@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { type ReactNode, useEffect, useState } from "react";
-import { backlogCapture, confirmSchedule, createEvent, getSchedule, planSchedule } from "./lib/api";
+import { backlogCapture, confirmSchedule, createEvent, getSchedule, planSchedule, updateEvent } from "./lib/api";
 import { applyUndoToast, failToast, runMutation } from "./lib/feedback";
 import {
   addMinutesHM,
@@ -26,12 +26,21 @@ import {
   todayISO,
 } from "./lib/format";
 import { ProRequiredView, SignedOutView } from "./components/states";
+import {
+  CALENDAR_DEFAULT,
+  CalendarFields,
+  CalendarFormValues,
+  CalendarWriteFields,
+  calendarCreateFields,
+  hasCalendarChange,
+  useCalendars,
+} from "./components/calendar-fields";
 import { minutesFromClock } from "./lib/schedule-model";
 import { ScheduleContext } from "./lib/launch-context";
 import { parseCapture } from "./lib/nl-parse";
 import { WEB_BASE } from "./lib/wire";
 
-interface FormValues {
+interface FormValues extends CalendarFormValues {
   name: string;
   start: Date | null; // date + time in one field; empty = fit by duration
   duration: string;
@@ -75,6 +84,7 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string 
   const { data: taxonomy, isLoading, revalidate } = useCachedPromise((d: string) => getSchedule(d, true), [todayISO()]);
   const areas = taxonomy?.ok ? (taxonomy.data.areas ?? []) : [];
   const activityTypes = taxonomy?.ok ? (taxonomy.data.activityTypes ?? []) : [];
+  const { writable: calendars, defaultId: defaultCalendarId } = useCalendars();
   const [name, setName] = useState(ctx?.name ?? (parsed?.name && parsed.name !== "(untitled)" ? parsed.name : initial));
 
   // U5: nothing seeded the name, so offer the current selection.
@@ -106,6 +116,7 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string 
     const finalName = values.name.trim() || "(untitled)";
     const durationText = values.duration.trim();
     const extras = optionalFields(values);
+    const calendar = calendarCreateFields(values);
 
     // A specific start → create at that time for the duration (default 30 min).
     if (values.start) {
@@ -138,6 +149,7 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string 
           name: finalName,
           ...(endNextDay ? { endNextDay: true } : {}),
           ...extras,
+          ...calendar,
         }),
       );
       return;
@@ -164,6 +176,7 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string 
         activityTypeId: extras.activityTypeId,
         kind: extras.kind,
         notes: extras.notes,
+        calendar,
         push,
       });
       return;
@@ -279,6 +292,13 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string 
         <Form.Dropdown.Item value="non-blocking" title="Non-blocking" />
         <Form.Dropdown.Item value="reference" title="Reference" />
       </Form.Dropdown>
+      <CalendarFields
+        writable={calendars}
+        defaultId={defaultCalendarId}
+        allowDefault
+        calendarDefault={CALENDAR_DEFAULT}
+        mirrorDefault={[]}
+      />
       <Form.TextArea id="notes" title="Notes" placeholder="Optional details for this block" />
     </Form>
   );
@@ -294,6 +314,7 @@ interface FlexibleArgs {
   activityTypeId?: string;
   kind?: string;
   notes?: string;
+  calendar: CalendarWriteFields;
   push: (element: ReactNode) => void;
 }
 
@@ -337,6 +358,7 @@ async function runFlexible(args: FlexibleArgs): Promise<void> {
     toast.style = Toast.Style.Success;
     toast.title = `Scheduled “${args.name}”`;
     if (outcome.undoToken) applyUndoToast(toast, outcome.undoToken);
+    await applyCalendar(outcome.eventId, args.calendar, toast);
     return;
   }
   if (outcome.kind === "proposals") {
@@ -345,6 +367,7 @@ async function runFlexible(args: FlexibleArgs): Promise<void> {
       <ProposalsList
         name={args.name}
         request={request}
+        calendar={args.calendar}
         initial={{
           options: outcome.options,
           commitToken: outcome.commitToken,
@@ -374,7 +397,12 @@ interface ProposalState {
   expiresAt?: number; // epoch ms; the proposals are stale past this
 }
 
-function ProposalsList(props: { name: string; request: PlanRequest; initial: ProposalState }) {
+function ProposalsList(props: {
+  name: string;
+  request: PlanRequest;
+  calendar: CalendarWriteFields;
+  initial: ProposalState;
+}) {
   const { pop } = useNavigation();
   const [state, setState] = useState<ProposalState>(props.initial);
 
@@ -392,6 +420,7 @@ function ProposalsList(props: { name: string; request: PlanRequest; initial: Pro
       toast.style = Toast.Style.Success;
       toast.title = `Scheduled “${props.name}”`;
       if (outcome.undoToken) applyUndoToast(toast, outcome.undoToken);
+      await applyCalendar(outcome.eventId, props.calendar, toast);
       pop();
       return;
     }
@@ -424,6 +453,7 @@ function ProposalsList(props: { name: string; request: PlanRequest; initial: Pro
     if (result.ok) {
       toast.style = Toast.Style.Success;
       toast.title = `Scheduled “${props.name}”`;
+      await applyCalendar(readOutcome(result.data).eventId, props.calendar, toast);
       pop();
       return;
     }
@@ -450,9 +480,9 @@ function ProposalsList(props: { name: string; request: PlanRequest; initial: Pro
 }
 
 type Outcome =
-  | { kind: "committed"; undoToken?: string }
-  | { kind: "proposals"; options: Proposal[]; commitToken: string; expiresAt?: number }
-  | { kind: "failed" };
+  | { kind: "committed"; undoToken?: string; eventId?: string }
+  | { kind: "proposals"; options: Proposal[]; commitToken: string; expiresAt?: number; eventId?: undefined }
+  | { kind: "failed"; eventId?: undefined };
 
 /** Read the documented BatchOutcome shape (the response type is loose JSON). */
 function readOutcome(data: Record<string, unknown>): Outcome {
@@ -460,7 +490,7 @@ function readOutcome(data: Record<string, unknown>): Outcome {
   const first = results[0] ?? {};
   const committed = Array.isArray(data.committed) ? data.committed : [];
   if (first.status === "committed" || committed.length > 0) {
-    return { kind: "committed", undoToken: first.undoToken as string | undefined };
+    return { kind: "committed", undoToken: first.undoToken as string | undefined, eventId: committedEventId(first) };
   }
   if (first.status === "proposals") {
     return {
@@ -471,6 +501,29 @@ function readOutcome(data: Record<string, unknown>): Outcome {
     };
   }
   return { kind: "failed" };
+}
+
+/** The id of the event a committed plan row made, when the row names it. */
+function committedEventId(row: Record<string, unknown>): string | undefined {
+  const event = row.event as { id?: unknown } | undefined;
+  return typeof event?.id === "string" ? event.id : undefined;
+}
+
+/**
+ * The flexible fit has no calendar fields, so a chosen calendar lands in a
+ * follow-up PATCH on the new event. The block stays scheduled either way; a
+ * failure only changes the toast message.
+ */
+async function applyCalendar(eventId: string | undefined, calendar: CalendarWriteFields, toast: Toast): Promise<void> {
+  if (!hasCalendarChange(calendar)) return;
+  if (!eventId) {
+    toast.message = "Pick the calendar with Edit Details.";
+    return;
+  }
+  const result = await updateEvent(eventId, calendar);
+  if (!result.ok || result.data.failed > 0) {
+    toast.message = "The calendar did not apply. Pick it with Edit Details.";
+  }
 }
 
 /**

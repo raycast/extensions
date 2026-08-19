@@ -1,5 +1,5 @@
 import { getAccessToken, NotAuthorizedError } from "./oauth";
-import type { ScheduleResponse } from "./schedule-model";
+import type { CalendarsResponse, ScheduleResponse } from "./schedule-model";
 import { API_BASE, ErrorCode, PATHS } from "./wire";
 
 // Typed client over /api/v1. It normalizes both refusal shapes to one result,
@@ -34,6 +34,9 @@ export type WriteOp =
       areaName?: string;
       activityTypeName?: string;
       kind?: string;
+      // Calendar publish targets (Pro). `syncTo: null` forces a dial-only block.
+      syncTo?: string | null;
+      mirrorTo?: string[];
     }
   | {
       op: "move";
@@ -68,6 +71,10 @@ export interface UpdateEventPatch {
   activityTypeName?: string;
   notes?: string;
   kind?: string;
+  // Re-home (`id`) or unlink (`null`) the calendar copy, and replace the mirror
+  // set. Both apply to the whole series, so they need `scope: "all"` on a repeat.
+  syncTo?: string | null;
+  mirrorTo?: string[];
   scope?: Scope;
   occurrenceDate?: string;
 }
@@ -276,6 +283,11 @@ export function getScheduleRange(from: string, to: string, compact = false): Pro
 /** Read a day plus the parked-block inbox. The backlog needs includeBacklog=true. */
 export function getScheduleWithBacklog(date: string): Promise<ApiResult<ScheduleResponse>> {
   return request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ date, includeBacklog: true }));
+}
+
+/** The connected calendars, in picker order, plus the account default. */
+export function listCalendars(): Promise<ApiResult<CalendarsResponse>> {
+  return request<CalendarsResponse>("GET", PATHS.calendars);
 }
 
 export function createEvent(op: Extract<WriteOp, { op: "create" }>): Promise<ApiResult<BatchReceipt>> {

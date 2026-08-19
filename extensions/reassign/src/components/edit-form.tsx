@@ -2,8 +2,9 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from
 import type { Scope, UpdateEventPatch } from "../lib/api";
 import type { ActivityType, Area, ScheduleEvent } from "../lib/schedule-model";
 import { minutesFromClock, resolveActivity, resolveArea } from "../lib/schedule-model";
+import { CALENDAR_NONE, CalendarFields, CalendarFormValues, calendarEditFields, useCalendars } from "./calendar-fields";
 
-interface EditFormValues {
+interface EditFormValues extends CalendarFormValues {
   name: string;
   end: string;
   areaId: string;
@@ -14,9 +15,9 @@ interface EditFormValues {
 
 /**
  * Edit a block's details with the `PATCH /events/{id}` op. It changes the name,
- * the end (so the duration), the area, the activity, and the notes. Date and
- * start stay in "Move to…" (the conflict-aware `move` op). It sends only the
- * changed fields. A recurring instance adds a scope picker.
+ * the end (so the duration), the area, the activity, the notes, and the calendar
+ * home / mirrors. Date and start stay in "Move to…" (the conflict-aware `move`
+ * op). It sends only the changed fields. A recurring instance adds a scope picker.
  * Limit: it cannot clear an area — pick another, or clear it on the web.
  */
 export function EditForm(props: {
@@ -31,6 +32,13 @@ export function EditForm(props: {
   const currentArea = resolveArea(event, areas);
   const currentActivity = resolveActivity(event, activityTypes);
   const currentNotes = typeof event.notes === "string" ? event.notes : "";
+  const { writable, defaultId } = useCalendars();
+  const writableIds = new Set(writable.map((c) => c.id));
+  // A block homed in a calendar we cannot write to cannot be re-homed here.
+  const canPickCalendar = !event.calendarId || writableIds.has(event.calendarId);
+  const mirrorIds = Array.isArray(event.mirrorCalendarIds) ? event.mirrorCalendarIds : [];
+  const knownMirrors = mirrorIds.filter((id) => writableIds.has(id));
+  const hiddenMirrors = mirrorIds.filter((id) => !writableIds.has(id));
 
   async function submit(values: EditFormValues) {
     const patch: UpdateEventPatch = {};
@@ -60,6 +68,12 @@ export function EditForm(props: {
       patch.activityTypeId = values.activityTypeId;
     }
     if (values.notes !== currentNotes) patch.notes = values.notes;
+    if (canPickCalendar) {
+      const cal = calendarEditFields(values, { calendarId: event.calendarId, mirrorIds: knownMirrors });
+      if (cal.syncTo !== undefined) patch.syncTo = cal.syncTo;
+      // Keep the mirrors the picker could not show, so a save never drops them.
+      if (cal.mirrorTo) patch.mirrorTo = [...cal.mirrorTo, ...hiddenMirrors];
+    }
 
     // Nothing changed — skip the round-trip and return to the list.
     if (Object.keys(patch).length === 0) {
@@ -69,6 +83,15 @@ export function EditForm(props: {
     if (recurring) {
       patch.scope = (values.scope as Scope) ?? "this";
       patch.occurrenceDate = event.date;
+      // The server applies a calendar change to the whole series only.
+      if ((patch.syncTo !== undefined || patch.mirrorTo) && patch.scope !== "all") {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "A calendar change covers the whole series",
+          message: "Set “Applies to” to every block in the series, or keep the calendar as it is.",
+        });
+        return;
+      }
     }
     await onSubmit(patch);
     pop();
@@ -113,6 +136,15 @@ export function EditForm(props: {
         </Form.Dropdown>
       )}
       <Form.TextArea id="notes" title="Notes" defaultValue={currentNotes} />
+      {canPickCalendar && (
+        <CalendarFields
+          writable={writable}
+          defaultId={defaultId}
+          allowDefault={false}
+          calendarDefault={event.calendarId ?? CALENDAR_NONE}
+          mirrorDefault={knownMirrors}
+        />
+      )}
       {recurring && (
         <Form.Dropdown id="scope" title="Applies to" defaultValue="this">
           <Form.Dropdown.Item value="this" title="This block only" />

@@ -45,5 +45,6 @@ export const PATHS = {
   scheduleConfirm: "/schedule/confirm",
   actionsUndo: "/actions/undo",
   backlog: "/backlog",
+  calendars: "/calendars",
   feedback: "/feedback",
 } as const;

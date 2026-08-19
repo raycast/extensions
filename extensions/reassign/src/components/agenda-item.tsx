@@ -51,6 +51,7 @@ export function BlockDetail(props: { event: ScheduleEvent; areas: Area[]; activi
   const status = reflectLabel(event);
   const notes = typeof event.notes === "string" ? event.notes.trim() : "";
   const source = eventSource(event);
+  const mirrors = Array.isArray(event.mirroredTo) ? event.mirroredTo.filter(Boolean).join(", ") : "";
   const meeting = eventMeeting(event);
   const locationText = typeof event.location?.text === "string" ? event.location.text.trim() : "";
 
@@ -75,7 +76,8 @@ export function BlockDetail(props: { event: ScheduleEvent; areas: Area[]; activi
             </List.Item.Detail.Metadata.TagList>
           ) : null}
           {activity ? <List.Item.Detail.Metadata.Label title="Activity" text={activity.name} /> : null}
-          {source ? <List.Item.Detail.Metadata.Label title="Source" text={source} /> : null}
+          {source ? <List.Item.Detail.Metadata.Label title="Calendar" text={source} /> : null}
+          {mirrors ? <List.Item.Detail.Metadata.Label title="Mirrored to" text={mirrors} /> : null}
           {status ? <List.Item.Detail.Metadata.Label title="Status" text={status} /> : null}
           {event.warning ? <List.Item.Detail.Metadata.Label title="Warning" text={event.warning} /> : null}
         </List.Item.Detail.Metadata>
@@ -111,10 +113,14 @@ function accessories(event: ScheduleEvent, areas: Area[]): List.Item.Accessory[]
   return items;
 }
 
-/** The display source of an event, or "" when it is a native Reassign block. */
+/**
+ * The calendar a block lives in, or "" for a dial-only block. A published
+ * native block carries `calendar`; a synced one may carry only `source`.
+ */
 function eventSource(event: ScheduleEvent): string {
+  if (typeof event.calendar === "string" && event.calendar) return event.calendar;
   if (!event.source || event.source === "reassign") return "";
-  return event.calendar ?? event.source;
+  return event.source;
 }
 
 /** A human status label for a reflected block, or "" when it is still open. */

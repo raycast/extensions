@@ -48,6 +48,10 @@ export interface ScheduleEvent {
   readOnly?: boolean;
   warning?: string;
   calendar?: string;
+  // The home calendar and the one-way copies (ids from GET /calendars, names for display).
+  calendarId?: string;
+  mirroredTo?: string[];
+  mirrorCalendarIds?: string[];
   meeting?: { url?: string; label?: string };
   location?: { text?: string; url?: string };
   // Full mode carries an inline area/activityType. Compact carries only ids.
@@ -93,6 +97,23 @@ export interface BacklogItem {
   activityTypeId?: string;
   activityType?: ActivityType | null;
   [key: string]: unknown;
+}
+
+/** One connected calendar from GET /calendars. Only a writable one is a sync target. */
+export interface Calendar {
+  id: string;
+  name: string;
+  provider?: string;
+  kind?: string;
+  account?: string;
+  color?: string;
+  writable?: boolean;
+  isDefault?: boolean;
+}
+
+export interface CalendarsResponse {
+  defaultCalendarId?: string | null;
+  calendars?: Calendar[];
 }
 
 export interface ScheduleResponse {
