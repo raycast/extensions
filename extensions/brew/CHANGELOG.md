@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Adopt] - {PR_MERGE_DATE}
+## [Adopt] - 2026-08-19
 
 - Added "Copy Adopt Command" (⌘⇧⌥C) and "Run Adopt in <terminal>" (⌘⇧↵) actions in Search for packages not yet managed by Homebrew. They run `brew install --adopt` to reclaim an externally-installed package (e.g. installed via a .dmg or another package manager) into Homebrew so it is covered by `brew upgrade`.
 - The Adopt action is intentionally not shown as a direct action for uninstalled packages so it doesn't sit confusingly next to Install; adopt is available via the copy/run command actions.
