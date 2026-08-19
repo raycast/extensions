@@ -15,25 +15,27 @@
   "commands": [
     {
       "name": "pools",
-      "title": "Runner Pools",
+      "title": "Show Runner Pools",
       "subtitle": "runpool",
       "description": "See every runner pool, start and stop them, and change how many runners each has",
       "mode": "view"
     },
     {
-      "name": "toggle",
-      "title": "Toggle Local CI",
-      "subtitle": "runpool",
-      "description": "Pause every pool, or resume on-demand running",
-      "mode": "no-view"
-    },
-    {
       "name": "status",
-      "title": "Pool Status",
+      "title": "Runner Pool Status",
       "subtitle": "runpool",
       "description": "Keep a live summary of the pools in this command's subtitle",
       "mode": "no-view",
       "interval": "1m"
+    },
+    {
+      "name": "menubar",
+      "title": "Runner Pools in Menu Bar",
+      "subtitle": "runpool",
+      "description": "Show how much of the pool is awake in the menu bar, as a fill level",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "disabledByDefault": true
     }
   ],
   "preferences": [

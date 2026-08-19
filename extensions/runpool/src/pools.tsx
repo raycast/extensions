@@ -1,41 +1,43 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, confirmAlert, open, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Icon,
+  Keyboard,
+  List,
+  confirmAlert,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { NotInstalled } from "./components/NotInstalled";
 import { PoolDetail } from "./components/PoolDetail";
 import { useStatus } from "./hooks/useStatus";
-import { isUnreachable, Pool, runpool, Status } from "./lib/runpool";
+import { isUnreachable, ownerAvatar, Pool, poolState, runpool, stateLabel, Status } from "./lib/runpool";
 
 /**
- * Colour carries the state, so the list is readable at a glance.
+ * Colour carries the state.
  *
- * Resting is grey rather than red on purpose: on-demand pools are *supposed*
- * to be down most of the time, and colouring the normal state as a problem
- * trains people to ignore the colour.
+ * Offline is grey rather than red on purpose. It is GitHub's word for a runner
+ * that is not connected, which for an on-demand pool is most of the time and is
+ * the intended resting state. Colouring the normal case as a problem trains
+ * people to ignore the colour, and then the one that matters gets ignored too.
  */
-function accessory(pool: Pool, paused: boolean): List.Item.Accessory {
-  if (paused) return { tag: { value: "Paused", color: Color.Orange }, tooltip: "runpool is paused" };
-  if (isUnreachable(pool)) {
-    return {
-      tag: { value: "Unreachable", color: Color.Red },
-      tooltip: "GitHub has no online runners for this pool, so jobs will queue forever. Re-register it.",
-    };
+function stateColor(pool: Pool, paused: boolean): Color {
+  switch (poolState(pool, paused)) {
+    case "unreachable":
+      return Color.Red;
+    case "active":
+      return Color.Green;
+    case "idle":
+      return Color.Blue;
+    case "paused":
+      return Color.Orange;
+    case "offline":
+      return Color.SecondaryText;
   }
-  if (pool.busy > 0) {
-    return {
-      tag: { value: `${pool.busy} building`, color: Color.Green },
-      tooltip: `${pool.busy} job${pool.busy === 1 ? "" : "s"} in flight`,
-    };
-  }
-  if (pool.running > 0) {
-    return { tag: { value: "Idle", color: Color.Blue }, tooltip: "Runners are up but nothing is running" };
-  }
-  return { tag: { value: "Resting", color: Color.SecondaryText }, tooltip: "Down until a job queues. This is normal." };
-}
-
-function subtitle(pool: Pool): string {
-  const local = `${pool.running}/${pool.count} up`;
-  if (pool.github_registered === null) return local;
-  return `${local} · github ${pool.github_online}/${pool.github_registered}`;
 }
 
 export default function Command() {
@@ -52,8 +54,33 @@ export default function Command() {
       revalidate();
     } catch (error) {
       toast.hide();
-      await showFailureToast(error, { title: pending.replace(/…$/, "") + " failed" });
+      await showFailureToast(error, { title: `${pending.replace(/…$/, "")} failed` });
     }
+  }
+
+  /**
+   * The global switch, behind a confirmation.
+   *
+   * Deliberately not on return and not a command of its own. Pausing stops
+   * every pool waking, so anything pushed afterwards queues silently with no
+   * signal beyond the jobs sitting there. That is too consequential to reach
+   * by pressing return on the wrong row.
+   */
+  async function togglePause(paused: boolean) {
+    if (!paused) {
+      const confirmed = await confirmAlert({
+        title: "Disable local CI?",
+        message:
+          "Every runner stands down and pools stop waking on queued jobs, so anything you push will queue until you enable it again.",
+        primaryAction: { title: "Disable", style: Alert.ActionStyle.Destructive },
+      });
+      if (!confirmed) return;
+    }
+    await act(
+      () => runpool([paused ? "resume" : "pause"]),
+      paused ? "Enabling…" : "Disabling…",
+      paused ? "Local CI enabled, pools wake on demand" : "Local CI disabled, all runners down",
+    );
   }
 
   return (
@@ -61,20 +88,30 @@ export default function Command() {
       {status?.pools.map((pool) => (
         <List.Item
           key={pool.name}
-          icon={pool.scope === "org" ? Icon.TwoPeople : Icon.Person}
+          // The owner's GitHub avatar, falling back to a glyph if it cannot be
+          // fetched, so a network blip never leaves a blank row.
+          icon={{
+            source: ownerAvatar(pool),
+            fallback: pool.scope === "org" ? Icon.TwoPeople : Icon.Person,
+          }}
           title={pool.name}
-          subtitle={subtitle(pool)}
-          accessories={[{ text: pool.target }, accessory(pool, status.paused)]}
+          subtitle={`${pool.count} ${pool.count === 1 ? "runner" : "runners"}`}
+          accessories={[
+            { text: pool.target },
+            {
+              tag: { value: stateLabel(pool, status.paused), color: stateColor(pool, status.paused) },
+              tooltip:
+                poolState(pool, status.paused) === "offline"
+                  ? "No runners connected. Normal for an on-demand pool; it wakes when a job queues."
+                  : poolState(pool, status.paused) === "unreachable"
+                    ? "GitHub has no online runners for this pool, so jobs will queue forever."
+                    : undefined,
+            },
+          ]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action.Push
-                  title="Show Repositories"
-                  icon={Icon.List}
-                  target={<PoolDetail pool={pool} />}
-                  // A repo pool serves exactly one repository, so opening
-                  // GitHub directly is more useful than a list of one.
-                />
+                <Action.Push title="Show Repositories" icon={Icon.List} target={<PoolDetail pool={pool} />} />
                 {pool.running === 0 ? (
                   <Action
                     title="Start Pool"
@@ -86,12 +123,12 @@ export default function Command() {
                     title="Stop Pool"
                     icon={Icon.Stop}
                     onAction={async () => {
-                      // runpool refuses while a job is running rather than
-                      // killing it. Say so up front instead of letting the
-                      // command fail with a message nobody expected.
+                      // runpool refuses while a job is in flight rather than
+                      // killing it. Say so first, instead of letting the command
+                      // fail with a message nobody was expecting.
                       if (pool.busy > 0) {
                         const go = await confirmAlert({
-                          title: `${pool.name} has ${pool.busy} job${pool.busy === 1 ? "" : "s"} running`,
+                          title: `${pool.name} is running ${pool.busy} ${pool.busy === 1 ? "job" : "jobs"}`,
                           message: "runpool will refuse to stop it. Wait for the jobs to finish, then try again.",
                           primaryAction: { title: "Try Anyway" },
                         });
@@ -99,6 +136,15 @@ export default function Command() {
                       }
                       act(() => runpool(["down", pool.name]), "Stopping…", `${pool.name} stopped`);
                     }}
+                  />
+                )}
+                {isUnreachable(pool) && (
+                  <Action
+                    title="Re-Register with GitHub"
+                    icon={Icon.Repeat}
+                    onAction={() =>
+                      act(() => runpool(["reregister", pool.name]), "Re-registering…", `${pool.name} re-registered`)
+                    }
                   />
                 )}
               </ActionPanel.Section>
@@ -122,35 +168,20 @@ export default function Command() {
                   ))}
               </ActionPanel.Section>
 
-              <ActionPanel.Section>
+              <ActionPanel.Section title="Local CI">
+                <Action
+                  title={status.paused ? "Enable Local CI" : "Disable Local CI"}
+                  icon={status.paused ? Icon.Play : Icon.Pause}
+                  style={status.paused ? Action.Style.Regular : Action.Style.Destructive}
+                  onAction={() => togglePause(status.paused)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                />
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
                   onAction={revalidate}
                   shortcut={Keyboard.Shortcut.Common.Refresh}
                 />
-                <Action
-                  title={status.paused ? "Resume Local CI" : "Pause Local CI"}
-                  icon={status.paused ? Icon.Play : Icon.Pause}
-                  onAction={() =>
-                    act(
-                      () => runpool([status.paused ? "resume" : "pause"]),
-                      status.paused ? "Resuming…" : "Pausing…",
-                      status.paused ? "Resumed" : "Paused, all runners down",
-                    )
-                  }
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                />
-                {isUnreachable(pool) && (
-                  <Action
-                    title="Re-Register with GitHub"
-                    icon={Icon.Repeat}
-                    style={Action.Style.Destructive}
-                    onAction={() =>
-                      act(() => runpool(["reregister", pool.name]), "Re-registering…", `${pool.name} re-registered`)
-                    }
-                  />
-                )}
                 <Action
                   title="Open Log"
                   icon={Icon.Document}
@@ -163,9 +194,9 @@ export default function Command() {
         />
       ))}
 
-      {/* Two empty states, not one. Without the hasFetched split, the "no pools"
-          message flashes up before the first result arrives and reads as if
-          nothing is configured. */}
+      {/* Two empty states, not one. Checking only isLoading shows "no pools"
+          for a frame before the first result lands, which reads as if nothing
+          is configured. */}
       {!hasFetched && <List.EmptyView icon={Icon.Clock} title="Reading Pools" />}
       {hasFetched && status?.pools.length === 0 && (
         <List.EmptyView

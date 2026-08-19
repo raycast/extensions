@@ -105,9 +105,49 @@ export async function getStatus(options?: { local?: boolean; signal?: AbortSigna
   return JSON.parse(await runpool(args, options?.signal)) as Status;
 }
 
-/** A pool is resting rather than broken when it has no runners up. */
-export function isResting(pool: Pool): boolean {
-  return pool.running === 0;
+/**
+ * The state words are GitHub's own, as shown on its runners settings page:
+ * Active, Idle, Offline. Matching them means anyone who has looked at that
+ * page already knows what these mean.
+ *
+ * The one thing to hold in mind is that Offline here is normal. GitHub uses it
+ * for a runner that is not connected, which for an on-demand pool is most of
+ * the time and is not a fault. The UI styles it neutrally for that reason.
+ */
+export type PoolState = "active" | "idle" | "offline" | "paused" | "unreachable";
+
+export function poolState(pool: Pool, paused: boolean): PoolState {
+  if (paused) return "paused";
+  if (isUnreachable(pool)) return "unreachable";
+  if (pool.busy > 0) return "active";
+  if (pool.running > 0) return "idle";
+  return "offline";
+}
+
+export function stateLabel(pool: Pool, paused: boolean): string {
+  switch (poolState(pool, paused)) {
+    case "paused":
+      return "Paused";
+    case "unreachable":
+      return "Not registered";
+    case "active":
+      return `Active · ${pool.busy} ${pool.busy === 1 ? "job" : "jobs"}`;
+    case "idle":
+      return "Idle";
+    case "offline":
+      return "Offline";
+  }
+}
+
+/** Proportion of a pool's runners that are up, for the fill-level icon. */
+export function fillLevel(pool: Pool): number {
+  return pool.count === 0 ? 0 : pool.running / pool.count;
+}
+
+/** Nearest rendered fill variant. Assets exist at 0, 25, 50, 75 and 100. */
+export function fillAsset(level: number): string {
+  const step = Math.round(Math.min(1, Math.max(0, level)) * 4) * 25;
+  return `pool-${step}.png`;
 }
 
 /**
@@ -126,7 +166,18 @@ export function summarise(status: Status): string {
   if (status.paused) return "Paused";
   const running = status.pools.reduce((n, p) => n + p.running, 0);
   const busy = status.pools.reduce((n, p) => n + p.busy, 0);
-  if (running === 0) return "Resting";
-  if (busy > 0) return `${busy} building, ${running} ${running === 1 ? "runner" : "runners"} up`;
-  return `${running} ${running === 1 ? "runner" : "runners"} up, idle`;
+  if (running === 0) return "Offline";
+  if (busy > 0) return `Active · ${busy} ${busy === 1 ? "job" : "jobs"}`;
+  return "Idle";
+}
+
+/**
+ * The GitHub avatar of whoever owns the pool: the organisation, or the user
+ * who owns the repository. Far more legible in a list than a generic glyph,
+ * and it makes the org-versus-personal distinction visible without a word of
+ * explanation.
+ */
+export function ownerAvatar(pool: Pool): string {
+  const owner = pool.scope === "org" ? pool.target : pool.target.split("/")[0];
+  return `https://github.com/${owner}.png?size=128`;
 }
