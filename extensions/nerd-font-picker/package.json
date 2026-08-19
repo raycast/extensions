@@ -25,24 +25,6 @@
           "type": "textfield",
           "required": false,
           "default": ""
-        },
-        {
-          "name": "iconColor",
-          "title": "Icon Colour",
-          "description": "Colour used to render each glyph icon",
-          "type": "dropdown",
-          "required": false,
-          "default": "white",
-          "data": [
-            {
-              "title": "White",
-              "value": "white"
-            },
-            {
-              "title": "Black",
-              "value": "black"
-            }
-          ]
         }
       ]
     }
@@ -55,6 +37,7 @@
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^20.12.12",
     "@types/opentype.js": "1.3.9",
+    "@types/react": "^19.2.18",
     "eslint": "^9.22.0",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
