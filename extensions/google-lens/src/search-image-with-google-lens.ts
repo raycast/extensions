@@ -17,8 +17,7 @@ import { existsSync } from "fs";
 import { readFile, unlink } from "fs/promises";
 import FormData from "form-data";
 import fetch from "node-fetch";
-import { API_BASE_URL, UPLOAD_ENDPOINT, ACCEPTED_TYPES } from "./constants";
-import { UploadResponse } from "./types";
+import { ACCEPTED_TYPES, GOOGLE_LENS_UPLOAD_ENDPOINT, MAX_FILE_SIZE_BYTES } from "./constants";
 
 const exec = promisify(execCb);
 
@@ -35,9 +34,9 @@ export default async () => {
   if (!turnOffUploadAlert) {
     if (
       !(await confirmAlert({
-        title: "Are you sure upload image?",
+        title: "Upload image to Google Lens?",
         message:
-          "The image will be uploaded to a third-party server maintained by the extension author to generate a public URL for Google Lens. Please avoid uploading sensitive content. (You can disable this warning in preferences)",
+          "The image will be sent directly to Google Lens for processing. Please avoid uploading sensitive content. (You can disable this warning in preferences)",
       }))
     ) {
       return;
@@ -115,34 +114,41 @@ export default async () => {
     }
 
     const buffer = await readFile(filePath);
+    if (buffer.length > MAX_FILE_SIZE_BYTES) {
+      throw new Error("Image exceeds the 20 MB Google Lens upload limit");
+    }
+
     const form = new FormData();
     const separator = platform() === "win32" ? "\\" : "/";
-    form.append("image", buffer, {
+    form.append("encoded_image", buffer, {
       filename: filePath.split(separator).pop(),
-      contentType: `image/${fileExtension}`,
+      contentType: `image/${fileExtension === "jpg" ? "jpeg" : fileExtension}`,
     });
 
-    const res = await fetch(UPLOAD_ENDPOINT, {
+    const uploadUrl = new URL(GOOGLE_LENS_UPLOAD_ENDPOINT);
+    uploadUrl.searchParams.set("ep", "cntpubb");
+    uploadUrl.searchParams.set("st", Date.now().toString());
+
+    const response = await fetch(uploadUrl, {
       method: "POST",
       body: form,
       headers: form.getHeaders(),
     });
 
-    if (res.ok) {
-      const result = (await res.json()) as UploadResponse;
-      if (result.filename) {
-        const imageUrl = `${API_BASE_URL}/image/${result.filename}`;
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Opening Google Lens...",
-        });
-        await open(`https://lens.google.com/uploadbyurl?url=${encodeURIComponent(imageUrl)}`);
-      } else {
-        throw new Error("Search failed");
-      }
-    } else {
-      throw new Error("Search failed");
+    if (!response.ok) {
+      throw new Error(`Google Lens upload failed (${response.status} ${response.statusText})`);
     }
+
+    const resultUrl = new URL(response.url);
+    if (resultUrl.protocol !== "https:" || resultUrl.hostname !== "lens.google.com") {
+      throw new Error("Google Lens returned an unexpected result URL");
+    }
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Opening Google Lens...",
+    });
+    await open(resultUrl.toString());
   } catch (error) {
     showFailureToast(error, { title: usedScreenshot ? "Screenshot search failed" : "Image search failed" });
   } finally {

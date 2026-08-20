@@ -1,5 +1,9 @@
 # Google Lens Changelog
 
+## [Fix] - 2026-08-20
+
+- Upload images directly to Google Lens instead of relying on a third-party server.
+
 ## [Maintenance] - 2026-04-15
 
 - Update the API base URL to avoid DNS issues.

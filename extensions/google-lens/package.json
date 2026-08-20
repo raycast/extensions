@@ -19,7 +19,7 @@
           "type": "checkbox",
           "required": false,
           "title": "Upload Image Alert",
-          "description": "Turn off the upload alert when uploading an image to Google Lens",
+          "description": "Turn off the alert before sending an image directly to Google Lens",
           "default": false
         }
       ]
