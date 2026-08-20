@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shell-apps",
+  "title": "Shell Apps",
+  "description": "Create and launch your own shell command shortcuts as apps on Windows",
+  "icon": "icon.png",
+  "author": "Chaika",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "version": "1.0.0",
+  "platforms": ["Windows"],
+  "commands": [
+    {
+      "name": "shell-apps",
+      "title": "Shell Apps",
+      "description": "Manage and launch your shell command shortcuts",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "app",
+          "placeholder": "App name to launch",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-app",
+      "title": "Create Shell App",
+      "description": "Create a new shell command shortcut",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultTerminal",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Terminal",
+      "description": "Terminal used by default when creating a new shortcut.",
+      "default": "powershell",
+      "data": [
+        { "title": "PowerShell", "value": "powershell" },
+        { "title": "PowerShell 7", "value": "powershell7" },
+        { "title": "Command Prompt", "value": "cmd" },
+        { "title": "Windows Terminal", "value": "wt" }
+      ]
+    },
+    {
+      "name": "defaultKeepOpen",
+      "type": "checkbox",
+      "required": false,
+      "title": "Keep Window Open",
+      "description": "Keep the terminal window open after the command exits by default.",
+      "default": true,
+      "label": "Keep terminal window open"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.16"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": ["shell", "command", "terminal", "powershell", "cmd", "windows", "launcher", "shortcut", "cli"]
+}
