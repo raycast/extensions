@@ -86,7 +86,8 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "overrides": {
     "brace-expansion": "5.0.9"
