@@ -4,10 +4,6 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-type Preferences = {
-  cliPath: string;
-};
-
 type SuccessEnvelope<T> = {
   ok: true;
   data: T;
