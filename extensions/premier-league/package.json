@@ -53,15 +53,6 @@
   ],
   "preferences": [
     {
-      "name": "usePulseliveApi",
-      "title": "Use Pulselive API",
-      "label": "Resolve the active season from the API",
-      "description": "Derive the current season from the Premier League API instead of the static season list, which can lag behind when a new season starts. Turn this off to use the season list on its own.",
-      "required": false,
-      "type": "checkbox",
-      "default": true
-    },
-    {
       "name": "filter",
       "title": "Search Bar Filter",
       "description": "Select your preferred filtering method in the search bar for Matches.",

@@ -1,4 +1,3 @@
-import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
@@ -37,6 +36,18 @@ interface Pagination<T> {
   cursor?: string | null;
 }
 
+const SEASON_START_MONTH = 6;
+
+const expectedSeasonId = (): string => {
+  const now = new Date();
+
+  return String(
+    now.getMonth() >= SEASON_START_MONTH
+      ? now.getFullYear()
+      : now.getFullYear() - 1,
+  );
+};
+
 const buildSeason = (seasonId: string): Season => ({
   seasonId,
   label: `${seasonId}/${String((Number(seasonId) + 1) % 100).padStart(2, "0")}`,
@@ -73,15 +84,15 @@ export const getSeasons = async (comp: string = "8"): Promise<Season[]> => {
     url: `https://resources.premierleague.com/premierleague25/config/season-config/competitions/${comp}.json`,
   };
 
-  const { usePulseliveApi } = getPreferenceValues<Preferences>();
-
   try {
-    const [{ data }, activeSeasonId] = await Promise.all([
-      axios(config) as Promise<AxiosResponse<EPLCompetition>>,
-      usePulseliveApi ? getActiveSeason(comp) : undefined,
-    ]);
-
+    const { data }: AxiosResponse<EPLCompetition> = await axios(config);
     const { seasons } = data;
+
+    if (seasons.some((s) => s.seasonId === expectedSeasonId())) {
+      return seasons;
+    }
+
+    const activeSeasonId = await getActiveSeason(comp);
 
     if (!activeSeasonId || seasons.some((s) => s.seasonId === activeSeasonId)) {
       return seasons;
