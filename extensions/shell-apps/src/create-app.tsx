@@ -16,10 +16,6 @@ import { APP_ICON_NAMES, iconByName } from "./lib/icons";
 import { getApps, upsertApp } from "./lib/store";
 import type { ShellApp, TerminalKind } from "./lib/types";
 
-interface Preferences {
-  defaultTerminal?: string;
-  defaultKeepOpen?: boolean;
-}
 
 interface Props {
   app?: ShellApp;
