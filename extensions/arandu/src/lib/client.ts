@@ -1,10 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Prefs {
-  apiToken: string;
-  baseUrl?: string;
-}
-
 export class AranduError extends Error {
   constructor(
     message: string,
@@ -15,12 +10,31 @@ export class AranduError extends Error {
   }
 }
 
+// The bearer token grants full account access, so it must never travel over
+// plain HTTP. Only loopback is exempt (self-hosted dev server on this machine).
+function isSecureBaseUrl(baseUrl: string): boolean {
+  try {
+    const url = new URL(baseUrl);
+    if (url.protocol === "https:") return true;
+    if (url.protocol !== "http:") return false;
+    return url.hostname === "localhost" || url.hostname === "127.0.0.1";
+  } catch {
+    return false;
+  }
+}
+
 function prefs(): { token: string; baseUrl: string } {
-  const p = getPreferenceValues<Prefs>();
+  const p = getPreferenceValues<Preferences>();
   const baseUrl = (p.baseUrl?.trim() || "https://arandu.lvdev.com.br").replace(
     /\/+$/,
     "",
   );
+  if (!isSecureBaseUrl(baseUrl)) {
+    throw new AranduError(
+      "Server URL must use HTTPS (plain HTTP is only allowed for localhost). Fix it in the extension preferences.",
+      0,
+    );
+  }
   return { token: p.apiToken.trim(), baseUrl };
 }
 
