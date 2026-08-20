@@ -1,6 +1,6 @@
 # MenuCloak Changelog
 
-## [Google Calendar Setup] - {PR_MERGE_DATE}
+## [Google Calendar Setup] - 2026-08-20
 
 - Link directly to the unified MenuCloak 1.9 download.
 - Explain how to connect Google Calendar from the native MenuCloak settings.
