@@ -1,6 +1,6 @@
 # ShowMD Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-20
 
 - Open files and folders with a native picker, or return to recent documents.
   Open a recent document's containing folder, reveal it in Finder, copy its
