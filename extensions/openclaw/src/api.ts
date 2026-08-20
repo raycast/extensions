@@ -112,7 +112,11 @@ export function getPreferences<T extends Preferences = Preferences>(): T &
   const agentId = String(prefs.agentId ?? "").trim() || "main";
 
   if (!token && file.token) token = file.token;
-  if (file.endpoint && !isLoopback(file.endpoint) && isLoopback(endpoint)) {
+  if (
+    file.endpoint &&
+    !isLoopback(file.endpoint) &&
+    endpoint === LOOPBACK_DEFAULT
+  ) {
     endpoint = file.endpoint;
   }
 
