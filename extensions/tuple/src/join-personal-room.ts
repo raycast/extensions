@@ -6,10 +6,12 @@ import { primaryPersonalRoom } from "./lib/types";
 export default async function JoinPersonalRoom() {
   try {
     const personalRooms = await listRooms("--kind", "personal", "--limit", "-1");
-    const room = primaryPersonalRoom(personalRooms) ?? personalRooms[0];
+    const room = primaryPersonalRoom(personalRooms);
 
     if (!room) {
-      await showHUD("No personal room found");
+      await showHUD(
+        personalRooms.length === 0 ? "No personal room found" : "Update Tuple to identify your primary room",
+      );
       return;
     }
 
