@@ -8,6 +8,7 @@ import { getCompletedReminders } from "swift:../../swift/AppleReminders";
 import { displayDueDate, getDateString, isFullDay, isOverdue, isToday } from "../helpers";
 
 import { Data, Priority, Reminder } from "./useData";
+import { nestSubtasks, useSubtasks } from "./useSubtasks";
 
 const { useTimeOfDayGrouping } = getPreferenceValues<Preferences.MyReminders>();
 
@@ -233,6 +234,8 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     false,
   );
 
+  const { data: parentIdByChildId } = useSubtasks();
+
   const { data: completedRemindersData } = useCachedPromise(
     (listId) => getCompletedReminders(listId === "all" ? undefined : listId),
     [listId],
@@ -367,6 +370,7 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     sections = sections.map((section) => {
       return {
         ...section,
+        reminders: nestSubtasks(section.reminders, parentIdByChildId),
         subtitle: `${section.reminders.length} ${section.reminders.length === 1 ? "reminder" : "reminders"}`,
       };
     });
@@ -378,7 +382,16 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     };
 
     return { sections, groupByProp };
-  }, [sortedReminders, groupBy, setGroupBy, completedReminders, showCompletedReminders, data, listId]);
+  }, [
+    sortedReminders,
+    groupBy,
+    setGroupBy,
+    completedReminders,
+    showCompletedReminders,
+    data,
+    listId,
+    parentIdByChildId,
+  ]);
 
   const viewProps: ViewProps = {
     groupBy: groupByProp,

@@ -24,6 +24,7 @@ export type Reminder = {
   list: { id: string; title: string; color: string } | null;
   location?: Location;
   creationDate?: Date;
+  isSubtask?: boolean;
 };
 
 export type List = { id: string; title: string; color: string; isDefault: boolean };
