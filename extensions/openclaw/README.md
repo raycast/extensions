@@ -1,6 +1,6 @@
 # OpenClaw for Raycast
 
-Chat with your local [OpenClaw](https://github.com/openclaw/openclaw) AI assistant directly from Raycast.
+Chat with your [OpenClaw](https://github.com/openclaw/openclaw) AI assistant from Raycast — on the same Mac as the gateway, or on a node that only talks to a remote gateway.
 
 ## Features
 
@@ -11,8 +11,9 @@ Chat with your local [OpenClaw](https://github.com/openclaw/openclaw) AI assista
 
 ## Requirements
 
-- [OpenClaw](https://github.com/openclaw/openclaw) installed and running locally
-- OpenClaw Gateway with HTTP API enabled
+- [OpenClaw](https://github.com/openclaw/openclaw) installed
+- A reachable OpenClaw **gateway** with the HTTP Chat Completions API enabled
+- This Mac can be the gateway host **or** a node. Do not start a second gateway on node-only Macs.
 
 ## Setup
 
@@ -38,11 +39,16 @@ The gateway will hot-reload the config automatically.
 
 ### 2. Find Your API Token
 
-Your token is in `~/.openclaw/openclaw.json` under `gateway.auth.token`:
+On the **gateway host**, the token is `gateway.auth.token`. On a **node** (`gateway.mode=remote`), use `gateway.remote.token` — it is the same bearer, stored under `remote`.
 
 ```bash
-cat ~/.openclaw/openclaw.json | grep -A 2 '"auth"' | grep token
+# gateway host
+python3 -c 'import json; from pathlib import Path; g=json.loads(Path.home().joinpath(".openclaw/openclaw.json").read_text())["gateway"]; print("auth", bool((g.get("auth") or {}).get("token")))'
+# node
+python3 -c 'import json; from pathlib import Path; g=json.loads(Path.home().joinpath(".openclaw/openclaw.json").read_text())["gateway"]; print("remote", bool((g.get("remote") or {}).get("token")), (g.get("remote") or {}).get("url"))'
 ```
+
+If the token preference is left empty, the extension reads those fields from `~/.openclaw/openclaw.json`. If API Endpoint is still the localhost default and the file has `gateway.remote.url` (`wss://…`), it uses the corresponding `https://` URL.
 
 ### 3. Choose Your Connection Method
 
@@ -179,13 +185,15 @@ Select text in any app, then run this command to:
 The HTTP API endpoint isn't enabled. Add the config shown in Setup step 1.
 
 ### "Failed to connect"
-Make sure OpenClaw gateway is running:
+If this Mac is a **node**, `http://127.0.0.1:18789` will fail — nothing should be listening there. Set API Endpoint to the Tailscale HTTPS URL of the gateway (`https://<machine>.<tailnet>.ts.net`). Do not run `openclaw gateway start` on the node.
+
+If OpenClaw is supposed to be local on this Mac:
 ```bash
 openclaw gateway status
 ```
 
 ### Token errors
-Verify your token matches `gateway.auth.token` in your OpenClaw config.
+On the gateway host use `gateway.auth.token`. On a node use `gateway.remote.token`.
 
 ## Acknowledgments
 
