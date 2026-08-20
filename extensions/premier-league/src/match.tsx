@@ -52,7 +52,7 @@ export default function EPLMatchday() {
         competition,
         team,
         season,
-        ...(matchweek > 0 ? { matchweek } : {}),
+        matchweek,
       };
     }
 
@@ -81,9 +81,6 @@ export default function EPLMatchday() {
         });
       },
     [props],
-    {
-      execute: Boolean(season) && (!isEPL || matchweek > 0),
-    },
   );
 
   const matchday = groupBy(data, (f) =>
