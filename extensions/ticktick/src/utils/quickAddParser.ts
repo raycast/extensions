@@ -14,7 +14,7 @@ const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\
 const cleanTitle = (value: string) =>
   value
     .replace(/\s+/g, " ")
-    .replace(/\s+([,.;!?])/g, "$1")
+    .replace(/\s+([,.;?])/g, "$1")
     .trim();
 
 const parsePriority = (text: string) => {
@@ -35,15 +35,19 @@ const parsePriority = (text: string) => {
 };
 
 const parseProject = (text: string, projects: Project[]) => {
+  let firstMatch: { match: RegExpExecArray; project: Project } | undefined;
   for (const project of [...projects].sort((a, b) => b.name.length - a.name.length)) {
     const pattern = new RegExp(`(?:^|\\s)[~^]${escapeRegExp(project.name)}(?=\\s|$)`, "i");
     const match = pattern.exec(text);
-    if (match?.index !== undefined) {
-      return {
-        text: `${text.slice(0, match.index)} ${text.slice(match.index + match[0].length)}`,
-        projectId: project.id,
-      };
-    }
+    if (match?.index !== undefined && (!firstMatch || match.index < firstMatch.match.index))
+      firstMatch = { match, project };
+  }
+  if (firstMatch) {
+    const { match, project } = firstMatch;
+    return {
+      text: `${text.slice(0, match.index)} ${text.slice(match.index + match[0].length)}`,
+      projectId: project.id,
+    };
   }
   return { text };
 };
@@ -86,12 +90,31 @@ const resolveDate = (dateText: string, timeText: string | undefined, now: Date) 
     date = moment(now).add(daysAhead, "days");
   } else {
     const formats = [
+      "YYYY-MM-DD",
       "YYYY-M-D",
+      "MM/DD/YYYY",
+      "MM/D/YYYY",
+      "M/DD/YYYY",
       "M/D/YYYY",
+      "MM-DD-YYYY",
+      "MM-D-YYYY",
+      "M-DD-YYYY",
       "M-D-YYYY",
+      "MM/DD/YY",
+      "MM/D/YY",
+      "M/DD/YY",
       "M/D/YY",
+      "MM-DD-YY",
+      "MM-D-YY",
+      "M-DD-YY",
       "M-D-YY",
+      "MM/DD",
+      "MM/D",
+      "M/DD",
       "M/D",
+      "MM-DD",
+      "MM-D",
+      "M-DD",
       "M-D",
       "MMM D YYYY",
       "MMMM D YYYY",
@@ -110,7 +133,7 @@ const resolveDate = (dateText: string, timeText: string | undefined, now: Date) 
     if (time === "noon") date.hour(12);
     else if (time === "midnight") date.hour(0);
     else {
-      const parsedTime = moment(time, ["H", "H:mm", "ha", "h:mma"], true);
+      const parsedTime = moment(time, ["H", "HH", "H:mm", "HH:mm", "ha", "hha", "h:mma", "hh:mma"], true);
       if (!parsedTime.isValid()) return undefined;
       date.hour(parsedTime.hour()).minute(parsedTime.minute());
     }
@@ -120,7 +143,7 @@ const resolveDate = (dateText: string, timeText: string | undefined, now: Date) 
 
 const parseDate = (text: string, now: Date) => {
   const patterns = [
-    new RegExp(`(?:^|\\s)\\*\\s*(${EXPLICIT_DATE_SOURCE})(?:\\s+(?:at\\s+)?(${TIME_SOURCE}))?`, "i"),
+    new RegExp(`(?:^|\\s)\\*\\s*(${EXPLICIT_DATE_SOURCE})(?:\\s+(?:at\\s+)?(${TIME_SOURCE}))?(?=\\s|$|[,.;!?])`, "i"),
     new RegExp(`(?:^|\\s)(?:at\\s+)?(${TIME_SOURCE})\\s+(${DATE_SOURCE})(?=\\s|$|[,.;!?])`, "i"),
     new RegExp(`(?:^|\\s)(${DATE_SOURCE})(?:\\s+(?:at\\s+)?(${TIME_SOURCE}))?(?=\\s|$|[,.;!?])`, "i"),
   ];
@@ -163,14 +186,40 @@ const parseDate = (text: string, now: Date) => {
 
 /** Parse the subset of TickTick quick-add syntax supported by the macOS AppleScript API. */
 export const parseQuickAdd = (input: string, projects: Project[], now = new Date()): ParsedQuickAdd => {
-  const project = parseProject(input, projects);
-  const priority = parsePriority(project.text);
-  const date = parseDate(priority.text, now);
+  let remainingText = input;
+  let projectId: ParsedQuickAdd["projectId"];
+  let project = parseProject(remainingText, projects);
+  while (project.projectId) {
+    projectId = projectId || project.projectId;
+    remainingText = project.text;
+    project = parseProject(remainingText, projects);
+  }
+
+  let priorityValue: ParsedQuickAdd["priority"];
+  let priority = parsePriority(remainingText);
+  while (priority.priority) {
+    priorityValue = priorityValue || priority.priority;
+    remainingText = priority.text;
+    priority = parsePriority(remainingText);
+  }
+
+  const date = parseDate(remainingText, now);
+  remainingText = date.text;
+
+  // Consume additional date/time metadata so it cannot become the task title.
+  if (date.dueDate) {
+    let additionalDate = parseDate(remainingText, now);
+    while (additionalDate.dueDate) {
+      remainingText = additionalDate.text;
+      additionalDate = parseDate(remainingText, now);
+    }
+  }
+
   return {
-    title: cleanTitle(date.text),
-    projectId: project.projectId,
+    title: cleanTitle(remainingText),
+    projectId,
     dueDate: date.dueDate,
     isAllDay: date.isAllDay,
-    priority: priority.priority,
+    priority: priorityValue,
   };
 };
