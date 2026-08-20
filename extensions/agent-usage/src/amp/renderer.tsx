@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import type { AmpUsage, AmpError } from "./types.ts";
+
 import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
@@ -9,6 +9,7 @@ import {
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
+import type { AmpUsage, AmpError } from "./types.ts";
 
 function formatPercent(value: number): string {
   return Number.isInteger(value) ? `${value}%` : `${value.toFixed(1)}%`;

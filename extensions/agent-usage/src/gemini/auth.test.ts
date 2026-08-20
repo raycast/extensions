@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 test("extractGeminiOAuthClientCredentials parses oauth2.js constants", async () => {
   const { extractGeminiOAuthClientCredentials } = await import("./auth.ts");

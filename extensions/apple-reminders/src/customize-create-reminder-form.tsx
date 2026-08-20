@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 
 import useCreateReminderFormLayout, {
   CreateReminderFormLayoutItem,
@@ -54,15 +54,15 @@ export default function CustomizeCreateReminderForm() {
                       onAction={() => setValue(insertSeparatorAfter(layout, index))}
                     />
                     <Action
-                      title="Move Up"
+                      title="Move up"
                       icon={Icon.ArrowUp}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                      shortcut={Keyboard.Shortcut.Common.MoveUp}
                       onAction={() => setValue(moveLayoutItem(layout, index, -1))}
                     />
                     <Action
                       title="Move Down"
                       icon={Icon.ArrowDown}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                      shortcut={Keyboard.Shortcut.Common.MoveDown}
                       onAction={() => setValue(moveLayoutItem(layout, index, 1))}
                     />
                     <Action
@@ -75,7 +75,7 @@ export default function CustomizeCreateReminderForm() {
                     <Action
                       title="Reset to Defaults"
                       icon={Icon.ArrowCounterClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                       onAction={() => setValue(defaultCreateReminderFormLayout)}
                     />
                   </ActionPanel>
@@ -116,7 +116,7 @@ export default function CustomizeCreateReminderForm() {
                   />
                   {canToggle ? (
                     <Action
-                      title={item.enabled ? "Turn Off" : "Turn On"}
+                      title={item.enabled ? "Turn off" : "Turn on"}
                       icon={item.enabled ? Icon.XMarkCircle : Icon.CheckCircle}
                       onAction={() =>
                         setValue(
@@ -133,21 +133,21 @@ export default function CustomizeCreateReminderForm() {
                     />
                   ) : null}
                   <Action
-                    title="Move Up"
+                    title="Move up"
                     icon={Icon.ArrowUp}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                    shortcut={Keyboard.Shortcut.Common.MoveUp}
                     onAction={() => setValue(moveLayoutItem(layout, index, -1))}
                   />
                   <Action
                     title="Move Down"
                     icon={Icon.ArrowDown}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                    shortcut={Keyboard.Shortcut.Common.MoveDown}
                     onAction={() => setValue(moveLayoutItem(layout, index, 1))}
                   />
                   <Action
                     title="Reset to Defaults"
                     icon={Icon.ArrowCounterClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={() => setValue(defaultCreateReminderFormLayout)}
                   />
                 </ActionPanel>

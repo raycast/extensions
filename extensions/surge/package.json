@@ -108,5 +108,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.8",
+    "js-yaml@4": "4.3.1"
   }
 }

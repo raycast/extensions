@@ -1,6 +1,6 @@
-import { pathToFileURL, fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
 import { dirname, join, extname } from "node:path";
+import { pathToFileURL, fileURLToPath } from "node:url";
 
 export async function resolve(specifier, context, nextResolve) {
   if (specifier === "@raycast/api") {

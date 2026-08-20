@@ -1,11 +1,11 @@
 import { parseAntigravityCommandModelConfigsResponse, parseAntigravityUserStatusResponse } from "./parser.ts";
-import type { AntigravityError, AntigravityUsage } from "./types.ts";
 import {
   AntigravityProbeError,
   type AntigravityProbeResult,
   type AntigravityProbeSource,
   fetchAntigravityRawStatus,
 } from "./probe.ts";
+import type { AntigravityError, AntigravityUsage } from "./types.ts";
 
 type ProbeFetcher = (preferredSource?: AntigravityProbeSource) => Promise<AntigravityProbeResult>;
 

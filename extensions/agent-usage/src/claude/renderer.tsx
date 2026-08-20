@@ -1,5 +1,6 @@
-import React from "react";
 import { List } from "@raycast/api";
+import React from "react";
+
 import type { Accessory } from "../agents/types.ts";
 import {
   formatErrorOrNoData,

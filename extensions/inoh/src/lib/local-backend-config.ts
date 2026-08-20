@@ -4,14 +4,12 @@ import { environment } from "@raycast/api";
 
 /**
  * Optional overrides for pointing development builds at a local backend
- * (Supabase CLI Docker stack + Stripe test mode). Any field left out falls
- * back to the production value in {@link ../constants}.
+ * (Supabase CLI Docker stack). Any field left out falls back to the
+ * production value in {@link ../constants}.
  */
 type LocalBackendConfig = {
   supabaseUrl?: string;
   supabasePublishableKey?: string;
-  stripePriceMonthly?: string;
-  stripePriceAnnual?: string;
 };
 
 const LOCAL_CONFIG_PATH = join(environment.assetsPath, "local-config.json");

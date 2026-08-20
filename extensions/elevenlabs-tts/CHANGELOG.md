@@ -1,5 +1,11 @@
 # Raycast ElevenLabs TTS Changelog
 
+## [Fix Repeated Already Reading] - 2026-08-17
+
+### Fixed
+
+- Speech commands never finishing after playback because the final stream marker was ignored, leaving every next run reporting "Already reading" until the command was launched twice
+
 ## [Fix Stuck Playback Sessions] - 2026-08-10
 
 ### Fixed

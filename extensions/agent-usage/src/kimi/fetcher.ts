@@ -1,5 +1,5 @@
-import type { KimiUsage, KimiError } from "./types.ts";
 import { httpFetch } from "../agents/http.ts";
+import type { KimiUsage, KimiError } from "./types.ts";
 
 export const KIMI_OPENCODE_KEY = "kimi-for-coding";
 

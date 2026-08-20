@@ -1,9 +1,12 @@
 import {
   Action,
   ActionPanel,
+  BrowserExtension,
   Clipboard,
   Form,
+  getFrontmostApplication,
   getSelectedFinderItems,
+  getSelectedText,
   getPreferenceValues,
   Icon,
   LaunchProps,
@@ -14,7 +17,9 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { runAppleScript, showFailureToast, useCachedPromise } from "@raycast/utils";
+import { readdirSync, readFileSync } from "fs";
+import { join } from "path";
 import { useEffect, useMemo, useState } from "react";
 import {
   addObjectToSpaces,
@@ -34,9 +39,22 @@ import {
   classifyFilePaths,
   classifyTextInput,
   getUnsupportedUploadFiles,
+  isProbablyUrl,
   SaveInput,
 } from "./save-input";
 import { isUserTag } from "./tag-utils";
+import {
+  buildActiveTabAppleScript,
+  detectFlavorFromScriptingDefinition,
+  extractBundleIdFromInfoPlist,
+  getBrowserScriptFlavor,
+  getScriptingBundleId,
+  isKnownBrowserBundleId,
+  isSafeBundleId,
+  parseActiveTabUrl,
+  ScriptableBrowserFlavor,
+  supportsAppleScript,
+} from "./browser-tabs";
 
 /** Only the fields still read from the submitted form; title, URL and body are controlled state. */
 type SaveValues = {
@@ -101,6 +119,249 @@ async function getClipboardInitialState(): Promise<InitialState | undefined> {
   return undefined;
 }
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// A single short retry: the first read succeeds when there is a selection, so extra
+// attempts mostly add dead time to the common "no selection, just save the page" case.
+const SELECTED_TEXT_RETRY_DELAYS_MS = [0, 90];
+
+async function getSelectedTextInitialState(): Promise<InitialState | undefined> {
+  for (const retryDelayMs of SELECTED_TEXT_RETRY_DELAYS_MS) {
+    if (retryDelayMs > 0) {
+      await delay(retryDelayMs);
+    }
+
+    try {
+      const selected = await getSelectedText();
+      return getInitialStateFromInput(classifyTextInput(selected));
+    } catch {
+      // Accessibility text-selection reads are known to be flaky against web content
+      // (e.g. Safari); retry a couple of times before giving up on this layer.
+    }
+  }
+
+  return undefined;
+}
+
+const BROWSER_TABS_RETRY_DELAYS_MS = [0, 150, 350];
+const APPLESCRIPT_TIMEOUT_MS = 3000;
+
+type ScriptingDefinition = {
+  content: string;
+  /** The bundle that actually owns the terminology, which may be a nested app. */
+  bundleId?: string;
+};
+
+/**
+ * Locates an app's scripting definition. Some browsers (e.g. ChatGPT Atlas) nest the real
+ * app — and its `.sdef` — inside `Contents/Support`, in which case the terminology belongs
+ * to the nested bundle id rather than the one macOS reports for the frontmost app.
+ */
+function findScriptingDefinition(appPath: string): ScriptingDefinition | undefined {
+  const candidates: Array<{ appDir: string; nested: boolean }> = [{ appDir: appPath, nested: false }];
+  const supportDir = join(appPath, "Contents", "Support");
+
+  try {
+    for (const entry of readdirSync(supportDir)) {
+      if (entry.endsWith(".app")) {
+        candidates.push({ appDir: join(supportDir, entry), nested: true });
+      }
+    }
+  } catch {
+    // No nested Support bundle.
+  }
+
+  for (const { appDir, nested } of candidates) {
+    try {
+      const resourcesDir = join(appDir, "Contents", "Resources");
+      const sdefName = readdirSync(resourcesDir).find((entry) => entry.endsWith(".sdef"));
+
+      if (!sdefName) {
+        continue;
+      }
+
+      const content = readFileSync(join(resourcesDir, sdefName), "utf8");
+
+      if (!nested) {
+        return { content };
+      }
+
+      const infoPlist = readFileSync(join(appDir, "Contents", "Info.plist"), "utf8");
+      return { content, bundleId: extractBundleIdFromInfoPlist(infoPlist) };
+    } catch {
+      // Directory missing or unreadable; try the next candidate.
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Resolves how to script the frontmost browser: allowlist first, then the app's own
+ * scripting definition so unlisted browsers keep working without a code change.
+ */
+function resolveBrowserTarget(
+  bundleId: string,
+  appPath?: string,
+): { bundleId: string; flavor: ScriptableBrowserFlavor } | undefined {
+  const knownFlavor = getBrowserScriptFlavor(bundleId);
+
+  if (knownFlavor === "safari" || knownFlavor === "chromium") {
+    return { bundleId: getScriptingBundleId(bundleId), flavor: knownFlavor };
+  }
+
+  // A recognized-but-unscriptable browser (Firefox); don't probe its bundle.
+  if (knownFlavor === "none" || !appPath) {
+    return undefined;
+  }
+
+  const scriptingDefinition = findScriptingDefinition(appPath);
+
+  if (!scriptingDefinition) {
+    return undefined;
+  }
+
+  const flavor = detectFlavorFromScriptingDefinition(scriptingDefinition.content);
+
+  if (!flavor) {
+    return undefined;
+  }
+
+  const scriptingBundleId = scriptingDefinition.bundleId ?? bundleId;
+  return isSafeBundleId(scriptingBundleId) ? { bundleId: scriptingBundleId, flavor } : undefined;
+}
+
+type FrontmostBrowser = {
+  /** The bundle to address in AppleScript; undefined for browsers we can't script. */
+  scriptingBundleId?: string;
+  /** Undefined for browsers we can't script (Firefox), which use the Browser Extension. */
+  flavor?: ScriptableBrowserFlavor;
+};
+
+/**
+ * Identifies the frontmost app as a browser. Known bundle ids resolve immediately;
+ * anything else is accepted only if its scripting definition looks like a browser's,
+ * which is what lets newer browsers work without being added to the allowlist.
+ */
+function resolveFrontmostBrowser(frontmostApplication: {
+  bundleId?: string;
+  path?: string;
+}): FrontmostBrowser | undefined {
+  const bundleId = frontmostApplication.bundleId;
+
+  if (!bundleId || !isSafeBundleId(bundleId)) {
+    return undefined;
+  }
+
+  const target = supportsAppleScript() ? resolveBrowserTarget(bundleId, frontmostApplication.path) : undefined;
+
+  if (target) {
+    return { scriptingBundleId: target.bundleId, flavor: target.flavor };
+  }
+
+  return isKnownBrowserBundleId(bundleId) ? {} : undefined;
+}
+
+async function getActiveTabUrlViaAppleScript(browser: FrontmostBrowser): Promise<string | undefined> {
+  const { scriptingBundleId, flavor } = browser;
+
+  if (!scriptingBundleId || !flavor) {
+    return undefined;
+  }
+
+  try {
+    const output = await runAppleScript(buildActiveTabAppleScript(scriptingBundleId, flavor), {
+      timeout: APPLESCRIPT_TIMEOUT_MS,
+    });
+
+    return parseActiveTabUrl(output);
+  } catch {
+    // Automation permission denied, browser not scriptable, or no open window.
+    return undefined;
+  }
+}
+
+async function getActiveTabUrlViaBrowserExtension(): Promise<string | undefined> {
+  for (const retryDelayMs of BROWSER_TABS_RETRY_DELAYS_MS) {
+    if (retryDelayMs > 0) {
+      await delay(retryDelayMs);
+    }
+
+    try {
+      const tabs = await BrowserExtension.getTabs();
+      const activeTab = tabs.find((tab) => tab.active);
+
+      if (activeTab?.url && isProbablyUrl(activeTab.url)) {
+        return activeTab.url;
+      }
+
+      // If no tab is reported as active (a known Safari/Browser-Extension gap),
+      // we deliberately don't guess — reading page content across tabs to work
+      // around it would require broader per-site permissions than this feature
+      // is worth. Fall through to other detection layers instead.
+      return undefined;
+    } catch {
+      // The native-messaging bridge to the Browser Extension can be transiently
+      // unavailable (e.g. right after install, or on a tab opened before it connected);
+      // retry a couple of times before giving up.
+    }
+  }
+
+  return undefined;
+}
+
+async function getBrowserInitialState(browser: FrontmostBrowser): Promise<InitialState | undefined> {
+  // Independent reads — running them together keeps the command's open latency close to
+  // the slower of the two rather than their sum.
+  const [activeTabUrlFromScript, selectedTextInitialState] = await Promise.all([
+    getActiveTabUrlViaAppleScript(browser),
+    getSelectedTextInitialState(),
+  ]);
+
+  // A selection is an explicit act, so it wins over whatever page happens to be open.
+  if (selectedTextInitialState) {
+    return selectedTextInitialState;
+  }
+
+  if (activeTabUrlFromScript && isProbablyUrl(activeTabUrlFromScript)) {
+    return { ...EMPTY_INITIAL_STATE, kind: "url", url: activeTabUrlFromScript };
+  }
+
+  // The Browser Extension reports whichever browser it's installed in, which isn't
+  // necessarily the frontmost one — trusting it for a scriptable browser surfaces a URL
+  // from a completely different app. Only fall back to it when the frontmost browser
+  // can't be scripted at all (Firefox), where there's no better option.
+  if (browser.flavor) {
+    return undefined;
+  }
+
+  const activeTabUrl = await getActiveTabUrlViaBrowserExtension();
+
+  if (activeTabUrl) {
+    return { ...EMPTY_INITIAL_STATE, kind: "url", url: activeTabUrl };
+  }
+
+  return undefined;
+}
+
+/**
+ * Detection runs at most once per command launch.
+ *
+ * `getSelectedText()` is a global, stateful operation (Raycast reads the selection through
+ * the system clipboard), so two concurrent calls interfere: one wins and the other fails,
+ * which made results flip between the selection, the tab URL and stale clipboard history.
+ * React's development double-mount triggers exactly that, so callers share one promise.
+ * Each command launch is a fresh process, so this cache lives exactly as long as it should.
+ */
+let inFlightInitialState: Promise<InitialState> | undefined;
+
+function resolveInitialStateOnce(fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
+  inFlightInitialState ??= resolveInitialState(fallbackText, launchContext);
+  return inFlightInitialState;
+}
+
 async function resolveInitialState(fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
   const launchContextFiles = classifyFilePaths([
     ...(Array.isArray(launchContext?.files) ? launchContext.files : []),
@@ -117,6 +378,37 @@ async function resolveInitialState(fallbackText?: string, launchContext?: SaveLa
 
   if (launchContext?.content) {
     return { ...EMPTY_INITIAL_STATE, kind: "note", content: launchContext.content };
+  }
+
+  // Opt-in: with the preference off, detection stays exactly as it has always been —
+  // clipboard first, then Finder — and the browser is never queried, so macOS never
+  // asks for Automation permission.
+  const { detectContext } = getPreferenceValues<Preferences>();
+
+  if (detectContext) {
+    let frontmostApplication: Awaited<ReturnType<typeof getFrontmostApplication>> | undefined;
+
+    try {
+      frontmostApplication = await getFrontmostApplication();
+    } catch {
+      // Frontmost application couldn't be determined; fall through to app-agnostic detection.
+    }
+
+    const frontmostBrowser = frontmostApplication ? resolveFrontmostBrowser(frontmostApplication) : undefined;
+
+    if (frontmostBrowser) {
+      const browserInitialState = await getBrowserInitialState(frontmostBrowser);
+
+      if (browserInitialState) {
+        return browserInitialState;
+      }
+    } else {
+      const selectedTextInitialState = await getSelectedTextInitialState();
+
+      if (selectedTextInitialState) {
+        return selectedTextInitialState;
+      }
+    }
   }
 
   const clipboardInitialState = await getClipboardInitialState();
@@ -155,10 +447,10 @@ export default function SaveToMymindCommand(props: LaunchProps) {
   const accessKeyScope = getAccessKeyScope(accessKeyId, accessKeySecret);
   const launchContext = useMemo(() => (props.launchContext ?? {}) as SaveLaunchContext, [props.launchContext]);
   const [kind, setKind] = useState<SaveValues["kind"]>("note");
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [url, setUrl] = useState("");
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const effectiveAccessLevel = useEffectiveAccessLevel(accessLevel, accessKeyScope);
@@ -188,7 +480,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
     async function loadInitialState() {
       try {
-        const nextState = await resolveInitialState(props.fallbackText, launchContext);
+        const nextState = await resolveInitialStateOnce(props.fallbackText, launchContext);
 
         if (cancelled) {
           return;

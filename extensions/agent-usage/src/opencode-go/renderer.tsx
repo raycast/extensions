@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
-import type { OpencodegoUsage, OpencodegoError, OpencodegoQuota } from "./types.ts";
-import type { Accessory } from "../agents/types.ts";
+
 import { formatResetTime, getRemainingPercent } from "../agents/format.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -10,6 +10,7 @@ import {
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
+import type { OpencodegoUsage, OpencodegoError, OpencodegoQuota } from "./types.ts";
 
 function formatQuotaText(quota: OpencodegoQuota): string {
   const remaining = quota.limit - quota.used;

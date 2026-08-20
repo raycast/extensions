@@ -6,7 +6,11 @@ import { SLACK_EMOJI_CODE_MAP } from "./constants/emoji.constants";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { type SlackStatusForm, StatusForm } from "./components/set-status/status-form.component";
 import { EmojiPicker } from "./components/set-status/emoji-picker.component";
-import { getDurationOptionFromTimestamp, getTextForExpiration } from "./utils/set-status/expiration.util";
+import {
+  getDurationOptionFromTimestamp,
+  getExpirationTimestamp,
+  getTextForExpiration,
+} from "./utils/set-status/expiration.util";
 import { showToastWithPromise } from "./utils/toast.util";
 import SetAiStatusForm from "./components/set-status/set-ai-status-form.component";
 
@@ -40,8 +44,19 @@ function normalizeEmoji(emoji?: string): string | undefined {
   return EMOJI_NAME_BY_CHAR[trimmed] ?? EMOJI_NAME_BY_CHAR[trimmed.replace(/️/g, "")];
 }
 
+// Accepts what `getExpirationTimestamp` understands: a keyword or a minute count. Returns undefined
+// otherwise, so the caller can report it instead of hitting that helper's NaN-to-"don't clear" path.
+function normalizeExpiration(expiration?: string): string | undefined {
+  const trimmed = expiration?.trim();
+  if (!trimmed) {
+    return "0";
+  }
+
+  return trimmed === "today" || trimmed === "week" || /^\d+$/.test(trimmed) ? trimmed : undefined;
+}
+
 function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>) {
-  const { statusText: statusTextArgument, emoji: emojiArgument } = props.arguments;
+  const { statusText: statusTextArgument, emoji: emojiArgument, expiration: expirationArgument } = props.arguments;
 
   const { data: me, isLoading: isFetchMeLoading } = useMe();
   const {
@@ -214,6 +229,17 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
 
     const statusText = statusTextArgument?.trim() || undefined;
     const emoji = normalizeEmoji(emojiArgument);
+    const expirationValue = normalizeExpiration(expirationArgument);
+
+    if (expirationValue === undefined) {
+      didAutoSetStatus.current = true;
+      showFailureToast(new Error(`"${expirationArgument?.trim()}" isn't a number of minutes, "today", or "week".`), {
+        title: "Failed to set status",
+      });
+      return;
+    }
+
+    const expiration = getExpirationTimestamp(expirationValue);
 
     // The emoji was provided but couldn't be mapped to a Slack `:name:` (e.g. a composite/ZWJ glyph
     // absent from SLACK_EMOJI_CODE_MAP). Surface it rather than silently dropping the launch.
@@ -240,7 +266,7 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
         await SlackClient.setStatus({
           statusText,
           emoji,
-          expiration: 0,
+          expiration,
           originProfile: profile,
         });
         await mutate();
@@ -252,7 +278,9 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
         error: "An error occurred while changing the state.",
         success: () => ({
           title: "Set status",
-          message: [emoji, statusText].filter(Boolean).join(" "),
+          message: [[emoji, statusText].filter(Boolean).join(" "), getTextForExpiration(expiration)]
+            .filter(Boolean)
+            .join(" · "),
         }),
       },
     );
@@ -265,6 +293,7 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
     mutate,
     statusTextArgument,
     emojiArgument,
+    expirationArgument,
   ]);
 
   return (

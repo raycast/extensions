@@ -4,20 +4,14 @@ import { CreateWorkspaceForm } from "./components/create-workspace-form";
 import { AgentActions, PaneActions, TabActions, WorkspaceActions } from "./components/resource-actions";
 import { StartAgentForm } from "./components/start-agent-form";
 import { useHerdrSnapshot } from "./hooks/use-herdr-snapshot";
-import { agentIcon } from "./lib/agent-appearance";
-import type { AgentInfo, PaneInfo } from "./lib/types";
-import { ErrorView, statusIcon, statusTitle } from "./lib/ui";
+import { agentIcon, agentName } from "./lib/agent-appearance";
+import type { PaneInfo } from "./lib/types";
+import { ErrorView, abbreviatePath, statusIcon, statusTitle, tabLabel } from "./lib/ui";
 
 type Scope = "all" | "attention" | "workspaces" | "tabs" | "panes" | "agents";
 
-function agentLabel(agent: AgentInfo): string {
-  return agent.name || agent.display_agent || agent.agent || agent.pane_id;
-}
-
 function paneLabel(pane: PaneInfo): string {
-  return (
-    pane.title || pane.display_agent || pane.agent || pane.terminal_title_stripped || pane.terminal_title || "Shell"
-  );
+  return pane.label || pane.terminal_title_stripped || pane.terminal_title || "Shell";
 }
 
 export default function Command() {
@@ -37,6 +31,7 @@ export default function Command() {
   const tabs = data?.tabs || [];
   const panes = data?.panes || [];
   const agents = data?.agents || [];
+  const remainingAgents = agents.filter((agent) => !attention.includes(agent));
   const listedPanes =
     scope === "agents"
       ? agents
@@ -80,9 +75,9 @@ export default function Command() {
           {attention.map((agent) => (
             <List.Item
               key={`attention-${agent.pane_id}`}
-              icon={agentIcon(agent.agent || agent.display_agent)}
-              title={agentLabel(agent)}
-              subtitle={agent.terminal_title_stripped || agent.foreground_cwd || agent.cwd}
+              icon={agentIcon(agent.agent)}
+              title={agentName(agent)}
+              subtitle={agent.terminal_title_stripped || abbreviatePath(agent.foreground_cwd || agent.cwd)}
               keywords={[agent.agent || "", agent.pane_id, agent.workspace_id, agent.tab_id, agent.cwd || ""]}
               accessories={[
                 { tag: { value: statusTitle(agent.agent_status), color: statusIcon(agent.agent_status).tintColor } },
@@ -132,7 +127,7 @@ export default function Command() {
               <List.Item
                 key={tab.tab_id}
                 icon={Icon.AppWindowList}
-                title={tab.label}
+                title={tabLabel(tab) ?? `Tab ${tab.number}`}
                 subtitle={`${workspace?.label || tab.workspace_id} · ${tab.tab_id} · ${tab.pane_count} pane${tab.pane_count === 1 ? "" : "s"}`}
                 keywords={[tab.tab_id, tab.workspace_id, workspace?.label || ""]}
                 accessories={[
@@ -155,9 +150,11 @@ export default function Command() {
             return (
               <List.Item
                 key={`${scope}-${pane.pane_id}`}
-                icon={agent ? agentIcon(agent.agent || agent.display_agent) : Icon.Terminal}
-                title={paneLabel(pane)}
-                subtitle={`${workspace?.label || pane.workspace_id} › ${tab?.label || pane.tab_id}`}
+                icon={agent ? agentIcon(agent.agent) : Icon.Terminal}
+                title={agent ? agentName(agent) : paneLabel(pane)}
+                subtitle={[workspace?.label || pane.workspace_id, tab ? tabLabel(tab) : pane.tab_id]
+                  .filter(Boolean)
+                  .join(" › ")}
                 keywords={[
                   pane.pane_id,
                   pane.cwd || "",
@@ -185,14 +182,14 @@ export default function Command() {
         </List.Section>
       ) : null}
 
-      {scope === "all" && agents.length > 0 ? (
-        <List.Section title="Agents" subtitle={`${agents.length}`}>
-          {agents.map((agent) => (
+      {scope === "all" && remainingAgents.length > 0 ? (
+        <List.Section title="Agents" subtitle={`${remainingAgents.length}`}>
+          {remainingAgents.map((agent) => (
             <List.Item
               key={`agent-${agent.pane_id}`}
-              icon={agentIcon(agent.agent || agent.display_agent)}
-              title={agentLabel(agent)}
-              subtitle={agent.foreground_cwd || agent.cwd || agent.pane_id}
+              icon={agentIcon(agent.agent)}
+              title={agentName(agent)}
+              subtitle={abbreviatePath(agent.foreground_cwd || agent.cwd) || agent.pane_id}
               keywords={[agent.agent || "", agent.pane_id, agent.name || "", agent.terminal_title || ""]}
               accessories={[
                 { tag: { value: statusTitle(agent.agent_status), color: statusIcon(agent.agent_status).tintColor } },

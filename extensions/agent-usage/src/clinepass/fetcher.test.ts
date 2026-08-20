@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+
 import { fetchClinePassUsage, parseClinePassResponses } from "./fetcher.ts";
 
-test("parseClinePassResponses treats 5h as rolling while mapping weekly and monthly reset dates", () => {
+test("parseClinePassResponses preserves reset dates and attaches maximum reset fallbacks to every limit", () => {
   const result = parseClinePassResponses(
     { id: "usr-example", email: "user@example.com", displayName: "Example" },
     { userId: "usr-example", balance: 1_234_500 },
@@ -20,11 +21,43 @@ test("parseClinePassResponses treats 5h as rolling while mapping weekly and mont
   assert.deepEqual(result.usage, {
     account: "Example",
     userId: "usr-example",
-    fiveHourLimit: { percentageRemaining: 64.6 },
-    weeklyLimit: { percentageRemaining: 0, resetsAt: "2026-08-10T00:00:00.000Z" },
-    monthlyLimit: { percentageRemaining: 90, resetsAt: "2026-09-01T00:00:00.000Z" },
+    fiveHourLimit: {
+      percentageRemaining: 64.6,
+      resetsAt: "2026-08-07T15:00:00.000Z",
+      maxResetSeconds: 5 * 60 * 60,
+    },
+    weeklyLimit: {
+      percentageRemaining: 0,
+      resetsAt: "2026-08-10T00:00:00.000Z",
+      maxResetSeconds: 7 * 24 * 60 * 60,
+    },
+    monthlyLimit: {
+      percentageRemaining: 90,
+      resetsAt: "2026-09-01T00:00:00.000Z",
+      maxResetSeconds: 30 * 24 * 60 * 60,
+    },
     credits: { balance: 1_234_500, balanceUsd: 1.2345 },
   });
+});
+
+test("parseClinePassResponses treats empty, null, and unknown reset dates as missing", () => {
+  const result = parseClinePassResponses(
+    { id: "usr-example" },
+    { userId: "usr-example", balance: 0 },
+    {
+      limits: [
+        { type: "five_hour", percentUsed: 10, resetsAt: "" },
+        { type: "weekly", percentUsed: 20, resetsAt: null },
+        { type: "monthly", percentUsed: 30, resetsAt: "unknown" },
+      ],
+    },
+    "usr-example",
+  );
+
+  assert.equal(result.error, null);
+  assert.deepEqual(result.usage?.fiveHourLimit, { percentageRemaining: 90, maxResetSeconds: 5 * 60 * 60 });
+  assert.deepEqual(result.usage?.weeklyLimit, { percentageRemaining: 80, maxResetSeconds: 7 * 24 * 60 * 60 });
+  assert.deepEqual(result.usage?.monthlyLimit, { percentageRemaining: 70, maxResetSeconds: 30 * 24 * 60 * 60 });
 });
 
 test("parseClinePassResponses rejects a profile for a different requested user", () => {

@@ -19,7 +19,8 @@
     "1weiho",
     "xmok",
     "niksite",
-    "ojowwalker77"
+    "ojowwalker77",
+    "gumadeiras"
   ],
   "pastContributors": [
     "axsuul",
@@ -585,5 +586,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

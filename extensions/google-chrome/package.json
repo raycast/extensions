@@ -24,7 +24,8 @@
     "0xdhrv",
     "xmok",
     "hayk_safaryan",
-    "alexi.build"
+    "alexi.build",
+    "oussama_moussaoui"
   ],
   "pastContributors": [
     "jonasengelmann"
@@ -100,6 +101,13 @@
       "subtitle": "Google Chrome",
       "description": "Name the currently active Google Chrome window.",
       "mode": "no-view"
+    },
+    {
+      "name": "search-windows",
+      "title": "Search Windows",
+      "subtitle": "Google Chrome",
+      "description": "List all open windows and focus the selected one.",
+      "mode": "view"
     }
   ],
   "tools": [

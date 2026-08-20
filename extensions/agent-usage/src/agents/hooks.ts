@@ -1,9 +1,10 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useCallback, useRef } from "react";
-import type { UsageState } from "./types.ts";
+
 import type { AccountsState, AccountUsageState } from "../accounts/types.ts";
 import { isOpenCodeActiveToken } from "./opencode-active.ts";
+import type { UsageState } from "./types.ts";
 import {
   allAccountRowsSucceeded,
   hashAuthKey,

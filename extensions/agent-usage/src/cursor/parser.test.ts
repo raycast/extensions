@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 test("parseCursorUsage uses enterprise overall when plan is absent", async () => {
   const { parseCursorUsage } = await import("./parser.ts");

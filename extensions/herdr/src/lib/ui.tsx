@@ -1,7 +1,20 @@
+import { homedir } from "node:os";
 import { Action, ActionPanel, Color, Detail, Icon, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { formatHerdrError } from "./herdr";
-import type { AgentStatus } from "./types";
+import type { AgentStatus, TabInfo } from "./types";
 export { shortcuts } from "./shortcuts";
+
+// Herdr defaults a tab's label to its number, which identifies nothing.
+export function tabLabel(tab?: TabInfo): string | undefined {
+  if (!tab || tab.label === String(tab.number)) return undefined;
+  return tab.label;
+}
+
+export function abbreviatePath(path?: string): string | undefined {
+  if (!path) return undefined;
+  const home = homedir();
+  return path === home || path.startsWith(`${home}/`) ? `~${path.slice(home.length)}` : path;
+}
 
 export function statusTitle(status?: AgentStatus): string {
   switch (status) {

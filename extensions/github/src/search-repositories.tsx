@@ -35,15 +35,21 @@ function SearchRepositories() {
   const {
     data,
     isLoading,
+    error,
     mutate: mutateList,
+    pagination,
   } = useCachedPromise(
-    async (query) => {
+    (query: string) => async (options: { page: number; cursor?: string }) => {
       const result = await github.searchRepositories({
         query,
-        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
+        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 25 }),
+        after: options.page > 0 ? options.cursor : undefined,
       });
-
-      return result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment);
+      return {
+        data: result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment) ?? [],
+        hasMore: result.search.pageInfo.hasNextPage,
+        cursor: result.search.pageInfo.endCursor ?? undefined,
+      };
     },
     [query],
     { keepPreviousData: true },
@@ -71,6 +77,7 @@ function SearchRepositories() {
       onSearchTextChange={setSearchText}
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
       throttle
+      pagination={pagination}
     >
       <List.Section title="Visited Repositories" subtitle={validHistory ? String(validHistory.length) : undefined}>
         {validHistory.map((repository) => (
@@ -105,7 +112,7 @@ function SearchRepositories() {
         </List.Section>
       ) : null}
 
-      <RepositoryListEmptyView searchText={searchText} isLoading={isLoading} />
+      <RepositoryListEmptyView searchText={searchText} isLoading={isLoading} error={error} />
     </List>
   );
 }

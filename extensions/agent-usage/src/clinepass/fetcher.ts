@@ -1,3 +1,4 @@
+import { parseDate } from "../agents/format.ts";
 import { httpFetch } from "../agents/http.ts";
 import { formatClineApiToken, refreshClineCredential } from "./auth.ts";
 import type {
@@ -11,6 +12,9 @@ import type {
 } from "./types.ts";
 
 const CLINE_API = "https://api.cline.bot/api/v1";
+const FIVE_HOUR_MAX_RESET_SECONDS = 5 * 60 * 60;
+const WEEKLY_MAX_RESET_SECONDS = 7 * 24 * 60 * 60;
+const MONTHLY_MAX_RESET_SECONDS = 30 * 24 * 60 * 60;
 
 interface ApiEnvelope {
   success?: boolean;
@@ -35,12 +39,15 @@ function parseEnvelope(data: unknown, label: string): { data: unknown; error: Cl
   return { data: envelope.data, error: null };
 }
 
-function toLimit(limits: ClineUsageLimits["limits"], type: string, includeReset = true): ClinePassLimit | null {
+function toLimit(limits: ClineUsageLimits["limits"], type: string, maxResetSeconds: number): ClinePassLimit | null {
   const limit = limits.find((entry) => entry.type === type);
   if (!limit || typeof limit.percentUsed !== "number" || !Number.isFinite(limit.percentUsed)) return null;
+  const resetsAt =
+    typeof limit.resetsAt === "string" && limit.resetsAt && parseDate(limit.resetsAt) ? limit.resetsAt : undefined;
   return {
     percentageRemaining: Math.min(100, Math.max(0, 100 - limit.percentUsed)),
-    ...(includeReset && typeof limit.resetsAt === "string" && limit.resetsAt ? { resetsAt: limit.resetsAt } : {}),
+    ...(resetsAt ? { resetsAt } : {}),
+    maxResetSeconds,
   };
 }
 
@@ -74,9 +81,9 @@ export function parseClinePassResponses(
     return { usage: null, error: { type: "parse_error", message: "Cline returned invalid usage limits." } };
   }
 
-  const fiveHourLimit = toLimit(limits, "five_hour", false);
-  const weeklyLimit = toLimit(limits, "weekly");
-  const monthlyLimit = toLimit(limits, "monthly");
+  const fiveHourLimit = toLimit(limits, "five_hour", FIVE_HOUR_MAX_RESET_SECONDS);
+  const weeklyLimit = toLimit(limits, "weekly", WEEKLY_MAX_RESET_SECONDS);
+  const monthlyLimit = toLimit(limits, "monthly", MONTHLY_MAX_RESET_SECONDS);
   const missing = [
     ["5h", fiveHourLimit],
     ["weekly", weeklyLimit],

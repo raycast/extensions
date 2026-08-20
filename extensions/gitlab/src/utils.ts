@@ -284,8 +284,7 @@ export function formatDurationHuman(totalSeconds: number): string {
 
 export interface Preferences {
   instance: string;
-  authType?: "pat" | "oauth";
-  token: string;
+  token?: string;
   oauthClientId?: string;
   artifactDownloadDirectory?: string;
   primaryaction: "browser" | "detail";
@@ -326,28 +325,22 @@ export function getInstance(preferences: Preferences = getPreferences()): string
   return (preferences.instance.trim() || DEFAULT_GITLAB_INSTANCE).replace(/\/+$/, "");
 }
 
-export function isOAuthEnabled(preferences: Preferences = getPreferences()): boolean {
-  return preferences.authType === "oauth";
+// A configured token wins over OAuth: it is the credential the user set explicitly,
+// so an upgrade never diverts them into a browser flow they did not ask for. Every
+// other case is OAuth, including "neither configured". `requireOAuthClientId` is
+// the single site that reports nothing being set.
+export function getPersonalAccessToken(preferences: Preferences = getPreferences()): string | undefined {
+  return preferences.token?.trim() || undefined;
 }
 
 export function requireOAuthClientId(preferences: Preferences = getPreferences()): string {
   const clientId = preferences.oauthClientId?.trim();
   if (!clientId) {
     throw new Error(
-      "GitLab OAuth Application ID is not configured. Open the GitLab extension preferences and either set the Application ID or switch Authentication back to Personal Access Token.",
+      "GitLab authentication is not configured. Open the GitLab extension preferences and set either the API Token or the OAuth Application ID.",
     );
   }
   return clientId;
-}
-
-export function requirePersonalAccessToken(preferences: Preferences = getPreferences()): string {
-  const token = preferences.token?.trim();
-  if (!token) {
-    throw new Error(
-      "GitLab API Token is not configured. Open the GitLab extension preferences and either set the API Token or switch Authentication to OAuth.",
-    );
-  }
-  return token;
 }
 
 export function parseCommaSeparatedPreference(value: string | undefined): string[] {

@@ -204,7 +204,9 @@
               "type": "link",
               "url": "https://example.com/typography",
               "mymindUrl": "https://access.mymind.com/everything/#obj_1",
-              "tags": ["design"],
+              "tags": [
+                "design"
+              ],
               "spaceIds": [],
               "created": "2024-01-01T00:00:00Z",
               "modified": "2024-01-01T00:00:00Z"
@@ -353,6 +355,15 @@
       ]
     },
     {
+      "name": "detectContext",
+      "type": "checkbox",
+      "required": false,
+      "title": "Context Detection",
+      "label": "Prefill from the active browser tab and selected text",
+      "description": "Off by default. When enabled, Save to mymind prefills from what you are looking at: selected text becomes a note, and the active browser tab's URL becomes a link. Reading the browser tab asks macOS for permission to control that browser the first time. macOS only.",
+      "default": false
+    },
+    {
       "name": "mediaGridColumns",
       "type": "dropdown",
       "required": false,
@@ -381,6 +392,7 @@
   ],
   "overrides": {
     "minimatch": "^10.0.1",
-    "picomatch": "^4.0.4"
+    "picomatch": "^4.0.4",
+    "js-yaml@4": "4.3.1"
   }
 }

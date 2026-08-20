@@ -730,11 +730,15 @@ async function toJsonOrError(response: Response): Promise<any> {
 }
 
 type AuthType = "pat" | "oauth";
-type TokenResolver = () => Promise<string>;
-export interface AuthConfig {
+/** A token together with the header scheme that carries it, so the two cannot diverge. */
+export interface Credential {
   authType: AuthType;
-  resolve: TokenResolver;
-  /** Force-refresh the token after a 401. Only consulted when `authType === "oauth"`. */
+  token: string;
+}
+type CredentialResolver = () => Promise<Credential>;
+export interface AuthConfig {
+  resolve: CredentialResolver;
+  /** Force-refresh the token after a 401. Only consulted for OAuth credentials. */
   refresh?: () => Promise<string>;
 }
 
@@ -744,15 +748,13 @@ export class GitLab {
 
   constructor(url: string, auth: string | AuthConfig) {
     this.url = url;
-    this.auth = typeof auth === "string" ? { authType: "pat", resolve: async () => auth } : auth;
+    this.auth = typeof auth === "string" ? { resolve: async () => ({ authType: "pat", token: auth }) } : auth;
   }
 
-  private buildAuthHeaders(token: string): Record<string, string> {
-    return this.auth.authType === "oauth" ? { Authorization: `Bearer ${token}` } : { "PRIVATE-TOKEN": token };
-  }
-
-  private async resolveToken(force = false): Promise<string> {
-    return force && this.auth.refresh ? this.auth.refresh() : this.auth.resolve();
+  private buildAuthHeaders(credential: Credential): Record<string, string> {
+    return credential.authType === "oauth"
+      ? { Authorization: `Bearer ${credential.token}` }
+      : { "PRIVATE-TOKEN": credential.token };
   }
 
   private getFetcher() {
@@ -763,31 +765,32 @@ export class GitLab {
       const requestMethod = typeof options?.method === "string" ? options.method : "GET";
       logGitLabApiRequest(requestUrl, requestMethod, options?.body);
 
-      const send = async (token: string) =>
+      const send = async (credential: Credential) =>
         fetch(fullUrl, {
           ...options,
           headers: {
             "Content-Type": "application/json",
             ...(options?.headers ?? {}),
-            ...this.buildAuthHeaders(token),
+            ...this.buildAuthHeaders(credential),
           },
           agent,
         });
 
-      const response = await send(await this.resolveToken());
+      const credential = await this.auth.resolve();
+      const response = await send(credential);
 
       // On OAuth 401, force-refresh once and retry. Skip the retry for
       // non-replayable bodies (streams, FormData) since they were consumed.
       if (
         response.status === 401 &&
-        this.auth.authType === "oauth" &&
+        credential.authType === "oauth" &&
         this.auth.refresh &&
         isReplayableBody(options?.body)
       ) {
         try {
-          const fresh = await this.resolveToken(true);
+          const fresh = await this.auth.refresh();
           logGitLabApiRequest(`${requestUrl} (oauth retry)`, requestMethod);
-          const retryResponse = await send(fresh);
+          const retryResponse = await send({ authType: "oauth", token: fresh });
           if (!retryResponse.ok) {
             await warnGitLabApiErrorResponse(retryResponse, requestUrl, requestMethod);
           }

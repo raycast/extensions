@@ -236,8 +236,17 @@ export class AudioManager extends EventEmitter {
         return;
       }
 
-      // Skip non-audio messages (e.g., acknowledgments)
       if (!message.audio) {
+        // The final stream marker arrives without audio, so conclude before the audio guard
+        if (message.isFinal) {
+          console.log(`Stream complete after ${this.streamState.chunksReceived} chunks`);
+          this.streamState.streamComplete = true;
+          this.ws?.close();
+          this.checkAndEmitComplete();
+          return;
+        }
+
+        // Skip other non-audio messages (e.g., acknowledgments)
         console.log("Received non-audio message:", JSON.stringify(message));
         return;
       }
@@ -387,22 +396,34 @@ export class AudioManager extends EventEmitter {
 
   /**
    * Handles WebSocket connection close
-   * Ensures cleanup if playback hasn't started
+   * Concludes the stream so the command always settles and releases its session
    */
-  private handleWebSocketClose(): void {
-    console.log("WebSocket connection closed");
-    if (!this.streamState.isPlaying) {
-      // If connection closed without receiving any audio chunks, emit error
-      // chunksReceived = -1 means an error was already emitted
-      if (this.streamState.chunksReceived === 0) {
-        console.error("Connection closed without receiving any audio chunks");
-        this.emit("error", new Error("No audio received"));
-      } else if (this.streamState.chunksReceived > 0) {
-        // Stream completed but playback never started - mark as complete
-        this.emit("complete");
-      }
-      // If chunksReceived is -1, error was already emitted, do nothing
+  private handleWebSocketClose(code: number): void {
+    console.log(`WebSocket connection closed (code ${code})`);
+    // The close is expected once the stream concluded; completion arrives when playback finishes
+    if (this.streamState.streamComplete) return;
+
+    // chunksReceived = -1 means an error was already emitted
+    if (this.streamState.chunksReceived === -1) return;
+
+    if (this.streamState.chunksReceived === 0) {
+      console.error("Connection closed without receiving any audio chunks");
+      this.emit("error", new Error("No audio received"));
+      return;
     }
+
+    // Anything but a normal closure (1000) means the stream may have been truncated
+    // — including 1005, a close without a status code — so surface it as a failure
+    if (code !== 1000) {
+      this.emit("error", new Error(`Connection closed unexpectedly (code ${code})`));
+      return;
+    }
+
+    // The server may close normally without sending isFinal; mark the stream complete
+    // and let the complete event fire once playback (started or pending a chunk write,
+    // which always follows a received chunk) finishes
+    this.streamState.streamComplete = true;
+    this.checkAndEmitComplete();
   }
 
   /**

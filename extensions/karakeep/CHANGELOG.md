@@ -1,5 +1,35 @@
 # Karakeep Changelog
 
+## [2.4.4] - 2026-08-17
+
+- Fixed a custom title being applied to an existing bookmark even when the rest of the submission failed. Adding a bookmark whose URL is already saved renames it, and that rename now happens only after the list and tag steps have succeeded, so a failure leaves the existing bookmark untouched
+- Create Bookmark no longer reports "Creation failed" when the bookmark was saved and only a later step failed. The toast now says which part didn't apply (the list, the tags, or the title) and the form stays open so you can retry without retyping anything
+- Fixed the Update Karakeep command offering to copy a Docker command for a previously-detected instance after a re-check had failed, and carrying the earlier result's state into the next check
+- Added a "Use Page Title" action (⌘T) to Create Bookmark, which fills the Title field from the active browser tab. It appears only when the Raycast browser extension is available, since that is the only source of a page title. The field is still empty by default, because a title you set overrides the one Karakeep reads from the page and keeps it from ever updating
+- Fixed the Safari entry under "Add to Browser" opening an App Store listing that no longer exists. It now opens the Karakeep app
+- Keyboard shortcuts now follow Raycast's standard bindings, so they match what you already know from other extensions. Delete moved to ⌃D, Edit to ⌘E, Open to ⌘O, Copy ID to ⌘⇧C, and Clear Cache to ⌃⇧D; every shortcut also declares an explicit Windows binding
+- Backing out of the "Delete list" confirmation no longer shows a red "Delete cancelled" error, matching every other confirmation in the extension
+- Error toasts that report a failure with no underlying exception — a browser tab that couldn't be read, a bookmark the server returned empty, a backup that failed on its own — now let you copy the details, so every error toast can be turned into a bug report
+
+## [2.4.3] - 2026-08-13
+
+- Added an optional Title field to Create Bookmark. Leave it empty to use the page title detected by Karakeep. Custom titles are also applied when the submitted URL already exists in Karakeep.
+
+## [2.4.2] - 2026-08-12
+
+- Added an "Add to List" action to the Bookmarks and Bookmark Detail views, as a submenu you can filter by typing (⌘⇧L)
+- The list icon field takes any single emoji again, and ⌘I opens a searchable grid of all 1,870 emoji. Keycap emoji (1️⃣, #️⃣, *️⃣) are now accepted — the validator was rejecting them
+- Lists that share a name are now distinguished by their parent list — in the Lists view, the Add to List menu, and the parent-list pickers — since Karakeep allows duplicate list names
+- Fixed list creation failing with "HTTP 400". The API requires an icon, and the form sent none when the field was left empty
+- Fixed every command with a list dropdown firing one request per list on open. A bookmark count was fetched for each list, which cost 45 requests on a 45-list library and reported the wrong number anyway — it was capped at the page size, so any list with more than 10 bookmarks showed "(10)".
+- Added an "Update Karakeep" command that pulls the latest Docker images and restarts a local instance, with live progress. A failed update names the cause — registry unreachable, not authorized, out of disk, port in use — and says whether your instance is still running
+- The Update command refuses to run when it can't prove which Docker project is Karakeep — if more than one project publishes your port, if what's answering there doesn't identify as Karakeep, or if the container is stopped while something else already holds the port — rather than recreating an unrelated app. When Karakeep is stopped there's nothing to ask, so the update names the project and asks you to confirm before recreating it
+- Docker detection now works on Windows, matches the published port by protocol and bind address rather than number alone, and only offers to start containers Docker can actually start
+- After a successful update, ⌘Y opens the release notes for the version you're running, fetched from GitHub
+- Rewrote the settings labels for Raycast 2.0's preferences UI
+- Preview image failures are now logged with the underlying cause instead of failing silently into a placeholder
+- API errors now say what actually failed (e.g. "icon: expected string, received undefined") instead of a bare status code. This also covers Search and Summarize, whose errors are shaped differently and were showing only "HTTP 500"
+
 ## [2.4.1] - 2026-08-08
 
 - Fixed every bookmark appearing twice after going offline and reconnecting. The pagination prefetch ran even when the server was unreachable, which advanced the page counter while the request failed; the next successful fetch was then appended to the cached rows instead of replacing them. The prefetch now waits for a request that has actually succeeded.

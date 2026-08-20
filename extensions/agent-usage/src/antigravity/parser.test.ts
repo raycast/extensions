@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 test("parseAntigravityUserStatusResponse parses account and prioritized models", async () => {
   const { parseAntigravityUserStatusResponse } = await import("./parser.ts");

@@ -1,7 +1,7 @@
-import test from "node:test";
 import assert from "node:assert/strict";
 import os from "node:os";
 import path from "node:path";
+import test from "node:test";
 
 test("resolveClaudeCredentialsPaths prefers CLAUDE_CONFIG_DIR and keeps the default fallback", async () => {
   const { resolveClaudeCredentialsPaths } = await import("./fetcher.ts");
