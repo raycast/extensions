@@ -42,7 +42,9 @@ function trimSlash(url: string): string {
 function isLoopback(endpoint: string): boolean {
   try {
     const hostname = new URL(endpoint).hostname;
-    return hostname === "127.0.0.1" || hostname === "localhost" || hostname === "::1";
+    return (
+      hostname === "127.0.0.1" || hostname === "localhost" || hostname === "::1"
+    );
   } catch {
     return /127\.0\.0\.1|localhost/.test(endpoint);
   }
@@ -63,17 +65,25 @@ function httpEndpointFromRemoteUrl(url: string): string | undefined {
 
 function readOpenClawFileConfig(): FileGatewayConfig {
   try {
-    const raw = readFileSync(join(homedir(), ".openclaw", "openclaw.json"), "utf8");
-    const gateway = (JSON.parse(raw) as { gateway?: Record<string, unknown> }).gateway;
+    const raw = readFileSync(
+      join(homedir(), ".openclaw", "openclaw.json"),
+      "utf8",
+    );
+    const gateway = (JSON.parse(raw) as { gateway?: Record<string, unknown> })
+      .gateway;
     if (!gateway || typeof gateway !== "object") return {};
     const auth = gateway.auth as { token?: string } | undefined;
-    const remote = gateway.remote as { token?: string; url?: string } | undefined;
+    const remote = gateway.remote as
+      | { token?: string; url?: string }
+      | undefined;
     const token =
       (typeof remote?.token === "string" && remote.token.trim()) ||
       (typeof auth?.token === "string" && auth.token.trim()) ||
       undefined;
     const endpoint =
-      (typeof remote?.url === "string" && httpEndpointFromRemoteUrl(remote.url)) || undefined;
+      (typeof remote?.url === "string" &&
+        httpEndpointFromRemoteUrl(remote.url)) ||
+      undefined;
     return { endpoint, token };
   } catch {
     return {};
@@ -91,10 +101,13 @@ export type ResolvedPreferences = Preferences & {
  * fall back to ~/.openclaw/openclaw.json so node/remote Macs work without
  * a second local gateway.
  */
-export function getPreferences<T extends Preferences = Preferences>(): T & ResolvedPreferences {
+export function getPreferences<T extends Preferences = Preferences>(): T &
+  ResolvedPreferences {
   const prefs = getPreferenceValues<T>();
   const file = readOpenClawFileConfig();
-  let endpoint = trimSlash(String(prefs.endpoint ?? "").trim() || LOOPBACK_DEFAULT);
+  let endpoint = trimSlash(
+    String(prefs.endpoint ?? "").trim() || LOOPBACK_DEFAULT,
+  );
   let token = String(prefs.token ?? "").trim();
   const agentId = String(prefs.agentId ?? "").trim() || "main";
 
@@ -119,7 +132,9 @@ function describeHttpError(status: number, body: string): string {
 
 function describeFetchError(error: unknown, endpoint: string): string {
   const msg = error instanceof Error ? error.message : String(error);
-  if (/failed to fetch|ECONNREFUSED|NetworkError|Load failed|network/i.test(msg)) {
+  if (
+    /failed to fetch|ECONNREFUSED|NetworkError|Load failed|network/i.test(msg)
+  ) {
     if (isLoopback(endpoint)) {
       return `Failed to connect to ${endpoint}. If OpenClaw runs on another machine, set API Endpoint to that host's Tailscale HTTPS URL and do not start a local gateway on this Mac.`;
     }
