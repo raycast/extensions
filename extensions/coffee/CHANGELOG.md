@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-08-20
 
 - Fixed future caffeination schedules not activating automatically and ensured they stop at the configured end time.
 
