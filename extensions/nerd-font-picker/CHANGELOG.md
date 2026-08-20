@@ -1,6 +1,6 @@
-## [1.0.1] - {PR_MERGE_DATE}
+# ***Nerd Font Picker*** Changelog
 
-### What's Changed
+## [Improvements] - {PR_MERGE_DATE}
 
 - Remove the extension's icon colour preference option in favour of using Raycast's native `Color.PrimaryText` which automatically adapts to the user's current Raycast theme (light/dark). The icon uses this colour in both the list and detail views (the latter uses the `raycast-tint-color` query parameter to achieve the appropriate effect).
 - Updated README

@@ -6,6 +6,7 @@
   "description": "Browse and copy Nerd Font glyphs from your installed fonts",
   "icon": "extension-icon.png",
   "author": "kud",
+  "contributors": ["spoon"],
   "license": "MIT",
   "categories": [
     "Developer Tools",
