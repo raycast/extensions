@@ -10,8 +10,10 @@ A titled thread of question-and-answer turns sent to one model, persisted so it 
 A Conversation is assembled from two sources with different authority: fields the user sets while browsing (its title, whether it is archived) belong to it alone, while its turns and timestamps can be re-derived from older storage. Adding a field means deciding which side owns it — a field owned by browsing that gets treated as re-derivable will silently revert.
 
 ### Turn
-One question and the answer it produced, together with which model or preset answered. Turns are ordered oldest-first within a Conversation; a Conversation with no turns is legitimate and must survive, since it represents a question asked but not yet answered.
-*Avoid:* Chat, message
+One question and the answer it produced, together with which model or preset answered. Turns are ordered oldest-first within a Conversation.
+*Avoid:* Chat
+
+A Conversation with no turns at all is not created by asking — asking files the question immediately, as a turn whose answer is still empty. Zero-turn Conversations exist only as carried-over data from older storage, and they must survive every later write: a rule that legitimately refuses to store a NEW empty Conversation must never delete one that is already there.
 
 A turn records the model that answered it rather than inheriting the Conversation's current model, so two identical questions answered by different models remain distinguishable after the fact.
 
@@ -40,4 +42,4 @@ The rule deciding whether a record new to storage may be written at all. Distinc
 ## Flagged ambiguities
 
 - **Model** had been used for both a Claude model and a saved Preset — these are distinct. User-facing surfaces say Preset; the underlying type is still named `Model` for historical reasons.
-- **Chat** had been used for both a single turn and a whole Conversation — a turn is the narrower one, and Conversation is the unit users act on.
+- **Chat** had been used for both a single turn and a whole Conversation — a turn is the narrower one, and Conversation is the unit users act on. "Message" stays in user-facing copy (a row reads "3 messages"), because it is the word a reader already knows; "turn" is the internal term.

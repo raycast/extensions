@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { Conversation } from "../../type";
 
 /**
- * Rename uses `title`, falling back to the first question when absent — per the brief.
+ * Rename uses `title`, falling back to the conversation's latest question when absent.
  * A minimal Form rather than any inline-edit affordance: Raycast's `List.Item` has no
  * text-input action, so a pushed Form is the standard shape (matches `QuestionForm` /
  * `ModelForm` elsewhere in this codebase).
@@ -16,7 +16,10 @@ export const RenameForm = ({
   onSubmit: (title: string) => void;
 }) => {
   const { pop } = useNavigation();
-  const initialTitle = conversation.title ?? conversation.chats[0]?.question ?? "";
+  // The LAST question, not the first: `views/recents-list.tsx` titles the row from
+  // `chats.at(-1)`, so pre-filling from `chats[0]` opened the form showing text that was
+  // not the title the user clicked on any multi-turn conversation.
+  const initialTitle = conversation.title ?? conversation.chats.at(-1)?.question ?? "";
   const [title, setTitle] = useState<string>(initialTitle);
 
   return (

@@ -8,7 +8,7 @@ import { RAW_MODEL_PREFIX, buildRawModel, shortModelName } from "../utils/models
  * "Regenerate Answer with Preset…" / "…with Model…" — re-asks the SAME question against
  * a different preset or bare model, each opening a submenu of the available choices.
  *
- * THE RULING — append, not replace. Regenerating APPENDS a new answer to the
+ * THE APPEND RULE — append, not replace. Regenerating APPENDS a new answer to the
  * conversation rather than overwriting the existing one: nothing is destroyed, the user
  * can compare the two answers side by side, and it composes with the per-answer
  * `answer_model` accessory (`src/type.ts`, `src/views/chat.tsx`) that exists specifically

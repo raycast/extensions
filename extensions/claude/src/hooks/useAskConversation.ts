@@ -7,7 +7,7 @@ import type { Conversation } from "../type";
 /**
  * ASK'S PERSISTENCE PATH — `recents_v1`, and nothing else.
  *
- * WHAT THIS REPLACES (CRITICAL A). Ask used to persist through `useConversations()` (the
+ * WHAT THIS REPLACES. Ask used to persist through `useConversations()` (the
  * legacy `conversations` key) and `useChat` used to persist answers through `useHistory()`
  * (the legacy `history` key). With the legacy keys retired those are writes to keys that
  * no longer exist — and before retirement they were the resurrection engine:
@@ -27,7 +27,7 @@ import type { Conversation } from "../type";
  * branch) and the migration's orphan-synthesis path (which existed precisely to fold flat
  * answers back into conversations). Recents is the single surface now, and every answer
  * it shows lives inside a conversation's `chats`. A parallel flat list would be a second
- * source of truth for answer text — the exact thing this fix-wave exists to remove — so
+ * source of truth for answer text — the exact thing the single-source-of-truth rework exists to remove — so
  * `useChat` no longer writes one. Answers reach storage exactly once, as part of the
  * conversation row Ask persists here.
  */
@@ -35,7 +35,7 @@ import type { Conversation } from "../type";
 /**
  * Persists Ask's conversation to `recents_v1`, with a DELETED-WHILE-OPEN guard.
  *
- * THE RULING ON THE SECOND-ORDER CASE (deleted while Ask was open). If the conversation
+ * THE SECOND-ORDER CASE (deleted while Ask was open). If the conversation
  * Ask holds was deleted from Recents while Ask stayed open, this hook STOPS PERSISTING IT
  * rather than recreating it.
  *
@@ -43,7 +43,7 @@ import type { Conversation } from "../type";
  * `recents_v1` is materially the same failure as the legacy resurrection, just one key
  * over. Ask's in-memory `conversation.chats` holds the FULL pre-delete transcript, so an
  * upsert would restore every answer the user explicitly deleted — not merely the one new
- * turn they just asked. "Delete deletes. Everywhere." (THE RULING, `recentsDelete.ts`)
+ * turn they just asked. "Delete deletes. Everywhere." (the delete rule, `recentsDelete.ts`)
  * cannot survive a path that restores deleted answer text from a stale React snapshot.
  * A delete the user watched succeed must not be undone by a window they forgot was open.
  *
@@ -85,7 +85,7 @@ import type { Conversation } from "../type";
 export function useAskConversation(existingConversation?: Conversation): {
   persist: (conversation: Conversation) => Promise<void>;
   /** Resolves true when the pin was written; false when the row was absent (deleted). */
-  pin: (conversation: Conversation) => Promise<boolean>;
+  setPinned: (conversation: Conversation, pinned: boolean) => Promise<boolean>;
   wasDeleted: () => boolean;
 } {
   /** Latches once a write is refused because the row is gone from storage. */
@@ -94,7 +94,7 @@ export function useAskConversation(existingConversation?: Conversation): {
    * Whether this conversation HAS EVER BEEN FILED IN STORAGE — not merely whether this
    * hook instance has written it.
    *
-   * THE DISTINCTION, AND WHY IT IS THE WHOLE FIX (Grepile CRITICAL). This used to be
+   * THE DISTINCTION, AND WHY IT IS THE WHOLE FIX . This used to be
    * `useRef(false)` on a hook that took no arguments, which made it mean "has this hook
    * instance written yet." Those two readings agree only when Ask CREATED the
    * conversation. They diverge in the most common way a user reaches an existing
@@ -211,7 +211,7 @@ export function useAskConversation(existingConversation?: Conversation): {
    * WHY THIS MOVED. The action used to `add` a copy of the answer to the legacy
    * `savedChats` key. With that key retired, nothing reads it, so the action would have
    * become a silent no-op — a button that reports "Answer saved!" and saves nothing,
-   * which is the same class of UI-lying-about-state defect this fix-wave exists to close.
+   * which is the same class of UI-lying-about-state defect this rework exists to close.
    *
    * Pinning the conversation is the honest equivalent and requires no new storage
    * concept: `savedChats.saved_at` was ALREADY how a saved answer expressed itself after
@@ -223,8 +223,8 @@ export function useAskConversation(existingConversation?: Conversation): {
    * previous unpin, and leaving a later `unpinned_at` in place would let `resolvePinState`
    * conclude the conversation is still unpinned — the save would appear to do nothing.
    */
-  const pin = useCallback(
-    async (conversation: Conversation): Promise<boolean> => {
+  const setPinned = useCallback(
+    async (conversation: Conversation, pinned: boolean): Promise<boolean> => {
       if (wasDeletedRef.current) return false;
 
       return enqueue(async () => {
@@ -241,11 +241,14 @@ export function useAskConversation(existingConversation?: Conversation): {
         // Unlike `persist`, there is NO `add` fallback here: pinning is only ever an action
         // on a conversation the user is looking at, which by definition Ask has already
         // filed. A pin that finds no row has nothing legitimate to insert.
+        // Unpinning writes `unpinned_at` rather than merely clearing `pinned_at`: a
+        // migrated conversation re-derives its `pinned_at`, so a cleared field alone would
+        // be undone before the user saw it. Same rule as Recents' own toggle.
         const { written } = await recentsStore.updateIfPresent({
           ...conversation,
-          pinned: true,
-          pinned_at: now,
-          unpinned_at: undefined,
+          pinned,
+          pinned_at: pinned ? now : undefined,
+          unpinned_at: pinned ? undefined : now,
         });
 
         if (!written) {
@@ -274,7 +277,7 @@ export function useAskConversation(existingConversation?: Conversation): {
 
   const wasDeleted = useCallback(() => wasDeletedRef.current, []);
 
-  return { persist, pin, wasDeleted };
+  return { persist, setPinned, wasDeleted };
 }
 
 /**

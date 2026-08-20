@@ -116,9 +116,9 @@ export default function Model() {
           />
           <ActionPanel.Section title="Delete">
             <DestructiveAction
-              title="Remove"
+              title="Delete Preset"
               dialog={{
-                title: "Are you sure you want to remove this preset from your collection?",
+                title: "Are you sure you want to delete this preset?",
               }}
               onAction={() => models.remove(model)}
             />
@@ -149,7 +149,10 @@ export default function Model() {
       );
     });
 
-  const defaultModelOnly = filteredModels.find((x) => x.id === DEFAULT_MODEL.id) ?? DEFAULT_MODEL;
+  // No `?? DEFAULT_MODEL` fallback: the built-in preset is a row like any other and must
+  // disappear when the search does not match it. The fallback made it render on every
+  // non-empty result set, so a query matching one custom preset showed two.
+  const defaultModelOnly = filteredModels.find((x) => x.id === DEFAULT_MODEL.id);
 
   const customModelsOnly = filteredModels.filter((x) => x.id !== DEFAULT_MODEL.id);
 
@@ -216,12 +219,14 @@ export default function Model() {
         />
       ) : (
         <>
-          <ModelListItem
-            key="default"
-            model={defaultModelOnly}
-            selectedModel={selectedModelId}
-            actionPanel={getActionPanel}
-          />
+          {defaultModelOnly && (
+            <ModelListItem
+              key="default"
+              model={defaultModelOnly}
+              selectedModel={selectedModelId}
+              actionPanel={getActionPanel}
+            />
+          )}
           <ModelListView
             key="pinned"
             title="Pinned"

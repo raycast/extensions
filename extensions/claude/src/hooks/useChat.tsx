@@ -84,7 +84,7 @@ export function useChat<T extends Chat>(
   const toastRef = useRef<Toast | null>(null);
 
   /**
-   * REQUEST IDENTITY (fix-wave 6, MEDIUM 1). Overlapping submissions previously shared
+   * REQUEST IDENTITY. Overlapping submissions previously shared
    * one `streamRef` and one `updateIntervalRef` with no notion of *which* request owned
    * them: submitting Q2 while Q1 was still streaming aborted Q1's stream, but Q1's
    * placeholder row — a question with a blank answer — stayed in `data` forever, because
@@ -151,6 +151,19 @@ export function useChat<T extends Chat>(
       title: "Getting your answer...",
       style: Toast.Style.Animated,
     });
+
+    // THE FIRST GATE, and it belongs HERE rather than after the token count: `showToast`
+    // is itself an await, so this request can already have been superseded — or the view
+    // unmounted — by the time it resolves. Everything below this line touches shared
+    // state (`toastRef`, the selected row, `data`), and the unmount cleanup effect has
+    // already run by now in the unmount case, so it saw `toastRef.current === null` and
+    // could not hide a toast that did not exist yet. Hiding it here is what stops an
+    // animated toast outliving the view that started it.
+    if (!isCurrent()) {
+      await toast.hide();
+      return;
+    }
+
     toastRef.current = toast;
 
     let chat: Chat = {
@@ -215,7 +228,7 @@ export function useChat<T extends Chat>(
     }
 
     if (useStream) {
-      // OWNERSHIP GATE (Grepile IMPORTANT) — and it must come FIRST, before the teardown
+      // OWNERSHIP GATE — and it must come FIRST, before the teardown
       // below, which is the subtlety that makes this the whole fix.
       //
       // This entire block runs AFTER `await buildBoundedMessages(...)`, which makes a
@@ -235,7 +248,7 @@ export function useChat<T extends Chat>(
       if (!isCurrent()) {
         // Drop this request's placeholder row. Nothing downstream will do it: no stream
         // is ever created, so neither "end" nor "error" can fire (the same reason the
-        // abort path needs explicit cleanup, MEDIUM 1). Without this the superseded
+        // abort path needs explicit cleanup). Without this the superseded
         // question sits in `data` forever with a blank answer.
         setData((prev) => prev.filter((a) => a.id !== chat.id));
         return;
@@ -244,7 +257,7 @@ export function useChat<T extends Chat>(
       // Abort any existing stream before starting a new one. The abort is why the
       // superseded request's callbacks never fire ("end"/"error" are not emitted on
       // abort) — so the cleanup that WOULD have run there has to happen here instead,
-      // explicitly, or the previous question's placeholder row leaks (MEDIUM 1).
+      // explicitly, or the previous question's placeholder row leaks.
       //
       // Reached only by a request that is still current (gate above), so what it tears
       // down is always a genuinely superseded predecessor — never the active stream.
@@ -368,7 +381,7 @@ export function useChat<T extends Chat>(
           // flat write of the answer — see `useAskConversation`'s docstring for why the
           // separate `history` concept no longer exists.
           setData((prev) => prev.map((a) => (a.id === chat.id ? { ...streamedChat } : a)));
-          resolveToast(toast, { title: "Got your answer!", style: Toast.Style.Success });
+          resolveToast(toast, { title: "Got your answer", style: Toast.Style.Success });
         })
         .on("error", (err) => {
           // Same identity gate as "end" above. An abort does not emit "error", but a
@@ -521,7 +534,7 @@ export function useChat<T extends Chat>(
             return a;
           });
         });
-        resolveToast(toast, { title: "Got your answer!", style: Toast.Style.Success });
+        resolveToast(toast, { title: "Got your answer", style: Toast.Style.Success });
       } else if (succeeded) {
         // The request succeeded but produced no usable text — an API response whose only
         // text block is whitespace (or a response carrying no text block at all). This

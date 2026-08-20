@@ -15,30 +15,29 @@ import { toChronological } from "../utils";
 import { resolveToast } from "../utils/toast";
 
 /**
- * The `recents_v1` collection store. Reuses Task 1's `createCollectionStore` directly —
+ * The `recents_v1` collection store. Reuses `createCollectionStore` directly —
  * `add`/`update`/`reload` (Ask's continue path, and every other Recents mutation except
  * Delete/Clear) go through the SAME read-modify-write store every other collection uses.
  * Delete/Clear are deliberately NOT store mutations: they must destroy legacy-key rows
- * too (THE RULING) and must be gated on a verified migration, neither of which
+ * too (the delete rule) and must be gated on a verified migration, neither of which
  * `CollectionStore`'s generic shape expresses — see `recentsDelete.ts`.
  *
  * `persistFilter` here is a write-ADMISSION rule for conversations `recents_v1` has
- * never stored before (`collection.ts`'s updated contract, fix round 2) — it blocks a
+ * never stored before (`collection.ts`'s contract) — it blocks a
  * brand-new zero-turn conversation from landing in `recents_v1` before Ask gives it a
- * first chat, inherited from `useConversations.tsx`'s identical rule for `conversations`.
- * It must NEVER cause an already-migrated zero-turn conversation (Task 5's
- * `mergeIntoRecents`/Test 7 explicitly preserves `chats: []` rows from legacy data) to be
+ * first chat, inherited from the retired `conversations` hook's identical rule.
+ * It must NEVER cause an already-migrated zero-turn conversation (`mergeIntoRecents` explicitly preserves `chats: []` rows from legacy data) to be
  * dropped merely because Pin/Archive/Rename touches it — `collection.ts`'s `persist()`
  * now guarantees that structurally by only filtering rows absent from the pre-mutation
- * read. See `useRecents.test.ts` for the regression test and its falsification.
+ * read.
  *
  * THE INVARIANT this establishes: no user action other than an explicit Delete/Delete
  * All may remove a conversation from `recents_v1`. Pin, Unpin, Archive, Unarchive, and
  * Rename are all `update` calls and must be pure upserts with respect to row survival.
  *
- * Exported (not module-private) so `useRecents.test.ts` can drive this EXACT store
- * instance directly — the same "test the real wiring, not a reimplementation" discipline
- * `recentsDelete.test.ts` and `useModel.test.ts` already follow in this codebase.
+ * Exported (not module-private) so anything checking this behavior drives this EXACT
+ * store instance rather than a reimplementation of it — a check against a copy of the
+ * wiring passes while the real wiring stays untested.
  */
 const baseRecentsStore: CollectionStore<Conversation> = createCollectionStore<Conversation>(RECENTS_KEY, {
   transformOnRead: (items) =>
@@ -113,7 +112,7 @@ function pickLongerTranscript(incoming: Conversation, current: Conversation): Co
 
 /**
  * `baseRecentsStore` wrapped so every MUTATION announces itself by bumping the
- * `recents_v1` generation counter (HIGH D).
+ * `recents_v1` generation counter.
  *
  * Why the wrapper rather than a bump at each call site: a Recents action (pin, unpin,
  * archive, unarchive, rename) and Ask's persist all write through this store, and a
@@ -154,7 +153,7 @@ export type RecentsHook = {
   /** Direct upsert — same shape as `src/model.tsx`'s toggle, not an effect chain. */
   update: (conversation: Conversation) => Promise<void>;
   reload: () => Promise<void>;
-  /** Deletes one conversation from `recents_v1` AND all three legacy keys (THE RULING).
+  /** Deletes one conversation from `recents_v1` AND all three legacy keys (the delete rule).
    *  Runs and verifies the migration first, structurally (see `recentsDelete.ts`). */
   remove: (conversation: Conversation) => Promise<void>;
   /** Clears `recents_v1` AND all three legacy keys. Same migration-first guard as `remove`. */
@@ -173,7 +172,7 @@ export function useRecents(): RecentsHook {
 
   const reload = useCallback(async () => {
     try {
-      // Runs the migration first on every load, per Task 5/6: idempotent, so mounting
+      // Runs the migration first on every load, idempotent, so mounting
       // Recents repeatedly is cheap, and this is what makes a fresh install (or one that
       // never opened Recents before) see its legacy conversations/history/savedChats
       // folded into `recents_v1` the first time this command opens.
@@ -224,9 +223,9 @@ export function useRecents(): RecentsHook {
   /**
    * Direct upsert: read fresh, write, reconcile onto in-memory state. Follows
    * `src/model.tsx`'s toggle shape (a plain `models.update({ ...model, pinned: ... })`
-   * call) rather than `src/conversation.tsx:19-27`'s `setState` + two `useEffect`s
-   * chained together to eventually call `conversations.update` — the brief singles that
-   * effect chain out as the source of the stale-selection bugs this command replaces.
+   * call) rather than the retired Conversations command's `setState` + two `useEffect`s
+   * chained together to eventually call `conversations.update` — that effect chain was the
+   * source of the stale-selection bugs this command replaces.
    */
   const update = useCallback(
     async (conversation: Conversation) => {

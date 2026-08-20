@@ -19,7 +19,7 @@ import { QuestionForm } from "./views/question/form";
 
 export default function Ask(props: { conversation?: Conversation }) {
   // Ask persists to `recents_v1` — the single source of truth — never to the retired
-  // legacy `conversations`/`history` keys. See `useAskConversation` for CRITICAL A and
+  // legacy `conversations`/`history` keys. See `useAskConversation` for what this replaced and
   // the deleted-while-open ruling.
   //
   // `props.conversation` is passed so the hook knows this conversation PREDATES the view.
@@ -255,27 +255,44 @@ export default function Ask(props: { conversation?: Conversation }) {
         onModelChange={setSelectedModelId}
         resolveModel={resolveModel}
         onClearQuestion={() => question.update("")}
+        isPinned={!!conversation.pinned_at}
         onPinAnswer={async () => {
-          // Pinning flags the conversation in `recents_v1` — see `useAskConversation.pin`.
-          // The toast lives here because the hook is storage-only; it reports the real
-          // outcome rather than a fixed success string, and a failure keeps its Copy Error
-          // action per House Style.
+          // Pins or unpins the conversation in `recents_v1` — see
+          // `useAskConversation.setPinned`. The toast lives here because the hook is
+          // storage-only; it reports the real outcome rather than a fixed success string,
+          // and a failure keeps its Copy Error action per House Style.
+          //
+          // Local state is updated on success so the action's own title flips: without it
+          // Ask would keep offering "Pin" on a conversation it had just pinned, which is
+          // the disagreement with Recents this replaced.
+          const next = !conversation.pinned_at;
           try {
-            const pinned = await askConversation.pin(conversation);
-            if (pinned) {
-              await showResolvedToast({ title: "Conversation pinned", style: Toast.Style.Success });
+            const written = await askConversation.setPinned(conversation, next);
+            if (written) {
+              setConversation((current) => ({
+                ...current,
+                pinned: next,
+                pinned_at: next ? new Date().toISOString() : undefined,
+                unpinned_at: next ? current.unpinned_at : new Date().toISOString(),
+              }));
+              await showResolvedToast({
+                title: next ? "Conversation pinned" : "Conversation unpinned",
+                style: Toast.Style.Success,
+              });
             } else {
               // The row is gone from `recents_v1` — deleted in Recents while this window
-              // stayed open. Pin refuses to recreate it (see `useAskConversation.pin`), so
+              // stayed open. The write refuses to recreate it (see `setPinned`), so
               // reporting success here would be the UI lying about its state.
               await showResolvedToast({
-                title: "Couldn't pin conversation",
+                title: next ? "Couldn't pin conversation" : "Couldn't unpin conversation",
                 message: "It was deleted from Recents.",
                 style: Toast.Style.Failure,
               });
             }
           } catch (error) {
-            await showFailureToast(error, { title: "Couldn't pin conversation" });
+            await showFailureToast(error, {
+              title: next ? "Couldn't pin conversation" : "Couldn't unpin conversation",
+            });
           }
         }}
       />

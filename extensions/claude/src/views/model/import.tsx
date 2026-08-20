@@ -93,7 +93,7 @@ export const ModelImportForm = (props: { use: { models: ModelHook } }) => {
           title: "Raycast Agent import complete",
           message:
             agentWarnings.length > 0
-              ? `${summarize(result.tally)} — ${agentWarnings.length} warning(s)`
+              ? `${summarize(result.tally)} — ${agentWarnings.length} ${agentWarnings.length === 1 ? "warning" : "warnings"}`
               : summarize(result.tally),
           primaryAction:
             agentWarnings.length > 0
@@ -132,7 +132,9 @@ export const ModelImportForm = (props: { use: { models: ModelHook } }) => {
         style: result.tally.failed > 0 ? Toast.Style.Failure : Toast.Style.Success,
         title: "Preset import complete",
         message:
-          warnings.length > 0 ? `${summarize(result.tally)} — ${warnings.length} warning(s)` : summarize(result.tally),
+          warnings.length > 0
+            ? `${summarize(result.tally)} — ${warnings.length} ${warnings.length === 1 ? "warning" : "warnings"}`
+            : summarize(result.tally),
         primaryAction:
           warnings.length > 0
             ? {
@@ -173,7 +175,7 @@ export const ModelImportForm = (props: { use: { models: ModelHook } }) => {
         title="Import Presets"
         text={
           "Choose a native Claude presets YAML file, or a Raycast Agent export (.json). " +
-          "Raycast Agent import is provisional — see the report for details."
+          "Raycast Agent import is provisional: the format was reconstructed from sample exports, so an agent file whose shape differs may import incompletely."
         }
       />
       <Form.FilePicker

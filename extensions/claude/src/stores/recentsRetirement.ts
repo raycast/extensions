@@ -2,15 +2,14 @@ import { LocalStorage } from "@raycast/api";
 // From the LEAF key module, never from `recentsMigration` — importing the key names from
 // there would recreate the circular import this module's `retireLegacyKeys` consumer
 // already forms. See `recentsKeys.ts` for what that cycle broke.
-import { LEGACY_KEYS } from "./recentsKeys";
+import { LEGACY_KEYS, RECENTS_KEY } from "./recentsKeys";
 
 /**
- * LEGACY KEY RETIREMENT — the user's ruling (fix-wave 6, superseding Task 5's "never
- * touch the legacy keys" constraint).
+ * LEGACY KEY RETIREMENT, superseding the earlier "never touch the legacy keys" constraint.
  *
  * The three legacy keys (`conversations`, `history`, `savedChats`) were a SECOND LIVE
  * SOURCE OF TRUTH forever: `runRecentsMigration()` re-derived from them on every Recents
- * mount, and Ask kept writing to them. That is the shared root cause of both Criticals —
+ * mount, and Ask kept writing to them. That is the shared root cause of two defects —
  * a conversation deleted from `recents_v1` was re-derived back into existence from legacy
  * rows Ask had rewritten. Defending the second source (tombstones, delete-everywhere
  * sweeps) was tried and kept leaking. This module REMOVES the second source instead.
@@ -57,11 +56,20 @@ declare const verifiedPayloadBrand: unique symbol;
 export type VerifiedPayload = string & { readonly [verifiedPayloadBrand]: true };
 
 /**
- * The only mint for a `VerifiedPayload`, and it earns the name: it takes what was written
- * AND what was read back, and throws unless they are identical. A caller cannot produce
- * the token by asserting it verified — it has to hand over both strings and be right.
+ * The only mint for a `VerifiedPayload`, and it does the re-read ITSELF rather than
+ * accepting one as an argument.
+ *
+ * That distinction is the whole point. An earlier version took `(written, readBack)` and
+ * compared them, which a future caller could satisfy with `verifyPayloadRoundTrip(x, x)`
+ * — a token minted without storage ever being consulted, which is exactly the proof the
+ * type is supposed to carry. Reading `recents_v1` here means the only way to obtain a
+ * `VerifiedPayload` is for storage to actually hold that payload at this moment.
+ *
+ * Throws — with the same message the inline check it replaced used — when the value on
+ * disk differs, which aborts the migration before any legacy key is deleted.
  */
-export function verifyPayloadRoundTrip(written: string, readBack: string | undefined): VerifiedPayload {
+export async function verifyPayloadRoundTrip(written: string): Promise<VerifiedPayload> {
+  const readBack = await LocalStorage.getItem<string>(RECENTS_KEY);
   if (readBack !== written) {
     throw new Error("Recents migration write did not verify on re-read; storage may not have persisted it.");
   }
@@ -208,7 +216,7 @@ export async function isRetirementComplete(currentPayload: string, currentRowCou
  *   its verified write happened before any delete. Re-running finishes the rest.
  *
  * The reverse ordering (delete first, mark second) is what would create the "data in
- * neither place" state the brief warns about: a crash after deleting `conversations` but
+ * neither place" state: a crash after deleting `conversations` but
  * before writing the marker leaves a later run believing retirement never happened, so it
  * re-derives from now-empty legacy keys — and if `recents_v1` were ever independently
  * reset in that window, the rows would be gone from both. Marker-first makes

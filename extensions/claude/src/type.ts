@@ -46,7 +46,7 @@ export interface SavedChat extends Chat {
 }
 
 /**
- * THE OWNERSHIP INVARIANT (established fix-wave 5; enforced in
+ * THE OWNERSHIP INVARIANT (enforced in
  * `src/stores/recentsMigration.ts`'s `RECENTS_OWNED_FIELDS` / `reconcileRecents`).
  *
  * A `Conversation` in `recents_v1` is assembled from TWO sources with different
@@ -64,9 +64,8 @@ export interface SavedChat extends Chat {
  *   re-derivation unconditionally, EVEN when the derived row is genuinely newer.
  *
  * Why this is written here and not only in the migration: the whole-row `updated_at`
- * tie-break silently reverted Archive, Rename, and Unpin for every user with legacy data
- * (fix-wave 5's Critical). The root cause was that this split existed only in someone's
- * head. Adding a field to this interface means deciding which side it falls on — if it is
+ * tie-break silently reverted Archive, Rename, and Unpin for every user with legacy data.
+ * The root cause was that this split existed nowhere but in a maintainer's head. Adding a field to this interface means deciding which side it falls on — if it is
  * set by a Recents action and by nothing in `conversations`/`history`/`savedChats`, it is
  * Recents-owned and MUST be added to `RECENTS_OWNED_FIELDS`.
  */
@@ -78,7 +77,7 @@ export interface Conversation {
   created_at: string;
   pinned: boolean;
   /** Ordering source of truth for pinning. Replaces `pinned` for sort purposes — a
-   *  boolean loses pin order, which Saved Answers relies on (`src/saved.tsx:43-45`).
+   *  boolean loses pin order, which the retired Saved Answers command sorted by.
    *  `pinned` is kept for now so existing callers keep compiling; `!!pinned_at` yields
    *  the boolean for free once callers migrate. Mirrors `SavedChat.saved_at`.
    *  RECENTS-OWNED, but uniquely also DERIVABLE: `savedChats.saved_at` re-derives a
@@ -172,7 +171,7 @@ export interface ChangeModelProp {
 export interface QuestionFormProps extends ChangeModelProp {
   initialQuestion: string;
   /**
-   * THE SUBMIT RULE (fix-wave 6, the third instance of "displayed value ≠ used value").
+   * THE SUBMIT RULE — the third instance of "displayed value ≠ used value" in this extension.
    *
    * `onSubmit` MUST receive the selected model id as its second argument, and the caller
    * MUST resolve the model from THAT id — never from a variable captured when the form
@@ -214,6 +213,8 @@ export interface ChatViewProps extends ChangeModelProp {
    *  rather than owned here, because the conversation being pinned is Ask's state. See
    *  `useAskConversation`'s `pin` for why saving is a pin now. */
   onPinAnswer: () => void;
+  /** Whether the conversation is currently pinned, so the action can say which way it goes. */
+  isPinned: boolean;
   /** Empties the search bar. Supplied by Ask because the field is CONTROLLED there
    *  (`<List searchText={question.data}>`) — Raycast's imperative `clearSearchBar()` is a
    *  no-op against a controlled value, since React re-renders the old text straight back.

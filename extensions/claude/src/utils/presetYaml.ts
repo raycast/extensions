@@ -188,7 +188,7 @@ export function parsePresetYamlDocument(parsed: unknown): unknown[] {
 
 /**
  * Validates and converts the parsed YAML rows into runtime `Model`s, applying every rule
- * the brief calls out: id generation, repeat-import dedupe by name, unknown-model
+ * the cases that must be handled: id generation, repeat-import dedupe by name, unknown-model
  * fallback, numeric clamping, and the temperature-drop gate. Returns a full outcome per
  * row (never throws for a single bad row) plus the resulting preset list, so the caller
  * can both persist `models` and report the `tally` to the user.

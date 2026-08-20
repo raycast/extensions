@@ -55,16 +55,12 @@ export const CopyToClipboardAction = (props: Action.CopyToClipboard.Props) => (
  * concrete value is injected by the Raycast host at runtime and is not resolvable from
  * the package, so ⌘. is confirmed from the app's own UI rather than from the types.
  */
-export const PinAnswerAction = ({ onAction }: { onAction: () => void }) => (
-  <Action icon={Icon.Tack} title="Pin Conversation" onAction={onAction} shortcut={Keyboard.Shortcut.Common.Pin} />
-);
-
-export const SaveAsSnippetAction = ({ text, name }: { text: string; name: string }) => (
-  <Action.CreateSnippet
-    icon={Icon.Snippets}
-    title="Save as a Snippet"
-    snippet={{ text, name }}
-    shortcut={Keyboard.Shortcut.Common.New}
+export const PinAnswerAction = ({ onAction, isPinned }: { onAction: () => void; isPinned: boolean }) => (
+  <Action
+    icon={isPinned ? Icon.TackDisabled : Icon.Tack}
+    title={isPinned ? "Unpin Conversation" : "Pin Conversation"}
+    onAction={onAction}
+    shortcut={Keyboard.Shortcut.Common.Pin}
   />
 );
 

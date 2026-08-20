@@ -51,7 +51,7 @@ is appended, so you keep both and can compare.
 ## Exporting your history
 
 Deleting a conversation in Recents is permanent — it's removed everywhere, including
-history and saved answers, with nothing left behind to recover. **Export History to
+anything carried over from an earlier version, with nothing left behind to recover. **Export History to
 JSON** (⌘⇧E) writes every conversation — active and archived, regardless of the current
 filter — to a timestamped file in your Downloads folder before you delete anything, or
 just to keep a copy of your data. There is no import for this file yet; it's export only.
@@ -83,14 +83,14 @@ edit them in a text editor, or move them to another machine. Both actions live i
   temperature, and max output tokens — to a file you choose.
 - **Import Presets…** (⌘⇧I) reads one back. When a preset in the file has the same name as
   one you already have, the importer asks what to do rather than overwriting silently:
-  skip the incoming one, replace yours, or keep both (the incoming one is renamed).
+  skip the incoming one or replace yours. Whichever you choose applies to every name
+  collision in that file, and the result is reported as a tally.
 
 The importer also accepts a **Raycast Agent JSON** file, mapping each agent's instructions
-and model onto a preset, and export can emit that format as well. Treat this as
-provisional: it is built from sample export files rather than a verified round trip
-against Raycast itself, so an agent file whose shape differs may import incompletely, and
-an exported file is not confirmed to load into Raycast's own agent importer. Plain YAML is
-the supported path.
+and model onto a preset. Treat this as provisional: it is built from sample export files
+rather than a verified round trip against Raycast itself, so an agent file whose shape
+differs may import incompletely. Plain YAML is the supported path, and there is no Agent
+JSON export — only import.
 
 # How to use
 
