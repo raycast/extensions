@@ -64,5 +64,29 @@ export function nestSubtasks(reminders: Reminder[], parentIdByChildId: Record<st
 
   if (childrenByParentId.size === 0) return reminders;
 
-  return topLevel.flatMap((reminder) => [reminder, ...(childrenByParentId.get(reminder.id) ?? [])]);
+  // Emit each top-level reminder followed by its descendants depth-first so
+  // deeper nesting levels are preserved.
+  const nested: Reminder[] = [];
+  const emittedIds = new Set<string>();
+
+  function emit(reminder: Reminder) {
+    if (emittedIds.has(reminder.id)) return;
+    emittedIds.add(reminder.id);
+    nested.push(reminder);
+    for (const child of childrenByParentId.get(reminder.id) ?? []) {
+      emit(child);
+    }
+  }
+
+  for (const reminder of topLevel) {
+    emit(reminder);
+  }
+
+  // Safety net for malformed data (e.g. a parent cycle): never let a reminder
+  // disappear from the list.
+  for (const reminder of reminders) {
+    emit(reminder);
+  }
+
+  return nested;
 }
