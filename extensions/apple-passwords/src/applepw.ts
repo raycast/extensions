@@ -478,6 +478,7 @@ export function createApplePwClient(options: ApplePwClientOptions = {}): ApplePw
 
   async function listPasswords(query: string): Promise<ApplePwCommandOutcome<ApplePwPasswordEntry[]>> {
     const candidates = buildSearchCandidates(query);
+    const discoveredEntries = new Map<string, ApplePwPasswordEntry>();
     let lastStdout = "";
     let lastStderr = "";
 
@@ -499,20 +500,19 @@ export function createApplePwClient(options: ApplePwClientOptions = {}): ApplePw
       }
       const otpUsernames = new Set(normalizeResults(otpResponse.payload?.results).map((entry) => entry.username));
 
-      return {
-        kind: "success",
-        payload: entries.map((entry) => ({
-          ...entry,
-          has_otp: otpUsernames.has(entry.username),
-        })),
-        stdout: response.stdout,
-        stderr: response.stderr,
-      };
+      for (const entry of entries) {
+        const key = entry.id || `${entry.domain}\0${entry.username}`;
+        const existing = discoveredEntries.get(key);
+        discoveredEntries.set(key, {
+          ...(existing ?? entry),
+          has_otp: Boolean(existing?.has_otp || otpUsernames.has(entry.username)),
+        });
+      }
     }
 
     return {
       kind: "success",
-      payload: [],
+      payload: [...discoveredEntries.values()],
       stdout: lastStdout,
       stderr: lastStderr,
     };

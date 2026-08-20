@@ -184,15 +184,19 @@ test("builds URL candidates for domain fragments, domains, and full URLs", () =>
   assert.equal(fragmentCandidates.includes("https://example.com"), true);
 });
 
-test("tries expanded domain candidates until live discovery returns an account", async () => {
+test("aggregates and deduplicates accounts from every expanded domain candidate", async () => {
   const calls: string[][] = [];
   const client = createApplePwClient({
     runner: async (_command, args) => {
       calls.push(args);
-      const results =
-        args[0] === "pw" && args[2] === "example.com"
-          ? [{ id: "1", username: "alice@example.com", domain: "example.com", password: "Not Included" }]
-          : [];
+      let results: object[] = [];
+      if (args[0] === "pw" && args[2].includes("example.com")) {
+        results = [{ id: "1", username: "alice@example.com", domain: "example.com", password: "Not Included" }];
+      } else if (args[0] === "pw" && args[2].includes("example.org")) {
+        results = [{ id: "2", username: "bob@example.org", domain: "example.org", password: "Not Included" }];
+      } else if (args[0] === "otp" && args[2].includes("example.org")) {
+        results = [{ id: "otp-2", username: "bob@example.org", domain: "example.org", code: "123456" }];
+      }
       return {
         stdout: JSON.stringify({ results, status: 0 }),
         stderr: "",
@@ -206,13 +210,26 @@ test("tries expanded domain candidates until live discovery returns an account",
   const result = await client.listPasswords("example");
 
   assert.equal(result.kind, "success");
-  assert.equal(result.payload.length, 1);
-  assert.deepEqual(calls, [
-    ["pw", "list", "example"],
-    ["pw", "list", "https://example"],
-    ["pw", "list", "example.com"],
-    ["otp", "list", "example.com"],
+  assert.deepEqual(result.payload, [
+    {
+      id: "1",
+      username: "alice@example.com",
+      domain: "example.com",
+      password: "Not Included",
+      has_otp: false,
+    },
+    {
+      id: "2",
+      username: "bob@example.org",
+      domain: "example.org",
+      password: "Not Included",
+      has_otp: true,
+    },
   ]);
+  assert.equal(
+    calls.some((args) => args[0] === "pw" && args[2] === "example.dev"),
+    true,
+  );
 });
 
 test("builds auth response arguments correctly", () => {
