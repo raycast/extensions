@@ -23,21 +23,49 @@ export default function Command() {
       .then(() => setState("already-running"))
       .catch(() => {
         try {
-          const child = spawn(cookPath, ["server", recipePath, "-p", serverPort], {
-            detached: true,
-            stdio: "ignore",
+          let spawnFailed = false;
+          const child = spawn(
+            cookPath,
+            ["server", recipePath, "-p", serverPort],
+            {
+              detached: true,
+              stdio: "ignore",
+            },
+          );
+
+          child.on("error", (err) => {
+            spawnFailed = true;
+            setState("error");
+            setErrorMsg(err.message);
           });
+
           child.unref();
 
-          setTimeout(async () => {
+          // Bounded readiness probe: retry until the server responds or the
+          // deadline passes, so slower CookCLI startups aren't falsely reported
+          // as failed (see Greptile review on PR #30223).
+          const PROBE_INTERVAL_MS = 500;
+          const PROBE_TIMEOUT_MS = 15000;
+          const startedAt = Date.now();
+
+          const probe = async () => {
+            if (spawnFailed) return;
             try {
               await fetch(url);
               setState("started");
             } catch {
-              setState("error");
-              setErrorMsg("Server process started but not responding. Check your preferences.");
+              if (Date.now() - startedAt >= PROBE_TIMEOUT_MS) {
+                setState("error");
+                setErrorMsg(
+                  "Server process started but not responding. Check your preferences.",
+                );
+              } else {
+                setTimeout(probe, PROBE_INTERVAL_MS);
+              }
             }
-          }, 2000);
+          };
+
+          setTimeout(probe, PROBE_INTERVAL_MS);
         } catch (err) {
           setState("error");
           setErrorMsg(err instanceof Error ? err.message : String(err));
@@ -48,7 +76,8 @@ export default function Command() {
   const { serverPort, recipePath } = getPreferences();
   const url = `http://localhost:${serverPort}`;
 
-  if (state === "loading") return <Detail isLoading markdown="*Checking server…*" />;
+  if (state === "loading")
+    return <Detail isLoading markdown="*Checking server…*" />;
 
   if (state === "already-running") {
     return (

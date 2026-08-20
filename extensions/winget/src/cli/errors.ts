@@ -141,14 +141,6 @@ function getExitCodeMessage(exitCode: number): string | undefined {
 // Error types
 // ---------------------------------------------------------------------------
 
-/** Thrown when the no-output watchdog kills a stuck operation. */
-class StaleProcessError extends Error {
-  constructor(message = "Process appears stuck") {
-    super(message);
-    this.name = "StaleProcessError";
-  }
-}
-
 /** Thrown if and only if the operation was aborted via its AbortSignal. */
 class CancelledError extends Error {
   constructor(message = "Operation was cancelled") {
@@ -162,7 +154,13 @@ class WingetNotFoundError extends Error {
   constructor(executable: string) {
     super(
       executable === "winget"
-        ? "winget was not found. Install 'App Installer' from the Microsoft Store, then restart Raycast."
+        ? // Distinguish "not installed" from the known platform regression
+          // where the worker's PATH snapshot misses the per-user entries
+          // (winget's alias lives in ...\Microsoft\WindowsApps).
+          /WindowsApps/i.test(process.env.PATH ?? "")
+          ? "winget was not found. Install 'App Installer' from the Microsoft Store, then restart Raycast."
+          : "winget was not found: Raycast's worker environment is missing the per-user PATH (known platform issue). " +
+            "Restarting Raycast usually fixes it; setting the WinGet Path preference works around it permanently."
         : `winget was not found at "${executable}". Fix the WinGet Path preference.`,
     );
     this.name = "WingetNotFoundError";
@@ -210,7 +208,6 @@ export {
   PIN_DOES_NOT_EXIST,
   PORTABLE_INSTALL_FAILED,
   PORTABLE_UNINSTALL_FAILED,
-  StaleProcessError,
   toUnsignedHResult,
   UPDATE_NOT_APPLICABLE,
   UPDATE_INSTALL_TECHNOLOGY_MISMATCH,

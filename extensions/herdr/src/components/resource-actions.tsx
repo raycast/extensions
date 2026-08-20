@@ -8,6 +8,7 @@ import {
   confirmAlert,
   openExtensionPreferences,
 } from "@raycast/api";
+import { agentName } from "../lib/agent-appearance";
 import { focusResource, getAgentTarget, runHerdr, sendAgentKeys, sendPaneKeys } from "../lib/herdr";
 import { launchHerdrInTerminal, revealFocusedHerdr } from "../lib/terminal";
 import type { AgentInfo, PaneInfo, TabInfo, WorkspaceInfo } from "../lib/types";
@@ -20,7 +21,7 @@ import { CreateWorktreeForm } from "./create-worktree-form";
 import { StartAgentForm } from "./start-agent-form";
 
 function displayAgent(agent: AgentInfo): string {
-  return agent.name || agent.display_agent || agent.agent || agent.pane_id;
+  return agentName(agent);
 }
 
 function UtilityActions({ onRefresh }: { onRefresh?: () => void | Promise<void> }) {
@@ -276,7 +277,7 @@ export function PaneActions({
   agents: AgentInfo[];
   onDone?: () => void | Promise<void>;
 }) {
-  const label = pane.title || pane.terminal_title_stripped || pane.terminal_title || pane.pane_id;
+  const label = pane.label || pane.terminal_title_stripped || pane.terminal_title || pane.pane_id;
   const agent = agents.find((candidate) => candidate.pane_id === pane.pane_id);
   if (agent) return <AgentActions agent={agent} agents={agents} onDone={onDone} />;
 
@@ -337,7 +338,7 @@ export function PaneActions({
           title="Rename Pane"
           icon={Icon.Pencil}
           shortcut={shortcuts.rename}
-          target={<RenameForm kind="pane" id={pane.pane_id} currentName={pane.title || ""} onDone={onDone} />}
+          target={<RenameForm kind="pane" id={pane.pane_id} currentName={pane.label || ""} onDone={onDone} />}
         />
         <Action.CopyToClipboard title="Copy Pane ID" content={pane.pane_id} shortcut={shortcuts.copyId} />
         {pane.foreground_cwd || pane.cwd ? (

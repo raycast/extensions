@@ -2,6 +2,7 @@ import {
   Comment,
   Cycle,
   Issue,
+  IssueLabel,
   IssueRelation,
   Project,
   ProjectMilestone,
@@ -446,6 +447,66 @@ export async function getSubIssues(issueId: string) {
   }
 
   return data.issue.children.nodes;
+}
+
+export type IssuePromptRelative = Pick<Issue, "id" | "identifier" | "title" | "description">;
+
+export type IssuePromptResult = Pick<Issue, "identifier" | "title" | "branchName" | "description"> & {
+  team?: Pick<Team, "name">;
+  labels: { nodes: Pick<IssueLabel, "name">[] };
+  project?: Pick<Project, "name" | "description">;
+  parent?: IssuePromptRelative;
+  children: { nodes: IssuePromptRelative[] };
+};
+
+export async function getIssuePromptData(issueId: string) {
+  const { graphQLClient } = getLinearClient();
+
+  const { data } = await graphQLClient.rawRequest<{ issue: IssuePromptResult }, Record<string, unknown>>(
+    `
+      query($issueId: String!) {
+        issue(id: $issueId) {
+          identifier
+          title
+          branchName
+          description
+          team {
+            name
+          }
+          labels {
+            nodes {
+              name
+            }
+          }
+          project {
+            name
+            description
+          }
+          parent {
+            id
+            identifier
+            title
+            description
+          }
+          children {
+            nodes {
+              id
+              identifier
+              title
+              description
+            }
+          }
+        }
+      }
+    `,
+    { issueId },
+  );
+
+  if (!data) {
+    throw new Error("Cannot find the Linear issue");
+  }
+
+  return data.issue;
 }
 
 export type CommentResult = Pick<Comment, "id" | "body" | "createdAt" | "url"> & {

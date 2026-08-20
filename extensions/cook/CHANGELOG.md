@@ -1,6 +1,11 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Updated] - {PR_MERGE_DATE}
+
+- Add Windows platform support
+- Harden Start Server readiness check: bounded retry instead of one-shot probe
+
+## [Initial Release] - 2026-08-13
 
 - View Recipes: browse, search, and view parsed recipes with ingredients, cookware, steps, and metadata
 - Cooking Mode: step-by-step interactive cooking with built-in countdown timer

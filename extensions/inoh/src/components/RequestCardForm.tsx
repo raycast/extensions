@@ -1,9 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation, Icon } from "@raycast/api";
 import { useState } from "react";
+import { useRequiredFormField } from "../hooks/useRequiredFormField";
 import { submitRequestCard } from "../lib/request-card";
-
-const WORD_REQUIRED_ERROR = "Word is required";
-const CONTEXT_REQUIRED_ERROR = "Context is required";
 
 type RequestCardFormValues = {
   word: string;
@@ -16,24 +14,19 @@ type RequestCardFormValues = {
  */
 export function RequestCardForm({ userId, initialWord }: { userId: string; initialWord?: string }) {
   const { pop } = useNavigation();
-  const [wordError, setWordError] = useState<string | undefined>();
-  const [contextError, setContextError] = useState<string | undefined>();
+  const wordField = useRequiredFormField("Word is required");
+  const contextField = useRequiredFormField("Context is required");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(values: RequestCardFormValues) {
     const word = values.word.trim();
     const context = values.context.trim();
 
-    let hasValidationError = false;
-    if (!word) {
-      setWordError(WORD_REQUIRED_ERROR);
-      hasValidationError = true;
-    }
-    if (!context) {
-      setContextError(CONTEXT_REQUIRED_ERROR);
-      hasValidationError = true;
-    }
-    if (hasValidationError) {
+    // Reason: validate both fields before returning so the user sees every
+    // missing field at once instead of fixing them one at a time.
+    const isWordValid = wordField.validate(word);
+    const isContextValid = contextField.validate(context);
+    if (!isWordValid || !isContextValid) {
       return;
     }
 
@@ -69,25 +62,17 @@ export function RequestCardForm({ userId, initialWord }: { userId: string; initi
         title="Word"
         placeholder="Enter the word"
         defaultValue={initialWord}
-        error={wordError}
-        onChange={() => wordError && setWordError(undefined)}
-        onBlur={(event) => {
-          if (!event.target.value?.trim()) {
-            setWordError(WORD_REQUIRED_ERROR);
-          }
-        }}
+        error={wordField.error}
+        onChange={wordField.handleChange}
+        onBlur={wordField.handleBlur}
       />
       <Form.TextArea
         id="context"
         title="Context"
         placeholder="Add context or the meaning you want"
-        error={contextError}
-        onChange={() => contextError && setContextError(undefined)}
-        onBlur={(event) => {
-          if (!event.target.value?.trim()) {
-            setContextError(CONTEXT_REQUIRED_ERROR);
-          }
-        }}
+        error={contextField.error}
+        onChange={contextField.handleChange}
+        onBlur={contextField.handleBlur}
       />
     </Form>
   );

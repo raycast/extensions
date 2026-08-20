@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildGhosttyClearMarkerScript,
   buildGhosttyFocusScript,
   buildITermFocusScript,
   buildTerminalFocusScript,
@@ -16,10 +15,11 @@ ttys001  herdr     herdr
 ttys002  herdr     herdr --session work
 ttys003  herdr     herdr session attach review
 ttys004  zsh       zsh
+ttys005  herdr     herdr --session default
 `;
 
-  it("finds only default-session Herdr clients", () => {
-    expect(parseHerdrClientTtys(processes, "/opt/herdr", "default")).toEqual(["/dev/ttys001"]);
+  it("finds bare and explicitly default-session Herdr clients", () => {
+    expect(parseHerdrClientTtys(processes, "/opt/herdr", "default")).toEqual(["/dev/ttys001", "/dev/ttys005"]);
   });
 
   it("finds the requested named session", () => {
@@ -41,12 +41,6 @@ describe("terminal focus adapters", () => {
     expect(script).toContain('if (name of t as text) is "herdr-raycast-session"');
     expect(script).not.toContain('is "herdr"');
     expect(script).not.toContain("id of t");
-  });
-
-  it("clears the Ghostty marker title on the matching terminal only", () => {
-    const script = buildGhosttyClearMarkerScript("herdr-raycast-session");
-    expect(script).toContain('if (name of t as text) is "herdr-raycast-session"');
-    expect(script).toContain('set name of t to "herdr"');
   });
 
   it("selects the first WezTerm pane with an exact Herdr TTY", () => {

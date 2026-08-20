@@ -12,6 +12,16 @@ interface FetchOptions {
   headers?: Record<string, string>;
 }
 
+interface FetchResult<T> {
+  data: T;
+  status: number;
+}
+
+export interface CreateBookmarkResult {
+  bookmark: Bookmark;
+  wasCreated: boolean;
+}
+
 interface ZodIssue {
   path?: (string | number)[];
   message?: string;
@@ -60,6 +70,11 @@ function describeApiError(body: string, status: number): string {
 }
 
 export async function fetchWithAuth<T = unknown>(path: string, options: FetchOptions = {}): Promise<T> {
+  const result = await fetchWithAuthResult<T>(path, options);
+  return result.data;
+}
+
+async function fetchWithAuthResult<T>(path: string, options: FetchOptions = {}): Promise<FetchResult<T>> {
   const { apiUrl, apiKey } = await getApiConfig();
   const url = new URL(path, apiUrl);
   const method = options.method || "GET";
@@ -113,9 +128,9 @@ export async function fetchWithAuth<T = unknown>(path: string, options: FetchOpt
   done({ status: response.status });
 
   try {
-    return JSON.parse(data) as T;
+    return { data: JSON.parse(data) as T, status: response.status };
   } catch {
-    return data as T;
+    return { data: data as T, status: response.status };
   }
 }
 
@@ -158,10 +173,16 @@ export async function fetchGetAllBookmarks({
 }
 
 export async function fetchCreateBookmark(payload: object): Promise<Bookmark> {
-  return fetchWithAuth<Bookmark>("/api/v1/bookmarks", {
+  const result = await fetchCreateBookmarkResult(payload);
+  return result.bookmark;
+}
+
+export async function fetchCreateBookmarkResult(payload: object): Promise<CreateBookmarkResult> {
+  const result = await fetchWithAuthResult<Bookmark>("/api/v1/bookmarks", {
     method: "POST",
     body: payload,
   });
+  return { bookmark: result.data, wasCreated: result.status === 201 };
 }
 
 export async function fetchGetSingleBookmark(id: string): Promise<Bookmark> {

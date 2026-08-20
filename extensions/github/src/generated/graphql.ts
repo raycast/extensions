@@ -381,6 +381,62 @@ export type SearchIssuesQuery = {
   };
 };
 
+export type IssueByNumberQueryVariables = Exact<{
+  owner: string;
+  name: string;
+  issueNumber: number;
+}>;
+
+export type IssueByNumberQuery = {
+  repository: {
+    issue: {
+      id: string;
+      url: any;
+      title: string;
+      number: number;
+      closed: boolean;
+      state: Types.IssueState;
+      stateReason: Types.IssueStateReason | null;
+      updatedAt: any;
+      author:
+        | { id: string; login: string; avatarUrl: any }
+        | { id: string; login: string; name: string | null; avatarUrl: any }
+        | { id: string; login: string; avatarUrl: any }
+        | { id: string; login: string; name: string | null; avatarUrl: any }
+        | { id: string; avatarUrl: any; name: string | null; login: string; isViewer: boolean }
+        | null;
+      linkedBranches: {
+        totalCount: number;
+        nodes: Array<{ id: string; ref: { id: string; name: string } | null } | null> | null;
+      };
+      milestone: { id: string; title: string } | null;
+      repository: {
+        id: string;
+        nameWithOwner: string;
+        name: string;
+        url: any;
+        mergeCommitAllowed: boolean;
+        squashMergeAllowed: boolean;
+        rebaseMergeAllowed: boolean;
+        autoMergeAllowed: boolean;
+        defaultBranchRef: { target: { oid: any } | { oid: any } | { oid: any } | { oid: any } | null } | null;
+        owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
+      };
+      comments: { totalCount: number };
+      assignees: {
+        totalCount: number;
+        nodes: Array<{
+          id: string;
+          avatarUrl: any;
+          name: string | null;
+          login: string;
+          isViewer: boolean;
+        } | null> | null;
+      };
+    } | null;
+  } | null;
+};
+
 export type CloseIssueMutationVariables = Exact<{
   nodeId: string | number;
   stateReason: Types.IssueClosedStateReason;
@@ -589,6 +645,7 @@ export type PullRequestFieldsFragment = {
 export type SearchPullRequestsQueryVariables = Exact<{
   query: string;
   numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type SearchPullRequestsQuery = {
@@ -652,6 +709,7 @@ export type SearchPullRequestsQuery = {
         | Record<PropertyKey, never>
         | null;
     } | null> | null;
+    pageInfo: { endCursor: string | null; hasNextPage: boolean };
   };
 };
 
@@ -1117,6 +1175,7 @@ export type ExtendedRepositoryFieldsFragment = {
 export type SearchRepositoriesQueryVariables = Exact<{
   query: string;
   numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type SearchRepositoriesQuery = {
@@ -1149,6 +1208,7 @@ export type SearchRepositoriesQuery = {
       | Record<PropertyKey, never>
       | null
     > | null;
+    pageInfo: { endCursor: string | null; hasNextPage: boolean };
   };
 };
 
@@ -2195,6 +2255,16 @@ export const SearchIssuesDocument = gql`
   }
   ${IssueFieldsFragmentDoc}
 `;
+export const IssueByNumberDocument = gql`
+  query issueByNumber($owner: String!, $name: String!, $issueNumber: Int!) {
+    repository(owner: $owner, name: $name) {
+      issue(number: $issueNumber) {
+        ...IssueFields
+      }
+    }
+  }
+  ${IssueFieldsFragmentDoc}
+`;
 export const CloseIssueDocument = gql`
   mutation closeIssue($nodeId: ID!, $stateReason: IssueClosedStateReason!) {
     closeIssue(input: { issueId: $nodeId, stateReason: $stateReason }) {
@@ -2278,12 +2348,16 @@ export const ProjectDetailsDocument = gql`
   ${ProjectFieldsFragmentDoc}
 `;
 export const SearchPullRequestsDocument = gql`
-  query searchPullRequests($query: String!, $numberOfItems: Int!) {
-    search(query: $query, type: ISSUE, first: $numberOfItems) {
+  query searchPullRequests($query: String!, $numberOfItems: Int!, $after: String) {
+    search(query: $query, type: ISSUE, first: $numberOfItems, after: $after) {
       edges {
         node {
           ...PullRequestFields
         }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }
@@ -2517,10 +2591,14 @@ export const InitPullRequestDocument = gql`
   ${PullRequestFieldsFragmentDoc}
 `;
 export const SearchRepositoriesDocument = gql`
-  query searchRepositories($query: String!, $numberOfItems: Int!) {
-    search(query: $query, first: $numberOfItems, type: REPOSITORY) {
+  query searchRepositories($query: String!, $numberOfItems: Int!, $after: String) {
+    search(query: $query, first: $numberOfItems, after: $after, type: REPOSITORY) {
       nodes {
         ...ExtendedRepositoryFields
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }
@@ -3057,6 +3135,24 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             signal,
           }),
         "searchIssues",
+        "query",
+        variables,
+      );
+    },
+    issueByNumber(
+      variables: IssueByNumberQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<IssueByNumberQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<IssueByNumberQuery>({
+            document: IssueByNumberDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "issueByNumber",
         "query",
         variables,
       );

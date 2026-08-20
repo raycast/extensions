@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 import { IssueFieldsFragment } from "../generated/graphql";
-import { ISSUE_DEFAULT_SORT_QUERY } from "../helpers/issue";
+import { ISSUE_DEFAULT_SORT_QUERY, normalizeIssueSearchText, parseIssueNumberLookup } from "../helpers/issue";
 
 import IssueListItem from "./IssueListItem";
 
@@ -22,8 +22,20 @@ export function RepositoryIssueList(props: { repo: string }): JSX.Element {
     mutate: mutateList,
   } = usePromise(
     async (searchText, sortTxt) => {
+      const lookup = parseIssueNumberLookup(searchText, props.repo);
+      if (lookup) {
+        try {
+          const exact = await github.issueByNumber(lookup);
+          if (exact.repository?.issue) {
+            return [exact.repository.issue as IssueFieldsFragment];
+          }
+        } catch {
+          // Fall back to search when the repository is inaccessible.
+        }
+      }
+
       const result = await github.searchIssues({
-        query: `is:issue ${sortTxt} ${repoFilter} ${searchText}`,
+        query: `is:issue ${sortTxt} ${repoFilter} ${normalizeIssueSearchText(searchText)}`,
         numberOfItems: 20,
       });
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
@@ -32,7 +44,13 @@ export function RepositoryIssueList(props: { repo: string }): JSX.Element {
   );
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} navigationTitle={props.repo} throttle>
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      navigationTitle={props.repo}
+      searchBarPlaceholder="Filter by title or #123"
+      throttle
+    >
       <List.Section title="Issues" subtitle={`${data?.length}`}>
         {data?.map((d) => <IssueListItem key={d.id} issue={d} {...{ mutateList, sortQuery, setSortQuery }} />)}
       </List.Section>

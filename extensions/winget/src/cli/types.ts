@@ -77,6 +77,8 @@ type WingetProgressState =
   | { type: "installing" }
   | { type: "uninstalling" }
   | { type: "repairing" }
+  /** Advisory: the process is alive but has printed nothing for a while. */
+  | { type: "stalled"; silentMinutes: number }
   | { type: "complete"; success: boolean; message?: string };
 
 /** Terminal result of a winget operation. */
@@ -115,8 +117,12 @@ interface SpawnWingetOptions {
   onStderr?: (chunk: string) => void;
   signal?: AbortSignal;
   timeout?: number;
-  /** Arm the no-output stale watchdog (mutations only). */
-  staleWatchdog?: boolean;
+  /**
+   * Arms the no-output watchdog (mutations only): called with the silent
+   * duration once per additional minute after the threshold. Advisory — the
+   * process keeps running; cancellation is the caller's escape hatch.
+   */
+  onSilence?: (silentMinutes: number) => void;
   onSpawn?: (pid: number) => void;
 }
 

@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Preferences } from "../types";
 import { isApiReachable } from "../utils/connection";
 import { ensureReachable } from "../utils/submitGuard";
 import { useCanRecoverLocally } from "./useCanRecoverLocally";

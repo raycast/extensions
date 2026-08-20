@@ -1,5 +1,7 @@
 import { getGitHubClient } from "../api/githubClient";
 import { getBoundedPreferenceNumber } from "../components/Menu";
+import { IssueFieldsFragment } from "../generated/graphql";
+import { normalizeIssueSearchText, parseIssueNumberLookup } from "../helpers/issue";
 import { withGitHubClient } from "../helpers/withGithubClient";
 
 type Input = {
@@ -24,9 +26,21 @@ type Input = {
 export default withGitHubClient(async ({ query }: Input) => {
   const { github } = getGitHubClient();
 
+  const lookup = parseIssueNumberLookup(query);
+  if (lookup) {
+    try {
+      const exact = await github.issueByNumber(lookup);
+      if (exact.repository?.issue) {
+        return [exact.repository.issue as IssueFieldsFragment];
+      }
+    } catch {
+      // Fall back to search when the repository is inaccessible.
+    }
+  }
+
   const result = await github.searchIssues({
     numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
-    query: `is:issue archived:false ${query}`,
+    query: `is:issue archived:false ${normalizeIssueSearchText(query)}`,
   });
 
   return result.search.nodes;

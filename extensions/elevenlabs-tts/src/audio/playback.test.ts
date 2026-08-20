@@ -165,19 +165,73 @@ describe("stopActivePlayback", () => {
   });
 
   it("terminates the verified player and clears the record once it exits", async () => {
+    let terminated = false;
     mockedExecFile.mockImplementation((_file, _args, options, callback) => {
       const cb = typeof options === "function" ? options : callback;
-      cb?.(null, `/usr/bin/afplay ${audioFile}\n`, "");
+      if (terminated) cb?.(Object.assign(new Error("ps exited with code 1"), { code: 1 }), "", "");
+      else cb?.(null, `/usr/bin/afplay ${audioFile}\n`, "");
       return {} as ChildProcess;
     });
 
+    jest.spyOn(process, "kill").mockImplementation((_pid, signal) => {
+      if (signal === "SIGTERM") terminated = true;
+      return true;
+    });
+
+    await expect(stopActivePlayback()).resolves.toBe(true);
+    await expect(fs.access(PLAYBACK_FILE)).rejects.toThrow();
+  });
+
+  it("keeps the record when the exit check fails and the player is still alive", async () => {
     let terminated = false;
+    mockedExecFile.mockImplementation((_file, _args, options, callback) => {
+      const cb = typeof options === "function" ? options : callback;
+      if (terminated) cb?.(Object.assign(new Error("ps timed out"), { code: "ETIMEDOUT" }), "", "");
+      else cb?.(null, `/usr/bin/afplay ${audioFile}\n`, "");
+      return {} as ChildProcess;
+    });
+
+    jest.spyOn(process, "kill").mockImplementation((_pid, signal) => {
+      if (signal === "SIGTERM") terminated = true;
+      return true;
+    });
+
+    await expect(stopActivePlayback()).resolves.toBe(false);
+    await expect(fs.readFile(PLAYBACK_FILE, "utf8")).resolves.toBe(JSON.stringify({ sessionId, pid, audioFile }));
+  });
+
+  it("clears the record when the exit check fails but the player is gone", async () => {
+    let terminated = false;
+    mockedExecFile.mockImplementation((_file, _args, options, callback) => {
+      const cb = typeof options === "function" ? options : callback;
+      if (terminated) cb?.(Object.assign(new Error("ps timed out"), { code: "ETIMEDOUT" }), "", "");
+      else cb?.(null, `/usr/bin/afplay ${audioFile}\n`, "");
+      return {} as ChildProcess;
+    });
+
     jest.spyOn(process, "kill").mockImplementation((_pid, signal) => {
       if (signal === "SIGTERM") {
         terminated = true;
         return true;
       }
       if (terminated) throw Object.assign(new Error("No such process"), { code: "ESRCH" });
+      return true;
+    });
+
+    await expect(stopActivePlayback()).resolves.toBe(true);
+    await expect(fs.access(PLAYBACK_FILE)).rejects.toThrow();
+  });
+
+  it("treats a defunct player as exited and clears the record", async () => {
+    let terminated = false;
+    mockedExecFile.mockImplementation((_file, _args, options, callback) => {
+      const cb = typeof options === "function" ? options : callback;
+      cb?.(null, terminated ? "<defunct>\n" : `/usr/bin/afplay ${audioFile}\n`, "");
+      return {} as ChildProcess;
+    });
+
+    jest.spyOn(process, "kill").mockImplementation((_pid, signal) => {
+      if (signal === "SIGTERM") terminated = true;
       return true;
     });
 

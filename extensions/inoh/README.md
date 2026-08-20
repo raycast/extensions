@@ -2,7 +2,7 @@
 
 # Inoh
 
-Add vocabulary cards to your [Inoh](https://apps.apple.com/app/id6757024294) decks directly from Raycast.
+Add vocabulary cards to your [Inoh](https://inoh.app) decks directly from Raycast.
 
 ## Commands
 
@@ -29,8 +29,15 @@ account automatically.
 
 ## Plans
 
-Adding cards requires an Inoh account. The **free plan** holds up to **300 cards**
-across all decks. When you reach the limit, the extension opens **Inoh Pro**
-checkout in your browser for unlimited cards. The 300-card limit is enforced
-server-side, so it applies consistently across the Raycast extension and the
-Inoh app.
+The free plan includes **up to 300 cards** — you only need an Inoh account.
+Paid plans hold more cards and unlock more practice in the Inoh app:
+
+- **Inoh Plus** — up to 1,000 cards, unlimited daily reviews + 1,000 pronunciation practices/month
+- **Inoh Pro** — everything in Plus, unlimited cards + 10,000 pronunciation practices/month
+
+Your current plan shows as a badge in the header next to your email
+(Free, Plus, or Pro). Free accounts get an **Upgrade Plan** action that opens
+the Inoh plans page in your browser; paid accounts get **Manage Subscription**,
+which opens your account settings on [inoh.app](https://inoh.app) to change or
+cancel the plan. After you upgrade, the badge updates the next time you open
+the extension.

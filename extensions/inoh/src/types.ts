@@ -24,7 +24,9 @@ export type Deck = {
   updated_at: string;
 };
 
-export type AddCardResult = { success: true; cardId: string } | { success: false; error: string };
+export type AddCardResult =
+  | { success: true; cardId: string }
+  | { success: false; error: string; isPlanLimit?: boolean };
 
 export type RemoveCardResult = { success: true } | { success: false; error: string };
 

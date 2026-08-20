@@ -35,18 +35,42 @@ export default async function Command(props: { arguments: Arguments.FetchYoutube
 
     if (actualAction === "save") {
       // Get download location
-      const downloadsFolder = defaultDownloadFolder || path.join(os.homedir(), "Downloads");
-
-      // Create filename and save
+      const fallbackFolder = path.join(os.homedir(), "Downloads");
       const sanitizedTitle = sanitizeFilename(title);
-      const filename = path.join(downloadsFolder, `${sanitizedTitle}_transcript.txt`);
-      await fs.writeFile(filename, transcript);
+
+      // The transcript has already been fetched by this point, so a configured
+      // folder that has since been deleted or unmounted must not be allowed to
+      // discard it. Recreate the folder if we can, and fall back to Downloads
+      // if we can't.
+      let downloadsFolder = defaultDownloadFolder || fallbackFolder;
+      let usedFallbackFolder = false;
+
+      const writeTo = async (folder: string) => {
+        await fs.mkdir(folder, { recursive: true });
+        const target = path.join(folder, `${sanitizedTitle}_transcript.txt`);
+        await fs.writeFile(target, transcript);
+        return target;
+      };
+
+      let filename: string;
+      try {
+        filename = await writeTo(downloadsFolder);
+      } catch (writeError) {
+        if (downloadsFolder === fallbackFolder) {
+          throw writeError;
+        }
+        downloadsFolder = fallbackFolder;
+        usedFallbackFolder = true;
+        filename = await writeTo(downloadsFolder);
+      }
 
       // Show success toast with actions
       await showToast({
         style: Toast.Style.Success,
-        title: "Transcript fetched and saved",
-        message: `Saved to: ${filename}`,
+        title: usedFallbackFolder ? "Saved to Downloads instead" : "Transcript fetched and saved",
+        message: usedFallbackFolder
+          ? `Your configured folder was unavailable. Saved to: ${filename}`
+          : `Saved to: ${filename}`,
         primaryAction: {
           title: "Open File",
           onAction: () => open(filename),

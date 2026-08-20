@@ -147,7 +147,7 @@ async function stopPlaybackForSession(sessionId: string): Promise<boolean> {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ESRCH") return false;
   }
-  if (!(await waitForProcessExit(record.pid, 1_000))) return false;
+  if (!(await waitForPlaybackExit(record, 1_000))) return false;
 
   await clearPlayback(sessionId, record.pid);
   return true;
@@ -162,13 +162,30 @@ function isProcessGone(pid: number): boolean {
   }
 }
 
-async function waitForProcessExit(pid: number, timeoutMs: number): Promise<boolean> {
+// kill(pid, 0) also succeeds for a zombie (Raycast's host process never reaps players
+// spawned by an interrupted command), so exit is detected by ps no longer reporting
+// the owned afplay command: a reaped pid fails ps and a zombie shows <defunct>.
+async function waitForPlaybackExit(record: PlaybackRecord, timeoutMs: number): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
   do {
-    if (isProcessGone(pid)) return true;
+    if (!(await isPlaybackProcessRunning(record))) return true;
     await new Promise((resolve) => setTimeout(resolve, 50));
   } while (Date.now() < deadline);
-  return isProcessGone(pid);
+  return !(await isPlaybackProcessRunning(record));
+}
+
+async function isPlaybackProcessRunning(record: PlaybackRecord): Promise<boolean> {
+  try {
+    const { stdout } = await execFileAsync("ps", ["-p", String(record.pid), "-o", "command="], {
+      timeout: 1000,
+    });
+    return isOwnedPlaybackCommand(stdout, record.audioFile);
+  } catch (error) {
+    // ps exits 1 when the pid is gone; on any other failure (timeout, spawn error)
+    // fall back to a liveness probe instead of assuming the player exited
+    if ((error as { code?: number | string }).code === 1) return false;
+    return !isProcessGone(record.pid);
+  }
 }
 
 async function readPlayback(): Promise<PlaybackRecord | undefined> {

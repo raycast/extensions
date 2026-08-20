@@ -483,6 +483,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "tripsy",
+    title: "Tripsy",
+    description:
+      "Tripsy's official MCP server connects AI assistants to your Tripsy account so you can create trips and manage flights, stays, activities, expenses, and itinerary details through natural language.",
+    icon: "https://framerusercontent.com/images/4xxcLxeTur6SPIrEG8pq54OT3Y.png",
+    homepage: "https://tripsy.app",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tripsy.app"],
+    },
+  },
+  {
     name: "xero",
     title: "Xero",
     description:

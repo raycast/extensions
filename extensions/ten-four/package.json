@@ -25,6 +25,23 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "shelfUrl",
+      "title": "Shelf URL",
+      "description": "Optional. Leave blank to keep the shelf in a local file (~/.ten-four.json) on this Mac. Set it to an HTTPS Ten Four shelf service endpoint (for example via tailscale serve). HTTP is only supported for loopback testing.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://your-host.ts.net/shelf"
+    },
+    {
+      "name": "shelfToken",
+      "title": "Shelf Token",
+      "description": "Required when Shelf URL is set. Must match TENFOUR_TOKEN on the shelf service.",
+      "type": "password",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.99.0"
   },

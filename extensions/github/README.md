@@ -25,6 +25,23 @@ Otherwise, you can manually create it:
 5. Click "Generate token".
 6. Copy the token in the "GitHub Token" field in the extension's preferences.
 
+## Cloning and Downloading Repositories
+
+The extension provides two different ways to get repository files locally:
+
+- **Clone and Open (Default Path)** runs `git clone` and opens the repository in your configured IDE. It uses:
+  `<Default Clone Path>/<repository-name>`.
+- **Clone with Options (Choose Path)** also runs `git clone`, but lets you choose or override the destination for that clone.
+- **Download as ZIP** downloads an archive of a repository or directory. It does not create a Git repository and does not use the Default Clone Path.
+
+To clone a repository:
+
+1. Set **Default Clone Path** and **IDE Application** in the extension preferences if you want to use **Clone and Open (Default Path)**.
+2. Open **Search Repositories** and select a repository.
+3. Open the Action Panel (`⌘K`) and choose **Clone and Open (Default Path)** or **Clone with Options (Choose Path)**.
+
+The **Default Clone Path** preference applies only to these extension clone actions. It is not used by **Download as ZIP** or by a natural-language request to the GitHub AI assistant; those flows may use their own destination or working directory.
+
 ## Menu Bar Commands
 
 This extension ships three independent Menu Bar Commands. They can be enabled together or in any combination depending on what you want at a glance from your menu bar.

@@ -528,10 +528,14 @@ test("moves across volumes by copy+verify+unlink, clearing the copy when the sou
   };
 
   const from = write(dir, "a.txt", "cross-volume");
+  const mtime = new Date("2024-01-02T03:04:05Z");
+  fs.utimesSync(from, new Date(), mtime);
   const to = path.join(dir, "moved.txt");
   moveFile(from, to, exdev);
   assert.equal(fs.existsSync(from), false);
   assert.equal(fs.readFileSync(to, "utf8"), "cross-volume");
+  // The copy keeps the source's mtime, same as a same-volume rename would.
+  assert.equal(fs.statSync(to).mtime.getTime(), mtime.getTime());
 
   const keep = write(dir, "b.txt", "keep-source");
   const copy = path.join(dir, "copy.txt");

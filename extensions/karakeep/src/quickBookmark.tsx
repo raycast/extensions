@@ -6,7 +6,7 @@ import { getBrowserLink } from "./hooks/useBrowserLink";
 import { Bookmark } from "./types";
 import { getTranslator } from "./i18n/standalone";
 import { ensureReachable } from "./utils/submitGuard";
-import { toErrorMessage } from "./utils/toast";
+import { attachCopyDetail, toErrorMessage } from "./utils/toast";
 
 const log = logger.child("[QuickBookmark]");
 
@@ -30,6 +30,10 @@ export default async function QuickBookmark() {
       toast.style = Toast.Style.Failure;
       toast.title = t("quickBookmark.failedToGetBrowserUrl.title");
       toast.message = t("quickBookmark.failedToGetBrowserUrl.message");
+      // No exception to unwrap — the browser extension simply returned nothing.
+      // House style still wants something copyable, so hand over the state needed
+      // to file the bug rather than leaving a dead-end toast.
+      attachCopyDetail(toast, "Could not read the active tab URL from any supported browser.");
       return;
     }
 
@@ -55,6 +59,7 @@ export default async function QuickBookmark() {
       log.error("Bookmark creation returned empty result", { url });
       toast.style = Toast.Style.Failure;
       toast.title = t("quickBookmark.failedToCreateBookmark");
+      attachCopyDetail(toast, `Karakeep accepted the request but returned no bookmark.\nurl: ${url}`);
       return;
     }
 

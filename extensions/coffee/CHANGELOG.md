@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Enhancement] - 2026-08-14
+
+- Added an "instant on" feature: when the new *Start caffeination when Raycast starts* preference is enabled, Coffee automatically keeps your Mac awake (indefinitely) shortly after Raycast launches. Manual decaffeination persists until the next Raycast restart.
+
 ## [AI Extension] - 2026-07-22
 
 - Added AI tools to caffeinate until a specific date and time.

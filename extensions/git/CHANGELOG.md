@@ -1,5 +1,22 @@
 # Changelog
 
+## [Update] - 2026-08-13
+
+### Added
+- **Manage Repositories**: Open a repository automatically after adding or creating a single one
+- **Git**: When checkout, merge, rebase, pull, cherry-pick, revert, or create branch is blocked by local changes, offer to stash, retry, then restore the stash
+- **Worktrees**: Switch to a worktree after creating it
+- **Commits**: Generate a commit message (⌘G) in the style of recent commits in the repository
+- **Commits**: Search the full commit history with Git instead of filtering only the loaded page
+
+### Changed
+- **Branches**: Keep the create-branch name draft until the branch is created successfully
+
+## [Update] - 2026-07-30
+
+### Fixed
+- **Diff**: Fix crash when opening the file diff view caused by a missing `strtok3` runtime import from `file-type`
+
 ## [Update] - 2026-07-30
 
 ### Fixed

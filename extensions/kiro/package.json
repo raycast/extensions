@@ -29,7 +29,10 @@
       "description": "Search and open recent projects from Kiro.",
       "mode": "view",
       "shortcut": {
-        "modifiers": ["cmd", "opt"],
+        "modifiers": [
+          "cmd",
+          "opt"
+        ],
         "key": "k"
       }
     },
@@ -40,7 +43,9 @@
       "description": "Opens the currently selected Finder item with Kiro.",
       "mode": "no-view",
       "shortcut": {
-        "modifiers": ["opt"],
+        "modifiers": [
+          "opt"
+        ],
         "key": "k"
       }
     },
@@ -51,7 +56,10 @@
       "description": "Opens a new Kiro window.",
       "mode": "no-view",
       "shortcut": {
-        "modifiers": ["shift", "opt"],
+        "modifiers": [
+          "shift",
+          "opt"
+        ],
         "key": "k"
       }
     },
@@ -162,5 +170,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

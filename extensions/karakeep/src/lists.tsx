@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Form, Icon, List, useNavigation, Keyboard } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import React, { useCallback, useMemo } from "react";
 import { logger } from "@chrismessina/raycast-logger";
@@ -350,19 +350,19 @@ function ListItem({ list, label, level, apiUrl, onOpen, onEdit, onCreate, onDele
               title={t("list.openList")}
               onAction={() => onOpen(list)}
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action
               title={t("list.editList")}
               onAction={() => onEdit(list)}
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
             <Action
               title={t("list.createList")}
               onAction={onCreate}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -370,7 +370,7 @@ function ListItem({ list, label, level, apiUrl, onOpen, onEdit, onCreate, onDele
             <Action.CopyToClipboard
               title={t("common.copyId")}
               content={list.id}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -379,7 +379,7 @@ function ListItem({ list, label, level, apiUrl, onOpen, onEdit, onCreate, onDele
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={() => onDelete(list.id)}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -400,34 +400,35 @@ export default function Lists() {
       const list = lists?.find((list) => list.id === id);
       const listName = list?.name;
 
+      // Declining the confirmation is a normal outcome, not an error. It used to
+      // raise a red Failure toast reading "Delete cancelled", which reports a
+      // successful no-op as a problem — and no other confirmAlert in this
+      // extension says anything when you back out. Stay silent to match.
       if (
-        await confirmAlert({
+        !(await confirmAlert({
           title: t("list.deleteList"),
           message: t("list.deleteConfirm", { name: listName || "" }),
-        })
+        }))
       ) {
-        await runWithToast({
-          loading: { title: t("common.deleting") },
-          success: { title: t("common.deleteSuccess") },
-          failure: { title: t("common.deleteFailed") },
-          action: async () => {
-            try {
-              log.info("Deleting list", { listId: id, listName });
-              await fetchDeleteList(id);
-              await revalidate();
-              log.info("List deleted", { listId: id });
-            } catch (error) {
-              log.error("Failed to delete list", { listId: id, listName, error });
-              throw error;
-            }
-          },
-        });
-      } else {
-        await showToast({
-          title: t("common.deleteCancel"),
-          style: Toast.Style.Failure,
-        });
+        return;
       }
+
+      await runWithToast({
+        loading: { title: t("common.deleting") },
+        success: { title: t("common.deleteSuccess") },
+        failure: { title: t("common.deleteFailed") },
+        action: async () => {
+          try {
+            log.info("Deleting list", { listId: id, listName });
+            await fetchDeleteList(id);
+            await revalidate();
+            log.info("List deleted", { listId: id });
+          } catch (error) {
+            log.error("Failed to delete list", { listId: id, listName, error });
+            throw error;
+          }
+        },
+      });
     },
     [lists, revalidate, t],
   );
@@ -496,7 +497,7 @@ export default function Lists() {
             title={t("list.createList")}
             onAction={handleCreateList}
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
           />
         </ActionPanel>
       }
@@ -512,7 +513,7 @@ export default function Lists() {
                 title={t("list.createList")}
                 onAction={handleCreateList}
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
             </ActionPanel>
           }
@@ -527,14 +528,14 @@ export default function Lists() {
               title={t("list.openFavorites")}
               onAction={handleShowFavoritedBookmarks}
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.OpenInBrowser url={`${apiUrl}/dashboard/favourites`} title={t("common.viewInBrowser")} />
             <Action
               title={t("list.createList")}
               onAction={handleCreateList}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel>
         }
@@ -548,14 +549,14 @@ export default function Lists() {
               title={t("list.openArchived")}
               onAction={handleShowArchivedBookmarks}
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.OpenInBrowser url={`${apiUrl}/dashboard/archive`} title={t("common.viewInBrowser")} />
             <Action
               title={t("list.createList")}
               onAction={handleCreateList}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel>
         }

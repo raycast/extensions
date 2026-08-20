@@ -40,12 +40,12 @@
   ],
   "preferences": [
     {
-      "name": "laravel_forge_api_key",
+      "name": "laravel_forge_api_token",
       "type": "password",
       "required": true,
-      "title": "Laravel Forge API Key",
-      "description": "Generate from your Laravel Forge profile",
-      "placeholder": "API Key"
+      "title": "Forge API Token (v2)",
+      "description": "Forge API v1 is retired, so this needs a new v2 token. Create one at forge.laravel.com/profile/api \u2014 see the README for the scopes to tick.",
+      "placeholder": "API Token"
     },
     {
       "name": "laravel_forge_ssh_user",
@@ -57,12 +57,12 @@
       "placeholder": "SSH User"
     },
     {
-      "name": "laravel_forge_api_key_two",
+      "name": "laravel_forge_api_token_two",
       "type": "password",
       "required": false,
-      "title": "Laravel Forge API Key 2 (optional)",
+      "title": "Forge API Token 2 (optional)",
       "description": "Optionally add a second account.",
-      "placeholder": "API Key (optional)"
+      "placeholder": "API Token (optional)"
     },
     {
       "name": "laravel_forge_ssh_user_two",
@@ -70,32 +70,27 @@
       "required": false,
       "title": "Laravel Forge SSH User 2 (optional)",
       "default": "forge",
-      "description": "Change the SSH user to login with ont he second account",
+      "description": "Change the SSH user to login with on the second account",
       "placeholder": "SSH User"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
-    "@raycast/utils": "^1.5.2",
-    "date-fns": "^2.29.3",
+    "@raycast/api": "^1.104.24",
+    "date-fns": "^4.4.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.1",
-    "run-applescript": "^6.1.0",
-    "swr": "^2.1.3"
+    "node-fetch": "^3.3.2",
+    "run-applescript": "^7.1.0",
+    "swr": "^2.5.1"
   },
   "devDependencies": {
-    "@faker-js/faker": "^7.6.0",
-    "@raycast/eslint-config": "1.0.5",
-    "@types/lodash": "^4.14.194",
-    "@types/node": "~18.15.11",
-    "@types/react": "^18.0.35",
-    "@typescript-eslint/eslint-plugin": "^5.58.0",
-    "@typescript-eslint/parser": "^5.58.0",
-    "eslint": "^8.38.0",
-    "eslint-config-prettier": "^8.8.0",
-    "node-ray": "^1.19.4",
-    "prettier": "2.8.7",
-    "typescript": "^5.0.4"
+    "@faker-js/faker": "^10.5.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/lodash": "^4.17.25",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
