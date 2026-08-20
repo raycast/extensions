@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { api } from "./lib/client";
 
@@ -14,7 +22,10 @@ export default function CreateTask() {
     validation: { title: FormValidation.Required },
     initialValues: { priority: "med" },
     onSubmit: async (values) => {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task…" });
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Creating task…",
+      });
       try {
         await api.createTask({
           title: values.title.trim(),
@@ -38,12 +49,24 @@ export default function CreateTask() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Task" icon={Icon.CheckCircle} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Create Task"
+            icon={Icon.CheckCircle}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
-      <Form.TextField title="Title" placeholder="What needs to be done?" {...itemProps.title} />
-      <Form.TextArea title="Notes" placeholder="Details (optional)" {...itemProps.body} />
+      <Form.TextField
+        title="Title"
+        placeholder="What needs to be done?"
+        {...itemProps.title}
+      />
+      <Form.TextArea
+        title="Notes"
+        placeholder="Details (optional)"
+        {...itemProps.body}
+      />
       <Form.Dropdown title="Priority" {...itemProps.priority}>
         <Form.Dropdown.Item value="low" title="Low" />
         <Form.Dropdown.Item value="med" title="Medium" />

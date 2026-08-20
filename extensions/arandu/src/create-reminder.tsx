@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { api } from "./lib/client";
 
@@ -19,7 +27,10 @@ export default function CreateReminder() {
       },
     },
     onSubmit: async (values) => {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating reminder…" });
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Creating reminder…",
+      });
       try {
         await api.createReminder({
           title: values.title.trim(),
@@ -43,7 +54,11 @@ export default function CreateReminder() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Reminder" icon={Icon.Bell} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Create Reminder"
+            icon={Icon.Bell}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
@@ -52,8 +67,16 @@ export default function CreateReminder() {
         placeholder="What should Arandu remind you of?"
         {...itemProps.title}
       />
-      <Form.TextArea title="Notes" placeholder="Details (optional)" {...itemProps.body} />
-      <Form.DatePicker title="When" type={Form.DatePicker.Type.DateTime} {...itemProps.fireAt} />
+      <Form.TextArea
+        title="Notes"
+        placeholder="Details (optional)"
+        {...itemProps.body}
+      />
+      <Form.DatePicker
+        title="When"
+        type={Form.DatePicker.Type.DateTime}
+        {...itemProps.fireAt}
+      />
     </Form>
   );
 }

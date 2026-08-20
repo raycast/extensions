@@ -12,11 +12,18 @@ function dayLabel(iso: string): string {
     a.getDate() === b.getDate();
   if (sameDay(d, today)) return "Today";
   if (sameDay(d, tomorrow)) return "Tomorrow";
-  return d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+  return d.toLocaleDateString(undefined, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 }
 
 function fmtTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 const SOURCE_ICON: Record<AgendaEvent["source"], Color> = {
@@ -50,8 +57,14 @@ export default function Agenda() {
               title={e.title}
               subtitle={e.workBlock ? `Block · ${e.workBlock.label}` : e.origin}
               accessories={[
-                ...(e.location ? [{ icon: Icon.Pin, tooltip: e.location }] : []),
-                { text: e.allDay ? "All day" : `${fmtTime(e.start)} – ${fmtTime(e.end)}` },
+                ...(e.location
+                  ? [{ icon: Icon.Pin, tooltip: e.location }]
+                  : []),
+                {
+                  text: e.allDay
+                    ? "All day"
+                    : `${fmtTime(e.start)} – ${fmtTime(e.end)}`,
+                },
               ]}
               actions={
                 <ActionPanel>

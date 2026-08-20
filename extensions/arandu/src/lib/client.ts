@@ -17,7 +17,10 @@ export class AranduError extends Error {
 
 function prefs(): { token: string; baseUrl: string } {
   const p = getPreferenceValues<Prefs>();
-  const baseUrl = (p.baseUrl?.trim() || "https://arandu.lvdev.com.br").replace(/\/+$/, "");
+  const baseUrl = (p.baseUrl?.trim() || "https://arandu.lvdev.com.br").replace(
+    /\/+$/,
+    "",
+  );
   return { token: p.apiToken.trim(), baseUrl };
 }
 
@@ -45,7 +48,8 @@ export async function request<T>(
   });
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   if (!res.ok) {
-    const serverMsg = typeof data.error === "string" ? data.error : `${res.status} on ${path}`;
+    const serverMsg =
+      typeof data.error === "string" ? data.error : `${res.status} on ${path}`;
     throw new AranduError(FRIENDLY[res.status] ?? serverMsg, res.status);
   }
   return data as T;
@@ -82,7 +86,12 @@ export interface TodayResponse {
   now: number;
   events: PlanEvent[];
   allDayEvents: PlanEvent[];
-  scheduled: Array<{ candidate: PlanCandidate; start: number; end: number; pinned: boolean }>;
+  scheduled: Array<{
+    candidate: PlanCandidate;
+    start: number;
+    end: number;
+    pinned: boolean;
+  }>;
   reminders: Array<{
     id: string;
     title: string;
@@ -151,9 +160,10 @@ export interface Habit {
 export const api = {
   today: () => request<TodayResponse>("/api/today"),
   agenda: () =>
-    request<{ events: AgendaEvent[]; failures: Array<{ source: string; error: string }> }>(
-      "/api/agenda",
-    ),
+    request<{
+      events: AgendaEvent[];
+      failures: Array<{ source: string; error: string }>;
+    }>("/api/agenda"),
   habits: () => request<{ habits: Habit[] }>("/api/habits"),
   checkHabit: (id: string, done: boolean, slot?: string) =>
     request<Habit>(`/api/habits/${id}/check`, {
@@ -161,7 +171,9 @@ export const api = {
       body: JSON.stringify({ done, ...(slot ? { slot } : {}) }),
     }),
   completeTask: (id: string) =>
-    request<unknown>(`/api/tasks/${encodeURIComponent(id)}/done`, { method: "POST" }),
+    request<unknown>(`/api/tasks/${encodeURIComponent(id)}/done`, {
+      method: "POST",
+    }),
   completeJiraFromToday: (id: string) =>
     request<unknown>(`/api/task-overrides/${encodeURIComponent(id)}/complete`, {
       method: "PUT",
@@ -174,13 +186,21 @@ export const api = {
     body?: string;
     priority?: "low" | "med" | "high" | "urgent";
     dueAt?: number;
-  }) => request<{ id: string }>("/api/tasks", { method: "POST", body: JSON.stringify(input) }),
+  }) =>
+    request<{ id: string }>("/api/tasks", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
   createReminder: (input: {
     title: string;
     body?: string;
     nextFireAt: number;
     timezone?: string;
-  }) => request<{ id: string }>("/api/reminders", { method: "POST", body: JSON.stringify(input) }),
+  }) =>
+    request<{ id: string }>("/api/reminders", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
   ask: (transcript: string) =>
     request<{
       conversationId: string;

@@ -1,9 +1,21 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  Keyboard,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { api, type TodayResponse } from "./lib/client";
 
 function fmtTime(ms: number): string {
-  return new Date(ms).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return new Date(ms).toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 const PRIORITY_COLOR: Record<string, Color> = {
@@ -15,14 +27,28 @@ const PRIORITY_COLOR: Record<string, Color> = {
 
 function priorityAccessory(priority?: string) {
   if (!priority) return [];
-  return [{ tag: { value: priority, color: PRIORITY_COLOR[priority] ?? Color.SecondaryText } }];
+  return [
+    {
+      tag: {
+        value: priority,
+        color: PRIORITY_COLOR[priority] ?? Color.SecondaryText,
+      },
+    },
+  ];
 }
 
 export default function Today() {
   const { data, isLoading, revalidate } = usePromise(api.today);
 
-  const completeTask = async (item: { id: string; source: string; title: string }) => {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Completing…" });
+  const completeTask = async (item: {
+    id: string;
+    source: string;
+    title: string;
+  }) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Completing…",
+    });
     try {
       if (item.source === "arandu") await api.completeTask(item.id);
       else await api.completeJiraFromToday(item.id);
@@ -38,7 +64,10 @@ export default function Today() {
   };
 
   const completeReminder = async (id: string, title: string) => {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Completing…" });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Completing…",
+    });
     try {
       await api.completeReminder(id);
       toast.style = Toast.Style.Success;
@@ -61,7 +90,12 @@ export default function Today() {
     />
   );
 
-  const taskActions = (item: { id: string; source: string; title: string; url: string | null }) => (
+  const taskActions = (item: {
+    id: string;
+    source: string;
+    title: string;
+    url: string | null;
+  }) => (
     <ActionPanel>
       <Action
         title="Complete Task"
@@ -122,7 +156,9 @@ export default function Today() {
               icon={{ source: Icon.Calendar, tintColor: Color.Purple }}
               title={e.title}
               subtitle={e.workBlock ? `Block · ${e.workBlock.label}` : e.origin}
-              accessories={[{ text: `${fmtTime(e.start)} – ${fmtTime(e.end)}` }]}
+              accessories={[
+                { text: `${fmtTime(e.start)} – ${fmtTime(e.end)}` },
+              ]}
               actions={
                 <ActionPanel>
                   {e.url ? <Action.OpenInBrowser url={e.url} /> : null}
@@ -142,7 +178,10 @@ export default function Today() {
               icon={{ source: Icon.Circle, tintColor: Color.Blue }}
               title={s.candidate.title}
               subtitle={s.candidate.origin}
-              accessories={[...priorityAccessory(s.candidate.priority), { text: fmtTime(s.start) }]}
+              accessories={[
+                ...priorityAccessory(s.candidate.priority),
+                { text: fmtTime(s.start) },
+              ]}
               actions={taskActions(s.candidate)}
             />
           ))}
@@ -161,7 +200,9 @@ export default function Today() {
               }
               title={r.title}
               accessories={[
-                ...(r.recurring ? [{ icon: Icon.Repeat, tooltip: "Recurring" }] : []),
+                ...(r.recurring
+                  ? [{ icon: Icon.Repeat, tooltip: "Recurring" }]
+                  : []),
                 { text: fmtTime(r.fireAt) },
               ]}
               actions={
@@ -205,7 +246,8 @@ export default function Today() {
                         await showToast({
                           style: Toast.Style.Failure,
                           title: "Failed to update habit",
-                          message: err instanceof Error ? err.message : String(err),
+                          message:
+                            err instanceof Error ? err.message : String(err),
                         });
                       }
                     }}

@@ -1,9 +1,19 @@
-import { Action, ActionPanel, Detail, Form, Icon, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  Icon,
+  useNavigation,
+} from "@raycast/api";
 import { useForm, usePromise, FormValidation } from "@raycast/utils";
 import { api } from "./lib/client";
 
 function Answer({ question }: { question: string }) {
-  const { data, error, isLoading } = usePromise(async (q: string) => api.ask(q), [question]);
+  const { data, error, isLoading } = usePromise(
+    async (q: string) => api.ask(q),
+    [question],
+  );
 
   const reply = error
     ? `**Error:** ${error.message}`
@@ -18,7 +28,9 @@ function Answer({ question }: { question: string }) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          {data?.text ? <Action.CopyToClipboard title="Copy Reply" content={data.text} /> : null}
+          {data?.text ? (
+            <Action.CopyToClipboard title="Copy Reply" content={data.text} />
+          ) : null}
         </ActionPanel>
       }
     />
@@ -42,7 +54,11 @@ export default function Ask() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Ask Arandu" icon={Icon.SpeechBubble} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Ask Arandu"
+            icon={Icon.SpeechBubble}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
