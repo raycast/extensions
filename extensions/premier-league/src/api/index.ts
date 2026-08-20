@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
@@ -36,16 +37,73 @@ interface Pagination<T> {
   cursor?: string | null;
 }
 
+const buildSeason = (seasonId: string): Season => ({
+  seasonId,
+  label: `${seasonId}/${String((Number(seasonId) + 1) % 100).padStart(2, "0")}`,
+  annotations: [],
+  qualification: [],
+  relegation: [],
+});
+
+export const getActiveSeason = async (
+  comp: string = "8",
+): Promise<string | undefined> => {
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `${endpoint}/v2/matches`,
+    params: {
+      competition: comp,
+      _sort: "kickoff:desc",
+      _limit: 1,
+    },
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPagination<Fixture>> = await axios(config);
+
+    return data.data[0]?.season;
+  } catch {
+    return undefined;
+  }
+};
+
 export const getSeasons = async (comp: string = "8"): Promise<Season[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `https://resources.premierleague.com/premierleague25/config/season-config/competitions/${comp}.json`,
   };
 
-  try {
-    const { data }: AxiosResponse<EPLCompetition> = await axios(config);
+  const { usePulseliveApi } = getPreferenceValues<Preferences>();
 
-    return data.seasons;
+  try {
+    const [{ data }, activeSeasonId] = await Promise.all([
+      axios(config) as Promise<AxiosResponse<EPLCompetition>>,
+      usePulseliveApi ? getActiveSeason(comp) : undefined,
+    ]);
+
+    const { seasons } = data;
+
+    if (!activeSeasonId || seasons.some((s) => s.seasonId === activeSeasonId)) {
+      return seasons;
+    }
+
+    if (!seasons.length) {
+      return [buildSeason(activeSeasonId)];
+    }
+
+    const newest = seasons.reduce(
+      (max, s) => Math.max(max, Number(s.seasonId)),
+      0,
+    );
+
+    const missing: Season[] = [];
+    for (let year = newest + 1; year <= Number(activeSeasonId); year += 1) {
+      missing.push(buildSeason(String(year)));
+    }
+
+    return [...missing, ...seasons].sort(
+      (a, b) => Number(b.seasonId) - Number(a.seasonId),
+    );
   } catch (e) {
     showFailureToast(e);
 
