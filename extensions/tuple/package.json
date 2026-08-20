@@ -54,7 +54,7 @@
     {
       "name": "join-personal-room",
       "title": "Join Personal Room",
-      "description": "Join your most recent personal room.",
+      "description": "Join your primary personal room.",
       "mode": "no-view"
     },
     {
@@ -95,7 +95,12 @@
     {
       "name": "list-contacts",
       "title": "List Contacts",
-      "description": "List Tuple contacts with online status, favorite, and recent flags."
+      "description": "List Tuple contacts with presence, favorites, recency, and the call action currently available."
+    },
+    {
+      "name": "list-active-calls",
+      "title": "List Active Calls",
+      "description": "List ongoing Tuple calls with grouped participants, room, capacity, and joinability."
     },
     {
       "name": "get-active-call",
@@ -105,11 +110,11 @@
     {
       "name": "list-rooms",
       "title": "List Rooms",
-      "description": "List personal and team Tuple rooms and who is currently in each."
+      "description": "List personal and team Tuple rooms, including the primary personal room and current occupants."
     }
   ],
   "ai": {
-    "instructions": "Calls are recorded Tuple pair-programming sessions stored locally. The tools are read-only. To answer questions about what was said, use search-transcripts with a few focused key words or a name (all terms must appear in a segment, so keep queries specific; search again with different terms to broaden). For recency or 'who/when' questions, use list-recent-calls (it accepts a participant filter and includes any saved summary). Resolve a person to their email with list-contacts when needed; contacts carry an online/busy/offline status, so use it for presence questions like 'who is around right now?' (busy means in a call). Rooms are persistent named spaces distinct from calls and can be occupied even when the user isn't on a call — use list-rooms for 'who is in a room?' or 'which rooms are active?'. Use read-transcript only when you need a call's full text. Cite the call (participants and date) in answers.",
+    "instructions": "Calls are recorded Tuple pair-programming sessions stored locally. The tools are read-only. To answer questions about what was said, use search-transcripts with a few focused key words or a name (all terms must appear in a segment, so keep queries specific; search again with different terms to broaden). For recency or 'who/when' questions about recorded calls, use list-recent-calls (it accepts a participant filter and includes any saved summary). Use list-active-calls for who is pairing right now, whether a live call is joinable, or which room it belongs to; it groups participants using Tuple's canonical visibility rules. Resolve an individual to their email or availability with list-contacts. Rooms are persistent named spaces distinct from calls and can be occupied even when the user isn't on a call — use list-rooms for occupancy and primary-room questions. Use read-transcript only when you need a call's full text. Cite the call (participants and date) in answers.",
     "evals": [
       {
         "input": "@tuple am I on a call right now?",
@@ -172,7 +177,8 @@
               "speaker": "Jordan Alvarez",
               "text": "the migration is on track"
             }
-          ]
+          ],
+          "read-transcript": "[10:05:00] Jordan Alvarez: the migration is on track"
         },
         "expected": [
           {
@@ -193,6 +199,8 @@
                 "slug": "tXFZbE",
                 "url": "https://tuple.app/c/tXFZbE",
                 "favorited": false,
+                "primary": false,
+                "createdAt": "2026-06-20T10:00:00Z",
                 "activeCall": false,
                 "occupants": [
                   "Riley Chen"
@@ -205,6 +213,39 @@
           {
             "callsTool": {
               "name": "list-rooms"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@tuple who is pairing right now?",
+        "mocks": {
+          "list-active-calls": [
+            {
+              "id": "call-1",
+              "participants": [
+                {
+                  "name": "Riley Chen",
+                  "email": "riley@example.com"
+                },
+                {
+                  "name": "Jordan Alvarez",
+                  "email": "jordan@example.com"
+                }
+              ],
+              "unknownParticipants": 0,
+              "anonymous": false,
+              "capacity": 4,
+              "joinable": true,
+              "room": null,
+              "current": false
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-active-calls"
             }
           }
         ]
@@ -248,7 +289,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "overrides": {
-    "brace-expansion": "5.0.8",
+    "brace-expansion": "5.0.9",
     "js-yaml@4": "4.3.1"
   }
 }
