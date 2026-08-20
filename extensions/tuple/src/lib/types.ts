@@ -159,16 +159,16 @@ export interface Room {
   active_call: boolean;
 }
 
-/** The newest-created personal room, matching Tuple's primary-room rule. */
+/** The newest-created personal room when the CLI provides enough data to identify it reliably. */
 export function primaryPersonalRoom(rooms: Room[]): Room | undefined {
-  return rooms
-    .filter((room) => room.kind === "personal")
-    .reduce<Room | undefined>((primary, room) => {
-      if (!primary) {
-        return room;
-      }
-      return (room.created_at ?? "") > (primary.created_at ?? "") ? room : primary;
-    }, undefined);
+  const personalRooms = rooms.filter((room) => room.kind === "personal");
+  if (personalRooms.length <= 1) {
+    return personalRooms[0];
+  }
+  if (personalRooms.some((room) => !room.created_at)) {
+    return undefined;
+  }
+  return personalRooms.reduce((primary, room) => (room.created_at! > primary.created_at! ? room : primary));
 }
 
 /** One full-text search hit, from `tuple transcription search --format json`. */

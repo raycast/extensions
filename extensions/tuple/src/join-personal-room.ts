@@ -5,7 +5,8 @@ import { primaryPersonalRoom } from "./lib/types";
 
 export default async function JoinPersonalRoom() {
   try {
-    const room = primaryPersonalRoom(await listRooms("--kind", "personal", "--limit", "-1"));
+    const personalRooms = await listRooms("--kind", "personal", "--limit", "-1");
+    const room = primaryPersonalRoom(personalRooms) ?? personalRooms[0];
 
     if (!room) {
       await showHUD("No personal room found");
