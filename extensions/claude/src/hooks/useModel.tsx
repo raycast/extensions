@@ -20,13 +20,6 @@ const DEFAULT_PROMPT = "You are a useful assistant";
 const LEGACY_DEFAULT_NAME = "Default Model";
 
 /**
- * The output ceiling every default preset was seeded with before per-model limits were
- * read from the API. Named rather than inlined because it is a value this hook once wrote
- * and now needs to recognize as its own — see `computeRepointedDefault`.
- */
-const LEGACY_SEEDED_MAX_TOKENS = "4096";
-
-/**
  * The built-in preset. Its `option` is a last-resort fallback: on load it is re-pointed
  * at the newest Sonnet from the live model list.
  */
@@ -180,19 +173,16 @@ export function computeRepointedDefault(current: Model[], liveModels: AvailableM
   const modelCeiling = getMaxTokensForModel(newestSonnet.id, liveModels).toString();
 
   // `isUntouchedDefault` does NOT look at `max_tokens`, so a user who raised or lowered
-  // the built-in preset's output limit still reads as untouched. Reasserting the model
-  // ceiling on every mount would therefore silently undo that edit each launch.
+  // the built-in preset's output limit still reads as untouched. The ceiling is therefore
+  // written ONLY when the model is changing anyway — that value belonged to the old model
+  // and cannot survive the move — and never merely because it looks out of date.
   //
-  // The defect this addresses is narrower than "keep max_tokens in sync": a default
-  // seeded before the API advertised per-model limits is stuck on the legacy 4096 even
-  // after it repoints onto a model whose real ceiling is far higher. So the ceiling is
-  // written only when the model is changing anyway (the value belonged to the OLD model
-  // and cannot survive the move), or when it is still exactly that legacy 4096 — a value
-  // this hook wrote, not one the user chose.
-  const isRepointing = existingDefault.option !== newestSonnet.id;
-  const stuckOnLegacyCeiling =
-    existingDefault.max_tokens === LEGACY_SEEDED_MAX_TOKENS && modelCeiling !== LEGACY_SEEDED_MAX_TOKENS;
-  const nextMaxTokens = isRepointing || stuckOnLegacyCeiling ? modelCeiling : existingDefault.max_tokens;
+  // A default seeded before per-model limits were read from the API sits on 4096 until
+  // then. Bumping it on sight was tried and reverted: nothing in storage distinguishes
+  // "seeded 4096" from "the user typed 4096", so the bump silently overwrites a real
+  // choice. A preset is hand-curated data; where the signal is ambiguous, leave it alone.
+  // The user can raise it in the Presets form, and the next repoint does it for free.
+  const nextMaxTokens = existingDefault.option !== newestSonnet.id ? modelCeiling : existingDefault.max_tokens;
 
   if (
     existingDefault.option === newestSonnet.id &&

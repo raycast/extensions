@@ -211,7 +211,7 @@ export interface ChatViewProps extends ChangeModelProp {
   resolveModel: (modelId: string) => Model;
   /** "Pin Conversation" — pins the containing conversation in `recents_v1`. Supplied by Ask
    *  rather than owned here, because the conversation being pinned is Ask's state. See
-   *  `useAskConversation`'s `pin` for why saving is a pin now. */
+   *  `useAskConversation`'s `setPinned` for why saving is a pin now. */
   onPinAnswer: () => void;
   /** Whether the conversation is currently pinned, so the action can say which way it goes. */
   isPinned: boolean;

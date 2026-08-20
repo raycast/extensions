@@ -104,7 +104,7 @@ Then work through, in order:
 
 **If a user edit reverts on relaunch,** the field is being re-derived rather than preserved. For archive or rename, check that the field is in `RECENTS_OWNED_FIELDS`. For pin or unpin, that array is the wrong place to look — pin state is resolved by `resolvePinState` comparing `pinned_at` against `unpinned_at`, so a reverting unpin is a bug in that comparison.
 
-**If a preset is stuck at a 4,096-token ceiling,** only the built-in default is re-pointed automatically, and only while the user has not edited it (`computeRepointedDefault`). A preset the user created keeps whatever ceiling it was saved with, deliberately — that value may be a choice, not a leftover. Raise it in the Presets form.
+**If a preset is stuck at a 4,096-token ceiling,** that is deliberate and not a bug to fix in place. `computeRepointedDefault` writes `max_tokens` only when it is already re-pointing the built-in default at a different model — the old value belonged to the old model. It never rewrites the ceiling of a preset that already points at the right model, because nothing in storage distinguishes a seeded 4096 from a 4096 the user typed, and a preset is hand-curated data. Raise it in the Presets form.
 
 **If requests fail on a current model,** check that `temperature` is not sent unconditionally and that non-streaming `max_tokens` is clamped. Both are handled in `src/utils/models.ts` through a single builder the streaming and non-streaming paths share; they were duplicated once, and the copy that got missed 400'd every request for users with streaming disabled.
 

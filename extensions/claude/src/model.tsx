@@ -156,6 +156,14 @@ export default function Model() {
 
   const customModelsOnly = filteredModels.filter((x) => x.id !== DEFAULT_MODEL.id);
 
+  // `selectedItemId` is controlled, so it must never name a row the search has filtered
+  // out: List then selects something else while this state still points at the hidden row,
+  // and `ModelListItem` gates `actions` on that comparison — leaving every visible row
+  // with a dead action panel until the user manually reselects. Falling back to `undefined`
+  // hands selection back to List, whose own `onSelectionChange` re-syncs this state.
+  const visibleModelIds = new Set(filteredModels.map((model) => model.id));
+  const visibleSelectedModelId = selectedModelId && visibleModelIds.has(selectedModelId) ? selectedModelId : undefined;
+
   return (
     <List
       isShowingDetail={filteredModels.length === 0 ? false : true}
@@ -163,7 +171,7 @@ export default function Model() {
       filtering={false}
       throttle={false}
       navigationTitle={"Presets"}
-      selectedItemId={selectedModelId || undefined}
+      selectedItemId={visibleSelectedModelId}
       onSelectionChange={(id) => {
         if (id !== selectedModelId) {
           setSelectedModelId(id);
