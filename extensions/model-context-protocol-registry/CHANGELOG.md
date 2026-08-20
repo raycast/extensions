@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add PostEverywhere MCP Server] - {PR_MERGE_DATE}
+## [Add PostEverywhere MCP Server] - 2026-08-20
 
 - Added PostEverywhere (social media publishing to 11 platforms) to the official registry entries
 
