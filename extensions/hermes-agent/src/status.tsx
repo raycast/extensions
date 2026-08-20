@@ -20,7 +20,7 @@ async function checkGatewayStatus(): Promise<GatewayStatus> {
   const prefs = getPreferences();
   const startTime = Date.now();
   const base = endpointBase(prefs.endpoint);
-  const headers: HeadersInit = {};
+  const headers: Record<string, string> = {};
   if (prefs.token) {
     headers.Authorization = `Bearer ${prefs.token}`;
   }
@@ -60,11 +60,15 @@ async function checkGatewayStatus(): Promise<GatewayStatus> {
         // Listing body is optional for the health bit.
       }
 
-      // Optional Hermes extras; do not require /health and do not treat it as proof of auth.
+      // Optional Hermes extras. Bound the wait so a hanging /health cannot
+      // block Status after /v1/models already proved the API is up.
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2500);
       try {
         const healthResponse = await fetch(`${base}/health`, {
           method: "GET",
           headers,
+          signal: controller.signal,
         });
         if (healthResponse.ok) {
           const data = (await healthResponse.json()) as {
@@ -76,6 +80,8 @@ async function checkGatewayStatus(): Promise<GatewayStatus> {
         }
       } catch {
         // /health is not part of the OpenAI protocol.
+      } finally {
+        clearTimeout(timer);
       }
 
       return status;

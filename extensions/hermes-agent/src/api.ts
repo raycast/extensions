@@ -37,7 +37,7 @@ function endpointBase(endpoint: string): string {
   return endpoint.replace(/\/+$/, "");
 }
 
-function authHeaders(token: string): HeadersInit {
+function authHeaders(token?: string): Record<string, string> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -45,6 +45,19 @@ function authHeaders(token: string): HeadersInit {
     headers.Authorization = `Bearer ${token}`;
   }
   return headers;
+}
+
+function modelIdsFromList(data: ModelsList): string[] {
+  return (data.data || [])
+    .map((model) => model.id)
+    .filter((id): id is string => typeof id === "string" && id.length > 0);
+}
+
+export function pickAdvertisedModel(ids: string[]): string {
+  if (ids.includes("hermes-agent")) {
+    return "hermes-agent";
+  }
+  return ids[0] || "hermes-agent";
 }
 
 /**
@@ -64,15 +77,7 @@ export async function resolveModelName(prefs: Preferences): Promise<string> {
     });
     if (response.ok) {
       const data = (await response.json()) as ModelsList;
-      const ids = (data.data || [])
-        .map((model) => model.id)
-        .filter((id): id is string => typeof id === "string" && id.length > 0);
-      if (ids.includes("hermes-agent")) {
-        return "hermes-agent";
-      }
-      if (ids[0]) {
-        return ids[0];
-      }
+      return pickAdvertisedModel(modelIdsFromList(data));
     }
   } catch {
     // Fall through to the Hermes default.
