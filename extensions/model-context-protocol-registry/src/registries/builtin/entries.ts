@@ -301,6 +301,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "posteverywhere",
+    title: "PostEverywhere",
+    description:
+      "Social media publishing MCP server. Schedule and post to 11 platforms (Instagram, TikTok, YouTube, LinkedIn, X, Facebook, Threads, Pinterest, Bluesky, Telegram, Discord) with media upload, AI captions, campaigns, and analytics through natural language.",
+    icon: "https://app.posteverywhere.ai/favicon.svg",
+    homepage: "https://developers.posteverywhere.ai/integrations/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@posteverywhere/mcp"],
+      env: {
+        POSTEVERYWHERE_API_KEY: "<YOUR_API_KEY_HERE>",
+      },
+    },
+  },
+  {
     name: "prisma",
     title: "Prisma",
     description:
