@@ -35,11 +35,14 @@ async function update(updates: Updates, caffeinated: boolean) {
     await tryLaunchCommand("index", { caffeinated });
   }
   if (updates.status) {
-    await tryLaunchCommand("status", { caffeinated });
+    await tryLaunchCommand("status", { caffeinated, skipScheduleMonitorHeartbeat: true });
   }
 }
 
-async function tryLaunchCommand(commandName: string, context: { caffeinated: boolean }) {
+async function tryLaunchCommand(
+  commandName: string,
+  context: { caffeinated: boolean; skipScheduleMonitorHeartbeat?: boolean },
+) {
   try {
     await launchCommand({ name: commandName, type: LaunchType.Background, context });
   } catch {
