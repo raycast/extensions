@@ -31,6 +31,7 @@ interface StreamDelta {
 interface FileGatewayConfig {
   endpoint?: string;
   token?: string;
+  remoteMode?: boolean;
 }
 
 const LOOPBACK_DEFAULT = "http://127.0.0.1:18789";
@@ -84,7 +85,8 @@ function readOpenClawFileConfig(): FileGatewayConfig {
       (typeof remote?.url === "string" &&
         httpEndpointFromRemoteUrl(remote.url)) ||
       undefined;
-    return { endpoint, token };
+    const remoteMode = gateway.mode === "remote";
+    return { endpoint, token, remoteMode };
   } catch {
     return {};
   }
@@ -115,6 +117,7 @@ export function getPreferences<T extends Preferences = Preferences>(): T &
   if (
     file.endpoint &&
     !isLoopback(file.endpoint) &&
+    file.remoteMode &&
     endpoint === LOOPBACK_DEFAULT
   ) {
     endpoint = file.endpoint;
