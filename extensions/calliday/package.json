@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "calliday",
   "title": "Calliday",
-  "description": "Automatic time tracking, at your fingertips. See what Calliday is tracking right now, browse today's report, search the documents and pages you've spent time in, grow pomodoro tomatoes, and start timers - all read from the local database on your Mac; nothing touches the network.",
+  "description": "Companion for the Calliday app - it tracks your time automatically, this extension puts it at your fingertips. See what Calliday is tracking right now, browse today's report, search the documents and pages you've spent time in, grow pomodoro tomatoes, and start timers - all read from the app's local database on your Mac; nothing touches the network. Requires the Calliday app.",
   "icon": "icon.png",
   "author": "yaanisy",
   "license": "MIT",
