@@ -1,6 +1,6 @@
 # Shell Apps Changelog
 
-## [Initial Version] - 2026-08-20
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Create named shell command shortcuts
 - Launch shortcuts in a dedicated terminal window (PowerShell, PowerShell 7, Command Prompt, Windows Terminal)
