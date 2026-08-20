@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Grid, ActionPanel, Action, Icon } from "@raycast/api";
 
+import { OpenPreferencesAction } from "@/lib/components/OpenPreferencesAction";
 import { useInstanceManager } from "@/lib/hooks/useInstanceManager";
 import { useCalendar } from "@/lib/hooks/useRadarrAPI";
 import { getMoviePoster, formatReleaseDate, getNextReleaseDate } from "@/lib/utils/formatting";
@@ -79,11 +80,7 @@ export default function UpcomingReleases() {
                     onAction={() => switchToInstance(instance)}
                   />
                 ))}
-                <Action.Open
-                  title="Open Preferences"
-                  target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/preferences`}
-                  icon={Icon.Gear}
-                />
+                <OpenPreferencesAction />
               </ActionPanel.Section>
             )}
           </ActionPanel>
@@ -105,11 +102,7 @@ export default function UpcomingReleases() {
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action.Open
-                title="Open Preferences"
-                target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/preferences`}
-                icon={Icon.Gear}
-              />
+              <OpenPreferencesAction />
             </ActionPanel>
           }
         />
