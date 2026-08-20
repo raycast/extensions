@@ -601,7 +601,7 @@ export function carryRecentsOwnedFields(next: Conversation, current: Conversatio
  * - a pin newer than the unpin        -> pinned. This covers both re-pinning from the UI
  *   and the honest case where the user saved the answer again after unpinning.
  */
-function resolvePinState(
+export function resolvePinState(
   current: Conversation,
   derived: Conversation,
 ): Pick<Conversation, "pinned_at" | "unpinned_at" | "pinned"> {

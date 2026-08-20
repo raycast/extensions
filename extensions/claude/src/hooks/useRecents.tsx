@@ -5,6 +5,7 @@ import { clearAllRecents, deleteRecent, verifyMigrationForDelete } from "../stor
 import {
   RECENTS_KEY,
   carryRecentsOwnedFields,
+  resolvePinState,
   runRecentsMigration,
   withGenerationBump,
 } from "../stores/recentsMigration";
@@ -59,13 +60,18 @@ const baseRecentsStore: CollectionStore<Conversation> = createCollectionStore<Co
    * 2. Its `chats` may hold an EARLIER, shorter answer than what storage already has, if
    *    a slower write lands after a faster one (see the `chats` rule below).
    *
-   * `pinned`/`pinned_at`/`unpinned_at` are deliberately NOT carried from `current`: Ask's
-   * Pin action writes exactly those fields and must be able to change them. It goes
-   * through the same path, so blanket-carrying pin state here would make Pin a no-op.
+   * 3. Its pin state is stale the same way, and this path CANNOT simply carry pin from
+   *    `current` the way it carries `archived`/`title`: Ask's own Pin action writes
+   *    exactly those fields through this same path, so a blanket carry would make Pin a
+   *    no-op. Neither side is authoritative — the NEWER DECISION is. `resolvePinState`
+   *    already encodes that rule for the migration (latest `pinned_at` against latest
+   *    `unpinned_at`, unpin wins ties), so it is reused here rather than restated: a
+   *    stream tick carrying a pin from before the user unpinned in Recents loses to the
+   *    newer unpin, while the Pin action's own fresh timestamp wins.
    */
   mergeOnUpdate: (incoming, current) => {
     const owned = carryRecentsOwnedFields(incoming, current);
-    return { ...owned, chats: pickLongerTranscript(incoming, current) };
+    return { ...owned, ...resolvePinState(current, incoming), chats: pickLongerTranscript(incoming, current) };
   },
 });
 

@@ -4,10 +4,12 @@ import { showToast, Toast } from "@raycast/api";
  * Resolves an in-progress toast by hiding it and presenting a fresh one for the outcome.
  *
  * This exists because of a screenshot: "Preset saved!" rendered beside a still-spinning
- * Animated icon. Mutating `.style`/`.title` on a presented toast IS supported and works —
- * the actual defect was showing an Animated toast for work that was never asynchronous, so
- * the spinner had no latency to cover and the eye caught it mid-flicker. Hiding and
- * re-presenting removes any dependence on the mutation landing at all.
+ * Animated icon. Mutating `.style`/`.title` on a presented toast is supported and does
+ * work; the defect was showing an Animated toast for work that was never asynchronous, so
+ * the spinner had no latency to cover and the eye caught it mid-flicker. Hide-and-reshow
+ * is used anyway, for a narrower reason: it makes the resolved state a single atomic
+ * presentation instead of two mutations that both have to land, which is what a
+ * half-applied mutation looked like on screen.
  *
  * Use for an operation that genuinely needs an in-progress indicator — something
  * observably slower than a LocalStorage write: a network call, a stream, a file write. For
