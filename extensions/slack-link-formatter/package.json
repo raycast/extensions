@@ -1,0 +1,34 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "slack-link-formatter",
+  "title": "Slack Link Formatter",
+  "description": "A Raycast extension that converts a clipboard URL into a rich title hyperlink for Slack",
+  "icon": "icon.png",
+  "author": "yousefhadder",
+  "categories": ["Productivity", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-slack-link",
+      "title": "Copy Slack Link from Clipboard URL",
+      "description": "Fetches the page title for the URL on your clipboard and copies an HTML anchor with the raw URL as plain-text fallback",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
