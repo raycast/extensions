@@ -17,6 +17,7 @@ export default async function BrowseChats() {
         id: chat.id,
         title: chat.title,
         type: chat.type,
+        isForum: chat.isForum,
         lastMessage: chat.lastMessage?.text,
         lastMessageDate: chat.lastMessage?.date?.toISOString(),
         isPinned: chat.isPinned,

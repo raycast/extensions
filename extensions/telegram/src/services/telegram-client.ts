@@ -55,6 +55,7 @@ export interface ChatMessage {
   senderId?: string;
   senderName?: string;
   senderPhoto?: string;
+  isOutgoing: boolean;
 }
 
 export interface Chat {
@@ -65,6 +66,21 @@ export interface Chat {
   unreadCount: number;
   photo?: string;
   isPinned: boolean;
+  isForum: boolean;
+}
+
+export interface ChatTopic {
+  id: number;
+  title: string;
+  iconColor: number;
+  iconEmojiId?: string;
+  lastMessage?: ChatMessage;
+  lastActivityDate: Date;
+  unreadCount: number;
+  unreadMentionsCount: number;
+  isPinned: boolean;
+  isClosed: boolean;
+  isHidden: boolean;
 }
 
 export interface TelegramConfig {
@@ -82,6 +98,15 @@ export interface GetChatsOptions {
 export interface GetMessagesOptions {
   config: TelegramConfig;
   chatId: string;
+  topicId?: number;
+  limit?: number;
+  searchQuery?: string;
+  skipMediaDownload?: boolean;
+}
+
+export interface GetChatTopicsOptions {
+  config: TelegramConfig;
+  chatId: string;
   limit?: number;
   searchQuery?: string;
   skipMediaDownload?: boolean;
@@ -97,6 +122,7 @@ export interface GetSavedMessagesOptions {
 export interface SendMessageOptions {
   config: TelegramConfig;
   chatId: string;
+  topicId?: number;
   message: string;
   filePaths?: string | string[];
 }
@@ -459,23 +485,34 @@ async function processChatMessage(
   let senderName: string | undefined;
   let senderPhoto: string | undefined;
 
-  // Try to get sender info from fromId
-  if (msg.fromId && msg.fromId instanceof Api.PeerUser) {
-    senderId = msg.fromId.userId.toString();
+  // Resolve users as well as chats/channels that are allowed to post as the sender.
+  if (msg.fromId) {
     try {
-      const user = await client.getEntity(msg.fromId.userId);
-      if (user instanceof Api.User) {
-        senderName = user.firstName || "";
-        if (user.lastName) senderName += ` ${user.lastName}`;
+      const sender = await client.getEntity(msg.fromId);
+      senderId = sender.id.toString();
 
-        if (user.deleted) {
+      if (sender instanceof Api.User) {
+        senderName = sender.firstName || "";
+        if (sender.lastName) senderName += ` ${sender.lastName}`;
+
+        if (sender.deleted) {
           senderName = "Deleted Account";
         } else if (!senderName.trim()) {
           senderName = "Unknown User";
         }
 
-        if (!skipMediaDownload && user.photo && "photoId" in user.photo) {
-          senderPhoto = await downloadProfilePhoto(client, user, user.id.toString(), "profile");
+        if (!skipMediaDownload && sender.photo && "photoId" in sender.photo) {
+          senderPhoto = await downloadProfilePhoto(client, sender, sender.id.toString(), "profile");
+        }
+      } else if (sender instanceof Api.Channel) {
+        senderName = sender.title;
+        if (!skipMediaDownload && sender.photo && "photoId" in sender.photo) {
+          senderPhoto = await downloadProfilePhoto(client, sender, sender.id.toString(), "channel");
+        }
+      } else if (sender instanceof Api.Chat) {
+        senderName = sender.title;
+        if (!skipMediaDownload && sender.photo && "photoId" in sender.photo) {
+          senderPhoto = await downloadProfilePhoto(client, sender, sender.id.toString(), "chat");
         }
       }
     } catch (error) {
@@ -507,6 +544,7 @@ async function processChatMessage(
     senderId,
     senderName,
     senderPhoto,
+    isOutgoing: Boolean(msg.out),
   };
 }
 
@@ -539,7 +577,7 @@ export async function getSavedMessages(options: GetSavedMessagesOptions): Promis
 }
 
 export async function getChatMessages(options: GetMessagesOptions): Promise<ChatMessage[]> {
-  const { config, chatId, limit = 50, searchQuery, skipMediaDownload = false } = options;
+  const { config, chatId, topicId, limit = 50, searchQuery, skipMediaDownload = false } = options;
 
   const client = await getClient(config);
 
@@ -548,11 +586,16 @@ export async function getChatMessages(options: GetMessagesOptions): Promise<Chat
   }
 
   const messages = await client.getMessages(chatId, {
-    limit,
-    search: searchQuery || undefined,
+    limit: topicId && searchQuery ? Math.max(limit, 100) : limit,
+    search: topicId ? undefined : searchQuery || undefined,
+    replyTo: topicId,
   });
 
-  const filteredMessages = messages.filter((msg) => msg.message || msg.media);
+  const normalizedQuery = searchQuery?.trim().toLocaleLowerCase();
+  const filteredMessages = messages
+    .filter((msg) => msg.message || msg.media)
+    .filter((msg) => !normalizedQuery || msg.message.toLocaleLowerCase().includes(normalizedQuery))
+    .slice(0, limit);
 
   // Get the chat entity to know who the chat partner is
   const entity = await client.getEntity(chatId);
@@ -564,6 +607,68 @@ export async function getChatMessages(options: GetMessagesOptions): Promise<Chat
   );
 
   return processedMessages;
+}
+
+export async function getChatTopics(options: GetChatTopicsOptions): Promise<ChatTopic[]> {
+  const { config, chatId, limit = 100, searchQuery, skipMediaDownload = false } = options;
+
+  const client = await getClient(config);
+
+  if (!client.connected) {
+    await client.connect();
+  }
+
+  const entity = await client.getEntity(chatId);
+  if (!(entity instanceof Api.Channel) || !entity.forum) {
+    return [];
+  }
+
+  const result = await client.invoke(
+    new Api.channels.GetForumTopics({
+      channel: entity,
+      q: searchQuery?.trim() || undefined,
+      offsetDate: 0,
+      offsetId: 0,
+      offsetTopic: 0,
+      limit,
+    }),
+  );
+
+  const messagesById = new Map(
+    result.messages
+      .filter((message): message is Api.Message => message instanceof Api.Message)
+      .map((message) => [message.id, message]),
+  );
+
+  const topics = await Promise.all(
+    result.topics
+      .filter((topic): topic is Api.ForumTopic => topic instanceof Api.ForumTopic)
+      .map(async (topic): Promise<ChatTopic> => {
+        const lastApiMessage = messagesById.get(topic.topMessage);
+        const lastMessage = lastApiMessage
+          ? await processChatMessage(client, lastApiMessage, skipMediaDownload, entity)
+          : undefined;
+
+        return {
+          id: topic.id,
+          title: topic.title,
+          iconColor: topic.iconColor,
+          iconEmojiId: topic.iconEmojiId?.toString(),
+          lastMessage,
+          lastActivityDate: lastMessage?.date || new Date(topic.date * 1000),
+          unreadCount: topic.unreadCount,
+          unreadMentionsCount: topic.unreadMentionsCount,
+          isPinned: Boolean(topic.pinned),
+          isClosed: Boolean(topic.closed),
+          isHidden: Boolean(topic.hidden),
+        };
+      }),
+  );
+
+  return topics.sort((a, b) => {
+    if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+    return b.lastActivityDate.getTime() - a.lastActivityDate.getTime();
+  });
 }
 
 export async function getChats(options: GetChatsOptions): Promise<Chat[]> {
@@ -630,6 +735,7 @@ export async function getChats(options: GetChatsOptions): Promise<Chat[]> {
         unreadCount: dialog.unreadCount,
         photo,
         isPinned: dialog.pinned || false,
+        isForum: entity instanceof Api.Channel && Boolean(entity.forum),
       };
     }),
   );
@@ -674,6 +780,7 @@ export async function getChatById(config: TelegramConfig, chatId: string): Promi
       type,
       unreadCount: 0,
       isPinned: false,
+      isForum: entity instanceof Api.Channel && Boolean(entity.forum),
     };
   } catch (error) {
     console.error("Failed to get chat by ID:", error);
@@ -682,7 +789,7 @@ export async function getChatById(config: TelegramConfig, chatId: string): Promi
 }
 
 export async function sendMessage(options: SendMessageOptions): Promise<void> {
-  const { config, chatId, message, filePaths } = options;
+  const { config, chatId, topicId, message, filePaths } = options;
 
   const client = await getClient(config);
 
@@ -693,7 +800,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<void> {
   const files = filePaths ? (Array.isArray(filePaths) ? filePaths : [filePaths]) : [];
 
   if (files.length === 0) {
-    await client.sendMessage(chatId, { message });
+    await client.sendMessage(chatId, { message, replyTo: topicId });
     return;
   }
 
@@ -701,6 +808,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<void> {
   await client.sendMessage(chatId, {
     message,
     file: files[0],
+    replyTo: topicId,
   });
 
   // If there are more files, send them in separate messages
@@ -709,6 +817,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<void> {
       await client.sendMessage(chatId, {
         message: "",
         file: files[i],
+        replyTo: topicId,
       });
     }
   }

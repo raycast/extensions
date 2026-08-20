@@ -86,10 +86,31 @@
     {
       "name": "browse-chats",
       "title": "Browse Telegram Chats",
-      "description": "Browse available Telegram chats (private and group). Returns a list of chats with their IDs, titles, types, and last message info. Use this when you need to find a chat to send a message to or when the user asks to see their chats.",
+      "description": "Browse available Telegram chats (private and group). Returns chat IDs, titles, types, forum status, and last message info. Use browse-topics next when isForum is true.",
       "parameters": {
         "type": "object",
         "properties": {}
+      }
+    },
+    {
+      "name": "browse-topics",
+      "title": "Browse Telegram Topics",
+      "description": "Browse or search the topics inside a Telegram forum group. Use browse-chats first to get a forum chatId, then use the returned topic ID with read-messages, analyze-messages, or send-message.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chatId": {
+            "type": "string",
+            "description": "The forum group chat ID (get this from browse-chats where isForum is true)"
+          },
+          "query": {
+            "type": "string",
+            "description": "Optional topic title search"
+          }
+        },
+        "required": [
+          "chatId"
+        ]
       }
     },
     {
@@ -102,6 +123,10 @@
           "chatId": {
             "type": "string",
             "description": "The chat ID to read messages from (get this from browse-chats tool)"
+          },
+          "topicId": {
+            "type": "number",
+            "description": "Optional forum topic ID (get this from browse-topics tool)"
           },
           "limit": {
             "type": "number",
@@ -123,6 +148,10 @@
           "chatId": {
             "type": "string",
             "description": "The chat ID to send the message to (get this from browse-chats tool)"
+          },
+          "topicId": {
+            "type": "number",
+            "description": "Optional forum topic ID (get this from browse-topics tool)"
           },
           "message": {
             "type": "string",
@@ -149,6 +178,10 @@
           "chatId": {
             "type": "string",
             "description": "The chat ID to analyze messages from (get this from browse-chats tool)"
+          },
+          "topicId": {
+            "type": "number",
+            "description": "Optional forum topic ID (get this from browse-topics tool)"
           },
           "query": {
             "type": "string",
@@ -189,5 +222,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "contributors": [
+    "alpme"
+  ]
 }

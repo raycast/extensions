@@ -8,13 +8,14 @@ import { handleTelegramError } from "../utils/errors";
 
 interface Arguments {
   chatId: string;
+  topicId?: number;
   message: string;
   useClipboardFile?: boolean;
 }
 
 export default async function SendMessage(args: Arguments) {
   try {
-    const { chatId, message, useClipboardFile } = args;
+    const { chatId, topicId, message, useClipboardFile } = args;
 
     if (!chatId) {
       throw new Error("Chat ID is required");
@@ -39,7 +40,7 @@ export default async function SendMessage(args: Arguments) {
     }
 
     const config = getConfig();
-    await sendMessage({ config, chatId, message, filePaths: filePath });
+    await sendMessage({ config, chatId, topicId, message, filePaths: filePath });
 
     return {
       message: "Message sent successfully",
@@ -55,6 +56,7 @@ export const confirmation: Tool.Confirmation<Arguments> = async (input) => {
 
   const infoItems = [
     { name: "To", value: chat?.title || input.chatId },
+    ...(input.topicId ? [{ name: "Topic ID", value: input.topicId.toString() }] : []),
     { name: "Message", value: input.message },
   ];
 

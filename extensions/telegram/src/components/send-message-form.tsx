@@ -1,20 +1,23 @@
 import { Form, ActionPanel, Action, Icon, showToast, Toast, popToRoot } from "@raycast/api";
-import { Chat } from "../services/telegram-client";
+import { Chat, ChatTopic } from "../services/telegram-client";
 import { useSendMessage } from "../hooks/use-send-message";
 
 interface SendMessageFormProps {
   chat: Chat;
+  topic?: ChatTopic;
   onSuccess?: () => void;
 }
 
-export function SendMessageForm({ chat, onSuccess }: SendMessageFormProps) {
+export function SendMessageForm({ chat, topic, onSuccess }: SendMessageFormProps) {
+  const destination = topic ? `${chat.title} · ${topic.title}` : chat.title;
   const { handleSubmit, itemProps, isSubmitting } = useSendMessage({
     chatId: chat.id,
+    topicId: topic?.id,
     onSuccess: async () => {
       await showToast({
         style: Toast.Style.Success,
         title: "Message Sent",
-        message: `Message sent to ${chat.title}`,
+        message: `Message sent to ${destination}`,
       });
 
       onSuccess?.();
@@ -25,7 +28,7 @@ export function SendMessageForm({ chat, onSuccess }: SendMessageFormProps) {
   return (
     <Form
       isLoading={isSubmitting}
-      navigationTitle={`Send Message to ${chat.title}`}
+      navigationTitle={`Send to ${destination}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.ArrowRight} title="Send Message" onSubmit={handleSubmit} />
