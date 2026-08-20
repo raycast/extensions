@@ -134,6 +134,15 @@ export const findSite = async (query: string) => {
   return found[0];
 };
 
+export const targetServer = async ({ server, site }: { server?: string; site?: string }): Promise<ServerMatch> => {
+  if (server) return findServer(server);
+  if (site) {
+    const match = await findSite(site);
+    return { server: match.server, token: match.token };
+  }
+  throw new Error("Name the server, or a site that runs on it.");
+};
+
 export const nameList = (names: string[], limit = 8) => {
   if (!names.length) return "none";
   if (names.length <= limit) return names.join(", ");
