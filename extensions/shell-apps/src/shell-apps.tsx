@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import CreateAppForm from "./create-app";
 import { appDeeplink } from "./lib/deeplink";
 import { iconByName } from "./lib/icons";
-import { deleteApp, getAppByName, getApps, upsertApp } from "./lib/store";
+import { createAppWithUniqueName, deleteApp, getAppByName, getApps } from "./lib/store";
 import { launchApp } from "./lib/terminal";
 import { TERMINAL_LABELS, type ShellApp } from "./lib/types";
 
@@ -81,22 +81,13 @@ export default function Command(props: { arguments: CommandArguments }) {
   }
 
   async function handleDuplicate(app: ShellApp) {
-    const apps = await getApps();
-    const used = new Set(apps.map((item) => item.name.toLowerCase()));
-    const base = `${app.name} Copy`;
-    let name = base;
-    let counter = 2;
-    while (used.has(name.toLowerCase())) {
-      name = `${base} ${counter}`;
-      counter += 1;
-    }
-    await upsertApp({
+    await createAppWithUniqueName(`${app.name} Copy`, (name) => ({
       ...app,
       id: randomUUID(),
       name,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-    });
+    }));
     await reload();
     await showHUD(`Duplicated ${app.name}`);
   }
