@@ -1,6 +1,6 @@
 # OpenClaw Changelog
 
-## [Remote gateway / nodes] - {PR_MERGE_DATE}
+## [Remote gateway / nodes] - 2026-08-20
 
 - Read `gateway.remote.token` / `gateway.remote.url` from `~/.openclaw/openclaw.json` when Raycast prefs still have an empty token or the localhost default
 - Token preference is no longer required so node Macs are not blocked on the first-run password field
