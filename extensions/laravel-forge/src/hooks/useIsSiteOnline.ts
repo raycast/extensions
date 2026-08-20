@@ -1,6 +1,5 @@
 import useSWR from "swr";
 import { ISite } from "../types";
-import fetch from "node-fetch";
 import { findValidUrlsFromSite } from "../lib/url";
 import { USE_FAKE_DATA } from "../config";
 
