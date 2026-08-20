@@ -58,9 +58,11 @@ const DATE_SOURCE = [
   "(?:mon(?:day)?|tue(?:sday)?|wed(?:nesday)?|thu(?:rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)",
   "in \\d+ (?:days?|weeks?)",
   "\\d{4}-\\d{1,2}-\\d{1,2}",
-  "\\d{1,2}[/-]\\d{1,2}(?:[/-]\\d{2,4})?",
+  "\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4}",
   "(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?) \\d{1,2}(?:st|nd|rd|th)?(?:,? \\d{4})?",
 ].join("|");
+
+const EXPLICIT_DATE_SOURCE = `${DATE_SOURCE}|\\d{1,2}[/-]\\d{1,2}`;
 
 const TIME_SOURCE = "(?:noon|midnight|\\d{1,2}(?::\\d{2})?\\s*(?:am|pm)?)";
 
@@ -118,7 +120,7 @@ const resolveDate = (dateText: string, timeText: string | undefined, now: Date) 
 
 const parseDate = (text: string, now: Date) => {
   const patterns = [
-    new RegExp(`(?:^|\\s)\\*\\s*(${DATE_SOURCE})(?:\\s+(?:at\\s+)?(${TIME_SOURCE}))?`, "i"),
+    new RegExp(`(?:^|\\s)\\*\\s*(${EXPLICIT_DATE_SOURCE})(?:\\s+(?:at\\s+)?(${TIME_SOURCE}))?`, "i"),
     new RegExp(`(?:^|\\s)(?:at\\s+)?(${TIME_SOURCE})\\s+(${DATE_SOURCE})(?=\\s|$|[,.;!?])`, "i"),
     new RegExp(`(?:^|\\s)(${DATE_SOURCE})(?:\\s+(?:at\\s+)?(${TIME_SOURCE}))?(?=\\s|$|[,.;!?])`, "i"),
   ];

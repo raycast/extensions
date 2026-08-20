@@ -44,9 +44,31 @@ test("treats a time without a date as today", () => {
 });
 
 test("does not treat ordinary numbers or month names as dates", () => {
-  for (const title of ["Buy 2 apples", "Plan May launch"]) {
+  for (const title of [
+    "Buy 2 apples",
+    "Plan May launch",
+    "Investigate regression 5-7 in staging",
+    "Deploy versions 5/7",
+  ]) {
     const parsed = parseQuickAdd(title, projects, now);
     assert.equal(parsed.title, title);
     assert.equal(parsed.dueDate, undefined);
   }
+});
+
+test("requires a marker for ambiguous short numeric dates", () => {
+  const parsed = parseQuickAdd("Submit report *5/7", projects, now);
+
+  assert.equal(parsed.title, "Submit report");
+  assert.equal(parsed.isAllDay, true);
+  assert.deepEqual(parsed.dueDate, new Date(2027, 4, 7));
+});
+
+test("exposes an empty title when the input contains only metadata", () => {
+  const parsed = parseQuickAdd("tomorrow ~Inbox !high", projects, now);
+
+  assert.equal(parsed.title, "");
+  assert.equal(parsed.projectId, "inbox");
+  assert.equal(parsed.priority, "5");
+  assert.deepEqual(parsed.dueDate, new Date(2026, 7, 21));
 });

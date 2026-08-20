@@ -7,11 +7,19 @@ import { parseQuickAdd } from "./utils/quickAddParser";
 
 export default async function QuickAddTask(props: LaunchProps) {
   const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
+  const closeAfterDelay = () => setTimeout(() => closeMainWindow(), 500);
   await toast.show();
   try {
     await initGlobalProjectInfo();
     const projects = getProjects();
     const parsed = parseQuickAdd(props.arguments.text ?? props.fallbackText, projects);
+    if (!parsed.title) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Task title required";
+      toast.message = "Add a title in addition to the date, list, or priority.";
+      closeAfterDelay();
+      return;
+    }
     const title = parsed.title.replace(/"/g, `\\"`);
     const description = props.arguments.description?.replace(/"/g, `\\"`);
     const defaultDate = getDefaultDate();
@@ -42,7 +50,5 @@ export default async function QuickAddTask(props: LaunchProps) {
     toast.style = Toast.Style.Failure;
     toast.title = "Something went wrong";
   }
-  setTimeout(() => {
-    closeMainWindow();
-  }, 500);
+  closeAfterDelay();
 }
