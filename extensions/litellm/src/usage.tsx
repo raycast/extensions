@@ -1,48 +1,23 @@
-import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { useRef } from "react";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { openPreferences } from "./lib/actions";
+import { DASHBOARD_SHORTCUT, SHARE_SHORTCUT } from "./lib/shortcuts";
 import {
   daysAgo,
   fetchDailyActivity,
-  fetchKeyInfoCached,
   formatTokens,
   formatUSD,
   getBaseUrl,
   getMonthlyBudget,
-  KeyInfo,
   mergeModelBreakdown,
   startOfMonth,
+  startOfWeek,
   sumResults,
   toDateString,
   UsageTotals,
 } from "./lib/litellm";
 
-const DASHBOARD_SHORTCUT: Keyboard.Shortcut = {
-  macOS: { modifiers: ["cmd"], key: "d" },
-  Windows: { modifiers: ["ctrl"], key: "d" },
-};
-const SHARE_SHORTCUT: Keyboard.Shortcut = {
-  macOS: { modifiers: ["cmd", "shift"], key: "s" },
-  Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-};
-
 const MODEL_COLORS = [Color.Purple, Color.Blue, Color.Magenta, Color.Orange, Color.Green, Color.Yellow];
-
-/** Open extension preferences, surfacing any failure as a toast instead of silently doing nothing. */
-async function openPreferences() {
-  try {
-    await openExtensionPreferences();
-  } catch (error) {
-    await showFailureToast(error, { title: "Could not open preferences" });
-  }
-}
-
-function formatResetDate(value?: string | null): string | undefined {
-  if (!value) return undefined;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return undefined;
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-}
 
 /** Grey at $0, green up to $100, orange up to $1000, red beyond. */
 function amountColor(amount: number): Color {
@@ -52,22 +27,12 @@ function amountColor(amount: number): Color {
   return Color.Red;
 }
 
-/** Green under 70% of budget, orange under 90%, red at/over 90%. */
-function budgetColor(spend: number, maxBudget?: number | null): Color {
-  if (maxBudget == null || maxBudget <= 0) return Color.PrimaryText;
-  const ratio = spend / maxBudget;
-  if (ratio >= 0.9) return Color.Red;
-  if (ratio >= 0.7) return Color.Orange;
-  return Color.Green;
-}
-
 interface UsageData {
   totalsToday: UsageTotals;
   totals7d: UsageTotals;
   totals30d: UsageTotals;
   totalsMonth: UsageTotals;
   models: Array<{ model: string } & UsageTotals>;
-  keyInfo: KeyInfo | null;
 }
 
 function usageLine(label: string, totals: UsageTotals): string {
@@ -119,9 +84,6 @@ function ShareUsageDetail({ text }: { text: string }) {
 }
 
 export default function Command() {
-  // Refresh forces a key-info refetch; normal opens use the 1h TTL cache.
-  const forceKeyInfo = useRef(false);
-
   const { data, isLoading, error, revalidate } = useCachedPromise(async () => {
     const today = new Date();
     const monthStart = startOfMonth();
@@ -130,23 +92,22 @@ export default function Command() {
     const endDate = toDateString(today);
 
     const activity = await fetchDailyActivity(startDate, endDate);
-    // /key/info is best-effort and rarely changes — cached for 1h unless refreshed.
-    const keyInfo: KeyInfo | null = await fetchKeyInfoCached(forceKeyInfo.current);
-    forceKeyInfo.current = false;
 
     const results = activity.results ?? [];
     const todayStr = toDateString(today);
+    const weekStr = toDateString(startOfWeek());
     const sevenDaysAgo = toDateString(daysAgo(6));
     const thirtyDaysAgo = toDateString(daysAgo(29));
     const monthStr = toDateString(monthStart);
 
     const totalsToday = sumResults(results.filter((r) => r.date === todayStr));
+    const totalsWeek = sumResults(results.filter((r) => r.date >= weekStr));
     const totals7d = sumResults(results.filter((r) => r.date >= sevenDaysAgo));
     const totals30d = sumResults(results.filter((r) => r.date >= thirtyDaysAgo));
     const totalsMonth = sumResults(results.filter((r) => r.date >= monthStr));
     const models = mergeModelBreakdown(results.filter((r) => r.date >= thirtyDaysAgo));
 
-    return { totalsToday, totals7d, totals30d, totalsMonth, models, keyInfo };
+    return { totalsToday, totalsWeek, totals7d, totals30d, totalsMonth, models };
   });
 
   const monthlyBudget = getMonthlyBudget();
@@ -170,10 +131,7 @@ export default function Command() {
         title="Refresh"
         icon={Icon.ArrowClockwise}
         shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={() => {
-          forceKeyInfo.current = true;
-          revalidate();
-        }}
+        onAction={() => revalidate()}
       />
       <Action title="Open Preferences" icon={Icon.Gear} onAction={openPreferences} />
     </ActionPanel>
@@ -213,8 +171,11 @@ export default function Command() {
     );
   };
 
-  const keyInfo = data?.keyInfo;
-  const resetDate = formatResetDate(keyInfo?.budget_reset_at);
+  // Models are sorted by spend desc. If more than 10 models have spend, cap the
+  // list at those with spend to keep it short; otherwise show all (incl. zero-spend).
+  const allModels = data?.models ?? [];
+  const spendModels = allModels.filter((m) => m.spend > 0);
+  const visibleModels = spendModels.length > 10 ? spendModels : allModels;
 
   return (
     <List isLoading={isLoading}>
@@ -222,11 +183,12 @@ export default function Command() {
         {data && totalRow("Today", data.totalsToday)}
         {data && totalRow("Last 7 Days", data.totals7d)}
         {data && totalRow("Last 30 Days", data.totals30d)}
+        {data && totalRow("This Week", data.totalsWeek)}
         {data && totalRow("This Month", data.totalsMonth, monthlyBudget)}
       </List.Section>
 
       <List.Section title="By Model (30 days)">
-        {(data?.models ?? []).map((m, i) => (
+        {visibleModels.map((m, i) => (
           <List.Item
             key={m.model}
             title={m.model}
@@ -237,43 +199,6 @@ export default function Command() {
           />
         ))}
       </List.Section>
-
-      {keyInfo && (
-        <List.Section title="Key">
-          {keyInfo.key_alias && (
-            <List.Item
-              title="Key"
-              subtitle={keyInfo.key_alias}
-              icon={{ source: Icon.Key, tintColor: Color.SecondaryText }}
-              actions={actions(keyInfo.key_alias)}
-            />
-          )}
-          <List.Item
-            title="Spend"
-            icon={{ source: Icon.BankNote, tintColor: budgetColor(keyInfo.spend ?? 0, keyInfo.max_budget) }}
-            accessories={[
-              {
-                tag: {
-                  value:
-                    keyInfo.max_budget != null
-                      ? `${formatUSD(keyInfo.spend ?? 0)} / ${formatUSD(keyInfo.max_budget)}`
-                      : formatUSD(keyInfo.spend ?? 0),
-                  color: budgetColor(keyInfo.spend ?? 0, keyInfo.max_budget),
-                },
-              },
-            ]}
-            actions={actions(formatUSD(keyInfo.spend ?? 0))}
-          />
-          {resetDate && (
-            <List.Item
-              title="Budget Resets"
-              subtitle={resetDate}
-              icon={{ source: Icon.Calendar, tintColor: Color.Blue }}
-              actions={actions(resetDate)}
-            />
-          )}
-        </List.Section>
-      )}
     </List>
   );
 }

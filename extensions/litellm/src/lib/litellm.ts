@@ -1,4 +1,4 @@
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 
 export interface DailyMetrics {
   spend: number;
@@ -54,13 +54,6 @@ export interface DailyActivityMetadata {
 export interface DailyActivityResponse {
   results: DailyActivityResult[];
   metadata: DailyActivityMetadata;
-}
-
-export interface KeyInfo {
-  key_alias?: string | null;
-  spend?: number;
-  max_budget?: number | null;
-  budget_reset_at?: string | null;
 }
 
 /** Aggregated numbers for an arbitrary window, plus a merged per-model breakdown. */
@@ -142,6 +135,13 @@ export function startOfMonth(): Date {
   return new Date(now.getFullYear(), now.getMonth(), 1);
 }
 
+/** Monday of the current calendar week at local midnight. */
+export function startOfWeek(): Date {
+  const now = new Date();
+  const diff = (now.getDay() + 6) % 7; // days since Monday (Sun=0 → 6)
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() - diff);
+}
+
 /** Parse the optional monthly budget preference. Empty or invalid → undefined (no % shown). */
 export function getMonthlyBudget(): number | undefined {
   const { monthlyBudget } = getPreferenceValues<Preferences>();
@@ -184,57 +184,6 @@ export async function fetchDailyActivity(startDate: string, endDate: string): Pr
       total_api_requests: 0,
     },
   };
-}
-
-export async function fetchKeyInfo(): Promise<KeyInfo> {
-  const data = await request<{ info?: KeyInfo } & KeyInfo>("/key/info");
-  // Some proxy versions nest under `info`, others return the fields at the top level.
-  return data.info ?? data;
-}
-
-const keyInfoCache = new Cache({ namespace: "litellm-key-info" });
-const KEY_INFO_TTL_MS = 60 * 60 * 1000; // 1 hour
-
-/**
- * Scope the cache entry to the active credentials so switching proxy or virtual
- * key never surfaces another key's alias/spend/budget. A small FNV-1a hash keeps
- * the raw virtual key out of the on-disk cache; collision-resistance isn't needed
- * here since this only namespaces a best-effort cache.
- */
-function keyInfoCacheKey(): string {
-  const { baseUrl, apiKey } = getConfig();
-  const input = `${baseUrl}\n${apiKey}`;
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < input.length; i++) {
-    hash ^= input.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0).toString(16);
-}
-
-/**
- * Key info rarely changes, so cache it for an hour (stale-while-revalidate style).
- * Pass `force` (used by the Refresh action) to bypass the TTL and refetch.
- */
-export async function fetchKeyInfoCached(force = false): Promise<KeyInfo | null> {
-  const cacheKey = keyInfoCacheKey();
-  const cached = keyInfoCache.get(cacheKey);
-  const parsed = cached ? (JSON.parse(cached) as { data: KeyInfo; fetchedAt: number }) : undefined;
-
-  if (!force && parsed && Date.now() - parsed.fetchedAt < KEY_INFO_TTL_MS) {
-    return parsed.data;
-  }
-
-  try {
-    const data = await fetchKeyInfo();
-    keyInfoCache.set(cacheKey, JSON.stringify({ data, fetchedAt: Date.now() }));
-    return data;
-  } catch (error) {
-    // Best-effort: /key/info isn't exposed on every proxy/permission set.
-    // Log for debugging, then fall back to whatever we last had rather than dropping the section.
-    console.error("fetchKeyInfo failed, using cached value if available:", error);
-    return parsed?.data ?? null;
-  }
 }
 
 /** Sum the given result rows and normalise total tokens (which some versions omit). */

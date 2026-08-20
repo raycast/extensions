@@ -29,17 +29,18 @@ A LiteLLM **virtual key** (starts with `sk-`). Get one by either:
 - Asking an admin to mint one for you (`POST /key/generate`).
 
 A regular, non-admin virtual key is enough — the extension only reads your own usage via the
-`/user/daily/activity` and `/key/info` routes.
+`/user/daily/activity` route.
 
 > Your key is stored securely in Raycast preferences (as a password field) and is only sent to
 > the Base URL you configure.
 
 ### Optional: Monthly Budget
 
-Set **Monthly Budget** (USD) to see how much of your budget you've used this month. The menu
-bar title then shows today's spend plus the month-to-date percentage (e.g. `🚅 $2.10 · 45%`),
-and both the menu bar dropdown and the Usage command show `spent / budget · %`. Leave it empty
-to hide the percentage — no budget is set by default.
+Set **Monthly Budget** (USD) to see how much of your budget you've used this month. This is a
+value you enter yourself in preferences — the extension does not read any budget from your key.
+The menu bar title then shows today's spend plus the month-to-date percentage (e.g.
+`🚅 $2.10 · 45%`), and both the menu bar dropdown and the Usage command show `spent / budget · %`.
+Leave it empty to hide the percentage — no budget is set by default.
 
 ## Setup
 
@@ -54,5 +55,4 @@ preferences in Raycast.
 
 - **"Unauthorized"** — double-check the Virtual Key and that the Base URL matches your proxy.
 - **"Could not reach …"** — verify the Base URL is reachable from your machine.
-- **No budget section** — your proxy version or key permissions may not expose `/key/info`;
-  the rest of the usage data still works.
+- **No budget percentage** — set the optional **Monthly Budget** preference to show month-to-date %.

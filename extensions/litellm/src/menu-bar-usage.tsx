@@ -1,60 +1,17 @@
-import {
-  Color,
-  Icon,
-  Keyboard,
-  MenuBarExtra,
-  launchCommand,
-  LaunchType,
-  open,
-  openExtensionPreferences,
-} from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { Color, Icon, Keyboard, MenuBarExtra } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { openDashboard, openPreferences, openUsageCommand } from "./lib/actions";
+import { DASHBOARD_SHORTCUT, OPEN_USAGE_SHORTCUT } from "./lib/shortcuts";
 import {
   fetchDailyActivity,
   formatTokens,
   formatUSD,
-  getBaseUrl,
   getMonthlyBudget,
   mergeModelBreakdown,
   startOfMonth,
   sumResults,
   toDateString,
 } from "./lib/litellm";
-
-const OPEN_USAGE_SHORTCUT: Keyboard.Shortcut = {
-  macOS: { modifiers: ["cmd"], key: "u" },
-  Windows: { modifiers: ["ctrl"], key: "u" },
-};
-const DASHBOARD_SHORTCUT: Keyboard.Shortcut = {
-  macOS: { modifiers: ["cmd"], key: "d" },
-  Windows: { modifiers: ["ctrl"], key: "d" },
-};
-
-// Menu-bar action handlers can throw (e.g. a disabled command, a failed open).
-// Surface the failure as a toast instead of letting the click silently do nothing.
-async function openUsageCommand() {
-  try {
-    await launchCommand({ name: "usage", type: LaunchType.UserInitiated });
-  } catch (error) {
-    await showFailureToast(error, { title: "Could not open Usage" });
-  }
-}
-
-async function openDashboard() {
-  try {
-    await open(`${getBaseUrl()}/ui`);
-  } catch (error) {
-    await showFailureToast(error, { title: "Could not open dashboard" });
-  }
-}
-
-async function openPreferences() {
-  try {
-    await openExtensionPreferences();
-  } catch (error) {
-    await showFailureToast(error, { title: "Could not open preferences" });
-  }
-}
 
 export default function Command() {
   const { data, isLoading, error, revalidate } = useCachedPromise(async () => {
@@ -76,7 +33,7 @@ export default function Command() {
   const todayStr = toDateString(new Date());
   const todayTotals = sumResults(results.filter((r) => r.date === todayStr));
   const monthTotals = sumResults(results);
-  const models = mergeModelBreakdown(results);
+  const models = mergeModelBreakdown(results).filter((m) => m.spend > 0 || m.apiRequests > 0);
 
   const monthlyBudget = getMonthlyBudget();
   const monthPct = monthlyBudget != null ? Math.round((monthTotals.spend / monthlyBudget) * 100) : undefined;
@@ -124,7 +81,7 @@ export default function Command() {
               key={m.model}
               title={m.model}
               icon={{ source: Icon.Dot, tintColor: Color.Purple }}
-              subtitle={`${formatUSD(m.spend)} · ${formatTokens(m.totalTokens)}`}
+              subtitle={`${formatTokens(m.totalTokens)} · ${m.apiRequests} reqs · ${formatUSD(m.spend)}`}
             />
           ))}
         </MenuBarExtra.Section>
