@@ -1,6 +1,6 @@
 # Changelog
 
-## [Updated] - {PR_MERGE_DATE}
+## [Updated] - 2026-08-20
 
 - Add Windows platform support
 - Harden Start Server readiness check: bounded retry instead of one-shot probe
