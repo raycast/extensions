@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screens",
+  "title": "Screens",
+  "description": "Open your saved Screens 5 connections and connect to unlisted computers over VNC or SSH",
+  "icon": "screens-icon.png",
+  "author": "bendrucker",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "search-screens",
+      "title": "Search Screens",
+      "subtitle": "Screens",
+      "description": "Search your saved screens and connect to one",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "archivePath",
+          "type": "file",
+          "title": "Screens Archive",
+          "description": "In Screens, go to Settings → Archives → Export…, save the .screens file, then select it here.",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "quick-connect",
+      "title": "Quick Connect",
+      "subtitle": "Screens",
+      "description": "Connect to a computer that isn't in your Screens library",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "eslint": "^10.6.0",
+    "typescript": "^6.0.3"
+  },
+  "version": "1.0.0",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
