@@ -15,7 +15,7 @@ newest first, each row labelled a "Result" (`List.Section title="Results"`,
 `:127` — the section title, not this entry's line number). `src/recents.tsx` renders
 CONVERSATIONS. Both read the exact same underlying data: `ask.tsx` writes every
 conversation's `chats` array to `recents_v1` on every change (the persistence effect
-at `src/ask.tsx:134`). Same storage, two different mental models layered on top.
+at `src/ask.tsx:141`). Same storage, two different mental models layered on top.
 
 **Consequence:** a follow-up reads as a new search result rather than a turn in a
 thread — asking a question about "Which one…" pushes it above "What's the diffe…"

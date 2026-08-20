@@ -6,11 +6,11 @@ Most extensions in this monorepo carry no such file, and this one does so delibe
 
 ## Lineage
 
-This extension is a **fork of the ChatGPT Raycast extension**, not an independent build. That origin explains most of what looks odd here.
+This extension is a **fork of the ChatGPT Raycast extension**, not an independent build. That origin explains most of what looks odd here. The comparisons below were true of upstream at the time of writing and are not re-checked by anything — verify before relying on one.
 
 The upstream extension still declares the five commands this one inherited, under identical names *and* identical titles — `ask` / Ask Question, `saved` / Saved Answers, `history` / History, `conversation` / Conversations, `model` / Models — alongside five it has added since (summarize, two image commands, and two AI-command commands) that were never forked. The Conversations-vs-History split, the storage shape, and the hook structure were all inherited wholesale and never designed for Claude.
 
-For roughly two years the fork was maintained as a model-list updater. Of 25 changelog bullets at the fork point, 11 concern the model list, and exactly three touch how those commands behave — all of them fixes: *"History now saves as expected"*, *"Removed duplicate history entries that were being created when streaming was enabled"*, and *"Restarting a conversation will retain the currently selected model"*.
+For roughly two years the fork was maintained as a model-list updater. Of 25 changelog bullets at the fork point, 11 concern the model list, and the handful that touch how the commands behave are all small fixes — *"History now saves as expected"*, *"Removed duplicate history entries that were being created when streaming was enabled"*, *"Restarting a conversation will retain the currently selected model"*, a de-duplicated Copy Question action, and a stream-cleanup fix. No bullet reconsiders the command set.
 
 So the divergence runs both ways. Upstream grew; this fork did not track it. Nothing here is a port of upstream's later work, and upstream is not a reference for how this extension should behave.
 
@@ -34,7 +34,7 @@ Two structural problems drove the rework:
 
 Changing a command's `title` while holding its `name` fixed is the intended pattern for any future rename: the `name` is the manifest identifier a user's hotkey or Quicklink is bound to, and the `title` is only copy. (The compatibility benefit is the *intent* behind keeping `name: model` — it is not something this repo can verify on its own.)
 
-Whether `history` and `saved` should survive as thin commands opening Recents pre-filtered was raised in Store review and **settled: they do not.** Both are removed outright, and that removal leads the changelog in user-facing language. The cost is real and was accepted knowingly — a hotkey or Quicklink bound to either stops working with no in-product signal. `saved` in particular had no filter to open Recents *with*: the Status dropdown is Active/Archived/All, and pinning is not a status.
+`history` and `saved` are removed outright rather than kept as thin commands opening Recents pre-filtered. The cost was accepted knowingly: a hotkey or Quicklink bound to either stops working with no in-product signal, which is why that removal leads the changelog. `saved` in particular had no filter to open Recents *with* — the Status dropdown is Active/Archived/All, and pinning is not a status.
 
 ### Naming policy
 
@@ -61,7 +61,8 @@ See `CONCEPTS.md` for the vocabulary these docs assume (Conversation, Turn, Rece
 | `recents_legacy_retired_v1` | marker recording that the migration wrote and verified a payload |
 | `models` | saved Presets |
 | `presets_seeded_v1` | guard so default Presets seed exactly once |
-| `available_models_cache_v2` | last successful `/v1/models` response |
+| `available_models_cache_v2` | last successful `/v1/models` response; the unversioned predecessor is deleted on the next successful write |
+| `recents_status_filter` | the Recents Status dropdown's last value |
 
 Legacy keys — `conversations`, `history`, `savedChats` — are migrated into `recents_v1` and then deleted. Names live in `src/stores/recentsKeys.ts`; the migration is `src/stores/recentsMigration.ts`; the deletion is `src/stores/recentsRetirement.ts`.
 
@@ -115,6 +116,6 @@ All three gates, before any Store submission — `ray build` and `ray lint` both
 npx tsc --noEmit && npx ray build -e dist && npx ray lint
 ```
 
-**This checkout has no committed tests and no test script**, so assertions written while developing are not a reviewable gate and do not run in CI. (Some extensions in this monorepo do ship test suites; this one does not.) That has a consequence worth naming: a check that exists only in a scratch file is a check nobody reviews. Be deliberate about what such a check asserts against — assert against the dependency whose behavior you are relying on, never against a constant this repo also owns, or the check passes by agreeing with itself.
+**This extension ships no tests and no test script**, so anything you write to check your work is a scratch file nobody reviews and CI never runs. Two consequences: the three gates above are the only automated signal, and a check that asserts against a constant this repo also owns proves nothing — assert against the dependency whose behavior you are actually relying on.
 
 `docs/DESIGN-NOTES.md` covers design decisions in more depth than this file.

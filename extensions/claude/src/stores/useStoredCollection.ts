@@ -26,14 +26,14 @@ export type StoredCollectionHook<T extends { id: string }> = {
  *   in storage yet must be preserved.
  * - Behavior 6: because `add`/`update` read from storage, and `persistFilter` has
  *   already filtered storage, a row `persistFilter` excludes is ABSENT from the list the
- *   NEXT `add`/`update` call returns (verified in Task 1's store). Without reconciling,
+ *   NEXT `add`/`update` call returns (verified in the collection store). Without reconciling,
  *   an in-progress conversation with zero chats — e.g. the one Ask just added on mount —
  *   would vanish from state the instant any other mutation runs, even though it is still
  *   the row the user is looking at. The data survives either way (the upsert re-adds it
  *   once it has chats); this reconciliation is what keeps the UI honest in the meantime.
  *
  * `update` is additionally safe here because it is an upsert against the FULL
- * pre-`persistFilter` list (Task 1's contract), so its own returned list always
+ * pre-`persistFilter` list (the collection store's contract), so its own returned list always
  * contains the row it just touched — this never resurrects something update removed,
  * because update cannot remove anything.
  *
@@ -77,7 +77,7 @@ export function replaceState<T extends { id: string }>(authoritative: T[]): T[] 
  * from inside a React `setData` functional updater, where `previous` is always the
  * actual latest state (not a value closed over before an await) — using an async
  * function's own stale closure of `previous` would reintroduce a lost-update bug at the
- * React layer, the same class of bug Task 1's store exists to close at the storage layer.
+ * React layer, the same class of bug the collection store exists to close at the storage layer.
  *
  * This is the seam that matters: the round-1 defect was never a bug in `reconcileById`
  * or `replaceState` individually — both were correct in isolation — it was in which one
@@ -122,7 +122,7 @@ export const mutations = {
 };
 
 /**
- * Shared React hook wrapping Task 1's `createCollectionStore`. Every mutation is a
+ * Shared React hook wrapping `createCollectionStore`. Every mutation is a
  * read-modify-write against `LocalStorage` (never a functional state updater over a
  * React snapshot) — `data` follows storage, storage is never derived from `data`.
  *

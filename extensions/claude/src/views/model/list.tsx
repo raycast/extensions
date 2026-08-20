@@ -14,9 +14,9 @@ export const ModelListView = ({
   selectedModel: string | null;
   actionPanel: (model: Model) => ReactNode;
 }) =>
-  // Gate the section on non-empty, matching `src/conversation.tsx:140`'s pattern for the
-  // Pinned header — an empty `List.Section` still renders its header/subtitle, which
-  // showed a "Pinned — 0" (or "Presets — 0") header with nothing under it.
+  // Gate the section on non-empty, matching the Pinned-header pattern in `src/recents.tsx`:
+  // an empty `List.Section` still renders its header/subtitle, which showed a "Pinned — 0"
+  // (or "Presets — 0") header with nothing under it.
   models.length === 0 ? null : (
     <List.Section title={title} subtitle={models.length.toLocaleString()}>
       {models.map((model) => (

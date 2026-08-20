@@ -23,7 +23,7 @@ export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: 
             setData(selectedText.trim());
             await showToast({
               style: Toast.Style.Success,
-              title: "Selected text loaded!",
+              title: "Selected text loaded",
             });
           }
         } catch (error) {

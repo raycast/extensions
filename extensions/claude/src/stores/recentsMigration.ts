@@ -14,7 +14,8 @@ export { CONVERSATIONS_KEY, HISTORY_KEY, RECENTS_GENERATION_KEY, RECENTS_KEY, SA
 /**
  * Monotonic write counter for `recents_v1`, bumped by EVERY writer of that key
  * (`runRecentsMigration` here, and `deleteRecent`/`clearAllRecents` in
- * `recentsDelete.ts`). This is the generation check that closes CRITICAL B and HIGH D.
+ * `recentsDelete.ts`). This is the generation check that closes the two write-ordering
+ * defects described below.
  *
  * THE BUG IT CLOSES. Per-key read-modify-write was mistaken for a multi-key transaction:
  *
@@ -26,7 +27,7 @@ export { CONVERSATIONS_KEY, HISTORY_KEY, RECENTS_GENERATION_KEY, RECENTS_KEY, SA
  * the stale write itself landed — which it did. Verification of one's own write says
  * nothing about whether a concurrent writer's change was clobbered in the process.
  *
- * The same shape erases a Recents action (HIGH D): an archive/rename/unpin landing
+ * The same shape erases a Recents action: an archive/rename/unpin landing
  * between a migration's read and its whole-key write is overwritten by the stale payload.
  *
  * THE FIX: every writer reads this counter alongside `recents_v1`, and before committing
@@ -75,7 +76,7 @@ export async function readGeneration(): Promise<number> {
  * Their obligation is the mirror of the migration's: not to detect a conflict, but to
  * ANNOUNCE their write so a migration holding an older snapshot can detect it. A writer
  * that skips this bump is invisible to the conflict check and its change can be silently
- * overwritten (HIGH D) or its deletion undone (CRITICAL B).
+ * overwritten or its deletion undone.
  */
 export async function bumpRecentsGeneration(): Promise<void> {
   const current = await readGeneration();
@@ -85,7 +86,7 @@ export async function bumpRecentsGeneration(): Promise<void> {
 /**
  * Runs `write` with the generation bumped BEFORE it, not after.
  *
- * THE BUG THIS CLOSES (the reopened HIGH D). `recentsStore`'s mutations used to write
+ * THE BUG THIS CLOSES . `recentsStore`'s mutations used to write
  * `recents_v1` and bump the counter afterwards:
  *
  *   Recents action writes recents_v1 (archives X)
@@ -184,7 +185,7 @@ type LegacyKeyRead<T> = {
  * Reads a legacy collection key directly, with no `transformOnRead`/`persistFilter`
  * side effects — the migration must see the RAW stored shape (including rows a live
  * store's `persistFilter` would normally hide, e.g. a `chats: []` conversation
- * predating that filter — Test 7 in the brief). Tolerates a missing or corrupt key by
+ * predating that filter). Tolerates a missing or corrupt key by
  * contributing no rows; a migration must never throw on a legacy key another command
  * left in a bad state.
  *
@@ -295,7 +296,7 @@ const recentsRescueStore = createCollectionStore<Conversation>(RECENTS_KEY);
  * The side-key naming matches `collection.ts`'s `pickCorruptSideKey` exactly — including
  * the `_<n>` collision suffix — because `recentsDelete.ts`'s `clearAllRecents` sweeps
  * side-keys by the `${key}__corrupt_` prefix, and a rescue that used a different shape
- * would leave chat text on disk after a "delete everywhere" (THE RULING's privacy point).
+ * would leave chat text on disk after a "delete everywhere" (the delete rule's privacy point).
  * That sweep covers all four keys (`recents_v1` plus the three legacy ones), so a legacy
  * key's rescue is swept by Delete All exactly like a `recents_v1` rescue is.
  *
@@ -388,7 +389,7 @@ async function rescueUnreadableLegacyKeys(
  * together with a late write, produces the same result either way (see
  * `runRecentsMigration` below for exactly how re-runs stay a no-op).
  *
- * The three-way join, per the brief:
+ * The three-way join:
  * 1. An answer already present in some conversation's `chats` does NOT get a new row
  *    (matched on `Chat.id`).
  * 2. When such an answer was saved, its `saved_at` transfers to the containing
@@ -404,7 +405,7 @@ async function rescueUnreadableLegacyKeys(
  * 4. A synthesized one-turn conversation's `created_at`/`updated_at` come from the
  *    chat's own `created_at`.
  *
- * Conversations with `chats: []` (Test 7 — legacy data predating the `persistFilter`
+ * Conversations with `chats: []` (legacy data predating the `persistFilter`
  * rule that now keeps these out of storage) pass through unchanged: they are neither
  * a data-loss risk nor a join target (there is nothing in `chats` to match against),
  * so they are carried into `recents_v1` as zero-turn conversations rather than dropped.
@@ -448,7 +449,7 @@ export function mergeIntoRecents(legacy: {
   }
 
   // Rule 1 + 2 applied to the threaded conversations themselves: carry every legacy
-  // conversation through as-is (including `chats: []` rows — Test 7), applying the
+  // conversation through as-is (including `chats: []` rows), applying the
   // pinned_at transfer where a saved answer inside it calls for one. `pinned_at` is
   // additive-only relative to whatever pinned_at a conversation might already carry
   // (defensive: current storage never sets it, but a prior migration run — or a future
@@ -684,8 +685,8 @@ export type RecentsMigrationResult = {
  * 4. Commit to `recents_v1` ONLY IF the generation counter has not moved since step 1
  *    (`commitRecentsIfUnchanged`). If it moved, another writer (a delete, or a Recents
  *    action) committed while this run was deriving — the payload in hand would resurrect
- *    what they removed (CRITICAL B) or erase what they wrote (HIGH D), so it is discarded
- *    and the whole derivation is retried against fresh state.
+ *    what they removed or erase what they wrote, so it is discarded and the whole
+ *    derivation is retried against fresh state.
  * 5. Verify by re-reading `recents_v1` and comparing to what was written — a migration
  *    must be able to tell whether its own write actually landed. Throws if not, so a
  *    caller never treats an unwritten migration as complete.
@@ -747,7 +748,7 @@ export async function runRecentsMigration(): Promise<RecentsMigrationResult> {
 
     // Verify by re-read, per the commit protocol: not trusting that `setItem` resolving
     // without throwing means the value is durably there.
-    const verifiedPayload = verifyPayloadRoundTrip(payload, await LocalStorage.getItem<string>(RECENTS_KEY));
+    const verifiedPayload = await verifyPayloadRoundTrip(payload);
 
     // THE PANIC CASE, before any delete. Any legacy key whose bytes the migration could
     // not fully understand is copied to a `<key>__corrupt_<ISO>` side-key and that copy is

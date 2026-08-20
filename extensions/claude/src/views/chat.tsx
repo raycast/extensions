@@ -23,6 +23,7 @@ export const ChatView = ({
   onModelChange,
   resolveModel,
   onPinAnswer,
+  isPinned,
   onClearQuestion,
 }: ChatViewProps) => {
   // Copy before sorting: `data` is the useChat state array, which Ask persists as
@@ -61,13 +62,13 @@ export const ChatView = ({
             {/* Asking a follow-up is the primary action on a selected answer row: it's
                 first in the panel, so ⏎ opens Full Text Input (⌘T stays bound to the same
                 action, unchanged, for anyone who already knows that shortcut). Copy Answer
-                moves to ⌘⏎ instead of ⏎ — still one keystroke away, no longer the no-op-
-                adjacent default on a view whose whole point is continuing the conversation. */}
+                keeps its own `Keyboard.Shortcut.Common.Copy` binding instead of being the ⏎
+                default on a view whose whole point is continuing the conversation. */}
             {formInputAction}
             <CopyActionSection answer={selectedChat.answer} question={selectedChat.question} />
-            {selectedChat.answer ? <PinActionSection onPinAnswerAction={onPinAnswer} /> : null}
+            {selectedChat.answer ? <PinActionSection onPinAnswerAction={onPinAnswer} isPinned={isPinned} /> : null}
             {selectedChat.answer ? (
-              // Append, not replace — see THE RULING in `src/actions/regenerate.tsx`.
+              // Append, not replace — see the append rule in `src/actions/regenerate.tsx`.
               // Resolves the model directly from the submenu item the user picked (via
               // `buildRawModel`/the preset object itself inside `RegenerateActionSection`),
               // never from this closure's captured `model` prop — same principle as THE
@@ -79,7 +80,6 @@ export const ChatView = ({
                 onRegenerate={(regenerateModel) => use.chats.ask(selectedChat.question, regenerateModel)}
               />
             ) : null}
-            <ActionPanel.Section title="Output"></ActionPanel.Section>
           </>
         ) : null}
         {/* Rendered here only when the branch above didn't already render it (the empty-

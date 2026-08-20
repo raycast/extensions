@@ -4,7 +4,7 @@ import { CONVERSATIONS_KEY, HISTORY_KEY, RECENTS_KEY, SAVED_CHATS_KEY } from "./
 import { bumpRecentsGeneration, runRecentsMigration } from "./recentsMigration";
 
 /**
- * THE RULING (decided by the user):
+ * THE DELETE RULE:
  *
  * Delete deletes. Everywhere. No tombstones.
  *
@@ -55,13 +55,13 @@ declare const verifiedBrand: unique symbol;
 export type MigrationVerifiedToken = { readonly [verifiedBrand]: true };
 
 /**
- * Runs the real migration commit protocol (`runRecentsMigration`, Task 5) and mints a
+ * Runs the real migration commit protocol (`runRecentsMigration`) and mints a
  * `MigrationVerifiedToken` only if it resolves without throwing. `runRecentsMigration`
- * itself throws if its write doesn't verify by re-read (Task 5's commit protocol), so a
+ * itself throws if its write doesn't verify by re-read (the migration's commit protocol), so a
  * failed or unverified migration propagates as a rejected promise here and no token is
  * ever produced — a delete call site that doesn't await this successfully has no token
  * to pass, and `deleteRecent`/`clearAllRecents` are typed to require one. This is the
- * "structural, not a comment" enforcement the brief requires: there is no code path that
+ * "structural, not a comment" enforcement this needs: there is no code path that
  * reaches a delete without this function's promise having resolved first.
  */
 export async function verifyMigrationForDelete(): Promise<MigrationVerifiedToken> {
@@ -105,7 +105,7 @@ async function removeChatsFromLegacyKeys(chatIds: ReadonlySet<string>): Promise<
  * first — is what retires them. Unconditionally writing a filtered array back would
  * therefore RECREATE a key that retirement had just deleted, on every single delete:
  * `recents_v1` would gain a permanent empty-array shadow of the very second source of
- * truth this fix-wave removed, and `isRetirementComplete` would keep seeing legacy keys
+ * truth this rework removed, and `isRetirementComplete` would keep seeing legacy keys
  * present. Writing nothing when there is nothing there keeps retirement durable.
  */
 async function pruneLegacyKey<T extends { id: string }>(key: string, chatIds: ReadonlySet<string>): Promise<void> {
@@ -172,7 +172,7 @@ export async function deleteRecent(token: MigrationVerifiedToken, conversationId
   const nextRecents = recents.filter((c) => c.id !== conversationId);
   const nextLegacyConversations = legacyConversations.filter((c) => c.id !== conversationId);
 
-  // Bump the generation counter as part of writing `recents_v1` (CRITICAL B). A migration
+  // Bump the generation counter as part of writing `recents_v1`. A migration
   // that read `recents_v1` BEFORE this delete will re-read the counter before committing,
   // see it has moved, and discard its now-stale payload instead of writing the deleted
   // conversation back. Without this bump the delete is invisible to that check and the
@@ -204,7 +204,7 @@ async function writeIfPresent<T>(key: string, rows: T[]): Promise<void> {
  * copies a key's raw, unparseable value under `<key>__corrupt_<ISO-timestamp>[_<n>]`
  * before repairing the key itself — by design, so a corruption event never destroys data.
  * For `recents_v1`/`conversations`/`history`/`savedChats`, that raw value can be a chat's
- * question/answer text. THE RULING's rationale is privacy: a delete that leaves the
+ * question/answer text. the delete rule's rationale is privacy: a delete that leaves the
  * content readable elsewhere on disk is a broken promise. Clear-all is the point where
  * that applies to these side-keys too — leaving them behind after "delete everywhere"
  * would mean rescued chat text outlives the very delete that was supposed to remove it.
@@ -220,7 +220,7 @@ function isCorruptSideKeyFor(key: string, candidate: string): boolean {
  * corrupt-value rescue side-keys those four keys may have left behind (see
  * `isCorruptSideKeyFor`'s docstring for why). Same token requirement and same reasoning
  * as `deleteRecent` — see its docstring and the module docstring above for why this
- * supersedes Task 5's legacy-key constraint here only.
+ * supersedes the legacy-key constraint here only.
  */
 export async function clearAllRecents(token: MigrationVerifiedToken): Promise<Conversation[]> {
   void token;
@@ -241,7 +241,7 @@ export async function clearAllRecents(token: MigrationVerifiedToken): Promise<Co
     // empty arrays — leaving the second source of truth present-but-empty forever, and
     // making `anyLegacyKeyPresent`/`isRetirementComplete` permanently disagree with
     // reality. `removeItem` on an already-retired key is a no-op, so this is safe either
-    // way, and it satisfies THE RULING more completely than emptying does.
+    // way, and it satisfies the delete rule more completely than emptying does.
     ...[CONVERSATIONS_KEY, HISTORY_KEY, SAVED_CHATS_KEY].map((key) => LocalStorage.removeItem(key)),
     ...sideKeysToRemove.map((key) => LocalStorage.removeItem(key)),
   ]);

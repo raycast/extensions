@@ -55,11 +55,19 @@ function useStatusFilter(): { status: StatusFilter; isLoading: boolean; setStatu
 
   useEffect(() => {
     (async () => {
-      const stored = await LocalStorage.getItem<string>(STATUS_FILTER_KEY);
-      if (isStatusFilter(stored)) {
-        setStatusState(stored);
+      try {
+        const stored = await LocalStorage.getItem<string>(STATUS_FILTER_KEY);
+        if (isStatusFilter(stored)) {
+          setStatusState(stored);
+        }
+      } catch {
+        // A filter we cannot read is not a reason to withhold the list — the default
+        // filter is a perfectly good answer. Swallowing it in `finally` below is what
+        // stops a rejected read from leaving Recents on its spinner forever with an
+        // unhandled rejection behind it.
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     })();
     // Runs once per mount, matching every other collection/hook load effect in this
     // codebase — there is nothing else this depends on.
@@ -251,7 +259,7 @@ export default function Recents() {
       )
     : statusFiltered;
 
-  // Pinned rows sort by pinned_at; the rest sort by updated_at, newest first (per the brief).
+  // Pinned rows sort by pinned_at; the rest sort by updated_at, newest first.
   const pinnedConversations = searchFiltered
     .filter((x) => !!x.pinned_at)
     .sort((a, b) => new Date(b.pinned_at ?? 0).getTime() - new Date(a.pinned_at ?? 0).getTime());
@@ -310,7 +318,8 @@ export default function Recents() {
           title="Delete"
           dialog={{
             title: "Are you sure you want to delete this conversation?",
-            message: "This permanently deletes it everywhere, including your history and saved answers.",
+            message:
+              "This permanently deletes it everywhere, including anything carried over from earlier versions of the extension.",
             primaryButton: "Delete",
           }}
           onAction={() => recents.remove(conversation)}
@@ -320,7 +329,7 @@ export default function Recents() {
           dialog={{
             title: "Are you sure you want to delete all your recents?",
             message:
-              "This permanently deletes every conversation everywhere, including your history and saved answers.",
+              "This permanently deletes every conversation everywhere, including anything carried over from earlier versions of the extension.",
             primaryButton: "Delete All",
           }}
           onAction={() => recents.clear()}
@@ -382,13 +391,26 @@ export default function Recents() {
           }
         />
       ) : searchFiltered.length === 0 ? (
+        // Two different reasons the list can be empty, and they need different copy. With
+        // no search text the cause is the Status dropdown alone, and offering "Clear
+        // Search" there is a no-op that sends the user looking in the wrong place.
         <List.EmptyView
-          title="No Matching Recents"
-          description={`Nothing matches "${searchText}".`}
-          icon={Icon.MagnifyingGlass}
+          title={searchText ? "No Matching Recents" : status === "archived" ? "Nothing Archived" : "No Active Recents"}
+          description={
+            searchText
+              ? `Nothing matches "${searchText}".`
+              : status === "archived"
+                ? "Archive a conversation from its row and it will show up here."
+                : "Everything you have is archived. Switch the filter to Archived or All to see it."
+          }
+          icon={searchText ? Icon.MagnifyingGlass : CLAUDE_ICON}
           actions={
             <ActionPanel>
-              <Action title="Clear Search" icon={Icon.XMarkCircle} onAction={() => setSearchText("")} />
+              {searchText ? (
+                <Action title="Clear Search" icon={Icon.XMarkCircle} onAction={() => setSearchText("")} />
+              ) : (
+                <Action title="Show All Recents" icon={Icon.List} onAction={() => setStatus("all")} />
+              )}
               <Action
                 title="Start New Conversation"
                 icon={Icon.Plus}

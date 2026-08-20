@@ -40,7 +40,7 @@
   — it looked like nothing had happened
 - Improved: "Continue Ask" in Recents is now **Ask a Follow-up**, and on an answer you are
   reading, Enter opens the question input rather than copying the answer. Copy Answer moved
-  to ⌘C
+  to ⌘⇧C
 - Fix: The search bar is cleared after you ask, so the answer view reads as a place to ask the
   next question instead of the results of the last one. Starting a new conversation clears it
   too, instead of leaving the previous question sitting there
@@ -68,7 +68,7 @@
 - Feature: Presets can be exported to and imported from a YAML file (⌘⇧E and ⌘⇧I in the
   Presets command), so you can back them up, edit them in a text editor, or move them to
   another machine. Importing asks what to do when a preset name already exists — skip it,
-  replace it, or keep both — instead of silently overwriting your work
+  or replace it — instead of silently overwriting your work
 - Feature: The preset importer also accepts a Raycast Agent JSON file, mapping each agent's
   instructions and model onto a preset. This one is provisional: it is built from sample
   export files rather than a verified live export, so an agent file whose shape differs may
@@ -78,8 +78,7 @@
 - Feature: Ships starter presets (Deep Reasoning, Balanced, Quick Answer, Code) built from the
   newest Opus, Sonnet, and Haiku available to your account
 - Feature: The built-in preset tracks the newest Sonnet and is named for the model it actually
-  calls, instead of a generic "Default Model" pinned to an older release. It now also picks up
-  that model's real output ceiling, rather than staying on the old 4,096-token limit
+  calls, instead of a generic "Default Model" pinned to an older release
 - Improved: Seeded preset prompts follow Anthropic's published Claude Opus 5 prompting
   guidance — step-by-step and self-verification instructions removed (the model does this
   unprompted, and asking for it wastes tokens), with explicit conciseness and scope wording in
@@ -91,8 +90,8 @@
 - Feature: Failure toasts carry a "Copy Error" action, and route to preferences or billing when
   the error is an auth or quota problem
 - Improved: Model names drop the redundant "Claude" prefix in pickers and lists
-- Improved: Conversations show a message count and drop the redundant date column; the presets
-  list drops its date column too, and the dates remain in the detail panel
+- Improved: Conversations show a message count alongside the date, and the presets list drops
+  its date column — those dates remain in the preset's detail panel
 - Fix: The model list is re-fetched after this update rather than reused from an older cache,
   so per-model output and context limits take effect immediately instead of on the next refresh
 - Chore: Updated `@raycast/utils` (1 → 2), ESLint 9 with flat config, TypeScript 5.9, Prettier

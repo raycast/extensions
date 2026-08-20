@@ -62,7 +62,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
           id: props.model.id,
           created_at: props.model.created_at,
         });
-        await showResolvedToast({ title: "Preset updated!", style: Toast.Style.Success });
+        await showResolvedToast({ title: "Preset updated", style: Toast.Style.Success });
       } else {
         await use.models.add({
           ...updatedModel,
@@ -210,7 +210,11 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
             icon={Icon.Checkmark}
             onSubmit={handleSubmit}
           />
-          <Action title="Show Anthropic Prompts" icon={Icon.Book} onAction={() => setShowAnthropicPrompts((s) => !s)} />
+          <Action
+            title={showAnthropicPrompts ? "Hide Anthropic Prompts" : "Show Anthropic Prompts"}
+            icon={Icon.Book}
+            onAction={() => setShowAnthropicPrompts((s) => !s)}
+          />
         </ActionPanel>
       }
     >

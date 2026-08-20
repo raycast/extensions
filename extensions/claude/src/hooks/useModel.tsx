@@ -20,6 +20,13 @@ const DEFAULT_PROMPT = "You are a useful assistant";
 const LEGACY_DEFAULT_NAME = "Default Model";
 
 /**
+ * The output ceiling every default preset was seeded with before per-model limits were
+ * read from the API. Named rather than inlined because it is a value this hook once wrote
+ * and now needs to recognize as its own — see `computeRepointedDefault`.
+ */
+const LEGACY_SEEDED_MAX_TOKENS = "4096";
+
+/**
  * The built-in preset. Its `option` is a last-resort fallback: on load it is re-pointed
  * at the newest Sonnet from the live model list.
  */
@@ -42,7 +49,7 @@ const FALLBACK_OPTIONS: Model["option"][] = ["claude-sonnet-4-5-20250929", "clau
 
 /**
  * The models collection store. `keep` carries `clear()`-preserves-`DEFAULT_MODEL`
- * structurally (Task 1's store), rather than the hand-rolled `filter(id === "default")`
+ * structurally (the collection store), rather than the hand-rolled `filter(id === "default")`
  * this hook used to do inside its own `setData` updater.
  */
 export const modelsStore: CollectionStore<Model> = createCollectionStore<Model>(MODELS_KEY, {
@@ -71,7 +78,7 @@ export function isUntouchedDefault(model: Model, availableModels: AvailableModel
 /**
  * The seed-once decision: pure enough to test directly, and kept separate from the
  * effect so a preset the user deletes stays deleted regardless of how many times the
- * hook mounts across the five commands that use it.
+ * hook mounts across the commands that use it.
  */
 export async function shouldSeedPresets(): Promise<boolean> {
   const alreadySeeded = await LocalStorage.getItem<string>(PRESETS_SEEDED_KEY);
@@ -170,11 +177,23 @@ export function computeRepointedDefault(current: Model[], liveModels: AvailableM
   if (!existingDefault || !newestSonnet || !isUntouchedDefault(existingDefault, liveModels)) return null;
 
   const nextName = shortModelName(newestSonnet.display_name);
-  // `max_tokens` is part of what a repoint owns, so it is also part of what decides
-  // whether one is needed. Comparing only name and option left a default that already
-  // pointed at the newest Sonnet stuck on whatever ceiling it was seeded with — for an
-  // install predating the API-advertised limits, the legacy 4096.
-  const nextMaxTokens = getMaxTokensForModel(newestSonnet.id, liveModels).toString();
+  const modelCeiling = getMaxTokensForModel(newestSonnet.id, liveModels).toString();
+
+  // `isUntouchedDefault` does NOT look at `max_tokens`, so a user who raised or lowered
+  // the built-in preset's output limit still reads as untouched. Reasserting the model
+  // ceiling on every mount would therefore silently undo that edit each launch.
+  //
+  // The defect this addresses is narrower than "keep max_tokens in sync": a default
+  // seeded before the API advertised per-model limits is stuck on the legacy 4096 even
+  // after it repoints onto a model whose real ceiling is far higher. So the ceiling is
+  // written only when the model is changing anyway (the value belonged to the OLD model
+  // and cannot survive the move), or when it is still exactly that legacy 4096 — a value
+  // this hook wrote, not one the user chose.
+  const isRepointing = existingDefault.option !== newestSonnet.id;
+  const stuckOnLegacyCeiling =
+    existingDefault.max_tokens === LEGACY_SEEDED_MAX_TOKENS && modelCeiling !== LEGACY_SEEDED_MAX_TOKENS;
+  const nextMaxTokens = isRepointing || stuckOnLegacyCeiling ? modelCeiling : existingDefault.max_tokens;
+
   if (
     existingDefault.option === newestSonnet.id &&
     existingDefault.name === nextName &&
@@ -210,13 +229,13 @@ export async function loadModels(store: CollectionStore<Model>, liveModels: Avai
 
   await seedStarterPresetsOnce(store, liveModels);
 
-  // Read fresh storage right before deciding on a repoint — five commands mount this
+  // Read fresh storage right before deciding on a repoint — several commands mount this
   // hook, and `store.update` below re-reads again anyway, so this read is purely to
   // decide WHETHER a write is needed at all.
   const current = await store.read();
   const repointedDefault = computeRepointedDefault(current, liveModels);
 
-  // `update` is the store's structural read-before-write merge (Task 1): it re-reads
+  // `update` is the store's structural read-before-write merge (the collection store): it re-reads
   // storage immediately before writing, so a row another mounted command touched in
   // between is not clobbered. The hand-rolled re-read-and-merge this hook used to do
   // (`changedIds` tracking) is gone — the store now provides it.
@@ -283,7 +302,7 @@ export function useModel(): ModelHook {
       const newModel: Model = { ...model, created_at: new Date().toISOString() };
       const result = await mutations.add.run(store, (items) => items, newModel);
       setData((previous) => mutations.add.applyTo(result, previous));
-      await showResolvedToast({ title: "Preset saved!", style: Toast.Style.Success });
+      await showResolvedToast({ title: "Preset saved", style: Toast.Style.Success });
     },
     [store],
   );
@@ -301,7 +320,7 @@ export function useModel(): ModelHook {
       // No Animated phase — see `add` above.
       const result = await mutations.remove.run(store, (items) => items, model.id);
       setData(mutations.remove.applyTo(result));
-      await showResolvedToast({ title: "Preset removed!", style: Toast.Style.Success });
+      await showResolvedToast({ title: "Preset deleted", style: Toast.Style.Success });
     },
     [store],
   );
@@ -314,7 +333,7 @@ export function useModel(): ModelHook {
     // next state, per `mutations.clear`/`replaceState`.
     const result = await mutations.clear.run(store, (items) => items);
     setData(mutations.clear.applyTo(result));
-    await showResolvedToast({ title: "Presets cleared!", style: Toast.Style.Success });
+    await showResolvedToast({ title: "Presets deleted", style: Toast.Style.Success });
   }, [store]);
 
   return useMemo(

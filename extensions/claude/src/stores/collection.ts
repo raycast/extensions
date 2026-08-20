@@ -20,8 +20,7 @@ export type CollectionOptions<T> = {
    * written at all — e.g. an in-flight empty conversation Ask hasn't answered yet. It
    * must NEVER cause a row that was already persisted to be dropped on the next write
    * that merely touches it (pin/archive/rename), even if that row would fail the filter
-   * today. See `persist()` below for the mechanics, and
-   * `useRecents.test.ts`/`collection.test.ts` for the regression this fixes: pinning a
+   * today. See `persist()` below for the mechanics. The regression this fixes: pinning a
    * migrated zero-turn conversation used to delete it from storage outright, because
    * `persistFilter` was being applied to the ENTIRE next list on every write, not just
    * the rows genuinely new to it.
