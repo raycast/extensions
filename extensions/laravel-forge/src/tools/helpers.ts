@@ -1,10 +1,102 @@
-import { Server } from "../api/Server";
-import { Site } from "../api/Site";
-import { IServer, ISite } from "../types";
+import { getPreferenceValues } from "@raycast/api";
+import { sortBy } from "lodash";
 import { unwrapToken } from "../lib/auth";
+import { flatten, getCollection, relatedId, relatedResource } from "../lib/forge";
+import { IServer, ISite } from "../types";
 
 export type ServerMatch = { server: IServer; token: string };
 export type SiteMatch = { site: ISite; server: IServer; token: string };
+
+type Account = { tokenKey: string; token: string; sshUser: string };
+
+// One fetch serves a whole answer: a confirmation and its tool, or two tools the model chains
+const once = <T>(build: () => Promise<T>) => {
+  let pending: Promise<T> | undefined;
+  return () => (pending ??= build());
+};
+
+const accounts = (): Account[] => {
+  const preferences = getPreferenceValues();
+  return [
+    { tokenKey: "laravel_forge_api_token", sshUser: String(preferences?.laravel_forge_ssh_user || "forge") },
+    { tokenKey: "laravel_forge_api_token_two", sshUser: String(preferences?.laravel_forge_ssh_user_two || "forge") },
+  ]
+    .map((account) => ({ ...account, token: unwrapToken(account.tokenKey) }))
+    .filter((account) => account.token);
+};
+
+const orgSlugs = once(async () => {
+  const entries = await Promise.all(
+    accounts().map(async ({ tokenKey, token }) => {
+      const { items } = await getCollection("orgs", token);
+      return [tokenKey, items.map((org) => String(org.attributes?.slug ?? ""))] as const;
+    }),
+  );
+  return new Map(entries);
+});
+
+export const allServers = once(async (): Promise<ServerMatch[]> => {
+  const slugs = await orgSlugs();
+  const perAccount = await Promise.all(
+    accounts().map(async ({ tokenKey, token, sshUser }) => {
+      const perOrg = await Promise.all(
+        (slugs.get(tokenKey) ?? []).map(async (slug) => {
+          const { items } = await getCollection(`orgs/${slug}/servers`, token);
+          return items.map((server) => ({
+            server: { ...flatten<IServer>(server), org_slug: slug, api_token_key: tokenKey, ssh_user: sshUser },
+            token,
+          }));
+        }),
+      );
+      return perOrg.flat();
+    }),
+  );
+  return sortBy(
+    perAccount.flat().filter(({ server }) => !server.revoked),
+    ({ server }) => server.name?.toLowerCase(),
+  );
+});
+
+const orgByServerId = async (tokenKey: string) => {
+  const servers = await allServers();
+  return new Map(
+    servers.filter(({ server }) => server.api_token_key === tokenKey).map(({ server }) => [server.id, server.org_slug]),
+  );
+};
+
+export const allSites = once(async (): Promise<SiteMatch[]> => {
+  const slugs = await orgSlugs();
+  const perAccount = await Promise.all(
+    accounts().map(async ({ tokenKey, token, sshUser }) => {
+      const { items, included } = await getCollection("sites?include=server", token);
+      const orgs = slugs.get(tokenKey) ?? [];
+      // The site list carries its server; only the org slug needs the server walk
+      const owners = orgs.length > 1 ? await orgByServerId(tokenKey) : undefined;
+
+      return items.flatMap((item) => {
+        const resource = relatedResource(item, "server", included);
+        if (!resource) return [];
+        const id = Number(resource.id);
+        const server: IServer = {
+          ...flatten<IServer>(resource),
+          org_slug: owners ? (owners.get(id) ?? "") : (orgs[0] ?? ""),
+          api_token_key: tokenKey,
+          ssh_user: sshUser,
+        };
+        const site = { ...flatten<ISite>(item), server_id: relatedId(item, "server") ?? id };
+        return [{ site, server, token }];
+      });
+    }),
+  );
+  return sortBy(perAccount.flat(), ({ site }) => site.name?.toLowerCase());
+});
+
+export const sitesOnServer = async (server: IServer) => {
+  const sites = await allSites();
+  return sites
+    .filter((match) => match.server.id === server.id && match.server.api_token_key === server.api_token_key)
+    .map(({ site }) => site.name ?? String(site.id));
+};
 
 const normalize = (value: string) => value.trim().toLowerCase();
 
@@ -14,11 +106,6 @@ const noMatch = (kind: string, query: string, names: string[]) =>
 
 const ambiguous = (kind: string, query: string, names: string[]) =>
   new Error(`"${query}" matches several ${kind}s: ${names.join(", ")}. Ask which one.`);
-
-export const allServers = async (): Promise<ServerMatch[]> => {
-  const servers = await Server.getAll();
-  return servers.map((server) => ({ server, token: unwrapToken(server.api_token_key) }));
-};
 
 export const findServer = async (query: string) => {
   const servers = await allServers();
@@ -33,23 +120,6 @@ export const findServer = async (query: string) => {
   return found[0];
 };
 
-export const allSites = async (): Promise<SiteMatch[]> => {
-  const servers = await allServers();
-  const tokenKeys = [...new Set(servers.map(({ server }) => server.api_token_key))];
-  const perAccount = await Promise.all(
-    tokenKeys.map(async (tokenKey) => {
-      const token = unwrapToken(tokenKey);
-      const sites = await Site.getSitesWithoutServer({ token });
-      return sites.flatMap((site) => {
-        // Server ids only mean anything within the account they came from
-        const owner = servers.find(({ server }) => server.api_token_key === tokenKey && server.id === site.server_id);
-        return owner ? [{ site, server: owner.server, token }] : [];
-      });
-    }),
-  );
-  return perAccount.flat();
-};
-
 export const findSite = async (query: string) => {
   const sites = await allSites();
   const search = normalize(query);
@@ -62,13 +132,6 @@ export const findSite = async (query: string) => {
   if (!found.length) throw noMatch("site", query, sites.map(label));
   if (found.length > 1) throw ambiguous("site", query, found.map(label));
   return found[0];
-};
-
-export const sitesOnServer = async (server: IServer) => {
-  const sites = await allSites();
-  return sites
-    .filter((match) => match.server.id === server.id && match.server.api_token_key === server.api_token_key)
-    .map(({ site }) => site.name ?? String(site.id));
 };
 
 export const nameList = (names: string[], limit = 8) => {
