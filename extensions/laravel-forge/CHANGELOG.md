@@ -1,6 +1,6 @@
 # Laravel Forge Changelog
 
-## [AI Tools] - {PR_MERGE_DATE}
+## [AI Tools] - 2026-08-20
 - Ask Laravel Forge from AI Chat: what is deploying, why a deploy failed, a site's Nginx config or logs, whether a site is up
 - Deploying a site, restarting a service and rebooting a server are AI tools too, each asking to confirm first and listing the sites it affects
 
