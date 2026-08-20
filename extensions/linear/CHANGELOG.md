@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Issue Attachments] - {PR_MERGE_DATE}
+## [Issue Attachments] - 2026-08-20
 
 - Fix attachments added through Create Issue failing to upload.
 
