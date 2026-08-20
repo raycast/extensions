@@ -17,11 +17,6 @@ Get instant access to Premier League data right from your Raycast menu. Easily s
 * **Managers:** View manager profiles with information on teams managed and career achievements.
 * **Awards:** Explore a list of Premier League individual and team awards, including winners and statistics.
 
-### Preferences
-
-* **Use Pulselive API:** On by default. Resolves the active season from the Premier League API rather than trusting the static season list, which can lag behind for weeks after a new season starts. Turn it off to use the static list on its own.
-* **Search Bar Filter:** Choose whether the Matches search bar filters by competition or by club.
-
 ## Issues
 
 Report bugs or suggest improvements by creating an issue [here](https://github.com/anhthang/raycast-premier-league/issues).

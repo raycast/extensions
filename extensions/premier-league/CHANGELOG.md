@@ -2,9 +2,7 @@
 
 ## [Fix Season Rollover] - {PR_MERGE_DATE}
 
-- Fix Matches, Table, Clubs and Squad showing the previous season after a new one starts. The static season list can lag behind the season it describes, so the active season is now resolved from the API and merged into the list.
-- Add the "Use Pulselive API" preference to turn the above off and use the static season list on its own.
-- Stop Matches issuing a fixtures request before the matchweek is known, which always returned no results.
+- Fix Matches, Table, Clubs and Squad showing the previous season once a new one kicks off. The season list the extension reads can trail the season it describes by months, so from July the active season is now read from the API and merged into that list.
 
 ## [Endpoint Exodus] - 2025-11-05
 
