@@ -3,6 +3,7 @@ import { StringSession } from "telegram/sessions";
 import { LocalStorage, environment } from "@raycast/api";
 import { Api } from "telegram/tl";
 import { computeCheck } from "telegram/Password";
+import { generateRandomBigInt } from "telegram/Helpers";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -585,13 +586,39 @@ export async function getChatMessages(options: GetMessagesOptions): Promise<Chat
     await client.connect();
   }
 
-  const messages = await client.getMessages(chatId, {
-    limit: topicId && searchQuery ? Math.max(limit, 100) : limit,
-    search: topicId ? undefined : searchQuery || undefined,
-    replyTo: topicId,
-  });
-
   const normalizedQuery = searchQuery?.trim().toLocaleLowerCase();
+  let messages: Api.Message[];
+
+  if (topicId && normalizedQuery) {
+    const searchResult = await client.invoke(
+      new Api.messages.Search({
+        peer: await client.getInputEntity(chatId),
+        q: searchQuery!.trim(),
+        topMsgId: topicId,
+        filter: new Api.InputMessagesFilterEmpty(),
+        minDate: 0,
+        maxDate: 0,
+        offsetId: 0,
+        addOffset: 0,
+        limit,
+        maxId: 0,
+        minId: 0,
+        hash: generateRandomBigInt(),
+      }),
+    );
+
+    messages =
+      "messages" in searchResult
+        ? searchResult.messages.filter((message): message is Api.Message => message instanceof Api.Message)
+        : [];
+  } else {
+    messages = await client.getMessages(chatId, {
+      limit,
+      search: searchQuery || undefined,
+      replyTo: topicId,
+    });
+  }
+
   const filteredMessages = messages
     .filter((msg) => msg.message || msg.media)
     .filter((msg) => !normalizedQuery || msg.message.toLocaleLowerCase().includes(normalizedQuery))
