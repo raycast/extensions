@@ -43,12 +43,18 @@ async function checkGatewayStatus(): Promise<GatewayStatus> {
     if (modelsResponse.ok) {
       status.healthy = true;
       try {
-        const payload = (await modelsResponse.json()) as { data?: { id?: string }[] };
+        const payload = (await modelsResponse.json()) as {
+          data?: { id?: string }[];
+        };
         const ids = (payload.data || [])
           .map((model) => model.id)
-          .filter((id): id is string => typeof id === "string" && id.length > 0);
+          .filter(
+            (id): id is string => typeof id === "string" && id.length > 0,
+          );
         if (!(prefs.modelName || "").trim()) {
-          status.modelName = ids.includes("hermes-agent") ? "hermes-agent" : ids[0] || status.modelName;
+          status.modelName = ids.includes("hermes-agent")
+            ? "hermes-agent"
+            : ids[0] || status.modelName;
         }
       } catch {
         // Listing body is optional for the health bit.
