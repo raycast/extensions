@@ -1,6 +1,6 @@
 # Radarr Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-08-20
 
 ### Added
 
