@@ -8,9 +8,7 @@ import type { ShellApp, TerminalKind } from "./types";
 const WINDIR = process.env.SystemRoot || process.env.WINDIR || "C:\\Windows";
 const POWERSHELL = `${WINDIR}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`;
 const CMD = `${WINDIR}\\System32\\cmd.exe`;
-const POWERSHELL7 = process.env.ProgramFiles
-  ? `${process.env.ProgramFiles}\\PowerShell\\7\\pwsh.exe`
-  : "pwsh.exe";
+const POWERSHELL7 = process.env.ProgramFiles ? `${process.env.ProgramFiles}\\PowerShell\\7\\pwsh.exe` : "pwsh.exe";
 const WT = "wt.exe";
 
 function psQuote(value: string): string {
@@ -69,9 +67,19 @@ function buildArgs(app: ShellApp): LaunchTarget {
   }
 }
 
-function startProcess(target: LaunchTarget): string {
-  const args = target.args.map(psQuote).join(", ");
-  return `Start-Process -FilePath ${psQuote(target.exe)} -ArgumentList @(${args}) -ErrorAction Stop`;
+function buildCmdFile(app: ShellApp): string {
+  const lines = ["@echo off", `cd /d "${app.workingDirectory?.trim() ?? ""}"`, app.command.trim()];
+  if (app.keepOpen) lines.push("pause");
+  // The launcher exits right after starting the terminal, so the batch file
+  // must not be deleted by the host while the (elevated) process is still
+  // starting up. Let the file delete itself once the batch is done.
+  lines.push(`start "" /b cmd /d /c del /q "%~f0" >nul 2>&1`);
+  return lines.join("\r\n") + "\r\n";
+}
+
+interface LauncherScript {
+  script: string;
+  cmdFile?: { path: string; content: string };
 }
 
 /**
@@ -98,36 +106,48 @@ const RESTORE_PATH = [
   `$env:PATH = (@("$__spa_sys\\System32;$__spa_sys", $__spa_mp, $__spa_up, $env:PATH) | Where-Object { $_ }) -join ';'`,
 ].join(" ");
 
-function buildLauncherScript(app: ShellApp, resultFile: string): string {
-  const target = buildArgs(app);
+function buildLauncherScript(app: ShellApp, resultFile: string, cmdFilePath: string): LauncherScript {
   const writeError = `Set-Content -LiteralPath ${psQuote(resultFile)} -Value $_.Exception.Message`;
+  const wd = app.workingDirectory?.trim();
+  const elevated = app.runAsAdmin;
+  // `cmd` can't take a working directory as an argument without the quotes
+  // getting mangled by `Start-Process -ArgumentList`, and `-WorkingDirectory`
+  // is disallowed with `-Verb RunAs` (an elevated process starts in System32
+  // regardless), so for elevated `cmd` we launch a temp `.cmd` file that
+  // `cd /d`s first.
+  const viaCmdFile = app.terminal === "cmd" && !!wd && elevated;
 
-  let body: string;
-  if (app.runAsAdmin) {
+  const startProcessStatement = (target: LaunchTarget, useCmdFile: boolean): string => {
+    if (useCmdFile) {
+      return `Start-Process -FilePath ${psQuote(cmdFilePath)} -Verb RunAs -ErrorAction Stop`;
+    }
     const parts = [
-      `Start-Process -FilePath ${psQuote(target.exe)}`,
+      "Start-Process",
+      `-FilePath ${psQuote(target.exe)}`,
       `-ArgumentList @(${target.args.map(psQuote).join(", ")})`,
-      "-Verb RunAs",
-      "-ErrorAction Stop",
     ];
-    body = `try { ${parts.join(" ")} } catch { ${writeError}; exit 1 }`;
-  } else if (app.terminal === "wt") {
+    if (wd && !elevated) {
+      parts.push(`-WorkingDirectory ${psQuote(wd)}`);
+    }
+    if (elevated) {
+      parts.push("-Verb RunAs");
+    }
+    parts.push("-ErrorAction Stop");
+    return parts.join(" ");
+  };
+
+  const target = buildArgs(app);
+  let body: string;
+  if (app.terminal === "wt") {
     // Fall back to PowerShell when Windows Terminal is not available.
     const fallback = buildArgs({ ...app, terminal: "powershell" as TerminalKind });
-    body = `try { ${startProcess(target)} } catch { try { ${startProcess(fallback)} } catch { ${writeError}; exit 1 } }`;
+    body = `try { ${startProcessStatement(target, false)} } catch { try { ${startProcessStatement(fallback, false)} } catch { ${writeError}; exit 1 } }`;
   } else {
-    body = `try { ${startProcess(target)} } catch { ${writeError}; exit 1 }`;
+    body = `try { ${startProcessStatement(target, viaCmdFile)} } catch { ${writeError}; exit 1 }`;
   }
 
-  // `cmd` can't take a working directory via a startup argument without the
-  // quotes getting mangled by `Start-Process -ArgumentList`, so we set the
-  // launcher's own location instead: the spawned terminal inherits it.
-  const cmdPrefix =
-    app.terminal === "cmd" && app.workingDirectory && app.workingDirectory.trim()
-      ? `Set-Location -LiteralPath ${psQuote(app.workingDirectory.trim())}; `
-      : "";
-
-  return `${RESTORE_PATH}; ${cmdPrefix}${body}`;
+  const script = `${RESTORE_PATH}; ${body}`;
+  return viaCmdFile ? { script, cmdFile: { path: cmdFilePath, content: buildCmdFile(app) } } : { script };
 }
 
 /**
@@ -137,22 +157,32 @@ function buildLauncherScript(app: ShellApp, resultFile: string): string {
 export function launchApp(app: ShellApp): Promise<string | null> {
   return new Promise((resolve) => {
     const resultFile = join(tmpdir(), `shell-apps-launch-${randomUUID()}.txt`);
-    const script = buildLauncherScript(app, resultFile);
     const psFile = join(tmpdir(), `shell-apps-launcher-${randomUUID()}.ps1`);
+    const cmdFile = join(tmpdir(), `shell-apps-cmd-${randomUUID()}.cmd`);
+    const { script, cmdFile: cmdFileContent } = buildLauncherScript(app, resultFile, cmdFile);
 
     let settled = false;
     const cleanup = () => {
-      try {
-        unlinkSync(resultFile);
-      } catch {
-        // ignore
-      }
-      try {
-        unlinkSync(psFile);
-      } catch {
-        // ignore
+      for (const file of [resultFile, psFile]) {
+        try {
+          unlinkSync(file);
+        } catch {
+          // ignore
+        }
       }
     };
+    // The batch file deletes itself once the terminal has run. As a fallback
+    // (e.g. the command called `exit` early), remove it a while later so the
+    // elevated process always has time to read it first.
+    if (cmdFileContent) {
+      setTimeout(() => {
+        try {
+          unlinkSync(cmdFile);
+        } catch {
+          // ignore
+        }
+      }, 60000);
+    }
     const settle = (message: string | null) => {
       if (settled) return;
       settled = true;
@@ -162,6 +192,9 @@ export function launchApp(app: ShellApp): Promise<string | null> {
 
     try {
       writeFileSync(psFile, "\ufeff" + script, "utf8");
+      if (cmdFileContent) {
+        writeFileSync(cmdFile, cmdFileContent.content, "utf8");
+      }
     } catch (error) {
       settle(`Failed to write launcher script: ${(error as Error).message}`);
       return;

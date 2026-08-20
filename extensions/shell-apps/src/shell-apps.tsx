@@ -81,10 +81,19 @@ export default function Command(props: { arguments: CommandArguments }) {
   }
 
   async function handleDuplicate(app: ShellApp) {
+    const apps = await getApps();
+    const used = new Set(apps.map((item) => item.name.toLowerCase()));
+    const base = `${app.name} Copy`;
+    let name = base;
+    let counter = 2;
+    while (used.has(name.toLowerCase())) {
+      name = `${base} ${counter}`;
+      counter += 1;
+    }
     await upsertApp({
       ...app,
       id: randomUUID(),
-      name: `${app.name} Copy`,
+      name,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -118,11 +127,7 @@ export default function Command(props: { arguments: CommandArguments }) {
   });
 
   return (
-    <List
-      isLoading={apps === null}
-      searchBarPlaceholder="Search shell apps…"
-      onSearchTextChange={setSearchText}
-    >
+    <List isLoading={apps === null} searchBarPlaceholder="Search shell apps…" onSearchTextChange={setSearchText}>
       {filtered.map((app) => (
         <List.Item
           key={app.id}
@@ -184,11 +189,7 @@ export default function Command(props: { arguments: CommandArguments }) {
           description="Create your first shell command shortcut"
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Create Shell App"
-                icon={Icon.Plus}
-                target={<CreateAppForm onSaved={reload} />}
-              />
+              <Action.Push title="Create Shell App" icon={Icon.Plus} target={<CreateAppForm onSaved={reload} />} />
             </ActionPanel>
           }
         />
