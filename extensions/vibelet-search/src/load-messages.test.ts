@@ -2,73 +2,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { buildRipgrepArgs, loadSessionMessages, parseCodexSessionMetaLine } from "./parsers";
-import type { CodexConversationLine, SessionMeta } from "./types";
-
-describe("parseCodexSessionMetaLine", () => {
-  it("parses new format session_meta lines", () => {
-    const line: CodexConversationLine = {
-      type: "session_meta",
-      timestamp: "2026-04-10T10:00:00.000Z",
-      payload: {
-        id: "019d-7-abc",
-        cwd: "/Users/me/project",
-      },
-    };
-    expect(parseCodexSessionMetaLine(line)).toEqual({
-      id: "019d-7-abc",
-      projectPath: "/Users/me/project",
-      ts: new Date("2026-04-10T10:00:00.000Z").getTime(),
-    });
-  });
-
-  it("parses old format session lines (no `type` field)", () => {
-    const line: CodexConversationLine = {
-      id: "old-style-id",
-      timestamp: "2025-09-01T08:00:00.000Z",
-      instructions: "you are a helpful assistant",
-      git: { cwd: "/Users/me/old-project" },
-    };
-    expect(parseCodexSessionMetaLine(line)).toEqual({
-      id: "old-style-id",
-      projectPath: "/Users/me/old-project",
-      ts: new Date("2025-09-01T08:00:00.000Z").getTime(),
-    });
-  });
-
-  it("returns null when neither format matches", () => {
-    expect(parseCodexSessionMetaLine({ type: "response_item" } as CodexConversationLine)).toBeNull();
-    expect(parseCodexSessionMetaLine({} as CodexConversationLine)).toBeNull();
-  });
-
-  it("returns null when payload.id is missing in new format", () => {
-    expect(
-      parseCodexSessionMetaLine({
-        type: "session_meta",
-        timestamp: "2026-04-10T10:00:00.000Z",
-        payload: { cwd: "/foo" },
-      }),
-    ).toBeNull();
-  });
-
-  it("handles missing cwd gracefully (empty string)", () => {
-    const line: CodexConversationLine = {
-      type: "session_meta",
-      timestamp: "2026-04-10T10:00:00.000Z",
-      payload: { id: "abc" },
-    };
-    expect(parseCodexSessionMetaLine(line)?.projectPath).toBe("");
-  });
-});
-
-describe("buildRipgrepArgs", () => {
-  it("terminates options before the user query", () => {
-    const args = buildRipgrepArgs("--help", ["/tmp/sessions"]);
-    const terminatorIndex = args.indexOf("--");
-    expect(terminatorIndex).toBeGreaterThan(-1);
-    expect(args.slice(terminatorIndex)).toEqual(["--", "--help", "/tmp/sessions"]);
-  });
-});
+import { loadSessionMessages, readJsonlUntil } from "./load-messages";
+import type { SessionMeta } from "./types";
 
 describe("loadSessionMessages", () => {
   let tmpDir: string;
@@ -353,5 +288,47 @@ describe("loadSessionMessages", () => {
     const messages = await loadSessionMessages(meta, { maxLineBytes: 180 });
     expect(messages).toHaveLength(1);
     expect(messages[0].content).toBe("kept");
+  });
+});
+
+describe("readJsonlUntil", () => {
+  let untilDir: string;
+
+  beforeEach(() => {
+    untilDir = fs.mkdtempSync(path.join(os.tmpdir(), "vibelet-until-"));
+  });
+
+  afterEach(() => {
+    fs.rmSync(untilDir, { recursive: true, force: true });
+  });
+
+  function writeUntil(name: string, lines: string[]): string {
+    const file = path.join(untilDir, name);
+    fs.writeFileSync(file, lines.join("\n") + "\n");
+    return file;
+  }
+
+  it("returns parsed lines and stops early via the stop predicate (no premature-close error)", async () => {
+    const filePath = writeUntil("until.jsonl", [
+      JSON.stringify({ id: 1 }),
+      JSON.stringify({ id: 2 }),
+      JSON.stringify({ id: 3 }),
+    ]);
+    const results = await readJsonlUntil(filePath, 65536, (parsed) => (parsed as { id: number }).id === 2);
+    expect(results.map((r) => (r as { id: number }).id)).toEqual([1, 2]);
+  });
+
+  it("caps the read via maxBytes", async () => {
+    const filePath = writeUntil("bytes.jsonl", [
+      JSON.stringify({ id: "a".repeat(40) }),
+      JSON.stringify({ id: "bbbb" }),
+    ]);
+    const results = await readJsonlUntil(filePath, 30);
+    expect(results.length).toBe(1);
+  });
+
+  it("returns [] for a missing file", async () => {
+    const results = await readJsonlUntil(path.join(untilDir, "nope.jsonl"), 65536);
+    expect(results).toEqual([]);
   });
 });
