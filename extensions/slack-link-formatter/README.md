@@ -6,7 +6,7 @@ A Raycast extension that converts a URL on your clipboard into a rich title hype
 
 - macOS with [Raycast](https://www.raycast.com/) installed.
 - A URL copied to your clipboard before running the command.
-- Optional: [GitHub CLI](https://cli.github.com/) installed and authenticated with `gh auth login` for better titles on GitHub pull request and issue links.
+- Optional: [GitHub CLI](https://cli.github.com/) installed and authenticated with `gh auth login` for better titles on GitHub pull request, issue, and discussion links.
 - For local development: Node.js and npm.
 
 ## How It Works
@@ -24,7 +24,7 @@ Slack prefers the HTML representation and shows a clickable title hyperlink. App
 
 ## GitHub Links
 
-For GitHub pull requests and issues, the command first tries to use the GitHub CLI (`gh`) to fetch the title when `gh` is installed and authenticated. This helps with links that do not expose complete page metadata to unauthenticated requests.
+For GitHub pull requests, issues, and repository discussions, the command first tries to use the GitHub CLI (`gh`) to fetch the title when `gh` is installed and authenticated. This helps with links that do not expose complete page metadata to unauthenticated requests.
 
 If `gh` is unavailable or the lookup fails, the command falls back to fetching the page HTML directly.
 

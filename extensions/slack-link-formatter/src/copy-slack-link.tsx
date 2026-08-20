@@ -11,14 +11,23 @@ const GH_CLI_CANDIDATES = [
   "/usr/local/bin/gh",
   "/usr/bin/gh",
 ];
+const GH_CLI_TIMEOUT_MS = 5000;
 
 function findGhCli(): string | undefined {
   return GH_CLI_CANDIDATES.find((path) => existsSync(path));
 }
 
+async function execGh(ghPath: string, args: string[]): Promise<string> {
+  const { stdout } = await execFileAsync(ghPath, args, {
+    timeout: GH_CLI_TIMEOUT_MS,
+  });
+
+  return stdout.trim();
+}
+
 /**
  * Some GitHub pages return limited metadata to unauthenticated fetches.
- * When the URL is a github.com issue/PR/repo, prefer the authenticated
+ * When the URL is a github.com PR/issue/discussion, prefer the authenticated
  * `gh` CLI (using the user's existing `gh auth login` session) for the real title.
  */
 async function fetchGitHubTitleViaCli(
@@ -31,38 +40,63 @@ async function fetchGitHubTitleViaCli(
 
   const prMatch = url.match(/github\.com\/([^/]+\/[^/]+)\/pull\/(\d+)/);
   const issueMatch = url.match(/github\.com\/([^/]+\/[^/]+)\/issues\/(\d+)/);
+  const discussionMatch = url.match(
+    /github\.com\/([^/]+)\/([^/]+)\/discussions\/(\d+)/,
+  );
 
   try {
     if (prMatch) {
       const [, repo, number] = prMatch;
-      const { stdout } = await execFileAsync(ghPath, [
-        "pr",
-        "view",
-        number,
-        "--repo",
-        repo,
-        "--json",
-        "title",
-        "-q",
-        ".title",
-      ]);
-      return stdout.trim() || undefined;
+      return (
+        (await execGh(ghPath, [
+          "pr",
+          "view",
+          number,
+          "--repo",
+          repo,
+          "--json",
+          "title",
+          "-q",
+          ".title",
+        ])) || undefined
+      );
     }
 
     if (issueMatch) {
       const [, repo, number] = issueMatch;
-      const { stdout } = await execFileAsync(ghPath, [
-        "issue",
-        "view",
-        number,
-        "--repo",
-        repo,
-        "--json",
-        "title",
-        "-q",
-        ".title",
-      ]);
-      return stdout.trim() || undefined;
+      return (
+        (await execGh(ghPath, [
+          "issue",
+          "view",
+          number,
+          "--repo",
+          repo,
+          "--json",
+          "title",
+          "-q",
+          ".title",
+        ])) || undefined
+      );
+    }
+
+    if (discussionMatch) {
+      const [, owner, name, number] = discussionMatch;
+      return (
+        (await execGh(ghPath, [
+          "api",
+          "graphql",
+          "-f",
+          "query=query($owner: String!, $name: String!, $number: Int!) { repository(owner: $owner, name: $name) { discussion(number: $number) { title } } }",
+          "-f",
+          `owner=${owner}`,
+          "-f",
+          `name=${name}`,
+          "-F",
+          `number=${number}`,
+          "--jq",
+          ".data.repository.discussion.title",
+        ])) || undefined
+      );
     }
   } catch {
     // Fall through to the plain HTTP fetch (e.g. not authenticated, repo doesn't exist, gh not logged in).

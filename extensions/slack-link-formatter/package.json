@@ -5,7 +5,7 @@
   "description": "A Raycast extension that converts a clipboard URL into a rich title hyperlink for Slack",
   "icon": "icon.png",
   "author": "yousefhadder",
-  "categories": ["Productivity", "Web"],
+  "categories": ["Communication"],
   "license": "MIT",
   "commands": [
     {
