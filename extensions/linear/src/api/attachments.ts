@@ -8,7 +8,9 @@ import { getLinearClient } from "./linearClient";
 const DEFAULT_CONTENT_TYPE = "application/octet-stream";
 
 const CONTENT_TYPES: Readonly<Record<string, string>> = {
+  ".apng": "image/apng",
   ".avif": "image/avif",
+  ".bmp": "image/bmp",
   ".csv": "text/csv",
   ".doc": "application/msword",
   ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -16,6 +18,7 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
   ".gz": "application/gzip",
   ".heic": "image/heic",
   ".heif": "image/heif",
+  ".ico": "image/x-icon",
   ".jpeg": "image/jpeg",
   ".jpg": "image/jpeg",
   ".json": "application/json",
@@ -29,6 +32,8 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
   ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
   ".svg": "image/svg+xml",
   ".tar": "application/x-tar",
+  ".tif": "image/tiff",
+  ".tiff": "image/tiff",
   ".txt": "text/plain",
   ".webm": "video/webm",
   ".webp": "image/webp",
