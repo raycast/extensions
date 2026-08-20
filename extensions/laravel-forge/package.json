@@ -38,13 +38,70 @@
       "interval": "10s"
     }
   ],
+  "tools": [
+    {
+      "name": "list-servers",
+      "title": "List Servers",
+      "description": "List every Laravel Forge server across the configured accounts, with provider, region, IP address and connection status"
+    },
+    {
+      "name": "list-sites",
+      "title": "List Sites",
+      "description": "List sites across every server, or only the sites on one named server, with their repository, branch and deployment status"
+    },
+    {
+      "name": "deployment-status",
+      "title": "Check Deployment Status",
+      "description": "Show which sites are deploying right now and which ones have a failed deployment"
+    },
+    {
+      "name": "deployment-history",
+      "title": "Get Deployment History",
+      "description": "List recent deployments for a site with their status, commit and timings"
+    },
+    {
+      "name": "deployment-log",
+      "title": "Read Deployment Log",
+      "description": "Read the output of a site's latest deployment, or of a specific deployment, to find out why it failed"
+    },
+    {
+      "name": "server-events",
+      "title": "Get Server Events",
+      "description": "List recent Forge events for a server, or read the command output of one event"
+    },
+    {
+      "name": "site-online",
+      "title": "Check If a Site Is Online",
+      "description": "Request a site over HTTP and report whether it responds"
+    },
+    {
+      "name": "site-config",
+      "title": "Read Site Config or Logs",
+      "description": "Read a site's nginx config, application log, nginx error log or nginx access log"
+    },
+    {
+      "name": "deploy-site",
+      "title": "Deploy a Site",
+      "description": "Trigger a deployment for a site"
+    },
+    {
+      "name": "restart-service",
+      "title": "Restart a Service",
+      "description": "Start, stop or restart php, nginx, mysql or redis on a server"
+    },
+    {
+      "name": "reboot-server",
+      "title": "Reboot a Server",
+      "description": "Reboot a server, taking every site on it down until it comes back"
+    }
+  ],
   "preferences": [
     {
       "name": "laravel_forge_api_token",
       "type": "password",
       "required": true,
       "title": "Forge API Token (v2)",
-      "description": "Forge API v1 is retired, so this needs a new v2 token. Create one at forge.laravel.com/profile/api \u2014 see the README for the scopes to tick.",
+      "description": "Generate from your Laravel Forge profile",
       "placeholder": "API Token"
     },
     {
@@ -78,7 +135,6 @@
     "@raycast/api": "^1.104.24",
     "date-fns": "^4.4.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.2",
     "run-applescript": "^7.1.0",
     "swr": "^2.5.1"
   },
