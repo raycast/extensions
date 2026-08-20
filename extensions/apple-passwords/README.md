@@ -1,10 +1,10 @@
 # Apple Password
 
-Search Apple Passwords from Raycast with live discovery through the local `applepw` CLI, cached account metadata in SQLite, and no stored secrets.
+Search Apple Passwords from Raycast with live discovery through the local `apw` CLI, cached account metadata in SQLite, and no stored secrets.
 
 ## Features
 
-- Search by domain or email fragment.
+- Search by a full URL, exact domain, or short domain fragment such as `github`.
 - Copy a password from Apple Passwords.
 - Copy a one-time code when OTP is available.
 - Prompt for authentication inline when the daemon needs a code.
@@ -12,16 +12,19 @@ Search Apple Passwords from Raycast with live discovery through the local `apple
 
 ## Install
 
-1. Install the `applepw` CLI:
+1. Install the maintained `apw` CLI:
 
    ```sh
-   brew install alecharmon/tap/applepw
+   brew install bendews/tap/apw
    ```
 
-2. Open the `Search Passwords` command in Raycast.
-3. If prompted, enter the code from Apple Passwords to authenticate the local daemon.
+2. Install Apple's iCloud Passwords extension in Google Chrome, Brave, Edge, or Chromium.
+3. Open the `Search Passwords` command in Raycast.
+4. If prompted, choose `Request Code`. Apple's native popup temporarily hides Raycast.
+5. Reopen Raycast and enter the 6-digit code shown by Apple Passwords.
 
 If the CLI is missing, the extension shows setup instructions and offers the install command directly in Raycast.
+CSV import is optional; live search and password retrieval do not require it.
 
 ## CSV Import
 
@@ -46,7 +49,7 @@ What the CSV import does not do:
 - It does not store one-time codes in the password cache.
 - It does not replace live password retrieval from Apple Passwords.
 
-Imported rows are useful for search quality, but password copy still depends on what the live `applepw` lookup can resolve.
+Imported rows are useful for search quality, but password copy still depends on what the live `apw` lookup can resolve.
 
 ## Local Storage
 

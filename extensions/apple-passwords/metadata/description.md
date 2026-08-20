@@ -1,4 +1,4 @@
-Search Apple Passwords from Raycast using the local `applepw` CLI.
+Search Apple Passwords from Raycast using the maintained local `apw` CLI.
 
 Apple Password lets you search by domain or email fragment, copy passwords, copy one-time codes, and authenticate inline when the Apple Passwords daemon needs a code.
 
