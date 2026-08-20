@@ -40,27 +40,19 @@ export async function getAppByName(name: string): Promise<ShellApp | undefined> 
   return apps.find((app) => app.name.toLowerCase() === query);
 }
 
-export async function upsertApp(app: ShellApp): Promise<void> {
-  await enqueue(async () => {
+export async function upsertApp(app: ShellApp): Promise<{ ok: true } | { ok: false; existingName: string }> {
+  return enqueue(async () => {
     const apps = await getApps();
+    const clash = apps.find((item) => item.id !== app.id && item.name.toLowerCase() === app.name.toLowerCase());
+    if (clash) {
+      return { ok: false as const, existingName: clash.name };
+    }
     const index = apps.findIndex((item) => item.id === app.id);
     if (index >= 0) {
       apps[index] = app;
     } else {
       apps.push(app);
     }
-    await saveApps(apps);
-  });
-}
-
-export async function createApp(entry: ShellApp): Promise<{ ok: true } | { ok: false; existingName: string }> {
-  return enqueue(async () => {
-    const apps = await getApps();
-    const clash = apps.find((item) => item.name.toLowerCase() === entry.name.toLowerCase());
-    if (clash) {
-      return { ok: false as const, existingName: clash.name };
-    }
-    apps.push(entry);
     await saveApps(apps);
     return { ok: true as const };
   });

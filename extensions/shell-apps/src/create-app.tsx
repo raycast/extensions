@@ -13,7 +13,7 @@ import { randomUUID } from "crypto";
 import { existsSync } from "fs";
 import { useState } from "react";
 import { APP_ICON_NAMES, iconByName } from "./lib/icons";
-import { createApp, getApps, upsertApp } from "./lib/store";
+import { upsertApp } from "./lib/store";
 import type { ShellApp, TerminalKind } from "./lib/types";
 
 interface Props {
@@ -71,29 +71,14 @@ export default function CreateAppForm({ app, onSaved }: Props) {
       updatedAt: now,
     };
 
-    if (app?.id) {
-      const duplicate = (await getApps()).find(
-        (item) => item.id !== app.id && item.name.toLowerCase() === entryName.toLowerCase(),
-      );
-      if (duplicate) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Name already used",
-          message: `A shell app named "${duplicate.name}" already exists. Quicklinks require unique names.`,
-        });
-        return;
-      }
-      await upsertApp(entry);
-    } else {
-      const result = await createApp(entry);
-      if (!result.ok) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Name already used",
-          message: `A shell app named "${result.existingName}" already exists. Quicklinks require unique names.`,
-        });
-        return;
-      }
+    const result = await upsertApp(entry);
+    if (!result.ok) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Name already used",
+        message: `A shell app named "${result.existingName}" already exists. Quicklinks require unique names.`,
+      });
+      return;
     }
     await onSaved?.();
     await showHUD(isEditing ? "Shell app updated" : "Shell app created");

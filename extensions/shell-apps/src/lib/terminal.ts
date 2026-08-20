@@ -67,21 +67,6 @@ function buildArgs(app: ShellApp): LaunchTarget {
   }
 }
 
-function buildCmdFile(app: ShellApp): string {
-  const lines = ["@echo off", `cd /d "${app.workingDirectory?.trim() ?? ""}"`, app.command.trim()];
-  if (app.keepOpen) lines.push("pause");
-  // The launcher exits right after starting the terminal, so the batch file
-  // must not be deleted by the host while the (elevated) process is still
-  // starting up. Let the file delete itself once the batch is done.
-  lines.push(`start "" /b cmd /d /c del /q "%~f0" >nul 2>&1`);
-  return lines.join("\r\n") + "\r\n";
-}
-
-interface LauncherScript {
-  script: string;
-  cmdFile?: { path: string; content: string };
-}
-
 /**
  * The extension host is a GUI process without a console, so spawning a terminal
  * directly (with `detached: true`) gives it no visible window and PowerShell
@@ -106,21 +91,32 @@ const RESTORE_PATH = [
   `$env:PATH = (@("$__spa_sys\\System32;$__spa_sys", $__spa_mp, $__spa_up, $env:PATH) | Where-Object { $_ }) -join ';'`,
 ].join(" ");
 
-function buildLauncherScript(app: ShellApp, resultFile: string, cmdFilePath: string): LauncherScript {
+function buildLauncherScript(app: ShellApp, resultFile: string): string {
   const writeError = `Set-Content -LiteralPath ${psQuote(resultFile)} -Value $_.Exception.Message`;
   const wd = app.workingDirectory?.trim();
   const elevated = app.runAsAdmin;
-  // `cmd` can't take a working directory as an argument without the quotes
-  // getting mangled by `Start-Process -ArgumentList`, and `-WorkingDirectory`
-  // is disallowed with `-Verb RunAs` (an elevated process starts in System32
-  // regardless), so for elevated `cmd` we launch a temp `.cmd` file that
-  // `cd /d`s first.
-  const viaCmdFile = app.terminal === "cmd" && !!wd && elevated;
 
-  const startProcessStatement = (target: LaunchTarget, useCmdFile: boolean): string => {
-    if (useCmdFile) {
-      return `Start-Process -FilePath ${psQuote(cmdFilePath)} -Verb RunAs -ErrorAction Stop`;
-    }
+  // An elevated process always starts in System32 (`-WorkingDirectory` is
+  // disallowed with `-Verb RunAs`), so for elevated `cmd` the working
+  // directory has to be part of the payload itself. It is passed inline via
+  // `ProcessStartInfo.Arguments` instead of a temp batch file: a batch file
+  // sits in a user-writable temp folder while the UAC prompt is pending, so
+  // another process running as the same user could swap its contents and get
+  // arbitrary commands executed elevated. Command-line arguments are fixed
+  // once the process is created, leaving nothing to tamper with afterwards.
+  const startElevatedCmd = (): string => {
+    const inner = [...(wd ? [`cd /d "${wd}"`] : []), app.command.trim()].join(" && ");
+    return [
+      "$__psi = New-Object System.Diagnostics.ProcessStartInfo",
+      `$__psi.FileName = ${psQuote(CMD)}`,
+      `$__psi.Arguments = ${psQuote(`/d /s /${app.keepOpen ? "k" : "c"} "${inner}"`)}`,
+      "$__psi.Verb = 'runas'",
+      "$__psi.UseShellExecute = $true",
+      "[System.Diagnostics.Process]::Start($__psi) > $null",
+    ].join("; ");
+  };
+
+  const startProcessStatement = (target: LaunchTarget): string => {
     const parts = [
       "Start-Process",
       `-FilePath ${psQuote(target.exe)}`,
@@ -136,18 +132,19 @@ function buildLauncherScript(app: ShellApp, resultFile: string, cmdFilePath: str
     return parts.join(" ");
   };
 
-  const target = buildArgs(app);
   let body: string;
   if (app.terminal === "wt") {
     // Fall back to PowerShell when Windows Terminal is not available.
+    const target = buildArgs(app);
     const fallback = buildArgs({ ...app, terminal: "powershell" as TerminalKind });
-    body = `try { ${startProcessStatement(target, false)} } catch { try { ${startProcessStatement(fallback, false)} } catch { ${writeError}; exit 1 } }`;
+    body = `try { ${startProcessStatement(target)} } catch { try { ${startProcessStatement(fallback)} } catch { ${writeError}; exit 1 } }`;
+  } else if (app.terminal === "cmd" && elevated) {
+    body = `try { ${startElevatedCmd()} } catch { ${writeError}; exit 1 }`;
   } else {
-    body = `try { ${startProcessStatement(target, viaCmdFile)} } catch { ${writeError}; exit 1 }`;
+    body = `try { ${startProcessStatement(buildArgs(app))} } catch { ${writeError}; exit 1 }`;
   }
 
-  const script = `${RESTORE_PATH}; ${body}`;
-  return viaCmdFile ? { script, cmdFile: { path: cmdFilePath, content: buildCmdFile(app) } } : { script };
+  return `${RESTORE_PATH}; ${body}`;
 }
 
 /**
@@ -158,8 +155,7 @@ export function launchApp(app: ShellApp): Promise<string | null> {
   return new Promise((resolve) => {
     const resultFile = join(tmpdir(), `shell-apps-launch-${randomUUID()}.txt`);
     const psFile = join(tmpdir(), `shell-apps-launcher-${randomUUID()}.ps1`);
-    const cmdFile = join(tmpdir(), `shell-apps-cmd-${randomUUID()}.cmd`);
-    const { script, cmdFile: cmdFileContent } = buildLauncherScript(app, resultFile, cmdFile);
+    const script = buildLauncherScript(app, resultFile);
 
     let settled = false;
     const cleanup = () => {
@@ -171,18 +167,6 @@ export function launchApp(app: ShellApp): Promise<string | null> {
         }
       }
     };
-    // The batch file deletes itself once the terminal has run. As a fallback
-    // (e.g. the command called `exit` early), remove it a while later so the
-    // elevated process always has time to read it first.
-    if (cmdFileContent) {
-      setTimeout(() => {
-        try {
-          unlinkSync(cmdFile);
-        } catch {
-          // ignore
-        }
-      }, 60000);
-    }
     const settle = (message: string | null) => {
       if (settled) return;
       settled = true;
@@ -192,9 +176,6 @@ export function launchApp(app: ShellApp): Promise<string | null> {
 
     try {
       writeFileSync(psFile, "\ufeff" + script, "utf8");
-      if (cmdFileContent) {
-        writeFileSync(cmdFile, cmdFileContent.content, "utf8");
-      }
     } catch (error) {
       settle(`Failed to write launcher script: ${(error as Error).message}`);
       return;
