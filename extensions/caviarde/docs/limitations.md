@@ -20,9 +20,11 @@ never masked, since they identify nobody.
 Private ranges (`10/8`, `172.16/12`, `192.168/16`) **are** masked, on the grounds
 that they can describe an internal topology.
 
-A numeric identifier of 13 to 19 digits that happens to pass Luhn is read as a
-card. Roughly one such identifier in ten. A 13-digit millisecond timestamp is in
-range.
+A third rule covers cards, for the same reason: Luhn alone accepts about one
+numeric identifier in ten, timestamps and order numbers included. A card also has
+to begin with an issuer prefix, so a number outside those ranges is left alone
+even when its check digit is right. The cost is the reverse case, a card from an
+issuer outside the listed ranges, which is not masked at all.
 
 ## Names
 

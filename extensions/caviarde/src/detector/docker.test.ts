@@ -53,11 +53,20 @@ describe("detector image", () => {
 });
 
 describe("container arguments", () => {
-  const args = containerArgs("/tmp/gliner_layer.py");
+  const args = containerArgs("/tmp/gliner_layer.py", CONTAINER_PORT);
   const pair = (flag: string) => args[args.indexOf(flag) + 1];
 
   it("publishes on loopback only, because /analyze is unauthenticated", () => {
     expect(pair("-p")).toBe(`127.0.0.1:${CONTAINER_PORT}:${CONTAINER_PORT}`);
+  });
+
+  // The setup command polls the address in the preference, so the container has
+  // to bind that port rather than a fixed one.
+  it("publishes on the port it is given, not on a fixed one", () => {
+    const moved = containerArgs("/tmp/gliner_layer.py", 6000);
+    expect(moved[moved.indexOf("-p") + 1]).toBe(
+      `127.0.0.1:6000:${CONTAINER_PORT}`,
+    );
   });
 
   it("drops every capability and forbids regaining privileges", () => {

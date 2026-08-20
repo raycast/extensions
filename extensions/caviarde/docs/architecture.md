@@ -70,6 +70,7 @@ src/
     merge.ts                 overlap resolution
     validators/
       luhn.ts
+      card.ts                issuer prefix, so Luhn alone cannot mask a timestamp
       iban.ts                mod-97
       ip.ts                  address validity, and which ranges identify nobody
       french-business.ts     SIREN, SIRET
@@ -77,6 +78,7 @@ src/
   detector/
     client.ts                the single HTTP module
     image.ts                 pinned digest, thresholds, docker probe paths
+    endpoint.ts              the port the managed container must publish on
     docker.ts                container lifecycle
   masking/
     placeholders.ts          [TYPE_N] assignment
@@ -97,8 +99,8 @@ one-file fix.
 ## Detection
 
 **Deterministic**, always, no network: emails, French and international phone
-numbers, IPv4 and IPv6, IBAN (mod-97), credit cards and SIRET (Luhn), SIREN
-behind a keyword guard, API keys, JWTs, PEM private keys, and `@mentions` as
+numbers, IPv4 and IPv6, IBAN (mod-97), credit cards (Luhn plus an issuer
+prefix), SIRET (Luhn), SIREN behind a keyword guard, API keys, JWTs, PEM private keys, and `@mentions` as
 person names.
 
 **Semantic**, over HTTP, optional: people, places and street addresses, plus

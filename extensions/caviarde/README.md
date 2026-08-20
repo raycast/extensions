@@ -120,7 +120,8 @@ detector answers, so they stay green without one.
 
 **Patterns, always, with no network and no dependency.** Email addresses, French
 and international phone numbers, IPv4 and IPv6, IBANs validated with mod-97,
-credit cards and SIRET validated with Luhn, SIREN company numbers, API keys and
+credit cards validated with Luhn and an issuer prefix, SIRET validated with Luhn,
+SIREN company numbers, API keys and
 access tokens, JWTs, PEM private keys, and names written as `@mentions`. Every
 match is checksum-validated where a checksum exists, so a random sixteen-digit
 number is not mistaken for a card.

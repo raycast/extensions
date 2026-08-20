@@ -1,8 +1,8 @@
 import type { EntityType, Span } from "./types";
+import { isCardNumber } from "./validators/card";
 import { isSirenValid, isSiretValid } from "./validators/french-business";
 import { isIbanValid } from "./validators/iban";
 import { isMaskableIpv4, isMaskableIpv6 } from "./validators/ip";
-import { isLuhnValid } from "./validators/luhn";
 
 const PEM_BLOCK =
   /-----BEGIN (?:[A-Z0-9]+ )*PRIVATE KEY-----[\s\S]{1,20000}?-----END (?:[A-Z0-9]+ )*PRIVATE KEY-----/g;
@@ -135,10 +135,7 @@ const FINDERS: readonly Finder[] = [
   findIban,
   simple("SIRET", SIRET_CANDIDATE, (m) => isSiretValid(digitsOf(m))),
   findSiren,
-  simple("CARD", CARD_CANDIDATE, (m) => {
-    const digits = digitsOf(m);
-    return digits.length >= 13 && digits.length <= 19 && isLuhnValid(digits);
-  }),
+  simple("CARD", CARD_CANDIDATE, (m) => isCardNumber(digitsOf(m))),
   simple("PHONE", PHONE_INTERNATIONAL),
   simple("PHONE", PHONE_FRENCH),
 ];

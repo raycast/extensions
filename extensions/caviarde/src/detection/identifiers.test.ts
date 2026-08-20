@@ -21,6 +21,10 @@ const CASES: Array<[string, string]> = [
   ["order number", "commande 2024-00184722"],
   ["ticket ref", "ticket #4821"],
   ["epoch milliseconds", "ts 1735689600000"],
+  // Luhn is one check digit, so roughly one number in ten satisfies it by
+  // chance. This timestamp does, five milliseconds after one that does not.
+  ["epoch milliseconds that satisfy Luhn", "ts 1735689600005"],
+  ["order number that satisfies Luhn", "commande 1234567890123452"],
   ["git sha", "commit 9f2a1c4e8b7d3f6a0c5e2b8d4f7a1c3e6b9d0f2a"],
   ["semver", "version 1.104.24"],
   ["loopback with port", "listening on 127.0.0.1:5002"],

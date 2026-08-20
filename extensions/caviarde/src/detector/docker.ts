@@ -141,7 +141,7 @@ export function readPullProgress(logPath: string): PullProgress | null {
   return { layers: status.size, done, finished: /^Status: /m.test(log), error };
 }
 
-export function containerArgs(patchPath: string): string[] {
+export function containerArgs(patchPath: string, hostPort: number): string[] {
   const env = Object.entries(FLOORS).flatMap(([key, value]) => [
     "-e",
     `${key}=${value}`,
@@ -154,9 +154,10 @@ export function containerArgs(patchPath: string): string[] {
     CONTAINER_NAME,
     "--restart",
     "unless-stopped",
-    // Loopback only: /analyze is unauthenticated.
+    // Loopback only: /analyze is unauthenticated. The published port follows the
+    // preference, or the command would poll an address it never bound.
     "-p",
-    `127.0.0.1:${CONTAINER_PORT}:${CONTAINER_PORT}`,
+    `127.0.0.1:${hostPort}:${CONTAINER_PORT}`,
     "--read-only",
     "--tmpfs",
     "/tmp",
@@ -184,8 +185,9 @@ export function containerArgs(patchPath: string): string[] {
 export async function startContainer(
   docker: string,
   patchPath: string,
+  hostPort: number,
 ): Promise<void> {
-  await run(docker, containerArgs(patchPath), {
+  await run(docker, containerArgs(patchPath, hostPort), {
     timeout: 60_000,
     env: dockerEnv(docker),
   });

@@ -16,6 +16,7 @@ import {
   startContainer,
   startPull,
 } from "./detector/docker";
+import { loopbackPort } from "./detector/endpoint";
 import { type RawPreferences, toSettings } from "./preferences";
 
 const HEALTH_TIMEOUT_MS = 2000;
@@ -58,6 +59,8 @@ const TEXT = {
   imagePreparing: "Preparing the download.",
   imageForeign:
     "The pinned image is not on disk, so the detector answering on this address is a different one.",
+  imageAbsent:
+    "The pinned image is not on disk, and there is no local detector for this command to start it for.",
   detectorStarting:
     "Starting the container. The model takes a few seconds to load.",
   detectorReady:
@@ -65,6 +68,7 @@ const TEXT = {
   detectorForeign:
     "A detector is already running on this address, so nothing was restarted.",
   detectorNeedsRuntime: `The detector needs a container runtime.\n\n${DEGRADED}`,
+  detectorRemote: `The Detector URL does not point at this machine, so this command cannot start or manage it. Point it back at loopback, or start that detector yourself.\n\n${DEGRADED}`,
   detectorNeedsImage: `The detector cannot start until the image is downloaded.\n\n${DEGRADED}`,
   detectorRefused: `The container could not start and nothing is answering on this address. The port is most likely in use.\n\n${DEGRADED}`,
   detectorSilent:
@@ -174,6 +178,7 @@ async function pullImage(
 async function run(update: Update, finish: () => void): Promise<void> {
   const url = toSettings(getPreferenceValues<RawPreferences>()).detectorUrl;
   const alreadyUp = await detectorAnswers(url);
+  const port = loopbackPort(url);
   const address: [string, string] = ["Address", url];
 
   const detectorFacts: [string, string][] = [
@@ -249,6 +254,12 @@ async function run(update: Update, finish: () => void): Promise<void> {
       status: "Not on disk",
       body: TEXT.imageForeign,
     });
+  } else if (port === null) {
+    update("image", {
+      state: "waiting",
+      status: "Not on disk",
+      body: TEXT.imageAbsent,
+    });
   } else {
     const logPath = join(environment.supportPath, "pull.log");
     onDisk = await pullImage(docker, update, logPath);
@@ -276,6 +287,17 @@ async function run(update: Update, finish: () => void): Promise<void> {
     return;
   }
 
+  if (port === null) {
+    update("container", {
+      state: "fail",
+      status: "Not running",
+      body: TEXT.detectorRemote,
+      facts: [address],
+    });
+    finish();
+    return;
+  }
+
   update("container", {
     state: "busy",
     status: "Starting",
@@ -289,6 +311,7 @@ async function run(update: Update, finish: () => void): Promise<void> {
     await startContainer(
       docker,
       join(environment.assetsPath, "detector-patch", "gliner_layer.py"),
+      port,
     );
   } catch {
     refused = true;

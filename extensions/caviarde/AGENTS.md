@@ -53,6 +53,14 @@ persistence.
   and company ids, timestamps, git SHAs, loopback addresses. Masked text that
   cannot be used for a database query has failed. `identifiers.test.ts` locks
   this in.
+- **A checksum alone never qualifies a match.** Luhn is one digit, so about one
+  arbitrary number in ten passes it: a card needs an issuer prefix as well, a
+  bare SIREN needs a keyword or its spaced form. Where a test asserts that some
+  identifier is left alone, assert first that it does satisfy the checksum, or
+  the test passes for the wrong reason.
+- **The managed container publishes on the port the preference names.** Binding a
+  fixed port while polling the preference reports a failure for a detector that
+  is running, which is the one thing the setup screen must never do.
 - **Placeholders are `[TYPE_N]`**, single brackets, 1-indexed per type. This is
   masking, not redaction: `redact` appears in no identifier.
 - **Nothing we declare floats.** Exact dependency versions, `save-exact=true`,
@@ -78,19 +86,33 @@ either side of a threshold in two different documents. One sample proves nothing
   Containers stop when the Mac sleeps.
 - Integration tests skip themselves when the detector is down, mirroring how the
   extension degrades.
-- Image sources live in `media/`. `assets/` holds only what the extension loads at
-  runtime, which the store checklist verifies, and `metadata/` only the store
-  screenshots.
+- Image sources live in `media/`, images the extension loads at runtime in
+  `assets/`, and the store checklist verifies that separation. There is no
+  `metadata/`: the store's `metadata-images` check wants a Raycast Window Capture
+  composite, centred with roughly 12% padding on every side, and the store page
+  renders the README regardless, so the illustration lives in `media/` and is shown
+  there.
 - Changing the icon needs a full Raycast restart. `assets/icon.png` is regenerated
   from `media/icon.svg` with `sips`, not `qlmanage`, which flattens transparency
-  onto white. Store screenshots go the other way: `qlmanage` renders their colours
-  correctly where `sips` ignores tspan fills, then `sips` crops to 2000x1250.
-- The repository is developed with pnpm but published with npm, so it carries both
-  lockfiles. `ray publish` requires `package-lock.json` and refuses outright when
-  `pnpm-lock.yaml` is present, so that file has to be moved aside for the length of
-  the command and put back afterwards. Regenerate `package-lock.json` with
-  `npm install --package-lock-only` in a directory holding only the manifest: run in
-  place, npm reads pnpm's virtual store and fails to resolve.
+  onto white. The wider illustrations go the other way: `qlmanage` renders their
+  colours correctly where `sips` ignores tspan fills, then `sips` crops the band.
+
+### Publishing
+
+`ray publish` copies the working directory, skipping only `.git`, `.github`,
+`node_modules` and a few build artefacts. It does not read `.gitignore`, so
+anything sitting in the folder ships, including agent scratch directories. Publish
+from a throwaway `git clone` rather than from the working copy, which also pins
+what goes out to a commit that exists on the remote.
+
+It requires `package-lock.json` at version 2 or above and refuses outright when
+`pnpm-lock.yaml` is present, so delete that one in the clone after installing.
+Regenerate `package-lock.json` with `npm install --package-lock-only` in a
+directory holding only the manifest: run in place, npm reads pnpm's virtual store
+and fails to resolve.
+
+`CLAUDE.md` is a symlink and has no business in a monorepo; drop it in the clone
+too. The command needs an interactive terminal for its GitHub sign-in.
 
 ## Where things are documented
 
