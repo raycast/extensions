@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cronitor",
   "title": "Cronitor",
-  "description": "",
+  "description": "View Monitors in Cronitor",
   "icon": "cronitor.png",
   "author": "xmok",
   "license": "MIT",
@@ -10,17 +10,17 @@
     {
       "name": "api_key",
       "title": "API Key",
-      "placeholder": "",
+      "placeholder": "Cronitor API Key",
       "type": "password",
       "required": true,
-      "description": ""
+      "description": "Cronitor API Key"
     }
   ],
   "commands": [
     {
       "name": "search-monitors",
       "title": "Search Monitors",
-      "description": "",
+      "description": "Search Monitors in Cronitor",
       "mode": "view"
     }
   ],
