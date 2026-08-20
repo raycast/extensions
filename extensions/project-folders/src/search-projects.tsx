@@ -65,15 +65,9 @@ async function openFrameAndFinder(frameUrl: string, finderPath: string, app?: Ap
   await openInFinder(finderPath);
 }
 
-type Prefs = {
-  projectsRoot: string;
-  linkApp?: Application;
-  asanaApp?: Application;
-};
-
 export default function Command(props: LaunchProps<{ launchContext?: { gid?: string } }>) {
   const targetGid = props.launchContext?.gid;
-  const { projectsRoot, linkApp, asanaApp } = getPreferenceValues<Prefs>();
+  const { projectsRoot, linkApp, asanaApp } = getPreferenceValues<Preferences.SearchProjects>();
 
   const {
     data: index,
@@ -281,7 +275,11 @@ function ProjectItem({ project, isPinned, onPinChanged, onRefresh, linkApp, asan
               icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ["opt", "cmd"], key: "r" }}
               onAction={async () => {
-                await refreshProjectInSnapshot(getPreferenceValues<Prefs>().projectsRoot, project.year, project.name);
+                await refreshProjectInSnapshot(
+                  getPreferenceValues<Preferences.SearchProjects>().projectsRoot,
+                  project.year,
+                  project.name,
+                );
                 onRefresh();
               }}
             />

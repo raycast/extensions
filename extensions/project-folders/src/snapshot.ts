@@ -1,15 +1,19 @@
 import { environment } from "@raycast/api";
 import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { readAllLinks, type ProjectLinks } from "./links";
+import { LINK_FILES, readAllLinks, type LinkKind, type ProjectLinks } from "./links";
 
 const YEAR_RE = /^\d{4}$/;
-const SNAPSHOT_VERSION = 2;
+const SNAPSHOT_VERSION = 3;
 const SNAPSHOT_PATH = join(environment.supportPath, "index.json");
+const LINK_KINDS = Object.keys(LINK_FILES) as LinkKind[];
+
+type LinkMtimes = Partial<Record<LinkKind, number>>;
 
 export type SnapshotProject = {
   name: string;
   mtime: number;
+  linkMtimes: LinkMtimes;
   links: ProjectLinks;
   subfolders: string[];
 };
@@ -55,22 +59,42 @@ async function readSubfolders(projectPath: string): Promise<string[]> {
   }
 }
 
+async function readLinkMtimes(projectPath: string): Promise<LinkMtimes> {
+  const entries = await Promise.all(
+    LINK_KINDS.map(async (kind) => {
+      try {
+        const linkStat = await stat(join(projectPath, LINK_FILES[kind]));
+        return linkStat.isFile() ? ([kind, linkStat.mtimeMs] as const) : null;
+      } catch {
+        return null;
+      }
+    }),
+  );
+  return Object.fromEntries(entries.filter((entry): entry is readonly [LinkKind, number] => entry !== null));
+}
+
 async function scanProject(
   yearPath: string,
   name: string,
   diskMtime: number,
   cached: SnapshotProject | undefined,
 ): Promise<SnapshotProject> {
-  if (cached && cached.mtime === diskMtime) return cached;
   const projectPath = join(yearPath, name);
-  const [links, subfolders] = await Promise.all([readAllLinks(projectPath), readSubfolders(projectPath)]);
-  return { name, mtime: diskMtime, links, subfolders };
+  const linkMtimes = await readLinkMtimes(projectPath);
+  const canReuseLinks = cached ? LINK_KINDS.every((kind) => cached.linkMtimes[kind] === linkMtimes[kind]) : false;
+  const canReuseSubfolders = cached ? cached.mtime === diskMtime : false;
+  if (cached && canReuseLinks && canReuseSubfolders) return cached;
+
+  const [links, subfolders] = await Promise.all([
+    cached && canReuseLinks ? cached.links : readAllLinks(projectPath),
+    cached && canReuseSubfolders ? cached.subfolders : readSubfolders(projectPath),
+  ]);
+  return { name, mtime: diskMtime, linkMtimes, links, subfolders };
 }
 
 async function scanYear(root: string, year: string, cached: SnapshotYear | undefined): Promise<SnapshotYear> {
   const yearPath = join(root, year);
   const yearStat = await stat(yearPath);
-  if (cached && cached.mtime === yearStat.mtimeMs) return cached;
 
   const entries = await readdir(yearPath, { withFileTypes: true });
   const dirs = entries.filter((e) => e.isDirectory() && !e.name.startsWith("."));
