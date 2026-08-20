@@ -8,8 +8,8 @@ import {
   formatSessionPlainText,
   highlightMatch,
   renderMessage,
-} from "./format-session";
-import type { SessionMessage, SessionMeta } from "./types";
+} from "../format";
+import type { SessionMessage, SessionMeta } from "../types";
 
 const sampleMeta: SessionMeta = {
   id: "abc-123",

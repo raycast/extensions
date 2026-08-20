@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { claudeAdapter, codexAdapter, cleanTitle, getAdapter, isMeaningfulUserMessage } from "./format-adapters";
+import { claudeAdapter, codexAdapter, cleanTitle, getAdapter, isMeaningfulUserMessage } from "./index";
 
 describe("isMeaningfulUserMessage", () => {
   it("rejects only empty / whitespace-only input (short replies are still real)", () => {

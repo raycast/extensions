@@ -1,5 +1,6 @@
-import { SOURCE_BADGE, SOURCE_LABEL } from "./source-display";
-import type { SessionMessage, SessionMeta } from "./types";
+import { SOURCE_BADGE, SOURCE_LABEL } from "../source-display";
+import type { SessionMessage, SessionMeta } from "../types";
+import { highlightMatch } from "./highlight";
 
 /**
  * Format a single message as a markdown chunk.
@@ -79,41 +80,6 @@ export function formatSessionPlainText(meta: SessionMeta, messages: SessionMessa
 }
 
 /**
- * Find the index of the first message that contains `query` (case-insensitive).
- * Returns -1 if no match.
- */
-export function findMatchIndex(messages: SessionMessage[], query: string): number {
-  if (!query) return -1;
-  const q = query.toLowerCase();
-  for (let i = 0; i < messages.length; i++) {
-    if (messages[i].content.toLowerCase().includes(q)) return i;
-  }
-  return -1;
-}
-
-/**
- * Wrap each occurrence of `query` (case-insensitive) in **bold** for markdown rendering.
- */
-export function highlightMatch(text: string, query: string): string {
-  if (!query) return text;
-  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const re = new RegExp(escaped, "gi");
-  let inFence = false;
-
-  return text
-    .split("\n")
-    .map((line) => {
-      const isFence = /^\s*(`{3,}|~{3,})/.test(line);
-      if (isFence) {
-        inFence = !inFence;
-        return line;
-      }
-      return inFence ? line : line.replace(re, (m) => `**${m}**`);
-    })
-    .join("\n");
-}
-
-/**
  * Render each line of `text` as a blockquote ("> ...") so the user message looks like a bubble.
  */
 export function asBubble(text: string): string {
@@ -137,19 +103,4 @@ export function formatMessageTime(ts: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-/**
- * Format an epoch ms timestamp as a relative time ("5m ago", "3d ago", "Nov 12 2024").
- */
-export function formatRelativeTime(ts: number): string {
-  const diff = Date.now() - ts;
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(ts).toLocaleDateString();
 }
