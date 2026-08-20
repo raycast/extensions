@@ -3,20 +3,25 @@ import { addTask } from "./service/osScript";
 import { getProjects, initGlobalProjectInfo } from "./service/project";
 import { getDefaultDate } from "./service/preference";
 import { formatToServerDate } from "./utils/date";
+import { parseQuickAdd } from "./utils/quickAddParser";
 
 export default async function QuickAddTask(props: LaunchProps) {
   const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
   await toast.show();
   try {
     await initGlobalProjectInfo();
-    const title = (props.arguments.text ?? props.fallbackText).replace(/"/g, `\\"`);
+    const projects = getProjects();
+    const parsed = parseQuickAdd(props.arguments.text ?? props.fallbackText, projects);
+    const title = parsed.title.replace(/"/g, `\\"`);
     const description = props.arguments.description?.replace(/"/g, `\\"`);
+    const defaultDate = getDefaultDate();
     const result = await addTask({
-      projectId: getProjects().find((project) => project.name === "Inbox")?.id || "",
+      projectId: parsed.projectId || projects.find((project) => project.name === "Inbox")?.id || "",
       title,
       description,
-      dueDate: formatToServerDate(getDefaultDate()),
-      isAllDay: false,
+      dueDate: formatToServerDate(parsed.dueDate || defaultDate),
+      isAllDay: parsed.dueDate ? parsed.isAllDay : false,
+      priority: parsed.priority,
     });
 
     switch (result) {

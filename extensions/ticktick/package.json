@@ -9,7 +9,8 @@
     "Alireza",
     "yakitrak",
     "ridemountainpig",
-    "harsh_varshney"
+    "harsh_varshney",
+    "jason_lemieux"
   ],
   "license": "MIT",
   "categories": [
@@ -119,12 +120,12 @@
       "name": "quickAdd",
       "title": "Quick Add Task",
       "subtitle": "TickTick",
-      "description": "Quick way to add task in TickTick.",
+      "description": "Quickly add a task using natural-language dates, *dates, ~lists, and !priorities.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "text",
-          "placeholder": "Title",
+          "placeholder": "Task tomorrow at 9 ~Work !high",
           "type": "text",
           "required": true
         },
@@ -254,6 +255,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/*.test.mts",
     "publish": "ray publish"
   },
   "platforms": [
