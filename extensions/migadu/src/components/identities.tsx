@@ -238,7 +238,8 @@ function IdentitiesCreate({ mailbox, onIdentityCreated }: IdentitiesCreateProps)
           <Action
             title="Generate Random Address"
             icon={Icon.RotateClockwise}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
+            // eslint-disable-next-line @raycast/prefer-common-shortcut
+            shortcut={{ modifiers: ["ctrl"], key: "r" }}
             onAction={generateLocalPart}
           />
         </ActionPanel>
