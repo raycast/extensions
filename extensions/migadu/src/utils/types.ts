@@ -1,18 +1,15 @@
 // DOMAINS
 export type Domain = {
   name: string;
-  state: string;
+  "state": string
+  description: string;
 };
 export type FormDomainCreate = {
-  name: string;
-  hosted_dns: string;
-  create_default_addresses: boolean;
-};
+  name: string, hosted_dns:string, create_default_addresses:boolean
+}
 export type DomainCreate = {
-  name: string;
-  hosted_dns: boolean;
-  create_default_addresses: boolean;
-};
+  name: string, hosted_dns:boolean, create_default_addresses:boolean
+}
 
 // MAILBOXES
 export type Mailbox = {
@@ -239,15 +236,7 @@ export type RewriteEdit = {
 };
 
 export type BodyRequest =
-  | DomainCreate
-  | MailboxCreate
-  | MailboxEdit
-  | IdentityCreate
-  | IdentityEdit
-  | AliasCreate
-  | AliasEdit
-  | RewriteCreate
-  | RewriteEdit;
+  DomainCreate| MailboxCreate | MailboxEdit | IdentityCreate | IdentityEdit | AliasCreate | AliasEdit | RewriteCreate | RewriteEdit;
 export type ErrorResponse = {
   error: string;
 };
