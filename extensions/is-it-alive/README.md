@@ -32,11 +32,12 @@
 
 ## Supported status pages
 
-The extension auto-detects the provider when you add a URL. Detection order: **Railway → AWS → Salesforce Trust → Google Cloud → AI Studio → incident.io → Better Stack → Instatus → Statuspage → Checkly → Uptime.com → RSS**.
+The extension auto-detects the provider when you add a URL. Detection order: **Railway → OutageDeck → AWS → Salesforce Trust → Google Cloud → AI Studio → incident.io → Better Stack → Instatus → Statuspage → Checkly → Uptime.com → RSS**.
 
 | Provider          | Examples                                                       | Detection                             |
 | ----------------- | -------------------------------------------------------------- | ------------------------------------- |
 | **Railway**       | [status.railway.com](https://status.railway.com)               | Hostname match                        |
+| **OutageDeck**    | [outagedeck.com/providers/github](https://outagedeck.com/providers/github) | Provider URL; normalized public API |
 | **AWS**           | [health.aws.amazon.com](https://health.aws.amazon.com/health/status) | Hostname match                 |
 | **Salesforce Trust** | [status.salesforce.com/products/Heroku](https://status.salesforce.com/products/Heroku), [status.heroku.com](https://status.heroku.com) | Hostname match |
 | **Google Cloud**  | [status.cloud.google.com](https://status.cloud.google.com), `status.cloud.google.com/products/vertex-gemini-api` | Hostname match |
@@ -60,6 +61,8 @@ Uptime.com status pages embed their full state as React props in the page HTML; 
 The RSS fallback is checked last and covers pages whose APIs and HTML are blocked (e.g. status.x.ai sits behind a Cloudflare challenge but keeps `/feed.xml` reachable). It is incident-only: components are derived from incident titles, day history marks incident days, and no uptime percentage is available.
 
 The AWS adapter reads the Health Dashboard's public `currentevents` endpoint (UTF-16 JSON) plus the 12-month `historyevents.json` S3 export. Components cover service–region pairs that have reported events; services with no events in the window don't appear.
+
+The OutageDeck adapter accepts any `outagedeck.com/providers/{slug}` URL and reads the keyless public API. It provides a consistent vendor-published status, service breakdown, and active-incident shape for cloud and SaaS providers, based on their official status feeds.
 
 The Salesforce Trust adapter uses the public `api.status.salesforce.com/v1` API and covers any product page on [status.salesforce.com](https://status.salesforce.com) (Heroku, Tableau, Mulesoft, Slack, …). Add `https://status.salesforce.com/products/{Product}` to monitor one product; the bare domain maps to the core Salesforce Services product. `status.heroku.com` is deprecated in favor of Salesforce Trust, so it maps to the Heroku product automatically.
 
@@ -105,6 +108,7 @@ src/
     incident-io.ts       # incident.io proxy API
     instatus.ts          # Instatus public /summary.json API
     railway.ts           # Railway status API
+    outagedeck.ts        # OutageDeck normalized public API
     rss.ts               # generic RSS feed fallback (e.g. status.x.ai)
     aistudio.ts          # Google AI Studio / Gemini API incidents RPC
     googlecloud.ts       # Google Cloud Service Health incidents/products JSON

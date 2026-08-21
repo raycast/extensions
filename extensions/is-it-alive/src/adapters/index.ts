@@ -13,6 +13,7 @@ import { checklyAdapter } from "@/adapters/checkly";
 import { googleCloudAdapter } from "@/adapters/googlecloud";
 import { incidentIoAdapter } from "@/adapters/incident-io";
 import { instatusAdapter } from "@/adapters/instatus";
+import { outagedeckAdapter } from "@/adapters/outagedeck";
 import { railwayAdapter } from "@/adapters/railway";
 import { rssAdapter } from "@/adapters/rss";
 import { salesforceAdapter } from "@/adapters/salesforce";
@@ -34,6 +35,7 @@ const adapters: Record<SiteProvider, StatusAdapter> = {
   uptimecom: uptimecomAdapter,
   googlecloud: googleCloudAdapter,
   aistudio: aiStudioAdapter,
+  outagedeck: outagedeckAdapter,
 };
 
 export function getAdapter(provider: SiteProvider): StatusAdapter {
@@ -45,6 +47,11 @@ export async function detectProvider(siteUrl: string): Promise<SiteProvider> {
 
   if (isRailwayHost(normalized)) {
     return "railway";
+  }
+
+  const isOutageDeck = await outagedeckAdapter.detect?.(normalized);
+  if (isOutageDeck) {
+    return "outagedeck";
   }
 
   const isAws = await awsAdapter.detect?.(normalized);
@@ -103,7 +110,7 @@ export async function detectProvider(siteUrl: string): Promise<SiteProvider> {
   }
 
   throw new Error(
-    "Unsupported status page. Try Statuspage, Better Stack, incident.io, Instatus, Checkly, an RSS status feed, or status.railway.app",
+    "Unsupported status page. Try OutageDeck, Statuspage, Better Stack, incident.io, Instatus, Checkly, an RSS status feed, or status.railway.app",
   );
 }
 
