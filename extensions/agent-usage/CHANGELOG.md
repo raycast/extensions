@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add AIHubMix Usage] - 2026-08-21
+## [Add AIHubMix Usage] - {PR_MERGE_DATE}
 
 - Add AIHubMix balance monitoring to the main list and menu bar
 - Query account remaining and used balances with an Access Key from https://console.aihubmix.com/setting, or `AIHUBMIX_ACCESS_KEY`

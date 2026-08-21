@@ -77,7 +77,7 @@
     {
       "name": "aihubmixApiKey",
       "type": "password",
-      "title": "AIHubMix Access Key",
+      "title": "AIHubMix Access Key (Optional)",
       "description": "Copy the Access Key from https://console.aihubmix.com/setting, or set AIHUBMIX_ACCESS_KEY in your shell.",
       "required": false
     },
