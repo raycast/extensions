@@ -20,14 +20,11 @@ import { randomUUID } from "node:crypto";
 import { useMemo, useRef, useState } from "react";
 
 import { CATEGORY_STORAGE_KEY, Category, Entry, STORAGE_KEY } from "./entries";
+import { PasswordEntryValues, PasswordForm } from "./password-form";
 
 const NO_CATEGORY_VALUE = "__none__";
 
-type EntryValues = {
-  key: string;
-  value: string;
-  categoryId?: string;
-};
+type EntryValues = PasswordEntryValues;
 
 type EntryFormValues = {
   key: string;
@@ -251,6 +248,12 @@ export default function Command() {
             <ActionPanel>
               <Action.Push title="Create Key" icon={Icon.Plus} target={createEntryForm()} />
               <Action.Push
+                title="Generate Password"
+                icon={Icon.Key}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                target={<PasswordForm entries={entries} categories={categories} onSave={saveEntry} />}
+              />
+              <Action.Push
                 title="Create Category"
                 icon={Icon.Folder}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
@@ -297,6 +300,12 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push title="Create Category" icon={Icon.Folder} target={createCategoryForm()} />
+                <Action.Push
+                  title="Generate Password"
+                  icon={Icon.Key}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                  target={<PasswordForm entries={entries} categories={categories} onSave={saveEntry} />}
+                />
               </ActionPanel>
             }
           />
@@ -313,6 +322,19 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push title="Create Key" icon={Icon.Plus} target={createEntryForm(candidateKey)} />
+                <Action.Push
+                  title="Generate Password"
+                  icon={Icon.Key}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                  target={
+                    <PasswordForm
+                      entries={entries}
+                      categories={categories}
+                      initialKey={candidateKey}
+                      onSave={saveEntry}
+                    />
+                  }
+                />
                 <Action.Push
                   title="Create Category"
                   icon={Icon.Folder}
@@ -448,6 +470,19 @@ function EntryActions({
           target={createEntryForm()}
         />
         <Action.Push
+          title="Generate Password"
+          icon={Icon.Key}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+          target={
+            <PasswordForm
+              entries={entries}
+              categories={categories}
+              initialCategoryId={currentCategoryId}
+              onSave={onSave}
+            />
+          }
+        />
+        <Action.Push
           title="Create Category"
           icon={Icon.Folder}
           shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
@@ -513,6 +548,19 @@ function CategoryActions({
         icon={Icon.Plus}
         shortcut={Keyboard.Shortcut.Common.New}
         target={createEntryForm("", category.id)}
+      />
+      <Action.Push
+        title="Generate Password in Category"
+        icon={Icon.Key}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+        target={
+          <PasswordForm
+            entries={entries}
+            categories={categories}
+            initialCategoryId={category.id}
+            onSave={onSaveEntry}
+          />
+        }
       />
       <Action.Push
         title="Rename Category"
@@ -601,6 +649,19 @@ function CategoryView({
           actions={
             <ActionPanel>
               <Action.Push title="Create Key" icon={Icon.Plus} target={createEntryInCategory()} />
+              <Action.Push
+                title="Generate Password"
+                icon={Icon.Key}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                target={
+                  <PasswordForm
+                    entries={viewEntries}
+                    categories={viewCategories}
+                    initialCategoryId={currentCategory.id}
+                    onSave={saveEntry}
+                  />
+                }
+              />
               <Action.Push title="Rename Category" icon={Icon.Pencil} target={createCategoryForm(currentCategory)} />
             </ActionPanel>
           }

@@ -11,6 +11,10 @@ Store key-value pairs locally in Raycast, organize them into categories, and cop
 
 Open the Action Panel with `⌘ K` to edit or delete a key, copy its name, move it to another category, or create a new key.
 
+## Generate Passwords
+
+Run the standalone **Generate Password** command, select **Generate Password** from an Action Panel, or press `⌘ ⇧ G` inside **Search Key Values**. Enter a key name, optionally choose a category, and submit the form. The extension generates a 12-character password using only letters and digits, saves it as the key's value, and copies it to the clipboard.
+
 ## Categories
 
 Select **Create Category** in the main view, then choose the category when creating or editing a key. Keys without an assigned category remain under **Uncategorized**.

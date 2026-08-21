@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kv-store",
   "title": "Key Value Store",
-  "description": "Store key-value pairs in categories and copy values from Raycast or the menu bar.",
+  "description": "Store categorized key-value pairs, generate passwords, and copy values from Raycast or the menu bar.",
   "icon": "icon.png",
   "author": "georgy_s",
   "platforms": [
@@ -16,7 +16,7 @@
     {
       "name": "kv",
       "title": "Search Key Values",
-      "description": "Create, organize, search, and copy local key-value pairs.",
+      "description": "Create, organize, search, generate passwords, and copy local key-value pairs.",
       "mode": "view",
       "keywords": [
         "kv",
@@ -24,7 +24,21 @@
         "value",
         "clipboard",
         "storage",
-        "category"
+        "category",
+        "password",
+        "generator"
+      ]
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "description": "Generate a 12-character alphanumeric password and save it as a key.",
+      "mode": "view",
+      "keywords": [
+        "password",
+        "key",
+        "generate",
+        "random"
       ]
     },
     {
