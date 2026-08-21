@@ -1,4 +1,14 @@
-import { Form, ActionPanel, Action, getPreferenceValues, showHUD, PopToRootType, Clipboard, Icon } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  getPreferenceValues,
+  showHUD,
+  PopToRootType,
+  Clipboard,
+  Icon,
+  Keyboard,
+} from "@raycast/api";
 import { createMailboxIdentity, getMailboxes } from "./utils/api";
 import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { uniqueNamesGenerator } from "unique-names-generator";
@@ -107,10 +117,7 @@ export default function CreateAnonymousIdentityCommand() {
           <Action
             onAction={regenerateLocalPart}
             title="Generate New Address"
-            shortcut={{
-              key: "r",
-              modifiers: ["ctrl"],
-            }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             icon={Icon.RotateClockwise}
           />
           {/*

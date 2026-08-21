@@ -84,7 +84,7 @@ export function IdentitiesIndex({ mailbox }: { mailbox: Mailbox }) {
                 <Action
                   title="Create New Identity"
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   onAction={() =>
                     push(<IdentitiesCreate mailbox={mailbox} onIdentityCreated={getMailboxIdentitiesFromApi} />)
                   }
@@ -137,7 +137,7 @@ ${identity.footer_html_body}`}
                 <Action
                   title="Create New Identity"
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   onAction={() =>
                     push(<IdentitiesCreate mailbox={mailbox} onIdentityCreated={getMailboxIdentitiesFromApi} />)
                   }
@@ -238,10 +238,7 @@ function IdentitiesCreate({ mailbox, onIdentityCreated }: IdentitiesCreateProps)
           <Action
             title="Generate Random Address"
             icon={Icon.RotateClockwise}
-            shortcut={{
-              modifiers: ["ctrl"],
-              key: "r",
-            }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={generateLocalPart}
           />
         </ActionPanel>
