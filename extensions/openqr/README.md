@@ -65,22 +65,18 @@ your account hits a plan limit, the API says so and the command surfaces it as a
 
 ### Generate Static QR Code
 
-Encode any text or URL (`POST /v1/qr`). Choose **PNG** or **SVG** and set the pixel
-size. From the result you can open the file, reveal it in Finder, copy the file (or the
-SVG markup) to the clipboard, or generate another. The code never expires and needs no
-server to resolve.
-
-> Foreground and background colors apply to **SVG** output. The API's PNG renderer is
-> monochrome, so a PNG comes back black on white whatever colors you set.
+Encode any text or URL (`POST /v1/qr`). Choose **PNG** or **SVG**, set the pixel size,
+and optionally set foreground and background colors (either `232E3A` or `#232E3A`). Both
+formats honour the colors. From the result you can open the file, reveal it in Finder,
+copy the file (or the SVG markup) to the clipboard, or generate another. The code never
+expires and needs no server to resolve.
 
 ### Generate Dynamic QR Code
 
 Create an editable short link on `oqr.to` (`POST /v1/dynamic`) from a destination URL,
 with an optional label and saved theme. The short URL is copied to the clipboard, and
 the **QR image for that short URL is rendered inline** to copy, save or open: a dynamic
-code exists to be printed, so the link on its own is not the useful half. The inline
-image is a PNG, so it is monochrome; a themed code downloads in color from the OpenQR
-dashboard.
+code exists to be printed, so the link on its own is not the useful half. If a theme was given, the image uses its colors.
 
 > Custom slugs, tags and folders are not set at creation. `/v1/dynamic` does not accept
 > them; set them afterwards in the dashboard.
