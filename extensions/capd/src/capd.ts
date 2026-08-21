@@ -3,7 +3,7 @@ import { access, constants } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { getApplications, getPreferenceValues } from "@raycast/api";
-import { CapdFailed, CapdNotInstalled, CapdResult, ExitCode, explain, isAbort } from "./contract";
+import { CapdFailed, CapdNotInstalled, CapdResult, ExitCode, explain, isAbort, parseHits } from "./contract";
 import type { Hit } from "./types";
 
 const execFileAsync = promisify(execFile);
@@ -96,7 +96,7 @@ export async function run(args: string[], signal?: AbortSignal): Promise<CapdRes
 
 export async function search(query: string, limit: number, signal?: AbortSignal): Promise<Hit[]> {
   const { stdout } = await run(["search", query, "--json", "--limit", String(limit)], signal);
-  return JSON.parse(stdout) as Hit[];
+  return parseHits(stdout);
 }
 
 /**

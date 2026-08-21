@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { ExitCode, explain, isAbort, wasAlreadyCaptured } from "../src/contract";
+import { ExitCode, explain, isAbort, parseHits, wasAlreadyCaptured } from "../src/contract";
 import { Capture, Hit, headline, tagList } from "../src/types";
 
 /**
@@ -137,5 +137,26 @@ describe("add output", () => {
   it("recognizes a re-capture", () => {
     expect(wasAlreadyCaptured("Already captured #3 (2026-03-03): Notes — https://example.com")).toBe(true);
     expect(wasAlreadyCaptured("Captured #4: Notes — https://example.com")).toBe(false);
+  });
+});
+
+describe("parseHits", () => {
+  it("returns an empty list when stdout is blank", () => {
+    expect(parseHits("")).toEqual([]);
+    expect(parseHits("  \n")).toEqual([]);
+  });
+
+  it("parses a JSON array", () => {
+    const hits = parseHits('[{"capture":{"id":3},"snippet":"Notes"}]');
+    expect(hits).toHaveLength(1);
+    expect(hits[0].capture.id).toBe(3);
+  });
+
+  it("rejects a non-array payload", () => {
+    expect(() => parseHits('{"capture":{"id":3}}')).toThrow("Capd search did not return a JSON array.");
+  });
+
+  it("rejects invalid JSON", () => {
+    expect(() => parseHits("not json")).toThrow("Capd search returned invalid JSON.");
   });
 });

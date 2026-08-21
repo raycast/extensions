@@ -1,3 +1,5 @@
+import type { Hit } from "./types";
+
 /** The `capd` CLI's documented exit codes. They are a stable interface, not sysexits. */
 export const ExitCode = {
   ok: 0,
@@ -53,4 +55,25 @@ export function explain({ stderr, code }: Pick<CapdResult, "stderr" | "code">): 
 /** Distinguishes `Already captured #3 (…)` from `Captured #3: …` in `capd add` output. */
 export function wasAlreadyCaptured(line: string): boolean {
   return line.startsWith("Already captured");
+}
+
+/** `capd search --json` writes an array, or nothing when there are no hits. */
+export function parseHits(stdout: string): Hit[] {
+  const trimmed = stdout.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    throw new Error("Capd search returned invalid JSON.");
+  }
+
+  if (!Array.isArray(parsed)) {
+    throw new Error("Capd search did not return a JSON array.");
+  }
+
+  return parsed as Hit[];
 }

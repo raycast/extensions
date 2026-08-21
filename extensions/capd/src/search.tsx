@@ -12,13 +12,15 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
-import { getFavicon, useCachedPromise } from "@raycast/utils";
+import { getFavicon, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { remove, search, searchLimit } from "./capd";
 import { CapdNotInstalled } from "./contract";
 import { Capture, Hit, headline, tagList } from "./types";
 
 const INSTALL_GUIDE = "https://capd.jxd.dev/install";
 const PLACEHOLDER = "swift concurrency site:swift.org tag:development after:2026-01-01";
+const COPY_TITLE_SHORTCUT: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "t" };
+const COPY_MARKDOWN_SHORTCUT: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "m" };
 
 export default function Command() {
   const [query, setQuery] = useState("");
@@ -27,7 +29,17 @@ export default function Command() {
   const { data, isLoading, error, revalidate, mutate } = useCachedPromise(
     (text: string, limit: number) => search(text, limit, abortable.current?.signal),
     [query, searchLimit()],
-    { abortable, keepPreviousData: true, initialData: [] as Hit[] },
+    {
+      abortable,
+      keepPreviousData: true,
+      initialData: [] as Hit[],
+      onError: (searchError) => {
+        if (searchError instanceof CapdNotInstalled) {
+          return;
+        }
+        showFailureToast(searchError, { title: "Could not search Capd" });
+      },
+    },
   );
 
   if (error instanceof CapdNotInstalled) {
@@ -42,11 +54,15 @@ export default function Command() {
       searchBarPlaceholder={PLACEHOLDER}
       throttle
     >
-      {isLoading ? null : (
+      {isLoading || error ? null : (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title={query ? "No matching captures" : "Nothing captured yet"}
-          description={query ? "Try fewer words, or drop a site: or tag: filter." : "Press ⌃⌥C anywhere to capture."}
+          description={
+            query
+              ? "Try fewer words, or drop a site: or tag: filter."
+              : "Use the Capture command to save a link, selection, or the clipboard."
+          }
         />
       )}
       {(data ?? []).map((hit) => (
@@ -92,23 +108,19 @@ function Actions({
           <Action.CopyToClipboard title="Copy URL" content={capture.url} shortcut={Keyboard.Shortcut.Common.Copy} />
         ) : null}
         {capture.title ? (
-          <Action.CopyToClipboard
-            title="Copy Title"
-            content={capture.title}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-          />
+          <Action.CopyToClipboard title="Copy Title" content={capture.title} shortcut={COPY_TITLE_SHORTCUT} />
         ) : null}
         <Action.CopyToClipboard
           title="Copy as Markdown"
           content={markdown(capture)}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          shortcut={COPY_MARKDOWN_SHORTCUT}
         />
         {capture.selection ? <Action.CopyToClipboard title="Copy Selection" content={capture.selection} /> : null}
       </ActionPanel.Section>
 
       <ActionPanel.Section>
         <Action
-          title="Reload"
+          title="Refresh"
           icon={Icon.ArrowClockwise}
           onAction={onReload}
           shortcut={Keyboard.Shortcut.Common.Refresh}
