@@ -32,6 +32,7 @@ export default function CreateTicketCommand() {
 
   const { data: projects } = useCachedPromise(listProjects, [], { keepPreviousData: true });
   const [projectId, setProjectId] = useState<string>("");
+  const [sprintId, setSprintId] = useState<string>("");
   const { data: sprints } = useCachedPromise(listSprints, [projectId], {
     execute: projectId.length > 0,
     keepPreviousData: false,
@@ -71,7 +72,7 @@ export default function CreateTicketCommand() {
         owningDepartmentId: values.owningDepartmentId,
         assigneeUserId: values.assigneeUserId || undefined,
         projectId: values.projectId || undefined,
-        sprintId: values.sprintId || undefined,
+        sprintId: values.projectId ? values.sprintId || undefined : undefined,
         dueDate: values.dueDate ? values.dueDate.toISOString() : undefined,
         needsResponse: values.needsResponse,
       });
@@ -163,7 +164,15 @@ export default function CreateTicketCommand() {
       </Form.Dropdown>
 
       {projects && projects.length > 0 ? (
-        <Form.Dropdown id="projectId" title="Project" value={projectId} onChange={setProjectId}>
+        <Form.Dropdown
+          id="projectId"
+          title="Project"
+          value={projectId}
+          onChange={(value) => {
+            setProjectId(value);
+            setSprintId("");
+          }}
+        >
           <Form.Dropdown.Item value="" title="No Project" />
           {projects.map((project) => (
             <Form.Dropdown.Item key={project.id} value={project.id} title={project.name} />
@@ -172,7 +181,13 @@ export default function CreateTicketCommand() {
       ) : null}
 
       {projectId && sprints && sprints.length > 0 ? (
-        <Form.Dropdown id="sprintId" title="Sprint" info="Only open sprints can accept new tickets.">
+        <Form.Dropdown
+          id="sprintId"
+          title="Sprint"
+          value={sprintId}
+          onChange={setSprintId}
+          info="Only open sprints can accept new tickets."
+        >
           <Form.Dropdown.Item value="" title="Project Backlog" />
           {sprints.map((sprint) => (
             <Form.Dropdown.Item key={sprint.id} value={sprint.id} title={sprint.label} />
