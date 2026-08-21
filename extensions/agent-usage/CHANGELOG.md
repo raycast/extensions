@@ -1,5 +1,12 @@
 # Agent Usage Changelog
 
+## [Add MinimaxCN support] - 2026-08-21
+
+### New Features
+
+- Add MinimaxCN (Chinese-region MiniMax) to the main list and menu bar
+- Coding-plan quota window: 5h interval + weekly, with `current_interval_remaining_percent` fallback when counts are 0
+
 ## [Show Cursor Auto and API percentages] - 2026-08-16
 
 ### Improvements
