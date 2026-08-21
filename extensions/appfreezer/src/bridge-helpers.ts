@@ -5,7 +5,7 @@ export interface InstalledApplication {
   path: string;
 }
 
-export type AgentAction = "refresh" | "pause" | "resume" | "resume-all" | "quit" | "force-quit";
+export type AgentAction = "pause" | "resume" | "resume-all" | "quit" | "force-quit";
 
 export function locateAppFreezerPath(applications: readonly InstalledApplication[]): string | undefined {
   return applications.find((application) => application.bundleId === APPFREEZER_BUNDLE_ID)?.path;

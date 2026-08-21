@@ -13,6 +13,17 @@
     "System",
     "Productivity"
   ],
+  "keywords": [
+    "pause",
+    "resume",
+    "freeze",
+    "quit",
+    "force quit",
+    "applications",
+    "process",
+    "cpu",
+    "memory"
+  ],
   "commands": [
     {
       "name": "resume-all",
@@ -47,6 +58,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "eslint src tests && prettier --check 'src/**/*.{ts,tsx}' 'tests/**/*.ts'",
+    "fix-lint": "eslint src tests && prettier --write 'src/**/*.{ts,tsx}' 'tests/**/*.ts'",
     "lint:store": "ray lint --exit-on-error",
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest run",
@@ -54,6 +66,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
     "react": "^19.0.0"
   },
   "devDependencies": {

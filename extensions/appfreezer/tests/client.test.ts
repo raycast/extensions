@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  ACTION_WAIT_TIMEOUT_MS,
   AgentConnectionError,
   AgentLaunchError,
   AgentTimeoutError,
@@ -98,7 +99,11 @@ describe("App Freezer client", () => {
       lastAction: { requestID: "request-1", status: "succeeded" },
     });
     expect(deps.openURL).toHaveBeenCalledWith("appfreezer://pause?requestID=request-1&id=opaque-id");
-    expect(deps.runCLI).toHaveBeenCalledWith(cliPath, ["wait", "--request-id", "request-1", "--json"], 4_000);
+    expect(deps.runCLI).toHaveBeenCalledWith(
+      cliPath,
+      ["wait", "--request-id", "request-1", "--json"],
+      ACTION_WAIT_TIMEOUT_MS,
+    );
   });
 
   it("rejects actions missing an application ID without external side effects", async () => {

@@ -1,5 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
 import { performAction } from "./appfreezer";
+import { readableError } from "./errors";
 
 export default async function ResumeAll() {
   const toast = await showToast({
@@ -13,6 +14,6 @@ export default async function ResumeAll() {
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Could not resume all applications";
-    toast.message = error instanceof Error ? error.message : String(error);
+    toast.message = readableError(error);
   }
 }

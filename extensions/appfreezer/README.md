@@ -1,6 +1,6 @@
 # App Freezer for Raycast
 
-Search, pause, and resume macOS applications from Raycast. This extension is a deliberately thin client: only the native App Freezer agent manages process trees, sends signals, applies safety rules, and persists recovery state.
+Search, pause, and resume macOS applications from Raycast. This extension is a thin client: only the native App Freezer agent manages process trees, sends signals, applies safety rules, and persists recovery state.
 
 ## Requirements
 
@@ -23,6 +23,20 @@ Install App Freezer before using the extension. The native app is distributed se
 - Open App Freezer Settings
 - Refresh the native-agent snapshot
 
+### Resume All Apps
+
+Resume every application currently paused by App Freezer.
+
+### Quit App
+
+Send a normal Quit request to a selected application after confirmation.
+
+### Force Quit App
+
+Force quit a selected application after confirmation. Unsaved changes may be lost.
+
+Application lists can be sorted by name, CPU, or memory. Paused status, CPU, and memory appear as accessories.
+
 ## Development
 
 ```sh
@@ -34,8 +48,6 @@ npm run build
 ```
 
 Install and run App Freezer before testing actions. The native agent protocol is documented in [`docs/protocol.md`](docs/protocol.md).
-
-Pause or Resume App replaces the duplicate standalone Pause and Resume commands. Resume All Apps, Quit App, and Force Quit App remain available. Application lists can be sorted by name, CPU, or memory and consistently show Paused status only when applicable, followed by CPU and memory using Raycast's standard text color. Quit and Force Quit always require confirmation. Refreshes and app actions are serialized because protocol v4 exposes one `lastAction` result slot. Older native agents are rejected with an upgrade message. The blue extension icon uses the exact native menu-bar PNG as its alpha mask; the unchanged source copy is `assets/menu-bar-mark.png`.
 
 ## License
 

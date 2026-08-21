@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <title>Snow Pause</title>
-  <desc>A compact snowflake whose open center contains a pause symbol.</desc>
-  <g id="icon" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M54 256h116M342 256h116M98 98l92 92M322 322l92 92M414 98l-92 92M190 322l-92 92" stroke-width="42"/>
-    <path d="m54 256 42-42M54 256l42 42M458 256l-42-42M458 256l-42 42M98 98l62 2M98 98l2 62M414 414l-62-2M414 414l-2-62M414 98l-62 2M414 98l-2 62M98 414l62-2M98 414l2-62" stroke-width="30"/>
-    <path d="M218 176v160M294 176v160" stroke-width="48"/>
-  </g>
-</svg>

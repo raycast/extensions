@@ -2,7 +2,8 @@ import { join } from "node:path";
 import { AgentAction, buildActionURL, InstalledApplication, locateAppFreezerPath } from "./bridge-helpers";
 import { actionError, actionOutcome, AgentSnapshot, parseSnapshot, ProtocolError } from "./protocol";
 
-const ACTION_TIMEOUT_MS = 3_000;
+export const ACTION_TIMEOUT_MS = 3_000;
+export const ACTION_WAIT_TIMEOUT_MS = ACTION_TIMEOUT_MS + 1_000;
 
 export class AppFreezerNotInstalledError extends Error {
   constructor() {
@@ -34,7 +35,7 @@ export class AgentConnectionError extends Error {
 
 export class AgentTimeoutError extends Error {
   constructor() {
-    super("App Freezer did not confirm the request within 3 seconds.");
+    super(`App Freezer did not confirm the request within ${ACTION_TIMEOUT_MS / 1_000} seconds.`);
     this.name = "AgentTimeoutError";
   }
 }
@@ -64,7 +65,7 @@ function isTimeout(error: unknown): boolean {
   return (
     candidate.code === "ETIMEDOUT" ||
     candidate.killed === true ||
-    /did not respond within 3 seconds|timed? out/i.test(errorText(error))
+    new RegExp(`did not respond within ${ACTION_TIMEOUT_MS / 1_000} seconds|timed? out`, "i").test(errorText(error))
   );
 }
 
@@ -119,7 +120,7 @@ export function createAppFreezerClient(dependencies: AppFreezerClientDependencie
   }
 
   async function waitForAction(cliPath: string, requestID: string): Promise<AgentSnapshot> {
-    return runAndParse(cliPath, ["wait", "--request-id", requestID, "--json"], ACTION_TIMEOUT_MS + 1_000);
+    return runAndParse(cliPath, ["wait", "--request-id", requestID, "--json"], ACTION_WAIT_TIMEOUT_MS);
   }
 
   async function performActionNow(action: AgentAction, id?: string): Promise<AgentSnapshot> {

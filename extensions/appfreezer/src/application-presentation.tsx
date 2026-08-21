@@ -1,8 +1,14 @@
 import { Color, List } from "@raycast/api";
-import { ApplicationSortMode } from "./application-sort";
+import { APPLICATION_SORT_MODES, ApplicationSortMode, isApplicationSortMode } from "./application-sort";
 import { AppFreezerApplication } from "./protocol";
 
 export type { ApplicationSortMode } from "./application-sort";
+
+const SORT_MODE_TITLES: Record<ApplicationSortMode, string> = {
+  name: "Name",
+  cpu: "CPU",
+  memory: "Memory",
+};
 
 function formatPercent(value: number): string {
   return value.toFixed(value >= 10 ? 0 : 1);
@@ -35,11 +41,15 @@ export function ApplicationSortDropdown({
     <List.Dropdown
       tooltip="Sort Applications"
       value={value}
-      onChange={(newValue) => onChange(newValue as ApplicationSortMode)}
+      onChange={(newValue) => {
+        if (isApplicationSortMode(newValue)) {
+          onChange(newValue);
+        }
+      }}
     >
-      <List.Dropdown.Item title="Name" value="name" />
-      <List.Dropdown.Item title="CPU" value="cpu" />
-      <List.Dropdown.Item title="Memory" value="memory" />
+      {APPLICATION_SORT_MODES.map((mode) => (
+        <List.Dropdown.Item key={mode} title={SORT_MODE_TITLES[mode]} value={mode} />
+      ))}
     </List.Dropdown>
   );
 }

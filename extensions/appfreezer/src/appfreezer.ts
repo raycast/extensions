@@ -1,8 +1,9 @@
-import { getApplications, open } from "@raycast/api";
+import { getApplications, open, showToast, Toast } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
 import { access } from "node:fs/promises";
 import { createAppFreezerClient } from "./client";
+import { readableError } from "./errors";
 
 export {
   AgentConnectionError,
@@ -37,4 +38,15 @@ const client = createAppFreezerClient({
 
 export const loadSnapshot = client.loadSnapshot;
 export const performAction = client.performAction;
-export const openSettings = client.openSettings;
+
+export async function openSettings(): Promise<void> {
+  try {
+    await client.openSettings();
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not open App Freezer Settings",
+      message: readableError(error),
+    });
+  }
+}

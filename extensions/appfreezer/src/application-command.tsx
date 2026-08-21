@@ -1,9 +1,11 @@
 import { Action, ActionPanel, Alert, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { AppFreezerNotInstalledError, loadSnapshot, performAction } from "./appfreezer";
+import { useCallback, useMemo, useState } from "react";
+import { AppFreezerNotInstalledError, performAction } from "./appfreezer";
 import { ApplicationSortDropdown, ApplicationSortMode, applicationAccessories } from "./application-presentation";
 import { sortApplications } from "./application-sort";
-import { AgentSnapshot, AppFreezerApplication } from "./protocol";
+import { readableError } from "./errors";
+import { AppFreezerApplication } from "./protocol";
+import { useAgentSnapshot } from "./use-agent-snapshot";
 
 export type ApplicationCommandMode = "quit" | "force-quit";
 
@@ -35,10 +37,6 @@ const definitions: Record<ApplicationCommandMode, CommandDefinition> = {
   },
 };
 
-function readableError(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 function applicationsForMode(
   applications: AppFreezerApplication[],
   sortMode: ApplicationSortMode,
@@ -51,26 +49,8 @@ function applicationsForMode(
 
 export function ApplicationCommand({ mode }: { mode: ApplicationCommandMode }) {
   const definition = definitions[mode];
-  const [snapshot, setSnapshot] = useState<AgentSnapshot>();
-  const [error, setError] = useState<unknown>();
-  const [loading, setLoading] = useState(true);
+  const { snapshot, error, isLoading, revalidate, applySnapshot } = useAgentSnapshot();
   const [sortMode, setSortMode] = useState<ApplicationSortMode>("name");
-
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      setSnapshot(await loadSnapshot());
-      setError(undefined);
-    } catch (caught) {
-      setError(caught);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
 
   const applications = useMemo(() => applicationsForMode(snapshot?.applications ?? [], sortMode), [snapshot, sortMode]);
 
@@ -95,8 +75,7 @@ export function ApplicationCommand({ mode }: { mode: ApplicationCommandMode }) {
         title: `${definition.verb} ${application.name}…`,
       });
       try {
-        const next = await performAction(definition.action, application.id);
-        setSnapshot(next);
+        await applySnapshot(performAction(definition.action, application.id));
         toast.style = Toast.Style.Success;
         toast.title = `${definition.verb} completed for ${application.name}`;
       } catch (caught) {
@@ -105,19 +84,19 @@ export function ApplicationCommand({ mode }: { mode: ApplicationCommandMode }) {
         toast.message = readableError(caught);
       }
     },
-    [definition, mode],
+    [applySnapshot, definition, mode],
   );
 
   if (error) {
     return (
-      <List isLoading={loading}>
+      <List isLoading={isLoading}>
         <List.EmptyView
           icon={error instanceof AppFreezerNotInstalledError ? Icon.Download : Icon.Warning}
           title={error instanceof AppFreezerNotInstalledError ? "App Freezer Is Not Installed" : "Could Not Load Apps"}
           description={readableError(error)}
           actions={
             <ActionPanel>
-              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={refresh} />
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
           }
         />
@@ -127,7 +106,7 @@ export function ApplicationCommand({ mode }: { mode: ApplicationCommandMode }) {
 
   return (
     <List
-      isLoading={loading}
+      isLoading={isLoading}
       searchBarPlaceholder={`${definition.verb} an app…`}
       searchBarAccessory={<ApplicationSortDropdown value={sortMode} onChange={setSortMode} />}
     >
@@ -147,19 +126,19 @@ export function ApplicationCommand({ mode }: { mode: ApplicationCommandMode }) {
                 style={definition.destructive ? Action.Style.Destructive : Action.Style.Regular}
                 onAction={() => run(application)}
               />
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refresh} />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
           }
         />
       ))}
-      {!loading && applications.length === 0 ? (
+      {!isLoading && applications.length === 0 ? (
         <List.EmptyView
           icon={definition.icon}
           title={definition.emptyTitle}
           description={definition.emptyDescription}
           actions={
             <ActionPanel>
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refresh} />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
           }
         />
