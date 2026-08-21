@@ -52,7 +52,16 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 		throw new Error(body?.message ?? `Request failed (${response.status})`);
 	}
 
-	return (await response.json()) as T;
+	if (response.status === 204) {
+		return undefined as T;
+	}
+
+	const text = await response.text();
+	if (!text) {
+		return undefined as T;
+	}
+
+	return JSON.parse(text) as T;
 }
 
 export function createTask(text: string) {
@@ -70,5 +79,5 @@ export function setTaskCompleted(id: string, completed: boolean) {
 }
 
 export function deleteTask(id: string) {
-	return request<LogEntry>(`/api/logs/${id}`, { method: "DELETE" });
+	return request<void>(`/api/logs/${id}`, { method: "DELETE" });
 }

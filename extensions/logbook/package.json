@@ -8,6 +8,14 @@
 	"categories": [
 		"Productivity"
 	],
+	"keywords": [
+		"log",
+		"journal",
+		"todo",
+		"task",
+		"daily",
+		"notes"
+	],
 	"license": "MIT",
 	"commands": [
 		{
@@ -15,7 +23,12 @@
 			"title": "Search Tasks",
 			"subtitle": "Logbook",
 			"description": "Browse your logbook, mark tasks complete, and delete entries.",
-			"mode": "view"
+			"mode": "view",
+			"keywords": [
+				"todo",
+				"journal",
+				"log"
+			]
 		},
 		{
 			"name": "add-task",
@@ -23,6 +36,11 @@
 			"subtitle": "Logbook",
 			"description": "Add a task to your logbook without opening a window.",
 			"mode": "no-view",
+			"keywords": [
+				"create",
+				"new",
+				"todo"
+			],
 			"arguments": [
 				{
 					"name": "text",
@@ -40,6 +58,7 @@
 			"description": "Where the Logbook web app is hosted. Change this only if you self-host.",
 			"type": "textfield",
 			"required": false,
+			"placeholder": "https://logbook.acrosaas.com",
 			"default": "https://logbook.acrosaas.com"
 		},
 		{
@@ -48,20 +67,21 @@
 			"description": "Where the Logbook API is hosted. Change this only if you self-host.",
 			"type": "textfield",
 			"required": false,
+			"placeholder": "https://api.logbook.acrosaas.com",
 			"default": "https://api.logbook.acrosaas.com"
 		}
 	],
 	"dependencies": {
-		"@raycast/api": "^1.104.24",
-		"@raycast/utils": "^2.2.7"
+		"@raycast/api": "^2.0.4",
+		"@raycast/utils": "^2.3.0"
 	},
 	"devDependencies": {
 		"@raycast/eslint-config": "^2.2.0",
-		"@types/node": "^22.13.10",
-		"@types/react": "^19.0.10",
-		"eslint": "^9.39.5",
+		"@types/node": "^26.2.0",
+		"@types/react": "^19.2.18",
+		"eslint": "^10.9.0",
 		"prettier": "^3.9.6",
-		"typescript": "^5.8.2"
+		"typescript": "~5.9.3"
 	},
 	"scripts": {
 		"build": "ray build",
@@ -70,5 +90,9 @@
 		"fix-lint": "ray lint --fix",
 		"typecheck": "tsc --noEmit",
 		"publish": "npx @raycast/api@latest publish"
-	}
+	},
+	"platforms": [
+		"macOS",
+		"Windows"
+	]
 }

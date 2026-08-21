@@ -22,7 +22,6 @@ const urls = getUrls();
 /** No refresh URL — the token stays valid until revoked server-side. */
 export const logbook = new OAuthService({
 	client,
-	// Mirrors RAYCAST_CLIENT_ID; can't be imported from outside the workspace.
 	clientId: "logbook-raycast",
 	scope: "",
 	authorizeUrl: `${urls.web}/raycast/authorize`,
