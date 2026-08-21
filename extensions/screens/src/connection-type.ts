@@ -1,5 +1,6 @@
 import { Color, Icon, Image, List } from '@raycast/api';
 import { ConnectionType } from './archive';
+import { ConnectTarget } from './connect';
 
 export interface TypeSection {
   title: string;
@@ -66,7 +67,24 @@ export function connectionAccessories(
  * The type to store for a section the user picked. An imported connection keeps the more specific
  * type it came in with whenever that still belongs to the chosen section.
  */
-export function typeForSection(title: string, current?: ConnectionType): ConnectionType {
+export function typeForSection(title: string, current: ConnectionType): ConnectionType {
   const section = TYPE_SECTIONS.find((entry) => entry.title === title) ?? TYPE_SECTIONS[0];
-  return current && section.types.includes(current) ? current : section.types[0];
+  return section.types.includes(current) ? current : section.types[0];
+}
+
+/** How a row reaches its host, when that is worth calling out. */
+export function targetStatus(target: ConnectTarget): List.Item.Accessory | undefined {
+  if (target.kind === 'direct') {
+    return {
+      icon: { source: Icon.ArrowRight, tintColor: Color.SecondaryText },
+      tooltip: 'Connects to this host directly rather than through the connection saved in Screens.',
+    };
+  }
+  if (target.ambiguous) {
+    return {
+      icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
+      tooltip: 'Another connection shares this name, so Screens decides which one opens.',
+    };
+  }
+  return undefined;
 }

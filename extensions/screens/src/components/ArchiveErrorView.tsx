@@ -1,111 +1,51 @@
-import { Action, ActionPanel, Detail, openExtensionPreferences } from '@raycast/api';
-import { ArchiveError } from '../archive';
+import { Action, ActionPanel, Detail, Icon, useNavigation } from '@raycast/api';
+import { ArchiveError, ArchiveErrorType } from '../archive';
 
-const EXPORT_STEPS = [
-  'Open **Screens**',
-  'Go to **Settings → Archives → Export…**',
-  'Save the `.screens` file somewhere it will stay put, such as your Documents folder',
-  "Select that file in this extension's preferences",
-];
-
-type ArchiveErrorViewProps = {
-  error: Error;
-  onRetry?: () => void;
+const PROBLEMS: Record<ArchiveErrorType, { title: string; description: string }> = {
+  FILE_NOT_FOUND: {
+    title: 'Archive Not Found',
+    description: 'The file is no longer at that path.',
+  },
+  UNREADABLE: {
+    title: 'Archive Unreadable',
+    description:
+      'The file is there but could not be read. One kept in iCloud Drive has to be downloaded to this Mac first.',
+  },
+  INVALID_JSON: {
+    title: 'Not a Screens Archive',
+    description: 'The file could not be read as JSON. An export interrupted partway through leaves it that way.',
+  },
+  NOT_AN_ARCHIVE: {
+    title: 'No Connections in Archive',
+    description: 'The file is valid JSON, but holds no connections.',
+  },
 };
 
-type ErrorGuidance = {
-  title: string;
-  description: string;
-  solutions: string[];
-};
+const UNKNOWN = { title: 'Could Not Read the Archive', description: 'Something went wrong reading the file.' };
 
-export default function ArchiveErrorView({ error, onRetry }: ArchiveErrorViewProps) {
-  const guidance = getGuidance(error);
+export default function ArchiveErrorView({ error, onRetry }: { error: Error; onRetry: () => void }) {
+  const { pop } = useNavigation();
+  const problem = error instanceof ArchiveError ? PROBLEMS[error.type] : UNKNOWN;
+  const detail = error instanceof ArchiveError ? error.originalError : error.message;
 
   return (
     <Detail
-      navigationTitle={guidance.title}
-      markdown={buildMarkdown(guidance, error)}
+      navigationTitle={problem.title}
+      markdown={`# ${problem.title}
+
+${problem.description} Choose a different file, or export a fresh archive from Screens:
+
+1. Open **Screens**
+2. Go to **Settings → Archives → Export…**
+3. Save the \`.screens\` file
+
+${detail ? `---\n\n\`${detail}\`` : ''}`}
       actions={
         <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          {onRetry ? <Action title="Try Again" onAction={onRetry} /> : null}
+          <Action title="Choose a Different Archive" icon={Icon.Finder} onAction={pop} />
+          <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
         </ActionPanel>
       }
     />
   );
-}
-
-function getGuidance(error: Error): ErrorGuidance {
-  if (error instanceof ArchiveError) {
-    switch (error.type) {
-      case 'FILE_NOT_FOUND':
-        return {
-          title: 'Archive Not Found',
-          description: 'The archive selected in preferences is no longer at that path.',
-          solutions: [
-            'If you moved or renamed the file, select it again in preferences',
-            'If you deleted it, export a fresh one:',
-            ...EXPORT_STEPS,
-          ],
-        };
-
-      case 'UNREADABLE':
-        return {
-          title: 'Archive Unreadable',
-          description: 'The archive exists but could not be read.',
-          solutions: [
-            '**Check permissions**: make sure the file is readable by your user account',
-            '**Move it out of a protected folder**: files in iCloud Drive may not be downloaded locally',
-            '**Re-export**: export a fresh archive and select it in preferences',
-          ],
-        };
-
-      case 'INVALID_JSON':
-        return {
-          title: 'Archive Is Not Valid',
-          description: 'The selected file is not readable as a Screens archive.',
-          solutions: [
-            '**Check the file**: make sure you selected the `.screens` file, not a folder or a backup',
-            '**Re-export**: a truncated export can leave an unreadable file. Export again:',
-            ...EXPORT_STEPS,
-          ],
-        };
-
-      case 'NOT_AN_ARCHIVE':
-        return {
-          title: 'No Connections in Archive',
-          description: 'The file parsed, but it has no list of connections in it.',
-          solutions: [
-            '**Check the file**: this looks like valid JSON but not a Screens archive',
-            '**Re-export**: export a fresh archive from Screens:',
-            ...EXPORT_STEPS,
-          ],
-        };
-    }
-  }
-
-  return {
-    title: 'Error',
-    description: 'An error occurred while reading the Screens archive.',
-    solutions: ['Check that the archive selected in preferences still exists', 'Export a fresh archive from Screens'],
-  };
-}
-
-function buildMarkdown(guidance: ErrorGuidance, error: Error): string {
-  const path = error instanceof ArchiveError ? error.path : undefined;
-  const original = error instanceof ArchiveError ? error.originalError : error.message;
-
-  return `# ${guidance.title}
-
-${guidance.description}
-
-## Solutions
-
-${guidance.solutions.map((solution, index) => `${index + 1}. ${solution}`).join('\n')}
-
-## Technical Details
-
-- Error Type: \`${error instanceof ArchiveError ? error.type : error.constructor.name}\`${path ? `\n- Path: \`${path}\`` : ''}
-- Original Error: \`${original || 'N/A'}\``;
 }

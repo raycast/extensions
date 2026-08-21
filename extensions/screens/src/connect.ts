@@ -111,7 +111,7 @@ export function describeTarget(target: ConnectTarget): string {
 }
 
 /** The address of the host itself, bypassing the library. Only VNC has an ad-hoc URL scheme. */
-export function directUrl(connection: Connection): string | undefined {
+function directUrl(connection: Connection): string | undefined {
   if (connection.clientProtocol !== 'vnc') return undefined;
 
   const address = directAddress(connection);

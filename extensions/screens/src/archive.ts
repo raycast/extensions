@@ -1,7 +1,9 @@
 import { statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 
-export type ConnectionType = 'local' | 'remote' | 'tailscale' | 'url' | 'saved' | 'recent';
+const CONNECTION_TYPES = ['local', 'remote', 'tailscale', 'url', 'saved', 'recent'] as const;
+
+export type ConnectionType = (typeof CONNECTION_TYPES)[number];
 
 export type ClientProtocol = 'vnc' | 'rdp';
 
@@ -42,8 +44,6 @@ export class ArchiveError extends Error {
 const CORE_DATA_EPOCH_OFFSET_SECONDS = 978307200;
 const NEVER_CONNECTED = -63114076800;
 
-const CONNECTION_TYPES: ConnectionType[] = ['local', 'remote', 'tailscale', 'url', 'saved', 'recent'];
-
 /**
  * The archive's modification time, which is the real export time. Returns 0 when the file is
  * missing or unreadable so callers can use it as a cache key without handling failure twice.
@@ -60,7 +60,7 @@ export function archiveModifiedAt(path: string): number {
  * Reads a `.screens` archive exported from Screens → Settings → Archives → Export….
  *
  * `modifiedAt` comes from {@link archiveModifiedAt} and serves as both the cache key and the
- * export date. The archive's own `filename` field lags the real export, so it is not used.
+ * export date: the archive's own `filename` field lags the real export.
  */
 export async function readArchive(path: string, modifiedAt: number): Promise<Archive> {
   let contents: string;

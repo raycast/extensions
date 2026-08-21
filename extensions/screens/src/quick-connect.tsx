@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, closeMainWindow, open } from '@raycast/api';
 import { showFailureToast } from '@raycast/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AdHocProtocol, ConnectOptions, DEFAULT_PORTS, HostSpec, adHocUrl, parseHostSpec } from './connect';
 
 type ConnectForm = {
@@ -14,8 +14,8 @@ type ConnectForm = {
 
 /**
  * Connects straight away when the root search bar supplied a host, and asks for the details
- * otherwise. A host that doesn't parse falls through to the form carrying what was typed, so a typo
- * is corrected rather than retyped.
+ * otherwise. A scheme typed inline wins over the dropdown, and a host that doesn't parse falls
+ * through to the form carrying what was typed, so a typo is corrected rather than retyped.
  */
 export default function Command({ arguments: args }: LaunchProps<{ arguments: Arguments.QuickConnect }>) {
   const typed = args.host?.trim() ?? '';
@@ -23,15 +23,20 @@ export default function Command({ arguments: args }: LaunchProps<{ arguments: Ar
   const spec = parseHostSpec(typed);
 
   if (spec) {
-    return <ImmediateConnect spec={spec} protocol={chosen ?? spec.protocol ?? 'vnc'} />;
+    return <ImmediateConnect spec={spec} protocol={spec.protocol ?? chosen ?? 'vnc'} />;
   }
   return <QuickConnectForm host={typed} protocol={chosen ?? 'vnc'} />;
 }
 
 function ImmediateConnect({ spec, protocol }: { spec: HostSpec; protocol: AdHocProtocol }) {
+  // Opening twice would start two sessions, so the connection survives a remount.
+  const started = useRef(false);
+
   useEffect(() => {
+    if (started.current) return;
+    started.current = true;
     connect(spec.host, protocol, { port: spec.port, username: spec.username });
-  }, []);
+  }, [spec, protocol]);
 
   return <Detail isLoading markdown={`Connecting to \`${spec.host}\`…`} />;
 }

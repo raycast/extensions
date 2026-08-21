@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Alert,
-  Color,
   Icon,
   Image,
   Keyboard,
@@ -18,7 +17,7 @@ import {
 import { showFailureToast, useFrecencySorting } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 import { ClientProtocol } from './archive';
-import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections } from './connection-type';
+import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections, targetStatus } from './connection-type';
 import { ConnectOptions, describeTarget, targetUrl } from './connect';
 import { SavedConnection, blankConnection, useSavedConnections } from './library';
 import ConnectionForm from './components/ConnectionForm';
@@ -104,7 +103,7 @@ export default function Command() {
               }}
               title={connection.name}
               subtitle={describeTarget(connection.target)}
-              accessories={connectionAccessories(connection.type, targetStatus(connection))}
+              accessories={connectionAccessories(connection.type, targetStatus(connection.target))}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
@@ -184,21 +183,4 @@ function ImportAction() {
       onAction={() => launchCommand({ name: 'import-connections', type: LaunchType.UserInitiated })}
     />
   );
-}
-
-/** How the row reaches its host, when that is worth calling out. */
-function targetStatus(connection: SavedConnection): List.Item.Accessory | undefined {
-  if (connection.target.kind === 'direct') {
-    return {
-      icon: { source: Icon.ArrowRight, tintColor: Color.SecondaryText },
-      tooltip: 'Connects to this host directly rather than through the connection saved in Screens.',
-    };
-  }
-  if (connection.target.ambiguous) {
-    return {
-      icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
-      tooltip: 'Another connection shares this name, so Screens decides which one opens.',
-    };
-  }
-  return undefined;
 }

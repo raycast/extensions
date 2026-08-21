@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Form, Icon, List, Toast, popToRoot, showToa
 import { useCachedPromise } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 import { Archive, Connection, archiveModifiedAt, readArchive } from './archive';
-import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections } from './connection-type';
+import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections, targetStatus } from './connection-type';
 import { describeTarget, normalizeHostname, resolveTarget } from './connect';
 import { SavedConnection, toSavedConnection, useSavedConnections } from './library';
 import ArchiveErrorView from './components/ArchiveErrorView';
@@ -87,7 +87,7 @@ function SelectConnections({ path }: { path: string }) {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={`Import Connections — ${selection.size} of ${all.length} selected`}
+      navigationTitle={navigationTitle(selection.size, all.length, data?.exportedAt)}
       searchBarPlaceholder="Filter connections"
       searchBarAccessory={<TypeFilter sections={availableSections} value={filter} onChange={setFilter} />}
     >
@@ -106,11 +106,7 @@ function SelectConnections({ path }: { path: string }) {
                 }
                 title={connection.name || normalizeHostname(connection.hostname)}
                 subtitle={describeTarget(target)}
-                accessories={connectionAccessories(
-                  connection.type,
-                  ambiguityWarning(target.kind === 'saved' && target.ambiguous),
-                  archiveUsage(connection),
-                )}
+                accessories={connectionAccessories(connection.type, targetStatus(target), archiveUsage(connection))}
                 actions={
                   <ActionPanel>
                     <Action
@@ -155,6 +151,13 @@ function SelectConnections({ path }: { path: string }) {
   );
 }
 
+/** Keeps the export date in view, so importing from a stale archive is a visible choice. */
+function navigationTitle(selected: number, total: number, exportedAt: Date | undefined): string {
+  const counts = `${selected} of ${total} selected`;
+  if (!exportedAt) return counts;
+  return `${counts} · exported ${exportedAt.toLocaleDateString(undefined, { dateStyle: 'medium' })}`;
+}
+
 /**
  * Screens lists everything it discovers on the local network, so a fresh archive is mostly hosts
  * the user has never opened. Preselect the ones they have actually connected to, or the ones they
@@ -190,14 +193,6 @@ function archiveUsage(connection: Connection): List.Item.Accessory[] {
       tooltip: connection.lastConnectionDate ? 'Last connected, according to the archive' : null,
     },
   ];
-}
-
-function ambiguityWarning(ambiguous: boolean): List.Item.Accessory | undefined {
-  if (!ambiguous) return undefined;
-  return {
-    icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
-    tooltip: 'Another connection shares this name and hostname, so Screens decides which one opens.',
-  };
 }
 
 function byUsage(a: Connection, b: Connection): number {
