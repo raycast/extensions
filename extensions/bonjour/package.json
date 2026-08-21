@@ -1,5 +1,5 @@
 {
-  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "$schema": "https://raycast.com/schemas/extension.json",
   "name": "bonjour",
   "title": "Bonjour",
   "description": "Manage Bonjour services",
@@ -30,17 +30,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.0",
-    "@raycast/utils": "^1.16.3",
-    "bonjour-service": "^1.2.1"
+    "@raycast/api": "latest",
+    "@raycast/utils": "latest",
+    "bonjour-service": "latest"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "react-devtools": "latest",
+    "typescript": "latest"
   },
   "scripts": {
     "build": "ray build -e dist",
