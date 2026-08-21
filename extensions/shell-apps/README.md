@@ -2,7 +2,7 @@
 
 Turn any shell command into an app-like shortcut for Windows, right from Raycast. Give your most-used commands (`npm run build`, `git status`, `wsl`, custom scripts...) a name, launch them in a dedicated terminal window, and pin them to the root search like real apps.
 
-![Shell Apps list](metadata/shell-apps-1.png)
+![Create Shell App form](metadata/shell-apps-1.png)
 
 ## Features
 
@@ -37,11 +37,9 @@ preferences you can also assign it a hotkey, so `⌥ Space → My App` or a keyb
 
 ## Screenshots
 
-![Shell Apps list](metadata/shell-apps-1.png)
+![Create Shell App form](metadata/shell-apps-1.png)
 
-![Create Shell App form](metadata/shell-apps-2.png)
-
-![Launch a shortcut in a terminal](metadata/shell-apps-3.png)
+![Shell Apps list with the action menu open](metadata/shell-apps-2.png)
 
 ## Commands
 

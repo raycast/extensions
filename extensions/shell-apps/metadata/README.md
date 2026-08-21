@@ -6,13 +6,12 @@ This directory contains screenshots for the Raycast Store listing.
 
 - **Resolution**: 2000×1250 pixels (16:10 aspect ratio)
 - **Format**: PNG
-- **Count**: Minimum 3, maximum 6 screenshots
+- **Count**: 2 screenshots (Raycast recommends at least 3, maximum 6)
 
 ## Naming Convention
 
-- `shell-apps-1.png` - List of configured shell app shortcuts
-- `shell-apps-2.png` - Create Shell App form
-- `shell-apps-3.png` - Launching a shortcut in a terminal window
+- `shell-apps-1.png` - Create Shell App form
+- `shell-apps-2.png` - Shell Apps list with the action menu open
 
 ## Guidelines
 
