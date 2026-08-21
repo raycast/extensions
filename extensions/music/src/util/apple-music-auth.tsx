@@ -40,6 +40,23 @@ function debugLog(message: string): void {
   if (environment.isDevelopment) console.debug(`[AppleMusicAuth] ${message}`);
 }
 
+/** Caches derived from the signed-in account (storefront, /v1/me responses)
+ * must not outlive the token they were built under — the next sign-in may be
+ * a different account, or the same account in a different storefront. Modules
+ * owning such a cache register a clearer here; all clearers run whenever the
+ * stored tokens are discarded (sign-out, expiry, revocation). */
+type AccountCacheClearer = () => void | Promise<void>;
+const accountCacheClearers: AccountCacheClearer[] = [];
+
+export function registerAccountCacheClearer(clear: AccountCacheClearer): void {
+  accountCacheClearers.push(clear);
+}
+
+async function discardTokens(): Promise<void> {
+  await client.removeTokens();
+  for (const clear of accountCacheClearers) await clear();
+}
+
 async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", CLIENT_ID);
@@ -69,7 +86,7 @@ async function authorize(): Promise<string> {
   if (tokenSet?.accessToken) {
     if (!tokenSet.isExpired()) return tokenSet.accessToken;
     debugLog("stored user token reported expired; discarding and re-authorizing");
-    await client.removeTokens();
+    await discardTokens();
   }
 
   const authRequest = await client.authorizationRequest({
@@ -118,7 +135,7 @@ async function authorizeAndValidate(): Promise<string> {
   if (await isTokenAccepted(token)) return token;
 
   debugLog("Apple rejected the stored user token; clearing it and signing in again");
-  await client.removeTokens();
+  await discardTokens();
   return authorize();
 }
 
@@ -131,7 +148,7 @@ export const withAppleMusicAuth = withAccessToken({ authorize: authorizeAndValid
 /** Drop the stored user token. The next authenticated command prompts for a
  * fresh sign-in, which is also how you switch accounts. */
 export async function signOut(): Promise<void> {
-  await client.removeTokens();
+  await discardTokens();
 }
 
 /** Sign-out affordance for the action panel of any authenticated command.

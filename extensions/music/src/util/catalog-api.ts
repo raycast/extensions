@@ -2,7 +2,7 @@ import { Cache, LocalStorage } from "@raycast/api";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 
-import { appleMusicFetch } from "./apple-music-auth";
+import { appleMusicFetch, registerAccountCacheClearer } from "./apple-music-auth";
 import { CatalogAlbum, CatalogSong } from "./models";
 
 // Shared Apple Music catalog client: storefront resolution, 429 backoff
@@ -19,6 +19,15 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 const cache = new Cache({ namespace: "catalog-api" });
 const STOREFRONT_KEY = "catalog-storefront";
+
+// The storefront and every cached /v1/me response are account-scoped: a new
+// sign-in must not inherit the previous account's regional catalog or
+// personalized feeds. Dropping the whole response cache also costs the
+// catalog day-cache, which is an acceptable price for an event this rare.
+registerAccountCacheClearer(() => {
+  cache.clear();
+  return LocalStorage.removeItem(STOREFRONT_KEY);
+});
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

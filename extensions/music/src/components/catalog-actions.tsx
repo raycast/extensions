@@ -19,7 +19,7 @@ export function AddToLibraryAction({ kind, id, title }: { kind: keyof typeof ADD
       icon={Icon.Plus}
       shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
       onAction={async () => {
-        await showToast({ style: Toast.Style.Animated, title: "Adding to Library…" });
+        const toast = await showToast({ style: Toast.Style.Animated, title: "Adding to Library…" });
 
         const alreadyInLibrary = await pipe(
           isInLibrary(kind, id),
@@ -29,6 +29,9 @@ export function AddToLibraryAction({ kind, id, title }: { kind: keyof typeof ADD
         )();
 
         if (alreadyInLibrary) {
+          // An animated toast never resolves on its own — hide it before the
+          // alert so a Cancel doesn't leave it spinning forever.
+          await toast.hide();
           const confirmed = await confirmAlert({
             title: "Already in Library",
             message: `"${title}" is already in your library. Add it anyway?`,
@@ -63,5 +66,7 @@ export function AddToLibraryAction({ kind, id, title }: { kind: keyof typeof ADD
 
 export function OpenInMusicAction({ url }: { url: string | null }) {
   if (!url) return null;
-  return <Action.OpenInBrowser title="Open in Music" icon={Icon.Music} url={url} />;
+  // The music: scheme hands the page to Music.app; the https URL would open
+  // the web player in the browser instead.
+  return <Action.Open title="Open in Music" icon={Icon.Music} target={url.replace(/^https:/, "music:")} />;
 }
