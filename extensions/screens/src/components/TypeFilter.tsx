@@ -17,7 +17,7 @@ export default function TypeFilter({
   if (sections.length < 2) return null;
 
   return (
-    <List.Dropdown tooltip="Filter by Type" value={value} onChange={onChange} storeValue>
+    <List.Dropdown tooltip="Filter by Type" value={value} onChange={onChange}>
       <List.Dropdown.Item title="All Types" value={ALL_TYPES} icon={Icon.AppWindowGrid3x3} />
       <List.Dropdown.Section>
         {sections.map((section) => (

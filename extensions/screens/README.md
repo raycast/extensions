@@ -19,12 +19,14 @@ no archive.
 ## Commands
 
 **Search Connections** lists what you have, grouped by type and ordered by how often and how recently you connect from
-Raycast. Connect with Return, or use Observe Mode (⌘⇧E) to watch without controlling and Guest (⌘⇧G) to skip saved
-credentials. Filter by type from the dropdown in the top right. Add a connection with ⌘N, edit one with ⌘E to rename it
-or change what it opens, and remove one with ⌃X, which drops it from Raycast and leaves Screens untouched.
+Raycast. Search matches a connection's name or the address it opens. Connect with Return. On a VNC connection, Observe
+Mode (⌘⇧E) watches without controlling and Guest (⌘⇧G) skips saved credentials. Filter by type from the dropdown in the
+top right. Add a connection with ⌘N, edit one with ⌘E to rename it or change what it opens, and remove one with ⌃X,
+which drops it from Raycast and leaves Screens untouched.
 
-**Import Connections** picks an archive and selects what to keep. Running it again replaces the list, so it both adds
-new connections and drops ones you no longer want. Your previous choices come back preselected.
+**Import Connections** picks an archive and selects what to keep. Running it again updates the connections that archive
+covers, adding new ones and dropping the ones you deselect, and leaves anything you added by hand alone. Your previous
+choices come back preselected.
 
 **Quick Connect** connects to a machine that isn't in your list. Type a host straight into the root search bar, in any
 form a URL would take: `desk-imac.local`, `admin@10.0.0.4:5901`, `ssh://192.0.2.10`, or `[2001:db8::1]`. Launch it with

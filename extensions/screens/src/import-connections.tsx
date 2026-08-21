@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Form, Icon, List, Toast, popToRoot, showToast, useNavigation } from '@raycast/api';
-import { useCachedPromise } from '@raycast/utils';
+import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 import { Archive, Connection, archiveModifiedAt, readArchive } from './archive';
 import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections, targetStatus } from './connection-type';
@@ -10,24 +10,17 @@ import TypeFilter from './components/TypeFilter';
 
 export default function Command() {
   const { push } = useNavigation();
-  const [pathError, setPathError] = useState<string | undefined>();
+
+  const { handleSubmit, itemProps } = useForm<{ archive: string[] }>({
+    validation: { archive: FormValidation.Required },
+    onSubmit: (values) => push(<SelectConnections path={values.archive[0]} />),
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Choose Connections"
-            icon={Icon.ArrowRight}
-            onSubmit={(values: { archive: string[] }) => {
-              const path = values.archive?.[0];
-              if (!path) {
-                setPathError('Required');
-                return;
-              }
-              push(<SelectConnections path={path} />);
-            }}
-          />
+          <Action.SubmitForm title="Choose Connections" icon={Icon.ArrowRight} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -36,12 +29,10 @@ export default function Command() {
         text="In Screens, go to Settings → Archives → Export…, save the .screens file, then choose it here. You pick which connections to keep on the next step."
       />
       <Form.FilePicker
-        id="archive"
         title="Archive"
         allowMultipleSelection={false}
         canChooseDirectories={false}
-        error={pathError}
-        onChange={() => setPathError(undefined)}
+        {...itemProps.archive}
       />
     </Form>
   );
@@ -49,7 +40,8 @@ export default function Command() {
 
 function SelectConnections({ path }: { path: string }) {
   const { connections: saved, setConnections } = useSavedConnections();
-  const { data, isLoading, error, revalidate } = useCachedPromise(readArchive, [path, archiveModifiedAt(path)]);
+  const modifiedAt = useMemo(() => archiveModifiedAt(path), [path]);
+  const { data, isLoading, error, revalidate } = useCachedPromise(readArchive, [path, modifiedAt]);
 
   const [selected, setSelected] = useState<Set<string> | undefined>();
   const [filter, setFilter] = useState(ALL_TYPES);
@@ -76,7 +68,13 @@ function SelectConnections({ path }: { path: string }) {
 
   async function save() {
     const keep = all.filter((connection) => selection.has(connection.id));
-    await setConnections(keep.map((connection) => toSavedConnection(connection, all)));
+
+    // An import replaces only what this archive covers. A connection added by hand, or kept from a
+    // different archive, is one this archive has no opinion about, so importing leaves it alone.
+    const covered = new Set(all.map((connection) => connection.id));
+    const untouched = saved.filter((connection) => !covered.has(connection.id));
+
+    await setConnections([...untouched, ...keep.map((connection) => toSavedConnection(connection, all))]);
     await showToast({
       style: Toast.Style.Success,
       title: keep.length === 1 ? 'Imported 1 connection' : `Imported ${keep.length} connections`,

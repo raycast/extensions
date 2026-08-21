@@ -113,16 +113,24 @@ function parseConnection(value: unknown): Connection | undefined {
   const id = typeof raw.id === 'string' ? raw.id : undefined;
   if (!id) return undefined;
 
+  const name = typeof raw.name === 'string' ? raw.name.trim() : '';
+  const hostname = typeof raw.hostname === 'string' ? raw.hostname : '';
+  const sourceURL = nonEmptyString(raw.sourceURL);
+
+  // Every URL scheme Screens accepts addresses a connection by one of these three. An entry holding
+  // none of them is one nothing can open and no row can label, so it is dropped.
+  if (!name && !hostname.trim() && !sourceURL) return undefined;
+
   return {
     id,
-    name: typeof raw.name === 'string' ? raw.name : '',
-    hostname: typeof raw.hostname === 'string' ? raw.hostname : '',
+    name,
+    hostname,
     type: parseType(raw.type),
     clientProtocol: raw.clientProtocol === 'rdp' ? 'rdp' : 'vnc',
     port: typeof raw.port === 'number' ? raw.port : 0,
     publicIpAddress: nonEmptyString(raw.publicIpAddress),
     publicPort: typeof raw.publicPort === 'number' && raw.publicPort > 0 ? raw.publicPort : undefined,
-    sourceURL: nonEmptyString(raw.sourceURL),
+    sourceURL,
     username: parseUsername(raw.users),
     lastConnectionDate: parseCoreDataDate(raw.lastConnectionDate),
     numberOfConnections: typeof raw.numberOfConnections === 'number' ? raw.numberOfConnections : 0,

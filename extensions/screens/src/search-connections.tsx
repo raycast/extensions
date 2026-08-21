@@ -83,8 +83,12 @@ export default function Command() {
     >
       <List.EmptyView
         icon={Icon.Desktop}
-        title="No Connections Yet"
-        description="Import an archive exported from Screens, or add a connection by hand."
+        title={connections.length === 0 ? 'No Connections Yet' : 'No Matching Connections'}
+        description={
+          connections.length === 0
+            ? 'Import an archive exported from Screens, or add a connection by hand.'
+            : 'Your other connections are hidden by the search or the type filter.'
+        }
         actions={
           <ActionPanel>
             <ImportAction />
@@ -94,73 +98,81 @@ export default function Command() {
       />
       {sections.map((section) => (
         <List.Section key={section.title} title={section.title} subtitle={`${section.connections.length}`}>
-          {section.connections.map((connection) => (
-            <List.Item
-              key={connection.id}
-              icon={{
-                value: PROTOCOL_ICONS[connection.clientProtocol],
-                tooltip: connection.clientProtocol.toUpperCase(),
-              }}
-              title={connection.name}
-              subtitle={describeTarget(connection.target)}
-              accessories={connectionAccessories(connection.type, targetStatus(connection.target))}
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Section>
-                    <Action title="Connect" icon={Icon.Desktop} onAction={() => connect(connection)} />
-                    {supportsScreenSharing(connection.target) && (
-                      <Action
-                        title="Connect in Observe Mode"
-                        icon={Icon.Eye}
-                        shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
-                        onAction={() => connect(connection, { observe: true })}
+          {section.connections.map((connection) => {
+            const address = describeTarget(connection.target);
+            const canShareScreen = supportsScreenSharing(connection.target, connection.clientProtocol);
+
+            return (
+              <List.Item
+                key={connection.id}
+                icon={{
+                  value: PROTOCOL_ICONS[connection.clientProtocol],
+                  tooltip: connection.clientProtocol.toUpperCase(),
+                }}
+                title={connection.name}
+                subtitle={address}
+                // Raycast searches titles and keywords, so without this a machine is findable only by
+                // the name it was given and never by the address it answers on.
+                keywords={[address]}
+                accessories={connectionAccessories(connection.type, targetStatus(connection.target))}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section>
+                      <Action title="Connect" icon={Icon.Desktop} onAction={() => connect(connection)} />
+                      {canShareScreen && (
+                        <Action
+                          title="Connect in Observe Mode"
+                          icon={Icon.Eye}
+                          shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
+                          onAction={() => connect(connection, { observe: true })}
+                        />
+                      )}
+                      {canShareScreen && (
+                        <Action
+                          title="Connect as Guest"
+                          icon={Icon.Person}
+                          shortcut={{ modifiers: ['cmd', 'shift'], key: 'g' }}
+                          onAction={() => connect(connection, { guest: true })}
+                        />
+                      )}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <Action.Push
+                        title="Edit Connection"
+                        icon={Icon.Pencil}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
+                        target={<ConnectionForm connection={connection} onSave={save} />}
                       />
-                    )}
-                    {supportsScreenSharing(connection.target) && (
+                      {addAction}
                       <Action
-                        title="Connect as Guest"
-                        icon={Icon.Person}
-                        shortcut={{ modifiers: ['cmd', 'shift'], key: 'g' }}
-                        onAction={() => connect(connection, { guest: true })}
+                        title="Remove from Raycast"
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                        onAction={() => remove(connection)}
                       />
-                    )}
-                  </ActionPanel.Section>
-                  <ActionPanel.Section>
-                    <Action.Push
-                      title="Edit Connection"
-                      icon={Icon.Pencil}
-                      shortcut={Keyboard.Shortcut.Common.Edit}
-                      target={<ConnectionForm connection={connection} onSave={save} />}
-                    />
-                    {addAction}
-                    <Action
-                      title="Remove from Raycast"
-                      icon={Icon.Trash}
-                      style={Action.Style.Destructive}
-                      shortcut={Keyboard.Shortcut.Common.Remove}
-                      onAction={() => remove(connection)}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section>
-                    <Action.CopyToClipboard
-                      title="Copy Address"
-                      content={describeTarget(connection.target)}
-                      shortcut={Keyboard.Shortcut.Common.Copy}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Connect URL"
-                      content={targetUrl(connection.target)}
-                      shortcut={Keyboard.Shortcut.Common.CopyPath}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section>
-                    <ImportAction />
-                    <Action.Open title="Open Screens" target="/Applications/Screens 5.app" icon={Icon.AppWindow} />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          ))}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <Action.CopyToClipboard
+                        title="Copy Address"
+                        content={address}
+                        shortcut={Keyboard.Shortcut.Common.Copy}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Connect URL"
+                        content={targetUrl(connection.target)}
+                        shortcut={Keyboard.Shortcut.Common.CopyPath}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <ImportAction />
+                      <Action.Open title="Open Screens" target="/Applications/Screens 5.app" icon={Icon.AppWindow} />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       ))}
     </List>

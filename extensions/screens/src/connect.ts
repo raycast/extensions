@@ -1,4 +1,4 @@
-import { Connection } from './archive';
+import { ClientProtocol, Connection } from './archive';
 
 export interface ConnectOptions {
   observe?: boolean;
@@ -105,10 +105,12 @@ export function targetUrl(target: ConnectTarget, options: ConnectOptions = {}): 
 }
 
 /**
- * Whether Observe Mode and Guest apply. Both are screen-sharing options, so an SSH target has no
- * use for them.
+ * Whether Observe Mode and Guest apply. Both are Apple screen-sharing options, so they reach only a
+ * VNC connection: SSH has no screen to share, and RDP authenticates against Windows, which has
+ * neither an observe mode nor a guest account to offer.
  */
-export function supportsScreenSharing(target: ConnectTarget): boolean {
+export function supportsScreenSharing(target: ConnectTarget, clientProtocol: ClientProtocol): boolean {
+  if (clientProtocol !== 'vnc') return false;
   return !(target.kind === 'direct' && target.url.toLowerCase().startsWith('ssh://'));
 }
 
@@ -138,7 +140,9 @@ function directUrl(connection: Connection): string | undefined {
  */
 function directAddress(connection: Connection): { host: string; port: number } | undefined {
   const hostname = normalizeHostname(connection.hostname);
-  const byHostname = hostname ? { host: hostname, port: connection.port } : undefined;
+  // Screens stores a display label such as `Front Desk iMac` in this field on some connections, so
+  // only a hostname free of whitespace counts as an address.
+  const byHostname = hostname && !/\s/.test(hostname) ? { host: hostname, port: connection.port } : undefined;
 
   if (connection.type === 'local') return byHostname;
   if (connection.publicIpAddress) {
