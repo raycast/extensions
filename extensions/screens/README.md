@@ -30,6 +30,8 @@ a connection's name or the address it opens. Filter by type from the dropdown in
 - **⌘E** edits a connection, to rename it or change what it opens
 - **⌃X** removes a connection from Raycast, leaving Screens untouched
 
+The action panel also copies a connection's address or the URL it opens, and opens Import Connections.
+
 #### Import Connections
 
 Picks an archive and selects what to keep. Running it again updates the connections that archive covers, adding new ones
@@ -39,8 +41,9 @@ preselected.
 #### Quick Connect
 
 Connects to a machine that isn't in your list. Type a host straight into the root search bar, in any form a URL would
-take: `desk-imac.local`, `admin@10.0.0.4:5901`, `ssh://192.0.2.10`, or `[2001:db8::1]`. Launch it with the host empty
-for a form with port, username, Observe Mode, and Guest.
+take: `desk-imac.local`, `admin@10.0.0.4:5901`, `ssh://192.0.2.10`, or `[2001:db8::1]`. A second argument chooses VNC or
+SSH, and a scheme typed into the host itself wins over it. Launch it with the host empty for a form with protocol, port,
+username, Observe Mode, and Guest.
 
 ## How Connections Are Addressed
 
