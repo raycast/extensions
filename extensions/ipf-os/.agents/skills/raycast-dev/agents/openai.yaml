@@ -1,0 +1,4 @@
+interface:
+  display_name: "Raycast Developer"
+  short_description: "Build, review, and debug Raycast extensions"
+  default_prompt: "Use $raycast-dev to architect, build, review, or debug Raycast extensions using @raycast/api, @raycast/utils, declarative UI components, and Raycast CLI workflows."

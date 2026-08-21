@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ipf-os",
+  "title": "iPF OS",
+  "description": "Raise, track, and action iPF OS tickets without leaving your keyboard.",
+  "icon": "extension-icon.png",
+  "author": "joseph_emmanuel",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-tickets",
+      "title": "Search Tickets",
+      "subtitle": "iPF OS",
+      "description": "Find any ticket and act on it. Opens on what you are watching, and widens to the whole organisation.",
+      "mode": "view",
+      "keywords": ["ticket", "tickets", "ticketing", "issue", "support", "backlog", "watching"]
+    },
+    {
+      "name": "create-ticket",
+      "title": "Create Ticket",
+      "subtitle": "iPF OS",
+      "description": "Raise a ticket and route it to the right department, project, or person.",
+      "mode": "view",
+      "keywords": ["ticket", "raise", "report", "bug", "request", "support", "new"]
+    },
+    {
+      "name": "assigned-tickets",
+      "title": "Assigned Tickets",
+      "subtitle": "iPF OS",
+      "description": "Keeps a count of the open tickets assigned to you in the menu bar, overdue ones first.",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "keywords": ["ticket", "assigned", "queue", "overdue", "workload"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "API Gateway",
+      "description": "iPF OS gateway, including the /api/v1 path.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://os.gateway.beagile.africa/api/v1"
+    },
+    {
+      "name": "webAppUrl",
+      "title": "Web App",
+      "description": "Where Connect and Open in iPF OS send you.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://os.beagile.africa"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
