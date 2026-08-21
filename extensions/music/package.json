@@ -131,7 +131,7 @@
       "description": "Get info about currently playing track.",
       "disabledByDefault": true,
       "mode": "no-view",
-      "interval": "30s"
+      "interval": "1m"
     },
     {
       "name": "remove-current-playing-from-current-playlist",

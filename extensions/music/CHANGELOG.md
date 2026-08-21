@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Background Refresh Fix] - 2026-08-21
+
+- Reduced background current-track refreshes to once per minute.
+
 ## [Fix Library Album Search] - 2026-06-15
 
 - Fixed `Play Library Album` so searching by artist name shows matching albums from the library.
