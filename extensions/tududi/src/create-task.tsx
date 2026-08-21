@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { createTask, fetchProjects, fetchTags } from "./lib/api";
-import { parsePriority, TASK_STATUS } from "./lib/constants";
+import { isInTodayPlan, parsePriority, TASK_STATUS } from "./lib/constants";
 
 export default function Command() {
   const [name, setName] = useState("");
@@ -30,8 +30,9 @@ export default function Command() {
         .map((uid) => tags.find((t) => t.uid === uid))
         .filter((t): t is NonNullable<typeof t> => Boolean(t));
 
-      // Tududi removed the boolean `today` field. Tasks appear in Today's plan
-      // when status is planned / in_progress / waiting. Checking "Today" sets Planned.
+      // Tududi removed the boolean `today` field. Tasks appear in Today's plan when
+      // status is planned / in_progress / waiting. Only rewrite statuses that aren't
+      // already in the plan (e.g. Not Started, Done) so In Progress / Waiting are kept.
       let resolvedStatus = Number.parseInt(status, 10);
       if (today && !isInTodayPlan(resolvedStatus)) {
         resolvedStatus = TASK_STATUS.PLANNED;
