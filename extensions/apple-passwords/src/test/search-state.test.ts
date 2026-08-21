@@ -40,6 +40,7 @@ function makeApplePwClient(overrides: Partial<ApplePwClient>): ApplePwClient {
     getOtp: async () => {
       throw new Error("not used");
     },
+    requestAuthentication: async () => undefined,
     authenticate: async () => ({ status: 0 }),
     execute: async () => {
       throw new Error("not used");
@@ -450,6 +451,22 @@ test("authenticates startup pin submissions without a pending action", async () 
   assert.equal(result.query, "");
   assert.deepEqual(result.rows, []);
   assert.deepEqual(calls, ["auth:654321"]);
+});
+
+test("requests an Apple Passwords pairing code explicitly", async () => {
+  let requestCount = 0;
+  const workflow = createPasswordSearchWorkflow({
+    applePw: makeApplePwClient({
+      requestAuthentication: async () => {
+        requestCount += 1;
+      },
+    }),
+    repository: makeRepository({}),
+  });
+
+  await workflow.requestPin();
+
+  assert.equal(requestCount, 1);
 });
 
 test("fetches password and otp secrets for the selected account", async () => {

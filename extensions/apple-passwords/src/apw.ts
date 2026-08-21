@@ -9,6 +9,7 @@ import {
   type ApplePwOtpEntry,
   type ApplePwPasswordEntry,
 } from "./applepw";
+import { copyConcealedToClipboard } from "./clipboard";
 import { createAccountRepository, type AccountRecord, type AccountRepository, type DiscoveredAccount } from "./db";
 
 type PendingAction =
@@ -42,6 +43,7 @@ export interface PasswordSearchWorkflow {
   fetchPassword(account: AccountRecord): Promise<PasswordSearchOutcome>;
   fetchOtp(account: AccountRecord): Promise<PasswordSearchOutcome>;
   importAccounts(accounts: DiscoveredAccount[], query: string): Promise<SearchResultsOutcome>;
+  requestPin(): Promise<void>;
   submitPin(pin: string): Promise<PasswordSearchOutcome>;
 }
 
@@ -53,7 +55,6 @@ export interface PasswordSearchWorkflowOptions {
 type UiRuntime = {
   Action: typeof import("@raycast/api").Action;
   ActionPanel: typeof import("@raycast/api").ActionPanel;
-  Clipboard: typeof import("@raycast/api").Clipboard;
   Detail: typeof import("@raycast/api").Detail;
   Form: typeof import("@raycast/api").Form;
   Icon: typeof import("@raycast/api").Icon;
@@ -67,7 +68,7 @@ type UiRuntime = {
 const require = createRequire(join(process.cwd(), "package.json"));
 const defaultApplePwClient = createApplePwClient();
 let uiRuntime: UiRuntime | null = null;
-export const APPLEPW_INSTALL_COMMAND = "brew install alecharmon/tap/applepw";
+export const APPLEPW_INSTALL_COMMAND = "brew install bendews/tap/apw";
 
 function getUiRuntime(): UiRuntime {
   if (uiRuntime) {
@@ -78,7 +79,6 @@ function getUiRuntime(): UiRuntime {
   uiRuntime = {
     Action: api.Action,
     ActionPanel: api.ActionPanel,
-    Clipboard: api.Clipboard,
     Detail: api.Detail,
     Form: api.Form,
     Icon: api.Icon,
@@ -103,7 +103,7 @@ function selectPasswordValue(result: ApplePwCommandOutcome<ApplePwPasswordEntry[
   const entry = result.kind === "success" ? result.payload[0] : undefined;
   const password = entry?.password?.trim();
   if (!password) {
-    throw new Error("applepw did not return a password");
+    throw new Error("apw did not return a password");
   }
   return password;
 }
@@ -113,7 +113,7 @@ function selectOtpValue(result: ApplePwCommandOutcome<ApplePwOtpEntry[]>, accoun
   const entry = entries.find((candidate) => candidate.username === account.username) ?? entries[0];
   const code = entry?.code?.trim();
   if (!code) {
-    throw new Error("applepw did not return a 2FA code");
+    throw new Error("apw did not return a 2FA code");
   }
   return code;
 }
@@ -376,13 +376,16 @@ export function createPasswordSearchWorkflow(options: PasswordSearchWorkflowOpti
         rows,
       };
     },
+    requestPin: async () => {
+      await applePw.requestAuthentication();
+    },
     submitPin,
   };
 }
 
 async function copySecretAndNotify(outcome: SecretOutcome): Promise<void> {
   const ui = getUiRuntime();
-  await ui.Clipboard.copy(outcome.value, { concealed: true });
+  await copyConcealedToClipboard(outcome.value);
   await ui.showHUD(outcome.action === "password" ? "Password copied" : "2FA code copied");
 }
 
@@ -434,17 +437,38 @@ function SecretActionListItem({
   });
 }
 
-export function AuthPromptForm({ prompt, onSubmit }: { prompt: string; onSubmit: (pin: string) => Promise<void> }) {
+export function AuthPromptForm({
+  prompt,
+  onRequestCode,
+  onSubmit,
+}: {
+  prompt: string;
+  onRequestCode: () => Promise<void>;
+  onSubmit: (pin: string) => Promise<void>;
+}) {
   const ui = getUiRuntime();
   const h = React.createElement;
+  const [pin, setPin] = useState("");
+  const submitAction = h(ui.Action.SubmitForm, createAuthPromptSubmitActionProps(onSubmit));
+  const requestCodeAction = h(ui.Action, {
+    title: "Request Code",
+    icon: ui.Icon.Key,
+    shortcut: { modifiers: ["cmd"], key: "r" },
+    onAction: () => void onRequestCode(),
+  });
 
   return h(
     ui.Form,
     {
-      actions: h(ui.ActionPanel, null, h(ui.Action.SubmitForm, createAuthPromptSubmitActionProps(onSubmit))),
+      actions: h(
+        ui.ActionPanel,
+        null,
+        pin.trim() ? submitAction : requestCodeAction,
+        pin.trim() ? requestCodeAction : submitAction,
+      ),
     },
     h(ui.Form.Description, createAuthPromptDescriptionProps(prompt)),
-    h(ui.Form.PasswordField, createAuthPromptFieldProps()),
+    h(ui.Form.PasswordField, { ...createAuthPromptFieldProps(), onChange: setPin }),
   );
 }
 
@@ -474,14 +498,14 @@ export function createAuthPromptDescriptionProps(prompt: string) {
 }
 
 export function isMissingApplePwBinaryError(error: unknown): boolean {
-  return error instanceof Error && error.message.includes("Unable to locate applepw binary");
+  return error instanceof Error && /Unable to locate (?:applepw|apw) binary/.test(error.message);
 }
 
 export function createMissingBinaryMarkdown() {
   return [
     "# Install Apple Passwords CLI",
     "",
-    "This command needs the local `applepw` CLI before it can search your Apple Passwords cache.",
+    "This command needs the local `apw` CLI before it can search Apple Passwords.",
     "",
     "## Install",
     "",
@@ -489,7 +513,8 @@ export function createMissingBinaryMarkdown() {
     APPLEPW_INSTALL_COMMAND,
     "```",
     "",
-    "After installing, reopen the command and authenticate.",
+    "Google Chrome, Brave, Edge, or Chromium must also have Apple's iCloud Passwords extension installed.",
+    "After installing, reopen the command and authenticate with the 6-digit code shown by Apple Passwords.",
   ].join("\n");
 }
 
@@ -786,6 +811,26 @@ export default function Command() {
     }
   };
 
+  const handleRequestCode = async () => {
+    if (!workflow) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await workflow.requestPin();
+      await getUiRuntime().showHUD("Apple Passwords code requested — reopen Raycast to enter it");
+    } catch (error) {
+      if (isMissingApplePwBinaryError(error)) {
+        setMissingBinary(true);
+        return;
+      }
+      await presentError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleCsvImport = async (filePath: string) => {
     if (!workflow) {
       return;
@@ -821,7 +866,11 @@ export default function Command() {
   }
 
   if (authPrompt) {
-    return React.createElement(AuthPromptForm, { prompt: authPrompt, onSubmit: handlePinSubmit });
+    return React.createElement(AuthPromptForm, {
+      prompt: authPrompt,
+      onRequestCode: handleRequestCode,
+      onSubmit: handlePinSubmit,
+    });
   }
 
   const ui = getUiRuntime();
@@ -837,7 +886,7 @@ export default function Command() {
       ? {
           icon: ui.Icon.Key,
           title: "No matches found",
-          description: `No passwords were found for ${trimmedQuery}. For improved search experience, import your password domains from an Apple Passwords CSV.`,
+          description: `No passwords were found for ${trimmedQuery}. CSV import is optional and only improves search coverage.`,
         }
       : {
           icon: ui.Icon.Key,
@@ -848,6 +897,7 @@ export default function Command() {
     ui.List,
     {
       isLoading,
+      throttle: true,
       searchBarPlaceholder: "Search by domain or email",
       onSearchTextChange: setQuery,
     },

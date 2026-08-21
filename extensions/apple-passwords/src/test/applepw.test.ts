@@ -2,6 +2,7 @@ import { strict as assert } from "node:assert";
 import {
   ApplePwCliError,
   buildAuthResponseArgs,
+  buildSearchCandidates,
   createApplePwClient,
   resolveApplePwBinaryCandidates,
   sanitizeLoggedArgs,
@@ -9,20 +10,29 @@ import {
 import { test } from "./test-harness";
 
 test("preserves auth-required output for listPasswords", async () => {
+  const calls: string[][] = [];
   const client = createApplePwClient({
-    runner: async () => ({
-      stdout: "Enter PIN:",
-      stderr: "",
-      exitCode: null,
-      signal: null,
-    }),
+    runner: async (_command, args) => {
+      calls.push(args);
+      return args[0] === "auth"
+        ? { stdout: JSON.stringify({ status: 0 }), stderr: "", exitCode: 0, signal: null }
+        : { stdout: "Enter PIN:", stderr: "", exitCode: null, signal: null };
+    },
     binaryPath: "/bin/applepw",
   });
 
   const result = await client.listPasswords("example.com");
+  await client.requestAuthentication();
+  const authResult = await client.authenticate("123456");
 
   assert.equal(result.kind, "auth-required");
-  assert.equal(result.prompt, "Enter PIN:");
+  assert.equal(result.prompt, "Choose Request Code, then enter the 6-digit code shown by Apple Passwords.");
+  assert.deepEqual(authResult, { status: 0 });
+  assert.deepEqual(calls, [
+    ["pw", "list", "example.com"],
+    ["auth", "request"],
+    ["auth", "response", "--pin", "123456"],
+  ]);
 });
 
 test("listPasswords exposes successful payload", async () => {
@@ -91,25 +101,24 @@ test("listPasswords normalizes object-shaped results into an array", async () =>
       username: "alice@example.com",
       domain: "example.com",
       code: "123456",
+      has_otp: true,
     },
   ]);
 });
 
 test("getOtp preserves auth-required output", async () => {
   const client = createApplePwClient({
-    runner: async () => ({
-      stdout: "",
-      stderr: "Enter PIN:",
-      exitCode: null,
-      signal: null,
-    }),
+    runner: async (_command, args) =>
+      args[0] === "auth"
+        ? { stdout: JSON.stringify({ status: 0 }), stderr: "", exitCode: 0, signal: null }
+        : { stdout: "", stderr: "Enter PIN:", exitCode: null, signal: null },
     binaryPath: "/bin/applepw",
   });
 
   const result = await client.getOtp("example.com");
 
   assert.equal(result.kind, "auth-required");
-  assert.equal(result.prompt, "Enter PIN:");
+  assert.equal(result.prompt, "Choose Request Code, then enter the 6-digit code shown by Apple Passwords.");
 });
 
 test("surfaces CLI errors", async () => {
@@ -155,36 +164,78 @@ test("resolveApplePwBinaryCandidates prefers explicit override then env then PAT
   );
 
   const candidates = resolveApplePwBinaryCandidates({ env: {} });
-  assert.equal(candidates[0], "applepw");
-  assert.equal(candidates.includes("/opt/homebrew/bin/applepw"), true);
-  assert.equal(candidates.includes("/usr/local/bin/applepw"), true);
+  assert.equal(candidates[0], "apw");
+  assert.equal(candidates.includes("/opt/homebrew/bin/apw"), true);
+  assert.equal(candidates.includes("/usr/local/bin/apw"), true);
+});
+
+test("builds URL candidates for domain fragments, domains, and full URLs", () => {
+  assert.deepEqual(buildSearchCandidates("example.com"), ["example.com", "https://example.com"]);
+  assert.deepEqual(buildSearchCandidates("https://login.example.com/path"), [
+    "https://login.example.com/path",
+    "login.example.com",
+    "https://login.example.com",
+    "example.com",
+    "https://example.com",
+  ]);
+
+  const fragmentCandidates = buildSearchCandidates("example");
+  assert.equal(fragmentCandidates.includes("example.com"), true);
+  assert.equal(fragmentCandidates.includes("https://example.com"), true);
+});
+
+test("aggregates and deduplicates accounts from every expanded domain candidate", async () => {
+  const calls: string[][] = [];
+  const client = createApplePwClient({
+    runner: async (_command, args) => {
+      calls.push(args);
+      let results: object[] = [];
+      if (args[0] === "pw" && args[2].includes("example.com")) {
+        results = [{ id: "1", username: "alice@example.com", domain: "example.com", password: "Not Included" }];
+      } else if (args[0] === "pw" && args[2].includes("example.org")) {
+        results = [{ id: "2", username: "bob@example.org", domain: "example.org", password: "Not Included" }];
+      } else if (args[0] === "otp" && args[2].includes("example.org")) {
+        results = [{ id: "otp-2", username: "bob@example.org", domain: "example.org", code: "123456" }];
+      }
+      return {
+        stdout: JSON.stringify({ results, status: 0 }),
+        stderr: "",
+        exitCode: 0,
+        signal: null,
+      };
+    },
+    binaryPath: "/bin/apw",
+  });
+
+  const result = await client.listPasswords("example");
+
+  assert.equal(result.kind, "success");
+  assert.deepEqual(result.payload, [
+    {
+      id: "1",
+      username: "alice@example.com",
+      domain: "example.com",
+      password: "Not Included",
+      has_otp: false,
+    },
+    {
+      id: "2",
+      username: "bob@example.org",
+      domain: "example.org",
+      password: "Not Included",
+      has_otp: true,
+    },
+  ]);
+  assert.equal(
+    calls.some((args) => args[0] === "pw" && args[2] === "example.dev"),
+    true,
+  );
 });
 
 test("builds auth response arguments correctly", () => {
-  const args = buildAuthResponseArgs(
-    {
-      salt: "salt-value",
-      serverKey: "server-key-value",
-      username: "user@example.com",
-      clientKey: "client-key-value",
-    },
-    "123456",
-  );
+  const args = buildAuthResponseArgs("123456");
 
-  assert.deepEqual(args, [
-    "auth",
-    "response",
-    "--pin",
-    "123456",
-    "--salt",
-    "salt-value",
-    "--server-key",
-    "server-key-value",
-    "--client-key",
-    "client-key-value",
-    "--username",
-    "user@example.com",
-  ]);
+  assert.deepEqual(args, ["auth", "response", "--pin", "123456"]);
 });
 
 test("sanitizeLoggedArgs redacts pin values", () => {
@@ -212,25 +263,11 @@ test("ApplePwCliError stores sanitized args so PIN is not retained on the error 
   assert.equal(rawArgs[3], "secret-pin");
 });
 
-test("authenticate runs request and response", async () => {
+test("authenticate responds to an already-requested challenge", async () => {
   const calls: Array<{ command: string; args: string[] }> = [];
   const client = createApplePwClient({
     runner: async (command, args) => {
       calls.push({ command, args });
-      if (args[0] === "auth" && args[1] === "request") {
-        return {
-          stdout: JSON.stringify({
-            salt: "salt-value",
-            serverKey: "server-key-value",
-            username: "user@example.com",
-            clientKey: "client-key-value",
-          }),
-          stderr: "",
-          exitCode: 0,
-          signal: null,
-        };
-      }
-
       return {
         stdout: JSON.stringify({ status: 0 }),
         stderr: "",
@@ -247,60 +284,83 @@ test("authenticate runs request and response", async () => {
   assert.deepEqual(calls, [
     {
       command: "/bin/applepw",
-      args: ["auth", "request"],
-    },
-    {
-      command: "/bin/applepw",
-      args: [
-        "auth",
-        "response",
-        "--pin",
-        "123456",
-        "--salt",
-        "salt-value",
-        "--server-key",
-        "server-key-value",
-        "--client-key",
-        "client-key-value",
-        "--username",
-        "user@example.com",
-      ],
+      args: ["auth", "response", "--pin", "123456"],
     },
   ]);
 });
 
 test("authenticate tolerates non-json log lines before the json status", async () => {
-  let callCount = 0;
   const client = createApplePwClient({
-    runner: async () => {
-      callCount += 1;
-      if (callCount === 1) {
-        return {
-          stdout: JSON.stringify({
-            salt: "salt-value",
-            serverKey: "server-key-value",
-            username: "user@example.com",
-            clientKey: "client-key-value",
-          }),
-          stderr: "",
-          exitCode: 0,
-          signal: null,
-        };
+    runner: async () => ({
+      stdout: 'Challenge verified, updating config\n{"status":0}',
+      stderr: "",
+      exitCode: 0,
+      signal: null,
+    }),
+    binaryPath: "/bin/applepw",
+  });
+
+  await client.requestAuthentication();
+  const result = await client.authenticate("123456");
+
+  assert.deepEqual(result, { status: 0 });
+});
+
+test("treats APW invalid-session responses as authentication required", async () => {
+  const client = createApplePwClient({
+    runner: async (_command, args) =>
+      args[0] === "auth"
+        ? { stdout: JSON.stringify({ status: 0 }), stderr: "", exitCode: 0, signal: null }
+        : {
+            stdout: "",
+            stderr: JSON.stringify({ error: "APW is not running or not authenticated", status: 9, results: [] }),
+            exitCode: 9,
+            signal: null,
+          },
+    binaryPath: "/bin/apw",
+  });
+
+  const result = await client.listPasswords("example.com");
+
+  assert.equal(result.kind, "auth-required");
+});
+
+test("starts the APW daemon before retrying authentication", async () => {
+  let requestCount = 0;
+  let daemonStartCount = 0;
+  const client = createApplePwClient({
+    runner: async (_command, args) => {
+      if (args[0] === "auth" && args[1] === "request") {
+        requestCount += 1;
+        if (requestCount === 1) {
+          return {
+            stdout: "",
+            stderr: JSON.stringify({ error: "APW is not running", status: 9, results: [] }),
+            exitCode: 9,
+            signal: null,
+          };
+        }
       }
 
       return {
-        stdout: 'Challenge verified, updating config\n{"status":0}',
+        stdout: JSON.stringify({ status: 0 }),
         stderr: "",
         exitCode: 0,
         signal: null,
       };
     },
-    binaryPath: "/bin/applepw",
+    daemonStarter: async () => {
+      daemonStartCount += 1;
+    },
+    binaryPath: "/bin/apw",
   });
 
+  await client.requestAuthentication();
   const result = await client.authenticate("123456");
 
   assert.deepEqual(result, { status: 0 });
+  assert.equal(daemonStartCount, 1);
+  assert.equal(requestCount, 2);
 });
 
 test("getStatus exposes the status payload", async () => {
