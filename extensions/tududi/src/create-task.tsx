@@ -33,7 +33,7 @@ export default function Command() {
       // Tududi removed the boolean `today` field. Tasks appear in Today's plan
       // when status is planned / in_progress / waiting. Checking "Today" sets Planned.
       let resolvedStatus = Number.parseInt(status, 10);
-      if (today) {
+      if (today && !isInTodayPlan(resolvedStatus)) {
         resolvedStatus = TASK_STATUS.PLANNED;
       }
 
