@@ -12,7 +12,7 @@ import {
 import { ReactElement, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { hasLocalIcon, localIconPath, refreshGlyphsInBackground, renderIcons } from "./catalog";
 import { iosAvailability, imageURL, searchSymbols, SFSymbol, SYMBOLS } from "./data";
-import { intentSearch, MissingKeyError } from "./gemini";
+import { intentSearch, InvalidKeyError, MissingKeyError } from "./gemini";
 
 const GRID_COLUMNS = 8;
 const MIN_QUERY_LENGTH = 2;
@@ -25,16 +25,11 @@ const RESULT_LIMIT = 250;
 // renders interleave between batches.
 const BACKFILL_CHUNK = 400;
 
-type PrimaryAction = "copySymbol" | "pasteSymbol" | "copyName" | "pasteName";
-
-interface Preferences {
-  geminiApiKey?: string;
-  primaryAction: PrimaryAction;
-  model?: string;
-}
+// Preference types come from the generated manifest types (raycast-env.d.ts).
+type PrimaryAction = Preferences.Search["primaryAction"];
 
 export default function Command() {
-  const { geminiApiKey, primaryAction, model } = getPreferenceValues<Preferences>();
+  const { geminiApiKey, primaryAction, model } = getPreferenceValues<Preferences.Search>();
   const apiKey = geminiApiKey?.trim() ?? "";
   const modelId = model?.trim() || "gemini-3.1-flash-lite";
 
@@ -66,7 +61,14 @@ export default function Command() {
       } catch (error) {
         if (controller.signal.aborted) return;
         if (id === requestId.current) setAiResult({ query, symbols: [] });
-        if (!(error instanceof MissingKeyError)) {
+        if (error instanceof InvalidKeyError) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Gemini API key rejected",
+            message: error.message,
+            primaryAction: { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() },
+          });
+        } else if (!(error instanceof MissingKeyError)) {
           await showToast({ style: Toast.Style.Failure, title: "AI intent search failed", message: String(error) });
         }
       } finally {

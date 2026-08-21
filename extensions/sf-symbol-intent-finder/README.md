@@ -6,6 +6,13 @@ SF Symbols are named after how they *look* (`arrow.uturn.backward`), not what yo
 
 Search `undo` and you'll get `arrow.uturn.backward`, `arrow.counterclockwise`, and friends, even though none of them contain the word "undo".
 
+## How is this different from "SF Symbols Search"?
+
+[SF Symbols Search](https://www.raycast.com/jffrykkn/sf-symbols-search) is a great name/keyword lookup. This extension differs in two ways:
+
+- **Intent search.** A parallel AI search (bring your own free Gemini key) maps what you *mean* to real symbol names, and every suggestion is validated against the catalog so hallucinated names never appear. Without a key, it's still a fast local search.
+- **Self-updating catalog.** Symbol names and availability are read from *your* macOS at runtime, glyph characters refresh weekly from Apple's release metadata, and icons are rendered locally by the OS. New SF Symbols show up as soon as your Mac knows them — no waiting for a bundled dataset to be updated.
+
 ## Features
 
 - ⚡️ Instant local search over 9,000+ SF Symbols (name, keywords, categories)

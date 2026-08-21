@@ -8,8 +8,11 @@ const MAX_RESULTS = 18;
 
 type CacheEntry = { ts: number; names: string[] };
 
-/** Raised when the key is missing/invalid so the UI can hint the user appropriately. */
+/** Raised when no key is configured, so the UI shows the setup hint instead of an error. */
 export class MissingKeyError extends Error {}
+
+/** Raised when Gemini rejects a configured key, so the UI can point at Preferences. */
+export class InvalidKeyError extends Error {}
 
 function cacheKey(model: string, query: string): string {
   return `${CACHE_PREFIX}${model}:${query.trim().toLowerCase()}`;
@@ -107,7 +110,7 @@ export async function intentSearch(
   });
 
   if (response.status === 400 || response.status === 401 || response.status === 403) {
-    throw new MissingKeyError(`Gemini rejected the request (${response.status}). Check your API key.`);
+    throw new InvalidKeyError(`Gemini rejected the request (${response.status}). Check your API key.`);
   }
   if (response.status === 404) {
     throw new Error(`Model "${model}" not found. Check the AI Model preference.`);

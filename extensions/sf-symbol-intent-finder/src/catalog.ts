@@ -201,38 +201,49 @@ export function hasLocalIcon(name: string): boolean {
 // OS); remembered per session so they are not retried on every search.
 const unrenderable = new Set<string>();
 
+// Set when osascript itself fails (crash, bad output): rendering is a
+// progressive enhancement, so give up for the session and keep remote images.
+let rendererBroken = false;
+
 // Serialize osascript invocations so batches never pile up.
-let renderQueue: Promise<unknown> = Promise.resolve();
+let renderQueue: Promise<number> = Promise.resolve(0);
 
 /**
  * Renders the given symbols to the local icon cache (batched, serialized).
- * Resolves with the number of newly rendered icons.
+ * Resolves with the number of newly rendered icons. Never rejects — on a
+ * renderer failure the remaining work is skipped and remote images stay in use.
  */
 export function renderIcons(names: string[]): Promise<number> {
   const result = renderQueue.then(async () => {
-    const missing = names.filter((name) => !renderedIcons.has(name) && !unrenderable.has(name));
     let rendered = 0;
+    if (rendererBroken) return rendered;
+    const missing = names.filter((name) => !renderedIcons.has(name) && !unrenderable.has(name));
     for (let i = 0; i < missing.length; i += RENDER_BATCH_SIZE) {
       const batch = missing.slice(i, i + RENDER_BATCH_SIZE);
-      const { stdout } = await execFileAsync("osascript", [
-        "-l",
-        "JavaScript",
-        `${environment.assetsPath}/render-symbols.js`,
-        ICON_DIR,
-        JSON.stringify(batch),
-      ]);
-      const { fail } = JSON.parse(stdout.trim()) as { ok: number; fail: string[] };
-      const failed = new Set(fail);
-      for (const name of batch) {
-        if (failed.has(name)) unrenderable.add(name);
-        else {
-          renderedIcons.add(name);
-          rendered++;
+      try {
+        const { stdout } = await execFileAsync("osascript", [
+          "-l",
+          "JavaScript",
+          `${environment.assetsPath}/render-symbols.js`,
+          ICON_DIR,
+          JSON.stringify(batch),
+        ]);
+        const { fail } = JSON.parse(stdout.trim()) as { ok: number; fail: string[] };
+        const failed = new Set(fail);
+        for (const name of batch) {
+          if (failed.has(name)) unrenderable.add(name);
+          else {
+            renderedIcons.add(name);
+            rendered++;
+          }
         }
+      } catch {
+        rendererBroken = true;
+        break;
       }
     }
     return rendered;
   });
-  renderQueue = result.catch(() => undefined);
+  renderQueue = result;
   return result;
 }
