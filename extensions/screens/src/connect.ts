@@ -11,7 +11,7 @@ export interface ConnectOptions {
  */
 export type ConnectTarget = { kind: 'saved'; identifier: string; ambiguous: boolean } | { kind: 'direct'; url: string };
 
-const DEFAULT_VNC_PORT = 5900;
+export const DEFAULT_PORTS: Record<'vnc' | 'ssh', number> = { vnc: 5900, ssh: 22 };
 
 /**
  * Decides how to reach `screen`.
@@ -67,16 +67,16 @@ export function directUrl(screen: Screen): string | undefined {
   if (!address) return undefined;
 
   const credentials = screen.username ? `${encodeURIComponent(screen.username)}@` : '';
-  const suffix = address.port && address.port !== DEFAULT_VNC_PORT ? `:${address.port}` : '';
+  const suffix = address.port && address.port !== DEFAULT_PORTS.vnc ? `:${address.port}` : '';
 
-  return `vnc://${credentials}${address.host}${suffix}`;
+  return `vnc://${credentials}${formatHost(address.host)}${suffix}`;
 }
 
 /**
  * Where the host answers. A local screen is reached by its Bonjour name: Screens also records the
  * network's public address on those, but that routes out to the WAN, and every machine behind one
- * router shares it. Tailscale and remote screens are reached at the recorded address, which for
- * Tailscale is the stable 100.x address and is more dependable than its hostname.
+ * router shares it. Tailscale and remote screens are reached at the recorded address, because their
+ * hostname is a display name rather than something resolvable, e.g. `Front Desk iMac`.
  */
 function directAddress(screen: Screen): { host: string; port: number } | undefined {
   const hostname = normalizeHostname(screen.hostname);
@@ -96,11 +96,19 @@ export function adHocUrl(
 ): string {
   const credentials = options.username ? `${encodeURIComponent(options.username.trim())}@` : '';
   const port = options.port?.trim() ? `:${options.port.trim()}` : '';
-  return `${protocol}://${credentials}${host.trim()}${port}${buildQuery(options)}`;
+  return `${protocol}://${credentials}${formatHost(host.trim())}${port}${buildQuery(options)}`;
 }
 
 /**
- * Screens stores Bonjour hostnames fully qualified, e.g. `Mac-Studio.local.`. The trailing dot is
+ * An IPv6 literal has to be bracketed to sit in a URL authority, e.g. `vnc://[2001:db8::1]:5900`.
+ * Screens records one in `publicIpAddress` wherever the host answers on IPv6.
+ */
+function formatHost(host: string): string {
+  return host.includes(':') && !host.startsWith('[') ? `[${host}]` : host;
+}
+
+/**
+ * Screens stores Bonjour hostnames fully qualified, e.g. `office-imac.local.`. The trailing dot is
  * dropped so the stored form and the form a user would type compare and address the same.
  */
 export function normalizeHostname(hostname: string): string {

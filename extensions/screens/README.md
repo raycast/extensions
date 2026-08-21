@@ -33,8 +33,8 @@ identify one screen, this extension opens the saved screen, which carries its st
 they don't, it connects to the machine's address instead. Those rows carry an arrow icon, and the address is shown as
 the subtitle so you can see exactly what a row will open.
 
-This matters more than it sounds. A library with three machines all named "Tailgate" has no way to say which one you
-mean, and Screens itself would pick. Addressing them directly reaches the right machine every time.
+This matters more than it sounds. Three different machines sharing one name leave Screens no way to know which you
+mean, so it picks one. Addressing them directly reaches the right machine every time.
 
 RDP screens have no ad-hoc URL scheme to fall back on, so a duplicate-named RDP screen shows a warning icon and lets
 Screens choose.
