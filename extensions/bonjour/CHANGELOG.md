@@ -1,5 +1,9 @@
 # Bonjour Changelog
 
+## [Updates] - {PR_MERGE_DATE}
+
+- updates for Raycast 2.0
+
 ## [Minor Improvements] - 2024-09-12
 
 - add status indicator to menu bar
