@@ -5,16 +5,67 @@
   "description": "Control the Tomito app, a Pomodoro timer for macOS",
   "icon": "tomito-icon.png",
   "author": "elyse",
+  "contributors": [
+    "zhenhuaw"
+  ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "focusSyncEnabled",
+      "title": "Focus Synchronization",
+      "description": "Run the configured macOS Shortcuts after explicit Tomito commands",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Synchronize Tomito with Focus"
+    },
+    {
+      "name": "enableFocusShortcut",
+      "title": "Enable Focus Shortcut",
+      "description": "The exact name of the macOS Shortcut that enables your Focus mode",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Enable Work Focus"
+    },
+    {
+      "name": "disableFocusShortcut",
+      "title": "Disable Focus Shortcut",
+      "description": "The exact name of the macOS Shortcut that disables your Focus mode",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Disable Work Focus"
+    }
+  ],
   "commands": [
     {
       "name": "start",
       "title": "Start/Pause/Resume",
       "subtitle": "Tomito",
       "description": "Start, pause, or resume current interval",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-tomito",
+      "title": "Start Tomito",
+      "subtitle": "Tomito",
+      "description": "Start the current interval and optionally enable Focus",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause-tomito",
+      "title": "Pause Tomito",
+      "subtitle": "Tomito",
+      "description": "Pause the current interval and optionally disable Focus",
+      "mode": "no-view"
+    },
+    {
+      "name": "resume-tomito",
+      "title": "Resume Tomito",
+      "subtitle": "Tomito",
+      "description": "Resume the current interval and optionally enable Focus",
       "mode": "no-view"
     },
     {
@@ -26,8 +77,9 @@
     },
     {
       "name": "finish",
-      "title": "Finish",
-      "description": "Finish current interval",
+      "title": "Finish Tomito",
+      "subtitle": "Tomito",
+      "description": "Finish the current interval and optionally disable Focus",
       "mode": "no-view"
     },
     {
@@ -65,13 +117,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.0",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
