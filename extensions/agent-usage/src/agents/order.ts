@@ -14,6 +14,7 @@ export const DEFAULT_AGENT_ORDER = [
   "grok",
   "kimi",
   "minimax",
+  "minimaxcn",
   "opencode-go",
   "synthetic",
   "zai",
