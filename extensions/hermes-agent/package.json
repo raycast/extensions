@@ -33,6 +33,12 @@
       "mode": "view"
     },
     {
+      "name": "sessions",
+      "title": "Browse Sessions",
+      "description": "Browse, continue, fork, rename, or delete Hermes sessions from any surface",
+      "mode": "view"
+    },
+    {
       "name": "clipboard",
       "title": "Ask About Clipboard",
       "description": "Ask Hermes about your clipboard content",
@@ -55,6 +61,42 @@
       "title": "Open Webchat",
       "description": "Open Hermes webchat in browser",
       "mode": "no-view"
+    },
+    {
+      "name": "run-task",
+      "title": "Run Task",
+      "description": "Run an async agent task with live tool activity and approval handling",
+      "mode": "view"
+    },
+    {
+      "name": "skills",
+      "title": "Browse Skills",
+      "description": "Browse installed Hermes skills by category",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Hermes Status",
+      "description": "Live Hermes gateway status in the menu bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "cron-jobs",
+      "title": "Browse Cron Jobs",
+      "description": "List, pause, resume, trigger, or delete Hermes cron jobs",
+      "mode": "view"
+    },
+    {
+      "name": "create-cron-job",
+      "title": "Create Cron Job",
+      "description": "Create a new Hermes cron job with schedule, prompt, and delivery target",
+      "mode": "view"
+    },
+    {
+      "name": "toolsets",
+      "title": "Browse Toolsets",
+      "description": "List Hermes toolsets and their tools",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -80,6 +122,22 @@
       "type": "textfield",
       "default": "",
       "required": false
+    },
+    {
+      "name": "dashboardPort",
+      "title": "Dashboard Port",
+      "description": "Port of the Hermes web dashboard used by Open Webchat",
+      "type": "textfield",
+      "default": "9119",
+      "required": false
+    },
+    {
+      "name": "profile",
+      "title": "Profile",
+      "description": "Optional Hermes profile name for multi-profile gateways (uses /p/{profile}/ routes). Leave empty for the default profile.",
+      "type": "textfield",
+      "default": "",
+      "required": false
     }
   ],
   "dependencies": {
@@ -102,6 +160,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

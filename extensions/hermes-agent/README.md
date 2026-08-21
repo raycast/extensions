@@ -4,10 +4,19 @@ Chat with your local [Hermes Agent](https://github.com/nousresearch/hermes-agent
 
 ## Features
 
-- **Ask Hermes** - Quick question and answer
-- **Chat with Hermes** - Persistent conversations with history
+- **Ask Hermes** - Quick question and answer, streamed as it arrives
+- **Chat with Hermes** - Conversations on server-side Hermes sessions, with live tool activity while the agent works
+- **Browse Sessions** - Continue, fork, rename, or delete sessions from any Hermes surface (CLI, desktop, messaging)
+- **Run Task** - Async agent run with live tool activity, streaming output, approval handling, and continue in chat
+- **Browse Skills** - List installed skills by category, search, copy a `/skill` command
+- **Browse Cron Jobs** - List, pause, resume, trigger, or delete scheduled jobs
+- **Create Cron Job** - Schedule a new job with prompt, delivery target, and skills
+- **Browse Toolsets** - List toolsets and the tools each one provides
+- **Hermes Status** - Live gateway status, active agents, and readiness checks in the menu bar
 - **Ask About Clipboard** - Analyze clipboard content with custom prompts
 - **Process Selected Text** - Summarize, explain, translate, fix grammar, and more
+
+Conversations started in Raycast live in the Hermes session store, so you can pick them up later with `hermes --resume <id>`, in the desktop app, or from Browse Sessions. Follow-ups from result views (Continue in Chat) stay on the same session.
 
 ## Requirements
 
@@ -136,11 +145,19 @@ This is the default - no configuration changes needed on Hermes.
 Quick Q&A - type a question, get an answer. Supports passing a question as an argument for automation.
 
 ### Chat with Hermes
-Full conversation interface with:
-- Persistent chat history
-- Multiple conversations
+Conversation interface backed by server-side Hermes sessions:
+- Transcripts live in the Hermes session store, not in Raycast
+- Live tool activity while the agent works (terminal, web, file edits)
 - Streaming responses
 - Newest messages shown first
+- Resume any conversation later from the CLI (`hermes --resume <id>`), the desktop app, or Browse Sessions
+
+### Browse Sessions
+Lists sessions from every Hermes surface, newest first, with source tags (cli, desktop, telegram, ...). From here you can:
+- Continue a conversation in Raycast
+- Fork a session and continue the copy
+- Rename or delete sessions
+- Copy the session id or a ready-to-paste `hermes --resume` command
 
 ### Ask About Clipboard
 Reads your clipboard and lets you ask questions about it. Great for:

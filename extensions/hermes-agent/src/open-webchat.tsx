@@ -1,70 +1,87 @@
 import { open, showToast, Toast } from "@raycast/api";
-import { getPreferences } from "./api";
 import { exec } from "child_process";
+import { accessSync, constants } from "fs";
 import { Socket } from "net";
-import { promisify } from "util";
 import os from "os";
 import path from "path";
+import { promisify } from "util";
+import { getPreferences } from "./api";
 
 const execAsync = promisify(exec);
+const isWindows = process.platform === "win32";
 
 /**
- * Resolve the path to the hermes binary.
- * Hermes is typically installed at ~/.local/bin/hermes.
+ * Locate the hermes launcher across install styles and platforms.
+ * macOS: shell installer (~/.local/bin), Homebrew (/opt/homebrew/bin, /usr/local/bin)
+ * Windows: pip (%APPDATA%\Python\Scripts), uv (%USERPROFILE%\.local\bin)
+ * Linux: ~/.local/bin, /usr/local/bin
  */
 function getHermesPath(): string {
-  const hermesBinPath = path.join(os.homedir(), ".local", "bin", "hermes");
-  return hermesBinPath;
+  const home = os.homedir();
+  const candidates = isWindows
+    ? [
+        path.join(home, ".local", "bin", "hermes.exe"),
+        path.join(home, ".local", "bin", "hermes.bat"),
+        path.join(process.env.APPDATA || "", "Python", "Scripts", "hermes.exe"),
+        path.join(process.env.APPDATA || "", "Python", "Scripts", "hermes.bat"),
+      ]
+    : [
+        path.join(home, ".local", "bin", "hermes"),
+        "/opt/homebrew/bin/hermes",
+        "/usr/local/bin/hermes",
+      ];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    try {
+      accessSync(candidate, constants.X_OK);
+      return candidate;
+    } catch {
+      // Try the next location.
+    }
+  }
+  return candidates[0] || "hermes";
 }
 
 export default async function Command() {
   try {
-    const prefs = getPreferences<Preferences>();
+    const prefs = getPreferences();
     const apiUrl = new URL(prefs.endpoint);
     const hostname = apiUrl.hostname;
-    const dashboardUrl = `http://${hostname}:9119`;
+    const port = parseInt(prefs.dashboardPort || "9119", 10) || 9119;
+    const dashboardUrl = `http://${hostname}:${port}`;
 
-    // Check if port 9119 has a service running
-    const isRunning = await checkPort(hostname, 9119);
-
+    const isRunning = await checkPort(hostname, port);
     if (isRunning) {
-      // Dashboard is already running, just open it
       await open(dashboardUrl);
       return;
     }
 
-    // Dashboard is not running on this port
-    // Only try to start it locally if the endpoint is localhost
     const isLocal =
       hostname === "127.0.0.1" ||
       hostname === "localhost" ||
       hostname === "0.0.0.0";
 
     if (!isLocal) {
-      // Remote endpoint - can't start dashboard remotely
       throw new Error(
-        `Dashboard is not running on ${hostname}:9119. Please start it manually on the remote machine.`,
+        `No dashboard on ${hostname}:${port}. Start it on the remote machine with \`hermes dashboard\` (and expose the port, e.g. \`tailscale serve\`).`,
       );
     }
 
-    // Start dashboard locally
     await showToast({
       style: Toast.Style.Animated,
-      title: "Starting Hermes Dashboard...",
+      title: "Starting Hermes Dashboard…",
       message: "Running hermes dashboard",
     });
 
-    await startDashboard();
+    await startDashboard(port);
 
-    // Wait for the dashboard to become available
     await showToast({
       style: Toast.Style.Animated,
-      title: "Starting Hermes Dashboard...",
+      title: "Starting Hermes Dashboard…",
       message: "Waiting for dashboard to be ready",
     });
 
-    await waitForPort("127.0.0.1", 9119, { timeout: 30000 });
-
+    await waitForPort("127.0.0.1", port, { timeout: 30000 });
     await open(dashboardUrl);
 
     await showToast({
@@ -120,19 +137,30 @@ async function waitForPort(
   );
 }
 
-async function startDashboard(): Promise<void> {
+async function startDashboard(port: number): Promise<void> {
   const hermesPath = getHermesPath();
+  const portArg = port !== 9119 ? ` --port ${port}` : "";
 
-  // Use nohup with absolute path to hermes binary
-  // Run in background so the command returns immediately
-  const command = `nohup "${hermesPath}" dashboard --no-open > /dev/null 2>&1 &`;
-
-  await execAsync(command, {
-    timeout: 5000,
-    // Ensure we have a minimal PATH that includes standard system locations
-    env: {
-      ...process.env,
-      PATH: `${path.dirname(hermesPath)}:/usr/local/bin:/usr/bin:/bin:${process.env.PATH || ""}`,
-    },
-  });
+  if (isWindows) {
+    // Windows: use start to launch detached, no nohup available
+    const command = `start "" /B "${hermesPath}" dashboard --no-open${portArg} > NUL 2>&1`;
+    await execAsync(command, {
+      timeout: 5000,
+      shell: "cmd.exe",
+      env: {
+        ...process.env,
+        PATH: `${path.dirname(hermesPath)};${process.env.PATH || ""}`,
+      },
+    });
+  } else {
+    // macOS/Linux: nohup for detached background process
+    const command = `nohup "${hermesPath}" dashboard --no-open${portArg} > /dev/null 2>&1 &`;
+    await execAsync(command, {
+      timeout: 5000,
+      env: {
+        ...process.env,
+        PATH: `${path.dirname(hermesPath)}:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${process.env.PATH || ""}`,
+      },
+    });
+  }
 }
