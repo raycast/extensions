@@ -87,7 +87,12 @@ async function getStorefront(): Promise<string> {
   const json = (await res.json()) as { data?: { id: string }[] };
   const id = json.data?.[0]?.id;
   if (!id) throw new Error("storefront lookup returned no id");
-  if (generation === accountGeneration) await LocalStorage.setItem(STOREFRONT_KEY, id);
+  if (generation === accountGeneration) {
+    await LocalStorage.setItem(STOREFRONT_KEY, id);
+    // The account changed while the write was in flight — it may have landed
+    // after the clearer's removal, so undo it.
+    if (generation !== accountGeneration) await LocalStorage.removeItem(STOREFRONT_KEY);
+  }
   return id;
 }
 
