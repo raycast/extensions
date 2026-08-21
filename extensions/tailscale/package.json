@@ -78,7 +78,7 @@
       "subtitle": "Tailscale",
       "description": "Show Tailscale's connection status.",
       "mode": "no-view",
-      "interval": "30s",
+      "interval": "1m",
       "preferences": [
         {
           "name": "showHostname",

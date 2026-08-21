@@ -24,7 +24,7 @@
       "subtitle": "WIP",
       "description": "Show WIP Streak",
       "mode": "no-view",
-      "interval": "10s"
+      "interval": "1m"
     },
     {
       "name": "done",

@@ -23,7 +23,7 @@
       "title": "Current Desktop",
       "description": "Show the currently active desktop with live status.",
       "mode": "no-view",
-      "interval": "10s"
+      "interval": "1m"
     },
     {
       "name": "rename-current-space",
