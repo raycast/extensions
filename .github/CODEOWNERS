@@ -110,6 +110,7 @@
 /extensions/appcleaner                                              @tborychowski
 /extensions/append-clipboard                                        @koinzhang @cyrusn
 /extensions/append-to-file                                          @lenpr
+/extensions/appfreezer                                              @chxsong
 /extensions/appgrid                                                 @Jungwoon
 /extensions/apple-books                                             @vimtor
 /extensions/apple-container                                         @DaviReisVieira
@@ -1467,7 +1468,7 @@
 /extensions/lock-time                                               @yangwenmai
 /extensions/lockdock                                                @mishamyrt
 /extensions/lodash                                                  @vimtor @rushi
-/extensions/logbook                                                 
+/extensions/logbook                                                 @Rushi0508
 /extensions/logitech-litra                                          @timrogers @amaechler
 /extensions/logos-launcher                                          @Marvive
 /extensions/logseq                                                  @futantan @sawhney17 @hadret @jonatan-petursson @d3chapma
