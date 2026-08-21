@@ -1,7 +1,5 @@
 # Search on Discogs
 
-# Search on Discogs
-
 A [Raycast](https://raycast.com) extension that searches for the currently playing track in the Music app on [Discogs](https://www.discogs.com).
 
 ## Usage
