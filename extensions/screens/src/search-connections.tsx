@@ -18,7 +18,7 @@ import { showFailureToast, useFrecencySorting } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 import { ClientProtocol } from './archive';
 import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections, targetStatus } from './connection-type';
-import { ConnectOptions, describeTarget, targetUrl } from './connect';
+import { ConnectOptions, describeTarget, supportsScreenSharing, targetUrl } from './connect';
 import { SavedConnection, blankConnection, useSavedConnections } from './library';
 import ConnectionForm from './components/ConnectionForm';
 import TypeFilter from './components/TypeFilter';
@@ -108,18 +108,22 @@ export default function Command() {
                 <ActionPanel>
                   <ActionPanel.Section>
                     <Action title="Connect" icon={Icon.Desktop} onAction={() => connect(connection)} />
-                    <Action
-                      title="Connect in Observe Mode"
-                      icon={Icon.Eye}
-                      shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
-                      onAction={() => connect(connection, { observe: true })}
-                    />
-                    <Action
-                      title="Connect as Guest"
-                      icon={Icon.Person}
-                      shortcut={{ modifiers: ['cmd', 'shift'], key: 'g' }}
-                      onAction={() => connect(connection, { guest: true })}
-                    />
+                    {supportsScreenSharing(connection.target) && (
+                      <Action
+                        title="Connect in Observe Mode"
+                        icon={Icon.Eye}
+                        shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
+                        onAction={() => connect(connection, { observe: true })}
+                      />
+                    )}
+                    {supportsScreenSharing(connection.target) && (
+                      <Action
+                        title="Connect as Guest"
+                        icon={Icon.Person}
+                        shortcut={{ modifiers: ['cmd', 'shift'], key: 'g' }}
+                        onAction={() => connect(connection, { guest: true })}
+                      />
+                    )}
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action.Push

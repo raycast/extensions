@@ -81,9 +81,13 @@ function QuickConnectForm({ host, protocol: initialProtocol }: { host: string; p
       </Form.Dropdown>
       <Form.TextField id="port" title="Port" placeholder={String(DEFAULT_PORTS[protocol])} />
       <Form.TextField id="username" title="Username" placeholder="Optional" />
-      <Form.Separator />
-      <Form.Checkbox id="observe" label="Observe Mode" info="Watch the screen without controlling it." />
-      <Form.Checkbox id="guest" label="Connect as Guest" info="Connect without using saved credentials." />
+      {protocol === 'vnc' && (
+        <>
+          <Form.Separator />
+          <Form.Checkbox id="observe" label="Observe Mode" info="Watch the screen without controlling it." />
+          <Form.Checkbox id="guest" label="Connect as Guest" info="Connect without using saved credentials." />
+        </>
+      )}
     </Form>
   );
 }

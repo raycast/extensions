@@ -104,6 +104,14 @@ export function targetUrl(target: ConnectTarget, options: ConnectOptions = {}): 
   return `screens://${encodeURIComponent(target.identifier)}${query}`;
 }
 
+/**
+ * Whether Observe Mode and Guest apply. Both are screen-sharing options, so an SSH target has no
+ * use for them.
+ */
+export function supportsScreenSharing(target: ConnectTarget): boolean {
+  return !(target.kind === 'direct' && target.url.toLowerCase().startsWith('ssh://'));
+}
+
 /** What the target actually addresses, for display and for copying. */
 export function describeTarget(target: ConnectTarget): string {
   return target.kind === 'direct' ? target.url : target.identifier;
