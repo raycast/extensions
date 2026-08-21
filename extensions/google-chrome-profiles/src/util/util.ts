@@ -1,11 +1,28 @@
 import { URL } from "url";
 import { writeFileSync, unlinkSync } from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
-import { spawn } from "child_process";
+import { lstat, readFile, rename, rm, writeFile } from "fs/promises";
+import { tmpdir, homedir } from "os";
+import { dirname, join, resolve } from "path";
+import { spawn, execFile } from "child_process";
+import { promisify } from "util";
 import { randomUUID } from "crypto";
 import { showToast, Toast } from "@raycast/api";
-import { BrowserConfig } from "./types";
+import { BrowserConfig, GoogleChromeLocalState, Profile } from "./types";
+
+const execFileAsync = promisify(execFile);
+
+const profileIsOpen = async (profilePath: string) => {
+  try {
+    const { stdout } = await execFileAsync("/usr/sbin/lsof", ["-nP", "-t", "+D", profilePath], { timeout: 10000 });
+    return stdout.trim().length > 0;
+  } catch (error) {
+    const output = error instanceof Error && "stdout" in error ? String(error.stdout) : "";
+    if (output.trim()) return true;
+    const code = error instanceof Error ? (error as { code?: string | number }).code : undefined;
+    if (code === 1 || code === "1") return false;
+    throw new Error("Could not determine whether the Chrome profile is open");
+  }
+};
 
 export type ChromeTarget =
   | { action: "focus" }
@@ -18,6 +35,68 @@ export const ChromeAction = {
   NewTab: { action: "newTab" } as ChromeTarget,
   NewWindow: { action: "newWindow" } as ChromeTarget,
   openUrl: (url: string): ChromeTarget => ({ action: "openUrl", url }),
+};
+
+export const deleteChromeProfile = async (profile: Profile, browser: BrowserConfig) => {
+  const dataDirectory = resolve(homedir(), browser.dataPath);
+  const profilePath = resolve(dataDirectory, profile.directory);
+  if (dirname(profilePath) !== dataDirectory) throw new Error("Invalid Chrome profile directory");
+
+  const localStatePath = join(dataDirectory, "Local State");
+  const localState = JSON.parse(await readFile(localStatePath, "utf8")) as GoogleChromeLocalState;
+  const infoCache = localState.profile?.info_cache;
+  if (!infoCache || !Object.prototype.hasOwnProperty.call(infoCache, profile.directory)) {
+    throw new Error("Profile no longer exists");
+  }
+  if (Object.keys(infoCache).length === 1) throw new Error("Chrome must keep at least one profile");
+
+  let profileStats;
+  try {
+    profileStats = await lstat(profilePath);
+  } catch (error) {
+    if (error instanceof Error && (error as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new Error("Chrome profile directory not found");
+    }
+    throw error;
+  }
+  if (!profileStats.isDirectory()) throw new Error("Chrome profile path is not a directory");
+  if (await profileIsOpen(profilePath)) throw new Error(`Close the ${profile.name} profile before deleting it`);
+
+  const deletedProfilePath = join(dataDirectory, `.raycast-delete-${randomUUID()}`);
+  await rename(profilePath, deletedProfilePath);
+
+  try {
+    if (await profileIsOpen(deletedProfilePath)) {
+      throw new Error(`Close the ${profile.name} profile before deleting it`);
+    }
+    delete infoCache[profile.directory];
+    localState.profile.last_active_profiles = localState.profile.last_active_profiles?.filter(
+      (directory) => directory !== profile.directory,
+    );
+    localState.profile.profiles_order = localState.profile.profiles_order?.filter(
+      (directory) => directory !== profile.directory,
+    );
+    if (localState.profile.last_used === profile.directory) {
+      localState.profile.last_used = Object.keys(infoCache)[0];
+    }
+    const temporaryLocalStatePath = `${localStatePath}.${randomUUID()}.tmp`;
+    try {
+      await writeFile(temporaryLocalStatePath, `${JSON.stringify(localState, null, 2)}\n`, "utf8");
+      await rename(temporaryLocalStatePath, localStatePath);
+    } finally {
+      await rm(temporaryLocalStatePath, { force: true }).catch(() => undefined);
+    }
+  } catch (error) {
+    try {
+      await rename(deletedProfilePath, profilePath);
+    } catch {
+      throw new Error("Profile deletion failed and could not be rolled back");
+    }
+    throw error;
+  }
+
+  await rm(deletedProfilePath, { recursive: true, force: true });
+  return localState;
 };
 
 export const createBookmarkListItem = (url: string, name?: string) => {
