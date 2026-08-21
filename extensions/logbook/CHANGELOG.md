@@ -1,6 +1,6 @@
 # Logbook Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-21
 
 - Add a task from Raycast's search bar without opening a window
 - Search and browse your logbook, filtered by pending, completed, or all
