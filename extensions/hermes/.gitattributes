@@ -1,0 +1,8 @@
+# O Prettier exige LF. Sem isto, o checkout no Windows (local e no CI) grava CRLF
+# e o `ray lint` reprova todos os arquivos por "code style issues".
+* text=auto eol=lf
+
+*.png binary
+*.gif binary
+*.jpg binary
+*.ico binary
