@@ -1,4 +1,4 @@
-import { ClientProtocol, Connection } from './archive';
+import { ClientProtocol, Connection } from "./archive";
 
 export interface ConnectOptions {
   observe?: boolean;
@@ -9,9 +9,9 @@ export interface ConnectOptions {
  * How to reach a connection. `saved` opens the connection from Screens' own library, which carries its
  * stored settings and credentials. `direct` addresses the host itself and carries none of that.
  */
-export type ConnectTarget = { kind: 'saved'; identifier: string; ambiguous: boolean } | { kind: 'direct'; url: string };
+export type ConnectTarget = { kind: "saved"; identifier: string; ambiguous: boolean } | { kind: "direct"; url: string };
 
-export type AdHocProtocol = 'vnc' | 'ssh';
+export type AdHocProtocol = "vnc" | "ssh";
 
 export const DEFAULT_PORTS: Record<AdHocProtocol, number> = { vnc: 5900, ssh: 22 };
 
@@ -39,12 +39,12 @@ export function parseHostSpec(spec: string): HostSpec | undefined {
   const scheme = /^([a-z][a-z0-9+.-]*):\/\//i.exec(rest);
   if (scheme) {
     const named = scheme[1].toLowerCase();
-    if (named !== 'vnc' && named !== 'ssh') return undefined;
+    if (named !== "vnc" && named !== "ssh") return undefined;
     protocol = named;
-    rest = rest.slice(scheme[0].length).replace(/[/?#].*$/, '');
+    rest = rest.slice(scheme[0].length).replace(/[/?#].*$/, "");
   }
 
-  const separator = rest.lastIndexOf('@');
+  const separator = rest.lastIndexOf("@");
   const username = separator === -1 ? undefined : rest.slice(0, separator);
   const authority = rest.slice(separator + 1);
 
@@ -53,13 +53,13 @@ export function parseHostSpec(spec: string): HostSpec | undefined {
     return { host: bracketed[1], port: bracketed[2], protocol, username };
   }
 
-  const parts = authority.split(':');
+  const parts = authority.split(":");
   if (parts.length === 2 && /^\d+$/.test(parts[1])) {
     return parts[0] ? { host: parts[0], port: parts[1], protocol, username } : undefined;
   }
 
   // Anything left holding a colon is only a host if it reads as an unbracketed IPv6 literal.
-  if (authority.includes(':') && !/^[0-9a-f:]+$/i.test(authority)) return undefined;
+  if (authority.includes(":") && !/^[0-9a-f:]+$/i.test(authority)) return undefined;
 
   return authority ? { host: authority, protocol, username } : undefined;
 }
@@ -74,31 +74,31 @@ export function parseHostSpec(spec: string): HostSpec | undefined {
 export function resolveTarget(connection: Connection, all: Connection[]): ConnectTarget {
   // A url-type connection stores the exact target it was created from. Nothing to guess.
   if (connection.sourceURL) {
-    return { kind: 'direct', url: connection.sourceURL };
+    return { kind: "direct", url: connection.sourceURL };
   }
 
   const hostname = normalizeHostname(connection.hostname);
   if (hostname && isUniqueIdentifier(hostname, connection, all)) {
-    return { kind: 'saved', identifier: hostname, ambiguous: false };
+    return { kind: "saved", identifier: hostname, ambiguous: false };
   }
 
   const name = connection.name.trim();
   if (name && isUniqueIdentifier(name, connection, all)) {
-    return { kind: 'saved', identifier: name, ambiguous: false };
+    return { kind: "saved", identifier: name, ambiguous: false };
   }
 
   const direct = directUrl(connection);
   if (direct) {
-    return { kind: 'direct', url: direct };
+    return { kind: "direct", url: direct };
   }
 
   // An RDP connection has no ad-hoc URL scheme, so an ambiguous name is the only remaining handle.
-  return { kind: 'saved', identifier: name || hostname, ambiguous: true };
+  return { kind: "saved", identifier: name || hostname, ambiguous: true };
 }
 
 export function targetUrl(target: ConnectTarget, options: ConnectOptions = {}): string {
   const query = buildQuery(options);
-  if (target.kind === 'direct') {
+  if (target.kind === "direct") {
     return appendQuery(target.url, query);
   }
   return `screens://${encodeURIComponent(target.identifier)}${query}`;
@@ -110,24 +110,24 @@ export function targetUrl(target: ConnectTarget, options: ConnectOptions = {}): 
  * neither an observe mode nor a guest account to offer.
  */
 export function supportsScreenSharing(target: ConnectTarget, clientProtocol: ClientProtocol): boolean {
-  if (clientProtocol !== 'vnc') return false;
-  return !(target.kind === 'direct' && target.url.toLowerCase().startsWith('ssh://'));
+  if (clientProtocol !== "vnc") return false;
+  return !(target.kind === "direct" && target.url.toLowerCase().startsWith("ssh://"));
 }
 
 /** What the target actually addresses, for display and for copying. */
 export function describeTarget(target: ConnectTarget): string {
-  return target.kind === 'direct' ? target.url : target.identifier;
+  return target.kind === "direct" ? target.url : target.identifier;
 }
 
 /** The direct address of the host itself. Only VNC has an ad-hoc URL scheme. */
 function directUrl(connection: Connection): string | undefined {
-  if (connection.clientProtocol !== 'vnc') return undefined;
+  if (connection.clientProtocol !== "vnc") return undefined;
 
   const address = directAddress(connection);
   if (!address) return undefined;
 
-  const credentials = connection.username ? `${encodeURIComponent(connection.username)}@` : '';
-  const suffix = address.port && address.port !== DEFAULT_PORTS.vnc ? `:${address.port}` : '';
+  const credentials = connection.username ? `${encodeURIComponent(connection.username)}@` : "";
+  const suffix = address.port && address.port !== DEFAULT_PORTS.vnc ? `:${address.port}` : "";
 
   return `vnc://${credentials}${formatHost(address.host)}${suffix}`;
 }
@@ -144,7 +144,7 @@ function directAddress(connection: Connection): { host: string; port: number } |
   // only a hostname free of whitespace counts as an address.
   const byHostname = hostname && !/\s/.test(hostname) ? { host: hostname, port: connection.port } : undefined;
 
-  if (connection.type === 'local') return byHostname;
+  if (connection.type === "local") return byHostname;
   if (connection.publicIpAddress) {
     return { host: connection.publicIpAddress, port: connection.publicPort ?? connection.port };
   }
@@ -156,8 +156,8 @@ export function adHocUrl(
   protocol: AdHocProtocol,
   options: ConnectOptions & { port?: string; username?: string } = {},
 ): string {
-  const credentials = options.username ? `${encodeURIComponent(options.username.trim())}@` : '';
-  const port = options.port?.trim() ? `:${options.port.trim()}` : '';
+  const credentials = options.username ? `${encodeURIComponent(options.username.trim())}@` : "";
+  const port = options.port?.trim() ? `:${options.port.trim()}` : "";
   return `${protocol}://${credentials}${formatHost(host.trim())}${port}${buildQuery(options)}`;
 }
 
@@ -166,7 +166,7 @@ export function adHocUrl(
  * Screens records one in `publicIpAddress` wherever the host answers on IPv6.
  */
 function formatHost(host: string): string {
-  return host.includes(':') && !host.startsWith('[') ? `[${host}]` : host;
+  return host.includes(":") && !host.startsWith("[") ? `[${host}]` : host;
 }
 
 /**
@@ -174,7 +174,7 @@ function formatHost(host: string): string {
  * dropped so the stored form and the form a user would type compare and address the same.
  */
 export function normalizeHostname(hostname: string): string {
-  return hostname.trim().replace(/\.+$/, '');
+  return hostname.trim().replace(/\.+$/, "");
 }
 
 /**
@@ -193,13 +193,13 @@ function isUniqueIdentifier(identifier: string, connection: Connection, all: Con
 
 function appendQuery(url: string, query: string): string {
   if (!query) return url;
-  return url.includes('?') ? `${url}&${query.slice(1)}` : url + query;
+  return url.includes("?") ? `${url}&${query.slice(1)}` : url + query;
 }
 
 function buildQuery(options: ConnectOptions): string {
   const params = new URLSearchParams();
-  if (options.observe) params.set('observe', 'true');
-  if (options.guest) params.set('guest', 'true');
+  if (options.observe) params.set("observe", "true");
+  if (options.guest) params.set("guest", "true");
   const query = params.toString();
-  return query ? `?${query}` : '';
+  return query ? `?${query}` : "";
 }

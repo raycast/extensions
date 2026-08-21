@@ -13,15 +13,15 @@ import {
   launchCommand,
   open,
   showToast,
-} from '@raycast/api';
-import { showFailureToast, useFrecencySorting } from '@raycast/utils';
-import { useMemo, useState } from 'react';
-import { ClientProtocol } from './archive';
-import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections, targetStatus } from './connection-type';
-import { ConnectOptions, describeTarget, supportsScreenSharing, targetUrl } from './connect';
-import { SavedConnection, blankConnection, useSavedConnections } from './library';
-import ConnectionForm from './components/ConnectionForm';
-import TypeFilter from './components/TypeFilter';
+} from "@raycast/api";
+import { showFailureToast, useFrecencySorting } from "@raycast/utils";
+import { useMemo, useState } from "react";
+import { ClientProtocol } from "./archive";
+import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections, targetStatus } from "./connection-type";
+import { ConnectOptions, describeTarget, supportsScreenSharing, targetUrl } from "./connect";
+import { SavedConnection, blankConnection, useSavedConnections } from "./library";
+import ConnectionForm from "./components/ConnectionForm";
+import TypeFilter from "./components/TypeFilter";
 
 const PROTOCOL_ICONS: Record<ClientProtocol, Image.ImageLike> = {
   vnc: Icon.Monitor,
@@ -53,8 +53,8 @@ export default function Command() {
   async function remove(connection: SavedConnection) {
     const confirmed = await confirmAlert({
       title: `Remove ${connection.name}?`,
-      message: 'This only removes it from Raycast. The connection stays in Screens.',
-      primaryAction: { title: 'Remove', style: Alert.ActionStyle.Destructive },
+      message: "This only removes it from Raycast. The connection stays in Screens.",
+      primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
 
@@ -83,11 +83,11 @@ export default function Command() {
     >
       <List.EmptyView
         icon={Icon.Desktop}
-        title={connections.length === 0 ? 'No Connections Yet' : 'No Matching Connections'}
+        title={connections.length === 0 ? "No Connections Yet" : "No Matching Connections"}
         description={
           connections.length === 0
-            ? 'Import an archive exported from Screens, or add a connection by hand.'
-            : 'Your other connections are hidden by the search or the type filter.'
+            ? "Import an archive exported from Screens, or add a connection by hand."
+            : "Your other connections are hidden by the search or the type filter."
         }
         actions={
           <ActionPanel>
@@ -123,7 +123,7 @@ export default function Command() {
                         <Action
                           title="Connect in Observe Mode"
                           icon={Icon.Eye}
-                          shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                           onAction={() => connect(connection, { observe: true })}
                         />
                       )}
@@ -131,7 +131,7 @@ export default function Command() {
                         <Action
                           title="Connect as Guest"
                           icon={Icon.Person}
-                          shortcut={{ modifiers: ['cmd', 'shift'], key: 'g' }}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
                           onAction={() => connect(connection, { guest: true })}
                         />
                       )}
@@ -193,9 +193,9 @@ function AddAction({ onSave }: { onSave: (connection: SavedConnection) => Promis
 function ImportAction() {
   async function launchImport() {
     try {
-      await launchCommand({ name: 'import-connections', type: LaunchType.UserInitiated });
+      await launchCommand({ name: "import-connections", type: LaunchType.UserInitiated });
     } catch (error) {
-      await showFailureToast(error, { title: 'Could not open Import Connections' });
+      await showFailureToast(error, { title: "Could not open Import Connections" });
     }
   }
 
@@ -203,7 +203,7 @@ function ImportAction() {
     <Action
       title="Import Connections…"
       icon={Icon.Download}
-      shortcut={{ modifiers: ['cmd'], key: 'i' }}
+      shortcut={{ modifiers: ["cmd"], key: "i" }}
       onAction={launchImport}
     />
   );

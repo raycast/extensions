@@ -1,8 +1,8 @@
-import { useLocalStorage } from '@raycast/utils';
-import { ClientProtocol, Connection, ConnectionType } from './archive';
-import { ConnectTarget, normalizeHostname, resolveTarget } from './connect';
+import { useLocalStorage } from "@raycast/utils";
+import { ClientProtocol, Connection, ConnectionType } from "./archive";
+import { ConnectTarget, normalizeHostname, resolveTarget } from "./connect";
 
-const STORAGE_KEY = 'connections';
+const STORAGE_KEY = "connections";
 
 /**
  * A connection in Raycast's own list. Importing an archive is a shortcut for filling this in, so it
@@ -39,9 +39,9 @@ export function toSavedConnection(connection: Connection, all: Connection[]): Sa
 export function blankConnection(): SavedConnection {
   return {
     id: crypto.randomUUID(),
-    name: '',
-    type: 'local',
-    clientProtocol: 'vnc',
-    target: { kind: 'saved', identifier: '', ambiguous: false },
+    name: "",
+    type: "local",
+    clientProtocol: "vnc",
+    target: { kind: "saved", identifier: "", ambiguous: false },
   };
 }

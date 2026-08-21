@@ -1,6 +1,6 @@
-import { Color, Icon, Image, List } from '@raycast/api';
-import { ConnectionType } from './archive';
-import { ConnectTarget } from './connect';
+import { Color, Icon, Image, List } from "@raycast/api";
+import { ConnectionType } from "./archive";
+import { ConnectTarget } from "./connect";
 
 export interface TypeSection {
   title: string;
@@ -8,25 +8,25 @@ export interface TypeSection {
 }
 
 export const TYPE_SECTIONS: TypeSection[] = [
-  { title: 'Local Network', types: ['local'] },
-  { title: 'Tailscale', types: ['tailscale'] },
-  { title: 'Remote', types: ['remote'] },
-  { title: 'Other', types: ['url', 'saved', 'recent'] },
+  { title: "Local Network", types: ["local"] },
+  { title: "Tailscale", types: ["tailscale"] },
+  { title: "Remote", types: ["remote"] },
+  { title: "Other", types: ["url", "saved", "recent"] },
 ];
 
 export const TYPE_ICONS: Record<ConnectionType, Image.ImageLike> = {
   local: Icon.Desktop,
-  tailscale: { source: 'tailscale.png', tintColor: Color.PrimaryText },
+  tailscale: { source: "tailscale.png", tintColor: Color.PrimaryText },
   remote: Icon.Globe,
   url: Icon.Link,
   saved: Icon.Desktop,
   recent: Icon.Clock,
 };
 
-export const ALL_TYPES = 'all';
+export const ALL_TYPES = "all";
 
 export function sectionTitle(type: ConnectionType): string {
-  return TYPE_SECTIONS.find((section) => section.types.includes(type))?.title ?? 'Other';
+  return TYPE_SECTIONS.find((section) => section.types.includes(type))?.title ?? "Other";
 }
 
 /** The sections `connections` actually fills, so a filter only offers types the user has. */
@@ -74,16 +74,16 @@ export function typeForSection(title: string, current: ConnectionType): Connecti
 
 /** How a row reaches its host, when that is worth calling out. */
 export function targetStatus(target: ConnectTarget): List.Item.Accessory | undefined {
-  if (target.kind === 'direct') {
+  if (target.kind === "direct") {
     return {
       icon: { source: Icon.ArrowRight, tintColor: Color.SecondaryText },
-      tooltip: 'Connects to this host directly rather than through the connection saved in Screens.',
+      tooltip: "Connects to this host directly rather than through the connection saved in Screens.",
     };
   }
   if (target.ambiguous) {
     return {
       icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
-      tooltip: 'Another connection shares this name, so Screens decides which one opens.',
+      tooltip: "Another connection shares this name, so Screens decides which one opens.",
     };
   }
   return undefined;

@@ -1,5 +1,5 @@
-import { Icon, List } from '@raycast/api';
-import { ALL_TYPES, TYPE_ICONS, TypeSection } from '../connection-type';
+import { Icon, List } from "@raycast/api";
+import { ALL_TYPES, TYPE_ICONS, TypeSection } from "../connection-type";
 
 /**
  * Renders nothing when every connection shares one type: a dropdown whose only real choice is the
