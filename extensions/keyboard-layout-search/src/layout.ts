@@ -9,6 +9,7 @@ export type LayoutDefinition = {
   keyboardName: string;
   map: ReadonlyMap<string, string>;
   scriptPattern?: RegExp;
+  normalizeInput?: (text: string) => string;
 };
 
 type Row = {
@@ -163,6 +164,7 @@ export const LAYOUTS: readonly LayoutDefinition[] = [
     title: "Greek",
     keyboardName: "Ελληνικά",
     scriptPattern: /[\u0370-\u03ff]/u,
+    normalizeInput: (text) => text.normalize("NFD").replace(/\p{M}/gu, ""),
     map: createKeyMap([
       {
         source: ";ςερτυθιοπ[]",
@@ -199,7 +201,8 @@ export type Conversion = {
 
 export function convertToEnglish(text: string, layout: LayoutDefinition): Conversion {
   let changedCharacters = 0;
-  const convertedText = Array.from(text, (character) => {
+  const normalizedText = layout.normalizeInput?.(text) ?? text;
+  const convertedText = Array.from(normalizedText, (character) => {
     const convertedCharacter = layout.map.get(character) ?? character;
     if (convertedCharacter !== character) changedCharacters += 1;
     return convertedCharacter;

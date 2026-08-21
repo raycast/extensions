@@ -15,10 +15,6 @@ import type { Application } from "@raycast/api";
 import { detectCorrection, isLayoutMode } from "./detection";
 import type { LayoutMode } from "./layout";
 
-type Preferences = {
-  layoutMode: string;
-};
-
 function QueryActions({ query }: { query: string }) {
   const webSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 

@@ -17,12 +17,22 @@ test("converts supported layouts to the physical US English keys", () => {
   assert.equal(convertToEnglish("chro,e", getLayout("french")).text, "chrome");
   assert.equal(convertToEnglish("zoutube", getLayout("german")).text, "youtube");
   assert.equal(convertToEnglish("ζοομ", getLayout("greek")).text, "zoom");
+  assert.equal(convertToEnglish("άέήίόύώ", getLayout("greek")).text, "aehioyv");
+  assert.equal(convertToEnglish("ΆΈΉΊΌΎΏ", getLayout("greek")).text, "AEHIOYV");
+  assert.equal(convertToEnglish("α\u0301", getLayout("greek")).text, "a");
 });
 
 test("automatically detects non-Latin layouts", () => {
   const correction = detectCorrection("сгкыщк", applications, "auto");
   assert.equal(correction.query, "cursor");
   assert.equal(correction.applications[0]?.application.name, "Cursor");
+});
+
+test("automatically converts precomposed Greek accents", () => {
+  const correction = detectCorrection("ζόομ", applications, "auto");
+  assert.equal(correction.query, "zoom");
+  assert.equal(correction.layout?.id, "greek");
+  assert.equal(correction.applications[0]?.application.name, "Zoom");
 });
 
 test("automatically detects a Latin layout from a strong application match", () => {
