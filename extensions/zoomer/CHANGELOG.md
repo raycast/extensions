@@ -1,6 +1,6 @@
 # Zoomer Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-21
 
 - Capture a selected area or the full screen, with a choice of output (default, copy, save, upload)
 - Start and stop screen recordings
