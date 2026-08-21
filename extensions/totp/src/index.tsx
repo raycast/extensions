@@ -105,7 +105,7 @@ export default function TOTP() {
                     concealed
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
-                  <Action.Paste title="Paste OTP" content={code.value} shortcut={{ modifiers: ["cmd"], key: "v" }} />
+                  <Action.Paste title="Paste OTP" content={code.value} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>{addAction}</ActionPanel.Section>
                 <Action
