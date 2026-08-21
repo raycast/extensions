@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add One MCP Server] - 2026-08-20
+## [Add One MCP Server] - {PR_MERGE_DATE}
 
 Add One to the official registry, connecting AI assistants to 700+ apps through four tools: list connected accounts, search a platform's actions, read an action's real API documentation, and execute it. The remote Streamable HTTP server uses One OAuth sign-in through an `mcp-remote` bridge.
 
