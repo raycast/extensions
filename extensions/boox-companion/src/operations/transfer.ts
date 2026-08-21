@@ -1,5 +1,7 @@
-import { randomUUID } from "node:crypto";
-import { stat } from "node:fs/promises";
+import { createHash, randomUUID } from "node:crypto";
+import { createReadStream } from "node:fs";
+import { mkdtemp, rm, stat } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { BooxClient } from "../api/boox-client";
 import { describeBooxError } from "../lib/errors";
@@ -128,8 +130,17 @@ async function replaceStorageFile(
     }
 
     if (observedReplacement && !observedReplacement.dir && observedReplacement.size === localSize) {
-      await removeStorageBackup(client, backup);
-      return;
+      try {
+        if (await remoteFileMatches(client, observedReplacement, localPath)) {
+          await removeStorageBackup(client, backup);
+          return;
+        }
+      } catch (verificationError) {
+        throw new Error(
+          `${describeBooxError(uploadError)}. The same-name file could not be verified by content: ${describeBooxError(verificationError)}. ` +
+            `It was left untouched; the original remains as ${backupName}`
+        );
+      }
     }
 
     if (observedReplacement) {
@@ -149,6 +160,23 @@ async function replaceStorageFile(
   }
 
   await removeStorageBackup(client, backup);
+}
+
+async function remoteFileMatches(client: BooxClient, remote: StorageEntry, localPath: string): Promise<boolean> {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "boox-transfer-verify-"));
+  try {
+    const downloaded = await client.downloadFile(remote.path, path.join(directory, "replacement"));
+    const [localHash, remoteHash] = await Promise.all([hashFile(localPath), hashFile(downloaded)]);
+    return localHash === remoteHash;
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+}
+
+async function hashFile(filePath: string): Promise<string> {
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(filePath)) hash.update(chunk);
+  return hash.digest("hex");
 }
 
 async function removeStorageBackup(client: BooxClient, backup: StorageEntry): Promise<void> {

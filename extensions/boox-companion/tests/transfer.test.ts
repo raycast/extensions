@@ -161,6 +161,10 @@ describe("file transfers", () => {
       .mockResolvedValueOnce(storagePage([existing]))
       .mockResolvedValueOnce(storagePage([committed]));
     vi.mocked(client.uploadStorage).mockRejectedValue(new Error("response lost"));
+    vi.mocked(client.downloadFile).mockImplementation(async (_remotePath, destination) => {
+      await writeFile(destination, "new");
+      return destination;
+    });
 
     const result = await transferFiles({
       client,
@@ -177,6 +181,36 @@ describe("file transfers", () => {
     );
     expect(client.deleteStorage).not.toHaveBeenCalledWith(committed);
     expect(client.renameStorage).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves both files when a same-size replacement has different content", async () => {
+    const file = await createFile("book.epub", "new");
+    const existing = storageFile("book.epub");
+    const corrupt = { ...existing, size: 3 };
+    const client = mockClient({ duplicates: ["book.epub"], entries: [existing] });
+    vi.mocked(client.listStorage)
+      .mockResolvedValueOnce(storagePage([existing]))
+      .mockResolvedValueOnce(storagePage([corrupt]));
+    vi.mocked(client.uploadStorage).mockRejectedValue(new Error("response lost"));
+    vi.mocked(client.downloadFile).mockImplementation(async (_remotePath, destination) => {
+      await writeFile(destination, "bad");
+      return destination;
+    });
+
+    const result = await transferFiles({
+      client,
+      paths: [file],
+      mode: "storage",
+      destination: "/Books",
+      conflictPolicy: "replace",
+    });
+
+    const backupName = vi.mocked(client.renameStorage).mock.calls[0][1];
+    expect(result).toMatchObject({ uploaded: 0, skipped: 0, failed: 1 });
+    expect(result.items[0].error).toMatch(
+      new RegExp(`same-name file may have completed uploading.*original remains as ${backupName}`)
+    );
+    expect(client.deleteStorage).not.toHaveBeenCalled();
   });
 
   it("reports a preserved backup when automatic restoration cannot finish", async () => {
@@ -337,6 +371,7 @@ function mockClient(options: { duplicates?: string[]; entries?: StorageEntry[] }
     deleteStorage: vi.fn().mockResolvedValue(undefined),
     renameStorage: vi.fn().mockResolvedValue(undefined),
     uploadStorage: vi.fn().mockResolvedValue(undefined),
+    downloadFile: vi.fn(),
     uploadLibrary: vi.fn().mockResolvedValue(undefined),
     getLibrary: vi.fn().mockResolvedValue({ books: [], shelves: [], bookCount: 0, shelfCount: 0 }),
   } as unknown as BooxClient;
