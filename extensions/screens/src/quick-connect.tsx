@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, closeMainWindow, 
 import { showFailureToast, useForm } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import { AdHocProtocol, ConnectOptions, DEFAULT_PORTS, HostSpec, adHocUrl, parseHostSpec } from "./connect";
-import { optionalPort, requiredText } from "./components/validation";
+import { connectableHost, optionalPort } from "./components/validation";
 
 /** `protocol` is a string because that is what a dropdown reports. {@link adHocProtocol} narrows it. */
 type ConnectForm = {
@@ -50,7 +50,7 @@ function ImmediateConnect({ spec, protocol }: { spec: HostSpec; protocol: AdHocP
 function QuickConnectForm({ host, protocol }: { host: string; protocol: AdHocProtocol }) {
   const { handleSubmit, itemProps, values } = useForm<ConnectForm>({
     initialValues: { host, protocol, port: "", username: "", observe: false, guest: false },
-    validation: { host: requiredText, port: optionalPort },
+    validation: { host: connectableHost, port: optionalPort },
     onSubmit: (submitted) => connect(submitted.host.trim(), adHocProtocol(submitted.protocol), submitted),
   });
 

@@ -15,6 +15,12 @@ export type AdHocProtocol = "vnc" | "ssh";
 
 export const DEFAULT_PORTS: Record<AdHocProtocol, number> = { vnc: 5900, ssh: 22 };
 
+/** A port a URL authority can carry. Anything else addresses a different machine than intended. */
+export function isValidPort(port: string): boolean {
+  const trimmed = port.trim();
+  return /^\d+$/.test(trimmed) && Number(trimmed) >= 1 && Number(trimmed) <= 65535;
+}
+
 /** A connection target as someone would type it. */
 export interface HostSpec {
   host: string;
@@ -50,11 +56,13 @@ export function parseHostSpec(spec: string): HostSpec | undefined {
 
   const bracketed = /^\[([^\]]+)\](?::(\d+))?$/.exec(authority);
   if (bracketed) {
+    if (bracketed[2] !== undefined && !isValidPort(bracketed[2])) return undefined;
     return { host: bracketed[1], port: bracketed[2], protocol, username };
   }
 
   const parts = authority.split(":");
   if (parts.length === 2 && /^\d+$/.test(parts[1])) {
+    if (!isValidPort(parts[1])) return undefined;
     return parts[0] ? { host: parts[0], port: parts[1], protocol, username } : undefined;
   }
 
