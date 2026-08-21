@@ -87,6 +87,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [JobYap](https://jobyap.com/agents) | Search job postings aggregated from companies' official careers sites — salaries, locations, and a community discussion thread on every job. Remote Streamable HTTP MCP server; no auth required. |
 | [Tendem](https://github.com/Toloka/tendem-mcp) | Delegate tasks to vetted human experts - research, competitive analysis, fact-checking, copywriting, editing, design review, presentation polish, data cleaning and list building. Submit a task in natural language; Tendem's orchestrator scopes it and quotes a transparent price, and after explicit approval a vetted human expert executes it and returns verified results as markdown plus files. Remote Streamable HTTP MCP server with OAuth 2.0 sign-in on first use. |
 | [Structured](https://mcp.structured.app) | Structured is an all-in-one day planner that combines tasks and to-dos in a visual timeline. Its MCP server lets AI assistants view schedules and inbox tasks, and create, update, complete, delete, and manage recurring tasks. Remote Streamable HTTP server with Structured Cloud OAuth sign-in; some features require Structured Pro. |
+| [One](https://www.withone.ai/docs/mcp) | One connects AI tools to 700+ apps such as Gmail, Slack, Stripe, Shopify, HubSpot, Notion, and Linear through four tools: list connected accounts, search a platform's actions, read an action's real API documentation, and execute it. Remote Streamable HTTP server with One OAuth sign-in. |
 
 ### Community MCP Servers
 

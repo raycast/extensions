@@ -873,6 +873,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       ],
     },
   },
+  {
+    name: "one",
+    title: "One",
+    description:
+      "One is an MCP server that connects your AI tools to 700+ apps like Gmail, Slack, Stripe, Shopify, HubSpot, Notion, and Linear. Four tools cover everything: list your connected accounts, search a platform's actions, read an action's real API documentation, and execute it. Remote Streamable HTTP server with One OAuth sign-in, so no API keys are stored locally.",
+    icon: "https://assets.withone.ai/logos/one-logo.png",
+    homepage: "https://www.withone.ai/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.withone.ai/mcp"],
+      env: {
+        npm_config_yes: "true",
+      },
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
