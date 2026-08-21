@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add MinimaxCN support] - {PR_MERGE_DATE}
+## [Add MinimaxCN support] - 2026-08-21
 
 ### New Features
 
