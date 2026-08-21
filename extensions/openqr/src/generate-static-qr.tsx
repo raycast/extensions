@@ -162,11 +162,13 @@ export default function Command() {
         id="dark"
         title="Foreground color"
         placeholder="232E3A (hex, optional)"
+        info="Applies to SVG output. PNG is rendered monochrome by the API."
       />
       <Form.TextField
         id="light"
         title="Background color"
         placeholder="FFFFFF (hex, optional)"
+        info="Applies to SVG output. PNG is rendered monochrome by the API."
       />
     </Form>
   );
