@@ -1,20 +1,9 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, List, open, showToast, Toast } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { calliday, callidayJSON, clock, fmt, Status } from "./lib/cli";
+import { CallidayErrorView } from "./lib/error-view";
 
-const STATE_META: Record<
-  Status["state"],
-  { label: string; icon: Icon; tint: Color }
-> = {
+const STATE_META: Record<Status["state"], { label: string; icon: Icon; tint: Color }> = {
   tracking: { label: "Tracking", icon: Icon.CircleFilled, tint: Color.Green },
   idle: {
     label: "Idle — clock stopped",
@@ -30,98 +19,92 @@ const STATE_META: Record<
 };
 
 export default function Now() {
-  const { data, isLoading, revalidate } = usePromise(() =>
-    callidayJSON<Status>(["status"]),
-  );
+  const { data, error, isLoading, revalidate } = usePromise(() => callidayJSON<Status>(["status"]), [], {
+    failureToastOptions: { title: "Couldn't reach Calliday" },
+  });
 
-  const openApp = (
-    <Action
-      title="Open Calliday"
-      icon={Icon.AppWindow}
-      onAction={() => open("calliday://")}
-    />
-  );
+  const openApp = <Action title="Open Calliday" icon={Icon.AppWindow} onAction={() => open("calliday://")} />;
 
   return (
     <List isLoading={isLoading}>
-      {data && (
-        <>
-          <List.Section title="Now">
-            <List.Item
-              icon={{
-                source: STATE_META[data.state].icon,
-                tintColor: STATE_META[data.state].tint,
-              }}
-              title={data.current?.app ?? STATE_META[data.state].label}
-              subtitle={data.current?.domain ?? data.current?.title}
-              accessories={
-                data.current
-                  ? [
-                      {
-                        text: fmt(
-                          Math.max(0, Date.now() / 1000 - data.current.since),
-                        ),
-                        icon: Icon.Clock,
-                      },
-                    ]
-                  : []
-              }
-              actions={
-                <ActionPanel>
-                  {openApp}
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    onAction={revalidate}
-                  />
-                </ActionPanel>
-              }
-            />
-            <List.Item
-              icon={Icon.Calendar}
-              title="Today"
-              accessories={[{ text: `${fmt(data.today_seconds)} tracked` }]}
-              actions={<ActionPanel>{openApp}</ActionPanel>}
-            />
-          </List.Section>
-          <List.Section title="Timer">
-            {data.timer ? (
+      {error ? (
+        <CallidayErrorView error={error} />
+      ) : (
+        data && (
+          <>
+            <List.Section title="Now">
               <List.Item
-                icon={{ source: Icon.Stopwatch, tintColor: Color.Orange }}
-                title={data.timer.name}
-                subtitle={
-                  data.timer.project ? `[${data.timer.project}]` : undefined
+                icon={{
+                  source: STATE_META[data.state].icon,
+                  tintColor: STATE_META[data.state].tint,
+                }}
+                title={data.current?.app ?? STATE_META[data.state].label}
+                subtitle={data.current?.domain ?? data.current?.title}
+                accessories={
+                  data.current
+                    ? [
+                        {
+                          text: fmt(Math.max(0, Date.now() / 1000 - data.current.since)),
+                          icon: Icon.Clock,
+                        },
+                      ]
+                    : []
                 }
-                accessories={[{ text: `since ${clock(data.timer.start)}` }]}
                 actions={
                   <ActionPanel>
-                    <Action
-                      title="Stop Timer"
-                      icon={Icon.Stop}
-                      style={Action.Style.Destructive}
-                      onAction={async () => {
-                        await calliday(["timer", "stop"]);
-                        await showToast({
-                          style: Toast.Style.Success,
-                          title: "Timer stopped",
-                        });
-                        revalidate();
-                      }}
-                    />
                     {openApp}
+                    <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
                   </ActionPanel>
                 }
               />
-            ) : (
               <List.Item
-                icon={Icon.Stopwatch}
-                title="No timer running"
-                subtitle="Use “Start Timer” to begin one"
+                icon={Icon.Calendar}
+                title="Today"
+                accessories={[{ text: `${fmt(data.today_seconds)} tracked` }]}
                 actions={<ActionPanel>{openApp}</ActionPanel>}
               />
-            )}
-          </List.Section>
-        </>
+            </List.Section>
+            <List.Section title="Timer">
+              {data.timer ? (
+                <List.Item
+                  icon={{ source: Icon.Stopwatch, tintColor: Color.Orange }}
+                  title={data.timer.name}
+                  subtitle={data.timer.project ? `[${data.timer.project}]` : undefined}
+                  accessories={[{ text: `since ${clock(data.timer.start)}` }]}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title="Stop Timer"
+                        icon={Icon.Stop}
+                        style={Action.Style.Destructive}
+                        onAction={async () => {
+                          try {
+                            await calliday(["timer", "stop"]);
+                            await showToast({
+                              style: Toast.Style.Success,
+                              title: "Timer stopped",
+                            });
+                            revalidate();
+                          } catch (err) {
+                            await showFailureToast(err, { title: "Couldn't stop the timer" });
+                          }
+                        }}
+                      />
+                      {openApp}
+                    </ActionPanel>
+                  }
+                />
+              ) : (
+                <List.Item
+                  icon={Icon.Stopwatch}
+                  title="No timer running"
+                  subtitle="Use “Start Timer” to begin one"
+                  actions={<ActionPanel>{openApp}</ActionPanel>}
+                />
+              )}
+            </List.Section>
+          </>
+        )
       )}
     </List>
   );

@@ -8,9 +8,8 @@ const exec = promisify(execFile);
 /** Resolve the calliday binary from preferences (default: where the app
  * installs it). `~` is expanded so the preference stays readable. */
 export function cliPath(): string {
-  const { cliPath } = getPreferenceValues<{ cliPath?: string }>();
-  const raw =
-    cliPath?.trim() || "~/Library/Application Support/Calliday/bin/calliday";
+  const { cliPath } = getPreferenceValues<Preferences>();
+  const raw = cliPath.trim() || "~/Library/Application Support/Calliday/bin/calliday";
   return raw.startsWith("~") ? homedir() + raw.slice(1) : raw;
 }
 
@@ -19,18 +18,27 @@ export async function calliday(args: string[]): Promise<string> {
     const { stdout } = await exec(cliPath(), args);
     return stdout;
   } catch (error) {
-    const err = error as NodeJS.ErrnoException;
+    const err = error as NodeJS.ErrnoException & { stderr?: string };
     if (err.code === "ENOENT") {
       throw new Error(
         "calliday CLI not found — open Calliday and check Settings → General, or set the path in this extension's preferences.",
       );
+    }
+    const stderr = err.stderr?.trim();
+    if (stderr) {
+      throw new Error(stderr);
     }
     throw error;
   }
 }
 
 export async function callidayJSON<T>(args: string[]): Promise<T> {
-  return JSON.parse(await calliday([...args, "--json"])) as T;
+  const raw = await calliday([...args, "--json"]);
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    throw new Error("Calliday returned invalid data. Make sure the app is up to date.");
+  }
 }
 
 // ── Shapes mirrored from the CLI's --json output ─────────────────────────

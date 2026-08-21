@@ -9,4 +9,4 @@
   on the timeline, open it, or reveal it in the Finder.
 - Tomatoes: the pomodoro on the vine (give it up, if you must) and today's
   harvest, run by run.
-- Start a Tomato and Start Timer commands for zero-click ritual starts.
+- Start Tomato and Start Timer commands for zero-click ritual starts.

@@ -32,7 +32,7 @@ Calliday app:
   reveal it in the Finder.
 - **Tomatoes** — the one on the vine (with a give-up action) and today's
   harvest, run by run.
-- **Start a Tomato** — plant a pomodoro straight from Raycast; Calliday
+- **Start Tomato** — plant a pomodoro straight from Raycast; Calliday
   notifies you when it's ripe.
 - **Start Timer** — begin a manual timer with a name, without opening
   anything.
@@ -44,14 +44,5 @@ Calliday app:
   default install path is used automatically). The extension does nothing
   without it.
 
-## Development install
-
-```sh
-cd raycast
-npm install
-npm run dev     # opens Raycast in development mode with the extension live
-```
-
-After the first `npm run dev`, the extension stays available in Raycast
-(search "Calliday"). The CLI path can be overridden in the extension's
-preferences if Calliday lives somewhere unusual.
+The CLI path can be overridden in the extension's preferences if Calliday
+lives somewhere unusual.

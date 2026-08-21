@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, open } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { callidayJSON, fmt, Report } from "./lib/cli";
+import { CallidayErrorView } from "./lib/error-view";
 
 function productivityTint(score?: number | null): Color {
   if (score == null) return Color.SecondaryText;
@@ -10,82 +11,82 @@ function productivityTint(score?: number | null): Color {
 }
 
 export default function Today() {
-  const { data, isLoading } = usePromise(() =>
-    callidayJSON<Report>(["report", "day"]),
-  );
+  const { data, error, isLoading } = usePromise(() => callidayJSON<Report>(["report", "day"]), [], {
+    failureToastOptions: { title: "Couldn't reach Calliday" },
+  });
 
   const actions = (
     <ActionPanel>
-      <Action
-        title="Open Calliday"
-        icon={Icon.AppWindow}
-        onAction={() => open("calliday://")}
-      />
+      <Action title="Open Calliday" icon={Icon.AppWindow} onAction={() => open("calliday://")} />
     </ActionPanel>
   );
 
   return (
     <List isLoading={isLoading}>
-      {data && (
-        <>
-          <List.Section title={data.rangeLabel}>
-            <List.Item
-              icon={{ source: Icon.Clock, tintColor: Color.Orange }}
-              title={`${fmt(data.totalSeconds)} tracked`}
-              accessories={
-                data.productivity != null
-                  ? [
-                      {
-                        tag: {
-                          value: `${Math.round(data.productivity * 100)}% productive`,
-                          color: productivityTint(data.productivity),
+      {error ? (
+        <CallidayErrorView error={error} />
+      ) : (
+        data && (
+          <>
+            <List.Section title={data.rangeLabel}>
+              <List.Item
+                icon={{ source: Icon.Clock, tintColor: Color.Orange }}
+                title={`${fmt(data.totalSeconds)} tracked`}
+                accessories={
+                  data.productivity != null
+                    ? [
+                        {
+                          tag: {
+                            value: `${Math.round(data.productivity * 100)}% productive`,
+                            color: productivityTint(data.productivity),
+                          },
                         },
-                      },
-                    ]
-                  : []
-              }
-              actions={actions}
-            />
-          </List.Section>
-          <List.Section title="Projects">
-            {data.byProject.slice(0, 8).map((row) => (
-              <List.Item
-                key={row.name}
-                icon={{
-                  source: Icon.CircleFilled,
-                  tintColor: productivityTint(row.productivity),
-                }}
-                title={row.name}
-                accessories={[{ text: fmt(row.seconds) }]}
+                      ]
+                    : []
+                }
                 actions={actions}
               />
-            ))}
-          </List.Section>
-          <List.Section title="Apps">
-            {data.byApp.slice(0, 8).map((row) => (
-              <List.Item
-                key={row.name}
-                icon={Icon.AppWindowList}
-                title={row.name}
-                accessories={[{ text: fmt(row.seconds) }]}
-                actions={actions}
-              />
-            ))}
-          </List.Section>
-          {data.byDomain.length > 0 && (
-            <List.Section title="Sites">
-              {data.byDomain.slice(0, 6).map((row) => (
+            </List.Section>
+            <List.Section title="Projects">
+              {data.byProject.slice(0, 8).map((row) => (
                 <List.Item
                   key={row.name}
-                  icon={Icon.Globe}
+                  icon={{
+                    source: Icon.CircleFilled,
+                    tintColor: productivityTint(row.productivity),
+                  }}
                   title={row.name}
                   accessories={[{ text: fmt(row.seconds) }]}
                   actions={actions}
                 />
               ))}
             </List.Section>
-          )}
-        </>
+            <List.Section title="Apps">
+              {data.byApp.slice(0, 8).map((row) => (
+                <List.Item
+                  key={row.name}
+                  icon={Icon.AppWindowList}
+                  title={row.name}
+                  accessories={[{ text: fmt(row.seconds) }]}
+                  actions={actions}
+                />
+              ))}
+            </List.Section>
+            {data.byDomain.length > 0 && (
+              <List.Section title="Sites">
+                {data.byDomain.slice(0, 6).map((row) => (
+                  <List.Item
+                    key={row.name}
+                    icon={Icon.Globe}
+                    title={row.name}
+                    accessories={[{ text: fmt(row.seconds) }]}
+                    actions={actions}
+                  />
+                ))}
+              </List.Section>
+            )}
+          </>
+        )
       )}
     </List>
   );

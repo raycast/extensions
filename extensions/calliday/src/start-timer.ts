@@ -1,9 +1,7 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { calliday } from "./lib/cli";
 
-export default async function StartTimer(
-  props: LaunchProps<{ arguments: { name: string } }>,
-) {
+export default async function StartTimer(props: LaunchProps<{ arguments: Arguments.StartTimer }>) {
   try {
     await calliday(["timer", "start", props.arguments.name]);
     await showHUD(`⏱ Timer started: ${props.arguments.name}`);
