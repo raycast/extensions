@@ -13,7 +13,7 @@ Open the Action Panel with `⌘ K` to edit or delete a key, copy its name, move 
 
 ## Generate Passwords
 
-Run the standalone **Generate Password** command, select **Generate Password** from an Action Panel, or press `⌘ ⇧ G` inside **Search Key Values**. Enter a key name, optionally choose a category, and submit the form. The extension generates a 12-character password using only letters and digits, saves it as the key's value, and copies it to the clipboard.
+Run the standalone **Generate Password** command, select **Generate Password** from an Action Panel, or press `⌘ ⇧ G` inside **Search Key Values**. Enter a key name, optionally choose a category, choose the password length and allowed character sets, and list any characters that must be excluded. The extension guarantees at least one character from every selected set, saves the generated password as the key's value, and copies it to the clipboard. The defaults remain 12 characters with lowercase letters, uppercase letters, and numbers.
 
 ## Categories
 

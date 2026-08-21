@@ -13,7 +13,7 @@ import {
 import { useForm } from "@raycast/utils";
 
 import { Category, Entry } from "./entries";
-import { generatePassword } from "./password";
+import { DEFAULT_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, generatePassword } from "./password";
 
 const NO_CATEGORY_VALUE = "__none__";
 
@@ -26,6 +26,12 @@ export type PasswordEntryValues = {
 type PasswordFormValues = {
   key: string;
   categoryId: string;
+  length: string;
+  includeLowercase: boolean;
+  includeUppercase: boolean;
+  includeNumbers: boolean;
+  includeSymbols: boolean;
+  excludedCharacters: string;
 };
 
 type PasswordFormProps = {
@@ -58,6 +64,12 @@ export function PasswordForm({
     initialValues: {
       key: initialKey,
       categoryId: initialCategoryId ?? NO_CATEGORY_VALUE,
+      length: String(DEFAULT_PASSWORD_LENGTH),
+      includeLowercase: true,
+      includeUppercase: true,
+      includeNumbers: true,
+      includeSymbols: false,
+      excludedCharacters: "",
     },
     validation: {
       key: (value) => {
@@ -71,13 +83,32 @@ export function PasswordForm({
 
         return duplicate ? "This key already exists" : undefined;
       },
+      length: (value) => {
+        const normalized = value?.trim() ?? "";
+
+        if (!/^\d+$/.test(normalized)) {
+          return "Enter a whole number";
+        }
+
+        const length = Number(normalized);
+        return length < MIN_PASSWORD_LENGTH || length > MAX_PASSWORD_LENGTH
+          ? `Use a length from ${MIN_PASSWORD_LENGTH} to ${MAX_PASSWORD_LENGTH}`
+          : undefined;
+      },
     },
     async onSubmit(values) {
       const key = values.key.trim();
       const categoryId = values.categoryId === NO_CATEGORY_VALUE ? undefined : values.categoryId;
 
       try {
-        const password = generatePassword();
+        const password = generatePassword({
+          length: Number(values.length),
+          includeLowercase: values.includeLowercase,
+          includeUppercase: values.includeUppercase,
+          includeNumbers: values.includeNumbers,
+          includeSymbols: values.includeSymbols,
+          excludedCharacters: values.excludedCharacters,
+        });
         await onSave({ key, value: password, categoryId });
         await Clipboard.copy(password);
         if (closeAfterSave) {
@@ -120,7 +151,19 @@ export function PasswordForm({
           <Form.Dropdown.Item key={category.id} value={category.id} title={category.name} icon={Icon.Folder} />
         ))}
       </Form.Dropdown>
-      <Form.Description text="Generates a 12-character password using only letters and digits, saves it, and copies it to the clipboard." />
+      <Form.Separator />
+      <Form.TextField title="Length" placeholder={String(DEFAULT_PASSWORD_LENGTH)} {...itemProps.length} />
+      <Form.Checkbox title="Characters" label="Lowercase Letters (a-z)" {...itemProps.includeLowercase} />
+      <Form.Checkbox label="Uppercase Letters (A-Z)" {...itemProps.includeUppercase} />
+      <Form.Checkbox label="Numbers (0-9)" {...itemProps.includeNumbers} />
+      <Form.Checkbox label="Symbols (!@#$...)" {...itemProps.includeSymbols} />
+      <Form.TextField
+        title="Exclude Characters"
+        placeholder="For example, 0OIl1"
+        info="Every character entered here is removed from the generator."
+        {...itemProps.excludedCharacters}
+      />
+      <Form.Description text="The password includes at least one character from every selected set, is saved as the key's value, and is copied to the clipboard." />
     </Form>
   );
 }
