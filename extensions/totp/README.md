@@ -2,10 +2,19 @@
 
 A private, local-first TOTP authenticator for Raycast.
 
+Unlike extensions tied to a specific provider or authenticator export format, TOTP works directly with standard Base32 secrets and `otpauth://` URIs. It has no network integration, no Keychain dependency, and no external app requirement.
+
 ## Commands
 
 - **TOTP** — search saved accounts, copy or paste the current OTP, add/remove accounts, and import/export backups.
 - **Quick OTP** — generate and copy an OTP from a Base32 secret or `otpauth://` URI without saving it. Use **Add Account** to save the current input.
+
+## Why TOTP?
+
+- Works with any standard TOTP provider, not a single service or companion app.
+- Supports SHA-1, SHA-256, SHA-512, custom digits, and custom periods from standard URIs.
+- Keeps Quick OTP sessions ephemeral unless you explicitly save them.
+- Includes encrypted, portable backups for moving accounts between Macs.
 
 ## Storage and Backups
 
