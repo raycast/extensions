@@ -22,12 +22,14 @@ test("sortByDefaultAgentOrder uses the canonical provider order and keeps provid
     { id: "claude", rowId: "claude" },
     { id: "antigravity", rowId: "antigravity" },
     { id: "amp", rowId: "amp" },
+    { id: "aihubmix", rowId: "aihubmix" },
     { id: "codex", rowId: "codex-2" },
   ];
 
   assert.deepEqual(
     sortByDefaultAgentOrder(agents).map((agent) => agent.rowId),
     [
+      "aihubmix",
       "amp",
       "antigravity",
       "claude",

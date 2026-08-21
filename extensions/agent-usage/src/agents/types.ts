@@ -1,6 +1,7 @@
 import type { Image } from "@raycast/api";
 
 export type AgentId =
+  | "aihubmix"
   | "amp"
   | "claude"
   | "clinepass"
@@ -42,6 +43,7 @@ export interface Accessory {
 }
 
 export interface AgentVisibilityPreferences {
+  showAihubmix: boolean;
   showAmp: boolean;
   showAntigravity: boolean;
   showClaude: boolean;
