@@ -15,7 +15,7 @@ export type AdHocProtocol = 'vnc' | 'ssh';
 
 export const DEFAULT_PORTS: Record<AdHocProtocol, number> = { vnc: 5900, ssh: 22 };
 
-/** A connection target as someone would type it, rather than as Screens stores it. */
+/** A connection target as someone would type it. */
 export interface HostSpec {
   host: string;
   protocol?: AdHocProtocol;
@@ -68,9 +68,8 @@ export function parseHostSpec(spec: string): HostSpec | undefined {
  * Decides how to reach `connection`.
  *
  * `screens://` takes a name or hostname and never an id, so an identifier that matches more than
- * one entry is ambiguous. `all` must be every connection in the archive, not the subset the user
- * imported: Screens still holds the whole library, so a name dropped at import time can still
- * collide.
+ * one entry is ambiguous. `all` must be every connection in the archive: Screens still holds the
+ * whole library, so a name dropped at import time can still collide.
  */
 export function resolveTarget(connection: Connection, all: Connection[]): ConnectTarget {
   // A url-type connection stores the exact target it was created from. Nothing to guess.
@@ -110,7 +109,7 @@ export function describeTarget(target: ConnectTarget): string {
   return target.kind === 'direct' ? target.url : target.identifier;
 }
 
-/** The address of the host itself, bypassing the library. Only VNC has an ad-hoc URL scheme. */
+/** The direct address of the host itself. Only VNC has an ad-hoc URL scheme. */
 function directUrl(connection: Connection): string | undefined {
   if (connection.clientProtocol !== 'vnc') return undefined;
 
@@ -124,10 +123,10 @@ function directUrl(connection: Connection): string | undefined {
 }
 
 /**
- * Where the host answers. A local connection is reached by its Bonjour name: Screens also records the
- * network's public address on those, but that routes out to the WAN, and every machine behind one
- * router shares it. Tailscale and remote connections are reached at the recorded address, because their
- * hostname is a display name rather than something resolvable, e.g. `Front Desk iMac`.
+ * Where the host answers. A local connection is reached by its Bonjour name: Screens also records
+ * the network's public address on those, but that routes out to the WAN, and every machine behind
+ * one router shares it. Tailscale and remote connections are reached at the recorded address,
+ * because their hostname is a display name, e.g. `Front Desk iMac`.
  */
 function directAddress(connection: Connection): { host: string; port: number } | undefined {
   const hostname = normalizeHostname(connection.hostname);

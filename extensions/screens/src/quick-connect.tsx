@@ -15,7 +15,7 @@ type ConnectForm = {
 /**
  * Connects straight away when the root search bar supplied a host, and asks for the details
  * otherwise. A scheme typed inline wins over the dropdown, and a host that doesn't parse falls
- * through to the form carrying what was typed, so a typo is corrected rather than retyped.
+ * through to the form carrying what was typed.
  */
 export default function Command({ arguments: args }: LaunchProps<{ arguments: Arguments.QuickConnect }>) {
   const typed = args.host?.trim() ?? '';

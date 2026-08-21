@@ -46,7 +46,7 @@ const NEVER_CONNECTED = -63114076800;
 
 /**
  * The archive's modification time, which is the real export time. Returns 0 when the file is
- * missing or unreadable so callers can use it as a cache key without handling failure twice.
+ * missing or unreadable so callers can use it as a cache key.
  */
 export function archiveModifiedAt(path: string): number {
   try {
