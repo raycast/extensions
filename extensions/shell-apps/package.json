@@ -4,7 +4,7 @@
   "title": "Shell Apps",
   "description": "Create and launch your own shell command shortcuts as apps on Windows",
   "icon": "icon.png",
-  "author": "Chaika",
+  "author": "Kxrbx",
   "categories": ["Developer Tools", "Productivity"],
   "license": "MIT",
   "version": "1.0.0",
