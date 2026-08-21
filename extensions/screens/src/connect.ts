@@ -5,65 +5,88 @@ export interface ConnectOptions {
   guest?: boolean;
 }
 
-export interface ConnectTarget {
-  url: string;
-  /**
-   * True when the URL asks Screens to open a screen from the library, which carries its stored
-   * settings and credentials. False when the URL addresses the host directly instead.
-   */
-  viaSavedScreen: boolean;
-  /** True when the identifier in the URL matches more than one saved screen and Screens picks. */
-  ambiguous: boolean;
-}
+/**
+ * How to reach a screen. `saved` opens the screen from Screens' own library, which carries its
+ * stored settings and credentials. `direct` addresses the host itself and carries none of that.
+ */
+export type ConnectTarget = { kind: 'saved'; identifier: string; ambiguous: boolean } | { kind: 'direct'; url: string };
 
 const DEFAULT_VNC_PORT = 5900;
 
 /**
- * Builds the URL that connects to `screen`.
+ * Decides how to reach `screen`.
  *
- * `screens://` takes a name or hostname, never an id, so a screen whose name and hostname are both
- * shared with another screen cannot be addressed unambiguously. `all` is the rest of the library,
- * used to detect that case and fall back to the host's address.
+ * `screens://` takes a name or hostname and never an id, so an identifier that matches more than
+ * one entry is ambiguous. `all` must be every screen in the archive, not the subset the user
+ * imported: Screens still holds the whole library, so a name dropped at import time can still
+ * collide.
  */
-export function connectUrl(screen: Screen, all: Screen[], options: ConnectOptions = {}): ConnectTarget {
-  const query = buildQuery(options);
-
+export function resolveTarget(screen: Screen, all: Screen[]): ConnectTarget {
   // A url-type screen stores the exact target it was created from. Nothing to guess.
   if (screen.sourceURL) {
-    return { url: appendQuery(screen.sourceURL, query), viaSavedScreen: false, ambiguous: false };
+    return { kind: 'direct', url: screen.sourceURL };
   }
 
   const hostname = normalizeHostname(screen.hostname);
   if (hostname && isUniqueIdentifier(hostname, screen, all)) {
-    return { url: `screens://${encodeURIComponent(hostname)}${query}`, viaSavedScreen: true, ambiguous: false };
+    return { kind: 'saved', identifier: hostname, ambiguous: false };
   }
 
   const name = screen.name.trim();
   if (name && isUniqueIdentifier(name, screen, all)) {
-    return { url: `screens://${encodeURIComponent(name)}${query}`, viaSavedScreen: true, ambiguous: false };
+    return { kind: 'saved', identifier: name, ambiguous: false };
   }
 
-  const direct = directUrl(screen, query);
+  const direct = directUrl(screen);
   if (direct) {
-    return { url: direct, viaSavedScreen: false, ambiguous: false };
+    return { kind: 'direct', url: direct };
   }
 
   // An RDP screen has no ad-hoc URL scheme, so an ambiguous name is the only remaining handle.
-  return { url: `screens://${encodeURIComponent(name || hostname)}${query}`, viaSavedScreen: true, ambiguous: true };
+  return { kind: 'saved', identifier: name || hostname, ambiguous: true };
+}
+
+export function targetUrl(target: ConnectTarget, options: ConnectOptions = {}): string {
+  const query = buildQuery(options);
+  if (target.kind === 'direct') {
+    return appendQuery(target.url, query);
+  }
+  return `screens://${encodeURIComponent(target.identifier)}${query}`;
+}
+
+/** What the target actually addresses, for display and for copying. */
+export function describeTarget(target: ConnectTarget): string {
+  return target.kind === 'direct' ? target.url : target.identifier;
 }
 
 /** The address of the host itself, bypassing the library. Only VNC has an ad-hoc URL scheme. */
-export function directUrl(screen: Screen, query = ''): string | undefined {
+export function directUrl(screen: Screen): string | undefined {
   if (screen.clientProtocol !== 'vnc') return undefined;
 
-  const host = screen.publicIpAddress ?? normalizeHostname(screen.hostname);
-  if (!host) return undefined;
+  const address = directAddress(screen);
+  if (!address) return undefined;
 
-  const port = screen.publicIpAddress ? (screen.publicPort ?? screen.port) : screen.port;
   const credentials = screen.username ? `${encodeURIComponent(screen.username)}@` : '';
-  const suffix = port && port !== DEFAULT_VNC_PORT ? `:${port}` : '';
+  const suffix = address.port && address.port !== DEFAULT_VNC_PORT ? `:${address.port}` : '';
 
-  return `vnc://${credentials}${host}${suffix}${query}`;
+  return `vnc://${credentials}${address.host}${suffix}`;
+}
+
+/**
+ * Where the host answers. A local screen is reached by its Bonjour name: Screens also records the
+ * network's public address on those, but that routes out to the WAN, and every machine behind one
+ * router shares it. Tailscale and remote screens are reached at the recorded address, which for
+ * Tailscale is the stable 100.x address and is more dependable than its hostname.
+ */
+function directAddress(screen: Screen): { host: string; port: number } | undefined {
+  const hostname = normalizeHostname(screen.hostname);
+  const byHostname = hostname ? { host: hostname, port: screen.port } : undefined;
+
+  if (screen.type === 'local') return byHostname;
+  if (screen.publicIpAddress) {
+    return { host: screen.publicIpAddress, port: screen.publicPort ?? screen.port };
+  }
+  return byHostname;
 }
 
 export function adHocUrl(

@@ -1,20 +1,24 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
   Icon,
   Keyboard,
+  LaunchType,
   List,
+  Toast,
   closeMainWindow,
-  getPreferenceValues,
+  confirmAlert,
+  launchCommand,
   open,
-  openExtensionPreferences,
+  showToast,
 } from '@raycast/api';
-import { showFailureToast, useCachedPromise } from '@raycast/utils';
+import { showFailureToast } from '@raycast/utils';
 import { useMemo } from 'react';
-import { Screen, ScreenType, archiveModifiedAt, readArchive } from './archive';
-import { ConnectOptions, connectUrl, directUrl, normalizeHostname } from './connect';
-import ArchiveErrorView from './components/ArchiveErrorView';
+import { ScreenType } from './archive';
+import { ConnectOptions, describeTarget, normalizeHostname, targetUrl } from './connect';
+import { ImportedScreen, importedScreenTitle, useImportedScreens } from './library';
 
 const SECTIONS: { title: string; types: ScreenType[] }[] = [
   { title: 'Local Network', types: ['local'] },
@@ -33,35 +37,86 @@ const TYPE_ICONS: Record<ScreenType, Icon> = {
 };
 
 export default function Command() {
-  const { archivePath } = getPreferenceValues<Preferences.SearchScreens>();
-  const modifiedAt = archiveModifiedAt(archivePath);
-
-  const { data, isLoading, error, revalidate } = useCachedPromise(readArchive, [archivePath, modifiedAt]);
-
-  const screens = useMemo(() => data?.screens ?? [], [data]);
+  const { screens, setScreens, isLoading } = useImportedScreens();
   const sections = useMemo(() => groupByType(screens), [screens]);
 
-  if (error) {
-    return <ArchiveErrorView error={error} onRetry={revalidate} />;
+  async function remove(screen: ImportedScreen) {
+    const confirmed = await confirmAlert({
+      title: `Remove ${importedScreenTitle(screen)}?`,
+      message: 'This only removes it from Raycast. The screen stays in Screens.',
+      primaryAction: { title: 'Remove', style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
+    await setScreens(screens.filter((other) => other.id !== screen.id));
+    await showToast({ style: Toast.Style.Success, title: `Removed ${importedScreenTitle(screen)}` });
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle={data ? `Archive from ${formatDate(data.exportedAt)}` : 'Screens'}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search screens">
       <List.EmptyView
         icon={Icon.Desktop}
-        title="No Screens in This Archive"
-        description="Export an archive from Screens → Settings → Archives → Export…, then select it in preferences."
+        title="No Screens Imported"
+        description="Import an archive exported from Screens, then pick the screens worth keeping."
         actions={
           <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-            <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            <ImportAction />
           </ActionPanel>
         }
       />
       {sections.map((section) => (
         <List.Section key={section.title} title={section.title} subtitle={`${section.screens.length}`}>
           {section.screens.map((screen) => (
-            <ScreenItem key={screen.id} screen={screen} all={screens} onRefresh={revalidate} />
+            <List.Item
+              key={screen.id}
+              icon={TYPE_ICONS[screen.type]}
+              title={importedScreenTitle(screen)}
+              subtitle={describeTarget(screen.target)}
+              keywords={[normalizeHostname(screen.hostname), screen.name]}
+              accessories={buildAccessories(screen)}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action title="Connect" icon={Icon.Desktop} onAction={() => connect(screen)} />
+                    <Action
+                      title="Connect in Observe Mode"
+                      icon={Icon.Eye}
+                      shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
+                      onAction={() => connect(screen, { observe: true })}
+                    />
+                    <Action
+                      title="Connect as Guest"
+                      icon={Icon.Person}
+                      shortcut={{ modifiers: ['cmd', 'shift'], key: 'g' }}
+                      onAction={() => connect(screen, { guest: true })}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action.CopyToClipboard
+                      title="Copy Hostname"
+                      content={normalizeHostname(screen.hostname)}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Connect URL"
+                      content={targetUrl(screen.target)}
+                      shortcut={Keyboard.Shortcut.Common.CopyPath}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <ImportAction />
+                    <Action
+                      title="Remove from Raycast"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
+                      onAction={() => remove(screen)}
+                    />
+                    <Action.Open title="Open Screens" target="/Applications/Screens 5.app" icon={Icon.AppWindow} />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
           ))}
         </List.Section>
       ))}
@@ -69,83 +124,35 @@ export default function Command() {
   );
 }
 
-function ScreenItem({ screen, all, onRefresh }: { screen: Screen; all: Screen[]; onRefresh: () => void }) {
-  const target = connectUrl(screen, all);
-  const address = directUrl(screen);
-
+function ImportAction() {
   return (
-    <List.Item
-      icon={TYPE_ICONS[screen.type]}
-      title={screen.name || normalizeHostname(screen.hostname)}
-      subtitle={normalizeHostname(screen.hostname)}
-      keywords={[screen.username, screen.publicIpAddress].filter((keyword): keyword is string => Boolean(keyword))}
-      accessories={buildAccessories(screen, target.viaSavedScreen, target.ambiguous)}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action title="Connect" icon={Icon.Desktop} onAction={() => connect(screen, all)} />
-            <Action
-              title="Connect in Observe Mode"
-              icon={Icon.Eye}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
-              onAction={() => connect(screen, all, { observe: true })}
-            />
-            <Action
-              title="Connect as Guest"
-              icon={Icon.Person}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'g' }}
-              onAction={() => connect(screen, all, { guest: true })}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Hostname"
-              content={normalizeHostname(screen.hostname)}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
-            {address ? (
-              <Action.CopyToClipboard
-                title="Copy Address"
-                content={address}
-                shortcut={Keyboard.Shortcut.Common.CopyPath}
-              />
-            ) : null}
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.Open title="Open Screens" target="/Applications/Screens 5.app" icon={Icon.AppWindow} />
-            <Action
-              title="Refresh"
-              icon={Icon.ArrowClockwise}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
-              onAction={onRefresh}
-            />
-            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
+    <Action
+      title="Import Screens…"
+      icon={Icon.Download}
+      shortcut={{ modifiers: ['cmd'], key: 'i' }}
+      onAction={() => launchCommand({ name: 'import-screens', type: LaunchType.UserInitiated })}
     />
   );
 }
 
-async function connect(screen: Screen, all: Screen[], options?: ConnectOptions) {
-  const { url } = connectUrl(screen, all, options);
+async function connect(screen: ImportedScreen, options?: ConnectOptions) {
   try {
-    await open(url);
+    await open(targetUrl(screen.target, options));
     await closeMainWindow();
   } catch (error) {
-    await showFailureToast(error, { title: `Could not connect to ${screen.name || screen.hostname}` });
+    await showFailureToast(error, { title: `Could not connect to ${importedScreenTitle(screen)}` });
   }
 }
 
-function buildAccessories(screen: Screen, viaSavedScreen: boolean, ambiguous: boolean): List.Item.Accessory[] {
+function buildAccessories(screen: ImportedScreen): List.Item.Accessory[] {
   const accessories: List.Item.Accessory[] = [];
 
-  if (ambiguous) {
+  if (screen.target.kind === 'saved' && screen.target.ambiguous) {
     accessories.push({
       icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
       tooltip: 'Another screen shares this name, so Screens decides which one opens.',
     });
-  } else if (!viaSavedScreen) {
+  } else if (screen.target.kind === 'direct') {
     accessories.push({
       icon: { source: Icon.ArrowRight, tintColor: Color.SecondaryText },
       tooltip: 'Connects to this host directly rather than through the saved screen.',
@@ -154,28 +161,26 @@ function buildAccessories(screen: Screen, viaSavedScreen: boolean, ambiguous: bo
 
   accessories.push({ tag: screen.clientProtocol.toUpperCase() });
 
-  if (screen.lastConnectionDate) {
-    accessories.push({
-      date: screen.lastConnectionDate,
-      tooltip: `Last connected ${formatDate(screen.lastConnectionDate)}`,
-    });
+  const lastConnected = screen.lastConnectionDate ? new Date(screen.lastConnectionDate) : undefined;
+  if (lastConnected) {
+    accessories.push({ date: lastConnected, tooltip: 'Last connected, according to the archive' });
   }
 
   return accessories;
 }
 
-function groupByType(screens: Screen[]): { title: string; screens: Screen[] }[] {
+function groupByType(screens: ImportedScreen[]): { title: string; screens: ImportedScreen[] }[] {
   return SECTIONS.map((section) => ({
     title: section.title,
     screens: screens.filter((screen) => section.types.includes(screen.type)).sort(byRecency),
   })).filter((section) => section.screens.length > 0);
 }
 
-function byRecency(a: Screen, b: Screen): number {
-  const difference = (b.lastConnectionDate?.getTime() ?? 0) - (a.lastConnectionDate?.getTime() ?? 0);
+function byRecency(a: ImportedScreen, b: ImportedScreen): number {
+  const difference = timestamp(b) - timestamp(a);
   return difference !== 0 ? difference : b.numberOfConnections - a.numberOfConnections;
 }
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+function timestamp(screen: ImportedScreen): number {
+  return screen.lastConnectionDate ? new Date(screen.lastConnectionDate).getTime() : 0;
 }
