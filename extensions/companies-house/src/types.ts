@@ -1,3 +1,9 @@
+/** Props for company-scoped list views that show a company number and optional title. */
+export type CompanyViewProps = {
+  companyNumber: string;
+  companyName?: string;
+};
+
 /**
  * Response shapes for the Companies House Public Data API.
  *

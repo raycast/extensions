@@ -108,7 +108,10 @@ export function CompanyListItem({
           <Action
             title={showingDetail ? "Hide Details" : "Show Details"}
             icon={Icon.Sidebar}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "d" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+            }}
             onAction={onToggleDetail}
           />
           <Action.CopyToClipboard

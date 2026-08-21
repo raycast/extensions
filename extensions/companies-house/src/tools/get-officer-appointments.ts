@@ -1,13 +1,7 @@
 import { getOfficerAppointments } from "../api";
 import { companyStatusLabel, formatDate, officerRoleLabel } from "../helpers";
-import type { AppointmentItem } from "../types";
-
-/**
- * Enough pages to cover any officer a caller is realistically asking about,
- * without letting a company-formation agent with thousands of appointments
- * spend the whole rate limit on one question.
- */
-const MAX_PAGES = 10;
+import { fetchAllPages } from "../pagination";
+import type { AppointmentItem, AppointmentsResponse } from "../types";
 
 type Input = {
   /**
@@ -21,29 +15,16 @@ type Input = {
 
 /** List every company appointment for an officer across all companies, by officer id. Useful for seeing what else a director is involved in. Reports whether every appointment was read, so a long list is never presented as a complete one. */
 export default async function tool(input: Input) {
-  const items: AppointmentItem[] = [];
-  let name: string | undefined;
-  let total: number | undefined;
-  let startIndex = 0;
-
-  for (let page = 0; page < MAX_PAGES; page++) {
-    const res = await getOfficerAppointments(input.officerId, startIndex);
-    if (page === 0) name = res.name;
-    const pageItems = res.items ?? [];
-    items.push(...pageItems);
-    total ??= res.total_results;
-    startIndex += pageItems.length;
-    if (pageItems.length === 0 || items.length >= (total ?? items.length))
-      break;
-  }
-
-  const complete = items.length >= (total ?? items.length);
+  const { items, total, complete, firstPage } = await fetchAllPages<
+    AppointmentItem,
+    AppointmentsResponse
+  >((startIndex) => getOfficerAppointments(input.officerId, startIndex));
 
   return {
-    name,
+    name: firstPage?.name,
     // The register's own total. A single request returns 20, so counting the
     // list below would understate an officer with more appointments than that.
-    total: total ?? items.length,
+    total,
     returned: items.length,
     complete,
     ...(complete

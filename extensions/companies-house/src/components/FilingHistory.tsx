@@ -244,7 +244,10 @@ function FilingRow({
             <Action
               title="Download Document"
               icon={Icon.Download}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "d" },
+                Windows: { modifiers: ["ctrl"], key: "d" },
+              }}
               onAction={() =>
                 void downloadDocument(
                   documentLink,

@@ -18,48 +18,37 @@ import {
   explanationSummary,
   type PscExplanation,
 } from "../psc-explanation";
-import type { PscItem, PscStatementItem } from "../types";
-
-const MAX_PAGES = 10;
+import { fetchAllPages } from "../pagination";
+import type {
+  CompanyViewProps,
+  PscItem,
+  PscResponse,
+  PscStatementItem,
+} from "../types";
 
 type StatusFilter = "all" | "active" | "ceased";
 
 export function PersonsWithSignificantControl({
   companyNumber,
   companyName,
-}: {
-  companyNumber: string;
-  companyName?: string;
-}) {
+}: CompanyViewProps) {
   const [status, setStatus] = useState<StatusFilter>("all");
 
   // Loaded in full so search filters across every entry, with the page budget
   // reported rather than hidden. See CompanyOfficers for the same reasoning.
   const { isLoading, data } = useCachedPromise(
     async (company: string) => {
-      const all: PscItem[] = [];
-      let startIndex = 0;
-      let total: number | undefined;
-      let activeCount: number | undefined;
-      let ceasedCount: number | undefined;
-
-      for (let page = 0; page < MAX_PAGES; page++) {
-        const res = await getPersonsWithSignificantControl(company, startIndex);
-        const items = res.items ?? [];
-        all.push(...items);
-        total ??= res.total_results;
-        activeCount ??= res.active_count;
-        ceasedCount ??= res.ceased_count;
-        startIndex += items.length;
-        if (items.length === 0 || all.length >= (total ?? all.length)) break;
-      }
+      const { items, total, complete, firstPage } = await fetchAllPages<
+        PscItem,
+        PscResponse
+      >((startIndex) => getPersonsWithSignificantControl(company, startIndex));
 
       return {
-        people: all,
-        total: total ?? all.length,
-        activeCount,
-        ceasedCount,
-        complete: all.length >= (total ?? all.length),
+        people: items,
+        total,
+        activeCount: firstPage?.active_count,
+        ceasedCount: firstPage?.ceased_count,
+        complete,
       };
     },
     [companyNumber],

@@ -11,12 +11,11 @@ import {
   officerRoleLabel,
   statusColor,
 } from "../helpers";
-import type { AppointmentItem, DateOfBirth } from "../types";
+import { fetchAllPages } from "../pagination";
+import type { AppointmentItem, AppointmentsResponse } from "../types";
 
 import { CompanyProfile } from "./CompanyProfile";
 import { Disqualifications } from "./Disqualifications";
-
-const MAX_PAGES = 10;
 
 export function OfficerAppointments({
   officerId,
@@ -27,30 +26,17 @@ export function OfficerAppointments({
 }) {
   const { isLoading, data } = useCachedPromise(
     async (id: string) => {
-      const items: AppointmentItem[] = [];
-      let name: string | undefined;
-      let dateOfBirth: DateOfBirth | undefined;
-      let startIndex = 0;
-      let total: number | undefined;
-      for (let page = 0; page < MAX_PAGES; page++) {
-        const res = await getOfficerAppointments(id, startIndex);
-        if (page === 0) {
-          name = res.name;
-          dateOfBirth = res.date_of_birth;
-        }
-        const pageItems = res.items ?? [];
-        items.push(...pageItems);
-        total ??= res.total_results;
-        startIndex += pageItems.length;
-        if (pageItems.length === 0 || items.length >= (total ?? items.length))
-          break;
-      }
+      const { items, total, complete, firstPage } = await fetchAllPages<
+        AppointmentItem,
+        AppointmentsResponse
+      >((startIndex) => getOfficerAppointments(id, startIndex));
+
       return {
-        name,
-        dateOfBirth,
+        name: firstPage?.name,
+        dateOfBirth: firstPage?.date_of_birth,
         items,
-        total: total ?? items.length,
-        complete: items.length >= (total ?? items.length),
+        total,
+        complete,
       };
     },
     [officerId],

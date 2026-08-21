@@ -26,7 +26,7 @@ The key stays on your machine. Nothing is proxied through a third party.
 - **Filing history** — rendered with the official Companies House descriptions, with actions to open or download the filed document itself.
 - **Charges** — mortgages and their status, dates and persons entitled.
 - **Insolvency** — cases, their dated events, and the practitioners appointed.
-- **Persons with significant control** — beneficial owners and their nature of control. When the register is empty, the extension says *why*: an exemption in force, a statement filed in its place, or a genuine gap.
+- **Persons with significant control** — beneficial owners and their nature of control. When the register is empty, the extension says _why_: an exemption in force, a statement filed in its place, or a genuine gap.
 - **Disqualified directors** — searchable by name, with the statutory reason, the disqualifying act, and the period.
 
 ## AI

@@ -18,22 +18,22 @@ import {
   standingLabel,
   type OfficerCounts,
 } from "../officer-standing";
-import type { CompanyOfficer } from "../types";
+import { fetchAllPages } from "../pagination";
+import type {
+  CompanyOfficer,
+  CompanyOfficersResponse,
+  CompanyViewProps,
+} from "../types";
 
 import { Disqualifications } from "./Disqualifications";
 import { OfficerAppointments } from "./OfficerAppointments";
-
-const MAX_PAGES = 10;
 
 type StatusFilter = "all" | "active" | "resigned" | "inactive";
 
 export function CompanyOfficers({
   companyNumber,
   companyName,
-}: {
-  companyNumber: string;
-  companyName?: string;
-}) {
+}: CompanyViewProps) {
   const [status, setStatus] = useState<StatusFilter>("all");
 
   // Officers are loaded in full rather than page by page, so that Raycast's
@@ -43,33 +43,19 @@ export function CompanyOfficers({
   // truncated list that says nothing is indistinguishable from a complete one.
   const { isLoading, data } = useCachedPromise(
     async (company: string) => {
-      const all: CompanyOfficer[] = [];
-      let startIndex = 0;
-      let total: number | undefined;
-      let activeCount: number | undefined;
-      let inactiveCount: number | undefined;
-      let resignedCount: number | undefined;
-
-      for (let page = 0; page < MAX_PAGES; page++) {
-        const res = await getCompanyOfficers(company, startIndex);
-        const items = res.items ?? [];
-        all.push(...items);
-        total ??= res.total_results;
-        activeCount ??= res.active_count;
-        inactiveCount ??= res.inactive_count;
-        resignedCount ??= res.resigned_count;
-        startIndex += items.length;
-        if (items.length === 0 || all.length >= (total ?? all.length)) break;
-      }
+      const { items, total, complete, firstPage } = await fetchAllPages<
+        CompanyOfficer,
+        CompanyOfficersResponse
+      >((startIndex) => getCompanyOfficers(company, startIndex));
 
       return {
-        officers: all,
+        officers: items,
         // The API's own totals, not the length of what we managed to read.
-        total: total ?? all.length,
-        activeCount,
-        inactiveCount,
-        resignedCount,
-        complete: all.length >= (total ?? all.length),
+        total,
+        activeCount: firstPage?.active_count,
+        inactiveCount: firstPage?.inactive_count,
+        resignedCount: firstPage?.resigned_count,
+        complete,
       };
     },
     [companyNumber],
