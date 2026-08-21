@@ -9,3 +9,4 @@
 - Draw all randomness from `crypto.randomInt()` (CSPRNG)
 - Copy passwords with the `concealed` flag so they stay out of clipboard history
 - Copy, paste or preview the generated password from the action panel
+- Preserve non-BMP characters (such as emoji) in a custom symbol set by sampling code points instead of UTF-16 code units

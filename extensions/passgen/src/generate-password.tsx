@@ -32,11 +32,13 @@ function buildPools(values: FormValues): string[] {
 }
 
 function generatePassword(length: number, pools: string[]): string {
-  const all = pools.join("");
+  // Split by code point, not UTF-16 code unit, so non-BMP symbols stay intact
+  const poolCharacters = pools.map((pool) => Array.from(pool));
+  const allCharacters = poolCharacters.flat();
   // Guarantee at least one character from every selected set
-  const chars = pools.map((pool) => pool[randomInt(pool.length)]);
+  const chars = poolCharacters.map((pool) => pool[randomInt(pool.length)]);
   while (chars.length < length) {
-    chars.push(all[randomInt(all.length)]);
+    chars.push(allCharacters[randomInt(allCharacters.length)]);
   }
   // Fisher–Yates shuffle so guaranteed characters are not always first
   for (let i = chars.length - 1; i > 0; i--) {
