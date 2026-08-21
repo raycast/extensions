@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { type ParsedAccount } from "./totp";
 
 const storageKey = "accounts";
+let mutationQueue = Promise.resolve();
 
 export type Account = ParsedAccount & { id: string };
 
@@ -17,32 +18,52 @@ export async function loadAccounts(): Promise<Account[]> {
   }
 }
 
-export async function saveAccount(input: ParsedAccount): Promise<void> {
-  const accounts = await loadAccounts();
-  accounts.push({ id: randomUUID(), ...input });
-  await save(accounts);
+export function saveAccount(input: ParsedAccount): Promise<void> {
+  return mutate(async () => {
+    const accounts = await loadAccounts();
+    accounts.push({ id: randomUUID(), ...input });
+    await save(accounts);
+  });
 }
 
-export async function updateAccount(id: string, input: ParsedAccount): Promise<void> {
-  const accounts = await loadAccounts();
-  const index = accounts.findIndex((account) => account.id === id);
-  if (index < 0) throw new Error("Account not found.");
-  accounts[index] = { id, ...input };
-  await save(accounts);
+export function updateAccount(id: string, input: ParsedAccount): Promise<void> {
+  return mutate(async () => {
+    const accounts = await loadAccounts();
+    const index = accounts.findIndex((account) => account.id === id);
+    if (index < 0) throw new Error("Account not found.");
+    accounts[index] = { id, ...input };
+    await save(accounts);
+  });
 }
 
-export async function removeAccount(id: string): Promise<void> {
-  await save((await loadAccounts()).filter((account) => account.id !== id));
+export function removeAccount(id: string): Promise<void> {
+  return mutate(async () => save((await loadAccounts()).filter((account) => account.id !== id)));
 }
 
-export async function mergeAccounts(imported: Account[]): Promise<number> {
-  const accounts = await loadAccounts();
-  const existing = new Set(accounts.map((account) => `${account.name}\0${account.issuer}\0${account.secret}`));
-  const additions = imported
-    .filter((account) => !existing.has(`${account.name}\0${account.issuer}\0${account.secret}`))
-    .map((account) => ({ ...account, id: randomUUID() }));
-  await save([...accounts, ...additions]);
-  return additions.length;
+export function mergeAccounts(imported: Account[]): Promise<number> {
+  return mutate(async () => {
+    const accounts = await loadAccounts();
+    const existing = new Set(accounts.map(accountKey));
+    const additions: Account[] = [];
+    for (const account of imported) {
+      if (existing.has(accountKey(account))) continue;
+      const addition = { ...account, id: randomUUID() };
+      additions.push(addition);
+      existing.add(accountKey(addition));
+    }
+    await save([...accounts, ...additions]);
+    return additions.length;
+  });
+}
+
+function mutate<T>(operation: () => Promise<T>): Promise<T> {
+  const result = mutationQueue.then(operation);
+  mutationQueue = result.then(() => undefined, () => undefined);
+  return result;
+}
+
+function accountKey(account: Account): string {
+  return `${account.name}\0${account.issuer}\0${account.secret}`;
 }
 
 async function save(accounts: Account[]): Promise<void> {
