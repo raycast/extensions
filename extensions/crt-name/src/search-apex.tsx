@@ -6,18 +6,14 @@ import { invalidateApexCache, searchApex } from "./api";
 
 const PAGE_SIZE = 100;
 
-type Arguments = {
-  apex: string;
-};
-
 function formatFirstSeen(value: string | null): string {
   if (!value) return "Unknown";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Unknown";
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" }).format(date);
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchApex }>) {
   const [searchText, setSearchText] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const { data, error, isLoading, revalidate } = useCachedPromise(searchApex, [props.arguments.apex], {
