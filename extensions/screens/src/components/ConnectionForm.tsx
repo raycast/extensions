@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Form, Icon, useNavigation } from '@raycast/api';
-import { useForm } from '@raycast/utils';
-import { ConnectTarget } from '../connect';
-import { TYPE_ICONS, TYPE_SECTIONS, sectionTitle, typeForSection } from '../connection-type';
-import { SavedConnection } from '../library';
-import { requiredText } from './validation';
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import { useForm } from "@raycast/utils";
+import { ConnectTarget } from "../connect";
+import { TYPE_ICONS, TYPE_SECTIONS, sectionTitle, typeForSection } from "../connection-type";
+import { SavedConnection } from "../library";
+import { connectableUrl, requiredText } from "./validation";
 
 /**
  * Every dropdown reports a plain string, so the fields they back are typed as one and narrowed on
@@ -40,26 +40,26 @@ export default function ConnectionForm({
       section: sectionTitle(connection.type),
       protocol: connection.clientProtocol,
       kind: connection.target.kind,
-      identifier: connection.target.kind === 'saved' ? connection.target.identifier : '',
-      url: connection.target.kind === 'direct' ? connection.target.url : '',
+      identifier: connection.target.kind === "saved" ? connection.target.identifier : "",
+      url: connection.target.kind === "direct" ? connection.target.url : "",
     },
     // Only the field the chosen kind actually shows is required. The other one is unmounted, so
     // holding it against the user would block a form they cannot see the error on.
     validation: {
       name: requiredText,
-      identifier: (value) => (form.values.kind === 'saved' ? requiredText(value) : undefined),
-      url: (value) => (form.values.kind === 'direct' ? requiredText(value) : undefined),
+      identifier: (value) => (form.values.kind === "saved" ? requiredText(value) : undefined),
+      url: (value) => (form.values.kind === "direct" ? connectableUrl(value) : undefined),
     },
     async onSubmit(submitted) {
       await onSave({
         id: connection.id,
         name: submitted.name.trim(),
         type: typeForSection(submitted.section, connection.type),
-        clientProtocol: submitted.protocol === 'rdp' ? 'rdp' : 'vnc',
+        clientProtocol: submitted.protocol === "rdp" ? "rdp" : "vnc",
         target:
-          submitted.kind === 'saved'
+          submitted.kind === "saved"
             ? savedTarget(submitted.identifier.trim())
-            : { kind: 'direct', url: submitted.url.trim() },
+            : { kind: "direct", url: submitted.url.trim() },
       });
       pop();
     },
@@ -74,16 +74,16 @@ export default function ConnectionForm({
    */
   function savedTarget(identifier: string): ConnectTarget {
     const previous = connection.target;
-    const ambiguous = previous.kind === 'saved' && previous.identifier === identifier && previous.ambiguous;
-    return { kind: 'saved', identifier, ambiguous };
+    const ambiguous = previous.kind === "saved" && previous.identifier === identifier && previous.ambiguous;
+    return { kind: "saved", identifier, ambiguous };
   }
 
   return (
     <Form
-      navigationTitle={isNew ? 'Add Connection' : `Edit ${connection.name}`}
+      navigationTitle={isNew ? "Add Connection" : `Edit ${connection.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={isNew ? 'Add Connection' : 'Save'} icon={Icon.Check} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={isNew ? "Add Connection" : "Save"} icon={Icon.Check} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -107,7 +107,7 @@ export default function ConnectionForm({
         <Form.Dropdown.Item value="saved" title="Saved Connection" icon={Icon.Desktop} />
         <Form.Dropdown.Item value="direct" title="Direct Address" icon={Icon.Globe} />
       </Form.Dropdown>
-      {values.kind === 'saved' ? (
+      {values.kind === "saved" ? (
         <Form.TextField
           title="Name or Hostname"
           placeholder="What Screens should match"

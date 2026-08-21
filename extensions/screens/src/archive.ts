@@ -1,11 +1,12 @@
-import { statSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { statSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { isConnectableUrl } from "./url-scheme";
 
-const CONNECTION_TYPES = ['local', 'remote', 'tailscale', 'url', 'saved', 'recent'] as const;
+const CONNECTION_TYPES = ["local", "remote", "tailscale", "url", "saved", "recent"] as const;
 
 export type ConnectionType = (typeof CONNECTION_TYPES)[number];
 
-export type ClientProtocol = 'vnc' | 'rdp';
+export type ClientProtocol = "vnc" | "rdp";
 
 export interface Connection {
   id: string;
@@ -27,7 +28,7 @@ export interface Archive {
   exportedAt: Date;
 }
 
-export type ArchiveErrorType = 'FILE_NOT_FOUND' | 'UNREADABLE' | 'INVALID_JSON' | 'NOT_AN_ARCHIVE';
+export type ArchiveErrorType = "FILE_NOT_FOUND" | "UNREADABLE" | "INVALID_JSON" | "NOT_AN_ARCHIVE";
 
 export class ArchiveError extends Error {
   constructor(
@@ -36,7 +37,7 @@ export class ArchiveError extends Error {
     readonly originalError?: string,
   ) {
     super(`${type} while reading ${path}`);
-    this.name = 'ArchiveError';
+    this.name = "ArchiveError";
   }
 }
 
@@ -65,10 +66,10 @@ export function archiveModifiedAt(path: string): number {
 export async function readArchive(path: string, modifiedAt: number): Promise<Archive> {
   let contents: string;
   try {
-    contents = await readFile(path, 'utf8');
+    contents = await readFile(path, "utf8");
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
-    const type = code === 'ENOENT' ? 'FILE_NOT_FOUND' : 'UNREADABLE';
+    const type = code === "ENOENT" ? "FILE_NOT_FOUND" : "UNREADABLE";
     throw new ArchiveError(type, path, error instanceof Error ? error.message : String(error));
   }
 
@@ -76,13 +77,13 @@ export async function readArchive(path: string, modifiedAt: number): Promise<Arc
   try {
     parsed = JSON.parse(contents);
   } catch (error) {
-    throw new ArchiveError('INVALID_JSON', path, error instanceof Error ? error.message : String(error));
+    throw new ArchiveError("INVALID_JSON", path, error instanceof Error ? error.message : String(error));
   }
 
   // Screens calls these connections, but serializes them under `screens`.
   const raw = parsed as { screens?: unknown };
   if (!Array.isArray(raw.screens)) {
-    throw new ArchiveError('NOT_AN_ARCHIVE', path);
+    throw new ArchiveError("NOT_AN_ARCHIVE", path);
   }
 
   return {
@@ -107,15 +108,15 @@ type RawConnection = {
 };
 
 function parseConnection(value: unknown): Connection | undefined {
-  if (typeof value !== 'object' || value === null) return undefined;
+  if (typeof value !== "object" || value === null) return undefined;
   const raw = value as RawConnection;
 
-  const id = typeof raw.id === 'string' ? raw.id : undefined;
+  const id = typeof raw.id === "string" ? raw.id : undefined;
   if (!id) return undefined;
 
-  const name = typeof raw.name === 'string' ? raw.name.trim() : '';
-  const hostname = typeof raw.hostname === 'string' ? raw.hostname : '';
-  const sourceURL = nonEmptyString(raw.sourceURL);
+  const name = typeof raw.name === "string" ? raw.name.trim() : "";
+  const hostname = typeof raw.hostname === "string" ? raw.hostname : "";
+  const sourceURL = connectableUrl(raw.sourceURL);
 
   // Every URL scheme Screens accepts addresses a connection by one of these three. An entry holding
   // none of them is one nothing can open and no row can label, so it is dropped.
@@ -126,22 +127,22 @@ function parseConnection(value: unknown): Connection | undefined {
     name,
     hostname,
     type: parseType(raw.type),
-    clientProtocol: raw.clientProtocol === 'rdp' ? 'rdp' : 'vnc',
-    port: typeof raw.port === 'number' ? raw.port : 0,
+    clientProtocol: raw.clientProtocol === "rdp" ? "rdp" : "vnc",
+    port: typeof raw.port === "number" ? raw.port : 0,
     publicIpAddress: nonEmptyString(raw.publicIpAddress),
-    publicPort: typeof raw.publicPort === 'number' && raw.publicPort > 0 ? raw.publicPort : undefined,
+    publicPort: typeof raw.publicPort === "number" && raw.publicPort > 0 ? raw.publicPort : undefined,
     sourceURL,
     username: parseUsername(raw.users),
     lastConnectionDate: parseCoreDataDate(raw.lastConnectionDate),
-    numberOfConnections: typeof raw.numberOfConnections === 'number' ? raw.numberOfConnections : 0,
+    numberOfConnections: typeof raw.numberOfConnections === "number" ? raw.numberOfConnections : 0,
   };
 }
 
 /** Screens tags the type as a single-key object, e.g. `{"tailscale": {}}`. */
 function parseType(value: unknown): ConnectionType {
-  if (typeof value !== 'object' || value === null) return 'remote';
+  if (typeof value !== "object" || value === null) return "remote";
   const key = Object.keys(value)[0];
-  return CONNECTION_TYPES.find((type) => type === key) ?? 'remote';
+  return CONNECTION_TYPES.find((type) => type === key) ?? "remote";
 }
 
 function parseUsername(users: unknown): string | undefined {
@@ -151,11 +152,21 @@ function parseUsername(users: unknown): string | undefined {
 }
 
 function parseCoreDataDate(value: unknown): Date | undefined {
-  if (typeof value !== 'number' || value === NEVER_CONNECTED) return undefined;
+  if (typeof value !== "number" || value === NEVER_CONNECTED) return undefined;
   const date = new Date((value + CORE_DATA_EPOCH_OFFSET_SECONDS) * 1000);
   return Number.isNaN(date.getTime()) ? undefined : date;
 }
 
 function nonEmptyString(value: unknown): string | undefined {
-  return typeof value === 'string' && value.length > 0 ? value : undefined;
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+/**
+ * A stored address, kept only when this extension can open it. An archive is a file the user picked,
+ * and its `sourceURL` is opened as it stands, so a scheme belonging to some other app is discarded
+ * here and the connection is addressed by name or hostname instead.
+ */
+function connectableUrl(value: unknown): string | undefined {
+  const url = nonEmptyString(value);
+  return url && isConnectableUrl(url) ? url : undefined;
 }

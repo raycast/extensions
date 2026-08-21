@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, closeMainWindow, open } from '@raycast/api';
-import { showFailureToast, useForm } from '@raycast/utils';
-import { useEffect, useRef } from 'react';
-import { AdHocProtocol, ConnectOptions, DEFAULT_PORTS, HostSpec, adHocUrl, parseHostSpec } from './connect';
-import { requiredText } from './components/validation';
+import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, closeMainWindow, open } from "@raycast/api";
+import { showFailureToast, useForm } from "@raycast/utils";
+import { useEffect, useRef } from "react";
+import { AdHocProtocol, ConnectOptions, DEFAULT_PORTS, HostSpec, adHocUrl, parseHostSpec } from "./connect";
+import { optionalPort, requiredText } from "./components/validation";
 
 /** `protocol` is a string because that is what a dropdown reports. {@link adHocProtocol} narrows it. */
 type ConnectForm = {
@@ -15,7 +15,7 @@ type ConnectForm = {
 };
 
 function adHocProtocol(value: string): AdHocProtocol {
-  return value === 'ssh' ? 'ssh' : 'vnc';
+  return value === "ssh" ? "ssh" : "vnc";
 }
 
 /**
@@ -24,14 +24,14 @@ function adHocProtocol(value: string): AdHocProtocol {
  * through to the form carrying what was typed.
  */
 export default function Command({ arguments: args }: LaunchProps<{ arguments: Arguments.QuickConnect }>) {
-  const typed = args.host?.trim() ?? '';
-  const chosen = args.protocol === 'ssh' || args.protocol === 'vnc' ? args.protocol : undefined;
+  const typed = args.host?.trim() ?? "";
+  const chosen = args.protocol === "ssh" || args.protocol === "vnc" ? args.protocol : undefined;
   const spec = parseHostSpec(typed);
 
   if (spec) {
-    return <ImmediateConnect spec={spec} protocol={spec.protocol ?? chosen ?? 'vnc'} />;
+    return <ImmediateConnect spec={spec} protocol={spec.protocol ?? chosen ?? "vnc"} />;
   }
-  return <QuickConnectForm host={typed} protocol={chosen ?? 'vnc'} />;
+  return <QuickConnectForm host={typed} protocol={chosen ?? "vnc"} />;
 }
 
 function ImmediateConnect({ spec, protocol }: { spec: HostSpec; protocol: AdHocProtocol }) {
@@ -49,8 +49,8 @@ function ImmediateConnect({ spec, protocol }: { spec: HostSpec; protocol: AdHocP
 
 function QuickConnectForm({ host, protocol }: { host: string; protocol: AdHocProtocol }) {
   const { handleSubmit, itemProps, values } = useForm<ConnectForm>({
-    initialValues: { host, protocol, port: '', username: '', observe: false, guest: false },
-    validation: { host: requiredText },
+    initialValues: { host, protocol, port: "", username: "", observe: false, guest: false },
+    validation: { host: requiredText, port: optionalPort },
     onSubmit: (submitted) => connect(submitted.host.trim(), adHocProtocol(submitted.protocol), submitted),
   });
 
@@ -73,7 +73,7 @@ function QuickConnectForm({ host, protocol }: { host: string; protocol: AdHocPro
         {...itemProps.port}
       />
       <Form.TextField title="Username" placeholder="Optional" {...itemProps.username} />
-      {values.protocol === 'vnc' && (
+      {values.protocol === "vnc" && (
         <>
           <Form.Separator />
           <Form.Checkbox label="Observe Mode" info="Watch the screen without controlling it." {...itemProps.observe} />
