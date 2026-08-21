@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "multi-ai-chat",
+  "title": "Multi AI Chat",
+  "description": "Send one prompt to ChatGPT, Claude, Grok, and Perplexity by opening query URLs in your browser.",
+  "icon": "icon.png",
+  "author": "matheuscoelho3006",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "keywords": [
+    "ai",
+    "chat",
+    "chatgpt",
+    "claude",
+    "grok",
+    "perplexity",
+    "prompt"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "multi-ai-chat",
+      "title": "Multi AI Chat",
+      "description": "Open one prompt in multiple AI chatbots at once",
+      "mode": "view"
+    },
+    {
+      "name": "manage-presets",
+      "title": "Manage AI Prompt Presets",
+      "description": "Create, edit, delete, and add hotkeys to reusable AI prompt presets",
+      "mode": "view"
+    },
+    {
+      "name": "run-presets",
+      "title": "Run AI Prompt Preset",
+      "description": "Choose and run a reusable prompt in configured AI chats",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "browser",
+      "title": "Browser",
+      "description": "Which browser to open AI chats in. Prompts are included in the URLs and may appear in browser history and sync.",
+      "type": "dropdown",
+      "required": false,
+      "default": "",
+      "data": [
+        {
+          "title": "System Default",
+          "value": ""
+        },
+        {
+          "title": "Google Chrome",
+          "value": "com.google.Chrome"
+        },
+        {
+          "title": "Safari",
+          "value": "com.apple.Safari"
+        },
+        {
+          "title": "Vivaldi",
+          "value": "com.vivaldi.Vivaldi"
+        },
+        {
+          "title": "Arc",
+          "value": "company.thebrowser.Browser"
+        },
+        {
+          "title": "Brave",
+          "value": "com.brave.Browser"
+        },
+        {
+          "title": "Microsoft Edge",
+          "value": "com.microsoft.edgemac"
+        },
+        {
+          "title": "Firefox",
+          "value": "org.mozilla.firefox"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/*.test.mts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
