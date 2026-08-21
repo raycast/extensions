@@ -39,13 +39,11 @@ export const useStorageList = (mock = false) => {
   }));
 
   const hasServers = mock || servers.length > 0;
-  const showErrorScreen = !mock && servers.length === 1 && groups.length > 0 && groups[0].error !== undefined;
 
   return {
     isLoading: !mock && isLoading,
     groups,
     hasServers,
     revalidate,
-    showErrorScreen,
   };
 };

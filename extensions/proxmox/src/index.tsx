@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { type VmListGroup, useVmList } from "@/hooks/use-vm-list";
 import { getVmStatusIcon } from "@/utils/ui";
-import { ErrorGuard } from "@/components/ErrorGuard";
 import { NoServersEmptyView } from "@/components/NoServersEmptyView";
 import { ServerErrorItem } from "@/components/ServerErrorItem";
 import { VmActionPanel } from "@/components/VmActionPanel";
@@ -10,7 +9,7 @@ import { VmTypeDropdown } from "@/components/VmTypeDropdown";
 import { ManageServers } from "@/screens/ManageServers";
 
 const Command = () => {
-  const { isLoading, groups, hasServers, revalidate, mutate, setType, showErrorScreen } = useVmList();
+  const { isLoading, groups, hasServers, revalidate, mutate, setType } = useVmList();
   const showSections = groups.length > 1;
   const showNoServers = !isLoading && !hasServers;
 
@@ -49,26 +48,24 @@ const Command = () => {
   };
 
   return (
-    <ErrorGuard showErrorScreen={showErrorScreen}>
-      <List
-        isLoading={isLoading}
-        isShowingDetail={!showNoServers}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Refresh"
-              icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={revalidate}
-            />
-            <Action.Push title="Manage Servers" icon={Icon.Gear} target={<ManageServers />} />
-          </ActionPanel>
-        }
-        searchBarAccessory={<VmTypeDropdown onChange={setType} />}
-      >
-        {showNoServers ? <NoServersEmptyView /> : groups.map(renderGroup)}
-      </List>
-    </ErrorGuard>
+    <List
+      isLoading={isLoading}
+      isShowingDetail={!showNoServers}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={revalidate}
+          />
+          <Action.Push title="Manage Servers" icon={Icon.Gear} target={<ManageServers />} />
+        </ActionPanel>
+      }
+      searchBarAccessory={<VmTypeDropdown onChange={setType} />}
+    >
+      {showNoServers ? <NoServersEmptyView /> : groups.map(renderGroup)}
+    </List>
   );
 };
 

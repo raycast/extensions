@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { type StorageListGroup, useStorageList } from "@/hooks/use-storage-list";
 import { getStorageStatusIcon } from "@/utils/ui";
-import { ErrorGuard } from "@/components/ErrorGuard";
 import { NoServersEmptyView } from "@/components/NoServersEmptyView";
 import { ServerErrorItem } from "@/components/ServerErrorItem";
 import { StorageDetail } from "@/components/StorageDetail";
@@ -9,7 +8,7 @@ import { ManageServers } from "@/screens/ManageServers";
 import { StorageContentList } from "@/screens/StorageContentList";
 
 const Command = () => {
-  const { isLoading, groups, hasServers, revalidate, showErrorScreen } = useStorageList();
+  const { isLoading, groups, hasServers, revalidate } = useStorageList();
   const showSections = groups.length > 1;
   const showNoServers = !isLoading && !hasServers;
 
@@ -56,25 +55,23 @@ const Command = () => {
   };
 
   return (
-    <ErrorGuard showErrorScreen={showErrorScreen}>
-      <List
-        isLoading={isLoading}
-        isShowingDetail={!showNoServers}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Refresh"
-              icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={revalidate}
-            />
-            <Action.Push title="Manage Servers" icon={Icon.Gear} target={<ManageServers />} />
-          </ActionPanel>
-        }
-      >
-        {showNoServers ? <NoServersEmptyView /> : groups.map(renderGroup)}
-      </List>
-    </ErrorGuard>
+    <List
+      isLoading={isLoading}
+      isShowingDetail={!showNoServers}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={revalidate}
+          />
+          <Action.Push title="Manage Servers" icon={Icon.Gear} target={<ManageServers />} />
+        </ActionPanel>
+      }
+    >
+      {showNoServers ? <NoServersEmptyView /> : groups.map(renderGroup)}
+    </List>
   );
 };
 
