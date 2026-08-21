@@ -1,6 +1,6 @@
 # CRT Name Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-21
 
 - Search [crt.name](https://crt.name) for subdomains indexed against an apex domain
 - Show when each hostname first appeared in the index
