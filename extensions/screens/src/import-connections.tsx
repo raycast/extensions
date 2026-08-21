@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Archive, Connection, archiveModifiedAt, readArchive } from "./archive";
 import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections, targetStatus } from "./connection-type";
 import { describeTarget, normalizeHostname, resolveTarget } from "./connect";
-import { SavedConnection, toSavedConnection, useSavedConnections } from "./library";
+import { SavedConnection, toSavedConnection, useReviewedConnections, useSavedConnections } from "./library";
 import ArchiveErrorView from "./components/ArchiveErrorView";
 import TypeFilter from "./components/TypeFilter";
 
@@ -40,12 +40,13 @@ export default function Command() {
 
 function SelectConnections({ path }: { path: string }) {
   const { connections: saved, setConnections } = useSavedConnections();
+  const { reviewed, setReviewed } = useReviewedConnections();
   const modifiedAt = useMemo(() => archiveModifiedAt(path), [path]);
   const { data, isLoading, error, revalidate } = useCachedPromise(readArchive, [path, modifiedAt]);
 
   const [selected, setSelected] = useState<Set<string> | undefined>();
   const [filter, setFilter] = useState(ALL_TYPES);
-  const selection = selected ?? defaultSelection(data, saved);
+  const selection = selected ?? defaultSelection(data, saved, reviewed);
 
   const all = useMemo(() => data?.connections ?? [], [data]);
   const sections = useMemo(() => groupByType(all, filter, byUsage), [all, filter]);
@@ -75,6 +76,7 @@ function SelectConnections({ path }: { path: string }) {
     const untouched = saved.filter((connection) => !covered.has(connection.id));
 
     await setConnections([...untouched, ...keep.map((connection) => toSavedConnection(connection, all))]);
+    await setReviewed([...new Set([...reviewed, ...covered])]);
     await showToast({
       style: Toast.Style.Success,
       title: keep.length === 1 ? "Imported 1 connection" : `Imported ${keep.length} connections`,
@@ -158,22 +160,22 @@ function navigationTitle(selected: number, total: number, exportedAt: Date | und
 
 /**
  * Screens lists everything it discovers on the local network, so a fresh archive is mostly hosts
- * the user has never opened. Preselect the ones they have actually connected to, or the ones they
- * kept last time if this is a re-import.
+ * the user has never opened.
  *
- * Only a connection this archive covers counts as a previous choice. Judging by the saved list as a
- * whole would read a hand-added connection as a re-import and open the form with nothing selected.
+ * Each entry is judged on its own rather than the archive as a whole, so one hand-added connection
+ * cannot make a first import look like a re-import. An entry the user has already accepted stays
+ * selected, one they already declined stays deselected, and one they have yet to see falls back to
+ * whether Screens records them connecting to it.
  */
-function defaultSelection(archive: Archive | undefined, saved: SavedConnection[]): Set<string> {
+function defaultSelection(archive: Archive | undefined, saved: SavedConnection[], reviewed: Set<string>): Set<string> {
   if (!archive) return new Set();
 
   const kept = new Set(saved.map((connection) => connection.id));
-  const previously = archive.connections.filter((entry) => kept.has(entry.id));
-  if (previously.length > 0) {
-    return new Set(previously.map((entry) => entry.id));
-  }
+  const selected = archive.connections.filter((entry) =>
+    reviewed.has(entry.id) ? kept.has(entry.id) : hasBeenUsed(entry),
+  );
 
-  return new Set(archive.connections.filter(hasBeenUsed).map((entry) => entry.id));
+  return new Set(selected.map((entry) => entry.id));
 }
 
 function hasBeenUsed(connection: Connection): boolean {

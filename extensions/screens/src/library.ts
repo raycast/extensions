@@ -3,6 +3,7 @@ import { ClientProtocol, Connection, ConnectionType } from "./archive";
 import { ConnectTarget, normalizeHostname, resolveTarget } from "./connect";
 
 const STORAGE_KEY = "connections";
+const REVIEWED_KEY = "reviewed-connections";
 
 /**
  * A connection in Raycast's own list. Importing an archive is a shortcut for filling this in, so it
@@ -20,6 +21,16 @@ export interface SavedConnection {
 export function useSavedConnections() {
   const { value, setValue, isLoading } = useLocalStorage<SavedConnection[]>(STORAGE_KEY, []);
   return { connections: value ?? [], setConnections: setValue, isLoading };
+}
+
+/**
+ * Every connection an import has already offered, whether or not it was kept. An archive the user
+ * declined in full leaves nothing behind in the saved list, which reads the same as an archive
+ * never imported, so without this the next import would offer those connections over again.
+ */
+export function useReviewedConnections() {
+  const { value, setValue, isLoading } = useLocalStorage<string[]>(REVIEWED_KEY, []);
+  return { reviewed: new Set(value ?? []), setReviewed: setValue, isLoading };
 }
 
 /**
