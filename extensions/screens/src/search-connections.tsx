@@ -175,12 +175,20 @@ function AddAction({ onSave }: { onSave: (connection: SavedConnection) => Promis
 }
 
 function ImportAction() {
+  async function launchImport() {
+    try {
+      await launchCommand({ name: 'import-connections', type: LaunchType.UserInitiated });
+    } catch (error) {
+      await showFailureToast(error, { title: 'Could not open Import Connections' });
+    }
+  }
+
   return (
     <Action
       title="Import Connections…"
       icon={Icon.Download}
       shortcut={{ modifiers: ['cmd'], key: 'i' }}
-      onAction={() => launchCommand({ name: 'import-connections', type: LaunchType.UserInitiated })}
+      onAction={launchImport}
     />
   );
 }
