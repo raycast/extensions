@@ -319,6 +319,7 @@
 /extensions/canva                                                   @xmok
 /extensions/canvascast                                              @YodaLightsabr @yug2005
 /extensions/capacities                                              @sbleh @xmok
+/extensions/capd                                                    @jamiedavenport
 /extensions/capture                                                 @syhchen
 /extensions/capture-fullpage-of-website                             @Coun1er @j3lte @ridemountainpig
 /extensions/capture-raycast-metadata                                @koinzhang
@@ -756,6 +757,7 @@
 /extensions/ecosia-search                                           @MFCo
 /extensions/edgestore-raycast                                       @perfectbase
 /extensions/effect-docs                                             @rvaccone
+/extensions/ego-lite                                                @virtualcca
 /extensions/ekstraklasa                                             @szarbartosz
 /extensions/element                                                 @Aayush9029 @Visual-Studio-Coder
 /extensions/elevenlabs-tts                                          @lachiejames @thierrygrimm @keito4
@@ -843,6 +845,7 @@
 /extensions/fetch-youtube-transcript                                @apoorv12 @pernielsentikaer @ridemountainpig
 /extensions/ffmpeg                                                  @RenderCoder @blekmus @aagedal @EvanZhouDev @j3lte
 /extensions/fhir                                                    @loris
+/extensions/fibery-quick-capture                                    @janjezek
 /extensions/fibonacci-sequence                                      @adambutler
 /extensions/fifteen-million-merits                                  @alexibuild
 /extensions/figa                                                    @jatne
@@ -1437,6 +1440,7 @@
 /extensions/linguee                                                 @geekdada
 /extensions/link-bundles                                            @birkoni5 @AlexIsMaking
 /extensions/link-cleaner                                            @haku-huang @xmok @ezzylan @cupcakearmy
+/extensions/link-commands                                           @kud
 /extensions/link-transformer                                        @dangkhoipro
 /extensions/linkace                                                 @jaspermayone
 /extensions/linkace-search                                          @zisoft
@@ -1660,6 +1664,7 @@
 /extensions/moon-phrase                                             @bucketfish
 /extensions/morning-coffee                                          @olimynameis
 /extensions/mound-for-pile                                          @cr34t1ve
+/extensions/mouse-cursor-toggle                                     @Dhaiwat10
 /extensions/mouse-jiggle                                            @steveafrost
 /extensions/mousehunt-helper                                        @chesterhow
 /extensions/mouseless                                               @NextMerge
@@ -1865,7 +1870,7 @@
 /extensions/openai-gpt                                              @simicvm @DorukAkinci @EvilMouth
 /extensions/openai-speak                                            @jnchman
 /extensions/openai-translator                                       @douo @dekura @leeonfield @ridemountainpig
-/extensions/openclaw                                                @leveragedrobot @leveragedrobot
+/extensions/openclaw                                                @leveragedrobot @leveragedrobot @RaviTharuma
 /extensions/opencode-sessions                                       @mike182uk @mormubis @0xdhrv
 /extensions/opencodex-usage                                         @list-jonas
 /extensions/openfortivpn                                            @rafalpetryka
@@ -2477,6 +2482,7 @@
 /extensions/shortcut                                                @Yukaii @robertn702 @BrianHicks @vinsg
 /extensions/shortcuts-search                                        @solomkinmv
 /extensions/shottr                                                  @jfernandogt @Caffeine19
+/extensions/showmd                                                  @l0kyurue1
 /extensions/shroud-email                                            @xmok
 /extensions/shutdown-timer                                          @WhosMadeer
 /extensions/sidecar                                                 @lsps9150414 @shkm
@@ -3190,6 +3196,7 @@
 /extensions/zoo                                                     @ViGeng
 /extensions/zoom                                                    @thomaslombart @Visual-Studio-Coder @samuelkraft @jacpd @0xdhrv
 /extensions/zoom-control                                            @prashantv @pernielsentikaer @JackCasica
+/extensions/zoomer                                                  @colindotfun
 /extensions/zotero                                                  @sadanand-singh @lazarjov @joshuahhh @faridrashidi @ridemountainpig @kszenes
 /extensions/zoxide-git-projects                                     @theherk
 /extensions/zread-ai                                                @alexibuild

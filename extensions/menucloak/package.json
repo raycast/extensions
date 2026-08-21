@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "menucloak",
   "title": "MenuCloak",
-  "description": "Turn unused application menu space into your current focus",
+  "description": "Control MenuCloak focus, cloak, and Google Calendar settings",
   "icon": "extension-icon.png",
   "categories": [
     "Applications",
@@ -49,7 +49,7 @@
     {
       "name": "open-settings",
       "title": "Open MenuCloak Settings",
-      "description": "Edit focus text and MenuCloak settings",
+      "description": "Edit focus text or connect Google Calendar",
       "mode": "no-view"
     }
   ],

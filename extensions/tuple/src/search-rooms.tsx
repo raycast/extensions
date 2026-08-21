@@ -3,7 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { TupleErrorEmptyView } from "./lib/empty-state";
 import { useTupleJson } from "./lib/hooks";
 import { joinCall, setRoomFavorite } from "./lib/tuple";
-import { Room } from "./lib/types";
+import { primaryPersonalRoom, Room } from "./lib/types";
 
 export default function SearchRooms() {
   // `tuple rooms list` returns one flat, kind-tagged array, with occupants and the active-room
@@ -14,14 +14,18 @@ export default function SearchRooms() {
   });
 
   const rooms = data ?? [];
-  const personal = sortRooms(rooms.filter((room) => room.kind === "personal"));
+  const primaryRoom = primaryPersonalRoom(rooms);
+  const personal = sortRooms(
+    rooms.filter((room) => room.kind === "personal"),
+    primaryRoom?.slug,
+  );
   const team = sortRooms(rooms.filter((room) => room.kind === "team"));
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search your rooms">
       <List.Section title="Personal">
         {personal.map((room) => (
-          <RoomItem key={room.slug} room={room} onChange={revalidate} />
+          <RoomItem key={room.slug} room={room} primary={room.slug === primaryRoom?.slug} onChange={revalidate} />
         ))}
       </List.Section>
       <List.Section title="Team">
@@ -42,11 +46,14 @@ export default function SearchRooms() {
   );
 }
 
-function RoomItem({ room, onChange }: { room: Room; onChange: () => void }) {
+function RoomItem({ room, primary = false, onChange }: { room: Room; primary?: boolean; onChange: () => void }) {
   const label = roomLabel(room);
   const occupants = room.members.map((member) => member.full_name || member.email || "Someone");
   const accessories: List.Item.Accessory[] = [];
 
+  if (primary) {
+    accessories.push({ tag: "Primary" });
+  }
   if (occupants.length > 0) {
     accessories.push({
       icon: { source: Icon.TwoPeople, tintColor: Color.Green },
@@ -109,8 +116,11 @@ async function toggleFavorite(room: Room, label: string, onChange: () => void) {
 }
 
 /** Occupied rooms first, then favorites, then by name. */
-function sortRooms(rooms: Room[]): Room[] {
+function sortRooms(rooms: Room[], primarySlug?: string): Room[] {
   return [...rooms].sort((a, b) => {
+    if (primarySlug && (a.slug === primarySlug) !== (b.slug === primarySlug)) {
+      return a.slug === primarySlug ? -1 : 1;
+    }
     const aOccupied = a.members.length > 0;
     const bOccupied = b.members.length > 0;
     if (aOccupied !== bOccupied) {
