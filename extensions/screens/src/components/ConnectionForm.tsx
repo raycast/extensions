@@ -1,16 +1,19 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from '@raycast/api';
-import { useState } from 'react';
-import { ClientProtocol } from '../archive';
+import { useForm } from '@raycast/utils';
+import { ConnectTarget } from '../connect';
 import { TYPE_ICONS, TYPE_SECTIONS, sectionTitle, typeForSection } from '../connection-type';
 import { SavedConnection } from '../library';
+import { requiredText } from './validation';
 
-type TargetKind = 'saved' | 'direct';
-
+/**
+ * Every dropdown reports a plain string, so the fields they back are typed as one and narrowed on
+ * submit rather than carrying a union the form itself cannot honour.
+ */
 type FormValues = {
   name: string;
   section: string;
-  protocol: ClientProtocol;
-  kind: TargetKind;
+  protocol: string;
+  kind: string;
   identifier: string;
   url: string;
 };
@@ -30,35 +33,49 @@ export default function ConnectionForm({
   onSave: (connection: SavedConnection) => Promise<void>;
 }) {
   const { pop } = useNavigation();
-  const [kind, setKind] = useState<TargetKind>(connection.target.kind);
-  const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
 
-  async function submit(values: FormValues) {
-    const missing: Partial<Record<keyof FormValues, string>> = {};
-    if (!values.name.trim()) missing.name = 'Required';
-    if (values.kind === 'saved' && !values.identifier.trim()) missing.identifier = 'Required';
-    if (values.kind === 'direct' && !values.url.trim()) missing.url = 'Required';
+  const form: ReturnType<typeof useForm<FormValues>> = useForm<FormValues>({
+    initialValues: {
+      name: connection.name,
+      section: sectionTitle(connection.type),
+      protocol: connection.clientProtocol,
+      kind: connection.target.kind,
+      identifier: connection.target.kind === 'saved' ? connection.target.identifier : '',
+      url: connection.target.kind === 'direct' ? connection.target.url : '',
+    },
+    // Only the field the chosen kind actually shows is required. The other one is unmounted, so
+    // holding it against the user would block a form they cannot see the error on.
+    validation: {
+      name: requiredText,
+      identifier: (value) => (form.values.kind === 'saved' ? requiredText(value) : undefined),
+      url: (value) => (form.values.kind === 'direct' ? requiredText(value) : undefined),
+    },
+    async onSubmit(submitted) {
+      await onSave({
+        id: connection.id,
+        name: submitted.name.trim(),
+        type: typeForSection(submitted.section, connection.type),
+        clientProtocol: submitted.protocol === 'rdp' ? 'rdp' : 'vnc',
+        target:
+          submitted.kind === 'saved'
+            ? savedTarget(submitted.identifier.trim())
+            : { kind: 'direct', url: submitted.url.trim() },
+      });
+      pop();
+    },
+  });
 
-    if (Object.keys(missing).length > 0) {
-      setErrors(missing);
-      return;
-    }
+  const { handleSubmit, itemProps, values } = form;
 
-    await onSave({
-      id: connection.id,
-      name: values.name.trim(),
-      type: typeForSection(values.section, connection.type),
-      clientProtocol: values.protocol,
-      target:
-        values.kind === 'saved'
-          ? { kind: 'saved', identifier: values.identifier.trim(), ambiguous: false }
-          : { kind: 'direct', url: values.url.trim() },
-    });
-    pop();
-  }
-
-  function clear(field: keyof FormValues) {
-    setErrors((current) => ({ ...current, [field]: undefined }));
+  /**
+   * Whether an identifier is ambiguous depends on Screens' whole library, which this form cannot
+   * see. An identifier left as it was keeps the answer the import worked out for it. A new one is
+   * the user's own choice of what Screens should match, so it carries no warning.
+   */
+  function savedTarget(identifier: string): ConnectTarget {
+    const previous = connection.target;
+    const ambiguous = previous.kind === 'saved' && previous.identifier === identifier && previous.ambiguous;
+    return { kind: 'saved', identifier, ambiguous };
   }
 
   return (
@@ -66,19 +83,12 @@ export default function ConnectionForm({
       navigationTitle={isNew ? 'Add Connection' : `Edit ${connection.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={isNew ? 'Add Connection' : 'Save'} icon={Icon.Check} onSubmit={submit} />
+          <Action.SubmitForm title={isNew ? 'Add Connection' : 'Save'} icon={Icon.Check} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        defaultValue={connection.name}
-        placeholder="Shown in Raycast"
-        error={errors.name}
-        onChange={() => clear('name')}
-      />
-      <Form.Dropdown id="section" title="Type" defaultValue={sectionTitle(connection.type)}>
+      <Form.TextField title="Name" placeholder="Shown in Raycast" {...itemProps.name} />
+      <Form.Dropdown title="Type" {...itemProps.section}>
         {TYPE_SECTIONS.map((section) => (
           <Form.Dropdown.Item
             key={section.title}
@@ -88,34 +98,28 @@ export default function ConnectionForm({
           />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown id="protocol" title="Protocol" defaultValue={connection.clientProtocol}>
+      <Form.Dropdown title="Protocol" {...itemProps.protocol}>
         <Form.Dropdown.Item value="vnc" title="VNC" icon={Icon.Monitor} />
         <Form.Dropdown.Item value="rdp" title="RDP" icon={Icon.Window} />
       </Form.Dropdown>
       <Form.Separator />
-      <Form.Dropdown id="kind" title="Connect Via" value={kind} onChange={(value) => setKind(value as TargetKind)}>
+      <Form.Dropdown title="Connect Via" {...itemProps.kind}>
         <Form.Dropdown.Item value="saved" title="Saved Connection" icon={Icon.Desktop} />
         <Form.Dropdown.Item value="direct" title="Direct Address" icon={Icon.Globe} />
       </Form.Dropdown>
-      {kind === 'saved' ? (
+      {values.kind === 'saved' ? (
         <Form.TextField
-          id="identifier"
           title="Name or Hostname"
-          defaultValue={connection.target.kind === 'saved' ? connection.target.identifier : ''}
           placeholder="What Screens should match"
           info="Screens looks this up in its own library, so the connection keeps its stored settings and credentials. It has to match exactly one connection there."
-          error={errors.identifier}
-          onChange={() => clear('identifier')}
+          {...itemProps.identifier}
         />
       ) : (
         <Form.TextField
-          id="url"
           title="Address"
-          defaultValue={connection.target.kind === 'direct' ? connection.target.url : ''}
           placeholder="vnc://host or ssh://host"
           info="Connects straight to this address, bypassing the connection saved in Screens and the credentials stored with it."
-          error={errors.url}
-          onChange={() => clear('url')}
+          {...itemProps.url}
         />
       )}
     </Form>

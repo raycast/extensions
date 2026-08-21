@@ -1,16 +1,22 @@
 import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, closeMainWindow, open } from '@raycast/api';
-import { showFailureToast } from '@raycast/utils';
-import { useEffect, useRef, useState } from 'react';
+import { showFailureToast, useForm } from '@raycast/utils';
+import { useEffect, useRef } from 'react';
 import { AdHocProtocol, ConnectOptions, DEFAULT_PORTS, HostSpec, adHocUrl, parseHostSpec } from './connect';
+import { requiredText } from './components/validation';
 
+/** `protocol` is a string because that is what a dropdown reports. {@link adHocProtocol} narrows it. */
 type ConnectForm = {
   host: string;
-  protocol: AdHocProtocol;
+  protocol: string;
   port: string;
   username: string;
   observe: boolean;
   guest: boolean;
 };
+
+function adHocProtocol(value: string): AdHocProtocol {
+  return value === 'ssh' ? 'ssh' : 'vnc';
+}
 
 /**
  * Connects straight away when the root search bar supplied a host, and asks for the details
@@ -41,51 +47,41 @@ function ImmediateConnect({ spec, protocol }: { spec: HostSpec; protocol: AdHocP
   return <Detail isLoading markdown={`Connecting to \`${spec.host}\`…`} />;
 }
 
-function QuickConnectForm({ host, protocol: initialProtocol }: { host: string; protocol: AdHocProtocol }) {
-  const [hostError, setHostError] = useState<string | undefined>();
-  const [protocol, setProtocol] = useState<AdHocProtocol>(initialProtocol);
-
-  async function submit(values: ConnectForm) {
-    if (!values.host.trim()) {
-      setHostError('Required');
-      return;
-    }
-
-    await connect(values.host.trim(), values.protocol, values);
-  }
+function QuickConnectForm({ host, protocol }: { host: string; protocol: AdHocProtocol }) {
+  const { handleSubmit, itemProps, values } = useForm<ConnectForm>({
+    initialValues: { host, protocol, port: '', username: '', observe: false, guest: false },
+    validation: { host: requiredText },
+    onSubmit: (submitted) => connect(submitted.host.trim(), adHocProtocol(submitted.protocol), submitted),
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Connect" icon={Icon.Desktop} onSubmit={submit} />
+          <Action.SubmitForm title="Connect" icon={Icon.Desktop} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="host"
-        title="Host"
-        placeholder="Host name or IP address"
-        defaultValue={host}
-        error={hostError}
-        onChange={() => setHostError(undefined)}
-      />
-      <Form.Dropdown
-        id="protocol"
-        title="Protocol"
-        value={protocol}
-        onChange={(value) => setProtocol(value as AdHocProtocol)}
-      >
+      <Form.TextField title="Host" placeholder="Host name or IP address" {...itemProps.host} />
+      <Form.Dropdown title="Protocol" {...itemProps.protocol}>
         <Form.Dropdown.Item value="vnc" title="VNC" icon={Icon.Desktop} />
         <Form.Dropdown.Item value="ssh" title="SSH" icon={Icon.Terminal} />
       </Form.Dropdown>
-      <Form.TextField id="port" title="Port" placeholder={String(DEFAULT_PORTS[protocol])} />
-      <Form.TextField id="username" title="Username" placeholder="Optional" />
-      {protocol === 'vnc' && (
+      <Form.TextField
+        title="Port"
+        placeholder={String(DEFAULT_PORTS[adHocProtocol(values.protocol)])}
+        {...itemProps.port}
+      />
+      <Form.TextField title="Username" placeholder="Optional" {...itemProps.username} />
+      {values.protocol === 'vnc' && (
         <>
           <Form.Separator />
-          <Form.Checkbox id="observe" label="Observe Mode" info="Watch the screen without controlling it." />
-          <Form.Checkbox id="guest" label="Connect as Guest" info="Connect without using saved credentials." />
+          <Form.Checkbox label="Observe Mode" info="Watch the screen without controlling it." {...itemProps.observe} />
+          <Form.Checkbox
+            label="Connect as Guest"
+            info="Connect without using saved credentials."
+            {...itemProps.guest}
+          />
         </>
       )}
     </Form>
