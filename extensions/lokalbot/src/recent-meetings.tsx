@@ -22,13 +22,6 @@ interface Meeting {
   has_system_track: boolean;
 }
 
-const shortDate = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
 /** Format seconds as m:ss. */
 function duration(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -113,8 +106,8 @@ export default function Command() {
             <List.Item
               key={meeting.uuid || meeting.id}
               title={meeting.title}
-              subtitle={shortDate.format(new Date(meeting.date))}
               accessories={[
+                { date: new Date(meeting.date), tooltip: "Captured" },
                 { tag: meeting.app_source },
                 ...(flags ? [{ tag: flags }] : []),
                 { text: duration(meeting.duration_seconds) },

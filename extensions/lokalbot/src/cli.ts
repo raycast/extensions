@@ -7,10 +7,6 @@ const execFileAsync = promisify(execFile);
 export const FALLBACK_CLI =
   "/Applications/LokalBot.app/Contents/Helpers/lokalbot-cli";
 
-interface Preferences {
-  cliPath: string;
-}
-
 /** Error thrown when the LokalBot CLI cannot be located or executed. */
 export class CliMissingError extends Error {}
 
