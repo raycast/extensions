@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-21
 
 - Create tasks in any active Fibery database.
 - Discover supported fields directly from the workspace schema.
