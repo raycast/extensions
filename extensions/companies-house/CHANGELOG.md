@@ -1,6 +1,6 @@
 # Companies House Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-21
 
 - Search UK companies by name or number, with recently viewed companies on the empty search
 - View a company profile: status and status detail, registered office, SIC (nature of business) codes, and accounts and confirmation-statement dates
