@@ -48,6 +48,10 @@ código-fonte do Hermes.
 3. `discovery.ts` pode ler `config.yaml`, `gateway.pid` e as linhas autorizadas de `.env`:
    `API_SERVER_PORT` para descoberta e `API_SERVER_KEY` somente na ação explícita de detecção.
    Nunca lê `auth.json`, `state.db` ou qualquer outra linha do `.env`.
+4. O host de destino é **sempre** loopback (`127.0.0.0/8`, `::1`, `localhost`) — inclusive quando
+   vem da preferência `apiUrl`, que escolhe a porta e não o host (D1). Como toda requisição leva
+   `Authorization: Bearer <API_SERVER_KEY>`, um endereço de fora entregaria a chave a um terceiro.
+   Endereço recusado para a descoberta com erro na tela; nunca em silêncio.
 
 ---
 
@@ -75,7 +79,7 @@ A pesquisa verificada vence nos fatos. Cada desvio abaixo é deliberado.
 
 | # | O brief diz | O que fazemos | Por quê (fato verificado) |
 |---|---|---|---|
-| D1 | `apiUrl` com default `http://127.0.0.1:8642` | `apiUrl` **opcional, sem default** (vazio = detecção automática) | A porta é dirigida por `config.yaml → platforms.api_server.extra.port`; um default fixo esconde instalações com porta diferente. Com o campo vazio rodamos a descoberta ordenada (§3), que também valida `platform === "hermes-agent"`. Se o usuário preencher, a preferência vence e **não há fallback silencioso**. |
+| D1 | `apiUrl` com default `http://127.0.0.1:8642` | `apiUrl` **opcional, sem default** (vazio = detecção automática) | A porta é dirigida por `config.yaml → platforms.api_server.extra.port`; um default fixo esconde instalações com porta diferente. Com o campo vazio rodamos a descoberta ordenada (§3), que também valida `platform === "hermes-agent"`. Se o usuário preencher, a preferência vence e **não há fallback silencioso**. O que o campo **não** escolhe é o host: só loopback (`127.0.0.0/8`, `::1`, `localhost`) passa, porque toda requisição leva `Authorization: Bearer <API_SERVER_KEY>` e um endereço externo entregaria a chave. Endereço recusado vira erro de tela, nunca descoberta automática. |
 | D2 | Header principal `X-Hermes-Session-Id` | **Nunca enviamos** `X-Hermes-Session-Id` | As rotas `/api/sessions/{id}/chat[/stream]` **não leem** esse header (o id do path vence); `/v1/runs` também não. Enviá-lo só teria efeito em `/v1/chat/completions`, que não usamos (D3). |
 | D3 | Endpoints `POST /v1/chat/completions` e `POST /v1/responses` | **Não implementados** no cliente | `/v1/chat/completions` deriva ids opacos `api-<sha256[:16]>`, não aparece na lista de sessões e usa `prompt_tokens/completion_tokens` (naming divergente). `/v1/responses` grava em `response_store.db` (LRU de 100), fora do `state.db` que o Desktop lê ⇒ quebra a sincronização. YAGNI: nenhuma jornada do MVP precisa deles. |
 | D4 | "não ler diretamente arquivos internos do Hermes" | `discovery.ts` lê `gateway.pid`, `gateway_state.json`, `config.yaml` e no máximo a linha `API_SERVER_PORT` do `.env` | Só assim a auto-descoberta funciona; nenhum arquivo é **escrito** e nenhum segredo é lido. O `/health` continua sendo a autoridade final. |
@@ -1367,7 +1371,7 @@ Nunca renderize `e.message` cru, nunca renderize o corpo HTTP, nunca inclua head
   {
     "name": "apiUrl",
     "title": "Endereço do Hermes",
-    "description": "Deixe em branco para detectar automaticamente. Preencha apenas se o seu Hermes usa outra porta.",
+    "description": "Deixe em branco para detectar automaticamente. Preencha apenas se o seu Hermes usa outra porta. O endereço tem de ser da sua própria máquina: 127.0.0.1 e localhost são aceitos, qualquer outro é recusado.",
     "type": "textfield",
     "required": false,
     "placeholder": "Detectar automaticamente"
@@ -1449,6 +1453,12 @@ export interface HermesPreferences {
   apiServerKey: string;
   /** undefined ⇒ usar auto-descoberta. Já normalizado (sem barra final, localhost → 127.0.0.1). */
   apiUrl?: string;
+  /**
+   * Host digitado e RECUSADO por não ser a própria máquina. Preenchido ⇒ apiUrl fica undefined,
+   * mas a descoberta NÃO pode cair na busca automática como se o campo estivesse em branco:
+   * quem digitou um endereço externo precisa ler na tela por que foi recusado (§6.1 S0).
+   */
+  rejectedApiUrlHost?: string;
   /** Sempre preenchido; em branco cai em `defaultSessionKey()`, que é por sistema. Máx. 256 chars. */
   sessionKey: string;
   defaultProvider?: string;
@@ -1459,25 +1469,61 @@ export interface HermesPreferences {
 }
 
 /**
- * Normaliza uma base URL do Hermes.
- * - remove barras finais
- * - substitui "localhost" por "127.0.0.1" (a porta 8642 é IPv4-only; Node pode resolver ::1)
- * - assume http:// quando o usuário digita só "127.0.0.1:8642"
+ * Só a própria máquina: 127.0.0.0/8, ::1 e localhost.
+ *
+ * O hostname chega normalizado pelo URL do Node, e é por isso que a checagem é curta: o
+ * parser expande as formas abreviadas de IPv4 (127.1, 2130706433, 0x7f.0.0.1 viram todas
+ * 127.0.0.1), comprime o IPv6, converte IDN para punycode e descarta o userinfo —
+ * "http://127.0.0.1@exemplo.com" tem hostname "exemplo.com", que é para onde a requisição
+ * realmente iria. ::ffff:127.0.0.1 é recusado de propósito: falha fechado.
  */
-export function normalizeBaseUrl(input: string): string | undefined {
+export function isLoopbackHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[(.*)\]$/, "$1");
+  if (host === "localhost" || host === "::1") return true;
+  const octets = /^127\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  return octets !== null && octets.slice(1).every((octet) => Number(octet) <= 255);
+}
+
+/**
+ * Normaliza uma base URL do Hermes e diz se ela é aceitável.
+ * - remove barras finais
+ * - substitui "localhost"/"::1" por "127.0.0.1" (a porta 8642 é IPv4-only; Node pode resolver ::1).
+ *   Só os NOMES: um "127.0.0.5" explícito é loopback e continua sendo o que o usuário pediu
+ * - assume http:// quando o usuário digita só "127.0.0.1:8642"
+ * - RECUSA host que não seja loopback. É segurança, não estilo: hermes-api.ts põe
+ *   `Authorization: Bearer <API_SERVER_KEY>` em toda requisição, então um host externo aqui
+ *   entregaria a chave do Hermes a um terceiro. A porta continua livre — é para isso que o
+ *   campo existe. A recusa vira erro de tela em resolveBaseUrl (§6.1 S0), nunca auto-descoberta
+ */
+export type BaseUrlRefusal = "malformed" | "not-loopback";
+
+export interface BaseUrlCheck {
+  baseUrl?: string;
+  refusal?: BaseUrlRefusal;
+  /** Host recusado, já normalizado. Só em refusal === "not-loopback". */
+  host?: string;
+}
+
+export function checkBaseUrl(input: string): BaseUrlCheck {
   const raw = input.trim();
-  if (raw === "") return undefined;
+  if (raw === "") return {};
   const withScheme = /^https?:\/\//i.test(raw) ? raw : `http://${raw}`;
   let url: URL;
   try {
     url = new URL(withScheme);
   } catch {
-    return undefined;
+    return { refusal: "malformed" };
   }
+  if (!isLoopbackHost(url.hostname)) return { refusal: "not-loopback", host: url.hostname };
   if (url.hostname === "localhost" || url.hostname === "::1" || url.hostname === "[::1]") {
     url.hostname = "127.0.0.1";
   }
-  return `${url.protocol}//${url.host}${url.pathname.replace(/\/+$/, "")}`.replace(/\/+$/, "");
+  return { baseUrl: `${url.protocol}//${url.host}${url.pathname}`.replace(/\/+$/, "") };
+}
+
+/** Atalho para quem só quer o endereço utilizável. */
+export function normalizeBaseUrl(input: string): string | undefined {
+  return checkBaseUrl(input).baseUrl;
 }
 
 export function getHermesPreferences(): HermesPreferences {
@@ -1485,9 +1531,12 @@ export function getHermesPreferences(): HermesPreferences {
   const parsedLimit = Number.parseInt(raw.maxHistoryItems ?? "50", 10);
   const maxHistoryItems = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 200) : 50;
 
+  const address = raw.apiUrl ? checkBaseUrl(raw.apiUrl) : {};
+
   return {
     apiServerKey: (raw.apiServerKey ?? "").trim(),
-    apiUrl: raw.apiUrl ? normalizeBaseUrl(raw.apiUrl) : undefined,
+    apiUrl: address.baseUrl,
+    rejectedApiUrlHost: address.refusal === "not-loopback" ? address.host : undefined,
     sessionKey: (raw.sessionKey?.trim() || defaultSessionKey()).slice(0, 256),
     defaultProvider: raw.defaultProvider?.trim() || undefined,
     defaultModel: raw.defaultModel?.trim() || undefined,
@@ -1530,7 +1579,12 @@ export function requireApiKey(): string {
 ### 6.1 Algoritmo (ordem exata)
 
 ```text
-S0  Preferência apiUrl preenchida?
+S0  Host recusado (não-loopback)?
+      sim → HermesWrongServerError com recovery "open_preferences", ANTES de qualquer conexão.
+             *** nunca cai para descoberta automática: o endereço externo sumiria da tela
+                 sem explicação e a extensão pareceria estar funcionando ***
+
+    Preferência apiUrl preenchida?
       sim → probe /health nessa URL.
              platform === "hermes-agent"  → PRONTO (source: "preference")
              platform === outro           → HermesWrongServerError (ex.: apontou para 8644)
@@ -1852,7 +1906,17 @@ export async function resolveBaseUrl(options?: { force?: boolean; deps?: Discove
   if (!options?.force && memo) return memo;
 
   // S0 — preferência explícita vence e não tem fallback.
-  const { apiUrl } = getHermesPreferences();
+  const { apiUrl, rejectedApiUrlHost } = getHermesPreferences();
+
+  // Endereço fora desta máquina: para aqui, e na cara do usuário.
+  if (rejectedApiUrlHost !== undefined) {
+    throw new HermesWrongServerError({
+      userMessage: NON_LOOPBACK_MESSAGE,
+      technical: `Hermes Address is set to host "${rejectedApiUrlHost}", which is not a loopback address. …`,
+      recovery: "open_preferences",
+    });
+  }
+
   if (apiUrl) {
     const health = await probe(apiUrl, PROBE_TIMEOUT_MS);
     if (isHermesAgent(health)) {

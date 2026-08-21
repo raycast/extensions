@@ -27,6 +27,11 @@ Useful context for judging whether something is a vulnerability here:
 - **The extension talks only to `127.0.0.1`** — the Hermes API Server on the same machine. There is
   no remote mode and no external endpoint. Any code path that would send data off the machine is a
   bug, and a report-worthy one.
+- **That is enforced, not just promised.** The `Hermes Address` preference accepts loopback only
+  (`127.0.0.0/8`, `::1`, `localhost`); the port is free, the host is not. Anything else is refused
+  in `checkBaseUrl()` and the discovery stops with an error on screen instead of connecting — a
+  request would have carried the key in the `Authorization` header. A way around that check is a
+  vulnerability.
 - **The Hermes key (`API_SERVER_KEY`) is a local secret.** It is stored in Raycast's secure
   storage, sent only as an `Authorization: Bearer` header to `127.0.0.1`, and redacted everywhere
   it could otherwise surface: screens, toasts, error messages and the "technical details" payload
@@ -47,5 +52,3 @@ Useful context for judging whether something is a vulnerability here:
 - Vulnerabilities in Hermes Agent itself, in Raycast, or in Node.js — report those upstream.
 - Anything that requires an attacker to already have code execution on the user's machine as that
   user. At that point the local Hermes key is already theirs, with or without this extension.
-- Missing hardening on an install where the user pointed the extension at a non-local address by
-  editing preferences by hand.

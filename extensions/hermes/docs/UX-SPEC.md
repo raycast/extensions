@@ -229,7 +229,7 @@ Hermes remoto; macOS.
 | `name` | `type` | `title` | `label` (checkbox) | `default` | `description` |
 |---|---|---|---|---|---|
 | `apiServerKey` | `password` | `Chave de acesso do Hermes` | — | — | `Chave local do Hermes API Server. Use "Detectar configuração automaticamente" no comando Configurar Hermes se você não sabe qual é.` |
-| `apiUrl` | `textfield` | `Endereço do Hermes` | — | **nenhum** (vazio = detecção automática) | `Deixe em branco para detectar automaticamente. Preencha apenas se o seu Hermes usa outra porta.` |
+| `apiUrl` | `textfield` | `Endereço do Hermes` | — | **nenhum** (vazio = detecção automática) | `Deixe em branco para detectar automaticamente. Preencha apenas se o seu Hermes usa outra porta. O endereço tem de ser da sua própria máquina: 127.0.0.1 e localhost são aceitos, qualquer outro é recusado.` |
 | `streamResponses` | `checkbox` | `Resposta` | `Mostrar a resposta enquanto ela é escrita` | `true` | `Desative se você preferir ver apenas a resposta pronta.` |
 | `defaultModel` | `textfield` | `Modelo padrão` | — | — | `Opcional. Deixe em branco para usar o modelo padrão configurado no Hermes.` |
 | `defaultProvider` | `textfield` | `Provedor padrão` | — | — | `Opcional. Só preencha se o suporte pediu ou se você sabe exatamente o que faz.` |
@@ -239,6 +239,15 @@ Hermes remoto; macOS.
 **`apiUrl` não tem default** (ARCHITECTURE D1): um valor preenchido desliga a auto-descoberta de
 porta — a preferência sempre vence e nunca cai para descoberta. Com default fixo, uma instalação em
 outra porta ficaria permanentemente quebrada.
+
+**`apiUrl` escolhe a porta, não o host.** Só loopback passa (`127.0.0.0/8`, `::1`, `localhost`);
+qualquer outro endereço é recusado em `checkBaseUrl()`. Não é preferência de estilo: toda requisição
+leva `Authorization: Bearer <API_SERVER_KEY>`, então um host de fora receberia a chave do Hermes do
+usuário. A recusa **não** pode virar auto-descoberta silenciosa — some da tela o endereço que a
+pessoa digitou e a extensão parece funcionando. Ela vira erro de tela cheia, com `Open Settings`:
+_"The Hermes address must point to your own computer. Only 127.0.0.1 and localhost are accepted, on
+any port — the extension sends your Hermes key with every request and never hands it to another
+machine."_ (literal em inglês, como todo texto de tela desde a tradução da interface).
 
 **`maxHistoryItems` é `dropdown`, não `textfield`** (ARCHITECTURE D5): o schema do manifest tem sete
 tipos e **nenhum numérico** (07 §6.1); um textfield exigiria validação e falharia para o público
