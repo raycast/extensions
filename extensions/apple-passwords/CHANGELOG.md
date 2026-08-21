@@ -1,6 +1,6 @@
 # Apple Passwords Changelog
 
-## [Updated] - {PR_MERGE_DATE}
+## [Updated] - 2026-08-21
 
 - Updated extension to meet Raycast extension development criteria
 - Updated for new version of `apw`
