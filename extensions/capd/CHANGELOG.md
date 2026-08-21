@@ -1,6 +1,6 @@
 # Capd Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-21
 
 - Search captures with full-text search and Capd's `site:`, `tag:`, `after:`, and `before:`
   filters, or browse recent captures with an empty search bar
