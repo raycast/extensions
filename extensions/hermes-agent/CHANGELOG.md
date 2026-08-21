@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.1] - {PR_MERGE_DATE}
+## [0.1.1] - 2026-08-21
 
 - Status uses `GET /v1/models` as the primary liveness check (OpenAI-compatible). `/health` is optional metadata.
 - Empty Model Name uses a model advertised by `/v1/models` instead of always sending `hermes-agent`.
