@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Form, Icon, List, Toast, showToast, useNavigation } from '@raycast/api';
+import { Action, ActionPanel, Color, Form, Icon, List, Toast, popToRoot, showToast, useNavigation } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 import { Archive, Screen, archiveModifiedAt, readArchive } from './archive';
@@ -53,7 +53,6 @@ export default function Command() {
 }
 
 function SelectScreens({ path }: { path: string }) {
-  const { pop } = useNavigation();
   const { screens: imported, setScreens } = useImportedScreens();
   const { data, isLoading, error, revalidate } = useCachedPromise(readArchive, [path, archiveModifiedAt(path)]);
 
@@ -85,7 +84,7 @@ function SelectScreens({ path }: { path: string }) {
       style: Toast.Style.Success,
       title: keep.length === 1 ? 'Imported 1 screen' : `Imported ${keep.length} screens`,
     });
-    pop();
+    await popToRoot();
   }
 
   return (
