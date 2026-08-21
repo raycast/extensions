@@ -1,13 +1,8 @@
-import {
-  closeMainWindow,
-  getApplications,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { captureException, closeMainWindow, getApplications, open, showToast, Toast } from "@raycast/api";
 
 const ZOOMER_BUNDLE_ID = "studio.zoomer.desktop";
-const ZOOMER_DOWNLOAD_URL = "https://zoomer.studio";
+const ZOOMER_WEBSITE_URL = "https://zoomer.studio";
+const ZOOMER_DOWNLOAD_URL = "https://zoomer.studio/downloads/latest";
 
 const SCREENSHOT_OUTPUTS = ["default", "copy", "save", "upload"] as const;
 const SETTINGS_SECTIONS = ["app", "recording", "screenshot"] as const;
@@ -25,36 +20,15 @@ type ZoomerPath =
   | "open-screenshots"
   | "open-settings";
 
-export function normalizeScreenshotOutput(
-  value: string | undefined,
-): ScreenshotOutput {
-  if (value === undefined || value === "") {
-    return "default";
-  }
-  if (isOneOf(SCREENSHOT_OUTPUTS, value)) {
-    return value;
-  }
-
-  throw new Error(`Unsupported screenshot output: ${value}`);
+export function normalizeScreenshotOutput(value: string | undefined): ScreenshotOutput {
+  return value !== undefined && isOneOf(SCREENSHOT_OUTPUTS, value) ? value : "default";
 }
 
-export function normalizeSettingsSection(
-  value: string | undefined,
-): SettingsSection {
-  if (value === undefined || value === "") {
-    return "app";
-  }
-  if (isOneOf(SETTINGS_SECTIONS, value)) {
-    return value;
-  }
-
-  throw new Error(`Unsupported settings section: ${value}`);
+export function normalizeSettingsSection(value: string | undefined): SettingsSection {
+  return value !== undefined && isOneOf(SETTINGS_SECTIONS, value) ? value : "app";
 }
 
-export function zoomerUrl(
-  path: ZoomerPath,
-  params: Partial<Record<"output" | "section", string>> = {},
-): string {
+export function zoomerUrl(path: ZoomerPath, params: Partial<Record<"output" | "section", string>> = {}): string {
   const url = new URL(`zoomer://app/${path}`);
 
   for (const [key, value] of Object.entries(params)) {
@@ -85,13 +59,14 @@ export async function openZoomerUrl(url: string): Promise<void> {
   try {
     await open(url, ZOOMER_BUNDLE_ID);
   } catch (error: unknown) {
+    captureException(error);
     await showToast({
       style: Toast.Style.Failure,
       title: "Could not open Zoomer",
       message: error instanceof Error ? error.message : undefined,
       primaryAction: {
         title: "Open Zoomer Website",
-        onAction: () => void open(ZOOMER_DOWNLOAD_URL),
+        onAction: () => void open(ZOOMER_WEBSITE_URL),
       },
     });
   }
@@ -100,18 +75,13 @@ export async function openZoomerUrl(url: string): Promise<void> {
 async function zoomerIsInstalled(): Promise<boolean> {
   try {
     const applications = await getApplications();
-    return applications.some(
-      (application) => application.bundleId === ZOOMER_BUNDLE_ID,
-    );
+    return applications.some((application) => application.bundleId === ZOOMER_BUNDLE_ID);
   } catch {
     // If the installed-app list can't be read, don't block — let open() try.
     return true;
   }
 }
 
-function isOneOf<T extends readonly string[]>(
-  values: T,
-  value: string,
-): value is T[number] {
+function isOneOf<T extends readonly string[]>(values: T, value: string): value is T[number] {
   return values.includes(value);
 }

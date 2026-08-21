@@ -2,7 +2,7 @@
 
 Trigger [Zoomer](https://zoomer.studio) screenshots and recordings straight from Raycast.
 
-Requires the **Zoomer desktop app** for macOS. Each command hands off to the running app through a `zoomer://` deep link; if Zoomer isn't installed, the command shows how to get it instead of failing silently.
+Requires the **Zoomer desktop app** for macOS. Each command hands off to the Zoomer app through a `zoomer://` deep link; if Zoomer isn't installed, the command shows how to get it instead of failing silently.
 
 ## Commands
 

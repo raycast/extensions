@@ -12,12 +12,24 @@
   "categories": [
     "Applications"
   ],
+  "keywords": [
+    "screenshot",
+    "screen capture",
+    "recording",
+    "screen recorder"
+  ],
   "commands": [
     {
       "name": "capture-area",
       "title": "Capture Area",
       "description": "Capture a selected area with Zoomer.",
       "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "snip",
+        "region",
+        "selection"
+      ],
       "arguments": [
         {
           "name": "output",
@@ -50,6 +62,10 @@
       "title": "Capture Full Screen",
       "description": "Capture your current screen with Zoomer.",
       "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "display"
+      ],
       "arguments": [
         {
           "name": "output",
@@ -81,37 +97,61 @@
       "name": "capture-history",
       "title": "Capture History",
       "description": "Open your recent captures in Zoomer.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "recents",
+        "gallery",
+        "history"
+      ]
     },
     {
       "name": "start-recording",
       "title": "Start Recording",
       "description": "Start a screen recording with Zoomer.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "record",
+        "video"
+      ]
     },
     {
       "name": "stop-recording",
       "title": "Stop Recording",
       "description": "Stop the active screen recording.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "record",
+        "video"
+      ]
     },
     {
       "name": "open-recordings",
       "title": "Open Recordings",
       "description": "Open your recent recordings in Zoomer.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "video",
+        "gallery"
+      ]
     },
     {
       "name": "open-screenshots",
       "title": "Open Screenshots",
       "description": "Open your recent screenshots in Zoomer.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "gallery",
+        "history"
+      ]
     },
     {
       "name": "open-settings",
       "title": "Open Settings",
       "description": "Open a section of Zoomer settings.",
       "mode": "no-view",
+      "keywords": [
+        "preferences"
+      ],
       "arguments": [
         {
           "name": "section",
@@ -139,6 +179,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "typecheck": "tsc --noEmit"
   },
