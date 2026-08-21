@@ -20,6 +20,9 @@ test("converts supported layouts to the physical US English keys", () => {
   assert.equal(convertToEnglish("άέήίόύώ", getLayout("greek")).text, "aehioyv");
   assert.equal(convertToEnglish("ΆΈΉΊΌΎΏ", getLayout("greek")).text, "AEHIOYV");
   assert.equal(convertToEnglish("α\u0301", getLayout("greek")).text, "a");
+  assert.equal(convertToEnglish("΄", getLayout("greek")).text, ";");
+  assert.equal(convertToEnglish("café", getLayout("greek")).text, "café");
+  assert.equal(convertToEnglish("cafe\u0301", getLayout("greek")).text, "cafe\u0301");
 });
 
 test("automatically detects non-Latin layouts", () => {
@@ -33,6 +36,12 @@ test("automatically converts precomposed Greek accents", () => {
   assert.equal(correction.query, "zoom");
   assert.equal(correction.layout?.id, "greek");
   assert.equal(correction.applications[0]?.application.name, "Zoom");
+});
+
+test("preserves non-Greek accents in mixed-script queries", () => {
+  const correction = detectCorrection("ζόομ café", applications, "auto");
+  assert.equal(correction.query, "zoom café");
+  assert.equal(correction.layout?.id, "greek");
 });
 
 test("automatically detects a Latin layout from a strong application match", () => {

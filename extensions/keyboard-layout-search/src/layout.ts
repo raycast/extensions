@@ -56,6 +56,28 @@ const ENGLISH = {
   shiftedBottom: "ZXCVBNM<>?",
 };
 
+const COMBINING_MARK_PATTERN = /\p{M}/u;
+const GREEK_SCRIPT_PATTERN = /\p{Script=Greek}/u;
+const LETTER_PATTERN = /\p{Letter}/u;
+
+function normalizeGreekInput(text: string): string {
+  let previousBaseWasGreekLetter = false;
+  let normalizedText = "";
+
+  for (const character of text) {
+    if (COMBINING_MARK_PATTERN.test(character)) {
+      if (!previousBaseWasGreekLetter) normalizedText += character;
+      continue;
+    }
+
+    const isGreekLetter = GREEK_SCRIPT_PATTERN.test(character) && LETTER_PATTERN.test(character);
+    normalizedText += isGreekLetter ? character.normalize("NFD").replace(/\p{M}/gu, "") : character;
+    previousBaseWasGreekLetter = isGreekLetter;
+  }
+
+  return normalizedText;
+}
+
 export const LAYOUTS: readonly LayoutDefinition[] = [
   {
     id: "russian",
@@ -164,7 +186,7 @@ export const LAYOUTS: readonly LayoutDefinition[] = [
     title: "Greek",
     keyboardName: "Ελληνικά",
     scriptPattern: /[\u0370-\u03ff]/u,
-    normalizeInput: (text) => text.normalize("NFD").replace(/\p{M}/gu, ""),
+    normalizeInput: normalizeGreekInput,
     map: createKeyMap([
       {
         source: ";ςερτυθιοπ[]",
