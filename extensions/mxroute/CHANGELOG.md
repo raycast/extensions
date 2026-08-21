@@ -1,5 +1,10 @@
 # MXroute Changelog
 
+## [View and Update Domain Spam Settings] - {PR_MERGE_DATE}
+
+- Add links for more email clients
+- View and update spam settings
+
 ## [Remove Domain] - 2026-06-08
 
 - Add "Remove Domain" `Action`
