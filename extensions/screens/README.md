@@ -1,6 +1,6 @@
 # Screens
 
-Connect to the computers you use in [Screens 5](https://edovia.com/en/screens-mac/) from Raycast, plus ad-hoc VNC and
+Connect to the computers you use in [Screens 5](https://edovia.com/en/screens) from Raycast, plus ad-hoc VNC and
 SSH connections to machines that aren't in your list.
 
 ## Setup
@@ -18,41 +18,54 @@ no archive.
 
 ## Commands
 
-**Search Connections** lists what you have, grouped by type and ordered by how often and how recently you connect from
-Raycast. Search matches a connection's name or the address it opens. Connect with Return. On a VNC connection, Observe
-Mode (⌘⇧E) watches without controlling and Guest (⌘⇧G) skips saved credentials. Filter by type from the dropdown in the
-top right. Add a connection with ⌘N, edit one with ⌘E to rename it or change what it opens, and remove one with ⌃X,
-which drops it from Raycast and leaves Screens untouched.
+#### Search Connections
 
-**Import Connections** picks an archive and selects what to keep. Running it again updates the connections that archive
-covers, adding new ones and dropping the ones you deselect, and leaves anything you added by hand alone. Your previous
-choices come back preselected.
+Lists what you have, grouped by type and ordered by how often and how recently you connect from Raycast. Search matches
+a connection's name or the address it opens. Filter by type from the dropdown in the top right.
 
-**Quick Connect** connects to a machine that isn't in your list. Type a host straight into the root search bar, in any
-form a URL would take: `desk-imac.local`, `admin@10.0.0.4:5901`, `ssh://192.0.2.10`, or `[2001:db8::1]`. Launch it with
-the host empty for a form with port, username, Observe Mode, and Guest.
+- **Return** connects
+- **⌘⇧E** connects in Observe Mode, watching a VNC connection without controlling it
+- **⌘⇧G** connects as Guest, skipping the credentials saved for a VNC connection
+- **⌘N** adds a connection
+- **⌘E** edits a connection, to rename it or change what it opens
+- **⌃X** removes a connection from Raycast, leaving Screens untouched
 
-## How connections are addressed
+#### Import Connections
+
+Picks an archive and selects what to keep. Running it again updates the connections that archive covers, adding new ones
+and dropping the ones you deselect, and leaves anything you added by hand alone. Your previous choices come back
+preselected.
+
+#### Quick Connect
+
+Connects to a machine that isn't in your list. Type a host straight into the root search bar, in any form a URL would
+take: `desk-imac.local`, `admin@10.0.0.4:5901`, `ssh://192.0.2.10`, or `[2001:db8::1]`. Launch it with the host empty
+for a form with port, username, Observe Mode, and Guest.
+
+## How Connections Are Addressed
 
 Screens' URL scheme addresses a saved connection by name or hostname, never by id. When a name or hostname uniquely
 identifies one connection, this extension opens it through Screens, which carries its stored settings and credentials.
 When neither does, it connects to the machine's address instead. Those rows carry an arrow icon, and the address is
 shown as the subtitle so you can see exactly what a row will open.
 
-This matters more than it sounds. Three different machines sharing one name leave Screens no way to know which you
-mean, so it picks one. Addressing them directly reaches the right machine every time. Editing a connection lets you
-override either choice.
+Three different machines sharing one name leave Screens no way to know which you mean, so it picks one. Addressing them
+directly reaches the right machine. Editing a connection lets you override either choice.
 
 RDP connections have no ad-hoc URL scheme to fall back on, so a duplicate-named RDP connection shows a warning icon
 and lets Screens choose.
 
 ## Limitations
 
-**An import is a snapshot.** Adding or renaming a connection in Screens does not change what you imported. Run Import
+#### Snapshot Imports
+
+An import is a snapshot, so adding or renaming a connection in Screens does not change what you imported. Run Import
 Connections again to pick it up, or edit the connection in Raycast.
 
-**Nothing writes back.** Screens imports archives through a UI flow, so this extension only reads. It also can't list,
-disconnect, or control a running session. Screens exposes no scripting interface, and its URL schemes are one-way.
+#### No Write-Back
+
+Screens imports archives through a UI flow, so this extension only reads. It also can't list, disconnect, or control a
+running session. Screens exposes no scripting interface, and its URL schemes are one-way.
 
 ## Credits
 
