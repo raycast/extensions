@@ -74,8 +74,8 @@ function getGuidance(error: Error): ErrorGuidance {
 
       case 'NOT_AN_ARCHIVE':
         return {
-          title: 'No Screens in Archive',
-          description: 'The file parsed, but it has no list of screens in it.',
+          title: 'No Connections in Archive',
+          description: 'The file parsed, but it has no list of connections in it.',
           solutions: [
             '**Check the file**: this looks like valid JSON but not a Screens archive',
             '**Re-export**: export a fresh archive from Screens:',

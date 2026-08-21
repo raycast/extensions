@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screens",
   "title": "Screens",
-  "description": "Connect to computers you use in Screens 5, plus ad-hoc VNC and SSH connections",
+  "description": "Connect to the computers you use in Screens 5, plus ad-hoc VNC and SSH connections",
   "icon": "screens-icon.png",
   "author": "bendrucker",
   "license": "MIT",
@@ -15,10 +15,10 @@
   ],
   "commands": [
     {
-      "name": "search-screens",
-      "title": "Search Screens",
+      "name": "search-connections",
+      "title": "Search Connections",
       "subtitle": "Screens",
-      "description": "Search your imported screens and connect to one",
+      "description": "Search your imported Screens connections and connect to one",
       "mode": "view"
     },
     {
@@ -26,13 +26,37 @@
       "title": "Quick Connect",
       "subtitle": "Screens",
       "description": "Connect to a computer that isn't in your Screens library",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "host",
+          "placeholder": "Host name or IP address",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "protocol",
+          "placeholder": "Protocol",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "VNC",
+              "value": "vnc"
+            },
+            {
+              "title": "SSH",
+              "value": "ssh"
+            }
+          ]
+        }
+      ]
     },
     {
-      "name": "import-screens",
-      "title": "Import Screens",
+      "name": "import-connections",
+      "title": "Import Connections",
       "subtitle": "Screens",
-      "description": "Pick which screens from an exported Screens archive to keep in Raycast",
+      "description": "Pick which connections from an exported Screens archive to keep in Raycast",
       "mode": "view"
     }
   ],

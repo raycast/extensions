@@ -1,17 +1,12 @@
 import { Action, ActionPanel, Color, Form, Icon, List, Toast, popToRoot, showToast, useNavigation } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useMemo, useState } from 'react';
-import { Archive, Screen, archiveModifiedAt, readArchive } from './archive';
+import { Archive, Connection, archiveModifiedAt, readArchive } from './archive';
+import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections } from './connection-type';
 import { describeTarget, normalizeHostname, resolveTarget } from './connect';
-import { ImportedScreen, toImportedScreen, useImportedScreens } from './library';
+import { SavedConnection, toSavedConnection, useSavedConnections } from './library';
 import ArchiveErrorView from './components/ArchiveErrorView';
-
-const SECTIONS: { title: string; types: Screen['type'][] }[] = [
-  { title: 'Local Network', types: ['local'] },
-  { title: 'Tailscale', types: ['tailscale'] },
-  { title: 'Remote', types: ['remote'] },
-  { title: 'Other', types: ['url', 'saved', 'recent'] },
-];
+import TypeFilter from './components/TypeFilter';
 
 export default function Command() {
   const { push } = useNavigation();
@@ -22,7 +17,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Choose Screens"
+            title="Choose Connections"
             icon={Icon.ArrowRight}
             onSubmit={(values: { archive: string[] }) => {
               const path = values.archive?.[0];
@@ -30,7 +25,7 @@ export default function Command() {
                 setPathError('Required');
                 return;
               }
-              push(<SelectScreens path={path} />);
+              push(<SelectConnections path={path} />);
             }}
           />
         </ActionPanel>
@@ -38,7 +33,7 @@ export default function Command() {
     >
       <Form.Description
         title="Screens Archive"
-        text="In Screens, go to Settings → Archives → Export…, save the .screens file, then choose it here. You pick which screens to keep on the next step."
+        text="In Screens, go to Settings → Archives → Export…, save the .screens file, then choose it here. You pick which connections to keep on the next step."
       />
       <Form.FilePicker
         id="archive"
@@ -52,15 +47,17 @@ export default function Command() {
   );
 }
 
-function SelectScreens({ path }: { path: string }) {
-  const { screens: imported, setScreens } = useImportedScreens();
+function SelectConnections({ path }: { path: string }) {
+  const { connections: saved, setConnections } = useSavedConnections();
   const { data, isLoading, error, revalidate } = useCachedPromise(readArchive, [path, archiveModifiedAt(path)]);
 
   const [selected, setSelected] = useState<Set<string> | undefined>();
-  const selection = selected ?? defaultSelection(data, imported);
+  const [filter, setFilter] = useState(ALL_TYPES);
+  const selection = selected ?? defaultSelection(data, saved);
 
-  const all = useMemo(() => data?.screens ?? [], [data]);
-  const sections = useMemo(() => groupByType(all), [all]);
+  const all = useMemo(() => data?.connections ?? [], [data]);
+  const sections = useMemo(() => groupByType(all, filter, byUsage), [all, filter]);
+  const availableSections = useMemo(() => occupiedSections(all), [all]);
 
   if (error) {
     return <ArchiveErrorView error={error} onRetry={revalidate} />;
@@ -78,11 +75,11 @@ function SelectScreens({ path }: { path: string }) {
   }
 
   async function save() {
-    const keep = all.filter((screen) => selection.has(screen.id));
-    await setScreens(keep.map((screen) => toImportedScreen(screen, all)));
+    const keep = all.filter((connection) => selection.has(connection.id));
+    await setConnections(keep.map((connection) => toSavedConnection(connection, all)));
     await showToast({
       style: Toast.Style.Success,
-      title: keep.length === 1 ? 'Imported 1 screen' : `Imported ${keep.length} screens`,
+      title: keep.length === 1 ? 'Imported 1 connection' : `Imported ${keep.length} connections`,
     });
     await popToRoot();
   }
@@ -90,34 +87,39 @@ function SelectScreens({ path }: { path: string }) {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={`Import Screens — ${selection.size} of ${all.length} selected`}
-      searchBarPlaceholder="Filter screens"
+      navigationTitle={`Import Connections — ${selection.size} of ${all.length} selected`}
+      searchBarPlaceholder="Filter connections"
+      searchBarAccessory={<TypeFilter sections={availableSections} value={filter} onChange={setFilter} />}
     >
       {sections.map((section) => (
-        <List.Section key={section.title} title={section.title} subtitle={`${section.screens.length}`}>
-          {section.screens.map((screen) => {
-            const target = resolveTarget(screen, all);
-            const checked = selection.has(screen.id);
+        <List.Section key={section.title} title={section.title} subtitle={`${section.connections.length}`}>
+          {section.connections.map((connection) => {
+            const target = resolveTarget(connection, all);
+            const checked = selection.has(connection.id);
             return (
               <List.Item
-                key={screen.id}
+                key={connection.id}
                 icon={
                   checked
                     ? { source: Icon.CheckCircle, tintColor: Color.Green }
                     : { source: Icon.Circle, tintColor: Color.SecondaryText }
                 }
-                title={screen.name || normalizeHostname(screen.hostname)}
+                title={connection.name || normalizeHostname(connection.hostname)}
                 subtitle={describeTarget(target)}
-                accessories={pickerAccessories(screen, target.kind === 'saved' && target.ambiguous)}
+                accessories={connectionAccessories(
+                  connection.type,
+                  ambiguityWarning(target.kind === 'saved' && target.ambiguous),
+                  archiveUsage(connection),
+                )}
                 actions={
                   <ActionPanel>
                     <Action
                       title={checked ? 'Exclude' : 'Include'}
                       icon={checked ? Icon.Circle : Icon.CheckCircle}
-                      onAction={() => toggle(screen.id)}
+                      onAction={() => toggle(connection.id)}
                     />
                     <Action
-                      title={`Import ${selection.size} ${selection.size === 1 ? 'Screen' : 'Screens'}`}
+                      title={`Import ${selection.size} ${selection.size === 1 ? 'Connection' : 'Connections'}`}
                       icon={Icon.Download}
                       shortcut={{ modifiers: ['cmd'], key: 'return' }}
                       onAction={save}
@@ -127,7 +129,7 @@ function SelectScreens({ path }: { path: string }) {
                         title="Select All"
                         icon={Icon.CheckCircle}
                         shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}
-                        onAction={() => setAll(all.map((item) => item.id))}
+                        onAction={() => setAll(all.map((entry) => entry.id))}
                       />
                       <Action
                         title="Select None"
@@ -139,7 +141,7 @@ function SelectScreens({ path }: { path: string }) {
                         title="Select Previously Connected"
                         icon={Icon.Clock}
                         shortcut={{ modifiers: ['cmd', 'shift'], key: 'u' }}
-                        onAction={() => setAll(all.filter(hasBeenUsed).map((item) => item.id))}
+                        onAction={() => setAll(all.filter(hasBeenUsed).map((entry) => entry.id))}
                       />
                     </ActionPanel.Section>
                   </ActionPanel>
@@ -158,49 +160,47 @@ function SelectScreens({ path }: { path: string }) {
  * the user has never opened. Preselect the ones they have actually connected to, or the ones they
  * kept last time if this is a re-import.
  */
-function defaultSelection(archive: Archive | undefined, imported: ImportedScreen[]): Set<string> {
+function defaultSelection(archive: Archive | undefined, saved: SavedConnection[]): Set<string> {
   if (!archive) return new Set();
-  if (imported.length > 0) {
-    const kept = new Set(imported.map((screen) => screen.id));
-    return new Set(archive.screens.filter((screen) => kept.has(screen.id)).map((screen) => screen.id));
+  if (saved.length > 0) {
+    const kept = new Set(saved.map((connection) => connection.id));
+    return new Set(archive.connections.filter((entry) => kept.has(entry.id)).map((entry) => entry.id));
   }
-  return new Set(archive.screens.filter(hasBeenUsed).map((screen) => screen.id));
+  return new Set(archive.connections.filter(hasBeenUsed).map((entry) => entry.id));
 }
 
-function hasBeenUsed(screen: Screen): boolean {
-  return screen.numberOfConnections > 0 || screen.lastConnectionDate !== undefined;
+function hasBeenUsed(connection: Connection): boolean {
+  return connection.numberOfConnections > 0 || connection.lastConnectionDate !== undefined;
 }
 
-function pickerAccessories(screen: Screen, ambiguous: boolean): List.Item.Accessory[] {
-  const accessories: List.Item.Accessory[] = [];
+/**
+ * What Screens recorded about this connection. It is accurate here, where the archive itself is
+ * what's on screen, and is what the default selection is drawn from.
+ */
+function archiveUsage(connection: Connection): List.Item.Accessory[] {
+  const used = connection.numberOfConnections > 0;
 
-  if (ambiguous) {
-    accessories.push({
-      icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
-      tooltip: 'Another screen shares this name and hostname, so Screens decides which one opens.',
-    });
-  }
-
-  accessories.push({
-    text: screen.numberOfConnections > 0 ? `${screen.numberOfConnections}×` : 'never used',
-    tooltip: 'Times connected, according to the archive',
-  });
-
-  if (screen.lastConnectionDate) {
-    accessories.push({ date: screen.lastConnectionDate });
-  }
-
-  return accessories;
+  return [
+    {
+      text: used ? `${connection.numberOfConnections}×` : null,
+      tooltip: used ? 'Times connected, according to the archive' : null,
+    },
+    {
+      date: connection.lastConnectionDate ?? null,
+      tooltip: connection.lastConnectionDate ? 'Last connected, according to the archive' : null,
+    },
+  ];
 }
 
-function groupByType(screens: Screen[]): { title: string; screens: Screen[] }[] {
-  return SECTIONS.map((section) => ({
-    title: section.title,
-    screens: screens.filter((screen) => section.types.includes(screen.type)).sort(byUsage),
-  })).filter((section) => section.screens.length > 0);
+function ambiguityWarning(ambiguous: boolean): List.Item.Accessory | undefined {
+  if (!ambiguous) return undefined;
+  return {
+    icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
+    tooltip: 'Another connection shares this name and hostname, so Screens decides which one opens.',
+  };
 }
 
-function byUsage(a: Screen, b: Screen): number {
+function byUsage(a: Connection, b: Connection): number {
   const difference = (b.lastConnectionDate?.getTime() ?? 0) - (a.lastConnectionDate?.getTime() ?? 0);
   return difference !== 0 ? difference : b.numberOfConnections - a.numberOfConnections;
 }

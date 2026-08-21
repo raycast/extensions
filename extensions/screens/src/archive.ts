@@ -1,15 +1,15 @@
 import { statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 
-export type ScreenType = 'local' | 'remote' | 'tailscale' | 'url' | 'saved' | 'recent';
+export type ConnectionType = 'local' | 'remote' | 'tailscale' | 'url' | 'saved' | 'recent';
 
 export type ClientProtocol = 'vnc' | 'rdp';
 
-export interface Screen {
+export interface Connection {
   id: string;
   name: string;
   hostname: string;
-  type: ScreenType;
+  type: ConnectionType;
   clientProtocol: ClientProtocol;
   port: number;
   publicIpAddress?: string;
@@ -21,7 +21,7 @@ export interface Screen {
 }
 
 export interface Archive {
-  screens: Screen[];
+  connections: Connection[];
   exportedAt: Date;
 }
 
@@ -42,7 +42,7 @@ export class ArchiveError extends Error {
 const CORE_DATA_EPOCH_OFFSET_SECONDS = 978307200;
 const NEVER_CONNECTED = -63114076800;
 
-const SCREEN_TYPES: ScreenType[] = ['local', 'remote', 'tailscale', 'url', 'saved', 'recent'];
+const CONNECTION_TYPES: ConnectionType[] = ['local', 'remote', 'tailscale', 'url', 'saved', 'recent'];
 
 /**
  * The archive's modification time, which is the real export time. Returns 0 when the file is
@@ -79,18 +79,19 @@ export async function readArchive(path: string, modifiedAt: number): Promise<Arc
     throw new ArchiveError('INVALID_JSON', path, error instanceof Error ? error.message : String(error));
   }
 
+  // Screens calls these connections, but serializes them under `screens`.
   const raw = parsed as { screens?: unknown };
   if (!Array.isArray(raw.screens)) {
     throw new ArchiveError('NOT_AN_ARCHIVE', path);
   }
 
   return {
-    screens: raw.screens.map(parseScreen).filter((screen): screen is Screen => screen !== undefined),
+    connections: raw.screens.map(parseConnection).filter((entry): entry is Connection => entry !== undefined),
     exportedAt: new Date(modifiedAt),
   };
 }
 
-type RawScreen = {
+type RawConnection = {
   id?: unknown;
   name?: unknown;
   hostname?: unknown;
@@ -105,9 +106,9 @@ type RawScreen = {
   numberOfConnections?: unknown;
 };
 
-function parseScreen(value: unknown): Screen | undefined {
+function parseConnection(value: unknown): Connection | undefined {
   if (typeof value !== 'object' || value === null) return undefined;
-  const raw = value as RawScreen;
+  const raw = value as RawConnection;
 
   const id = typeof raw.id === 'string' ? raw.id : undefined;
   if (!id) return undefined;
@@ -129,10 +130,10 @@ function parseScreen(value: unknown): Screen | undefined {
 }
 
 /** Screens tags the type as a single-key object, e.g. `{"tailscale": {}}`. */
-function parseType(value: unknown): ScreenType {
+function parseType(value: unknown): ConnectionType {
   if (typeof value !== 'object' || value === null) return 'remote';
   const key = Object.keys(value)[0];
-  return SCREEN_TYPES.find((type) => type === key) ?? 'remote';
+  return CONNECTION_TYPES.find((type) => type === key) ?? 'remote';
 }
 
 function parseUsername(users: unknown): string | undefined {
