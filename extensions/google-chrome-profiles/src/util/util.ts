@@ -11,7 +11,7 @@ import { BrowserConfig, GoogleChromeLocalState, Profile } from "./types";
 
 const execFileAsync = promisify(execFile);
 
-const profileIsOpen = async (profilePath: string) => {
+const isProfileOpen = async (profilePath: string) => {
   try {
     const { stdout } = await execFileAsync("/usr/sbin/lsof", ["-nP", "-t", "+D", profilePath], { timeout: 10000 });
     return stdout.trim().length > 0;
@@ -21,6 +21,22 @@ const profileIsOpen = async (profilePath: string) => {
     const code = error instanceof Error ? (error as { code?: string | number }).code : undefined;
     if (code === 1 || code === "1") return false;
     throw new Error("Could not determine whether the Chrome profile is open");
+  }
+};
+
+export const readChromeLocalState = async (browser: BrowserConfig) => {
+  const path = join(homedir(), browser.dataPath, "Local State");
+  const text = await readFile(path, "utf8");
+  return { path, text, state: JSON.parse(text) as GoogleChromeLocalState };
+};
+
+const writeFileAtomically = async (path: string, text: string) => {
+  const temporaryPath = `${path}.${randomUUID()}.tmp`;
+  try {
+    await writeFile(temporaryPath, text, "utf8");
+    await rename(temporaryPath, path);
+  } finally {
+    await rm(temporaryPath, { force: true }).catch(() => undefined);
   }
 };
 
@@ -42,8 +58,7 @@ export const deleteChromeProfile = async (profile: Profile, browser: BrowserConf
   const profilePath = resolve(dataDirectory, profile.directory);
   if (dirname(profilePath) !== dataDirectory) throw new Error("Invalid Chrome profile directory");
 
-  const localStatePath = join(dataDirectory, "Local State");
-  const localState = JSON.parse(await readFile(localStatePath, "utf8")) as GoogleChromeLocalState;
+  const { path: localStatePath, text: originalLocalStateText, state: localState } = await readChromeLocalState(browser);
   const infoCache = localState.profile?.info_cache;
   if (!infoCache || !Object.prototype.hasOwnProperty.call(infoCache, profile.directory)) {
     throw new Error("Profile no longer exists");
@@ -60,13 +75,13 @@ export const deleteChromeProfile = async (profile: Profile, browser: BrowserConf
     throw error;
   }
   if (!profileStats.isDirectory()) throw new Error("Chrome profile path is not a directory");
-  if (await profileIsOpen(profilePath)) throw new Error(`Close the ${profile.name} profile before deleting it`);
+  if (await isProfileOpen(profilePath)) throw new Error(`Close the ${profile.name} profile before deleting it`);
 
   const deletedProfilePath = join(dataDirectory, `.raycast-delete-${randomUUID()}`);
   await rename(profilePath, deletedProfilePath);
 
   try {
-    if (await profileIsOpen(deletedProfilePath)) {
+    if (await isProfileOpen(deletedProfilePath)) {
       throw new Error(`Close the ${profile.name} profile before deleting it`);
     }
     delete infoCache[profile.directory];
@@ -79,23 +94,28 @@ export const deleteChromeProfile = async (profile: Profile, browser: BrowserConf
     if (localState.profile.last_used === profile.directory) {
       localState.profile.last_used = Object.keys(infoCache)[0];
     }
-    const temporaryLocalStatePath = `${localStatePath}.${randomUUID()}.tmp`;
-    try {
-      await writeFile(temporaryLocalStatePath, `${JSON.stringify(localState, null, 2)}\n`, "utf8");
-      await rename(temporaryLocalStatePath, localStatePath);
-    } finally {
-      await rm(temporaryLocalStatePath, { force: true }).catch(() => undefined);
-    }
+    await writeFileAtomically(localStatePath, `${JSON.stringify(localState, null, 2)}\n`);
   } catch (error) {
     try {
       await rename(deletedProfilePath, profilePath);
+      await writeFileAtomically(localStatePath, originalLocalStateText);
     } catch {
       throw new Error("Profile deletion failed and could not be rolled back");
     }
     throw error;
   }
 
-  await rm(deletedProfilePath, { recursive: true, force: true });
+  try {
+    await rm(deletedProfilePath, { recursive: true, force: true });
+  } catch (error) {
+    try {
+      await rename(deletedProfilePath, profilePath);
+      await writeFileAtomically(localStatePath, originalLocalStateText);
+    } catch {
+      throw new Error("Profile deletion failed and could not be rolled back");
+    }
+    throw error;
+  }
   return localState;
 };
 

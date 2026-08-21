@@ -33,6 +33,7 @@ import {
   isValidUrl,
   formatAsUrl,
   openGoogleChrome,
+  readChromeLocalState,
   deleteChromeProfile,
   ChromeAction,
   ChromeTarget,
@@ -114,10 +115,7 @@ export default function Command() {
       try {
         // for google-chrome-profiles-1.png:
         // 1. comment the code below:
-        const path = join(homedir(), browser.dataPath, "Local State");
-        const localStateFileBuffer = await readFile(path);
-        const localStateFileText = localStateFileBuffer.toString("utf-8");
-        setLocalState(JSON.parse(localStateFileText));
+        setLocalState((await readChromeLocalState(browser)).state);
         // 2. uncomment function _createDataSetForScreenshot1() at the bottom of the file
         // 3. uncomment code below:
         // setLocalState(_createDataSetForScreenshot1());
