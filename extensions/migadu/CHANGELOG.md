@@ -1,6 +1,6 @@
 # Migadu Changelog
 
-## [Domains Preference No Longer Needed] - {PR_MERGE_DATE}
+## [Domains Preference No Longer Needed] - 2026-08-21
 
 - Migadu now allows you to fetch domains via API so the previous workflow of manually entering Domains is not longer needed.
 - In the future, the current method will be improved further through use of `List.Dropdown`
