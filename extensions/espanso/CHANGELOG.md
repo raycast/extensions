@@ -1,6 +1,6 @@
 # Espanso Changelog
 
-## [Fix trigger search and overflowing labels] - {PR_MERGE_DATE}
+## [Fix trigger search and overflowing labels] - 2026-08-21
 
 ### Bug Fixes
 
