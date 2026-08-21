@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Color, Form, Icon, List, Toast, popToRoot, showToast, useNavigation } from '@raycast/api';
-import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
-import { useMemo, useState } from 'react';
-import { Archive, Connection, archiveModifiedAt, readArchive } from './archive';
-import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections, targetStatus } from './connection-type';
-import { describeTarget, normalizeHostname, resolveTarget } from './connect';
-import { SavedConnection, toSavedConnection, useSavedConnections } from './library';
-import ArchiveErrorView from './components/ArchiveErrorView';
-import TypeFilter from './components/TypeFilter';
+import { Action, ActionPanel, Color, Form, Icon, List, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
+import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { useMemo, useState } from "react";
+import { Archive, Connection, archiveModifiedAt, readArchive } from "./archive";
+import { ALL_TYPES, connectionAccessories, groupByType, occupiedSections, targetStatus } from "./connection-type";
+import { describeTarget, normalizeHostname, resolveTarget } from "./connect";
+import { SavedConnection, toSavedConnection, useSavedConnections } from "./library";
+import ArchiveErrorView from "./components/ArchiveErrorView";
+import TypeFilter from "./components/TypeFilter";
 
 export default function Command() {
   const { push } = useNavigation();
@@ -77,7 +77,7 @@ function SelectConnections({ path }: { path: string }) {
     await setConnections([...untouched, ...keep.map((connection) => toSavedConnection(connection, all))]);
     await showToast({
       style: Toast.Style.Success,
-      title: keep.length === 1 ? 'Imported 1 connection' : `Imported ${keep.length} connections`,
+      title: keep.length === 1 ? "Imported 1 connection" : `Imported ${keep.length} connections`,
     });
     await popToRoot();
   }
@@ -108,33 +108,33 @@ function SelectConnections({ path }: { path: string }) {
                 actions={
                   <ActionPanel>
                     <Action
-                      title={checked ? 'Exclude' : 'Include'}
+                      title={checked ? "Exclude" : "Include"}
                       icon={checked ? Icon.Circle : Icon.CheckCircle}
                       onAction={() => toggle(connection.id)}
                     />
                     <Action
-                      title={`Import ${selection.size} ${selection.size === 1 ? 'Connection' : 'Connections'}`}
+                      title={`Import ${selection.size} ${selection.size === 1 ? "Connection" : "Connections"}`}
                       icon={Icon.Download}
-                      shortcut={{ modifiers: ['cmd'], key: 'return' }}
+                      shortcut={{ modifiers: ["cmd"], key: "return" }}
                       onAction={save}
                     />
                     <ActionPanel.Section>
                       <Action
                         title="Select All"
                         icon={Icon.CheckCircle}
-                        shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
                         onAction={() => setAll(all.map((entry) => entry.id))}
                       />
                       <Action
                         title="Select None"
                         icon={Icon.Circle}
-                        shortcut={{ modifiers: ['cmd', 'shift'], key: 'n' }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
                         onAction={() => setAll([])}
                       />
                       <Action
                         title="Select Previously Connected"
                         icon={Icon.Clock}
-                        shortcut={{ modifiers: ['cmd', 'shift'], key: 'u' }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
                         onAction={() => setAll(all.filter(hasBeenUsed).map((entry) => entry.id))}
                       />
                     </ActionPanel.Section>
@@ -153,20 +153,26 @@ function SelectConnections({ path }: { path: string }) {
 function navigationTitle(selected: number, total: number, exportedAt: Date | undefined): string {
   const counts = `${selected} of ${total} selected`;
   if (!exportedAt) return counts;
-  return `${counts} · exported ${exportedAt.toLocaleDateString(undefined, { dateStyle: 'medium' })}`;
+  return `${counts} · exported ${exportedAt.toLocaleDateString(undefined, { dateStyle: "medium" })}`;
 }
 
 /**
  * Screens lists everything it discovers on the local network, so a fresh archive is mostly hosts
  * the user has never opened. Preselect the ones they have actually connected to, or the ones they
  * kept last time if this is a re-import.
+ *
+ * Only a connection this archive covers counts as a previous choice. Judging by the saved list as a
+ * whole would read a hand-added connection as a re-import and open the form with nothing selected.
  */
 function defaultSelection(archive: Archive | undefined, saved: SavedConnection[]): Set<string> {
   if (!archive) return new Set();
-  if (saved.length > 0) {
-    const kept = new Set(saved.map((connection) => connection.id));
-    return new Set(archive.connections.filter((entry) => kept.has(entry.id)).map((entry) => entry.id));
+
+  const kept = new Set(saved.map((connection) => connection.id));
+  const previously = archive.connections.filter((entry) => kept.has(entry.id));
+  if (previously.length > 0) {
+    return new Set(previously.map((entry) => entry.id));
   }
+
   return new Set(archive.connections.filter(hasBeenUsed).map((entry) => entry.id));
 }
 
@@ -184,11 +190,11 @@ function archiveUsage(connection: Connection): List.Item.Accessory[] {
   return [
     {
       text: used ? `${connection.numberOfConnections}×` : null,
-      tooltip: used ? 'Times connected, according to the archive' : null,
+      tooltip: used ? "Times connected, according to the archive" : null,
     },
     {
       date: connection.lastConnectionDate ?? null,
-      tooltip: connection.lastConnectionDate ? 'Last connected, according to the archive' : null,
+      tooltip: connection.lastConnectionDate ? "Last connected, according to the archive" : null,
     },
   ];
 }
