@@ -1,6 +1,6 @@
 # Is It Alive? Changelog
 
-## [OutageDeck Support] - {PR_MERGE_DATE}
+## [OutageDeck Support] - 2026-08-21
 
 - Add OutageDeck provider URLs for normalized vendor-published status, service details, and active incidents across cloud and SaaS providers
 
