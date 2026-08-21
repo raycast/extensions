@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Note, Preferences, Project, ProjectsResponse, Tag, Task, TasksResponse } from "./types";
+import type { Note, Project, ProjectsResponse, Tag, Task, TasksResponse } from "./types";
 
 function normalizeBaseUrl(apiUrl: string): string {
   let base = apiUrl.trim().replace(/\/+$/, "");

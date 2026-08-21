@@ -41,11 +41,6 @@ export interface Note {
   Project?: Project | null;
 }
 
-export interface Preferences {
-  apiUrl: string;
-  token: string;
-}
-
 export interface TasksResponse {
   tasks: Task[];
   tasks_today_plan?: Task[];
