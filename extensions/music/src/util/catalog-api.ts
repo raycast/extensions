@@ -24,7 +24,15 @@ const STOREFRONT_KEY = "catalog-storefront";
 // sign-in must not inherit the previous account's regional catalog or
 // personalized feeds. Dropping the whole response cache also costs the
 // catalog day-cache, which is an acceptable price for an event this rare.
+//
+// The generation counter closes the race the clearer alone leaves open: a
+// lookup already in flight when the account changes would otherwise persist
+// the old account's response after the caches were wiped. Anything started
+// under an older generation may still return its result, but must not store it.
+let accountGeneration = 0;
+
 registerAccountCacheClearer(() => {
+  accountGeneration++;
   cache.clear();
   return LocalStorage.removeItem(STOREFRONT_KEY);
 });
@@ -62,22 +70,24 @@ async function cachedGet<T>(path: string, ttlMs = CACHE_TTL_MS): Promise<T> {
       // corrupt entry — refetch
     }
   }
+  const generation = accountGeneration;
   const res = await fetchWithRetry(path);
   if (!res.ok) throw new Error(`Apple Music API ${res.status} for ${path.split("?")[0]}`);
   const data = (await res.json()) as T;
-  cache.set(path, JSON.stringify({ at: Date.now(), data }));
+  if (generation === accountGeneration) cache.set(path, JSON.stringify({ at: Date.now(), data }));
   return data;
 }
 
 async function getStorefront(): Promise<string> {
   const stored = await LocalStorage.getItem<string>(STOREFRONT_KEY);
   if (stored) return stored;
+  const generation = accountGeneration;
   const res = await fetchWithRetry("/v1/me/storefront");
   if (!res.ok) throw new Error(`storefront lookup failed (${res.status})`);
   const json = (await res.json()) as { data?: { id: string }[] };
   const id = json.data?.[0]?.id;
   if (!id) throw new Error("storefront lookup returned no id");
-  await LocalStorage.setItem(STOREFRONT_KEY, id);
+  if (generation === accountGeneration) await LocalStorage.setItem(STOREFRONT_KEY, id);
   return id;
 }
 
