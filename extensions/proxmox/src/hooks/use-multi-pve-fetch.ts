@@ -22,7 +22,7 @@ export const useMultiPveFetch = <T>(url: string, options?: MultiPveFetchOptions)
   const abortable = useRef<AbortController>(null);
 
   const result = usePromise(
-    async (servers: PveServer[]): Promise<PveServerResult<T>[]> =>
+    async (url: string, servers: PveServer[]): Promise<PveServerResult<T>[]> =>
       Promise.all(
         servers.map(async (server) => {
           try {
@@ -39,7 +39,7 @@ export const useMultiPveFetch = <T>(url: string, options?: MultiPveFetchOptions)
           }
         }),
       ),
-    [servers],
+    [url, servers],
     {
       abortable,
       execute: execute && !isLoadingServers,
