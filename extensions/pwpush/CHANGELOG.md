@@ -1,6 +1,6 @@
 # PwPush Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-21
 
 - Added PwPush API v2 support with JSON request bodies.
 - Added file attachments via multipart uploads.
