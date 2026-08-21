@@ -3,7 +3,8 @@
  *
  * Ordem exata:
  *   S0  preferência `apiUrl` preenchida → sonda e PRONTO. Sem fallback silencioso:
- *       escolha explícita do usuário manda, mesmo quando dá errado.
+ *       escolha explícita do usuário manda, mesmo quando dá errado. Endereço que não
+ *       seja loopback é recusado ANTES de qualquer conexão, com erro na tela.
  *   S1  cache em LocalStorage (mesmo pid/start_time do gateway, < 12 h) → sonda rápida.
  *   S2  HERMES_HOME: env > gateway.pid.hermes_home > pasta padrão da plataforma
  *       (`%LOCALAPPDATA%\hermes` no Windows, `~/.hermes` no macOS).
@@ -42,6 +43,15 @@ export const DEFAULT_PORT = 8642;
  */
 const E1_MESSAGE =
   "Could not connect to Hermes. Check that the Hermes API Server is on, and that the address and the key are right.";
+
+/**
+ * Recusa de endereço não-loopback. O primeiro ponto vira o título da tela cheia
+ * (`splitMessage` em `session-detail.tsx`), o resto vira a descrição.
+ */
+const NON_LOOPBACK_MESSAGE =
+  "The Hermes address must point to your own computer. " +
+  "Only 127.0.0.1 and localhost are accepted, on any port — the extension sends your Hermes key " +
+  "with every request and never hands it to another machine.";
 
 /** Adaptador de webhook: responde `/health` com `platform: "webhook"`. */
 const WEBHOOK_PORT = 8644;
@@ -398,7 +408,22 @@ export async function resolveBaseUrl(options?: { force?: boolean; deps?: Discove
   if (!options?.force && memo) return memo;
 
   // S0 — a preferência explícita vence e não tem fallback.
-  const { apiUrl } = getHermesPreferences();
+  const { apiUrl, rejectedApiUrlHost } = getHermesPreferences();
+
+  // Endereço fora desta máquina: para aqui, e na cara do usuário. Cair na descoberta
+  // automática seria pior do que o bug — o endereço externo sumiria da tela sem
+  // explicação e a extensão pareceria estar funcionando.
+  if (rejectedApiUrlHost !== undefined) {
+    throw new HermesWrongServerError({
+      userMessage: NON_LOOPBACK_MESSAGE,
+      technical:
+        `Hermes Address is set to host "${rejectedApiUrlHost}", which is not a loopback address. ` +
+        `Every request carries the header Authorization: Bearer <API_SERVER_KEY>, so the address was ` +
+        `refused before any connection was opened. Accepted hosts: 127.0.0.0/8, ::1, localhost — any port.`,
+      recovery: "open_preferences",
+    });
+  }
+
   if (apiUrl) {
     const health = await probe(apiUrl, PROBE_TIMEOUT_MS);
     if (isHermesAgent(health) && health) {

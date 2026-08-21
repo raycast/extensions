@@ -33,6 +33,15 @@ interface RawPreferences {
 export interface HermesPreferences {
   /** `undefined` ⇒ usar a auto-descoberta. Já normalizado (sem barra final, IPv4). */
   apiUrl?: string;
+  /**
+   * Host que o usuário digitou e que foi RECUSADO por não ser a própria máquina.
+   *
+   * Quando isto está preenchido, `apiUrl` fica `undefined` — mas a descoberta NÃO pode
+   * cair na busca automática como se o campo estivesse em branco: quem digitou um
+   * endereço externo precisa ler na tela por que ele foi recusado. Ver `resolveBaseUrl`
+   * em `discovery.ts`, que para aqui e lança.
+   */
+  rejectedApiUrlHost?: string;
   /** Sempre preenchido; em branco cai no padrão do sistema. Máx. 256 chars. */
   sessionKey: string;
   defaultProvider?: string;
@@ -70,35 +79,81 @@ export function defaultSessionKey(platform: UiPlatform = toUiPlatform()): string
 const MAX_HISTORY_FALLBACK = 50;
 
 /**
- * Normaliza uma base URL do Hermes:
+ * Só a própria máquina: `127.0.0.0/8`, `::1` e `localhost`.
+ *
+ * O `hostname` chega aqui já normalizado pelo `URL` do Node, e é por isso que a checagem
+ * pode ser esta comparação curta: o parser resolve as formas abreviadas de IPv4
+ * (`127.1`, `2130706433`, `0x7f.0.0.1` viram todas `127.0.0.1`), comprime o IPv6
+ * (`[0:0:0:0:0:0:0:1]` vira `[::1]`), converte IDN para punycode (um `localhost` com
+ * cirílico não passa por `localhost`) e descarta o userinfo — `http://127.0.0.1@exemplo.com`
+ * tem `hostname === "exemplo.com"`, que é o host para onde a requisição realmente iria.
+ *
+ * Formas exóticas mas legítimas de loopback (`::ffff:127.0.0.1`) são recusadas de
+ * propósito: falhar fechado custa ao usuário reescrever o endereço como `127.0.0.1`.
+ */
+export function isLoopbackHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[(.*)\]$/, "$1");
+  if (host === "localhost" || host === "::1") return true;
+  const octets = /^127\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  return octets !== null && octets.slice(1).every((octet) => Number(octet) <= 255);
+}
+
+/** Por que uma base URL digitada foi recusada. */
+export type BaseUrlRefusal = "malformed" | "not-loopback";
+
+export interface BaseUrlCheck {
+  /** Base URL normalizada. `undefined` quando o campo estava vazio ou foi recusado. */
+  baseUrl?: string;
+  /** `undefined` quando aceitou — ou quando o campo estava vazio, que não é recusa. */
+  refusal?: BaseUrlRefusal;
+  /** Host recusado, já normalizado pelo `URL`. Só existe em `refusal === "not-loopback"`. */
+  host?: string;
+}
+
+/**
+ * Normaliza uma base URL do Hermes e diz se ela é aceitável:
  * - remove barras finais;
  * - reescreve `localhost`/`::1` para `127.0.0.1` (a porta do API Server escuta só IPv4
  *   e o Node pode resolver `localhost` para `::1`, dando ECONNREFUSED com o Hermes no ar);
- * - assume `http://` quando o usuário digita apenas `127.0.0.1:8642`.
+ * - assume `http://` quando o usuário digita apenas `127.0.0.1:8642`;
+ * - RECUSA qualquer host que não seja loopback.
+ *
+ * A recusa é de segurança, não de estilo: `hermes-api.ts` põe `Authorization: Bearer
+ * <API_SERVER_KEY>` em toda requisição, então um host externo aqui entregaria a chave do
+ * Hermes a um terceiro. A porta continua livre — é para isso que o campo existe.
  */
-export function normalizeBaseUrl(input: string): string | undefined {
+export function checkBaseUrl(input: string): BaseUrlCheck {
   const raw = input.trim();
-  if (raw === "") return undefined;
+  if (raw === "") return {};
   const withScheme = /^https?:\/\//i.test(raw) ? raw : `http://${raw}`;
   let url: URL;
   try {
     url = new URL(withScheme);
   } catch {
-    return undefined;
+    return { refusal: "malformed" };
   }
+  if (!isLoopbackHost(url.hostname)) return { refusal: "not-loopback", host: url.hostname };
+  // Só os nomes: um `127.0.0.5` explícito é loopback e continua sendo o que o usuário pediu.
   if (url.hostname === "localhost" || url.hostname === "::1" || url.hostname === "[::1]") {
     url.hostname = "127.0.0.1";
   }
-  return `${url.protocol}//${url.host}${url.pathname}`.replace(/\/+$/, "");
+  return { baseUrl: `${url.protocol}//${url.host}${url.pathname}`.replace(/\/+$/, "") };
+}
+
+/** Atalho de `checkBaseUrl()` para quem só quer o endereço utilizável. */
+export function normalizeBaseUrl(input: string): string | undefined {
+  return checkBaseUrl(input).baseUrl;
 }
 
 export function getHermesPreferences(): HermesPreferences {
   const raw = getPreferenceValues<RawPreferences>();
   const parsedLimit = Number.parseInt(raw.maxHistoryItems ?? String(MAX_HISTORY_FALLBACK), 10);
   const maxHistoryItems = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 200) : MAX_HISTORY_FALLBACK;
+  const address = raw.apiUrl ? checkBaseUrl(raw.apiUrl) : {};
 
   return {
-    apiUrl: raw.apiUrl ? normalizeBaseUrl(raw.apiUrl) : undefined,
+    apiUrl: address.baseUrl,
+    rejectedApiUrlHost: address.refusal === "not-loopback" ? address.host : undefined,
     sessionKey: (raw.sessionKey?.trim() || defaultSessionKey()).slice(0, 256),
     defaultProvider: raw.defaultProvider?.trim() || undefined,
     defaultModel: raw.defaultModel?.trim() || undefined,

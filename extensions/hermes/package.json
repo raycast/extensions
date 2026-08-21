@@ -300,7 +300,7 @@
     {
       "name": "apiUrl",
       "title": "Hermes Address",
-      "description": "Leave this blank to detect it automatically. Fill it in only if your Hermes uses another port.",
+      "description": "Leave this blank to detect it automatically. Fill it in only if your Hermes uses another port. It has to stay on your own computer: 127.0.0.1 and localhost are accepted, any other address is refused.",
       "type": "textfield",
       "required": false,
       "placeholder": "Detect automatically"

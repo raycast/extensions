@@ -685,6 +685,74 @@ test("normalizeBaseUrl: localhost e ::1 viram 127.0.0.1 (a porta escuta só IPv4
   assert.equal(preferences.normalizeBaseUrl("nao é uma url"), undefined);
 });
 
+/**
+ * A porta é do usuário, o host não. Toda requisição leva `Authorization: Bearer
+ * <API_SERVER_KEY>` (`hermes-api.ts`), então um host de fora entregaria a chave do Hermes
+ * a um terceiro — e o README promete que a extensão só fala com `127.0.0.1`.
+ */
+test("normalizeBaseUrl: a porta é livre, o host tem de ser a própria máquina", () => {
+  // Aceita a faixa inteira de loopback, em qualquer porta, e sem reescrever o IP pedido.
+  assert.equal(preferences.normalizeBaseUrl("http://127.0.0.1:1"), "http://127.0.0.1:1");
+  assert.equal(preferences.normalizeBaseUrl("127.0.0.1:65535"), "http://127.0.0.1:65535");
+  assert.equal(preferences.normalizeBaseUrl("http://127.0.0.5:8642"), "http://127.0.0.5:8642");
+  assert.equal(preferences.normalizeBaseUrl("http://127.255.255.254:8642"), "http://127.255.255.254:8642");
+  // Formas abreviadas de IPv4 que o `URL` do Node expande para 127.0.0.1.
+  assert.equal(preferences.normalizeBaseUrl("http://127.1:8642"), "http://127.0.0.1:8642");
+  assert.equal(preferences.normalizeBaseUrl("http://2130706433:8642"), "http://127.0.0.1:8642");
+
+  // Recusas. `undefined` em `normalizeBaseUrl`, "not-loopback" em `checkBaseUrl`.
+  const refused = [
+    "http://exemplo.com",
+    "https://exemplo.com:8642",
+    "exemplo.com:8642",
+    "http://192.168.0.10:8642",
+    "http://10.0.0.1:8642",
+    "http://0.0.0.0:8642",
+    "http://169.254.169.254", // metadata de nuvem: o alvo clássico de um SSRF
+    "http://localhost.exemplo.com:8642",
+    "http://[::ffff:127.0.0.1]:8642", // loopback de verdade, mas exótico: falha fechado
+    "http://[2606:4700:4700::1111]:8642",
+  ];
+  for (const address of refused) {
+    assert.equal(preferences.normalizeBaseUrl(address), undefined, `${address} tinha de ser recusado`);
+    assert.equal(preferences.checkBaseUrl(address).refusal, "not-loopback", `${address}: motivo errado`);
+  }
+
+  // `127.0.0.1` no userinfo não torna o destino local — o host é o que vem depois do `@`.
+  assert.equal(preferences.checkBaseUrl("http://127.0.0.1@exemplo.com/").host, "exemplo.com");
+
+  // Campo em branco não é recusa: é "descubra sozinho".
+  assert.deepEqual(preferences.checkBaseUrl("   "), {});
+  assert.equal(preferences.checkBaseUrl("nao é uma url").refusal, "malformed");
+});
+
+test("preferência apiUrl fora do loopback: erro na tela, sem sondar e sem descoberta automática", async () => {
+  await resetAll();
+  __setPreferences({ apiUrl: "http://exemplo.com:8642" });
+
+  const fs = fakeFs({ [CONFIG_PATH]: CONFIG_REAL });
+  const { calls, probe } = fakeProbe({ "http://127.0.0.1:8642": agent() });
+
+  await assert.rejects(
+    () =>
+      resolveBaseUrl({
+        force: true,
+        deps: { env: { HERMES_HOME: HOME }, readTextFile: fs.readTextFile, probe },
+      }),
+    (err: unknown) => {
+      // A recusa tem de chegar ao usuário, em inglês, com o caminho de conserto.
+      assert.ok(err instanceof errors.HermesWrongServerError);
+      assert.equal(err.recovery, "open_preferences");
+      assert.match(err.userMessage, /must point to your own computer/);
+      assert.match(err.userMessage, /127\.0\.0\.1/);
+      assert.match(err.technical, /exemplo\.com/);
+      return true;
+    },
+  );
+
+  assert.deepEqual(calls, [], "nem uma sondagem: a recusa acontece antes de abrir conexão");
+});
+
 test("cache: resolveBaseUrl memoriza, invalidateBaseUrl derruba memo e LocalStorage", async () => {
   await resetAll();
 

@@ -1,5 +1,21 @@
 # Hermes Changelog
 
+## [Local address only] - {PR_MERGE_DATE}
+
+- **The Hermes Address preference no longer accepts an address outside your own computer.**
+  Every request carries your `API_SERVER_KEY` in the `Authorization` header, so an address
+  such as `http://example.com:8642` typed into that field handed the key of your Hermes to
+  whoever answered there. The README always said the extension talks to `127.0.0.1` only;
+  now the code says it too.
+- Accepted hosts are `127.0.0.0/8`, `::1` and `localhost` — that is, the whole loopback
+  range. **The port stays free**, which is the reason the field exists: `127.0.0.1:9000`,
+  `localhost:8700` and `127.0.0.2:8642` all keep working exactly as before.
+- **An address that is refused says so on screen** and offers **Open Settings**, instead of
+  quietly falling back to the automatic discovery. Silently ignoring the field would have
+  been worse than the bug: the address would vanish from the screen without a word and the
+  extension would look like it was working.
+- Nothing changes for anyone who left the field blank, which is the normal setup.
+
 ## [English interface] - {PR_MERGE_DATE}
 
 - **The whole interface is now in English.** Raycast does not localize an extension: the
