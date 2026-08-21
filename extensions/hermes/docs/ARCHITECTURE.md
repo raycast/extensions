@@ -18,7 +18,7 @@
 > - os textos que nomeiam programas e teclas do sistema saem de `src/lib/platform.ts`.
 >
 > Nada do contrato com o Hermes API Server mudou. **O caminho macOS não foi exercitado ao vivo:**
-> a validação manual continua sendo só de Windows 11 (ver `docs/CHECKLIST-MANUAL.md`).
+> a validação manual continua sendo só de Windows 11.
 
 **Escopo deste documento.** Especificação técnica completa e auto-contida de tudo que fica em
 `src/lib/`: tipos, descoberta do servidor, cliente HTTP, parser SSE, erros, preferências,

@@ -47,8 +47,7 @@
 - Opening a conversation in Hermes Desktop became defensive: if the `hermes://` scheme is
   not registered, the extension says so instead of failing silently.
 - **Validated by hand on Windows 11 only.** The automated tests cover both code paths, but
-  the first pass on a Mac — keyboard, deep link and manual setup — still has to be done. The
-  script is in `docs/CHECKLIST-MANUAL.md`.
+  the first pass on a Mac — keyboard, deep link and manual setup — still has to be done.
 
 ## [Reliability fixes] - {PR_MERGE_DATE}
 

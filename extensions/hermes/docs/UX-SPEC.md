@@ -12,7 +12,7 @@
 > - a preferência `sessionKey` perdeu o `default` do manifesto: o padrão é resolvido em código, por
 >   sistema, para não migrar em silêncio quem já usa a extensão.
 >
-> **O caminho macOS não foi validado ao vivo** — ver a seção macOS de `docs/CHECKLIST-MANUAL.md`.
+> **O caminho macOS não foi validado ao vivo.**
 
 Especificação completa de experiência e interface. Este documento é a fonte da verdade de UI para o
 agente de implementação: nomes de comando, telas, estados, textos literais em pt-BR, atalhos e

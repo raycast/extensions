@@ -82,10 +82,9 @@ no Jest, no Vitest, no transform step. That is why Node 24 is a hard requirement
 
 Anything that touches a live Hermes — streaming, approvals, keyboard flows, the Raycast window
 itself — is **not** covered by the automated suite and cannot be verified by any automation
-available here. Walk [`docs/CHECKLIST-MANUAL.md`](docs/CHECKLIST-MANUAL.md) by hand on a machine
-with Hermes running, and say in the PR which items you actually ran **and on which system**. The
-checklist has a macOS section that has never been walked; if you are on a Mac, that is the most
-valuable thing you can contribute.
+available here. Exercise those flows by hand on a machine with Hermes running, and say in the PR
+what you actually ran **and on which system**. macOS has never been walked; if you are on a Mac,
+that is the most valuable thing you can contribute.
 
 ## Rules that are not details
 

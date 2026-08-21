@@ -11,7 +11,7 @@ O usuário deve conseguir abrir o Raycast, pedir algo ao Hermes, acompanhar a ex
 Os sete fluxos-base do MVP e os oito comandos antes previstos para a segunda fase já estão
 implementados no checkout atual, totalizando 15 comandos no manifesto. A ordem das fases abaixo
 continua sendo a prioridade de produto; não deve ser lida como ausência das telas já entregues.
-A validação visual e contra um Hermes ligado continua no `docs/CHECKLIST-MANUAL.md`.
+A validação visual e contra um Hermes ligado continua sendo feita à mão.
 
 ## Resultado esperado
 

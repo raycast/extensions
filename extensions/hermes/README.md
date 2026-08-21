@@ -19,7 +19,32 @@ without leaving what you were doing. One shortcut, one question, the answer show
 - **Status:** not published on the Raycast Store yet; install from source (see
   [Development](#development)).
 
-<!-- Demo GIF goes here once recorded: ![Demo](assets/demo.gif) -->
+![Ask Hermes — a finished answer, with the conversation metadata panel](media/hermes-1.png)
+
+<details>
+<summary><b>Five more screens</b></summary>
+
+**Hermes Conversations** — your history, including conversations that started in Hermes Desktop.
+
+![Hermes Conversations](media/hermes-2.png)
+
+**Run a Task in Hermes** — the agent's steps as they happen, then the result.
+
+![Run a Task in Hermes](media/hermes-3.png)
+
+**Hermes Toolsets** — the tool groups, and which ones are ready to use right now.
+
+![Hermes Toolsets](media/hermes-4.png)
+
+**Hermes Models** — switch the model without leaving Raycast.
+
+![Hermes Models](media/hermes-5.png)
+
+**Check Hermes Connection** — what the extension found, in plain language.
+
+![Check Hermes Connection](media/hermes-6.png)
+
+</details>
 
 ## The core idea: it is the *same* conversation as Hermes Desktop
 
@@ -63,8 +88,7 @@ on either system without touching preferences.
 > **Honest status:** every automated gate (316 tests, types, lint, release build) runs on both code
 > paths, but this branch has only been exercised **by hand on Windows 11**. The macOS run — the
 > keyboard, the `hermes://` deep link into Hermes Desktop, and Finder/TextEdit in the manual setup
-> screen — still needs a first pass on real hardware. See
-> [docs/CHECKLIST-MANUAL.md](docs/CHECKLIST-MANUAL.md).
+> screen — still needs a first pass on real hardware.
 
 ## Setup (no terminal required)
 
@@ -151,8 +175,8 @@ Worth being honest about what is outside this version:
   the automated suite and the manifest declares both systems, but nobody has run it on macOS end to
   end yet. Deep-link and keyboard behaviour there are the two things most likely to need a nudge.
 - **Actions that depend on a live Hermes still need manual validation per machine.** The automated
-  suite covers contracts, safety, queueing, persistence and parsing; the keyboard checklist and the
-  streaming/approval scenarios live in [docs/CHECKLIST-MANUAL.md](docs/CHECKLIST-MANUAL.md).
+  suite covers contracts, safety, queueing, persistence and parsing; the keyboard flows and the
+  streaming/approval scenarios are exercised by hand.
 - **Voice, long-term memory and session features** exposed by Hermes have no interface here.
 - **Not on the Raycast Store yet.** Until then, installing means running the developer step below
   once on this machine.

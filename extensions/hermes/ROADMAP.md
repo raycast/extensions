@@ -27,9 +27,9 @@ cap grows in steps of 40 with no ceiling. Conversations past roughly 160 exchang
 thrashing it. This is a known shape, not a bug, and it deserves a measurement before anyone changes
 a number.
 
-**Close the manual-validation gap.** Streaming, approvals and every keyboard flow live in
-[`docs/CHECKLIST-MANUAL.md`](docs/CHECKLIST-MANUAL.md) and are walked by hand — the Raycast window
-is not visible to screen automation on Windows, so no amount of test-writing removes this step.
+**Close the manual-validation gap.** Streaming, approvals and every keyboard flow are walked by
+hand — the Raycast window is not visible to screen automation on Windows, so no amount of
+test-writing removes this step.
 Anything that can be pulled out of the checklist into a contract test should be.
 
 **First macOS pass on real hardware.** The manifest now declares `"platforms": ["macOS", "Windows"]`

@@ -443,7 +443,7 @@ precise redescobrir o degrau.
 (`C:\Program Files\WindowsApps\Raycast.Raycast_2.0.3.0_x64__qypenmj9wpt2a\Raycast`), não na
 documentação. Não foi exercitado na tela — isso é do checklist manual.
 
-O `CHECKLIST-MANUAL.md` afirmava que só restava capturar à mão e recompor. A afirmação vinha
+O passo a passo manual afirmava que só restava capturar à mão e recompor. A afirmação vinha
 de uma verdade parcial: a janela é desenhada pelo `Raycast.UIAccess.exe` e **de fato** sai em
 branco no `Print Screen` e em qualquer automação de tela. Só que o app não usa o mesmo
 caminho que essas ferramentas — ele se captura pela API de captura do Windows

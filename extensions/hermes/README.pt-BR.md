@@ -19,6 +19,33 @@ aparece ali mesmo.
   base de código. Veja [Os dois sistemas](#os-dois-sistemas).
 - **Fala com:** só `127.0.0.1` — o Hermes API Server da sua própria máquina. Nada sai daqui.
 
+![Perguntar ao Hermes — uma resposta pronta, com o painel de detalhes da conversa](media/hermes-1.png)
+
+<details>
+<summary><b>Mais cinco telas</b></summary>
+
+**Conversas do Hermes** — seu histórico, incluindo as conversas que começaram no Hermes Desktop.
+
+![Conversas do Hermes](media/hermes-2.png)
+
+**Executar tarefa no Hermes** — as etapas do agente conforme acontecem, e depois o resultado.
+
+![Executar tarefa no Hermes](media/hermes-3.png)
+
+**Ferramentas do Hermes** — os grupos de ferramentas, e quais estão prontos para usar agora.
+
+![Ferramentas do Hermes](media/hermes-4.png)
+
+**Modelos do Hermes** — troque de modelo sem sair do Raycast.
+
+![Modelos do Hermes](media/hermes-5.png)
+
+**Verificar conexão com Hermes** — o que a extensão encontrou, em português claro.
+
+![Verificar conexão com Hermes](media/hermes-6.png)
+
+</details>
+
 ## A ideia principal: é a MESMA conversa do Hermes Desktop
 
 Esta não é uma segunda caixa de chat que vive à parte. Tudo que você pergunta aqui é
@@ -55,8 +82,7 @@ encontrada sozinha, sem mexer em preferência nenhuma.
 > **O que ainda não foi testado à mão:** os portões automatizados (316 testes, tipos, lint e build
 > de release) cobrem os dois caminhos de código, mas esta versão só foi exercitada de verdade **no
 > Windows 11**. Falta a primeira passada num Mac: o teclado, o link `hermes://` abrindo o Hermes
-> Desktop e a tela de configuração manual com Finder e TextEdit. O roteiro está em
-> [docs/CHECKLIST-MANUAL.md](docs/CHECKLIST-MANUAL.md).
+> Desktop e a tela de configuração manual com Finder e TextEdit.
 
 ## Instalação e configuração (sem terminal)
 
@@ -150,8 +176,7 @@ Vale ser honesto sobre o que está fora desta versão:
   mais chance de precisar de ajuste.
 - **Ações dependentes do Hermes real ainda precisam de validação manual em cada máquina.**
   Os testes automatizados cobrem contratos, segurança, fila, persistência e parsing; o
-  checklist de teclado e os cenários de streaming/aprovação continuam em
-  `docs/CHECKLIST-MANUAL.md`.
+  os fluxos de teclado e os cenários de streaming/aprovação continuam sendo feitos à mão.
 - **Voz, memória de longo prazo e recursos de sessão** expostos pelo Hermes não têm
   interface aqui.
 - **A extensão ainda não está publicada na Raycast Store.** Até lá, a instalação depende de
