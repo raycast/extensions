@@ -1,9 +1,5 @@
 /** Shape of the CourtListener v4 search API responses we care about (`type=o`, i.e. case law). */
 
-export interface Preferences {
-  apiToken: string;
-}
-
 /** A single opinion inside a cluster. A cluster is one decision; it can hold several opinions. */
 export interface OpinionResult {
   id: number;
