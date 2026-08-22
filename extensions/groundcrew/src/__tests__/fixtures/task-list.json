@@ -1,0 +1,98 @@
+[
+  {
+    "id": "tracker:TEM-3895",
+    "source": "work-tracker",
+    "title": "Build the Groundcrew task browser",
+    "description": "Render canonical tasks from every configured source.",
+    "status": "todo",
+    "repository": "ClipboardHealth/groundcrew-raycast",
+    "agent": "codex",
+    "assignee": "Shubham",
+    "updatedAt": "2026-08-20T10:00:00.000Z",
+    "blockers": [],
+    "hasMoreBlockers": false,
+    "url": "https://tasks.example.test/TEM-3895",
+    "priority": 1
+  },
+  {
+    "id": "queue:RUN-42",
+    "source": "delivery-queue",
+    "title": "Run active implementation",
+    "description": "Work is underway.",
+    "status": "in-progress",
+    "repository": "ClipboardHealth/groundcrew",
+    "agent": "claude",
+    "assignee": "Alex",
+    "updatedAt": "2026-08-20T09:00:00.000Z",
+    "blockers": [],
+    "hasMoreBlockers": false,
+    "priority": 2
+  },
+  {
+    "id": "tracker:REV-7",
+    "source": "work-tracker",
+    "title": "Review task browser",
+    "description": "Awaiting review.",
+    "status": "in-review",
+    "repository": "ClipboardHealth/groundcrew-raycast",
+    "agent": "copilot",
+    "assignee": "Sam",
+    "updatedAt": "2026-08-20T08:00:00.000Z",
+    "blockers": [],
+    "hasMoreBlockers": false
+  },
+  {
+    "id": "queue:BLOCKED-3",
+    "source": "delivery-queue",
+    "title": "Blocked task",
+    "description": "Waiting for a dependency.",
+    "status": "todo",
+    "repository": "ClipboardHealth/groundcrew",
+    "assignee": "Jamie",
+    "updatedAt": "2026-08-20T07:00:00.000Z",
+    "blockers": [
+      {
+        "id": "queue:DEP-2",
+        "title": "Publish shared contract",
+        "status": "in-progress"
+      }
+    ],
+    "hasMoreBlockers": false,
+    "priority": 3
+  },
+  {
+    "id": "tracker:DONE-9",
+    "source": "work-tracker",
+    "title": "Completed task",
+    "description": "Already shipped.",
+    "status": "done",
+    "repository": "ClipboardHealth/groundcrew-raycast",
+    "agent": "codex",
+    "assignee": "Taylor",
+    "updatedAt": "2026-08-19T18:00:00.000Z",
+    "blockers": [],
+    "hasMoreBlockers": false
+  },
+  {
+    "id": "archive:MISC-1",
+    "source": "archive",
+    "title": "Task with another canonical status",
+    "description": "Preserve tasks mapped to other.",
+    "status": "other",
+    "assignee": "Morgan",
+    "updatedAt": "2026-08-19T17:00:00.000Z",
+    "blockers": [],
+    "hasMoreBlockers": false
+  },
+  {
+    "id": "archive:MISC-2",
+    "source": "archive",
+    "title": "Newer task with another canonical status",
+    "description": "Sort unprioritized tasks deterministically.",
+    "status": "other",
+    "assignee": "Riley",
+    "updatedAt": "2026-08-19T18:00:00.000Z",
+    "blockers": [],
+    "hasMoreBlockers": false
+  }
+]
