@@ -5,6 +5,7 @@ export interface TmuxPane {
   paneId: string;
   sessionName: string;
   windowIndex: number;
+  windowActivity: number;
 }
 
 export interface PaneContent extends TmuxPane {
@@ -24,23 +25,30 @@ function tmux(args: string[]): Promise<string> {
 }
 
 export async function getAllPanes(): Promise<TmuxPane[]> {
-  // pane_id (%N) and window_index (a number) never contain spaces, so we can
-  // put session_name last and split on the first two spaces only — the name may
-  // contain spaces (and any separator byte; Raycast's exec strips control chars,
-  // so an ASCII space is the only safe delimiter here)
-  const stdout = await tmux(["list-panes", "-a", "-F", "#{pane_id} #{window_index} #{session_name}"]);
+  // pane_id (%N), window_index and window_activity (numbers) never contain
+  // spaces, so we put session_name last and split on the first three spaces —
+  // the name may contain spaces (and any separator byte; Raycast's exec strips
+  // control chars, so an ASCII space is the only safe delimiter here)
+  const stdout = await tmux([
+    "list-panes",
+    "-a",
+    "-F",
+    "#{pane_id} #{window_index} #{window_activity} #{session_name}",
+  ]);
 
   return stdout
     .split("\n")
     .filter(Boolean)
     .map((line) => {
-      const firstSpace = line.indexOf(" ");
-      const secondSpace = line.indexOf(" ", firstSpace + 1);
+      const s1 = line.indexOf(" ");
+      const s2 = line.indexOf(" ", s1 + 1);
+      const s3 = line.indexOf(" ", s2 + 1);
 
       return {
-        paneId: line.slice(0, firstSpace),
-        windowIndex: Number(line.slice(firstSpace + 1, secondSpace)),
-        sessionName: line.slice(secondSpace + 1),
+        paneId: line.slice(0, s1),
+        windowIndex: Number(line.slice(s1 + 1, s2)),
+        windowActivity: Number(line.slice(s2 + 1, s3)),
+        sessionName: line.slice(s3 + 1),
       };
     });
 }
@@ -83,6 +91,9 @@ export async function captureAllPanes(): Promise<PaneContent[]> {
   return captured.filter((pane): pane is PaneContent => pane !== null);
 }
 
-export function selectWindow(sessionName: string, windowIndex: number): Promise<string> {
-  return tmux(["select-window", "-t", `=${sessionName}:${windowIndex}`]);
+// Focus the exact matched pane: selecting its window activates the window,
+// selecting the pane activates it within that window (a window may hold several)
+export async function focusPane(paneId: string): Promise<void> {
+  await tmux(["select-window", "-t", paneId]);
+  await tmux(["select-pane", "-t", paneId]);
 }

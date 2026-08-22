@@ -1,8 +1,7 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { captureAllPanes, type PaneContent, selectWindow } from "./utils/paneUtils";
-import { openSessionInTerminal } from "./utils/sessionUtils";
-import { switchToWindow } from "./utils/windowUtils";
+import { captureAllPanes, focusPane, type PaneContent } from "./utils/paneUtils";
+import { openSessionInTerminal, switchToSession } from "./utils/sessionUtils";
 import { checkTerminalSetup } from "./utils/terminalUtils";
 import { SelectTerminalApp } from "./SelectTerminalApp";
 import { getTerminalCapabilities, type OpenTarget, type TerminalCapabilities } from "./utils/terminalLaunchUtils";
@@ -70,6 +69,12 @@ export default function Command() {
     })();
   }, []);
 
+  useEffect(() => {
+    if (isTerminalSetup) {
+      (async () => setTerminalCapabilities(await getTerminalCapabilities()))();
+    }
+  }, [isTerminalSetup]);
+
   const requireTerminal = (action: () => void) => {
     if (isTerminalSetup) {
       action();
@@ -88,7 +93,11 @@ export default function Command() {
 
     const bySession = new Map<string, { matches: Match[]; seen: Set<string>; total: number }>();
 
-    for (const pane of panes) {
+    // Most-recently-active panes first, so when the same line exists in several
+    // panes of a session the dedup keeps the newest occurrence
+    const orderedPanes = [...panes].sort((a, b) => b.windowActivity - a.windowActivity);
+
+    for (const pane of orderedPanes) {
       // Walk newest lines first so the most recent occurrence wins
       for (let lineIndex = pane.lines.length - 1; lineIndex >= 0; lineIndex--) {
         const line = pane.lines[lineIndex];
@@ -117,13 +126,21 @@ export default function Command() {
 
   const hasResults = results.length > 0;
 
-  const openMatch = async (match: Match, target: OpenTarget) => {
+  const focusMatch = async (match: Match) => {
     try {
-      await selectWindow(match.pane.sessionName, match.pane.windowIndex);
+      await focusPane(match.pane.paneId);
     } catch (e) {
       console.error(`exec error: ${e}`);
     }
+  };
 
+  const switchToMatch = async (match: Match) => {
+    await focusMatch(match);
+    switchToSession(match.pane.sessionName, setIsLoading);
+  };
+
+  const openMatch = async (match: Match, target: OpenTarget) => {
+    await focusMatch(match);
     await openSessionInTerminal(match.pane.sessionName, target, setIsLoading);
   };
 
@@ -158,12 +175,6 @@ export default function Command() {
           }
         >
           {group.matches.map((match) => {
-            const window = {
-              sessionName: match.pane.sessionName,
-              windowIndex: match.pane.windowIndex,
-              windowName: String(match.pane.windowIndex),
-            };
-
             return (
               <List.Item
                 key={`${match.pane.paneId}:${match.lineIndex}`}
@@ -177,7 +188,7 @@ export default function Command() {
                       <Action
                         title="Switch to Session"
                         icon={Icon.ArrowRight}
-                        onAction={() => requireTerminal(() => switchToWindow(window, setIsLoading))}
+                        onAction={() => requireTerminal(() => switchToMatch(match))}
                       />
                       {terminalCapabilities?.supportsTab && (
                         <Action
