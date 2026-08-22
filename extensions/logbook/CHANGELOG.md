@@ -1,6 +1,6 @@
 # Logbook Changelog
 
-## [Fix dark mode icon and installation on macOS 15] - {PR_MERGE_DATE}
+## [Fix dark mode icon and installation on macOS 15] - 2026-08-22
 
 - Use the same icon in light and dark mode
 - Target Raycast API 1.x so the extension installs on macOS 15 and earlier
