@@ -1,11 +1,11 @@
 # Changelog
 
-## [iOS App Link] - {PR_MERGE_DATE}
+## [iOS App Link] - 2026-08-22
 
 - The Apps section now opens the Inoh iOS app on the App Store instead of
   showing a "coming soon" toast
 
-## [Plan State in the Header] - {PR_MERGE_DATE}
+## [Plan State in the Header] - 2026-08-22
 
 - The plan badge now shows what is about to change: "Plus · ends 1 Sep" for a
   pending cancellation, "Pro · Plus from 1 Sep" for a scheduled downgrade, and
@@ -13,11 +13,11 @@
 - The account action matches: Resume Subscription, Fix Payment, or Manage
   Subscription open the web app's new Plan & Billing page
 
-## [New Tagline] - {PR_MERGE_DATE}
+## [New Tagline] - 2026-08-22
 
 - Store description now leads with the Inoh tagline: the vocabulary app for the articulate
 
-## [Per-Plan Card Limits] - {PR_MERGE_DATE}
+## [Per-Plan Card Limits] - 2026-08-22
 
 - Total cards are now capped per plan: Free holds up to 300 cards, Plus up to
   1,000, and Pro is unlimited
