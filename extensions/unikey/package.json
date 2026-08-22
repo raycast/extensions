@@ -46,7 +46,7 @@
     },
     {
       "name": "clipboardClearSeconds",
-      "title": "Clear Clipboard After (seconds)",
+      "title": "Clear Clipboard After (Seconds)",
       "onlyIntegers": true,
       "type": "textfield",
       "default": "30",

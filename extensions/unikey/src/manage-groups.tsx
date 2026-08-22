@@ -115,6 +115,10 @@ function GroupNameForm(props: { dir: string; existing?: string; onSaved: () => v
         return false;
       }
     } else if (name !== props.existing) {
+      if (vault.groups.some((g) => g.name === name)) {
+        setError(`"${name}" already exists`);
+        return false;
+      }
       renameGroupRefs(vault, props.existing, name);
       const gi = vault.groups.findIndex((g) => g.name === props.existing);
       if (gi >= 0) vault.groups[gi].name = name;

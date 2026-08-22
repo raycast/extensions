@@ -226,7 +226,12 @@ function GroupView(props: { dir: string; groupName: string; onMutate: () => void
                   shortcut={{ modifiers: [], key: "enter" }}
                   onAction={() => copyPasteSecret(entry.password)}
                 />
-                <Action.CopyToClipboard content={entry.password} title="Copy Password Only" />
+                <Action
+                  title="Copy Password Only"
+                  onAction={() => {
+                    void copyOnly(entry.password);
+                  }}
+                />
                 <Action.Push
                   title="Edit"
                   target={

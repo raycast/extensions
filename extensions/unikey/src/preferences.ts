@@ -1,12 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface Prefs {
-  vaultPath?: string;
-  clipboardClearSeconds?: string;
-}
-
-export function getPrefs(): Prefs {
-  return getPreferenceValues<Prefs>();
+export function getPrefs(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 export function vaultPath(): string {
