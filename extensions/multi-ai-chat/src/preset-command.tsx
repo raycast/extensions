@@ -15,17 +15,14 @@ import {
   Toast,
 } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  buildPromptUrlRequests,
-  openPromptUrlRequests,
-} from "./lib/prompt-urls.js";
-import { loadPreset, loadPresets } from "./lib/preset-storage.js";
+import { openPromptUrlRequests } from "./lib/prompt-urls.js";
+import { preparePresetExecution } from "./lib/preset-execution.js";
+import { loadPresets } from "./lib/preset-storage.js";
 import {
   buildPresetDeeplink,
   canRunPresetImmediately,
   extractTemplateArguments,
   getTemplateArgumentValue,
-  renderPromptTemplate,
   type PromptPreset,
 } from "./lib/presets.js";
 import { PresetConfigForm } from "./preset-config-form.js";
@@ -381,8 +378,8 @@ async function executePreset(
   });
 
   try {
-    const storedPreset = await loadPreset(preset.id);
-    if (!storedPreset) {
+    const prepared = await preparePresetExecution(preset, values);
+    if (prepared.status === "missing") {
       await showToast({
         style: Toast.Style.Failure,
         title: "Preset is no longer available",
@@ -391,8 +388,7 @@ async function executePreset(
       return;
     }
 
-    const prompt = renderPromptTemplate(storedPreset.template, values);
-    const requests = buildPromptUrlRequests(prompt, storedPreset.serviceCounts);
+    const requests = prepared.requests;
     if (requests.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
