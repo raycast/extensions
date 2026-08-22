@@ -1,5 +1,15 @@
 # Link Commands Changelog
 
+## [Surface Routers] - {PR_MERGE_DATE}
+
+### Added
+
+- **Desktop App** on the create form — pick the native app for a service and the command becomes a surface router: it opens the app where the app is installed, falls back to the URL where it is not, and gains an optional App/Web dropdown so either surface can be forced. One row per service instead of a launcher and a separate web pin competing for the same query. Offered only for URL targets without a `{query}`, since a search command has already spent its first argument.
+
+### Changed
+
+- The detail pane lists a dropdown argument's choices rather than its placeholder. A dropdown's choices are what it actually tells you — "Surface" names the axis but not what you can pick along it.
+
 ## [Initial Version] - 2026-08-21
 
 ### Added

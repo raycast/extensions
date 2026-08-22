@@ -1,3 +1,5 @@
+import { basename } from "node:path";
+
 const FALLBACK_LINK_ICON = "https://api.iconify.design/mingcute/link-line.svg";
 
 const FALLBACK_FOLDER_ICON = "https://api.iconify.design/mingcute/folder-line.svg";
@@ -26,6 +28,12 @@ export type ScriptDraft = {
   /** `media` becomes ` · #media` on the subtitle. Never on the title. */
   category?: string;
   application?: string;
+  /**
+   * Absolute path to a native app that stands in for the target wherever it is installed. Its presence
+   * is what turns a plain opener into a surface router: the script gains an App/Web dropdown, and with
+   * no argument it prefers the app and falls back to the target.
+   */
+  desktopApplication?: string;
   author?: string;
   authorURL?: string;
   iconReference?: string;
@@ -152,6 +160,60 @@ export const scriptFilename = (draft: ScriptDraft) => {
  */
 const escapeForShell = (value: string) => value.replace(/([\\"`$])/g, "\\$1");
 
+const SURFACE_ARGUMENT = {
+  type: "dropdown",
+  placeholder: "Surface",
+  optional: true,
+  data: [
+    { title: "App", value: "app" },
+    { title: "Web", value: "web" },
+  ],
+};
+
+const appNameOf = (appPath: string) => basename(appPath).replace(/\.app$/i, "");
+
+/**
+ * A router spends `argument1` on its surface dropdown, so a target carrying a `{query}` placeholder
+ * cannot be one — that argument is already the search term. A non-URL target is excluded for the same
+ * kind of reason: "the app or the folder" is not a choice anyone means to offer.
+ */
+const routerAppOf = (draft: ScriptDraft) =>
+  draft.desktopApplication && !findPlaceholder(draft.target) && /^https?:\/\//i.test(draft.target)
+    ? draft.desktopApplication
+    : undefined;
+
+const routerBody = (draft: ScriptDraft, appPath: string) => {
+  const name = escapeForShell(appNameOf(appPath));
+  const openApp = `open -a "${name}"`;
+  const openWeb = draft.application ? `open -a "${escapeForShell(draft.application)}" "$url"` : 'open "$url"';
+
+  return [
+    `url="${escapeForShell(draft.target)}"`,
+    `app="${escapeForShell(appPath)}"`,
+    "",
+    "case $1 in",
+    "  web)",
+    `    ${openWeb}`,
+    "    ;;",
+    "  app)",
+    "    if [[ -d $app ]]; then",
+    `      ${openApp}`,
+    "    else",
+    `      echo "${name}.app is not installed"`,
+    "      exit 1",
+    "    fi",
+    "    ;;",
+    "  *)",
+    "    if [[ -d $app ]]; then",
+    `      ${openApp}`,
+    "    else",
+    `      ${openWeb}`,
+    "    fi",
+    "    ;;",
+    "esac",
+  ].join("\n");
+};
+
 const buildBody = (draft: ScriptDraft) => {
   const placeholder = findPlaceholder(draft.target);
 
@@ -164,6 +226,9 @@ const buildBody = (draft: ScriptDraft) => {
   // survive while the target's own `$` characters do not. A literal "$1" replacement string would be read
   // as a capture-group reference and expand to the placeholder's own name, hence the function form.
   const target = escapeForShell(draft.target);
+
+  const routerApp = routerAppOf(draft);
+  if (routerApp) return routerBody(draft, routerApp);
 
   if (placeholder) return `open "${target.replace(PLACEHOLDER_PATTERN, () => "$1")}"`;
   if (draft.application) return `open -a "${escapeForShell(draft.application)}" "${target}"`;
@@ -195,7 +260,9 @@ export const buildScript = (draft: ScriptDraft) => {
   ];
 
   if (subtitle) lines.push(`# @raycast.packageName ${singleLine(subtitle)}`);
-  if (placeholder) {
+  if (routerAppOf(draft)) {
+    lines.push(`# @raycast.argument1 ${JSON.stringify(SURFACE_ARGUMENT)}`);
+  } else if (placeholder) {
     // The argument is JSON, so it is serialised rather than quoted by hand — that escapes the quotes
     // and control characters a hand-built string would let straight through.
     lines.push(

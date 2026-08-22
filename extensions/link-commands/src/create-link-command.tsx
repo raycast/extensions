@@ -38,6 +38,7 @@ type CreateInput = {
   packageName: string;
   category: string;
   application: string;
+  desktopApplication: string;
   icon: string;
   author?: string;
   authorURL?: string;
@@ -62,6 +63,7 @@ const createScript = async (input: CreateInput) => {
     packageName: input.packageName.trim() || undefined,
     category: input.category.trim() || undefined,
     application: input.application || undefined,
+    desktopApplication: input.desktopApplication || undefined,
     author: input.author,
     authorURL: input.authorURL,
   };
@@ -97,6 +99,7 @@ const Command = () => {
   const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [application, setApplication] = useState("");
+  const [desktopApplication, setDesktopApplication] = useState("");
   const [icon, setIcon] = useState("");
   const [directory, setDirectory] = useState(directories[0] ?? "");
 
@@ -113,6 +116,10 @@ const Command = () => {
   // already holds the right answer for every service it has seen, so it is asked first.
   const learned = learnedPackages(discovered?.commands ?? []);
   const suggestedPackage = packageForTarget(target, learned) ?? brandFor(target);
+
+  // Mirrors the generator's own guard rather than restating it loosely: a search command has already
+  // spent argument1 on its query, and "the app or the folder" is not a choice a path target can offer.
+  const canRoute = /^https?:\/\//i.test(target.trim()) && !findPlaceholder(target);
 
   // The dropdown holds a sentinel while a new value is being typed; everything downstream sees
   // only the resolved string.
@@ -154,6 +161,7 @@ const Command = () => {
         packageName: packageName.trim() || suggestedPackage || "",
         category: chosenCategory,
         application,
+        desktopApplication,
         icon,
         author: preferences.defaultAuthor,
         authorURL: preferences.defaultAuthorURL,
@@ -255,6 +263,21 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
           value={newCategory}
           onChange={setNewCategory}
         />
+      ) : null}
+
+      {canRoute ? (
+        <Form.Dropdown
+          id="desktopApplication"
+          title="Desktop App"
+          info="The native app for this service, if it has one. Picking it turns the command into a surface router: it opens the app where the app is installed, falls back to the target where it is not, and gains an App/Web dropdown so either can be forced."
+          value={desktopApplication}
+          onChange={setDesktopApplication}
+        >
+          <Form.Dropdown.Item title="None — always open the target" value="" />
+          {(applications ?? []).map((app) => (
+            <Form.Dropdown.Item key={app.path} title={app.name} value={app.path} icon={{ fileIcon: app.path }} />
+          ))}
+        </Form.Dropdown>
       ) : null}
 
       <Form.Dropdown id="application" title="Open With" value={application} onChange={setApplication}>
