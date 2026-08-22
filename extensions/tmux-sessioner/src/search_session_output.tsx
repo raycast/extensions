@@ -91,18 +91,22 @@ export default function Command() {
       return [];
     }
 
-    const bySession = new Map<string, { matches: Match[]; seen: Set<string>; total: number }>();
+    const bySession = new Map<string, { matches: Match[]; total: number }>();
 
-    // Most-recently-active panes first, so when the same line exists in several
-    // panes of a session the dedup keeps the newest occurrence. Panes in one
-    // window share window_activity (tmux has no per-pane recency), so the active
-    // pane — the one the user is looking at — breaks that tie.
+    // Order panes by most-recent window activity (active pane first within a
+    // window) purely for display: recent matches surface at the top.
     const orderedPanes = [...panes].sort(
       (a, b) => b.windowActivity - a.windowActivity || Number(b.paneActive) - Number(a.paneActive),
     );
 
     for (const pane of orderedPanes) {
-      // Walk newest lines first so the most recent occurrence wins
+      // Dedup per pane, not per session: the same line in different panes is a
+      // distinct, separately-navigable location, so no pane's occurrence is
+      // dropped in favour of another's (tmux exposes no per-pane recency that
+      // could rank them anyway). Repeats within one pane still collapse.
+      const seen = new Set<string>();
+
+      // Walk newest lines first so a pane's most recent occurrence is the one kept
       for (let lineIndex = pane.lines.length - 1; lineIndex >= 0; lineIndex--) {
         const line = pane.lines[lineIndex];
 
@@ -110,12 +114,11 @@ export default function Command() {
           continue;
         }
 
-        const group = bySession.get(pane.sessionName) ?? { matches: [], seen: new Set<string>(), total: 0 };
+        const group = bySession.get(pane.sessionName) ?? { matches: [], total: 0 };
         group.total += 1;
 
-        // Repeated prompts/commands would drown the results; keep one per distinct line
-        if (!group.seen.has(line) && group.matches.length < MAX_MATCHES_PER_SESSION) {
-          group.seen.add(line);
+        if (!seen.has(line) && group.matches.length < MAX_MATCHES_PER_SESSION) {
+          seen.add(line);
           group.matches.push({ pane, lineIndex, line });
         }
 
