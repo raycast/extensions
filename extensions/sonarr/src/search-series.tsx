@@ -4,6 +4,7 @@ import type { SeriesLookup } from "@/lib/types/series";
 import { searchSeries, useSeries } from "@/lib/hooks/useSonarrAPI";
 import { getSeriesPoster, getSeriesStatus } from "@/lib/utils/formatting";
 import AddSeriesForm from "@/lib/components/AddSeriesForm";
+import { Shortcuts } from "@/lib/utils/shortcuts";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -129,7 +130,7 @@ function SeriesListItem({
                 title="Configure & Add"
                 icon={Icon.Plus}
                 target={<AddSeriesForm series={series} onSeriesAdded={onSeriesAdded} />}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                shortcut={Shortcuts.configureAndAdd}
               />
             )}
           </ActionPanel.Section>

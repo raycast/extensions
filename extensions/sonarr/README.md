@@ -2,6 +2,11 @@
 
 View your Sonarr instance, upcoming shows and much more
 
+### Requirements
+- Raycast for macOS or Windows
+- Sonarr v3.0+ running and reachable from the machine Raycast runs on
+- Sonarr API key (Settings > General > Security)
+
 ### Instance Setup
 - Website: https://sonarr.tv/
 - Sonarr docs: https://wiki.servarr.com/sonarr
