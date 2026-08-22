@@ -34,6 +34,7 @@ import {
   useGrokUsage,
   useKimiAccounts,
   useMiniMaxUsage,
+  useMinimaxCNUsage,
   useOpencodegoUsage,
   useSyntheticAccounts,
   useZaiAccounts,
@@ -73,6 +74,8 @@ import { formatKimiUsageText, getKimiAccessory, renderKimiDetail } from "./kimi/
 import type { KimiError, KimiUsage } from "./kimi/types.ts";
 import { formatMiniMaxUsageText, getMiniMaxAccessory, renderMiniMaxDetail } from "./minimax/renderer.tsx";
 import type { MiniMaxError, MiniMaxUsage } from "./minimax/types.ts";
+import { formatMinimaxCNUsageText, getMinimaxCNAccessory, renderMinimaxCNDetail } from "./minimaxcn/renderer.tsx";
+import type { MinimaxCNError, MinimaxCNUsage } from "./minimaxcn/types.ts";
 import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDetail } from "./opencode-go/renderer.tsx";
 import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types.ts";
 import { formatSyntheticUsageText, getSyntheticAccessory, renderSyntheticDetail } from "./synthetic/renderer.tsx";
@@ -112,6 +115,7 @@ interface AgentUsageById {
   antigravity: AntigravityUsage;
   zai: ZaiUsage;
   minimax: MiniMaxUsage;
+  minimaxcn: MinimaxCNUsage;
   "opencode-go": OpencodegoUsage;
 }
 
@@ -132,6 +136,7 @@ interface AgentErrorById {
   antigravity: AntigravityError;
   zai: ZaiError;
   minimax: MiniMaxError;
+  minimaxcn: MinimaxCNError;
   "opencode-go": OpencodegoError;
 }
 
@@ -369,6 +374,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     getAccessory: getMiniMaxAccessory,
     formatUsageText: formatMiniMaxUsageText,
   },
+  minimaxcn: {
+    id: "minimaxcn",
+    name: "MinimaxCN",
+    icon: "minimaxcn-icon.svg",
+    description: "MinimaxCN (MiniMax 国内版) Coding Plan",
+    isSupported: true,
+    settingsUrl: "https://www.minimaxi.com",
+    useUsage: useMinimaxCNUsage,
+    renderDetail: renderMinimaxCNDetail,
+    getAccessory: getMinimaxCNAccessory,
+    formatUsageText: formatMinimaxCNUsageText,
+  },
   "opencode-go": {
     id: "opencode-go",
     name: "OpenCode Go",
@@ -476,6 +493,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const grokState = AGENT_REGISTRY.grok.useUsage(Boolean(prefs.showGrok));
   const antigravityState = AGENT_REGISTRY.antigravity.useUsage(Boolean(prefs.showAntigravity));
   const minimaxState = AGENT_REGISTRY.minimax.useUsage(Boolean(prefs.showMinimax));
+  const minimaxcnState = AGENT_REGISTRY.minimaxcn.useUsage(Boolean(prefs.showMinimaxCN));
   const opencodegoState = AGENT_REGISTRY["opencode-go"].useUsage(Boolean(prefs.showOpencodeGo));
 
   // Multi-account providers
@@ -497,6 +515,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     grok: createAgentView(AGENT_REGISTRY.grok, grokState, Boolean(prefs.showGrok)),
     antigravity: createAgentView(AGENT_REGISTRY.antigravity, antigravityState, Boolean(prefs.showAntigravity)),
     minimax: createAgentView(AGENT_REGISTRY.minimax, minimaxState, Boolean(prefs.showMinimax)),
+    minimaxcn: createAgentView(AGENT_REGISTRY.minimaxcn, minimaxcnState, Boolean(prefs.showMinimaxCN)),
     "opencode-go": createAgentView(AGENT_REGISTRY["opencode-go"], opencodegoState, Boolean(prefs.showOpencodeGo)),
   };
 

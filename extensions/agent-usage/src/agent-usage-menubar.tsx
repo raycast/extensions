@@ -28,6 +28,7 @@ import {
   useGrokUsage,
   useKimiAccounts,
   useMiniMaxUsage,
+  useMinimaxCNUsage,
   useOpencodegoUsage,
   useSyntheticAccounts,
   useZaiAccounts,
@@ -48,6 +49,7 @@ import { getGeminiAccessory } from "./gemini/renderer.tsx";
 import { getGrokAccessory } from "./grok/renderer.tsx";
 import { getKimiAccessory } from "./kimi/renderer.tsx";
 import { getMiniMaxAccessory } from "./minimax/renderer.tsx";
+import { getMinimaxCNAccessory } from "./minimaxcn/renderer.tsx";
 import { getOpencodegoAccessory } from "./opencode-go/renderer.tsx";
 import { getSyntheticAccessory } from "./synthetic/renderer.tsx";
 import { getZaiAccessory } from "./zai/renderer.tsx";
@@ -97,6 +99,7 @@ export default function MenuBarCommand() {
   const isAntigravityVisible = Boolean(prefs.showAntigravity);
   const isZaiVisible = Boolean(prefs.showZai);
   const isMinimaxVisible = Boolean(prefs.showMinimax);
+  const isMinimaxCNVisible = Boolean(prefs.showMinimaxCN);
   const isOpencodeGoVisible = Boolean(prefs.showOpencodeGo);
 
   const aihubmixState = useAihubmixUsage(isAihubmixVisible);
@@ -115,6 +118,7 @@ export default function MenuBarCommand() {
   const antigravityState = useAntigravityUsage(isAntigravityVisible);
   const zaiState = useZaiAccounts(isZaiVisible);
   const minimaxState = useMiniMaxUsage(isMinimaxVisible);
+  const minimaxcnState = useMinimaxCNUsage(isMinimaxCNVisible);
   const opencodegoState = useOpencodegoUsage(isOpencodeGoVisible);
 
   // Single-account agents - memoized to prevent unnecessary re-renders
@@ -229,6 +233,16 @@ export default function MenuBarCommand() {
         accessory: getMiniMaxAccessory(minimaxState.usage, minimaxState.error, minimaxState.isLoading),
         revalidate: minimaxState.revalidate,
         lastFetchedAt: minimaxState.lastFetchedAt,
+      },
+      {
+        id: "minimaxcn",
+        name: "MinimaxCN",
+        icon: getThemeIcon("minimaxcn-icon.svg"),
+        visible: isMinimaxCNVisible,
+        isLoading: minimaxcnState.isLoading,
+        accessory: getMinimaxCNAccessory(minimaxcnState.usage, minimaxcnState.error, minimaxcnState.isLoading),
+        revalidate: minimaxcnState.revalidate,
+        lastFetchedAt: minimaxcnState.lastFetchedAt,
       },
       {
         id: "opencode-go",

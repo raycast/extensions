@@ -17,6 +17,7 @@ export type AgentId =
   | "antigravity"
   | "zai"
   | "minimax"
+  | "minimaxcn"
   | "opencode-go";
 
 export interface AgentDefinition {
@@ -57,6 +58,7 @@ export interface AgentVisibilityPreferences {
   showGrok: boolean;
   showKimi: boolean;
   showMinimax: boolean;
+  showMinimaxCN: boolean;
   showOpencodeGo: boolean;
   showSynthetic: boolean;
   showZai: boolean;

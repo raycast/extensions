@@ -110,6 +110,7 @@
 /extensions/appcleaner                                              @tborychowski
 /extensions/append-clipboard                                        @koinzhang @cyrusn
 /extensions/append-to-file                                          @lenpr
+/extensions/appfreezer                                              @chxsong
 /extensions/appgrid                                                 @Jungwoon
 /extensions/apple-books                                             @vimtor
 /extensions/apple-container                                         @DaviReisVieira
@@ -319,6 +320,7 @@
 /extensions/canva                                                   @xmok
 /extensions/canvascast                                              @YodaLightsabr @yug2005
 /extensions/capacities                                              @sbleh @xmok
+/extensions/capd                                                    @jamiedavenport
 /extensions/capture                                                 @syhchen
 /extensions/capture-fullpage-of-website                             @Coun1er @j3lte @ridemountainpig
 /extensions/capture-raycast-metadata                                @koinzhang
@@ -480,6 +482,7 @@
 /extensions/commitlint                                              @lardissone
 /extensions/common-directory                                        @koinzhang
 /extensions/comodoro                                                @jesse-c
+/extensions/companies-house                                         @aicayzer
 /extensions/composerize                                             @j3lte
 /extensions/compress-pdf                                            @felixhaeberle @xmok
 /extensions/compressx                                               @dqhieu
@@ -538,6 +541,7 @@
 /extensions/cron-description                                        @niall-maloney @xmok
 /extensions/cron-manager                                            @TahaZahit
 /extensions/crossbell                                               @Songkeys @hyoban
+/extensions/crt-name                                                @0xdhrv
 /extensions/crunchbase                                              @qdequele
 /extensions/cryptgeon                                               @cupcakearmy
 /extensions/crypto-portfolio-tracker                                @narghev
@@ -844,6 +848,7 @@
 /extensions/fetch-youtube-transcript                                @apoorv12 @pernielsentikaer @ridemountainpig
 /extensions/ffmpeg                                                  @RenderCoder @blekmus @aagedal @EvanZhouDev @j3lte
 /extensions/fhir                                                    @loris
+/extensions/fibery-quick-capture                                    @janjezek
 /extensions/fibonacci-sequence                                      @adambutler
 /extensions/fifteen-million-merits                                  @alexibuild
 /extensions/figa                                                    @jatne
@@ -1128,7 +1133,7 @@
 /extensions/hephaestus                                              @AkaShark
 /extensions/heptabase                                               @ARui-tw
 /extensions/herdr                                                   @vlste
-/extensions/hermes-agent                                            @dailin3
+/extensions/hermes-agent                                            @dailin3 @RaviTharuma
 /extensions/heroicons                                               @haackt @mil3na @j3lte @Cybrarist
 /extensions/heroku                                                  @Yukaii
 /extensions/hestiacp-admin                                          @xmok
@@ -1438,6 +1443,7 @@
 /extensions/linguee                                                 @geekdada
 /extensions/link-bundles                                            @birkoni5 @AlexIsMaking
 /extensions/link-cleaner                                            @haku-huang @xmok @ezzylan @cupcakearmy
+/extensions/link-commands                                           @kud
 /extensions/link-transformer                                        @dangkhoipro
 /extensions/linkace                                                 @jaspermayone
 /extensions/linkace-search                                          @zisoft
@@ -1463,6 +1469,7 @@
 /extensions/lock-time                                               @yangwenmai
 /extensions/lockdock                                                @mishamyrt
 /extensions/lodash                                                  @vimtor @rushi
+/extensions/logbook                                                 @Rushi0508
 /extensions/logitech-litra                                          @timrogers @amaechler
 /extensions/logos-launcher                                          @Marvive
 /extensions/logseq                                                  @futantan @sawhney17 @hadret @jonatan-petursson @d3chapma
@@ -1661,6 +1668,7 @@
 /extensions/moon-phrase                                             @bucketfish
 /extensions/morning-coffee                                          @olimynameis
 /extensions/mound-for-pile                                          @cr34t1ve
+/extensions/mouse-cursor-toggle                                     @Dhaiwat10
 /extensions/mouse-jiggle                                            @steveafrost
 /extensions/mousehunt-helper                                        @chesterhow
 /extensions/mouseless                                               @NextMerge
@@ -2116,6 +2124,7 @@
 /extensions/pushover                                                @nandastone
 /extensions/putio                                                   @altaywtf @kud
 /extensions/putty-sessions                                          @THEN00P
+/extensions/pwpush                                                  @Mouxy
 /extensions/px-to-rem-converter                                     @raulanatol
 /extensions/px-to-tailwind                                          @kemiljk
 /extensions/python                                                  @ahmedivy @MuhammadrizoDeveloper @benjaminkifle
@@ -3192,6 +3201,7 @@
 /extensions/zoo                                                     @ViGeng
 /extensions/zoom                                                    @thomaslombart @Visual-Studio-Coder @samuelkraft @jacpd @0xdhrv
 /extensions/zoom-control                                            @prashantv @pernielsentikaer @JackCasica
+/extensions/zoomer                                                  @colindotfun
 /extensions/zotero                                                  @sadanand-singh @lazarjov @joshuahhh @faridrashidi @ridemountainpig @kszenes
 /extensions/zoxide-git-projects                                     @theherk
 /extensions/zread-ai                                                @alexibuild

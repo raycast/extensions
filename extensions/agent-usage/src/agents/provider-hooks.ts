@@ -39,6 +39,9 @@ import type { KimiError, KimiUsage } from "../kimi/types.ts";
 import { resolveMiniMaxAuthTokens } from "../minimax/auth.ts";
 import { fetchMiniMaxUsage } from "../minimax/fetcher.ts";
 import type { MiniMaxError, MiniMaxUsage } from "../minimax/types.ts";
+import { resolveMinimaxCNAuthTokens } from "../minimaxcn/auth.ts";
+import { fetchMinimaxCNUsage } from "../minimaxcn/fetcher.ts";
+import type { MinimaxCNError, MinimaxCNUsage } from "../minimaxcn/types.ts";
 import { fetchOpencodegoUsage } from "../opencode-go/fetcher.ts";
 import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types.ts";
 import { fetchSyntheticUsage, SYNTHETIC_OPENCODE_KEY } from "../synthetic/fetcher.ts";
@@ -68,6 +71,7 @@ type SharedPrefs = {
   syntheticApiToken?: string;
   zaiApiToken?: string;
   minimaxApiToken?: string;
+  minimaxcnApiToken?: string;
   opencodegoWorkspaceId?: string;
   opencodegoAuthCookie?: string;
 };
@@ -221,6 +225,30 @@ export const useMiniMaxUsage = createUsageHook<MiniMaxUsage, MiniMaxError>({
       };
     }
     return fetchMiniMaxUsage(primaryToken);
+  },
+});
+
+// MinimaxCN — the Chinese-region MiniMax provider (api.minimaxi.com, vs api.minimax.io for the international edition).
+// Token resolves from MINIMAX_CN_API_KEY env var or the minimaxcnApiToken preference.
+export const useMinimaxCNUsage = createUsageHook<MinimaxCNUsage, MinimaxCNError>({
+  agentId: "minimaxcn",
+  resolveAuthKey: async () => {
+    const { primaryToken } = await resolveMinimaxCNAuthTokens({ preferenceToken: prefValue("minimaxcnApiToken") });
+    return primaryToken ?? "";
+  },
+  fetcher: async () => {
+    const { primaryToken } = await resolveMinimaxCNAuthTokens({ preferenceToken: prefValue("minimaxcnApiToken") });
+    if (!primaryToken) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "MinimaxCN token not configured. Add it in extension settings (Cmd+,) or set MINIMAX_CN_API_KEY in your shell.",
+        },
+      };
+    }
+    return fetchMinimaxCNUsage(primaryToken);
   },
 });
 

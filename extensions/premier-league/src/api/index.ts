@@ -36,6 +36,48 @@ interface Pagination<T> {
   cursor?: string | null;
 }
 
+const SEASON_START_MONTH = 6;
+
+const expectedSeasonId = (): string => {
+  const now = new Date();
+
+  return String(
+    now.getMonth() >= SEASON_START_MONTH
+      ? now.getFullYear()
+      : now.getFullYear() - 1,
+  );
+};
+
+const buildSeason = (seasonId: string): Season => ({
+  seasonId,
+  label: `${seasonId}/${String((Number(seasonId) + 1) % 100).padStart(2, "0")}`,
+  annotations: [],
+  qualification: [],
+  relegation: [],
+});
+
+export const getActiveSeason = async (
+  comp: string = "8",
+): Promise<string | undefined> => {
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `${endpoint}/v2/matches`,
+    params: {
+      competition: comp,
+      _sort: "kickoff:desc",
+      _limit: 1,
+    },
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPagination<Fixture>> = await axios(config);
+
+    return data.data[0]?.season;
+  } catch {
+    return undefined;
+  }
+};
+
 export const getSeasons = async (comp: string = "8"): Promise<Season[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
@@ -44,8 +86,35 @@ export const getSeasons = async (comp: string = "8"): Promise<Season[]> => {
 
   try {
     const { data }: AxiosResponse<EPLCompetition> = await axios(config);
+    const { seasons } = data;
 
-    return data.seasons;
+    if (seasons.some((s) => s.seasonId === expectedSeasonId())) {
+      return seasons;
+    }
+
+    const activeSeasonId = await getActiveSeason(comp);
+
+    if (!activeSeasonId || seasons.some((s) => s.seasonId === activeSeasonId)) {
+      return seasons;
+    }
+
+    if (!seasons.length) {
+      return [buildSeason(activeSeasonId)];
+    }
+
+    const newest = seasons.reduce(
+      (max, s) => Math.max(max, Number(s.seasonId)),
+      0,
+    );
+
+    const missing: Season[] = [];
+    for (let year = newest + 1; year <= Number(activeSeasonId); year += 1) {
+      missing.push(buildSeason(String(year)));
+    }
+
+    return [...missing, ...seasons].sort(
+      (a, b) => Number(b.seasonId) - Number(a.seasonId),
+    );
   } catch (e) {
     showFailureToast(e);
 
