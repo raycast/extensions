@@ -3,6 +3,7 @@
 ## [Add mirroring toggle] - {PR_MERGE_DATE}
 
 - Added a "Toggle Mirroring" action (and a standalone hotkey-able command) that turns mirroring off if it's on, or on if it's off, using a configurable default direction.
+- Bound the in-list "Toggle Mirroring" action to ⌘T for quick access.
 
 ## [New Features & Bugfixes] - 2026-04-02
 

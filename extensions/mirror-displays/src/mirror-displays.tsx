@@ -45,6 +45,7 @@ export default function Command() {
             <Action
               title="Toggle Mirroring"
               icon={Icon.Repeat}
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
               onAction={() => runMirrorAction("toggle", defaultToggleDirection)}
             />
           </ActionPanel>
