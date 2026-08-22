@@ -14,8 +14,6 @@
     "rootDir": ".",
     "outDir": ".test-build",
     "module": "commonjs",
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   }
 }

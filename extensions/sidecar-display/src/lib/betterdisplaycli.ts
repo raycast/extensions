@@ -23,7 +23,7 @@ const execFileAsync = promisify(execFile);
 // WARN: These MUST differ. `betterdisplaycli` is a one-line wrapper that execs the
 //   whole BetterDisplay app binary, and when the app is not running the call
 //   blocks until it gives up — measured at 16s. Applying the write budget to
-//   status reads meant a background tick polling every 30s could not finish one
+//   status reads meant a background tick polling every minute could not finish one
 //   render inside its own interval, so renders piled up and cold-launched the app
 //   binary continuously.
 const READ_TIMEOUT_MS = 3_000;
