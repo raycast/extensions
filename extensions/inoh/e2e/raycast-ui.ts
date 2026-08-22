@@ -26,9 +26,8 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 const LOCAL_CONFIG_PATH = path.resolve(process.cwd(), "assets/local-config.json");
+const MANIFEST_PATH = path.resolve(process.cwd(), "package.json");
 const RAYCAST_APP_NAME = "Raycast";
-/** Every command of this extension hangs off this deeplink prefix. */
-const EXTENSION_DEEPLINK_PREFIX = "raycast://extensions/tai/inoh/";
 const FOCUS_TIMEOUT_MS = 10_000;
 const POLL_INTERVAL_MS = 250;
 /** macOS virtual key codes; the numbers are the only thing naming the keys. */
@@ -89,13 +88,39 @@ function _assertDevServerRunning(): void {
 }
 
 /**
+ * Builds the deeplink Raycast answers for one of this extension's commands.
+ *
+ * Reason: a deeplink is the only way into a command from outside the Raycast
+ * runtime (`launchCommand` needs to be called from within a command), so every
+ * segment is read from the manifest instead of hardcoded — renaming the author,
+ * the extension, or the command then fails here loudly rather than opening
+ * something stale.
+ *
+ * @param commandName - The command's `name` from package.json, e.g. `add-card`
+ * @returns The `raycast://extensions/...` URL for that command
+ * @throws When the manifest declares no such command
+ */
+function _buildCommandDeeplink(commandName: string): string {
+  const manifest = JSON.parse(readFileSync(MANIFEST_PATH, "utf8")) as {
+    name: string;
+    author: string;
+    commands: { name: string }[];
+  };
+  const hasDeclaredCommand = manifest.commands.some((command) => command.name === commandName);
+  if (!hasDeclaredCommand) {
+    throw new Error(`package.json declares no command named "${commandName}".`);
+  }
+  return `raycast://extensions/${manifest.author}/${manifest.name}/${commandName}`;
+}
+
+/**
  * Opens one of the extension's commands and waits for Raycast to take focus.
  *
  * @param commandName - The command's `name` from package.json, e.g. `add-card`
- * @throws When Raycast does not come to the front
+ * @throws When Raycast does not come to the front, or the command is not in the manifest
  */
 export async function openExtensionCommand(commandName: string): Promise<void> {
-  execFileSync("open", [`${EXTENSION_DEEPLINK_PREFIX}${commandName}`]);
+  execFileSync("open", [_buildCommandDeeplink(commandName)]);
 
   const deadline = Date.now() + FOCUS_TIMEOUT_MS;
   while (Date.now() < deadline) {
