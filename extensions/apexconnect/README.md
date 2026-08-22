@@ -74,6 +74,8 @@ If you set an internal URL, Apex Connect uses it whenever it detects you're on y
 
 On `MyWifi1` or `MyWifi2`, the internal URL is used. On any other network, it falls back to the Apex Connect URL.
 
+> **Security note:** if your internal URL uses a `.local` hostname, it's resolved via mDNS, which isn't authenticated — any device on the same network can answer for it. Use HTTPS with a valid certificate for your internal URL where possible, and avoid combining a `.local` address with **Ignore Certificates** on networks you don't fully trust.
+
 ## Commands
 
 <details>
