@@ -3,10 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { createGroundcrewClient, type GroundcrewClient } from "../cli";
 
-interface Preferences {
-  crewPath?: string;
-}
-
 const GROUNDCREW_INSTALL_URL = "https://www.npmjs.com/package/@clipboard-health/groundcrew";
 
 interface DoctorState {

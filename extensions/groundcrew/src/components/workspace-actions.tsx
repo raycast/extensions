@@ -4,10 +4,6 @@ import { existsSync } from "node:fs";
 
 import type { GroundcrewStatusWorktree } from "../types/groundcrew";
 
-interface WorkspacePreferences {
-  editorApp?: string;
-}
-
 // cmux ships its CLI inside the app bundle; that absolute path works even under
 // Raycast's stripped PATH. Fall back to common Homebrew locations.
 const CMUX_CANDIDATES = [
@@ -100,7 +96,7 @@ export function WorkspaceActions({
   taskId: string;
   worktrees: readonly GroundcrewStatusWorktree[];
 }) {
-  const { editorApp } = getPreferenceValues<WorkspacePreferences>();
+  const { editorApp } = getPreferenceValues<Preferences>();
   const dirs = worktrees.filter((worktree) => worktree.dir.trim().length > 0);
   const editor = editorApp?.trim();
   const primary = dirs[0];

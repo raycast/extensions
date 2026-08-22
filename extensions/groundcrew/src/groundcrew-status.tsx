@@ -5,10 +5,6 @@ import { createGroundcrewClient, type GroundcrewClient } from "./cli";
 import { StatusDashboard } from "./components";
 import type { LifecycleMutations } from "./components/lifecycle-actions";
 
-interface Preferences {
-  crewPath?: string;
-}
-
 export default function Command() {
   const { crewPath } = getPreferenceValues<Preferences>();
   const getClient = useMemo(() => {

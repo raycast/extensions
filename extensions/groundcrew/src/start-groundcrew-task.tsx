@@ -10,15 +10,7 @@ import {
   type LifecycleMutations,
 } from "./components/lifecycle-actions";
 
-interface Preferences {
-  crewPath?: string;
-}
-
-interface Arguments {
-  taskId: string;
-}
-
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.StartGroundcrewTask }>) {
   const { crewPath } = getPreferenceValues<Preferences>();
   const rawInput = props.arguments.taskId.trim();
   const taskId = naturalTaskId(rawInput);

@@ -4,15 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createGroundcrewClient, type GroundcrewClient } from "./cli";
 import { lifecycleErrorDetail } from "./components/lifecycle-actions";
 
-interface Preferences {
-  crewPath?: string;
-}
-
-interface Arguments {
-  target: string;
-  kind?: string;
-}
-
 interface OpenState {
   isLoading: boolean;
   message?: string;
@@ -22,7 +13,7 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Groundcrew failed without an error message.";
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGroundcrewWorkspace }>) {
   const { crewPath } = getPreferenceValues<Preferences>();
   const target = props.arguments.target.trim();
   const kind = props.arguments.kind === "branch" ? "branch" : "pr";
