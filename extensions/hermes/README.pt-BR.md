@@ -1,6 +1,6 @@
 # Hermes para Raycast
 
-[![CI](https://github.com/savio22/hermes-raycast/actions/workflows/ci.yml/badge.svg)](https://github.com/savio22/hermes-raycast/actions/workflows/ci.yml)
+[![CI](https://github.com/schacal/hermes-raycast/actions/workflows/ci.yml/badge.svg)](https://github.com/schacal/hermes-raycast/actions/workflows/ci.yml)
 
 Converse com o **Hermes Agent** que já roda no seu computador — sem abrir outro
 aplicativo, sem sair do que você estava fazendo. Um atalho, uma pergunta, a resposta

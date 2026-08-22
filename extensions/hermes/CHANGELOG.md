@@ -25,7 +25,7 @@
 - Command names changed with it. **Ask Hermes** was `Perguntar ao Hermes`,
   **Hermes Conversations** was `Conversas do Hermes`, **Run a Task in Hermes** was
   `Executar tarefa no Hermes`, **Hermes Tasks** was `Execuções do Hermes`, and the other
-  eleven follow the same rule. The deep link does not change: `raycast://extensions/savio22/hermes/<name>` still
+  eleven follow the same rule. The deep link does not change: `raycast://extensions/schacal/hermes/<name>` still
   points at the same commands, because only the titles were translated.
 - **The clipboard commands answer in English now, and that is a behaviour change.**
   `Summarize Clipboard` used to ask for a summary in Brazilian Portuguese and now asks for

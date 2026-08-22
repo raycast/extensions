@@ -1,6 +1,6 @@
 # Hermes for Raycast
 
-[![CI](https://github.com/savio22/hermes-raycast/actions/workflows/ci.yml/badge.svg)](https://github.com/savio22/hermes-raycast/actions/workflows/ci.yml)
+[![CI](https://github.com/schacal/hermes-raycast/actions/workflows/ci.yml/badge.svg)](https://github.com/schacal/hermes-raycast/actions/workflows/ci.yml)
 
 Talk to the **Hermes Agent already running on your machine** — without opening another app,
 without leaving what you were doing. One shortcut, one question, the answer shows up right there.
