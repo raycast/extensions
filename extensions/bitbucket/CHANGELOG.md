@@ -1,6 +1,6 @@
 # Bitbucket Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-08-22
 
 - Added Search All Open Pull Requests command to browse open PRs across the workspace
 
