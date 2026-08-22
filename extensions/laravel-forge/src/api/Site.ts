@@ -68,4 +68,9 @@ export const Site = {
   },
 };
 
-export const sortAndFilterSites = (sites: ISite[]) => sortBy(sites ?? [], "name") as ISite[];
+// The API sends "Deploying" despite its documented lowercase status enums.
+export const sortAndFilterSites = (sites: ISite[]) =>
+  sortBy(sites ?? [], "name").map((site) => ({
+    ...site,
+    deployment_status: site.deployment_status?.toLowerCase() ?? null,
+  })) as ISite[];
