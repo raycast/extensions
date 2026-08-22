@@ -1,4 +1,4 @@
-import { Application, closeMainWindow, getApplications, open, showToast, Toast } from "@raycast/api";
+import { Application, closeMainWindow, getApplications, open, showHUD, showToast, Toast } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -54,10 +54,18 @@ export async function runSowiksCommand(host: string): Promise<void> {
 
   await closeMainWindow();
 
-  // Pinned to the bundle id on purpose: URL schemes are global and unowned, so
-  // another app registering "sowiks" would otherwise receive these commands.
-  // `src` is telemetry only — anyone can set it, so nothing may trust it.
-  await open(`sowiks://${host}?src=raycast`, BUNDLE_ID);
+  try {
+    // Pinned to the bundle id on purpose: URL schemes are global and unowned, so
+    // another app registering "sowiks" would otherwise receive these commands.
+    // `src` is telemetry only — anyone can set it, so nothing may trust it.
+    await open(`sowiks://${host}?src=raycast`, BUNDLE_ID);
+  } catch {
+    // Launch Services can still refuse the URL — most often on a copy that has
+    // never been opened, so the scheme was never registered. Raycast's window
+    // is already gone by now and a toast has nowhere to appear, which is why
+    // this is a HUD, and why it says what to do rather than what went wrong.
+    await showHUD("Sowiks did not open — launch it once from Applications, then try again");
+  }
 }
 
 /** Opens a Sowiks web page. No app needed, so no checks. */
