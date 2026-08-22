@@ -2,6 +2,7 @@ import { get } from "node:https";
 import { URL, URLSearchParams } from "node:url";
 
 const API_URL = "https://is-agentic.com/api/v1/report";
+const REQUEST_TIMEOUT_MS = 15_000;
 
 export type Tier = "essential" | "recommended" | "bonus";
 export type IssueResult = "failed" | "partial";
@@ -68,14 +69,33 @@ export function normalizeUrl(value: string): string {
 
 async function request(url: string): Promise<{ statusCode: number; body: string }> {
   return new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = <T>(callback: (value: T) => void, value: T) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      callback(value);
+    };
     const request = get(`${API_URL}?${new URLSearchParams({ url })}`, (response) => {
       const chunks: Buffer[] = [];
       response.on("data", (chunk: Buffer) => chunks.push(chunk));
-      response.on("end", () =>
-        resolve({ statusCode: response.statusCode ?? 500, body: Buffer.concat(chunks).toString("utf8") }),
+      response.once("aborted", () =>
+        finish(
+          reject,
+          new IsAgenticError("Is Agentic ended the response before the report was complete. Please try again."),
+        ),
+      );
+      response.once("error", (error) => finish(reject, error));
+      response.once("end", () =>
+        finish(resolve, { statusCode: response.statusCode ?? 500, body: Buffer.concat(chunks).toString("utf8") }),
       );
     });
-    request.once("error", reject);
+    const timeout = setTimeout(() => {
+      const error = new IsAgenticError("Is Agentic took too long to respond. Please try again.");
+      request.destroy(error);
+      finish(reject, error);
+    }, REQUEST_TIMEOUT_MS);
+    request.once("error", (error) => finish(reject, error));
   });
 }
 
