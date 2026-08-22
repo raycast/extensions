@@ -1,6 +1,6 @@
 # Laravel Forge Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-08-22
 - Show active deployments again in the menu bar: the Forge API reports "Deploying" while the extension compared against lowercase "deploying"
 
 ## [AI Tools] - 2026-08-20
