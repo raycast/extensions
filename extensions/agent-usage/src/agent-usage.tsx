@@ -20,6 +20,7 @@ import { formatErrorMarkdown } from "./agents/detail-format.ts";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
 import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId } from "./agents/order.ts";
 import {
+  useAihubmixUsage,
   useAmpUsage,
   useAntigravityUsage,
   useClaudeUsage,
@@ -40,6 +41,8 @@ import {
 } from "./agents/provider-hooks.ts";
 import type { Accessory, AgentDefinition, AgentId, AgentVisibilityPreferences, UsageState } from "./agents/types.ts";
 import { getListIcon } from "./agents/ui.tsx";
+import { formatAihubmixUsageText, getAihubmixAccessory, renderAihubmixDetail } from "./aihubmix/renderer.tsx";
+import type { AihubmixError, AihubmixUsage } from "./aihubmix/types.ts";
 import { formatAmpUsageText, getAmpAccessory, renderAmpDetail } from "./amp/renderer.tsx";
 import type { AmpError, AmpUsage } from "./amp/types.ts";
 import {
@@ -96,6 +99,7 @@ interface AgentRegistryEntry<TUsage, TError extends ErrorLike> extends AgentDefi
 type MultiAccountAgentId = "clinepass" | "codex" | "kimi" | "synthetic" | "zai";
 
 interface AgentUsageById {
+  aihubmix: AihubmixUsage;
   amp: AmpUsage;
   claude: ClaudeUsage;
   clinepass: ClinePassUsage;
@@ -116,6 +120,7 @@ interface AgentUsageById {
 }
 
 interface AgentErrorById {
+  aihubmix: AihubmixError;
   amp: AmpError;
   claude: ClaudeError;
   clinepass: ClinePassError;
@@ -184,6 +189,18 @@ interface AccountedAgentView {
 }
 
 const AGENT_REGISTRY: AgentRegistry = {
+  aihubmix: {
+    id: "aihubmix",
+    name: "AIHubMix",
+    icon: "aihubmix.svg",
+    description: "AIHubMix API Balance",
+    isSupported: true,
+    settingsUrl: "https://console.aihubmix.com/statistics",
+    useUsage: useAihubmixUsage,
+    renderDetail: renderAihubmixDetail,
+    getAccessory: getAihubmixAccessory,
+    formatUsageText: formatAihubmixUsageText,
+  },
   amp: {
     id: "amp",
     name: "Amp",
@@ -465,6 +482,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const { push } = useNavigation();
 
   // Hooks must be called unconditionally at top level (React rules)
+  const aihubmixState = AGENT_REGISTRY.aihubmix.useUsage(Boolean(prefs.showAihubmix));
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
   const claudeState = AGENT_REGISTRY.claude.useUsage(Boolean(prefs.showClaude));
   const copilotState = AGENT_REGISTRY.copilot.useUsage(Boolean(prefs.showCopilot));
@@ -486,6 +504,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const zaiState = useZaiAccounts(Boolean(prefs.showZai));
 
   const agentViews: Omit<Record<AgentId, AgentView>, MultiAccountAgentId> = {
+    aihubmix: createAgentView(AGENT_REGISTRY.aihubmix, aihubmixState, Boolean(prefs.showAihubmix)),
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
     claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
     copilot: createAgentView(AGENT_REGISTRY.copilot, copilotState, Boolean(prefs.showCopilot)),

@@ -14,6 +14,7 @@ import { useMemo } from "react";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
 import { sortByDefaultAgentOrder } from "./agents/order.ts";
 import {
+  useAihubmixUsage,
   useAmpUsage,
   useAntigravityUsage,
   useClaudeUsage,
@@ -34,6 +35,7 @@ import {
 } from "./agents/provider-hooks.ts";
 import type { AgentId, Accessory, AgentVisibilityPreferences } from "./agents/types.ts";
 import { getThemeIcon } from "./agents/ui.tsx";
+import { getAihubmixAccessory } from "./aihubmix/renderer.tsx";
 import { getAmpAccessory } from "./amp/renderer.tsx";
 import { getAntigravityAccessory } from "./antigravity/renderer.tsx";
 import { getClaudeAccessory } from "./claude/renderer.tsx";
@@ -81,6 +83,7 @@ function getMenuItemTooltip(usageTooltip?: string): string {
 export default function MenuBarCommand() {
   const prefs = getPreferenceValues<AgentVisibilityPreferences>();
 
+  const isAihubmixVisible = Boolean(prefs.showAihubmix);
   const isAmpVisible = Boolean(prefs.showAmp);
   const isClaudeVisible = Boolean(prefs.showClaude);
   const isClinePassVisible = Boolean(prefs.showClinePass);
@@ -99,6 +102,7 @@ export default function MenuBarCommand() {
   const isMinimaxCNVisible = Boolean(prefs.showMinimaxCN);
   const isOpencodeGoVisible = Boolean(prefs.showOpencodeGo);
 
+  const aihubmixState = useAihubmixUsage(isAihubmixVisible);
   const ampState = useAmpUsage(isAmpVisible);
   const claudeState = useClaudeUsage(isClaudeVisible);
   const clinePassState = useClinePassAccounts(isClinePassVisible);
@@ -120,6 +124,16 @@ export default function MenuBarCommand() {
   // Single-account agents - memoized to prevent unnecessary re-renders
   const singleAgents = useMemo<MenuBarAgent[]>(
     () => [
+      {
+        id: "aihubmix",
+        name: "AIHubMix",
+        icon: "aihubmix.svg",
+        visible: isAihubmixVisible,
+        isLoading: aihubmixState.isLoading,
+        accessory: getAihubmixAccessory(aihubmixState.usage, aihubmixState.error, aihubmixState.isLoading),
+        revalidate: aihubmixState.revalidate,
+        lastFetchedAt: aihubmixState.lastFetchedAt,
+      },
       {
         id: "amp",
         name: "Amp",
@@ -242,6 +256,7 @@ export default function MenuBarCommand() {
       },
     ],
     [
+      isAihubmixVisible,
       isAmpVisible,
       isClaudeVisible,
       isCopilotVisible,
@@ -251,6 +266,11 @@ export default function MenuBarCommand() {
       isGeminiVisible,
       isGrokVisible,
       isAntigravityVisible,
+      aihubmixState.isLoading,
+      aihubmixState.usage,
+      aihubmixState.error,
+      aihubmixState.revalidate,
+      aihubmixState.lastFetchedAt,
       ampState.isLoading,
       ampState.usage,
       ampState.error,

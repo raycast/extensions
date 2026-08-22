@@ -1,6 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 
 import { loadAccounts } from "../accounts/storage.ts";
+import { resolveAihubmixAccessKey } from "../aihubmix/auth.ts";
+import { fetchAihubmixUsage } from "../aihubmix/fetcher.ts";
+import type { AihubmixError, AihubmixUsage } from "../aihubmix/types.ts";
 import { fetchAmpUsage } from "../amp/fetcher.ts";
 import type { AmpError, AmpUsage } from "../amp/types.ts";
 import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
@@ -60,6 +63,7 @@ import { readOpencodeAuthToken } from "./opencode-auth.ts";
 // Root-level preferences shared by both commands.
 type SharedPrefs = {
   additionalCodexHomes?: string;
+  aihubmixApiKey?: string;
   copilotAuthToken?: string;
   cursorCookieHeader?: string;
   deepseekApiKey?: string;
@@ -75,6 +79,25 @@ type SharedPrefs = {
 function prefValue(key: keyof SharedPrefs): string {
   return getPreferenceValues<SharedPrefs>()[key]?.trim() || "";
 }
+
+export const useAihubmixUsage = createUsageHook<AihubmixUsage, AihubmixError>({
+  agentId: "aihubmix",
+  resolveAuthKey: async () => (await resolveAihubmixAccessKey(prefValue("aihubmixApiKey"))) ?? "",
+  fetcher: async () => {
+    const accessKey = await resolveAihubmixAccessKey(prefValue("aihubmixApiKey"));
+    if (!accessKey) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "AIHubMix Access Key not configured. Copy it from https://console.aihubmix.com/setting, then paste it in extension settings (Cmd+,) or set AIHUBMIX_ACCESS_KEY in your shell.",
+        },
+      };
+    }
+    return fetchAihubmixUsage(accessKey);
+  },
+});
 
 export const useAmpUsage = createUsageHook<AmpUsage, AmpError>({
   agentId: "amp",

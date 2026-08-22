@@ -1,5 +1,10 @@
 # Agent Usage Changelog
 
+## [Add AIHubMix Usage] - 2026-08-22
+
+- Add AIHubMix balance monitoring to the main list and menu bar
+- Query account remaining and used balances with an Access Key from https://console.aihubmix.com/setting, or `AIHUBMIX_ACCESS_KEY`
+
 ## [Add MinimaxCN support] - 2026-08-21
 
 ### New Features

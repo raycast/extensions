@@ -52,6 +52,9 @@ export function isMonochromeSvg(svg: string): boolean {
 
   let hasInk = false;
   for (const paint of paints) {
+    if (paint.trim().toLowerCase().startsWith("url(")) {
+      return false;
+    }
     if (isIgnoredPaint(paint)) {
       continue;
     }
