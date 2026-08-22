@@ -1,6 +1,6 @@
 # Bonjour Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2026-08-22
 
 - updates for Raycast 2.0
 
