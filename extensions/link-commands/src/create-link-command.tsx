@@ -117,8 +117,8 @@ const Command = () => {
   const learned = learnedPackages(discovered?.commands ?? []);
   const suggestedPackage = packageForTarget(target, learned) ?? brandFor(target);
 
-  // Mirrors the generator's own guard rather than restating it loosely: a search command has already
-  // spent argument1 on its query, and "the app or the folder" is not a choice a path target can offer.
+  // Mirrors the generator's own guard rather than restating it loosely: `open -a` takes no query, so a
+  // search target has nothing an app could stand in for, and a folder has no web surface to fall back to.
   const canRoute = /^https?:\/\//i.test(target.trim()) && !findPlaceholder(target);
 
   // The dropdown holds a sentinel while a new value is being typed; everything downstream sees
@@ -269,7 +269,7 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
         <Form.Dropdown
           id="desktopApplication"
           title="Desktop App"
-          info="The native app for this service, if it has one. Picking it turns the command into a surface router: it opens the app where the app is installed, falls back to the target where it is not, and gains an App/Web dropdown so either can be forced."
+          info="The native app for this service, if it has one. Picking it turns the command into a surface router: it opens the app where the app is installed and the target where it is not, so the same command works on machines that differ in what they have. It stays argument-free, so it still fires from a hotkey."
           value={desktopApplication}
           onChange={setDesktopApplication}
         >
