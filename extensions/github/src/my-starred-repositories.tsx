@@ -14,7 +14,7 @@ const STARRED_REPOSITORIES_BATCH_SIZE = 25;
 function MyStarredRepositories() {
   const { github } = getGitHubClient();
 
-  const { data: history, visitRepository } = useHistory(undefined, null);
+  const { data: history, visitRepository, updateRepository, removeRepository } = useHistory(undefined, null);
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", STARRED_REPO_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-my-starred-repo",
   });
@@ -29,7 +29,7 @@ function MyStarredRepositories() {
     async (sort: string, afterCursor: string | null) => {
       const orderByField = sort.split(":")[0].toUpperCase() as StarOrderField;
       const orderByDirection = sort.split(":")[1].toUpperCase() as OrderDirection;
-      const requestedCount = getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 });
+      const requestedCount = getBoundedPreferenceNumber({ name: "numberOfResults", default: 25 });
       const repos: ExtendedRepositoryFieldsFragment[] = [];
       let pageInfo: { hasNextPage: boolean; endCursor?: string | null } = {
         hasNextPage: false,
@@ -111,17 +111,29 @@ function MyStarredRepositories() {
     }
   };
 
-  const mutateList = useCallback(async () => {
-    setIsPendingMutation(true);
-    try {
-      setCursor(null);
-      setAllRepositories([]);
-      setHasMore(true);
-      await mutate();
-    } finally {
-      setIsPendingMutation(false);
-    }
-  }, [mutate]);
+  const mutateList = useCallback(
+    async (
+      _asyncUpdate?: unknown,
+      options?: {
+        optimisticUpdate?: (data: ExtendedRepositoryFieldsFragment[]) => ExtendedRepositoryFieldsFragment[] | undefined;
+      },
+    ) => {
+      if (options?.optimisticUpdate) {
+        setAllRepositories((prev) => options.optimisticUpdate!(prev) ?? prev);
+      }
+
+      setIsPendingMutation(true);
+      try {
+        setCursor(null);
+        setAllRepositories([]);
+        setHasMore(true);
+        await mutate();
+      } finally {
+        setIsPendingMutation(false);
+      }
+    },
+    [mutate],
+  );
   const isInitialLoading = isLoading && allRepositories.length === 0;
 
   return (
@@ -144,6 +156,8 @@ function MyStarredRepositories() {
             repository={repository}
             mutateList={mutateList}
             onVisit={visitRepository}
+            onUpdate={updateRepository}
+            onRemove={removeRepository}
             sortQuery={sortQuery}
             setSortQuery={setSortQuery}
             sortTypesData={sortTypesData}
@@ -161,6 +175,7 @@ function MyStarredRepositories() {
             repository={repository}
             mutateList={mutateList}
             onVisit={visitRepository}
+            onUpdate={updateRepository}
             sortQuery={sortQuery}
             setSortQuery={setSortQuery}
             sortTypesData={sortTypesData}

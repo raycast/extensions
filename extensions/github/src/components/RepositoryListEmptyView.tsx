@@ -32,6 +32,10 @@ export default function RepositoryListEmptyView({ searchText, isLoading, error }
     );
   }
 
+  if (searchText.length > 0 && isLoading) {
+    return <List.EmptyView title="Searching repositories..." />;
+  }
+
   if (searchText.length > 0 && !isLoading) {
     return <List.EmptyView title="No repositories found" />;
   }

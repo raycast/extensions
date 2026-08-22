@@ -179,8 +179,13 @@ export default function IssueActions({
     try {
       await showToast({ style: Toast.Style.Animated, title: `Creating branch for issue #${issue.number}` });
 
+      const oid = issue.repository.defaultBranchRef?.target?.oid;
+      if (!oid) {
+        throw new Error("Repository default branch commit SHA is unavailable");
+      }
+
       const res = await github.createLinkedBranch({
-        input: { issueId: issue.id, oid: issue.repository.defaultBranchRef?.target?.oid },
+        input: { issueId: issue.id, oid },
       });
       const branchName = res.createLinkedBranch?.linkedBranch?.ref?.name;
       await mutate();

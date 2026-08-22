@@ -231,6 +231,14 @@
           "default": false,
           "label": "Display Owner Names",
           "description": "Display owner name alongside repository name in search results"
+        },
+        {
+          "name": "disableThrottle",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Disable Throttle",
+          "description": "Disable search input throttling for immediate search on each keystroke"
         }
       ]
     },
