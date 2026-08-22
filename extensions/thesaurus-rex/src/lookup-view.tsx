@@ -81,7 +81,10 @@ export default function LookupView({ kinds }: { kinds: Kind[] }) {
       <Action
         title="Toggle Details"
         icon={Icon.Sidebar}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "d" },
+          Windows: { modifiers: ["ctrl"], key: "d" },
+        }}
         onAction={() => setShowingDetail((shown) => !shown)}
       />
     </ActionPanel>

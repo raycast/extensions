@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Color,
   Icon,
+  Keyboard,
   List,
   confirmAlert,
   environment,
@@ -57,7 +58,7 @@ export default function ManageDictionaries() {
           title="Delete Dictionaries"
           icon={Icon.Trash}
           style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
           onAction={remove}
         />
       )}
