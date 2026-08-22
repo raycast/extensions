@@ -1,6 +1,6 @@
 # Tududi Changelog
 
-## [1.9.0] - {PR_MERGE_DATE}
+## [1.9.0] - 2026-08-22
 
 ### Compatibility with Tududi 1.4+
 
