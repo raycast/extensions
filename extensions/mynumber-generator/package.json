@@ -4,8 +4,8 @@
   "version": "0.1.1",
   "description": "Generate dummy but checksum-valid Mynumbers (Japanese Individual Numbers) for testing.",
   "categories": [
-    "Developer Tools",
-    "Data"
+    "Data",
+    "Developer Tools"
   ],
   "license": "MIT",
   "author": "serizawa",
@@ -16,8 +16,9 @@
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "knip": "knip",
+    "check:metadata": "python3 scripts/check_raycast_images.py metadata/*.png",
     "test": "bun test src",
-    "publish": "npm install --package-lock-only && bunx @raycast/api@latest publish"
+    "publish": "bash scripts/publish.sh"
   },
   "dependencies": {
     "@raycast/api": "^1.104.24"
@@ -35,6 +36,13 @@
       "name": "generate-mynumber",
       "title": "Generate Mynumbers",
       "description": "Generate dummy Mynumbers with a valid check digit and copy or paste them.",
+      "keywords": [
+        "mynumber",
+        "my number",
+        "マイナンバー",
+        "個人番号",
+        "individual number"
+      ],
       "mode": "no-view",
       "arguments": [
         {
