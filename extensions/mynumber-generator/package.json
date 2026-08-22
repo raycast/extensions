@@ -1,7 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mynumber-generator",
-  "version": "0.1.1",
   "description": "Generate dummy but checksum-valid Mynumbers (Japanese Individual Numbers) for testing.",
   "categories": [
     "Data",
@@ -10,24 +9,17 @@
   "license": "MIT",
   "author": "serizawa",
   "scripts": {
-    "build": "ray build -e dist -o dist",
+    "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "oxlint src",
-    "fmt": "oxfmt",
-    "fmt:check": "oxfmt --check",
-    "knip": "knip",
-    "check:metadata": "python3 scripts/check_raycast_images.py metadata/*.png",
-    "test": "bun test src",
-    "publish": "bash scripts/publish.sh"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
     "@raycast/api": "^1.104.24"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "knip": "^6.31.0",
-    "oxfmt": "^0.61.0",
-    "oxlint": "^1.76.0",
     "typescript": "^5.6.0"
   },
   "icon": "extension-icon.png",
