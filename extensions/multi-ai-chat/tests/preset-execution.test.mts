@@ -22,7 +22,7 @@ const visiblePreset: PromptPreset = {
   serviceCounts: { chatgpt: 0, claude: 1, grok: 0, perplexity: 0 },
 };
 
-test("prepares the submitted snapshot when the stored preset changed", async () => {
+test("rejects execution and returns the latest preset when storage changed", async () => {
   const storedPreset: PromptPreset = {
     ...visiblePreset,
     template: "Explain {topic} in {language}",
@@ -40,6 +40,16 @@ test("prepares the submitted snapshot when the stored preset changed", async () 
   );
 
   assert.equal(requestedId, visiblePreset.id);
+  assert.deepEqual(prepared, { status: "changed", preset: storedPreset });
+});
+
+test("prepares requests when the displayed and stored revisions match", async () => {
+  const prepared = await preparePresetExecution(
+    visiblePreset,
+    { topic: "AI" },
+    async () => visiblePreset,
+  );
+
   assert.equal(prepared.status, "ready");
   if (prepared.status !== "ready") return;
 

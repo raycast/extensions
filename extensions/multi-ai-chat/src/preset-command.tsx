@@ -176,7 +176,12 @@ export function RunPresetForm({
 
     setIsLoading(true);
     try {
-      await executePreset(currentPreset, values, preferences.browser);
+      await executePreset(
+        currentPreset,
+        values,
+        preferences.browser,
+        handlePresetChange,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -265,7 +270,7 @@ export function RunPresetAction({
 
     isRunning.current = true;
     try {
-      await executePreset(preset, {}, preferences.browser);
+      await executePreset(preset, {}, preferences.browser, onPresetChange);
     } finally {
       isRunning.current = false;
     }
@@ -322,12 +327,12 @@ function AutoRunPreset({
     isRunning.current = true;
     setIsLoading(true);
     try {
-      await executePreset(preset, {}, preferences.browser);
+      await executePreset(preset, {}, preferences.browser, onPresetChange);
     } finally {
       isRunning.current = false;
       setIsLoading(false);
     }
-  }, [preferences.browser, preset]);
+  }, [onPresetChange, preferences.browser, preset]);
 
   useEffect(() => {
     if (hasAutomaticallyRun.current) return;
@@ -370,6 +375,7 @@ async function executePreset(
   preset: PromptPreset,
   values: Record<string, string>,
   browser: string,
+  onPresetChange: (preset: PromptPreset) => void,
 ): Promise<void> {
   await showToast({
     style: Toast.Style.Animated,
@@ -384,6 +390,15 @@ async function executePreset(
         style: Toast.Style.Failure,
         title: "Preset is no longer available",
         message: "It may have been deleted in another Raycast window.",
+      });
+      return;
+    }
+    if (prepared.status === "changed") {
+      onPresetChange(prepared.preset);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Preset changed",
+        message: "Review the updated preset and run it again.",
       });
       return;
     }
