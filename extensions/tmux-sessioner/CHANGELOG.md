@@ -1,6 +1,6 @@
 # Tmux Sessioner Changelog
 
-## [Search Session Output] - {PR_MERGE_DATE}
+## [Search Session Output] - 2026-08-22
 
 ### Added
 
