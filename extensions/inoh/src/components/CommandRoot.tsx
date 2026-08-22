@@ -5,8 +5,8 @@ import { useDecks } from "../hooks/useDecks";
 import { useDictionarySearch } from "../hooks/useDictionarySearch";
 import { useUserCardIds } from "../hooks/useUserCardIds";
 import { useSubscriptionState } from "../hooks/useSubscriptionState";
-import { TIER_DISPLAY_NAMES } from "../lib/subscription";
-import type { SubscriptionTier } from "../lib/subscription";
+import { describePlanBadge } from "../lib/subscription";
+import type { SubscriptionState } from "../lib/subscription";
 import { PLANS_URL } from "../constants";
 import { addCardToDeck, removeCardFromDeck } from "../lib/card";
 import { pronounceWord } from "../lib/audio";
@@ -19,14 +19,18 @@ import type { DictionaryEntry } from "../types";
 
 /**
  * Header text: the account, plus a plan badge once the plan has been read
- * (e.g. "Inoh · me@example.com · Plus"). The header is the one place a List
- * shows something at all times without spending a row, so it carries the
- * badge; the matching Upgrade/Manage action lives in the Account section.
+ * (e.g. "Inoh · me@example.com · Plus", or "… · Plus · ends 1 Sep" when a
+ * change is pending). The header is the one place a List shows something at
+ * all times without spending a row, so it carries the badge; the matching
+ * plan action lives in the Account section.
  */
-function _buildNavigationTitle(email: string | undefined, tier: SubscriptionTier | undefined): string | undefined {
+function _buildNavigationTitle(
+  email: string | undefined,
+  subscriptionState: SubscriptionState | undefined,
+): string | undefined {
   if (!email) return undefined;
   const parts = ["Inoh", email];
-  if (tier) parts.push(TIER_DISPLAY_NAMES[tier]);
+  if (subscriptionState) parts.push(describePlanBadge(subscriptionState));
   return parts.join(" · ");
 }
 
@@ -165,7 +169,7 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
     <List
       isLoading={isLoading}
       isShowingDetail={hasResults}
-      navigationTitle={_buildNavigationTitle(user?.email, subscriptionState?.tier)}
+      navigationTitle={_buildNavigationTitle(user?.email, subscriptionState)}
       searchText={searchText}
       searchBarPlaceholder="Search for a word..."
       onSearchTextChange={setSearchText}
