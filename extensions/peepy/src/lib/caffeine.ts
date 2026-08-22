@@ -11,6 +11,8 @@ export type RunningCaffeineState = {
   mode: CaffeineMode;
   startedAt: string;
   endsAt?: string;
+  /** Process creation timestamp (epoch ms) captured at spawn, used to detect PID reuse. */
+  helperCreatedAtMs?: number;
 };
 
 export type ProcessSnapshot = {
@@ -76,6 +78,104 @@ function isProcessRunning(pid: number) {
   }
 }
 
+/**
+ * Tolerance (ms) allowed between the recorded helper creation time and the live
+ * process creation time. PID values get reused by the OS, so comparing creation
+ * timestamps is how we avoid killing an unrelated process that happens to reuse
+ * the tracked PID.
+ */
+const PROCESS_IDENTITY_TOLERANCE_MS = 15_000;
+
+type ProcessIdentity = {
+  name: string | null;
+  createdAtMs: number | null;
+};
+
+function readProcessIdentity(pid: number): ProcessIdentity | null {
+  try {
+    if (process.platform === "win32") {
+      const command = [
+        `$p = Get-Process -Id ${pid} -ErrorAction SilentlyContinue`,
+        "if (-not $p) { exit 1 }",
+        "ConvertTo-Json -InputObject @{ name = $p.ProcessName; createdMs = [DateTimeOffset]::new($p.StartTime.ToUniversalTime()).ToUnixTimeMilliseconds() } -Compress",
+      ].join("; ");
+
+      const result = spawnSync("powershell.exe", ["-NoProfile", "-Command", command], {
+        encoding: "utf8",
+        windowsHide: true,
+      });
+
+      if (result.status !== 0 || !result.stdout.trim()) {
+        return null;
+      }
+
+      const parsed = JSON.parse(result.stdout) as { name?: string; createdMs?: number };
+      return {
+        name: parsed.name ?? null,
+        createdAtMs:
+          typeof parsed.createdMs === "number" && Number.isFinite(parsed.createdMs) ? parsed.createdMs : null,
+      };
+    }
+
+    const result = spawnSync("ps", ["-p", String(pid), "-o", "etimes=,comm="], {
+      encoding: "utf8",
+    });
+
+    if (result.status !== 0 || !result.stdout.trim()) {
+      return null;
+    }
+
+    const trimmed = result.stdout.trim();
+    const separatorIndex = trimmed.indexOf(" ");
+    if (separatorIndex === -1) {
+      return null;
+    }
+
+    const elapsedSeconds = Number.parseInt(trimmed.slice(0, separatorIndex), 10);
+    if (!Number.isFinite(elapsedSeconds) || elapsedSeconds < 0) {
+      return null;
+    }
+
+    return {
+      name: trimmed.slice(separatorIndex).trim() || null,
+      createdAtMs: Date.now() - elapsedSeconds * 1000,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function identityMatches(state: RunningCaffeineState, identity: ProcessIdentity | null) {
+  if (!identity || identity.createdAtMs === null || state.helperCreatedAtMs === undefined) {
+    // Without a recorded creation time we cannot prove the PID was reused, so we
+    // fall back to the previous behavior instead of blocking legitimate stops.
+    return true;
+  }
+
+  return Math.abs(identity.createdAtMs - state.helperCreatedAtMs) <= PROCESS_IDENTITY_TOLERANCE_MS;
+}
+
+function isTrackedProcessAlive(state: RunningCaffeineState) {
+  if (!isProcessRunning(state.pid)) {
+    return false;
+  }
+
+  return identityMatches(state, readProcessIdentity(state.pid));
+}
+
+function killTrackedProcess(pid: number) {
+  try {
+    process.kill(pid);
+  } catch {
+    if (process.platform === "win32") {
+      spawnSync("taskkill.exe", ["/PID", String(pid), "/T", "/F"], {
+        stdio: "ignore",
+        windowsHide: true,
+      });
+    }
+  }
+}
+
 function toPowerShellSingleQuoted(value: string) {
   return `'${value.replace(/'/g, "''")}'`;
 }
@@ -131,7 +231,7 @@ function ensureWindowsScript() {
   writeFileSync(windowsScriptPath, scriptContents, "utf8");
 }
 
-function startMacCaffeine(durationMs?: number, keepDisplayAwake = true) {
+function startMacCaffeine(durationMs?: number, keepDisplayAwake = true): { pid: number; createdAtMs?: number } {
   const args = keepDisplayAwake ? ["-d", "-i"] : ["-i"];
   if (durationMs && durationMs > 0) {
     args.push("-t", String(Math.max(1, Math.ceil(durationMs / 1000))));
@@ -142,10 +242,17 @@ function startMacCaffeine(durationMs?: number, keepDisplayAwake = true) {
     stdio: "ignore",
   });
   child.unref();
-  return child.pid;
+
+  if (!child.pid) {
+    throw new Error("Failed to launch macOS caffeine helper.");
+  }
+
+  // Record the helper's creation time so later PID-reuse can be detected.
+  const identity = readProcessIdentity(child.pid);
+  return { pid: child.pid, createdAtMs: identity?.createdAtMs ?? undefined };
 }
 
-function startWindowsCaffeine(durationMs?: number, keepDisplayAwake = true) {
+function startWindowsCaffeine(durationMs?: number, keepDisplayAwake = true): { pid: number; createdAtMs?: number } {
   ensureWindowsScript();
 
   const args = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", windowsScriptPath];
@@ -162,7 +269,7 @@ function startWindowsCaffeine(durationMs?: number, keepDisplayAwake = true) {
     `-ArgumentList @(${argumentList})`,
     "-WindowStyle Hidden",
     "-PassThru;",
-    "$process.Id",
+    "ConvertTo-Json -InputObject @{ pid = $process.Id; createdMs = [DateTimeOffset]::new($process.StartTime.ToUniversalTime()).ToUnixTimeMilliseconds() } -Compress",
   ].join(" ");
 
   const launchResult = spawnSync("powershell.exe", ["-NoProfile", "-Command", launchCommand], {
@@ -174,12 +281,21 @@ function startWindowsCaffeine(durationMs?: number, keepDisplayAwake = true) {
     throw new Error(launchResult.stderr?.trim() || "Failed to launch Windows caffeine helper.");
   }
 
-  const pid = Number.parseInt(launchResult.stdout.trim(), 10);
-  if (!Number.isFinite(pid)) {
+  let parsedLaunch: { pid?: unknown; createdMs?: unknown };
+  try {
+    parsedLaunch = JSON.parse(launchResult.stdout.trim());
+  } catch {
     throw new Error(`Failed to read Windows caffeine helper PID: ${launchResult.stdout}`);
   }
 
-  return pid;
+  const pid = Number(parsedLaunch.pid);
+  if (!Number.isInteger(pid) || pid <= 0) {
+    throw new Error(`Failed to read Windows caffeine helper PID: ${launchResult.stdout}`);
+  }
+
+  // Record the helper's creation time so later PID-reuse can be detected.
+  const createdAtMs = Number(parsedLaunch.createdMs);
+  return { pid, createdAtMs: Number.isFinite(createdAtMs) ? createdAtMs : undefined };
 }
 
 export async function getRunningState() {
@@ -188,7 +304,7 @@ export async function getRunningState() {
     return null;
   }
 
-  if (!isProcessRunning(savedState.pid)) {
+  if (!isTrackedProcessAlive(savedState)) {
     clearStateFile();
     return null;
   }
@@ -256,23 +372,24 @@ export async function startCaffeine(options?: { durationMs?: number; keepDisplay
 
   const durationMs = options?.durationMs;
   const keepDisplayAwake = options?.keepDisplayAwake ?? true;
-  const pid =
+  const helper =
     process.platform === "darwin"
       ? startMacCaffeine(durationMs, keepDisplayAwake)
       : process.platform === "win32"
         ? startWindowsCaffeine(durationMs, keepDisplayAwake)
         : null;
 
-  if (!pid) {
+  if (!helper) {
     throw new Error(`Unsupported platform: ${process.platform}`);
   }
 
   const state: RunningCaffeineState = {
-    pid,
+    pid: helper.pid,
     keepDisplayAwake,
     mode: durationMs && durationMs > 0 ? "timed" : "indefinite",
     startedAt: new Date().toISOString(),
     endsAt: durationMs && durationMs > 0 ? new Date(Date.now() + durationMs).toISOString() : undefined,
+    helperCreatedAtMs: helper.createdAtMs,
   };
 
   writeStateFile(state);
@@ -285,15 +402,10 @@ export async function stopCaffeine() {
     return false;
   }
 
-  try {
-    process.kill(savedState.pid);
-  } catch {
-    if (process.platform === "win32") {
-      spawnSync("taskkill.exe", ["/PID", String(savedState.pid), "/T", "/F"], {
-        stdio: "ignore",
-        windowsHide: true,
-      });
-    }
+  // Only terminate the process when it is still the one we spawned. If the PID
+  // was recycled by another process, leave it alone and just forget the state.
+  if (isTrackedProcessAlive(savedState)) {
+    killTrackedProcess(savedState.pid);
   }
 
   clearStateFile();
@@ -302,17 +414,10 @@ export async function stopCaffeine() {
 
 export async function resetCaffeineState() {
   const snapshot = getProcessSnapshot();
-  if (snapshot?.isRunning) {
-    try {
-      process.kill(snapshot.pid);
-    } catch {
-      if (process.platform === "win32") {
-        spawnSync("taskkill.exe", ["/PID", String(snapshot.pid), "/T", "/F"], {
-          stdio: "ignore",
-          windowsHide: true,
-        });
-      }
-    }
+  const savedState = readTrackedState();
+
+  if (snapshot?.isRunning && savedState && identityMatches(savedState, readProcessIdentity(snapshot.pid))) {
+    killTrackedProcess(snapshot.pid);
   }
 
   clearStateFile();

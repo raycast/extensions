@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "peepy",
   "title": "Peepy",
   "description": "Keep your computer awake so Claude Code, Codex, and other AI agents can keep working.",
