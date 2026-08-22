@@ -503,6 +503,7 @@ describe("lifecycle action inputs", () => {
           stopTask: vi.fn(),
           resumeTask: vi.fn(),
           cleanupTask,
+          completeTask: vi.fn(),
         },
         reconcile: async () => ({ statusRefreshed: true, taskRefreshed: true }),
       });

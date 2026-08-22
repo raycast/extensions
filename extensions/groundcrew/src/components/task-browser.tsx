@@ -255,7 +255,7 @@ function EmptyStateActions({
       <RefreshAction title="Refresh Tasks" onRefresh={onRefresh} />
       {showPreferences ? (
         <>
-          <Action.Push title="Run Doctor" icon={Icon.Stethoscope} target={<GroundcrewDoctor />} />
+          <Action.Push title="Run Doctor" icon={Icon.MagnifyingGlass} target={<GroundcrewDoctor />} />
           <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           <Action.OpenInBrowser title="Install Groundcrew CLI" icon={Icon.Download} url={GROUNDCREW_INSTALL_URL} />
         </>
