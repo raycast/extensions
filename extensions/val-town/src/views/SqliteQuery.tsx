@@ -133,8 +133,66 @@ function QueryResult({ val, sql }: { val: string; sql: string }) {
   );
 }
 
+/**
+ * SQLite allows `WITH ... INSERT/UPDATE/DELETE`, so accepting any WITH-prefixed statement lets a CTE
+ * smuggle a write through the read-only view. The statement is scanned outside strings and comments,
+ * at parenthesis depth zero (CTE bodies live inside parens), and only a top-level SELECT survives.
+ */
 function isSelect(sql: string): boolean {
-  return /^\s*(select|with)\b/i.test(sql);
+  const keywords: string[] = [];
+  let depth = 0;
+  let i = 0;
+
+  while (i < sql.length) {
+    const rest = sql.slice(i);
+    if (rest.startsWith("--")) {
+      const end = sql.indexOf("\n", i);
+      i = end === -1 ? sql.length : end + 1;
+    } else if (rest.startsWith("/*")) {
+      const end = sql.indexOf("*/", i + 2);
+      i = end === -1 ? sql.length : end + 2;
+    } else if (sql[i] === "'" || sql[i] === '"' || sql[i] === "`") {
+      const quote = sql[i];
+      i += 1;
+      while (i < sql.length && sql[i] !== quote) i += sql[i] === "\\" ? 2 : 1;
+      i += 1;
+    } else if (sql[i] === "(") {
+      depth += 1;
+      i += 1;
+    } else if (sql[i] === ")") {
+      depth = Math.max(0, depth - 1);
+      i += 1;
+    } else if (/[a-zA-Z_]/.test(sql[i])) {
+      let j = i;
+      while (j < sql.length && /\w/.test(sql[j])) j += 1;
+      if (depth === 0) keywords.push(sql.slice(i, j).toLowerCase());
+      i = j;
+    } else {
+      i += 1;
+    }
+  }
+
+  if (keywords.length === 0) return false;
+  if (keywords[0] === "select") return true;
+  if (keywords[0] !== "with") return false;
+
+  // A WITH statement is read-only only when its top-level verb is SELECT.
+  const verbs = new Set([
+    "select",
+    "insert",
+    "update",
+    "delete",
+    "replace",
+    "create",
+    "drop",
+    "alter",
+    "vacuum",
+    "pragma",
+    "attach",
+    "reindex",
+  ]);
+  const verb = keywords.slice(1).find((word) => verbs.has(word));
+  return verb === "select";
 }
 
 /** The val-scoped database answers with objects; the deprecated global one with arrays. */
