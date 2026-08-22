@@ -1,5 +1,9 @@
 # Mirror Displays Changelog
 
+## [Add mirroring toggle] - {PR_MERGE_DATE}
+
+- Added a "Toggle Mirroring" action (and a standalone hotkey-able command) that turns mirroring off if it's on, or on if it's off, using a configurable default direction.
+
 ## [New Features & Bugfixes] - 2026-04-02
 
 - Modernized UI to use a full-page Raycast List view instead of a background shortcut.
