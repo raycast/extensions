@@ -1,6 +1,6 @@
 # Val Town Changelog
 
-## [Rewrite] - {PR_MERGE_DATE}
+## [Rewrite] - 2026-08-22
 
 Rebuilt around one command and an allow list: browse your vals, and allow Raycast AI to run the ones you choose.
 

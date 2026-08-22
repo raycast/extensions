@@ -29,7 +29,7 @@
     {
       "name": "execute-tool",
       "title": "Execute Val Town Tool",
-      "description": "Run one of the user's Val Town tools. Use it whenever the user's request matches a tool's description from list-tools \u2014 running them is what they are for. Never guess a name or argument."
+      "description": "Run one of the user's Val Town tools. Use it whenever the user's request matches a tool's description from list-tools — running them is what they are for. Never guess a name or argument."
     },
     {
       "name": "get-val-info",
@@ -53,7 +53,7 @@
     }
   ],
   "ai": {
-    "instructions": "The user's vals are capabilities they set up to be used. Call list-tools, and when the request matches what a val's description says it does, call execute-tool with that val \u2014 do not ask first and do not just offer: each val's own confirmation setting already guards anything sensitive. Only a question about the collection itself, like what tools the user has, ends at list-tools. Never invent a val name or an argument."
+    "instructions": "The user's vals are capabilities they set up to be used. Call list-tools, and when the request matches what a val's description says it does, call execute-tool with that val — do not ask first and do not just offer: each val's own confirmation setting already guards anything sensitive. Only a question about the collection itself, like what tools the user has, ends at list-tools. Never invent a val name or an argument."
   },
   "preferences": [
     {
@@ -83,5 +83,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
