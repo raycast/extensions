@@ -54,14 +54,6 @@ npm run dev
 
 5. **Start New Timer** or **Reset** to begin again.
 
-Timer state is persisted with Raycast's `LocalStorage`, so it survives Raycast restarts.
-
-## Screenshots
-
-|                         Start Work Timer                          |                              Running                              |                                  Paused                                   |
-|:-----------------------------------------------------------------:|:-----------------------------------------------------------------:|:-------------------------------------------------------------------------:|
-| <img src="assets/screenshots/start-timer-form.png" width="260" /> | <img src="assets/screenshots/menu-bar-running.png" width="220" /> | <img src="assets/screenshots/menu-bar-paused-dropdown.png" width="220" /> |
-
 ## Development
 
 ```bash
