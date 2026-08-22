@@ -44,10 +44,24 @@ function buildHistoryQuery(searchText: string, limit: number, options: HistoryQu
 
   const totalMatchesColumn = options.includeTotalMatches ? ", COUNT(*) OVER() AS totalMatches" : "";
 
+  // Chromium can store several URL variants for one navigation with the same title and timestamp.
+  // Rank those variants before applying the result limit so they occupy one history row.
   return `
+    WITH ranked_history AS (
+      SELECT id,
+            url,
+            title,
+            last_visit_time,
+            ROW_NUMBER() OVER (
+              PARTITION BY title, last_visit_time
+              ORDER BY length(url), id DESC
+            ) AS duplicate_rank
+      FROM urls
+      ${where}
+    )
     SELECT id, url, title, ${TIME_EXPR} AS lastVisitedAt${totalMatchesColumn}
-    FROM urls
-    ${where}
+    FROM ranked_history
+    WHERE duplicate_rank = 1
     ORDER BY last_visit_time DESC
     LIMIT ${Math.max(1, Math.floor(limit))};
   `;
@@ -94,10 +108,18 @@ export async function searchHistory(searchText = "", limit = 20): Promise<Histor
 }
 
 /** Search one Aside profile without an extension-managed history cache. */
-export function useHistorySearch(searchText: string, limit = 25, profile = configuredProfile()) {
+export function useHistorySearch(
+  searchText: string,
+  limit = 25,
+  profile = configuredProfile(),
+  options: HistoryQueryOptions = {},
+) {
   const dbPath = historyDbPath(resolveAsideProfile(profile));
   const dbExists = existsSync(dbPath);
-  const query = useMemo(() => (dbExists ? buildHistoryQuery(searchText, limit) : ""), [searchText, limit, dbExists]);
+  const query = useMemo(
+    () => (dbExists ? buildHistoryQuery(searchText, limit, options) : ""),
+    [searchText, limit, dbExists, options.includeTotalMatches],
+  );
   const { data, error, isLoading, permissionView, revalidate } = useSQL<HistoryRow>(
     dbExists ? dbPath : __filename,
     query,
@@ -109,6 +131,7 @@ export function useHistorySearch(searchText: string, limit = 25, profile = confi
   );
 
   const entries = useMemo<HistoryEntry[]>(() => (data ?? []).map(mapHistoryRow), [data]);
+  const totalMatches = data?.[0]?.totalMatches ?? entries.length;
 
-  return { data: entries, error, isAvailable: dbExists, isLoading, permissionView, revalidate };
+  return { data: entries, totalMatches, error, isAvailable: dbExists, isLoading, permissionView, revalidate };
 }
