@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, Color, Image } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color, Image, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { isFuture, isPast } from "date-fns";
@@ -13,6 +13,7 @@ import {
   formatRelativeTime,
   getSonarrUrl,
 } from "@/lib/utils/formatting";
+import { Shortcuts } from "@/lib/utils/shortcuts";
 
 type FilterStatus = "all" | "missing" | "upcoming" | "unreleased";
 
@@ -182,7 +183,7 @@ function MissingEpisodeListItem({ episode, onRefresh }: { episode: WantedMissing
                 title="Search Episode"
                 icon={Icon.MagnifyingGlass}
                 onAction={handleSearchEpisode}
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                shortcut={Shortcuts.searchEpisode}
               />
             )}
           </ActionPanel.Section>
@@ -194,7 +195,7 @@ function MissingEpisodeListItem({ episode, onRefresh }: { episode: WantedMissing
                   title="Open in Sonarr"
                   url={`${sonarrUrl}/series/${episode.series.titleSlug}`}
                   icon={Icon.Globe}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
                 {episode.series.tvdbId && (
                   <Action.OpenInBrowser
@@ -219,7 +220,7 @@ function MissingEpisodeListItem({ episode, onRefresh }: { episode: WantedMissing
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
         </ActionPanel>
