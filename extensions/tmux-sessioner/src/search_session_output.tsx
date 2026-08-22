@@ -94,8 +94,12 @@ export default function Command() {
     const bySession = new Map<string, { matches: Match[]; seen: Set<string>; total: number }>();
 
     // Most-recently-active panes first, so when the same line exists in several
-    // panes of a session the dedup keeps the newest occurrence
-    const orderedPanes = [...panes].sort((a, b) => b.windowActivity - a.windowActivity);
+    // panes of a session the dedup keeps the newest occurrence. Panes in one
+    // window share window_activity (tmux has no per-pane recency), so the active
+    // pane — the one the user is looking at — breaks that tie.
+    const orderedPanes = [...panes].sort(
+      (a, b) => b.windowActivity - a.windowActivity || Number(b.paneActive) - Number(a.paneActive),
+    );
 
     for (const pane of orderedPanes) {
       // Walk newest lines first so the most recent occurrence wins

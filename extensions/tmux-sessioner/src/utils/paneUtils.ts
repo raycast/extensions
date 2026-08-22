@@ -6,6 +6,7 @@ export interface TmuxPane {
   sessionName: string;
   windowIndex: number;
   windowActivity: number;
+  paneActive: boolean;
 }
 
 export interface PaneContent extends TmuxPane {
@@ -33,7 +34,7 @@ export async function getAllPanes(): Promise<TmuxPane[]> {
     "list-panes",
     "-a",
     "-F",
-    "#{pane_id} #{window_index} #{window_activity} #{session_name}",
+    "#{pane_id} #{window_index} #{window_activity} #{pane_active} #{session_name}",
   ]);
 
   return stdout
@@ -43,12 +44,14 @@ export async function getAllPanes(): Promise<TmuxPane[]> {
       const s1 = line.indexOf(" ");
       const s2 = line.indexOf(" ", s1 + 1);
       const s3 = line.indexOf(" ", s2 + 1);
+      const s4 = line.indexOf(" ", s3 + 1);
 
       return {
         paneId: line.slice(0, s1),
         windowIndex: Number(line.slice(s1 + 1, s2)),
         windowActivity: Number(line.slice(s2 + 1, s3)),
-        sessionName: line.slice(s3 + 1),
+        paneActive: line.slice(s3 + 1, s4) === "1",
+        sessionName: line.slice(s4 + 1),
       };
     });
 }
