@@ -69,19 +69,19 @@ export const deleteChromeProfile = async (profile: Profile, browser: BrowserConf
   try {
     profileStats = await lstat(profilePath);
   } catch (error) {
-    if (error instanceof Error && (error as NodeJS.ErrnoException).code === "ENOENT") {
-      throw new Error("Chrome profile directory not found");
-    }
-    throw error;
+    if (!(error instanceof Error) || (error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
-  if (!profileStats.isDirectory()) throw new Error("Chrome profile path is not a directory");
-  if (await isProfileOpen(profilePath)) throw new Error(`Close the ${profile.name} profile before deleting it`);
+  if (profileStats && !profileStats.isDirectory()) throw new Error("Chrome profile path is not a directory");
 
-  const deletedProfilePath = join(dataDirectory, `.raycast-delete-${randomUUID()}`);
-  await rename(profilePath, deletedProfilePath);
+  let deletedProfilePath: string | undefined;
+  if (profileStats) {
+    if (await isProfileOpen(profilePath)) throw new Error(`Close the ${profile.name} profile before deleting it`);
+    deletedProfilePath = join(dataDirectory, `.raycast-delete-${randomUUID()}`);
+    await rename(profilePath, deletedProfilePath);
+  }
 
   try {
-    if (await isProfileOpen(deletedProfilePath)) {
+    if (deletedProfilePath && (await isProfileOpen(deletedProfilePath))) {
       throw new Error(`Close the ${profile.name} profile before deleting it`);
     }
     delete infoCache[profile.directory];
@@ -97,7 +97,7 @@ export const deleteChromeProfile = async (profile: Profile, browser: BrowserConf
     await writeFileAtomically(localStatePath, `${JSON.stringify(localState, null, 2)}\n`);
   } catch (error) {
     try {
-      await rename(deletedProfilePath, profilePath);
+      if (deletedProfilePath) await rename(deletedProfilePath, profilePath);
       await writeFileAtomically(localStatePath, originalLocalStateText);
     } catch {
       throw new Error("Profile deletion failed and could not be rolled back");
@@ -105,16 +105,18 @@ export const deleteChromeProfile = async (profile: Profile, browser: BrowserConf
     throw error;
   }
 
-  try {
-    await rm(deletedProfilePath, { recursive: true, force: true });
-  } catch (error) {
+  if (deletedProfilePath) {
     try {
-      await rename(deletedProfilePath, profilePath);
-      await writeFileAtomically(localStatePath, originalLocalStateText);
-    } catch {
-      throw new Error("Profile deletion failed and could not be rolled back");
+      await rm(deletedProfilePath, { recursive: true, force: true });
+    } catch (error) {
+      try {
+        await rename(deletedProfilePath, profilePath);
+        await writeFileAtomically(localStatePath, originalLocalStateText);
+      } catch {
+        throw new Error("Profile deletion failed and could not be rolled back");
+      }
+      throw error;
     }
-    throw error;
   }
   return localState;
 };
