@@ -76,7 +76,7 @@ export function PresetConfigForm({ preset, onSave }: PresetConfigFormProps) {
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Could not save preset",
+        title: "Could not save prompt",
         message: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -89,11 +89,11 @@ export function PresetConfigForm({ preset, onSave }: PresetConfigFormProps) {
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle={preset ? "Edit Preset" : "Create Preset"}
+      navigationTitle={preset ? "Edit Saved Prompt" : "Create Saved Prompt"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Save Preset"
+            title="Save Prompt"
             icon={Icon.CheckCircle}
             onSubmit={handleSubmit}
           />
@@ -127,7 +127,7 @@ export function PresetConfigForm({ preset, onSave }: PresetConfigFormProps) {
       />
       <Form.Description
         title="Arguments"
-        text="Every named placeholder, such as {topic}, becomes a field when you run this preset. Repeated placeholders reuse the same value."
+        text="Every named placeholder, such as {topic}, becomes a field when you run this saved prompt. Repeated placeholders reuse the same value."
       />
       <Form.Separator />
       {AI_SERVICES.map((service) => (

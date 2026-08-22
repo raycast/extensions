@@ -1,6 +1,8 @@
 import {
   Action,
   ActionPanel,
+  Alert,
+  confirmAlert,
   Detail,
   environment,
   Form,
@@ -15,9 +17,9 @@ import {
   Toast,
 } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { openPromptUrlRequests } from "./lib/prompt-urls.js";
+import { AI_SERVICES, openPromptUrlRequests } from "./lib/prompt-urls.js";
 import { preparePresetExecution } from "./lib/preset-execution.js";
-import { loadPresets } from "./lib/preset-storage.js";
+import { deletePreset, loadPresets } from "./lib/preset-storage.js";
 import {
   buildPresetDeeplink,
   canRunPresetImmediately,
@@ -43,7 +45,7 @@ export default function RunPresetsCommand(props: RunPresetLaunchProps) {
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Could not load presets",
+          title: "Could not load saved prompts",
           message: error instanceof Error ? error.message : String(error),
         });
       } finally {
@@ -60,27 +62,73 @@ export default function RunPresetsCommand(props: RunPresetLaunchProps) {
       (candidate) => candidate.id === requestedPresetId,
     );
     if (preset) {
-      return <RequestedPreset preset={preset} onPresetChange={replacePreset} />;
+      return <RequestedPreset preset={preset} onPresetChange={updatePreset} />;
     }
   }
 
-  function replacePreset(preset: PromptPreset) {
-    setPresets((current) =>
-      current.map((candidate) =>
+  function updatePreset(preset: PromptPreset) {
+    setPresets((current) => {
+      const existingPreset = current.some(
+        (candidate) => candidate.id === preset.id,
+      );
+      if (!existingPreset) return [...current, preset];
+      return current.map((candidate) =>
         candidate.id === preset.id ? preset : candidate,
-      ),
-    );
+      );
+    });
+  }
+
+  async function removePreset(preset: PromptPreset) {
+    const confirmed = await confirmAlert({
+      title: `Delete “${preset.name}”?`,
+      message: "Any Quicklink for this saved prompt will stop finding it.",
+      primaryAction: {
+        title: "Delete Saved Prompt",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
+    try {
+      await deletePreset(preset.id);
+      setPresets((current) =>
+        current.filter((candidate) => candidate.id !== preset.id),
+      );
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Deleted ${preset.name}`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not delete saved prompt",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Choose a preset…">
+    <List isLoading={isLoading} searchBarPlaceholder="Search saved prompts…">
       <List.EmptyView
         icon={Icon.Stars}
-        title={requestedPresetId ? "Preset Not Found" : "No Presets Yet"}
+        title={
+          requestedPresetId ? "Saved Prompt Not Found" : "No Saved Prompts Yet"
+        }
         description={
           requestedPresetId
-            ? "This preset may have been deleted. You can remove its Quicklink."
-            : "Create presets from the Manage AI Prompt Presets command."
+            ? "It may have been deleted. You can remove its Quicklink."
+            : "Create a reusable prompt template and choose where it opens."
+        }
+        actions={
+          requestedPresetId ? undefined : (
+            <ActionPanel>
+              <Action.Push
+                title="Create Saved Prompt"
+                icon={Icon.Plus}
+                target={<PresetConfigForm onSave={updatePreset} />}
+              />
+            </ActionPanel>
+          )
         }
       />
       {!requestedPresetId
@@ -89,6 +137,7 @@ export default function RunPresetsCommand(props: RunPresetLaunchProps) {
               key={preset.id}
               icon={Icon.Stars}
               title={preset.name}
+              subtitle={describePreset(preset)}
               accessories={[
                 {
                   text: `${Object.values(preset.serviceCounts).reduce((sum, count) => sum + count, 0)} tabs`,
@@ -98,21 +147,18 @@ export default function RunPresetsCommand(props: RunPresetLaunchProps) {
                 <ActionPanel>
                   <RunPresetAction
                     preset={preset}
-                    onPresetChange={replacePreset}
+                    onPresetChange={updatePreset}
                   />
                   <Action.Push
-                    title="Edit Preset"
+                    title="Edit Saved Prompt"
                     icon={Icon.Pencil}
                     shortcut={Keyboard.Shortcut.Common.Edit}
                     target={
-                      <PresetConfigForm
-                        preset={preset}
-                        onSave={replacePreset}
-                      />
+                      <PresetConfigForm preset={preset} onSave={updatePreset} />
                     }
                   />
                   <Action.CreateQuicklink
-                    title="Create Quicklink for Preset"
+                    title="Create Quicklink for Saved Prompt"
                     icon={Icon.Link}
                     quicklink={{
                       name: preset.name,
@@ -123,6 +169,19 @@ export default function RunPresetsCommand(props: RunPresetLaunchProps) {
                       ),
                     }}
                   />
+                  <Action.Push
+                    title="Create Saved Prompt"
+                    icon={Icon.Plus}
+                    shortcut={Keyboard.Shortcut.Common.New}
+                    target={<PresetConfigForm onSave={updatePreset} />}
+                  />
+                  <Action
+                    title="Delete Saved Prompt"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    onAction={() => removePreset(preset)}
+                  />
                 </ActionPanel>
               }
             />
@@ -130,6 +189,19 @@ export default function RunPresetsCommand(props: RunPresetLaunchProps) {
         : null}
     </List>
   );
+}
+
+function describePreset(preset: PromptPreset): string {
+  const argumentCount = extractTemplateArguments(preset.template).length;
+  const destinations = AI_SERVICES.filter(
+    (service) => preset.serviceCounts[service.id] > 0,
+  )
+    .map((service) => {
+      const count = preset.serviceCounts[service.id];
+      return count === 1 ? service.name : `${service.name} ×${count}`;
+    })
+    .join(", ");
+  return `${argumentCount} argument${argumentCount === 1 ? "" : "s"} · ${destinations}`;
 }
 
 export function RunPresetForm({
@@ -199,12 +271,12 @@ export function RunPresetForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Run Preset"
+            title="Run Saved Prompt"
             icon={Icon.Airplane}
             onSubmit={handleSubmit}
           />
           <Action.Push
-            title="Edit Preset"
+            title="Edit Saved Prompt"
             icon={Icon.Pencil}
             shortcut={Keyboard.Shortcut.Common.Edit}
             target={
@@ -244,7 +316,7 @@ export function RunPresetForm({
       {argumentsInTemplate.length === 0 ? (
         <Form.Description
           title="Prompt"
-          text="This preset has no arguments and is ready to run."
+          text="This saved prompt has no arguments and is ready to run."
         />
       ) : null}
       <Form.Description
@@ -279,7 +351,7 @@ export function RunPresetAction({
   if (canRunPresetImmediately(preset)) {
     return (
       <Action
-        title="Run Preset"
+        title="Run Saved Prompt"
         icon={Icon.Airplane}
         onAction={runImmediately}
       />
@@ -288,7 +360,7 @@ export function RunPresetAction({
 
   return (
     <Action.Push
-      title="Run Preset"
+      title="Run Saved Prompt"
       icon={Icon.Airplane}
       target={<RunPresetForm preset={preset} onPresetChange={onPresetChange} />}
     />
@@ -348,17 +420,17 @@ function AutoRunPreset({
       markdown={
         isLoading
           ? "Opening the configured tabs…"
-          : "The automatic run finished with an issue. You can retry or edit the preset."
+          : "The automatic run finished with an issue. You can retry or edit the saved prompt."
       }
       actions={
         <ActionPanel>
           <Action
-            title="Run Preset Again"
+            title="Run Saved Prompt Again"
             icon={Icon.Airplane}
             onAction={runPreset}
           />
           <Action.Push
-            title="Edit Preset"
+            title="Edit Saved Prompt"
             icon={Icon.Pencil}
             shortcut={Keyboard.Shortcut.Common.Edit}
             target={
@@ -379,7 +451,7 @@ async function executePreset(
 ): Promise<void> {
   await showToast({
     style: Toast.Style.Animated,
-    title: "Preparing preset…",
+    title: "Preparing saved prompt…",
     message: `Running ${preset.name}`,
   });
 
@@ -388,7 +460,7 @@ async function executePreset(
     if (prepared.status === "missing") {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Preset is no longer available",
+        title: "Saved prompt is no longer available",
         message: "It may have been deleted in another Raycast window.",
       });
       return;
@@ -397,8 +469,8 @@ async function executePreset(
       onPresetChange(prepared.preset);
       await showToast({
         style: Toast.Style.Failure,
-        title: "Preset changed",
-        message: "Review the updated preset and run it again.",
+        title: "Saved prompt changed",
+        message: "Review the updated saved prompt and run it again.",
       });
       return;
     }
@@ -407,7 +479,7 @@ async function executePreset(
     if (requests.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "This preset has no enabled services",
+        title: "This saved prompt has no enabled services",
       });
       return;
     }

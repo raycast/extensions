@@ -8,7 +8,7 @@ This extension is designed for comparing or delegating work across separate prov
 
 - Send the same prompt to several provider websites in one action.
 - Reuse existing browser sessions without API keys or a Raycast AI subscription.
-- Save parameterized prompt presets and launch them from Raycast Quicklinks.
+- Save parameterized prompt templates and launch them from Raycast Quicklinks.
 
 ## Commands
 
@@ -25,9 +25,9 @@ Tabs open sequentially in this order:
 
 If one tab fails to open, the extension records the failure and continues with the remaining tabs.
 
-### Manage AI Prompt Presets
+### Saved Prompts
 
-Create, edit, and delete reusable prompt templates. A preset stores:
+Search, run, create, edit, and delete reusable prompt templates. A saved prompt stores:
 
 - A name
 - A prompt template
@@ -39,13 +39,9 @@ Add named arguments with braces, such as:
 Summarize the latest developments in {topic} for an audience of {audience}.
 ```
 
-Each unique argument becomes a field when the preset runs. Repeated arguments reuse the same value.
+Each unique argument becomes a field when the saved prompt runs. Repeated arguments reuse the same value.
 
-You can also create a Raycast Quicklink for a preset. Presets without arguments run immediately from their Quicklinks; presets with arguments open a form first.
-
-### Run AI Prompt Preset
-
-Search your saved presets and run one. Presets are stored locally by Raycast.
+You can also create a Raycast Quicklink for a saved prompt. Saved prompts without arguments run immediately from their Quicklinks; saved prompts with arguments open a form first. Saved prompts are stored locally by Raycast.
 
 ## Browser Preference
 

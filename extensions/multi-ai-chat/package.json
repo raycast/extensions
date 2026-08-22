@@ -30,15 +30,9 @@
       "mode": "view"
     },
     {
-      "name": "manage-presets",
-      "title": "Manage AI Prompt Presets",
-      "description": "Create, edit, delete, and add hotkeys to reusable AI prompt presets",
-      "mode": "view"
-    },
-    {
       "name": "run-presets",
-      "title": "Run AI Prompt Preset",
-      "description": "Choose and run a reusable prompt in configured AI chats",
+      "title": "Saved Prompts",
+      "description": "Create, manage, and run reusable prompts in configured AI chats",
       "mode": "view"
     }
   ],
