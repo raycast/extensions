@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { withCache } from "@raycast/utils";
-import { ApiUsage, CitationLookup, Preferences, SearchResponse } from "./types";
+import { ApiUsage, CitationLookup, SearchResponse } from "./types";
 
 const API_ROOT = "https://www.courtlistener.com/api/rest/v4";
 export const WEB_ROOT = "https://www.courtlistener.com";
@@ -23,6 +23,8 @@ export class ApiError extends Error {
 }
 
 function authHeader() {
+  // `Preferences` is the ambient type generated into raycast-env.d.ts from the manifest, so a
+  // change to the preference in package.json shows up here rather than drifting past a hand-copy.
   const { apiToken } = getPreferenceValues<Preferences>();
   return { Authorization: `Token ${apiToken}` };
 }
