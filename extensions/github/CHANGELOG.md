@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Search Repositories UX and Performance Fixes] - {PR_MERGE_DATE}
+## [Search Repositories UX and Performance Fixes] - 2026-08-22
 
 - Search Repositories: Show **Recent Visited Repositories** when the search field is empty instead of running a blank API search.
 - Search Repositories: Add **Disable Throttle** preference for immediate search on each keystroke.
