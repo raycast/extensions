@@ -130,22 +130,33 @@ export default function Command() {
 
   const hasResults = results.length > 0;
 
-  const focusMatch = async (match: Match) => {
+  const focusMatch = async (match: Match): Promise<boolean> => {
     try {
       await focusPane(match.pane.paneId);
+      return true;
     } catch (e) {
+      // The matched pane closed since the capture, so this result is stale:
+      // don't navigate elsewhere and report success — tell the user to reload
       console.error(`exec error: ${e}`);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "That pane has closed 😢",
+        message: "Reload the scrollback with ⌘R and search again",
+      });
+      return false;
     }
   };
 
   const switchToMatch = async (match: Match) => {
-    await focusMatch(match);
-    switchToSession(match.pane.sessionName, setIsLoading);
+    if (await focusMatch(match)) {
+      switchToSession(match.pane.sessionName, setIsLoading);
+    }
   };
 
   const openMatch = async (match: Match, target: OpenTarget) => {
-    await focusMatch(match);
-    await openSessionInTerminal(match.pane.sessionName, target, setIsLoading);
+    if (await focusMatch(match)) {
+      await openSessionInTerminal(match.pane.sessionName, target, setIsLoading);
+    }
   };
 
   return (
