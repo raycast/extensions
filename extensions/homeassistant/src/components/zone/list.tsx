@@ -1,6 +1,7 @@
-import { useHAStates } from "@components/hooks";
+import { useHAStates, useVisibleHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
+import { sortStatesWithFavoritesFirst, useEntityOverrides } from "@lib/entity-overrides";
 import { State } from "@lib/haapi";
 import { List, Toast, showToast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
@@ -37,8 +38,9 @@ export function ZoneList(props: { state: State }): React.ReactElement {
 
 export function ZonesList(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, "zone", "", allStates);
+  const { states: allStates, error, isLoading } = useVisibleHAStates();
+  const { entityAliases, favoriteEntityIds } = useEntityOverrides();
+  const { states } = useStateSearch(searchText, "zone", "", allStates, entityAliases);
 
   if (error) {
     showToast({
@@ -52,9 +54,11 @@ export function ZonesList(): React.ReactElement {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
+  const sortedStates = sortStatesWithFavoritesFirst(states, favoriteEntityIds, entityAliases);
+
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {states?.map((state) => (
+      {sortedStates?.map((state) => (
         <StateListItem key={state.entity_id} state={state} />
       ))}
     </List>

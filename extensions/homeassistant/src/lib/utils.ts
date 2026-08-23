@@ -58,6 +58,10 @@ export function getFriendlyName(state: State): string {
   return state.attributes.friendly_name || state.entity_id;
 }
 
+export function getDisplayName(state: State, alias?: string): string {
+  return alias || state.attributes.friendly_name || state.entity_id;
+}
+
 export function getStateTooltip(state: State): string {
   const lastChanged = formatToHumanDateTime(state.last_changed) || "?";
   const lastUpdated = formatToHumanDateTime(state.last_updated) || "?";

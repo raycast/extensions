@@ -1,14 +1,16 @@
-import { useHAStates } from "@components/hooks";
+import { useVisibleHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
+import { sortStatesWithFavoritesFirst, useEntityOverrides } from "@lib/entity-overrides";
 import { List, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
 import { sortBatteries } from "./utils";
 
 export function BatteryList(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, "", "battery", allStates);
+  const { states: allStates, error, isLoading } = useVisibleHAStates();
+  const { entityAliases, favoriteEntityIds } = useEntityOverrides();
+  const { states } = useStateSearch(searchText, "", "battery", allStates, entityAliases);
 
   if (error) {
     showToast({
@@ -22,7 +24,7 @@ export function BatteryList(): React.ReactElement {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
-  const sortedStates = sortBatteries(states);
+  const sortedStates = sortStatesWithFavoritesFirst(sortBatteries(states) ?? states, favoriteEntityIds, entityAliases);
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
       {sortedStates?.map((state) => (

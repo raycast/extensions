@@ -1,8 +1,9 @@
 import { ShowAttributesAction } from "@components/entity";
-import { useHAStates } from "@components/hooks";
+import { useHAStates, useVisibleHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
 import { PrimaryIconColor } from "@components/state/utils";
+import { sortStatesWithFavoritesFirst, useEntityOverrides } from "@lib/entity-overrides";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getStateTooltip } from "@lib/utils";
@@ -53,8 +54,10 @@ function HACSUpdateItems(props: { state: State | undefined }): React.ReactElemen
 
 export function UpdatesList(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, "update", "", allStates);
+  const { states: allStates, error, isLoading } = useVisibleHAStates();
+  const { states: allStatesUnfiltered } = useHAStates();
+  const { entityAliases, favoriteEntityIds } = useEntityOverrides();
+  const { states } = useStateSearch(searchText, "update", "", allStates, entityAliases);
 
   if (error) {
     showToast({
@@ -68,10 +71,11 @@ export function UpdatesList(): React.ReactElement {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
-  const updateRequiredStates = states.filter((s) => s.state === "on");
-  const otherStates = states.filter((s) => s.state !== "on");
+  const sortedStates = sortStatesWithFavoritesFirst(states, favoriteEntityIds, entityAliases);
+  const updateRequiredStates = sortedStates.filter((s) => s.state === "on");
+  const otherStates = sortedStates.filter((s) => s.state !== "on");
 
-  const hacsState = allStates?.find((s) => s.entity_id === "sensor.hacs");
+  const hacsState = allStatesUnfiltered?.find((s) => s.entity_id === "sensor.hacs");
 
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
