@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Fix translations failing with JSON parse error] - 2026-08-24
+## [Fix translations failing with JSON parse error] - {PR_MERGE_DATE}
 
 - Switched the Google Translate API client identifier from `gtx` to `dict-chrome-ex` to avoid Google's 429 HTML block page for non-browser clients
 
