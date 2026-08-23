@@ -1,6 +1,6 @@
 # Mirror Displays Changelog
 
-## [Fix mirroring on desktop Macs] - {PR_MERGE_DATE}
+## [Fix mirroring on desktop Macs] - 2026-08-23
 
 - Fixed "Could not find the internal Mac display" error on Macs with no built-in display (Mac mini, Mac Studio, Mac Pro) by falling back to the system's main display as the primary screen.
 
