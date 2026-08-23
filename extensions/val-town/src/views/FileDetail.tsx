@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api
 import { useCachedPromise } from "@raycast/utils";
 import { endpointOf, readFile, webUrlFor } from "../lib/api";
 import { codeBlock, errorMessage, fileIcon, formatRelative } from "../lib/format";
+import { cmdOrCtrl } from "../lib/shortcuts";
 import type { ValFile } from "../lib/types";
 import { LogList } from "./LogList";
 import { RunResult } from "./RunResult";
@@ -51,7 +52,7 @@ export function FileDetail({ val, branch, file }: { val: string; branch: string;
             <Action.Push
               title="View Logs"
               icon={Icon.Terminal}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
+              shortcut={cmdOrCtrl("l")}
               target={<LogList fileId={file.id} fileName={file.path} />}
             />
             {file.type === "interval" ? (

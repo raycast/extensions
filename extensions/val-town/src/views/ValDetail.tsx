@@ -15,6 +15,7 @@ import { getValDetail, listVals, setPrivacy, webUrlFor } from "../lib/api";
 import { appAccessColor, errorMessage, formatRelative, privacyColor } from "../lib/format";
 import { cacheVal, cachedReadme, cachedVal } from "../lib/cache";
 import { loadReadme } from "../lib/readme";
+import { cmdOrCtrl } from "../lib/shortcuts";
 import { loadState } from "../lib/store";
 import type { Privacy } from "../lib/types";
 import { readValConfig, writeValConfig, type ValConfig } from "../lib/valconfig";
@@ -210,7 +211,7 @@ export function ValDetail({ identifier }: { identifier: string }) {
             <Action
               title="Configure Val"
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              shortcut={cmdOrCtrl("t")}
               onAction={() => configure(false)}
             />
             <Action.Push
@@ -222,13 +223,13 @@ export function ValDetail({ identifier }: { identifier: string }) {
             <Action.Push
               title="SQLite"
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
+              shortcut={cmdOrCtrl("l")}
               target={<SqliteQuery val={identifier} />}
             />
             <Action.Push
               title="Blobs"
               icon={Icon.Box}
-              shortcut={{ modifiers: ["cmd"], key: "b" }}
+              shortcut={cmdOrCtrl("b")}
               target={<BlobList val={identifier} />}
             />
             {branchCount > 1 ? (
@@ -260,7 +261,7 @@ export function ValDetail({ identifier }: { identifier: string }) {
               <Action
                 title="Enable AI Agent Access"
                 icon={Icon.CheckCircle}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                shortcut={cmdOrCtrl("a", "shift")}
                 onAction={() => configure(true)}
               />
             ) : null}
@@ -268,7 +269,7 @@ export function ValDetail({ identifier }: { identifier: string }) {
               <Action
                 title="Enable AI Agent Access"
                 icon={Icon.CheckCircle}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                shortcut={cmdOrCtrl("a", "shift")}
                 onAction={() => updateConfig({ active: true }, "Enabling", "Enabled")}
               />
             ) : null}
@@ -276,7 +277,7 @@ export function ValDetail({ identifier }: { identifier: string }) {
               <Action
                 title="Disable AI Agent Access"
                 icon={Icon.Circle}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                shortcut={cmdOrCtrl("a", "shift")}
                 onAction={() => updateConfig({ active: false }, "Disabling", "Disabled")}
               />
             ) : null}

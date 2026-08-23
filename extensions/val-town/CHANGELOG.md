@@ -1,5 +1,9 @@
 # Val Town Changelog
 
+## [Windows support] - 2026-08-23
+
+- Runs on Raycast for Windows as well as macOS
+
 ## [Rewrite] - 2026-08-22
 
 Rebuilt around one command and an allow list: browse your vals, and allow Raycast AI to run the ones you choose.
