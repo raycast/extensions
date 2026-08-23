@@ -5,6 +5,7 @@
   "description": "Search the dbt documentation website https://docs.getdbt.com/",
   "icon": "dbt-icon.png",
   "author": "b-per",
+  "contributors": ["xmok"],
   "license": "MIT",
   "categories": [
     "Documentation"
@@ -19,25 +20,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.0",
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7",
     "algoliasearch": "^4.11.0",
-    "prettier": "^2.5.0",
-    "cheerio": "^1.0.0-rc.12",
-    "node-fetch": "^3.2.9"
+    "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

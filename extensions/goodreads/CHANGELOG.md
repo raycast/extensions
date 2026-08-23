@@ -1,5 +1,15 @@
 # goodreads Changelog
 
+## [Copy Cover URL in Book Details] - 2026-06-27
+
+- Add `Copy` to book details (ref: [Issue #28910](https://github.com/raycast/extensions/issues/28910))
+- chore: update deps
+- update: many `shortcut` to be cross-platform
+
+## [Bugfix] - 2026-05-21
+
+- Restore book search results.
+
 ## [Windows Support] - 2026-03-01
 
 - Add Windows platform support

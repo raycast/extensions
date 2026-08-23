@@ -1,5 +1,29 @@
 # Obsidian Changelog
 
+## [Fix Plugin Configuration Permission Errors] - 2026-08-19
+
+- Prevent plugin checks from crashing when Obsidian configuration files cannot be read
+
+## [Fix AI searchNote OOM on oversized Markdown] - 2026-08-15
+
+- Skip Markdown files larger than 1 MiB during full-content search instead of reading them into the 100 MB extension heap
+- Limit tag search on oversized files to a growing prefix (64 KiB steps, 1 MiB cap) so YAML tags still match when frontmatter crosses the first chunk
+- Default the AI `searchNote` `searchContent` parameter to `false`, matching the UI Search Note command
+
+## [Fix Delete Note Shortcut] - 2026-07-18
+
+- Update the Delete Note action to use the common `Keyboard.Shortcut.Common.Remove` shortcut
+- Drop the previous custom `opt+d` shortcut from the Delete Note action
+
+## [Add Open Action Shortcuts] - 2026-07-18
+
+- Add keyboard shortcut to the "Open in Default App" action
+- Assign the common Open shortcut to the "Open in New Obsidian Tab" action
+
+## [Add] - 2026-06-28
+
+- Added vault path display to the Open Vault command
+
 ## [Fix] - 2026-05-05
 
 - Fix vault auto-discovery on Windows and Linux by reading `obsidian.json` from the per-platform Obsidian config dir

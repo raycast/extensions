@@ -7,37 +7,29 @@ import { CommandRoot } from "./components/CommandRoot";
 // content. We clear the clipboard first so we can detect whether the app
 // actually copied anything, then restore the original clipboard if selection
 // fails or nothing was copied.
-async function readSelectedText(): Promise<string> {
+async function _readSelectedText(): Promise<string> {
   const originalClipboard = await Clipboard.readText();
-
   await Clipboard.copy("");
-  try {
-    const text = await getSelectedText();
-    const trimmed = text.trim();
 
-    if (trimmed) {
-      return trimmed;
-    }
+  const trimmedSelection = await getSelectedText()
+    .then((text) => text.trim())
+    .catch(() => "");
 
-    if (originalClipboard) {
-      await Clipboard.copy(originalClipboard);
-    }
-
-    throw new Error("No text selected");
-  } catch {
-    if (originalClipboard) {
-      await Clipboard.copy(originalClipboard);
-    }
-
-    throw new Error("No text selected");
+  if (trimmedSelection) {
+    return trimmedSelection;
   }
+
+  if (originalClipboard) {
+    await Clipboard.copy(originalClipboard);
+  }
+  throw new Error("No text selected");
 }
 
 export default function SearchSelectedWord() {
   const [selectedText, setSelectedText] = useState("");
 
   useEffect(() => {
-    readSelectedText()
+    _readSelectedText()
       .then(setSelectedText)
       .catch(async () => {
         await showToast({

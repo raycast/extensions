@@ -14,33 +14,32 @@ Send the current browser article to Kindle as a clean EPUB, with domain-based cl
 
 ## Advantages vs Official "Send to Kindle" Chrome Extension
 
-| Feature | This Raycast extension | Official Chrome extension |
-| ------------------------------------------------------ | ---------------------- | ------------------------- |
-| Outdated UX | ❌ | ✅ |
-| Readability.js-based extraction for better results | ✅ | ❌ |
-| Custom per-domain CSS filters | ✅ | ❌ |
-| Manual cover photo selection (`Cover CSS`) | ✅ | ❌ |
-| Guided cover selector picker (`Add Cover Skill`) | ✅ | ❌ |
-| Guided filter selector (`Add Filter Skill`) | ✅ | ❌ |
-| Cover preview before sending | ✅ | ❌ |
-| Edit content before sending | ✅ | ❌ |
-| Faster (in email mode) | ✅ | ❌ |
-| Uses site name instead of article author name | ✅ | ❌ |
-| Import/export filter profiles (JSON) | ✅ | ❌ |
-| Two delivery methods (local app or email) | ✅ | ❌ |
-| Optional removal of all article links before sending | ✅ | ❌ |
-| Sending history | ✅ | ❌ |
+| Feature                                              | This Raycast extension | Official Chrome extension |
+| ---------------------------------------------------- | ---------------------- | ------------------------- |
+| Outdated UX                                          | ❌                     | ✅                        |
+| Readability.js-based extraction for better results   | ✅                     | ❌                        |
+| Custom per-domain CSS filters                        | ✅                     | ❌                        |
+| Manual cover photo selection (`Cover CSS`)           | ✅                     | ❌                        |
+| Guided cover selector picker (`Add Cover Skill`)     | ✅                     | ❌                        |
+| Guided filter selector (`Add Filter Skill`)          | ✅                     | ❌                        |
+| Cover preview before sending                         | ✅                     | ❌                        |
+| Edit content before sending                          | ✅                     | ❌                        |
+| Faster (in email mode)                               | ✅                     | ❌                        |
+| Uses site name instead of article author name        | ✅                     | ❌                        |
+| Import/export filter profiles (JSON)                 | ✅                     | ❌                        |
+| Two delivery methods (local app or email)            | ✅                     | ❌                        |
+| Optional removal of all article links before sending | ✅                     | ❌                        |
+| Sending history                                      | ✅                     | ❌                        |
 
 ## Cover Skill vs Filter Skill
 
-The extension uses 2 complementary skill types per domain. 
+The extension uses 2 complementary skill types per domain.
 
 When a skill is added, it is applied to all the future articles you will send from that domain.
 
 - `Filter Skill`
   - Removes unwanted page blocks before extraction (ads, sidebars, popups, cookie walls, related-content blocks).
   - Goal: cleaner article body and better readability output.
-  
 - `Cover Skill`
   - Targets the best image to use as the Kindle cover.
   - Goal: consistent, high-quality cover image instead of random inline article images (or no image at all with the official "Send to Kindle Chrome extension").

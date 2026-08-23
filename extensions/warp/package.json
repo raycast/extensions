@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "warp",
   "title": "Warp",
-  "description": "Open Warp tabs/windows and Launch Configurations.",
+  "description": "Open Warp tabs, windows, and Tab Configs.",
   "icon": "warp-icon.png",
   "author": "joetannenbaum",
   "contributors": [
@@ -25,8 +25,8 @@
   "commands": [
     {
       "name": "launch-config",
-      "title": "Open Launch Configuration",
-      "description": "Open a Warp Launch Configuration.",
+      "title": "Open Tab Config",
+      "description": "Open a Warp Tab Config or legacy Launch Configuration.",
       "mode": "view"
     },
     {
@@ -77,7 +77,6 @@
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.4.8",
-    "node-spotlight": "^1.0.0",
     "yaml": "^2.2.1"
   },
   "devDependencies": {
@@ -99,6 +98,12 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
-  ]
+    "macOS",
+    "Windows"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.1",
+    "fast-uri": "3.1.5"
+  }
 }

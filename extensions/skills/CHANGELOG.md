@@ -1,5 +1,73 @@
 # Skills Changelog
 
+## [Updated contributor] - 2026-08-18
+
+## [Fix Runtime Detection and Skill Lookup] - 2026-07-30
+
+- Detect `bun`/`node` installed outside a version manager or Homebrew, so "Unable to find a working bunx or npx command" no longer appears for Bun's official installer (`~/.bun/bin`), Nix / nix-darwin profiles, mise, and asdf
+- Report what the `skills` CLI printed when it exits non-zero, instead of only "Command failed: bunx --silent skills@latest …" with no reason — the CLI writes its errors to stdout, which was being discarded
+- Fall back to `npx` when `bunx` dies without printing anything at all, limited to read-only commands so a mutating `add`/`remove`/`update` is never run twice
+- Resolve skills whose `SKILL.md` sits at the repository root (single-skill repos), which previously failed to load in the detail view
+- Make the `read-skill` AI tool use the same repo-layout resolution as the detail view, so nested and root-level skills are readable
+
+## [Document Custom Registry Configuration] - 2026-07-03
+
+- Add README guidance for pointing `bunx`/`npx` at a custom package registry (corporate proxy) via `~/.npmrc` and `~/.bunfig.toml`, since Raycast does not inherit shell environment variables
+
+## [Use Security Audit API] - 2026-06-26
+
+- Use the Skills security audit API instead of parsing audit data from the skills.sh HTML page
+
+## [Sync Skills Agent IDs] - 2026-06-26
+
+- Sync the local Skills CLI agent ID fallback map with the upstream supported agents list
+
+## [Add Update All Skills Command] - 2026-06-16
+
+- Add a standalone "Update All Skills" command to update all installed skills directly from Raycast
+
+## [Fix Skill Contents for Nested Skills] - 2026-06-09
+
+- Fix skill details and the "Copy Skill Contents" action falling back to the repository README for skills nested under category folders (e.g. `skills/productivity/grill-me/SKILL.md`) by locating the real SKILL.md anywhere in the repository tree
+
+## [Copy Skill Contents] - 2026-06-06
+
+- Add a "Copy Skill Contents" action to copy a skill's full SKILL.md to the clipboard from search results, skill details, and installed skills, so it can be pasted into tools like ChatGPT or Claude without installing the skill
+- Move the "Copy Install Command" action to `⌘ ⇧ I` so the canonical copy shortcut (`⌘ ⇧ C`) copies the skill contents
+
+## [Fix Confirmation Dialog Icon] - 2026-06-05
+
+- Show a relevant icon in the Update, Install, and Remove confirmation dialogs instead of falling back to the oversized extension icon on Windows
+
+## [Fix Global Skill Updates] - 2026-06-04
+
+- Run skill update actions against global installs, matching the global skill list shown in Manage Skills
+
+## [Default Agents Preference] - 2026-06-01
+
+- Add a "Default Agents" preference to pre-select agents when installing a skill, so frequently-used agents (e.g. Claude Code) are checked automatically without manual selection each time
+
+## [Show Installed Skill Audit Details] - 2026-05-20
+
+- Add an "Open on skills.sh" action and `skills.sh` detail link for published installed skills
+- Show security audit statuses, audit links, and audit actions in installed skill details
+
+## [Ask Skills AI Extension] - 2026-05-12
+
+- Add `@skills` support in Raycast AI Chat with five tools: search the marketplace by query, read a skill's full instructions, list installed skills, install a skill for specific agents, and remove a skill
+
+## [Fix Stale Search Results] - 2026-05-12
+
+- Clear stale search results when the current search fails or is superseded by a newer query
+
+## [Standardize Open Actions] - 2026-05-12
+
+- Standardize **Open on skills.sh** and **Open Repository** actions across Search Skills and Manage Skills
+
+## [Fix Support Directory Initialization] - 2026-05-11
+
+- Ensure the extension support directory exists before cached hooks run, preventing "Could not create extension support directory" errors on first launch
+
 ## [Add Newly Supported Agents] - 2026-05-05
 
 - Add 11 agents supported by the Skills CLI: AiderDesk, Code Studio, CodeArts Agent, Codemaker, Devin for Terminal, Dexto, ForgeCode, IBM Bob, Rovo Dev, Tabnine CLI, and Universal

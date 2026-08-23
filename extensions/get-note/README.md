@@ -25,10 +25,12 @@ GetNote brings your GetNote workspace into Raycast. Browse recent notes, run sem
 - `Search Notes`
 - `Save Link`
 - `Save Text Note`
+- `Save Image Note`
 
 ## AI Tools
 
 - `get-total-note-count`
+- `get-quota`
 - `search-notes`
 - `get-note-detail`
 - `save-link-note`

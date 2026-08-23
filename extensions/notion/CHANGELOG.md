@@ -1,5 +1,15 @@
 # Notion Changelog
 
+## [Add Note Command] - 2026-08-19
+
+- Add a new `Add Note` command that appends a note to a page titled with the current date, nested inside a notes page (`NOTES` by default)
+- Create the notes page and the daily page automatically when they don't exist yet
+- Add preferences for the notes page name, the date format of the daily page, and the note style (bulleted list, to-do or paragraph)
+
+## [Add Pin Pages Action] - 2026-05-19
+
+- Add a new action to pin a page in the `Search Page` command
+
 ## [Add date divider to Quick Capture] - 2026-04-30
 
 - Add an `Append with a date divider` checkbox to Notion Quick Capture so captured content can be prefixed with the current date ([#27345](https://github.com/raycast/extensions/pull/27345))

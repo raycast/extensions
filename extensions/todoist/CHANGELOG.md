@@ -1,5 +1,55 @@
 # Todoist Changelog
 
+## [Fix menu bar out-of-memory crash] - 2026-07-18
+
+- Fixed the Menu Bar command crashing with "Worker terminated due to reaching memory limit" on larger accounts. Every command previously shared one cache key holding the entire sync state (all tasks, comments, and locations); the menu bar's background worker now uses its own cache key holding only the small slice of data it needs (user, projects, items, labels, collaborators), completing the sync scoping started in #28005.
+
+## [Omit paid task fields unless requested] - 2026-06-28
+
+- **Create Task tool**: The AI tool now omits empty deadline and duration payloads, and its field descriptions clarify that those paid Todoist fields should only be sent when explicitly requested. Standard task creation with ordinary due dates remains compatible with Free plan accounts.
+
+## [Revert Quick Add Task fallback command fix] - 2026-06-24
+
+- Reverted the Quick Add Task fallback command fix because making the `text` argument optional broke the hotkey workflow (command launched immediately with empty text instead of prompting for input).
+
+## [Fix Quick Add Task fallback command] - 2026-06-24
+
+- Quick Add Task now works as a Raycast fallback command on Raycast 2.0+. Previously it failed with "Value is missing in argument" because the text argument was required.
+
+## [Guard against empty sync response arrays] - 2026-06-19
+
+- Prevent cache corruption when the Todoist Sync API returns an empty array for projects, items, labels, filters, or notes during incremental sync mutations.
+
+## [Keep recurrence when rescheduling] - 2026-06-19
+
+- **Recurring tasks keep their repeat rule** when you change the due date from task actions or the menu bar (including shortcuts like Today, Tomorrow, Next Week, and Next Weekend).
+- **Hourly recurring tasks** still anchor an all-day due to the current time when rescheduled.
+- **Focused task** no longer unfocuses while the menu bar is loading, and removing the focus label is skipped safely when the task is missing.
+- **AI tools** accept comma-separated or JSON-array strings for labels, resource types, and comment notification user IDs.
+- **Windows**: Fixed the Create View Quicklink keyboard shortcut (`Ctrl` + `Shift` + `N`).
+
+## [Fix Create Task tool paid fields] - 2026-05-28
+
+- The Create Task tool now omits empty or invalid `deadline` and `duration` fields so standard task creation works for Todoist Free plan users.
+
+## [Include deadlines in Today] - 2026-05-20
+
+- Show tasks whose deadline is today or overdue in the Today view, even when they do not have a due date.
+
+## [Menu bar priority sorting] - 2026-05-18
+
+- **Sort menu bar tasks by priority**: Tasks shown in the menu bar (Today, Upcoming, Inbox, and Filter views) are now ordered by priority first (highest first), then by their existing default order, so the most important tasks surface at the top.
+- **Toggle from preferences**: A new **Sort tasks by priority** checkbox in the menu bar command preferences lets you turn priority sorting off and fall back to the previous default ordering. Enabled by default.
+
+## [Reduce Menu Bar sync size] - 2026-05-28
+
+- Reduced Menu Bar Tasks memory usage by syncing only the Todoist resources used by the menu bar.
+
+## [Add Keyboard Shortcuts] - 2026-05-16
+
+- Added a shortcut to create Raycast quicklinks from Todoist views.
+- Added the common new-item shortcut to create Todoist quicklinks from Todoist views.
+
 ## [Filter completion UI and incremental reminder sync] - 2026-05-04
 
 - **Duplicate “at task time” reminders on hourly repeat**: Applying the **same** hourly recurrence twice (when the task already had a timed due and a relative-at-task reminder) no longer queues a second identical reminder; the extension now trusts the merged cache whenever Sync returns an empty `reminders` delta, not only when the field was omitted entirely.
@@ -29,16 +79,20 @@
 - Filters whose query is comma-separated (multiple sub-queries) still show one section per sub-query when **Group tasks by** is **Default**; sort order applies within that layout.
 
 ## [Show deadline as how many days remains] - 2026-03-31
+
 - The task deadlines are shown as "in X days" instead of a specific date, like the todoist app.
 
 ## [Fix reminders and Create Task NLP parsing] - 2026-03-06
+
 - Enabled Todoist auto_reminder in Quick Add and added a fallback reminder creation path when Todoist does not create it automatically.
 - Fixed Create Task natural-language token cleanup and due-time parsing edge cases.
 
 ## [Fixing Todoist PR updates] - 2026-02-11
+
 - Fixed a crash in the syncRequest caused by the Todoist API returning an empty sync_status object, which led to a TypeError when reading error properties from an undefined value.
 
 ## [Set Due Date to Everyday for Existing Tasks] - 2025-10-10
+
 - **Add Option To Schedule "Everyday" for existing tasks**: Now on the homepage you can set schedule the due date of tasks to repeat everyday. Useful to setting tasks to recurring events.
 
 ## [Improved Due Time Handling] - 2025-09-04

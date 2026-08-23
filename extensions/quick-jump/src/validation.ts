@@ -390,6 +390,12 @@ function validateUnusedGlobalPlaceholders(data: Root, warnings: ValidationError[
           placeholders.forEach((p) => usedPlaceholders.add(p));
         }
       }
+
+      // Check the URL's own direct url string
+      if (url.url) {
+        const placeholders = extractPlaceholders(url.url);
+        placeholders.forEach((p) => usedPlaceholders.add(p));
+      }
     }
   }
 

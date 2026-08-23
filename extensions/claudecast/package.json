@@ -199,8 +199,8 @@
           "name": "showCostInMenuBar",
           "type": "checkbox",
           "default": false,
-          "label": "Show Cost in Menu Bar",
-          "description": "Display today's cost next to the menu bar icon",
+          "label": "Show Today's Cost",
+          "description": "Display today's spend (USD) next to the menu bar icon. Updates every 30 seconds.",
           "required": false
         }
       ]
@@ -245,7 +245,7 @@
     {
       "name": "terminalApp",
       "title": "Terminal Application",
-      "description": "The terminal app to use for launching Claude Code sessions",
+      "description": "Choose which terminal opens new Claude Code sessions. Each app uses its native AppleScript or CLI so launches are reliable across macOS updates.",
       "type": "dropdown",
       "default": "Terminal",
       "required": false,
@@ -263,19 +263,23 @@
           "value": "Warp"
         },
         {
-          "title": "Kitty",
+          "title": "kitty",
           "value": "kitty"
         },
         {
           "title": "Ghostty",
           "value": "Ghostty"
+        },
+        {
+          "title": "cmux",
+          "value": "cmux"
         }
       ]
     },
     {
       "name": "openIn",
       "title": "Open In",
-      "description": "Whether to open Claude Code sessions in a new window or a new tab. Notes: kitty's New Tab requires `allow_remote_control yes` and a `listen_on` socket in kitty.conf (otherwise falls back to a new window). Warp always opens a new window.",
+      "description": "Choose whether new Claude Code sessions open in a new terminal window or a new tab in the front window. Per-terminal notes: kitty New Tab requires `allow_remote_control yes` and a `listen_on` socket in `kitty.conf` (otherwise falls back to a new window). Warp always opens a new window regardless of this setting.",
       "type": "dropdown",
       "default": "window",
       "required": false,

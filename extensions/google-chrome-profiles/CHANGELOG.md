@@ -1,5 +1,19 @@
 # Google Chrome Profiles Changelog
 
+## [Fix] - 2026-08-12
+
+- Fix opening a profile while Chrome is closed producing two windows: the requested profile, plus one for whichever profile was used last. The Bring to Front / New Tab / Open URL path began with `tell application "Google Chrome" to activate`, which launches Chrome with no arguments; a flagless Chrome restores every profile listed in `profile.last_active_profiles` (Local State), so the previous profile's window appeared before System Events ever clicked the Profiles menu. Branch on whether the browser is already running: when it is, the Profiles-menu click is unchanged and keeps the focus / add-a-tab / find-an-existing-tab semantics; when it is not, do a single cold start into the requested profile with `/usr/bin/open -n -a <bundle> --args --profile-directory=<dir> --new-window [url]`. `--profile-directory` is the profile a cold Chrome boots into, which is what suppresses the session restore.
+- Fix the New Window action holding an `osascript` subprocess open for the browser's entire lifetime. It exec'd Chrome's inner Mach-O binary directly, so `do shell script` never returned; it now shares the `/usr/bin/open` helper above, which returns as soon as Launch Services takes the request. `BrowserConfig.binaryPath` becomes `appPath` accordingly, since `open -a` expects the `.app` bundle.
+
+## [Fix] - 2026-07-14
+
+- Fix profile actions still failing in the store build after the 2026-05-26 detached-spawn fix. `showHUD` was awaited *before* spawning the detached `osascript` subprocess; `showHUD` closes the main window, which starts the extension process teardown, so in the distribution build the Node process could be killed before the `spawn` call ever ran — the HUD appeared but no Chrome action happened. (Dev mode keeps the process alive, which is why this never reproduced under `npm run dev`.) Spawn the detached subprocess first, then show the HUD; skip the HUD when the spawn failed so the failure toast stays visible.
+
+## [Fix] - 2026-05-26
+
+- Fix silent failure of all profile actions (Bring to Front, New Tab, New Window, Open URL) for users who have not previously granted Raycast `AppleEvents` permission for `System Events.app`. `@raycast/utils.runAppleScript` spawns `osascript` without `detached: true`, so it inherits the extension's Node process group. Raycast tears that group down ~40ms after the action handler returns control to React, which kills `osascript` mid-flight and also cancels the asynchronous TCC permission prompt that macOS tries to render on first run, leaving no path for the user to actually grant the permission. Run AppleScript via a detached `child_process.spawn("/usr/bin/osascript", [...], { detached: true, stdio: "ignore" })` + `child.unref()` so the subprocess survives teardown, the TCC prompt renders, and the script runs to completion.
+- Fix bookmark favicon crash on `chrome://` / `about:` URLs: `new URL(...).origin` is `null` for opaque-origin schemes; passing that to `getFavicon` threw `TypeError: Invalid URL` and broke the bookmarks list. Only resolve favicons for `http(s)` bookmarks; use the globe icon for everything else.
+
 ## [Feature] - 2026-04-08
 
 - Add "New Window" action to open a new Chrome window for a profile

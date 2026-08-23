@@ -190,11 +190,11 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title={getTitle()} icon="action-icon.png" onAction={() => handleOpenProject()} />
+            <Action title={getTitle()} icon="icon.png" onAction={() => handleOpenProject()} />
             <Action.ShowInFinder path={path} />
             <Action
               title={getTitle(true)}
-              icon="action-icon.png"
+              icon="icon.png"
               onAction={() => handleOpenProject(true)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             />
@@ -265,10 +265,10 @@ function RemoteItem(
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title={getTitle()} icon="action-icon.png" url={getUrl(uri)} />
+            <Action.OpenInBrowser title={getTitle()} icon="icon.png" url={getUrl(uri)} />
             <Action.OpenInBrowser
               title={getTitle(true)}
-              icon="action-icon.png"
+              icon="icon.png"
               url={getUrl(uri, true)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             />

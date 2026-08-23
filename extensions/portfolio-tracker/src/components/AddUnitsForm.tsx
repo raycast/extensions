@@ -23,8 +23,8 @@
  *   position={position}
  *   accountId={account.id}
  *   accountName={account.name}
- *   onSubmit={async (newTotalUnits) => {
- *     await updatePosition(account.id, position.id, newTotalUnits);
+ *   onSubmit={async (newTotalUnits, newAvgCostPrice) => {
+ *     await updatePosition(account.id, position.id, { units: newTotalUnits, avgCostPrice: newAvgCostPrice });
  *   }}
  * />
  * ```
@@ -41,10 +41,13 @@ import {
   validateTotalValue,
   parseTotalValue,
   computeUnitsFromTotalValue,
+  validatePrice,
 } from "../utils/validation";
 import { formatUnits, formatCurrency, getDisplayName } from "../utils/formatting";
+import { computeWeightedAvgCost } from "../utils/pnl";
 import { useAssetPrice } from "../hooks/useAssetPrice";
 import { useFxRate } from "../hooks/useFxRate";
+import { useOptionalPrice } from "../hooks/useOptionalPrice";
 
 // ──────────────────────────────────────────
 // Input Mode
@@ -76,8 +79,10 @@ interface AddUnitsFormProps {
    * Receives the NEW TOTAL units (currentUnits + addedUnits), already computed.
    *
    * @param newTotalUnits - The updated total number of units
+   * @param newAvgCostPrice - The updated average buy price (weighted), or
+   *   undefined when the user didn't enter a price paid (cost stays unchanged)
    */
-  onSubmit: (newTotalUnits: number) => Promise<void>;
+  onSubmit: (newTotalUnits: number, newAvgCostPrice?: number) => Promise<void>;
 }
 
 // ──────────────────────────────────────────
@@ -137,7 +142,15 @@ export function AddUnitsForm({
   const [unitsError, setUnitsError] = useState<string | undefined>(undefined);
   const [totalValueInput, setTotalValueInput] = useState<string>("");
   const [totalValueError, setTotalValueError] = useState<string | undefined>(undefined);
+  const [pricePaidInput, setPricePaidInput] = useState<string>("");
+  const [pricePaidError, setPricePaidError] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // When a price paid is entered, value mode divides by it instead of the
+  // current price — "amount invested ÷ price paid" recovers the units bought.
+  const enteredPricePaid = useOptionalPrice(pricePaidInput);
+
+  const valueModeUnitPrice = enteredPricePaid ?? referencePrice;
 
   const needsFxConversion = valueCurrency !== position.currency;
 
@@ -177,13 +190,13 @@ export function AddUnitsForm({
 
   const computedUnitsFromValue = useMemo(() => {
     const trimmed = totalValueInput.trim();
-    if (!trimmed || !referencePrice) return null;
+    if (!trimmed || !valueModeUnitPrice) return null;
     const parsed = Number(trimmed);
     if (isNaN(parsed) || parsed <= 0) return null;
     const valueInAssetCurrency = needsFxConversion && fxRate ? parsed * fxRate : parsed;
     if (needsFxConversion && !fxRate) return null;
-    return computeUnitsFromTotalValue(valueInAssetCurrency, referencePrice);
-  }, [totalValueInput, referencePrice, needsFxConversion, fxRate]);
+    return computeUnitsFromTotalValue(valueInAssetCurrency, valueModeUnitPrice);
+  }, [totalValueInput, valueModeUnitPrice, needsFxConversion, fxRate]);
 
   const newTotalFromValue = useMemo(() => {
     if (computedUnitsFromValue === null) return null;
@@ -195,19 +208,27 @@ export function AddUnitsForm({
       return "Loading FX rate...";
     }
     if (computedUnitsFromValue === null || newTotalFromValue === null) {
+      const priceHint = enteredPricePaid
+        ? `your price paid (${formatCurrency(enteredPricePaid, position.currency)})`
+        : `${formatCurrency(referencePrice, position.currency)}/unit`;
       return needsFxConversion
-        ? `Enter the total amount to invest in ${valueCurrency}. Will be converted to ${position.currency} then divided by ${formatCurrency(referencePrice, position.currency)}/unit.`
-        : `Enter the total amount to invest in ${valueCurrency}. Units will be calculated at ${formatCurrency(referencePrice, position.currency)}/unit.`;
+        ? `Enter the total amount to invest in ${valueCurrency}. Will be converted to ${position.currency} then divided by ${priceHint}.`
+        : `Enter the total amount to invest in ${valueCurrency}. Units will be calculated at ${priceHint}.`;
     }
-    const nativeAdded = computedUnitsFromValue * referencePrice;
+    const priceLabel = enteredPricePaid
+      ? `${formatCurrency(enteredPricePaid, position.currency)} paid`
+      : formatCurrency(referencePrice, position.currency);
+    const nativeAdded = computedUnitsFromValue * valueModeUnitPrice;
     if (needsFxConversion && fxRate) {
-      return `→ ${formatUnits(computedUnitsFromValue)} units × ${formatCurrency(referencePrice, position.currency)} = ${formatCurrency(nativeAdded, position.currency)} (${formatCurrency(Number(totalValueInput.trim()), valueCurrency)} at ${fxRate.toFixed(4)} ${valueCurrency}/${position.currency})\n${currentUnitsDisplay} + ${formatUnits(computedUnitsFromValue)} = ${formatUnits(newTotalFromValue)} units`;
+      return `→ ${formatUnits(computedUnitsFromValue)} units × ${priceLabel} = ${formatCurrency(nativeAdded, position.currency)} (${formatCurrency(Number(totalValueInput.trim()), valueCurrency)} at ${fxRate.toFixed(4)} ${valueCurrency}/${position.currency})\n${currentUnitsDisplay} + ${formatUnits(computedUnitsFromValue)} = ${formatUnits(newTotalFromValue)} units`;
     }
-    return `→ ${formatUnits(computedUnitsFromValue)} units × ${formatCurrency(referencePrice, position.currency)} = ${formatCurrency(nativeAdded, position.currency)}\n${currentUnitsDisplay} + ${formatUnits(computedUnitsFromValue)} = ${formatUnits(newTotalFromValue)} units`;
+    return `→ ${formatUnits(computedUnitsFromValue)} units × ${priceLabel} = ${formatCurrency(nativeAdded, position.currency)}\n${currentUnitsDisplay} + ${formatUnits(computedUnitsFromValue)} = ${formatUnits(newTotalFromValue)} units`;
   }, [
     computedUnitsFromValue,
     newTotalFromValue,
     referencePrice,
+    enteredPricePaid,
+    valueModeUnitPrice,
     position.currency,
     currentUnitsDisplay,
     needsFxConversion,
@@ -251,6 +272,17 @@ export function AddUnitsForm({
     setTotalValueError(undefined);
   }
 
+  function handlePricePaidBlur(event: Form.Event<string>) {
+    if (event.target.value && event.target.value.trim().length > 0) {
+      setPricePaidError(validatePrice(event.target.value));
+    }
+  }
+
+  function handlePricePaidChange(value: string) {
+    setPricePaidInput(value);
+    if (pricePaidError) setPricePaidError(undefined);
+  }
+
   // ── Submission ──
 
   async function handleSubmit(values: {
@@ -258,8 +290,19 @@ export function AddUnitsForm({
     totalValueToAdd?: string;
     inputMode?: string;
     valueCurrency?: string;
+    pricePaid?: string;
   }) {
     let addedUnits: number;
+
+    // Validate the optional price paid (native currency)
+    const trimmedPricePaid = values.pricePaid?.trim() ?? "";
+    if (!isCash && trimmedPricePaid) {
+      const priceValidation = validatePrice(trimmedPricePaid);
+      if (priceValidation) {
+        setPricePaidError(priceValidation);
+        return;
+      }
+    }
 
     if (!isCash && inputMode === "value") {
       const tvValidation = validateTotalValue(values.totalValueToAdd);
@@ -275,7 +318,10 @@ export function AddUnitsForm({
 
       const totalValue = parseTotalValue(values.totalValueToAdd!);
       const totalValueInAssetCurrency = needsFxConversion && fxRate ? totalValue * fxRate : totalValue;
-      addedUnits = computeUnitsFromTotalValue(totalValueInAssetCurrency, referencePrice);
+      // Divide by the price paid when entered ("amount invested ÷ price paid"),
+      // otherwise by the current price ("buying at today's price").
+      const paidPrice = trimmedPricePaid ? Number(trimmedPricePaid) : undefined;
+      addedUnits = computeUnitsFromTotalValue(totalValueInAssetCurrency, paidPrice ?? referencePrice);
       if (addedUnits <= 0) {
         setTotalValueError("Computed units would be zero — check the price and total value.");
         return;
@@ -291,10 +337,16 @@ export function AddUnitsForm({
 
     const computedTotal = position.units + addedUnits;
 
+    // Update the average buy price (weighted) when a price paid is provided
+    const newAvgCostPrice =
+      !isCash && trimmedPricePaid
+        ? computeWeightedAvgCost(position.units, position.avgCostPrice, addedUnits, Number(trimmedPricePaid))
+        : undefined;
+
     setIsSubmitting(true);
 
     try {
-      await onSubmit(computedTotal);
+      await onSubmit(computedTotal, newAvgCostPrice);
       pop();
     } catch (error) {
       console.error("AddUnitsForm submission failed:", error);
@@ -386,6 +438,35 @@ export function AddUnitsForm({
           />
 
           <Form.Description title="" text={valuePreviewText} />
+        </>
+      )}
+
+      {/* ── Price Paid (optional, non-cash — updates average buy price) ── */}
+      {!isCash && (
+        <>
+          <Form.Separator />
+
+          <Form.TextField
+            id="pricePaid"
+            title="Price Paid per Unit"
+            placeholder={
+              referencePrice > 0
+                ? `e.g. ${formatCurrency(referencePrice, position.currency)} (optional)`
+                : `e.g. 72.50 (${position.currency}, optional)`
+            }
+            error={pricePaidError}
+            onChange={handlePricePaidChange}
+            onBlur={handlePricePaidBlur}
+          />
+
+          <Form.Description
+            title=""
+            text={
+              position.avgCostPrice !== undefined
+                ? `Optional. Updates your average buy price (currently ${formatCurrency(position.avgCostPrice, position.currency)}) using a weighted average. Leave empty to keep it unchanged.`
+                : `Optional. Applies this price as the average buy price for your ENTIRE holding — including the ${formatUnits(position.units)} units you already hold, not just the ones added now — and enables profit/loss tracking.`
+            }
+          />
         </>
       )}
     </Form>

@@ -16,7 +16,7 @@ import { CreateDraftForm } from "./create-draft";
 import { DraftItem } from "./drafts-components";
 import { getScheduledSortTime } from "./drafts-helpers";
 
-const SOCIAL_SETS_COMMAND_URL = `raycast://extensions/${encodeURIComponent(
+const SOCIAL_SETS_COMMAND_URL = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${encodeURIComponent(
   environment.ownerOrAuthorName,
 )}/${encodeURIComponent(environment.extensionName)}/social-sets`;
 

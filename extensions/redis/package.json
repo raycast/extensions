@@ -68,7 +68,7 @@
   "dependencies": {
     "@raycast/api": "^1.40.1",
     "@raycast/utils": "^1.4.8",
-    "axios": "^0.30.3",
+    "axios": "^1.8.4",
     "node-fetch": "^3.2.10",
     "node-html-parser": "^6.1.1",
     "redis": "^4.3.1"
@@ -92,5 +92,10 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.1",
+    "fast-uri": "3.1.5"
+  }
 }

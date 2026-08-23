@@ -34,6 +34,13 @@
       "subtitle": "Query text from image",
       "description": "Screenshot OCR, and query text from image.",
       "mode": "no-view"
+    },
+    {
+      "name": "favorites",
+      "title": "Favorite Words",
+      "subtitle": "Easydict",
+      "description": "Browse and manage words you saved from Easydict.",
+      "mode": "view"
     }
   ],
   "categories": [
@@ -57,57 +64,59 @@
     "gemini"
   ],
   "dependencies": {
-    "@deeplx/core": "^0.1.3",
-    "@raycast/api": "^1.104.6",
-    "@vitalets/google-translate-api": "^9.2.1",
-    "axios": "^1.10.0",
-    "cheerio": "^1.1.0",
-    "eventsource": "^4.1.0",
-    "eventsource-parser": "^3.0.6",
-    "execa": "^9.6.1",
-    "file-type": "^21.3.0",
+    "@deeplx/core": "^0.2.2",
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "@xsai/shared-chat": "^0.5.0-beta.6",
+    "@xsai/stream-text": "^0.5.0-beta.6",
     "franc": "^6.2.0",
-    "hpagent": "^1.2.0",
-    "mac-system-proxy": "^1.0.4",
-    "node-fetch": "^3.3.2",
+    "native-say": "^0.0.2",
     "node-html-parser": "^7.0.2",
-    "play-sound": "^1.1.6",
-    "run-applescript": "^7.1.0",
-    "tencentcloud-sdk-nodejs-tmt": "^4.1.134"
+    "ofetch": "^1.5.1",
+    "tinyexec": "^1.2.4"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.4.1",
-    "@commitlint/config-conventional": "^20.4.1",
-    "@raycast/eslint-config": "^2.1.1",
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
+    "@raycast/eslint-config": "^2.2.0",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "22.13.10",
-    "@types/play-sound": "^1.1.2",
-    "@types/react": "19.0.10",
-    "@typescript-eslint/eslint-plugin": "^8.55.0",
-    "eslint": "^9.39.2",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "husky": "^9.1.7",
-    "nano-staged": "^0.9.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "automd": "^0.4.3",
+    "eslint": "^10.8.0",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-simple-import-sort": "^13.0.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "jsdom": "^29.1.1",
+    "nano-staged": "^1.0.2",
     "prettier": "^3.8.1",
-    "react": "^19.1.5",
-    "typescript": "^5.9.3"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.4",
+    "simple-git-hooks": "^2.13.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/recognizeText assets",
+    "build:swift": "node scripts/build-swift.mjs",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "nano-staged": "nano-staged",
-    "prepare": "husky",
-    "eslint": "eslint src/** --fix --ext .ts,.tsx,.js,.jsx"
+    "postinstall": "npx simple-git-hooks",
+    "eslint": "eslint src/ --fix",
+    "docs:gen": "automd",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
-  "overrides": {
-    "whatlang-node": "file:overrides/whatlang-node"
+  "simple-git-hooks": {
+    "pre-commit": "./node_modules/.bin/nano-staged",
+    "commit-msg": "npx --no-install commitlint --edit $1"
   },
   "nano-staged": {
-    "*.{ts,tsx,js,jsx}": "npm run eslint",
+    "*.{ts,tsx,js,jsx}": "eslint --fix",
     "**/*": [
-      "prettier --write . --ignore-unknown"
+      "prettier --write --ignore-unknown"
     ]
   },
   "preferences": [
@@ -588,14 +597,6 @@
       "default": false
     },
     {
-      "name": "enableSystemProxy",
-      "type": "checkbox",
-      "label": "Use System Proxy",
-      "required": false,
-      "description": "⚠️ Note that it should only be enabled if needed, as it can slow down requests.",
-      "default": false
-    },
-    {
       "title": "Language Detection",
       "name": "enableBaiduLanguageDetect",
       "type": "checkbox",
@@ -605,12 +606,37 @@
       "default": true
     },
     {
+      "name": "enableTencentLanguageDetect",
+      "type": "checkbox",
+      "label": "Enable Tencent Language Detect",
+      "required": false,
+      "description": "Turn on/off Tencent Language Detect.",
+      "default": false
+    },
+    {
+      "name": "enableVolcanoLanguageDetect",
+      "type": "checkbox",
+      "label": "Enable Volcano Language Detect",
+      "required": false,
+      "description": "Turn on/off Volcano Language Detect.",
+      "default": false
+    },
+    {
       "title": "Apple System Features",
       "name": "enableAppleTranslate",
       "type": "checkbox",
       "label": "Apple Translate",
       "required": false,
-      "description": "⚠️ An `Apple Translate` shortcut needs to be installed, please see README for more details.",
+      "description": "⚠️ (macOS only) An `Apple Translate` shortcut needs to be installed, please see README for more details.",
+      "default": false
+    },
+    {
+      "title": "Display Options",
+      "name": "flagsAreNotLanguages",
+      "type": "checkbox",
+      "label": "Flags are not languages",
+      "required": false,
+      "description": "Hide country flags next to language names, respecting that flags represent countries, not languages.",
       "default": false
     },
     {
@@ -636,7 +662,7 @@
       "name": "enableOpenAITranslate",
       "label": "OpenAI Translate",
       "required": false,
-      "description": "Turn on/off OpenAI Translate. Use system proxy by default. App Key is required.",
+      "description": "Turn on/off OpenAI Translate. App Key is required.",
       "default": false
     },
     {
@@ -644,7 +670,7 @@
       "name": "enableGeminiTranslate",
       "label": "Gemini Translate",
       "required": false,
-      "description": "Turn on/off Gemini Translate. Use system proxy by default. App Key is required.",
+      "description": "Turn on/off Gemini Translate. App Key is required.",
       "default": false
     },
     {
@@ -652,7 +678,7 @@
       "name": "enableDeepLTranslate",
       "label": "DeepL Translate",
       "required": false,
-      "description": "Turn on/off DeepL Translate. Use system proxy by default. App Key is required.",
+      "description": "Turn on/off DeepL Translate. App Key is required.",
       "default": false
     },
     {
@@ -668,7 +694,7 @@
       "type": "checkbox",
       "label": "Google Translate",
       "required": false,
-      "description": "⚠️ Use system proxy by default. A proxy is required to use Google if you are in China.",
+      "description": "⚠️ A proxy is required to use Google if you are in China.",
       "default": false
     },
     {
@@ -693,7 +719,7 @@
       "label": "Tencent Translate",
       "required": false,
       "description": "Turn on/off Tencent Translate. App Key is required.",
-      "default": true
+      "default": false
     },
     {
       "name": "enableVolcanoTranslate",
@@ -733,8 +759,7 @@
       "name": "openAIAPIKey",
       "type": "password",
       "required": false,
-      "description": "Your OpenAI API Key",
-      "default": ""
+      "description": "Your OpenAI API Key"
     },
     {
       "title": "OpenAI Endpoint",
@@ -742,8 +767,8 @@
       "type": "textfield",
       "required": false,
       "description": "Custom OpenAI API URL",
-      "default": "https://api.openai.com/v1/chat/completions",
-      "placeholder": "https://api.openai.com/v1/chat/completions"
+      "default": "https://api.openai.com/v1",
+      "placeholder": "https://api.openai.com/v1"
     },
     {
       "title": "OpenAI Model",
@@ -767,8 +792,7 @@
       "name": "geminiAPIKey",
       "type": "password",
       "required": false,
-      "description": "Your Gemini API Key",
-      "default": ""
+      "description": "Your Gemini API Key"
     },
     {
       "title": "Gemini Endpoint",
@@ -784,15 +808,14 @@
       "type": "textfield",
       "required": false,
       "description": "Gemini Model",
-      "default": "gemini-2.0-flash"
+      "default": "gemini-2.5-flash"
     },
     {
       "title": "DeepL Auth Key",
       "name": "deepLAuthKey",
       "type": "password",
       "required": false,
-      "description": "Your DeepL Auth Key",
-      "default": ""
+      "description": "Your DeepL Auth Key"
     },
     {
       "title": "DeepL API URL",
@@ -808,23 +831,21 @@
       "name": "baiduAppId",
       "type": "textfield",
       "required": false,
-      "description": "Your Baidu App ID",
-      "default": ""
+      "description": "Your Baidu App ID"
     },
     {
       "title": "Baidu App Secret",
       "name": "baiduAppSecret",
       "type": "password",
       "required": false,
-      "description": "Your Baidu App Secret",
-      "default": ""
+      "description": "Your Baidu App Secret"
     },
     {
       "title": "Tencent SecretId",
       "name": "tencentSecretId",
       "type": "textfield",
       "required": false,
-      "description": "Your Tencent SecretId",
+      "description": "Your Tencent SecretId (for Translate & Detect)",
       "default": ""
     },
     {
@@ -832,15 +853,14 @@
       "name": "tencentSecretKey",
       "type": "password",
       "required": false,
-      "description": "Your Tencent SecretKey",
-      "default": ""
+      "description": "Your Tencent SecretKey (for Translate & Detect)"
     },
     {
       "title": "Volcano Access Key ID",
       "name": "volcanoAccessKeyId",
       "type": "textfield",
       "required": false,
-      "description": "Your Volcano Access Key ID",
+      "description": "Your Volcano Access Key ID (for Translate & Detect)",
       "default": ""
     },
     {
@@ -848,19 +868,26 @@
       "name": "volcanoAccessKeySecret",
       "type": "password",
       "required": false,
-      "description": "Your Volcano Access Key Secret",
-      "default": ""
+      "description": "Your Volcano Access Key Secret (for Translate & Detect)"
     },
     {
       "title": "Caiyun Token",
       "name": "caiyunToken",
       "type": "password",
       "required": false,
-      "description": "Your Caiyun Token",
-      "default": ""
+      "description": "Your Caiyun Token"
     }
   ],
   "platforms": [
-    "macOS"
-  ]
+    "macOS",
+    "Windows"
+  ],
+  "allowScripts": {
+    "simple-git-hooks@2.13.1": true,
+    "esbuild@0.27.7": true,
+    "@parcel/watcher@2.5.6": true,
+    "fsevents@2.3.3": true,
+    "unrs-resolver@1.12.2": true
+  },
+  "packageManager": "npm@11.17.0"
 }

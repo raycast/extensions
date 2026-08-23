@@ -3,6 +3,8 @@ import { getCustomNpxPath } from "../preferences";
 import { execAsync } from "../utils/exec-async";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { describeParseFailure } from "../utils/parse-diagnostics";
+import { captureCcusageVersion } from "../utils/ccusage-version";
 import { validateDateFormat } from "../utils/date-validator";
 
 type Input = {
@@ -32,7 +34,7 @@ export default async function getSessionUsage(input?: Input): Promise<{
     cacheCreationTokens: number;
     cacheReadTokens: number;
     modelName: string;
-    date: string;
+    date?: string;
   }>;
   sessionCount: number;
 }> {
@@ -69,7 +71,8 @@ export default async function getSessionUsage(input?: Input): Promise<{
   const parseResult = stringToJSON.pipe(SessionUsageCommandResponseSchema).safeParse(stdout.toString());
 
   if (!parseResult.success) {
-    throw new Error(`Invalid session usage data: ${parseResult.error.message}`);
+    const version = await captureCcusageVersion();
+    throw new Error(describeParseFailure("Invalid session usage data", stdout.toString(), parseResult.error, version));
   }
 
   return {

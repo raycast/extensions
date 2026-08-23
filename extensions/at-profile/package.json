@@ -140,7 +140,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.6",
     "@raycast/utils": "^2.2.2",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.3.1"
   },
   "devDependencies": {
     "@oclif/core": "^2.12.0",
@@ -163,5 +163,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.1"
+  }
 }

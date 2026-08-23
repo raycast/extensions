@@ -37,6 +37,19 @@ export interface Song {
   starred?: string;
 }
 
+export interface Playlist {
+  id: string;
+  name: string;
+  comment?: string;
+  owner?: string;
+  public?: boolean;
+  songCount?: number;
+  duration?: number;
+  created?: string;
+  changed?: string;
+  coverArt?: string;
+}
+
 export interface SearchResult {
   artists: Artist[];
   albums: Album[];
@@ -140,6 +153,34 @@ export async function search3(query: string): Promise<SearchResult> {
   };
 }
 
+// Subsonic's search3 endpoint doesn't cover playlists, so the Search command
+// fetches the playlist list once and filters it client-side per query.
+export function filterPlaylists(
+  playlists: Playlist[],
+  query: string,
+  limit = 10,
+): Playlist[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [];
+  return playlists
+    .filter(
+      (p) =>
+        p.name?.toLowerCase().includes(needle) ||
+        p.comment?.toLowerCase().includes(needle),
+    )
+    .slice(0, limit);
+}
+
+export async function getPlaylists(): Promise<Playlist[]> {
+  const result = await apiCall<{
+    playlists?: {
+      playlist?: Playlist | Playlist[];
+    };
+  }>("getPlaylists");
+
+  return toArray(result.playlists?.playlist);
+}
+
 export async function getAlbumList(
   type: string,
   size = 25,
@@ -175,7 +216,7 @@ export function getCoverArtUrl(coverArtId: string, size = 100): string {
 }
 
 export function getNavidromeWebUrl(
-  type: "artist" | "album" | "song",
+  type: "artist" | "album" | "song" | "playlist",
   id: string,
 ): string {
   const baseUrl = getBaseUrl();
@@ -187,6 +228,8 @@ export function getNavidromeWebUrl(
       return `${baseUrl}/app/#/album/${id}/show`;
     case "song":
       return `${baseUrl}/app/#/album/${id}/show`;
+    case "playlist":
+      return `${baseUrl}/app/#/playlist/${id}/show`;
     default:
       return baseUrl;
   }
@@ -197,6 +240,17 @@ export function formatDuration(seconds?: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
+export function formatLongDuration(seconds?: number): string {
+  if (!seconds) return "";
+  const hours = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  if (hours > 0) {
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  }
+  if (mins > 0) return `${mins}m`;
+  return `< 1m`;
 }
 
 export async function ping(): Promise<boolean> {

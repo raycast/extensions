@@ -18,7 +18,8 @@
     "joshhayes747",
     "inovvia",
     "mateus_badalotti",
-    "pavzagor"
+    "pavzagor",
+    "alexi.build"
   ],
   "keywords": [
     "sound",
@@ -62,17 +63,17 @@
       "name": "auto-switch-input",
       "title": "Enforce Input Device",
       "subtitle": "Audio Device",
-      "description": "Keeps your default input device and pinned volumes in place. Runs silently in the background every 10 seconds. If you disable this, your default device and pinned volumes will stop being enforced — macOS may switch devices or reset volumes after sleep, Bluetooth reconnects, etc.",
+      "description": "Keeps your default input device and pinned volumes in place. Runs silently in the background every minute. If you disable this, your default device and pinned volumes will stop being enforced — macOS may switch devices or reset volumes after sleep, Bluetooth reconnects, etc.",
       "mode": "no-view",
-      "interval": "10s"
+      "interval": "1m"
     },
     {
       "name": "auto-switch-output",
       "title": "Enforce Output Device",
       "subtitle": "Audio Device",
-      "description": "Keeps your default output device and pinned volumes in place. Runs silently in the background every 10 seconds. If you disable this, your default device and pinned volumes will stop being enforced — macOS may switch devices or reset volumes after sleep, Bluetooth reconnects, etc.",
+      "description": "Keeps your default output device and pinned volumes in place. Runs silently in the background every minute. If you disable this, your default device and pinned volumes will stop being enforced — macOS may switch devices or reset volumes after sleep, Bluetooth reconnects, etc.",
       "mode": "no-view",
-      "interval": "10s"
+      "interval": "1m"
     },
     {
       "name": "customize-order",

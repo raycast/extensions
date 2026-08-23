@@ -5,6 +5,9 @@
   "description": "Interact with your Convex projects directly from Raycast",
   "icon": "command-icon.png",
   "author": "devwithbobby",
+  "contributors": [
+    "noss"
+  ],
   "authorUrl": "https://devwithbobby.com",
   "categories": [
     "Developer Tools",
@@ -78,6 +81,22 @@
       "mode": "view"
     },
     {
+      "name": "deployment-health",
+      "title": "Show Deployment Health",
+      "subtitle": "Convex",
+      "description": "Live charts for function calls, failures, cache hits, scheduler lag, crons, and scheduled functions",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-status",
+      "title": "Deployment Status in Menu Bar",
+      "subtitle": "Convex",
+      "description": "Show live deployment vitals in the menu bar and get alerted on function failures",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "disabledByDefault": true
+    },
+    {
       "name": "search-docs",
       "title": "Search Docs",
       "subtitle": "Convex",
@@ -100,20 +119,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.87.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.10.2",
-    "@types/react": "19.0.2",
-    "eslint": "^8.57.0",
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.2",
-    "react": "^19.0.0"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

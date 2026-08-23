@@ -32,6 +32,7 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             name: string;
             image: string;
             description?: string | undefined;
+            slackTeamId?: string | undefined;
         };
         output: void;
         meta: object;
@@ -48,6 +49,12 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             spaceId: string;
         };
         output: ({
+            _count: {
+                tags: number;
+                bookmarks: number;
+                users: number;
+                memberAuthPolicies: number;
+            };
             users: {
                 status: import(".prisma/client").$Enums.TeamMemberStatus;
                 spaceId: string;
@@ -67,12 +74,6 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 emailPattern: string;
                 authCheckIntervalSec: number;
             }[];
-            _count: {
-                tags: number;
-                bookmarks: number;
-                users: number;
-                memberAuthPolicies: number;
-            };
         } & {
             type: import(".prisma/client").$Enums.SpaceType;
             status: string | null;
@@ -82,6 +83,7 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             name: string;
             updatedAt: Date;
             image: string | null;
+            slackTeamId: string | null;
         }) | null;
         meta: object;
     }>;
@@ -91,6 +93,7 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             description?: string | undefined;
             name?: string | undefined;
             image?: string | undefined;
+            slackTeamId?: string | undefined;
             myNickname?: string | undefined;
             myImage?: string | undefined;
         };
@@ -103,6 +106,32 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             targetEmail: string;
         };
         output: void;
+        meta: object;
+    }>;
+    updateMemberRole: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+            role: "ADMIN" | "MEMBER" | "READ";
+            targetEmail: string;
+        };
+        output: void;
+        meta: object;
+    }>;
+    topUsedBookmarks: import("@trpc/server").TRPCQueryProcedure<{
+        input: {
+            spaceId: string;
+            limit?: number | undefined;
+            range?: "7d" | "30d" | "1y" | undefined;
+        };
+        output: {
+            useCount: number;
+            bookmark: {
+                id: string;
+                name: string;
+                url: string;
+                faviconUrl: string | null;
+            };
+        }[];
         meta: object;
     }>;
 }>>;

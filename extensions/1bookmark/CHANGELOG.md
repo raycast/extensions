@@ -1,5 +1,20 @@
 # 1Bookmark Changelog
 
+## [Bookmark Detail View and UX Improvements] - 2026-07-06
+
+- 0.13.0
+- 📱 Bookmark detail view is now available. Toggle it with the **Show/Hide Details** action.
+- 📱 Add Bookmark now loads the page title automatically when you enter a URL.
+- 🔍 Tag filter is simplified to a single `#tag` prefix. Use `##` to search for a literal `#`.
+- 💅🏼 Space icon emoji input is now supported, including keycap and flag emojis.
+- 👥 Spaces now support read-only (READ) members.
+- 👥 Team spaces can now set a Slack team ID.
+- 🐛 Show a friendly error message when registering a duplicated bookmark URL.
+- 🐛 Signing out now clears all user-scoped caches completely.
+- 🐛 When your session is revoked (e.g. account deleted or session removed on the website), the extension now returns to the login view instead of showing errors.
+- 💻 Favicons are now resolved on the client and persisted, improving list rendering.
+- 💻 Internal tooling migrated from npm to pnpm, plus several cleanups and fixes.
+
 ## [HotFix Login bug] - 2026-04-13
 
 - 0.12.1

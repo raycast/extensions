@@ -1,4 +1,4 @@
-import { McpServerConfig } from "../../mcp/types";
+import { McpServerConfig } from "../types";
 
 /**
  * Delete Mcp Server Config from LocalStorage.
@@ -9,7 +9,7 @@ import { McpServerConfig } from "../../mcp/types";
 export async function DeleteMcpServer(
   name: string,
   value: McpServerConfig,
-  setValue: (value: McpServerConfig) => Promise<void>
+  setValue: (value: McpServerConfig) => Promise<void>,
 ): Promise<void> {
   const oldConfig: McpServerConfig = structuredClone(value);
   delete oldConfig.mcpServers[name];

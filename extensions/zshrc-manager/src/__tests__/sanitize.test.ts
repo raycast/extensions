@@ -1,74 +1,8 @@
-import {
-  sanitizeMarkdown,
-  escapeShellContent,
-  validateFilePath,
-  validateFilePathForWrite,
-  validateFileSize,
-  truncateContent,
-  validateZshrcContent,
-} from "../utils/sanitize";
+import { validateFilePath, validateFilePathForWrite, validateFileSize, validateZshrcContent } from "../utils/sanitize";
 import { FILE_CONSTANTS } from "../constants";
 import { homedir } from "node:os";
 
 describe("sanitize.ts", () => {
-  describe("sanitizeMarkdown", () => {
-    it("should escape backticks", () => {
-      const content = "This has `backticks` in it";
-      const result = sanitizeMarkdown(content);
-      expect(result).toBe("This has \\\\`backticks\\\\` in it");
-    });
-
-    it("should escape dollar signs", () => {
-      const content = "This has $variables in it";
-      const result = sanitizeMarkdown(content);
-      expect(result).toBe("This has \\\\$variables in it");
-    });
-
-    it("should escape backslashes", () => {
-      const content = "This has \\backslashes in it";
-      const result = sanitizeMarkdown(content);
-      expect(result).toBe("This has \\\\backslashes in it");
-    });
-
-    it("should handle multiple special characters", () => {
-      const content = "This has `backticks`, $variables, and \\backslashes";
-      const result = sanitizeMarkdown(content);
-      expect(result).toBe("This has \\\\`backticks\\\\`, \\\\$variables, and \\\\backslashes");
-    });
-
-    it("should handle empty content", () => {
-      const result = sanitizeMarkdown("");
-      expect(result).toBe("");
-    });
-
-    it("should handle content with no special characters", () => {
-      const content = "This is normal content";
-      const result = sanitizeMarkdown(content);
-      expect(result).toBe("This is normal content");
-    });
-  });
-
-  describe("escapeShellContent", () => {
-    it("should escape all shell special characters", () => {
-      const content = "This has `backticks`, $variables, \\backslashes, \"quotes\", and 'apostrophes'";
-      const result = escapeShellContent(content);
-      expect(result).toBe(
-        "This has \\\\`backticks\\\\`, \\\\$variables, \\\\backslashes, \\\"quotes\\\", and \\'apostrophes\\'",
-      );
-    });
-
-    it("should handle empty content", () => {
-      const result = escapeShellContent("");
-      expect(result).toBe("");
-    });
-
-    it("should handle content with no special characters", () => {
-      const content = "This is normal content";
-      const result = escapeShellContent(content);
-      expect(result).toBe("This is normal content");
-    });
-  });
-
   describe("validateFilePath", () => {
     it("should return true for valid file paths", async () => {
       // Only the exact .zshrc path in home directory should be valid
@@ -150,37 +84,6 @@ describe("sanitize.ts", () => {
     it("should reject negative file sizes", () => {
       expect(validateFileSize(-1)).toBe(false);
       expect(validateFileSize(-100)).toBe(false);
-    });
-  });
-
-  describe("truncateContent", () => {
-    it("should return content unchanged if within limit", () => {
-      const content = "Short content";
-      const result = truncateContent(content, 100);
-      expect(result).toBe("Short content");
-    });
-
-    it("should truncate content exceeding limit", () => {
-      const content = "A".repeat(1000);
-      const result = truncateContent(content, 100);
-      expect(result).toBe("A".repeat(100) + "\n... (truncated)");
-    });
-
-    it("should use default max length", () => {
-      const content = "A".repeat(20000);
-      const result = truncateContent(content);
-      expect(result).toBe("A".repeat(10000) + "\n... (truncated)");
-    });
-
-    it("should handle empty content", () => {
-      const result = truncateContent("");
-      expect(result).toBe("");
-    });
-
-    it("should handle content exactly at limit", () => {
-      const content = "A".repeat(100);
-      const result = truncateContent(content, 100);
-      expect(result).toBe("A".repeat(100));
     });
   });
 

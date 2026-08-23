@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, LocalStorage } from "@raycast/api";
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getProjects, project } from "./composables/FetchData";
-import { getTokens } from "./composables/WebClient";
+import { getTokens, onTokenChange } from "./composables/WebClient";
 
 const Actions = (props: { projectID: string; isBillable: boolean }) => {
   const { data: BaseUrl } = useCachedPromise(() => LocalStorage.getItem<string>("URL"));
@@ -15,12 +15,18 @@ const Actions = (props: { projectID: string; isBillable: boolean }) => {
         icon={Icon.Envelope}
         title="Copy Project Mail Address"
         content={`project-${props.projectID}@hello.awork.com`}
-        shortcut={{ modifiers: ["ctrl"], key: "e" }}
+        shortcut={{
+          macOS: { modifiers: ["ctrl"], key: "e" },
+          Windows: { modifiers: ["ctrl"], key: "e" },
+        }}
       />
       <Action
         icon={Icon.Clock}
         title="Log Time"
-        shortcut={{ modifiers: ["cmd", "ctrl"], key: "enter" }}
+        shortcut={{
+          macOS: { modifiers: ["ctrl", "cmd"], key: "enter" },
+          Windows: { modifiers: ["ctrl", "windows"], key: "enter" },
+        }}
         onAction={async () => {
           try {
             await launchCommand({
@@ -32,14 +38,38 @@ const Actions = (props: { projectID: string; isBillable: boolean }) => {
               },
             });
           } catch (error) {
-            showFailureToast("Failed to launch time logging", error as Error);
+            showFailureToast(error, { title: "Failed to launch time logging" });
+          }
+        }}
+      />
+      <Action
+        icon={Icon.Plus}
+        title="Create Task"
+        shortcut={{
+          macOS: { modifiers: ["ctrl"], key: "c" },
+          Windows: { modifiers: ["ctrl"], key: "c" },
+        }}
+        onAction={async () => {
+          try {
+            await launchCommand({
+              name: "createTask",
+              type: LaunchType.UserInitiated,
+              context: {
+                projectId: props.projectID,
+              },
+            });
+          } catch (error) {
+            showFailureToast("Failed to launch task creation", error as Error);
           }
         }}
       />
       <Action
         icon={Icon.BulletPoints}
-        title={"Show Tasks"}
-        shortcut={{ modifiers: ["ctrl"], key: "enter" }}
+        title={"Show Project Tasks"}
+        shortcut={{
+          macOS: { modifiers: ["ctrl"], key: "enter" },
+          Windows: { modifiers: ["ctrl"], key: "enter" },
+        }}
         onAction={async () => {
           try {
             await launchCommand({
@@ -50,7 +80,7 @@ const Actions = (props: { projectID: string; isBillable: boolean }) => {
               },
             });
           } catch (error) {
-            showFailureToast("Failed to launch tasks", error as Error);
+            showFailureToast(error, { title: "Failed to launch tasks" });
           }
         }}
       />
@@ -88,26 +118,18 @@ const ProjectItem = (props: { project: project }) => {
 };
 
 export default function Command() {
-  const { data: token, revalidate } = usePromise(getTokens, [], {
-    onData: (data) => {
-      if (!data || data.isExpired()) {
-        revalidate();
-      }
-    },
-  });
+  const { data: token, revalidate: revalidateToken } = usePromise(getTokens);
+
+  useEffect(() => {
+    return onTokenChange(revalidateToken);
+  }, [revalidateToken]);
   const [searchText, setSearchText] = useState<string>("");
   const {
     data: projects,
     isLoading,
     pagination,
-    revalidate: updateSearch,
   } = useCachedPromise(getProjects, [token?.accessToken as string, searchText, 100], {
     execute: !!token?.accessToken && !token.isExpired(),
-    onData: (data) => {
-      if (!data || (data.length === 0 && !searchText)) {
-        updateSearch();
-      }
-    },
   });
 
   return (

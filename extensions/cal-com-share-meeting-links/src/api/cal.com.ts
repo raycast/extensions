@@ -122,16 +122,21 @@ export type CalSchedulePatch = Partial<
   Pick<CalSchedule, "name" | "timeZone" | "isDefault" | "availability" | "overrides">
 >;
 
-const { token } = getPreferenceValues<Preferences>();
+const { token, region } = getPreferenceValues<Preferences>();
+
+const isEU = region === "eu";
+export const userBaseUrl = isEU ? "https://api.cal.eu" : "https://api.cal.com";
+export const appBaseUrl = isEU ? "https://app.cal.eu" : "https://app.cal.com";
+export const publicBaseUrl = isEU ? "https://cal.eu" : "https://cal.com";
 
 const api = axios.create({
-  baseURL: "https://api.cal.com/v2/",
+  baseURL: `${userBaseUrl}/v2/`,
   headers: {
     Authorization: `Bearer ${token}`,
   },
 });
 
-async function calAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
+export async function calAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
   const resp = await api.request<{ status: string; data: T }>({ method, ...props });
   return resp.data.data;
 }
@@ -473,10 +478,10 @@ interface MembershipResponse {
 function normalizeAvatarUrl(url: string | null): string | null {
   if (!url) return null;
   if (url.startsWith("/api/avatar/")) {
-    return `https://app.cal.com${url}?size=32`;
+    return `${appBaseUrl}${url}?size=32`;
   }
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  if (url.startsWith("/")) return `https://app.cal.com${url}`;
+  if (url.startsWith("/")) return `${appBaseUrl}${url}`;
   return url;
 }
 

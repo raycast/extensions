@@ -1,5 +1,16 @@
 # Claude Changelog
 
+## [API compatibility fixes] - 2026-08-19
+
+- Fix: Asking a question on Claude Opus 4.7 or newer (including Opus 4.7, Sonnet 5, and Opus 5) failed with a 400 error. Sampling parameters were removed on those models, and the extension was still sending `temperature` on every request.
+- Fix: With "Stream Responses" turned off, requests could fail outright instead of answering — and on Opus 4 and 4.1 the failure left the loading indicator spinning with no error shown. Non-streaming requests are now capped at the limit the API accepts, and if a particular model rejects even that, the request is retried at a smaller size rather than failing — so a long answer comes back shorter rather than not at all, and nothing is left hanging.
+- Fix: Presets on newer models were capped at 4,096 output tokens. The maximum is now read from the API for each model instead of guessed from its name.
+- Fix: Only the first 20 models were listed. The full model list is now loaded.
+- Fix: Long conversations stopped working permanently once they outgrew the model's context window. Older turns are now left out of the request when needed — the conversation stays readable in full, and a note says when this happened and why.
+- Fix: Asking a new question while an answer was still streaming could let the abandoned request overwrite the new one's result and leave the newer answer unstoppable.
+- Fix: Asking a second question before the first answered could let the earlier request report success and stop the loading indicator while the newer answer was still being written.
+- Improvement: Updated the Anthropic SDK, which the token-counting used by the fix above requires.
+
 ## [Fix memory leak] - 2026-02-01
 
 - Fix: Resolved JS heap out of memory error by throttling UI updates during streaming responses

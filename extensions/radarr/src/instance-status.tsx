@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { List, ActionPanel, Action, showToast, Toast, Icon, Color } from "@raycast/api";
 
+import { OpenPreferencesAction } from "@/lib/components/OpenPreferencesAction";
 import { getRadarrInstances, getActiveRadarrInstance } from "@/lib/types/config";
 import { testConnection, useHealth } from "@/lib/hooks/useRadarrAPI";
 import type { RadarrInstance } from "@/lib/types/config";
@@ -126,11 +127,7 @@ export default function InstanceStatus() {
               </ActionPanel.Section>
               {quickActions}
               <ActionPanel.Section>
-                <Action.Open
-                  title="Open Extension Preferences"
-                  target="raycast://extensions/preferences"
-                  icon={Icon.Gear}
-                />
+                <OpenPreferencesAction title="Open Extension Preferences" />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -218,11 +215,7 @@ export default function InstanceStatus() {
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action.Open
-                title="Open Extension Preferences"
-                target="raycast://extensions/preferences"
-                icon={Icon.Gear}
-              />
+              <OpenPreferencesAction title="Open Extension Preferences" />
             </ActionPanel>
           }
         />

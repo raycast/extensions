@@ -31,6 +31,11 @@ export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(previousTrack);
 
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
+
     // Feedback based on result
     switch (result) {
       case "ytmusic-prev":
@@ -53,6 +58,6 @@ export default async () => {
     }
     await closeMainWindow();
   } catch (error) {
-    // do nothing if error is thrown because it will be handled by the toast
+    await showHUD(`❌ Command failed: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 };

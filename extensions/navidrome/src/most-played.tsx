@@ -1,32 +1,22 @@
-import {
-  ActionPanel,
-  Action,
-  Grid,
-  Icon,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
   getMostPlayed,
   getCoverArtUrl,
   getNavidromeWebUrl,
   type Album,
 } from "./api";
+import { FetchEmptyView } from "./components";
 
 export default function MostPlayedCommand() {
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, error } = useCachedPromise(
     async () => {
       return await getMostPlayed(40);
     },
     [],
     {
       onError: (err) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load most played albums",
-          message: err.message,
-        });
+        showFailureToast(err, { title: "Failed to load most played albums" });
       },
     },
   );
@@ -37,15 +27,18 @@ export default function MostPlayedCommand() {
       columns={5}
       searchBarPlaceholder="Filter most played albums..."
     >
-      {!data || data.length === 0
-        ? !isLoading && (
-            <Grid.EmptyView
-              icon={Icon.Music}
-              title="No Albums Found"
-              description="Play some music first!"
-            />
-          )
-        : data.map((album) => <AlbumGridItem key={album.id} album={album} />)}
+      {!data || data.length === 0 ? (
+        <FetchEmptyView
+          error={error}
+          isLoading={isLoading}
+          errorTitle="Could Not Load Albums"
+          emptyIcon={Icon.Music}
+          emptyTitle="No Albums Found"
+          emptyDescription="Play some music first!"
+        />
+      ) : (
+        data.map((album) => <AlbumGridItem key={album.id} album={album} />)
+      )}
     </Grid>
   );
 }

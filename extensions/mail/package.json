@@ -17,7 +17,9 @@
     "ViGeng",
     "dante",
     "5z99tsb75z",
-    "xilopaint"
+    "xilopaint",
+    "chrahe",
+    "clins1994"
   ],
   "categories": [
     "Applications",
@@ -194,6 +196,11 @@
       "description": "Send an email with Apple Mail."
     },
     {
+      "name": "move-to-trash",
+      "title": "Move to Trash",
+      "description": "Move an email to Trash in Apple Mail."
+    },
+    {
       "name": "copy-email-link",
       "title": "Copy Email Link",
       "description": "Copy the local link (URI) of the selected Apple Mail email so you can jump directly to that message. This makes it convenient to locate a specific email for context."
@@ -236,5 +243,8 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9"
+  }
 }

@@ -13,11 +13,16 @@ const sanitizeURL = (url: string): string => {
 	// Fix double URL encoding (%25XX → %XX)
 	url = url.replace(/%25([0-9A-Fa-f]{2})/g, "%$1");
 
-	// Strip dashes and plus signs from the secret parameter (ente sometimes adds those)
-	url = url.replace(
-		/(secret=)([A-Za-z0-9\-+]+)/g,
-		(_, prefix, secret) => prefix + secret.replace(/[-+]/g, "")
-	);
+	// Fix bare issuer parameters (`&issuer&` → `&issuer=&`) emitted by some Ente Auth exports.
+	url = url.replace(/([?&]issuer)(?=&|$)/g, "$1=");
+
+	// Normalize null OTP parameters from Ente exports.
+	url = url.replace(/([?&])period=null(?=&|$)/g, "$1period=30");
+	url = url.replace(/([?&])(algorithm|digits)=null(?=&|$)/g, "$1");
+	url = url.replace(/\?&/g, "?").replace(/&&+/g, "&").replace(/[?&]$/, "");
+
+	// Strip whitespace, dashes and plus signs from the secret parameter (ente sometimes adds those)
+	url = url.replace(/([?&]secret=)([^&]+)/g, (_, prefix, secret) => prefix + secret.replace(/[\s\-+]/g, ""));
 
 	return url;
 };
@@ -62,8 +67,8 @@ export const parseSecrets = (rawSecretsURLs: string[]): Secret[] => {
 				if (secret) {
 					secretsList.push(secret);
 				}
-			} catch {
-				console.error("Error parsing line:", line);
+			} catch (error) {
+				console.error("Error parsing line:", line, error);
 			}
 		}
 	});

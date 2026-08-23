@@ -1,5 +1,11 @@
 # Changelog
 
+## [Sign in with your browser] - 2026-07-03
+
+- Sign in with your browser in one step — copying an API key is no longer required to get started
+- Existing API keys keep working as before
+- AI tools and background save commands no longer pop open a browser sign-in window unexpectedly
+
 ## 1.0.30 - 2026-05-06
 
 - Add **Save to Teak** fallback command so you can capture text or URLs from Raycast root search

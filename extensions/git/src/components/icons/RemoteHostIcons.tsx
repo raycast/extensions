@@ -23,15 +23,15 @@ export function RemoteHostProviderIcon(provider: RemoteProvider | undefined): Im
   }
 
   switch (provider) {
-    case "GitHub":
+    case RemoteProvider.GitHub:
       return { source: "github.svg", tintColor: Color.PrimaryText };
-    case "GitLab":
+    case RemoteProvider.GitLab:
       return { source: "gitlab.svg", tintColor: Color.Red };
-    case "Bitbucket":
+    case RemoteProvider.Bitbucket:
       return { source: "bitbucket.svg", tintColor: Color.Blue };
-    case "Azure DevOps":
-      return { source: "azure-devops.svg", tintColor: Color.Blue };
-    case "Gitea":
+    case RemoteProvider.AzureDevOps:
+      return { source: "azuredevops.svg", tintColor: Color.Blue };
+    case RemoteProvider.Gitea:
       return { source: "gitea.svg", tintColor: Color.Green };
     default:
       return { source: Icon.Globe, tintColor: Color.SecondaryText };

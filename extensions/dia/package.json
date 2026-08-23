@@ -13,7 +13,8 @@
     "pernielsentikaer",
     "loris",
     "xmok",
-    "heytommy"
+    "heytommy",
+    "christianmagill"
   ],
   "platforms": [
     "macOS"
@@ -38,6 +39,36 @@
         {
           "title": "Open in New Tab",
           "value": "open"
+        }
+      ]
+    },
+    {
+      "name": "searchEngine",
+      "type": "dropdown",
+      "title": "Search Engine",
+      "description": "Search engine used for Search Dia suggestions and query fallback actions.",
+      "required": false,
+      "default": "google",
+      "data": [
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "Kagi",
+          "value": "kagi"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "Brave Search",
+          "value": "brave"
+        },
+        {
+          "title": "Bing",
+          "value": "bing"
         }
       ]
     }
@@ -97,7 +128,7 @@
       "name": "open-url",
       "title": "Open URL in Dia",
       "subtitle": "Dia",
-      "description": "Open a URL in a new Dia tab. Falls back to clipboard or Google search.",
+      "description": "Open a URL in a new Dia tab. Falls back to clipboard or the configured search engine.",
       "mode": "no-view",
       "arguments": [
         {
@@ -131,5 +162,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

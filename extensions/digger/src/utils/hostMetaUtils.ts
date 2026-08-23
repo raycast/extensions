@@ -1,6 +1,6 @@
-import { fetchWithTimeout } from "./fetcher";
-import { TIMEOUTS } from "./config";
 import { HostMetadataData } from "../types";
+import { TIMEOUTS } from "./config";
+import { fetchWithTimeout } from "./fetcher";
 import { getLogger } from "./logger";
 
 const log = getLogger("hostmeta");

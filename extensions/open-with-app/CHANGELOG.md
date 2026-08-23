@@ -1,5 +1,10 @@
 # Open With App Changelog
 
+## [Fix default selection on Raycast 2] - 2026-05-25
+
+- Fix: default the highlighted row to the first Recommended Application instead of the first Other Application
+- Fix: prevent a one-row scroll the first time the user presses the down arrow
+
 ## [Add Bloom support] - 2026-05-05
 
 - Read the selection from Bloom in addition to Finder

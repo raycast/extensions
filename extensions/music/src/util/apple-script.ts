@@ -15,6 +15,12 @@ export const runScript = (command: string) =>
 export const tell = (application: string, command: string) =>
   runScript(`tell application "${application}" to ${command}`);
 
+export const escapeAppleScriptString = (value: string) =>
+  value
+    .replace(/[\r\n]+/g, " ")
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"');
+
 /**
  * Transforms an object to a querystring concatened in apple-script.
  * @example

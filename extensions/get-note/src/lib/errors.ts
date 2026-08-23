@@ -5,13 +5,20 @@ export class GetNoteError extends Error {
   code?: number;
   reason?: string;
   requestId?: string;
+  status?: number;
+  retryAfterMs?: number;
 
-  constructor(message: string, options?: { code?: number; reason?: string; requestId?: string }) {
+  constructor(
+    message: string,
+    options?: { code?: number; reason?: string; requestId?: string; status?: number; retryAfterMs?: number },
+  ) {
     super(message);
     this.name = "GetNoteError";
     this.code = options?.code;
     this.reason = options?.reason;
     this.requestId = options?.requestId;
+    this.status = options?.status;
+    this.retryAfterMs = options?.retryAfterMs;
   }
 }
 
@@ -32,8 +39,14 @@ export function normalizeGetNoteError(error: unknown): string {
       return "This account cannot use the GetNote OpenAPI yet. Please confirm the membership status.";
     }
 
-    if (error.reason === "quota_day" || error.reason === "quota_month" || error.code === 42900) {
-      return "The GetNote API quota has been reached. Please try again later.";
+    if (
+      error.status === 429 ||
+      error.reason === "quota_day" ||
+      error.reason === "quota_month" ||
+      error.code === 10202 ||
+      error.code === 42900
+    ) {
+      return "GetNote is rate limiting this request. Please try again later.";
     }
 
     return error.message;
@@ -60,6 +73,9 @@ export function buildApiError(payload: GetNoteApiErrorPayload | null | undefined
   });
 }
 
-export function createRequestError(endpoint: string, status: number): GetNoteError {
-  return new GetNoteError(`Request to ${GETNOTE_BASE_URL}${endpoint} failed (HTTP ${status}).`);
+export function createRequestError(endpoint: string, status: number, retryAfterMs?: number): GetNoteError {
+  return new GetNoteError(`Request to ${GETNOTE_BASE_URL}${endpoint} failed (HTTP ${status}).`, {
+    status,
+    retryAfterMs,
+  });
 }

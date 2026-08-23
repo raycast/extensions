@@ -1,28 +1,53 @@
 import { useState } from "react";
-import { Action, ActionPanel, List, showToast, Toast, Icon, openExtensionPreferences } from "@raycast/api";
-import { useExec } from "@raycast/utils";
-import { getDatabaseInfo, buildQuery, parseTranscriptions } from "./lib/database";
+import { Action, ActionPanel, List, Icon, openExtensionPreferences } from "@raycast/api";
+import { useSQL } from "@raycast/utils";
+import { getDatabaseInfo, buildQuery, normalizeTranscriptions, SCHEMA_QUERY } from "./lib/database";
+import type { SchemaColumn } from "./lib/database";
+import type { Transcription } from "./lib/types";
 import { TranscriptionItem } from "./components/TranscriptionItem";
 
 const DISPLAY_LIMIT = 100;
+const PERMISSION_PRIMING = "VoiceInk stores your transcription history in a local database.";
 
 export default function SearchTranscriptions() {
   const [searchText, setSearchText] = useState("");
   const dbInfo = getDatabaseInfo();
 
-  const query = buildQuery(DISPLAY_LIMIT, searchText || undefined);
+  const queryDatabasePath = dbInfo.available ? dbInfo.path : "/dev/null";
 
-  const { isLoading, data } = useExec("sqlite3", ["-json", "-readonly", dbInfo.path, query], {
+  // VoiceInk renames columns between versions, so read the schema first and
+  // only ask for columns this database has.
+  const {
+    isLoading: isLoadingSchema,
+    data: schemaColumns,
+    error: schemaError,
+    permissionView: schemaPermissionView,
+  } = useSQL<SchemaColumn>(queryDatabasePath, SCHEMA_QUERY, {
     execute: dbInfo.available,
-    parseOutput: ({ stdout }) => parseTranscriptions(stdout),
-    onError: (error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load transcriptions",
-        message: error.message,
-      });
+    permissionPriming: PERMISSION_PRIMING,
+    failureToastOptions: {
+      title: "Failed to read the transcriptions database",
     },
   });
+
+  const columns = schemaColumns?.map((column) => column.name);
+  const query = buildQuery(DISPLAY_LIMIT, searchText || undefined, columns ?? []);
+
+  const { isLoading, data, error, permissionView } = useSQL<Transcription>(queryDatabasePath, query, {
+    execute: dbInfo.available && columns !== undefined,
+    permissionPriming: PERMISSION_PRIMING,
+    failureToastOptions: {
+      title: "Failed to load transcriptions",
+    },
+  });
+
+  if (schemaPermissionView) {
+    return schemaPermissionView;
+  }
+
+  if (permissionView) {
+    return permissionView;
+  }
 
   if (!dbInfo.available) {
     return (
@@ -41,17 +66,21 @@ export default function SearchTranscriptions() {
     );
   }
 
-  const transcriptions = data || [];
+  const transcriptions = normalizeTranscriptions(data || []);
+  const loadError = schemaError ?? error;
+  const isLoadingAny = isLoadingSchema || isLoading;
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoadingAny}
       filtering={false}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search transcriptions..."
       throttle
     >
-      {transcriptions.length === 0 && !isLoading ? (
+      {loadError ? (
+        <List.EmptyView icon={Icon.Warning} title="Unable to Read Transcriptions" description={loadError.message} />
+      ) : transcriptions.length === 0 && !isLoadingAny ? (
         <List.EmptyView
           icon={searchText ? Icon.MagnifyingGlass : Icon.Message}
           title={searchText ? "No Results" : "No Transcriptions"}

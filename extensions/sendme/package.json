@@ -43,7 +43,7 @@
     "date-fns": "^2.30.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "~18.16.0",
     "@types/react": "^18.0.28",
     "eslint": "^8.32.0",
@@ -59,5 +59,11 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "js-yaml@4": "4.3.1",
+    "brace-expansion@1": "1.1.16",
+    "brace-expansion@2": "2.1.2",
+    "brace-expansion@5": "5.0.9"
+  }
 }

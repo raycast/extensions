@@ -1,10 +1,22 @@
 # Raycast Store Updates
 
-Never miss new extensions or extension updates ever again!
+<div align="center">
+  <a href="https://github.com/chrismessina">
+    <img src="https://img.shields.io/github/followers/chrismessina?label=Follow%20chrismessina&style=social" alt="Follow @chrismessina">
+  </a>
+  <a href="https://github.com/chrismessina/raycast-store-updates/stargazers">
+    <img src="https://img.shields.io/github/stars/chrismessina/raycast-store-updates?style=social" alt="Stars">
+  </a>
+  <a href="https://www.raycast.com/chrismessina/raycast-store-updates">
+    <img src="https://img.shields.io/badge/Raycast-Store-red.svg" alt="Raycast Store Updates on Raycast store.">
+  </a>
+</div>
 
-![Raycast Store Updates](metadata/raycast-store-updates-2.png)
+![Raycast Store Updates](media/hero.png)
 
-## Features
+## Never miss new extensions or extension updates ever again
+
+### Features
 
 - **New Extensions Feed** — See the latest extensions published to the Raycast Store via the official JSON feed
 - **Extension Updates** — Track recently updated extensions via merged GitHub PRs in the [raycast/extensions](https://github.com/raycast/extensions) repo
@@ -12,27 +24,15 @@ Never miss new extensions or extension updates ever again!
 - **Changelog Viewer** — Read an extension's changelog inline, copy recent changes, or open it on GitHub
 - **Platform Filter Toggles** — Show or hide macOS-only and Windows-only extensions directly from the action panel (cross-platform extensions are always shown)
 - **My Updates Filter** — Filter the dropdown to show only updates for extensions you have installed locally
+- **Category & Author Filters** — Narrow the list to a single category, or show only a specific author's extensions, on top of the type and platform filters
 - **Read/Unread Tracking** — Optionally mark items as read to keep your list tidy, with "Mark All as Read" and undo (⌘Z) support
 - **Filter Dropdown** — Quickly switch between Show All, New, Updates, and My Updates views
+- **Time Grouping** — Items are grouped into Today / Yesterday / Previous 7 Days / Previous 30 Days / Earlier for easier scanning
 
-## Preferences
+## Store Updates Menu Bar
 
-| Preference               | Type     | Default | Description                                                        |
-| ------------------------ | -------- | ------- | ------------------------------------------------------------------ |
-| Track Read/Unread Status | Checkbox | Off     | When enabled, items can be marked as read and hidden from the list |
+An optional menu-bar command shows a badge with the number of new and updated extensions since you last checked, refreshing in the background
 
-## Actions
+**Tip:** Hold ⌥ (Option) and click an item in the menu bar to open its changelog instead of the Store page!
 
-| Action                            | Shortcut | Description                                            |
-| --------------------------------- | -------- | ------------------------------------------------------ |
-| View Changelog                    | `↵`      | Push view showing the extension's full changelog       |
-| Copy Recent Changes               | `⌘⇧C`    | Copy the latest changelog section to clipboard         |
-| Open Changelog in Browser         | `⌘⇧L`    | Open the changelog on GitHub                           |
-| Open in Browser                   | —        | Open the extension's store page in a browser           |
-| Open in Raycast Store             | —        | Open the extension via Raycast deeplink                |
-| Copy Extension URL                | `⌘C`     | Copy the store URL                                     |
-| Hide/Show macOS-only Extensions   | —        | Toggle visibility of macOS-exclusive extensions        |
-| Hide/Show Windows-only Extensions | —        | Toggle visibility of Windows-exclusive extensions      |
-| Mark as Read                      | `⌘⇧R`    | Mark the selected item as read (when tracking enabled) |
-| Mark All as Read                  | `⌘⇧A`    | Mark all visible items as read (when tracking enabled) |
-| Undo                              | `⌘Z`     | Undo the last read action (when tracking enabled)      |
+![Menu bar](media/menubar.png)

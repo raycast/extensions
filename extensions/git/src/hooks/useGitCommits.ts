@@ -2,17 +2,19 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { GitManager } from "../utils/git-manager";
 import { BranchFilter, RepositoryContext, SelectedBranch } from "../open-repository";
 import { Branch, BranchesState, DetachedHead } from "../types";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 /**
  * Hook for fetching the commit history of a Git repository.
- * Repository path and branch are included in cache dependencies to ensure separate cache per repository and branch.
+ * Search is executed by Git (`git log`) rather than client-side filtering.
+ * Repository path, branch, and search query are included in cache dependencies.
  */
 export function useGitCommits(gitManager: GitManager, branchesState?: BranchesState): RepositoryContext["commits"] {
   const [branchFilter, setBranchFilter] = useCachedState<BranchFilter>(
     `${gitManager.repoPath}:selected-commits-filter`,
     { kind: "current", upstream: false },
   );
+  const [searchText, setSearchText] = useState("");
 
   const selectedBranch: SelectedBranch | undefined = useMemo(() => {
     if (!branchesState) {
@@ -32,12 +34,15 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
         } else if (branchesState.currentBranch) {
           if (branchFilter.upstream) {
             if (!branchesState.currentBranch.upstream) return undefined;
-            const upstreamName = branchesState.currentBranch.upstream?.fullName;
+            const upstreamName = branchesState.currentBranch.upstream.fullName;
+            const upstreamBranch = branchesState.remoteBranches[branchesState.currentBranch.upstream.remote]?.find(
+              (branch) => branch.displayName === upstreamName,
+            );
+            if (!upstreamBranch) return undefined;
+
             return {
               kind: "branch",
-              ...branchesState.remoteBranches[branchesState.currentBranch.upstream.remote]?.find(
-                (branch) => branch.displayName === upstreamName,
-              ),
+              ...upstreamBranch,
             } as SelectedBranch;
           } else {
             return {
@@ -52,34 +57,48 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
       case "branch":
         switch (branchFilter.value.type) {
           case "current":
-          case "local":
-            return {
-              kind: "branch",
-              ...branchesState.localBranches.find((branch) => branch.name === branchFilter.value.name),
-            } as SelectedBranch;
-
-          case "remote":
-            if (!branchesState.remoteBranches[branchFilter.value.remote!]) {
-              return undefined;
-            }
+          case "local": {
+            const localBranch = branchesState.localBranches.find((branch) => branch.name === branchFilter.value.name);
+            if (!localBranch) return undefined;
 
             return {
               kind: "branch",
-              ...branchesState.remoteBranches[branchFilter.value.remote!].find(
-                (branch) => branch.name === branchFilter.value.name,
-              ),
+              ...localBranch,
             } as SelectedBranch;
+          }
+
+          case "remote": {
+            const remoteName = branchFilter.value.remote;
+            if (!remoteName) return undefined;
+
+            const remoteBranches = branchesState.remoteBranches[remoteName];
+            if (!remoteBranches) return undefined;
+
+            const remoteBranch = remoteBranches.find((branch) => branch.name === branchFilter.value.name);
+            if (!remoteBranch) return undefined;
+
+            return {
+              kind: "branch",
+              ...remoteBranch,
+            } as SelectedBranch;
+          }
         }
     }
   }, [branchFilter, branchesState]);
 
   const commitsPromise = useCachedPromise(
-    (_repoPath: string, branchFilter: BranchFilter, _selectedBranch?: Branch, _detachedHead?: DetachedHead) =>
+    (
+      _repoPath: string,
+      branchFilter: BranchFilter,
+      searchText: string,
+      _selectedBranch?: Branch,
+      _detachedHead?: DetachedHead,
+    ) =>
       async (options: { page: number }) => {
         const selectedSourceName = evaluateBranchName(branchFilter, branchesState!);
 
         try {
-          const commits = await gitManager.getCommits(selectedSourceName, options.page);
+          const commits = await gitManager.getCommits(selectedSourceName, options.page, searchText);
 
           return {
             data: commits,
@@ -89,7 +108,7 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
           return { data: [], hasMore: false };
         }
       },
-    [gitManager.repoPath, branchFilter, branchesState?.currentBranch, branchesState?.detachedHead], // Include both repository path and branch for proper cache isolation
+    [gitManager.repoPath, branchFilter, searchText, branchesState?.currentBranch, branchesState?.detachedHead],
     {
       execute: branchesState !== undefined,
       initialData: [],
@@ -100,7 +119,9 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
     ...commitsPromise,
     selectedBranch,
     filter: branchFilter,
+    searchText,
     setFilter: setBranchFilter,
+    setSearchText,
   } as RepositoryContext["commits"];
 }
 

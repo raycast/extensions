@@ -2,7 +2,8 @@ import fs from "fs";
 
 import { FileSystemItem } from "@raycast/api";
 import isSvg from "is-svg";
-import { optimize, PluginConfig } from "svgo";
+import type { PluginConfig } from "svgo";
+import { optimizeSvg } from "./optimizer";
 
 interface SVGItem {
   data: string;
@@ -66,12 +67,16 @@ const optimizeItems = async (items: FileSystemItem[], plugins: PluginConfig[]) =
         const content = isFile ? fs.readFileSync(path, "utf8") : null;
 
         if (content && isSvg(content)) {
-          const result = optimize(content, { plugins });
-          resolve({ data: result.data, path });
+          try {
+            const optimized = optimizeSvg(content, plugins);
+            resolve({ data: optimized, path });
+          } catch (err) {
+            reject(err);
+          }
         } else {
           reject(`Selected item is not a SVG:\n\n${path}`);
         }
-      })
+      }),
   );
 
   const list = await Promise.all(promises);

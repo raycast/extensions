@@ -1,9 +1,9 @@
-import { List, Icon, Color } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { getFavicon, getProgressIcon } from "@raycast/utils";
-import { DiggerResult } from "../types";
 import { Actions } from "../actions";
-import { formatBytes, getStatusText } from "../utils/formatters";
+import { DiggerResult } from "../types";
 import { getDeniedAccessMessage } from "../utils/botDetection";
+import { formatBytes, getStatusText } from "../utils/formatters";
 
 interface OverviewProps {
   data: DiggerResult | null;

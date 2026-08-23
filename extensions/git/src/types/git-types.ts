@@ -16,6 +16,22 @@ export interface Repository {
   languageStats?: LanguageStats[];
   /** Cloning state information if repository is being cloned. */
   cloning?: RepositoryCloningProcess;
+  /** Set when the repository is a linked worktree of another repository. */
+  worktree?: WorktreeOrigin;
+}
+
+/**
+ * Describes the repository a linked worktree belongs to.
+ */
+export interface WorktreeOrigin {
+  /** Absolute path to the main worktree (the repository itself). */
+  repositoryRootPath: string;
+  /** Name of the repository the worktree belongs to. */
+  repositoryName: string;
+  /** Folder name of the worktree directory. */
+  name: string;
+  /** Display name combining repository and worktree names (e.g. "my-repo: feature-branch"). */
+  displayName: string;
 }
 
 /**
@@ -216,7 +232,13 @@ export interface Stash {
 /**
  * Known Git hosting providers.
  */
-export type RemoteProvider = "GitHub" | "GitLab" | "Bitbucket" | "Azure DevOps" | "Gitea" | undefined;
+export enum RemoteProvider {
+  GitHub = "GitHub",
+  GitLab = "GitLab",
+  Bitbucket = "Bitbucket",
+  AzureDevOps = "Azure DevOps",
+  Gitea = "Gitea",
+}
 
 export type RemoteWebPage = Action.OpenInBrowser.Props;
 /**
@@ -230,7 +252,8 @@ export type Remote = {
   organizationName?: string;
   displayName: string;
   repositoryName?: string;
-  provider: RemoteProvider;
+  provider?: RemoteProvider;
+  isOverridedProvider?: boolean;
   avatarUrl?: string;
   webPages: {
     fileRelated: (filePath: string, ref?: string) => RemoteWebPage[];
@@ -251,6 +274,32 @@ export interface Submodule {
   relativePath: string;
   /** Absolute path to the submodule. */
   fullPath: string;
+}
+
+/**
+ * Represents a Git worktree registered in the repository.
+ */
+export interface Worktree {
+  /** Folder name of the worktree directory. */
+  name: string;
+  /** Absolute path to the worktree directory. */
+  path: string;
+  /** Commit hash the worktree HEAD points to. */
+  head?: string;
+  /** Checked out branch name, undefined when HEAD is detached or the worktree is bare. */
+  branch?: string;
+  /** Whether this is the main worktree (the repository itself). */
+  isMain: boolean;
+  /** Whether the worktree is bare. */
+  isBare: boolean;
+  /** Whether the worktree HEAD is detached. */
+  isDetached: boolean;
+  /** Whether the worktree is locked and cannot be pruned or moved. */
+  isLocked: boolean;
+  /** Reason why the worktree is locked, if provided. */
+  lockReason?: string;
+  /** Whether the worktree directory is missing and can be pruned. */
+  isPrunable: boolean;
 }
 
 /**

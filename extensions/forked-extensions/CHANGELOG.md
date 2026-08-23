@@ -1,5 +1,14 @@
 # Raycast Fork Extensions Changelog
 
+## [Repository Cleanup] - 2026-08-12
+
+- Add a "Clean Up Repository" manager action with confirmation and before-and-after pack statistics.
+- Run Git maintenance in the foreground without scheduling background jobs.
+
+## [Fix Concurrent Git Operations] - 2026-06-02
+
+- Wait for transient Git index locks before running repository commands and show a clear message when another operation is already running.
+
 ## [Improvements] - 2026-04-11
 
 - Optimize clone and fetch behavior with the "tree:0" partial clone filter, "--no-tags", and "upstream/main"-only tracking

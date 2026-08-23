@@ -1,5 +1,12 @@
 # React Native Directory Changelog
 
+## [Fixed] - 2026-05-17
+
+- Fixed a Raycast Beta crash caused by list item subtitles with only tooltip text.
+- Hid library row descriptions when the detail pane is expanded.
+- Updated Raycast dependencies to pinned current versions.
+- Added loading feedback while package author metadata is fetched.
+
 ## [Added] - 2026-02-01
 
 - Added popularity/trending indicator with HOT label

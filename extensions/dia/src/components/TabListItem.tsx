@@ -1,20 +1,19 @@
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
-import { getFavicon, showFailureToast } from "@raycast/utils";
-import { focusTab, type Tab } from "../dia";
+import { getFavicon, showFailureToast, type MutatePromise } from "@raycast/utils";
+import { closeTab, focusTab, TabNotFoundError, type Tab } from "../dia";
+import { getSearchActionTitle, getSearchEngine, getSearchUrl } from "../search-engines";
 import { getAccessories, getSubtitle } from "../utils";
 
 interface TabListItemProps {
   tab: Tab;
   searchText?: string;
   onTabAction?: () => void;
+  mutateTabs?: MutatePromise<Tab[] | undefined>;
 }
 
-interface Preferences {
-  defaultTabAction: "focus" | "open";
-}
-
-export function TabListItem({ tab, searchText, onTabAction }: TabListItemProps) {
-  const { defaultTabAction } = getPreferenceValues<Preferences>();
+export function TabListItem({ tab, searchText, onTabAction, mutateTabs }: TabListItemProps) {
+  const { defaultTabAction } = getPreferenceValues<Preferences.Search>();
+  const searchEngine = searchText ? getSearchEngine() : undefined;
 
   const focusAction = (
     <Action
@@ -63,8 +62,8 @@ export function TabListItem({ tab, searchText, onTabAction }: TabListItemProps) 
           {secondaryAction}
           {searchText && (
             <Action.OpenInBrowser
-              title="Search Google"
-              url={`https://www.google.com/search?q=${encodeURIComponent(searchText)}`}
+              title={getSearchActionTitle(searchEngine)}
+              url={getSearchUrl(searchText, searchEngine)}
               icon={Icon.MagnifyingGlass}
               shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
               onOpen={() => {
@@ -72,6 +71,38 @@ export function TabListItem({ tab, searchText, onTabAction }: TabListItemProps) 
               }}
             />
           )}
+          <ActionPanel.Section>
+            <Action
+              icon={Icon.XMarkCircle}
+              title="Close Tab"
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+              onAction={async () => {
+                try {
+                  if (mutateTabs) {
+                    // Optimistically drop the row so rapid-fire closes stay snappy;
+                    // roll back and refetch only if the browser rejects the close.
+                    await mutateTabs(closeTab(tab), {
+                      optimisticUpdate: (data) =>
+                        data?.filter((t) => !(t.windowId === tab.windowId && t.tabId === tab.tabId)),
+                      rollbackOnError: true,
+                      shouldRevalidateAfter: false,
+                    });
+                  } else {
+                    await closeTab(tab);
+                    onTabAction?.();
+                  }
+                } catch (error) {
+                  if (error instanceof TabNotFoundError) {
+                    // Tab is already gone or its IDs are stale — refetch to reconcile the list.
+                    onTabAction?.();
+                  } else {
+                    await showFailureToast(error, { title: "Failed closing tab" });
+                  }
+                }
+              }}
+            />
+          </ActionPanel.Section>
           <ActionPanel.Section>
             {tab.url && (
               <>

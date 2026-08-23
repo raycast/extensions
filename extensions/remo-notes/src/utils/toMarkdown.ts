@@ -7,9 +7,6 @@ const turndownService = new TurndownService({
   emDelimiter: "_",
 });
 
-/**
- * Converts HTML content to Markdown.
- */
 export function toMarkdown(html: string): string {
   if (!html) return "";
   return turndownService.turndown(html);

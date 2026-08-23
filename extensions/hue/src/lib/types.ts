@@ -45,25 +45,6 @@ export interface HasId {
 
 export type Method = "GET" | "DELETE" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "PURGE" | "LINK" | "UNLINK";
 
-export type MDnsService = {
-  addresses: string[];
-  subtypes: string[];
-  rawTxt: Buffer[];
-  txt: Record<string, string>;
-  name: string;
-  fqdn: string;
-  host: string;
-  referer: {
-    address: string;
-    family: string;
-    port: number;
-    size: number;
-  };
-  port: number;
-  type: string;
-  protocol: string;
-};
-
 export type HueApiService = {
   id: string;
   internalipaddress: string;

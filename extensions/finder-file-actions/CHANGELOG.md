@@ -1,5 +1,15 @@
 # Finder File Actions Changelog
 
+## [Finder-native undo and filename handling] - 2026-08-07
+
+- Fixed "Create Text File" treating a typed filename as an extension and creating names such as `untitled.notes`
+- Added Finder-native undo for Move to Folder and Copy to Folder
+- Updated @raycast/api to 1.104.24 and @raycast/utils to 2.2.7
+
+## [Pinned folder custom names] - 2026-05-28
+
+- Added custom names for pinned folders
+
 ## [New commands, search fix, icon refresh] - 2026-04-12
 
 - Added "Create Folder" command that creates a new folder in the current Finder directory

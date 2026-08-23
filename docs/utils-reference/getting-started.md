@@ -16,6 +16,33 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v2.3.0
+
+- Added `cacheWriteDebounce` to `useCachedState`, `useCachedPromise`, `useFetch`, `useExec`, and `useStreamJSON`
+- Fixed paginated `useFetch` URL factories running during render, repeatedly revalidating when passed inline, and bypassing the hook's error handling when they throw
+- Fixed `usePromise` handling of synchronous errors, asynchronous callbacks, and automatic optimistic-update rollbacks
+- Fixed `useCachedPromise` returning data and pagination state belonging to a previous cache key when `keepPreviousData` is disabled
+- Fixed `useExec` commands waiting forever for stdin, and restored support for disabling its timeout with `timeout: 0`
+- Fixed OAuth token refresh recovery and custom Google and Slack refresh-token URLs
+- Fixed `runAppleScript` and `runPowerShellScript` ignoring `parseOutput` and always returning a string
+- Fixed `useSQL` throwing during render when a database is missing and retaining a stale permission view after subsequent results
+- Fixed stale `useAI` streams overwriting newer results and model changes not triggering a new request
+- Fixed `useStreamJSON` not flattening arrays returned by `transform` before filtering and paginating them
+- Fixed failed `useStreamJSON` downloads replacing valid caches with partial files
+- Fixed SQLite connections leaking when queries fail or are aborted
+- Fixed frecency decay calculations, in-place sorting of caller-owned arrays
+- Fixed `useForm.reset` ignoring explicit falsy values
+- Fixed `getProgressIcon` ignoring `backgroundOpacity: 0`
+- Fixed `runAppleScript` timeout error messages reporting `undefined` instead of the effective timeout
+
+### v2.2.6
+
+- Fixed an issue where refreshing OAuth tokens would fails for providers that return scope as an array instead of a string
+
+### v2.2.5
+
+- Fixed an issue where `useSql` would not properly show the permission priming screen
+
 ### v2.2.4
 
 - Fixed an issue where an avatar's initials wouldn't be centered

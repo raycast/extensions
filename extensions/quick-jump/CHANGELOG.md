@@ -1,5 +1,10 @@
 # Quick Jump Changelog
 
+## [Fix] - 2026-07-07
+
+### Fixed
+- Fix false positive unused global placeholder issue 
+
 ## [Enhancement] - 2026-01-24
 
 ### Added

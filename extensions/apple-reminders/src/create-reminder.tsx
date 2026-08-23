@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { addMilliseconds, format, startOfToday } from "date-fns";
-import { ReactElement, useRef } from "react";
+import { ReactElement, useRef, useState } from "react";
 import { createReminder } from "swift:../swift/AppleReminders";
 
 import LocationForm from "./components/LocationForm";
@@ -25,6 +25,7 @@ import { List, Reminder, useData } from "./hooks/useData";
 import useLocations, { Location } from "./hooks/useLocations";
 import usePostCreateActions from "./hooks/usePostCreateActions";
 import ManageCreateActions from "./manage-create-actions";
+import { ParsedDueDate, parseDueDate } from "./parse-due-date";
 import { runPostCreateActions } from "./post-create-shortcuts";
 
 export type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
@@ -76,6 +77,8 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
   const { value: postCreateActions } = usePostCreateActions();
 
   const { locations, addLocation } = useLocations();
+  const [dateText, setDateText] = useState("");
+  const nlpParseRef = useRef<ParsedDueDate | null>(null);
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
@@ -110,9 +113,9 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       }
 
       if (values.dueDate) {
-        payload.dueDate = Form.DatePicker.isFullDay(values.dueDate)
-          ? format(values.dueDate, "yyyy-MM-dd")
-          : values.dueDate.toISOString();
+        const parsedNlp = nlpParseRef.current;
+        const isDateTime = parsedNlp ? parsedNlp.isDateTime : !Form.DatePicker.isFullDay(values.dueDate);
+        payload.dueDate = isDateTime ? values.dueDate.toISOString() : format(values.dueDate, "yyyy-MM-dd");
       }
 
       if (values.isRecurring) {
@@ -176,6 +179,9 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       setValue("location", "");
       setValue("address", "");
       setValue("radius", "");
+      setDateText("");
+      nlpParseRef.current = null;
+      setValue("dueDate", selectTodayAsDefault ? addMilliseconds(startOfToday(), 1) : null);
 
       focus("title");
     } catch (error) {
@@ -220,6 +226,26 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       await submitReminder(values, submitOptionsRef.current);
     },
   });
+
+  function handleDueDateTextChange(value: string) {
+    setDateText(value);
+
+    if (!value.trim()) {
+      nlpParseRef.current = null;
+      setValue("dueDate", null);
+      return;
+    }
+
+    const parsed = parseDueDate(value);
+    if (parsed) {
+      nlpParseRef.current = parsed;
+      setValue("dueDate", parsed.date);
+      return;
+    }
+
+    nlpParseRef.current = null;
+    setValue("dueDate", null);
+  }
 
   async function submitWithOptions(values: CreateReminderValues, options?: SubmitOptions) {
     submitOptionsRef.current = options;
@@ -292,7 +318,27 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       case "notes":
         return [<Form.TextArea key="notes" {...itemProps.notes} title="Notes" placeholder="Add some notes" />];
       case "dueDate":
-        return [<Form.DatePicker key="dueDate" {...itemProps.dueDate} title="Date" />];
+        return [
+          <Form.TextField
+            key="dueDateText"
+            id="dueDateText"
+            title="Date"
+            placeholder="1h, in 10 minutes, tomorrow 3:45pm"
+            value={dateText}
+            onChange={handleDueDateTextChange}
+            info="Supports 1h, 3 hours, 30 minutes, 3 days, 1 year, and times like 3:45pm. The h shortcut means hours."
+          />,
+          <Form.DatePicker
+            key="dueDate"
+            {...itemProps.dueDate}
+            title="Calendar"
+            type={Form.DatePicker.Type.DateTime}
+            onChange={(value) => {
+              nlpParseRef.current = null;
+              itemProps.dueDate.onChange?.(value);
+            }}
+          />,
+        ];
       case "recurrence":
         if (!isFieldEnabled("dueDate") || !values.dueDate) {
           return [];
@@ -413,6 +459,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
           <Action.SubmitForm
             icon={Icon.Window}
             onSubmit={(values) => submitWithOptions(values as CreateReminderValues, { closeWindowAfterCreate: true })}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             title="Create Reminder and Close Window"
           />
           <Action.Push

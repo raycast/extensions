@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Grid, ActionPanel, Action, Icon, Color } from "@raycast/api";
 
+import { OpenPreferencesAction } from "@/lib/components/OpenPreferencesAction";
 import { useInstanceManager } from "@/lib/hooks/useInstanceManager";
 import { useMissingMovies } from "@/lib/hooks/useRadarrAPI";
 import { getMoviePoster } from "@/lib/utils/formatting";
@@ -119,7 +120,7 @@ export default function MissingMovies() {
                     onAction={() => switchToInstance(instance)}
                   />
                 ))}
-                <Action.Open title="Open Preferences" target="raycast://extensions/preferences" icon={Icon.Gear} />
+                <OpenPreferencesAction />
               </ActionPanel.Section>
             )}
           </ActionPanel>
@@ -141,7 +142,7 @@ export default function MissingMovies() {
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action.Open title="Open Preferences" target="raycast://extensions/preferences" icon={Icon.Gear} />
+              <OpenPreferencesAction />
             </ActionPanel>
           }
         />

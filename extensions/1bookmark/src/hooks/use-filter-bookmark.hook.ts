@@ -2,43 +2,37 @@ import { useMemo } from "react";
 import { PreparedBookmark } from "./use-prepare-bookmark-search.hook";
 
 /**
- * Parse special filter characters from the keyword
- * !space - Filter by space name or bookmark creator name
- * @user - Filter by creator name
- * #tag# - Filter by tag (must be surrounded by # symbols)
+ * Parse special filter characters from the keyword (token-based).
+ * !space  - Filter by space name
+ * @user   - Filter by creator name
+ * #tag    - Filter by tag
+ * ##text  - Escape: literal "#text" in the search keyword (e.g. Slack channels)
  */
 function parseKeywordFilters(keyword: string) {
   const filters = {
     spaceFilters: [] as string[],
     creatorFilters: [] as string[],
     tagFilters: [] as string[],
-    cleanKeyword: keyword,
+    cleanKeyword: "",
   };
 
-  // Extract space filters (!space)
-  const spaceMatches = keyword.match(/!(\S+)/g);
-  if (spaceMatches) {
-    filters.spaceFilters = spaceMatches.map((match) => match.substring(1).toLowerCase());
-    filters.cleanKeyword = filters.cleanKeyword.replace(/!(\S+)/g, "");
+  const cleanParts: string[] = [];
+
+  for (const token of keyword.split(/\s+/).filter(Boolean)) {
+    if (token.startsWith("##")) {
+      cleanParts.push(token.slice(1));
+    } else if (token.length > 1 && token.startsWith("#")) {
+      filters.tagFilters.push(token.slice(1).toLowerCase());
+    } else if (token.length > 1 && token.startsWith("!")) {
+      filters.spaceFilters.push(token.slice(1).toLowerCase());
+    } else if (token.length > 1 && token.startsWith("@")) {
+      filters.creatorFilters.push(token.slice(1).toLowerCase());
+    } else {
+      cleanParts.push(token);
+    }
   }
 
-  // Extract creator filters (@creator)
-  const creatorMatches = keyword.match(/@(\S+)/g);
-  if (creatorMatches) {
-    filters.creatorFilters = creatorMatches.map((match) => match.substring(1).toLowerCase());
-    filters.cleanKeyword = filters.cleanKeyword.replace(/@(\S+)/g, "");
-  }
-
-  // Extract tag filters (#tag#)
-  const tagMatches = keyword.match(/#([^#\s]+)#/g);
-  if (tagMatches) {
-    filters.tagFilters = tagMatches.map((match) => match.substring(1, match.length - 1).toLowerCase());
-    filters.cleanKeyword = filters.cleanKeyword.replace(/#([^#\s]+)#/g, "");
-  }
-
-  // Clean up extra spaces and trim
-  filters.cleanKeyword = filters.cleanKeyword.replace(/\s+/g, " ").trim();
-
+  filters.cleanKeyword = cleanParts.join(" ");
   return filters;
 }
 

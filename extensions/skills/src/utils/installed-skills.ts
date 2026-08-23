@@ -35,7 +35,9 @@ export async function getInstalledSkillsWithLock(): Promise<InstalledSkill[]> {
     return {
       ...skill,
       source: lock.source,
+      sourceType: lock.sourceType,
       sourceUrl: lock.sourceUrl ? stripGitSuffix(lock.sourceUrl) : undefined,
+      ref: lock.ref,
       installedAt: lock.installedAt,
       updatedAt: lock.updatedAt,
     };

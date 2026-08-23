@@ -1,5 +1,21 @@
 # Dia Changelog
 
+## [Security: Address dependabot alert] - 2026-08-19
+
+- Updated package-lock.json to fix https://github.com/raycast/extensions/security/dependabot/76383
+
+## [Close Tab] - 2026-08-18
+
+- Added Close Tab action to Search Dia and Search Tabs.
+
+## [Configurable Search Engine] - 2026-06-11
+
+- Added a search engine preference for Search Dia suggestions and web search fallback actions.
+
+## [Fix bookmark opening] - 2026-05-21
+
+- Fixed bookmark results failing to open in Dia on newer Dia versions.
+
 ## [Fixed SQL query escaping] - 2026-03-27
 
 - Fixed single quote escaping in SQL queries to use proper SQL string literals instead of double quotes

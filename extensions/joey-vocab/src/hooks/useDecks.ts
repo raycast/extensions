@@ -5,7 +5,7 @@ import type { Deck } from "../types";
 /**
  * Fetches all decks for the given user.
  */
-async function fetchDecks(userId: string): Promise<Deck[]> {
+async function _fetchDecks(userId: string): Promise<Deck[]> {
   const { data: deckRows, error } = await supabase
     .from("decks")
     .select("*")
@@ -24,7 +24,9 @@ async function fetchDecks(userId: string): Promise<Deck[]> {
  * Only executes when a valid userId is provided.
  */
 export function useDecks(userId: string | null) {
-  const { data, isLoading, error } = useCachedPromise((id: string) => fetchDecks(id), [userId!], { execute: !!userId });
+  const { data, isLoading, error } = useCachedPromise((id: string) => _fetchDecks(id), [userId!], {
+    execute: !!userId,
+  });
 
   return { decks: data ?? [], isLoading, error };
 }

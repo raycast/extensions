@@ -8,7 +8,8 @@
   "contributors": [
     "neil_brown",
     "nicolas-marien",
-    "Civ2boss"
+    "Civ2boss",
+    "alexi.build"
   ],
   "categories": [
     "Productivity",
@@ -48,15 +49,15 @@
     {
       "name": "save-link",
       "title": "Save Link",
-      "description": "Save a URL to Reader",
+      "description": "Save a URL to Reader; falls back to the current browser tab when omitted",
       "mode": "no-view",
       "icon": "reader-logo.png",
       "arguments": [
         {
           "name": "url",
-          "placeholder": "URL",
+          "placeholder": "URL (optional)",
           "type": "text",
-          "required": true
+          "required": false
         },
         {
           "name": "author",
@@ -143,19 +144,69 @@
           "type": "dropdown",
           "description": "The default location to use when listing content",
           "title": "Default list location"
+        },
+        {
+          "name": "defaultSortBy",
+          "title": "Default sort",
+          "description": "The default sort to use when opening List Documents",
+          "type": "dropdown",
+          "required": false,
+          "default": "last_moved_at",
+          "data": [
+            {
+              "title": "Date Moved",
+              "value": "last_moved_at"
+            },
+            {
+              "title": "Date Saved",
+              "value": "saved_at"
+            },
+            {
+              "title": "Date Published",
+              "value": "published_date"
+            },
+            {
+              "title": "Date Last Opened",
+              "value": "last_opened_at"
+            },
+            {
+              "title": "Author",
+              "value": "author"
+            },
+            {
+              "title": "Category",
+              "value": "category"
+            },
+            {
+              "title": "Length",
+              "value": "word_count"
+            },
+            {
+              "title": "Progress",
+              "value": "reading_progress"
+            },
+            {
+              "title": "Title",
+              "value": "title"
+            },
+            {
+              "title": "Random",
+              "value": "random"
+            }
+          ]
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.91.2",
-    "@raycast/utils": "1.18.1",
+    "@raycast/api": "1.104.21",
+    "@raycast/utils": "2.2.7",
     "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
@@ -185,5 +236,9 @@
       "label": "Open links in desktop app",
       "default": false
     }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ]
 }

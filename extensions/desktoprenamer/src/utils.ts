@@ -33,11 +33,44 @@ export async function handleDesktopRenamerError(error: unknown, errorMessage = "
           onAction: () => open("https://github.com/gitmichaelqiu/DesktopRenamer"),
         },
       });
+    } else if (error instanceof Error && error.message === "NotRunning") {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "DesktopRenamer Not Running",
+        message: "Open DesktopRenamer to use this command.",
+        primaryAction: {
+          title: "Open DesktopRenamer",
+          onAction: async () => {
+            try {
+              await open("/Applications/DesktopRenamer.app");
+            } catch {
+              await showToast({ style: Toast.Style.Failure, title: "Failed to launch app" });
+            }
+          },
+        },
+      });
+    } else if (error instanceof Error && error.message.includes("API Disabled")) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "SpaceAPI Disabled",
+        message: "Enable SpaceAPI in DesktopRenamer settings.",
+        primaryAction: {
+          title: "Open DesktopRenamer",
+          onAction: async () => {
+            try {
+              await open("/Applications/DesktopRenamer.app");
+            } catch {
+              await showToast({ style: Toast.Style.Failure, title: "Failed to launch app" });
+            }
+          },
+        },
+      });
     } else {
+      const message = error instanceof Error ? error.message : errorMessage;
       await showToast({
         style: Toast.Style.Failure,
         title: "Command Failed",
-        message: errorMessage,
+        message: message || errorMessage,
         primaryAction: {
           title: "Open DesktopRenamer",
           onAction: async () => {
@@ -73,4 +106,20 @@ export async function runDesktopRenamerScript(scriptContent: string, errorMessag
 
 export async function runDesktopRenamerCommand(command: string, errorMessage = "Is DesktopRenamer running?") {
   return await runDesktopRenamerScript(`tell application "DesktopRenamer" to ${command}`, errorMessage);
+}
+
+export async function moveSpecificWindowToSpace(args: {
+  windowID: number;
+  pid: number;
+  fromSpaceID: string;
+  targetSpaceID: string;
+}) {
+  const windowID = escapeAppleScriptString(String(args.windowID));
+  const pid = escapeAppleScriptString(String(args.pid));
+  const fromSpaceID = escapeAppleScriptString(args.fromSpaceID);
+  const targetSpaceID = escapeAppleScriptString(args.targetSpaceID);
+
+  await runDesktopRenamerCommand(
+    `move specific window "${windowID}" pid "${pid}" from space "${fromSpaceID}" to space "${targetSpaceID}"`,
+  );
 }

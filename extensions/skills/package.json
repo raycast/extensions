@@ -12,7 +12,8 @@
     "elwin_liu",
     "pernielsentikaer",
     "kayo_timoteo",
-    "alexi.build"
+    "alexi.build",
+    "alastairsounds"
   ],
   "platforms": [
     "macOS",
@@ -36,6 +37,40 @@
       "subtitle": "Skills",
       "description": "View and remove installed skills",
       "mode": "view"
+    },
+    {
+      "name": "update-all-skills",
+      "title": "Update All Skills",
+      "subtitle": "Skills",
+      "description": "Update all installed skills",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-skills",
+      "title": "Search Skills",
+      "description": "Search the skills.sh marketplace for agent skills matching a query."
+    },
+    {
+      "name": "read-skill",
+      "title": "Read Skill",
+      "description": "Fetch the full SKILL.md content for a specific skill to understand what it does."
+    },
+    {
+      "name": "list-installed-skills",
+      "title": "List Installed Skills",
+      "description": "List all locally installed skills with their agents, source, and install dates."
+    },
+    {
+      "name": "install-skill",
+      "title": "Install Skill",
+      "description": "Install a skill from the skills.sh marketplace. Only call after the user has confirmed."
+    },
+    {
+      "name": "remove-skill",
+      "title": "Remove Skill",
+      "description": "Remove an installed skill. Only call after the user has confirmed."
     }
   ],
   "preferences": [
@@ -61,13 +96,21 @@
       "description": "Opt out of anonymous usage data collected by the underlying Skills CLI for commands run through this extension. The extension itself does not collect telemetry data.",
       "type": "checkbox",
       "required": false
+    },
+    {
+      "name": "defaultAgents",
+      "title": "Default Agents",
+      "description": "Agents pre-selected when installing a skill. Enter comma-separated display names exactly as shown in the agent picker, e.g. \"Claude Code, Windsurf\". Leave empty to start with no agents pre-selected.",
+      "placeholder": "e.g., Claude Code, Windsurf",
+      "type": "textfield",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.104.5",
-    "@raycast/utils": "2.2.3",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "@raycast/api": "^1.104.16",
+    "@raycast/utils": "^2.2.4",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "semver": "^7.7.3"
   },
   "devDependencies": {
@@ -86,5 +129,8 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "ray publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

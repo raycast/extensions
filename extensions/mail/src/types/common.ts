@@ -1,4 +1,4 @@
-import { Image } from "@raycast/api";
+import { MailboxType } from "../utils/mailbox";
 
 export type AnyFn<T = void> = (...args: unknown[]) => T;
 
@@ -20,7 +20,7 @@ export type Account = {
 export type Mailbox = {
   name: string;
   unreadCount: number;
-  icon?: Image.ImageLike;
+  type: MailboxType;
   messages?: Message[];
 };
 

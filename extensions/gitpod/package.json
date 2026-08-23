@@ -132,16 +132,17 @@
     "@bufbuild/connect": "^0.8.6",
     "@bufbuild/connect-node": "^0.8.6",
     "@bufbuild/protobuf": "^1.2.0",
-    "@graphql-codegen/cli": "^2.16.2",
-    "@graphql-codegen/typescript-graphql-request": "^4.5.8",
-    "@graphql-codegen/typescript-operations": "^2.5.11",
+    "@graphql-codegen/cli": "^7.0.0",
+    "@graphql-codegen/typescript": "^6.0.1",
+    "@graphql-codegen/typescript-graphql-request": "^7.0.1",
+    "@graphql-codegen/typescript-operations": "^6.0.2",
     "@raycast/api": "^1.57.1",
     "@raycast/utils": "^1.9.1",
     "date-fns": "^2.29.3",
-    "graphql-request": "^5.1.0",
+    "graphql-request": "^6.1.0",
     "lodash": "^4.17.23",
     "node-fetch": "^3.3.0",
-    "octokit": "^2.0.10",
+    "octokit": "^3.1.2",
     "ws": "^8.11.0"
   },
   "devDependencies": {
@@ -163,5 +164,11 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "generate": "graphql-codegen --config codegen.ts"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.1",
+    "js-yaml@4": "4.3.1",
+    "fast-uri": "3.1.5"
   }
 }

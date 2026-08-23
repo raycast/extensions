@@ -32,7 +32,7 @@
   "dependencies": {
     "@raycast/api": "^1.32.1",
     "@youri-kane/heroku-client": "0.1.17",
-    "axios": "^0.30.3",
+    "axios": "^1.8.4",
     "gravatar": "^1.8.2",
     "swr": "^1.2.2"
   },
@@ -55,5 +55,11 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "axios": "^1.8.4",
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.1",
+    "fast-uri": "3.1.5"
+  }
 }

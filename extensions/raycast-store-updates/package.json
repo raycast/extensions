@@ -6,7 +6,8 @@
   "icon": "store-updates-icon.png",
   "author": "chrismessina",
   "contributors": [
-    "alexi.build"
+    "alexi.build",
+    "Undolog"
   ],
   "platforms": [
     "macOS",
@@ -19,12 +20,46 @@
   "preferences": [
     {
       "name": "trackReadStatus",
-      "title": "Track Read/Unread Status",
-      "label": "Enable",
-      "description": "When enabled, items can be marked as read and hidden from the list",
+      "title": "Read Status",
+      "label": "Enable read/unread statuses",
+      "description": "Mark items as read and hide them from the list.",
       "type": "checkbox",
       "required": false,
       "default": false
+    },
+    {
+      "name": "githubToken",
+      "title": "GitHub Token",
+      "description": "Optional. Raises the GitHub API limit from 60 to 5,000 requests/hour. A classic token with no scopes is enough.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "useGraphQL",
+      "title": "GraphQL",
+      "label": "Use GraphQL (experimental)",
+      "description": "Fetch pull requests via GraphQL. Requires a token; falls back to REST without one.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "menuBarScope",
+      "title": "Menu Bar",
+      "description": "Which updates the menu bar counts. Does not affect the main list.",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "data": [
+        {
+          "title": "All Updates",
+          "value": "all"
+        },
+        {
+          "title": "My Updates (installed only)",
+          "value": "my-updates"
+        }
+      ]
     }
   ],
   "commands": [
@@ -34,14 +69,23 @@
       "subtitle": "Raycast Store Updates",
       "description": "See the latest Raycast store updates and new extensions",
       "mode": "view"
+    },
+    {
+      "name": "store-updates-menu-bar",
+      "title": "Store Updates Menu Bar",
+      "subtitle": "Raycast Store Updates",
+      "description": "Show new and updated Raycast Store extensions in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1h"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.3",
-    "@raycast/utils": "^2.2.2"
+    "@chrismessina/raycast-kit": "^0.1.3",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",

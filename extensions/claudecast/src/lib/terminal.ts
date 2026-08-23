@@ -35,7 +35,7 @@ function normalizeModelName(model: string): string {
   return model;
 }
 
-type TerminalApp = "Terminal" | "iTerm" | "Warp" | "kitty" | "Ghostty";
+type TerminalApp = "Terminal" | "iTerm" | "Warp" | "kitty" | "Ghostty" | "cmux";
 type OpenIn = "window" | "tab";
 
 /**
@@ -66,7 +66,9 @@ export async function openTerminalWithCommand(
         await openInITerm(command, cwd, openIn);
         break;
       case "Warp":
-        // Warp's YAML launch config always opens a new window; openIn is N/A
+        // Warp always opens a new window. The YAML launch-config flow is the
+        // only reliable mechanism; new-tab via System Events keystroke or
+        // the warp:// URL scheme is unreliable in practice.
         await openInWarp(command, cwd);
         break;
       case "kitty":
@@ -74,6 +76,9 @@ export async function openTerminalWithCommand(
         break;
       case "Ghostty":
         await openInGhostty(command, cwd, openIn);
+        break;
+      case "cmux":
+        await openInCmux(command, cwd, openIn);
         break;
       default:
         await openInTerminalApp(command, cwd, openIn);
@@ -87,16 +92,24 @@ export async function openTerminalWithCommand(
   }
 }
 
+// Escape a value for safe inclusion in an AppleScript double-quoted string.
+// AppleScript does not expand `$` inside string literals, so we only need to
+// escape `"` (and pass through `\` since AppleScript treats `\\` as `\`).
+function escapeAppleScriptDoubleQuoted(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 async function openInTerminalApp(
   command: string,
   cwd: string,
   openIn: OpenIn,
 ): Promise<void> {
+  const escapedCommand = escapeAppleScriptDoubleQuoted(command);
+  const escapedCwd = escapeAppleScriptDoubleQuoted(cwd);
+
   if (openIn === "tab") {
-    // ⌘T keystroke via System Events creates a real new tab.
-    // Raycast has Accessibility permission so this works from the extension.
-    const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-    const escapedCwd = cwd.replace(/"/g, '\\"');
+    // Cmd+T keystroke via System Events creates a real new tab in the front
+    // Terminal window. Requires Raycast Accessibility access.
     const script = `
       tell application "Terminal"
         activate
@@ -111,18 +124,19 @@ async function openInTerminalApp(
       end tell
     `;
     await execFilePromise("osascript", ["-e", script]);
-  } else {
-    // Write command to a temp .command file and open it with Terminal.
-    // 'open -a Terminal file.command' always spawns a fresh window.
-    const tempFile = join(tmpdir(), `claudecast-${Date.now()}.command`);
-    const escapedCwdForBash = cwd.replace(/"/g, '\\"');
-    writeFileSync(
-      tempFile,
-      `#!/bin/bash\ncd "${escapedCwdForBash}"\nrm -f "${tempFile}"\n${command}\n`,
-      { mode: 0o755 },
-    );
-    await execFilePromise("open", ["-a", "Terminal", tempFile]);
+    return;
   }
+
+  // Window mode: write command to a temp .command file and open it with
+  // Terminal. `open -a Terminal file.command` always spawns a fresh window.
+  const tempFile = join(tmpdir(), `claudecast-${Date.now()}.command`);
+  const escapedCwdForBash = cwd.replace(/"/g, '\\"');
+  writeFileSync(
+    tempFile,
+    `#!/bin/bash\ncd "${escapedCwdForBash}"\nrm -f "${tempFile}"\n${command}\n`,
+    { mode: 0o755 },
+  );
+  await execFilePromise("open", ["-a", "Terminal", tempFile]);
 }
 
 async function openInITerm(
@@ -130,8 +144,8 @@ async function openInITerm(
   cwd: string,
   openIn: OpenIn,
 ): Promise<void> {
-  const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-  const escapedCwd = cwd.replace(/"/g, '\\"');
+  const escapedCommand = escapeAppleScriptDoubleQuoted(command);
+  const escapedCwd = escapeAppleScriptDoubleQuoted(cwd);
 
   let script: string;
   if (openIn === "tab") {
@@ -180,11 +194,11 @@ function escapeYamlDoubleQuoted(s: string): string {
     .replace(/\t/g, "\\t");
 }
 
-// Warp's YAML launch config opens a new window; openIn does not apply here
-// (the previous warp://action/new_tab?command= URL scheme was unreliable
-// at executing the command).
+// Warp launcher. Always opens a new window via a temporary YAML launch
+// configuration opened with `warp://launch/`. Warp's `warp://action/new_tab`
+// URL scheme and System Events Cmd+T keystroke are both unreliable, so we
+// don't expose a tab mode for Warp.
 async function openInWarp(command: string, cwd: string): Promise<void> {
-  // Use dynamic launch configuration for reliable command execution
   const lcId = randomUUID();
   const lcDir = join(homedir(), ".warp", "launch_configurations");
   if (!existsSync(lcDir)) {
@@ -234,10 +248,11 @@ async function openInKitty(
       ]);
       return;
     } catch {
-      // Remote control not configured — fall through to window mode
+      // Remote control not configured; fall through to window mode
     }
   }
   await execFilePromise("kitty", [
+    "--single-instance",
     `--directory=${cwd}`,
     "-e",
     "sh",
@@ -251,8 +266,8 @@ async function openInGhostty(
   cwd: string,
   openIn: OpenIn,
 ): Promise<void> {
-  const escapedCommand = command.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  const escapedCwd = cwd.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const escapedCommand = escapeAppleScriptDoubleQuoted(command);
+  const escapedCwd = escapeAppleScriptDoubleQuoted(cwd);
 
   // Use Ghostty's native AppleScript API with surface configuration.
   // `new tab` opens the surface as a tab in the front window when one
@@ -268,6 +283,63 @@ async function openInGhostty(
     end tell
   `;
 
+  await execFilePromise("osascript", ["-e", script]);
+}
+
+/**
+ * Launch a command inside a cmux workspace.
+ *
+ * Tab mode uses `open -a cmux <dir>`, which routes through cmux's
+ * application:openFile: handler to create a new workspace in the front window
+ * with the shell's pwd set to <dir> (no `cd` typed). The cmux CLI socket is
+ * unreliable across installs, so we avoid it.
+ *
+ * Window mode uses cmux's AppleScript `new window` verb to spawn a fresh
+ * window, then types `cd "<cwd>" && <command>` via cmux's `perform action`
+ * Ghostty input pipeline (no System Events / Accessibility needed in either
+ * mode). Window mode pays the shell-escape cost on the cwd because there is
+ * no open-handler equivalent for "new window."
+ */
+async function openInCmux(
+  command: string,
+  cwd: string,
+  openIn: OpenIn,
+): Promise<void> {
+  const escapedCommand = escapeAppleScriptDoubleQuoted(command);
+
+  if (openIn === "window") {
+    // Shell escaping for cwd inside the typed `cd "..."`. Backslash and double
+    // quote both need handling at the shell layer.
+    const shellEscapedCwd = cwd.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    // Then escape the whole typed string for the AppleScript double-quoted
+    // scalar. The shell-escaped cwd already contains \\ and \" so the
+    // AppleScript-layer escape converts those to \\\\ and \\\".
+    const typed = escapeAppleScriptDoubleQuoted(
+      `cd "${shellEscapedCwd}" && ${command}`,
+    );
+    const script = `
+      tell application "cmux"
+        activate
+        set w to new window
+        delay 0.7
+        perform action ("text:" & "${typed}" & (ASCII character 10)) on focused terminal of selected tab of w
+      end tell
+    `;
+    await execFilePromise("osascript", ["-e", script]);
+    return;
+  }
+
+  // Tab mode: open-handler creates a workspace in the front window with cwd
+  // set as the shell's process pwd.
+  await execFilePromise("open", ["-a", "cmux", cwd]);
+  // Wait for the new workspace's terminal to initialize. 700ms covers warm
+  // relaunches; cold first-launch tested at ~500ms.
+  await new Promise((resolve) => setTimeout(resolve, 700));
+  const script = `
+    tell application "cmux"
+      perform action ("text:" & "${escapedCommand}" & (ASCII character 10)) on focused terminal of selected tab of front window
+    end tell
+  `;
   await execFilePromise("osascript", ["-e", script]);
 }
 
@@ -1054,6 +1126,7 @@ export async function getAvailableTerminals(): Promise<TerminalApp[]> {
     ["Warp", "Warp"],
     ["kitty", "kitty"],
     ["Ghostty", "Ghostty"],
+    ["cmux", "cmux"],
   ];
 
   for (const [appName, terminal] of checks) {

@@ -128,8 +128,8 @@ function resolveUri(uri: string, name: string): string {
   return resolved;
 }
 
-export async function transformInventoryResponse(buffer: ArrayBuffer): Promise<InventoryItem[]> {
-  const raw = Buffer.from(buffer);
+export async function transformInventoryResponse(buffer: ArrayBuffer | Uint8Array): Promise<InventoryItem[]> {
+  const raw = buffer instanceof Uint8Array ? Buffer.from(buffer) : Buffer.from(new Uint8Array(buffer));
   const lines = await parseInventory(raw);
   const filtered = dedupeAndFilter(lines);
   filtered.sort((a, b) => a.shortName.localeCompare(b.shortName));

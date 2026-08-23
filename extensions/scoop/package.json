@@ -4,7 +4,9 @@
   "title": "Scoop",
   "description": "Manage Scoop, the command-line installer for Windows.",
   "icon": "scoop.png",
-  "platforms": ["Windows"],
+  "platforms": [
+    "Windows"
+  ],
   "author": "zsombor_biro",
   "license": "MIT",
   "categories": [
@@ -12,7 +14,8 @@
     "System"
   ],
   "contributors": [
-    "shubham"
+    "shubham",
+    "Netizen"
   ],
   "keywords": [
     "scoop",
@@ -76,5 +79,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

@@ -48,6 +48,18 @@ export type SyncData = {
   user: User;
 };
 
+export type SyncResourceType =
+  | "user"
+  | "projects"
+  | "items"
+  | "sections"
+  | "labels"
+  | "filters"
+  | "collaborators"
+  | "reminders"
+  | "locations"
+  | "notes";
+
 export type CachedDataParams = {
   data: SyncData | undefined;
   setData: Dispatch<SetStateAction<SyncData | undefined>>;
@@ -109,10 +121,10 @@ export async function getFilterTasks(query: string) {
   }
 }
 
-export async function initialSync() {
+export async function initialSync(resourceTypes?: SyncResourceType[]) {
   return syncRequest({
     sync_token: "*",
-    resource_types: [
+    resource_types: resourceTypes ?? [
       "user",
       "projects",
       "items",
@@ -181,6 +193,8 @@ export async function updateProject(args: UpdateProjectArgs, { setData }: Cached
       },
     ],
   });
+
+  if (updatedData.projects.length === 0) return;
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
@@ -449,6 +463,8 @@ export async function moveTask(args: MoveTaskArgs, { setData }: CachedDataParams
     ],
   });
 
+  if (updatedData.items.length === 0) return;
+
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
     items: prev.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
@@ -594,6 +610,8 @@ export async function addLabel(args: AddLabelArgs, { setData }: CachedDataParams
       ],
     });
 
+    if (addedData.labels.length === 0) return;
+
     mergeIntoCachedData(setData, (prev) => ({
       ...prev,
       labels: [...prev.labels, addedData.labels[0]],
@@ -626,6 +644,8 @@ export async function updateLabel(args: UpdateLabelArgs, { setData }: CachedData
       },
     ],
   });
+
+  if (updatedData.labels.length === 0) return;
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
@@ -684,6 +704,8 @@ export async function updateFilter(args: UpdateFilterArgs, { setData }: CachedDa
       },
     ],
   });
+
+  if (updatedData.filters.length === 0) return;
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
@@ -785,6 +807,8 @@ export async function updateComment(args: UpdateCommentArgs, { setData }: Cached
       },
     ],
   });
+
+  if (updatedData.notes.length === 0) return;
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,

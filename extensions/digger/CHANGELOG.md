@@ -1,5 +1,28 @@
 # Digger Changelog
 
+## [Failed digs no longer hang, and shortcuts work on Windows] - 2026-08-11
+
+### Fixed
+
+- A dig that failed outright — an unreachable host, a mistyped domain — left the spinner running forever and never showed an error. It now reports the failure immediately.
+- Errors identify the actual problem. A DNS failure now reads "Connection Failed" with connection-specific advice and the underlying cause, instead of a generic "Fetch Error".
+- Keyboard shortcuts now work on Windows. Every custom shortcut previously used a ⌘-based binding that does not exist there, leaving those actions unreachable.
+- In the HTTP Headers list, "Copy Header Name" and "Copy Header Value" were both bound to ⌘ ⇧ C, so one of them could never be triggered. "Copy Header Name" now uses ⌘ ⌥ C.
+- Digging a new URL before the previous one finished could let the abandoned dig overwrite the new results, blank its panels, or fill its progress bars.
+- DNS & Certificates no longer shows the previous site's certificate when the current site's TLS lookup fails.
+- "Open in Wayback Machine" and "Save to Wayback Machine" now open the correct app when running Raycast beta.
+
+### Added
+
+- **Copy Error** on the failure toast and **Copy Error Details** on the error screen, both copying the same report: the URL, the underlying cause, and the suggestions.
+- **Copy Error Details** on the "Some data couldn't be loaded" banner, for the individual component failures.
+
+### Changed
+
+- The failure screen is now a centred empty state rather than a list row with a detail pane beside it.
+- "Save to Wayback Machine" moved from ⌘ ⇧ S to ⌘ ⇧ Y, and "Copy Canonical URL" from ⌘ ⌥ C to ⌘ ⌥ U, so they no longer shadow Raycast's standard shortcuts.
+- URLs written to the debug log are stripped of their query strings.
+
 ## [Add Content Signals and Payment Required (x402) detection] - 2026-02-19
 
 ### Added: Content Signals detection

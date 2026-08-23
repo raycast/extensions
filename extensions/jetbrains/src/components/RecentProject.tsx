@@ -203,6 +203,16 @@ export function RecentProject({
               tooltip: `Last opened ${new Date(recent.opened).toLocaleString()}`,
             }
           : {},
+        recent.branch
+          ? {
+              icon: Icon.Code,
+              tag: {
+                value: recent.branch,
+                color: Color.Green,
+              },
+              tooltip: `Git branch: ${recent.branch}`,
+            }
+          : {},
         {
           tag: {
             value: app.name,

@@ -31,6 +31,52 @@ query getViewerStats($repositoriesCount: Int = 100) {
     issuesOpen: issues(states: [OPEN]) {
       totalCount
     }
+    recentPullRequests: pullRequests(first: 5, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        number
+        title
+        url
+        state
+        repository {
+          nameWithOwner
+        }
+      }
+    }
+    recentOpenPullRequests: pullRequests(first: 5, states: [OPEN], orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        number
+        title
+        url
+        repository {
+          nameWithOwner
+        }
+      }
+    }
+    recentIssues: issues(first: 5, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        number
+        title
+        url
+        state
+        repository {
+          nameWithOwner
+        }
+      }
+    }
+    recentOpenIssues: issues(first: 5, states: [OPEN], orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        number
+        title
+        url
+        repository {
+          nameWithOwner
+        }
+      }
+    }
     contributionsCollection {
       totalCommitContributions
     }
@@ -44,6 +90,9 @@ query getViewerStats($repositoriesCount: Int = 100) {
     ) {
       totalCount
       nodes {
+        id
+        nameWithOwner
+        url
         stargazerCount
         forkCount
       }
@@ -58,5 +107,11 @@ query getViewerStats($repositoriesCount: Int = 100) {
         url
       }
     }
+  }
+  rateLimit {
+    remaining
+    limit
+    used
+    resetAt
   }
 }

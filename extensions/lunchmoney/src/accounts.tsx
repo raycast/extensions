@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Icon, List, Color, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { ManualAccount, PlaidAccount, useLunchMoney } from "./api";
+import { ManualAccount, PlaidAccount, useLunchMoney, usePrimaryCurrency } from "./api";
 import { getAmountValue, formatCurrency } from "./format";
 
 interface Account {
@@ -10,6 +10,7 @@ interface Account {
   name: string;
   display_name: string | null;
   balance: string;
+  to_base: number;
   balance_as_of: string;
   currency: string;
   institution_name: string | null;
@@ -70,6 +71,7 @@ export default function Command() {
         name: account.name,
         display_name: account.display_name ?? null,
         balance: account.balance,
+        to_base: account.to_base ?? parseFloat(account.balance),
         balance_as_of: account.balance_as_of ?? new Date().toISOString(),
         currency: account.currency,
         institution_name: account.institution_name ?? null,
@@ -83,6 +85,7 @@ export default function Command() {
         name: plaid.name,
         display_name: plaid.display_name ?? null,
         balance: plaid.balance,
+        to_base: plaid.to_base ?? parseFloat(plaid.balance),
         balance_as_of: plaid.last_import ?? new Date().toISOString(),
         currency: plaid.currency || "usd",
         institution_name: plaid.institution_name ?? null,
@@ -95,6 +98,7 @@ export default function Command() {
   });
 
   const accounts = data ?? [];
+  const primaryCurrency = usePrimaryCurrency();
 
   async function handleSync() {
     try {
@@ -154,17 +158,18 @@ export default function Command() {
 
   const otherAccounts = activeAccounts.filter((acc) => !cashAccounts.includes(acc) && !creditAccounts.includes(acc));
 
-  // Calculate net worth (assets minus liabilities)
+  // Net worth (assets minus liabilities) in the user's primary currency. Uses each account's
+  // `to_base` so balances in different currencies are converted before summing, rather than
+  // adding raw amounts across currencies.
   const netWorth = activeAccounts.reduce((sum, acc) => {
-    const balance = getAmountValue(acc.balance);
     const isLiability =
       acc.type_name.toLowerCase().includes("credit") ||
       acc.type_name.toLowerCase().includes("loan") ||
       acc.type_name.toLowerCase().includes("mortgage");
-    return sum + (isLiability ? -balance : balance);
+    return sum + (isLiability ? -acc.to_base : acc.to_base);
   }, 0);
 
-  const formattedNetWorth = formatCurrency(netWorth, "USD");
+  const formattedNetWorth = formatCurrency(netWorth, primaryCurrency);
 
   const renderAccount = (account: Account) => {
     const balance = getAmountValue(account.balance);

@@ -71,4 +71,8 @@ sound-search
 linkinize
 beeper
 pieces-raycast
+saasflow
+globalping
+mymind
+buffer
 nocal

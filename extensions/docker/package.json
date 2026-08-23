@@ -73,10 +73,14 @@
     "node-fetch": "^3.0.0"
   },
   "overrides": {
-    "tar-fs": ">=3.1.1"
+    "tar-fs": ">=3.1.1",
+    "js-yaml@4": "4.3.1",
+    "brace-expansion@1": "1.1.16",
+    "brace-expansion@2": "2.1.2",
+    "brace-expansion@5": "5.0.9"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "eslint": "^8.57.1",
     "typescript": "^5.7.3"
   },

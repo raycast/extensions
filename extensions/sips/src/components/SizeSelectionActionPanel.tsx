@@ -62,7 +62,7 @@ export default function SizeSelectionActionPanel(props: { width: number; height:
         shortcut={{ modifiers: ["cmd"], key: "l" }}
         quicklink={{
           name: `Create ${width}x${height} Image`,
-          link: `raycast://extensions/HelloImSteven/sips/create-image?context=${encodeURIComponent(JSON.stringify({ imageWidth: width, imageHeight: height }))}`,
+          link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/HelloImSteven/sips/create-image?context=${encodeURIComponent(JSON.stringify({ imageWidth: width, imageHeight: height }))}`,
         }}
       />
 

@@ -115,14 +115,14 @@
     "ynab": "^2.6.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.15.18",
     "@types/react": "^19.1.4",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.9"
+    "vitest": "^4.1.10"
   },
   "preferences": [
     {
@@ -162,5 +162,10 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.16",
+    "brace-expansion@2": "2.1.2",
+    "brace-expansion@5": "5.0.9"
+  }
 }

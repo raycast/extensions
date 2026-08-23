@@ -53,13 +53,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^2.2.0"
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "typescript": "^5.7.0",
-    "@types/node": "22.x"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.x",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",

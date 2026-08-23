@@ -1,5 +1,58 @@
 # Changelog
 
+## [Update] - 2026-08-13
+
+### Added
+- **Manage Repositories**: Open a repository automatically after adding or creating a single one
+- **Git**: When checkout, merge, rebase, pull, cherry-pick, revert, or create branch is blocked by local changes, offer to stash, retry, then restore the stash
+- **Worktrees**: Switch to a worktree after creating it
+- **Commits**: Generate a commit message (⌘G) in the style of recent commits in the repository
+- **Commits**: Search the full commit history with Git instead of filtering only the loaded page
+
+### Changed
+- **Branches**: Keep the create-branch name draft until the branch is created successfully
+
+## [Update] - 2026-07-30
+
+### Fixed
+- **Diff**: Fix crash when opening the file diff view caused by a missing `strtok3` runtime import from `file-type`
+
+## [Update] - 2026-07-30
+
+### Fixed
+- **Diff**: Fix crash when opening the file diff view caused by a missing `strtok3` runtime import from `file-type`
+
+## [Update] - 2026-07-30
+
+### Added
+- **Worktrees**: Add "Worktrees" view listing all worktrees of the repository with actions to open, copy the path and delete a worktree
+- **Branches**: Show an indicator on branches that are checked out in another worktree and open that worktree on checkout
+- **Manage Repositories / Switch Repository**: List linked worktrees of the known repositories as `<repository>: <worktree>` entries
+
+### Fixed
+- **Worktrees**: Read repository state (rebase/merge/cherry-pick progress, stashes, local config) from the correct Git directory when a linked worktree is opened
+
+## [Update] - 2026-05-25
+
+### Added
+- **Manage Repositories**: Add "Clear Cache" action for clearing the extension cache
+
+### Changed
+- **Storage**: Move stable data from `Cache` to `LocalStorage`
+
+### Fixed
+- **Diff**: Show raw Git diff output without stripping leading whitespace from added/removed lines, so indented code changes display correctly
+- **Commit Details**: Load changed files with `--first-parent` when fetching a commit by hash, matching the commits history view for merge commits
+
+## [Update] - 2026-05-11
+
+### Added
+- **Remotes**: Add "Host Provider" dropdown to `RemoteEditorForm` for manually selecting the provider for unknown host URLs
+
+### Fixed
+- **Remote Host Parser**: Fix SSH URL parsing with port (e.g. `git@host:2224/org/repo.git`)
+- **Azure DevOps**: Fix logo icon path
+
 ## [Update] - 2026-04-13
 
 ### Added

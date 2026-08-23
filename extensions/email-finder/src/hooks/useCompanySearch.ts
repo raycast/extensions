@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { searchCompanyByName, CompanySearchResult } from "../backend";
+import { searchCompanyByName, type CompanySearchResult } from "../api/clearout-client";
 
 interface UseCompanySearchResult {
   results: CompanySearchResult[];
@@ -13,7 +13,6 @@ export function useCompanySearch(query: string): UseCompanySearchResult {
   const [error, setError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    // * Minimum 2 characters before searching
     if (!query || query.trim().length < 2) {
       setResults([]);
       setIsLoading(false);
@@ -34,8 +33,10 @@ export function useCompanySearch(query: string): UseCompanySearchResult {
       })
       .catch((err) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to search");
+          setResults([]);
+          setError("Failed to search companies. Please try again.");
           setIsLoading(false);
+          console.error("Company search failed:", err);
         }
       });
 

@@ -6,10 +6,10 @@
  * feature can be maintained independently or removed if needed.
  */
 
+import { parseHTML } from "linkedom";
 import { paywallLog } from "../utils/logger";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PaywallDocument = any;
+export type PaywallDocument = ReturnType<typeof parseHTML>["document"];
 
 /**
  * Result of paywall detection
@@ -93,9 +93,10 @@ export const SITE_PAYWALL_SELECTORS: Record<string, string[]> = {
 };
 
 /**
- * Helper to safely query a selector on a document
+ * Helper to safely query a selector on a document.
+ * Selectors come from config and linkedom rejects some of them, hence the catch.
  */
-function querySelector(document: PaywallDocument, selector: string): PaywallDocument | null {
+function querySelector(document: PaywallDocument, selector: string): Element | null {
   try {
     return document.querySelector(selector);
   } catch {

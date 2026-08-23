@@ -2,9 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cyberduck",
   "title": "Cyberduck",
+  "categories": [
+    "Applications"
+  ],
   "description": "Quickly open your cyberduck connections",
   "icon": "icon.png",
   "author": "scottaglia",
+  "contributors": [
+    "xmok"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,7 +22,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.9",
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
     "fast-xml-parser": "^5.3.2"
   },
   "devDependencies": {

@@ -302,7 +302,7 @@ export function filterMeetingsBySpecificDate(
 
 // Generate deep link URL
 export function generateDeepLink(meetingId: string): string {
-  return `raycast://extensions/keito4/tldv/open-meeting?meetingId=${encodeURIComponent(meetingId)}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/keito4/tldv/open-meeting?meetingId=${encodeURIComponent(meetingId)}`;
 }
 
 // Calculate speaker statistics

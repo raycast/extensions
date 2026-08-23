@@ -1,7 +1,23 @@
 import { ReactElement } from "react";
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
-import { closeActiveTab, openNewTab, reloadTab, setActiveTab, createNewGuestWindowToWebsite } from "../actions";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getPreferenceValues,
+  Keyboard,
+  Icon,
+  Toast,
+  showToast,
+} from "@raycast/api";
+import {
+  closeActiveTab,
+  openNewTab,
+  reloadTab,
+  setActiveTab,
+  createNewGuestWindowToWebsite,
+  setActiveWindow,
+} from "../actions";
+import { Preferences, SettingsProfileOpenBehaviour, Tab, ChromeWindow } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "../constants";
 
@@ -9,6 +25,7 @@ export class ChromeActions {
   public static NewTab = NewTabActions;
   public static TabList = TabListItemActions;
   public static TabHistory = HistoryItemActions;
+  public static WindowList = WindowListActions;
 }
 
 function NewTabActions({ query, url }: { query?: string; url?: string }): ReactElement {
@@ -98,6 +115,7 @@ function HistoryItemActions({
             })
           }
           title={"Open in Current Profile"}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
         <Action
           onAction={() =>
@@ -109,6 +127,7 @@ function HistoryItemActions({
             })
           }
           title={"Open in Original Profile"}
+          shortcut={Keyboard.Shortcut.Common.OpenWith}
         />
       </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
@@ -171,5 +190,35 @@ function ReloadTab(props: { tab: Tab }) {
       onAction={handleAction}
       shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
     />
+  );
+}
+
+function WindowListActions({
+  window,
+  refreshWindowsListOnFailure,
+}: {
+  window: ChromeWindow;
+  refreshWindowsListOnFailure?: () => void;
+}): ReactElement {
+  return (
+    <ActionPanel title={window.title}>
+      <Action
+        title="Focus Window"
+        icon={{ source: Icon.Window }}
+        onAction={async () => {
+          try {
+            await setActiveWindow(window.id);
+            await closeMainWindow();
+          } catch {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to focus window",
+              message: "Window may have been closed",
+            });
+            if (refreshWindowsListOnFailure) refreshWindowsListOnFailure();
+          }
+        }}
+      />
+    </ActionPanel>
   );
 }

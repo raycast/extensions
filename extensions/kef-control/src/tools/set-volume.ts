@@ -9,9 +9,18 @@ type SetVolumeArgs = {
  */
 export default async function (args: SetVolumeArgs) {
   const preferences = getPreferenceValues<Preferences>();
-  await fetch(
-    `http://${preferences["ip-address"]}/api/setData?path=player:volume&roles=value&value={"type":"i32_","i32_":${args.volume}}`,
-  );
+  const response = await fetch(`http://${preferences["ip-address"]}/api/setData`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      path: "player:volume",
+      roles: "value",
+      value: { type: "i32_", i32_: args.volume },
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`KEF setData failed: ${response.status} ${response.statusText}`);
+  }
 }
 
 export const confirmation: Tool.Confirmation<SetVolumeArgs> = async (input) => {

@@ -10,7 +10,15 @@ This is a Raycast extension for [Resend](https://resend.com/) - _Email for devel
 
 1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/resend)
 
-2. **Get your API Key**: The first time you use the extension, you'll need to enter your Resend API key:
+2. **Authenticate**: The first time you use the extension, you'll need to log in to link your Resend account:
+
+    a. `Run` any command
+
+    b. `Log In`
+
+    c. `Enjoy`!
+
+3. (OPTIONALLY) **Use your API Key**:
 
    a. `Sign in` to your Resend Dashboard at [this link](https://resend.com/login) OR `Create an account` at [this link](https://resend.com/signup)
 
@@ -22,7 +30,7 @@ This is a Raycast extension for [Resend](https://resend.com/) - _Email for devel
    d. `Copy` the once shown **API Key**
    <img src="./assets/resend-view-api-key.png" alt="View API Key" />
 
-   e. `Enter` API Key in Preferences OR at first prompt
+   e. `Enter` API Key in Preferences
 
 ## 🔧 Commands
 

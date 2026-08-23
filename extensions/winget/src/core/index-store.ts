@@ -1,0 +1,369 @@
+/**
+ * The package index: a single versioned JSON envelope shared by all commands.
+ *
+ * Concurrency model:
+ * - Every read-modify-write goes through one short-lived index-write lock, so
+ *   `revision` is a true monotonic counter; views reload when it changes.
+ * - `mutationEpoch` is bumped when a mutation acquires the global op-lock.
+ *   Refreshers record the epoch when their winget queries START; a mutable
+ *   commit whose epoch is stale aborts ("fenced"). This prevents pre-mutation
+ *   snapshots from resurrecting rows a mutation just changed. Catalog commits
+ *   need no fencing (catalog data is mutation-independent).
+ * - `patchMutable` never touches `packages`; `commitCatalog` refuses
+ *   suspicious shrinkage (a failed/truncated search must not destroy the index).
+ *
+ * Pure module: paths and clock injected; @raycast/api stays out.
+ */
+
+import {
+  type WingetInstalledPackage,
+  type WingetPinnedPackage,
+  type WingetSearchPackage,
+  type WingetUpgradePackage,
+} from "../cli/types";
+
+import { deleteFileQuiet, fileMtime, readJson, writeJsonAtomic } from "./files";
+import { acquireLock, releaseLock, type LockEnvironment } from "./lock";
+
+const SCHEMA_VERSION = 2;
+/** A rebuild may not shrink the catalog below this fraction of the previous size. */
+const SHRINK_GUARD_RATIO = 0.1;
+/** How long acquirers spin on the index-write lock before giving up. */
+const WRITE_LOCK_WAIT_MS = 15_000;
+const WRITE_LOCK_RETRY_MS = 50;
+/** Index writes are ms-scale; a crashed writer is reapable after this. */
+const WRITE_LOCK_STALE_MS = 10_000;
+
+interface MutableSlices {
+  installed: WingetInstalledPackage[];
+  upgradable: WingetUpgradePackage[];
+  pinned: WingetPinnedPackage[];
+}
+
+interface PackageIndex extends MutableSlices {
+  schemaVersion: typeof SCHEMA_VERSION;
+  /** Monotonic write counter; views reload when it changes. */
+  revision: number;
+  /** Bumped when a mutation takes the op-lock; fences stale refresh snapshots. */
+  mutationEpoch: number;
+  /** When `packages` was last rebuilt (TTL applies to this). */
+  builtAt: number | null;
+  /** When the mutable slices were last refreshed from winget. */
+  mutableAt: number | null;
+  packages: WingetSearchPackage[];
+  /**
+   * Updates winget lists but refuses to apply ("no applicable upgrade" — the
+   * listed installer does not match this system). Keyed by `source|id`, value
+   * is the available version that was refused; the marker hides the row from
+   * upgradable views until winget offers a DIFFERENT version (reconciled on
+   * every mutable commit).
+   */
+  notApplicable: Record<string, string>;
+  /**
+   * Upgrades that failed for a reason tied to the offered installer (broken
+   * vendor packaging, technology mismatch, installer crash), keyed by
+   * `source|id`. Bulk runs skip exactly the recorded version; explicit
+   * single-package retries are never blocked. Reconciled on every mutable
+   * commit under the same rule as `notApplicable`: the marker lives only
+   * while winget offers exactly that version.
+   */
+  failedUpgrades: Record<string, FailedUpgrade>;
+}
+
+interface FailedUpgrade {
+  version: string;
+  message?: string;
+}
+
+interface IndexPaths {
+  indexPath: string;
+  writeLockPath: string;
+}
+
+const EMPTY_INDEX: PackageIndex = {
+  schemaVersion: SCHEMA_VERSION,
+  revision: 0,
+  mutationEpoch: 0,
+  builtAt: null,
+  mutableAt: null,
+  packages: [],
+  installed: [],
+  upgradable: [],
+  pinned: [],
+  notApplicable: {},
+  failedUpgrades: {},
+};
+
+/** Canonical `source|id` key for cross-slice and marker lookups. */
+function packageKey(pkg: { id: string; source: string }): string {
+  return `${pkg.source}|${pkg.id}`;
+}
+
+function sleepSync(ms: number): void {
+  const buffer = new SharedArrayBuffer(4);
+  Atomics.wait(new Int32Array(buffer), 0, 0, ms);
+}
+
+function loadIndex(paths: IndexPaths): PackageIndex | null {
+  const data = readJson<PackageIndex>(paths.indexPath);
+  if (!data || data.schemaVersion !== SCHEMA_VERSION || !Array.isArray(data.packages)) {
+    return null;
+  }
+  // Additive fields: files written before markers existed lack them.
+  data.notApplicable ??= {};
+  data.failedUpgrades ??= {};
+  return data;
+}
+
+function indexMtime(paths: IndexPaths): number | null {
+  return fileMtime(paths.indexPath);
+}
+
+/**
+ * Run one read-modify-write of the index under the index-write lock.
+ * `mutate` returns the next envelope (revision is stamped here) or null to
+ * abort without writing.
+ */
+function withIndexWrite<T>(
+  paths: IndexPaths,
+  env: LockEnvironment,
+  mutate: (current: PackageIndex) => { next: PackageIndex | null; result: T },
+): T {
+  const opId = `idx-${Math.random().toString(36).slice(2)}`;
+  const deadline = env.now() + WRITE_LOCK_WAIT_MS;
+  // Holds are ms-scale, so a dead writer should block others briefly, not for
+  // the op-lock's 30 s staleness window.
+  const lockEnv = { ...env, staleMs: WRITE_LOCK_STALE_MS };
+  for (;;) {
+    const acquired = acquireLock(paths.writeLockPath, { opId, kind: "index-write", title: "index write" }, lockEnv);
+    if (acquired.status === "acquired") {
+      break;
+    }
+    if (env.now() > deadline) {
+      throw new Error("Timed out waiting for the index write lock");
+    }
+    sleepSync(WRITE_LOCK_RETRY_MS);
+  }
+
+  try {
+    const current = loadIndex(paths) ?? EMPTY_INDEX;
+    const { next, result } = mutate(current);
+    if (next) {
+      writeJsonAtomic(paths.indexPath, {
+        ...next,
+        schemaVersion: SCHEMA_VERSION,
+        revision: current.revision + 1,
+      });
+    }
+    return result;
+  } finally {
+    releaseLock(paths.writeLockPath, opId);
+  }
+}
+
+/**
+ * Reset the index to empty through the same write lock as every other
+ * mutation, rather than deleting the file under a concurrent writer. Views
+ * reload on the revision bump, and the empty catalog reads as stale.
+ *
+ * The mutation epoch survives: a refresher that recorded an epoch before this
+ * ran is still holding a snapshot of the old contents, and restarting the
+ * count would let a later mutation reach that same number and admit the stale
+ * commit the fence exists to reject.
+ */
+function clearIndex(paths: IndexPaths, env: LockEnvironment): void {
+  withIndexWrite(paths, env, (current) => ({
+    next: { ...EMPTY_INDEX, mutationEpoch: current.mutationEpoch },
+    result: undefined,
+  }));
+}
+
+/** Called when a mutation acquires the op-lock: fences in-flight refresh snapshots. */
+function bumpMutationEpoch(paths: IndexPaths, env: LockEnvironment): number {
+  return withIndexWrite(paths, env, (current) => ({
+    next: { ...current, mutationEpoch: current.mutationEpoch + 1 },
+    result: current.mutationEpoch + 1,
+  }));
+}
+
+/** The epoch a refresher must record before starting its winget queries. */
+function currentMutationEpoch(paths: IndexPaths): number {
+  return loadIndex(paths)?.mutationEpoch ?? 0;
+}
+
+type CommitOutcome = "committed" | "fenced" | "rejected-shrink";
+
+/**
+ * Drop version-keyed markers the new upgradable slice no longer supports: the
+ * row is gone (upgraded or uninstalled elsewhere) or winget now offers a
+ * different version (which must be re-tried, not silently hidden or skipped).
+ */
+function reconcileVersionMarkers<T>(
+  markers: Record<string, T>,
+  upgradable: WingetUpgradePackage[],
+  markerVersion: (marker: T) => string,
+): Record<string, T> {
+  const entries = Object.entries(markers);
+  if (entries.length === 0) {
+    return markers;
+  }
+  const availableByKey = new Map(upgradable.map((pkg) => [packageKey(pkg), pkg.available]));
+  return Object.fromEntries(entries.filter(([key, marker]) => availableByKey.get(key) === markerVersion(marker)));
+}
+
+/**
+ * Apply a surgical change to the mutable slices (post-operation optimistic
+ * patches and authoritative refreshes). Never touches `packages`.
+ */
+function patchMutable(
+  paths: IndexPaths,
+  env: LockEnvironment,
+  options: {
+    /** Epoch when the source data was captured; omit for optimistic patches made under the op-lock. */
+    startEpoch?: number;
+    stampMutableAt?: boolean;
+  },
+  mutate: (slices: MutableSlices) => MutableSlices,
+): CommitOutcome {
+  return withIndexWrite(paths, env, (current) => {
+    if (options.startEpoch !== undefined && current.mutationEpoch !== options.startEpoch) {
+      return { next: null, result: "fenced" as const };
+    }
+    const slices = mutate({
+      installed: current.installed,
+      upgradable: current.upgradable,
+      pinned: current.pinned,
+    });
+    return {
+      next: {
+        ...current,
+        ...slices,
+        notApplicable: reconcileVersionMarkers(current.notApplicable, slices.upgradable, (version) => version),
+        failedUpgrades: reconcileVersionMarkers(current.failedUpgrades, slices.upgradable, (marker) => marker.version),
+        mutableAt: options.stampMutableAt ? env.now() : current.mutableAt,
+      },
+      result: "committed" as const,
+    };
+  });
+}
+
+/**
+ * Discard the mutable slices' freshness stamp so the next view mount
+ * re-queries winget. Used when a refresh observed a state known to be
+ * mid-transition (e.g. a package still registered right after its
+ * uninstaller reported success) — the data is correct NOW but expected to
+ * change without any further operation.
+ */
+function markMutableStale(paths: IndexPaths, env: LockEnvironment): void {
+  withIndexWrite(paths, env, (current) => ({
+    next: { ...current, mutableAt: null },
+    result: undefined,
+  }));
+}
+
+/** Record that upgrading to the currently offered version failed. */
+function markUpgradeFailed(
+  paths: IndexPaths,
+  env: LockEnvironment,
+  target: { id: string; source: string },
+  marker: FailedUpgrade,
+): void {
+  withIndexWrite(paths, env, (current) => ({
+    next: {
+      ...current,
+      failedUpgrades: { ...current.failedUpgrades, [packageKey(target)]: marker },
+    },
+    result: undefined,
+  }));
+}
+
+/** Record that the listed update for a package does not apply to this system. */
+function markUpdateNotApplicable(
+  paths: IndexPaths,
+  env: LockEnvironment,
+  target: { id: string; source: string },
+  availableVersion: string,
+): void {
+  withIndexWrite(paths, env, (current) => ({
+    next: {
+      ...current,
+      notApplicable: { ...current.notApplicable, [packageKey(target)]: availableVersion },
+    },
+    result: undefined,
+  }));
+}
+
+/** Commit only the catalog slice (stage 1 of the staged cold build). */
+function commitCatalog(paths: IndexPaths, env: LockEnvironment, packages: WingetSearchPackage[]): CommitOutcome {
+  return withIndexWrite(paths, env, (current) => {
+    if (current.packages.length > 0 && packages.length < current.packages.length * SHRINK_GUARD_RATIO) {
+      return { next: null, result: "rejected-shrink" as const };
+    }
+    return {
+      next: { ...current, packages, builtAt: env.now() },
+      result: "committed" as const,
+    };
+  });
+}
+
+function isCatalogFresh(index: PackageIndex | null, validityMs: number, now: number): boolean {
+  return !!index && index.builtAt !== null && index.packages.length > 0 && now - index.builtAt < validityMs;
+}
+
+/** One-time migration from the legacy v1 cache file, which is then deleted. */
+function migrateLegacyIndex(paths: IndexPaths, env: LockEnvironment, legacyPath: string): boolean {
+  interface LegacyIndex {
+    packages?: WingetSearchPackage[];
+    installed?: WingetInstalledPackage[];
+    upgradable?: WingetUpgradePackage[];
+    pinned?: WingetPinnedPackage[];
+    timestamp?: number | null;
+  }
+  const legacy = readJson<LegacyIndex>(legacyPath);
+  if (!legacy || !Array.isArray(legacy.packages) || legacy.packages.length === 0) {
+    deleteFileQuiet(legacyPath);
+    return false;
+  }
+  const migrated = withIndexWrite(paths, env, (current) => {
+    if (current.packages.length > 0) {
+      return { next: null, result: false };
+    }
+    return {
+      next: {
+        ...current,
+        packages: legacy.packages ?? [],
+        installed: legacy.installed ?? [],
+        upgradable: legacy.upgradable ?? [],
+        pinned: legacy.pinned ?? [],
+        builtAt: legacy.timestamp ?? null,
+        mutableAt: legacy.timestamp ?? null,
+      },
+      result: true,
+    };
+  });
+  deleteFileQuiet(legacyPath);
+  return migrated;
+}
+
+export {
+  bumpMutationEpoch,
+  clearIndex,
+  commitCatalog,
+  currentMutationEpoch,
+  EMPTY_INDEX,
+  indexMtime,
+  isCatalogFresh,
+  loadIndex,
+  markMutableStale,
+  markUpdateNotApplicable,
+  markUpgradeFailed,
+  migrateLegacyIndex,
+  packageKey,
+  patchMutable,
+  SCHEMA_VERSION,
+  type CommitOutcome,
+  type FailedUpgrade,
+  type IndexPaths,
+  type MutableSlices,
+  type PackageIndex,
+};

@@ -1,5 +1,9 @@
 # Premier League Changelog
 
+## [Fix Season Rollover] - 2026-08-21
+
+- Fix Matches, Table, Clubs and Squad showing the previous season once a new one kicks off. The season list the extension reads can trail the season it describes by months, so from July the active season is now read from the API and merged into that list.
+
 ## [Endpoint Exodus] - 2025-11-05
 
 - Upgrade to new Premier League API with cursor pagination and updated IDs.

@@ -21,7 +21,9 @@
     "abesto",
     "xmok",
     "pernielsentikaer",
-    "0xdhrv"
+    "0xdhrv",
+    "ridemountainpig",
+    "alvesrafa"
   ],
   "pastContributors": [
     "thomaslombart",
@@ -107,6 +109,62 @@
       "title": "Quick Capture",
       "description": "Capture something and put it out in a Notion page.",
       "mode": "view"
+    },
+    {
+      "name": "add-note",
+      "title": "Add Note",
+      "subtitle": "Notion",
+      "description": "Write a quick note into a daily page inside your notes page.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "note",
+          "type": "text",
+          "title": "Note",
+          "placeholder": "Note",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "notes_page_name",
+          "type": "textfield",
+          "title": "Notes Page",
+          "required": false,
+          "default": "NOTES",
+          "description": "Name of the Notion page holding the daily note pages. It is created automatically if you pick a parent page in the form."
+        },
+        {
+          "name": "note_date_format",
+          "type": "textfield",
+          "title": "Date Page Format",
+          "required": false,
+          "default": "yyyy-MM-dd",
+          "description": "date-fns format used as the title of the daily page, e.g. yyyy-MM-dd or 'dd MMM yyyy'."
+        },
+        {
+          "name": "note_style",
+          "type": "dropdown",
+          "title": "Note Style",
+          "required": false,
+          "default": "bulleted",
+          "data": [
+            {
+              "title": "Bulleted List",
+              "value": "bulleted"
+            },
+            {
+              "title": "To-do Checkbox",
+              "value": "todo"
+            },
+            {
+              "title": "Plain Paragraph",
+              "value": "paragraph"
+            }
+          ],
+          "description": "How each note is written to the daily page."
+        }
+      ]
     },
     {
       "description": "Append or prepend text, along with date, to a Notion page.",
@@ -297,7 +355,8 @@
     "typescript": "^5.9.3"
   },
   "overrides": {
-    "katex": "^0.16.21"
+    "katex": "^0.16.21",
+    "brace-expansion": "5.0.9"
   },
   "scripts": {
     "build": "ray build",

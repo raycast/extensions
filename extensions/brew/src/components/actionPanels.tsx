@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import {
+  brewAdoptCommand,
   brewInstallCommand,
   brewInstallPath,
   brewIsInstalled,
@@ -15,6 +16,15 @@ import * as Actions from "./actions";
 import { CaskInfo } from "./caskInfo";
 import { FormulaInfo } from "./formulaInfo";
 
+const ToggleDetailsAction = (props: { onToggleDetails: () => void }) => (
+  <Action
+    title="Toggle Details"
+    icon={Icon.AppWindowSidebarRight}
+    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+    onAction={props.onToggleDetails}
+  />
+);
+
 const DebugSection = (props: { obj: Cask | Formula }) => (
   <ActionPanel.Section>
     <Action.Push
@@ -24,7 +34,11 @@ const DebugSection = (props: { obj: Cask | Formula }) => (
           markdown={"```json\n" + JSON.stringify(props.obj, null, 2) + "\n```"}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard title="Copy JSON" content={JSON.stringify(props.obj, null, 2)} />
+              <Action.CopyToClipboard
+                title="Copy JSON"
+                content={JSON.stringify(props.obj, null, 2)}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
             </ActionPanel>
           }
         />
@@ -40,6 +54,7 @@ export function CaskActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
+  onToggleDetails?: () => void;
 }) {
   const { cask } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -57,14 +72,31 @@ export function CaskActionPanel(props: {
           )}
           {cask.outdated && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(cask)} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser title="Open Cask" url={`https://formulae.brew.sh/cask/${cask.token}`} />
-          <Action.CopyToClipboard title="Copy Cask URL" content={`https://formulae.brew.sh/cask/${cask.token}`} />
+          <Action.OpenInBrowser
+            title="Open Cask"
+            url={`https://formulae.brew.sh/cask/${cask.token}`}
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
+          <Action.CopyToClipboard
+            title="Copy Cask URL"
+            content={`https://formulae.brew.sh/cask/${cask.token}`}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
+          />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser title="Open Homepage" url={cask.homepage} />
-          <Action.CopyToClipboard title="Copy Homepage URL" content={cask.homepage} />
+          <Action.OpenInBrowser
+            title="Open Homepage"
+            url={cask.homepage}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
+          />
+          <Action.CopyToClipboard
+            title="Copy Homepage URL"
+            content={cask.homepage}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
+          />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Actions.FormulaUninstallAction formula={cask} onAction={props.onAction} />
@@ -77,16 +109,13 @@ export function CaskActionPanel(props: {
             title={`Run Uninstall in ${terminalName}`}
             icon={terminalIcon}
             style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
             onAction={() => runCommandInTerminal(brewUninstallCommand(cask))}
           />
         </ActionPanel.Section>
 
         <ActionPanel.Section>
-          <Action.CopyToClipboard
-            title="Copy Cask ID"
-            content={cask.token}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
+          <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
           <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
         </ActionPanel.Section>
 
@@ -107,13 +136,10 @@ export function CaskActionPanel(props: {
             />
           )}
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.CopyToClipboard
-            title="Copy Cask ID"
-            content={cask.token}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
+          <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
           <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
           <Action.CopyToClipboard
             title="Copy Install Command"
@@ -123,16 +149,44 @@ export function CaskActionPanel(props: {
           <Action
             title={`Run Install in ${terminalName}`}
             icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={() => runCommandInTerminal(brewInstallCommand(cask))}
+          />
+          <Action.CopyToClipboard
+            title="Copy Adopt Command"
+            content={brewAdoptCommand(cask)}
+            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+          />
+          <Action
+            title={`Run Adopt in ${terminalName}`}
+            icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={() => runCommandInTerminal(brewAdoptCommand(cask))}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser title="Open Cask" url={`https://formulae.brew.sh/cask/${cask.token}`} />
-          <Action.CopyToClipboard title="Copy Cask URL" content={`https://formulae.brew.sh/cask/${cask.token}`} />
+          <Action.OpenInBrowser
+            title="Open Cask"
+            url={`https://formulae.brew.sh/cask/${cask.token}`}
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
+          <Action.CopyToClipboard
+            title="Copy Cask URL"
+            content={`https://formulae.brew.sh/cask/${cask.token}`}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
+          />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser title="Open Homepage" url={cask.homepage} />
-          <Action.CopyToClipboard title="Copy Homepage URL" content={cask.homepage} />
+          <Action.OpenInBrowser
+            title="Open Homepage"
+            url={cask.homepage}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
+          />
+          <Action.CopyToClipboard
+            title="Copy Homepage URL"
+            content={cask.homepage}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
+          />
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -150,6 +204,7 @@ export function FormulaActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
+  onToggleDetails?: () => void;
 }) {
   const { formula } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -169,17 +224,31 @@ export function FormulaActionPanel(props: {
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
           <Actions.FormulaShowAllInstalled onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser title="Open Formula" url={`https://formulae.brew.sh/formula/${formula.name}`} />
+          <Action.OpenInBrowser
+            title="Open Formula"
+            url={`https://formulae.brew.sh/formula/${formula.name}`}
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
           <Action.CopyToClipboard
             title="Copy Formula URL"
             content={`https://formulae.brew.sh/formula/${formula.name}`}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser title="Open Homepage" url={formula.homepage} />
-          <Action.CopyToClipboard title="Copy Homepage URL" content={formula.homepage} />
+          <Action.OpenInBrowser
+            title="Open Homepage"
+            url={formula.homepage}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
+          />
+          <Action.CopyToClipboard
+            title="Copy Homepage URL"
+            content={formula.homepage}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
+          />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Actions.FormulaUninstallAction formula={formula} onAction={props.onAction} />
@@ -192,6 +261,7 @@ export function FormulaActionPanel(props: {
             title={`Run Uninstall in ${terminalName}`}
             style={Action.Style.Destructive}
             icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
             onAction={() => runCommandInTerminal(brewUninstallCommand(formula))}
           />
         </ActionPanel.Section>
@@ -213,12 +283,13 @@ export function FormulaActionPanel(props: {
             />
           )}
           <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard
             title="Copy Formula Name"
             content={formula.name}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
 
           <Action.CopyToClipboard
@@ -229,19 +300,44 @@ export function FormulaActionPanel(props: {
           <Action
             title={`Run Install in ${terminalName}`}
             icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={() => runCommandInTerminal(brewInstallCommand(formula))}
+          />
+          <Action.CopyToClipboard
+            title="Copy Adopt Command"
+            content={brewAdoptCommand(formula)}
+            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+          />
+          <Action
+            title={`Run Adopt in ${terminalName}`}
+            icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={() => runCommandInTerminal(brewAdoptCommand(formula))}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser title="Open Formula" url={`https://formulae.brew.sh/formula/${formula.name}`} />
+          <Action.OpenInBrowser
+            title="Open Formula"
+            url={`https://formulae.brew.sh/formula/${formula.name}`}
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
           <Action.CopyToClipboard
             title="Copy Formula URL"
             content={`https://formulae.brew.sh/formula/${formula.name}`}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.OpenInBrowser title="Open Homepage" url={formula.homepage} />
-          <Action.CopyToClipboard title="Copy Homepage URL" content={formula.homepage} />
+          <Action.OpenInBrowser
+            title="Open Homepage"
+            url={formula.homepage}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
+          />
+          <Action.CopyToClipboard
+            title="Copy Homepage URL"
+            content={formula.homepage}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
+          />
         </ActionPanel.Section>
 
         <DebugSection obj={formula} />
@@ -283,16 +379,22 @@ export function OutdatedActionPanel(props: {
         <Action
           title={`Run Upgrade in ${terminalName}`}
           icon={terminalIcon}
+          shortcut={{ modifiers: ["cmd"], key: "return" }}
           onAction={() => runCommandInTerminal(brewUpgradeCommand(outdated))}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Actions.FormulaUninstallAction formula={outdated} onAction={props.onAction} />
-        <Action.CopyToClipboard title="Copy Uninstall Command" content={brewUninstallCommand(outdated)} />
+        <Action.CopyToClipboard
+          title="Copy Uninstall Command"
+          content={brewUninstallCommand(outdated)}
+          shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+        />
         <Action
           title={`Run Uninstall in ${terminalName}`}
           icon={terminalIcon}
           style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
           onAction={() => runCommandInTerminal(brewUninstallCommand(outdated))}
         />
       </ActionPanel.Section>

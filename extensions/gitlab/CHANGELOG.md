@@ -1,5 +1,85 @@
 # GitLab Changelog
 
+## [Simplified authentication] - 2026-08-12
+
+- Remove the `Sign out of GitLab` command. Raycast adds a logout option to the extension preferences once you have signed in with OAuth
+- Remove the `Authentication` preference. The extension uses the `API Token` when one is set and OAuth otherwise
+- Clear the `API Token` field to keep using OAuth if both are configured
+
+## [MR todos, project search, and API logging] - 2026-07-17
+
+- Show MR todo state from the list query; add or mark todos done without loading the full todos list
+- Add searchable project dropdown with server-side search and pinned selection in Search MR and project pickers
+- Cache the selected project in Search MR instead of only the project ID
+- Fetch merge request pipeline lists via REST API
+- Log GitLab REST and GraphQL requests and improve API error diagnostics
+
+## [GraphQL merge requests, discussions, and CI] - 2026-07-09
+
+- Migrate merge request, commit, and pipeline lists to GraphQL with cursor pagination (20 items per page)
+- Show pipeline status, approval count, and discussion progress on MR list rows
+- Add MR side panel with metadata toggle, markdown description, and list accessories
+- Add MR approve/revoke action; refresh detail after approve
+- Edit merge requests from list rows and detail view
+- Require project selection in Search MR; add draft filter and GitLab scope/sort filters
+- Add GraphQL-backed MR discussions list with reply, diff context in side panel, and resolve/reopen thread actions
+- Add Create MR form drafts; sort branch dropdowns by latest commit; cached project selection and markdown description
+- Add CI job and pipeline actions: retry, cancel, run pipeline, copy URL, and artifact downloads
+- Show duration on pipeline and job list rows; fetch jobs and artifacts via GraphQL
+- Modernize branches and commits UI with expanded branch actions and commit author avatars
+- Rename `project_view` command to Show Project; cache project quicklink loads
+- Fix relative upload URLs in markdown descriptions and notes
+- Fix branch form navigation, MR menu bar list keys, and Apollo cache errors when MR filters change
+
+## [Reduce MR list detail memory usage] - 2026-06-16
+
+- Reduce extra detail fetching in merge request list previews
+
+## [Add option to hide archived projects in Menu Bar Commands] - 2026-05-25
+
+- Add "Hide Archived Projects" option to Issues Menu Bar settings
+- Add "Hide Archived Projects" option to Merge Requests Menu Bar settings
+
+## [Updates] - 2026-05-20
+
+- Contributor updates
+
+## [OAuth authentication] - 2026-05-18
+
+- Add OAuth (PKCE) authentication as an alternative to Personal Access Tokens.
+  Tokens are stored encrypted by Raycast, refreshed automatically when expired,
+  and the browser flow only runs on first use or when the refresh token is
+  revoked. Recommended for enterprise instances that auto-rotate PATs.
+- Add `Authentication` and `OAuth Application ID` preferences. The existing
+  `API Token` field is unchanged and remains the default.
+- REST and GraphQL clients now share a token resolver and transparently retry
+  once on `401 Unauthorized` after force-refreshing the OAuth access token.
+- Concurrent refresh and authorization calls are coalesced via in-memory locks,
+  so parallel requests during a token expiry trigger a single refresh request
+  and a single browser tab.
+- Add **Sign Out of GitLab** no-view command to clear the locally cached OAuth
+  tokens (useful for switching accounts or after a server-side revocation).
+
+## [Keep cached merge requests interactive] - 2026-05-18
+
+- Keep cached list results actionable while stale data refreshes in the background
+
+## [Pipeline triggers, My Pipelines & Job controls] - 2026-05-18
+
+- Add top-level `My Pipelines` command listing your recent pipelines across projects
+- Add `Trigger New Pipeline` action with branch/tag selection and CI/CD variables
+- Add `Play Job` action for manual jobs and `Cancel Job` action for running jobs
+- Add `Show Log` action to view a job's trace inside Raycast
+
+## [Fix OOM crash in My Projects for large GitLab instances] - 2026-05-16
+
+- Fix out-of-memory crash when fetching thousands of projects by using parallel batch fetching with per-page mapping
+- Replace Fuse.js search with lightweight multi-term substring matching for the project list to reduce memory usage
+- Cap rendered list items to 100 to prevent memory exhaustion from complex ActionPanels
+- Sort projects by last activity date so most relevant projects appear first
+- Add "Search active projects only" preference to My Projects command (consistent with Search Projects)
+- Set background cache refetch interval to 1 day (was 5 minutes)
+
 ## [Merged MR icon in todos] - 2026-04-15
 
 - Show purple merged icon for todos on merged merge requests

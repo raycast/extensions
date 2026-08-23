@@ -27,7 +27,7 @@ import { parseArticle } from "./readability";
 import { formatArticle } from "./markdown";
 import { isBrowserExtensionAvailable, tryGetContentFromOpenTab } from "./browser-extension";
 import { tryBypassPaywall, createArchiveSource, ArchiveSource } from "./paywall-hopper";
-import { detectPaywallInText } from "./paywall-detector";
+import { detectPaywall } from "./paywall-detector";
 import { BrowserTab } from "../types/browser";
 import { ArticleState } from "../types/article";
 
@@ -45,6 +45,11 @@ interface LoadArticleOptions {
   enablePaywallHopper?: boolean;
   /** Whether to show the article image at the top (default: true) */
   showArticleImage?: boolean;
+  /**
+   * Reports what the loader is doing, so the UI can say so.
+   * A paywall bypass tries several sources in turn and can run for a while.
+   */
+  onProgress?: (status: string) => void;
 }
 
 /**
@@ -58,7 +63,10 @@ export async function loadArticleFromUrl(
 ): Promise<LoadArticleResult> {
   urlLog.log("session:url-resolved", { url, source });
 
+  const progress = options.onProgress ?? (() => {});
+
   // Step 1: Fetch HTML
+  progress("Fetching article…");
   const fetchResult = await fetchHtml(url);
   let archiveSource: ArchiveSource | undefined;
 
@@ -77,7 +85,8 @@ export async function loadArticleFromUrl(
       if (options.enablePaywallHopper) {
         paywallLog.log("hopper:blocked-page-detected", { url, statusCode: fetchResult.error.statusCode });
 
-        const hopperResult = await tryBypassPaywall(url);
+        progress("Page is blocked — trying Paywall Hopper…");
+        const hopperResult = await tryBypassPaywall(url, progress);
 
         if (hopperResult.success && hopperResult.html) {
           paywallLog.log("hopper:bypass-success", {
@@ -156,7 +165,7 @@ export async function loadArticleFromUrl(
       }
 
       // Tab not found - show manual browser extension flow
-      const extensionAvailable = await isBrowserExtensionAvailable();
+      const extensionAvailable = isBrowserExtensionAvailable();
       urlLog.log(extensionAvailable ? "fetch:blocked-with-extension" : "fetch:blocked-no-extension", { url });
       return {
         status: "blocked",
@@ -174,6 +183,7 @@ export async function loadArticleFromUrl(
   // When skipPreCheck is true (from "Try Anyway"), also enable forceParse
   const forceParse = options.forceParse ?? options.skipPreCheck;
   urlLog.log("parse:start", { url, skipPreCheck: options.skipPreCheck, forceParse });
+  progress("Extracting article…");
   const parseResult = parseArticle(fetchResult.data.html, fetchResult.data.url, {
     skipPreCheck: options.skipPreCheck,
     forceParse,
@@ -201,17 +211,29 @@ export async function loadArticleFromUrl(
   // Step 2.5: Check for soft paywall (200 OK but truncated/preview content)
   // Sites like NYTimes return 200 but serve preview content with paywall markers
   if (options.enablePaywallHopper) {
-    const paywallCheck = detectPaywallInText(parseResult.article.textContent, url);
+    // Weigh the HTML and the page's own description too, not just the extracted text:
+    // the barrier markup and a body far shorter than its og:description are the signals
+    // that catch paywalls on sites nobody thought to enumerate.
+    const paywallCheck = detectPaywall(
+      {
+        textContent: parseResult.article.textContent,
+        html: fetchResult.data.html,
+        description: parseResult.article.description,
+      },
+      url,
+    );
 
     if (paywallCheck.isPaywalled) {
       paywallLog.log("hopper:soft-paywall-detected", {
         url,
-        pattern: paywallCheck.matchedPattern,
+        score: paywallCheck.score,
+        signals: paywallCheck.signals.map((s) => s.name),
         originalContentLength: parseResult.article.textContent.length,
       });
 
       // Try to get full content via Paywall Hopper
-      const hopperResult = await tryBypassPaywall(url);
+      progress("Paywall detected — trying Paywall Hopper…");
+      const hopperResult = await tryBypassPaywall(url, progress);
 
       if (hopperResult.success && hopperResult.html) {
         // Parse the bypassed content
@@ -318,11 +340,12 @@ export async function loadArticleViaPaywallHopper(
   url: string,
   options: {
     showArticleImage?: boolean;
+    onProgress?: (status: string) => void;
   },
 ): Promise<LoadArticleResult> {
   paywallLog.log("hopper:direct-attempt", { url });
 
-  const hopperResult = await tryBypassPaywall(url);
+  const hopperResult = await tryBypassPaywall(url, options.onProgress);
 
   if (!hopperResult.success || !hopperResult.html) {
     paywallLog.log("hopper:direct-failed", { url, error: hopperResult.error });

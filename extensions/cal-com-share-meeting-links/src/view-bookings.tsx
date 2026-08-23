@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, openCommandPreferences, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedState } from "@raycast/utils";
 import {
+  appBaseUrl,
   CalBooking,
   confirmBooking,
   declineBooking,
@@ -109,7 +110,7 @@ export default function viewBookings() {
   const openAllBookingsAction = (
     <Action.OpenInBrowser
       title="Open All Bookings in Browser"
-      url="https://app.cal.com/bookings/upcoming"
+      url={`${appBaseUrl}/bookings/upcoming`}
       shortcut={{ modifiers: ["cmd"], key: "b" }}
     />
   );
@@ -124,7 +125,7 @@ export default function viewBookings() {
           {/* Enter = safe view action; destructive actions live behind explicit shortcuts. */}
           <Action.OpenInBrowser
             title="Open Booking in Browser"
-            url={`https://app.cal.com/bookings/upcoming?uid=${item.uid}`}
+            url={`${appBaseUrl}/bookings/upcoming?uid=${item.uid}`}
           />
           {item.meetingUrl && (
             <Action.OpenInBrowser

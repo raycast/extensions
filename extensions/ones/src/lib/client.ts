@@ -1,8 +1,8 @@
 import axios, {
   type AxiosInstance,
-  type AxiosRequestConfig,
   type AxiosRequestHeaders,
   type GenericAbortSignal,
+  type InternalAxiosRequestConfig,
 } from "axios";
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { login } from "./api";
@@ -159,7 +159,7 @@ export class Client {
       timeout: 30000,
     });
     this.httpClient.interceptors.request.use(
-      (config: AxiosRequestConfig) => {
+      (config: InternalAxiosRequestConfig) => {
         if (config.headers === undefined) {
           config.headers = {} as AxiosRequestHeaders;
         }

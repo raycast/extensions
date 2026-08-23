@@ -13,7 +13,7 @@ export interface ClaudeUsage {
   plan: string;
   fiveHour: ClaudeRateWindow;
   sevenDay: ClaudeRateWindow | null;
-  sevenDayModel: ClaudeRateWindow | null;
+  modelWindows: Record<string, ClaudeRateWindow>;
   extraUsage: ClaudeExtraUsage | null;
 }
 

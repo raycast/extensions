@@ -4,12 +4,14 @@ import { useCallback } from "react";
 const LAST_FETCH_KEY = "github-last-fetch-time";
 const RATE_LIMIT_RESET_KEY = "github-rate-limit-reset";
 const MIN_REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+/** GitHub's rate-limit window is 1h, so no honest cooldown exceeds it. */
+const MAX_COOLDOWN_MS = 60 * 60 * 1000;
 
 interface UseGitHubRateLimitResult {
   /** Returns null if refresh is allowed, or a message describing when to retry. */
   checkRefreshAllowed: () => Promise<string | null>;
   /** Call after a successful fetch to persist the timestamp. */
-  recordFetch: (rateLimitResetEpochSeconds?: number) => Promise<void>;
+  recordFetch: (info?: { remaining?: number; resetEpochSeconds?: number }) => Promise<void>;
   /** Call when a 403/429 rate limit error is received. Returns the "try again in X" message. */
   recordRateLimit: (resetEpochSeconds?: number) => Promise<string>;
 }
@@ -41,20 +43,30 @@ export function useGitHubRateLimit(): UseGitHubRateLimitResult {
     return null;
   }, []);
 
-  const recordFetch = useCallback(async (rateLimitResetEpochSeconds?: number) => {
+  const recordFetch = useCallback(async (info?: { remaining?: number; resetEpochSeconds?: number }) => {
     await LocalStorage.setItem(LAST_FETCH_KEY, String(Date.now()));
 
-    if (rateLimitResetEpochSeconds) {
-      await LocalStorage.setItem(RATE_LIMIT_RESET_KEY, String(rateLimitResetEpochSeconds * 1000));
+    // The unauthenticated GitHub API returns X-RateLimit-Reset on EVERY response
+    // (it is the epoch when the hourly window rolls over, not a "blocked until" time).
+    // Only treat it as a block when the quota is actually exhausted (remaining === 0),
+    // otherwise a normal success would falsely gate refreshes for the rest of the hour.
+    if (info && info.remaining === 0 && info.resetEpochSeconds) {
+      await LocalStorage.setItem(RATE_LIMIT_RESET_KEY, String(info.resetEpochSeconds * 1000));
     } else {
-      // Clear any stale rate limit
+      // Clear any stale rate limit; successful fetches are gated by MIN_REFRESH_INTERVAL instead.
       await LocalStorage.removeItem(RATE_LIMIT_RESET_KEY);
     }
   }, []);
 
   const recordRateLimit = useCallback(async (resetEpochSeconds?: number): Promise<string> => {
-    // Default: block for 60 minutes if we don't know the reset time
-    const resetMs = resetEpochSeconds ? resetEpochSeconds * 1000 : Date.now() + 60 * 60 * 1000;
+    // Only honor a reset time GitHub actually sent, and only if it is in the future
+    // and within the 1h its limit window can span. Without a usable reset, fall back to
+    // the ordinary 5-minute interval — NOT an invented hour. Guessing long on unknown
+    // evidence turns a transient proxy 403 into a 60-minute lockout.
+    const now = Date.now();
+    const reported = resetEpochSeconds ? resetEpochSeconds * 1000 : null;
+    const isUsable = reported !== null && reported > now && reported <= now + MAX_COOLDOWN_MS;
+    const resetMs = isUsable ? reported : now + MIN_REFRESH_INTERVAL_MS;
     await LocalStorage.setItem(RATE_LIMIT_RESET_KEY, String(resetMs));
     return formatTimeRemaining(resetMs - Date.now());
   }, []);

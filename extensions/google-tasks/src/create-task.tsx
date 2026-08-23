@@ -22,12 +22,7 @@ export default function Command() {
   }, []);
 
   const handleCreate = async (listId: string, task: TaskForm) => {
-    try {
-      await createTask(listId, task);
-    } catch (error) {
-      console.error(error);
-      showToast({ style: Toast.Style.Failure, title: String(error) });
-    }
+    await createTask(listId, task);
   };
 
   if (isLoading) {

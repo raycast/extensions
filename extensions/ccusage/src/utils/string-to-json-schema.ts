@@ -11,7 +11,7 @@ import { z } from "zod";
  * this helper locates the first `{` or `[` character and slices from there so
  * that the parser only sees valid JSON.
  */
-function extractJSON(raw: string): string {
+export function extractJSON(raw: string): string {
   const objStart = raw.indexOf("{");
   const arrStart = raw.indexOf("[");
 

@@ -1,25 +1,69 @@
-import { useFetch } from "@raycast/utils";
-import { INVENTORY_URL, transformInventoryResponse, type InventoryItem } from "../lib/inventory";
+import { useCallback, useEffect, useState } from "react";
+import { loadInventory, type DocumentationSourceMode, type ResolvedDocumentationSource } from "../lib/docs-source";
+import type { InventoryItem } from "../lib/inventory";
 
 interface UseInventoryResult {
   data?: InventoryItem[];
+  source?: ResolvedDocumentationSource;
+  remoteError?: Error;
   isLoading: boolean;
   error?: Error;
   revalidate: () => void;
 }
 
-export function useInventory(): UseInventoryResult {
-  const { data, isLoading, error, revalidate } = useFetch<InventoryItem[]>(INVENTORY_URL, {
-    keepPreviousData: true,
-    parseResponse: async (response) => {
-      if (!response.ok) {
-        throw new Error(`Failed to load Pandas inventory: ${response.status} ${response.statusText}`);
+interface UseInventoryOptions {
+  localDocsDirectory?: string;
+  mode: DocumentationSourceMode;
+}
+
+export function useInventory({ localDocsDirectory, mode }: UseInventoryOptions): UseInventoryResult {
+  const [result, setResult] = useState<{
+    data?: InventoryItem[];
+    source?: ResolvedDocumentationSource;
+    remoteError?: Error;
+    error?: Error;
+  }>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [reloadToken, setReloadToken] = useState(0);
+
+  const revalidate = useCallback(() => setReloadToken((current) => current + 1), []);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function run() {
+      setIsLoading(true);
+      try {
+        const loaded = await loadInventory({ localDocsDirectory, mode });
+        if (!isActive) {
+          return;
+        }
+        setResult({
+          data: loaded.data,
+          source: loaded.source,
+          remoteError: loaded.remoteError,
+        });
+      } catch (error) {
+        if (!isActive) {
+          return;
+        }
+        setResult((current) => ({
+          ...current,
+          error: error instanceof Error ? error : new Error(String(error)),
+        }));
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
       }
+    }
 
-      const buffer = await response.arrayBuffer();
-      return transformInventoryResponse(buffer);
-    },
-  });
+    run();
 
-  return { data, isLoading, error, revalidate };
+    return () => {
+      isActive = false;
+    };
+  }, [localDocsDirectory, mode, reloadToken]);
+
+  return { ...result, isLoading, revalidate };
 }

@@ -2,7 +2,7 @@
   "name": "minimax-ai",
   "title": "MiniMax",
   "description": "MiniMax AI Chat for Raycast",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "icon": "icon.png",
   "author": "monfortegg",
   "repository": {
@@ -47,16 +47,50 @@
       "placeholder": "Enter your MiniMax API key"
     },
     {
+      "name": "apiEndpoint",
+      "type": "dropdown",
+      "required": false,
+      "title": "API Endpoint",
+      "description": "Select the API endpoint based on your account region",
+      "default": "international",
+      "data": [
+        {
+          "title": "China (api.minimaxi.com)",
+          "value": "china"
+        },
+        {
+          "title": "International (api.minimax.io)",
+          "value": "international"
+        }
+      ]
+    },
+    {
       "name": "model",
       "type": "dropdown",
       "required": false,
       "title": "Model",
       "description": "MiniMax model to use for AI responses",
-      "default": "MiniMax-M2.5",
+      "default": "MiniMax-M2.7",
       "data": [
         {
-          "title": "MiniMax M2.5 (Recommended)",
+          "title": "MiniMax M2.7 (Recommended)",
+          "value": "MiniMax-M2.7"
+        },
+        {
+          "title": "MiniMax M2.7-highspeed",
+          "value": "MiniMax-M2.7-highspeed"
+        },
+        {
+          "title": "MiniMax M2.5",
           "value": "MiniMax-M2.5"
+        },
+        {
+          "title": "MiniMax M2.5-highspeed",
+          "value": "MiniMax-M2.5-highspeed"
+        },
+        {
+          "title": "M2-her (Roleplay)",
+          "value": "M2-her"
         },
         {
           "title": "MiniMax M2.1",

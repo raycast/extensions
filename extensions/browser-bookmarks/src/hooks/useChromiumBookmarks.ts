@@ -28,8 +28,10 @@ type BookmarksRoot = {
   roots: {
     bookmark_bar: BookmarkFolder;
     other: BookmarkFolder;
-  };
+  } & Record<string, BookmarkFolder | undefined>;
 };
+
+const CHROMIUM_BOOKMARK_FILE_NAMES = ["Bookmarks", "AccountBookmarks"] as const;
 
 function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
   const bookmarks = [];
@@ -50,6 +52,36 @@ function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
   }
 
   return bookmarks;
+}
+
+function getBookmarkCount(bookmarksRoot: BookmarksRoot) {
+  return Object.values(bookmarksRoot.roots).reduce((count, root) => count + (root ? getBookmarks(root).length : 0), 0);
+}
+
+function hasChromiumBookmarksFile(path: string, profile: string) {
+  return CHROMIUM_BOOKMARK_FILE_NAMES.some((fileName) => existsSync(join(path, profile, fileName)));
+}
+
+async function readChromiumBookmarks(path: string, profile: string) {
+  const accountBookmarksPath = join(path, profile, "AccountBookmarks");
+
+  if (existsSync(accountBookmarksPath)) {
+    try {
+      const accountBookmarks = JSON.parse((await read(accountBookmarksPath)).toString()) as BookmarksRoot;
+      if (getBookmarkCount(accountBookmarks) > 0) {
+        return accountBookmarks;
+      }
+    } catch {
+      // Fall back to the legacy Bookmarks file below.
+    }
+  }
+
+  const bookmarksPath = join(path, profile, "Bookmarks");
+  if (!existsSync(bookmarksPath)) {
+    return;
+  }
+
+  return JSON.parse((await read(bookmarksPath)).toString()) as BookmarksRoot;
 }
 
 type Folder = {
@@ -88,7 +120,7 @@ async function getChromiumProfilesFallback(path: string): Promise<ChromiumProfil
   let profiles;
   try {
     profiles = readdirSync(path, { withFileTypes: true })
-      .filter((d) => d.isDirectory() && existsSync(join(path, d.name, "Bookmarks")))
+      .filter((d) => d.isDirectory() && hasChromiumBookmarksFile(path, d.name))
       .map((d) => ({ path: d.name, name: d.name }));
   } catch {
     return { profiles: [], defaultProfile: "" };
@@ -126,8 +158,7 @@ async function getChromiumProfiles(path: string): Promise<ChromiumProfilesResult
   const profiles = Object.entries(profileInfoCache)
     .filter(([profilePath]) => {
       try {
-        const profileDirectory = readdirSync(`${path}/${profilePath}`);
-        return profileDirectory.includes("Bookmarks");
+        return hasChromiumBookmarksFile(path, profilePath);
       } catch {
         return false;
       }
@@ -160,6 +191,7 @@ async function getChromiumSourceSignature(path: string, profile: string) {
 
   if (profile) {
     signatures.push(await getFileSignature(join(path, profile, "Bookmarks")));
+    signatures.push(await getFileSignature(join(path, profile, "AccountBookmarks")));
   }
 
   return signatures.join("|");
@@ -216,12 +248,11 @@ export default function useChromiumBookmarks(
     mutate: mutateBookmarks,
   } = useCachedPromise(
     async (profile, isEnabled, currentPath) => {
-      if (!profile || !isEnabled || !existsSync(`${currentPath}/${profile}/Bookmarks`)) {
+      if (!profile || !isEnabled || !hasChromiumBookmarksFile(currentPath, profile)) {
         return;
       }
 
-      const file = await read(`${currentPath}/${profile}/Bookmarks`);
-      return JSON.parse(file.toString()) as BookmarksRoot;
+      return readChromiumBookmarks(currentPath, profile);
     },
     [currentProfile, enabled, path],
   );
@@ -298,11 +329,14 @@ export default function useChromiumBookmarks(
     };
   }, [currentProfile, enabled, mutate, path]);
 
-  const toolbarBookmarks = data ? getBookmarks(data.roots.bookmark_bar) : [];
-  const toolbarFolders = data ? getFolders(data.roots.bookmark_bar) : [];
+  const toolbarRoot = data?.roots.bookmark_bar;
+  const otherRoot = data?.roots.other;
 
-  const otherBookmarks = data ? getBookmarks(data.roots.other) : [];
-  const otherFolders = data ? getFolders(data.roots.other) : [];
+  const toolbarBookmarks = toolbarRoot ? getBookmarks(toolbarRoot) : [];
+  const toolbarFolders = toolbarRoot ? getFolders(toolbarRoot) : [];
+
+  const otherBookmarks = otherRoot ? getBookmarks(otherRoot) : [];
+  const otherFolders = otherRoot ? getFolders(otherRoot) : [];
 
   const bookmarks = [...toolbarBookmarks, ...otherBookmarks].map((bookmark) => {
     return {

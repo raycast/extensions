@@ -57,13 +57,13 @@
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.16.3",
-    "axios": "^0.30.3"
+    "axios": "^1.8.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^20.8.10",
     "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
+    "eslint": "^8.57.1",
     "prettier": "^2.5.1",
     "react": "^18.2.0",
     "typescript": "^5.5.4"
@@ -77,5 +77,11 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "js-yaml@4": "4.3.1",
+    "brace-expansion@1": "1.1.16",
+    "brace-expansion@2": "2.1.2",
+    "brace-expansion@5": "5.0.9"
+  }
 }

@@ -7,6 +7,9 @@
   "owner": "putio",
   "access": "public",
   "author": "altaywtf",
+  "contributors": [
+    "kud"
+  ],
   "categories": [
     "Applications",
     "Media"
@@ -88,7 +91,7 @@
       "title": "App-specific password",
       "type": "password",
       "placeholder": "Get this from put.io/raycast",
-      "description": "App-specific password used for authenticating with put.io API.",
+      "description": "Create one at put.io/raycast (sign in first), then paste it here. This is a revocable app-specific password — not your put.io account password.",
       "required": true
     }
   ],
@@ -107,11 +110,21 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "overrides": {
+    "axios": "^1.8.4",
+    "minimatch": "^10.0.1",
+    "picomatch": "^4.0.4",
+    "brace-expansion": "5.0.8",
+    "js-yaml@4": "4.3.1"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

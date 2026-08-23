@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { parse } from "fast-xml-parser";
+import { XMLParser } from "fast-xml-parser";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import useDashApp from "./useDashApp";
@@ -47,7 +47,8 @@ async function searchDash(dashApp: Application, query: string, signal: AbortSign
       cwd: `${dashApp.path}/Contents/Resources`,
       signal,
     });
-    const jsonData = parse(data, { ignoreAttributes: false });
+    const parser = new XMLParser({ ignoreAttributes: false });
+    const jsonData = parser.parse(data);
 
     if (!jsonData || (typeof jsonData.output === "undefined" && typeof jsonData.items === "undefined")) {
       return [];

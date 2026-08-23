@@ -10,7 +10,8 @@
     "pernielsentikaer",
     "stevensd2m",
     "aliaksandr_zhebit",
-    "xilopaint"
+    "xilopaint",
+    "alexi.build"
   ],
   "license": "MIT",
   "categories": [
@@ -30,7 +31,7 @@
     "axios": "^1.8.4",
     "extract-zip": "^2.0.1",
     "sha256-file": "^1.0.0",
-    "tar": "^7.2.0"
+    "tar": "^7.5.22"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
@@ -52,5 +53,10 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "overrides": {
+    "tar": "^7.5.22",
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

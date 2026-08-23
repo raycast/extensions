@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { buildInstallCommand, formatInstalls, type Skill, SKILLS_BASE_URL } from "../shared";
+import { buildInstallCommand, buildSkillUrl, formatInstalls, type Skill } from "../shared";
 import { type InstalledSkillMatch } from "../hooks/useInstalledSkillMatches";
+import { fetchSkillContent } from "../hooks/skill-content";
+import { CopySkillContentsAction } from "./actions/CopySkillContentsAction";
 import { InstallSkillAction } from "./actions/InstallSkillAction";
 import { SkillDetailView } from "./SkillDetailView";
 
@@ -23,6 +25,7 @@ export function SkillListItem({
   const isInstalled = installedMatch.type === "exact";
   const hasSourceConflict = installedMatch.type === "conflict";
   const installedSource = installedMatch.type === "conflict" ? (installedMatch.source ?? "Unknown source") : undefined;
+  const skillUrl = buildSkillUrl(skill);
 
   const iconValue = isInstalled
     ? { source: Icon.CheckCircle, tintColor: Color.Green }
@@ -57,23 +60,24 @@ export function SkillListItem({
             onPush={() => onViewedSkillChange(skill.id)}
           />
           <InstallSkillAction skill={skill} installedMatch={installedMatch} onSkillInstalled={onSkillInstalled} />
+          <CopySkillContentsAction loadContent={() => fetchSkillContent(skill).then((result) => result?.raw)} />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={buildInstallCommand(skill)}
             icon={Icon.Terminal}
-            shortcut={Keyboard.Shortcut.Common.Copy}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+          />
+          <Action.OpenInBrowser
+            title="Open on skills.sh"
+            url={skillUrl}
+            icon={Icon.Globe}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
           <Action.OpenInBrowser
             title="Open Repository"
             url={`https://github.com/${skill.source}`}
             icon={Icon.Globe}
             shortcut={Keyboard.Shortcut.Common.OpenWith}
-          />
-          <Action.OpenInBrowser
-            title="Open Skills"
-            url={`${SKILLS_BASE_URL}/${skill.source}/${skill.skillId}`}
-            icon={Icon.Link}
-            shortcut={Keyboard.Shortcut.Common.Open}
           />
         </ActionPanel>
       }

@@ -47,7 +47,7 @@ async function checkForNewSales(
           ? `New sale: ${currency}${newPayments[0].amount}`
           : `${newPayments.length} new sales: ${currency}${total}`;
 
-      await open("raycast://confetti");
+      await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`);
       await showHUD(`🎉 ${label}`);
     }
   } catch {

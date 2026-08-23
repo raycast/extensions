@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, Clipboard, Color, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  Icon,
+  Toast,
+  confirmAlert,
+  showToast,
+  Keyboard,
+} from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -168,8 +179,13 @@ export default function IssueActions({
     try {
       await showToast({ style: Toast.Style.Animated, title: `Creating branch for issue #${issue.number}` });
 
+      const oid = issue.repository.defaultBranchRef?.target?.oid;
+      if (!oid) {
+        throw new Error("Repository default branch commit SHA is unavailable");
+      }
+
       const res = await github.createLinkedBranch({
-        input: { issueId: issue.id, oid: issue.repository.defaultBranchRef?.target?.oid },
+        input: { issueId: issue.id, oid },
       });
       const branchName = res.createLinkedBranch?.linkedBranch?.ref?.name;
       await mutate();
@@ -339,7 +355,7 @@ export default function IssueActions({
           icon={Icon.ArrowClockwise}
           title="Refresh"
           onAction={mutate}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </ActionPanel.Section>
     </ActionPanel>

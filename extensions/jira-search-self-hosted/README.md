@@ -17,6 +17,7 @@ search extension built by sven to work with JIRA server instances.
     - If you type a filter in the search box, it overrides the configured defaults for that field.
   - For example enter `pdf export @dev @it #bug #story` to find all issues which contain words starting with "pdf" and "export" and which are in the "DEV" or "IT" project and which are of type "Bug" or "Story."
   - Find issue directly by issue key (for example `DEV-1234`).
+  - Find an issue by number (for example `1234`) when its project key is configured in **Default Included Projects**.
 - Find projects by title.
 - Find boards by title.
 - Use the following actions on found entities:
@@ -34,6 +35,7 @@ To connect the extension to your Jira instance you need to fill the following pr
 - **Jira Domain:** The domain of your Jira instance like `mycompany.atlassian.net` or with a base URL like `mycompany.atlassian.net/baseUrl/jira`.
 - **Personal Access Token:** A personal access token created as described in [Using Personal Access Tokens](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html).
 - **Default Filters:** Optional comma-separated include and exclude defaults for projects, statuses, issue types, and assignees.
+  - Configure project keys (for example `DEV`, not a project name) in **Default Included Projects** to search for issues by number alone.
 
 ### Unsafe HTTPS
 

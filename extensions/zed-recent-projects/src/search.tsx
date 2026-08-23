@@ -11,6 +11,7 @@ import { closeZedWindow, getZedBundleId, openWithZedCli, ZedBuild } from "./lib/
 import { showOpenStatus } from "./lib/preferences";
 import { execWindowsZed } from "./lib/windows";
 import { platform } from "os";
+import { openProject } from "./lib/open-project";
 
 const isMac = platform() === "darwin";
 
@@ -192,20 +193,29 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   const zedIcon = { fileIcon: app.path };
   const primaryPath = getEntryPrimaryPath(entry);
 
+  const actionTitle = entry.isOpen ? "Focus Window" : "Open in Zed";
+
   // WSL support (Windows only)
   const openZedInWsl = () => execWindowsZed(["--wsl", `${entry.wsl?.user}@${entry.wsl?.distro}`, `/${primaryPath}`]);
 
   if (entry.wsl) {
-    return <Action title="Open in Zed" onAction={openZedInWsl} icon={zedIcon} />;
+    return <Action title={actionTitle} onAction={openZedInWsl} icon={zedIcon} />;
   }
+
+  // Helper to trigger staggered revalidations while Raycast is in the background.
+  // This gives Zed enough time to launch and update its SQLite DB.
+  const triggerRevalidation = () => {
+    setTimeout(revalidate, 500);
+    setTimeout(revalidate, 1500);
+    setTimeout(revalidate, 3000);
+  };
 
   // Multi-folder workspace - use CLI
   if (isEntryMultiFolder(entry) && cliPath) {
     const openMultiFolder = async () => {
       try {
-        setTimeout(revalidate, 200);
-        await closeMainWindow();
-        await openWithZedCli(cliPath, entry.paths);
+        await openProject(() => openWithZedCli(cliPath, entry.paths), closeMainWindow);
+        triggerRevalidation();
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
@@ -214,21 +224,44 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
         });
       }
     };
-    return <Action title="Open in Zed" onAction={openMultiFolder} icon={zedIcon} />;
+    return <Action title={actionTitle} onAction={openMultiFolder} icon={zedIcon} />;
+  }
+
+  // Remote (SSH) entries: paths are relative and not usable with the CLI directly;
+  // fall back to the URI scheme (ssh://user@host/path) which Zed handles natively.
+  if (entry.type === "remote") {
+    return (
+      <Action.Open
+        title={actionTitle}
+        target={entry.uri}
+        application={app}
+        icon={zedIcon}
+        onOpen={triggerRevalidation}
+      />
+    );
   }
 
   // If CLI available, use it for consistency (handles revalidation)
   if (cliPath) {
     const openSingleFolder = async () => {
-      setTimeout(revalidate, 200);
-      await closeMainWindow();
-      await openWithZedCli(cliPath!, [entry.paths[0]]);
+      try {
+        await openProject(() => openWithZedCli(cliPath!, [entry.paths[0]]), closeMainWindow);
+        triggerRevalidation();
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to open project",
+          message: String(error),
+        });
+      }
     };
-    return <Action title="Open in Zed" icon={zedIcon} onAction={openSingleFolder} />;
+    return <Action title={actionTitle} icon={zedIcon} onAction={openSingleFolder} />;
   }
 
-  // Fallback: open via URI scheme (no revalidation)
-  return <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />;
+  // Fallback: open via URI scheme
+  return (
+    <Action.Open title={actionTitle} target={entry.uri} application={app} icon={zedIcon} onOpen={triggerRevalidation} />
+  );
 }
 
 function RemoveActionSection({

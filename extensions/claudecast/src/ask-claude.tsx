@@ -15,6 +15,8 @@ import { useState, useEffect } from "react";
 import { existsSync, mkdirSync } from "fs";
 import { homedir } from "os";
 import {
+  ensureClaudeApiAuth,
+  ensureClaudeInstalled,
   executePrompt,
   isClaudeInstalled,
   ClaudeResponse,
@@ -156,13 +158,20 @@ function AskClaudeForm() {
     }
   }
 
-  // Manual context capture
+  // Manual context capture. Keeps only the user-controlled signals: selected
+  // text, clipboard, and frontmost app name. The working directory is set
+  // separately via the form's Project Path field.
   async function handleCaptureContext() {
     setIsCapturingContext(true);
     try {
-      const capturedContext = await captureContext();
-      setContext(capturedContext);
-      const summary = getContextSummary(capturedContext);
+      const captured = await captureContext();
+      const sanitized = {
+        selectedText: captured.selectedText,
+        clipboard: captured.clipboard,
+        frontmostApp: captured.frontmostApp,
+      };
+      setContext(sanitized);
+      const summary = getContextSummary(sanitized);
       if (summary) {
         await showToast({
           style: Toast.Style.Success,
@@ -220,6 +229,15 @@ function AskClaudeForm() {
           setIsSubmitting(false);
           return;
         }
+      }
+
+      if (!(await ensureClaudeInstalled())) {
+        setIsSubmitting(false);
+        return;
+      }
+      if (!(await ensureClaudeApiAuth())) {
+        setIsSubmitting(false);
+        return;
       }
 
       await showToast({

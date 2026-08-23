@@ -1,5 +1,5 @@
-import { useCachedState } from "@raycast/utils";
 import { nanoid } from "nanoid";
+import { useStorage } from "./useStorage";
 
 /**
  * Represents an AI commit message prompt preset.
@@ -112,11 +112,29 @@ Output only the commit message, no markdown or extra text.
 };
 
 /**
- * Hook for managing AI commit message prompt presets in cached state.
+ * Prompt used when generating a commit message from the repository's commit history.
+ */
+export const HISTORY_STYLE_PROMPT = `
+You are a Git commit message generator.
+
+Infer the commit message template from the recent commit history.
+Match the repository's existing style: title format (type, scope, ticket, emoji, prefix), capitalization, and whether a body is used.
+
+Write a commit message for the staged diff that looks like it belongs in this history.
+
+Rules:
+- Output only the commit message, no markdown or extra text
+- Use imperative mood
+- Focus on WHAT changed
+- Omit a body if recent commits usually omit it
+`.trim();
+
+/**
+ * Hook for managing AI commit message prompt presets in persistent storage.
  * Presets are global for the extension (not per repository).
  */
 export function useAiPromptPresets() {
-  const [data, setData] = useCachedState<AiPromptPresetsData>("ai-prompt-presets", {
+  const [data, setData] = useStorage<AiPromptPresetsData>("ai-prompt-presets", {
     presets: [CONVENTIONAL_MESSAGE_PROMPT, GITMOJI_MESSAGE_PROMPT, MINIMALIST_MESSAGE_PROMPT],
     defaultPresetId: CONVENTIONAL_MESSAGE_PROMPT.id,
   });

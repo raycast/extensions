@@ -49,7 +49,7 @@ export const getRaycastFocusLink = (
   } = {},
 ) => {
   const args = Object.keys(params).length > 0 ? `?arguments=${encodeURIComponent(JSON.stringify(params))}` : "";
-  return `raycast://extensions/${RAYCAST_EXTENSION_AUTHOR}/${RAYCAST_EXTENSION_NAME}/${RAYCAST_FOCUS_COMMAND}${args}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${RAYCAST_EXTENSION_AUTHOR}/${RAYCAST_EXTENSION_NAME}/${RAYCAST_FOCUS_COMMAND}${args}`;
 };
 
 export function createBeeperOAuth() {
@@ -408,18 +408,23 @@ export const createChat = async (body: {
   return getBeeperDesktop().chats.create(body);
 };
 
+const DEFAULT_MESSAGE_PAGE_LIMIT = 50;
+
 export const listChatMessages = async (
   chatID: string,
-  params?: { cursor?: string | null; direction?: "after" | "before" },
+  params?: { cursor?: string | null; direction?: "after" | "before"; limit?: number },
 ): Promise<CursorResponse<BeeperDesktop.Message>> => {
+  const limit = params?.limit ?? DEFAULT_MESSAGE_PAGE_LIMIT;
+
   if (useMockData()) {
     const items = MOCK_MESSAGES.filter((m) => m.chatId === chatID)
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+      .slice(0, limit)
       .map(mockMessageToBeeperMessage);
     return { items, hasMore: false };
   }
   const response = await getBeeperDesktop().get(`/v1/chats/${encodeURIComponent(chatID)}/messages`, {
-    query: params,
+    query: { ...params, limit },
   });
   return normalizeUnknownCursorResponse<BeeperDesktop.Message>(response);
 };

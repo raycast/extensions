@@ -1,5 +1,23 @@
 # FreeAgent Changelog
 
+## [Add Create Expense command] - 2026-07-01
+
+- Added a Create Expense command to record out-of-pocket expenses against a category
+- Supports selecting a category (grouped as in the FreeAgent web app), amount, date, description and sales tax rate
+- Optionally attach a receipt (PNG, JPG, GIF or PDF) to the expense
+
+## [Fix missing tasks and projects in Create Timeslip] - 2026-07-01
+
+- Fixed bug where projects with more than 25 tasks only loaded the first page, leaving later tasks unselectable (and unsearchable) in the Create Timeslip form
+- Now fetches all pages for tasks and projects so the full list is available
+
+## [Fix review feedback for AI tools] - 2026-05-14
+
+- Added `list-projects`, `create-project`, and `delete-project` AI tools (create/delete require confirmation)
+- Added `list-tasks`, `create-task-ai`, `update-task`, and `delete-task` AI tools, all with confirmation for mutations
+- Added `list-timeslips-ai`, `create-timeslip-ai`, `update-timeslip`, and `delete-timeslip` AI tools, including the ability to switch a timeslip to a different task
+- Updated the AI instructions with a workflow for "clean up tasks and recreate from a structure"
+
 ## [Fix timeslip date display] - 2026-04-15
 
 - Changed timeslip list to show day-level relative dates (Today, Yesterday, 3 days ago) instead of hour-level (14 hours ago)

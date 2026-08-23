@@ -10,6 +10,7 @@ interface ElgatoService {
   type: string;
   protocol: string;
   addresses: string[];
+  displayName?: string;
   referer: {
     address: string;
     family: string;
@@ -75,6 +76,15 @@ interface CacheData {
   expiresAt: number; // Unix timestamp in milliseconds
 }
 
+interface AccessoryInfo {
+  displayName?: string;
+}
+
+type KeyLightTarget = {
+  input: string;
+  normalized: string;
+};
+
 const CACHE_KEY = "elgato-keylights";
 const CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds (7 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds)
 
@@ -128,6 +138,20 @@ export class KeyLight {
       }
     }
     this.keyLights = [];
+  }
+
+  private static async getAccessoryInfo(address: string, port: number) {
+    try {
+      const response = await axios.get<AccessoryInfo>(`http://${address}:${port}/elgato/accessory-info`, {
+        timeout: 2000,
+      });
+      return response.data;
+    } catch (error) {
+      if (environment.isDevelopment) {
+        console.error(`Failed to fetch accessory info for ${address}:${port}`, error);
+      }
+      return undefined;
+    }
   }
 
   static async discover(forceRefresh = false) {
@@ -237,21 +261,23 @@ export class KeyLight {
           },
         };
 
-        const keyLight = new KeyLight(serviceWithAddress);
+        const serviceWithDisplayName = {
+          ...serviceWithAddress,
+          displayName: service.name,
+        };
+
+        const keyLight = new KeyLight(serviceWithDisplayName);
+        // Push synchronously, with no `await` in between, so a light is
+        // reflected in `keyLights` the instant it's confirmed. This guarantees
+        // the discovery timeout below can never observe an empty array for a
+        // light that has already been found.
         this.keyLights.push(keyLight);
 
-        // Update toast with found light
-        showToast({
-          style: Toast.Style.Animated,
-          title: "Found Key Light",
-          message: `Discovered ${service.name} at ${address}`,
-        });
-
-        // Save to cache as soon as we find lights
+        // Save to cache as soon as we find lights, without waiting on enrichment below
         this.saveCache(this.keyLights);
 
-        // If discovery timeout has elapsed and we found at least one light, resolve
-        if (discoveryComplete && this.keyLights.length > 0) {
+        // If discovery timeout has already elapsed, resolve immediately now that a light was found
+        if (discoveryComplete) {
           if (environment.isDevelopment) {
             console.log(`Discovery complete. Found ${this.keyLights.length} Key Light(s)`);
           }
@@ -265,6 +291,21 @@ export class KeyLight {
           bonjour.destroy();
           clearTimeout(discoveryTimeout);
         }
+
+        // Enrich the light with its display name in the background. This is
+        // purely cosmetic, so it must never gate (or be gated by) discovery
+        // resolution/rejection above.
+        this.getAccessoryInfo(address, service.port).then((accessoryInfo) => {
+          keyLight.service.displayName = accessoryInfo?.displayName || service.name;
+
+          showToast({
+            style: Toast.Style.Animated,
+            title: "Found Key Light",
+            message: `Discovered ${keyLight.service.displayName} at ${address}`,
+          });
+
+          this.saveCache(this.keyLights);
+        });
       });
 
       browser.on("up", (service: ElgatoService) => {
@@ -335,11 +376,122 @@ export class KeyLight {
     this.service = service;
   }
 
-  async getSettings() {
-    const statuses = new Array<KeyLightSettings>();
+  private static normalizeTarget(target: string) {
+    return target.trim().toLowerCase();
+  }
 
-    for (let x = 0; x < KeyLight.keyLights.length; x++) {
-      const service = KeyLight.keyLights[x].service;
+  private static targetCandidates(light: KeyLight) {
+    return [
+      light.service.displayName,
+      light.service.name,
+      light.service.host,
+      light.service.fqdn,
+      light.service.referer.address,
+      ...(light.service.addresses ?? []),
+    ]
+      .filter((value): value is string => Boolean(value))
+      .map((value) => this.normalizeTarget(value));
+  }
+
+  static getDiscoveredLights() {
+    return this.keyLights ?? [];
+  }
+
+  static describeLight(light: KeyLight) {
+    return `${light.service.displayName || light.service.name} (${light.service.referer.address})`;
+  }
+
+  static getTargetLights(targets?: string[]) {
+    const lights = this.getDiscoveredLights();
+
+    // `undefined` means "no filter configured" (target all lights), while an
+    // explicit empty array means "targeting specific lights, but none are
+    // selected" and must match nothing rather than falling back to all lights.
+    if (targets === undefined) {
+      return lights;
+    }
+    if (targets.length === 0) {
+      return [];
+    }
+
+    const parsedTargets = targets
+      .map((target) => ({ input: target, normalized: this.normalizeTarget(target) }))
+      .filter((target) => target.normalized.length > 0);
+
+    return lights.filter((light) => {
+      const candidates = this.targetCandidates(light);
+      return parsedTargets.some((target) => candidates.includes(target.normalized));
+    });
+  }
+
+  static getMissingTargets(targets?: string[]) {
+    if (!targets || targets.length === 0) {
+      return [];
+    }
+
+    const parsedTargets: KeyLightTarget[] = targets
+      .map((target) => ({ input: target, normalized: this.normalizeTarget(target) }))
+      .filter((target) => target.normalized.length > 0);
+
+    return parsedTargets.filter((target) => !this.getTargetLights([target.input]).length).map((target) => target.input);
+  }
+
+  private getTargetLightsOrThrow(targets?: string[]) {
+    const lights = KeyLight.getTargetLights(targets);
+    if (lights.length > 0) {
+      return lights;
+    }
+
+    if (targets && targets.length === 0) {
+      throw new Error(
+        "No target Key Lights are selected. Choose at least one light in the extension preferences, or switch to targeting all lights.",
+      );
+    }
+
+    const configuredTargets = targets?.filter(Boolean) ?? [];
+    if (configuredTargets.length === 0) {
+      throw new Error("No Key Lights were discovered");
+    }
+
+    const discoveredLights = KeyLight.getDiscoveredLights();
+    const availableLights = discoveredLights.length
+      ? discoveredLights.map((light) => KeyLight.describeLight(light)).join(", ")
+      : "none";
+    const missingTargets = KeyLight.getMissingTargets(configuredTargets).join(", ");
+    throw new Error(
+      `No configured target lights were found. Missing: ${missingTargets}. Discovered lights: ${availableLights}.`,
+    );
+  }
+
+  private async rediscoverAndGetTargets(targets?: string[]) {
+    await KeyLight.clearCache();
+    await KeyLight.discover(true);
+    return this.getTargetLightsOrThrow(targets);
+  }
+
+  private findMatchingLight(light: KeyLight, candidates: KeyLight[]) {
+    const targetCandidates = KeyLight.targetCandidates(light);
+    return candidates.find((candidate) => {
+      const candidateTargets = KeyLight.targetCandidates(candidate);
+      return candidateTargets.some((candidateTarget) => targetCandidates.includes(candidateTarget));
+    });
+  }
+
+  private isConnectionError(error: Error) {
+    return (
+      error.message.includes("ECONNREFUSED") ||
+      error.message.includes("ECONNRESET") ||
+      error.message.includes("ETIMEDOUT") ||
+      error.message.includes("EHOSTUNREACH")
+    );
+  }
+
+  async getSettings(targets?: string[]) {
+    const statuses = new Array<KeyLightSettings>();
+    const lights = this.getTargetLightsOrThrow(targets);
+
+    for (let x = 0; x < lights.length; x++) {
+      const service = lights[x].service;
       const keyLight = await this.getKeyLight(service);
       statuses.push({
         on: keyLight.on,
@@ -351,118 +503,116 @@ export class KeyLight {
     return statuses;
   }
 
-  async toggle() {
-    if (!KeyLight.keyLights || KeyLight.keyLights.length === 0) {
-      throw new Error("No Key Lights were discovered");
-    }
+  async toggle(targets?: string[]) {
+    const lights = this.getTargetLightsOrThrow(targets);
 
-    // First, get the current state of all lights
-    const currentStates = await Promise.all(
-      KeyLight.keyLights.map(async (light) => {
-        try {
-          const keyLight = await this.getKeyLight(light.service);
-          return { light, state: keyLight.on };
-        } catch (e) {
-          const error = e as Error;
-          if (
-            error.message.includes("ECONNREFUSED") ||
-            error.message.includes("ETIMEDOUT") ||
-            error.message.includes("EHOSTUNREACH")
-          ) {
-            if (environment.isDevelopment) {
-              console.error("Connection error, attempting rediscovery...");
-            }
-            await KeyLight.clearCache();
-            await KeyLight.discover(true);
-            const keyLight = await this.getKeyLight(light.service);
-            return { light, state: keyLight.on };
-          }
+    const currentStates = [];
+    for (const light of lights) {
+      try {
+        const keyLight = await this.getKeyLight(light.service);
+        currentStates.push({ light, state: keyLight.on });
+      } catch (e) {
+        const error = e as Error;
+        if (!this.isConnectionError(error)) {
           throw error;
         }
-      }),
-    );
 
-    // Determine the new state based on the first light's current state
+        if (environment.isDevelopment) {
+          console.error("Connection error, attempting rediscovery...");
+        }
+
+        const refreshedLights = await this.rediscoverAndGetTargets(targets);
+        const refreshedLight = this.findMatchingLight(light, refreshedLights);
+        if (!refreshedLight) {
+          throw new Error(`Failed to re-match Key Light ${KeyLight.describeLight(light)} after rediscovery`);
+        }
+
+        const keyLight = await this.getKeyLight(refreshedLight.service);
+        currentStates.push({ light: refreshedLight, state: keyLight.on });
+      }
+    }
+
     const newState = !currentStates[0].state;
 
-    // Update all lights in parallel
-    await Promise.all(
-      currentStates.map(async ({ light }) => {
-        try {
-          await this.updateKeyLight(light.service, { on: newState });
-        } catch (e) {
-          const error = e as Error;
-          if (
-            error.message.includes("ECONNREFUSED") ||
-            error.message.includes("ETIMEDOUT") ||
-            error.message.includes("EHOSTUNREACH")
-          ) {
-            if (environment.isDevelopment) {
-              console.error("Connection error, attempting rediscovery...");
-            }
-            await KeyLight.clearCache();
-            await KeyLight.discover(true);
-            await this.updateKeyLight(light.service, { on: newState });
-          } else {
-            throw error;
-          }
+    for (const { light } of currentStates) {
+      try {
+        await this.updateKeyLight(light.service, { on: newState });
+      } catch (e) {
+        const error = e as Error;
+        if (!this.isConnectionError(error)) {
+          throw error;
         }
-      }),
-    );
+
+        if (environment.isDevelopment) {
+          console.error("Connection error, attempting rediscovery...");
+        }
+
+        const refreshedLights = await this.rediscoverAndGetTargets(targets);
+        const refreshedLight = this.findMatchingLight(light, refreshedLights);
+        if (!refreshedLight) {
+          throw new Error(`Failed to re-match Key Light ${KeyLight.describeLight(light)} after rediscovery`);
+        }
+
+        await this.updateKeyLight(refreshedLight.service, { on: newState });
+      }
+    }
 
     return newState;
   }
 
-  async turnOn() {
-    for (let x = 0; x < KeyLight.keyLights.length; x++) {
-      const service = KeyLight.keyLights[x].service;
+  async turnOn(targets?: string[]) {
+    const lights = this.getTargetLightsOrThrow(targets);
+    for (let x = 0; x < lights.length; x++) {
+      const service = lights[x].service;
       await this.updateKeyLight(service, { on: true });
     }
   }
 
-  async turnOff() {
-    for (let x = 0; x < KeyLight.keyLights.length; x++) {
-      const service = KeyLight.keyLights[x].service;
+  async turnOff(targets?: string[]) {
+    const lights = this.getTargetLightsOrThrow(targets);
+    for (let x = 0; x < lights.length; x++) {
+      const service = lights[x].service;
       await this.updateKeyLight(service, { on: false });
     }
   }
 
-  async update(options: { brightness?: number; temperature?: number; on?: boolean }) {
-    for (let x = 0; x < KeyLight.keyLights.length; x++) {
-      const service = KeyLight.keyLights[x].service;
+  async update(options: { brightness?: number; temperature?: number; on?: boolean }, targets?: string[]) {
+    const lights = this.getTargetLightsOrThrow(targets);
+    for (let x = 0; x < lights.length; x++) {
+      const service = lights[x].service;
       await this.updateKeyLight(service, options);
     }
   }
 
-  async increaseBrightness() {
+  async increaseBrightness(targets?: string[]) {
     let newBrightness;
-    for (let x = 0; x < KeyLight.keyLights.length; x++) {
+    const lights = this.getTargetLightsOrThrow(targets);
+    for (let x = 0; x < lights.length; x++) {
+      const light = lights[x];
       try {
-        const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
+        const keyLight = await this.getKeyLight(light.service);
         newBrightness = Math.min(keyLight.brightness + 5, 100);
-        await this.updateKeyLight(KeyLight.keyLights[x].service, { brightness: newBrightness });
+        await this.updateKeyLight(light.service, { brightness: newBrightness });
       } catch (e) {
         const error = e as Error;
-        // Only clear cache and retry for connection errors
-        if (
-          error.message.includes("ECONNREFUSED") ||
-          error.message.includes("ETIMEDOUT") ||
-          error.message.includes("EHOSTUNREACH")
-        ) {
+        if (this.isConnectionError(error)) {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
-          await KeyLight.clearCache();
           try {
-            await KeyLight.discover(true);
-            const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
+            const refreshedLights = await this.rediscoverAndGetTargets(targets);
+            const refreshedLight = this.findMatchingLight(light, refreshedLights);
+            if (!refreshedLight) {
+              throw new Error(`Failed to re-match Key Light ${KeyLight.describeLight(light)} after rediscovery`);
+            }
+
+            const keyLight = await this.getKeyLight(refreshedLight.service);
             newBrightness = Math.min(keyLight.brightness + 5, 100);
-            await this.updateKeyLight(KeyLight.keyLights[x].service, { brightness: newBrightness });
+            await this.updateKeyLight(refreshedLight.service, { brightness: newBrightness });
           } catch (retryError) {
             throw new Error(`Failed increasing brightness: ${(retryError as Error).message}`);
           }
         } else {
-          // For other errors, just propagate them without clearing cache
           throw new Error(`Failed increasing brightness: ${error.message}`);
         }
       }
@@ -471,35 +621,35 @@ export class KeyLight {
     return newBrightness;
   }
 
-  async decreaseBrightness() {
+  async decreaseBrightness(targets?: string[]) {
     let newBrightness;
-    for (let x = 0; x < KeyLight.keyLights.length; x++) {
+    const lights = this.getTargetLightsOrThrow(targets);
+    for (let x = 0; x < lights.length; x++) {
+      const light = lights[x];
       try {
-        const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
+        const keyLight = await this.getKeyLight(light.service);
         newBrightness = Math.max(keyLight.brightness - 5, 0);
-        await this.updateKeyLight(KeyLight.keyLights[x].service, { brightness: newBrightness });
+        await this.updateKeyLight(light.service, { brightness: newBrightness });
       } catch (e) {
         const error = e as Error;
-        // Only clear cache and retry for connection errors
-        if (
-          error.message.includes("ECONNREFUSED") ||
-          error.message.includes("ETIMEDOUT") ||
-          error.message.includes("EHOSTUNREACH")
-        ) {
+        if (this.isConnectionError(error)) {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
-          await KeyLight.clearCache();
           try {
-            await KeyLight.discover(true);
-            const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
+            const refreshedLights = await this.rediscoverAndGetTargets(targets);
+            const refreshedLight = this.findMatchingLight(light, refreshedLights);
+            if (!refreshedLight) {
+              throw new Error(`Failed to re-match Key Light ${KeyLight.describeLight(light)} after rediscovery`);
+            }
+
+            const keyLight = await this.getKeyLight(refreshedLight.service);
             newBrightness = Math.max(keyLight.brightness - 5, 0);
-            await this.updateKeyLight(KeyLight.keyLights[x].service, { brightness: newBrightness });
+            await this.updateKeyLight(refreshedLight.service, { brightness: newBrightness });
           } catch (retryError) {
             throw new Error(`Failed decreasing brightness: ${(retryError as Error).message}`);
           }
         } else {
-          // For other errors, just propagate them without clearing cache
           throw new Error(`Failed decreasing brightness: ${error.message}`);
         }
       }
@@ -508,35 +658,35 @@ export class KeyLight {
     return newBrightness;
   }
 
-  async increaseTemperature() {
+  async increaseTemperature(targets?: string[]) {
     let newTemperature;
-    for (let x = 0; x < KeyLight.keyLights.length; x++) {
+    const lights = this.getTargetLightsOrThrow(targets);
+    for (let x = 0; x < lights.length; x++) {
+      const light = lights[x];
       try {
-        const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
+        const keyLight = await this.getKeyLight(light.service);
         newTemperature = Math.min(keyLight.temperature + TEMPERATURE_STEP, WARM_TEMPERATURE);
-        await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
+        await this.updateKeyLight(light.service, { temperature: newTemperature });
       } catch (e) {
         const error = e as Error;
-        // Only clear cache and retry for connection errors
-        if (
-          error.message.includes("ECONNREFUSED") ||
-          error.message.includes("ETIMEDOUT") ||
-          error.message.includes("EHOSTUNREACH")
-        ) {
+        if (this.isConnectionError(error)) {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
-          await KeyLight.clearCache();
           try {
-            await KeyLight.discover(true);
-            const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
+            const refreshedLights = await this.rediscoverAndGetTargets(targets);
+            const refreshedLight = this.findMatchingLight(light, refreshedLights);
+            if (!refreshedLight) {
+              throw new Error(`Failed to re-match Key Light ${KeyLight.describeLight(light)} after rediscovery`);
+            }
+
+            const keyLight = await this.getKeyLight(refreshedLight.service);
             newTemperature = Math.min(keyLight.temperature + TEMPERATURE_STEP, WARM_TEMPERATURE);
-            await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
+            await this.updateKeyLight(refreshedLight.service, { temperature: newTemperature });
           } catch (retryError) {
             throw new Error(`Failed increasing temperature: ${(retryError as Error).message}`);
           }
         } else {
-          // For other errors, just propagate them without clearing cache
           throw new Error(`Failed increasing temperature: ${error.message}`);
         }
       }
@@ -545,35 +695,35 @@ export class KeyLight {
     return newTemperature;
   }
 
-  async decreaseTemperature() {
+  async decreaseTemperature(targets?: string[]) {
     let newTemperature;
-    for (let x = 0; x < KeyLight.keyLights.length; x++) {
+    const lights = this.getTargetLightsOrThrow(targets);
+    for (let x = 0; x < lights.length; x++) {
+      const light = lights[x];
       try {
-        const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-        newTemperature = Math.min(keyLight.temperature - TEMPERATURE_STEP, WARM_TEMPERATURE);
-        await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
+        const keyLight = await this.getKeyLight(light.service);
+        newTemperature = Math.max(keyLight.temperature - TEMPERATURE_STEP, COLD_TEMPERATURE);
+        await this.updateKeyLight(light.service, { temperature: newTemperature });
       } catch (e) {
         const error = e as Error;
-        // Only clear cache and retry for connection errors
-        if (
-          error.message.includes("ECONNREFUSED") ||
-          error.message.includes("ETIMEDOUT") ||
-          error.message.includes("EHOSTUNREACH")
-        ) {
+        if (this.isConnectionError(error)) {
           if (environment.isDevelopment) {
             console.error(`Connection error for Key Light ${x + 1}, attempting rediscovery...`);
           }
-          await KeyLight.clearCache();
           try {
-            await KeyLight.discover(true);
-            const keyLight = await this.getKeyLight(KeyLight.keyLights[x].service);
-            newTemperature = Math.min(keyLight.temperature - TEMPERATURE_STEP, WARM_TEMPERATURE);
-            await this.updateKeyLight(KeyLight.keyLights[x].service, { temperature: newTemperature });
+            const refreshedLights = await this.rediscoverAndGetTargets(targets);
+            const refreshedLight = this.findMatchingLight(light, refreshedLights);
+            if (!refreshedLight) {
+              throw new Error(`Failed to re-match Key Light ${KeyLight.describeLight(light)} after rediscovery`);
+            }
+
+            const keyLight = await this.getKeyLight(refreshedLight.service);
+            newTemperature = Math.max(keyLight.temperature - TEMPERATURE_STEP, COLD_TEMPERATURE);
+            await this.updateKeyLight(refreshedLight.service, { temperature: newTemperature });
           } catch (retryError) {
             throw new Error(`Failed decreasing temperature: ${(retryError as Error).message}`);
           }
         } else {
-          // For other errors, just propagate them without clearing cache
           throw new Error(`Failed decreasing temperature: ${error.message}`);
         }
       }

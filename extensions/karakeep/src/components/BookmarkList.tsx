@@ -2,10 +2,12 @@ import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useBookmarkFilter } from "../hooks/useBookmarkFilter";
 import { useConfig } from "../hooks/useConfig";
+import { useGetAllLists } from "../hooks/useGetAllLists";
 import { useEnsureScrollablePagination } from "../hooks/usePrefetchPagination";
 import { useSearchBookmarks } from "../hooks/useSearchBookmarks";
 import { useTranslation } from "../hooks/useTranslation";
-import { Bookmark } from "../types";
+import { connectionGuard } from "./ConnectionErrorView";
+import { Bookmark, List as BookmarkListType } from "../types";
 import { BookmarkItem } from "./BookmarkItem";
 interface BookmarkListProps {
   bookmarks: Bookmark[] | undefined;
@@ -16,6 +18,8 @@ interface BookmarkListProps {
   };
   isLoading: boolean;
   error?: Error;
+  /** Whether the rows came from a request that succeeded this session. */
+  hasLiveData?: boolean;
   onRefresh?: () => void;
   searchBarPlaceholder?: string;
   emptyViewTitle?: string;
@@ -26,15 +30,31 @@ interface BookmarkListProps {
   itemLabel?: string;
   /** Optional accessory element rendered in the search bar (e.g. a List.Dropdown for filtering) */
   searchBarAccessory?: Parameters<typeof List>[0]["searchBarAccessory"];
+  /** Lists for the Add to List submenu. Pass these when the caller has already
+   * fetched them; otherwise this component fetches its own copy. */
+  lists?: BookmarkListType[];
 }
 function SearchBookmarkList({ searchText }: { searchText: string }) {
   const { t } = useTranslation();
-  const { bookmarks, isLoading: isLoadingBookmarks, revalidate: revalidateBookmarks } = useSearchBookmarks(searchText);
+  const {
+    bookmarks,
+    isLoading: isLoadingBookmarks,
+    error,
+    hasLiveData,
+    revalidate: revalidateBookmarks,
+  } = useSearchBookmarks(searchText);
+
+  // Online search hits the API on every keystroke; with the default toast
+  // suppressed, a dead server would otherwise look like "no results".
+  const guard = connectionGuard(error, hasLiveData, revalidateBookmarks);
+  if (guard) return guard;
 
   return (
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoadingBookmarks}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={revalidateBookmarks}
       searchBarPlaceholder={t("bookmarkList.searchPlaceholder")}
       emptyViewTitle={t("bookmarkList.emptySearch.title")}
@@ -47,6 +67,8 @@ export function BookmarkList({
   bookmarks,
   pagination,
   isLoading,
+  error,
+  hasLiveData,
   onRefresh,
   searchBarPlaceholder,
   emptyViewTitle,
@@ -55,10 +77,17 @@ export function BookmarkList({
   onBookmarkVisit,
   itemLabel,
   searchBarAccessory,
+  lists: providedLists,
 }: BookmarkListProps) {
   const { t } = useTranslation();
   const { push } = useNavigation();
   const { config } = useConfig();
+  // Fetched HERE, not in BookmarkItem: BookmarkItem renders once per row, so
+  // fetching there would be one request per visible bookmark. `execute` is off
+  // when the caller already has them, since useCachedPromise caches the VALUE
+  // but still runs the promise per hook instance.
+  const { lists: fetchedLists, isLoading: isLoadingLists } = useGetAllLists(!providedLists);
+  const lists = providedLists ?? fetchedLists;
   const [searchText, setSearchText] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
 
@@ -112,6 +141,10 @@ export function BookmarkList({
     isLoading,
     itemCount: displayInfo.displayBookmarks.length,
     enabled: searchText.trim().length === 0,
+    // Without these the prefetch fires against a dead server and duplicates
+    // the list on reconnect — see raycast/extensions#30021.
+    error,
+    hasLiveData,
   });
 
   useEffect(() => {
@@ -179,6 +212,8 @@ export function BookmarkList({
             onRefresh={onRefresh || (() => {})}
             onVisit={onBookmarkVisit}
             isSelected={selectedItemId === bookmark.id}
+            lists={lists}
+            isLoadingLists={isLoadingLists}
           />
         ))}
       </List.Section>

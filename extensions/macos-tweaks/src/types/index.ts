@@ -11,6 +11,7 @@ export type TweakCategory =
   | "security"
   | "menubar"
   | "apps"
+  | "sound"
   | "misc";
 
 export type TweakType = "boolean" | "string" | "number" | "enum";
@@ -38,6 +39,7 @@ export interface TweakDefinition {
   max?: number;
   requiresRestart?: string;
   minMacOS?: string;
+  maxMacOS?: string;
   risk: TweakRisk;
   tags: string[];
   /**
@@ -75,5 +77,6 @@ export const CATEGORY_META: Record<TweakCategory, { title: string; icon: string 
   security: { title: "Security & Privacy", icon: "lock" },
   menubar: { title: "Menu Bar & UI", icon: "bar-chart-01" },
   apps: { title: "Apps", icon: "app-window-grid-3x3" },
+  sound: { title: "Sound", icon: "speaker-loud" },
   misc: { title: "Miscellaneous", icon: "gear" },
 };

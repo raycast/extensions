@@ -1,5 +1,45 @@
 # Spotify Player Changelog
 
+## [Fix Your Library Memory Usage] - 2026-08-16
+
+- Load only liked songs when rendering the liked songs entry instead of fetching every library category.
+
+## [Copy Embed Code Action] - 2026-07-10
+
+- Add a "Copy Embed Code" action to the action panel and the menu bar
+
+## [Fix Find Lyrics] - 2026-07-09
+
+- Fixed the Find Lyrics command by replacing the broken Genius package integration with LRCLIB lyrics lookup.
+
+## [Show Liked Songs Status in Now Playing] - 2026-06-26
+
+- Now Playing detail view shows a "Liked" field indicating whether the current track is in your Liked Songs
+
+## [Upade README] - 2026-06-24
+
+- Update the extension README to include the 💸 emoji next to each command that requires Spotify Premium, as per the Spotify API docs
+
+## [Fix stale seek position in menu bar] - 2026-06-20
+
+- Skip/back 15 seconds in the menu bar now estimates the current playback position using elapsed time since the last API fetch, instead of using the stale cached value.
+
+## [See Which Playlists Contain the Current Song] - 2026-06-16
+
+- All "Add to Playlist" interactions now show a checkmark on playlists that already contain the song
+- Selecting a playlist that already has the song removes it instead of adding a duplicate
+- Now Playing detail view shows an "In Playlists" section with thumbnails of every playlist the song is in
+
+## [Fix Podcast Episode Navigation] - 2026-05-28
+
+- Prevent podcast episode navigation from crashing when Spotify omits show details in search results
+
+## [Add Keyboard Shortcuts] - 2026-05-17
+
+- Added shortcuts for opening Your Library and Search from Now Playing and Add Playing Song to Playlist
+- Added shortcuts for liking, disliking, adding to playlists, connecting devices, and showing related content
+- Added artist action shortcuts for showing albums and popular songs
+
 ## [Fix OAuth PKCE invalid_grant] - 2026-04-04
 
 - Clear corrupted tokens on invalid_grant error so the user is prompted to re-authenticate instead of being stuck

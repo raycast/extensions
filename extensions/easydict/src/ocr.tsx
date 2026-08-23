@@ -1,17 +1,26 @@
-/*
- * @author: tisfeng
- * @createTime: 2023-05-15 23:31
- * @lastEditor: tisfeng
- * @lastEditTime: 2023-05-17 18:42
- * @fileName: ocr.tsx
- *
- * Copyright (c) 2023 by ${git_name}, All Rights Reserved.
- */
+/* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { closeMainWindow, open, showHUD } from "@raycast/api";
-import { recognizeText } from "./recognizeText";
+import { closeMainWindow, environment, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { chmod } from "fs/promises";
+import { join } from "path";
+import { x } from "tinyexec";
+
+import { logError, logTrace } from "@/utils/logger";
+
+const recognizeText = async () => {
+  const command = join(environment.assetsPath, "recognizeText");
+  await chmod(command, "755");
+  const result = await x(command, [], {
+    throwOnError: true,
+  });
+  return result.stdout.trim();
+};
 
 export default async function command() {
+  if (process.platform !== "darwin") {
+    return await showHUD("❌ OCR feature is currently only supported on macOS.");
+  }
+
   await closeMainWindow();
 
   try {
@@ -19,18 +28,22 @@ export default async function command() {
     if (!recognizedText) {
       return await showHUD("❌ No text detected!");
     }
-    console.log(`Recognized text: ${recognizedText}`);
+    logTrace("OCR", `recognized text: ${recognizedText}`);
 
-    const encodedQueryText = encodeURIComponent(recognizedText);
-    const easyDictUrl = `raycast://extensions/isfeng/easydict/easydict?fallbackText=${encodedQueryText}`;
     try {
-      await open(easyDictUrl);
+      await launchCommand({
+        name: "easydict",
+        type: LaunchType.UserInitiated,
+        arguments: {
+          queryText: recognizedText,
+        },
+      });
     } catch (error) {
-      console.error(error);
+      logError("OCR", `launch easydict error: ${error}`);
       await showHUD("⚠️ Failed to query Easy Dictionary");
     }
   } catch (e) {
-    console.error(e);
+    logError("OCR", `recognize text error: ${e}`);
     await showHUD("❌ Failed detecting text");
   }
 }

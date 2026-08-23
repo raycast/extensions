@@ -57,6 +57,7 @@ export declare const userRouter: import("@trpc/server").TRPCBuiltRouter<{
                 name: string;
                 updatedAt: Date;
                 image: string | null;
+                slackTeamId: string | null;
             }[];
             createdAt: Date;
             name: string;
@@ -94,6 +95,7 @@ export declare const userRouter: import("@trpc/server").TRPCBuiltRouter<{
         input: {
             spaceId: string;
             emails: string[];
+            role?: "ADMIN" | "MEMBER" | "READ" | undefined;
         };
         output: void;
         meta: object;
@@ -119,6 +121,49 @@ export declare const userRouter: import("@trpc/server").TRPCBuiltRouter<{
             name: string;
         };
         output: void;
+        meta: object;
+    }>;
+    listSessions: import("@trpc/server").TRPCQueryProcedure<{
+        input: void;
+        output: {
+            sessions: {
+                jti: string;
+                createdAt: Date;
+                expires: Date;
+                deviceName: string | null;
+                lastActive: Date;
+            }[];
+            currentJti: string;
+        };
+        meta: object;
+    }>;
+    revokeSession: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            jti: string;
+        };
+        output: void;
+        meta: object;
+    }>;
+    listBlockingOwnerships: import("@trpc/server").TRPCQueryProcedure<{
+        input: void;
+        output: {
+            id: string;
+            name: string;
+        }[];
+        meta: object;
+    }>;
+    deleteAccount: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            confirmEmail: string;
+        };
+        output: void;
+        meta: object;
+    }>;
+    revokeOtherSessions: import("@trpc/server").TRPCMutationProcedure<{
+        input: void;
+        output: {
+            count: number;
+        };
         meta: object;
     }>;
 }>>;

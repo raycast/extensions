@@ -91,7 +91,7 @@
   "dependencies": {
     "@raycast/api": "^1.92.1",
     "@raycast/utils": "^1.17.0",
-    "axios": "^1.8.4"
+    "axios": "^1.18.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
@@ -99,16 +99,21 @@
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^3.2.6"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9"
+  }
 }

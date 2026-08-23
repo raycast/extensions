@@ -1,11 +1,28 @@
 # Bitwarden Changelog
 
+## [Fix Authenticator TOTP] - 2026-07-13
+
+- Fix authenticator failing when TOTP secrets contain spaces
+
+## [Fix sync session handling] - 2026-05-28
+
+- Fixed failed sync attempts immediately clearing the active session before cached vault data can load.
+
+## [CLI update] - 2026-05-27
+
+- Update CLI to v2026.4.2
+
+## [Update Contributors] - 2026-05-19
+
+- Update contributors
+
 ## [Update packages] - 2026-04-24
 
 - Update Raycast packages to the latest version
 
 ## [CLI update & Fix] - 2026-04-23
 
+- Update CLI to v2026.3.0
 - Logout whenever there is a "Invalid session token" error
 
 ## [Fix] - 2026-04-20

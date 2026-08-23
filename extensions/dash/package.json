@@ -56,9 +56,9 @@
   "dependencies": {
     "@raycast/api": "^1.53.4",
     "execa": "6.1.0",
-    "fast-xml-parser": "3.20.3",
+    "fast-xml-parser": "^5.7.0",
     "html-entities": "2.3.2",
-    "node-fetch": "3.0.0",
+    "node-fetch": "^3.3.2",
     "raycast-toolkit": "1.0.3",
     "tempy": "2.0.0"
   },
@@ -77,5 +77,9 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

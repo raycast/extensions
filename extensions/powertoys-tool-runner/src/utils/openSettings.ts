@@ -1,20 +1,17 @@
 import { runPowerShellScript, showFailureToast } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
-import { isPowerToysRunning } from "./triggerEvent";
+import { ensurePowerToysIsRunning } from "./triggerEvent";
 import { getPowerToysInstallPath } from "./getPowerToysInstallPath";
 
 export async function openPowerToysSettings(moduleName: string): Promise<void> {
   try {
-    const [isRunning, installPath] = await Promise.all([isPowerToysRunning(), getPowerToysInstallPath()]);
+    const isRunning = await ensurePowerToysIsRunning();
 
     if (!isRunning) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "PowerToys is not running",
-        message: "Please ensure PowerToys is installed and running",
-      });
       return;
     }
+
+    const installPath = await getPowerToysInstallPath();
 
     if (!installPath) {
       await showToast({
