@@ -5,6 +5,16 @@ import { useCallback, useMemo } from "react";
 
 const CACHE_NAMESPACE = "entity-overrides";
 
+export function prioritizeFavoriteStates(states: State[], favoriteEntityIds: Set<string>): State[] {
+  if (favoriteEntityIds.size === 0) {
+    return states;
+  }
+  return [
+    ...states.filter((state) => favoriteEntityIds.has(state.entity_id)),
+    ...states.filter((state) => !favoriteEntityIds.has(state.entity_id)),
+  ];
+}
+
 export function sortStatesWithFavoritesFirst(
   states: State[],
   favoriteEntityIds: Set<string>,
@@ -16,9 +26,7 @@ export function sortStatesWithFavoritesFirst(
     if (aFavorite !== bFavorite) {
       return aFavorite ? -1 : 1;
     }
-    return getDisplayName(a, entityAliases[a.entity_id]).localeCompare(
-      getDisplayName(b, entityAliases[b.entity_id]),
-    );
+    return getDisplayName(a, entityAliases[a.entity_id]).localeCompare(getDisplayName(b, entityAliases[b.entity_id]));
   });
 }
 
@@ -52,9 +60,13 @@ export function useEntityOverrides() {
   const [hiddenEntities, setHiddenEntities] = useCachedState<string[]>("hidden-entities", [], {
     cacheNamespace: CACHE_NAMESPACE,
   });
-  const [entityAliases, setEntityAliases] = useCachedState<Record<string, string>>("entity-aliases", {}, {
-    cacheNamespace: CACHE_NAMESPACE,
-  });
+  const [entityAliases, setEntityAliases] = useCachedState<Record<string, string>>(
+    "entity-aliases",
+    {},
+    {
+      cacheNamespace: CACHE_NAMESPACE,
+    },
+  );
   const [favoriteEntities, setFavoriteEntities] = useCachedState<string[]>("favorite-entities", [], {
     cacheNamespace: CACHE_NAMESPACE,
   });

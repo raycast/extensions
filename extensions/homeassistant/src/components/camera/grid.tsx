@@ -1,7 +1,7 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { useVisibleHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
-import { sortStatesWithFavoritesFirst, useEntityOverrides } from "@lib/entity-overrides";
+import { prioritizeFavoriteStates, useEntityOverrides } from "@lib/entity-overrides";
 import { State } from "@lib/haapi";
 import { getDisplayName } from "@lib/utils";
 import { Action, ActionPanel, Color, Grid, Image, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
@@ -94,7 +94,7 @@ export function CameraGrid(): React.ReactElement {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
-  const sortedStates = sortStatesWithFavoritesFirst(states, favoriteEntityIds, entityAliases);
+  const sortedStates = prioritizeFavoriteStates(states, favoriteEntityIds);
 
   return (
     <Grid

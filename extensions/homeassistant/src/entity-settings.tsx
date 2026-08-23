@@ -12,8 +12,7 @@ export default function EntitySettingsCommand() {
   const statesById = useMemo(() => new Map((states ?? []).map((state) => [state.entity_id, state])), [states]);
 
   const aliasEntries = useMemo(
-    () =>
-      Object.entries(entityAliases).sort(([, a], [, b]) => a.localeCompare(b)),
+    () => Object.entries(entityAliases).sort(([, a], [, b]) => a.localeCompare(b)),
     [entityAliases],
   );
 
@@ -88,11 +87,7 @@ export default function EntitySettingsCommand() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title="Visibility">
-                      <Action
-                        title="Show Entity"
-                        icon={Icon.Eye}
-                        onAction={() => showEntity(entityId)}
-                      />
+                      <Action title="Show Entity" icon={Icon.Eye} onAction={() => showEntity(entityId)} />
                     </ActionPanel.Section>
                   </ActionPanel>
                 }

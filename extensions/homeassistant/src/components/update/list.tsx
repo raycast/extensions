@@ -3,7 +3,7 @@ import { useHAStates, useVisibleHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
 import { PrimaryIconColor } from "@components/state/utils";
-import { sortStatesWithFavoritesFirst, useEntityOverrides } from "@lib/entity-overrides";
+import { partitionFavoriteStates, useEntityOverrides } from "@lib/entity-overrides";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getStateTooltip } from "@lib/utils";
@@ -71,14 +71,21 @@ export function UpdatesList(): React.ReactElement {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
-  const sortedStates = sortStatesWithFavoritesFirst(states, favoriteEntityIds, entityAliases);
-  const updateRequiredStates = sortedStates.filter((s) => s.state === "on");
-  const otherStates = sortedStates.filter((s) => s.state !== "on");
+  const { favorites, others } = partitionFavoriteStates(states, favoriteEntityIds);
+  const updateRequiredStates = others.filter((s) => s.state === "on");
+  const otherStates = others.filter((s) => s.state !== "on");
 
   const hacsState = allStatesUnfiltered?.find((s) => s.entity_id === "sensor.hacs");
 
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
+      {favorites.length > 0 && (
+        <List.Section title="Favorites" subtitle={`${favorites.length}`}>
+          {favorites.map((state) => (
+            <StateListItem key={state.entity_id} state={state} />
+          ))}
+        </List.Section>
+      )}
       <List.Section title="Update Available" subtitle={`${updateRequiredStates?.length}`}>
         {updateRequiredStates?.map((state) => (
           <StateListItem key={state.entity_id} state={state} />
