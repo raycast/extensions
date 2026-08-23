@@ -5,6 +5,7 @@ import { listVals, setPrivacy, webUrlFor } from "./lib/api";
 import { cacheConfigs, cachedConfigs, cachedState } from "./lib/cache";
 import { appAccessColor, errorMessage, privacyColor } from "./lib/format";
 import { prefetchVal } from "./lib/readme";
+import { cmdOrCtrl } from "./lib/shortcuts";
 import { loadState, normalizeState, type ExtensionState } from "./lib/store";
 import type { Privacy, ValSummary } from "./lib/types";
 import { readConfigs, readValConfig, writeValConfig, type ValConfig } from "./lib/valconfig";
@@ -177,7 +178,7 @@ export default function SearchVals() {
           <Action
             title="Configure Val"
             icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={cmdOrCtrl("t")}
             onAction={() => configure(identifier, false, val?.description)}
           />
           <Action.OpenInBrowser title="Open on Val Town" url={val?.links.html ?? webUrlFor(identifier)} />
@@ -204,7 +205,7 @@ export default function SearchVals() {
             <Action
               title="Enable AI Agent Access"
               icon={Icon.CheckCircle}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              shortcut={cmdOrCtrl("a", "shift")}
               onAction={() => configure(identifier, true, val?.description)}
             />
           ) : null}
@@ -212,7 +213,7 @@ export default function SearchVals() {
             <Action
               title="Enable AI Agent Access"
               icon={Icon.CheckCircle}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              shortcut={cmdOrCtrl("a", "shift")}
               onAction={() => updateConfig(identifier, config, { active: true })}
             />
           ) : null}
@@ -220,7 +221,7 @@ export default function SearchVals() {
             <Action
               title="Disable AI Agent Access"
               icon={Icon.Circle}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              shortcut={cmdOrCtrl("a", "shift")}
               onAction={() => updateConfig(identifier, config, { active: false })}
             />
           ) : null}

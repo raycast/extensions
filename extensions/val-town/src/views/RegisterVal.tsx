@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Form, Icon, Keyboard, List, Toast, showToas
 import { useEffect, useState } from "react";
 import { listFiles } from "../lib/api";
 import { canIntrospect, introspect, pickEntrypoint, RUNNABLE_TYPES } from "../lib/schema";
+import { cmdOrCtrl } from "../lib/shortcuts";
 import { type ExtensionState } from "../lib/store";
 import { addTool } from "../lib/tools";
 import { emptyValConfig, readValConfig, writeValConfig, type ValConfig } from "../lib/valconfig";
@@ -176,12 +177,7 @@ export function RegisterVal({
         <ActionPanel>
           <Action.SubmitForm title="Save" icon={Icon.Check} onSubmit={submit} />
           {canIntrospect() ? (
-            <Action
-              title="Ask AI to Generate"
-              icon={Icon.Stars}
-              shortcut={{ modifiers: ["cmd"], key: "g" }}
-              onAction={generate}
-            />
+            <Action title="Ask AI to Generate" icon={Icon.Stars} shortcut={cmdOrCtrl("g")} onAction={generate} />
           ) : null}
           <Action.OpenInBrowser
             title="Open Argument Examples"
