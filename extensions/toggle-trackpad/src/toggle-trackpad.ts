@@ -13,15 +13,34 @@ const ACTIVATE_SETTINGS_PATH =
 
 type TrackpadSetting = 0 | 1;
 
+function isMissingPreferenceError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    "code" in error &&
+    error.code === 1 &&
+    "stderr" in error &&
+    typeof error.stderr === "string" &&
+    error.stderr.includes(`(${DOMAIN}, ${KEY}) does not exist`)
+  );
+}
+
 async function readCurrentState(): Promise<TrackpadSetting> {
-  const { stdout } = await execFileAsync(DEFAULTS_PATH, ["read", DOMAIN, KEY]);
-  const value = stdout.trim();
+  try {
+    const { stdout } = await execFileAsync(DEFAULTS_PATH, ["read", DOMAIN, KEY]);
+    const value = stdout.trim();
 
-  if (value !== "0" && value !== "1") {
-    throw new Error(`Unexpected ${KEY} value: ${JSON.stringify(value)}`);
+    if (value !== "0" && value !== "1") {
+      throw new Error(`Unexpected ${KEY} value: ${JSON.stringify(value)}`);
+    }
+
+    return value === "1" ? 1 : 0;
+  } catch (error) {
+    if (isMissingPreferenceError(error)) {
+      return 0;
+    }
+
+    throw error;
   }
-
-  return value === "1" ? 1 : 0;
 }
 
 async function writeState(value: TrackpadSetting): Promise<void> {
