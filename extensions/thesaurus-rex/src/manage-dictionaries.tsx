@@ -5,6 +5,7 @@ import {
   Icon,
   Keyboard,
   List,
+  Toast,
   confirmAlert,
   environment,
   showToast,
@@ -41,9 +42,17 @@ export default function ManageDictionaries() {
       icon: Icon.Trash,
     });
     if (!confirmed) return;
-    await removeOfflineData(dir);
-    setHasData(false);
-    await showToast({ title: "Dictionaries deleted" });
+    try {
+      await removeOfflineData(dir);
+      setHasData(false);
+      await showToast({ title: "Dictionaries deleted" });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not delete dictionaries",
+        message: String(error),
+      });
+    }
   }, [dir]);
 
   const actions = (
@@ -53,7 +62,7 @@ export default function ManageDictionaries() {
         icon={Icon.Download}
         onAction={download}
       />
-      {hasData && (
+      {hasData && !isBusy && (
         <Action
           title="Delete Dictionaries"
           icon={Icon.Trash}

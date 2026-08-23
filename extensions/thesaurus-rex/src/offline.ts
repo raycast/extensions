@@ -96,9 +96,22 @@ export async function downloadDatasets(
 }
 
 export async function removeOfflineData(dir: string): Promise<void> {
+  const path = dbPath(dir);
+  if (existsSync(path)) {
+    // The lock lives in the file, so we open before unlinking. A second connection,
+    // not `handle`: downloadDatasets may already hold that one in this process, and
+    // closing it would tear down an install we are about to refuse.
+    const connection = openDb(path);
+    try {
+      if (!acquireInstallLock(connection))
+        throw new Error("A dictionary download is already running");
+    } finally {
+      connection.close();
+    }
+  }
   handle?.close();
   handle = undefined;
   for (const suffix of ["", "-wal", "-shm"]) {
-    await rm(dbPath(dir) + suffix, { force: true });
+    await rm(path + suffix, { force: true });
   }
 }
