@@ -59,16 +59,22 @@ async function resolveAppName(bundleId: string, fallback: string): Promise<strin
 }
 
 export async function discoverMenuShortcuts(): Promise<ScanResult> {
-  const hits = plistCandidates().filter((p) => {
+  const hits: string[] = [];
+  const prefilterFails: string[] = [];
+  for (const p of plistCandidates()) {
     try {
-      return readFileSync(p).includes(MARKER);
+      if (readFileSync(p).includes(MARKER)) hits.push(p);
     } catch {
-      return false;
+      // prefilter unreadable → remember its category so a sweep doesn't treat the
+      // omission as a removal and delete valid stored entries for this app
+      prefilterFails.push(basename(p, ".plist"));
     }
-  });
+  }
 
   const apps: DiscoveredApp[] = [];
-  const failedApps: string[] = [];
+  const failedApps = new Set<string>();
+  for (const id of prefilterFails) failedApps.add(await resolveAppName(id, id));
+
   for (const path of hits) {
     const fallbackName = basename(path, ".plist");
     try {
@@ -78,9 +84,9 @@ export async function discoverMenuShortcuts(): Promise<ScanResult> {
     } catch {
       // unreadable plist → skip domain, but remember its category so Import All
       // won't treat the omission as a removal and delete valid stored entries
-      failedApps.push(await resolveAppName(fallbackName, fallbackName));
+      failedApps.add(await resolveAppName(fallbackName, fallbackName));
     }
   }
   apps.sort((a, b) => a.app.localeCompare(b.app));
-  return { apps, failedApps };
+  return { apps, failedApps: [...failedApps] };
 }
