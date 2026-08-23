@@ -1,18 +1,15 @@
-import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useMemo } from "react";
 
-import { createGroundcrewClient, type GroundcrewClient } from "./cli";
+import { type GroundcrewClient } from "./cli";
 import { StatusDashboard } from "./components";
 import type { LifecycleMutations } from "./components/lifecycle-actions";
+import { createGroundcrewClientFromPreferences } from "./create-client";
 
 export default function Command() {
-  const { crewPath } = getPreferenceValues<Preferences>();
   const getClient = useMemo(() => {
     let clientPromise: Promise<GroundcrewClient> | undefined;
     return async () => {
-      clientPromise ??= createGroundcrewClient({
-        ...(crewPath?.trim() ? { executablePath: crewPath.trim() } : {}),
-      });
+      clientPromise ??= createGroundcrewClientFromPreferences();
       try {
         return await clientPromise;
       } catch (error) {
@@ -20,7 +17,7 @@ export default function Command() {
         throw error;
       }
     };
-  }, [crewPath]);
+  }, []);
   const loadStatus = useCallback(async () => (await getClient()).getStatus(), [getClient]);
   const loadTasks = useCallback(async () => (await getClient()).listTasks(), [getClient]);
   const mutations = useMemo<LifecycleMutations>(

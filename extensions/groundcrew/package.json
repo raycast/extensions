@@ -25,6 +25,22 @@
       "type": "textfield",
       "required": false,
       "placeholder": "Visual Studio Code"
+    },
+    {
+      "name": "additionalPath",
+      "title": "Additional PATH",
+      "description": "Colon-separated directories prepended to PATH when crew runs, so crew and the tools it shells out to (node, git, cmux, gh) resolve under Raycast's stripped environment. Supports ~ and $HOME. Find them with `dirname $(which crew node git cmux gh)`.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/.local/state/fnm_multishells/current/bin:/opt/homebrew/bin"
+    },
+    {
+      "name": "linearApiKey",
+      "title": "Linear API Key",
+      "description": "Optional Linear API key exported to crew as GROUNDCREW_LINEAR_API_KEY. Set it only if crew can't otherwise read your key under Raycast's stripped environment. Stored locally in Raycast; never sent anywhere else.",
+      "type": "password",
+      "required": false,
+      "placeholder": "lin_api_…"
     }
   ],
   "commands": [

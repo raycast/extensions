@@ -1,8 +1,9 @@
-import { Detail, getPreferenceValues, type LaunchProps, showToast, Toast } from "@raycast/api";
+import { Detail, type LaunchProps, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { createGroundcrewClient, type GroundcrewClient } from "./cli";
+import { type GroundcrewClient } from "./cli";
 import { lifecycleErrorDetail } from "./components/lifecycle-actions";
+import { createGroundcrewClientFromPreferences } from "./create-client";
 
 interface OpenState {
   isLoading: boolean;
@@ -14,7 +15,6 @@ function errorMessage(error: unknown): string {
 }
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGroundcrewWorkspace }>) {
-  const { crewPath } = getPreferenceValues<Preferences>();
   const target = props.arguments.target.trim();
   const kind = props.arguments.kind === "branch" ? "branch" : "pr";
   const [state, setState] = useState<OpenState>({ isLoading: true });
@@ -23,9 +23,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGr
   const getClient = useMemo(() => {
     let clientPromise: Promise<GroundcrewClient> | undefined;
     return async () => {
-      clientPromise ??= createGroundcrewClient({
-        ...(crewPath?.trim() ? { executablePath: crewPath.trim() } : {}),
-      });
+      clientPromise ??= createGroundcrewClientFromPreferences();
       try {
         return await clientPromise;
       } catch (error) {
@@ -33,7 +31,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGr
         throw error;
       }
     };
-  }, [crewPath]);
+  }, []);
 
   useEffect(() => {
     if (started.current) {

@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { createGroundcrewClient, type GroundcrewClient } from "../cli";
+import { type GroundcrewClient } from "../cli";
+import { createGroundcrewClientFromPreferences } from "../create-client";
 
 const GROUNDCREW_INSTALL_URL = "https://www.npmjs.com/package/@clipboard-health/groundcrew";
 
@@ -16,20 +17,17 @@ function errorMessage(error: unknown): string {
 }
 
 /**
- * Runs `crew doctor` and renders its diagnostics. Self-contained (reads the crewPath
- * preference and creates its own client) so it can be pushed from any error state.
+ * Runs `crew doctor` and renders its diagnostics. Self-contained (reads the extension
+ * preferences and creates its own client) so it can be pushed from any error state.
  */
 export function GroundcrewDoctor() {
-  const { crewPath } = getPreferenceValues<Preferences>();
   const [state, setState] = useState<DoctorState>({ isLoading: true });
   const mounted = useRef(false);
 
   const getClient = useMemo(() => {
     let clientPromise: Promise<GroundcrewClient> | undefined;
     return async () => {
-      clientPromise ??= createGroundcrewClient({
-        ...(crewPath?.trim() ? { executablePath: crewPath.trim() } : {}),
-      });
+      clientPromise ??= createGroundcrewClientFromPreferences();
       try {
         return await clientPromise;
       } catch (error) {
@@ -37,7 +35,7 @@ export function GroundcrewDoctor() {
         throw error;
       }
     };
-  }, [crewPath]);
+  }, []);
 
   const run = useCallback(async () => {
     setState((current) => ({ ...current, isLoading: true }));

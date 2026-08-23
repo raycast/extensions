@@ -1,7 +1,7 @@
-import { Detail, getPreferenceValues, type LaunchProps } from "@raycast/api";
+import { Detail, type LaunchProps } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
-import { createGroundcrewClient, type GroundcrewClient } from "./cli";
+import { type GroundcrewClient } from "./cli";
 import {
   findCanonicalTask,
   findLifecycleTask,
@@ -9,18 +9,16 @@ import {
   useLifecycleActionController,
   type LifecycleMutations,
 } from "./components/lifecycle-actions";
+import { createGroundcrewClientFromPreferences } from "./create-client";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.StartGroundcrewTask }>) {
-  const { crewPath } = getPreferenceValues<Preferences>();
   const rawInput = props.arguments.taskId.trim();
   const taskId = naturalTaskId(rawInput);
 
   const getClient = useMemo(() => {
     let clientPromise: Promise<GroundcrewClient> | undefined;
     return async () => {
-      clientPromise ??= createGroundcrewClient({
-        ...(crewPath?.trim() ? { executablePath: crewPath.trim() } : {}),
-      });
+      clientPromise ??= createGroundcrewClientFromPreferences();
       try {
         return await clientPromise;
       } catch (error) {
@@ -28,7 +26,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.StartG
         throw error;
       }
     };
-  }, [crewPath]);
+  }, []);
 
   const mutations = useMemo<LifecycleMutations>(
     () => ({
