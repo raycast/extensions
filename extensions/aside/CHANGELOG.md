@@ -1,9 +1,9 @@
 # Aside Changelog
 
-## [Search Improvements] - 2026-08-22
+## [Search Improvements] - {PR_MERGE_DATE}
 
 - Added profile-aware bookmark results to Search Aside, with shared ranking and a five-item preview before typing.
-- Collapsed browser-generated history URL variants with the same title and visit time into single recent events.
+- Collapsed Chromium redirect chains to their final destinations without hiding independent visits that share a title or timestamp.
 - Made live tab loading significantly faster by fetching Aside tab details in bulk.
 - Added total match counts to Search Aside's 25-item history preview.
 - Renamed the non-pinned tab section from "Other Tabs" to "Open Tabs" for clarity.
