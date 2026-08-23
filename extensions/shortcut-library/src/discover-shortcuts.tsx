@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, confirmAlert, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { platform } from "os";
 import { discoverMenuShortcuts } from "./scanner";
 import type { DiscoveredApp } from "./scanner";
 import { applyDiscovery, pairKey } from "./discover";
@@ -16,6 +17,18 @@ export default function Command() {
   const { pop } = useNavigation();
   const [state, setState] = useState<ScanState>();
   const [error, setError] = useState<string>();
+
+  const isMac = platform() === "darwin";
+  if (!isMac) {
+    return (
+      <List navigationTitle="Discover Shortcuts">
+        <List.EmptyView
+          title="Discover is macOS-only"
+          description="App menu shortcut scanning relies on macOS preferences. Use Import from JSON to bring shortcuts in here."
+        />
+      </List>
+    );
+  }
 
   useEffect(() => {
     let alive = true;

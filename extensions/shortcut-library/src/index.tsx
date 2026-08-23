@@ -12,7 +12,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { writeFileSync } from "fs";
-import { homedir } from "os";
+import { homedir, platform } from "os";
 import { join } from "path";
 import { useState } from "react";
 import { usePromise } from "@raycast/utils";
@@ -33,6 +33,7 @@ export default function Command() {
   const tagColors = buildTagColors(shortcuts);
 
   const reload = revalidate;
+  const isMac = platform() === "darwin";
 
   const visible =
     filter === "all"
@@ -81,7 +82,7 @@ export default function Command() {
                 target={<ShortcutForm mutate={reload} />}
               />
               <Action.Push title="Import from JSON…" target={<ImportForm mutate={reload} />} />
-              <Action.Push title="Discover Shortcuts" target={<DiscoverShortcuts />} />
+              {isMac && <Action.Push title="Discover Shortcuts" target={<DiscoverShortcuts />} />}
             </ActionPanel>
           }
         />
@@ -114,12 +115,15 @@ export default function Command() {
                         <Action title="Duplicate Shortcut" onAction={() => duplicateShortcut(s, reload)} />
                         <Action
                           title="Delete Shortcut"
-                          shortcut={{ key: "x", modifiers: ["ctrl"] }}
+                          shortcut={{
+                            macOS: { key: "x", modifiers: ["ctrl"] },
+                            Windows: { key: "delete", modifiers: ["shift"] },
+                          }}
                           style={Action.Style.Destructive}
                           onAction={() => deleteShortcut(s.id, s.title, reload)}
                         />
                         <ActionPanel.Section>
-                          <Action.Push title="Discover Shortcuts" target={<DiscoverShortcuts />} />
+                          {isMac && <Action.Push title="Discover Shortcuts" target={<DiscoverShortcuts />} />}
                           <Action.Push title="Import from JSON…" target={<ImportForm mutate={reload} />} />
                           <Action.CopyToClipboard title="Copy All as Markdown" content={toMarkdown(shortcuts)} />
                           <Action title="Export to ~/Downloads" onAction={() => exportToDownloads(shortcuts)} />
