@@ -8,6 +8,7 @@ import {
   acquireInstallLock,
   dbPath,
   insertEntries,
+  installLockPath,
   lookup,
   openDb,
   releaseInstallLock,
@@ -27,13 +28,14 @@ test("remove deletes the database files when no install is running", async () =>
   assert.equal(existsSync(dbPath(dir)), false);
   assert.equal(existsSync(dbPath(dir) + "-wal"), false);
   assert.equal(existsSync(dbPath(dir) + "-shm"), false);
+  assert.equal(existsSync(installLockPath(dir)), false, "lock released");
 });
 
 test("remove refuses while an install holds the lock", async () => {
   const dir = await mkdtemp(join(tmpdir(), "trex-rm-lock-"));
   const installer = openDb(dbPath(dir));
   await insertEntries(installer, "syn", "wordnet", [["run", ["sprint"]]]);
-  assert.equal(acquireInstallLock(installer), true);
+  assert.equal(acquireInstallLock(dir), true);
 
   await assert.rejects(
     () => removeOfflineData(dir),
@@ -47,7 +49,7 @@ test("remove refuses while an install holds the lock", async () => {
     "in-flight install still has its file",
   );
 
-  releaseInstallLock(installer);
+  releaseInstallLock(dir);
   installer.close();
   await removeOfflineData(dir);
   assert.equal(existsSync(dbPath(dir)), false, "free to delete once released");

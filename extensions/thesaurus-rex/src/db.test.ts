@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -9,6 +9,7 @@ import {
   dbPath,
   getMeta,
   insertEntries,
+  installLockPath,
   lookup,
   openDb,
   releaseInstallLock,
@@ -178,15 +179,40 @@ test("meta survives and overwrites", async () => {
   assert.equal(getMeta(db, "syn:source"), "https://example.test/b");
 });
 
-test("only one install holds the lock, and a stale one is taken over", async () => {
-  const db = await freshDb();
-  assert.equal(acquireInstallLock(db), true);
-  assert.equal(acquireInstallLock(db), false, "a second install is refused");
+test("only one install holds the lock, and a dead holder is taken over", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "trex-lock-"));
+  assert.equal(acquireInstallLock(dir), true);
+  assert.equal(acquireInstallLock(dir), false, "a second install is refused");
 
-  releaseInstallLock(db);
-  assert.equal(acquireInstallLock(db), true, "released, so free again");
+  releaseInstallLock(dir);
+  assert.equal(acquireInstallLock(dir), true, "released, so free again");
+  releaseInstallLock(dir);
 
-  // a crash mid-install leaves the row behind: it expires rather than blocking forever
-  setMeta(db, "install:lock", String(Date.now() - 16 * 60_000));
-  assert.equal(acquireInstallLock(db), true, "stale lock taken over");
+  // a crash mid-install leaves the file behind: the pid is gone, so it is free
+  const dead = 2_147_483_647;
+  try {
+    process.kill(dead, 0);
+  } catch {
+    await writeFile(installLockPath(dir), String(dead));
+    assert.equal(acquireInstallLock(dir), true, "dead holder taken over");
+    releaseInstallLock(dir);
+  }
+});
+
+test("unlinking the database does not drop the install lock", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "trex-lock-unlink-"));
+  const path = dbPath(dir);
+  openDb(path).close();
+  assert.equal(acquireInstallLock(dir), true);
+
+  await rm(path, { force: true });
+  await rm(path + "-wal", { force: true });
+  await rm(path + "-shm", { force: true });
+
+  assert.equal(
+    acquireInstallLock(dir),
+    false,
+    "lock lives beside the database, so deletion cannot drop it",
+  );
+  releaseInstallLock(dir);
 });

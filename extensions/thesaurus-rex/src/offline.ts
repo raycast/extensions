@@ -85,33 +85,26 @@ export async function downloadDatasets(
   onBytes?: (bytes: number) => void,
   signal?: AbortSignal,
 ): Promise<{ synonyms: number; antonyms: number; definitions: number }> {
-  const handle = db(dir);
-  if (!acquireInstallLock(handle))
+  if (!acquireInstallLock(dir))
     throw new Error("A dictionary download is already running");
   try {
-    return await ingestOewn(handle, signal, onBytes);
+    return await ingestOewn(db(dir), signal, onBytes);
   } finally {
-    releaseInstallLock(handle);
+    releaseInstallLock(dir);
   }
 }
 
 export async function removeOfflineData(dir: string): Promise<void> {
-  const path = dbPath(dir);
-  if (existsSync(path)) {
-    // The lock lives in the file, so we open before unlinking. A second connection,
-    // not `handle`: downloadDatasets may already hold that one in this process, and
-    // closing it would tear down an install we are about to refuse.
-    const connection = openDb(path);
-    try {
-      if (!acquireInstallLock(connection))
-        throw new Error("A dictionary download is already running");
-    } finally {
-      connection.close();
+  if (!acquireInstallLock(dir))
+    throw new Error("A dictionary download is already running");
+  try {
+    handle?.close();
+    handle = undefined;
+    const path = dbPath(dir);
+    for (const suffix of ["-wal", "-shm", ""]) {
+      await rm(path + suffix, { force: true });
     }
-  }
-  handle?.close();
-  handle = undefined;
-  for (const suffix of ["", "-wal", "-shm"]) {
-    await rm(path + suffix, { force: true });
+  } finally {
+    releaseInstallLock(dir);
   }
 }

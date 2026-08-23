@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { rmSync } from "node:fs";
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 export type Kind = "syn" | "ant" | "def" | "pro";
@@ -195,33 +195,52 @@ function undoubleConsonant(stem: string): string | undefined {
     : undefined;
 }
 
-const LOCK_KEY = "install:lock";
-/** Longer than the download timeout plus a build, so a real install is never evicted. */
-const LOCK_STALE_MS = 15 * 60_000;
+const INSTALL_LOCK = "offline.install.lock";
+
+export function installLockPath(dir: string): string {
+  return join(dir, INSTALL_LOCK);
+}
 
 /**
  * Every command runs in its own process against one database, so two of them can start
  * an install at the same time — same file, same fixed staging table names. The winner
- * proceeds; the loser is told rather than left to collide over SQLite locks. A lock left
- * behind by a crash expires.
+ * proceeds; the loser is told rather than left to collide over SQLite locks.
+ *
+ * Sibling of the database, not a row in it: deletion unlinks the db, and a lock that
+ * lived there would vanish with the first `rm`, leaving WAL/SHM cleanup free to hit a
+ * replacement. The file holds a pid, so a live parse cannot expire, and a crash (a pid
+ * that is gone) does not block the next attempt forever.
  */
-export function acquireInstallLock(db: DatabaseSync): boolean {
-  db.exec("BEGIN IMMEDIATE");
+export function acquireInstallLock(dir: string): boolean {
+  const path = installLockPath(dir);
+  if (tryLock(path)) return true;
+  if (lockIsHeld(path)) return false;
+  rmSync(path, { force: true });
+  return tryLock(path);
+}
+
+function tryLock(path: string): boolean {
   try {
-    const held = Number(getMeta(db, LOCK_KEY) ?? 0);
-    if (held && Date.now() - held < LOCK_STALE_MS) {
-      db.exec("COMMIT");
-      return false;
-    }
-    setMeta(db, LOCK_KEY, String(Date.now()));
-    db.exec("COMMIT");
+    writeFileSync(path, String(process.pid), { flag: "wx" });
     return true;
   } catch (error) {
-    db.exec("ROLLBACK");
+    if ((error as NodeJS.ErrnoException).code === "EEXIST") return false;
     throw error;
   }
 }
 
-export function releaseInstallLock(db: DatabaseSync): void {
-  db.prepare("DELETE FROM meta WHERE key = ?").run(LOCK_KEY);
+function lockIsHeld(path: string): boolean {
+  try {
+    const pid = Number(readFileSync(path, "utf8"));
+    if (!Number.isInteger(pid) || pid <= 0) return false;
+    process.kill(pid, 0); // existence check; does not signal
+    return true;
+  } catch (error) {
+    // EPERM: the process exists but we cannot signal it, so the lock is live.
+    return (error as NodeJS.ErrnoException).code === "EPERM";
+  }
+}
+
+export function releaseInstallLock(dir: string): void {
+  rmSync(installLockPath(dir), { force: true });
 }
