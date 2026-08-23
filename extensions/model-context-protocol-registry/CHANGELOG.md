@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add smart-me MCP Server] - 2026-08-23
+## [Add smart-me MCP Server] - {PR_MERGE_DATE}
 
 Add smart-me to the official registry, giving AI assistants access to the smart-me energy platform: live meter readings, quarter-hourly load profiles and daily series, EV charging stations with their sessions and load-management groups, and the tariffs, invoice positions and ZEV (tenant) billing of a property. The remote Streamable HTTP server uses smart-me OAuth sign-in through an `mcp-remote` bridge.
 
