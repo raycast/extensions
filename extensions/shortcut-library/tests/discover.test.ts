@@ -119,3 +119,16 @@ test("applyDiscovery sweep spares protected categories", () => {
   assert.deepEqual(removed.map((s) => s.title), ["Zombie"]);
   assert.ok(next.some((s) => s.title === "Sidebar"), "protected category survives sweep");
 });
+
+test("applyDiscovery sweep spares entries matched by either bundle id or display name", () => {
+  // A failed scan protects by the stable bundle id AND the resolved display name,
+  // so a stored entry using either identity survives the sweep (Greptile issue:
+  // display name resolution flips between scans and could orphan stored entries).
+  const byBundle = normalizeShortcut({ category: "com.example.Terminal", title: "Sidebar", keys: "Cmd + Shift + S", source: SOURCE_DISCOVER });
+  const byName = normalizeShortcut({ category: "Terminal", title: "Zoom", keys: "Cmd + =", source: SOURCE_DISCOVER });
+
+  const { next, removed } = applyDiscovery([byBundle, byName], [], true, ["com.example.Terminal", "Terminal"]);
+
+  assert.deepEqual(removed, []);
+  assert.equal(next.length, 2);
+});

@@ -73,7 +73,14 @@ export async function discoverMenuShortcuts(): Promise<ScanResult> {
 
   const apps: DiscoveredApp[] = [];
   const failedApps = new Set<string>();
-  for (const id of prefilterFails) failedApps.add(await resolveAppName(id, id));
+  // Protect by both the stable bundle id and the resolved display name: a scan can
+  // resolve the display name in one run but fall back to the bundle id in another
+  // (Spotlight flakiness), so protecting by just one lets the other identity slip
+  // through and the sweep delete valid stored entries.
+  for (const id of prefilterFails) {
+    failedApps.add(id);
+    failedApps.add(await resolveAppName(id, id));
+  }
 
   for (const path of hits) {
     const fallbackName = basename(path, ".plist");
@@ -83,7 +90,9 @@ export async function discoverMenuShortcuts(): Promise<ScanResult> {
       if (shortcuts.length > 0 && shortcuts[0].category) apps.push({ app: shortcuts[0].category, shortcuts });
     } catch {
       // unreadable plist → skip domain, but remember its category so Import All
-      // won't treat the omission as a removal and delete valid stored entries
+      // won't treat the omission as a removal and delete valid stored entries.
+      // Protect by bundle id too, matching the prefilter path above.
+      failedApps.add(fallbackName);
       failedApps.add(await resolveAppName(fallbackName, fallbackName));
     }
   }
