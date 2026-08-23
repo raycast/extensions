@@ -419,26 +419,52 @@ export function getTithiAtInstant(jd: number): Tithi {
 }
 
 /**
- * Tithi for the Nepali calendar day containing the given date, evaluated at
- * Kathmandu sunrise per panchang convention.
+ * Tithi for an explicit Gregorian calendar date, evaluated at Kathmandu
+ * sunrise per panchang convention.
+ *
+ * Takes calendar components rather than a Date so the result cannot shift
+ * with the host's timezone.
+ */
+export function getTithiForGregorian(
+  year: number,
+  month: number,
+  day: number,
+): Tithi {
+  return getTithiAtInstant(kathmanduSunriseJd(year, month, day));
+}
+
+/**
+ * Tithi for a Bikram Sambat date.
+ *
+ * bsToAd returns a host-local date whose *local* components are the intended
+ * calendar date, so they are read directly. Converting through UTC here would
+ * select the previous day on any host east of NPT (+05:45).
+ */
+export function getTithiForBsDate(bs: BsDate): Tithi {
+  const ad = bsToAd(bs.year, bs.month, bs.day);
+  return getTithiForGregorian(
+    ad.getFullYear(),
+    ad.getMonth() + 1,
+    ad.getDate(),
+  );
+}
+
+/**
+ * Tithi for the Nepali day in progress at the given instant.
+ *
+ * Unlike getTithiForBsDate this genuinely is a point in time, so it is shifted
+ * into Kathmandu's offset to find which Nepali calendar day is current there.
  */
 export function getTithiForDate(date: Date): Tithi {
-  // Read the date as it stands on the clock in Kathmandu, not the host's zone.
   const npt = new Date(date.getTime() + NPT_OFFSET_MINUTES * 60000);
-  const sunriseJd = kathmanduSunriseJd(
+  return getTithiForGregorian(
     npt.getUTCFullYear(),
     npt.getUTCMonth() + 1,
     npt.getUTCDate(),
   );
-  return getTithiAtInstant(sunriseJd);
 }
 
-/** Tithi for a Bikram Sambat date. */
-export function getTithiForBsDate(bs: BsDate): Tithi {
-  return getTithiForDate(bsToAd(bs.year, bs.month, bs.day));
-}
-
-/** Tithi for today. */
+/** Tithi for the Nepali day currently in progress in Kathmandu. */
 export function getCurrentTithi(): Tithi {
   return getTithiForDate(new Date());
 }

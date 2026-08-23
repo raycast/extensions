@@ -268,6 +268,20 @@ function daysSinceRefAd(date: Date): number {
  */
 export function adToBs(adYear: number, adMonth: number, adDay: number): BsDate {
   const inputDate = new Date(adYear, adMonth - 1, adDay);
+
+  // The Date constructor rolls impossible dates forward — 31 Feb becomes
+  // 2 Mar — which would yield a plausible but wrong BS result. Reject any
+  // input that did not survive the round trip unchanged.
+  if (
+    inputDate.getFullYear() !== adYear ||
+    inputDate.getMonth() !== adMonth - 1 ||
+    inputDate.getDate() !== adDay
+  ) {
+    throw new Error(
+      `${adDay}/${adMonth}/${adYear} is not a real date in the Gregorian calendar`,
+    );
+  }
+
   let totalDays = daysSinceRefAd(inputDate);
 
   if (totalDays < 0) {

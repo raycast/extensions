@@ -27,7 +27,15 @@ export function generateCalendarSvg(
     prevMonth = 12;
     prevYear--;
   }
-  const daysInPrevMonth = getBsMonthDays(prevYear, prevMonth);
+  // At the very start of the supported range there is no previous month to
+  // measure. Those cells are greyed-out filler, so fall back to a nominal
+  // length rather than letting the lookup throw mid-render.
+  let daysInPrevMonth: number;
+  try {
+    daysInPrevMonth = getBsMonthDays(prevYear, prevMonth);
+  } catch {
+    daysInPrevMonth = 30;
+  }
 
   const width = 640;
   const height = 480;

@@ -22,6 +22,7 @@ import {
   formatAdDate,
   getBsDayOfWeek,
   getBsMonthDays,
+  getSupportedRange,
   WEEKDAY_NAMES_NP,
   BS_MONTH_NAMES,
   BsDate,
@@ -89,8 +90,12 @@ function ConverterForm() {
         const ad = bsToAd(y, m, d);
         setResult(formatAdDate(ad));
       }
-    } catch {
-      setResult("Invalid date format. Use DD/MM/YYYY");
+    } catch (err) {
+      setResult(
+        err instanceof Error && err.message
+          ? err.message
+          : "Invalid date format. Use DD/MM/YYYY",
+      );
     }
   };
 
@@ -297,6 +302,10 @@ export default function Dashboard() {
   const tithi = getTithiForBsDate(today);
   const adDate = bsToAd(today.year, today.month, today.day);
 
+  // The BS month-length table only covers a fixed span of years; stepping
+  // outside it throws while rendering, so navigation stops at the edges.
+  const { minYear, maxYear } = getSupportedRange();
+
   const nextMonth = () => {
     setViewDate((prev) => {
       let m = prev.month + 1;
@@ -305,6 +314,7 @@ export default function Dashboard() {
         m = 1;
         y++;
       }
+      if (y > maxYear) return prev;
       return { year: y, month: m, day: 1 };
     });
   };
@@ -317,6 +327,7 @@ export default function Dashboard() {
         m = 12;
         y--;
       }
+      if (y < minYear) return prev;
       return { year: y, month: m, day: 1 };
     });
   };
