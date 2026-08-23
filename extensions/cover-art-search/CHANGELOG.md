@@ -1,6 +1,6 @@
 # Changelog
 
-## [Capacities Integration] - {PR_MERGE_DATE}
+## [Capacities Integration] - 2026-08-23
 
 - Added an "Add as Cover in Capacities" action that uploads a result's cover art to Capacities and links it to the matching object
 - The Capacities object type(s), cover property, and image collection are all configurable by name in preferences — no internal IDs needed
