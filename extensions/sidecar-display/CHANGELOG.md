@@ -1,6 +1,6 @@
 # Sidecar Display Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-23
 
 - Connect and disconnect an iPad over Sidecar from Raycast, forcing it to **extend** (or mirror) without ever writing or moving the main display.
 - Drives Sidecar through a bundled **Swift helper** (macOS SidecarCore + CoreGraphics), so it needs nothing else installed.
