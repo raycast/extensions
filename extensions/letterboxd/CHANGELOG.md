@@ -1,6 +1,6 @@
 # letterboxd Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-08-23
 
 - Added paginated movie search with recent searches and clearer empty states
 - Added ratings, runtimes, Top 250 positions, genres, and IMDb/TMDB actions to search results
