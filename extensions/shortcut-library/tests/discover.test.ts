@@ -109,26 +109,29 @@ test("applyDiscovery skips exact duplicates already present", () => {
   assert.equal(next.length, 1);
 });
 
-test("applyDiscovery sweep spares protected categories", () => {
+test("applyDiscovery partial scan never sweeps discover-sourced entries", () => {
   const up = normalizeShortcut({ category: "UpNote", title: "Sidebar", keys: "Cmd + Shift + S", source: SOURCE_DISCOVER });
-  const zombie = normalizeShortcut({ category: "OldApp", title: "Zombie", keys: "Cmd + Z", source: SOURCE_DISCOVER });
-  // UpNote's plist was unreadable this run and is protected; OldApp is not.
-  const incoming = [normalizeShortcut({ category: "OldApp", title: "Zombie", keys: "Cmd + Shift + Z" })];
-  const { next, removed } = applyDiscovery([up, zombie], incoming, true, ["UpNote"]);
-
-  assert.deepEqual(removed.map((s) => s.title), ["Zombie"]);
-  assert.ok(next.some((s) => s.title === "Sidebar"), "protected category survives sweep");
-});
-
-test("applyDiscovery sweep spares entries matched by either bundle id or display name", () => {
-  // A failed scan protects by the stable bundle id AND the resolved display name,
-  // so a stored entry using either identity survives the sweep (Greptile issue:
-  // display name resolution flips between scans and could orphan stored entries).
-  const byBundle = normalizeShortcut({ category: "com.example.Terminal", title: "Sidebar", keys: "Cmd + Shift + S", source: SOURCE_DISCOVER });
-  const byName = normalizeShortcut({ category: "Terminal", title: "Zoom", keys: "Cmd + =", source: SOURCE_DISCOVER });
-
-  const { next, removed } = applyDiscovery([byBundle, byName], [], true, ["com.example.Terminal", "Terminal"]);
+  const other = normalizeShortcut({ category: "Terminal", title: "Zoom", keys: "Cmd + =", source: SOURCE_DISCOVER });
+  const manual = normalizeShortcut({ category: "Manual", title: "Handmade", keys: "Hyper + H" });
+  // One app unreadable → keepCategories is populated. A broken Spotlight run may
+  // have stored a display name that differs from the bundle id we can see now, so
+  // the destructive sweep is skipped entirely rather than risk deleting valid data.
+  const incoming = [normalizeShortcut({ category: "Terminal", title: "Zoom", keys: "Cmd + Shift + Z" })];
+  const { next, removed } = applyDiscovery([up, other, manual], incoming, true, ["com.example.UpNote"]);
 
   assert.deepEqual(removed, []);
-  assert.equal(next.length, 2);
+  assert.ok(next.some((s) => s.title === "Sidebar"), "unreadable app entry survives");
+  assert.ok(next.some((s) => s.title === "Zoom"), "other discover entry survives");
+  assert.ok(next.some((s) => s.keys === "Cmd + Shift + Z"), "re-keyed discover entry still imported");
+  assert.equal(next.length, 4);
+});
+
+test("applyDiscovery sweep removes outdated entries only on a fully healthy scan", () => {
+  const stale = normalizeShortcut({ category: "Terminal", title: "Old Menu", keys: "Cmd + O", source: SOURCE_DISCOVER });
+  const incoming = [normalizeShortcut({ category: "Terminal", title: "New Menu", keys: "Cmd + N" })];
+  // No failed apps → sweep runs and drops the vanished discover entry.
+  const { next, removed } = applyDiscovery([stale], incoming, true);
+
+  assert.deepEqual(removed.map((s) => s.title), ["Old Menu"]);
+  assert.ok(next.some((s) => s.title === "New Menu"));
 });

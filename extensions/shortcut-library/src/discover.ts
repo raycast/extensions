@@ -90,9 +90,10 @@ export interface DiscoveryOutcome {
 /**
  * sweep=true ("Import All"): replaces every discover-sourced entry that no longer
  * matches the scan exactly, so vanished or re-keyed app customizations are cleaned up.
- * `keepCategories` protects discover-sourced entries under those categories from the
- * sweep (used for apps whose prefs were unreadable, so a partial scan can't erase
- * valid stored shortcuts).
+ * `keepCategories` protects discover-sourced entries when part of the scan failed:
+ * once any app is unreadable we cannot reliably match its stored identity (a broken
+ * Spotlight run resolves to a bundle id where a healthy run stored a display name),
+ * so the destructive sweep is skipped entirely rather than risk deleting valid data.
  * sweep=false (single import): only touches discover-sourced entries sharing the
  * incoming items' category+title.
  */
@@ -105,11 +106,8 @@ export function applyDiscovery(
   let keep: Shortcut[];
   if (sweep) {
     const fresh = new Set(incoming.map(fullKey));
-    const safe = keepCategories ? new Set([...keepCategories].map(normalizeKey)) : new Set<string>();
-    keep = existing.filter(
-      (e) =>
-        e.source !== SOURCE_DISCOVER || fresh.has(fullKey(e)) || safe.has(normalizeKey(e.category ?? UNCATEGORIZED))
-    );
+    const partial = keepCategories ? hasAny(keepCategories) : false;
+    keep = existing.filter((e) => e.source !== SOURCE_DISCOVER || partial || fresh.has(fullKey(e)));
   } else {
     const targets = new Set(incoming.map(pairKey));
     keep = existing.filter((e) => e.source !== SOURCE_DISCOVER || !targets.has(pairKey(e)));
@@ -120,6 +118,7 @@ export function applyDiscovery(
   return { next: [...keep, ...added], added, removed };
 }
 
-function normalizeKey(v: string): string {
-  return v.toLowerCase().replace(/\s+/g, " ").trim();
+function hasAny(it: Iterable<string>): boolean {
+  for (const _ of it) return true;
+  return false;
 }
