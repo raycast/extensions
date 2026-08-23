@@ -67,11 +67,22 @@ env -i HOME="$HOME" PATH="/usr/bin:/bin" ~/.local/bin/crew-raycast --version
 
 </details>
 
+## Manual Installation
+
+```sh
+git clone https://github.com/shubhsherl/groundcrew-raycast.git
+cd groundcrew-raycast
+npm ci
+npm run build
+```
+
+Then set your preferences under [Configuration](#configuration). To update later, `git pull` and re-run `npm run build`. Remove it anytime from Raycast → Extensions.
+
 ## Development
 
 ```sh
 npm install
-npm run dev     # ray develop
-npm run build   # produce and validate a distribution build
+npm run dev     # ray develop — hot-reloads a dev copy while running
+npm run build   # ray build — compiles and installs the extension into Raycast
 npm test        # vitest
 ```
