@@ -1,6 +1,6 @@
 # Mint Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-23
 
 - View Mint disk status, recent activity, and managed folders.
 - View the seven most recent reclaimable-space and free-space trend points.
