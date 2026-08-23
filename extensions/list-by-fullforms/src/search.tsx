@@ -219,15 +219,29 @@ export default function SearchCommand() {
     ? `${apiBase()}/api/v1/recent?limit=10`
     : `${apiBase()}/api/v1/recent?limit=10&workspace_id=${workspaceId}`;
 
+  // NO keepPreviousData here, deliberately, unlike the search fetch
+  // above. That flag keeps the prior arguments' results on screen while
+  // a new request lands, which is right for search (the URL changes on
+  // every keystroke, so dropping data mid-type would flicker the whole
+  // list). This query's URL changes on exactly ONE event: a workspace
+  // switch. Keeping the previous data there would render the OLD
+  // workspace's entries under the NEW workspace selection, and since
+  // these rows carry live star / edit / note / report actions, the user
+  // could act on rows that aren't in the scope they're looking at.
+  // Without the flag, a switch to a workspace not yet loaded this
+  // session shows the loading state instead (isLoading covers it), and
+  // the two common paths stay flicker-free anyway because useFetch
+  // caches per arguments: clearing the search bar re-reads the same URL
+  // from cache, as does returning to a workspace viewed earlier.
   const recentQuery = useFetch<RecentEntriesResponse>(recentUrl, {
     headers: authHeaders(),
     execute: !trimmed,
-    keepPreviousData: true,
     onError: () => {},
   });
 
-  // Array.isArray guard per the house convention: keepPreviousData can
-  // briefly serve a cached pre-migration shape across a server deploy.
+  // Array.isArray guard per the house convention: useFetch's cache
+  // persists between command runs, so the first paint after a server
+  // redeploy can briefly serve a cached pre-migration shape.
   const recentEntries =
     !trimmed && Array.isArray(recentQuery.data?.entries)
       ? recentQuery.data.entries
