@@ -209,35 +209,77 @@ export function installLockPath(dir: string): string {
  *
  * Sibling of the database, not a row in it: deletion unlinks the db, and a lock that
  * lived there would vanish with the first `rm`. The holder is an open write
- * transaction: a crash drops it, and two reclaimers cannot both unlink-and-create
- * because there is nothing to steal.
+ * transaction: a crash drops it. Reclaiming leftover junk re-checks before moving
+ * the file, and puts it back if the inode is already locked, so two reclaimers
+ * cannot both delete a live replacement and create a second lock.
  */
 export function acquireInstallLock(dir: string): boolean {
   const path = installLockPath(dir);
   if (heldLocks.has(path)) return false;
   try {
-    heldLocks.set(path, beginLock(path));
-    return true;
+    return adoptLock(path);
   } catch (error) {
     if (isBusy(error)) return false;
     if (!isCorrupt(error)) throw error;
-    // leftover pid-text file from an older lock, or a torn db. Rename, don't
-    // unlink: two reclaimers would otherwise delete each other's replacement.
-    const stale = `${path}.stale`;
-    rmSync(stale, { force: true });
+    return reclaimCorrupt(path);
+  }
+}
+
+function adoptLock(path: string): boolean {
+  heldLocks.set(path, beginLock(path));
+  return true;
+}
+
+function tryAdopt(path: string): boolean {
+  try {
+    return adoptLock(path);
+  } catch (error) {
+    if (isBusy(error)) return false;
+    throw error;
+  }
+}
+
+function reclaimCorrupt(path: string): boolean {
+  try {
+    return adoptLock(path);
+  } catch (error) {
+    if (isBusy(error)) return false;
+    if (!isCorrupt(error)) throw error;
+  }
+
+  const stale = `${path}.${process.pid}.stale`;
+  try {
+    renameSync(path, stale);
+  } catch (move) {
+    const code = (move as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") return tryAdopt(path);
+    if (code === "EBUSY" || code === "EPERM" || code === "EACCES") return false;
+    throw move;
+  }
+
+  try {
+    // Probe the inode we moved. Busy means we took a live lock off the
+    // well-known path; put it back and give up.
+    const db = beginLock(stale);
+    db.close();
     try {
-      renameSync(path, stale);
-    } catch (move) {
-      if ((move as NodeJS.ErrnoException).code !== "ENOENT") throw move;
+      renameSync(stale, path);
+    } catch {
+      rmSync(stale, { force: true });
     }
+    return tryAdopt(path);
+  } catch (error) {
+    if (isBusy(error)) {
+      try {
+        renameSync(stale, path);
+      } catch {
+        /* the holder still has the inode */
+      }
+      return false;
+    }
+    if (!isCorrupt(error)) throw error;
     rmSync(stale, { force: true });
-    try {
-      heldLocks.set(path, beginLock(path));
-      return true;
-    } catch (retry) {
-      if (isBusy(retry)) return false;
-      throw retry;
-    }
+    return tryAdopt(path);
   }
 }
 

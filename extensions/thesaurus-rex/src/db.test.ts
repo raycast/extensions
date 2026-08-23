@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -214,6 +215,11 @@ test("only one install holds the lock, and a dropped connection is taken over", 
     acquireInstallLock(dir),
     true,
     "leftover non-db lock is replaced",
+  );
+  assert.equal(
+    existsSync(`${installLockPath(dir)}.${process.pid}.stale`),
+    false,
+    "junk is discarded, not left beside a live lock",
   );
   releaseInstallLock(dir);
 });
