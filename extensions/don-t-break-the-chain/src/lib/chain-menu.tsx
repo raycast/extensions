@@ -8,6 +8,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useRef } from "react";
 import {
   MonthKey,
   addMonths,
@@ -19,7 +20,7 @@ import {
   parseMonthKey,
 } from "./month";
 import { chainIndex, chainName, chainPreferences } from "./preferences";
-import { ChainData, EMPTY_CHAIN, clearMonth, loadChain, saveChain, stampRevision, toggleDay } from "./store";
+import { ChainData, EMPTY_CHAIN, clearMonth, loadChain, saveChain, toggleDay } from "./store";
 import { calendarIcon } from "./svg";
 import { dayGlyph, renderWeekGlyphs } from "./text";
 
@@ -55,19 +56,28 @@ export default function ChainMenuBar() {
   const marked = new Set(chain.marks[viewMonth] ?? []);
   const streak = currentStreak(chain.marks, today);
 
-  async function update(next: ChainData) {
-    // Stamp before saving so the copy held in state carries the new revision,
-    // and the save after it is guaranteed to stamp higher still.
-    const stamped = stampRevision(next);
-    await mutate(saveChain(id, stamped), {
-      optimisticUpdate: () => stamped,
-      rollbackOnError: true,
-      shouldRevalidateAfter: false,
-    });
+  const writes = useRef<Promise<unknown>>(Promise.resolve());
+
+  async function update(apply: (current: ChainData) => ChainData) {
+    // Queue so two menu actions cannot both snapshot the same render and save
+    // over each other. Each save then applies against the latest persisted chain.
+    const run = () =>
+      mutate(saveChain(id, apply), {
+        optimisticUpdate: (current) => apply(current ?? EMPTY_CHAIN),
+        rollbackOnError: true,
+        shouldRevalidateAfter: false,
+      });
+
+    const pending = writes.current.then(run, run);
+    writes.current = pending.then(
+      () => undefined,
+      () => undefined,
+    );
+    await pending;
   }
 
-  const goTo = (month: MonthKey) => update({ ...chain, viewMonth: month });
-  const toggle = (day: number) => update(toggleDay({ ...chain, viewMonth }, viewMonth, day));
+  const goTo = (month: MonthKey) => update((current) => ({ ...current, viewMonth: month }));
+  const toggle = (day: number) => update((current) => toggleDay({ ...current, viewMonth }, viewMonth, day));
 
   const { year, month } = parseMonthKey(viewMonth);
   const isCurrentMonth = viewMonth === thisMonth;
@@ -138,7 +148,7 @@ export default function ChainMenuBar() {
           <MenuBarExtra.Item
             title="Yes, Clear Every Cross in This Month"
             icon={Icon.Trash}
-            onAction={() => update(clearMonth({ ...chain, viewMonth }, viewMonth))}
+            onAction={() => update((current) => clearMonth({ ...current, viewMonth }, viewMonth))}
           />
         </MenuBarExtra.Submenu>
       </MenuBarExtra.Section>

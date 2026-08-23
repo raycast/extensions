@@ -67,19 +67,12 @@ function merge(primary: ChainData | undefined, backup: ChainData | undefined): C
   if (!backup) return primary;
 
   // A save stamps both stores with the same revision, so a mismatch means one
-  // of the two writes did not land. The newer store is authoritative.
+  // of the two writes did not land. The newer store is taken whole — unioning
+  // equal or older marks would resurrect days the newer snapshot deleted.
   const primaryRevision = primary.revision ?? 0;
   const backupRevision = backup.revision ?? 0;
-  if (primaryRevision > backupRevision) return primary;
   if (backupRevision > primaryRevision) return backup;
-
-  // Equal revisions: the same save, or history written before revisions
-  // existed. Union, so a store that was wiped rather than written still heals.
-  const marks: Record<MonthKey, number[]> = { ...primary.marks };
-  for (const [month, days] of Object.entries(backup.marks)) {
-    marks[month] = [...new Set([...(marks[month] ?? []), ...days])].sort((a, b) => a - b);
-  }
-  return { marks, viewMonth: primary.viewMonth ?? backup.viewMonth, revision: primary.revision };
+  return primary;
 }
 
 export async function loadChain(id: string): Promise<ChainData> {
@@ -99,13 +92,27 @@ function noneOnError(): undefined {
 
 /**
  * Stamp a save with the next revision. Uses the clock so the number is
- * meaningful, but never goes backwards even if the clock does.
+ * meaningful, but never goes backwards even if the clock does, and never
+ * repeats within the same millisecond.
  */
-export function stampRevision(data: ChainData): ChainData {
-  return { ...data, revision: Math.max(Date.now(), (data.revision ?? 0) + 1) };
+let lastRevision = 0;
+
+function stampRevision(data: ChainData): ChainData {
+  const next = Math.max(Date.now(), (data.revision ?? 0) + 1, lastRevision + 1);
+  lastRevision = next;
+  return { ...data, revision: next };
 }
 
-export async function saveChain(id: string, data: ChainData): Promise<void> {
+const pendingSaves = new Map<string, Promise<unknown>>();
+
+function enqueueSave<T>(id: string, work: () => Promise<T>): Promise<T> {
+  const previous = pendingSaves.get(id) ?? Promise.resolve();
+  const next = previous.then(work, work);
+  pendingSaves.set(id, next);
+  return next;
+}
+
+async function persistChain(id: string, data: ChainData): Promise<void> {
   const json = JSON.stringify(data);
 
   // The file is the durable copy, so write it first: if it fails, LocalStorage
@@ -117,6 +124,19 @@ export async function saveChain(id: string, data: ChainData): Promise<void> {
   await fs.rename(temporary, chainFile(id));
 
   await LocalStorage.setItem(id, json);
+}
+
+/**
+ * Apply a mutation to the latest persisted chain, then write both stores.
+ * Callers pass an updater so two in-flight actions compose instead of each
+ * saving over the same rendered snapshot.
+ */
+export async function saveChain(id: string, apply: (current: ChainData) => ChainData): Promise<ChainData> {
+  return enqueueSave(id, async () => {
+    const stamped = stampRevision(apply(await loadChain(id)));
+    await persistChain(id, stamped);
+    return stamped;
+  });
 }
 
 export function toggleDay(data: ChainData, month: MonthKey, day: number): ChainData {
