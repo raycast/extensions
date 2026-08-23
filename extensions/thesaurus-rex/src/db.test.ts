@@ -179,24 +179,43 @@ test("meta survives and overwrites", async () => {
   assert.equal(getMeta(db, "syn:source"), "https://example.test/b");
 });
 
-test("only one install holds the lock, and a dead holder is taken over", async () => {
+test("only one install holds the lock, and a dropped connection is taken over", async () => {
   const dir = await mkdtemp(join(tmpdir(), "trex-lock-"));
   assert.equal(acquireInstallLock(dir), true);
   assert.equal(acquireInstallLock(dir), false, "a second install is refused");
+
+  const other = new DatabaseSync(installLockPath(dir));
+  other.exec("PRAGMA busy_timeout = 0");
+  assert.throws(
+    () => other.exec("BEGIN IMMEDIATE"),
+    /database is locked/,
+    "another connection cannot take a write lock while it is held",
+  );
+  other.close();
 
   releaseInstallLock(dir);
   assert.equal(acquireInstallLock(dir), true, "released, so free again");
   releaseInstallLock(dir);
 
-  // a crash mid-install leaves the file behind: the pid is gone, so it is free
-  const dead = 2_147_483_647;
-  try {
-    process.kill(dead, 0);
-  } catch {
-    await writeFile(installLockPath(dir), String(dead));
-    assert.equal(acquireInstallLock(dir), true, "dead holder taken over");
-    releaseInstallLock(dir);
-  }
+  // a crash mid-install closes the connection: the OS drops the lock
+  const crashed = new DatabaseSync(installLockPath(dir));
+  crashed.exec("PRAGMA busy_timeout = 0");
+  crashed.exec("BEGIN IMMEDIATE");
+  crashed.close();
+  assert.equal(
+    acquireInstallLock(dir),
+    true,
+    "closed connection releases the lock",
+  );
+  releaseInstallLock(dir);
+
+  await writeFile(installLockPath(dir), "12345");
+  assert.equal(
+    acquireInstallLock(dir),
+    true,
+    "leftover non-db lock is replaced",
+  );
+  releaseInstallLock(dir);
 });
 
 test("unlinking the database does not drop the install lock", async () => {

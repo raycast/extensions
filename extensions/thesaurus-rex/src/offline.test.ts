@@ -8,7 +8,6 @@ import {
   acquireInstallLock,
   dbPath,
   insertEntries,
-  installLockPath,
   lookup,
   openDb,
   releaseInstallLock,
@@ -28,7 +27,12 @@ test("remove deletes the database files when no install is running", async () =>
   assert.equal(existsSync(dbPath(dir)), false);
   assert.equal(existsSync(dbPath(dir) + "-wal"), false);
   assert.equal(existsSync(dbPath(dir) + "-shm"), false);
-  assert.equal(existsSync(installLockPath(dir)), false, "lock released");
+  assert.equal(
+    acquireInstallLock(dir),
+    true,
+    "lock released even if the sibling file remains",
+  );
+  releaseInstallLock(dir);
 });
 
 test("remove refuses while an install holds the lock", async () => {

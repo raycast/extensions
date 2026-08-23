@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { renameSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
 export type Kind = "syn" | "ant" | "def" | "pro";
@@ -196,6 +196,7 @@ function undoubleConsonant(stem: string): string | undefined {
 }
 
 const INSTALL_LOCK = "offline.install.lock";
+const heldLocks = new Map<string, DatabaseSync>();
 
 export function installLockPath(dir: string): string {
   return join(dir, INSTALL_LOCK);
@@ -207,40 +208,60 @@ export function installLockPath(dir: string): string {
  * proceeds; the loser is told rather than left to collide over SQLite locks.
  *
  * Sibling of the database, not a row in it: deletion unlinks the db, and a lock that
- * lived there would vanish with the first `rm`, leaving WAL/SHM cleanup free to hit a
- * replacement. The file holds a pid, so a live parse cannot expire, and a crash (a pid
- * that is gone) does not block the next attempt forever.
+ * lived there would vanish with the first `rm`. The holder is an open write
+ * transaction: a crash drops it, and two reclaimers cannot both unlink-and-create
+ * because there is nothing to steal.
  */
 export function acquireInstallLock(dir: string): boolean {
   const path = installLockPath(dir);
-  if (tryLock(path)) return true;
-  if (lockIsHeld(path)) return false;
-  rmSync(path, { force: true });
-  return tryLock(path);
-}
-
-function tryLock(path: string): boolean {
+  if (heldLocks.has(path)) return false;
   try {
-    writeFileSync(path, String(process.pid), { flag: "wx" });
+    heldLocks.set(path, beginLock(path));
     return true;
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "EEXIST") return false;
+    if (isBusy(error)) return false;
+    if (!isCorrupt(error)) throw error;
+    // leftover pid-text file from an older lock, or a torn db. Rename, don't
+    // unlink: two reclaimers would otherwise delete each other's replacement.
+    const stale = `${path}.stale`;
+    rmSync(stale, { force: true });
+    try {
+      renameSync(path, stale);
+    } catch (move) {
+      if ((move as NodeJS.ErrnoException).code !== "ENOENT") throw move;
+    }
+    rmSync(stale, { force: true });
+    try {
+      heldLocks.set(path, beginLock(path));
+      return true;
+    } catch (retry) {
+      if (isBusy(retry)) return false;
+      throw retry;
+    }
+  }
+}
+
+function beginLock(path: string): DatabaseSync {
+  const db = new DatabaseSync(path);
+  try {
+    db.exec("PRAGMA busy_timeout = 0");
+    db.exec("BEGIN IMMEDIATE");
+    return db;
+  } catch (error) {
+    db.close();
     throw error;
   }
 }
 
-function lockIsHeld(path: string): boolean {
-  try {
-    const pid = Number(readFileSync(path, "utf8"));
-    if (!Number.isInteger(pid) || pid <= 0) return false;
-    process.kill(pid, 0); // existence check; does not signal
-    return true;
-  } catch (error) {
-    // EPERM: the process exists but we cannot signal it, so the lock is live.
-    return (error as NodeJS.ErrnoException).code === "EPERM";
-  }
+function isBusy(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /database is locked|database table is locked/i.test(message);
 }
 
 export function releaseInstallLock(dir: string): void {
-  rmSync(installLockPath(dir), { force: true });
+  const path = installLockPath(dir);
+  const db = heldLocks.get(path);
+  if (!db) return;
+  heldLocks.delete(path);
+  db.close();
 }
