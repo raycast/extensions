@@ -10,13 +10,13 @@ The calendar is drawn, not written: seven columns, one cell per real day of the 
 
 Click the calendar in the menu bar to open it. Each week is a row of boxes; open a row and click a day to cross it off or clear it again.
 
-| Item | What it does |
-| --- | --- |
-| `☐ ☒ ☒ ☐ ☐ ☐ ☐` | One week. Open it to toggle an individual day. |
-| ◀︎ / ▶︎ | Step to the previous / next month. |
-| Cross Off Today | Toggles today without hunting for it (⌘T). |
-| Clear <Month> | Wipes every cross in the month on screen. Asks first. |
-| Export to Text File… | Writes every month of every chain to a `.txt` (⌘⇧E). |
+| Item                 | What it does                                          |
+| -------------------- | ----------------------------------------------------- |
+| `☐ ☒ ☒ ☐ ☐ ☐ ☐`      | One week. Open it to toggle an individual day.        |
+| ◀︎ / ▶︎                | Step to the previous / next month.                    |
+| Cross Off Today      | Toggles today without hunting for it (⌘T).            |
+| Clear <Month>        | Wipes every cross in the month on screen. Asks first. |
+| Export to Text File… | Writes every month of every chain to a `.txt` (⌘⇧E).  |
 
 ### Months don't roll over on their own
 
