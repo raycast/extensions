@@ -1,6 +1,6 @@
 # Is Agentic Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-23
 
 - Initial version of the Is Agentic extension.
 - Add detailed Is Agentic report views with score breakdowns, evidence, and recommendations.
