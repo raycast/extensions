@@ -1,0 +1,28 @@
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+.npmrc
+!.npmrc.example
+credentials*.json
+secrets*.json
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+
+# macOS and editor files
+.DS_Store
+.idea/
+.vscode/
+*.log
+*.swp
