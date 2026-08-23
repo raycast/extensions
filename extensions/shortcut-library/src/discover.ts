@@ -56,7 +56,7 @@ export function decodeKeyEquivalent(raw: string): string | null {
   return [...MODIFIER_ORDER.filter((m) => mods.has(m)), key].join(" + ");
 }
 
-export function parseAppPreferences(json: unknown, appName: string, bundleId?: string): Shortcut[] {
+export function parseAppPreferences(json: unknown, appName: string, sourceFile?: string): Shortcut[] {
   const prefs = (typeof json === "object" && json !== null ? json : {}) as Record<string, unknown>;
   const equivs = prefs.NSUserKeyEquivalents;
   if (typeof equivs !== "object" || equivs === null) return [];
@@ -67,7 +67,7 @@ export function parseAppPreferences(json: unknown, appName: string, bundleId?: s
     const title = rawTitle.trim();
     const keys = decodeKeyEquivalent(rawCode);
     if (!title || !keys) continue;
-    out.push(normalizeShortcut({ category: appName, title, keys, source: SOURCE_DISCOVER, bundleId }));
+    out.push(normalizeShortcut({ category: appName, title, keys, source: SOURCE_DISCOVER, sourceFile }));
   }
   return out.sort((a, b) => a.title.localeCompare(b.title));
 }
@@ -77,10 +77,6 @@ export function pairKey(s: Pick<Shortcut, "category" | "title">): string {
   return `${norm(s.category ?? UNCATEGORIZED)}|${norm(s.title)}`;
 }
 
-function fullKey(s: Shortcut): string {
-  return `${pairKey(s)}|${s.keys.toLowerCase().replace(/\s+/g, " ").trim()}`;
-}
-
 export interface DiscoveryOutcome {
   next: Shortcut[];
   added: Shortcut[];
@@ -88,30 +84,33 @@ export interface DiscoveryOutcome {
 }
 
 /**
- * sweep=true ("Import All"): replaces every discover-sourced entry that no longer
- * matches the scan exactly, so vanished or re-keyed app customizations are cleaned up.
- *
- * Swept apps are matched by their stable bundle id, because the display-name
- * category (derived from Spotlight) can flip between scans — a broken Spotlight run
- * falls back to the bundle id while a healthy run stored a display name. Entries
- * whose bundle id is in `keepBundleIds` (an unreadable plist this run) are never
- * removed; every successfully-scanned app is still swept normally, so a re-keyed
- * healthy app gets its stale row removed rather than coexisting with its replacement.
+ * sweep=true ("Import All"): removes a discover-sourced entry only when its own
+ * source file was positively re-read this run and the entry's title+keys are no
+ * longer present in that file. Provenance is the plist path, not the bundle id or
+ * display name: a bundle id can span several files (prefs dir + sandbox containers)
+ * whose read success differs per run, and the display-name category flips with
+ * Spotlight availability — either as an identity silently mis-attributes entries.
+ * Entries from files that were unreadable, absent, or user-detached are never
+ * removed by a scan.
  * sweep=false (single import): only touches discover-sourced entries sharing the
  * incoming items' category+title.
  */
-export function applyDiscovery(
-  existing: Shortcut[],
-  incoming: Shortcut[],
-  sweep: boolean,
-  keepBundleIds?: Iterable<string>
-): DiscoveryOutcome {
+export function applyDiscovery(existing: Shortcut[], incoming: Shortcut[], sweep: boolean): DiscoveryOutcome {
   let keep: Shortcut[];
   if (sweep) {
-    const fresh = new Set(incoming.map(fullKey));
-    const safe = keepBundleIds ? new Set([...keepBundleIds].map(normalizeKey)) : new Set<string>();
+    const freshByFile = new Map<string, Set<string>>();
+    for (const s of incoming) {
+      if (!s.sourceFile) continue;
+      let set = freshByFile.get(s.sourceFile);
+      if (!set) freshByFile.set(s.sourceFile, (set = new Set()));
+      set.add(entryKey(s));
+    }
     keep = existing.filter(
-      (e) => e.source !== SOURCE_DISCOVER || fresh.has(fullKey(e)) || safe.has(normalizeKey(e.bundleId ?? ""))
+      (e) =>
+        e.source !== SOURCE_DISCOVER ||
+        e.sourceFile === undefined ||
+        !freshByFile.has(e.sourceFile) ||
+        freshByFile.get(e.sourceFile)!.has(entryKey(e))
     );
   } else {
     const targets = new Set(incoming.map(pairKey));
@@ -121,6 +120,10 @@ export function applyDiscovery(
   const removed = existing.filter((e) => !keep.includes(e));
   const { added } = mergeShortcuts(keep, incoming);
   return { next: [...keep, ...added], added, removed };
+}
+
+function entryKey(s: Pick<Shortcut, "title" | "keys">): string {
+  return `${normalizeKey(s.title)}|${normalizeKey(s.keys)}`;
 }
 
 function normalizeKey(v: string): string {

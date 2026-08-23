@@ -60,46 +60,29 @@ async function resolveAppName(bundleId: string, fallback: string): Promise<strin
 
 export async function discoverMenuShortcuts(): Promise<ScanResult> {
   const hits: string[] = [];
-  const prefilterFails: string[] = [];
+  const failedFiles: string[] = [];
   for (const p of plistCandidates()) {
     try {
       if (readFileSync(p).includes(MARKER)) hits.push(p);
     } catch {
-      // prefilter unreadable → remember its category so a sweep doesn't treat the
-      // omission as a removal and delete valid stored entries for this app
-      prefilterFails.push(basename(p, ".plist"));
+      // unreadable at prefilter → its stored entries stay untouched by the sweep
+      failedFiles.push(p);
     }
   }
 
   const apps: DiscoveredApp[] = [];
-  const failedApps = new Set<string>();
-  for (const id of prefilterFails) failedApps.add(id);
-
   for (const path of hits) {
     const fallbackName = basename(path, ".plist");
     try {
       const json = await readPlist(path);
-      const shortcuts = parseAppPreferences(json, await resolveAppName(fallbackName, fallbackName), fallbackName);
+      const shortcuts = parseAppPreferences(json, await resolveAppName(fallbackName, fallbackName), path);
       if (shortcuts.length > 0 && shortcuts[0].category) apps.push({ app: shortcuts[0].category, shortcuts });
     } catch {
-      // unreadable plist → skip domain and record its bundle id (the plist filename)
-      // so Import All protects that app's stored entries from the destructive sweep
-      failedApps.add(fallbackName);
+      // unreadable plist → skip domain; its file is simply absent from the sweep's
+      // freshly-read set, so entries imported from it are never removed
+      failedFiles.push(path);
     }
   }
   apps.sort((a, b) => a.app.localeCompare(b.app));
-  return { apps, failedApps: pruneReaders(failedApps, apps) };
-}
-
-/**
- * A bundle id may span several plist files (main prefs dir + sandbox containers).
- * A bundle is only "failed" if every copy was unreadable: when at least one copy
- * reads cleanly we have fresh data for that bundle, so it must be swept normally —
- * exempting it would leave stale rows from the readable copy in the library and
- * retain old+new bindings for a re-keyed shortcut.
- */
-export function pruneReaders(failedApps: Iterable<string>, apps: DiscoveredApp[]): string[] {
-  const readable = new Set<string>();
-  for (const a of apps) for (const s of a.shortcuts) if (s.bundleId) readable.add(s.bundleId);
-  return [...new Set(failedApps)].filter((id) => !readable.has(id));
+  return { apps, failedApps: failedFiles };
 }

@@ -53,7 +53,7 @@ export function ShortcutForm({ existing, mutate }: { existing?: Shortcut; mutate
       const items = await loadShortcuts();
       if (existing) {
         const idx = items.findIndex((i) => i.id === existing.id);
-        items[idx] = { ...existing, ...shortcut, id: existing.id, source: undefined };
+        items[idx] = { ...existing, ...shortcut, id: existing.id, source: undefined, sourceFile: undefined };
       } else {
         items.push({ ...shortcut, id: generateId() });
       }

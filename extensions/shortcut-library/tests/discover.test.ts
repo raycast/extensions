@@ -1,7 +1,6 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { applyDiscovery, decodeKeyEquivalent, parseAppPreferences, SOURCE_DISCOVER } from "../src/discover";
-import { pruneReaders } from "../src/scanner";
 import { normalizeShortcut } from "../src/schema";
 
 test("decodeKeyEquivalent maps modifiers and keys", () => {
@@ -57,21 +56,23 @@ test("parseAppPreferences returns empty for missing/garbage payload", () => {
   assert.deepEqual(parseAppPreferences(null, "X"), []);
 });
 
-function disc(title: string, keys: string, bundleId?: string): ReturnType<typeof normalizeShortcut> {
-  return normalizeShortcut({ category: "Terminal", title, keys, source: SOURCE_DISCOVER, bundleId });
+const FILE_A = "/Users/x/Library/Preferences/com.terminal.plist";
+const FILE_B = "/Users/x/Library/Containers/terminal/Data/Library/Preferences/com.terminal.plist";
+const FILE_UP = "/Users/x/Library/Containers/upnote/Data/Library/Preferences/com.example.UpNote.plist";
+const FILE_MAIL = "/Users/x/Library/Preferences/com.apple.mail.plist";
+
+function disc(title: string, keys: string, sourceFile?: string): ReturnType<typeof normalizeShortcut> {
+  return normalizeShortcut({ category: "Terminal", title, keys, source: SOURCE_DISCOVER, sourceFile });
 }
 
 test("applyDiscovery sweep replaces changed keys and drops vanished entries", () => {
   const existing = [
-    disc("Toggle Sidebar", "Cmd + Ctrl + S"),
-    disc("Old Menu", "Cmd + O"),
+    disc("Toggle Sidebar", "Cmd + Ctrl + S", FILE_A),
+    disc("Old Menu", "Cmd + O", FILE_A),
     normalizeShortcut({ category: "Manual", title: "Handmade", keys: "Hyper + H" }),
-    normalizeShortcut({ category: "Terminal", title: "User Edited", keys: "F1", source: SOURCE_DISCOVER }),
   ];
-  // simulate user edit detaching entry
-  existing[3] = { ...existing[3], source: undefined };
 
-  const incoming = [disc("Toggle Sidebar", "Cmd + Shift + S"), disc("New Menu", "Cmd + N")];
+  const incoming = [disc("Toggle Sidebar", "Cmd + Shift + S", FILE_A), disc("New Menu", "Cmd + N", FILE_A)];
   const { next, added, removed } = applyDiscovery(existing, incoming, true);
 
   assert.deepEqual(
@@ -85,12 +86,23 @@ test("applyDiscovery sweep replaces changed keys and drops vanished entries", ()
 
   const titles = next.map((s) => s.title);
   assert.ok(titles.includes("Old Menu") === false);
-  assert.ok(titles.includes("User Edited"), "detached entry survives");
   assert.ok(titles.includes("Handmade"), "manual entry untouched");
 
   const sidebar = next.find((s) => s.title === "Toggle Sidebar")!;
   assert.equal(sidebar.keys, "Cmd + Shift + S");
   assert.equal(next.filter((s) => s.title === "Toggle Sidebar").length, 1, "no stale copy left behind");
+});
+
+test("applyDiscovery keeps entries from files not re-read this run", () => {
+  // UpNote's plist was unreadable this run, so no incoming entry carries FILE_UP;
+  // its stored row must survive untouched even though it matches no incoming item.
+  const up = normalizeShortcut({ category: "UpNote", title: "Sidebar", keys: "Cmd + Shift + S", source: SOURCE_DISCOVER, sourceFile: FILE_UP });
+  const incoming = [disc("Zoom", "Cmd + Shift + Z", FILE_A)];
+
+  const { next, removed } = applyDiscovery([up], incoming, true);
+
+  assert.deepEqual(removed, []);
+  assert.equal(next.length, 2);
 });
 
 test("applyDiscovery single import only touches same title pair", () => {
@@ -110,45 +122,37 @@ test("applyDiscovery skips exact duplicates already present", () => {
   assert.equal(next.length, 1);
 });
 
-test("applyDiscovery partial scan sweeps healthy apps but spares the failed app", () => {
-  // UpNote's plist was unreadable this run (protected by its bundle id) while
-  // Terminal scanned fine and re-keyed Zoom from Cmd+= to Cmd+Shift+Z. Terminal's
-  // stale row must be swept, not kept, otherwise both bindings coexist.
-  const up = normalizeShortcut({ category: "UpNote", title: "Sidebar", keys: "Cmd + Shift + S", source: SOURCE_DISCOVER, bundleId: "com.example.UpNote" });
-  const zoomOld = disc("Zoom", "Cmd + =", "com.terminal");
-  const manual = normalizeShortcut({ category: "Manual", title: "Handmade", keys: "Hyper + H" });
-  const incoming = [disc("Zoom", "Cmd + Shift + Z", "com.terminal")];
+test("applyDiscovery sweeps per file when one copy of a bundle reads and a sibling does not", () => {
+  // Same bundle id, two files: FILE_A read fine and re-keyed Zoom; FILE_B was
+  // unreadable. The readable file's stale row must be swept (no stale+updated
+  // coexistence) while the unreadable file's row is retained — neither blanket
+  // exemption nor blanket sweeping is correct here.
+  const zoomOld = disc("Zoom", "Cmd + =", FILE_A);
+  const legacyFromFileB = disc("Legacy Menu", "Cmd + L", FILE_B);
+  const incoming = [disc("Zoom", "Cmd + Shift + Z", FILE_A)];
 
-  const { next, removed } = applyDiscovery([up, zoomOld, manual], incoming, true, ["com.example.UpNote"]);
+  const { next, removed } = applyDiscovery([zoomOld, legacyFromFileB], incoming, true);
 
-  assert.deepEqual(removed.map((s) => s.title), ["Zoom"], "healthy app's stale row swept");
-  assert.ok(next.some((s) => s.title === "Sidebar"), "failed app entry survives");
-  assert.ok(next.some((s) => s.title === "Handmade"), "manual entry untouched");
+  assert.deepEqual(removed.map((s) => s.title), ["Zoom"], "readable file's stale row swept");
+  assert.ok(next.some((s) => s.title === "Legacy Menu"), "unreadable file's row retained");
   const zooms = next.filter((s) => s.title === "Zoom");
   assert.equal(zooms.length, 1, "exactly one Zoom, no stale+updated coexistence");
   assert.equal(zooms[0].keys, "Cmd + Shift + Z");
 });
 
-test("applyDiscovery sweep removes stale entries across apps when fully healthy", () => {
-  const staleTerm = disc("Old Menu", "Cmd + O", "com.terminal");
-  const staleMail = normalizeShortcut({ category: "Mail", title: "Old Compose", keys: "Cmd + N", source: SOURCE_DISCOVER, bundleId: "com.apple.mail" });
-  const incoming = [disc("New Menu", "Cmd + Shift + O", "com.terminal")];
-  // No failed apps → sweep runs and drops every vanished/outdated discover entry,
-  // regardless of which app it belongs to.
-  const { next, removed } = applyDiscovery([staleTerm, staleMail], incoming, true);
-
-  assert.deepEqual(removed.map((s) => s.title).sort(), ["Old Compose", "Old Menu"]);
-  assert.ok(next.some((s) => s.title === "New Menu"));
-});
-
-test("pruneReaders exempts only bundles with no readable copy", () => {
-  // "com.terminal" has a readable copy (in apps) AND an unreadable sibling file.
-  // It must NOT be exempted — the readable copy's fresh data should sweep its stale rows.
-  // "com.broken" has no readable copy, so it stays exempted.
-  const apps = [
-    { app: "Terminal", shortcuts: [disc("Zoom", "Cmd + Shift + Z", "com.terminal")] },
+test("applyDiscovery sweep removes only entries absent from their own re-read file", () => {
+  // Mail's file was also read this run but no longer customizes Old Compose,
+  // while keeping another shortcut — so exactly the vanished row is removed.
+  const staleMail = normalizeShortcut({ category: "Mail", title: "Old Compose", keys: "Cmd + N", source: SOURCE_DISCOVER, sourceFile: FILE_MAIL });
+  const keptMail = normalizeShortcut({ category: "Mail", title: "Reply", keys: "Cmd + R", source: SOURCE_DISCOVER, sourceFile: FILE_MAIL });
+  const incoming = [
+    disc("New Menu", "Cmd + Shift + O", FILE_A),
+    normalizeShortcut({ category: "Mail", title: "Reply", keys: "Cmd + R", source: SOURCE_DISCOVER, sourceFile: FILE_MAIL }),
   ];
-  const failed = ["com.terminal", "com.broken"];
 
-  assert.deepEqual(pruneReaders(failed, apps), ["com.broken"]);
+  const { next, removed } = applyDiscovery([staleMail, keptMail], incoming, true);
+
+  assert.deepEqual(removed.map((s) => s.title), ["Old Compose"]);
+  assert.ok(next.some((s) => s.title === "Reply"));
+  assert.ok(next.some((s) => s.title === "New Menu"));
 });

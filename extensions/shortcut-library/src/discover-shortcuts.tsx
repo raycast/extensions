@@ -77,12 +77,12 @@ export default function Command() {
   }
 
   async function importAll() {
-    const outcome = applyDiscovery(scan.existing, incoming, true, scan.failedApps);
+    const outcome = applyDiscovery(scan.existing, incoming, true);
     const confirmed = await confirmAlert({
       title: "Import discovered shortcuts?",
       message: `${outcome.added.length} to add, ${outcome.removed.length} outdated to remove.${
         scan.failedApps.length > 0
-          ? `\n\n${scan.failedApps.length} app(s) unreadable — their existing shortcuts won't be touched.`
+          ? `\n\n${scan.failedApps.length} preference file(s) unreadable — shortcuts imported from them won't be touched.`
           : ""
       }`,
       primaryAction: { title: "Import" },

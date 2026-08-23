@@ -190,7 +190,7 @@ function tagAccessories(s: Shortcut, colors: Map<string, string>): { tag: { valu
 
 async function duplicateShortcut(s: Shortcut, reload: () => void) {
   const items = await loadShortcuts();
-  items.push({ ...s, id: generateId(), source: undefined });
+  items.push({ ...s, id: generateId(), source: undefined, sourceFile: undefined });
   await saveShortcuts(items);
   reload();
   showToast({ style: Toast.Style.Success, title: `Duplicated ${s.title}` });
