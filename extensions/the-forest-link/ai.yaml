@@ -11,6 +11,7 @@ evals:
       take-a-walk:
         url: "https://example.com/strange-corner"
         walkedAt: "2026-08-23T17:00:00.000Z"
+        savedToHistory: true
         message: "A new path through The Forest was found and saved to walk history."
     expected:
       - callsTool: "take-a-walk"

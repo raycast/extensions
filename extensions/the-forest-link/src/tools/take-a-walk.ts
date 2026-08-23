@@ -10,8 +10,11 @@ export default async function takeAWalk() {
   const entry = await recordWalk(url);
 
   return {
-    url: entry.url,
-    walkedAt: entry.walkedAt,
-    message: "A new path through The Forest was found and saved to walk history.",
+    url,
+    walkedAt: entry?.walkedAt,
+    savedToHistory: Boolean(entry),
+    message: entry
+      ? "A new path through The Forest was found and saved to walk history."
+      : "A new path through The Forest was found, but an overlapping history clear prevented it from being saved.",
   };
 }

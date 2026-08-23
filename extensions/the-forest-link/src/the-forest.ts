@@ -1,9 +1,20 @@
+import type { ClientRequest } from "node:http";
 import { request } from "node:https";
 import { URL, URLSearchParams } from "node:url";
 
 export const THE_FOREST_URL = "https://theforest.link/";
 export const WALK_URL = `${THE_FOREST_URL}go-for-a-walk/`;
 const PLANT_URL = `${THE_FOREST_URL}api/submit/index.php`;
+const REQUEST_TIMEOUT_MS = 10_000;
+
+function addRequestDeadline(request: ClientRequest, operation: string) {
+  const deadline = setTimeout(() => {
+    request.destroy(new Error(`${operation} timed out after ${REQUEST_TIMEOUT_MS / 1_000} seconds`));
+  }, REQUEST_TIMEOUT_MS);
+
+  request.once("response", () => clearTimeout(deadline));
+  request.once("error", () => clearTimeout(deadline));
+}
 
 export function normalizeWebsiteUrl(value: string) {
   const website = new URL(value.trim());
@@ -16,10 +27,11 @@ export function normalizeWebsiteUrl(value: string) {
 function getRedirect(url: string) {
   return new Promise<string>((resolve, reject) => {
     const walk = request(url, { method: "GET" });
+    addRequestDeadline(walk, "Forest walk");
 
     walk.on("response", (response) => {
-      response.resume();
       const location = response.headers.location;
+      response.destroy();
       if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && location) {
         resolve(new URL(location, url).toString());
       } else {
@@ -61,17 +73,18 @@ export function plantWebsite(website: string) {
         "Content-Length": Buffer.byteLength(body),
       },
     });
+    addRequestDeadline(submission, "Website planting");
 
     submission.on("response", (response) => {
-      response.resume();
-      response.on("end", () => {
-        const statusCode = response.statusCode ?? 0;
-        if (statusCode >= 200 && statusCode < 300) {
-          resolve();
-        } else {
-          reject(new Error(`The Forest returned ${statusCode} ${response.statusMessage ?? ""}`.trim()));
-        }
-      });
+      const statusCode = response.statusCode ?? 0;
+      const statusMessage = response.statusMessage ?? "";
+      response.destroy();
+
+      if (statusCode >= 200 && statusCode < 300) {
+        resolve();
+      } else {
+        reject(new Error(`The Forest returned ${statusCode} ${statusMessage}`.trim()));
+      }
     });
     submission.on("error", reject);
     submission.end(body);
