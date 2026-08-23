@@ -22,6 +22,7 @@ export function normalizeShortcut(value: unknown): Shortcut {
     keys,
     tags: tags.length > 0 ? tags : undefined,
     source: src.source === "discover" ? "discover" : undefined,
+    bundleId: typeof src.bundleId === "string" && src.bundleId.length > 0 ? src.bundleId : undefined,
   };
 }
 

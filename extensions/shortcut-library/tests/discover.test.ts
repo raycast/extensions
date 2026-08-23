@@ -56,8 +56,8 @@ test("parseAppPreferences returns empty for missing/garbage payload", () => {
   assert.deepEqual(parseAppPreferences(null, "X"), []);
 });
 
-function disc(title: string, keys: string): ReturnType<typeof normalizeShortcut> {
-  return normalizeShortcut({ category: "Terminal", title, keys, source: SOURCE_DISCOVER });
+function disc(title: string, keys: string, bundleId?: string): ReturnType<typeof normalizeShortcut> {
+  return normalizeShortcut({ category: "Terminal", title, keys, source: SOURCE_DISCOVER, bundleId });
 }
 
 test("applyDiscovery sweep replaces changed keys and drops vanished entries", () => {
@@ -109,29 +109,33 @@ test("applyDiscovery skips exact duplicates already present", () => {
   assert.equal(next.length, 1);
 });
 
-test("applyDiscovery partial scan never sweeps discover-sourced entries", () => {
-  const up = normalizeShortcut({ category: "UpNote", title: "Sidebar", keys: "Cmd + Shift + S", source: SOURCE_DISCOVER });
-  const other = normalizeShortcut({ category: "Terminal", title: "Zoom", keys: "Cmd + =", source: SOURCE_DISCOVER });
+test("applyDiscovery partial scan sweeps healthy apps but spares the failed app", () => {
+  // UpNote's plist was unreadable this run (protected by its bundle id) while
+  // Terminal scanned fine and re-keyed Zoom from Cmd+= to Cmd+Shift+Z. Terminal's
+  // stale row must be swept, not kept, otherwise both bindings coexist.
+  const up = normalizeShortcut({ category: "UpNote", title: "Sidebar", keys: "Cmd + Shift + S", source: SOURCE_DISCOVER, bundleId: "com.example.UpNote" });
+  const zoomOld = disc("Zoom", "Cmd + =", "com.terminal");
   const manual = normalizeShortcut({ category: "Manual", title: "Handmade", keys: "Hyper + H" });
-  // One app unreadable → keepCategories is populated. A broken Spotlight run may
-  // have stored a display name that differs from the bundle id we can see now, so
-  // the destructive sweep is skipped entirely rather than risk deleting valid data.
-  const incoming = [normalizeShortcut({ category: "Terminal", title: "Zoom", keys: "Cmd + Shift + Z" })];
-  const { next, removed } = applyDiscovery([up, other, manual], incoming, true, ["com.example.UpNote"]);
+  const incoming = [disc("Zoom", "Cmd + Shift + Z", "com.terminal")];
 
-  assert.deepEqual(removed, []);
-  assert.ok(next.some((s) => s.title === "Sidebar"), "unreadable app entry survives");
-  assert.ok(next.some((s) => s.title === "Zoom"), "other discover entry survives");
-  assert.ok(next.some((s) => s.keys === "Cmd + Shift + Z"), "re-keyed discover entry still imported");
-  assert.equal(next.length, 4);
+  const { next, removed } = applyDiscovery([up, zoomOld, manual], incoming, true, ["com.example.UpNote"]);
+
+  assert.deepEqual(removed.map((s) => s.title), ["Zoom"], "healthy app's stale row swept");
+  assert.ok(next.some((s) => s.title === "Sidebar"), "failed app entry survives");
+  assert.ok(next.some((s) => s.title === "Handmade"), "manual entry untouched");
+  const zooms = next.filter((s) => s.title === "Zoom");
+  assert.equal(zooms.length, 1, "exactly one Zoom, no stale+updated coexistence");
+  assert.equal(zooms[0].keys, "Cmd + Shift + Z");
 });
 
-test("applyDiscovery sweep removes outdated entries only on a fully healthy scan", () => {
-  const stale = normalizeShortcut({ category: "Terminal", title: "Old Menu", keys: "Cmd + O", source: SOURCE_DISCOVER });
-  const incoming = [normalizeShortcut({ category: "Terminal", title: "New Menu", keys: "Cmd + N" })];
-  // No failed apps → sweep runs and drops the vanished discover entry.
-  const { next, removed } = applyDiscovery([stale], incoming, true);
+test("applyDiscovery sweep removes stale entries across apps when fully healthy", () => {
+  const staleTerm = disc("Old Menu", "Cmd + O", "com.terminal");
+  const staleMail = normalizeShortcut({ category: "Mail", title: "Old Compose", keys: "Cmd + N", source: SOURCE_DISCOVER, bundleId: "com.apple.mail" });
+  const incoming = [disc("New Menu", "Cmd + Shift + O", "com.terminal")];
+  // No failed apps → sweep runs and drops every vanished/outdated discover entry,
+  // regardless of which app it belongs to.
+  const { next, removed } = applyDiscovery([staleTerm, staleMail], incoming, true);
 
-  assert.deepEqual(removed.map((s) => s.title), ["Old Menu"]);
+  assert.deepEqual(removed.map((s) => s.title).sort(), ["Old Compose", "Old Menu"]);
   assert.ok(next.some((s) => s.title === "New Menu"));
 });

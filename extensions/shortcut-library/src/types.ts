@@ -5,6 +5,7 @@ export interface Shortcut {
   keys: string;
   tags?: string[];
   source?: "discover";
+  bundleId?: string;
 }
 
 export type NewShortcut = Omit<Shortcut, "id">;

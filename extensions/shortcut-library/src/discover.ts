@@ -56,7 +56,7 @@ export function decodeKeyEquivalent(raw: string): string | null {
   return [...MODIFIER_ORDER.filter((m) => mods.has(m)), key].join(" + ");
 }
 
-export function parseAppPreferences(json: unknown, appName: string): Shortcut[] {
+export function parseAppPreferences(json: unknown, appName: string, bundleId?: string): Shortcut[] {
   const prefs = (typeof json === "object" && json !== null ? json : {}) as Record<string, unknown>;
   const equivs = prefs.NSUserKeyEquivalents;
   if (typeof equivs !== "object" || equivs === null) return [];
@@ -67,7 +67,7 @@ export function parseAppPreferences(json: unknown, appName: string): Shortcut[] 
     const title = rawTitle.trim();
     const keys = decodeKeyEquivalent(rawCode);
     if (!title || !keys) continue;
-    out.push(normalizeShortcut({ category: appName, title, keys, source: SOURCE_DISCOVER }));
+    out.push(normalizeShortcut({ category: appName, title, keys, source: SOURCE_DISCOVER, bundleId }));
   }
   return out.sort((a, b) => a.title.localeCompare(b.title));
 }
@@ -90,10 +90,13 @@ export interface DiscoveryOutcome {
 /**
  * sweep=true ("Import All"): replaces every discover-sourced entry that no longer
  * matches the scan exactly, so vanished or re-keyed app customizations are cleaned up.
- * `keepCategories` protects discover-sourced entries when part of the scan failed:
- * once any app is unreadable we cannot reliably match its stored identity (a broken
- * Spotlight run resolves to a bundle id where a healthy run stored a display name),
- * so the destructive sweep is skipped entirely rather than risk deleting valid data.
+ *
+ * Swept apps are matched by their stable bundle id, because the display-name
+ * category (derived from Spotlight) can flip between scans — a broken Spotlight run
+ * falls back to the bundle id while a healthy run stored a display name. Entries
+ * whose bundle id is in `keepBundleIds` (an unreadable plist this run) are never
+ * removed; every successfully-scanned app is still swept normally, so a re-keyed
+ * healthy app gets its stale row removed rather than coexisting with its replacement.
  * sweep=false (single import): only touches discover-sourced entries sharing the
  * incoming items' category+title.
  */
@@ -101,13 +104,15 @@ export function applyDiscovery(
   existing: Shortcut[],
   incoming: Shortcut[],
   sweep: boolean,
-  keepCategories?: Iterable<string>
+  keepBundleIds?: Iterable<string>
 ): DiscoveryOutcome {
   let keep: Shortcut[];
   if (sweep) {
     const fresh = new Set(incoming.map(fullKey));
-    const partial = keepCategories ? hasAny(keepCategories) : false;
-    keep = existing.filter((e) => e.source !== SOURCE_DISCOVER || partial || fresh.has(fullKey(e)));
+    const safe = keepBundleIds ? new Set([...keepBundleIds].map(normalizeKey)) : new Set<string>();
+    keep = existing.filter(
+      (e) => e.source !== SOURCE_DISCOVER || fresh.has(fullKey(e)) || safe.has(normalizeKey(e.bundleId ?? ""))
+    );
   } else {
     const targets = new Set(incoming.map(pairKey));
     keep = existing.filter((e) => e.source !== SOURCE_DISCOVER || !targets.has(pairKey(e)));
@@ -118,7 +123,6 @@ export function applyDiscovery(
   return { next: [...keep, ...added], added, removed };
 }
 
-function hasAny(it: Iterable<string>): boolean {
-  for (const _ of it) return true;
-  return false;
+function normalizeKey(v: string): string {
+  return v.toLowerCase().replace(/\s+/g, " ").trim();
 }

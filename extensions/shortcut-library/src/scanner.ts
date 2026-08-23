@@ -79,11 +79,11 @@ export async function discoverMenuShortcuts(): Promise<ScanResult> {
     const fallbackName = basename(path, ".plist");
     try {
       const json = await readPlist(path);
-      const shortcuts = parseAppPreferences(json, await resolveAppName(fallbackName, fallbackName));
+      const shortcuts = parseAppPreferences(json, await resolveAppName(fallbackName, fallbackName), fallbackName);
       if (shortcuts.length > 0 && shortcuts[0].category) apps.push({ app: shortcuts[0].category, shortcuts });
     } catch {
-      // unreadable plist → skip domain and remember its bundle id so Import All
-      // treats the scan as partial and won't delete valid stored entries
+      // unreadable plist → skip domain and record its bundle id (the plist filename)
+      // so Import All protects that app's stored entries from the destructive sweep
       failedApps.add(fallbackName);
     }
   }
