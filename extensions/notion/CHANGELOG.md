@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Fix Create Database Page not saving properties] - {PR_MERGE_DATE}
+## [Fix Create Database Page not saving properties] - 2026-08-23
 
 - Fix `Create Database Page` creating the page but dropping the filled-in properties after Notion's database/data-source split: the page is now created against the data source (`data_source_id`) instead of the parent database container ([#30460](https://github.com/raycast/extensions/issues/30460))
 - Fix property values being sent without their Notion type wrapper (e.g. `{ checkbox: true }`, `{ number: 42 }`, `{ select: { id } }`), which made the API silently ignore most of them
