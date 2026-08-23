@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useRef, useState } from "react";
 import {
   ActionPanel,
   Action,
@@ -8,17 +8,16 @@ import {
   showToast,
   closeMainWindow,
   getPreferenceValues,
+  Icon,
 } from "@raycast/api";
 import { writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { fileTypeFromBuffer } from "file-type";
 import { CapacitiesClient } from "@capacities/api";
 
-// Constants
-const SEARCH_DEBOUNCE_MS = 500;
 const GRID_COLUMNS = 4;
 const SUPPORTED_IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp", "bmp", "tiff"] as const;
 
@@ -37,7 +36,6 @@ const IMDB_TYPE_LABELS: Record<string, string> = {
   podcastSeries: "Podcast",
 };
 
-// Types
 interface SearchItem {
   id: string;
   title: string;
@@ -46,14 +44,6 @@ interface SearchItem {
   pageUrl: string;
 }
 
-interface Preferences {
-  capacitiesApiToken?: string;
-  capacitiesObjectType?: string;
-  capacitiesCoverProperty?: string;
-  capacitiesImageCollection?: string;
-}
-
-// Utility functions
 const isValidImageExtension = (extension: string): extension is (typeof SUPPORTED_IMAGE_EXTENSIONS)[number] => {
   return SUPPORTED_IMAGE_EXTENSIONS.includes(extension as (typeof SUPPORTED_IMAGE_EXTENSIONS)[number]);
 };
@@ -83,14 +73,6 @@ const determineImageExtension = async (buffer: Buffer, originalExtension: string
   }
 
   throw new Error("Unsupported image format");
-};
-
-const parseJsonSafe = async <T,>(response: Response): Promise<T | undefined> => {
-  try {
-    return (await response.json()) as T;
-  } catch {
-    return undefined;
-  }
 };
 
 const downloadImageBuffer = async (imageUrl: string): Promise<Buffer> => {
@@ -126,17 +108,18 @@ const getImdbSuggestionBucket = (query: string): string => {
   return /^[a-z0-9]$/.test(firstChar) ? firstChar : "_";
 };
 
-const searchImdb = async (query: string): Promise<SearchItem[]> => {
+const searchImdb = async (query: string, signal?: AbortSignal): Promise<SearchItem[]> => {
   const bucket = getImdbSuggestionBucket(query);
   const encodedQuery = encodeURIComponent(query.trim());
-  const response = await fetch(`https://v2.sg.media-imdb.com/suggestion/${bucket}/${encodedQuery}.json`);
-  const data = await parseJsonSafe<ImdbSuggestionResponse>(response);
+  const response = await fetch(`https://v2.sg.media-imdb.com/suggestion/${bucket}/${encodedQuery}.json`, { signal });
 
   if (!response.ok) {
     throw new Error(`IMDb error: HTTP ${response.status}`);
   }
 
-  return (data?.d || [])
+  const data = (await response.json()) as ImdbSuggestionResponse;
+
+  return (data.d || [])
     .filter(
       (item) => item.id.startsWith("tt") && item.qid && !EXCLUDED_IMDB_QIDS.has(item.qid) && item.i?.imageUrl && item.l,
     )
@@ -169,6 +152,14 @@ const CAPACITIES_IMAGE_CATEGORY_PROPERTY_ID = "media_imageCategory";
 const CAPACITIES_IMAGE_CATEGORY_COVER_OPTION_ID = "cover";
 
 const normalize = (value: string): string => value.trim().toLowerCase();
+
+const trashCapacitiesObject = async (capacities: CapacitiesClient, id: string): Promise<void> => {
+  try {
+    await capacities.object.delete({ id });
+  } catch {
+    // Cleanup is best-effort — the original error is more useful to the user.
+  }
+};
 
 const addCoverToCapacities = async (preferences: Preferences, item: SearchItem): Promise<string> => {
   const { capacitiesApiToken, capacitiesObjectType, capacitiesCoverProperty, capacitiesImageCollection } = preferences;
@@ -235,7 +226,7 @@ const addCoverToCapacities = async (preferences: Preferences, item: SearchItem):
 
   const { results } = await capacities.objects.search({
     query: item.title,
-    structureIds: [...coverPropertyByStructureId.keys()],
+    structureIds: Array.from(coverPropertyByStructureId.keys()),
     limit: 1,
   });
   const target = results[0];
@@ -257,118 +248,105 @@ const addCoverToCapacities = async (preferences: Preferences, item: SearchItem):
     properties: { title: { type: "title", title: { value: `${item.title} cover` } } },
   });
 
-  await capacities.object.update({
-    id: createdImage.id,
-    ...(collectionId ? { collections: [collectionId] } : {}),
-    properties: {
-      [CAPACITIES_IMAGE_CATEGORY_PROPERTY_ID]: {
-        type: "label",
-        label: [{ id: CAPACITIES_IMAGE_CATEGORY_COVER_OPTION_ID, name: "Cover" }],
+  try {
+    await capacities.object.update({
+      id: createdImage.id,
+      ...(collectionId ? { collections: [collectionId] } : {}),
+      properties: {
+        [CAPACITIES_IMAGE_CATEGORY_PROPERTY_ID]: {
+          type: "label",
+          label: [{ id: CAPACITIES_IMAGE_CATEGORY_COVER_OPTION_ID, name: "Cover" }],
+        },
       },
-    },
-  });
+    });
 
-  await capacities.object.update({
-    id: target.id,
-    properties: {
-      [coverPropertyId]: { type: "entity", entity: [{ id: createdImage.id }] },
-    },
-  });
+    await capacities.object.update({
+      id: target.id,
+      properties: {
+        [coverPropertyId]: { type: "entity", entity: [{ id: createdImage.id }] },
+      },
+    });
+  } catch (error) {
+    await trashCapacitiesObject(capacities, createdImage.id);
+    throw error;
+  }
 
   return target.title;
 };
 
-// Main component
-export default function SearchCoverArtCommand() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const [items, setItems] = useState<SearchItem[]>([]);
+const handleCopyImageToClipboard = async (imageUrl: string) => {
+  await showToast({
+    title: "Copying image to clipboard...",
+    style: Toast.Style.Animated,
+  });
 
+  try {
+    const buffer = await downloadImageBuffer(imageUrl);
+    const originalExtension = extractFileExtension(imageUrl);
+    const extension = await determineImageExtension(buffer, originalExtension);
+    const tempFilePath = await createTempImageFile(buffer, extension);
+
+    await Clipboard.copy({ file: tempFilePath });
+    closeMainWindow();
+
+    await showToast({
+      title: "Image copied to clipboard",
+      style: Toast.Style.Success,
+    });
+  } catch (error) {
+    await showFailureToast(error, {
+      title: "Failed to copy image to clipboard",
+    });
+  }
+};
+
+const handleAddCoverToCapacities = async (preferences: Preferences, item: SearchItem) => {
+  await showToast({ title: "Adding cover in Capacities...", style: Toast.Style.Animated });
+
+  try {
+    const matchedTitle = await addCoverToCapacities(preferences, item);
+    await showToast({ title: `Cover added to "${matchedTitle}"`, style: Toast.Style.Success });
+  } catch (error) {
+    await showFailureToast(error, { title: "Failed to add cover in Capacities" });
+  }
+};
+
+export default function SearchCoverArtCommand() {
+  const [searchText, setSearchText] = useState("");
+  const abortable = useRef<AbortController | null>(null);
   const preferences = getPreferenceValues<Preferences>();
 
-  const runSearch = useCallback(async (query: string) => {
-    if (!query.trim()) {
-      setItems([]);
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const results = await searchImdb(query);
-      setItems(results);
-    } catch (error) {
-      console.error("Error searching images:", error);
-      await showFailureToast(error, { title: "Failed to search" });
-      setItems([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const handleCopyImageToClipboard = useCallback(async (imageUrl: string) => {
-    await showToast({
-      title: "Copying image to clipboard...",
-      style: Toast.Style.Animated,
-    });
-
-    try {
-      const buffer = await downloadImageBuffer(imageUrl);
-      const originalExtension = extractFileExtension(imageUrl);
-      const extension = await determineImageExtension(buffer, originalExtension);
-      const tempFilePath = await createTempImageFile(buffer, extension);
-
-      await Clipboard.copy({ file: tempFilePath });
-      closeMainWindow();
-
-      await showToast({
-        title: "Image copied to clipboard",
-        style: Toast.Style.Success,
-      });
-    } catch (error) {
-      await showFailureToast(error, {
-        title: "Failed to copy image to clipboard",
-      });
-    }
-  }, []);
-
-  const handleAddCoverToCapacities = useCallback(
-    async (item: SearchItem) => {
-      await showToast({ title: "Adding cover in Capacities...", style: Toast.Style.Animated });
-
-      try {
-        const matchedTitle = await addCoverToCapacities(preferences, item);
-        await showToast({ title: `Cover added to "${matchedTitle}"`, style: Toast.Style.Success });
-      } catch (error) {
-        await showFailureToast(error, { title: "Failed to add cover in Capacities" });
-      }
+  const { data, isLoading } = useCachedPromise(
+    async (query: string) => searchImdb(query, abortable.current?.signal),
+    [searchText],
+    {
+      keepPreviousData: true,
+      abortable,
+      execute: Boolean(searchText.trim()),
+      failureToastOptions: { title: "Failed to search" },
     },
-    [preferences],
   );
 
-  useEffect(() => {
-    setIsLoading(true);
-    const timeoutId = setTimeout(() => {
-      runSearch(searchText);
-    }, SEARCH_DEBOUNCE_MS);
-
-    return () => {
-      clearTimeout(timeoutId);
-      setIsLoading(false);
-    };
-  }, [searchText, runSearch]);
+  const items = searchText.trim() ? (data ?? []) : [];
 
   return (
     <Grid
       columns={GRID_COLUMNS}
       isLoading={isLoading}
+      throttle
       fit={Grid.Fit.Fill}
       aspectRatio="2/3"
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search movies, TV, anime, and games on IMDb..."
     >
-      <Grid.EmptyView title={searchText && !isLoading ? "No results found" : "Start typing to search IMDb"} />
+      <Grid.EmptyView
+        title={searchText.trim() ? "No results found" : "Start typing to search IMDb"}
+        description={
+          searchText.trim()
+            ? "Try a broader or differently spelled query. TV and podcast episodes are excluded."
+            : undefined
+        }
+      />
       {items.map((item) => (
         <Grid.Item
           key={item.id}
@@ -377,12 +355,21 @@ export default function SearchCoverArtCommand() {
           subtitle={item.subtitle}
           actions={
             <ActionPanel>
-              <Action title="Copy Image to Clipboard" onAction={() => handleCopyImageToClipboard(item.imageUrl)} />
-              <Action title="Add as Cover in Capacities" onAction={() => handleAddCoverToCapacities(item)} />
+              <Action
+                icon={Icon.Clipboard}
+                title="Copy Image to Clipboard"
+                onAction={() => handleCopyImageToClipboard(item.imageUrl)}
+              />
+              {preferences.capacitiesApiToken ? (
+                <Action
+                  icon={Icon.Image}
+                  title="Add as Cover in Capacities"
+                  onAction={() => handleAddCoverToCapacities(preferences, item)}
+                />
+              ) : null}
               <Action.CopyToClipboard content={item.imageUrl} title="Copy Image URL" />
               <Action.OpenInBrowser url={item.imageUrl} title="Open Image in Browser" />
-              {/* eslint-disable-next-line @raycast/prefer-title-case -- "IMDb" is the correct brand casing */}
-              <Action.OpenInBrowser url={item.pageUrl} title="View on IMDb" />
+              <Action.OpenInBrowser icon={Icon.FilmStrip} url={item.pageUrl} title="View on IMDb" />
             </ActionPanel>
           }
         />

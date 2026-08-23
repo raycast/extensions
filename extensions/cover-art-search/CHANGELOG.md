@@ -1,4 +1,4 @@
-# Cover Art Search Changelog
+# Changelog
 
 ## [Capacities Integration] - {PR_MERGE_DATE}
 
@@ -11,7 +11,7 @@
 ## [Replace deprecated Google API] - 2026-08-08
 
 - Replaced the deprecated Google Custom Search JSON API with IMDb's own search-suggestion endpoint, covering movies, TV, anime, and games in one search
-- Results now show an IMDb type badge (e.g. "Movie", "TV Series", "Video Game") and year
-- Results now show title and year, and include a "View on IMDb" action
+- Results now show an IMDb type badge (e.g. "Movie", "TV Series", "Video Game") and image dimensions
+- Results now include a "View on IMDb" action
 
 ## [Initial Version] - 2025-06-16
