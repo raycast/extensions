@@ -5,7 +5,7 @@ import { setTimeout } from "node:timers/promises";
 
 export const preferences = getPreferenceValues<Preferences>();
 
-const isWin = process.platform === "win32";
+export const isWin = process.platform === "win32";
 
 export const execp = promisify(exec);
 
@@ -15,11 +15,18 @@ export function getCliPath(): string {
   if (cliPath) return cliPath;
 
   return isWin
-    ? 'C:\\"Program Files"\\Flameshot\\bin\\flameshot-cli.exe'
+    ? "C:\\Program Files\\Flameshot\\bin\\flameshot-cli.exe"
     : "/Applications/Flameshot.app/Contents/MacOS/flameshot";
 }
 
-export async function countdown(milliseconds: number): Promise<void> {
+export async function countdown(milliseconds: number, showCountdown = true): Promise<void> {
+  if (!milliseconds) return;
+
+  if (!showCountdown) {
+    await setTimeout(milliseconds);
+    return;
+  }
+
   const formatSeconds = (value: number) => (value / 1000).toFixed(3).replace(/\.?0+$/, "");
 
   let remaining = Math.max(0, milliseconds);
