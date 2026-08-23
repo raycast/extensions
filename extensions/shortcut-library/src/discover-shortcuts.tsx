@@ -10,6 +10,7 @@ import { loadShortcuts, saveShortcuts } from "./data";
 interface ScanState {
   apps: DiscoveredApp[];
   failedApps: string[];
+  readFiles: string[];
   existing: Shortcut[];
 }
 
@@ -34,7 +35,8 @@ export default function Command() {
     let alive = true;
     Promise.all([discoverMenuShortcuts(), loadShortcuts()])
       .then(([result, existing]) => {
-        if (alive) setState({ apps: result.apps, failedApps: result.failedApps, existing });
+        if (alive)
+          setState({ apps: result.apps, failedApps: result.failedApps, readFiles: result.readFiles, existing });
       })
       .catch((e: Error) => {
         if (alive) setError(e.message);
@@ -77,7 +79,7 @@ export default function Command() {
   }
 
   async function importAll() {
-    const outcome = applyDiscovery(scan.existing, incoming, true);
+    const outcome = applyDiscovery(scan.existing, incoming, true, scan.readFiles);
     const confirmed = await confirmAlert({
       title: "Import discovered shortcuts?",
       message: `${outcome.added.length} to add, ${outcome.removed.length} outdated to remove.${

@@ -17,6 +17,8 @@ export interface DiscoveredApp {
 export interface ScanResult {
   apps: DiscoveredApp[];
   failedApps: string[];
+  /** every plist positively parsed this run, including ones with no shortcuts left */
+  readFiles: string[];
 }
 
 function plistCandidates(): string[] {
@@ -71,11 +73,16 @@ export async function discoverMenuShortcuts(): Promise<ScanResult> {
   }
 
   const apps: DiscoveredApp[] = [];
+  const readFiles: string[] = [];
   for (const path of hits) {
     const fallbackName = basename(path, ".plist");
     try {
       const json = await readPlist(path);
       const shortcuts = parseAppPreferences(json, await resolveAppName(fallbackName, fallbackName), path);
+      // record the file even when no shortcuts survive parsing: an empty result is
+      // positive evidence the user removed their customizations, which Import All
+      // needs so stale rows from this file are cleaned up instead of lingering
+      readFiles.push(path);
       if (shortcuts.length > 0 && shortcuts[0].category) apps.push({ app: shortcuts[0].category, shortcuts });
     } catch {
       // unreadable plist → skip domain; its file is simply absent from the sweep's
@@ -84,5 +91,5 @@ export async function discoverMenuShortcuts(): Promise<ScanResult> {
     }
   }
   apps.sort((a, b) => a.app.localeCompare(b.app));
-  return { apps, failedApps: failedFiles };
+  return { apps, failedApps: failedFiles, readFiles };
 }

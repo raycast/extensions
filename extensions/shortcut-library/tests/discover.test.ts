@@ -73,7 +73,7 @@ test("applyDiscovery sweep replaces changed keys and drops vanished entries", ()
   ];
 
   const incoming = [disc("Toggle Sidebar", "Cmd + Shift + S", FILE_A), disc("New Menu", "Cmd + N", FILE_A)];
-  const { next, added, removed } = applyDiscovery(existing, incoming, true);
+  const { next, added, removed } = applyDiscovery(existing, incoming, true, [FILE_A]);
 
   assert.deepEqual(
     added.map((s) => s.title).sort(),
@@ -94,15 +94,29 @@ test("applyDiscovery sweep replaces changed keys and drops vanished entries", ()
 });
 
 test("applyDiscovery keeps entries from files not re-read this run", () => {
-  // UpNote's plist was unreadable this run, so no incoming entry carries FILE_UP;
-  // its stored row must survive untouched even though it matches no incoming item.
+  // UpNote's plist was unreadable this run, so FILE_UP is not among the freshly
+  // read files; its stored row must survive untouched even though it matches no
+  // incoming item.
   const up = normalizeShortcut({ category: "UpNote", title: "Sidebar", keys: "Cmd + Shift + S", source: SOURCE_DISCOVER, sourceFile: FILE_UP });
   const incoming = [disc("Zoom", "Cmd + Shift + Z", FILE_A)];
 
-  const { next, removed } = applyDiscovery([up], incoming, true);
+  const { next, removed } = applyDiscovery([up], incoming, true, [FILE_A]);
 
   assert.deepEqual(removed, []);
   assert.equal(next.length, 2);
+});
+
+test("applyDiscovery clears rows from a file that now has no shortcuts left", () => {
+  // Terminal's plist still parses but the user removed their last customization,
+  // so it yields zero incoming entries. Its stale rows must be cleaned up rather
+  // than lingering forever.
+  const stale = disc("Old Menu", "Cmd + O", FILE_A);
+  const incoming = [normalizeShortcut({ category: "Mail", title: "Reply", keys: "Cmd + R", source: SOURCE_DISCOVER, sourceFile: FILE_MAIL })];
+
+  const { next, removed } = applyDiscovery([stale], incoming, true, [FILE_A, FILE_MAIL]);
+
+  assert.deepEqual(removed.map((s) => s.title), ["Old Menu"]);
+  assert.deepEqual(next.map((s) => s.title), ["Reply"]);
 });
 
 test("applyDiscovery single import only touches same title pair", () => {
@@ -131,7 +145,7 @@ test("applyDiscovery sweeps per file when one copy of a bundle reads and a sibli
   const legacyFromFileB = disc("Legacy Menu", "Cmd + L", FILE_B);
   const incoming = [disc("Zoom", "Cmd + Shift + Z", FILE_A)];
 
-  const { next, removed } = applyDiscovery([zoomOld, legacyFromFileB], incoming, true);
+  const { next, removed } = applyDiscovery([zoomOld, legacyFromFileB], incoming, true, [FILE_A]);
 
   assert.deepEqual(removed.map((s) => s.title), ["Zoom"], "readable file's stale row swept");
   assert.ok(next.some((s) => s.title === "Legacy Menu"), "unreadable file's row retained");
@@ -150,7 +164,7 @@ test("applyDiscovery sweep removes only entries absent from their own re-read fi
     normalizeShortcut({ category: "Mail", title: "Reply", keys: "Cmd + R", source: SOURCE_DISCOVER, sourceFile: FILE_MAIL }),
   ];
 
-  const { next, removed } = applyDiscovery([staleMail, keptMail], incoming, true);
+  const { next, removed } = applyDiscovery([staleMail, keptMail], incoming, true, [FILE_A, FILE_MAIL]);
 
   assert.deepEqual(removed.map((s) => s.title), ["Old Compose"]);
   assert.ok(next.some((s) => s.title === "Reply"));

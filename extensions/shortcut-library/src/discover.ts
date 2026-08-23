@@ -85,33 +85,39 @@ export interface DiscoveryOutcome {
 
 /**
  * sweep=true ("Import All"): removes a discover-sourced entry only when its own
- * source file was positively re-read this run and the entry's title+keys are no
- * longer present in that file. Provenance is the plist path, not the bundle id or
- * display name: a bundle id can span several files (prefs dir + sandbox containers)
- * whose read success differs per run, and the display-name category flips with
- * Spotlight availability — either as an identity silently mis-attributes entries.
- * Entries from files that were unreadable, absent, or user-detached are never
- * removed by a scan.
+ * source file was positively re-read this run (`readFiles`) and the entry's
+ * title+keys are no longer present in that file. Provenance is the plist path,
+ * not the bundle id or display name: a bundle id can span several files (prefs
+ * dir + sandbox containers) whose read success differs per run, and the
+ * display-name category flips with Spotlight availability — either as an identity
+ * silently mis-attributes entries. A freshly-read file with zero shortcuts is
+ * still evidence its bindings were removed, so its stale rows get cleaned up;
+ * files that were unreadable, absent, or user-detached are never touched.
  * sweep=false (single import): only touches discover-sourced entries sharing the
  * incoming items' category+title.
  */
-export function applyDiscovery(existing: Shortcut[], incoming: Shortcut[], sweep: boolean): DiscoveryOutcome {
+export function applyDiscovery(
+  existing: Shortcut[],
+  incoming: Shortcut[],
+  sweep: boolean,
+  readFiles: Iterable<string> = []
+): DiscoveryOutcome {
   let keep: Shortcut[];
   if (sweep) {
+    const fresh = new Set(readFiles);
     const freshByFile = new Map<string, Set<string>>();
     for (const s of incoming) {
-      if (!s.sourceFile) continue;
+      if (!s.sourceFile || !fresh.has(s.sourceFile)) continue;
       let set = freshByFile.get(s.sourceFile);
       if (!set) freshByFile.set(s.sourceFile, (set = new Set()));
       set.add(entryKey(s));
     }
-    keep = existing.filter(
-      (e) =>
-        e.source !== SOURCE_DISCOVER ||
-        e.sourceFile === undefined ||
-        !freshByFile.has(e.sourceFile) ||
-        freshByFile.get(e.sourceFile)!.has(entryKey(e))
-    );
+    keep = existing.filter((e) => {
+      if (e.source !== SOURCE_DISCOVER) return true;
+      const file = e.sourceFile;
+      if (file === undefined || !fresh.has(file)) return true; // no evidence this run → keep
+      return freshByFile.get(file)?.has(entryKey(e)) ?? false; // read but gone → remove
+    });
   } else {
     const targets = new Set(incoming.map(pairKey));
     keep = existing.filter((e) => e.source !== SOURCE_DISCOVER || !targets.has(pairKey(e)));
