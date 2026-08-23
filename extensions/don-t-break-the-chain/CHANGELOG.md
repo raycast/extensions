@@ -1,6 +1,6 @@
 # Don't Break the Chain Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-23
 
 - Menu bar mini calendar drawn as a bare grid: one cell per real day, an ✕ through finished days, no day numbers and no days borrowed from neighbouring months
 - Click any day to cross it off, including days in past months
