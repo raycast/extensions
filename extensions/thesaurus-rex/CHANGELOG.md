@@ -1,6 +1,6 @@
 # Thesaurus Rex Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-23
 
 - Look up definitions, synonyms, antonyms, examples and pronunciation for any word, and copy or paste a result.
 - Fully offline: Open English WordNet 2024 is downloaded once on request and stored as a local SQLite database, so no lookup leaves the Mac.
