@@ -112,7 +112,9 @@ describe("MacNetworkPingProvider", () => {
     const executor = async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
       if (command === "/sbin/route") {
-        return { stdout: "route to: default\ninterface: utun6\n" };
+        return {
+          stdout: "route to: default\ngateway: 10.8.0.1\ninterface: utun6\n",
+        };
       }
       if (command === "/usr/sbin/networksetup") {
         return { stdout: "Hardware Port: Wi-Fi\nDevice: en0\n" };

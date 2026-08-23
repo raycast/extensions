@@ -134,63 +134,57 @@ export default function PingCommand() {
     const provider = new MacNetworkPingProvider({ remoteEndpoint });
     return { provider, service: new PingService(provider) };
   }, [remoteEndpoint]);
-  const requestNumber = useRef(0);
+  const refreshRequestNumber = useRef(0);
+  const speedRequestNumber = useRef(0);
   const [result, setResult] = useState<PingResult>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(true);
   const [isSpeedLoading, setIsSpeedLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const currentRequest = ++requestNumber.current;
-    setIsLoading(true);
+    const currentRequest = ++refreshRequestNumber.current;
     setIsRefreshing(true);
-    setIsSpeedLoading(false);
     setError(undefined);
 
     try {
       const nextResult = await service.service.check();
-      if (currentRequest !== requestNumber.current) {
+      if (currentRequest !== refreshRequestNumber.current) {
         return;
       }
 
       setResult(nextResult);
     } catch (checkError) {
-      if (currentRequest !== requestNumber.current) {
+      if (currentRequest !== refreshRequestNumber.current) {
         return;
       }
 
       setResult(undefined);
       setError(getErrorMessage(checkError));
     } finally {
-      if (currentRequest === requestNumber.current) {
+      if (currentRequest === refreshRequestNumber.current) {
         setIsRefreshing(false);
-        setIsLoading(false);
       }
     }
   }, [service]);
 
   const measureSpeed = useCallback(async () => {
-    const currentRequest = ++requestNumber.current;
-    setIsLoading(true);
-    setIsRefreshing(false);
+    const currentRequest = ++speedRequestNumber.current;
     setIsSpeedLoading(true);
     setError(undefined);
 
     try {
       const speed = await service.provider.measureSpeed();
-      if (currentRequest !== requestNumber.current) {
+      if (currentRequest !== speedRequestNumber.current) {
         return;
       }
       setResult((current) => (current ? { ...current, speed } : current));
     } catch (speedError) {
-      if (currentRequest === requestNumber.current) {
+      if (currentRequest === speedRequestNumber.current) {
         setError(getErrorMessage(speedError));
       }
     } finally {
-      setIsSpeedLoading(false);
-      if (currentRequest === requestNumber.current) {
-        setIsLoading(false);
+      if (currentRequest === speedRequestNumber.current) {
+        setIsSpeedLoading(false);
       }
     }
   }, [service]);
@@ -202,7 +196,7 @@ export default function PingCommand() {
   const presentation = getStatusPresentation(
     result?.diagnosis,
     error,
-    isLoading,
+    isRefreshing || isSpeedLoading,
   );
   const probes = result
     ? [result.gateway, result.internet, result.speed, result.server, result.vpn]
@@ -211,8 +205,8 @@ export default function PingCommand() {
   return (
     <MenuBarExtra
       icon={{ source: presentation.icon, tintColor: presentation.color }}
-      tooltip={getTooltip(presentation, result, isLoading)}
-      isLoading={isLoading}
+      tooltip={getTooltip(presentation, result, isRefreshing || isSpeedLoading)}
+      isLoading={isRefreshing || isSpeedLoading}
     >
       <MenuBarExtra.Section title="Диагностика">
         <MenuBarExtra.Item

@@ -292,7 +292,14 @@ export class MacNetworkPingProvider implements PingProvider {
 
   async check(): Promise<PingProbeSet> {
     const routeResult = await this.readDefaultRoute();
-    const gatewayRoute = routeResult.route ?? (await this.readPhysicalRoute());
+    const defaultRoute = routeResult.route;
+    const defaultRouteIsVpn = defaultRoute?.interface
+      ? /^utun\d+$/iu.test(defaultRoute.interface)
+      : false;
+    const gatewayRoute =
+      defaultRoute && !defaultRouteIsVpn
+        ? defaultRoute
+        : ((await this.readPhysicalRoute()) ?? defaultRoute);
     const gateway = await this.probeGateway(gatewayRoute, routeResult.reason);
 
     const [internetHttp, internetPing, server, vpn] = await Promise.all([

@@ -74,7 +74,10 @@ export class GoogleTranslateProvider implements TranslationProvider {
     const url = new URL(this.endpoint);
 
     url.searchParams.set("client", "gtx");
-    url.searchParams.set("sl", "auto");
+    // Keep the requested direction consistent with the local detector. Using
+    // Google's automatic source detection here can disagree for mixed-script
+    // text and produce results such as EN → EN.
+    url.searchParams.set("sl", localSourceLanguage);
     url.searchParams.set("tl", targetLanguage);
     url.searchParams.set("dt", "t");
     url.searchParams.set("dj", "1");

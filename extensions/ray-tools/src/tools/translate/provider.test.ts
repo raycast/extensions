@@ -33,7 +33,7 @@ describe("Google translation provider", () => {
       sourceLanguage: "ru",
       targetLanguage: "en",
     });
-    expect(requests[0]?.url).toContain("sl=auto");
+    expect(requests[0]?.url).toContain("sl=ru");
     expect(requests[0]?.url).toContain("tl=en");
   });
 
