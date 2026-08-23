@@ -2,7 +2,8 @@ import { LaunchType, LocalStorage, Toast, captureException, environment, popToRo
 import { clearCache } from "./cache";
 
 const doTheFetch = async (url: string, options?: RequestInit) => {
-  const isBackground = environment.launchType === LaunchType.Background;
+  // A tool's thrown message already reaches the model; a toast on top is noise
+  const silent = environment.launchType === LaunchType.Background || environment.entryPointType === "tool";
   let res;
   try {
     res = await fetch(url, options);
@@ -10,7 +11,7 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
     if (e instanceof Error) {
       console.error({ error: e, url });
       captureException(e);
-      if (!isBackground) showResetToast({ title: `Error ${res?.status}: ${e.message}` });
+      if (!silent) showResetToast({ title: `Error ${res?.status}: ${e.message}` });
       throw new Error(e.message);
     }
   }
@@ -20,9 +21,24 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
     const title = rejectedToken
       ? "Forge rejected the API token. Create a v2 token with the scopes you need."
       : `Error ${res?.status}: ${res?.statusText}`;
-    if (!isBackground) showResetToast({ title });
+    if (!silent) showResetToast({ title });
     captureException(new Error(`${res?.status} ${res?.statusText}: ${url}`));
-    throw new Error(res?.statusText);
+    // Forge explains itself in the body: a 400 names the filters it does allow
+    const detail = await res
+      ?.text()
+      .then((body) => {
+        try {
+          return String((JSON.parse(body) as { message?: string }).message ?? body);
+        } catch {
+          return body;
+        }
+      })
+      .catch(() => "");
+    throw new Error(
+      [`${res?.status ?? "network"} ${res?.statusText || "request failed"}: ${url}`, detail?.slice(0, 300)]
+        .filter(Boolean)
+        .join(" — "),
+    );
   }
   return res;
 };

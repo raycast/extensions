@@ -3,11 +3,11 @@ import { findSite, tail } from "./helpers";
 
 type Input = {
   /**
-   * Name of the site, as shown in Forge (for example "example.com").
+   * The site's id as a string, for example "2882133", or its exact name.
    */
   site: string;
   /**
-   * Id of a specific deployment. Leave empty for the most recent deployment.
+   * Id of one deployment. Leave empty for the latest.
    */
   deploymentId?: number;
 };

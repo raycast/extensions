@@ -4,13 +4,28 @@ import { IEvent, IServer, ISite } from "../types";
 import { flatten, getCollection, getResource, postAction } from "../lib/forge";
 import { Site } from "./Site";
 
-export type ServiceAction = "reboot" | "start" | "stop";
+export type ServiceAction = "reboot" | "reload" | "stop";
+export type Service = "php" | "nginx" | "database" | "redis";
+
+// Forge has no start: a stopped service comes back with reboot, and anything else 422s
+export const SERVICE_ACTIONS: Record<Service, ServiceAction[]> = {
+  php: ["reboot", "reload"],
+  nginx: ["reboot", "stop"],
+  database: ["reboot", "stop"],
+  redis: ["reboot"],
+};
+
+// Forge's mysql and postgres endpoints both act on whichever engine the server runs
+export const databaseService = (server: IServer) => {
+  if (!server.database_type) throw new Error(`${server.name ?? server.id} has no database installed.`);
+  return server.database_type.startsWith("postgres") ? "postgres" : "mysql";
+};
 
 type RunAction = {
   server: IServer;
   token: string;
   action?: ServiceAction;
-  service?: string;
+  service?: Service;
 };
 
 type ServerWithToken = { server: IServer; token: string };
@@ -37,8 +52,9 @@ export const Server = {
   },
 
   async runAction({ server, token, action = "reboot", service }: RunAction) {
-    const endpoint = service
-      ? `orgs/${server.org_slug}/servers/${server.id}/services/${service}/actions`
+    const slug = service === "database" ? databaseService(server) : service;
+    const endpoint = slug
+      ? `orgs/${server.org_slug}/servers/${server.id}/services/${slug}/actions`
       : `orgs/${server.org_slug}/servers/${server.id}/actions`;
     // PHP runs one pool per installed version, so the action has to name one
     const payload = service === "php" ? { action, version: server.php_version } : { action };

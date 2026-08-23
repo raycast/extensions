@@ -1,17 +1,20 @@
 import { Tool } from "@raycast/api";
 import { Site } from "../api/Site";
 import { repositoryLabel } from "../lib/url";
-import { findSite } from "./helpers";
+import { findSite, resolveForConfirmation } from "./helpers";
 
 type Input = {
   /**
-   * Name of the site to deploy, as shown in Forge (for example "example.com").
+   * The site's id as a string, for example "2882133", or its exact name. Names repeat across
+   * servers, so a partial name is refused.
    */
   site: string;
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ site }) => {
-  const { site: found, server } = await findSite(site);
+  const match = await resolveForConfirmation(() => findSite(site));
+  if (!match) return { message: `Deploy "${site}"?` };
+  const { site: found, server } = match;
   return {
     message: `Deploy ${found.name}?`,
     info: [

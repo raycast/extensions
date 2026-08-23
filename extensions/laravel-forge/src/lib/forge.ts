@@ -40,7 +40,7 @@ export const getCollection = async (path: string, token: string, { pages = PAGE_
     if (!cursor) break;
   }
 
-  return { items, included };
+  return { items, included, nextCursor: cursor };
 };
 
 export const getResource = async (path: string, token: string) => {

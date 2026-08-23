@@ -3,11 +3,11 @@ import { findServer, tail } from "./helpers";
 
 type Input = {
   /**
-   * Name of the server, as shown in Forge.
+   * The server's id as a string, for example "678350", or its exact name.
    */
   server: string;
   /**
-   * Id of a specific event to read the command output of. Leave empty to list recent events.
+   * Id of one event to read the output of. Leave empty to list recent events.
    */
   eventId?: number;
 };

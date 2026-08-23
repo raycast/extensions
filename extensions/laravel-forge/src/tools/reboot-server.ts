@@ -1,20 +1,22 @@
 import { Tool } from "@raycast/api";
 import { Server } from "../api/Server";
-import { nameList, sitesOnServer, targetServer } from "./helpers";
+import { nameList, resolveForConfirmation, sitesOnServer, targetServer } from "./helpers";
 
 type Input = {
   /**
-   * Name of the server to reboot, as shown in Forge. Leave empty if you only know a site that runs on it.
+   * The server's id as a string, or its exact name. Leave empty if you only know a site on it.
    */
   server?: string;
   /**
-   * Name of a site on the server, used when the server itself was not named.
+   * The site's id as a string, for example "2882133", or its exact name.
    */
   site?: string;
 };
 
 export const confirmation: Tool.Confirmation<Input> = async ({ server, site }) => {
-  const { server: found } = await targetServer({ server, site });
+  const resolved = await resolveForConfirmation(() => targetServer({ server, site }));
+  if (!resolved) return { message: `Reboot "${server ?? site}"?` };
+  const { server: found } = resolved;
   const sites = await sitesOnServer(found);
   return {
     message: `Reboot ${found.name}? Every site on it goes down until it comes back.`,
