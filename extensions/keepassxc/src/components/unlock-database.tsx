@@ -3,6 +3,7 @@ import { JSX } from "react/jsx-runtime";
 import { useForm } from "@raycast/utils";
 
 import { KeePassLoader, showToastKeepassxcCliErrors } from "../utils/keepass-loader";
+import { InactivityTimer } from "../utils/inactivity-timer";
 
 interface PasswordForm {
   password: string;
@@ -39,6 +40,7 @@ export default function UnlockDatabase({
         KeePassLoader.cacheCredentials(value.password, value.keyFile[0]);
         KeePassLoader.setCredentials(value.password, value.keyFile[0]);
         setIsUnlocked(true);
+        void InactivityTimer.recordActivity();
       }, showToastKeepassxcCliErrors);
     },
   });

@@ -5,6 +5,7 @@ import { List } from "@raycast/api";
 import Entry from "./entry";
 import FolderFilterDropdown from "./folder-filter-dropdown";
 import { KeePassLoader, showToastKeepassxcCliErrors } from "../utils/keepass-loader";
+import { InactivityTimer } from "../utils/inactivity-timer";
 import { PinLoader } from "../utils/pin-loader";
 import { getEntryId, getFolders } from "../utils/entry-helper";
 
@@ -73,6 +74,8 @@ export default function SearchDatabase({
         folders.length > 0 ? <FolderFilterDropdown folders={folders} onFolderChange={setEntriesFolder} /> : undefined
       }
       throttle={true}
+      onSearchTextChange={() => void InactivityTimer.recordActivity()}
+      onSelectionChange={() => void InactivityTimer.recordActivity()}
     >
       {pinnedEntries.length > 0 && (
         <List.Section title="Favorites">

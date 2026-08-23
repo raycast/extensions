@@ -1,22 +1,20 @@
 import { useState, useEffect } from "react";
 import { JSX } from "react/jsx-runtime";
-import { Detail, getPreferenceValues } from "@raycast/api";
+import { Detail } from "@raycast/api";
 import { KeePassLoader } from "./utils/keepass-loader";
-import { InactivityTimer } from "./utils/inactivity-timer";
+import { InactivityTimer, LOCK_AFTER_MS } from "./utils/inactivity-timer";
 import SearchDatabase from "./components/search-database";
 import UnlockDatabase from "./components/unlock-database";
-
-// The amount of time (in minutes) after which the database should be locked due to inactivity
-const lockAfterInactivity = Number(getPreferenceValues().lockAfterInactivity);
 
 /**
  * The entry point of Search command
  *
  * This component determines whether the database is already unlocked or not,
  * and renders either the search interface or the unlock interface accordingly.
- * If the user has set the lockAfterInactivity preference, the component will
- * automatically launch an inactivity timer, which will lock the database after
- * the specified amount of time if the user doesn't interact with the database
+ * When auto-lock is enabled (`LOCK_AFTER_MS > 0`), a lock watcher is started
+ * once the database is unlocked — whether from cached credentials on mount or
+ * via the unlock form — and stopped when the database is locked or the command
+ * unmounts.
  *
  * @returns {JSX.Element} - The rendered component
  */
@@ -27,15 +25,16 @@ export default function Command(): JSX.Element {
   useEffect(() => {
     KeePassLoader.loadCredentialsCache().then((credentials) => {
       if (credentials.databasePassword || credentials.keyFile) {
-        if (lockAfterInactivity > 0) {
-          InactivityTimer.hasRecentActivity().then((hasRecentActivity) => {
-            if (hasRecentActivity) {
-              setIsUnlocked(true);
+        if (LOCK_AFTER_MS > 0) {
+          InactivityTimer.hasRecentActivity().then((recent) => {
+            if (recent) {
               KeePassLoader.setCredentials(credentials.databasePassword, credentials.keyFile);
+              setIsUnlocked(true);
+              void InactivityTimer.recordActivity();
             } else {
               KeePassLoader.deleteCredentialsCache();
+              KeePassLoader.clearCredentials();
             }
-            InactivityTimer.launchInactivityTimer();
             setIsLoaded(true);
           });
         } else {
@@ -44,13 +43,20 @@ export default function Command(): JSX.Element {
           setIsLoaded(true);
         }
       } else {
-        if (lockAfterInactivity > 0) {
-          InactivityTimer.launchInactivityTimer();
-        }
         setIsLoaded(true);
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (!isUnlocked || LOCK_AFTER_MS <= 0) return () => {};
+    const cleanup = InactivityTimer.startLockWatcher(() => {
+      KeePassLoader.deleteCredentialsCache();
+      KeePassLoader.clearCredentials();
+      setIsUnlocked(false);
+    });
+    return () => cleanup();
+  }, [isUnlocked]);
 
   if (!isLoaded) {
     return <Detail />;

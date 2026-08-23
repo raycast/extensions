@@ -1,5 +1,13 @@
 # KeePassXC Extension Changelog
 
+## [1.10.1]
+
+### Fixed
+
+- Auto-lock now actually re-prompts for the database password after the configured inactivity period (#30458). Previously the inactivity timer wrote the current time to local storage every few seconds forever, so the database was always considered "active" and never locked. Activity is now recorded only on genuine interaction, and a read-only watcher locks the database when the period elapses — whether the view stays open or Raycast was closed and reopened.
+
+- Clear the cached database entries (decrypted passwords, usernames, and TOTP codes) from local storage when the database locks, so secrets are not left readable after auto-lock.
+
 ## [1.10.0] - 2026-03-30
 
 ### Added

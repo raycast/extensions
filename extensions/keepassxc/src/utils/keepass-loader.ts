@@ -213,15 +213,16 @@ class KeePassLoader {
     });
 
   /**
-   * Removes the stored credentials from `LocalStorage`
+   * Removes the stored credentials and cached entries from `LocalStorage`
    *
-   * This function deletes the cached database password and key file path
-   * from LocalStorage, ensuring that the credentials are no longer stored
-   * locally
+   * This function deletes the cached database password, key file path, and the
+   * cached entries (decrypted CSV) from LocalStorage, ensuring that credentials
+   * and entry secrets are no longer stored locally. Called on every lock path.
    */
   static deleteCredentialsCache = () => {
     LocalStorage.removeItem("databasePassword");
     LocalStorage.removeItem("keyFile");
+    LocalStorage.removeItem("entries");
   };
 
   /**
@@ -345,6 +346,16 @@ class KeePassLoader {
   static setCredentials = (password: string = "", keyFile: string = "") => {
     this.setDatabasePassword(password);
     this.setKeyFile(keyFile);
+  };
+
+  /**
+   * Clears the in-memory database password and key file path
+   *
+   * Security hygiene on lock so secrets don't linger while the unlock form shows.
+   */
+  static clearCredentials = () => {
+    this.databasePassword = "";
+    this.keyFile = "";
   };
 }
 
