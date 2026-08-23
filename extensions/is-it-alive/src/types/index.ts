@@ -11,7 +11,8 @@ export type SiteProvider =
   | "salesforce"
   | "uptimecom"
   | "googlecloud"
-  | "aistudio";
+  | "aistudio"
+  | "outagedeck";
 
 export type StatusIndicator = "none" | "minor" | "major" | "critical";
 

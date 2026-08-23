@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, Keyboard } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { useHistory } from "@/lib/hooks/useSonarrAPI";
 import type { HistoryRecord } from "@/lib/types/history";
@@ -210,7 +210,7 @@ function HistoryListItem({ record, onRefresh }: { record: HistoryRecord; onRefre
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
         </ActionPanel>

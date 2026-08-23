@@ -59,6 +59,20 @@ interface PackageIndex extends MutableSlices {
    * every mutable commit).
    */
   notApplicable: Record<string, string>;
+  /**
+   * Upgrades that failed for a reason tied to the offered installer (broken
+   * vendor packaging, technology mismatch, installer crash), keyed by
+   * `source|id`. Bulk runs skip exactly the recorded version; explicit
+   * single-package retries are never blocked. Reconciled on every mutable
+   * commit under the same rule as `notApplicable`: the marker lives only
+   * while winget offers exactly that version.
+   */
+  failedUpgrades: Record<string, FailedUpgrade>;
+}
+
+interface FailedUpgrade {
+  version: string;
+  message?: string;
 }
 
 interface IndexPaths {
@@ -77,6 +91,7 @@ const EMPTY_INDEX: PackageIndex = {
   upgradable: [],
   pinned: [],
   notApplicable: {},
+  failedUpgrades: {},
 };
 
 /** Canonical `source|id` key for cross-slice and marker lookups. */
@@ -94,8 +109,9 @@ function loadIndex(paths: IndexPaths): PackageIndex | null {
   if (!data || data.schemaVersion !== SCHEMA_VERSION || !Array.isArray(data.packages)) {
     return null;
   }
-  // Additive field: files written before markers existed lack it.
+  // Additive fields: files written before markers existed lack them.
   data.notApplicable ??= {};
+  data.failedUpgrades ??= {};
   return data;
 }
 
@@ -145,6 +161,23 @@ function withIndexWrite<T>(
   }
 }
 
+/**
+ * Reset the index to empty through the same write lock as every other
+ * mutation, rather than deleting the file under a concurrent writer. Views
+ * reload on the revision bump, and the empty catalog reads as stale.
+ *
+ * The mutation epoch survives: a refresher that recorded an epoch before this
+ * ran is still holding a snapshot of the old contents, and restarting the
+ * count would let a later mutation reach that same number and admit the stale
+ * commit the fence exists to reject.
+ */
+function clearIndex(paths: IndexPaths, env: LockEnvironment): void {
+  withIndexWrite(paths, env, (current) => ({
+    next: { ...EMPTY_INDEX, mutationEpoch: current.mutationEpoch },
+    result: undefined,
+  }));
+}
+
 /** Called when a mutation acquires the op-lock: fences in-flight refresh snapshots. */
 function bumpMutationEpoch(paths: IndexPaths, env: LockEnvironment): number {
   return withIndexWrite(paths, env, (current) => ({
@@ -161,20 +194,21 @@ function currentMutationEpoch(paths: IndexPaths): number {
 type CommitOutcome = "committed" | "fenced" | "rejected-shrink";
 
 /**
- * Drop not-applicable markers the new upgradable slice no longer supports:
- * the row is gone (upgraded or uninstalled elsewhere) or winget now offers a
- * different version (which must be re-tried, not silently hidden).
+ * Drop version-keyed markers the new upgradable slice no longer supports: the
+ * row is gone (upgraded or uninstalled elsewhere) or winget now offers a
+ * different version (which must be re-tried, not silently hidden or skipped).
  */
-function reconcileNotApplicable(
-  markers: Record<string, string>,
+function reconcileVersionMarkers<T>(
+  markers: Record<string, T>,
   upgradable: WingetUpgradePackage[],
-): Record<string, string> {
+  markerVersion: (marker: T) => string,
+): Record<string, T> {
   const entries = Object.entries(markers);
   if (entries.length === 0) {
     return markers;
   }
   const availableByKey = new Map(upgradable.map((pkg) => [packageKey(pkg), pkg.available]));
-  return Object.fromEntries(entries.filter(([key, version]) => availableByKey.get(key) === version));
+  return Object.fromEntries(entries.filter(([key, marker]) => availableByKey.get(key) === markerVersion(marker)));
 }
 
 /**
@@ -204,12 +238,43 @@ function patchMutable(
       next: {
         ...current,
         ...slices,
-        notApplicable: reconcileNotApplicable(current.notApplicable, slices.upgradable),
+        notApplicable: reconcileVersionMarkers(current.notApplicable, slices.upgradable, (version) => version),
+        failedUpgrades: reconcileVersionMarkers(current.failedUpgrades, slices.upgradable, (marker) => marker.version),
         mutableAt: options.stampMutableAt ? env.now() : current.mutableAt,
       },
       result: "committed" as const,
     };
   });
+}
+
+/**
+ * Discard the mutable slices' freshness stamp so the next view mount
+ * re-queries winget. Used when a refresh observed a state known to be
+ * mid-transition (e.g. a package still registered right after its
+ * uninstaller reported success) — the data is correct NOW but expected to
+ * change without any further operation.
+ */
+function markMutableStale(paths: IndexPaths, env: LockEnvironment): void {
+  withIndexWrite(paths, env, (current) => ({
+    next: { ...current, mutableAt: null },
+    result: undefined,
+  }));
+}
+
+/** Record that upgrading to the currently offered version failed. */
+function markUpgradeFailed(
+  paths: IndexPaths,
+  env: LockEnvironment,
+  target: { id: string; source: string },
+  marker: FailedUpgrade,
+): void {
+  withIndexWrite(paths, env, (current) => ({
+    next: {
+      ...current,
+      failedUpgrades: { ...current.failedUpgrades, [packageKey(target)]: marker },
+    },
+    result: undefined,
+  }));
 }
 
 /** Record that the listed update for a package does not apply to this system. */
@@ -282,18 +347,22 @@ function migrateLegacyIndex(paths: IndexPaths, env: LockEnvironment, legacyPath:
 
 export {
   bumpMutationEpoch,
+  clearIndex,
   commitCatalog,
   currentMutationEpoch,
   EMPTY_INDEX,
   indexMtime,
   isCatalogFresh,
   loadIndex,
+  markMutableStale,
   markUpdateNotApplicable,
+  markUpgradeFailed,
   migrateLegacyIndex,
   packageKey,
   patchMutable,
   SCHEMA_VERSION,
   type CommitOutcome,
+  type FailedUpgrade,
   type IndexPaths,
   type MutableSlices,
   type PackageIndex,

@@ -10,6 +10,7 @@ import {
   StatusState,
 } from "../generated/graphql";
 
+import { getCheckStatePresentation } from "./pull-request-checks";
 import { getGitHubUser } from "./users";
 
 export function getMergeMethodTitle(method: PullRequestMergeMethod): string {
@@ -129,17 +130,12 @@ export function getNumberOfComments(pullRequest: PullRequestFieldsFragment) {
 }
 
 export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState): List.Item.Accessory | null {
-  switch (commitStatusCheckRollupState) {
-    case "SUCCESS":
-      return { icon: Icon.Check, tooltip: "Checks: Success" };
-    case "ERROR":
-    case "FAILURE":
-      return { icon: Icon.Xmark, tooltip: "Checks: Failure" };
-    case "PENDING":
-      return { icon: Icon.Clock, tooltip: "Checks: Pending" };
-    default:
-      return null;
+  const presentation = getCheckStatePresentation(commitStatusCheckRollupState);
+  if (!presentation) {
+    return null;
   }
+
+  return { icon: Icon[presentation.icon], tooltip: `Checks: ${presentation.text}` };
 }
 
 export type PullRequestFile = RestEndpointMethodTypes["pulls"]["listFiles"]["response"]["data"][0];

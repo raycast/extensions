@@ -85,19 +85,24 @@ export type GoogleChromeBookmarkFile = {
 export interface BrowserConfig {
   readonly appName: string;
   readonly dataPath: string;
-  readonly binaryPath: string;
+  /**
+   * The `.app` bundle, passed to `open -a`. Not the inner Mach-O binary:
+   * `open` resolves the bundle through Launch Services, which is what makes
+   * the browser come to the front and the command return immediately.
+   */
+  readonly appPath: string;
 }
 
 export const BROWSERS: Record<string, BrowserConfig> = {
   chrome: {
     appName: "Google Chrome",
     dataPath: "Library/Application Support/Google/Chrome",
-    binaryPath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    appPath: "/Applications/Google Chrome.app",
   },
   "chrome-canary": {
     appName: "Google Chrome Canary",
     dataPath: "Library/Application Support/Google/Chrome Canary",
-    binaryPath: "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
+    appPath: "/Applications/Google Chrome Canary.app",
   },
 };
 

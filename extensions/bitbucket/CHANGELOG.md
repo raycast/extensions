@@ -1,5 +1,9 @@
 # Bitbucket Changelog
 
+## [Update] - 2026-08-22
+
+- Added Search All Open Pull Requests command to browse open PRs across the workspace
+
 ## [Update] - 2025-11-17
 
 - Update shortcuts to be consistent across MacOS and Windows

@@ -279,7 +279,7 @@ function AddRepositoryActions({ onAddRepository }: { onAddRepository: (repoPath:
 }
 
 function CreateRepositoryForm({ onAddRepository }: { onAddRepository: (repoPath: string) => void }) {
-  const { pop } = useNavigation();
+  const { pop, push } = useNavigation();
   const [outputDirectory, setOutputDirectory] = useCachedState<string[]>("create-repository-output-directory", []);
   const [repositoryName, setRepositoryName] = useState<string>("");
 
@@ -315,6 +315,7 @@ function CreateRepositoryForm({ onAddRepository }: { onAddRepository: (repoPath:
       });
 
       pop();
+      push(<OpenRepository arguments={{ path: repoPath }} />);
     } catch (error) {
       await showFailureToast(error, { title: "Failed to create repository" });
     }
@@ -352,7 +353,7 @@ function CreateRepositoryForm({ onAddRepository }: { onAddRepository: (repoPath:
 }
 
 function AddRepositoryForm({ onAddRepository }: { onAddRepository: (repoPath: string) => void }) {
-  const { pop } = useNavigation();
+  const { pop, push } = useNavigation();
   const [repositoryPaths, setRepositoryPaths] = useState<string[]>([]);
 
   // Compute validation errors for multiple repositories
@@ -378,7 +379,7 @@ function AddRepositoryForm({ onAddRepository }: { onAddRepository: (repoPath: st
     for (const repoPath of values.repositoryPath) {
       const repoName = basename(repoPath);
 
-      onAddRepository(repoPath);
+      await onAddRepository(repoPath);
 
       await showToast({
         style: Toast.Style.Animated,
@@ -386,11 +387,17 @@ function AddRepositoryForm({ onAddRepository }: { onAddRepository: (repoPath: st
       });
     }
 
+    const addedOneRepository = values.repositoryPath.length === 1;
+
     await showToast({
       style: Toast.Style.Success,
-      title: repositoryPaths.length > 1 ? "All repositories added" : "Repository added",
+      title: addedOneRepository ? "Repository added" : "All repositories added",
     });
     pop();
+
+    if (addedOneRepository) {
+      push(<OpenRepository arguments={{ path: values.repositoryPath[0] }} />);
+    }
   };
 
   return (

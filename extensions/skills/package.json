@@ -13,7 +13,7 @@
     "pernielsentikaer",
     "kayo_timoteo",
     "alexi.build",
-    "alastair_scheuermann"
+    "alastairsounds"
   ],
   "platforms": [
     "macOS",
@@ -129,5 +129,8 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "ray publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

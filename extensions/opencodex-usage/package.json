@@ -1,0 +1,305 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "opencodex-usage",
+  "title": "OpenCodex Usage",
+  "description": "Shows the usage of all the connected OpenCodex model providers",
+  "icon": "extension-icon.png",
+  "author": "jonas_list",
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "opencodex",
+    "usage",
+    "quota",
+    "rate limit",
+    "tokens",
+    "llm",
+    "claude",
+    "codex",
+    "gemini",
+    "proxy"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "provider-usage",
+      "title": "Provider Usage",
+      "subtitle": "OpenCodex",
+      "description": "Shows the rate-limit usage of all connected OpenCodex model providers",
+      "mode": "view",
+      "icon": "command-provider-usage.png"
+    },
+    {
+      "name": "usage-menu-bar",
+      "title": "Usage in Menu Bar",
+      "subtitle": "OpenCodex",
+      "description": "Shows OpenCodex provider quota usage in the menu bar",
+      "mode": "menu-bar",
+      "icon": "command-usage-menu-bar.png",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "menuBarProvider",
+          "title": "Provider in Pill",
+          "description": "Which provider the menu bar pill reports. All providers shows whichever is under most pressure.",
+          "type": "dropdown",
+          "required": false,
+          "default": "all",
+          "data": [
+            {
+              "title": "All providers",
+              "value": "all"
+            },
+            {
+              "title": "Claude",
+              "value": "anthropic"
+            },
+            {
+              "title": "Codex",
+              "value": "openai"
+            },
+            {
+              "title": "Gemini",
+              "value": "gemini"
+            },
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "Grok",
+              "value": "grok"
+            },
+            {
+              "title": "xAI",
+              "value": "xai"
+            },
+            {
+              "title": "Kimi",
+              "value": "kimi"
+            },
+            {
+              "title": "DeepSeek",
+              "value": "deepseek"
+            },
+            {
+              "title": "Mistral",
+              "value": "mistral"
+            },
+            {
+              "title": "Qwen",
+              "value": "qwen"
+            },
+            {
+              "title": "Z.ai",
+              "value": "zai"
+            },
+            {
+              "title": "OpenRouter",
+              "value": "openrouter"
+            },
+            {
+              "title": "Groq",
+              "value": "groq"
+            },
+            {
+              "title": "Cerebras",
+              "value": "cerebras"
+            },
+            {
+              "title": "Ollama",
+              "value": "ollama"
+            },
+            {
+              "title": "Cursor",
+              "value": "cursor"
+            },
+            {
+              "title": "MiniMax",
+              "value": "minimax"
+            }
+          ]
+        },
+        {
+          "name": "menuBarWindow",
+          "title": "Pill Window",
+          "description": "Which rate-limit window the menu bar pill reports",
+          "type": "dropdown",
+          "required": false,
+          "default": "inherit",
+          "data": [
+            {
+              "title": "Same as ring setting",
+              "value": "inherit"
+            },
+            {
+              "title": "Highest usage",
+              "value": "worst"
+            },
+            {
+              "title": "5h",
+              "value": "5h"
+            },
+            {
+              "title": "Weekly",
+              "value": "weekly"
+            },
+            {
+              "title": "Monthly",
+              "value": "monthly"
+            }
+          ]
+        },
+        {
+          "name": "menuBarShowProvider",
+          "title": "Pill Label",
+          "description": "What to display next to the ring in the menu bar",
+          "type": "dropdown",
+          "required": false,
+          "default": "percent",
+          "data": [
+            {
+              "title": "Percentage only",
+              "value": "percent"
+            },
+            {
+              "title": "Provider and percentage",
+              "value": "provider"
+            },
+            {
+              "title": "Ring only",
+              "value": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "usage-stats",
+      "title": "Usage Stats",
+      "subtitle": "OpenCodex",
+      "description": "Detailed OpenCodex usage: requests, tokens, cost, per-model and per-day breakdown",
+      "mode": "view",
+      "icon": "command-usage-stats.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "OpenCodex URL",
+      "description": "Base URL of the running OpenCodex proxy",
+      "type": "textfield",
+      "required": false,
+      "default": "http://127.0.0.1:10100"
+    },
+    {
+      "name": "adminToken",
+      "title": "Admin Token",
+      "description": "Admin token for the OpenCodex management API. Leave empty to read ~/.opencodex/admin-api-token automatically for a local proxy. Required when the proxy is not on this machine.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "usageRange",
+      "title": "Usage Range",
+      "description": "Time range used for request and token statistics",
+      "type": "dropdown",
+      "required": false,
+      "default": "30d",
+      "data": [
+        {
+          "title": "7 days",
+          "value": "7d"
+        },
+        {
+          "title": "30 days",
+          "value": "30d"
+        },
+        {
+          "title": "All time",
+          "value": "all"
+        }
+      ]
+    },
+    {
+      "name": "ringWindow",
+      "title": "Ring Window",
+      "description": "Which rate-limit window the ring and percentage next to a provider shows",
+      "type": "dropdown",
+      "required": false,
+      "default": "weekly",
+      "data": [
+        {
+          "title": "Weekly",
+          "value": "weekly"
+        },
+        {
+          "title": "5h",
+          "value": "5h"
+        },
+        {
+          "title": "Monthly",
+          "value": "monthly"
+        },
+        {
+          "title": "Highest usage",
+          "value": "worst"
+        }
+      ]
+    },
+    {
+      "name": "paceWindow",
+      "title": "Pace Window",
+      "description": "Which window the pace hint compares against elapsed time",
+      "type": "dropdown",
+      "required": false,
+      "default": "weekly",
+      "data": [
+        {
+          "title": "Weekly",
+          "value": "weekly"
+        },
+        {
+          "title": "5h",
+          "value": "5h"
+        },
+        {
+          "title": "Monthly",
+          "value": "monthly"
+        },
+        {
+          "title": "Off",
+          "value": "off"
+        }
+      ]
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "fetch-logos": "node scripts/fetch-logos.mjs",
+    "icons": "node scripts/render-icons.mjs",
+    "rings": "node scripts/render-rings.mjs"
+  }
+}

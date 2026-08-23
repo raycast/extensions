@@ -1,5 +1,23 @@
 # Sonarr Changelog
 
+## [Windows Support] - 2026-08-22
+
+### Added
+
+- Windows support: the extension is now available on both macOS and Windows
+
+### Changed
+
+- Keyboard shortcuts are now declared per platform, so every action shortcut also works on Windows instead of being ignored
+- Upgraded to `@raycast/api` v2 and updated the remaining dependencies to their latest versions
+- Refreshed the transitive security overrides, scoping `brace-expansion` per major so nested dependencies keep their own supported range
+- `Host` and `Port` preferences now describe one value each, steering new setups to a bare hostname with the port in its own field
+
+### Fixed
+
+- Fixed every "Open in Sonarr" link when `Host` holds a full URL or a `host:port` value: the browser links and the API requests now resolve the instance URL through a single shared helper instead of two implementations that could disagree
+- Fixed connecting to an instance behind a reverse proxy: a `Host` written as an explicit URL without a port (e.g. `https://sonarr.example.com`) no longer has the `Port` preference appended to it
+
 ## [Update] - 2026-02-21
 
 - Removed an unused command entirely

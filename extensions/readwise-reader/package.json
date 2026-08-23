@@ -144,6 +144,56 @@
           "type": "dropdown",
           "description": "The default location to use when listing content",
           "title": "Default list location"
+        },
+        {
+          "name": "defaultSortBy",
+          "title": "Default sort",
+          "description": "The default sort to use when opening List Documents",
+          "type": "dropdown",
+          "required": false,
+          "default": "last_moved_at",
+          "data": [
+            {
+              "title": "Date Moved",
+              "value": "last_moved_at"
+            },
+            {
+              "title": "Date Saved",
+              "value": "saved_at"
+            },
+            {
+              "title": "Date Published",
+              "value": "published_date"
+            },
+            {
+              "title": "Date Last Opened",
+              "value": "last_opened_at"
+            },
+            {
+              "title": "Author",
+              "value": "author"
+            },
+            {
+              "title": "Category",
+              "value": "category"
+            },
+            {
+              "title": "Length",
+              "value": "word_count"
+            },
+            {
+              "title": "Progress",
+              "value": "reading_progress"
+            },
+            {
+              "title": "Title",
+              "value": "title"
+            },
+            {
+              "title": "Random",
+              "value": "random"
+            }
+          ]
         }
       ]
     }

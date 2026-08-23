@@ -1,7 +1,7 @@
 import { Action, Icon } from "@raycast/api";
 import { ResourceDetailView } from "../components/ResourceDetailView";
-import { SitemapDetailView } from "../components/SitemapDetailView";
 import { ResourcesListView } from "../components/ResourcesListView";
+import { SitemapDetailView } from "../components/SitemapDetailView";
 import { DiggerResult } from "../types";
 
 /**

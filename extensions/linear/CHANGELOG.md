@@ -1,5 +1,13 @@
 # Linear Changelog
 
+## [Issue Attachments] - 2026-08-20
+
+- Fix attachments added through Create Issue failing to upload.
+
+## [Copy as Prompt] - 2026-08-19
+
+- Add a "Copy as Prompt" action to issue copy actions, matching Linear's native action of the same name. Copies the issue as a structured prompt for coding agents, including its description, team, labels, project, and parent or sub-issues.
+
 ## [My Issues Sub Views] - 2026-07-30
 
 - Add a dropdown to the "My Issues" command to switch between the Assigned, Created, and Subscribed sub views, matching the Linear app. Assigned stays the default.

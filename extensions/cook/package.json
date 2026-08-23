@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cook",
+  "title": "Cook",
+  "description": "Browse, view, and generate shopping lists from your Cooklang recipe collection",
+  "icon": "icon.png",
+  "author": "chizitere_david",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-recipes",
+      "title": "View Recipes",
+      "subtitle": "Cook",
+      "description": "Search your recipe collection and view recipes with ingredients, steps, cookware, and metadata",
+      "mode": "view"
+    },
+    {
+      "name": "shopping-list",
+      "title": "Shopping List",
+      "subtitle": "Cook",
+      "description": "Select recipes and generate a combined shopping list with quantities",
+      "mode": "view"
+    },
+    {
+      "name": "pantry",
+      "title": "Pantry",
+      "subtitle": "Cook",
+      "description": "View pantry inventory, find what you can make, and check depleted/expiring items",
+      "mode": "view"
+    },
+    {
+      "name": "start-server",
+      "title": "Start Cook Server",
+      "subtitle": "Cook",
+      "description": "Launch the CookCLI web server to browse recipes in your browser",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "recipePath",
+      "title": "Recipe Directory",
+      "description": "Path to your Cooklang recipe collection",
+      "type": "directory",
+      "required": true,
+      "default": "~/Documents/Recipes"
+    },
+    {
+      "name": "cookCliPath",
+      "title": "CookCLI Binary Path",
+      "description": "Path to the cook CLI executable (install via brew or cargo)",
+      "type": "textfield",
+      "required": true,
+      "default": "/opt/homebrew/bin/cook"
+    },
+    {
+      "name": "serverPort",
+      "title": "Cook Server Port",
+      "description": "Port for launching the cook web server",
+      "type": "textfield",
+      "required": false,
+      "default": "9080"
+    }
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^25.9.5",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "vitest": "^3.2.7"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9"
+  }
+}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { List, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { DiggerResult } from "../types";
 import { getFontDisplayName, getFontSubtitle } from "../utils/fontUtils";
 import { truncateText } from "../utils/formatters";

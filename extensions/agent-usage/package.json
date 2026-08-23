@@ -1,30 +1,100 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-usage",
-  "title": "Agent Usage",
-  "description": "Monitor AI coding agent usage across Amp, Claude, Codex, Copilot, Cursor, Droid, Gemini, Grok, Kimi, Synthetic, Antigravity, z.ai, MiniMax, and OpenCode Go",
-  "icon": "extension-icon.png",
+  "description": "Monitor AI coding agent usage across AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, Synthetic and z.ai",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
   "author": "thuggyduck",
   "contributors": [
     "alexi.build",
     "adrianbonpin",
-    "garrick_zhang"
+    "garrick_zhang",
+    "EDM115",
+    "chingweih",
+    "2f6ft9t7t6"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "ray build -e dist -o ./dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "undici": "^8.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.20.1",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "icon": "extension-icon.png",
+  "allowScripts": {
+    "esbuild": true
+  },
+  "commands": [
+    {
+      "name": "agent-usage",
+      "title": "Agent Usage",
+      "subtitle": "Show Agents Usage",
+      "description": "Show agents usage",
+      "mode": "view"
+    },
+    {
+      "name": "agent-usage-menubar",
+      "title": "Agent Usage Menu Bar",
+      "subtitle": "Agent Usage",
+      "description": "Show agent usage in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1h"
+    }
   ],
   "platforms": [
     "macOS",
     "Windows"
   ],
-  "categories": [
-    "Productivity"
-  ],
-  "license": "MIT",
   "preferences": [
+    {
+      "name": "showAihubmix",
+      "type": "checkbox",
+      "title": "Visible Agents",
+      "label": "Show AIHubMix",
+      "description": "Show AIHubMix balance in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "aihubmixApiKey",
+      "type": "password",
+      "title": "AIHubMix Access Key (Optional)",
+      "description": "Copy the Access Key from https://console.aihubmix.com/setting, or set AIHUBMIX_ACCESS_KEY in your shell.",
+      "required": false
+    },
     {
       "name": "showAmp",
       "type": "checkbox",
-      "title": "Visible Agents",
       "label": "Show Amp",
       "description": "Show Amp usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showAntigravity",
+      "type": "checkbox",
+      "label": "Show Antigravity",
+      "description": "Show Antigravity usage in the list",
       "default": true,
       "required": false
     },
@@ -37,11 +107,27 @@
       "required": false
     },
     {
+      "name": "showClinePass",
+      "type": "checkbox",
+      "label": "Show ClinePass",
+      "description": "Show ClinePass usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "showCodex",
       "type": "checkbox",
       "label": "Show Codex",
       "description": "Show Codex usage in the list",
       "default": true,
+      "required": false
+    },
+    {
+      "name": "additionalCodexHomes",
+      "type": "textfield",
+      "title": "Additional Codex Homes (Optional)",
+      "placeholder": "~/.codex-personal, ~/.codex-work",
+      "description": "Comma-separated CODEX_HOME directories to include in addition to the default Codex home",
       "required": false
     },
     {
@@ -53,11 +139,40 @@
       "required": false
     },
     {
+      "name": "copilotAuthToken",
+      "type": "password",
+      "title": "Copilot Authorization Token (Optional)",
+      "description": "Optional fallback OAuth token for Copilot usage. Usually auto-detected from GH_TOKEN or GITHUB_TOKEN (for example from 'gh auth token'). Standard PATs may not work.",
+      "required": false
+    },
+    {
       "name": "showCursor",
       "type": "checkbox",
       "label": "Show Cursor",
       "description": "Show Cursor usage in the list",
       "default": true,
+      "required": false
+    },
+    {
+      "name": "cursorCookieHeader",
+      "type": "password",
+      "title": "Cursor Cookie Header (Optional)",
+      "description": "Optional fallback Cookie header from cursor.com. Usually auto-detected from your local Cursor.app login.",
+      "required": false
+    },
+    {
+      "name": "showDeepSeek",
+      "type": "checkbox",
+      "label": "Show DeepSeek",
+      "description": "Show DeepSeek balance in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "deepseekApiKey",
+      "type": "password",
+      "title": "DeepSeek API Key (Optional)",
+      "description": "Auto-detected from OpenCode login (deepseek) or DEEPSEEK_API_KEY/DEEPSEEK_KEY. Fallback: paste an API key from https://platform.deepseek.com/api_keys.",
       "required": false
     },
     {
@@ -93,27 +208,10 @@
       "required": false
     },
     {
-      "name": "showSynthetic",
-      "type": "checkbox",
-      "label": "Show Synthetic",
-      "description": "Show Synthetic usage in the list",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "showAntigravity",
-      "type": "checkbox",
-      "label": "Show Antigravity",
-      "description": "Show Antigravity usage in the list",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "showZai",
-      "type": "checkbox",
-      "label": "Show z.ai (GLM)",
-      "description": "Show z.ai (GLM) usage in the list",
-      "default": true,
+      "name": "kimiAuthToken",
+      "type": "password",
+      "title": "Kimi Authorization Token (Optional)",
+      "description": "Auto-detected from OpenCode login (kimi-for-coding). Fallback: paste the Authorization header value from https://www.kimi.com/code/console DevTools. Format: 'Bearer eyJ...' or just 'eyJ...'",
       "required": false
     },
     {
@@ -125,53 +223,33 @@
       "required": false
     },
     {
+      "name": "minimaxApiToken",
+      "type": "password",
+      "title": "MiniMax API Token (Optional)",
+      "description": "Optional fallback token. Usually auto-detected from MINIMAX_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
+      "required": false
+    },
+    {
+      "name": "showMinimaxCN",
+      "type": "checkbox",
+      "label": "Show MinimaxCN",
+      "description": "Show MinimaxCN (MiniMax 国内版) usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "minimaxcnApiToken",
+      "type": "password",
+      "title": "MinimaxCN API Token (Optional)",
+      "description": "Optional fallback token. Usually auto-detected from MINIMAX_CN_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
+      "required": false
+    },
+    {
       "name": "showOpencodeGo",
       "type": "checkbox",
       "label": "Show OpenCode Go",
       "description": "Show OpenCode Go subscription usage in the list",
       "default": true,
-      "required": false
-    },
-    {
-      "name": "copilotAuthToken",
-      "type": "password",
-      "title": "Copilot Authorization Token (Optional)",
-      "description": "Optional fallback OAuth token for Copilot usage. Usually auto-detected from GH_TOKEN or GITHUB_TOKEN (for example from 'gh auth token'). Standard PATs may not work.",
-      "required": false
-    },
-    {
-      "name": "cursorCookieHeader",
-      "type": "password",
-      "title": "Cursor Cookie Header (Optional)",
-      "description": "Optional fallback Cookie header from cursor.com. Usually auto-detected from your local Cursor.app login.",
-      "required": false
-    },
-    {
-      "name": "kimiAuthToken",
-      "type": "password",
-      "title": "Kimi Authorization Token (Optional)",
-      "description": "Auto-detected from OpenCode login (kimi-for-coding). Fallback: paste the Authorization header value from https://www.kimi.com/code/console DevTools. Format: 'Bearer eyJ...' or just 'eyJ...'",
-      "required": false
-    },
-    {
-      "name": "syntheticApiToken",
-      "type": "password",
-      "title": "Synthetic API Token (Optional)",
-      "description": "Auto-detected from OpenCode login (synthetic). Fallback: paste your Synthetic API key from https://synthetic.new/billing.",
-      "required": false
-    },
-    {
-      "name": "zaiApiToken",
-      "type": "password",
-      "title": "z.ai API Token (Optional)",
-      "description": "Optional fallback token. Usually auto-detected from ZAI_API_KEY or GLM_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
-      "required": false
-    },
-    {
-      "name": "minimaxApiToken",
-      "type": "password",
-      "title": "MiniMax API Token (Optional)",
-      "description": "Optional fallback token. Usually auto-detected from MINIMAX_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
       "required": false
     },
     {
@@ -189,6 +267,36 @@
       "required": false
     },
     {
+      "name": "showSynthetic",
+      "type": "checkbox",
+      "label": "Show Synthetic",
+      "description": "Show Synthetic usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "syntheticApiToken",
+      "type": "password",
+      "title": "Synthetic API Token (Optional)",
+      "description": "Auto-detected from OpenCode login (synthetic). Fallback: paste your Synthetic API key from https://synthetic.new/billing.",
+      "required": false
+    },
+    {
+      "name": "showZai",
+      "type": "checkbox",
+      "label": "Show z.ai (GLM)",
+      "description": "Show z.ai (GLM) usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "zaiApiToken",
+      "type": "password",
+      "title": "z.ai API Token (Optional)",
+      "description": "Optional fallback token. Usually auto-detected from ZAI_API_KEY or GLM_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
+      "required": false
+    },
+    {
       "name": "cacheTtl",
       "type": "textfield",
       "title": "Cache Duration (Seconds)",
@@ -197,43 +305,5 @@
       "required": false
     }
   ],
-  "commands": [
-    {
-      "name": "agent-usage",
-      "title": "Agent Usage",
-      "subtitle": "Show Agents Usage",
-      "description": "Show agents usage",
-      "mode": "view"
-    },
-    {
-      "name": "agent-usage-menubar",
-      "title": "Agent Usage Menu Bar",
-      "subtitle": "Agent Usage",
-      "description": "Show agent usage in the menu bar",
-      "mode": "menu-bar",
-      "interval": "1h"
-    }
-  ],
-  "dependencies": {
-    "@raycast/api": "^1.104.3",
-    "@raycast/utils": "^1.17.0",
-    "undici": "^6.27.0"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
-  },
-  "scripts": {
-    "build": "ray build",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish",
-    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'"
-  }
+  "title": "Agent Usage"
 }

@@ -1,5 +1,11 @@
 # Tmux Sessioner Changelog
 
+## [Search Session Output] - 2026-08-22
+
+### Added
+
+- **Search Session Output** command: full-text search across the scrollback of every pane in every tmux session — commands you ran and the output they printed. Results are grouped by session (one entry per distinct line, newest first) with the surrounding lines shown in the detail pane; `⏎` switches to the matching session and window, `⌘T` / `⇧⌘T` open it in a new terminal tab/window, `⇧⌘C` copies the line, `⌘R` reloads the scrollback.
+
 ## [Open sessions in a new terminal tab or window] - 2026-08-04
 
 ### Added

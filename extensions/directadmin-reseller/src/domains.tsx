@@ -7,11 +7,12 @@ import ErrorComponent from "./components/ErrorComponent";
 import InvalidUrlComponent from "./components/InvalidUrlComponent";
 import { isInvalidUrl } from "./utils/functions";
 import { useGetDomains } from "./utils/hooks";
+import { Panel } from "./types/panel";
 
-export default function Domains() {
+export default function Domains({ panel }: { panel?: Panel }) {
   if (isInvalidUrl()) return <InvalidUrlComponent />;
 
-  const { isLoading, data: domains, error, revalidate } = useGetDomains();
+  const { isLoading, data: domains, error, revalidate } = useGetDomains(panel);
 
   return error ? (
     <ErrorComponent errorResponse={error} />
@@ -27,39 +28,43 @@ export default function Domains() {
               <Action.Push
                 title="Get Subdomains"
                 icon={Icon.Globe}
-                target={<GetSubdomainsComponent domain={domain} />}
+                target={<GetSubdomainsComponent domain={domain} panel={panel} />}
               />
               <Action.Push
                 title="Get Email Accounts"
                 icon={Icon.AtSymbol}
-                target={<GetEmailAccountsComponent domain={domain} />}
+                target={<GetEmailAccountsComponent domain={domain} panel={panel} />}
               />
-              <ActionPanel.Section>
-                <Action.Push
-                  title="Create Domain"
-                  icon={Icon.Plus}
-                  target={<CreateNewDomainComponent onDomainCreated={revalidate} />}
-                />
-              </ActionPanel.Section>
+              {!panel && (
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="Create Domain"
+                    icon={Icon.Plus}
+                    target={<CreateNewDomainComponent onDomainCreated={revalidate} />}
+                  />
+                </ActionPanel.Section>
+              )}
             </ActionPanel>
           }
         />
       ))}
       {!isLoading && (
         <List.Section title="Actions">
-          <List.Item
-            title="Create Domain"
-            icon={Icon.Plus}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Create Domain"
-                  icon={Icon.Plus}
-                  target={<CreateNewDomainComponent onDomainCreated={revalidate} />}
-                />
-              </ActionPanel>
-            }
-          />
+          {!panel && (
+            <List.Item
+              title="Create Domain"
+              icon={Icon.Plus}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="Create Domain"
+                    icon={Icon.Plus}
+                    target={<CreateNewDomainComponent onDomainCreated={revalidate} />}
+                  />
+                </ActionPanel>
+              }
+            />
+          )}
         </List.Section>
       )}
     </List>

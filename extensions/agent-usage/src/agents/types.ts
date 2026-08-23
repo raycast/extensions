@@ -1,11 +1,14 @@
 import type { Image } from "@raycast/api";
 
 export type AgentId =
+  | "aihubmix"
   | "amp"
   | "claude"
+  | "clinepass"
   | "codex"
   | "copilot"
   | "cursor"
+  | "deepseek"
   | "droid"
   | "gemini"
   | "grok"
@@ -14,6 +17,7 @@ export type AgentId =
   | "antigravity"
   | "zai"
   | "minimax"
+  | "minimaxcn"
   | "opencode-go";
 
 export interface AgentDefinition {
@@ -37,6 +41,27 @@ export interface Accessory {
   text: string;
   tooltip?: string;
   icon?: Image.ImageLike;
+}
+
+export interface AgentVisibilityPreferences {
+  showAihubmix: boolean;
+  showAmp: boolean;
+  showAntigravity: boolean;
+  showClaude: boolean;
+  showClinePass: boolean;
+  showCodex: boolean;
+  showCopilot: boolean;
+  showCursor: boolean;
+  showDeepSeek: boolean;
+  showDroid: boolean;
+  showGemini: boolean;
+  showGrok: boolean;
+  showKimi: boolean;
+  showMinimax: boolean;
+  showMinimaxCN: boolean;
+  showOpencodeGo: boolean;
+  showSynthetic: boolean;
+  showZai: boolean;
 }
 
 /** Extended accessory with OpenCode active indicator */

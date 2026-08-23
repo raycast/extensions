@@ -17,9 +17,9 @@ import {
 import fs from "node:fs";
 import path from "node:path";
 import { useRef, useState } from "react";
-import { analyze, type AnalyzeCounts, type Phase } from "./core/analyze.js";
+import { analyze, type AnalyzeCounts, type HashCacheState, type Phase } from "./core/analyze.js";
 import { canonicalPath, isInsideDir, loadConfig } from "./core/config.js";
-import { executePlan } from "./core/execute.js";
+import { executePlan, relativeToDest } from "./core/execute.js";
 import { bucketLabel, formatSize, type PlanEntry } from "./core/plan.js";
 import { describeError } from "./errors.js";
 
@@ -53,6 +53,31 @@ const SIMILAR_TEXT: Record<string, string> = {
   "normalized-name": "The same thing under a different name",
   "same-stem": "The same name in another format",
 };
+
+/**
+ * The block appended to <dest>/.tidy/similar.md after a run that flagged
+ * anything. Paths are post-move and relative to the archive: this report exists
+ * because the flags are visible nowhere else once the plan is gone, so it has
+ * to say where each file actually ended up — and since it sits inside that
+ * archive, an absolute prefix on every line would only bury the names.
+ */
+function formatSimilarBlock(flagged: PlanEntry[], { destDir }: { destDir: string }) {
+  const lines = [`\n## ${new Date().toISOString()}\n`];
+  const peers = (list: string[]) => list.map((p) => `\`${relativeToDest(p, destDir)}\``).join(", ");
+  for (const e of flagged) {
+    const name = relativeToDest(e.to, destDir);
+    if (e.perceptual) {
+      const best = e.perceptual.best ? " (largest of the set)" : "";
+      lines.push(`- \`${name}\`${best}\n  looks nearly identical to ${peers(e.perceptual.peers)}`);
+    }
+    if (e.similar) {
+      const what = SIMILAR_TEXT[e.similar.reason] ?? e.similar.reason;
+      const best = e.similar.best ? " (this one looks the most complete)" : "";
+      lines.push(`- \`${name}\`${best}\n  ${what}: ${peers(e.similar.peers)}`);
+    }
+  }
+  return lines.join("\n") + "\n";
+}
 
 function isDirectory(filePath: string) {
   try {
@@ -105,7 +130,7 @@ export default function TidyFolderCommand() {
     try {
       const config = loadConfig();
       if (!values.smart) config.detect = false;
-      const { entries, sourceFiles, counts } = await analyze({
+      const { entries, sourceFiles, counts, hashCache } = await analyze({
         sourceDir,
         destDir,
         config,
@@ -132,7 +157,9 @@ export default function TidyFolderCommand() {
           message: `Those files will land in ${config.fallbackCategory}. Add them in ${config._path} to enable.`,
         });
       }
-      push(<PlanView entries={entries} counts={counts} sourceDir={sourceDir} destDir={destDir} />);
+      push(
+        <PlanView entries={entries} counts={counts} sourceDir={sourceDir} destDir={destDir} hashCache={hashCache} />,
+      );
     } catch (err) {
       const { title, message } = describeError(err, "Scan failed");
       toast.style = Toast.Style.Failure;
@@ -188,7 +215,7 @@ export default function TidyFolderCommand() {
         id="smart"
         label="Smart checks (near-duplicates, broken files, visually similar images)"
         defaultValue={true}
-        info="Near-duplicates and similar images are only flagged in the plan — they're still archived normally. Broken files and OS junk are moved to a review folder."
+        info="Near-duplicates and similar images are only flagged — they're still archived normally, and each run that flags any writes a report to .tidy/similar.md in the destination. Broken files and OS junk are moved to a review folder."
       />
       <Form.Description text="You'll see the full plan first — nothing moves until you confirm." />
     </Form>
@@ -200,11 +227,13 @@ function PlanView({
   counts,
   sourceDir,
   destDir,
+  hashCache,
 }: {
   entries: PlanEntry[];
   counts: AnalyzeCounts;
   sourceDir: string;
   destDir: string;
+  hashCache: HashCacheState | null;
 }) {
   // A ref, not the state flag: two Enter presses land in the same render pass,
   // and both would still see `executing === false`.
@@ -240,14 +269,32 @@ function PlanView({
       if (!ok) return;
 
       toast = await showToast({ style: Toast.Style.Animated, title: "Tidying…" });
-      executePlan(entries, { destDir, sourceDir });
+      const { similarReportPath, reportErrors } = executePlan(entries, {
+        destDir,
+        sourceDir,
+        hashCache,
+        formatSimilarBlock,
+      });
       toast.style = Toast.Style.Success;
       toast.title = `Done: ${counts.archive} archived, ${counts.duplicate} duplicates, ${counts.review} to review`;
-      toast.message = "Use “Undo Last Tidy” to revert";
+      // A record that couldn't be appended rides along on the success toast:
+      // every file moved, so calling this a failure would be a lie about the
+      // archive — and it would hide the undo hint the user may still want.
+      const notWritten = reportErrors.map((e) => describeError(e, "").title).join(", ");
+      toast.message = notWritten ? `${notWritten} — use “Undo Last Tidy” to revert` : "Use “Undo Last Tidy” to revert";
       toast.primaryAction = {
         title: "Open Destination",
         onAction: () => open(destDir),
       };
+      // The flagged files were archived normally, so once this toast is gone
+      // nothing on disk shows which ones were grouped together — the report is
+      // the only way back to them.
+      if (similarReportPath) {
+        toast.secondaryAction = {
+          title: "Open Look-Alike Report",
+          onAction: () => open(similarReportPath),
+        };
+      }
       await popToRoot();
     } catch (err) {
       // The plan is built before the confirmation, so a failure here can land

@@ -6,6 +6,7 @@ import { connectionGuard } from "./components/ConnectionErrorView";
 import { useApiReachable } from "./hooks/useApiReachable";
 import { useGetAllBookmarks } from "./hooks/useGetAllBookmarks";
 import { useGetAllLists } from "./hooks/useGetAllLists";
+import { List as BookmarkListType } from "./types";
 import { useGetListsBookmarks } from "./hooks/useGetListsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
 import { runWithToast } from "./utils/toast";
@@ -39,8 +40,10 @@ function ListFilterDropdown({ onChange }: { onChange: (listId: string) => void }
 
 function AllBookmarksView({
   searchBarAccessory,
+  lists,
 }: {
   searchBarAccessory: Parameters<typeof List>[0]["searchBarAccessory"];
+  lists: BookmarkListType[];
 }) {
   const { t } = useTranslation();
   const { isLoading, bookmarks, error, hasLiveData, revalidate, pagination } = useGetAllBookmarks();
@@ -89,6 +92,7 @@ function AllBookmarksView({
       emptyViewTitle={t("bookmarkList.emptySearch.title")}
       emptyViewDescription={t("bookmarkList.emptySearch.description")}
       searchBarAccessory={searchBarAccessory}
+      lists={lists}
     />
   );
 }
@@ -97,10 +101,12 @@ function ListBookmarksView({
   listId,
   listName,
   searchBarAccessory,
+  lists,
 }: {
   listId: string;
   listName: string;
   searchBarAccessory: Parameters<typeof List>[0]["searchBarAccessory"];
+  lists: BookmarkListType[];
 }) {
   const { t } = useTranslation();
   const { isLoading, bookmarks, error, hasLiveData, revalidate, pagination } = useGetListsBookmarks(listId);
@@ -129,13 +135,16 @@ function ListBookmarksView({
       emptyViewDescription={t("bookmarkList.emptySearch.description")}
       itemLabel={listName}
       searchBarAccessory={searchBarAccessory}
+      lists={lists}
     />
   );
 }
 
 export default function BookmarksList() {
-  // Shares useCachedPromise's cache with ListFilterDropdown's call, so this
-  // resolves the selected list without issuing a second request.
+  // useCachedPromise caches the VALUE, not the request — it runs its promise
+  // once per hook instance — so this is a genuinely separate fetch from
+  // ListFilterDropdown's. Pass the result down rather than letting BookmarkList
+  // fetch a third copy for its Add to List submenu.
   const { lists } = useGetAllLists();
   const [selectedListId, setSelectedListId] = useState("");
 
@@ -145,9 +154,14 @@ export default function BookmarksList() {
 
   if (selectedListId && selectedList) {
     return (
-      <ListBookmarksView listId={selectedListId} listName={selectedList.name} searchBarAccessory={searchBarAccessory} />
+      <ListBookmarksView
+        listId={selectedListId}
+        listName={selectedList.name}
+        searchBarAccessory={searchBarAccessory}
+        lists={lists}
+      />
     );
   }
 
-  return <AllBookmarksView searchBarAccessory={searchBarAccessory} />;
+  return <AllBookmarksView searchBarAccessory={searchBarAccessory} lists={lists} />;
 }

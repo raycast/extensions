@@ -113,6 +113,12 @@ The timeframe is selected interactively via an API-derived Timeframe dropdown (s
 
 Prettier is configured for 120-character line width with double quotes (see [.prettierrc](.prettierrc)).
 
+## Changelog
+
+[CHANGELOG.md](CHANGELOG.md) entries are titled `## [<Version title>] - {PR_MERGE_DATE}`. Use the literal placeholder
+string `{PR_MERGE_DATE}` for the date — Raycast's publish process fills in the actual merge date automatically;
+do not hand-write a date.
+
 ## Documentation
 
 Use context7 (via the `find-docs` skill) to look up Raycast API docs. Invoke it with `/find-docs` and pass a query like `"Raycast List.Dropdown props"`. The library IDs to prefer:

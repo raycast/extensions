@@ -8,7 +8,8 @@ import {
   formatTimeLeft,
   getSeriesPoster,
 } from "@/lib/utils/formatting";
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Image, List } from "@raycast/api";
+import { Shortcuts } from "@/lib/utils/shortcuts";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Image, List, Keyboard } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
 export default function Command() {
@@ -203,13 +204,13 @@ function QueueListItem({ item, onRefresh }: { item: QueueItem; onRefresh: () => 
               title="Remove from Queue"
               icon={Icon.Trash}
               onAction={() => handleRemove(false)}
-              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              shortcut={Shortcuts.removeFromQueue}
             />
             <Action
               title="Remove and Blocklist"
               icon={Icon.XMarkCircle}
               onAction={() => handleRemove(true)}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+              shortcut={Shortcuts.removeAndBlocklist}
             />
           </ActionPanel.Section>
 
@@ -218,7 +219,7 @@ function QueueListItem({ item, onRefresh }: { item: QueueItem; onRefresh: () => 
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
         </ActionPanel>

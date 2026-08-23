@@ -7,7 +7,7 @@ import { HealthCheckType } from "@/lib/types/system";
 
 export default function Command() {
   const preferences = getPreferenceValues<SonarrPreferences>();
-  const { host, port, http } = preferences;
+  const { http } = preferences;
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{
     success: boolean;
@@ -86,7 +86,6 @@ export default function Command() {
           title="Instance URL"
           subtitle={sonarrUrl}
           icon={Icon.Link}
-          accessories={[{ text: `${host}:${port}` }]}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Open Sonarr" url={sonarrUrl} icon={Icon.Globe} />

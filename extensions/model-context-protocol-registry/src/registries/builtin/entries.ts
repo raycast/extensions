@@ -301,6 +301,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "posteverywhere",
+    title: "PostEverywhere",
+    description:
+      "Social media publishing MCP server. Schedule and post to 11 platforms (Instagram, TikTok, YouTube, LinkedIn, X, Facebook, Threads, Pinterest, Bluesky, Telegram, Discord) with media upload, AI captions, campaigns, and analytics through natural language.",
+    icon: "https://app.posteverywhere.ai/favicon.svg",
+    homepage: "https://developers.posteverywhere.ai/integrations/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@posteverywhere/mcp"],
+      env: {
+        POSTEVERYWHERE_API_KEY: "<YOUR_API_KEY_HERE>",
+      },
+    },
+  },
+  {
     name: "prisma",
     title: "Prisma",
     description:
@@ -480,6 +495,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://api.trendsmcp.ai/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
+    },
+  },
+  {
+    name: "tripsy",
+    title: "Tripsy",
+    description:
+      "Tripsy's official MCP server connects AI assistants to your Tripsy account so you can create trips and manage flights, stays, activities, expenses, and itinerary details through natural language.",
+    icon: "https://framerusercontent.com/images/4xxcLxeTur6SPIrEG8pq54OT3Y.png",
+    homepage: "https://tripsy.app",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tripsy.app"],
     },
   },
   {
@@ -844,6 +871,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         "--static-oauth-client-metadata",
         '{"scope":"email"}',
       ],
+    },
+  },
+  {
+    name: "one",
+    title: "One",
+    description:
+      "One is an MCP server that connects your AI tools to 700+ apps like Gmail, Slack, Stripe, Shopify, HubSpot, Notion, and Linear. Four tools cover everything: list your connected accounts, search a platform's actions, read an action's real API documentation, and execute it. Remote Streamable HTTP server with One OAuth sign-in, so no API keys are stored locally.",
+    icon: "https://assets.withone.ai/logos/one-logo.png",
+    homepage: "https://www.withone.ai/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.withone.ai/mcp"],
+      env: {
+        npm_config_yes: "true",
+      },
     },
   },
 ];

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yerd",
+  "title": "Yerd",
+  "description": "Manage Yerd sites, PHP versions, services, databases, mail and diagnostics from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "kylekanderson",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "php",
+    "laravel",
+    "valet",
+    "herd",
+    "local development",
+    "yerd"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "sites",
+      "title": "Search Sites",
+      "description": "Search and manage local Yerd sites.",
+      "mode": "view"
+    },
+    {
+      "name": "php",
+      "title": "Manage PHP & Tools",
+      "description": "Manage PHP versions and dev tools.",
+      "mode": "view"
+    },
+    {
+      "name": "services",
+      "title": "Manage Services & Databases",
+      "description": "Start, stop, and manage services and databases.",
+      "mode": "view"
+    },
+    {
+      "name": "mail",
+      "title": "View Captured Mail",
+      "description": "Browse captured mail from the Yerd mail sink.",
+      "mode": "view"
+    },
+    {
+      "name": "proxies",
+      "title": "Manage Proxies",
+      "description": "Add, remove, and list Yerd proxies.",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Yerd Status & Doctor",
+      "description": "View daemon status and run diagnostics.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "yerdPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Yerd CLI Path",
+      "description": "Absolute path to the yerd binary. Leave empty for auto-detection.",
+      "placeholder": "~/Library/Application Support/io.yerd.Yerd/bin/yerd"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "*",
+    "eslint": "^9",
+    "prettier": "^3",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

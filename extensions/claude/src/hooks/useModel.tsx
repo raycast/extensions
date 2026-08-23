@@ -1,7 +1,7 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Model, ModelHook } from "../type";
-import { fetchAvailableModels } from "../api/models";
+import { fetchAvailableModels, type AvailableModel } from "../api/models";
 
 export const DEFAULT_MODEL: Model = {
   id: "default",
@@ -35,7 +35,7 @@ export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
   const [isLoading, setLoading] = useState(false);
   const [option, setOption] = useState<Model["option"][]>(FALLBACK_OPTIONS);
-  const [availableModels, setAvailableModels] = useState<Array<{ id: string; display_name: string }>>([]);
+  const [availableModels, setAvailableModels] = useState<AvailableModel[]>([]);
 
   useEffect(() => {
     setLoading(true);

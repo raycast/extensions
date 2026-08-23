@@ -3,23 +3,30 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { promisify } from "node:util";
 
-import { Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Color, getPreferenceValues, Keyboard, showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 
 import { getErrorMessage } from "./errors";
 
-export const WEB_IDES = [
+export const WEB_IDES: {
+  title: string;
+  baseUrl: string;
+  icon?: { source: string; tintColor?: Color };
+  shortcut?: Keyboard.Shortcut;
+}[] = [
   {
     title: "github.dev",
     baseUrl: "https://github.dev/",
     icon: { source: "github-dev.svg", tintColor: Color.PrimaryText },
+    shortcut: { modifiers: ["cmd"], key: "o" },
   },
   {
     title: "VS Code for the Web",
     baseUrl: "https://vscode.dev/github/",
     icon: { source: "vscode.svg", tintColor: Color.PrimaryText },
+    shortcut: { modifiers: ["cmd"], key: "v" },
   },
   {
     title: "CodeSandbox",
@@ -45,6 +52,13 @@ export const WEB_IDES = [
     title: "Sourcegraph",
     baseUrl: `https://sourcegraph.com/github.com/`,
     icon: { source: "sourcegraph.svg", tintColor: Color.PrimaryText },
+    shortcut: { modifiers: ["cmd"], key: "s" },
+  },
+  {
+    title: "DeepWiki",
+    baseUrl: "https://deepwiki.com/",
+    icon: { source: "deepwiki.png" },
+    shortcut: { modifiers: ["cmd"], key: "d" },
   },
   {
     title: "VS Code Remote Repositories",
@@ -106,6 +120,24 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
     setHistory(nextRepositories);
   }
 
+  function updateRepository(repository: ExtendedRepositoryFieldsFragment) {
+    setHistory((current) =>
+      (current ?? []).map((item) =>
+        item.id === repository.id
+          ? {
+              ...item,
+              viewerHasStarred: repository.viewerHasStarred,
+              stargazerCount: repository.stargazerCount,
+            }
+          : item,
+      ),
+    );
+  }
+
+  function removeRepository(repository: ExtendedRepositoryFieldsFragment) {
+    setHistory((current) => (current ?? []).filter((item) => item.id !== repository.id));
+  }
+
   let data = history;
 
   if (searchText) {
@@ -118,10 +150,11 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
     data = data.filter((r) => r.nameWithOwner.match(repositoryFilter));
   }
 
-  return { data, visitRepository };
+  return { data, visitRepository, updateRepository, removeRepository };
 }
 
 export const REPO_SORT_TYPES_TO_QUERIES = [
+  { title: "Relevance", value: "" },
   { title: "Last Update", value: "sort:updated-desc" },
   { title: "Name", value: "sort:name-asc" },
   { title: "Stars", value: "sort:stars-desc" },
