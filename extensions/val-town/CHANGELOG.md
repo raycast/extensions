@@ -1,6 +1,6 @@
 # Val Town Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-08-23
 
 - Runs on Raycast for Windows as well as macOS
 
