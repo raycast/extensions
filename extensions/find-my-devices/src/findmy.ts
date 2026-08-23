@@ -60,8 +60,8 @@ function parseBridgeError(stderr: string, fallback: string): BridgeError {
 async function runBridge<T>(
   command: string,
   commandArguments: string[] = [],
+  appleAccount = preferences().appleAccount,
 ): Promise<T> {
-  const prefs = preferences();
   await mkdir(SESSION_DIRECTORY, { recursive: true, mode: 0o700 });
 
   try {
@@ -71,7 +71,7 @@ async function runBridge<T>(
         BRIDGE_PATH,
         command,
         "--apple-account",
-        prefs.appleAccount,
+        appleAccount,
         "--session-dir",
         SESSION_DIRECTORY,
         ...commandArguments,
@@ -92,16 +92,20 @@ async function runBridge<T>(
   }
 }
 
-export async function loadState(): Promise<LoadState> {
+export async function loadState(
+  appleAccount: string,
+  includeFamily: boolean,
+): Promise<LoadState> {
   if (!(await exists(MANAGED_PYTHON))) {
     return { kind: "helper-missing" };
   }
 
   try {
-    const response = await runBridge<BridgeListResponse>("list", [
-      "--include-family",
-      preferences().includeFamily ? "true" : "false",
-    ]);
+    const response = await runBridge<BridgeListResponse>(
+      "list",
+      ["--include-family", includeFamily ? "true" : "false"],
+      appleAccount,
+    );
     return { kind: "ready", devices: response.devices };
   } catch (error) {
     const bridgeError = error as BridgeError;

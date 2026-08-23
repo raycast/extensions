@@ -9,14 +9,19 @@
     "macOS"
   ],
   "categories": [
-    "Productivity"
+    "Productivity",
+    "System"
   ],
   "keywords": [
     "find my",
     "apple",
     "iphone",
     "ipad",
-    "devices"
+    "devices",
+    "icloud",
+    "airpods",
+    "macbook",
+    "play sound"
   ],
   "license": "MIT",
   "engines": {
@@ -26,7 +31,7 @@
     {
       "name": "find-my-devices",
       "title": "Find My Devices",
-      "description": "List devices and play a sound",
+      "description": "List your Apple Find My devices and play a sound",
       "mode": "view"
     }
   ],

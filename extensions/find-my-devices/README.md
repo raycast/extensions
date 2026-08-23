@@ -1,4 +1,4 @@
-# Find My Devices for Raycast
+# Find My Devices
 
 Find My Devices lists Apple devices that are available to your Apple Account. Select a device to send a Play Sound request.
 
@@ -22,31 +22,28 @@ Find My Devices lists Apple devices that are available to your Apple Account. Se
 - An Apple Account with Find My enabled
 - Internet access during setup and use
 
-## Install from source
+## Getting Started
 
-1. Clone this repository.
-2. Run `npm install`.
-3. Run `npm run dev`.
-4. Enter your Apple Account email in the extension preference.
-5. Run **Find My Devices**.
-6. Select **Install Helper and Sign In**.
-7. Complete the local Terminal sign-in.
-8. Return to Raycast and select **Refresh Devices**.
+1. Enter your Apple Account email in the extension preference. Do not enter a password there.
+2. Run **Find My Devices**.
+3. Select **Install Helper and Sign in**.
+4. Complete the local Terminal sign-in. Enter your password and 2FA code only in that window.
+5. Return to Raycast and select **Refresh Devices**.
 
 Setup creates a private Python environment in the Raycast extension support directory. It installs PyiCloud 2.6.5 and its dependencies from PyPI with the exact hashes in `assets/pyicloud-requirements.txt`.
 
 ## Controls
 
 - `Enter`: Play Sound
-- `Command-R`: Refresh devices
-- `Command-O`: Open Find My on iCloud.com
-- `Command-Shift-C`: Copy the device identifier
+- `Command-R`: Refresh Devices
+- `Command-O`: Open Find My
+- `Command-Shift-C`: Copy Device ID
 
 ## Privacy and authentication
 
 The Apple password and verification code are entered only in a local Terminal window. Raycast does not receive or store them. The authentication helper disables Keychain access. It stores only the resulting iCloud web session in the Raycast extension support directory.
 
-The saved session can have access to more iCloud web data than Find My. Use **Sign Out and Clear Session** when you no longer need the extension. The extension does not send account data, device data, or analytics to the project author.
+The saved session can have access to more iCloud web data than Find My. Use **Sign out and Clear Session** when you no longer need the extension. The extension does not send account data, device data, or analytics to the project author.
 
 The restricted Python bridge supports only these operations:
 

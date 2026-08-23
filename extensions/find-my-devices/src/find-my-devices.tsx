@@ -10,8 +10,9 @@ import {
   openExtensionPreferences,
   showToast,
   Keyboard,
+  getPreferenceValues,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import {
   helperVersion,
   loadState,
@@ -80,6 +81,25 @@ function groupDevices(
 }
 
 async function requestSound(device: FindMyDevice): Promise<void> {
+  if (!device.soundAvailable) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Sound Not Available",
+      message: `${device.name} cannot play a Find My sound.`,
+    });
+    return;
+  }
+
+  if (device.isFamily) {
+    const confirmed = await confirmAlert({
+      title: `Play Sound on ${device.name}?`,
+      message:
+        "This device belongs to a family member. They will hear an alert.",
+      primaryAction: { title: "Play Sound" },
+    });
+    if (!confirmed) return;
+  }
+
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: `Pinging ${device.name}`,
@@ -87,12 +107,12 @@ async function requestSound(device: FindMyDevice): Promise<void> {
   try {
     await playSound(device);
     toast.style = Toast.Style.Success;
-    toast.title = "Play Sound sent";
+    toast.title = "Play Sound Sent";
     toast.message = device.name;
   } catch (error) {
     const bridgeError = error as { message?: string };
     toast.style = Toast.Style.Failure;
-    toast.title = "Could not play sound";
+    toast.title = "Could Not Play Sound";
     toast.message = bridgeError.message || String(error);
   }
 }
@@ -100,36 +120,45 @@ async function requestSound(device: FindMyDevice): Promise<void> {
 function SetupActions({
   state,
   refresh,
+  onSignOut,
 }: {
   state: LoadState;
   refresh: () => void;
+  onSignOut?: () => void;
 }) {
+  const showSignIn =
+    state.kind === "helper-missing" ||
+    state.kind === "auth-required" ||
+    state.kind === "error";
+
   return (
     <ActionPanel>
-      <Action
-        title={
-          state.kind === "helper-missing"
-            ? "Install Helper and Sign in"
-            : "Sign in Again"
-        }
-        icon={Icon.Terminal}
-        onAction={async () => {
-          try {
-            await openSetupInTerminal();
-            await showToast({
-              style: Toast.Style.Success,
-              title: "Setup Opened in Terminal",
-              message: "Return here after sign-in, then refresh.",
-            });
-          } catch (error) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Could Not Open Setup",
-              message: String(error),
-            });
+      {showSignIn ? (
+        <Action
+          title={
+            state.kind === "helper-missing"
+              ? "Install Helper and Sign in"
+              : "Sign in Again"
           }
-        }}
-      />
+          icon={Icon.Terminal}
+          onAction={async () => {
+            try {
+              await openSetupInTerminal();
+              await showToast({
+                style: Toast.Style.Success,
+                title: "Setup Opened in Terminal",
+                message: "Return here after sign-in, then refresh.",
+              });
+            } catch (error) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Could Not Open Setup",
+                message: String(error),
+              });
+            }
+          }}
+        />
+      ) : null}
       <Action
         title="Refresh Devices"
         icon={Icon.ArrowClockwise}
@@ -141,6 +170,14 @@ function SetupActions({
         icon={Icon.Gear}
         onAction={openExtensionPreferences}
       />
+      {onSignOut && state.kind !== "helper-missing" ? (
+        <Action
+          title="Sign out and Clear Session"
+          icon={Icon.Logout}
+          style={Action.Style.Destructive}
+          onAction={onSignOut}
+        />
+      ) : null}
     </ActionPanel>
   );
 }
@@ -148,55 +185,68 @@ function SetupActions({
 function EmptyState({
   state,
   refresh,
+  onSignOut,
 }: {
   state: LoadState;
   refresh: () => void;
+  onSignOut?: () => void;
 }) {
-  if (state.kind === "helper-missing") {
-    return (
-      <List.EmptyView
-        icon={Icon.Shield}
-        title="One-Time Setup Required"
-        description={`Install hash-verified PyiCloud ${helperVersion()} packages and sign in in Terminal. Your Apple password and 2FA code are never entered in Raycast or saved in Keychain.`}
-        actions={<SetupActions state={state} refresh={refresh} />}
-      />
-    );
-  }
-
-  if (state.kind === "auth-required") {
-    return (
-      <List.EmptyView
-        icon={Icon.Lock}
-        title="Apple Sign-In Required"
-        description="Open the local Terminal sign-in. Enter your password and 2FA code there. The saved web session has broad iCloud access, so use this only on your Mac."
-        actions={<SetupActions state={state} refresh={refresh} />}
-      />
-    );
-  }
-
-  if (state.kind === "error") {
-    return (
-      <List.EmptyView
-        icon={Icon.ExclamationMark}
-        title="Cannot Load Find My Devices"
-        description={state.message}
-        actions={<SetupActions state={state} refresh={refresh} />}
-      />
-    );
-  }
-
-  return (
-    <List.EmptyView
-      icon={Icon.Mobile}
-      title="No Devices Found"
-      description="Apple returned no Find My devices for this account."
-      actions={<SetupActions state={state} refresh={refresh} />}
-    />
+  const actions = (
+    <SetupActions state={state} refresh={refresh} onSignOut={onSignOut} />
   );
+
+  switch (state.kind) {
+    case "helper-missing":
+      return (
+        <List.EmptyView
+          icon={Icon.Shield}
+          title="One-Time Setup Required"
+          description={`Install hash-verified PyiCloud ${helperVersion()} packages and sign in in Terminal. Your Apple password and 2FA code are never entered in Raycast or saved in Keychain.`}
+          actions={actions}
+        />
+      );
+    case "auth-required":
+      return (
+        <List.EmptyView
+          icon={Icon.Lock}
+          title="Apple Sign-In Required"
+          description="Open the local Terminal sign-in. Enter your password and 2FA code there. The saved web session has broad iCloud access, so use this only on your Mac."
+          actions={actions}
+        />
+      );
+    case "error":
+      return (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Cannot Load Find My Devices"
+          description={state.message}
+          actions={actions}
+        />
+      );
+    case "ready":
+      return (
+        <List.EmptyView
+          icon={Icon.Mobile}
+          title="No Devices Found"
+          description="Apple returned no Find My devices for this account."
+          actions={actions}
+        />
+      );
+    default: {
+      const _exhaustive: never = state;
+      return _exhaustive;
+    }
+  }
 }
 
 export default function Command() {
-  const { data, isLoading, revalidate } = usePromise(loadState);
+  const { appleAccount, includeFamily } =
+    getPreferenceValues<Preferences.FindMyDevices>();
+  const { data, isLoading, revalidate } = useCachedPromise(
+    loadState,
+    [appleAccount, includeFamily],
+    { keepPreviousData: true },
+  );
   const state: LoadState = data ?? { kind: "ready", devices: [] };
   const devices = state.kind === "ready" ? state.devices : [];
   const groups = groupDevices(devices);
@@ -215,19 +265,19 @@ export default function Command() {
 
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Signing out",
+      title: "Signing Out",
     });
     try {
       const result = await signOut();
       toast.style = Toast.Style.Success;
-      toast.title = "Local session cleared";
+      toast.title = "Local Session Cleared";
       toast.message = result.remoteLogoutConfirmed
         ? "Apple also confirmed the remote sign-out."
         : "Remote sign-out was not confirmed.";
       revalidate();
     } catch (error) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Could not sign out";
+      toast.title = "Could Not Sign Out";
       toast.message = String(error);
     }
   }
@@ -236,10 +286,14 @@ export default function Command() {
     <List
       isLoading={isLoading}
       filtering={{ keepSectionOrder: true }}
-      searchBarPlaceholder="Search devices or people"
+      searchBarPlaceholder="Search devices or people…"
     >
       {!isLoading && (state.kind !== "ready" || devices.length === 0) ? (
-        <EmptyState state={state} refresh={revalidate} />
+        <EmptyState
+          state={state}
+          refresh={revalidate}
+          onSignOut={confirmSignOut}
+        />
       ) : null}
 
       {groups.map(([owner, ownerDevices]) => (
@@ -296,7 +350,7 @@ export default function Command() {
                     </ActionPanel.Section>
                     <ActionPanel.Section>
                       <Action.OpenInBrowser
-                        title="Open Find My on ICloud.com"
+                        title="Open Find My"
                         url="https://www.icloud.com/find/"
                         shortcut={Keyboard.Shortcut.Common.Open}
                       />
