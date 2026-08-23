@@ -26,23 +26,28 @@ Raycast command: **BIP39 Wallet Generator for 1Password → Generate Wallet**
 Generates a wallet locally and displays it. Opening the command immediately
 generates the wallet and shows the EVM, Bitcoin Native SegWit, and Solana
 addresses with their derivation paths. The recovery phrase is rendered as a
-numbered word grid that starts **masked** — press <kbd>Command</kbd> +
-<kbd>S</kbd> to reveal or hide it. Copying the phrase uses concealed clipboard
-mode, so it is excluded from Raycast's clipboard
-history (third-party clipboard managers may still record it unless they honor
-the concealed-pasteboard convention). The recovery phrase length is controlled
-by extension preferences. This command never invokes the 1Password CLI.
+numbered word grid that starts **masked**. Press <kbd>Enter</kbd> or
+<kbd>Command</kbd> + <kbd>S</kbd> to reveal or hide it. Copying the phrase is
+the second top-level Action Panel item and always opens a confirmation. An
+approved copy uses concealed clipboard mode, so it is excluded from Raycast's
+clipboard history (third-party clipboard managers may still record it unless
+they honor the concealed-pasteboard convention). The recovery phrase length is
+controlled by extension preferences. Generating a replacement wallet—whether
+from the Action Panel, <kbd>Command</kbd> + <kbd>R</kbd>, or a recovery-phrase
+length change—always requires confirmation that the current recovery phrase
+will be discarded and cannot be recovered. This command never invokes the
+1Password CLI.
 
 Shortcuts:
 
-| Action               | Shortcut                                             |
-| -------------------- | ---------------------------------------------------- |
-| Reveal / hide phrase | <kbd>Command</kbd> + <kbd>S</kbd>                    |
-| Copy recovery phrase | <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd> |
-| Copy ETH/EVM address | <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>E</kbd> |
-| Copy BTC address     | <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> |
-| Copy SOL address     | <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>L</kbd> |
-| Generate new wallet  | <kbd>Command</kbd> + <kbd>R</kbd>                    |
+| Action                                       | Shortcut                                              |
+| -------------------------------------------- | ----------------------------------------------------- |
+| Reveal / hide phrase                         | <kbd>Enter</kbd> or <kbd>Command</kbd> + <kbd>S</kbd> |
+| Copy recovery phrase (confirmation required) | <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd>  |
+| Copy ETH/EVM address                         | <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>E</kbd>  |
+| Copy BTC address                             | <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>  |
+| Copy SOL address                             | <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>L</kbd>  |
+| Generate new wallet (confirmation required)  | <kbd>Command</kbd> + <kbd>R</kbd>                     |
 
 Because this command displays the recovery phrase on screen and allows copying
 it to the clipboard, use it only in a private environment and store the phrase
@@ -58,8 +63,9 @@ wallet directly to 1Password. The command:
 
 1. Generates a new 12- or 24-word BIP39 recovery phrase.
 2. Shows the same masked recovery phrase and public-address preview as
-   **Generate Wallet**. You can reveal or hide the phrase, regenerate the
-   wallet, and copy public addresses.
+   **Generate Wallet**. You can reveal or hide the phrase, copy public
+   addresses, and regenerate the wallet after confirming that the current
+   recovery phrase will be discarded.
 3. After **Save to 1Password** is selected, checks that the 1Password CLI is
    installed and authenticated and loads the available vaults.
 4. Collects the item title and target vault.
@@ -132,9 +138,13 @@ The extension looks for `op` at `/opt/homebrew/bin/op` and
 
 - Both commands start with the recovery phrase masked. Revealing it places the
   words on screen and should only be done in a trusted, private environment.
-- **Generate Wallet** can explicitly copy the recovery phrase using Raycast's
-  concealed clipboard mode. This excludes it from Raycast Clipboard History,
-  but third-party clipboard managers may still record it.
+- Both commands require confirmation before replacing the displayed wallet,
+  including replacements triggered by the refresh shortcut or a recovery
+  phrase length preference change. Canceling keeps the current wallet intact.
+- **Generate Wallet** can explicitly copy the recovery phrase after a
+  confirmation. Approved copies use Raycast's concealed clipboard mode. This
+  excludes them from Raycast Clipboard History, but third-party clipboard
+  managers may still record them.
 - **Generate Wallet to 1Password** has no recovery-phrase copy action. Saving
   does not place the phrase on the clipboard.
 

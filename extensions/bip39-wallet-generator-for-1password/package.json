@@ -3,10 +3,16 @@
   "name": "bip39-wallet-generator-for-1password",
   "title": "BIP39 Wallet Generator for 1Password",
   "description": "Generate a BIP39 wallet locally and save it directly to 1Password",
-  "icon": "extension-icon-mnemonic-v2.png",
-  "author": "Silencem",
+  "icon": "extension-icon-mnemonic-v3.png",
+  "author": "aurevae",
   "categories": [
     "Security"
+  ],
+  "keywords": [
+    "bip39",
+    "mnemonic",
+    "seed phrase",
+    "1password"
   ],
   "license": "MIT",
   "type": "module",
@@ -18,12 +24,24 @@
       "name": "generate-wallet",
       "title": "Generate Wallet",
       "description": "Generate a BIP39 recovery phrase locally and display its EVM, Bitcoin, and Solana addresses",
+      "keywords": [
+        "bip39",
+        "mnemonic",
+        "seed phrase",
+        "1password"
+      ],
       "mode": "view"
     },
     {
       "name": "generate-wallet-to-1password",
       "title": "Generate Wallet to 1Password",
       "description": "Generate a wallet and save its recovery phrase and public addresses to 1Password",
+      "keywords": [
+        "bip39",
+        "mnemonic",
+        "seed phrase",
+        "1password"
+      ],
       "mode": "view"
     }
   ],
