@@ -26,10 +26,47 @@ import {
   BS_MONTH_NAMES,
   BsDate,
 } from "./utils/nepali-date";
-import { getCurrentTithi } from "./utils/holidays";
+import { getTithiForBsDate, Tithi } from "./utils/tithi";
 import { generateCalendarSvg } from "./utils/calendar-renderer";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+
+/**
+ * Escapes a string for safe interpolation into an AppleScript string literal.
+ *
+ * Backslashes are escaped before quotes — doing it the other way round lets a
+ * trailing backslash consume the closing quote and break out of the literal.
+ */
+function escapeAppleScript(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+/**
+ * Renders the almanac block shown under the calendar.
+ *
+ * The tithi leads as its own heading rather than sitting in the table — on a
+ * fasting day you want to see "Ekadashi" without reading a row of a grid.
+ */
+function formatAlmanac(
+  label: string,
+  bsLine: string,
+  adLine: string,
+  tithi: Tithi,
+): string {
+  const observance = tithi.observance ? `\n**${tithi.observance}**\n` : "";
+
+  return `## ${tithi.moonIcon} ${tithi.name}
+
+_${tithi.nameNp}_ · ${tithi.paksha} Paksha
+${observance}
+| **${label}** | |
+| :--- | :--- |
+| **Bikram Sambat** | ${bsLine} |
+| **English Date** | ${adLine} |
+| **Tithi** | ${tithi.name} (${tithi.nameNp}) — day ${tithi.num} of ${tithi.paksha} |
+| **Paksha** | ${tithi.paksha} (${tithi.pakshaNp}) |
+`;
+}
 
 // ─── Sub-Views ─────────────────────────────────────────────────────────────
 
@@ -193,7 +230,7 @@ function ReminderForm({ initialDate }: { initialDate?: Date }) {
           set year of theDate to ${parsedTime.getFullYear()}
           set time of theDate to (${parsedTime.getHours()} * 3600 + ${parsedTime.getMinutes()} * 60)
           
-          make new reminder with properties {name:"${eventTitle}", due date:theDate, body:"${finalNotes.replace(/"/g, '\\"')}"}
+          make new reminder with properties {name:"${escapeAppleScript(eventTitle)}", due date:theDate, body:"${escapeAppleScript(finalNotes)}"}
         end tell
       `;
       await runAppleScript(appleScript);
@@ -257,7 +294,7 @@ export default function Dashboard() {
   const today = useMemo(() => getTodayBs(), []);
   const [viewDate, setViewDate] = useState<BsDate>(today);
 
-  const tithi = getCurrentTithi();
+  const tithi = getTithiForBsDate(today);
   const adDate = bsToAd(today.year, today.month, today.day);
 
   const nextMonth = () => {
@@ -288,12 +325,12 @@ export default function Dashboard() {
 
 ---
 
-| **Vedic Almanac (Today)** | |
-| :--- | :--- |
-| **Bikram Sambat** | ${formatBsDate(today)} (${formatBsDateNp(today)}) |
-| **English Date** | ${formatAdDate(adDate)} |
-| **Lunar Tithi** | ${tithi.paksha} ${tithi.name} |
-`;
+${formatAlmanac(
+  "Vedic Almanac (Today)",
+  `${formatBsDate(today)} (${formatBsDateNp(today)})`,
+  formatAdDate(adDate),
+  tithi,
+)}`;
 
   return (
     <List
@@ -319,6 +356,7 @@ export default function Dashboard() {
                 };
                 const dow = getBsDayOfWeek(date.year, date.month, date.day);
                 const ad = bsToAd(date.year, date.month, date.day);
+                const dayTithi = getTithiForBsDate(date);
                 return (
                   <List.Item
                     key={`jump-day-${d}`}
@@ -330,15 +368,25 @@ export default function Dashboard() {
 
 ---
 
-| **Vedic Almanac** | ${d} ${BS_MONTH_NAMES[viewDate.month - 1]} |
-| :--- | :--- |
-| **Bikram Sambat** | ${formatBsDate(date)} |
-| **English Date** | ${formatAdDate(ad)} |
-| **Lunar Tithi** | ${tithi.paksha} ${tithi.name} |
-`}
+${formatAlmanac(
+  `Vedic Almanac — ${d} ${BS_MONTH_NAMES[viewDate.month - 1]}`,
+  formatBsDate(date),
+  formatAdDate(ad),
+  dayTithi,
+)}`}
                       />
                     }
                     accessories={[
+                      {
+                        tag: {
+                          value: dayTithi.name,
+                          color: dayTithi.isSpecial
+                            ? Color.Yellow
+                            : Color.SecondaryText,
+                        },
+                        tooltip:
+                          dayTithi.observance ?? `${dayTithi.paksha} Paksha`,
+                      },
                       {
                         icon: Icon.Bell,
                         tooltip: "Press Cmd + Enter to set a reminder",
@@ -405,18 +453,21 @@ export default function Dashboard() {
 
 ---
 
-| **Vedic Almanac (Today)** | |
-| :--- | :--- |
-| **Bikram Sambat** | ${formatBsDate(today)} (${formatBsDateNp(today)}) |
-| **English Date** | ${formatAdDate(adDate)} |
-| **Lunar Tithi** | ${tithi.paksha} ${tithi.name} |
-`}
+${formatAlmanac(
+  "Vedic Almanac (Today)",
+  `${formatBsDate(today)} (${formatBsDateNp(today)})`,
+  formatAdDate(adDate),
+  tithi,
+)}`}
               />
             }
             accessories={[
               {
-                icon: Icon.Bell,
-                tooltip: "Press Cmd + Shift + R to set a reminder",
+                tag: {
+                  value: `${tithi.moonIcon} ${tithi.name}`,
+                  color: tithi.isSpecial ? Color.Yellow : Color.SecondaryText,
+                },
+                tooltip: tithi.observance ?? `${tithi.paksha} Paksha`,
               },
             ]}
             actions={

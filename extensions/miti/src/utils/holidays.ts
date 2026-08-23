@@ -1,5 +1,5 @@
 /**
- * Nepali Public Holidays & Tithi Data
+ * Nepali Public Holidays
  *
  * Contains major public holidays for BS 2083 (April 2026 – April 2027).
  * Holidays with bsYear undefined are recurring fixed-date holidays.
@@ -313,61 +313,6 @@ export function getHolidayOnDate(bsDate: BsDate): Holiday | null {
       return yearMatch && h.bsMonth === bsDate.month && h.bsDay === bsDate.day;
     }) ?? null
   );
-}
-
-/**
- * Placeholder Tithi function.
- * TODO: Integrate a real panchang API for accurate lunar day calculation.
- */
-export function getCurrentTithi(): {
-  name: string;
-  nameNp: string;
-  paksha: string;
-} {
-  // Mock rotation based on day-of-year for visual demo
-  const tithiNames = [
-    "Pratipada",
-    "Dwitiya",
-    "Tritiya",
-    "Chaturthi",
-    "Panchami",
-    "Shashthi",
-    "Saptami",
-    "Ashtami",
-    "Navami",
-    "Dashami",
-    "Ekadashi",
-    "Dwadashi",
-    "Trayodashi",
-    "Chaturdashi",
-    "Purnima",
-  ];
-  const tithiNamesNp = [
-    "प्रतिपदा",
-    "द्वितीया",
-    "तृतीया",
-    "चतुर्थी",
-    "पञ्चमी",
-    "षष्ठी",
-    "सप्तमी",
-    "अष्टमी",
-    "नवमी",
-    "दशमी",
-    "एकादशी",
-    "द्वादशी",
-    "त्रयोदशी",
-    "चतुर्दशी",
-    "पूर्णिमा",
-  ];
-
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) /
-      86400000,
-  );
-  const idx = dayOfYear % 15;
-  const paksha = dayOfYear % 30 < 15 ? "Shukla" : "Krishna";
-
-  return { name: tithiNames[idx], nameNp: tithiNamesNp[idx], paksha };
 }
 
 /** Format holiday info string for detail views. */
