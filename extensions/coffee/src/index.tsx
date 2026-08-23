@@ -11,6 +11,7 @@ import {
 import { useExec } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { formatDuration, startCaffeinate, stopCaffeinate, deviceName } from "./utils";
+import { maybeAutoCaffeinate } from "./status";
 import { CaffeinateStatus, get_caffeinate_state } from "rust:../rust";
 
 function parseEtime(etime: string): number {
@@ -153,6 +154,11 @@ export default function Command(props: LaunchProps) {
   useEffect(() => {
     setLocalCaffeinateStatus(null);
   }, [caffeinateStatus]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    void maybeAutoCaffeinate();
+  }, [isLoading]);
 
   useEffect(() => {
     if (!displayCaffeinateStatus || data.totalSeconds === null || data.startTime === null) return;

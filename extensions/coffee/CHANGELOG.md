@@ -10,6 +10,18 @@
 - Use platform-neutral wording in tools and AI instructions
 - Bump all dependencies to the latest
 
+## [Fix] - 2026-08-21
+
+- Reduced background status refreshes to once per minute.
+
+## [Fix] - 2026-08-20
+
+- Fixed future caffeination schedules not activating automatically and ensured they stop at the configured end time.
+
+## [Enhancement] - 2026-08-14
+
+- Added an "instant on" feature: when the new *Start caffeination when Raycast starts* preference is enabled, Coffee automatically keeps your Mac awake (indefinitely) shortly after Raycast launches. Manual decaffeination persists until the next Raycast restart.
+
 ## [AI Extension] - 2026-07-22
 
 - Added AI tools to caffeinate until a specific date and time.

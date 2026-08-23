@@ -13,13 +13,16 @@
     "xilopaint",
     "ridemountainpig",
     "zakj",
-    "Visual-Studio-Coder",
     "Katsuba",
     "alexi.build",
     "mbuvarp",
     "frederik_obe",
     "bsradcliffe",
+    "aditi_bhagat",
     "muhammadrizo"
+  ],
+  "pastContributors": [
+    "Visual-Studio-Coder"
   ],
   "categories": [
     "System"
@@ -134,7 +137,7 @@
       "title": "Caffeinate Status",
       "description": "Show the current caffeination status",
       "mode": "no-view",
-      "interval": "15s"
+      "interval": "1m"
     }
   ],
   "tools": [
@@ -235,19 +238,28 @@
           "value": "paper-cup"
         }
       ]
+    },
+    {
+      "name": "startCaffeinateOnLaunch",
+      "description": "Automatically keep your Mac awake (indefinitely) when Raycast starts. Requires the Caffeinate Status command (15 s interval) or the Caffeinate Status Menu Bar command (1 m interval) to be enabled.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Launch",
+      "label": "Start caffeination when Raycast starts"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.24",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/api": "^2.0.5",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "26.1.2",
+    "@types/node": "26.2.0",
     "@types/react": "19.2.18",
-    "eslint": "^10.8.0",
+    "eslint": "^10.9.0",
     "prettier": "^3.9.6",
-    "typescript": "^6.0.0"
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -257,7 +269,11 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  },
   "allowScripts": {
-    "esbuild@0.27.7": true
+    "esbuild@0.28.2": true
   }
 }

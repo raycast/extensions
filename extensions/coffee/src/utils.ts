@@ -44,11 +44,14 @@ async function update(updates: Updates, caffeinated: boolean) {
     await tryLaunchCommand("index", { caffeinated });
   }
   if (updates.status) {
-    await tryLaunchCommand("status", { caffeinated });
+    await tryLaunchCommand("status", { caffeinated, skipScheduleMonitorHeartbeat: true });
   }
 }
 
-async function tryLaunchCommand(commandName: string, context: { caffeinated: boolean }) {
+async function tryLaunchCommand(
+  commandName: string,
+  context: { caffeinated: boolean; skipScheduleMonitorHeartbeat?: boolean },
+) {
   try {
     await launchCommand({ name: commandName, type: LaunchType.Background, context });
   } catch {
@@ -101,6 +104,27 @@ export async function getSchedule() {
 
   const schedule: Schedule = JSON.parse(getSchedule);
   return schedule;
+}
+
+export function parseSchedule(value: string | number | boolean): Schedule | undefined {
+  if (typeof value !== "string") return undefined;
+
+  try {
+    const schedule = JSON.parse(value) as Partial<Schedule>;
+    if (
+      typeof schedule.day === "string" &&
+      typeof schedule.from === "string" &&
+      typeof schedule.to === "string" &&
+      typeof schedule.IsManuallyDecafed === "boolean" &&
+      typeof schedule.IsRunning === "boolean"
+    ) {
+      return schedule as Schedule;
+    }
+  } catch {
+    // Ignore unrelated local storage values.
+  }
+
+  return undefined;
 }
 
 export async function changeScheduleState(operation: string, schedule: Schedule) {
