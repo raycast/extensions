@@ -1,6 +1,7 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { applyDiscovery, decodeKeyEquivalent, parseAppPreferences, SOURCE_DISCOVER } from "../src/discover";
+import { pruneReaders } from "../src/scanner";
 import { normalizeShortcut } from "../src/schema";
 
 test("decodeKeyEquivalent maps modifiers and keys", () => {
@@ -138,4 +139,16 @@ test("applyDiscovery sweep removes stale entries across apps when fully healthy"
 
   assert.deepEqual(removed.map((s) => s.title).sort(), ["Old Compose", "Old Menu"]);
   assert.ok(next.some((s) => s.title === "New Menu"));
+});
+
+test("pruneReaders exempts only bundles with no readable copy", () => {
+  // "com.terminal" has a readable copy (in apps) AND an unreadable sibling file.
+  // It must NOT be exempted — the readable copy's fresh data should sweep its stale rows.
+  // "com.broken" has no readable copy, so it stays exempted.
+  const apps = [
+    { app: "Terminal", shortcuts: [disc("Zoom", "Cmd + Shift + Z", "com.terminal")] },
+  ];
+  const failed = ["com.terminal", "com.broken"];
+
+  assert.deepEqual(pruneReaders(failed, apps), ["com.broken"]);
 });

@@ -88,5 +88,18 @@ export async function discoverMenuShortcuts(): Promise<ScanResult> {
     }
   }
   apps.sort((a, b) => a.app.localeCompare(b.app));
-  return { apps, failedApps: [...failedApps] };
+  return { apps, failedApps: pruneReaders(failedApps, apps) };
+}
+
+/**
+ * A bundle id may span several plist files (main prefs dir + sandbox containers).
+ * A bundle is only "failed" if every copy was unreadable: when at least one copy
+ * reads cleanly we have fresh data for that bundle, so it must be swept normally —
+ * exempting it would leave stale rows from the readable copy in the library and
+ * retain old+new bindings for a re-keyed shortcut.
+ */
+export function pruneReaders(failedApps: Iterable<string>, apps: DiscoveredApp[]): string[] {
+  const readable = new Set<string>();
+  for (const a of apps) for (const s of a.shortcuts) if (s.bundleId) readable.add(s.bundleId);
+  return [...new Set(failedApps)].filter((id) => !readable.has(id));
 }
