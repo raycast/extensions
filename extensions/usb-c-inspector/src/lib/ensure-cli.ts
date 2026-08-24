@@ -1,7 +1,7 @@
 import { environment, LocalStorage } from "@raycast/api";
 import { createHash } from "crypto";
 import { createWriteStream, existsSync } from "fs";
-import { chmod, mkdir, mkdtemp, open, readFile, rename, rm, writeFile } from "fs/promises";
+import { chmod, mkdir, mkdtemp, readdir, readFile, rename, rm, rmdir, stat, writeFile } from "fs/promises";
 import path from "path";
 import { pipeline } from "stream/promises";
 import { Readable } from "stream";
@@ -84,21 +84,70 @@ async function sleep(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-const LOCK_FILE_NAME = "whatcable-cli.lock";
+const LOCK_DIR_NAME = "whatcable-cli.lock";
 const LOCK_WAIT_MS = 5 * 60 * 1000;
+const EMPTY_LOCK_STALE_MS = 10_000;
 
-async function acquireInstallLock(lockPath: string): Promise<void> {
-  await mkdir(path.dirname(lockPath), { recursive: true });
+function lockDirPath(): string {
+  return path.join(environment.supportPath, LOCK_DIR_NAME);
+}
+
+function ownerFilePath(pid: number): string {
+  return path.join(lockDirPath(), `owner-${pid}`);
+}
+
+/**
+ * Reap a dead holder's lock without unlinking a replacement.
+ * The owner file is named `owner-<pid>`, so we only delete that exact file.
+ * `rmdir` then fails if another process already created `owner-<livePid>`.
+ */
+async function tryReapStaleLock(lockDir: string): Promise<void> {
+  let entries: string[];
+  try {
+    entries = await readdir(lockDir);
+  } catch {
+    return;
+  }
+
+  if (entries.length === 0) {
+    try {
+      const info = await stat(lockDir);
+      if (Date.now() - info.mtimeMs > EMPTY_LOCK_STALE_MS) {
+        await rmdir(lockDir);
+      }
+    } catch {
+      // Already gone, or not empty anymore.
+    }
+    return;
+  }
+
+  const owners = entries.filter((entry) => entry.startsWith("owner-"));
+  if (owners.length !== 1) {
+    return;
+  }
+
+  const owner = Number(owners[0].slice("owner-".length));
+  if (!Number.isInteger(owner) || owner <= 0 || isPidAlive(owner)) {
+    return;
+  }
+
+  await rm(path.join(lockDir, owners[0]), { force: true });
+  try {
+    await rmdir(lockDir);
+  } catch {
+    // Another process already placed a live owner file in this directory.
+  }
+}
+
+async function acquireInstallLock(): Promise<void> {
+  const lockDir = lockDirPath();
+  await mkdir(environment.supportPath, { recursive: true });
   const deadline = Date.now() + LOCK_WAIT_MS;
 
   while (true) {
     try {
-      const handle = await open(lockPath, "wx");
-      try {
-        await handle.writeFile(`${process.pid}\n`);
-      } finally {
-        await handle.close();
-      }
+      await mkdir(lockDir);
+      await writeFile(ownerFilePath(process.pid), `${process.pid}\n`, "utf8");
       return;
     } catch (error) {
       const code = (error as NodeJS.ErrnoException).code;
@@ -108,27 +157,27 @@ async function acquireInstallLock(lockPath: string): Promise<void> {
       if (Date.now() > deadline) {
         throw new Error("Timed out waiting for WhatCable CLI install lock.");
       }
-      try {
-        const owner = Number((await readFile(lockPath, "utf8")).trim().split("\n")[0]);
-        if (Number.isInteger(owner) && owner > 0 && !isPidAlive(owner)) {
-          await rm(lockPath, { force: true });
-          continue;
-        }
-      } catch {
-        // Unreadable lock — wait and retry.
-      }
+      await tryReapStaleLock(lockDir);
       await sleep(100);
     }
   }
 }
 
+async function releaseInstallLock(): Promise<void> {
+  await rm(ownerFilePath(process.pid), { force: true });
+  try {
+    await rmdir(lockDirPath());
+  } catch {
+    // Another waiter may already be inside the directory.
+  }
+}
+
 async function withInstallLock<T>(fn: () => Promise<T>): Promise<T> {
-  const lockPath = path.join(environment.supportPath, LOCK_FILE_NAME);
-  await acquireInstallLock(lockPath);
+  await acquireInstallLock();
   try {
     return await fn();
   } finally {
-    await rm(lockPath, { force: true });
+    await releaseInstallLock();
   }
 }
 
