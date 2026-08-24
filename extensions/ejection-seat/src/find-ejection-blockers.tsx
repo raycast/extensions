@@ -680,7 +680,21 @@ function BlockerList({ volume, onVolumesChanged }: { volume: Volume; onVolumesCh
       searchBarPlaceholder="Filter processes or paths"
     >
       {error ? (
-        <List.EmptyView icon={Icon.ExclamationMark} title="Could Not Scan This Volume" description={error} />
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could Not Scan This Volume"
+          description={error}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh Scan"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={onRefresh}
+              />
+            </ActionPanel>
+          }
+        />
       ) : null}
       {!error && !isLoading && blockers.length === 0 ? (
         <List.EmptyView
@@ -689,18 +703,23 @@ function BlockerList({ volume, onVolumesChanged }: { volume: Volume; onVolumesCh
           description="Raycast cannot see files opened by root processes such as Spotlight or Time Machine."
           actions={
             <ActionPanel>
-              <Action
-                title="Eject Volume"
-                icon={Icon.Eject}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-                onAction={() => ejectVolume(volume, onEjected, onRefresh)}
-              />
-              <Action
-                title="Refresh Scan"
-                icon={Icon.ArrowClockwise}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={onRefresh}
-              />
+              <ActionPanel.Section>
+                <Action.ShowInFinder path={volume.mountPoint} />
+                <Action
+                  title="Refresh Scan"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={onRefresh}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Resolve">
+                <Action
+                  title="Eject Volume"
+                  icon={Icon.Eject}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                  onAction={() => ejectVolume(volume, onEjected, onRefresh)}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
