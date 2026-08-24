@@ -77,6 +77,25 @@ class PathSelectionTests(unittest.TestCase):
                 ],
             )
 
+    def test_rename_out_of_metadata_still_affects_original_extension(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            extension_dir = repo_root / "extensions" / "example"
+            extension_dir.mkdir(parents=True)
+
+            actual = checker.affected_extension_dirs(
+                repo_root,
+                [
+                    checker.ChangedFile(
+                        "extensions/example/assets/screenshot.png",
+                        "renamed",
+                        "extensions/example/metadata/screenshot.png",
+                    )
+                ],
+            )
+
+            self.assertEqual(actual, [extension_dir])
+
 
 class StructureTests(unittest.TestCase):
     def test_missing_metadata_directory_is_allowed(self) -> None:
