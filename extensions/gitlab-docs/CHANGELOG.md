@@ -1,6 +1,6 @@
 # GitLab Docs Changelog
 
-## [SVG grid view fix for Raycast 2.0] - 2026-08-24
+## [SVG grid view fix for Raycast 2.0] - {PR_MERGE_DATE}
 
 - Fixes the visual alignment of the SVG icons in the grid view for Raycast 2.0
 
