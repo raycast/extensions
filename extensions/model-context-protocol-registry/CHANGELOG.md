@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Refresh plori MCP Server] - 2026-08-23
+## [Refresh plori MCP Server] - {PR_MERGE_DATE}
 
 Refresh plori's description for its current persistent-environment positioning and support for runs, human input, scheduling, connections, and workflows.
 
