@@ -9,6 +9,8 @@ import {
   closeMainWindow,
   useNavigation,
   open,
+  launchCommand,
+  LaunchType,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -20,8 +22,6 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-const EJECT_ALL_DISKS_URL = "raycast://extensions/raycast/system-actions/eject-all-disks";
-const KILL_PROCESS_URL = "raycast://extensions/rolandleth/kill-process/index";
 const LSOF_TIMEOUT_MS = 8_000;
 const EJECT_TIMEOUT_MS = 30_000;
 const MAX_DETAIL_REFERENCES = 12;
@@ -394,7 +394,10 @@ async function scanAll(): Promise<Scan[]> {
 // the newline, so this stays bounded to the one line diskutil printed.
 const DISSENTER = /dissented by PID (\d+) \((.*)\)/i;
 
-async function ejectVolume(volume: Volume, onEjected: () => void): Promise<void> {
+// onEjected and onFailed are deliberately separate: a failed eject must NOT pop the
+// blocker list, because the toast that names the vetoing process (and offers to
+// activate it) is useless if the view showing that process's actions is already gone.
+async function ejectVolume(volume: Volume, onEjected: () => void, onFailed: () => void): Promise<void> {
   const toast = await showToast({ style: Toast.Style.Animated, title: `Ejecting ${volume.name}` });
 
   try {
@@ -415,7 +418,7 @@ async function ejectVolume(volume: Volume, onEjected: () => void): Promise<void>
     const dissenter = DISSENTER.exec(detail);
     if (!dissenter) {
       await showFailure(`Could not eject ${volume.name}`, new Error(detail));
-      onEjected();
+      onFailed();
       return;
     }
 
@@ -433,7 +436,7 @@ async function ejectVolume(volume: Volume, onEjected: () => void): Promise<void>
       },
       secondaryAction: app ? { title: `Activate ${app.name}`, onAction: () => activateApp(app) } : undefined,
     });
-    onEjected();
+    onFailed();
   }
 }
 
@@ -466,11 +469,29 @@ async function quitApp(app: AppBundle, onQuit: () => void): Promise<void> {
   }
 }
 
-async function openDeepLink(url: string): Promise<void> {
+async function openKillProcess(): Promise<void> {
   try {
-    await open(url);
+    await launchCommand({
+      ownerOrAuthorName: "rolandleth",
+      extensionName: "kill-process",
+      name: "index",
+      type: LaunchType.UserInitiated,
+    });
   } catch (error) {
-    await showFailure("Could not open Raycast command", error);
+    await showFailure("Could not open Kill Process", error);
+  }
+}
+
+async function openEjectAllDisks(): Promise<void> {
+  try {
+    await launchCommand({
+      ownerOrAuthorName: "raycast",
+      extensionName: "system-actions",
+      name: "eject-all-disks",
+      type: LaunchType.UserInitiated,
+    });
+  } catch (error) {
+    await showFailure("Could not open Eject All Disks", error);
   }
 }
 
@@ -618,12 +639,12 @@ function BlockerActions({
           title="Eject Volume"
           icon={Icon.Eject}
           shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-          onAction={() => ejectVolume(volume, onEjected)}
+          onAction={() => ejectVolume(volume, onEjected, onRefresh)}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Other Commands">
-        <Action title="Open Kill Process" icon={Icon.XMarkCircle} onAction={() => openDeepLink(KILL_PROCESS_URL)} />
-        <Action title="Open Eject All Disks" icon={Icon.Eject} onAction={() => openDeepLink(EJECT_ALL_DISKS_URL)} />
+        <Action title="Open Kill Process" icon={Icon.XMarkCircle} onAction={openKillProcess} />
+        <Action title="Open Eject All Disks" icon={Icon.Eject} onAction={openEjectAllDisks} />
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -672,7 +693,7 @@ function BlockerList({ volume, onVolumesChanged }: { volume: Volume; onVolumesCh
                 title="Eject Volume"
                 icon={Icon.Eject}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-                onAction={() => ejectVolume(volume, onEjected)}
+                onAction={() => ejectVolume(volume, onEjected, onRefresh)}
               />
               <Action
                 title="Refresh Scan"
@@ -787,13 +808,9 @@ export default function Command() {
                   title="Eject Volume"
                   icon={Icon.Eject}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-                  onAction={() => ejectVolume(scan.volume, revalidate)}
+                  onAction={() => ejectVolume(scan.volume, revalidate, revalidate)}
                 />
-                <Action
-                  title="Open Eject All Disks"
-                  icon={Icon.Eject}
-                  onAction={() => openDeepLink(EJECT_ALL_DISKS_URL)}
-                />
+                <Action title="Open Eject All Disks" icon={Icon.Eject} onAction={openEjectAllDisks} />
               </ActionPanel.Section>
             </ActionPanel>
           }
