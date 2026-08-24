@@ -1,6 +1,6 @@
 # TextArray Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-24
 
 - Run TextArray Tool command: search 540+ text tools and run them on the selected text or clipboard.
 - Paste (`↵`), copy (`⌘C`), open on textarray.com (`⌘O`), and reload input (`⌘R`).
