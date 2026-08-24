@@ -341,6 +341,6 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "overrides": {
-    "brace-expansion": "5.0.8"
+    "brace-expansion": "5.0.9"
   }
 }

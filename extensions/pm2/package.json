@@ -102,6 +102,7 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.8"
+    "brace-expansion": "5.0.9",
+    "ip-address": "10.5.0"
   }
 }
