@@ -3,7 +3,7 @@ import { Device } from "./devices.model";
 
 export function findDevice(devices: Device[], nameOrMacAddress: string, fuzzyRatio: string): Device | undefined {
   const minimumRatio = Number(fuzzyRatio);
-  if (!Number.isFinite(minimumRatio) || minimumRatio < 0 || minimumRatio > 100) {
+  if (!fuzzyRatio.trim() || !Number.isFinite(minimumRatio) || minimumRatio < 0 || minimumRatio > 100) {
     throw new Error("Invalid fuzzy ratio. Check extension preferences.");
   }
 

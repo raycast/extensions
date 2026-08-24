@@ -333,10 +333,17 @@ function Get-ConnectionState {
     $device = Wait-WinRt (
       [Windows.Devices.Bluetooth.BluetoothDevice]::FromIdAsync($Id)
     ) ([Windows.Devices.Bluetooth.BluetoothDevice])
-    $device.ConnectionStatus -eq ([Windows.Devices.Bluetooth.BluetoothConnectionStatus]::Connected)
-  } catch {
-    $false
-  }
+    if ($device) {
+      return $device.ConnectionStatus -eq ([Windows.Devices.Bluetooth.BluetoothConnectionStatus]::Connected)
+    }
+  } catch {}
+
+  try {
+    $device = Wait-WinRt (
+      [Windows.Devices.Bluetooth.BluetoothLEDevice]::FromIdAsync($Id)
+    ) ([Windows.Devices.Bluetooth.BluetoothLEDevice])
+    $device -and $device.ConnectionStatus -eq ([Windows.Devices.Bluetooth.BluetoothConnectionStatus]::Connected)
+  } catch { $false }
 }
 
 function Wait-ConnectionState {
@@ -449,10 +456,11 @@ try {
     }
     "RefreshAll" {
       if (Test-ActiveBluetoothInput) { throw "Refresh All is unavailable while a Bluetooth keyboard or mouse is active." }
+      $initialState = (Get-BluetoothRadio).State
       try {
         Set-BluetoothRadioState Off
       } finally {
-        Set-BluetoothRadioState On
+        Set-BluetoothRadioState $initialState
       }
       [pscustomobject]@{ success = $true } | ConvertTo-Json -Compress
     }
