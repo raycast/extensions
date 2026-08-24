@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flameshot",
   "title": "Flameshot",
-  "description": "Capture and view screenshots, control Flameshot",
+  "description": "Capture screenshots with Flameshot",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [
