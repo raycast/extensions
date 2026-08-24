@@ -18,7 +18,7 @@ Raycastから入力したテキストを、選択したObsidian Vault内のMarkd
 
 - Daily Note・To Do・Shoppingを⌘1 / ⌘2 / ⌘3で切り替え
 - ⌘ Enterで保存
-- Daily Noteの自動作成
+- 既存Daily Note・既存Markdownへの追記
 - 既存Markdownへの追記・先頭追加
 - 見出し直後・セクション末尾への挿入
 - Bullet / Task / Plain形式
@@ -35,13 +35,9 @@ Raycastから入力したテキストを、選択したObsidian Vault内のMarkd
 
 1. Raycastで Talk to Action for Raycast のExtension Preferencesを開く。
 2. Obsidian Vault にVaultのルートフォルダを選ぶ。
-3. Daily Note - Folder と Daily Note - File Format を設定する。
-4. Daily Note - ...、To Do - ...、Shopping - ... の各ルートを設定する。
+3. Daily Note - Folder と Daily Note - File Format を設定し、対象日のMarkdownをVault内にあらかじめ作成する。
+4. Daily Note - ...、To Do - ...、Shopping - ... の各ルートを設定する。保存先はすべて既存Markdownを選ぶ。
 5. 初回はバックアップ済みのテスト用Vaultで保存を確認する。
-
-設定例（テスト用Vault）:
-
-![Raycast Extension Preferencesの設定例](media/settings-example.png)
 
 ### 初期ルート
 
@@ -57,14 +53,14 @@ Shoppingの File Path は利用者が設定するまで保存できません。�
 
 - 保存先は、設定したVaultの内側だけです。
 - ../、絶対パス、Vault外へ向くシンボリックリンクは拒否します。
-- Existing Fileは、対象が存在しない場合に作成しません。
+- Daily Noteを含め、対象が存在しない場合に作成しません。
 - 既存内容を消すOverwrite操作はありません。
 - 保存中にファイルが変更された場合は、最大1回だけ再読込してから保存します。
 
 ## 保存できないとき
 
 - `Obsidian Vault was not found`：Extension Preferencesで存在するVaultのルートフォルダを選び直してください。
-- `Existing file was not found`：Existing Fileを選んだ場合は、Vault内に対象のMarkdownファイルを先に作成してください。
+- `Existing file was not found`：Daily NoteまたはExisting Fileを選んだ場合は、Vault内に対象のMarkdownファイルを先に作成してください。
 - `File Path must stay inside the selected Vault`：絶対パスや`../`を使わず、Vaultからの相対パスを入力してください。
 - `Input is empty`：保存する本文を入力してください。
 
@@ -87,8 +83,7 @@ daily-input-launcher.sh はRaycastのDeep Linkを開くだけの任意スクリ�
 - 日付ファイル名
 - 追記・先頭追加
 - 見出し直後・セクション末尾
-- Daily Note作成
-- Existing File未作成
+- Daily Note・Existing Fileの未作成拒否
 - Vault外パス・symlink・非Markdown拒否
 
 ## 参考文献

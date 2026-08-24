@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 
 export type InputMode = "note" | "task" | "shopping";
-export type Destination = "daily-note" | "existing-file" | "new-file";
+export type Destination = "daily-note" | "existing-file";
 export type Position = "append" | "prepend";
 export type Section = "none" | "after-heading" | "section-end";
 export type LineFormat = "bullet" | "task" | "plain";
@@ -32,7 +32,6 @@ export interface SaveInputOptions {
 export interface SaveResult {
   absolutePath: string;
   relativePath: string;
-  created: boolean;
   lineCount: number;
 }
 
@@ -47,7 +46,6 @@ interface ResolvedTarget {
   vaultPath: string;
   absolutePath: string;
   relativePath: string;
-  allowCreate: boolean;
 }
 
 interface HeadingMatch {
@@ -60,7 +58,7 @@ interface LockOwner {
   token: string;
 }
 
-const DESTINATIONS: Destination[] = ["daily-note", "existing-file", "new-file"];
+const DESTINATIONS: Destination[] = ["daily-note", "existing-file"];
 const POSITIONS: Position[] = ["append", "prepend"];
 const SECTIONS: Section[] = ["none", "after-heading", "section-end"];
 const LINE_FORMATS: LineFormat[] = ["bullet", "task", "plain"];
@@ -201,7 +199,6 @@ export function normalizeRelativePath(value: string, label: string): string {
 async function resolveTarget(options: SaveInputOptions): Promise<ResolvedTarget> {
   const vaultPath = await resolveVaultPath(options.vaultPath);
   let relativePath: string;
-  let allowCreate: boolean;
 
   switch (options.route.destination) {
     case "daily-note": {
@@ -210,23 +207,17 @@ async function resolveTarget(options: SaveInputOptions): Promise<ResolvedTarget>
         : "";
       const fileName = formatDailyNoteFileName(options.dailyNoteFileFormat, options.now ?? new Date());
       relativePath = folder ? path.join(folder, fileName) : fileName;
-      allowCreate = true;
       break;
     }
     case "existing-file":
       relativePath = ensureMarkdownRelativePath(options.route.filePath, "File Path");
-      allowCreate = false;
-      break;
-    case "new-file":
-      relativePath = ensureMarkdownRelativePath(options.route.filePath, "File Path");
-      allowCreate = true;
       break;
     default:
       assertNever(options.route.destination);
   }
 
   const absolutePath = await resolveInsideVault(vaultPath, relativePath);
-  if (!allowCreate && !(await pathExists(absolutePath))) {
+  if (!(await pathExists(absolutePath))) {
     throw new StorageError("Existing file was not found: " + relativePath);
   }
 
@@ -234,49 +225,23 @@ async function resolveTarget(options: SaveInputOptions): Promise<ResolvedTarget>
     vaultPath,
     absolutePath,
     relativePath: toVaultRelativePath(vaultPath, absolutePath),
-    allowCreate,
   };
 }
 
 async function writeToTarget(target: ResolvedTarget, newLines: string[], route: Route): Promise<SaveResult> {
   return withTargetLock(target.absolutePath, () =>
     withFilesystemLock(target, async () => {
-      await fs.mkdir(path.dirname(target.absolutePath), { recursive: true });
-
       for (let attempt = 0; attempt < 2; attempt += 1) {
         const existingContent = await readTextIfExists(target.absolutePath);
 
         if (existingContent === null) {
-          if (!target.allowCreate) {
-            throw new StorageError("Existing file was not found: " + target.relativePath);
-          }
-
-          const content = buildUpdatedContent("", newLines, route);
-          try {
-            const handle = await openVerifiedTarget(target, true);
-            try {
-              await writeAll(handle, content);
-            } finally {
-              await handle.close();
-            }
-            return {
-              absolutePath: target.absolutePath,
-              relativePath: target.relativePath,
-              created: true,
-              lineCount: newLines.length,
-            };
-          } catch (error) {
-            if (isErrorCode(error, "EEXIST") && attempt === 0) {
-              continue;
-            }
-            throw toStorageError(error, target.relativePath);
-          }
+          throw new StorageError("Existing file was not found: " + target.relativePath);
         }
 
         const content = buildUpdatedContent(existingContent, newLines, route);
         let handle: FileHandle | undefined;
         try {
-          handle = await openVerifiedTarget(target, false);
+          handle = await openVerifiedTarget(target);
           const contentBeforeWrite = await handle.readFile({ encoding: "utf8" });
           if (contentBeforeWrite !== existingContent) {
             if (attempt === 0) {
@@ -290,7 +255,6 @@ async function writeToTarget(target: ResolvedTarget, newLines: string[], route: 
           return {
             absolutePath: target.absolutePath,
             relativePath: target.relativePath,
-            created: false,
             lineCount: newLines.length,
           };
         } catch (error) {
@@ -455,13 +419,11 @@ function wait(duration: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, duration));
 }
 
-async function openVerifiedTarget(target: ResolvedTarget, create: boolean): Promise<FileHandle> {
-  const flags = constants.O_RDWR | constants.O_NOFOLLOW | (create ? constants.O_CREAT | constants.O_EXCL : 0);
+async function openVerifiedTarget(target: ResolvedTarget): Promise<FileHandle> {
+  const flags = constants.O_RDWR | constants.O_NOFOLLOW;
   let handle: FileHandle | undefined;
-  let created = false;
   try {
     handle = await fs.open(target.absolutePath, flags, 0o600);
-    created = create;
     await resolveInsideVault(target.vaultPath, target.relativePath);
 
     const [handleStats, targetStats, targetLinkStats] = await Promise.all([
@@ -480,30 +442,8 @@ async function openVerifiedTarget(target: ResolvedTarget, create: boolean): Prom
     }
     return handle;
   } catch (error) {
-    if (created && handle) {
-      await removeCreatedTarget(target, handle);
-    }
     await handle?.close();
     throw error;
-  }
-}
-
-async function removeCreatedTarget(target: ResolvedTarget, handle: FileHandle): Promise<void> {
-  try {
-    const [handleStats, targetStats, targetLinkStats] = await Promise.all([
-      handle.stat(),
-      fs.stat(target.absolutePath),
-      fs.lstat(target.absolutePath),
-    ]);
-    if (
-      !targetLinkStats.isSymbolicLink() &&
-      handleStats.dev === targetStats.dev &&
-      handleStats.ino === targetStats.ino
-    ) {
-      await fs.unlink(target.absolutePath);
-    }
-  } catch {
-    // Preserve the original validation error when cleanup cannot be verified.
   }
 }
 

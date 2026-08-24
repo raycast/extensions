@@ -34,7 +34,7 @@
       "type": "textfield",
       "required": false,
       "title": "Daily Note - Folder",
-      "description": "Vault-relative folder. Leave blank to use the Vault root.",
+      "description": "Vault-relative folder. The Daily Note file must already exist.",
       "default": "Daily Note",
       "placeholder": "Daily Note"
     },
@@ -43,7 +43,7 @@
       "type": "textfield",
       "required": true,
       "title": "Daily Note - File Format",
-      "description": "File name format using YYYY, MM, and DD.",
+      "description": "Existing file name format using YYYY, MM, and DD.",
       "default": "YYYY-MM-DD",
       "placeholder": "YYYY-MM-DD"
     },
@@ -71,10 +71,6 @@
         {
           "title": "Existing File",
           "value": "existing-file"
-        },
-        {
-          "title": "New File",
-          "value": "new-file"
         }
       ]
     },
@@ -83,7 +79,7 @@
       "type": "textfield",
       "required": false,
       "title": "Daily Note - File Path",
-      "description": "Vault-relative Markdown path for Existing File or New File.",
+      "description": "Vault-relative Markdown path for Existing File.",
       "default": "",
       "placeholder": "Notes/Inbox.md"
     },
@@ -182,10 +178,6 @@
         {
           "title": "Existing File",
           "value": "existing-file"
-        },
-        {
-          "title": "New File",
-          "value": "new-file"
         }
       ]
     },
@@ -194,7 +186,7 @@
       "type": "textfield",
       "required": false,
       "title": "To Do - File Path",
-      "description": "Vault-relative Markdown path for Existing File or New File.",
+      "description": "Vault-relative Markdown path for Existing File.",
       "default": "",
       "placeholder": "Task.md"
     },
@@ -293,10 +285,6 @@
         {
           "title": "Existing File",
           "value": "existing-file"
-        },
-        {
-          "title": "New File",
-          "value": "new-file"
         }
       ]
     },

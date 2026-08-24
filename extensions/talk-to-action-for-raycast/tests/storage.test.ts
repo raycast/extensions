@@ -115,8 +115,10 @@ describe("content insertion", () => {
 });
 
 describe("Vault writes", () => {
-  test("creates a Daily Note and appends a To Do without a plugin", async () => {
+  test("appends to an existing Daily Note without a plugin", async () => {
     const vault = await makeVault();
+    await mkdir(path.join(vault, "Daily Note"));
+    await writeFile(path.join(vault, "Daily Note/2026-08-14.md"), "");
     const result = await saveInput({
       vaultPath: vault,
       dailyNoteFolder: "Daily Note",
@@ -249,6 +251,22 @@ describe("Vault writes", () => {
     ).rejects.toThrow("Existing file was not found");
   });
 
+  test("does not create a Daily Note target", async () => {
+    const vault = await makeVault();
+    await mkdir(path.join(vault, "Daily Note"));
+    await expect(
+      saveInput({
+        vaultPath: vault,
+        dailyNoteFolder: "Daily Note",
+        dailyNoteFileFormat: "YYYY-MM-DD",
+        route: { ...baseRoute, destination: "daily-note", filePath: "" },
+        input: "New",
+        now: new Date(2026, 7, 14),
+      }),
+    ).rejects.toThrow("Existing file was not found");
+    await expect(readFile(path.join(vault, "Daily Note/2026-08-14.md"), "utf8")).rejects.toThrow("ENOENT");
+  });
+
   test("rejects Vault escape paths and non-Markdown files", async () => {
     const vault = await makeVault();
     await expect(
@@ -291,34 +309,6 @@ describe("Vault writes", () => {
 });
 
 describe("additional route behavior", () => {
-  test("creates a New File and appends to it on the next save", async () => {
-    const vault = await makeVault();
-    const route = {
-      ...baseRoute,
-      destination: "new-file" as const,
-      filePath: "Notes/Capture",
-    };
-
-    const first = await saveInput({
-      vaultPath: vault,
-      dailyNoteFolder: "",
-      dailyNoteFileFormat: "YYYY-MM-DD",
-      route,
-      input: "First",
-    });
-    const second = await saveInput({
-      vaultPath: vault,
-      dailyNoteFolder: "",
-      dailyNoteFileFormat: "YYYY-MM-DD",
-      route,
-      input: "Second",
-    });
-
-    expect(first.created).toBe(true);
-    expect(second.created).toBe(false);
-    expect(await readFile(path.join(vault, "Notes/Capture.md"), "utf8")).toBe("- [ ] First\n- [ ] Second\n");
-  });
-
   test("does not modify a file when its requested heading is missing", async () => {
     const vault = await makeVault();
     const filePath = path.join(vault, "Tasks.md");
