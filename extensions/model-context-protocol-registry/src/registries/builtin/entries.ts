@@ -782,7 +782,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "plori",
     title: "plori",
     description:
-      "Give your AI agent its own cloud computer. plori hosts agents on persistent machines with a real disk, tools, and memory that survives between sessions; idle agents scale to zero. This server creates and drives those agents: invoke an agent and read its reply, answer human-in-the-loop questions, and schedule deferred runs. Sign-in happens in the browser on first use (OAuth), or use an API key for headless setups.",
+      "Create and drive cloud AI agents in persistent environments with durable disks, real CLI tools, and memory. Supports runs, human input, scheduling, connections, and workflows over remote MCP. Sign in with OAuth 2.1, or use an API key for headless setups.",
     icon: "https://plori.ai/icon-512.png",
     homepage: "https://plori.ai/mcp",
     configuration: {
