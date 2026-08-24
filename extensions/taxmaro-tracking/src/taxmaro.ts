@@ -8,12 +8,12 @@ const REQUEST_TIMEOUT_MS = 15_000;
 
 interface TaxmaroPreferences {
   apiToken: string;
-  colleagueId: string;
 }
 
 const preferences = getPreferenceValues<TaxmaroPreferences>();
 const apiToken = preferences.apiToken.trim();
-const colleagueId = preferences.colleagueId.trim();
+
+const COLLEAGUE_ID_PLACEHOLDER = "0";
 
 const TrackingStatusResponse = z
   .object({
@@ -47,7 +47,7 @@ const request = async (path: string, init?: RequestInit): Promise<Response> => {
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${apiToken}`,
-      selectedColleagueId: colleagueId,
+      selectedColleagueId: COLLEAGUE_ID_PLACEHOLDER,
       ...init?.headers,
     },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
@@ -61,7 +61,7 @@ const request = async (path: string, init?: RequestInit): Promise<Response> => {
 };
 
 const requestTrackingStatus = async (): Promise<TrackingStatus> => {
-  const response = await request(`/loggedin_colleague_details/${colleagueId}`);
+  const response = await request(`/loggedin_colleague_details/${COLLEAGUE_ID_PLACEHOLDER}`);
   return TrackingStatusResponse.parse(await response.json());
 };
 
@@ -72,7 +72,7 @@ export const fetchTrackingStatus = async (): Promise<TrackingStatus> => {
 };
 
 const postTrackingAction = async (running: boolean): Promise<void> => {
-  await request(`/colleagues/${colleagueId}/time_tracking_actions`, {
+  await request(`/colleagues/${COLLEAGUE_ID_PLACEHOLDER}/time_tracking_actions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status: running ? "start" : "stop" }),

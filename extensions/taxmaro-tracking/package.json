@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "taxmaro-tracking",
-  "description": "Shortcuts for work time tracking on the Taxmaro platform.",
+  "description": "Unofficial Raycast Extension providing Shortcuts for time tracking on Taxmaro.",
   "categories": [
     "Productivity"
   ],
@@ -30,23 +30,6 @@
     "typescript": "^6.0.3"
   },
   "icon": "extension-icon.png",
-  "preferences": [
-    {
-      "name": "apiToken",
-      "title": "API Token",
-      "description": "JWT API token created in Taxmaro.",
-      "type": "password",
-      "required": true
-    },
-    {
-      "name": "colleagueId",
-      "title": "Colleague ID",
-      "description": "Your numeric Taxmaro colleague ID.",
-      "type": "textfield",
-      "placeholder": "86379",
-      "required": true
-    }
-  ],
   "commands": [
     {
       "name": "toggle-tracking",
@@ -66,6 +49,15 @@
   ],
   "platforms": [
     "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "API token created in Taxmaro.",
+      "type": "password",
+      "required": true
+    }
   ],
   "title": "Taxmaro Tracking",
   "tools": []
