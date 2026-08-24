@@ -1,172 +1,300 @@
-import { Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
+import { Toast, environment, getPreferenceValues, openExtensionPreferences, showToast } from "@raycast/api";
 import { runJxa } from "run-jxa";
 
-import { basename, extname } from "path";
+import { basename, extname, join } from "path";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import * as fs from "fs";
 
-import { Pocket, Card, Preferences } from "./types";
+import { Pocket, Card, Preferences, WalletStatus } from "./types";
+import { isWindows } from "./platform";
+import { purgePdfThumbnails } from "./lib/pdfThumbnail";
 
-const PREVIEW_DIR = `${environment.supportPath}/.previews`;
+const execFileAsync = promisify(execFile);
 
+const PREVIEW_DIR = join(environment.supportPath, ".previews");
+
+// Windows renders PNG, macOS gets a TIFF straight out of AVFoundation.
+const PREVIEW_EXT = isWindows ? ".png" : ".tiff";
+
+// Define supported file extensions
+const videoExts = [".mov", ".mp4", ".m4v", ".mts", ".3gp", ".m2ts", ".m2v", ".mpeg", ".mpg", ".mts", ".vob"];
+const imageExts = [
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".avif",
+  ".bmp",
+  ".dds",
+  ".exr",
+  ".gif",
+  ".hdr",
+  ".ico",
+  ".jpe",
+  ".pbm",
+  ".pfm",
+  ".pgm",
+  ".pict",
+  ".ppm",
+  ".psd",
+  ".sgi",
+  ".svg",
+  ".tga",
+  ".tiff",
+  ".webp",
+  ".cr2",
+  ".dng",
+  ".heic",
+  ".heif",
+  ".jp2",
+  ".nef",
+  ".orf",
+  ".raf",
+  ".rw2",
+];
+
+/** Thrown when the Wallet directory exists but its contents can't be listed (e.g. permissions). */
+export class WalletUnreadableError extends Error {}
+
+export const walletStatus = getWalletStatus();
 export const walletPath = getWalletPath();
-function getWalletPath() {
-  const preferences = getPreferenceValues<Preferences>();
-  if (preferences.walletDirectory) {
-    const definedDir = fs.lstatSync(preferences.walletDirectory);
-    if (definedDir.isDirectory()) return preferences.walletDirectory;
+
+function getWalletStatus(): WalletStatus {
+  const { walletDirectory } = getPreferenceValues<Preferences>();
+  if (!walletDirectory) return "missing";
+
+  try {
+    // statSync follows symlinks, so a linked Wallet directory is accepted too.
+    return fs.statSync(walletDirectory).isDirectory() ? "ready" : "not-found";
+  } catch (e) {
+    // Moved, renamed, or on an unmounted drive.
+    return "not-found";
   }
-  return environment.supportPath;
 }
 
-export function fetchPocketNames(): string[] {
-  return fs.readdirSync(walletPath).filter((item) => {
-    if (item.startsWith(".")) return;
-
-    const filePath = `${walletPath}/${item}`;
-    let fileStats;
-
-    try {
-      fs.accessSync(filePath, fs.constants.R_OK);
-
-      fileStats = fs.lstatSync(filePath);
-      if (fileStats.isSymbolicLink()) fileStats = fs.lstatSync(fs.readlinkSync(filePath));
-    } catch (e) {
-      // Photos is protected by default, and is a frequent appearance in my extension error emails.
-      // I figure it makes sense to explicitly ignore it.
-      if (item.endsWith(".photoslibrary")) return;
-
-      // Try to continue even if we can't read the directory
-      // This allows the extension to work with directories that have special characters
-      if (!getPreferenceValues<Preferences>().suppressReadErrors) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: `${filePath} could not be read`,
-          message:
-            "File/directory may contain special characters, or protect read access. Suppress this error in extension preferences.",
-        });
-      }
-      return;
-    }
-
-    if (fileStats.isDirectory()) return item;
-  });
+function getWalletPath() {
+  const { walletDirectory } = getPreferenceValues<Preferences>();
+  return walletStatus === "ready" ? walletDirectory : environment.supportPath;
 }
 
 export async function fetchFiles(): Promise<Pocket[]> {
-  const pocketArr: Pocket[] = [];
+  const pockets: Pocket[] = [];
 
-  const cards = await loadPocketCards(walletPath);
-  if (cards.length > 0) pocketArr.push({ cards: cards });
+  // Guards against symlink cycles, which recursion into linked directories makes reachable.
+  const visitedDirectories = new Set<string>();
 
-  await Promise.all(
-    fetchPocketNames().map(async (item) => {
-      const cards = await loadPocketCards(`${walletPath}/${item}`);
-      if (cards.length > 0) pocketArr.push({ name: item, cards: cards });
-    })
-  );
+  await collectPockets(walletPath, undefined, pockets, visitedDirectories, true);
 
-  return pocketArr;
+  // The Wallet root's own Cards come first, then Pockets by path so parents precede children.
+  return pockets.sort((a, b) => {
+    if (a.name === undefined) return -1;
+    if (b.name === undefined) return 1;
+    return a.name.localeCompare(b.name);
+  });
 }
 
-async function loadPocketCards(dir: string): Promise<Card[]> {
-  const cardArr: Card[] = [];
-  const items = fs.readdirSync(dir);
+/**
+ * A Pocket is any directory holding at least one Card. Pockets nest to any depth and are named
+ * by their path relative to the Wallet root ("memes/reactions"), which keeps every level
+ * addressable in the Pocket filter and as a grid section.
+ */
+async function collectPockets(
+  dir: string,
+  pocketName: string | undefined,
+  pockets: Pocket[],
+  visitedDirectories: Set<string>,
+  isRoot = false
+): Promise<void> {
+  let realPath: string;
+  try {
+    realPath = fs.realpathSync(dir);
+  } catch (e) {
+    if (isRoot) throw new WalletUnreadableError(unreadableWalletMessage(dir));
+    reportUnreadable(dir, "directory");
+    return;
+  }
 
-  // Define supported file extensions
-  const videoExts = [".mov", ".mp4", ".m4v", ".mts", ".3gp", ".m2ts", ".m2v", ".mpeg", ".mpg", ".mts", ".vob"];
-  const imageExts = [
-    ".png",
-    ".jpg",
-    ".jpeg",
-    ".bmp",
-    ".dds",
-    ".exr",
-    ".gif",
-    ".hdr",
-    ".ico",
-    ".jpe",
-    ".pbm",
-    ".pfm",
-    ".pgm",
-    ".pict",
-    ".ppm",
-    ".psd",
-    ".sgi",
-    ".svg",
-    ".tga",
-    ".tiff",
-    ".webp",
-    ".cr2",
-    ".dng",
-    ".heic",
-    ".heif",
-    ".jp2",
-    ".nef",
-    ".orf",
-    ".raf",
-    ".rw2",
-  ];
+  if (visitedDirectories.has(realPath)) return;
+  visitedDirectories.add(realPath);
+
+  let entries: fs.Dirent[];
+  try {
+    fs.accessSync(dir, fs.constants.R_OK);
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (e) {
+    if (isRoot) throw new WalletUnreadableError(unreadableWalletMessage(dir));
+    reportUnreadable(dir, "directory");
+    return;
+  }
+
+  const visibleEntries = entries.filter((entry) => !entry.name.startsWith("."));
+
+  const cards = await loadPocketCards(dir, visibleEntries);
+  if (cards.length > 0) pockets.push({ name: pocketName, cards });
+
+  for (const entry of visibleEntries) {
+    const entryPath = join(dir, entry.name);
+
+    let isDirectory = entry.isDirectory();
+    if (entry.isSymbolicLink()) {
+      try {
+        isDirectory = fs.statSync(entryPath).isDirectory();
+      } catch (e) {
+        continue;
+      }
+    }
+    if (!isDirectory) continue;
+
+    await collectPockets(
+      entryPath,
+      pocketName ? `${pocketName}/${entry.name}` : entry.name,
+      pockets,
+      visitedDirectories
+    );
+  }
+}
+
+async function loadPocketCards(dir: string, entries: fs.Dirent[]): Promise<Card[]> {
+  const cardArr: Card[] = [];
 
   await Promise.all(
-    items.map(async (item) => {
-      if (item.startsWith(".")) return;
-
-      const filePath = `${dir}/${item}`;
-      let fileExt = extname(filePath);
-      const fileName = basename(filePath, fileExt);
-      fileExt = fileExt.toLowerCase();
+    entries.map(async (entry) => {
+      const filePath = join(dir, entry.name);
+      const rawExt = extname(filePath);
+      const fileName = basename(filePath, rawExt);
+      const fileExt = rawExt.toLowerCase();
       let fileStats;
 
       try {
         fileStats = fs.lstatSync(filePath);
-        if (fileStats.isSymbolicLink()) fileStats = fs.lstatSync(fs.readlinkSync(filePath));
+        if (fileStats.isSymbolicLink()) fileStats = fs.statSync(filePath);
       } catch (e) {
         // If we can't read the file stats, try to still include it if it's an image
         // If it's an image file, include it even if we can't get stats
         if (imageExts.includes(fileExt)) {
-          cardArr.push({ name: fileName, path: filePath, preview: filePath });
+          cardArr.push(buildCard(fileName, filePath, fileExt, filePath));
           return;
         }
 
-        // For non-image files, show error if not suppressed
-        if (!getPreferenceValues<Preferences>().suppressReadErrors) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: `${filePath} could not be read`,
-            message: "File may contain special characters. Suppress this error in extension preferences.",
-          });
-        }
-
+        reportUnreadable(filePath, "file");
         return;
       }
 
-      if (fileStats.isDirectory() || fileStats.isSymbolicLink()) return;
+      if (fileStats.isDirectory()) return;
       let previewPath: string | undefined = undefined;
 
       if (videoExts.includes(fileExt) && getPreferenceValues<Preferences>().videoPreviews) {
-        if (!fs.existsSync(PREVIEW_DIR)) fs.mkdirSync(PREVIEW_DIR);
-        // Sanitize the path to create a valid filename
-        const sanitizedPath = dir.replaceAll("/", "-").replace(/[^a-zA-Z0-9\-_]/g, "_");
-        const sanitizedItem = item.replace(/[^a-zA-Z0-9\-_.]/g, "_");
-        previewPath = `${PREVIEW_DIR}/${sanitizedPath}-${sanitizedItem}.tiff`;
-
-        if (!fs.existsSync(previewPath)) await generateVideoPreview(filePath, previewPath);
+        previewPath = await videoPreviewFor(dir, entry.name, filePath);
       } else if (imageExts.includes(fileExt)) {
         previewPath = filePath;
       }
 
-      cardArr.push({ name: fileName, path: filePath, preview: previewPath });
+      // PDFs deliberately get no preview here: they are rendered asynchronously by
+      // usePdfThumbnails so a slow PDFium pass never blocks the grid.
+      cardArr.push(buildCard(fileName, filePath, fileExt, previewPath, fileStats));
     })
   );
 
-  return cardArr.sort();
+  return cardArr;
+}
+
+function buildCard(name: string, path: string, fileExt: string, preview: string | undefined, stats?: fs.Stats): Card {
+  return {
+    name,
+    path,
+    preview,
+    extension: fileExt.replace(/^\./, ""),
+    size: stats?.size ?? 0,
+    mtimeMs: stats?.mtimeMs ?? 0,
+    createdAtMs: stats?.birthtimeMs ?? 0,
+  };
+}
+
+async function videoPreviewFor(dir: string, item: string, filePath: string): Promise<string | undefined> {
+  fs.mkdirSync(PREVIEW_DIR, { recursive: true });
+  // Sanitize the path to create a valid filename.
+  // Windows paths contain both separators and a drive colon, so strip all of them.
+  const sanitizedPath = dir.replace(/[\\/:]/g, "-").replace(/[^a-zA-Z0-9\-_]/g, "_");
+  const sanitizedItem = item.replace(/[^a-zA-Z0-9\-_.]/g, "_");
+  const previewPath = join(PREVIEW_DIR, `${sanitizedPath}-${sanitizedItem}${PREVIEW_EXT}`);
+
+  if (fs.existsSync(previewPath)) return previewPath;
+  return (await generateVideoPreview(filePath, previewPath)) ? previewPath : undefined;
+}
+
+function unreadableWalletMessage(dir: string): string {
+  return `"${dir}" could not be read. It may be protected, or on a drive that isn't currently accessible.`;
+}
+
+function reportUnreadable(path: string, kind: "file" | "directory") {
+  // Photos is protected by default, and is a frequent appearance in my extension error emails.
+  // I figure it makes sense to explicitly ignore it.
+  if (path.endsWith(".photoslibrary")) return;
+
+  showToast({
+    style: Toast.Style.Failure,
+    title: `${path} could not be read`,
+    message:
+      kind === "directory"
+        ? "File/directory may contain special characters, or protect read access."
+        : "File may contain special characters.",
+    primaryAction: {
+      title: "Change Wallet Directory",
+      onAction: () => openExtensionPreferences(),
+    },
+  });
 }
 
 export function purgePreviews() {
   fs.rmSync(PREVIEW_DIR, { recursive: true, force: true });
+  purgePdfThumbnails();
+  ffmpegMissingReported = false;
 }
 
 async function generateVideoPreview(inputPath: string, outputPath: string): Promise<string | undefined> {
+  const previewPath = isWindows
+    ? await generateVideoPreviewWithFfmpeg(inputPath, outputPath)
+    : await generateVideoPreviewWithJxa(inputPath, outputPath);
+
+  return previewPath?.toString();
+}
+
+// ffmpeg is not bundled with Raycast, so a missing binary is an expected outcome
+// rather than an error. Warn once per Wallet scan and fall back to the file-type icon.
+let ffmpegMissingReported = false;
+
+async function generateVideoPreviewWithFfmpeg(inputPath: string, outputPath: string): Promise<string | undefined> {
+  try {
+    await execFileAsync(
+      "ffmpeg",
+      ["-hide_banner", "-loglevel", "error", "-y", "-ss", "0", "-i", inputPath, "-frames:v", "1", outputPath],
+      { windowsHide: true }
+    );
+  } catch (e) {
+    const isMissingBinary = (e as NodeJS.ErrnoException)?.code === "ENOENT";
+
+    if (isMissingBinary && !ffmpegMissingReported) {
+      ffmpegMissingReported = true;
+      showToast({
+        style: Toast.Style.Failure,
+        title: "ffmpeg not found",
+        message:
+          "Video previews on Windows require ffmpeg on your PATH. Install it, or turn off 'Generate Video Previews' in extension preferences.",
+      });
+    } else if (!isMissingBinary) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: `Could not generate a preview for ${basename(inputPath)}`,
+      });
+    }
+
+    return undefined;
+  }
+
+  return fs.existsSync(outputPath) ? outputPath : undefined;
+}
+
+async function generateVideoPreviewWithJxa(inputPath: string, outputPath: string): Promise<string | undefined> {
   const previewPath = await runJxa(
     `
       ObjC.import("objc");
@@ -176,7 +304,7 @@ async function generateVideoPreview(inputPath: string, outputPath: string): Prom
       ObjC.import("CoreGraphics");
       ObjC.import("CoreImage");
       ObjC.import("AppKit");
-      
+
       const [inputPath, outputPath] = args;
 
       // Load the video file
@@ -185,14 +313,14 @@ async function generateVideoPreview(inputPath: string, outputPath: string): Prom
       );
 
       const asset = $.objc_getClass("AVAsset").assetWithURL(assetURL);
-      
+
       // Ensure the video has a video track
       if (asset.tracksWithMediaType($.AVMediaTypeVideo).count == 0) {
         return undefined;
       }
 
       const frameCount = 15; // The number of frames to analyze
-      
+
       // Set up the AVAssetReader for reading the video frames into pixel buffers
       const reader = $.objc_getClass("AVAssetReader").alloc.initWithAssetError(
         asset,
@@ -208,7 +336,7 @@ async function generateVideoPreview(inputPath: string, outputPath: string): Prom
       ).alloc.initWithTrackOutputSettings(track, settings);
       reader.addOutput(readerOutput);
       reader.startReading;
-      
+
       // Read the video frames into pixel buffers
       let buf = readerOutput.copyNextSampleBuffer;
       if (reader.status != $.AVAssetReaderStatusFailed) {

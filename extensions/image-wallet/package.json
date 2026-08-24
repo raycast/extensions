@@ -16,6 +16,10 @@
     "gif"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "image-wallet",
@@ -30,12 +34,68 @@
       "title": "Wallet Directory",
       "description": "Path to load Wallet from. Leave blank for default.",
       "type": "directory",
-      "required": true
+      "required": false
+    },
+    {
+      "name": "thumbnailLayout",
+      "title": "Thumbnail Layout",
+      "type": "dropdown",
+      "required": false,
+      "default": "inset",
+      "description": "How Card images are laid out inside their grid cell.",
+      "data": [
+        {
+          "title": "Inset (image centred with padding)",
+          "value": "inset"
+        },
+        {
+          "title": "Contain (fill the cell, whole image visible)",
+          "value": "contain"
+        },
+        {
+          "title": "Fill (crop to fill the cell edge to edge)",
+          "value": "fill"
+        }
+      ]
+    },
+    {
+      "name": "gridColumns",
+      "title": "Cards per Row",
+      "type": "dropdown",
+      "required": false,
+      "default": "5",
+      "description": "How many Cards fit across the grid. Fewer columns means larger thumbnails.",
+      "data": [
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        }
+      ]
     },
     {
       "name": "videoPreviews",
       "label": "Generate Video Previews",
-      "description": "Should video Cards generate preview images?\n\nCan slow down Wallet when adding videos.\nManually reset previews with ⌘⇧R.",
+      "description": "Should video Cards generate preview images?\n\nCan slow down Wallet when adding videos.\nRequires ffmpeg on your PATH on Windows.\nManually reset previews with the Reset Video Previews action.",
       "type": "checkbox",
       "required": true,
       "default": true
@@ -47,20 +107,14 @@
       "type": "checkbox",
       "required": true,
       "default": true
-    },
-    {
-      "name": "suppressReadErrors",
-      "label": "Suppress Read Errors",
-      "description": "Hide the warning when a file or directory could not be read.",
-      "type": "checkbox",
-      "required": false,
-      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
+    "@raycast/api": "^1.104.0",
     "@raycast/utils": "^1.5.2",
-    "run-jxa": "^3.0.0"
+    "run-jxa": "^3.0.0",
+    "@hyzyla/pdfium": "^2.1.13",
+    "pngjs": "^7.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
@@ -69,7 +123,8 @@
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "@types/pngjs": "^6.0.5"
   },
   "scripts": {
     "build": "ray build -e dist",
