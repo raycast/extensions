@@ -8,6 +8,9 @@ type Input = {
   sql: string;
 };
 
+// Cap the rows returned to the model so a large SELECT doesn't overflow the context window.
+const MAX_TOOL_ROWS = 100;
+
 const READ_ONLY_PREFIX = /^\s*(select|show|describe|desc|explain)\b/i;
 const WRITE_KEYWORD =
   /\b(insert|update|delete|replace|merge|create|drop|alter|truncate|rename|grant|revoke|call|set|load)\b/i;
@@ -137,11 +140,14 @@ export default async function (input: Input) {
   // if that classification was wrong (e.g. a write hidden in a stored function), the server blocks it.
   const result = await runQuery(connection, input.sql, { readOnly: isReadOnly(input.sql) });
   if (isRows(result.rows)) {
+    // Cap the rows handed back to the model so a large result set doesn't blow up the context.
+    const truncated = result.rows.length > MAX_TOOL_ROWS;
     return {
       connection: connection.name,
       rowCount: result.rows.length,
       durationMs: result.durationMs,
-      rows: result.rows,
+      truncated,
+      rows: truncated ? result.rows.slice(0, MAX_TOOL_ROWS) : result.rows,
     };
   }
   return { connection: connection.name, durationMs: result.durationMs, result: summarizeWrite(result.rows) };

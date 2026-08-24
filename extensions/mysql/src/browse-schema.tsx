@@ -14,6 +14,22 @@ import { ResultView } from "./views/result-view";
 import { NoConnection } from "./views/no-connection";
 import { useState } from "react";
 
+/** Shown in place of the "nothing here" empty view when a load actually failed, with the real error + Retry. */
+function LoadError({ title, error, onRetry }: { title: string; error: Error; onRetry: () => void }) {
+  return (
+    <List.EmptyView
+      icon={Icon.Warning}
+      title={title}
+      description={error.message}
+      actions={
+        <ActionPanel>
+          <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 export default function BrowseSchema() {
   const { push } = useNavigation();
   const [connectionId, setConnectionId] = useState<string>();
@@ -28,10 +44,12 @@ export default function BrowseSchema() {
   const connection =
     connections?.find((c) => c.id === connectionId) ?? connections?.find((c) => c.isDefault) ?? connections?.[0];
 
-  const { data: databases, isLoading: loadingDatabases } = usePromise(
-    async (conn?: Connection) => (conn ? listDatabases(conn) : []),
-    [connection],
-  );
+  const {
+    data: databases,
+    isLoading: loadingDatabases,
+    error: databasesError,
+    revalidate: reloadDatabases,
+  } = usePromise(async (conn?: Connection) => (conn ? listDatabases(conn) : []), [connection]);
 
   if (!loadingConnections && (!connections || connections.length === 0)) {
     return <NoConnection />;
@@ -49,7 +67,11 @@ export default function BrowseSchema() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView title="No databases" />
+      {databasesError ? (
+        <LoadError title="Failed to load databases" error={databasesError} onRetry={reloadDatabases} />
+      ) : (
+        <List.EmptyView title="No databases" />
+      )}
       {(databases ?? []).map((database) => (
         <List.Item
           key={database}
@@ -74,11 +96,15 @@ export default function BrowseSchema() {
 
 function Tables({ connection, database }: { connection: Connection; database: string }) {
   const { push } = useNavigation();
-  const { data: tables, isLoading } = usePromise(() => listTables(connection, database), []);
+  const { data: tables, isLoading, error, revalidate } = usePromise(() => listTables(connection, database), []);
 
   return (
     <List isLoading={isLoading} navigationTitle={database} searchBarPlaceholder="Filter tables…">
-      <List.EmptyView title="No tables" />
+      {error ? (
+        <LoadError title="Failed to load tables" error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView title="No tables" />
+      )}
       {(tables ?? []).map((table) => (
         <List.Item
           key={table}
@@ -122,11 +148,20 @@ function Tables({ connection, database }: { connection: Connection; database: st
 }
 
 function Columns({ connection, database, table }: { connection: Connection; database: string; table: string }) {
-  const { data: columns, isLoading } = usePromise(() => listColumns(connection, database, table), []);
+  const {
+    data: columns,
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(() => listColumns(connection, database, table), []);
 
   return (
     <List isLoading={isLoading} navigationTitle={`${database}.${table}`} searchBarPlaceholder="Filter columns…">
-      <List.EmptyView title="No columns" />
+      {error ? (
+        <LoadError title="Failed to load columns" error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView title="No columns" />
+      )}
       {(columns ?? []).map((column) => (
         <List.Item
           key={column.field}
@@ -144,16 +179,20 @@ function Columns({ connection, database, table }: { connection: Connection; data
 }
 
 function CreateStatement({ connection, database, table }: { connection: Connection; database: string; table: string }) {
-  const { data, isLoading } = usePromise(() => showCreateTable(connection, database, table), []);
+  const { data, isLoading, error, revalidate } = usePromise(() => showCreateTable(connection, database, table), []);
   const ddl = data ?? "";
   return (
     <Detail
       isLoading={isLoading}
       navigationTitle={`${database}.${table}`}
-      markdown={"```sql\n" + ddl + "\n```"}
+      markdown={error ? `# Failed to load\n\n${error.message}` : "```sql\n" + ddl + "\n```"}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Create Statement" content={ddl} />
+          {error ? (
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+          ) : (
+            <Action.CopyToClipboard title="Copy Create Statement" content={ddl} />
+          )}
         </ActionPanel>
       }
     />
@@ -174,26 +213,28 @@ function buildMermaid(foreignKeys: ForeignKey[]): string {
 }
 
 function Relationships({ connection, database, table }: { connection: Connection; database: string; table: string }) {
-  const { data, isLoading } = usePromise(() => listForeignKeys(connection, database, table), []);
+  const { data, isLoading, error, revalidate } = usePromise(() => listForeignKeys(connection, database, table), []);
   const outgoing = data?.outgoing ?? [];
   const incoming = data?.incoming ?? [];
 
   const section = (title: string, items: string[]) =>
     `## ${title}\n${items.length ? items.map((i) => `- ${i}`).join("\n") : "_None._"}`;
 
-  const markdown = [
-    `# Relationships — \`${table}\``,
-    "",
-    section(
-      "References (outgoing)",
-      outgoing.map((fk) => `\`${fk.fromColumn}\` → \`${fk.toTable}.${fk.toColumn}\`  ·  _${fk.constraint}_`),
-    ),
-    "",
-    section(
-      "Referenced by (incoming)",
-      incoming.map((fk) => `\`${fk.fromTable}.${fk.fromColumn}\` → \`${fk.toColumn}\`  ·  _${fk.constraint}_`),
-    ),
-  ].join("\n");
+  const markdown = error
+    ? `# Failed to load relationships\n\n${error.message}`
+    : [
+        `# Relationships — \`${table}\``,
+        "",
+        section(
+          "References (outgoing)",
+          outgoing.map((fk) => `\`${fk.fromColumn}\` → \`${fk.toTable}.${fk.toColumn}\`  ·  _${fk.constraint}_`),
+        ),
+        "",
+        section(
+          "Referenced by (incoming)",
+          incoming.map((fk) => `\`${fk.fromTable}.${fk.fromColumn}\` → \`${fk.toColumn}\`  ·  _${fk.constraint}_`),
+        ),
+      ].join("\n");
 
   const mermaid = buildMermaid([...outgoing, ...incoming]);
 
@@ -204,7 +245,11 @@ function Relationships({ connection, database, table }: { connection: Connection
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy as Mermaid ER Diagram" content={mermaid} icon={Icon.Code} />
+          {error ? (
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+          ) : (
+            <Action.CopyToClipboard title="Copy as Mermaid ER Diagram" content={mermaid} icon={Icon.Code} />
+          )}
         </ActionPanel>
       }
     />

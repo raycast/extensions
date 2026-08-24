@@ -58,17 +58,21 @@ export async function getActiveConnection(): Promise<Connection | undefined> {
   return active ?? connectionFromPreferences();
 }
 
+const SSL_MODES: SslMode[] = ["off", "require", "insecure"];
+
 export function connectionFromPreferences(): Connection | undefined {
   const prefs = getPreferenceValues<Preferences>();
   if (!prefs.defaultHost) return undefined;
+  const port = Number.parseInt(prefs.defaultPort ?? "", 10);
+  const ssl = SSL_MODES.includes(prefs.defaultSsl as SslMode) ? (prefs.defaultSsl as SslMode) : "off";
   return {
     id: "preferences",
     name: "Preferences",
     isDefault: true,
     host: prefs.defaultHost,
-    port: 3306,
+    port: Number.isFinite(port) && port > 0 ? port : 3306,
     user: prefs.defaultUser || "root",
     password: prefs.defaultPassword || undefined,
-    ssl: "off",
+    ssl,
   };
 }
