@@ -1,7 +1,7 @@
 import { environment, LocalStorage } from "@raycast/api";
 import { createHash } from "crypto";
 import { createWriteStream, existsSync } from "fs";
-import { chmod, mkdir, mkdtemp, readdir, readFile, rename, rm, rmdir, stat, writeFile } from "fs/promises";
+import { chmod, mkdir, mkdtemp, readdir, readFile, rename, rm, rmdir, writeFile } from "fs/promises";
 import path from "path";
 import { pipeline } from "stream/promises";
 import { Readable } from "stream";
@@ -86,7 +86,6 @@ async function sleep(ms: number): Promise<void> {
 
 const LOCK_DIR_NAME = "whatcable-cli.lock";
 const LOCK_WAIT_MS = 5 * 60 * 1000;
-const EMPTY_LOCK_STALE_MS = 10_000;
 
 function lockDirPath(): string {
   return path.join(environment.supportPath, LOCK_DIR_NAME);
@@ -94,6 +93,10 @@ function lockDirPath(): string {
 
 function ownerFilePath(pid: number): string {
   return path.join(lockDirPath(), `owner-${pid}`);
+}
+
+function isLockHeldError(code: string | undefined): boolean {
+  return code === "EEXIST" || code === "ENOTEMPTY" || code === "EISDIR";
 }
 
 /**
@@ -111,12 +114,9 @@ async function tryReapStaleLock(lockDir: string): Promise<void> {
 
   if (entries.length === 0) {
     try {
-      const info = await stat(lockDir);
-      if (Date.now() - info.mtimeMs > EMPTY_LOCK_STALE_MS) {
-        await rmdir(lockDir);
-      }
+      await rmdir(lockDir);
     } catch {
-      // Already gone, or not empty anymore.
+      // Already gone, or a waiter published into it.
     }
     return;
   }
@@ -145,13 +145,16 @@ async function acquireInstallLock(): Promise<void> {
   const deadline = Date.now() + LOCK_WAIT_MS;
 
   while (true) {
+    const stagingDir = await mkdtemp(path.join(environment.supportPath, `${LOCK_DIR_NAME}-`));
     try {
-      await mkdir(lockDir);
-      await writeFile(ownerFilePath(process.pid), `${process.pid}\n`, "utf8");
+      await writeFile(path.join(stagingDir, `owner-${process.pid}`), `${process.pid}\n`, "utf8");
+      // Publish owner file and directory in one rename so waiters never see an empty lock.
+      await rename(stagingDir, lockDir);
       return;
     } catch (error) {
+      await rm(stagingDir, { recursive: true, force: true });
       const code = (error as NodeJS.ErrnoException).code;
-      if (code !== "EEXIST") {
+      if (!isLockHeldError(code)) {
         throw error;
       }
       if (Date.now() > deadline) {
