@@ -78,7 +78,7 @@
   "preferences": [
     {
       "name": "fxPath",
-      "title": "fx Executable",
+      "title": "Fx Executable",
       "description": "Command name or full path to the fx executable",
       "type": "textfield",
       "required": true,

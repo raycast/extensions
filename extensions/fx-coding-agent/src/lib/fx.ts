@@ -5,11 +5,6 @@ import { statSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 
-export type FxPreferences = {
-  fxPath?: string;
-  defaultWorkspace?: string;
-};
-
 export type FxSession = {
   id: string;
   title: string | null;
@@ -187,8 +182,8 @@ export class FxCommandError extends Error {
   }
 }
 
-export function getFxPreferences(): Required<Pick<FxPreferences, "fxPath">> & Pick<FxPreferences, "defaultWorkspace"> {
-  const preferences = getPreferenceValues<FxPreferences>();
+export function getFxPreferences(): Preferences {
+  const preferences = getPreferenceValues<Preferences>();
   return {
     fxPath: resolveExecutable(preferences.fxPath),
     defaultWorkspace: preferences.defaultWorkspace,
