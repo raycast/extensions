@@ -7,7 +7,7 @@ It was written after three commercial graders all called a client's site healthy
 while the language switcher on every translated article linked to a 404 — a bug
 none of them could see, because it was only wrong on pages they never opened.
 
-![Preview a site in about a second](metadata/seo-audit-1.png)
+![Preview a site in about a second](media/seo-audit-1.png)
 
 ## Three commands
 
@@ -60,7 +60,7 @@ forty, not forty rows.
 - **Performance** — never estimated. `--psi` asks Google for Google's own
   field measurement, or the number is not shown at all
 
-![What to change, worst first](metadata/seo-audit-2.png)
+![What to change, worst first](media/seo-audit-2.png)
 
 ## Export
 
@@ -92,7 +92,7 @@ somebody's index.
 Anything left at its default is not sent, so the defaults stay written down in
 one place: the engine.
 
-![Every flag that shapes a run](metadata/seo-audit-3.png)
+![Every flag that shapes a run](media/seo-audit-3.png)
 
 ## It shares a library with the macOS app
 
@@ -104,7 +104,7 @@ Reading only, deliberately: deleting somebody's seven minutes behind a single
 Return is not a trade worth offering. That stays in the app, where the
 confirmation and the undo live.
 
-![Runs the app already finished](metadata/seo-audit-4.png)
+![Runs the app already finished](media/seo-audit-4.png)
 
 ## Nothing leaves your machine
 
@@ -122,7 +122,7 @@ import { preview } from "@nurkamol/seo-audit";
 
 That one line is the whole architecture. The command line, the GitHub Action,
 the hosted Worker, the macOS app and this extension all import the same
-`seo-audit` package — none of them reimplements a check. A report from Raycast
+`@nurkamol/seo-audit` package — none of them reimplements a check. A report from Raycast
 and one from `seo-audit --json` are the same report, which is the rule that lets
 this project have five front ends without them drifting apart.
 
@@ -134,7 +134,7 @@ the three named speeds, which exist in Swift and JavaScript and must mean the
 same crawl in both windows; and the browser and system menus, because a dropdown
 in a static manifest cannot read the engine's list at runtime.
 
-![The whole report, exported](metadata/seo-audit-5.png)
+![The whole report, exported](media/seo-audit-5.png)
 
 ## Not here, and why
 
@@ -149,30 +149,32 @@ All of them are in the command line: `npx @nurkamol/seo-audit example.com`.
 ## Working on it
 
 ```bash
-cd raycast
 npm install
 npm run dev      # ray develop — opens Raycast against this folder
 npm run lint
 ```
 
-The extension depends on `seo-audit` as a published package, because a Store
-submission is this folder and nothing above it. Inside this repository the
-package is not installed, so `npm test` at the repository root runs
-`scripts/link-engine.mjs` first, which symlinks `raycast/node_modules/seo-audit`
-at the repository. That way a checkout builds and tests without a publish step,
-and `package.json` still says the version the Store needs to see.
+It depends on `@nurkamol/seo-audit` as an ordinary published package, so this
+folder stands on its own — which is the point, since a Store submission is this
+folder and nothing above it.
 
 The half that is not React lives in `lib/present.mjs` — plain ESM with no
-`@raycast/api` import anywhere in it, so `node --test` can run it from the
-repository root along with everything else. The components are thin over it on
-purpose: what goes wrong quietly is a preference that parses to `NaN` pages, a
-library row pointing at a file that is gone, or a refusal drawn as a result, and
-all three are in the tested half.
+`@raycast/api` import anywhere in it, so a plain `node --test` can run it. The
+components are thin over it on purpose: what goes wrong quietly is a preference
+that parses to `NaN` pages, a library row pointing at a file that is gone, or a
+refusal drawn as a result, and all three are in the tested half.
 
 `lib/engine.ts` is the one place that says what the engine returns, and
-`lib/seo-audit.d.ts` is why it has to: the engine ships plain ESM with no
-declarations and stays that way, because the command line's premise is that it
-runs under `npx` with nothing installed.
+`lib/engine-package.d.ts` is why it has to: the engine ships plain ESM with no
+type declarations and stays that way, because the command line's premise is
+that it runs under `npx` with nothing installed and emitting types would mean a
+build step.
+
+The tests themselves live with the engine, in the
+[source repository](https://github.com/nurkamol/seo-audit) — including the ones
+that fail if this folder ever imports something above itself, if a preference
+this manifest declares stops being read, or if this README links a picture that
+is not there.
 
 MIT. Source and the other four front ends:
 [github.com/nurkamol/seo-audit](https://github.com/nurkamol/seo-audit).
