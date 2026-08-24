@@ -10,7 +10,7 @@ import {
   overSelectedMandatoryNetworks,
   PLACEMENT_META,
   requiresPlacement,
-  validatePlacementPayload,
+  validatePlacements,
 } from "./lib/placements";
 import { createPost } from "./lib/postproxy";
 import { platformIcon, platformLabel } from "./lib/platforms";
@@ -48,10 +48,9 @@ export default function PublishPost() {
       try {
         const selectedNow = profiles.filter((p) => v.profiles.includes(p.id));
         const platforms = buildPlatforms(v.platformParams, networkPlacements);
-        // Single validation choke point over the FINAL payload (dropdown + raw JSON merged): a
-        // placement may be sent only when one profile of the network is selected, and mandatory
-        // networks must have one. Catches multi-profile ambiguity and raw-JSON placements alike.
-        const placementError = validatePlacementPayload(platforms, selectedNow);
+        // Validate the final payload against a fresh fetch for the current profiles: catches
+        // multi-profile ambiguity, raw-JSON placements, and stale/invalid ids alike.
+        const placementError = await validatePlacements(platforms, selectedNow);
         if (placementError) {
           toast.style = Toast.Style.Failure;
           toast.title = "Placement";
@@ -110,6 +109,30 @@ export default function PublishPost() {
   const placementNetworks = placementsByNetwork
     ? Object.keys(placementsByNetwork).filter((n) => PLACEMENT_META[n])
     : [];
+
+  // When placements change (e.g. the profile on a network was swapped), drop any selection that's no
+  // longer valid — reset it to empty so the dropdown shows "Choose…" again. Never auto-pick a default.
+  useEffect(() => {
+    if (!placementsByNetwork) return;
+    setNetworkPlacements((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const net of Object.keys(prev)) {
+        const list = placementsByNetwork[net];
+        if (!list) {
+          delete next[net]; // network no longer has a single selected profile
+          changed = true;
+          continue;
+        }
+        const validIds = new Set(list.map((p) => p.id ?? ""));
+        if (prev[net] && !validIds.has(prev[net])) {
+          next[net] = "";
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [placementsByNetwork]);
 
   return (
     <Form

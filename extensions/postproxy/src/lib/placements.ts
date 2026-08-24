@@ -107,21 +107,28 @@ export function buildPlatforms(
 }
 
 /**
- * The single validation choke point: check the FINAL platforms payload (dropdown + raw JSON merged)
- * against the selection. A placement is one shared value per network per post, so:
+ * The single validation choke point, run at submit time over the FINAL platforms payload (dropdown +
+ * raw JSON merged). A placement is one shared value per network per post, so:
  *  - it may only be sent when exactly one profile of that network is selected;
- *  - mandatory networks additionally require it.
+ *  - mandatory networks must have one;
+ *  - the sent id must belong to the CURRENTLY selected profile — re-fetched fresh, so a stale
+ *    selection (e.g. swapping the profile for another on the same network), an out-of-order load, or
+ *    a hand-typed raw-JSON id can't target a page/board/org/channel/location the user didn't pick.
  * Returns a user-facing error message, or null when the payload is safe to publish.
  */
-export function validatePlacementPayload(
+export async function validatePlacements(
   platforms: Record<string, Record<string, unknown>> | undefined,
   selectedProfiles: Profile[],
-): string | null {
+): Promise<string | null> {
   const counts = placementNetworkCounts(selectedProfiles);
+  const fresh = await loadPlacementsByNetwork(eligiblePlacementProfiles(selectedProfiles));
+
   for (const [net, meta] of Object.entries(PLACEMENT_META)) {
     const count = counts[net] ?? 0;
     if (count === 0) continue;
-    const hasPlacement = Boolean(platforms?.[net]?.[meta.key]);
+    const sentId = platforms?.[net]?.[meta.key];
+    const hasPlacement = Boolean(sentId);
+
     if (count > 1) {
       if (hasPlacement) {
         return `${meta.label}: a placement can't be shared across multiple profiles. Select a single profile on this network, or publish them in separate posts.`;
@@ -129,7 +136,16 @@ export function validatePlacementPayload(
       if (requiresPlacement(net)) {
         return `${meta.label}: multiple profiles are selected and each needs its own placement. Publish them in separate posts.`;
       }
-    } else if (requiresPlacement(net) && !hasPlacement) {
+      continue;
+    }
+
+    // Exactly one profile of this network is selected.
+    const validIds = new Set((fresh[net] ?? []).map((p) => p.id ?? ""));
+    if (hasPlacement) {
+      if (!validIds.has(String(sentId))) {
+        return `Choose a ${meta.label} to publish.`; // stale / out-of-order / invalid raw-JSON id
+      }
+    } else if (requiresPlacement(net)) {
       return `Choose a ${meta.label} to publish.`;
     }
   }
