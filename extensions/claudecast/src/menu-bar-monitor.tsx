@@ -16,13 +16,18 @@ import {
   UsageStats,
 } from "./lib/usage-stats";
 import { getMostRecentProject } from "./lib/project-discovery";
+import { shortcut } from "./lib/shortcuts";
+import { loadClaudeSubscriptionUsage } from "./lib/claude-subscription";
+import type { SubscriptionUsageResult } from "./lib/subscription-usage";
 
 export default function MenuBarMonitor() {
   const [isLoading, setIsLoading] = useState(true);
   const [isActive, setIsActive] = useState(false);
   const [todayStats, setTodayStats] = useState<UsageStats | null>(null);
   const [recentProject, setRecentProject] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionUsageResult>();
   const [error, setError] = useState<string | null>(null);
+  const preferences = getPreferenceValues<Preferences.MenuBarMonitor>();
 
   async function refresh() {
     try {
@@ -32,6 +37,9 @@ export default function MenuBarMonitor() {
       // Skip the full-history "last project" scan on background ticks; only run
       // it when the user actually opens the menu.
       const fetches: Promise<unknown>[] = [isClaudeActive(), getTodayStats()];
+      const subscriptionIndex = preferences.subscriptionUsageOAuthToken
+        ? fetches.push(loadClaudeSubscriptionUsage().catch(() => undefined)) - 1
+        : -1;
       if (!isBackground) {
         fetches.push(getMostRecentProject());
       }
@@ -39,13 +47,18 @@ export default function MenuBarMonitor() {
       const results = await Promise.all(fetches);
       setIsActive(results[0] as boolean);
       setTodayStats(results[1] as UsageStats);
+      if (subscriptionIndex >= 0) {
+        setSubscription(
+          results[subscriptionIndex] as SubscriptionUsageResult | undefined,
+        );
+      }
       if (!isBackground) {
-        const recent = results[2] as { name?: string } | null;
+        const recent = results.at(-1) as { name?: string } | null;
         setRecentProject(recent?.name || null);
       }
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
+      setError(e instanceof Error ? e.message : "Unknown Error");
     } finally {
       setIsLoading(false);
     }
@@ -54,8 +67,6 @@ export default function MenuBarMonitor() {
   useEffect(() => {
     refresh();
   }, []);
-
-  const preferences = getPreferenceValues<Preferences.MenuBarMonitor>();
 
   const getIcon = () => {
     if (error) {
@@ -77,8 +88,8 @@ export default function MenuBarMonitor() {
   };
 
   const tooltip = isActive
-    ? "Claude Code is running"
-    : `Today: ${todayStats?.totalSessions || 0} sessions`;
+    ? "Claude Code Is Running"
+    : `Today: ${todayStats?.totalSessions || 0} Sessions`;
 
   return (
     <MenuBarExtra
@@ -90,7 +101,7 @@ export default function MenuBarMonitor() {
       {/* Status Section */}
       <MenuBarExtra.Section title="Status">
         <MenuBarExtra.Item
-          title={isActive ? "Claude Code is running" : "Idle"}
+          title={isActive ? "Claude Code Is Running" : "Idle"}
           icon={
             isActive
               ? { source: Icon.CircleFilled, tintColor: Color.Green }
@@ -99,11 +110,31 @@ export default function MenuBarMonitor() {
         />
         {recentProject && (
           <MenuBarExtra.Item
-            title={`Last project: ${recentProject}`}
+            title={`Last Project: ${recentProject}`}
             icon={Icon.Folder}
           />
         )}
       </MenuBarExtra.Section>
+
+      {subscription?.usage ? (
+        <MenuBarExtra.Section title="Subscription Limits">
+          {subscription.usage.fiveHour ? (
+            <MenuBarExtra.Item
+              title={`Five-Hour Usage: ${formatUsagePercent(subscription.usage.fiveHour.usedPercent)}`}
+              icon={Icon.Clock}
+            />
+          ) : null}
+          {subscription.usage.weekly ? (
+            <MenuBarExtra.Item
+              title={`Weekly Usage: ${formatUsagePercent(subscription.usage.weekly.usedPercent)}`}
+              icon={Icon.Gauge}
+            />
+          ) : null}
+          {subscription.stale ? (
+            <MenuBarExtra.Item title="Data Status: Stale" icon={Icon.Warning} />
+          ) : null}
+        </MenuBarExtra.Section>
+      ) : null}
 
       {/* Today's Stats */}
       <MenuBarExtra.Section title="Today">
@@ -120,9 +151,29 @@ export default function MenuBarMonitor() {
       {/* Quick Actions */}
       <MenuBarExtra.Section title="Quick Actions">
         <MenuBarExtra.Item
+          title="Manage Agents"
+          icon={Icon.Person}
+          onAction={() => {
+            launchCommand({
+              name: "manage-agents",
+              type: LaunchType.UserInitiated,
+            });
+          }}
+        />
+        <MenuBarExtra.Item
+          title="Manage Worktrees"
+          icon={Icon.Tree}
+          onAction={() => {
+            launchCommand({
+              name: "manage-worktrees",
+              type: LaunchType.UserInitiated,
+            });
+          }}
+        />
+        <MenuBarExtra.Item
           title="Ask Claude Code"
           icon={Icon.Message}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={shortcut.primaryShift("c")}
           onAction={() => {
             launchCommand({
               name: "ask-claude",
@@ -133,7 +184,7 @@ export default function MenuBarMonitor() {
         <MenuBarExtra.Item
           title="Quick Continue"
           icon={Icon.ArrowRight}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+          shortcut={shortcut.primaryAlt("r")}
           onAction={() => {
             launchCommand({
               name: "quick-continue",
@@ -144,7 +195,7 @@ export default function MenuBarMonitor() {
         <MenuBarExtra.Item
           title="Browse Sessions"
           icon={Icon.List}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}
+          shortcut={shortcut.primaryAlt("s")}
           onAction={() => {
             launchCommand({
               name: "browse-sessions",
@@ -155,7 +206,7 @@ export default function MenuBarMonitor() {
         <MenuBarExtra.Item
           title="Launch Project"
           icon={Icon.Folder}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "l" }}
+          shortcut={shortcut.primaryAlt("l")}
           onAction={() => {
             launchCommand({
               name: "launch-project",
@@ -180,10 +231,14 @@ export default function MenuBarMonitor() {
         <MenuBarExtra.Item
           title="Preferences..."
           icon={Icon.Gear}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={shortcut.primary(",")}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
+}
+
+function formatUsagePercent(value: number): string {
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}% Used`;
 }

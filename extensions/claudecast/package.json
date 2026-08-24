@@ -14,6 +14,9 @@
     "Productivity"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
   "commands": [
     {
       "name": "ask-claude",
@@ -113,11 +116,15 @@
               "value": ""
             },
             {
+              "title": "Fable (Long-Running Agents)",
+              "value": "fable"
+            },
+            {
               "title": "Sonnet (Balanced)",
               "value": "sonnet"
             },
             {
-              "title": "Opus (Most Capable)",
+              "title": "Opus (Complex Reasoning)",
               "value": "opus"
             },
             {
@@ -138,6 +145,20 @@
         "continue",
         "resume",
         "last"
+      ]
+    },
+    {
+      "name": "manage-worktrees",
+      "title": "Manage Worktrees",
+      "description": "Inspect and safely maintain Git worktrees used by Claude Code",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "git",
+        "worktrees",
+        "branches",
+        "agents",
+        "cleanup"
       ]
     },
     {
@@ -187,7 +208,7 @@
       "title": "Claude Code Status",
       "description": "Monitor Claude Code usage and status",
       "mode": "menu-bar",
-      "interval": "30s",
+      "interval": "1m",
       "icon": "command-icon.png",
       "keywords": [
         "status",
@@ -200,7 +221,7 @@
           "type": "checkbox",
           "default": false,
           "label": "Show Today's Cost",
-          "description": "Display today's spend (USD) next to the menu bar icon. Updates every 30 seconds.",
+          "description": "Display today's spend (USD) next to the menu bar icon. Updates every minute.",
           "required": false
         }
       ]
@@ -217,6 +238,37 @@
         "tokens",
         "stats"
       ]
+    },
+    {
+      "name": "claude-questions",
+      "title": "Permission Inbox",
+      "description": "Answer Claude questions, permissions, plans, and agent requests through Raycast",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "claude",
+        "permissions",
+        "questions",
+        "plans",
+        "agents",
+        "input",
+        "hooks",
+        "answers"
+      ]
+    },
+    {
+      "name": "manage-agents",
+      "title": "Manage Agents",
+      "description": "Dispatch and control Claude Code background agents",
+      "mode": "view",
+      "icon": "command-icon.png",
+      "keywords": [
+        "agents",
+        "background",
+        "dispatch",
+        "worktree",
+        "tasks"
+      ]
     }
   ],
   "preferences": [
@@ -229,11 +281,15 @@
       "required": false,
       "data": [
         {
+          "title": "Fable (Long-Running Agents)",
+          "value": "fable"
+        },
+        {
           "title": "Sonnet (Balanced)",
           "value": "sonnet"
         },
         {
-          "title": "Opus (Most Capable)",
+          "title": "Opus (Complex Reasoning)",
           "value": "opus"
         },
         {
@@ -245,9 +301,12 @@
     {
       "name": "terminalApp",
       "title": "Terminal Application",
-      "description": "Choose which terminal opens new Claude Code sessions. Each app uses its native AppleScript or CLI so launches are reliable across macOS updates.",
+      "description": "Choose which terminal opens Claude Code. macOS uses each app's native launcher. Windows supports Windows Terminal, PowerShell, Windows PowerShell, and Command Prompt.",
       "type": "dropdown",
-      "default": "Terminal",
+      "default": {
+        "macOS": "Terminal",
+        "Windows": "Windows Terminal"
+      },
       "required": false,
       "data": [
         {
@@ -273,13 +332,29 @@
         {
           "title": "cmux",
           "value": "cmux"
+        },
+        {
+          "title": "Windows Terminal",
+          "value": "Windows Terminal"
+        },
+        {
+          "title": "PowerShell 7",
+          "value": "PowerShell"
+        },
+        {
+          "title": "Windows PowerShell",
+          "value": "Windows PowerShell"
+        },
+        {
+          "title": "Command Prompt",
+          "value": "Command Prompt"
         }
       ]
     },
     {
       "name": "openIn",
       "title": "Open In",
-      "description": "Choose whether new Claude Code sessions open in a new terminal window or a new tab in the front window. Per-terminal notes: kitty New Tab requires `allow_remote_control yes` and a `listen_on` socket in `kitty.conf` (otherwise falls back to a new window). Warp always opens a new window regardless of this setting.",
+      "description": "Choose a new window or tab. Windows Terminal supports both. PowerShell and Command Prompt open windows. On macOS, Warp always opens a window and kitty tabs require remote control.",
       "type": "dropdown",
       "default": "window",
       "required": false,
@@ -302,6 +377,13 @@
       "required": false
     },
     {
+      "name": "claudeConfigPath",
+      "title": "Claude Config Directory",
+      "description": "Claude data directory containing projects and credentials. Leave empty to use CLAUDE_CONFIG_DIR or ~/.claude.",
+      "type": "directory",
+      "required": false
+    },
+    {
       "name": "anthropicApiKey",
       "title": "Anthropic API Key",
       "description": "Your Anthropic API key for pay-as-you-go billing (console.anthropic.com). Use this OR OAuth Token.",
@@ -314,10 +396,17 @@
       "description": "For Claude Pro/Team subscribers: Run 'claude setup-token' in terminal and paste the token here.",
       "type": "password",
       "required": false
+    },
+    {
+      "name": "subscriptionUsageOAuthToken",
+      "title": "Subscription Usage OAuth Token",
+      "description": "A Claude OAuth access token with the user:profile scope. Used only for api.anthropic.com subscription limits. This is separate from the setup-token prompt credential and Anthropic API key.",
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.0",
+    "@raycast/api": "^1.104.25",
     "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
@@ -329,16 +418,21 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/agent-control.test.ts tests/ask-user-question.test.ts tests/claude-spawn.test.ts tests/date.test.ts tests/no-machine-paths.test.ts tests/permission-inbox.test.ts tests/platform.test.ts tests/pricing.test.ts tests/session-inbox.test.ts tests/session-parser-core.test.ts tests/session-search-index.test.ts tests/session-search-index-performance.test.ts tests/subscription-usage.test.ts tests/terminal-core.test.ts tests/windows-runtime.test.ts tests/worktree-concurrency.test.ts tests/worktree-core.test.ts tests/worktree-integration.test.ts tests/wsl-core.test.ts",
     "publish": "npx @raycast/api@latest publish"
   },
   "overrides": {
-    "@types/react": "18.2.79"
+    "@types/react": "18.2.79",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "9.0.7"
+    }
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
