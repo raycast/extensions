@@ -16,6 +16,7 @@ SCRIPTS_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS_DIR))
 
 import check_metadata_images as checker  # noqa: E402
+import check_raycast_images as framing_checker  # noqa: E402
 
 
 class PathSelectionTests(unittest.TestCase):
@@ -173,18 +174,59 @@ class ImageStyleTests(unittest.TestCase):
 
         self.assertEqual(issues, [])
 
-    def test_macos_framing_is_not_applied_to_windows_or_cross_platform_images(self) -> None:
-        cases = [
-            (["macOS"], True),
-            (["Windows"], False),
-            (["macOS", "Windows"], False),
-            ([], True),
-        ]
-        for platforms, expected in cases:
-            with self.subTest(platforms=platforms), tempfile.TemporaryDirectory() as temp_dir:
-                extension_dir = Path(temp_dir) / "example"
-                self.write_manifest(extension_dir, platforms)
-                self.assertEqual(checker.requires_macos_framing(extension_dir), expected)
+    def test_windows_capture_detector_prefers_outer_window_over_inner_panel(self) -> None:
+        array = np.full((1250, 2000, 3), 8, dtype=np.uint8)
+        array[150:1100, 250:1750] = 30
+        array[440:1000, 1030:1735] = 75
+
+        self.assertEqual(
+            framing_checker.find_window_bbox(array),
+            (150, 250, 1099, 1749),
+        )
+
+    def test_off_center_windows_capture_is_not_accepted_as_store_framing(self) -> None:
+        array = np.full((1250, 2000, 3), 8, dtype=np.uint8)
+        array[150:1100, 100:1600] = 100
+
+        bbox = framing_checker.find_window_bbox(array)
+
+        self.assertIsNotNone(bbox)
+        self.assertFalse(framing_checker._padding_is_expected(*bbox, 1250, 2000))
+
+    def test_run_sends_windows_screenshots_to_framing_validator(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            validator = repo_root / "scripts" / "check_raycast_images.py"
+            validator.parent.mkdir()
+            validator.touch()
+
+            extension_dir = repo_root / "extensions" / "media-switcher"
+            self.write_manifest(extension_dir, ["Windows"])
+            screenshots = [extension_dir / "metadata" / f"{index}.png" for index in range(3)]
+
+            with (
+                mock.patch.object(
+                    checker,
+                    "validate_extension_structure",
+                    return_value=(screenshots, []),
+                ),
+                mock.patch.object(checker, "validate_image_dimensions", return_value=[]),
+                mock.patch.object(checker, "validate_image_set", return_value=[]),
+                mock.patch.object(checker.subprocess, "run") as run_validator,
+            ):
+                run_validator.return_value.returncode = 0
+                result = checker.run(repo_root, [extension_dir])
+
+            self.assertEqual(result, 0)
+            run_validator.assert_called_once_with(
+                [
+                    sys.executable,
+                    str(validator),
+                    *(str(screenshot) for screenshot in screenshots),
+                ],
+                cwd=repo_root,
+                check=False,
+            )
 
 
 if __name__ == "__main__":

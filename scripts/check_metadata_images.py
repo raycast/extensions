@@ -344,12 +344,6 @@ def extension_platforms(extension_dir: Path) -> tuple[str, ...]:
     return tuple(platform for platform in platforms if isinstance(platform, str))
 
 
-def requires_macos_framing(extension_dir: Path) -> bool:
-    platforms = set(extension_platforms(extension_dir))
-    # Extensions created before the platforms field defaulted to macOS.
-    return not platforms or platforms == {"macOS"}
-
-
 def validate_image_dimensions(images: Sequence[Path]) -> list[str]:
     from PIL import Image
 
@@ -425,7 +419,6 @@ def run(repo_root: Path, extension_dirs: Sequence[Path]) -> int:
         return 0
 
     images: list[Path] = []
-    macos_framing_images: list[Path] = []
     issues: list[str] = []
     for extension_dir in extension_dirs:
         extension_images, structure_issues = validate_extension_structure(extension_dir)
@@ -433,8 +426,6 @@ def run(repo_root: Path, extension_dirs: Sequence[Path]) -> int:
         issues.extend(structure_issues)
         issues.extend(validate_image_dimensions(extension_images))
         issues.extend(validate_image_set(extension_dir, extension_images))
-        if requires_macos_framing(extension_dir):
-            macos_framing_images.extend(extension_images)
 
     print(
         f"Validating {len(images)} metadata image(s) across "
@@ -445,12 +436,12 @@ def run(repo_root: Path, extension_dirs: Sequence[Path]) -> int:
         print_issues(issues)
 
     validator_result = 0
-    if macos_framing_images:
+    if images:
         completed = subprocess.run(
             [
                 sys.executable,
                 str(validator),
-                *(str(image) for image in macos_framing_images),
+                *(str(image) for image in images),
             ],
             cwd=repo_root,
             check=False,
