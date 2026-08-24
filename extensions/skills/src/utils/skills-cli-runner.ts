@@ -64,8 +64,18 @@ export interface RunSkillsCliOptions {
   readOnly?: boolean;
 }
 
+export type SkillsCliRunner = (args: string[], options?: RunSkillsCliOptions) => Promise<string>;
+
 export async function runSkillsCli(args: string[], options: RunSkillsCliOptions = {}): Promise<string> {
-  return enqueueSkillsCliRun(() => withSkillsCliLock(() => runSkillsCliCommand(args, options.readOnly ?? false)));
+  return withSkillsCliLock((runLocked) => runLocked(args, options));
+}
+
+export async function withSkillsCliLock<T>(run: (runLocked: SkillsCliRunner) => Promise<T>): Promise<T> {
+  return enqueueSkillsCliRun(() =>
+    withCrossProcessSkillsCliLock(() =>
+      run((args, options = {}) => runSkillsCliCommand(args, options.readOnly ?? false)),
+    ),
+  );
 }
 
 async function enqueueSkillsCliRun<T>(run: () => Promise<T>): Promise<T> {
@@ -74,7 +84,7 @@ async function enqueueSkillsCliRun<T>(run: () => Promise<T>): Promise<T> {
   return runAfterPending;
 }
 
-async function withSkillsCliLock<T>(run: () => Promise<T>): Promise<T> {
+async function withCrossProcessSkillsCliLock<T>(run: () => Promise<T>): Promise<T> {
   await mkdir(environment.supportPath, { recursive: true });
   await writeFile(SKILLS_CLI_LOCK_TARGET, "", { flag: "a" });
   const release = await lockfile.lock(SKILLS_CLI_LOCK_TARGET, {
