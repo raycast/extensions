@@ -1,6 +1,6 @@
 # TextArray for Raycast
 
-Run 150+ [TextArray](https://textarray.com) text tools on your selected text or
+Run 540+ [TextArray](https://textarray.com) text tools on your selected text or
 clipboard, without leaving the keyboard. Case conversion, encoding, cleaning,
 formatting, ciphers, generators and more.
 

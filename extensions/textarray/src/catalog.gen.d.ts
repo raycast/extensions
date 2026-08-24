@@ -23,6 +23,7 @@ export type ToolRun = (
 export interface CatalogTool {
   slug: string;
   name: string;
+  desc: string;
   category: string;
   mode: 'transform' | 'generate';
   run: ToolRun;

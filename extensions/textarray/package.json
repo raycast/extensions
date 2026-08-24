@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "textarray",
   "title": "TextArray",
-  "description": "300+ text tools that run locally — transform the selected text or clipboard: case, encoding, cleaning, formatting, ciphers and more. Nothing leaves your machine.",
+  "description": "540+ text tools that run locally — transform the selected text or clipboard: case, encoding, cleaning, formatting, ciphers and more. Nothing leaves your machine.",
   "icon": "icon.png",
   "author": "apptiary_com",
   "categories": [
