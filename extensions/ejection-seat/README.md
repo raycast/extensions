@@ -1,8 +1,14 @@
-# Ejection Seat
+<div align="center">
+  <br/>
+  <br/>
+  <img src="./assets/extension-icon.png" alt="Ejection Seat" width="100"/>
+  <h3>Ejection Seat</h3>
+  <p>Find the processes and files that may be preventing a disk from ejecting</p>
+  <br/>
+  <br/>
+</div>
 
-macOS refuses to eject a disk and tells you "one or more programs may be using it" — without naming a single one. Ejection Seat names them.
-
-Pick a mounted volume and the extension shows you which processes hold filesystem references on it, what kind of reference each one holds, and what to do about it.
+macOS refuses to eject a disk and tells you "one or more programs may be using it" — without naming a single one. Ejection Seat names them. Pick a mounted volume and it shows you which processes hold filesystem references on it, what kind of reference each one holds, and what to do about it.
 
 ## What it shows
 
