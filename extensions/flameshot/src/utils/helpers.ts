@@ -1,5 +1,5 @@
 import { getPreferenceValues, showToast } from "@raycast/api";
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { setTimeout } from "node:timers/promises";
 
@@ -7,7 +7,7 @@ export const preferences = getPreferenceValues<Preferences>();
 
 export const isWin = process.platform === "win32";
 
-export const execp = promisify(exec);
+export const execp = promisify(execFile);
 
 export function getCliPath(): string {
   const cliPath = preferences.cliPath;
