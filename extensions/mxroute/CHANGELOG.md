@@ -1,6 +1,6 @@
 # MXroute Changelog
 
-## [View and Update Domain Spam Settings] - {PR_MERGE_DATE}
+## [View and Update Domain Spam Settings] - 2026-08-24
 
 - Add links for more email clients
 - View and update spam settings
