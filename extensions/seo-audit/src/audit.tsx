@@ -40,7 +40,9 @@ const TONE: Record<string, { icon: Icon; tint: Color }> = {
 };
 
 export default function Command(
-  props: LaunchProps<{ arguments: { site: string } }>,
+  // `Arguments.Audit` is generated from the manifest, so the shape of what
+  // arrives here cannot disagree with what the command declares it takes.
+  props: LaunchProps<{ arguments: Arguments.Audit }>,
 ) {
   return <Report site={normalise(props.arguments.site) ?? ""} />;
 }
@@ -56,7 +58,7 @@ export function Report({ site }: { site: string }) {
   const [working, setWorking] = useState(true);
   const [failed, setFailed] = useState<string | null>(null);
 
-  const options = crawlOptions(getPreferenceValues());
+  const options = crawlOptions(getPreferenceValues<Preferences>());
 
   useEffect(() => {
     if (!site) {

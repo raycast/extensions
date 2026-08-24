@@ -7,11 +7,16 @@
 
 import type { Cause, Finding, Level, Meta, Plan } from "./engine";
 
-export interface Preferences {
-  limit?: string;
-  speed?: "gentle" | "normal" | "fast";
-  checkExternal?: boolean;
-}
+/**
+ * The preferences, as the manifest declares them.
+ *
+ * `ExtensionPreferences` is generated from `package.json` by the Raycast build,
+ * so this cannot drift from it. It was hand-written once and listed three of
+ * the thirteen preferences `crawlOptions()` actually reads — the other ten were
+ * invisible to every caller, which is the exact failure a copied type produces:
+ * not a wrong answer, a quietly incomplete one.
+ */
+export type Preferences = ExtensionPreferences;
 
 export interface CrawlOptions {
   limit: number;
