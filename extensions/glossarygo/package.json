@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "glossarygo",
+  "title": "GlossaryGo",
+  "description": "Search a private local glossary by term prefix",
+  "icon": "extension-icon.png",
+  "author": "kyrylo_avramenko",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.14"
+  },
+  "commands": [
+    {
+      "name": "search-term",
+      "title": "Search Term",
+      "description": "Find a term in your local glossary",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "glossaryFile",
+          "title": "Glossary File",
+          "description": "Select the local .yaml glossary to search",
+          "type": "file",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^2.3.0",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.20.1",
+    "@types/react": "19.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
+    "@vitest/eslint-plugin": "^1.6.27",
+    "eslint": "^9.22.0",
+    "eslint-plugin-promise": "^7.3.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.4",
+    "eslint-plugin-unicorn": "^61.0.2",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "format": "prettier --write .",
+    "check:format": "prettier --check ."
+  }
+}

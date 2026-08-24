@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GlossaryGo Glossary",
+  "description": "The local glossary format accepted by GlossaryGo.",
+  "$comment": "Runtime-only source constraints: the glossary must be a readable UTF-8 .yaml file no larger than 5 MiB and contain exactly one YAML document. YAML directives, custom tags, anchors, aliases, and merge keys are unsupported.",
+  "type": "object",
+  "required": ["terms"],
+  "properties": {
+    "terms": {
+      "type": "array",
+      "$comment": "uniqueItems rejects exact duplicate entries only. At runtime, terms must be unique under Unicode NFC normalization plus case-insensitive comparison, even when definitions differ.",
+      "items": {
+        "type": "object",
+        "required": ["term", "definition"],
+        "properties": {
+          "term": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "definition": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}

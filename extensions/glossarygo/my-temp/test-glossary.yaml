@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=../glossary.schema.json
+terms:
+  - term: API
+    definition: A defined interface that allows software systems to communicate.
+
+  - term: ADR
+    definition: A short record of an architectural decision and the reasons behind it.
+
+  - term: CLI
+    definition: A command-line interface for interacting with software through text commands.
+
+  - term: Database
+    definition: An organized collection of data that software can store, query, and update.
+
+  - term: Deployment
+    definition: The process of making a software build available for users or other systems.
+
+  - term: Endpoint
+    definition: A specific address where a service receives or returns data.
+
+  - term: Feature Flag
+    definition: A configuration switch that controls whether a feature is enabled.
+
+  - term: Refactoring
+    definition: Improving the internal structure of code without changing its external behavior.
+
+  - term: Regression
+    definition: A previously working behavior that stops working after a change.
+
+  - term: YAML
+    definition: A human-readable data serialization format commonly used for configuration files.
