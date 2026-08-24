@@ -35,36 +35,42 @@
     {
       "name": "status",
       "title": "Status",
+      "subtitle": "Postproxy",
       "description": "See what's happening — posts published, engagement, and what's awaiting your reply.",
       "mode": "view"
     },
     {
       "name": "profiles",
       "title": "Profiles",
+      "subtitle": "Postproxy",
       "description": "View connected profiles grouped by profile group, with stats.",
       "mode": "view"
     },
     {
       "name": "publish-post",
       "title": "Publish Post",
+      "subtitle": "Postproxy",
       "description": "Create, schedule, or draft a post across your profiles.",
       "mode": "view"
     },
     {
       "name": "recent-posts",
       "title": "Recent Posts",
+      "subtitle": "Postproxy",
       "description": "Browse recent posts and manage their comments.",
       "mode": "view"
     },
     {
       "name": "recent-comments",
       "title": "Recent Comments",
+      "subtitle": "Postproxy",
       "description": "Browse recent comments across your posts and reply.",
       "mode": "view"
     },
     {
       "name": "direct-messages",
       "title": "Direct Messages",
+      "subtitle": "Postproxy",
       "description": "Read and reply to direct messages.",
       "mode": "view"
     }

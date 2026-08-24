@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { useFetch } from "@raycast/utils";
+import { ErrorView } from "./components/ErrorView";
 import { PostList } from "./components/PostList";
 import DirectMessages from "./direct-messages";
 import RecentComments from "./recent-comments";
@@ -35,7 +36,7 @@ function countTag(n: number): List.Item.Accessory {
 
 export default function Status() {
   const [win, setWin] = useState("24h");
-  const { data, isLoading, revalidate } = useFetch<SummaryResponse>(api(`/summary?window=${win}`), {
+  const { data, isLoading, error, revalidate } = useFetch<SummaryResponse>(api(`/summary?window=${win}`), {
     headers: authHeaders(),
     keepPreviousData: true,
   });
@@ -73,7 +74,9 @@ export default function Status() {
         </List.Dropdown>
       }
     >
-      {data ? (
+      {error && !data ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : data ? (
         <>
           <List.Section title="Needs Reply" subtitle="current backlog">
             <List.Item

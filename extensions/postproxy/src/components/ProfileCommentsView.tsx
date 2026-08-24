@@ -3,6 +3,7 @@ import { showFailureToast, useFetch } from "@raycast/utils";
 import { api, authHeaders, deleteProfileComment, normalizeList, profileCommentReply } from "../lib/postproxy";
 import { formatDate } from "../lib/format";
 import type { ProfileComment } from "../lib/types";
+import { ErrorView } from "./ErrorView";
 import { ReplyForm } from "./ReplyForm";
 
 function reviewMarkdown(review: ProfileComment): string {
@@ -16,7 +17,7 @@ function reviewMarkdown(review: ProfileComment): string {
 
 /** Google Business reviews for a profile: browse, reply, and delete your replies. */
 export function ProfileCommentsView({ profileId, profileName }: { profileId: string; profileName?: string }) {
-  const { data, isLoading, revalidate } = useFetch(api(`/profiles/${profileId}/comments?per_page=50`), {
+  const { data, isLoading, error, revalidate } = useFetch(api(`/profiles/${profileId}/comments?per_page=50`), {
     headers: authHeaders(),
     mapResult: (result: unknown) => ({ data: normalizeList<ProfileComment>(result) }),
     initialData: [] as ProfileComment[],
@@ -39,7 +40,9 @@ export function ProfileCommentsView({ profileId, profileName }: { profileId: str
       navigationTitle={profileName ? `${profileName} — Reviews` : "Reviews"}
       searchBarPlaceholder="Search reviews…"
     >
-      {data.length === 0 && !isLoading ? (
+      {error && data.length === 0 ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : data.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Star}
           title="No reviews"

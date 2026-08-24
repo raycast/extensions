@@ -3,6 +3,7 @@ import { showFailureToast, useFetch } from "@raycast/utils";
 import { api, authHeaders, commentAction, deleteComment, normalizeList, replyComment } from "../lib/postproxy";
 import { formatDate } from "../lib/format";
 import type { Comment } from "../lib/types";
+import { ErrorView } from "./ErrorView";
 import { ReplyForm } from "./ReplyForm";
 
 function commentMarkdown(comment: Comment): string {
@@ -18,7 +19,7 @@ function commentMarkdown(comment: Comment): string {
 
 export function CommentsView({ postId, profileId }: { postId: string; profileId: string }) {
   const url = api(`/posts/${postId}/comments?profile_id=${profileId}&per_page=50`);
-  const { data, isLoading, revalidate } = useFetch(url, {
+  const { data, isLoading, error, revalidate } = useFetch(url, {
     headers: authHeaders(),
     mapResult: (result: unknown) => ({ data: normalizeList<Comment>(result) }),
     initialData: [] as Comment[],
@@ -36,7 +37,9 @@ export function CommentsView({ postId, profileId }: { postId: string; profileId:
 
   return (
     <List isLoading={isLoading} isShowingDetail navigationTitle="Comments" searchBarPlaceholder="Search comments…">
-      {data.length === 0 && !isLoading ? (
+      {error && data.length === 0 ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : data.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.Bubble} title="No comments" description="No comments on this post yet." />
       ) : (
         data.map((comment) => (

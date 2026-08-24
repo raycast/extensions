@@ -13,7 +13,11 @@ import type { Placement, Profile, ProfileStatsResponse } from "../lib/types";
 export function ProfileStats({ profile, groupName }: { profile: Profile; groupName?: string }) {
   const requiresPlacement = needsPlacement(profile.platform);
 
-  const { data: placements, isLoading: loadingPlacements } = useFetch(api(`/profiles/${profile.id}/placements`), {
+  const {
+    data: placements,
+    isLoading: loadingPlacements,
+    error: placementsError,
+  } = useFetch(api(`/profiles/${profile.id}/placements`), {
     headers: authHeaders(),
     mapResult: (result: unknown) => ({ data: normalizeList<Placement>(result) }),
     initialData: [] as Placement[],
@@ -24,10 +28,15 @@ export function ProfileStats({ profile, groupName }: { profile: Profile; groupNa
   const canFetchStats = !requiresPlacement || Boolean(placementId);
   const statsUrl = api(`/profiles/${profile.id}/stats${placementId ? `?placement_id=${placementId}` : ""}`);
 
-  const { data: stats, isLoading: loadingStats } = useFetch<ProfileStatsResponse>(statsUrl, {
+  const {
+    data: stats,
+    isLoading: loadingStats,
+    error: statsError,
+  } = useFetch<ProfileStatsResponse>(statsUrl, {
     headers: authHeaders(),
     execute: canFetchStats,
   });
+  const error = placementsError ?? statsError;
 
   if (requiresPlacement && !placementId && !loadingPlacements) {
     return (
@@ -57,6 +66,8 @@ export function ProfileStats({ profile, groupName }: { profile: Profile; groupNa
             statEntries.map(([key, value]) => (
               <List.Item.Detail.Metadata.Label key={key} title={humanizeKey(key)} text={formatNumber(value)} />
             ))
+          ) : error ? (
+            <List.Item.Detail.Metadata.Label title="Stats" text={`Error: ${error.message}`} />
           ) : (
             <List.Item.Detail.Metadata.Label title="Stats" text={isLoading ? "Loading…" : "No data yet"} />
           )}

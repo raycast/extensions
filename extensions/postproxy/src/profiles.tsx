@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
+import { ErrorView } from "./components/ErrorView";
 import { PostList } from "./components/PostList";
 import { ProfileCommentsView } from "./components/ProfileCommentsView";
 import { ProfileStats } from "./components/ProfileStats";
@@ -9,7 +10,7 @@ import { APP_URL } from "./lib/postproxy";
 import { platformIcon, platformLabel } from "./lib/platforms";
 
 export default function Profiles() {
-  const { data: profiles, isLoading: loadingProfiles, revalidate } = useProfiles();
+  const { data: profiles, isLoading: loadingProfiles, error, revalidate } = useProfiles();
   const { data: groups, isLoading: loadingGroups } = useProfileGroups();
   const [showDetail, setShowDetail] = useState(false);
   const [groupFilter, setGroupFilter] = useState("");
@@ -38,7 +39,9 @@ export default function Profiles() {
         </List.Dropdown>
       }
     >
-      {profiles.length === 0 && !loadingProfiles ? (
+      {error && profiles.length === 0 ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : profiles.length === 0 && !loadingProfiles ? (
         <List.EmptyView
           icon={Icon.PersonCircle}
           title="No connected profiles"

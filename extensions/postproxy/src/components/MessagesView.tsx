@@ -3,6 +3,7 @@ import { showFailureToast, useFetch } from "@raycast/utils";
 import { api, APP_URL, authHeaders, normalizeList, reactMessage, sendMessage, unreactMessage } from "../lib/postproxy";
 import { participantProfileUrl, supportsReactions } from "../lib/dm";
 import type { Chat, Message } from "../lib/types";
+import { ErrorView } from "./ErrorView";
 import { ReplyForm } from "./ReplyForm";
 
 const REACTIONS = ["love", "like", "smile", "wow", "sad", "angry"];
@@ -19,7 +20,7 @@ function messageMarkdown(message: Message, chatTitle: string): string {
 
 export function MessagesView({ chat }: { chat: Chat }) {
   const chatTitle = chat.participant_name ?? chat.participant_username ?? "Chat";
-  const { data, isLoading, revalidate } = useFetch(api(`/chats/${chat.id}/messages?per_page=50`), {
+  const { data, isLoading, error, revalidate } = useFetch(api(`/chats/${chat.id}/messages?per_page=50`), {
     headers: authHeaders(),
     mapResult: (result: unknown) => ({ data: normalizeList<Message>(result) }),
     keepPreviousData: true,
@@ -66,7 +67,9 @@ export function MessagesView({ chat }: { chat: Chat }) {
 
   return (
     <List isLoading={isLoading} isShowingDetail navigationTitle={chatTitle} searchBarPlaceholder="Search messages…">
-      {data.length === 0 && !isLoading ? (
+      {error && data.length === 0 ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : data.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Message}
           title="No messages"

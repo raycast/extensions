@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm, usePromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { groupProfiles, profileOptionTitle } from "./lib/grouping";
 import { useProfileGroups, useProfiles } from "./lib/hooks";
 import {
@@ -25,9 +25,14 @@ interface FormValues {
 }
 
 export default function PublishPost() {
-  const { data: profiles, isLoading } = useProfiles();
+  const { data: profiles, isLoading, error: profilesError } = useProfiles();
   const { data: groups } = useProfileGroups();
   const { pop } = useNavigation();
+
+  // The Form can't host an EmptyView, so surface a load error (e.g. a bad API key) as a toast.
+  useEffect(() => {
+    if (profilesError) showFailureToast(profilesError, { title: "Couldn't load profiles" });
+  }, [profilesError]);
 
   // Per-network placement selections (Facebook Page / LinkedIn Org / Pinterest Board / Telegram Channel).
   const [networkPlacements, setNetworkPlacements] = useState<Record<string, string>>({});

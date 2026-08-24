@@ -9,6 +9,7 @@ import { platformIcon, platformLabel } from "../lib/platforms";
 import { totalImpressions } from "../lib/stats";
 import type { Post, PostStatsResponse } from "../lib/types";
 import { CommentsView } from "./CommentsView";
+import { ErrorView } from "./ErrorView";
 import { PostDetail } from "./PostDetail";
 
 const STATUS_COLOR: Record<string, Color> = {
@@ -89,7 +90,7 @@ export function PostList({
   if (profileId) params.set("profile_id", profileId);
   else if (platform) params.append("platforms[]", platform);
 
-  const { data, isLoading, revalidate } = useFetch(api(`/posts?${params.toString()}`), {
+  const { data, isLoading, error, revalidate } = useFetch(api(`/posts?${params.toString()}`), {
     headers: authHeaders(),
     mapResult: (result: unknown) => ({ data: normalizeList<Post>(result) }),
     keepPreviousData: true,
@@ -172,7 +173,9 @@ export function PostList({
         </List.Dropdown>
       }
     >
-      {posts.length === 0 && !isLoading ? (
+      {error && posts.length === 0 ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : posts.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Document}
           title="No posts match your filters"

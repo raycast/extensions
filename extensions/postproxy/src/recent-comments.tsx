@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { usePromise } from "@raycast/utils";
 import { CommentsView } from "./components/CommentsView";
+import { ErrorView } from "./components/ErrorView";
 import { PostDetail } from "./components/PostDetail";
 import { ReplyForm } from "./components/ReplyForm";
 import { supportsComments } from "./lib/comments";
@@ -61,7 +62,7 @@ function commentMarkdown(entry: CommentEntry): string {
 }
 
 export default function RecentComments() {
-  const { data: profiles, isLoading: loadingProfiles } = useProfiles();
+  const { data: profiles, isLoading: loadingProfiles, error: profilesError } = useProfiles();
   const { data: groups } = useProfileGroups();
   const commentable = profiles.filter((profile) => supportsComments(profile.platform));
   const [selected, setSelected] = useState(""); // "" = All profiles
@@ -72,8 +73,9 @@ export default function RecentComments() {
     [selected, commentableKey],
   );
 
-  const { data, isLoading, revalidate } = usePromise(loadRecentComments, [targets]);
+  const { data, isLoading, error: commentsError, revalidate } = usePromise(loadRecentComments, [targets]);
   const entries = data ?? [];
+  const error = profilesError ?? commentsError;
 
   return (
     <List
@@ -98,7 +100,9 @@ export default function RecentComments() {
         </List.Dropdown>
       }
     >
-      {commentable.length === 0 && !loadingProfiles ? (
+      {error && entries.length === 0 ? (
+        <ErrorView error={error} onRetry={revalidate} />
+      ) : commentable.length === 0 && !loadingProfiles ? (
         <List.EmptyView
           icon={Icon.Bubble}
           title="No commentable profiles"

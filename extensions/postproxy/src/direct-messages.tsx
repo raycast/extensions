@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { usePromise } from "@raycast/utils";
+import { ErrorView } from "./components/ErrorView";
 import { MessagesView } from "./components/MessagesView";
 import { participantProfileUrl, supportsDMs } from "./lib/dm";
 import { groupProfiles, profileOptionTitle } from "./lib/grouping";
@@ -36,7 +37,7 @@ async function loadChats(targets: Profile[]): Promise<Chat[]> {
 }
 
 export default function DirectMessages() {
-  const { data: profiles, isLoading: loadingProfiles } = useProfiles();
+  const { data: profiles, isLoading: loadingProfiles, error, revalidate: revalidateProfiles } = useProfiles();
   const { data: groups } = useProfileGroups();
   const [selected, setSelected] = useState(""); // "" = All profiles
 
@@ -73,7 +74,9 @@ export default function DirectMessages() {
         </List.Dropdown>
       }
     >
-      {dmProfiles.length === 0 && !loadingProfiles ? (
+      {error && profiles.length === 0 ? (
+        <ErrorView error={error} onRetry={revalidateProfiles} />
+      ) : dmProfiles.length === 0 && !loadingProfiles ? (
         <List.EmptyView
           icon={Icon.Message}
           title="No DM-capable profiles"
