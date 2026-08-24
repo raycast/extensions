@@ -1,6 +1,6 @@
 # MediaFlow Changelog
 
-## [Fix Now Playing menu bar crash] - {PR_MERGE_DATE}
+## [Fix Now Playing menu bar crash] - 2026-08-24
 
 - Fix a `renderEmpty timed out after 5000ms` crash in the Now Playing menu-bar command when nothing was playing and "Show when stopped" was disabled. The live-refresh stream no longer keeps the command running on the empty state, so the menu-bar item updates reliably.
 
