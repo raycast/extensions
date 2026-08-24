@@ -28,7 +28,8 @@ async function readSkillLock(): Promise<Record<string, SkillLockEntry>> {
 }
 
 export async function getInstalledSkillsWithLock(): Promise<InstalledSkill[]> {
-  const [skills, lockEntries] = await Promise.all([listInstalledSkills(), readSkillLock()]);
+  const skills = await listInstalledSkills();
+  const lockEntries = await readSkillLock();
   return skills.map((skill) => {
     const lock = lockEntries[skill.name];
     if (!lock) return skill;

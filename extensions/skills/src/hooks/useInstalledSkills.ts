@@ -5,10 +5,8 @@ import { type InstalledSkill } from "../shared";
 export type MutateSkills = MutatePromise<InstalledSkill[] | undefined>;
 
 async function fetchSkillsWithUpdateStatus(): Promise<InstalledSkill[]> {
-  const [skills, updatable] = await Promise.all([
-    getInstalledSkillsWithLock(),
-    checkForUpdates().catch((): string[] => []),
-  ]);
+  const skills = await getInstalledSkillsWithLock();
+  const updatable = await checkForUpdates().catch((): string[] => []);
   const updatableSet = new Set(updatable);
   return skills.map((skill) => ({ ...skill, hasUpdate: updatableSet.has(skill.name) }));
 }
