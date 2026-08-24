@@ -25,7 +25,7 @@ Search recent spreadsheet files and open them in VisiGrid.
 The extension drives the `vgrid` CLI, which ships with VisiGrid:
 
 ```
-brew install visigrid/tap/visigrid
+brew install --cask visigrid/tap/visigrid
 ```
 
 VisiGrid is a fast, native, open-source (AGPL) spreadsheet — a 43 MB binary that opens 100,000-row files instantly. macOS and Linux. Learn more at [visigrid.app](https://visigrid.app).

@@ -5,9 +5,20 @@
   "description": "Spreadsheet powers from your launcher: evaluate Excel formulas against clipboard data, peek inside xlsx/csv/sheet files, and open workbooks — via the VisiGrid CLI.",
   "icon": "icon.png",
   "author": "visigrid",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
+  ],
+  "keywords": [
+    "spreadsheet",
+    "excel",
+    "csv",
+    "xlsx",
+    "formula",
+    "vgrid"
   ],
   "license": "MIT",
   "commands": [
@@ -48,11 +59,13 @@
       "description": "Path to the vgrid CLI binary. Leave empty to auto-detect (Homebrew locations).",
       "type": "textfield",
       "required": false,
+      "placeholder": "/opt/homebrew/bin/vgrid",
       "default": ""
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4"
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
@@ -66,6 +79,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -15,7 +15,7 @@ let cached: string | null = null;
 export class VgridMissingError extends Error {
   constructor() {
     super(
-      "vgrid CLI not found. Install VisiGrid: brew install visigrid/tap/visigrid",
+      "vgrid CLI not found. Install VisiGrid: brew install --cask visigrid/tap/visigrid",
     );
   }
 }

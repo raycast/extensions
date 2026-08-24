@@ -8,17 +8,24 @@ import {
   Form,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { runVgrid, VgridMissingError } from "./vgrid";
+import { usePromise } from "@raycast/utils";
+import { runVgrid } from "./vgrid";
 
 /** Evaluate an Excel formula against CSV data from the clipboard.
  *  The clipboard is loaded into the grid at A1, exactly like
  *  `pbpaste | vgrid calc --from csv "<formula>"`. */
 
-type CalcState =
-  | { kind: "loading" }
-  | { kind: "result"; formula: string; result: string; dataPreview: string }
-  | { kind: "error"; message: string };
+function describeClipboard(clip: string): string {
+  const rows = clip.trim().split("\n").filter(Boolean);
+  if (rows.length === 0) {
+    return "Clipboard is empty — literal formulas like =SUM(1,2,3) still work; copy data to reference A1, B1, …";
+  }
+  const { data, format } = normalizeClipboard(clip);
+  const cols =
+    data.split("\n")[0]?.split(format === "tsv" ? "\t" : ",").length ?? 1;
+  const first = rows[0].length > 40 ? rows[0].slice(0, 40) + "…" : rows[0];
+  return `Clipboard data → loaded at A1: ${rows.length} row${rows.length === 1 ? "" : "s"} × ${cols} col${cols === 1 ? "" : "s"} (first: ${first})`;
+}
 
 /** Real-world tables come off the clipboard three ways: tab-separated
  *  (cells copied from spreadsheet apps and most HTML email tables),
@@ -94,38 +101,24 @@ async function evaluate(
 }
 
 function ResultView(props: { formula: string }) {
-  const [state, setState] = useState<CalcState>({ kind: "loading" });
+  const { data, isLoading, error } = usePromise(evaluate, [props.formula]);
 
-  useEffect(() => {
-    evaluate(props.formula)
-      .then(({ result, dataPreview }) =>
-        setState({
-          kind: "result",
-          formula: props.formula,
-          result,
-          dataPreview,
-        }),
-      )
-      .catch((e: Error) =>
-        setState({
-          kind: "error",
-          message: e instanceof VgridMissingError ? e.message : e.message,
-        }),
-      );
-  }, [props.formula]);
-
-  if (state.kind === "loading")
+  if (isLoading || (!data && !error))
     return <Detail isLoading markdown="Evaluating…" />;
-  if (state.kind === "error")
-    return <Detail markdown={`## Couldn't evaluate\n\n${state.message}`} />;
+  if (error || !data)
+    return (
+      <Detail
+        markdown={`## Couldn't evaluate\n\n${error?.message ?? "Unknown error"}`}
+      />
+    );
 
   const md = [
-    `# ${state.result}`,
+    `# ${data.result}`,
     "",
-    `\`${state.formula}\` over clipboard data:`,
+    `\`${props.formula}\` over clipboard data:`,
     "",
     "```",
-    state.dataPreview,
+    data.dataPreview,
     "```",
   ].join("\n");
 
@@ -134,8 +127,8 @@ function ResultView(props: { formula: string }) {
       markdown={md}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Result" content={state.result} />
-          <Action.Paste title="Paste Result" content={state.result} />
+          <Action.CopyToClipboard title="Copy Result" content={data.result} />
+          <Action.Paste title="Paste Result" content={data.result} />
         </ActionPanel>
       }
     />
@@ -147,27 +140,14 @@ export default function QuickCalc(
 ) {
   const initial = props.arguments.formula?.trim();
   const { push } = useNavigation();
-  const [clipInfo, setClipInfo] = useState<string>("Reading clipboard…");
-
-  useEffect(() => {
-    Clipboard.readText().then((clip) => {
-      const rows = (clip ?? "").trim().split("\n").filter(Boolean);
-      if (rows.length === 0) {
-        setClipInfo(
-          "Clipboard is empty — literal formulas like =SUM(1,2,3) still work; copy data to reference A1, B1, …",
-        );
-      } else {
-        const { data, format } = normalizeClipboard(clip ?? "");
-        const cols =
-          data.split("\n")[0]?.split(format === "tsv" ? "\t" : ",").length ?? 1;
-        const first =
-          rows[0].length > 40 ? rows[0].slice(0, 40) + "…" : rows[0];
-        setClipInfo(
-          `Clipboard data → loaded at A1: ${rows.length} row${rows.length === 1 ? "" : "s"} × ${cols} col${cols === 1 ? "" : "s"} (first: ${first})`,
-        );
-      }
-    });
-  }, []);
+  const { data: clip, isLoading: clipLoading } = usePromise(
+    async () => (await Clipboard.readText()) ?? "",
+    [],
+  );
+  const clipInfo =
+    clipLoading || clip === undefined
+      ? "Reading clipboard…"
+      : describeClipboard(clip);
 
   // Formula given as a launch argument: evaluate immediately.
   if (initial)

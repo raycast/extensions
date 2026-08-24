@@ -1,59 +1,59 @@
-import { Action, ActionPanel, List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { findSpreadsheets, SheetFile } from "./spreadsheet-files";
 import { runVgrid } from "./vgrid";
 
 /** Browse recent spreadsheets; the detail pane renders `vgrid peek` output. */
 
-function useSpreadsheets() {
-  const [files, setFiles] = useState<SheetFile[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    findSpreadsheets()
-      .then(setFiles)
-      .finally(() => setLoading(false));
-  }, []);
-  return { files, loading };
-}
-
 function PeekDetail(props: { file: SheetFile }) {
-  const [markdown, setMarkdown] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    runVgrid(["peek", props.file.path])
-      .then((out) => {
-        if (cancelled) return;
-        // peek may print an import log line before the grid; keep grid only.
-        const grid = out
-          .split("\n")
-          .filter((l) => !l.startsWith("["))
-          .join("\n")
-          .trimEnd();
-        setMarkdown("```\n" + grid + "\n```");
-      })
-      .catch((e: Error) => {
-        if (!cancelled) setMarkdown(`Couldn't peek: ${e.message}`);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [props.file.path]);
+  const {
+    data: markdown,
+    isLoading,
+    error,
+  } = useCachedPromise(
+    async (path: string) => {
+      const out = await runVgrid(["peek", path]);
+      // peek may print an import log line before the grid; keep grid only.
+      const grid = out
+        .split("\n")
+        .filter((l) => !l.startsWith("["))
+        .join("\n")
+        .trimEnd();
+      return "```\n" + grid + "\n```";
+    },
+    [props.file.path],
+  );
 
   return (
-    <List.Item.Detail isLoading={markdown === null} markdown={markdown ?? ""} />
+    <List.Item.Detail
+      isLoading={isLoading}
+      markdown={error ? `Couldn't peek: ${error.message}` : (markdown ?? "")}
+    />
   );
 }
 
 export default function Peek() {
-  const { files, loading } = useSpreadsheets();
+  const {
+    data: files = [],
+    isLoading,
+    error,
+  } = useCachedPromise(findSpreadsheets, []);
 
   return (
     <List
-      isLoading={loading}
+      isLoading={isLoading}
       isShowingDetail
       searchBarPlaceholder="Search spreadsheets…"
     >
+      <List.EmptyView
+        icon={error ? Icon.Warning : Icon.Document}
+        title={error ? "Couldn't Find Spreadsheets" : "No Spreadsheets Found"}
+        description={
+          error
+            ? error.message
+            : "No recent .xlsx, .csv, or .sheet files under your home folder."
+        }
+      />
       {files.map((f) => (
         <List.Item
           key={f.path}
