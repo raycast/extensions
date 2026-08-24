@@ -2,7 +2,7 @@
 
 Ever lost your cursor in the vast expanse of your multi-monitor setup? 😥 One second it's there, the next it's vanished into the digital abyss. Fear not! This Raycast extension is the trusty sidekick you need to find your elusive pointer in a flash! 🔦
 
-It calls a small Swift app that dims the screen where the cursor is and puts a spotlight on its location.
+It calls a small Swift app that dims the entire screen except for a spotlight around the cursor.
 
 ### Default mode
 ![where is my cursor default mode](metadata/default_mode.gif)
@@ -25,13 +25,17 @@ This extension comes with a few commands to help you out:
 
 This extension should work right out of the box!
 
-The Swift helper is compiled automatically by Raycast when the extension is built or installed from the store — no binaries are bundled, and nothing extra needs to be installed. If you want to build locally yourself, make sure you have the Xcode Command Line Tools installed:
+The Swift helper is compiled automatically by Raycast when the extension is built or installed from the store — no binaries are bundled, and nothing extra needs to be installed. 
+
+## 🏗️ Build 
+
+If you want to build locally yourself, make sure you have the Xcode Command Line Tools installed:
 
 ```
 xcode-select --install
 ```
 
-The first time you run a command, macOS might ask for permission to control the screen. This is expected and required for the extension to be able to dim the screen and highlight your cursor.
+The first time you run a command, macOS might ask for permission to Raycast control the screen. This is expected and required for the extension to be able to dim the screen and highlight your cursor.
 
 ## 🕵️ How It Works
 
@@ -53,7 +57,7 @@ Custom Mode accepts hex colors for both the circle and its border:
 
 ## 🔒 Privacy
 
-This extension works completely offline and does not collect, store, or transmit any user data. Your privacy is safe and sound. 🛡️
+This extension works completely offline and does not collect, store, or transmit any user data.
 
 ## 🖼️ Examples
 
