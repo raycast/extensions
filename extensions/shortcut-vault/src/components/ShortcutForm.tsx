@@ -107,7 +107,7 @@ export function ShortcutForm({ shortcut, onSaved }: Props) {
       }
 
       if (shortcut) {
-        await updateCustomShortcut(shortcut.id, nextSubmittedValues);
+        await updateCustomShortcut(shortcut.id, nextSubmittedValues, shortcut.updatedAt);
         await showToast({ style: Toast.Style.Success, title: "Shortcut updated" });
         onSaved?.();
         pop();

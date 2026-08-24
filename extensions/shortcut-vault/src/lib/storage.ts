@@ -80,20 +80,28 @@ export async function createCustomShortcut(values: ShortcutFormValues): Promise<
   });
 }
 
-export async function updateCustomShortcut(id: string, values: ShortcutFormValues): Promise<Shortcut> {
+export async function updateCustomShortcut(
+  id: string,
+  values: ShortcutFormValues,
+  expectedUpdatedAt?: string,
+): Promise<Shortcut> {
   return withStorageAccess(async () => {
     const itemKey = getItemKey(id);
-    const rawBefore = await LocalStorage.getItem<string>(itemKey);
+    const raw = await LocalStorage.getItem<string>(itemKey);
 
-    if (!rawBefore) {
+    if (!raw) {
       throw new Error("That custom shortcut could not be found or was deleted.");
     }
 
     let existing: Shortcut;
     try {
-      existing = parseStoredShortcut(JSON.parse(rawBefore));
+      existing = parseStoredShortcut(JSON.parse(raw));
     } catch {
       throw new Error("That custom shortcut is invalid and cannot be updated.");
+    }
+
+    if (expectedUpdatedAt && existing.updatedAt !== expectedUpdatedAt) {
+      throw new Error("That custom shortcut was modified in another window. Please reopen and try your edit again.");
     }
 
     const updated: Shortcut = {
@@ -108,14 +116,6 @@ export async function updateCustomShortcut(id: string, values: ShortcutFormValue
       notes: values.notes.trim() || undefined,
       updatedAt: new Date().toISOString(),
     };
-
-    const rawCheck = await LocalStorage.getItem<string>(itemKey);
-    if (!rawCheck) {
-      throw new Error("That custom shortcut was deleted prior to saving updates.");
-    }
-    if (rawCheck !== rawBefore) {
-      throw new Error("That custom shortcut was modified concurrently. Please try your edit again.");
-    }
 
     await LocalStorage.setItem(itemKey, JSON.stringify(updated));
     return updated;
@@ -140,35 +140,49 @@ export async function importCustomShortcuts(
   });
 }
 
-export async function deleteCustomShortcut(id: string): Promise<void> {
+export async function deleteCustomShortcut(id: string, expectedUpdatedAt?: string): Promise<void> {
   await withStorageAccess(async () => {
     const itemKey = getItemKey(id);
-    const rawCheck = await LocalStorage.getItem<string>(itemKey);
-    if (rawCheck) {
-      await LocalStorage.removeItem(itemKey);
+    const raw = await LocalStorage.getItem<string>(itemKey);
+    if (!raw) {
+      return;
     }
+
+    if (expectedUpdatedAt) {
+      try {
+        const existing = parseStoredShortcut(JSON.parse(raw));
+        if (existing.updatedAt !== expectedUpdatedAt) {
+          throw new Error("That custom shortcut was modified in another window. Please reopen before deleting.");
+        }
+      } catch (err) {
+        if (err instanceof Error && err.message.includes("modified in another window")) {
+          throw err;
+        }
+      }
+    }
+
+    await LocalStorage.removeItem(itemKey);
   });
 }
 
-export async function duplicateCustomShortcut(id: string): Promise<Shortcut> {
+export async function duplicateCustomShortcut(id: string, expectedUpdatedAt?: string): Promise<Shortcut> {
   return withStorageAccess(async () => {
     const itemKey = getItemKey(id);
-    const rawBefore = await LocalStorage.getItem<string>(itemKey);
+    const raw = await LocalStorage.getItem<string>(itemKey);
 
-    if (!rawBefore) {
+    if (!raw) {
       throw new Error("That custom shortcut could not be found or was deleted.");
     }
 
     let existing: Shortcut;
     try {
-      existing = parseStoredShortcut(JSON.parse(rawBefore));
+      existing = parseStoredShortcut(JSON.parse(raw));
     } catch {
       throw new Error("That custom shortcut is invalid and cannot be duplicated.");
     }
 
-    const rawCheck = await LocalStorage.getItem<string>(itemKey);
-    if (!rawCheck) {
-      throw new Error("That custom shortcut was deleted prior to duplicating.");
+    if (expectedUpdatedAt && existing.updatedAt !== expectedUpdatedAt) {
+      throw new Error("That custom shortcut was modified in another window. Please reopen and try duplicating again.");
     }
 
     const now = new Date().toISOString();

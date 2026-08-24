@@ -407,7 +407,7 @@ function ShortcutActions({
         shortcut={{ modifiers: ["cmd"], key: "d" }}
         onAction={async () => {
           try {
-            await duplicateCustomShortcut(shortcut.id);
+            await duplicateCustomShortcut(shortcut.id, shortcut.updatedAt);
             await showToast({ style: Toast.Style.Success, title: "Shortcut duplicated" });
             onChanged();
           } catch (error) {
@@ -439,7 +439,7 @@ function ShortcutActions({
           }
 
           try {
-            await deleteCustomShortcut(shortcut.id);
+            await deleteCustomShortcut(shortcut.id, shortcut.updatedAt);
             await showToast({ style: Toast.Style.Success, title: "Deleted custom shortcut" });
             onChanged();
           } catch (error) {
