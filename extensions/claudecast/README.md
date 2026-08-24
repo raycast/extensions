@@ -83,7 +83,7 @@ Use one session inbox for Claude CLI transcripts and validated metadata from Cla
 - Inline conversation preview with the most recent 20 messages and a "Showing last N of M messages" notice for long sessions
 - Resume, fork, or delete sessions
 - See cost and token usage per session
-- Restores the original permission mode and model on resume
+- Restores the original permission mode on resume
 
 ### Agentic Workflows
 
@@ -177,7 +177,7 @@ Real-time Claude Code status in your menu bar.
 - Active session indicator
 - Today's cost and session count
 - Quick access to all commands
-- Cached five-hour and weekly subscription percentages when configured
+- Cached five-hour and weekly subscription percentages after Usage Dashboard refreshes subscription data through the Claude login
 
 Raycast does not expose menu-bar commands on Windows. Windows users can open Manage Agents and Usage Dashboard from Raycast.
 
@@ -258,9 +258,11 @@ Local cost estimates and server-side Claude subscription limits in one dashboard
 
 ## Setup
 
-### OAuth Token (Required for API Features)
+### Authentication for API Features
 
-Some features (Ask Claude Code, Transform Selection, Git Actions) require an OAuth token to work in Raycast's sandboxed environment:
+Ask Claude Code, Transform Selection, Git Actions, and Agentic Workflows use the active Claude CLI authentication. A normal `claude auth login` works without another ClaudeCast preference.
+
+For environments where Claude Code cannot use its saved login, generate a long-lived inference token:
 
 1. Generate a long-lived OAuth token:
 
@@ -396,4 +398,4 @@ Contributions welcome! Please read the contributing guidelines first.
 
 ## Credits
 
-Built with [Raycast](https://raycast.com) and [Claude Code](https://anthropic.com/claude-code). Subscription behavior research was informed by [CodexBar](https://github.com/steipete/CodexBar) and recent Claude usage extensions in [raycast/extensions](https://github.com/raycast/extensions).
+Built with [Raycast](https://raycast.com) and [Claude Code](https://anthropic.com/claude-code).
