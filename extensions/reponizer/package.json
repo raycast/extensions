@@ -1,0 +1,182 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reponizer",
+  "title": "Reponizer",
+  "description": "Organize, audit, and sync a structured git repository folder (git-get style host/owner/repo layout).",
+  "keywords": ["git", "repository", "repositories", "clone", "git-get", "ghq", "projects", "monorepo"],
+  "icon": "icon.png",
+  "author": "lonetis",
+  "license": "MIT",
+  "categories": ["Developer Tools"],
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "search-repos",
+      "title": "Search Repositories",
+      "subtitle": "Reponizer",
+      "description": "Browse, inspect, and manage all local git repositories.",
+      "mode": "view"
+    },
+    {
+      "name": "clone-repo",
+      "title": "Clone Repository",
+      "subtitle": "Reponizer",
+      "description": "Clone a repository into the structured repos folder.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "Repository URL",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "fetch-all",
+      "title": "Fetch All Repositories",
+      "subtitle": "Reponizer",
+      "description": "Run git fetch in every repository and refresh their status.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pull-all",
+      "title": "Pull All Repositories",
+      "subtitle": "Reponizer",
+      "description": "Fast-forward pull every clean repository and refresh their status.",
+      "mode": "no-view"
+    },
+    {
+      "name": "export-repos",
+      "title": "Export Repository List",
+      "subtitle": "Reponizer",
+      "description": "Export the repository list to a JSON file for mirroring on another machine.",
+      "mode": "no-view"
+    },
+    {
+      "name": "import-repos",
+      "title": "Import Repository List",
+      "subtitle": "Reponizer",
+      "description": "Import a repository list and clone missing repositories into the folder structure.",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-status",
+      "title": "Repository Health",
+      "subtitle": "Reponizer",
+      "description": "Menu bar overview of repositories that need attention.",
+      "mode": "menu-bar",
+      "interval": "1h",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "reposRoot",
+      "type": "directory",
+      "required": false,
+      "default": "~/repos",
+      "title": "Repositories Root",
+      "description": "Folder containing all repositories, organized as host/owner/repo (git-get layout)."
+    },
+    {
+      "name": "defaultProtocol",
+      "type": "dropdown",
+      "required": false,
+      "default": "ssh",
+      "title": "Default Protocol",
+      "description": "Protocol used when cloning bare paths (e.g. github.com/owner/repo) and when suggesting origin URLs.",
+      "data": [
+        { "title": "SSH", "value": "ssh" },
+        { "title": "HTTPS", "value": "https" }
+      ]
+    },
+    {
+      "name": "scanDepth",
+      "type": "dropdown",
+      "required": false,
+      "default": "4",
+      "title": "Max Scan Depth",
+      "description": "How many folder levels below the root to search for repositories. 3 covers host/owner/repo; increase for GitLab subgroups.",
+      "data": [
+        { "title": "3 levels", "value": "3" },
+        { "title": "4 levels", "value": "4" },
+        { "title": "5 levels", "value": "5" },
+        { "title": "6 levels", "value": "6" },
+        { "title": "7 levels", "value": "7" },
+        { "title": "8 levels", "value": "8" },
+        { "title": "9 levels", "value": "9" },
+        { "title": "10 levels", "value": "10" }
+      ]
+    },
+    {
+      "name": "networkConcurrency",
+      "type": "dropdown",
+      "required": false,
+      "default": "4",
+      "title": "Network Concurrency",
+      "description": "How many repositories Fetch All / Pull All sync at the same time. Higher values finish faster but put more load on the SSH agent (e.g. 1Password) and the network.",
+      "data": [
+        { "title": "1 (sequential)", "value": "1" },
+        { "title": "2", "value": "2" },
+        { "title": "4", "value": "4" },
+        { "title": "6", "value": "6" },
+        { "title": "8", "value": "8" },
+        { "title": "12", "value": "12" },
+        { "title": "16", "value": "16" }
+      ]
+    },
+    {
+      "name": "hostAliases",
+      "type": "textfield",
+      "required": false,
+      "title": "Host Aliases",
+      "description": "Comma-separated alias=host pairs mapping a folder name under the root to the real remote host, e.g. “buw=git.uni-wuppertal.de, overleaf.com=git.overleaf.com”. Aliases may be any folder name."
+    },
+    {
+      "name": "hostOnlyHosts",
+      "type": "textfield",
+      "required": false,
+      "title": "Host-Only Comparison",
+      "description": "Comma-separated hosts (alias or real host) whose repos are audited by host only — the folder path below the host may differ from the remote path (e.g. Overleaf’s opaque project IDs)."
+    },
+    {
+      "name": "editorApp",
+      "type": "appPicker",
+      "required": false,
+      "default": "com.microsoft.VSCode",
+      "title": "Editor",
+      "description": "Application used by the “Open in Editor” action."
+    },
+    {
+      "name": "terminalApp",
+      "type": "appPicker",
+      "required": false,
+      "default": "com.apple.Terminal",
+      "title": "Terminal",
+      "description": "Application used by the “Open in Terminal” action. Terminal.app, iTerm2, kitty, Alacritty, WezTerm, Ghostty, and Warp all open in the repository folder."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.5",
+    "git-url-parse": "^16.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/git-url-parse": "^9.0.3",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "deploy": "bash scripts/deploy.sh",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

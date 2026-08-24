@@ -1,0 +1,9 @@
+{
+  "features": {
+    "ghcr.io/esimkowitz/devcontainer-features/claude-code-persistence:1": {
+      "version": "1.0.0",
+      "resolved": "ghcr.io/esimkowitz/devcontainer-features/claude-code-persistence@sha256:a69dae5fa14a7d8bcdc6d05d515d17f1ad22ce6254ed1232b5f043b8c94bcc1c",
+      "integrity": "sha256:a69dae5fa14a7d8bcdc6d05d515d17f1ad22ce6254ed1232b5f043b8c94bcc1c"
+    }
+  }
+}
