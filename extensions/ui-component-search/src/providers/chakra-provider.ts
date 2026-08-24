@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { LIBRARY_URLS } from "../constants";
 import { UIComponent, UILibrary } from "../types";
 import { getCached, setCache } from "../utils/cache";
