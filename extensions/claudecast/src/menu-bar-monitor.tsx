@@ -37,9 +37,12 @@ export default function MenuBarMonitor() {
       // Skip the full-history "last project" scan on background ticks; only run
       // it when the user actually opens the menu.
       const fetches: Promise<unknown>[] = [isClaudeActive(), getTodayStats()];
-      const subscriptionIndex = preferences.subscriptionUsageOAuthToken
-        ? fetches.push(loadClaudeSubscriptionUsage().catch(() => undefined)) - 1
-        : -1;
+      const subscriptionIndex =
+        fetches.push(
+          loadClaudeSubscriptionUsage({
+            allowKeychainPrompt: false,
+          }).catch(() => undefined),
+        ) - 1;
       if (!isBackground) {
         fetches.push(getMostRecentProject());
       }
@@ -47,11 +50,9 @@ export default function MenuBarMonitor() {
       const results = await Promise.all(fetches);
       setIsActive(results[0] as boolean);
       setTodayStats(results[1] as UsageStats);
-      if (subscriptionIndex >= 0) {
-        setSubscription(
-          results[subscriptionIndex] as SubscriptionUsageResult | undefined,
-        );
-      }
+      setSubscription(
+        results[subscriptionIndex] as SubscriptionUsageResult | undefined,
+      );
       if (!isBackground) {
         const recent = results.at(-1) as { name?: string } | null;
         setRecentProject(recent?.name || null);

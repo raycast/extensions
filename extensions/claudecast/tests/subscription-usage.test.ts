@@ -9,6 +9,7 @@ import {
   makeSubscriptionUsageSnapshot,
   MAX_SUBSCRIPTION_SNAPSHOTS,
   parseClaudeSubscriptionUsage,
+  resolveSubscriptionCredential,
   SubscriptionUsageError,
   type ClaudeSubscriptionUsage,
   type FetchLike,
@@ -205,6 +206,33 @@ test("returns stale cached data with its refresh error", () => {
   assert.equal(result.usage?.weekly?.usedPercent, 40);
   assert.equal(result.stale, true);
   assert.equal(result.error, "Network Request Failed");
+});
+
+test("discovers subscription credentials and keeps discovery errors safe", async () => {
+  let reads = 0;
+  const discovered = await resolveSubscriptionCredential(
+    undefined,
+    async () => {
+      reads++;
+      return TOKEN;
+    },
+  );
+  assert.equal(discovered.credential, TOKEN);
+  assert.equal(reads, 1);
+
+  const configured = await resolveSubscriptionCredential(TOKEN, async () => {
+    reads++;
+    return "unused";
+  });
+  assert.equal(configured.credential, TOKEN);
+  assert.equal(reads, 1);
+
+  const safeError = new Error("Claude Code Keychain Access Was Denied");
+  safeError.name = "ClaudeOAuthCredentialError";
+  const failed = await resolveSubscriptionCredential(undefined, async () => {
+    throw safeError;
+  });
+  assert.equal(failed.error, "Claude Code Keychain Access Was Denied");
 });
 
 test("withholds forecasts when history is sparse", () => {

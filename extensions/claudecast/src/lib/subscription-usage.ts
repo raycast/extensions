@@ -65,6 +65,23 @@ export interface SubscriptionUsageResult {
   error?: string;
 }
 
+export async function resolveSubscriptionCredential(
+  credential: string | undefined,
+  provider?: () => Promise<string | undefined>,
+): Promise<{ credential?: string; error?: string }> {
+  const configured = credential?.trim();
+  if (configured) return { credential: configured };
+  if (!provider) return {};
+  try {
+    return { credential: (await provider())?.trim() || undefined };
+  } catch (error) {
+    if (error instanceof Error && error.name === "ClaudeOAuthCredentialError") {
+      return { error: error.message };
+    }
+    return { error: "Claude Subscription Usage Credential Discovery Failed" };
+  }
+}
+
 export function buildSubscriptionUsageResult(
   usage: ClaudeSubscriptionUsage,
   snapshots: SubscriptionUsageSnapshot[],

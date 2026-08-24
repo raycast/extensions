@@ -272,13 +272,11 @@ Some features (Ask Claude Code, Transform Selection, Git Actions) require an OAu
    - Open Raycast, search for "ClaudeCast," and open its preferences
    - Paste the token in the "OAuth Token" field
 
-### Subscription Usage Token
+### Subscription Usage
 
-Subscription limits use Anthropic's OAuth usage endpoint and require a separate OAuth access token with the `user:profile` scope. ClaudeCast does not reuse an Anthropic API key or the token produced by `claude setup-token` for this request.
+Subscription limits use the Claude account already connected through `claude auth login`. On macOS, ClaudeCast asks for access to Claude Code's `Claude Code-credentials` Keychain item when Usage Dashboard first needs a refresh. Linux and Windows use Claude Code's protected `.credentials.json` file.
 
-Add the compatible access token to the password field named Subscription Usage OAuth Token. Raycast stores password preferences securely. ClaudeCast sends this token only to `https://api.anthropic.com/api/oauth/usage`, never writes it to the support directory, and never includes it in errors or logs.
-
-Raycast cannot read Claude Code credentials from the macOS Keychain. If this preference is empty, the Usage Dashboard continues to show local token and cost estimates without subscription data.
+ClaudeCast reads only the access token and required `user:profile` scope, sends the token only to `https://api.anthropic.com/api/oauth/usage`, and never writes credentials to its support directory, errors, or logs. The inference-only token produced by `claude setup-token` cannot load subscription limits.
 
 ### Claude Question Hook
 
@@ -296,7 +294,7 @@ Open Raycast preferences and configure ClaudeCast:
 - **Claude Code Path**: Optionally specify a custom path to the Claude CLI binary
 - **Claude Config Directory**: Optionally point ClaudeCast and Claude Code at a custom data directory. The default follows `CLAUDE_CONFIG_DIR`, then `~/.claude`.
 - **Anthropic API Key / OAuth Token**: For API features (Ask Claude Code, Git Actions, Transform Selection, Agentic Workflows). Either preference works. The auth gate also accepts `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, or `CLAUDE_CODE_OAUTH_TOKEN` env vars, or existing `claude auth login` credentials.
-- **Subscription Usage OAuth Token**: A separate OAuth access token with `user:profile`, used only for five-hour and weekly subscription limits.
+- **Subscription Usage**: Sign in with `claude auth login`. Usage Dashboard reads the existing protected Claude Code credential when refreshing five-hour and weekly limits.
 
 ## Usage
 

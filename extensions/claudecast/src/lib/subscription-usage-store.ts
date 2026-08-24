@@ -7,6 +7,7 @@ import {
   buildSubscriptionUsageForecast,
   fetchClaudeSubscriptionUsage,
   makeSubscriptionUsageSnapshot,
+  resolveSubscriptionCredential,
   SUBSCRIPTION_CACHE_TTL_MS,
   SubscriptionUsageError,
   validateCachedSubscriptionUsage,
@@ -27,6 +28,7 @@ const LOCK_POLL_MS = 100;
 
 export interface LoadSubscriptionUsageOptions {
   credential?: string;
+  credentialProvider?: () => Promise<string | undefined>;
   forceRefresh?: boolean;
   signal?: AbortSignal;
   fetchImpl?: FetchLike;
@@ -51,16 +53,17 @@ export async function loadStoredSubscriptionUsage(
     return resultFromUsage(cached, snapshots, false, undefined, now);
   }
 
-  const credential = options.credential?.trim();
+  const resolvedCredential = await resolveSubscriptionCredential(
+    options.credential,
+    options.credentialProvider,
+  );
+  const credential = resolvedCredential.credential;
   if (!credential) {
+    const message =
+      resolvedCredential.error ??
+      "Sign In with 'claude auth login' to Load Subscription Usage";
     return cached
-      ? resultFromUsage(
-          cached,
-          snapshots,
-          true,
-          "Add A Subscription Usage OAuth Token In Extension Preferences",
-          now,
-        )
+      ? resultFromUsage(cached, snapshots, true, message, now)
       : {
           forecast: buildSubscriptionUsageForecast(
             [],
@@ -68,8 +71,7 @@ export async function loadStoredSubscriptionUsage(
             now.getTime(),
           ),
           stale: false,
-          error:
-            "Add A Subscription Usage OAuth Token In Extension Preferences",
+          error: message,
         };
   }
 
