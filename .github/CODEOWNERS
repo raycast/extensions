@@ -2758,6 +2758,7 @@
 /extensions/text-rewrap                                             @arembridge
 /extensions/text-scramble                                           @bomkino
 /extensions/text-shortcuts                                          @koinzhang @snptrs @gfazioli
+/extensions/textarray                                               @jantursky
 /extensions/textlint-rule-aws-service-name                          @bun913
 /extensions/textream                                                @alexibuild
 /extensions/texts                                                   @zavbala
