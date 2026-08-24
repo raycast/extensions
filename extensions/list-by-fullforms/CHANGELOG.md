@@ -1,6 +1,6 @@
 # List by FullForms Changelog
 
-## [Recently Added Section, Description Callouts, and Raycast-Tagged Tokens] - {PR_MERGE_DATE}
+## [Recently Added Section, Description Callouts, and Raycast-Tagged Tokens] - 2026-08-24
 
 - The description field in Quick Add Entry and the entry edit form now speaks the web editor's callout syntax with one keystroke: Cmd+Shift+E, Cmd+Shift+N, and Cmd+Shift+R append an Example, Note, or Reference callout block and focus the field. A ⓘ tooltip on the field documents the syntax for hand-typing
 - New "Copy as Mention" action (Cmd+Shift+M) on Search Entries results copies the entry's mention token, ready to paste into any description; the web app renders it as a link to the entry
