@@ -36,4 +36,4 @@ macOS support is intended but not yet implemented because I don't have a Mac to 
 
 ## Issues
 
-If any issues persist, feel free to [contact me](https://x.com/muhammadrizo_y).
+If any issues persist, feel free to [contact me](https://x.com/muhammadrizo_y)
