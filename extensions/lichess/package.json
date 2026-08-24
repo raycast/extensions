@@ -1,0 +1,107 @@
+{
+  "name": "lichess",
+  "title": "Lichess",
+  "description": "View recent Lichess games and open positions in Lichess Analysis.",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.22.1",
+    "npm": ">=10"
+  },
+  "icon": "extension-icon-black.png",
+  "author": "Arthurr",
+  "license": "MIT",
+  "categories": [
+    "Fun"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions",
+    "publish": "npx @raycast/api@latest publish",
+    "knip": "knip",
+    "lint:fix": "ray lint --fix",
+    "format:check": "prettier --write .",
+    "prepare": "husky",
+    "test": "tsc --project tsconfig.test.json && node --test .tmp/test-build/test/**/*.test.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{cjs,mjs,json,md,css}": "prettier --write"
+  },
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "latest",
+    "chess.js": "latest",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "eslint": "latest",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "husky": "^9.1.7",
+    "knip": "^6.32.2",
+    "lint-staged": "^17.3.0",
+    "prettier": "latest",
+    "typescript": "^6.0.3"
+  },
+  "preferences": [
+    {
+      "name": "lichessUsername",
+      "title": "Lichess Username",
+      "description": "The Lichess username used to fetch public recent games.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "DrNykterstein"
+    }
+  ],
+  "commands": [
+    {
+      "name": "recent-games",
+      "title": "Recent Games",
+      "description": "Show the latest public games for a Lichess user.",
+      "mode": "view"
+    },
+    {
+      "name": "analyze-position-game",
+      "title": "Analyze Position / Game",
+      "description": "Open a pasted FEN or PGN in the Lichess Analysis Board.",
+      "mode": "view"
+    },
+    {
+      "name": "create-game",
+      "title": "Create Game",
+      "description": "Create a public Lichess seek, rapid 10+0 by default.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "lichessApiToken",
+          "title": "Lichess API Token",
+          "description": "Create one at https://lichess.org/account/oauth/token, enable board:play, then paste the token here.",
+          "type": "password",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-game",
+      "title": "New Game",
+      "description": "Open the Lichess new game page.",
+      "mode": "no-view"
+    }
+  ]
+}
