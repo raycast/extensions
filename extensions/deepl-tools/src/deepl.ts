@@ -126,7 +126,7 @@ export async function translate(text: string, preferences: AppPreferences) {
     }
 
     const sourceLang = detectedSourceLanguages.size === 1 ? [...detectedSourceLanguages][0] : undefined;
-    return { translatedText: translatedChunks.join(""), sourceLang };
+    return { translatedText: translatedChunks.join(""), sourceLang, detectedSourceLanguages };
   }
 
   let result = await translateChunks(direction);
@@ -135,11 +135,15 @@ export async function translate(text: string, preferences: AppPreferences) {
   const detectedSource = sourceLanguageCode(result.sourceLang || "");
   const translatableChunkCount = chunks.filter((chunk) => chunk.trim()).length;
   const canConstrainSource = translatableChunkCount === 1;
+  const detectedPrimary = result.detectedSourceLanguages.has(primarySource);
 
-  if (direction.isUncertain && detectedSource === primarySource) {
+  if (direction.isUncertain && detectedPrimary) {
     direction = {
       targetLang: preferences.secondaryLanguage,
-      rule: `DeepL detected ${languageName(primarySource)} → ${languageName(preferences.secondaryLanguage)}`,
+      rule:
+        result.detectedSourceLanguages.size === 1
+          ? `DeepL detected ${languageName(primarySource)} → ${languageName(preferences.secondaryLanguage)}`
+          : `Mixed input includes ${languageName(primarySource)} → ${languageName(preferences.secondaryLanguage)}`,
       isUncertain: false,
     };
     result = await translateChunks(direction, canConstrainSource ? primarySource : undefined);
@@ -155,6 +159,7 @@ export async function translate(text: string, preferences: AppPreferences) {
   return {
     targetLang: direction.targetLang,
     rule: direction.rule,
-    ...result,
+    translatedText: result.translatedText,
+    sourceLang: result.sourceLang,
   };
 }

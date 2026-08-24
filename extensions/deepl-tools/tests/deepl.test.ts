@@ -63,21 +63,32 @@ test("constrains ambiguous short text to the configured language pair", async (c
   assert.equal(requests[1].get("source_lang"), "EN");
 });
 
-test("does not force the first detected language onto later chunks", async (context) => {
+test("corrects mixed chunks without forcing one source language onto the others", async (context) => {
   const requests: URLSearchParams[] = [];
   context.mock.method(globalThis, "fetch", async (_input, init) => {
     requests.push(init?.body as URLSearchParams);
-    return requests.length === 1 ? deepLResponse("EN", "собака") : deepLResponse("RU", "cat");
+    const responses = [
+      deepLResponse("RU", "привет"),
+      deepLResponse("FR", "bonjour"),
+      deepLResponse("RU", "hello"),
+      deepLResponse("FR", "hello"),
+    ];
+    return responses[requests.length - 1];
   });
 
-  const result = await translate("dog\n\nкот", preferences);
+  const result = await translate("привет\n\nbonjour", preferences);
 
-  assert.equal(result.translatedText, "собака\n\ncat");
+  assert.equal(result.translatedText, "hello\n\nhello");
+  assert.equal(result.targetLang, "EN-US");
   assert.equal(result.sourceLang, undefined);
-  assert.equal(requests.length, 2);
+  assert.equal(requests.length, 4);
+  assert.deepEqual(
+    requests.map((body) => body.get("target_lang")),
+    ["RU", "RU", "EN-US", "EN-US"],
+  );
   assert.deepEqual(
     requests.map((body) => body.get("source_lang")),
-    [null, null],
+    [null, null, null, null],
   );
 });
 
