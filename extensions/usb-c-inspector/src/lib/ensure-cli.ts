@@ -1,8 +1,7 @@
 import { environment, LocalStorage } from "@raycast/api";
 import { createHash } from "crypto";
 import { createWriteStream, existsSync } from "fs";
-import { chmod, mkdir, mkdtemp, readFile, rename, rm, writeFile } from "fs/promises";
-import { tmpdir } from "os";
+import { chmod, mkdir, mkdtemp, open, readFile, rename, rm, writeFile } from "fs/promises";
 import path from "path";
 import { pipeline } from "stream/promises";
 import { Readable } from "stream";
@@ -72,12 +71,96 @@ async function fetchLatestCliAsset(): Promise<{ release: GitHubRelease; asset: G
   return { release, asset, sha256 };
 }
 
+function isPidAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const LOCK_FILE_NAME = "whatcable-cli.lock";
+const LOCK_WAIT_MS = 5 * 60 * 1000;
+
+async function acquireInstallLock(lockPath: string): Promise<void> {
+  await mkdir(path.dirname(lockPath), { recursive: true });
+  const deadline = Date.now() + LOCK_WAIT_MS;
+
+  while (true) {
+    try {
+      const handle = await open(lockPath, "wx");
+      try {
+        await handle.writeFile(`${process.pid}\n`);
+      } finally {
+        await handle.close();
+      }
+      return;
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== "EEXIST") {
+        throw error;
+      }
+      if (Date.now() > deadline) {
+        throw new Error("Timed out waiting for WhatCable CLI install lock.");
+      }
+      try {
+        const owner = Number((await readFile(lockPath, "utf8")).trim().split("\n")[0]);
+        if (Number.isInteger(owner) && owner > 0 && !isPidAlive(owner)) {
+          await rm(lockPath, { force: true });
+          continue;
+        }
+      } catch {
+        // Unreadable lock — wait and retry.
+      }
+      await sleep(100);
+    }
+  }
+}
+
+async function withInstallLock<T>(fn: () => Promise<T>): Promise<T> {
+  const lockPath = path.join(environment.supportPath, LOCK_FILE_NAME);
+  await acquireInstallLock(lockPath);
+  try {
+    return await fn();
+  } finally {
+    await rm(lockPath, { force: true });
+  }
+}
+
+/** Swap the live cache only after staging is complete, so a crash never leaves an empty target. */
+async function replaceCachedCli(stagingDir: string): Promise<void> {
+  const targetDir = cachedCliDir();
+  const outgoingDir = path.join(environment.supportPath, `.${CLI_DIR_NAME}-outgoing-${process.pid}`);
+  await rm(outgoingDir, { recursive: true, force: true });
+
+  if (existsSync(targetDir)) {
+    await rename(targetDir, outgoingDir);
+  }
+
+  try {
+    await rename(stagingDir, targetDir);
+  } catch (error) {
+    if (existsSync(outgoingDir) && !existsSync(targetDir)) {
+      await rename(outgoingDir, targetDir);
+    }
+    throw error;
+  }
+
+  await rm(outgoingDir, { recursive: true, force: true });
+}
+
 async function installFromGitHub(): Promise<string> {
   const { release, asset, sha256 } = await fetchLatestCliAsset();
   const supportRoot = environment.supportPath;
   await mkdir(supportRoot, { recursive: true });
 
-  const tempRoot = await mkdtemp(path.join(tmpdir(), "whatcable-raycast-"));
+  // Stage on the same volume as the live cache so the final rename stays atomic.
+  const tempRoot = await mkdtemp(path.join(supportRoot, "whatcable-dl-"));
   const zipPath = path.join(tempRoot, asset.name);
   const extractRoot = path.join(tempRoot, "extract");
   const stagingDir = path.join(tempRoot, CLI_DIR_NAME);
@@ -100,22 +183,19 @@ async function installFromGitHub(): Promise<string> {
     // Keep companion bundles next to the binary (required by the CLI packaging).
     await rename(path.join(extractRoot, CLI_DIR_NAME), stagingDir);
 
-    const targetDir = cachedCliDir();
-    await rm(targetDir, { recursive: true, force: true });
-    await rename(stagingDir, targetDir);
-
-    const cli = cachedCliPath();
-    await chmod(cli, 0o755);
-    await writeFile(path.join(targetDir, "VERSION"), `${release.tag_name}\n`, "utf8");
+    const stagedBinary = path.join(stagingDir, CLI_BINARY_NAME);
+    await chmod(stagedBinary, 0o755);
+    await writeFile(path.join(stagingDir, "VERSION"), `${release.tag_name}\n`, "utf8");
+    await replaceCachedCli(stagingDir);
     await LocalStorage.setItem(VERSION_KEY, release.tag_name);
 
-    return cli;
+    return cachedCliPath();
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
 }
 
-/** Coalesce concurrent installs onto one in-flight promise (shared supportPath target). */
+/** Coalesce concurrent installs onto a single in-flight promise (same JS process). */
 let installInFlight: Promise<string> | null = null;
 
 /**
@@ -126,7 +206,9 @@ let installInFlight: Promise<string> | null = null;
  * and staged. A failed download therefore leaves the previous CLI intact.
  */
 export async function ensureCli(options?: { forceDownload?: boolean }): Promise<string> {
-  if (!options?.forceDownload) {
+  const forceDownload = options?.forceDownload ?? false;
+
+  if (!forceDownload) {
     const existing = resolveExistingCli();
     if (existing) {
       return existing;
@@ -134,10 +216,19 @@ export async function ensureCli(options?: { forceDownload?: boolean }): Promise<
   }
 
   if (!installInFlight) {
-    installInFlight = installFromGitHub().finally(() => {
+    installInFlight = withInstallLock(async () => {
+      // Another command process may have finished installing while we waited for the lock.
+      if (!forceDownload) {
+        const existing = resolveExistingCli();
+        if (existing) {
+          return existing;
+        }
+      }
+      return installFromGitHub();
+    }).finally(() => {
       installInFlight = null;
     });
-  } else if (options?.forceDownload) {
+  } else if (forceDownload) {
     await installInFlight;
     return ensureCli({ forceDownload: true });
   }
