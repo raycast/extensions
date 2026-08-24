@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mise-window-sets",
+  "title": "Mise Window Sets",
+  "description": "Apply saved Mise window Sets from Raycast.",
+  "icon": "icon.png",
+  "author": "carlosaguado04",
+  "categories": ["Productivity", "System"],
+  "keywords": ["mise", "windows", "layout", "arrange", "desktop", "sets"],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "apply-set",
+      "title": "Apply Set",
+      "subtitle": "Mise",
+      "description": "Pick a saved Mise Set and arrange windows. Applying via layouts:// requires Mise Pro.",
+      "mode": "view"
+    },
+    {
+      "name": "reload-sets",
+      "title": "Reload Sets",
+      "subtitle": "Mise",
+      "description": "Ask Mise to reload Sets from disk (available on Free).",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nRunning as a collaborator? Remember to email submit@raycast.com to get access.\\n\\n\" && ray build -e dist",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
