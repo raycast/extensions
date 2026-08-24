@@ -15,6 +15,7 @@ import {
   ActionPanel,
   Clipboard,
   Icon,
+  Keyboard,
   List,
   Toast,
   closeMainWindow,
@@ -177,18 +178,21 @@ export default function Command() {
                   <Action
                     title="Copy Result to Clipboard"
                     icon={Icon.CopyClipboard}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "c" },
+                      Windows: { modifiers: ["ctrl"], key: "c" },
+                    }}
                     onAction={() => copy(tool)}
                   />
                   <Action.OpenInBrowser
                     title="Open on Textarray.com"
                     url={toolUrl(tool, input)}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                   />
                   <Action
                     title="Reload Input from Selection"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={async () => {
                       setLoadingInput(true);
                       setInput(await readInput());
