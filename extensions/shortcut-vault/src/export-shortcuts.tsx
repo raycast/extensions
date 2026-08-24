@@ -7,17 +7,21 @@ import { getCustomShortcuts } from "./lib/storage";
 export default function Command() {
   const [count, setCount] = useState<number | undefined>();
   const [lastExportPath, setLastExportPath] = useState<string>();
+  const [loadError, setLoadError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
   async function refreshCount() {
     setIsLoading(true);
+    setLoadError(undefined);
     try {
       setCount((await getCustomShortcuts()).length);
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Open Shortcut Vault again and retry.";
+      setLoadError(message);
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not prepare export",
-        message: error instanceof Error ? error.message : "Open Shortcut Vault again and retry.",
+        message,
       });
     } finally {
       setIsLoading(false);
@@ -63,24 +67,32 @@ export default function Command() {
     }
   }
 
-  const hasShortcuts = Boolean(count);
-  const markdown = hasShortcuts
+  const hasShortcuts = !loadError && Boolean(count);
+  const markdown = loadError
     ? [
-        "# Export Shortcuts",
+        "# Could not prepare export",
         "",
-        `Shortcut Vault will export **${count} custom shortcut${count === 1 ? "" : "s"}** as versioned JSON.`,
+        "Shortcut Vault could not load custom shortcuts from storage:",
         "",
-        "The exported file uses the official Shortcut Vault import/export format and can be imported back without changes.",
-        "",
-        lastExportPath ? `Last export: \`${lastExportPath}\`` : undefined,
-      ]
-        .filter(Boolean)
-        .join("\n")
-    : [
-        "# Nothing to export",
-        "",
-        "Shortcut Vault only exports custom shortcuts. Add a custom shortcut first, then return here to create a JSON export.",
-      ].join("\n");
+        `> ${loadError}`,
+      ].join("\n")
+    : hasShortcuts
+      ? [
+          "# Export Shortcuts",
+          "",
+          `Shortcut Vault will export **${count} custom shortcut${count === 1 ? "" : "s"}** as versioned JSON.`,
+          "",
+          "The exported file uses the official Shortcut Vault import/export format and can be imported back without changes.",
+          "",
+          lastExportPath ? `Last export: \`${lastExportPath}\`` : undefined,
+        ]
+          .filter(Boolean)
+          .join("\n")
+      : [
+          "# Nothing to export",
+          "",
+          "Shortcut Vault only exports custom shortcuts. Add a custom shortcut first, then return here to create a JSON export.",
+        ].join("\n");
 
   return (
     <Detail
@@ -88,7 +100,11 @@ export default function Command() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          {hasShortcuts ? (
+          {loadError ? (
+            <ActionPanel.Section>
+              <Action title="Retry" icon={Icon.Redo} onAction={refreshCount} />
+            </ActionPanel.Section>
+          ) : hasShortcuts ? (
             <ActionPanel.Section title="Export">
               <Action title="Export JSON" icon={Icon.Download} onAction={exportToFile} />
               <Action title="Copy Export JSON" icon={Icon.Clipboard} onAction={copyExportJson} />

@@ -21,30 +21,9 @@
       "icon": "icon.png"
     },
     {
-      "name": "search-default-shortcuts",
-      "title": "Search Default Shortcuts",
-      "description": "Search bundled shortcut databases.",
-      "mode": "view",
-      "icon": "icon.png"
-    },
-    {
-      "name": "search-custom-shortcuts",
-      "title": "Search Custom Shortcuts",
-      "description": "Search shortcuts you created.",
-      "mode": "view",
-      "icon": "icon.png"
-    },
-    {
       "name": "add-shortcut",
       "title": "Add Shortcut",
       "description": "Save a custom shortcut.",
-      "mode": "view",
-      "icon": "icon.png"
-    },
-    {
-      "name": "manage-custom-shortcuts",
-      "title": "Manage Custom Shortcuts",
-      "description": "Edit, duplicate, and delete custom shortcuts.",
       "mode": "view",
       "icon": "icon.png"
     },
@@ -71,7 +50,7 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "typecheck": "npm run generate-data && tsc --noEmit",
-    "test": "tsc -p tsconfig.test.json && node .tmp/test-build/scripts/test-import-export-format.js && node .tmp/test-build/scripts/test-shortcut-search.js && node .tmp/test-build/scripts/test-serial-task-queue.js",
+    "test": "tsc -p tsconfig.test.json && node .tmp/test-build/scripts/test-import-export-format.js && node .tmp/test-build/scripts/test-shortcut-search.js && node .tmp/test-build/scripts/test-serial-task-queue.js && node .tmp/test-build/scripts/test-storage-mutex.js",
     "publish": "npx @raycast/api@latest publish",
     "verify": "npm run validate-data && npm run typecheck && npm run test && npm run lint && npm run build"
   },

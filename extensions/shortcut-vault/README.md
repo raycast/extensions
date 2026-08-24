@@ -31,36 +31,26 @@ Shortcut Vault includes verified default shortcut databases for 18 popular macOS
 ## Commands
 
 ### Search Shortcuts
-The primary search experience. Combines bundled default shortcuts and your custom shortcuts into a unified list.
+The primary search and management experience. Combines bundled default shortcuts and your personal custom shortcuts into a unified list.
 - Press **Enter** on any result to copy the shortcut keys immediately.
-- Use the filter dropdown (`Accessory`) to narrow by owner, scope, or source.
-
-### Search Default Shortcuts
-Search only the bundled database of 530+ shortcuts.
-
-### Search Custom Shortcuts
-Search only shortcuts created or imported by you.
+- Use the filter dropdown (`Accessory`) to narrow by **Source** (Default, Custom), **Scope** (Global, App, Webapp), or **Owner App**.
+- Manage custom shortcuts directly from the list: **Edit**, **Duplicate (`⌘D`)**, or **Delete (`⌘Backspace`)**.
+- Press **`⌘N`** to quickly add a new custom shortcut.
 
 ### Add Shortcut
 Save a new custom shortcut with:
 - Command name
 - Interactive modifier selectors (`⌘`, `⌥`, `⌃`, `⇧`, `fn`)
-- Key name
+- Key name (with live preview)
 - Owner App / Webapp (defaults to *General* if left blank)
 - Scope (*Global*, *App*, *Webapp*)
 - Context notes
 
-### Manage Custom Shortcuts
-View and manage your saved shortcuts with quick actions:
-- **Edit**: Modify shortcut details.
-- **Duplicate (`⌘D`)**: Create a copy of an existing shortcut.
-- **Delete (`⌘Backspace`)**: Remove a shortcut with confirmation.
-
 ### Export Shortcuts
-Export custom shortcuts to a versioned JSON file under Raycast support storage or copy the JSON payload directly to your clipboard.
+Export custom shortcuts to a versioned JSON file or copy the JSON payload directly to your clipboard.
 
 ### Import Shortcuts
-Import custom shortcuts from a Shortcut Vault JSON file. Validates format, version, and required fields before saving.
+Import custom shortcuts from a Shortcut Vault JSON file. Validates format, version, schema, and URLs before saving.
 
 ---
 

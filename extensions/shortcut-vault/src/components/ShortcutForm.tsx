@@ -143,7 +143,7 @@ export function ShortcutForm({ shortcut, onSaved }: Props) {
     <Form
       key={isEditing ? shortcut?.id : formResetKey}
       isLoading={isSubmitting}
-      navigationTitle={isEditing ? "Edit Shortcut" : "Add Shortcut"}
+      navigationTitle={isEditing ? "Edit Shortcut" : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

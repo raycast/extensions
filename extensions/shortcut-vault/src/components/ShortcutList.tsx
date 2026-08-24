@@ -1,10 +1,23 @@
-import { Action, ActionPanel, Alert, Clipboard, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { deleteCustomShortcut, duplicateCustomShortcut } from "../lib/storage";
 import { getShortcuts } from "../lib/shortcut-data";
 import { buildSearchKeywords, getFullShortcutText, getShortcutSubtitle } from "../lib/shortcut-format";
 import { searchShortcuts } from "../lib/shortcut-search";
 import { SCOPE_LABELS, SOURCE_LABELS } from "../lib/labels";
+import { isSafeHttpUrl } from "../lib/safe-url";
 import type { ScopeType, Shortcut, ShortcutFilter, SourceType } from "../types/shortcut";
 import { ShortcutDetails } from "./ShortcutDetails";
 import { ShortcutForm } from "./ShortcutForm";
@@ -462,7 +475,17 @@ function ShortcutActions({
       </ActionPanel.Section>
       <ActionPanel.Section title="Details">
         <Action.Push title="Show Details" icon={Icon.Sidebar} target={<ShortcutDetails shortcut={shortcut} />} />
-        {shortcut.sourceUrl ? <Action.OpenInBrowser title="Open Source URL" url={shortcut.sourceUrl} /> : null}
+        {shortcut.sourceUrl && isSafeHttpUrl(shortcut.sourceUrl) ? (
+          <Action.OpenInBrowser title="Open Source URL" url={shortcut.sourceUrl} />
+        ) : null}
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Create">
+        <Action.Push
+          title="Add Shortcut"
+          icon={Icon.Plus}
+          shortcut={Keyboard.Shortcut.Common.New}
+          target={<ShortcutForm onSaved={onChanged} />}
+        />
       </ActionPanel.Section>
       {intent === "search" ? manageActions : null}
     </ActionPanel>

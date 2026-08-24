@@ -19,7 +19,7 @@ for (const file of files) {
 
   validateString(dataset.ownerName, `${file}.ownerName`);
   validateEnum(dataset.ownerType, ownerTypes, `${file}.ownerType`);
-  validateOptionalString(dataset.sourceUrl, `${file}.sourceUrl`);
+  validateOptionalUrl(dataset.sourceUrl, `${file}.sourceUrl`);
 
   if (!Array.isArray(dataset.shortcuts) || dataset.shortcuts.length === 0) {
     fail(`${file}.shortcuts must be a non-empty array.`);
@@ -35,7 +35,7 @@ for (const file of files) {
     validateString(shortcut.key, `${label}.key`);
     validateEnum(shortcut.scope, scopes, `${label}.scope`);
     validateOptionalString(shortcut.notes, `${label}.notes`);
-    validateOptionalString(shortcut.sourceUrl, `${label}.sourceUrl`);
+    validateOptionalUrl(shortcut.sourceUrl, `${label}.sourceUrl`);
 
     if (!Array.isArray(shortcut.modifiers)) {
       fail(`${label}.modifiers must be an array.`);
@@ -72,6 +72,22 @@ function validateString(value, fieldName) {
 function validateOptionalString(value, fieldName) {
   if (value !== undefined && typeof value !== "string") {
     fail(`${fieldName} must be a string when provided.`);
+  }
+}
+
+function validateOptionalUrl(value, fieldName) {
+  if (value !== undefined) {
+    if (typeof value !== "string" || !value.trim()) {
+      fail(`${fieldName} must be a non-empty string when provided.`);
+    }
+    try {
+      const url = new URL(value);
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        fail(`${fieldName} must use http or https protocol.`);
+      }
+    } catch {
+      fail(`${fieldName} must be a valid http or https URL.`);
+    }
   }
 }
 
