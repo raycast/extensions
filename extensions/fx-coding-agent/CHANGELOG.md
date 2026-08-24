@@ -1,6 +1,6 @@
 # Fx Coding Agent Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-24
 
 - Added complete saved conversation history to session details, including every user and fx turn plus compact tool activity.
 - Replaced raw Usage and Health JSON screens with searchable native Raycast lists, metadata, status colors, token breakdowns, and per-model usage.
