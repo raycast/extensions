@@ -1,7 +1,8 @@
 import { environment, LocalStorage } from "@raycast/api";
 import { createHash } from "crypto";
 import { createWriteStream, existsSync } from "fs";
-import { chmod, mkdir, mkdtemp, readdir, readFile, rename, rm, rmdir, writeFile } from "fs/promises";
+import { spawnSync } from "child_process";
+import { chmod, mkdir, mkdtemp, readdir, readFile, rename, rm, rmdir, stat, writeFile } from "fs/promises";
 import path from "path";
 import { pipeline } from "stream/promises";
 import { Readable } from "stream";
@@ -80,12 +81,53 @@ function isPidAlive(pid: number): boolean {
   }
 }
 
+/** macOS `comm` is truncated; Raycast commands run as Raycast or node (`ray develop`). */
+function isLikelyLockHolderProcess(pid: number): boolean {
+  const result = spawnSync("/bin/ps", ["-p", String(pid), "-o", "comm="], {
+    encoding: "utf8",
+    timeout: 1000,
+  });
+  const comm = (result.stdout ?? "").trim().toLowerCase();
+  if (!comm) {
+    return false;
+  }
+  return comm.includes("raycast") || comm === "node" || comm.startsWith("node");
+}
+
+async function lockOwnerAgeMs(ownerPath: string): Promise<number> {
+  try {
+    const raw = await readFile(ownerPath, "utf8");
+    const startedAt = Number(raw.trim().split("\n")[1]);
+    if (Number.isFinite(startedAt) && startedAt > 0) {
+      return Date.now() - startedAt;
+    }
+  } catch {
+    // Fall through to mtime.
+  }
+  try {
+    const info = await stat(ownerPath);
+    return Date.now() - info.mtimeMs;
+  } catch {
+    return Number.POSITIVE_INFINITY;
+  }
+}
+
+async function isLockOwnerStillHolding(lockDir: string, ownerName: string, owner: number): Promise<boolean> {
+  if (!isPidAlive(owner) || !isLikelyLockHolderProcess(owner)) {
+    return false;
+  }
+  const ageMs = await lockOwnerAgeMs(path.join(lockDir, ownerName));
+  return ageMs < STALE_LOCK_MS;
+}
+
 async function sleep(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 const LOCK_DIR_NAME = "whatcable-cli.lock";
 const LOCK_WAIT_MS = 5 * 60 * 1000;
+/** Shorter than LOCK_WAIT_MS so waiters can reap a reused-PID lock before they time out. */
+const STALE_LOCK_MS = 2 * 60 * 1000;
 
 function lockDirPath(): string {
   return path.join(environment.supportPath, LOCK_DIR_NAME);
@@ -100,7 +142,7 @@ function isLockHeldError(code: string | undefined): boolean {
 }
 
 /**
- * Reap a dead holder's lock without unlinking a replacement.
+ * Reap a dead or reused-PID holder's lock without unlinking a replacement.
  * The owner file is named `owner-<pid>`, so we only delete that exact file.
  * `rmdir` then fails if another process already created `owner-<livePid>`.
  */
@@ -126,12 +168,17 @@ async function tryReapStaleLock(lockDir: string): Promise<void> {
     return;
   }
 
-  const owner = Number(owners[0].slice("owner-".length));
-  if (!Number.isInteger(owner) || owner <= 0 || isPidAlive(owner)) {
+  const ownerName = owners[0];
+  const owner = Number(ownerName.slice("owner-".length));
+  if (!Number.isInteger(owner) || owner <= 0) {
     return;
   }
 
-  await rm(path.join(lockDir, owners[0]), { force: true });
+  if (await isLockOwnerStillHolding(lockDir, ownerName, owner)) {
+    return;
+  }
+
+  await rm(path.join(lockDir, ownerName), { force: true });
   try {
     await rmdir(lockDir);
   } catch {
@@ -147,7 +194,7 @@ async function acquireInstallLock(): Promise<void> {
   while (true) {
     const stagingDir = await mkdtemp(path.join(environment.supportPath, `${LOCK_DIR_NAME}-`));
     try {
-      await writeFile(path.join(stagingDir, `owner-${process.pid}`), `${process.pid}\n`, "utf8");
+      await writeFile(path.join(stagingDir, `owner-${process.pid}`), `${process.pid}\n${Date.now()}\n`, "utf8");
       // Publish owner file and directory in one rename so waiters never see an empty lock.
       await rename(stagingDir, lockDir);
       return;
