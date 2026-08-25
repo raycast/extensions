@@ -2,10 +2,18 @@ import { executeSQL } from "@raycast/utils";
 
 import { escapeSQLString, getOpenNoteURL, NOTES_DB, Link, Backlink, Tag, NoteItem } from "../helpers";
 
-export async function getNotes(maxQueryResults: number, filterByTags: string[] = [], searchText?: string) {
+export async function getNotes(
+  maxQueryResults: number,
+  filterByTags: string[] = [],
+  searchText?: string,
+  exactTitleMatch = false,
+) {
   const trimmedSearchText = searchText?.trim();
+  // Exact-title matches are filtered in SQL (before LIMIT) so a match can't be pushed out of the window by recency.
   const searchFilter = trimmedSearchText
-    ? ` AND (
+    ? exactTitleMatch
+      ? ` AND LOWER(TRIM(note.ztitle1)) = LOWER('${escapeSQLString(trimmedSearchText)}')`
+      : ` AND (
         note.ztitle1 LIKE '%${escapeSQLString(trimmedSearchText)}%' OR
         note.zsnippet LIKE '%${escapeSQLString(trimmedSearchText)}%'
       )`
