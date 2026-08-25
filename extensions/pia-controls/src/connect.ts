@@ -1,4 +1,5 @@
-import { connectToPIA } from "./utils";
-export default async () => {
-  await connectToPIA();
-};
+import { connectCurrent } from "./lib/actions";
+
+export default async function Command() {
+  await connectCurrent();
+}
