@@ -46,14 +46,16 @@ export const getFlagEmoji = (isoCode?: string) => {
     .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 };
 
+export const getKickoffDate = (str: string, tz: string = "GMT"): Date =>
+  new Date(`${str}${tz === "BST" ? "+01:00" : "+00:00"}`);
+
 export const convertISOToLocalTime = (
   str: string,
   tz: string = "GMT",
   output: string = "EEE d MMM yyyy, HH:mm",
 ) => {
   try {
-    const stringWithTZ = tz === "BST" ? `${str}+01:00` : `${str}+00:00`;
-    return format(new Date(stringWithTZ), output);
+    return format(getKickoffDate(str, tz), output);
   } catch (error) {
     showFailureToast(error, { message: `Invalid ISO date value: ${str}` });
 

@@ -1,5 +1,6 @@
 import { showFailureToast } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { formatISO } from "date-fns";
 import {
   Club,
   Content,
@@ -136,6 +137,33 @@ export const getMatchweek = async (): Promise<number> => {
     showFailureToast(e);
 
     return 0;
+  }
+};
+
+export const getUpcomingMatchweek = async (
+  season: string,
+  comp: string = "8",
+): Promise<number | undefined> => {
+  const today = formatISO(new Date(), { representation: "date" });
+
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/v2/matches`,
+    params: {
+      competition: comp,
+      season,
+      _sort: "kickoff:asc",
+      _limit: 1,
+      [`kickoff>${today}`]: "",
+    },
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPagination<Fixture>> = await axios(config);
+
+    return data.data[0]?.matchWeek;
+  } catch {
+    return undefined;
   }
 };
 
