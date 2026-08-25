@@ -14,11 +14,6 @@ import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
 
-interface Preferences {
-  zlibPath: string;
-  downloadDir: string;
-  zlibDomain: string;
-}
 
 interface Book {
   id: string;
