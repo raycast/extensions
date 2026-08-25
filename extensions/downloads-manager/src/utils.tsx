@@ -253,6 +253,7 @@ const finderTrashScript = `on run argv
     end try
     set itemIndex to itemIndex + 1
   end repeat
+  set AppleScript's text item delimiters to ","
   return trashedIndexes as string
 end run`;
 
