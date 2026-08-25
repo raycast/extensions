@@ -42,6 +42,10 @@ export const Shortcuts = {
     macOS: { modifiers: ["cmd", "shift"], key: "backspace" },
     Windows: { modifiers: ["ctrl", "shift"], key: "d" },
   },
+  switchInstance: {
+    macOS: { modifiers: ["cmd", "shift"], key: "i" },
+    Windows: { modifiers: ["ctrl", "shift"], key: "i" },
+  },
   configureAndAdd: {
     macOS: { modifiers: ["cmd", "shift"], key: "a" },
     Windows: { modifiers: ["ctrl", "shift"], key: "a" },
