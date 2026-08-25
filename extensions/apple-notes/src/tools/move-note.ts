@@ -19,6 +19,9 @@ export default async function (input: Input) {
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   return {
-    info: [{ name: "Destination folder", value: input.folderName }],
+    info: [
+      { name: "Destination folder", value: input.folderName },
+      ...(input.accountName ? [{ name: "Destination account", value: input.accountName }] : []),
+    ],
   };
 };
