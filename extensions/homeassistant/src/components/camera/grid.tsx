@@ -1,7 +1,7 @@
 import { EntityStandardActionSections } from "@components/entity";
 import { useVisibleHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
-import { prioritizeFavoriteStates, useEntityOverrides } from "@lib/entity-overrides";
+import { partitionFavoriteStates, useEntityOverrides } from "@lib/entity-overrides";
 import { State } from "@lib/haapi";
 import { getDisplayName } from "@lib/utils";
 import { Action, ActionPanel, Color, Grid, Image, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
@@ -94,7 +94,7 @@ export function CameraGrid(): React.ReactElement {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
-  const sortedStates = prioritizeFavoriteStates(states, favoriteEntityIds);
+  const { favorites, others } = partitionFavoriteStates(states, favoriteEntityIds);
 
   return (
     <Grid
@@ -104,9 +104,18 @@ export function CameraGrid(): React.ReactElement {
       columns={3}
       fit={Grid.Fit.Fill}
     >
-      {sortedStates.map((s) => (
-        <CameraGridItem key={s.entity_id} state={s} />
-      ))}
+      {favorites.length > 0 && (
+        <Grid.Section title="Favorites" subtitle={`${favorites.length}`}>
+          {favorites.map((s) => (
+            <CameraGridItem key={s.entity_id} state={s} />
+          ))}
+        </Grid.Section>
+      )}
+      <Grid.Section title={favorites.length > 0 ? "Cameras" : undefined} subtitle={`${others.length}`}>
+        {others.map((s) => (
+          <CameraGridItem key={s.entity_id} state={s} />
+        ))}
+      </Grid.Section>
     </Grid>
   );
 }
