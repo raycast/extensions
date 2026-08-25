@@ -17,7 +17,7 @@ export function TooltipFieldsView() {
   const { fields, setFields, isTooltipFieldsLoaded } = useTooltipFields();
 
   const availableFields = TOOLTIP_FIELD_OPTIONS.map((option) => option.value).filter(
-    (field) => !fields.includes(field)
+    (field) => !fields.includes(field),
   );
 
   function enable(field: TooltipField) {
@@ -52,10 +52,10 @@ export function TooltipFieldsView() {
             title={titleFor(field)}
             actions={
               <ActionPanel>
-                <Action title="Remove From Tooltip" icon={Icon.Circle} onAction={() => disable(field)} />
+                <Action title="Remove from Tooltip" icon={Icon.Circle} onAction={() => disable(field)} />
                 {index > 0 && (
                   <Action
-                    title="Move Up"
+                    title="Move up"
                     icon={Icon.ArrowUp}
                     shortcut={Keyboard.Shortcut.Common.MoveUp}
                     onAction={() => move(field, -1)}

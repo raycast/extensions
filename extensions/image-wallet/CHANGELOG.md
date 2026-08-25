@@ -9,7 +9,7 @@
 - Pockets now nest: folders at any depth become their own Pocket, named by their path
 - Added dedicated screens for a missing, deleted, or unreadable Wallet directory
 - Added .avif support
-- Removed the 'Suppress Read Errors' preference; read errors are always reported, now with a "Change Wallet Directory" action on the toast
+- Read-error toasts now include a Change Wallet Directory action; the existing Suppress Read Errors preference still silences them
 
 ## [Windows Support] - {PR_MERGE_DATE}
 

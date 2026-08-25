@@ -26,7 +26,7 @@ async function getLibrary(): Promise<PDFiumLibrary> {
         const wasmFile = await readFile(join(environment.assetsPath, "pdfium.wasm"));
         const wasmBinary = wasmFile.buffer.slice(
           wasmFile.byteOffset,
-          wasmFile.byteOffset + wasmFile.byteLength
+          wasmFile.byteOffset + wasmFile.byteLength,
         ) as ArrayBuffer;
         return await PDFiumLibrary.init({ wasmBinary });
       } catch (error) {

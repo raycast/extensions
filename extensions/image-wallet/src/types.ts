@@ -29,6 +29,7 @@ export interface Preferences {
   gridColumns: string;
   videoPreviews: boolean;
   rememberPocketFilter: boolean;
+  suppressReadErrors?: boolean;
 }
 
 export type SortMode =

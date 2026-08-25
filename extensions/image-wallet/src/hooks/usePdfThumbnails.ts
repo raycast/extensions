@@ -11,7 +11,7 @@ export function usePdfThumbnails(pockets: Pocket[] | undefined): Record<string, 
 
   const pdfCards = useMemo(
     () => (pockets ?? []).flatMap((pocket) => pocket.cards).filter((card: Card) => card.extension === "pdf"),
-    [pockets]
+    [pockets],
   );
   const pdfKey = pdfCards.map((card) => `${card.path}:${card.mtimeMs}`).join("|");
 
@@ -25,7 +25,7 @@ export function usePdfThumbnails(pockets: Pocket[] | undefined): Record<string, 
         const thumbnailPath = await getPdfThumbnail(card.path, card.mtimeMs);
         if (!cancelled && thumbnailPath) {
           setThumbnails((previous) =>
-            previous[card.path] === thumbnailPath ? previous : { ...previous, [card.path]: thumbnailPath }
+            previous[card.path] === thumbnailPath ? previous : { ...previous, [card.path]: thumbnailPath },
           );
         }
       }

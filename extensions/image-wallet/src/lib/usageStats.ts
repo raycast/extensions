@@ -24,7 +24,7 @@ function withLock<T>(mutate: () => Promise<T>): Promise<T> {
   const result = mutationQueue.then(mutate, mutate);
   mutationQueue = result.then(
     () => undefined,
-    () => undefined
+    () => undefined,
   );
   return result;
 }

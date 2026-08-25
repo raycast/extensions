@@ -107,25 +107,33 @@
       "type": "checkbox",
       "required": true,
       "default": true
+    },
+    {
+      "name": "suppressReadErrors",
+      "label": "Suppress Read Errors",
+      "description": "Hide the warning when a file or directory could not be read.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
     "@hyzyla/pdfium": "^2.1.13",
-    "@raycast/api": "^1.104.0",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^2.0.6",
+    "@raycast/utils": "^2.3.0",
     "image-size": "^2.0.2",
     "pngjs": "^7.0.0",
-    "run-jxa": "^3.0.0"
+    "run-jxa": "^4.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^22.13.10",
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "^26.3.0",
     "@types/pngjs": "^6.0.5",
-    "@types/react": "^19.0.10",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@types/react": "^19.2.18",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "typescript": "~5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

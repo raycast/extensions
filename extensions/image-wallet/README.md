@@ -22,7 +22,7 @@ path relative to the Wallet Directory.
 
 Cards can be sorted by name, date added, date modified, file size, or by how you actually use
 them — "Recently Used" and "Most Used" are tracked whenever you paste or copy a Card. Pick a mode
-from the **Sort Cards By** action (`⌘⇧S` / `Ctrl+Shift+S`); the choice is remembered between
+from the **Sort Cards by** action (`⌘⇧S` / `Ctrl+Shift+S`); the choice is remembered between
 launches. The search bar dropdown stays dedicated to filtering by Pocket.
 
 ## Previews

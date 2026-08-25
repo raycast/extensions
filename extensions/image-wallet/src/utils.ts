@@ -58,35 +58,50 @@ const imageExts = [
 /** Thrown when the Wallet directory exists but its contents can't be listed (e.g. permissions). */
 export class WalletUnreadableError extends Error {}
 
-export const walletStatus = getWalletStatus();
-export const walletPath = getWalletPath();
+export type ResolvedWallet = {
+  status: WalletStatus;
+  path: string;
+  walletDirectory: string;
+};
 
-function getWalletStatus(): WalletStatus {
+/**
+ * Re-reads the Wallet directory preference and stats it. Call this from render and from
+ * fetch/revalidate — never cache the result at module load, or a Change Wallet Directory
+ * round-trip stays stuck on the previous missing/not-found state until relaunch.
+ */
+export function resolveWallet(): ResolvedWallet {
   const { walletDirectory } = getPreferenceValues<Preferences>();
-  if (!walletDirectory) return "missing";
+  if (!walletDirectory) {
+    return { status: "missing", path: environment.supportPath, walletDirectory: "" };
+  }
 
   try {
     // statSync follows symlinks, so a linked Wallet directory is accepted too.
-    return fs.statSync(walletDirectory).isDirectory() ? "ready" : "not-found";
-  } catch (e) {
+    if (fs.statSync(walletDirectory).isDirectory()) {
+      return { status: "ready", path: walletDirectory, walletDirectory };
+    }
+    return { status: "not-found", path: environment.supportPath, walletDirectory };
+  } catch {
     // Moved, renamed, or on an unmounted drive.
-    return "not-found";
+    return { status: "not-found", path: environment.supportPath, walletDirectory };
   }
 }
 
-function getWalletPath() {
-  const { walletDirectory } = getPreferenceValues<Preferences>();
-  return walletStatus === "ready" ? walletDirectory : environment.supportPath;
-}
+export async function fetchFiles(walletDirectory?: string): Promise<Pocket[]> {
+  // `walletDirectory` is a usePromise dependency so a preference change re-runs the scan.
+  // Always re-read via resolveWallet so Retry recovers even when this argument is stale.
+  void walletDirectory;
 
-export async function fetchFiles(): Promise<Pocket[]> {
+  const { status, path } = resolveWallet();
+  if (status !== "ready") return [];
+
   const pockets: Pocket[] = [];
 
   // Guards against symlink cycles, which recursion into linked directories makes reachable.
   const visitedDirectories = new Set<string>();
   const wantsDimensions = (await loadTooltipFields()).includes("dimensions");
 
-  await collectPockets(walletPath, undefined, pockets, visitedDirectories, wantsDimensions, true);
+  await collectPockets(path, undefined, pockets, visitedDirectories, wantsDimensions, true);
 
   // The Wallet root's own Cards come first, then Pockets by path so parents precede children.
   return pockets.sort((a, b) => {
@@ -107,12 +122,12 @@ async function collectPockets(
   pockets: Pocket[],
   visitedDirectories: Set<string>,
   wantsDimensions: boolean,
-  isRoot = false
+  isRoot = false,
 ): Promise<void> {
   let realPath: string;
   try {
     realPath = fs.realpathSync(dir);
-  } catch (e) {
+  } catch {
     if (isRoot) throw new WalletUnreadableError(unreadableWalletMessage(dir));
     reportUnreadable(dir, "directory");
     return;
@@ -125,7 +140,7 @@ async function collectPockets(
   try {
     fs.accessSync(dir, fs.constants.R_OK);
     entries = fs.readdirSync(dir, { withFileTypes: true });
-  } catch (e) {
+  } catch {
     if (isRoot) throw new WalletUnreadableError(unreadableWalletMessage(dir));
     reportUnreadable(dir, "directory");
     return;
@@ -143,7 +158,7 @@ async function collectPockets(
     if (entry.isSymbolicLink()) {
       try {
         isDirectory = fs.statSync(entryPath).isDirectory();
-      } catch (e) {
+      } catch {
         continue;
       }
     }
@@ -154,7 +169,7 @@ async function collectPockets(
       pocketName ? `${pocketName}/${entry.name}` : entry.name,
       pockets,
       visitedDirectories,
-      wantsDimensions
+      wantsDimensions,
     );
   }
 }
@@ -173,7 +188,7 @@ async function loadPocketCards(dir: string, entries: fs.Dirent[], wantsDimension
       try {
         fileStats = fs.lstatSync(filePath);
         if (fileStats.isSymbolicLink()) fileStats = fs.statSync(filePath);
-      } catch (e) {
+      } catch {
         // If we can't read the file stats, try to still include it if it's an image
         // If it's an image file, include it even if we can't get stats
         if (imageExts.includes(fileExt)) {
@@ -202,7 +217,7 @@ async function loadPocketCards(dir: string, entries: fs.Dirent[], wantsDimension
       // PDFs deliberately get no preview here: they are rendered asynchronously by
       // usePdfThumbnails so a slow PDFium pass never blocks the grid.
       cardArr.push(buildCard(fileName, filePath, fileExt, previewPath, fileStats, dimensions));
-    })
+    }),
   );
 
   return cardArr;
@@ -214,7 +229,7 @@ function buildCard(
   fileExt: string,
   preview: string | undefined,
   stats?: fs.Stats,
-  dimensions?: { width: number; height: number }
+  dimensions?: { width: number; height: number },
 ): Card {
   return {
     name,
@@ -245,7 +260,7 @@ function readDimensions(path: string | undefined): { width: number; height: numb
 
     const { width, height } = imageSize(buffer);
     return width && height ? { width, height } : undefined;
-  } catch (e) {
+  } catch {
     // Unsupported or unrecognized format (e.g. many RAW extensions) — just skip dimensions.
     return undefined;
   } finally {
@@ -273,14 +288,15 @@ function reportUnreadable(path: string, kind: "file" | "directory") {
   // Photos is protected by default, and is a frequent appearance in my extension error emails.
   // I figure it makes sense to explicitly ignore it.
   if (path.endsWith(".photoslibrary")) return;
+  if (getPreferenceValues<Preferences>().suppressReadErrors) return;
 
   showToast({
     style: Toast.Style.Failure,
     title: `${path} could not be read`,
     message:
       kind === "directory"
-        ? "File/directory may contain special characters, or protect read access."
-        : "File may contain special characters.",
+        ? "File/directory may contain special characters, or protect read access. Suppress this error in extension preferences."
+        : "File may contain special characters. Suppress this error in extension preferences.",
     primaryAction: {
       title: "Change Wallet Directory",
       onAction: () => openExtensionPreferences(),
@@ -311,7 +327,7 @@ async function generateVideoPreviewWithFfmpeg(inputPath: string, outputPath: str
     await execFileAsync(
       "ffmpeg",
       ["-hide_banner", "-loglevel", "error", "-y", "-ss", "0", "-i", inputPath, "-frames:v", "1", outputPath],
-      { windowsHide: true }
+      { windowsHide: true },
     );
   } catch (e) {
     const isMissingBinary = (e as NodeJS.ErrnoException)?.code === "ENOENT";
@@ -394,7 +410,7 @@ async function generateVideoPreviewWithJxa(inputPath: string, outputPath: string
       return outputPath
       }
       `,
-    [inputPath, outputPath]
+    [inputPath, outputPath],
   );
 
   return previewPath?.toString();
