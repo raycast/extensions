@@ -49,14 +49,16 @@ export default async function (input: Input) {
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  let resolvedNoteId = input.noteId;
-  let resolvedTitle: string | undefined;
+  // Resolution failures must propagate: falling back to the raw input id here would let the
+  // confirmation show an unresolved identifier while execution independently re-resolves and
+  // deletes whatever note that resolves to.
+  const resolvedNoteId = await resolveAppleNoteId(input.noteId);
 
+  let resolvedTitle: string | undefined;
   try {
-    resolvedNoteId = await resolveAppleNoteId(input.noteId);
     resolvedTitle = await getNoteTitleByResolvedId(resolvedNoteId);
   } catch {
-    // Fall back to ID-only confirmation when identity lookup fails.
+    // Fall back to ID-only confirmation when the title lookup fails.
   }
 
   const displayId = shortenNoteId(resolvedNoteId);
