@@ -202,5 +202,8 @@
       "mode": "view",
       "icon": "command-icon.png"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

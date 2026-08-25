@@ -1,6 +1,6 @@
 # Transcribe Audio Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2026-08-25
 
 ### Added
 - Initial release: transcribe audio and video files using OpenAI, Deepgram, or ElevenLabs.
