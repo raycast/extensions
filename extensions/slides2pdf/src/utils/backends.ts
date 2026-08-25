@@ -3,7 +3,6 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { promisify } from "util";
-import { PDFDocument } from "pdf-lib";
 import { renderTextFilePdf } from "./textpdf";
 
 const execFileAsync = promisify(execFile);
@@ -350,8 +349,11 @@ function docPathHandler(appName: string, spec: AppScriptSpec): string {
 // The wait loop covers open being
 // asynchronous for non-native formats, a no-op for an already-open document, and apps that
 // auto-create a blank startup document. The export runs inside try/on error so the message is
-// captured instead of swallowed; the document is always closed, the app quits if we launched it,
-// and the captured error is re-raised outside the tell block.
+// captured instead of swallowed; the document is always closed and the app quits if we launched
+// it. The captured error is re-raised only when export itself did not finish — a close failure
+// after a completed export is not a conversion failure. A leftover file is not used as a success
+// signal: a failed export can leave a parseable but incomplete PDF, which would otherwise be
+// published and skip fallback engines.
 function conversionScript(appName: string, src: string, outputPath: string, spec: AppScriptSpec): string {
   const docs = `${spec.docClass}s`;
   const doc = (i: string) => `${spec.docClass} ${i}`;
@@ -361,6 +363,7 @@ function conversionScript(appName: string, src: string, outputPath: string, spec
     `set wasRunning to (application "${appName}" is running)`,
     `set errMsg to ""`,
     `set docIndex to 0`,
+    `set exportDone to false`,
     `tell application "${appName}"`,
     `  try`,
     `    with timeout of 600 seconds`,
@@ -406,6 +409,7 @@ function conversionScript(appName: string, src: string, outputPath: string, spec
     `      end repeat`,
     `      set outFile to POSIX file ${asString(outputPath)}`,
     `      ${spec.exportLine(doc("docIndex"))}`,
+    `      set exportDone to true`,
     `      close ${doc("docIndex")} saving no`,
     `    end timeout`,
     `  on error eMsg`,
@@ -418,7 +422,7 @@ function conversionScript(appName: string, src: string, outputPath: string, spec
     `    if not wasRunning then quit`,
     `  end try`,
     `end tell`,
-    `if errMsg is not "" then error errMsg`,
+    `if errMsg is not "" and exportDone is false then error errMsg`,
   ].join("\n");
 }
 
@@ -510,20 +514,6 @@ function publishFile(staging: string, outputPath: string): void {
   }
 }
 
-// Whether a file left behind by a failed export is a usable PDF. Parsing it is the only honest
-// check: a %%EOF trailer says nothing about the body, and an export that died halfway can leave a
-// file that still ends in one. Encrypted output counts as usable — it opens fine in a reader, so
-// discarding it would lose a good conversion. Only reached on the error path, so the parse costs
-// nothing in the normal case.
-async function isReadablePdf(p: string): Promise<boolean> {
-  try {
-    const doc = await PDFDocument.load(fs.readFileSync(p), { ignoreEncryption: true });
-    return doc.getPageCount() > 0;
-  } catch {
-    return false;
-  }
-}
-
 async function runBackend(backend: Backend, src: string, outputPath: string): Promise<void> {
   if (backend.type === "libreoffice") {
     // Isolated user profile: --convert-to silently produces nothing when another LibreOffice
@@ -575,17 +565,11 @@ async function runBackend(backend: Backend, src: string, outputPath: string): Pr
   const tmpOut = sandboxSafeOutputPath(type);
   const scriptOut = tmpOut ?? outputPath;
   try {
-    try {
-      await runAppleScript(
-        conversionScript(backend.appName!, src, scriptOut, APP_SPECS[type]),
-        type,
-        closeDocScript(backend.appName!, src, APP_SPECS[type]),
-      );
-    } catch (e) {
-      // Keep a PDF that was produced despite a late script error (the close failing after a good
-      // export) — but only a readable one, so a half-written file falls through to the next engine.
-      if (!(await isReadablePdf(scriptOut))) throw e;
-    }
+    await runAppleScript(
+      conversionScript(backend.appName!, src, scriptOut, APP_SPECS[type]),
+      type,
+      closeDocScript(backend.appName!, src, APP_SPECS[type]),
+    );
     if (tmpOut && fs.existsSync(tmpOut)) moveFile(tmpOut, outputPath);
   } finally {
     // A failed export can leave a partial file inside the app's container, where nothing else
