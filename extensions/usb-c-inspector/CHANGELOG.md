@@ -1,6 +1,6 @@
 # USB-C Inspector Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2026-08-25
 
 - Shorten the Store listing and overview so they fit the Store card and read more naturally
 
