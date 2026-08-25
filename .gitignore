@@ -183,3 +183,4 @@ scripts/internal/**
 .cursor/**
 extensions/vim-leader-key/docs/UI-KEYBOARD-LAYOUT.md
 extensions/where-is-my-cursor/CHANGES.md
+extensions/where-is-my-cursor/.venv
