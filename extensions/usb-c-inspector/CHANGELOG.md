@@ -1,5 +1,9 @@
 # USB-C Inspector Changelog
 
+## [1.0.1] - 2026-08-25
+
+- Shorten the Store listing and overview so they fit the Store card and read more naturally
+
 ## [Initial Version] - 2026-08-25
 
 - Show All USB-C Ports with plain-English headlines from the official WhatCable CLI
