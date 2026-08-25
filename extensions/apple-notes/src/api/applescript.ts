@@ -116,18 +116,30 @@ export async function appendNoteBody(id: string, content: string) {
 
 export async function moveNoteToFolder(id: string, folderName: string, accountName?: string) {
   const escapedFolderName = escapeDoubleQuotes(folderName);
-  // Without an explicit account, search every account for a matching folder name.
+  // Without an explicit account, require a single matching folder across accounts.
   const findFolder = accountName
     ? `set theFolder to folder "${escapedFolderName}" of account "${escapeDoubleQuotes(accountName)}"`
     : `
       set theFolder to missing value
+      set matchingAccountNames to {}
       repeat with acc in accounts
         try
-          set theFolder to folder "${escapedFolderName}" of acc
-          exit repeat
+          set candidateFolder to folder "${escapedFolderName}" of acc
+          copy (name of acc) to end of matchingAccountNames
+          if theFolder is missing value then
+            set theFolder to candidateFolder
+          end if
         end try
       end repeat
-      if theFolder is missing value then error "Folder \\"${escapedFolderName}\\" not found"
+      if (count of matchingAccountNames) is 0 then
+        error "Folder \\"${escapedFolderName}\\" not found"
+      end if
+      if (count of matchingAccountNames) > 1 then
+        set AppleScript's text item delimiters to ", "
+        set matchingAccountsText to matchingAccountNames as text
+        set AppleScript's text item delimiters to ""
+        error "Folder \\"${escapedFolderName}\\" exists in multiple accounts (" & matchingAccountsText & "). Provide accountName."
+      end if
     `;
 
   return runAppleScript(

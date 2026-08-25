@@ -18,6 +18,6 @@ export default async function (input: Input) {
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   return {
     style: Action.Style.Destructive,
-    message: `Are you sure you want to delete "${input.noteTitle ?? input.noteId}"?`,
+    message: `Are you sure you want to delete note "${input.noteId}"?`,
   };
 };

@@ -14,8 +14,34 @@ export default async (props: LaunchProps<{ arguments: Arguments.Ai }>) => {
   let targetNote: Awaited<ReturnType<typeof getNotes>>[number] | undefined;
   if (noteQuery) {
     await showToast({ style: Toast.Style.Animated, title: "Looking for note" });
-    const matches = await getNotes(50, [], noteQuery);
-    targetNote = matches.find((note) => note.title.toLowerCase() === noteQuery.toLowerCase()) ?? matches[0];
+    const findExactMatches = (notes: Awaited<ReturnType<typeof getNotes>>) => {
+      const normalizedQuery = noteQuery.toLowerCase();
+      return notes.filter((note) => note.title.trim().toLowerCase() === normalizedQuery);
+    };
+
+    const initialMatches = await getNotes(50, [], noteQuery);
+    let exactMatches = findExactMatches(initialMatches);
+
+    // Retry with a larger window so an older exact-title match is not missed.
+    if (exactMatches.length === 0 && initialMatches.length === 50) {
+      const expandedMatches = await getNotes(500, [], noteQuery);
+      exactMatches = findExactMatches(expandedMatches);
+    }
+
+    if (exactMatches.length === 1) {
+      targetNote = exactMatches[0];
+    }
+
+    if (exactMatches.length > 1) {
+      await showFailureToast(
+        new Error(`Multiple notes titled "${noteQuery}" were found. Please use a more specific title.`),
+        {
+          title: "Note title is ambiguous",
+        },
+      );
+      return;
+    }
+
     if (!targetNote) {
       await showFailureToast(new Error(`No note matching "${noteQuery}" was found.`), {
         title: "Could not find note",
