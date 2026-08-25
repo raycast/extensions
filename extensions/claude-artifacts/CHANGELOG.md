@@ -1,5 +1,12 @@
 # Claude Artifacts Changelog
 
+## [Tell You When Tracking Stops] - {PR_MERGE_DATE}
+
+- Added an **Artifact Tracking Is Off** row at the top of the list when the Claude Code hook is not registered — until now a list that had quietly stopped updating looked exactly like one that was up to date
+- Added a **Set Up Artifact Tracking** screen with a prompt you can paste into Claude Code to install and register the hook for you, instead of leaving you holding a JSON fragment with nowhere to put it
+- The same screen now backs the first-run empty state, so setup instructions no longer differ depending on how you got there
+- Renamed the Finder actions from **Reveal** to **Show**, matching the verb Raycast uses elsewhere
+
 ## [Open the Artifact Galleries] - 2026-08-03
 
 - Added **View Claude Code Artifacts** (⌘⇧O) and **View Claude Artifacts** (⌘⇧G), which open the two galleries on claude.ai

@@ -5,7 +5,9 @@ import { useMemo, useState } from "react";
 import { GalleryActionSection } from "./actions/gallery";
 import { RevealInFinderAction } from "./actions/reveal-in-finder";
 import { NoArtifactsEmptyView, NoMatchesEmptyView, emptyViewForProblem } from "./components/empty-views";
+import { HookNotRegisteredItem } from "./components/hook-setup";
 import { formatRelativeDate } from "./utils/dates";
+import { readHookStatus } from "./utils/hook-status";
 import { INDEX_PATH, readIndex } from "./utils/index-file";
 import type { Artifact, IndexResult } from "./types/artifact";
 
@@ -71,7 +73,7 @@ function ArtifactListItem({ artifact }: { artifact: Artifact }) {
           <GalleryActionSection />
           <ActionPanel.Section>
             <RevealInFinderAction
-              title="Reveal Index File"
+              title="Show Index File"
               // The FILE, not its directory — `showInFinder` selects the target
               // it is given, so passing the folder merely opened ~/.claude
               // without highlighting anything.
@@ -96,6 +98,18 @@ export default function Command() {
     initialData: EMPTY_RESULT,
     // `readIndex` resolves rather than rejecting, so a failure arrives as a
     // `problem` on the payload and is rendered as a specific empty state.
+    keepPreviousData: true,
+  });
+
+  // Kept as its own read rather than folded into `readIndex`: the index says
+  // what was recorded, this says whether recording still works, and a failure
+  // to answer the second question must not blank the first.
+  //
+  // Defaults to "registered" so the warning cannot flash during the first read
+  // — claiming recording is broken and then retracting it is worse than being
+  // a beat late.
+  const { data: hookStatus = "registered" } = useCachedPromise(readHookStatus, [], {
+    initialData: "registered" as const,
     keepPreviousData: true,
   });
 
@@ -137,6 +151,19 @@ export default function Command() {
       searchBarPlaceholder="Search artifacts by title or project…"
       searchBarAccessory={searchBarAccessory}
     >
+      {/*
+        Rendered above the results, and only when the index itself is readable —
+        a `problem` already routes to `NotInstalledEmptyView`, which tells the
+        same story at full size.
+
+        Emitting this item deliberately suppresses the no-artifacts and
+        no-matches empty views: both say some version of "publish an artifact
+        and it will appear here", which is a promise the extension cannot keep
+        while nothing is recording. A row that names the real reason beats an
+        empty state that misattributes it to having published nothing.
+      */}
+      {!problem && hookStatus === "missing" ? <HookNotRegisteredItem /> : null}
+
       {problem ? (
         emptyViewForProblem(problem, errorMessage)
       ) : artifacts.length === 0 ? (
