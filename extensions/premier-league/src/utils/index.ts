@@ -46,6 +46,24 @@ export const getFlagEmoji = (isoCode?: string) => {
     .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 };
 
+export const getCompetitionTimestamp = (date: Date): string => {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+
+  const part = (type: string) =>
+    parts.find((p) => p.type === type)?.value ?? "00";
+
+  return `${part("year")}-${part("month")}-${part("day")} ${part("hour")}:${part("minute")}:${part("second")}`;
+};
+
 export const getKickoffDate = (str: string, tz: string = "GMT"): Date =>
   new Date(`${str}${tz === "BST" ? "+01:00" : "+00:00"}`);
 

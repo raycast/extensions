@@ -1,6 +1,5 @@
 import { showFailureToast } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { formatISO } from "date-fns";
 import {
   Club,
   Content,
@@ -26,6 +25,7 @@ import {
   TeamForm,
 } from "../types";
 import { competitions } from "../components/searchbar_competition";
+import { getCompetitionTimestamp } from "../utils";
 
 const epl = competitions[0].value;
 
@@ -144,7 +144,7 @@ export const getUpcomingMatchweek = async (
   season: string,
   comp: string = "8",
 ): Promise<number | undefined> => {
-  const today = formatISO(new Date(), { representation: "date" });
+  const now = getCompetitionTimestamp(new Date());
 
   const config: AxiosRequestConfig = {
     method: "get",
@@ -154,7 +154,7 @@ export const getUpcomingMatchweek = async (
       season,
       _sort: "kickoff:asc",
       _limit: 1,
-      [`kickoff>${today}`]: "",
+      [`kickoff>${now}`]: "",
     },
   };
 
