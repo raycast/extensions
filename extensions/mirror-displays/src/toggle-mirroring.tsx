@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
-import { runMirrorAction, MirrorDirection } from "./lib/mirror";
+import { runMirrorAction } from "./lib/mirror";
 
 export default async function Command() {
-  const { defaultToggleDirection } = getPreferenceValues<{ defaultToggleDirection: MirrorDirection }>();
+  const { defaultToggleDirection } = getPreferenceValues<Preferences>();
   await runMirrorAction("toggle", defaultToggleDirection);
 }
