@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
-import { rm } from "node:fs/promises";
-import { exportBackup, importBackup } from "./backup.ts";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { importBackup, writeBackup } from "./backup.ts";
 import { generateCode, parseInput } from "./totp.ts";
 
 const timestamps = [59, 1_111_111_109, 1_111_111_111, 1_234_567_890, 2_000_000_000, 20_000_000_000];
@@ -23,12 +25,14 @@ assert.deepEqual(account, {
   period: 45,
 });
 
-const path = await exportBackup([{ id: "demo", ...account }], "passphrase");
+const directory = await mkdtemp(join(tmpdir(), "totp-test-"));
+const path = join(directory, "backup.json");
 try {
+  await writeBackup([{ id: "demo", ...account }], "passphrase", path);
   assert.deepEqual(await importBackup(path, "passphrase"), [{ id: "demo", ...account }]);
   await assert.rejects(importBackup(path, "wrong-passphrase"));
 } finally {
-  await rm(path, { force: true });
+  await rm(directory, { recursive: true, force: true });
 }
 
 console.log("TOTP checks passed");
