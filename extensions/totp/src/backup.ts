@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { Account } from "./accounts.ts";
@@ -14,6 +14,13 @@ type BackupFile = {
 };
 
 export async function exportBackup(accounts: Account[], password: string): Promise<string> {
+  const filename = `totp-backup-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+  const path = join(homedir(), "Downloads", filename);
+  await writeBackup(accounts, password, path);
+  return path;
+}
+
+export async function writeBackup(accounts: Account[], password: string, path: string): Promise<void> {
   if (password.length < 8) throw new Error("Passphrase must be at least 8 characters.");
 
   const salt = randomBytes(16);
@@ -28,10 +35,9 @@ export async function exportBackup(accounts: Account[], password: string): Promi
     tag: cipher.getAuthTag().toString("base64"),
     ciphertext: ciphertext.toString("base64"),
   };
-  const filename = `totp-backup-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
-  const path = join(homedir(), "Downloads", filename);
-  await writeFile(path, JSON.stringify(backup), { encoding: "utf8", mode: 0o600 });
-  return path;
+  const temporaryPath = `${path}.tmp`;
+  await writeFile(temporaryPath, JSON.stringify(backup), { encoding: "utf8", mode: 0o600 });
+  await rename(temporaryPath, path);
 }
 
 export async function importBackup(path: string, password: string): Promise<Account[]> {
