@@ -5,7 +5,7 @@ Ever lost your cursor in the vast expanse of your multi-monitor setup? 😥 One 
 It calls a small Swift app that dims the entire screen except for a spotlight around the cursor.
 
 ### Default mode
-![where is my cursor default mode](metadata/default.png)
+![where is my cursor default mode](images/default.png)
 
 ## ✨ Features
 
@@ -62,10 +62,10 @@ This extension works completely offline and does not collect, store, or transmit
 ## 🖼️ Examples
 
 ### Presentation mode
-![where is my cursor presentation mode](metadata/presentation.png)
+![where is my cursor presentation mode](images/presentation.png)
 
 ### Custom mode
-![where is my cursor custom mode](metadata/custom.png)
+![where is my cursor custom mode](images/custom.png)
 
 ---
 
