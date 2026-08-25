@@ -12,7 +12,6 @@ import { useFetch } from "@raycast/utils";
 import { useEffect } from "react";
 import {
   CheckResult,
-  Preferences,
   categoryNames,
   checkUrl,
   parseCheckResponse,

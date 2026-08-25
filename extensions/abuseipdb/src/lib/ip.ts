@@ -1,8 +1,8 @@
 import { isIP } from "net";
 
-/** Strip wrapping punctuation and a trailing port from a token. */
+/** Strip wrapping punctuation, sentence punctuation and a trailing port from a token. */
 function normalise(token: string): string {
-  const trimmed = token.trim().replace(/^[<("'\s]+|[>)"'\s,;]+$/g, "");
+  const trimmed = token.trim().replace(/^[<("'\s]+|[>)"'\s,;.!?]+$/g, "");
 
   // [2001:db8::1]:443 -> 2001:db8::1
   const bracketed = trimmed.match(/^\[([^\]]+)\](?::\d+)?$/);

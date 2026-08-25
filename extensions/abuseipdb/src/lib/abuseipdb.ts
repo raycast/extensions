@@ -2,12 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 export const CHECK_ENDPOINT = "https://api.abuseipdb.com/api/v2/check";
 
-export type Preferences = {
-  apiKey: string;
-  maxAgeInDays?: string;
-  verbose?: boolean;
-};
-
 export type AbuseReport = {
   reportedAt: string;
   comment: string;
