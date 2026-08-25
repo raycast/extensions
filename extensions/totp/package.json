@@ -26,6 +26,22 @@
   "icon": "totp-icon.png",
   "categories": ["Security"],
   "platforms": ["macOS"],
+  "preferences": [
+    {
+      "name": "backupDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Automatic Backup Directory",
+      "description": "Write an encrypted totp-backup.json after every account change."
+    },
+    {
+      "name": "backupPassphrase",
+      "type": "password",
+      "required": false,
+      "title": "Automatic Backup Passphrase",
+      "description": "Used to encrypt automatic backups. Leave both backup preferences empty to disable automatic backups."
+    }
+  ],
   "commands": [
       {
         "name": "index",
