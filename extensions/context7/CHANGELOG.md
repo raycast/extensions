@@ -1,6 +1,6 @@
 # Context7
 
-## [Raycast API 2.0] - {PR_MERGE_DATE}
+## [Raycast API 2.0] - 2026-08-25
 
 - Updated to Raycast API 2.0
 - Updated dependencies
