@@ -16,12 +16,14 @@
     {
       "name": "manage-items",
       "title": "Manage Items",
+      "subtitle": "Agentcfg",
       "description": "Browse items, see per-target install state, and toggle, install, or sync directly.",
       "mode": "view"
     },
     {
       "name": "sync-configs",
       "title": "Sync Configs",
+      "subtitle": "Agentcfg",
       "description": "Run agentcfg sync across all configured agent targets.",
       "mode": "no-view"
     }
