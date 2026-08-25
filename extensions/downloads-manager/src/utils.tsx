@@ -257,20 +257,34 @@ const finderTrashScript = `on run argv
   return trashedIndexes as string
 end run`;
 
+function getTrashedPathsFromFinderStdout(filePaths: string[], stdout: string): string[] {
+  return stdout
+    .trim()
+    .split(",")
+    .map((index) => Number.parseInt(index.trim(), 10))
+    .filter((index) => Number.isInteger(index) && index > 0 && index <= filePaths.length)
+    .map((index) => filePaths[index - 1]);
+}
+
 function trashWithFinder(filePaths: string[]): Promise<string[]> {
   return new Promise((resolve, reject) => {
     execFile("/usr/bin/osascript", ["-e", finderTrashScript, ...filePaths], (error, stdout) => {
-      if (error) {
+      const reportedPaths = getTrashedPathsFromFinderStdout(filePaths, stdout);
+
+      if (!error) {
+        resolve(reportedPaths);
+        return;
+      }
+
+      // osascript can exit non-zero after Finder has already moved some items.
+      // Recover those so callers can drop stale list entries instead of showing a total failure.
+      const trashedPaths = [...new Set([...reportedPaths, ...filePaths.filter((path) => !existsSync(path))])];
+      if (trashedPaths.length === 0) {
         reject(error);
         return;
       }
 
-      const trashedIndexes = stdout
-        .trim()
-        .split(",")
-        .map((index) => Number.parseInt(index.trim(), 10))
-        .filter((index) => Number.isInteger(index) && index > 0 && index <= filePaths.length);
-      resolve(trashedIndexes.map((index) => filePaths[index - 1]));
+      resolve(trashedPaths);
     });
   });
 }
@@ -295,7 +309,16 @@ export async function moveToTrash(paths: string | string[]): Promise<MoveToTrash
     // Finder understands the file provider location and moves those items to Trash correctly.
     const remainingPaths = filePaths.filter(existsSync);
     const trashedPaths = filePaths.filter((path) => !existsSync(path));
-    const finderTrashedPaths = remainingPaths.length > 0 ? await trashWithFinder(remainingPaths) : [];
+
+    let finderTrashedPaths: string[] = [];
+    try {
+      finderTrashedPaths = remainingPaths.length > 0 ? await trashWithFinder(remainingPaths) : [];
+    } catch (finderError) {
+      if (trashedPaths.length === 0) {
+        throw finderError;
+      }
+    }
+
     const allTrashedPaths = [...trashedPaths, ...finderTrashedPaths];
     return {
       trashedPaths: allTrashedPaths,
