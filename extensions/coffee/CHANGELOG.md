@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-08-25
 
 - Add support for Windows platform
 - Add app picker support to the "Caffeinate While" command on Windows
