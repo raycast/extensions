@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Fixed team field on issue creation] - {PR_MERGE_DATE}
+## [Fixed team field on issue creation] - 2026-08-25
 
 - Fixed the Team field showing up under "Unknown fields" (and not rendering as a dropdown) on the create-issue form for sites using the newer Atlassian Teams field (`atlassian-team`), so a team can now be selected and set on new issues
 - Added support for both Team field types: the Atlassian Teams platform field (`atlassian-team`) and the Advanced Roadmaps Team field (`rm-teams-custom-field-team`), both sent as a plain-string Team ID (an `{ id }` object is silently dropped)
