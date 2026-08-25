@@ -155,7 +155,7 @@ export function getCustomFieldsForDetail(issue?: IssueDetail | null) {
   return { customMarkdownFields, customMetadataFields };
 }
 
-const supportedCustomFieldsForCreateIssue = [
+const supportedCustomFieldsForCreateIssue: CustomFieldSchema[] = [
   CustomFieldSchema.datePicker,
   CustomFieldSchema.dateTime,
   CustomFieldSchema.epicLabel,

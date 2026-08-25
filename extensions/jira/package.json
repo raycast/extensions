@@ -602,7 +602,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
-    "test": "node --import tsx --test \"test/*.test.ts\""
+    "test": "node --test \"test/*.test.ts\""
   },
   "platforms": [
     "macOS",

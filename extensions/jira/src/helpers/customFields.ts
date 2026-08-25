@@ -5,26 +5,28 @@ import { markdownToAdf } from "marklassian";
 // unit-tested with Node's built-in `node:test` runner (see `test/customFields.test.ts`) without
 // needing the Raycast runtime.
 
-export enum CustomFieldSchema {
-  unknown = "unknown",
-  datePicker = "com.atlassian.jira.plugin.system.customfieldtypes:datepicker",
-  dateTime = "com.atlassian.jira.plugin.system.customfieldtypes:datetime",
-  epicLabel = "com.pyxis.greenhopper.jira:gh-epic-label",
-  epicLink = "com.pyxis.greenhopper.jira:gh-epic-link",
-  float = "com.atlassian.jira.plugin.system.customfieldtypes:float",
-  labels = "com.atlassian.jira.plugin.system.customfieldtypes:labels",
-  multiSelect = "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
-  multiCheckboxes = "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
-  radioButtons = "com.atlassian.jira.plugin.system.customfieldtypes:radiobuttons",
-  select = "com.atlassian.jira.plugin.system.customfieldtypes:select",
-  sprint = "com.pyxis.greenhopper.jira:gh-sprint",
-  storyPointEstimate = "com.pyxis.greenhopper.jira:jsw-story-points",
-  textarea = "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
-  textfield = "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
-  userPicker = "com.atlassian.jira.plugin.system.customfieldtypes:userpicker",
-  team = "com.atlassian.teams:rm-teams-custom-field-team",
-  atlassianTeam = "com.atlassian.jira.plugin.system.customfieldtypes:atlassian-team",
-}
+export const CustomFieldSchema = {
+  unknown: "unknown",
+  datePicker: "com.atlassian.jira.plugin.system.customfieldtypes:datepicker",
+  dateTime: "com.atlassian.jira.plugin.system.customfieldtypes:datetime",
+  epicLabel: "com.pyxis.greenhopper.jira:gh-epic-label",
+  epicLink: "com.pyxis.greenhopper.jira:gh-epic-link",
+  float: "com.atlassian.jira.plugin.system.customfieldtypes:float",
+  labels: "com.atlassian.jira.plugin.system.customfieldtypes:labels",
+  multiSelect: "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+  multiCheckboxes: "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+  radioButtons: "com.atlassian.jira.plugin.system.customfieldtypes:radiobuttons",
+  select: "com.atlassian.jira.plugin.system.customfieldtypes:select",
+  sprint: "com.pyxis.greenhopper.jira:gh-sprint",
+  storyPointEstimate: "com.pyxis.greenhopper.jira:jsw-story-points",
+  textarea: "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+  textfield: "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+  userPicker: "com.atlassian.jira.plugin.system.customfieldtypes:userpicker",
+  team: "com.atlassian.teams:rm-teams-custom-field-team",
+  atlassianTeam: "com.atlassian.jira.plugin.system.customfieldtypes:atlassian-team",
+} as const;
+
+export type CustomFieldSchema = (typeof CustomFieldSchema)[keyof typeof CustomFieldSchema];
 
 export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unknown) {
   switch (fieldSchema) {
