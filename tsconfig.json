@@ -8,7 +8,7 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "jsx": "react-jsx",
+    "jsx": "react",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noUnusedLocals": true,
