@@ -7,9 +7,12 @@ import { walletPath, walletStatus, fetchFiles, purgePreviews } from "./utils";
 import { displayName, previewSource, primaryModifierLabel } from "./platform";
 import { useCardSorting } from "./hooks/useCardSorting";
 import { usePdfThumbnails } from "./hooks/usePdfThumbnails";
+import { useTooltipFields } from "./hooks/useTooltipFields";
 import { sortCards } from "./lib/sort";
 import { SORT_OPTIONS } from "./lib/sortPreference";
-import { Card, Pocket, Preferences, ThumbnailLayout } from "./types";
+import { cardTooltip } from "./lib/cardTooltip";
+import { TooltipFieldsView } from "./components/TooltipFieldsView";
+import { Card, Pocket, Preferences, ThumbnailLayout, TooltipField, UsageStats } from "./types";
 
 // Raycast maps "cmd" to the Windows key on Windows, so every custom shortcut has to
 // declare its Ctrl-based Windows counterpart explicitly.
@@ -38,6 +41,11 @@ const SHORTCUT_SORT: Keyboard.Shortcut = {
   Windows: { modifiers: ["ctrl", "shift"], key: "s" },
 };
 
+const SHORTCUT_CONFIGURE_TOOLTIP: Keyboard.Shortcut = {
+  macOS: { modifiers: ["cmd", "shift"], key: "t" },
+  Windows: { modifiers: ["ctrl", "shift"], key: "t" },
+};
+
 const MIN_COLUMNS = 1;
 const MAX_COLUMNS = 8;
 const DEFAULT_COLUMNS = 5;
@@ -54,6 +62,7 @@ export default function Command() {
     onError: noop,
   });
   const { sortMode, setSortMode, usage, markUsed, isSortLoaded } = useCardSorting(pockets);
+  const { fields: tooltipFields, reload: reloadTooltipFields, isTooltipFieldsLoaded } = useTooltipFields();
   const pdfThumbnails = usePdfThumbnails(pockets);
   const preferences = getPreferenceValues<Preferences>();
 
@@ -73,7 +82,7 @@ export default function Command() {
   return (
     <Grid
       columns={resolveColumns(preferences.gridColumns)}
-      isLoading={isLoading || !isSortLoaded}
+      isLoading={isLoading || !isSortLoaded || !isTooltipFieldsLoaded}
       {...layout}
       searchBarPlaceholder={`Search ${cardCount} Card${cardCount != 1 ? "s" : ""}`}
       searchBarAccessory={
@@ -108,7 +117,7 @@ export default function Command() {
         {sortCards(pocket.cards, sortMode, usage).map((card) => (
           <Grid.Item
             key={card.path}
-            content={cardContent(card, pdfThumbnails)}
+            content={cardContent(card, pdfThumbnails, usage, tooltipFields)}
             title={displayName(card.name)}
             keywords={[card.name]}
             actions={loadCardActionNodes(card)}
@@ -159,6 +168,13 @@ export default function Command() {
             />
           ))}
         </ActionPanel.Submenu>
+        <Action.Push
+          title="Configure Card Tooltip"
+          icon={Icon.Tag}
+          shortcut={SHORTCUT_CONFIGURE_TOOLTIP}
+          target={<TooltipFieldsView />}
+          onPop={reloadTooltipFields}
+        />
         <Action.ShowInFinder title="Edit Wallet" shortcut={SHORTCUT_EDIT_WALLET} path={walletPath} />
         <Action
           title="Change Wallet Directory"
@@ -243,9 +259,15 @@ function pocketNames(pockets: Pocket[] | undefined): string[] {
   return (pockets ?? []).map((pocket) => pocket.name).filter((name): name is string => name !== undefined);
 }
 
-function cardContent(card: Card, pdfThumbnails: Record<string, string>) {
+function cardContent(
+  card: Card,
+  pdfThumbnails: Record<string, string>,
+  usage: UsageStats,
+  tooltipFields: TooltipField[]
+) {
   const preview = card.preview ?? pdfThumbnails[card.path];
-  return preview ? previewSource(preview) : { fileIcon: card.path };
+  const value = preview ? previewSource(preview) : { fileIcon: card.path };
+  return { value, tooltip: cardTooltip(card, tooltipFields, usage) };
 }
 
 /** "inset" reproduces the original look: the image centred in its cell with padding around it. */

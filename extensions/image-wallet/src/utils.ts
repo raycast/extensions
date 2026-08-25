@@ -1,5 +1,6 @@
 import { Toast, environment, getPreferenceValues, openExtensionPreferences, showToast } from "@raycast/api";
 import { runJxa } from "run-jxa";
+import { imageSize } from "image-size";
 
 import { basename, extname, join } from "path";
 import { execFile } from "child_process";
@@ -9,6 +10,7 @@ import * as fs from "fs";
 import { Pocket, Card, Preferences, WalletStatus } from "./types";
 import { isWindows } from "./platform";
 import { purgePdfThumbnails } from "./lib/pdfThumbnail";
+import { loadTooltipFields } from "./lib/tooltipFields";
 
 const execFileAsync = promisify(execFile);
 
@@ -82,8 +84,9 @@ export async function fetchFiles(): Promise<Pocket[]> {
 
   // Guards against symlink cycles, which recursion into linked directories makes reachable.
   const visitedDirectories = new Set<string>();
+  const wantsDimensions = (await loadTooltipFields()).includes("dimensions");
 
-  await collectPockets(walletPath, undefined, pockets, visitedDirectories, true);
+  await collectPockets(walletPath, undefined, pockets, visitedDirectories, wantsDimensions, true);
 
   // The Wallet root's own Cards come first, then Pockets by path so parents precede children.
   return pockets.sort((a, b) => {
@@ -103,6 +106,7 @@ async function collectPockets(
   pocketName: string | undefined,
   pockets: Pocket[],
   visitedDirectories: Set<string>,
+  wantsDimensions: boolean,
   isRoot = false
 ): Promise<void> {
   let realPath: string;
@@ -129,7 +133,7 @@ async function collectPockets(
 
   const visibleEntries = entries.filter((entry) => !entry.name.startsWith("."));
 
-  const cards = await loadPocketCards(dir, visibleEntries);
+  const cards = await loadPocketCards(dir, visibleEntries, wantsDimensions);
   if (cards.length > 0) pockets.push({ name: pocketName, cards });
 
   for (const entry of visibleEntries) {
@@ -149,12 +153,13 @@ async function collectPockets(
       entryPath,
       pocketName ? `${pocketName}/${entry.name}` : entry.name,
       pockets,
-      visitedDirectories
+      visitedDirectories,
+      wantsDimensions
     );
   }
 }
 
-async function loadPocketCards(dir: string, entries: fs.Dirent[]): Promise<Card[]> {
+async function loadPocketCards(dir: string, entries: fs.Dirent[], wantsDimensions: boolean): Promise<Card[]> {
   const cardArr: Card[] = [];
 
   await Promise.all(
@@ -172,7 +177,8 @@ async function loadPocketCards(dir: string, entries: fs.Dirent[]): Promise<Card[
         // If we can't read the file stats, try to still include it if it's an image
         // If it's an image file, include it even if we can't get stats
         if (imageExts.includes(fileExt)) {
-          cardArr.push(buildCard(fileName, filePath, fileExt, filePath));
+          const dimensions = wantsDimensions ? readDimensions(filePath) : undefined;
+          cardArr.push(buildCard(fileName, filePath, fileExt, filePath, undefined, dimensions));
           return;
         }
 
@@ -189,16 +195,27 @@ async function loadPocketCards(dir: string, entries: fs.Dirent[]): Promise<Card[
         previewPath = filePath;
       }
 
+      // The video preview frame is captured at the source video's native resolution (no
+      // scaling), so reading its header gives the video's own pixel dimensions for free.
+      const dimensions = wantsDimensions ? readDimensions(previewPath) : undefined;
+
       // PDFs deliberately get no preview here: they are rendered asynchronously by
       // usePdfThumbnails so a slow PDFium pass never blocks the grid.
-      cardArr.push(buildCard(fileName, filePath, fileExt, previewPath, fileStats));
+      cardArr.push(buildCard(fileName, filePath, fileExt, previewPath, fileStats, dimensions));
     })
   );
 
   return cardArr;
 }
 
-function buildCard(name: string, path: string, fileExt: string, preview: string | undefined, stats?: fs.Stats): Card {
+function buildCard(
+  name: string,
+  path: string,
+  fileExt: string,
+  preview: string | undefined,
+  stats?: fs.Stats,
+  dimensions?: { width: number; height: number }
+): Card {
   return {
     name,
     path,
@@ -207,7 +224,33 @@ function buildCard(name: string, path: string, fileExt: string, preview: string 
     size: stats?.size ?? 0,
     mtimeMs: stats?.mtimeMs ?? 0,
     createdAtMs: stats?.birthtimeMs ?? 0,
+    width: dimensions?.width,
+    height: dimensions?.height,
   };
+}
+
+// 1 MB comfortably covers the header/metadata block of every format image-size supports,
+// so reading it stays cheap even for large originals instead of loading the whole file.
+const DIMENSION_READ_BYTES = 1024 * 1024;
+
+/** Reads only the start of the file, so this stays cheap even for large images or video frames. */
+function readDimensions(path: string | undefined): { width: number; height: number } | undefined {
+  if (!path) return undefined;
+
+  let fd: number | undefined;
+  try {
+    fd = fs.openSync(path, "r");
+    const buffer = Buffer.alloc(Math.min(DIMENSION_READ_BYTES, fs.fstatSync(fd).size));
+    fs.readSync(fd, buffer, 0, buffer.length, 0);
+
+    const { width, height } = imageSize(buffer);
+    return width && height ? { width, height } : undefined;
+  } catch (e) {
+    // Unsupported or unrecognized format (e.g. many RAW extensions) — just skip dimensions.
+    return undefined;
+  } finally {
+    if (fd !== undefined) fs.closeSync(fd);
+  }
 }
 
 async function videoPreviewFor(dir: string, item: string, filePath: string): Promise<string | undefined> {

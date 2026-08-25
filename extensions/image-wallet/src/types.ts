@@ -13,9 +13,15 @@ export type Card = {
   size: number;
   mtimeMs: number;
   createdAtMs: number;
+  /** Pixel dimensions, when cheaply readable from the file's (or video preview's) header. */
+  width?: number;
+  height?: number;
 };
 
 export type ThumbnailLayout = "inset" | "contain" | "fill";
+
+/** Extra facts a Card's tooltip can show alongside its name, in the user's chosen order. */
+export type TooltipField = "date-created" | "date-modified" | "size" | "usage" | "dimensions";
 
 export interface Preferences {
   walletDirectory: string;
