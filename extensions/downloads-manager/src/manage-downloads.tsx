@@ -181,8 +181,18 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     }
 
     try {
-      await moveToTrash(paths);
-      handleTrash(paths);
+      const { trashedPaths, failedPaths } = await moveToTrash(paths);
+      handleTrash(trashedPaths);
+
+      if (failedPaths.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Some Items Could Not Be Moved to Trash",
+          message: `${failedPaths.length} item${failedPaths.length === 1 ? "" : "s"} could not be moved`,
+        });
+        return;
+      }
+
       await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
     } catch (error) {
       await showFailureToast(error, { title: "Move to Trash Failed" });

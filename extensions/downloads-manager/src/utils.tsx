@@ -243,26 +243,48 @@ async function showDeleteFeedback(feedback: DeleteFeedback, title: string, style
 }
 
 const finderTrashScript = `on run argv
+  set trashedIndexes to {}
+  set itemIndex to 1
   repeat with filePath in argv
-    set targetFile to POSIX file (filePath as text) as alias
-    tell application "Finder" to delete targetFile
+    try
+      set targetFile to POSIX file (filePath as text) as alias
+      tell application "Finder" to delete targetFile
+      set end of trashedIndexes to itemIndex
+    end try
+    set itemIndex to itemIndex + 1
   end repeat
+  return trashedIndexes as string
 end run`;
 
-function trashWithFinder(filePaths: string[]): Promise<void> {
+function trashWithFinder(filePaths: string[]): Promise<string[]> {
   return new Promise((resolve, reject) => {
-    execFile("/usr/bin/osascript", ["-e", finderTrashScript, ...filePaths], (error) => {
-      if (error) reject(error);
-      else resolve();
+    execFile("/usr/bin/osascript", ["-e", finderTrashScript, ...filePaths], (error, stdout) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      const trashedIndexes = stdout
+        .trim()
+        .split(",")
+        .map((index) => Number.parseInt(index.trim(), 10))
+        .filter((index) => Number.isInteger(index) && index > 0 && index <= filePaths.length);
+      resolve(trashedIndexes.map((index) => filePaths[index - 1]));
     });
   });
 }
 
-export async function moveToTrash(paths: string | string[]): Promise<void> {
+export type MoveToTrashResult = {
+  trashedPaths: string[];
+  failedPaths: string[];
+};
+
+export async function moveToTrash(paths: string | string[]): Promise<MoveToTrashResult> {
   const filePaths = Array.isArray(paths) ? paths : [paths];
 
   try {
     await trash(paths);
+    return { trashedPaths: filePaths, failedPaths: [] };
   } catch (error) {
     if (process.platform !== "darwin") {
       throw error;
@@ -271,9 +293,13 @@ export async function moveToTrash(paths: string | string[]): Promise<void> {
     // Raycast's Trash API can fail for items in an iCloud Drive-backed Downloads folder.
     // Finder understands the file provider location and moves those items to Trash correctly.
     const remainingPaths = filePaths.filter(existsSync);
-    if (remainingPaths.length > 0) {
-      await trashWithFinder(remainingPaths);
-    }
+    const trashedPaths = filePaths.filter((path) => !existsSync(path));
+    const finderTrashedPaths = remainingPaths.length > 0 ? await trashWithFinder(remainingPaths) : [];
+    const allTrashedPaths = [...trashedPaths, ...finderTrashedPaths];
+    return {
+      trashedPaths: allTrashedPaths,
+      failedPaths: filePaths.filter((path) => !allTrashedPaths.includes(path)),
+    };
   }
 }
 
@@ -292,7 +318,10 @@ export async function deleteFileOrFolder(
 
   if (deletionBehavior === "trash") {
     try {
-      await moveToTrash(filePath);
+      const { failedPaths } = await moveToTrash(filePath);
+      if (failedPaths.length > 0) {
+        throw new Error(`Could not move ${failedPaths.join(", ")} to Trash`);
+      }
     } catch (error) {
       await showFailureToast(error, { title: "Move to Trash Failed" });
       return;

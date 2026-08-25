@@ -2,7 +2,7 @@
 
 ## [Fix download management reliability] - {PR_MERGE_DATE}
 
-- Fixed moving downloads to Trash on macOS when the Downloads folder is backed by iCloud Drive ([#29951](https://github.com/raycast/extensions/issues/29951), [#30503](https://github.com/raycast/extensions/issues/30503)).
+- Fixed moving downloads to Trash on macOS when the Downloads folder is backed by iCloud Drive, including keeping the list accurate when only some selected items move successfully ([#29951](https://github.com/raycast/extensions/issues/29951), [#30503](https://github.com/raycast/extensions/issues/30503)).
 - Reduced memory usage while loading large Downloads folders and generating text previews to prevent worker out-of-memory crashes ([#24383](https://github.com/raycast/extensions/issues/24383)).
 
 ## [Add Copy Path action] - 2026-05-18
