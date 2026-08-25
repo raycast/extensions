@@ -13,10 +13,19 @@ export default function StartTimer() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    getState().then((state) => {
-      setExisting(state);
-      setIsLoading(false);
-    });
+    getState()
+      .then((state) => {
+        setExisting(state);
+      })
+      .catch(() => {
+        void showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load timer state",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   async function handleSubmit(values: FormValues) {

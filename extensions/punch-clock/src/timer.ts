@@ -17,14 +17,58 @@ export interface TimerState {
   running: boolean;
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function normalizeState(value: unknown): TimerState | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const candidate = value as Record<string, unknown>;
+
+  if (
+    !isFiniteNumber(candidate.totalMinutes) ||
+    !isFiniteNumber(candidate.breakMinutes) ||
+    !isFiniteNumber(candidate.startTime) ||
+    !isFiniteNumber(candidate.endTime)
+  ) {
+    return undefined;
+  }
+
+  const stoppedTime =
+    candidate.stoppedTime === null ? null : isFiniteNumber(candidate.stoppedTime) ? candidate.stoppedTime : undefined;
+  // stoppedTime must be either null or a finite number; anything else (e.g.
+  // a stringified value from corrupted storage) makes the state untrustworthy.
+  if (stoppedTime === undefined && candidate.stoppedTime !== undefined) return undefined;
+
+  if (typeof candidate.running !== "boolean") return undefined;
+
+  return {
+    totalMinutes: candidate.totalMinutes,
+    breakMinutes: candidate.breakMinutes,
+    startTime: candidate.startTime,
+    endTime: candidate.endTime,
+    stoppedTime: stoppedTime ?? null,
+    running: candidate.running,
+  };
+}
+
 export async function getState(): Promise<TimerState | undefined> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
   if (!raw) return undefined;
+  let parsed: unknown;
   try {
-    return JSON.parse(raw) as TimerState;
+    parsed = JSON.parse(raw);
   } catch {
+    await clearState();
     return undefined;
   }
+  const state = normalizeState(parsed);
+  if (!state) {
+    // Corrupted/outdated state; clear it so we don't keep tripping over it.
+    await clearState();
+    return undefined;
+  }
+  return state;
 }
 
 export async function setState(state: TimerState): Promise<void> {
@@ -83,8 +127,8 @@ export function formatClock(date: number | Date): string {
 
 /** Formats a duration (ms) as H:MM:SS, or -H:MM:SS if negative. */
 export function formatDuration(ms: number): string {
-  const negative = ms < 0;
-  const abs = Math.abs(Math.round(ms / 1000));
+  const abs = ms >= 0 ? Math.ceil(ms / 1000) : Math.floor(-ms / 1000);
+  const negative = ms < 0 && abs > 0;
   const hours = Math.floor(abs / 3600);
   const minutes = Math.floor((abs % 3600) / 60);
   const seconds = abs % 60;
