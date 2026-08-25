@@ -1,6 +1,6 @@
 # Sonarr Changelog
 
-## [Second Instance and Windows Connection Fix] - {PR_MERGE_DATE}
+## [Second Instance and Windows Connection Fix] - 2026-08-25
 
 ### Added
 
