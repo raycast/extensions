@@ -22,7 +22,7 @@ Closing the progress toast does not stop anything — it only hides the toast, a
 
 ## Setup
 
-At least one conversion engine must be installed. Run **Setup Conversion Engines** to see which engines were detected, pick a preferred engine per file type, and get install help.
+At least one conversion engine must be installed. Run **Setup Conversion Engines** to see which engines were detected and get install help. Pick a preferred engine per file type in the extension preferences.
 
 Keynote, Pages, and Numbers are free on the Mac App Store. For the widest format support (including ODF formats like `.odp`, `.odt`, `.ods`), install LibreOffice:
 
@@ -46,8 +46,9 @@ iWork formats (`.key`, `.pages`, `.numbers`) require their own app — no other 
 
 ## Preferences
 
-- **Open when single file converted** — open the generated PDF immediately after converting a single file.
-- **Open when multiple files converted** — open all generated PDFs after a batch conversion finishes.
+- **Preferred Presentation / Document / Spreadsheet / Image Engine** — which app to try first for that file type (`Auto` uses the format-native engine).
+- **Open After Single Convert** — open the generated PDF immediately after converting a single file.
+- **Open After Batch Convert** — open all generated PDFs after a batch conversion finishes.
 
 ## Troubleshooting
 

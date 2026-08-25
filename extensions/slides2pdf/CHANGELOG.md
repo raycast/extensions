@@ -10,4 +10,4 @@
 - Everything runs on-device — no cloud service, no upload, no account
 - Live progress in the toast during batch conversions (current file and x/y counter)
 - Stop Conversion command ends a batch after the file it is working on
-- Setup command shows detected engines and lets you pick a preferred engine per file type
+- Setup command shows detected engines and install help; preferred engine per file type is set in preferences

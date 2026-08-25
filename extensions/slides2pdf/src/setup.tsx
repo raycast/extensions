@@ -1,13 +1,5 @@
-import { List, Icon, Color, Action, ActionPanel, Clipboard } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { detectBackends, selectBackendForFile, Backend, BackendType } from "./utils/backends";
-import {
-  DEFAULT_PREFERENCES,
-  loadPreferences,
-  setPreference,
-  Preferences,
-  PreferredCategory,
-} from "./utils/preferences";
+import { List, Icon, Color, Action, ActionPanel, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { detectBackends, selectBackendForFile, BackendType } from "./utils/backends";
 
 interface BackendMeta {
   label: string;
@@ -61,68 +53,63 @@ const BACKEND_META: Record<BackendType, BackendMeta> = {
   },
 };
 
+type EnginePrefKey = "preferredPresentation" | "preferredDocument" | "preferredSpreadsheet" | "preferredImage";
+
 const GROUPS: {
   title: string;
   types: BackendType[];
   repExt: string;
-  prefLabel: string;
-  category: PreferredCategory;
+  prefKey: EnginePrefKey;
 }[] = [
   {
     title: "Presentations  ·  .pptx  .ppt  .key  .odp",
     types: ["powerpoint", "keynote", "libreoffice"],
     repExt: ".pptx",
-    prefLabel: "Presentations",
-    category: "presentation",
+    prefKey: "preferredPresentation",
   },
   {
     title: "Documents  ·  .docx  .doc  .pages  .odt  .rtf",
     types: ["word", "pages", "libreoffice"],
     repExt: ".docx",
-    prefLabel: "Documents",
-    category: "document",
+    prefKey: "preferredDocument",
   },
   {
     title: "Spreadsheets  ·  .xlsx  .xls  .numbers  .ods  .csv",
     types: ["excel", "numbers", "libreoffice"],
     repExt: ".xlsx",
-    prefLabel: "Spreadsheets",
-    category: "spreadsheet",
+    prefKey: "preferredSpreadsheet",
   },
   {
     title: "Images  ·  .jpg  .png  .heic  .tiff  .gif",
     types: ["sips", "libreoffice"],
     repExt: ".jpg",
-    prefLabel: "Images",
-    category: "image",
+    prefKey: "preferredImage",
   },
 ];
 
+function engineActions(type: BackendType, installUrl?: string) {
+  return (
+    <ActionPanel>
+      {installUrl && <Action.OpenInBrowser title={`Install ${BACKEND_META[type].label}`} url={installUrl} />}
+      {installUrl && type === "libreoffice" && (
+        <Action.CopyToClipboard title="Copy Homebrew Command" content="brew install --cask libreoffice" />
+      )}
+      <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+    </ActionPanel>
+  );
+}
+
 export default function Command() {
-  const [available, setAvailable] = useState<Backend[]>([]);
-  const [prefs, setPrefs] = useState<Preferences>(DEFAULT_PREFERENCES);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      setAvailable(detectBackends());
-      setPrefs(await loadPreferences());
-      setLoaded(true);
-    })();
-  }, []);
-
-  async function setPreferred(category: PreferredCategory, value: string) {
-    await setPreference(category, value);
-    setPrefs((prev) => ({ ...prev, [category]: value }));
-  }
+  const prefs = getPreferenceValues<Preferences>();
+  const available = detectBackends();
 
   return (
-    <List isLoading={!loaded}>
+    <List searchBarPlaceholder="Search Engines">
       {GROUPS.map((group) => {
-        const activeBackend = loaded ? selectBackendForFile(prefs[group.category], available, group.repExt) : null;
+        const activeBackend = selectBackendForFile(prefs[group.prefKey], available, group.repExt);
 
         return (
-          <List.Section key={group.category} title={group.title}>
+          <List.Section key={group.prefKey} title={group.title}>
             {group.types.map((type) => {
               const meta = BACKEND_META[type];
               const found = available.find((b) => b.type === type);
@@ -138,51 +125,17 @@ export default function Command() {
 
               return (
                 <List.Item
-                  key={`${group.category}-${type}`}
+                  key={`${group.prefKey}-${type}`}
                   title={meta.label}
                   subtitle={found ? found.path : meta.hint}
                   accessories={accessories}
-                  actions={
-                    <ActionPanel>
-                      {found ? (
-                        <>
-                          <Action
-                            title={`Set as Preferred for ${group.prefLabel}`}
-                            icon={isActive ? Icon.Checkmark : Icon.ArrowRight}
-                            onAction={() => setPreferred(group.category, type)}
-                          />
-                          {prefs[group.category] !== "auto" && (
-                            <Action
-                              title={`Reset ${group.prefLabel} to Auto`}
-                              icon={Icon.ArrowCounterClockwise}
-                              onAction={() => setPreferred(group.category, "auto")}
-                            />
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          {meta.installUrl && (
-                            <Action.OpenInBrowser title={`Install ${meta.label}`} url={meta.installUrl} />
-                          )}
-                          {type === "libreoffice" && (
-                            <Action
-                              title="Copy Homebrew Command"
-                              icon={Icon.Clipboard}
-                              onAction={() => Clipboard.copy("brew install --cask libreoffice")}
-                            />
-                          )}
-                        </>
-                      )}
-                    </ActionPanel>
-                  }
+                  actions={engineActions(type, found ? undefined : meta.installUrl)}
                 />
               );
             })}
           </List.Section>
         );
       })}
-      {/* Text formats have exactly one engine (the bundled renderer) and no preference to pick,
-          so this section is informational only and stays outside the GROUPS loop. */}
       <List.Section title="Text & Code  ·  .json  .md  .xml  .log  source files …">
         <List.Item
           title={BACKEND_META.builtin.label}
@@ -191,6 +144,7 @@ export default function Command() {
             { tag: { value: "In Use", color: Color.Green } },
             { icon: { source: Icon.Checkmark, tintColor: Color.Green } },
           ]}
+          actions={engineActions("builtin")}
         />
       </List.Section>
     </List>

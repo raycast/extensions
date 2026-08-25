@@ -1,8 +1,7 @@
 import { showToast, Toast, getSelectedFinderItems, open, getPreferenceValues, closeMainWindow } from "@raycast/api";
 import fs from "fs";
 import path from "path";
-import { detectBackends, rankBackendsForFile, convertFile, fileCategory } from "./utils/backends";
-import { loadPreferences } from "./utils/preferences";
+import { detectBackends, rankBackendsForFile, convertFile, fileCategory, FileCategory } from "./utils/backends";
 import { beginConversion, endConversion, isStopRequested, markAlive } from "./utils/stop-signal";
 
 export default async function Command() {
@@ -23,10 +22,16 @@ export default async function Command() {
 
   await closeMainWindow().catch(() => {});
 
-  const prefs = getPreferenceValues<Preferences.ConvertToPdf>();
+  const prefs = getPreferenceValues<Preferences>();
   // detectBackends always includes the bundled text renderer, so there is at least one engine.
   const available = detectBackends();
-  const preferred = await loadPreferences();
+  const preferred: Record<FileCategory, string> = {
+    presentation: prefs.preferredPresentation,
+    document: prefs.preferredDocument,
+    spreadsheet: prefs.preferredSpreadsheet,
+    image: prefs.preferredImage,
+    other: "auto",
+  };
   const producedFiles: string[] = [];
   const errors: { base: string; message: string }[] = [];
   const skippedPdfs: string[] = [];
@@ -105,7 +110,6 @@ export default async function Command() {
       for (const backend of backends) {
         try {
           toast.message = `via ${backend.label}`;
-          console.log(`[slides2pdf] Converting "${base}" via ${backend.label}`);
           await convertFile(backend, src, outputPath);
           producedFiles.push(outputPath);
           converted = true;

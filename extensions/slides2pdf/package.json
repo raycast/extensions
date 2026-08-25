@@ -49,16 +49,116 @@
       "name": "setup",
       "title": "Setup Conversion Engines",
       "subtitle": "Slides2PDF",
-      "description": "Check which conversion engines are installed, pick a preferred engine per file type, and get install help.",
+      "description": "See which conversion engines are installed and get install help.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
+      "name": "preferredPresentation",
+      "type": "dropdown",
+      "title": "Preferred Presentation Engine",
+      "description": "Tried first for slides (.pptx, .ppt, .key, .odp). Falls back if missing or it fails.",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "Microsoft PowerPoint",
+          "value": "powerpoint"
+        },
+        {
+          "title": "Keynote",
+          "value": "keynote"
+        },
+        {
+          "title": "LibreOffice",
+          "value": "libreoffice"
+        }
+      ]
+    },
+    {
+      "name": "preferredDocument",
+      "type": "dropdown",
+      "title": "Preferred Document Engine",
+      "description": "Tried first for documents (.docx, .doc, .pages, .odt, .rtf). Falls back if missing or it fails.",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "Microsoft Word",
+          "value": "word"
+        },
+        {
+          "title": "Pages",
+          "value": "pages"
+        },
+        {
+          "title": "LibreOffice",
+          "value": "libreoffice"
+        }
+      ]
+    },
+    {
+      "name": "preferredSpreadsheet",
+      "type": "dropdown",
+      "title": "Preferred Spreadsheet Engine",
+      "description": "Tried first for spreadsheets (.xlsx, .xls, .numbers, .ods, .csv). Falls back if missing or it fails.",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "Microsoft Excel",
+          "value": "excel"
+        },
+        {
+          "title": "Numbers",
+          "value": "numbers"
+        },
+        {
+          "title": "LibreOffice",
+          "value": "libreoffice"
+        }
+      ]
+    },
+    {
+      "name": "preferredImage",
+      "type": "dropdown",
+      "title": "Preferred Image Engine",
+      "description": "Tried first for images (.jpg, .png, .heic, …). Falls back if missing or it fails.",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "sips",
+          "value": "sips"
+        },
+        {
+          "title": "LibreOffice",
+          "value": "libreoffice"
+        }
+      ]
+    },
+    {
       "name": "openAfterConvertSingle",
       "type": "checkbox",
-      "title": "Open when single file converted",
-      "label": "Open after single convert",
+      "title": "After Conversion",
+      "label": "Open After Single Convert",
       "description": "Open the generated PDF immediately when converting a single selected file.",
       "required": false,
       "default": false
@@ -66,8 +166,8 @@
     {
       "name": "openAfterConvertBatch",
       "type": "checkbox",
-      "title": "Open when multiple files converted",
-      "label": "Open after batch convert",
+      "title": "",
+      "label": "Open After Batch Convert",
       "description": "Open all generated PDFs after converting multiple selected files (after all conversions finish).",
       "required": false,
       "default": false
