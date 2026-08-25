@@ -1,6 +1,6 @@
 # Google Chrome Profiles Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-08-25
 
 - Add a destructive action to delete a Chrome profile and its local data from the profile list.
 - Allow deleting an inactive profile while Chrome remains open; the active profile must be closed first.
