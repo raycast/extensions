@@ -1,6 +1,6 @@
 import { getPreferenceValues, launchCommand, LaunchType, LocalStorage, updateCommandMetadata } from "@raycast/api";
 import { execFileSync } from "node:child_process";
-import { Schedule, startCaffeinate, getSchedule, stopCaffeinate, isCaffeinateRunning } from "./utils";
+import { Schedule, startCaffeinate, getSchedule, stopCaffeinate, isCaffeinateRunning, deviceName } from "./utils";
 
 const AUTO_CAFFEINATE_PID_KEY = "autoCaffeinateRaycastPid";
 const SCHEDULE_MONITOR_LAST_RUN_KEY = "scheduleMonitorLastRun";
@@ -110,8 +110,8 @@ export async function checkSchedule() {
 
 /**
  * Starts caffeination (indefinitely) once per Raycast session when the
- * "Start caffeination when Raycast starts" preference is enabled and the Mac
- * is not already caffeinated or covered by a schedule. Returns true when
+ * "Start caffeination when Raycast starts" preference is enabled and the
+ * computer is not already caffeinated or covered by a schedule. Returns true when
  * caffeination was started.
  *
  * Session detection is keyed off the Raycast launch time stored in
@@ -138,7 +138,7 @@ export async function maybeAutoCaffeinate(isScheduled?: boolean): Promise<boolea
   // Sleep/wake does not change the session ID, so it cannot trigger a false positive.
   if (currentSessionId === storedSessionId) return false;
 
-  await startCaffeinate({ menubar: true, status: true }, "Auto-caffeinating your Mac");
+  await startCaffeinate({ menubar: true, status: true }, `Auto-caffeinating your ${deviceName()}`);
   return true;
 }
 
