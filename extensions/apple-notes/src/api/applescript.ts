@@ -101,3 +101,63 @@ export async function getSelectedNote() {
     end tell
   `);
 }
+
+export async function appendNoteBody(id: string, content: string) {
+  return runAppleScript(
+    `
+    tell application "Notes"
+      set theNote to note id "${escapeDoubleQuotes(id)}"
+      set body of theNote to (body of theNote) & "${escapeDoubleQuotes(content)}"
+    end tell
+    `,
+    { timeout: 30_000 },
+  );
+}
+
+export async function moveNoteToFolder(id: string, folderName: string, accountName?: string) {
+  const escapedFolderName = escapeDoubleQuotes(folderName);
+  // Without an explicit account, search every account for a matching folder name.
+  const findFolder = accountName
+    ? `set theFolder to folder "${escapedFolderName}" of account "${escapeDoubleQuotes(accountName)}"`
+    : `
+      set theFolder to missing value
+      repeat with acc in accounts
+        try
+          set theFolder to folder "${escapedFolderName}" of acc
+          exit repeat
+        end try
+      end repeat
+      if theFolder is missing value then error "Folder \\"${escapedFolderName}\\" not found"
+    `;
+
+  return runAppleScript(
+    `
+    tell application "Notes"
+      set theNote to note id "${escapeDoubleQuotes(id)}"
+      ${findFolder}
+      move theNote to theFolder
+    end tell
+    `,
+    { timeout: 30_000 },
+  );
+}
+
+export async function getFolders() {
+  return runAppleScript(
+    `
+    tell application "Notes"
+      set output to {}
+      repeat with acc in accounts
+        repeat with fld in folders of acc
+          copy ((name of acc) & "|" & (name of fld)) to end of output
+        end repeat
+      end repeat
+      set AppleScript's text item delimiters to linefeed
+      set resultText to output as text
+      set AppleScript's text item delimiters to ""
+      return resultText
+    end tell
+    `,
+    { timeout: 30_000 },
+  );
+}
