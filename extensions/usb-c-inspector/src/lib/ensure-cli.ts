@@ -125,8 +125,9 @@ async function sleep(ms: number): Promise<void> {
 
 const LOCK_DIR_NAME = "whatcable-cli.lock";
 const LOCK_WAIT_MS = 5 * 60 * 1000;
-/** Shorter than LOCK_WAIT_MS so waiters can reap a reused-PID lock before they time out. */
+/** Heartbeat freshness window; shorter than LOCK_WAIT_MS so reused-PID locks are reaped in time. */
 const STALE_LOCK_MS = 2 * 60 * 1000;
+const HEARTBEAT_INTERVAL_MS = 10_000;
 
 function lockDirPath(): string {
   return path.join(environment.supportPath, LOCK_DIR_NAME);
@@ -134,6 +135,26 @@ function lockDirPath(): string {
 
 function ownerFilePath(pid: number): string {
   return path.join(lockDirPath(), `owner-${pid}`);
+}
+
+async function refreshLockHeartbeat(): Promise<void> {
+  const ownerPath = ownerFilePath(process.pid);
+  if (!existsSync(ownerPath)) {
+    return;
+  }
+  try {
+    await writeFile(ownerPath, `${process.pid}\n${Date.now()}\n`, "utf8");
+  } catch {
+    // Lock dir may have been removed; the next acquire/reap cycle recovers.
+  }
+}
+
+function startLockHeartbeat(): () => void {
+  const timer = setInterval(() => {
+    void refreshLockHeartbeat();
+  }, HEARTBEAT_INTERVAL_MS);
+  timer.unref();
+  return () => clearInterval(timer);
 }
 
 function isLockHeldError(code: string | undefined): boolean {
@@ -223,9 +244,11 @@ async function releaseInstallLock(): Promise<void> {
 
 async function withInstallLock<T>(fn: () => Promise<T>): Promise<T> {
   await acquireInstallLock();
+  const stopHeartbeat = startLockHeartbeat();
   try {
     return await fn();
   } finally {
+    stopHeartbeat();
     await releaseInstallLock();
   }
 }
