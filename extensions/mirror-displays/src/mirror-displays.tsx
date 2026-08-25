@@ -1,8 +1,8 @@
 import { List, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
-import { runMirrorAction, MirrorDirection } from "./lib/mirror";
+import { runMirrorAction } from "./lib/mirror";
 
 export default function Command() {
-  const { defaultToggleDirection } = getPreferenceValues<{ defaultToggleDirection: MirrorDirection }>();
+  const { defaultToggleDirection } = getPreferenceValues<Preferences>();
 
   return (
     <List isLoading={false}>
