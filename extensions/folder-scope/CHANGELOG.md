@@ -6,4 +6,5 @@
 - Finder-aware directory detection: selection, frontmost window, or configurable fallback.
 - Engine chain: bundled ripgrep (SHA-256-verified download) → system ripgrep → built-in Node.js engine.
 - Plain text and regex modes with smart-case matching.
+- Ignore-aware scanning in every engine, including `.gitignore` negation (`!`) patterns in the Node.js fallback.
 - Result actions: open file, jump to line in VS Code/Cursor/Zed/Sublime Text/Rider, reveal in Finder, copy path/line/context, session exclusions, parent-folder search.

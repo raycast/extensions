@@ -229,26 +229,36 @@ export function globMatches(glob: CompiledGlob, relativePath: string): boolean {
 export interface IgnoreRule {
   glob: CompiledGlob;
   dirOnly: boolean;
+  negated: boolean;
 }
 
 /**
  * Parses `.gitignore`-style content with the shared subset semantics: comments
- * and blank lines are skipped, and negation (`!`) rules are dropped rather
- * than approximated — a documented divergence from ripgrep.
+ * and blank lines are skipped; negation (`!`) rules are kept and resolved
+ * last-match-wins within one file (gitignore semantics). A `!` rule in a
+ * nested ignore file cannot un-ignore a path matched by a parent scope —
+ * a documented divergence from ripgrep.
  */
 export function parseIgnoreContent(content: string): IgnoreRule[] {
   const rules: IgnoreRule[] = [];
   for (const rawLine of content.split("\n")) {
-    const line = rawLine.trim();
-    if (line.length === 0 || line.startsWith("#") || line.startsWith("!")) continue;
+    let line = rawLine.trim();
+    if (line.length === 0 || line.startsWith("#")) continue;
+    const negated = line.startsWith("!");
+    if (negated) line = line.slice(1);
     const dirOnly = line.endsWith("/");
     const compiled = compileGlob(dirOnly ? line.slice(0, -1) : line);
-    if (compiled) rules.push({ glob: compiled, dirOnly });
+    if (compiled) rules.push({ glob: compiled, dirOnly, negated });
   }
   return rules;
 }
 
-/** `relativePath` must be relative to the directory holding the ignore file. */
+/** `relativePath` must be relative to the directory holding the ignore file. Last matching rule wins. */
 export function isIgnoredByRules(rules: IgnoreRule[], relativePath: string, isDirectory: boolean): boolean {
-  return rules.some((rule) => (isDirectory || !rule.dirOnly) && globMatches(rule.glob, relativePath));
+  let ignored = false;
+  for (const rule of rules) {
+    if (!isDirectory && rule.dirOnly) continue;
+    if (globMatches(rule.glob, relativePath)) ignored = !rule.negated;
+  }
+  return ignored;
 }

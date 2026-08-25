@@ -110,7 +110,7 @@ The following differences apply to the **Node.js fallback** when neither bundled
 * Regular expressions use the JavaScript regex syntax instead of ripgrep's Rust regex syntax.
 * Column numbers are UTF-16 based, while ripgrep reports byte offsets.
 * Glob support is limited to `*`, `**`, and `?`; `{a,b}` alternation and `[…]` classes are not supported.
-* Ignore-file support is limited to `.gitignore` and `.ignore`. Negation patterns (`!`) and ignore files above the search root are not supported.
+* Ignore-file support is limited to `.gitignore` and `.ignore`. Negation patterns (`!`) are resolved last-match-wins within each file, but a nested ignore file cannot un-ignore paths matched by a parent one, and ignore files above the search root are not read.
 * Files are decoded as UTF-8.
 * Multiline matches are reported using their first line.
 

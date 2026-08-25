@@ -167,12 +167,31 @@ test("root-anchored ignore rules match only at the root", () => {
   assert.equal(isIgnoredByRules(rules, "sub/.env", false), false);
 });
 
-test("parses ignore content, skipping comments, blanks, and negations", () => {
-  const rules = parseIgnoreContent("# yorum\n\nnode_modules/\n!keep.log\n*.log\n");
-  assert.equal(rules.length, 2);
+test("parses ignore content, skipping comments and blanks; negation is last-match-wins", () => {
+  const rules = parseIgnoreContent("# yorum\n\nnode_modules/\n*.log\n!keep.log\n");
+  assert.equal(rules.length, 3);
   assert.equal(isIgnoredByRules(rules, "debug.log", false), true);
   assert.equal(isIgnoredByRules(rules, "alt/debug.log", false), true);
+  assert.equal(isIgnoredByRules(rules, "keep.log", false), false);
   assert.equal(isIgnoredByRules(rules, "node_modules", true), true);
   assert.equal(isIgnoredByRules(rules, "node_modules", false), false);
   assert.equal(isIgnoredByRules(rules, "app.txt", false), false);
+});
+
+test("a later positive rule re-ignores a negated path", () => {
+  const rules = parseIgnoreContent("!keep.log\n*.log\n");
+  assert.equal(isIgnoredByRules(rules, "keep.log", false), true);
+});
+
+test("blanket * with extension re-includes keeps source files visible", () => {
+  // Regression: "ignore everything, re-include directories and source extensions"
+  // (Glyph-style .gitignore). Dropping the ! rules made the whole tree invisible.
+  const rules = parseIgnoreContent("*\n!*/\n!*.md\n!*.ts\nnode_modules/\n");
+  assert.equal(isIgnoredByRules(rules, "src", true), false);
+  assert.equal(isIgnoredByRules(rules, "src/i18n/locales/tr.ts", false), false);
+  assert.equal(isIgnoredByRules(rules, "README.md", false), false);
+  assert.equal(isIgnoredByRules(rules, "photo.png", false), true);
+  assert.equal(isIgnoredByRules(rules, "node_modules", true), true);
+  // Dir-only negation (!*/) must not un-ignore files.
+  assert.equal(isIgnoredByRules(rules, "binary", false), true);
 });
