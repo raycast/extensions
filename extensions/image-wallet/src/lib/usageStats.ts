@@ -3,7 +3,7 @@ import { UsageStats } from "../types";
 
 const STORAGE_KEY = "usage-stats";
 
-export async function loadUsageStats(): Promise<UsageStats> {
+async function loadUsageStats(): Promise<UsageStats> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
   if (!raw) return {};
 
@@ -18,6 +18,9 @@ export async function loadUsageStats(): Promise<UsageStats> {
 // LocalStorage has no atomic update, so two overlapping calls (e.g. a paste and a copy in
 // quick succession, or a prune racing a paste) would otherwise clobber one another's change.
 // Chaining every mutation through this queue serializes them so each sees the prior one's result.
+// Hydrating React state must use the same queue: an unlocked getItem can resolve after a
+// mutation has already called setUsage, and that stale snapshot would revert Recently Used
+// / Most Used ordering.
 let mutationQueue: Promise<unknown> = Promise.resolve();
 
 function withLock<T>(mutate: () => Promise<T>): Promise<T> {
@@ -27,6 +30,10 @@ function withLock<T>(mutate: () => Promise<T>): Promise<T> {
     () => undefined,
   );
   return result;
+}
+
+export function readUsageStats(): Promise<UsageStats> {
+  return withLock(() => loadUsageStats());
 }
 
 export function recordUsage(path: string): Promise<UsageStats> {

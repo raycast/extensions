@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { DEFAULT_SORT_MODE, loadSortMode, saveSortMode } from "../lib/sortPreference";
-import { loadUsageStats, pruneUsageStats, recordUsage } from "../lib/usageStats";
+import { pruneUsageStats, readUsageStats, recordUsage } from "../lib/usageStats";
 import { Pocket, SortMode, UsageStats } from "../types";
 
 /**
@@ -13,12 +13,26 @@ export function useCardSorting(pockets: Pocket[] | undefined) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     (async () => {
-      const [mode, stats] = await Promise.all([loadSortMode(), loadUsageStats()]);
-      setSortModeState(mode);
+      // Apply usage as soon as the locked read returns. Waiting on loadSortMode via
+      // Promise.all would let a paste/prune complete first, then overwrite it with this
+      // snapshot and revert Recently Used / Most Used until the next mutation.
+      const modePromise = loadSortMode();
+      const stats = await readUsageStats();
+      if (cancelled) return;
       setUsage(stats);
+
+      const mode = await modePromise;
+      if (cancelled) return;
+      setSortModeState(mode);
       setIsLoaded(true);
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
