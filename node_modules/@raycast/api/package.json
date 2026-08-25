@@ -1,0 +1,54 @@
+{
+  "name": "@raycast/api",
+  "version": "1.104.25",
+  "description": "Build extensions for Raycast with React and Node.js.",
+  "author": "Raycast Technologies Ltd.",
+  "homepage": "https://developers.raycast.com",
+  "repository": {
+    "url": "https://github.com/raycast/extensions"
+  },
+  "license": "MIT",
+  "types": "types/index.d.ts",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "dependencies": {
+    "@oclif/core": "^4.8.4",
+    "@oclif/plugin-autocomplete": "^3.2.40",
+    "@oclif/plugin-help": "^6.2.37",
+    "@oclif/plugin-not-found": "^3.2.74",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "esbuild": "^0.27.3",
+    "react": "19.0.0"
+  },
+  "peerDependencies": {
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "react-devtools": "6.1.1"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    },
+    "react-devtools": {
+      "optional": true
+    }
+  },
+  "bin": {
+    "ray": "./bin/run.js"
+  },
+  "oclif": {
+    "bin": "ray",
+    "dirname": "ray",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-autocomplete",
+      "@oclif/plugin-help",
+      "@oclif/plugin-not-found"
+    ]
+  }
+}

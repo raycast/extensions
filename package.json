@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zlib-search",
+  "title": "Z-Library",
+  "description": "Search Z-Library and download books, powered by the zlib CLI.",
+  "icon": "icon.png",
+  "author": "materialcritic",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-books",
+      "title": "Search Books",
+      "subtitle": "Z-Library",
+      "description": "Search Z-Library and download books",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "zlibPath",
+      "title": "zlib Binary Path",
+      "description": "Path to the zlib executable",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/zlib",
+      "required": false
+    },
+    {
+      "name": "downloadDir",
+      "title": "Download Directory",
+      "description": "Where downloaded books are saved",
+      "type": "textfield",
+      "default": "~/Downloads",
+      "required": false
+    },
+    {
+      "name": "zlibDomain",
+      "title": "Z-Library Domain Override",
+      "description": "Optional. Only set this if your saved login session uses a blocked domain (see `zlib doctor --eapi`).",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
