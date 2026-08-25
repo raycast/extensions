@@ -3,19 +3,16 @@ import { readConnectionState, readStatus } from "../lib/pia";
 import { ConnectionState, VpnStatus } from "../types";
 
 const POLL_INTERVAL_MS = 2000;
-/** Refresh the full detail set every Nth poll even if the state looks static. */
+/** Refresh the full detail set every Nth poll even when the state looks static. */
 const DETAIL_REFRESH_EVERY = 5;
 
-// Before the first read completes nothing is known — starting at
-// "Disconnected" would flash a confident wrong state on every launch.
+// Starting at "Disconnected" would flash a confident wrong state on launch.
 const EMPTY: VpnStatus = { state: "Unknown" };
 
 /**
- * Each `piactl get` is its own subprocess, so reading every field on every tick
- * would spawn six processes a second or two. The connection state is the only
- * value that needs to be live, so poll that alone and pull the rest when it
- * changes — plus periodically, since fields like the forwarded port can settle
- * while the state stays "Connected".
+ * Each `piactl get` is its own subprocess, so only the connection state is
+ * polled; the rest is refetched when it changes, and periodically for values
+ * like the forwarded port that settle while the state stays "Connected".
  */
 export function useStatus(cliPath: string | undefined) {
   const [status, setStatus] = useState<VpnStatus>(EMPTY);

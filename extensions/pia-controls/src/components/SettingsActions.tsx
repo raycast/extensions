@@ -29,12 +29,9 @@ async function applySetting(change: () => Promise<void>, successMessage: string,
 }
 
 /**
- * PIA settings, shown on every row rather than only the status row so they're
- * reachable wherever the selection happens to be.
- *
- * Each action is rendered only when its current value was actually read —
- * toggling against an unknown value would set the opposite of what the label
- * promises.
+ * Shown on every row so settings are reachable wherever the selection is.
+ * Each action renders only when its value was read, since toggling an unknown
+ * value would do the opposite of what the label promises.
  */
 export function SettingsActions({ status, cliPath, appPath, onSettingChanged }: Props) {
   return (

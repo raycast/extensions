@@ -6,11 +6,7 @@ import { SetupState } from "../types";
 const REVALIDATE_MS = 3000;
 const INITIAL: SetupState = { stage: "checking" };
 
-/**
- * Setup only needs re-checking while something is missing — once PIA answers,
- * the install/CLI/login state won't change under us, so stop polling and leave
- * the per-tick cost to the status hook.
- */
+/** Polls only while something is missing; install and login state won't change once ready. */
 export function useSetup() {
   const result = useCachedPromise(detectSetup, [], {
     keepPreviousData: true,

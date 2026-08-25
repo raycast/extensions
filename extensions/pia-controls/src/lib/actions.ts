@@ -31,12 +31,8 @@ export class DaemonInactiveError extends Error {
 }
 
 /**
- * Connect, translating PIA's idle-daemon failure into something actionable.
- *
- * This deliberately does NOT switch on background mode by itself: that is a
- * persistent change to how the user's VPN behaves when the app is closed
- * (it also keeps the killswitch alive), and an extension must not silently
- * reconfigure a security tool. Surface it and let the user decide.
+ * Reports the idle daemon instead of enabling background mode, which is a
+ * persistent change to how the VPN behaves with the app closed.
  */
 async function connectOrExplain(cliPath: string): Promise<void> {
   try {
@@ -71,10 +67,7 @@ export async function loadRecents(): Promise<Region[]> {
   }
 }
 
-/**
- * Select a region and connect. `piactl connect` also re-applies settings on an
- * already-active tunnel, so switching regions needs no explicit disconnect.
- */
+/** `piactl connect` re-applies settings on an active tunnel, so switching needs no disconnect. */
 export async function connectToRegion(region: Region): Promise<void> {
   await closeMainWindow({ clearRootSearch: true });
 
@@ -96,14 +89,8 @@ export async function connectToRegion(region: Region): Promise<void> {
     await showHUD(`Connecting to ${label(region)}…`);
     await connectOrExplain(setup.cliPath);
 
-    // Any already-active tunnel — connected or still connecting toward a
-    // different region — has to be observed cycling before a "Connected"
-    // reading means anything. Otherwise the in-flight connection completing
-    // would be reported as success for the region just requested.
-    //
-    // piactl exposes the *selected* region, not the connected one, so there is
-    // no way to confirm the endpoint directly; observing the transition is the
-    // strongest signal available.
+    // piactl exposes the selected region, not the connected one, so an active
+    // tunnel must be seen cycling before "Connected" means this region.
     const state = isActive(before)
       ? await waitForReconnect(setup.cliPath)
       : await waitForState(setup.cliPath, (s) => s === "Connected");
@@ -112,13 +99,9 @@ export async function connectToRegion(region: Region): Promise<void> {
       return;
     }
 
-    // Recorded only after the tunnel is confirmed up. Storing it earlier would
-    // let a failed attempt become the target of "Connect Most Recent",
-    // displacing the last region that actually worked.
+    // Only after success, so a failed attempt can't displace the last working region.
     await rememberRecent(region);
 
-    // Report the tunnel address, not `pubip` — that one still shows the user's
-    // real ISP address while connected.
     const status = await readStatus(setup.cliPath);
     await showHUD(status.vpnIp ? `Connected — ${label(region)} · ${status.vpnIp}` : `Connected — ${label(region)}`);
   } catch (e) {
@@ -126,10 +109,7 @@ export async function connectToRegion(region: Region): Promise<void> {
   }
 }
 
-/**
- * Connect using whichever region PIA already has selected, without changing it.
- * This is what the standalone Connect command has always done.
- */
+/** Connects using whichever region PIA already has selected, without changing it. */
 export async function connectCurrent(): Promise<void> {
   await closeMainWindow({ clearRootSearch: true });
 
@@ -196,8 +176,7 @@ export async function toggleVpn(): Promise<void> {
 
   try {
     const state = await readConnectionState(setup.cliPath);
-    // Never guess which way to toggle. Treating an unreadable state as "off"
-    // would connect a VPN the user asked to disconnect.
+    // Guessing here would connect a VPN the user asked to disconnect.
     if (state === "Unknown") {
       await showHUD("Could not read PIA status — is the app running?");
       return;

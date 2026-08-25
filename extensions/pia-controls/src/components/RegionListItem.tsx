@@ -38,9 +38,7 @@ export function RegionListItem({
   onSettingChanged,
 }: Props) {
   const isConnectedHere = isCurrent && status.state === "Connected";
-  // Many regions are just the country ("France", "Albania"), where showing the
-  // country as a subtitle would repeat the title. Only add it when it says
-  // something new — "ES Madrid" is worth pairing with "Spain".
+  // Most regions are named after their country, where a subtitle would just repeat the title.
   const countrySubtitle = region.name.toLowerCase() === region.country.toLowerCase() ? undefined : region.country;
 
   const accessories: List.Item.Accessory[] = [];

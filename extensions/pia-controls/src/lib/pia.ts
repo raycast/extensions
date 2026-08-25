@@ -1,14 +1,11 @@
-import { existsSync } from "fs";
+import { existsSync, realpathSync } from "fs";
 import { run } from "./exec";
 import { isValidRegionId } from "./regions";
 import { ConnectionState, Protocol, SetupState, VpnStatus } from "../types";
 
 export const PIA_APP_PATH = "/Applications/Private Internet Access.app";
+const PIA_BUNDLE_ID = "com.privateinternetaccess.vpn";
 
-/**
- * piactl is symlinked into /usr/local/bin by the installer, but that symlink is
- * optional — fall back to the binary inside the app bundle.
- */
 const CLI_CANDIDATES = ["/usr/local/bin/piactl", `${PIA_APP_PATH}/Contents/MacOS/piactl`, "/opt/homebrew/bin/piactl"];
 
 const CONNECTION_STATES: ConnectionState[] = [
@@ -25,6 +22,26 @@ export function findCliPath(): string | undefined {
   return CLI_CANDIDATES.find((p) => existsSync(p));
 }
 
+/** The installer symlinks piactl into the bundle it belongs to. */
+function appPathFromCli(cliPath: string): string | undefined {
+  try {
+    const real = realpathSync(cliPath);
+    const bundle = real.slice(0, real.indexOf("/Contents/MacOS/"));
+    return bundle.endsWith(".app") && existsSync(bundle) ? bundle : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function findAppPathBySpotlight(): Promise<string | undefined> {
+  try {
+    const out = await run("/usr/bin/mdfind", [`kMDItemCFBundleIdentifier == '${PIA_BUNDLE_ID}'`], { timeout: 5000 });
+    return out.split("\n").find(Boolean);
+  } catch {
+    return undefined;
+  }
+}
+
 async function piactl(cliPath: string, args: string[], timeout?: number) {
   return run(cliPath, args, { timeout });
 }
@@ -38,12 +55,7 @@ async function get(cliPath: string, key: string): Promise<string | undefined> {
   }
 }
 
-/**
- * An unreadable state is reported as "Unknown", never as "Disconnected".
- * Collapsing a failed read into "off" would make the toggle connect a VPN the
- * user meant to disconnect, and would let a disconnect wait-loop report
- * success it never observed.
- */
+/** Unreadable state is "Unknown", never "Disconnected", so a failed read can't invert a toggle. */
 function parseState(value: string | undefined): ConnectionState {
   const match = CONNECTION_STATES.find((s) => s === value);
   return match ?? "Unknown";
@@ -61,18 +73,15 @@ export async function readStatus(cliPath: string): Promise<VpnStatus> {
     get(cliPath, "allowlan"),
   ]);
 
+  // Unreadable fields stay undefined; a default here would be shown as fact.
   return {
     state: parseState(state),
-    // A failed read must stay undefined. Defaulting to AUTO_REGION here would
-    // label a specific region as "Automatic" in the UI.
     regionId,
     // piactl reports "Unknown" rather than empty when there is no tunnel.
     vpnIp: vpnIp && vpnIp !== "Unknown" ? vpnIp : undefined,
     publicIp: publicIp && publicIp !== "Unknown" ? publicIp : undefined,
     protocol: protocol === "openvpn" || protocol === "wireguard" ? protocol : undefined,
     portForward,
-    // Likewise: an unreadable toggle is undefined, not false. Defaulting to
-    // false would flip the action-panel labels and invert the next toggle.
     requestPortForward: parseBool(requestPortForward),
     allowLan: parseBool(allowLan),
   };
@@ -84,10 +93,6 @@ function parseBool(value: string | undefined): boolean | undefined {
   return undefined;
 }
 
-/**
- * Settings the user can change from the action panel. Each is only ever called
- * from an explicit action — nothing here runs on its own.
- */
 export async function setRequestPortForward(cliPath: string, enabled: boolean): Promise<void> {
   await piactl(cliPath, ["set", "requestportforward", String(enabled)]);
 }
@@ -119,10 +124,6 @@ export async function disconnect(cliPath: string): Promise<void> {
   await piactl(cliPath, ["disconnect"], 15_000);
 }
 
-// Note: no wrapper for `piactl background enable` / `set` beyond the region.
-// This extension only connects, disconnects, and selects a region — it never
-// changes how PIA behaves outside of an action the user explicitly triggered.
-
 export async function waitForState(
   cliPath: string,
   predicate: (s: ConnectionState) => boolean,
@@ -131,8 +132,7 @@ export async function waitForState(
   let current: ConnectionState = "Unknown";
   for (let i = 0; i < attempts; i++) {
     current = await readConnectionState(cliPath);
-    // An unreadable state proves nothing — keep polling rather than letting a
-    // transient failure satisfy the caller's condition.
+    // An unreadable state proves nothing, so it must not satisfy the predicate.
     if (current !== "Unknown" && predicate(current)) return current;
     await new Promise((r) => setTimeout(r, intervalMs));
   }
@@ -140,19 +140,11 @@ export async function waitForState(
 }
 
 /**
- * Wait for a connect that was issued while a tunnel was already up.
- *
- * Switching regions goes Connected -> DisconnectingToReconnect -> Connected,
- * so polling for "Connected" alone would match the *pre-switch* reading and
- * report success before the new region is live. Reconnecting to the region
- * already in use, by contrast, never leaves Connected at all (verified against
- * piactl), so "never left" is a legitimate success rather than a failure.
- *
- * The three outcomes must stay distinct:
- *   - observed leaving Connected  -> wait for it to come back
- *   - observed staying Connected  -> already on the requested region
- *   - never read successfully     -> Unknown; nothing was observed, so the
- *     caller must not claim the switch happened
+ * Confirms a connect issued while a tunnel was already up. Switching regions
+ * goes Connected -> DisconnectingToReconnect -> Connected, so a bare
+ * "Connected" poll would match the pre-switch reading. Reconnecting to the
+ * region already in use never leaves Connected, so that case is a success;
+ * never reading successfully is not.
  */
 export async function waitForReconnect(
   cliPath: string,
@@ -173,8 +165,6 @@ export async function waitForReconnect(
     await new Promise((r) => setTimeout(r, intervalMs));
   }
 
-  // Every read failed: the tunnel may never have restarted, and the next
-  // "Connected" we see could be the pre-switch connection.
   if (!sawReadable) return "Unknown";
   if (!leftConnected) return "Connected";
 
@@ -188,24 +178,26 @@ export function isActive(state: ConnectionState): boolean {
 }
 
 /**
- * Detect whether we can drive PIA at all. `piactl get connectionstate` fails
- * when the daemon is unreachable, and reports through stderr when logged out.
+ * Gates on piactl rather than on the app living at a fixed path: PIA can be
+ * installed anywhere while its CLI helper is still on PATH.
  */
 export async function detectSetup(): Promise<SetupState> {
-  if (!existsSync(PIA_APP_PATH)) return { stage: "not-installed" };
-
   const cliPath = findCliPath();
-  if (!cliPath) return { stage: "no-cli", appPath: PIA_APP_PATH };
+  const appPath = (cliPath && appPathFromCli(cliPath)) ?? (existsSync(PIA_APP_PATH) ? PIA_APP_PATH : undefined);
+
+  if (!cliPath) {
+    const found = appPath ?? (await findAppPathBySpotlight());
+    return found ? { stage: "no-cli", appPath: found } : { stage: "not-installed" };
+  }
 
   try {
     await piactl(cliPath, ["get", "connectionstate"], 6000);
   } catch (e) {
     const message = e instanceof Error ? e.message.toLowerCase() : "";
-    if (message.includes("not logged in") || message.includes("log in")) {
-      return { stage: "not-logged-in", appPath: PIA_APP_PATH, cliPath };
-    }
-    return { stage: "daemon-unavailable", appPath: PIA_APP_PATH, cliPath };
+    const stage =
+      message.includes("not logged in") || message.includes("log in") ? "not-logged-in" : "daemon-unavailable";
+    return { stage, appPath, cliPath };
   }
 
-  return { stage: "ready", appPath: PIA_APP_PATH, cliPath };
+  return { stage: "ready", appPath, cliPath };
 }

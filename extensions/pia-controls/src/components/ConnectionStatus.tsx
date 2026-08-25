@@ -78,9 +78,8 @@ export function ConnectionStatus({ status, region, appPath, cliPath, onToggle, o
       ? `Selected: ${regionName}`
       : "";
 
-  // piactl's `pubip` is the ISP-assigned address and does NOT change while the
-  // tunnel is up, so surfacing it as the connected IP would show the user's
-  // real home address. `vpnip` is the tunnel address — the safe one to show.
+  // `pubip` is the ISP address and does not change while connected, so showing
+  // it as the connected IP would reveal the user's real location.
   const accessories: List.Item.Accessory[] = [];
   if (isConnected && status.vpnIp) {
     accessories.push({
@@ -109,8 +108,7 @@ export function ConnectionStatus({ status, region, appPath, cliPath, onToggle, o
       tooltip: "Port forwarding requested on next connect",
     });
   }
-  // Only claim LAN is blocked when that was actually read as false — an
-  // unreadable setting must not be reported as a restriction that isn't there.
+  // Only when read as false; unknown must not be shown as a restriction.
   if (status.allowLan === false) {
     accessories.push({
       tag: { value: "LAN blocked", color: Color.Orange },
@@ -129,9 +127,7 @@ export function ConnectionStatus({ status, region, appPath, cliPath, onToggle, o
       accessories={accessories}
       actions={
         <ActionPanel>
-          {/* Hidden when the state is unreadable: the label would have to
-              guess a direction, and acting on that guess is what turns a
-              disconnect request into a connection. */}
+          {/* Hidden when unreadable: the label would have to guess a direction. */}
           {!isUnknown && (
             <Action
               title={isConnected ? "Disconnect" : "Connect"}

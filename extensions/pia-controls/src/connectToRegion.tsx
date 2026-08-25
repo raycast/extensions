@@ -19,16 +19,14 @@ export default function Command() {
   const { favorites, toggle: toggleFavorite } = useFavorites();
   const recents = useRecents();
 
-  // Undefined while the region is unreadable — don't fall back to "Automatic",
-  // which would mislabel whichever region is actually selected.
+  // No "Automatic" fallback: that would mislabel whichever region is selected.
   const currentRegion = status.regionId
     ? (byId.get(status.regionId) ?? (status.regionId === AUTO_REGION_ENTRY.id ? AUTO_REGION_ENTRY : undefined))
     : undefined;
 
   const favoriteRegions = useMemo(() => regions.filter((r) => favorites.has(r.id)), [regions, favorites]);
 
-  // Recents are stored as snapshots; re-resolve against the live catalog so
-  // port-forward/offline flags stay accurate.
+  // Stored as snapshots, so re-resolve against the live catalog.
   const recentRegions = useMemo(
     () => recents.map((r) => byId.get(r.id) ?? r).filter((r) => !favorites.has(r.id)),
     [recents, byId, favorites],
