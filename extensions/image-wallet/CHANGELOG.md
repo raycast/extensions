@@ -1,6 +1,6 @@
 # Image Wallet Changelog
 
-## [Sorting, PDF Previews and Layout Options] - {PR_MERGE_DATE}
+## [Sorting, PDF Previews and Layout Options] - 2026-08-25
 
 - Added PDF Cards previews, rendered from the first page with PDFium (WebAssembly, so macOS and Windows behave identically)
 - Added sorting by name, date added, date modified, file size, Recently Used, and Most Used
@@ -11,7 +11,7 @@
 - Added .avif support
 - Read-error toasts now include a Change Wallet Directory action; the existing Suppress Read Errors preference still silences them
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-08-25
 
 - Added Windows support
 - Video previews on Windows are generated with ffmpeg when it is available on the PATH
