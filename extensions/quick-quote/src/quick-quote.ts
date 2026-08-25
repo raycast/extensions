@@ -16,7 +16,11 @@ async function clipboardChangeCount(): Promise<number> {
     "-e",
     'ObjC.import("AppKit"); $.NSPasteboard.generalPasteboard.changeCount',
   ]);
-  return Number(stdout.trim());
+  const count = Number(stdout.trim());
+  if (!Number.isFinite(count)) {
+    throw new Error("Could not read pasteboard change count");
+  }
+  return count;
 }
 
 async function readSelectionViaCopy(originalText: string): Promise<string | null> {
@@ -47,18 +51,23 @@ export default async function main() {
   // pasteboard and then throw on the post-copy probe, which would otherwise leave
   // the user's clipboard as the raw selection.
   try {
-    const selection = await readSelection(originalClipboard.text);
+    try {
+      const selection = await readSelection(originalClipboard.text);
 
-    if (!selection || !isMeaningfulSelection(selection)) {
-      await showHUD("No text selected");
-      return;
+      if (!selection || !isMeaningfulSelection(selection)) {
+        await showHUD("No text selected");
+        return;
+      }
+
+      await Clipboard.paste(quoteText(selection));
+      await new Promise((resolve) => setTimeout(resolve, PASTE_DELAY_MS));
+      didQuote = true;
+    } finally {
+      await Clipboard.copy(toRestorableContent(originalClipboard));
     }
-
-    await Clipboard.paste(quoteText(selection));
-    await new Promise((resolve) => setTimeout(resolve, PASTE_DELAY_MS));
-    didQuote = true;
-  } finally {
-    await Clipboard.copy(toRestorableContent(originalClipboard));
+  } catch {
+    await showHUD("Couldn't quote selection");
+    return;
   }
 
   if (didQuote) {

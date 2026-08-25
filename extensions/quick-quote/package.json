@@ -6,10 +6,22 @@
   "type": "module",
   "icon": "extension-icon.png",
   "author": "kumamaki",
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity",
     "Developer Tools"
+  ],
+  "keywords": [
+    "quote",
+    "blockquote",
+    "markdown",
+    "selection",
+    "claude",
+    "agent",
+    "prompt"
   ],
   "commands": [
     {
