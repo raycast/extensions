@@ -525,19 +525,9 @@
       "description": "Retrieve an attachment's content by ID."
     },
     {
-      "name": "prepare-attachment-upload",
-      "title": "Prepare Attachment Upload",
-      "description": "Prepare a direct Linear file upload for an existing issue.\n\nWorkflow:\n1. Call this tool with issue, filename, contentType, and size.\n2. Upload raw bytes with PUT to uploadRequest.url outside MCP.\n3. All headers in uploadRequest.headers are part of the signed request, so send them verbatim.\n4. After PUT succeeds, call create_attachment_from_upload with assetUrl to link it to the issue.\n\nDo not base64-encode or transform the file. Use curl --data-binary @path or fetch(url, { method: 'PUT', body: blob }).\nOmitting or modifying any signed header, including casing, will return HTTP 403.\nThe signed URL must be used within 60 seconds or it will expire.\n\nUpload sequencing:\nPrepare, PUT, and finalize one file before calling this tool for another file.\nDo not batch multiple prepare_attachment_upload calls before starting the PUTs because earlier signed URLs can expire while later files are prepared.\n\nExample:\ncurl -X PUT --data-binary @file.png \\\n  -H \"content-type: image/png\" \\\n  -H \"x-goog-content-length-range: N,N\" \\\n  -H \"cache-control: public, max-age=31536000\" \\\n  -H 'Content-Disposition: attachment; filename=\"file.png\"' \\\n  \"<uploadRequest.url>\""
-    },
-    {
-      "name": "create-attachment-from-upload",
-      "title": "Create Attachment from Upload",
-      "description": "Link an already-uploaded Linear assetUrl to an existing issue as an attachment.\n\nUse this only after:\n1. prepare_attachment_upload returned an assetUrl and uploadRequest.\n2. The client successfully PUT raw file bytes to uploadRequest.url.\n\nThis tool does not upload file content. It only creates the Linear attachment row.\nIf the direct upload failed or the signed URL expired, rerun prepare_attachment_upload and upload again."
-    },
-    {
       "name": "create-attachment",
-      "title": "Create Attachment (Deprecated)",
-      "description": "Deprecated fallback for tiny files only. Accepts base64 file content, verifies SHA-256 checksum, and uploads it through the MCP worker.\nPrefer `prepare_attachment_upload` plus direct PUT plus `create_attachment_from_upload`.\n\nCRITICAL: Do not print base64Content and then copy it into this tool call.\nOpaque base64 copied through model-visible text is easy to corrupt.\n\nGenerate base64Content mechanically from the source bytes and pass it through a programmatic argument construction path whenever available. Before calling this tool, verify the values are consistent:\n\nUnix-like shells:\nfile=\"/path/to/file\"\nbase64Content=$(base64 < \"$file\" | tr -d '\\n\\r')\nsha256=$(shasum -a 256 \"$file\" | awk '{print $1}')\ndecodedSha256=$(printf '%s' \"$base64Content\" | base64 -d | shasum -a 256 | awk '{print $1}')\nsize=$(wc -c < \"$file\" | tr -d ' ') # optional; stat can also get file byte size\ndecodedSize=$(printf '%s' \"$base64Content\" | base64 -d | wc -c | tr -d ' ')\n\nPowerShell:\n$file = 'C:\\path\\to\\file'\n$bytes = [IO.File]::ReadAllBytes($file)\n$base64Content = [Convert]::ToBase64String($bytes)\n$sha256 = (Get-FileHash -Algorithm SHA256 -Path $file).Hash.ToLower()\n$size = $bytes.Length # optional\n$decoded = [Convert]::FromBase64String($base64Content)\n$decodedStream = [IO.MemoryStream]::new($decoded)\n$decodedSha256 = (Get-FileHash -Algorithm SHA256 -InputStream $decodedStream).Hash.ToLower()\n$decodedSize = $decoded.Length\n\ndecodedSha256 must equal sha256. If you pass size, decodedSize must equal size.\nPass `sha256`. Passing `size` is optional, but recommended for clearer mismatch errors."
+      "title": "Create Attachment",
+      "description": "Upload a local file and attach it to an existing Linear issue. Pass the absolute local file path; the extension handles reading, uploading, and linking the file."
     },
     {
       "name": "delete-attachment",
