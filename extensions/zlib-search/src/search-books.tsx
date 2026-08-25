@@ -11,9 +11,16 @@ import {
 import { useExec } from "@raycast/utils";
 import { execFile } from "child_process";
 import { promisify } from "util";
+import { existsSync } from "fs";
 
 const execFileAsync = promisify(execFile);
 
+const ZLIB_PATH_CANDIDATES = ["/opt/homebrew/bin/zlib", "/usr/local/bin/zlib"];
+
+function resolveZlibPath(configuredPath: string): string {
+  if (configuredPath) return configuredPath;
+  return ZLIB_PATH_CANDIDATES.find((path) => existsSync(path)) ?? "zlib";
+}
 
 interface Book {
   id: string;
@@ -38,7 +45,7 @@ const EMPTY_RESULT: SearchResult = { books: [], page: 0, total_pages: 0 };
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const prefs = getPreferenceValues<Preferences>();
-  const zlibPath = prefs.zlibPath || "/opt/homebrew/bin/zlib";
+  const zlibPath = resolveZlibPath(prefs.zlibPath);
   const downloadDir = prefs.downloadDir || "~/Downloads";
 
   const execEnv: NodeJS.ProcessEnv = { ...process.env };

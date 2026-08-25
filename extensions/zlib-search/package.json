@@ -22,9 +22,9 @@
     {
       "name": "zlibPath",
       "title": "zlib Binary Path",
-      "description": "Path to the zlib executable",
+      "description": "Path to the zlib executable. Leave blank to auto-detect (Apple Silicon or Intel Homebrew).",
       "type": "textfield",
-      "default": "/opt/homebrew/bin/zlib",
+      "default": "",
       "required": false
     },
     {
