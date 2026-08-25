@@ -1,11 +1,10 @@
-import { Action, ActionPanel, environment, Icon, Keyboard, List, LocalStorage, open } from "@raycast/api";
+import { Action, ActionPanel, environment, Icon, Keyboard, List, LocalStorage } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { PortListDetail } from "./PortListDetail";
-import { SetupView } from "./SetupView";
 import { DEMO_OUTPUT, DEMO_STORAGE_KEY } from "../lib/demo-ports";
-import { portAccessories, portListIcon } from "../lib/format";
+import { comparePorts, portAccessories, portListIcon, portListTitle } from "../lib/format";
 import type { Port } from "../lib/types";
 import { fetchWhatCableOutput, WhatCableError } from "../lib/whatcable";
 
@@ -20,12 +19,35 @@ interface PortsCommandProps {
 
 type PortsPayload = Awaited<ReturnType<typeof fetchWhatCableOutput>>;
 
+const WHATCABLE_REPO_URL = "https://github.com/darrylmorley/whatcable";
+const WHATCABLE_RELEASES_URL = "https://github.com/darrylmorley/whatcable/releases";
+
 function demoPayload(): PortsPayload {
   return {
     cliPath: "demo",
     output: DEMO_OUTPUT,
     raw: JSON.stringify(DEMO_OUTPUT, null, 2),
   };
+}
+
+function filterPorts(ports: Port[], filter: PortsFilter): Port[] {
+  switch (filter) {
+    case "all":
+      return ports;
+    case "connected":
+      return ports.filter((port) => port.connectionActive);
+    default: {
+      const _exhaustive: never = filter;
+      return _exhaustive;
+    }
+  }
+}
+
+function errorMessage(error: unknown): string {
+  if (error instanceof WhatCableError || error instanceof Error) {
+    return error.message;
+  }
+  return "Something went wrong while loading port data.";
 }
 
 export function PortsCommand({ filter, searchBarPlaceholder, emptyTitle, emptyDescription }: PortsCommandProps) {
@@ -74,11 +96,9 @@ export function PortsCommand({ filter, searchBarPlaceholder, emptyTitle, emptyDe
   }, []);
 
   const ports = useMemo(() => {
-    const all = data?.output.ports ?? [];
-    if (filter === "connected") {
-      return all.filter((port) => port.connectionActive);
-    }
-    return all;
+    return filterPorts(data?.output.ports ?? [], filter)
+      .slice()
+      .sort(comparePorts);
   }, [data?.output.ports, filter]);
 
   const demoActions = environment.isDevelopment ? (
@@ -94,32 +114,38 @@ export function PortsCommand({ filter, searchBarPlaceholder, emptyTitle, emptyDe
     )
   ) : null;
 
-  if (error && !data) {
-    const message =
-      error instanceof WhatCableError
-        ? error.message
-        : error instanceof Error
-          ? error.message
-          : "Something went wrong while loading port data.";
+  const retryActions = (
+    <ActionPanel>
+      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refresh} />
+      <Action title="Re-Download CLI" icon={Icon.Download} onAction={forceRedownload} />
+      {demoActions}
+      <Action.OpenInBrowser title="Open WhatCable Releases" url={WHATCABLE_RELEASES_URL} />
+      <Action.OpenInBrowser title="Open WhatCable on GitHub" url={WHATCABLE_REPO_URL} />
+    </ActionPanel>
+  );
 
+  if (error && !data) {
     return (
-      <SetupView
-        title="USB-C Inspector"
-        isLoading={isLoading}
-        markdown={`# Could not load ports\n\n${message}\n\nIf this is the first launch, check your network connection so the official CLI can be downloaded from GitHub Releases.`}
-        onRetry={refresh}
-        onForceDownload={forceRedownload}
-      />
+      <List isLoading={isLoading} searchBarPlaceholder={searchBarPlaceholder}>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could Not Load Ports"
+          description={`${errorMessage(error)} If this is the first launch, check your network so the official CLI can download from GitHub Releases.`}
+          actions={retryActions}
+        />
+      </List>
     );
   }
 
   if ((!data && isLoading) || !demoReady) {
     return (
-      <SetupView
-        title="USB-C Inspector"
-        isLoading
-        markdown={`# Preparing USB-C Inspector\n\nLooking for a local CLI, or downloading the official notarized WhatCable binary from GitHub Releases.\n\nThis only happens once (unless you re-download).`}
-      />
+      <List isLoading searchBarPlaceholder={searchBarPlaceholder}>
+        <List.EmptyView
+          icon={Icon.Download}
+          title="Preparing USB-C Inspector"
+          description="Looking for a local CLI, or downloading the official WhatCable binary from GitHub Releases. This only happens once."
+        />
+      </List>
     );
   }
 
@@ -179,32 +205,34 @@ function PortListItem({
   const accessories = portAccessories(port);
   return (
     <List.Item
-      title={port.name}
+      title={portListTitle(port)}
       icon={portListIcon(port)}
       accessories={isShowingDetail ? accessories.filter((a) => a.tag) : accessories}
       detail={<PortListDetail port={port} />}
       actions={
         <ActionPanel>
-          {detailToggleAction}
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            onAction={onRefresh}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-          />
-          {demoActions}
-          <Action.CopyToClipboard
-            title="Copy Port JSON"
-            content={JSON.stringify(port, null, 2)}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-          />
-          <Action.CopyToClipboard title="Copy Full JSON" content={rawJson} />
-          <Action title="Re-Download CLI" icon={Icon.Download} onAction={onForceDownload} />
-          <Action
-            title="Open WhatCable on GitHub"
-            icon={Icon.Globe}
-            onAction={() => open("https://github.com/darrylmorley/whatcable")}
-          />
+          <ActionPanel.Section>
+            {detailToggleAction}
+            <Action
+              title="Refresh"
+              icon={Icon.ArrowClockwise}
+              onAction={onRefresh}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+            />
+            {demoActions}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy Port JSON"
+              content={JSON.stringify(port, null, 2)}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
+            <Action.CopyToClipboard title="Copy Full JSON" content={rawJson} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action title="Re-Download CLI" icon={Icon.Download} onAction={onForceDownload} />
+            <Action.OpenInBrowser title="Open WhatCable on GitHub" url={WHATCABLE_REPO_URL} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

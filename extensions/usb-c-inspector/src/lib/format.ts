@@ -229,6 +229,36 @@ export function portAccessories(port: Port): PortAccessory[] {
   return [{ text: port.headline }];
 }
 
+function portNumber(port: Port): number | null {
+  const match = port.name.match(/(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
+/** Short list title so MagSafe / USB-C labels stay visible beside the detail pane. */
+export function portListTitle(port: Port): string {
+  const match = port.name.match(/^Port\s+(\d+)\s*\((.+)\)$/i);
+  if (!match) {
+    return port.name;
+  }
+  const [, number, type] = match;
+  if (/^USB-C$/i.test(type)) {
+    return `USB-C ${number}`;
+  }
+  if (/^MagSafe/i.test(type)) {
+    return type;
+  }
+  return `${type} ${number}`;
+}
+
+export function comparePorts(a: Port, b: Port): number {
+  const aNumber = portNumber(a);
+  const bNumber = portNumber(b);
+  if (aNumber != null && bNumber != null && aNumber !== bNumber) {
+    return aNumber - bNumber;
+  }
+  return a.name.localeCompare(b.name);
+}
+
 export function portListIcon(port: Port): { source: Icon; tintColor: Color } {
   if (!port.connectionActive) {
     return { source: Icon.Circle, tintColor: Color.SecondaryText };

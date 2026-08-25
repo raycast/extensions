@@ -1,4 +1,4 @@
-import { environment, LocalStorage } from "@raycast/api";
+import { environment } from "@raycast/api";
 import { createHash } from "crypto";
 import { createWriteStream, existsSync } from "fs";
 import { spawnSync } from "child_process";
@@ -12,7 +12,6 @@ import { cachedCliDir, cachedCliPath, CLI_BINARY_NAME, CLI_DIR_NAME } from "./pa
 import { resolveExistingCli } from "./resolve-cli";
 
 const RELEASES_API = "https://api.github.com/repos/darrylmorley/whatcable/releases/latest";
-const VERSION_KEY = "whatcableCliVersion";
 const USER_AGENT = "raycast-whatcable-extension";
 
 interface GitHubAsset {
@@ -49,7 +48,7 @@ async function downloadFile(url: string, destination: string): Promise<void> {
   if (!response.ok || !response.body) {
     throw new Error(`Download failed (${response.status}) from GitHub Releases.`);
   }
-  const nodeStream = Readable.fromWeb(response.body as import("stream/web").ReadableStream);
+  const nodeStream = Readable.fromWeb(response.body as Parameters<typeof Readable.fromWeb>[0]);
   await pipeline(nodeStream, createWriteStream(destination));
 }
 
@@ -286,7 +285,6 @@ async function installFromGitHub(): Promise<string> {
     await chmod(stagedBinary, 0o755);
     await writeFile(path.join(stagingDir, "VERSION"), `${release.tag_name}\n`, "utf8");
     await replaceCachedCli(stagingDir);
-    await LocalStorage.setItem(VERSION_KEY, release.tag_name);
 
     return cachedCliPath();
   } finally {
@@ -333,16 +331,4 @@ export async function ensureCli(options?: { forceDownload?: boolean }): Promise<
   }
 
   return installInFlight;
-}
-
-export async function getCachedCliVersion(): Promise<string | undefined> {
-  const stored = await LocalStorage.getItem<string>(VERSION_KEY);
-  if (stored) {
-    return stored;
-  }
-  const versionFile = path.join(cachedCliDir(), "VERSION");
-  if (existsSync(versionFile)) {
-    return (await readFile(versionFile, "utf8")).trim();
-  }
-  return undefined;
 }
