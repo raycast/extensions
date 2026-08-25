@@ -20,7 +20,9 @@ Unlike extensions tied to a specific provider or authenticator export format, TO
 
 Accounts and secrets are stored locally in Raycast's encrypted storage. They do not sync automatically between Macs.
 
-Use **Export Encrypted Backup** to create an AES-256-GCM encrypted backup in `~/Downloads`. Keep its passphrase safe: it is never stored and cannot be recovered. Use **Import Encrypted Backup** on a new Mac to merge the backup's accounts.
+Use **Export Encrypted Backup** to create an AES-256-GCM encrypted backup in `~/Downloads`. Keep its passphrase safe: it cannot be recovered. Use **Import Encrypted Backup** on a new Mac to merge the backup's accounts.
+
+For automatic recovery, set **Automatic Backup Directory** and **Automatic Backup Passphrase** in the extension preferences. Every account change atomically replaces `totp-backup.json` in that directory with an AES-256-GCM encrypted backup.
 
 ## Security
 
