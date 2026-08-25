@@ -88,8 +88,11 @@ function CodeItem({
     [isSelected, code.short_url, safeName(code.slug)],
   );
 
+  // 170pt, not more. A List.Item.Detail that also renders metadata gives the markdown
+  // roughly 196pt of height, so a larger image is silently cropped at the metadata
+  // divider. Measured at 260pt: the bottom 63pt of the code was cut off.
   const detailMarkdown = qrPath
-    ? `![QR code](file://${qrPath}?raycast-width=260&raycast-height=260)`
+    ? `![QR code](file://${qrPath}?raycast-width=170&raycast-height=170)`
     : "Rendering QR code…";
 
   return (
