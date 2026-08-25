@@ -1,6 +1,6 @@
 # Punch Clock Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-24
 
 - Enter your total working time and break length for the day
 - Live countdown of remaining working time in the macOS menu bar
