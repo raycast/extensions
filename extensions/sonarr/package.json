@@ -81,6 +81,15 @@
   ],
   "preferences": [
     {
+      "name": "instanceName",
+      "title": "Instance Name",
+      "required": false,
+      "description": "A friendly name for your primary Sonarr instance",
+      "type": "textfield",
+      "placeholder": "Main",
+      "default": "Main"
+    },
+    {
       "name": "host",
       "title": "Host",
       "required": true,
@@ -127,8 +136,98 @@
       "title": "API Key",
       "required": true,
       "description": "The API key of the Sonarr server",
+      "type": "password",
+      "default": "",
+      "placeholder": "Enter your API key"
+    },
+    {
+      "name": "enableSecondaryInstance",
+      "title": "Second Instance",
+      "required": false,
+      "description": "Add a second Sonarr instance you can switch to from any command",
+      "type": "checkbox",
+      "label": "Enable second Sonarr instance",
+      "default": false
+    },
+    {
+      "name": "secondaryInstanceName",
+      "title": "Second Instance Name",
+      "required": false,
+      "description": "A friendly name for your second Sonarr instance",
+      "type": "textfield",
+      "placeholder": "Remote Server",
+      "default": ""
+    },
+    {
+      "name": "secondaryHost",
+      "title": "Second Instance Host",
+      "required": false,
+      "description": "Hostname or IP of the second Sonarr server, without the port (e.g. 192.168.0.30)",
+      "type": "textfield",
+      "placeholder": "sonarr.example.com",
+      "default": ""
+    },
+    {
+      "name": "secondaryPort",
+      "title": "Second Instance Port",
+      "required": false,
+      "description": "Port of the second Sonarr server (e.g. 8989)",
+      "type": "textfield",
+      "placeholder": "8989",
+      "default": "8989"
+    },
+    {
+      "name": "secondaryBase",
+      "title": "Second Instance URL Base (Optional)",
+      "required": false,
+      "description": "Optional URL base path of the second Sonarr server (e.g. sonarr if your URL is /sonarr)",
       "type": "textfield",
       "default": ""
+    },
+    {
+      "name": "secondaryHttp",
+      "title": "Second Instance Connection Type",
+      "required": false,
+      "description": "Change the connection type for the second Sonarr server",
+      "type": "dropdown",
+      "default": "http",
+      "data": [
+        {
+          "value": "http",
+          "title": "HTTP"
+        },
+        {
+          "value": "https",
+          "title": "HTTPS"
+        }
+      ]
+    },
+    {
+      "name": "secondaryApiKey",
+      "title": "Second Instance API Key",
+      "required": false,
+      "description": "The API key of the second Sonarr server",
+      "type": "password",
+      "placeholder": "Enter the second API key",
+      "default": ""
+    },
+    {
+      "name": "activeInstance",
+      "title": "Active Instance",
+      "required": false,
+      "description": "Which instance commands start on. Switching from a command overrides it until you change this preference again.",
+      "type": "dropdown",
+      "default": "primary",
+      "data": [
+        {
+          "value": "primary",
+          "title": "Primary Instance"
+        },
+        {
+          "value": "secondary",
+          "title": "Second Instance"
+        }
+      ]
     },
     {
       "name": "futureDays",
