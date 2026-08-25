@@ -521,7 +521,14 @@ export default function Command(props: {
               <Action.Push
                 title="Copy Command"
                 shortcut={Keyboard.Shortcut.Common.Copy}
-                target={<RecipeParamForm recipe={recipe} onSubmit={() => {}} />}
+                target={
+                  <RecipeParamForm
+                    recipe={recipe}
+                    onSubmit={(args) => {
+                      void runRecipe(recipe, args);
+                    }}
+                  />
+                }
               />
             ) : (
               <Action.CopyToClipboard
