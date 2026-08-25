@@ -61,7 +61,7 @@ function apiErrorMessage(status: number, payload: DeepLResponse) {
 async function translateChunk(
   text: string,
   preferences: AppPreferences,
-  direction: Direction,
+  direction: Pick<Direction, "targetLang">,
   sourceLanguage?: string,
 ) {
   const body = new URLSearchParams();
@@ -109,24 +109,40 @@ export async function translate(text: string, preferences: AppPreferences) {
   const chunks = splitTextForDeepL(text);
 
   async function translateChunks(activeDirection: Direction, sourceLanguage?: string) {
-    const translatedChunks: string[] = [];
+    const translatedChunks: Array<{
+      sourceText: string;
+      translatedText: string;
+      sourceLang?: string;
+    }> = [];
     const detectedSourceLanguages = new Set<string>();
 
     for (const chunk of chunks) {
       if (!chunk.trim()) {
-        translatedChunks.push(chunk);
+        translatedChunks.push({ sourceText: chunk, translatedText: chunk });
         continue;
       }
 
       const translatedChunk = await translateChunk(chunk, preferences, activeDirection, sourceLanguage);
-      translatedChunks.push(translatedChunk.translatedText);
-      if (translatedChunk.sourceLang) {
-        detectedSourceLanguages.add(sourceLanguageCode(translatedChunk.sourceLang));
+      const detectedSourceLanguage = translatedChunk.sourceLang
+        ? sourceLanguageCode(translatedChunk.sourceLang)
+        : undefined;
+      translatedChunks.push({
+        sourceText: chunk,
+        translatedText: translatedChunk.translatedText,
+        sourceLang: detectedSourceLanguage,
+      });
+      if (detectedSourceLanguage) {
+        detectedSourceLanguages.add(detectedSourceLanguage);
       }
     }
 
     const sourceLang = detectedSourceLanguages.size === 1 ? [...detectedSourceLanguages][0] : undefined;
-    return { translatedText: translatedChunks.join(""), sourceLang, detectedSourceLanguages };
+    return {
+      translatedText: translatedChunks.map((chunk) => chunk.translatedText).join(""),
+      sourceLang,
+      detectedSourceLanguages,
+      translatedChunks,
+    };
   }
 
   let result = await translateChunks(direction);
@@ -136,8 +152,39 @@ export async function translate(text: string, preferences: AppPreferences) {
   const translatableChunkCount = chunks.filter((chunk) => chunk.trim()).length;
   const canConstrainSource = translatableChunkCount === 1;
   const detectedPrimary = result.detectedSourceLanguages.has(primarySource);
+  const detectedSecondary = result.detectedSourceLanguages.has(secondarySource);
+  let directionLabel: string | undefined;
 
-  if (direction.isUncertain && detectedPrimary) {
+  if (direction.isUncertain && detectedPrimary && detectedSecondary) {
+    const translatedChunks: string[] = [];
+
+    for (const chunk of result.translatedChunks) {
+      if (chunk.sourceLang !== primarySource) {
+        translatedChunks.push(chunk.translatedText);
+        continue;
+      }
+
+      const translatedChunk = await translateChunk(
+        chunk.sourceText,
+        preferences,
+        { targetLang: preferences.secondaryLanguage },
+        primarySource,
+      );
+      translatedChunks.push(translatedChunk.translatedText);
+    }
+
+    direction = {
+      targetLang: preferences.secondaryLanguage,
+      rule: `Mixed ${languageName(primarySource)} ↔ ${languageName(secondarySource)} translated per chunk`,
+      isUncertain: false,
+    };
+    directionLabel = `${languageName(preferences.primaryLanguage)} ↔ ${languageName(preferences.secondaryLanguage)} (per chunk)`;
+    result = {
+      ...result,
+      translatedText: translatedChunks.join(""),
+      sourceLang: undefined,
+    };
+  } else if (direction.isUncertain && detectedPrimary) {
     direction = {
       targetLang: preferences.secondaryLanguage,
       rule:
@@ -161,5 +208,6 @@ export async function translate(text: string, preferences: AppPreferences) {
     rule: direction.rule,
     translatedText: result.translatedText,
     sourceLang: result.sourceLang,
+    directionLabel,
   };
 }

@@ -92,6 +92,35 @@ test("corrects mixed chunks without forcing one source language onto the others"
   );
 });
 
+test("translates configured-language chunks in opposite directions", async (context) => {
+  const requests: URLSearchParams[] = [];
+  context.mock.method(globalThis, "fetch", async (_input, init) => {
+    requests.push(init?.body as URLSearchParams);
+    const responses = [
+      deepLResponse("RU", "привет"),
+      deepLResponse("EN", "мир"),
+      deepLResponse("RU", "hello"),
+    ];
+    return responses[requests.length - 1];
+  });
+
+  const result = await translate("привет\n\nworld", preferences);
+
+  assert.equal(result.translatedText, "hello\n\nмир");
+  assert.equal(result.sourceLang, undefined);
+  assert.equal(result.directionLabel, "Russian ↔ English (American) (per chunk)");
+  assert.equal(result.rule, "Mixed Russian ↔ English translated per chunk");
+  assert.equal(requests.length, 3);
+  assert.deepEqual(
+    requests.map((body) => body.get("target_lang")),
+    ["RU", "RU", "EN-US"],
+  );
+  assert.deepEqual(
+    requests.map((body) => body.get("source_lang")),
+    [null, null, "RU"],
+  );
+});
+
 test("uses the API Free endpoint and sends the key in the authorization header", async (context) => {
   let requestedUrl = "";
   let authorization = "";

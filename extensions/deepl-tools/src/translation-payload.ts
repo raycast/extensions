@@ -5,6 +5,7 @@ export type CompletedTranslation = {
   translatedText: string;
   sourceLang?: string;
   targetLang: string;
+  directionLabel?: string;
   rule: string;
 };
 

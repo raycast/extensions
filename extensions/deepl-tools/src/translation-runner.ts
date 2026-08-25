@@ -118,6 +118,7 @@ async function translateAndShow(sourceText: string) {
       translatedText: result.translatedText,
       sourceLang: result.sourceLang,
       targetLang: result.targetLang,
+      directionLabel: result.directionLabel,
       rule: result.rule,
     });
   } catch (error) {

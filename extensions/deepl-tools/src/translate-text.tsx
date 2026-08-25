@@ -128,7 +128,9 @@ function TranslateTextCommand({ props, preferences }: { props: TranslateTextProp
       <Detail.Metadata>
         <Detail.Metadata.Label
           title="Direction"
-          text={`${languageName(state.sourceLang || "AUTO")} → ${languageName(state.targetLang)}`}
+          text={
+            state.directionLabel || `${languageName(state.sourceLang || "AUTO")} → ${languageName(state.targetLang)}`
+          }
         />
         <Detail.Metadata.Label title="Routing" text={state.rule} />
         <Detail.Metadata.Label title="Characters" text={String(state.sourceText.length)} />
