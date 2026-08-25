@@ -152,49 +152,58 @@ function findMissingRequiredParams(
 
 function RecipeParamForm({
   recipe,
+  primaryAction = "run",
   onSubmit,
 }: {
   recipe: JustRecipe;
+  primaryAction?: "run" | "copy";
   onSubmit: (args: string[]) => void;
 }) {
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+
+  const runAction = (
+    <Action.SubmitForm
+      key="run"
+      title="Run Recipe"
+      onSubmit={(values) => {
+        const typed = values as Record<string, string>;
+        const missing = findMissingRequiredParams(recipe, typed);
+        if (missing.length > 0) {
+          setErrors(Object.fromEntries(missing.map((n) => [n, "Required"])));
+          return false;
+        }
+        onSubmit(argsFromFormValues(recipe, typed));
+      }}
+    />
+  );
+
+  const copyAction = (
+    <Action.SubmitForm
+      key="copy"
+      title="Copy Command"
+      shortcut={Keyboard.Shortcut.Common.Copy}
+      onSubmit={(values) => {
+        const typed = values as Record<string, string>;
+        const missing = findMissingRequiredParams(recipe, typed);
+        if (missing.length > 0) {
+          setErrors(Object.fromEntries(missing.map((n) => [n, "Required"])));
+          return false;
+        }
+        const args = argsFromFormValues(recipe, typed);
+        void Clipboard.copy(buildRecipeCmd(recipe, args));
+        void showHUD("Command copied");
+      }}
+    />
+  );
 
   return (
     <Form
       navigationTitle={`Run: ${recipe.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Run Recipe"
-            onSubmit={(values) => {
-              const typed = values as Record<string, string>;
-              const missing = findMissingRequiredParams(recipe, typed);
-              if (missing.length > 0) {
-                setErrors(
-                  Object.fromEntries(missing.map((n) => [n, "Required"])),
-                );
-                return false;
-              }
-              onSubmit(argsFromFormValues(recipe, typed));
-            }}
-          />
-          <Action.SubmitForm
-            title="Copy Command"
-            shortcut={Keyboard.Shortcut.Common.Copy}
-            onSubmit={(values) => {
-              const typed = values as Record<string, string>;
-              const missing = findMissingRequiredParams(recipe, typed);
-              if (missing.length > 0) {
-                setErrors(
-                  Object.fromEntries(missing.map((n) => [n, "Required"])),
-                );
-                return false;
-              }
-              const args = argsFromFormValues(recipe, typed);
-              void Clipboard.copy(buildRecipeCmd(recipe, args));
-              void showHUD("Command copied");
-            }}
-          />
+          {primaryAction === "copy"
+            ? [copyAction, runAction]
+            : [runAction, copyAction]}
         </ActionPanel>
       }
     >
@@ -524,6 +533,7 @@ export default function Command(props: {
                 target={
                   <RecipeParamForm
                     recipe={recipe}
+                    primaryAction="copy"
                     onSubmit={(args) => {
                       void runRecipe(recipe, args);
                     }}
