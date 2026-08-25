@@ -1,6 +1,6 @@
 # Tuple Changelog
 
-## [Compact Transcript Timestamps] - {PR_MERGE_DATE}
+## [Compact Transcript Timestamps] - 2026-08-25
 
 - Transcript views and AI summaries keep compact clock timestamps as Tuple shifts its CLI default to full RFC3339 instants.
 
