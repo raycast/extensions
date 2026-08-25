@@ -14,13 +14,48 @@ pub struct MediaSessionInfo {
     pub title: String,
     pub artist: String,
     pub is_playing: bool,
+    // Exactly one of these is populated per session:
+    // exe_path  — process executable of a classic app (shell fileIcon).
+    // icon_path — rendered logo image of a packaged (MSIX/Store) app.
+    pub exe_path: String,
+    pub icon_path: String,
 }
 
 #[raycast]
 fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
+    use windows::Win32::Foundation::CloseHandle;
+    use windows::Win32::System::Diagnostics::ToolHelp::{
+        CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
+    };
+
     let manager = get_session_manager()?;
     let sessions = manager.GetSessions().map_err(|e| format!("GetSessions failed: {}", e))?;
     let iterator = sessions.First().map_err(|e| format!("First failed: {}", e))?;
+
+    // Single process-table scan: name stems and parent PIDs let each session
+    // resolve to its owning executable, or to the host app when the matched
+    // process is a headless engine embedded inside another application.
+    let mut procs: std::collections::HashMap<u32, (String, String, u32)> = std::collections::HashMap::new();
+    let mut by_name: std::collections::HashMap<String, Vec<u32>> = std::collections::HashMap::new();
+    unsafe {
+        let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
+            .map_err(|e| format!("CreateToolhelp32Snapshot failed: {}", e))?;
+        let mut entry = PROCESSENTRY32W::default();
+        entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
+        if Process32FirstW(snapshot, &mut entry).is_ok() {
+            loop {
+                let pid = entry.th32ProcessID;
+                let raw = String::from_utf16_lossy(&entry.szExeFile).trim_end_matches('\0').to_string();
+                let stem = raw.to_lowercase().trim_end_matches(".exe").to_string();
+                procs.insert(pid, (stem.clone(), raw, entry.th32ParentProcessID));
+                by_name.entry(stem).or_default().push(pid);
+                if Process32NextW(snapshot, &mut entry).is_err() {
+                    break;
+                }
+            }
+        }
+        let _ = CloseHandle(snapshot);
+    }
 
     let mut result = Vec::new();
     let mut app_index: std::collections::HashMap<String, u32> = std::collections::HashMap::new();
@@ -54,16 +89,77 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
         let status = info.PlaybackStatus().map_err(|e| format!("PlaybackStatus failed: {}", e))?;
         let is_playing = status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing;
 
+        // Packaged (MSIX/Store) apps have no process-name match and no
+        // embedded exe icon; pull the logo out of their package manifest.
+        let (exe_path, icon_path, resolved_app_name) = if app_id.contains('!') {
+            (String::new(), packaged_app_icon(&app_id).unwrap_or_default(), format_app_name(&app_id))
+        } else {
+            // Display identity comes from a real window owner: the matched
+            // process itself when it has a visible window, otherwise the host
+            // app it was spawned by (an embedded engine has no window of its own).
+            let exe_name = app_id.to_lowercase().trim_end_matches(".exe").to_string();
+            let mut chosen: Option<(u32, String)> = None;
+            if let Some(pids) = by_name.get(&exe_name) {
+                for &pid in pids {
+                    if unsafe { has_visible_window(pid) } {
+                        chosen = procs.get(&pid).map(|(_, raw, _)| (pid, raw.clone()));
+                        break;
+                    }
+                }
+                if chosen.is_none() {
+                    'host: for &pid in pids {
+                        let mut cur = pid;
+                        for _ in 0..8 {
+                            let parent = match procs.get(&cur) {
+                                Some((_, _, p)) if *p != 0 && *p != cur => *p,
+                                _ => break,
+                            };
+                            if unsafe { has_visible_window(parent) } {
+                                chosen = procs.get(&parent).map(|(_, raw, _)| (parent, raw.clone()));
+                                break 'host;
+                            }
+                            cur = parent;
+                        }
+                    }
+                }
+                if chosen.is_none() {
+                    if let Some(&first) = pids.first() {
+                        chosen = procs.get(&first).map(|(_, raw, _)| (first, raw.clone()));
+                    }
+                }
+            }
+
+            match &chosen {
+                Some((pid, raw)) => (unsafe { exe_path_from_pid(*pid) }.unwrap_or_default(), String::new(), format_app_name(raw)),
+                None => (String::new(), String::new(), format_app_name(&app_id)),
+            }
+        };
+
         result.push(MediaSessionInfo {
             app_id: app_id.clone(),
             session_index,
-            app_name: format_app_name(&app_id),
+            app_name: resolved_app_name,
             title,
             artist,
             is_playing,
+            exe_path,
+            icon_path,
         });
 
         iterator.MoveNext().map_err(|e| format!("MoveNext failed: {}", e))?;
+    }
+
+    // Prefer the Start Menu shortcut name when the resolved executable has
+    // one — it is the display name users recognize (and what launchers show).
+    if result.iter().any(|s| !s.exe_path.is_empty()) {
+        let names = start_menu_shortcut_names();
+        if !names.is_empty() {
+            for session in result.iter_mut() {
+                if let Some(name) = names.get(&session.exe_path.to_lowercase()) {
+                    session.app_name = name.clone();
+                }
+            }
+        }
     }
 
     Ok(result)
@@ -582,14 +678,251 @@ unsafe fn exe_path_from_pid(pid: u32) -> Option<String> {
 
     let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid).ok()?;
     let mut buf = [0u16; 1024];
-    let mut size = (buf.len() * 2) as u32;
+    let mut size = buf.len() as u32;
     let ok = QueryFullProcessImageNameW(handle, PROCESS_NAME_WIN32, windows::core::PWSTR(buf.as_mut_ptr()), &mut size);
     let _ = CloseHandle(handle);
     if ok.is_ok() && size > 0 {
-        Some(String::from_utf16_lossy(&buf[..(size as usize / 2)]).trim_end_matches('\0').to_string())
+        Some(String::from_utf16_lossy(&buf[..size as usize]).trim_end_matches('\0').to_string())
     } else {
         None
     }
+}
+
+// Whether any visible top-level window belongs to this process.
+unsafe fn has_visible_window(pid: u32) -> bool {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use windows::Win32::Foundation::{BOOL, HWND, LPARAM, TRUE};
+    use windows::Win32::UI::WindowsAndMessaging::{EnumWindows, GetWindowThreadProcessId, IsWindowVisible};
+
+    static TARGET_PID: AtomicUsize = AtomicUsize::new(0);
+    static FOUND: AtomicUsize = AtomicUsize::new(0);
+    unsafe extern "system" fn cb(hwnd: HWND, _lparam: LPARAM) -> BOOL {
+        if !IsWindowVisible(hwnd).as_bool() {
+            return TRUE;
+        }
+        let mut wpid: u32 = 0;
+        let _ = GetWindowThreadProcessId(hwnd, Some(&mut wpid));
+        if wpid as usize == TARGET_PID.load(Ordering::SeqCst) {
+            FOUND.store(1, Ordering::SeqCst);
+            return BOOL(0);
+        }
+        TRUE
+    }
+    TARGET_PID.store(pid as usize, Ordering::SeqCst);
+    FOUND.store(0, Ordering::SeqCst);
+    let _ = EnumWindows(Some(cb), LPARAM(0));
+    FOUND.load(Ordering::SeqCst) != 0
+}
+
+fn collect_shortcuts(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
+    let Ok(entries) = std::fs::read_dir(dir) else { return };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            collect_shortcuts(&path, out);
+        } else if path.extension().map(|e| e.eq_ignore_ascii_case("lnk")).unwrap_or(false) {
+            out.push(path);
+        }
+    }
+}
+
+// Friendly display names from Start Menu shortcuts: maps each shortcut's
+// target executable path to the shortcut's own file name (e.g. an exe with
+// no embedded metadata still shows the name users see in the Start menu).
+fn start_menu_shortcut_names() -> std::collections::HashMap<String, String> {
+    static CACHE: std::sync::Mutex<Option<std::collections::HashMap<String, String>>> =
+        std::sync::Mutex::new(None);
+    if let Ok(guard) = CACHE.lock() {
+        if let Some(map) = guard.as_ref() {
+            return map.clone();
+        }
+    }
+
+    let mut map: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+    use std::os::windows::ffi::OsStrExt;
+    unsafe {
+        use windows::core::{Interface, PCWSTR};
+        use windows::Win32::Storage::FileSystem::WIN32_FIND_DATAW;
+        use windows::Win32::System::Com::{
+            CoCreateInstance, CoInitializeEx, CoTaskMemFree, CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED,
+            IPersistFile,
+        };
+        use windows::Win32::UI::Shell::{
+            FOLDERID_CommonPrograms, FOLDERID_Programs, IShellLinkW, KNOWN_FOLDER_FLAG, SHGetKnownFolderPath,
+            ShellLink,
+        };
+
+        // S_FALSE / RPC_E_CHANGED_MODE are fine; the apartment is usable either way.
+        let _ = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
+
+        let mut files: Vec<std::path::PathBuf> = Vec::new();
+        for folder in [&FOLDERID_Programs, &FOLDERID_CommonPrograms] {
+            if let Ok(path) = SHGetKnownFolderPath(folder, KNOWN_FOLDER_FLAG(0), None) {
+                collect_shortcuts(std::path::Path::new(&path.display().to_string()), &mut files);
+                CoTaskMemFree(Some(path.as_ptr().cast()));
+            }
+        }
+
+        for lnk in files {
+            let Ok(link): Result<IShellLinkW, _> = CoCreateInstance(&ShellLink, None, CLSCTX_INPROC_SERVER) else {
+                continue;
+            };
+            let Ok(persist) = link.cast::<IPersistFile>() else { continue };
+            let wide: Vec<u16> = lnk.as_os_str().encode_wide().chain(Some(0)).collect();
+            if persist.Load(PCWSTR(wide.as_ptr()), windows::Win32::System::Com::STGM(0)).is_err() {
+                continue;
+            }
+            let mut target = [0u16; 260];
+            let mut fd = WIN32_FIND_DATAW::default();
+            if link.GetPath(&mut target, &mut fd, 0).is_err() {
+                continue;
+            }
+            let len = target.iter().position(|c| *c == 0).unwrap_or(target.len());
+            let exe_path = String::from_utf16_lossy(&target[..len]).to_lowercase();
+            if exe_path.is_empty() || !exe_path.ends_with(".exe") {
+                continue;
+            }
+            if let Some(stem) = lnk.file_stem().and_then(|s| s.to_str()) {
+                map.entry(exe_path).or_insert_with(|| stem.to_string());
+            }
+        }
+    }
+
+    if let Ok(mut guard) = CACHE.lock() {
+        *guard = Some(map.clone());
+    }
+    map
+}
+
+fn xml_attr(manifest: &str, attr: &str) -> Option<String> {
+    let needle = format!("{}=\"", attr);
+    let start = manifest.find(&needle)? + needle.len();
+    let end = start + manifest[start..].find('"')?;
+    Some(manifest[start..end].replace('/', "\\"))
+}
+
+// Rank MRT asset variants: closest targetsize to 32px, then scales (200 best),
+// then the bare logo; contrast/theme/light variants are deprioritized.
+fn asset_score(name: &str) -> u32 {
+    let lower = name.to_lowercase();
+    let parse_suffix = |marker: &str| -> Option<i32> {
+        lower
+            .split(marker)
+            .nth(1)
+            .map(|rest| rest.chars().take_while(|c| c.is_ascii_digit()).collect::<String>())
+            .and_then(|digits| digits.parse::<i32>().ok())
+    };
+    let mut score = match (parse_suffix("targetsize-"), parse_suffix("scale-")) {
+        (Some(ts), _) => ((ts - 32).abs() * 10) as u32 + 10,
+        (None, Some(sc)) => ((200 - sc).abs() * 10) as u32 + 100,
+        _ => 500,
+    };
+    if lower.contains("altform-unplated") && !lower.contains("lightunplated") {
+        score = score.saturating_sub(5);
+    }
+    if lower.contains("lightunplated") {
+        score += 30;
+    }
+    if lower.contains("theme-light") || lower.contains("theme-dark") {
+        score += 50;
+    }
+    if lower.contains("contrast-") {
+        score += 300;
+    }
+    score
+}
+
+// Pick the best-sized PNG among the scale/targetsize variants of a manifest logo.
+fn pick_best_logo_asset(base: &std::path::Path) -> Option<String> {
+    let stem = base.file_stem()?.to_str()?.to_string();
+    let dir = base.parent()?;
+    let mut best: Option<(u32, std::path::PathBuf)> = None;
+    for entry in std::fs::read_dir(dir).ok()?.flatten() {
+        let path = entry.path();
+        let Some(name) = path.file_name().and_then(|n| n.to_str()) else { continue };
+        if !name.starts_with(&stem) || !name.to_lowercase().ends_with(".png") {
+            continue;
+        }
+        let score = asset_score(name);
+        if best.as_ref().map(|(s, _)| score < *s).unwrap_or(true) {
+            best = Some((score, path));
+        }
+    }
+    best?.1.to_str().map(|s| s.to_string())
+}
+
+
+// Packaged (MSIX/Store) apps carry their icon as manifest-referenced assets,
+// not an embedded exe icon. Resolve the package's install folder and pick the
+// best logo variant from it.
+fn packaged_app_icon(app_id: &str) -> Option<String> {
+    use windows::core::{HSTRING, PWSTR};
+    use windows::Win32::Foundation::{ERROR_INSUFFICIENT_BUFFER, ERROR_SUCCESS};
+    use windows::Win32::Storage::Packaging::Appx::{GetPackagePathByFullName, GetPackagesByPackageFamily};
+
+    if !app_id.contains('!') {
+        return None;
+    }
+    let pfn = app_id.split('!').next()?;
+    if pfn.is_empty() || !pfn.contains('_') {
+        return None;
+    }
+
+    let pfn_h = HSTRING::from(pfn);
+    let mut count = 0u32;
+    let mut names_len = 0u32;
+    // The sizing call reports ERROR_INSUFFICIENT_BUFFER while filling the lengths.
+    let sized_err = unsafe { GetPackagesByPackageFamily(&pfn_h, &mut count, None, &mut names_len, PWSTR::null()) };
+    if (sized_err != ERROR_SUCCESS && sized_err != ERROR_INSUFFICIENT_BUFFER) || count == 0 || names_len == 0 {
+        return None;
+    }
+    let mut names_buf = vec![0u16; names_len as usize];
+    let mut name_ptrs: Vec<PWSTR> = vec![PWSTR::null(); count as usize];
+    let listed_err = unsafe {
+        GetPackagesByPackageFamily(
+            &pfn_h,
+            &mut count,
+            Some(name_ptrs.as_mut_ptr()),
+            &mut names_len,
+            PWSTR(names_buf.as_mut_ptr()),
+        )
+    };
+    if listed_err != ERROR_SUCCESS {
+        return None;
+    }
+    let full_names: Vec<String> = String::from_utf16_lossy(&names_buf)
+        .split('\0')
+        .filter(|s| !s.is_empty())
+        .map(|s| s.to_string())
+        .collect();
+
+    for full in full_names {
+        let full_h = HSTRING::from(full.as_str());
+        let mut path_len = 0u32;
+        let sized_path_err = unsafe { GetPackagePathByFullName(&full_h, &mut path_len, PWSTR::null()) };
+        if (sized_path_err != ERROR_SUCCESS && sized_path_err != ERROR_INSUFFICIENT_BUFFER) || path_len == 0 {
+            continue;
+        }
+        let mut path_buf = vec![0u16; path_len as usize];
+        let path_err =
+            unsafe { GetPackagePathByFullName(&full_h, &mut path_len, PWSTR(path_buf.as_mut_ptr())) };
+        if path_err != ERROR_SUCCESS {
+            continue;
+        }
+        let root = String::from_utf16_lossy(&path_buf);
+        let root = root.trim_end_matches('\0');
+        let Ok(manifest) = std::fs::read_to_string(std::path::Path::new(root).join("AppxManifest.xml")) else {
+            continue;
+        };
+        let Some(rel) = xml_attr(&manifest, "Square44x44Logo").or_else(|| xml_attr(&manifest, "Logo")) else {
+            continue;
+        };
+        let base = std::path::Path::new(root).join(rel);
+        if let Some(icon) = pick_best_logo_asset(&base) {
+            return Some(icon);
+        }
+    }
+    None
 }
 
 #[raycast]

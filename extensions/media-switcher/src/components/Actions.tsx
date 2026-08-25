@@ -1,4 +1,4 @@
-import { Action, Icon, showToast, Toast, Keyboard, Clipboard, getPreferenceValues } from "@raycast/api";
+import { Action, Icon, showToast, Toast, Keyboard, getPreferenceValues, Color } from "@raycast/api";
 import {
   switch_session,
   pause_session,
@@ -96,7 +96,7 @@ interface TrackInfoProps {
   artist: string;
 }
 
-export function ActionPause({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
+export function PauseAction({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Pause"
@@ -106,7 +106,7 @@ export function ActionPause({ appId, sessionIndex, titlePrefix, artistPrefix, re
   );
 }
 
-export function ActionPlay({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
+export function PlayAction({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Play"
@@ -116,7 +116,7 @@ export function ActionPlay({ appId, sessionIndex, titlePrefix, artistPrefix, rev
   );
 }
 
-export function ActionSwitch({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
+export function SwitchAction({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Switch to This Session"
@@ -126,11 +126,25 @@ export function ActionSwitch({ appId, sessionIndex, titlePrefix, artistPrefix, r
   );
 }
 
-export function ActionReveal({ appId }: { appId: string }) {
+export function RevealApplicationAction({
+  appId,
+  exePath,
+  iconPath,
+}: {
+  appId: string;
+  exePath: string;
+  iconPath: string;
+}) {
   return (
     <Action
       title="Reveal Application"
-      icon={Icon.AppWindow}
+      icon={
+        iconPath
+          ? { source: `file:///${iconPath}` }
+          : exePath
+            ? { fileIcon: exePath, tintColor: Color.Red }
+            : Icon.AppWindow
+      }
       shortcut={{
         macOS: { modifiers: ["shift"], key: "return" },
         Windows: { modifiers: ["shift"], key: "enter" },
@@ -153,7 +167,7 @@ const nextTrackShortcut: Keyboard.Shortcut = {
   Windows: { modifiers: ["ctrl"], key: prevNextTrackShortcuts === "squareBrackets" ? "]" : "arrowRight" },
 };
 
-export function ActionPreviousTrack({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
+export function PreviousTrackAction({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Previous Track"
@@ -170,7 +184,7 @@ export function ActionPreviousTrack({ appId, sessionIndex, titlePrefix, artistPr
   );
 }
 
-export function ActionNextTrack({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
+export function NextTrackAction({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Next Track"
@@ -183,7 +197,7 @@ export function ActionNextTrack({ appId, sessionIndex, titlePrefix, artistPrefix
   );
 }
 
-export function ActionVolumeUp({ volStep }: VolumeProps) {
+export function VolumeUpAction({ volStep }: VolumeProps) {
   return (
     <Action
       // eslint-disable-next-line @raycast/prefer-title-case
@@ -201,7 +215,7 @@ export function ActionVolumeUp({ volStep }: VolumeProps) {
   );
 }
 
-export function ActionVolumeDown({ volStep }: VolumeProps) {
+export function VolumeDownAction({ volStep }: VolumeProps) {
   return (
     <Action
       title="Turn Volume Down"
@@ -218,22 +232,17 @@ export function ActionVolumeDown({ volStep }: VolumeProps) {
   );
 }
 
-export function ActionCopyTrackInfo({ title, artist }: TrackInfoProps) {
+export function CopyTrackInfoAction({ title, artist }: TrackInfoProps) {
   return (
-    <Action
+    <Action.CopyToClipboard
       title="Copy Track Info"
-      icon={Icon.Clipboard}
+      content={artist ? `${title} — ${artist}` : title}
       shortcut={Keyboard.Shortcut.Common.Copy}
-      onAction={async () => {
-        const text = artist ? `${title} — ${artist}` : title;
-        await Clipboard.copy(text);
-        await showToast({ style: Toast.Style.Success, title: "Copied to clipboard", message: text });
-      }}
     />
   );
 }
 
-export function ActionRefresh({ revalidate }: { revalidate: () => void }) {
+export function RefreshAction<T>({ revalidate }: { revalidate: () => Promise<T> | void }) {
   return (
     <Action
       title="Refresh"

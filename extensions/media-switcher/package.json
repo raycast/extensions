@@ -24,17 +24,17 @@
       "preferences": [
         {
           "name": "prevNextTrackShortcuts",
-          "description": "Pick shortcuts for the \"Previous Track\" and \"Next Track\" actions",
+          "title": "Previous / Next Track Shortcuts",
+          "description": "Choose shortcuts for the \"Previous Track\" and \"Next Track\" actions",
           "type": "dropdown",
           "required": false,
-          "title": "Previous / Next Track Shortcuts",
           "data": [
             {
-              "title": "`⌘` / `Ctrl` + `[` and `]`",
+              "title": "⌘ / Ctrl and Square Brackets [ ]",
               "value": "squareBrackets"
             },
             {
-              "title": "`⌘` / `Ctrl` + `←` and `→`",
+              "title": "⌘ / Ctrl and Arrow Keys ← →",
               "value": "arrowKeys"
             }
           ],
@@ -42,37 +42,37 @@
         },
         {
           "name": "refreshInterval",
+          "title": "Refresh Interval (seconds)",
           "description": "How often to auto-refresh the media session list. Set to 0 to disable",
           "type": "textfield",
           "required": false,
           "default": "5",
-          "placeholder": "5",
-          "title": "Refresh Interval (seconds)"
+          "placeholder": "5"
         },
         {
           "name": "volumeStep",
+          "title": "Volume Step",
           "description": "How much to increase or decrease the volume by",
           "type": "textfield",
           "required": false,
           "default": "5",
-          "placeholder": "5",
-          "title": "Volume Step"
+          "placeholder": "5"
         }
       ]
     }
   ],
   "tools": [],
   "dependencies": {
-    "@raycast/api": "^1.104.24",
+    "@raycast/api": "^2.0.6",
     "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "26.1.2",
+    "@types/node": "26.3.0",
     "@types/react": "19.2.18",
-    "eslint": "^10.8.0",
+    "eslint": "^10.9.1",
     "prettier": "^3.9.6",
-    "typescript": "^6.0.0"
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -83,6 +83,6 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "allowScripts": {
-    "esbuild@0.27.7": true
+    "esbuild@0.28.2": true
   }
 }

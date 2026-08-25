@@ -1,17 +1,17 @@
-import { ActionPanel, List, Icon, Color, getPreferenceValues, showToast, Toast, Action } from "@raycast/api";
+import { ActionPanel, List, Icon, getPreferenceValues, showToast, Toast, Action, Color } from "@raycast/api";
 import { useEffect, useRef } from "react";
 import { usePromise } from "@raycast/utils";
 import {
-  ActionPause,
-  ActionPlay,
-  ActionSwitch,
-  ActionReveal,
-  ActionPreviousTrack,
-  ActionNextTrack,
-  ActionCopyTrackInfo,
-  ActionVolumeUp,
-  ActionVolumeDown,
-  ActionRefresh,
+  PauseAction,
+  PlayAction,
+  SwitchAction,
+  RevealApplicationAction,
+  PreviousTrackAction,
+  NextTrackAction,
+  CopyTrackInfoAction,
+  VolumeUpAction,
+  VolumeDownAction,
+  RefreshAction,
 } from "./components/Actions";
 import { list_sessions } from "rust:../rust";
 
@@ -58,17 +58,32 @@ export default function Command() {
         return (
           <List.Item
             key={`${session.app_id}-${session.session_index}`}
-            icon={session.is_playing ? { source: Icon.Play, tintColor: Color.Green } : Icon.Pause}
-            title={session.title || "No title"}
-            subtitle={session.artist || session.app_name}
-            accessories={[{ text: session.app_name }]}
+            icon={
+              session.icon_path
+                ? { value: { source: `file:///${session.icon_path}` }, tooltip: session.app_name }
+                : session.exe_path
+                  ? { value: { fileIcon: session.exe_path }, tooltip: session.app_name }
+                  : { value: Icon.Music, tooltip: session.app_name }
+            }
+            title={session.title ? { value: session.title, tooltip: session.title } : "No title"}
+            subtitle={
+              session.artist
+                ? { value: session.artist, tooltip: session.artist }
+                : { value: session.app_name, tooltip: session.app_name }
+            }
+            accessories={[
+              {
+                icon: session.is_playing ? { source: Icon.Waveform, tintColor: Color.Green } : Icon.Pause,
+                text: session.is_playing ? { value: "Playing", color: Color.Green } : "Paused",
+              },
+            ]}
             actions={
               <ActionPanel>
                 {hasIdentity ? (
                   <>
                     {session.is_playing ? (
                       <ActionPanel.Section>
-                        <ActionPause
+                        <PauseAction
                           appId={session.app_id}
                           sessionIndex={session.session_index}
                           titlePrefix={session.title}
@@ -79,7 +94,7 @@ export default function Command() {
                     ) : (
                       <ActionPanel.Section>
                         {sessions?.some((s) => s.is_playing) && (
-                          <ActionSwitch
+                          <SwitchAction
                             appId={session.app_id}
                             sessionIndex={session.session_index}
                             titlePrefix={session.title}
@@ -87,7 +102,7 @@ export default function Command() {
                             revalidate={revalidate}
                           />
                         )}
-                        <ActionPlay
+                        <PlayAction
                           appId={session.app_id}
                           sessionIndex={session.session_index}
                           titlePrefix={session.title}
@@ -97,14 +112,14 @@ export default function Command() {
                       </ActionPanel.Section>
                     )}
                     <ActionPanel.Section>
-                      <ActionPreviousTrack
+                      <PreviousTrackAction
                         appId={session.app_id}
                         sessionIndex={session.session_index}
                         titlePrefix={session.title}
                         artistPrefix={session.artist}
                         revalidate={revalidate}
                       />
-                      <ActionNextTrack
+                      <NextTrackAction
                         appId={session.app_id}
                         sessionIndex={session.session_index}
                         titlePrefix={session.title}
@@ -130,15 +145,19 @@ export default function Command() {
                   </ActionPanel.Section>
                 )}
                 <ActionPanel.Section>
-                  <ActionReveal appId={session.app_id} />
-                  <ActionCopyTrackInfo title={session.title} artist={session.artist} />
+                  <RevealApplicationAction
+                    appId={session.app_id}
+                    exePath={session.exe_path}
+                    iconPath={session.icon_path}
+                  />
+                  <CopyTrackInfoAction title={session.title} artist={session.artist} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <ActionVolumeUp volStep={volStep} />
-                  <ActionVolumeDown volStep={volStep} />
+                  <VolumeUpAction volStep={volStep} />
+                  <VolumeDownAction volStep={volStep} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <ActionRefresh revalidate={revalidate} />
+                  <RefreshAction revalidate={revalidate} />
                 </ActionPanel.Section>
               </ActionPanel>
             }
