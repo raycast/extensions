@@ -1,5 +1,7 @@
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { randomUUID } from "node:crypto";
+import { join } from "node:path";
+import { writeBackup } from "./backup";
 import { type ParsedAccount } from "./totp";
 
 const storageKey = "accounts";
@@ -67,8 +69,14 @@ function accountKey(account: Account): string {
 }
 
 async function save(accounts: Account[]): Promise<void> {
-  await LocalStorage.setItem(
-    storageKey,
-    JSON.stringify(accounts.sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id))),
-  );
+  const sorted = accounts.sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id));
+  const { backupDirectory, backupPassphrase } = getPreferenceValues<{
+    backupDirectory?: string;
+    backupPassphrase?: string;
+  }>();
+  if (backupDirectory || backupPassphrase) {
+    if (!backupDirectory || !backupPassphrase) throw new Error("Set both Automatic Backup preferences or clear both to disable it.");
+    await writeBackup(sorted, backupPassphrase, join(backupDirectory, "totp-backup.json"));
+  }
+  await LocalStorage.setItem(storageKey, JSON.stringify(sorted));
 }
