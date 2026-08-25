@@ -1,13 +1,13 @@
 # USB-C Inspector
 
-See exactly what your USB-C and MagSafe cables can do — charging watts, data speed, Thunderbolt, and connected devices — directly from Raycast.
+USB-C Inspector shows what each USB-C or MagSafe cable can do: charging watts, data speed, Thunderbolt, and the device on the other end.
+
+Plug a cable in, pick the port, and read the details. On first launch the extension downloads the official WhatCable CLI and verifies it. No separate install needed.
 
 ## Requirements
 
 - **Apple Silicon Mac** (M1 or later). USB-PD / e-marker data is not available on Intel Macs.
 - **macOS 14 (Sonoma)** or later.
-
-You do **not** need to install WhatCable separately. On first launch the extension downloads the notarized CLI from [GitHub Releases](https://github.com/darrylmorley/whatcable/releases) and verifies it with SHA-256.
 
 ## Commands
 
