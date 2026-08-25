@@ -14,15 +14,10 @@ import {
 import { basename } from "node:path";
 import { useEffect, useMemo, useState } from "react";
 
-import type { ConflictBehavior } from "../domain/file-conflicts";
 import { sortDestinations } from "../domain/destination";
 import { getFinderSelection } from "../services/finder-selection";
 import { type FileOperationMode, performFileOperation } from "../services/file-operations";
 import { useDestinations } from "./use-destinations";
-
-interface Preferences {
-  conflictBehavior: ConflictBehavior;
-}
 
 export interface DestinationOperationListProps {
   mode: FileOperationMode;

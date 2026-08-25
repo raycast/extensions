@@ -7,7 +7,7 @@ import {
   isRecord,
   validateDestinationDraft,
 } from "./destination";
-import { CsvParseError, parseCsv } from "./csv";
+import { CsvParseError, parseCsv, restoreSpreadsheetText } from "./csv";
 
 export type ImportFormat = "csv" | "json";
 export type ImportStatus = "valid" | "invalid" | "duplicate" | "missing-folder";
@@ -99,7 +99,9 @@ export function parseCsvImport(content: string): ParsedImport {
 
     const entries = rows.slice(1).map((row, index) => {
       const sourceIndex = index + 1;
-      const values = Object.fromEntries(headers.map((header, column) => [header, row.values[column]?.trim() ?? ""]));
+      const values = Object.fromEntries(
+        headers.map((header, column) => [header, restoreSpreadsheetText(row.values[column]?.trim() ?? "")]),
+      );
       const errors: string[] = [];
       if (row.values.length !== headers.length) {
         errors.push(`Expected ${headers.length} fields but found ${row.values.length}.`);

@@ -145,7 +145,7 @@ async function transferWithRollback(
 
 async function transfer(mode: FileOperationMode, sourcePath: string, targetPath: string): Promise<void> {
   if (mode === "copy") {
-    await copyItem(sourcePath, targetPath);
+    await copyItemSafely(sourcePath, targetPath);
     return;
   }
 
@@ -155,7 +155,7 @@ async function transfer(mode: FileOperationMode, sourcePath: string, targetPath:
     if (!isNodeError(error) || error.code !== "EXDEV") {
       throw error;
     }
-    await copyItem(sourcePath, targetPath);
+    await copyItemSafely(sourcePath, targetPath);
     try {
       await rm(sourcePath, { recursive: true });
     } catch (removeError) {
@@ -172,7 +172,35 @@ async function transfer(mode: FileOperationMode, sourcePath: string, targetPath:
   }
 }
 
-async function copyItem(sourcePath: string, targetPath: string): Promise<void> {
+type CopyFileSystemItem = (sourcePath: string, targetPath: string) => Promise<void>;
+
+export async function copyItemSafely(
+  sourcePath: string,
+  targetPath: string,
+  copyFileSystemItem: CopyFileSystemItem = copyFileSystemItemDirectly,
+): Promise<void> {
+  const stagingPath = join(dirname(targetPath), `.folder-routes-copy-${randomUUID()}-${basename(targetPath)}`);
+
+  try {
+    await copyFileSystemItem(sourcePath, stagingPath);
+    if (await pathExists(targetPath)) {
+      throw new Error(`An item with the same name was created while copying: ${targetPath}`);
+    }
+    await rename(stagingPath, targetPath);
+  } catch (copyError) {
+    try {
+      await rm(stagingPath, { recursive: true, force: true });
+    } catch (cleanupError) {
+      throw new AggregateError(
+        [copyError, cleanupError],
+        `Copy failed and its temporary data could not be removed: ${stagingPath}`,
+      );
+    }
+    throw copyError;
+  }
+}
+
+async function copyFileSystemItemDirectly(sourcePath: string, targetPath: string): Promise<void> {
   await cp(sourcePath, targetPath, {
     recursive: true,
     force: false,

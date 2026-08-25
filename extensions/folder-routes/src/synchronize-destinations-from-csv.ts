@@ -3,12 +3,8 @@ import { Toast, getPreferenceValues, showHUD, showToast } from "@raycast/api";
 import { CsvSynchronizationError, synchronizeDestinationsFromCsv } from "./services/csv-synchronization";
 import { resolveDestinationsCsvPath } from "./services/destination-csv";
 
-interface Preferences {
-  destinationsCsvFile?: string;
-}
-
 export default async function Command() {
-  const { destinationsCsvFile } = getPreferenceValues<Preferences>();
+  const { destinationsCsvFile } = getPreferenceValues<Preferences.SynchronizeDestinationsFromCsv>();
 
   try {
     const count = await synchronizeDestinationsFromCsv(resolveDestinationsCsvPath(destinationsCsvFile));

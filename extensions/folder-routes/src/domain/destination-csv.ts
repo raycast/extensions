@@ -1,5 +1,5 @@
 import type { Destination } from "./destination";
-import { parseCsv } from "./csv";
+import { parseCsv, protectSpreadsheetText } from "./csv";
 import { parseCsvImport } from "./import";
 
 export const DESTINATION_CSV_HEADERS = ["id", "name", "path", "keywords", "copy", "move", "pinned"] as const;
@@ -53,5 +53,6 @@ function destinationValue(destination: Destination, header: string): string {
 }
 
 function csvValue(value: string): string {
-  return /[",\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
+  const protectedValue = protectSpreadsheetText(value);
+  return /[",\r\n]/.test(protectedValue) ? `"${protectedValue.replaceAll('"', '""')}"` : protectedValue;
 }

@@ -22,7 +22,7 @@ import { useDestinations } from "./use-destinations";
 export function ManageDestinationsList() {
   const state = useDestinations();
   const destinations = sortDestinations(state.destinations);
-  const { destinationsCsvFile } = getPreferenceValues<{ destinationsCsvFile?: string }>();
+  const { destinationsCsvFile } = getPreferenceValues<Preferences.ManageDestinations>();
 
   async function remove(destination: Destination) {
     const confirmed = await confirmAlert({

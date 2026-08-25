@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test, { type TestContext } from "node:test";
 
-import { performFileOperation } from "../src/services/file-operations";
+import { copyItemSafely, performFileOperation } from "../src/services/file-operations";
 
 interface FileOperationFixture {
   destination: string;
@@ -103,4 +103,21 @@ test("prompt cancellation skips without modifying either item", async (t) => {
   assert.equal(result.skippedCount, 1);
   assert.equal(await readFile(fixture.source, "utf8"), "new content\n");
   assert.equal(await readFile(target, "utf8"), "existing content\n");
+});
+
+test("failed copies remove partial staging data and never expose an incomplete target", async (t) => {
+  const fixture = await createFixture(t);
+  const target = join(fixture.destination, "example.txt");
+
+  await assert.rejects(
+    copyItemSafely(fixture.source, target, async (_sourcePath, stagingPath) => {
+      await writeFile(stagingPath, "partial content\n", "utf8");
+      throw new Error("simulated copy failure");
+    }),
+    /simulated copy failure/,
+  );
+
+  await assert.rejects(readFile(target, "utf8"), { code: "ENOENT" });
+  assert.deepEqual(await readdir(fixture.destination), []);
+  assert.equal(await readFile(fixture.source, "utf8"), "new content\n");
 });

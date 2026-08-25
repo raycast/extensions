@@ -13,6 +13,19 @@ export class CsvParseError extends Error {
   }
 }
 
+const SPREADSHEET_FORMULA_PREFIX = /^[=+\-@]/;
+
+export function protectSpreadsheetText(value: string): string {
+  return value.startsWith("'") || SPREADSHEET_FORMULA_PREFIX.test(value) ? `'${value}` : value;
+}
+
+export function restoreSpreadsheetText(value: string): string {
+  if (value.startsWith("''") || /^'[=+\-@]/.test(value)) {
+    return value.slice(1);
+  }
+  return value;
+}
+
 export function parseCsv(input: string): CsvRow[] {
   const text = input.replace(/^\uFEFF/, "");
   const rows: CsvRow[] = [];

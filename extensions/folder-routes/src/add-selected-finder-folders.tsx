@@ -10,16 +10,9 @@ import { getDestinations } from "./services/destination-repository";
 import { getFinderSelection } from "./services/finder-selection";
 import { isDirectory } from "./services/filesystem";
 
-interface Preferences {
-  destinationsCsvFile?: string;
-  newFinderFoldersCopy: boolean;
-  newFinderFoldersMove: boolean;
-  newFinderFoldersPinned: boolean;
-}
-
 export default async function Command() {
   const { destinationsCsvFile, newFinderFoldersCopy, newFinderFoldersMove, newFinderFoldersPinned } =
-    getPreferenceValues<Preferences>();
+    getPreferenceValues<Preferences.AddSelectedFinderFolders>();
 
   try {
     const paths = await getFinderSelection();
