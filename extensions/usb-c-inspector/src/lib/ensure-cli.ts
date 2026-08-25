@@ -128,6 +128,7 @@ const LOCK_WAIT_MS = 5 * 60 * 1000;
 /** Heartbeat freshness window; shorter than LOCK_WAIT_MS so reused-PID locks are reaped in time. */
 const STALE_LOCK_MS = 2 * 60 * 1000;
 const HEARTBEAT_INTERVAL_MS = 10_000;
+const LOST_INSTALL_LOCK_MESSAGE = "Lost WhatCable CLI install lock before replacing the shared cache.";
 
 function lockDirPath(): string {
   return path.join(environment.supportPath, LOCK_DIR_NAME);
@@ -135,6 +136,16 @@ function lockDirPath(): string {
 
 function ownerFilePath(pid: number): string {
   return path.join(lockDirPath(), `owner-${pid}`);
+}
+
+/** True when this process still has its published owner file (not merely a live PID). */
+async function ownsInstallLock(): Promise<boolean> {
+  try {
+    const raw = await readFile(ownerFilePath(process.pid), "utf8");
+    return Number(raw.trim().split("\n")[0]) === process.pid;
+  } catch {
+    return false;
+  }
 }
 
 async function refreshLockHeartbeat(): Promise<void> {
@@ -256,6 +267,12 @@ async function replaceCachedCli(stagingDir: string): Promise<void> {
   const outgoingDir = path.join(environment.supportPath, `.${CLI_DIR_NAME}-outgoing-${process.pid}`);
   await rm(outgoingDir, { recursive: true, force: true });
 
+  // A suspended holder can be reaped after STALE_LOCK_MS while still running.
+  // Refuse to touch the shared cache unless we still own the lock.
+  if (!(await ownsInstallLock())) {
+    throw new Error(LOST_INSTALL_LOCK_MESSAGE);
+  }
+
   if (existsSync(targetDir)) {
     await rename(targetDir, outgoingDir);
   }
@@ -304,7 +321,17 @@ async function installFromGitHub(): Promise<string> {
     const stagedBinary = path.join(stagingDir, CLI_BINARY_NAME);
     await chmod(stagedBinary, 0o755);
     await writeFile(path.join(stagingDir, "VERSION"), `${release.tag_name}\n`, "utf8");
-    await replaceCachedCli(stagingDir);
+    try {
+      await replaceCachedCli(stagingDir);
+    } catch (error) {
+      if (error instanceof Error && error.message === LOST_INSTALL_LOCK_MESSAGE) {
+        const existing = resolveExistingCli();
+        if (existing) {
+          return existing;
+        }
+      }
+      throw error;
+    }
 
     return cachedCliPath();
   } finally {
