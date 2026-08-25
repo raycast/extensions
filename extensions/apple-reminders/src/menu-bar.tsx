@@ -232,12 +232,14 @@ export default function Command() {
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
-                title={`${timePrefix}${addPriorityToTitle(
-                  displayListTitleForMenuBarReminders
-                    ? addListTitle(reminder.title, reminder.list?.title)
-                    : reminder.title,
-                  reminder.priority,
-                )}`}
+                title={truncate(
+                  `${timePrefix}${addPriorityToTitle(
+                    displayListTitleForMenuBarReminders
+                      ? addListTitle(reminder.title, reminder.list?.title)
+                      : reminder.title,
+                    reminder.priority,
+                  )}`,
+                )}
               >
                 <MenuBarExtra.Item
                   title="Open Reminder"
