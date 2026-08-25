@@ -1,6 +1,6 @@
 # App Freezer Changelog
 
-## [AI Tool Support] - {PR_MERGE_DATE}
+## [AI Tool Support] - 2026-08-25
 
 - Add a read-only "List Applications" AI tool for querying paused/running status and live CPU/memory usage.
 
