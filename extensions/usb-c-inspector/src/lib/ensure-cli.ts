@@ -2,7 +2,7 @@ import { environment } from "@raycast/api";
 import { createHash } from "crypto";
 import { createWriteStream, existsSync } from "fs";
 import { spawnSync } from "child_process";
-import { chmod, mkdir, mkdtemp, readdir, readFile, rename, rm, rmdir, stat, writeFile } from "fs/promises";
+import { chmod, mkdir, mkdtemp, open, readdir, readFile, rename, rm, rmdir, stat, writeFile } from "fs/promises";
 import path from "path";
 import { pipeline } from "stream/promises";
 import { Readable } from "stream";
@@ -138,23 +138,33 @@ function ownerFilePath(pid: number): string {
 }
 
 async function refreshLockHeartbeat(): Promise<void> {
-  const ownerPath = ownerFilePath(process.pid);
-  if (!existsSync(ownerPath)) {
-    return;
-  }
   try {
-    await writeFile(ownerPath, `${process.pid}\n${Date.now()}\n`, "utf8");
+    // `r+` refuses to create: a resumed heartbeat must not plant a new owner file.
+    const handle = await open(ownerFilePath(process.pid), "r+");
+    try {
+      await handle.truncate(0);
+      await handle.writeFile(`${process.pid}\n${Date.now()}\n`, "utf8");
+    } finally {
+      await handle.close();
+    }
   } catch {
-    // Lock dir may have been removed; the next acquire/reap cycle recovers.
+    // Owner file or lock dir is gone; do not recreate it.
   }
 }
 
 function startLockHeartbeat(): () => void {
+  let stopped = false;
   const timer = setInterval(() => {
+    if (stopped) {
+      return;
+    }
     void refreshLockHeartbeat();
   }, HEARTBEAT_INTERVAL_MS);
   timer.unref();
-  return () => clearInterval(timer);
+  return () => {
+    stopped = true;
+    clearInterval(timer);
+  };
 }
 
 function isLockHeldError(code: string | undefined): boolean {
@@ -162,9 +172,9 @@ function isLockHeldError(code: string | undefined): boolean {
 }
 
 /**
- * Reap a dead or reused-PID holder's lock without unlinking a replacement.
- * The owner file is named `owner-<pid>`, so we only delete that exact file.
- * `rmdir` then fails if another process already created `owner-<livePid>`.
+ * Reap stale `owner-<pid>` files without unlinking a live replacement.
+ * Each owner is named for its pid, so only that file is removed. `rmdir`
+ * then fails if a live owner remains.
  */
 async function tryReapStaleLock(lockDir: string): Promise<void> {
   let entries: string[];
@@ -174,35 +184,22 @@ async function tryReapStaleLock(lockDir: string): Promise<void> {
     return;
   }
 
-  if (entries.length === 0) {
-    try {
-      await rmdir(lockDir);
-    } catch {
-      // Already gone, or a waiter published into it.
-    }
-    return;
-  }
-
   const owners = entries.filter((entry) => entry.startsWith("owner-"));
-  if (owners.length !== 1) {
-    return;
+  for (const ownerName of owners) {
+    const owner = Number(ownerName.slice("owner-".length));
+    if (!Number.isInteger(owner) || owner <= 0) {
+      continue;
+    }
+    if (await isLockOwnerStillHolding(lockDir, ownerName, owner)) {
+      continue;
+    }
+    await rm(path.join(lockDir, ownerName), { force: true });
   }
 
-  const ownerName = owners[0];
-  const owner = Number(ownerName.slice("owner-".length));
-  if (!Number.isInteger(owner) || owner <= 0) {
-    return;
-  }
-
-  if (await isLockOwnerStillHolding(lockDir, ownerName, owner)) {
-    return;
-  }
-
-  await rm(path.join(lockDir, ownerName), { force: true });
   try {
     await rmdir(lockDir);
   } catch {
-    // Another process already placed a live owner file in this directory.
+    // Still held, already gone, or a waiter published into it.
   }
 }
 
