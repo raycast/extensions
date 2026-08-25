@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "layoutlock",
+  "title": "LayoutLock",
+  "description": "Save and restore LayoutLock window layouts from Raycast.",
+  "icon": "icon.png",
+  "author": "brkgng",
+  "access": "public",
+  "platforms": ["macOS"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "keywords": ["windows", "workspace", "layout", "restore"],
+  "commands": [
+    {
+      "name": "restore-layout",
+      "title": "Restore Layout",
+      "description": "Search and request restoration of a saved LayoutLock layout.",
+      "mode": "view"
+    },
+    {
+      "name": "save-current-layout",
+      "title": "Save Current Layout",
+      "description": "Request that LayoutLock save the current window layout.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "name",
+          "type": "text",
+          "placeholder": "Layout name (optional)",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  }
+}
