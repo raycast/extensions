@@ -1,6 +1,6 @@
 # Dimmer Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-25
 
 - Dim every connected Mac display beyond its minimum hardware brightness.
 - Adjust dimming with Raycast commands, assignable hotkeys, or the menu bar.
