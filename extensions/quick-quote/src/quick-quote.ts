@@ -2,12 +2,27 @@ import { Clipboard, getSelectedText, showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { isMeaningfulSelection, quoteText, resolveSelectionAfterCopy, toRestorableContent } from "./quote";
+import {
+  ClipboardState,
+  confirmCopySamples,
+  isMeaningfulSelection,
+  quoteText,
+  resolveSelectionAfterCopy,
+  toRestorableContent,
+} from "./quote";
 
-const COPY_DELAY_MS = 150;
+const COPY_TIMEOUT_MS = 150;
 const PASTE_DELAY_MS = 200;
 
 const execFileAsync = promisify(execFile);
+
+function parseChangeCount(stdout: string): number {
+  const count = Number(stdout.trim());
+  if (!Number.isFinite(count)) {
+    throw new Error("Could not read pasteboard change count");
+  }
+  return count;
+}
 
 async function clipboardChangeCount(): Promise<number> {
   const { stdout } = await execFileAsync("osascript", [
@@ -16,19 +31,40 @@ async function clipboardChangeCount(): Promise<number> {
     "-e",
     'ObjC.import("AppKit"); $.NSPasteboard.generalPasteboard.changeCount',
   ]);
-  const count = Number(stdout.trim());
-  if (!Number.isFinite(count)) {
-    throw new Error("Could not read pasteboard change count");
-  }
-  return count;
+  return parseChangeCount(stdout);
+}
+
+async function waitForPasteboardChange(startCount: number, timeoutMs: number): Promise<number> {
+  const { stdout } = await execFileAsync("osascript", [
+    "-l",
+    "JavaScript",
+    "-e",
+    `ObjC.import("AppKit");
+     const pb = $.NSPasteboard.generalPasteboard;
+     const start = ${startCount};
+     const deadline = Date.now() + ${timeoutMs};
+     let current = Number(pb.changeCount);
+     while (current === start && Date.now() < deadline) {
+       $.NSThread.sleepForTimeInterval(0.01);
+       current = Number(pb.changeCount);
+     }
+     current;`,
+  ]);
+  return parseChangeCount(stdout);
+}
+
+async function probeCopy(baseline: ClipboardState): Promise<string | null> {
+  await runAppleScript(`tell application "System Events" to keystroke "c" using command down`);
+  await waitForPasteboardChange(baseline.changeCount, COPY_TIMEOUT_MS);
+  const after = { text: (await Clipboard.read()).text, changeCount: await clipboardChangeCount() };
+  return resolveSelectionAfterCopy(baseline, after);
 }
 
 async function readSelectionViaCopy(originalText: string): Promise<string | null> {
-  const before = { text: originalText, changeCount: await clipboardChangeCount() };
-  await runAppleScript(`tell application "System Events" to keystroke "c" using command down`);
-  await new Promise((resolve) => setTimeout(resolve, COPY_DELAY_MS));
-  const after = { text: (await Clipboard.read()).text, changeCount: await clipboardChangeCount() };
-  return resolveSelectionAfterCopy(before, after);
+  const first = await probeCopy({ text: originalText, changeCount: await clipboardChangeCount() });
+  if (first == null) return null;
+  const second = await probeCopy({ text: first, changeCount: await clipboardChangeCount() });
+  return confirmCopySamples(first, second);
 }
 
 async function readSelection(originalText: string): Promise<string | null> {

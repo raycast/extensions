@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { isMeaningfulSelection, quoteText, resolveSelectionAfterCopy, toRestorableContent } from "./quote";
+import {
+  confirmCopySamples,
+  isMeaningfulSelection,
+  quoteText,
+  resolveSelectionAfterCopy,
+  toRestorableContent,
+} from "./quote";
 
 describe("quoteText", () => {
   it("prefixes a single line and appends a trailing newline", () => {
@@ -71,6 +77,28 @@ describe("resolveSelectionAfterCopy", () => {
     const before = { text: "x", changeCount: 1 };
     const after = { text: "", changeCount: 2 };
     expect(resolveSelectionAfterCopy(before, after)).toBeNull();
+  });
+
+  it("returns null when the count moved more than once (concurrent write)", () => {
+    const before = { text: "old", changeCount: 1 };
+    const after = { text: "other-app", changeCount: 3 };
+    expect(resolveSelectionAfterCopy(before, after)).toBeNull();
+  });
+});
+
+describe("confirmCopySamples", () => {
+  it("keeps the text when both Cmd+C probes agree", () => {
+    expect(confirmCopySamples("sel", "sel")).toBe("sel");
+  });
+
+  it("returns null when the second probe differs (concurrent overwrite)", () => {
+    expect(confirmCopySamples("sel", "other-app")).toBeNull();
+  });
+
+  it("returns null when either probe failed", () => {
+    expect(confirmCopySamples(null, "sel")).toBeNull();
+    expect(confirmCopySamples("sel", null)).toBeNull();
+    expect(confirmCopySamples(null, null)).toBeNull();
   });
 });
 

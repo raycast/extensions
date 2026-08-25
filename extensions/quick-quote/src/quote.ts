@@ -19,16 +19,20 @@ export interface ClipboardState {
 }
 
 /**
- * NSPasteboard.changeCount bumps on every clipboard write, so only a bump
- * proves the Cmd+C keystroke actually copied a selection. An unchanged
- * clipboard is ambiguous: it could be a terminal that auto-copied on select,
- * or stale contents (a password copied earlier) with no selection at all.
- * Quoting on ambiguity risks pasting secrets, so we bail instead. Auto-copy
- * terminals still work because they re-copy the selection on Cmd+C.
+ * NSPasteboard.changeCount bumps on every clipboard write. Exactly one bump
+ * after Cmd+C is the copy we sent; no bump is a stale clipboard; more than
+ * one bump means another writer also touched the pasteboard. Auto-copy
+ * terminals still work because they re-copy the selection on Cmd+C (one bump).
  */
 export function resolveSelectionAfterCopy(before: ClipboardState, after: ClipboardState): string | null {
-  if (after.changeCount === before.changeCount) return null;
+  if (after.changeCount - before.changeCount !== 1) return null;
   return after.text || null;
+}
+
+/** Second Cmd+C must reproduce the first sample; a mismatch is another writer. */
+export function confirmCopySamples(first: string | null, second: string | null): string | null {
+  if (first == null || first !== second) return null;
+  return first;
 }
 
 export interface ClipboardSnapshot {
