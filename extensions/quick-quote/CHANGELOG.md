@@ -1,6 +1,6 @@
 # Quick Quote Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-25
 
 - Quick Quote command: prefix every line of the current selection with `> ` and paste it back into the focused app
 - Reads the selection via the macOS Accessibility API, with a Cmd+C clipboard fallback for terminals (handles auto-copy-on-select)
