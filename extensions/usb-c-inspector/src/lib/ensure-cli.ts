@@ -153,8 +153,11 @@ async function refreshLockHeartbeat(): Promise<void> {
     // `r+` refuses to create: a resumed heartbeat must not plant a new owner file.
     const handle = await open(ownerFilePath(process.pid), "r+");
     try {
-      await handle.truncate(0);
-      await handle.writeFile(`${process.pid}\n${Date.now()}\n`, "utf8");
+      const payload = `${process.pid}\n${Date.now()}\n`;
+      // Overwrite in place, then shrink. Truncating first would let
+      // ownsInstallLock read an empty file and drop a live lock.
+      await handle.write(payload, 0, "utf8");
+      await handle.truncate(payload.length);
     } finally {
       await handle.close();
     }
