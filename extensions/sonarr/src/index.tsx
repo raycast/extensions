@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Icon, List, confirmAlert, Alert, Color, Image, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  confirmAlert,
+  Alert,
+  Color,
+  Image,
+  getPreferenceValues,
+  Keyboard,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import type { SingleSeries } from "@/lib/types/episode";
@@ -15,6 +26,7 @@ import {
   formatQualityProfile,
   getSonarrUrl,
 } from "@/lib/utils/formatting";
+import { Shortcuts } from "@/lib/utils/shortcuts";
 
 export default function Command() {
   const preferences = getPreferenceValues<SonarrPreferences>();
@@ -175,20 +187,20 @@ function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefr
                 title="Search Episode"
                 icon={Icon.MagnifyingGlass}
                 onAction={handleSearchEpisode}
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                shortcut={Shortcuts.searchEpisode}
               />
             )}
             <Action
               title="Search Season"
               icon={Icon.Folder}
               onAction={handleSearchSeason}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              shortcut={Shortcuts.searchSeason}
             />
             <Action
               title={episode.monitored ? "Disable Monitoring" : "Enable Monitoring"}
               icon={episode.monitored ? Icon.EyeSlash : Icon.Eye}
               onAction={handleToggleMonitoring}
-              shortcut={{ modifiers: ["cmd"], key: "m" }}
+              shortcut={Shortcuts.toggleMonitoring}
             />
           </ActionPanel.Section>
 
@@ -197,7 +209,7 @@ function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefr
               title="Open Series in Sonarr"
               url={`${sonarrUrl}/series/${episode.series.titleSlug}`}
               icon={Icon.Globe}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             {episode.series.tvdbId && (
               <Action.OpenInBrowser
@@ -220,7 +232,7 @@ function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefr
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
         </ActionPanel>

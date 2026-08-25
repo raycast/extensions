@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Grid } from "@raycast/api";
+import { Action, ActionPanel, Icon, Grid, Keyboard } from "@raycast/api";
 import { useState, useMemo } from "react";
 import type { SeriesFull } from "@/lib/types/series";
 import { useSeries } from "@/lib/hooks/useSonarrAPI";
@@ -12,6 +12,7 @@ import {
   getSonarrUrl,
 } from "@/lib/utils/formatting";
 import { SeriesDetail } from "@/lib/components/SeriesDetail";
+import { Shortcuts } from "@/lib/utils/shortcuts";
 
 type FilterStatus = "all" | "available" | "missing";
 
@@ -155,14 +156,14 @@ function SeriesGridItem({ series, onRefresh }: { series: SeriesFull; onRefresh: 
               title="View Details"
               icon={Icon.Eye}
               target={<SeriesDetail content={content} />}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={Shortcuts.viewDetails}
             />
             {series.path && (
               <Action.CopyToClipboard
                 title="Copy Path"
                 content={series.path}
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={Shortcuts.copyPath}
               />
             )}
           </ActionPanel.Section>
@@ -172,7 +173,7 @@ function SeriesGridItem({ series, onRefresh }: { series: SeriesFull; onRefresh: 
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
         </ActionPanel>

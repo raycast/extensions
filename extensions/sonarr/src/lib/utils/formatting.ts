@@ -1,14 +1,10 @@
-import { getPreferenceValues } from "@raycast/api";
 import { format, formatDistanceToNow, isPast, isFuture } from "date-fns";
 import type { Image, Ratings } from "@/lib/types/episode";
-import type { SonarrPreferences } from "@/lib/types/preferences";
 import { CoverType } from "@/lib/types/episode";
+import { getSonarrBaseUrl } from "@/lib/utils/connection";
 
 export function getSonarrUrl(): string {
-  const preferences = getPreferenceValues<SonarrPreferences>();
-  const { http, host, port, base } = preferences;
-  const baseUrl = base ? `/${base.replace(/^\/|\/$/g, "")}` : "";
-  return `${http}://${host}:${port}${baseUrl}`;
+  return getSonarrBaseUrl();
 }
 
 export function formatSeriesTitle(title: string, year?: number): string {

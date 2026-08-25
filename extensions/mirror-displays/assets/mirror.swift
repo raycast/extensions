@@ -41,6 +41,16 @@ for d in displays {
     }
 }
 
+if macDisplay == nil {
+    // Desktop Macs (Mac mini, Studio, Pro) have no built-in display.
+    // Fall back to the current main display as the "primary" screen.
+    let mainID = CGMainDisplayID()
+    if displays.contains(mainID) {
+        macDisplay = mainID
+        extDisplays.removeAll { $0 == mainID }
+    }
+}
+
 guard let mac = macDisplay else {
     fputs("Could not find the internal Mac display.\n", stderr)
     exit(1)

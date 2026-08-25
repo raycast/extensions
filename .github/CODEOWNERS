@@ -522,6 +522,7 @@
 /extensions/counter                                                 @EvanZhouDev @pernielsentikaer
 /extensions/country-lookup                                          @pernielsentikaer @yusifaliyevpro @j3lte @xmok
 /extensions/cove-cast                                               @frogeth
+/extensions/cover-art-search                                        @louaymd
 /extensions/covert-color                                            @YFAnt
 /extensions/coze                                                    @chyroc
 /extensions/cpanel                                                  @xmok
@@ -704,6 +705,7 @@
 /extensions/dolar-hoy                                               @GustavoCarvallo01
 /extensions/dollar-blue                                             @agusluques
 /extensions/domainr                                                 @Rawnly @xmok @chrismessina @c1vk
+/extensions/don-t-break-the-chain                                   @ramysami
 /extensions/dondori                                                 @ruslan-korneev
 /extensions/done-bear                                               @mblode
 /extensions/donut                                                   @Visual-Studio-Coder
@@ -870,6 +872,7 @@
 /extensions/filezilla                                               @naqet @xmok @uaustudio
 /extensions/fillerama                                               @pryley
 /extensions/finary                                                  @jetaix
+/extensions/find-my-devices                                         @Visual-Studio-Coder
 /extensions/find-opengl-enum                                        @jsyishan @LitoMore
 /extensions/find-website                                            @nahuedu @ridemountainpig
 /extensions/finder-file-actions                                     @pa1ar
@@ -953,6 +956,7 @@
 /extensions/fumadocs                                                @ridemountainpig
 /extensions/fuzzy-file-search                                       @erykksc @gilitos92
 /extensions/fvm                                                     @leoafarias
+/extensions/fx-coding-agent                                         @0xdhrv
 /extensions/fxcodex                                                 @maximkrouk
 /extensions/g-cloud                                                 @ojowwalker77 @bselleslagh
 /extensions/game-scout                                              @Glct26
@@ -1263,6 +1267,7 @@
 /extensions/iptv                                                    @Aayush9029
 /extensions/iridium                                                 @crisboarna
 /extensions/irish-rail                                              @dave-kav
+/extensions/is-agentic                                              @0xdhrv
 /extensions/is-it-alive                                             @Aler1x @jchristianhall @danielsequeira
 /extensions/is-it-toxic-to                                          @chesterhow @pernielsentikaer
 /extensions/isdown                                                  @ntomas @iml885203
@@ -1422,7 +1427,7 @@
 /extensions/lenscast                                                @peduarte @xmok
 /extensions/let-me-google-that                                      @Ek2100 @Princeyadav05
 /extensions/letta                                                   @wesseljt
-/extensions/letterboxd                                              @rgarcia @ridemountainpig
+/extensions/letterboxd                                              @rgarcia @ridemountainpig @0xdhrv
 /extensions/lgtmeow                                                 @snaka
 /extensions/liba-ro                                                 @neemspees
 /extensions/libraries-io                                            @djpowers
@@ -1456,6 +1461,7 @@
 /extensions/liquipedia-matches                                      @EemilSuo @pernielsentikaer
 /extensions/list-by-fullforms                                       @mrmithunmathew
 /extensions/list-randomizer                                         @quuu
+/extensions/litellm                                                 @Lp-Francois
 /extensions/literal                                                 @OkanBilal
 /extensions/litterbox                                               @0xdhrv
 /extensions/liveblocks                                              @andreaselia
@@ -1625,10 +1631,11 @@
 /extensions/minio-manager                                           @2214372851
 /extensions/minion-ipsum                                            @vigosan
 /extensions/minisim                                                 @okwasniewski
+/extensions/mint-mac-care                                           @yg1112
 /extensions/minttr                                                  @EryouHao
 /extensions/miraie-ac-control                                       @AyushSaini00
 /extensions/miro                                                    @felixhaeberle @mathieudutour @Silv-1
-/extensions/mirror-displays                                         @yonbergman @leodbrs
+/extensions/mirror-displays                                         @yonbergman @leodbrs @vitto-moz
 /extensions/mise-workspace                                          @disinfeqt
 /extensions/mistral                                                 @colinlienard
 /extensions/mite                                                    @paoloricciuti @ramsaysewell
@@ -1929,6 +1936,7 @@
 /extensions/papago-translate                                        @Rita-Mordio @jaeyeonling @hongmono
 /extensions/paper                                                   @luctst
 /extensions/paper-agent                                             @galleonli
+/extensions/paper-design                                            @asifk987
 /extensions/paperform                                               @parterburn
 /extensions/paperless-ngx                                           @Padamdam @ibrikin @csigritz
 /extensions/papermatch                                              @marlonjames71 @AndrewMonty
@@ -2492,6 +2500,7 @@
 /extensions/shutdown-timer                                          @WhosMadeer
 /extensions/sidecar                                                 @lsps9150414 @shkm
 /extensions/sidecar-connect                                         @dejuknow
+/extensions/sidecar-display                                         @chiptoma
 /extensions/signal                                                  @leeraymond78
 /extensions/silent-mention                                          @peduarte @MuhammadrizoDeveloper
 /extensions/silent-mode                                             @planecore
@@ -2750,6 +2759,7 @@
 /extensions/text-rewrap                                             @arembridge
 /extensions/text-scramble                                           @bomkino
 /extensions/text-shortcuts                                          @koinzhang @snptrs @gfazioli
+/extensions/textarray                                               @jantursky
 /extensions/textlint-rule-aws-service-name                          @bun913
 /extensions/textream                                                @alexibuild
 /extensions/texts                                                   @zavbala
@@ -2757,6 +2767,7 @@
 /extensions/tflink-tmpfile                                          @tflink-tmpfile
 /extensions/thaw                                                    @diazdesandi
 /extensions/the-blue-cloud                                          @chyroc @xmok
+/extensions/the-forest-link                                         @0xdhrv
 /extensions/the-lot-radio                                           @evnm
 /extensions/the-matrix                                              @clins1994
 /extensions/the-matrix-of-destiny                                   @ordinz
@@ -2766,6 +2777,7 @@
 /extensions/thermo-convert                                          @kud
 /extensions/thermostats                                             @humanfriend22
 /extensions/thesaurus                                               @ABukSwienty @YourMCGeek @mbuvarp
+/extensions/thesaurus-rex                                           @invm
 /extensions/thesvg                                                  @thegdsks
 /extensions/thingiverse                                             @mSarheed
 /extensions/things                                                  @loris @andreaselia @jfkisafk @srikirank @vimtor @samuelkraft @bendrucker @vmrjnvc @dinocosta @janosorcsik @faridrashidi @pernielsentikaer

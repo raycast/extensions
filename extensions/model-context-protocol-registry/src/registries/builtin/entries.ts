@@ -782,7 +782,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "plori",
     title: "plori",
     description:
-      "Give your AI agent its own cloud computer. plori hosts agents on persistent machines with a real disk, tools, and memory that survives between sessions; idle agents scale to zero. This server creates and drives those agents: invoke an agent and read its reply, answer human-in-the-loop questions, and schedule deferred runs. Sign-in happens in the browser on first use (OAuth), or use an API key for headless setups.",
+      "Create and drive cloud AI agents in persistent environments with durable disks, real CLI tools, and memory. Supports runs, human input, scheduling, connections, and workflows over remote MCP. Sign in with OAuth 2.1, or use an API key for headless setups.",
     icon: "https://plori.ai/icon-512.png",
     homepage: "https://plori.ai/mcp",
     configuration: {
@@ -886,6 +886,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         npm_config_yes: "true",
       },
+    },
+  },
+  {
+    name: "smart-me",
+    title: "smart-me",
+    description:
+      "Your building's energy in real time: live meter readings, quarter-hourly load profiles and daily series, EV charging stations with their sessions and load-management groups, and the tariffs, invoice positions and ZEV (tenant) billing of a property on the smart-me platform. The remote Streamable HTTP server uses smart-me OAuth sign-in through an `mcp-remote` bridge.",
+    icon: "https://web.smart-me.com/wp-content/uploads/2025/09/sm_favicon.png",
+    homepage: "https://github.com/eCarUp/smart-me-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.smart-me.com/mcp"],
     },
   },
 ];

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, Keyboard } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { useBlocklist } from "@/lib/hooks/useSonarrAPI";
 import type { BlocklistRecord } from "@/lib/types/blocklist";
@@ -194,7 +194,7 @@ function BlocklistItem({ record, onRefresh }: { record: BlocklistRecord; onRefre
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
         </ActionPanel>

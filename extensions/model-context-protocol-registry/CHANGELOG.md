@@ -1,5 +1,13 @@
 # Model Context Protocol Registry Changelog
 
+## [Refresh plori MCP Server] - 2026-08-24
+
+Refresh plori's description for its current persistent-environment positioning and support for runs, human input, scheduling, connections, and workflows.
+
+## [Add smart-me MCP Server] - 2026-08-23
+
+Add smart-me to the official registry, giving AI assistants access to the smart-me energy platform: live meter readings, quarter-hourly load profiles and daily series, EV charging stations with their sessions and load-management groups, and the tariffs, invoice positions and ZEV (tenant) billing of a property. The remote Streamable HTTP server uses smart-me OAuth sign-in through an `mcp-remote` bridge.
+
 ## [Add One MCP Server] - 2026-08-21
 
 Add One to the official registry, connecting AI assistants to 700+ apps through four tools: list connected accounts, search a platform's actions, read an action's real API documentation, and execute it. The remote Streamable HTTP server uses One OAuth sign-in through an `mcp-remote` bridge.

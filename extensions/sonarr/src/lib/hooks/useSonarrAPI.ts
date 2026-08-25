@@ -19,53 +19,15 @@ import {
   SystemStatusSchema,
 } from "@/lib/types/schemas";
 import { fetchAndValidate, fetchWithTimeout } from "@/lib/utils/api-helpers";
+import { getSonarrBaseUrl } from "@/lib/utils/connection";
 
 function getApiConfig() {
   const preferences = getPreferenceValues<SonarrPreferences>();
-  const rawHost = preferences.host.trim();
-  const rawPort = preferences.port.trim();
-  const rawBase = preferences.base.trim();
-  const apiKey = preferences.apiKey.trim();
-
-  let protocol = preferences.http;
-  let host = rawHost;
-  let port = rawPort;
-  let baseFromHost = "";
-
-  if (/^https?:\/\//i.test(rawHost)) {
-    try {
-      const parsed = new URL(rawHost);
-      protocol = parsed.protocol.replace(":", "") as "http" | "https";
-      host = parsed.hostname;
-      port = parsed.port || rawPort;
-      baseFromHost = parsed.pathname === "/" ? "" : parsed.pathname;
-    } catch {
-      // Keep original values and let the request fail with a clear error.
-    }
-  } else {
-    const slashIndex = host.indexOf("/");
-
-    if (slashIndex !== -1) {
-      baseFromHost = host.slice(slashIndex + 1);
-      host = host.slice(0, slashIndex);
-    }
-
-    const hostPortMatch = host.match(/^(.+):(\d+)$/);
-    if (hostPortMatch) {
-      host = hostPortMatch[1];
-      port = hostPortMatch[2];
-    }
-  }
-
-  host = host.replace(/\/+$/g, "");
-  const basePath = (rawBase || baseFromHost).replace(/^\/|\/$/g, "");
-
-  const url = `${protocol}://${host}${port ? `:${port}` : ""}${basePath ? `/${basePath}` : ""}`;
 
   return {
-    url,
+    url: getSonarrBaseUrl(),
     headers: {
-      "X-Api-Key": apiKey,
+      "X-Api-Key": preferences.apiKey.trim(),
     },
   };
 }
