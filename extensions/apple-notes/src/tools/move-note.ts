@@ -8,7 +8,10 @@ type Input = {
   noteId: string;
   /** The name of the destination folder. Use list-folders to find a valid folder name. */
   folderName: string;
-  /** The name of the account that owns the destination folder, if known. */
+  /**
+   * The name of the account that owns the destination folder.
+   * Required whenever list-folders shows more than one account with a folder of this name.
+   */
   accountName?: string;
 };
 
