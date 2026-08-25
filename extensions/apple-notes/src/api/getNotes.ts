@@ -2,6 +2,39 @@ import { executeSQL } from "@raycast/utils";
 
 import { escapeSQLString, getOpenNoteURL, NOTES_DB, Link, Backlink, Tag, NoteItem } from "../helpers";
 
+// SQLite's LOWER()/LIKE only fold ASCII case and never strip accents, so "cafe" wouldn't match
+// "Café" in SQL. This is the authoritative, fully Unicode-aware check applied in JS; the SQL-side
+// filter below only folds the common Latin accents, as a bound on how much data JS has to look at.
+function normalizeForSearch(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+// Common Latin accented characters mapped to their base letter, used to build a SQL expression
+// that approximates normalizeForSearch well enough to prefilter and bound the query in SQL.
+const SQL_DIACRITIC_REPLACEMENTS: [string, string][] = [
+  ["àáâãäå", "a"],
+  ["èéêë", "e"],
+  ["ìíîï", "i"],
+  ["òóôõö", "o"],
+  ["ùúûü", "u"],
+  ["ýÿ", "y"],
+  ["ñ", "n"],
+  ["ç", "c"],
+];
+
+function foldSqlColumn(column: string): string {
+  const withDiacriticsFolded = SQL_DIACRITIC_REPLACEMENTS.reduce((expr, [accentedChars, base]) => {
+    return [...accentedChars, ...accentedChars.toUpperCase()].reduce(
+      (inner, accentedChar) => `REPLACE(${inner}, '${accentedChar}', '${base}')`,
+      expr,
+    );
+  }, column);
+  return `LOWER(${withDiacriticsFolded})`;
+}
+
 export async function getNotes(
   maxQueryResults: number,
   filterByTags: string[] = [],
@@ -9,13 +42,13 @@ export async function getNotes(
   exactTitleMatch = false,
 ) {
   const trimmedSearchText = searchText?.trim();
-  // Exact-title matches are filtered in SQL (before LIMIT) so a match can't be pushed out of the window by recency.
+  const foldedSearchText = trimmedSearchText ? escapeSQLString(normalizeForSearch(trimmedSearchText)) : "";
   const searchFilter = trimmedSearchText
     ? exactTitleMatch
-      ? ` AND LOWER(TRIM(note.ztitle1)) = LOWER('${escapeSQLString(trimmedSearchText)}')`
+      ? ` AND ${foldSqlColumn("TRIM(note.ztitle1)")} = '${foldedSearchText}'`
       : ` AND (
-        note.ztitle1 LIKE '%${escapeSQLString(trimmedSearchText)}%' OR
-        note.zsnippet LIKE '%${escapeSQLString(trimmedSearchText)}%'
+        ${foldSqlColumn("note.ztitle1")} LIKE '%${foldedSearchText}%' OR
+        ${foldSqlColumn("note.zsnippet")} LIKE '%${foldedSearchText}%'
       )`
     : "";
 
@@ -155,6 +188,22 @@ export async function getNotes(
       const noteTags = note.tags.map((t) => t.text);
       return filterByTags.every((tag) => noteTags.includes(`#${tag.replace("#", "")}`));
     });
+  }
+
+  if (trimmedSearchText) {
+    if (exactTitleMatch) {
+      const normalizedQuery = trimmedSearchText.toLowerCase();
+      notesWithAdditionalFields = notesWithAdditionalFields.filter(
+        (note) => note.title.trim().toLowerCase() === normalizedQuery,
+      );
+    } else {
+      const normalizedQuery = normalizeForSearch(trimmedSearchText);
+      notesWithAdditionalFields = notesWithAdditionalFields.filter(
+        (note) =>
+          normalizeForSearch(note.title).includes(normalizedQuery) ||
+          normalizeForSearch(note.snippet).includes(normalizedQuery),
+      );
+    }
   }
 
   return notesWithAdditionalFields;
