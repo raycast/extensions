@@ -32,7 +32,11 @@ function Favorites() {
 
           if (type === "customView" && customView) {
             props = {
-              icon: getIcon({ icon: customView.icon, color: customView.color, fallbackIcon: Icon.Layers }),
+              icon: getIcon({
+                icon: customView.icon ?? undefined,
+                color: customView.color ?? undefined,
+                fallbackIcon: Icon.Layers,
+              }),
               title: customView.name,
             };
 

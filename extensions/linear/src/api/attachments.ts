@@ -141,51 +141,20 @@ export type CreateAttachmentPayload = {
 };
 
 export async function createAttachment(payload: CreateAttachmentPayload) {
-  const { graphQLClient } = getLinearClient();
-
+  const { linearClient } = getLinearClient();
   const file = await uploadFile(payload.url);
+  const result = await linearClient.createAttachment({
+    issueId: payload.issueId,
+    title: file.name,
+    url: file.assetUrl,
+  });
 
-  const attachmentInput = `issueId: "${payload.issueId}", title: "${file.name}", url: "${file.assetUrl}"`;
-
-  const { data } = await graphQLClient.rawRequest<
-    { attachmentCreate: { success: boolean; attachment: { id: string } } },
-    Record<string, unknown>
-  >(
-    `
-      mutation {
-        attachmentCreate(input: { ${attachmentInput} }) {
-          success
-          attachment {
-            id
-          }
-        }
-      }
-    `,
-  );
-
-  return { success: data?.attachmentCreate.success, id: data?.attachmentCreate.attachment.id };
+  return { success: result.success, id: result.attachmentId };
 }
 
 export async function attachLinkUrl(payload: CreateAttachmentPayload) {
-  const { graphQLClient } = getLinearClient();
+  const { linearClient } = getLinearClient();
+  const result = await linearClient.attachmentLinkURL(payload.issueId, payload.url);
 
-  const attachmentInput = `issueId: "${payload.issueId}", url: "${payload.url}"`;
-
-  const { data } = await graphQLClient.rawRequest<
-    { attachmentLinkURL: { success: boolean; attachment: { id: string } } },
-    Record<string, unknown>
-  >(
-    `
-      mutation {
-        attachmentLinkURL(${attachmentInput}) {
-          success
-          attachment {
-            id
-          }
-        }
-      }
-    `,
-  );
-
-  return { success: data?.attachmentLinkURL.success, id: data?.attachmentLinkURL.attachment.id };
+  return { success: result.success, id: result.attachmentId };
 }
