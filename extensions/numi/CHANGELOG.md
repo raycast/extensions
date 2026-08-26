@@ -6,6 +6,7 @@
 - History now persists in LocalStorage instead of the evictable cache, and existing history is migrated automatically
 - Added history actions: reuse a query, delete a single entry, and clear the whole history
 - History entries now show when they were run
+- Typing a query no longer saves it word by word: nothing is recorded until you stop typing, and finishing a query replaces the partial one it was built from
 - Fixed overlapping history changes overwriting each other: deleting several entries quickly no longer brings the first one back, and clearing the history no longer restores it if a query was being saved at the time
 - Fixed queries failing until the next status check when numi-cli is moved or uninstalled while the command is open
 - Fixed results being returned with a leading space

@@ -73,6 +73,34 @@ export function createHistoryWriter(): HistoryWriter {
   };
 }
 
+export interface AppendOptions {
+  max: number;
+  /** Query this typing session recorded a moment ago, if any. */
+  supersedes?: string | null;
+}
+
+/**
+ * Adds an entry, replacing the one this session just wrote when the new query
+ * merely extends it.
+ *
+ * Numi answers partial input with something different from the input itself -
+ * "340 GBP" gives "£ 340" - so pausing while typing "340 GBP to USD" would
+ * otherwise leave an entry for every stop along the way. Only the query the
+ * same session recorded last is replaced, so an older entry that happens to be
+ * a prefix is left alone.
+ */
+export function appendEntry(current: HistoryEntry[], entry: HistoryEntry, options: AppendOptions): HistoryEntry[] {
+  const withoutDuplicate = current.filter((existing) => existing.query !== entry.query);
+
+  const supersedes = options.supersedes;
+  const extendsPrevious = Boolean(supersedes) && supersedes !== entry.query && entry.query.startsWith(supersedes!);
+  const pruned = extendsPrevious
+    ? withoutDuplicate.filter((existing) => existing.query !== supersedes)
+    : withoutDuplicate;
+
+  return [...pruned, entry].slice(-options.max);
+}
+
 export function parseMaxHistory(raw: string | undefined): number {
   const parsed = Number.parseInt((raw ?? "").trim(), 10);
   if (!Number.isInteger(parsed) || parsed < 1) return DEFAULT_MAX_HISTORY;

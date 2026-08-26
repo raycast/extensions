@@ -20,6 +20,7 @@ import {
   HISTORY_STORAGE_KEY,
   type HistoryEntry,
   type HistoryUpdater,
+  appendEntry,
   clearLegacyHistory,
   createHistoryWriter,
   parseMaxHistory,
@@ -27,7 +28,14 @@ import {
 } from "./services/history";
 
 const BACKEND_POLL_INTERVAL_MS = 5000;
-const SEARCH_DEBOUNCE_MS = 200;
+const SEARCH_DEBOUNCE_MS = 400;
+
+/**
+ * History waits considerably longer than the query does. Numi answers partial
+ * input, so recording on the same cadence as the search would save a query
+ * word by word as it is typed.
+ */
+const HISTORY_SETTLE_MS = 1200;
 
 function useDebouncedValue<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -48,6 +56,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
   // and "use this query" from history all flow through one source of truth.
   const [searchText, setSearchText] = useState(props.arguments.queryArgument ?? "");
   const debouncedQuery = useDebouncedValue(searchText, SEARCH_DEBOUNCE_MS);
+  const settledQuery = useDebouncedValue(searchText, HISTORY_SETTLE_MS);
   const [isBackendAvailable, setIsBackendAvailable] = useState<boolean | undefined>(undefined);
 
   const {
@@ -129,20 +138,27 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
   }, [isHistoryLoading, mutateHistory, maxHistory]);
 
   const recordQuery = useCallback(
-    (entryQuery: string, entryResults: string[]) =>
-      mutateHistory((current) => {
-        const withoutDuplicate = current.filter((entry) => entry.query !== entryQuery);
-        const entry = { query: entryQuery, results: entryResults, timestamp: Date.now() };
-        return [...withoutDuplicate, entry].slice(-maxHistory);
-      }),
+    (entryQuery: string, entryResults: string[], supersedes: string | null) =>
+      mutateHistory((current) =>
+        appendEntry(
+          current,
+          { query: entryQuery, results: entryResults, timestamp: Date.now() },
+          { max: maxHistory, supersedes },
+        ),
+      ),
     [mutateHistory, maxHistory],
   );
 
   const lastRecorded = useRef("");
+  const lastRecordedQuery = useRef<string | null>(null);
   useEffect(() => {
     if (isQuerying || isHistoryLoading) return;
 
     const expression = debouncedQuery.trim();
+    // Nothing is saved until typing has fully stopped: while a query is still
+    // being typed the settled value lags behind and the two differ.
+    if (settledQuery.trim() !== expression) return;
+
     const result = results?.[0]?.trim();
     // Echoing the input back (e.g. plain text) is not a calculation worth saving.
     if (!expression || !result || result === expression) return;
@@ -151,8 +167,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
     if (lastRecorded.current === signature) return;
     lastRecorded.current = signature;
 
-    void recordQuery(expression, results ?? []);
-  }, [debouncedQuery, results, isQuerying, isHistoryLoading, recordQuery]);
+    const supersedes = lastRecordedQuery.current;
+    lastRecordedQuery.current = expression;
+    void recordQuery(expression, results ?? [], supersedes);
+  }, [debouncedQuery, settledQuery, results, isQuerying, isHistoryLoading, recordQuery]);
 
   const deleteEntry = useCallback(
     (entryQuery: string) => mutateHistory((current) => current.filter((entry) => entry.query !== entryQuery)),
@@ -172,6 +190,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
     await mutateHistory(() => []);
     clearLegacyHistory();
     lastRecorded.current = "";
+    lastRecordedQuery.current = null;
     await showToast({ style: Toast.Style.Success, title: "History cleared" });
   }, [mutateHistory]);
 
