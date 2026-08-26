@@ -106,9 +106,18 @@ export default withAccessToken(linear)(async (input: Input) => {
     : new Set(currentById.keys());
   for (const id of (await ids(input.addInitiatives, resolveInitiative)) ?? []) desired.add(id);
   for (const id of (await ids(input.removeInitiatives, resolveInitiative)) ?? []) desired.delete(id);
-  for (const [id, item] of currentById) if (!desired.has(id)) await client().deleteInitiativeToProject(item.id);
-  for (const id of desired)
-    if (!currentById.has(id)) await client().createInitiativeToProject({ initiativeId: id, projectId: saved.id });
+  for (const [id, item] of currentById) {
+    if (!desired.has(id)) {
+      const result = await client().deleteInitiativeToProject(item.id);
+      if (!result.success) throw new Error("Failed to remove initiative from project.");
+    }
+  }
+  for (const id of desired) {
+    if (!currentById.has(id)) {
+      const result = await client().createInitiativeToProject({ initiativeId: id, projectId: saved.id });
+      if (!result.success || !result.initiativeToProject) throw new Error("Failed to add initiative to project.");
+    }
+  }
   for (const link of input.links ?? []) {
     const result = await client().createEntityExternalLink({ projectId: saved.id, url: link.url, label: link.title });
     if (!result.success || !result.entityExternalLink) throw new Error("Failed to create project link.");
