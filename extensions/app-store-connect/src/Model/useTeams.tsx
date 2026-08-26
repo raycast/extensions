@@ -4,12 +4,31 @@ import { useEffect, useState } from "react";
 
 export const teamSchema = z.object({
   name: z.string(),
-  issuerID: z.string(),
+  /**
+   * Team keys carry an Issuer ID; individual keys have none. Apple signs the two
+   * differently — a team key sets the `iss` claim, an individual key sets `sub: "user"`
+   * and omits `iss` entirely — so absence here is what selects the individual-key path.
+   * Optional (not removed) so credentials stored by earlier versions still parse.
+   */
+  issuerID: z.string().optional(),
   apiKey: z.string(),
   privateKey: z.string(),
 });
 
 export type Team = z.infer<typeof teamSchema>;
+
+/**
+ * The name is purely a local label for the credential picker — it is never sent to
+ * Apple and has no equivalent in the API. So it is optional; when left blank, fall
+ * back to something self-describing and unique (the key ID distinguishes entries).
+ */
+export function credentialLabel(name: string, isIndividualKey: boolean, apiKey: string) {
+  const trimmed = name.trim();
+  if (trimmed.length > 0) {
+    return trimmed;
+  }
+  return `${isIndividualKey ? "Individual Key" : "Team Key"} (${apiKey})`;
+}
 
 export const teamSchemas = z.array(teamSchema);
 
@@ -71,7 +90,8 @@ export const useTeams = () => {
     const apiKey = await LocalStorage.getItem<string>("apiKey");
     const privateKey = await LocalStorage.getItem<string>("privateKey");
     const issuerID = await LocalStorage.getItem<string>("issuerID");
-    if (apiKey === undefined || privateKey === undefined || issuerID === undefined || teamName === undefined) {
+    // issuerID is deliberately not required — an individual key has none.
+    if (apiKey === undefined || privateKey === undefined || teamName === undefined) {
       return undefined;
     } else {
       return {
@@ -86,7 +106,14 @@ export const useTeams = () => {
     await LocalStorage.setItem("teamName", team.name);
     await LocalStorage.setItem("apiKey", team.apiKey);
     await LocalStorage.setItem("privateKey", team.privateKey);
-    await LocalStorage.setItem("issuerID", team.issuerID);
+    if (team.issuerID) {
+      await LocalStorage.setItem("issuerID", team.issuerID);
+    } else {
+      // Must clear, not skip: these are flat top-level keys, so switching from a team
+      // key to an individual one would otherwise leave the previous issuer behind and
+      // sign `iss` instead of `sub` — which fails auth for a non-obvious reason.
+      await LocalStorage.removeItem("issuerID");
+    }
     setCurrentTeam(team);
   };
 

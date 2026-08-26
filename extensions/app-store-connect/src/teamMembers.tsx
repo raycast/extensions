@@ -73,10 +73,12 @@ export default function Command() {
     return "";
   };
 
-  const makeTitle = (user: User) => {
+  // Accepts an invitation too: both carry the same name fields, and both need a title
+  // for their ActionPanel section.
+  const makeTitle = (user: User | UserInvitation) => {
     const firstName = JSON.stringify(user.attributes.firstName ?? "");
     const lastName = JSON.stringify(user.attributes.lastName ?? "");
-    return `${JSON.parse(firstName)} ${JSON.parse(lastName)}`;
+    return `${JSON.parse(firstName)} ${JSON.parse(lastName)}`.trim();
   };
 
   const inviteAction = () => {
@@ -129,38 +131,41 @@ export default function Command() {
           <List.Section title="Invited">
             {allInvitedUsers.map((user: UserInvitation) => (
               <List.Item
-                title={user.attributes.firstName + " " + user.attributes.lastName}
+                key={user.id}
+                title={makeTitle(user)}
                 subtitle={user.attributes.email}
                 accessories={[{ text: rolesString(user.attributes.roles), tooltip: "Roles" }]}
                 actions={
                   <ActionPanel>
-                    {copyAction(user)}
-                    <Action
-                      title="Revoke"
-                      icon={Icon.Trash}
-                      shortcut={Keyboard.Shortcut.Common.Remove}
-                      style={Action.Style.Destructive}
-                      onAction={async () => {
-                        if (
-                          await confirmAlert({
-                            title: "Are you sure?",
-                            primaryAction: { title: "Revoke", style: Alert.ActionStyle.Destructive },
-                          })
-                        ) {
-                          const revoked = allInvitedUsers.find((user) => user.id === user.id);
-                          try {
-                            setAllInvitedUsers(allInvitedUsers.filter((user) => user.id !== user.id));
-                            await fetchAppStoreConnect(`/userInvitations/${user.id}`, "DELETE");
-                          } catch (error) {
-                            if (revoked) {
-                              setAllInvitedUsers([...allInvitedUsers, revoked]);
+                    <ActionPanel.Section title={makeTitle(user)}>
+                      {copyAction(user)}
+                      <Action
+                        title="Revoke"
+                        icon={Icon.Trash}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                        style={Action.Style.Destructive}
+                        onAction={async () => {
+                          if (
+                            await confirmAlert({
+                              title: "Are you sure?",
+                              primaryAction: { title: "Revoke", style: Alert.ActionStyle.Destructive },
+                            })
+                          ) {
+                            const revoked = allInvitedUsers.find((u) => u.id === user.id);
+                            try {
+                              setAllInvitedUsers(allInvitedUsers.filter((u) => u.id !== user.id));
+                              await fetchAppStoreConnect(`/userInvitations/${user.id}`, "DELETE");
+                            } catch (error) {
+                              if (revoked) {
+                                setAllInvitedUsers([...allInvitedUsers, revoked]);
+                              }
+                              presentError(error);
                             }
-                            presentError(error);
                           }
-                        }
-                      }}
-                    />
-                    {inviteAction()}
+                        }}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>{inviteAction()}</ActionPanel.Section>
                   </ActionPanel>
                 }
               />
@@ -176,53 +181,55 @@ export default function Command() {
               accessories={[{ text: rolesString(user.attributes.roles), tooltip: "Roles" }]}
               actions={
                 <ActionPanel>
-                  <Action.Push
-                    title="Edit User"
-                    icon={Icon.Person}
-                    shortcut={Keyboard.Shortcut.Common.Edit}
-                    target={
-                      <EditTeamMember
-                        user={user}
-                        userChanged={(newUser) => {
-                          setAllUsers(
-                            allUsers.map((user) => {
-                              if (user.id === newUser.id) {
-                                return newUser;
-                              }
-                              return user;
-                            }),
-                          );
-                        }}
-                      />
-                    }
-                  />
-                  {copyAction(user)}
-                  <Action
-                    title="Remove"
-                    icon={Icon.Trash}
-                    shortcut={Keyboard.Shortcut.Common.Remove}
-                    style={Action.Style.Destructive}
-                    onAction={async () => {
-                      if (
-                        await confirmAlert({
-                          title: "Are you sure?",
-                          primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
-                        })
-                      ) {
-                        const removed = allUsers.find((user) => user.id === user.id);
-                        try {
-                          setAllUsers(allUsers.filter((user) => user.id !== user.id));
-                          await fetchAppStoreConnect(`/users/${user.id}`, "DELETE");
-                        } catch (error) {
-                          if (removed) {
-                            setAllUsers([...allUsers, removed]);
-                          }
-                          presentError(error);
-                        }
+                  <ActionPanel.Section title={makeTitle(user)}>
+                    <Action.Push
+                      title="Edit User"
+                      icon={Icon.Person}
+                      shortcut={Keyboard.Shortcut.Common.Edit}
+                      target={
+                        <EditTeamMember
+                          user={user}
+                          userChanged={(newUser) => {
+                            setAllUsers(
+                              allUsers.map((user) => {
+                                if (user.id === newUser.id) {
+                                  return newUser;
+                                }
+                                return user;
+                              }),
+                            );
+                          }}
+                        />
                       }
-                    }}
-                  />
-                  {inviteAction()}
+                    />
+                    {copyAction(user)}
+                    <Action
+                      title="Remove"
+                      icon={Icon.Trash}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
+                      style={Action.Style.Destructive}
+                      onAction={async () => {
+                        if (
+                          await confirmAlert({
+                            title: "Are you sure?",
+                            primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                          })
+                        ) {
+                          const removed = allUsers.find((u) => u.id === user.id);
+                          try {
+                            setAllUsers(allUsers.filter((u) => u.id !== user.id));
+                            await fetchAppStoreConnect(`/users/${user.id}`, "DELETE");
+                          } catch (error) {
+                            if (removed) {
+                              setAllUsers([...allUsers, removed]);
+                            }
+                            presentError(error);
+                          }
+                        }
+                      }}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>{inviteAction()}</ActionPanel.Section>
                 </ActionPanel>
               }
             />

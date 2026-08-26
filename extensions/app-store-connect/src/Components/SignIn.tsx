@@ -1,9 +1,11 @@
 import { ActionPanel, Form, Action } from "@raycast/api";
 import { useEffect, useState, ReactNode } from "react";
 import fs from "fs";
-import { fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
+import CredentialFields, { KeyType, validateIssuerID } from "./CredentialFields";
+import { encodeBase64 } from "../Utils/base64";
+import { fetchAppStoreConnect, ATCError, assertPrivateKeyUsable } from "../Hooks/useAppStoreConnect";
 import { presentError } from "../Utils/utils";
-import { useTeams, Team } from "../Model/useTeams";
+import { useTeams, Team, credentialLabel } from "../Model/useTeams";
 import { FormValidation, useForm } from "@raycast/utils";
 
 interface SignInProps {
@@ -11,10 +13,21 @@ interface SignInProps {
   didSignIn: () => void;
 }
 
+interface SignInFormValues {
+  privateKey: string[];
+  apiKey: string;
+  issuerID: string;
+  name: string;
+}
+
 export default function SignIn({ children, didSignIn }: SignInProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isCheckConnection, setIsCheckConnection] = useState(false);
+  // Held outside useForm: the issuerID validator depends on it, and reading useForm's
+  // own `values` inside its config is a circular reference.
+  const [keyType, setKeyType] = useState<KeyType>("team");
+  const isIndividualKey = keyType === "individual";
   const { isLoading: isLoadingTeams, currentTeam, selectCurrentTeam, removeCurrentTeam, addTeam } = useTeams();
 
   useEffect(() => {
@@ -31,49 +44,56 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
     })();
   }, [didSignIn, currentTeam, isLoadingTeams]);
 
-  const { handleSubmit, itemProps } = useForm<{
-    privateKey: string[];
-    apiKey: string;
-    issuerID: string;
-    name: string;
-  }>({
+  const { handleSubmit, itemProps } = useForm<SignInFormValues>({
     onSubmit: async (values) => {
       const file = values.privateKey[0];
       if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
         return;
       }
-      if (!values.apiKey || !values.issuerID) {
+      if (!values.apiKey || (!isIndividualKey && !values.issuerID)) {
         return;
       }
 
       setIsCheckConnection(true);
 
       const privateKeyContent = fs.readFileSync(file, "utf8");
-      const encodedPrivateKey = base64EncodePrivateKey(privateKeyContent);
+      const encodedPrivateKey = encodeBase64(privateKeyContent);
 
       const team: Team = {
-        name: values.name,
-        issuerID: values.issuerID,
+        name: credentialLabel(values.name, isIndividualKey, values.apiKey),
+        issuerID: isIndividualKey ? undefined : values.issuerID,
         apiKey: values.apiKey,
         privateKey: encodedPrivateKey,
       };
 
       try {
+        // Parse the key before persisting anything: an unusable key throws with no HTTP
+        // status, and a fully-populated stored key set makes the extension consider
+        // itself signed in on next launch — hiding this form behind a key that can
+        // never sign a request.
+        await assertPrivateKeyUsable(encodedPrivateKey);
+
         await addTeam(team);
         await selectCurrentTeam(team);
         await fetchAppStoreConnect("/apps");
         setIsAuthenticated(true);
         didSignIn();
       } catch (error) {
-        removeCurrentTeam();
+        // 401 only. removeCurrentTeam() deletes the persisted record, so a 429/5xx/
+        // offline blip must not trigger it — and a 403 means the key is valid but
+        // lacks permission for /apps, which discarding it would not fix.
+        if (error instanceof ATCError && error.status === 401) {
+          removeCurrentTeam();
+        }
         presentError(error);
       } finally {
         setIsCheckConnection(false);
       }
     },
     validation: {
-      name: FormValidation.Required,
-      issuerID: FormValidation.Required,
+      // `name` is intentionally unvalidated — see credentialLabel().
+      // Required for a team key, meaningless for an individual one.
+      issuerID: (value) => validateIssuerID(value, isIndividualKey),
       apiKey: FormValidation.Required,
       privateKey: FormValidation.Required,
     },
@@ -101,28 +121,15 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
           </ActionPanel>
         }
       >
-        <Form.TextField
-          title="Team name"
-          {...itemProps.name}
-          info="Name of the team, this is only used for display purposes"
+        <CredentialFields
+          keyType={keyType}
+          onKeyTypeChange={setKeyType}
+          nameProps={itemProps.name}
+          issuerIDProps={itemProps.issuerID}
+          apiKeyProps={itemProps.apiKey}
+          privateKeyProps={itemProps.privateKey}
         />
-        <Form.TextField title="Issuer ID" {...itemProps.issuerID} />
-        <Form.TextField title="API Key" {...itemProps.apiKey} />
-        <Form.FilePicker title="Private Key" allowMultipleSelection={false} {...itemProps.privateKey} />
       </Form>
     );
-  }
-}
-
-function base64EncodePrivateKey(privateKey: string) {
-  // Check if we're in a browser environment
-  if (typeof btoa === "function") {
-    return btoa(privateKey);
-  }
-  // For Node.js environment
-  else if (typeof Buffer !== "undefined") {
-    return Buffer.from(privateKey).toString("base64");
-  } else {
-    throw new Error("Unable to base64 encode: environment not supported");
   }
 }

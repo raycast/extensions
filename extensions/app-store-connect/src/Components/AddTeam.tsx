@@ -1,9 +1,11 @@
 import { ActionPanel, Form, Action, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import fs from "fs";
-import { fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
+import CredentialFields, { KeyType, validateIssuerID } from "./CredentialFields";
+import { encodeBase64 } from "../Utils/base64";
+import { fetchAppStoreConnect, ATCError, assertPrivateKeyUsable } from "../Hooks/useAppStoreConnect";
 import { presentError } from "../Utils/utils";
-import { useTeams, Team } from "../Model/useTeams";
+import { useTeams, Team, credentialLabel } from "../Model/useTeams";
 import { useForm, FormValidation } from "@raycast/utils";
 interface SignInProps {
   didSignIn: (team: Team) => void;
@@ -11,7 +13,11 @@ interface SignInProps {
 
 export default function AddTeam({ didSignIn }: SignInProps) {
   const [isCheckConnection, setIsCheckConnection] = useState(false);
-  const { selectCurrentTeam, addTeam, deleteTeam, currentTeam, teams } = useTeams();
+  const { selectCurrentTeam, addTeam, deleteTeam, currentTeam } = useTeams();
+  // Held outside useForm: the issuerID validator depends on it, and reading useForm's
+  // own `values` inside its config is a circular reference.
+  const [keyType, setKeyType] = useState<KeyType>("team");
+  const isIndividualKey = keyType === "individual";
 
   interface FormValues {
     privateKey: string[];
@@ -33,32 +39,49 @@ export default function AddTeam({ didSignIn }: SignInProps) {
         return;
       }
       setIsCheckConnection(true);
+      // Captured before selecting the new key, so a rollback can restore it.
+      const previouslySelectedTeam = currentTeam;
+      // Declared out here so the catch can roll back the exact key it added; it stays
+      // undefined if we failed before persisting anything.
+      let addedTeam: Team | undefined;
 
       try {
         const privateKeyContent = fs.readFileSync(file, "utf8");
-        const encodedPrivateKey = base64EncodePrivateKey(privateKeyContent);
+        const encodedPrivateKey = encodeBase64(privateKeyContent);
 
         const team: Team = {
-          name: values.name,
-          issuerID: values.issuerID,
+          name: credentialLabel(values.name, isIndividualKey, values.apiKey),
+          issuerID: isIndividualKey ? undefined : values.issuerID,
           apiKey: values.apiKey,
           privateKey: encodedPrivateKey,
         };
 
+        // Parse the key before persisting anything: an unusable key then fails with
+        // nothing stored to roll back.
+        await assertPrivateKeyUsable(encodedPrivateKey);
+
+        addedTeam = team;
         await addTeam(team);
         await selectCurrentTeam(team);
         await fetchAppStoreConnect("/apps");
         didSignIn(team);
         showToast({
           style: Toast.Style.Success,
-          title: "Success!",
-          message: "Added team",
+          title: "Key Added",
+          message: team.name,
         });
       } catch (error) {
-        if (currentTeam) {
-          await deleteTeam(currentTeam);
-          if (teams.length > 0 && currentTeam.apiKey !== teams[teams.length - 1].apiKey) {
-            selectCurrentTeam(teams[teams.length - 1]);
+        // Roll back only the key just added, identified directly — `currentTeam` is the
+        // render-time value, i.e. the PREVIOUSLY selected key, so deleting it would
+        // discard a working credential and leave the rejected one selected.
+        //
+        // 401 only: a 403 means the key is valid but lacks permission for /apps, and
+        // discarding a valid key over a role restriction is not recoverable by the user.
+        const rejected = error instanceof ATCError && error.status === 401;
+        if (rejected && addedTeam) {
+          await deleteTeam(addedTeam);
+          if (previouslySelectedTeam) {
+            await selectCurrentTeam(previouslySelectedTeam);
           }
         }
         presentError(error);
@@ -69,8 +92,9 @@ export default function AddTeam({ didSignIn }: SignInProps) {
     validation: {
       privateKey: FormValidation.Required,
       apiKey: FormValidation.Required,
-      issuerID: FormValidation.Required,
-      name: FormValidation.Required,
+      // Required for a team key, meaningless for an individual one.
+      issuerID: (value) => validateIssuerID(value, isIndividualKey),
+      // `name` is intentionally unvalidated — see credentialLabel().
     },
   });
   return (
@@ -88,27 +112,14 @@ export default function AddTeam({ didSignIn }: SignInProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="Team Name"
-        {...itemProps.name}
-        info="Name of the team, this is only used for display purposes"
+      <CredentialFields
+        keyType={keyType}
+        onKeyTypeChange={setKeyType}
+        nameProps={itemProps.name}
+        issuerIDProps={itemProps.issuerID}
+        apiKeyProps={itemProps.apiKey}
+        privateKeyProps={itemProps.privateKey}
       />
-      <Form.TextField {...itemProps.issuerID} title="Issuer ID" />
-      <Form.TextField {...itemProps.apiKey} title="Key ID" />
-      <Form.FilePicker {...itemProps.privateKey} title="Private Key" allowMultipleSelection={false} />
     </Form>
   );
-}
-
-function base64EncodePrivateKey(privateKey: string) {
-  // Check if we're in a browser environment
-  if (typeof btoa === "function") {
-    return btoa(privateKey);
-  }
-  // For Node.js environment
-  else if (typeof Buffer !== "undefined") {
-    return Buffer.from(privateKey).toString("base64");
-  } else {
-    throw new Error("Unable to base64 encode: environment not supported");
-  }
 }

@@ -68,40 +68,45 @@ export default function Command() {
           key={team.apiKey}
           actions={
             <ActionPanel>
-              {!isCurrentTeam(team) && (
-                <Action
-                  title="Use Team"
-                  icon={Icon.CheckCircle}
-                  onAction={() => {
-                    selectCurrentTeam(team);
-                    showToast({
-                      style: Toast.Style.Success,
-                      title: `Switched to ${team.name}`,
-                    });
-                  }}
-                />
-              )}
-              <Action.Push
-                title="Add New Team"
-                icon={Icon.AddPerson}
-                target={
-                  <AddTeam
-                    didSignIn={(team) => {
-                      setTeams([...teams, team]);
+              <ActionPanel.Section title={team.name}>
+                {!isCurrentTeam(team) && (
+                  <Action
+                    title="Use Team"
+                    icon={Icon.CheckCircle}
+                    onAction={() => {
                       selectCurrentTeam(team);
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: `Switched to ${team.name}`,
+                      });
                     }}
                   />
-                }
-              />
-              <Action
-                title="Delete Team"
-                shortcut={Keyboard.Shortcut.Common.Remove}
-                style={Action.Style.Destructive}
-                icon={Icon.Trash}
-                onAction={() => {
-                  _deleteTeam(team);
-                }}
-              />
+                )}
+                <Action
+                  title="Delete Team"
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  style={Action.Style.Destructive}
+                  icon={Icon.Trash}
+                  onAction={() => {
+                    _deleteTeam(team);
+                  }}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action.Push
+                  title="Add New Team"
+                  icon={Icon.AddPerson}
+                  shortcut={Keyboard.Shortcut.Common.New}
+                  target={
+                    <AddTeam
+                      didSignIn={(team) => {
+                        setTeams([...teams, team]);
+                        selectCurrentTeam(team);
+                      }}
+                    />
+                  }
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
