@@ -13,6 +13,12 @@ Translate text in Raycast with models installed in your local Ollama library. Ol
 - Reuse, copy, swap, or remove translations from local history.
 - Keep translation text on this Mac without accounts, API keys, or analytics.
 
+## How this differs from Ollama AI
+
+[Ollama AI](https://www.raycast.com/massimiliano_pasquini/raycast-ollama) is a broad Ollama toolbox that includes translation among many other commands. Ollama Translate is intentionally focused on translation, with translate-while-typing, a remembered source and target language pair, offline language detection used as a model hint, reusable local history, language swapping, and a second-pass meaning review.
+
+Choose Ollama AI if you want several Ollama workflows in one extension. Choose Ollama Translate if translation is your primary workflow and you want a dedicated interface and translation-specific controls.
+
 ## Requirements
 
 - Raycast for macOS.
