@@ -95,6 +95,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | Title | Description |
 |-------|-------------|
 | [Talk to Figma](https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp) | This project implements a Model Context Protocol (MCP) integration between Cursor AI and Figma, allowing Cursor to communicate with Figma for reading designs and modifying them programmatically. |
+| [AgentMailKit](https://github.com/ariaxhan/agentmailkit) | Email job runner for agents. Tools: list_jobs, run_job, preview_job, list_plugins. Email sends are defined as named jobs, run_job renders a preview and defaults to dry_run true, and delivery happens only when dry_run is set false. SMTP credentials come from the environment. |
 | [Airbnb](https://github.com/openbnb-org/mcp-server-airbnb) | MCP Server for searching Airbnb and get listing details. |
 | [Airtable](https://github.com/domdomegg/airtable-mcp-server) | A Model Context Protocol server that provides read and write access to Airtable databases. This server enables LLMs to inspect database schemas, then read and write records. |
 | [Apple Script](https://github.com/peakmojo/applescript-mcp) | A Model Context Protocol (MCP) server that lets you run AppleScript code to interact with Mac. This MCP is intentionally designed to be simple, straightforward, intuitive, and require minimal setup. |
@@ -106,8 +107,10 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Ghost](https://github.com/MFYDev/ghost-mcp) | A Model Context Protocol (MCP) server for interacting with Ghost CMS through LLM interfaces like Claude. This server provides secure and comprehensive access to your Ghost blog, leveraging JWT authentication and a rich set of MCP tools for managing posts, users, members, tiers, offers, and newsletters. |
 | [iTerm](https://github.com/ferrislucas/iterm-mcp) | A Model Context Protocol server that provides access to your iTerm session. |
 | [Lightdash](https://github.com/syucream/lightdash-mcp-server) | This server provides MCP-compatible access to Lightdash's API, allowing AI assistants to interact with your Lightdash data through a standardized interface. |
+| [Metabrain](https://github.com/ariaxhan/metabrain) | Persistent memory for coding agents. Tools: learn, recall, verdict, hypotheses, start_brief, stats, capture_error. Lessons, failures and hypotheses are written to a local SQLite file and retrieved by keyword before the next task. No API key and no network call. |
 | [Monday](https://github.com/sakce/mcp-server-monday) | MCP Server for monday.com, enabling MCP clients to interact with Monday.com boards, items, updates, and documents. |
 | [Paperless-NGX](https://github.com/baruchiro/paperless-mcp) | An MCP server for interacting with a Paperless-NGX API server. Manage documents, tags, correspondents, and document types in your Paperless-NGX instance. |
+| [Site Spec](https://github.com/ariaxhan/site-spec) | Website audit and repair. Tools: audit_site, fix_issue, compile_spec, list_checks. 40 checks across SEO, accessibility, privacy, structured data and AI searchability, each finding returned with the file and the fix. No API key required. |
 | [VC Deal Flow Signal](https://github.com/kindrat86/vc-deal-flow-signal) | GitHub-derived engineering acceleration signals for ~400 venture-backed startups across 20 sectors. Five read-only tools for VC sourcing — trending startups, sector lookup, individual signal, dataset summary, methodology. No API key required. |
 
 
