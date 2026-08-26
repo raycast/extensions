@@ -8,7 +8,7 @@ import { usePinnedEntries } from "./hooks/use-pinned-entries";
 import { useRecentWorkspaces } from "./hooks/use-recent-workspaces";
 import { isMultiFolder } from "./lib/workspaces";
 import { closeZedWindow, focusZedWindow, getZedBundleId, openWithZedCli, ZedBuild } from "./lib/zed";
-import { showOpenStatus } from "./lib/preferences";
+import { focusOpenProjects, showOpenStatus } from "./lib/preferences";
 import { execWindowsZed } from "./lib/windows";
 import { platform } from "os";
 import { openProject } from "./lib/open-project";
@@ -194,10 +194,11 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   const primaryPath = getEntryPrimaryPath(entry);
   const bundleId = getZedBundleId(getPreferenceValues<Preferences>().build as ZedBuild);
 
-  // When the entry is already open, raise its window instead of invoking the
+  // Opt-in: raise the window of an already-open entry instead of invoking the
   // CLI, which opens a duplicate window on recent Zed versions. macOS only:
   // focusing goes through System Events (cliPath is also null off macOS).
-  const focusIfOpen = async () => isMac && entry.isOpen && (await focusZedWindow(entry.title, bundleId));
+  const focusIfOpen = async () =>
+    focusOpenProjects && isMac && entry.isOpen && (await focusZedWindow(entry.title, bundleId));
 
   const actionTitle = entry.isOpen ? "Focus Window" : "Open in Zed";
 
