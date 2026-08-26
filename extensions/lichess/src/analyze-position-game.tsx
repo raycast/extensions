@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api"
 import { useState } from "react";
 
 import { parseChessInput } from "./lib/chess";
-import { analysisUrlForFen, analysisUrlForPgnMoves } from "./lib/lichessUrls";
+import { analysisUrlForChessInput } from "./lib/lichessUrls";
 
 interface AnalyzeFormValues {
   input: string;
@@ -11,12 +11,7 @@ interface AnalyzeFormValues {
 export default function Command() {
   const [input, setInput] = useState("");
   const parsedInput = parseChessInput(input);
-  const analysisUrl =
-    parsedInput?.type === "fen"
-      ? analysisUrlForFen(parsedInput.fen)
-      : parsedInput?.type === "pgn"
-        ? analysisUrlForPgnMoves(parsedInput.moveText, parsedInput.ply)
-        : undefined;
+  const analysisUrl = parsedInput ? analysisUrlForChessInput(parsedInput) : undefined;
 
   async function handleSubmit(values: AnalyzeFormValues) {
     const parsed = parseChessInput(values.input);

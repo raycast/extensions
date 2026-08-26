@@ -3,13 +3,24 @@ import { describe, test } from "node:test";
 
 import { fenFromPgn, parseChessInput, parseFen, parsePgn } from "../src/lib/chess";
 import { toRecentGameViewModel } from "../src/lib/formatGame";
-import { analysisUrlForFen, analysisUrlForPgnMoves, createGameUrl, gameUrl } from "../src/lib/lichessUrls";
+import {
+  analysisUrlForChessInput,
+  analysisUrlForFen,
+  analysisUrlForPgnMoves,
+  createGameUrl,
+  gameUrl,
+} from "../src/lib/lichessUrls";
 import { estimatedDurationSeconds, isSupportedRealtimeSeekClock, parseClockValue } from "../src/lib/timeControl";
 import type { LichessGame } from "../src/types/lichess";
 
 const STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const SHORT_PGN = "1. e4 e5 2. Nf3 Nc6";
 const SHORT_PGN_FEN = "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3";
+const SETUP_PGN = `[SetUp "1"]
+[FEN "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"]
+
+1... e5 2. Nf3`;
+const SETUP_PGN_FEN = "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
 
 describe("chess parsing", () => {
   test("parses and normalizes a valid FEN", () => {
@@ -25,8 +36,18 @@ describe("chess parsing", () => {
 
     assert.equal(parsed?.fen, SHORT_PGN_FEN);
     assert.equal(parsed?.moveText, "e4 e5 Nf3 Nc6");
+    assert.equal(parsed?.hasSetupFen, false);
     assert.equal(parsed?.ply, 4);
     assert.equal(fenFromPgn(SHORT_PGN), SHORT_PGN_FEN);
+  });
+
+  test("keeps track of PGN setup positions", () => {
+    const parsed = parsePgn(SETUP_PGN);
+
+    assert.equal(parsed?.fen, SETUP_PGN_FEN);
+    assert.equal(parsed?.moveText, "e5 Nf3");
+    assert.equal(parsed?.hasSetupFen, true);
+    assert.equal(parsed?.ply, 2);
   });
 
   test("detects whether chess input is FEN or PGN", () => {
@@ -48,6 +69,16 @@ describe("lichess URLs", () => {
       "https://lichess.org/analysis/standard/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_1",
     );
     assert.equal(analysisUrlForPgnMoves("e4 e5 Nf3+ Nc6#", 4), "https://lichess.org/analysis/pgn/e4_e5_Nf3_Nc6#4");
+  });
+
+  test("uses the final FEN URL for PGNs with setup positions", () => {
+    const parsed = parseChessInput(SETUP_PGN);
+
+    assert.ok(parsed);
+    assert.equal(
+      analysisUrlForChessInput(parsed),
+      "https://lichess.org/analysis/standard/rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R_b_KQkq_-_1_2",
+    );
   });
 });
 

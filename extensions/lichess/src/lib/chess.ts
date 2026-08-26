@@ -15,6 +15,7 @@ export type ChessInput =
       fen: string;
       pgn: string;
       moveText: string;
+      hasSetupFen: boolean;
       ply: number;
     };
 
@@ -53,7 +54,9 @@ export function parseFen(input: string): string | undefined {
   }
 }
 
-export function parsePgn(input: string): { fen: string; pgn: string; moveText: string; ply: number } | undefined {
+export function parsePgn(
+  input: string,
+): { fen: string; pgn: string; moveText: string; hasSetupFen: boolean; ply: number } | undefined {
   const chess = new Chess();
 
   try {
@@ -63,6 +66,7 @@ export function parsePgn(input: string): { fen: string; pgn: string; moveText: s
   }
 
   const history = chess.history();
+  const headers = chess.getHeaders();
 
   if (history.length === 0) {
     return undefined;
@@ -72,6 +76,7 @@ export function parsePgn(input: string): { fen: string; pgn: string; moveText: s
     fen: chess.fen(),
     pgn: chess.pgn(),
     moveText: history.join(" "),
+    hasSetupFen: headers.SetUp === "1" && typeof headers.FEN === "string",
     ply: history.length,
   };
 }
