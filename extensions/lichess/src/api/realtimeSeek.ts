@@ -142,10 +142,14 @@ async function waitForStartedSeekGame(
 ): Promise<string | undefined | typeof REALTIME_SEEK_TIMEOUT_RESULT> {
   const firstResult = await Promise.race([
     startedGame.then((gameId) => ({ type: "game" as const, gameId })),
-    withTimeout(seekClosed.then(() => ({ type: "seekClosed" as const })), timeoutMs, {
-      type: "timeout" as const,
-      result: REALTIME_SEEK_TIMEOUT_RESULT,
-    } as const),
+    withTimeout(
+      seekClosed.then(() => ({ type: "seekClosed" as const })),
+      timeoutMs,
+      {
+        type: "timeout" as const,
+        result: REALTIME_SEEK_TIMEOUT_RESULT,
+      } as const,
+    ),
   ]);
 
   if (firstResult.type === "game") {
