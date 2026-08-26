@@ -125,13 +125,15 @@ function imageDimensions(tag: string): { width?: number; height?: number } {
 }
 
 /**
- * Hosts that may serve a feature image. Post metadata is remote content, so the
- * URL it supplies is untrusted: without this check, a published or compromised
- * post could point the size probe at an internal service on the reader's
- * network. An unrecognised host is not fetched — the image still renders, just
- * without measured dimensions.
+ * Ghost content is remote, and rendering an image is itself a request: an image
+ * URL from a published — or compromised — post makes Raycast contact whatever
+ * host it names. Two gates guard that, because the two kinds of image URL in a
+ * post carry different trust.
+ *
+ * `feature_image` is set by CeyPay when publishing and always resolves to a
+ * CeyPay property or its CDN, so it is held to an exact allowlist.
  */
-const IMAGE_HOSTS = new Set([
+const FEATURE_IMAGE_HOSTS = new Set([
   "blog.ceypay.io",
   "www.ceypay.io",
   "ceypay.io",
@@ -139,14 +141,51 @@ const IMAGE_HOSTS = new Set([
   "assets.staticimg.com",
 ]);
 
-export function isProbeableImage(url: string | undefined): url is string {
+/**
+ * Gate for the feature image: the grid thumbnail, the detail hero, and the size
+ * probe. An unrecognised host is never contacted — the post falls back to a
+ * brand glyph rather than showing a broken image.
+ */
+export function isTrustedImage(url: string | undefined): url is string {
   if (!url) return false;
   try {
     const parsed = new URL(url);
-    return parsed.protocol === "https:" && IMAGE_HOSTS.has(parsed.hostname);
+    return parsed.protocol === "https:" && FEATURE_IMAGE_HOSTS.has(parsed.hostname);
   } catch {
     return false;
   }
+}
+
+/** Hostnames that resolve inside the reader's own network rather than the internet. */
+const PRIVATE_SUFFIX = /(^|\.)(localhost|local|internal|intranet|lan|home\.arpa)$/i;
+
+/**
+ * Gate for images inside the post body. Posts legitimately embed screenshots
+ * from third-party sites, so an exact allowlist would silently drop real
+ * illustrations and need editing every time an author cites a new source.
+ * Instead this blocks what the allowlist was actually protecting against: a
+ * request aimed at the reader's own machine or LAN. Plain HTTP, a bare IP
+ * address (no legitimate article image is served from one), a single-label
+ * intranet name, and the private suffixes above are all refused; ordinary
+ * public HTTPS hosts render.
+ */
+function isRenderableImage(url: string): boolean {
+  try {
+    const { protocol, hostname } = new URL(url);
+    if (protocol !== "https:") return false;
+    // URL keeps IPv6 literals bracketed, so this catches both families.
+    if (/^\[|^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return false;
+    if (PRIVATE_SUFFIX.test(hostname)) return false;
+    // A name with no dot is an intranet host, never a public image server.
+    return hostname.includes(".");
+  } catch {
+    return false;
+  }
+}
+
+/** A markdown image, or nothing at all when its host must not be contacted. */
+function markdownImage(src: string, width?: number, height?: number): string {
+  return isRenderableImage(src) ? `![](${sizedImage(src, width, height)})` : "";
 }
 
 export type ImageSize = { width: number; height: number };
@@ -221,7 +260,10 @@ export function postToMarkdown(post: BlogPost, heroSize?: ImageSize): string {
     if (!src) return "";
     const { width, height } = imageDimensions(tag);
     const text = caption ? `\n*${decodeEntities(caption.replace(/<[^>]+>/g, "").trim())}*` : "";
-    return `\n\n![](${sizedImage(src, width, height)})${text}\n\n`;
+    const image = markdownImage(src, width, height);
+    // A dropped image keeps its caption: the caption is text, not a request.
+    if (!image) return text ? `\n\n${text.trim()}\n\n` : "";
+    return `\n\n${image}${text}\n\n`;
   });
 
   out = out
@@ -247,7 +289,8 @@ export function postToMarkdown(post: BlogPost, heroSize?: ImageSize): string {
       const src = tag.match(/src="([^"]*)"/i)?.[1];
       if (!src) return "";
       const { width, height } = imageDimensions(tag);
-      return `\n![](${sizedImage(src, width, height)})\n`;
+      const image = markdownImage(src, width, height);
+      return image ? `\n${image}\n` : "";
     })
     .replace(/<hr[^>]*>/gi, "\n\n---\n\n")
     .replace(/<br\s*\/?>/gi, "  \n")
@@ -265,7 +308,10 @@ export function postToMarkdown(post: BlogPost, heroSize?: ImageSize): string {
     .filter(Boolean)
     .join(" · ");
 
-  const hero = post.featureImage ? `![](${sizedImage(post.featureImage, heroSize?.width, heroSize?.height)})` : "";
+  // The hero is the feature image, so it is held to the stricter allowlist.
+  const hero = isTrustedImage(post.featureImage)
+    ? `![](${sizedImage(post.featureImage, heroSize?.width, heroSize?.height)})`
+    : "";
 
   const header = [`# ${post.title}`, byline ? `*${byline}*` : "", hero].filter(Boolean).join("\n\n");
 

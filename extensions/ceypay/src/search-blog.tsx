@@ -9,7 +9,7 @@ import {
   postsUrl,
   publicPostUrl,
   publicTagUrl,
-  isProbeableImage,
+  isTrustedImage,
   readImageSize,
 } from "./lib/ghost";
 import type { BlogPost } from "./lib/types";
@@ -81,9 +81,10 @@ function PostItem({ post }: { post: BlogPost }) {
 
   return (
     <Grid.Item
-      // Posts without a feature image fall back to a brand-tinted glyph.
+      // Posts with no feature image — or one from a host we do not trust, since
+      // rendering it would fetch it — fall back to a brand-tinted glyph.
       content={
-        post.featureImage
+        isTrustedImage(post.featureImage)
           ? { value: { source: post.featureImage }, tooltip: post.excerpt }
           : { value: { source: Icon.Document, tintColor: BRAND }, tooltip: post.excerpt }
       }
@@ -112,7 +113,7 @@ function PostItem({ post }: { post: BlogPost }) {
  */
 function useHeroSize(url: string | undefined) {
   // The URL comes from post metadata, so it is only fetched if it is one we trust.
-  const probeable = isProbeableImage(url);
+  const probeable = isTrustedImage(url);
 
   const { data } = useFetch(probeable ? url : "", {
     execute: probeable,
