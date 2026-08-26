@@ -10,10 +10,7 @@
     "Finance"
   ],
   "icon": "bitcoin-tools-app-icon.png",
-  "author": "rohenaz",
-  "contributors": [
-    "luke_lorenzo"
-  ],
+  "author": "satchmo",
   "license": "MIT",
   "repository": "https://github.com/b-open-io/raycast-bsv",
   "platforms": [
