@@ -28,7 +28,13 @@
     {
       "name": "match",
       "title": "Matches",
-      "description": "View fixtures, results, and archives in one place.",
+      "description": "View played and in-progress matches, working back through the season.",
+      "mode": "view"
+    },
+    {
+      "name": "fixture",
+      "title": "Fixtures",
+      "description": "Browse upcoming Premier League matches, matchweek by matchweek.",
       "mode": "view"
     },
     {
