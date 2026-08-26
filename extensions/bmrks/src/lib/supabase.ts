@@ -1,5 +1,6 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, WebSocketLikeConstructor } from "@supabase/supabase-js";
+import { WebSocket } from "ws";
 
 // These are not sensitive. Has access to public operations, like auth.
 const supabaseUrl = "https://nswbygdrtmlsfuyqsokv.supabase.co";
@@ -43,5 +44,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
+  },
+  realtime: {
+    // Raycast's Node runtime has no global WebSocket, and supabase-js eagerly
+    // resolves one on client creation, so we must supply a transport.
+    transport: WebSocket as unknown as WebSocketLikeConstructor,
   },
 });
