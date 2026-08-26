@@ -34,9 +34,13 @@ export function useEntityOverrides() {
   const [hiddenEntities, setHiddenEntities] = useCachedState<string[]>("hidden-entities", [], {
     cacheNamespace: CACHE_NAMESPACE,
   });
-  const [entityAliases, setEntityAliases] = useCachedState<Record<string, string>>("entity-aliases", {}, {
-    cacheNamespace: CACHE_NAMESPACE,
-  });
+  const [entityAliases, setEntityAliases] = useCachedState<Record<string, string>>(
+    "entity-aliases",
+    {},
+    {
+      cacheNamespace: CACHE_NAMESPACE,
+    },
+  );
   const [favoriteEntities, setFavoriteEntities] = useCachedState<string[]>("favorite-entities", [], {
     cacheNamespace: CACHE_NAMESPACE,
   });
