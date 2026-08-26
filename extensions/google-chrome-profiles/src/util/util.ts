@@ -424,7 +424,11 @@ const resolveGivenName = async (browser: BrowserConfig, profile: Profile): Promi
   try {
     const { state: localState } = await readChromeLocalState(browser);
     return localState.profile.info_cache[profile.directory]?.gaia_given_name;
-  } catch {
+  } catch (error) {
+    // Non-fatal: the caller falls back to the raw profile name. Logged so a
+    // stale-Quicklink mismatch is diagnosable (I/O error vs. malformed
+    // Local State) instead of silently doing nothing.
+    console.debug("resolveGivenName: could not read Local State", error);
     return undefined;
   }
 };
