@@ -124,6 +124,31 @@ function imageDimensions(tag: string): { width?: number; height?: number } {
   return { width: width || undefined, height: height || undefined };
 }
 
+/**
+ * Hosts that may serve a feature image. Post metadata is remote content, so the
+ * URL it supplies is untrusted: without this check, a published or compromised
+ * post could point the size probe at an internal service on the reader's
+ * network. An unrecognised host is not fetched — the image still renders, just
+ * without measured dimensions.
+ */
+const IMAGE_HOSTS = new Set([
+  "blog.ceypay.io",
+  "www.ceypay.io",
+  "ceypay.io",
+  "digitalpress.fra1.cdn.digitaloceanspaces.com",
+  "assets.staticimg.com",
+]);
+
+export function isProbeableImage(url: string | undefined): url is string {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" && IMAGE_HOSTS.has(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
 export type ImageSize = { width: number; height: number };
 
 /**

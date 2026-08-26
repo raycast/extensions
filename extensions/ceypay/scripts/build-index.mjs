@@ -25,9 +25,19 @@ const DOCS_DIR = process.env.DOCS_DIR ? path.resolve(process.env.DOCS_DIR) : pat
 const OUT = path.join(ROOT, "assets", "index.json");
 const VERIFY = !process.argv.includes("--no-verify");
 
+/**
+ * `assets/index.json` is committed, so the extension builds without the docs
+ * repository. Only a contributor regenerating the index needs it — and only
+ * they set DOCS_DIR, so an explicit path that does not exist is still an error.
+ */
 if (!fs.existsSync(path.join(DOCS_DIR, "docs.json"))) {
-  console.error(`✗ No docs.json at ${DOCS_DIR}\n  Set DOCS_DIR to your CeyPay docs checkout.`);
-  process.exit(1);
+  if (process.env.DOCS_DIR) {
+    console.error(`✗ No docs.json at ${DOCS_DIR}\n  Check the DOCS_DIR path.`);
+    process.exit(1);
+  }
+  console.log(`• No docs checkout at ${DOCS_DIR} — keeping the committed assets/index.json.`);
+  console.log("  Set DOCS_DIR to a CeyPay docs checkout to regenerate it.");
+  process.exit(0);
 }
 
 const docsConfig = JSON.parse(fs.readFileSync(path.join(DOCS_DIR, "docs.json"), "utf8"));

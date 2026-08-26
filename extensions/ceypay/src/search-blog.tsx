@@ -9,6 +9,7 @@ import {
   postsUrl,
   publicPostUrl,
   publicTagUrl,
+  isProbeableImage,
   readImageSize,
 } from "./lib/ghost";
 import type { BlogPost } from "./lib/types";
@@ -110,8 +111,11 @@ function PostItem({ post }: { post: BlogPost }) {
  * first couple of kilobytes are fetched to measure it.
  */
 function useHeroSize(url: string | undefined) {
-  const { data } = useFetch(url ?? "", {
-    execute: Boolean(url),
+  // The URL comes from post metadata, so it is only fetched if it is one we trust.
+  const probeable = isProbeableImage(url);
+
+  const { data } = useFetch(probeable ? url : "", {
+    execute: probeable,
     headers: { Range: "bytes=0-2047" },
     parseResponse: async (response) => {
       if (!response.ok) return undefined;
