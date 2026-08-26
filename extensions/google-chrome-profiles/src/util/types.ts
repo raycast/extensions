@@ -24,6 +24,12 @@ export type GoogleChromeInfoCacheProfile = {
    */
   gaia_name?: string;
   /**
+   * The Google account's given (first) name, eg: `Steve`. This — not `name`
+   * or `gaia_name` — is what Chrome's Profiles menu bar item actually shows
+   * for a signed-in profile: `${gaia_given_name} (${name})`, eg "Steve (Work)".
+   */
+  gaia_given_name?: string;
+  /**
    * The email of the user Google account, eg: `steve.jobs@gmail.com`.
    */
   user_name?: string;

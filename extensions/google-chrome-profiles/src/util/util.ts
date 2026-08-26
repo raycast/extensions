@@ -1,11 +1,12 @@
 import { URL } from "url";
 import { writeFileSync, unlinkSync } from "fs";
-import { tmpdir } from "os";
+import { readFile } from "fs/promises";
+import { homedir, tmpdir } from "os";
 import { join } from "path";
 import { spawn } from "child_process";
 import { randomUUID } from "crypto";
 import { showToast, Toast } from "@raycast/api";
-import { BrowserConfig } from "./types";
+import { BrowserConfig, GoogleChromeLocalState } from "./types";
 
 export type ChromeTarget =
   | { action: "focus" }
@@ -294,6 +295,45 @@ const launchInProfileCommand = (browser: BrowserConfig, profileDirectory: string
 };
 
 /**
+ * Looks up the exact label Chrome's Profiles menu bar item uses for
+ * `profile.directory`, by reading the same `Local State` file Chrome itself
+ * renders that menu from.
+ *
+ * For a profile signed into a Google account, that menu does *not* show the
+ * profile's own name — it shows `${gaia_given_name} (${name})`, eg a profile
+ * named "Work" signed in with a Google account given name "Alex" appears in
+ * the menu as "Alex (Work)". Matching against the raw profile name alone
+ * therefore never matches a signed-in profile, which previously fell through
+ * to a substring search across every menu item and could silently click an
+ * unrelated profile whose label happened to contain the search text (eg
+ * profile "Work" matched "Work admin" or "old work" first, depending on menu
+ * order — opening a different profile's session with no visible error).
+ *
+ * Read fresh from disk rather than trusting a `gaia_given_name` passed in by
+ * the caller: the Quicklink/deeplink path (`open-profile.tsx`) only carries
+ * `directory` and `name` across the deeplink, so it has no Google-account
+ * info to give us — reading `Local State` here fixes that path too, using
+ * the one piece every caller already has: `profile.directory`.
+ *
+ * Returns `undefined` (never throws) when `Local State` can't be read/parsed
+ * or the profile has no `gaia_given_name`, so the caller falls back to the
+ * raw profile name — correct for local, non-signed-in profiles.
+ */
+const getGoogleAccountMenuLabel = async (
+  browser: BrowserConfig,
+  profile: { name: string; directory: string },
+): Promise<string | undefined> => {
+  try {
+    const path = join(homedir(), browser.dataPath, "Local State");
+    const localState: GoogleChromeLocalState = JSON.parse(await readFile(path, "utf-8"));
+    const givenName = localState.profile.info_cache[profile.directory]?.gaia_given_name;
+    return givenName ? `${givenName} (${profile.name})` : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
  * Run the script that opens Google Chrome.
  *
  * - `ChromeAction.Focus`: focuses the existing profile window (or opens it if not open)
@@ -331,7 +371,14 @@ export const openGoogleChrome = async (
     return;
   }
 
-  const escapedProfileName = escapeAppleScriptString(profile.name);
+  const googleAccountLabel = await getGoogleAccountMenuLabel(browser, profile);
+  // Try the Google-account label first — what Chrome actually shows for a
+  // signed-in profile — then the raw profile name, which is what Chrome
+  // shows for a local profile and is also the safety net if the lookup
+  // above failed. Both are exact candidates: no substring/contains matching,
+  // since that can't distinguish "OT" from "OT admin" or "adm ot".
+  const candidateNames = [...new Set([googleAccountLabel, profile.name].filter((n): n is string => Boolean(n)))];
+  const escapedCandidates = candidateNames.map((n) => `"${escapeAppleScriptString(n)}"`).join(", ");
   const escapedUrl = url ? escapeAppleScriptString(url) : undefined;
   const escapedAppName = escapeAppleScriptString(browser.appName);
 
@@ -349,24 +396,19 @@ export const openGoogleChrome = async (
       tell process "${escapedAppName}"
         set profileMenu to menu 1 of menu bar item 8 of menu bar 1
         set menuItems to name of menu items of profileMenu
+        set candidateNames to {${escapedCandidates}}
 
-        if "${escapedProfileName}" is in menuItems then
-          click menu item "${escapedProfileName}" of profileMenu
-        else
-          set foundMatch to false
-          repeat with menuItemName in menuItems
-            if menuItemName is not missing value then
-              if menuItemName contains "${escapedProfileName}" then
-                click menu item menuItemName of profileMenu
-                set foundMatch to true
-                exit repeat
-              end if
-            end if
-          end repeat
-
-          if foundMatch is false then
-            error "Profile not found in menu"
+        set foundMatch to false
+        repeat with candidateName in candidateNames
+          if candidateName is in menuItems then
+            click menu item candidateName of profileMenu
+            set foundMatch to true
+            exit repeat
           end if
+        end repeat
+
+        if foundMatch is false then
+          error "Profile not found in menu"
         end if
       end tell
     end tell
