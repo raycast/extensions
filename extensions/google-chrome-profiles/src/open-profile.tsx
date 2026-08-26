@@ -47,7 +47,7 @@ export default async function Command(props: LaunchProps) {
   const profile: Profile = {
     directory: profileDirectory,
     name: profileName,
-    ...(profileGivenName && { givenName: profileGivenName }),
+    givenName: profileGivenName,
   };
   await openGoogleChrome(
     profile,
