@@ -68,25 +68,25 @@ If the shortcut contains some "ambiguous" modifiers (eg. `ctrl`, or `cmd`, or `w
 
 A collection of shortcuts that are commonly used throughout Raycast. Using them should help provide a more consistent experience and preserve muscle memory.
 
-| Name            | macOS     | Windows              |
-| --------------- | --------- | -------------------- |
-| Copy            | ⌘ + ⇧ + C | `ctrl` + `shift` + C |
-| CopyDeeplink    | ⌘ + ⇧ + C | `ctrl` + `shift` + C |
-| CopyName        | ⌘ + ⇧ + . | `ctrl` + `alt` + C   |
-| CopyPath        | ⌘ + ⇧ + , | `alt` + `shift` + C  |
-| Save            | ⌘ + S     | `ctrl` + S           |
-| Duplicate       | ⌘ + D     | `ctrl` + `shift` + S |
-| Edit            | ⌘ + E     | `ctrl` + E           |
-| MoveDown        | ⌘ + ⇧ + ↓ | `ctrl` + `shift` + ↓ |
-| MoveUp          | ⌘ + ⇧ + ↑ | `ctrl` + `shift` + ↑ |
-| New             | ⌘ + N     | `ctrl` + N           |
-| Open            | ⌘ + O     | `ctrl` + O           |
-| OpenWith        | ⌘ + ⇧ + O | `ctrl` + `shift` + O |
-| Pin             | ⌘ + ⇧ + P | `ctrl` + .           |
-| Refresh         | ⌘ + R     | `ctrl` + R           |
-| Remove          | ⌃ + X     | `ctrl` + D           |
-| RemoveAll       | ⌃ + ⇧ + X | `ctrl` + `shift` + D |
-| ToggleQuickLook | ⌘ + Y     | `ctrl` + Y           |
+| Name            | macOS         | Windows              |
+| --------------- | ------------- | -------------------- |
+| Copy            | `⌘` + `⇧` + C | `ctrl` + `shift` + C |
+| CopyDeeplink    | `⌘` + `⇧` + C | `ctrl` + `shift` + C |
+| CopyName        | `⌘` + `⇧` + . | `ctrl` + `alt` + C   |
+| CopyPath        | `⌘` + `⇧` + , | `alt` + `shift` + C  |
+| Save            | `⌘` + S       | `ctrl` + S           |
+| Duplicate       | `⌘` + D       | `ctrl` + `shift` + S |
+| Edit            | `⌘` + E       | `ctrl` + E           |
+| MoveDown        | `⌘` + `⇧` + ↓ | `ctrl` + `shift` + ↓ |
+| MoveUp          | `⌘` + `⇧` + ↑ | `ctrl` + `shift` + ↑ |
+| New             | `⌘` + N       | `ctrl` + N           |
+| Open            | `⌘` + O       | `ctrl` + O           |
+| OpenWith        | `⌘` + `⇧` + O | `ctrl` + `shift` + O |
+| Pin             | `⌘` + .       | `ctrl` + .           |
+| Refresh         | `⌘` + R       | `ctrl` + R           |
+| Remove          | `⌃` + X       | `ctrl` + D           |
+| RemoveAll       | `⌃` + `⇧` + X | `ctrl` + `shift` + D |
+| ToggleQuickLook | `⌘` + Y       | `ctrl` + Y           |
 
 ### Keyboard.KeyEquivalent
 
