@@ -297,8 +297,8 @@ export const getMatches = async (
     method: "get",
     url: `${endpoint}/v2/matches`,
     params: {
-      ...props,
       _sort: "kickoff:asc",
+      ...props,
     },
   };
 
