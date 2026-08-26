@@ -200,11 +200,12 @@ export async function setIssueRelations(
   const add = async (values: string[] | undefined, type: IssueRelationType, inverse = false) => {
     for (const value of values ?? []) {
       const related = await resolveIssue(value);
-      await client().createIssueRelation({
+      const result = await client().createIssueRelation({
         issueId: inverse ? related.id : issue.id,
         relatedIssueId: inverse ? issue.id : related.id,
         type,
       });
+      if (!result.success || !result.issueRelation) throw new Error("Failed to create issue relation.");
     }
   };
   await add(additions.blocks, IssueRelationType.Blocks);
@@ -215,11 +216,17 @@ export async function setIssueRelations(
       (relation) => relation.type === IssueRelationType.Duplicate,
     );
     if (additions.duplicateOf === null) {
-      for (const relation of duplicateRelations) await client().deleteIssueRelation(relation.id);
+      for (const relation of duplicateRelations) {
+        const result = await client().deleteIssueRelation(relation.id);
+        if (!result.success) throw new Error("Failed to remove duplicate issue relation.");
+      }
     } else {
       const duplicate = await resolveIssue(additions.duplicateOf);
       for (const relation of duplicateRelations) {
-        if (relation.relatedIssueId !== duplicate.id) await client().deleteIssueRelation(relation.id);
+        if (relation.relatedIssueId !== duplicate.id) {
+          const result = await client().deleteIssueRelation(relation.id);
+          if (!result.success) throw new Error("Failed to remove duplicate issue relation.");
+        }
       }
       if (!duplicateRelations.some((relation) => relation.relatedIssueId === duplicate.id)) {
         await add([duplicate.id], IssueRelationType.Duplicate);
@@ -235,7 +242,10 @@ export async function setIssueRelations(
       : (await issue.relations({ first: 250 })).nodes;
     for (const relation of relations) {
       const target = inverse ? relation.issueId : relation.relatedIssueId;
-      if (relation.type === type && target && targetIds.has(target)) await client().deleteIssueRelation(relation.id);
+      if (relation.type === type && target && targetIds.has(target)) {
+        const result = await client().deleteIssueRelation(relation.id);
+        if (!result.success) throw new Error("Failed to remove issue relation.");
+      }
     }
   };
   await remove(removals.removeBlocks, "blocks");
@@ -254,11 +264,19 @@ export async function setIssueReleases(
   const desired = input.setReleases ? new Set<string>() : new Set(current.map((release) => release.id));
   for (const value of input.setReleases ?? input.addReleases ?? []) desired.add((await resolveRelease(value)).id);
   for (const value of input.removeReleases ?? []) desired.delete((await resolveRelease(value)).id);
-  for (const release of current)
-    if (!desired.has(release.id)) await client().issueToReleaseDeleteByIssueAndRelease(issue.id, release.id);
+  for (const release of current) {
+    if (!desired.has(release.id)) {
+      const result = await client().issueToReleaseDeleteByIssueAndRelease(issue.id, release.id);
+      if (!result.success) throw new Error("Failed to remove issue release.");
+    }
+  }
   const currentIds = new Set(current.map((release) => release.id));
-  for (const releaseId of desired)
-    if (!currentIds.has(releaseId)) await client().createIssueToRelease({ issueId: issue.id, releaseId });
+  for (const releaseId of desired) {
+    if (!currentIds.has(releaseId)) {
+      const result = await client().createIssueToRelease({ issueId: issue.id, releaseId });
+      if (!result.success || !result.issueToRelease) throw new Error("Failed to add issue release.");
+    }
+  }
 }
 
 export type IssueUpdateInput = Parameters<LinearClient["updateIssue"]>[1];
