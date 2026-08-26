@@ -133,13 +133,23 @@ function imageDimensions(tag: string): { width?: number; height?: number } {
 /**
  * Ghost content is remote, and rendering an image is itself a request: an image
  * URL from a published — or compromised — post makes Raycast contact whatever
- * host it names. Two gates guard that, because the two kinds of image URL in a
- * post carry different trust.
+ * host it names. Every image in the blog therefore has to come from a host named
+ * here, whether it is the feature image or one embedded in the post body.
  *
- * `feature_image` is set by CeyPay when publishing and always resolves to a
- * CeyPay property or its CDN, so it is held to an exact allowlist.
+ * An allowlist rather than a rule about which hosts look private, because a
+ * hostname does not tell you where it points: `127.0.0.1.nip.io` is an ordinary
+ * public name that resolves to loopback, and resolving it here would not settle
+ * it either — Raycast makes the real request later, and the answer can change in
+ * between. Naming the hosts is the only check that does not depend on
+ * resolution.
+ *
+ * Nothing is lost by being strict: every image that renders across the live blog
+ * is already served from one of these. Third-party images do appear in posts, but
+ * only inside bookmark cards, which are unwrapped to a plain link well before any
+ * image is emitted. Add a host here if the blog ever serves images from a new
+ * one.
  */
-const FEATURE_IMAGE_HOSTS = new Set([
+const IMAGE_HOSTS = new Set([
   "blog.ceypay.io",
   "www.ceypay.io",
   "ceypay.io",
@@ -148,42 +158,16 @@ const FEATURE_IMAGE_HOSTS = new Set([
 ]);
 
 /**
- * Gate for the feature image: the grid thumbnail, the detail hero, and the size
- * probe. An unrecognised host is never contacted — the post falls back to a
- * brand glyph rather than showing a broken image.
+ * The one gate for every image sink: the grid thumbnail, the detail hero, the
+ * images in the post body, and the size probe. An unrecognised host is never
+ * contacted — the image is dropped, or the post falls back to a brand glyph,
+ * rather than showing as broken.
  */
 export function isTrustedImage(url: string | undefined): url is string {
   if (!url) return false;
   try {
     const parsed = new URL(url);
-    return parsed.protocol === "https:" && FEATURE_IMAGE_HOSTS.has(parsed.hostname);
-  } catch {
-    return false;
-  }
-}
-
-/** Hostnames that resolve inside the reader's own network rather than the internet. */
-const PRIVATE_SUFFIX = /(^|\.)(localhost|local|internal|intranet|lan|home\.arpa)$/i;
-
-/**
- * Gate for images inside the post body. Posts legitimately embed screenshots
- * from third-party sites, so an exact allowlist would silently drop real
- * illustrations and need editing every time an author cites a new source.
- * Instead this blocks what the allowlist was actually protecting against: a
- * request aimed at the reader's own machine or LAN. Plain HTTP, a bare IP
- * address (no legitimate article image is served from one), a single-label
- * intranet name, and the private suffixes above are all refused; ordinary
- * public HTTPS hosts render.
- */
-function isRenderableImage(url: string): boolean {
-  try {
-    const { protocol, hostname } = new URL(url);
-    if (protocol !== "https:") return false;
-    // URL keeps IPv6 literals bracketed, so this catches both families.
-    if (/^\[|^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return false;
-    if (PRIVATE_SUFFIX.test(hostname)) return false;
-    // A name with no dot is an intranet host, never a public image server.
-    return hostname.includes(".");
+    return parsed.protocol === "https:" && IMAGE_HOSTS.has(parsed.hostname);
   } catch {
     return false;
   }
@@ -191,7 +175,7 @@ function isRenderableImage(url: string): boolean {
 
 /** A markdown image, or nothing at all when its host must not be contacted. */
 function markdownImage(src: string, width?: number, height?: number): string {
-  return isRenderableImage(src) ? `![](${sizedImage(src, width, height)})` : "";
+  return isTrustedImage(src) ? `![](${sizedImage(src, width, height)})` : "";
 }
 
 export type ImageSize = { width: number; height: number };
@@ -335,6 +319,6 @@ export function postToMarkdown(post: BlogPost, heroSize?: ImageSize): string {
   // an image and fetches. This last pass holds anything that reached the output
   // by that route to the same rule.
   return document.replace(/!\[[^\]]*\]\(\s*([^)\s]+)[^)]*\)/g, (image, src: string) =>
-    isRenderableImage(src) ? image : "",
+    isTrustedImage(src) ? image : "",
   );
 }
