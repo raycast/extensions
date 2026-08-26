@@ -19,7 +19,7 @@ export default defineConfig([
       complexity: ["warn", 8],
       "max-depth": ["warn", 3],
       "max-lines": [
-        "warn",
+        "error",
         {
           max: 250,
           skipBlankLines: true,
@@ -27,7 +27,7 @@ export default defineConfig([
         },
       ],
       "max-lines-per-function": [
-        "warn",
+        "error",
         {
           max: 80,
           skipBlankLines: true,
