@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clipboard-to-file",
   "title": "Clipboard to File",
-  "description": "Write the current clipboard contents to a labeled file in a configurable folder",
+  "description": "Save clipboard text or copied files to a configurable folder",
   "icon": "icon.png",
   "author": "michihuber",
   "platforms": [
@@ -26,12 +26,12 @@
     {
       "name": "write-clipboard",
       "title": "Write Clipboard to File",
-      "description": "Write the current clipboard contents to <destination folder>/<label>",
+      "description": "Write the current clipboard contents to a labeled file in the configured folder",
       "mode": "no-view",
       "arguments": [
         {
           "name": "label",
-          "placeholder": "Filename or label",
+          "placeholder": "Filename",
           "type": "text",
           "required": true
         }
@@ -46,7 +46,7 @@
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "1.104.25"
+    "@raycast/api": "^2.0.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",

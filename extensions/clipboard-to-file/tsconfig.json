@@ -8,5 +8,5 @@
     "strict": true,
     "target": "ES2022"
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "raycast-env.d.ts"]
 }
