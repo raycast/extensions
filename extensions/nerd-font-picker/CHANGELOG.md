@@ -6,7 +6,6 @@
 - Updated README
   - Documented the new icon colour behaviour and removed the now redundant `Item Colour` preference option.
   - Added documentation for the `Font Name` preference.
-- Added new extension icon.
 
 ## [1.0.0] - 2026-05-13
 
