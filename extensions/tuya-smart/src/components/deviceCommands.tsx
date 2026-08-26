@@ -1,51 +1,43 @@
+import type { JSX } from "react";
+import { Color, Icon, List } from "@raycast/api";
 import { Device, FunctionItem } from "../utils/interfaces";
-import { CommandList } from "./list";
+import { CommandActionPanel, withUpdatedStatus } from "./actionPanels";
+import { formatStatusValue, isNoiseStatus, statusLabel, cleanName, temperatureUnitOf } from "../utils/deviceSemantics";
+
+/** Data points a user can act on: booleans to flip, numbers to set, enums to choose. */
+function actionableStatuses(device: Device): FunctionItem[] {
+  return (device.status ?? []).filter(
+    (status) => !isNoiseStatus(status) && (typeof status.value === "boolean" || typeof status.value === "number"),
+  );
+}
 
 export function DeviceCommands(props: { device: Device; onAction: (device: Device) => void }): JSX.Element {
   const device = props.device;
-  let commands: FunctionItem[];
-  switch (device.category) {
-    case "Switch":
-    case "kg":
-    case "Socket": {
-      commands = (device.status ?? []).filter((status) => status.type === "Boolean");
-      break;
-    }
-    case "cl":
-    case "Curtain": {
-      commands = [
-        { code: "control", value: "open", name: "Open" },
-        { code: "control", value: "close", name: "Close" },
-        { code: "control", value: "stop", name: "Stop" },
-      ];
-      break;
-    }
-    case "dj":
-    case "Light Source": {
-      commands = [
-        {
-          code: "switch_led",
-          value: (device.status ?? []).find((status) => status.code === "switch_led")?.value,
-          name: "Toggle On/Off",
-        },
-        { code: "work_mode", value: "white", name: "Workmode: White" },
-        { code: "work_mode", value: "colour", name: "Workmode: Colour" },
-        { code: "work_mode", value: "scene", name: "Workmode: Scene" },
-        { code: "work_mode", value: "music", name: "Workmode: Music" },
-      ];
-      break;
-    }
-    default:
-      return <></>;
-  }
+  const unit = temperatureUnitOf(device);
+  const commands = actionableStatuses(device);
 
   return (
-    <CommandList
-      commands={commands}
-      device={device}
-      onAction={(device) => {
-        props.onAction(device);
-      }}
-    />
+    <List navigationTitle={cleanName(device.name)} searchBarPlaceholder="Search switches by name">
+      <List.Section title="Switches" subtitle={String(commands.length)}>
+        {commands.map((command) => (
+          <List.Item
+            key={command.code}
+            title={statusLabel(command)}
+            accessories={[{ text: formatStatusValue(command, unit) }]}
+            icon={{
+              source: typeof command.value === "boolean" && command.value ? Icon.CircleFilled : Icon.Circle,
+              tintColor: command.value ? Color.Green : Color.Red,
+            }}
+            actions={
+              <CommandActionPanel
+                command={command}
+                device={device}
+                onAction={({ command: updated }) => props.onAction(withUpdatedStatus(device, updated))}
+              />
+            }
+          />
+        ))}
+      </List.Section>
+    </List>
   );
 }

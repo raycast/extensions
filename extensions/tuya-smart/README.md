@@ -15,7 +15,7 @@
         <li><a href="#get-authorization-key">Get authorization key</a></li>
       </ul>
     </li>
-    <li><a href="#Throubleshooting">Throubleshooting</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
   </ol>
 </details>
 
@@ -55,7 +55,35 @@
 Click the created project to enter the `Project Overview` page and get the `Authorization Key`. You will need these for setting up the integration. in the next step.
 <img src="https://github.com/AndresMorelos/raycast-extensions/blob/tuya-smart-extension/extensions/tuya-smart/assets/auth_key.png?raw=true">
 
-## Throubleshooting
+## Local Network Fallback
+
+The Tuya IoT Core trial expires roughly every six months, and while it is lapsed the
+cloud API rejects every call. To keep the extension usable, commands fall back to
+Tuya's local network protocol.
+
+How it works:
+
+- While the cloud is reachable, each device's local key and address are kept in the
+  extension's cache along with the rest of its data.
+- If a command fails because the subscription has expired, it is retried directly
+  against the device on your network, and the toast says so.
+- The device list itself falls back to the last cached copy.
+
+Limitations, which are worth knowing before relying on it:
+
+- It only works on the same local network as the devices. It does nothing remotely.
+- Tuya devices accept a single local connection at a time, so it will not work while
+  the Tuya Smart or Smart Life app is open on your phone.
+- Sensors are not supported; they only report when their state changes.
+- The local protocol addresses data points by number, and Tuya's cloud API does not
+  publish that number. It is derived from Tuya's standard instruction set and then
+  checked against the device's own schema. If they disagree, the command is refused
+  rather than sent to the wrong data point.
+- A device's local key changes if you remove and re-add it in the app. Open the
+  extension once while the cloud works to refresh it.
+- Discovering new devices always needs the cloud.
+
+## Troubleshooting
 
 ### If no devices show up
 
@@ -76,6 +104,8 @@ Incorrect Access ID or Access Secret. Please refer to the Configuration part abo
 ---
 
 ### 1106: permission deny
+
+- IoT Core subscription expired: the trial has to be extended roughly every six months on the Tuya IoT Platform under `Cloud` > `Cloud Services` > `IoT Core` > `My Subscriptions`. The extension reports this explicitly when it happens.
 
 - App account not linked with cloud project: On the Tuya IoT Platform, you have linked devices by using Tuya Smart or Smart Life app in your cloud project. For more information, see Link devices by app account.
 
