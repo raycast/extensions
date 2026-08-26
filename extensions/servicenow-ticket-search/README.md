@@ -24,16 +24,14 @@ A Raycast extension for quickly searching and opening ServiceNow tickets in your
    ```bash
    npm install
    ```
-3. Build the extension:
+3. Load it into Raycast:
    ```bash
-   npm run build
+   npm run dev
    ```
-4. Import into Raycast:
-   - Open Raycast preferences
-   - Go to Extensions
-   - Click the "+" button
-   - Select "Add Script Directory"
-   - Select this project directory
+   This builds the extension and registers it with your local Raycast, where it
+   appears under a "Development" heading. The command watches `src/`, so edits
+   reload without a restart. Stop it with Ctrl-C, or via Stop Development in the
+   extension's action panel.
 
 ### Configuration
 
@@ -103,7 +101,20 @@ npm run lint
 
 # Fix linting issues
 npm run fix-lint
+
+# Run the test suite
+npm test
+
+# Re-run tests on change
+npm run test:watch
 ```
+
+### Layout
+
+`src/servicenow.ts` holds the domain logic — input parsing, zero-padding, URL
+building — and deliberately imports nothing from `@raycast/api`, so it loads in
+a plain Node process and is tested directly in `src/servicenow.test.ts`.
+`src/search-ticket.tsx` holds the Raycast component and the icon/colour mapping.
 
 ## License
 

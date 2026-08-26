@@ -21,7 +21,8 @@
   "commands": [
     {
       "name": "search-ticket",
-      "title": "Search ServiceNow Ticket",
+      "title": "Search Ticket",
+      "subtitle": "ServiceNow",
       "description": "Search for ServiceNow tickets by number (CHG, DMND, INC, ENHC, RITM)",
       "mode": "view"
     }
@@ -37,8 +38,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.16.0"
+    "@raycast/api": "^1.79.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
@@ -46,7 +46,8 @@
     "@types/react": "^19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -54,7 +55,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "allowScripts": {
     "esbuild@0.27.7": true
