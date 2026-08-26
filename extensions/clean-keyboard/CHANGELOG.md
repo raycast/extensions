@@ -2,7 +2,7 @@
 
 ## [Fix Forever Duration] - {PR_MERGE_DATE}
 
-- Fixed the Forever option unlocking the keyboard after 15 seconds
+- Fixed the Forever option unlocking the keyboard after 15 seconds and ensured manual unlock exits its native handler
 
 ## [Lock Fn Keys] - 2026-05-07
 
