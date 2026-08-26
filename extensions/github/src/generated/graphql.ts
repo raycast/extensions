@@ -1495,9 +1495,7 @@ export type GetViewerQuery = {
   };
 };
 
-export type GetViewerStatsQueryVariables = Exact<{
-  repositoriesCount?: number | null | undefined;
-}>;
+export type GetViewerStatsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetViewerStatsQuery = {
   viewer: {
@@ -1520,6 +1518,19 @@ export type GetViewerStatsQuery = {
     pullRequestsOpen: { totalCount: number };
     issuesAuthored: { totalCount: number };
     issuesOpen: { totalCount: number };
+    contributionsCollection: { totalCommitContributions: number };
+    publicRepos: { totalCount: number };
+    ownedRepositories: { totalCount: number };
+  };
+  rateLimit: { remaining: number; limit: number; used: number; resetAt: any } | null;
+};
+
+export type GetViewerStatsDetailsQueryVariables = Exact<{
+  repositoriesCount?: number | null | undefined;
+}>;
+
+export type GetViewerStatsDetailsQuery = {
+  viewer: {
     recentPullRequests: {
       nodes: Array<{
         id: string;
@@ -1558,10 +1569,7 @@ export type GetViewerStatsQuery = {
         repository: { nameWithOwner: string };
       } | null> | null;
     };
-    contributionsCollection: { totalCommitContributions: number };
-    publicRepos: { totalCount: number };
     ownedRepositories: {
-      totalCount: number;
       nodes: Array<{
         id: string;
         nameWithOwner: string;
@@ -1571,11 +1579,9 @@ export type GetViewerStatsQuery = {
       } | null> | null;
     };
     organizations: {
-      totalCount: number;
       nodes: Array<{ id: string; login: string; name: string | null; avatarUrl: any; url: any } | null> | null;
     };
   };
-  rateLimit: { remaining: number; limit: number; used: number; resetAt: any } | null;
 };
 
 export const ShortRepositoryFieldsFragmentDoc = gql`
@@ -2785,7 +2791,7 @@ export const GetViewerDocument = gql`
   ${ProjectFieldsFragmentDoc}
 `;
 export const GetViewerStatsDocument = gql`
-  query getViewerStats($repositoriesCount: Int = 100) {
+  query getViewerStats {
     viewer {
       ...UserFields
       bio
@@ -2818,6 +2824,28 @@ export const GetViewerStatsDocument = gql`
       issuesOpen: issues(states: [OPEN]) {
         totalCount
       }
+      contributionsCollection {
+        totalCommitContributions
+      }
+      publicRepos: repositories(ownerAffiliations: OWNER, privacy: PUBLIC) {
+        totalCount
+      }
+      ownedRepositories: repositories(ownerAffiliations: OWNER) {
+        totalCount
+      }
+    }
+    rateLimit {
+      remaining
+      limit
+      used
+      resetAt
+    }
+  }
+  ${UserFieldsFragmentDoc}
+`;
+export const GetViewerStatsDetailsDocument = gql`
+  query getViewerStatsDetails($repositoriesCount: Int = 100) {
+    viewer {
       recentPullRequests: pullRequests(first: 5, orderBy: { field: UPDATED_AT, direction: DESC }) {
         nodes {
           id
@@ -2864,18 +2892,11 @@ export const GetViewerStatsDocument = gql`
           }
         }
       }
-      contributionsCollection {
-        totalCommitContributions
-      }
-      publicRepos: repositories(ownerAffiliations: OWNER, privacy: PUBLIC) {
-        totalCount
-      }
       ownedRepositories: repositories(
         first: $repositoriesCount
         ownerAffiliations: OWNER
         orderBy: { field: STARGAZERS, direction: DESC }
       ) {
-        totalCount
         nodes {
           id
           nameWithOwner
@@ -2885,7 +2906,6 @@ export const GetViewerStatsDocument = gql`
         }
       }
       organizations(first: 20) {
-        totalCount
         nodes {
           id
           login
@@ -2895,14 +2915,7 @@ export const GetViewerStatsDocument = gql`
         }
       }
     }
-    rateLimit {
-      remaining
-      limit
-      used
-      resetAt
-    }
   }
-  ${UserFieldsFragmentDoc}
 `;
 
 export type SdkFunctionWrapper = <T>(
@@ -3830,6 +3843,24 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             signal,
           }),
         "getViewerStats",
+        "query",
+        variables,
+      );
+    },
+    getViewerStatsDetails(
+      variables?: GetViewerStatsDetailsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<GetViewerStatsDetailsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<GetViewerStatsDetailsQuery>({
+            document: GetViewerStatsDetailsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "getViewerStatsDetails",
         "query",
         variables,
       );
