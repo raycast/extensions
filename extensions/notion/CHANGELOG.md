@@ -1,5 +1,11 @@
 # Notion Changelog
 
+## [Fix Create Database Page not saving properties] - 2026-08-23
+
+- Fix `Create Database Page` creating the page but dropping the filled-in properties after Notion's database/data-source split: the page is now created against the data source (`data_source_id`) instead of the parent database container ([#30460](https://github.com/raycast/extensions/issues/30460))
+- Fix property values being sent without their Notion type wrapper (e.g. `{ checkbox: true }`, `{ number: 42 }`, `{ select: { id } }`), which made the API silently ignore most of them
+- Fix checkbox `false` and number `0` being dropped by the form-value falsy check
+
 ## [Add Note Command] - 2026-08-19
 
 - Add a new `Add Note` command that appends a note to a page titled with the current date, nested inside a notes page (`NOTES` by default)

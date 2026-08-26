@@ -1,20 +1,20 @@
 import { Tool } from "@raycast/api";
-import { startCaffeinate } from "../utils";
+import { startCaffeinate, deviceName } from "../utils";
 
 type Input = {
   /**
-   * Future date and time to keep the Mac awake until, in ISO 8601 format.
+   * Future date and time to keep the computer awake until, in ISO 8601 format.
    * Include the local UTC offset when known, for example "2026-07-19T17:00:00+01:00".
    */
   dateTime: string;
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => ({
-  message: `Keep your Mac awake until ${formatDateTime(parseFutureDate(input.dateTime))}?`,
+  message: `Keep your ${deviceName()} awake until ${formatDateTime(parseFutureDate(input.dateTime))}?`,
 });
 
 /**
- * Prevents the Mac from sleeping until a specific future date and time.
+ * Prevents the computer from sleeping until a specific future date and time.
  */
 export default async function tool(input: Input) {
   const target = parseFutureDate(input.dateTime);
@@ -26,7 +26,7 @@ export default async function tool(input: Input) {
     caffeinated: true,
     until: target.toISOString(),
     durationSeconds,
-    message: `Mac will stay awake until ${formatDateTime(target)}`,
+    message: `${deviceName()} will stay awake until ${formatDateTime(target)}`,
   };
 }
 

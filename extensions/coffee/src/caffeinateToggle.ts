@@ -1,12 +1,11 @@
-import { execSync } from "child_process";
-import { startCaffeinate, stopCaffeinate } from "./utils";
+import { isCaffeinateRunning, startCaffeinate, stopCaffeinate, deviceName } from "./utils";
 
 export default async () => {
-  try {
-    execSync("pgrep caffeinate");
+  const isRunning = await isCaffeinateRunning();
 
-    await stopCaffeinate({ menubar: true, status: true }, "Your Mac is now decaffeinated");
-  } catch {
-    await startCaffeinate({ menubar: true, status: true }, "Your Mac is now caffeinated");
+  if (isRunning) {
+    await stopCaffeinate({ menubar: true, status: true }, `Your ${deviceName()} is now decaffeinated`);
+  } else {
+    await startCaffeinate({ menubar: true, status: true }, `Your ${deviceName()} is now caffeinated`);
   }
 };

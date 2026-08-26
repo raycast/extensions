@@ -15,7 +15,12 @@ This is a extension for raycast to manage tmux sessions.
 - Bootstrap project sessions: create a folder and run a startup command in one go 🚀
 - Delete sessions 🗑
 - Kill multiple sessions at once 🧹
+- Search commands and output across all sessions' scrollback 🔍
 - Rename sessions 📝
+
+## Searching session output
+
+`Search Session Output` greps the scrollback of every pane in every session, so you can find that command you ran or error you saw without remembering which session it was in. Matches are grouped by session with surrounding context; press `⏎` to switch there, or open it in a new terminal tab. Tip: raise tmux's `history-limit` (e.g. `set -g history-limit 50000`) to search further back.
 
 ## Bootstrapping project sessions
 

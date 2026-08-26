@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "litellm",
+  "title": "LiteLLM",
+  "description": "LiteLLM directly from Raycast commands",
+  "icon": "extension-icon.png",
+  "author": "Francois",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar-usage",
+      "title": "Today's Spend",
+      "subtitle": "LiteLLM",
+      "description": "Show today's LiteLLM spend in the menu bar",
+      "mode": "menu-bar",
+      "interval": "15m"
+    },
+    {
+      "name": "usage",
+      "title": "Usage",
+      "subtitle": "LiteLLM",
+      "description": "See your total spend, tokens and per-model breakdown",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "LiteLLM Base URL",
+      "description": "Your LiteLLM proxy URL, e.g. https://llm.example.com",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://llm.example.com"
+    },
+    {
+      "name": "apiKey",
+      "title": "Virtual Key",
+      "description": "Your LiteLLM virtual key (sk-...)",
+      "type": "password",
+      "required": true,
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "monthlyBudget",
+      "title": "Monthly Budget",
+      "description": "Your monthly budget (USD). Used to show month-to-date % of budget. Leave empty to hide the %.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g. 100"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

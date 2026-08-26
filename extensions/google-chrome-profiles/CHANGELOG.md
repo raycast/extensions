@@ -1,5 +1,10 @@
 # Google Chrome Profiles Changelog
 
+## [Feature] - 2026-08-25
+
+- Add a destructive action to delete a Chrome profile and its local data from the profile list.
+- Allow deleting an inactive profile while Chrome remains open; the active profile must be closed first.
+
 ## [Fix] - 2026-08-12
 
 - Fix opening a profile while Chrome is closed producing two windows: the requested profile, plus one for whichever profile was used last. The Bring to Front / New Tab / Open URL path began with `tell application "Google Chrome" to activate`, which launches Chrome with no arguments; a flagless Chrome restores every profile listed in `profile.last_active_profiles` (Local State), so the previous profile's window appeared before System Events ever clicked the Profiles menu. Branch on whether the browser is already running: when it is, the Profiles-menu click is unchanged and keeps the focus / add-a-tab / find-an-existing-tab semantics; when it is not, do a single cold start into the requested profile with `/usr/bin/open -n -a <bundle> --args --profile-directory=<dir> --new-window [url]`. `--profile-directory` is the profile a cold Chrome boots into, which is what suppresses the session restore.

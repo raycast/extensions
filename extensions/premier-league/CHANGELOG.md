@@ -1,5 +1,12 @@
 # Premier League Changelog
 
+## [Matchweek Navigation] - 2026-08-26
+
+- Fix Matches loading fixtures from the earliest seasons on record while the current season was still resolving.
+- Land on the upcoming matchweek instead of the one the gameweek config reports, and list the previous matchweek above it until the upcoming one kicks off.
+- Fetch a whole matchweek in one request. Scrolling no longer pulls in more matches or repeats fixtures already on screen.
+- Rename the matchweek actions to "Next Matchweek (n)" and "Previous Matchweek (n)", and bind them to `]` and `[`.
+
 ## [Fix Season Rollover] - 2026-08-21
 
 - Fix Matches, Table, Clubs and Squad showing the previous season once a new one kicks off. The season list the extension reads can trail the season it describes by months, so from July the active season is now read from the API and merged into that list.
