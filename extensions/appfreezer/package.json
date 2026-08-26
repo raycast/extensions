@@ -54,6 +54,43 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "list-applications",
+      "title": "List Applications",
+      "description": "List the applications App Freezer currently knows about, with their paused/running status and live CPU and memory usage. Read-only: never pauses, resumes, or quits anything."
+    }
+  ],
+  "ai": {
+    "instructions": "Use List Applications to answer questions about which applications are currently paused or running, and their CPU/memory usage, as reported by App Freezer. This tool is read-only and never pauses, resumes, or quits an application; if the user wants to change an application's state, tell them to use the Pause or Resume App, Quit App, Force Quit App, or Resume All Apps commands instead.",
+    "evals": [
+      {
+        "input": "@App Freezer Which apps are currently paused?",
+        "mocks": {
+          "list-applications": {
+            "generatedAt": "2026-07-30T12:00:00Z",
+            "count": 1,
+            "applications": [
+              {
+                "name": "Example",
+                "status": "paused",
+                "cpuPercent": 0,
+                "memoryPercent": 3.4
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-applications"
+          },
+          {
+            "includes": "Example"
+          }
+        ]
+      }
+    ]
+  },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
