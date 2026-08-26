@@ -42,7 +42,7 @@ ${HOOK_SNIPPET}
 **3. Check that it took**
 
 \`\`\`bash
-jq '[.hooks.PostToolUse[] | select(.hooks[]?.command | test("artifact";"i"))] | length' ~/.claude/settings.json
+jq '[.hooks.PostToolUse[] | select(.hooks[]?.command | (test("artifact";"i") and (test("probe-artifact-hook\\\\.sh";"i") | not)))] | length' ~/.claude/settings.json
 \`\`\`
 
 \`0\` means tracking is still off.

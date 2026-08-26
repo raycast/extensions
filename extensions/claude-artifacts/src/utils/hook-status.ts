@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import path from "path";
@@ -81,7 +83,7 @@ ${HOOK_SNIPPET}
 
 3. Verify the registration actually landed:
 
-jq '[.hooks.PostToolUse[] | select(.hooks[]?.command | test("artifact";"i"))] | length' ~/.claude/settings.json
+jq '[.hooks.PostToolUse[] | select(.hooks[]?.command | (test("artifact";"i") and (test("probe-artifact-hook\\\\.sh";"i") | not)))] | length' ~/.claude/settings.json
 
 That must print 1 or more. Tell me if it prints 0.
 
@@ -139,12 +141,20 @@ function matchesArtifactTool(matcher: unknown): boolean {
  * has to be about artifacts.
  *
  * Matched loosely rather than against the documented script path, so a renamed
- * or relocated recorder still counts as registered.
+ * or relocated recorder still counts as registered. The one exception is the
+ * shipped diagnostic probe: it is deliberately installed as an Artifact hook
+ * but never writes the index, so exclude its stable basename while keeping the
+ * recorder path otherwise unconstrained.
  */
 function runsAnArtifactRecorder(hooks: unknown): boolean {
   if (!Array.isArray(hooks)) return false;
 
-  return hooks.some((hook: HookCommand) => typeof hook?.command === "string" && /artifact/i.test(hook.command));
+  return hooks.some(
+    (hook: HookCommand) =>
+      typeof hook?.command === "string" &&
+      /artifact/i.test(hook.command) &&
+      !/(?:^|[/\\\s'"])probe-artifact-hook\.sh\b/i.test(hook.command),
+  );
 }
 
 function hasArtifactHook(settings: unknown): boolean {
