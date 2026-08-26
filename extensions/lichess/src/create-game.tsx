@@ -24,16 +24,12 @@ interface CreateGameValues {
   color: "random" | "white" | "black";
 }
 
-interface Preferences {
-  lichessApiToken?: string;
-}
-
 const DEFAULT_TIME = "10";
 const DEFAULT_INCREMENT = "0";
 const LICHESS_TOKEN_URL = "https://lichess.org/account/oauth/token";
 
 export default function Command() {
-  const token = getPreferenceValues<Preferences>().lichessApiToken?.trim();
+  const token = getPreferenceValues<Preferences.CreateGame>().lichessApiToken?.trim();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(values: CreateGameValues) {

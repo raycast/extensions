@@ -7,12 +7,8 @@ import { RecentGameViewModel } from "./types/lichess";
 
 const RECENT_GAME_LIMIT = 15;
 
-interface Preferences {
-  lichessUsername: string;
-}
-
 export default function Command() {
-  const { lichessUsername } = getPreferenceValues<Preferences>();
+  const { lichessUsername } = getPreferenceValues<Preferences.RecentGames>();
   const username = lichessUsername.trim();
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
