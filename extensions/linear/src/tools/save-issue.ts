@@ -95,7 +95,8 @@ export default withAccessToken(linear)(async (input: Input) => {
   }
 
   for (const link of input.links ?? []) {
-    await client().createAttachment({ issueId: issue.id, url: link.url, title: link.title });
+    const result = await client().createAttachment({ issueId: issue.id, url: link.url, title: link.title });
+    if (!result.success || !result.attachment) throw new Error("Failed to create issue link.");
   }
   await setIssueReleases(issue, input);
   await setIssueRelations(

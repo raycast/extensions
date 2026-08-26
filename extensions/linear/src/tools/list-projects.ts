@@ -93,7 +93,7 @@ export default withAccessToken(linear)(async (input: Input) => {
         includeArchived: input.includeArchived,
         orderBy: input.orderBy === "createdAt" ? PaginationOrderBy.CreatedAt : PaginationOrderBy.UpdatedAt,
       }),
-    { ...input, limit: Math.min(input.limit ?? 50, 50) },
+    input,
   );
   const nodes: Record<string, unknown>[] = [];
   for (const project of result.nodes) {

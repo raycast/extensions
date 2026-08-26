@@ -109,8 +109,10 @@ export default withAccessToken(linear)(async (input: Input) => {
   for (const [id, item] of currentById) if (!desired.has(id)) await client().deleteInitiativeToProject(item.id);
   for (const id of desired)
     if (!currentById.has(id)) await client().createInitiativeToProject({ initiativeId: id, projectId: saved.id });
-  for (const link of input.links ?? [])
-    await client().createEntityExternalLink({ projectId: saved.id, url: link.url, label: link.title });
+  for (const link of input.links ?? []) {
+    const result = await client().createEntityExternalLink({ projectId: saved.id, url: link.url, label: link.title });
+    if (!result.success || !result.entityExternalLink) throw new Error("Failed to create project link.");
+  }
   return {
     ...saved,
     summary: saved.description,
