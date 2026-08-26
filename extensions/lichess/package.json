@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lichess",
   "title": "Lichess",
   "description": "View recent Lichess games and open positions in Lichess Analysis.",
