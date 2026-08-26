@@ -5,7 +5,7 @@ export default function UnsupportedPlatformView() {
     <Detail
       markdown={`# Unsupported platform
 
-Quick Shell Raycast runs on **Windows** and **macOS**.
+Quick Shell Workspaces runs on **Windows** and **macOS**.
 
 Install [Raycast](https://www.raycast.com/) on Windows or Mac, then open this extension again.`}
     />

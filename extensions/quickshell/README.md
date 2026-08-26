@@ -1,4 +1,4 @@
-# Quick Shell Raycast
+# Quick Shell Workspaces
 
 Raycast-native workspace launcher for Quick Shell on **Windows** and **macOS**.
 
@@ -14,13 +14,13 @@ Quick Shell provides a unique feature set tailored for cross-platform developers
 
 ## Commands
 
-- **Quick Shell** — search, launch, create, discover git repos, edit, favorite, duplicate, import/export, undo/redo, preferences
+- **Open Workspace** — search, launch, create, discover git repos, edit, favorite, duplicate, import/export, undo/redo, preferences
 
-**Extension preferences** (Raycast → Extensions → Quick Shell): default terminal app, default profile, show recents, multi-command tabs, block dirty branch switch.
+**Extension preferences** (Raycast → Extensions → Quick Shell Workspaces): default terminal app, default profile, show recents, multi-command tabs, block dirty branch switch.
 
-Root search: the command is titled **Quick Shell**; its subtitle shows your 3 most recent workspaces. Register it as a fallback command so root-search text seeds the list via `fallbackText`. Open the command and use Actions (Ctrl+K) for Recent / Import / Export. Use **Add to Root Search** on a workspace to create a Quicklink.
+Root search: the command is titled **Open Workspace**; its subtitle shows your 3 most recent workspaces. Register it as a fallback command so root-search text seeds the list via `fallbackText`. Open the command and use Actions (Ctrl+K) for Recent / Import / Export. Use **Add to Root Search** on a workspace to create a Quicklink.
 
-Create, Discover, and Edit are Actions / pushed views inside Quick Shell (not separate root commands).
+Create, Discover, and Edit are Actions / pushed views inside Open Workspace (not separate root commands).
 
 ## Requirements
 

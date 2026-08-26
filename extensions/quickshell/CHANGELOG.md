@@ -1,7 +1,8 @@
-# Quick Shell Changelog
+# Quick Shell Workspaces Changelog
 
 ## [Command suggestions] - {PR_MERGE_DATE}
 
+- Rename the Store listing to Quick Shell Workspaces and the command to Open Workspace (package id remains `quickshell`)
 - Package Windows `QuickShell.Suggest.exe` into Raycast assets for richer command suggestions
 - Manual Add Workspace shows suggestions in the dropdown without auto-applying them
 - Keep leftover suggestions selectable; fall back to local folder heuristics on macOS or when Suggest is unavailable
