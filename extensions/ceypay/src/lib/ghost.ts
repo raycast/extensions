@@ -15,13 +15,19 @@ const CONTENT_API_KEY = "e40eee7081c2918b7f0807023d";
 const API = "https://blog.ceypay.io/ghost/api/content";
 const PUBLIC_BLOG = "https://www.ceypay.io/blog";
 
-/** `post.url` points at the private Ghost domain, which would show a login wall. */
+/**
+ * `post.url` points at the private Ghost domain, which would show a login wall.
+ *
+ * The slug is remote content pasted into a URL that "Open in Browser" hands to
+ * the reader's browser, so it is encoded: a real Ghost slug is unaffected, and
+ * one carrying `?`, `#` or `..` can no longer reshape the link.
+ */
 export function publicPostUrl(slug: string): string {
-  return `${PUBLIC_BLOG}/${slug}`;
+  return `${PUBLIC_BLOG}/${encodeURIComponent(slug)}`;
 }
 
 export function publicTagUrl(slug: string): string {
-  return `${PUBLIC_BLOG}/tag/${slug}`;
+  return `${PUBLIC_BLOG}/tag/${encodeURIComponent(slug)}`;
 }
 
 export function postsUrl(): string {
@@ -317,10 +323,18 @@ export function postToMarkdown(post: BlogPost, heroSize?: ImageSize): string {
 
   // Blank line between header and body: a single newline would fold the feature
   // image and the opening paragraph into one block.
-  return [header, decodeEntities(out)]
+  const document = [header, decodeEntities(out)]
     .filter(Boolean)
     .join("\n\n")
     .replace(/\n{3,}/g, "\n\n")
     .replace(/^(\s*- .*)\n\n(?=\s*- )/gm, "$1\n")
     .trim();
+
+  // Every `<img>` is gated on the way through, but an image can also arrive as
+  // plain text — a title, caption or tag name that is itself `![](…)` renders as
+  // an image and fetches. This last pass holds anything that reached the output
+  // by that route to the same rule.
+  return document.replace(/!\[[^\]]*\]\(\s*([^)\s]+)[^)]*\)/g, (image, src: string) =>
+    isRenderableImage(src) ? image : "",
+  );
 }
