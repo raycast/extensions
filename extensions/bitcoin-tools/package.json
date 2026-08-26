@@ -12,7 +12,6 @@
   "icon": "bitcoin-tools-app-icon.png",
   "author": "satchmo",
   "license": "MIT",
-  "repository": "https://github.com/b-open-io/raycast-bsv",
   "platforms": [
     "macOS"
   ],
