@@ -2,6 +2,8 @@ import type { LichessGame } from "../types/lichess";
 
 const LICHESS_API_BASE_URL = "https://lichess.org/api";
 const REALTIME_SEEK_TIMEOUT_MS = 15_000;
+const REALTIME_SEEK_TIMEOUT_MESSAGE = "No opponent joined before the seek wait timed out. The Lichess seek was canceled.";
+const REALTIME_SEEK_TIMEOUT_RESULT = Symbol("realtimeSeekTimeout");
 
 export class LichessApiError extends Error {
   constructor(
@@ -58,7 +60,10 @@ interface BoardGameStartEvent {
   };
 }
 
-export async function createRealtimeBoardSeek(options: CreateSeekOptions): Promise<string | undefined> {
+export async function createRealtimeBoardSeek(
+  options: CreateSeekOptions,
+  timeoutMs = REALTIME_SEEK_TIMEOUT_MS,
+): Promise<string | undefined> {
   const eventController = new AbortController();
   const seekController = new AbortController();
   const gameStart = waitForBoardGameStart(options.token, eventController.signal);
@@ -66,7 +71,13 @@ export async function createRealtimeBoardSeek(options: CreateSeekOptions): Promi
 
   try {
     seekResponse = await createBoardSeek(options, seekController.signal);
-    return await withTimeout(gameStart, REALTIME_SEEK_TIMEOUT_MS);
+    const gameId = await withTimeout(gameStart, timeoutMs);
+
+    if (gameId === REALTIME_SEEK_TIMEOUT_RESULT) {
+      throw new LichessApiError(REALTIME_SEEK_TIMEOUT_MESSAGE);
+    }
+
+    return gameId;
   } finally {
     seekController.abort();
     eventController.abort();
@@ -232,11 +243,14 @@ async function closeResponseBody(response: Response | undefined): Promise<void> 
   }
 }
 
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | undefined> {
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+): Promise<T | typeof REALTIME_SEEK_TIMEOUT_RESULT> {
   return Promise.race([
     promise,
-    new Promise<undefined>((resolve) => {
-      setTimeout(() => resolve(undefined), timeoutMs);
+    new Promise<typeof REALTIME_SEEK_TIMEOUT_RESULT>((resolve) => {
+      setTimeout(() => resolve(REALTIME_SEEK_TIMEOUT_RESULT), timeoutMs);
     }),
   ]);
 }
