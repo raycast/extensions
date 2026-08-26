@@ -20,7 +20,16 @@ function execEnvironment(): NodeJS.ProcessEnv {
   return { ...process.env, PATH: path };
 }
 
-let resolvedCliPath: string | undefined;
+/**
+ * Caches which candidate path won, since resolving costs up to three probes.
+ * Keyed on the override so changing the preference invalidates it without
+ * needing the command to reload.
+ */
+let resolved: { override: string; path: string } | undefined;
+
+function configuredOverride(): string {
+  return getPreferenceValues<Preferences>().numi_cli_binary_path?.trim() ?? "";
+}
 
 async function isValidNumiCli(binary: string): Promise<boolean> {
   try {
@@ -38,20 +47,25 @@ async function isValidNumiCli(binary: string): Promise<boolean> {
  * Macs (/usr/local/bin) work without the user configuring anything.
  */
 export async function findNumiCliPath(): Promise<string | undefined> {
-  if (resolvedCliPath) return resolvedCliPath;
+  const override = configuredOverride();
+  if (resolved?.override === override) return resolved.path;
 
-  const { numi_cli_binary_path } = getPreferenceValues<Preferences>();
-  const override = numi_cli_binary_path?.trim();
   const candidates = [...new Set(override ? [override, ...NUMI_CLI_CANDIDATES] : NUMI_CLI_CANDIDATES)];
 
   for (const candidate of candidates) {
     if (await isValidNumiCli(candidate)) {
-      resolvedCliPath = candidate;
+      resolved = { override, path: candidate };
       return candidate;
     }
   }
 
+  resolved = undefined;
   return undefined;
+}
+
+/** Drops the cached path so the next lookup probes again. */
+export function invalidateNumiCliPath(): void {
+  resolved = undefined;
 }
 
 export async function requireNumiCliPath(): Promise<string> {
@@ -62,7 +76,19 @@ export async function requireNumiCliPath(): Promise<string> {
   return binary;
 }
 
+/**
+ * Re-validates rather than trusting the cache. This backs a poll that has to be
+ * able to report numi-cli going away mid-session; answering from the cache
+ * would pin it to `true` after the first success.
+ */
 export async function isNumiCliInstalled(): Promise<boolean> {
+  const override = configuredOverride();
+
+  if (resolved?.override === override && (await isValidNumiCli(resolved.path))) return true;
+
+  // Cached path stopped working - drop it so the next call re-resolves.
+  if (resolved?.override === override) resolved = undefined;
+
   return (await findNumiCliPath()) !== undefined;
 }
 

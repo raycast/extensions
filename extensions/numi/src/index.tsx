@@ -19,7 +19,9 @@ import { isConnectionRefused, isNumiApiAvailable, runQuery } from "./services/re
 import {
   HISTORY_STORAGE_KEY,
   type HistoryEntry,
+  type HistoryUpdater,
   clearLegacyHistory,
+  createHistoryWriter,
   parseMaxHistory,
   readLegacyHistory,
 } from "./services/history";
@@ -51,9 +53,23 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
   const {
     value: history,
     setValue: setHistory,
-    removeValue: removeHistory,
     isLoading: isHistoryLoading,
   } = useLocalStorage<HistoryEntry[]>(HISTORY_STORAGE_KEY, []);
+
+  // Every history change goes through one serialized writer, so overlapping
+  // mutations compose instead of overwriting each other. See createHistoryWriter.
+  const writer = useRef(createHistoryWriter()).current;
+
+  useEffect(() => {
+    // Skipped while loading so the writer is never seeded with an empty array
+    // while a stored history is still on its way in.
+    if (!isHistoryLoading) writer.sync(history ?? []);
+  }, [history, isHistoryLoading, writer]);
+
+  const mutateHistory = useCallback(
+    (updater: HistoryUpdater) => writer.mutate(updater, setHistory),
+    [writer, setHistory],
+  );
 
   const handleQueryError = useCallback(
     async (error: Error) => {
@@ -97,29 +113,29 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
   }, [use_numi_cli]);
 
   // One-time move of history off the evictable Cache and into LocalStorage.
+  // Queued like every other mutation: this is the one moment real user data is
+  // at stake, so it must not race a query being recorded on the same launch.
   const hasMigrated = useRef(false);
   useEffect(() => {
     if (isHistoryLoading || hasMigrated.current) return;
     hasMigrated.current = true;
 
-    if ((history ?? []).length > 0) {
-      clearLegacyHistory();
-      return;
-    }
-
     const legacy = readLegacyHistory();
     if (legacy.length === 0) return;
 
-    void setHistory(legacy.slice(-maxHistory)).then(clearLegacyHistory);
-  }, [isHistoryLoading, history, setHistory, maxHistory]);
+    void mutateHistory((current) => (current.length > 0 ? current : legacy.slice(-maxHistory))).then(
+      clearLegacyHistory,
+    );
+  }, [isHistoryLoading, mutateHistory, maxHistory]);
 
   const recordQuery = useCallback(
-    async (entryQuery: string, entryResults: string[]) => {
-      const withoutDuplicate = (history ?? []).filter((entry) => entry.query !== entryQuery);
-      const next = [...withoutDuplicate, { query: entryQuery, results: entryResults, timestamp: Date.now() }];
-      await setHistory(next.slice(-maxHistory));
-    },
-    [history, setHistory, maxHistory],
+    (entryQuery: string, entryResults: string[]) =>
+      mutateHistory((current) => {
+        const withoutDuplicate = current.filter((entry) => entry.query !== entryQuery);
+        const entry = { query: entryQuery, results: entryResults, timestamp: Date.now() };
+        return [...withoutDuplicate, entry].slice(-maxHistory);
+      }),
+    [mutateHistory, maxHistory],
   );
 
   const lastRecorded = useRef("");
@@ -139,10 +155,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
   }, [debouncedQuery, results, isQuerying, isHistoryLoading, recordQuery]);
 
   const deleteEntry = useCallback(
-    async (entryQuery: string) => {
-      await setHistory((history ?? []).filter((entry) => entry.query !== entryQuery));
-    },
-    [history, setHistory],
+    (entryQuery: string) => mutateHistory((current) => current.filter((entry) => entry.query !== entryQuery)),
+    [mutateHistory],
   );
 
   const clearHistory = useCallback(async () => {
@@ -153,11 +167,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
     });
     if (!confirmed) return;
 
-    await removeHistory();
+    // Queued rather than removing the key outright, so a query still being
+    // recorded cannot land afterwards and resurrect the list.
+    await mutateHistory(() => []);
     clearLegacyHistory();
     lastRecorded.current = "";
     await showToast({ style: Toast.Style.Success, title: "History cleared" });
-  }, [removeHistory]);
+  }, [mutateHistory]);
 
   const currentResults = (results ?? []).filter((result) => result.trim().length > 0);
   const historyEntries = [...(history ?? [])].reverse();

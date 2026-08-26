@@ -1,7 +1,7 @@
 import http from "node:http";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { requireNumiCliPath } from "./checkinstall";
+import { invalidateNumiCliPath, requireNumiCliPath } from "./checkinstall";
 
 const execFileAsync = promisify(execFile);
 
@@ -80,14 +80,11 @@ export function query(expression?: string): Promise<string[]> {
   });
 }
 
-export async function queryWithNumiCli(expression?: string): Promise<string[]> {
-  const trimmed = expression?.trim();
-  if (!trimmed) return [];
-
+async function runNumiCli(expression: string): Promise<string[]> {
   const binary = await requireNumiCliPath();
   // Passed as an argv entry rather than interpolated into a shell command, so
   // backticks, $(), ; and | in the query text cannot be executed.
-  const { stdout, stderr } = await execFileAsync(binary, [trimmed]);
+  const { stdout, stderr } = await execFileAsync(binary, [expression]);
 
   if (stderr) {
     console.error(stderr);
@@ -95,6 +92,22 @@ export async function queryWithNumiCli(expression?: string): Promise<string[]> {
   }
 
   return [stdout.trimEnd()];
+}
+
+export async function queryWithNumiCli(expression?: string): Promise<string[]> {
+  const trimmed = expression?.trim();
+  if (!trimmed) return [];
+
+  try {
+    return await runNumiCli(trimmed);
+  } catch (error) {
+    // The resolved path is cached, so it can outlive the binary if numi-cli is
+    // uninstalled or moved mid-session. Re-resolve once before giving up rather
+    // than surfacing a bare ENOENT.
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    invalidateNumiCliPath();
+    return runNumiCli(trimmed);
+  }
 }
 
 export async function runQuery(expression: string, useNumiCli: boolean): Promise<string[]> {

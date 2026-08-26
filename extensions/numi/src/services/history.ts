@@ -14,6 +14,57 @@ export interface HistoryEntry {
   timestamp: number;
 }
 
+export type HistoryUpdater = (current: HistoryEntry[]) => HistoryEntry[];
+
+export interface HistoryWriter {
+  /** Adopt a value that came from storage. Ignored while writes are in flight. */
+  sync(value: HistoryEntry[]): void;
+  /** Queue a functional update. Resolves once it has been persisted. */
+  mutate(updater: HistoryUpdater, persist: (next: HistoryEntry[]) => Promise<void>): Promise<void>;
+}
+
+/**
+ * Serializes history writes over a single authoritative value.
+ *
+ * `useLocalStorage` only accepts a value, not a functional update, so callers
+ * would otherwise persist a whole array derived from whatever the last render
+ * captured. Two deletes issued before React re-renders would both start from
+ * the same array and the first entry would come back. Updaters here read the
+ * running value instead, and each one is advanced before its write is awaited
+ * so the next queued update already sees it.
+ */
+export function createHistoryWriter(): HistoryWriter {
+  let current: HistoryEntry[] = [];
+  let queue: Promise<unknown> = Promise.resolve();
+  let inFlight = 0;
+
+  return {
+    sync(value) {
+      // A queued update is ahead of anything storage can report, so adopting a
+      // value mid-flight would roll it back.
+      if (inFlight === 0) current = value;
+    },
+
+    mutate(updater, persist) {
+      inFlight += 1;
+
+      const write = queue.then(async () => {
+        const next = updater(current);
+        current = next;
+        await persist(next);
+      });
+
+      queue = write
+        .catch(() => undefined)
+        .finally(() => {
+          inFlight -= 1;
+        });
+
+      return write;
+    },
+  };
+}
+
 export function parseMaxHistory(raw: string | undefined): number {
   const parsed = Number.parseInt((raw ?? "").trim(), 10);
   if (!Number.isInteger(parsed) || parsed < 1) return DEFAULT_MAX_HISTORY;
