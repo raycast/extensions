@@ -21,9 +21,7 @@ test("an older provider refresh cannot persist after a newer refresh", async () 
   const cache = new MemoryCache();
   const order = new ProviderRequestOrder();
   const responses: Array<(snapshot: ProviderSnapshot) => void> = [];
-  const provider = providerWithFetch(
-    () => new Promise<ProviderSnapshot>((resolve) => responses.push(resolve)),
-  );
+  const provider = providerWithFetch(() => new Promise<ProviderSnapshot>((resolve) => responses.push(resolve)));
 
   const olderToken = order.begin(provider.id);
   const older = refreshProviderStatus(provider, {

@@ -6,10 +6,7 @@ import {
   historyWindow,
   markBeforeMonitoredSince,
 } from "../src/providers/utils/component-history";
-import {
-  buildComponentHistoryMarkdown,
-  formatUptimePercent,
-} from "../src/utils/component-history-markdown";
+import { buildComponentHistoryMarkdown, formatUptimePercent } from "../src/utils/component-history-markdown";
 
 test("normalizes calendar history without treating pre-monitoring days as healthy", () => {
   const days = historyWindow(3, new Date("2026-08-11T16:00:00Z"));

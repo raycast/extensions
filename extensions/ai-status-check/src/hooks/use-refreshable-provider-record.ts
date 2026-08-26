@@ -13,8 +13,16 @@ export function useRefreshableProviderRecord(
 
   const refresh = useCallback(async () => {
     setCurrentRecord((current) => ({ ...current, refreshState: "refreshing", refreshError: undefined }));
-    const result = await refreshProvider(providerId);
-    if (result) setCurrentRecord(result);
+    try {
+      const result = await refreshProvider(providerId);
+      setCurrentRecord((current) => result ?? { ...current, refreshState: "idle" });
+    } catch (error) {
+      setCurrentRecord((current) => ({
+        ...current,
+        refreshState: "failed",
+        refreshError: error instanceof Error && error.message ? error.message : "Could not refresh provider status",
+      }));
+    }
   }, [providerId, refreshProvider]);
 
   return { record: currentRecord, refresh };

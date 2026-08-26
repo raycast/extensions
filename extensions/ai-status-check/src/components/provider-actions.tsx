@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Icon, Keyboard, openExtensionPreferences } from "@raycast/api";
-import type { ReactNode } from "react";
 import type { ComponentStatus, Incident } from "../domain/types";
 import type { ProviderDefinition } from "../providers/types";
 
@@ -9,7 +8,7 @@ interface ProviderActionsProps {
 }
 
 interface NavigationActionsProps extends ProviderActionsProps {
-  target: ReactNode;
+  target: Action.Push.Props["target"];
 }
 
 export function ProviderListActions({
@@ -18,7 +17,7 @@ export function ProviderListActions({
   onRefreshAll,
 }: {
   provider: ProviderDefinition;
-  detail: ReactNode;
+  detail: Action.Push.Props["target"];
   onRefreshAll(): Promise<void>;
 }) {
   return (
