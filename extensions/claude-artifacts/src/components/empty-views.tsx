@@ -21,11 +21,22 @@ export function NotInstalledEmptyView() {
       actions={
         <ActionPanel>
           {/*
+            "View Setup Instructions" stays FIRST, and therefore stays the
+            Enter default, because it was the default before this state gained
+            any setup actions. The new ones are appended rather than inserted.
+
+            The in-app screen below is the better destination and it would be
+            tempting to promote it — but silently repointing the default action
+            of an already-shipped surface is a change users did not ask for,
+            and one keystroke is a cheap price for not making it.
+          */}
+          <Action.OpenInBrowser title="View Setup Instructions" icon={Icon.Book} url={SETUP_DOCS_URL} />
+          {/*
             Same destination as the warning row's: first run and
             silently-broken are the same problem at different times, and the
             two must not drift into different instructions.
           */}
-          <Action.Push title="Show Setup Instructions" icon={Icon.Book} target={<HookSetupDetail />} />
+          <Action.Push title="Set Up Artifact Tracking" icon={Icon.Plug} target={<HookSetupDetail />} />
           <Action.CopyToClipboard
             title="Copy Setup Prompt"
             icon={Icon.Clipboard}

@@ -110,8 +110,11 @@ export function HookNotRegisteredItem() {
             fragment on the clipboard leaves the user holding something with no
             obvious destination — it is not a whole file, and it names a script
             they may not have yet.
+
+            Primary here, unlike in `NotInstalledEmptyView`: this row is new, so
+            there is no prior default action to preserve.
           */}
-          <Action.Push title="Show Setup Instructions" icon={Icon.Book} target={<HookSetupDetail />} />
+          <Action.Push title="Set Up Artifact Tracking" icon={Icon.Plug} target={<HookSetupDetail />} />
           <Action.CopyToClipboard
             title="Copy Setup Prompt"
             icon={Icon.Clipboard}

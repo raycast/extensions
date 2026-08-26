@@ -6,6 +6,8 @@
 - Added a **Set Up Artifact Tracking** screen with a prompt you can paste into Claude Code to install and register the hook for you, instead of leaving you holding a JSON fragment with nowhere to put it
 - The same screen now backs the first-run empty state, so setup instructions no longer differ depending on how you got there
 - Renamed the Finder actions from **Reveal** to **Show**, matching the verb Raycast uses elsewhere
+- Updated the Store screenshot, which still showed action names from before the previous release
+- Moved to `@raycast/api` 2.0 — no behavior change, and it clears every outstanding dependency advisory
 
 ## [Open the Artifact Galleries] - 2026-08-03
 
