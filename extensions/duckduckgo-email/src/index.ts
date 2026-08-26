@@ -12,17 +12,28 @@ interface EmailResponse {
 }
 async function getEmail() {
   const preferences = getPreferenceValues<Preferences>();
-  console.log(preferences);
   const response = await fetch("https://quack.duckduckgo.com/api/email/addresses", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${preferences.token}`,
+      // DuckDuckGo's bot protection rejects requests without a browser-like User-Agent
+      "User-Agent": "Mozilla/5.0",
     },
     redirect: "follow",
   });
-  const parsedResponse = (await response.json()) as EmailResponse;
-  if (parsedResponse.error) {
-    throw new Error(parsedResponse.error);
+  const body = await response.text();
+  let parsedResponse: EmailResponse;
+  try {
+    parsedResponse = JSON.parse(body) as EmailResponse;
+  } catch {
+    // Non-JSON body (e.g. empty 403 from bot protection)
+    parsedResponse = {};
+  }
+  if (!response.ok || parsedResponse.error) {
+    throw new Error(parsedResponse.error ?? `Request failed with status ${response.status}`);
+  }
+  if (!parsedResponse.address) {
+    throw new Error("No address in response");
   }
   return parsedResponse.address + "@duck.com";
 }

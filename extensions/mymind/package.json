@@ -204,7 +204,9 @@
               "type": "link",
               "url": "https://example.com/typography",
               "mymindUrl": "https://access.mymind.com/everything/#obj_1",
-              "tags": ["design"],
+              "tags": [
+                "design"
+              ],
               "spaceIds": [],
               "created": "2024-01-01T00:00:00Z",
               "modified": "2024-01-01T00:00:00Z"
@@ -390,6 +392,7 @@
   ],
   "overrides": {
     "minimatch": "^10.0.1",
-    "picomatch": "^4.0.4"
+    "picomatch": "^4.0.4",
+    "js-yaml@4": "4.3.1"
   }
 }

@@ -1,6 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 
 import { loadAccounts } from "../accounts/storage.ts";
+import { resolveAihubmixAccessKey } from "../aihubmix/auth.ts";
+import { fetchAihubmixUsage } from "../aihubmix/fetcher.ts";
+import type { AihubmixError, AihubmixUsage } from "../aihubmix/types.ts";
 import { fetchAmpUsage } from "../amp/fetcher.ts";
 import type { AmpError, AmpUsage } from "../amp/types.ts";
 import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
@@ -13,7 +16,7 @@ import { fetchClinePassUsage } from "../clinepass/fetcher.ts";
 import { clearClineLocalCredential, loadClineLocalCredential, saveClineLocalCredential } from "../clinepass/storage.ts";
 import type { ClinePassError, ClinePassUsage } from "../clinepass/types.ts";
 import { buildCodexAccountCandidates } from "../codex/accounts.ts";
-import { listCodexOAuthAccounts } from "../codex/auth.ts";
+import { listCodexOAuthAccounts, parseAdditionalCodexHomes } from "../codex/auth.ts";
 import { fetchCodexUsage } from "../codex/fetcher.ts";
 import type { CodexError, CodexUsage } from "../codex/types.ts";
 import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "../copilot/auth.ts";
@@ -21,6 +24,9 @@ import { fetchCopilotUsage } from "../copilot/fetcher.ts";
 import type { CopilotError, CopilotUsage } from "../copilot/types.ts";
 import { fetchCursorUsage, resolveCursorCredential } from "../cursor/fetcher.ts";
 import type { CursorError, CursorUsage } from "../cursor/types.ts";
+import { resolveDeepSeekApiKey } from "../deepseek/auth.ts";
+import { fetchDeepSeekUsage } from "../deepseek/fetcher.ts";
+import type { DeepSeekError, DeepSeekUsage } from "../deepseek/types.ts";
 import { resolveDroidAuth } from "../droid/auth.ts";
 import { fetchDroidUsage } from "../droid/fetcher.ts";
 import type { DroidError, DroidUsage } from "../droid/types.ts";
@@ -33,6 +39,9 @@ import type { KimiError, KimiUsage } from "../kimi/types.ts";
 import { resolveMiniMaxAuthTokens } from "../minimax/auth.ts";
 import { fetchMiniMaxUsage } from "../minimax/fetcher.ts";
 import type { MiniMaxError, MiniMaxUsage } from "../minimax/types.ts";
+import { resolveMinimaxCNAuthTokens } from "../minimaxcn/auth.ts";
+import { fetchMinimaxCNUsage } from "../minimaxcn/fetcher.ts";
+import type { MinimaxCNError, MinimaxCNUsage } from "../minimaxcn/types.ts";
 import { fetchOpencodegoUsage } from "../opencode-go/fetcher.ts";
 import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types.ts";
 import { fetchSyntheticUsage, SYNTHETIC_OPENCODE_KEY } from "../synthetic/fetcher.ts";
@@ -53,12 +62,16 @@ import { readOpencodeAuthToken } from "./opencode-auth.ts";
 
 // Root-level preferences shared by both commands.
 type SharedPrefs = {
+  additionalCodexHomes?: string;
+  aihubmixApiKey?: string;
   copilotAuthToken?: string;
   cursorCookieHeader?: string;
+  deepseekApiKey?: string;
   kimiAuthToken?: string;
   syntheticApiToken?: string;
   zaiApiToken?: string;
   minimaxApiToken?: string;
+  minimaxcnApiToken?: string;
   opencodegoWorkspaceId?: string;
   opencodegoAuthCookie?: string;
 };
@@ -66,6 +79,25 @@ type SharedPrefs = {
 function prefValue(key: keyof SharedPrefs): string {
   return getPreferenceValues<SharedPrefs>()[key]?.trim() || "";
 }
+
+export const useAihubmixUsage = createUsageHook<AihubmixUsage, AihubmixError>({
+  agentId: "aihubmix",
+  resolveAuthKey: async () => (await resolveAihubmixAccessKey(prefValue("aihubmixApiKey"))) ?? "",
+  fetcher: async () => {
+    const accessKey = await resolveAihubmixAccessKey(prefValue("aihubmixApiKey"));
+    if (!accessKey) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "AIHubMix Access Key not configured. Copy it from https://console.aihubmix.com/setting, then paste it in extension settings (Cmd+,) or set AIHUBMIX_ACCESS_KEY in your shell.",
+        },
+      };
+    }
+    return fetchAihubmixUsage(accessKey);
+  },
+});
 
 export const useAmpUsage = createUsageHook<AmpUsage, AmpError>({
   agentId: "amp",
@@ -125,6 +157,25 @@ export const useCursorUsage = createUsageHook<CursorUsage, CursorError>({
   fetcher: () => fetchCursorUsage(prefValue("cursorCookieHeader")),
 });
 
+export const useDeepSeekUsage = createUsageHook<DeepSeekUsage, DeepSeekError>({
+  agentId: "deepseek",
+  resolveAuthKey: async () => (await resolveDeepSeekApiKey(prefValue("deepseekApiKey"))) ?? "",
+  fetcher: async () => {
+    const apiKey = await resolveDeepSeekApiKey(prefValue("deepseekApiKey"));
+    if (!apiKey) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "DeepSeek API key not configured. Add it in extension settings (Cmd+,), log in through OpenCode, or set DEEPSEEK_API_KEY in your shell.",
+        },
+      };
+    }
+    return fetchDeepSeekUsage(apiKey);
+  },
+});
+
 export const useDroidUsage = createUsageHook<DroidUsage, DroidError>({
   agentId: "droid",
   resolveAuthKey: async () => (await resolveDroidAuth()).accessToken ?? "",
@@ -177,6 +228,30 @@ export const useMiniMaxUsage = createUsageHook<MiniMaxUsage, MiniMaxError>({
   },
 });
 
+// MinimaxCN — the Chinese-region MiniMax provider (api.minimaxi.com, vs api.minimax.io for the international edition).
+// Token resolves from MINIMAX_CN_API_KEY env var or the minimaxcnApiToken preference.
+export const useMinimaxCNUsage = createUsageHook<MinimaxCNUsage, MinimaxCNError>({
+  agentId: "minimaxcn",
+  resolveAuthKey: async () => {
+    const { primaryToken } = await resolveMinimaxCNAuthTokens({ preferenceToken: prefValue("minimaxcnApiToken") });
+    return primaryToken ?? "";
+  },
+  fetcher: async () => {
+    const { primaryToken } = await resolveMinimaxCNAuthTokens({ preferenceToken: prefValue("minimaxcnApiToken") });
+    if (!primaryToken) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "MinimaxCN token not configured. Add it in extension settings (Cmd+,) or set MINIMAX_CN_API_KEY in your shell.",
+        },
+      };
+    }
+    return fetchMinimaxCNUsage(primaryToken);
+  },
+});
+
 export const useOpencodegoUsage = createUsageHook<OpencodegoUsage, OpencodegoError>({
   agentId: "opencode-go",
   resolveAuthKey: async () => `${prefValue("opencodegoWorkspaceId")}\n${prefValue("opencodegoAuthCookie")}`,
@@ -221,7 +296,18 @@ export const useCodexAccounts = createAccountsHook<
   ReturnType<typeof buildCodexAccountCandidates>[number]
 >({
   agentId: "codex",
-  getAccounts: async () => buildCodexAccountCandidates(listCodexOAuthAccounts(), await loadAccounts("codex")),
+  getAccounts: async () => {
+    const defaultAccounts = listCodexOAuthAccounts();
+    const additionalAccounts = parseAdditionalCodexHomes(prefValue("additionalCodexHomes")).flatMap(
+      (codexHome, homeIndex) =>
+        listCodexOAuthAccounts({ codexHome }).map((account) => ({
+          ...account,
+          id: `codex-home-${homeIndex}-${account.id}`,
+        })),
+    );
+
+    return buildCodexAccountCandidates([...defaultAccounts, ...additionalAccounts], await loadAccounts("codex"));
+  },
   fetcher: async (account) => {
     if (account.needsAccountId) {
       return {

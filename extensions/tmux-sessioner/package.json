@@ -48,6 +48,12 @@
       "title": "Manage Tmux Windows",
       "description": "Manage Tmux Windows that user can switch or delete any tmux window from here",
       "mode": "view"
+    },
+    {
+      "name": "search_session_output",
+      "title": "Search Session Output",
+      "description": "Search commands and printed output across the scrollback of all tmux sessions",
+      "mode": "view"
     }
   ],
   "preferences": [

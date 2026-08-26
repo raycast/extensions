@@ -12,7 +12,7 @@ import { withGitHubClient } from "./helpers/withGithubClient";
 function MyLatestRepositories() {
   const { github } = getGitHubClient();
 
-  const { data: history, visitRepository } = useHistory(undefined, null);
+  const { data: history, visitRepository, updateRepository, removeRepository } = useHistory(undefined, null);
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", MY_REPO_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-my-latest-repo",
   });
@@ -27,7 +27,7 @@ function MyLatestRepositories() {
       const orderByField = sort.split(":")[0].toUpperCase() as RepositoryOrderField;
       const orderByDirection = sort.split(":")[1].toUpperCase() as OrderDirection;
       const result = await github.myLatestRepositories({
-        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
+        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 25 }),
         orderByField,
         orderByDirection,
       });
@@ -59,7 +59,16 @@ function MyLatestRepositories() {
         {validHistory.map((repository) => (
           <RepositoryListItem
             key={repository.id}
-            {...{ repository, mutateList, onVisit: visitRepository, sortQuery, setSortQuery, sortTypesData }}
+            {...{
+              repository,
+              mutateList,
+              onVisit: visitRepository,
+              onUpdate: updateRepository,
+              onRemove: removeRepository,
+              sortQuery,
+              setSortQuery,
+              sortTypesData,
+            }}
           />
         ))}
       </List.Section>
@@ -70,7 +79,15 @@ function MyLatestRepositories() {
             return (
               <RepositoryListItem
                 key={repository.id}
-                {...{ repository, mutateList, onVisit: visitRepository, sortQuery, setSortQuery, sortTypesData }}
+                {...{
+                  repository,
+                  mutateList,
+                  onVisit: visitRepository,
+                  onUpdate: updateRepository,
+                  sortQuery,
+                  setSortQuery,
+                  sortTypesData,
+                }}
               />
             );
           })}

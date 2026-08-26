@@ -119,6 +119,7 @@ src/
     opencode-auth.ts       # Shared OpenCode credential helpers
     opencode-active.ts     # Shared OpenCode active-account helpers
   amp/                     # Amp provider (fetcher/parser/renderer/types)
+  aihubmix/                # AIHubMix provider
   antigravity/             # Antigravity provider
   claude/                  # Claude provider
   clinepass/               # ClinePass limits, Cline credits, credential discovery/refresh, and account helpers

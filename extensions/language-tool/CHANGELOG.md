@@ -1,5 +1,15 @@
 # Changelog
 
+## [Apply All Preferences in Check Text Instant] - 2026-08-26
+
+### Fixed
+- Check Text Instant now sends Mother Tongue, Preferred Variants, Enabled Rules, Enabled Categories, Disabled Categories and Enable Only Specified Rules, the six preferences it was silently leaving out. They are extension-wide preferences and Check Text already applied all of them.
+
+## [Fix Premium Accounts] - 2026-08-15
+
+### Fixed
+- Authenticated requests now go to the Premium API host. Filling in Username/Email and API Key previously made every check fail with "Credentials provided, but server isn't configured to support this", because the credentials were sent to the free endpoint, which rejects them.
+
 ## [1.1.0] - 2025-12-19
 
 ### Improved

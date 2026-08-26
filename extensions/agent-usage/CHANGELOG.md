@@ -1,5 +1,40 @@
 # Agent Usage Changelog
 
+## [Add AIHubMix Usage] - 2026-08-22
+
+- Add AIHubMix balance monitoring to the main list and menu bar
+- Query account remaining and used balances with an Access Key from https://console.aihubmix.com/setting, or `AIHUBMIX_ACCESS_KEY`
+
+## [Add MinimaxCN support] - 2026-08-21
+
+### New Features
+
+- Add MinimaxCN (Chinese-region MiniMax) to the main list and menu bar
+- Coding-plan quota window: 5h interval + weekly, with `current_interval_remaining_percent` fallback when counts are 0
+
+## [Show Cursor Auto and API percentages] - 2026-08-16
+
+### Improvements
+
+- Show Auto and API remaining percentages together on the Cursor list and menu bar when both windows are available
+- Color the Cursor usage pie from the tighter of the two windows
+
+## [Add support for multiple CODEX_HOME] - 2026-08-15
+
+- Support additional CODEX_HOME in preferences, letting users read from multiple active codex account
+
+## [Add DeepSeek Usage] - 2026-08-14
+
+- Add DeepSeek balance monitoring to the main list and menu bar
+- Show total, topped-up, and granted balances
+- Automatically detect API keys from OpenCode or environment variables, with manual setup available in Preferences
+
+## [Fix Antigravity detection on 2.7+] - 2026-08-13
+
+### Bug Fixes
+
+- Detect the suffix-less `language_server` binary shipped by Antigravity 2.7+, which left the Antigravity row stuck on "Not Running" while the app was running
+
 ## [Fix ClinePass usage limits windows] - 2026-08-12
 
 ### Bug Fixes

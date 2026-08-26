@@ -71,6 +71,8 @@
     "publish": "ray publish"
   },
   "overrides": {
-    "undici": "^6.24.0"
+    "undici": "^6.24.0",
+    "brace-expansion": "5.0.9",
+    "fast-uri": "3.1.5"
   }
 }

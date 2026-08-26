@@ -17,7 +17,7 @@ import {
 import fs from "node:fs";
 import path from "node:path";
 import { useRef, useState } from "react";
-import { analyze, type AnalyzeCounts, type Phase } from "./core/analyze.js";
+import { analyze, type AnalyzeCounts, type HashCacheState, type Phase } from "./core/analyze.js";
 import { canonicalPath, isInsideDir, loadConfig } from "./core/config.js";
 import { executePlan, relativeToDest } from "./core/execute.js";
 import { bucketLabel, formatSize, type PlanEntry } from "./core/plan.js";
@@ -130,7 +130,7 @@ export default function TidyFolderCommand() {
     try {
       const config = loadConfig();
       if (!values.smart) config.detect = false;
-      const { entries, sourceFiles, counts } = await analyze({
+      const { entries, sourceFiles, counts, hashCache } = await analyze({
         sourceDir,
         destDir,
         config,
@@ -157,7 +157,9 @@ export default function TidyFolderCommand() {
           message: `Those files will land in ${config.fallbackCategory}. Add them in ${config._path} to enable.`,
         });
       }
-      push(<PlanView entries={entries} counts={counts} sourceDir={sourceDir} destDir={destDir} />);
+      push(
+        <PlanView entries={entries} counts={counts} sourceDir={sourceDir} destDir={destDir} hashCache={hashCache} />,
+      );
     } catch (err) {
       const { title, message } = describeError(err, "Scan failed");
       toast.style = Toast.Style.Failure;
@@ -225,11 +227,13 @@ function PlanView({
   counts,
   sourceDir,
   destDir,
+  hashCache,
 }: {
   entries: PlanEntry[];
   counts: AnalyzeCounts;
   sourceDir: string;
   destDir: string;
+  hashCache: HashCacheState | null;
 }) {
   // A ref, not the state flag: two Enter presses land in the same render pass,
   // and both would still see `executing === false`.
@@ -265,7 +269,12 @@ function PlanView({
       if (!ok) return;
 
       toast = await showToast({ style: Toast.Style.Animated, title: "Tidying…" });
-      const { similarReportPath, reportErrors } = executePlan(entries, { destDir, sourceDir, formatSimilarBlock });
+      const { similarReportPath, reportErrors } = executePlan(entries, {
+        destDir,
+        sourceDir,
+        hashCache,
+        formatSimilarBlock,
+      });
       toast.style = Toast.Style.Success;
       toast.title = `Done: ${counts.archive} archived, ${counts.duplicate} duplicates, ${counts.review} to review`;
       // A record that couldn't be appended rides along on the success toast:

@@ -1,6 +1,7 @@
 import type { AgentId } from "./types.ts";
 
 export const DEFAULT_AGENT_ORDER = [
+  "aihubmix",
   "amp",
   "antigravity",
   "claude",
@@ -8,11 +9,13 @@ export const DEFAULT_AGENT_ORDER = [
   "codex",
   "copilot",
   "cursor",
+  "deepseek",
   "droid",
   "gemini",
   "grok",
   "kimi",
   "minimax",
+  "minimaxcn",
   "opencode-go",
   "synthetic",
   "zai",

@@ -1,17 +1,22 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast, confirmAlert } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFileSelection, usePreview } from "./lib/hooks";
 import { RenameRule } from "./lib/rules";
 import AddRuleForm from "./components/AddRuleForm";
 import { batchRename, checkConflicts } from "./lib/batch";
 import { openRenameHistory, recordRenameHistory } from "./lib/history-nav";
+import { filterByScope, itemNoun, type RenameScope } from "./lib/selection";
 import { getUserFriendlyErrorMessage } from "./lib/errors";
 import type { RenameOperation } from "./types";
 import path from "path";
 
 export default function AdvancedRenameCommand() {
-  const { files, loading } = useFileSelection();
+  const { files: selection, loading } = useFileSelection();
+  const [scope, setScope] = useState<RenameScope>("files");
   const [rules, setRules] = useState<RenameRule[]>([]);
+  // The working set is the selection narrowed to the chosen scope, so the
+  // preview below always lists exactly what "Apply Rename" will act on.
+  const files = useMemo(() => filterByScope(selection, scope), [selection, scope]);
   const previewFiles = usePreview(files, rules);
 
   const addRule = (rule: RenameRule) => {
@@ -36,20 +41,31 @@ export default function AdvancedRenameCommand() {
   };
 
   const applyRename = async () => {
+    // A non-empty selection that the scope filters down to nothing: say so
+    // rather than reporting "no rules changed anything".
+    if (selection.length > 0 && files.length === 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `No ${itemNoun(scope, 2)} in the selection`,
+        message: `Select ${itemNoun(scope, 2)} in Finder, or change "Apply to".`,
+      });
+      return;
+    }
+
     const filesToRename = previewFiles.filter((f) => f.newName && f.newName !== path.basename(f.originalPath));
 
     if (filesToRename.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "No files to rename",
-        message: "Add rules that change at least one filename.",
+        title: `No ${itemNoun(scope, 2)} to rename`,
+        message: `Add rules that change at least one ${itemNoun(scope, 1)} name.`,
       });
       return;
     }
 
     if (
       await confirmAlert({
-        title: `Rename ${filesToRename.length} files?`,
+        title: `Rename ${filesToRename.length} ${itemNoun(scope, filesToRename.length)}?`,
         primaryAction: { title: "Rename" },
       })
     ) {
@@ -75,7 +91,7 @@ export default function AdvancedRenameCommand() {
         const results = await batchRename(operations);
         const successfulOps = results.filter((r) => r.success).map(({ oldPath, newPath }) => ({ oldPath, newPath }));
         const historySaved = await recordRenameHistory(
-          `Advanced rename of ${successfulOps.length} ${successfulOps.length === 1 ? "file" : "files"}`,
+          `Advanced rename of ${successfulOps.length} ${itemNoun(scope, successfulOps.length)}`,
           successfulOps,
         );
         const successCount = successfulOps.length;
@@ -90,7 +106,7 @@ export default function AdvancedRenameCommand() {
         } else {
           await showToast({
             style: Toast.Style.Success,
-            title: `Successfully renamed ${successCount} files`,
+            title: `Successfully renamed ${successCount} ${itemNoun(scope, successCount)}`,
             // An empty batch records no history by design — only warn when
             // there was something to save and saving failed.
             message: successCount > 0 && !historySaved ? "History could not be saved" : undefined,
@@ -108,7 +124,25 @@ export default function AdvancedRenameCommand() {
   };
 
   return (
-    <List isShowingDetail isLoading={loading}>
+    <List
+      isShowingDetail
+      isLoading={loading}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Apply to"
+          value={scope}
+          onChange={(newValue) => {
+            if (newValue === "files" || newValue === "folders" || newValue === "both") {
+              setScope(newValue);
+            }
+          }}
+        >
+          <List.Dropdown.Item title="Files" value="files" icon={Icon.Document} />
+          <List.Dropdown.Item title="Folders" value="folders" icon={Icon.Folder} />
+          <List.Dropdown.Item title="Files & Folders" value="both" icon={Icon.List} />
+        </List.Dropdown>
+      }
+    >
       <List.Section title="Active Rules">
         {rules.length === 0 && (
           <List.Item

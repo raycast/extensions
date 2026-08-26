@@ -16,11 +16,9 @@ Winget comes pre-installed on Windows 11 and recent Windows 10 builds. If it is 
 | **Search Packages**      | Search the winget catalog and install packages                      |
 | **Show Installed**       | List installed packages; upgrade, uninstall, pin, or repair them    |
 | **Show Upgradable**      | View packages with updates and upgrade one or all                   |
-| **Upgrade All Packages** | Upgrade everything that isn't pinned (see note below)               |
+| **Upgrade All Packages** | Upgrade everything that isn't pinned                                |
 | **Export Packages**      | Save installed packages to a winget JSON manifest                   |
 | **Import Packages**      | Install packages from a winget JSON manifest                        |
-
-> **Keep _Upgrade All Packages_ enabled** for the best experience: besides upgrading everything, it runs this extension's package operations in the background. With it disabled, operations run inside the view that started them — they still complete if you leave, but progress toasts stop, and an interrupted bulk run continues only when relaunched.
 
 ## Preferences
 

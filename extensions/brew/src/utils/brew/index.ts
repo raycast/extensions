@@ -94,6 +94,7 @@ export {
   isCask,
   brewCompare,
   brewInstallCommand,
+  brewAdoptCommand,
   brewUninstallCommand,
   brewUpgradeCommand,
 } from "./helpers";

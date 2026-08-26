@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import {
+  brewAdoptCommand,
   brewInstallCommand,
   brewInstallPath,
   brewIsInstalled,
@@ -151,6 +152,17 @@ export function CaskActionPanel(props: {
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={() => runCommandInTerminal(brewInstallCommand(cask))}
           />
+          <Action.CopyToClipboard
+            title="Copy Adopt Command"
+            content={brewAdoptCommand(cask)}
+            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+          />
+          <Action
+            title={`Run Adopt in ${terminalName}`}
+            icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={() => runCommandInTerminal(brewAdoptCommand(cask))}
+          />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -290,6 +302,17 @@ export function FormulaActionPanel(props: {
             icon={terminalIcon}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={() => runCommandInTerminal(brewInstallCommand(formula))}
+          />
+          <Action.CopyToClipboard
+            title="Copy Adopt Command"
+            content={brewAdoptCommand(formula)}
+            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+          />
+          <Action
+            title={`Run Adopt in ${terminalName}`}
+            icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={() => runCommandInTerminal(brewAdoptCommand(formula))}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>

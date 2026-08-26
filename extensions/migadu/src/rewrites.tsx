@@ -65,11 +65,11 @@ function RewritesIndex({ domain }: { domain: string }) {
       searchBarPlaceholder="Search rewrite..."
       actions={
         <ActionPanel>
-          <Action
+          <Action.Push
             title="Create New Rewrite"
             icon={Icon.Forward}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={() => push(<RewritesCreate domain={domain} onRewriteCreated={getDomainRewritesFromApi} />)}
+            shortcut={Keyboard.Shortcut.Common.New}
+            target={<RewritesCreate domain={domain} onRewriteCreated={getDomainRewritesFromApi} />}
           />
           <Action
             title="Reload Rewrites"
@@ -105,7 +105,7 @@ function RewritesIndex({ domain }: { domain: string }) {
                 <Action
                   title="Create New Rewrite"
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   onAction={() => push(<RewritesCreate domain={domain} onRewriteCreated={getDomainRewritesFromApi} />)}
                 />
                 <Action

@@ -1,7 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export type GoogleChromeLocalState = {
-  profile: { info_cache: GoogleChromeInfoCache };
+  profile: {
+    info_cache: GoogleChromeInfoCache;
+    last_active_profiles?: string[];
+    last_used?: string;
+    profiles_order?: string[];
+  };
 };
 
 export type GoogleChromeInfoCache = { [key: string]: GoogleChromeInfoCacheProfile };

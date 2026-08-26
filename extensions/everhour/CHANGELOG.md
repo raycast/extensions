@@ -1,5 +1,9 @@
 # Everhour
 
+## [Fix] - 2026-08-21
+
+- Reduced background timer status refreshes to once per minute.
+
 ## [Fix] - 2024-10-25
 
 - Fix for issue [#14813](https://github.com/raycast/extensions/issues/14813)

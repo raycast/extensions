@@ -7,12 +7,13 @@ import { LocalStorage } from "@raycast/api";
 import { USE_FAKE_DATA } from "../config";
 import { MockSite } from "../api/Mock";
 
-type key = [IServer["id"], IServer["api_token_key"]];
+type key = [IServer["id"], IServer["api_token_key"], IServer["org_slug"]];
 
-const fetcher = async ([serverId, tokenKey]: key) => {
+const fetcher = async ([serverId, tokenKey, orgSlug]: key) => {
   if (USE_FAKE_DATA) return MockSite.getAll(serverId);
-  const cacheKey = `sites-${serverId}`;
+  const cacheKey = `sites-v2-${serverId}`;
   Site.getAll({
+    orgSlug,
     serverId,
     token: unwrapToken(tokenKey),
   })
@@ -23,7 +24,11 @@ const fetcher = async ([serverId, tokenKey]: key) => {
 };
 
 export const useSites = (server?: IServer, optons: Partial<SWRConfiguration> = {}) => {
-  const { data, error } = useSWR<ISite[]>(server?.id ? [server.id, server.api_token_key] : null, fetcher, optons);
+  const { data, error } = useSWR<ISite[]>(
+    server?.id ? [server.id, server.api_token_key, server.org_slug] : null,
+    fetcher,
+    optons,
+  );
 
   return {
     sites: data,

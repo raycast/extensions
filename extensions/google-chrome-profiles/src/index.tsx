@@ -1,7 +1,9 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Clipboard,
+  confirmAlert,
   environment,
   getPreferenceValues,
   Icon,
@@ -31,12 +33,19 @@ import {
   isValidUrl,
   formatAsUrl,
   openGoogleChrome,
+  readChromeLocalState,
+  deleteChromeProfile,
   ChromeAction,
   ChromeTarget,
 } from "./util/util";
 import { getFavicon } from "@raycast/utils";
 
-const ProfileItem = (props: { index: number; profile: Profile; browser: BrowserConfig }) => {
+const ProfileItem = (props: {
+  index: number;
+  profile: Profile;
+  browser: BrowserConfig;
+  onDelete: (profile: Profile) => Promise<void>;
+}) => {
   const { index, profile, browser } = props;
 
   return (
@@ -83,6 +92,13 @@ const ProfileItem = (props: { index: number; profile: Profile; browser: BrowserC
               );
             }}
           />
+          <Action
+            title="Delete Profile"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+            onAction={() => props.onDelete(profile)}
+          />
         </ActionPanel>
       }
     />
@@ -99,10 +115,7 @@ export default function Command() {
       try {
         // for google-chrome-profiles-1.png:
         // 1. comment the code below:
-        const path = join(homedir(), browser.dataPath, "Local State");
-        const localStateFileBuffer = await readFile(path);
-        const localStateFileText = localStateFileBuffer.toString("utf-8");
-        setLocalState(JSON.parse(localStateFileText));
+        setLocalState((await readChromeLocalState(browser)).state);
         // 2. uncomment function _createDataSetForScreenshot1() at the bottom of the file
         // 3. uncomment code below:
         // setLocalState(_createDataSetForScreenshot1());
@@ -121,13 +134,42 @@ export default function Command() {
   const infoCache = localState?.profile.info_cache;
   const profiles = infoCache && Object.keys(infoCache).map(extractProfileFromInfoCache(infoCache));
 
+  const deleteProfile = async (profile: Profile) => {
+    if (
+      !(await confirmAlert({
+        title: `Delete “${profile.name}” profile?`,
+        message: "This permanently deletes its bookmarks, history, passwords, and other local data.",
+        primaryAction: { title: "Delete Profile", style: Alert.ActionStyle.Destructive },
+      }))
+    ) {
+      return;
+    }
+
+    try {
+      setLocalState(await deleteChromeProfile(profile, browser));
+      await showToast(Toast.Style.Success, `Deleted ${profile.name}`);
+    } catch (error) {
+      await showToast(
+        Toast.Style.Failure,
+        "Could not delete profile",
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  };
+
   return (
     <List isLoading={!profiles && !error} searchBarPlaceholder="Search Profile">
       {profiles &&
         profiles
           .sort(sortAlphabetically)
           .map((profile, index) => (
-            <ProfileItem key={profile.directory} index={index} profile={profile} browser={browser} />
+            <ProfileItem
+              key={profile.directory}
+              index={index}
+              profile={profile}
+              browser={browser}
+              onDelete={deleteProfile}
+            />
           ))}
     </List>
   );

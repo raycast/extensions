@@ -20,6 +20,7 @@ import { formatErrorMarkdown } from "./agents/detail-format.ts";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
 import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId } from "./agents/order.ts";
 import {
+  useAihubmixUsage,
   useAmpUsage,
   useAntigravityUsage,
   useClaudeUsage,
@@ -27,17 +28,21 @@ import {
   useCodexAccounts,
   useCopilotUsage,
   useCursorUsage,
+  useDeepSeekUsage,
   useDroidUsage,
   useGeminiUsage,
   useGrokUsage,
   useKimiAccounts,
   useMiniMaxUsage,
+  useMinimaxCNUsage,
   useOpencodegoUsage,
   useSyntheticAccounts,
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
 import type { Accessory, AgentDefinition, AgentId, AgentVisibilityPreferences, UsageState } from "./agents/types.ts";
 import { getListIcon } from "./agents/ui.tsx";
+import { formatAihubmixUsageText, getAihubmixAccessory, renderAihubmixDetail } from "./aihubmix/renderer.tsx";
+import type { AihubmixError, AihubmixUsage } from "./aihubmix/types.ts";
 import { formatAmpUsageText, getAmpAccessory, renderAmpDetail } from "./amp/renderer.tsx";
 import type { AmpError, AmpUsage } from "./amp/types.ts";
 import {
@@ -56,6 +61,8 @@ import { formatCopilotUsageText, getCopilotAccessory, renderCopilotDetail } from
 import type { CopilotError, CopilotUsage } from "./copilot/types.ts";
 import { formatCursorUsageText, getCursorAccessory, renderCursorDetail } from "./cursor/renderer.tsx";
 import type { CursorError, CursorUsage } from "./cursor/types.ts";
+import { formatDeepSeekUsageText, getDeepSeekAccessory, renderDeepSeekDetail } from "./deepseek/renderer.tsx";
+import type { DeepSeekError, DeepSeekUsage } from "./deepseek/types.ts";
 import { formatDroidUsageText, getDroidAccessory, renderDroidDetail } from "./droid/renderer.tsx";
 import type { DroidError, DroidUsage } from "./droid/types.ts";
 import { launchGeminiReauth, shouldPromptGeminiReauth } from "./gemini/reauth.ts";
@@ -67,6 +74,8 @@ import { formatKimiUsageText, getKimiAccessory, renderKimiDetail } from "./kimi/
 import type { KimiError, KimiUsage } from "./kimi/types.ts";
 import { formatMiniMaxUsageText, getMiniMaxAccessory, renderMiniMaxDetail } from "./minimax/renderer.tsx";
 import type { MiniMaxError, MiniMaxUsage } from "./minimax/types.ts";
+import { formatMinimaxCNUsageText, getMinimaxCNAccessory, renderMinimaxCNDetail } from "./minimaxcn/renderer.tsx";
+import type { MinimaxCNError, MinimaxCNUsage } from "./minimaxcn/types.ts";
 import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDetail } from "./opencode-go/renderer.tsx";
 import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types.ts";
 import { formatSyntheticUsageText, getSyntheticAccessory, renderSyntheticDetail } from "./synthetic/renderer.tsx";
@@ -90,12 +99,14 @@ interface AgentRegistryEntry<TUsage, TError extends ErrorLike> extends AgentDefi
 type MultiAccountAgentId = "clinepass" | "codex" | "kimi" | "synthetic" | "zai";
 
 interface AgentUsageById {
+  aihubmix: AihubmixUsage;
   amp: AmpUsage;
   claude: ClaudeUsage;
   clinepass: ClinePassUsage;
   codex: CodexUsage;
   copilot: CopilotUsage;
   cursor: CursorUsage;
+  deepseek: DeepSeekUsage;
   droid: DroidUsage;
   gemini: GeminiUsage;
   grok: GrokUsage;
@@ -104,16 +115,19 @@ interface AgentUsageById {
   antigravity: AntigravityUsage;
   zai: ZaiUsage;
   minimax: MiniMaxUsage;
+  minimaxcn: MinimaxCNUsage;
   "opencode-go": OpencodegoUsage;
 }
 
 interface AgentErrorById {
+  aihubmix: AihubmixError;
   amp: AmpError;
   claude: ClaudeError;
   clinepass: ClinePassError;
   codex: CodexError;
   copilot: CopilotError;
   cursor: CursorError;
+  deepseek: DeepSeekError;
   droid: DroidError;
   gemini: GeminiError;
   grok: GrokError;
@@ -122,6 +136,7 @@ interface AgentErrorById {
   antigravity: AntigravityError;
   zai: ZaiError;
   minimax: MiniMaxError;
+  minimaxcn: MinimaxCNError;
   "opencode-go": OpencodegoError;
 }
 
@@ -174,6 +189,18 @@ interface AccountedAgentView {
 }
 
 const AGENT_REGISTRY: AgentRegistry = {
+  aihubmix: {
+    id: "aihubmix",
+    name: "AIHubMix",
+    icon: "aihubmix.svg",
+    description: "AIHubMix API Balance",
+    isSupported: true,
+    settingsUrl: "https://console.aihubmix.com/statistics",
+    useUsage: useAihubmixUsage,
+    renderDetail: renderAihubmixDetail,
+    getAccessory: getAihubmixAccessory,
+    formatUsageText: formatAihubmixUsageText,
+  },
   amp: {
     id: "amp",
     name: "Amp",
@@ -243,6 +270,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     renderDetail: renderCursorDetail,
     getAccessory: getCursorAccessory,
     formatUsageText: formatCursorUsageText,
+  },
+  deepseek: {
+    id: "deepseek",
+    name: "DeepSeek",
+    icon: "deepseek.svg",
+    description: "DeepSeek API Balance",
+    isSupported: true,
+    settingsUrl: "https://platform.deepseek.com/usage",
+    useUsage: useDeepSeekUsage,
+    renderDetail: renderDeepSeekDetail,
+    getAccessory: getDeepSeekAccessory,
+    formatUsageText: formatDeepSeekUsageText,
   },
   droid: {
     id: "droid",
@@ -334,6 +373,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     renderDetail: renderMiniMaxDetail,
     getAccessory: getMiniMaxAccessory,
     formatUsageText: formatMiniMaxUsageText,
+  },
+  minimaxcn: {
+    id: "minimaxcn",
+    name: "MinimaxCN",
+    icon: "minimaxcn-icon.svg",
+    description: "MinimaxCN (MiniMax 国内版) Coding Plan",
+    isSupported: true,
+    settingsUrl: "https://www.minimaxi.com",
+    useUsage: useMinimaxCNUsage,
+    renderDetail: renderMinimaxCNDetail,
+    getAccessory: getMinimaxCNAccessory,
+    formatUsageText: formatMinimaxCNUsageText,
   },
   "opencode-go": {
     id: "opencode-go",
@@ -431,15 +482,18 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const { push } = useNavigation();
 
   // Hooks must be called unconditionally at top level (React rules)
+  const aihubmixState = AGENT_REGISTRY.aihubmix.useUsage(Boolean(prefs.showAihubmix));
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
   const claudeState = AGENT_REGISTRY.claude.useUsage(Boolean(prefs.showClaude));
   const copilotState = AGENT_REGISTRY.copilot.useUsage(Boolean(prefs.showCopilot));
   const cursorState = AGENT_REGISTRY.cursor.useUsage(Boolean(prefs.showCursor));
+  const deepseekState = AGENT_REGISTRY.deepseek.useUsage(Boolean(prefs.showDeepSeek));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
   const geminiState = AGENT_REGISTRY.gemini.useUsage(Boolean(prefs.showGemini));
   const grokState = AGENT_REGISTRY.grok.useUsage(Boolean(prefs.showGrok));
   const antigravityState = AGENT_REGISTRY.antigravity.useUsage(Boolean(prefs.showAntigravity));
   const minimaxState = AGENT_REGISTRY.minimax.useUsage(Boolean(prefs.showMinimax));
+  const minimaxcnState = AGENT_REGISTRY.minimaxcn.useUsage(Boolean(prefs.showMinimaxCN));
   const opencodegoState = AGENT_REGISTRY["opencode-go"].useUsage(Boolean(prefs.showOpencodeGo));
 
   // Multi-account providers
@@ -450,15 +504,18 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const zaiState = useZaiAccounts(Boolean(prefs.showZai));
 
   const agentViews: Omit<Record<AgentId, AgentView>, MultiAccountAgentId> = {
+    aihubmix: createAgentView(AGENT_REGISTRY.aihubmix, aihubmixState, Boolean(prefs.showAihubmix)),
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
     claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
     copilot: createAgentView(AGENT_REGISTRY.copilot, copilotState, Boolean(prefs.showCopilot)),
     cursor: createAgentView(AGENT_REGISTRY.cursor, cursorState, Boolean(prefs.showCursor)),
+    deepseek: createAgentView(AGENT_REGISTRY.deepseek, deepseekState, Boolean(prefs.showDeepSeek)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
     gemini: createAgentView(AGENT_REGISTRY.gemini, geminiState, Boolean(prefs.showGemini)),
     grok: createAgentView(AGENT_REGISTRY.grok, grokState, Boolean(prefs.showGrok)),
     antigravity: createAgentView(AGENT_REGISTRY.antigravity, antigravityState, Boolean(prefs.showAntigravity)),
     minimax: createAgentView(AGENT_REGISTRY.minimax, minimaxState, Boolean(prefs.showMinimax)),
+    minimaxcn: createAgentView(AGENT_REGISTRY.minimaxcn, minimaxcnState, Boolean(prefs.showMinimaxCN)),
     "opencode-go": createAgentView(AGENT_REGISTRY["opencode-go"], opencodegoState, Boolean(prefs.showOpencodeGo)),
   };
 

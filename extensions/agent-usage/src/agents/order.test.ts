@@ -14,6 +14,7 @@ test("sortByDefaultAgentOrder uses the canonical provider order and keeps provid
     { id: "grok", rowId: "grok" },
     { id: "gemini", rowId: "gemini" },
     { id: "droid", rowId: "droid" },
+    { id: "deepseek", rowId: "deepseek" },
     { id: "cursor", rowId: "cursor" },
     { id: "copilot", rowId: "copilot" },
     { id: "codex", rowId: "codex-1" },
@@ -21,12 +22,14 @@ test("sortByDefaultAgentOrder uses the canonical provider order and keeps provid
     { id: "claude", rowId: "claude" },
     { id: "antigravity", rowId: "antigravity" },
     { id: "amp", rowId: "amp" },
+    { id: "aihubmix", rowId: "aihubmix" },
     { id: "codex", rowId: "codex-2" },
   ];
 
   assert.deepEqual(
     sortByDefaultAgentOrder(agents).map((agent) => agent.rowId),
     [
+      "aihubmix",
       "amp",
       "antigravity",
       "claude",
@@ -35,6 +38,7 @@ test("sortByDefaultAgentOrder uses the canonical provider order and keeps provid
       "codex-2",
       "copilot",
       "cursor",
+      "deepseek",
       "droid",
       "gemini",
       "grok",

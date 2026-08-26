@@ -1,67 +1,56 @@
-# Apple Password
+# Apple Passwords
 
-Search Apple Passwords from Raycast with live discovery through the local `applepw` CLI, cached account metadata in SQLite, and no stored secrets.
+Search and manage Apple Passwords (iCloud Keychain) from Raycast using the [APW](https://github.com/bendews/apw) CLI.
 
-## Features
+## Requirements
 
-- Search by domain or email fragment.
-- Copy a password from Apple Passwords.
-- Copy a one-time code when OTP is available.
-- Prompt for authentication inline when the daemon needs a code.
-- Import a CSV to improve local search coverage.
+1. Install a [supported browser](https://github.com/bendews/apw) and iCloud Passwords extension
+2. Install `apw` via Homebrew and start the daemon:
 
-## Install
-
-1. Install the `applepw` CLI:
-
-   ```sh
-   brew install alecharmon/tap/applepw
-   ```
-
-2. Open the `Search Passwords` command in Raycast.
-3. If prompted, enter the code from Apple Passwords to authenticate the local daemon.
-
-If the CLI is missing, the extension shows setup instructions and offers the install command directly in Raycast.
-
-## CSV Import
-
-The extension can import account metadata from an Apple Passwords CSV to improve search results.
-
-1. Open the Apple Passwords app.
-2. Choose `File > Export All Passwords to File`.
-3. In Raycast, open `Search Passwords`.
-4. Use the `Import CSV Cache` action.
-5. Select the exported CSV file and continue.
-
-What the CSV import does:
-
-- Imports website domain metadata.
-- Imports usernames.
-- Imports OTP availability when present.
-- Updates the local password cache used for search ranking.
-
-What the CSV import does not do:
-
-- It does not store password values in the password cache.
-- It does not store one-time codes in the password cache.
-- It does not replace live password retrieval from Apple Passwords.
-
-Imported rows are useful for search quality, but password copy still depends on what the live `applepw` lookup can resolve.
-
-## Local Storage
-
-The extension stores only non-secret metadata in a local SQLite database:
-
-- domain
-- username
-- OTP availability
-- first-seen timestamp
-- last-seen timestamp
-- last-used timestamp
-
-Passwords and one-time codes are never written to disk by the extension.
+```sh
+brew install bendews/tap/apw
+brew services start apw
+```
 
 ## Commands
 
-- `Search Passwords`: Search Apple Passwords and copy passwords or one-time codes.
-- `Clear Password Cache`: Delete the local password cache file.
+### Apple Passwords
+
+Search your keychain by URL or domain. Opening the command auto-detects the active browser tab's domain and loads matching logins immediately. You can also type any domain into the search bar manually.
+
+Each result shows which secrets are available as tags — **Password** is always present, **OTP** appears for entries that have a one-time code. Actions:
+
+| Action | Shortcut | Description |
+|--------|----------|-------------|
+| Copy Username | ↩ | Fill (or copy) the username |
+| Copy Password | ⇧↩ | Fill (or copy) the password |
+| Copy OTP | ⌘⇧↩ | Fill (or copy) the current one-time code |
+
+If the daemon needs authentication, this command opens **Authenticate Apple Passwords** automatically.
+
+### Save Apple Password
+
+Save a new or updated login. The URL field is pre-filled from your active browser tab and the password field is pre-filled from the clipboard if it contains text.
+
+Built-in password generator (⌘G):
+
+| Type | Description |
+|------|-------------|
+| Random | Letters, digits, and symbols — configurable length (default 20) |
+| Alphanumeric | Letters and digits only — configurable length (default 20) |
+| Memorable | 4-word hyphenated passphrase |
+| PIN | 6-digit numeric PIN |
+
+When saving a login detected from the browser, the password is also copied or filled at the cursor (respecting the **Copy secrets** preference) before the save completes.
+
+### Authenticate Apple Passwords
+
+Sends an auth challenge to the APW daemon, which causes macOS to display a PIN. Enter the PIN to authenticate. On success the **Apple Passwords** search opens automatically.
+
+## Preferences
+
+| Preference | Default | Description |
+|-----------|---------|-------------|
+| APW CLI path | `/opt/homebrew/bin/apw` | Path to the `apw` binary |
+| Copy secrets | Disabled | Copy secret values to the clipboard; disable to paste at the cursor instead |
+| Cache timeout | `5` minutes | How long password list results are cached. Set to `0` to disable caching |

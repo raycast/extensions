@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
+import { isUniqueViolation } from "./postgres-errors";
 import type { RequestCardPayload, RequestCardResult } from "../types";
 
-const POSTGRES_UNIQUE_VIOLATION = "23505";
 const ACTIVE_REQUEST_EXISTS_ERROR = "You already have an active request for this word.";
 
 /**
@@ -21,7 +21,7 @@ export async function submitRequestCard(userId: string, payload: RequestCardPayl
 
   if (error) {
     // Reason: a unique violation means an active request already exists for this word.
-    if (error.code === POSTGRES_UNIQUE_VIOLATION) {
+    if (isUniqueViolation(error)) {
       return { success: false, error: ACTIVE_REQUEST_EXISTS_ERROR };
     }
     return { success: false, error: error.message };

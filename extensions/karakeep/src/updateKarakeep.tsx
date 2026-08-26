@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, Clipboard, confirmAlert, Detail, Icon, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  confirmAlert,
+  Detail,
+  Icon,
+  showToast,
+  Toast,
+  Keyboard,
+} from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import {
@@ -45,6 +56,14 @@ export default function UpdateKarakeep() {
 
   const detect = useCallback(async () => {
     setPhase("checking");
+    // Clear everything derived from the PREVIOUS detection before starting.
+    // Only the success path assigns these, so without this an early return
+    // leaves the last run's container and identity verdict in place. Nothing
+    // can reach them today — the destructive action is gated on `phase` — but
+    // that invariant lives thirty lines away, and the Copy Command action was
+    // already rendering a stale project's invocation on a failed re-check.
+    setContainer(undefined);
+    setIdentityProven(false);
     // Every bail below is logged: "the command says it can't update" is the
     // most likely thing to need diagnosing, and until now all five reasons
     // reached the screen but none reached the log.
@@ -330,16 +349,16 @@ export default function UpdateKarakeep() {
               title={t("update.actions.viewChangelog")}
               icon={Icon.Document}
               target={<ChangelogView image={container?.image} />}
-              shortcut={{
-                macOS: { modifiers: ["cmd"], key: "y" },
-                Windows: { modifiers: ["ctrl"], key: "y" },
-              }}
+              // Pushes a Detail view; it does not Quick Look a file. ToggleQuickLook
+              // was `ray lint --fix` matching the old ⌘Y combo, not the meaning.
+              // Open is the right constant and is otherwise unused in this panel.
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
           )}
           {phase === "unavailable" && (
             <Action title={t("update.actions.recheck")} icon={Icon.ArrowClockwise} onAction={detect} />
           )}
-          {container?.configFiles?.[0] && (
+          {phase !== "unavailable" && container?.configFiles?.[0] && (
             <Action.CopyToClipboard title={t("update.actions.copyCommand")} content={composeCommandLine(container)} />
           )}
         </ActionPanel>

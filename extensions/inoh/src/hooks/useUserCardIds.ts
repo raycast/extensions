@@ -21,9 +21,12 @@ async function _fetchUserCardDictionaryIds(userId: string): Promise<string[]> {
  * Only executes when a valid userId is provided.
  */
 export function useUserCardIds(userId: string | null) {
+  // Reason: the empty-string fallback is never fetched — `execute` gates the
+  // call until a real userId exists. It only satisfies the argument type
+  // without a non-null assertion.
   const { data, isLoading, error, revalidate } = useCachedPromise(
     (id: string) => _fetchUserCardDictionaryIds(id),
-    [userId!],
+    [userId ?? ""],
     { execute: !!userId },
   );
 

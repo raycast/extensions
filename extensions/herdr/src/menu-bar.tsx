@@ -1,17 +1,13 @@
 import { Icon, Keyboard, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences } from "@raycast/api";
 import { useHerdrSnapshot } from "./hooks/use-herdr-snapshot";
-import { agentIcon } from "./lib/agent-appearance";
+import { agentIcon, agentName } from "./lib/agent-appearance";
 import { focusResource, getAgentTarget } from "./lib/herdr";
 import { getHerdrPreferences } from "./lib/preferences";
 import { launchHerdrInTerminal, revealFocusedHerdr } from "./lib/terminal";
 import type { AgentInfo, AgentStatus, HerdrSnapshot } from "./lib/types";
-import { statusIcon, statusTitle } from "./lib/ui";
+import { runAction, statusIcon, statusTitle } from "./lib/ui";
 
 const DISPLAYED_STATUSES: AgentStatus[] = ["blocked", "done", "working", "unknown"];
-
-function agentName(agent: AgentInfo): string {
-  return agent.name || agent.display_agent || agent.agent || agent.pane_id;
-}
 
 function agentLocation(agent: AgentInfo, snapshot: HerdrSnapshot): string {
   const workspace = snapshot.workspaces.find((item) => item.workspace_id === agent.workspace_id);
@@ -22,14 +18,24 @@ function agentLocation(agent: AgentInfo, snapshot: HerdrSnapshot): string {
 }
 
 async function focusAgent(agent: AgentInfo): Promise<void> {
-  await focusResource("agent", getAgentTarget(agent));
-  await revealFocusedHerdr();
+  await runAction(
+    `Focusing ${agentName(agent)}`,
+    async () => {
+      await focusResource("agent", getAgentTarget(agent));
+      await revealFocusedHerdr();
+    },
+    { success: `Focused ${agentName(agent)}` },
+  );
+}
+
+function openHerdr(): Promise<boolean> {
+  return runAction("Opening Herdr", () => launchHerdrInTerminal(), { success: "Herdr Opened" });
 }
 
 function AgentItem({ agent, snapshot }: { agent: AgentInfo; snapshot: HerdrSnapshot }) {
   return (
     <MenuBarExtra.Item
-      icon={agentIcon(agent.agent || agent.display_agent)}
+      icon={agentIcon(agent.agent)}
       title={agentName(agent)}
       subtitle={agentLocation(agent, snapshot)}
       tooltip={`${statusTitle(agent.agent_status)} · ${agentLocation(agent, snapshot)}`}
@@ -77,14 +83,14 @@ export default function Command() {
       tooltip={
         snapshot.error
           ? "Herdr is unavailable"
-          : `Herdr · ${blocked.length} need attention · ${done.length} done · ${working.length} working · ${idle.length} idle`
+          : `Herdr · ${blocked.length} need attention · ${done.length} done · ${working.length} working · ${idle.length} idle · ${unknown.length} unknown`
       }
     >
       {snapshot.error ? (
         <MenuBarExtra.Item
           title="Herdr Unavailable — Open Herdr"
           icon={Icon.ExclamationMark}
-          onAction={() => void launchHerdrInTerminal()}
+          onAction={() => void openHerdr()}
         />
       ) : null}
 
@@ -141,7 +147,7 @@ export default function Command() {
           title="Open Herdr"
           icon={Icon.Terminal}
           shortcut={{ modifiers: ["cmd"], key: "t" }}
-          onAction={() => void launchHerdrInTerminal()}
+          onAction={() => void openHerdr()}
         />
         <MenuBarExtra.Item
           title="Refresh"

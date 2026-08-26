@@ -2,7 +2,7 @@
 
 # Inoh
 
-Add vocabulary cards to your [Inoh](https://apps.apple.com/app/id6757024294) decks directly from Raycast.
+[Inoh](https://inoh.app) is the vocabulary app for the articulate. This extension adds words to your Inoh decks directly from Raycast.
 
 ## Commands
 
@@ -29,8 +29,36 @@ account automatically.
 
 ## Plans
 
-Adding cards requires an Inoh account. The **free plan** holds up to **300 cards**
-across all decks. When you reach the limit, the extension opens **Inoh Pro**
-checkout in your browser for unlimited cards. The 300-card limit is enforced
-server-side, so it applies consistently across the Raycast extension and the
-Inoh app.
+The free plan includes **up to 300 cards** — you only need an Inoh account.
+Paid plans hold more cards and unlock more practice in the Inoh app:
+
+- **Inoh Plus** — up to 1,000 cards, unlimited daily reviews + 1,000 pronunciation practices/month
+- **Inoh Pro** — everything in Plus, unlimited cards + 10,000 pronunciation practices/month
+
+Your current plan shows as a badge in the header next to your email
+(Free, Plus, or Pro). Free accounts get an **Upgrade Plan** action that opens
+the Inoh plans page in your browser; paid accounts get **Manage Subscription**,
+which opens your account settings on [inoh.app](https://inoh.app) to change or
+cancel the plan. After you upgrade, the badge updates the next time you open
+the extension.
+
+## End-to-end tests
+
+Raycast is closed-source and offers no way to drive an extension's views, so
+these tests exercise the extension's **real modules** — its Supabase client,
+auth, dictionary search, and FSRS card seeding — against a **local** Supabase
+stack. Nothing is mocked except `@raycast/api` itself, which only exists inside
+the Raycast runtime.
+
+```bash
+cd ../inoh-backend && pnpm db:start     # once per session
+cd -                                     # back here
+pnpm e2e:run
+```
+
+Covered: signing in with a real emailed code, the free-plan reading, dictionary
+search (hit and miss), adding a word with correct FSRS seeding, removing it,
+refusing a duplicate, and the free card cap's message.
+
+The views themselves are on the manual checklist in
+[inoh-backend/E2E.md](../inoh-backend/E2E.md).

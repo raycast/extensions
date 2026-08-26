@@ -129,6 +129,17 @@ export function resolveCodexHome(env: NodeJS.ProcessEnv = process.env): string |
   return isExistingDirectory(codexHome) ? codexHome : null;
 }
 
+export function parseAdditionalCodexHomes(value: string, homeDir: string = os.homedir()): string[] {
+  const homes = value
+    .split(/[\n,]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => (entry === "~" ? homeDir : entry.startsWith("~/") ? path.join(homeDir, entry.slice(2)) : entry))
+    .map((entry) => path.resolve(entry));
+
+  return [...new Set(homes)];
+}
+
 function readCodexLoginAuth(authFilePath: string): CodexAuthData {
   try {
     if (!fs.existsSync(authFilePath)) {
@@ -159,7 +170,9 @@ function formatStoredAccountLabel(fileName: string, accountId: string, userId: s
   return normalized || accountId;
 }
 
-function getCodexAccountDedupeKeys(account: CodexOAuthAccount): string[] {
+export function getCodexAccountDedupeKeys(
+  account: Pick<CodexOAuthAccount, "token" | "userId" | "accountId">,
+): string[] {
   const keys = [`token:${account.token}`];
   if (account.userId && account.accountId) {
     keys.unshift(`user-account:${account.userId}:${account.accountId}`);

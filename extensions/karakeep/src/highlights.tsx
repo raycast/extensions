@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Detail, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Detail, Form, Icon, List, useNavigation, Keyboard } from "@raycast/api";
 import { useCachedPromise, useForm } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteHighlight, fetchGetAllHighlights, fetchGetSingleBookmark, fetchUpdateHighlight } from "./apis";
@@ -176,13 +176,13 @@ function HighlightDetail({ highlight, onRefresh }: { highlight: Highlight; onRef
             <Action.CopyToClipboard
               content={highlight.text}
               title={t("highlights.actions.copyText")}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
             />
             {highlight.note && (
               <Action.CopyToClipboard
                 content={highlight.note}
                 title={t("highlights.actions.copyNote")}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
             )}
           </ActionPanel.Section>
@@ -191,14 +191,14 @@ function HighlightDetail({ highlight, onRefresh }: { highlight: Highlight; onRef
               title={t("highlights.actions.edit")}
               icon={Icon.Pencil}
               onAction={() => push(<EditHighlightForm highlight={highlight} onUpdated={onRefresh} />)}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
             <Action
               title={t("highlights.actions.delete")}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={handleDelete}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -238,27 +238,27 @@ export default function Highlights() {
                   title={t("bookmarkItem.actions.viewDetail")}
                   icon={Icon.Sidebar}
                   onAction={() => push(<HighlightDetail highlight={highlight} onRefresh={revalidate} />)}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
                 <OpenBookmarkAction bookmarkId={highlight.bookmarkId} t={t} />
                 <Action
                   title={t("highlights.actions.edit")}
                   icon={Icon.Pencil}
                   onAction={() => push(<EditHighlightForm highlight={highlight} onUpdated={revalidate} />)}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action.CopyToClipboard
                   content={highlight.text}
                   title={t("highlights.actions.copyText")}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
                 />
                 {highlight.note && (
                   <Action.CopyToClipboard
                     content={highlight.note}
                     title={t("highlights.actions.copyNote")}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                 )}
               </ActionPanel.Section>
@@ -268,7 +268,7 @@ export default function Highlights() {
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => deleteHighlight(highlight.id, t, revalidate)}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               </ActionPanel.Section>
             </ActionPanel>

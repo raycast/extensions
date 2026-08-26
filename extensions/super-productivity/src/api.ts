@@ -21,12 +21,14 @@ function getBaseUrl(): string {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const { accessToken } = getPreferenceValues<Preferences>();
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${path}`;
 
   try {
     const res = await fetch(url, {
       headers: {
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
       ...options,

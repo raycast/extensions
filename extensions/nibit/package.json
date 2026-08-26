@@ -130,5 +130,8 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "test": "vitest run"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }
