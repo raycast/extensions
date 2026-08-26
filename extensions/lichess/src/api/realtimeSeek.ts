@@ -1,5 +1,5 @@
-import { assertOkResponse, closeResponseBody, LICHESS_API_BASE_URL, LichessApiError } from "./client";
 import { withTimeout } from "../lib/async";
+import { assertOkResponse, closeResponseBody, LICHESS_API_BASE_URL, LichessApiError } from "./client";
 
 const REALTIME_SEEK_TIMEOUT_MS = 15_000;
 const REALTIME_SEEK_GAME_START_GRACE_MS = 1_500;

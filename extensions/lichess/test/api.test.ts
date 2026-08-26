@@ -3,6 +3,32 @@ import { test } from "node:test";
 
 import { createRealtimeBoardSeek, LichessApiError } from "../src/api/lichess";
 
+const EXISTING_GAME = {
+  gameId: "existing",
+  rated: true,
+  secondsLeft: 600,
+  source: "lobby",
+  variant: { key: "standard" },
+};
+
+const UNRELATED_GAME = {
+  gameId: "unrelated",
+  color: "white",
+  rated: false,
+  secondsLeft: 600,
+  source: "friend",
+  variant: { key: "standard" },
+};
+
+const MATCHED_GAME = {
+  gameId: "matched",
+  color: "white",
+  rated: true,
+  secondsLeft: 600,
+  source: "lobby",
+  variant: { key: "standard" },
+};
+
 test("createRealtimeBoardSeek reports a canceled seek when waiting for a match times out", async () => {
   const originalFetch = globalThis.fetch;
   let eventSignalAborted = false;
@@ -90,57 +116,16 @@ test("createRealtimeBoardSeek resolves the game created by the seek", async () =
       return Response.json({
         nowPlaying:
           accountPlayingRequests === 1
-            ? [{ gameId: "existing", rated: true, secondsLeft: 600, source: "lobby", variant: { key: "standard" } }]
-            : [
-                { gameId: "existing", rated: true, secondsLeft: 600, source: "lobby", variant: { key: "standard" } },
-                {
-                  gameId: "unrelated",
-                  color: "white",
-                  rated: false,
-                  secondsLeft: 600,
-                  source: "friend",
-                  variant: { key: "standard" },
-                },
-                {
-                  gameId: "matched",
-                  color: "white",
-                  rated: true,
-                  secondsLeft: 600,
-                  source: "lobby",
-                  variant: { key: "standard" },
-                },
-              ],
+            ? [EXISTING_GAME]
+            : [EXISTING_GAME, UNRELATED_GAME, MATCHED_GAME],
       });
     }
 
     if (url.endsWith("/stream/event")) {
       const events = [
-        {
-          type: "gameStart",
-          game: { gameId: "existing", rated: true, secondsLeft: 600, source: "lobby", variant: { key: "standard" } },
-        },
-        {
-          type: "gameStart",
-          game: {
-            gameId: "unrelated",
-            color: "white",
-            rated: false,
-            secondsLeft: 600,
-            source: "friend",
-            variant: { key: "standard" },
-          },
-        },
-        {
-          type: "gameStart",
-          game: {
-            gameId: "matched",
-            color: "white",
-            rated: true,
-            secondsLeft: 600,
-            source: "lobby",
-            variant: { key: "standard" },
-          },
-        },
+        { type: "gameStart", game: EXISTING_GAME },
+        { type: "gameStart", game: UNRELATED_GAME },
+        { type: "gameStart", game: MATCHED_GAME },
       ];
 
       return new Response(events.map((event) => JSON.stringify(event)).join("\n"), { status: 200 });
