@@ -241,7 +241,7 @@
     "@types/react": "19.2.18",
     "eslint": "^10.9.1",
     "prettier": "^3.9.6",
-    "typescript": "^7.0.2"
+    "typescript": "~6.0.3"
   },
   "engines": {
     "node": ">=22.22.2"
