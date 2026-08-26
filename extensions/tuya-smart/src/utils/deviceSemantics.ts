@@ -1,5 +1,6 @@
 import { Device, FunctionItem } from "./interfaces";
 import { isSwitchStatus } from "./filters";
+import { temperatureUnitPreference } from "./preferences";
 
 export type DeviceKind = "control" | "sensor" | "lock";
 
@@ -230,6 +231,9 @@ export function meaningfulStatuses(device: Device): FunctionItem[] {
 }
 
 export function temperatureUnitOf(device: Device): "c" | "f" {
+  const preferred = temperatureUnitPreference();
+  if (preferred === "c" || preferred === "f") return preferred;
+
   const unit = (device.status ?? []).find((status) => status.code === "temp_unit_convert")?.value;
   return unit === "f" ? "f" : "c";
 }

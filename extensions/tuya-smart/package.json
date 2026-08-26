@@ -77,6 +77,28 @@
           "value": "https://openapi-ueaz.tuyaus.com"
         }
       ]
+    },
+    {
+      "name": "temperatureUnit",
+      "type": "dropdown",
+      "required": false,
+      "default": "device",
+      "title": "Temperature Unit",
+      "description": "How temperatures are shown. Following the device matches what the Tuya app displays; pick a unit to override devices that do not report one.",
+      "data": [
+        {
+          "title": "Follow the device",
+          "value": "device"
+        },
+        {
+          "title": "Celsius",
+          "value": "c"
+        },
+        {
+          "title": "Fahrenheit",
+          "value": "f"
+        }
+      ]
     }
   ],
   "dependencies": {

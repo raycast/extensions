@@ -2,6 +2,9 @@
 
 ## [Redesigned List, Error Handling, Light Controls, Menu Bar and AI Tools] - {PR_MERGE_DATE}
 
+- Added a Temperature Unit preference. Temperatures follow the device's own setting by
+  default, matching the Tuya app; Celsius or Fahrenheit can be forced for devices that
+  never report one.
 - The details side panel is now off by default and toggles with Cmd+Shift+D. It used
   to be always open, which squeezed the list column and cut off the state, battery and
   offline labels.
