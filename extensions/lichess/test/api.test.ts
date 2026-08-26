@@ -5,6 +5,7 @@ import { createRealtimeBoardSeek, LichessApiError } from "../src/api/lichess";
 
 test("createRealtimeBoardSeek reports a canceled seek when waiting for a match times out", async () => {
   const originalFetch = globalThis.fetch;
+  let eventSignalAborted = false;
   let seekSignalAborted = false;
 
   globalThis.fetch = async (input, init) => {
@@ -12,6 +13,23 @@ test("createRealtimeBoardSeek reports a canceled seek when waiting for a match t
 
     if (url.includes("/account/playing")) {
       return Response.json({ nowPlaying: [] });
+    }
+
+    if (url.endsWith("/stream/event")) {
+      let streamController: ReadableStreamDefaultController<Uint8Array>;
+      init?.signal?.addEventListener("abort", () => {
+        eventSignalAborted = true;
+        streamController.error(new Error("Event stream aborted"));
+      });
+
+      return new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            streamController = controller;
+          },
+        }),
+        { status: 200 },
+      );
     }
 
     if (url.endsWith("/board/seek")) {
@@ -52,6 +70,7 @@ test("createRealtimeBoardSeek reports a canceled seek when waiting for a match t
         error.message === "No opponent joined before the seek wait timed out. The Lichess seek was canceled.",
     );
 
+    assert.equal(eventSignalAborted, true);
     assert.equal(seekSignalAborted, true);
   } finally {
     globalThis.fetch = originalFetch;
@@ -94,6 +113,39 @@ test("createRealtimeBoardSeek resolves the game created by the seek", async () =
       });
     }
 
+    if (url.endsWith("/stream/event")) {
+      const events = [
+        {
+          type: "gameStart",
+          game: { gameId: "existing", rated: true, secondsLeft: 600, source: "lobby", variant: { key: "standard" } },
+        },
+        {
+          type: "gameStart",
+          game: {
+            gameId: "unrelated",
+            color: "white",
+            rated: false,
+            secondsLeft: 600,
+            source: "friend",
+            variant: { key: "standard" },
+          },
+        },
+        {
+          type: "gameStart",
+          game: {
+            gameId: "matched",
+            color: "white",
+            rated: true,
+            secondsLeft: 600,
+            source: "lobby",
+            variant: { key: "standard" },
+          },
+        },
+      ];
+
+      return new Response(events.map((event) => JSON.stringify(event)).join("\n"), { status: 200 });
+    }
+
     if (url.endsWith("/board/seek")) {
       return new Response(
         new ReadableStream<Uint8Array>({
@@ -119,7 +171,7 @@ test("createRealtimeBoardSeek resolves the game created by the seek", async () =
     });
 
     assert.equal(gameId, "matched");
-    assert.equal(accountPlayingRequests, 2);
+    assert.equal(accountPlayingRequests, 1);
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -133,6 +185,10 @@ test("createRealtimeBoardSeek rejects when the seek closes without a matching ga
 
     if (url.includes("/account/playing")) {
       return Response.json({ nowPlaying: [] });
+    }
+
+    if (url.endsWith("/stream/event")) {
+      return new Response("", { status: 200 });
     }
 
     if (url.endsWith("/board/seek")) {
