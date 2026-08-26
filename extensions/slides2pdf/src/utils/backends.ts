@@ -1,7 +1,9 @@
 import { execFile, spawnSync } from "child_process";
+import crypto from "crypto";
 import fs from "fs";
 import os from "os";
 import path from "path";
+import { pipeline } from "stream/promises";
 import { promisify } from "util";
 import { renderTextFilePdf } from "./textpdf";
 
@@ -478,39 +480,51 @@ function moveFile(from: string, to: string): void {
   }
 }
 
-// Engines write to a per-process staging path that is moved into place only on success:
+// Engines write to a per-run staging path that is moved into place only on success:
 // outputPath is never partially written, never needs failure cleanup (a file someone else
 // creates there concurrently stays untouched), and a stale file can't pass the output check.
-// The staging name is fresh per run, so AppleScript's export-errors-on-existing-file rule
-// can't fire either.
+// The staging name is random per run, so AppleScript's export-errors-on-existing-file rule
+// can't fire and the path can't be precomputed by anything else writing to the folder.
 export async function convertFile(backend: Backend, src: string, outputPath: string): Promise<void> {
   if (fs.existsSync(outputPath)) throw new Error(`Output already exists: ${path.basename(outputPath)}`);
-  const staging = `${outputPath}.converting-${process.pid}.pdf`;
-  fs.rmSync(staging, { force: true });
+  const staging = `${outputPath}.converting-${crypto.randomBytes(6).toString("hex")}.pdf`;
   try {
     await runBackend(backend, src, staging);
     if (!fs.existsSync(staging)) throw new Error("Conversion produced no output file");
-    publishFile(staging, outputPath);
+    await publishFile(staging, outputPath);
   } finally {
     fs.rmSync(staging, { force: true });
   }
 }
 
-// Never replace a file that appeared at outputPath while the engine was running (rename would
-// silently clobber it): link() and an exclusive copy both fail with EEXIST instead. Staging lives
-// next to the output, so cross-device is impossible; the copy only covers filesystems without
-// hard links. convertFile removes the staging file either way.
-function publishFile(staging: string, outputPath: string): void {
+// Publish by copying from a verified handle: the staging entry is opened with O_NOFOLLOW,
+// checked to be a regular file, and the published bytes are read from that same open handle —
+// a symlink or replacement dropped at the staging path can't redirect what gets published.
+// Never replace a file that appeared at outputPath while the engine was running: the exclusive
+// "wx" create fails with EEXIST instead of clobbering it. convertFile removes the staging file
+// either way.
+async function publishFile(staging: string, outputPath: string): Promise<void> {
+  const fd = fs.openSync(staging, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
+  const source = fs.createReadStream("", { fd });
   try {
-    try {
-      fs.linkSync(staging, outputPath);
-    } catch (e) {
-      if ((e as NodeJS.ErrnoException).code === "EEXIST") throw e;
-      fs.copyFileSync(staging, outputPath, fs.constants.COPYFILE_EXCL);
-    }
+    if (!fs.fstatSync(fd).isFile()) throw new Error("Conversion output is not a regular file");
   } catch (e) {
-    if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e;
-    throw new Error(`Output already exists: ${path.basename(outputPath)}`);
+    source.destroy();
+    throw e;
+  }
+  try {
+    await pipeline(source, fs.createWriteStream(outputPath, { flags: "wx" }));
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "EEXIST") {
+      throw new Error(`Output already exists: ${path.basename(outputPath)}`);
+    }
+    // Any other failure comes after the exclusive create succeeded — remove the partial file.
+    try {
+      fs.rmSync(outputPath, { force: true });
+    } catch {
+      // The original error is the one worth reporting.
+    }
+    throw e;
   }
 }
 
