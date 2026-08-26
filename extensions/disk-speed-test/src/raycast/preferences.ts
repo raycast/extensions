@@ -6,17 +6,11 @@ import { ensureBenchmarkDirectory } from "../benchmark/destination";
 import { BenchmarkTarget, benchmarkRunConfiguration, parseBenchmarkTarget } from "../benchmark/targets";
 import { getRememberedDestinationRoot } from "./storage";
 
-interface ExtensionPreferences {
-  benchmarkDirectory?: string;
-  maxTestSizeMiB?: string;
-  targetDurationSeconds?: string;
-}
-
 export async function resolveDestinationRoot(override?: string): Promise<string> {
   if (override) return override;
   const remembered = await getRememberedDestinationRoot();
   if (remembered) return remembered;
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   return preferences.benchmarkDirectory || path.join(os.homedir(), "Library", "Caches");
 }
 
@@ -32,6 +26,6 @@ export async function resolveRunConfiguration(
 }
 
 export function resolveBenchmarkPreferenceSummary(): BenchmarkTarget {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   return parseBenchmarkTarget(preferences);
 }
