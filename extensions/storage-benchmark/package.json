@@ -1,0 +1,141 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "storage-benchmark",
+  "title": "Storage Benchmark",
+  "description": "Benchmark sequential read and write performance for local storage",
+  "icon": "icon.png",
+  "author": "ricoloic",
+  "license": "MIT",
+  "categories": [
+    "System"
+  ],
+  "keywords": [
+    "benchmark",
+    "disk",
+    "performance",
+    "speed",
+    "ssd",
+    "storage"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "run-storage-benchmark",
+      "title": "Run Storage Benchmark",
+      "description": "Benchmark sequential read and write storage performance",
+      "mode": "view"
+    },
+    {
+      "name": "view-storage-history",
+      "title": "View Storage History",
+      "description": "Review storage benchmark results and baselines",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "benchmarkDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Default Benchmark Folder",
+      "description": "Optional folder used for benchmark files; defaults to a private cache folder in your home directory"
+    },
+    {
+      "name": "maxTestSizeMiB",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Maximum Test Data",
+      "description": "Default temporary file limit; individual runs can override it",
+      "default": "256",
+      "data": [
+        {
+          "title": "256 MiB",
+          "value": "256"
+        },
+        {
+          "title": "512 MiB",
+          "value": "512"
+        },
+        {
+          "title": "1 GiB",
+          "value": "1024"
+        },
+        {
+          "title": "2 GiB",
+          "value": "2048"
+        },
+        {
+          "title": "5 GiB",
+          "value": "5120"
+        },
+        {
+          "title": "10 GiB",
+          "value": "10240"
+        },
+        {
+          "title": "25 GiB",
+          "value": "25600"
+        }
+      ]
+    },
+    {
+      "name": "targetDurationSeconds",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Time Target",
+      "description": "Default duration limit for each measured phase; individual runs can override it",
+      "default": "10",
+      "data": [
+        {
+          "title": "3 seconds",
+          "value": "3"
+        },
+        {
+          "title": "5 seconds",
+          "value": "5"
+        },
+        {
+          "title": "10 seconds",
+          "value": "10"
+        },
+        {
+          "title": "25 seconds",
+          "value": "25"
+        },
+        {
+          "title": "45 seconds",
+          "value": "45"
+        },
+        {
+          "title": "1 minute",
+          "value": "60"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "ray build -e dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:helper": "swift test --package-path native/DiskSpeedHelper",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
