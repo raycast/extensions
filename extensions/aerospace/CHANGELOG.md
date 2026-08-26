@@ -1,6 +1,6 @@
 # aerospace Changelog
 
-## [Focused Workspace First] - {PR_MERGE_DATE}
+## [Focused Workspace First] - 2026-08-26
 
 - Show the focused workspace first when switching apps across all workspaces
 
