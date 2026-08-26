@@ -56,11 +56,7 @@ export async function createRealtimeBoardSeek(
     startedGame = findStartedSeekGameFromEvents(eventResponse, options, initialGameIds);
     seekResponse = await createBoardSeek(options, seekController.signal);
     seekClosed = waitForResponseBodyToClose(seekResponse);
-    const seekResult = await withTimeout(
-      waitForStartedSeekGame(seekClosed, startedGame),
-      timeoutMs,
-      REALTIME_SEEK_TIMEOUT_RESULT,
-    );
+    const seekResult = await waitForStartedSeekGame(seekClosed, startedGame, timeoutMs);
 
     if (seekResult === REALTIME_SEEK_TIMEOUT_RESULT) {
       throw new LichessApiError(REALTIME_SEEK_TIMEOUT_MESSAGE);
@@ -142,14 +138,22 @@ async function fetchPlayingGameIds(token: string): Promise<Set<string>> {
 async function waitForStartedSeekGame(
   seekClosed: Promise<void>,
   startedGame: Promise<string | undefined>,
-): Promise<string | undefined> {
+  timeoutMs: number,
+): Promise<string | undefined | typeof REALTIME_SEEK_TIMEOUT_RESULT> {
   const firstResult = await Promise.race([
     startedGame.then((gameId) => ({ type: "game" as const, gameId })),
-    seekClosed.then(() => ({ type: "seekClosed" as const })),
+    withTimeout(seekClosed.then(() => ({ type: "seekClosed" as const })), timeoutMs, {
+      type: "timeout" as const,
+      result: REALTIME_SEEK_TIMEOUT_RESULT,
+    } as const),
   ]);
 
   if (firstResult.type === "game") {
     return firstResult.gameId;
+  }
+
+  if (firstResult.type === "timeout") {
+    return firstResult.result;
   }
 
   const gameId = await withTimeout(startedGame, REALTIME_SEEK_GAME_START_GRACE_MS, REALTIME_SEEK_TIMEOUT_RESULT);

@@ -29,6 +29,15 @@ const MATCHED_GAME = {
   variant: { key: "standard" },
 };
 
+const CREATE_SEEK_OPTIONS = {
+  token: "token",
+  time: 10,
+  increment: 0,
+  rated: true,
+  color: "white",
+  variant: "standard",
+} as const;
+
 test("createRealtimeBoardSeek reports a canceled seek when waiting for a match times out", async () => {
   const originalFetch = globalThis.fetch;
   let eventSignalAborted = false;
@@ -103,6 +112,34 @@ test("createRealtimeBoardSeek reports a canceled seek when waiting for a match t
   }
 });
 
+test("createRealtimeBoardSeek waits for game start after seek closes near timeout", async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+
+    if (url.includes("/account/playing")) {
+      return Response.json({ nowPlaying: [] });
+    }
+
+    if (url.endsWith("/stream/event")) {
+      return delayedResponse([{ delayMs: 15, text: `${JSON.stringify({ type: "gameStart", game: MATCHED_GAME })}\n` }]);
+    }
+
+    if (url.endsWith("/board/seek")) {
+      return delayedResponse([{ delayMs: 8, close: true }]);
+    }
+
+    throw new Error(`Unexpected fetch URL: ${url}`);
+  };
+
+  try {
+    assert.equal(await createRealtimeBoardSeek(CREATE_SEEK_OPTIONS, 10), "matched");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("createRealtimeBoardSeek resolves the game created by the seek", async () => {
   const originalFetch = globalThis.fetch;
   let accountPlayingRequests = 0;
@@ -146,14 +183,7 @@ test("createRealtimeBoardSeek resolves the game created by the seek", async () =
   };
 
   try {
-    const gameId = await createRealtimeBoardSeek({
-      token: "token",
-      time: 10,
-      increment: 0,
-      rated: true,
-      color: "white",
-      variant: "standard",
-    });
+    const gameId = await createRealtimeBoardSeek(CREATE_SEEK_OPTIONS);
 
     assert.equal(gameId, "matched");
     assert.equal(accountPlayingRequests, 1);
@@ -192,14 +222,7 @@ test("createRealtimeBoardSeek rejects when the seek closes without a matching ga
 
   try {
     await assert.rejects(
-      createRealtimeBoardSeek({
-        token: "token",
-        time: 10,
-        increment: 0,
-        rated: true,
-        color: "white",
-        variant: "standard",
-      }),
+      createRealtimeBoardSeek(CREATE_SEEK_OPTIONS),
       (error) =>
         error instanceof LichessApiError &&
         error.message === "The Lichess seek ended before a matching game could be found.",
@@ -208,3 +231,26 @@ test("createRealtimeBoardSeek rejects when the seek closes without a matching ga
     globalThis.fetch = originalFetch;
   }
 });
+
+function delayedResponse(events: { delayMs: number; text?: string; close?: boolean }[]): Response {
+  const encoder = new TextEncoder();
+
+  return new Response(
+    new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const event of events) {
+          setTimeout(() => {
+            if (event.text) {
+              controller.enqueue(encoder.encode(event.text));
+            }
+
+            if (event.close) {
+              controller.close();
+            }
+          }, event.delayMs);
+        }
+      },
+    }),
+    { status: 200 },
+  );
+}
