@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Expanded AI Tools] - {PR_MERGE_DATE}
+## [Expanded AI Tools] - 2026-08-26
 
 - Expand the Linear AI extension with native tools for issues, projects, initiatives, documents, comments, teams, users, cycles, labels, milestones, releases, status updates, attachments, agent skills, and documentation search.
 - Add cursor pagination to collection tools, full-text issue search, structured issue filtering, and issue deletion with confirmation.
