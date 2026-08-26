@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "smry",
-  "title": "smry",
+  "title": "Smry",
   "description": "Save browser tabs and links to your smry Inbox or Later list.",
   "icon": "icon.png",
   "author": "smry",
