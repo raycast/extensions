@@ -179,3 +179,16 @@ export function copySelectedColors(items: (HistoryItem | string)[], format: Copy
       return copyAsCSSVariables(items);
   }
 }
+
+export function parseColorList(colors: string): string[] {
+  const parsedColors = colors
+    .split(";")
+    .map((color) => color.trim())
+    .filter(Boolean);
+
+  if (parsedColors.length === 0) {
+    throw new Error("Provide at least one CSS color.");
+  }
+
+  return parsedColors;
+}

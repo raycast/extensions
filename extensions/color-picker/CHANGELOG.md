@@ -1,5 +1,10 @@
 # Color Picker Changelog
 
+## [AI Tools & macOS Color Preview] - {PR_MERGE_DATE}
+
+- Add AI tools to convert and name colors, analyze contrast, generate color scales, format palettes, and list or save colors and favorites
+- Show a live, centered color swatch and hex value while picking colors on macOS
+
 ## [Fix] - 2026-06-20
 
 - Fix the `Color Wheel` command showing an oversized, clipped wheel by replacing the preview asset and rendering it at a smaller height

@@ -12,6 +12,34 @@ A simple system-wide color picker. The color picker can be triggered with a stan
 - Pick a color with color wheel
 - Convert any color to a different format
 - Get the color name for a hex code
+- Use Raycast AI to convert, name, analyze, scale, format, inspect, and save colors
+
+## Raycast AI
+
+Mention `@color-picker` in Raycast AI to work with colors in natural language. The extension can convert and name CSS colors, check WCAG contrast, generate OKLCH scales, format palettes, list recent or favorite colors, and save colors to history or favorites after confirmation.
+
+### Analyze Contrast
+
+Compare opaque foreground and background colors to get the WCAG contrast ratio and AA/AAA results for normal text, large text, and non-text elements.
+
+### Generate Color Scales
+
+Turn an opaque base color into an 11-step scale from `50` through `950`. Colors are interpolated in OKLCH and the original base color is kept at `500`.
+
+### Format Palettes
+
+Format multiple colors as JSON, CSS variables, or CSS classes.
+
+For example:
+
+- `@color-picker Convert #FF6363 to OKLCH`
+- `@color-picker What is the closest name for #663399?`
+- `@color-picker Show my five most recent favorite colors`
+- `@color-picker Save #FF6363 and #66D3BB to my color history`
+- `@color-picker Add #E6E6E7 to my favorites`
+- `@color-picker Does #777 text on white pass WCAG AA contrast?`
+- `@color-picker Generate a 50-950 color scale from #FF6363`
+- `@color-picker Format #FF6363 and #66D3BB as CSS variables`
 
 ## API
 

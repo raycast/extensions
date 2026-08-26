@@ -152,6 +152,43 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "convert-color",
+      "title": "Convert Color",
+      "description": "Convert a color to HEX, RGB, HSL, HSV, OKLCH, LCH, or Display P3"
+    },
+    {
+      "name": "name-color",
+      "title": "Name Color",
+      "description": "Find the closest human-readable names for a color"
+    },
+    {
+      "name": "list-saved-colors",
+      "title": "List Saved Colors",
+      "description": "List colors from Color Picker history or favorites"
+    },
+    {
+      "name": "save-colors",
+      "title": "Save Colors",
+      "description": "Save one or more colors to Color Picker history or favorites"
+    },
+    {
+      "name": "analyze-contrast",
+      "title": "Analyze Contrast",
+      "description": "Calculate WCAG contrast and accessibility results for two colors"
+    },
+    {
+      "name": "generate-color-scale",
+      "title": "Generate Color Scale",
+      "description": "Generate an OKLCH color scale from 50 through 950"
+    },
+    {
+      "name": "format-palette",
+      "title": "Format Palette",
+      "description": "Format colors as JSON, CSS variables, or CSS classes"
+    }
+  ],
   "preferences": [
     {
       "data": [
@@ -236,6 +273,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node --experimental-strip-types --test test/color-tools.test.mjs",
     "pull": "ray pull-contributions",
     "publish": "ray publish"
   },

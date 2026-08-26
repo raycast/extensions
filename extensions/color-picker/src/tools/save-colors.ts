@@ -22,7 +22,7 @@ export default async function saveColors(input: Input) {
   const colors = normalizeColors(input.colors);
   const destination = input.favorite ? "favorites" : "history";
 
-  colors.forEach((color) => addToHistory(color, { isFavorite: input.favorite }));
+  colors.forEach((color) => addToHistory(color, input.favorite ? { isFavorite: true } : undefined));
 
   return {
     savedCount: colors.length,
