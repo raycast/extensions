@@ -22,6 +22,8 @@ export const awardMap: Record<string, string> = {
   YPOTS: "Young Player of the Season",
 };
 
+export const TOTAL_MATCHWEEKS = 38;
+
 export const livePeriods = ["FirstHalf", "SecondHalf", "HalfTime"];
 
 export const getFlagEmoji = (isoCode?: string) => {
