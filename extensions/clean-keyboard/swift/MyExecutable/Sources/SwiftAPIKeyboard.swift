@@ -91,7 +91,7 @@ func globalKeyEventHandler(
 
 @raycast func handler(duration: Int?) {
   let handler = EventHandler()
-  handler.scheduleTimer(duration: duration ?? 15)
+  handler.scheduleTimer(duration: duration)
   handler.run()
 }
 

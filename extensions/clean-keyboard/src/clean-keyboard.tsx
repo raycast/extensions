@@ -4,7 +4,7 @@ import { isMac, isTahoe, readFnState, setFnState } from "./lib/utils";
 
 interface Duration {
   display: string;
-  seconds: number;
+  seconds?: number;
   icon: string;
 }
 
@@ -46,7 +46,6 @@ const durations: Duration[] = [
   },
   {
     display: "Forever",
-    seconds: Infinity,
     icon: "🤯",
   },
 ];
@@ -86,7 +85,7 @@ export default function Command() {
   }, [isRunning]);
 
   const lockAction = async (duration: Duration) => {
-    let handler: (duration: number) => void;
+    let handler: (duration?: number) => void;
     if (isMac) {
       const { handler: handlerSwift } = await import("swift:../swift/MyExecutable");
       handler = handlerSwift;
@@ -105,7 +104,7 @@ export default function Command() {
       }
     }
 
-    setTimeLeft(duration.seconds);
+    setTimeLeft(duration.seconds ?? null);
     setIcon(duration.icon);
     setIsRunning(true);
     await showToast({ title: "Keyboard locked" });
