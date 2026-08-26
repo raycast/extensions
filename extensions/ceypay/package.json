@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ceypay",
+  "title": "CeyPay",
+  "description": "Search CeyPay documentation and API reference — accept crypto payments, settle in Sri Lankan Rupees.",
+  "icon": "icon.png",
+  "author": "kasuncfdo",
+  "categories": ["Documentation", "Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-docs",
+      "title": "Search Docs",
+      "subtitle": "CeyPay",
+      "description": "Search CeyPay guides, integrations, changelog, and reference pages",
+      "mode": "view"
+    },
+    {
+      "name": "search-api",
+      "title": "Search API Endpoints",
+      "subtitle": "CeyPay",
+      "description": "Browse the CeyPay REST API — endpoints, parameters, and examples",
+      "mode": "view"
+    },
+    {
+      "name": "search-blog",
+      "title": "Search Blog",
+      "subtitle": "CeyPay",
+      "description": "Read the latest CeyPay blog posts — product news, partnerships, and company updates",
+      "mode": "view"
+    },
+    {
+      "name": "changelog",
+      "title": "Changelog",
+      "subtitle": "CeyPay",
+      "description": "Browse CeyPay product and legal updates, newest first",
+      "mode": "view"
+    },
+    {
+      "name": "socials",
+      "title": "Follow CeyPay",
+      "subtitle": "CeyPay",
+      "description": "Open CeyPay on Telegram, X, LinkedIn, GitHub, Instagram, Facebook, or TikTok",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.7.5",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "npm run build:index && ray build -e dist",
+    "build:index": "node scripts/build-index.mjs",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

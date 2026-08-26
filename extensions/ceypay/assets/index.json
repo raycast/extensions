@@ -1,0 +1,3139 @@
+{
+  "generatedAt": "2026-08-26T13:34:59.062Z",
+  "baseUrl": "https://docs.ceypay.io",
+  "servers": [
+    {
+      "url": "https://api.ceypay.io",
+      "description": "Production"
+    },
+    {
+      "url": "https://sandbox-api.ceypay.io",
+      "description": "Sandbox — integration testing, no real funds move"
+    }
+  ],
+  "securityHeaders": [
+    {
+      "id": "apiKeyId",
+      "name": "x-api-key",
+      "description": "Your API key **ID only** — the part before the dot, e.g. `ak_live_abc123`. Never send the secret."
+    },
+    {
+      "id": "timestamp",
+      "name": "x-timestamp",
+      "description": "Current Unix timestamp in **milliseconds**. Requests older than 5 minutes are rejected."
+    },
+    {
+      "id": "signature",
+      "name": "x-signature",
+      "description": "`HMAC-SHA256(timestamp + method + path + body, SHA256(secret))` as lowercase hex. See [Authentication](/api/v1/authentication)."
+    }
+  ],
+  "tags": [
+    {
+      "name": "Payments",
+      "description": "Create and track one-off crypto payments. Every payment returns a QR code and a checkout link you can present to the customer."
+    },
+    {
+      "name": "Payment Links",
+      "description": "Shareable hosted checkout pages. Use them to collect payment over email, SMS, or social media without building a checkout flow."
+    },
+    {
+      "name": "Direct Debit",
+      "description": "Pre-authorisation contracts that let you charge a customer on demand after they sign once."
+    },
+    {
+      "name": "Subscriptions",
+      "description": "Recurring billing built on top of a signed Direct Debit contract. CeyPay charges the contract automatically on your billing cycle."
+    },
+    {
+      "name": "Branches",
+      "description": "Organise payments, links, and contracts across locations, teams, or — if you operate as an aggregator — across your own customers."
+    },
+    {
+      "name": "Withdrawals",
+      "description": "Request settlement of your unsettled payment balance to your registered bank account."
+    },
+    {
+      "name": "Offramp",
+      "description": "Convert USDT to LKR and settle directly to a Sri Lankan bank account. Available only to merchants with the `AGGREGATOR` role."
+    },
+    {
+      "name": "Banks",
+      "description": "Reference data for Sri Lankan banks and their CEFTS codes."
+    }
+  ],
+  "pages": [
+    {
+      "title": "API Authentication",
+      "description": "Learn how CeyPay's HMAC-SHA256 signature authentication secures API communication between your application and our servers.",
+      "slug": "api/v1/authentication",
+      "url": "https://docs.ceypay.io/api/v1/authentication",
+      "tab": "API Reference",
+      "group": "Getting Started"
+    },
+    {
+      "title": "Direct Debit Guide",
+      "description": "How Direct Debit contracts work: the signing flow, cross-currency charges, and slippage protection for LKR contracts.",
+      "slug": "api/v1/direct-debit",
+      "url": "https://docs.ceypay.io/api/v1/direct-debit",
+      "tab": "API Reference",
+      "group": "Guides"
+    },
+    {
+      "title": "Error Codes Reference",
+      "description": "Complete guide to all error responses you may encounter when using the CeyPay API, with troubleshooting steps for each.",
+      "slug": "api/v1/errors",
+      "url": "https://docs.ceypay.io/api/v1/errors",
+      "tab": "API Reference",
+      "group": "Reference"
+    },
+    {
+      "title": "Offramp Guide",
+      "description": "How to convert USDT to LKR and settle directly to a Sri Lankan bank account: the transfer flow, FX rate locks, idempotency, and webhooks.",
+      "slug": "api/v1/offramp",
+      "url": "https://docs.ceypay.io/api/v1/offramp",
+      "tab": "API Reference",
+      "group": "Guides"
+    },
+    {
+      "title": "Payment Aggregator Guide",
+      "description": "Use CeyPay as a payment aggregator. Create a branch for each of your customers and tie all transactions to that branch for clean per-customer reporting.",
+      "slug": "api/v1/payment-aggregator",
+      "url": "https://docs.ceypay.io/api/v1/payment-aggregator",
+      "tab": "API Reference",
+      "group": "Guides"
+    },
+    {
+      "title": "Quick Start Guide",
+      "description": "Get started with the CeyPay API in minutes. This guide walks you through creating your first payment.",
+      "slug": "api/v1/quickstart",
+      "url": "https://docs.ceypay.io/api/v1/quickstart",
+      "tab": "API Reference",
+      "group": "Getting Started"
+    },
+    {
+      "title": "Rate Limiting",
+      "description": "CeyPay's API implements rate limiting to ensure fair usage and system stability. Learn about rate limits, headers, and best practices.",
+      "slug": "api/v1/rate-limits",
+      "url": "https://docs.ceypay.io/api/v1/rate-limits",
+      "tab": "API Reference",
+      "group": "Reference"
+    },
+    {
+      "title": "Webhook Integration",
+      "description": "Receive real-time webhook notifications when payment events occur. Learn webhook setup, ED25519 signature verification, and best practices.",
+      "slug": "api/v1/webhooks",
+      "url": "https://docs.ceypay.io/api/v1/webhooks",
+      "tab": "API Reference",
+      "group": "Reference"
+    },
+    {
+      "title": "Legal Updates",
+      "description": "Transparency on CeyPay's operational scope, regulatory positioning, and compliance-related updates",
+      "slug": "changelog/legal-updates",
+      "url": "https://docs.ceypay.io/changelog/legal-updates",
+      "tab": "Changelog",
+      "group": ""
+    },
+    {
+      "title": "Product Updates",
+      "description": "Stay up to date with the latest changes and improvements to CeyPay.",
+      "slug": "changelog/product-updates",
+      "url": "https://docs.ceypay.io/changelog/product-updates",
+      "tab": "Changelog",
+      "group": ""
+    },
+    {
+      "title": "Frequently Asked Questions",
+      "description": "Get answers to common questions about CeyPay's crypto payment gateway.",
+      "slug": "guides/faq",
+      "url": "https://docs.ceypay.io/guides/faq",
+      "tab": "Docs",
+      "group": "Resources"
+    },
+    {
+      "title": "Configuration",
+      "description": "Complete reference for all CeyPay WordPress Plugin settings.",
+      "slug": "integrations/wordpress/configuration",
+      "url": "https://docs.ceypay.io/integrations/wordpress/configuration",
+      "tab": "Docs",
+      "group": "WordPress"
+    },
+    {
+      "title": "Introduction",
+      "description": "Accept crypto payments on your WooCommerce store with CeyPay WordPress Plugin.",
+      "slug": "integrations/wordpress/introduction",
+      "url": "https://docs.ceypay.io/integrations/wordpress/introduction",
+      "tab": "Docs",
+      "group": "WordPress"
+    },
+    {
+      "title": "Privacy & External Services",
+      "description": "External services used by the CeyPay WordPress plugin and how data is handled.",
+      "slug": "integrations/wordpress/privacy",
+      "url": "https://docs.ceypay.io/integrations/wordpress/privacy",
+      "tab": "Docs",
+      "group": "WordPress"
+    },
+    {
+      "title": "Quickstart",
+      "description": "Get CeyPay WordPress Plugin installed and accepting crypto payments in minutes.",
+      "slug": "integrations/wordpress/quickstart",
+      "url": "https://docs.ceypay.io/integrations/wordpress/quickstart",
+      "tab": "Docs",
+      "group": "WordPress"
+    },
+    {
+      "title": "Testing",
+      "description": "How to test your CeyPay WordPress Plugin integration before accepting real payments.",
+      "slug": "integrations/wordpress/testing",
+      "url": "https://docs.ceypay.io/integrations/wordpress/testing",
+      "tab": "Docs",
+      "group": "WordPress"
+    },
+    {
+      "title": "Troubleshooting",
+      "description": "Solutions for common issues with CeyPay WordPress Plugin.",
+      "slug": "integrations/wordpress/troubleshooting",
+      "url": "https://docs.ceypay.io/integrations/wordpress/troubleshooting",
+      "tab": "Docs",
+      "group": "WordPress"
+    },
+    {
+      "title": "Webhooks",
+      "description": "Technical reference for CeyPay WordPress Plugin webhook integration and signature verification.",
+      "slug": "integrations/wordpress/webhooks",
+      "url": "https://docs.ceypay.io/integrations/wordpress/webhooks",
+      "tab": "Docs",
+      "group": "WordPress"
+    },
+    {
+      "title": "Accept Crypto. Get Paid in Rupees.",
+      "description": "CeyPay makes accepting cryptocurrency simple. Customers pay in crypto, you receive LKR. No wallets, no crypto knowledge, no extra steps.",
+      "slug": "introduction",
+      "url": "https://docs.ceypay.io/introduction",
+      "tab": "Docs",
+      "group": "Getting Started"
+    },
+    {
+      "title": "Report Abuse",
+      "description": "Report fraudulent activity or abuse of the CeyPay payment system.",
+      "slug": "report-abuse",
+      "url": "https://docs.ceypay.io/report-abuse",
+      "tab": "Docs",
+      "group": "Resources"
+    },
+    {
+      "title": "Support",
+      "description": "Get help with CeyPay integration, troubleshooting, and technical support.",
+      "slug": "support",
+      "url": "https://docs.ceypay.io/support",
+      "tab": "Support",
+      "group": ""
+    }
+  ],
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/v1/bank/list",
+      "operationId": "listBanks",
+      "title": "List banks",
+      "summary": "List banks",
+      "description": "Returns all active Sri Lankan banks and their CEFTS codes. This is static reference data — cache it and reuse the result.\n\n**Rate limit:** 300 requests/minute.",
+      "tag": "Banks",
+      "group": "Offramp",
+      "url": "https://docs.ceypay.io/api/v1/reference/list-banks",
+      "hasCanonicalUrl": false,
+      "parameters": [],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Supported banks",
+          "example": [
+            {
+              "code": 7056,
+              "name": "Commercial Bank PLC"
+            },
+            {
+              "code": 7083,
+              "name": "Bank of Ceylon"
+            },
+            {
+              "code": 7010,
+              "name": "People's Bank"
+            }
+          ]
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/branch",
+      "operationId": "createBranch",
+      "title": "Create branch",
+      "summary": "Create branch",
+      "description": "Creates a branch under your merchant account. Branches created via the API always settle to the merchant's bank account.\n\n**Rate limit:** 60 requests/minute.",
+      "tag": "Branches",
+      "group": "Branches",
+      "url": "https://docs.ceypay.io/api/v1/reference/create-branch",
+      "hasCanonicalUrl": false,
+      "parameters": [],
+      "requestExample": {
+        "name": "Colombo Main Branch",
+        "code": "COL-MAIN",
+        "address": "123 Galle Road",
+        "city": "Colombo",
+        "postalCode": "00300",
+        "phone": "+94112345678",
+        "telegramGroupId": "-1001234567890"
+      },
+      "requestRequired": true,
+      "responses": [
+        {
+          "status": "201",
+          "description": "Branch created",
+          "example": {
+            "id": "550e8400-e29b-41d4-a716-446655440010",
+            "merchantId": "merchant_12345",
+            "name": "Colombo Main Branch",
+            "code": "COL-MAIN",
+            "address": "123 Galle Road",
+            "city": "Colombo",
+            "postalCode": "00300",
+            "phone": "+94112345678",
+            "telegramGroupId": "-1001234567890",
+            "isActive": true,
+            "usesMerchantBankAccount": true,
+            "createdAt": "2026-04-17T10:30:00.000Z",
+            "updatedAt": "2026-04-17T10:30:00.000Z"
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "409",
+          "description": "The resource conflicts with an existing one — for example a duplicate branch code.",
+          "example": {
+            "statusCode": 409,
+            "message": "Branch code already exists",
+            "error": "Conflict"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/branch/{id}",
+      "operationId": "deactivateBranch",
+      "title": "Deactivate branch",
+      "summary": "Deactivate branch",
+      "description": "Deactivates a branch. This is a soft delete — the branch and its payment history are preserved and remain reportable by `branchId`.\n\n**Rate limit:** 30 requests/minute.",
+      "tag": "Branches",
+      "group": "Branches",
+      "url": "https://docs.ceypay.io/api/v1/reference/deactivate-branch",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Branch ID."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "204",
+          "description": "Branch deactivated. No response body."
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/branch/{id}",
+      "operationId": "getBranch",
+      "title": "Get branch",
+      "summary": "Get branch",
+      "description": "Retrieves a single branch.\n\n**Rate limit:** 300 requests/minute.",
+      "tag": "Branches",
+      "group": "Branches",
+      "url": "https://docs.ceypay.io/api/v1/reference/get-branch",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Branch ID."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Branch"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant account.",
+          "example": {
+            "statusCode": 403,
+            "message": "Forbidden resource",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/branch/{id}",
+      "operationId": "updateBranch",
+      "title": "Update branch",
+      "summary": "Update branch",
+      "description": "Updates a branch. Send only the fields you want to change.\n\n**Rate limit:** 60 requests/minute.",
+      "tag": "Branches",
+      "group": "Branches",
+      "url": "https://docs.ceypay.io/api/v1/reference/update-branch",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Branch ID."
+        }
+      ],
+      "requestExample": {
+        "phone": "+94117654321",
+        "telegramGroupId": "-1009876543210"
+      },
+      "requestRequired": true,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Branch updated"
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "409",
+          "description": "The resource conflicts with an existing one — for example a duplicate branch code.",
+          "example": {
+            "statusCode": 409,
+            "message": "Branch code already exists",
+            "error": "Conflict"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/branch/list",
+      "operationId": "listBranches",
+      "title": "List branches",
+      "summary": "List branches",
+      "description": "Returns a paginated list of branches for your merchant account.\n\n**Rate limit:** 200 requests/minute.",
+      "tag": "Branches",
+      "group": "Branches",
+      "url": "https://docs.ceypay.io/api/v1/reference/list-branches",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Page number, 1-indexed."
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Items per page."
+        },
+        {
+          "name": "search",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Search by branch name or code."
+        },
+        {
+          "name": "isActive",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter by active status."
+        },
+        {
+          "name": "sortBy",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Field to sort by."
+        },
+        {
+          "name": "sortOrder",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Sort direction."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Paginated branches"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/direct-debit",
+      "operationId": "createDirectDebitContract",
+      "title": "Create direct debit",
+      "summary": "Create contract",
+      "description": "Creates a pre-authorisation contract for the customer to sign. Returns a QR code and deep link for approval.\n\nFor `LKR` contracts, set `slippageBps` to absorb exchange-rate movement between signing and charging. Slippage is rejected on `USDT` contracts.\n\n**Rate limit:** 100 requests/minute.",
+      "tag": "Direct Debit",
+      "group": "Direct Debit",
+      "url": "https://docs.ceypay.io/api/v1/reference/create-direct-debit-contract",
+      "hasCanonicalUrl": false,
+      "parameters": [],
+      "requestExample": {
+        "provider": "BINANCE_PAY",
+        "currency": "USDT",
+        "serviceName": "Monthly Subscription",
+        "scenarioId": "550e8400-e29b-41d4-a716-446655440003",
+        "singleUpperLimit": 100,
+        "returnUrl": "https://your-app.com/contract/success",
+        "cancelUrl": "https://your-app.com/contract/cancelled",
+        "webhookUrl": "https://your-app.com/api/contract-webhook"
+      },
+      "requestRequired": true,
+      "responses": [
+        {
+          "status": "201",
+          "description": "Contract created",
+          "example": {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "merchantId": "merchant_12345",
+            "merchantContractCode": "DD20260309120530A3F4",
+            "serviceName": "Monthly Subscription",
+            "status": "INITIATED",
+            "currency": "USDT",
+            "singleUpperLimit": 100,
+            "paymentProvider": "BINANCE_PAY",
+            "qrContent": "binance://contract?code=...",
+            "deepLink": "https://app.binance.com/contract/sign?code=...",
+            "createdAt": "2026-03-25T10:30:00.000Z"
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant account.",
+          "example": {
+            "statusCode": 403,
+            "message": "Forbidden resource",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/direct-debit/{id}",
+      "operationId": "getDirectDebitContract",
+      "title": "Get contract",
+      "summary": "Get contract",
+      "description": "Retrieves a single Direct Debit contract.\n\n**Rate limit:** 100 requests/minute.",
+      "tag": "Direct Debit",
+      "group": "Direct Debit",
+      "url": "https://docs.ceypay.io/api/v1/reference/get-direct-debit-contract",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Direct Debit contract ID."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Contract",
+          "example": {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "merchantId": "merchant_12345",
+            "branchId": "550e8400-e29b-41d4-a716-446655440002",
+            "paymentProvider": "BINANCE_PAY",
+            "merchantContractCode": "DD20260309120530A3F4",
+            "preContractId": "29383937493038367292",
+            "contractId": 123456789,
+            "bizId": "420471959722147840",
+            "serviceName": "Monthly Subscription",
+            "scenarioId": "550e8400-e29b-41d4-a716-446655440003",
+            "currency": "USDT",
+            "singleUpperLimit": 100,
+            "periodic": false,
+            "contractEndTime": "2027-03-25T00:00:00.000Z",
+            "requestExpireTime": "2026-03-26T00:00:00.000Z",
+            "openUserId": "eb6b287a44dd73dd81645a3cbcfee162",
+            "merchantAccountNo": "user@example.com",
+            "status": "SIGNED",
+            "paymentCount": 3,
+            "totalAmountCharged": 150,
+            "lastPaymentAt": "2026-03-24T10:30:00.000Z",
+            "webhookUrl": "https://your-app.com/api/contract-webhook",
+            "createdAt": "2026-03-25T10:30:00.000Z",
+            "updatedAt": "2026-03-25T11:00:00.000Z"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant account.",
+          "example": {
+            "statusCode": 403,
+            "message": "Forbidden resource",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/direct-debit/{id}/payment",
+      "operationId": "chargeDirectDebitContract",
+      "title": "Charge contract",
+      "summary": "Charge contract",
+      "description": "Charges a signed contract on demand. No customer interaction is required, so the response contains no QR code or checkout link.\n\nThe amount is converted to USDT and must not exceed the contract's `singleUpperLimit` after conversion. You may charge in a different currency than the contract's.\n\n**Rate limit:** 100 requests/minute.",
+      "tag": "Direct Debit",
+      "group": "Direct Debit",
+      "url": "https://docs.ceypay.io/api/v1/reference/charge-direct-debit-contract",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Direct Debit contract ID."
+        }
+      ],
+      "requestExample": {
+        "currency": "USDT",
+        "amount": 50,
+        "productName": "Monthly Subscription",
+        "productDetail": "Premium membership for March 2026",
+        "customerBilling": {
+          "firstName": "John",
+          "lastName": "Doe",
+          "email": "john@example.com",
+          "phone": "+94771234567"
+        },
+        "webhookUrl": "https://your-app.com/api/payment-webhook"
+      },
+      "requestRequired": true,
+      "responses": [
+        {
+          "status": "201",
+          "description": "Payment created",
+          "example": {
+            "id": "550e8400-e29b-41d4-a716-446655440001",
+            "merchantId": "merchant_12345",
+            "payId": "binance_pay_xyz789",
+            "paymentNo": "320045925617",
+            "amount": 50,
+            "currency": "USDT",
+            "status": "INITIATED",
+            "paymentProvider": "BINANCE_PAY",
+            "directDebitContractId": "550e8400-e29b-41d4-a716-446655440000",
+            "createdAt": "2026-03-25T10:30:00.000Z",
+            "feeBreakdown": {
+              "grossAmountUSDT": 50,
+              "exchangeFeePercentage": 1,
+              "exchangeFeeAmountUSDT": 0.5,
+              "ceypayFeePercentage": 0.5,
+              "ceypayFeeAmountUSDT": 0.25,
+              "totalFeesUSDT": 0.75,
+              "netAmountUSDT": 49.25
+            }
+          }
+        },
+        {
+          "status": "400",
+          "description": "Contract not signed or expired, amount exceeds the contract limit after conversion, or no exchange rate available.",
+          "example": {
+            "statusCode": 400,
+            "message": "Payment 5000 LKR converts to 15.15 USDT, exceeding contract limit 6.06 USDT.",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/direct-debit/{id}/sync",
+      "operationId": "syncDirectDebitContract",
+      "title": "Sync contract status",
+      "summary": "Sync contract status",
+      "description": "Queries the payment provider for the contract's latest status and persists it. Use this to check whether the customer has signed.\n\n**Rate limit:** 50 requests/minute.",
+      "tag": "Direct Debit",
+      "group": "Direct Debit",
+      "url": "https://docs.ceypay.io/api/v1/reference/sync-direct-debit-contract",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Direct Debit contract ID."
+        }
+      ],
+      "requestExample": {},
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Contract with refreshed status"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/direct-debit/{id}/terminate",
+      "operationId": "terminateDirectDebitContract",
+      "title": "Terminate contract",
+      "summary": "Terminate contract",
+      "description": "Terminates a signed contract. Only contracts in `SIGNED` status can be terminated.\n\n**Rate limit:** 50 requests/minute.",
+      "tag": "Direct Debit",
+      "group": "Direct Debit",
+      "url": "https://docs.ceypay.io/api/v1/reference/terminate-direct-debit-contract",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Direct Debit contract ID."
+        }
+      ],
+      "requestExample": {
+        "terminationNotes": "User requested cancellation"
+      },
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Contract terminated"
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/direct-debit/list",
+      "operationId": "listDirectDebitContracts",
+      "title": "List contracts",
+      "summary": "List contracts",
+      "description": "Returns a paginated list of Direct Debit contracts for your merchant account.\n\n**Rate limit:** 100 requests/minute.",
+      "tag": "Direct Debit",
+      "group": "Direct Debit",
+      "url": "https://docs.ceypay.io/api/v1/reference/list-direct-debit-contracts",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Page number, 1-indexed."
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Items per page."
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter by contract status."
+        },
+        {
+          "name": "branchId",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter to a single branch."
+        },
+        {
+          "name": "currency",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter by contract currency."
+        },
+        {
+          "name": "paymentProvider",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter by payment provider."
+        },
+        {
+          "name": "search",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Search by merchant contract code or service name."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Paginated contracts"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/direct-debit/scenario-code/list",
+      "operationId": "listScenarioCodes",
+      "title": "List scenario codes",
+      "summary": "List scenario codes",
+      "description": "Returns the scenario codes supported for Direct Debit contracts. A scenario defines the type of service and its transaction limits — pass the returned `id` as `scenarioId` when creating a contract.\n\n**Rate limit:** 200 requests/minute.",
+      "tag": "Direct Debit",
+      "group": "Direct Debit",
+      "url": "https://docs.ceypay.io/api/v1/reference/list-scenario-codes",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "provider",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter by payment provider."
+        },
+        {
+          "name": "active",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter by active status."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Scenario codes",
+          "example": {
+            "data": [
+              {
+                "id": "550e8400-e29b-41d4-a716-446655440003",
+                "scenarioId": "12345",
+                "scenarioName": "Subscription Service",
+                "paymentProvider": "BINANCE_PAY",
+                "maxLimit": 1000,
+                "isActive": true
+              }
+            ]
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/aggregator/offramp",
+      "operationId": "createOfframp",
+      "title": "Create offramp",
+      "summary": "Create offramp",
+      "description": "Initiates a USDT → LKR bank transfer against a locked FX rate.\n\nThis endpoint is idempotent on `externalRef`. Resubmitting the same key — after a network timeout, for example — returns the original offramp unchanged rather than creating a duplicate transfer.\n\n**Rate limit:** 60 requests/minute.",
+      "tag": "Offramp",
+      "group": "Offramp",
+      "url": "https://docs.ceypay.io/api/v1/reference/create-offramp",
+      "hasCanonicalUrl": false,
+      "parameters": [],
+      "requestExample": {
+        "fxLockId": "a3b4c5d6-e7f8-4a9b-b0c1-d2e3f4a5b6c7",
+        "userId": "550e8400-e29b-41d4-a716-446655440000",
+        "userBankId": "7f4e2100-a1b2-4c3d-8e9f-556677889900",
+        "externalRef": "withdrawal-9876543",
+        "webhookUrl": "https://api.yourplatform.com/ceypay/webhook"
+      },
+      "requestRequired": true,
+      "responses": [
+        {
+          "status": "201",
+          "description": "Offramp created",
+          "example": {
+            "paymentId": "c1d2e3f4-a5b6-4c7d-8e9f-001122334455",
+            "status": "PENDING",
+            "amountUsdt": 1000,
+            "amountLkr": 295500,
+            "rateUsdtLkr": 295.5,
+            "externalRef": "withdrawal-9876543",
+            "bankRef": null,
+            "completedAt": null,
+            "failedAt": null,
+            "createdAt": "2026-05-28T10:00:45.000Z"
+          }
+        },
+        {
+          "status": "400",
+          "description": "Validation error, expired FX quote, or already-used `fxLockId`."
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant, or your account lacks the `AGGREGATOR` role.",
+          "example": {
+            "statusCode": 403,
+            "message": "Aggregator access is not enabled for this account",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/aggregator/offramp/{id}",
+      "operationId": "getOfframp",
+      "title": "Get offramp",
+      "summary": "Get offramp",
+      "description": "Retrieves the current status of an offramp. Poll this, or supply a `webhookUrl` when creating the offramp to be notified instead.\n\n**Rate limit:** 300 requests/minute.",
+      "tag": "Offramp",
+      "group": "Offramp",
+      "url": "https://docs.ceypay.io/api/v1/reference/get-offramp",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Offramp `paymentId`."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Offramp",
+          "example": {
+            "paymentId": "c1d2e3f4-a5b6-4c7d-8e9f-001122334455",
+            "status": "COMPLETED",
+            "amountUsdt": 1000,
+            "amountLkr": 295500,
+            "rateUsdtLkr": 295.5,
+            "externalRef": "withdrawal-9876543",
+            "bankRef": "BOC-TX-123456",
+            "completedAt": "2026-05-28T10:05:00.000Z",
+            "failedAt": null,
+            "createdAt": "2026-05-28T10:00:45.000Z"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant, or your account lacks the `AGGREGATOR` role.",
+          "example": {
+            "statusCode": 403,
+            "message": "Aggregator access is not enabled for this account",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/aggregator/quote",
+      "operationId": "getOfframpQuote",
+      "title": "Get FX quote",
+      "summary": "Get FX quote",
+      "description": "Fetches the current USDT/LKR rate and locks it for 60 seconds. Pass the returned `fxLockId` to `POST /v1/aggregator/offramp` before `expiresAt` — expired and already-used locks are rejected.\n\n**Rate limit:** 120 requests/minute.",
+      "tag": "Offramp",
+      "group": "Offramp",
+      "url": "https://docs.ceypay.io/api/v1/reference/get-offramp-quote",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "amount_usdt",
+          "in": "query",
+          "required": true,
+          "type": "number",
+          "description": "USDT amount to convert."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Locked quote",
+          "example": {
+            "fxLockId": "a3b4c5d6-e7f8-4a9b-b0c1-d2e3f4a5b6c7",
+            "rateUsdtLkr": 295.5,
+            "amountUsdt": 1000,
+            "amountLkr": 295500,
+            "expiresAt": "2026-05-28T10:01:00.000Z"
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant, or your account lacks the `AGGREGATOR` role.",
+          "example": {
+            "statusCode": 403,
+            "message": "Aggregator access is not enabled for this account",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/aggregator/report/ledger",
+      "operationId": "getLedgerReport",
+      "title": "Float balance ledger report",
+      "summary": "Float balance ledger report",
+      "description": "Returns every LKR movement on your float — top-ups, offramp debits, and refunds — with period summary statistics for reconciliation.\n\n**Rate limit:** 60 requests/minute.",
+      "tag": "Offramp",
+      "group": "Offramp",
+      "url": "https://docs.ceypay.io/api/v1/reference/get-ledger-report",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Page number, 1-indexed."
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Items per page."
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter by ledger entry type."
+        },
+        {
+          "name": "startDate",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Inclusive start date (ISO 8601), e.g. `2026-05-01`."
+        },
+        {
+          "name": "endDate",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Inclusive end date (ISO 8601), e.g. `2026-05-31`."
+        },
+        {
+          "name": "sortOrder",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Sort direction."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Ledger report",
+          "example": {
+            "pagination": {
+              "currentPage": 1,
+              "totalPages": 1,
+              "totalCount": 13,
+              "limit": 50,
+              "hasNext": false,
+              "hasPrev": false
+            },
+            "summary": {
+              "currentBalanceLkr": 500000,
+              "totalCreditsLkr": 750000,
+              "totalDebitsLkr": 295500,
+              "totalRefundsLkr": 0,
+              "netMovementLkr": 454500,
+              "creditCount": 3,
+              "debitCount": 10,
+              "refundCount": 0,
+              "openingBalanceLkr": 45500,
+              "closingBalanceLkr": 500000
+            },
+            "ledger": [
+              {
+                "id": "d4e5f6a7-b8c9-4d0e-1f2a-334455667788",
+                "type": "DEBIT",
+                "amountLkr": 295500,
+                "balanceAfter": 500000,
+                "aggregatorOfframpId": "c1d2e3f4-a5b6-4c7d-8e9f-001122334455",
+                "bankRef": null,
+                "notes": null,
+                "createdAt": "2026-05-28T10:00:45.000Z"
+              }
+            ]
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant, or your account lacks the `AGGREGATOR` role.",
+          "example": {
+            "statusCode": 403,
+            "message": "Aggregator access is not enabled for this account",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/aggregator/report/offramp",
+      "operationId": "getOfframpReport",
+      "title": "Offramp transaction report",
+      "summary": "Offramp transaction report",
+      "description": "Returns a paginated list of offramps with per-status totals and a weighted average FX rate. Each row carries the end-user ID and destination bank details so the export is self-contained.\n\nThe `summary` block always covers the full date window regardless of the `status` filter, so per-status breakdowns stay visible even when the item list is filtered.\n\n**Rate limit:** 60 requests/minute.",
+      "tag": "Offramp",
+      "group": "Offramp",
+      "url": "https://docs.ceypay.io/api/v1/reference/get-offramp-report",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Page number, 1-indexed."
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Items per page."
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter items by offramp status."
+        },
+        {
+          "name": "startDate",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Inclusive start date (ISO 8601), e.g. `2026-05-01`."
+        },
+        {
+          "name": "endDate",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Inclusive end date (ISO 8601), e.g. `2026-05-31`."
+        },
+        {
+          "name": "sortBy",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Field to sort by."
+        },
+        {
+          "name": "sortOrder",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Sort direction."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Offramp report"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant, or your account lacks the `AGGREGATOR` role.",
+          "example": {
+            "statusCode": 403,
+            "message": "Aggregator access is not enabled for this account",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/aggregator/user",
+      "operationId": "createAggregatorUser",
+      "title": "Create or retrieve end-user",
+      "summary": "Create or retrieve end-user",
+      "description": "Upserts an end-user keyed by your own user ID. Safe to call before every offramp — if the user already exists the existing record is returned.\n\nCeyPay stores only the `externalUserId` you provide. No personal or identifying information about your end-users is collected.\n\n**Rate limit:** 120 requests/minute.",
+      "tag": "Offramp",
+      "group": "Offramp",
+      "url": "https://docs.ceypay.io/api/v1/reference/create-aggregator-user",
+      "hasCanonicalUrl": false,
+      "parameters": [],
+      "requestExample": {
+        "externalUserId": "usr_1234567890"
+      },
+      "requestRequired": true,
+      "responses": [
+        {
+          "status": "200",
+          "description": "End-user created or retrieved",
+          "example": {
+            "userId": "550e8400-e29b-41d4-a716-446655440000",
+            "externalUserId": "usr_1234567890",
+            "createdAt": "2026-05-28T10:00:00.000Z"
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant, or your account lacks the `AGGREGATOR` role.",
+          "example": {
+            "statusCode": 403,
+            "message": "Aggregator access is not enabled for this account",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/aggregator/user/{id}/bank-account",
+      "operationId": "addAggregatorUserBankAccount",
+      "title": "Add bank account",
+      "summary": "Add bank account",
+      "description": "Registers a Sri Lankan bank account for an end-user and returns a reusable `userBankId`. An end-user may have several bank accounts, each with its own ID.\n\n**Rate limit:** 60 requests/minute.",
+      "tag": "Offramp",
+      "group": "Offramp",
+      "url": "https://docs.ceypay.io/api/v1/reference/add-aggregator-user-bank-account",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Aggregator end-user ID returned by `POST /v1/aggregator/user`."
+        }
+      ],
+      "requestExample": {
+        "bankCode": 7056,
+        "accountNumber": "1234567890",
+        "accountName": "John Doe",
+        "beneficiaryMobile": "+94771234567",
+        "beneficiaryEmail": "john.doe@example.com"
+      },
+      "requestRequired": true,
+      "responses": [
+        {
+          "status": "201",
+          "description": "Bank account registered",
+          "example": {
+            "userBankId": "7f4e2100-a1b2-4c3d-8e9f-556677889900",
+            "bankCode": 7056,
+            "bankName": "Commercial Bank PLC",
+            "accountNumber": "1234567890",
+            "accountName": "John Doe",
+            "beneficiaryMobile": "+94771234567",
+            "beneficiaryEmail": "john.doe@example.com",
+            "createdAt": "2026-05-28T10:01:00.000Z"
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant, or your account lacks the `AGGREGATOR` role.",
+          "example": {
+            "statusCode": 403,
+            "message": "Aggregator access is not enabled for this account",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/aggregator/user/{id}/bank-account/list",
+      "operationId": "listAggregatorUserBankAccounts",
+      "title": "List bank accounts",
+      "summary": "List bank accounts",
+      "description": "Returns every bank account registered for an end-user.\n\n**Rate limit:** 200 requests/minute.",
+      "tag": "Offramp",
+      "group": "Offramp",
+      "url": "https://docs.ceypay.io/api/v1/reference/list-aggregator-user-bank-accounts",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Aggregator end-user ID returned by `POST /v1/aggregator/user`."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Registered bank accounts"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant, or your account lacks the `AGGREGATOR` role.",
+          "example": {
+            "statusCode": 403,
+            "message": "Aggregator access is not enabled for this account",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/payment-link",
+      "operationId": "createPaymentLink",
+      "title": "Create payment link",
+      "summary": "Create payment link",
+      "description": "Creates a hosted checkout link you can share with customers.\n\n**Rate limit:** 50 requests/minute.",
+      "tag": "Payment Links",
+      "group": "Payment Links",
+      "url": "https://docs.ceypay.io/api/v1/reference/create-payment-link",
+      "hasCanonicalUrl": false,
+      "parameters": [],
+      "requestExample": {
+        "merchantTradeNo": "ORDER-2026-001",
+        "name": "Premium Subscription",
+        "description": "Monthly premium plan subscription",
+        "amount": 49.99,
+        "currency": "USDT",
+        "reusable": false,
+        "allowCustomAmount": false,
+        "allowQuantityBuy": true,
+        "maxQuantity": 10,
+        "successUrl": "https://yourstore.com/payment/success",
+        "cancelUrl": "https://yourstore.com/payment/cancelled",
+        "webhookUrl": "https://yourstore.com/webhooks/ceypay"
+      },
+      "requestRequired": true,
+      "responses": [
+        {
+          "status": "201",
+          "description": "Payment link created",
+          "example": {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "merchant_id": "merchant_12345",
+            "slug": "link_abc123xyz",
+            "merchantTradeNo": "ORDER-2026-001",
+            "name": "Premium Subscription",
+            "description": "Monthly premium plan subscription",
+            "amount": 49.99,
+            "currency": "USDT",
+            "allowCustomAmount": false,
+            "allowQuantityBuy": true,
+            "maxQuantity": 10,
+            "reusable": false,
+            "successUrl": "https://yourstore.com/payment/success",
+            "cancelUrl": "https://yourstore.com/payment/cancelled",
+            "webhookUrl": "https://yourstore.com/webhooks/ceypay",
+            "used_count": 0,
+            "status": "ACTIVE",
+            "creator_type": "API_KEY",
+            "creator_id": "ak_live_abc123",
+            "created_at": "2026-01-15T10:30:00Z",
+            "updated_at": "2026-01-15T10:30:00Z"
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/payment-link/{id}",
+      "operationId": "deactivatePaymentLink",
+      "title": "Deactivate payment link",
+      "summary": "Deactivate payment link",
+      "description": "Deactivates a payment link. This is a soft delete — the link stops accepting new payments but its history is preserved.\n\n**Rate limit:** 50 requests/minute.",
+      "tag": "Payment Links",
+      "group": "Payment Links",
+      "url": "https://docs.ceypay.io/api/v1/reference/deactivate-payment-link",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Payment link ID."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Payment link deactivated",
+          "example": {
+            "message": "Payment link deactivated successfully"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant account.",
+          "example": {
+            "statusCode": 403,
+            "message": "Forbidden resource",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/payment-link/{id}",
+      "operationId": "getPaymentLink",
+      "title": "Get payment link",
+      "summary": "Get payment link",
+      "description": "Retrieves a single payment link.\n\n**Rate limit:** 100 requests/minute.",
+      "tag": "Payment Links",
+      "group": "Payment Links",
+      "url": "https://docs.ceypay.io/api/v1/reference/get-payment-link",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Payment link ID."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Payment link"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant account.",
+          "example": {
+            "statusCode": 403,
+            "message": "Forbidden resource",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/payment-link/list",
+      "operationId": "listPaymentLinks",
+      "title": "List payment links",
+      "summary": "List payment links",
+      "description": "Returns a paginated list of your payment links.\n\n**Rate limit:** 100 requests/minute.",
+      "tag": "Payment Links",
+      "group": "Payment Links",
+      "url": "https://docs.ceypay.io/api/v1/reference/list-payment-links",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Page number, 1-indexed."
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Items per page."
+        },
+        {
+          "name": "branchId",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter to a single branch."
+        },
+        {
+          "name": "search",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Search by name or description."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Paginated payment links",
+          "example": {
+            "data": [
+              {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "name": "Premium Subscription",
+                "amount": 49.99,
+                "currency": "USDT",
+                "status": "ACTIVE"
+              }
+            ],
+            "page": 1,
+            "limit": 20,
+            "total": 45,
+            "totalPages": 3,
+            "hasNext": true,
+            "hasPrev": false
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/payment",
+      "operationId": "createPayment",
+      "title": "Create payment",
+      "summary": "Create payment",
+      "description": "Creates a payment order and returns a QR code and checkout link for the customer to pay.\n\nWhen `currency` is `LKR`, the amount is converted to USDT at the current exchange rate and the response includes the LKR breakdown.\n\n**Rate limit:** 100 requests/minute.",
+      "tag": "Payments",
+      "group": "Payments",
+      "url": "https://docs.ceypay.io/api/v1/reference/create-payment",
+      "hasCanonicalUrl": false,
+      "parameters": [],
+      "requestExample": {
+        "amount": 149.99,
+        "currency": "USDT",
+        "provider": "BYBIT",
+        "goods": [
+          {
+            "name": "Wireless Headphones",
+            "description": "Noise-cancelling Bluetooth headphones",
+            "mccCode": "5732"
+          }
+        ],
+        "merchantTradeNo": "ORDER-2026-001",
+        "webhookUrl": "https://mystore.com/api/payment-webhook",
+        "customerBilling": {
+          "email": "customer@example.com",
+          "firstName": "John",
+          "lastName": "Doe",
+          "phone": "+94771234567",
+          "address": "123 Main Street"
+        }
+      },
+      "requestRequired": true,
+      "responses": [
+        {
+          "status": "201",
+          "description": "Payment created",
+          "example": {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "merchantId": "merchant_12345",
+            "payId": "bybit_pay_abc123",
+            "paymentNo": "320045925616",
+            "amount": 149.99,
+            "currency": "USDT",
+            "status": "INITIATED",
+            "qrContent": "bybit://pay?id=abc123...",
+            "checkoutLink": "https://checkout.bybit.com/pay/abc123",
+            "goods": [
+              {
+                "name": "Wireless Headphones",
+                "description": "Noise-cancelling Bluetooth headphones",
+                "mccCode": "5732"
+              }
+            ],
+            "customerBilling": {
+              "email": "customer@example.com",
+              "firstName": "John",
+              "lastName": "Doe"
+            },
+            "paymentProvider": "BYBIT",
+            "expireTime": "2026-01-15T11:30:00.000Z",
+            "createdAt": "2026-01-15T10:30:00.000Z",
+            "feeBreakdown": {
+              "grossAmountUSDT": 149.99,
+              "exchangeFeePercentage": 1,
+              "exchangeFeeAmountUSDT": 1.5,
+              "ceypayFeePercentage": 0.5,
+              "ceypayFeeAmountUSDT": 0.75,
+              "totalFeesUSDT": 2.25,
+              "netAmountUSDT": 147.74
+            }
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/payment/{id}",
+      "operationId": "getPayment",
+      "title": "Get payment",
+      "summary": "Get payment",
+      "description": "Retrieves a single payment. Only returns payments belonging to your merchant account.\n\n**Rate limit:** 300 requests/minute.",
+      "tag": "Payments",
+      "group": "Payments",
+      "url": "https://docs.ceypay.io/api/v1/reference/get-payment",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Payment ID."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Payment"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant account.",
+          "example": {
+            "statusCode": 403,
+            "message": "Forbidden resource",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/payment/list",
+      "operationId": "listPayments",
+      "title": "List payments",
+      "summary": "List payments",
+      "description": "Returns a paginated list of your payments, newest first.\n\n**Rate limit:** 200 requests/minute.",
+      "tag": "Payments",
+      "group": "Payments",
+      "url": "https://docs.ceypay.io/api/v1/reference/list-payments",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Page number, 1-indexed."
+        },
+        {
+          "name": "pageSize",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Items per page."
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter by payment status."
+        },
+        {
+          "name": "dateRange",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Date range preset."
+        },
+        {
+          "name": "branchId",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter to a single branch."
+        },
+        {
+          "name": "search",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Search by payment ID or customer details."
+        },
+        {
+          "name": "ids",
+          "in": "query",
+          "required": false,
+          "type": "array",
+          "description": "Fetch specific payments by ID. Accepts comma-separated values (`ids=id1,id2`) or repeated params (`ids[]=id1&ids[]=id2`). Maximum 50 IDs."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Paginated payments",
+          "example": {
+            "data": [
+              {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "amount": 149.99,
+                "currency": "USDT",
+                "status": "PAID",
+                "createdAt": "2026-01-15T10:30:00.000Z",
+                "paidAt": "2026-01-15T10:35:00.000Z"
+              }
+            ],
+            "meta": {
+              "page": 1,
+              "pageSize": 20,
+              "totalItems": 150,
+              "totalPages": 8
+            }
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscription",
+      "operationId": "createSubscription",
+      "title": "Create subscription",
+      "summary": "Create subscription",
+      "description": "Creates a recurring billing schedule against a signed Direct Debit contract. CeyPay charges the contract automatically each cycle and retries failed charges according to your retry settings.",
+      "tag": "Subscriptions",
+      "group": "Subscriptions",
+      "url": "https://docs.ceypay.io/api/v1/reference/create-subscription",
+      "hasCanonicalUrl": false,
+      "parameters": [],
+      "requestExample": {
+        "contractId": "efb69c23-12b0-4983-8fa5-44645a2965fb",
+        "name": "Pro Plan",
+        "description": "Monthly Pro tier",
+        "billingCycle": "MONTHLY",
+        "billingCycleInterval": 1,
+        "amount": 49.99,
+        "currency": "USDT",
+        "productName": "Pro Plan Subscription",
+        "productDetail": "Includes premium features",
+        "startDate": "2026-03-01T00:00:00Z",
+        "endDate": "2027-06-01T00:00:00Z",
+        "timezone": "Asia/Colombo",
+        "maxCycles": 12,
+        "spendingCap": 500,
+        "maxRetryAttempts": 3,
+        "retryIntervalHours": 24,
+        "gracePeriodDays": 3,
+        "webhookUrl": "https://merchant.example.com/webhooks/subscription",
+        "metadata": {
+          "planTier": "pro"
+        }
+      },
+      "requestRequired": true,
+      "responses": [
+        {
+          "status": "201",
+          "description": "Subscription created"
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscription/{id}",
+      "operationId": "getSubscription",
+      "title": "Get subscription",
+      "summary": "Get subscription",
+      "description": "Retrieves a single subscription.",
+      "tag": "Subscriptions",
+      "group": "Subscriptions",
+      "url": "https://docs.ceypay.io/api/v1/reference/get-subscription",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Subscription ID."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Subscription"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant account.",
+          "example": {
+            "statusCode": 403,
+            "message": "Forbidden resource",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscription/{id}/cancel",
+      "operationId": "cancelSubscription",
+      "title": "Cancel subscription",
+      "summary": "Cancel subscription",
+      "description": "Cancels a subscription permanently. Cancelled subscriptions cannot be resumed — create a new subscription instead.",
+      "tag": "Subscriptions",
+      "group": "Subscriptions",
+      "url": "https://docs.ceypay.io/api/v1/reference/cancel-subscription",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Subscription ID."
+        }
+      ],
+      "requestExample": {
+        "reason": "Customer churn"
+      },
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Subscription cancelled"
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscription/{id}/pause",
+      "operationId": "pauseSubscription",
+      "title": "Pause subscription",
+      "summary": "Pause subscription",
+      "description": "Pauses billing. No charges are attempted while a subscription is paused; the schedule resumes from the next cycle after you call resume.",
+      "tag": "Subscriptions",
+      "group": "Subscriptions",
+      "url": "https://docs.ceypay.io/api/v1/reference/pause-subscription",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Subscription ID."
+        }
+      ],
+      "requestExample": {
+        "reason": "Customer requested temporary hold"
+      },
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Subscription paused"
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscription/{id}/payments",
+      "operationId": "listSubscriptionPayments",
+      "title": "List subscription payments",
+      "summary": "List subscription payments",
+      "description": "Returns the billing history for a subscription — one entry per charge attempt, including retries.",
+      "tag": "Subscriptions",
+      "group": "Subscriptions",
+      "url": "https://docs.ceypay.io/api/v1/reference/list-subscription-payments",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Subscription ID."
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Page number, 1-indexed."
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Items per page."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Paginated payment history"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/subscription/{id}/resume",
+      "operationId": "resumeSubscription",
+      "title": "Resume subscription",
+      "summary": "Resume subscription",
+      "description": "Resumes a paused subscription. Billing continues from the next scheduled cycle.",
+      "tag": "Subscriptions",
+      "group": "Subscriptions",
+      "url": "https://docs.ceypay.io/api/v1/reference/resume-subscription",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Subscription ID."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Subscription resumed"
+        },
+        {
+          "status": "400",
+          "description": "Invalid request body or validation error.",
+          "example": {
+            "statusCode": 400,
+            "message": "amount must be a positive number",
+            "error": "Bad Request"
+          }
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/subscription/list",
+      "operationId": "listSubscriptions",
+      "title": "List subscriptions",
+      "summary": "List subscriptions",
+      "description": "Returns a paginated list of subscriptions for your merchant account.",
+      "tag": "Subscriptions",
+      "group": "Subscriptions",
+      "url": "https://docs.ceypay.io/api/v1/reference/list-subscriptions",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Page number, 1-indexed."
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Items per page."
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter by subscription status."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Paginated subscriptions"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/withdrawal",
+      "operationId": "createWithdrawal",
+      "title": "Create withdrawal",
+      "summary": "Create withdrawal request",
+      "description": "Bundles all currently unsettled `PAID` payments into a settlement request and submits it for payout.\n\nOnly one active (`PENDING` or `APPROVED`) request is allowed per merchant per day. If the net amount is below the platform's auto-approval threshold the request is approved immediately and the transfer starts; otherwise it stays `PENDING` until a CeyPay admin reviews it.\n\nRequests created via the API record the `apiKeyId` that made them — `requestedBy` will be `null` and `requesterName` will be `\"API\"`.\n\n**Rate limit:** 10 requests/minute.",
+      "tag": "Withdrawals",
+      "group": "Withdrawals",
+      "url": "https://docs.ceypay.io/api/v1/reference/create-withdrawal",
+      "hasCanonicalUrl": false,
+      "parameters": [],
+      "requestExample": {
+        "branchId": "550e8400-e29b-41d4-a716-446655440000"
+      },
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "201",
+          "description": "Withdrawal request created",
+          "example": {
+            "id": "770e8400-e29b-41d4-a716-446655440000",
+            "bankRefId": "CPAY0042260615",
+            "merchantId": "550e8400-e29b-41d4-a716-446655440001",
+            "merchantName": "Acme Corp",
+            "branchId": "550e8400-e29b-41d4-a716-446655440000",
+            "settlementDate": "2026-06-15",
+            "requestedBy": null,
+            "requesterName": "API",
+            "apiKeyId": "990e8400-e29b-41d4-a716-446655440099",
+            "requestedAt": "2026-06-15T10:00:00.000Z",
+            "status": "PENDING",
+            "totalPaymentsCount": 12,
+            "totalNetAmountLkr": 450000.5,
+            "totalNetAmountUsdt": 1500,
+            "totalGrossAmountLkr": 465000,
+            "totalGrossAmountUsdt": 1550,
+            "totalFeesLkr": 15000,
+            "totalFeesUsdt": 50,
+            "createdAt": "2026-06-15T10:00:00.000Z",
+            "updatedAt": "2026-06-15T10:00:00.000Z"
+          }
+        },
+        {
+          "status": "400",
+          "description": "No unsettled payments, amount below the minimum withdrawal threshold, or a request already exists for today."
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "Merchant account is inactive or not approved."
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/withdrawal/{id}",
+      "operationId": "getWithdrawal",
+      "title": "Get withdrawal request",
+      "summary": "Get withdrawal request",
+      "description": "Retrieves a withdrawal request including the individual payments it settles.\n\n**Rate limit:** 100 requests/minute.",
+      "tag": "Withdrawals",
+      "group": "Withdrawals",
+      "url": "https://docs.ceypay.io/api/v1/reference/get-withdrawal",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "description": "Withdrawal request ID."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Withdrawal request"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "403",
+          "description": "The resource belongs to another merchant account.",
+          "example": {
+            "statusCode": 403,
+            "message": "Forbidden resource",
+            "error": "Forbidden"
+          }
+        },
+        {
+          "status": "404",
+          "description": "Resource not found.",
+          "example": {
+            "statusCode": 404,
+            "message": "Not found",
+            "error": "Not Found"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/withdrawal/list",
+      "operationId": "listWithdrawals",
+      "title": "List withdrawal requests",
+      "summary": "List withdrawal requests",
+      "description": "Returns a paginated list of withdrawal requests together with summary totals for the filtered set.\n\n**Rate limit:** 100 requests/minute.",
+      "tag": "Withdrawals",
+      "group": "Withdrawals",
+      "url": "https://docs.ceypay.io/api/v1/reference/list-withdrawals",
+      "hasCanonicalUrl": false,
+      "parameters": [
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Page number, 1-indexed."
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "description": "Items per page."
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Filter by status."
+        },
+        {
+          "name": "startDate",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Inclusive settlement-date lower bound (ISO 8601)."
+        },
+        {
+          "name": "endDate",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Inclusive settlement-date upper bound (ISO 8601)."
+        },
+        {
+          "name": "sortBy",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Field to sort by."
+        },
+        {
+          "name": "sortOrder",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Sort direction."
+        }
+      ],
+      "requestRequired": false,
+      "responses": [
+        {
+          "status": "200",
+          "description": "Paginated withdrawal requests"
+        },
+        {
+          "status": "401",
+          "description": "Invalid API key, signature, or timestamp outside the valid window.",
+          "example": {
+            "statusCode": 401,
+            "message": "Invalid signature",
+            "error": "Unauthorized"
+          }
+        },
+        {
+          "status": "429",
+          "description": "Rate limit exceeded. Check the `X-RateLimit-Reset` header for when the window resets.",
+          "example": {
+            "statusCode": 429,
+            "message": "Too many requests",
+            "error": "Too Many Requests"
+          }
+        }
+      ],
+      "docsLive": false
+    }
+  ]
+}
