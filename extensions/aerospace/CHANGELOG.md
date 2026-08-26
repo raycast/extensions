@@ -1,5 +1,9 @@
 # aerospace Changelog
 
+## [Focused Workspace First] - 2026-08-26
+
+- Show the focused workspace first when switching apps across all workspaces
+
 ## [Maintenance] - 2026-07-28
 
 - Eliminate 1-2s startup delay by removing `shell-env` (no longer spawns a login shell)
