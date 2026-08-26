@@ -1,6 +1,6 @@
 # Pi Cast Changelog
 
-## [Initial Version] - 2026-08-25
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Start new Pi sessions in Terminal.
 - Continue the latest Pi session for a project.
