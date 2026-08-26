@@ -1,6 +1,6 @@
 # Premier League Changelog
 
-## [Matchweek Navigation] - {PR_MERGE_DATE}
+## [Matchweek Navigation] - 2026-08-26
 
 - Fix Matches loading fixtures from the earliest seasons on record while the current season was still resolving.
 - Land on the upcoming matchweek instead of the one the gameweek config reports, and list the previous matchweek above it until the upcoming one kicks off.
