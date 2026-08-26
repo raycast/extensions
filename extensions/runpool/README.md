@@ -12,7 +12,11 @@ The extension tells you how to install it if it is missing, so there is no harm 
 
 ## Commands
 
-**Show Runner Pools** lists every pool against its owner's GitHub avatar, with how many of its runner slots are busy. Start and stop a pool, change its runner count, disable local CI, and open the log. Press return to see which repositories a pool serves.
+**Show Runner Pools** lists every pool against its owner's GitHub avatar, with how many of its runner slots are busy. Start and stop a pool, change its runner count, and open the log. Press return to see which repositories a pool serves.
+
+**Show Recent Workflow Runs** lists recent GitHub Actions workflow runs across the repositories your pools serve. It shows the pull request or branch, result, elapsed time and the runners that handled the workflow, including RunPool hosts, Blacksmith and GitHub. Press return to see the workflow's individual jobs, then open a job or the whole workflow on GitHub. Scroll to load older runs.
+
+**Manage Runner Pools** pauses or resumes automatic RunPool runners. Pausing stands its runners down and prevents them waking for queued work; it does not affect Blacksmith or GitHub workflows.
 
 **Runner Status** keeps a live summary in its own subtitle in Raycast's root search, refreshed every minute.
 
@@ -33,7 +37,7 @@ The state tags use GitHub's own words, as shown on its runners settings page.
 
 ## AI
 
-Ask Raycast AI things like "what are my runner pools doing", "stop the marfa pool", or "disable local CI". Anything that changes capacity asks first.
+Ask Raycast AI things like "what are my runner pools doing", "stop the marfa pool", or "pause runner pools". Anything that changes capacity asks first.
 
 ## Preferences
 

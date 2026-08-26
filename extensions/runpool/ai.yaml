@@ -4,6 +4,13 @@ instructions: |
   A pool is a set of runners bound to one GitHub scope. Pools are on-demand:
   they wake within about a minute of a job queueing and stand down when idle.
 
+  "Local CI" means these RunPool runner pools. Pausing them does not affect
+  Blacksmith or GitHub workflows.
+
+  Treat requests to pause, resume, disable or enable "local CI" as requests
+  to pause or resume RunPool runner pools. Use toggle-pause for those requests,
+  even when all pools are resting.
+
   Read the state before changing it. get-status is cheap and tells you the pool
   names, which the other tools need.
 

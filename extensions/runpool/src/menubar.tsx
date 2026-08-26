@@ -58,9 +58,9 @@ export default function Command() {
     <MenuBarExtra
       icon={icon}
       isLoading={isLoading}
-      tooltip={status?.paused ? "RunPool: local CI disabled" : `RunPool: ${busy} of ${slots} runners busy`}
+      tooltip={status?.paused ? "RunPool: runner pools paused" : `RunPool: ${busy} of ${slots} runners busy`}
     >
-      <MenuBarExtra.Section title={status?.paused ? "Local CI disabled" : undefined}>
+      <MenuBarExtra.Section title={status?.paused ? "Runner pools paused" : undefined}>
         {status?.pools.map((pool) => (
           <MenuBarExtra.Item
             key={pool.name}

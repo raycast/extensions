@@ -5,6 +5,10 @@ import { homedir } from "os";
 import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
+const COMMAND_ENV = {
+  ...process.env,
+  PATH: `/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${process.env.PATH ?? ""}`,
+};
 
 /** One pool, exactly as `runpool status --json` reports it. */
 export interface Pool {
@@ -93,13 +97,38 @@ export async function runpool(args: string[], signal?: AbortSignal): Promise<str
   const bin = requireRunpool();
   const { stdout } = await execFileAsync(bin, args, {
     signal,
-    env: {
-      ...process.env,
-      PATH: `/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${process.env.PATH ?? ""}`,
-    },
+    env: COMMAND_ENV,
     maxBuffer: 4 * 1024 * 1024,
   });
   return stdout;
+}
+
+/**
+ * Run GitHub CLI with the same PATH as runpool.
+ *
+ * The history view owns GitHub's workflow data, rather than extending runpool
+ * beyond runner capacity. Keeping the process setup here means both commands
+ * work from Raycast's deliberately minimal environment.
+ */
+export async function github(args: string[], signal?: AbortSignal): Promise<string> {
+  try {
+    const { stdout } = await execFileAsync("gh", args, {
+      signal,
+      env: COMMAND_ENV,
+      maxBuffer: 4 * 1024 * 1024,
+    });
+    return stdout;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new Error("GitHub CLI (gh) is required. Install it, then run: gh auth login");
+    }
+
+    const stderr = (error as { stderr?: string } | null)?.stderr ?? "";
+    if (/auth login|not logged|authentication/i.test(stderr)) {
+      throw new Error("GitHub CLI is not authenticated. Run: gh auth login");
+    }
+    throw error;
+  }
 }
 
 /**

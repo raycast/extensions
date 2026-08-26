@@ -70,31 +70,6 @@ export default function Command() {
     }
   }
 
-  /**
-   * The global switch, behind a confirmation.
-   *
-   * Deliberately not on return and not a command of its own. Pausing stops
-   * every pool waking, so anything pushed afterwards queues silently with no
-   * signal beyond the jobs sitting there. That is too consequential to reach
-   * by pressing return on the wrong row.
-   */
-  async function togglePause(paused: boolean) {
-    if (!paused) {
-      const confirmed = await confirmAlert({
-        title: "Disable local CI?",
-        message:
-          "Every runner stands down and pools stop waking on queued jobs, so anything you push will queue until you enable it again.",
-        primaryAction: { title: "Disable", style: Alert.ActionStyle.Destructive },
-      });
-      if (!confirmed) return;
-    }
-    await act(
-      () => runpool([paused ? "resume" : "pause"]),
-      paused ? "Enabling…" : "Disabling…",
-      paused ? "Local CI enabled, pools wake on demand" : "Local CI disabled, all runners down",
-    );
-  }
-
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter pools">
       {status?.pools.map((pool) => (
@@ -162,20 +137,6 @@ export default function Command() {
                     }
                   />
                 )}
-              </ActionPanel.Section>
-
-              {/* The global switch sits with the pool's own start and stop,
-                  because it is the same decision at a wider scope. Capacity
-                  follows: it is changed rarely, and putting it above the
-                  switch buried the thing people actually come here for. */}
-              <ActionPanel.Section title="Local CI">
-                <Action
-                  title={status.paused ? "Enable Local CI" : "Disable Local CI"}
-                  icon={status.paused ? Icon.Play : Icon.Pause}
-                  style={status.paused ? Action.Style.Regular : Action.Style.Destructive}
-                  onAction={() => togglePause(status.paused)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                />
               </ActionPanel.Section>
 
               <ActionPanel.Section title="Capacity">

@@ -21,6 +21,20 @@
       "mode": "view"
     },
     {
+      "name": "recent-runs",
+      "title": "Show Recent Workflow Runs",
+      "subtitle": "RunPool",
+      "description": "See recent GitHub Actions workflow runs for repositories served by your runner pools",
+      "mode": "view"
+    },
+    {
+      "name": "manage-runner-pools",
+      "title": "Manage Runner Pools",
+      "subtitle": "RunPool",
+      "description": "Pause or resume automatic runner pools without affecting other CI providers",
+      "mode": "view"
+    },
+    {
       "name": "status",
       "title": "Runner Status",
       "subtitle": "RunPool",
@@ -90,8 +104,8 @@
     },
     {
       "name": "toggle-pause",
-      "title": "Pause or Resume Local CI",
-      "description": "Pause stands every pool down and stops them waking. Resume returns to on-demand"
+      "title": "Pause or Resume Runner Pools",
+      "description": "Pause stands every RunPool runner down and stops pools waking. Resume returns them to on-demand"
     }
   ],
   "dependencies": {

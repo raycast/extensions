@@ -5,7 +5,8 @@
 - List every runner pool against its owner's GitHub avatar, showing jobs running out of total runner slots
 - Start and stop pools, and change how many runners each has
 - Drill into a pool to see the repositories it serves, and open them on GitHub
-- Disable and enable local CI, behind a confirmation
+- Browse recent workflow runs, then drill into their individual jobs, with each duration and runner location
+- Pause and resume runner pools, behind a confirmation
 - A live summary in the root search subtitle, refreshed in the background
 - An optional menu bar item, off by default, whose icon fills with the work in flight
 - An optional machine load readout, off by default
