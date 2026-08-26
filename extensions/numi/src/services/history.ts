@@ -32,6 +32,14 @@ export interface HistoryWriter {
  * the same array and the first entry would come back. Updaters here read the
  * running value instead, and each one is advanced before its write is awaited
  * so the next queued update already sees it.
+ *
+ * Assumes a single writer. `useLocalStorage` reads the key once and never
+ * subscribes to it, so a second concurrent writer would go unnoticed by this
+ * one. That holds today because the view command is the only thing that
+ * touches HISTORY_STORAGE_KEY - the AI tool only runs queries. Anything new
+ * that needs to write history must go through this writer rather than calling
+ * LocalStorage directly, and cross-process coordination would need storage
+ * primitives LocalStorage does not offer.
  */
 export function createHistoryWriter(): HistoryWriter {
   let current: HistoryEntry[] = [];
