@@ -116,11 +116,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.0.6"
+    "@raycast/api": "^2.0.6",
+    "proper-lockfile": "^4.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.19.17",
+    "@types/proper-lockfile": "^4.1.4",
     "@types/react": "19.0.10",
     "eslint": "^10.8.0",
     "prettier": "^3.9.6",

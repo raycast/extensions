@@ -3,6 +3,7 @@ import { BenchmarkHistory, BenchmarkRunInput, HistoryKeyValueStore, compatibilit
 
 class MemoryStore implements HistoryKeyValueStore {
   private readonly values = new Map<string, string>();
+  private exclusiveTail = Promise.resolve();
 
   async get(key: string): Promise<string | undefined> {
     return this.values.get(key);
@@ -11,9 +12,72 @@ class MemoryStore implements HistoryKeyValueStore {
   async set(key: string, value: string): Promise<void> {
     this.values.set(key, value);
   }
+
+  async runExclusive<T>(operation: () => Promise<T>): Promise<T> {
+    const previous = this.exclusiveTail;
+    let release!: () => void;
+    this.exclusiveTail = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    await previous;
+    try {
+      return await operation();
+    } finally {
+      release();
+    }
+  }
+}
+
+class ConcurrentReadStore extends MemoryStore {
+  private readonly initialReadGate: Promise<void>;
+  private releaseInitialReads!: () => void;
+  private initialReads = 0;
+  private hasRunExclusiveOperation = false;
+
+  constructor() {
+    super();
+    this.initialReadGate = new Promise((resolve) => {
+      this.releaseInitialReads = resolve;
+    });
+  }
+
+  override async get(key: string): Promise<string | undefined> {
+    if (!this.hasRunExclusiveOperation && this.initialReads < 2) {
+      this.initialReads += 1;
+      if (this.initialReads === 2) this.releaseInitialReads();
+      await this.initialReadGate;
+    }
+    return super.get(key);
+  }
+
+  override async runExclusive<T>(operation: () => Promise<T>): Promise<T> {
+    return super.runExclusive(async () => {
+      this.hasRunExclusiveOperation = true;
+      return operation();
+    });
+  }
 }
 
 describe("BenchmarkHistory", () => {
+  it("preserves concurrent writes from independent command instances", async () => {
+    const store = new ConcurrentReadStore();
+    const firstCommand = new BenchmarkHistory(store);
+    const secondCommand = new BenchmarkHistory(store);
+
+    await Promise.all([
+      firstCommand.recordSuccess(
+        runInput({ id: "run-1", read: 1_000, write: 900, completedAt: "2026-08-25T12:00:00.000Z" }),
+      ),
+      secondCommand.recordSuccess(
+        runInput({ id: "run-2", read: 970, write: 880, completedAt: "2026-08-25T12:05:00.000Z" }),
+      ),
+    ]);
+
+    const runIds = (await firstCommand.snapshot()).volumes["volume-1"].successfulRuns.map((run) => run.id);
+    expect(new Set(runIds)).toEqual(new Set(["run-1", "run-2"]));
+  });
+
   it("confirms the first baseline after a close compatible result", async () => {
     const history = new BenchmarkHistory(new MemoryStore());
     const first = runInput({ id: "run-1", read: 1_000, write: 900, completedAt: "2026-08-25T12:00:00.000Z" });
