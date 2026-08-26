@@ -195,8 +195,9 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   const bundleId = getZedBundleId(getPreferenceValues<Preferences>().build as ZedBuild);
 
   // When the entry is already open, raise its window instead of invoking the
-  // CLI, which opens a duplicate window on recent Zed versions.
-  const focusIfOpen = async () => entry.isOpen && (await focusZedWindow(entry.title, bundleId));
+  // CLI, which opens a duplicate window on recent Zed versions. macOS only:
+  // focusing goes through System Events (cliPath is also null off macOS).
+  const focusIfOpen = async () => isMac && entry.isOpen && (await focusZedWindow(entry.title, bundleId));
 
   const actionTitle = entry.isOpen ? "Focus Window" : "Open in Zed";
 
