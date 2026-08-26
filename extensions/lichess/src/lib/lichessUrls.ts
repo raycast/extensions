@@ -15,11 +15,21 @@ export function analysisUrlForFen(fen: string): string {
 }
 
 export function analysisUrlForChessInput(input: ChessInput): string {
-  if (input.type === "fen" || input.hasSetupFen) {
+  if (input.type === "fen") {
     return analysisUrlForFen(input.fen);
   }
 
+  if (input.hasSetupFen) {
+    return analysisUrlForPgn(input.pgn, input.ply);
+  }
+
   return analysisUrlForPgnMoves(input.moveText, input.ply);
+}
+
+export function analysisUrlForPgn(pgn: string, ply?: number): string {
+  const hash = ply && ply > 0 ? `#${ply}` : "";
+
+  return `${LICHESS_BASE_URL}/analysis/pgn/${encodeURIComponent(pgn.trim())}${hash}`;
 }
 
 export function analysisUrlForPgnMoves(moveText: string, ply?: number): string {

@@ -6,6 +6,7 @@ import { toRecentGameViewModel } from "../src/lib/formatGame";
 import {
   analysisUrlForChessInput,
   analysisUrlForFen,
+  analysisUrlForPgn,
   analysisUrlForPgnMoves,
   createGameUrl,
   gameUrl,
@@ -71,13 +72,19 @@ describe("lichess URLs", () => {
     assert.equal(analysisUrlForPgnMoves("e4 e5 Nf3+ Nc6#", 4), "https://lichess.org/analysis/pgn/e4_e5_Nf3_Nc6#4");
   });
 
-  test("uses the final FEN URL for PGNs with setup positions", () => {
+  test("builds analysis URLs for full PGNs", () => {
+    assert.equal(analysisUrlForPgn(SHORT_PGN, 4), "https://lichess.org/analysis/pgn/1.%20e4%20e5%202.%20Nf3%20Nc6#4");
+  });
+
+  test("preserves move history for PGNs with setup positions", () => {
     const parsed = parseChessInput(SETUP_PGN);
 
     assert.ok(parsed);
-    assert.equal(
+    assert.equal(parsed.type, "pgn");
+    assert.equal(analysisUrlForChessInput(parsed), analysisUrlForPgn(parsed.pgn, parsed.ply));
+    assert.match(
       analysisUrlForChessInput(parsed),
-      "https://lichess.org/analysis/standard/rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R_b_KQkq_-_1_2",
+      /^https:\/\/lichess\.org\/analysis\/pgn\/%5BEvent%20%22%3F%22%5D.*%5BSetUp%20%221%22%5D.*%5BFEN%20%22rnbqkbnr%2Fpppppppp.*1\.%20\.{3}%20e5%202\.%20Nf3%20\*#2$/s,
     );
   });
 });
