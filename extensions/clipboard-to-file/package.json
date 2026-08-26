@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clipboard-to-file",
+  "title": "Clipboard to File",
+  "description": "Write the current clipboard contents to a labeled file in a configurable folder",
+  "icon": "icon.png",
+  "author": "michihuber",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "destinationPath",
+      "type": "directory",
+      "required": true,
+      "title": "Destination Folder",
+      "description": "Folder where clipboard files are saved",
+      "default": "/Users/Shared"
+    }
+  ],
+  "commands": [
+    {
+      "name": "write-clipboard",
+      "title": "Write Clipboard to File",
+      "description": "Write the current clipboard contents to <destination folder>/<label>",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "label",
+          "placeholder": "Filename or label",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.25"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "9.39.2",
+    "prettier": "3.9.0",
+    "typescript": "5.9.3"
+  }
+}
