@@ -25,4 +25,3 @@
 - Quick toggle command for switching states
 - Session history and statistics calculation
 - Configurable preferences for notifications and goals
-
