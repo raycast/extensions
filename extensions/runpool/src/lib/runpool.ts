@@ -263,7 +263,11 @@ export function errorMessage(error: unknown): string {
  * and it makes the org-versus-personal distinction visible without a word of
  * explanation.
  */
+export function githubAvatar(owner: string): string {
+  return `https://github.com/${owner}.png?size=128`;
+}
+
 export function ownerAvatar(pool: Pool): string {
   const owner = pool.scope === "org" ? pool.target : pool.target.split("/")[0];
-  return `https://github.com/${owner}.png?size=128`;
+  return githubAvatar(owner);
 }

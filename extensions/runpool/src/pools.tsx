@@ -20,6 +20,7 @@ import { useStatus } from "./hooks/useStatus";
 import {
   errorMessage,
   fraction,
+  getStatus,
   isUnreachable,
   ownerAvatar,
   Pool,
@@ -67,6 +68,34 @@ export default function Command() {
     } catch (error) {
       toast.hide();
       await showFailureToast(error, { title: `${pending.replace(/…$/, "")} failed` });
+    }
+  }
+
+  async function setPoolCount(pool: Pool, count: number) {
+    try {
+      // Capacity can be changed outside this view. Refresh before deciding
+      // whether this selection deregisters runners, rather than trusting the
+      // count captured when the list row rendered.
+      const current = (await getStatus({ local: true })).pools.find((candidate) => candidate.name === pool.name);
+      if (!current) throw new Error(`Pool "${pool.name}" no longer exists.`);
+
+      if (count < current.count) {
+        const confirmed = await confirmAlert({
+          title: `Reduce ${pool.name} to ${count} runners?`,
+          message:
+            "The surplus runners are deregistered from GitHub, not just stopped. Growing the pool again registers new ones.",
+          primaryAction: { title: "Reduce", style: Alert.ActionStyle.Destructive },
+        });
+        if (!confirmed) return;
+      }
+
+      await act(
+        () => runpool(["set-count", pool.name, String(count)]),
+        `Resizing to ${count}…`,
+        `${pool.name} now has ${count} runners`,
+      );
+    } catch (error) {
+      await showFailureToast(error, { title: "Could Not Read Current Pool Capacity" });
     }
   }
 
@@ -152,26 +181,7 @@ export default function Command() {
                       title={`Set to ${n} Runners`}
                       icon={Icon.Gauge}
                       style={n < pool.count ? Action.Style.Destructive : Action.Style.Regular}
-                      onAction={async () => {
-                        // Shrinking deregisters the surplus runners from
-                        // GitHub rather than merely stopping them, which is
-                        // why the AI tool for this same operation asks first.
-                        // Growing only ever adds, so it needs no ceremony.
-                        if (n < pool.count) {
-                          const confirmed = await confirmAlert({
-                            title: `Reduce ${pool.name} to ${n} runners?`,
-                            message:
-                              "The surplus runners are deregistered from GitHub, not just stopped. Growing the pool again registers new ones.",
-                            primaryAction: { title: "Reduce", style: Alert.ActionStyle.Destructive },
-                          });
-                          if (!confirmed) return;
-                        }
-                        act(
-                          () => runpool(["set-count", pool.name, String(n)]),
-                          `Resizing to ${n}…`,
-                          `${pool.name} now has ${n} runners`,
-                        );
-                      }}
+                      onAction={() => setPoolCount(pool, n)}
                     />
                   ))}
               </ActionPanel.Section>

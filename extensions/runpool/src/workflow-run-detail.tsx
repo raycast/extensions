@@ -37,15 +37,15 @@ export function WorkflowRunDetail({ run, pools }: { run: WorkflowRun; pools: Poo
     >
       {jobs.map((job) => {
         const duration = jobDuration(job);
-        const location = jobLocation(job, pools) ?? "Runner not assigned";
+        const location = jobLocation(job, pools) ?? (job.status === "queued" ? "Runner not assigned" : undefined);
         return (
           <List.Item
             key={job.id}
             icon={Icon.Hammer}
             title={job.name}
             accessories={[
+              ...(location ? [{ text: location }] : []),
               ...(duration ? [{ text: duration }] : []),
-              { text: location },
               { tag: { value: jobStatus(job), color: statusColor(job) } },
             ]}
             actions={

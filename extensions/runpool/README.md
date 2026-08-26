@@ -14,7 +14,7 @@ The extension tells you how to install it if it is missing, so there is no harm 
 
 **Show Runner Pools** lists every pool against its owner's GitHub avatar, with how many of its runner slots are busy. Start and stop a pool, change its runner count, and open the log. Press return to see which repositories a pool serves.
 
-**Show Recent Workflow Runs** lists recent GitHub Actions workflow runs across the repositories your pools serve. It shows the pull request or branch, result, elapsed time and the runners that handled the workflow, including RunPool hosts, Blacksmith and GitHub. Press return to see the workflow's individual jobs, then open a job or the whole workflow on GitHub. Scroll to load older runs.
+**Show Recent Workflow Runs** lists recent GitHub Actions workflow runs across the repositories your pools serve. It shows the pull request or branch, when the workflow was triggered, its result and a compact runner summary, including RunPool hosts, Blacksmith and GitHub. Press return to see the workflow's individual jobs, with each job's duration and runner, then open a job, pull request or the whole workflow on GitHub. Scroll to load older runs.
 
 **Manage Runner Pools** pauses or resumes automatic RunPool runners. Pausing stands its runners down and prevents them waking for queued work; it does not affect Blacksmith or GitHub workflows.
 

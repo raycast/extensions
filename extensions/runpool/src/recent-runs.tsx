@@ -1,18 +1,17 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NotInstalled } from "./components/NotInstalled";
 import {
   configuredRepositories,
   enrichWorkflowRuns,
-  runDuration,
   runStatus,
   runSubtitle,
   SourceFailure,
   WorkflowRun,
   WorkflowRunPager,
 } from "./lib/github";
-import { errorMessage, findRunpool, getStatus, Pool } from "./lib/runpool";
+import { errorMessage, findRunpool, getStatus, githubAvatar, Pool } from "./lib/runpool";
 import { WorkflowRunDetail } from "./workflow-run-detail";
 
 type HistoryState = {
@@ -50,12 +49,24 @@ function statusColor(run: WorkflowRun): Color {
   }
 }
 
-function runnerText(run: WorkflowRun): string {
+function runnerText(run: WorkflowRun): string | undefined {
   if (run.locations) {
-    if (run.locations.length > 0) return run.locations.join(", ");
+    if (run.locations.length === 1) return run.locations[0];
+    if (run.locations.length > 1) return `${run.locations[0]} +${run.locations.length - 1}`;
     return "Runner not assigned";
   }
-  return run.status === "queued" ? "Runner not assigned" : "Finding runner";
+  return run.status === "queued" ? "Runner not assigned" : undefined;
+}
+
+function timeAgo(timestamp: string, now = Date.now()): string | undefined {
+  const elapsed = Math.max(0, Math.floor((now - Date.parse(timestamp)) / 1000));
+  if (Number.isNaN(elapsed)) return undefined;
+  if (elapsed < 60) return "just now";
+  const minutes = Math.floor(elapsed / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
 }
 
 /** Replace a visible raw row once its job and pull-request metadata arrives. */
@@ -163,16 +174,18 @@ export default function Command() {
       )}
       {state.runs.map((run) => {
         const pullRequest = run.pullRequests?.[0];
-        const duration = runDuration(run);
+        const runner = runnerText(run);
+        const ago = timeAgo(run.createdAt);
+        const [owner, repository] = run.repository.split("/");
         return (
           <List.Item
             key={run.key}
-            icon={Icon.Hammer}
-            title={`${run.repository} / ${run.workflow}`}
+            icon={{ source: githubAvatar(owner), fallback: Icon.TwoPeople, mask: Image.Mask.RoundedRectangle }}
+            title={`${repository ?? run.repository} / ${run.workflow}`}
             subtitle={runSubtitle(run)}
             accessories={[
-              ...(duration ? [{ text: duration }] : []),
-              { text: runnerText(run) },
+              ...(runner ? [{ text: runner }] : []),
+              ...(ago ? [{ text: ago }] : []),
               { tag: { value: runStatus(run), color: statusColor(run) } },
             ]}
             actions={
@@ -184,7 +197,12 @@ export default function Command() {
                 />
                 <Action.OpenInBrowser title="Open Run on GitHub" icon={Icon.ArrowNe} url={run.url} />
                 {pullRequest && (
-                  <Action.OpenInBrowser title="Open Pull Request" icon={Icon.TwoPeople} url={pullRequest.html_url} />
+                  <Action.OpenInBrowser
+                    title="Open Pull Request"
+                    icon={Icon.TwoPeople}
+                    url={pullRequest.html_url}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                  />
                 )}
                 <Action.OpenInBrowser
                   title="Open Repository"
