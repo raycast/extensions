@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix today's stats ignoring the in-progress session] - {PR_MERGE_DATE}
+## [Fix today's stats ignoring the in-progress session] - 2026-08-26
 
 ### Fixed
 
