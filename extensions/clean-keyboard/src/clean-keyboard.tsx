@@ -158,7 +158,7 @@ export default function Command() {
           title={`Cleaning keyboard${timeLeft ? ` for ${timeLeft} seconds…` : ""}`}
           actions={
             <ActionPanel>
-              <Action title={"Back"} onAction={timeLeft === null ? unlockAction : () => setIsRunning(false)} />
+              {timeLeft !== null && <Action title={"Back"} onAction={() => setIsRunning(false)} />}
               <Action
                 autoFocus={false}
                 title={"Unlock Keyboard"}
