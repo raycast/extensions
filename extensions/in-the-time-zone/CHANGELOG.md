@@ -1,5 +1,9 @@
 # In The Timezone Changelog
 
+## [System Time Format] - {PR_MERGE_DATE}
+
+- Respect the system 12/24-hour format, with preferences to override it
+
 ## [Initial Version] - 2026-04-08
 
 - Initial release

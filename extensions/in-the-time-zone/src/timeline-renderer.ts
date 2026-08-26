@@ -6,6 +6,7 @@ export interface TimelineConfig {
   baseISO: string;
   baseCityId: string | null;
   selectedZoneIds: string[];
+  timeFormat: string;
 }
 
 type HourType = "work" | "sleep" | "marginal";
@@ -39,7 +40,7 @@ function getDayDiff(localTime: DateTime, baseTime: DateTime): string {
 }
 
 export function generateCompactTimelineMarkdown(config: TimelineConfig): string {
-  const { baseISO, baseCityId, selectedZoneIds } = config;
+  const { baseISO, baseCityId, selectedZoneIds, timeFormat } = config;
 
   const baseZoneId = baseCityId ? getTimezone(baseCityId) : Intl.DateTimeFormat().resolvedOptions().timeZone;
   const baseTime = DateTime.fromISO(baseISO).setZone(baseZoneId);
@@ -54,7 +55,7 @@ export function generateCompactTimelineMarkdown(config: TimelineConfig): string 
     const offsetFromBase = localTime.offset - baseTime.offset;
 
     // Pad single-digit hours with a leading space so colons align
-    const rawTime = localTime.toFormat("h:mm a");
+    const rawTime = localTime.toFormat(timeFormat);
     const paddedTime = rawTime.padStart(8, " ");
 
     return {
