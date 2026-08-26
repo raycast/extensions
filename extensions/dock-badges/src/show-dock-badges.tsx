@@ -11,14 +11,7 @@ import {
   openCommandPreferences,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { AccessibilityError, DockTile, readDockTiles, readSystemDarkMode } from "./dock";
-
-interface Preferences {
-  symbol: "circle" | "bell" | "app";
-  symbolStyle: "outline" | "filled";
-  showCount: boolean;
-  hideWhenClear: boolean;
-}
+import { AccessibilityError, DockTile, clickDockTile, readDockTiles, readSystemDarkMode } from "./dock";
 
 interface DockApp {
   tile: DockTile;
@@ -45,7 +38,10 @@ const NON_APP_TILES = new Set(["Downloads", "Trash", "Applications", "Documents"
  * Menu bar glyph for the chosen symbol and style. Circle uses Raycast's built-in icons; Bell and App use
  * the SF Symbol SVGs in assets/icons ({bell,app}[-badge][-fill].svg). All are tinted at render time.
  */
-function iconSource({ symbol = "circle", symbolStyle = "filled" }: Preferences, badged: boolean): Image.Source {
+function iconSource(
+  { symbol = "circle", symbolStyle = "filled" }: Preferences.ShowDockBadges,
+  badged: boolean,
+): Image.Source {
   const filled = symbolStyle === "filled";
   if (symbol === "circle") return filled ? Icon.CircleFilled : Icon.Circle;
   return `icons/${symbol}${badged ? "-badge" : ""}${filled ? "-fill" : ""}.svg`;
@@ -62,7 +58,7 @@ function resolveApps(tiles: DockTile[], applications: Application[]): DockApp[] 
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.ShowDockBadges>();
 
   const { data, isLoading, error, revalidate } = useCachedPromise(readDockTiles, [], {
     keepPreviousData: true,
@@ -133,6 +129,15 @@ export default function Command() {
   );
 }
 
+/** Open the matched app; if that fails (unmatched or unusual bundle), click its Dock tile instead. */
+async function openDockApp({ tile, application }: DockApp): Promise<void> {
+  try {
+    await open(application?.path ?? `/Applications/${tile.name}.app`);
+  } catch {
+    await clickDockTile(tile.name);
+  }
+}
+
 function AppItem({ app, darkMode }: { app: DockApp; darkMode: boolean }) {
   const { tile, application } = app;
   return (
@@ -140,7 +145,7 @@ function AppItem({ app, darkMode }: { app: DockApp; darkMode: boolean }) {
       title={tile.name}
       subtitle={tile.badge}
       icon={application ? { fileIcon: application.path } : menuIcon(Icon.AppWindow, darkMode)}
-      onAction={() => open(application?.path ?? `/Applications/${tile.name}.app`)}
+      onAction={() => openDockApp(app)}
     />
   );
 }

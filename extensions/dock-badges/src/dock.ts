@@ -88,3 +88,12 @@ export async function readSystemDarkMode(): Promise<boolean> {
     return false;
   }
 }
+
+/** Clicks a Dock tile via Accessibility, activating whatever it represents. */
+export async function clickDockTile(name: string): Promise<void> {
+  const escaped = name.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  await runAppleScript(
+    `tell application "System Events" to tell process "Dock" to click UI element "${escaped}" of list 1`,
+    { timeout: 5000 },
+  );
+}
