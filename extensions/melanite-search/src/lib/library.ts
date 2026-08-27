@@ -13,6 +13,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 /**
  * 設定の型は package.json から raycast-env.d.ts に自動生成される `Preferences`
@@ -83,14 +84,29 @@ export function thumbPath(library: Library, id: string): string | undefined {
 }
 
 /**
+ * Raycast の画像ソース (`Image.Source` と markdown の `![](…)`) に渡せる形にする。
+ *
+ * 絶対パスをそのまま渡すのは Raycast の型契約 (`URL | Asset` — Asset は拡張の
+ * `assets/` 配下のファイル名) には無く、macOS でだけ通っている未文書の挙動。
+ * Windows では `C:\…` が不明なスキームの URI に見えて解決されず、サムネイルが
+ * 出ない。そこで Windows でだけ file:// URL に正規化する。macOS は現に動いている
+ * 経路をそのまま残す (file:// が同じように通る保証が無いため)。
+ */
+export function imageSource(absolutePath: string): string {
+  return process.platform === "win32" ? pathToFileURL(absolutePath).href : absolutePath;
+}
+
+/**
  * markdown の画像 (`![](…)`) に埋め込めるパスにする。
  *
- * Raycast は画像のソースに絶対パスをそのまま受け取る (file:// にはしない)。
  * 空白や括弧を含むファイル名があるので destination は CommonMark の山括弧記法
  * `![](<path>)` で囲む前提とし、その記法を壊す文字だけを潰す。
  * `?` はクエリパラメータ (raycast-width) と区別できなくなるので同様。
  * Melanite 側のファイル名サニタイズでこれらはまず現れないが、念のため。
+ *
+ * Windows 経路 (file:// URL) では `pathToFileURL` が同じ 4 文字を percent-encode
+ * 済みなので、この置換は何もしない。
  */
 export function markdownImagePath(absolutePath: string): string {
-  return absolutePath.replace(/[<>?#]/g, (c) => encodeURIComponent(c));
+  return imageSource(absolutePath).replace(/[<>?#]/g, (c) => encodeURIComponent(c));
 }

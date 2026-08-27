@@ -13,6 +13,7 @@ import { useMemo, useRef, useState } from "react";
 import { formatDate, formatSize, itemName, kindIcon, kindLabel, tagColor } from "./lib/format";
 import {
   getPreferences,
+  imageSource,
   itemFilePath,
   itemFolderPath,
   markdownImagePath,
@@ -181,7 +182,7 @@ function ItemListItem({
 
   return (
     <List.Item
-      icon={thumb ? { source: thumb, fallback: kindIcon(item.kind) } : kindIcon(item.kind)}
+      icon={thumb ? { source: imageSource(thumb), fallback: kindIcon(item.kind) } : kindIcon(item.kind)}
       title={name}
       subtitle={isShowingDetail ? undefined : tags.map((t) => t.name).join(", ")}
       accessories={accessories}
