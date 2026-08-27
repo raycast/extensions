@@ -752,16 +752,19 @@ export class QuickShellStorage {
       return;
     }
 
+    let parsed: unknown;
     try {
-      const parsed = JSON.parse(raw) as unknown;
-      this.cache = migrateStoredData(parsed);
-    } catch (error) {
-      // Newer schemas must not collapse into an empty cache that later overwrites disk.
-      if (error instanceof Error && error.message.startsWith("Unsupported Quick Shell data version:")) {
-        throw error;
-      }
-      this.cache = createEmptyStoredData();
+      parsed = JSON.parse(raw) as unknown;
+    } catch {
+      throw new Error("Stored workspace data is not valid JSON.");
     }
+
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("Stored workspace data is malformed.");
+    }
+
+    // Leave cache unset on parse/migration failure so a later save cannot overwrite disk.
+    this.cache = migrateStoredData(parsed);
 
     const coerced = coerceTrustedWhileDisabled(
       this.cache.workspaceSecurity,
