@@ -28,6 +28,10 @@ type MenuBarTaskProps = {
   setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
 };
 
+function getFailureMessage(title: string, error: unknown) {
+  return error instanceof Error && error.message ? `${title}: ${error.message}` : title;
+}
+
 const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
   const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
   const { taskWidth } = getPreferenceValues<Preferences.MenuBar>();
@@ -50,8 +54,8 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
       }
 
       await showHUD("Completed task");
-    } catch {
-      await showHUD("Unable to complete task");
+    } catch (error) {
+      await showHUD(getFailureMessage("Unable to complete task", error));
     }
     if (useConfetti) {
       try {
@@ -74,8 +78,8 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
 
       await updateTask(updateData, { data, setData });
       await showHUD(`Updated task ${type}`);
-    } catch {
-      await showHUD(`Unable to update task ${type}`);
+    } catch (error) {
+      await showHUD(getFailureMessage(`Unable to update task ${type}`, error));
     }
   }
 
@@ -83,8 +87,8 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
     try {
       await updateTask({ id: task.id, priority }, { data, setData });
       await showHUD("Updated task priority");
-    } catch {
-      await showHUD("Unable to update task priority");
+    } catch (error) {
+      await showHUD(getFailureMessage("Unable to update task priority", error));
     }
   }
 
@@ -92,8 +96,8 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
     try {
       await updateTask({ id: task.id, responsible_uid: collaboratorId }, { data, setData });
       await showHUD("Updated task assignee");
-    } catch {
-      await showHUD("Unable to update task assignee");
+    } catch (error) {
+      await showHUD(getFailureMessage("Unable to update task assignee", error));
     }
   }
 
@@ -101,8 +105,8 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
     try {
       await updateTask({ id: task.id, labels: [...task.labels, label] }, { data, setData });
       await showHUD("Added task label");
-    } catch {
-      await showHUD("Unable to add task label");
+    } catch (error) {
+      await showHUD(getFailureMessage("Unable to add task label", error));
     }
   }
 
@@ -117,8 +121,8 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
       try {
         await apiDeleteTAsk(task.id, { data, setData });
         await showHUD("Deleted task");
-      } catch {
-        await showHUD("Unable to delete task");
+      } catch (error) {
+        await showHUD(getFailureMessage("Unable to delete task", error));
       }
     }
   }
