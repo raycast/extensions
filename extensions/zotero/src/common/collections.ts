@@ -6,12 +6,20 @@ export interface CollectionRef {
   library: number;
 }
 
-// A collection as offered in the dropdown: a stable key to filter by and a title
+// A collection as offered in the dropdown: a stable id to filter by and a title
 // to show. Titles are made unique so the user can tell same-named collections
-// apart, but filtering always uses the key.
+// apart, but filtering always uses the id.
 export interface CollectionOption {
   key: string;
   title: string;
+}
+
+// Globally-unique id for a collection. Zotero collection keys are unique only
+// within a library (like item keys), so a personal and a group collection can
+// share a key; qualifying with the libraryID keeps them distinct. getData tags
+// each item's collections with this same id so filtering never conflates them.
+export function collectionId(library: number, key: string): string {
+  return `${library}:${key}`;
 }
 
 // Build dropdown options from raw collections, disambiguating duplicate names.
@@ -38,7 +46,7 @@ export function buildCollectionOptions(
       const libName = libraryNames.get(c.library) ?? `Library ${c.library}`;
       title = `${c.name} (${libName})`;
     }
-    return { key: c.key, title };
+    return { key: collectionId(c.library, c.key), title };
   });
 
   // Second pass: any titles that still collide get a short key suffix.
@@ -48,9 +56,25 @@ export function buildCollectionOptions(
   }
   for (const o of options) {
     if ((titleCounts.get(o.title) ?? 0) > 1) {
-      o.title = `${o.title} [${o.key.slice(0, 4)}]`;
+      // o.key is "<library>:<key>"; use a fragment of the collection key part.
+      const rawKey = o.key.slice(o.key.indexOf(":") + 1);
+      o.title = `${o.title} [${rawKey.slice(0, 4)}]`;
     }
   }
 
   return options;
+}
+
+// Options for only the collections the user can currently search: those in the
+// personal library plus any opted-in group libraries. Collections from groups
+// the user has not included are omitted, so the dropdown never offers a
+// collection that would always return nothing.
+export function visibleCollectionOptions(
+  collections: CollectionRef[],
+  allowedLibraryIds: Iterable<number>,
+  libraryNames: Map<number, string>,
+): CollectionOption[] {
+  const allowed = new Set(allowedLibraryIds);
+  const inScope = collections.filter((c) => allowed.has(c.library));
+  return buildCollectionOptions(inScope, libraryNames);
 }

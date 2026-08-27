@@ -3,6 +3,7 @@ import { getPreferenceValues, environment, showToast, Toast, LocalStorage } from
 import type { LibraryRef } from "./library";
 import { USER_LIBRARY_NAME } from "./library";
 import type { CollectionRef } from "./collections";
+import { collectionId } from "./collections";
 import * as utils from "./utils";
 import { existsSync, readFileSync, rmSync } from "fs";
 import { execFileSync } from "child_process";
@@ -179,7 +180,8 @@ SELECT  libraries.libraryID AS id,
 
 const COLLECTIONS_SQL = `
 SELECT  collections.collectionName AS name,
-        collections.key AS key
+        collections.key AS key,
+        collections.libraryID AS library
     FROM collections
     LEFT JOIN collectionItems
         ON collections.collectionID = collectionItems.collectionID
@@ -193,7 +195,7 @@ WHERE itemNotes.parentItemID = :id
 `;
 
 const cachePath = utils.cachePath("zotero.json");
-const CACHE_VERSION = 6;
+const CACHE_VERSION = 7;
 
 // LocalStorage key holding the JSON array of group libraryIDs the user opted
 // into searching. The personal library is always searched; group libraries are
@@ -563,7 +565,9 @@ async function getDataImpl(): Promise<RefData[]> {
     while (st6.step()) {
       const o = st6.getAsObject();
       cltNames.push(o.name);
-      cltKeys.push(o.key);
+      // Qualify by libraryID so collections sharing a key across libraries stay
+      // distinct (see collectionId).
+      cltKeys.push(collectionId(o.library as number, o.key as string));
     }
 
     st6.free();
