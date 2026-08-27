@@ -274,7 +274,7 @@ export const View = ({
             const attachmentFilePath = resolveAttachmentPath(item, preferences.zotero_path);
             return (
               <List.Item
-                key={item.key}
+                key={item.id ?? item.key}
                 id={`${item.id}`}
                 title={
                   item.title +
