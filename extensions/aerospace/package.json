@@ -74,7 +74,7 @@
         {
           "name": "defaultWorkspace",
           "title": "Default Search",
-          "description": "Choose whether to search the focused workspace or all workspaces",
+          "description": "Choose whether to search the focused, visible, or all workspaces",
           "required": true,
           "type": "dropdown",
           "default": "focused",
@@ -82,6 +82,10 @@
             {
               "title": "Focused",
               "value": "focused"
+            },
+            {
+              "title": "Visible",
+              "value": "visible"
             },
             {
               "title": "All",
@@ -93,12 +97,16 @@
       "arguments": [
         {
           "name": "workspace",
-          "placeholder": "Focused or All",
+          "placeholder": "Focused, Visible, or All",
           "type": "dropdown",
           "data": [
             {
               "title": "Focused",
               "value": "focused"
+            },
+            {
+              "title": "Visible",
+              "value": "visible"
             },
             {
               "title": "All",
@@ -117,6 +125,15 @@
       "required": false,
       "type": "textfield",
       "placeholder": "/opt/homebrew/bin/aerospace"
+    },
+    {
+      "name": "showFullBindings",
+      "title": "Show Full Bindings",
+      "description": "Show bindings from every configured mode. Turn this off to show only the main mode.",
+      "required": false,
+      "type": "checkbox",
+      "default": true,
+      "label": "Include bindings from every mode"
     }
   ],
   "dependencies": {

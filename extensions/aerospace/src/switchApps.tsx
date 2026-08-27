@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   closeMainWindow,
+  Detail,
   getPreferenceValues,
   Icon,
   Keyboard,
@@ -15,13 +16,22 @@ import { showFailureToast, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { AeroSpaceRecoveryActions } from "./components/AeroSpaceRecoveryActions";
 import {
+  buildWorkspaceCatalog,
   failureToastOptions,
   focusWindow,
+  listMonitors,
   listWindows,
+  listWorkspaces,
+  moveWindowToMonitor,
+  moveWindowToWorkspace,
   pullWindowToFocusedWorkspace,
-  setWindowTiling,
+  setWindowLayout,
+  toggleWindowFullscreen,
+  WindowScope,
   WindowSnapshot,
 } from "./utils/aerospace";
+import { extractWorkspaceKeys, getConfigPath, loadConfig } from "./utils/config";
+import { createWindowRule } from "./utils/rules";
 
 type SwitchAppsLaunchContext = { searchText?: string };
 
@@ -39,39 +49,138 @@ async function runWindowAction(title: string, operation: () => Promise<void>): P
   }
 }
 
+async function loadWorkspaceDestinations() {
+  const [workspaces, config] = await Promise.all([listWorkspaces(), loadConfig().catch(() => ({}))]);
+  return buildWorkspaceCatalog(workspaces, [], extractWorkspaceKeys(config));
+}
+
+function WorkspaceDestination({ window }: { window: WindowSnapshot }) {
+  const { data: workspaces = [], isLoading } = usePromise(loadWorkspaceDestinations);
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Choose a workspace">
+      {workspaces
+        .filter((workspace) => workspace.name !== window.workspace)
+        .map((workspace) => (
+          <List.Item
+            key={workspace.name}
+            icon={workspace.isVisible ? Icon.Desktop : Icon.Circle}
+            title={`Workspace ${workspace.name}`}
+            subtitle={workspace.monitorName}
+            accessories={workspace.isFocused ? [{ tag: "focused" }] : workspace.isVisible ? [{ tag: "visible" }] : []}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Move Window Here"
+                  onAction={() =>
+                    runWindowAction("Could Not Move Window", () => moveWindowToWorkspace(window.id, workspace.name))
+                  }
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+    </List>
+  );
+}
+
+function MonitorDestination({ window }: { window: WindowSnapshot }) {
+  const { data: monitors = [], isLoading } = usePromise(listMonitors);
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Choose a monitor">
+      {monitors
+        .filter((monitor) => monitor.name !== window.monitorName)
+        .map((monitor) => (
+          <List.Item
+            key={monitor.name}
+            icon={Icon.Monitor}
+            title={monitor.name}
+            accessories={monitor.isMain ? [{ tag: "main" }] : []}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Move Window Here"
+                  onAction={() =>
+                    runWindowAction("Could Not Move Window", () => moveWindowToMonitor(window.id, monitor.name))
+                  }
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+    </List>
+  );
+}
+
+function WindowRulePreview({ window }: { window: WindowSnapshot }) {
+  const rule = createWindowRule(window);
+  const { data: configPath } = usePromise(getConfigPath);
+  const markdown = [
+    `# Rule for ${window.appName}`,
+    "",
+    `This copy-only helper keeps future **${window.appName}** windows on workspace **${window.workspace}** with the current ${window.layout === "floating" ? "floating" : "tiling"} behavior. Review the snippet before adding it to your config.`,
+    "",
+    "```toml",
+    rule,
+    "```",
+  ].join("\n");
+
+  return (
+    <Detail
+      navigationTitle={`Rule for ${window.appName}`}
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Rule" content={rule} />
+          {configPath && <Action.OpenWith title="Open Config with…" path={configPath} />}
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 function WindowActions({ window, onRefresh }: { window: WindowSnapshot; onRefresh: () => Promise<unknown> }) {
+  const targetLayout = window.layout === "floating" ? "tiling" : "floating";
   return (
     <ActionPanel>
       <Action
         title="Focus Window"
         onAction={() => runWindowAction("Could Not Focus Window", () => focusWindow(window.id))}
       />
-      <Action
-        title="Pull to Current Workspace"
-        icon={Icon.ArrowDown}
-        shortcut={{ modifiers: ["shift"], key: "enter" }}
-        onAction={() => runWindowAction("Could Not Move Window", () => pullWindowToFocusedWorkspace(window.id))}
-      />
-      <Action
-        title="Set to Tiling"
-        icon={Icon.AppWindowGrid3x3}
-        shortcut={{ modifiers: ["cmd"], key: "t" }}
-        onAction={async () => {
-          try {
-            await setWindowTiling(window.id);
-            await showToast({ style: Toast.Style.Success, title: "Window Set to Tiling" });
-            await finishWindowAction();
-          } catch (error) {
-            await showFailureToast(error, { title: "Could Not Set Tiling Layout" });
+      <ActionPanel.Section title="Move">
+        <Action.Push title="Move to Workspace…" icon={Icon.Desktop} target={<WorkspaceDestination window={window} />} />
+        <Action.Push title="Move to Monitor…" icon={Icon.Monitor} target={<MonitorDestination window={window} />} />
+        <Action
+          title="Pull to Current Workspace"
+          icon={Icon.ArrowDown}
+          shortcut={{ modifiers: ["shift"], key: "enter" }}
+          onAction={() => runWindowAction("Could Not Move Window", () => pullWindowToFocusedWorkspace(window.id))}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Layout">
+        <Action
+          title={`Set to ${targetLayout === "floating" ? "Floating" : "Tiling"}`}
+          icon={Icon.AppWindowGrid3x3}
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
+          onAction={() =>
+            runWindowAction("Could Not Change Window Layout", () => setWindowLayout(window.id, targetLayout))
           }
-        }}
-      />
+        />
+        <Action
+          title={window.isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          icon={Icon.Maximize}
+          onAction={() => runWindowAction("Could Not Change Fullscreen", () => toggleWindowFullscreen(window.id))}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Configuration">
+        <Action.Push title="Copy Rule for This App…" icon={Icon.Code} target={<WindowRulePreview window={window} />} />
+      </ActionPanel.Section>
       <Action
         title="Refresh Windows"
         icon={Icon.ArrowClockwise}
         shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={async () => {
           await onRefresh();
+          await showToast({ style: Toast.Style.Success, title: "Windows Refreshed" });
         }}
       />
     </ActionPanel>
@@ -82,7 +191,8 @@ export default function Command(
   props: LaunchProps<{ arguments: Arguments.SwitchApps; launchContext?: SwitchAppsLaunchContext }>,
 ) {
   const { defaultWorkspace } = getPreferenceValues<Preferences.SwitchApps>();
-  const workspace = props.arguments.workspace ?? defaultWorkspace;
+  const initialScope = (props.arguments.workspace ?? defaultWorkspace) as WindowScope;
+  const [scope, setScope] = useState<WindowScope>(initialScope);
   const [searchText, setSearchText] = useState(props.launchContext?.searchText ?? "");
 
   const {
@@ -90,11 +200,11 @@ export default function Command(
     isLoading,
     error,
     revalidate,
-  } = usePromise(listWindows, [workspace], {
+  } = usePromise(listWindows, [scope], {
     failureToastOptions: failureToastOptions("Failed to Load Windows"),
   });
 
-  const grouped = new Map<string, { monitor: string; windows: WindowSnapshot[]; focused: boolean }>();
+  const grouped = new Map<string, { monitor: string; windows: WindowSnapshot[]; focused: boolean; visible: boolean }>();
   for (const window of windows) {
     const existing = grouped.get(window.workspace);
     if (existing) {
@@ -104,6 +214,7 @@ export default function Command(
         monitor: window.monitorName,
         windows: [window],
         focused: window.workspaceIsFocused,
+        visible: window.workspaceIsVisible,
       });
     }
   }
@@ -112,9 +223,16 @@ export default function Command(
     <List
       isLoading={isLoading}
       filtering={{ keepSectionOrder: true }}
-      searchBarPlaceholder="Search by app, title, or workspace"
+      searchBarPlaceholder="Search by window, app, or workspace"
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Window Scope" value={scope} onChange={(value) => setScope(value as WindowScope)}>
+          <List.Dropdown.Item title="Focused" value="focused" />
+          <List.Dropdown.Item title="Visible" value="visible" />
+          <List.Dropdown.Item title="All" value="all" />
+        </List.Dropdown>
+      }
     >
       {!isLoading && windows.length === 0 && (
         <List.EmptyView
@@ -123,28 +241,46 @@ export default function Command(
           description={
             error
               ? error.message
-              : workspace === "focused"
-                ? "The focused workspace has no windows."
-                : "AeroSpace reported no open windows."
+              : scope === "focused"
+                ? "The focused workspace has no windows. Try Visible or All."
+                : scope === "visible"
+                  ? "The visible workspaces have no windows. Try All."
+                  : "AeroSpace reported no open windows."
           }
           actions={error ? <AeroSpaceRecoveryActions error={error} onRetry={revalidate} /> : undefined}
         />
       )}
-      {[...grouped.entries()].map(([workspaceName, group]) => (
-        <List.Section key={workspaceName} title={`Workspace ${workspaceName}`} subtitle={group.monitor}>
-          {group.windows.map((window) => (
-            <List.Item
-              key={window.id}
-              title={window.appName}
-              subtitle={window.title}
-              icon={window.appBundlePath ? { fileIcon: window.appBundlePath } : Icon.AppWindow}
-              keywords={[window.title, window.workspace, window.monitorName, window.appBundleId].filter(Boolean)}
-              accessories={group.focused ? [{ tag: "focused" }] : undefined}
-              actions={<WindowActions window={window} onRefresh={revalidate} />}
-            />
-          ))}
-        </List.Section>
-      ))}
+      {[...grouped.entries()].map(([workspaceName, group]) => {
+        const status = group.focused ? "Focused" : group.visible ? "Visible" : undefined;
+        return (
+          <List.Section
+            key={workspaceName}
+            title={`Workspace ${workspaceName}${status ? ` — ${status}` : ""}`}
+            subtitle={group.monitor}
+          >
+            {group.windows.map((window) => (
+              <List.Item
+                key={window.id}
+                title={window.title || window.appName}
+                subtitle={window.appName}
+                icon={window.appBundlePath ? { fileIcon: window.appBundlePath } : Icon.AppWindow}
+                keywords={[
+                  window.appName,
+                  window.title,
+                  window.workspace,
+                  window.monitorName,
+                  window.appBundleId,
+                ].filter(Boolean)}
+                accessories={[
+                  ...(window.layout === "floating" ? [{ tag: "floating" }] : []),
+                  ...(window.isFullscreen ? [{ tag: "fullscreen" }] : []),
+                ]}
+                actions={<WindowActions window={window} onRefresh={revalidate} />}
+              />
+            ))}
+          </List.Section>
+        );
+      })}
     </List>
   );
 }

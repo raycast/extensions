@@ -28,6 +28,9 @@ describe("AeroSpace response parsing", () => {
           workspace: "1",
           "monitor-name": "Built-in Retina Display",
           "workspace-is-focused": true,
+          "workspace-is-visible": true,
+          "window-layout": "v_tiles",
+          "window-is-fullscreen": false,
         },
       ]),
     );
@@ -42,6 +45,9 @@ describe("AeroSpace response parsing", () => {
         workspace: "1",
         monitorName: "Built-in Retina Display",
         workspaceIsFocused: true,
+        workspaceIsVisible: true,
+        layout: "v_tiles",
+        isFullscreen: false,
       },
     ]);
   });
@@ -55,6 +61,7 @@ describe("AeroSpace response parsing", () => {
             "workspace-is-focused": "yes",
             "workspace-is-visible": true,
             "monitor-name": "Built-in Retina Display",
+            "workspace-root-container-layout": "v_tiles",
           },
         ]),
       ),
@@ -73,6 +80,9 @@ describe("workspace catalog", () => {
       workspace: "1",
       monitorName: "Main",
       workspaceIsFocused: true,
+      workspaceIsVisible: true,
+      layout: "v_tiles",
+      isFullscreen: false,
     },
     {
       appName: "Terminal",
@@ -83,6 +93,9 @@ describe("workspace catalog", () => {
       workspace: "1",
       monitorName: "Main",
       workspaceIsFocused: true,
+      workspaceIsVisible: true,
+      layout: "v_tiles",
+      isFullscreen: false,
     },
     {
       appName: "Safari",
@@ -93,14 +106,17 @@ describe("workspace catalog", () => {
       workspace: "2",
       monitorName: "Main",
       workspaceIsFocused: false,
+      workspaceIsVisible: false,
+      layout: "v_tiles",
+      isFullscreen: false,
     },
   ];
 
   it("deduplicates apps and keeps the focused workspace first", () => {
     const catalog = buildWorkspaceCatalog(
       [
-        { name: "2", isFocused: false, isVisible: false, monitorName: "Main" },
-        { name: "1", isFocused: true, isVisible: true, monitorName: "Main" },
+        { name: "2", isFocused: false, isVisible: false, monitorName: "Main", rootLayout: "v_tiles" },
+        { name: "1", isFocused: true, isVisible: true, monitorName: "Main", rootLayout: "v_tiles" },
       ],
       windows,
       { "1": "alt-1" },
@@ -118,6 +134,7 @@ describe("workspace catalog", () => {
         name: "2",
         isFocused: false,
         isVisible: false,
+        rootLayout: "",
         apps: [],
         binding: "alt-2",
       },
@@ -125,6 +142,7 @@ describe("workspace catalog", () => {
         name: "10",
         isFocused: false,
         isVisible: false,
+        rootLayout: "",
         apps: [],
         binding: "alt-0",
       },
@@ -132,9 +150,31 @@ describe("workspace catalog", () => {
         name: "W",
         isFocused: false,
         isVisible: false,
+        rootLayout: "",
         apps: [],
         binding: "alt-w",
       },
     ]);
+  });
+
+  it("orders focused, visible, non-empty, then empty workspaces", () => {
+    const catalog = buildWorkspaceCatalog(
+      [
+        { name: "4", isFocused: false, isVisible: false, rootLayout: "v_tiles" },
+        { name: "3", isFocused: false, isVisible: true, rootLayout: "v_tiles" },
+        { name: "1", isFocused: true, isVisible: true, rootLayout: "v_tiles" },
+        { name: "2", isFocused: false, isVisible: false, rootLayout: "v_tiles" },
+      ],
+      [
+        {
+          ...windows[2],
+          workspace: "2",
+          workspaceIsFocused: false,
+          workspaceIsVisible: false,
+        },
+      ],
+    );
+
+    expect(catalog.map((workspace) => workspace.name)).toEqual(["1", "3", "2", "4"]);
   });
 });

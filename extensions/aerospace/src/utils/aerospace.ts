@@ -1,9 +1,10 @@
 import { getApplications, getPreferenceValues, open, openExtensionPreferences, Toast } from "@raycast/api";
-import { execFile } from "child_process";
+import { execFile, spawn } from "child_process";
 import { constants } from "fs";
 import { access } from "fs/promises";
 import os from "os";
 import path from "path";
+import { createInterface } from "readline";
 import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
@@ -40,6 +41,9 @@ export type WindowSnapshot = {
   workspace: string;
   monitorName: string;
   workspaceIsFocused: boolean;
+  workspaceIsVisible: boolean;
+  layout: string;
+  isFullscreen: boolean;
 };
 
 export type WorkspaceSnapshot = {
@@ -47,7 +51,22 @@ export type WorkspaceSnapshot = {
   isFocused: boolean;
   isVisible: boolean;
   monitorName?: string;
+  rootLayout: string;
 };
+
+export type MonitorSnapshot = {
+  name: string;
+  isMain: boolean;
+};
+
+export type WindowScope = "focused" | "visible" | "all";
+export type TilingLayout = "h_tiles" | "v_tiles" | "h_accordion" | "v_accordion";
+
+export type AeroSpaceEvent =
+  | { type: "focus-changed"; workspace: string; windowId?: number }
+  | { type: "focused-monitor-changed"; workspace: string; monitorId: number }
+  | { type: "focused-workspace-changed"; workspace: string; previousWorkspace?: string }
+  | { type: "mode-changed"; mode: string };
 
 export type WorkspaceApp = {
   name: string;
@@ -88,6 +107,14 @@ function readBoolean(record: UnknownRecord, key: string): boolean {
   return value;
 }
 
+function readOptionalString(record: UnknownRecord, key: string, fallback = ""): string {
+  return record[key] === undefined ? fallback : readString(record, key);
+}
+
+function readOptionalBoolean(record: UnknownRecord, key: string, fallback = false): boolean {
+  return record[key] === undefined ? fallback : readBoolean(record, key);
+}
+
 function invalidResponse(detail: string, cause?: unknown): AeroSpaceError {
   return new AeroSpaceError(`AeroSpace returned an unexpected response. ${detail}.`, "invalid-response", { cause });
 }
@@ -115,6 +142,13 @@ export function parseWindowSnapshots(output: string): WindowSnapshot[] {
       workspace: readString(value, "workspace"),
       monitorName: readString(value, "monitor-name"),
       workspaceIsFocused: readBoolean(value, "workspace-is-focused"),
+      workspaceIsVisible: readOptionalBoolean(
+        value,
+        "workspace-is-visible",
+        readBoolean(value, "workspace-is-focused"),
+      ),
+      layout: readOptionalString(value, "window-layout"),
+      isFullscreen: readOptionalBoolean(value, "window-is-fullscreen"),
     };
   });
 }
@@ -127,6 +161,17 @@ export function parseWorkspaceSnapshots(output: string): WorkspaceSnapshot[] {
       isFocused: readBoolean(value, "workspace-is-focused"),
       isVisible: readBoolean(value, "workspace-is-visible"),
       monitorName: readString(value, "monitor-name") || undefined,
+      rootLayout: readOptionalString(value, "workspace-root-container-layout"),
+    };
+  });
+}
+
+export function parseMonitorSnapshots(output: string): MonitorSnapshot[] {
+  return parseJsonArray(output).map((value) => {
+    if (!isRecord(value)) throw invalidResponse("Expected every monitor to be an object");
+    return {
+      name: readString(value, "monitor-name"),
+      isMain: readBoolean(value, "monitor-is-main"),
     };
   });
 }
@@ -148,6 +193,7 @@ export function buildWorkspaceCatalog(
         name,
         isFocused: false,
         isVisible: false,
+        rootLayout: "",
         apps: [],
         binding: bindings[name],
       });
@@ -158,8 +204,9 @@ export function buildWorkspaceCatalog(
     const workspace = catalog.get(window.workspace) ?? {
       name: window.workspace,
       isFocused: window.workspaceIsFocused,
-      isVisible: window.workspaceIsFocused,
+      isVisible: window.workspaceIsVisible,
       monitorName: window.monitorName,
+      rootLayout: "",
       apps: [],
       binding: bindings[window.workspace],
     };
@@ -180,9 +227,11 @@ export function buildWorkspaceCatalog(
       ...workspace,
       apps: workspace.apps.sort((left, right) => NAME_COLLATOR.compare(left.name, right.name)),
     }))
-    .sort(
-      (left, right) => Number(right.isFocused) - Number(left.isFocused) || NAME_COLLATOR.compare(left.name, right.name),
-    );
+    .sort((left, right) => {
+      const statusOrder = (workspace: WorkspaceCatalogItem) =>
+        workspace.isFocused ? 0 : workspace.isVisible ? 1 : workspace.apps.length > 0 ? 2 : 3;
+      return statusOrder(left) - statusOrder(right) || NAME_COLLATOR.compare(left.name, right.name);
+    });
 }
 
 export async function resolveAerospaceBin(): Promise<string> {
@@ -288,41 +337,57 @@ export async function openAeroSpaceApplication(): Promise<void> {
   await open(application.path);
 }
 
-export async function listWindows(scope: "focused" | "all"): Promise<WindowSnapshot[]> {
-  const selector = scope === "focused" ? ["--workspace", "focused"] : ["--all"];
-  const output = await aerospace(
-    "list-windows",
-    ...selector,
-    "--json",
-    "--format",
-    [
-      "%{app-name}",
-      "%{window-title}",
-      "%{window-id}",
-      "%{workspace}",
-      "%{app-bundle-id}",
-      "%{app-bundle-path}",
-      "%{monitor-name}",
-      "%{workspace-is-focused}",
-    ].join(" "),
-  );
+export async function listWindows(scope: WindowScope): Promise<WindowSnapshot[]> {
+  const selector = scope === "all" ? ["--all"] : ["--workspace", scope];
+  const baseFormat = [
+    "%{app-name}",
+    "%{window-title}",
+    "%{window-id}",
+    "%{workspace}",
+    "%{app-bundle-id}",
+    "%{app-bundle-path}",
+    "%{monitor-name}",
+    "%{workspace-is-focused}",
+  ];
+  const query = (format: string[]) => aerospace("list-windows", ...selector, "--json", "--format", format.join(" "));
+  const output = await query([
+    ...baseFormat,
+    "%{workspace-is-visible}",
+    "%{window-layout}",
+    "%{window-is-fullscreen}",
+  ]).catch((error: unknown) => {
+    if (error instanceof AeroSpaceError && error.kind === "command-failed") return query(baseFormat);
+    throw error;
+  });
   return parseWindowSnapshots(output).sort(
     (left, right) =>
       Number(right.workspaceIsFocused) - Number(left.workspaceIsFocused) ||
+      Number(right.workspaceIsVisible) - Number(left.workspaceIsVisible) ||
       NAME_COLLATOR.compare(left.workspace, right.workspace) ||
-      NAME_COLLATOR.compare(left.appName, right.appName),
+      NAME_COLLATOR.compare(left.title || left.appName, right.title || right.appName),
   );
 }
 
 export async function listWorkspaces(): Promise<WorkspaceSnapshot[]> {
+  const baseFormat = ["%{workspace}", "%{workspace-is-focused}", "%{workspace-is-visible}", "%{monitor-name}"];
+  const query = (format: string[]) => aerospace("list-workspaces", "--all", "--json", "--format", format.join(" "));
+  const output = await query([...baseFormat, "%{workspace-root-container-layout}"]).catch((error: unknown) => {
+    if (error instanceof AeroSpaceError && error.kind === "command-failed") return query(baseFormat);
+    throw error;
+  });
+  return parseWorkspaceSnapshots(output);
+}
+
+export async function listMonitors(): Promise<MonitorSnapshot[]> {
   const output = await aerospace(
-    "list-workspaces",
-    "--all",
+    "list-monitors",
     "--json",
     "--format",
-    ["%{workspace}", "%{workspace-is-focused}", "%{workspace-is-visible}", "%{monitor-name}"].join(" "),
+    ["%{monitor-name}", "%{monitor-is-main}"].join(" "),
   );
-  return parseWorkspaceSnapshots(output);
+  return parseMonitorSnapshots(output).sort(
+    (left, right) => Number(right.isMain) - Number(left.isMain) || NAME_COLLATOR.compare(left.name, right.name),
+  );
 }
 
 export async function getFocusedWorkspace(): Promise<string> {
@@ -342,10 +407,131 @@ export async function pullWindowToFocusedWorkspace(windowId: number): Promise<vo
   await aerospace("move-node-to-workspace", "--focus-follows-window", "--window-id", String(windowId), "--", workspace);
 }
 
-export async function setWindowTiling(windowId: number): Promise<void> {
-  await aerospace("layout", "--window-id", String(windowId), "tiling");
+export async function moveWindowToWorkspace(windowId: number, workspace: string): Promise<void> {
+  await aerospace("move-node-to-workspace", "--window-id", String(windowId), "--", workspace);
+}
+
+export async function moveWindowToMonitor(windowId: number, monitor: string): Promise<void> {
+  await aerospace("move-node-to-monitor", "--window-id", String(windowId), "--", monitor);
+}
+
+export async function setWindowLayout(windowId: number, layout: "floating" | "tiling"): Promise<void> {
+  await aerospace("layout", "--window-id", String(windowId), layout);
+}
+
+export async function toggleWindowFullscreen(windowId: number): Promise<void> {
+  await aerospace("fullscreen", "--window-id", String(windowId));
+}
+
+export async function summonWorkspace(name: string): Promise<void> {
+  await aerospace("summon-workspace", "--", name);
+}
+
+export async function balanceWorkspace(name?: string): Promise<void> {
+  await aerospace("balance-sizes", ...(name ? ["--workspace", name] : []));
+}
+
+export async function setWorkspaceRootLayout(name: string, layout: TilingLayout): Promise<void> {
+  await aerospace("layout", "--workspace", name, "--root", layout);
+}
+
+export async function workspaceBackAndForth(): Promise<void> {
+  await aerospace("workspace-back-and-forth");
+}
+
+export async function toggleAeroSpaceEnabled(): Promise<void> {
+  await aerospace("enable", "toggle");
+}
+
+export async function getCurrentMode(): Promise<string> {
+  return aerospace("list-modes", "--current");
+}
+
+export async function getVersionInfo(): Promise<string> {
+  return aerospace("--version");
+}
+
+export async function validateConfig(): Promise<string> {
+  return aerospace("reload-config", "--dry-run", "--warnings-as-errors");
+}
+
+export async function reloadConfig(): Promise<void> {
+  await validateConfig();
+  await aerospace("reload-config");
 }
 
 export async function triggerBinding(mode: string, binding: string): Promise<void> {
   await aerospace("trigger-binding", "--mode", mode, "--", binding);
+}
+
+function parseAeroSpaceEvent(line: string): AeroSpaceEvent | null {
+  let value: unknown;
+  try {
+    value = JSON.parse(line);
+  } catch {
+    return null;
+  }
+  if (!isRecord(value) || typeof value._event !== "string") return null;
+
+  if (value._event === "mode-changed" && typeof value.mode === "string") {
+    return { type: "mode-changed", mode: value.mode };
+  }
+  if (value._event === "focused-workspace-changed" && typeof value.workspace === "string") {
+    return {
+      type: "focused-workspace-changed",
+      workspace: value.workspace,
+      previousWorkspace: typeof value.prevWorkspace === "string" ? value.prevWorkspace : undefined,
+    };
+  }
+  if (
+    value._event === "focused-monitor-changed" &&
+    typeof value.workspace === "string" &&
+    typeof value.monitorId === "number"
+  ) {
+    return { type: "focused-monitor-changed", workspace: value.workspace, monitorId: value.monitorId };
+  }
+  if (value._event === "focus-changed" && typeof value.workspace === "string") {
+    return {
+      type: "focus-changed",
+      workspace: value.workspace,
+      windowId: typeof value.windowId === "number" ? value.windowId : undefined,
+    };
+  }
+  return null;
+}
+
+export async function subscribeToAeroSpaceEvents(
+  onEvent: (event: AeroSpaceEvent) => void,
+  onError: (error: AeroSpaceError) => void,
+): Promise<() => void> {
+  const child = spawn(
+    await resolveAerospaceBin(),
+    ["subscribe", "focus-changed", "focused-monitor-changed", "focused-workspace-changed", "mode-changed"],
+    { stdio: ["ignore", "pipe", "pipe"] },
+  );
+  const output = createInterface({ input: child.stdout });
+  let stopped = false;
+  let stderr = "";
+
+  output.on("line", (line) => {
+    const event = parseAeroSpaceEvent(line);
+    if (event) onEvent(event);
+  });
+  child.stderr.on("data", (chunk: Buffer | string) => {
+    stderr += chunk.toString();
+  });
+  child.on("error", (error) => {
+    if (!stopped) onError(formatAeroSpaceError(error));
+  });
+  child.on("close", (code) => {
+    if (!stopped && code !== 0) {
+      onError(new AeroSpaceError(stderr.trim() || "The AeroSpace event stream stopped.", "command-failed"));
+    }
+  });
+
+  return () => {
+    stopped = true;
+    output.close();
+    child.kill();
+  };
 }
