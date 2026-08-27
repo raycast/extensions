@@ -35,15 +35,16 @@ const getWindowsBuildNumber = (): Promise<string> =>
 const getStorageInfo = async () => {
   if (isWindows) {
     const [disks, fs] = await Promise.all([si.diskLayout(), si.fsSize()]);
-    const disk = disks[0];
     const totalBytes = fs.reduce((sum, f) => sum + f.size, 0);
     const freeBytes = fs.reduce((sum, f) => sum + f.available, 0);
     const usedBytes = totalBytes - freeBytes;
-    const diskType = disk?.type || "Disk";
-    const name = `${Math.round(totalBytes / 1e9)} GB ${diskType}`;
+    const isSingleDisk = disks.length === 1;
+    const diskType = isSingleDisk ? disks[0].type : "";
+    const diskName = isSingleDisk ? disks[0].name : "";
+    const name = diskType ? `${Math.round(totalBytes / 1e9)} GB ${diskType}` : "Storage";
     return {
       title: name,
-      model: disk?.name,
+      model: diskName,
       text: `${formatStorage(usedBytes)} used of ${formatStorage(totalBytes)} (${formatStorage(freeBytes)} available)`,
     };
   }

@@ -10,6 +10,11 @@ interface StorageInfo {
 
 const formatStorage = (bytes: number) => `${(bytes / 1e9).toFixed(2)} GB`;
 
+const loadSwiftStorage = async (): Promise<{ total: number; used: number; free: number }> => {
+  const { getStorageInfo } = await import("swift:../../swift");
+  return getStorageInfo();
+};
+
 /**
  * Get storage information
  * @returns {Promise<StorageInfo>} Storage information including total, used, and free space
@@ -26,11 +31,10 @@ export default async function Command(): Promise<StorageInfo> {
       freeBytes = fs.reduce((sum, f) => sum + f.available, 0);
       usedBytes = totalBytes - freeBytes;
     } else {
-      const fs = await si.fsSize();
-      const root = fs.find((f) => f.mount === "/") || fs[0];
-      totalBytes = root.size;
-      usedBytes = root.used;
-      freeBytes = root.available;
+      const info = await loadSwiftStorage();
+      totalBytes = info.total;
+      usedBytes = info.used;
+      freeBytes = info.free;
     }
 
     const totalFormatted = formatStorage(totalBytes);

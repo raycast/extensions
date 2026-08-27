@@ -67,18 +67,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.24",
+    "@raycast/api": "^2.1.0",
     "macos-release": "^3.5.1",
     "macos-version": "^6.0.0",
-    "systeminformation": "^5.33.1"
+    "systeminformation": "^5.33.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.4.0",
     "@types/react": "^19.2.18",
-    "eslint": "^10.8.1",
+    "eslint": "^10.9.1",
     "prettier": "^3.9.6",
-    "typescript": "^6.0.0"
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -89,7 +89,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "allowScripts": {
-    "esbuild@0.27.7": true
+    "esbuild": true
   },
   "ai": {
     "tools": [
