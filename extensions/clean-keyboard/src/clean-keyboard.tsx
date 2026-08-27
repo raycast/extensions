@@ -85,7 +85,7 @@ export default function Command() {
   }, [isRunning]);
 
   const lockAction = async (duration: Duration) => {
-    let handler: (duration?: number) => void;
+    let handler: (duration: number | null) => Promise<void>;
     if (isMac) {
       const { handler: handlerSwift } = await import("swift:../swift/MyExecutable");
       handler = handlerSwift;
@@ -104,18 +104,21 @@ export default function Command() {
       }
     }
 
-    setTimeLeft(duration.seconds ?? null);
-    setIcon(duration.icon);
-    setIsRunning(true);
-    await showToast({ title: "Keyboard locked" });
+    const durationSeconds = duration.seconds ?? null;
+    const handlerPromise = handler(durationSeconds);
 
-    Promise.resolve(handler(duration.seconds)).catch(async (err) => {
+    handlerPromise.catch(async (err) => {
       // Roll back UI if hook installation failed
       setIsRunning(false);
       setTimeLeft(null);
       setIcon(null);
       await showToast({ title: "Failed to lock keyboard", message: String(err), style: Toast.Style.Failure });
     });
+
+    setTimeLeft(durationSeconds);
+    setIcon(duration.icon);
+    setIsRunning(true);
+    await showToast({ title: "Keyboard locked" });
   };
 
   const unlockAction = async () => {
