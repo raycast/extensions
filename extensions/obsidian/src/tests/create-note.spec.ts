@@ -63,4 +63,12 @@ describe("createNote openOnCreate", () => {
     expect(saved).toBe(true);
     expect(open).not.toHaveBeenCalled();
   });
+
+  it("still reports success when opening the note fails", async () => {
+    mockPreferences.openOnCreate = true;
+    vi.mocked(open).mockRejectedValueOnce(new Error("No application available to open URL"));
+    const saved = await createNote(tempVault.vault, { name: "Saved Note", path: "", content: "body", tags: [] });
+    expect(saved).toBe(true);
+    expect(open).toHaveBeenCalledTimes(1);
+  });
 });

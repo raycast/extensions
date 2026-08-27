@@ -39,7 +39,11 @@ export async function createNote(vault: ObsidianVault, params: CreateNoteParams)
 
   if (pref.openOnCreate && saved) {
     const target = "obsidian://open?path=" + encodeURIComponent(path.join(vault.path, params.path, name + ".md"));
-    await openUrl(target);
+    try {
+      await openUrl(target);
+    } catch {
+      // The note is already saved; a failed open must not mask the save or skip cache invalidation.
+    }
   }
   return saved;
 }
