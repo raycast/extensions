@@ -4,13 +4,13 @@ Control the [AeroSpace](https://github.com/nikitabobko/AeroSpace) tiling window 
 
 The extension uses AeroSpace's CLI as its runtime interface. It does not synthesize keyboard events or require Accessibility permission to trigger your bindings.
 
-![shortcuts](./metadata/aerospace-1.png)
+![shortcuts](./media/aerospace-1.png)
 
 ![menubar](./media/menubar.jpg)
 
-![switcher](./metadata/aerospace-3.png)
+![switcher](./media/aerospace-3.png)
 
-![view config](./metadata/aerospace-4.png)
+![view config](./media/aerospace-4.png)
 
 ## Features
 

@@ -1,6 +1,6 @@
 # aerospace Changelog
 
-## [Runtime and Configuration Upgrade] - 2026-08-27
+## [Runtime and Configuration Upgrade] - {PR_MERGE_DATE}
 
 - Trigger shortcuts with AeroSpace's native `trigger-binding` command instead of AppleScript keyboard events
 - Show the complete TOML file and the binding configuration loaded by the running AeroSpace process as distinct views
