@@ -1,5 +1,13 @@
 # Brew Changelog
 
+## [Upgrade View] - 2026-08-27
+
+- The Upgrade command now lists the outdated formulae & casks, matching the Show Outdated command, instead of a list of progress steps.
+- Upgrade progress is reported via the toast/HUD, with the icon of each package reflecting its upgrade status.
+- "Upgrade All" now upgrades each package in turn, so its progress is reported per package.
+- Added a Refresh action to the outdated action panel.
+- Pinned formulae are skipped when upgrading.
+
 ## [Adopt] - 2026-08-19
 
 - Added "Copy Adopt Command" (⌘⇧⌥C) and "Run Adopt in <terminal>" (⌘⇧↵) actions in Search for packages not yet managed by Homebrew. They run `brew install --adopt` to reclaim an externally-installed package (e.g. installed via a .dmg or another package manager) into Homebrew so it is covered by `brew upgrade`.
