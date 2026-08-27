@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Fix Menu Bar task actions in background] - {PR_MERGE_DATE}
+## [Fix Menu Bar task actions in background] - 2026-08-27
 
 - Use background-safe HUD notifications for Menu Bar task actions instead of Toast APIs that can crash the command.
 
