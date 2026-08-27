@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sports-odds",
+  "title": "Sports Odds",
+  "description": "Search live sports odds, compare the best available lines across 30+ sportsbooks, and run betting math (Kelly, hedge, de-vig, free bet) powered by ParlayAPI",
+  "icon": "icon.png",
+  "author": "jacobiusmakes",
+  "categories": ["Data", "Finance"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-odds",
+      "title": "Search Odds",
+      "subtitle": "Sports Odds",
+      "description": "Search a team or matchup and see the best available moneyline at each sportsbook",
+      "mode": "view"
+    },
+    {
+      "name": "line-calculators",
+      "title": "Line Calculators",
+      "subtitle": "Sports Odds",
+      "description": "Kelly stake sizing, hedge calculator, de-vig edge check, and free bet conversion",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "ParlayAPI Key",
+      "description": "Optional. Unlocks full odds boards (moneyline, spreads, totals from every book). The free tier includes 1,000 credits per month with no card required: https://parlay-api.com/signup",
+      "placeholder": "pk_live_..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.0.1",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
