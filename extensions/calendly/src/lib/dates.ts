@@ -25,3 +25,18 @@ export function formatDateTime(value: string) {
 export function localTimezone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
+
+export function isValidTimezone(value: string) {
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function timezones() {
+  const local = localTimezone();
+  const supported = typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : [local];
+  return [local, ...supported.filter((zone) => zone !== local)];
+}

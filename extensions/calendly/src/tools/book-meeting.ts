@@ -3,6 +3,8 @@ import { withAccessToken } from "@raycast/utils";
 
 import { getEventType, listAvailableTimes } from "../api/event-types";
 import { bookMeeting } from "../api/meetings";
+import { isValidTimezone } from "../lib/dates";
+import { locationTitle, locationWithInviteeDetails, resolveConfiguredLocation } from "../lib/locations";
 import { calendlyOAuth } from "../oauth/calendly";
 
 interface Input {
@@ -16,22 +18,30 @@ interface Input {
   inviteeEmail: string;
   /** Invitee's IANA timezone, for example America/New_York. */
   inviteeTimezone: string;
-  /** Location kind from the selected event type, if it defines locations. */
-  locationKind?: string;
-  /** Invitee-supplied location details when the selected kind requires them. */
+  /** Zero-based location index from List Event Types. Required when the event type has more than one location. */
+  locationIndex?: number;
+  /** Invitee-supplied location details when the selected location requires them. */
   location?: string;
 }
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => ({
-  message: `Book this Calendly meeting with ${input.inviteeName}?`,
-  info: [
-    { name: "Invitee", value: `${input.inviteeName} (${input.inviteeEmail})` },
-    { name: "Start", value: new Date(input.startTime).toLocaleString() },
-    { name: "Timezone", value: input.inviteeTimezone },
-  ],
-});
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const eventType = await getEventType(input.eventTypeUri);
+  const location = resolveConfiguredLocation(eventType.locations, input.locationIndex);
+  return {
+    message: `Book ${eventType.name} with ${input.inviteeName}?`,
+    info: [
+      { name: "Invitee", value: `${input.inviteeName} (${input.inviteeEmail})` },
+      { name: "Start", value: new Date(input.startTime).toLocaleString() },
+      { name: "Timezone", value: input.inviteeTimezone },
+      { name: "Location", value: location ? locationTitle(location) : undefined },
+    ],
+  };
+};
 
 async function tool(input: Input) {
+  if (!isValidTimezone(input.inviteeTimezone)) {
+    throw new Error("inviteeTimezone must be a valid IANA timezone, for example America/New_York.");
+  }
   const eventType = await getEventType(input.eventTypeUri);
   const startTime = new Date(input.startTime);
   if (!Number.isFinite(startTime.getTime())) throw new Error("startTime must be a valid ISO 8601 date.");
@@ -48,14 +58,7 @@ async function tool(input: Input) {
     throw new Error("That time is no longer available. Find available times again before booking.");
   }
 
-  const configuredLocation = input.locationKind
-    ? eventType.locations.find((location) => location.kind === input.locationKind)
-    : eventType.locations.length === 1
-      ? eventType.locations[0]
-      : undefined;
-  if (eventType.locations.length > 1 && !configuredLocation) {
-    throw new Error("Choose a locationKind from the event type before booking.");
-  }
+  const configuredLocation = resolveConfiguredLocation(eventType.locations, input.locationIndex);
 
   return bookMeeting({
     eventTypeUri: eventType.uri,
@@ -63,9 +66,7 @@ async function tool(input: Input) {
     name: input.inviteeName,
     email: input.inviteeEmail,
     timezone: input.inviteeTimezone,
-    location: configuredLocation
-      ? { ...configuredLocation, ...(input.location ? { location: input.location } : {}) }
-      : undefined,
+    location: configuredLocation ? locationWithInviteeDetails(configuredLocation, input.location) : undefined,
   });
 }
 

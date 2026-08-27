@@ -14,7 +14,7 @@ Sign in with Calendly when Raycast prompts you. The extension uses OAuth 2.1 wit
 
 ## Features
 
-- Browse the next 90 days of meetings, grouped by Today, Tomorrow, and date
+- Browse the next 7, 30, or 90 days of meetings, grouped by Today, Tomorrow, and date
 - Join a meeting, copy the join link or invitee email, reschedule in the browser, or cancel with confirmation
 - Browse active event types with duration, kind, and scheduling URL
 - Copy a reusable scheduling link, the next available times, or a one-time booking link
@@ -27,7 +27,7 @@ Direct booking uses Calendly's Scheduling API and is available only for accounts
 
 ### Upcoming Meetings
 
-Lists your active Calendly meetings for the next 90 days. Search by meeting name, invitee name, email, or location.
+Lists your active Calendly meetings. Use the date-range dropdown to show the next 7, 30, or 90 days. Search by meeting name, invitee name, email, or location. Meetings appear first; invitee names load in the background.
 
 | Action             | What it does                                                  |
 | ------------------ | ------------------------------------------------------------- |
@@ -51,23 +51,23 @@ Lists your active event types with duration and scheduling URL.
 
 ### Book Meeting
 
-Books an invitee into an open slot. Choose an event type, enter name and email, pick a time from the next 7 days, and optionally choose a location. The chosen slot is re-checked immediately before booking so you are not writing to a time that has already been taken.
+Books an invitee into an open slot. Choose an event type, enter name and email, set the invitee's timezone (defaults to yours), pick a time from the next 7 days, and optionally choose a location. The chosen slot is re-checked immediately before booking so you are not writing to a time that has already been taken.
 
-The form uses your local timezone. Booking asks for confirmation before it creates the invitee.
+Booking asks for confirmation before it creates the invitee.
 
 ## Raycast AI
 
 Mention `@calendly` in Raycast AI to work with your calendar in conversation. Write tools show a confirmation before they change anything; canceling a meeting uses a destructive confirmation.
 
-| Tool                   | What it does                                                             |
-| ---------------------- | ------------------------------------------------------------------------ |
-| List Meetings          | Lists scheduled meetings in a date range (defaults to the next 30 days)  |
-| Get Meeting            | Returns a meeting and its invitees, including reschedule and cancel URLs |
-| List Event Types       | Lists your active event types, durations, locations, and scheduling URLs |
-| Find Available Times   | Finds open times for an event type (at most 7 days per request)          |
-| Create Single-Use Link | Creates a one-time scheduling link for an event type                     |
-| Book Meeting           | Books an invitee into a verified available time                          |
-| Cancel Meeting         | Cancels a scheduled meeting and notifies invitees                        |
+| Tool                   | What it does                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------- |
+| List Meetings          | Lists scheduled meetings in a date range (defaults to the next 30 days)               |
+| Get Meeting            | Returns a meeting and its invitees, including reschedule and cancel URLs              |
+| List Event Types       | Lists your active event types, durations, locations with indexes, and scheduling URLs |
+| Find Available Times   | Finds open times for an event type (at most 7 days per request)                       |
+| Create Single-Use Link | Creates a one-time scheduling link for an event type                                  |
+| Book Meeting           | Books an invitee into a verified available time, using a location index when needed   |
+| Cancel Meeting         | Cancels a scheduled meeting and notifies invitees                                     |
 
 ## Authentication
 

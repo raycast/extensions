@@ -3,22 +3,24 @@ import { FormValidation, useCachedPromise, useForm, withAccessToken } from "@ray
 
 import { getEventType, listAvailableTimes, listEventTypes } from "./api/event-types";
 import { bookMeeting } from "./api/meetings";
-import { EventTypeLocation } from "./api/types";
-import { endOfRange, formatDateTime, localTimezone } from "./lib/dates";
-import { locationDetailPlaceholder, locationDetailTitle, locationNeedsInviteeDetails } from "./lib/locations";
+import { endOfRange, formatDateTime, isValidTimezone, localTimezone, timezones } from "./lib/dates";
+import {
+  locationDetailPlaceholder,
+  locationDetailTitle,
+  locationNeedsInviteeDetails,
+  locationTitle,
+  locationWithInviteeDetails,
+} from "./lib/locations";
 import { calendlyOAuth } from "./oauth/calendly";
 
 interface Values {
   eventTypeUri: string;
   name: string;
   email: string;
+  timezone: string;
   startTime: string;
   locationIndex: string;
   locationDetails: string;
-}
-
-function locationTitle(location: EventTypeLocation) {
-  return location.location || location.kind.replaceAll("_", " ");
 }
 
 export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
@@ -29,6 +31,7 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
       eventTypeUri: eventTypeUri ?? "",
       name: "",
       email: "",
+      timezone: localTimezone(),
       startTime: "",
       locationIndex: "0",
       locationDetails: "",
@@ -40,6 +43,10 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
         if (!value) return "Invitee email is required";
         if (!/^\S+@\S+\.\S+$/.test(value)) return "Enter a valid email address";
       },
+      timezone(value) {
+        if (!value) return "Invitee timezone is required";
+        if (!isValidTimezone(value)) return "Enter a valid IANA timezone";
+      },
       startTime: FormValidation.Required,
     },
     async onSubmit(formValues) {
@@ -47,17 +54,15 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
         const selectedEventType = await getEventType(formValues.eventTypeUri);
         const selectedLocation = selectedEventType.locations[Number(formValues.locationIndex)];
         const location = selectedLocation
-          ? {
-              ...selectedLocation,
-              ...(formValues.locationDetails?.trim() ? { location: formValues.locationDetails.trim() } : {}),
-            }
+          ? locationWithInviteeDetails(selectedLocation, formValues.locationDetails)
           : undefined;
-        if (location && locationNeedsInviteeDetails(location) && !location.location) {
+        if (selectedLocation && locationNeedsInviteeDetails(selectedLocation) && !formValues.locationDetails?.trim()) {
           await showToast({
             style: Toast.Style.Failure,
-            title: location.kind === "outbound_call" ? "Phone number is required" : "Location details are required",
+            title:
+              selectedLocation.kind === "outbound_call" ? "Phone number is required" : "Location details are required",
             message:
-              location.kind === "outbound_call"
+              selectedLocation.kind === "outbound_call"
                 ? "Enter the invitee's phone number for this location."
                 : "Enter the location details required for this meeting.",
           });
@@ -76,7 +81,7 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
 
         const confirmed = await confirmAlert({
           title: `Book ${selectedEventType.name}?`,
-          message: `${formValues.name} at ${formatDateTime(formValues.startTime)}`,
+          message: `${formValues.name} at ${formatDateTime(formValues.startTime)} (${formValues.timezone})`,
           primaryAction: { title: "Book Meeting", style: Alert.ActionStyle.Default },
         });
         if (!confirmed) return;
@@ -88,7 +93,7 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
             startTime: formValues.startTime,
             name: formValues.name,
             email: formValues.email,
-            timezone: localTimezone(),
+            timezone: formValues.timezone,
             location,
           });
           toast.style = Toast.Style.Success;
@@ -152,6 +157,11 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
       <Form.Separator />
       <Form.TextField title="Invitee Name" placeholder="Sarah Smith" {...itemProps.name} />
       <Form.TextField title="Email" placeholder="sarah@example.com" {...itemProps.email} />
+      <Form.Dropdown title="Invitee Timezone" {...itemProps.timezone}>
+        {timezones().map((zone) => (
+          <Form.Dropdown.Item key={zone} value={zone} title={zone} />
+        ))}
+      </Form.Dropdown>
       <Form.Dropdown title="Available Time" {...itemProps.startTime}>
         {availableTimes
           .filter((time) => time.status === "available")
@@ -184,7 +194,6 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
           {...itemProps.locationDetails}
         />
       ) : null}
-      <Form.Description title="Timezone" text={localTimezone()} />
     </Form>
   );
 }

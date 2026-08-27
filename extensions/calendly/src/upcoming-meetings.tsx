@@ -1,5 +1,6 @@
 import { Icon, List } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
+import { useState } from "react";
 
 import { listInvitees, listMeetings } from "./api/meetings";
 import { Invitee, ScheduledEvent } from "./api/types";
@@ -7,6 +8,12 @@ import { MeetingActions } from "./components/meeting-actions";
 import { mapWithConcurrency } from "./lib/async";
 import { endOfRange, formatMeetingDate, formatMeetingTime } from "./lib/dates";
 import { calendlyOAuth } from "./oauth/calendly";
+
+const RANGE_OPTIONS = [
+  { value: "7", title: "Next 7 Days" },
+  { value: "30", title: "Next 30 Days" },
+  { value: "90", title: "Next 90 Days" },
+] as const;
 
 interface MeetingWithInvitee {
   meeting: ScheduledEvent;
@@ -22,21 +29,41 @@ function sectionTitle(value: string) {
   return formatMeetingDate(value);
 }
 
-async function loadMeetings(): Promise<MeetingWithInvitee[]> {
+async function loadMeetings(days: number) {
   const now = new Date();
-  const meetings = await listMeetings({ startTime: now, endTime: endOfRange(now, 90) });
-  return mapWithConcurrency(meetings, 5, async (meeting) => {
+  return listMeetings({ startTime: now, endTime: endOfRange(now, days) });
+}
+
+async function loadInvitees(uris: string[]): Promise<Record<string, Invitee | undefined>> {
+  const entries = await mapWithConcurrency(uris, 5, async (uri) => {
     try {
-      const invitees = await listInvitees(meeting.uri);
-      return { meeting, invitee: invitees[0] };
+      const invitees = await listInvitees(uri);
+      return [uri, invitees[0]] as const;
     } catch {
-      return { meeting };
+      return [uri, undefined] as const;
     }
   });
+  return Object.fromEntries(entries);
 }
 
 function UpcomingMeetings() {
-  const { data = [], isLoading, revalidate } = useCachedPromise(loadMeetings, []);
+  const [rangeDays, setRangeDays] = useState("30");
+  const {
+    data: meetings = [],
+    isLoading,
+    revalidate,
+  } = useCachedPromise(loadMeetings, [Number(rangeDays)], {
+    keepPreviousData: true,
+  });
+  const meetingUris = meetings.map((meeting) => meeting.uri);
+  const { data: inviteesByUri = {} } = useCachedPromise(loadInvitees, [meetingUris], {
+    execute: meetingUris.length > 0,
+    keepPreviousData: true,
+  });
+  const data: MeetingWithInvitee[] = meetings.map((meeting) => ({
+    meeting,
+    invitee: inviteesByUri[meeting.uri],
+  }));
   const sections = data.reduce<Map<string, MeetingWithInvitee[]>>((result, item) => {
     const title = sectionTitle(item.meeting.start_time);
     result.set(title, [...(result.get(title) ?? []), item]);
@@ -44,17 +71,27 @@ function UpcomingMeetings() {
   }, new Map());
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search upcoming meetings…">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search upcoming meetings…"
+      searchBarAccessory={
+        <List.Dropdown tooltip="Date Range" value={rangeDays} onChange={setRangeDays} storeValue>
+          {RANGE_OPTIONS.map((option) => (
+            <List.Dropdown.Item key={option.value} value={option.value} title={option.title} />
+          ))}
+        </List.Dropdown>
+      }
+    >
       {!isLoading && data.length === 0 ? (
         <List.EmptyView
           icon={Icon.Calendar}
           title="No Upcoming Meetings"
-          description="Your active Calendly meetings for the next 90 days will appear here."
+          description={`Your active Calendly meetings for the next ${rangeDays} days will appear here.`}
         />
       ) : null}
-      {[...sections.entries()].map(([title, meetings]) => (
+      {[...sections.entries()].map(([title, sectionMeetings]) => (
         <List.Section key={title} title={title}>
-          {meetings.map(({ meeting, invitee }) => (
+          {sectionMeetings.map(({ meeting, invitee }) => (
             <List.Item
               key={meeting.uri}
               icon={Icon.Calendar}
