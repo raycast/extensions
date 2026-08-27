@@ -61,11 +61,13 @@ private final class LiveColorPreview {
 
   func start() {
     update()
-    timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
+    let timer = Timer(timeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
       MainActor.assumeIsolated {
         self?.update()
       }
     }
+    RunLoop.main.add(timer, forMode: .common)
+    self.timer = timer
   }
 
   func stop() {
