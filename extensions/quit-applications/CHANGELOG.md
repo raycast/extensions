@@ -1,6 +1,6 @@
 # Quit Applications Changelog
 
-## [Quit exact application bundle] - {PR_MERGE_DATE}
+## [Quit exact application bundle] - 2026-08-27
 
 - Target the selected bundle path when quitting or restarting and only report success after the exact application exits.
 
