@@ -2,36 +2,40 @@
 import { nanoid } from "nanoid";
 import { SearchResult } from "./types";
 
+// Types match the official Kagi v1 API client:
+// https://github.com/kagisearch/kagi-openapi-typescript
+interface KagiSearchItem {
+  url: string;
+  title: string;
+  snippet?: string;
+  time?: string;
+}
+
 interface KagiSearchResponse {
-  meta: {
-    id: string;
-    node: string;
-    ms: number;
-    api_balance: number;
+  meta?: {
+    id?: string;
+    node?: string;
+    ms?: number;
+    api_balance?: number;
   };
-  data: Array<{
-    t: number;
-    url: string;
-    title: string;
-    snippet?: string;
-    published?: string;
-    thumbnail?: {
-      url: string;
-      width?: number;
-      height?: number;
-    };
-    list?: string[]; // for related searches (t=1)
-  }>;
+  data?: {
+    search?: KagiSearchItem[];
+    news?: KagiSearchItem[];
+    related_search?: KagiSearchItem[];
+  };
 }
 
 export async function searchWithKagiAPI(query: string, apiKey: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const response = await fetch(`https://kagi.com/api/v0/search?q=${encodeURIComponent(query)}`, {
-    method: "GET",
+  const response = await fetch("https://kagi.com/api/v1/search", {
+    method: "POST",
     signal: signal,
     headers: {
-      Authorization: `Bot ${apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({
+      query: query,
+    }),
   });
 
   if (!response.ok) {
@@ -39,22 +43,14 @@ export async function searchWithKagiAPI(query: string, apiKey: string, signal: A
   }
 
   const data = (await response.json()) as KagiSearchResponse;
-  const results: SearchResult[] = [];
 
-  // Process search results (t=0)
-  data.data.forEach((item) => {
-    if (item.t === 0) {
-      results.push({
-        id: nanoid(),
-        query: item.title,
-        description: item.snippet || "",
-        url: item.url,
-        isApiResult: true,
-      });
-    }
-  });
-
-  return results;
+  return (data.data?.search ?? []).map((item) => ({
+    id: nanoid(),
+    query: item.title,
+    description: item.snippet || "",
+    url: item.url,
+    isApiResult: true,
+  }));
 }
 
 interface FastGPTResponse {

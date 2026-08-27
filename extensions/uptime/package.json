@@ -36,5 +36,10 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.1",
+    "fast-uri": "3.1.5"
+  }
 }

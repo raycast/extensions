@@ -14,6 +14,7 @@ import { useMemo } from "react";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
 import { sortByDefaultAgentOrder } from "./agents/order.ts";
 import {
+  useAihubmixUsage,
   useAmpUsage,
   useAntigravityUsage,
   useClaudeUsage,
@@ -27,12 +28,14 @@ import {
   useGrokUsage,
   useKimiAccounts,
   useMiniMaxUsage,
+  useMinimaxCNUsage,
   useOpencodegoUsage,
   useSyntheticAccounts,
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
 import type { AgentId, Accessory, AgentVisibilityPreferences } from "./agents/types.ts";
 import { getThemeIcon } from "./agents/ui.tsx";
+import { getAihubmixAccessory } from "./aihubmix/renderer.tsx";
 import { getAmpAccessory } from "./amp/renderer.tsx";
 import { getAntigravityAccessory } from "./antigravity/renderer.tsx";
 import { getClaudeAccessory } from "./claude/renderer.tsx";
@@ -46,6 +49,7 @@ import { getGeminiAccessory } from "./gemini/renderer.tsx";
 import { getGrokAccessory } from "./grok/renderer.tsx";
 import { getKimiAccessory } from "./kimi/renderer.tsx";
 import { getMiniMaxAccessory } from "./minimax/renderer.tsx";
+import { getMinimaxCNAccessory } from "./minimaxcn/renderer.tsx";
 import { getOpencodegoAccessory } from "./opencode-go/renderer.tsx";
 import { getSyntheticAccessory } from "./synthetic/renderer.tsx";
 import { getZaiAccessory } from "./zai/renderer.tsx";
@@ -79,6 +83,7 @@ function getMenuItemTooltip(usageTooltip?: string): string {
 export default function MenuBarCommand() {
   const prefs = getPreferenceValues<AgentVisibilityPreferences>();
 
+  const isAihubmixVisible = Boolean(prefs.showAihubmix);
   const isAmpVisible = Boolean(prefs.showAmp);
   const isClaudeVisible = Boolean(prefs.showClaude);
   const isClinePassVisible = Boolean(prefs.showClinePass);
@@ -94,8 +99,10 @@ export default function MenuBarCommand() {
   const isAntigravityVisible = Boolean(prefs.showAntigravity);
   const isZaiVisible = Boolean(prefs.showZai);
   const isMinimaxVisible = Boolean(prefs.showMinimax);
+  const isMinimaxCNVisible = Boolean(prefs.showMinimaxCN);
   const isOpencodeGoVisible = Boolean(prefs.showOpencodeGo);
 
+  const aihubmixState = useAihubmixUsage(isAihubmixVisible);
   const ampState = useAmpUsage(isAmpVisible);
   const claudeState = useClaudeUsage(isClaudeVisible);
   const clinePassState = useClinePassAccounts(isClinePassVisible);
@@ -111,11 +118,22 @@ export default function MenuBarCommand() {
   const antigravityState = useAntigravityUsage(isAntigravityVisible);
   const zaiState = useZaiAccounts(isZaiVisible);
   const minimaxState = useMiniMaxUsage(isMinimaxVisible);
+  const minimaxcnState = useMinimaxCNUsage(isMinimaxCNVisible);
   const opencodegoState = useOpencodegoUsage(isOpencodeGoVisible);
 
   // Single-account agents - memoized to prevent unnecessary re-renders
   const singleAgents = useMemo<MenuBarAgent[]>(
     () => [
+      {
+        id: "aihubmix",
+        name: "AIHubMix",
+        icon: "aihubmix.svg",
+        visible: isAihubmixVisible,
+        isLoading: aihubmixState.isLoading,
+        accessory: getAihubmixAccessory(aihubmixState.usage, aihubmixState.error, aihubmixState.isLoading),
+        revalidate: aihubmixState.revalidate,
+        lastFetchedAt: aihubmixState.lastFetchedAt,
+      },
       {
         id: "amp",
         name: "Amp",
@@ -217,6 +235,16 @@ export default function MenuBarCommand() {
         lastFetchedAt: minimaxState.lastFetchedAt,
       },
       {
+        id: "minimaxcn",
+        name: "MinimaxCN",
+        icon: getThemeIcon("minimaxcn-icon.svg"),
+        visible: isMinimaxCNVisible,
+        isLoading: minimaxcnState.isLoading,
+        accessory: getMinimaxCNAccessory(minimaxcnState.usage, minimaxcnState.error, minimaxcnState.isLoading),
+        revalidate: minimaxcnState.revalidate,
+        lastFetchedAt: minimaxcnState.lastFetchedAt,
+      },
+      {
         id: "opencode-go",
         name: "OpenCode Go",
         icon: getThemeIcon("opencode-go-icon.svg"),
@@ -228,6 +256,7 @@ export default function MenuBarCommand() {
       },
     ],
     [
+      isAihubmixVisible,
       isAmpVisible,
       isClaudeVisible,
       isCopilotVisible,
@@ -237,6 +266,11 @@ export default function MenuBarCommand() {
       isGeminiVisible,
       isGrokVisible,
       isAntigravityVisible,
+      aihubmixState.isLoading,
+      aihubmixState.usage,
+      aihubmixState.error,
+      aihubmixState.revalidate,
+      aihubmixState.lastFetchedAt,
       ampState.isLoading,
       ampState.usage,
       ampState.error,

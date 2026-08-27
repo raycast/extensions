@@ -56,6 +56,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "overrides": {
-    "axios": "^1.18.0"
+    "axios": "^1.18.0",
+    "brace-expansion": "5.0.9"
   }
 }

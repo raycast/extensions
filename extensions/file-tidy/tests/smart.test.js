@@ -8,6 +8,7 @@ import { analyze } from "../src/core/analyze.js";
 import { buildExtIndex, buildFolderNamer, organizedDirNames } from "../src/core/config.js";
 import { executePlan } from "../src/core/execute.js";
 import { checkHealth } from "../src/core/health.js";
+import { moveFile } from "../src/core/move.js";
 import { clusterByHash, hashImages, loadHashCache, saveHashCache } from "../src/core/phash.js";
 import { buildPlan } from "../src/core/plan.js";
 import { buildSubIndex, scanSource, subClassify } from "../src/core/scan.js";
@@ -561,6 +562,98 @@ test("phash: the cache hits on path+size+mtime and survives a round trip to disk
   fs.utimesSync(p, stat2.atime, stat.mtime);
   const again = await hashImages([file], { cache: loaded });
   assert.equal(again.get(p), first.get(p));
+});
+
+test("phash: a cross-volume move keeps the source mtime, so the re-keyed cache entry still hits", async () => {
+  const dir = tmp();
+  const from = makeJpeg(dir, "a.jpg", {});
+  const stat = fs.statSync(from);
+  const file = { path: from, name: "a.jpg", ext: "jpg", size: stat.size, mtime: stat.mtime };
+  const cache = new Map();
+  const first = await hashImages([file], { cache });
+
+  // Forced onto the copy+verify+unlink path, as when the destination sits on
+  // another volume.
+  const to = path.join(dir, "moved.jpg");
+  const exdev = () => {
+    const e = new Error("cross-device link");
+    e.code = "EXDEV";
+    throw e;
+  };
+  moveFile(from, to, exdev);
+  assert.equal(fs.statSync(to).mtime.getTime(), stat.mtime.getTime()); // the copy did not get a fresh mtime
+
+  // Same-size garbage in place of the pixels, mtime kept: only a cache hit can
+  // reproduce the hash, so equality proves the image was not decoded again.
+  fs.writeFileSync(to, Buffer.alloc(stat.size, 1));
+  fs.utimesSync(to, stat.atime, stat.mtime);
+  const rekeyed = new Map([[to, cache.get(from)]]); // executePlan re-keys entries to final paths
+  const again = await hashImages([{ ...file, path: to, mtime: fs.statSync(to).mtime }], { cache: rekeyed });
+  assert.equal(again.get(to), first.get(from));
+});
+
+test("phash: saving merges the disk cache — another run's entries survive, dead paths still drop", () => {
+  const dest = tmp();
+  const ours = write(dest, "ours.jpg", "a");
+  const theirs = write(dest, "theirs.jpg", "b");
+  const dead = path.join(dest, "gone.jpg"); // never created
+  const entry = (n) => ({ size: n, mtimeMs: n, hash: BigInt(n) });
+
+  // Another run finished between this run's cache load and its save: it
+  // persisted an entry this run never saw, a stale entry for a since-deleted
+  // file, and an outdated entry for a path this run re-hashed.
+  saveHashCache(
+    dest,
+    new Map([
+      [ours, entry(9)],
+      [theirs, entry(2)],
+      [dead, entry(3)],
+    ]),
+    [{ path: ours }, { path: theirs }, { path: dead }],
+  );
+
+  saveHashCache(dest, new Map([[ours, entry(1)]]), [{ path: ours }]);
+
+  const loaded = loadHashCache(dest);
+  assert.deepEqual(loaded.get(ours), entry(1)); // this run's entry wins on a shared key
+  assert.deepEqual(loaded.get(theirs), entry(2)); // the other run's entry survives the save
+  assert.equal(loaded.has(dead), false); // pruning still drops paths that no longer exist
+});
+
+test("phash: a preview against a missing destination leaves no trace on disk", async () => {
+  const src = tmp();
+  const dest = path.join(tmp(), "archive"); // never created
+  makeJpeg(src, "a.jpg", {});
+
+  await analyze({
+    sourceDir: src,
+    destDir: dest,
+    config: cfg({ detect: { similar: false, health: false, perceptual: true } }),
+  });
+  // The hash cache used to be saved during analysis, mkdir-ing dest/.tidy into
+  // existence before any confirmation — so a dry run had a lasting side effect
+  // and the adapters' "destination doesn't exist, create it?" prompt never
+  // fired, its existence check finding the directory already there.
+  assert.equal(fs.existsSync(dest), false);
+});
+
+test("phash: a successful run persists the cache to dest/.tidy, keyed to where each image landed", async () => {
+  const src = tmp();
+  const dest = tmp();
+  const orig = makeJpeg(src, "a.jpg", {});
+
+  const config = cfg({ detect: { similar: false, health: false, perceptual: true } });
+  const { entries, hashCache } = await analyze({ sourceDir: src, destDir: dest, config });
+  assert.ok(!fs.existsSync(path.join(dest, ".tidy", "phash-cache.json"))); // analysis alone wrote nothing
+
+  executePlan(entries, { destDir: dest, sourceDir: src, hashCache });
+  const archived = path.join(dest, "ft_Images", ym, "a.jpg");
+  assert.ok(fs.existsSync(archived));
+  const loaded = loadHashCache(dest);
+  // Remapped to the post-move path — an entry still keyed to the emptied
+  // source would never hit again
+  assert.equal(loaded.get(archived).hash, hashCache.cache.get(orig).hash);
+  assert.ok(!loaded.has(orig));
 });
 
 test("phash: the whole pass is skipped when the source batch holds no hashable image", async () => {

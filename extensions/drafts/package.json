@@ -278,7 +278,9 @@
   },
   "overrides": {
     "tar-fs": ">=3.1.1",
-    "tar": "^7.5.13"
+    "tar": "7.5.22",
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   },
   "scripts": {
     "build": "ray build -e dist",

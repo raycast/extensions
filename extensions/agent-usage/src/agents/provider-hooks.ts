@@ -1,6 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 
 import { loadAccounts } from "../accounts/storage.ts";
+import { resolveAihubmixAccessKey } from "../aihubmix/auth.ts";
+import { fetchAihubmixUsage } from "../aihubmix/fetcher.ts";
+import type { AihubmixError, AihubmixUsage } from "../aihubmix/types.ts";
 import { fetchAmpUsage } from "../amp/fetcher.ts";
 import type { AmpError, AmpUsage } from "../amp/types.ts";
 import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
@@ -36,6 +39,9 @@ import type { KimiError, KimiUsage } from "../kimi/types.ts";
 import { resolveMiniMaxAuthTokens } from "../minimax/auth.ts";
 import { fetchMiniMaxUsage } from "../minimax/fetcher.ts";
 import type { MiniMaxError, MiniMaxUsage } from "../minimax/types.ts";
+import { resolveMinimaxCNAuthTokens } from "../minimaxcn/auth.ts";
+import { fetchMinimaxCNUsage } from "../minimaxcn/fetcher.ts";
+import type { MinimaxCNError, MinimaxCNUsage } from "../minimaxcn/types.ts";
 import { fetchOpencodegoUsage } from "../opencode-go/fetcher.ts";
 import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types.ts";
 import { fetchSyntheticUsage, SYNTHETIC_OPENCODE_KEY } from "../synthetic/fetcher.ts";
@@ -57,6 +63,7 @@ import { readOpencodeAuthToken } from "./opencode-auth.ts";
 // Root-level preferences shared by both commands.
 type SharedPrefs = {
   additionalCodexHomes?: string;
+  aihubmixApiKey?: string;
   copilotAuthToken?: string;
   cursorCookieHeader?: string;
   deepseekApiKey?: string;
@@ -64,6 +71,7 @@ type SharedPrefs = {
   syntheticApiToken?: string;
   zaiApiToken?: string;
   minimaxApiToken?: string;
+  minimaxcnApiToken?: string;
   opencodegoWorkspaceId?: string;
   opencodegoAuthCookie?: string;
 };
@@ -71,6 +79,25 @@ type SharedPrefs = {
 function prefValue(key: keyof SharedPrefs): string {
   return getPreferenceValues<SharedPrefs>()[key]?.trim() || "";
 }
+
+export const useAihubmixUsage = createUsageHook<AihubmixUsage, AihubmixError>({
+  agentId: "aihubmix",
+  resolveAuthKey: async () => (await resolveAihubmixAccessKey(prefValue("aihubmixApiKey"))) ?? "",
+  fetcher: async () => {
+    const accessKey = await resolveAihubmixAccessKey(prefValue("aihubmixApiKey"));
+    if (!accessKey) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "AIHubMix Access Key not configured. Copy it from https://console.aihubmix.com/setting, then paste it in extension settings (Cmd+,) or set AIHUBMIX_ACCESS_KEY in your shell.",
+        },
+      };
+    }
+    return fetchAihubmixUsage(accessKey);
+  },
+});
 
 export const useAmpUsage = createUsageHook<AmpUsage, AmpError>({
   agentId: "amp",
@@ -198,6 +225,30 @@ export const useMiniMaxUsage = createUsageHook<MiniMaxUsage, MiniMaxError>({
       };
     }
     return fetchMiniMaxUsage(primaryToken);
+  },
+});
+
+// MinimaxCN — the Chinese-region MiniMax provider (api.minimaxi.com, vs api.minimax.io for the international edition).
+// Token resolves from MINIMAX_CN_API_KEY env var or the minimaxcnApiToken preference.
+export const useMinimaxCNUsage = createUsageHook<MinimaxCNUsage, MinimaxCNError>({
+  agentId: "minimaxcn",
+  resolveAuthKey: async () => {
+    const { primaryToken } = await resolveMinimaxCNAuthTokens({ preferenceToken: prefValue("minimaxcnApiToken") });
+    return primaryToken ?? "";
+  },
+  fetcher: async () => {
+    const { primaryToken } = await resolveMinimaxCNAuthTokens({ preferenceToken: prefValue("minimaxcnApiToken") });
+    if (!primaryToken) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "MinimaxCN token not configured. Add it in extension settings (Cmd+,) or set MINIMAX_CN_API_KEY in your shell.",
+        },
+      };
+    }
+    return fetchMinimaxCNUsage(primaryToken);
   },
 });
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [Updated] - 2026-08-20
+
+- Add Windows platform support
+- Harden Start Server readiness check: bounded retry instead of one-shot probe
+
 ## [Initial Release] - 2026-08-13
 
 - View Recipes: browse, search, and view parsed recipes with ingredients, cookware, steps, and metadata

@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix] — 2026-08-21
+
+- Reduced background keep-alive checks to once per minute.
+
 ## [1.0.0] — 2026-04-08
 
 Initial release.

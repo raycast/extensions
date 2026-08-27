@@ -42,7 +42,7 @@
       "name": "apiToken",
       "type": "password",
       "title": "API Token",
-      "description": "Generate one at list.fullforms.com/account under API tokens.",
+      "description": "Generate one at list.fullforms.com/account?token_client=raycast (opens the dialog pre-filled and tags the token as Raycast's).",
       "required": true,
       "placeholder": "ffl_..."
     },

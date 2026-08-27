@@ -11,11 +11,12 @@ function appleScriptString(value: string): string {
 }
 
 function sessionMatches(args: string, sessionName?: string): boolean {
-  const session = sessionName?.trim();
   const namedSession = args.match(/(?:^|\s)--session(?:=|\s+)([^\s]+)/)?.[1];
   const attachedSession = args.match(/(?:^|\s)session\s+attach\s+([^\s]+)/)?.[1];
-  if (!session || session === "default") return !namedSession && !attachedSession;
-  return namedSession === session || attachedSession === session;
+  // A bare client reads as default. Argv cannot reveal a client that joined a
+  // named session through an inherited HERDR_SESSION.
+  const clientSession = namedSession || attachedSession || "default";
+  return clientSession === (sessionName?.trim() || "default");
 }
 
 export function parseHerdrClientTtys(output: string, binary: string, sessionName?: string): string[] {
@@ -91,21 +92,6 @@ export function buildGhosttyFocusScript(title: string): string {
         end if
       end repeat
       delay 0.02
-    end repeat
-  end ignoring
-  return "miss"
-end tell`;
-}
-
-export function buildGhosttyClearMarkerScript(marker: string): string {
-  const targetMarker = appleScriptString(marker);
-  return `tell application "Ghostty"
-  ignoring case
-    repeat with t in terminals
-      if (name of t as text) is ${targetMarker} then
-        set name of t to "herdr"
-        return "cleared"
-      end if
     end repeat
   end ignoring
   return "miss"

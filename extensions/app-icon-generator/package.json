@@ -6,13 +6,14 @@
   "icon": "command-icon.png",
   "author": "HunterJi",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "0xdhrv"
   ],
   "categories": [
     "Design Tools",
     "Developer Tools"
   ],
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "MIT",
   "commands": [
     {
@@ -23,18 +24,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.1",
+    "@raycast/api": "^1.104.25",
     "@types/to-ico": "^1.1.3",
-    "jimp": "^0.22.12",
-    "png-to-ico": "^2.1.8"
+    "jimp": "^1.6.1",
+    "png-to-ico": "^3.0.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.18",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -145,5 +146,9 @@
       "placeholder": "Add Epic Games Store as default platform",
       "label": "Epic Games Store"
     }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ]
 }

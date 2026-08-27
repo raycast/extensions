@@ -1,8 +1,10 @@
+import { homedir } from "node:os";
 import { Icon, type Image } from "@raycast/api";
-import { AGENT_KINDS, type AgentKind } from "./types";
+import { AGENT_KINDS, type AgentKind, type PaneInfo } from "./types";
 
 const AGENT_TITLES: Record<AgentKind, string> = {
   claude: "Claude Code",
+  antigravity: "Antigravity",
   codex: "Codex",
   gemini: "Gemini CLI",
   cursor: "Cursor",
@@ -28,6 +30,8 @@ const AGENT_TITLES: Record<AgentKind, string> = {
 const ALIASES: Record<string, AgentKind> = {
   claudecode: "claude",
   claude_code: "claude",
+  antigravity_cli: "antigravity",
+  antigravitycli: "antigravity",
   geminicli: "gemini",
   gemini_cli: "gemini",
   cursoragent: "cursor",
@@ -93,6 +97,19 @@ export function agentTitle(value?: string): string {
     .trim()
     .replace(/[_-]+/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+// display_agent is a Nerd Font glyph for herdr's own status line and never
+// renders as text in Raycast, so unnamed agents show their working directory.
+export function agentName(agent: Pick<PaneInfo, "name" | "agent" | "cwd" | "foreground_cwd">): string {
+  const name = agent.name?.trim();
+  if (name) return name;
+  const dir = (agent.foreground_cwd || agent.cwd)?.replace(/\/+$/, "");
+  if (dir && dir !== homedir()) {
+    const base = dir.slice(dir.lastIndexOf("/") + 1);
+    if (base) return base;
+  }
+  return agentTitle(agent.agent);
 }
 
 export function agentIcon(value?: string): Image.ImageLike {

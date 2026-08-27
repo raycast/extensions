@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mint-mac-care",
+  "title": "Mint",
+  "description": "Inspect Mac storage trends, scan reclaimable space, and explain file activity through Mint",
+  "icon": "extension-icon.png",
+  "author": "dzg-studio",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mint-status",
+      "title": "View Mint Status",
+      "subtitle": "Mint",
+      "description": "View disk trends, recent activity, and managed folders",
+      "mode": "view"
+    },
+    {
+      "name": "mint-scan",
+      "title": "Scan Reclaimable Space",
+      "subtitle": "Mint",
+      "description": "Run a read-only scan for developer caches, app caches, logs, and junk",
+      "mode": "view"
+    },
+    {
+      "name": "mint-why",
+      "title": "Explain Disk Growth or File Activity",
+      "subtitle": "Mint",
+      "description": "Explain storage growth or investigate Mint operations involving a path",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "path",
+          "placeholder": "Optional path, for example ~/Downloads",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts",
+    "validate": "npm run lint && npm test && npm run build",
+    "prepublishOnly": "echo 'Publish this extension through the Raycast Store, not npm.' && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

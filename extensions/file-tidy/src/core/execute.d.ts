@@ -1,3 +1,4 @@
+import type { HashCacheState } from "./analyze.js";
 import type { PlanEntry } from "./plan.js";
 
 /**
@@ -15,6 +16,7 @@ export function executePlan(
   opts: {
     destDir: string;
     sourceDir: string;
+    hashCache?: HashCacheState | null;
     formatDupBlock?: (dups: PlanEntry[]) => string;
     formatSimilarBlock?: (flagged: PlanEntry[], opts: { destDir: string }) => string;
   },

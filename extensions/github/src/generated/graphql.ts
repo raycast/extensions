@@ -65,46 +65,11 @@ export type DiscussionFieldsFragment = {
 
 export type SearchDiscussionsQueryVariables = Exact<{
   query: string;
-  numberOfOpenItems: number;
+  numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type SearchDiscussionsQuery = {
-  openDiscussions: {
-    nodes: Array<
-      | {
-          id: string;
-          title: string;
-          bodyText: string;
-          publishedAt: any;
-          url: any;
-          upvoteCount: number;
-          repository: {
-            id: string;
-            nameWithOwner: string;
-            name: string;
-            url: any;
-            mergeCommitAllowed: boolean;
-            squashMergeAllowed: boolean;
-            rebaseMergeAllowed: boolean;
-            autoMergeAllowed: boolean;
-            defaultBranchRef: { target: { oid: any } | { oid: any } | { oid: any } | { oid: any } | null } | null;
-            owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
-          };
-          category: { name: string; emoji: string; emojiHTML: any };
-          comments: { totalCount: number };
-          answer: { bodyText: string } | null;
-          author:
-            | { login: string; avatarUrl: any }
-            | { login: string; avatarUrl: any }
-            | { login: string; avatarUrl: any }
-            | { login: string; avatarUrl: any }
-            | { login: string; avatarUrl: any }
-            | null;
-        }
-      | Record<PropertyKey, never>
-      | null
-    > | null;
-  };
   searchDiscussions: {
     nodes: Array<
       | {
@@ -140,6 +105,7 @@ export type SearchDiscussionsQuery = {
       | Record<PropertyKey, never>
       | null
     > | null;
+    pageInfo: { endCursor: string | null; hasNextPage: boolean };
   };
 };
 
@@ -325,6 +291,7 @@ export type IssueDetailsQuery = {
 export type SearchIssuesQueryVariables = Exact<{
   query: string;
   numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type SearchIssuesQuery = {
@@ -378,6 +345,7 @@ export type SearchIssuesQuery = {
       | Record<PropertyKey, never>
       | null
     > | null;
+    pageInfo: { endCursor: string | null; hasNextPage: boolean };
   };
 };
 
@@ -1152,10 +1120,6 @@ export type ExtendedRepositoryFieldsFragment = {
   nameWithOwner: string;
   name: string;
   url: any;
-  mergeCommitAllowed: boolean;
-  squashMergeAllowed: boolean;
-  rebaseMergeAllowed: boolean;
-  autoMergeAllowed: boolean;
   updatedAt: any;
   pushedAt: any;
   stargazerCount: number;
@@ -1163,13 +1127,8 @@ export type ExtendedRepositoryFieldsFragment = {
   isFork: boolean;
   isPrivate: boolean;
   viewerHasStarred: boolean;
-  hasIssuesEnabled: boolean;
-  hasWikiEnabled: boolean;
-  hasProjectsEnabled: boolean;
-  hasDiscussionsEnabled: boolean;
   owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
   primaryLanguage: { id: string; name: string; color: string | null } | null;
-  releases: { totalCount: number };
 };
 
 export type SearchRepositoriesQueryVariables = Exact<{
@@ -1186,10 +1145,6 @@ export type SearchRepositoriesQuery = {
           nameWithOwner: string;
           name: string;
           url: any;
-          mergeCommitAllowed: boolean;
-          squashMergeAllowed: boolean;
-          rebaseMergeAllowed: boolean;
-          autoMergeAllowed: boolean;
           updatedAt: any;
           pushedAt: any;
           stargazerCount: number;
@@ -1197,13 +1152,8 @@ export type SearchRepositoriesQuery = {
           isFork: boolean;
           isPrivate: boolean;
           viewerHasStarred: boolean;
-          hasIssuesEnabled: boolean;
-          hasWikiEnabled: boolean;
-          hasProjectsEnabled: boolean;
-          hasDiscussionsEnabled: boolean;
           owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
           primaryLanguage: { id: string; name: string; color: string | null } | null;
-          releases: { totalCount: number };
         }
       | Record<PropertyKey, never>
       | null
@@ -1226,10 +1176,6 @@ export type MyLatestRepositoriesQuery = {
         nameWithOwner: string;
         name: string;
         url: any;
-        mergeCommitAllowed: boolean;
-        squashMergeAllowed: boolean;
-        rebaseMergeAllowed: boolean;
-        autoMergeAllowed: boolean;
         updatedAt: any;
         pushedAt: any;
         stargazerCount: number;
@@ -1237,13 +1183,8 @@ export type MyLatestRepositoriesQuery = {
         isFork: boolean;
         isPrivate: boolean;
         viewerHasStarred: boolean;
-        hasIssuesEnabled: boolean;
-        hasWikiEnabled: boolean;
-        hasProjectsEnabled: boolean;
-        hasDiscussionsEnabled: boolean;
         owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
         primaryLanguage: { id: string; name: string; color: string | null } | null;
-        releases: { totalCount: number };
       } | null> | null;
     };
   };
@@ -1295,6 +1236,10 @@ export type DataForRepositoryQueryVariables = Exact<{
 
 export type DataForRepositoryQuery = {
   repository: {
+    mergeCommitAllowed: boolean;
+    squashMergeAllowed: boolean;
+    rebaseMergeAllowed: boolean;
+    autoMergeAllowed: boolean;
     defaultBranchRef: {
       id: string;
       name: string;
@@ -1427,6 +1372,8 @@ export type ReleaseFieldsFragment = {
 export type RepositoryReleasesQueryVariables = Exact<{
   name: string;
   owner: string;
+  numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type RepositoryReleasesQuery = {
@@ -1441,6 +1388,7 @@ export type RepositoryReleasesQuery = {
         tagName: string;
         url: any;
       } | null> | null;
+      pageInfo: { endCursor: string | null; hasNextPage: boolean };
     };
   } | null;
 };
@@ -1472,10 +1420,6 @@ export type MyStarredRepositoriesQuery = {
         nameWithOwner: string;
         name: string;
         url: any;
-        mergeCommitAllowed: boolean;
-        squashMergeAllowed: boolean;
-        rebaseMergeAllowed: boolean;
-        autoMergeAllowed: boolean;
         updatedAt: any;
         pushedAt: any;
         stargazerCount: number;
@@ -1483,13 +1427,8 @@ export type MyStarredRepositoriesQuery = {
         isFork: boolean;
         isPrivate: boolean;
         viewerHasStarred: boolean;
-        hasIssuesEnabled: boolean;
-        hasWikiEnabled: boolean;
-        hasProjectsEnabled: boolean;
-        hasDiscussionsEnabled: boolean;
         owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
         primaryLanguage: { id: string; name: string; color: string | null } | null;
-        releases: { totalCount: number };
       } | null> | null;
       pageInfo: { hasNextPage: boolean; endCursor: string | null };
     };
@@ -2098,10 +2037,6 @@ export const ExtendedRepositoryFieldsFragmentDoc = gql`
       avatarUrl(size: 64)
     }
     url
-    mergeCommitAllowed
-    squashMergeAllowed
-    rebaseMergeAllowed
-    autoMergeAllowed
     updatedAt
     pushedAt
     stargazerCount
@@ -2113,13 +2048,6 @@ export const ExtendedRepositoryFieldsFragmentDoc = gql`
       id
       name
       color
-    }
-    hasIssuesEnabled
-    hasWikiEnabled
-    hasProjectsEnabled
-    hasDiscussionsEnabled
-    releases {
-      totalCount
     }
   }
 `;
@@ -2166,15 +2094,14 @@ export const DeleteLinkedBranchDocument = gql`
   }
 `;
 export const SearchDiscussionsDocument = gql`
-  query searchDiscussions($query: String!, $numberOfOpenItems: Int!) {
-    openDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
+  query searchDiscussions($query: String!, $numberOfItems: Int!, $after: String) {
+    searchDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfItems, after: $after) {
       nodes {
         ...DiscussionFields
       }
-    }
-    searchDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
-      nodes {
-        ...DiscussionFields
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }
@@ -2246,10 +2173,14 @@ export const IssueDetailsDocument = gql`
   ${IssueDetailFieldsFragmentDoc}
 `;
 export const SearchIssuesDocument = gql`
-  query searchIssues($query: String!, $numberOfItems: Int!) {
-    search(query: $query, type: ISSUE, first: $numberOfItems) {
+  query searchIssues($query: String!, $numberOfItems: Int!, $after: String) {
+    search(query: $query, type: ISSUE, first: $numberOfItems, after: $after) {
       nodes {
         ...IssueFields
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }
@@ -2653,6 +2584,10 @@ export const CommentsForPullRequestDocument = gql`
 export const DataForRepositoryDocument = gql`
   query dataForRepository($owner: String!, $name: String!) {
     repository(owner: $owner, name: $name) {
+      mergeCommitAllowed
+      squashMergeAllowed
+      rebaseMergeAllowed
+      autoMergeAllowed
       defaultBranchRef {
         id
         name
@@ -2771,12 +2706,16 @@ export const RepositoryIssuesDocument = gql`
   ${IssueFieldsFragmentDoc}
 `;
 export const RepositoryReleasesDocument = gql`
-  query repositoryReleases($name: String!, $owner: String!) {
+  query repositoryReleases($name: String!, $owner: String!, $numberOfItems: Int!, $after: String) {
     repository(name: $name, owner: $owner) {
       ... on Repository {
-        releases(first: 30, orderBy: { field: CREATED_AT, direction: DESC }) {
+        releases(first: $numberOfItems, after: $after, orderBy: { field: CREATED_AT, direction: DESC }) {
           nodes {
             ...ReleaseFields
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
           }
         }
       }

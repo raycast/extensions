@@ -283,7 +283,7 @@
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
     "@types/js-yaml": "^4.0.9",
-    "js-yaml": "^4.1.2",
+    "js-yaml": "^4.3.1",
     "tsx": "^4.21.0",
     "vitest": "^4.1.6",
     "swagger2openapi": "^7.0.8",
@@ -301,5 +301,9 @@
     "publish": "npx @raycast/api@latest publish",
     "gen:langs": "tsx scripts/fetch-langs.ts",
     "gen:types": "tsx scripts/generate-gitea-types.ts"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml": "^4.3.1"
   }
 }

@@ -36,14 +36,20 @@ async function getWindows(workspace: string): Promise<WindowWithPath[]> {
     "%{app-name} %{window-title} %{window-id} %{app-pid} %{workspace} %{app-bundle-id} %{monitor-name}",
   ];
 
-  const [output, apps] = await Promise.all([aerospace(...args), getApplications()]);
+  const [output, apps, focusedWorkspace] = await Promise.all([
+    aerospace(...args),
+    getApplications(),
+    workspace === "focused" ? undefined : aerospace("list-workspaces", "--focused"),
+  ]);
   const pathByBundleId = new Map(apps.map((a) => [a.bundleId, a.path]));
   const windows: Window[] = JSON.parse(output);
 
-  return windows.map((w) => ({
-    ...w,
-    "app-path": pathByBundleId.get(w["app-bundle-id"]) || "",
-  }));
+  return windows
+    .map((w) => ({
+      ...w,
+      "app-path": pathByBundleId.get(w["app-bundle-id"]) || "",
+    }))
+    .sort((a, b) => Number(b.workspace === focusedWorkspace) - Number(a.workspace === focusedWorkspace));
 }
 
 export default function Command(

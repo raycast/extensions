@@ -7,6 +7,7 @@ import {
   isInvalidCustomNpxPathError,
   isNpxResolutionError,
   runSkillsCli,
+  type SkillsCliRunner,
 } from "./skills-cli-runner";
 
 const home = homedir();
@@ -40,8 +41,8 @@ function parseSkillsListJson(stdout: string): InstalledSkill[] {
   }));
 }
 
-export async function listInstalledSkills(): Promise<InstalledSkill[]> {
-  const stdout = await runSkillsCli(["list", "-g", "--json"], { readOnly: true });
+export async function listInstalledSkills(runCli: SkillsCliRunner = runSkillsCli): Promise<InstalledSkill[]> {
+  const stdout = await runCli(["list", "-g", "--json"], { readOnly: true });
   try {
     return parseSkillsListJson(stdout);
   } catch {

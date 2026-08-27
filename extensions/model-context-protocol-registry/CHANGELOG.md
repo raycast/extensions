@@ -1,5 +1,25 @@
 # Model Context Protocol Registry Changelog
 
+## [Refresh plori MCP Server] - 2026-08-24
+
+Refresh plori's description for its current persistent-environment positioning and support for runs, human input, scheduling, connections, and workflows.
+
+## [Add smart-me MCP Server] - 2026-08-23
+
+Add smart-me to the official registry, giving AI assistants access to the smart-me energy platform: live meter readings, quarter-hourly load profiles and daily series, EV charging stations with their sessions and load-management groups, and the tariffs, invoice positions and ZEV (tenant) billing of a property. The remote Streamable HTTP server uses smart-me OAuth sign-in through an `mcp-remote` bridge.
+
+## [Add One MCP Server] - 2026-08-21
+
+Add One to the official registry, connecting AI assistants to 700+ apps through four tools: list connected accounts, search a platform's actions, read an action's real API documentation, and execute it. The remote Streamable HTTP server uses One OAuth sign-in through an `mcp-remote` bridge.
+
+## [Add PostEverywhere MCP Server] - 2026-08-20
+
+- Added PostEverywhere (social media publishing to 11 platforms) to the official registry entries
+
+## [Add Tripsy MCP Server] - 2026-08-19
+
+Add Tripsy to the official registry, enabling AI assistants to create trips and manage flights, stays, activities, expenses, and itinerary details. The remote Streamable HTTP server uses Tripsy OAuth sign-in through an `mcp-remote` bridge.
+
 ## [Add Structured MCP Server] - 2026-08-06
 
 Add Structured to the official registry, allowing AI assistants to view schedules and inbox tasks and create, update, complete, delete, and manage recurring tasks. The remote Streamable HTTP server uses Structured Cloud OAuth sign-in through an `mcp-remote` bridge with a dedicated public client and email-only scope.

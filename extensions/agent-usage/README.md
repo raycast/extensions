@@ -7,7 +7,7 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, OpenCode Go, Synthetic, and z.ai (GLM)
+- **Multi-Agent Support** - View usage for AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, Synthetic, and z.ai (GLM)
 - **Multi-Account Support** - Manage multiple API keys per provider with named accounts ("Work", "Personal", etc.)
 - **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
@@ -21,6 +21,7 @@ Track usage across your AI coding agents in one place.
 
 | Agent           | Data Source                 | Manual Key | OpenCode | Env Var | Multi-Account | Setup                                                                                            |
 | --------------- | --------------------------- | :--------: | :------: | :-----: | :-----------: | ------------------------------------------------------------------------------------------------ |
+| **AIHubMix**    | AIHubMix user self API      |     ✓      |    —     |    ✓    |       —       | Paste the Access Key from https://console.aihubmix.com/setting, or set `AIHUBMIX_ACCESS_KEY`      |
 | **Amp**         | Local SQLite database       |     —      |    —     |    —    |       —       | Auto-detected from local database                                                                |
 | **Claude**      | Anthropic OAuth Usage API   |     —      |    ✓     |    —    |       —       | Auto-detected after `claude` login                                                               |
 | **ClinePass**   | Cline API                   |     ✓      |    —     |    —    |       ✓       | Auto-detected from the local Cline login, or add a user ID and API key via Manage Accounts       |
@@ -35,6 +36,7 @@ Track usage across your AI coding agents in one place.
 | **Antigravity** | Google API                  |     —      |    —     |    —    |       —       | Auto-detected from local API                                                                     |
 | **Synthetic**   | Synthetic API               |     ✓      |    ✓     |    —    |       ✓       | Use OpenCode `synthetic`, or paste API key from https://synthetic.new/billing                    |
 | **MiniMax**     | MiniMax API                 |     ✓      |    ✓     |    ✓    |       —       | Use OpenCode `minimax-coding-plan`, set `MINIMAX_API_KEY` env var, or paste token in preferences |
+| **MinimaxCN**   | MinimaxCN API (国内版)        |     ✓      |    —     |    ✓    |       —       | Set `MINIMAX_CN_API_KEY` env var, or paste token in preferences |
 | **OpenCode Go** | OpenCode API                |     ✓      |    —     |    —    |       —       | Set workspace ID and auth cookie in preferences                                                  |
 | **z.ai (GLM)**  | Zhipu API                   |     ✓      |    ✓     |    ✓    |       ✓       | Paste token, use OpenCode `zai-coding-plan`, or set `ZAI_API_KEY`/`GLM_API_KEY` env var          |
 
@@ -50,6 +52,10 @@ Track usage across your AI coding agents in one place.
 ClinePass reads the shared Cline login from `~/.cline/data/settings/providers.json`, with `~/.cline/data/secrets.json` supported as a legacy fallback. Expired file-backed sessions are refreshed through Cline and saved atomically to the source file while preserving unrelated settings. If Cline replaces the credential while Agent Usage is fetching, Agent Usage rereads the file and uses Cline's newer value instead of overwriting it.
 
 Additional ClinePass accounts can be added from the in-view **Manage Accounts** action. Each manual account requires a Cline user ID beginning with `usr-` and an API key beginning with `sk_`.
+
+### AIHubMix Credentials
+
+Agent Usage shows your AIHubMix account balance. Copy the **Access Key** from [AIHubMix Settings](https://console.aihubmix.com/setting), then paste it into the **AIHubMix Access Key** extension preference, or set `AIHUBMIX_ACCESS_KEY` in your shell. The preference takes priority if both are set.
 
 ### DeepSeek Credentials
 

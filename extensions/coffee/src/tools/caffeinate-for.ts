@@ -1,4 +1,4 @@
-import { startCaffeinate } from "../utils";
+import { startCaffeinate, deviceName } from "../utils";
 
 type Input = {
   /**
@@ -16,7 +16,7 @@ type Input = {
 };
 
 /**
- * Prevents your Mac from going to sleep for a specified duration
+ * Prevents your computer from going to sleep for a specified duration
  */
 export default async function (input: Input) {
   const { hours = 0, minutes = 0, seconds = 0 } = input;
@@ -30,5 +30,5 @@ export default async function (input: Input) {
 
   await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${totalSeconds}`);
 
-  return `Mac will stay awake for ${formattedTime}`;
+  return `${deviceName()} will stay awake for ${formattedTime}`;
 }

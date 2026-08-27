@@ -3,7 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { TupleErrorEmptyView } from "./lib/empty-state";
 import { useTupleJson } from "./lib/hooks";
 import { joinCall, setFavorite, startCall } from "./lib/tuple";
-import { Contact } from "./lib/types";
+import { Contact, ContactCallAction, contactCallAction } from "./lib/types";
 
 export default function SearchContacts() {
   const { data, isLoading, error, revalidate } = useTupleJson<Contact[]>(["contacts", "list"], {
@@ -51,6 +51,7 @@ export default function SearchContacts() {
 }
 
 function ContactItem({ contact, onChange }: { contact: Contact; onChange: () => void }) {
+  const callAction = contactCallAction(contact);
   const accessories: List.Item.Accessory[] = [];
   if (contact.favorited) {
     accessories.push({ icon: "⭐", tooltip: "Favorite" });
@@ -58,7 +59,7 @@ function ContactItem({ contact, onChange }: { contact: Contact; onChange: () => 
   if (contact.recent) {
     accessories.push({ tag: "Recent" });
   }
-  const presence = presenceTag(contact);
+  const presence = presenceTag(contact, callAction);
   accessories.push({ tag: presence });
 
   return (
@@ -70,10 +71,10 @@ function ContactItem({ contact, onChange }: { contact: Contact; onChange: () => 
       accessories={accessories}
       actions={
         <ActionPanel>
-          {contact.status === "busy" ? (
-            // They're already in a call/room, so joining is the only sensible action.
+          {callAction === "join" && (
             <Action title="Join Call" icon={Icon.Phone} onAction={() => joinCallWithFeedback(contact)} />
-          ) : (
+          )}
+          {callAction === "start" && (
             <Action title="Start Call" icon={Icon.Phone} onAction={() => startCallWithFeedback(contact)} />
           )}
           <Action
@@ -134,13 +135,14 @@ function isPresent(contact: Contact): boolean {
   return contact.status === "online" || contact.status === "busy";
 }
 
-/** Status pill: green when online, orange when in a call, muted when offline. */
-function presenceTag(contact: Contact): { value: string; color: Color } {
+function presenceTag(contact: Contact, callAction: ContactCallAction): { value: string; color: Color } {
   switch (contact.status) {
     case "online":
       return { value: "Online", color: Color.Green };
     case "busy":
-      return { value: "In a Call", color: Color.Orange };
+      return callAction === "join"
+        ? { value: "In a Call", color: Color.Orange }
+        : { value: "Call Full", color: Color.SecondaryText };
     default:
       return { value: "Offline", color: Color.SecondaryText };
   }

@@ -433,6 +433,74 @@ export async function focusTab(tab: Tab) {
   }
 }
 
+/** Thrown when a tab's window/tab IDs no longer match a live tab in Dia (stale cache or already closed). */
+export class TabNotFoundError extends Error {
+  constructor() {
+    super("Tab not found; it may have already been closed.");
+    this.name = "TabNotFoundError";
+  }
+}
+
+export async function closeTab(tab: Tab) {
+  const escapedWindowId = escapeAppleScriptString(tab.windowId);
+  const escapedTabId = escapeAppleScriptString(tab.tabId);
+
+  let result: string;
+  try {
+    // JXA: direct window/tab lookup by ID (no nested loops), no activate
+    const jxa = `
+      (() => {
+        const dia = Application("Dia");
+        const wins = dia.windows();
+        for (let i = 0; i < wins.length; i++) {
+          if (String(wins[i].id()) === '${tab.windowId.replace(/'/g, "\\'")}') {
+            const tabs = wins[i].tabs();
+            for (let j = 0; j < tabs.length; j++) {
+              if (String(tabs[j].id()) === '${tab.tabId.replace(/'/g, "\\'")}') {
+                tabs[j].close();
+                return "ok";
+              }
+            }
+          }
+        }
+        return "not_found";
+      })()
+    `;
+    result = execSync(`osascript -l JavaScript -e '${jxa.replace(/'/g, "'\\''")}'`, {
+      timeout: 3000,
+      encoding: "utf-8",
+    }).trim();
+  } catch {
+    // JXA unavailable — fall back to AppleScript, which reports its own outcome
+    result = (
+      await runAppleScript(
+        `set _result to "not_found"
+        tell application "Dia"
+          repeat with w in every window
+            if id of w is "${escapedWindowId}" then
+              repeat with t in every tab of w
+                if id of t is "${escapedTabId}" then
+                  close t
+                  set _result to "ok"
+                  exit repeat
+                end if
+              end repeat
+              exit repeat
+            end if
+          end repeat
+        end tell
+        return _result`,
+      )
+    ).trim();
+  }
+
+  // IDs no longer match a live tab — throw a typed error so the optimistic caller can
+  // revalidate against real state instead of leaving the row removed while it's still open.
+  if (result !== "ok") {
+    throw new TabNotFoundError();
+  }
+}
+
 export async function createNewWindow(profile?: string) {
   if (profile) {
     // Escape user input to prevent AppleScript injection

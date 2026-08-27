@@ -3,12 +3,15 @@ import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getProjects, getTasks, task } from "./composables/FetchData";
 import { getTokens, onTokenChange } from "./composables/WebClient";
+import EditTask from "./editTask";
 
 const Actions = (props: {
   taskId: string;
   taskKey: string | undefined;
   projectId: string;
   typeOfWorkId: string | undefined;
+  parentId: string | undefined;
+  onUpdated: () => void | Promise<void>;
 }) => {
   const { data: BaseUrl } = useCachedPromise(() => LocalStorage.getItem<string>("URL"));
 
@@ -16,15 +19,54 @@ const Actions = (props: {
     <ActionPanel>
       <Action.OpenInBrowser url={`${BaseUrl}/tasks/${props.taskId}`} />
       <Action.CopyToClipboard title={"Copy URL to Clipboard"} content={`${BaseUrl}/tasks/${props.taskId}`} />
+      <Action.Push
+        icon={Icon.Pencil}
+        title="Edit Task"
+        shortcut={{
+          macOS: { modifiers: ["ctrl"], key: "e" },
+          Windows: { modifiers: ["ctrl"], key: "e" },
+        }}
+        target={<EditTask taskId={props.taskId} onUpdated={props.onUpdated} />}
+      />
+      {!props.parentId && (
+        <Action
+          icon={Icon.Plus}
+          title="Create Subtask"
+          shortcut={{
+            macOS: { modifiers: ["ctrl"], key: "c" },
+            Windows: { modifiers: ["ctrl"], key: "c" },
+          }}
+          onAction={async () => {
+            try {
+              await launchCommand({
+                name: "createTask",
+                type: LaunchType.UserInitiated,
+                context: {
+                  projectId: props.projectId,
+                  parentTaskId: props.taskId,
+                },
+              });
+            } catch (error) {
+              showFailureToast("Failed to launch task creation", error as Error);
+            }
+          }}
+        />
+      )}
       <Action.CopyToClipboard
         title={"Copy Task ID"}
         content={props.taskKey ? props.taskKey : props.taskId}
-        shortcut={{ modifiers: ["ctrl"], key: "i" }}
+        shortcut={{
+          macOS: { modifiers: ["ctrl"], key: "i" },
+          Windows: { modifiers: ["ctrl"], key: "i" },
+        }}
       />
       <Action
         icon={Icon.Clock}
         title="Log Time"
-        shortcut={{ modifiers: ["ctrl", "cmd"], key: "enter" }}
+        shortcut={{
+          macOS: { modifiers: ["ctrl", "cmd"], key: "enter" },
+          Windows: { modifiers: ["ctrl", "windows"], key: "enter" },
+        }}
         onAction={async () => {
           try {
             await launchCommand({
@@ -37,7 +79,7 @@ const Actions = (props: {
               },
             });
           } catch (error) {
-            showFailureToast("Failed to launch time logging", error as Error);
+            showFailureToast(error, { title: "Failed to launch time logging" });
           }
         }}
       />
@@ -45,7 +87,7 @@ const Actions = (props: {
   );
 };
 
-const TaskItem = (props: { task: task }) => {
+const TaskItem = (props: { task: task; onUpdated: () => void | Promise<void> }) => {
   let icon;
   switch (props.task.taskStatus.type) {
     case "todo":
@@ -82,6 +124,8 @@ const TaskItem = (props: { task: task }) => {
           projectId={props.task.projectId}
           typeOfWorkId={props.task.typeOfWorkId}
           taskKey={props.task.taskIdentifier}
+          parentId={props.task.parentId}
+          onUpdated={props.onUpdated}
         />
       }
     />
@@ -100,6 +144,7 @@ export default function Command(props: LaunchProps) {
     data: tasks,
     pagination,
     isLoading: isLoadingTasks,
+    revalidate: revalidateTasks,
   } = useCachedPromise(getTasks, [token?.accessToken as string, searchText, 100, projectId], {
     execute: !!token?.accessToken && !token.isExpired(),
   });
@@ -140,7 +185,7 @@ export default function Command(props: LaunchProps) {
         Array.isArray(tasks) &&
         tasks
           .filter((task) => !projectId || task.projectId === projectId)
-          .map((task) => <TaskItem key={task.id} task={task} />)}
+          .map((task) => <TaskItem key={task.id} task={task} onUpdated={revalidateTasks} />)}
     </List>
   );
 }

@@ -45,7 +45,7 @@ export async function translate(text: string, options?: TranslateOption): Promis
     // URL & query string required by Google Translate.
     let baseUrl = "https://translate.google.com/translate_a/single";
     let data: any = {
-        client: "gtx",
+        client: "dict-chrome-ex",
         sl: options.from,
         tl: options.to,
         hl: options.to,

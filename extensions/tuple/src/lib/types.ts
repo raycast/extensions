@@ -12,12 +12,84 @@ export interface Contact {
   favorited: boolean;
   recent: boolean;
   status: ContactStatus;
+  /** Present for a busy contact: the call they're on. Absent on CLIs predating the contract. */
+  call?: ContactCall | null;
+}
+
+/**
+ * The call a busy contact is on. `joinable` is the CLI's own derivation of the
+ * predicate the engine enforces before letting anyone in, so consumers branch
+ * on it rather than reproducing the participant/capacity arithmetic.
+ */
+export interface ContactCall {
+  id: string;
+  participant_ids: number[];
+  capacity: number;
+  sfu_backed: boolean;
+  personal_room?: { owner: number; auto_join_behavior: string } | null;
+  joinable?: boolean;
+}
+
+/**
+ * Whether a busy contact's call can be joined. `unknown` is the older-CLI case:
+ * builds predating the contract omit `call` entirely, so there is nothing to
+ * judge — the action stays on offer and the CLI rejects it if it must. Treating
+ * unknown as "not joinable" would strip Join Call from every busy contact
+ * against those builds.
+ */
+export type Joinability = "joinable" | "not-joinable" | "unknown";
+
+export function callJoinability(contact: Contact | undefined): Joinability {
+  const call = contact?.call;
+  if (!call) {
+    return "unknown";
+  }
+  if (typeof call.joinable === "boolean") {
+    return call.joinable ? "joinable" : "not-joinable";
+  }
+  // A build that sends the call but not the derived flag: apply the same predicate.
+  if (call.id && Array.isArray(call.participant_ids) && typeof call.capacity === "number") {
+    return call.participant_ids.length < call.capacity ? "joinable" : "not-joinable";
+  }
+  return "unknown";
+}
+
+/**
+ * What a contact's entry should offer. Mirrors the Tuple app's popover: no way
+ * to ring someone offline, and joining only a call that has room. The CLI
+ * enforces the same rules — `call start` at an offline or busy target is
+ * rejected outright — so offering the action anyway would just be a button that
+ * fails. Forcing past the guard is deliberately not on offer, because the app
+ * doesn't offer it either.
+ *
+ * A status that is neither busy nor offline counts as reachable: the daemon
+ * passes presence through verbatim and "available" is a synonym for online.
+ */
+export type ContactCallAction = "start" | "join" | "none";
+
+export function contactCallAction(contact: Contact): ContactCallAction {
+  if (contact.status === "busy") {
+    return callJoinability(contact) === "not-joinable" ? "none" : "join";
+  }
+  return contact.status === "offline" ? "none" : "start";
 }
 
 export interface CallParticipant {
   id: number;
   full_name: string;
   email: string;
+}
+
+/** One grouped live call from `tuple call list`. */
+export interface OngoingCall {
+  id: string;
+  participants: CallParticipant[];
+  unknown_participants: number;
+  anonymous: boolean;
+  capacity: number;
+  joinable: boolean;
+  room: { slug: string; name: string } | null;
+  current: boolean;
 }
 
 /** A stored (recorded) call, from `tuple transcription list`. */
@@ -79,10 +151,24 @@ export interface Room {
   slug: string;
   name: string;
   http_value: string;
+  /** RFC 3339 creation time. Older CLIs omit it. */
+  created_at?: string;
   favorited: boolean;
   members: RoomMember[];
   kind: RoomKind;
   active_call: boolean;
+}
+
+/** The newest-created personal room when the CLI provides enough data to identify it reliably. */
+export function primaryPersonalRoom(rooms: Room[]): Room | undefined {
+  const personalRooms = rooms.filter((room) => room.kind === "personal");
+  if (personalRooms.length <= 1) {
+    return personalRooms[0];
+  }
+  if (personalRooms.some((room) => !room.created_at)) {
+    return undefined;
+  }
+  return personalRooms.reduce((primary, room) => (room.created_at! > primary.created_at! ? room : primary));
 }
 
 /** One full-text search hit, from `tuple transcription search --format json`. */
@@ -101,14 +187,31 @@ export enum TupleErrorKind {
   NotInstalled = "not_installed",
   /** A call-scoped command ran while no call was active. Often a normal state, not a failure. */
   NoActiveCall = "no_active_call",
-  /** Tried to join a call/room while already in one — the CLI rejects this rather than switching. */
+  /** Tried to join a call/room while already in one without asking the CLI to switch. */
   AlreadyInCall = "already_in_call",
   /** The Tuple app/daemon is not running, so the CLI could not reach it. */
   DaemonDown = "daemon_down",
   /** The transcript store doesn't exist yet — transcription has never run on this machine. */
   TranscriptionUnavailable = "transcription_unavailable",
+  /** `call start` refused: the target is offline. The app offers no start action for them either. */
+  ContactOffline = "contact_offline",
+  /** `call start` refused: the target is already on a call. Join it instead. */
+  ContactBusy = "contact_busy",
+  /** `call join` refused: the target isn't on a call anyone can join. */
+  NotJoinable = "not_joinable",
   /** Anything else — surfaced to the user verbatim. */
   Unknown = "unknown",
+}
+
+/**
+ * The error envelope `--format json` writes to *stdout* (with exit 1) on
+ * current CLIs. `kind` is the daemon's or command's stable identifier;
+ * `error_code` is the HTTP status when the failure came from the daemon.
+ */
+export interface TupleErrorPayload {
+  error?: string;
+  error_code?: number;
+  kind?: string;
 }
 
 export class TupleError extends Error {

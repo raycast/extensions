@@ -19,9 +19,9 @@ export const WEBSITE_URL = "https://inoh.app";
 
 /**
  * Product pages for the other Inoh ecosystem apps, listed in the Apps action
- * section. The iOS app (mid-rebrand) has no URL yet and surfaces as
- * "Coming soon" — add its constant once live.
+ * section.
  */
+export const IOS_APP_URL = "https://apps.apple.com/app/id6799947889";
 export const CHROME_EXTENSION_URL =
   "https://chromewebstore.google.com/detail/fihdhfkhbocbgmnhdigkljknabnjeoai?utm_source=item-share-cb";
 export const OBSIDIAN_PLUGIN_URL = "https://obsidian.md/plugins?id=inoh";
@@ -29,7 +29,8 @@ export const OBSIDIAN_PLUGIN_URL = "https://obsidian.md/plugins?id=inoh";
 /**
  * Plan pages in the Inoh web app. Upgrading and managing a subscription
  * happen there, not in the extension: the plans page lists live prices and
- * runs Stripe checkout, and Settings opens the billing portal for paid plans.
+ * runs Stripe checkout; Plan & Billing is where subscribers upgrade,
+ * downgrade, cancel, resume, and fix their card.
  */
 export const PLANS_URL = `${WEBSITE_URL}/subscription-plan`;
-export const ACCOUNT_SETTINGS_URL = `${WEBSITE_URL}/settings`;
+export const BILLING_URL = `${WEBSITE_URL}/billing`;

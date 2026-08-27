@@ -29,7 +29,18 @@ import { closeSync, fstatSync, openSync, readSync } from "node:fs";
 import {
   CancelledError,
   COMMAND_REQUIRES_ADMIN,
+  CTRL_SIGNAL_RECEIVED,
+  DOWNLOAD_FAILED,
   getExitCodeMessage,
+  INSTALL_CANCELLED_BY_USER,
+  INSTALL_DISK_FULL,
+  INSTALL_FILE_IN_USE,
+  INSTALL_INSTALL_IN_PROGRESS,
+  INSTALL_INSUFFICIENT_MEMORY,
+  INSTALL_NO_NETWORK,
+  INSTALL_PACKAGE_IN_USE,
+  INSTALL_PACKAGE_IN_USE_BY_APPLICATION,
+  INSTALL_REBOOT_REQUIRED_FOR_INSTALL,
   NO_APPLICATIONS_FOUND,
   PORTABLE_UNINSTALL_FAILED,
   toUnsignedHResult,
@@ -219,7 +230,7 @@ async function executeOperation(args: string[], options: WingetExecutorOptions =
     const execResult = await runWinget(args, {
       signal: options.signal,
       timeout: options.timeout,
-      staleWatchdog: true,
+      onSilence: (silentMinutes) => options.onProgress?.({ type: "stalled", silentMinutes }),
       onSpawn: options.onSpawn,
       onStdout: (chunk) => detector.feed(chunk),
       onStderr: (chunk) => detector.feed(chunk),
@@ -362,12 +373,17 @@ async function showPackageDetails(
   id: string,
   source: WingetSource,
   signal?: AbortSignal,
+  version?: string,
 ): Promise<WingetPackageDetails | null> {
   return withQuerySlot(async () => {
-    const result = await runWinget(withSource(["show", ...EXACT_ID_FLAGS, id, ...BASE_FLAGS], source), {
-      timeout: DETAILS_TIMEOUT_MS,
-      signal,
-    });
+    const versionFlags = version ? ["--version", version] : [];
+    const result = await runWinget(
+      withSource(["show", ...EXACT_ID_FLAGS, id, ...versionFlags, ...BASE_FLAGS], source),
+      {
+        timeout: DETAILS_TIMEOUT_MS,
+        signal,
+      },
+    );
     const details = parsePackageDetails(result.stdout);
     if (details === null && result.exitCode !== 0 && toUnsignedHResult(result.exitCode) !== NO_APPLICATIONS_FOUND) {
       // Transient failure (network/source), not a definitive "no such
@@ -689,6 +705,40 @@ function isModifiedPortableFailure(result: WingetOperationResult): boolean {
   return /portable package/i.test(message) && /modified/i.test(message);
 }
 
+/**
+ * Failure classes caused by the environment or the user's own choice
+ * (declines, busy installers, disk/memory/network, reboot pending), not by
+ * the offered installer. A later attempt can succeed with the SAME version,
+ * so these must never produce a failed-upgrade marker.
+ */
+const RETRYABLE_FAILURE_CODES: ReadonlySet<number> = new Set([
+  CTRL_SIGNAL_RECEIVED,
+  INSTALL_CANCELLED_BY_USER,
+  COMMAND_REQUIRES_ADMIN,
+  INSTALL_PACKAGE_IN_USE,
+  INSTALL_INSTALL_IN_PROGRESS,
+  INSTALL_FILE_IN_USE,
+  INSTALL_PACKAGE_IN_USE_BY_APPLICATION,
+  INSTALL_DISK_FULL,
+  INSTALL_INSUFFICIENT_MEMORY,
+  INSTALL_NO_NETWORK,
+  DOWNLOAD_FAILED,
+  INSTALL_REBOOT_REQUIRED_FOR_INSTALL,
+]);
+
+/** True when the same operation may succeed later without a version change. */
+function isRetryableFailure(result: WingetOperationResult): boolean {
+  if (result.cancelled || result.exitCode === UAC_DECLINED_EXIT_CODE) {
+    return true;
+  }
+  if (result.exitCode !== undefined && RETRYABLE_FAILURE_CODES.has(toUnsignedHResult(result.exitCode))) {
+    return true;
+  }
+  // Installer-level busy states surface as embedded codes or as the curated
+  // app-in-use message (silent installers only disclose it in their logs).
+  return isInstallerBusyFailure(result) || /^App in use/.test(result.message ?? "");
+}
+
 async function upgradePackage(
   id: string,
   source: WingetSource,
@@ -811,6 +861,7 @@ export {
   isElevationFailure,
   isInstallerBusyFailure,
   isModifiedPortableFailure,
+  isRetryableFailure,
   remapUninstallNotFound,
   remapUpgradeNotFound,
   downloadInstaller,
