@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## [Fix AI contact search caching] - 2026-08-27
+
+- Key AI contact-search results by query and retry empty results so the tool matches the regular Search Contacts command.
+
 ## [Create All-Day Events] - 2026-08-14
 
 - Add all-day event creation to Create Event and Create Quick Event, including natural-language date-only phrases and “all day”
