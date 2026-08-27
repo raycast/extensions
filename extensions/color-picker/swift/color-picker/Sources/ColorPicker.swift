@@ -2,7 +2,7 @@ import AppKit
 import CoreMedia
 import CoreVideo
 import RaycastSwiftMacros
-import ScreenCaptureKit
+@preconcurrency import ScreenCaptureKit
 
 private struct RGBSample: Sendable {
   let red: UInt8
