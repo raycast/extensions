@@ -107,11 +107,20 @@ describe("rankResults", () => {
     expect(out[0].title).toBe("Unrelated Title");
   });
 
-  it("dedupes items sharing a key (no doubles)", () => {
-    const a = item({ key: "SAMEKEY", title: "Dup", collection: ["A", "B"] });
+  it("dedupes the same item (same id) appearing twice", () => {
+    const a = item({ id: 42, key: "SAMEKEY", title: "Dup" });
     const b = { ...a };
     const out = rankResults([a, b], "", {});
-    expect(out.filter((i) => i.key === "SAMEKEY")).toHaveLength(1);
+    expect(out.filter((i) => i.id === 42)).toHaveLength(1);
+  });
+
+  it("keeps two distinct items that share a Zotero key across libraries", () => {
+    // Zotero item keys are unique only within a library, so a personal item and
+    // a group item can share a key while being different papers.
+    const personal = item({ id: 10, key: "SAMEKEY", library: 1, title: "Personal" });
+    const group = item({ id: 20, key: "SAMEKEY", library: 2, title: "Group" });
+    const out = rankResults([personal, group], "", {});
+    expect(out.map((i) => i.title).sort()).toEqual(["Group", "Personal"]);
   });
 
   it("matches a whole-word term inside a long abstract (substring, not subsequence)", () => {
@@ -128,11 +137,19 @@ describe("rankResults", () => {
     expect(out).toHaveLength(0);
   });
 
-  it("restricts to an allowed-collections set when provided", () => {
-    const inScope = item({ title: "Keep", collection: ["Physics"] });
-    const outScope = item({ title: "Drop", collection: ["Cooking"] });
-    const out = rankResults([inScope, outScope], "", { collections: ["Physics"] });
+  it("restricts to an allowed-collections set by collection key", () => {
+    const inScope = item({ title: "Keep", collectionKeys: ["PHYSKEY"] });
+    const outScope = item({ title: "Drop", collectionKeys: ["COOKKEY"] });
+    const out = rankResults([inScope, outScope], "", { collections: ["PHYSKEY"] });
     expect(out.map((i) => i.title)).toEqual(["Keep"]);
+  });
+
+  it("does not conflate distinct collections that share a name (filters by key)", () => {
+    // Two collections named "Papers" in different libraries have different keys.
+    const a = item({ title: "A", collectionKeys: ["PAPERS_A"] });
+    const b = item({ title: "B", collectionKeys: ["PAPERS_B"] });
+    const out = rankResults([a, b], "", { collections: ["PAPERS_A"] });
+    expect(out.map((i) => i.title)).toEqual(["A"]);
   });
 
   it("restricts to an allowed-libraries set when provided (personal-only default)", () => {

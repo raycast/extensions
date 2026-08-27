@@ -6,7 +6,7 @@
 - Added a "Search by BibTeX Citation Key" preference. With it on, typing a citation key like `smith2020quantum` returns that item.
 - Group libraries are now supported. By default only your personal library is searched, so a paper shared to a group no longer shows up twice. Use the new "Configure Group Libraries" action (`⌘L`) to pick which groups to include.
 - Items in group libraries now open in Zotero. The `zotero://` links use the `/groups/<groupID>/` path for group items, so pressing Enter opens them instead of doing nothing.
-- Selecting a collection now filters the whole library before the 100-item cap, and duplicate items are removed, so an entry in two collections shows once.
+- Selecting a collection now filters the whole library before the 100-item cap. Collections are matched by their key, so two collections that share a name stay separate, and the dropdown labels them so you can tell them apart.
 - Large libraries no longer run out of memory while searching. Matching long fields such as abstracts and notes no longer grows the heap on every keystroke.
 
 ## [Fixes] - 2026-07-17

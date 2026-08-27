@@ -28,7 +28,8 @@ export function parseQuery(q: string): ParsedQuery {
 export interface RankOptions {
   // Include the Better BibTeX citekey as a (highest-weight) search field.
   bibtexSearch?: boolean;
-  // If provided, keep only items belonging to at least one of these collections.
+  // If provided, keep only items belonging to at least one of these collections,
+  // identified by collection key.
   collections?: string[];
   // If provided, keep only items whose libraryID is in this set. Used to scope
   // search to the personal library (default) plus any opted-in group libraries.
@@ -113,8 +114,10 @@ function recency(item: RefData): number {
 }
 
 function inCollections(item: RefData, allowed: Set<string>): boolean {
-  if (!item.collection || item.collection.length === 0) return false;
-  return item.collection.some((c) => allowed.has(c));
+  // Filter on collection keys, not names: distinct collections can share a name
+  // but never a key, so this never conflates same-named collections.
+  if (!item.collectionKeys || item.collectionKeys.length === 0) return false;
+  return item.collectionKeys.some((k) => allowed.has(k));
 }
 
 // Rank items against a query. Pure: no Raycast / DB access, so it is the tested
@@ -124,10 +127,12 @@ export function rankResults(items: RefData[], query: string, opts: RankOptions =
   const limit = opts.limit ?? DEFAULT_LIMIT;
   const threshold = opts.threshold ?? DEFAULT_THRESHOLD;
 
-  // Dedupe by key up front so a doubled row can never reach the UI.
+  // Dedupe by the globally-unique item id (items.itemID). Zotero item *keys* are
+  // unique only within a library, so a personal item and a group item can share
+  // a key while being different papers; keying dedupe on the id keeps both.
   const seen = new Set<string>();
   let pool = items.filter((it) => {
-    const k = it.key ?? String(it.id);
+    const k = it.id != null ? `id:${it.id}` : `${it.library ?? "?"}:${it.key}`;
     if (seen.has(k)) return false;
     seen.add(k);
     return true;

@@ -1,10 +1,12 @@
 import { List } from "@raycast/api";
+import type { CollectionOption } from "./collections";
+
 export default function CollectionDropdown(props: {
-  collections: string[];
+  options: CollectionOption[];
   value: string;
   onSelection: (newValue: string) => void;
 }) {
-  const { onSelection, collections, value } = props;
+  const { onSelection, options, value } = props;
   return (
     <List.Dropdown
       tooltip="Select Collection"
@@ -14,8 +16,8 @@ export default function CollectionDropdown(props: {
       }}
     >
       <List.Dropdown.Item key="All" title="All" value="All" />
-      {collections.map((col) => (
-        <List.Dropdown.Item key={col} title={col} value={col} />
+      {options.map((opt) => (
+        <List.Dropdown.Item key={opt.key} title={opt.title} value={opt.key} />
       ))}
     </List.Dropdown>
   );

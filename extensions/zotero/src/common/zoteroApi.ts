@@ -2,6 +2,7 @@ import { stat, readFile, writeFile, copyFile, rename } from "fs/promises";
 import { getPreferenceValues, environment, showToast, Toast, LocalStorage } from "@raycast/api";
 import type { LibraryRef } from "./library";
 import { USER_LIBRARY_NAME } from "./library";
+import type { CollectionRef } from "./collections";
 import * as utils from "./utils";
 import { existsSync, readFileSync, rmSync } from "fs";
 import { execFileSync } from "child_process";
@@ -44,7 +45,12 @@ export interface RefData {
   tags?: string[];
   notes?: string[];
   attachment?: Attachment;
+  // Human-readable collection names (for display).
   collection?: string[];
+  // Collection keys (globally unique), used for filtering. Distinct collections
+  // that happen to share a name have different keys, so filtering by key never
+  // conflates them.
+  collectionKeys?: string[];
   [key: string]: any;
 }
 
@@ -155,7 +161,9 @@ ORDER BY "index" ASC
 `;
 
 const ALL_COLLECTIONS_SQL = `
-SELECT DISTINCT collections.collectionName AS name
+SELECT  collections.collectionName AS name,
+        collections.key AS key,
+        collections.libraryID AS library
     FROM collections
 `;
 
@@ -185,7 +193,7 @@ WHERE itemNotes.parentItemID = :id
 `;
 
 const cachePath = utils.cachePath("zotero.json");
-const CACHE_VERSION = 5;
+const CACHE_VERSION = 6;
 
 // LocalStorage key holding the JSON array of group libraryIDs the user opted
 // into searching. The personal library is always searched; group libraries are
@@ -427,12 +435,13 @@ export const setIncludedGroupLibraries = async (ids: number[]): Promise<void> =>
   await LocalStorage.setItem(INCLUDED_GROUPS_KEY, JSON.stringify(ids));
 };
 
-export const getCollections = async (): Promise<string[]> => {
+export const getCollections = async (): Promise<CollectionRef[]> => {
   const db = await openDb();
   const st = db.prepare(ALL_COLLECTIONS_SQL);
-  const cols = [];
+  const cols: CollectionRef[] = [];
   while (st.step()) {
-    cols.push(st.getAsObject().name);
+    const r = st.getAsObject();
+    cols.push({ key: r.key as string, name: r.name as string, library: r.library as number });
   }
   st.free();
   db.close();
@@ -549,15 +558,19 @@ async function getDataImpl(): Promise<RefData[]> {
     const st6 = db.prepare(COLLECTIONS_SQL);
     st6.bind({ ":id": row.id });
 
-    const clt = [];
+    const cltNames = [];
+    const cltKeys = [];
     while (st6.step()) {
-      clt.push(st6.getAsObject().name);
+      const o = st6.getAsObject();
+      cltNames.push(o.name);
+      cltKeys.push(o.key);
     }
 
     st6.free();
 
-    if (clt.length > 0) {
-      row.collection = clt;
+    if (cltNames.length > 0) {
+      row.collection = cltNames;
+      row.collectionKeys = cltKeys;
     }
 
     if (bibtexEnabled(preferences)) {

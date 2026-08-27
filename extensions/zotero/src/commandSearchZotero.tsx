@@ -1,11 +1,12 @@
 import {
   searchResources,
   getCollections,
-  getGroupLibraries,
+  getLibraries,
   getIncludedGroupLibraries,
   setIncludedGroupLibraries,
 } from "./common/zoteroApi";
 import type { LibraryRef } from "./common/library";
+import { buildCollectionOptions, type CollectionOption } from "./common/collections";
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "./common/store";
 import { View } from "./common/View";
@@ -17,7 +18,7 @@ export default function MyView() {
   const textRef = useRef("");
   const collectionRef = useRef("All");
   const store = useStore(["results"], (_, q) => searchResources(q as string, collectionRef.current), true);
-  const [collections, setCollections] = useState<string[]>([]);
+  const [collections, setCollections] = useState<CollectionOption[]>([]);
   const [collection, setCollection] = useState("All");
   const [groupLibraries, setGroupLibraries] = useState<LibraryRef[]>([]);
   const [includedGroups, setIncludedGroups] = useState<number[]>([]);
@@ -25,13 +26,14 @@ export default function MyView() {
 
   useEffect(() => {
     const init = async () => {
-      const [cols, groups, included] = await Promise.all([
+      const [cols, libraries, included] = await Promise.all([
         getCollections(),
-        getGroupLibraries(),
+        getLibraries(),
         getIncludedGroupLibraries(),
       ]);
-      setCollections(cols);
-      setGroupLibraries(groups);
+      const libraryNames = new Map(libraries.map((l) => [l.id, l.name]));
+      setCollections(buildCollectionOptions(cols, libraryNames));
+      setGroupLibraries(libraries.filter((l) => l.type === "group"));
       setIncludedGroups(included);
       await store.runQuery("");
     };

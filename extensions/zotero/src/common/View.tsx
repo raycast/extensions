@@ -15,6 +15,7 @@ import {
 import { dirname, join } from "path";
 import { RefData, Preferences, resolveHome, MAX_RENDER_RESULTS } from "./zoteroApi";
 import { LibraryRef, zoteroSelectUri, zoteroOpenPdfUri } from "./library";
+import type { CollectionOption } from "./collections";
 import { useVisitedUrls } from "./useVisitedUrls";
 import {
   exportRef,
@@ -28,7 +29,7 @@ import CollectionDropdown from "./CollectionDropdown";
 
 type Props = {
   sectionNames: string[];
-  collections: string[];
+  collections: CollectionOption[];
   selectedCollection: string;
   onCollectionChange: (value: string) => void;
   groupLibraries: LibraryRef[];
@@ -256,7 +257,7 @@ export const View = ({
       throttle={throttle}
       searchBarPlaceholder="Search Zotero..."
       searchBarAccessory={
-        <CollectionDropdown value={selectedCollection} onSelection={onCollectionChange} collections={collections} />
+        <CollectionDropdown value={selectedCollection} onSelection={onCollectionChange} options={collections} />
       }
     >
       {sectionNames.map((sectionName, sectionIndex) => (
