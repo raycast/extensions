@@ -25,11 +25,14 @@ import {
   TeamForm,
 } from "../types";
 import { competitions } from "../components/searchbar_competition";
-import { getCompetitionTimestamp } from "../utils";
+import { subHours } from "date-fns";
+import { getCompetitionTimestamp, isFinished } from "../utils";
 
 const epl = competitions[0].value;
 
 const endpoint = "https://sdp-prem-prod.premier-league-prod.pulselive.com/api";
+
+const LIVE_WINDOW_HOURS = 3;
 
 interface Pagination<T> {
   data: T[];
@@ -144,7 +147,7 @@ export const getUpcomingMatchweek = async (
   season: string,
   comp: string = "8",
 ): Promise<number | undefined> => {
-  const now = getCompetitionTimestamp(new Date());
+  const from = getCompetitionTimestamp(subHours(new Date(), LIVE_WINDOW_HOURS));
 
   const config: AxiosRequestConfig = {
     method: "get",
@@ -153,15 +156,16 @@ export const getUpcomingMatchweek = async (
       competition: comp,
       season,
       _sort: "kickoff:asc",
-      _limit: 1,
-      [`kickoff>${now}`]: "",
+      _limit: 20,
+      [`kickoff>${from}`]: "",
     },
   };
 
   try {
     const { data }: AxiosResponse<EPLPagination<Fixture>> = await axios(config);
+    const match = data.data.find((m) => !isFinished(m)) ?? data.data[0];
 
-    return data.data[0]?.matchWeek;
+    return match?.matchWeek;
   } catch {
     return undefined;
   }

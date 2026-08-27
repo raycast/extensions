@@ -34,7 +34,7 @@
     {
       "name": "fixture",
       "title": "Fixtures",
-      "description": "Browse upcoming Premier League matches, matchweek by matchweek.",
+      "description": "Browse upcoming and in-progress Premier League matches, matchweek by matchweek.",
       "mode": "view"
     },
     {

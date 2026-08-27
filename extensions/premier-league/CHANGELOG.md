@@ -2,7 +2,8 @@
 
 ## [Split Matches and Fixtures] - {PR_MERGE_DATE}
 
-- Add a Fixtures command for upcoming matches, leaving Matches to cover what has already been played.
+- Add a Fixtures command covering matches in progress and still to come, leaving Matches to cover what has already been played.
+- Show the live clock on matches in any half, not only on ones the feed marks with a short code.
 - Restore scrolling to load more, now in the direction each command is about: Matches works back through earlier matchweeks, Fixtures works forward through later ones.
 - Add a "Jump to…" action on both commands for moving straight to a matchweek, on `J`.
 - Rename the matchweek actions to "Next: Matchweek n" and "Previous: Matchweek n". Each command starts with only the action that keeps you on its side of today, and offers the other one once you have moved.

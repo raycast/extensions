@@ -26,6 +26,12 @@ export const TOTAL_MATCHWEEKS = 38;
 
 export const livePeriods = ["FirstHalf", "SecondHalf", "HalfTime"];
 
+export const isFinished = (match: Fixture): boolean =>
+  match.period === "FullTime";
+
+export const isLive = (match: Fixture): boolean =>
+  livePeriods.includes(match.period) || match.period === "L";
+
 export const getFlagEmoji = (isoCode?: string) => {
   if (!isoCode) return "🏴";
 
