@@ -7,7 +7,8 @@
 import React from "react";
 import { Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { OutdatedCask, OutdatedFormula, OutdatedResults } from "../utils";
+import { OutdatedCask, OutdatedFormula, OutdatedResults, type UpgradePackageStatus } from "../utils";
+import type { PackageState } from "../hooks/useBrewUpgrade";
 import { OutdatedActionPanel } from "./actionPanels";
 import { InstallableFilterType, placeholder } from "./filter";
 
@@ -16,6 +17,13 @@ export type OutdatedIcon = (
   outdated: OutdatedCask | OutdatedFormula,
   isCask: boolean,
 ) => React.ComponentProps<typeof List.Item>["icon"];
+
+/** Called when a package upgrade starts or finishes, e.g. to update its icon. */
+export type OutdatedUpgradeCallback = (
+  outdated: OutdatedCask | OutdatedFormula,
+  isCask: boolean,
+  status: UpgradePackageStatus,
+) => void;
 
 /** Actions for a list item. Defaults to the standard OutdatedActionPanel. */
 export type OutdatedActions = (
@@ -33,11 +41,35 @@ export interface OutdatedListProps {
   searchBarPlaceholder?: string;
   icon?: OutdatedIcon;
   actions?: OutdatedActions;
+  onUpgrade?: OutdatedUpgradeCallback;
+  /** Overrides the default "Upgrade All", e.g. to report progress per package */
+  onUpgradeAll?: () => void;
   onAction: () => void;
 }
 
 /** Icon for a package which is outdated, but not (yet) upgraded. */
 export const PENDING_ICON = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
+
+/**
+ * The list item icon, indicating the upgrade status of a package.
+ */
+export function statusIcon(state?: PackageState): React.ComponentProps<typeof List.Item>["icon"] {
+  if (!state) return { value: PENDING_ICON, tooltip: "Pending" };
+
+  switch (state.status) {
+    case "upgrading":
+      return { value: { source: Icon.ArrowDownCircle, tintColor: Color.Blue }, tooltip: "Upgrading…" };
+    case "upgraded":
+      return { value: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Upgraded" };
+    case "failed":
+      return { value: { source: Icon.XMarkCircle, tintColor: Color.Red }, tooltip: state.message ?? "Upgrade failed" };
+    case "skipped":
+      return {
+        value: { source: Icon.MinusCircle, tintColor: Color.SecondaryText },
+        tooltip: state.message ?? "Skipped",
+      };
+  }
+}
 
 export function OutdatedList(props: OutdatedListProps) {
   const formulae = props.filterType != InstallableFilterType.casks ? (props.outdated?.formulae ?? []) : [];
@@ -82,6 +114,8 @@ export function OutdatedList(props: OutdatedListProps) {
                 outdated={formula}
                 icon={props.icon}
                 actions={props.actions}
+                onUpgrade={props.onUpgrade}
+                onUpgradeAll={props.onUpgradeAll}
                 onAction={props.onAction}
               />
             ))}
@@ -93,6 +127,8 @@ export function OutdatedList(props: OutdatedListProps) {
                 outdated={cask}
                 icon={props.icon}
                 actions={props.actions}
+                onUpgrade={props.onUpgrade}
+                onUpgradeAll={props.onUpgradeAll}
                 onAction={props.onAction}
               />
             ))}
@@ -106,6 +142,8 @@ export function OutdatedList(props: OutdatedListProps) {
 interface OutdatedListItemProps {
   icon?: OutdatedIcon;
   actions?: OutdatedActions;
+  onUpgrade?: OutdatedUpgradeCallback;
+  onUpgradeAll?: () => void;
   onAction: () => void;
 }
 
@@ -119,7 +157,16 @@ function OutdatedCaskListItem(props: OutdatedListItemProps & { outdated: Outdate
       title={outdated.name}
       accessories={[{ text: version }]}
       icon={props.icon?.(outdated, true) ?? PENDING_ICON}
-      actions={props.actions?.(outdated, true) ?? <OutdatedActionPanel outdated={outdated} onAction={props.onAction} />}
+      actions={
+        props.actions?.(outdated, true) ?? (
+          <OutdatedActionPanel
+            outdated={outdated}
+            onUpgrade={(status) => props.onUpgrade?.(outdated, true, status)}
+            onUpgradeAll={props.onUpgradeAll}
+            onAction={props.onAction}
+          />
+        )
+      }
     />
   );
 }
@@ -139,7 +186,14 @@ function OutdatedFormulaeListItem(props: OutdatedListItemProps & { outdated: Out
       accessories={[{ text: version }]}
       icon={props.icon?.(outdated, false) ?? PENDING_ICON}
       actions={
-        props.actions?.(outdated, false) ?? <OutdatedActionPanel outdated={outdated} onAction={props.onAction} />
+        props.actions?.(outdated, false) ?? (
+          <OutdatedActionPanel
+            outdated={outdated}
+            onUpgrade={(status) => props.onUpgrade?.(outdated, false, status)}
+            onUpgradeAll={props.onUpgradeAll}
+            onAction={props.onAction}
+          />
+        )
       }
     />
   );

@@ -4,7 +4,8 @@
 
 - The Upgrade command now lists the outdated formulae & casks, matching the Show Outdated command, instead of a list of progress steps.
 - Upgrade progress is reported via the toast/HUD, with the icon of each package reflecting its upgrade status.
-- Outdated packages now use a grey check icon, matching the pending state in the Upgrade command.
+- "Upgrade All" now upgrades each package in turn, so its progress is reported per package.
+- Added a Refresh action to the outdated action panel.
 - Pinned formulae are skipped when upgrading.
 
 ## [Adopt] - 2026-08-19
