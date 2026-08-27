@@ -1,0 +1,96 @@
+instructions: |
+  Calendly tools operate on the authenticated user's scheduling data.
+  Resolve event type and meeting URIs with list-event-types or list-meetings before calling tools that require them.
+  Treat all date-time inputs and outputs as ISO 8601 values and preserve the user's requested timezone.
+  Use get-available-times before book-meeting, offer the user concrete open slots, and only book a startTime returned as available.
+  Booking, cancellation, and single-use-link creation require the built-in confirmation; never imply they succeeded until the tool returns successfully.
+  Calendly does not currently provide a reschedule API. Use the rescheduleUrl returned by get-meeting when a user needs to reschedule.
+evals:
+  - input: "@calendly when can I fit a 30 minute call tomorrow?"
+    mocks:
+      list-event-types:
+        - uri: "https://api.calendly.com/event_types/30MIN"
+          name: "30 Minute Meeting"
+          durationMinutes: 30
+          schedulingUrl: "https://calendly.com/example/30min"
+          locations: []
+      get-available-times:
+        - startTime: "2025-02-11T09:00:00.000Z"
+        - startTime: "2025-02-11T09:30:00.000Z"
+    expected:
+      - callsTool: list-event-types
+      - callsTool: get-available-times
+
+  - input: "@calendly what's my next meeting with John?"
+    mocks:
+      list-meetings:
+        - uri: "https://api.calendly.com/scheduled_events/NEXT"
+          name: "Design Review"
+          status: "active"
+          startTime: "2025-02-11T10:30:00.000Z"
+          endTime: "2025-02-11T11:00:00.000Z"
+      get-meeting:
+        uri: "https://api.calendly.com/scheduled_events/NEXT"
+        name: "Design Review"
+        status: "active"
+        startTime: "2025-02-11T10:30:00.000Z"
+        endTime: "2025-02-11T11:00:00.000Z"
+        invitees:
+          - name: "John Appleseed"
+            email: "john@example.com"
+            status: "active"
+    expected:
+      - callsTool: list-meetings
+      - callsTool: get-meeting
+
+  - input: "@calendly create a single-use link for my 1:1"
+    mocks:
+      list-event-types:
+        - uri: "https://api.calendly.com/event_types/ONEONONE"
+          name: "1:1"
+          durationMinutes: 30
+          schedulingUrl: "https://calendly.com/example/one-on-one"
+          locations: []
+      create-single-use-link:
+        booking_url: "https://calendly.com/d/example"
+        owner: "https://api.calendly.com/event_types/ONEONONE"
+        owner_type: "EventType"
+    expected:
+      - callsTool: list-event-types
+      - callsTool: create-single-use-link
+
+  - input: "@calendly book my 30-minute meeting with Sarah at 3pm Thursday in America/New_York; her email is sarah@example.com"
+    mocks:
+      list-event-types:
+        - uri: "https://api.calendly.com/event_types/30MIN"
+          name: "30 Minute Meeting"
+          durationMinutes: 30
+          schedulingUrl: "https://calendly.com/example/30min"
+          locations: []
+      get-available-times:
+        - startTime: "2025-02-13T20:00:00.000Z"
+      book-meeting:
+        uri: "https://api.calendly.com/scheduled_events/BOOKED/invitees/SARAH"
+        event: "https://api.calendly.com/scheduled_events/BOOKED"
+        name: "Sarah"
+        email: "sarah@example.com"
+        status: "active"
+    expected:
+      - callsTool: list-event-types
+      - callsTool: get-available-times
+      - callsTool: book-meeting
+
+  - input: "@calendly cancel my 3pm meeting with Alex"
+    mocks:
+      list-meetings:
+        - uri: "https://api.calendly.com/scheduled_events/ALEX"
+          name: "Intro Call"
+          status: "active"
+          startTime: "2025-02-10T15:00:00.000Z"
+          endTime: "2025-02-10T15:30:00.000Z"
+      cancel-meeting:
+        canceled: true
+        meeting: "https://api.calendly.com/scheduled_events/ALEX"
+    expected:
+      - callsTool: list-meetings
+      - callsTool: cancel-meeting

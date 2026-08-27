@@ -1,13 +1,38 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "calendly",
-  "title": "Calendly Share Meeting Links",
-  "description": "Quickly share your Calendly meeting links",
-  "icon": "logo.png",
-  "author": "eluce2",
-  "contributors": ["eric_dumesnil"],
+  "title": "Calendly",
+  "description": "Manage Calendly meetings, event types, availability, and bookings",
+  "icon": "calendly-icon.png",
+  "author": "0xdhrv",
+  "contributors": ["eluce2", "eric_dumesnil"],
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "upcoming-meetings",
+      "title": "Upcoming Meetings",
+      "description": "View and manage upcoming Calendly meetings",
+      "mode": "view"
+    },
+    {
+      "name": "event-types",
+      "title": "Event Types",
+      "description": "Browse event types and share available times",
+      "mode": "view"
+    },
+    {
+      "name": "book-meeting",
+      "title": "Book Meeting",
+      "description": "Book an invitee into an available Calendly time",
+      "mode": "view"
+    },
     {
       "name": "calendly",
       "title": "Share Meeting Link",
@@ -16,11 +41,47 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "list-meetings",
+      "title": "List Meetings",
+      "description": "List scheduled Calendly meetings in a date range"
+    },
+    {
+      "name": "get-meeting",
+      "title": "Get Meeting",
+      "description": "Get a scheduled Calendly meeting and its invitees"
+    },
+    {
+      "name": "list-event-types",
+      "title": "List Event Types",
+      "description": "List the authenticated user's active Calendly event types"
+    },
+    {
+      "name": "get-available-times",
+      "title": "Find Available Times",
+      "description": "Find open times for a Calendly event type in a date range"
+    },
+    {
+      "name": "create-single-use-link",
+      "title": "Create Single-Use Link",
+      "description": "Create a single-use scheduling link for an event type"
+    },
+    {
+      "name": "book-meeting",
+      "title": "Book Meeting",
+      "description": "Book an invitee into a verified available time"
+    },
+    {
+      "name": "cancel-meeting",
+      "title": "Cancel Meeting",
+      "description": "Cancel a scheduled Calendly meeting"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.39.2",
-    "@raycast/utils": "^1.3.1",
-    "axios": "^0.30.3",
-    "moment": "^2.29.1"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "axios": "^0.30.3"
   },
   "preferences": [
     {
@@ -39,23 +100,23 @@
       "title": "Default Action",
       "description": "The action to use by default",
       "required": false,
-      "default": "meeting",
-      "value": "meeting"
+      "default": "meeting"
     }
   ],
   "devDependencies": {
-    "@types/lodash": "^4.14.175",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
-  },
-  "platforms": [
-    "macOS"
-  ]
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
 }

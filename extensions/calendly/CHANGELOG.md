@@ -1,5 +1,13 @@
 # Calendly Changelog
 
+## [Initial Version] - {PR_MERGE_DATE}
+
+- Sign in with Calendly OAuth to manage meetings from Raycast
+- Browse upcoming meetings for the next 90 days, then join, copy links, reschedule, or cancel
+- Browse event types and copy scheduling links, the next available times, or a single-use booking link
+- Book an invitee into a verified open slot from Raycast
+- Use Raycast AI to list meetings, check availability, create links, book, or cancel
+
 ## [Added event duration] - 2026-04-12
 
 - Display event duration as a right-aligned accessory on each event type
@@ -15,4 +23,4 @@
 
 ## [Update] - 2022-09-12
 
- - OAuth Support 🎉
+- OAuth Support 🎉
