@@ -1,5 +1,13 @@
 # Agent Usage Changelog
 
+## [Fix Amp usage parse] - 2026-08-27
+
+### Bug Fixes
+
+- Parse `amp usage` when labels are markdown-bold (`**Amp Free:**`), which is what the CLI emits when it is not attached to a TTY (Raycast's fetch path)
+- Parse Amp Megawatt/Gigawatt subscription remaining (other usage + orb usage) in the detail view
+- List and menu bar still show Amp Free when present; if Amp Free is absent they use the tighter subscription pool instead of 0%
+
 ## [Add AIHubMix Usage] - 2026-08-22
 
 - Add AIHubMix balance monitoring to the main list and menu bar
