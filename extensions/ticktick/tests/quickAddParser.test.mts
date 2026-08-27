@@ -7,6 +7,7 @@ const projects = [
   { id: "inbox", name: "Inbox" },
   { id: "client-work", name: "Client Work" },
 ];
+type ParsedPriority = "0" | "1" | "3" | "5";
 
 test("parses natural-language dates, multi-word lists, and priorities", () => {
   const parsed = parseQuickAdd("Send proposal at 9 tomorrow ~Client Work !high", projects, now);
@@ -73,21 +74,62 @@ test("exposes an empty title when the input contains only metadata", () => {
   assert.deepEqual(parsed.dueDate, new Date(2026, 7, 21));
 });
 
-test("consumes additional date metadata instead of treating it as a title", () => {
+test("uses the first date and preserves later date expressions like TickTick", () => {
   const parsed = parseQuickAdd("today tomorrow ~Inbox !high", projects, now);
 
-  assert.equal(parsed.title, "");
+  assert.equal(parsed.title, "tomorrow");
   assert.equal(parsed.projectId, "inbox");
   assert.equal(parsed.priority, "5");
   assert.deepEqual(parsed.dueDate, new Date(2026, 7, 20));
 });
 
-test("consumes repeated project and priority metadata in input order", () => {
+test("parses bare weekdays in titles like TickTick", () => {
+  const cases: Array<[string, string, Date]> = [
+    ["Monday report", "report", new Date(2026, 7, 24)],
+    ["Friday deployment checklist", "deployment checklist", new Date(2026, 7, 21)],
+    ["Prepare Monday report for Friday", "Prepare report for Friday", new Date(2026, 7, 24)],
+    ["Move Tuesday meeting to Thursday", "Move meeting to Thursday", new Date(2026, 7, 25)],
+  ];
+
+  for (const [input, expectedTitle, expectedDate] of cases) {
+    const parsed = parseQuickAdd(input, projects, now);
+    assert.equal(parsed.title, expectedTitle, input);
+    assert.deepEqual(parsed.dueDate, expectedDate, input);
+  }
+});
+
+test("uses the first project without consuming later project metadata", () => {
   const parsed = parseQuickAdd("today ~Client Work ~Inbox !high !low", projects, now);
 
-  assert.equal(parsed.title, "");
+  assert.equal(parsed.title, "~Inbox");
   assert.equal(parsed.projectId, "client-work");
-  assert.equal(parsed.priority, "5");
+  assert.equal(parsed.priority, "1");
+});
+
+test("supports TickTick priority syntax", () => {
+  const cases: Array<[string, ParsedPriority]> = [
+    ["!1", "5"],
+    ["!high", "5"],
+    ["!2", "3"],
+    ["!medium", "3"],
+    ["!3", "1"],
+    ["!low", "1"],
+    ["!none", "0"],
+  ];
+
+  for (const [token, expectedPriority] of cases) {
+    const parsed = parseQuickAdd(`Task ${token}`, projects, now);
+    assert.equal(parsed.title, "Task", token);
+    assert.equal(parsed.priority, expectedPriority, token);
+  }
+});
+
+test("does not parse unsupported priority aliases", () => {
+  for (const token of ["!", "!!", "!!!", "!0", "!med"]) {
+    const parsed = parseQuickAdd(`Task ${token}`, projects, now);
+    assert.equal(parsed.title, `Task ${token}`, token);
+    assert.equal(parsed.priority, undefined, token);
+  }
 });
 
 test("parses documented ISO and zero-padded numeric dates and times", () => {

@@ -18,16 +18,16 @@ const cleanTitle = (value: string) =>
     .trim();
 
 const parsePriority = (text: string) => {
-  const match = text.match(/(?:^|\s)(!{1,3}|!(?:none|low|medium|med|high|[0-3]))(?=\s|$)/i);
+  const match = text.match(/(?:^|\s)(!(?:none|low|medium|high|[1-3]))(?=\s|$)/i);
   if (!match || match.index === undefined) return { text };
 
   const token = match[1].toLowerCase();
   const priority: ParsedQuickAdd["priority"] =
-    token === "!none" || token === "!0"
+    token === "!none"
       ? "0"
-      : token === "!low" || token === "!3" || token === "!"
+      : token === "!low" || token === "!3"
       ? "1"
-      : token === "!medium" || token === "!med" || token === "!2" || token === "!!"
+      : token === "!medium" || token === "!2"
       ? "3"
       : "5";
 
@@ -187,33 +187,21 @@ const parseDate = (text: string, now: Date) => {
 /** Parse the subset of TickTick quick-add syntax supported by the macOS AppleScript API. */
 export const parseQuickAdd = (input: string, projects: Project[], now = new Date()): ParsedQuickAdd => {
   let remainingText = input;
-  let projectId: ParsedQuickAdd["projectId"];
-  let project = parseProject(remainingText, projects);
-  while (project.projectId) {
-    projectId = projectId || project.projectId;
-    remainingText = project.text;
-    project = parseProject(remainingText, projects);
-  }
+  const project = parseProject(remainingText, projects);
+  const projectId = project.projectId;
+  remainingText = project.text;
 
   let priorityValue: ParsedQuickAdd["priority"];
   let priority = parsePriority(remainingText);
   while (priority.priority) {
-    priorityValue = priorityValue || priority.priority;
+    // TickTick applies the last recognized priority when several are entered.
+    priorityValue = priority.priority;
     remainingText = priority.text;
     priority = parsePriority(remainingText);
   }
 
   const date = parseDate(remainingText, now);
   remainingText = date.text;
-
-  // Consume additional date/time metadata so it cannot become the task title.
-  if (date.dueDate) {
-    let additionalDate = parseDate(remainingText, now);
-    while (additionalDate.dueDate) {
-      remainingText = additionalDate.text;
-      additionalDate = parseDate(remainingText, now);
-    }
-  }
 
   return {
     title: cleanTitle(remainingText),
