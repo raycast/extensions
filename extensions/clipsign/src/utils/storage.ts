@@ -1,9 +1,8 @@
 import { LocalStorage, Clipboard } from "@raycast/api";
 import * as PImage from "pureimage";
-import { mkdir } from "fs/promises";
+import { mkdir, readFile, copyFile } from "fs/promises";
 import { createWriteStream } from "fs";
 import path from "path";
-import { readFile } from "fs/promises";
 import { Signature } from "../types";
 
 const SIGNATURES_KEY = "esignature_signatures";
@@ -27,6 +26,12 @@ export async function saveSignature(
       ...signature,
       id: generateId(),
     };
+
+    const outDir = path.join(
+      process.env.HOME!,
+      "Library/Application Support/raycast/signatures",
+    );
+    await mkdir(outDir, { recursive: true });
 
     //  render to PNG and convert to image type
     if (signature.type === "text" && signature.content) {
@@ -61,11 +66,6 @@ export async function saveSignature(
       ctx.textBaseline = "top";
       ctx.fillText(text, padding, padding);
 
-      const outDir = path.join(
-        process.env.HOME!,
-        "Library/Application Support/raycast/signatures",
-      );
-      await mkdir(outDir, { recursive: true });
       const outPath = path.join(outDir, `${newSignature.id}.png`);
       await new Promise<void>((resolve, reject) => {
         const stream = createWriteStream(outPath);
@@ -74,6 +74,12 @@ export async function saveSignature(
 
       newSignature.imagePath = outPath;
       newSignature.type = "image";
+    } else if (signature.type === "image" && signature.imagePath) {
+      // BUG FIX: Copy the uploaded image into the safe Raycast directory
+      const extension = path.extname(signature.imagePath) || ".png";
+      const outPath = path.join(outDir, `${newSignature.id}${extension}`);
+      await copyFile(signature.imagePath, outPath);
+      newSignature.imagePath = outPath;
     }
 
     signatures.push(newSignature);
