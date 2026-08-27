@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Fix Menu Bar Reminders title truncation] - {PR_MERGE_DATE}
+## [Fix Menu Bar Reminders title truncation] - 2026-08-27
 
 - Truncate menu bar reminder titles by Unicode character instead of UTF-16 code units so emoji and other multi-byte characters are not split.
 
