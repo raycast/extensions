@@ -1,6 +1,6 @@
 # ClipSign Changelog
 
-## [Unreleased] - {PR_MERGE_DATE}
+## [Unreleased] - 2026-08-27
 
 **Fixed**
 
