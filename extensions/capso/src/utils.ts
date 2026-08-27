@@ -17,10 +17,9 @@ export function getCapsoShortcut(
   defaultModifiers = "option down, shift down",
 ): ShortcutConfig {
   try {
-    const raw = execSync(
-      `defaults read com.awesomemacapps.capso KeyboardShortcuts_${actionKey} 2>/dev/null`,
-      { encoding: "utf8" },
-    ).trim();
+    const raw = execSync(`defaults read com.awesomemacapps.capso KeyboardShortcuts_${actionKey} 2>/dev/null`, {
+      encoding: "utf8",
+    }).trim();
 
     if (!raw) {
       return { keyCode: defaultKeyCode, modifiers: defaultModifiers };
@@ -38,7 +37,7 @@ export function getCapsoShortcut(
 
     return {
       keyCode,
-      modifiers: modifiers.length > 0 ? modifiers.join(", ") : defaultModifiers,
+      modifiers: modifiers.join(", "),
     };
   } catch {
     return { keyCode: defaultKeyCode, modifiers: defaultModifiers };
@@ -55,17 +54,14 @@ export async function triggerCapsoAction(
   defaultModifiers = "option down, shift down",
 ) {
   try {
-    const { keyCode, modifiers } = getCapsoShortcut(
-      actionKey,
-      defaultKeyCode,
-      defaultModifiers,
-    );
+    const { keyCode, modifiers } = getCapsoShortcut(actionKey, defaultKeyCode, defaultModifiers);
     await closeMainWindow();
 
+    const modifierClause = modifiers ? ` using {${modifiers}}` : "";
     const script = `
       delay 0.1
       tell application "System Events"
-        key code ${keyCode} using {${modifiers}}
+        key code ${keyCode}${modifierClause}
       end tell
     `;
 
