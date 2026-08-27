@@ -16,7 +16,7 @@ const DEFAULT_MAX_DEPLOYMENTS = 10;
 
 export default function MenuBarDeployments() {
   const { maxDeployments } = getPreferenceValues<Preferences.MenuBarDeployments>();
-  const configuredLimit = Number.parseInt(maxDeployments, 10);
+  const configuredLimit = maxDeployments ? Number.parseInt(maxDeployments, 10) : Number.NaN;
   const limit = Number.isFinite(configuredLimit) && configuredLimit > 0 ? configuredLimit : DEFAULT_MAX_DEPLOYMENTS;
   const { isLoading, data = [] } = useDeploymentHistory(limit);
   const deployments = data.slice(0, limit);
