@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { z } from "zod";
+import { isSameCredential, removeOneCredential } from "../Utils/credentials";
 import { useEffect, useState } from "react";
 
 export const teamSchema = z.object({
@@ -9,8 +10,17 @@ export const teamSchema = z.object({
    * differently — a team key sets the `iss` claim, an individual key sets `sub: "user"`
    * and omits `iss` entirely — so absence here is what selects the individual-key path.
    * Optional (not removed) so credentials stored by earlier versions still parse.
+   *
+   * Empty string is normalized to undefined on parse. Everything else treats "" as
+   * absent — `selectCurrentTeam` removes the flat key for it, the signer branches on
+   * falsiness — but a raw `""` would compare unequal to `undefined` in the identity
+   * check, so a record stored that way could be deleted from the list while the flat
+   * selection keys still pointed at it. One representation, decided here.
    */
-  issuerID: z.string().optional(),
+  issuerID: z
+    .string()
+    .optional()
+    .transform((value) => (value === undefined || value.length === 0 ? undefined : value)),
   apiKey: z.string(),
   privateKey: z.string(),
 });
@@ -32,6 +42,20 @@ export function credentialLabel(name: string, isIndividualKey: boolean, apiKey: 
 
 export const teamSchemas = z.array(teamSchema);
 
+/**
+ * Stored credentials, and which one is selected.
+ *
+ * **Known limitation — last write wins.** Every mutation here is a read-modify-write
+ * against `LocalStorage`, which offers no compare-and-swap. Two Raycast commands running
+ * at once can therefore lose one of two concurrent additions, and the selection is four
+ * independent keys rather than one record, so interleaved selections could in principle
+ * mix one credential's name with another's key material.
+ *
+ * This is documented rather than papered over: closing it properly means storing the
+ * selection as a single serialized record with a stable id, which is a storage-format
+ * change needing a migration for existing users. In practice a person drives one
+ * credential form at a time, so the window is small — but it is real, not absent.
+ */
 export const useTeams = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -55,19 +79,31 @@ export const useTeams = () => {
     }
     const json = JSON.parse(storageTeams);
     const parsed = teamSchemas.parse(json);
-    const filtered = parsed.filter((t) => t.apiKey !== team.apiKey);
-    const newJson = JSON.stringify(filtered);
-    await LocalStorage.setItem("teams", newJson);
-    setTeams(await getTeams());
+    // Drops a SINGLE entry matched on the whole credential — see Utils/credentials.
+    const { removed, remaining } = removeOneCredential(parsed, team);
+    if (!removed) {
+      return;
+    }
+    await LocalStorage.setItem("teams", JSON.stringify(remaining));
+    setTeams(remaining);
     const currentTeam = await getCurrentTeam();
-    if (currentTeam?.apiKey === team.apiKey) {
-      await removeCurrentTeam();
-      const newTeams = await getTeams();
-      setTeams(newTeams);
-      if (newTeams && newTeams.length > 0) {
-        selectCurrentTeam(newTeams[newTeams.length - 1]);
+    // An identical duplicate still backs the selection, so only drop it when nothing left matches.
+    if (
+      currentTeam &&
+      isSameCredential(currentTeam, team) &&
+      !remaining.some((t) => isSameCredential(t, currentTeam))
+    ) {
+      await clearCurrentTeam();
+      if (remaining.length > 0) {
+        await selectCurrentTeam(remaining[remaining.length - 1]);
       }
     }
+  };
+
+  /** Reads storage fresh — a render-time snapshot may name a credential since deleted. */
+  const hasStoredTeam = async (team: Team) => {
+    const stored = await getTeams();
+    return stored.some((candidate) => isSameCredential(candidate, team));
   };
 
   const addTeam = async (team: Team) => {
@@ -96,7 +132,10 @@ export const useTeams = () => {
     } else {
       return {
         name: teamName,
-        issuerID: issuerID,
+        // Same normalization the schema applies to the stored list: this record is
+        // compared against those with isSameCredential, so "" and undefined must not
+        // be two ways of saying "individual key".
+        issuerID: issuerID === undefined || issuerID.length === 0 ? undefined : issuerID,
         apiKey: apiKey,
         privateKey: privateKey,
       };
@@ -117,14 +156,18 @@ export const useTeams = () => {
     setCurrentTeam(team);
   };
 
+  const clearCurrentTeam = async () => {
+    await LocalStorage.removeItem("teamName");
+    await LocalStorage.removeItem("apiKey");
+    await LocalStorage.removeItem("privateKey");
+    await LocalStorage.removeItem("issuerID");
+    setCurrentTeam(undefined);
+  };
+
   const removeCurrentTeam = async () => {
     const currentTeam = await getCurrentTeam();
     if (currentTeam) {
-      await LocalStorage.removeItem("teamName");
-      await LocalStorage.removeItem("apiKey");
-      await LocalStorage.removeItem("privateKey");
-      await LocalStorage.removeItem("issuerID");
-      setCurrentTeam(undefined);
+      await clearCurrentTeam();
       await deleteTeam(currentTeam);
       setTeams(await getTeams());
     }
@@ -146,5 +189,6 @@ export const useTeams = () => {
     currentTeam,
     selectCurrentTeam,
     removeCurrentTeam,
+    hasStoredTeam,
   };
 };

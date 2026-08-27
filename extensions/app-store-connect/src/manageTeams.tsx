@@ -1,5 +1,6 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { useTeams, Team } from "./Model/useTeams";
+import { isSameCredential } from "./Utils/credentials";
 import { useEffect, useState } from "react";
 import { confirmAlert, Alert } from "@raycast/api";
 import AddTeam from "./Components/AddTeam";
@@ -30,8 +31,11 @@ export default function Command() {
     })();
   };
 
+  // Whole-record identity: two credentials can share a Key ID (a key re-added under a
+  // corrected Issuer ID), and comparing Key IDs alone marks both rows as current and
+  // leaves neither offering "Use Team".
   const isCurrentTeam = (team: Team) => {
-    return currentTeam?.apiKey === team.apiKey;
+    return currentTeam !== undefined && isSameCredential(currentTeam, team);
   };
 
   const accessoriesForTeam = (team: Team) => {
@@ -60,12 +64,12 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      {teams?.map((team: Team) => (
+      {teams?.map((team: Team, index: number) => (
         <List.Item
           title={team.name}
           accessories={accessoriesForTeam(team)}
           subtitle={team.apiKey}
-          key={team.apiKey}
+          key={`${team.apiKey}-${team.issuerID ?? "individual"}-${index}`}
           actions={
             <ActionPanel>
               <ActionPanel.Section title={team.name}>

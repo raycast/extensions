@@ -28,7 +28,7 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
   // own `values` inside its config is a circular reference.
   const [keyType, setKeyType] = useState<KeyType>("team");
   const isIndividualKey = keyType === "individual";
-  const { isLoading: isLoadingTeams, currentTeam, selectCurrentTeam, removeCurrentTeam, addTeam } = useTeams();
+  const { isLoading: isLoadingTeams, currentTeam, selectCurrentTeam, deleteTeam, addTeam } = useTeams();
 
   useEffect(() => {
     (async () => {
@@ -55,6 +55,9 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
       }
 
       setIsCheckConnection(true);
+      // Declared out here so the catch rolls back the exact key it added; stays undefined
+      // if we failed before persisting anything.
+      let addedTeam: Team | undefined;
 
       const privateKeyContent = fs.readFileSync(file, "utf8");
       const encodedPrivateKey = encodeBase64(privateKeyContent);
@@ -73,17 +76,21 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
         // never sign a request.
         await assertPrivateKeyUsable(encodedPrivateKey);
 
+        addedTeam = team;
         await addTeam(team);
         await selectCurrentTeam(team);
         await fetchAppStoreConnect("/apps");
         setIsAuthenticated(true);
         didSignIn();
       } catch (error) {
-        // 401 only. removeCurrentTeam() deletes the persisted record, so a 429/5xx/
-        // offline blip must not trigger it — and a 403 means the key is valid but
-        // lacks permission for /apps, which discarding it would not fix.
-        if (error instanceof ATCError && error.status === 401) {
-          removeCurrentTeam();
+        // Roll back the credential this form ADDED, not "whatever is currently selected":
+        // removeCurrentTeam() reads the live selection, so anything that changed it while
+        // the request was in flight would be deleted instead of the rejected key.
+        //
+        // 401 only. A 429/5xx/offline blip must not discard a credential, and a 403 means
+        // the key is valid but lacks permission for /apps, which deleting it would not fix.
+        if (error instanceof ATCError && error.status === 401 && addedTeam) {
+          await deleteTeam(addedTeam);
         }
         presentError(error);
       } finally {

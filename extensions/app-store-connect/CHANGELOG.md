@@ -5,6 +5,7 @@
 - Add support for Apple's individual API keys, which have no Issuer ID
 - Fix removing a team member or revoking an invitation clearing the entire list
 - Fix adding a rejected key deleting the previously working one instead
+- Fix removing one credential also removing another that shares its Key ID
 - Fix a transient network error, a permission error, or an unreadable key file during sign-in deleting stored credentials
 - Fix removals leaving a row missing from the list when the request failed
 - Fix adding and removing builds from a beta group failing from the Manage Builds screen

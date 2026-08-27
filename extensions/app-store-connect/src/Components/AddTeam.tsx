@@ -13,7 +13,7 @@ interface SignInProps {
 
 export default function AddTeam({ didSignIn }: SignInProps) {
   const [isCheckConnection, setIsCheckConnection] = useState(false);
-  const { selectCurrentTeam, addTeam, deleteTeam, currentTeam } = useTeams();
+  const { selectCurrentTeam, addTeam, deleteTeam, currentTeam, hasStoredTeam } = useTeams();
   // Held outside useForm: the issuerID validator depends on it, and reading useForm's
   // own `values` inside its config is a circular reference.
   const [keyType, setKeyType] = useState<KeyType>("team");
@@ -80,7 +80,11 @@ export default function AddTeam({ didSignIn }: SignInProps) {
         const rejected = error instanceof ATCError && error.status === 401;
         if (rejected && addedTeam) {
           await deleteTeam(addedTeam);
-          if (previouslySelectedTeam) {
+          // `previouslySelectedTeam` is a render-time snapshot, so it may have been
+          // deleted by another command while this request was in flight. Re-select it
+          // only if it is still there; deleteTeam has already repaired the selection
+          // otherwise.
+          if (previouslySelectedTeam && (await hasStoredTeam(previouslySelectedTeam))) {
             await selectCurrentTeam(previouslySelectedTeam);
           }
         }
