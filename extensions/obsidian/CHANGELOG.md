@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Exact Content Match Navigation] - {PR_MERGE_DATE}
+## [Exact Content Match Navigation] - 2026-08-27
 
 - Show each exact content occurrence as a separate result with highlighted context and line and column information
 - Open Obsidian at the selected occurrence using the official Obsidian CLI
