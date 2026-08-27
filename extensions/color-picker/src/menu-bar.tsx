@@ -14,9 +14,11 @@ import { getFormattedColor, getIcon, getPreviewColor, getShortcut } from "./lib/
 
 export default function Command() {
   const { history, remove, clear } = useHistory();
+  const favorites = history?.filter((item) => item.isFavorite) ?? [];
+  const recentColors = history?.filter((item) => !item.isFavorite) ?? [];
 
   return (
-    <MenuBarExtra icon={Icon.EyeDropper}>
+    <MenuBarExtra icon={Icon.EyeDropper} isLoading={history === undefined}>
       <MenuBarExtra.Item
         title="Pick Color"
         onAction={async () => {
@@ -31,8 +33,34 @@ export default function Command() {
           }
         }}
       />
-      <MenuBarExtra.Section>
-        {history?.slice(0, 9).map((historyItem, index) => {
+      {favorites.length > 0 && (
+        <MenuBarExtra.Section title="Favorites">
+          {favorites.slice(0, 9).map((historyItem, index) => {
+            const formattedColor = getFormattedColor(historyItem.color);
+            const previewColor = getPreviewColor(historyItem.color);
+            return (
+              <MenuBarExtra.Item
+                key={formattedColor}
+                icon={getIcon(previewColor)}
+                title={formattedColor}
+                subtitle={historyItem.title}
+                shortcut={getShortcut(index)}
+                onAction={async () => {
+                  await Clipboard.copy(formattedColor);
+                  await showHUD("Copied color to clipboard");
+                }}
+              />
+            );
+          })}
+          <MenuBarExtra.Item
+            title="View All Favorite Colors"
+            icon={Icon.Star}
+            onAction={() => launchCommand({ name: "favorite-colors", type: LaunchType.UserInitiated })}
+          />
+        </MenuBarExtra.Section>
+      )}
+      <MenuBarExtra.Section title="Recent Colors">
+        {recentColors.slice(0, 9).map((historyItem, index) => {
           const formattedColor = getFormattedColor(historyItem.color);
           const previewColor = getPreviewColor(historyItem.color);
           return (
