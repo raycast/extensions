@@ -1,5 +1,9 @@
 # Google Chrome Profiles Changelog
 
+## [Fix] - 2026-08-27
+
+- Fix selecting a profile bringing a *different* profile to front (e.g. selecting "Work" opened "Work admin"). For a profile signed into a Google account, Chrome's Profiles menu bar item does not show the profile's own name — it shows `${gaia_given_name} (${name})`, e.g. a profile named "Work" signed in with a Google account whose given name is "Alex" appears in the menu as "Alex (Work)". The exact-name match against the raw profile name therefore never matched a signed-in profile, and always fell through to a substring search across every menu item — which happily clicked any other profile whose name was a substring of the search text (e.g. "Work" matched "Work admin" or "old work", depending on menu order), with no visible error. Carry the profile's `gaia_given_name` on the `Profile` object itself (read once alongside the rest of the profile, and across the Quicklink/deeplink, which previously dropped it) to construct the label Chrome actually shows, and try it — then the raw profile name — as exact candidates only; drop the substring fallback entirely, since guessing the wrong profile is worse than a clear "Profile not found in menu" failure. A Quicklink created before this fix, whose deeplink still lacks the given name, falls back to a one-time `Local State` read so it keeps working.
+
 ## [Feature] - 2026-08-25
 
 - Add a destructive action to delete a Chrome profile and its local data from the profile list.
