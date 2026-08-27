@@ -1,6 +1,6 @@
 # WP Bones Changelog
 
-## [Raycast 2 Compatibility] - {PR_MERGE_DATE}
+## [Raycast 2 Compatibility] - 2026-08-27
 
 - Fixed every menu bar icon being invisible on Raycast 2: the assets were stroke-only SVG outlines, which the menu bar renderer does not draw, so they now ship as PNGs tinted with `Color.PrimaryText` and follow the current appearance
 - Fixed the menu bar logo losing the yellow "new version available" dot: it now ships a light and a dark variant, so the dot keeps its colour in both themes
