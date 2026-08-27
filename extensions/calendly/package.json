@@ -4,8 +4,11 @@
   "title": "Calendly",
   "description": "Manage Calendly meetings, event types, availability, and bookings",
   "icon": "calendly-icon.png",
-  "author": "0xdhrv",
-  "contributors": ["eluce2", "eric_dumesnil"],
+  "author": "eluce2",
+  "contributors": [
+    "eric_dumesnil",
+    "0xdhrv"
+  ],
   "platforms": [
     "Windows",
     "macOS"

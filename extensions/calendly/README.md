@@ -29,25 +29,25 @@ Direct booking uses Calendly's Scheduling API and is available only for accounts
 
 Lists your active Calendly meetings for the next 90 days. Search by meeting name, invitee name, email, or location.
 
-| Action              | What it does                                              |
-| ------------------- | --------------------------------------------------------- |
-| Join Meeting        | Opens the video or location URL in the browser            |
-| Copy Meeting Link   | Copies the join URL                                       |
-| Copy Invitee Email  | Copies the first invitee's email                          |
-| Reschedule Meeting  | Opens the invitee's Calendly reschedule page              |
-| Cancel Meeting      | Cancels the meeting after confirmation; invitees are notified |
+| Action             | What it does                                                  |
+| ------------------ | ------------------------------------------------------------- |
+| Join Meeting       | Opens the video or location URL in the browser                |
+| Copy Meeting Link  | Copies the join URL                                           |
+| Copy Invitee Email | Copies the first invitee's email                              |
+| Reschedule Meeting | Opens the invitee's Calendly reschedule page                  |
+| Cancel Meeting     | Cancels the meeting after confirmation; invitees are notified |
 
 ### Event Types
 
 Lists your active event types with duration and scheduling URL.
 
-| Action                     | What it does                                                                 |
-| -------------------------- | ---------------------------------------------------------------------------- |
-| Copy Scheduling Link       | Copies the reusable event type URL                                           |
-| Open Scheduling Page       | Opens the event type in the browser                                          |
-| Copy Next Available Times  | Copies the next 5 open times in the next 7 days, plus the scheduling URL     |
-| Create Single-Use Link     | Creates a one-time booking URL and copies it                                 |
-| Book Meeting               | Opens the booking form with this event type selected                         |
+| Action                    | What it does                                                             |
+| ------------------------- | ------------------------------------------------------------------------ |
+| Copy Scheduling Link      | Copies the reusable event type URL                                       |
+| Open Scheduling Page      | Opens the event type in the browser                                      |
+| Copy Next Available Times | Copies the next 5 open times in the next 7 days, plus the scheduling URL |
+| Create Single-Use Link    | Creates a one-time booking URL and copies it                             |
+| Book Meeting              | Opens the booking form with this event type selected                     |
 
 ### Book Meeting
 
@@ -59,15 +59,15 @@ The form uses your local timezone. Booking asks for confirmation before it creat
 
 Mention `@calendly` in Raycast AI to work with your calendar in conversation. Write tools show a confirmation before they change anything; canceling a meeting uses a destructive confirmation.
 
-| Tool                   | What it does                                                                 |
-| ---------------------- | ---------------------------------------------------------------------------- |
-| List Meetings          | Lists scheduled meetings in a date range (defaults to the next 30 days)      |
-| Get Meeting            | Returns a meeting and its invitees, including reschedule and cancel URLs     |
-| List Event Types       | Lists your active event types, durations, locations, and scheduling URLs     |
-| Find Available Times   | Finds open times for an event type (at most 7 days per request)              |
-| Create Single-Use Link | Creates a one-time scheduling link for an event type                         |
-| Book Meeting           | Books an invitee into a verified available time                              |
-| Cancel Meeting         | Cancels a scheduled meeting and notifies invitees                            |
+| Tool                   | What it does                                                             |
+| ---------------------- | ------------------------------------------------------------------------ |
+| List Meetings          | Lists scheduled meetings in a date range (defaults to the next 30 days)  |
+| Get Meeting            | Returns a meeting and its invitees, including reschedule and cancel URLs |
+| List Event Types       | Lists your active event types, durations, locations, and scheduling URLs |
+| Find Available Times   | Finds open times for an event type (at most 7 days per request)          |
+| Create Single-Use Link | Creates a one-time scheduling link for an event type                     |
+| Book Meeting           | Books an invitee into a verified available time                          |
+| Cancel Meeting         | Cancels a scheduled meeting and notifies invitees                        |
 
 ## Authentication
 
