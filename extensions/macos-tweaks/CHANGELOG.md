@@ -1,6 +1,6 @@
 # macOS Tweaks Changelog
 
-## [Raycast 2 Compatibility] - {PR_MERGE_DATE}
+## [Raycast 2 Compatibility] - 2026-08-27
 
 - Updated to `@raycast/api` 2.x
 
