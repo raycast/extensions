@@ -1,6 +1,6 @@
 # Changelog
 
-## [Restore Configure Session defaults] - {PR_MERGE_DATE}
+## [Restore Configure Session defaults] - 2026-08-27
 
 - Pre-fill the Configure Session duration and unit in Raycast v2 and remember the last entered values between launches.
 
