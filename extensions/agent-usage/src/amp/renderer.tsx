@@ -9,6 +9,7 @@ import {
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
+import { effectiveRemainingPercent } from "./effective-remaining.ts";
 import type { AmpError, AmpFreeUsage, AmpSubscriptionUsage, AmpUsage } from "./types.ts";
 
 function formatPercent(value: number): string {
@@ -118,7 +119,11 @@ export function getAmpAccessory(usage: AmpUsage | null, error: AmpError | null, 
   }
   tooltipParts.push(`Credits: ${usage.individualCredits.unit}${usage.individualCredits.remaining.toFixed(2)}`);
 
-  const percent = usage.ampFree?.percentRemaining ?? 0;
+  const percent = effectiveRemainingPercent(usage);
+  if (percent === null) {
+    return getNoDataAccessory();
+  }
+
   return {
     icon: generatePieIcon(percent),
     text: formatPercent(percent),
