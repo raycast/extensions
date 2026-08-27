@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.raycast-swift-build/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+gateway.env
+coverage/
+.idea/
+*.local

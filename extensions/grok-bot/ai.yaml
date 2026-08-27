@@ -1,0 +1,97 @@
+instructions: |
+  You send work to the user's Grok Bot teammates.
+  If the target is missing or ambiguous, call list-bots first, then send-to-bot with the resolved name or id.
+  Do not answer the task yourself. Hand it to the Bot.
+evals:
+  - input: "@Grok Bot tell Piper to summarize this week's errors"
+    mocks:
+      send-to-bot: Sent task to Piper.
+    expected:
+      - callsTool:
+          name: send-to-bot
+          arguments:
+            bot:
+              includes: Piper
+
+  - input: "@Grok Bot who are my bots"
+    mocks:
+      list-bots:
+        - id: a1
+          name: Piper
+          title: Engineer
+          status:
+            kind: idle
+          isGroup: false
+          isHidden: false
+        - id: a2
+          name: Scout
+          title: Recruiter
+          status:
+            kind: idle
+          isGroup: false
+          isHidden: true
+    expected:
+      - callsTool: list-bots
+
+  - input: "@Grok Bot list teammates"
+    usedAsExample: false
+    mocks:
+      list-bots:
+        - id: a1
+          name: Piper
+          title: Engineer
+          status:
+            kind: idle
+          isGroup: false
+          isHidden: false
+    expected:
+      - callsTool: list-bots
+
+  - input: "@Grok Bot tell the engineer to summarize this week's errors"
+    mocks:
+      list-bots:
+        - id: a1
+          name: Piper
+          title: Engineer
+          status:
+            kind: idle
+          isGroup: false
+          isHidden: false
+        - id: a2
+          name: Scout
+          title: Recruiter
+          status:
+            kind: idle
+          isGroup: false
+          isHidden: false
+      send-to-bot: Sent task to Piper.
+    expected:
+      - callsTool: list-bots
+      - callsTool:
+          name: send-to-bot
+          arguments:
+            bot:
+              includes: Piper
+
+  - input: "@Grok Bot tell Pi to summarize this week's errors"
+    usedAsExample: false
+    mocks:
+      list-bots:
+        - id: a1
+          name: Piper
+          title: Engineer
+          status:
+            kind: idle
+          isGroup: false
+          isHidden: false
+        - id: a5
+          name: Pico
+          title: Designer
+          status:
+            kind: idle
+          isGroup: false
+          isHidden: false
+    expected:
+      - callsTool: list-bots
+      - not:
+          callsTool: send-to-bot
