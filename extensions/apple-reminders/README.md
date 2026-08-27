@@ -90,6 +90,10 @@ The AI will set:
 
 You can disable this behavior by toggling on the "Don't use the AI" preference for the "Quick Add Reminder" command. The intelligent date and time parsing will still work, but not the other fields.
 
+## Subtasks
+
+Subtasks are displayed indented under their parent reminder in the "My Reminders" command. Apple's EventKit framework doesn't expose subtask relationships, so they are read from the local Reminders database. This requires granting Raycast Full Disk Access in `System Settings → Privacy & Security → Full Disk Access`. Without it, reminders are displayed as a flat list.
+
 ## Troubleshooting
 
 > I can't see any reminders and get a `Failed to fetch latest data` error.

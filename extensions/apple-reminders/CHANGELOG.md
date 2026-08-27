@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Display subtasks nested under their parent reminder] - {PR_MERGE_DATE}
+
+- Subtasks are now displayed indented under their parent reminder in the "My Reminders" command. Since EventKit doesn't expose subtask relationships, they are read from the local Reminders database, which requires granting Raycast Full Disk Access. Without it, reminders are displayed as a flat list, as before.
+
 ## [Fix natural-language due dates] - 2026-08-19
 
 - Restore relative due-date parsing in Create Reminder for `1h`, `1 hour`, `3 hours`, `in 10 minutes`, `3:45 pm`, `3 days`, and `1 year`.

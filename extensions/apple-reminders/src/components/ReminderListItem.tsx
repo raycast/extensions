@@ -96,9 +96,19 @@ export default function ReminderListItem({
 
   return (
     <List.Item
-      icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
+      icon={
+        reminder.isSubtask
+          ? undefined
+          : reminder.isCompleted
+            ? { source: Icon.CheckCircle, tintColor: Color.Green }
+            : Icon.Circle
+      }
       key={reminder.id}
-      title={reminder.title}
+      title={
+        reminder.isSubtask
+          ? `\u{2800}\u{2800}\u{2800}${reminder.isCompleted ? "\u{2713}" : "\u{25EF}"} ${reminder.title}`
+          : reminder.title
+      }
       subtitle={reminder.notes}
       accessories={accessories}
       keywords={keywords}
