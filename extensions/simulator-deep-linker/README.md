@@ -1,19 +1,26 @@
-# SimulatorDeepLinker for Raycast
+# Simulator Deep Linker
 
-Add and search saved deep links, switch environments, copy resolved URLs, and open links on iOS or Android targets.
+> This extension requires the [free, open-source Simulator Deep Linker macOS app](https://github.com/StefanBoblic/SimulatorDeepLinker). Install it with Homebrew or download it from [GitHub Releases](https://github.com/StefanBoblic/SimulatorDeepLinker/releases/latest).
 
-The extension automatically reads the active SimulatorDeepLinker storage and opens links directly with `xcrun` or `adb`. A separate CLI installation and manual JSON selection are not required.
+Search your saved deep-link library from Raycast, switch environments, copy resolved URLs, and open links on iOS or Android developer devices.
 
-## Setup
+## Before You Start
 
-1. Open SimulatorDeepLinker once so it can publish its integration settings.
-2. Run `npm install && npm run dev` in this extension directory.
-3. Run **Add Deep Link** to save a link, or **Search Deep Links** to find and open one.
+1. Install Simulator Deep Linker:
+   - Homebrew: `brew tap StefanBoblic/tap && brew install --cask simulator-deep-linker`
+   - Or download the latest free release from [GitHub Releases](https://github.com/StefanBoblic/SimulatorDeepLinker/releases/latest).
+2. Open the macOS app once. It creates the shared storage and publishes its location for the extension.
+3. For Apple targets, install Xcode. For Android targets, install Android Platform Tools and make sure `adb` can see the device.
 
-The add form writes directly to the same shared JSON storage as the macOS app. It accepts a title, URL or template, group, comma-separated tags, and a favorite flag. Environment selection remains part of opening a link, so it is not stored on individual links.
+## Using the Extension
 
-To remove one saved link, open its action menu in **Search Deep Links**, choose **Delete Deep Link**, and confirm the destructive action.
+- **Add Deep Link** saves a title, URL or template, group, tags, and favorite status to the same local library as the macOS app.
+- **Search Deep Links** searches that library by title, URL, group, or tag. Use the environment dropdown to resolve `{{KEY}}` and `${KEY}` variables.
+- Open the action panel and choose **Select Target Device** to switch between booted iOS Simulators or connected Android devices without leaving the command.
+- Use **Delete Deep Link** to remove a saved entry, or copy either its resolved URL or original template.
 
-The default target is the booted iOS Simulator. Platform, target, bundle identifier, Android package, and an optional storage override remain available in Raycast preferences.
+Development and Production environments start without variables. Configure every placeholder used by a template in the macOS app under **Settings → Environments**. The extension warns instead of opening a URL when the selected environment leaves placeholders unresolved.
 
-For Store validation, run `npm run build`. For publication, run `npm run publish` and authenticate with the Raycast account matching the `author` field in `package.json`.
+The extension detects the app's active storage automatically. If you deliberately keep a compatible `deeplinks.json` elsewhere, select it with **Storage Override** in the extension preferences.
+
+Unlike the Xcode extension's **Open URL in Simulator** and the Adb extension's **Open Url**, Simulator Deep Linker keeps a searchable, shared library with groups, tags, favorites, and reusable environments.

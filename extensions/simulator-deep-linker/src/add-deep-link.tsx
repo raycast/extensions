@@ -44,7 +44,7 @@ export default function AddDeepLink() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Could Not Access Storage",
-        message: storageError ?? "Open SimulatorDeepLinker once, then try again.",
+        message: storageError ?? "Install and open Simulator Deep Linker once, then try again.",
       });
       return;
     }
@@ -85,7 +85,7 @@ export default function AddDeepLink() {
     >
       <Form.Description
         title="Storage"
-        text={configuration?.storagePath ?? storageError ?? "Detecting SimulatorDeepLinker storage…"}
+        text={configuration?.storagePath ?? storageError ?? "Detecting Simulator Deep Linker storage…"}
       />
       <Form.TextField id="title" title="Title" placeholder="Open Product Details" />
       <Form.TextField

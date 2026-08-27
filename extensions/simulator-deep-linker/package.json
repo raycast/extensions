@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simulator-deep-linker",
-  "title": "SimulatorDeepLinker",
-  "description": "Search and open saved deep links on iOS and Android developer devices.",
+  "title": "Simulator Deep Linker",
+  "description": "Requires the free Simulator Deep Linker macOS app; search and open its saved links on iOS and Android devices.",
   "icon": "icon.png",
   "author": "shtefan_boblik",
   "platforms": [
@@ -23,7 +23,7 @@
     {
       "name": "add-deep-link",
       "title": "Add Deep Link",
-      "description": "Add a link to the shared SimulatorDeepLinker storage",
+      "description": "Add a link to the shared Simulator Deep Linker storage",
       "mode": "view"
     }
   ],
@@ -31,7 +31,7 @@
     {
       "name": "storageFile",
       "title": "Storage Override",
-      "description": "Optional deeplinks.json override. The SimulatorDeepLinker storage is detected automatically.",
+      "description": "Optional deeplinks.json override. The Simulator Deep Linker storage is detected automatically.",
       "type": "file",
       "required": false
     },
@@ -67,8 +67,8 @@
     },
     {
       "name": "target",
-      "title": "Target Identifier",
-      "description": "Optional for iOS Simulator (defaults to booted). Required for physical Apple devices and Android.",
+      "title": "Fallback Target Identifier",
+      "description": "Optional simulator or ADB fallback. Required for physical Apple devices. Connected simulators and Android devices can be selected in the command.",
       "type": "textfield",
       "required": false
     },

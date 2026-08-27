@@ -53,7 +53,7 @@ export async function resolveStorageConfiguration(storageOverride?: string): Pro
   try {
     const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as IntegrationManifest;
     if (manifest.schemaVersion !== 1 || !manifest.storagePath) {
-      throw new Error("Unsupported SimulatorDeepLinker integration manifest.");
+      throw new Error("Unsupported Simulator Deep Linker integration manifest.");
     }
     await access(manifest.storagePath);
     return {
@@ -71,7 +71,7 @@ export async function resolveStorageConfiguration(storageOverride?: string): Pro
     } catch {
       const reason = manifestError instanceof Error ? manifestError.message : String(manifestError);
       throw new Error(
-        `Open SimulatorDeepLinker once to configure automatic storage, or select a Storage Override. ${reason}`,
+        `Install and open Simulator Deep Linker once to configure automatic storage, or select a Storage Override. ${reason}`,
       );
     }
   }
