@@ -1,388 +1,221 @@
 /**
- * Upgrade command for upgrading all brew packages with progress display.
+ * Upgrade command: upgrades all outdated packages.
+ *
+ * Shows the outdated formulae & casks, with progress reported via the toast/HUD.
+ * The icon of each item reflects its upgrade status.
  */
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast, popToRoot } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
-import { brewUpgradeWithProgress, preferences, showBrewFailureToast, actionsLogger, ensureError } from "./utils";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  actionsLogger,
+  brewUpgradeCommand,
+  brewUpgradeOutdated,
+  ensureError,
+  formatCount,
+  type OutdatedCask,
+  type OutdatedFormula,
+  type OutdatedResults,
+  preferences,
+  showActionToast,
+  showBrewFailureToast,
+  upgradeKey,
+  type ActionToastHandle,
+  type UpgradePackageStatus,
+} from "./utils";
+import { useBrewOutdated } from "./hooks/useBrewOutdated";
+import { InstallableFilterDropdown, InstallableFilterType } from "./components/filter";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import type { UpgradeStep } from "./utils/brew/upgrade";
+import { OutdatedList, PENDING_ICON } from "./components/outdatedList";
 
-/// Status Messages
-
-const STATUS_MESSAGES = {
-  UPGRADING: "Upgrading...",
-  NOTHING_TO_UPGRADE: "Nothing to upgrade!",
-  UPGRADE_CANCELLED: "Upgrade Cancelled",
-  UPGRADE_FAILED: "Upgrade Failed",
-} as const;
+interface PackageState {
+  status: UpgradePackageStatus;
+  message?: string;
+}
 
 /**
- * Get the icon for a step based on its status.
+ * The list item icon, indicating the upgrade status of a package.
  */
-function getStepIcon(step: UpgradeStep): { source: Icon; tintColor?: Color } | ReturnType<typeof getProgressIcon> {
-  switch (step.status) {
-    case "pending":
-      return { source: Icon.Circle, tintColor: Color.SecondaryText };
-    case "running":
-      return getProgressIcon(0.5);
-    case "completed":
-      return { source: Icon.CheckCircle, tintColor: Color.Green };
+function statusIcon(state?: PackageState): React.ComponentProps<typeof List.Item>["icon"] {
+  if (!state) return { value: PENDING_ICON, tooltip: "Pending" };
+
+  switch (state.status) {
+    case "upgrading":
+      return { value: { source: Icon.ArrowDownCircle, tintColor: Color.Blue }, tooltip: "Upgrading…" };
+    case "upgraded":
+      return { value: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Upgraded" };
     case "failed":
-      // Use warning icon for recoverable errors
-      if (step.isRecoverable) {
-        return { source: Icon.ExclamationMark, tintColor: Color.Orange };
-      }
-      return { source: Icon.XMarkCircle, tintColor: Color.Red };
+      return { value: { source: Icon.XMarkCircle, tintColor: Color.Red }, tooltip: state.message ?? "Upgrade failed" };
     case "skipped":
-      return { source: Icon.MinusCircle, tintColor: Color.SecondaryText };
+      return {
+        value: { source: Icon.MinusCircle, tintColor: Color.SecondaryText },
+        tooltip: state.message ?? "Skipped",
+      };
   }
 }
 
-/**
- * Format duration in a human-readable way.
- */
-function formatDuration(startTime?: number, endTime?: number): string | undefined {
-  if (!startTime) return undefined;
-  const end = endTime || Date.now();
-  const durationMs = end - startTime;
-  if (durationMs < 1000) return `${durationMs}ms`;
-  const seconds = Math.floor(durationMs / 1000);
-  if (seconds < 60) return `${seconds}s`;
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}m ${remainingSeconds}s`;
-}
-
-/**
- * Calculate overall progress percentage.
- */
-function calculateProgress(steps: UpgradeStep[]): number {
-  if (steps.length === 0) return 0;
-  const completed = steps.filter(
-    (s) => s.status === "completed" || s.status === "skipped" || s.status === "failed",
-  ).length;
-  return completed / steps.length;
+function UpgradingActionPanel(props: { outdated: OutdatedCask | OutdatedFormula; onCancel: () => void }) {
+  return (
+    <ActionPanel>
+      <Action
+        title="Cancel Upgrade"
+        icon={Icon.XMarkCircle}
+        style={Action.Style.Destructive}
+        onAction={props.onCancel}
+      />
+      <Action.CopyToClipboard
+        title="Copy Upgrade Command"
+        content={brewUpgradeCommand(props.outdated)}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+      />
+    </ActionPanel>
+  );
 }
 
 function UpgradeContent() {
-  const [steps, setSteps] = useState<UpgradeStep[]>([]);
-  const [isRunning, setIsRunning] = useState(true);
-  const [currentOutput, setCurrentOutput] = useState<string>("");
-  const [error, setError] = useState<Error | undefined>();
-  const [wasCancelled, setWasCancelled] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const [filter, setFilter] = useState(InstallableFilterType.all);
+  // The upgrade runs its own brew update, so skip the hook's background refresh:
+  // brew does not support concurrent processes.
+  const { isLoading, data, revalidate } = useBrewOutdated({ backgroundRefresh: false });
+  // Fresh results, fetched by the upgrade after running brew update
+  const [outdated, setOutdated] = useState<OutdatedResults | undefined>();
+  const [states, setStates] = useState<Map<string, PackageState>>(new Map());
+  const [isUpgrading, setIsUpgrading] = useState(true);
+  const toastRef = useRef<ActionToastHandle | undefined>(undefined);
   const hasStartedRef = useRef(false);
-  const isMountedRef = useRef(true);
 
-  const handleProgress = useCallback((newSteps: UpgradeStep[], output?: string) => {
-    if (!isMountedRef.current) return;
-    setSteps([...newSteps]);
-    if (output) {
-      setCurrentOutput(output);
-    }
-    actionsLogger.log("Upgrade progress", {
-      completedSteps: newSteps.filter((s) => s.status === "completed").length,
-      totalSteps: newSteps.length,
+  const setPackageState = useCallback((key: string, state: PackageState) => {
+    setStates((previous) => {
+      const existing = previous.get(key);
+      if (existing?.status === state.status && existing?.message === state.message) {
+        return previous;
+      }
+      const next = new Map(previous);
+      next.set(key, state);
+      return next;
     });
   }, []);
 
   const runUpgrade = useCallback(async () => {
-    if (hasStartedRef.current) {
-      actionsLogger.log("Upgrade already started, skipping duplicate call");
-      return;
-    }
+    if (hasStartedRef.current) return;
     hasStartedRef.current = true;
+
     actionsLogger.log("Starting upgrade process");
 
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
+    const toast = showActionToast({ title: "Upgrading", message: "Updating Homebrew…", cancelable: true });
+    toastRef.current = toast;
 
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Upgrading packages...",
-    });
+    // Progress is reported via the toast: only the package status is reflected in the list
+    let total = 0;
+    let finished = 0;
 
     try {
-      const result = await brewUpgradeWithProgress(preferences.greedyUpgrades, handleProgress, controller.signal);
-
-      if (result.success) {
-        const completedCount = result.steps.filter((s) => s.status === "completed").length;
-        const skippedCount = result.steps.filter((s) => s.status === "skipped").length;
-
-        if (completedCount <= 2) {
-          toast.style = Toast.Style.Success;
-          toast.title = STATUS_MESSAGES.NOTHING_TO_UPGRADE;
-        } else {
-          const upgradedCount = completedCount - 2;
-          toast.style = Toast.Style.Success;
-          toast.title = `${upgradedCount} package${upgradedCount === 1 ? "" : "s"} upgraded.`;
-          if (skippedCount > 0) {
-            toast.title += ` ${skippedCount} skipped.`;
+      const summary = await brewUpgradeOutdated({
+        greedy: preferences.greedyUpgrades,
+        cancel: toast.abort?.signal,
+        onEvent: (event) => {
+          switch (event.type) {
+            case "update":
+              toast.updateTitle("Upgrading");
+              toast.updateMessage("Updating Homebrew…");
+              break;
+            case "check":
+              toast.updateMessage("Checking for outdated packages…");
+              break;
+            case "start":
+              total = event.packages.length;
+              setOutdated(event.outdated);
+              break;
+            case "prefetch":
+              toast.updateTitle(`Downloading ${formatCount(total, "package")}`);
+              toast.updateMessage(event.progress?.message ?? "");
+              break;
+            case "package":
+              if (event.status === "upgrading" && event.progress) {
+                // Download/install progress is shown in the toast only, to avoid
+                // re-rendering the list for every line of brew output
+                toast.updateMessage(event.progress.message);
+              } else {
+                if (event.status === "upgrading") {
+                  toast.updateTitle(`Upgrading ${event.package.name} (${finished + 1}/${total})`);
+                  toast.updateMessage("");
+                } else if (event.status !== "skipped") {
+                  finished += 1;
+                }
+                setPackageState(upgradeKey(event.package), { status: event.status, message: event.message });
+              }
+              break;
           }
-        }
+        },
+      });
+
+      if (summary.cancelled) {
+        toast.hide();
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Upgrade Cancelled",
+          message: `${formatCount(summary.upgraded.length, "package")} upgraded`,
+        });
+      } else if (summary.failed.length > 0) {
+        // Keep the window open so the failed packages remain visible
+        toast.hide();
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Failed to upgrade ${formatCount(summary.failed.length, "package")}`,
+          message: summary.failed.map((pkg) => pkg.name).join(", "),
+        });
+      } else if (summary.upgraded.length === 0) {
+        await toast.showSuccessHUD("Nothing to upgrade");
       } else {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Upgrade failed";
-        toast.message = result.error?.message;
-        setError(result.error);
+        await toast.showSuccessHUD(`Upgraded ${formatCount(summary.upgraded.length, "package")}`);
       }
     } catch (err) {
       const error = ensureError(err);
-      actionsLogger.error("Upgrade caught exception", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      });
+      toast.hide();
 
       if (error.name === "AbortError") {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Upgrade cancelled";
-        setWasCancelled(true);
-        // Log cancellation with current state (steps is captured in closure)
-        actionsLogger.log("Upgrade cancelled by user", {
-          completedSteps: steps.filter((s) => s.status === "completed").length,
-          runningStep: steps.find((s) => s.status === "running")?.title,
-          pendingSteps: steps.filter((s) => s.status === "pending").length,
-          totalSteps: steps.length,
-        });
+        actionsLogger.log("Upgrade cancelled by user");
+        await showToast({ style: Toast.Style.Failure, title: "Upgrade Cancelled" });
       } else {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Upgrade failed";
-        toast.message = error.message;
-        setError(error);
+        actionsLogger.error("Upgrade failed", { name: error.name, message: error.message });
         await showBrewFailureToast("Upgrade failed", error);
       }
     } finally {
-      setIsRunning(false);
-      abortControllerRef.current = null;
+      setIsUpgrading(false);
     }
-  }, [handleProgress]);
+  }, [setPackageState]);
 
+  // Start once the (cached) outdated packages are listed, so the upgrade
+  // doesn't run concurrently with the initial brew outdated fetch.
   useEffect(() => {
-    isMountedRef.current = true;
-    actionsLogger.log("UpgradeView mounted");
-    runUpgrade();
-
-    return () => {
-      actionsLogger.log("UpgradeView cleanup called");
-      isMountedRef.current = false;
-      // Don't abort on cleanup - let the process complete
-      // User can manually cancel if needed
-    };
-  }, [runUpgrade]);
+    if (!isLoading) {
+      runUpgrade();
+    }
+  }, [isLoading, runUpgrade]);
 
   const handleCancel = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    toastRef.current?.abort?.abort();
   }, []);
 
-  const progress = calculateProgress(steps);
-  const runningStep = steps.find((s) => s.status === "running");
-  const completedCount = steps.filter((s) => s.status === "completed").length;
-  const failedCount = steps.filter((s) => s.status === "failed").length;
-  const recoverableCount = steps.filter((s) => s.status === "failed" && s.isRecoverable).length;
-
-  // Count skipped steps (for cancelled detection)
-  const skippedCount = steps.filter((s) => s.status === "skipped").length;
-  const cancelledStepCount = steps.filter((s) => s.message === "Cancelled by user" || s.message === "Cancelled").length;
-  const isCancelledState = wasCancelled || cancelledStepCount > 0;
-
-  // Determine navigation title based on state
-  let navigationTitle: string = STATUS_MESSAGES.UPGRADING;
-  if (!isRunning) {
-    if (isCancelledState) {
-      navigationTitle = STATUS_MESSAGES.UPGRADE_CANCELLED;
-    } else if (error || failedCount > 0) {
-      navigationTitle = STATUS_MESSAGES.UPGRADE_FAILED;
-    } else if (completedCount <= 2) {
-      // No packages were actually upgraded (only update + check steps)
-      navigationTitle = STATUS_MESSAGES.NOTHING_TO_UPGRADE;
-    } else {
-      navigationTitle = `Upgraded ${completedCount - 2} package${completedCount - 2 === 1 ? "" : "s"}`;
-    }
-  } else if (runningStep) {
-    navigationTitle = `Upgrading ${runningStep.title}...`;
-  }
-
-  // Determine search bar placeholder based on state
-  let searchBarPlaceholder: string = STATUS_MESSAGES.UPGRADING;
-  if (!isRunning) {
-    if (isCancelledState) {
-      searchBarPlaceholder = STATUS_MESSAGES.UPGRADE_CANCELLED;
-    } else if (error || failedCount > 0) {
-      searchBarPlaceholder = STATUS_MESSAGES.UPGRADE_FAILED;
-    } else if (completedCount <= 2) {
-      searchBarPlaceholder = STATUS_MESSAGES.NOTHING_TO_UPGRADE;
-    } else {
-      searchBarPlaceholder = "Upgrade Complete";
-    }
-  }
+  const handleAction = useCallback(() => {
+    // Show the refreshed results, rather than those fetched by the upgrade
+    setOutdated(undefined);
+    setStates(new Map());
+    revalidate();
+  }, [revalidate]);
 
   return (
-    <List
-      isLoading={isRunning && steps.length === 0}
-      navigationTitle={navigationTitle}
-      searchBarPlaceholder={searchBarPlaceholder}
-    >
-      {steps.length === 0 && isRunning && (
-        <List.EmptyView
-          icon={getProgressIcon(0.1)}
-          title="Preparing upgrade..."
-          description="Checking for outdated packages"
-        />
-      )}
-
-      {steps.length > 0 && (
-        <>
-          <List.Section title="Progress" subtitle={`${Math.round(progress * 100)}% complete`}>
-            {steps.map((step) => (
-              <List.Item
-                key={step.id}
-                icon={getStepIcon(step)}
-                title={step.title}
-                subtitle={step.subtitle}
-                accessories={[
-                  // Show current phase for running steps
-                  ...(step.status === "running" && step.currentPhase
-                    ? [
-                        {
-                          tag: { value: step.currentPhase, color: Color.Blue },
-                          tooltip: `Current phase: ${step.currentPhase}`,
-                        },
-                      ]
-                    : []),
-                  // Show message (use "Cancelled" instead of "Aborted" for abort errors)
-                  ...(step.message
-                    ? [
-                        {
-                          text: step.message === "Aborted" ? "Cancelled" : step.message,
-                          tooltip: step.message === "Aborted" ? "Cancelled by user" : step.message,
-                        },
-                      ]
-                    : []),
-                  // Show recoverable indicator for failed steps
-                  ...(step.status === "failed" && step.isRecoverable
-                    ? [
-                        {
-                          tag: { value: "Retry", color: Color.Orange },
-                          tooltip: "This error may be resolved by retrying",
-                        },
-                      ]
-                    : []),
-                  // Show duration
-                  ...(step.status === "running" || step.status === "completed" || step.status === "failed"
-                    ? [{ text: formatDuration(step.startTime, step.endTime), tooltip: "Duration" }]
-                    : []),
-                ]}
-                actions={
-                  <ActionPanel>
-                    {isRunning && (
-                      <Action
-                        title="Cancel Upgrade"
-                        icon={Icon.XMarkCircle}
-                        style={Action.Style.Destructive}
-                        onAction={handleCancel}
-                      />
-                    )}
-                    {!isRunning && <Action title="Close" icon={Icon.ArrowLeft} onAction={() => popToRoot()} />}
-                    {currentOutput && (
-                      <Action.CopyToClipboard
-                        title="Copy Output Log"
-                        content={currentOutput}
-                        shortcut={{ modifiers: ["cmd"], key: "l" }}
-                      />
-                    )}
-                  </ActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-
-          {!isRunning && (
-            <List.Section title="Summary">
-              {/* Show upgraded packages */}
-              {steps
-                .filter((s) => s.status === "completed" && (s.id.startsWith("formula-") || s.id.startsWith("cask-")))
-                .map((step) => (
-                  <List.Item
-                    key={`summary-${step.id}`}
-                    icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-                    title={step.title}
-                    accessories={[
-                      ...(step.subtitle ? [{ text: step.subtitle, tooltip: "Version change" }] : []),
-                      { text: "Upgraded", tooltip: `Upgraded in ${formatDuration(step.startTime, step.endTime)}` },
-                    ]}
-                  />
-                ))}
-              {/* Show failed packages */}
-              {steps
-                .filter((s) => s.status === "failed" && (s.id.startsWith("formula-") || s.id.startsWith("cask-")))
-                .map((step) => (
-                  <List.Item
-                    key={`summary-${step.id}`}
-                    icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                    title={step.title}
-                    accessories={[
-                      ...(step.subtitle ? [{ text: step.subtitle, tooltip: "Version change" }] : []),
-                      { text: step.message || "Failed", tooltip: step.message },
-                    ]}
-                  />
-                ))}
-              {/* Show totals if there were packages */}
-              {(completedCount > 2 || failedCount > 0 || isCancelledState) && (
-                <List.Item
-                  icon={{
-                    source: isCancelledState ? Icon.XMarkCircle : Icon.Document,
-                    tintColor: isCancelledState ? Color.Orange : Color.SecondaryText,
-                  }}
-                  title="Total"
-                  accessories={[
-                    // Show upgraded count only if we actually upgraded packages (completedCount > 2 means more than just update+check)
-                    ...(completedCount > 2
-                      ? [{ text: `${completedCount - 2} upgraded`, tooltip: "Packages upgraded" }]
-                      : []),
-                    // Show cancelled info if cancelled
-                    ...(isCancelledState
-                      ? [
-                          {
-                            text:
-                              cancelledStepCount > 0
-                                ? `${cancelledStepCount} cancelled`
-                                : skippedCount > 0
-                                  ? `${skippedCount} skipped`
-                                  : "Cancelled",
-                            tooltip: "Upgrade was cancelled by user",
-                          },
-                        ]
-                      : []),
-                    // Show failed count (excluding cancellation-related failures)
-                    ...(failedCount > 0 && !isCancelledState
-                      ? [
-                          {
-                            text: `${failedCount} failed${recoverableCount > 0 ? ` (${recoverableCount} retryable)` : ""}`,
-                            tooltip:
-                              recoverableCount > 0 ? "Some failures may be resolved by retrying" : "Packages failed",
-                          },
-                        ]
-                      : []),
-                  ]}
-                />
-              )}
-              {/* Show message when nothing to upgrade (only if not cancelled) */}
-              {completedCount <= 2 && failedCount === 0 && !isCancelledState && (
-                <List.Item
-                  icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-                  title="All packages are up to date"
-                />
-              )}
-            </List.Section>
-          )}
-        </>
-      )}
-    </List>
+    <OutdatedList
+      outdated={outdated ?? data}
+      isLoading={isLoading || isUpgrading}
+      filterType={filter}
+      navigationTitle="Upgrade"
+      searchBarPlaceholder={isUpgrading ? "Upgrading…" : undefined}
+      searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
+      icon={(item, isCask) => statusIcon(states.get(upgradeKey({ name: item.name, isCask })))}
+      actions={isUpgrading ? (item) => <UpgradingActionPanel outdated={item} onCancel={handleCancel} /> : undefined}
+      onAction={handleAction}
+    />
   );
 }
 

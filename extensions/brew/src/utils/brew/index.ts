@@ -66,8 +66,14 @@ export {
 } from "./actions";
 
 // Upgrade with progress
-export { brewUpgradeWithProgress } from "./upgrade";
-export type { UpgradeStep, UpgradeStepStatus, UpgradeProgressCallback, UpgradeResult } from "./upgrade";
+export { brewUpgradeOutdated, upgradeKey } from "./upgrade";
+export type {
+  UpgradePackage,
+  UpgradePackageStatus,
+  UpgradeEvent,
+  UpgradeEventCallback,
+  UpgradeSummary,
+} from "./upgrade";
 
 // Services
 export {
