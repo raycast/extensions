@@ -12,7 +12,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { showFailureToast, useLocalStorage, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { AeroSpaceRecoveryActions } from "./components/AeroSpaceRecoveryActions";
 import {
@@ -32,6 +32,7 @@ import {
 } from "./utils/aerospace";
 import { extractWorkspaceKeys, getConfigPath, loadConfig } from "./utils/config";
 import { createWindowRule } from "./utils/rules";
+import { resolveWindowScope, WINDOW_SCOPE_STORAGE_KEY } from "./utils/windowScope";
 
 type SwitchAppsLaunchContext = { searchText?: string };
 
@@ -191,8 +192,10 @@ export default function Command(
   props: LaunchProps<{ arguments: Arguments.SwitchApps; launchContext?: SwitchAppsLaunchContext }>,
 ) {
   const { defaultWorkspace } = getPreferenceValues<Preferences.SwitchApps>();
-  const initialScope = (props.arguments.workspace ?? defaultWorkspace) as WindowScope;
-  const [scope, setScope] = useState<WindowScope>(initialScope);
+  const launchScope = props.arguments.workspace as WindowScope | undefined;
+  const { value: rememberedScope, setValue: rememberScope } = useLocalStorage<WindowScope>(WINDOW_SCOPE_STORAGE_KEY);
+  const [sessionScope, setSessionScope] = useState<WindowScope>();
+  const scope = resolveWindowScope(sessionScope, launchScope, rememberedScope, defaultWorkspace);
   const [searchText, setSearchText] = useState(props.launchContext?.searchText ?? "");
 
   const {
@@ -227,7 +230,15 @@ export default function Command(
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <List.Dropdown tooltip="Window Scope" value={scope} onChange={(value) => setScope(value as WindowScope)}>
+        <List.Dropdown
+          tooltip="Window Scope"
+          value={scope}
+          onChange={(value) => {
+            const nextScope = value as WindowScope;
+            setSessionScope(nextScope);
+            void rememberScope(nextScope);
+          }}
+        >
           <List.Dropdown.Item title="Focused" value="focused" />
           <List.Dropdown.Item title="Visible" value="visible" />
           <List.Dropdown.Item title="All" value="all" />

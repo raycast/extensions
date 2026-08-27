@@ -4,6 +4,7 @@ import {
   launchCommand,
   LaunchType,
   MenuBarExtra,
+  open,
   openExtensionPreferences,
   showHUD,
 } from "@raycast/api";
@@ -34,7 +35,7 @@ async function runMenuAction(title: string, operation: () => Promise<void>, succ
 
 export default function Command() {
   const { shortcuts, isLoading, error, revalidate } = useShortcuts();
-  const { showFullBindings } = getPreferenceValues<Preferences>();
+  const { showFullBindings, showMenuBarExtras } = getPreferenceValues<Preferences>();
   const [workspace, setWorkspace] = useState<string>();
   const [mode, setMode] = useState<string>();
   const [streamError, setStreamError] = useState<AeroSpaceError>();
@@ -91,6 +92,79 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon="menubar-icon.png" title={menuTitle} tooltip={tooltip} isLoading={isLoading}>
+      {!isLoading && !error && shortcuts.length === 0 && <MenuBarExtra.Item title="No Shortcuts Found" />}
+      {[...grouped.entries()].map(([bindingMode, modeShortcuts]) => (
+        <MenuBarExtra.Section
+          key={bindingMode}
+          title={`${bindingMode.charAt(0).toUpperCase() + bindingMode.slice(1)} Mode`}
+        >
+          {modeShortcuts.map((shortcut) => {
+            const parsed = parseShortcutKey(shortcut.key);
+            return (
+              <MenuBarExtra.Item
+                key={`${shortcut.mode}:${shortcut.key}`}
+                title={shortcut.title}
+                subtitle={shortcut.command}
+                shortcut={parsed ?? undefined}
+                onAction={() => executeShortcutInMode(shortcut)}
+              />
+            );
+          })}
+        </MenuBarExtra.Section>
+      ))}
+
+      {showMenuBarExtras !== false && (
+        <>
+          <MenuBarExtra.Section title="Quick Actions">
+            <MenuBarExtra.Item
+              title="Previous Workspace"
+              icon={Icon.ArrowLeft}
+              onAction={() => runMenuAction("Could Not Switch Workspace", workspaceBackAndForth)}
+            />
+            <MenuBarExtra.Item
+              title="Balance Window Sizes"
+              icon={Icon.Ruler}
+              onAction={() =>
+                runMenuAction("Could Not Balance Window Sizes", () => balanceWorkspace(), "Sizes Balanced")
+              }
+            />
+            <MenuBarExtra.Item
+              title="Validate and Reload Config"
+              icon={Icon.ArrowClockwise}
+              onAction={() => runMenuAction("Configuration Was Not Reloaded", reloadConfig, "Config Reloaded")}
+            />
+            <MenuBarExtra.Item
+              title="Toggle AeroSpace"
+              icon={Icon.Switch}
+              onAction={() => runMenuAction("Could Not Toggle AeroSpace", toggleAeroSpaceEnabled)}
+            />
+          </MenuBarExtra.Section>
+
+          <MenuBarExtra.Section title="Open">
+            <MenuBarExtra.Item
+              title="Browse Workspaces…"
+              icon={Icon.Desktop}
+              onAction={() => launchCommand({ name: "goToWorkspace", type: LaunchType.UserInitiated })}
+            />
+            <MenuBarExtra.Item
+              title="Switch Windows…"
+              icon={Icon.AppWindowGrid3x3}
+              onAction={() => launchCommand({ name: "switchApps", type: LaunchType.UserInitiated })}
+            />
+            <MenuBarExtra.Item
+              title="Open Bindings…"
+              icon={Icon.Keyboard}
+              onAction={() => launchCommand({ name: "showShortcuts", type: LaunchType.UserInitiated })}
+            />
+            <MenuBarExtra.Item
+              title="View What’s New…"
+              icon={Icon.Document}
+              onAction={() => open("https://www.raycast.com/limonkufu/aerospace")}
+            />
+          </MenuBarExtra.Section>
+        </>
+      )}
+
       <MenuBarExtra.Section title="Status">
         <MenuBarExtra.Item title={workspace ? `Workspace ${workspace}` : "Workspace unavailable"} />
         <MenuBarExtra.Item title={mode ? `${mode.charAt(0).toUpperCase() + mode.slice(1)} mode` : "Mode unavailable"} />
@@ -107,72 +181,6 @@ export default function Command() {
             />
           )}
         </MenuBarExtra.Section>
-      )}
-
-      <MenuBarExtra.Section title="Quick Actions">
-        <MenuBarExtra.Item
-          title="Previous Workspace"
-          icon={Icon.ArrowLeft}
-          onAction={() => runMenuAction("Could Not Switch Workspace", workspaceBackAndForth)}
-        />
-        <MenuBarExtra.Item
-          title="Balance Window Sizes"
-          icon={Icon.Ruler}
-          onAction={() => runMenuAction("Could Not Balance Window Sizes", () => balanceWorkspace(), "Sizes Balanced")}
-        />
-        <MenuBarExtra.Item
-          title="Validate and Reload Config"
-          icon={Icon.ArrowClockwise}
-          onAction={() => runMenuAction("Configuration Was Not Reloaded", reloadConfig, "Config Reloaded")}
-        />
-        <MenuBarExtra.Item
-          title="Toggle AeroSpace"
-          icon={Icon.Switch}
-          onAction={() => runMenuAction("Could Not Toggle AeroSpace", toggleAeroSpaceEnabled)}
-        />
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Section title="Open">
-        <MenuBarExtra.Item
-          title="Browse Workspaces…"
-          icon={Icon.Desktop}
-          onAction={() => launchCommand({ name: "goToWorkspace", type: LaunchType.UserInitiated })}
-        />
-        <MenuBarExtra.Item
-          title="Switch Windows…"
-          icon={Icon.AppWindowGrid3x3}
-          onAction={() => launchCommand({ name: "switchApps", type: LaunchType.UserInitiated })}
-        />
-        <MenuBarExtra.Item
-          title="Open Bindings…"
-          icon={Icon.Keyboard}
-          onAction={() => launchCommand({ name: "showShortcuts", type: LaunchType.UserInitiated })}
-        />
-      </MenuBarExtra.Section>
-
-      {!isLoading && !error && shortcuts.length === 0 && <MenuBarExtra.Item title="No Shortcuts Found" />}
-      {grouped.size > 0 && (
-        <MenuBarExtra.Submenu title="Bindings" icon={Icon.Keyboard}>
-          {[...grouped.entries()].map(([bindingMode, modeShortcuts]) => (
-            <MenuBarExtra.Submenu
-              key={bindingMode}
-              title={`${bindingMode.charAt(0).toUpperCase() + bindingMode.slice(1)} Mode`}
-            >
-              {modeShortcuts.map((shortcut) => {
-                const parsed = parseShortcutKey(shortcut.key);
-                return (
-                  <MenuBarExtra.Item
-                    key={shortcut.key}
-                    title={shortcut.title}
-                    subtitle={shortcut.command}
-                    shortcut={parsed ?? undefined}
-                    onAction={() => executeShortcutInMode(shortcut)}
-                  />
-                );
-              })}
-            </MenuBarExtra.Submenu>
-          ))}
-        </MenuBarExtra.Submenu>
       )}
 
       <MenuBarExtra.Section>

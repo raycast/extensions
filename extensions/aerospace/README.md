@@ -17,9 +17,9 @@ The extension uses AeroSpace's CLI as its runtime interface. It does not synthes
 - Browse human-readable shortcuts grouped by intent and trigger them with `aerospace trigger-binding`
 - Keep every configured binding visible by default, or show only the main mode with the **Show Full Bindings** preference
 - Check runtime, validation, and disk-versus-loaded binding health before inspecting or reloading the complete TOML config
-- See the focused workspace and binding mode live in the menu bar, alongside safe quick actions and the full binding catalog
+- Keep bindings immediately visible in the menu bar, with optional quick actions and command links below them
 - Browse focused, visible, non-empty, then empty workspaces together with their apps, monitor, layout, and binding
-- Search windows across the focused, visible, or all workspaces, then focus, move, float, tile, or fullscreen them
+- Search windows across the focused, visible, or all workspaces, remember the last scope, then focus, move, float, tile, or fullscreen them
 - Generate a reviewable `on-window-detected` rule for an app without automatically changing the config file
 
 ## Requirements
@@ -41,8 +41,10 @@ The extension detects the `aerospace` binary in common Homebrew, Nix, and nix-da
 - Use **Show AeroSpace Shortcuts** to search human-readable binding names, keys, modes, or raw commands
 - Use **Show AeroSpace Config** to check configuration health, inspect the complete file, compare loaded bindings, and safely reload
 - Use **Go to Workspace** to search workspaces, inspect monitor and visibility state, switch, summon, balance, or change root layout
-- Use **Enable AeroSpace Menu Bar Shortcuts** for live workspace and mode status, quick actions, and persistent binding access
-- Use **Switch Apps in Workspace** to choose a live search scope and manage open windows
+- Use **Enable AeroSpace Menu Bar Shortcuts** for top-level binding access, live status, and optional quick actions
+- Use **Switch Apps in Workspace** to choose a live search scope, remember it for next time, and manage open windows
+
+In extension preferences, turn off **Show Menu Bar Extras** to keep only bindings, status, refresh, and preferences in the menu bar. **Show Full Bindings** remains on by default; turn it off to show only the main mode. The menu bar's **View What’s New…** item opens the extension's Store page, where Raycast shows its native Version History.
 
 The config view deliberately checks two sources. **View Full Config** opens the complete file returned by `aerospace config --config-path`. **View Loaded Binding Configuration** calls `aerospace config --get . --json`; AeroSpace currently exposes only `mode.*` values through that command. The health summary compares those bindings and runs `reload-config --dry-run --warnings-as-errors`. A real reload only runs after that validation succeeds. Shortcut activation prefers the loaded configuration and falls back to the file for older CLI versions.
 

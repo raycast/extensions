@@ -10,11 +10,12 @@
 - Add validated CLI response models, focused runtime operations, and unit tests
 - Update Raycast API, utilities, linting, formatting, TypeScript, TOML, and test dependencies
 - Align command metadata, root navigation behavior, loading states, error handling, and scripts with current Raycast guidance
-- Add a live Focused, Visible, or All scope picker and make window titles easier to scan
+- Add a live Focused, Visible, or All scope picker, remember its latest selection, and make window titles easier to scan
 - Add safe window and workspace move, monitor, layout, fullscreen, summon, and balance actions
 - Group bindings by human-readable intent while keeping every configured mode visible by default
 - Add configuration health, dry-run validation, safe reload, and disk-versus-loaded binding comparison
-- Show live workspace and binding-mode status plus focused quick actions in the menu bar
+- Keep bindings immediately visible in the menu bar and add a default-on preference for its Quick Actions and Open sections
+- Link the menu bar to Raycast's native Version History so users can discover release changes
 - Add a copy-only `on-window-detected` rule assistant that never rewrites the user's config
 
 ## [Focused Workspace First] - 2026-08-26

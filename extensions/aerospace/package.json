@@ -74,7 +74,7 @@
         {
           "name": "defaultWorkspace",
           "title": "Default Search",
-          "description": "Choose whether to search the focused, visible, or all workspaces",
+          "description": "Initial scope before you choose one. The window switcher remembers your latest selection.",
           "required": true,
           "type": "dropdown",
           "default": "focused",
@@ -134,6 +134,15 @@
       "type": "checkbox",
       "default": true,
       "label": "Include bindings from every mode"
+    },
+    {
+      "name": "showMenuBarExtras",
+      "title": "Show Menu Bar Extras",
+      "description": "Show Quick Actions and Open sections after the top-level binding catalog.",
+      "required": false,
+      "type": "checkbox",
+      "default": true,
+      "label": "Show Quick Actions and Open sections"
     }
   ],
   "dependencies": {
