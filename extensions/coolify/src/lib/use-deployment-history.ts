@@ -16,9 +16,19 @@ async function fetchDeploymentHistory(take: number): Promise<Deployment[]> {
   const applicationUuids = resources
     .filter((resource) => resource.type === "application")
     .map((resource) => resource.uuid);
-  const deploymentHistories = await Promise.all(
+  const results = await Promise.allSettled(
     applicationUuids.map((uuid) => request<DeploymentHistory>(`deployments/applications/${uuid}?take=${take}`)),
   );
+  const deploymentHistories = results
+    .filter((result): result is PromiseFulfilledResult<DeploymentHistory> => result.status === "fulfilled")
+    .map((result) => result.value);
+
+  if (applicationUuids.length > 0 && deploymentHistories.length === 0) {
+    const failure = results.find((result) => result.status === "rejected");
+    throw failure?.status === "rejected" && failure.reason instanceof Error
+      ? failure.reason
+      : new Error("Failed to fetch deployment history");
+  }
 
   return deploymentHistories
     .flatMap((history) => history.deployments)
