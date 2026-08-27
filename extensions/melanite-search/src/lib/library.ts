@@ -14,14 +14,11 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 
-export type SortOrder = "modified" | "imported" | "created" | "name";
-
-export interface MelanitePreferences {
-  libraryPath: string;
-  sortOrder: SortOrder;
-  resultLimit: string;
-  searchMemo: boolean;
-}
+/**
+ * 設定の型は package.json から raycast-env.d.ts に自動生成される `Preferences`
+ * (グローバル宣言) をそのまま使う。手で書き写すとマニフェストを変えたときにずれる。
+ */
+export type SortOrder = Preferences["sortOrder"];
 
 export interface Library {
   /** .melanite フォルダの絶対パス */
@@ -40,8 +37,8 @@ function expandHome(p: string): string {
   return p;
 }
 
-export function getPreferences(): MelanitePreferences {
-  const prefs = getPreferenceValues<MelanitePreferences>();
+export function getPreferences(): Preferences {
+  const prefs = getPreferenceValues<Preferences>();
   return {
     ...prefs,
     libraryPath: expandHome((prefs.libraryPath ?? "").trim()),
