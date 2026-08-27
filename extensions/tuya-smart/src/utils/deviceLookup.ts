@@ -22,7 +22,11 @@ export function findDeviceByName(devices: Device[], query: string): Device | und
   );
 }
 
-/** Picks the switch a request refers to, defaulting to the device's only switch. */
+/**
+ * Picks the switch a request refers to. When a name was given and matches nothing, this
+ * returns undefined rather than falling back to the first switch: silently operating a
+ * different gang of a multi-switch outlet is the worst thing this extension could do.
+ */
 export function findSwitchOnDevice(device: Device, query?: string): FunctionItem | undefined {
   const switches = (device.status ?? []).filter(isSwitchStatus);
   if (switches.length === 0) return undefined;
@@ -32,7 +36,6 @@ export function findSwitchOnDevice(device: Device, query?: string): FunctionItem
   return (
     switches.find((status) => normalize(status.name ?? "") === needle) ??
     switches.find((status) => normalize(status.code) === needle) ??
-    switches.find((status) => normalize(status.name ?? status.code).includes(needle)) ??
-    switches[0]
+    switches.find((status) => normalize(status.name ?? status.code).includes(needle))
   );
 }

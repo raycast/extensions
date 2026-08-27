@@ -3,20 +3,12 @@ import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { Device, FunctionItem } from "../utils/interfaces";
 import { findBrightness, findColorTemp } from "../utils/lightFunctions";
 import { isSwitchStatus } from "../utils/filters";
-import { classifyDevice, cleanName } from "../utils/deviceSemantics";
+import { applyCommandResult, classifyDevice, cleanName } from "../utils/deviceSemantics";
 
 import { DeviceCommands } from "./deviceCommands";
 
 import * as Actions from "./actions";
 import RenameFunctionForm from "./renameFunction";
-
-/** Replaces one data point without mutating the device held in state. */
-export function withUpdatedStatus(device: Device, command: FunctionItem): Device {
-  return {
-    ...device,
-    status: (device.status ?? []).map((status) => (status.code === command.code ? command : status)),
-  };
-}
 
 export function DeviceActionPanel(props: {
   device: Device;
@@ -30,7 +22,7 @@ export function DeviceActionPanel(props: {
   const colorTemp = findColorTemp(device);
   const isControl = classifyDevice(device) === "control";
 
-  const apply = ({ command }: Actions.CommandResult) => props.onAction(withUpdatedStatus(device, command));
+  const apply = (outcome: Actions.CommandResult) => props.onAction(applyCommandResult(device, outcome));
 
   return (
     <ActionPanel>

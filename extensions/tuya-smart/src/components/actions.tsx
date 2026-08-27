@@ -112,6 +112,9 @@ async function runCommand(
     return { result: true, command };
   } catch (error) {
     ShowToastError(error);
-    return { result: false, command };
+    // Hand back the value the device still holds, so even a caller that ignores
+    // `result` cannot persist a state that was never applied.
+    const unchanged = (device.status ?? []).find((status) => status.code === command.code);
+    return { result: false, command: unchanged ?? command };
   }
 }

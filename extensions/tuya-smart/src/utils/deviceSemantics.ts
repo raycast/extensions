@@ -36,6 +36,23 @@ const LOCK_CATEGORIES = new Set([
 
 const BATTERY_CODES = ["battery_percentage", "residual_electricity", "battery_percentage_1"];
 
+/** Replaces one data point without mutating the device held in state. */
+export function withUpdatedStatus(device: Device, command: FunctionItem): Device {
+  return {
+    ...device,
+    status: (device.status ?? []).map((status) => (status.code === command.code ? command : status)),
+  };
+}
+
+/**
+ * A command that failed must not leave its requested value behind. The device list is
+ * persisted, so writing an unapplied value means the UI keeps showing, across relaunches,
+ * a state the physical device never reached.
+ */
+export function applyCommandResult(device: Device, outcome: { result: boolean; command: FunctionItem }): Device {
+  return outcome.result ? withUpdatedStatus(device, outcome.command) : device;
+}
+
 export function isNoiseStatus(status: FunctionItem): boolean {
   if (NOISE_CODES.has(status.code)) return true;
   // Countdown timers sit at zero on every socket; they are only meaningful when running.
@@ -321,6 +338,19 @@ export function isSensitiveStatus(status: FunctionItem): boolean {
   return SENSITIVE_CODES.has(status.code);
 }
 
+/**
+ * Encoded bookkeeping that no consumer can parse. Kept separate from `isNoiseStatus`
+ * on purpose: that one answers "what does a person want to read", and also hides an
+ * idle countdown, which an assistant may legitimately be asked about. This one answers
+ * "what can anything actually reason about".
+ */
+const OPAQUE_CODES = new Set(["synch_method", "rtc_lock"]);
+
+export function isOpaqueStatus(status: FunctionItem): boolean {
+  if (OPAQUE_CODES.has(status.code)) return true;
+  return typeof status.value === "string" && /^[A-Za-z0-9+/]{12,}={0,2}$/.test(status.value);
+}
+
 export interface DeviceDescription {
   id: string;
   name: string;
@@ -344,13 +374,13 @@ export interface DeviceDescription {
  * Everything an assistant needs to answer questions about a device. Values are given
  * both formatted and raw: a `va_temperature` of 294 means 29.4 degrees, so answering
  * with the raw number would be wrong, but the raw value still allows comparisons.
- * Only credentials and physical locators are withheld.
+ * Only credentials, physical locators and unparseable encoded values are withheld.
  */
 export function describeDeviceForAI(device: Device): DeviceDescription {
   const unit = temperatureUnitOf(device);
   const alarms = alarmsOf(device);
   const battery = batteryOf(device);
-  const withheld = (device.status ?? []).filter(isSensitiveStatus).length;
+  const withheld = (device.status ?? []).filter((s) => isSensitiveStatus(s) || isOpaqueStatus(s)).length;
 
   return {
     id: device.id,
@@ -369,7 +399,7 @@ export function describeDeviceForAI(device: Device): DeviceDescription {
       .filter(isSwitchStatus)
       .map((status) => ({ code: status.code, name: statusLabel(status), isOn: status.value === true })),
     readings: (device.status ?? [])
-      .filter((status) => !isSwitchStatus(status) && !isSensitiveStatus(status))
+      .filter((status) => !isSwitchStatus(status) && !isSensitiveStatus(status) && !isOpaqueStatus(status))
       .map((status) => ({
         code: status.code,
         name: statusLabel(status),
@@ -378,7 +408,7 @@ export function describeDeviceForAI(device: Device): DeviceDescription {
       })),
     ...(withheld > 0
       ? {
-          omitted: `${withheld} data ${withheld === 1 ? "point was" : "points were"} withheld because they hold lock credentials.`,
+          omitted: `${withheld} data ${withheld === 1 ? "point was" : "points were"} withheld: lock credentials, or encoded values nothing can read.`,
         }
       : {}),
   };

@@ -1,8 +1,15 @@
 import type { JSX } from "react";
 import { Color, Icon, List } from "@raycast/api";
 import { Device, FunctionItem } from "../utils/interfaces";
-import { CommandActionPanel, withUpdatedStatus } from "./actionPanels";
-import { formatStatusValue, isNoiseStatus, statusLabel, cleanName, temperatureUnitOf } from "../utils/deviceSemantics";
+import { CommandActionPanel } from "./actionPanels";
+import {
+  applyCommandResult,
+  formatStatusValue,
+  isNoiseStatus,
+  statusLabel,
+  cleanName,
+  temperatureUnitOf,
+} from "../utils/deviceSemantics";
 
 /** Data points a user can act on: booleans to flip, numbers to set, enums to choose. */
 function actionableStatuses(device: Device): FunctionItem[] {
@@ -32,7 +39,7 @@ export function DeviceCommands(props: { device: Device; onAction: (device: Devic
               <CommandActionPanel
                 command={command}
                 device={device}
-                onAction={({ command: updated }) => props.onAction(withUpdatedStatus(device, updated))}
+                onAction={(outcome) => props.onAction(applyCommandResult(device, outcome))}
               />
             }
           />
