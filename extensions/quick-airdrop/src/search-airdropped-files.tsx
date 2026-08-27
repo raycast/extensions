@@ -107,8 +107,8 @@ export default function Command(props: LaunchProps<{ launchContext: SearchLaunch
         title="No AirDropped Files"
         description="Files received via AirDrop land in your Downloads folder — nothing there right now."
       />
-      <List.Section title="Latest Transfer" subtitle={describeTransfer(visibleTransfer)}>
-        {visibleTransfer.map((file) => (
+      <List.Section title="Latest Transfer" subtitle={describeTransfer(transfer)}>
+        {transfer.map((file) => (
           <FileListItem key={file.path} file={file} transfer={transfer} intent={intent} />
         ))}
       </List.Section>
