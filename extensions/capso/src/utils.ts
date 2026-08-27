@@ -26,8 +26,14 @@ export function getCapsoShortcut(
     }
 
     const parsed = JSON.parse(raw);
-    const keyCode = parsed.carbonKeyCode ?? defaultKeyCode;
-    const carbonMods: number = parsed.carbonModifiers ?? 0;
+    const keyCode =
+      typeof parsed.carbonKeyCode === "number" && Number.isInteger(parsed.carbonKeyCode) && parsed.carbonKeyCode >= 0
+        ? parsed.carbonKeyCode
+        : defaultKeyCode;
+    const carbonMods: number =
+      typeof parsed.carbonModifiers === "number" && Number.isInteger(parsed.carbonModifiers)
+        ? parsed.carbonModifiers
+        : 0;
 
     const modifiers: string[] = [];
     if (carbonMods & 256) modifiers.push("command down");
