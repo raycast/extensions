@@ -1,10 +1,14 @@
 import { List } from "@raycast/api";
-export default function CollectionDropdown(props: { collections: string[]; onSelection: (newValue: string) => void }) {
-  const { onSelection, collections } = props;
+export default function CollectionDropdown(props: {
+  collections: string[];
+  value: string;
+  onSelection: (newValue: string) => void;
+}) {
+  const { onSelection, collections, value } = props;
   return (
     <List.Dropdown
       tooltip="Select Collection"
-      storeValue={true}
+      value={value}
       onChange={(newValue) => {
         onSelection(newValue);
       }}
