@@ -26,7 +26,14 @@ export default function SearchOddsCommand() {
     },
   );
 
-  const games = useMemo(() => dedupeGames(data?.results ?? []), [data]);
+  // Only render results while the query is one we actually search for.
+  // `keepPreviousData` is here to stop the list flashing empty between
+  // keystrokes, but it also retains the last response when `execute` goes
+  // false -- and once it is false no fetch will ever reconcile it, so
+  // clearing the search bar left the previous matchups on screen and still
+  // actionable. Gating on the same condition as `execute` keeps the
+  // anti-flicker behaviour while tying what is shown to what was asked.
+  const games = useMemo(() => (query.length >= 2 ? dedupeGames(data?.results ?? []) : []), [data, query]);
 
   return (
     <List

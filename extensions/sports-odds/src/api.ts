@@ -2,11 +2,10 @@ import { getPreferenceValues } from "@raycast/api";
 
 export const BASE_URL = "https://parlay-api.com";
 
-interface Preferences {
-  apiKey?: string;
-}
-
 export function getApiKey(): string | undefined {
+  // `Preferences` is the global type Raycast generates from package.json into
+  // raycast-env.d.ts. Declaring a local copy shadowed it and would drift the
+  // moment a preference is added or renamed in the manifest.
   const { apiKey } = getPreferenceValues<Preferences>();
   const trimmed = apiKey?.trim();
   return trimmed ? trimmed : undefined;
