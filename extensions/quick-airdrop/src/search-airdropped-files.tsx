@@ -1,4 +1,17 @@
-import { Action, ActionPanel, Icon, LaunchProps, List, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  LaunchProps,
+  List,
+  showHUD,
+  showToast,
+  Toast,
+  trash,
+} from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import {
   AirDroppedFile,
@@ -31,8 +44,32 @@ async function pasteFiles(files: AirDroppedFile[]) {
   }
 }
 
-function FileActions(props: { file: AirDroppedFile; transfer: AirDroppedFile[]; intent?: "copy" | "paste" }) {
-  const { file, transfer, intent } = props;
+async function trashFiles(files: AirDroppedFile[], onTrashed: () => void) {
+  const confirmed = await confirmAlert({
+    title: files.length === 1 ? "Move File to Trash?" : `Move ${files.length} Files to Trash?`,
+    message: describeTransfer(files),
+    icon: Icon.Trash,
+    primaryAction: { title: "Move to Trash", style: Alert.ActionStyle.Destructive },
+  });
+  if (!confirmed) {
+    return;
+  }
+  try {
+    await trash(files.map((file) => file.path));
+    await showToast({ style: Toast.Style.Success, title: `Moved ${describeTransfer(files)} to Trash` });
+    onTrashed();
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not move to Trash" });
+  }
+}
+
+function FileActions(props: {
+  file: AirDroppedFile;
+  transfer: AirDroppedFile[];
+  intent?: "copy" | "paste";
+  onTrashed: () => void;
+}) {
+  const { file, transfer, intent, onTrashed } = props;
   const isPasteFirst = intent === "paste";
 
   const copySingle = <Action icon={Icon.Clipboard} title="Copy File" onAction={() => copyFiles([file])} />;
@@ -65,18 +102,42 @@ function FileActions(props: { file: AirDroppedFile; transfer: AirDroppedFile[]; 
         <Action.ShowInFinder path={file.path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
         <Action.OpenWith path={file.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
       </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.Trash
+          paths={file.path}
+          shortcut={Keyboard.Shortcut.Common.Remove}
+          onTrash={async () => {
+            await showToast({ style: Toast.Style.Success, title: `Moved ${file.name} to Trash` });
+            onTrashed();
+          }}
+        />
+        {transfer.length > 1 && transfer.some((item) => item.path === file.path) && (
+          <Action
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            title={`Trash All ${transfer.length} Files`}
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
+            onAction={() => trashFiles(transfer, onTrashed)}
+          />
+        )}
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
 
-function FileListItem(props: { file: AirDroppedFile; transfer: AirDroppedFile[]; intent?: "copy" | "paste" }) {
-  const { file, transfer, intent } = props;
+function FileListItem(props: {
+  file: AirDroppedFile;
+  transfer: AirDroppedFile[];
+  intent?: "copy" | "paste";
+  onTrashed: () => void;
+}) {
+  const { file, transfer, intent, onTrashed } = props;
   return (
     <List.Item
       icon={{ fileIcon: file.path }}
       title={file.name}
       accessories={[{ date: file.receivedAt, tooltip: `Received ${file.receivedAt.toLocaleString()}` }]}
-      actions={<FileActions file={file} transfer={transfer} intent={intent} />}
+      actions={<FileActions file={file} transfer={transfer} intent={intent} onTrashed={onTrashed} />}
     />
   );
 }
@@ -85,7 +146,7 @@ export default function Command(props: LaunchProps<{ launchContext: SearchLaunch
   const scope = props.launchContext?.scope;
   const intent = props.launchContext?.intent;
 
-  const { isLoading, data } = usePromise(findAirDroppedFiles, [], {
+  const { isLoading, data, revalidate } = usePromise(findAirDroppedFiles, [], {
     onError: async (error) => {
       await showFailureToast(error, { title: "Could not scan the Downloads folder" });
     },
@@ -109,13 +170,13 @@ export default function Command(props: LaunchProps<{ launchContext: SearchLaunch
       />
       <List.Section title="Latest Transfer" subtitle={describeTransfer(transfer)}>
         {transfer.map((file) => (
-          <FileListItem key={file.path} file={file} transfer={transfer} intent={intent} />
+          <FileListItem key={file.path} file={file} transfer={transfer} intent={intent} onTrashed={revalidate} />
         ))}
       </List.Section>
       {earlier.length > 0 && (
         <List.Section title="Earlier">
           {earlier.map((file) => (
-            <FileListItem key={file.path} file={file} transfer={transfer} intent={intent} />
+            <FileListItem key={file.path} file={file} transfer={transfer} intent={intent} onTrashed={revalidate} />
           ))}
         </List.Section>
       )}

@@ -13,7 +13,7 @@ Trigger the macOS AirDrop sheet straight from Raycast.
 - **AirDrop Selected Text** — Sends the text currently highlighted in the frontmost app. URLs go through as links; anything else is dropped into a temporary `.txt`.
 - **Copy Last AirDropped File** — Copies the most recently received AirDrop file to the clipboard.
 - **Paste Last AirDropped File** — Pastes the most recently received AirDrop file straight into the frontmost app.
-- **Search AirDropped Files** — Browses every file received via AirDrop (newest first) with copy, paste, open, and reveal actions.
+- **Search AirDropped Files** — Browses every file received via AirDrop (newest first) with copy, paste, open, reveal, and trash actions. A single file can be moved to the Trash with `⌃X`; when the latest transfer contained several files, the whole batch can be trashed at once (with confirmation).
 
 If the last transfer contained several files, the copy/paste commands open a picker scoped to that transfer, with `Copy All` / `Paste All` actions.
 
