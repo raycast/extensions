@@ -2,6 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openqr",
   "title": "OpenQR",
+  "version": "1.1.0",
   "description": "Generate QR codes and manage dynamic (editable) QR codes with scan analytics, straight from Raycast.",
   "icon": "openqr-icon.png",
   "author": "sam_moreton",

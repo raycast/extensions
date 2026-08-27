@@ -1,5 +1,9 @@
 # OpenQR Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Manage Dynamic QR Codes: a failed load (invalid API key, network error) now shows the error on the list with a Retry action, instead of looking like an empty account.
+
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Generate Static QR Code: encode any text or URL, choose PNG or SVG, set the pixel size and optional foreground/background colors, then copy the image, save it, or open it.

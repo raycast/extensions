@@ -24,6 +24,7 @@ export default function Command() {
     data: codes,
     isLoading,
     revalidate,
+    error,
   } = useCachedPromise(
     async () => client().listDynamicCodes({ limit: 200 }),
     [],
@@ -49,11 +50,32 @@ export default function Command() {
       onSelectionChange={setSelectedId}
       searchBarPlaceholder="Filter by label, slug or destination…"
     >
-      <List.EmptyView
-        icon={Icon.BarCode}
-        title="No dynamic codes yet"
-        description="Create one with the “Generate Dynamic QR Code” command."
-      />
+      {error ? (
+        // A failed load must never read as an empty account: the two need opposite
+        // remedies (fix the key or network vs create a code), so the error itself goes
+        // on the list, with a retry one keystroke away.
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Couldn’t load dynamic codes"
+          description={errorMessage(error)}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={() => void revalidate()}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.BarCode}
+          title="No dynamic codes yet"
+          description="Create one with the “Generate Dynamic QR Code” command."
+        />
+      )}
       {(codes ?? []).map((code) => (
         <CodeItem
           key={code.id}
