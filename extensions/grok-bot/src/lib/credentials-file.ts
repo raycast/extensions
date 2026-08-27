@@ -1,7 +1,7 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { lstatSync, readFileSync } from "node:fs";
-import { Preferences, Result, err, ok } from "./types";
+import { GatewayCredentials, Result, err, ok } from "./types";
 
 export type CredentialsFileError =
   | { kind: "missing" }
@@ -38,7 +38,7 @@ function isEnoent(error: unknown): boolean {
   return error.code === "ENOENT";
 }
 
-export function parseGatewayEnv(text: string): Result<Preferences, CredentialsFileError> {
+export function parseGatewayEnv(text: string): Result<GatewayCredentials, CredentialsFileError> {
   let gatewayUrl = "";
   let gatewayToken = "";
 
@@ -70,7 +70,7 @@ export function parseGatewayEnv(text: string): Result<Preferences, CredentialsFi
   return ok({ gatewayUrl, gatewayToken });
 }
 
-export function loadGatewayCredentialsFile(filePath: string): Result<Preferences, CredentialsFileError> {
+export function loadGatewayCredentialsFile(filePath: string): Result<GatewayCredentials, CredentialsFileError> {
   try {
     const stat = lstatSync(filePath);
     if (stat.isSymbolicLink() || !stat.isFile()) {
@@ -89,6 +89,6 @@ export function loadGatewayCredentialsFile(filePath: string): Result<Preferences
   }
 }
 
-export function loadDefaultGatewayCredentialsFile(): Result<Preferences, CredentialsFileError> {
+export function loadDefaultGatewayCredentialsFile(): Result<GatewayCredentials, CredentialsFileError> {
   return loadGatewayCredentialsFile(credentialsFilePath());
 }

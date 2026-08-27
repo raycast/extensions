@@ -1,7 +1,7 @@
 import { CredentialsFileError } from "./credentials-file";
-import { GatewayError, Preferences, Result, err, ok } from "./types";
+import { GatewayCredentials, GatewayError, Result, err, ok } from "./types";
 
-function isGatewayConfigured(prefs: Preferences): boolean {
+function isGatewayConfigured(prefs: GatewayCredentials): boolean {
   return prefs.gatewayUrl.length > 0 && prefs.gatewayToken.length > 0;
 }
 
@@ -25,9 +25,9 @@ function credentialsFileMessage(error: CredentialsFileError): string {
 }
 
 export function mergeGatewayCredentials(
-  raycast: Preferences,
-  file: Result<Preferences, CredentialsFileError>,
-): Result<Preferences, GatewayError> {
+  raycast: GatewayCredentials,
+  file: Result<GatewayCredentials, CredentialsFileError>,
+): Result<GatewayCredentials, GatewayError> {
   if (isGatewayConfigured(raycast)) {
     return ok({
       gatewayUrl: raycast.gatewayUrl.trim(),

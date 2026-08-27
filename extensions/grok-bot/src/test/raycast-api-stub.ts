@@ -23,6 +23,18 @@ export class Cache {
     }
     bucket.set(key, value);
   }
+
+  remove(key: string): boolean {
+    const bucket = cacheStore.get(this.namespace);
+    if (!bucket || !bucket.has(key)) {
+      return false;
+    }
+    return bucket.delete(key);
+  }
+
+  clear(): void {
+    cacheStore.delete(this.namespace);
+  }
 }
 
 export const Image = {

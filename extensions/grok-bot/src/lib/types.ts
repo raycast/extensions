@@ -20,7 +20,7 @@ export type Bot = {
   avatarHash: string | null;
 };
 
-export type Preferences = {
+export type GatewayCredentials = {
   gatewayUrl: string;
   gatewayToken: string;
 };

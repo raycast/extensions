@@ -1,9 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 import { loadDefaultGatewayCredentialsFile } from "./credentials-file";
 import { mergeGatewayCredentials } from "./gateway-config";
-import { Preferences, Result, GatewayError } from "./types";
+import { GatewayCredentials, Result, GatewayError } from "./types";
 
-function fromRaycast(): Preferences {
+function fromRaycast(): GatewayCredentials {
   const prefs = getPreferenceValues<Preferences>();
   return {
     gatewayUrl: prefs.gatewayUrl?.trim() ?? "",
@@ -11,6 +11,6 @@ function fromRaycast(): Preferences {
   };
 }
 
-export function resolveGatewayConfig(): Result<Preferences, GatewayError> {
+export function resolveGatewayConfig(): Result<GatewayCredentials, GatewayError> {
   return mergeGatewayCredentials(fromRaycast(), loadDefaultGatewayCredentialsFile());
 }
