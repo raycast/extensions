@@ -1,5 +1,25 @@
 # aerospace Changelog
 
+## [Runtime, Configuration, and UX Upgrade] - 2026-08-27
+
+- Trigger shortcuts with AeroSpace's native `trigger-binding` command instead of AppleScript keyboard events
+- Show the complete TOML file and the binding configuration loaded by the running AeroSpace process as distinct views
+- Add deduplicated open apps and search keywords to the workspace picker
+- Read window application paths and focused workspace state directly from AeroSpace's structured output
+- Add persistent, contextual recovery actions without assuming AeroSpace lives in `/Applications`
+- Add validated CLI response models, focused runtime operations, and unit tests
+- Update Raycast API, utilities, linting, formatting, TypeScript, TOML, and test dependencies
+- Align command metadata, root navigation behavior, loading states, error handling, and scripts with current Raycast guidance
+- Add a live Focused, Visible, or All scope picker, remember its latest selection, and make window titles easier to scan
+- Add safe window and workspace move, monitor, layout, fullscreen, summon, and balance actions
+- Group bindings by human-readable intent while keeping every configured mode visible by default
+- Name custom command bindings from their executable or script filename and positional arguments
+- Add configuration health, dry-run validation, safe reload, and disk-versus-loaded binding comparison
+- Keep bindings immediately visible in the menu bar and add a default-on preference for its Quick Actions and Open sections
+- Keep the menu-bar title icon-only by default, with an opt-in preference for the live workspace name
+- Link the menu bar to Raycast's native Version History so users can discover release changes
+- Add a copy-only `on-window-detected` rule assistant that never rewrites the user's config
+
 ## [Focused Workspace First] - 2026-08-26
 
 - Show the focused workspace first when switching apps across all workspaces
