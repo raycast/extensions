@@ -44,7 +44,7 @@ The extension detects the `aerospace` binary in common Homebrew, Nix, and nix-da
 - Use **Enable AeroSpace Menu Bar Shortcuts** for top-level binding access, live status, and optional quick actions
 - Use **Switch Apps in Workspace** to choose a live search scope, remember it for next time, and manage open windows
 
-In extension preferences, turn off **Show Menu Bar Extras** to keep only bindings, status, refresh, and preferences in the menu bar. **Show Full Bindings** remains on by default; turn it off to show only the main mode. The menu bar's **View What’s New…** item opens the extension's Store page, where Raycast shows its native Version History.
+In extension preferences, turn off **Show Menu Bar Extras** to keep only bindings, status, refresh, and preferences in the menu bar. **Show Full Bindings** remains on by default; turn it off to show only the main mode. The menu bar shows only its icon by default; turn on **Show Workspace Name** to add the live workspace and binding mode beside it. The menu bar's **View What’s New…** item opens the extension's Store page, where Raycast shows its native Version History.
 
 The config view deliberately checks two sources. **View Full Config** opens the complete file returned by `aerospace config --config-path`. **View Loaded Binding Configuration** calls `aerospace config --get . --json`; AeroSpace currently exposes only `mode.*` values through that command. The health summary compares those bindings and runs `reload-config --dry-run --warnings-as-errors`. A real reload only runs after that validation succeeds. Shortcut activation prefers the loaded configuration and falls back to the file for older CLI versions.
 

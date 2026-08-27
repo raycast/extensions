@@ -35,7 +35,7 @@ async function runMenuAction(title: string, operation: () => Promise<void>, succ
 
 export default function Command() {
   const { shortcuts, isLoading, error, revalidate } = useShortcuts();
-  const { showFullBindings, showMenuBarExtras } = getPreferenceValues<Preferences>();
+  const { showFullBindings, showMenuBarExtras, showWorkspaceName } = getPreferenceValues<Preferences>();
   const [workspace, setWorkspace] = useState<string>();
   const [mode, setMode] = useState<string>();
   const [streamError, setStreamError] = useState<AeroSpaceError>();
@@ -85,7 +85,8 @@ export default function Command() {
     return map;
   }, [shortcuts, showFullBindings]);
 
-  const menuTitle = workspace ? (mode && mode !== "main" ? `${workspace} · ${mode}` : workspace) : undefined;
+  const menuTitle =
+    showWorkspaceName && workspace ? (mode && mode !== "main" ? `${workspace} · ${mode}` : workspace) : undefined;
   const tooltip = workspace
     ? `AeroSpace — Workspace ${workspace}${mode ? `, ${mode} mode` : ""}`
     : "AeroSpace Shortcuts";

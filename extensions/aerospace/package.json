@@ -143,6 +143,15 @@
       "type": "checkbox",
       "default": true,
       "label": "Show Quick Actions and Open sections"
+    },
+    {
+      "name": "showWorkspaceName",
+      "title": "Show Workspace Name",
+      "description": "Show the current workspace beside the AeroSpace menu-bar icon.",
+      "required": false,
+      "type": "checkbox",
+      "default": false,
+      "label": "Show the current workspace in the menu bar"
     }
   ],
   "dependencies": {

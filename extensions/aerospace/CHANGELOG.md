@@ -15,6 +15,7 @@
 - Group bindings by human-readable intent while keeping every configured mode visible by default
 - Add configuration health, dry-run validation, safe reload, and disk-versus-loaded binding comparison
 - Keep bindings immediately visible in the menu bar and add a default-on preference for its Quick Actions and Open sections
+- Keep the menu-bar title icon-only by default, with an opt-in preference for the live workspace name
 - Link the menu bar to Raycast's native Version History so users can discover release changes
 - Add a copy-only `on-window-detected` rule assistant that never rewrites the user's config
 
