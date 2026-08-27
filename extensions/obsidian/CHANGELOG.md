@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Fix Open Note on Creation] - 2026-08-27
+## [Fix Open Note on Creation] - {PR_MERGE_DATE}
 
 - Open the created note in Obsidian before the command window closes, so the "Open on creation" preference works reliably
 
