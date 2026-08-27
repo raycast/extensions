@@ -126,8 +126,8 @@ On `MyWifi1` or `MyWifi2`, the internal URL is used. On any other network, it fa
 
 |                                                     |                                                     |
 | --------------------------------------------------- | --------------------------------------------------- |
-| ![All Entities](./metadata/apexconnect-1.png)        | ![Lights](./metadata/apexconnect-2.png)              |
-| ![Mediaplayers](./metadata/apexconnect-3.png)        | ![Covers](./metadata/apexconnect-4.png)              |
+| ![All Entities](./media/apexconnect-1.png)        | ![Lights](./media/apexconnect-2.png)              |
+| ![Mediaplayers](./media/apexconnect-3.png)        | ![Covers](./media/apexconnect-4.png)              |
 
 ## License
 
