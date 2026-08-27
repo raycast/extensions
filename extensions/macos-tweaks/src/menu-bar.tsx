@@ -71,12 +71,16 @@ export default function TweaksMenuBar() {
         <MenuBarExtra.Item
           title="Browse All Tweaks..."
           icon={Icon.MagnifyingGlass}
-          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Undolog/macos-tweaks/browse-tweaks`)}
+          onAction={() =>
+            open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Undolog/macos-tweaks/browse-tweaks`)
+          }
         />
         <MenuBarExtra.Item
           title="My Tweaks..."
           icon={Icon.List}
-          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Undolog/macos-tweaks/my-tweaks`)}
+          onAction={() =>
+            open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Undolog/macos-tweaks/my-tweaks`)
+          }
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>
