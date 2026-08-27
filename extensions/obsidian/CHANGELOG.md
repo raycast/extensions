@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Fix Open Note on Creation] - 2026-08-27
+
+- Open the created note in Obsidian before the command window closes, so the "Open on creation" preference works reliably
+
 ## [Exact Content Match Navigation] - 2026-08-27
 
 - Show each exact content occurrence as a separate result with highlighted context and line and column information
