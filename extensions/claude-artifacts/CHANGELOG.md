@@ -1,6 +1,6 @@
 # Claude Artifacts Changelog
 
-## [Tell You When Tracking Stops] - {PR_MERGE_DATE}
+## [Tell You When Tracking Stops] - 2026-08-27
 
 - Added an **Artifact Tracking Is Off** row at the top of the list when the Claude Code hook is not registered — until now a list that had quietly stopped updating looked exactly like one that was up to date
 - Added a **Set Up Artifact Tracking** screen with a prompt you can paste into Claude Code to install and register the hook for you, instead of leaving you holding a JSON fragment with nowhere to put it
