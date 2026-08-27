@@ -1,6 +1,6 @@
 # Quick AirDrop Changelog
 
-## [Received Files] - {PR_MERGE_DATE}
+## [Received Files] - 2026-08-27
 
 - Add `Copy Last AirDropped File` command to copy the most recently received file to the clipboard
 - Add `Paste Last AirDropped File` command to paste the most recently received file into the frontmost app
