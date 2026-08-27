@@ -14,7 +14,7 @@ The extension uses AeroSpace's CLI as its runtime interface. It does not synthes
 
 ## Features
 
-- Browse human-readable shortcuts grouped by intent and trigger them with `aerospace trigger-binding`
+- Browse human-readable shortcuts, including custom script names and arguments, and trigger them with `aerospace trigger-binding`
 - Keep every configured binding visible by default, or show only the main mode with the **Show Full Bindings** preference
 - Check runtime, validation, and disk-versus-loaded binding health before inspecting or reloading the complete TOML config
 - Keep bindings immediately visible in the menu bar, with optional quick actions and command links below them

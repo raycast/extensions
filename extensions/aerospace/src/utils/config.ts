@@ -313,10 +313,35 @@ function normalizeCommandWhitespace(command: string): string {
 }
 
 function commandParts(command: string): string[] {
-  return command
-    .trim()
-    .split(/\s+/)
-    .map((part) => part.replace(/^["']|["']$/g, ""));
+  const parts: string[] = [];
+  let current = "";
+  let quote: "'" | '"' | null = null;
+  let escaped = false;
+
+  for (const character of command.trim()) {
+    if (escaped) {
+      current += character;
+      escaped = false;
+    } else if (character === "\\") {
+      escaped = true;
+    } else if (quote) {
+      if (character === quote) quote = null;
+      else current += character;
+    } else if (character === "'" || character === '"') {
+      quote = character;
+    } else if (/\s/.test(character)) {
+      if (current) {
+        parts.push(current);
+        current = "";
+      }
+    } else {
+      current += character;
+    }
+  }
+
+  if (escaped) current += "\\";
+  if (current) parts.push(current);
+  return parts;
 }
 
 function commandArguments(command: string): string[] {
@@ -331,6 +356,59 @@ function titleCase(value: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+const SCRIPT_INTERPRETERS = new Set([
+  "bash",
+  "dash",
+  "fish",
+  "ksh",
+  "node",
+  "osascript",
+  "python",
+  "python2",
+  "python3",
+  "ruby",
+  "sh",
+  "zsh",
+]);
+
+const SCRIPT_EXTENSIONS = /\.(?:bash|command|fish|js|mjs|cjs|py|rb|scpt|sh|ts|zsh)$/i;
+const SHELL_OPERATORS = new Set(["|", "||", "&&", ">", ">>", "<", "<<", ";", "&"]);
+
+function commandName(value: string): string {
+  return titleCase(path.basename(value).replace(SCRIPT_EXTENSIONS, ""));
+}
+
+function isDisplayArgument(value: string): boolean {
+  return (
+    value !== "--" &&
+    !value.startsWith("-") &&
+    !SHELL_OPERATORS.has(value) &&
+    !/^\d*(?:>>?|<<?|>&)/.test(value) &&
+    !/^[A-Za-z_][A-Za-z0-9_]*=/.test(value)
+  );
+}
+
+function describeExecAndForget(parts: string[]): string {
+  let command = parts;
+
+  if (path.basename(command[0] ?? "") === "env") {
+    command = command.slice(1).filter((part) => !/^[A-Za-z_][A-Za-z0-9_]*=/.test(part));
+  }
+
+  const interpreter = path.basename(command[0] ?? "");
+  if (SCRIPT_INTERPRETERS.has(interpreter)) {
+    const interpreterArguments = command.slice(1);
+    if (interpreterArguments.some((part) => /^-[^-]*c/.test(part))) return "Shell Command";
+    const scriptIndex = interpreterArguments.findIndex((part) => !part.startsWith("-") && part !== "--");
+    command = scriptIndex >= 0 ? interpreterArguments.slice(scriptIndex) : [];
+  }
+
+  const [executable, ...args] = command;
+  if (!executable) return "Custom Command";
+
+  return [commandName(executable), ...args.filter(isDisplayArgument)].filter(Boolean).join(" ");
 }
 
 export function categorizeCommand(command: string): ShortcutCategory {
@@ -421,7 +499,7 @@ export function describeCommand(command: string): string {
     case "volume":
       return `Volume ${direction}`.trim();
     case "exec-and-forget":
-      return "Run Custom Command";
+      return describeExecAndForget(parts);
     default:
       return [titleCase(name || "Command"), target].filter(Boolean).join(": ");
   }

@@ -98,6 +98,23 @@ describe("AeroSpace config", () => {
     expect(describeCommand("mode service")).toBe("Enter Service Mode");
   });
 
+  it("describes custom commands from their script name and positional arguments", () => {
+    expect(
+      describeCommand("exec-and-forget /bin/bash /Users/example/.config/aerospace/scripts/switch-context.sh WEB"),
+    ).toBe("Switch Context WEB");
+    expect(describeCommand("exec-and-forget open -a Ghostty")).toBe("Open Ghostty");
+    expect(describeCommand("exec-and-forget open -a 'Google Chrome'")).toBe("Open Google Chrome");
+    expect(describeCommand("exec-and-forget /Users/example/bin/cleanup-layout.sh")).toBe("Cleanup Layout");
+  });
+
+  it("unwraps interpreters and environment assignments while keeping safe fallbacks", () => {
+    expect(
+      describeCommand("exec-and-forget env PROFILE=work /bin/zsh -eu /Users/example/bin/sync-windows.command DEV"),
+    ).toBe("Sync Windows DEV");
+    expect(describeCommand("exec-and-forget sh -c 'one; two'")).toBe("Shell Command");
+    expect(describeCommand("exec-and-forget")).toBe("Custom Command");
+  });
+
   it("splits loaded command sequences without splitting quoted shell commands", () => {
     expect(splitCommandSequence("reload-config; mode main")).toEqual(["reload-config", "mode main"]);
     expect(splitCommandSequence("exec-and-forget sh -c 'one; two'; mode main")).toEqual([

@@ -13,6 +13,7 @@
 - Add a live Focused, Visible, or All scope picker, remember its latest selection, and make window titles easier to scan
 - Add safe window and workspace move, monitor, layout, fullscreen, summon, and balance actions
 - Group bindings by human-readable intent while keeping every configured mode visible by default
+- Name custom command bindings from their executable or script filename and positional arguments
 - Add configuration health, dry-run validation, safe reload, and disk-versus-loaded binding comparison
 - Keep bindings immediately visible in the menu bar and add a default-on preference for its Quick Actions and Open sections
 - Keep the menu-bar title icon-only by default, with an opt-in preference for the live workspace name
