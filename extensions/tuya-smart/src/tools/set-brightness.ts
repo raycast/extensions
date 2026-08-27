@@ -1,6 +1,6 @@
 import { Tool } from "@raycast/api";
 import { controlDevice, loadDevicesWithFallback } from "../utils/deviceSource";
-import { findDeviceByName } from "../utils/deviceLookup";
+import { describeDeviceMiss, findDeviceByName } from "../utils/deviceLookup";
 import { cleanName } from "../utils/deviceSemantics";
 import { findBrightness, findColorTemp, parseRange, percentToRaw } from "../utils/lightFunctions";
 
@@ -20,7 +20,7 @@ async function resolve(input: Input) {
   const { devices } = await loadDevicesWithFallback();
   const device = findDeviceByName(devices, input.deviceName);
   if (!device) {
-    throw new Error(`There is no device called "${input.deviceName}". Call list-devices to see the names that exist.`);
+    throw new Error(describeDeviceMiss(devices, input.deviceName));
   }
 
   const wantsColorTemp = input.property === "colorTemperature";

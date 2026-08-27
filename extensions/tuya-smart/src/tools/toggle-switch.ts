@@ -1,8 +1,7 @@
 import { Tool } from "@raycast/api";
 import { controlDevice, loadDevicesWithFallback } from "../utils/deviceSource";
-import { findDeviceByName, findSwitchOnDevice } from "../utils/deviceLookup";
+import { describeDeviceMiss, describeSwitchMiss, findDeviceByName, findSwitchOnDevice } from "../utils/deviceLookup";
 import { cleanName } from "../utils/deviceSemantics";
-import { isSwitchStatus } from "../utils/filters";
 
 type Input = {
   /** The device name as it appears in the Tuya app, for example "Living Room Lamp". */
@@ -20,18 +19,12 @@ async function resolve(input: Input) {
   const { devices } = await loadDevicesWithFallback();
   const device = findDeviceByName(devices, input.deviceName);
   if (!device) {
-    throw new Error(`There is no device called "${input.deviceName}". Call list-devices to see the names that exist.`);
+    throw new Error(describeDeviceMiss(devices, input.deviceName));
   }
   const target = findSwitchOnDevice(device, input.switchName);
   if (!target) {
-    const available = (device.status ?? []).filter(isSwitchStatus).map((s) => s.name ?? s.code);
-    if (available.length === 0) {
-      throw new Error(`${cleanName(device.name)} has nothing that can be switched on or off.`);
-    }
-    // Never guess which one was meant; operating the wrong gang is worse than failing.
-    throw new Error(
-      `${cleanName(device.name)} has no switch called "${input.switchName}". It has: ${available.join(", ")}.`,
-    );
+    // Never guess which one was meant; operating the wrong relay is worse than failing.
+    throw new Error(describeSwitchMiss(device, input.switchName ?? ""));
   }
   const nextValue = input.turnOn ?? target.value !== true;
   return { device, target, nextValue };

@@ -1,41 +1,90 @@
 import { Device, FunctionItem } from "./interfaces";
 import { isSwitchStatus } from "./filters";
+import { cleanName } from "./deviceSemantics";
 
 const normalize = (value: string) => value.trim().toLowerCase();
 
 /**
- * Resolves the free-text name an AI tool or user supplies to a single device.
- * Ranked so that an exact name always wins over a coincidental substring.
+ * Every device a free-text name could plausibly mean, most specific tier first. An
+ * exact name wins outright even when it is also a substring of other names, so
+ * "Ventanal" resolves cleanly despite "Ventana ..." devices existing.
  */
-export function findDeviceByName(devices: Device[], query: string): Device | undefined {
+export function matchingDevices(devices: Device[], query: string): Device[] {
   const needle = normalize(query ?? "");
-  if (!needle) return undefined;
+  if (!needle) return [];
 
-  const byId = devices.find((device) => device.id === query);
-  if (byId) return byId;
+  const tiers = [
+    devices.filter((device) => device.id === query),
+    devices.filter((device) => normalize(device.name) === needle),
+    devices.filter((device) => normalize(device.name).startsWith(needle)),
+    devices.filter((device) => normalize(device.name).includes(needle)),
+    devices.filter((device) => needle.includes(normalize(device.name))),
+  ];
 
-  return (
-    devices.find((device) => normalize(device.name) === needle) ??
-    devices.find((device) => normalize(device.name).startsWith(needle)) ??
-    devices.find((device) => normalize(device.name).includes(needle)) ??
-    devices.find((device) => needle.includes(normalize(device.name)))
-  );
+  return tiers.find((tier) => tier.length > 0) ?? [];
 }
 
 /**
- * Picks the switch a request refers to. When a name was given and matches nothing, this
- * returns undefined rather than falling back to the first switch: silently operating a
- * different gang of a multi-switch outlet is the worst thing this extension could do.
+ * Resolves a name to exactly one device, or to nothing. Names in a Tuya account overlap
+ * heavily — "tomacorriente" can match five of them, one being a fridge — so an ambiguous
+ * query must be refused rather than answered with whichever matched first.
+ */
+export function findDeviceByName(devices: Device[], query: string): Device | undefined {
+  const matches = matchingDevices(devices, query);
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
+/** Every switch on the device a name could plausibly mean, most specific tier first. */
+export function matchingSwitches(device: Device, query: string): FunctionItem[] {
+  const switches = (device.status ?? []).filter(isSwitchStatus);
+  const needle = normalize(query ?? "");
+  if (!needle) return [];
+
+  const tiers = [
+    switches.filter((status) => normalize(status.name ?? "") === needle),
+    switches.filter((status) => normalize(status.code) === needle),
+    switches.filter((status) => normalize(status.name ?? status.code).includes(needle)),
+  ];
+
+  return tiers.find((tier) => tier.length > 0) ?? [];
+}
+
+/**
+ * Picks the switch a request refers to. A name that matches nothing, or that matches
+ * several gangs of the same outlet, resolves to nothing: silently operating a different
+ * relay than the one asked for is the worst thing this extension could do.
  */
 export function findSwitchOnDevice(device: Device, query?: string): FunctionItem | undefined {
   const switches = (device.status ?? []).filter(isSwitchStatus);
   if (switches.length === 0) return undefined;
   if (!query) return switches[0];
 
-  const needle = normalize(query);
-  return (
-    switches.find((status) => normalize(status.name ?? "") === needle) ??
-    switches.find((status) => normalize(status.code) === needle) ??
-    switches.find((status) => normalize(status.name ?? status.code).includes(needle))
-  );
+  const matches = matchingSwitches(device, query);
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
+/**
+ * The message an AI tool returns when a name could not be resolved. Naming the
+ * candidates lets the assistant ask which one was meant instead of retrying blindly.
+ */
+export function describeDeviceMiss(devices: Device[], query: string): string {
+  const matches = matchingDevices(devices, query);
+  if (matches.length === 0) {
+    return `There is no device called "${query}". Call list-devices to see the names that exist.`;
+  }
+  const names = matches.map((device) => cleanName(device.name)).join(", ");
+  return `"${query}" matches ${matches.length} devices: ${names}. Ask the user which one they meant.`;
+}
+
+export function describeSwitchMiss(device: Device, query: string): string {
+  const all = (device.status ?? []).filter(isSwitchStatus).map((status) => status.name ?? status.code);
+  if (all.length === 0) {
+    return `${cleanName(device.name)} has nothing that can be switched on or off.`;
+  }
+  const matches = matchingSwitches(device, query);
+  if (matches.length === 0) {
+    return `${cleanName(device.name)} has no switch called "${query}". It has: ${all.join(", ")}.`;
+  }
+  const names = matches.map((status) => status.name ?? status.code).join(", ");
+  return `"${query}" matches ${matches.length} switches on ${cleanName(device.name)}: ${names}. Ask the user which one they meant.`;
 }
