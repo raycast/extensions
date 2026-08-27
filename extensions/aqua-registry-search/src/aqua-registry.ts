@@ -175,10 +175,6 @@ export function parseRegistry(source: string): RegistryData {
 
   finishPackage();
 
-  if (!Array.isArray(packages)) {
-    throw new Error("Invalid registry format");
-  }
-
   return { packages };
 }
 

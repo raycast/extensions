@@ -9,6 +9,13 @@
     "macOS",
     "Windows"
   ],
+  "keywords": [
+    "aqua",
+    "aquaproj",
+    "cli",
+    "packages",
+    "version manager"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -17,8 +24,7 @@
     {
       "name": "search-aqua-registry",
       "title": "Search Aqua Registry",
-      "subtitle": "Aqua Registry",
-      "description": "Search the aqua registry for CLI tools and packages",
+      "description": "Search the Aqua Registry for CLI tools and packages",
       "keywords": [
         "aqua",
         "package",

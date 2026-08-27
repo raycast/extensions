@@ -26,6 +26,9 @@ export default function Command() {
   const { data, error, isLoading, revalidate } = useFetch<RegistryData>(REGISTRY_URL, {
     parseResponse: parseFetchResponse,
     keepPreviousData: true,
+    failureToastOptions: {
+      title: "Couldn't Load Aqua Registry",
+    },
   });
 
   const filteredPackages = useMemo(() => {
@@ -74,11 +77,17 @@ export default function Command() {
         <List.EmptyView
           icon={loadError ? Icon.Warning : Icon.MagnifyingGlass}
           title={loadError ? "Couldn’t Load Aqua Registry" : "No Packages Found"}
-          description={loadError ? loadError.message : `No packages match “${searchText.trim()}”`}
+          description={
+            loadError
+              ? loadError.message
+              : searchText.trim()
+                ? `No packages match “${searchText.trim()}”`
+                : "The registry returned no packages"
+          }
           actions={
             loadError ? (
               <ActionPanel>
-                <Action title="Retry" onAction={revalidate} />
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
               </ActionPanel>
             ) : undefined
           }
@@ -183,46 +192,45 @@ function PackageListItem({
         ) : undefined
       }
       actions={
-        isSelected ? (
-          <ActionPanel>
-            <ActionPanel.Section>
-              <Action.CopyToClipboard title="Copy Add Command" content={addCommand} />
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard title="Copy Add Command" content={addCommand} icon={Icon.Terminal} />
+            <Action.CopyToClipboard
+              title="Copy Package Name"
+              content={packageName}
+              icon={Icon.Clipboard}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
+            />
+            {registryUrl && (
               <Action.CopyToClipboard
-                title="Copy Package Name"
-                content={packageName}
-                shortcut={Keyboard.Shortcut.Common.CopyName}
+                title="Copy Registry Link"
+                content={registryUrl}
+                icon={Icon.Link}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
-              {registryUrl && (
-                <Action.CopyToClipboard
-                  title="Copy Registry Link"
-                  content={registryUrl}
-                  icon={Icon.Link}
-                  shortcut={Keyboard.Shortcut.Common.Copy}
-                />
-              )}
-            </ActionPanel.Section>
-            <ActionPanel.Section>
-              {githubUrl && <Action.OpenInBrowser title="Open Repository" url={githubUrl} />}
-              {registryUrl && (
-                <Action.OpenInBrowser
-                  title="Open Registry Page"
-                  url={registryUrl}
-                  icon={Icon.Book}
-                  shortcut={Keyboard.Shortcut.Common.Open}
-                />
-              )}
-              {pkg.link && <Action.OpenInBrowser title="Open Homepage" url={pkg.link} icon={Icon.House} />}
-            </ActionPanel.Section>
-            <ActionPanel.Section>
-              <Action
-                title="Toggle Details"
-                icon={Icon.AppWindowSidebarLeft}
-                shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-                onAction={onToggleDetail}
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {githubUrl && <Action.OpenInBrowser title="Open Repository" url={githubUrl} icon={Icon.Code} />}
+            {registryUrl && (
+              <Action.OpenInBrowser
+                title="Open Registry Page"
+                url={registryUrl}
+                icon={Icon.Book}
+                shortcut={Keyboard.Shortcut.Common.Open}
               />
-            </ActionPanel.Section>
-          </ActionPanel>
-        ) : undefined
+            )}
+            {pkg.link && <Action.OpenInBrowser title="Open Homepage" url={pkg.link} icon={Icon.House} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title="Toggle Details"
+              icon={Icon.AppWindowSidebarLeft}
+              shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+              onAction={onToggleDetail}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
       }
     />
   );
