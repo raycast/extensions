@@ -1,6 +1,6 @@
 # Fan Control Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-27
 
 - View fans with live actual/target RPM, supported range, and control mode
 - Set a manual RPM target for all fans or a specific fan, validated against the hardware range
