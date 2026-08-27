@@ -6,7 +6,7 @@ import { botListIcon } from "./lib/bot-icon";
 import { filterBotsForList } from "./lib/match-bot";
 import { Bot, statusLabel } from "./lib/types";
 import { AskForm } from "./views/ask-form";
-import { GatewayEmptyView, HiddenBotsEmptyView, SearchEmptyView } from "./views/gateway-empty";
+import { ChromeActionPanel, GatewayEmptyView, HiddenBotsEmptyView, SearchEmptyView } from "./views/gateway-empty";
 import { OpenGrokBotAction } from "./views/open-grok-bot-action";
 
 const COPY_ID_SHORTCUT: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
@@ -86,18 +86,7 @@ export default function BotsCommand() {
   const showGatewayEmpty = !isLoading && listedCount === 0 && (error !== null || bots.length === 0);
   const showSearchEmpty = !isLoading && listedCount === 0 && query.length > 0 && bots.length > 0;
   const showHiddenEmpty = !isLoading && listedCount === 0 && query.length === 0 && bots.length > 0;
-  const listActions = (
-    <ActionPanel>
-      <OpenGrokBotAction />
-      <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-      <Action
-        title="Refresh"
-        icon={Icon.ArrowClockwise}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={revalidate}
-      />
-    </ActionPanel>
-  );
+  const listActions = <ChromeActionPanel onRefresh={revalidate} />;
   const renderBot = (bot: Bot) => (
     <BotListItem
       key={bot.id}
@@ -122,7 +111,7 @@ export default function BotsCommand() {
 
   if (showGatewayEmpty) {
     return (
-      <List searchBarPlaceholder="Search bots" actions={listActions}>
+      <List searchBarPlaceholder="Search bots">
         <GatewayEmptyView error={error} onRetry={revalidate} />
       </List>
     );
@@ -130,27 +119,22 @@ export default function BotsCommand() {
 
   if (showSearchEmpty) {
     return (
-      <List searchBarPlaceholder="Search bots" onSearchTextChange={setSearchText} actions={listActions}>
-        <SearchEmptyView />
+      <List searchBarPlaceholder="Search bots" onSearchTextChange={setSearchText}>
+        <SearchEmptyView onRefresh={revalidate} />
       </List>
     );
   }
 
   if (showHiddenEmpty) {
     return (
-      <List searchBarPlaceholder="Search bots" onSearchTextChange={setSearchText} actions={listActions}>
-        <HiddenBotsEmptyView />
+      <List searchBarPlaceholder="Search bots" onSearchTextChange={setSearchText}>
+        <HiddenBotsEmptyView onRefresh={revalidate} />
       </List>
     );
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search bots"
-      onSearchTextChange={setSearchText}
-      actions={listActions}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search bots" onSearchTextChange={setSearchText}>
       {individuals.length > 0 ? <List.Section title="Bots">{individuals.map(renderBot)}</List.Section> : null}
 
       {groups.length > 0 ? <List.Section title="Groups">{groups.map(renderBot)}</List.Section> : null}

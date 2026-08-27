@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { GatewayError, gatewayErrorMessage } from "../lib/types";
 import { OpenGrokBotAction } from "./open-grok-bot-action";
 
@@ -64,6 +64,12 @@ function EmptyActionsPanel({ kind, onRetry }: { kind: EmptyActions; onRetry: () 
       <ActionPanel>
         <OpenGrokBotAction />
         <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={onRetry}
+        />
       </ActionPanel>
     );
   }
@@ -71,7 +77,8 @@ function EmptyActionsPanel({ kind, onRetry }: { kind: EmptyActions; onRetry: () 
   return (
     <ActionPanel>
       <OpenGrokBotAction />
-      <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
+      <Action title="Retry" icon={Icon.ArrowClockwise} shortcut={Keyboard.Shortcut.Common.Refresh} onAction={onRetry} />
+      <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
     </ActionPanel>
   );
 }
@@ -87,30 +94,37 @@ export function GatewayEmptyView({ error, onRetry }: { error: GatewayError | nul
   );
 }
 
-export function SearchEmptyView() {
+export function ChromeActionPanel({ onRefresh }: { onRefresh: () => void }) {
+  return (
+    <ActionPanel>
+      <OpenGrokBotAction />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={onRefresh}
+      />
+      <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+    </ActionPanel>
+  );
+}
+
+export function SearchEmptyView({ onRefresh }: { onRefresh: () => void }) {
   return (
     <List.EmptyView
       title="No matching bots"
       description="Try another name, or clear the search."
-      actions={
-        <ActionPanel>
-          <OpenGrokBotAction />
-        </ActionPanel>
-      }
+      actions={<ChromeActionPanel onRefresh={onRefresh} />}
     />
   );
 }
 
-export function HiddenBotsEmptyView() {
+export function HiddenBotsEmptyView({ onRefresh }: { onRefresh: () => void }) {
   return (
     <List.EmptyView
       title="Hidden bots"
       description="Search by name to find teammates hidden from the sidebar."
-      actions={
-        <ActionPanel>
-          <OpenGrokBotAction />
-        </ActionPanel>
-      }
+      actions={<ChromeActionPanel onRefresh={onRefresh} />}
     />
   );
 }

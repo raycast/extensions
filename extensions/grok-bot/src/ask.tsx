@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  List,
-  LaunchProps,
-  getSelectedText,
-  openExtensionPreferences,
-  popToRoot,
-} from "@raycast/api";
+import { Form, List, LaunchProps, getSelectedText, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useBots } from "./hooks/use-bots";
 import { getLastBotId } from "./lib/last-bot";
@@ -16,7 +6,6 @@ import { resolveInitialBot } from "./lib/match-bot";
 import { AgentId } from "./lib/types";
 import { AskForm } from "./views/ask-form";
 import { GatewayEmptyView } from "./views/gateway-empty";
-import { OpenGrokBotAction } from "./views/open-grok-bot-action";
 
 type AskArguments = {
   question?: string;
@@ -64,14 +53,7 @@ export default function AskCommand(props: LaunchProps<{ arguments: AskArguments;
 
   if (error || bots.length === 0) {
     return (
-      <List
-        actions={
-          <ActionPanel>
-            <OpenGrokBotAction />
-            <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-          </ActionPanel>
-        }
-      >
+      <List>
         <GatewayEmptyView error={error} onRetry={revalidate} />
       </List>
     );
