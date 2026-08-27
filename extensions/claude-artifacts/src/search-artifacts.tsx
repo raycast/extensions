@@ -162,10 +162,12 @@ export default function Command() {
         while nothing is recording. A row that names the real reason beats an
         empty state that misattributes it to having published nothing.
       */}
-      {!problem && hookStatus === "missing" ? <HookNotRegisteredItem /> : null}
+      {!problem && (hookStatus === "missing" || hookStatus === "disabled") ? (
+        <HookNotRegisteredItem disabled={hookStatus === "disabled"} />
+      ) : null}
 
       {problem ? (
-        emptyViewForProblem(problem, errorMessage)
+        emptyViewForProblem(problem, errorMessage, hookStatus === "registered")
       ) : artifacts.length === 0 ? (
         <NoArtifactsEmptyView />
       ) : visible.length === 0 ? (

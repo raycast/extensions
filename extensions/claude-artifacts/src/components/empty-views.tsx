@@ -36,7 +36,7 @@ export function NotInstalledEmptyView() {
             silently-broken are the same problem at different times, and the
             two must not drift into different instructions.
           */}
-          <Action.Push title="Set Up Artifact Tracking" icon={Icon.Plug} target={<HookSetupDetail />} />
+          <Action.Push title="Set up Artifact Tracking" icon={Icon.Plug} target={<HookSetupDetail />} />
           <Action.CopyToClipboard
             title="Copy Setup Prompt"
             icon={Icon.Clipboard}
@@ -111,6 +111,14 @@ export function NoMatchesEmptyView() {
   );
 }
 
-export function emptyViewForProblem(problem: IndexProblem, errorMessage?: string) {
-  return problem === "missing" ? <NotInstalledEmptyView /> : <MalformedEmptyView errorMessage={errorMessage} />;
+export function emptyViewForProblem(problem: IndexProblem, errorMessage?: string, hookRegistered = false) {
+  if (problem === "malformed") return <MalformedEmptyView errorMessage={errorMessage} />;
+
+  // The index file does not exist yet. That looks like "the hook was never
+  // installed" — but only if it wasn't. When a recorder IS registered, the
+  // file is simply absent until the first publish writes it, which is the
+  // ordinary "nothing recorded yet" state and needs no setup instructions.
+  // Routing here regardless sent a correctly configured user to reinstall
+  // something that was already working.
+  return hookRegistered ? <NoArtifactsEmptyView /> : <NotInstalledEmptyView />;
 }

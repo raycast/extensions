@@ -13,8 +13,16 @@ import path from "path";
  *
  * ponytail: user scope only. Claude Code also honours project-level
  * `.claude/settings.json` and enterprise managed policy, so a hook registered
- * ONLY in a project would be reported here as missing. Widen this list if that
- * ever turns out to be a real setup rather than a theoretical one.
+ * ONLY in a project is reported here as missing — a FALSE WARNING, telling
+ * someone to set up tracking that already works for them.
+ *
+ * Accepted rather than fixed, because there is no honest fix at this scope: a
+ * launcher command has no project context to resolve `.claude/` against, and
+ * guessing one from the indexed artifacts' `cwd` would still miss every project
+ * that has not published yet. The recorder writes a single global index and the
+ * README documents user-level registration only, so a project-only setup is off
+ * the documented path. Widen this list if that turns out to be a real setup
+ * rather than a theoretical one.
  */
 export const SETTINGS_PATHS = [
   path.join(homedir(), ".claude", "settings.json"),
@@ -83,13 +91,15 @@ ${HOOK_SNIPPET}
 
 3. Verify the registration actually landed:
 
-jq '[.hooks.PostToolUse[] | select(.hooks[]?.command | (test("artifact";"i") and (test("probe-artifact-hook\\\\.sh";"i") | not)))] | length' ~/.claude/settings.json
+jq '[.hooks.PostToolUse[]? | select(.matcher == "Artifact") | .hooks[]? | select((.command // "") | test("record-artifact"))] | length' ~/.claude/settings.json
 
 That must print 1 or more. Tell me if it prints 0.
 
+4. Confirm that neither \`disableAllHooks\` nor \`allowManagedHooksOnly\` is set to true in that file. Either one stops the hook running even when it is registered perfectly.
+
 The hook needs \`jq\` and \`perl\` — tell me if either is missing.
 
-Finally, remind me that hook registration only takes effect in a NEW Claude Code session, so I need to restart before publishing a test artifact.`;
+Finally: tell me to publish a test artifact and check that it appears, and that if it does not, restarting Claude Code is the first thing to try — a newly registered hook is not always picked up by an already-running session.`;
 
 /**
  * Whether a `PostToolUse` hook that records artifacts is currently registered.
@@ -100,7 +110,20 @@ Finally, remind me that hook registration only takes effect in a NEW Claude Code
  * Only `"missing"` — a file we parsed successfully that contains no matching
  * entry — is worth interrupting them for.
  */
-export type HookStatus = "registered" | "missing" | "unknown";
+export type HookStatus = "registered" | "missing" | "disabled" | "unknown";
+
+/**
+ * Settings that stop hooks running regardless of what is registered.
+ *
+ * `disableAllHooks` is a global kill switch; `allowManagedHooksOnly` restricts
+ * execution to hooks set by enterprise policy, which a user-registered recorder
+ * is not. Either one makes a perfectly well-formed registration inert.
+ *
+ * Tracked as a SEPARATE status from `"missing"` because the remedy is the
+ * opposite: the hook is already installed, and telling someone to install it
+ * again sends them to fix something that is not broken.
+ */
+const HOOK_KILL_SWITCHES = ["disableAllHooks", "allowManagedHooksOnly"] as const;
 
 interface HookCommand {
   command?: unknown;
@@ -168,8 +191,16 @@ function hasArtifactHook(settings: unknown): boolean {
   );
 }
 
+function hasKillSwitch(settings: unknown): boolean {
+  if (typeof settings !== "object" || settings === null) return false;
+  const s = settings as Record<string, unknown>;
+  return HOOK_KILL_SWITCHES.some((key) => s[key] === true);
+}
+
 export async function readHookStatus(): Promise<HookStatus> {
   let readAny = false;
+  let found = false;
+  let killed = false;
 
   for (const settingsPath of SETTINGS_PATHS) {
     let parsed: unknown;
@@ -183,8 +214,14 @@ export async function readHookStatus(): Promise<HookStatus> {
     }
 
     readAny = true;
-    if (hasArtifactHook(parsed)) return "registered";
+    if (hasKillSwitch(parsed)) killed = true;
+    if (hasArtifactHook(parsed)) found = true;
   }
 
-  return readAny ? "missing" : "unknown";
+  if (!readAny) return "unknown";
+  // Order matters: a kill switch beats a registration, because the hook exists
+  // and still will not run. Reporting "registered" here is the false-healthy
+  // case this module exists to prevent.
+  if (killed) return "disabled";
+  return found ? "registered" : "missing";
 }

@@ -42,14 +42,16 @@ ${HOOK_SNIPPET}
 **3. Check that it took**
 
 \`\`\`bash
-jq '[.hooks.PostToolUse[] | select(.hooks[]?.command | (test("artifact";"i") and (test("probe-artifact-hook\\\\.sh";"i") | not)))] | length' ~/.claude/settings.json
+jq '[.hooks.PostToolUse[]? | select(.matcher == "Artifact") | .hooks[]? | select((.command // "") | test("record-artifact"))] | length' ~/.claude/settings.json
 \`\`\`
 
 \`0\` means tracking is still off.
 
+Also make sure neither \`disableAllHooks\` nor \`allowManagedHooksOnly\` is \`true\` in that file. Either one stops the hook running even when it is registered perfectly.
+
 ---
 
-Registration only takes effect in a **new** Claude Code session — restart it before publishing a test artifact, or the install will look like it failed.
+Publish an artifact to confirm it works. If nothing appears, restart Claude Code first — a newly registered hook is not always picked up by an already-running session.
 
 Requires \`jq\` and \`perl\`. If either is missing the hook exits quietly rather than failing your Claude Code turn.`;
 
@@ -96,13 +98,16 @@ export function HookSetupDetail() {
  * and dropped the entry; 44 publishes went unrecorded over a month before
  * anyone noticed, and the extension reported nothing wrong the entire time.
  */
-export function HookNotRegisteredItem() {
+export function HookNotRegisteredItem({ disabled = false }: { disabled?: boolean }) {
   return (
     <List.Item
       icon={{ source: Icon.Warning, tintColor: Color.Orange }}
       title="Artifact Tracking Is Off"
-      subtitle="New Artifacts aren't being tracked"
-      accessories={[{ tag: { value: "Setup Tracking", color: Color.Orange } }]}
+      // Two different causes, two different fixes. A kill switch means the hook
+      // is already installed and inert, so the install instructions below are
+      // the wrong advice — say what actually has to change instead.
+      subtitle={disabled ? "Hooks are turned off in your Claude Code settings" : "New Artifacts aren't being tracked"}
+      accessories={[{ tag: { value: disabled ? "Hooks Disabled" : "Setup Tracking", color: Color.Orange } }]}
       actions={
         <ActionPanel>
           {/*
@@ -114,14 +119,16 @@ export function HookNotRegisteredItem() {
             Primary here, unlike in `NotInstalledEmptyView`: this row is new, so
             there is no prior default action to preserve.
           */}
-          <Action.Push title="Set Up Artifact Tracking" icon={Icon.Plug} target={<HookSetupDetail />} />
+          {/* When a kill switch is the cause, the settings file IS the fix. */}
+          {disabled ? <RevealInFinderAction title="Show Settings File" path={SETTINGS_PATHS[0]} /> : null}
+          <Action.Push title="Set up Artifact Tracking" icon={Icon.Plug} target={<HookSetupDetail />} />
           <Action.CopyToClipboard
             title="Copy Setup Prompt"
             icon={Icon.Clipboard}
             content={SETUP_PROMPT}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
-          <RevealInFinderAction title="Show Settings File" path={SETTINGS_PATHS[0]} />
+          {disabled ? null : <RevealInFinderAction title="Show Settings File" path={SETTINGS_PATHS[0]} />}
           <GalleryActionSection />
         </ActionPanel>
       }
