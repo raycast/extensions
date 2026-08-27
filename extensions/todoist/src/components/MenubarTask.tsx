@@ -7,10 +7,8 @@ import {
   open,
   launchCommand,
   LaunchType,
-  showToast,
-  Toast,
+  showHUD,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
@@ -51,15 +49,15 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
         unfocusTask();
       }
 
-      await showToast({ style: Toast.Style.Success, title: "Completed task" });
-    } catch (error) {
-      await showFailureToast(error, { title: "Unable to complete task" });
+      await showHUD("Completed task");
+    } catch {
+      await showHUD("Unable to complete task");
     }
     if (useConfetti) {
       try {
         await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti`);
-      } catch (error) {
-        await showFailureToast(error, { title: "Unable to show celebration" });
+      } catch {
+        await showHUD("Unable to show celebration");
       }
     }
   }
@@ -75,36 +73,36 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
       };
 
       await updateTask(updateData, { data, setData });
-      await showToast({ style: Toast.Style.Success, title: `Updated task ${type}` });
-    } catch (error) {
-      await showFailureToast(error, { title: `Unable to update task ${type}` });
+      await showHUD(`Updated task ${type}`);
+    } catch {
+      await showHUD(`Unable to update task ${type}`);
     }
   }
 
   async function changePriority(task: Task, priority: number) {
     try {
       await updateTask({ id: task.id, priority }, { data, setData });
-      await showToast({ style: Toast.Style.Success, title: "Updated task priority" });
-    } catch (error) {
-      await showFailureToast(error, { title: "Unable to update task priority" });
+      await showHUD("Updated task priority");
+    } catch {
+      await showHUD("Unable to update task priority");
     }
   }
 
   async function changeAssignee(task: Task, collaboratorId: string) {
     try {
       await updateTask({ id: task.id, responsible_uid: collaboratorId }, { data, setData });
-      await showToast({ style: Toast.Style.Success, title: "Updated task assignee" });
-    } catch (error) {
-      await showFailureToast(error, { title: "Unable to update task assignee" });
+      await showHUD("Updated task assignee");
+    } catch {
+      await showHUD("Unable to update task assignee");
     }
   }
 
   async function addLabel(task: Task, label: string) {
     try {
       await updateTask({ id: task.id, labels: [...task.labels, label] }, { data, setData });
-      await showToast({ style: Toast.Style.Success, title: "Added task label" });
-    } catch (error) {
-      await showFailureToast(error, { title: "Unable to add task label" });
+      await showHUD("Added task label");
+    } catch {
+      await showHUD("Unable to add task label");
     }
   }
 
@@ -118,9 +116,9 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
     ) {
       try {
         await apiDeleteTAsk(task.id, { data, setData });
-        await showToast({ style: Toast.Style.Success, title: "Deleted task" });
-      } catch (error) {
-        await showFailureToast(error, { title: "Unable to delete task" });
+        await showHUD("Deleted task");
+      } catch {
+        await showHUD("Unable to delete task");
       }
     }
   }
