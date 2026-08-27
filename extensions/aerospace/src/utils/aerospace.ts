@@ -188,7 +188,7 @@ export function buildWorkspaceCatalog(
 export async function resolveAerospaceBin(): Promise<string> {
   if (resolvedBinary) return resolvedBinary;
 
-  const { aerospaceBin } = getPreferenceValues<{ aerospaceBin?: string }>();
+  const { aerospaceBin } = getPreferenceValues<Preferences>();
   if (aerospaceBin?.trim()) {
     const configuredPath = aerospaceBin.trim();
     await access(configuredPath, constants.X_OK).catch(() => {

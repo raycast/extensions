@@ -23,9 +23,6 @@ import {
   WindowSnapshot,
 } from "./utils/aerospace";
 
-type WorkspaceScope = "focused" | "all";
-type SwitchAppsPreferences = { defaultWorkspace: WorkspaceScope };
-type SwitchAppsArguments = { workspace?: WorkspaceScope };
 type SwitchAppsLaunchContext = { searchText?: string };
 
 async function finishWindowAction(): Promise<void> {
@@ -82,9 +79,9 @@ function WindowActions({ window, onRefresh }: { window: WindowSnapshot; onRefres
 }
 
 export default function Command(
-  props: LaunchProps<{ arguments: SwitchAppsArguments; launchContext?: SwitchAppsLaunchContext }>,
+  props: LaunchProps<{ arguments: Arguments.SwitchApps; launchContext?: SwitchAppsLaunchContext }>,
 ) {
-  const { defaultWorkspace } = getPreferenceValues<SwitchAppsPreferences>();
+  const { defaultWorkspace } = getPreferenceValues<Preferences.SwitchApps>();
   const workspace = props.arguments.workspace ?? defaultWorkspace;
   const [searchText, setSearchText] = useState(props.launchContext?.searchText ?? "");
 
