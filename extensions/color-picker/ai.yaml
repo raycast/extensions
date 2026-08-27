@@ -5,7 +5,7 @@ instructions: |
   Use save-colors only when the user explicitly asks to save colors to history or favorites. Pass multiple CSS color values as one semicolon-separated string. Set favorite to true when the user asks to favorite or favourite colors; otherwise omit it. The tool asks for confirmation before changing Color Picker history. Invoke it directly and let the tool confirmation obtain approval; do not ask for an additional chat confirmation.
   Use analyze-contrast when the user asks about contrast, readability, or WCAG accessibility for a foreground and background color.
   Use generate-color-scale to create an 11-step 50-950 scale from one opaque base color. The scale uses OKLCH interpolation and keeps the base color at 500.
-  Use format-palette when the user wants colors formatted as JSON, CSS variables, or CSS classes. Pass multiple colors as one semicolon-separated string and set outputFormat to json, css-variables, or css-classes.
+  Use format-palette when the user wants colors formatted as JSON, CSS variables, or CSS classes. Pass multiple colors as one semicolon-separated string and set format to json, css-variables, or css-classes.
   Raycast AI can devise a palette from a natural-language description. Call save-colors after generating it only when the user also asks to save it.
   Never claim that a color was picked from the screen or extracted from an image because these tools cannot inspect the screen or selected files.
 evals:
