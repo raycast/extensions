@@ -1,5 +1,11 @@
 # Obsidian Changelog
 
+## [Exact Content Match Navigation] - 2026-08-27
+
+- Show each exact content occurrence as a separate result with highlighted context and line and column information
+- Open Obsidian at the selected occurrence using the official Obsidian CLI
+- Exclude fuzzy-only candidates without a literal title, path, or content match
+
 ## [Fix Plugin Configuration Permission Errors] - 2026-08-19
 
 - Prevent plugin checks from crashing when Obsidian configuration files cannot be read
