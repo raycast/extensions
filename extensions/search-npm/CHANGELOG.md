@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Add Aube support] - {PR_MERGE_DATE}
+## [Add Aube support] - 2026-08-27
 
 - Add Aube as a package manager option for copying install commands
 
