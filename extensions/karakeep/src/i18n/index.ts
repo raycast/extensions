@@ -21,6 +21,13 @@ export const translations = {
       notRunning: "Karakeep isn't running",
       notRunningDescription: "Press ↵ to start it.",
       unreachable: "Can't reach Karakeep",
+      // A rejected API key. Distinct from every "can't reach" state above: the
+      // server answered, it just refused us.
+      unauthorized: "Invalid API key",
+      unauthorizedDescription:
+        "Karakeep rejected the API key. Press ↵ to fix it in Extension Settings, then run this command again.",
+      unauthorizedFormHint: "Karakeep rejected your API key. Fix it in Extension Settings, then reopen this command.",
+      unauthorizedToast: "Karakeep rejected the API key. Update it in Extension Settings.",
       // {{apiUrl}} is interpolated by translate(); a function value would only
       // receive searchText/count, not an arbitrary parameter.
       unreachableDescription: "Nothing is responding at {{apiUrl}}. Check that Karakeep is running.",
@@ -689,6 +696,10 @@ export const translations = {
       notRunning: "Karakeep 未运行",
       notRunningDescription: "按 ↵ 启动。",
       unreachable: "无法连接到 Karakeep",
+      unauthorized: "API 密钥无效",
+      unauthorizedDescription: "Karakeep 拒绝了该 API 密钥。按 ↵ 在扩展设置中修复，然后重新运行此命令。",
+      unauthorizedFormHint: "Karakeep 拒绝了你的 API 密钥。请在扩展设置中修复，然后重新打开此命令。",
+      unauthorizedToast: "Karakeep 拒绝了该 API 密钥。请在扩展设置中更新。",
       unreachableDescription: "{{apiUrl}} 无响应。请检查 Karakeep 是否正在运行。",
 
       // 恢复操作
