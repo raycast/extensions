@@ -1,6 +1,6 @@
 # Network Diagnostics Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-08-27
 
 - Fixed Wi-Fi info failing on macOS Tahoe, where the `airport` utility was removed; Wi-Fi details are now read via the CoreWLAN framework.
 
