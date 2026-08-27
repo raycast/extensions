@@ -174,16 +174,16 @@ export default function MatchweekList(props: {
 
   const canGoPrevious = Boolean(
     isEPL &&
-      matchweek &&
-      landingMatchweek &&
-      (isPast ? matchweek > 1 : matchweek > landingMatchweek),
+    matchweek &&
+    landingMatchweek &&
+    (isPast ? matchweek > 1 : matchweek > landingMatchweek),
   );
 
   const canGoNext = Boolean(
     isEPL &&
-      matchweek &&
-      landingMatchweek &&
-      (isPast ? matchweek < landingMatchweek : matchweek < TOTAL_MATCHWEEKS),
+    matchweek &&
+    landingMatchweek &&
+    (isPast ? matchweek < landingMatchweek : matchweek < TOTAL_MATCHWEEKS),
   );
 
   const previousAction = canGoPrevious && matchweek && (
