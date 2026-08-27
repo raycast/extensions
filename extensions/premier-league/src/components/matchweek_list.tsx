@@ -11,6 +11,7 @@ import { format, formatISO, getMonth, startOfMonth } from "date-fns";
 import groupBy from "lodash.groupby";
 import {
   getClubs,
+  getLatestPlayedMatchweek,
   getMatches,
   getMatchweek,
   getSeasons,
@@ -20,7 +21,7 @@ import Matchday from "./matchday";
 import JumpToMatchweek from "./jump_to_matchweek";
 import SearchBarCompetition, { competitions } from "./searchbar_competition";
 import { Fixture } from "../types";
-import { convertISOToLocalTime, TOTAL_MATCHWEEKS } from "../utils";
+import { convertISOToLocalTime, isFinished, TOTAL_MATCHWEEKS } from "../utils";
 
 const { filter } = getPreferenceValues();
 
@@ -78,7 +79,7 @@ export default function MatchweekList(props: {
     async (id?: string) => {
       if (!id) return undefined;
       return isPast
-        ? await getMatchweek()
+        ? ((await getLatestPlayedMatchweek(id)) ?? (await getMatchweek()))
         : ((await getUpcomingMatchweek(id)) ?? (await getMatchweek()));
     },
     [season],
@@ -124,6 +125,9 @@ export default function MatchweekList(props: {
           return { data: [] as Fixture[], hasMore: false };
         }
 
+        const keep = (match: Fixture) =>
+          isPast ? isFinished(match) : !isFinished(match);
+
         if (request.kind === "month") {
           const page = await getMatches({
             competition: request.competition,
@@ -135,7 +139,7 @@ export default function MatchweekList(props: {
           });
 
           return {
-            data: page.data,
+            data: page.data.filter(keep),
             hasMore: page.hasMore,
             cursor: page.cursor ?? undefined,
           };
@@ -157,7 +161,7 @@ export default function MatchweekList(props: {
         const hasMore =
           request.direction === "past" ? next >= 1 : next <= TOTAL_MATCHWEEKS;
 
-        return { data: page.data, hasMore, cursor: next };
+        return { data: page.data.filter(keep), hasMore, cursor: next };
       },
     [request],
   );

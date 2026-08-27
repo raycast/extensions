@@ -28,13 +28,13 @@
     {
       "name": "match",
       "title": "Matches",
-      "description": "View played and in-progress matches, working back through the season.",
+      "description": "Look back over completed matches, working back through the season.",
       "mode": "view"
     },
     {
       "name": "fixture",
       "title": "Fixtures",
-      "description": "Browse upcoming and in-progress Premier League matches, matchweek by matchweek.",
+      "description": "Follow matches in progress and browse what is still to come.",
       "mode": "view"
     },
     {

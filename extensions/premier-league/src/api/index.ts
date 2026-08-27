@@ -143,6 +143,33 @@ export const getMatchweek = async (): Promise<number> => {
   }
 };
 
+export const getLatestPlayedMatchweek = async (
+  season: string,
+  comp: string = "8",
+): Promise<number | undefined> => {
+  const now = getCompetitionTimestamp(new Date());
+
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/v2/matches`,
+    params: {
+      competition: comp,
+      season,
+      _sort: "kickoff:desc",
+      _limit: 20,
+      [`kickoff<${now}`]: "",
+    },
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPagination<Fixture>> = await axios(config);
+
+    return data.data.find(isFinished)?.matchWeek;
+  } catch {
+    return undefined;
+  }
+};
+
 export const getUpcomingMatchweek = async (
   season: string,
   comp: string = "8",
