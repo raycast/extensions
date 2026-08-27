@@ -187,6 +187,7 @@ const extractProfileFromInfoCache =
     return {
       directory: infoCacheKey,
       name: profile.name,
+      givenName: profile.gaia_given_name,
       ...(profile.gaia_name &&
         profile.user_name &&
         profile.last_downloaded_gaia_picture_url_with_size && {
@@ -402,7 +403,16 @@ function newTabUrlWithQuery(searchText: string) {
 
 function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; browser: BrowserConfig }) {
   const context = encodeURIComponent(
-    JSON.stringify({ directory: props.profile.directory, name: props.profile.name, ...props.target }),
+    JSON.stringify({
+      directory: props.profile.directory,
+      name: props.profile.name,
+      // Carried across the deeplink so a Quicklink for a signed-in profile
+      // can match Chrome's Profiles menu without a Local State fallback
+      // read — see `openGoogleChrome`. (JSON.stringify drops it when
+      // undefined, so a local profile's deeplink stays unchanged.)
+      givenName: props.profile.givenName,
+      ...props.target,
+    }),
   );
   const deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/frouo/${
     environment.extensionName

@@ -1,5 +1,9 @@
 # macOS Tweaks Changelog
 
+## [Raycast 2 Compatibility] - 2026-08-27
+
+- Updated to `@raycast/api` 2.x
+
 ## [More Tweaks & Sound Category] - 2026-05-17
 
 ### New Category

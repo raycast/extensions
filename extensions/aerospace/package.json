@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aerospace",
-  "title": "Aerospace Tiling Window Manager",
-  "description": "Aerospace Tiling Window Manager Extension for Raycast",
+  "title": "AeroSpace Tiling Window Manager",
+  "description": "Control AeroSpace workspaces, windows, shortcuts, and configuration from Raycast",
   "icon": "aerospace-icon.png",
   "author": "limonkufu",
   "contributors": [
@@ -23,38 +23,58 @@
   "commands": [
     {
       "name": "showShortcuts",
-      "title": "Show Aerospace Shortcuts",
-      "description": "All of the shortcuts of the aerospace parsed from your config file",
+      "title": "Show AeroSpace Shortcuts",
+      "description": "View and trigger the shortcuts loaded by AeroSpace",
+      "keywords": [
+        "bindings",
+        "keyboard",
+        "hotkeys"
+      ],
       "mode": "view"
     },
     {
       "name": "showConfig",
-      "title": "Show Aerospace Config",
-      "description": "Show config of the aerospace",
+      "title": "Show AeroSpace Config",
+      "description": "View the complete config file and the bindings loaded by AeroSpace",
+      "keywords": [
+        "toml",
+        "settings",
+        "bindings"
+      ],
       "mode": "view"
     },
     {
       "name": "goToWorkspace",
       "title": "Go to Workspace",
-      "description": "Switch to an Aerospace workspace",
+      "description": "Browse AeroSpace workspaces and their open apps",
+      "keywords": [
+        "desktop",
+        "space",
+        "apps"
+      ],
       "mode": "view"
     },
     {
       "name": "shortcutsMenubar",
-      "title": "Enable Aerospace Menubar Shortcuts",
-      "description": "See your Aerospace shortcuts at a glance",
+      "title": "Enable AeroSpace Menu Bar Shortcuts",
+      "description": "View and trigger AeroSpace shortcuts from the menu bar",
       "mode": "menu-bar"
     },
     {
       "name": "switchApps",
       "title": "Switch Apps in Workspace",
-      "description": "Switch between the apps opened",
+      "description": "Find, focus, move, and tile open AeroSpace windows",
+      "keywords": [
+        "windows",
+        "focus",
+        "tile"
+      ],
       "mode": "view",
       "preferences": [
         {
           "name": "defaultWorkspace",
           "title": "Default Search",
-          "description": "Set the default workspace to search: All or focused",
+          "description": "Initial scope before you choose one. The window switcher remembers your latest selection.",
           "required": true,
           "type": "dropdown",
           "default": "focused",
@@ -62,6 +82,10 @@
             {
               "title": "Focused",
               "value": "focused"
+            },
+            {
+              "title": "Visible",
+              "value": "visible"
             },
             {
               "title": "All",
@@ -73,12 +97,16 @@
       "arguments": [
         {
           "name": "workspace",
-          "placeholder": "Focused or All",
+          "placeholder": "Focused, Visible, or All",
           "type": "dropdown",
           "data": [
             {
               "title": "Focused",
               "value": "focused"
+            },
+            {
+              "title": "Visible",
+              "value": "visible"
             },
             {
               "title": "All",
@@ -92,32 +120,65 @@
   "preferences": [
     {
       "name": "aerospaceBin",
-      "title": "Aerospace Binary Path",
-      "description": "Path to the aerospace binary. Leave empty to auto-detect from common locations.",
+      "title": "AeroSpace Binary Path",
+      "description": "Path to the AeroSpace CLI. Leave empty to detect common Homebrew and Nix locations.",
       "required": false,
       "type": "textfield",
       "placeholder": "/opt/homebrew/bin/aerospace"
+    },
+    {
+      "name": "showFullBindings",
+      "title": "Show Full Bindings",
+      "description": "Show bindings from every configured mode. Turn this off to show only the main mode.",
+      "required": false,
+      "type": "checkbox",
+      "default": true,
+      "label": "Include bindings from every mode"
+    },
+    {
+      "name": "showMenuBarExtras",
+      "title": "Show Menu Bar Extras",
+      "description": "Show Quick Actions and Open sections after the top-level binding catalog.",
+      "required": false,
+      "type": "checkbox",
+      "default": true,
+      "label": "Show Quick Actions and Open sections"
+    },
+    {
+      "name": "showWorkspaceName",
+      "title": "Show Workspace Name",
+      "description": "Show the current workspace beside the AeroSpace menu-bar icon.",
+      "required": false,
+      "type": "checkbox",
+      "default": false,
+      "label": "Show the current workspace in the menu bar"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.23",
-    "@raycast/utils": "^1.19.1",
-    "smol-toml": "^1.7.0"
+    "@raycast/api": "^2.1.0",
+    "@raycast/utils": "^2.3.0",
+    "smol-toml": "^1.8.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.12",
-    "eslint": "^9.22.0",
-    "prettier": "^3.9.5",
-    "typescript": "^5.9.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "lint:local": "eslint src eslint.config.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format:check": "prettier --check .",
+    "publish": "ray publish"
   },
   "platforms": [
     "macOS"

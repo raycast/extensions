@@ -18,7 +18,7 @@ export function NoteQuickLook(props: { showTitle: boolean; note: Note; vault: Ob
       actions={
         noteContent !== null ? (
           <ActionPanel>
-            <OpenNoteActions note={{ content: noteContent, ...note }} vault={vault} showQuickLook={false} />
+            <OpenNoteActions note={note} vault={vault} showQuickLook={false} />
             <NoteActions note={{ content: noteContent, ...note }} vault={vault} />
           </ActionPanel>
         ) : null
