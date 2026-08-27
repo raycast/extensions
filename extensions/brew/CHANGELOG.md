@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Upgrade View] - {PR_MERGE_DATE}
+## [Upgrade View] - 2026-08-27
 
 - The Upgrade command now lists the outdated formulae & casks, matching the Show Outdated command, instead of a list of progress steps.
 - Upgrade progress is reported via the toast/HUD, with the icon of each package reflecting its upgrade status.
