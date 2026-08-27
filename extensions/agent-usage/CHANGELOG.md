@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Fix Amp usage parse] - {PR_MERGE_DATE}
+## [Fix Amp usage parse] - 2026-08-27
 
 ### Bug Fixes
 
