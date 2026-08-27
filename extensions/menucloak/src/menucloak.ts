@@ -1,7 +1,7 @@
 import { getApplications, open, showHUD, showToast, Toast } from "@raycast/api";
 
 const bundleId = "com.dans.menucloak";
-const projectURL = "https://github.com/dans-huang/MenuCloak";
+const downloadURL = "https://github.com/dans-huang/MenuCloak/releases/latest";
 
 async function isInstalled(): Promise<boolean> {
   const applications = await getApplications();
@@ -13,10 +13,10 @@ export async function runMenuCloakAction(action: string, confirmation: string): 
     await showToast({
       style: Toast.Style.Failure,
       title: "MenuCloak is not installed",
-      message: "Install the native app before using this command.",
+      message: "Install MenuCloak 1.9 or newer to use Raycast and Google Calendar.",
       primaryAction: {
-        title: "View Installation Instructions",
-        onAction: () => open(projectURL),
+        title: "Download MenuCloak",
+        onAction: () => open(downloadURL),
       },
     });
     return;

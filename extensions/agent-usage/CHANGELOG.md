@@ -1,5 +1,17 @@
 # Agent Usage Changelog
 
+## [Add AIHubMix Usage] - 2026-08-22
+
+- Add AIHubMix balance monitoring to the main list and menu bar
+- Query account remaining and used balances with an Access Key from https://console.aihubmix.com/setting, or `AIHUBMIX_ACCESS_KEY`
+
+## [Add MinimaxCN support] - 2026-08-21
+
+### New Features
+
+- Add MinimaxCN (Chinese-region MiniMax) to the main list and menu bar
+- Coding-plan quota window: 5h interval + weekly, with `current_interval_remaining_percent` fallback when counts are 0
+
 ## [Show Cursor Auto and API percentages] - 2026-08-16
 
 ### Improvements

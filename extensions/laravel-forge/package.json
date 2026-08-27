@@ -38,13 +38,73 @@
       "interval": "10s"
     }
   ],
+  "ai": {
+    "instructions": "Deployments belong to sites, not servers.\nFailed deploy: deployment-status names the failing site, then deployment-log. If nothing is marked failed, take the id from deployment-history.\nSite down or erroring: site-online, then site-config for nginx-error-log, then application-log.\nServer trouble, like provisioning or a service that will not start: server-events.\nWhich server, PHP version, repository or branch a site uses: list-sites.\nA site's env file is not available here.\nSite names are domains and also answer on their aliases. If a lookup returns several names, ask which one.\nOnly deploy, restart or reboot when asked. Quick deploy being off means Forge will not deploy on push by itself."
+  },
+  "tools": [
+    {
+      "name": "list-servers",
+      "title": "List Servers",
+      "description": "List every Laravel Forge server across the configured accounts, with provider, region, IP address and connection status"
+    },
+    {
+      "name": "list-sites",
+      "title": "List Sites",
+      "description": "List the sites Laravel Forge manages, across every server or on one named server, with repository, branch and deployment status"
+    },
+    {
+      "name": "deployment-status",
+      "title": "Check Deployment Status",
+      "description": "Show which Laravel Forge sites are deploying right now and which ones have a failed deployment. Start here to work out which site a question about a failed deploy is about"
+    },
+    {
+      "name": "deployment-history",
+      "title": "Get Deployment History",
+      "description": "List recent deployments of a Laravel Forge site with their status, commit and timings. Use it to find an earlier failed deployment once the current status is no longer failed"
+    },
+    {
+      "name": "deployment-log",
+      "title": "Read Deployment Log",
+      "description": "Read the output of a Laravel Forge site's latest deployment, or of a specific deployment, to find out why it failed"
+    },
+    {
+      "name": "server-events",
+      "title": "Get Server Events",
+      "description": "List recent Laravel Forge events for a server, or read the command output of one event"
+    },
+    {
+      "name": "site-online",
+      "title": "Check If a Site Is Online",
+      "description": "Check whether a site hosted on Laravel Forge responds over HTTP, reporting the status code and treating a 4xx or 5xx as unhealthy"
+    },
+    {
+      "name": "site-config",
+      "title": "Read Site Config or Logs",
+      "description": "Read a Laravel Forge site's nginx config, application log, nginx error log or nginx access log"
+    },
+    {
+      "name": "deploy-site",
+      "title": "Deploy a Site",
+      "description": "Run the deployment script for a Laravel Forge site, deploying the latest commit on its branch"
+    },
+    {
+      "name": "restart-service",
+      "title": "Restart a Service",
+      "description": "Start, stop or restart php, nginx, mysql or redis on a Laravel Forge server, named directly or by a site running on it"
+    },
+    {
+      "name": "reboot-server",
+      "title": "Reboot a Server",
+      "description": "Reboot a Laravel Forge server, named directly or by a site running on it, taking every site on it down until it comes back"
+    }
+  ],
   "preferences": [
     {
       "name": "laravel_forge_api_token",
       "type": "password",
       "required": true,
       "title": "Forge API Token (v2)",
-      "description": "Forge API v1 is retired, so this needs a new v2 token. Create one at forge.laravel.com/profile/api \u2014 see the README for the scopes to tick.",
+      "description": "Generate from your Laravel Forge profile",
       "placeholder": "API Token"
     },
     {
@@ -78,7 +138,6 @@
     "@raycast/api": "^1.104.24",
     "date-fns": "^4.4.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.2",
     "run-applescript": "^7.1.0",
     "swr": "^2.5.1"
   },

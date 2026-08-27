@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 
 import { Response } from "node-fetch";
 
-import { parseJiraJsonResponse } from "../src/api/response";
+import { parseJiraJsonResponse } from "../src/api/response.ts";
 
 describe("parseJiraJsonResponse", () => {
   it("throws a clear Jira error when a successful response contains HTML", async () => {

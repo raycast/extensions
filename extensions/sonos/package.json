@@ -22,7 +22,7 @@
       "subtitle": "Sonos",
       "description": "Toggle the playback state of the active group",
       "mode": "no-view",
-      "interval": "5s"
+      "interval": "1m"
     },
     {
       "name": "set-group",

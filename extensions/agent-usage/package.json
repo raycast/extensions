@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-usage",
-  "description": "Monitor AI coding agent usage across Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, OpenCode Go, Synthetic and z.ai",
+  "description": "Monitor AI coding agent usage across AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, Synthetic and z.ai",
   "categories": [
     "Productivity"
   ],
@@ -12,11 +12,12 @@
     "adrianbonpin",
     "garrick_zhang",
     "EDM115",
-    "chingweih"
+    "chingweih",
+    "2f6ft9t7t6"
   ],
   "type": "module",
   "scripts": {
-    "build": "ray build",
+    "build": "ray build -e dist -o ./dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "format": "prettier --write .",
@@ -66,9 +67,24 @@
   ],
   "preferences": [
     {
-      "name": "showAmp",
+      "name": "showAihubmix",
       "type": "checkbox",
       "title": "Visible Agents",
+      "label": "Show AIHubMix",
+      "description": "Show AIHubMix balance in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "aihubmixApiKey",
+      "type": "password",
+      "title": "AIHubMix Access Key (Optional)",
+      "description": "Copy the Access Key from https://console.aihubmix.com/setting, or set AIHUBMIX_ACCESS_KEY in your shell.",
+      "required": false
+    },
+    {
+      "name": "showAmp",
+      "type": "checkbox",
       "label": "Show Amp",
       "description": "Show Amp usage in the list",
       "default": true,
@@ -211,6 +227,21 @@
       "type": "password",
       "title": "MiniMax API Token (Optional)",
       "description": "Optional fallback token. Usually auto-detected from MINIMAX_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
+      "required": false
+    },
+    {
+      "name": "showMinimaxCN",
+      "type": "checkbox",
+      "label": "Show MinimaxCN",
+      "description": "Show MinimaxCN (MiniMax 国内版) usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "minimaxcnApiToken",
+      "type": "password",
+      "title": "MinimaxCN API Token (Optional)",
+      "description": "Optional fallback token. Usually auto-detected from MINIMAX_CN_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
       "required": false
     },
     {

@@ -30,6 +30,14 @@ rejected the token, it is missing a scope or predates the v2 API.
 - Trigger deploy script
 - Reboot services
 
+## AI Chat
+Once installed, an "Ask Laravel Forge" item appears at the top of root search, and the extension can be
+mentioned from AI Chat or Quick AI. It can list servers and sites, report what is deploying, read a
+deployment log to explain a failure, read a site's Nginx config or logs, and check whether a site
+responds. Deploying a site, restarting a service and rebooting a server ask for confirmation first, and
+the card names every site the action takes down. A site's `.env` is deliberately out of reach here,
+since anything a tool returns is sent to the model.
+
 ## Non-Forge API Features
 - Check site connectivity
 - Open command from raycast:// url

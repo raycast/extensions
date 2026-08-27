@@ -1,5 +1,9 @@
 # DesktopRenamer Changelog
 
+## [Fix] - 2026-08-21
+
+- Reduced background desktop status refreshes to once per minute.
+
 ## [Window Actions] - 2026-08-03
 
 - Added window actions to `Batch Move Windows` and `List Windows` commands

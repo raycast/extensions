@@ -1,5 +1,10 @@
 # Changelog
 
+## [Apply All Preferences in Check Text Instant] - 2026-08-26
+
+### Fixed
+- Check Text Instant now sends Mother Tongue, Preferred Variants, Enabled Rules, Enabled Categories, Disabled Categories and Enable Only Specified Rules, the six preferences it was silently leaving out. They are extension-wide preferences and Check Text already applied all of them.
+
 ## [Fix Premium Accounts] - 2026-08-15
 
 ### Fixed

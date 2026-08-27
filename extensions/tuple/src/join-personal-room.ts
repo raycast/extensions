@@ -1,16 +1,17 @@
 import { showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { joinCall, listRooms } from "./lib/tuple";
+import { primaryPersonalRoom } from "./lib/types";
 
 export default async function JoinPersonalRoom() {
   try {
-    // `tuple rooms list --kind personal` returns the user's personal room(s) — almost always
-    // exactly one. The CLI orders rooms by occupied, then favorited, then name, so [0] is the
-    // highest-priority personal room (and, in the common single-room case, the only one).
-    const [room] = await listRooms("--kind", "personal");
+    const personalRooms = await listRooms("--kind", "personal", "--limit", "-1");
+    const room = primaryPersonalRoom(personalRooms);
 
     if (!room) {
-      await showHUD("No personal room found");
+      await showHUD(
+        personalRooms.length === 0 ? "No personal room found" : "Update Tuple to identify your primary room",
+      );
       return;
     }
 

@@ -1,5 +1,12 @@
 # Laravel Forge Changelog
 
+## [Fix] - 2026-08-22
+- Show active deployments again in the menu bar: the Forge API reports "Deploying" while the extension compared against lowercase "deploying"
+
+## [AI Tools] - 2026-08-20
+- Ask Laravel Forge from AI Chat: what is deploying, why a deploy failed, a site's Nginx config or logs, whether a site is up
+- Deploying a site, restarting a service and rebooting a server are AI tools too, each asking to confirm first and listing the sites it affects
+
 ## [Forge API v2] - 2026-08-18
 - Move every request to the Forge API v2, which replaces v1 on August 31, 2026
 - Servers are now listed per organization, across all organizations a token can see

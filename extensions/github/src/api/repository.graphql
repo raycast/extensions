@@ -27,10 +27,6 @@ fragment ExtendedRepositoryFields on Repository {
     avatarUrl(size: 64)
   }
   url
-  mergeCommitAllowed
-  squashMergeAllowed
-  rebaseMergeAllowed
-  autoMergeAllowed
   updatedAt
   pushedAt
   stargazerCount
@@ -42,13 +38,6 @@ fragment ExtendedRepositoryFields on Repository {
     id
     name
     color
-  }
-  hasIssuesEnabled
-  hasWikiEnabled
-  hasProjectsEnabled
-  hasDiscussionsEnabled
-  releases {
-    totalCount
   }
 }
 
@@ -108,6 +97,10 @@ query commentsForPullRequest($owner: String!, $name: String!, $number: Int!) {
 
 query dataForRepository($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
+    mergeCommitAllowed
+    squashMergeAllowed
+    rebaseMergeAllowed
+    autoMergeAllowed
     defaultBranchRef {
       id
       name
@@ -229,12 +222,16 @@ fragment ReleaseFields on Release {
   url
 }
 
-query repositoryReleases($name: String!, $owner: String!) {
+query repositoryReleases($name: String!, $owner: String!, $numberOfItems: Int!, $after: String) {
   repository(name: $name, owner: $owner) {
     ... on Repository {
-      releases(first: 30, orderBy: { field: CREATED_AT, direction: DESC }) {
+      releases(first: $numberOfItems, after: $after, orderBy: { field: CREATED_AT, direction: DESC }) {
         nodes {
           ...ReleaseFields
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
         }
       }
     }

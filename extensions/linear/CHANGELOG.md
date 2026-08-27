@@ -1,5 +1,14 @@
 # Linear Changelog
 
+## [Expanded AI Tools] - 2026-08-26
+
+- Expand the Linear AI extension with native tools for issues, projects, initiatives, documents, comments, teams, users, cycles, labels, milestones, releases, status updates, attachments, agent skills, and documentation search.
+- Add cursor pagination to collection tools, full-text issue search, structured issue filtering, and issue deletion with confirmation.
+
+## [Issue Attachments] - 2026-08-20
+
+- Fix attachments added through Create Issue failing to upload.
+
 ## [Copy as Prompt] - 2026-08-19
 
 - Add a "Copy as Prompt" action to issue copy actions, matching Linear's native action of the same name. Copies the issue as a structured prompt for coding agents, including its description, team, labels, project, and parent or sub-issues.

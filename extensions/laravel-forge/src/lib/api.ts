@@ -1,5 +1,4 @@
-import { LaunchType, LocalStorage, Toast, environment, popToRoot, showToast } from "@raycast/api";
-import fetch, { RequestInit } from "node-fetch";
+import { LaunchType, LocalStorage, Toast, captureException, environment, popToRoot, showToast } from "@raycast/api";
 import { clearCache } from "./cache";
 
 const doTheFetch = async (url: string, options?: RequestInit) => {
@@ -10,6 +9,7 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
   } catch (e) {
     if (e instanceof Error) {
       console.error({ error: e, url });
+      captureException(e);
       if (!isBackground) showResetToast({ title: `Error ${res?.status}: ${e.message}` });
       throw new Error(e.message);
     }
@@ -21,6 +21,7 @@ const doTheFetch = async (url: string, options?: RequestInit) => {
       ? "Forge rejected the API token. Create a v2 token with the scopes you need."
       : `Error ${res?.status}: ${res?.statusText}`;
     if (!isBackground) showResetToast({ title });
+    captureException(new Error(`${res?.status} ${res?.statusText}: ${url}`));
     throw new Error(res?.statusText);
   }
   return res;

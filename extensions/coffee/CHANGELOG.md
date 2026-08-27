@@ -1,8 +1,24 @@
 # Coffee Changelog
 
+## [Windows support] - 2026-08-25
+
+- Add support for Windows platform
+- Add app picker support to the "Caffeinate While" command on Windows
+- Stop caffeination when the selected app window closes
+- Filter out utility and system windows from the app picker
+- Use platform-neutral wording in tools, AI instructions, README, preferences, and HUDs
+
+## [Fix] - 2026-08-21
+
+- Reduced background status refreshes to once per minute.
+
+## [Fix] - 2026-08-20
+
+- Fixed future caffeination schedules not activating automatically and ensured they stop at the configured end time.
+
 ## [Enhancement] - 2026-08-14
 
-- Added an "instant on" feature: when the new *Start caffeination when Raycast starts* preference is enabled, Coffee automatically keeps your Mac awake (indefinitely) shortly after Raycast launches. Manual decaffeination persists until the next Raycast restart.
+- Added an "instant on" feature: when the new _Start caffeination when Raycast starts_ preference is enabled, Coffee automatically keeps your Mac awake (indefinitely) shortly after Raycast launches. Manual decaffeination persists until the next Raycast restart.
 
 ## [AI Extension] - 2026-07-22
 
