@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rename, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -196,6 +196,41 @@ describe("Vault writes", () => {
     for (const input of inputs) {
       expect(content).toContain("- [ ] " + input);
     }
+  });
+
+  test("does not modify a target that is moved outside the Vault during a save", async () => {
+    const vault = await makeVault();
+    const outside = await mkdtemp(path.join(os.tmpdir(), "talk-to-action-raycast-outside-"));
+    temporaryDirectories.push(outside);
+    const filePath = path.join(vault, "Tasks.md");
+    const movedPath = path.join(outside, "Tasks.md");
+    await writeFile(filePath, "# Tasks\n");
+
+    const moveTarget = (async () => {
+      for (let attempt = 0; attempt < 200; attempt += 1) {
+        const entries = await readdir(vault);
+        if (entries.some((entry) => entry.startsWith(".talk-to-action-for-raycast-"))) {
+          await rename(filePath, movedPath);
+          return true;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
+      return false;
+    })();
+
+    await expect(
+      saveInput({
+        vaultPath: vault,
+        dailyNoteFolder: "",
+        dailyNoteFileFormat: "YYYY-MM-DD",
+        route: baseRoute,
+        input: "Keep this inside the Vault ".repeat(500_000),
+      }),
+    ).rejects.toThrow("Tasks.md");
+
+    expect(await moveTarget).toBe(true);
+    expect(await readFile(movedPath, "utf8")).toBe("# Tasks\n");
+    await expect(readFile(filePath, "utf8")).rejects.toThrow("ENOENT");
   });
 
   test("reclaims a lock only after its owner process has exited", async () => {

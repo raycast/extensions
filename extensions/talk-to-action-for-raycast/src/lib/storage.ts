@@ -239,19 +239,15 @@ async function writeToTarget(target: ResolvedTarget, newLines: string[], route: 
         }
 
         const content = buildUpdatedContent(existingContent, newLines, route);
-        let handle: FileHandle | undefined;
         try {
-          handle = await openVerifiedTarget(target);
-          const contentBeforeWrite = await handle.readFile({ encoding: "utf8" });
-          if (contentBeforeWrite !== existingContent) {
+          const replaced = await replaceVerifiedTarget(target, existingContent, content);
+          if (!replaced) {
             if (attempt === 0) {
               continue;
             }
             throw new StorageError("The file changed while saving. Please submit again.");
           }
 
-          await handle.truncate(0);
-          await writeAll(handle, content);
           return {
             absolutePath: target.absolutePath,
             relativePath: target.relativePath,
@@ -259,8 +255,6 @@ async function writeToTarget(target: ResolvedTarget, newLines: string[], route: 
           };
         } catch (error) {
           throw toStorageError(error, target.relativePath);
-        } finally {
-          await handle?.close();
         }
       }
 
@@ -419,41 +413,52 @@ function wait(duration: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, duration));
 }
 
-async function openVerifiedTarget(target: ResolvedTarget): Promise<FileHandle> {
-  const flags = constants.O_RDWR | constants.O_NOFOLLOW;
-  let handle: FileHandle | undefined;
+async function replaceVerifiedTarget(
+  target: ResolvedTarget,
+  expectedContent: string,
+  replacementContent: string,
+): Promise<boolean> {
+  const temporaryPath = path.join(target.vaultPath, ".talk-to-action-for-raycast-" + randomUUID() + ".tmp");
+  let renamed = false;
   try {
-    handle = await fs.open(target.absolutePath, flags, 0o600);
-    await resolveInsideVault(target.vaultPath, target.relativePath);
-
-    const [handleStats, targetStats, targetLinkStats] = await Promise.all([
-      handle.stat(),
-      fs.stat(target.absolutePath),
-      fs.lstat(target.absolutePath),
-    ]);
-    if (
-      targetLinkStats.isSymbolicLink() ||
-      !handleStats.isFile() ||
-      handleStats.nlink !== 1 ||
-      handleStats.dev !== targetStats.dev ||
-      handleStats.ino !== targetStats.ino
-    ) {
-      throw new StorageError("The path must stay inside the selected Vault.");
+    const mode = await verifyExistingTarget(target);
+    if ((await readTextIfExists(target.absolutePath)) !== expectedContent) {
+      return false;
     }
-    return handle;
-  } catch (error) {
-    await handle?.close();
-    throw error;
+
+    await fs.writeFile(temporaryPath, replacementContent, { encoding: "utf8", flag: "wx", mode });
+
+    await verifyExistingTarget(target);
+    if ((await readTextIfExists(target.absolutePath)) !== expectedContent) {
+      return false;
+    }
+
+    await fs.rename(temporaryPath, target.absolutePath);
+    renamed = true;
+    return true;
+  } finally {
+    if (!renamed) {
+      await fs.unlink(temporaryPath).catch(() => undefined);
+    }
   }
 }
 
-async function writeAll(handle: FileHandle, content: string): Promise<void> {
-  const buffer = Buffer.from(content, "utf8");
-  let written = 0;
-  while (written < buffer.length) {
-    const result = await handle.write(buffer, written, buffer.length - written, written);
-    written += result.bytesWritten;
+async function verifyExistingTarget(target: ResolvedTarget): Promise<number> {
+  await resolveInsideVault(target.vaultPath, target.relativePath);
+  const [targetStats, targetLinkStats] = await Promise.all([
+    fs.stat(target.absolutePath),
+    fs.lstat(target.absolutePath),
+  ]);
+  if (
+    targetLinkStats.isSymbolicLink() ||
+    !targetStats.isFile() ||
+    targetStats.nlink !== 1 ||
+    targetStats.dev !== targetLinkStats.dev ||
+    targetStats.ino !== targetLinkStats.ino
+  ) {
+    throw new StorageError("The path must stay inside the selected Vault.");
   }
+  return targetStats.mode & 0o777;
 }
 
 async function resolveVaultPath(value: string): Promise<string> {
