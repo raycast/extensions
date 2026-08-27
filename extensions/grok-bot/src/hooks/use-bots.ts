@@ -1,7 +1,9 @@
+import { Toast, showToast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { listAgents } from "../lib/gateway";
 import { readCachedBots, writeCachedBots } from "../lib/roster-cache";
-import { Bot, GatewayError } from "../lib/types";
+import { applyRosterRefresh, isStaleRosterFailure, visibleRoster } from "../lib/roster-refresh";
+import { Bot, GatewayError, gatewayErrorMessage } from "../lib/types";
 
 export function useBots(): {
   bots: Bot[];
@@ -21,7 +23,6 @@ export function useBots(): {
 
   useEffect(() => {
     const abort = new AbortController();
-    const hadCommittedRoster = committed.length > 0;
     setIsLoading(true);
     setDraft(null);
     setError(null);
@@ -40,15 +41,10 @@ export function useBots(): {
 
       setIsLoading(false);
       setDraft(null);
+      setCommitted((current) => applyRosterRefresh({ committed: current, result }).committed);
+      setError(result.ok ? null : result.error);
       if (result.ok) {
-        setCommitted(result.value);
-        setError(null);
         writeCachedBots(result.value);
-        return;
-      }
-
-      if (!hadCommittedRoster) {
-        setError(result.error);
       }
     });
 
@@ -57,6 +53,23 @@ export function useBots(): {
     };
   }, [requestId]);
 
-  const bots = committed.length > 0 ? committed : (draft ?? []);
+  useEffect(() => {
+    const failure = { error, committedCount: committed.length };
+    if (!isStaleRosterFailure(failure)) {
+      return;
+    }
+
+    void showToast({
+      style: Toast.Style.Failure,
+      title: "Couldn't refresh bots",
+      message: gatewayErrorMessage(failure.error),
+      primaryAction: {
+        title: "Retry",
+        onAction: revalidate,
+      },
+    });
+  }, [committed.length, error, revalidate]);
+
+  const bots = visibleRoster({ committed, draft });
   return { bots, error, isLoading, revalidate };
 }

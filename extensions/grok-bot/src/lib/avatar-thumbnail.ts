@@ -110,32 +110,27 @@ async function defaultResize(input: { sourcePath: string; destPath: string }): P
     throw new Error("invalid image dimensions");
   }
   const side = Math.min(width, height);
-  const croppedPath = `${input.sourcePath}.cropped`;
-  await execFileAsync("/usr/bin/sips", ["-c", String(side), String(side), input.sourcePath, "--out", croppedPath], {
-    timeout: 15_000,
-  });
-  try {
-    await execFileAsync(
-      "/usr/bin/sips",
-      [
-        "-z",
-        String(AVATAR_SIZE_PX),
-        String(AVATAR_SIZE_PX),
-        "-s",
-        "format",
-        "jpeg",
-        "-s",
-        "formatOptions",
-        "70",
-        croppedPath,
-        "--out",
-        input.destPath,
-      ],
-      { timeout: 15_000 },
-    );
-  } finally {
-    unlinkQuiet(croppedPath);
-  }
+  await execFileAsync(
+    "/usr/bin/sips",
+    [
+      "-c",
+      String(side),
+      String(side),
+      "-z",
+      String(AVATAR_SIZE_PX),
+      String(AVATAR_SIZE_PX),
+      "-s",
+      "format",
+      "jpeg",
+      "-s",
+      "formatOptions",
+      "70",
+      input.sourcePath,
+      "--out",
+      input.destPath,
+    ],
+    { timeout: 15_000 },
+  );
 }
 
 function fileHasContent(path: string): boolean {

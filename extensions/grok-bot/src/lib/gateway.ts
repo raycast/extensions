@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { unlinkSync } from "node:fs";
 import { environment } from "@raycast/api";
-import { AgentId, Bot, GatewayError, Result, err, ok } from "./types";
+import { Bot, GatewayError, Result, err, ok, AgentId } from "./types";
 import { parseBot } from "./parse-bot";
 import { normalizeGatewayUrl } from "./gateway-config";
 import { resolveGatewayConfig } from "./preferences";
@@ -11,15 +11,19 @@ import { CapturedAvatar, createAvatarCaptureSink, materializeAvatarThumbnail } f
 const LIST_TIMEOUT_MS = 120_000;
 const SEND_TIMEOUT_MS = 30_000;
 const AVATAR_FIELD = "avatarDataUrl";
+const AVATAR_IN_FLIGHT_LIMIT = 4;
+
+export type AvatarMode = "materialize" | "skip";
 
 type GatewayConfig = {
   baseUrl: string;
   token: string;
 };
 
-type ListAgentsOptions = {
+export type ListAgentsOptions = {
   signal?: AbortSignal;
   onUpdate?: (bots: Bot[]) => void;
+  avatars?: AvatarMode;
 };
 
 function getConfig(): Result<GatewayConfig, GatewayError> {
@@ -57,6 +61,31 @@ function requestSignal(user: AbortSignal | undefined, timeoutMs: number): AbortS
 
 function isUserAbort(user?: AbortSignal): boolean {
   return user?.aborted === true;
+}
+
+function createSemaphore(limit: number) {
+  let available = limit;
+  const waiters: Array<() => void> = [];
+
+  return {
+    async acquire(): Promise<void> {
+      if (available > 0) {
+        available -= 1;
+        return;
+      }
+      await new Promise<void>((resolve) => {
+        waiters.push(resolve);
+      });
+    },
+    release(): void {
+      const waiter = waiters.shift();
+      if (waiter) {
+        waiter();
+        return;
+      }
+      available += 1;
+    },
+  };
 }
 
 async function postGateway(
@@ -133,6 +162,7 @@ function finishAgentList(input: {
 }
 
 export async function listAgents(options?: ListAgentsOptions): Promise<Result<Bot[], GatewayError>> {
+  const avatarMode = options?.avatars ?? "materialize";
   const response = await postGateway("/api/listAgents", "{}", {
     signal: options?.signal,
     timeoutMs: LIST_TIMEOUT_MS,
@@ -144,8 +174,21 @@ export async function listAgents(options?: ListAgentsOptions): Promise<Result<Bo
   const collected: Bot[] = [];
   let emitted = 0;
   let firstParseError = "";
-  let thumbs = Promise.resolve();
   const avatarDir = join(environment.supportPath, "avatars");
+  let createSink: (() => ReturnType<typeof createAvatarCaptureSink>) | undefined;
+  let semaphore: ReturnType<typeof createSemaphore> | null = null;
+  switch (avatarMode) {
+    case "materialize":
+      createSink = () => createAvatarCaptureSink(avatarDir);
+      semaphore = createSemaphore(AVATAR_IN_FLIGHT_LIMIT);
+      break;
+    case "skip":
+      break;
+    default: {
+      const _exhaustive: never = avatarMode;
+      return _exhaustive;
+    }
+  }
 
   const dropCapture = (captured: CapturedAvatar | null): void => {
     if (captured === null) {
@@ -157,6 +200,8 @@ export async function listAgents(options?: ListAgentsOptions): Promise<Result<Bo
       return;
     }
   };
+
+  const thumbs: Promise<void>[] = [];
 
   const onObject = (json: string, captured: CapturedAvatar | null) => {
     emitted += 1;
@@ -183,28 +228,38 @@ export async function listAgents(options?: ListAgentsOptions): Promise<Result<Bo
       return;
     }
     const bot = parsed.value;
+    const index = collected.length;
     collected.push(bot);
     options?.onUpdate?.([...collected]);
 
-    if (captured === null) {
+    if (captured === null || semaphore === null) {
       return;
     }
-    thumbs = thumbs.then(async () => {
-      if (options?.signal?.aborted) {
-        dropCapture(captured);
-        return;
-      }
-      const hash = await materializeAvatarThumbnail({
-        supportPath: environment.supportPath,
-        agentId: bot.id,
-        sourcePath: captured.sourcePath,
-        hash: captured.hash,
-      });
-      bot.avatarHash = hash;
-      if (!options?.signal?.aborted) {
-        options?.onUpdate?.([...collected]);
-      }
-    });
+
+    const gate = semaphore;
+    thumbs.push(
+      (async () => {
+        await gate.acquire();
+        try {
+          if (options?.signal?.aborted) {
+            dropCapture(captured);
+            return;
+          }
+          const hash = await materializeAvatarThumbnail({
+            supportPath: environment.supportPath,
+            agentId: bot.id,
+            sourcePath: captured.sourcePath,
+            hash: captured.hash,
+          });
+          collected[index] = { ...bot, avatarHash: hash };
+          if (!options?.signal?.aborted) {
+            options?.onUpdate?.([...collected]);
+          }
+        } finally {
+          gate.release();
+        }
+      })(),
+    );
   };
 
   try {
@@ -213,16 +268,16 @@ export async function listAgents(options?: ListAgentsOptions): Promise<Result<Bo
       return err({ kind: "invalid-response", detail: "response has no body" });
     }
 
-    const streamed = await streamJsonObjectsSkippingField(http.body, AVATAR_FIELD, onObject, {
-      createSink: () => createAvatarCaptureSink(avatarDir),
-      afterChunk: () => thumbs,
-    });
+    let streamed: { sawList: boolean; complete: boolean };
+    try {
+      streamed = await streamJsonObjectsSkippingField(http.body, AVATAR_FIELD, onObject, createSink);
+    } finally {
+      await Promise.all(thumbs);
+    }
 
     if (options?.signal?.aborted) {
       return err({ kind: "unreachable", cause: "aborted" });
     }
-
-    await thumbs;
 
     return finishAgentList({
       sawList: streamed.sawList,

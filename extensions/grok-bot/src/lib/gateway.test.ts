@@ -295,6 +295,131 @@ describe("gateway", () => {
     );
   });
 
+  it("does not block the next onUpdate while the first thumbnail materializes", async () => {
+    mockConfig("http://127.0.0.1:1340", "secret-token");
+    const pngBase64 =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+    const dataUrl = `data:image/png;base64,${pngBase64}`;
+    const hash = createHash("sha256").update(Buffer.from(pngBase64, "base64")).digest("hex").slice(0, 16);
+    const encoder = new TextEncoder();
+    let releaseFirst: (() => void) | undefined;
+    const firstBlocked = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
+    materializeAvatarThumbnail.mockImplementationOnce(async () => {
+      await firstBlocked;
+      return hash;
+    });
+    materializeAvatarThumbnail.mockResolvedValue(null);
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        const stream = new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(encoder.encode(`[{"id":"a1","name":"Piper","avatarDataUrl":"${dataUrl}"},`));
+            controller.enqueue(encoder.encode(`{"id":"a2","name":"Scout","avatarDataUrl":"${dataUrl}"}]`));
+            controller.close();
+          },
+        });
+        return new Response(stream, { status: 200 });
+      }),
+    );
+
+    const updates: string[][] = [];
+    const listPromise = listAgents({
+      onUpdate: (bots) => {
+        updates.push(bots.map((bot) => bot.name));
+      },
+    });
+
+    await vi.waitFor(() => {
+      expect(updates.some((names) => names.includes("Piper") && names.includes("Scout"))).toBe(true);
+    });
+
+    releaseFirst?.();
+    const result = await listPromise;
+    expect(result.ok).toBe(true);
+  });
+
+  it("keeps parsing later chunks while four thumbnails are already in flight", async () => {
+    mockConfig("http://127.0.0.1:1340", "secret-token");
+    const pngBase64 =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+    const dataUrl = `data:image/png;base64,${pngBase64}`;
+    const encoder = new TextEncoder();
+    let release: (() => void) | undefined;
+    const blocked = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    materializeAvatarThumbnail.mockImplementation(async () => {
+      await blocked;
+      return "1111111111111111";
+    });
+
+    function agentJson(id: string, name: string) {
+      return `{"id":"${id}","name":"${name}","avatarDataUrl":"${dataUrl}"}`;
+    }
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        const stream = new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(
+              encoder.encode(
+                `[${agentJson("a1", "N1")},${agentJson("a2", "N2")},${agentJson("a3", "N3")},${agentJson("a4", "N4")},`,
+              ),
+            );
+            controller.enqueue(encoder.encode(`${agentJson("a5", "N5")}]`));
+            controller.close();
+          },
+        });
+        return new Response(stream, { status: 200 });
+      }),
+    );
+
+    const updates: string[][] = [];
+    const listPromise = listAgents({
+      onUpdate: (bots) => {
+        updates.push(bots.map((bot) => bot.name));
+      },
+    });
+
+    await vi.waitFor(() => {
+      expect(updates.some((names) => names.includes("N5"))).toBe(true);
+    });
+
+    release?.();
+    const result = await listPromise;
+    expect(result.ok).toBe(true);
+  });
+
+  it("skips avatar materialization when avatars mode is skip", async () => {
+    mockConfig("http://127.0.0.1:1340", "secret-token");
+    const pngBase64 =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+    const dataUrl = `data:image/png;base64,${pngBase64}`;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(`[{"id":"a1","name":"Piper","avatarDataUrl":"${dataUrl}"}]`, {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+      ),
+    );
+
+    const result = await listAgents({ avatars: "skip" });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value[0]?.name).toBe("Piper");
+      expect(result.value[0]?.avatarHash).toBeNull();
+    }
+    expect(materializeAvatarThumbnail).not.toHaveBeenCalled();
+  });
+
   it("sendPrompt returns accepted on success", async () => {
     mockConfig("http://127.0.0.1:1340", "secret-token");
     vi.stubGlobal(

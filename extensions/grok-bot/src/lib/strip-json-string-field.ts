@@ -271,12 +271,9 @@ export async function streamJsonObjectsSkippingField<T>(
   stream: ReadableStream<Uint8Array>,
   field: string,
   onObject: (json: string, skipped: T | null) => void,
-  options?: {
-    createSink?: () => SkippedFieldSink<T>;
-    afterChunk?: () => Promise<void>;
-  },
+  createSink?: () => SkippedFieldSink<T>,
 ): Promise<{ sawList: boolean; complete: boolean }> {
-  const skipper = createJsonStringFieldSkipper(field, onObject, options?.createSink);
+  const skipper = createJsonStringFieldSkipper(field, onObject, createSink);
   const decoder = new TextDecoder();
   const reader = stream.getReader();
   try {
@@ -284,11 +281,9 @@ export async function streamJsonObjectsSkippingField<T>(
       const { done, value } = await reader.read();
       if (done) {
         skipper.push(decoder.decode());
-        await options?.afterChunk?.();
         break;
       }
       skipper.push(decoder.decode(value, { stream: true }));
-      await options?.afterChunk?.();
     }
   } finally {
     reader.releaseLock();

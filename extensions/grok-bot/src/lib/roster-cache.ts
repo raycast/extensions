@@ -23,3 +23,10 @@ export function readCachedBots(): Bot[] {
 export function writeCachedBots(bots: Bot[]): void {
   cache.set(CACHE_KEY, JSON.stringify(bots));
 }
+
+export function writeCachedBotsIfEmpty(bots: Bot[]): void {
+  if (readCachedBots().length > 0) {
+    return;
+  }
+  writeCachedBots(bots);
+}

@@ -5,7 +5,7 @@ import { getLastBotId } from "./lib/last-bot";
 import { resolveInitialBot } from "./lib/match-bot";
 import { AgentId } from "./lib/types";
 import { AskForm } from "./views/ask-form";
-import { GatewayEmptyView } from "./views/gateway-empty";
+import { GatewayEmptyView, RosterLoadingView } from "./views/gateway-empty";
 
 type AskArguments = {
   question?: string;
@@ -48,10 +48,17 @@ export default function AskCommand(props: LaunchProps<{ arguments: AskArguments;
   const ready = messageReady && lastReady && rosterReady;
 
   if (!ready) {
+    if (isLoading && bots.length === 0 && error === null) {
+      return (
+        <List isLoading filtering={false}>
+          <RosterLoadingView onRetry={revalidate} />
+        </List>
+      );
+    }
     return <Form isLoading />;
   }
 
-  if (error || bots.length === 0) {
+  if (bots.length === 0) {
     return (
       <List>
         <GatewayEmptyView error={error} onRetry={revalidate} />

@@ -26,6 +26,7 @@ Command titles follow Raycast store rules. Use Title Case, verb then noun: `List
 
 `npm run publish` needs 3–6 PNGs at 2000×1250 in `metadata/`. Capture them with Raycast Window Capture in dev mode, same wallpaper. Do not invent shots. Do not show a token or Serve URL.
 
-1. List Bots with a few teammates
-2. Ask Bot form
-3. Empty state **Can't reach your bots** or preferences
+1. `grok-bot-1.png` List Bots with teammates
+2. `grok-bot-2.png` Ask Bot from Raycast, with task and bot arguments
+3. `grok-bot-3.png` List Bots, Ask Bot, and Open Grok Bot in the root search
+4. `grok-bot-4.png` Ask Grok Bot in Raycast AI

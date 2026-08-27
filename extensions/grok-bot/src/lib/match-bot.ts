@@ -65,16 +65,49 @@ export function matchesListQuery(bot: Bot, query: string): boolean {
   );
 }
 
-export function filterBotsForList(bots: Bot[], query: string): { individuals: Bot[]; groups: Bot[]; hidden: Bot[] } {
-  const trimmed = query.trim();
-  const matching = trimmed.length === 0 ? bots : bots.filter((bot) => matchesListQuery(bot, trimmed));
-  const visible = matching.filter((bot) => !bot.isHidden);
+export type BotGroups = {
+  favorites: Bot[];
+  individuals: Bot[];
+  groups: Bot[];
+  hidden: Bot[];
+};
 
+function partitionBots(input: {
+  matching: Bot[];
+  favoriteIds: readonly AgentId[];
+  includeUnfavoritedHidden: boolean;
+}): BotGroups {
+  const favoriteSet = new Set(input.favoriteIds);
+  const byId = new Map(input.matching.map((bot) => [bot.id, bot]));
+  const favorites = input.favoriteIds.flatMap((id) => {
+    const bot = byId.get(id);
+    return bot ? [bot] : [];
+  });
+  const rest = input.matching.filter((bot) => !favoriteSet.has(bot.id));
   return {
-    individuals: visible.filter((bot) => !bot.isGroup),
-    groups: visible.filter((bot) => bot.isGroup),
-    hidden: trimmed.length > 0 ? matching.filter((bot) => bot.isHidden) : [],
+    favorites,
+    individuals: rest.filter((bot) => !bot.isGroup && !bot.isHidden),
+    groups: rest.filter((bot) => bot.isGroup && !bot.isHidden),
+    hidden: input.includeUnfavoritedHidden ? rest.filter((bot) => bot.isHidden) : [],
   };
+}
+
+export function filterBotsForList(input: { bots: Bot[]; query: string; favoriteIds?: readonly AgentId[] }): BotGroups {
+  const trimmed = input.query.trim();
+  const matching = trimmed.length === 0 ? input.bots : input.bots.filter((bot) => matchesListQuery(bot, trimmed));
+  return partitionBots({
+    matching,
+    favoriteIds: input.favoriteIds ?? [],
+    includeUnfavoritedHidden: trimmed.length > 0,
+  });
+}
+
+export function groupBotsForDropdown(input: { bots: Bot[]; favoriteIds?: readonly AgentId[] }): BotGroups {
+  return partitionBots({
+    matching: input.bots,
+    favoriteIds: input.favoriteIds ?? [],
+    includeUnfavoritedHidden: true,
+  });
 }
 
 export function resolveInitialBot(input: { bots: Bot[]; query?: string; lastId: AgentId | null }): Bot | null {

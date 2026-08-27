@@ -1,5 +1,5 @@
-import { listAgents } from "../lib/gateway";
 import { matchesListQuery } from "../lib/match-bot";
+import { loadToolRoster } from "../lib/tool-roster";
 import { Bot, gatewayErrorMessage } from "../lib/types";
 
 type Input = {
@@ -37,7 +37,7 @@ export function toListBotsResult(bots: Bot[], query?: string): ListBotRow[] {
  * List Grok Bot teammates. Optional query filters by name or title.
  */
 export default async function tool(input: Input) {
-  const botsResult = await listAgents();
+  const botsResult = await loadToolRoster();
   if (!botsResult.ok) {
     throw new Error(gatewayErrorMessage(botsResult.error));
   }

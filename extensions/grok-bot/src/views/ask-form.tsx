@@ -1,9 +1,11 @@
 import { Action, ActionPanel, Form, Icon, Toast, showHUD, showToast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
+import { useFavoriteIds } from "../hooks/use-favorite-ids";
 import { botListIcon } from "../lib/bot-icon";
 import { sendPrompt } from "../lib/gateway";
 import { setLastBotId } from "../lib/last-bot";
+import { groupBotsForDropdown } from "../lib/match-bot";
 import { AgentId, Bot, gatewayErrorMessage, parseAgentId } from "../lib/types";
 import { OpenGrokBotAction } from "./open-grok-bot-action";
 
@@ -19,18 +21,11 @@ type AskFormProps = {
   onSuccess?: () => void;
 };
 
-function dropdownGroups(bots: Bot[]): { groups: Bot[]; hidden: Bot[]; individuals: Bot[] } {
-  return {
-    individuals: bots.filter((bot) => !bot.isGroup && !bot.isHidden),
-    groups: bots.filter((bot) => bot.isGroup && !bot.isHidden),
-    hidden: bots.filter((bot) => bot.isHidden),
-  };
-}
-
 export function AskForm({ bots, initialBotId, initialMessage = "", onSuccess }: AskFormProps) {
   const { pop } = useNavigation();
+  const { favoriteIds } = useFavoriteIds();
   const [submitting, setSubmitting] = useState(false);
-  const { groups, hidden, individuals } = dropdownGroups(bots);
+  const { favorites, groups, hidden, individuals } = groupBotsForDropdown({ bots, favoriteIds });
 
   const { handleSubmit, itemProps } = useForm<AskFormValues>({
     onSubmit: async (values) => {
@@ -94,6 +89,13 @@ export function AskForm({ bots, initialBotId, initialMessage = "", onSuccess }: 
       }
     >
       <Form.Dropdown title="Bot" {...itemProps.botId}>
+        {favorites.length > 0 ? (
+          <Form.Dropdown.Section title="Favorites">
+            {favorites.map((bot) => (
+              <Form.Dropdown.Item key={bot.id} value={bot.id} title={bot.name} icon={botListIcon(bot)} />
+            ))}
+          </Form.Dropdown.Section>
+        ) : null}
         {individuals.length > 0 ? (
           <Form.Dropdown.Section title="Bots">
             {individuals.map((bot) => (

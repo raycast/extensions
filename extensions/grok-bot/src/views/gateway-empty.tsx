@@ -1,13 +1,11 @@
-import { Action, ActionPanel, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
+import { List } from "@raycast/api";
 import { GatewayError, gatewayErrorMessage } from "../lib/types";
-import { OpenGrokBotAction } from "./open-grok-bot-action";
-
-type EmptyActions = "prefs" | "retry";
+import { ChromeActionPanel, type ChromeKind } from "./chrome-actions";
 
 type EmptyCopy = {
   title: string;
   description: string;
-  actions: EmptyActions;
+  actions: Exclude<ChromeKind, "refresh">;
 };
 
 function emptyCopy(error: GatewayError | null): EmptyCopy {
@@ -58,54 +56,14 @@ function emptyCopy(error: GatewayError | null): EmptyCopy {
   }
 }
 
-function EmptyActionsPanel({ kind, onRetry }: { kind: EmptyActions; onRetry: () => void }) {
-  if (kind === "prefs") {
-    return (
-      <ActionPanel>
-        <OpenGrokBotAction />
-        <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-        <Action
-          title="Refresh"
-          icon={Icon.ArrowClockwise}
-          shortcut={Keyboard.Shortcut.Common.Refresh}
-          onAction={onRetry}
-        />
-      </ActionPanel>
-    );
-  }
-
-  return (
-    <ActionPanel>
-      <OpenGrokBotAction />
-      <Action title="Retry" icon={Icon.ArrowClockwise} shortcut={Keyboard.Shortcut.Common.Refresh} onAction={onRetry} />
-      <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-    </ActionPanel>
-  );
-}
-
 export function GatewayEmptyView({ error, onRetry }: { error: GatewayError | null; onRetry: () => void }) {
   const copy = emptyCopy(error);
   return (
     <List.EmptyView
       title={copy.title}
       description={copy.description}
-      actions={<EmptyActionsPanel kind={copy.actions} onRetry={onRetry} />}
+      actions={<ChromeActionPanel kind={copy.actions} onRefresh={onRetry} />}
     />
-  );
-}
-
-export function ChromeActionPanel({ onRefresh }: { onRefresh: () => void }) {
-  return (
-    <ActionPanel>
-      <OpenGrokBotAction />
-      <Action
-        title="Refresh"
-        icon={Icon.ArrowClockwise}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={onRefresh}
-      />
-      <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-    </ActionPanel>
   );
 }
 
@@ -114,7 +72,7 @@ export function SearchEmptyView({ onRefresh }: { onRefresh: () => void }) {
     <List.EmptyView
       title="No matching bots"
       description="Try another name, or clear the search."
-      actions={<ChromeActionPanel onRefresh={onRefresh} />}
+      actions={<ChromeActionPanel kind="refresh" onRefresh={onRefresh} />}
     />
   );
 }
@@ -124,7 +82,17 @@ export function HiddenBotsEmptyView({ onRefresh }: { onRefresh: () => void }) {
     <List.EmptyView
       title="Hidden bots"
       description="Search by name to find teammates hidden from the sidebar."
-      actions={<ChromeActionPanel onRefresh={onRefresh} />}
+      actions={<ChromeActionPanel kind="refresh" onRefresh={onRefresh} />}
+    />
+  );
+}
+
+export function RosterLoadingView({ onRetry }: { onRetry: () => void }) {
+  return (
+    <List.EmptyView
+      title="Loading teammates"
+      description="Names appear as they download."
+      actions={<ChromeActionPanel kind="refresh" onRefresh={onRetry} />}
     />
   );
 }

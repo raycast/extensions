@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { filterBotsForList, matchBotForSend, resolveInitialBot, unmatchedSendMessage } from "./match-bot";
+import {
+  filterBotsForList,
+  groupBotsForDropdown,
+  matchBotForSend,
+  resolveInitialBot,
+  unmatchedSendMessage,
+} from "./match-bot";
 import { Bot, parseAgentId } from "./types";
 
 function bot(overrides: { id: string; name: string } & Partial<Omit<Bot, "id" | "name">>): Bot {
@@ -55,16 +61,86 @@ describe("unmatchedSendMessage", () => {
   });
 });
 
+function favoriteIds(...raw: string[]) {
+  return raw.map((value) => {
+    const parsed = parseAgentId(value);
+    if (!parsed.ok) {
+      throw new Error("invalid favorite id");
+    }
+    return parsed.value;
+  });
+}
+
 describe("filterBotsForList", () => {
   it("hides hidden bots until there is a search query", () => {
-    const empty = filterBotsForList([piper, scout, crew], "");
+    const empty = filterBotsForList({ bots: [piper, scout, crew], query: "" });
+    expect(empty.favorites).toEqual([]);
     expect(empty.individuals.map((entry) => entry.name)).toEqual(["Piper"]);
     expect(empty.groups.map((entry) => entry.name)).toEqual(["Launch"]);
     expect(empty.hidden).toEqual([]);
 
-    const searched = filterBotsForList([piper, scout, crew], "talent");
+    const searched = filterBotsForList({ bots: [piper, scout, crew], query: "talent" });
+    expect(searched.favorites).toEqual([]);
     expect(searched.individuals).toEqual([]);
     expect(searched.hidden.map((entry) => entry.name)).toEqual(["Scout"]);
+  });
+
+  it("lists favorites in pin order, not roster order", () => {
+    const grouped = filterBotsForList({
+      bots: [piper, maya, scout],
+      query: "",
+      favoriteIds: favoriteIds("a3", "a1"),
+    });
+    expect(grouped.favorites.map((entry) => entry.name)).toEqual(["Maya", "Piper"]);
+    expect(grouped.individuals).toEqual([]);
+  });
+
+  it("shows a pinned hidden bot in favorites and not in hidden with an empty query", () => {
+    const grouped = filterBotsForList({
+      bots: [piper, scout, crew],
+      query: "",
+      favoriteIds: favoriteIds("a2"),
+    });
+    expect(grouped.favorites.map((entry) => entry.name)).toEqual(["Scout"]);
+    expect(grouped.hidden).toEqual([]);
+  });
+
+  it("keeps a pinned individual out of individuals", () => {
+    const grouped = filterBotsForList({
+      bots: [piper, maya],
+      query: "",
+      favoriteIds: favoriteIds("a1"),
+    });
+    expect(grouped.favorites.map((entry) => entry.name)).toEqual(["Piper"]);
+    expect(grouped.individuals.map((entry) => entry.name)).toEqual(["Maya"]);
+  });
+
+  it("excludes a favorite from favorites when the search query does not match it", () => {
+    const grouped = filterBotsForList({
+      bots: [piper, scout],
+      query: "talent",
+      favoriteIds: favoriteIds("a1", "a2"),
+    });
+    expect(grouped.favorites.map((entry) => entry.name)).toEqual(["Scout"]);
+    expect(grouped.individuals).toEqual([]);
+  });
+});
+
+describe("groupBotsForDropdown", () => {
+  it("lists unfavorited hidden bots in hidden when favorites are empty", () => {
+    const grouped = groupBotsForDropdown({ bots: [piper, scout, crew] });
+    expect(grouped.favorites).toEqual([]);
+    expect(grouped.hidden.map((entry) => entry.name)).toEqual(["Scout"]);
+  });
+
+  it("moves a hidden favorite into favorites and out of hidden", () => {
+    const grouped = groupBotsForDropdown({
+      bots: [piper, scout, crew],
+      favoriteIds: favoriteIds("a2"),
+    });
+    expect(grouped.favorites.map((entry) => entry.name)).toEqual(["Scout"]);
+    expect(grouped.hidden).toEqual([]);
+    expect(grouped.individuals.map((entry) => entry.name)).toEqual(["Piper"]);
   });
 });
 

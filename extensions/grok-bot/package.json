@@ -3,7 +3,7 @@
   "name": "grok-bot",
   "title": "Grok Bot",
   "description": "Unofficial Grok Bot client for Raycast on macOS (macOS only). Not on Raycast for iOS or Windows. Not affiliated with xAI.",
-  "icon": "icon.png",
+  "icon": "grok-bot.png",
   "author": "maxence_maisonnat",
   "platforms": [
     "macOS"
@@ -20,6 +20,7 @@
       "title": "List Bots",
       "subtitle": "Grok Bot",
       "description": "Search your Grok Bot teammates and send a task",
+      "icon": "grok-bot.png",
       "mode": "view",
       "keywords": [
         "teammates",
@@ -32,6 +33,7 @@
       "title": "Ask Bot",
       "subtitle": "Grok Bot",
       "description": "Send a task to a Grok Bot teammate",
+      "icon": "grok-bot.png",
       "mode": "view",
       "keywords": [
         "send",
@@ -58,6 +60,7 @@
       "title": "Open Grok Bot",
       "subtitle": "Grok Bot",
       "description": "Open the Grok Bot desktop app",
+      "icon": "grok-bot.png",
       "mode": "no-view"
     }
   ],
