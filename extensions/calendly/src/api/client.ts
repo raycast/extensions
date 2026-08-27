@@ -56,6 +56,35 @@ export async function calendlyRequest<T>(
   return (await response.json()) as T;
 }
 
+const MAX_COLLECTION_PAGES = 50;
+
+interface CollectionPage<T> {
+  collection: T[];
+  pagination?: {
+    next_page_token?: string | null;
+  };
+}
+
+export async function calendlyCollection<T>(
+  path: string,
+  query: Record<string, string | number | boolean | undefined> = {},
+): Promise<T[]> {
+  const items: T[] = [];
+  let pageToken: string | undefined;
+
+  for (let page = 0; page < MAX_COLLECTION_PAGES; page++) {
+    const { collection, pagination } = await calendlyRequest<CollectionPage<T>>(path, {
+      query: { ...query, page_token: pageToken },
+    });
+    items.push(...(collection ?? []));
+    const nextPageToken = pagination?.next_page_token;
+    if (!nextPageToken) return items;
+    pageToken = nextPageToken;
+  }
+
+  return items;
+}
+
 export function resourceId(uriOrId: string, resource: string) {
   const marker = `/${resource}/`;
   const markerIndex = uriOrId.indexOf(marker);

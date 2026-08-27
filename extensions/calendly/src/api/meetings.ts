@@ -1,12 +1,6 @@
-import { calendlyRequest, resourceId } from "./client";
-import {
-  CalendlyCollectionResponse,
-  CalendlyResourceResponse,
-  CreatedInvitee,
-  EventTypeLocation,
-  Invitee,
-  ScheduledEvent,
-} from "./types";
+import { locationNeedsInviteeDetails } from "../lib/locations";
+import { calendlyCollection, calendlyRequest, resourceId } from "./client";
+import { CalendlyResourceResponse, CreatedInvitee, EventTypeLocation, Invitee, ScheduledEvent } from "./types";
 import { getCurrentUser } from "./users";
 
 interface ListMeetingsOptions {
@@ -17,17 +11,14 @@ interface ListMeetingsOptions {
 
 export async function listMeetings({ startTime, endTime, status = "active" }: ListMeetingsOptions) {
   const user = await getCurrentUser();
-  const { collection } = await calendlyRequest<CalendlyCollectionResponse<ScheduledEvent>>("/scheduled_events", {
-    query: {
-      user: user.uri,
-      status,
-      min_start_time: startTime.toISOString(),
-      max_start_time: endTime.toISOString(),
-      sort: "start_time:asc",
-      count: 100,
-    },
+  return calendlyCollection<ScheduledEvent>("/scheduled_events", {
+    user: user.uri,
+    status,
+    min_start_time: startTime.toISOString(),
+    max_start_time: endTime.toISOString(),
+    sort: "start_time:asc",
+    count: 100,
   });
-  return collection;
 }
 
 export async function getMeeting(uriOrId: string) {
@@ -38,11 +29,7 @@ export async function getMeeting(uriOrId: string) {
 
 export async function listInvitees(meetingUriOrId: string) {
   const id = resourceId(meetingUriOrId, "scheduled_events");
-  const { collection } = await calendlyRequest<CalendlyCollectionResponse<Invitee>>(
-    `/scheduled_events/${id}/invitees`,
-    { query: { count: 100, status: "active" } },
-  );
-  return collection;
+  return calendlyCollection<Invitee>(`/scheduled_events/${id}/invitees`, { count: 100, status: "active" });
 }
 
 export async function cancelMeeting(meetingUriOrId: string, reason?: string) {
@@ -64,6 +51,14 @@ interface BookMeetingInput {
 
 export async function bookMeeting(input: BookMeetingInput) {
   const names = input.name.trim().split(/\s+/);
+  if (input.location && locationNeedsInviteeDetails(input.location) && !input.location.location?.trim()) {
+    throw new Error(
+      input.location.kind === "outbound_call"
+        ? "This location requires the invitee's phone number."
+        : "This location requires invitee-provided details.",
+    );
+  }
+
   const location = input.location
     ? {
         kind: input.location.kind,

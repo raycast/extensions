@@ -5,6 +5,7 @@ import { getEventType, listAvailableTimes, listEventTypes } from "./api/event-ty
 import { bookMeeting } from "./api/meetings";
 import { EventTypeLocation } from "./api/types";
 import { endOfRange, formatDateTime, localTimezone } from "./lib/dates";
+import { locationDetailPlaceholder, locationDetailTitle, locationNeedsInviteeDetails } from "./lib/locations";
 import { calendlyOAuth } from "./oauth/calendly";
 
 interface Values {
@@ -13,6 +14,7 @@ interface Values {
   email: string;
   startTime: string;
   locationIndex: string;
+  locationDetails: string;
 }
 
 function locationTitle(location: EventTypeLocation) {
@@ -29,6 +31,7 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
       email: "",
       startTime: "",
       locationIndex: "0",
+      locationDetails: "",
     },
     validation: {
       eventTypeUri: FormValidation.Required,
@@ -42,6 +45,24 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
     async onSubmit(formValues) {
       try {
         const selectedEventType = await getEventType(formValues.eventTypeUri);
+        const selectedLocation = selectedEventType.locations[Number(formValues.locationIndex)];
+        const location = selectedLocation
+          ? {
+              ...selectedLocation,
+              ...(formValues.locationDetails?.trim() ? { location: formValues.locationDetails.trim() } : {}),
+            }
+          : undefined;
+        if (location && locationNeedsInviteeDetails(location) && !location.location) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: location.kind === "outbound_call" ? "Phone number is required" : "Location details are required",
+            message:
+              location.kind === "outbound_call"
+                ? "Enter the invitee's phone number for this location."
+                : "Enter the location details required for this meeting.",
+          });
+          return;
+        }
         const chosenTime = new Date(formValues.startTime);
         if (chosenTime.getTime() <= Date.now() + 60_000) {
           throw new Error("That time is no longer far enough in the future. Choose another slot and try again.");
@@ -61,7 +82,6 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
         if (!confirmed) return;
 
         const toast = await showToast(Toast.Style.Animated, "Booking meeting…");
-        const location = selectedEventType.locations[Number(formValues.locationIndex)];
         try {
           await bookMeeting({
             eventTypeUri: selectedEventType.uri,
@@ -91,6 +111,7 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
   });
 
   const selectedEventType = eventTypes.find((eventType) => eventType.uri === values.eventTypeUri);
+  const selectedLocation = selectedEventType?.locations[Number(values.locationIndex)];
   const { data: availableTimes = [], isLoading: isLoadingTimes } = useCachedPromise(
     async (selectedUri) => {
       if (!selectedUri) return [];
@@ -117,6 +138,7 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
           setValue("eventTypeUri", value);
           setValue("startTime", "");
           setValue("locationIndex", "0");
+          setValue("locationDetails", "");
         }}
       >
         {eventTypes.map((eventType) => (
@@ -138,7 +160,14 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
           ))}
       </Form.Dropdown>
       {selectedEventType && selectedEventType.locations.length > 0 ? (
-        <Form.Dropdown title="Location" {...itemProps.locationIndex}>
+        <Form.Dropdown
+          title="Location"
+          {...itemProps.locationIndex}
+          onChange={(value) => {
+            setValue("locationIndex", value);
+            setValue("locationDetails", "");
+          }}
+        >
           {selectedEventType.locations.map((location, index) => (
             <Form.Dropdown.Item
               key={`${location.kind}-${index}`}
@@ -147,6 +176,13 @@ export function BookMeetingForm({ eventTypeUri }: { eventTypeUri?: string }) {
             />
           ))}
         </Form.Dropdown>
+      ) : null}
+      {selectedLocation && locationNeedsInviteeDetails(selectedLocation) ? (
+        <Form.TextField
+          title={locationDetailTitle(selectedLocation)}
+          placeholder={locationDetailPlaceholder(selectedLocation)}
+          {...itemProps.locationDetails}
+        />
       ) : null}
       <Form.Description title="Timezone" text={localTimezone()} />
     </Form>

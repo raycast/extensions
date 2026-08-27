@@ -83,8 +83,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^2.2.7",
-    "axios": "^0.30.3"
+    "@raycast/utils": "^2.2.7"
   },
   "preferences": [
     {

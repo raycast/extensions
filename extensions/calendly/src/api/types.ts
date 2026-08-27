@@ -8,6 +8,7 @@ export interface CalendlyUser {
   scheduling_url: string;
   timezone: string;
   current_organization: CalendlyUri;
+  avatar_url?: string | null;
 }
 
 export interface EventTypeLocation {

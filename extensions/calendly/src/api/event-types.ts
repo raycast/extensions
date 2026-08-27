@@ -1,21 +1,17 @@
-import { calendlyRequest, resourceId } from "./client";
-import {
-  AvailableTime,
-  CalendlyCollectionResponse,
-  CalendlyResourceResponse,
-  EventType,
-  SchedulingLink,
-} from "./types";
+import { calendlyCollection, calendlyRequest, resourceId } from "./client";
+import { AvailableTime, CalendlyResourceResponse, EventType, SchedulingLink } from "./types";
 import { getCurrentUser } from "./users";
 
 const AVAILABILITY_START_BUFFER_MS = 60_000;
 
 export async function listEventTypes() {
   const user = await getCurrentUser();
-  const { collection } = await calendlyRequest<CalendlyCollectionResponse<EventType>>("/event_types", {
-    query: { user: user.uri, active: true, count: 100, sort: "name:asc" },
+  return calendlyCollection<EventType>("/event_types", {
+    user: user.uri,
+    active: true,
+    count: 100,
+    sort: "name:asc",
   });
-  return collection;
 }
 
 export async function getEventType(uriOrId: string) {
@@ -31,17 +27,11 @@ export async function listAvailableTimes(eventTypeUri: string, startTime: Date, 
     throw new Error("The availability range must end in the future after its start time.");
   }
 
-  const { collection } = await calendlyRequest<CalendlyCollectionResponse<AvailableTime>>(
-    "/event_type_available_times",
-    {
-      query: {
-        event_type: eventTypeUri,
-        start_time: effectiveStartTime.toISOString(),
-        end_time: endTime.toISOString(),
-      },
-    },
-  );
-  return collection;
+  return calendlyCollection<AvailableTime>("/event_type_available_times", {
+    event_type: eventTypeUri,
+    start_time: effectiveStartTime.toISOString(),
+    end_time: endTime.toISOString(),
+  });
 }
 
 export async function createSingleUseLink(eventTypeUri: string) {

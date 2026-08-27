@@ -1,6 +1,7 @@
 import { withAccessToken } from "@raycast/utils";
 
 import { listEventTypes } from "../api/event-types";
+import { locationNeedsInviteeDetails } from "../lib/locations";
 import { calendlyOAuth } from "../oauth/calendly";
 
 async function tool() {
@@ -11,7 +12,10 @@ async function tool() {
     durationMinutes: eventType.duration,
     kind: eventType.kind,
     schedulingUrl: eventType.scheduling_url,
-    locations: eventType.locations,
+    locations: eventType.locations.map((location) => ({
+      ...location,
+      requiresInviteeDetails: locationNeedsInviteeDetails(location),
+    })),
   }));
 }
 
