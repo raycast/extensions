@@ -116,7 +116,7 @@ export async function getChatMessages(chatId: string, maxResults = 20) {
     path: `/chats/${encodeURIComponent(normalizedChatId)}/messages`,
     queryParams: {
       $top: String(Math.max(1, Math.min(maxResults, 50))),
-      $orderby: "lastModifiedDateTime desc",
+      $orderby: "createdDateTime desc",
     },
   });
   await failIfNotOk(response, "Getting chat messages");
