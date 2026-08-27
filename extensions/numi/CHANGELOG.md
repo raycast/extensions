@@ -1,6 +1,6 @@
 # Numi Changelog
 
-## [Fix History, Modernize Toolchain and Add AI Support] - {PR_MERGE_DATE}
+## [Fix History, Modernize Toolchain and Add AI Support] - 2026-08-27
 
 - Fixed query history: entries no longer duplicate, reorder themselves on every keystroke, or drop the most recent queries when the limit is reached
 - History now persists in LocalStorage instead of the evictable cache, and existing history is migrated automatically
