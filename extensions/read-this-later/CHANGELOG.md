@@ -1,4 +1,8 @@
-# Research Sync Changelog
+# Clipfile Changelog
+
+## [Renamed to Clipfile] - {PR_MERGE_DATE}
+
+- Renamed to Clipfile, matching the browser extension and iOS app, with the new icon
 
 ## [Research Sync rename, folders, reading and capture] - 2026-07-16
 
