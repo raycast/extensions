@@ -19,3 +19,4 @@ compiled_raycast_rust
 # local tooling and working notes
 /.claude
 CLAUDE.md
+pr-description.md

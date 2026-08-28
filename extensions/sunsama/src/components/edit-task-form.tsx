@@ -107,6 +107,11 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
       }
 
       setSubmitting(true);
+      // Each field is its own request and the server has no way to apply them
+      // together, so a failure part-way through leaves the earlier ones saved.
+      // Report how far it got rather than a bare failure, and refresh either
+      // way so the list shows what actually landed.
+      let applied = 0;
       const ok = await runWithToast(
         {
           pending: "Saving…",
@@ -114,14 +119,29 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
           failure: "Failed to update task",
         },
         async () => {
-          for (const change of changes) await change();
+          try {
+            for (const change of changes) {
+              await change();
+              applied++;
+            }
+          } catch (error) {
+            const detail =
+              error instanceof Error ? error.message : String(error);
+            throw applied > 0
+              ? new Error(
+                  `Saved ${applied} of ${changes.length} changes, then: ${detail}`,
+                )
+              : error;
+          }
         },
       );
       setSubmitting(false);
-      if (ok) {
-        onSaved();
-        pop();
-      }
+
+      // Anything that did land makes the list — and this form — stale.
+      if (applied > 0) onSaved();
+      // Stay open only when nothing was applied, so a retry starts from a
+      // form whose values still match the task.
+      if (ok || applied > 0) pop();
     },
     initialValues: {
       title: task.title,
@@ -169,7 +189,13 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
         title="Day"
         type={Form.DatePicker.Type.Date}
       />
-      <ChannelDropdown {...itemProps.channel} ensureName={currentChannel} />
+      <ChannelDropdown
+        {...itemProps.channel}
+        ensureName={currentChannel}
+        // A task already in a channel can't be taken out of one, so don't
+        // offer an option that would silently do nothing.
+        allowNone={!currentChannel}
+      />
       <Form.TextField
         {...itemProps.timeEstimate}
         title="Time Estimate"

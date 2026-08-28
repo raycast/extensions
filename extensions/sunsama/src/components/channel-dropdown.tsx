@@ -8,6 +8,12 @@ interface Props extends Partial<Form.ItemProps<string>> {
   id: string;
   /** A channel name that must be selectable even if it isn't in the list. */
   ensureName?: string;
+  /**
+   * Whether "No channel" can be picked. The server has no way to take a task
+   * out of a channel — `add_task_to_channel` rejects an empty name and there is
+   * no remove tool — so a task that already has one must not be offered it.
+   */
+  allowNone?: boolean;
 }
 
 /**
@@ -25,6 +31,7 @@ interface Props extends Partial<Form.ItemProps<string>> {
  */
 export function ChannelDropdown({
   ensureName,
+  allowNone = true,
   title,
   ...dropdownProps
 }: Props) {
@@ -53,7 +60,7 @@ export function ChannelDropdown({
           returns the cached channels on the first render, so normally this
           appears with them and nothing shifts; on a cold start the whole set
           arrives at once instead of "No channel" alone, then the rest. */}
-      {ready && <Form.Dropdown.Item value="" title="No channel" />}
+      {ready && allowNone && <Form.Dropdown.Item value="" title="No channel" />}
       {missing && <Form.Dropdown.Item value={missing} title={missing} />}
       {channels.map((ch) => (
         <Form.Dropdown.Item
