@@ -1,5 +1,10 @@
 # Deepcast Changelog
 
+## [Fix Close Window Preference] - {PR_MERGE_DATE}
+
+- Fix `Close Raycast After Translation` preference being ignored when `On Translation Action` is not set: the `default` case in `sendTranslateRequest` was not calling `delayedCloseWindow`, so the window would close even when the preference was off ([#30609](https://github.com/raycast/extensions/issues/30609))
+- Add `clipboard` as the default value for `On Translation Action` preference so it always has a valid value
+
 ## [Hyperlinks] - 2026-08-17
 
 - Preserve original HTML formatting and hyperlinks when translating copied rich text, then copy the result as rich text so it can be pasted back with ⌘V.
