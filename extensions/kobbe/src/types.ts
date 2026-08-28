@@ -67,3 +67,33 @@ export type RevenueResponse = {
   range: string;
   revenue: KobbeRevenue;
 };
+
+export type SourcesResponse = {
+  ok: true;
+  site: KobbeSite;
+  range: string;
+  sources: KobbeSource[];
+};
+
+export type KobbeSetupHealth = {
+  trackerInstalled: boolean;
+  pageviewsAllTime: number;
+  revenueConfigured?: boolean;
+  revenueOrdersAllTime?: number;
+  revenueSources?: Array<{
+    provider: string;
+    enabled: boolean;
+    webhookSecretConfigured: boolean;
+  }>;
+};
+
+export type SetupHealthResponse = {
+  ok: true;
+  site: KobbeSite;
+  health: KobbeSetupHealth;
+};
+
+export type KobbeLiveSite = {
+  site: KobbeSite;
+  online: number;
+};

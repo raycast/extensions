@@ -1,13 +1,13 @@
-import { Toast, showToast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-
 import { getKobbePreferences } from "./preferences";
 import type {
+  KobbeLiveSite,
   KobbeRevenue,
   KobbeSite,
   OverviewResponse,
   RevenueResponse,
+  SetupHealthResponse,
   SitesResponse,
+  SourcesResponse,
   TimeRange,
   TopPagesResponse,
 } from "./types";
@@ -29,13 +29,6 @@ export class KobbeApiError extends Error {
     this.requiredScope = requiredScope;
   }
 }
-
-export type Loadable<T> = {
-  data: T | null;
-  error: Error | null;
-  isLoading: boolean;
-  revalidate: () => void;
-};
 
 function errorMessageFromBody(body: ApiErrorBody, status: number): string {
   if (status === 401) {
@@ -83,54 +76,6 @@ async function kobbeFetch<T>(path: string, searchParams?: Record<string, string 
   return body as T;
 }
 
-export function useKobbeQuery<T>(load: () => Promise<T>, deps: readonly unknown[] = []): Loadable<T> {
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [reloadKey, setReloadKey] = useState(0);
-
-  const revalidate = useCallback(() => {
-    setReloadKey((key) => key + 1);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function run() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const result = await load();
-        if (!cancelled) {
-          setData(result);
-        }
-      } catch (cause) {
-        const nextError = cause instanceof Error ? cause : new Error("Could not load Kobbe data.");
-        if (!cancelled) {
-          setError(nextError);
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Could not load Kobbe data",
-            message: nextError.message,
-          });
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    void run();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [reloadKey, ...deps]);
-
-  return { data, error, isLoading, revalidate };
-}
-
 export async function listSites(): Promise<KobbeSite[]> {
   const response = await kobbeFetch<SitesResponse>("/api/agent/sites");
   return response.sites;
@@ -140,12 +85,56 @@ export async function getOverview(siteId: string, range: TimeRange): Promise<Ove
   return kobbeFetch<OverviewResponse>(`/api/agent/sites/${encodeURIComponent(siteId)}/overview`, { range });
 }
 
-export async function getTopPages(siteId: string, range: TimeRange, limit = 10): Promise<TopPagesResponse> {
+export async function getTopPages(siteId: string, range: TimeRange, limit = 25): Promise<TopPagesResponse> {
   return kobbeFetch<TopPagesResponse>(`/api/agent/sites/${encodeURIComponent(siteId)}/top-pages`, { range, limit });
+}
+
+export async function getSources(siteId: string, range: TimeRange, limit = 25): Promise<SourcesResponse> {
+  return kobbeFetch<SourcesResponse>(`/api/agent/sites/${encodeURIComponent(siteId)}/sources`, { range, limit });
 }
 
 export async function getRevenue(siteId: string, range: TimeRange): Promise<RevenueResponse> {
   return kobbeFetch<RevenueResponse>(`/api/agent/sites/${encodeURIComponent(siteId)}/revenue`, { range });
+}
+
+export async function getSetupHealth(siteId: string): Promise<SetupHealthResponse> {
+  return kobbeFetch<SetupHealthResponse>(`/api/agent/sites/${encodeURIComponent(siteId)}/setup-health`);
+}
+
+export async function getRevenueWithOverview(siteId: string, range: TimeRange) {
+  const [revenueResponse, overviewResponse] = await Promise.all([
+    getRevenue(siteId, range),
+    getOverview(siteId, range),
+  ]);
+  return { revenueResponse, overviewResponse };
+}
+
+export async function getLiveVisitors(): Promise<KobbeLiveSite[]> {
+  const sites = await listSites();
+  const overviews = await Promise.all(
+    sites.map(async (site) => {
+      try {
+        const response = await getOverview(site.id, "today");
+        return { site, online: parseCompactNumber(response.overview.kpis.online) };
+      } catch {
+        return { site, online: 0 };
+      }
+    }),
+  );
+  return overviews;
+}
+
+function parseCompactNumber(display: string): number {
+  const match = /^([\d.,]+)\s*([KMB])?$/i.exec(display.trim());
+  if (!match) {
+    return 0;
+  }
+  const base = Number(match[1].replace(/,/g, ""));
+  if (!Number.isFinite(base)) {
+    return 0;
+  }
+  const multiplier = { K: 1_000, M: 1_000_000, B: 1_000_000_000 }[match[2]?.toUpperCase() ?? ""] ?? 1;
+  return Math.round(base * multiplier);
 }
 
 export function dashboardUrl(siteId: string, range?: TimeRange): string {

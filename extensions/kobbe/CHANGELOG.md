@@ -1,5 +1,14 @@
 # Kobbe Changelog
 
+## [Live Visitors and New Commands] - {PR_MERGE_DATE}
+
+- Add Live Visitors menu bar command showing who is online right now across your sites.
+- Add Top Sources command backed by the Kobbe sources endpoint.
+- Add Setup Health command to check tracker installation and revenue webhook status.
+- Add a time range switcher to overview, top pages, and sources views.
+- Add site favicons and tinted metric icons for a richer dashboard feel.
+- Cache API responses so commands open instantly with the latest known data.
+
 ## [Update] - 2026-06-19
 
 - Address Raycast review feedback: remove unused assets, use generated preferences type, fix locale formatting, and unify metadata screenshots.
