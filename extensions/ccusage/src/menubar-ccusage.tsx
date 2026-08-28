@@ -157,14 +157,18 @@ export default function MenuBarccusage() {
 
   const limitBar = (utilization: number): string => createProgressBar(displayUtil(utilization), 22, progressBarStyle);
 
+  const limitRows = getLimitRows(effectiveLimitsData);
+
+  /** Six holds the alignment the fixed-width labels had before per-model rows carried API names. */
+  const labelWidth = Math.max(6, ...limitRows.map((row) => row.label.length));
+
   const limitTitle = (label: string, utilization: number): string =>
-    usePies ? label : `${label.padEnd(6)}  ${limitBar(utilization)}`;
+    usePies ? label : `${label.padEnd(labelWidth)}  ${limitBar(utilization)}`;
 
   /** When pies style is selected, use a pie SVG icon for each limit row; otherwise Icon.Gauge. */
   const limitIcon = (utilization: number): string | Icon => (usePies ? (pieIcon(utilization) as string) : Icon.Gauge);
 
   const menuBarTitlePref = getMenuBarTitle();
-  const limitRows = getLimitRows(effectiveLimitsData);
   const highestUtilization = limitRows.length > 0 ? Math.max(...limitRows.map((row) => row.utilization)) : null;
   const menuBarTitle = (() => {
     let title: string | undefined;

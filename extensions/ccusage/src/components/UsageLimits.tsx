@@ -112,7 +112,7 @@ export function UsageLimits() {
               {index > 0 && <List.Item.Detail.Metadata.Separator />}
               <List.Item.Detail.Metadata.Label
                 title={rowTitle(row.label, row.period)}
-                icon={row.key === "five_hour" ? Icon.Clock : Icon.Calendar}
+                icon={row.windowHours !== null && row.windowHours <= 24 ? Icon.Clock : Icon.Calendar}
               />
               <List.Item.Detail.Metadata.Label
                 title="Utilization"
