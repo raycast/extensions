@@ -44,8 +44,12 @@ const caskRanksRemote = {
   cachePath: cachePath(analyticsCacheFiles[1]),
 };
 
-async function loadRanks(remote: { url: string; cachePath: string }, onProgress?: DownloadProgressCallback) {
-  await downloadRemoteToCache(remote.url, remote.cachePath, onProgress);
+async function loadRanks(
+  remote: { url: string; cachePath: string },
+  onProgress?: DownloadProgressCallback,
+  signal?: AbortSignal,
+) {
+  await downloadRemoteToCache(remote.url, remote.cachePath, onProgress, signal);
   const response: RankedResponse = JSON.parse(await readFile(remote.cachePath, "utf8"));
   return parseRanks(response);
 }
@@ -69,9 +73,15 @@ export function invalidatePopularityRanks(): void {
   ranksPromise = undefined;
 }
 
-export function fetchPopularityRanks(onProgress?: DownloadProgressCallback): Promise<PopularityRanks> {
+export function fetchPopularityRanks(
+  onProgress?: DownloadProgressCallback,
+  signal?: AbortSignal,
+): Promise<PopularityRanks> {
   if (!ranksPromise) {
-    ranksPromise = Promise.all([loadRanks(formulaRanksRemote, onProgress), loadRanks(caskRanksRemote, onProgress)])
+    ranksPromise = Promise.all([
+      loadRanks(formulaRanksRemote, onProgress, signal),
+      loadRanks(caskRanksRemote, onProgress, signal),
+    ])
       .then(([formulae, casks]) => {
         fetchLogger.log("Loaded popularity ranks", {
           period: POPULARITY_PERIOD,

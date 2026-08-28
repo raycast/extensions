@@ -3,6 +3,7 @@
  * popularity sort in the search view.
  */
 
+import { useRef } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { fetchPopularityRanks, PopularityRanks, showBrewFailureToast } from "../utils";
@@ -22,6 +23,10 @@ interface UsePopularityRanksResult {
  * turn on the popularity sort.
  */
 export function usePopularityRanks(enabled: boolean): UsePopularityRanksResult {
+  // Without this, turning the sort off (or leaving the view) mid-download lets
+  // both ~1.3MB files run to completion with the toast still spinning.
+  const abortable = useRef<AbortController>(null);
+
   // usePromise, NOT useCachedPromise: the latter persists `data` through
   // JSON.stringify, which turns these Maps into `{}` — a second launch would
   // hand the sort a plain object and `.get()` would throw. Persistence buys
@@ -50,14 +55,18 @@ export function usePopularityRanks(enabled: boolean): UsePopularityRanksResult {
           const combined = percents.reduce((sum, percent) => sum + percent, 0) / percents.length;
 
           toast ??= showToast({ style: Toast.Style.Animated, title: "Downloading Install Statistics" });
-          toast.then((t) => (t.message = `${Math.round(combined)}%`));
-        });
+          // Detached on purpose — a progress callback cannot await. The catch
+          // keeps a rejected showToast from surfacing as an unhandled rejection;
+          // the failure itself is reported by the awaited chain below.
+          toast.then((t) => (t.message = `${Math.round(combined)}%`)).catch(() => {});
+        }, abortable.current?.signal);
       } finally {
-        await toast?.then((t) => t.hide());
+        await toast?.then((t) => t.hide()).catch(() => {});
       }
     },
     [],
     {
+      abortable,
       execute: enabled,
       onError: async (error) => {
         await showBrewFailureToast("Could Not Load Install Statistics", error);

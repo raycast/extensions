@@ -33,11 +33,23 @@ assert.equal(ranks.get("openssl@3"), 1476807);
 assert.equal(ranks.get("codex"), 276879);
 assert.equal(ranks.has("broken"), false, "malformed rows must be dropped, not stored as NaN");
 
-// Unranked packages sort last, not first; ties break by name.
-const sorted = [{ id: "unranked" }, { id: "codex" }, { id: "openssl@3" }].sort(byPopularity(ranks));
+// Ordering is by count descending. A zero count is a real value and must sort
+// ABOVE an absent one, which is the case the -1 sentinel exists to separate.
+const ordering = parseRanks({
+  items: [
+    { formula: "big", count: "1,000" },
+    { formula: "small", count: "10" },
+    { formula: "zero", count: "0" },
+    { formula: "tie-b", count: "10" },
+  ],
+});
+const sorted = [{ id: "unranked" }, { id: "zero" }, { id: "tie-b" }, { id: "small" }, { id: "big" }].sort(
+  byPopularity(ordering),
+);
 assert.deepEqual(
   sorted.map((entry) => entry.id),
-  ["openssl@3", "codex", "unranked"],
+  // big > (small, tie-b tied at 10 -> by name) > zero > unranked
+  ["big", "small", "tie-b", "zero", "unranked"],
 );
 
 // Package status. Disabled outranks deprecated because a disabled formula
@@ -68,8 +80,15 @@ async function checkLive() {
   const bulk = await (await fetch(`https://formulae.brew.sh/api/analytics/install/${POPULARITY_PERIOD}.json`)).json();
   const parsed = parseRanks(bulk);
   assert.ok(parsed.size > 1000, `expected thousands of ranked formulae, got ${parsed.size}`);
-  // The first row of the bulk file is the most installed, so it must sort first.
-  assert.equal(parsed.get(bulk.items[0].formula), Number(bulk.items[0].count.replace(/,/g, "")));
+  // The bulk file is published in count order, so parsing then re-sorting by
+  // count must reproduce the file's own order — this is the assertion that the
+  // dropped `number` rank was redundant.
+  const top: { id: string }[] = bulk.items.slice(0, 25).map((i: { formula: string }) => ({ id: i.formula }));
+  assert.deepEqual(
+    [...top].sort(byPopularity(parsed)).map((e: { id: string }) => e.id),
+    top.map((e: { id: string }) => e.id),
+    "sorting by count must reproduce the API's own ranking",
+  );
 
   const casks = parseRanks(
     await (await fetch(`https://formulae.brew.sh/api/analytics/cask-install/${POPULARITY_PERIOD}.json`)).json(),

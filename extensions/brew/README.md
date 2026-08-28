@@ -24,8 +24,8 @@ This extension uses several optimizations to provide a fast experience:
 ## Install Statistics
 
 Selecting a package shows its install counts (30 / 90 / 365 days) and build errors, taken from the
-[formulae.brew.sh](https://formulae.brew.sh) analytics API. Only the selected package is fetched,
-so browsing the list costs nothing.
+[formulae.brew.sh](https://formulae.brew.sh) analytics API. Only the selected package is fetched —
+about 5 KB per row you land on, and nothing at all for the rest of the list.
 
 **Sort by Popularity** (⇧⌘P in Search) is different: ranking every result requires Homebrew's bulk
 30-day rankings, about 2.6 MB for formulae and casks combined. That download happens the first time
