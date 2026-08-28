@@ -43,14 +43,21 @@ export async function getNotes(
 ) {
   const trimmedSearchText = searchText?.trim();
   const foldedSearchText = trimmedSearchText ? escapeSQLString(normalizeForSearch(trimmedSearchText)) : "";
-  const searchFilter = trimmedSearchText
-    ? exactTitleMatch
-      ? ` AND ${foldSqlColumn("TRIM(note.ztitle1)")} = '${foldedSearchText}'`
-      : ` AND (
-        ${foldSqlColumn("note.ztitle1")} LIKE '%${foldedSearchText}%' OR
-        ${foldSqlColumn("note.zsnippet")} LIKE '%${foldedSearchText}%'
-      )`
-    : "";
+  // SQLite's LOWER() only folds ASCII case, so a SQL-side fold can't be trusted to find exact
+  // matches that differ only by case in non-Latin scripts (e.g. "Привет" vs "ПРИВЕТ"). For those,
+  // skip the SQL filter and let the JS-side normalizeForSearch check below do the real matching.
+  const hasNonAsciiSearchText = trimmedSearchText
+    ? [...trimmedSearchText].some((char) => char.charCodeAt(0) > 127)
+    : false;
+  let searchFilter = "";
+  if (trimmedSearchText && exactTitleMatch && !hasNonAsciiSearchText) {
+    searchFilter = ` AND ${foldSqlColumn("TRIM(note.ztitle1)")} = '${foldedSearchText}'`;
+  } else if (trimmedSearchText && !exactTitleMatch) {
+    searchFilter = ` AND (
+      ${foldSqlColumn("note.ztitle1")} LIKE '%${foldedSearchText}%' OR
+      ${foldSqlColumn("note.zsnippet")} LIKE '%${foldedSearchText}%'
+    )`;
+  }
 
   const query = `
     SELECT
@@ -82,7 +89,7 @@ export async function getNotes(
         ${searchFilter}
     ORDER BY
         note.zmodificationdate1 DESC
-    LIMIT ${maxQueryResults}
+    LIMIT ${exactTitleMatch && hasNonAsciiSearchText ? -1 : maxQueryResults}
   `;
 
   const data = await executeSQL<NoteItem>(NOTES_DB, query);
@@ -190,13 +197,17 @@ export async function getNotes(
     });
   }
 
-  if (trimmedSearchText && !exactTitleMatch) {
+  if (trimmedSearchText) {
     const normalizedQuery = normalizeForSearch(trimmedSearchText);
-    notesWithAdditionalFields = notesWithAdditionalFields.filter(
-      (note) =>
-        normalizeForSearch(note.title).includes(normalizedQuery) ||
-        normalizeForSearch(note.snippet).includes(normalizedQuery),
+    notesWithAdditionalFields = notesWithAdditionalFields.filter((note) =>
+      exactTitleMatch
+        ? normalizeForSearch(note.title.trim()) === normalizedQuery
+        : normalizeForSearch(note.title).includes(normalizedQuery) ||
+          normalizeForSearch(note.snippet).includes(normalizedQuery),
     );
+    if (exactTitleMatch) {
+      notesWithAdditionalFields = notesWithAdditionalFields.slice(0, maxQueryResults);
+    }
   }
 
   return notesWithAdditionalFields;

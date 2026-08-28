@@ -15,7 +15,8 @@ export default async (props: LaunchProps<{ arguments: Arguments.Ai }>) => {
   if (noteQuery) {
     await showToast({ style: Toast.Style.Animated, title: "Looking for note" });
 
-    // Exact title match is filtered in SQL, so it can't be missed regardless of how many notes exist.
+    // Exact title match is verified with Unicode-aware comparison, so it can't be missed
+    // regardless of how many notes exist or what script the title uses.
     const exactMatches = await getNotes(10, [], noteQuery, true);
 
     if (exactMatches.length === 1) {
