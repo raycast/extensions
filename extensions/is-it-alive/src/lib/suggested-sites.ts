@@ -1,3 +1,5 @@
+import { Icon, Image } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { normalizeSiteUrl } from "@/lib/url";
 
 export type SuggestedSiteCategory =
@@ -311,13 +313,20 @@ export function unusedSuggestedSitesBySection(
 
 const DIRECT_IMAGE_PATTERN = /\.(png|ico|svg|jpe?g|webp)(\?|$)/i;
 
-export function suggestedFaviconSource(site: SuggestedSite): string {
+export function suggestedSiteIcon(site: SuggestedSite): Image.ImageLike {
   const favicon = site.favicon ?? site.url;
   if (DIRECT_IMAGE_PATTERN.test(favicon)) {
-    return favicon;
+    return {
+      source: favicon,
+      fallback: Icon.Globe,
+      mask: Image.Mask.Circle,
+    };
   }
 
-  return `https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(favicon)}`;
+  return getFavicon(favicon, {
+    fallback: Icon.Globe,
+    mask: Image.Mask.Circle,
+  });
 }
 
 function siteUrlKey(url: string): string {

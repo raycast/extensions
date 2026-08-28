@@ -3,7 +3,6 @@ import {
   ActionPanel,
   Color,
   Icon,
-  Image,
   List,
   showToast,
   Toast,
@@ -17,7 +16,7 @@ import { SiteForm } from "@/components/site-form";
 import { useSites, type SiteInput } from "@/hooks/use-sites";
 import { indicatorListIcon } from "@/lib/status-colors";
 import {
-  suggestedFaviconSource,
+  suggestedSiteIcon,
   unusedSuggestedSitesBySection,
   type SuggestedSite,
 } from "@/lib/suggested-sites";
@@ -304,11 +303,7 @@ export default function Command() {
                     key={site.url}
                     title={site.name}
                     subtitle={site.url}
-                    icon={{
-                      source: suggestedFaviconSource(site),
-                      fallback: Icon.Globe,
-                      mask: Image.Mask.Circle,
-                    }}
+                    icon={suggestedSiteIcon(site)}
                     keywords={[site.url, new URL(site.url).hostname]}
                     accessories={[
                       {
