@@ -10,21 +10,19 @@
     "Windows"
   ],
   "categories": [
-    "Other"
+    "Documentation"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "guide",
       "title": "Guide of the Day",
-      "subtitle": "A bite-sized open source lesson",
-      "description": "Read one practical lesson from the Open Source Guides each day",
+      "description": "Read bite-sized lessons adapted from the Open Source Guides",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.25",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^2.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
