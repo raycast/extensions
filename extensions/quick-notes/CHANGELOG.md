@@ -1,6 +1,6 @@
 # Quick Notes Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-08-28
 
 - Fix all keyboard shortcuts to work on Windows and prevent conflicts
 - Overhaul tag management: replace the old tag commands with a single `Manage Tags` command for creating, renaming, and deleting tags, with renames applied across all notes
