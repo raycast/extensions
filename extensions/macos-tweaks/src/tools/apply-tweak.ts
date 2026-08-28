@@ -23,7 +23,9 @@ function coerce(id: string, raw: string): TweakValue {
     if (raw === "false" || raw === "0") return false;
     throw new Error(`"${tweak.title}" is a switch: pass "true" or "false", not "${raw}".`);
   }
-  if (tweak.type === "number" || (tweak.type === "enum" && tweak.options?.every((o) => typeof o.value === "number"))) {
+  // only a free-form number tweak takes any number; a numeric enum falls through to the
+  // options check below, so a value it never declared cannot be written
+  if (tweak.type === "number") {
     const n = Number(raw);
     if (Number.isNaN(n)) throw new Error(`"${tweak.title}" takes a number, but got "${raw}".`);
     return n;
