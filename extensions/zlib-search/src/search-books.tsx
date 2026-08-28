@@ -22,6 +22,10 @@ function resolveZlibPath(configuredPath: string): string {
   return ZLIB_PATH_CANDIDATES.find((path) => existsSync(path)) ?? "zlib";
 }
 
+function truncate(text: string, max = 40): string {
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
 interface Book {
   id: string;
   hash?: string;
@@ -74,9 +78,16 @@ export default function Command() {
   async function handleDownload(book: Book) {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Downloading…",
-      message: book.name,
+      title: `Downloading ${truncate(book.name)}`,
+      message: "0s",
     });
+
+    const startedAt = Date.now();
+    const elapsedTimer = setInterval(() => {
+      const seconds = Math.round((Date.now() - startedAt) / 1000);
+      toast.message = `${seconds}s`;
+    }, 1000);
+
     try {
       await execFileAsync(
         zlibPath,
@@ -90,6 +101,8 @@ export default function Command() {
       toast.style = Toast.Style.Failure;
       toast.title = "Download failed";
       toast.message = err instanceof Error ? err.message : String(err);
+    } finally {
+      clearInterval(elapsedTimer);
     }
   }
 
