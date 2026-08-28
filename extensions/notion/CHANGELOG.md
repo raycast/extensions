@@ -1,8 +1,9 @@
 # Notion Changelog
 
-## [Fix Open in App for notion.com URLs] - {PR_MERGE_DATE}
+## [Fix Open in App for notion.com URLs and Windows deep links] - {PR_MERGE_DATE}
 
 - Fix `Open in App` deep-link generation only matching `notion.so` URLs: since Notion's domain migration, page URLs are served from `notion.com` hosts (e.g. `app.notion.com`), so the `notion://` deep link was never built and the desktop app opened the last viewed page instead of the target ([#30540](https://github.com/raycast/extensions/issues/30540))
+- Fix `Open in App` on Windows: `open(url, application)` launches the Notion app but drops the URL for `notion://` deep links, so the app opened the last viewed page. Deep links now go through the OS protocol handler without an explicit application; Add Note's "Open Page" toast action gets the same fix ([#30540](https://github.com/raycast/extensions/issues/30540))
 
 ## [Fix Create Database Page not saving properties] - 2026-08-23
 
