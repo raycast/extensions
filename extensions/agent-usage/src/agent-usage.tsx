@@ -18,7 +18,7 @@ import { ManageAccountsForm } from "./accounts/ManageAccountsForm.tsx";
 import type { AccountUsageState } from "./accounts/types.ts";
 import { formatErrorMarkdown } from "./agents/detail-format.ts";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
-import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId } from "./agents/order.ts";
+import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId, getRequestedSelectedRowId } from "./agents/order.ts";
 import {
   useAihubmixUsage,
   useAmpUsage,
@@ -685,9 +685,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   const requestedSelectedAgentId = props.launchContext?.selectedAgentId;
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(() =>
-    typeof requestedSelectedAgentId === "string" && isAgentId(requestedSelectedAgentId)
-      ? requestedSelectedAgentId
-      : undefined,
+    getRequestedSelectedRowId(requestedSelectedAgentId),
   );
 
   useEffect(() => {

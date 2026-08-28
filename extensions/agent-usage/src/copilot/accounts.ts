@@ -9,6 +9,7 @@ export interface CopilotAccountCandidate {
 interface BuildCopilotAccountCandidatesOptions {
   manualAccounts: AccountEntry[];
   preferenceToken?: string;
+  cliToken?: string | null;
   githubToken?: string | null;
   ghToken?: string | null;
 }
@@ -16,6 +17,7 @@ interface BuildCopilotAccountCandidatesOptions {
 export function buildCopilotAccountCandidates({
   manualAccounts,
   preferenceToken,
+  cliToken,
   githubToken,
   ghToken,
 }: BuildCopilotAccountCandidatesOptions): CopilotAccountCandidate[] {
@@ -34,6 +36,7 @@ export function buildCopilotAccountCandidates({
   }
 
   addAccount({ id: "copilot-pref", label: "Preference", token: preferenceToken ?? "" });
+  addAccount({ id: "copilot-gh-cli", label: "GitHub CLI", token: cliToken ?? "" });
   addAccount({ id: "copilot-github-env", label: "GITHUB_TOKEN", token: githubToken ?? "" });
   addAccount({ id: "copilot-gh-env", label: "GH_TOKEN", token: ghToken ?? "" });
 

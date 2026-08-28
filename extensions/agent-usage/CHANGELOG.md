@@ -6,7 +6,7 @@
 
 - Support unlimited named GitHub Copilot accounts, with separate rows in the main list and menu bar
 - Add Copilot accounts through the existing **Manage Accounts** action
-- Show `GITHUB_TOKEN` and `GH_TOKEN` as separate auto-detected accounts while retaining the legacy preference token
+- Prefer the active GitHub CLI token from `gh auth token`, then fall back to `GITHUB_TOKEN` and `GH_TOKEN` as separate auto-detected accounts while retaining the legacy preference token
 
 ### Improvements
 

@@ -127,10 +127,11 @@ export const useCopilotAccounts = createAccountsHook<
 >({
   agentId: "copilot",
   getAccounts: async () => {
-    const { githubToken, ghToken } = await resolveCopilotAuthTokens();
+    const { cliToken, githubToken, ghToken } = await resolveCopilotAuthTokens();
     return buildCopilotAccountCandidates({
       manualAccounts: await loadAccounts("copilot"),
       preferenceToken: prefValue("copilotAuthToken"),
+      cliToken,
       githubToken,
       ghToken,
     });
