@@ -9,7 +9,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   editNotes,
   editTitle,
@@ -47,21 +47,48 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
 
   const currentChannel = task.channelName ?? "";
 
+  // What the server is believed to hold. Each field is saved by its own
+  // request, so a failure part-way through leaves some already applied; this
+  // advances as they succeed, and the form diffs against it rather than the
+  // values it opened with. Retrying after a partial save then sends exactly
+  // what is still outstanding — including a field changed back to what it
+  // originally was, which a diff against the untouched task would miss.
+  const saved = useRef({
+    title: task.title,
+    notes: (task.notes ?? "").trim(),
+    channel: currentChannel,
+    day,
+    timeEstimate: task.timeEstimate,
+    subtasksWithTime: subtasksWithPlannedTime(task),
+  });
+
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
       const title = values.title.trim();
+      const notes = values.notes.trim();
+      const newDay = values.day ? toDayString(values.day) : null;
       const newEstimate = values.timeEstimate.trim()
         ? (parseDuration(values.timeEstimate) as number)
         : undefined;
 
-      // Only send fields that actually changed.
-      const changes: Array<() => Promise<void>> = [];
-      if (title !== task.title) changes.push(() => editTitle(task.id, title));
+      // Only send fields that differ from what the server holds. `commit`
+      // records the new value once its request succeeds.
+      const changes: Array<{ run: () => Promise<void>; commit: () => void }> =
+        [];
+      if (title !== saved.current.title) {
+        changes.push({
+          run: () => editTitle(task.id, title),
+          commit: () => (saved.current.title = title),
+        });
+      }
 
       // A task's estimate is derived from its subtasks whenever they carry one,
       // and the server rejects a task-level estimate until those are cleared.
-      const blockingSubtasks = subtasksWithPlannedTime(task);
-      if (newEstimate !== undefined && newEstimate !== task.timeEstimate) {
+      const blockingSubtasks = saved.current.subtasksWithTime;
+      if (
+        newEstimate !== undefined &&
+        newEstimate !== saved.current.timeEstimate
+      ) {
         if (blockingSubtasks.length > 0) {
           const ok = await confirmAlert({
             title: "Clear subtask planned times?",
@@ -75,21 +102,39 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
           });
           if (!ok) return;
         }
-        // Pushed as individual steps so a failure part-way through is counted
-        // accurately — clearing a subtask persists on its own.
-        changes.push(
-          ...plannedTimeSteps(task.id, newEstimate, blockingSubtasks),
-        );
+        // Added as individual steps because each clears one subtask and
+        // persists on its own; only the last sets the task's own estimate.
+        const steps = plannedTimeSteps(task.id, newEstimate, blockingSubtasks);
+        steps.forEach((run, i) => {
+          const isEstimate = i === steps.length - 1;
+          changes.push({
+            run,
+            commit: () => {
+              if (isEstimate) saved.current.timeEstimate = newEstimate;
+              else saved.current.subtasksWithTime = [];
+            },
+          });
+        });
       }
 
-      if (values.channel && values.channel !== currentChannel) {
-        changes.push(() => setChannel(task.id, values.channel));
+      if (values.channel && values.channel !== saved.current.channel) {
+        changes.push({
+          run: () => setChannel(task.id, values.channel),
+          commit: () => (saved.current.channel = values.channel),
+        });
       }
-      if (values.notes.trim() !== (task.notes ?? "").trim()) {
-        changes.push(() => editNotes(task.id, values.notes.trim()));
+      if (notes !== saved.current.notes) {
+        changes.push({
+          run: () => editNotes(task.id, notes),
+          commit: () => (saved.current.notes = notes),
+        });
       }
-      const newDay = values.day ? toDayString(values.day) : null;
-      if (newDay !== day) changes.push(() => rescheduleTask(task.id, newDay));
+      if (newDay !== saved.current.day) {
+        changes.push({
+          run: () => rescheduleTask(task.id, newDay),
+          commit: () => (saved.current.day = newDay ?? day),
+        });
+      }
 
       if (changes.length === 0) {
         pop();
@@ -123,7 +168,8 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
         async () => {
           try {
             for (const change of changes) {
-              await change();
+              await change.run();
+              change.commit();
               applied++;
             }
           } catch (error) {
@@ -143,7 +189,7 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
       if (applied > 0) onSaved();
       // Close only when everything saved. On a partial failure the form stays
       // open with the values still in it, so the edit isn't lost and can be
-      // retried — re-sending a change that already applied is a no-op.
+      // retried against what actually landed.
       if (ok) pop();
     },
     initialValues: {
