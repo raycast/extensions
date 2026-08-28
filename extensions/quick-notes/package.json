@@ -129,11 +129,5 @@
   "platforms": [
     "Windows",
     "macOS"
-  ],
-  "overrides": {
-    "esbuild": "^0.28.1"
-  },
-  "allowScripts": {
-    "esbuild@0.28.1": true
-  }
+  ]
 }
