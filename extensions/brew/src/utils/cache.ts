@@ -134,8 +134,9 @@ async function clearPartials(): Promise<void> {
           rm(path.join(environment.supportPath, entry), { recursive: true, force: true }).catch(() => {}),
         ),
     );
-  } catch {
-    // Support directory unreadable — nothing to sweep.
+  } catch (err) {
+    // Report it: "cache cleared" must not be printed over a sweep that never ran.
+    cacheLogger.warn("Could not sweep download temp files", { error: ensureError(err).message });
   }
 }
 
@@ -298,6 +299,12 @@ export async function downloadRemoteToCache(
   }
 
   // Only now does the file become visible at its real path.
+  //
+  // Two concurrent downloads of the same URL both rename here and the last one
+  // wins. That is accepted, not overlooked: both are complete responses for the
+  // same URL fetched moments apart, so arbitrating by mtime would add a
+  // read-then-rename window — a new race — to choose between two files whose
+  // contents match.
   try {
     await rename(partialPath, cachePath);
   } catch (renameError) {

@@ -19,7 +19,10 @@ import { PackageDetailResponse, fetchLogger, packageAnalyticsURL } from "../util
 export function usePackageDetail(name: string, isCask: boolean, isSelected: boolean) {
   const { data } = useFetch<PackageDetailResponse>(packageAnalyticsURL(name, isCask), {
     execute: isSelected,
-    keepPreviousData: true,
+    // Deliberately NOT keepPreviousData. These numbers render under a package
+    // name, so stale data here is data attributed to the wrong package — the
+    // one failure mode worth a flicker to avoid. Without it the statistics
+    // simply aren't there until they load.
     // This data is supplementary: log the failure, but don't interrupt the user
     // with a toast for rows that simply won't render.
     onError: (error) => {
