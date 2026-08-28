@@ -12,7 +12,7 @@ import { Cask, Formula, InstallableResults, DownloadProgress, IndexEntry } from 
 import { searchLogger } from "../logger";
 import { fetchFormulaIndex, fetchCaskIndex, fetchFormulaItems, fetchCaskItems } from "./fetch";
 import { brewCompare } from "./helpers";
-import { PopularityEntry, PopularityRanks, byPopularity } from "./analytics";
+import { PopularityRanks, byPopularity } from "./analytics";
 
 /** Progress callback for search download phases */
 export interface SearchDownloadProgress {
@@ -146,8 +146,12 @@ export async function brewSearch(
 
   // Stamp install counts onto the results so the UI can show why this order.
   if (ranks) {
-    applyPopularity(formulae, ranks.formulae, (formula) => formula.name);
-    applyPopularity(casks, ranks.casks, (cask) => cask.token);
+    for (const formula of formulae) {
+      formula.installs = ranks.formulae.get(formula.name);
+    }
+    for (const cask of casks) {
+      cask.installs = ranks.casks.get(cask.token);
+    }
   }
 
   // Set totalLength for UI (shows "X of Y results")
@@ -171,16 +175,4 @@ export async function brewSearch(
   });
 
   return { formulae, casks };
-}
-
-function applyPopularity<T extends { installs?: number; popularityRank?: number }>(
-  items: T[],
-  ranks: Map<string, PopularityEntry>,
-  id: (item: T) => string,
-): void {
-  for (const item of items) {
-    const entry = ranks.get(id(item));
-    item.installs = entry?.installs;
-    item.popularityRank = entry?.rank;
-  }
 }

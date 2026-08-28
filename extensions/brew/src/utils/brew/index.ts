@@ -54,7 +54,6 @@ export {
   packageStatus,
   fetchPopularityRanks,
   invalidatePopularityRanks,
-  hasPopularityCache,
   analyticsCacheFiles,
   POPULARITY_PERIOD,
 } from "./analytics";
@@ -63,7 +62,6 @@ export type {
   AnalyticsCounts,
   PackageAnalytics,
   PackageDetailResponse,
-  PopularityEntry,
   PopularityRanks,
 } from "./analytics";
 

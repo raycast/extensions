@@ -16,7 +16,6 @@ export type AnalyticsCounts = Partial<Record<AnalyticsPeriod, Record<string, num
 
 export interface PackageAnalytics {
   install?: AnalyticsCounts;
-  install_on_request?: AnalyticsCounts;
   build_error?: AnalyticsCounts;
 }
 
@@ -111,21 +110,14 @@ export const analyticsCacheFiles = [
   "analytics-cask-install-90d.json",
 ];
 
-export interface PopularityEntry {
-  /** 1 = most installed in its category. */
-  rank: number;
-  /** Installs over the ranking period. */
-  installs: number;
-}
-
+/** Package name -> installs over POPULARITY_PERIOD. */
 export interface PopularityRanks {
-  formulae: Map<string, PopularityEntry>;
-  casks: Map<string, PopularityEntry>;
+  formulae: Map<string, number>;
+  casks: Map<string, number>;
 }
 
 /** One item of a bulk analytics file. `count` is comma-formatted, e.g. "1,476,807". */
 export interface RankedItem {
-  number: number;
   formula?: string;
   cask?: string;
   count: string;
@@ -136,20 +128,23 @@ export interface RankedResponse {
 }
 
 /**
- * Build a name -> {rank, installs} map from a bulk analytics file.
+ * Build a name -> installs map from a bulk analytics file.
+ *
+ * The file also carries a `number` rank, but it is just the ordering by count,
+ * so it is not stored — sorting on the count reproduces it.
  *
  * Rows whose count doesn't parse are dropped rather than allowed to poison the
  * sort with NaN, which compares false against everything and would scatter
  * those packages arbitrarily.
  */
-export function parseRanks(response: RankedResponse): Map<string, PopularityEntry> {
-  const ranks = new Map<string, PopularityEntry>();
+export function parseRanks(response: RankedResponse): Map<string, number> {
+  const ranks = new Map<string, number>();
 
   for (const item of response.items ?? []) {
     const id = item.formula ?? item.cask;
     const installs = Number(String(item.count).replace(/,/g, ""));
     if (id && Number.isFinite(installs)) {
-      ranks.set(id, { rank: item.number, installs });
+      ranks.set(id, installs);
     }
   }
 
@@ -160,13 +155,14 @@ export function parseRanks(response: RankedResponse): Map<string, PopularityEntr
  * Order by install count, most installed first.
  *
  * A package with no analytics row (too new, or below the reporting threshold)
- * sorts last rather than first — `Infinity` rank, not a missing/zero one.
- * Ties fall back to name so the order stays stable between searches.
+ * sorts last rather than first — treated as -1, not as an absent value that
+ * would compare false against everything. Ties fall back to name so the order
+ * stays stable between searches.
  */
-export function byPopularity<T extends { id: string }>(ranks: Map<string, PopularityEntry>) {
+export function byPopularity<T extends { id: string }>(ranks: Map<string, number>) {
   return (a: T, b: T): number => {
-    const rankA = ranks.get(a.id)?.rank ?? Infinity;
-    const rankB = ranks.get(b.id)?.rank ?? Infinity;
-    return rankA === rankB ? a.id.localeCompare(b.id) : rankA - rankB;
+    const installsA = ranks.get(a.id) ?? -1;
+    const installsB = ranks.get(b.id) ?? -1;
+    return installsA === installsB ? a.id.localeCompare(b.id) : installsB - installsA;
   };
 }

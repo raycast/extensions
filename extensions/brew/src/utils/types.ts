@@ -35,8 +35,6 @@ interface Installable {
    * when results are sorted by popularity. Absent otherwise.
    */
   installs?: number;
-  /** Popularity rank within its category (1 = most installed). */
-  popularityRank?: number;
 }
 
 /// Cask Types

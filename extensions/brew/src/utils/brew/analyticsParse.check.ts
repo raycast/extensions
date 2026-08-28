@@ -24,13 +24,13 @@ assert.equal(totalForPeriod(undefined, "30d"), undefined);
 // Comma-formatted counts, and both key names.
 const ranks = parseRanks({
   items: [
-    { number: 1, formula: "openssl@3", count: "1,476,807" },
-    { number: 2, cask: "codex", count: "276,879" },
-    { number: 3, formula: "broken", count: "not-a-number" },
+    { formula: "openssl@3", count: "1,476,807" },
+    { cask: "codex", count: "276,879" },
+    { formula: "broken", count: "not-a-number" },
   ],
 });
-assert.equal(ranks.get("openssl@3")?.installs, 1476807);
-assert.equal(ranks.get("codex")?.rank, 2);
+assert.equal(ranks.get("openssl@3"), 1476807);
+assert.equal(ranks.get("codex"), 276879);
 assert.equal(ranks.has("broken"), false, "malformed rows must be dropped, not stored as NaN");
 
 // Unranked packages sort last, not first; ties break by name.
@@ -68,7 +68,8 @@ async function checkLive() {
   const bulk = await (await fetch(`https://formulae.brew.sh/api/analytics/install/${POPULARITY_PERIOD}.json`)).json();
   const parsed = parseRanks(bulk);
   assert.ok(parsed.size > 1000, `expected thousands of ranked formulae, got ${parsed.size}`);
-  assert.equal(parsed.get(bulk.items[0].formula)?.rank, 1);
+  // The first row of the bulk file is the most installed, so it must sort first.
+  assert.equal(parsed.get(bulk.items[0].formula), Number(bulk.items[0].count.replace(/,/g, "")));
 
   const casks = parseRanks(
     await (await fetch(`https://formulae.brew.sh/api/analytics/cask-install/${POPULARITY_PERIOD}.json`)).json(),

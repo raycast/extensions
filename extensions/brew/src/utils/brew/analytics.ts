@@ -15,7 +15,7 @@
  * three periods in bulk would mean ~9MB of downloads for three numbers.
  */
 
-import { readFile, stat } from "fs/promises";
+import { readFile } from "fs/promises";
 import { DownloadProgressCallback } from "../types";
 import { cachePath, downloadRemoteToCache } from "../cache";
 import { fetchLogger } from "../logger";
@@ -43,16 +43,6 @@ const caskRanksRemote = {
   url: `${apiBase}/analytics/cask-install/${POPULARITY_PERIOD}.json`,
   cachePath: cachePath(analyticsCacheFiles[1]),
 };
-
-/** True if both bulk analytics files are already on disk (a refresh may still download). */
-export async function hasPopularityCache(): Promise<boolean> {
-  try {
-    const stats = await Promise.all([stat(formulaRanksRemote.cachePath), stat(caskRanksRemote.cachePath)]);
-    return stats.every((s) => s.size > 0);
-  } catch {
-    return false;
-  }
-}
 
 async function loadRanks(remote: { url: string; cachePath: string }, onProgress?: DownloadProgressCallback) {
   await downloadRemoteToCache(remote.url, remote.cachePath, onProgress);
