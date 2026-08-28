@@ -180,3 +180,20 @@ export async function installCli(
   }
   return dest;
 }
+
+let inFlight: Promise<string> | null = null;
+
+/**
+ * 同一时刻只跑一次 installCli。调用方 load() 可重入（连点 Refresh、终止后自动刷新），
+ * 两轮同时进入恢复分支时若各下各的，后一轮会覆盖前一轮刚装好的副本，前一轮随即在
+ * verify/scan 里撞上不一致的文件（评审发现）。共用一个 Promise 后只有一次下载、
+ * 一次 rename，谁先到谁的进度回调生效，其余调用只等结果。
+ */
+export function installCliOnce(supportPath: string, onProgress?: (step: string) => void): Promise<string> {
+  if (!inFlight) {
+    inFlight = installCli(supportPath, onProgress).finally(() => {
+      inFlight = null;
+    });
+  }
+  return inFlight;
+}

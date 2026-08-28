@@ -16,7 +16,6 @@
  * 不覆盖本目录，在这里手抄一份码名就是一条没有守卫的漂移路径。
  */
 
-import { rm } from "node:fs/promises";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Action,
@@ -55,7 +54,7 @@ import {
   ChecksumMismatchError,
   DownloadFailedError,
   UnsupportedPlatformError,
-  installCli,
+  installCliOnce,
   installedCliPath,
 } from "./install";
 
@@ -186,8 +185,9 @@ export default function SearchPorts() {
     const supportPath = environment.supportPath;
     const searched = searchedLocations(prefs.cliPath, supportPath);
     try {
+      // 单飞：load() 可重入，两轮同时走到恢复分支时共用同一次下载（见 install.ts）。
       const install = () =>
-        installCli(supportPath, (step) => {
+        installCliOnce(supportPath, (step) => {
           if (!stale()) setState({ kind: "installing", step });
         });
 
@@ -201,12 +201,13 @@ export default function SearchPorts() {
       try {
         await verifyCli(cliPath, searched);
       } catch (e) {
-        // 托管副本跑不起来（下载被截断、换过架构、执行位丢了）时删掉重取一次 ——
+        // 托管副本跑不起来（下载被截断、换过架构、执行位丢了）时重取一份覆盖 ——
         // 否则扩展会卡死在「找不到 CLI」，而引导页明明写着我们会重新下载。
-        // 只对**我们自己下载的那份**这么做：用户在偏好里显式指定的路径不擅自删。
+        // 只对**我们自己下载的那份**这么做：用户在偏好里显式指定的路径不擅自动。
+        // 不先删旧副本：installCli 以 rename 原子覆盖，删除只会制造一个「磁盘上没有
+        // CLI」的窗口，并发的另一轮 load 会在这个窗口里撞上 ENOENT（评审发现）。
         if (cliPath !== installedCliPath(supportPath)) throw e;
         if (!stale()) setState({ kind: "installing", step: "Replacing an unusable copy…" });
-        await rm(cliPath, { force: true });
         cliPath = await install();
         await verifyCli(cliPath, searched);
       }
@@ -218,13 +219,12 @@ export default function SearchPorts() {
         // 陈旧二进制照样通过，要到 scan 才被拒。此时 Retry 会一次次选中同一份，
         // 用户视角是死循环。取一份最新的再试 —— 与上面「换掉不可用副本」同一套路。
         //
-        // 只换**我们自己下载的那份**（用户显式指定的路径不擅自删），且**只换一次**：
+        // 只换**我们自己下载的那份**（用户显式指定的路径不擅自动），且**只换一次**：
         // 新下的仍对不上，说明扩展与已发布的 CLI 确实不同代，那是真错误，
-        // 必须如实报给用户，绝不无限重下。
+        // 必须如实报给用户，绝不无限重下。同样不先删旧副本，理由见上。
         if (!(e instanceof SchemaMismatchError)) throw e;
         if (cliPath !== installedCliPath(supportPath)) throw e;
         if (!stale()) setState({ kind: "installing", step: "Updating the engine…" });
-        await rm(cliPath, { force: true });
         cliPath = await install();
         await verifyCli(cliPath, searched);
         report = await scan(cliPath);
