@@ -13,9 +13,9 @@ import { useState } from "react";
 import {
   editNotes,
   editTitle,
+  plannedTimeSteps,
   rescheduleTask,
   setChannel,
-  setTaskPlannedTime,
   subtasksWithPlannedTime,
 } from "../lib/sunsama-client";
 import { runWithToast } from "../lib/errors";
@@ -75,8 +75,10 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
           });
           if (!ok) return;
         }
-        changes.push(() =>
-          setTaskPlannedTime(task.id, newEstimate, blockingSubtasks),
+        // Pushed as individual steps so a failure part-way through is counted
+        // accurately — clearing a subtask persists on its own.
+        changes.push(
+          ...plannedTimeSteps(task.id, newEstimate, blockingSubtasks),
         );
       }
 

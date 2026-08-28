@@ -9,7 +9,7 @@ import {
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useState } from "react";
-import { setPlannedTime, setTaskPlannedTime } from "../lib/sunsama-client";
+import { plannedTimeSteps, setPlannedTime } from "../lib/sunsama-client";
 import { runWithToast } from "../lib/errors";
 import { parseDuration } from "../lib/time";
 
@@ -65,23 +65,43 @@ export function SetTimeForm({
         if (!ok) return;
       }
 
+      // Setting a task's own time can take several requests, since each
+      // subtask estimate has to be cleared first and each one persists
+      // separately. Track them individually so a failure part-way through
+      // still refreshes what landed.
+      const steps = subtaskId
+        ? [() => setPlannedTime(taskId, minutes, subtaskId)]
+        : plannedTimeSteps(taskId, minutes, clearSubtaskIds ?? []);
+
       setSaving(true);
+      let applied = 0;
       const ok = await runWithToast(
         {
           pending: "Saving…",
           success: "Planned time set",
           failure: "Failed to set planned time",
         },
-        () =>
-          subtaskId
-            ? setPlannedTime(taskId, minutes, subtaskId)
-            : setTaskPlannedTime(taskId, minutes, clearSubtaskIds ?? []),
+        async () => {
+          try {
+            for (const step of steps) {
+              await step();
+              applied++;
+            }
+          } catch (error) {
+            const detail =
+              error instanceof Error ? error.message : String(error);
+            throw applied > 0
+              ? new Error(
+                  `Applied ${applied} of ${steps.length} changes, then: ${detail}`,
+                )
+              : error;
+          }
+        },
       );
       setSaving(false);
-      if (ok) {
-        onSaved();
-        pop();
-      }
+
+      if (applied > 0) onSaved();
+      if (ok || applied > 0) pop();
     },
     initialValues: {
       value: currentMinutes > 0 ? String(currentMinutes) : "",

@@ -406,17 +406,23 @@ export async function setPlannedTime(
 }
 
 /**
- * Set a task's own planned time. Sunsama derives the task total from its
- * subtasks whenever any of them carry an estimate, and rejects a task-level
- * estimate in that case — so those have to be cleared first.
+ * The requests that set a task's own planned time, in order. Sunsama derives
+ * the task total from its subtasks whenever any of them carry an estimate, and
+ * rejects a task-level estimate in that case, so those are cleared first.
+ *
+ * Returned as separate steps rather than run together: each is its own request
+ * that persists on its own, and callers need to know how many landed if a
+ * later one fails.
  */
-export async function setTaskPlannedTime(
+export function plannedTimeSteps(
   taskId: string,
   minutes: number,
   subtaskIdsToClear: string[] = [],
-): Promise<void> {
-  for (const id of subtaskIdsToClear) await setPlannedTime(taskId, 0, id);
-  await setPlannedTime(taskId, minutes);
+): Array<() => Promise<void>> {
+  return [
+    ...subtaskIdsToClear.map((id) => () => setPlannedTime(taskId, 0, id)),
+    () => setPlannedTime(taskId, minutes),
+  ];
 }
 
 /** Subtask ids that carry their own planned time (these block a task-level estimate). */
