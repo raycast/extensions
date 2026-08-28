@@ -28,7 +28,7 @@ function jsonResponse(body: unknown): Response {
 describe("incidentIoAdapter", () => {
   it("follows a status page redirect before calling the proxy JSON API", async () => {
     const fetchMock = vi.fn(
-      async (input: RequestInfo | URL, init?: RequestInit) => {
+      async (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
         const url = String(input);
         if (
           init?.redirect === "manual" &&

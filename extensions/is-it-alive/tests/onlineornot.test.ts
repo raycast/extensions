@@ -67,7 +67,7 @@ describe("onlineornotAdapter", () => {
   });
 
   it("looks up custom domains by hostname with the public summary API", async () => {
-    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+    const fetchMock = vi.fn(async (input: Parameters<typeof fetch>[0]) => {
       const url = String(input);
       if (url.includes("/status_pages/status.openrouter.ai/summary")) {
         return jsonResponse(OPENROUTER_SUMMARY);
@@ -131,7 +131,7 @@ describe("onlineornotAdapter", () => {
   });
 
   it("fetches a custom domain through the summary API without reading HTML", async () => {
-    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+    const fetchMock = vi.fn(async (input: Parameters<typeof fetch>[0]) => {
       const url = String(input);
       if (url.includes("/status_pages/status.openrouter.ai/summary")) {
         return jsonResponse(OPENROUTER_SUMMARY);

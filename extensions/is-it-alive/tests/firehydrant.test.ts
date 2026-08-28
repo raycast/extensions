@@ -44,7 +44,7 @@ const REDIS_PAYLOAD = {
 
 describe("firehydrantAdapter", () => {
   it("detects pages that serve /data/payload.json", async () => {
-    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+    const fetchMock = vi.fn(async (input: Parameters<typeof fetch>[0]) => {
       const url = String(input);
       if (url === "https://status.redis.io/data/payload.json") {
         return new Response(JSON.stringify(REDIS_PAYLOAD), {
