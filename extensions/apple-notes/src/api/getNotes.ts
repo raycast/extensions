@@ -89,7 +89,7 @@ export async function getNotes(
         ${searchFilter}
     ORDER BY
         note.zmodificationdate1 DESC
-    LIMIT ${exactTitleMatch && hasNonAsciiSearchText ? -1 : maxQueryResults}
+    LIMIT ${maxQueryResults}
   `;
 
   const data = await executeSQL<NoteItem>(NOTES_DB, query);
