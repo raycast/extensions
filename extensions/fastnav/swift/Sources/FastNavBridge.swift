@@ -39,6 +39,7 @@ struct BridgeCommand: Codable {
     let action: String
     let focusedApplicationBonusEmpty: Double?
     let focusedApplicationBonusSearch: Double?
+    let isWebBacked: Bool?
 
     init(_ command: MenuCommand) {
         id = "\(command.usageKey)|\(command.order)"
@@ -53,6 +54,7 @@ struct BridgeCommand: Codable {
         action = command.action
         focusedApplicationBonusEmpty = command.focusedApplicationBonus(hasQuery: false)
         focusedApplicationBonusSearch = command.focusedApplicationBonus(hasQuery: true)
+        isWebBacked = command.isWebBacked
 
         switch command.source {
         case .menu:
@@ -80,7 +82,8 @@ struct BridgeCommand: Codable {
             element: AXUIElementCreateApplication(pid_t(pid)),
             order: order,
             source: commandSource,
-            action: action
+            action: action,
+            isWebBacked: isWebBacked ?? false
         )
     }
 }
@@ -88,6 +91,7 @@ struct BridgeCommand: Codable {
 enum BridgeError: LocalizedError {
     case applicationUnavailable
     case applicationCouldNotActivate(String)
+    case commandCouldNotStart(String)
     case commandDisabled
     case permissionRequired
 
@@ -97,6 +101,8 @@ enum BridgeError: LocalizedError {
             return "The selected application is no longer running."
         case .applicationCouldNotActivate(let name):
             return "\(name) could not be brought to the front."
+        case .commandCouldNotStart(let title):
+            return "The command “\(title)” could not be started."
         case .commandDisabled:
             return "That command is currently unavailable."
         case .permissionRequired:
@@ -152,6 +158,49 @@ enum BridgeError: LocalizedError {
           isEligibleApplication(application) else {
         throw BridgeError.applicationUnavailable
     }
+
+    if command.source == "interface",
+       command.action == kAXPressAction,
+       command.isWebBacked == true {
+        try launchDeferredCommand(command)
+        return ExecutionResponse(ok: true)
+    }
+
+    return try executeSynchronously(command, in: application)
+}
+
+@raycast func executeDeferredCommand(command: BridgeCommand) throws -> ExecutionResponse {
+    guard AXIsProcessTrusted() else { throw BridgeError.permissionRequired }
+    guard command.isEnabled else { throw BridgeError.commandDisabled }
+    guard let application = NSRunningApplication(processIdentifier: pid_t(command.pid)),
+          isEligibleApplication(application) else {
+        throw BridgeError.applicationUnavailable
+    }
+    return try executeSynchronously(command, in: application)
+}
+
+private func launchDeferredCommand(_ command: BridgeCommand) throws {
+    let data = try JSONEncoder().encode(command)
+    guard let payload = String(data: data, encoding: .utf8) else {
+        throw BridgeError.commandCouldNotStart(command.title)
+    }
+
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: CommandLine.arguments[0])
+    process.arguments = ["executeDeferredCommand", payload]
+    process.standardOutput = FileHandle.nullDevice
+    process.standardError = FileHandle.nullDevice
+    do {
+        try process.run()
+    } catch {
+        throw BridgeError.commandCouldNotStart(command.title)
+    }
+}
+
+private func executeSynchronously(
+    _ command: BridgeCommand,
+    in application: NSRunningApplication
+) throws -> ExecutionResponse {
 
     if !isActiveApplication(application) {
         application.activate(options: [])

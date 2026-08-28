@@ -36,6 +36,7 @@ export interface FastNavCommand {
   action: string;
   focusedApplicationBonusEmpty?: number;
   focusedApplicationBonusSearch?: number;
+  isWebBacked?: boolean;
 }
 
 export async function getRunningApplications(): Promise<ApplicationsResponse> {

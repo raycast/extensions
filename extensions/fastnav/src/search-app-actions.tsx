@@ -9,7 +9,6 @@ import {
   List,
   open,
   openExtensionPreferences,
-  PopToRootType,
   showHUD,
   showToast,
   Toast,
@@ -31,8 +30,8 @@ import { loadUsage, recordUsage, UsageMap } from "./usage";
 
 const accessibilitySettingsURL =
   "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
-const commandCache = new Cache({ namespace: "actions-v3" });
-const startupCache = new Cache({ namespace: "startup-v1" });
+const commandCache = new Cache({ namespace: "actions-v4" });
+const startupCache = new Cache({ namespace: "startup-v2" });
 const allApplicationsScope = "all";
 const focusedApplicationScope = "focused";
 const maximumConcurrentApplicationScans = 4;
@@ -498,12 +497,14 @@ export default function SearchAppActions() {
   }, [results, selectionResetKey]);
 
   async function run(command: FastNavCommand) {
-    await closeMainWindow({ popToRootType: PopToRootType.Immediate });
+    await closeMainWindow();
     try {
       await executeCommand(command);
       const updatedUsage = await recordUsage(command, usage);
       setUsage(updatedUsage);
-      await showHUD(`✓ ${command.title}`);
+      if (command.source === "menu") {
+        await showHUD(`✓ ${command.title}`);
+      }
     } catch (caughtError) {
       const message =
         caughtError instanceof Error

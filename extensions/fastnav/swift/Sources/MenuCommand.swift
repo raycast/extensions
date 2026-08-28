@@ -52,6 +52,7 @@ struct MenuCommand: Identifiable {
     let order: Int
     let source: CommandSource
     let action: String
+    let isWebBacked: Bool
 
     var breadcrumb: String {
         menuPath.joined(separator: " › ")

@@ -11,7 +11,6 @@ enum AccessibilityMenuError: LocalizedError {
     case interfaceElementUnavailable(String)
     case commandDisabled(String)
     case actionFailed(AXError)
-    case clickEventUnavailable
 
     var errorDescription: String? {
         switch self {
@@ -25,8 +24,6 @@ enum AccessibilityMenuError: LocalizedError {
             return "The command “\(title)” is no longer available."
         case .actionFailed(let error):
             return "The command could not be run (Accessibility error \(error.rawValue))."
-        case .clickEventUnavailable:
-            return "The interface element could not be clicked."
         }
     }
 }
@@ -115,7 +112,8 @@ final class AccessibilityMenuReader: @unchecked Sendable {
                         element: element,
                         order: order,
                         source: .menu,
-                        action: kAXPressAction
+                        action: kAXPressAction,
+                        isWebBacked: false
                     )
                 )
                 order += 1

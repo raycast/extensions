@@ -22,6 +22,7 @@ final class AccessibilityUIReader: @unchecked Sendable {
         let action: String
         let role: String
         let hasOwnLabel: Bool
+        let isWebBacked: Bool
     }
 
     private struct Node {
@@ -29,6 +30,7 @@ final class AccessibilityUIReader: @unchecked Sendable {
         let context: [String]
         let nearestAction: ActionTarget?
         let depth: Int
+        let isWebBacked: Bool
     }
 
     private struct Candidate {
@@ -39,6 +41,7 @@ final class AccessibilityUIReader: @unchecked Sendable {
         let context: [String]
         let isEnabled: Bool
         let order: Int
+        let isWebBacked: Bool
     }
 
     private let maximumNodes = 900
@@ -80,7 +83,15 @@ final class AccessibilityUIReader: @unchecked Sendable {
         }
 
         let appName = application.localizedName ?? "Application"
-        var queue = [Node(element: window, context: [], nearestAction: nil, depth: 0)]
+        var queue = [
+            Node(
+                element: window,
+                context: [],
+                nearestAction: nil,
+                depth: 0,
+                isWebBacked: false
+            )
+        ]
         var queueIndex = 0
         var visited = Set<ElementIdentity>()
         var candidateTargets = Set<ElementIdentity>()
@@ -99,6 +110,7 @@ final class AccessibilityUIReader: @unchecked Sendable {
 
             let role = stringAttribute(node.element, kAXRoleAttribute) ?? ""
             guard !excludedRoles.contains(role) else { continue }
+            let isWebBacked = node.isWebBacked || role == "AXWebArea"
 
             let label = bestLabel(for: node.element, role: role)
             let action = preferredAction(for: node.element, role: role, hasLabel: label != nil)
@@ -107,7 +119,8 @@ final class AccessibilityUIReader: @unchecked Sendable {
                     element: node.element,
                     action: $0,
                     role: role,
-                    hasOwnLabel: label != nil
+                    hasOwnLabel: label != nil,
+                    isWebBacked: isWebBacked
                 )
             }
 
@@ -162,7 +175,8 @@ final class AccessibilityUIReader: @unchecked Sendable {
                         element: child,
                         context: context,
                         nearestAction: nearestAction,
-                        depth: node.depth + 1
+                        depth: node.depth + 1,
+                        isWebBacked: isWebBacked
                     )
                 )
             }
@@ -189,7 +203,8 @@ final class AccessibilityUIReader: @unchecked Sendable {
                 element: candidate.element,
                 order: 10_000 + candidate.order,
                 source: .interface(role: candidate.role),
-                action: candidate.action
+                action: candidate.action,
+                isWebBacked: candidate.isWebBacked
             )
         }
     }
@@ -204,9 +219,12 @@ final class AccessibilityUIReader: @unchecked Sendable {
         }
 
         if refreshed.action == kAXPressAction,
-           isDOMBacked(refreshed.element),
-           let clickPoint = clickPoint(for: refreshed.element, in: application) {
-            try performClick(at: clickPoint)
+           refreshed.isWebBacked {
+            try performValidatedClick(
+                on: refreshed.element,
+                titled: refreshed.title,
+                in: application
+            )
             return
         }
 
@@ -215,67 +233,164 @@ final class AccessibilityUIReader: @unchecked Sendable {
         guard result == .success else { throw AccessibilityMenuError.actionFailed(result) }
     }
 
-    private func isDOMBacked(_ element: AXUIElement) -> Bool {
-        rawAttribute(element, "AXDOMClassList") != nil ||
-        rawAttribute(element, "AXDOMIdentifier") != nil
-    }
-
-    private func clickPoint(
-        for element: AXUIElement,
+    private func performValidatedClick(
+        on element: AXUIElement,
+        titled title: String,
         in application: NSRunningApplication
-    ) -> CGPoint? {
-        guard let targetFrame = elementFrame(element),
-              targetFrame.width >= 2,
-              targetFrame.height >= 2 else {
-            return nil
-        }
-
-        let applicationElement = AXUIElementCreateApplication(application.processIdentifier)
-        let window = elementAttribute(element, kAXWindowAttribute)
-            ?? elementAttribute(applicationElement, kAXFocusedWindowAttribute)
-        guard let windowFrame = window.flatMap(elementFrame),
-              !windowFrame.isEmpty else {
-            return targetFrame.center
-        }
-
-        let visibleFrame = targetFrame.intersection(windowFrame)
-        guard !visibleFrame.isNull,
-              visibleFrame.width >= 2,
-              visibleFrame.height >= 2 else {
-            return nil
-        }
-        return visibleFrame.center
-    }
-
-    private func performClick(at point: CGPoint) throws {
+    ) throws {
+        let point = try waitForValidatedClickPoint(
+            on: element,
+            titled: title,
+            in: application
+        )
         let source = CGEventSource(stateID: .hidSystemState)
         guard let mouseDown = CGEvent(
             mouseEventSource: source,
             mouseType: .leftMouseDown,
             mouseCursorPosition: point,
             mouseButton: .left
-        ),
-        let mouseUp = CGEvent(
-            mouseEventSource: source,
-            mouseType: .leftMouseUp,
-            mouseCursorPosition: point,
-            mouseButton: .left
         ) else {
-            throw AccessibilityMenuError.clickEventUnavailable
+            throw AccessibilityMenuError.interfaceElementUnavailable(title)
         }
 
-        let originalPosition = CGEvent(source: nil)?.location
         mouseDown.setIntegerValueField(.mouseEventClickState, value: 1)
-        mouseUp.setIntegerValueField(.mouseEventClickState, value: 1)
+        let mouseDownCounter = CGEventSource.counterForEventType(
+            .hidSystemState,
+            eventType: .leftMouseDown
+        )
         CGWarpMouseCursorPosition(point)
-        Thread.sleep(forTimeInterval: 0.012)
         mouseDown.post(tap: .cghidEventTap)
-        Thread.sleep(forTimeInterval: 0.012)
-        mouseUp.post(tap: .cghidEventTap)
-        Thread.sleep(forTimeInterval: 0.05)
-        if let originalPosition {
-            CGWarpMouseCursorPosition(originalPosition)
+        guard waitForEventDelivery(.leftMouseDown, after: mouseDownCounter) else {
+            throw AccessibilityMenuError.interfaceElementUnavailable(title)
         }
+
+        let releasePoint = try validatedClickPoint(
+            on: element,
+            titled: title,
+            in: application
+        )
+        guard let mouseUp = CGEvent(
+            mouseEventSource: source,
+            mouseType: .leftMouseUp,
+            mouseCursorPosition: releasePoint,
+            mouseButton: .left
+        ) else {
+            throw AccessibilityMenuError.interfaceElementUnavailable(title)
+        }
+
+        mouseUp.setIntegerValueField(.mouseEventClickState, value: 1)
+        let mouseUpCounter = CGEventSource.counterForEventType(
+            .hidSystemState,
+            eventType: .leftMouseUp
+        )
+        CGWarpMouseCursorPosition(releasePoint)
+        mouseUp.post(tap: .cghidEventTap)
+        guard waitForEventDelivery(.leftMouseUp, after: mouseUpCounter) else {
+            throw AccessibilityMenuError.interfaceElementUnavailable(title)
+        }
+    }
+
+    private func validatedClickPoint(
+        on element: AXUIElement,
+        titled title: String,
+        in application: NSRunningApplication
+    ) throws -> CGPoint {
+        let applicationElement = AXUIElementCreateApplication(application.processIdentifier)
+        let systemWideElement = AXUIElementCreateSystemWide()
+        guard isActive(application),
+              boolAttribute(element, kAXHiddenAttribute) != true,
+              boolAttribute(element, kAXEnabledAttribute) != false,
+              let targetFrame = elementFrame(element),
+              targetFrame.width >= 2,
+              targetFrame.height >= 2,
+              let targetWindow = elementAttribute(element, kAXWindowAttribute)
+                ?? elementAttribute(applicationElement, kAXFocusedWindowAttribute),
+              let focusedWindow = elementAttribute(applicationElement, kAXFocusedWindowAttribute),
+              CFEqual(targetWindow, focusedWindow),
+              let windowFrame = elementFrame(targetWindow),
+              !windowFrame.isEmpty else {
+            throw AccessibilityMenuError.interfaceElementUnavailable(title)
+        }
+
+        let visibleFrame = targetFrame.intersection(windowFrame)
+        guard !visibleFrame.isNull,
+              visibleFrame.width >= 2,
+              visibleFrame.height >= 2 else {
+            throw AccessibilityMenuError.interfaceElementUnavailable(title)
+        }
+
+        let point = visibleFrame.center
+        var hitElement: AXUIElement?
+        guard AXUIElementCopyElementAtPosition(
+            systemWideElement,
+            Float(point.x),
+            Float(point.y),
+            &hitElement
+        ) == .success,
+        let hitElement,
+        isDescendant(hitElement, of: element),
+        isActive(application) else {
+            throw AccessibilityMenuError.interfaceElementUnavailable(title)
+        }
+        return point
+    }
+
+    private func waitForValidatedClickPoint(
+        on element: AXUIElement,
+        titled title: String,
+        in application: NSRunningApplication
+    ) throws -> CGPoint {
+        let deadline = Date(timeIntervalSinceNow: 0.5)
+        repeat {
+            if let point = try? validatedClickPoint(
+                on: element,
+                titled: title,
+                in: application
+            ) {
+                return point
+            }
+            guard isActive(application) else { break }
+            _ = RunLoop.current.run(
+                mode: .default,
+                before: min(deadline, Date(timeIntervalSinceNow: 0.005))
+            )
+        } while Date() < deadline
+        throw AccessibilityMenuError.interfaceElementUnavailable(title)
+    }
+
+    private func waitForEventDelivery(
+        _ eventType: CGEventType,
+        after previousCounter: UInt32
+    ) -> Bool {
+        let deadline = Date(timeIntervalSinceNow: 0.08)
+        repeat {
+            if CGEventSource.counterForEventType(
+                .hidSystemState,
+                eventType: eventType
+            ) != previousCounter {
+                return true
+            }
+            _ = RunLoop.current.run(
+                mode: .default,
+                before: min(deadline, Date(timeIntervalSinceNow: 0.002))
+            )
+        } while Date() < deadline
+        return false
+    }
+
+    private func isActive(_ application: NSRunningApplication) -> Bool {
+        application.isActive ||
+            NSWorkspace.shared.frontmostApplication?.processIdentifier == application.processIdentifier
+    }
+
+    private func isDescendant(_ element: AXUIElement, of ancestor: AXUIElement) -> Bool {
+        var current: AXUIElement? = element
+        for _ in 0..<16 {
+            guard let candidate = current else { return false }
+            if CFEqual(candidate, ancestor) { return true }
+            current = elementAttribute(candidate, kAXParentAttribute)
+        }
+        return false
     }
 
     private func appendCandidate(
@@ -295,7 +410,8 @@ final class AccessibilityUIReader: @unchecked Sendable {
                 title: label,
                 context: Array(context.suffix(3)),
                 isEnabled: boolAttribute(target.element, kAXEnabledAttribute) ?? true,
-                order: candidates.count
+                order: candidates.count,
+                isWebBacked: target.isWebBacked
             )
         )
     }
