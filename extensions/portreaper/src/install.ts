@@ -16,8 +16,12 @@
  * # 完整性校验
  *
  * 先取 `portreaper-cli-SHA256SUMS`（由 release 流水线在 publish 阶段汇总三条构建腿
- * 的产物生成），再据它核对下载到的二进制。校验不通过就**删除**文件并报错 ——
- * 一个来路不明的可执行文件绝不能留在磁盘上，更不能去执行它。
+ * 的产物生成），再据它核对下载到的二进制。**校验在内存里、落盘之前完成**：不匹配的
+ * 字节从头到尾没碰过磁盘，谈不上「删掉它」——比「先写再删」强一档，别把顺序改回去
+ * （文档一度描述的正是那套更弱的机制，评审发现）。
+ *
+ * 两次取回都走 `releases/latest/download/`，中间若恰好发版会读到不同版本的校验和与
+ * 二进制。那是**竞态**不是攻击，故不匹配时整体重试一次；两次都不匹配才当安全事件报。
  */
 
 import { createHash, randomUUID } from "node:crypto";
@@ -137,7 +141,8 @@ export function installedCliPath(supportPath: string): string {
  * 下载最新 release 的 CLI 到扩展的 supportPath，校验 sha256 后置为可执行。
  * 返回可执行文件路径。
  *
- * 任何一步失败都不会留下半个文件：校验失败会删除已落盘的二进制。
+ * 任何一步失败都不会留下半个文件：校验不通过时二进制**根本没落过盘**，
+ * 而落盘本身是「临时文件 → 置执行位 → rename」的原子三步。
  */
 export async function installCli(
   supportPath: string,
@@ -145,20 +150,30 @@ export async function installCli(
 ): Promise<string> {
   const assetName = assetNameFor(process.platform, process.arch);
 
-  onProgress?.("Fetching checksums…");
-  const sumsText = (await fetchBuffer(`${RELEASE_BASE}/${CHECKSUM_ASSET}`)).toString("utf8");
-  const expected = parseChecksums(sumsText, assetName);
-  if (!expected) {
-    // 清单里没有这个资产 —— 可能是 release 不完整，也可能是资产改了名。
-    // 无论哪种，都不能跳过校验继续装。
-    throw new Error(`${CHECKSUM_ASSET} has no entry for ${assetName}`);
+  /** 取一遍「校验和 + 二进制」并核对。两者都解析自 `latest`，必须成对取用。 */
+  async function fetchAndVerify(): Promise<{ bin: Buffer; expected: string; actual: string }> {
+    onProgress?.("Fetching checksums…");
+    const sumsText = (await fetchBuffer(`${RELEASE_BASE}/${CHECKSUM_ASSET}`)).toString("utf8");
+    const expected = parseChecksums(sumsText, assetName);
+    if (!expected) {
+      // 清单里没有这个资产 —— 可能是 release 不完整，也可能是资产改了名。
+      // 无论哪种，都不能跳过校验继续装。
+      throw new Error(`${CHECKSUM_ASSET} has no entry for ${assetName}`);
+    }
+    onProgress?.("Downloading portreaper-cli…");
+    const bin = await fetchBuffer(`${RELEASE_BASE}/${assetName}`);
+    onProgress?.("Verifying…");
+    return { bin, expected, actual: sha256(bin) };
   }
 
-  onProgress?.("Downloading portreaper-cli…");
-  const bin = await fetchBuffer(`${RELEASE_BASE}/${assetName}`);
-
-  onProgress?.("Verifying…");
-  const actual = sha256(bin);
+  // 不匹配先整体重试一次：两次取回之间恰好发了新版时，拿到的是「旧校验和 + 新二进制」
+  // ——那是发版窗口内的竞态，而 UI 会把 ChecksumMismatchError 渲染成「可能有代理在
+  // 改写下载」这类安全事件文案，等于让用户去查一个不存在的问题（评审发现）。
+  // 重试后仍不匹配才是真的该报警。
+  let { bin, expected, actual } = await fetchAndVerify();
+  if (actual !== expected) {
+    ({ bin, expected, actual } = await fetchAndVerify());
+  }
   if (actual !== expected) {
     throw new ChecksumMismatchError(expected, actual);
   }
@@ -189,7 +204,10 @@ let inFlight: Promise<string> | null = null;
  * verify/scan 里撞上不一致的文件（评审发现）。共用一个 Promise 后只有一次下载、
  * 一次 rename，谁先到谁的进度回调生效，其余调用只等结果。
  */
-export function installCliOnce(supportPath: string, onProgress?: (step: string) => void): Promise<string> {
+export function installCliOnce(
+  supportPath: string,
+  onProgress?: (step: string) => void,
+): Promise<string> {
   if (!inFlight) {
     inFlight = installCli(supportPath, onProgress).finally(() => {
       inFlight = null;

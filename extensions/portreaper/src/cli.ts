@@ -131,6 +131,23 @@ export class CliOutputError extends Error {
 }
 
 /**
+ * `portreaper-cli scan` 没能跑完：超时、非零退出、maxBuffer 超限，或托管副本过旧
+ * 到认不出 `--cpu` 参数（`verifyCli` 只跑 `--version`，拦不住这种）。
+ *
+ * 它存在的唯一理由是**别把原始 stderr 甩到界面上**。CLI 的 stderr 有十几处是中文
+ * （`crates/portreaper-cli/src/main.rs` 的 eprintln!），而 Node 的 execFile 异常
+ * message 形如 `Command failed: <二进制绝对路径> scan --json --cpu=200\n<中文用法>`。
+ * 这是英文单语的 Store 扩展，kill / whitelist 两条路径早就按这条纪律包装过了，
+ * 唯独 scan 一路裸奔（评审发现）。原文进 `cause` 与 console，报 issue 时仍拿得到。
+ */
+export class ScanFailedError extends Error {
+  constructor(options?: ErrorOptions) {
+    super("Could not run portreaper-cli", options);
+    this.name = "ScanFailedError";
+  }
+}
+
+/**
  * 二进制发现阶梯，顺序即优先级：
  *
  * 1. 用户在扩展偏好里显式指定的路径 —— 永远最高，用于非常规安装位置
@@ -209,10 +226,17 @@ export async function scan(cliPath: string, opts: ScanOptions = {}): Promise<Sca
   // maxBuffer：一台开发机几百个进程的 JSON 可以到几百 KB，Node 默认 1MB 够用，
   // 但给到 8MB 以免在极端机器上撞上限 —— 超限时 Node 会**杀掉子进程并报
   // ERR_CHILD_PROCESS_STDIO_MAXBUFFER**，不是静默截断，但那条报错同样不可行动。
-  const { stdout } = await execFileAsync(cliPath, args, {
-    timeout: 20_000,
-    maxBuffer: 8 * 1024 * 1024,
-  });
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync(cliPath, args, {
+      timeout: 20_000,
+      maxBuffer: 8 * 1024 * 1024,
+    }));
+  } catch (e) {
+    // 与 kill / whitelist 同形：原文只进控制台，界面拿一句英文（见 ScanFailedError）
+    console.error("portreaper-cli scan failed:", e);
+    throw new ScanFailedError({ cause: e });
+  }
   return parseScanReport(stdout, cliPath);
 }
 

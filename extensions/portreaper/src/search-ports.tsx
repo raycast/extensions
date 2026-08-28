@@ -35,6 +35,7 @@ import {
 import {
   CliNotFoundError,
   CliOutputError,
+  ScanFailedError,
   SchemaMismatchError,
   type Confidence,
   type Platform,
@@ -300,7 +301,7 @@ export default function SearchPorts() {
                 "app. It downloads that engine from the project's GitHub release and verifies its",
                 "SHA-256 checksum before running it. This happens once.",
                 "",
-                "If the checksum does not match, the file is deleted and nothing is executed.",
+                "The checksum is verified in memory before anything is written to disk.",
               ].join("\n")}
             />
           }
@@ -485,6 +486,19 @@ function errorState(e: unknown, searched: string[]): State {
         `it ran, but printed: ${e.sample.trim() || "(nothing)"}`,
     };
   }
+  if (e instanceof ScanFailedError) {
+    return {
+      kind: "error",
+      title: "Scan Failed",
+      message:
+        "portreaper-cli did not complete the scan. It may be outdated, blocked, or timing out — " +
+        "reinstall it from the extension’s setup screen. Full details are in the extension console.",
+    };
+  }
+  // 兜底：到这里的都不是已知形态（CLI 子进程那条已经被 ScanFailedError 收口，
+  // 中文 stderr 不会再流到这里）。**这里确实会显示原始 message**，刻意如此：
+  // 未知错误连一句可搜索的线索都不给，用户就只能报「它坏了」。原文同时进 console。
+  console.error("portreaper: unrecognized scan error:", e);
   return {
     kind: "error",
     title: "Scan Failed",
