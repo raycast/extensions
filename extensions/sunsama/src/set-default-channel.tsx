@@ -13,14 +13,16 @@ import {
   RefreshChannelsAction,
   useChannels,
 } from "./components/channel-dropdown";
+import { matchesChannel, matchesNoChannel } from "./lib/channels";
 import { reportError } from "./lib/errors";
 
 export default function SetDefaultChannel() {
-  // The whole list is handed to Raycast so Raycast does the filtering;
-  // searching the server per keystroke ranks semantically and buries the
-  // exact match.
   const channels = useChannels();
-  const { list, isLoading, ready } = channels;
+  const { list, isLoading, ready, query, onSearchTextChange } = channels;
+  // Filtered here, not by Raycast: handling the search text so the server can
+  // be asked about channels the stored list is missing turns Raycast's own
+  // filtering off.
+  const visible = list.filter((ch) => matchesChannel(ch, query));
   const { data: current } = useCachedPromise(getDefaultChannel, []);
 
   async function choose(id: string, name: string) {
@@ -59,12 +61,20 @@ export default function SetDefaultChannel() {
       : [];
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search channels">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder={isLoading ? "Loading channels…" : "Search channels"}
+      // Off deliberately: the typed text has to reach the server to find a
+      // channel the stored list is missing, and handling it means filtering
+      // here instead — see `visible` above.
+      onSearchTextChange={onSearchTextChange}
+      filtering={false}
+    >
       {/* Shown as soon as there is a list to sit on top of. useCachedPromise
           returns the cached channels on the first render, so normally this
           appears with them and nothing shifts; on a cold start the whole set
           arrives at once instead of a lone "No channel" row. */}
-      {ready && (
+      {ready && matchesNoChannel(query) && (
         <List.Item
           title="No channel"
           subtitle="New tasks start without a channel"
@@ -72,7 +82,7 @@ export default function SetDefaultChannel() {
           actions={itemActions("", "No channel")}
         />
       )}
-      {list.map((ch) => (
+      {visible.map((ch) => (
         <List.Item
           key={ch.id}
           title={ch.name}

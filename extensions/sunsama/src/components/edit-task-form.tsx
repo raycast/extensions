@@ -259,7 +259,6 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
       <ChannelDropdown
         {...itemProps.channel}
         channels={channels}
-        ensureName={currentChannel}
         // A task already in a channel can't be taken out of one, so don't
         // offer an option that would silently do nothing.
         allowNone={!currentChannel}

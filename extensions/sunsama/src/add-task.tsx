@@ -179,11 +179,7 @@ export default function AddTask() {
         type={Form.DatePicker.Type.Date}
       />
       <Form.Separator />
-      <ChannelDropdown
-        {...itemProps.channel}
-        channels={channels}
-        ensureName={startingChannel || undefined}
-      />
+      <ChannelDropdown {...itemProps.channel} channels={channels} />
       <Form.Dropdown {...itemProps.position} title="Position">
         <Form.Dropdown.Item
           value="top"

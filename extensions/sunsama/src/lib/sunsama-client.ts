@@ -145,6 +145,45 @@ export async function forgetChannels(): Promise<void> {
   await LocalStorage.removeItem(CHANNELS_KEY);
 }
 
+/**
+ * Ask the server about a specific query.
+ *
+ * The sweep is best-effort by nature: the search ranks semantically and only
+ * ever returns 25, so a channel can fail to appear in any of the windows it
+ * builds from. Searching what the user actually typed is the reliable way to
+ * reach one — an exact name ranks first — so the pickers call this as you type
+ * and merge whatever comes back.
+ */
+export async function searchChannels(query: string): Promise<Channel[]> {
+  const text = query.trim();
+  if (text.length < 2) return [];
+  return searchChannelsRaw(text);
+}
+
+/** Add newly-found channels to the stored list, so they stay available. */
+export async function rememberChannels(found: Channel[]): Promise<void> {
+  if (found.length === 0) return;
+  const raw = await LocalStorage.getItem<string>(CHANNELS_KEY);
+  if (!raw) return; // Nothing swept yet; the first sweep will cover it.
+
+  let stored: Channel[];
+  try {
+    stored = JSON.parse(raw) as Channel[];
+  } catch {
+    return;
+  }
+
+  const byId = new Map(stored.map((c) => [c.id, c]));
+  const before = byId.size;
+  for (const channel of found) byId.set(channel.id, channel);
+  if (byId.size === before) return; // Nothing new — leave storage alone.
+
+  const merged = [...byId.values()].sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+  await LocalStorage.setItem(CHANNELS_KEY, JSON.stringify(merged));
+}
+
 const DEFAULT_CHANNEL_KEY = "sunsama-default-channel";
 
 export interface DefaultChannel {
