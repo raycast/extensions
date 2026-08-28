@@ -1,6 +1,6 @@
 # Zed Recent Projects Changelog
 
-## [Fix Missing PATH Entries from ~/.zshrc] - 2026-08-28
+## [Fix Missing PATH Entries from ~/.zshrc] - {PR_MERGE_DATE}
 
 - Fix `PATH` (and other rc-file-only env vars) not being visible to processes spawned by Zed (e.g. external formatters) when launched via this extension. The clean-env shell invocation now runs login *and* interactive (`-ilc`) instead of just login (`-lc`), so `~/.zshrc`/`~/.bashrc`, not just profile files, get sourced.
 
