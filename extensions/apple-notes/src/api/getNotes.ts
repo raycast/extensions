@@ -190,20 +190,13 @@ export async function getNotes(
     });
   }
 
-  if (trimmedSearchText) {
-    if (exactTitleMatch) {
-      const normalizedQuery = trimmedSearchText.toLowerCase();
-      notesWithAdditionalFields = notesWithAdditionalFields.filter(
-        (note) => note.title.trim().toLowerCase() === normalizedQuery,
-      );
-    } else {
-      const normalizedQuery = normalizeForSearch(trimmedSearchText);
-      notesWithAdditionalFields = notesWithAdditionalFields.filter(
-        (note) =>
-          normalizeForSearch(note.title).includes(normalizedQuery) ||
-          normalizeForSearch(note.snippet).includes(normalizedQuery),
-      );
-    }
+  if (trimmedSearchText && !exactTitleMatch) {
+    const normalizedQuery = normalizeForSearch(trimmedSearchText);
+    notesWithAdditionalFields = notesWithAdditionalFields.filter(
+      (note) =>
+        normalizeForSearch(note.title).includes(normalizedQuery) ||
+        normalizeForSearch(note.snippet).includes(normalizedQuery),
+    );
   }
 
   return notesWithAdditionalFields;
