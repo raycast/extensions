@@ -8,10 +8,7 @@ export async function handleOnOpenPage(page: Page, setRecentPage: (page: Page) =
   const url = urlForPreferredMethod(page.url, open_in);
 
   try {
-    // Pass open_in explicitly so the system opens the URL with the correct app,
-    // rather than relying on OS protocol-handler registration (which can be
-    // missing or broken, especially on Windows).
-    await open(url, open_in);
+    await openPageUrl(url, open_in);
   } catch {
     // Fallback: let the OS pick the handler (protocol handler for notion://,
     // default browser for https://).
@@ -41,4 +38,19 @@ export function urlForPreferredMethod(url: string, open_in?: Preferences["open_i
     return url.replace(/^https:\/\//i, "notion://");
   }
   return url;
+}
+
+/**
+ * Opens a URL using the right strategy for its scheme:
+ * - `notion://` deep links are handed to the OS protocol handler (no `app`
+ *   argument), because on Windows `open(url, application)` launches the app
+ *   but drops the URL for custom protocols (#30540).
+ * - Other URLs are opened with the specified application.
+ */
+export async function openPageUrl(url: string, open_in?: Preferences["open_in"]): Promise<void> {
+  if (url.startsWith("notion://")) {
+    await open(url);
+  } else {
+    await open(url, open_in);
+  }
 }
