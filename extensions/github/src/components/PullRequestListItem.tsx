@@ -20,7 +20,10 @@ import { SortActionProps } from "./SortAction";
 type PullRequestListItemProps = {
   pullRequest: PullRequestFieldsFragment;
   viewer?: UserFieldsFragment;
-  mutateList?: MutatePromise<PullRequestFieldsFragment[] | undefined> | ReturnType<typeof useMyPullRequests>["mutate"];
+  mutateList?:
+    | MutatePromise<PullRequestFieldsFragment[] | undefined>
+    | MutatePromise<PullRequestFieldsFragment[]>
+    | ReturnType<typeof useMyPullRequests>["mutate"];
   showAuthor?: boolean;
 };
 

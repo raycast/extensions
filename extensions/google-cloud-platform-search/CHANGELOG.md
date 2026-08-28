@@ -1,5 +1,9 @@
 # Google Cloud Platform Search Changelog
 
+## [Enhancement] - 2026-07-09
+
+- Add Secret Manager to the list of searchable console products.
+
 ## [Fix] - 2024-09-05
 
 - Use REST fallback when fetching projects using GCP's `ProjectsClient`.

@@ -11,12 +11,18 @@ import { useMyBookmarks } from "./hooks/use-bookmarks.hook";
 import { usePrepareBookmarkSearch } from "./hooks/use-prepare-bookmark-search.hook";
 import { useBookmarkSearch } from "./hooks/use-bookmark-search.hook";
 import { useFilterBookmark } from "./hooks/use-filter-bookmark.hook";
+import { useFaviconBackfill } from "./hooks/use-favicon-backfill.hook";
 import { RequiredActions } from "./components/BookmarkItemActionPanel";
 import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
+import { useUserCacheReset } from "./hooks/use-user-cache-reset.hook";
 import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
 import { cache } from "./utils/cache.util";
 import { useCachedState } from "@raycast/utils";
-import { CACHED_KEY_RANKING_ENTRIES, CACHED_KEY_SESSION_TOKEN } from "./utils/constants.util";
+import {
+  CACHED_KEY_RANKING_ENTRIES,
+  CACHED_KEY_SESSION_TOKEN,
+  CACHED_KEY_SHOWING_DETAIL,
+} from "./utils/constants.util";
 import { RankingEntries } from "./types";
 import { trpc } from "./utils/trpc.util";
 import { SpaceAuthFormBody } from "./views/SpaceAuthForm";
@@ -31,6 +37,7 @@ export function Body() {
     });
   const { data, isFetching, isFetched, refetch: refetchBookmarks } = useMyBookmarks();
   const [rankingEntries, setRankingEntries] = useCachedState<RankingEntries>(CACHED_KEY_RANKING_ENTRIES, {});
+  const [isShowingDetail, setIsShowingDetail] = useCachedState<boolean>(CACHED_KEY_SHOWING_DETAIL, false);
 
   const [keyword, setKeyword] = useState("");
   useEffect(() => {
@@ -40,6 +47,9 @@ export function Body() {
   const refetch = useCallback(async () => {
     await Promise.all([refetchBookmarks(), me.refetch(), refetchAuthRequiredSpaceIds()]);
   }, [refetchBookmarks, me.refetch, refetchAuthRequiredSpaceIds]);
+
+  // favicon이 비어있는 북마크를 백그라운드에서 resolve & 서버에 보고 (로컬 캐시도 동시 업데이트).
+  useFaviconBackfill(data);
 
   const selectedTags = useMemo(() => {
     if (!me.data) return [];
@@ -76,7 +86,7 @@ export function Body() {
     const helpTexts = [
       hasSpaceFilter ? `"!<spaceName>"` : "",
       hasCreatorFilter ? `"@<creator>"` : "",
-      hasTagFilter ? `"#<tag>#"` : "",
+      hasTagFilter ? `"#<tag>"` : "",
     ].filter(Boolean);
 
     return hasFilter ? `Filtered by ${helpTexts.join(", ")} pattern` : "";
@@ -91,6 +101,7 @@ export function Body() {
   }, [enabledSpaceIds, authRequiredSpaceIds]);
 
   const { loggedOutStatus } = useLoggedOutStatus();
+  useUserCacheReset(me.data?.email);
   if (loggedOutStatus) {
     return <LoginFormInView />;
   }
@@ -140,7 +151,7 @@ export function Body() {
         <List.Section title={`No results found. ${filterText}`}>
           <List.Item icon={Icon.Folder} title="!<spaceName> (filter by space name) " />
           <List.Item icon={Icon.Person} title="@<creator> (filter by creator) " />
-          <List.Item icon={Icon.Tag} title="#<tag># (filter by tag) " />
+          <List.Item icon={Icon.Tag} title="#<tag> (filter by tag) " />
         </List.Section>
       </List>
     );
@@ -149,6 +160,7 @@ export function Body() {
   return (
     <List
       isLoading={isFetching || !me.data}
+      isShowingDetail={isShowingDetail}
       searchBarAccessory={me.data && enabledSpaceIds && <BookmarkFilter spaceIds={enabledSpaceIds} me={me.data} />}
       searchText={keyword}
       onSearchTextChange={setKeyword}
@@ -164,6 +176,8 @@ export function Body() {
               refetch={refetch}
               rankingEntries={rankingEntries}
               setRankingEntries={setRankingEntries}
+              isShowingDetail={isShowingDetail}
+              setIsShowingDetail={setIsShowingDetail}
             />
           ))}
         </List.Section>
@@ -179,6 +193,8 @@ export function Body() {
               refetch={refetch}
               rankingEntries={rankingEntries}
               setRankingEntries={setRankingEntries}
+              isShowingDetail={isShowingDetail}
+              setIsShowingDetail={setIsShowingDetail}
             />
           ))}
         </List.Section>

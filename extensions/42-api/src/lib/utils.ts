@@ -2,7 +2,7 @@
  * Utility functions for the 42 API extension
  */
 
-import { LocationStats, TimeComponents, DateRange } from "./types";
+import { LocationStats, TimeComponents, DateRange, Location } from "./types";
 
 // =============================================================================
 // TIME PARSING & FORMATTING
@@ -103,15 +103,16 @@ export function formatDateString(date: Date): string {
  */
 export function getDateRange(daysBack = 0): DateRange {
   const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
   const startDate = new Date(today);
   startDate.setDate(startDate.getDate() - daysBack);
+  startDate.setHours(0, 0, 0, 0);
+
+  const endDate = new Date(today);
+  endDate.setHours(23, 59, 59, 999);
 
   return {
-    beginAt: formatDateString(startDate),
-    endAt: formatDateString(tomorrow),
+    beginAt: startDate.toISOString(),
+    endAt: endDate.toISOString(),
   };
 }
 
@@ -120,6 +121,44 @@ export function getDateRange(daysBack = 0): DateRange {
  */
 export function getTodayRange(): DateRange {
   return getDateRange(0);
+}
+
+function normalizeRangeBoundary(value: string, isEnd = false): string {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return `${value}${isEnd ? "T23:59:59.999Z" : "T00:00:00.000Z"}`;
+  }
+  return value;
+}
+
+export function buildLocationsRangeParam(dateRange: DateRange): string {
+  return `${normalizeRangeBoundary(dateRange.beginAt)},${normalizeRangeBoundary(dateRange.endAt, true)}`;
+}
+
+function formatSecondsAsTime(totalSeconds: number): string {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.000000`;
+}
+
+export function aggregateLocationsByDay(locations: Location[], rangeEnd?: string): LocationStats {
+  const totals = new Map<string, number>();
+  const now = Date.now();
+  const maxEndTime = rangeEnd ? new Date(rangeEnd).getTime() : now;
+
+  for (const location of locations) {
+    const begin = new Date(location.begin_at).getTime();
+    const rawEnd = location.end_at ? new Date(location.end_at).getTime() : now;
+    const end = Math.min(rawEnd, maxEndTime);
+
+    if (!Number.isFinite(begin) || !Number.isFinite(end) || end <= begin) continue;
+
+    const dayKey = formatDateString(new Date(location.begin_at));
+    totals.set(dayKey, (totals.get(dayKey) || 0) + Math.floor((end - begin) / 1000));
+  }
+
+  return Object.fromEntries(Array.from(totals.entries()).map(([day, seconds]) => [day, formatSecondsAsTime(seconds)]));
 }
 
 // =============================================================================

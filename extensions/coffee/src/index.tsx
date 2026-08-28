@@ -1,7 +1,18 @@
-import { Color, LaunchProps, MenuBarExtra, getPreferenceValues, showHUD } from "@raycast/api";
+import {
+  Color,
+  Icon,
+  LaunchProps,
+  LaunchType,
+  MenuBarExtra,
+  getPreferenceValues,
+  launchCommand,
+  showHUD,
+} from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { formatDuration, startCaffeinate, stopCaffeinate } from "./utils";
+import { formatDuration, startCaffeinate, stopCaffeinate, deviceName } from "./utils";
+import { maybeAutoCaffeinate } from "./status";
+import { CaffeinateStatus, get_caffeinate_state } from "rust:../rust";
 
 function parseEtime(etime: string): number {
   const parts = etime.split(":").reverse();
@@ -22,17 +33,32 @@ function parseEtime(etime: string): number {
 
 interface CaffeinateInfo {
   isRunning: boolean;
-  timeRemaining: string | null;
+  totalSeconds: number | null;
+  startTime: number | null;
 }
 
+const DURATION_PRESETS: { label: string; seconds: number }[] = [
+  { label: "10 Minutes", seconds: 10 * 60 },
+  { label: "30 Minutes", seconds: 30 * 60 },
+  { label: "1 Hour", seconds: 1 * 3600 },
+  { label: "2 Hours", seconds: 2 * 3600 },
+  { label: "4 Hours", seconds: 4 * 3600 },
+  { label: "8 Hours", seconds: 8 * 3600 },
+  { label: "12 Hours", seconds: 12 * 3600 },
+];
+
 function useCaffeinateInfo(execute: boolean) {
+  if (process.platform === "win32") {
+    return useWindowsCaffeinateInfo(execute);
+  }
+
   const { isLoading, data, mutate } = useExec("ps -o etime,args= -p $(pgrep caffeinate) 2>/dev/null", [], {
     shell: true,
     execute,
     parseOutput: (output): CaffeinateInfo => {
       const stdout = output.stdout.trim();
       if (!stdout) {
-        return { isRunning: false, timeRemaining: null };
+        return { isRunning: false, totalSeconds: null, startTime: null };
       }
 
       const lines = stdout.split("\n");
@@ -40,63 +66,152 @@ function useCaffeinateInfo(execute: boolean) {
 
       const secondsRunning = parseEtime(etime);
       const timeoutMatch = cmdArgs.join(" ").match(/-t (\d+)/);
+      const totalSeconds = timeoutMatch ? parseInt(timeoutMatch[1]) : null;
+      const startTime = Date.now() - secondsRunning * 1000;
 
-      let timeRemaining: string | null = null;
-      if (timeoutMatch) {
-        const secondsRemain = parseInt(timeoutMatch[1]) - secondsRunning;
-        if (secondsRemain > 0) {
-          timeRemaining = `${formatDuration(secondsRemain)} remain`;
-        }
-      }
-
-      return { isRunning: true, timeRemaining };
+      return { isRunning: true, totalSeconds, startTime };
     },
   });
 
   return {
     isLoading,
-    data: data ?? { isRunning: false, timeRemaining: null },
+    data: data ?? { isRunning: false, totalSeconds: null, startTime: null },
     mutate,
   };
+}
+
+type MutateOptions = { optimisticUpdate?: () => CaffeinateInfo };
+
+function useWindowsCaffeinateInfo(execute: boolean) {
+  const [isLoading, setIsLoading] = useState(execute);
+  const [data, setData] = useState<CaffeinateInfo>({ isRunning: false, totalSeconds: null, startTime: null });
+
+  const applyState = (info: CaffeinateStatus): CaffeinateInfo => ({
+    isRunning: info.running,
+    totalSeconds: info.durationSeconds,
+    startTime: info.startTime ? info.startTime * 1000 : null,
+  });
+
+  useEffect(() => {
+    if (!execute) return;
+    let disposed = false;
+
+    const refresh = async () => {
+      try {
+        const info = await get_caffeinate_state();
+        if (disposed) return;
+        setData(applyState(info));
+      } catch {
+        if (disposed) return;
+        setData({ isRunning: false, totalSeconds: null, startTime: null });
+      } finally {
+        if (!disposed) setIsLoading(false);
+      }
+    };
+
+    refresh();
+    const interval = setInterval(refresh, 5000);
+    return () => {
+      disposed = true;
+      clearInterval(interval);
+    };
+  }, [execute]);
+
+  const mutate = async (ctx?: Promise<unknown>, options?: MutateOptions) => {
+    if (options?.optimisticUpdate) setData(options.optimisticUpdate());
+    if (ctx) {
+      try {
+        await ctx;
+      } catch {
+        // Ignore: the status refresh below reports the actual state.
+      }
+    }
+    try {
+      const info = await get_caffeinate_state();
+      setData(applyState(info));
+    } catch {
+      // Keep the optimistic value.
+    }
+  };
+
+  return { isLoading, data, mutate };
 }
 
 export default function Command(props: LaunchProps) {
   const hasLaunchContext = props.launchContext?.caffeinated !== undefined;
 
-  // Always execute to get time remaining info, even when we have launch context
   const { isLoading, data, mutate } = useCaffeinateInfo(true);
 
-  // Use launch context for immediate status if available, otherwise use data from useExec
   const caffeinateStatus = hasLaunchContext ? props?.launchContext?.caffeinated : data.isRunning;
   const caffeinateLoader = hasLaunchContext ? false : isLoading;
   const preferences = getPreferenceValues<Preferences.Index>();
 
-  const extraInfoStr = data.timeRemaining;
+  const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState<boolean | null>(null);
+  const [, setTick] = useState(0);
 
-  const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState(caffeinateStatus);
+  const displayCaffeinateStatus = localCaffeinateStatus ?? caffeinateStatus;
 
   useEffect(() => {
-    setLocalCaffeinateStatus(caffeinateStatus);
+    setLocalCaffeinateStatus(null);
   }, [caffeinateStatus]);
 
-  const handleCaffeinateStatus = async () => {
-    if (localCaffeinateStatus) {
-      setLocalCaffeinateStatus(false);
-      await mutate(stopCaffeinate({ menubar: true, status: true }), {
-        optimisticUpdate: () => ({ isRunning: false, timeRemaining: null }),
-      });
-      if (preferences.hidenWhenDecaffeinated) {
-        showHUD("Your Mac is now decaffeinated");
-      }
-    } else {
-      setLocalCaffeinateStatus(true);
-      await mutate(startCaffeinate({ menubar: true, status: true }), {
-        optimisticUpdate: () => ({ isRunning: true, timeRemaining: null }),
-      });
+  useEffect(() => {
+    if (isLoading) return;
+    void maybeAutoCaffeinate();
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (!displayCaffeinateStatus || data.totalSeconds === null || data.startTime === null) return;
+    const interval = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, [displayCaffeinateStatus, data.totalSeconds, data.startTime]);
+
+  const liveRemaining = (() => {
+    if (!displayCaffeinateStatus || data.totalSeconds === null || data.startTime === null) return null;
+    const remain = data.totalSeconds - Math.floor((Date.now() - data.startTime) / 1000);
+    return remain > 0 ? `${formatDuration(remain)} remain` : null;
+  })();
+
+  const indefinitelyActive = displayCaffeinateStatus && data.totalSeconds === null;
+
+  const untilActive =
+    displayCaffeinateStatus &&
+    data.totalSeconds !== null &&
+    data.startTime !== null &&
+    !DURATION_PRESETS.some((p) => p.seconds === data.totalSeconds);
+
+  const untilSubtitle = (() => {
+    if (!untilActive || data.totalSeconds === null || data.startTime === null) return undefined;
+    const target = new Date(data.startTime + data.totalSeconds * 1000);
+    const time = target.toLocaleTimeString([], { timeStyle: "short" });
+    const sameDay = target.toDateString() === new Date().toDateString();
+    const targetLabel = sameDay ? time : `${target.toLocaleDateString([], { weekday: "short" })} ${time}`;
+    return liveRemaining ? `${targetLabel} — ${liveRemaining}` : targetLabel;
+  })();
+
+  const handleStartFor = async (seconds: number | null, durationLabel: string) => {
+    setLocalCaffeinateStatus(true);
+    const additionalArgs = seconds === null ? undefined : `-t ${seconds}`;
+    const hudMessage =
+      seconds === null
+        ? `Caffeinating your ${deviceName()} ${durationLabel}`
+        : `Caffeinating your ${deviceName()} for ${durationLabel}`;
+    await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs), {
+      optimisticUpdate: () => ({ isRunning: true, totalSeconds: seconds, startTime: Date.now() }),
+    });
+  };
+
+  const handleDeactivate = async () => {
+    setLocalCaffeinateStatus(false);
+    await mutate(stopCaffeinate({ menubar: true, status: true }), {
+      optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
+    });
+    if (preferences.hidenWhenDecaffeinated) {
+      showHUD(`Your ${deviceName()} is now decaffeinated`);
     }
   };
 
-  if (preferences.hidenWhenDecaffeinated && !localCaffeinateStatus && !isLoading) {
+  if (preferences.hidenWhenDecaffeinated && !displayCaffeinateStatus && !isLoading) {
     return null;
   }
 
@@ -104,19 +219,45 @@ export default function Command(props: LaunchProps) {
     <MenuBarExtra
       isLoading={caffeinateLoader}
       icon={
-        localCaffeinateStatus
+        displayCaffeinateStatus
           ? { source: `${preferences.icon}-filled.svg`, tintColor: Color.PrimaryText }
           : { source: `${preferences.icon}-empty.svg`, tintColor: Color.PrimaryText }
       }
     >
       {isLoading ? null : (
         <>
-          <MenuBarExtra.Section title={`Your mac is ${localCaffeinateStatus ? "caffeinated" : "decaffeinated"}`} />
-          {localCaffeinateStatus && extraInfoStr && <MenuBarExtra.Section title={extraInfoStr} />}
-          <MenuBarExtra.Item
-            title={localCaffeinateStatus ? "Decaffeinate" : "Caffeinate"}
-            onAction={handleCaffeinateStatus}
-          />
+          {displayCaffeinateStatus && <MenuBarExtra.Item title="Decaffeinate" onAction={handleDeactivate} />}
+          <MenuBarExtra.Section title="Caffeinate">
+            <MenuBarExtra.Item
+              title="Indefinitely"
+              icon={indefinitelyActive ? Icon.Checkmark : undefined}
+              onAction={indefinitelyActive ? handleDeactivate : () => handleStartFor(null, "indefinitely")}
+            />
+            {DURATION_PRESETS.map(({ label, seconds }) => {
+              const isActive = displayCaffeinateStatus && data.totalSeconds === seconds;
+              return (
+                <MenuBarExtra.Item
+                  key={label}
+                  title={label}
+                  subtitle={isActive ? (liveRemaining ?? undefined) : undefined}
+                  icon={isActive ? Icon.Checkmark : undefined}
+                  onAction={isActive ? handleDeactivate : () => handleStartFor(seconds, label.toLowerCase())}
+                />
+              );
+            })}
+          </MenuBarExtra.Section>
+          <MenuBarExtra.Section>
+            <MenuBarExtra.Item
+              title="Until…"
+              subtitle={untilSubtitle}
+              icon={untilActive ? Icon.Checkmark : undefined}
+              onAction={
+                untilActive
+                  ? handleDeactivate
+                  : () => launchCommand({ name: "caffeinateUntil", type: LaunchType.UserInitiated })
+              }
+            />
+          </MenuBarExtra.Section>
         </>
       )}
     </MenuBarExtra>

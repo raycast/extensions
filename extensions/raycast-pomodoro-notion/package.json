@@ -1,0 +1,215 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-pomodoro-notion",
+  "title": "PomoNotion Raycast Extension",
+  "description": "A Raycast Pomodoro timer with Notion logging, ambient audio, and active-minute tracking.",
+  "icon": "icon.png",
+  "author": "hk_raycast",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "pomonotion",
+    "pomodoro",
+    "timer",
+    "notion",
+    "focus",
+    "productivity"
+  ],
+  "commands": [
+    {
+      "name": "start-pomodoro",
+      "title": "Start Pomodoro",
+      "description": "Start a new Pomodoro work session.",
+      "mode": "view"
+    },
+    {
+      "name": "pomodoro-status",
+      "title": "Pomodoro Status",
+      "description": "View and control the current Pomodoro session.",
+      "mode": "view"
+    },
+    {
+      "name": "configure-notion",
+      "title": "Configure Notion",
+      "description": "Validate Notion settings and the target database schema.",
+      "mode": "view"
+    },
+    {
+      "name": "pause-pomodoro",
+      "title": "Pause Pomodoro",
+      "description": "Pause the current Pomodoro session.",
+      "mode": "no-view",
+      "keywords": [
+        "pause"
+      ]
+    },
+    {
+      "name": "resume-pomodoro",
+      "title": "Resume Pomodoro",
+      "description": "Resume a paused Pomodoro session.",
+      "mode": "no-view",
+      "keywords": [
+        "resume",
+        "restart"
+      ]
+    },
+    {
+      "name": "timer-elapsed",
+      "title": "Internal: Timer Elapsed",
+      "description": "Internal command for timer completion handling.",
+      "mode": "no-view"
+    },
+    {
+      "name": "finish-current-session",
+      "title": "Finish Current Session",
+      "description": "Finish the current work or break session.",
+      "mode": "view",
+      "keywords": [
+        "finish",
+        "end"
+      ]
+    },
+    {
+      "name": "discard-session",
+      "title": "Discard Session",
+      "description": "Stop the current session, optionally saving work logs.",
+      "mode": "view",
+      "keywords": [
+        "discard",
+        "reset",
+        "stop"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notionToken",
+      "title": "Notion Token (Advanced)",
+      "description": "Optional manual setup. Notion Connect access token. OAuth in Configure Notion is recommended for most users.",
+      "type": "password",
+      "required": false,
+      "placeholder": "secret_xxxxx"
+    },
+    {
+      "name": "notionDatabaseId",
+      "title": "Notion Database ID (Advanced)",
+      "description": "Optional manual setup. Database ID for Pomodoro work logs when not using OAuth database selection.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "name": "workMinutes",
+      "title": "Work Minutes",
+      "description": "Work duration in minutes for each session. Default is 25 minutes.",
+      "type": "textfield",
+      "required": true,
+      "default": "25",
+      "placeholder": "25"
+    },
+    {
+      "name": "shortBreakMinutes",
+      "title": "Short Break Minutes",
+      "description": "Short break duration in minutes after most work sessions.",
+      "type": "textfield",
+      "required": true,
+      "default": "5",
+      "placeholder": "5"
+    },
+    {
+      "name": "longBreakMinutes",
+      "title": "Long Break Minutes",
+      "description": "Long break duration in minutes after the configured cycle count.",
+      "type": "textfield",
+      "required": true,
+      "default": "15",
+      "placeholder": "15"
+    },
+    {
+      "name": "longBreakEvery",
+      "title": "Long Break Every",
+      "description": "Number of completed work sessions before starting a long break.",
+      "type": "textfield",
+      "required": true,
+      "default": "4",
+      "placeholder": "4"
+    },
+    {
+      "name": "workSoundFile",
+      "title": "Work Sound File",
+      "description": "Optional audio file to loop during work sessions.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "breakSoundFile",
+      "title": "Break Sound File",
+      "description": "Optional audio file to loop during break sessions.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "alarmSoundFile",
+      "title": "Alarm Sound File",
+      "description": "Optional audio file to play once when a session ends.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "workVolume",
+      "title": "Work Volume",
+      "description": "Playback volume for work audio, from 0 to 100.",
+      "type": "textfield",
+      "required": true,
+      "default": "60",
+      "placeholder": "60"
+    },
+    {
+      "name": "breakVolume",
+      "title": "Break Volume",
+      "description": "Playback volume for break audio, from 0 to 100.",
+      "type": "textfield",
+      "required": true,
+      "default": "50",
+      "placeholder": "50"
+    },
+    {
+      "name": "alarmVolume",
+      "title": "Alarm Volume",
+      "description": "Playback volume for the alarm sound, from 0 to 100.",
+      "type": "textfield",
+      "required": true,
+      "default": "80",
+      "placeholder": "80"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test:state": "tsx --test src/lib/pomodoro-state.test.ts",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@notionhq/client": "^5.21.0",
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.2.7",
+    "react": "^19.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.2",
+    "@types/react": "19.2.13",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "tsx": "^4.22.0",
+    "typescript": "^5.9.3"
+  }
+}

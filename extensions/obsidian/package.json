@@ -22,9 +22,17 @@
     "chris_van_es",
     "vicampuzano",
     "ErBlack",
-    "byheaven"
+    "byheaven",
+    "tofrankie",
+    "alexi.build",
+    "veilwalker",
+    "swhl",
+    "raulkolaric"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
   "preferences": [
     {
       "name": "vaultPath",
@@ -645,7 +653,7 @@
       "name": "searchNote",
       "title": "Search Note",
       "description": "Search for notes in Obsidian vaults by title, path, and optionally content.",
-      "instructions": "Use this tool to find notes. By default searches inside note content (searchContent=true) which enables tag filtering with 'tag:tagname' syntax. For faster title-only search, set searchContent=false. Returns a list of matching notes with vault name and path. Does not open Obsidian. Specifying a vault name is very important. Only keep it empty when the user did not mention anything in that direction."
+      "instructions": "Use this tool to find notes. By default searches title and path only (searchContent=false). Set searchContent=true only when the user needs full-text or tag search ('tag:tagname'). Content search skips Markdown files larger than 1 MiB to stay under the extension memory limit. Returns a list of matching notes with vault name and path. Does not open Obsidian. Specifying a vault name is very important. Only keep it empty when the user did not mention anything in that direction."
     },
     {
       "name": "createNote",
@@ -679,8 +687,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
+    "@raycast/api": "^1.104.23",
     "@types/uuid": "^8.3.4",
+    "fast-glob": "^3.3.3",
     "fuse.js": "^7.0.0",
     "luxon": "^3.4.4",
     "minisearch": "^7.1.2",
@@ -689,16 +698,16 @@
     "yaml": "^2.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.14.1",
     "@types/pako": "^2.0.3",
     "@types/react": "19.0.10",
-    "@vitest/coverage-v8": "^3.2.4",
-    "eslint": "^8.42.0",
+    "@vitest/coverage-v8": "^3.2.6",
+    "eslint": "^9.22.0",
     "prettier": "^2.8.8",
     "typescript": "^4.5.4",
-    "vitest": "^3.1.1"
+    "vitest": "^3.2.6"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -715,5 +724,5 @@
     "macOS",
     "Windows"
   ],
-  "version": "1.0.1"
+  "version": "1.0.3"
 }

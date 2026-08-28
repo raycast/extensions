@@ -6,6 +6,8 @@ import { MetadataExtractor } from "./metadata-extractor";
 import { getExtractor } from "../extractors";
 import { getSiteConfig } from "../config/site-config";
 
+type LinkedomDocument = ReturnType<typeof parseHTML>["document"];
+
 export interface ArticleContent {
   title: string;
   content: string;
@@ -33,32 +35,87 @@ export interface ReadabilityOptions {
 }
 
 /**
- * Converts relative URLs in HTML to absolute URLs
+ * Rewrites relative img/a URLs to absolute ones, in place.
+ *
+ * Done on the DOM rather than by regex over the HTML string: linkedom does not
+ * fully resolve <base>, and the regex approach required an entire second copy of
+ * the document as a string just to hold the result.
  */
-function makeUrlsAbsolute(html: string, baseUrl: string): string {
-  const base = new URL(baseUrl);
+function makeUrlsAbsolute(document: LinkedomDocument, baseUrl: string): void {
+  const rewrite = (selector: string, attr: string) => {
+    document.querySelectorAll(selector).forEach((el) => {
+      const value = el.getAttribute(attr);
+      if (!value) return;
 
-  // Convert relative src attributes in img tags
-  html = html.replace(/(<img[^>]+src=["'])([^"']+)(["'])/gi, (match, prefix, url, suffix) => {
-    try {
-      const absoluteUrl = new URL(url, base).href;
-      return prefix + absoluteUrl + suffix;
-    } catch {
-      return match; // Keep original if URL parsing fails
+      try {
+        el.setAttribute(attr, new URL(value, baseUrl).href);
+      } catch {
+        // Leave unparseable URLs as they are
+      }
+    });
+  };
+
+  rewrite("img[src]", "src");
+  rewrite("a[href]", "href");
+}
+
+/** Generic article containers, tried in order when the site has no configured selector. */
+const FALLBACK_SELECTORS = [
+  ".post-content",
+  ".entry-content",
+  ".article-content",
+  ".content",
+  "article",
+  "main",
+  '[role="main"]',
+];
+
+/** Minimum text for a generic container to be believable as the article. */
+const MIN_FALLBACK_TEXT_LENGTH = 200;
+
+interface FallbackContent {
+  selector: string;
+  content: string;
+  textContent: string;
+}
+
+/**
+ * Grabs the best direct-extraction candidate, for use if Readability comes back empty.
+ *
+ * Must be called BEFORE `Readability.parse()`, which strips the document it is given —
+ * afterwards these selectors match nothing and the fallback can never fire.
+ */
+function captureFallbackContent(document: LinkedomDocument, url: string): FallbackContent | null {
+  // A site-configured selector is the best guess for that site, but it must still hold
+  // real text: the container often renders empty on a paywalled or JS-populated page, and
+  // returning that as a "successful" parse would suppress the browser-tab and Paywall
+  // Hopper recovery paths that could still get the actual article.
+  try {
+    const config = getSiteConfig(new URL(url).hostname);
+
+    if (config?.articleSelector) {
+      const el = document.querySelector(config.articleSelector);
+      const textContent = el?.textContent ?? "";
+
+      if (textContent.trim().length > MIN_FALLBACK_TEXT_LENGTH) {
+        return { selector: config.articleSelector, content: el?.innerHTML ?? "", textContent };
+      }
     }
-  });
+  } catch {
+    // Invalid URL — fall through to the generic containers
+  }
 
-  // Convert relative href attributes in a tags
-  html = html.replace(/(<a[^>]+href=["'])([^"']+)(["'])/gi, (match, prefix, url, suffix) => {
-    try {
-      const absoluteUrl = new URL(url, base).href;
-      return prefix + absoluteUrl + suffix;
-    } catch {
-      return match; // Keep original if URL parsing fails
+  for (const selector of FALLBACK_SELECTORS) {
+    const el = document.querySelector(selector);
+    if (!el) continue;
+
+    const textContent = el.textContent ?? "";
+    if (textContent.trim().length > MIN_FALLBACK_TEXT_LENGTH) {
+      return { selector, content: el.innerHTML ?? "", textContent };
     }
-  });
+  }
 
-  return html;
+  return null;
 }
 
 /**
@@ -72,24 +129,24 @@ export function parseArticle(
   parseLog.log("parse:start", { url, htmlLength: html.length });
 
   try {
-    // Preprocess HTML to convert relative URLs to absolute URLs
-    // This is necessary because linkedom doesn't fully support base element URL resolution
-    const absoluteHtml = makeUrlsAbsolute(html, url);
+    // One DOM for the whole pipeline.
+    //
+    // This previously built three: one inside preCleanHtml, one by re-parsing its
+    // serialized output, and one by re-parsing the original HTML for metadata — all
+    // alive at once, alongside two full copies of the HTML string. A 1.9MB page cost
+    // ~104MB of heap and tripped Raycast's 100MB limit; a single DOM costs ~33MB.
+    //
+    // The order below is what makes one DOM sufficient: absolutize and read metadata
+    // first, then clean. Metadata lives in <head> (JSON-LD, meta tags, title, canonical),
+    // which the cleaner never touches, so nothing is lost by sharing the document.
+    const { document } = parseHTML(html);
 
-    // Pre-clean HTML to remove sidebars, ads, comments, subscription boxes, etc.
-    // Based on Safari Reader Mode and Reader View patterns
-    const cleaningResult = preCleanHtml(absoluteHtml, url);
+    makeUrlsAbsolute(document, url);
 
-    const { document } = parseHTML(cleaningResult.html);
+    const metadata = MetadataExtractor.extract(document, url);
 
-    // Extract rich metadata from Schema.org JSON-LD, OG tags, etc. BEFORE cleaning
-    // We use the original HTML to preserve metadata that might be removed during cleaning
-    const { document: originalDoc } = parseHTML(absoluteHtml);
-    const metadata = MetadataExtractor.extract(originalDoc, url);
-
-    // Check if we have a site-specific extractor for this URL
-    // Extractors provide custom content extraction for sites that don't work well with Readability
-    const extractor = getExtractor(originalDoc, url, metadata.schemaOrgData);
+    // Site-specific extractors run against the uncleaned document, as they did before.
+    const extractor = getExtractor(document, url, metadata.schemaOrgData);
     if (extractor) {
       parseLog.log("parse:extractor", { url, extractor: extractor.siteName });
 
@@ -130,6 +187,11 @@ export function parseArticle(
       }
     }
 
+    // Strip sidebars, ads, comments, subscription boxes, and other non-article chrome.
+    // Mutates the document in place; only Readability sees the result, and site
+    // extractors have already returned above without needing it.
+    preCleanHtml(document, url);
+
     // Pre-check if content is likely readable
     if (!options.skipPreCheck) {
       const isReadable = isProbablyReaderable(document);
@@ -148,6 +210,11 @@ export function parseArticle(
       }
     }
 
+    // Readability CONSUMES the document: after parse() the body is stripped bare and
+    // every selector below would miss. Snapshot the fallback's candidate containers
+    // first, while the DOM still has content in it.
+    const fallbackContent = options.forceParse ? captureFallbackContent(document, url) : null;
+
     // Parse with Readability
     const reader = new Readability(document);
     const article = reader.parse();
@@ -156,92 +223,31 @@ export function parseArticle(
       const reason = !article ? "Readability returned null" : "empty content";
       parseLog.warn("parse:readability-failed", { url, reason });
 
-      // If forceParse is enabled, try direct extraction using site config articleSelector
-      if (options.forceParse) {
-        const hostname = new URL(url).hostname;
-        const config = getSiteConfig(hostname);
+      // Fall back to whatever we snapshotted before Readability emptied the document.
+      if (fallbackContent) {
+        parseLog.log("parse:force-extract:success", {
+          url,
+          selector: fallbackContent.selector,
+          contentLength: fallbackContent.content.length,
+        });
 
-        if (config?.articleSelector) {
-          parseLog.log("parse:force-extract", { url, selector: config.articleSelector });
-          const contentElement = document.querySelector(config.articleSelector);
-
-          if (contentElement) {
-            const content = contentElement.innerHTML || "";
-            const textContent = contentElement.textContent || "";
-
-            if (content.trim().length > 0) {
-              parseLog.log("parse:force-extract:success", {
-                url,
-                selector: config.articleSelector,
-                contentLength: content.length,
-              });
-
-              return {
-                success: true,
-                article: {
-                  title: metadata.title || "Untitled",
-                  content,
-                  textContent,
-                  excerpt: metadata.description || "",
-                  byline: null,
-                  siteName: metadata.siteName || null,
-                  length: textContent.length,
-                  author: metadata.author || null,
-                  published: metadata.published || null,
-                  image: metadata.image || null,
-                  description: metadata.description || null,
-                  favicon: metadata.favicon || null,
-                },
-              };
-            }
-          }
-        }
-
-        // Last resort: try to find any reasonable content container
-        parseLog.log("parse:force-extract:fallback", { url });
-        const fallbackSelectors = [
-          ".post-content",
-          ".entry-content",
-          ".article-content",
-          ".content",
-          "article",
-          "main",
-          '[role="main"]',
-        ];
-
-        for (const selector of fallbackSelectors) {
-          const el = document.querySelector(selector);
-          if (el) {
-            const content = el.innerHTML || "";
-            const textContent = el.textContent || "";
-
-            if (textContent.trim().length > 200) {
-              parseLog.log("parse:force-extract:fallback-success", {
-                url,
-                selector,
-                contentLength: content.length,
-              });
-
-              return {
-                success: true,
-                article: {
-                  title: metadata.title || "Untitled",
-                  content,
-                  textContent,
-                  excerpt: metadata.description || "",
-                  byline: null,
-                  siteName: metadata.siteName || null,
-                  length: textContent.length,
-                  author: metadata.author || null,
-                  published: metadata.published || null,
-                  image: metadata.image || null,
-                  description: metadata.description || null,
-                  favicon: metadata.favicon || null,
-                },
-              };
-            }
-          }
-        }
+        return {
+          success: true,
+          article: {
+            title: metadata.title || "Untitled",
+            content: fallbackContent.content,
+            textContent: fallbackContent.textContent,
+            excerpt: metadata.description || "",
+            byline: null,
+            siteName: metadata.siteName || null,
+            length: fallbackContent.textContent.length,
+            author: metadata.author || null,
+            published: metadata.published || null,
+            image: metadata.image || null,
+            description: metadata.description || null,
+            favicon: metadata.favicon || null,
+          },
+        };
       }
 
       parseLog.error("parse:error", { url, reason });

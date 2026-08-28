@@ -116,16 +116,38 @@ describe("SessionUsageCommandResponseSchema", () => {
     expect(result.sessions[0].lastActivity).toBe("2026-05-24");
   });
 
-  it("rejects sessions whose `metadata.lastActivity` is null with a clear field path", () => {
-    const result = SessionUsageCommandResponseSchema.safeParse({
+  it("accepts a session with no `metadata` at all, leaving `lastActivity` undefined", () => {
+    // ccusage emits some rows (e.g. a non-Claude agent) without a metadata
+    // object, so neither a top-level nor a nested lastActivity exists. One such
+    // row must not fail the whole list. See raycast/extensions#28423.
+    const result = SessionUsageCommandResponseSchema.parse({
+      session: [{ ...rowBase, period: "abc-123", agent: "claude" }],
+      totals,
+    });
+
+    expect(result.sessions[0].sessionId).toBe("abc-123");
+    expect(result.sessions[0].lastActivity).toBeUndefined();
+  });
+
+  it("accepts a session whose `metadata.lastActivity` is null, leaving `lastActivity` undefined", () => {
+    const result = SessionUsageCommandResponseSchema.parse({
       session: [{ ...rowBase, period: "abc-123", metadata: { lastActivity: null } }],
       totals,
     });
 
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].path).toEqual(["sessions", 0, "lastActivity"]);
-    }
+    expect(result.sessions[0].lastActivity).toBeUndefined();
+  });
+
+  it("keeps dated sessions intact when one in the list is dateless", () => {
+    const result = SessionUsageCommandResponseSchema.parse({
+      session: [
+        { ...rowBase, period: "dated", metadata: { lastActivity: "2026-05-24" } },
+        { ...rowBase, period: "dateless", agent: "claude" },
+      ],
+      totals,
+    });
+
+    expect(result.sessions.map((s) => s.lastActivity)).toEqual(["2026-05-24", undefined]);
   });
 });
 

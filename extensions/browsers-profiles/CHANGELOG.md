@@ -1,5 +1,10 @@
 # Raycast Browsers Profiles
 
+## [Copy Deeplink] - 2026-08-11
+
+- Copy a profile as deeplink (ref: [Issue #23606](https://github.com/raycast/extensions/issues/23606))
+- Update `metadata` images
+
 ## [Add Vivaldi browser support] - 2026-03-27
 
 - Adding Vivaldi browser to supported browser list

@@ -89,6 +89,7 @@ export interface SteamData {
   release_date?: { date?: string };
   short_description?: string;
   steam_appid?: number;
+  price_overview?: { discount_percent?: number };
 }
 
 export interface SteamAppDetailsResponse {

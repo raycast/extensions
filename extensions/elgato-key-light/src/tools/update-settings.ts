@@ -1,10 +1,10 @@
 import { convertFormTemperatureToActual } from "../elgato";
-import { discoverKeyLights, ToolResponse, formatErrorResponse } from "../utils";
+import { discoverKeyLights, ToolResponse, formatErrorResponse, getTargetLightNames } from "../utils";
 
 /**
- * Input parameters for updating Key Light settings
+ * Tool to update the settings of all connected Key Lights
  */
-interface SettingsInput {
+export default async function tool(input: {
   /**
    * Brightness percentage (0-100)
    */
@@ -20,22 +20,24 @@ interface SettingsInput {
    * Power state
    */
   on?: boolean;
-}
-
-/**
- * Tool to update the settings of all connected Key Lights
- */
-export default async function tool(input: SettingsInput): Promise<ToolResponse<SettingsInput>> {
+}): Promise<
+  ToolResponse<{
+    brightness?: number;
+    temperature?: number;
+    on?: boolean;
+  }>
+> {
   try {
     const keyLight = await discoverKeyLights();
+    const targets = await getTargetLightNames();
 
     // Convert the temperature if provided
-    const settings: SettingsInput = {
+    const settings = {
       ...input,
       temperature: input.temperature !== undefined ? convertFormTemperatureToActual(input.temperature) : undefined,
     };
 
-    await keyLight.update(settings);
+    await keyLight.update(settings, targets);
 
     return {
       success: true,

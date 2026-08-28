@@ -34,6 +34,7 @@ The article loader orchestrates fetching and extraction:
 - **Error handling** — Surfaces network errors, access denied, etc.
 
 Key functions:
+
 - `loadArticleFromUrl()` — Main entry point for loading articles
 - `loadArticleViaPaywallHopper()` — Bypass paywalls via archive services
 
@@ -53,11 +54,12 @@ For sites requiring custom logic that completely bypasses Readability:
 - **Medium** — Handles Medium's custom article structure
 
 All extractors extend `BaseExtractor` and implement:
+
 - `canExtract()` — Returns true if this extractor handles the URL
 - `extract()` — Returns extracted content, textContent, and metadata
 - `siteName` — Human-readable site name
 
-#### Site Configuration (`src/utils/site-config.ts`)
+#### Site Configuration (`src/config/site-config.ts`)
 
 For simpler sites that just need selector adjustments (works WITH Readability):
 
@@ -69,7 +71,7 @@ For simpler sites that just need selector adjustments (works WITH Readability):
     articleSelector: ".article-body",
     removeSelectors: [".ads", ".sidebar"],
   },
-]
+];
 ```
 
 Site configs are applied during HTML pre-cleaning before Readability runs.
@@ -77,6 +79,7 @@ Site configs are applied during HTML pre-cleaning before Readability runs.
 #### Mozilla Readability (Fallback)
 
 Default extraction for standard article pages. Automatically identifies and extracts:
+
 - Article title
 - Author byline
 - Site name
@@ -111,12 +114,14 @@ Clean Markdown Output
 HTML content is converted to Markdown using Turndown with customizations:
 
 **Turndown configuration:**
+
 - Heading style: ATX (`#`, `##`, etc.)
 - Code block style: Fenced (```)
 - Bullet list marker: `-`
 - GitHub Flavored Markdown: Enabled (tables, strikethrough, task lists)
 
 **Custom rules:**
+
 - Remove remaining unwanted elements (ads, forms, buttons)
 - Strip image alt text and titles (prevents rendering issues)
 - Convert bracket `[text]` to parentheses `(text)` (prevents LaTeX interpretation)
@@ -135,12 +140,14 @@ Article → buildSummaryPrompt() → Raycast AI → formatSummaryBlock() → Dis
 ```
 
 **Components:**
+
 - **Prompts** (`src/config/prompts.ts`) — Template for each summary style
 - **AI Config** (`src/config/ai.ts`) — Model and creativity per style
 - **Caching** (`src/utils/summaryCache.ts`) — LocalStorage cache by URL + style
 - **Logging** — Tracks generation time, token estimates, success/failure
 
 **Summary styles:**
+
 - Overview — One-liner + 3 bullet points
 - Opposing Sides — Two contrasting perspectives
 - The 5 Ws — Who, What, Where, When, Why
@@ -150,6 +157,7 @@ Article → buildSummaryPrompt() → Raycast AI → formatSummaryBlock() → Dis
 - Arc-style Summary — Detailed, fact-specific summary
 
 Each style has:
+
 - Custom prompt template
 - Specific AI model configuration
 - Unique creativity level
@@ -160,29 +168,35 @@ Each style has:
 The UI is composed of specialized views for different states:
 
 **ArticleDetailView** (`ArticleDetailView.tsx`)
+
 - Main reading view with article content
 - Inline summary display (above article body)
 - Streaming summary support with loading states
 - Action panel integration
 
 **BlockedPageView** (`BlockedPageView.tsx`)
+
 - Shown when site blocks requests (403 errors)
 - Detects browser extension availability
 - Provides fallback instructions
 
 **NotReadableView** (`NotReadableView.tsx`)
+
 - Shown when pre-check determines page isn't readable
 - Offers option to bypass check and try anyway
 
 **EmptyContentView** (`EmptyContentView.tsx`)
+
 - Shown when extraction succeeds but content is too short
 - Handles edge case of valid HTML but no article content
 
 **UrlInputForm** (`UrlInputForm.tsx`)
+
 - Fallback form when no URL found in any source
 - Validates input before proceeding
 
 **InactiveTabActions** (`InactiveTabActions.tsx`)
+
 - Special case for browser reimport when tab is inactive
 - Prompts user to focus tab before reimporting
 
@@ -191,17 +205,20 @@ The UI is composed of specialized views for different states:
 The extension uses React hooks for state management in `src/open.tsx`:
 
 ### Article State
+
 - `article` — Current article data (title, content, metadata)
 - `isLoading` — Loading state for initial fetch
 - `error` — Error messages from fetch/extraction
 
 ### Blocked Page State
+
 - `blockedUrl` — URL that returned 403
 - `hasBrowserExtension` — Browser extension availability
 - `isWaitingForBrowser` — Waiting for browser fallback
 - `foundTab` — Matching browser tab for reimport
 
 ### Summary State
+
 - `summaryStyle` — Current summary style (overview, eli5, etc.)
 - `summaryPrompt` — Generated prompt for AI
 - `cachedSummary` — Previously generated summary from cache
@@ -210,6 +227,7 @@ The extension uses React hooks for state management in `src/open.tsx`:
 - `isSummarizing` — Active summarization in progress
 
 ### Form State
+
 - `showUrlForm` — Whether to show URL input form
 - `invalidInput` — Invalid URL error message
 
@@ -218,6 +236,7 @@ The extension uses React hooks for state management in `src/open.tsx`:
 Actions are context-aware and change based on article state:
 
 **ArticleActions** (`ArticleActions.tsx`)
+
 - Copy as Markdown (primary)
 - Copy Summary
 - Open in Browser
@@ -227,6 +246,7 @@ Actions are context-aware and change based on article state:
 - Open Archive Link (when paywall bypassed)
 
 Actions are organized into sections and adapt to:
+
 - AI availability
 - Summary cache state
 - Archive metadata presence
@@ -247,6 +267,7 @@ See [logger-integration.md](./logger-integration.md) for detailed logging conven
 ## Data Types (`src/types/`)
 
 ### Article (`article.ts`)
+
 ```typescript
 interface ArticleState {
   url: string;
@@ -261,18 +282,13 @@ interface ArticleState {
 ```
 
 ### Summary (`summary.ts`)
+
 ```typescript
-type SummaryStyle =
-  | "overview"
-  | "opposite-sides"
-  | "five-ws"
-  | "eli5"
-  | "translated"
-  | "entities"
-  | "arc-style";
+type SummaryStyle = "overview" | "opposite-sides" | "five-ws" | "eli5" | "translated" | "entities" | "arc-style";
 ```
 
 ### Browser (`browser.ts`)
+
 ```typescript
 interface BrowserTab {
   id: number;
@@ -298,32 +314,35 @@ User preferences defined in package.json and accessed via `getPreferenceValues()
 
 The extension handles multiple error scenarios gracefully:
 
-| Scenario | Behavior |
-|----------|----------|
-| No URL found | Show URL input form |
-| Invalid URL | Show error with validation message |
-| Network failure | "Unable to reach URL" error |
-| 403 Forbidden | Show blocked page view with browser fallback |
-| 451 Legal | "Unavailable for legal reasons" message |
-| Not readable | Show bypass option with warning |
-| Empty content | "No content found" with options |
-| AI failure | Show content without summary, log error |
+| Scenario        | Behavior                                     |
+| --------------- | -------------------------------------------- |
+| No URL found    | Show URL input form                          |
+| Invalid URL     | Show error with validation message           |
+| Network failure | "Unable to reach URL" error                  |
+| 403 Forbidden   | Show blocked page view with browser fallback |
+| 451 Legal       | "Unavailable for legal reasons" message      |
+| Not readable    | Show bypass option with warning              |
+| Empty content   | "No content found" with options              |
+| AI failure      | Show content without summary, log error      |
 
 All errors are logged appropriately and surfaced to users with actionable next steps.
 
 ## Performance Considerations
 
 ### Caching
+
 - **Summary cache** — Summaries cached by URL + style in LocalStorage
 - **No article cache** — Articles are fetched fresh each time (content may change)
 
 ### Image Handling
+
 - Lazy-loaded images resolved during pre-cleaning
 - Relative URLs converted to absolute
 - Image alt text stripped to prevent rendering issues
 - Optional: Hide images via preference
 
 ### AI Streaming
+
 - Summaries stream progressively via `useAI` hook
 - Partial summaries displayed during generation
 - Final summary cached when complete
@@ -332,6 +351,7 @@ All errors are logged appropriately and surfaced to users with actionable next s
 ## Dependencies
 
 ### Production
+
 - `@mozilla/readability` — Content extraction
 - `turndown` + `turndown-plugin-gfm` — Markdown conversion
 - `linkedom` — DOM parsing in Node.js
@@ -339,6 +359,7 @@ All errors are logged appropriately and surfaced to users with actionable next s
 - `@raycast/api` + `@raycast/utils` — Raycast framework
 
 ### Development
+
 - `@raycast/eslint-config` — Linting rules
 - TypeScript types for all dependencies
 

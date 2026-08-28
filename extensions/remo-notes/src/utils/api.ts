@@ -2,16 +2,19 @@ import { getPreferenceValues } from "@raycast/api";
 import { DEFAULT_CONVEX_URL } from "../config";
 import type { AskAiResponse, Folder, Note } from "../types";
 
-type ListNotesParams = {
-  includeDeleted?: boolean;
-  tags?: string[];
-  source?: "web" | "raycast";
-  limit?: number;
+export type InfiniteView = "pinned" | "trash" | "locked" | "vault" | "shared";
+
+type InfiniteNotesParams = {
+  view?: InfiniteView;
   folderId?: string;
-  quickCapturedOnly?: boolean;
-  lockedOnly?: boolean;
-  e2eOnly?: boolean;
-  sharedOnly?: boolean;
+  cursor?: string | null;
+  numItems?: number;
+};
+
+export type PaginatedNotes = {
+  page: Note[];
+  isDone: boolean;
+  continueCursor: string;
 };
 
 type ApiErrorPayload = {
@@ -124,20 +127,15 @@ export const remoApi = {
     return request<Note[]>(`/notes/search${toQueryString({ query })}`);
   },
 
-  listNotes(params: ListNotesParams) {
+  infiniteNotes(params: InfiniteNotesParams) {
     const query = toQueryString({
-      includeDeleted: params.includeDeleted,
-      source: params.source,
-      limit: params.limit,
+      view: params.view,
       folderId: params.folderId,
-      quickCapturedOnly: params.quickCapturedOnly,
-      lockedOnly: params.lockedOnly,
-      e2eOnly: params.e2eOnly,
-      sharedOnly: params.sharedOnly,
-      tag: params.tags,
+      cursor: params.cursor ?? undefined,
+      numItems: params.numItems,
     });
 
-    return request<Note[]>(`/notes/list${query}`);
+    return request<PaginatedNotes>(`/notes/infinite${query}`);
   },
 
   listFolders() {
@@ -188,10 +186,24 @@ export const remoApi = {
     });
   },
 
-  permanentDelete(noteId: string, password?: string) {
+  permanentDelete(noteId: string) {
     return request<{ success: boolean }>("/notes/permanent-delete", {
       method: "POST",
-      body: JSON.stringify({ noteId, password }),
+      body: JSON.stringify({ noteId }),
+    });
+  },
+
+  updateNote(noteId: string, payload: { title?: string; tags?: string[]; folderId?: string | null }) {
+    return request<{ noteId: string }>("/notes/update", {
+      method: "POST",
+      body: JSON.stringify({ noteId, ...payload }),
+    });
+  },
+
+  softDeleteNote(noteId: string) {
+    return request<{ success: boolean }>("/notes/delete", {
+      method: "POST",
+      body: JSON.stringify({ noteId }),
     });
   },
 

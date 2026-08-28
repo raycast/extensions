@@ -64,6 +64,36 @@ async function getChannelIdByChannelName(channelName?: string) {
   return undefined;
 }
 
+type HistoryMessage = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getSlackWebClient>["conversations"]["history"]>>["messages"]
+>[number];
+
+/**
+ * Extracts the text content of a message. Bot/webhook messages (e.g. IFTTT tweet streams)
+ * often have an empty top-level `text` with the actual content living in `attachments` or `blocks`.
+ */
+function getMessageText(message: HistoryMessage) {
+  if (message.text) {
+    return message.text;
+  }
+
+  const attachmentText = message.attachments
+    ?.map(
+      (attachment) =>
+        [attachment.pretext, attachment.title, attachment.text].filter(Boolean).join("\n") || attachment.fallback,
+    )
+    .filter(Boolean)
+    .join("\n\n");
+  if (attachmentText) {
+    return attachmentText;
+  }
+
+  return message.blocks
+    ?.map((block) => block.text?.text)
+    .filter(Boolean)
+    .join("\n");
+}
+
 async function getChannelHistory(input: Input) {
   const slackWebClient = getSlackWebClient();
   const { after, text }: Input = input;
@@ -92,8 +122,8 @@ async function getChannelHistory(input: Input) {
   }
 
   return messages.messages?.map((message) => ({
-    text: message.text,
-    user: message.user,
+    text: getMessageText(message),
+    user: message.user ?? message.bot_profile?.name ?? message.username,
     ts: message.ts,
     date: message.ts ? new Date(parseInt(message.ts, 10) * 1000).toISOString() : undefined,
   }));

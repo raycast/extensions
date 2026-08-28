@@ -1,12 +1,18 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
 import { TEAK_SETTINGS_URL } from "../lib/constants";
 import { SetApiKeyAction } from "./SetApiKeyAction";
+import { SignInWithBrowserAction } from "./SignInWithBrowserAction";
 
-export function MissingApiKeyDetail() {
+interface MissingApiKeyDetailProps {
+  onSignedIn?: () => void;
+}
+
+export function MissingApiKeyDetail({ onSignedIn }: MissingApiKeyDetailProps) {
   return (
     <Detail
       actions={
         <ActionPanel>
+          <SignInWithBrowserAction onSignedIn={onSignedIn} />
           <SetApiKeyAction />
           <Action.OpenInBrowser
             title="Open Teak Settings"
@@ -15,11 +21,11 @@ export function MissingApiKeyDetail() {
         </ActionPanel>
       }
       markdown={[
-        "# API key required",
+        "# Sign in to Teak",
         "",
-        "Create an API key in **Teak Settings > API Keys** and add it to Raycast preferences.",
+        "Sign in with your browser to start saving and searching cards. No API key required.",
         "",
-        "Use **Set API Key** to open extension preferences instantly.",
+        "Prefer an API key? Use **Set API Key** to open extension preferences and paste one from **Teak Settings → Manage API Keys**.",
       ].join("\n")}
     />
   );

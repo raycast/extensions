@@ -1,5 +1,63 @@
 # GitHub Changelog
 
+## [Search Repositories UX and Performance Fixes] - 2026-08-22
+
+- Search Repositories: Show **Recent Visited Repositories** when the search field is empty instead of running a blank API search.
+- Search Repositories: Add **Disable Throttle** preference for immediate search on each keystroke.
+- Search Repositories: Restore **My Organizations** filter when you belong to multiple organizations.
+- Repository history: Remove items from recently visited and refresh star state without a full list reload.
+- Search Repositories: Request fewer GraphQL fields per search result for faster responses.
+- Show Issues (per repository): Filter by open/closed/all and look up issues by `#123`.
+
+## [Search Pagination and Repository List Improvements] - 2026-08-14
+
+- Search Repositories: Add pagination and a **Relevance** sort option (now the default).
+- Search Pull Requests and Notifications: Add pagination so more results can be loaded beyond the initial page.
+- Repository lists: Show language and compact update date in accessories; use ★/☆ to reflect whether you starred the repository.
+- Preferences: Lower the default number of search results to 25 for faster initial loads.
+- Unread Notifications: Paginate the GitHub inbox so the menu bar count and repository filters include all unread threads, not just the first page.
+- Clone in VS Code: Add an extension preference to choose VS Code or Cursor, defaulting to VS Code from every repository command.
+- Open in Web IDE: Add **DeepWiki** to open AI-generated repository docs at deepwiki.com.
+- Search Issues: Look up a specific issue by number (`#123`, `owner/repo#123`, or `repo:owner/name 123`) via the GitHub API instead of full-text search.
+
+## [Clarify Clone and Download Actions] - 2026-08-13
+
+- Renamed repository actions and the **Download Repository as ZIP** command so clone (`git clone`) and ZIP download flows are clearly distinct.
+- Renamed the **Clone Path** preference to **Default Clone Path** and clarified that it applies only to clone actions, not ZIP downloads or AI-assisted flows.
+- **Clone with Options** now starts at your Default Clone Path when one is set, with inline guidance on how to override it for a single clone.
+- **Download as ZIP** forms explain that archives do not create a Git repository and do not use the Default Clone Path.
+- README: added a **Cloning and Downloading Repositories** section describing when to use each flow.
+- Normalized action titles to Title Case (`Enable Auto-Merge`, `Re-Run Workflow`, `Sort by`).
+
+## [Show CI status in pull request details] - 2026-08-10
+
+- Added a "Checks" row to pull request details showing successful, failed, or pending CI status.
+
+## [Improve GraphQL Code Generation] - 2026-08-10
+
+- Make GraphQL type generation deterministic and credential-free by using a checked-in GitHub schema.
+
+## [View Pull Request Diffs] - 2026-08-06
+
+- Added a "View Diff" action to pull requests, showing changed files with per-file patches that load progressively as you scroll.
+- Added a `get-pull-request-diff` AI tool.
+
+## [Clone with GitHub CLI] - 2026-08-06
+
+- Added a "Clone Tool" choice to the "Clone with Options" flow, letting you clone repositories with the GitHub CLI (`gh repo clone`) instead of plain `git clone`, using your existing `gh` authentication and configuration.
+- The Git method remains the default, and the target directory and branch options are preserved when using GitHub CLI.
+- Shows actionable guidance when the GitHub CLI is not installed or not authenticated.
+- Security: clone commands are now spawned without a shell, so branches and paths containing shell characters are handled safely.
+- Fixed `gh` detection for installations in Homebrew or other directories that are missing from Raycast's PATH.
+
+## [Show README in repository actions] - 2026-08-03
+
+- Added a "Show Readme" action to the Search Repositories, My Latest Repositories, and My Starred Repositories commands that renders the repository's README inside Raycast, with relative links and images resolved to absolute URLs.
+
+## [Mark draft pull requests as ready for review] - 2026-07-09
+
+- Added a "Ready for Review" action to pull request lists, shown for your own draft pull requests.
+
 ## [Fix opening GitHub URLs on Windows] - 2026-05-28
 
 - Updated the extension runtime dependencies so GitHub URLs open correctly in the default browser on Windows.
@@ -29,7 +87,7 @@
 - Added an `API` section showing the current GitHub API rate limit (remaining / total, with reset time tooltip).
 - Added a `Refresh Frequency` preference (15 minutes / 30 minutes / 1 hour / 2 hours, default 30 minutes) so users can balance freshness against GitHub API quota usage.
 - Each organization is now a submenu with quick access to **Open Profile**, **Repositories**, **People** and **Projects** instead of just opening the organization homepage.
-- `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the *Stats* menu bar enabled — the dedicated *My Pull Requests Menu Bar* and *My Issues Menu Bar* commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
+- `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the _Stats_ menu bar enabled — the dedicated _My Pull Requests Menu Bar_ and _My Issues Menu Bar_ commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
 
 ## [Download Repository Command] - 2026-04-28
 

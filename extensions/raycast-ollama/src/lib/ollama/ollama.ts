@@ -690,6 +690,10 @@ export class Ollama {
                 }
 
                 const emitDone = () => {
+                  if (textThinkingBuffer.length > 0) {
+                    e.emit("thinking", textThinkingBuffer);
+                    textThinkingBuffer = "";
+                  }
                   if (textContentBuffer.length > 0) e.emit("data", textContentBuffer);
                   e.emit("done", json);
                 };
@@ -700,7 +704,8 @@ export class Ollama {
                     if (textThinkingBuffer !== "") {
                       e.emit("thinking", textThinkingBuffer);
                       textThinkingBuffer = "";
-                    } else if (textContentBuffer !== "") {
+                    }
+                    if (textContentBuffer !== "") {
                       e.emit("data", textContentBuffer);
                       textContentBuffer = "";
                     }

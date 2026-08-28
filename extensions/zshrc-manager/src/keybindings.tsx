@@ -50,9 +50,7 @@ export default function Keybindings({ searchBarAccessory }: KeybindingsProps) {
       searchFields={["key", "command", "section", "keymap"]}
       searchBarAccessory={searchBarAccessory}
       generateTitle={(item) =>
-        item.keymap
-          ? `[${item.keymap}] ${formatKeyDisplay(item.key)} → ${item.command}`
-          : `${formatKeyDisplay(item.key)} → ${item.command}`
+        item.keymap ? `[${item.keymap}] ${formatKeyDisplay(item.key)}` : formatKeyDisplay(item.key)
       }
       generateOverviewMarkdown={(_, allItems, grouped) => `
 # Keybindings Summary
@@ -74,30 +72,9 @@ Keybindings (bindkey) map keyboard shortcuts to Zsh Line Editor (ZLE) widgets or
 - **history-search-backward**: Search history
 - **accept-line**: Execute command
       `}
-      generateItemMarkdown={(item) => `
-# Keybinding
-
-## Key Sequence
-\`\`\`
-${item.key}
-\`\`\`
-**Display**: ${formatKeyDisplay(item.key)}
-
-${item.keymap ? `## Keymap\n**${item.keymap}**${item.keymap === "vicmd" ? " (Vi command mode)" : item.keymap === "viins" ? " (Vi insert mode)" : item.keymap === "emacs" ? " (Emacs mode)" : ""}\n` : ""}
-## Widget/Command
-\`\`\`bash
-${item.command}
-\`\`\`
-
-${item.widget ? `**Type**: ${item.widget}` : ""}
-
-## Location
-- **Section**: ${item.section}
-- **File**: ~/.zshrc
-
-## Usage
-Press the key combination to trigger the bound action.
-      `}
+      getItemName={(item) => item.key}
+      getItemValue={(item) => item.command}
+      omitValueMarkdown={true}
       generateMetadata={(item) => (
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
@@ -142,6 +119,8 @@ Press the key combination to trigger the bound action.
               tintColor: MODERN_COLORS.neutral,
             }}
           />
+          <List.Item.Detail.Metadata.Label title="Section Starts" text={`Line ${item.sectionStartLine}`} />
+          <List.Item.Detail.Metadata.Label title="File" text="~/.zshrc" icon={Icon.Document} />
         </List.Item.Detail.Metadata>
       )}
       generateOverviewActions={(_, refresh) => (
@@ -149,9 +128,9 @@ Press the key combination to trigger the bound action.
           <SharedActionsSection onRefresh={refresh} />
         </ActionPanel>
       )}
-      generateItemActions={(_, refresh) => (
+      generateItemActions={(item, refresh) => (
         <ActionPanel>
-          <SharedActionsSection onRefresh={refresh} />
+          <SharedActionsSection onRefresh={refresh} item={{ copyName: item.key, copyValue: item.command }} />
         </ActionPanel>
       )}
     />

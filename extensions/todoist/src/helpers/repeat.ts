@@ -3,9 +3,11 @@
  * Presets cover interval 1; free-form `every 2 day` / `every 3 weeks` style input uses `buildDynamicRepeatOptions`.
  */
 import { Icon } from "@raycast/api";
-import { format } from "date-fns";
+import { addDays, format, nextMonday, nextSaturday } from "date-fns";
 
 import type { DateOrString, Task } from "../api";
+
+import { getAPIDate, getToday } from "./dates";
 
 export type RecurrenceUnit = "hour" | "day" | "week" | "month" | "year";
 
@@ -36,6 +38,60 @@ function anchorAllDayDateToNow(date: string): string {
   const anchor = new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
   if (Number.isNaN(+anchor)) return date;
   return format(anchor, "yyyy-MM-dd'T'HH:mm:ss");
+}
+
+function resolveDueNlpToDate(nlp: string): string | undefined {
+  const normalized = nlp.trim().toLowerCase();
+  const today = getToday();
+
+  switch (normalized) {
+    case "today":
+      return getAPIDate(today);
+    case "tomorrow":
+      return getAPIDate(addDays(today, 1));
+    case "next week":
+      return getAPIDate(nextMonday(today));
+    case "next weekend":
+      return getAPIDate(nextSaturday(today));
+    default:
+      return undefined;
+  }
+}
+
+function attachRecurrenceDate(recurrence: string, date: string): DateOrString {
+  return {
+    string: recurrence,
+    date: isHourlyDueString(recurrence) && !date.includes("T") ? anchorAllDayDateToNow(date) : date,
+  };
+}
+
+/**
+ * Builds a due payload for rescheduling that keeps an existing recurrence rule (`due.string`)
+ * while moving the next occurrence to a new date or menu-bar NLP shortcut.
+ */
+export function rescheduleDuePayload(task: Task, due: DateOrString): DateOrString {
+  const recurrence = task.due?.is_recurring ? task.due.string?.trim() : "";
+  if (!recurrence) {
+    return due;
+  }
+
+  if (due.string === "no date") {
+    return due;
+  }
+
+  if (due.date) {
+    return attachRecurrenceDate(recurrence, due.date);
+  }
+
+  const nlp = due.string?.trim();
+  if (nlp) {
+    const resolved = resolveDueNlpToDate(nlp);
+    if (resolved) {
+      return attachRecurrenceDate(recurrence, resolved);
+    }
+  }
+
+  return due;
 }
 
 /** Builds `{ string, date? }` for `item_update` from current task due + optional recurrence rule. */

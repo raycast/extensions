@@ -1,49 +1,91 @@
 # Fetch YouTube Transcript
 
-## Overview
-
-Fetch YouTube Transcript is a Raycast extension that allows you to easily fetch and save transcripts from YouTube videos.
+Fetch the transcript of a YouTube video from Raycast — save it as a text file, copy it to your clipboard, or hand it to Raycast AI to summarize.
 
 ## Features
 
-- Quickly retrieve transcripts for YouTube videos
-- Customizable download location
-- Simple and intuitive interface
+- Fetch a transcript from any YouTube video that has captions
+- Save it to a folder of your choice, or copy it straight to the clipboard
+- 16 languages, with your preferred one set once in preferences
+- Works with Raycast AI, so you can summarize a video or turn it into notes
 
-## ⚠️ Important Prerequisite: `yt-dlp` Installation
+## Requirement: `yt-dlp`
 
-This extension has been updated to use `yt-dlp`, a powerful and reliable command-line tool for interacting with YouTube. This change was made because previous methods were becoming unreliable due to frequent changes by YouTube.
-
-**You must install `yt-dlp` on your system for this extension to work.**
-
-You can install it easily using one of the following commands in your terminal. You can install it using pip or homebrew:
-
-```bash
-pip install yt-dlp
-```
-
-Or
+This extension uses [`yt-dlp`](https://github.com/yt-dlp/yt-dlp), a command-line tool for interacting with YouTube. **You must install it for the extension to work.**
 
 ```bash
 brew install yt-dlp
 ```
 
-Or, refer to the official `yt-dlp` documentation for other installation methods: [https://github.com/yt-dlp/yt-dlp#installation](https://github.com/yt-dlp/yt-dlp#installation)
+If you do not use Homebrew, see the [yt-dlp installation guide](https://github.com/yt-dlp/yt-dlp#installation) for other options.
 
-## Installation
-
-Install this extension through the Raycast Store.
+It is worth updating `yt-dlp` occasionally (`brew upgrade yt-dlp`), since YouTube changes frequently and older versions can stop working.
 
 ## Usage
 
-1. Ensure `yt-dlp` is installed on your system (see Prerequisites).
-2. Open Raycast
-3. Select Your Preferred Language.
-4. Run the "Fetch YouTube Transcript" command
-5. Paste the YouTube video URL
-   - Provide the full YouTube video URL (e.g., <https://www.youtube.com/watch?v=exampleID> or <https://youtu.be/exampleID>)
-6. **It will automatically fetch the transcript and save it to the downloads folder.**
-7. You can change your preferred download folder and preferred language in Raycast extension settings.
+1. Run the **Fetch YouTube Transcript** command.
+2. Paste the video URL.
+3. Optionally pick an action for this run — save to a file, or copy to the clipboard. If you leave it empty, your default action is used.
+
+The transcript is fetched and either saved or copied. When saving, the file is named after the video title and placed in your chosen folder.
+
+### Supported links
+
+Full URLs and share links both work:
+
+- `https://www.youtube.com/watch?v=VIDEO_ID`
+- `https://youtu.be/VIDEO_ID`
+- `https://www.youtube.com/shorts/VIDEO_ID`
+- `https://www.youtube.com/live/VIDEO_ID`
+- `https://www.youtube.com/embed/VIDEO_ID`
+
+## Using It with Raycast AI
+
+The extension also exposes transcript fetching to Raycast AI, so you can work with a video's contents in plain English instead of opening the saved file yourself.
+
+Type `@fetch-youtube-transcript` in Raycast AI, or paste a link and ask for what you want:
+
+- "Summarize this video: `https://www.youtube.com/watch?v=VIDEO_ID`"
+- "What are the key points of `https://youtu.be/VIDEO_ID`?"
+- "Get the Hindi transcript of this video and translate the main ideas to English"
+
+Because the AI receives the transcript as plain text, it can pass it on to your other extensions — for example, writing the summary straight into your notes app.
+
+Worth knowing:
+
+- The AI can request a different language for a single question without changing your Default Language preference.
+- For long videos the AI reads the transcript in parts, and is told when it has only seen a portion, so it can say a summary is partial instead of presenting it as complete.
+- This does not change the command. Transcripts you save are still saved in full, whatever the length of the video.
+
+## Preferences
+
+| Preference | Description |
+| --- | --- |
+| **Default Download Folder** | Where saved transcripts go. Defaults to your Downloads folder. |
+| **Default Language** | The caption language to request. Defaults to English. |
+| **Default Action** | Whether the command saves to a file or copies to the clipboard when you do not choose per run. |
+
+## Troubleshooting
+
+**"yt-dlp executable not found"**
+
+The extension looks for `yt-dlp` in the usual Homebrew locations and on your `PATH`. If you installed it somewhere else, point the extension at it by setting the `YT_DLP_PATH` environment variable to the full path of the binary. You can find that path with:
+
+```bash
+which yt-dlp
+```
+
+**"Transcript Not Available - No captions found"**
+
+The video has no captions in the language you requested. Not every video has captions, and auto-generated ones are not available in every language. Try English, or a different video.
+
+**The transcript downloads but looks wrong or stops early**
+
+YouTube changes often. Update `yt-dlp` first — most such problems are fixed by a newer version.
+
+## Notes
+
+Transcripts are usually auto-generated by YouTube, so expect missing punctuation and the occasional mis-transcribed word.
 
 ## Author
 
@@ -52,8 +94,3 @@ Apoorv Khandelwal
 ## License
 
 MIT
-
-## Categories
-
-- Media
-- Productivity

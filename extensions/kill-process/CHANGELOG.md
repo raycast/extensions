@@ -1,5 +1,14 @@
 # Kill Process Changelog
 
+## [Improvements] - 2026-06-25
+
+- App grouping is now enabled by default and groups processes by `.app` bundle path for more accurate CPU and memory totals (fixes #25095)
+- Killing a grouped app now terminates all related child processes, not just the main process
+- Grouped apps show how many processes they include in the subtitle
+- Auto-refresh is disabled when the extension launches in the background, preventing timeout errors while idle (fixes #28391)
+- The loading indicator only appears on the initial fetch; background refreshes no longer flash the list
+- Added empty states for failed fetches and when no processes are found
+
 ## [Bugfix] - 2026-05-27
 
 - Prevented background refreshes from overlapping and surfacing timeout errors while the process list is left open.

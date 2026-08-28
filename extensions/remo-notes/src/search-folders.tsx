@@ -1,52 +1,20 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { NoteListItem } from "./components/NoteListItem";
-import type { Folder, Note } from "./types";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import { NoteSections } from "./components/NoteSections";
 import { remoApi } from "./utils/api";
 import { handleError } from "./utils/errors";
 
 export default function SearchFolders() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [folders, setFolders] = useState<Folder[]>([]);
+  const { isLoading, data } = useCachedPromise(() => remoApi.listFolders(), [], {
+    onError: (error) => handleError(error, "Failed to fetch folders"),
+  });
 
-  useEffect(() => {
-    async function fetchFolders() {
-      try {
-        const result = await remoApi.listFolders();
-        setFolders(result);
-      } catch (error) {
-        handleError(error, "Failed to fetch folders");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchFolders();
-  }, []);
+  const folders = data ?? [];
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search folders...">
       <List.Section title="System">
-        <List.Item
-          title="Inbox"
-          icon={Icon.Tray}
-          actions={
-            <ActionPanel>
-              <Action.Push title="Open Inbox" target={<FolderNotesList filterType="inbox" title="Inbox" />} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          title="Quick Capture"
-          icon={Icon.Bolt}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Open Quick Capture"
-                target={<FolderNotesList filterType="quickCapture" title="Quick Capture" />}
-              />
-            </ActionPanel>
-          }
-        />
         <List.Item
           title="Vault"
           icon={Icon.Shield}
@@ -115,78 +83,38 @@ function FolderNotesList({
   folderId,
   title,
 }: {
-  filterType: "folder" | "inbox" | "trash" | "quickCapture" | "locked" | "vault" | "shared";
+  filterType: "folder" | "trash" | "locked" | "vault" | "shared";
   folderId?: string;
   title: string;
 }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [notes, setNotes] = useState<Note[]>([]);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
-  // We pass a refresh function to NoteListItem, reusing the logic
-  const fetchNotes = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      let result: Note[] = [];
+  const {
+    isLoading,
+    data,
+    pagination,
+    revalidate: fetchNotes,
+    mutate,
+  } = useCachedPromise(
+    (type: typeof filterType, fid?: string) =>
+      async ({ cursor }: { cursor?: string }) => {
+        const result = await remoApi.infiniteNotes(
+          type === "folder" ? { folderId: fid, cursor, numItems: 30 } : { view: type, cursor, numItems: 30 },
+        );
+        return { data: result.page, hasMore: !result.isDone, cursor: result.continueCursor };
+      },
+    [filterType, folderId],
+    { onError: (error) => handleError(error, "Failed to fetch notes") },
+  );
 
-      if (filterType === "trash") {
-        const deletedNotes = await remoApi.listNotes({
-          includeDeleted: true,
-          limit: 50,
-        });
-        result = deletedNotes.filter((note: Note) => note.deletedAt !== undefined);
-      } else if (filterType === "quickCapture") {
-        result = await remoApi.listNotes({
-          quickCapturedOnly: true,
-          limit: 50,
-        });
-      } else if (filterType === "inbox") {
-        result = await remoApi.listNotes({
-          folderId: "inbox",
-          limit: 50,
-        });
-      } else if (filterType === "locked") {
-        result = await remoApi.listNotes({
-          lockedOnly: true,
-          limit: 50,
-        });
-      } else if (filterType === "vault") {
-        result = await remoApi.listNotes({
-          e2eOnly: true,
-          limit: 50,
-        });
-      } else if (filterType === "shared") {
-        result = await remoApi.listNotes({
-          sharedOnly: true,
-          limit: 50,
-        });
-      } else {
-        result = await remoApi.listNotes({
-          folderId: folderId as Folder["_id"],
-          limit: 50,
-        });
-      }
+  const { data: folders } = useCachedPromise(() => remoApi.listFolders(), []);
 
-      // Sort pinned first
-      const sortedResult = result.sort((a: Note, b: Note) => {
-        if (a.isPinned === b.isPinned) return 0;
-        return a.isPinned ? -1 : 1;
-      });
-      setNotes(sortedResult);
-    } catch (error) {
-      handleError(error, "Failed to fetch notes");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filterType, folderId]);
-
-  useEffect(() => {
-    fetchNotes();
-  }, [fetchNotes]);
+  const notes = data ?? [];
 
   return (
     <List
       isLoading={isLoading}
+      pagination={pagination}
       searchBarPlaceholder={`Search in ${title}...`}
       navigationTitle={title}
       isShowingDetail={isShowingDetail}
@@ -194,15 +122,14 @@ function FolderNotesList({
       {notes.length === 0 && !isLoading ? (
         <List.EmptyView title={`No notes in ${title}`} icon={Icon.Document} />
       ) : (
-        notes.map((note) => (
-          <NoteListItem
-            key={note._id}
-            note={note}
-            onRefresh={fetchNotes}
-            isShowingDetail={isShowingDetail}
-            onToggleDetail={() => setIsShowingDetail((prev) => !prev)}
-          />
-        ))
+        <NoteSections
+          notes={notes}
+          onRefresh={fetchNotes}
+          mutate={mutate}
+          folders={folders}
+          isShowingDetail={isShowingDetail}
+          onToggleDetail={() => setIsShowingDetail((prev) => !prev)}
+        />
       )}
     </List>
   );

@@ -7,13 +7,13 @@
  * Created at     : 2023-07-dd 00:19:37
  */
 
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { readdirSync } from "fs";
 import path from "path";
 
 import { environment, getPreferenceValues } from "@raycast/api";
 
-import { getAVIFEncPaths } from "../utilities/avif";
+import { getAVIFEncPaths, losslessAvifEncArgs } from "../utilities/avif";
 import {
   addItemToRemove,
   convertPDF,
@@ -24,6 +24,14 @@ import {
   getWebPBinaryPath,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
+
+function cwebpCommandArgs(inputPath: string, outputPath: string, lossless: boolean): string[] {
+  return [...(lossless ? ["-lossless"] : []), inputPath, "-o", outputPath];
+}
+
+function potraceBinaryPath(): string {
+  return path.join(environment.assetsPath, "potrace/potrace");
+}
 
 /**
  * All supported image formats for conversion.
@@ -86,28 +94,27 @@ export default async function convert(
         // AVIF -> PNG -> WebP
         const { decoderPath } = await getAVIFEncPaths();
         await using pngFile = await getScopedTempFile("tmp", "png");
-        execSync(`${decoderPath} '${item}' '${pngFile.path}'`);
-        execSync(
-          `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} '${pngFile.path}' -o '${newPath}'`,
-        );
+        execFileSync(decoderPath, [item, pngFile.path]);
+        execFileSync(cwebpPath, cwebpCommandArgs(pngFile.path, newPath, preferences.useLosslessConversion));
       } else if (originalType.toLowerCase() == "pdf") {
         // PDF -> PNG -> WebP
         const folderPath = path.join(
           newPath.split("/").slice(0, -1).join("/"),
           path.basename(newPath, ".webp") + " WebP",
         );
-        execSync(`mkdir -p '${folderPath}'`);
+        execFileSync("mkdir", ["-p", folderPath]);
         await convertPDF("PNG", item, folderPath);
 
         const pngFiles = readdirSync(folderPath).map((file) => path.join(folderPath, file));
         for (const pngFile of pngFiles) {
-          execSync(
-            `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} '${pngFile}' -o '${pngFile.replace(".png", ".webp")}'`,
+          execFileSync(
+            cwebpPath,
+            cwebpCommandArgs(pngFile, pngFile.replace(".png", ".webp"), preferences.useLosslessConversion),
           );
           await addItemToRemove(pngFile);
         }
       } else {
-        execSync(`${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} '${item}' -o '${newPath}'`);
+        execFileSync(cwebpPath, cwebpCommandArgs(item, newPath, preferences.useLosslessConversion));
       }
     } else if (originalType.toLowerCase() == "svg") {
       if (["AVIF", "PDF", "WEBP"].includes(desiredType)) {
@@ -122,38 +129,33 @@ export default async function convert(
       }
     } else if (desiredType == "SVG") {
       await using bmpFile = await getScopedTempFile("tmp", "bmp");
-      execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
+      execFileSync("chmod", ["+x", potraceBinaryPath()]);
       if (originalType.toLowerCase() == "webp") {
         // WebP -> PNG -> BMP -> SVG
         await using pngFile = await getScopedTempFile("tmp", "png");
         const [dwebpPath] = await getWebPBinaryPath();
-        execSync(`${dwebpPath} '${item}' -o '${pngFile.path}'`);
-        execSync(
-          `sips --setProperty format "bmp" '${pngFile.path}' --out '${bmpFile.path}' && ${environment.assetsPath}/potrace/potrace -s --tight -o '${newPath}' '${bmpFile.path}'`,
-        );
+        execFileSync(dwebpPath, [item, "-o", pngFile.path]);
+        execFileSync("sips", ["--setProperty", "format", "bmp", pngFile.path, "--out", bmpFile.path]);
+        execFileSync(potraceBinaryPath(), ["-s", "--tight", "-o", newPath, bmpFile.path]);
       } else if (originalType.toLowerCase() == "pdf") {
         // PDF -> PNG -> BMP -> SVG
         const folderPath = path.join(
           newPath.split("/").slice(0, -1).join("/"),
           path.basename(newPath, ".svg") + " SVG",
         );
-        execSync(`mkdir -p '${folderPath}'`);
+        execFileSync("mkdir", ["-p", folderPath]);
         await convertPDF("PNG", item, folderPath);
 
         const pngFiles = readdirSync(folderPath).map((file) => path.join(folderPath, file));
         for (const pngFile of pngFiles) {
-          execSync(
-            `sips --setProperty format "bmp" '${pngFile}' --out '${bmpFile.path}' && ${
-              environment.assetsPath
-            }/potrace/potrace -s --tight -o '${pngFile.replace(".png", ".svg")}' '${bmpFile.path}'`,
-          );
+          execFileSync("sips", ["--setProperty", "format", "bmp", pngFile, "--out", bmpFile.path]);
+          execFileSync(potraceBinaryPath(), ["-s", "--tight", "-o", pngFile.replace(".png", ".svg"), bmpFile.path]);
           await addItemToRemove(pngFile);
         }
       } else {
         // Input Format -> BMP -> SVG
-        execSync(
-          `sips --setProperty format "bmp" '${item}' --out '${bmpFile.path}' && ${environment.assetsPath}/potrace/potrace -s --tight -o '${newPath}' '${bmpFile.path}'`,
-        );
+        execFileSync("sips", ["--setProperty", "format", "bmp", item, "--out", bmpFile.path]);
+        execFileSync(potraceBinaryPath(), ["-s", "--tight", "-o", newPath, bmpFile.path]);
       }
     } else if (desiredType == "AVIF") {
       // Input Format -> PNG -> AVIF
@@ -164,46 +166,50 @@ export default async function convert(
           newPath.split("/").slice(0, -1).join("/"),
           path.basename(newPath, ".avif") + " AVIF",
         );
-        execSync(`mkdir -p '${folderPath}'`);
+        execFileSync("mkdir", ["-p", folderPath]);
         await convertPDF("PNG", item, folderPath);
 
         const pngFiles = readdirSync(folderPath)
           .map((file) => path.join(folderPath, file))
           .filter((file) => file.endsWith(".png"));
         for (const pngFile of pngFiles) {
-          execSync(
-            `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100 " : ""}'${pngFile}' '${pngFile.replace(".png", ".avif")}'`,
-          );
+          execFileSync(encoderPath, [
+            ...(preferences.useLosslessConversion ? losslessAvifEncArgs : []),
+            pngFile,
+            pngFile.replace(".png", ".avif"),
+          ]);
           await addItemToRemove(pngFile);
         }
       } else {
         await using pngFile = await getScopedTempFile("tmp", "png");
         await convert([item], "PNG", [pngFile.path], true);
-        execSync(
-          `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100 " : ""}'${pngFile.path}' '${newPath}'`,
-        );
+        execFileSync(encoderPath, [
+          ...(preferences.useLosslessConversion ? losslessAvifEncArgs : []),
+          pngFile.path,
+          newPath,
+        ]);
       }
     } else if (originalType.toLowerCase() == "webp") {
       // WebP -> PNG -> Desired Format
       const [dwebpPath] = await getWebPBinaryPath();
-      execSync(`${dwebpPath} '${item}' -o '${newPath}'`);
-      execSync(`sips --setProperty format ${desiredType.toLowerCase()} '${newPath}'`);
+      execFileSync(dwebpPath, [item, "-o", newPath]);
+      execFileSync("sips", ["--setProperty", "format", desiredType.toLowerCase(), newPath]);
     } else if (originalType.toLowerCase() == "pdf") {
       // PDF -> Desired Format
       const itemName = path.basename(item);
       const folderName = `${itemName?.substring(0, itemName.lastIndexOf("."))} ${desiredType}`;
       const folderPath = path.join(newPath.split("/").slice(0, -1).join("/"), folderName);
-      execSync(`mkdir -p '${folderPath}'`);
+      execFileSync("mkdir", ["-p", folderPath]);
       await convertPDF(desiredType, item, folderPath);
     } else if (originalType.toLowerCase() == "avif") {
       // AVIF -> PNG -> Desired Format
       const { decoderPath } = await getAVIFEncPaths();
       await using pngFile = await getScopedTempFile("tmp", "png");
-      execSync(`${decoderPath} '${item}' '${pngFile.path}'`);
+      execFileSync(decoderPath, [item, pngFile.path]);
       return await convert([pngFile.path], desiredType, [newPath]);
     } else {
       // General Input Format -> Desired Format
-      execSync(`sips --setProperty format ${desiredType.toLowerCase()} '${item}' --out '${newPath}'`);
+      execFileSync("sips", ["--setProperty", "format", desiredType.toLowerCase(), item, "--out", newPath]);
     }
 
     resultPaths.push(newPath);

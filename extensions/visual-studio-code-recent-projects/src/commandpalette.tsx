@@ -1,18 +1,11 @@
-import { Action, ActionPanel, Icon, List, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
 import { useEffect, useState } from "react";
 import { Shortcut } from "./lib/shortcuts";
 import { getBuildNamePreference, getBuildScheme } from "./lib/vscode";
-import {
-  fileExists,
-  getErrorMessage,
-  isWin,
-  openURIinVSCode,
-  raycastForVSCodeURI,
-  waitForFileExists,
-} from "./lib/utils";
+import { fileExists, getErrorMessage, isWin } from "./lib/utils";
 
 interface CommandMetadata {
   command: string;
@@ -37,9 +30,20 @@ function CreateCommandQuickLinkAction(props: { command: CommandMetadata }) {
   return (
     <Action.CreateQuicklink
       shortcut={Shortcut.CreateQuickLink}
-      quicklink={{ link: raycastForVSCodeURI(`runcommand?cmd=${c.command}`), name: `VSCode - ${title}` }}
+      quicklink={{
+        link: raycastForVSCodeURI(`runcommand?cmd=${encodeURIComponent(c.command)}`),
+        name: `VSCode - ${title}`,
+      }}
     />
   );
+}
+
+function raycastForVSCodeURI(uri: string) {
+  return `${getBuildScheme()}://tonka3000.raycast/${uri}`;
+}
+
+async function openURIinVSCode(uri: string) {
+  await open(raycastForVSCodeURI(uri));
 }
 
 async function getCommandFromVSCode() {
@@ -63,11 +67,11 @@ async function getCommandFromVSCode() {
   if (await fileExists(responseFilename)) {
     await afs.rm(responseFilename);
   }
-  if (await waitForFileExists(responseFilename)) {
-    const cmds = await readCommandsFile(responseFilename);
-    return cmds;
+  const cmds = await waitForCommandsFile(responseFilename);
+  if (!cmds) {
+    throw new Error("Could not get VSCode commands");
   }
-  throw new Error("Could not get VSCode commands");
+  return cmds;
 }
 
 function CommandListItem(props: { command: CommandMetadata }) {
@@ -81,7 +85,7 @@ function CommandListItem(props: { command: CommandMetadata }) {
   };
   const handle = async () => {
     try {
-      await openURIinVSCode(`runcommand?cmd=${c.command}`);
+      await openURIinVSCode(`runcommand?cmd=${encodeURIComponent(c.command)}`);
       popToRoot();
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Could not run Command", message: getErrorMessage(error) });
@@ -89,6 +93,7 @@ function CommandListItem(props: { command: CommandMetadata }) {
   };
   return (
     <List.Item
+      icon={Icon.Terminal}
       title={title(c)}
       actions={
         <ActionPanel>
@@ -150,11 +155,22 @@ export default function CommandPaletteCommand() {
   );
 }
 
-async function readCommandsFile(filename: string): Promise<CommandMetadata[] | undefined> {
-  const data = await afs.readFile(filename, "utf-8");
-  const result = JSON.parse(data) as CommandMetadata[] | undefined;
-  await afs.rm(filename);
-  return result;
+async function waitForCommandsFile(filename: string): Promise<CommandMetadata[] | undefined> {
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    if (await fileExists(filename)) {
+      try {
+        const data = await afs.readFile(filename, "utf-8");
+        const cmds = JSON.parse(data) as CommandMetadata[] | undefined;
+        await afs.rm(filename);
+        return cmds;
+      } catch {
+        // The file is probably still being written; retry shortly.
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return undefined;
 }
 
 function useCommands(): {

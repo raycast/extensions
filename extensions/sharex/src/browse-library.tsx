@@ -61,30 +61,42 @@ export default function Command() {
       return;
     }
 
-    const basePath = prefs.screenshotsPath || join(homedir(), "Documents", "ShareX", "Screenshots");
+    const screenshotsPath = prefs.screenshotsPath || join(homedir(), "Documents", "ShareX", "Screenshots");
     const limit = parseInt(prefs.folderLimit) || 5;
+    const mediaFileRegex = /\.(png|jpe?g|gif|bmp|tiff?|mp4|webm|avi|webp|apng)$/i;
 
     try {
-      const items = await readdir(basePath);
-      const foldersWithStats = await Promise.all(
+      const items = await readdir(screenshotsPath);
+      const entriesWithStats = await Promise.all(
         items.map(async (item) => {
-          const path = join(basePath, item);
+          const path = join(screenshotsPath, item);
           const s = await stat(path);
           return { name: item, path, stat: s };
         }),
       );
 
-      const targetFolders = foldersWithStats
+      const allScreenshots: Screenshot[] = [];
+
+      for (const { path: filePath, name, stat: fileStat } of entriesWithStats) {
+        if (fileStat.isFile() && mediaFileRegex.test(name)) {
+          allScreenshots.push({
+            path: filePath,
+            name,
+            folder: "Screenshots",
+            created: fileStat.birthtimeMs,
+          });
+        }
+      }
+
+      const targetFolders = entriesWithStats
         .filter((f) => f.stat.isDirectory())
         .sort((a, b) => b.stat.birthtimeMs - a.stat.birthtimeMs)
         .slice(0, limit);
 
-      const allScreenshots: Screenshot[] = [];
-
       for (const { path: folderPath, name: folderName } of targetFolders) {
         const files = await readdir(folderPath);
         for (const file of files) {
-          if (/\.(png|jpe?g|gif|bmp|tiff?|mp4|webm|avi|webp|apng)$/i.test(file)) {
+          if (mediaFileRegex.test(file)) {
             const filePath = join(folderPath, file);
             const fileStat = await stat(filePath);
             allScreenshots.push({

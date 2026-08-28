@@ -8,13 +8,27 @@ import {
   calculateAverageUsage,
   createProgressBar,
 } from "../utils/usage-limits-formatter";
+import { formatDuration } from "../utils/data-formatter";
+import { showRemainingUsage } from "../preferences";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { ReactNode } from "react";
 
 export function UsageLimits() {
-  const { data, isLoading, error, isStale, isRateLimited, lastFetched, revalidate, isUsageLimitsAvailable } =
-    useClaudeUsageLimits();
+  const {
+    data,
+    isLoading,
+    error,
+    isStale,
+    isRateLimited,
+    rateLimitedUntil,
+    lastFetched,
+    revalidate,
+    isUsageLimitsAvailable,
+  } = useClaudeUsageLimits();
+
+  const rateLimitRetryIn =
+    rateLimitedUntil && rateLimitedUntil > Date.now() ? formatDuration(rateLimitedUntil - Date.now()) : null;
 
   if (!isUsageLimitsAvailable) {
     return null;
@@ -22,12 +36,18 @@ export function UsageLimits() {
 
   const fiveHourUtil = data?.five_hour?.utilization ?? 0;
   const sevenDayUtil = data?.seven_day?.utilization ?? 0;
+  const preferRemaining = showRemainingUsage();
 
   const accessories: List.Item.Accessory[] =
     error && !data
       ? STANDARD_ACCESSORIES.ERROR
       : isRateLimited && !data
-        ? [{ icon: Icon.Clock, text: "Rate limited" }]
+        ? [
+            {
+              icon: Icon.Clock,
+              text: rateLimitRetryIn ? `Rate limited · retry in ${rateLimitRetryIn}` : "Rate limited",
+            },
+          ]
         : !data
           ? STANDARD_ACCESSORIES.LOADING
           : isStale && !isLoading
@@ -35,8 +55,8 @@ export function UsageLimits() {
             : [
                 {
                   icon: Icon.Gauge,
-                  text: `${fiveHourUtil.toFixed(0)}%`,
-                  tooltip: "5-Hour Limit (higher priority)",
+                  text: `${(preferRemaining ? 100 - fiveHourUtil : fiveHourUtil).toFixed(0)}%`,
+                  tooltip: `5-Hour Limit · ${preferRemaining ? "Remaining" : "Consumed"} (higher priority)`,
                 },
               ];
 
@@ -53,8 +73,10 @@ export function UsageLimits() {
     if (isRateLimited && !data) {
       return (
         <ErrorMetadata
-          noDataMessage="Rate limited by Anthropic API"
-          noDataSubMessage="Retrying automatically — click Refresh to try now"
+          noDataMessage={
+            rateLimitRetryIn ? `Rate limited — retry in ${rateLimitRetryIn}` : "Rate limited by Anthropic API"
+          }
+          noDataSubMessage="Click Refresh to try now"
         />
       );
     }

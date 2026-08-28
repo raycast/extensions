@@ -2,6 +2,7 @@ import { Action, ActionPanel, Grid, Icon, Keyboard, showToast, Toast } from "@ra
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { setMaxListeners } from "node:events";
 import { useCallback, useRef, useState } from "react";
+import { useActionRunner } from "../lib/action-runner";
 import { initTraktClient } from "../lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "../lib/constants";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
@@ -47,26 +48,7 @@ export const SeasonGrid = ({ showId, slug, imdbId }: { showId: number; slug?: st
     },
   );
 
-  const handleAction = useCallback(
-    async (show: TraktSeasonListItem, action: (show: TraktSeasonListItem) => Promise<void>, message: string) => {
-      setActionLoading(true);
-      try {
-        await action(show);
-        showToast({
-          title: message,
-          style: Toast.Style.Success,
-        });
-      } catch (e) {
-        showToast({
-          title: (e as Error).message,
-          style: Toast.Style.Failure,
-        });
-      } finally {
-        setActionLoading(false);
-      }
-    },
-    [],
-  );
+  const handleAction = useActionRunner<TraktSeasonListItem>({ setActionLoading });
 
   const addSeasonToHistory = useCallback(async (season: TraktSeasonListItem) => {
     await traktClient.shows.addSeasonToHistory({

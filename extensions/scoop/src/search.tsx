@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ScoopInfo } from "./components/ScoopInfo";
 import { withToast } from "./utils";
 import { useScoop } from "./hooks/scoopHooks";
@@ -24,10 +25,20 @@ export default function SearchCommand() {
     const search = async () => {
       if (query) {
         setIsLoading(true);
-        const pkgs = await scoop.search(query);
-        if (!cancelled) {
-          setPackages(pkgs);
-          setIsLoading(false);
+        try {
+          const pkgs = await scoop.search(query);
+          if (!cancelled) {
+            setPackages(pkgs);
+          }
+        } catch (error) {
+          if (!cancelled) {
+            setPackages([]);
+            await showFailureToast(error, { title: "Failed to search Scoop packages." });
+          }
+        } finally {
+          if (!cancelled) {
+            setIsLoading(false);
+          }
         }
       } else {
         setPackages([]);

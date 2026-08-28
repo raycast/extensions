@@ -167,8 +167,13 @@ const parseRaycastOwnedFormat = (hostname: string, pathParts: string[]): ParsedR
 export function parseRaycastDeeplink(deeplink: string): ParsedRaycastCommand | null {
   try {
     const trimmedLink = deeplink.trim();
+    const currentSchemePrefix = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
 
-    if (!trimmedLink.startsWith(RAYCAST_DEEPLINK_PREFIX) && !trimmedLink.startsWith(RAYCAST_V2_DEEPLINK_PREFIX)) {
+    if (
+      !trimmedLink.startsWith(RAYCAST_DEEPLINK_PREFIX) &&
+      !trimmedLink.startsWith(RAYCAST_V2_DEEPLINK_PREFIX) &&
+      !trimmedLink.startsWith(currentSchemePrefix)
+    ) {
       return null;
     }
 

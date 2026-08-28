@@ -1,84 +1,71 @@
-import os from "node:os";
-import { execFile } from "node:child_process";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ActionPanel, Action, List, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { Category, SearchResult } from "./types";
 import useLocalStorage from "./hooks/useLocalStorage";
 import { getNewTabUri, getNewWindowUri } from "./uri";
 import { getAppName } from "./constants";
+import { getEffectiveRoots, searchDirectoriesMac, searchDirectoriesWindows } from "./search-directories";
+import { AddRootForm, ManageRoots } from "./manage-roots";
 
 const isWindows = process.platform === "win32";
-
-function searchDirectoriesWindows(query: string, maxResults: number): Promise<SearchResult[]> {
-  return new Promise((resolve) => {
-    const psCommand = `Get-ChildItem -Path $env:USERPROFILE -Directory -Recurse -Depth 5 -ErrorAction SilentlyContinue | Where-Object { $_.Name -like ('*' + $env:WARP_SEARCH_QUERY + '*') } | Select-Object -First ${maxResults} -ExpandProperty FullName`;
-    const env = { ...process.env, WARP_SEARCH_QUERY: query };
-    execFile("powershell", ["-NoProfile", "-Command", psCommand], { timeout: 15000, env }, (error, stdout) => {
-      if (error || !stdout) {
-        resolve([]);
-        return;
-      }
-      const results = stdout
-        .trim()
-        .split(/\r?\n/)
-        .filter(Boolean)
-        .map((p) => ({ name: p.trim().replace(os.homedir(), "~"), path: p.trim() }));
-      resolve(results);
-    });
-  });
-}
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [category, setCategory] = useState<Category>(Category.ALL);
   const [results, setResults] = useState<SearchResult[]>([]);
   const { data: pins, setData: setPins, isLoading: isPinsLoading } = useLocalStorage<SearchResult[]>("pinnedDirs", []);
+  const { data: roots, setData: setRoots, isLoading: isRootsLoading } = useLocalStorage<string[]>("searchRoots", []);
   const abortable = useRef<AbortController>();
 
   const maxResults = 250;
 
+  const effectiveRoots = useMemo(() => getEffectiveRoots(roots), [roots]);
+
   const { isLoading: isSearchResultsLoading } = usePromise(
-    async (query) => {
-      if (searchText === "") {
+    async (query: string, searchRoots: string[]) => {
+      if (query === "") {
         setResults([]);
-        return [];
+        return;
       }
 
-      if (isWindows) {
-        setResults([]);
-        const thisAbort = abortable.current;
-        const windowsResults = await searchDirectoriesWindows(searchText, maxResults);
-        if (thisAbort?.signal.aborted) return;
-        setResults(windowsResults);
-      } else {
-        const spotlight = (await import("node-spotlight")).default;
-        const results = await spotlight(query);
+      // Capture this search's signal so a newer search replacing
+      // `abortable.current` can't trick us into committing stale results.
+      const signal = abortable.current?.signal;
 
-        setResults([]);
+      const found = isWindows
+        ? await searchDirectoriesWindows(query, searchRoots, maxResults, signal)
+        : await searchDirectoriesMac(query, searchRoots, maxResults, signal);
 
-        let resultsCount = 0;
+      if (signal?.aborted) return;
 
-        for await (const result of results) {
-          setResults((state) => [...state, { name: result.path.replace(os.homedir(), "~"), path: result.path }]);
-
-          resultsCount++;
-
-          if (resultsCount >= maxResults) {
-            abortable?.current?.abort();
-            break;
-          }
-        }
-      }
+      setResults(found);
     },
-    [isWindows ? searchText : `kind:folders ${searchText}`],
+    [searchText, effectiveRoots],
     {
+      // Wait until persisted roots have loaded so the first search isn't scoped
+      // to the home-folder fallback before the user's folders are available.
+      execute: !isRootsLoading,
       abortable,
     }
   );
 
   function onCategoryChange(newValue: Category) {
     setCategory(newValue);
+  }
+
+  function addRoots(paths: string[]) {
+    setRoots((state) => {
+      const next = [...state];
+      for (const path of paths) {
+        if (!next.includes(path)) next.push(path);
+      }
+      return next;
+    });
+  }
+
+  function removeRoot(path: string) {
+    setRoots((state) => state.filter((root) => root !== path));
   }
 
   async function onPin(searchResult: SearchResult) {
@@ -115,6 +102,8 @@ export default function Command() {
     };
   }
 
+  const rootActions = <RootFolderActions roots={roots} onAddRoots={addRoots} onRemoveRoot={removeRoot} />;
+
   const filteredResults =
     category === Category.ALL ? results.filter((result) => !pins.find((pinned) => pinned.path === result.path)) : [];
 
@@ -122,7 +111,7 @@ export default function Command() {
     ? pins.filter((pinned) => pinned.name.toLowerCase().includes(searchText.toLowerCase()))
     : pins;
 
-  const isLoading = isSearchResultsLoading || isPinsLoading;
+  const isLoading = isSearchResultsLoading || isPinsLoading || isRootsLoading;
 
   return (
     <List
@@ -132,11 +121,18 @@ export default function Command() {
       throttle={true}
       onSearchTextChange={setSearchText}
     >
-      {searchText && <List.EmptyView title="No directories found" description="Try refining your search" />}
+      {searchText && (
+        <List.EmptyView
+          title="No directories found"
+          description="Try refining your search or adding a search folder"
+          actions={<ActionPanel>{rootActions}</ActionPanel>}
+        />
+      )}
       {!searchText && (
         <List.EmptyView
           title="Search for a directory"
           description={`Open a directory on your computer in ${getAppName()}`}
+          actions={<ActionPanel>{rootActions}</ActionPanel>}
         />
       )}
       <List.Section title={Category.PINNED}>
@@ -148,6 +144,7 @@ export default function Command() {
             validRearrangeDirections={getValidRearrangeDirections(searchResult)}
             onPin={() => onPin(searchResult)}
             onRearrange={onRearrange}
+            extraActions={rootActions}
           />
         ))}
       </List.Section>
@@ -158,6 +155,7 @@ export default function Command() {
             searchResult={searchResult}
             isPinned={false}
             onPin={() => onPin(searchResult)}
+            extraActions={rootActions}
           />
         ))}
       </List.Section>
@@ -176,14 +174,38 @@ function CategoryDropdown(props: { onCategoryChange: (newValue: Category) => voi
   );
 }
 
+function RootFolderActions(props: {
+  roots: string[];
+  onAddRoots: (paths: string[]) => void;
+  onRemoveRoot: (path: string) => void;
+}) {
+  return (
+    <ActionPanel.Section title="Search Folders">
+      <Action.Push
+        title="Add Search Folder"
+        icon={Icon.NewFolder}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        target={<AddRootForm onAdd={props.onAddRoots} />}
+      />
+      <Action.Push
+        title="Manage Search Folders"
+        icon={Icon.Folder}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+        target={<ManageRoots roots={props.roots} onAdd={props.onAddRoots} onRemove={props.onRemoveRoot} />}
+      />
+    </ActionPanel.Section>
+  );
+}
+
 function SearchListItem(props: {
   searchResult: SearchResult;
   isPinned: boolean;
   validRearrangeDirections?: { up: boolean; down: boolean };
   onPin: () => void;
   onRearrange?: (searchResult: SearchResult, direction: "up" | "down") => void;
+  extraActions?: JSX.Element;
 }) {
-  const { searchResult, isPinned, validRearrangeDirections, onPin, onRearrange } = props;
+  const { searchResult, isPinned, validRearrangeDirections, onPin, onRearrange, extraActions } = props;
 
   return (
     <List.Item
@@ -247,6 +269,7 @@ function SearchListItem(props: {
               </>
             )}
           </ActionPanel.Section>
+          {extraActions}
         </ActionPanel>
       }
     />

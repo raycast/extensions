@@ -11,7 +11,8 @@
     "hsuq",
     "pernielsentikaer",
     "ViGeng",
-    "sebdanielsson"
+    "sebdanielsson",
+    "greiner-petter"
   ],
   "categories": [
     "System",
@@ -27,17 +28,22 @@
         "internet"
       ],
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "IP in Menu Bar",
+      "description": "Display my IP address in the menu bar",
+      "mode": "menu-bar",
+      "interval": "30s"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.102.7",
     "@raycast/utils": "^2.2.1",
-    "cheerio": "1.1.2",
-    "ip": "^2.0.1"
+    "cheerio": "1.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/ip": "^1.1.3",
     "@types/node": "^22",
     "eslint": "^9",
     "prettier": "^3.6.2",
@@ -53,5 +59,11 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
+    "undici": "7.29.0"
+  }
 }

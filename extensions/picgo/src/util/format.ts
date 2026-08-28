@@ -8,7 +8,7 @@ const fileName = (img: IImgInfo) =>
     img.fileName?.replace(new RegExp(`\\${img.extname}`), "") ?? img.imgUrl?.split("/").pop()?.split(".")[0] ?? "image";
 const extName = (img: IImgInfo) => img.extname ?? "." + img.imgUrl?.split(".").pop();
 
-export const exportFormats: Record<string, ImgUrlExportFormat> = {
+export const exportFormats = {
     url: {
         name: "url",
         label: "URL",
@@ -49,4 +49,6 @@ export const exportFormats: Record<string, ImgUrlExportFormat> = {
                 })
                 .join("\n"),
     },
-};
+} satisfies Record<string, ImgUrlExportFormat>;
+
+export type ExportFormatKey = keyof typeof exportFormats;

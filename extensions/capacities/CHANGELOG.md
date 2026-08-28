@@ -1,5 +1,9 @@
 # Capacities Changelog
 
+## [Add Deadline to Create Task] - 2026-07-21
+
+- Add "Deadline" date picker to the Create Task command, mirroring Capacities' native two-date task creation (Date + Deadline).
+
 ## [Fix space dropdown selection] - 2026-05-20
 
 - Fixed space dropdown selection in the task, weblink, and daily note commands.

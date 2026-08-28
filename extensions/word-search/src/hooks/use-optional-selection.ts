@@ -9,26 +9,27 @@ import { useSelectionSetting } from "@/hooks/use-settings";
 const useOptionalSelection = (setContent: Dispatch<SetStateAction<string>>, disabled: boolean) => {
   const enabled = useSelectionSetting() && !disabled;
   const dataIsAlreadySet = useRef(false);
-  const { isLoading, data } = usePromise(async () => {
-    try {
-      return await getSelectedText();
-    } catch {
-      return "";
-    }
-  });
+  const { isLoading, data } = usePromise(
+    async () => {
+      try {
+        return await getSelectedText();
+      } catch {
+        return "";
+      }
+    },
+    [],
+    { execute: enabled },
+  );
 
   useEffect(() => {
     if (data && !isLoading && !dataIsAlreadySet.current) {
       dataIsAlreadySet.current = true;
-      if (!enabled) {
-        return;
-      }
       const trimmed = data.trim();
       if (trimmed && trimmed.length > 0) {
         setContent(trimmed);
       }
     }
-  }, [data, isLoading, setContent, enabled]);
+  }, [data, isLoading, setContent]);
 };
 
 export default useOptionalSelection;

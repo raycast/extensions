@@ -19,6 +19,7 @@ vi.mock("../hooks/useZshrcLoader", () => ({
 // Mock section icons
 vi.mock("../lib/section-icons", () => ({
   getSectionIcon: vi.fn(() => ({ icon: "folder", color: "#007AFF" })),
+  getSectionImage: vi.fn(() => ({ source: "folder", tintColor: "#007AFF" })),
 }));
 
 // Mock section accessories
@@ -57,11 +58,12 @@ vi.mock("@raycast/utils", () => ({
 
 // Import after mocks
 import { useZshrcLoader } from "../hooks/useZshrcLoader";
-import { getSectionIcon } from "../lib/section-icons";
+import { getSectionIcon, getSectionImage } from "../lib/section-icons";
 import { generateSectionAccessories, calculateTotalEntries } from "../utils/section-accessories";
 
 const mockUseZshrcLoader = vi.mocked(useZshrcLoader);
 const mockGetSectionIcon = vi.mocked(getSectionIcon);
+const mockGetSectionImage = vi.mocked(getSectionImage);
 const mockGenerateSectionAccessories = vi.mocked(generateSectionAccessories);
 const mockCalculateTotalEntries = vi.mocked(calculateTotalEntries);
 
@@ -211,7 +213,7 @@ describe("Sections", () => {
       });
     });
 
-    it("should call getSectionIcon for each labeled section", async () => {
+    it("should resolve an icon for each labeled section", async () => {
       mockUseZshrcLoader.mockReturnValue({
         sections: mockLabeledSections,
         isLoading: false,
@@ -223,9 +225,9 @@ describe("Sections", () => {
       render(<Sections />);
 
       await waitFor(() => {
-        expect(mockGetSectionIcon).toHaveBeenCalledWith("Aliases");
-        expect(mockGetSectionIcon).toHaveBeenCalledWith("Exports");
-        expect(mockGetSectionIcon).toHaveBeenCalledWith("Functions");
+        expect(mockGetSectionImage).toHaveBeenCalledWith("Aliases");
+        expect(mockGetSectionImage).toHaveBeenCalledWith("Exports");
+        expect(mockGetSectionImage).toHaveBeenCalledWith("Functions");
       });
     });
 

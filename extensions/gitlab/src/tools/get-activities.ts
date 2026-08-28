@@ -29,12 +29,12 @@ export default async function ({ scope, search }: Input) {
   const events = (await gitlab.fetch("events", params)) as ActivityEvent[];
 
   if (search && search.length > 0) {
-    const q = search.toLowerCase();
+    const searchLower = search.toLowerCase();
 
-    return events.filter((ev) => {
-      const action = String(ev.action_name || "").toLowerCase();
-      const title = String(ev.target_title || "").toLowerCase();
-      return action.includes(q) || title.includes(q);
+    return events.filter((event) => {
+      const action = String(event.action_name || "").toLowerCase();
+      const title = String(event.target_title || "").toLowerCase();
+      return action.includes(searchLower) || title.includes(searchLower);
     });
   }
 

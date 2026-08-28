@@ -1,5 +1,31 @@
 # Quick Notes Changelog
 
+## [Enhancement] - 2026-08-28
+
+- Fix all keyboard shortcuts to work on Windows and prevent conflicts
+- Overhaul tag management: replace the old tag commands with a single `Manage Tags` command for creating, renaming, and deleting tags, with renames applied across all notes
+- Add an `Import Notes` command to bring existing `.md` files into your notes folder, with multi-file selection
+- Add a `Delete All Notes` action to clear all notes at once
+- Give each note an `icon` property, stored in the markdown frontmatter
+- Update `README.md`
+- Bump all dependencies to the latest
+
+## [Clear Errors for Open Note Externally] - 2026-07-07
+
+- `Open Note Externally` now shows a clear error toast instead of a cryptic macOS "-50" dialog when the auto save folder is unset, missing on disk, or the note's markdown file doesn't exist
+- Error toasts for a missing or unset auto save location include a shortcut to open the extension settings
+
+## [YAML Frontmatter] - 2026-07-07
+
+- Notes saved or exported as markdown now include YAML frontmatter (`title`, `date`, `tags`) and an H1 title, ready for GitHub Pages / Jekyll blogs and Obsidian
+- `Sync with Folder` understands frontmatter: title, tags, and created date are read from it and it's kept out of your note body in Raycast
+- `Sync with Folder` rewrites files in your folder so existing notes pick up frontmatter automatically
+- Tags found in synced files' frontmatter are added to your tag list
+- Syncing no longer removes notes that haven't been saved to the folder yet
+- Fix sync errors being silently swallowed instead of showing a toast
+- Fix renaming a note logging an error when the old file was never saved to the folder
+- Fix `Open Note Externally` opening a bogus path when no auto save location is set
+
 ## [Windows Compatibility] - 2025-12-10
 
 - Normalize path handling with `path.join` so Quick Notes works on macOS and Windows Raycast.

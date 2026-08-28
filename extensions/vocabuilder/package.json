@@ -44,8 +44,8 @@
       "name": "sourceLanguage",
       "type": "dropdown",
       "required": true,
-      "title": "Source Language",
-      "description": "The language you want to translate from",
+      "title": "Default Source Language",
+      "description": "Used before you pick a language pair from the Translate dropdown",
       "default": "en",
       "data": [
         {
@@ -122,8 +122,8 @@
       "name": "targetLanguage",
       "type": "dropdown",
       "required": true,
-      "title": "Target Language",
-      "description": "The language you want to translate to",
+      "title": "Default Target Language",
+      "description": "Used before you pick a language pair from the Translate dropdown",
       "default": "uk",
       "data": [
         {
@@ -203,6 +203,108 @@
       "title": "Read Clipboard on Open",
       "label": "Enable",
       "description": "If enabled, prefill a suggestion only when clipboard content is a safe single word"
+    },
+    {
+      "name": "translationModelPreset",
+      "type": "dropdown",
+      "required": true,
+      "title": "Translation Model",
+      "description": "Gemini model used for translation. Use the custom model field only if you need an ID not listed here.",
+      "default": "gemini-3.5-flash",
+      "data": [
+        {
+          "title": "Gemini 3.5 Flash",
+          "value": "gemini-3.5-flash"
+        },
+        {
+          "title": "Gemini 3.1 Flash-Lite",
+          "value": "gemini-3.1-flash-lite"
+        },
+        {
+          "title": "Gemini 3.1 Pro Preview",
+          "value": "gemini-3.1-pro-preview"
+        },
+        {
+          "title": "Gemini 3 Flash Preview",
+          "value": "gemini-3-flash-preview"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "gemini-2.5-flash"
+        },
+        {
+          "title": "Gemini 2.5 Flash-Lite",
+          "value": "gemini-2.5-flash-lite"
+        },
+        {
+          "title": "Gemini 2.5 Pro",
+          "value": "gemini-2.5-pro"
+        }
+      ]
+    },
+    {
+      "name": "translationModel",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Translation Model ID",
+      "description": "Optional advanced override. Use an unprefixed ID, for example gemini-3.5-flash. Reasoning controls are applied only for recognized models.",
+      "placeholder": "gemini-3.5-flash"
+    },
+    {
+      "name": "reasoningLevel",
+      "type": "dropdown",
+      "required": true,
+      "title": "Reasoning Level",
+      "description": "Controls Gemini reasoning for translations. Minimum is fastest: it disables thinking where supported; Pro models use their lowest supported reasoning level.",
+      "default": "none",
+      "data": [
+        {
+          "title": "Minimum (fastest)",
+          "value": "none"
+        },
+        {
+          "title": "Low",
+          "value": "low"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "High",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "name": "ttsModelPreset",
+      "type": "dropdown",
+      "required": true,
+      "title": "Text-to-Speech Model",
+      "description": "Gemini model used for word pronunciation. Use the custom model field only if you need an ID not listed here.",
+      "default": "gemini-3.1-flash-tts-preview",
+      "data": [
+        {
+          "title": "Gemini 3.1 Flash TTS Preview",
+          "value": "gemini-3.1-flash-tts-preview"
+        },
+        {
+          "title": "Gemini 2.5 Flash Preview TTS",
+          "value": "gemini-2.5-flash-preview-tts"
+        },
+        {
+          "title": "Gemini 2.5 Pro Preview TTS",
+          "value": "gemini-2.5-pro-preview-tts"
+        }
+      ]
+    },
+    {
+      "name": "ttsModel",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Text-to-Speech Model ID",
+      "description": "Optional advanced override. Use an unprefixed ID, for example gemini-3.1-flash-tts-preview.",
+      "placeholder": "gemini-3.1-flash-tts-preview"
     }
   ],
   "dependencies": {
@@ -216,8 +318,10 @@
     "eslint": "^9.22.0",
     "husky": "^9.1.7",
     "prettier": "^3.8.1",
+    "promptfoo": "^0.121.11",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.2",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   },
   "scripts": {
     "build": "ray build",
@@ -229,9 +333,19 @@
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest run",
     "test:watch": "vitest",
+    "eval": "mkdir -p evals/results && promptfoo eval -c evals/promptfooconfig.yaml -o evals/results/promptfoo.json",
+    "eval:smoke": "mkdir -p evals/results && promptfoo eval -c evals/promptfooconfig.yaml --filter-sample 10 -o evals/results/promptfoo-smoke.json",
+    "eval:validate": "promptfoo validate -c evals/promptfooconfig.yaml",
+    "eval:results": "promptfoo view",
     "prepare": "husky"
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1",
+    "fast-uri": "3.1.5",
+    "sharp": "0.35.3"
+  }
 }

@@ -1,6 +1,40 @@
 # Brew Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Upgrade View] - 2026-08-27
+
+- The Upgrade command now lists the outdated formulae & casks, matching the Show Outdated command, instead of a list of progress steps.
+- Upgrade progress is reported via the toast/HUD, with the icon of each package reflecting its upgrade status.
+- "Upgrade All" now upgrades each package in turn, so its progress is reported per package.
+- Added a Refresh action to the outdated action panel.
+- Pinned formulae are skipped when upgrading.
+
+## [Adopt] - 2026-08-19
+
+- Added "Copy Adopt Command" (⌘⇧⌥C) and "Run Adopt in <terminal>" (⌘⇧↵) actions in Search for packages not yet managed by Homebrew. They run `brew install --adopt` to reclaim an externally-installed package (e.g. installed via a .dmg or another package manager) into Homebrew so it is covered by `brew upgrade`.
+- The Adopt action is intentionally not shown as a direct action for uninstalled packages so it doesn't sit confusingly next to Install; adopt is available via the copy/run command actions.
+
+## [Pin visibility, outdated tags, detail pane] - 2026-08-04
+
+- Show Installed: pinned formulae now render in their own "Pinned Formulae" section at the bottom of the list, with the count as the section subtitle, instead of sitting unlabelled among the other formulae
+- Installed packages with an available update now carry an `Outdated` tag — formulae and casks both. The list component is shared, so the tag also appears for installed-and-outdated packages in Search results
+- Show Installed: ⌘⇧D toggles a metadata detail pane for the selected package
+- A list of nothing but pinned formulae no longer reports itself as empty
+
+## [Bug fix] - 2026-08-03
+
+- Fixed "Show Installed" listing no packages on every open after the first. The installed-package lookups are `Map`s, which serialise to `{}`, so the cached value was emptied on write and then re-served empty forever. The serialisable form is cached now and the lookups are rebuilt on read; cache entries written by earlier versions are discarded rather than trusted.
+- Fixed Search intermittently failing to mark packages as installed, which had the same cause.
+
+## [Bug fix] - 2026-07-10
+
+- Search now works instantly against the existing package index while it refreshes in the background, instead of blocking until the refresh completes
+
+## [Manage Services] - 2026-07-09
+
+- Added a "Manage Services" command to list Homebrew services and start, stop, or restart them individually or all at once. Actions update the list optimistically so it reflects the new state immediately.
+- Added a "Services Menu Bar" command to control Homebrew services from the menu bar, with a submenu per service and start/stop/restart all. The menu refreshes on a configurable interval.
+
+## [Bug fix] -  2026-05-21
 
 - Improves reliability of index cache
 - Improves toast error message if fetch fails

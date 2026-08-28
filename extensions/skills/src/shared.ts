@@ -9,21 +9,32 @@ export type Skill = {
   source: string;
 };
 
-export type AuditProvider = "agent-trust-hub" | "socket" | "snyk";
-
 export type AuditStatus = "pass" | "warn" | "fail" | "unknown";
 
 export type SkillAudit = {
-  provider: AuditProvider;
+  provider: string;
+  providerLabel?: string;
   status: AuditStatus;
   url?: string;
 };
 
-export const AUDIT_PROVIDER_LABELS: Record<AuditProvider, string> = {
+export const AUDIT_PROVIDER_LABELS: Record<string, string> = {
   "agent-trust-hub": "Gen Agent Trust Hub",
   socket: "Socket",
   snyk: "Snyk",
 };
+
+function formatSlugLabel(slug: string): string {
+  return slug
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((word) => `${word.slice(0, 1).toUpperCase()}${word.slice(1)}`)
+    .join(" ");
+}
+
+export function formatAuditProviderLabel(audit: Pick<SkillAudit, "provider" | "providerLabel">): string {
+  return audit.providerLabel ?? AUDIT_PROVIDER_LABELS[audit.provider] ?? formatSlugLabel(audit.provider);
+}
 
 export type SearchResponse = {
   query: string;

@@ -59,5 +59,9 @@
     "Developer Tools",
     "System",
     "Web"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

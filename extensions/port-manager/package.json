@@ -13,13 +13,14 @@
   "contributors": [
     "Sheraff",
     "ridemountainpig",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "0xdhrv"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "kill-listening-process",
-      "title": "Kill Process Listening On",
+      "title": "Kill Process Listening on",
       "description": "Kill the process listening on a given port",
       "mode": "no-view",
       "arguments": [
@@ -66,7 +67,7 @@
               "value": "showDetails"
             },
             {
-              "title": "Show In Finder",
+              "title": "Show in Finder",
               "value": "showInFinder"
             },
             {
@@ -99,10 +100,10 @@
   "preferences": [
     {
       "name": "killSignal",
-      "description": "The signal used to kill the process",
+      "description": "The signal used to kill the process on macOS. Windows always terminates with taskkill.",
       "type": "dropdown",
       "required": false,
-      "default": "select",
+      "default": "ask",
       "title": "Kill Signal",
       "data": [
         {
@@ -121,16 +122,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.0",
-    "@raycast/utils": "^1.9.1",
-    "nanoid": "^4.0.2"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "nanoid": "^6.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^18.8.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -138,5 +139,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

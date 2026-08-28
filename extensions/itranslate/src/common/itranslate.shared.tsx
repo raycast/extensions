@@ -964,7 +964,7 @@ export async function capture(closeWindow: boolean): Promise<string> {
   if (Math.abs(now - stat.ctimeMs) > 3000) {
     capturePath = "";
   }
-  closeWindow && (await open("raycast://"));
+  closeWindow && (await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://`));
   return capturePath;
 }
 

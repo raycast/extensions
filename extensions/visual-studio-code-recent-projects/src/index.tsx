@@ -92,6 +92,14 @@ export default function Command() {
   );
 }
 
+const entryTypeIcons: Partial<Record<EntryType, Icon>> = {
+  [EntryType.Workspaces]: Icon.Code,
+  [EntryType.Folders]: Icon.Folder,
+  [EntryType.RemoteFolders]: Icon.Globe,
+  [EntryType.RemoteWorkspace]: Icon.Cloud,
+  [EntryType.Files]: Icon.Document,
+};
+
 function EntryTypeDropdown(props: { onChange: (type: EntryType) => void }) {
   return (
     <ListOrGridDropdown
@@ -100,13 +108,13 @@ function EntryTypeDropdown(props: { onChange: (type: EntryType) => void }) {
       storeValue
       onChange={(value) => props.onChange(value as EntryType)}
     >
-      <ListOrGridDropdownItem title="All Types" value="All Types" />
+      <ListOrGridDropdownItem title="All Types" value="All Types" icon={Icon.BulletPoints} />
       <ListOrGridDropdownSection>
         {Object.values(EntryType)
           .filter((key) => key !== "All Types")
           .sort()
           .map((key) => (
-            <ListOrGridDropdownItem key={key} title={key} value={key} />
+            <ListOrGridDropdownItem key={key} title={key} value={key} icon={entryTypeIcons[key]} />
           ))}
       </ListOrGridDropdownSection>
     </ListOrGridDropdown>

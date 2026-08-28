@@ -1,7 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { CacheEntry, DiggerResult } from "../types";
-import { getCacheKey } from "../utils/urlUtils";
 import { CACHE } from "../utils/config";
+import { getCacheKey } from "../utils/urlUtils";
 
 interface CacheIndex {
   keys: string[];
@@ -67,8 +67,17 @@ export function useCache() {
     return entry.data;
   };
 
-  const saveToCache = async (url: string, data: DiggerResult): Promise<void> => {
+  /**
+   * @param isCancelled Optional predicate re-checked after eviction, immediately
+   *   before the write. `evictLRU` is a suspension point long enough for a newer
+   *   fetch to start, abort this one, and persist its own entry first — after
+   *   which this call would resume and overwrite that newer entry under the same
+   *   key. Checking only before calling `saveToCache` cannot see that, because
+   *   the supersession happens after the call has already begun.
+   */
+  const saveToCache = async (url: string, data: DiggerResult, isCancelled?: () => boolean): Promise<void> => {
     await evictLRU();
+    if (isCancelled?.()) return;
 
     const cacheKey = getCacheKey(url);
     const now = Date.now();

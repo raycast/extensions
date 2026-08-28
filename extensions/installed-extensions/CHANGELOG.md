@@ -1,5 +1,14 @@
 # Installed Extensions Changelog
 
+## [Fix Windows Stable Support] - 2026-08-24
+
+- Add `com.raycast.windows` bundle ID mapping so Raycast 2.0 stable on Windows resolves `~/.config/raycast/extensions` instead of falling back to the beta `raycast-x` directory
+- Default to the stable `raycast` config directory on all platforms when the bundle ID cannot be determined
+
+## [Add action] - 2026-07-09
+
+- Add `View Developer` action
+
 ## [Fixed Extension Folder] - 2026-05-26
 
 - Detect the correct extensions folder from `environment.supportPath` instead of scanning multiple Raycast config directories.

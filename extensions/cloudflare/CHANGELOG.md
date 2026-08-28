@@ -1,5 +1,9 @@
 # Cloudflare Changelog
 
+## [Fix] - 2026-06-25
+
+- Prevent View Pages from crashing when a Pages project has no latest deployment.
+
 ## [Improve View Workers Command] - 2026-05-25
 
 - Improve `View Workers` command to show more fields in the detail view

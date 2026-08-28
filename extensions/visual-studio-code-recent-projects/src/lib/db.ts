@@ -1,4 +1,4 @@
-import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Alert, Clipboard, Icon, Toast, confirmAlert, showHUD, showToast } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import fs from "fs";
 import { homedir } from "os";
@@ -6,7 +6,7 @@ import path from "path";
 import { useEffect, useMemo, useState } from "react";
 import { build } from "./preferences";
 import { EntryLike, RecentEntries } from "./types";
-import { isMac, isSameEntry, isWin } from "./utils";
+import { isSameEntry, isWin } from "./utils";
 import { execFilePromise } from "../utils/exec";
 import { getBuildNamePreference, getProductJSONPath } from "./vscode";
 
@@ -204,8 +204,20 @@ export function useRecentEntries() {
           ? "Storage-backed copies are hidden for this Raycast session"
           : `Restart ${build} to sync the list in ${build} (optional)`,
       );
-    } catch {
-      showToast(Toast.Style.Failure, "Failed to remove entry");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to remove entry",
+        message,
+        primaryAction: {
+          title: "Copy Error",
+          onAction: () => {
+            Clipboard.copy(message);
+            showHUD("Copied to clipboard");
+          },
+        },
+      });
     }
   }
 
@@ -269,8 +281,20 @@ export function useRecentEntries() {
             : `Restart ${build} to sync the list in ${build} (optional)`,
         );
       }
-    } catch {
-      showToast(Toast.Style.Failure, "Failed to remove entries");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to remove entries",
+        message,
+        primaryAction: {
+          title: "Copy Error",
+          onAction: () => {
+            Clipboard.copy(message);
+            showHUD("Copied to clipboard");
+          },
+        },
+      });
     }
   }
 
@@ -307,23 +331,9 @@ function getSharedStateDatabasePath() {
 
   if (!sharedDataFolderName) return undefined;
 
-  if (isWin) {
-    return path.join(homedir(), "AppData", "Roaming", sharedDataFolderName, "User", "sharedStorage", "state.vscdb");
-  }
-
-  if (isMac) {
-    return path.join(
-      homedir(),
-      "Library",
-      "Application Support",
-      sharedDataFolderName,
-      "User",
-      "sharedStorage",
-      "state.vscdb",
-    );
-  }
-
-  return undefined;
+  // sharedDataFolderName (e.g. ".vscode-shared") lives directly in the home
+  // directory on all platforms — not in AppData/Roaming or Library/Application Support.
+  return path.join(homedir(), sharedDataFolderName, "sharedStorage", "state.vscdb");
 }
 
 function getSharedDataFolderName() {
@@ -349,11 +359,37 @@ async function saveEntries(
   storageKeys: readonly (typeof recentEntriesStorageKeys)[number][],
   databasePath: string,
 ) {
-  const data = JSON.stringify({ entries }).replace(/'/g, "''");
-  const query = storageKeys
-    .map((storageKey) => `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('${storageKey}', '${data}');`)
-    .join("\n");
-  await execFilePromise("sqlite3", [databasePath, query]);
+  const data = JSON.stringify({ entries });
+
+  let DatabaseSync;
+  try {
+    // `node:sqlite` is available on Node 22.13+ (which Raycast bundles) and works on
+    // all platforms, unlike the `sqlite3` CLI which only ships with macOS.
+    ({ DatabaseSync } = await import("node:sqlite"));
+  } catch {
+    // Fall back to the `sqlite3` CLI on runtimes without `node:sqlite`.
+    const escapedData = data.replace(/'/g, "''");
+    const query = storageKeys
+      .map((storageKey) => `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('${storageKey}', '${escapedData}');`)
+      .join("\n");
+    await execFilePromise("sqlite3", [databasePath, query]);
+    return;
+  }
+
+  const database = new DatabaseSync(databasePath);
+  try {
+    database.exec("BEGIN");
+    const statement = database.prepare("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)");
+    for (const storageKey of storageKeys) {
+      statement.run(storageKey, data);
+    }
+    database.exec("COMMIT");
+  } catch (error) {
+    database.exec("ROLLBACK");
+    throw error;
+  } finally {
+    database.close();
+  }
 }
 
 function getFallbackEntries(): EntryLike[] {

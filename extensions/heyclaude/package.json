@@ -141,6 +141,30 @@
       ]
     },
     {
+      "name": "trending",
+      "title": "Trending Resources",
+      "description": "Browse trending HeyClaude resources from public registry signals.",
+      "mode": "view",
+      "keywords": [
+        "trending",
+        "popular",
+        "claude",
+        "discovery"
+      ]
+    },
+    {
+      "name": "recent-updates",
+      "title": "Recent Updates",
+      "description": "Browse recently added or updated HeyClaude registry entries.",
+      "mode": "view",
+      "keywords": [
+        "recent",
+        "updates",
+        "changelog",
+        "claude"
+      ]
+    },
+    {
       "name": "jobs",
       "title": "Browse HeyClaude Jobs",
       "description": "Browse active HeyClaude jobs, review role details, and open external apply links.",
@@ -156,12 +180,12 @@
     {
       "name": "submit-content",
       "title": "Submit New Content",
-      "description": "Create a reviewed HeyClaude content submission with fields that map to the website and GitHub issue forms.",
+      "description": "Create a reviewed HeyClaude content submission with fields that map to the website and PR-first gate.",
       "mode": "view",
       "keywords": [
         "submit",
         "content",
-        "issue",
+        "pr",
         "github",
         "registry"
       ]
@@ -189,12 +213,15 @@
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "1.104.13",
-    "@raycast/utils": "^2.2.4"
+    "@raycast/api": "1.104.18",
+    "@raycast/utils": "2.2.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.1.1",
-    "tsx": "4.21.0",
-    "typescript": "6.0.2"
+    "tsx": "4.22.3",
+    "typescript": "6.0.3"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.6"
   }
 }

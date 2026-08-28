@@ -1,5 +1,11 @@
 # Polars Documentation Search Changelog
 
+## [1.1.0] - 2026-06-23
+
+- Added an optional local documentation source for downloaded Polars docs.
+- Added automatic local fallback when the live Polars docs cannot be reached and a local docs directory is configured.
+- Added recovery actions and setup guidance when the live docs inventory fails to load.
+
 ## [1.0.3] - 2026-03-02
 
 - Fixed objects inventory parsing to handle arbitrary whitespace between fields and validate malformed lines.

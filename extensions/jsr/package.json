@@ -92,7 +92,13 @@
                 "name": "zod",
                 "description": "TypeScript-first schema declaration and validation library with static type inference",
                 "score": 100,
-                "runtimeCompat": { "node": true, "deno": true, "bun": true, "browser": true, "workerd": true },
+                "runtimeCompat": {
+                  "node": true,
+                  "deno": true,
+                  "bun": true,
+                  "browser": true,
+                  "workerd": true
+                },
                 "url": "https://jsr.io/@zod/zod"
               },
               {
@@ -101,7 +107,13 @@
                 "name": "valibot",
                 "description": "Modular and type safe schema library",
                 "score": 95,
-                "runtimeCompat": { "node": true, "deno": true, "bun": true, "browser": true, "workerd": true },
+                "runtimeCompat": {
+                  "node": true,
+                  "deno": true,
+                  "bun": true,
+                  "browser": true,
+                  "workerd": true
+                },
                 "url": "https://jsr.io/@valibot/valibot"
               }
             ]
@@ -134,7 +146,13 @@
               "updatedAt": "2024-08-18T11:29:02.113616Z",
               "createdAt": "2023-12-22T11:10:57.995437Z"
             },
-            "runtimeCompat": { "browser": false, "deno": true, "node": false, "workerd": false, "bun": false },
+            "runtimeCompat": {
+              "browser": false,
+              "deno": true,
+              "node": false,
+              "workerd": false,
+              "bun": false
+            },
             "updatedAt": "2024-03-13T02:23:41.070982Z",
             "createdAt": "2023-12-22T03:19:20.157401Z",
             "versionCount": 68,
@@ -151,7 +169,10 @@
           {
             "callsTool": {
               "name": "get-package",
-              "arguments": { "scope": "std", "name": "fs" }
+              "arguments": {
+                "scope": "std",
+                "name": "fs"
+              }
             }
           }
         ]
@@ -169,7 +190,10 @@
           {
             "callsTool": {
               "name": "get-readme",
-              "arguments": { "scope": "zod", "name": "zod" }
+              "arguments": {
+                "scope": "zod",
+                "name": "zod"
+              }
             }
           }
         ]
@@ -211,7 +235,10 @@
           {
             "callsTool": {
               "name": "get-versions",
-              "arguments": { "scope": "std", "name": "fs" }
+              "arguments": {
+                "scope": "std",
+                "name": "fs"
+              }
             }
           }
         ]
@@ -229,7 +256,10 @@
           {
             "callsTool": {
               "name": "get-dependencies",
-              "arguments": { "scope": "zod", "name": "zod" }
+              "arguments": {
+                "scope": "zod",
+                "name": "zod"
+              }
             }
           }
         ]
@@ -240,8 +270,22 @@
           "get-dependents": {
             "total": 852,
             "dependents": [
-              { "scope": "denoland", "package": "fresh", "versions": ["1.6.0"], "totalVersions": 1 },
-              { "scope": "oak", "package": "oak", "versions": ["12.5.0"], "totalVersions": 1 }
+              {
+                "scope": "denoland",
+                "package": "fresh",
+                "versions": [
+                  "1.6.0"
+                ],
+                "totalVersions": 1
+              },
+              {
+                "scope": "oak",
+                "package": "oak",
+                "versions": [
+                  "12.5.0"
+                ],
+                "totalVersions": 1
+              }
             ]
           }
         },
@@ -249,7 +293,10 @@
           {
             "callsTool": {
               "name": "get-dependents",
-              "arguments": { "scope": "std", "name": "fs" }
+              "arguments": {
+                "scope": "std",
+                "name": "fs"
+              }
             }
           }
         ]
@@ -259,10 +306,19 @@
         "mocks": {
           "get-downloads": {
             "totalLast90Days": 24092,
-            "byKind": { "jsr_meta": 22304, "npm_tarball": 1788 },
+            "byKind": {
+              "jsr_meta": 22304,
+              "npm_tarball": 1788
+            },
             "recentVersions": [
-              { "version": "4.4.3", "downloads": 5000 },
-              { "version": "4.4.2", "downloads": 3000 }
+              {
+                "version": "4.4.3",
+                "downloads": 5000
+              },
+              {
+                "version": "4.4.2",
+                "downloads": 3000
+              }
             ]
           }
         },
@@ -270,7 +326,10 @@
           {
             "callsTool": {
               "name": "get-downloads",
-              "arguments": { "scope": "zod", "name": "zod" }
+              "arguments": {
+                "scope": "zod",
+                "name": "zod"
+              }
             }
           }
         ]
@@ -288,7 +347,9 @@
                 "description": "Helpers for working with the file system",
                 "score": 94,
                 "latestVersion": "1.0.23",
-                "runtimeCompat": { "deno": true },
+                "runtimeCompat": {
+                  "deno": true
+                },
                 "isArchived": false
               },
               {
@@ -298,7 +359,10 @@
                 "description": "Helpers for cross-platform path manipulation",
                 "score": 100,
                 "latestVersion": "1.0.10",
-                "runtimeCompat": { "deno": true, "node": true },
+                "runtimeCompat": {
+                  "deno": true,
+                  "node": true
+                },
                 "isArchived": false
               }
             ]
@@ -308,7 +372,9 @@
           {
             "callsTool": {
               "name": "list-scope-packages",
-              "arguments": { "scope": "std" }
+              "arguments": {
+                "scope": "std"
+              }
             }
           }
         ]
@@ -366,7 +432,10 @@
           {
             "callsTool": {
               "name": "get-package-manifest",
-              "arguments": { "scope": "zod", "name": "zod" }
+              "arguments": {
+                "scope": "zod",
+                "name": "zod"
+              }
             }
           }
         ]
@@ -391,7 +460,10 @@
           {
             "callsTool": {
               "name": "get-score-breakdown",
-              "arguments": { "scope": "std", "name": "fs" }
+              "arguments": {
+                "scope": "std",
+                "name": "fs"
+              }
             }
           }
         ]
@@ -433,5 +505,11 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
+    "undici": "7.29.0"
+  }
 }

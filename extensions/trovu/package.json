@@ -1516,7 +1516,7 @@
     "countries-list": "^3.3.0",
     "dayjs": "^1.11.20",
     "escape-string-regexp": "^5.0.0",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.1.2",
     "lodash": "^4.18.1",
     "split-limit": "^1.0.5"
   },
@@ -1541,5 +1541,10 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9"
+  }
 }

@@ -1,9 +1,11 @@
 import { getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
-import { useExec } from "@raycast/utils";
-import { execFileSync, execSync } from "node:child_process";
+import { useCachedPromise } from "@raycast/utils";
+import { execFile, execFileSync, execSync, type ExecFileSyncOptions } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
+import { promisify } from "node:util";
 
 import { Category, CategoryName, Item, User, Vault } from "./types";
 
@@ -53,7 +55,17 @@ export const getCliPath = () => {
   return cliPath;
 };
 export const ZSH_PATH = isWindows ? undefined : [preferences.zshPath, "/bin/zsh"].find((path) => existsSync(path));
-export const errorRegex = new RegExp(/\[\w+\]\s+\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}\s+(.*)$/m);
+const OP_LOG_PREFIX = /\[\w+\]\s+\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}\s+/;
+const OP_LOG_PREFIX_GLOBAL = new RegExp(OP_LOG_PREFIX, "g");
+
+// `op` puts the cause on its first log line and the steps to fix it on the ones after, so keep
+// everything from that line onwards instead of just the first match.
+export const extractOpErrorMessage = (message: string): string => {
+  const start = message.search(OP_LOG_PREFIX);
+  const body = start === -1 ? message : message.slice(start);
+
+  return body.replace(OP_LOG_PREFIX_GLOBAL, "").trim();
+};
 export function actionsForItem(item: Item): ActionID[] {
   // all actions in the default order
   const defaultActions: ActionID[] = [
@@ -93,18 +105,83 @@ export function hrefToOpenInBrowser(item: Item): string | undefined {
 
   return undefined;
 }
-export function op(args: string[]) {
+const execFileAsync = promisify(execFile);
+
+// After an `op` process disconnects, the Windows 1Password app briefly has no pipe listener
+// for the next CLI connection. Any `op` launched inside that window fails instantly with
+// "cannot connect to 1Password app" even though the app is running. The extension chains
+// `op` calls back-to-back, so on Windows connection failures are retried for a short period
+// and `op` invocations run one at a time. macOS does not have this race and keeps the
+// original fail-fast, concurrent behavior.
+const DESKTOP_APP_CONNECTION_ERROR = "cannot connect to 1Password app";
+const CONNECTION_RETRY_ATTEMPTS = 6;
+const CONNECTION_RETRY_DELAY_MS = 350;
+const OP_MAX_BUFFER = 10 * 1024 * 1024;
+
+const isDesktopAppConnectionError = (output: string) => output.includes(DESKTOP_APP_CONNECTION_ERROR);
+const getStderr = (error: unknown) => (error as { stderr?: string | Buffer }).stderr?.toString() ?? "";
+
+const sleepSync = (ms: number) => {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+};
+
+function execOpSync(args: string[], options: ExecFileSyncOptions = {}) {
   const cliPath = getCliPath();
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return execFileSync(cliPath, args, {
+        maxBuffer: OP_MAX_BUFFER,
+        ...(windowsEnv ? { env: windowsEnv } : {}),
+        ...options,
+      });
+    } catch (error) {
+      if (!isWindows || attempt >= CONNECTION_RETRY_ATTEMPTS || !isDesktopAppConnectionError(getStderr(error))) {
+        throw error;
+      }
+      sleepSync(CONNECTION_RETRY_DELAY_MS);
+    }
+  }
+}
 
-  if (cliPath) {
-    const stdout = execFileSync(cliPath, args, { maxBuffer: 4096 * 1024, ...(windowsEnv ? { env: windowsEnv } : {}) });
+// Concurrent `op` processes make the connection race above more likely, so run them one at a time.
+let opExecutionChain: Promise<unknown> = Promise.resolve();
 
-    return stdout.toString();
+export function execOp(args: string[]): Promise<string> {
+  const run = async () => {
+    const cliPath = getCliPath();
+    for (let attempt = 1; ; attempt++) {
+      try {
+        const { stdout, stderr } = await execFileAsync(cliPath, args, {
+          maxBuffer: OP_MAX_BUFFER,
+          ...(windowsEnv ? { env: windowsEnv } : {}),
+        });
+        if (stderr) handleErrors(stderr.toString());
+        return stdout.toString();
+      } catch (error) {
+        if (error instanceof ExtensionError) throw error;
+        const stderr = getStderr(error);
+        if (isWindows && attempt < CONNECTION_RETRY_ATTEMPTS && isDesktopAppConnectionError(stderr)) {
+          await delay(CONNECTION_RETRY_DELAY_MS);
+          continue;
+        }
+        handleErrors(stderr || (error instanceof Error ? error.message : String(error)));
+      }
+    }
+  };
+
+  if (!isWindows) {
+    return run();
   }
 
-  throw Error("1Password CLI is not found!");
+  const result = opExecutionChain.then(run, run);
+  opExecutionChain = result.catch(() => undefined);
+  return result;
 }
-export const handleErrors = (stderr: string) => {
+
+export function op(args: string[], options: ExecFileSyncOptions = {}) {
+  return execOpSync(args, options).toString();
+}
+export const handleErrors = (stderr: string): never => {
   if (stderr.includes("no such host")) {
     throw new ConnectionError("No connection to 1Password.", "Verify Your Internet Connection.");
   } else if (stderr.includes("could not get item") || stderr.includes("isn't an item")) {
@@ -126,45 +203,59 @@ export const checkZsh = () => {
 };
 export const signIn = (account?: string) => {
   if (isWindows) {
-    execFileSync(getCliPath(), ["signin", ...(account ? account.split(" ") : [])], {
-      stdio: "inherit",
+    // Keep stderr piped so desktop-app connection failures are recognized and retried.
+    execOpSync(["signin", ...(account ? account.split(" ") : [])], {
+      stdio: ["inherit", "inherit", "pipe"],
       timeout: 30000,
-      env: windowsEnv,
     });
   } else {
     execSync(`${getCliPath()} signin ${account ? account : ""}`, { shell: ZSH_PATH });
   }
 };
+const SIGN_IN_STATUS_TIMEOUT_MS = 30000;
+
 export const getSignInStatus = () => {
   try {
     if (isWindows) {
-      execFileSync(getCliPath(), ["whoami"], { env: windowsEnv });
+      execOpSync(["whoami"]);
     } else {
       execSync(`${getCliPath()} whoami`);
     }
     return true;
   } catch {
-    return false;
+    // With the 1Password app integration and no `op signin` session, `whoami` reports
+    // "account is not signed in" even though delegated sessions work. Probe the app
+    // directly before asking the user to sign in. This is not a read-only probe: it
+    // establishes the delegated session, which is what later lets `useAccount` resolve
+    // through `whoami`. It took 6.1s on macOS when it had to set one up, so the timeout
+    // here is only a guard against the app waiting forever on a prompt nobody answers.
+    try {
+      execOpSync(["account", "get"], { timeout: SIGN_IN_STATUS_TIMEOUT_MS });
+      return true;
+    } catch {
+      return false;
+    }
   }
 };
-export const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) => T) => {
-  return useExec<T, U>(getCliPath(), [...args, "--format=json"], {
-    env: windowsEnv,
-    onError: async (e) => {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: e.message,
-      });
+export const useOp = <T = Buffer>(args: string[], callback?: (data: T) => T) => {
+  return useCachedPromise(
+    async (...opArgs: string[]) => {
+      const data = JSON.parse(await execOp([...opArgs, "--format=json"])) as T;
+      return callback ? callback(data) : data;
     },
-    parseOutput: ({ error, exitCode, stderr, stdout }) => {
-      if (error) handleErrors(error.message);
-      if (stderr) handleErrors(stderr);
-      if (exitCode != 0) handleErrors(stdout);
-      if (callback) return callback(JSON.parse(stdout));
-      return JSON.parse(stdout);
+    args,
+    {
+      onError: async (e) => {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: e.message,
+        });
+      },
     },
-  });
+  );
 };
+const itemListFlags = () => (preferences.reduceItemListMemoryUsage ? [] : ["--long"]);
+
 export const usePasswords2 = ({
   account,
   execute = true,
@@ -174,11 +265,22 @@ export const usePasswords2 = ({
   execute: boolean;
   flags?: string[];
 }) =>
-  useExec<Item[], ExtensionError>(
-    getCliPath(),
-    ["--account", account, "items", "list", "--long", "--format=json", ...flags],
+  useCachedPromise(
+    async (...args: string[]) => {
+      const items = JSON.parse(await execOp(["--account", ...args, "--format=json"])) as Item[];
+
+      return items.sort((a, b) => {
+        if (a.favorite && !b.favorite) {
+          return -1;
+        } else if (!a.favorite && b.favorite) {
+          return 1;
+        }
+
+        return a.title.localeCompare(b.title);
+      });
+    },
+    [account, "items", "list", ...itemListFlags(), ...flags],
     {
-      env: windowsEnv,
       execute,
       onError: async (e) => {
         await showToast({
@@ -186,50 +288,53 @@ export const usePasswords2 = ({
           title: e.message,
         });
       },
-      parseOutput: ({ error, exitCode, stderr, stdout }) => {
-        if (error) handleErrors(error.message);
-        if (stderr) handleErrors(stderr);
-        if (exitCode != 0) handleErrors(stdout);
-        const items = JSON.parse(stdout) as Item[];
-
-        return items.sort((a, b) => {
-          if (a.favorite && !b.favorite) {
-            return -1;
-          } else if (!a.favorite && b.favorite) {
-            return 1;
-          }
-
-          return a.title.localeCompare(b.title);
+    },
+  );
+export const usePasswords = (flags: string[] = []) =>
+  useOp<Item[]>(["items", "list", ...itemListFlags(), ...flags], (data) =>
+    data.sort((a, b) => a.title.localeCompare(b.title)),
+  );
+export const useVaults = () =>
+  useOp<Vault[]>(["vault", "list"], (data) => data.sort((a, b) => a.name.localeCompare(b.name)));
+export const useCategories = () =>
+  useOp<Category[]>(["item", "template", "list"], (data) => data.sort((a, b) => a.name.localeCompare(b.name)));
+export const useAccount = () =>
+  useCachedPromise(
+    async () => {
+      try {
+        return JSON.parse(await execOp(["whoami", "--format=json"])) as User;
+      } catch (error) {
+        // With the 1Password app integration and no `op signin` session, `whoami` fails
+        // even though delegated sessions work. Resolve the account through the app instead.
+        try {
+          const account = JSON.parse(await execOp(["account", "get", "--format=json"])) as {
+            domain: string;
+            id: string;
+          };
+          return { account_uuid: account.id, email: "", url: `${account.domain}.1password.com`, user_uuid: "" } as User;
+        } catch {
+          throw error;
+        }
+      }
+    },
+    [],
+    {
+      onError: async (e) => {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: e.message,
         });
       },
     },
   );
-export const usePasswords = (flags: string[] = []) =>
-  useOp<Item[], ExtensionError>(["items", "list", "--long", ...flags], (data) =>
-    data.sort((a, b) => a.title.localeCompare(b.title)),
-  );
-export const useVaults = () =>
-  useOp<Vault[], ExtensionError>(["vault", "list"], (data) => data.sort((a, b) => a.name.localeCompare(b.name)));
-export const useCategories = () =>
-  useOp<Category[], ExtensionError>(["item", "template", "list"], (data) =>
-    data.sort((a, b) => a.name.localeCompare(b.name)),
-  );
-export const useAccount = () => useOp<User, ExtensionError>(["whoami"]);
-export const useAccounts = <T = User[], U = ExtensionError>(execute = true) =>
-  useExec<T, U>(getCliPath(), ["account", "list", "--format=json"], {
-    env: windowsEnv,
-    execute: execute,
+export const useAccounts = <T = User[]>(execute = true) =>
+  useCachedPromise(async () => JSON.parse(await execOp(["account", "list", "--format=json"])) as T, [], {
+    execute,
     onError: async (e) => {
       await showToast({
         style: Toast.Style.Failure,
         title: e.message,
       });
-    },
-    parseOutput: ({ error, exitCode, stderr, stdout }) => {
-      if (error) handleErrors(error.message);
-      if (stderr) handleErrors(stderr);
-      if (exitCode != 0) handleErrors(stdout);
-      return JSON.parse(stdout);
     },
   });
 export function getCategoryIcon(category: CategoryName) {

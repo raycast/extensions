@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macos-appearance-changer",
+  "title": "macOS Appearance Changer",
+  "description": "Create and apply custom macOS appearance profiles with wallpaper, icon style, and dark mode",
+  "icon": "extension-icon.png",
+  "author": "huzef44",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neo773/macos-appearance-changer"
+  },
+  "commands": [
+    {
+      "name": "apply-profile",
+      "title": "Apply Profile",
+      "description": "Apply a saved appearance profile",
+      "mode": "view"
+    },
+    {
+      "name": "create-profile",
+      "title": "Create Profile",
+      "description": "Create a new appearance profile",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-profiles",
+      "title": "Toggle Profiles",
+      "description": "Quickly toggle between two appearance profiles",
+      "mode": "no-view"
+    },
+    {
+      "name": "configure-toggle",
+      "title": "Configure Toggle Pair",
+      "description": "Choose which two profiles to toggle between",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.18"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -56,7 +56,15 @@ async function habiticaFetch<T>(endpoint: string, options: { method?: string; bo
   });
 
   if (!response.ok) {
-    throw new Error(`Habitica API error: ${response.status} ${response.statusText} - ${await response.text()}`);
+    const text = await response.text();
+    let detail: string | undefined;
+    try {
+      const parsed = JSON.parse(text) as { message?: string; error?: string };
+      detail = parsed.message ?? parsed.error;
+    } catch {
+      // Body wasn't JSON; fall through to generic error.
+    }
+    throw new Error(detail ?? `Habitica API error: ${response.status} ${response.statusText}`);
   }
 
   const json = (await response.json()) as { success: boolean; data: T; message?: string };
@@ -87,7 +95,6 @@ export async function getTags(): Promise<HabiticaTag[]> {
 export async function scoreTask(taskId: string, direction: "up" | "down"): Promise<void> {
   await habiticaFetch(`/api/v3/tasks/${taskId}/score/${direction}`, { method: "POST" });
   invalidateTasksCache();
-  invalidateTagsCache();
   invalidateUserCache();
 }
 
@@ -97,25 +104,39 @@ export async function updateTask(taskId: string, body: UpdateTaskBody): Promise<
     body: JSON.stringify(body),
   });
   invalidateTasksCache();
-  invalidateTagsCache();
   return result;
 }
 
 export async function createTask(body: CreateTaskBody): Promise<void> {
   await habiticaFetch("/api/v3/tasks/user", { method: "POST", body: JSON.stringify(body) });
   invalidateTasksCache();
-  invalidateTagsCache();
 }
 
 export async function deleteTask(taskId: string): Promise<void> {
   await habiticaFetch(`/api/v3/tasks/${taskId}`, { method: "DELETE" });
   invalidateTasksCache();
-  invalidateTagsCache();
+}
+
+export async function clearCompletedTodos(): Promise<void> {
+  await habiticaFetch("/api/v3/tasks/clearCompletedTodos", { method: "POST" });
+  invalidateTasksCache();
+}
+
+export async function addTagToTask(taskId: string, tagId: string): Promise<void> {
+  await habiticaFetch(`/api/v3/tasks/${taskId}/tags/${tagId}`, { method: "POST" });
+  invalidateTasksCache();
+}
+
+export async function removeTagFromTask(taskId: string, tagId: string): Promise<void> {
+  await habiticaFetch(`/api/v3/tasks/${taskId}/tags/${tagId}`, { method: "DELETE" });
+  invalidateTasksCache();
 }
 
 export async function getUser(): Promise<HabiticaUser> {
   if (isFresh(cache.user)) return cache.user.data;
-  const data = await habiticaFetch<HabiticaUser>("/api/v3/user?userFields=stats,party,items,profile,preferences");
+  const data = await habiticaFetch<HabiticaUser>(
+    "/api/v3/user?userFields=stats,party,items,profile,preferences,flags,needsCron,purchased.plan.mysteryItems",
+  );
   cache.user = { data, expiresAt: Date.now() + USER_TTL_MS };
   return data;
 }
@@ -155,5 +176,99 @@ export async function buyHealthPotion(): Promise<void> {
 
 export async function buyArmoire(): Promise<void> {
   await habiticaFetch("/api/v3/user/buy-armoire", { method: "POST" });
+  invalidateUserCache();
+}
+
+// ---------------------------------------------------------------------------
+// Checklist
+// ---------------------------------------------------------------------------
+
+export async function addChecklistItem(taskId: string, text: string): Promise<void> {
+  await habiticaFetch(`/api/v3/tasks/${taskId}/checklist`, {
+    method: "POST",
+    body: JSON.stringify({ text }),
+  });
+  invalidateTasksCache();
+}
+
+export async function scoreChecklistItem(taskId: string, itemId: string): Promise<void> {
+  await habiticaFetch(`/api/v3/tasks/${taskId}/checklist/${itemId}/score`, { method: "POST" });
+  invalidateTasksCache();
+}
+
+export async function updateChecklistItem(taskId: string, itemId: string, text: string): Promise<void> {
+  await habiticaFetch(`/api/v3/tasks/${taskId}/checklist/${itemId}`, {
+    method: "PUT",
+    body: JSON.stringify({ text }),
+  });
+  invalidateTasksCache();
+}
+
+export async function deleteChecklistItem(taskId: string, itemId: string): Promise<void> {
+  await habiticaFetch(`/api/v3/tasks/${taskId}/checklist/${itemId}`, { method: "DELETE" });
+  invalidateTasksCache();
+}
+
+// ---------------------------------------------------------------------------
+// Inventory actions
+// ---------------------------------------------------------------------------
+
+export async function hatchPet(eggKey: string, potionKey: string): Promise<void> {
+  await habiticaFetch(`/api/v3/user/hatch/${eggKey}/${potionKey}`, { method: "POST" });
+  invalidateUserCache();
+}
+
+export async function feedPet(petKey: string, foodKey: string, amount = 1): Promise<void> {
+  await habiticaFetch(`/api/v3/user/feed/${petKey}/${foodKey}?amount=${amount}`, { method: "POST" });
+  invalidateUserCache();
+}
+
+export async function equipItem(type: "mount" | "pet" | "equipped" | "costume", key: string): Promise<void> {
+  await habiticaFetch(`/api/v3/user/equip/${type}/${key}`, { method: "POST" });
+  invalidateUserCache();
+}
+
+export async function sellItem(type: "eggs" | "hatchingPotions" | "food", key: string, amount = 1): Promise<void> {
+  await habiticaFetch(`/api/v3/user/sell/${type}/${key}?amount=${amount}`, { method: "POST" });
+  invalidateUserCache();
+}
+
+export async function openMysteryItem(): Promise<void> {
+  await habiticaFetch("/api/v3/user/open-mystery-item", { method: "POST" });
+  invalidateUserCache();
+}
+
+// ---------------------------------------------------------------------------
+// Class / skills / stats
+// ---------------------------------------------------------------------------
+
+export async function castSpell(spellId: string, targetId?: string): Promise<void> {
+  const query = targetId ? `?targetId=${encodeURIComponent(targetId)}` : "";
+  await habiticaFetch(`/api/v3/user/class/cast/${spellId}${query}`, { method: "POST" });
+  invalidateUserCache();
+  invalidateTasksCache();
+}
+
+export async function allocateStat(stat: "str" | "con" | "int" | "per"): Promise<void> {
+  await habiticaFetch(`/api/v3/user/allocate?stat=${stat}`, { method: "POST" });
+  invalidateUserCache();
+}
+
+export async function allocateNow(): Promise<void> {
+  await habiticaFetch("/api/v3/user/allocate-now", { method: "POST" });
+  invalidateUserCache();
+}
+
+// ---------------------------------------------------------------------------
+// User state
+// ---------------------------------------------------------------------------
+
+export async function toggleSleep(): Promise<void> {
+  await habiticaFetch("/api/v3/user/sleep", { method: "POST" });
+  invalidateUserCache();
+}
+
+export async function reviveUser(): Promise<void> {
+  await habiticaFetch("/api/v3/user/revive", { method: "POST" });
   invalidateUserCache();
 }

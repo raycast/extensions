@@ -7,10 +7,12 @@
   "author": "islamtayeb",
   "contributors": [
     "mallsjr",
-    "IslamTayeb"
+    "IslamTayeb",
+    "ohivan"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Applications",
@@ -48,6 +50,14 @@
           "value": "ecosia"
         }
       ]
+    },
+    {
+      "name": "heliumPath",
+      "title": "Helium Location",
+      "description": "Only needed for portable or non-default installs. Windows: the path to Helium's chrome.exe (for example C:\\Users\\you\\AppData\\Local\\imput\\Helium\\Application\\chrome.exe). macOS: the path to Helium.app. Leave empty to detect it automatically.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Detected automatically"
     }
   ],
   "commands": [
@@ -61,6 +71,12 @@
       "name": "search-web",
       "title": "Search Web",
       "description": "Search the web with Helium browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search browsing history from Helium browser",
       "mode": "view"
     },
     {
@@ -89,8 +105,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -98,14 +114,21 @@
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.9"
   },
   "scripts": {
     "build": "ray build",
+    "benchmark:tabs": "node scripts/benchmark-tabs.mjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

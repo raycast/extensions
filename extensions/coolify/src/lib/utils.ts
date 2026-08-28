@@ -18,7 +18,9 @@ export function isValidCoolifyUrl() {
 }
 
 export function getResourceColor(resource: Resource | ResourceDetails) {
-  return resource.status.startsWith("running:") ? Color.Green : Color.Red;
+  if (resource.status.startsWith("running")) return Color.Green;
+  if (resource.status.startsWith("starting")) return Color.Yellow;
+  return Color.Red;
 }
 
 export function capitalizeFirstLetter(text: string) {

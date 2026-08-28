@@ -37,7 +37,7 @@ export default function Command() {
         <MenuBarExtra.Item
           key="show-all-history"
           title="Show All History"
-          onAction={() => open("raycast://extensions/raycast/clipboard-history/clipboard-history")}
+          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/clipboard-history/clipboard-history`)}
           icon={Icon.ArrowRightCircle}
         />
       </MenuBarExtra.Section>

@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [Fix] - 2026-06-16
+
+- [Fix] Command "Chat with Ollama" and "Answer" commands: fixed a bug in the thinking rendering during streaming. The thinking text could stop updating mid-generation while the stream continued and the final answer appeared. The root cause was a missing flush of the pending `textThinkingBuffer` on stream termination (`emitDone`) combined with a `else if` in the throttle path that prevented symmetric flushing of thinking and content buffers.
+
 ## [Improvement] - 2026-05-26
 
 - Command "Chat with Ollama": new system prompt with current date and system information in the context.

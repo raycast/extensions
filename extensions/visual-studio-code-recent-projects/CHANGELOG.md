@@ -1,5 +1,45 @@
 # Visual Studio Code Changelog
 
+## [Fix: Opening workspaces on Windows] - 2026-08-19
+
+- Fixed `.code-workspace` entries on Windows opening as a new empty file instead of the workspace. The `file://` URI was passed to the editor as a positional argument, which the VS Code CLI interprets as a file path. Windows now opens all local entries by path, completing the revert in [#28913](https://github.com/raycast/extensions/pull/28913).
+
+## [Fixes] - 2026-08-03
+
+- Fix `saveEntries` failing on Windows with `spawn sqlite3 ENOENT` by writing to the VS Code state database through `node:sqlite`, with a fallback to the `sqlite3` CLI
+- Fix VSCodium - Insiders extensions folder and URL handler resolution
+- Fix `Open With VSCode` on network shares (UNC paths) and local drives
+- Fix the `Commands` command hanging on mid-write reads; now polls with a timeout and retries
+- Add `Copy Error` primary action to failure toasts.
+- Add icons to the recent projects entry type dropdown.
+- Bump all dependencies to the latest
+
+## [Revert: Windows project opening] - 2026-06-21
+
+- `getSelectedFinderItems` works on Windows; reverted.
+- Using the URL handler causes previous VS Code windows to close; reverted.
+- Bumped dependency versions
+
+## [Update] - 2026-06-17
+
+- Added support for Devin Desktop.
+
+## [Fix: Windows project opening] - 2026-06-17
+
+- Fixed Windows project opening so recent projects are launched through the selected editor URL handler instead of Explorer.
+
+## [Fix: macOS user Applications path] - 2026-06-05
+
+- Fixed `product.json` resolution when Visual Studio Code is installed in `~/Applications`.
+
+## [Update] - 2026-06-02
+
+- Added support for IBM Bob.
+
+## [Fix: Search Recent Projects empty on macOS] - 2026-06-02
+
+- Fixed `Search Recent Projects` showing no results on macOS with VS Code 1.118+. The shared storage database (`.vscode-shared/sharedStorage/state.vscdb`) is placed in the home directory on all platforms, not inside `~/Library/Application Support`. Also removed a spurious `User/` path segment from the Windows shared storage path. Fixes [#28311](https://github.com/raycast/extensions/issues/28311).
+
 ## [Fix: Recent Projects on Windows] - 2026-05-25
 
 - Fixed `Search Recent Projects` on Windows by reading the current VS Code state key `recently.opened` while keeping compatibility with the older `history.recentlyOpenedPathsList` key used by older VS Code internals.

@@ -215,7 +215,7 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
   }, []);
 
   function getQuicklink(): Quicklink {
-    const url = "raycast://extensions/notion/notion/quick-capture";
+    const url = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/notion/notion/quick-capture`;
     const page = searchPages?.find((page) => page.id === itemProps.page.value);
     const launchContext: LaunchContext = {
       defaults: {

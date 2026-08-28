@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pins",
   "title": "Pins",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "description": "Create pins for paths and URLs and display them in the menu bar",
   "keywords": [
     "pin",
@@ -21,7 +21,8 @@
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "matheuscoelho3006"
   ],
   "categories": [
     "Productivity",
@@ -326,6 +327,20 @@
       ]
     },
     {
+      "name": "open-pin-group",
+      "title": "Open Pin Group",
+      "description": "Open all pins in a group",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "groupId",
+          "type": "text",
+          "required": true,
+          "placeholder": "Group ID"
+        }
+      ]
+    },
+    {
       "name": "copy-pins",
       "title": "Export Pin Data",
       "description": "Export pins and groups in JSON, CSV, TOML, YAML, or XML format",
@@ -514,7 +529,7 @@
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "@raycast/api": "^1.77.1",
-    "@raycast/utils": "^1.16.1",
+    "@raycast/utils": "^1.19.1",
     "@types/papaparse": "^5.3.8",
     "@types/xml-js": "^1.0.0",
     "papaparse": "^5.4.1",
@@ -536,5 +551,12 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

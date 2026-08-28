@@ -1,96 +1,60 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
-
-interface Project {
-  id: number;
-  uid: string;
-  name: string;
-}
-
-interface Tag {
-  uid: string;
-  name: string;
-}
+import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import { createNote, fetchProjects, fetchTags } from "./lib/api";
 
 export default function Command() {
-  const preferences = getPreferenceValues<{ apiUrl: string; token: string }>();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [selectedProject, setSelectedProject] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // Fetch projects
-        const projectsRes = await fetch(`${preferences.apiUrl}/api/projects`, {
-          headers: { Authorization: `Bearer ${preferences.token}` },
-        });
-        if (projectsRes.ok) {
-          const projectsData = (await projectsRes.json()) as { projects: Project[] };
-          setProjects(projectsData.projects.filter((p: Project) => p && p.id != null && p.name));
-        }
-
-        // Fetch tags
-        const tagsRes = await fetch(`${preferences.apiUrl}/api/tags`, {
-          headers: { Authorization: `Bearer ${preferences.token}` },
-        });
-        if (tagsRes.ok) {
-          const tagsData = (await tagsRes.json()) as Tag[];
-          setTags(tagsData.filter((t: Tag) => t && t.uid != null && t.name));
-        }
-      } catch (error) {
-        console.error("Failed to load projects/tags:", error);
-      }
-    }
-
-    loadData();
-  }, [preferences.apiUrl, preferences.token]);
+  const { data: projects = [], isLoading: projectsLoading } = useCachedPromise(fetchProjects);
+  const { data: tags = [], isLoading: tagsLoading } = useCachedPromise(fetchTags);
 
   async function handleSubmit() {
+    if (!title.trim()) {
+      showToast({ style: Toast.Style.Failure, title: "Title is required" });
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      // Create note
-      const selectedTagObjects = selectedTags.map((uid) => tags.find((t) => t.uid === uid)).filter(Boolean);
+      const selectedTagNames = selectedTags
+        .map((uid) => tags.find((t) => t.uid === uid)?.name)
+        .filter((name): name is string => Boolean(name));
       const selectedProjectObj = projects.find((p) => p.id.toString() === selectedProject);
-      const body = {
-        title,
+
+      await createNote({
+        title: title.trim(),
         content,
         ...(selectedProjectObj ? { project_uid: selectedProjectObj.uid } : {}),
-        ...(selectedTagObjects.length > 0
-          ? { tags: selectedTagObjects.filter((t) => t !== undefined).map((t) => t.name) }
-          : {}),
-      };
-      const response = await fetch(`${preferences.apiUrl}/api/note`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${preferences.token}`,
-        },
-        body: JSON.stringify(body),
+        ...(selectedTagNames.length > 0 ? { tags: selectedTagNames } : {}),
       });
 
-      if (response.ok) {
-        showToast({ title: "Note created successfully", style: Toast.Style.Success });
-        // Reset form
-        setTitle("");
-        setContent("");
-        setSelectedProject("");
-        setSelectedTags([]);
-      } else {
-        showToast({ title: "Failed to create note", message: response.statusText, style: Toast.Style.Failure });
-      }
+      showToast({ style: Toast.Style.Success, title: "Note created successfully" });
+      setTitle("");
+      setContent("");
+      setSelectedProject("");
+      setSelectedTags([]);
     } catch (error) {
-      showToast({ title: "Error", message: (error as Error).message, style: Toast.Style.Failure });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to create note",
+        message: (error as Error).message,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
     <Form
+      isLoading={projectsLoading || tagsLoading || isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Note" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

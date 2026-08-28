@@ -2,7 +2,6 @@ import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { Schedule } from "../interfaces";
 
 type ActionPanelProps = {
-  searchText: string;
   schedule: Schedule;
   onSetScheduleAction: () => void;
   onDeleteScheduleAction: (schedule: Schedule) => void;
@@ -11,7 +10,6 @@ type ActionPanelProps = {
 };
 
 export function ListActionPanel({
-  searchText,
   schedule,
   onSetScheduleAction,
   onDeleteScheduleAction,
@@ -20,13 +18,7 @@ export function ListActionPanel({
 }: ActionPanelProps) {
   return (
     <ActionPanel>
-      {searchText.length > 0 && <Action title="Set Schedule" icon={Icon.Calendar} onAction={onSetScheduleAction} />}
-      <Action
-        title="Set Caffeination Schedule"
-        icon={Icon.CopyClipboard}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
-        onAction={() => onSetScheduleAction()}
-      />
+      <Action title="Set Caffeination Schedule" icon={Icon.Calendar} onAction={onSetScheduleAction} />
       <Action
         title="Delete Caffeination Schedule"
         style={Action.Style.Destructive}

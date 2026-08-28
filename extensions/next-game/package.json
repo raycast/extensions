@@ -1,0 +1,211 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "next-game",
+  "title": "Next Game",
+  "categories": [
+    "Applications",
+    "Fun"
+  ],
+  "description": "What to Play Next - Smart Game Picker",
+  "icon": "icon.png",
+  "author": "glct26",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Play Next",
+      "description": "View game recommendations and start your next session",
+      "mode": "view"
+    },
+    {
+      "name": "manage-skipped",
+      "title": "Manage Skipped Games",
+      "description": "View and unskip games you have hidden from recommendations",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "customSteamPath",
+      "title": "Custom Steam Path",
+      "description": "Optional: Select your main Steam installation directory if it is not in the default location.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "listLimit",
+      "title": "Recommendation Limit",
+      "description": "Number of games to show in the list.",
+      "type": "dropdown",
+      "default": "10",
+      "required": false,
+      "data": [
+        {
+          "title": "Top 10",
+          "value": "10"
+        },
+        {
+          "title": "Extended (Top 20)",
+          "value": "20"
+        }
+      ]
+    },
+    {
+      "name": "useSteamClient",
+      "type": "checkbox",
+      "title": "Open Steam pages in Steam client",
+      "label": "Use Steam client instead of browser when available",
+      "required": false,
+      "default": false,
+      "description": "If enabled, Steam links will open in the Steam desktop client (steam://). Falls back to browser if unavailable."
+    },
+    {
+      "name": "showOnlyInstalled",
+      "title": "Library Visibility",
+      "label": "Show Only Installed Games",
+      "description": "Hide games not currently installed. (Requires Steam folder read permissions).",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "tasteTimeframe",
+      "title": "Base Recommendations On",
+      "description": "How far back should the algorithm look to determine your current taste?",
+      "type": "dropdown",
+      "default": "180",
+      "required": false,
+      "data": [
+        {
+          "title": "Last 3 Months",
+          "value": "90"
+        },
+        {
+          "title": "Last 6 Months",
+          "value": "180"
+        },
+        {
+          "title": "Last 1 Year",
+          "value": "365"
+        },
+        {
+          "title": "All Time",
+          "value": "all"
+        }
+      ]
+    },
+    {
+      "name": "modeFilter",
+      "title": "Exclusion Filters",
+      "description": "Hide games based on their supported modes.",
+      "type": "dropdown",
+      "default": "all",
+      "required": false,
+      "data": [
+        {
+          "title": "Show All Games",
+          "value": "all"
+        },
+        {
+          "title": "Hide Multiplayer-Only",
+          "value": "hide_multi"
+        },
+        {
+          "title": "Hide Singleplayer-Only",
+          "value": "hide_single"
+        }
+      ]
+    },
+    {
+      "name": "maxAgeYears",
+      "title": "Maximum Game Age",
+      "description": "Hide games older than this many years. (e.g. 5). Leave empty for no limit.",
+      "placeholder": "e.g., 5",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "blacklistedTags",
+      "title": "Blacklisted Tags",
+      "description": "Hide games containing these tags. Separate with commas (e.g., Anime, VR, Horror).",
+      "placeholder": "e.g., Anime, VR, Horror",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "requireController",
+      "title": "Hardware & Features",
+      "label": "Require Controller Support",
+      "description": "Only show games with partial or full controller support.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "requireAchievements",
+      "title": "Achievements",
+      "label": "Require Steam Achievements",
+      "description": "Only show games that have Steam Achievements.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "hideFreeToPlay",
+      "title": "Library Cleanup",
+      "label": "Hide Free-to-Play Games",
+      "description": "Hide games tagged as Free to Play.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "vrFilter",
+      "title": "VR Mode",
+      "description": "Filter games based on Virtual Reality support.",
+      "type": "dropdown",
+      "default": "all",
+      "required": false,
+      "data": [
+        {
+          "title": "Show All Games",
+          "value": "all"
+        },
+        {
+          "title": "Hide VR Games",
+          "value": "hide_vr"
+        },
+        {
+          "title": "VR Games Only",
+          "value": "only_vr"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.2.17",
+    "eslint": "^8.57.1",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "dev": "ray dev",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}

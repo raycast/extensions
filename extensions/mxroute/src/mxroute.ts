@@ -35,6 +35,7 @@ export const mxroute = {
   getDomainVerificationKey: () => makeRequest<DomainVerificationKey>("verification-key"),
   domains: {
     create: (domain: string) => makeRequest("domains", { method: "POST", body: JSON.stringify({ domain }) }),
+    delete: (domain: string) => makeRequest(`domains/${domain}`, { method: "DELETE" }),
     get: (domain: string) => makeRequest<Domain>(`domains/${domain}`),
     list: () => makeRequest<string[]>("domains"),
     setMailHostingStatus: (domain: string, values: { enabled: boolean }) =>
@@ -64,5 +65,8 @@ export const mxroute = {
         makeRequest(`domains/${domain}/forwarders/${alias}`, { method: "DELETE" }),
       list: (domain: string) => makeRequest<EmailForwarder[]>(`domains/${domain}/forwarders`),
     },
+    getSpamSettings: (domain: string) => makeRequest<{ high_score: number }>(`domains/${domain}/spam/settings`),
+    updateSpamSettings: (domain: string, values: { high_score: number }) =>
+      makeRequest(`domains/${domain}/spam/settings`, { method: "PATCH", body: JSON.stringify(values) }),
   },
 };

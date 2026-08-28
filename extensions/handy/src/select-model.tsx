@@ -62,11 +62,12 @@ export default function SelectModel() {
             key={model.id}
             title={model.name}
             subtitle={model.description}
-            accessories={
-              model.id === currentId
+            accessories={[
+              ...(model.quant ? [{ tag: model.quant }] : []),
+              ...(model.id === currentId
                 ? [{ text: "Active", icon: Icon.Checkmark }]
-                : []
-            }
+                : []),
+            ]}
             actions={
               <ActionPanel>
                 <Action

@@ -27,7 +27,7 @@ export const ServersList = ({ search }: { search: string }) => {
       servers?.find((server) => server.id.toString() === incomingSearch) ||
       servers?.find((server) => JSON.stringify(server).includes(incomingSearch));
     if (!server) return;
-    showToast(Toast.Style.Success, `Now showing: ${server?.name}` ?? `Now showing: #${server?.id}`);
+    showToast(Toast.Style.Success, server?.name ? `Now showing: ${server.name}` : `Now showing: #${server.id}`);
     push(<ServerSingle server={server} />);
     setIncomingSearch("");
   }, [incomingSearch]);

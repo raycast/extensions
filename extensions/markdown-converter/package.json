@@ -84,7 +84,7 @@
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
-  "version": "1.2.2",
+  "version": "1.2.3",
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",

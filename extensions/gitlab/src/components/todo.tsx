@@ -1,5 +1,5 @@
 import { ActionPanel, Color, Image, launchCommand, LaunchType, List } from "@raycast/api";
-import { Project, Todo, User } from "../gitlabapi";
+import { Project, Todo } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
 import { MRState } from "./mr";
@@ -7,19 +7,8 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { useTodos } from "./todo/utils";
 import { MyProjectsDropdown } from "./project";
 import { useState } from "react";
-import { capitalizeFirstLetter, getErrorMessage, isWindows, showErrorToast } from "../utils";
-import { CacheActionPanelSection } from "./cache_actions";
-
-function userToIcon(user?: User): Image.ImageLike {
-  let result = "";
-  if (!user) {
-    return "";
-  }
-  if (user.avatar_url) {
-    result = user.avatar_url;
-  }
-  return { source: result, mask: Image.Mask.Circle };
-}
+import { capitalizeFirstLetter, formatDateTime, isWindows } from "../utils";
+import { showFailureToast } from "@raycast/utils";
 
 const actionColors: Record<string, Color> = {
   marked: Color.Green,
@@ -28,41 +17,19 @@ const actionColors: Record<string, Color> = {
   mentioned: Color.Green,
 };
 
-function getActionColor(actionName: string): Color {
-  if (!actionName) {
-    return Color.Green;
-  }
-  let result = actionColors[actionName];
-  if (!result) {
-    result = Color.Green;
-  }
-  return result;
-}
-
 const targetTypeSouce: Record<string, string> = {
   mergerequest: GitLabIcons.merge_request,
   issue: GitLabIcons.issue,
   epic: GitLabIcons.epic,
 };
 
-function getTargetTypeSource(tt: string): string {
-  if (!tt) {
-    return GitLabIcons.todo;
-  }
-  let result = targetTypeSouce[tt.toLowerCase()];
-  if (!result) {
-    result = GitLabIcons.todo;
-  }
-  return result;
-}
-
 export function getTodoIcon(todo: Todo, overrideTintColor?: Color.ColorLike | null): Image.ImageLike {
   if (todo.target_type === "MergeRequest" && todo.target?.state === MRState.merged) {
     return { source: GitLabIcons.merged, tintColor: overrideTintColor ?? Color.Purple };
   }
   return {
-    source: getTargetTypeSource(todo.target_type),
-    tintColor: overrideTintColor ?? getActionColor(todo.action_name),
+    source: todo.target_type ? targetTypeSouce[todo.target_type.toLowerCase()] || GitLabIcons.todo : GitLabIcons.todo,
+    tintColor: overrideTintColor ?? (todo.action_name ? actionColors[todo.action_name] || Color.Green : Color.Green),
   };
 }
 
@@ -81,11 +48,7 @@ function TodoListEmptyView(props: { searchMode: boolean }) {
 
 export function TodoList() {
   const [project, setProject] = useState<Project>();
-  const { todos, error, isLoading, performRefetch: refresh } = useTodos(undefined, project);
-
-  if (error) {
-    showErrorToast(error, "Cannot search Merge Requests");
-  }
+  const { todos, isLoading, performRefetch: refresh } = useTodos(undefined, project);
 
   if (isLoading === undefined) {
     return <List isLoading={true} searchBarPlaceholder="" />;
@@ -98,7 +61,7 @@ export function TodoList() {
         await launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
       }
     } catch (error) {
-      showErrorToast(getErrorMessage(error), "Could not open Todos Menu Command");
+      showFailureToast(error, { title: "Could not open Todos Menu Command" });
     }
   };
 
@@ -109,12 +72,12 @@ export function TodoList() {
       throttle={true}
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
     >
-      <List.Section title="Todos" subtitle={`${todos?.length}`}>
-        {todos?.map((todo) => (
+      <List.Section title="Todos" subtitle={`${todos.length}`}>
+        {todos.map((todo) => (
           <TodoListItem key={todo.id} todo={todo} refreshData={refreshAll} />
         ))}
       </List.Section>
-      <TodoListEmptyView searchMode={todos && todos.length > 0} />
+      <TodoListEmptyView searchMode={todos.length > 0} />
     </List>
   );
 }
@@ -124,31 +87,36 @@ export function getPrettyTodoActionName(todo: Todo): string {
 }
 
 export function TodoListItem(props: { todo: Todo; refreshData: () => void }) {
-  const todo = props.todo;
-  const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
-  const updatedAt = todo.updated_at ? new Date(todo.updated_at) : undefined;
   return (
     <List.Item
-      id={todo.id.toString()}
-      title={todo.title ? todo.title : "?"}
-      subtitle={subtitle}
+      id={props.todo.id.toString()}
+      title={props.todo.title ? props.todo.title : "?"}
+      subtitle={props.todo.group ? props.todo.group.full_path : props.todo.project_with_namespace || ""}
       accessories={[
-        { tag: getPrettyTodoActionName(todo), tooltip: `Reason: ${getPrettyTodoActionName(todo)}` },
-        { date: updatedAt, tooltip: updatedAt ? `Updated: ${updatedAt.toLocaleString()}` : undefined },
-        { icon: userToIcon(todo.author), tooltip: todo.author?.name },
+        {
+          tag: getPrettyTodoActionName(props.todo),
+          tooltip: `Reason: ${getPrettyTodoActionName(props.todo)}`,
+        },
+        {
+          date: props.todo.updated_at ? new Date(props.todo.updated_at) : undefined,
+          tooltip: props.todo.updated_at ? `Updated: ${formatDateTime(props.todo.updated_at)}` : undefined,
+        },
+        {
+          icon: props.todo.author?.avatar_url ? { source: props.todo.author.avatar_url, mask: Image.Mask.Circle } : "",
+          tooltip: props.todo.author?.name,
+        },
       ]}
-      icon={{ value: getTodoIcon(todo), tooltip: todo.target_type }}
+      icon={{ value: getTodoIcon(props.todo), tooltip: props.todo.target_type }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ShowTodoDetailsAction todo={todo} />
-            <GitLabOpenInBrowserAction url={todo.target_url} />
+            <ShowTodoDetailsAction todo={props.todo} />
+            <GitLabOpenInBrowserAction url={props.todo.target_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CloseTodoAction todo={todo} finished={props.refreshData} />
+            <CloseTodoAction todo={props.todo} finished={props.refreshData} />
             <CloseAllTodoAction finished={props.refreshData} />
           </ActionPanel.Section>
-          <CacheActionPanelSection />
         </ActionPanel>
       }
     />

@@ -37,6 +37,7 @@ export function GifDetails(props: GifDetailsProps) {
 
   return (
     <Detail
+      navigationTitle={title}
       markdown={renderGifMarkdownDetails(props.item)}
       actions={<GifActions item={props.item} showViewDetails={false} mutate={props.mutate} />}
       metadata={

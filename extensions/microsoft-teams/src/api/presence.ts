@@ -39,9 +39,19 @@ export function defaultPresence(): Presence {
   return { id: "", availability: "PresenceUnknown", activity: "Available" };
 }
 
+function presenceEntityPath(entityId?: string) {
+  if (entityId === undefined) {
+    return "/me/presence";
+  }
+
+  const chatLikeMatch = entityId.match(/^[^:]+:([^:]+)/);
+  const userId = chatLikeMatch?.[1] || entityId;
+  return `/users/${userId}/presence`;
+}
+
 export async function getPresence(entityId?: string) {
   const response = await get({
-    path: entityId === undefined ? "/me/presence" : `/users/${entityId.split(":")[1].split(":")[0]}/presence`,
+    path: presenceEntityPath(entityId),
   });
   await failIfNotOk(response, "Getting presence");
   return bodyOf<Presence>(response);

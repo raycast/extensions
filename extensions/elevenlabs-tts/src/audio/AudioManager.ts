@@ -6,6 +6,7 @@ import { join } from "path/posix";
 import { WebSocket, Data } from "ws";
 import { StreamConfig, WSMessage, ElevenLabsConfig } from "./types";
 import { validatePlaybackSpeed } from "../voice/settings";
+import { clearPlayback, registerPlayback } from "./playback";
 
 /**
  * Manages the audio streaming and playback process
@@ -235,8 +236,17 @@ export class AudioManager extends EventEmitter {
         return;
       }
 
-      // Skip non-audio messages (e.g., acknowledgments)
       if (!message.audio) {
+        // The final stream marker arrives without audio, so conclude before the audio guard
+        if (message.isFinal) {
+          console.log(`Stream complete after ${this.streamState.chunksReceived} chunks`);
+          this.streamState.streamComplete = true;
+          this.ws?.close();
+          this.checkAndEmitComplete();
+          return;
+        }
+
+        // Skip other non-audio messages (e.g., acknowledgments)
         console.log("Received non-audio message:", JSON.stringify(message));
         return;
       }
@@ -325,21 +335,24 @@ export class AudioManager extends EventEmitter {
    * Uses afplay for macOS compatibility
    */
   private async playAudioFile(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      // Use macOS native audio player for reliable playback
-      // Use -r flag to control playback rate
-      const validatedSpeed = validatePlaybackSpeed(this.config.playbackSpeed);
-      const process = spawn("afplay", ["-r", validatedSpeed, this.tempFile]);
+    const validatedSpeed = validatePlaybackSpeed(this.config.playbackSpeed);
+    const audioProcess = spawn("afplay", ["-r", validatedSpeed, this.tempFile]);
+    const pid = audioProcess.pid;
+    let closed = false;
 
-      // Handle process errors (e.g., afplay not found)
-      process.on("error", (error) => {
+    const completion = new Promise<void>((resolve, reject) => {
+      audioProcess.once("error", async (error) => {
+        closed = true;
+        if (pid) await clearPlayback(this.config.sessionId, pid);
         console.error("Audio player process error:", error);
         reject(error);
       });
 
-      // Monitor process completion
-      process.on("close", (code) => {
-        if (code === 0) {
+      audioProcess.once("close", async (code, signal) => {
+        closed = true;
+        if (pid) await clearPlayback(this.config.sessionId, pid);
+
+        if (code === 0 || signal === "SIGTERM") {
           console.log("Audio player process completed successfully");
           resolve();
         } else {
@@ -348,6 +361,17 @@ export class AudioManager extends EventEmitter {
         }
       });
     });
+
+    if (!pid) throw new Error("Failed to start afplay");
+
+    try {
+      await registerPlayback(this.config.sessionId, pid, this.tempFile);
+    } catch (error) {
+      audioProcess.kill("SIGTERM");
+      throw error;
+    }
+    if (closed) await clearPlayback(this.config.sessionId, pid);
+    return completion;
   }
 
   /**
@@ -372,22 +396,34 @@ export class AudioManager extends EventEmitter {
 
   /**
    * Handles WebSocket connection close
-   * Ensures cleanup if playback hasn't started
+   * Concludes the stream so the command always settles and releases its session
    */
-  private handleWebSocketClose(): void {
-    console.log("WebSocket connection closed");
-    if (!this.streamState.isPlaying) {
-      // If connection closed without receiving any audio chunks, emit error
-      // chunksReceived = -1 means an error was already emitted
-      if (this.streamState.chunksReceived === 0) {
-        console.error("Connection closed without receiving any audio chunks");
-        this.emit("error", new Error("No audio received"));
-      } else if (this.streamState.chunksReceived > 0) {
-        // Stream completed but playback never started - mark as complete
-        this.emit("complete");
-      }
-      // If chunksReceived is -1, error was already emitted, do nothing
+  private handleWebSocketClose(code: number): void {
+    console.log(`WebSocket connection closed (code ${code})`);
+    // The close is expected once the stream concluded; completion arrives when playback finishes
+    if (this.streamState.streamComplete) return;
+
+    // chunksReceived = -1 means an error was already emitted
+    if (this.streamState.chunksReceived === -1) return;
+
+    if (this.streamState.chunksReceived === 0) {
+      console.error("Connection closed without receiving any audio chunks");
+      this.emit("error", new Error("No audio received"));
+      return;
     }
+
+    // Anything but a normal closure (1000) means the stream may have been truncated
+    // — including 1005, a close without a status code — so surface it as a failure
+    if (code !== 1000) {
+      this.emit("error", new Error(`Connection closed unexpectedly (code ${code})`));
+      return;
+    }
+
+    // The server may close normally without sending isFinal; mark the stream complete
+    // and let the complete event fire once playback (started or pending a chunk write,
+    // which always follows a received chunk) finishes
+    this.streamState.streamComplete = true;
+    this.checkAndEmitComplete();
   }
 
   /**

@@ -19,7 +19,8 @@
     "1weiho",
     "xmok",
     "niksite",
-    "ojowwalker77"
+    "ojowwalker77",
+    "gumadeiras"
   ],
   "pastContributors": [
     "axsuul",
@@ -51,6 +52,42 @@
           "description": "Switch between Safari search and Safari search history.",
           "label": "iCloud",
           "default": "Search",
+          "data": [
+            {
+              "value": "search",
+              "title": "Search"
+            },
+            {
+              "value": "searchHistory",
+              "title": "Search History"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-all",
+      "title": "Search Tabs, Bookmarks and History",
+      "subtitle": "Safari",
+      "description": "Search your open tabs, bookmarks and history in one place",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "areRemoteTabsUsed",
+          "type": "checkbox",
+          "required": false,
+          "title": "Devices",
+          "description": "Include iCloud tabs across all your devices",
+          "default": true,
+          "label": "iCloud"
+        },
+        {
+          "name": "fallbackSearchType",
+          "type": "dropdown",
+          "required": false,
+          "title": "Fallback Search",
+          "description": "Switch between Safari search and Safari search history.",
+          "default": "search",
           "data": [
             {
               "value": "search",
@@ -527,18 +564,17 @@
     "lodash": "^4.17.21",
     "lru-cache": "^11.0.2",
     "osascript-tag": "^0.1.2",
-    "pinyin": "^4.0.0-alpha.2",
+    "pinyin-pro": "^3.28.2",
     "simple-plist": "^1.4.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
+    "@types/lodash": "^4.17.7",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2",
-    "@types/lodash": "^4.17.7",
-    "@types/pinyin": "^2.10.2"
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",
@@ -550,5 +586,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

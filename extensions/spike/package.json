@@ -74,7 +74,7 @@
   "dependencies": {
     "@raycast/api": "^1.83.2",
     "@raycast/utils": "^1.17.0",
-    "axios": "^1.8.4",
+    "axios": "^1.18.0",
     "crypto-js": "^4.2.0",
     "moment-timezone": "^0.5.46"
   },
@@ -94,5 +94,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

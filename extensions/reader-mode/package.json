@@ -55,19 +55,18 @@
   "preferences": [
     {
       "name": "rewriteArticleTitles",
-      "title": "Rewrite Article Titles",
+      "title": "AI Features",
       "description": "Generate concise, easy-to-read titles (requires Raycast AI).",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Rewrite article titles",
       "default": false,
       "required": false
     },
     {
       "name": "enableAISummary",
-      "title": "Automatically Generate Summaries",
       "description": "Automatically summarize articles (requires Raycast AI).",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Automatically generate summaries",
       "default": false,
       "required": false
     },
@@ -205,18 +204,19 @@
     },
     {
       "name": "showArticleImage",
-      "title": "Article Image",
+      "title": "Reader View",
       "description": "Display the article's featured image at the top of the reader view.",
       "type": "checkbox",
-      "label": "Show",
+      "label": "Show article image",
       "default": true,
       "required": false
     },
     {
-      "name": "downloadPath",
-      "title": "Download Path",
-      "description": "Path to save downloaded files. If not set, defaults to Downloads folder.",
-      "type": "directory",
+      "name": "skipPreCheck",
+      "description": "Show reader mode even when a page doesn't look like an article, instead of warning first.",
+      "type": "checkbox",
+      "label": "Always show reader mode",
+      "default": true,
       "required": false
     },
     {
@@ -224,25 +224,23 @@
       "title": "Paywall Hopper",
       "description": "Try to retrieve paywalled or member-only content from archive services.",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Retrieve paywalled content",
       "default": true,
       "required": false
     },
     {
-      "name": "skipPreCheck",
-      "title": "Skip Readability Pre-Check",
-      "description": "Skip the readability pre-check and always show reader mode.",
-      "type": "checkbox",
-      "label": "Skip",
-      "default": true,
+      "name": "downloadPath",
+      "title": "Download Path",
+      "description": "Path to save downloaded files. If not set, defaults to your Downloads folder.",
+      "type": "directory",
       "required": false
     },
     {
       "name": "verboseLogging",
-      "title": "Debug Logging",
+      "title": "Troubleshooting",
       "description": "Enable extra diagnostics for troubleshooting and bug reports.",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Enable debug logging",
       "default": false,
       "required": false
     }
@@ -271,6 +269,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node tests/run.mjs",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

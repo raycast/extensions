@@ -13,6 +13,7 @@ const bundleIdMap: Record<string, { macos: string; windows: { name: string; exe:
     windows: { name: "Visual Studio Code - Insiders", exe: "Code - Insiders.exe" },
   },
   Cursor: { macos: "com.todesktop.230313mzl4w4u92", windows: { name: "Cursor", exe: "Cursor.exe" } },
+  "IBM Bob": { macos: "com.ibm.software.bob", windows: { name: "IBM Bob", exe: "IBM Bob.exe" } },
   Kiro: { macos: "dev.kiro.desktop", windows: { name: "Kiro", exe: "Kiro.exe" } },
   Positron: { macos: "com.rstudio.positron", windows: { name: "Positron", exe: "Positron.exe" } },
   Qoder: { macos: "com.qoder.ide", windows: { name: "Qoder", exe: "Qoder.exe" } },
@@ -23,6 +24,7 @@ const bundleIdMap: Record<string, { macos: string; windows: { name: string; exe:
     macos: "com.vscodium.VSCodiumInsiders",
     windows: { name: "VSCodium - Insiders", exe: "VSCodium - Insiders.exe" },
   },
+  Devin: { macos: "com.exafunction.windsurf", windows: { name: "Devin", exe: "Devin.exe" } },
   Windsurf: { macos: "com.exafunction.windsurf", windows: { name: "Windsurf", exe: "Windsurf.exe" } },
   Lingma: { macos: "com.aliyun.lingma.ide", windows: { name: "Lingma", exe: "Lingma.exe" } },
 };
@@ -39,7 +41,16 @@ export async function getEditorApplication(buildName: string): Promise<Applicati
   const bundleId = bundleIdMap[buildName];
   if (isMac) {
     if (bundleId) {
-      const app = apps.find((app) => app.bundleId === bundleId.macos);
+      const app = apps.find((app) => {
+        if (app.bundleId !== bundleId.macos) return false;
+
+        // Special case for Windsurf and Devin where the bundle ID is the same for both builds
+        if (app.bundleId === "com.exafunction.windsurf") {
+          return app.path.toLowerCase().includes(`${buildName.toLowerCase()}.app`);
+        }
+
+        return true;
+      });
       if (app) return app;
     }
   } else {

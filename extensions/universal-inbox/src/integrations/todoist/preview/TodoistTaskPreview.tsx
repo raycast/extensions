@@ -1,24 +1,25 @@
-import { getNotificationHtmlUrl, Notification } from "../../../notification";
-import { Detail, ActionPanel, Action } from "@raycast/api";
-import { useMemo } from "react";
+import { PreviewDetail } from "../../../preview/PreviewDetail";
+import { TaskMetadata } from "../../../preview/TaskMetadata";
+import { Notification } from "../../../notification";
 
 interface TodoistTaskPreviewProps {
   notification: Notification;
 }
 
 export function TodoistTaskPreview({ notification }: TodoistTaskPreviewProps) {
-  const notificationHtmlUrl = useMemo(() => {
-    return getNotificationHtmlUrl(notification);
-  }, [notification]);
+  const task = notification.task;
+  const title = task?.title ?? notification.title;
+
+  let markdown = `# ${title}`;
+  if (task?.body) {
+    markdown += `\n\n${task.body}`;
+  }
 
   return (
-    <Detail
-      markdown={`# ${notification.title}`}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={notificationHtmlUrl} />
-        </ActionPanel>
-      }
+    <PreviewDetail
+      notification={notification}
+      markdown={markdown}
+      metadata={task ? <TaskMetadata task={task} /> : undefined}
     />
   );
 }

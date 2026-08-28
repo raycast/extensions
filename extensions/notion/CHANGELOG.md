@@ -4,6 +4,18 @@
 
 - Fix `Open in App` deep-link generation only matching `notion.so` URLs: since Notion's domain migration, page URLs are served from `notion.com` hosts (e.g. `app.notion.com`), so the `notion://` deep link was never built and the desktop app opened the last viewed page instead of the target ([#30540](https://github.com/raycast/extensions/issues/30540))
 
+## [Fix Create Database Page not saving properties] - 2026-08-23
+
+- Fix `Create Database Page` creating the page but dropping the filled-in properties after Notion's database/data-source split: the page is now created against the data source (`data_source_id`) instead of the parent database container ([#30460](https://github.com/raycast/extensions/issues/30460))
+- Fix property values being sent without their Notion type wrapper (e.g. `{ checkbox: true }`, `{ number: 42 }`, `{ select: { id } }`), which made the API silently ignore most of them
+- Fix checkbox `false` and number `0` being dropped by the form-value falsy check
+
+## [Add Note Command] - 2026-08-19
+
+- Add a new `Add Note` command that appends a note to a page titled with the current date, nested inside a notes page (`NOTES` by default)
+- Create the notes page and the daily page automatically when they don't exist yet
+- Add preferences for the notes page name, the date format of the daily page, and the note style (bulleted list, to-do or paragraph)
+
 ## [Add Pin Pages Action] - 2026-05-19
 
 - Add a new action to pin a page in the `Search Page` command

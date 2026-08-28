@@ -1,16 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 
-import { Color, Grid, Icon } from "@raycast/api";
+import { Color, Grid, Icon, showToast, Toast } from "@raycast/api";
 
 import {
-  ServiceName,
   getMaxResults,
   getServiceTitle,
   getGridItemSize,
   getGridTrendingItemSize,
   GIF_SERVICE,
   GRID_COLUMNS,
+  isServiceName,
 } from "./preferences";
 
 import useSearchAPI from "./hooks/useSearchAPI";
@@ -22,11 +22,17 @@ export default function GifSearch() {
   const limit = getMaxResults();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchService, setSearchService] = useCachedState<ServiceName>("service", GIF_SERVICE.GIPHY);
+  const [cachedSearchService, setSearchService] = useCachedState<string>("service", GIF_SERVICE.GIPHY);
+  const searchService = isServiceName(cachedSearchService) ? cachedSearchService : GIF_SERVICE.GIPHY;
 
   const itemSize = searchTerm.length > 0 ? getGridItemSize() : getGridTrendingItemSize();
 
-  const { data: results, isLoading, pagination } = useSearchAPI({ term: searchTerm, service: searchService, limit });
+  const {
+    data: results,
+    error,
+    isLoading,
+    pagination,
+  } = useSearchAPI({ term: searchTerm, service: searchService, limit });
   const {
     recentGifs,
     favoriteGifs,
@@ -36,12 +42,25 @@ export default function GifSearch() {
   } = useLocalGifs(searchService, itemSize);
 
   const onServiceChange = (service: string) => {
-    setSearchService(service as ServiceName);
+    if (isServiceName(service)) setSearchService(service);
     setSearchTerm(searchTerm);
   };
 
   const showAllFavs = searchService === GIF_SERVICE.FAVORITES;
   const showAllRecents = searchService === GIF_SERVICE.RECENTS;
+  const showProviderError = Boolean(error && !results?.length && !showAllFavs && !showAllRecents);
+
+  useEffect(() => {
+    if (!error || showAllFavs || showAllRecents) {
+      return;
+    }
+
+    showToast({
+      style: Toast.Style.Failure,
+      title: `Could not load GIFs from ${getServiceTitle(searchService)}`,
+      message: error.message,
+    });
+  }, [error, searchService, showAllFavs, showAllRecents]);
 
   let placeholder = `Search for GIFs${searchService ? ` on ${getServiceTitle(searchService)}` : ""}`;
   if (showAllFavs) placeholder = "Search favorites";
@@ -51,6 +70,7 @@ export default function GifSearch() {
   if (showAllFavs) emptyState = { text: "Add some GIFs to your Favorites first…", icon: Icon.Clock };
   if (showAllRecents) emptyState = { text: "Work with some GIFs first…", icon: Icon.Clock };
   if (searchTerm.length > 0 && results?.length === 0) emptyState = { text: "No GIFs were found.", icon: Icon.Image };
+  if (showProviderError) emptyState = { text: error?.message ?? "Could not load GIFs.", icon: Icon.Image };
 
   let sections = [
     ...(searchTerm.length === 0
@@ -59,7 +79,7 @@ export default function GifSearch() {
           { title: "Recent", results: recentGifs, isLocalGifSection: true },
         ]
       : []),
-    { title: "Trending", results },
+    { title: "Trending", results: showProviderError ? [] : results },
   ];
 
   const showLocalGifsView = showAllFavs || showAllRecents;
@@ -89,11 +109,6 @@ export default function GifSearch() {
               title="GIPHY Clips"
               value={GIF_SERVICE.GIPHY_CLIPS}
               icon={{ source: "giphy-logo-square-180.png" }}
-            />
-            <Grid.Dropdown.Item
-              title="Tenor"
-              value={GIF_SERVICE.TENOR}
-              icon={{ source: "tenor-logo-square-180.png" }}
             />
             <Grid.Dropdown.Item
               title="Klipy"

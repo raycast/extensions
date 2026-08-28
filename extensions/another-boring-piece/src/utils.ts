@@ -1,12 +1,17 @@
 import fs from "fs";
+import os from "os";
 import crypto from "crypto";
 import path from "path";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import { environment } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import {
   recordWallpaperHistoryBestEffort,
   type WallpaperHistoryEventType,
 } from "./history-store";
+
+const execFileP = promisify(execFile);
 
 export const API_TRIPLE_URL =
   "https://service.anotherboring.day/api/wallpapers/raycast-triple";
@@ -187,14 +192,39 @@ export async function ensureWallpaperFile(url: string, id?: string) {
   return filePath;
 }
 
+async function setWallpaperWindows(imagePath: string) {
+  // SPI_SETDESKWALLPAPER (20) with SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE (3)
+  // persists the wallpaper across reboots and applies it to all monitors.
+  const ps = `$c=@"
+using System.Runtime.InteropServices;
+public class W {
+  [DllImport("user32.dll",CharSet=CharSet.Auto)]
+  public static extern int SystemParametersInfo(int a,int b,string c,int d);
+}
+"@
+Add-Type -TypeDefinition $c
+$r = [W]::SystemParametersInfo(20,0,'${imagePath.replace(/'/g, "''")}',3)
+if ($r -eq 0) { throw "SystemParametersInfo returned 0" }`;
+  const encoded = Buffer.from(ps, "utf16le").toString("base64");
+  await execFileP("powershell", ["-NoProfile", "-EncodedCommand", encoded]);
+}
+
+async function setWallpaperMac(filePath: string) {
+  const escapedPath = filePath.replace(/[\\"]/g, "\\$&");
+  const script = `tell application "System Events" to tell every desktop to set picture to "${escapedPath}"`;
+  await runAppleScript(script);
+}
+
 export async function setDesktopWallpaper(
   wallpaper: Wallpaper,
   eventType: WallpaperHistoryEventType = "selected",
 ) {
   const filePath = await ensureWallpaperFile(wallpaper.url, wallpaper.id);
-  const escapedPath = filePath.replace(/[\\"]/g, "\\$&");
-  const script = `tell application "System Events" to tell every desktop to set picture to "${escapedPath}"`;
-  await runAppleScript(script);
+  if (process.platform === "win32") {
+    await setWallpaperWindows(filePath);
+  } else {
+    await setWallpaperMac(filePath);
+  }
   recordWallpaperHistoryBestEffort({
     eventType,
     wallpaper,
@@ -204,7 +234,7 @@ export async function setDesktopWallpaper(
 
 export async function downloadWallpaper(wallpaper: Wallpaper) {
   const sourcePath = await ensureWallpaperFile(wallpaper.url, wallpaper.id);
-  const downloadsDir = path.join(process.env.HOME || "", "Downloads");
+  const downloadsDir = path.join(os.homedir(), "Downloads");
   const extension = path.extname(sourcePath) || ".jpg";
 
   const safeName = wallpaper.name.replace(/[^a-z0-9]/gi, "_");

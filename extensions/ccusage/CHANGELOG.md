@@ -1,4 +1,72 @@
-# Claude Code Usage (ccusage) Changelog
+# Claude Usage (ccusage) Changelog
+
+## [Rename to Claude Usage] - 2026-07-29
+
+### Changed
+
+- Renamed the extension from "Claude Code Usage" to "Claude Usage" — the Usage Limits and menu bar tracking reflect your overall Claude plan, not just Claude Code
+- Documented the Pie Chart menu bar icon style in the README
+
+## [Add menu bar section visibility toggles] - 2026-07-29
+
+### Added
+
+- **Section visibility toggles:** Individually show or hide each menu bar dropdown section — Rate Limits, Today's Usage, This Week, Monthly Usage, Total Usage, Current Block, and Working Time. All default to visible, so existing menus are unchanged.
+
+## [Add pie chart icon, pies progress style, and time remaining display] - 2026-07-28
+
+### Added
+
+- **Menu Bar Icon Style:** 'Pie Chart' — SVG pie icon showing 5-hour utilization, filling clockwise with Claude's orange
+- **Progress Bar Style:** 'Pies' — per-row pie SVG icons on rate limit rows instead of Icon.Gauge
+- **Time Remaining Display:** Show Time Remaining toggle appends 5-hour session countdown to the menu bar title text
+- **Time Remaining Format:** Customizable template string with placeholders: `{h}h{m}m`, `{M}m`, `{h.f}h`, etc.
+
+## [More progress bar styles] - 2026-07-12
+
+### Added
+
+- Six new progress bar styles — "Dots" (`●○`), "Segmented" (`▮▯`), "Squares" (`■□`), "Diamonds" (`◆◇`), "Stars" (`★☆`), and "Braille" (`⣿⣀`) — shape-based tracks that render consistently whether a menu row is idle or selected, unlike the Solid style's shade track; the default is unchanged
+
+## [Keep rate-limit bars visible during backoff] - 2026-07-12
+
+### Fixed
+
+- Rate limit progress bars no longer disappear when the menu bar restarts during a rate-limit backoff window. Restored cached limits now mark the feature available immediately, instead of waiting for a fetch that the backoff guard skips
+
+## [Reconcile menu bar usage readouts] - 2026-07-10
+
+### Fixed
+
+- Rate-limit percentages now agree across surfaces. The menu bar title, the progress bars, and the command's Usage Limits accessory all follow one "Usage Display Mode" preference, which defaults to Consumed so they match Claude's own settings out of the box
+- The last-fetched time now persists across relaunches, so a fresh menu bar process reports the real age of its data in "Last Updated" and the stale-data warning instead of a blank timestamp
+
+### Changed
+
+- The former menu bar "Progress Bar Mode" preference is now an extension-level "Usage Display Mode" preference and defaults to Consumed. If you previously set it to Remaining, reselect it in the extension preferences
+
+## [Honor server rate-limit backoff] - 2026-06-10
+
+### Fixed
+
+- Usage Limits no longer freeze after the Claude API returns a rate-limit response. The fetch now honors the server's `retry-after` window, coordinates one backoff across the menu bar and main view, and shows the real wait time
+- An expired token in `~/.claude/.credentials.json` no longer shadows a fresh Keychain token
+
+## [Tolerate dateless sessions] - 2026-06-03
+
+### Fixed
+
+- Session views no longer crash when `ccusage` reports a session with no activity date (a non-Claude agent row, or one whose entries lack timestamps); the session shows "unknown" instead of failing the entire list
+
+### Changed
+
+- Schema validation failures now report the `ccusage` version and a redacted structural fingerprint of the output (field names and value types, never values), so version-specific schema drift is diagnosable from an error report alone
+
+## [Monochrome menu bar icon] - 2026-06-02
+
+### Added
+
+- Added a menu bar preference to use a monochrome icon instead of the extension icon
 
 ## [ccusage v20] - 2026-05-25
 

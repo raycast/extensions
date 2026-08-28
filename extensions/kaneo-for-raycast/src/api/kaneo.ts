@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Project, ProjectDetail, Task, Notification, TaskRelation } from "../types";
+import type { Project, ProjectDetail, Task, Notification, TaskRelation, Column } from "../types";
+import { normalizeInstanceUrl } from "../lib/url";
 
 export class KaneoAPI {
   private instanceUrl: string;
@@ -9,14 +10,14 @@ export class KaneoAPI {
 
   constructor() {
     const prefs = getPreferenceValues();
-    this.instanceUrl = prefs.instanceUrl;
+    this.instanceUrl = normalizeInstanceUrl(prefs.instanceUrl);
     this.apiToken = prefs.apiToken;
     this.workspaceId = prefs.workspaceId;
     this.requestTimeout = Number(prefs.requestTimeout);
   }
 
   private async request<T>(path: string, init?: RequestInit, timeoutMs = this.requestTimeout): Promise<T> {
-    const url = `${this.instanceUrl.replace(/\/$/, "")}${path}`;
+    const url = `${this.instanceUrl}${path}`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -45,6 +46,11 @@ export class KaneoAPI {
       if ((error as Error).name === "AbortError") {
         throw new Error(`Kaneo API error: request to ${path} timed out after ${timeoutMs}ms`);
       }
+      if (error instanceof SyntaxError) {
+        throw new Error(
+          "Kaneo returned an unexpected response instead of JSON. Please check that your API URL is correct in the extension preferences.",
+        );
+      }
       throw error;
     } finally {
       clearTimeout(timeoutId);
@@ -64,6 +70,23 @@ export class KaneoAPI {
 
   async getProjectTasks(projectId: string): Promise<ProjectDetail> {
     return this.request<ProjectDetail>(`/api/task/tasks/${projectId}`);
+  }
+
+  async getWorkspaceBoard(workspaceId: string): Promise<Array<{ project: Project; columns: Column[] }>> {
+    const projects = await this.getProjects(workspaceId);
+    return Promise.all(
+      projects.map(async (project) => {
+        try {
+          const detail = await this.getProjectTasks(project.id.toString());
+          return { project, columns: detail?.data?.columns ?? detail?.columns ?? [] };
+        } catch (error) {
+          // One project failing must not break the whole overview — skip it and
+          // keep the tasks from the other projects.
+          console.error(`Kaneo: skipping project "${project.name}" — failed to load its tasks:`, error);
+          return { project, columns: [] as Column[] };
+        }
+      }),
+    );
   }
 
   async getTask(taskId: string): Promise<Task> {

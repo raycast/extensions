@@ -1,13 +1,24 @@
+export interface AmpFreeUsage {
+  /** Percentage of Amp Free remaining (0–100). */
+  percentRemaining: number;
+  /** e.g. "resets daily" when present in CLI output */
+  resetNote?: string;
+}
+
+export interface AmpSubscriptionUsage {
+  /** e.g. "Megawatt" or "Gigawatt" */
+  plan: string;
+  otherPercentRemaining: number;
+  orbPercentRemaining: number;
+  /** e.g. "resets upon renewal in 24 days" */
+  resetNote?: string;
+}
+
 export interface AmpUsage {
   email: string;
   nickname: string;
-  ampFree: {
-    used: number;
-    total: number;
-    unit: string;
-    replenishRate?: string;
-    bonus?: string;
-  };
+  ampFree?: AmpFreeUsage;
+  subscription?: AmpSubscriptionUsage;
   individualCredits: {
     remaining: number;
     unit: string;

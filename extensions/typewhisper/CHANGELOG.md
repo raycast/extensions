@@ -1,5 +1,10 @@
 # TypeWhisper Changelog
 
+## [Finder Selection for File Transcription] - 2026-06-28
+
+- Prefill Transcribe File with the selected Finder audio file when available
+- Keep the file picker as a fallback when Finder has no supported audio file selected
+
 ## [Improved Dictation Session Tracking] - 2026-04-24
 
 - Updated Start Dictation and Show Last Transcription to use dictation session IDs for exact transcript lookup

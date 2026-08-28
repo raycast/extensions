@@ -1,5 +1,23 @@
 # Tempo Changelog
 
+## [Prefill Remaining Estimate] - 2026-08-05
+
+- Prefill the editable remaining estimate from the selected Jira issue
+
+## [Add Remaining Estimate Validation] - 2026-06-22
+
+- Add validation for remaining estimate field based on global configuration
+
+## [Add Autofocus to Worklog Duration] - 2026-06-05
+
+- Autofocus the Time Spent field when opening the Add Worklog form
+
+## [Worklog Time Range Improvements] - 2026-06-03
+
+- Add optional start and end time entry when logging work and derive the duration automatically
+- Support `8:00`, `08:00`, `8h`, and `8h30` time formats in time-range mode
+- Remember the preferred time-range input mode between worklogs
+
 ## [Initial Version] - 2025-11-04
 
 - Add Worklog command with issue selection

@@ -1,14 +1,66 @@
-import { LaunchProps, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  Icon,
+  LaunchProps,
+  open,
+  PopToRootType,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { useEffect, useRef } from "react";
 import { getDefaultSearchEngine } from "./data/cache";
 import { builtinSearchEngines } from "./data/builtin-search-engines";
 import { getCustomSearchEngines } from "./data/custom-search-engines";
-import { isValidUrl, safeOpenUrl } from "./utils";
+import { isValidUrl } from "./utils";
 
-export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
+async function safeOpenUrl(url: string): Promise<void> {
+  if (!isValidUrl(url)) {
+    throw new Error(`Invalid URL: ${url}`);
+  }
+  return open(url);
+}
+
+type SearchProps = LaunchProps<{ arguments: Arguments.Search; fallbackText?: string }>;
+
+type SearchFormValues = {
+  query: string;
+};
+
+export default function SearchTheWeb(props: SearchProps) {
+  const initialQuery = props.arguments.query || props.fallbackText || "";
+  const didRunInitialQuery = useRef(false);
+
+  useEffect(() => {
+    if (!initialQuery || didRunInitialQuery.current) return;
+
+    didRunInitialQuery.current = true;
+    void runSearch(initialQuery);
+  }, [initialQuery]);
+
+  async function handleSubmit(values: SearchFormValues) {
+    await runSearch(values.query);
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Search the Web" icon={Icon.MagnifyingGlass} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="query" title="Query" placeholder="Search with !bangs" defaultValue={initialQuery} />
+    </Form>
+  );
+}
+
+async function runSearch(rawQuery: string) {
   try {
-    const rawQuery = (props.arguments.query ?? props.fallbackText) as string;
-
     const { searchEngine, finalQuery, searchEngineKey } = processQuery(rawQuery);
 
     if (!searchEngine) {
@@ -22,28 +74,30 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
     if (!finalQuery) {
       const url = new URL(searchEngine.u);
       await safeOpenUrl(url.origin);
-      return;
-    }
+    } else {
+      const urlsToOpen = searchEngine.urls && searchEngine.urls.length > 1 ? searchEngine.urls : [searchEngine.u];
 
-    const urlsToOpen = searchEngine.urls && searchEngine.urls.length > 1 ? searchEngine.urls : [searchEngine.u];
+      for (const urlTemplate of urlsToOpen) {
+        const searchUrl = urlTemplate.replace("{{{s}}}", encodeURIComponent(finalQuery).replace(/%2F/g, "/"));
 
-    for (const urlTemplate of urlsToOpen) {
-      const searchUrl = urlTemplate.replace("{{{s}}}", encodeURIComponent(finalQuery).replace(/%2F/g, "/"));
+        if (!isValidUrl(searchUrl)) {
+          throw new Error(`Invalid URL: ${searchUrl}`);
+        }
 
-      if (!isValidUrl(searchUrl)) {
-        throw new Error(`Invalid URL: ${searchUrl}`);
+        await safeOpenUrl(searchUrl);
       }
 
-      await safeOpenUrl(searchUrl);
+      if (urlsToOpen.length > 1) {
+        // A HUD rather than a toast: toasts are rendered inside the main window, so
+        // closing the window would tear the confirmation down before it can be read.
+        await showHUD(`Opened ${urlsToOpen.length} search tabs · ${finalQuery}`, {
+          popToRootType: PopToRootType.Immediate,
+        });
+        return;
+      }
     }
 
-    if (urlsToOpen.length > 1) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Opened ${urlsToOpen.length} search tabs`,
-        message: finalQuery,
-      });
-    }
+    await closeMainWindow({ popToRootType: PopToRootType.Immediate });
   } catch (error) {
     await showFailureToast(error);
   }
@@ -62,7 +116,7 @@ function findSearchEngine(key?: string) {
 }
 
 function processQuery(rawQuery: string) {
-  let query = rawQuery.trim();
+  let query = rawQuery?.trim() ?? "";
 
   const searchEngineKeyMatch = query.match(/!(\S+)/i);
   const searchEngineKey = searchEngineKeyMatch?.[1]?.toLowerCase();

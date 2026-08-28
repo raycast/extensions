@@ -285,7 +285,7 @@ export async function downloadRemoteToCache(
 const CHUNK_SIZE = 500;
 
 /** Current schema version for chunked cache */
-const CHUNKED_CACHE_VERSION = 1;
+export const CHUNKED_CACHE_VERSION = 1;
 
 /**
  * Get configuration for chunked cache paths.

@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getBrowsersTabs } from "../utils/applescript-utils";
+import { getBrowsersTabs } from "../utils/browser-utils";
 import { BrowserTab } from "../types/types";
 
 export function useBrowserTabs() {

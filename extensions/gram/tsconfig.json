@@ -3,6 +3,7 @@
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["ES2023"],
+    "types": ["node"],
     "module": "commonjs",
     "target": "ES2023",
     "strict": true,
@@ -11,6 +12,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true
-  }
+    "resolveJsonModule": true,
+  },
 }

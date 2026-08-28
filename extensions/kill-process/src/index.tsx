@@ -5,6 +5,7 @@ import {
   closeMainWindow,
   Color,
   confirmAlert,
+  environment,
   getPreferenceValues,
   Icon,
   Keyboard,
@@ -20,11 +21,14 @@ import { useEffect, useRef, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
 import { getFileIcon, getPlatformSpecificErrorHelp, hasRestartLaunchPath, isWindows } from "./utils/platform";
+import { groupRelatedProcesses } from "./utils/process-grouping";
+import { shouldRefreshProcesses } from "./utils/refresh";
 import {
   fetchProcessPerformance,
   fetchRunningProcesses,
   restartProcess as restartSelectedProcess,
   terminateProcess,
+  terminateProcessTree,
   terminateProcessesByName,
 } from "./utils/process";
 
@@ -34,6 +38,7 @@ type VisibleProcess = Process & { canRestartProcess: boolean };
 const APP_GROUPING_STORAGE_KEY = "kill-process.app-grouping-enabled";
 const SORT_BY_DROPDOWN_ID = "kill-process.sort-by";
 const DEFAULT_SORT_BY: SortBy = "cpu";
+const DEFAULT_APP_GROUPING_ENABLED = true;
 
 const parseBooleanLike = (value: LocalStorage.Value | undefined): boolean | null => {
   if (value == null) {
@@ -53,8 +58,11 @@ const isSortBy = (value: unknown): value is SortBy => {
 };
 
 export default function ProcessList() {
+  const canRefreshProcesses = shouldRefreshProcesses(environment.launchType);
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
   const [visibleProcesses, setVisibleProcesses] = useState<VisibleProcess[]>([]);
+  const [fetchError, setFetchError] = useState<string>();
+  const [isLoadingProcesses, setIsLoadingProcesses] = useState(canRefreshProcesses);
   const [query, setQuery] = useState<string>("");
 
   const preferences = getPreferenceValues<Preferences>();
@@ -69,7 +77,7 @@ export default function ProcessList() {
   const goToRootAfterKill = preferences.goToRootAfterKill;
   const skipConfirmation = preferences.skipConfirmation;
   const [sortBy, setSortBy] = useState<SortBy>(DEFAULT_SORT_BY);
-  const [isAppGroupingEnabled, setIsAppGroupingEnabled] = useState<boolean>(false);
+  const [isAppGroupingEnabled, setIsAppGroupingEnabled] = useState<boolean>(DEFAULT_APP_GROUPING_ENABLED);
   const isFetchingProcesses = useRef(false);
 
   // Cache CPU data from WMI queries (persists across refreshes)
@@ -105,6 +113,8 @@ export default function ProcessList() {
     }
 
     isFetchingProcesses.current = true;
+    setIsLoadingProcesses(true);
+    setFetchError(undefined);
     fetchRunningProcesses()
       .then((processes) => {
         // Apply cached CPU values to new process list
@@ -136,24 +146,27 @@ export default function ProcessList() {
       })
       .catch((err) => {
         console.error("Failed to fetch processes:", err);
+        const message = err instanceof Error ? err.message : "Unknown error";
+        setFetchError(message);
         if (showErrorToast) {
           showToast({
             title: "Failed to fetch processes",
             style: Toast.Style.Failure,
-            message: err instanceof Error ? err.message : "Unknown error",
+            message,
           });
         }
       })
       .finally(() => {
         isFetchingProcesses.current = false;
+        setIsLoadingProcesses(false);
       });
   };
 
-  useInterval(fetchProcesses, refreshDuration);
+  useInterval(fetchProcesses, canRefreshProcesses ? refreshDuration : null);
   useEffect(() => {
     let processes = [...fetchResult];
     if (isAppGroupingEnabled) {
-      processes = aggregate(processes);
+      processes = groupRelatedProcesses(processes);
     }
 
     processes.sort((a, b) => {
@@ -228,13 +241,18 @@ export default function ProcessList() {
     }
 
     try {
-      await terminateProcess(process.id, force);
+      if (process.type === "aggregatedApp") {
+        await terminateProcessTree(process.id, force);
+      } else {
+        await terminateProcess(process.id, force);
+      }
       showToast({
         title: `Killed ${processName}`,
         style: Toast.Style.Success,
       });
 
-      setFetchResult((prev) => prev.filter((p) => p.id !== process.id));
+      const terminatedProcessIds = new Set([process.id, ...(process.childProcessIds ?? [])]);
+      setFetchResult((prev) => prev.filter((p) => !terminatedProcessIds.has(p.id)));
       performPostKillActions();
     } catch {
       handleKillError(force);
@@ -340,6 +358,9 @@ export default function ProcessList() {
 
     if (process.type === "aggregatedApp") {
       pushSubtitle(process.appName);
+      if (process.childProcessCount != null && process.childProcessCount > 0) {
+        pushSubtitle(`${process.childProcessCount + 1} processes`);
+      }
     }
     if (shouldShowPID) {
       pushSubtitle(process.id.toString());
@@ -351,87 +372,6 @@ export default function ProcessList() {
     return subtitles.length > 0 ? subtitles.join(" - ") : undefined;
   };
 
-  const aggregate = (processes: Process[]): Process[] => {
-    const result = Array<Process>();
-    type ProcessNode = {
-      process: Process | undefined;
-      childNodes: ProcessNode[];
-    };
-    const appMap = new Map<number, ProcessNode>();
-    appMap.set(1, { process: { id: 1 } as Process, childNodes: [] });
-    const originalAppIds = Array<number>();
-    processes.forEach((process) => {
-      if (process.type === "app") {
-        originalAppIds.push(process.id);
-        let node = appMap.get(process.id);
-        if (node == undefined) {
-          node = { process, childNodes: [] } as ProcessNode;
-          appMap.set(process.id, node);
-        } else {
-          node.process = process;
-        }
-        let knownRootNode = appMap.get(process.pid);
-        if (knownRootNode == undefined) {
-          knownRootNode = {
-            process: undefined,
-            childNodes: [node],
-          } as ProcessNode;
-          appMap.set(process.pid, knownRootNode);
-        } else {
-          if (knownRootNode.process == undefined) {
-            knownRootNode.childNodes.push(node);
-          } else {
-            let nextNode;
-            while (
-              knownRootNode?.process != undefined &&
-              knownRootNode.process.pid !== 1 &&
-              (nextNode = appMap.get(knownRootNode.process.pid)) != undefined
-            ) {
-              knownRootNode = nextNode;
-            }
-            knownRootNode?.childNodes.push(node);
-          }
-        }
-        // move childNodes to parent
-        if (knownRootNode.process?.id !== 1) {
-          knownRootNode.childNodes = knownRootNode.childNodes.concat(node.childNodes);
-          node.childNodes = [];
-        }
-      } else {
-        result.push(process);
-      }
-    });
-    const rootApps = appMap.get(1)?.childNodes;
-    let afterAppIds = Array<number>();
-    rootApps?.forEach((rootApp) => {
-      if (rootApp.process == undefined) {
-        return;
-      }
-      afterAppIds.push(rootApp.process.id);
-      const childIds: number[] = rootApp.childNodes
-        .map((node) => node.process?.id)
-        .filter((item): item is number => item != undefined);
-      afterAppIds = afterAppIds.concat(childIds);
-      result.push({
-        id: rootApp.process.id,
-        pid: rootApp.process.pid,
-        cpu:
-          (rootApp.childNodes?.reduce((acc, cur) => {
-            return acc + (cur.process?.cpu ?? 0);
-          }, 0) ?? 0) + rootApp.process.cpu,
-        mem:
-          (rootApp.childNodes?.reduce((acc, cur) => {
-            return acc + (cur.process?.mem ?? 0);
-          }, 0) ?? 0) + rootApp.process.mem,
-        type: "aggregatedApp",
-        path: rootApp.process.path,
-        processName: rootApp.process.processName,
-        appName: rootApp.process.path.match(/(?<=\/)[^/]+(?=\.app\/)/)?.[0],
-      } as Process);
-    });
-    return result;
-  };
-
   const toggleAppGrouping = async () => {
     const nextValue = !isAppGroupingEnabled;
     await LocalStorage.setItem(APP_GROUPING_STORAGE_KEY, nextValue);
@@ -440,10 +380,11 @@ export default function ProcessList() {
   };
 
   const processCount = visibleProcesses.length;
+  const isShowingInitialLoadingState = isLoadingProcesses && visibleProcesses.length === 0;
 
   return (
     <List
-      isLoading={visibleProcesses.length === 0}
+      isLoading={isShowingInitialLoadingState}
       searchBarPlaceholder="Filter by name"
       onSearchTextChange={(query) => setQuery(query)}
       searchBarAccessory={
@@ -466,6 +407,10 @@ export default function ProcessList() {
         </List.Dropdown>
       }
     >
+      {fetchError ? <List.EmptyView title="Failed to Fetch Processes" description={fetchError} /> : null}
+      {!fetchError && !isLoadingProcesses && visibleProcesses.length === 0 ? (
+        <List.EmptyView title="No Processes Found" />
+      ) : null}
       <List.Section title="Processes" subtitle={`${processCount} running`}>
         {visibleProcesses
           .filter((process) => {

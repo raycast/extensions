@@ -24,7 +24,7 @@ export function generatePKCE(): PKCEPair {
 }
 
 export const PAIR_CALLBACK_URL =
-  "raycast://extensions/ngoquocdat/tablepro/pair";
+  `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/ngoquocdat/tablepro/pair`;
 
 export const VERIFIER_TTL_MS = 5 * 60 * 1000;
 

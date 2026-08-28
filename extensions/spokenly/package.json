@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spokenly",
+  "title": "Spokenly",
+  "description": "Control Spokenly speech-to-text: dictation, transcription history, file transcription, model selection, and quick commands",
+  "icon": "spokenly.png",
+  "author": "mattiacolombomc",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-dictation",
+      "title": "Toggle Dictation",
+      "subtitle": "Spokenly",
+      "description": "Start Spokenly's main dictation prompt",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-last-transcript",
+      "title": "Copy Last Transcript",
+      "subtitle": "Spokenly",
+      "description": "Copy the most recent transcription to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-last-transcript",
+      "title": "Paste Last Transcript",
+      "subtitle": "Spokenly",
+      "description": "Paste the most recent transcription into the active app",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-transcripts",
+      "title": "Search Transcripts",
+      "subtitle": "Spokenly",
+      "description": "Browse, copy, reveal and delete transcription history",
+      "mode": "view"
+    },
+    {
+      "name": "transcribe-file",
+      "title": "Transcribe File",
+      "subtitle": "Spokenly",
+      "description": "Transcribe an audio or video file through Spokenly",
+      "mode": "view"
+    },
+    {
+      "name": "open-history-folder",
+      "title": "Open History Folder",
+      "subtitle": "Spokenly",
+      "description": "Reveal the Spokenly history directory in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-last-recording",
+      "title": "Open Last Recording",
+      "subtitle": "Spokenly",
+      "description": "Reveal the most recent recording in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "select-model",
+      "title": "Select Dictation Model",
+      "subtitle": "Spokenly",
+      "description": "Switch the active dictation transcription model",
+      "mode": "view"
+    },
+    {
+      "name": "select-file-model",
+      "title": "Select File Transcription Model",
+      "subtitle": "Spokenly",
+      "description": "Switch the model used to transcribe files",
+      "mode": "view"
+    },
+    {
+      "name": "run-quick-command",
+      "title": "Run Quick Command",
+      "subtitle": "Spokenly",
+      "description": "Trigger one of your Spokenly quick commands",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mcpPort",
+      "title": "MCP Server Port",
+      "description": "Port where Spokenly's MCP server listens (default 51089)",
+      "type": "textfield",
+      "default": "51089",
+      "placeholder": "51089",
+      "required": false
+    },
+    {
+      "name": "useShortcutFallback",
+      "title": "Toggle Dictation Fallback",
+      "label": "Simulate the global shortcut instead of using the URL scheme",
+      "description": "Use System Events to replay your Spokenly dictation shortcut. Required if the URL scheme cannot stop an in-progress dictation. Needs Accessibility permission for Raycast.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.8"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

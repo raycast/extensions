@@ -21,18 +21,20 @@ import {
   InvoiceResponse,
   Project,
   ProjectsResponse,
+  ProjectResponse,
+  ProjectCreateData,
   Task,
   TasksResponse,
   TaskCreateData,
   TaskResponse,
+  TaskUpdateData,
+  TimeslipUpdateData,
+  TimeslipFilterOptions,
+  ExpenseCreateData,
+  ExpenseResponse,
+  Expense,
   TimeslipCreateData,
   TimeslipResponse,
-  TimeslipResponseSingle,
-  TimeslipUpdateData,
-  TaskUpdateData,
-  ProjectCreateData,
-  ProjectUpdateData,
-  ProjectResponse,
   Category,
   CategoriesResponse,
   BankTransactionExplanation,
@@ -74,11 +76,34 @@ async function makeRequest<T>(endpoint: string, accessToken: string, options?: R
     throw new FreeAgentError(`HTTP error! status: ${response.status}`, response.status);
   }
 
-  if (response.status === 204) {
-    return undefined as T;
+  // Some endpoints return an empty body (e.g. 204 No Content, or DELETE).
+  // Reading the text first lets us skip JSON parsing when there's nothing to
+  // parse, rather than throwing on an empty body.
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
+}
+
+// FreeAgent paginates list endpoints (default 25, max 100 per page). This
+// fetches every page and concatenates the results so callers get the full set.
+async function fetchAllPages<T, R>(
+  endpoint: string,
+  accessToken: string,
+  extract: (data: R) => T[] | undefined,
+): Promise<T[]> {
+  const perPage = 100;
+  const separator = endpoint.includes("?") ? "&" : "?";
+  const results: T[] = [];
+
+  for (let page = 1; ; page++) {
+    const data = await makeRequest<R>(`${endpoint}${separator}per_page=${perPage}&page=${page}`, accessToken);
+    const items = extract(data) || [];
+    results.push(...items);
+
+    // A short page means we've reached the end.
+    if (items.length < perPage) break;
   }
 
-  return response.json();
+  return results;
 }
 
 export async function getCurrentUser(accessToken: string): Promise<User> {
@@ -159,9 +184,67 @@ export async function fetchTimeslips(
   return data.timeslips || [];
 }
 
+export async function fetchTimeslipsFiltered(
+  accessToken: string,
+  options: TimeslipFilterOptions = {},
+): Promise<Timeslip[]> {
+  const params = new URLSearchParams();
+  params.set("view", options.view ?? "all");
+  params.set("sort", "-dated_on");
+  if (options.project) params.set("project", options.project);
+  if (options.task) params.set("task", options.task);
+  if (options.user) params.set("user", options.user);
+  if (options.fromDate) params.set("from_date", options.fromDate);
+  if (options.toDate) params.set("to_date", options.toDate);
+  if (options.nested) params.set("nested", "true");
+
+  return fetchAllPages<Timeslip, TimeslipsResponse>(
+    `/timeslips?${params.toString()}`,
+    accessToken,
+    (data) => data.timeslips,
+  );
+}
+
+export async function fetchTimeslip(accessToken: string, timeslipId: string): Promise<Timeslip> {
+  const data = await makeRequest<TimeslipResponse>(`/timeslips/${timeslipId}`, accessToken);
+  return data.timeslip;
+}
+
+export async function updateTimeslip(
+  accessToken: string,
+  timeslipId: string,
+  timeslipData: TimeslipUpdateData,
+): Promise<Timeslip> {
+  const data = await makeRequest<TimeslipResponse>(`/timeslips/${timeslipId}`, accessToken, {
+    method: "PUT",
+    body: JSON.stringify({ timeslip: timeslipData }),
+  });
+  return data.timeslip;
+}
+
+export async function deleteTimeslip(accessToken: string, timeslipId: string): Promise<void> {
+  await makeRequest<void>(`/timeslips/${timeslipId}`, accessToken, { method: "DELETE" });
+}
+
 export async function fetchProjects(accessToken: string, view: "active" | "all" = "active"): Promise<Project[]> {
-  const data = await makeRequest<ProjectsResponse>(`/projects?view=${view}`, accessToken);
-  return data.projects || [];
+  return fetchAllPages<Project, ProjectsResponse>(`/projects?view=${view}`, accessToken, (data) => data.projects);
+}
+
+export async function fetchProject(accessToken: string, projectId: string): Promise<Project> {
+  const data = await makeRequest<ProjectResponse>(`/projects/${projectId}`, accessToken);
+  return data.project;
+}
+
+export async function createProject(accessToken: string, projectData: ProjectCreateData): Promise<Project> {
+  const data = await makeRequest<ProjectResponse>("/projects", accessToken, {
+    method: "POST",
+    body: JSON.stringify({ project: projectData }),
+  });
+  return data.project;
+}
+
+export async function deleteProject(accessToken: string, projectId: string): Promise<void> {
+  await makeRequest<void>(`/projects/${projectId}`, accessToken, { method: "DELETE" });
 }
 
 export async function fetchTasks(
@@ -173,8 +256,24 @@ export async function fetchTasks(
   if (projectUrl) {
     endpoint += `&project=${encodeURIComponent(projectUrl)}`;
   }
-  const data = await makeRequest<TasksResponse>(endpoint, accessToken);
-  return data.tasks || [];
+  return fetchAllPages<Task, TasksResponse>(endpoint, accessToken, (data) => data.tasks);
+}
+
+export async function fetchTask(accessToken: string, taskId: string): Promise<Task> {
+  const data = await makeRequest<TaskResponse>(`/tasks/${taskId}`, accessToken);
+  return data.task;
+}
+
+export async function updateTask(accessToken: string, taskId: string, taskData: TaskUpdateData): Promise<Task> {
+  const data = await makeRequest<TaskResponse>(`/tasks/${taskId}`, accessToken, {
+    method: "PUT",
+    body: JSON.stringify({ task: taskData }),
+  });
+  return data.task;
+}
+
+export async function deleteTask(accessToken: string, taskId: string): Promise<void> {
+  await makeRequest<void>(`/tasks/${taskId}`, accessToken, { method: "DELETE" });
 }
 
 export async function createInvoice(accessToken: string, invoiceData: InvoiceCreateData): Promise<Invoice> {
@@ -191,6 +290,14 @@ export async function createTimeslip(accessToken: string, timeslipData: Timeslip
     body: JSON.stringify({ timeslip: timeslipData }),
   });
   return data.timeslip;
+}
+
+export async function createExpense(accessToken: string, expenseData: ExpenseCreateData): Promise<Expense> {
+  const data = await makeRequest<ExpenseResponse>("/expenses", accessToken, {
+    method: "POST",
+    body: JSON.stringify({ expense: expenseData }),
+  });
+  return data.expense;
 }
 
 export async function createTask(accessToken: string, projectUrl: string, taskData: TaskCreateData): Promise<Task> {
@@ -279,99 +386,6 @@ export async function updateBankTransaction(
     body: JSON.stringify({ bank_transaction: transactionData }),
   });
   return data.bank_transaction;
-}
-
-export async function fetchProject(accessToken: string, projectId: string): Promise<Project> {
-  const data = await makeRequest<ProjectResponse>(`/projects/${projectId}`, accessToken);
-  return data.project;
-}
-
-export async function createProject(accessToken: string, projectData: ProjectCreateData): Promise<Project> {
-  const data = await makeRequest<ProjectResponse>("/projects", accessToken, {
-    method: "POST",
-    body: JSON.stringify({ project: projectData }),
-  });
-  return data.project;
-}
-
-export async function updateProject(
-  accessToken: string,
-  projectId: string,
-  projectData: ProjectUpdateData,
-): Promise<Project> {
-  const data = await makeRequest<ProjectResponse>(`/projects/${projectId}`, accessToken, {
-    method: "PUT",
-    body: JSON.stringify({ project: projectData }),
-  });
-  return data.project;
-}
-
-export async function deleteProject(accessToken: string, projectId: string): Promise<void> {
-  await makeRequest<void>(`/projects/${projectId}`, accessToken, { method: "DELETE" });
-}
-
-export async function fetchTask(accessToken: string, taskId: string): Promise<Task> {
-  const data = await makeRequest<TaskResponse>(`/tasks/${taskId}`, accessToken);
-  return data.task;
-}
-
-export async function updateTask(accessToken: string, taskId: string, taskData: TaskUpdateData): Promise<Task> {
-  const data = await makeRequest<TaskResponse>(`/tasks/${taskId}`, accessToken, {
-    method: "PUT",
-    body: JSON.stringify({ task: taskData }),
-  });
-  return data.task;
-}
-
-export async function deleteTask(accessToken: string, taskId: string): Promise<void> {
-  await makeRequest<void>(`/tasks/${taskId}`, accessToken, { method: "DELETE" });
-}
-
-export async function fetchTimeslip(accessToken: string, timeslipId: string): Promise<Timeslip> {
-  const data = await makeRequest<TimeslipResponseSingle>(`/timeslips/${timeslipId}`, accessToken);
-  return data.timeslip;
-}
-
-export async function updateTimeslip(
-  accessToken: string,
-  timeslipId: string,
-  timeslipData: TimeslipUpdateData,
-): Promise<Timeslip> {
-  const data = await makeRequest<TimeslipResponseSingle>(`/timeslips/${timeslipId}`, accessToken, {
-    method: "PUT",
-    body: JSON.stringify({ timeslip: timeslipData }),
-  });
-  return data.timeslip;
-}
-
-export async function deleteTimeslip(accessToken: string, timeslipId: string): Promise<void> {
-  await makeRequest<void>(`/timeslips/${timeslipId}`, accessToken, { method: "DELETE" });
-}
-
-export async function fetchTimeslipsFiltered(
-  accessToken: string,
-  options: {
-    view?: "all" | "unbilled" | "running";
-    project?: string;
-    task?: string;
-    user?: string;
-    fromDate?: string;
-    toDate?: string;
-    nested?: boolean;
-  } = {},
-): Promise<Timeslip[]> {
-  const params = new URLSearchParams();
-  params.set("view", options.view ?? "all");
-  params.set("sort", "-dated_on");
-  if (options.project) params.set("project", options.project);
-  if (options.task) params.set("task", options.task);
-  if (options.user) params.set("user", options.user);
-  if (options.fromDate) params.set("from_date", options.fromDate);
-  if (options.toDate) params.set("to_date", options.toDate);
-  if (options.nested) params.set("nested", "true");
-
-  const data = await makeRequest<TimeslipsResponse>(`/timeslips?${params.toString()}`, accessToken);
-  return data.timeslips || [];
 }
 
 export { FreeAgentError };

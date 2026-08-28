@@ -7,25 +7,20 @@
  * unnecessary re-renders and potential rendering loops.
  */
 
-import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import { Color, Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
 import { useMemo } from "react";
-import {
-  MenuBarItem,
-  MenuBarItemConfigureCommand,
-  MenuBarRoot,
-  MenuBarSection,
-  getBoundedPreferenceNumber,
-} from "./components/menu";
+import { MenuBarItem, MenuBarItemConfigureCommand, MenuBarRoot, MenuBarSection } from "./components/menu";
 import { useMyIssues } from "./components/issues_my";
 import { IssueScope, IssueState } from "./components/issues";
 import { GitLabIcons } from "./icons";
-import { showErrorToast, getErrorMessage } from "./utils";
+import { getBoundedPreferenceNumber, getPreferences } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 async function launchMyIssues(): Promise<void> {
   try {
     return launchCommand({ name: "issue_my", type: LaunchType.UserInitiated });
   } catch (error) {
-    showErrorToast(getErrorMessage(error), "Could not open My Issues Command");
+    showFailureToast(error, { title: "Could not open My Issues Command" });
   }
 }
 
@@ -36,26 +31,20 @@ async function launchMyIssues(): Promise<void> {
 
 export default function MenuCommand() {
   // Memoize preferences to avoid unnecessary re-renders and rendering loops
-  const preferences = useMemo(() => getPreferenceValues(), []);
-  const includeLabels =
-    preferences.includeLabels && preferences.includeLabels.trim().length > 0 ? preferences.includeLabels : undefined;
-  const excludeLabels =
-    preferences.excludeLabels && preferences.excludeLabels.trim().length > 0 ? preferences.excludeLabels : undefined;
-  const showItemsCount = preferences.showtext as boolean;
-  const maxIssues = getBoundedPreferenceNumber({ name: "maxitems" });
-  const hideArchived = preferences.hideArchived as boolean;
+  const preferences = useMemo(() => getPreferences(), []);
 
-  const { issues, isLoading, error } = useMyIssues(IssueScope.assigned_to_me, IssueState.opened, undefined, {
-    includeLabels,
-    excludeLabels,
-    ...(hideArchived && { non_archived: true }),
+  const { issues, isLoading, error } = useMyIssues(IssueScope.assigned_to_me, IssueState.opened, {
+    includeLabels:
+      preferences.includeLabels && preferences.includeLabels.trim().length > 0 ? preferences.includeLabels : undefined,
+    excludeLabels:
+      preferences.excludeLabels && preferences.excludeLabels.trim().length > 0 ? preferences.excludeLabels : undefined,
+    ...(preferences.hideArchived === true && { non_archived: true }),
   });
-  const assignedCount = issues?.length || 0;
 
   return (
     <MenuBarRoot
       isLoading={isLoading}
-      title={showItemsCount ? (assignedCount <= 0 ? undefined : `${assignedCount}`) : undefined}
+      title={preferences.showtext ? (issues.length <= 0 ? undefined : `${issues.length}`) : undefined}
       icon={{ source: "issues.svg", tintColor: Color.PrimaryText }}
       tooltip="GitLab Issues"
       error={error}
@@ -68,21 +57,21 @@ export default function MenuCommand() {
           onAction={() => launchMyIssues()}
         />
         <MenuBarSection
-          maxChildren={maxIssues}
+          maxChildren={getBoundedPreferenceNumber(preferences.maxitems)}
           moreElement={(hidden) => (
             <MenuBarItem title={`... ${hidden} more assigned`} onAction={() => launchMyIssues()} />
           )}
         >
-          {issues?.map((m) => (
+          {issues.map((issue) => (
             <MenuBarItem
-              key={m.iid}
+              key={issue.iid}
               icon={{
                 source: GitLabIcons.issue,
                 tintColor: { light: "#000", dark: "#FFF", adjustContrast: false },
               }}
-              title={`#${m.iid} ${m.title}`}
-              tooltip={m.reference_full}
-              onAction={() => open(m.web_url)}
+              title={`#${issue.iid} ${issue.title}`}
+              tooltip={issue.reference_full}
+              onAction={() => open(issue.web_url)}
             />
           ))}
         </MenuBarSection>

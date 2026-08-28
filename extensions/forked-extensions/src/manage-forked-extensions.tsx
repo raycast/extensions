@@ -14,6 +14,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { withGithubClient } from "./api.js";
 import {
+  CleanUpRepository,
   CreateExtension,
   Diagnostics,
   ManageSparseCheckout,
@@ -83,6 +84,7 @@ function ManageForkedExtensions() {
             <ActionPanel.Section>
               <Action.Push icon={Icon.WrenchScrewdriver} title="Run Diagnostics" target={<Diagnostics />} />
               <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              <CleanUpRepository />
             </ActionPanel.Section>
           </ActionPanel>
         )
@@ -166,6 +168,7 @@ function ManageForkedExtensions() {
               <ActionPanel.Section>
                 <ManageSparseCheckout onChange={revalidate} />
                 <Action.Push icon={Icon.WrenchScrewdriver} title="Run Diagnostics" target={<Diagnostics />} />
+                <CleanUpRepository />
               </ActionPanel.Section>
             </ActionPanel>
           }

@@ -94,5 +94,10 @@ export function buildSubmissionDraftText(draft: SubmissionDraft) {
     `Brand domain: ${draft.brandDomain || ""}`,
     `Description: ${draft.description || ""}`,
     `Tags: ${Array.isArray(draft.tags) ? draft.tags.join(", ") : draft.tags || ""}`,
+    "",
+    "Policy notes:",
+    "- Use canonical source/docs URLs or copyable source content.",
+    "- Do not request HeyClaude-hosted /downloads ZIP/MCPB artifacts for community submissions.",
+    "- Eligible content submissions move through HeyClaude's PR-first maintainer-agent review.",
   ].join("\n");
 }

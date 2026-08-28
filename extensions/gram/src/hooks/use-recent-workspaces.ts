@@ -63,7 +63,6 @@ export function useRecentWorkspaces(dbPath: string, dbVersion: number): RecentWo
           if (!workspace) {
             return acc;
           }
-
           const isOpen =
             GramWorkspace.session_id === sessionId &&
             GramWorkspace.window_id !== null &&

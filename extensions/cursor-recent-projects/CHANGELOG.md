@@ -1,5 +1,9 @@
 # Cursor Changelog
 
+## [New Feature] - 2026-06-15
+
+- Add "Show Active Workspaces" command to list and switch between open Cursor windows
+
 ## [Add Keyboard Shortcut and Missing Icon] - 2026-05-16
 
 - Add a dedicated Cursor icon asset for Raycast action icons

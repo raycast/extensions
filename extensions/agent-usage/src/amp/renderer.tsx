@@ -1,6 +1,6 @@
-import { List, getPreferenceValues } from "@raycast/api";
-import { AmpUsage, AmpError } from "./types";
-import type { Accessory } from "../agents/types";
+import { List } from "@raycast/api";
+
+import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -8,24 +8,26 @@ import {
   getNoDataAccessory,
   generatePieIcon,
   generateAsciiBar,
-} from "../agents/ui";
+} from "../agents/ui.tsx";
+import { effectiveRemainingPercent } from "./effective-remaining.ts";
+import type { AmpError, AmpFreeUsage, AmpSubscriptionUsage, AmpUsage } from "./types.ts";
 
-type Preferences = Preferences.AgentUsage;
+function formatPercent(value: number): string {
+  return Number.isInteger(value) ? `${value}%` : `${value.toFixed(1)}%`;
+}
 
-function getReplenishInfo(usage: AmpUsage): { timeText: string; hoursUntil: number } | null {
-  if (!usage.ampFree.replenishRate) return null;
-  const replenishValue = parseFloat(usage.ampFree.replenishRate.replace(/[^0-9.]/g, ""));
-  if (replenishValue <= 0) return null;
-  const remainingToFull = usage.ampFree.total - (usage.ampFree.total - usage.ampFree.used);
-  if (remainingToFull <= 0) return null;
-  const hoursToFull = remainingToFull / replenishValue;
-  const totalMinutes = Math.ceil(hoursToFull * 60);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  let timeText = "";
-  if (hours > 0) timeText += `${hours}h `;
-  if (minutes > 0 || hours === 0) timeText += `${minutes}m`;
-  return { timeText: timeText.trim(), hoursUntil: hoursToFull };
+function formatAmpFreeSummary(ampFree: AmpFreeUsage): string {
+  const base = `${formatPercent(ampFree.percentRemaining)} remaining`;
+  return ampFree.resetNote ? `${base} (${ampFree.resetNote})` : base;
+}
+
+function formatSubscriptionPools(subscription: AmpSubscriptionUsage): string {
+  return `Other ${formatPercent(subscription.otherPercentRemaining)}  Orb ${formatPercent(subscription.orbPercentRemaining)}`;
+}
+
+function formatSubscriptionSummary(subscription: AmpSubscriptionUsage): string {
+  const base = `${formatSubscriptionPools(subscription)} remaining`;
+  return subscription.resetNote ? `${base} (${subscription.resetNote})` : base;
 }
 
 export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | null): string {
@@ -33,22 +35,17 @@ export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | nul
   if (fallback !== null) return fallback;
   const u = usage as AmpUsage;
 
-  const { ampFree, individualCredits } = u;
-  const ampFreeRemaining = ampFree.total - ampFree.used;
-  const ampFreePercent = ampFree.total > 0 ? (ampFreeRemaining / ampFree.total) * 100 : 0;
-
   let text = `Amp Usage`;
-  text += `\n\nAmp Free: ${ampFree.unit}${ampFreeRemaining.toFixed(2)} / ${ampFree.unit}${ampFree.total.toFixed(2)} (${ampFreePercent.toFixed(1)}%)`;
-  text += `\n${generateAsciiBar(ampFreePercent)}`;
-  if (ampFree.replenishRate) {
-    text += `\nReplenish Rate: +${ampFree.replenishRate}`;
-    const replenishInfo = getReplenishInfo(u);
-    if (replenishInfo) {
-      text += `\nResets In: ${replenishInfo.timeText}`;
-    }
+  if (u.ampFree) {
+    text += `\n\nAmp Free: ${formatAmpFreeSummary(u.ampFree)}`;
+    text += `\n${generateAsciiBar(u.ampFree.percentRemaining)}`;
   }
-  if (ampFree.bonus) text += `\nBonus: ${ampFree.bonus.replace(/\s+more\s+days?/, "d")}`;
-  text += `\n\nIndividual Credits: ${individualCredits.unit}${individualCredits.remaining.toFixed(2)}`;
+  if (u.subscription) {
+    text += `\n\n${u.subscription.plan}: ${formatSubscriptionSummary(u.subscription)}`;
+    text += `\nOther ${generateAsciiBar(u.subscription.otherPercentRemaining)}`;
+    text += `\nOrb ${generateAsciiBar(u.subscription.orbPercentRemaining)}`;
+  }
+  text += `\n\nIndividual Credits: ${u.individualCredits.unit}${u.individualCredits.remaining.toFixed(2)}`;
 
   return text;
 }
@@ -58,35 +55,37 @@ export function renderAmpDetail(usage: AmpUsage | null, error: AmpError | null):
   if (fallback !== null) return fallback;
   const u = usage as AmpUsage;
 
-  const { ampFree, individualCredits } = u;
-  const ampFreeRemaining = ampFree.total - ampFree.used;
-  const ampFreePercent = ampFree.total > 0 ? (ampFreeRemaining / ampFree.total) * 100 : 0;
-
   return (
     <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label title="Amp Free Used" text={`${ampFree.unit}${ampFree.used.toFixed(2)}`} />
-      <List.Item.Detail.Metadata.Label title="Amp Free Total" text={`${ampFree.unit}${ampFree.total.toFixed(2)}`} />
-      <List.Item.Detail.Metadata.Label
-        title="Amp Free Remaining"
-        text={`${generateAsciiBar(ampFreePercent)} ${ampFree.unit}${ampFreeRemaining.toFixed(2)} (${ampFreePercent.toFixed(1)}%) remaining`}
-      />
-      {ampFree.replenishRate && (
-        <List.Item.Detail.Metadata.Label title="Replenish Rate" text={`+${ampFree.replenishRate}`} />
+      {u.ampFree && (
+        <List.Item.Detail.Metadata.Label
+          title="Amp Free"
+          text={`${generateAsciiBar(u.ampFree.percentRemaining)} ${formatAmpFreeSummary(u.ampFree)}`}
+        />
       )}
-      {(() => {
-        const replenishInfo = getReplenishInfo(u);
-        if (!replenishInfo) return null;
-        return <List.Item.Detail.Metadata.Label title="Resets In" text={replenishInfo.timeText} />;
-      })()}
-      {ampFree.bonus && (
-        <List.Item.Detail.Metadata.Label title="Bonus" text={ampFree.bonus.replace(/\s+more\s+days?/, "d")} />
+
+      {u.subscription && (
+        <>
+          {u.ampFree && <List.Item.Detail.Metadata.Separator />}
+          <List.Item.Detail.Metadata.Label
+            title={`${u.subscription.plan} Other Usage`}
+            text={`${generateAsciiBar(u.subscription.otherPercentRemaining)} ${formatPercent(u.subscription.otherPercentRemaining)} remaining`}
+          />
+          <List.Item.Detail.Metadata.Label
+            title={`${u.subscription.plan} Orb`}
+            text={`${generateAsciiBar(u.subscription.orbPercentRemaining)} ${formatPercent(u.subscription.orbPercentRemaining)} remaining`}
+          />
+          {u.subscription.resetNote && (
+            <List.Item.Detail.Metadata.Label title="Renews" text={u.subscription.resetNote} />
+          )}
+        </>
       )}
 
       <List.Item.Detail.Metadata.Separator />
 
       <List.Item.Detail.Metadata.Label
         title="Individual Credits"
-        text={`${individualCredits.unit}${individualCredits.remaining.toFixed(2)}`}
+        text={`${u.individualCredits.unit}${u.individualCredits.remaining.toFixed(2)}`}
       />
     </List.Item.Detail.Metadata>
   );
@@ -111,23 +110,23 @@ export function getAmpAccessory(usage: AmpUsage | null, error: AmpError | null, 
     return getNoDataAccessory();
   }
 
-  const { ampDisplayMode = "amount" } = getPreferenceValues<Preferences>();
-  const remaining = usage.ampFree.total - usage.ampFree.used;
-  const percent = usage.ampFree.total > 0 ? (remaining / usage.ampFree.total) * 100 : 0;
+  const tooltipParts: string[] = [];
+  if (usage.ampFree) {
+    tooltipParts.push(`Amp Free: ${formatAmpFreeSummary(usage.ampFree)}`);
+  }
+  if (usage.subscription) {
+    tooltipParts.push(`${usage.subscription.plan}: ${formatSubscriptionSummary(usage.subscription)}`);
+  }
+  tooltipParts.push(`Credits: ${usage.individualCredits.unit}${usage.individualCredits.remaining.toFixed(2)}`);
 
-  const icon = generatePieIcon(percent);
-
-  if (ampDisplayMode === "percentage") {
-    return {
-      icon,
-      text: `${percent.toFixed(1)}%`,
-      tooltip: `${usage.ampFree.unit}${remaining.toFixed(2)} remaining (${percent.toFixed(1)}%)`,
-    };
+  const percent = effectiveRemainingPercent(usage);
+  if (percent === null) {
+    return getNoDataAccessory();
   }
 
   return {
-    icon,
-    text: `${usage.ampFree.unit}${remaining.toFixed(2)}`,
-    tooltip: `${usage.ampFree.unit}${remaining.toFixed(2)} remaining (${percent.toFixed(1)}%)`,
+    icon: generatePieIcon(percent),
+    text: formatPercent(percent),
+    tooltip: tooltipParts.join(" | "),
   };
 }

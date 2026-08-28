@@ -453,7 +453,7 @@ export default function Command() {
                 icon={Icon.Link}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
                 quicklink={{
-                  link: `raycast://extensions/GastroGeek/xecutor/launch_preset?arguments=%7B%22preset_name%22%3A%22${preset.name}%22%7D`,
+                  link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/GastroGeek/xecutor/launch_preset?arguments=%7B%22preset_name%22%3A%22${preset.name}%22%7D`,
                 }}
               />
               <Action.Push

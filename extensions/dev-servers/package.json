@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dev-servers",
   "title": "Dev Servers",
-  "description": "Project-grouped dashboard to manage dev servers. Detects the framework (Next, Svelte, Astro, Vite) and restarts with the right package manager (npm, pnpm, yarn, bun). Kill individually or by project, open in browser, copy URLs, and track uptime.",
+  "description": "Project-grouped dashboard for every dev server running on your Mac. Start, restart, and kill them without leaving Raycast, with the framework (Next, Svelte, Astro, Vite, Shopify) and package manager (npm, pnpm, yarn, bun) detected for you. Live count and quick actions in your menu bar.",
   "icon": "extension-icon.png",
   "author": "tavlean",
   "categories": [
@@ -10,22 +10,47 @@
   ],
   "keywords": [
     "dev server",
-    "dev servers",
     "localhost",
     "port",
-    "ports",
     "portless",
     "kill",
     "restart",
+    "start",
     "process",
     "dashboard",
-    "manage",
-    "monitor"
+    "menubar",
+    "monitor",
+    "shopify"
   ],
   "platforms": [
     "macOS"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "autoOpenInBrowser",
+      "title": "After Start",
+      "type": "checkbox",
+      "label": "Open in browser when the port binds",
+      "description": "Once a new dev server starts listening, automatically open its URL in your default browser. Applies whether you start from the Start Dev Server command, the dashboard, or the menu bar.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "terminalApp",
+      "title": "Terminal App",
+      "type": "appPicker",
+      "description": "Which terminal to open when using \"Open in Terminal\". Defaults to macOS Terminal if unset.",
+      "required": false
+    },
+    {
+      "name": "editorApp",
+      "title": "Editor App",
+      "type": "appPicker",
+      "description": "Which editor to open a project in with \"Open in Editor\" (e.g. VS Code, Cursor, Zed). The action is hidden when unset.",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "index",
@@ -33,13 +58,6 @@
       "description": "List and manage running dev servers",
       "mode": "view",
       "preferences": [
-        {
-          "name": "terminalApp",
-          "title": "Terminal App",
-          "type": "appPicker",
-          "description": "Which terminal to open when using \"Open in Terminal\". Defaults to macOS Terminal if unset.",
-          "required": false
-        },
         {
           "name": "refreshInterval",
           "title": "Refresh Interval",
@@ -105,6 +123,48 @@
           "type": "checkbox",
           "label": "Show localhost URL with custom domain",
           "description": "When a custom domain (e.g. via portless) points at a dev server, also show the localhost:PORT pill alongside it",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "start",
+      "title": "Start Dev Server",
+      "description": "Start a dev server from a Finder selection, a recent project, or any folder you pick",
+      "mode": "view",
+      "keywords": [
+        "spawn",
+        "boot",
+        "launch",
+        "run",
+        "recent"
+      ],
+      "preferences": [
+        {
+          "name": "confirmMultiStart",
+          "title": "Confirmations",
+          "type": "checkbox",
+          "label": "Confirm when starting multiple folders at once",
+          "description": "Show a confirmation alert before spawning more than one dev server from a multi-folder Finder selection",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menubar",
+      "title": "Dev Servers Menu Bar",
+      "description": "See running dev servers in the menu bar; kill, restart, open, or start one from the dropdown",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showCount",
+          "type": "checkbox",
+          "title": "Menu Bar",
+          "label": "Show running-server count",
+          "description": "Show the number of running dev servers next to the menu bar icon",
           "default": true,
           "required": false
         }

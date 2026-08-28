@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
-import { all, ModuleReplacement } from "module-replacements";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { ModuleReplacement, all } from "module-replacements";
+import { useState } from "react";
 
-import { useEffect, useState } from "react";
 import { DetailView } from "./components/DetailView";
-import { MISSING_REPLACEMENT_KEYS, Mappings, ModuleReplacementResolved, TYPE_COLOR, TYPE_LABEL } from "./constants";
+import { Mappings, ModuleReplacementResolved, TYPE_COLOR, TYPE_LABEL } from "./constants";
 
 const modules = Object.keys(all.mappings)
   .toSorted((a, b) => a.localeCompare(b))
@@ -22,17 +22,6 @@ function groupByFirstLetter(modules: ModuleReplacementResolved[]) {
 
 export default function Command() {
   const [type, setType] = useState<ModuleReplacement["type"] | "all">("all");
-  useEffect(() => {
-    if (MISSING_REPLACEMENT_KEYS.length === 0) return;
-
-    const sample = MISSING_REPLACEMENT_KEYS.slice(0, 3).join(", ");
-    const suffix = MISSING_REPLACEMENT_KEYS.length > 3 ? ", ..." : "";
-    void showToast({
-      style: Toast.Style.Failure,
-      title: "Module replacement data is inconsistent",
-      message: `Missing keys: ${sample}${suffix}`,
-    });
-  }, []);
 
   const filteredModules =
     type === "all"

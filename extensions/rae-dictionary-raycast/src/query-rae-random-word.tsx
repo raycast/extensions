@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { List, Icon, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { getRandomWord, WordEntry } from "./api/rae";
 import { WordEntryFC } from "./components/WordEntry";
@@ -39,7 +39,7 @@ export default function Command() {
             title="Load Another Random Word"
             onAction={fetchRandomWord}
             icon={Icon.Repeat}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
         </ActionPanel>
       }

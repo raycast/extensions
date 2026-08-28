@@ -28,6 +28,7 @@ async function fetchDataWithCaching<T>(
   variables: Record<string, number>,
   prefix: string,
   isArray = false,
+  isComplete: (value: T) => boolean = () => true,
 ): Promise<T | undefined> {
   // Create a simple hash of the query to include in the cache key
   const queryHash = query
@@ -50,7 +51,7 @@ async function fetchDataWithCaching<T>(
         const parsed: CachedData<T> = JSON.parse(cachedData);
 
         // Ensure parsed data has required properties
-        if (parsed.timestamp && parsed.value) {
+        if (parsed.timestamp && parsed.value && isComplete(parsed.value)) {
           if (now - parsed.timestamp < expiration) {
             return parsed.value;
           }
@@ -87,9 +88,11 @@ async function fetchDataWithCaching<T>(
       ? data.data[prefix]
       : data.data[prefix][0]) as unknown as T;
 
-    // Cache the fresh data with a timestamp
-    const dataToCache: CachedData<T> = { timestamp: now, value: fetchedData };
-    cache.set(key, JSON.stringify(dataToCache));
+    // Cache the fresh data with a timestamp, unless the response is incomplete
+    if (fetchedData && isComplete(fetchedData)) {
+      const dataToCache: CachedData<T> = { timestamp: now, value: fetchedData };
+      cache.set(key, JSON.stringify(dataToCache));
+    }
 
     return fetchedData;
   } catch (e: any) {
@@ -389,7 +392,14 @@ export const fetchPokemon = async (
 
   const variables = { language_id, pokemon_id };
 
-  return fetchDataWithCaching(query, variables, "pokemon");
+  return fetchDataWithCaching<Pokemon>(
+    query,
+    variables,
+    "pokemon",
+    false,
+    (pokemon) =>
+      Boolean(pokemon.pokemonstats?.length && pokemon.pokemontypes?.length),
+  );
 };
 
 export const fetchMoves = async (): Promise<Move[] | undefined> => {
@@ -551,7 +561,14 @@ export const fetchTypes = async (): Promise<TypeChartType[] | undefined> => {
 
   const variables = { language_id };
 
-  return fetchDataWithCaching(query, variables, "type", true);
+  return fetchDataWithCaching<TypeChartType[]>(
+    query,
+    variables,
+    "type",
+    true,
+    (types) =>
+      types.length > 0 && types.every((type) => type.typeefficacies?.length),
+  );
 };
 
 export const fetchNatures = async (): Promise<Nature[] | undefined> => {

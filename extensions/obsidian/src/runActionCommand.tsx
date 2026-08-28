@@ -12,6 +12,7 @@ import {
   confirmAlert,
   Alert,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import { openUrl } from "./utils/open";
 import { useEffect, useState } from "react";
@@ -193,7 +194,7 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
         await loadActions();
         showToast(Toast.Style.Success, "Actions Imported");
       }
-    } catch (e) {
+    } catch {
       showToast(Toast.Style.Failure, "Invalid JSON", "Clipboard content is not a valid actions export.");
     }
   }
@@ -221,24 +222,29 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
               <Action.Push title="Run Action" target={<ActionInput action={a} />} icon={Icon.Play} />
               <Action.CopyToClipboard
                 title="Copy Quicklink URL"
-                content={`raycast://extensions/marcjulian/obsidian/runActionCommand?launchContext=${encodeURIComponent(
+                content={`${
+                  process.env.RAYCAST_SCHEME ?? "raycast"
+                }://extensions/marcjulian/obsidian/runActionCommand?launchContext=${encodeURIComponent(
                   JSON.stringify({ actionId: a.id })
                 )}`}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
               <ActionPanel.Section>
                 <Action.Push
                   title="Edit Action"
                   target={<ActionForm action={a} onSave={loadActions} />}
                   icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                 />
                 <Action
                   title="Delete Action"
                   onAction={() => handleDelete(a)}
                   style={Action.Style.Destructive}
                   icon={Icon.Trash}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  shortcut={{
+                    macOS: { modifiers: ["ctrl"], key: "x" },
+                    Windows: { modifiers: ["ctrl"], key: "x" },
+                  }}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
@@ -246,7 +252,7 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
                   title="Create New Action"
                   target={<ActionForm onSave={loadActions} />}
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
@@ -254,13 +260,19 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
                   title="Export All Actions"
                   onAction={handleExport}
                   icon={Icon.Download}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+                  }}
                 />
                 <Action
                   title="Import Actions"
                   onAction={handleImport}
                   icon={Icon.Upload}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "i" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "i" },
+                  }}
                 />
               </ActionPanel.Section>
             </ActionPanel>
@@ -277,7 +289,10 @@ export default function RunActionCommand(props: LaunchProps<{ launchContext?: { 
               title="Import Actions"
               onAction={handleImport}
               icon={Icon.Upload}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "i" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "i" },
+              }}
             />
           </ActionPanel>
         }

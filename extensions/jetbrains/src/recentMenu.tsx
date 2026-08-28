@@ -32,7 +32,7 @@ export default function ProjectList(): React.JSX.Element {
         <MenuBarExtra.Item title={"Jetbrains Toolbox not found, please install it"} />
         <MenuBarExtra.Item
           title={"Open Raycast command for more info"}
-          onAction={() => open("raycast://extensions/gdsmith/jetbrains/recent")}
+          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/gdsmith/jetbrains/recent`)}
         />
       </MenuBarExtra>
     );

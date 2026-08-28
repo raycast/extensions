@@ -1,4 +1,8 @@
-import { calculateLeaveTime, calculateRemainingTime } from "./time-utils";
+import {
+  calculateLeaveDate,
+  calculateRemainingTime,
+  formatTime,
+} from "./time-utils";
 
 type Remaining = {
   hours: number;
@@ -16,9 +20,22 @@ export function buildLeaveStatus(
   workHours: number,
   breakMinutes: number,
   currentTime?: string,
+  startDate?: string,
 ): LeaveStatus {
-  const leaveTime = calculateLeaveTime(startTime, workHours, breakMinutes);
-  const remaining = calculateRemainingTime(leaveTime, startTime, currentTime);
+  const leaveDate = calculateLeaveDate(
+    startTime,
+    workHours,
+    breakMinutes,
+    startDate,
+  );
+  const leaveTime = formatTime(leaveDate);
+  const remaining = calculateRemainingTime(
+    leaveTime,
+    startTime,
+    currentTime,
+    startDate,
+    leaveDate,
+  );
   return { leaveTime, remaining };
 }
 

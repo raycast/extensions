@@ -5,6 +5,9 @@
   "description": "Control Handy speech-to-text: transcription history, dictionary, model selection, and recording",
   "icon": "handy.png",
   "author": "mattiacolombomc",
+  "contributors": [
+    "kud"
+  ],
   "license": "MIT",
   "platforms": [
     "macOS"
@@ -76,7 +79,7 @@
       "name": "open-recordings-folder",
       "title": "Open Recordings Folder",
       "subtitle": "Handy",
-      "description": "Open the recordings directory in Finder",
+      "description": "Open the recordings directory",
       "mode": "no-view"
     },
     {
@@ -101,7 +104,7 @@
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5",
-    "vitest": "^2.1.9"
+    "vitest": "^3.2.6"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -111,5 +114,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

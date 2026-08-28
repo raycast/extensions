@@ -1,5 +1,16 @@
 # Window Sizer Changelog
 
+## [New Feature and Improvements] - 2026-07-10
+
+- Added support for editing custom sizes
+- Added aspect ratio search
+- Unified and improved action icons and shortcuts
+
+## [Fixes] - 2026-06-09
+
+- Fixed list selection behavior while preserving selected item action icons
+- Added timeout handling for unresponsive window operations
+
 ## [Chore] - 2026-05-16
 
 - Updated screenshots to new Raycast

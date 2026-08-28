@@ -1,9 +1,9 @@
-import { List, Icon, Color } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { DiggerResult } from "../types";
 import { Actions } from "../actions";
-import { truncateText } from "../utils/formatters";
+import { DiggerResult } from "../types";
 import { getDeniedAccessMessage } from "../utils/botDetection";
+import { truncateText } from "../utils/formatters";
 
 interface DataFeedsAPIProps {
   data: DiggerResult | null;

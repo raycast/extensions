@@ -4,10 +4,18 @@ import { useEffect, useMemo, useState } from "react";
 import { showToast, Toast, getPreferenceValues, confirmAlert, environment, useNavigation, Color } from "@raycast/api";
 import { AI } from "@raycast/api";
 import { Action, ActionPanel, Form, Icon, Alert } from "@raycast/api";
-import { AiPromptPreset, useAiPromptPresets } from "../../hooks/useAiPromptPresets";
+import { AiPromptPreset, HISTORY_STYLE_PROMPT, useAiPromptPresets } from "../../hooks/useAiPromptPresets";
 import { AiMessagePresetEditorForm } from "../../manage-ai-message-prompts";
 import { RemoteHostIcon } from "../icons/RemoteHostIcons";
 import { RepositoryContext } from "../../open-repository";
+
+const MAX_HISTORY_EXAMPLE_LENGTH = 400;
+const HISTORY_STYLE_EXAMPLE_COUNT = 15;
+
+function truncateCommitExample(message: string): string {
+  if (message.length <= MAX_HISTORY_EXAMPLE_LENGTH) return message;
+  return `${message.slice(0, MAX_HISTORY_EXAMPLE_LENGTH).trimEnd()}...`;
+}
 
 /**
  * Form for creating a commit with AI generation support.
@@ -33,7 +41,7 @@ export function CommitMessageForm(context: RepositoryContext & { commit?: Commit
 
   useEffect(() => {
     if (preferences.autoGenerateCommitMessage && !context.commit) {
-      generateCommitMessage(defaultPreset);
+      generateCommitMessage();
     }
   }, [defaultPreset]);
 
@@ -60,21 +68,52 @@ export function CommitMessageForm(context: RepositoryContext & { commit?: Commit
     setAmend(false);
   };
 
-  const generateCommitMessage = async (presetPrompt: AiPromptPreset) => {
+  /**
+   * Generates a commit message with AI.
+   * Without a preset, infers the template from recent commit history (cmd+G default).
+   * Falls back to the default preset when history is empty.
+   */
+  const generateCommitMessage = async (presetPrompt?: AiPromptPreset) => {
     try {
       setIsGenerating(true);
 
-      // Get staged changes diff
-      const diff = await context.gitManager.getDiff();
+      const diff = !context.commit ? await context.gitManager.getDiff() : undefined;
       let lastCommit = null;
       if (amend) {
         lastCommit = await context.gitManager.getLastCommit();
       }
 
-      // Form a more structured and readable prompt for AI generation of commit message using selected preset
-      const promptParts = [presetPrompt.prompt.trim(), ""];
+      const recentMessages = presetPrompt
+        ? []
+        : (await context.gitManager.getCommits("HEAD", 0))
+            .slice(0, HISTORY_STYLE_EXAMPLE_COUNT)
+            .map((commit) => {
+              const subject = commit.message.trim();
+              const body = commit.body.trim();
+              if (!subject) return undefined;
+              return body ? `${subject}\n\n${body}` : subject;
+            })
+            .filter((message): message is string => Boolean(message));
+      const useHistoryStyle = !presetPrompt && recentMessages.length > 0;
+      const resolvedPreset = useHistoryStyle ? undefined : (presetPrompt ?? defaultPreset);
 
-      if (!context.commit) {
+      const promptParts: string[] = [];
+
+      if (useHistoryStyle) {
+        promptParts.push(
+          HISTORY_STYLE_PROMPT,
+          "",
+          "--------------------",
+          "RECENT COMMIT MESSAGES (newest first):",
+          "--------------------",
+          ...recentMessages.map((message, index) => `${index + 1})\n${truncateCommitExample(message)}`),
+          "",
+        );
+      } else {
+        promptParts.push(resolvedPreset!.prompt.trim(), "");
+      }
+
+      if (diff !== undefined) {
         promptParts.push(
           "--------------------",
           "GIT DIFF (staged changes):",
@@ -85,10 +124,20 @@ export function CommitMessageForm(context: RepositoryContext & { commit?: Commit
           "",
           "--------------------",
         );
+      } else if (context.commit) {
+        promptParts.push(
+          "--------------------",
+          "CURRENT COMMIT MESSAGE TO REWRITE:",
+          "--------------------",
+          context.commit.message.trim(),
+          "",
+          context.commit.body.trim(),
+          "",
+        );
       }
 
       // If amend is enabled and we have a last commit, include it in the context
-      if (amend && lastCommit) {
+      if (amend && lastCommit && !context.commit) {
         promptParts.push(
           "- Final commit message should be merged with previous amended commit message.",
           "--------------------",
@@ -109,7 +158,8 @@ export function CommitMessageForm(context: RepositoryContext & { commit?: Commit
         });
       }
 
-      const model = presetPrompt.model ? AI.Model[presetPrompt.model as keyof typeof AI.Model] : undefined;
+      const modelKey = (resolvedPreset ?? defaultPreset).model;
+      const model = modelKey ? AI.Model[modelKey as keyof typeof AI.Model] : undefined;
 
       const aiResponse = AI.ask(prompt, {
         creativity: "none",
@@ -118,7 +168,7 @@ export function CommitMessageForm(context: RepositoryContext & { commit?: Commit
       await showToast({
         style: Toast.Style.Animated,
         title: "Generating commit message...",
-        message: "This may take a few seconds.",
+        message: useHistoryStyle ? "Matching this repository's commit style." : "This may take a few seconds.",
       });
       setDraftMessage(await aiResponse);
 
@@ -169,10 +219,19 @@ export function CommitMessageForm(context: RepositoryContext & { commit?: Commit
 
     // Push if requested
     if (push && remote) {
-      try {
-        await context.gitManager.pushBranch(context.branches.data.currentBranch!, remote, forcePush);
-      } catch {
-        // Git error is already shown by GitManager
+      const currentBranch = context.branches.data.currentBranch;
+      if (!currentBranch) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot push",
+          message: "No current branch (detached HEAD).",
+        });
+      } else {
+        try {
+          await context.gitManager.pushBranch(currentBranch, remote, forcePush);
+        } catch {
+          // Git error is already shown by GitManager
+        }
       }
     }
     // Clear draft after successful commit
@@ -211,10 +270,9 @@ export function CommitMessageForm(context: RepositoryContext & { commit?: Commit
           {environment.canAccess("AI") && (
             <ActionPanel.Section title="AI Assistant">
               <Action
-                key={defaultPreset.id}
                 title="Generate Message"
                 icon={Icon.Wand}
-                onAction={() => generateCommitMessage(defaultPreset)}
+                onAction={() => generateCommitMessage()}
                 shortcut={{ modifiers: ["cmd"], key: "g" }}
               />
               <ActionPanel.Submenu

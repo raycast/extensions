@@ -1,25 +1,32 @@
+export interface CodexRateLimitWindow {
+  percentageRemaining: number;
+  resetsInSeconds: number;
+  limitWindowSeconds: number;
+}
+
+export interface CodexAdditionalRateLimit {
+  name: string;
+  meteredFeature?: string;
+  windows: CodexRateLimitWindow[];
+}
+
 export interface CodexUsage {
   account: string;
-  fiveHourLimit: {
-    percentageRemaining: number;
-    resetsInSeconds: number;
-    limitWindowSeconds: number;
-  };
-  weeklyLimit: {
-    percentageRemaining: number;
-    resetsInSeconds: number;
-    limitWindowSeconds: number;
-  };
-  codeReviewLimit?: {
-    percentageRemaining: number;
-    resetsInSeconds: number;
-    limitWindowSeconds: number;
-  };
+  displayName?: string;
+  fiveHourLimit?: CodexRateLimitWindow;
+  weeklyLimit?: CodexRateLimitWindow;
+  codeReviewLimit?: CodexRateLimitWindow;
+  additionalRateLimits?: CodexAdditionalRateLimit[];
   credits: {
     hasCredits: boolean;
     unlimited: boolean;
     balance: string;
   };
+  resetCredits?: {
+    availableCount: number | null;
+    expiresAtList: string[];
+  };
+  resetCreditsError?: string;
 }
 
 export interface CodexError {

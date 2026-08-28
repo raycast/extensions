@@ -1,51 +1,8 @@
-import { homedir } from "os";
-import { resolve } from "path";
-
 import { useSQL } from "@raycast/utils";
-import { partition } from "lodash";
 
-import { getOpenNoteURL } from "../helpers";
+import { getOpenNoteURL, NOTES_DB, Backlink, Link, NoteItem, Tag } from "../helpers";
 
-type Link = {
-  id: string;
-  text: string | null;
-  url: string | null;
-  notePk: number;
-};
-
-type Backlink = {
-  id: string;
-  title: string;
-  url: string;
-};
-
-type Tag = {
-  id: string;
-  text: string | null;
-  notePk: number;
-};
-
-export type NoteItem = {
-  id: string;
-  pk: number;
-  UUID: string;
-  title: string;
-  modifiedAt?: Date;
-  folder: string;
-  snippet: string;
-  account: string;
-  invitationLink: string | null;
-  links: Link[];
-  backlinks: Backlink[];
-  tags: Tag[];
-  // the booleans below are stored as 0 or 1 in the database
-  locked: boolean;
-  pinned: boolean;
-  checklist: boolean;
-  checklistInProgress: boolean;
-};
-
-const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
+export type { NoteItem } from "../helpers";
 
 const query = `
     SELECT
@@ -116,6 +73,13 @@ const tagsQuery = `
       link.ZTYPEUTI1 = 'com.apple.notes.inlinetextattachment.hashtag'
 `;
 
+function partition<T>(array: T[], predicate: (item: T) => boolean): [T[], T[]] {
+  return array.reduce(([pass, fail], item) => (predicate(item) ? [[...pass, item], fail] : [pass, [...fail, item]]), [
+    [],
+    [],
+  ] as [T[], T[]]);
+}
+
 export const useNotes = () => {
   const { data, ...rest } = useSQL<NoteItem>(NOTES_DB, query, {
     permissionPriming: "This is required to search your Apple Notes.",
@@ -149,7 +113,7 @@ export const useNotes = () => {
 
   const notesWithAdditionalFields = notes.map((note) => {
     const noteInvitation = invitations?.find((inv) => inv.noteId === note.id);
-    const noteLinks = links?.filter((link) => link.notePk == note.pk);
+    const noteLinks = links?.filter((link) => link.notePk === note.pk);
 
     const noteBacklinks: Backlink[] = [];
     links?.forEach((link) => {
@@ -165,7 +129,7 @@ export const useNotes = () => {
       }
     });
 
-    const noteTags = tags?.filter((tag) => tag.notePk == note.pk);
+    const noteTags = tags?.filter((tag) => tag.notePk === note.pk);
 
     return {
       ...note,
@@ -176,7 +140,10 @@ export const useNotes = () => {
     };
   });
 
-  const [activeNotes, deletedNotes] = partition(notesWithAdditionalFields, (note) => note.folder != "Recently Deleted");
+  const [activeNotes, deletedNotes] = partition(
+    notesWithAdditionalFields,
+    (note) => note.folder !== "Recently Deleted",
+  );
   const [pinnedNotes, unpinnedNotes] = partition(activeNotes, (note) => note.pinned);
 
   return {

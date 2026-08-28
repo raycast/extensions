@@ -36,6 +36,7 @@ A Vim-style keyboard shortcut sequences extension for Raycast that enables quick
 ### 🎯 Smart UI/UX
 
 - **Type-based Grouping**: Items organized by type for easy scanning
+- **Keyboard Layout Mode**: Toggle a compact current-group keyboard map in the detail pane
 - **Dynamic Icons**: App-specific icons and contextual indicators
 - **Real-time Search**: Type to navigate, with context-aware hints
 - **Comprehensive Actions**: Edit, delete, add, and navigate with keyboard shortcuts
@@ -105,7 +106,7 @@ Run `Quick Capture` to detect the current context and create a prefilled shortcu
 
 - **Auto-Reset Timeout**: Enable/disable automatic return to root
 - **Timeout Duration**: Set timeout between 2.5-6 seconds
-- **Open URLs in Active Browser**: Open URL shortcuts in the frontmost browser when one is active, with existing configured/default browser behavior as fallback
+- **Open URLs in Active Browser**: Open URL shortcuts in the browser behind Raycast when it can open web URLs, with existing configured/default browser behavior as fallback
 
 ### Import/Export
 
@@ -157,8 +158,10 @@ In this example, Google opens in Chrome (group default), while GitHub opens in F
 ### Navigation
 
 - **Any Key**: Navigate to action or group
-- **Backspace**: Go back to parent group
-- **Escape**: Reset to root menu
+- **Backspace**: Go back one Leader Key group when the search bar has no visible text
+- **Escape**: Follows Raycast's native behavior
+- **Tab**: Enter or exit Leader Key search mode
+- **⌘⇧K**: Toggle dual-column keyboard layout mode
 
 ### Management
 

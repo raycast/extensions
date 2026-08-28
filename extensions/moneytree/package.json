@@ -3,7 +3,7 @@
   "name": "moneytree",
   "title": "Moneytree",
   "description": "View and manage your finances from Moneytree via Raycast",
-  "icon": "moneytree-icon.png",
+  "icon": "extension-icon.png",
   "author": "clins1994",
   "platforms": [
     "macOS",
@@ -67,8 +67,246 @@
           "placeholder": "Query"
         }
       ]
+    },
+    {
+      "name": "list-categories",
+      "title": "List Categories",
+      "description": "Lists Moneytree categories and creates or edits custom child categories",
+      "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-credentials",
+      "title": "Get Credentials",
+      "description": "Get Moneytree credentials and linked institutions, including connection status, account counts, refresh metadata, errors, and total balances."
+    },
+    {
+      "name": "get-accounts",
+      "title": "Get Accounts",
+      "description": "Get Moneytree accounts with balances, currencies, types, statuses, and linked credential or institution names."
+    },
+    {
+      "name": "search-transactions",
+      "title": "Search Transactions",
+      "description": "Search Moneytree transactions by date range, account, or description and return signed amounts with account context."
+    },
+    {
+      "name": "get-categories",
+      "title": "Get Categories",
+      "description": "Get Moneytree transaction categories with ids, parent relationships, category types, and custom category flags."
+    },
+    {
+      "name": "update-transaction",
+      "title": "Update Transaction",
+      "description": "Update a Moneytree transaction's custom description and category. This mutates Moneytree data and should only be used when the user explicitly asks to edit a specific transaction."
+    },
+    {
+      "name": "create-category",
+      "title": "Create Category",
+      "description": "Create a custom Moneytree subcategory under an existing parent category. This mutates Moneytree data and should only be used when the user explicitly asks to create a category."
+    },
+    {
+      "name": "update-category",
+      "title": "Update Category",
+      "description": "Update a custom Moneytree category's name, parent, or icon. This mutates Moneytree data and should only be used when the user explicitly asks to edit a custom category."
+    }
+  ],
+  "ai": {
+    "instructions": "Moneytree stores financial credentials/institutions, accounts, categories, and transactions. Use get-credentials for institution connection status and grouped balances, get-accounts for account balances and account metadata, get-categories for transaction category ids, and search-transactions for spending, income, merchant, date, and account-specific questions. Treat transaction amounts as signed values: negative amounts are spending and positive amounts are income or refunds. To update a transaction, first use search-transactions to identify the exact transaction and get its original date, amount, claimId, and expenseType, then use get-categories to find the target category id, then call update-transaction only when the user explicitly asks to edit that specific transaction. To create a category, use get-categories to find the required top-level parent category id, then call create-category only when the user explicitly asks to create a subcategory. To edit a custom category, use get-categories to identify the existing custom category id, then call update-category with the requested name, top-level parent, or icon changes only when the user explicitly asks to edit that category. Do not expose secrets or ask for Moneytree passwords in chat. If a question requires more rows than returned, call search-transactions with a larger maxPages or a narrower date range.",
+    "evals": [
+      {
+        "input": "@moneytree which accounts have the highest balances?",
+        "mocks": {
+          "get-credentials": {
+            "count": 2,
+            "credentials": [
+              {
+                "id": 100,
+                "name": "Example Bank",
+                "status": "success",
+                "accountCount": 1,
+                "totalBalanceInBase": 120000,
+                "error": null
+              },
+              {
+                "id": 101,
+                "name": "Example Card",
+                "status": "success",
+                "accountCount": 1,
+                "totalBalanceInBase": -45000,
+                "error": null
+              }
+            ]
+          },
+          "get-accounts": {
+            "count": 2,
+            "accounts": [
+              {
+                "id": 1,
+                "name": "Main Checking",
+                "accountType": "bank",
+                "currency": "JPY",
+                "currentBalance": 120000,
+                "currentBalanceInBase": 120000,
+                "credentialName": "Example Bank"
+              },
+              {
+                "id": 2,
+                "name": "Credit Card",
+                "accountType": "credit_card",
+                "currency": "JPY",
+                "currentBalance": -45000,
+                "currentBalanceInBase": -45000,
+                "credentialName": "Example Card"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "or": [
+              {
+                "callsTool": "get-accounts"
+              },
+              {
+                "callsTool": "get-credentials"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "input": "@moneytree how much did I spend at Starbucks in May 2026?",
+        "mocks": {
+          "get-credentials": {
+            "count": 1,
+            "credentials": [
+              {
+                "id": 100,
+                "name": "Example Bank",
+                "status": "success",
+                "accountCount": 1,
+                "totalBalanceInBase": 120000,
+                "error": null
+              }
+            ]
+          },
+          "get-accounts": {
+            "count": 1,
+            "accounts": [
+              {
+                "id": 1,
+                "name": "Main Checking",
+                "accountType": "bank",
+                "currency": "JPY",
+                "currentBalance": 120000,
+                "currentBalanceInBase": 120000,
+                "credentialName": "Example Bank"
+              }
+            ]
+          },
+          "search-transactions": {
+            "totalCount": 2,
+            "transactions": [
+              {
+                "id": 10,
+                "date": "2026-05-04",
+                "amount": -520,
+                "description": "Starbucks",
+                "accountName": "Main Checking"
+              },
+              {
+                "id": 11,
+                "date": "2026-05-18",
+                "amount": -610,
+                "description": "Starbucks",
+                "accountName": "Main Checking"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-transactions",
+              "arguments": {
+                "query": {
+                  "includes": "Starbucks"
+                },
+                "startDate": "2026-05-01",
+                "endDate": "2026-05-31"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@moneytree are any of my bank connections broken?",
+        "mocks": {
+          "get-credentials": {
+            "count": 1,
+            "credentials": [
+              {
+                "id": 100,
+                "name": "Example Bank",
+                "status": "success",
+                "accountCount": 1,
+                "error": null
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-credentials"
+          }
+        ]
+      },
+      {
+        "input": "@moneytree rename my custom category Psychotherapy to Therapy under Health & Medical",
+        "mocks": {
+          "get-categories": {
+            "count": 2,
+            "categories": [
+              {
+                "id": 41,
+                "name": "Health & Medical",
+                "parentId": null,
+                "categoryType": "expense",
+                "iconKey": "health_medical",
+                "isCustom": false
+              },
+              {
+                "id": 1228961,
+                "name": "Psychotherapy",
+                "parentId": 41,
+                "parentName": "Health & Medical",
+                "categoryType": "expense",
+                "iconKey": "communications",
+                "isCustom": true
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-categories"
+          },
+          {
+            "callsTool": {
+              "name": "update-category",
+              "arguments": {
+                "categoryId": 1228961,
+                "parentId": 41,
+                "name": "Therapy"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.104.12",
     "@raycast/utils": "^2.2.3"

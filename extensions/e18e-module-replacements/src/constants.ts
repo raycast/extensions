@@ -15,24 +15,11 @@ export const TYPE_COLOR: Record<ModuleReplacement["type"], Color> = {
   removal: Color.Red,
 };
 
-const missingReplacementKeys = new Set<string>();
-
-function resolveReplacement(key: string) {
-  const replacement = all.replacements[key];
-  if (!replacement) {
-    missingReplacementKeys.add(key);
-    return [];
-  }
-
-  return [replacement];
-}
-
 export const ALL_MODULES = Object.values(all.mappings).map((value) => ({
   ...value,
-  replacements: value.replacements.flatMap(resolveReplacement),
+  replacements: value.replacements.map((key) => all.replacements[key]).filter(Boolean),
 }));
 
 export type ModuleReplacementResolved = (typeof ALL_MODULES)[number];
 
 export const Mappings = new Map(ALL_MODULES.map((mapping) => [mapping.moduleName, mapping]));
-export const MISSING_REPLACEMENT_KEYS = Array.from(missingReplacementKeys).toSorted((a, b) => a.localeCompare(b));

@@ -5,9 +5,7 @@ import { environment } from "@raycast/api";
 import type { Wallpaper } from "./utils";
 
 export type WallpaperHistoryEventType =
-  | "selected"
-  | "downloaded"
-  | "auto-switched";
+  "selected" | "downloaded" | "auto-switched";
 
 export type WallpaperHistoryEntry = {
   eventId: string;

@@ -14,7 +14,8 @@
     "validate",
     "dead_hikikomori",
     "mateus_badalotti",
-    "jomifepe"
+    "jomifepe",
+    "0xdhrv"
   ],
   "platforms": [
     "macOS",
@@ -796,6 +797,7 @@
     "@types/react": "19.0.10",
     "eslint": "^9.39.2",
     "prettier": "^3.7.4",
+    "tsx": "^4.22.4",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -803,6 +805,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --import tsx --test \"test/**/*.test.ts\""
   }
 }

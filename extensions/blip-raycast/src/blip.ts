@@ -1,8 +1,11 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { promisify } from "node:util";
+import { isMac } from "./platform";
+import { buildWindowsBlipVerbScript, getWindowsPowerShellArguments } from "./windows-scripts";
 
 const execFileAsync = promisify(execFile);
+
 const ACCESSIBILITY_SETTINGS_PATH = "System Settings > Privacy & Security > Accessibility";
 const ACCESSIBILITY_ERROR_PREFIX = "Raycast needs Accessibility permission to trigger Blip via Finder Services.";
 const SERVICES_SETTINGS_PATH = "System Settings > Keyboard > Keyboard Shortcuts > Services";
@@ -18,6 +21,14 @@ export async function sendPathToBlip(path: string) {
     throw new Error(`Path does not exist: ${path}`);
   }
 
+  if (isMac) {
+    await sendPathToBlipMac(path);
+  } else {
+    await sendPathToBlipWindows(path);
+  }
+}
+
+async function sendPathToBlipMac(path: string) {
   const script = buildBlipFinderServiceScript(path);
 
   try {
@@ -29,6 +40,31 @@ export async function sendPathToBlip(path: string) {
     const details = error instanceof Error ? error.message : "Unknown AppleScript failure.";
     throw new Error(buildAppleScriptError(details));
   }
+}
+
+async function sendPathToBlipWindows(path: string) {
+  const script = buildWindowsBlipVerbScript(path);
+
+  try {
+    await execFileAsync("powershell.exe", getWindowsPowerShellArguments(script), { timeout: 10000 });
+  } catch (error) {
+    const details = error instanceof Error ? error.message : "Unknown error.";
+    throw new Error(buildWindowsError(details));
+  }
+}
+
+function buildWindowsError(details: string): string {
+  const normalized = details.toLowerCase();
+
+  if (normalized.includes("blip_not_found")) {
+    return "Blip's Windows context menu was not found. Make sure Blip is installed and its shell extension is enabled.";
+  }
+
+  if (normalized.includes("folder_not_found") || normalized.includes("file_not_found")) {
+    return "Could not access the selected file. Make sure it exists and you have permission to read it.";
+  }
+
+  return `Blip could not be triggered. ${details}`;
 }
 
 function buildBlipFinderServiceScript(path: string) {

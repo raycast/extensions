@@ -20,15 +20,10 @@ test("protectInline handles double-backtick spans", () => {
 });
 
 test("protectInline replaces inline links", () => {
-  const { protected: p, tokens } = protectInline(
-    "see [the docs](https://example.com/a b) now",
-  );
+  const { protected: p, tokens } = protectInline("see [the docs](https://example.com/a b) now");
   assert.equal(tokens.length, 1);
   assert.equal(tokens[0], "[the docs](https://example.com/a b)");
-  assert.equal(
-    restoreInline(p, tokens),
-    "see [the docs](https://example.com/a b) now",
-  );
+  assert.equal(restoreInline(p, tokens), "see [the docs](https://example.com/a b) now");
 });
 
 test("protectInline replaces reference links", () => {
@@ -39,9 +34,7 @@ test("protectInline replaces reference links", () => {
 });
 
 test("protectInline replaces autolinks", () => {
-  const { protected: p, tokens } = protectInline(
-    "ping <https://example.com> please",
-  );
+  const { protected: p, tokens } = protectInline("ping <https://example.com> please");
   assert.equal(tokens.length, 1);
   assert.equal(tokens[0], "<https://example.com>");
   assert.equal(restoreInline(p, tokens), "ping <https://example.com> please");

@@ -23,7 +23,7 @@
     "@raycast/utils": "^1.17.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node-fetch": "^2.6.12",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.2",
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {

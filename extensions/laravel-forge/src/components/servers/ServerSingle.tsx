@@ -1,8 +1,15 @@
 import { ActionPanel, List, Icon, Action, showToast, Toast } from "@raycast/api";
-import { Server } from "../../api/Server";
+import { Server, ServiceAction } from "../../api/Server";
 import { IServer } from "../../types";
 import { unwrapToken } from "../../lib/auth";
 import { SitesList } from "../sites/SitesList";
+import { ServerEvents } from "./ServerEvents";
+
+const serviceActions: { action: ServiceAction; verb: string; running: string }[] = [
+  { action: "reboot", verb: "Reboot", running: "Rebooting" },
+  { action: "start", verb: "Start", running: "Starting" },
+  { action: "stop", verb: "Stop", running: "Stopping" },
+];
 
 export const ServerSingle = ({ server }: { server: IServer }) => {
   const token = unwrapToken(server.api_token_key);
@@ -34,7 +41,6 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                // eslint-disable-next-line @raycast/prefer-title-case
                 title={`Open SSH Connection (${server.ssh_user})`}
                 url={`ssh://${server.ssh_user}@${server.ip_address}`}
               />
@@ -69,8 +75,20 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
             </ActionPanel>
           }
         />
+        <List.Item
+          id="server-events"
+          key="server-events"
+          title="View server events"
+          icon={Icon.Clock}
+          accessories={[{ text: "press to view" }]}
+          actions={
+            <ActionPanel>
+              <Action.Push title="View Server Events" icon={Icon.Clock} target={<ServerEvents server={server} />} />
+            </ActionPanel>
+          }
+        />
       </List.Section>
-      <List.Section title="Reboot">
+      <List.Section title="Services">
         <List.Item
           id="reboot-server"
           key="reboot-server"
@@ -83,7 +101,7 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
                 title="Reboot Server"
                 onAction={async () => {
                   showToast(Toast.Style.Animated, `Rebooting server...`);
-                  await Server.reboot({ serverId: server.id, token }).catch(() => {
+                  await Server.runAction({ server, token }).catch(() => {
                     showToast(Toast.Style.Failure, `Failed to reboot server`);
                   });
                 }}
@@ -96,21 +114,24 @@ export const ServerSingle = ({ server }: { server: IServer }) => {
             <List.Item
               id={key}
               key={key}
-              title={`Reboot ${label}`}
+              title={label}
               icon={Icon.ArrowClockwise}
+              accessories={[{ text: "reboot, start or stop" }]}
               actions={
                 <ActionPanel>
-                  <Action
-                    icon={Icon.ArrowClockwise}
-                    // eslint-disable-next-line @raycast/prefer-title-case
-                    title={`Reboot ${label}`}
-                    onAction={async () => {
-                      showToast(Toast.Style.Animated, `Rebooting ${label}...`);
-                      await Server.reboot({ serverId: server.id, token, key }).catch(() => {
-                        showToast(Toast.Style.Failure, `Failed to reboot ${label}`);
-                      });
-                    }}
-                  />
+                  {serviceActions.map(({ action, verb, running }) => (
+                    <Action
+                      key={action}
+                      icon={action === "stop" ? Icon.Stop : Icon.ArrowClockwise}
+                      title={`${verb} ${label}`}
+                      onAction={async () => {
+                        showToast(Toast.Style.Animated, `${running} ${label}...`);
+                        await Server.runAction({ server, token, action, service: key }).catch(() => {
+                          showToast(Toast.Style.Failure, `Failed to ${action} ${label}`);
+                        });
+                      }}
+                    />
+                  ))}
                 </ActionPanel>
               }
             />

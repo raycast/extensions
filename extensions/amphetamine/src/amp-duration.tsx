@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { ComponentProps, ComponentType } from "react";
-import { Form, ActionPanel, Action, Toast, popToRoot, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, Toast, popToRoot, Icon, LocalStorage } from "@raycast/api";
 import ampStart from "./amp-start";
-import { formatDateTime, getDefaultTarget, getSessionTime } from "./session-time";
+import { formatDateTime, getSessionTime } from "./session-time";
 
 /** Next whole minute; used as DatePicker `min` so only future times are valid (and built-in "Now" is typically omitted). */
 function getMinimumUntilDate(): Date {
@@ -30,12 +30,48 @@ enum SessionType {
   time = "time",
 }
 
+const DURATION_STORAGE_KEY = "configure-session-duration";
+const INTERVAL_STORAGE_KEY = "configure-session-interval";
+
 export default function SessionWithDuration() {
   const [sessionType, setSessionType] = useState<SessionType>(SessionType.duration);
   const [interval, setDurationUnit] = useState<keyof typeof Intervals>(Intervals.minutes);
   const [duration, setDuration] = useState<string>(DefaultDuration.minutes);
-  const [target, setTarget] = useState<Date>(getDefaultTarget);
+  const [target, setTarget] = useState<Date | null>(null);
+  const [targetError, setTargetError] = useState<string | undefined>();
   const [earliestTarget, setEarliestTarget] = useState(getMinimumUntilDate);
+  const [isLoadingDefaults, setIsLoadingDefaults] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadStoredDuration() {
+      try {
+        const [storedDuration, storedInterval] = await Promise.all([
+          LocalStorage.getItem<string>(DURATION_STORAGE_KEY),
+          LocalStorage.getItem<string>(INTERVAL_STORAGE_KEY),
+        ]);
+
+        if (!isMounted) return;
+
+        if (storedDuration !== undefined) {
+          setDuration(storedDuration);
+        }
+        if (storedInterval === Intervals.minutes || storedInterval === Intervals.hours) {
+          setDurationUnit(storedInterval);
+        }
+      } catch {
+        // Keep the built-in defaults when local storage is unavailable.
+      } finally {
+        if (isMounted) setIsLoadingDefaults(false);
+      }
+    }
+
+    void loadStoredDuration();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (sessionType !== SessionType.time) return;
@@ -47,12 +83,13 @@ export default function SessionWithDuration() {
     return () => clearInterval(intervalId);
   }, [sessionType]);
 
-  useEffect(() => {
-    if (sessionType !== SessionType.time) return;
-    setTarget((t) => (t.getTime() < earliestTarget.getTime() ? getDefaultTarget() : t));
-  }, [sessionType, earliestTarget]);
+  function validateTarget(value: Date | null) {
+    const parsed = value ? getSessionTime(value) : undefined;
+    setTargetError(parsed ? undefined : "Choose a future date and time.");
+    return parsed;
+  }
 
-  const parsedTime = getSessionTime(target);
+  const parsedTime = target ? getSessionTime(target) : undefined;
   const timeInfo = parsedTime
     ? `Starts a session until ${formatDateTime(parsedTime.target)}.`
     : "Choose a future date and time.";
@@ -66,7 +103,7 @@ export default function SessionWithDuration() {
     toast.show();
 
     if (sessionType === SessionType.time) {
-      const parsed = getSessionTime(target);
+      const parsed = validateTarget(target);
       if (!parsed) {
         toast.title = "Failed to initialize a session.";
         toast.message = "Choose a future date and time.";
@@ -98,11 +135,13 @@ export default function SessionWithDuration() {
   function handleChangeDuration(newInterval: keyof typeof Intervals) {
     if (interval !== newInterval) {
       setDurationUnit(newInterval);
+      void LocalStorage.setItem(INTERVAL_STORAGE_KEY, newInterval);
     }
   }
 
   return (
     <Form
+      isLoading={isLoadingDefaults}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Start Session" onSubmit={submit} icon={Icon.List} />
@@ -144,14 +183,17 @@ export default function SessionWithDuration() {
             info={`Sets the session duration based on the unit selected.\n\nCurrent: ${duration} ${
               duration === "1" ? interval.substring(0, interval.length - 1) : interval
             }`}
-            storeValue
-            onChange={(value) => setDuration(value)}
+            value={duration}
+            onChange={(value) => {
+              setDuration(value);
+              void LocalStorage.setItem(DURATION_STORAGE_KEY, value);
+            }}
           />
           <Form.Dropdown
             id="interval"
             title="Unit"
-            storeValue
-            info={`Select whether the duration should be in minutes or in hours.\n\n- Changing the duration to hours will set a default value of 1 hour.\n- Changing the duration to minutes will set a default value of 30 minutes`}
+            value={interval}
+            info="Select whether the duration should be in minutes or hours. The entered duration is preserved when switching units."
             onChange={(value) => handleChangeDuration(value as keyof typeof Intervals)}
           >
             <Form.Dropdown.Item value="minutes" title="minutes" />
@@ -166,8 +208,12 @@ export default function SessionWithDuration() {
           type={Form.DatePicker.Type.DateTime}
           min={earliestTarget}
           info={timeInfo}
-          storeValue
-          onChange={(value) => setTarget(value ?? getDefaultTarget())}
+          error={targetError}
+          onChange={(value) => {
+            setTarget(value);
+            validateTarget(value);
+          }}
+          onBlur={(event) => validateTarget(event.target.value ?? null)}
         />
       ) : null}
     </Form>

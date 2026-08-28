@@ -24,6 +24,10 @@ The [Wayback Machine](https://archive.org/web/) is a digital archive of the Worl
 
 - Archive the current page you're viewing or a specific URL to the Internet Archive. This is perfect for preserving content before it changes or disappears.
 
+### Search Pages
+
+- Search archived webpages snapshots by URL.
+
 ### Settings & Preferences
 
 You can configure the extension with the following preferences:

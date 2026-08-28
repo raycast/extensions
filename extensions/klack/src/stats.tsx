@@ -20,8 +20,8 @@ const TOTAL_ROWS = [
   { title: "Clicks", icon: Icon.Mouse, key: "clicks" as const },
 ];
 
-function formatTrackingSince(d: Date): string {
-  return `Tracking since ${d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+function formatSince(d: Date): string {
+  return `Since ${d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
 }
 
 function StatsActions({ stats, revalidate }: { stats: Stats; revalidate: () => void }) {
@@ -65,7 +65,7 @@ export default function Command() {
 
   const blocked = data && (!data.enabled || !data.hasPermission);
   const totalsTitle =
-    !blocked && data?.trackingSince ? `Total Usage · ${formatTrackingSince(data.trackingSince)}` : "Total Usage";
+    !blocked && data?.trackingSince ? `Total Usage · ${formatSince(data.trackingSince)}` : "Total Usage";
 
   return (
     <List isLoading={isLoading} navigationTitle="Klack Stats">

@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import {
+  brewAdoptCommand,
   brewInstallCommand,
   brewInstallPath,
   brewIsInstalled,
@@ -9,11 +10,21 @@ import {
   type Formula,
   type OutdatedCask,
   type OutdatedFormula,
+  type UpgradePackageStatus,
 } from "../utils";
 import { useTerminalApp } from "../utils/terminal";
 import * as Actions from "./actions";
 import { CaskInfo } from "./caskInfo";
 import { FormulaInfo } from "./formulaInfo";
+
+const ToggleDetailsAction = (props: { onToggleDetails: () => void }) => (
+  <Action
+    title="Toggle Details"
+    icon={Icon.AppWindowSidebarRight}
+    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+    onAction={props.onToggleDetails}
+  />
+);
 
 const DebugSection = (props: { obj: Cask | Formula }) => (
   <ActionPanel.Section>
@@ -44,6 +55,7 @@ export function CaskActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
+  onToggleDetails?: () => void;
 }) {
   const { cask } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -61,6 +73,7 @@ export function CaskActionPanel(props: {
           )}
           {cask.outdated && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(cask)} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -124,6 +137,7 @@ export function CaskActionPanel(props: {
             />
           )}
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
@@ -138,6 +152,17 @@ export function CaskActionPanel(props: {
             icon={terminalIcon}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={() => runCommandInTerminal(brewInstallCommand(cask))}
+          />
+          <Action.CopyToClipboard
+            title="Copy Adopt Command"
+            content={brewAdoptCommand(cask)}
+            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+          />
+          <Action
+            title={`Run Adopt in ${terminalName}`}
+            icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={() => runCommandInTerminal(brewAdoptCommand(cask))}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
@@ -180,6 +205,7 @@ export function FormulaActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
+  onToggleDetails?: () => void;
 }) {
   const { formula } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -199,6 +225,7 @@ export function FormulaActionPanel(props: {
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
           <Actions.FormulaShowAllInstalled onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -257,6 +284,7 @@ export function FormulaActionPanel(props: {
             />
           )}
           <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard
@@ -275,6 +303,17 @@ export function FormulaActionPanel(props: {
             icon={terminalIcon}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={() => runCommandInTerminal(brewInstallCommand(formula))}
+          />
+          <Action.CopyToClipboard
+            title="Copy Adopt Command"
+            content={brewAdoptCommand(formula)}
+            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+          />
+          <Action
+            title={`Run Adopt in ${terminalName}`}
+            icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={() => runCommandInTerminal(brewAdoptCommand(formula))}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
@@ -316,6 +355,10 @@ export function FormulaActionPanel(props: {
 
 export function OutdatedActionPanel(props: {
   outdated: OutdatedCask | OutdatedFormula;
+  /** Called when the upgrade starts or finishes, e.g. to show its status in a list */
+  onUpgrade?: (status: UpgradePackageStatus) => void;
+  /** Overrides the default "Upgrade All", e.g. to report progress per package */
+  onUpgradeAll?: () => void;
   onAction: (result: boolean) => void;
 }) {
   const { outdated } = props;
@@ -325,12 +368,32 @@ export function OutdatedActionPanel(props: {
     return (o as OutdatedFormula).pinned != undefined;
   }
 
+  // When the caller shows the upgrade status itself, leave the list as-is:
+  // an upgraded package remains visible, with its status
+  function onUpgradeAction(result: boolean) {
+    if (props.onUpgrade) {
+      props.onUpgrade(result ? "upgraded" : "failed");
+    } else {
+      props.onAction(result);
+    }
+  }
+
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Actions.FormulaUpgradeAction formula={outdated} onAction={props.onAction} />
-        <Actions.FormulaUpgradeAllAction onAction={props.onAction} />
+        <Actions.FormulaUpgradeAction
+          formula={outdated}
+          onStart={() => props.onUpgrade?.("upgrading")}
+          onAction={onUpgradeAction}
+        />
+        <Actions.FormulaUpgradeAllAction onUpgradeAll={props.onUpgradeAll} onAction={props.onAction} />
         {isPinable(outdated) && <Actions.FormulaPinAction formula={outdated} onAction={props.onAction} />}
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={() => props.onAction(true)}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.CopyToClipboard
@@ -360,6 +423,29 @@ export function OutdatedActionPanel(props: {
           onAction={() => runCommandInTerminal(brewUninstallCommand(outdated))}
         />
       </ActionPanel.Section>
+    </ActionPanel>
+  );
+}
+
+/**
+ * Actions available while an upgrade is running.
+ *
+ * Other brew actions are omitted, since Homebrew does not support concurrent processes.
+ */
+export function UpgradingActionPanel(props: { outdated: OutdatedCask | OutdatedFormula; onCancel: () => void }) {
+  return (
+    <ActionPanel>
+      <Action
+        title="Cancel Upgrade"
+        icon={Icon.XMarkCircle}
+        style={Action.Style.Destructive}
+        onAction={props.onCancel}
+      />
+      <Action.CopyToClipboard
+        title="Copy Upgrade Command"
+        content={brewUpgradeCommand(props.outdated)}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+      />
     </ActionPanel>
   );
 }

@@ -1,5 +1,17 @@
 # Changelog
 
+## [Windows Support] - 2026-06-30
+
+- Added Windows support for setting wallpapers across all commands (Today's Wallpapers, Set Random Wallpaper, History, and Auto Switch Wallpaper).
+- Wallpaper: uses PowerShell + Win32 `SystemParametersInfo` on Windows; macOS continues to use AppleScript.
+- Downloads now resolve the home directory cross-platform so saving to `~/Downloads` works on Windows.
+
+## [Metadata Screenshot Cleanup] - 2026-06-03
+
+- Converted metadata screenshots from JPG to PNG format.
+- Renamed metadata screenshots to `another-boring-piece-1.png`, `another-boring-piece-2.png`, and `another-boring-piece-3.png`.
+- Removed original JPG screenshot files from `metadata`.
+
 ## [Add History Command and Shortcuts] - 2026-05-23
 
 - New command **History**: browse wallpapers you selected or downloaded, including automatic wallpaper switches.

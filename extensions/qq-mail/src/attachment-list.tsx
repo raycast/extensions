@@ -4,6 +4,7 @@ import { homedir } from "os";
 import { join, basename, extname } from "path";
 import { writeFile, mkdir, access } from "fs/promises";
 import { fetchAttachments, Attachment } from "./imap-client";
+import { formatDate } from "./utils";
 
 // Sanitize filename to prevent path traversal attacks
 function sanitizeFilename(filename: string): string {
@@ -47,7 +48,9 @@ interface AttachmentListProps {
   emailSubject: string;
 }
 
-export function AttachmentList({ mailboxPath, emailUid, emailSubject }: AttachmentListProps) {
+export function AttachmentList(props: AttachmentListProps) {
+  const { mailboxPath, emailUid, emailSubject } = props;
+
   const { pop } = useNavigation();
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,14 +70,7 @@ export function AttachmentList({ mailboxPath, emailUid, emailSubject }: Attachme
   }, [mailboxPath, emailUid]);
 
   const getTimestampedFolderName = (): string => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    return `qq-mail-attachments-${year}${month}${day}T${hours}${minutes}${seconds}`;
+    return `qq-mail-attachments-${formatDate(new Date()).replace(/[: ]/g, "-")}`;
   };
 
   const downloadAttachment = async (attachment: Attachment) => {
@@ -147,53 +143,52 @@ export function AttachmentList({ mailboxPath, emailUid, emailSubject }: Attachme
       navigationTitle={`Attachments - ${emailSubject}`}
       searchBarPlaceholder="Search attachments..."
     >
-      {attachments.length === 0 && !isLoading ? (
+      {attachments.length === 0 && !isLoading && (
         <List.EmptyView icon={Icon.Paperclip} title="No Attachments" description="This email has no attachments" />
-      ) : (
-        <>
-          {attachments.length > 1 && (
-            <List.Item
-              key="download-all"
-              title="Download All Attachments"
-              subtitle={`${attachments.length} files`}
-              icon={Icon.Download}
-              actions={
-                <ActionPanel>
-                  <Action title="Download All" icon={Icon.Download} onAction={downloadAllAttachments} />
-                  <Action title="Cancel" icon={Icon.XMarkCircle} onAction={pop} />
-                </ActionPanel>
-              }
-            />
-          )}
-          {attachments.map((attachment, index) => (
-            <List.Item
-              key={index}
-              title={attachment.filename}
-              subtitle={formatFileSize(attachment.content.length)}
-              icon={getFileIcon(attachment.contentType)}
-              accessories={[{ text: attachment.contentType.split("/")[1]?.toUpperCase() || "FILE" }]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title={`Download ${attachment.filename}`}
-                    icon={Icon.Download}
-                    onAction={() => downloadAttachment(attachment)}
-                  />
-                  {attachments.length > 1 && (
-                    <Action
-                      title="Download All Attachments"
-                      icon={Icon.Download}
-                      onAction={downloadAllAttachments}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                    />
-                  )}
-                  <Action title="Cancel" icon={Icon.XMarkCircle} onAction={pop} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </>
       )}
+      <>
+        {attachments.length > 1 && (
+          <List.Item
+            key="download-all"
+            title="Download All Attachments"
+            subtitle={`${attachments.length} files`}
+            icon={Icon.Download}
+            actions={
+              <ActionPanel>
+                <Action title="Download All" icon={Icon.Download} onAction={downloadAllAttachments} />
+                <Action title="Cancel" icon={Icon.XMarkCircle} onAction={pop} />
+              </ActionPanel>
+            }
+          />
+        )}
+        {attachments.map((attachment, index) => (
+          <List.Item
+            key={index}
+            title={attachment.filename}
+            subtitle={formatFileSize(attachment.content.length)}
+            icon={getFileIcon(attachment.contentType)}
+            accessories={[{ text: attachment.contentType.split("/")[1]?.toUpperCase() || "FILE" }]}
+            actions={
+              <ActionPanel>
+                <Action
+                  title={`Download ${attachment.filename}`}
+                  icon={Icon.Download}
+                  onAction={() => downloadAttachment(attachment)}
+                />
+                {attachments.length > 1 && (
+                  <Action
+                    title="Download All Attachments"
+                    icon={Icon.Download}
+                    onAction={downloadAllAttachments}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  />
+                )}
+                <Action title="Cancel" icon={Icon.XMarkCircle} onAction={pop} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </>
     </List>
   );
 }

@@ -10,8 +10,7 @@ type Input = {
 
 export default async function ({ todoId, todoParams }: Input) {
   try {
-    const todo = await updateTodo(todoId, todoParams);
-    return todo;
+    await updateTodo(todoId, todoParams);
   } catch (error) {
     if (error instanceof Error && error.message === 'unauthorized') {
       return {

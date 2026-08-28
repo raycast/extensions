@@ -1,5 +1,16 @@
 # Convert Changelog
 
+## [Update] - 2026-06-26
+
+- Added support for alpha as percentage in hsl()
+- Fixed HEXA alpha
+- Extract hsl regex matching function and add unit tests
+- Bump `@raycast/eslint-config` and move it to devDependencies
+
+## [Update] - 2026-06-25
+
+- Added support for modern space-separated hsl() color syntax
+
 ## [Update] - 2026-01-13
 
 - Added OKLCH color conversion

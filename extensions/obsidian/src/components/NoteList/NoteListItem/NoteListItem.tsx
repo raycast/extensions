@@ -1,5 +1,4 @@
 import { List, ActionPanel } from "@raycast/api";
-import fs from "fs";
 import {
   readingTime,
   wordCount,
@@ -9,11 +8,39 @@ import {
   filterContent,
 } from "../../../utils/utils";
 import { SearchNotePreferences } from "../../../utils/preferences";
-import { invalidateNotesCache } from "../../../api/cache/cache.service";
-import { NoteActions, OpenNoteActions } from "../../../utils/actions";
+import { NoteActions, OpenNoteActions, OpenPathInObsidianAction } from "../../../utils/actions";
 import { useNoteContent } from "../../../utils/hooks";
 import { useState } from "react";
 import { Note, ObsidianVault, ObsidianUtils } from "@/obsidian";
+import { ContentMatch, NoteSearchResult } from "@/api/search/content-match.service";
+import { normalizeRelativePath } from "@/utils/utils";
+import { shouldLoadNoteContentForList } from "@/api/search/note-preview.service";
+import { MAX_SEARCH_FILE_SIZE_BYTES } from "@/api/search/simple-content-search.service";
+
+function escapeMarkdown(text: string): string {
+  return text.replace(/([\\`*_[\]{}()<>#+.!|-])/g, "\\$1");
+}
+
+function highlightedLine(text: string, line: number, startColumn: number, match: ContentMatch): string {
+  if (line < match.line || line > match.endLine) return escapeMarkdown(text);
+
+  const start = line === match.line ? Math.max(0, match.column - startColumn) : 0;
+  const end = line === match.endLine ? Math.min(text.length, match.endColumn - startColumn) : text.length;
+  return `${escapeMarkdown(text.slice(0, start))}**${escapeMarkdown(text.slice(start, end))}**${escapeMarkdown(
+    text.slice(end)
+  )}`;
+}
+
+function matchPreview(note: Note, vault: ObsidianVault, match: ContentMatch): string {
+  const relativePath = normalizeRelativePath(note.path, vault.path);
+  const context = match.context
+    .map((item) => `> \`${item.line}\` ${highlightedLine(item.text, item.line, item.startColumn, match) || " "}`)
+    .join("\n>\n");
+
+  return `# ${escapeMarkdown(note.title)}\n\n${escapeMarkdown(relativePath)}\n\n**Line ${match.line}, Column ${
+    match.column
+  }**\n\n---\n\n${context}`;
+}
 
 interface NoteListItemMetadataProps {
   content: string;
@@ -48,35 +75,35 @@ function NoteListItemMetadata({ content, note, vault }: NoteListItemMetadataProp
 }
 
 export function NoteListItem(props: {
-  note: Note;
+  result: NoteSearchResult;
   vault: ObsidianVault;
-  key: string;
   pref: SearchNotePreferences;
   selectedItemId: string | null;
   onNoteUpdated?: (notePath: string, updates: Partial<Note>) => void;
   onDelete?: (note: Note, vault: ObsidianVault) => void;
 }) {
-  const { note, vault, pref, onNoteUpdated, onDelete } = props;
+  const { result, vault, pref, onNoteUpdated, onDelete } = props;
+  const { note, match } = result;
 
   const [isBookmarked, setIsBookmarked] = useState(note.bookmarked);
-  const isSelected = props.selectedItemId === note.path;
-  const { noteContent, isLoading } = useNoteContent(note, { enabled: isSelected });
-
-  const noteHasBeenMoved = !fs.existsSync(note.path);
-  if (noteHasBeenMoved) {
-    invalidateNotesCache(vault.path);
-  }
+  const isSelected = props.selectedItemId === result.id;
+  const fileSize = note.fileSize;
+  const isOversized = fileSize !== undefined && fileSize > MAX_SEARCH_FILE_SIZE_BYTES;
+  const shouldBypassInlineContent = match === undefined && (fileSize === undefined || isOversized);
+  const shouldLoadNoteContent =
+    fileSize !== undefined && shouldLoadNoteContentForList(isSelected, match !== undefined, fileSize);
+  const { noteContent, isLoading } = useNoteContent(note, { enabled: shouldLoadNoteContent });
 
   // Create a modified note object with the current bookmark state
   const updatedNote = { ...note, bookmarked: isBookmarked };
 
-  if (noteHasBeenMoved) return null;
-
   return (
     <List.Item
       title={updatedNote.title}
-      id={updatedNote.path}
+      subtitle={match?.context.find((item) => item.line === match.line)?.text.trim()}
+      id={result.id}
       accessories={[
+        ...(match ? [{ text: `L${match.line}:${match.column}` }] : []),
         {
           icon: isBookmarked
             ? {
@@ -86,10 +113,16 @@ export function NoteListItem(props: {
         },
       ]}
       detail={
-        noteContent && (
+        shouldBypassInlineContent ? undefined : (
           <List.Item.Detail
             isLoading={isLoading}
-            markdown={ObsidianUtils.renderCallouts(filterContent(noteContent))}
+            markdown={
+              match
+                ? matchPreview(note, vault, match)
+                : noteContent
+                ? ObsidianUtils.renderCallouts(filterContent(noteContent))
+                : ""
+            }
             metadata={
               noteContent && pref.showMetadata ? (
                 <NoteListItemMetadata note={note} content={noteContent} vault={vault} />
@@ -99,27 +132,29 @@ export function NoteListItem(props: {
         )
       }
       actions={
-        noteContent && (
-          <ActionPanel>
-            <OpenNoteActions note={{ content: noteContent, ...updatedNote }} vault={vault} />
-            <NoteActions
-              note={{ content: noteContent, ...updatedNote }}
-              vault={vault}
-              onNoteAction={(actionType) => {
-                switch (actionType) {
-                  case "bookmark":
-                    setIsBookmarked(true);
-                    break;
-                  case "unbookmark":
-                    setIsBookmarked(false);
-                    break;
-                }
-              }}
-              onNoteUpdated={onNoteUpdated}
-              onDelete={onDelete}
-            />
-          </ActionPanel>
-        )
+        <ActionPanel>
+          {shouldBypassInlineContent ? (
+            <OpenPathInObsidianAction path={updatedNote.path} />
+          ) : (
+            <OpenNoteActions note={updatedNote} vault={vault} match={match} />
+          )}
+          <NoteActions
+            note={noteContent ? { content: noteContent, ...updatedNote } : updatedNote}
+            vault={vault}
+            onNoteAction={(actionType) => {
+              switch (actionType) {
+                case "bookmark":
+                  setIsBookmarked(true);
+                  break;
+                case "unbookmark":
+                  setIsBookmarked(false);
+                  break;
+              }
+            }}
+            onNoteUpdated={onNoteUpdated}
+            onDelete={onDelete}
+          />
+        </ActionPanel>
       }
     />
   );

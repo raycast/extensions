@@ -1,6 +1,6 @@
 import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
-import { getInstagramMediaURLByGraphQL, handleDownload, mediaExtensionAndId, showErrorToast } from "./download-media";
+import { getInstagramMediaURL, handleDownload, mediaExtensionAndId, showErrorToast } from "./download-media";
 
 export default async function Command({
   arguments: { instagramUrl },
@@ -25,13 +25,14 @@ export default async function Command({
     }
 
     const shortcode = pathParts[1];
+    const mediaType = pathParts[0] === "p" ? "post" : "reel";
 
     const fetchToast = await showToast({
       title: "Fetching Media",
       style: Toast.Style.Animated,
     });
 
-    const instagramMedias = await getInstagramMediaURLByGraphQL(shortcode, fetchToast, instagramUrl);
+    const instagramMedias = await getInstagramMediaURL(shortcode, fetchToast, instagramUrl, mediaType);
     if (!instagramMedias) {
       // Helper already showed a failure toast.
       return;
