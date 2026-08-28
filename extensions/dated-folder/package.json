@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dated-folder",
+  "title": "Dated Folder",
+  "description": "Create a folder named after today's date and open it in your terminal",
+  "icon": "command-icon.png",
+  "author": "fhf1121",
+  "categories": ["Productivity", "Developer Tools"],
+  "keywords": ["folder", "date", "today", "terminal", "scratch", "workspace"],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-dated-folder",
+      "title": "Create Dated Folder",
+      "subtitle": "Dated Folder",
+      "description": "Create a folder named after today's date inside the configured parent folder and open it in a terminal",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "parentDir",
+      "title": "Parent Folder",
+      "description": "Where dated folders are created. Defaults to a \"temp\" folder on your Desktop when left empty.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "terminal",
+      "title": "Terminal",
+      "description": "App used to open the new folder. Follows the system default terminal when left empty.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "dateFormat",
+      "title": "Folder Name Format",
+      "description": "Tokens: yyyy, MM, dd, HH, mm, ss. Use / to create nested folders, e.g. yyyy/MM/dd.",
+      "type": "textfield",
+      "default": "yyyy-MM-dd",
+      "placeholder": "yyyy-MM-dd",
+      "required": false
+    },
+    {
+      "name": "revealInFinder",
+      "title": "Reveal",
+      "description": "Also reveal the new folder in Finder after opening it in the terminal.",
+      "label": "Reveal the folder in Finder",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.1.0",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.4.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
