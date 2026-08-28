@@ -37,7 +37,7 @@ export function urlForPreferredMethod(url: string, open_in?: Preferences["open_i
   // Create a deep link by replacing the scheme, keeping the rest of the URL
   // (host, path, query) unchanged.  This is the approach documented by Notion:
   // https://thomasjfrank.com/how-to-share-notion-links-that-open-directly-in-the-app/
-  if (/^https:\/\/(www\.)?notion\.so\//i.test(url)) {
+  if (/^https:\/\/([a-z0-9-]+\.)?notion\.(so|com)\//i.test(url)) {
     return url.replace(/^https:\/\//i, "notion://");
   }
   return url;
