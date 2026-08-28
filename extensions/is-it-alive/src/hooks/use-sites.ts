@@ -16,6 +16,17 @@ function createId(): string {
   return randomUUID();
 }
 
+function toMonitoredSite(input: SiteInput): MonitoredSite {
+  return {
+    id: createId(),
+    name: input.name,
+    url: input.url,
+    provider: input.provider,
+    monitoredRegions: input.monitoredRegions,
+    createdAt: new Date().toISOString(),
+  };
+}
+
 export function useSites() {
   const {
     value: sites,
@@ -23,21 +34,25 @@ export function useSites() {
     isLoading,
   } = useLocalStorage<MonitoredSite[]>(STORAGE_KEY, []);
 
-  const addSite = useCallback(
-    async (input: SiteInput) => {
-      const next: MonitoredSite = {
-        id: createId(),
-        name: input.name,
-        url: input.url,
-        provider: input.provider,
-        monitoredRegions: input.monitoredRegions,
-        createdAt: new Date().toISOString(),
-      };
+  const addSites = useCallback(
+    async (inputs: SiteInput[]) => {
+      if (inputs.length === 0) {
+        return [];
+      }
 
-      await setSites([...(sites ?? []), next]);
+      const next = inputs.map(toMonitoredSite);
+      await setSites([...(sites ?? []), ...next]);
       return next;
     },
     [setSites, sites],
+  );
+
+  const addSite = useCallback(
+    async (input: SiteInput) => {
+      const [next] = await addSites([input]);
+      return next;
+    },
+    [addSites],
   );
 
   const updateSite = useCallback(
@@ -70,6 +85,7 @@ export function useSites() {
     sites: sites ?? [],
     isLoading,
     addSite,
+    addSites,
     updateSite,
     deleteSite,
   };
