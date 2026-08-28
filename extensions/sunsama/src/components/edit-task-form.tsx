@@ -84,7 +84,7 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
 
       // A task's estimate is derived from its subtasks whenever they carry one,
       // and the server rejects a task-level estimate until those are cleared.
-      const blockingSubtasks = saved.current.subtasksWithTime;
+      const blockingSubtasks = [...saved.current.subtasksWithTime];
       if (
         newEstimate !== undefined &&
         newEstimate !== saved.current.timeEstimate
@@ -103,18 +103,30 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
           if (!ok) return;
         }
         // Added as individual steps because each clears one subtask and
-        // persists on its own; only the last sets the task's own estimate.
-        const steps = plannedTimeSteps(task.id, newEstimate, blockingSubtasks);
-        steps.forEach((run, i) => {
-          const isEstimate = i === steps.length - 1;
+        // persists on its own; the step without `clears` sets the estimate.
+        for (const step of plannedTimeSteps(
+          task.id,
+          newEstimate,
+          blockingSubtasks,
+        )) {
           changes.push({
-            run,
+            run: step.run,
             commit: () => {
-              if (isEstimate) saved.current.timeEstimate = newEstimate;
-              else saved.current.subtasksWithTime = [];
+              // Record only the subtask this step cleared. Marking them all
+              // cleared would make a retry skip the ones that never ran, and
+              // the server rejects the estimate while any of them still has
+              // planned time.
+              if (step.clears) {
+                saved.current.subtasksWithTime =
+                  saved.current.subtasksWithTime.filter(
+                    (id) => id !== step.clears,
+                  );
+              } else {
+                saved.current.timeEstimate = newEstimate;
+              }
             },
           });
-        });
+        }
       }
 
       if (values.channel && values.channel !== saved.current.channel) {

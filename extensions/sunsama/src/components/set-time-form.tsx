@@ -70,7 +70,7 @@ export function SetTimeForm({
       // separately. Track them individually so a failure part-way through
       // still refreshes what landed.
       const steps = subtaskId
-        ? [() => setPlannedTime(taskId, minutes, subtaskId)]
+        ? [{ run: () => setPlannedTime(taskId, minutes, subtaskId) }]
         : plannedTimeSteps(taskId, minutes, clearSubtaskIds ?? []);
 
       setSaving(true);
@@ -84,7 +84,7 @@ export function SetTimeForm({
         async () => {
           try {
             for (const step of steps) {
-              await step();
+              await step.run();
               applied++;
             }
           } catch (error) {

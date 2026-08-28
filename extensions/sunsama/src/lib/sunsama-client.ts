@@ -418,11 +418,24 @@ export function plannedTimeSteps(
   taskId: string,
   minutes: number,
   subtaskIdsToClear: string[] = [],
-): Array<() => Promise<void>> {
+): PlannedTimeStep[] {
   return [
-    ...subtaskIdsToClear.map((id) => () => setPlannedTime(taskId, 0, id)),
-    () => setPlannedTime(taskId, minutes),
+    ...subtaskIdsToClear.map((id) => ({
+      run: () => setPlannedTime(taskId, 0, id),
+      clears: id,
+    })),
+    { run: () => setPlannedTime(taskId, minutes) },
   ];
+}
+
+/**
+ * One request in a planned-time update. `clears` names the subtask this step
+ * clears, so a caller tracking what has been applied can say which ones
+ * actually went through rather than inferring it from position.
+ */
+export interface PlannedTimeStep {
+  run: () => Promise<void>;
+  clears?: string;
 }
 
 /** Subtask ids that carry their own planned time (these block a task-level estimate). */
