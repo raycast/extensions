@@ -100,8 +100,11 @@ export function SetTimeForm({
       );
       setSaving(false);
 
+      // Refresh the list for whatever did land.
       if (applied > 0) onSaved();
-      if (ok || applied > 0) pop();
+      // Close only when everything saved, so a partial failure keeps the
+      // entered time on screen to retry rather than discarding it.
+      if (ok) pop();
     },
     initialValues: {
       value: currentMinutes > 0 ? String(currentMinutes) : "",

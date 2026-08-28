@@ -139,11 +139,12 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
       );
       setSubmitting(false);
 
-      // Anything that did land makes the list — and this form — stale.
+      // Refresh the list for whatever did land.
       if (applied > 0) onSaved();
-      // Stay open only when nothing was applied, so a retry starts from a
-      // form whose values still match the task.
-      if (ok || applied > 0) pop();
+      // Close only when everything saved. On a partial failure the form stays
+      // open with the values still in it, so the edit isn't lost and can be
+      // retried — re-sending a change that already applied is a no-op.
+      if (ok) pop();
     },
     initialValues: {
       title: task.title,
