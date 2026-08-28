@@ -12,13 +12,6 @@ import {
   resolveInside,
 } from "./lib";
 
-interface Preferences {
-  parentDir?: string;
-  terminal?: Application;
-  dateFormat?: string;
-  revealInFinder: boolean;
-}
-
 const DEFAULT_FORMAT = "yyyy-MM-dd";
 
 async function openTerminalMac(target: string, app?: Application): Promise<string> {
@@ -35,7 +28,7 @@ async function openTerminalMac(target: string, app?: Application): Promise<strin
 
 export default async function command() {
   try {
-    const prefs = getPreferenceValues<Preferences>();
+    const prefs = getPreferenceValues<Preferences.CreateDatedFolder>();
 
     const parent = prefs.parentDir?.trim() || (await defaultParentDir());
     const format = prefs.dateFormat?.trim() || DEFAULT_FORMAT;
