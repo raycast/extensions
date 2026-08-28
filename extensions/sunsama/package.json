@@ -105,6 +105,16 @@
       "icon": "extension-icon.png"
     }
   ],
+  "preferences": [
+    {
+      "name": "workspaceUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Workspace URL",
+      "placeholder": "https://app.sunsama.com/group/your-workspace",
+      "description": "Lets Open in Sunsama jump straight to a task. Copy it from the address bar while Sunsama is open. Without it, Open in Sunsama opens the app's home page."
+    }
+  ],
   "title": "Sunsama",
   "author": "artistro08",
   "platforms": [

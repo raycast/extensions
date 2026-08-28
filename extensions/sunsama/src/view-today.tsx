@@ -30,6 +30,7 @@ import { signOut } from "./lib/mcp";
 import { addDays, nextMonday, todayString, toDayString } from "./lib/date";
 import { reportError, runWithToast } from "./lib/errors";
 import { formatDuration, formatElapsed } from "./lib/time";
+import { taskWebUrl, workspaceSlug } from "./lib/urls";
 import { Task } from "./lib/types";
 import { EditTaskForm } from "./components/edit-task-form";
 import { AddSubtasksForm } from "./components/add-subtasks-form";
@@ -131,7 +132,9 @@ export default function ViewToday() {
     { onError: () => undefined },
   );
 
-  const { showCompleted } = getPreferenceValues<Preferences.ViewToday>();
+  const { showCompleted, workspaceUrl } =
+    getPreferenceValues<Preferences.ViewToday>();
+  const workspace = workspaceSlug(workspaceUrl);
   // getTasksForDay already returns Sunsama's day order; just optionally hide
   // completed tasks. `allIds` covers every task on the day — including ones
   // hidden from the list — and every reorder has to send that whole set.
@@ -390,13 +393,24 @@ export default function ViewToday() {
                 <EditTaskForm task={task} day={day} onSaved={revalidate} />
               }
             />
+            {/* Only shown when the workspace is known — the link can't be
+                built without it, and a Sunsama extension pointing at Sunsama's
+                home page isn't worth an action. */}
+            {workspace && (
+              <Action.OpenInBrowser
+                title="Open in Sunsama"
+                icon={Icon.CloudSun}
+                url={taskWebUrl(workspace, task.id)}
+                shortcut={Keyboard.Shortcut.Common.Open}
+              />
+            )}
             {task.integrationUrl && (
               <Action
                 title={integrationLabel(task.integrationService)}
                 icon={Icon.Link}
-                // Opening the linked item is what Common.Open is for, and it's
-                // the binding people already reach for.
-                shortcut={Keyboard.Shortcut.Common.Open}
+                // The task's own page takes Open; the linked item in another
+                // service is the "open with" of the pair.
+                shortcut={Keyboard.Shortcut.Common.OpenWith}
                 onAction={() =>
                   openIntegration(
                     task.integrationUrl as string,
