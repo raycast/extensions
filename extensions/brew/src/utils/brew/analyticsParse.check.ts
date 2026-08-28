@@ -89,13 +89,15 @@ function assertReproducesFileOrder(
   const countOf = (entry: { id: string }) => ranks.get(entry.id);
   const ids: { id: string }[] = items.map((i) => ({ id: (i.formula ?? i.cask) as string }));
 
+  // Drop the unparseable rows FIRST rather than skipping over them in the
+  // comparison. Skipping hides an inversion that straddles a dropped row:
+  // [100, malformed, 200] would skip both adjacent pairs and pass.
+  const retained = ids.filter((entry) => countOf(entry) !== undefined);
+
   const nonIncreasing = (sequence: { id: string }[], what: string) => {
     for (let i = 0; i < sequence.length - 1; i++) {
-      const a = countOf(sequence[i]);
-      const b = countOf(sequence[i + 1]);
-      if (a === undefined || b === undefined) {
-        continue; // a row parseRanks dropped
-      }
+      const a = countOf(sequence[i]) as number;
+      const b = countOf(sequence[i + 1]) as number;
       assert.ok(
         a >= b,
         `${label}: ${what} is not ordered by count — ${sequence[i].id} (${a}) before ${sequence[i + 1].id} (${b})`,
@@ -103,9 +105,12 @@ function assertReproducesFileOrder(
     }
   };
 
-  assert.ok(ids.length > 1000, `${label}: only ${ids.length} rows — assertion is too weak`);
-  nonIncreasing(ids, "the published file");
-  nonIncreasing([...ids].sort(byPopularity(ranks)), "our re-sort");
+  assert.ok(retained.length > 1000, `${label}: only ${retained.length} parsed rows — assertion is too weak`);
+  // The published file being non-increasing is the real claim — it is what
+  // makes `number` redundant. Re-sorting it is the weaker half by construction,
+  // but it catches a comparator that disagrees with its own key.
+  nonIncreasing(retained, "the published file");
+  nonIncreasing([...retained].sort(byPopularity(ranks)), "our re-sort");
 }
 
 /// Live API — the shape assumptions above, against the real thing

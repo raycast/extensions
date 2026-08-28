@@ -19,6 +19,7 @@ import {
   DownloadProgress,
   hasSearchCache,
   invalidateChunkedCacheMemory,
+  invalidatePopularityRanks,
   onIndexRefreshed,
   PopularityRanks,
 } from "../utils";
@@ -31,8 +32,8 @@ interface UseBrewSearchOptions {
   ranks?: PopularityRanks;
   /**
    * Called after Clear Cache has deleted the on-disk caches. The rank hook owns
-   * its own copy of the rankings, and invalidating the module-level promise
-   * alone would leave it serving data from files that no longer exist.
+   * its own copy of the rankings, so clearing the module-level cache alone would
+   * leave the hook serving data parsed from files that no longer exist.
    */
   onCacheCleared?: () => void;
 }
@@ -254,8 +255,9 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
                   // chunked cache from scratch rather than reusing entries
                   // that point at the chunk files we just deleted.
                   invalidateChunkedCacheMemory();
-                  // clearCache() removed the analytics files too; re-run the
-                  // rankings load so it downloads them again.
+                  // clearCache() removed the analytics files too: drop the
+                  // parsed copy, then re-run the load so it downloads again.
+                  invalidatePopularityRanks();
                   onCacheCleared?.();
                   await mutate();
                 },

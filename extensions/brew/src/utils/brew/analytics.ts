@@ -55,21 +55,41 @@ async function loadRanks(
 }
 
 /**
+ * Ranks already parsed in this process. Caching the RESULT, not the in-flight
+ * promise: a shared promise also shares one abort signal, so whichever consumer
+ * started the load owned cancellation for everyone who joined it. Only
+ * successes are stored, so an aborted or failed load leaves nothing behind to
+ * retry around.
+ */
+let cachedRanks: PopularityRanks | undefined;
+
+/**
+ * Drop the cached rankings so the next fetch re-reads from disk.
+ *
+ * Required after clearCache(): it deletes the files these were parsed from,
+ * and without this the process would keep serving rankings that no longer have
+ * a backing cache.
+ */
+export function invalidatePopularityRanks(): void {
+  cachedRanks = undefined;
+}
+
+/**
  * Fetch (and disk-cache) the bulk install rankings for formulae and casks.
  *
- * Deliberately NOT memoized in a module-level promise. There is one consumer
- * (usePopularityRanks, which runs once per mount), so a shared promise bought
- * nothing — and it meant a shared abort signal: whoever started the fetch owned
- * cancellation for everyone who joined it, so one consumer aborting rejected
- * another's load with an AbortError it never asked for.
- *
- * Re-reading the cached files costs a disk read and a parse; the expensive part
- * (the download) is already avoided by downloadRemoteToCache's freshness check.
+ * `usePromise` re-runs its callback on mount, on every `execute` transition
+ * (⇧⌘P toggling), and on revalidate — so without the in-process cache, each
+ * toggle re-reads and re-parses ~2.6MB of JSON. The download itself is already
+ * avoided by downloadRemoteToCache's freshness check; this avoids the parse.
  */
 export function fetchPopularityRanks(
   onProgress?: DownloadProgressCallback,
   signal?: AbortSignal,
 ): Promise<PopularityRanks> {
+  if (cachedRanks) {
+    return Promise.resolve(cachedRanks);
+  }
+
   return Promise.all([
     loadRanks(formulaRanksRemote, onProgress, signal),
     loadRanks(caskRanksRemote, onProgress, signal),
@@ -79,6 +99,7 @@ export function fetchPopularityRanks(
       formulae: formulae.size,
       casks: casks.size,
     });
-    return { formulae, casks };
+    cachedRanks = { formulae, casks };
+    return cachedRanks;
   });
 }

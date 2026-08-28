@@ -206,7 +206,14 @@ export async function downloadRemoteToCache(
     complete: false,
   });
 
-  const writeStream = fs.createWriteStream(cachePath);
+  // Stream to a sibling temp file and rename into place. The rename is atomic,
+  // so a reader never observes a half-written cache file — and two concurrent
+  // downloads of the same URL each write their own temp rather than
+  // interleaving on one descriptor. Without this, an aborted download unlinks
+  // the destination out from under a download that has already started, and the
+  // freshness check (size > 0 + mtime) accepts whatever partial file is left.
+  const partialPath = `${cachePath}.partial`;
+  const writeStream = fs.createWriteStream(partialPath);
 
   try {
     if (onProgress) {
@@ -244,7 +251,7 @@ export async function downloadRemoteToCache(
   } catch (streamError) {
     writeStream.destroy();
     try {
-      fs.unlinkSync(cachePath);
+      fs.unlinkSync(partialPath);
     } catch {
       // Ignore cleanup errors
     }
@@ -259,11 +266,14 @@ export async function downloadRemoteToCache(
   // a progress callback is supplied, so it can't be trusted here.
   const bytesWritten = writeStream.bytesWritten;
   if (totalBytes > 0 && bytesWritten < totalBytes) {
-    await unlink(cachePath).catch(() => {});
+    await unlink(partialPath).catch(() => {});
     throw new NetworkError(`Truncated download: got ${bytesWritten} of ${totalBytes} bytes`, {
       url,
     });
   }
+
+  // Only now does the file become visible at its real path.
+  await rename(partialPath, cachePath);
 
   onProgress?.({
     url,
