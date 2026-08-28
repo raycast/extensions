@@ -37,7 +37,7 @@ type Input = {
  * specific doc or data entry.
  */
 export default async function tool(input: Input) {
-  const { dovetailApiToken } = getPreferenceValues<{ dovetailApiToken: string }>();
+  const { dovetailApiToken } = getPreferenceValues<Preferences>();
 
   const response = await fetch(BaseUrl + "/v2/search", {
     method: "POST",

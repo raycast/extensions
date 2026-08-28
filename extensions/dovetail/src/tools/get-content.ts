@@ -19,7 +19,7 @@ type Input = {
  * or summarized. Find ids first with the `search-workspace` tool.
  */
 export default async function tool(input: Input) {
-  const { dovetailApiToken } = getPreferenceValues<{ dovetailApiToken: string }>();
+  const { dovetailApiToken } = getPreferenceValues<Preferences>();
   const path = input.kind === "doc" ? "docs" : "data";
 
   const response = await fetch(`${BaseUrl}/v1/${path}/${input.id}/export/markdown`, {

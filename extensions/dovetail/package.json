@@ -102,6 +102,12 @@
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },
+  "overrides": {
+    "esbuild": "^0.28.1",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^9.0.9"
+    }
+  },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",

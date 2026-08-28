@@ -27,7 +27,7 @@ type Input = {
  * when the user asks for Dovetail's own "Magic Summarize" output.
  */
 export default async function tool(input: Input) {
-  const { dovetailApiToken } = getPreferenceValues<{ dovetailApiToken: string }>();
+  const { dovetailApiToken } = getPreferenceValues<Preferences>();
 
   if (!input.highlightIds?.length && !input.dataIds?.length && !input.docIds?.length && !input.tagIds?.length) {
     throw new Error("Provide at least one highlight, data, doc, or tag id to summarize.");
