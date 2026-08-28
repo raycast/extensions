@@ -11,11 +11,20 @@ import {
 } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { createTask, getDefaultChannel } from "./lib/sunsama-client";
+import {
+  createTask,
+  getDefaultChannel,
+  getRecentChannel,
+  rememberLastChannel,
+} from "./lib/sunsama-client";
 import { toDayString } from "./lib/date";
 import { reportError } from "./lib/errors";
 import { parseDuration, parseSubtasks } from "./lib/time";
-import { ChannelDropdown } from "./components/channel-dropdown";
+import {
+  ChannelDropdown,
+  RefreshChannelsAction,
+  useChannels,
+} from "./components/channel-dropdown";
 
 interface FormValues {
   task: string;
@@ -33,9 +42,22 @@ const TIME_HINT = "1h 30m · 90 · 1:15 · 45m";
 
 export default function AddTask() {
   const [submitting, setSubmitting] = useState(false);
-  const { defaultPosition } = getPreferenceValues<Preferences.AddTask>();
+  const { defaultPosition, rememberChannelMinutes } =
+    getPreferenceValues<Preferences.AddTask>();
+  const rememberFor = Number(rememberChannelMinutes) || 0;
+  const channels = useChannels();
 
-  const { data: defaultChannel } = useCachedPromise(getDefaultChannel, []);
+  // The channel to start on: the one just used, while it's still recent, and
+  // otherwise the saved default. Resolved together so the field is only set
+  // once and doesn't visibly change under the cursor.
+  const { data: startingChannel } = useCachedPromise(
+    async (minutes: number) => {
+      const recent = await getRecentChannel(minutes);
+      if (recent) return recent;
+      return (await getDefaultChannel())?.name ?? "";
+    },
+    [rememberFor],
+  );
 
   // useForm keeps the fields controlled, which is what lets the saved default
   // channel be applied below once it resolves — `defaultValue` is only read
@@ -46,7 +68,7 @@ export default function AddTask() {
       task: "",
       notes: "",
       day: new Date(),
-      channel: defaultChannel?.name ?? "",
+      channel: startingChannel ?? "",
       position: defaultPosition,
       timeEstimate: "",
       subtasks: "",
@@ -61,10 +83,10 @@ export default function AddTask() {
     },
   });
 
-  // On the very first run (no cache yet), apply the default once it resolves.
+  // On the very first run (no cache yet), apply it once it resolves.
   useEffect(() => {
-    if (defaultChannel?.name) setValue("channel", defaultChannel.name);
-  }, [defaultChannel, setValue]);
+    if (startingChannel) setValue("channel", startingChannel);
+  }, [startingChannel, setValue]);
 
   async function submit(values: FormValues) {
     const entry = values.task.trim();
@@ -106,6 +128,9 @@ export default function AddTask() {
         timeEstimate,
         subtasks: parseSubtasks(values.subtasks),
       });
+      // Recorded after the task lands, so the next one can start here while
+      // it's still recent.
+      await rememberLastChannel(values.channel);
       await toast.hide();
       // Close and go back to root. Without an explicit type this follows the
       // user's "Pop to Root Search" preference, which can leave the filled-in
@@ -132,6 +157,7 @@ export default function AddTask() {
             icon={Icon.Plus}
             onSubmit={handleSubmit}
           />
+          <RefreshChannelsAction channels={channels} />
         </ActionPanel>
       }
     >
@@ -155,7 +181,8 @@ export default function AddTask() {
       <Form.Separator />
       <ChannelDropdown
         {...itemProps.channel}
-        ensureName={defaultChannel?.name}
+        channels={channels}
+        ensureName={startingChannel || undefined}
       />
       <Form.Dropdown {...itemProps.position} title="Position">
         <Form.Dropdown.Item

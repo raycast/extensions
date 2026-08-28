@@ -22,7 +22,11 @@ import { runWithToast } from "../lib/errors";
 import { toDayString } from "../lib/date";
 import { parseDuration } from "../lib/time";
 import { Task } from "../lib/types";
-import { ChannelDropdown } from "./channel-dropdown";
+import {
+  ChannelDropdown,
+  RefreshChannelsAction,
+  useChannels,
+} from "./channel-dropdown";
 
 const TIME_HINT = "1h 30m · 90 · 1:15 · 45m";
 
@@ -46,6 +50,7 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
   const [submitting, setSubmitting] = useState(false);
 
   const currentChannel = task.channelName ?? "";
+  const channels = useChannels();
 
   // What the server is believed to hold. Each field is saved by its own
   // request, so a failure part-way through leaves some already applied; this
@@ -231,6 +236,7 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
             icon={Icon.Check}
             onSubmit={handleSubmit}
           />
+          <RefreshChannelsAction channels={channels} />
         </ActionPanel>
       }
     >
@@ -252,6 +258,7 @@ export function EditTaskForm({ task, day, onSaved }: Props) {
       />
       <ChannelDropdown
         {...itemProps.channel}
+        channels={channels}
         ensureName={currentChannel}
         // A task already in a channel can't be taken out of one, so don't
         // offer an option that would silently do nothing.

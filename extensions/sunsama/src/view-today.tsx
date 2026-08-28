@@ -16,6 +16,7 @@ import {
   completeTask,
   DayTasks,
   deleteTask,
+  forgetChannels,
   getActiveTimer,
   getTasksForDay,
   withActiveTimer,
@@ -296,7 +297,12 @@ export default function ViewToday() {
         success: "Signed out",
         failure: "Failed to sign out",
       },
-      signOut,
+      // Drop the stored channels too, so signing in as someone else doesn't
+      // inherit this account's list.
+      async () => {
+        await signOut();
+        await forgetChannels();
+      },
     );
   }
 
@@ -358,7 +364,7 @@ export default function ViewToday() {
               <Action
                 title="Mark as Completed"
                 icon={Icon.Check}
-                shortcut={{ modifiers: ["ctrl"], key: "enter" }}
+                shortcut={xShortcut("enter")}
                 onAction={() => onComplete(task)}
               />
             )}
@@ -388,7 +394,9 @@ export default function ViewToday() {
               <Action
                 title={integrationLabel(task.integrationService)}
                 icon={Icon.Link}
-                shortcut={xShortcut("i", "shift")}
+                // Opening the linked item is what Common.Open is for, and it's
+                // the binding people already reach for.
+                shortcut={Keyboard.Shortcut.Common.Open}
                 onAction={() =>
                   openIntegration(
                     task.integrationUrl as string,

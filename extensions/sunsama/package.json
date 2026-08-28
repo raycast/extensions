@@ -44,6 +44,21 @@
       ],
       "preferences": [
         {
+          "name": "rememberChannelMinutes",
+          "type": "dropdown",
+          "required": false,
+          "default": "0",
+          "title": "Reuse Last Channel",
+          "description": "Preselect the channel you last created a task in, if you used it recently. Falls back to the default channel after that.",
+          "data": [
+            { "title": "Off", "value": "0" },
+            { "title": "For 3 minutes", "value": "3" },
+            { "title": "For 5 minutes", "value": "5" },
+            { "title": "For 15 minutes", "value": "15" },
+            { "title": "For 1 hour", "value": "60" }
+          ]
+        },
+        {
           "name": "defaultPosition",
           "type": "dropdown",
           "required": false,

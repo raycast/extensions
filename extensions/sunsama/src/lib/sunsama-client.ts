@@ -61,59 +61,88 @@ async function searchChannelsRaw(
   return data.channels ?? [];
 }
 
-// Deliberately unalike, because the server ranks semantically rather than by
-// substring and caps each answer at 25. Seeds drawn from different vocabularies
-// surface different corners of a large category; together they cover far more
-// of it than any single query does.
-const CHANNEL_SEEDS = [
-  "project client website company brand",
-  "personal home admin life chores",
-  "media health property law manufacturing ministry",
-];
+const LETTERS = "abcdefghijklmnopqrstuvwxyz".split("");
 
-// Themed seeds pull channels whose names carry meaning, which leaves out the
-// ones named after a bare domain or an unrelated word. A single letter matches
-// nothing in particular, so the server falls back to a broad spread and those
-// surface too. Run unscoped, since the spread is the point.
-const BROAD_SEEDS = ["a", " "];
+/** Run tasks a few at a time so a full sweep doesn't fire dozens at once. */
+async function inBatches<T>(
+  tasks: Array<() => Promise<T[]>>,
+  size = 6,
+): Promise<T[][]> {
+  const out: T[][] = [];
+  for (let i = 0; i < tasks.length; i += size) {
+    // A single failed lookup shouldn't empty the picker.
+    const batch = tasks.slice(i, i + size).map((run) => run().catch(() => []));
+    out.push(...(await Promise.all(batch)));
+  }
+  return out;
+}
 
 /**
- * Every channel we can see, sorted by name.
+ * Every channel and category, sorted by name.
  *
- * The MCP server has no list-all endpoint — only a semantic search capped at 25
- * results — so the list is assembled by asking each category for its channels
- * with a couple of different seed queries and merging what comes back. A
- * category with fewer than 25 channels comes back complete; a larger one is
- * best-effort. That's why the pickers keep an escape hatch for a channel that
- * isn't in the list.
+ * There is no list-all endpoint — `search_channels` is the only way in, it
+ * ranks semantically, and it caps every answer at 25. No single query can
+ * return a longer list, so this sweeps one query per letter: each returns a
+ * different 25-item window, and merging them covers the whole set. Categories
+ * are swept separately, and included in the result — Sunsama lets a task be
+ * assigned straight to one ("Work", "My Stuff"), which is verified behaviour.
  */
-export async function getAllChannels(): Promise<Channel[]> {
-  const categories = (
-    await searchChannelsRaw("category", { isCategory: true })
-  ).filter((c) => c.isCategory);
+async function sweepAllChannels(): Promise<Channel[]> {
+  const categories = await searchChannelsRaw("category", { isCategory: true });
 
-  // Never send `isCategory: false` — pairing it with categoryStreamId makes the
-  // server return an empty set for a query that otherwise matches fine.
-  // Categories are dropped from the merged result below instead.
-  const lookups = [
+  // Never send `isCategory: false` — pairing it with categoryStreamId makes
+  // the server return an empty set for a query that otherwise matches fine.
+  const results = await inBatches([
+    // Unscoped, so each window can span every category.
+    ...LETTERS.map((letter) => () => searchChannelsRaw(letter)),
+    // Scoped as well, so a large category still gets windows of its own
+    // rather than competing with the rest for the same 25 slots.
     ...categories.flatMap((c) =>
-      CHANNEL_SEEDS.map((seed) =>
-        searchChannelsRaw(seed, { categoryStreamId: c.id }),
+      LETTERS.filter((_, i) => i % 3 === 0).map(
+        (letter) => () => searchChannelsRaw(letter, { categoryStreamId: c.id }),
       ),
     ),
-    ...BROAD_SEEDS.map((seed) => searchChannelsRaw(seed)),
-  ];
-
-  // One failed lookup shouldn't empty the picker.
-  const results = await Promise.all(lookups.map((p) => p.catch(() => [])));
+  ]);
 
   const byId = new Map<string, Channel>();
-  for (const list of results) {
-    for (const channel of list) {
-      if (!channel.isCategory) byId.set(channel.id, channel);
-    }
+  for (const channel of [...categories, ...results.flat()]) {
+    byId.set(channel.id, channel);
   }
   return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+const CHANNELS_KEY = "sunsama-channels";
+
+/**
+ * The channel list.
+ *
+ * Building it costs dozens of requests, and channels rarely change, so the
+ * sweep runs once and the result is stored. Every later read comes from
+ * storage until `refreshChannels` is called.
+ */
+export async function loadChannels(): Promise<Channel[]> {
+  const raw = await LocalStorage.getItem<string>(CHANNELS_KEY);
+  if (raw) {
+    try {
+      const stored = JSON.parse(raw) as Channel[];
+      if (stored.length > 0) return stored;
+    } catch {
+      // Unreadable — sweep again below.
+    }
+  }
+  return refreshChannels();
+}
+
+/** Re-sweep the server and replace the stored list. */
+export async function refreshChannels(): Promise<Channel[]> {
+  const channels = await sweepAllChannels();
+  await LocalStorage.setItem(CHANNELS_KEY, JSON.stringify(channels));
+  return channels;
+}
+
+/** Drop the stored list, so the next read sweeps again. */
+export async function forgetChannels(): Promise<void> {
+  await LocalStorage.removeItem(CHANNELS_KEY);
 }
 
 const DEFAULT_CHANNEL_KEY = "sunsama-default-channel";
@@ -146,6 +175,36 @@ export async function setDefaultChannel(
   if (channel)
     await LocalStorage.setItem(DEFAULT_CHANNEL_KEY, JSON.stringify(channel));
   else await LocalStorage.removeItem(DEFAULT_CHANNEL_KEY);
+}
+
+const LAST_CHANNEL_KEY = "sunsama-last-channel";
+
+/** Record the channel a task was just created in, with when it happened. */
+export async function rememberLastChannel(name: string): Promise<void> {
+  if (!name) return;
+  await LocalStorage.setItem(
+    LAST_CHANNEL_KEY,
+    JSON.stringify({ name, at: Date.now() }),
+  );
+}
+
+/**
+ * The channel last used to create a task, if that was within `withinMinutes`.
+ * A window of 0 disables it entirely.
+ */
+export async function getRecentChannel(
+  withinMinutes: number,
+): Promise<string | null> {
+  if (withinMinutes <= 0) return null;
+  const raw = await LocalStorage.getItem<string>(LAST_CHANNEL_KEY);
+  if (!raw) return null;
+  try {
+    const { name, at } = JSON.parse(raw) as { name: string; at: number };
+    const freshFor = withinMinutes * 60_000;
+    return name && Date.now() - at < freshFor ? name : null;
+  } catch {
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------

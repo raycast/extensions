@@ -8,24 +8,19 @@ import {
   showHUD,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { getDefaultChannel, setDefaultChannel } from "./lib/sunsama-client";
 import {
-  getAllChannels,
-  getDefaultChannel,
-  setDefaultChannel,
-} from "./lib/sunsama-client";
+  RefreshChannelsAction,
+  useChannels,
+} from "./components/channel-dropdown";
 import { reportError } from "./lib/errors";
 
 export default function SetDefaultChannel() {
-  // The whole list is loaded up front so Raycast does the filtering; searching
-  // the server per keystroke ranks semantically and buries the exact match.
-  const { data, isLoading } = useCachedPromise(getAllChannels, [], {
-    onError: (error) => reportError(error, "Failed to load channels"),
-  });
-  const channels = data ?? [];
-  // `useCachedPromise` hands back cached data on the first render while it
-  // revalidates, so `data` being set — not `isLoading` being false — is the
-  // signal that there's a list to render.
-  const ready = data !== undefined || !isLoading;
+  // The whole list is handed to Raycast so Raycast does the filtering;
+  // searching the server per keystroke ranks semantically and buries the
+  // exact match.
+  const channels = useChannels();
+  const { list, isLoading, ready } = channels;
   const { data: current } = useCachedPromise(getDefaultChannel, []);
 
   async function choose(id: string, name: string) {
@@ -53,6 +48,7 @@ export default function SetDefaultChannel() {
           icon={Icon.Check}
           onAction={() => choose(id, name)}
         />
+        <RefreshChannelsAction channels={channels} />
       </ActionPanel>
     );
   }
@@ -76,11 +72,12 @@ export default function SetDefaultChannel() {
           actions={itemActions("", "No channel")}
         />
       )}
-      {channels.map((ch) => (
+      {list.map((ch) => (
         <List.Item
           key={ch.id}
           title={ch.name}
-          subtitle={ch.categoryName ?? undefined}
+          // Categories hold tasks of their own, so they're listed too.
+          subtitle={ch.isCategory ? "Category" : (ch.categoryName ?? undefined)}
           accessories={selected(ch.id)}
           actions={itemActions(ch.id, ch.name)}
         />

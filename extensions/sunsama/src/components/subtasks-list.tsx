@@ -179,7 +179,7 @@ export function SubtasksList({ task, onChanged }: Props) {
                       : "Mark as Completed"
                   }
                   icon={subtask.completed ? Icon.Circle : Icon.Check}
-                  shortcut={{ modifiers: ["ctrl"], key: "enter" }}
+                  shortcut={xShortcut("enter")}
                   onAction={() => onToggle(subtask)}
                 />
               </ActionPanel.Section>
