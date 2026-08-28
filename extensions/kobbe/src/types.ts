@@ -95,5 +95,6 @@ export type SetupHealthResponse = {
 
 export type KobbeLiveSite = {
   site: KobbeSite;
-  online: number;
+  /** Visitors online now, or null when the overview request for this site failed. */
+  online: number | null;
 };

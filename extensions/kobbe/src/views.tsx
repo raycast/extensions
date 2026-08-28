@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Image, List, Keyboard } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -89,7 +89,7 @@ function TopPageActions(props: { siteId: string; range: TimeRange; path: string;
       <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={props.onRefresh}
       />
     </ActionPanel>
@@ -107,6 +107,17 @@ export function SiteActions(props: {
   return (
     <ActionPanel>
       <ActionPanel.Section>
+        <Action.OpenInBrowser title="Open Dashboard" url={dashboardUrl(props.site.id, range)} />
+        <Action.Push
+          title="View Top Pages"
+          icon={Icon.Document}
+          target={<TopPagesList site={props.site} range={range} />}
+        />
+        <Action.Push
+          title="View Revenue"
+          icon={Icon.Coins}
+          target={<RevenueDetail site={props.site} range={range} />}
+        />
         {props.hideOverview ? null : (
           <Action.Push
             title="View Overview"
@@ -114,18 +125,7 @@ export function SiteActions(props: {
             target={<SiteOverviewDetail site={props.site} range={range} />}
           />
         )}
-        <Action.OpenInBrowser title="Open Dashboard" url={dashboardUrl(props.site.id, range)} />
-        <Action.Push
-          title="View Top Pages"
-          icon={Icon.Document}
-          target={<TopPagesList site={props.site} range={range} />}
-        />
         <Action.Push title="View Sources" icon={Icon.Globe} target={<SourcesList site={props.site} range={range} />} />
-        <Action.Push
-          title="View Revenue"
-          icon={Icon.Coins}
-          target={<RevenueDetail site={props.site} range={range} />}
-        />
         <Action.Push title="View Setup Health" icon={Icon.Heartbeat} target={<SetupHealthList site={props.site} />} />
       </ActionPanel.Section>
       <ActionPanel.Section>
@@ -133,7 +133,7 @@ export function SiteActions(props: {
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={props.onRefresh}
           />
         ) : null}
@@ -398,7 +398,7 @@ export function SourcesList(props: { site: KobbeSite; range?: TimeRange }) {
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={sources.revalidate}
                 />
               </ActionPanel>
@@ -572,7 +572,7 @@ export function RevenueDetail(props: { site: KobbeSite; range?: TimeRange }) {
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={revenue.revalidate}
             />
           </ActionPanel.Section>

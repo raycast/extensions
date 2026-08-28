@@ -117,7 +117,8 @@ export async function getLiveVisitors(): Promise<KobbeLiveSite[]> {
         const response = await getOverview(site.id, "today");
         return { site, online: parseCompactNumber(response.overview.kpis.online) };
       } catch {
-        return { site, online: 0 };
+        // Keep the site visible but flag the count as unknown instead of a fake zero.
+        return { site, online: null };
       }
     }),
   );
