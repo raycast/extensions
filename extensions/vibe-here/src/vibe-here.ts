@@ -7,13 +7,6 @@ import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
 
-type Terminal = "warp" | "ghostty";
-
-interface Preferences {
-  terminal: Terminal;
-  vibePath: string;
-}
-
 function expandHome(path: string): string {
   if (path === "~") return homedir();
   if (path.startsWith("~/")) return `${homedir()}/${path.slice(2)}`;
@@ -71,7 +64,7 @@ function quoteAppleScript(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
-async function openInWarp(folder: string): Promise<void> {
+async function openInWarp(folder: string, vibeBin: string): Promise<void> {
   const uri = `warp://action/new_tab?path=${encodeURIComponent(folder)}`;
   await open(uri);
 
@@ -81,17 +74,17 @@ async function openInWarp(folder: string): Promise<void> {
     `tell application "Warp" to activate
      delay 0.55
      tell application "System Events"
-       keystroke "vibe"
+       keystroke quoted form of "${quoteAppleScript(vibeBin)}"
        key code 36
      end tell`,
   ]);
 }
 
-async function openInGhostty(folder: string): Promise<void> {
+async function openInGhostty(folder: string, vibeBin: string): Promise<void> {
   const ghostty = "/Applications/Ghostty.app/Contents/MacOS/ghostty";
   if (existsSync(ghostty)) {
     try {
-      await execFileAsync(ghostty, ["+new-window", `--working-directory=${folder}`, "-e", "vibe"]);
+      await execFileAsync(ghostty, ["+new-window", `--working-directory=${folder}`, "-e", vibeBin]);
       return;
     } catch {
       // fall through to AppleScript
@@ -106,8 +99,18 @@ async function openInGhostty(folder: string): Promise<void> {
      tell application "System Events"
        keystroke "t" using {command down}
        delay 0.2
-       keystroke "cd " & quoted form of "${quoteAppleScript(folder)}" & " && vibe"
+       keystroke "cd " & quoted form of "${quoteAppleScript(folder)}" & " && " & quoted form of "${quoteAppleScript(vibeBin)}"
        key code 36
+     end tell`,
+  ]);
+}
+
+async function openInAppleTerminal(folder: string, vibeBin: string): Promise<void> {
+  await execFileAsync("osascript", [
+    "-e",
+    `tell application "Terminal"
+       do script "cd " & quoted form of "${quoteAppleScript(folder)}" & " && " & quoted form of "${quoteAppleScript(vibeBin)}"
+       activate
      end tell`,
   ]);
 }
@@ -130,9 +133,11 @@ export default async function Command() {
     await closeMainWindow();
 
     if (terminal === "ghostty") {
-      await openInGhostty(folder);
+      await openInGhostty(folder, vibeBin);
+    } else if (terminal === "apple") {
+      await openInAppleTerminal(folder, vibeBin);
     } else {
-      await openInWarp(folder);
+      await openInWarp(folder, vibeBin);
     }
 
     await showHUD(`Vibe → ${folder}`);

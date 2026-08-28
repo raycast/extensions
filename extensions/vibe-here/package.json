@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vibe-here",
   "title": "Vibe Here",
-  "description": "Open Mistral Vibe in Warp or Ghostty in the selected folder — like Open in Warp.",
+  "description": "Open Mistral Vibe in Warp, Ghostty or Terminal in the selected folder.",
   "icon": "vibe-icon.png",
   "author": "sierakk",
   "categories": ["Developer Tools"],
@@ -11,7 +11,7 @@
     {
       "name": "vibe-here",
       "title": "Vibe Here",
-      "description": "Open Warp or Ghostty in the current/selected folder and start vibe",
+      "description": "Open Warp, Ghostty or Terminal in the current/selected folder and start vibe",
       "mode": "no-view",
       "icon": "vibe-icon.png"
     }
@@ -26,14 +26,15 @@
       "default": "warp",
       "data": [
         { "title": "Warp", "value": "warp" },
-        { "title": "Ghostty", "value": "ghostty" }
+        { "title": "Ghostty", "value": "ghostty" },
+        { "title": "Terminal", "value": "apple" }
       ]
     },
     {
       "name": "vibePath",
       "type": "textfield",
       "required": false,
-      "title": "vibe binary",
+      "title": "Vibe Binary",
       "description": "Path to the vibe CLI (Homebrew default is fine)",
       "default": "/opt/homebrew/bin/vibe",
       "placeholder": "/opt/homebrew/bin/vibe"
