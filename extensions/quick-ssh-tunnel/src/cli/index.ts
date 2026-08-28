@@ -4,10 +4,12 @@ import {
   formatConnection,
   formatSshCommand,
   validateConnection,
+  connectionKey,
 } from "../lib/core.js";
 import { getStatus, startTunnel, stopTunnel } from "../lib/process.js";
 import {
   cloneConnection,
+  findConnectionByKey,
   loadConnections,
   removeConnection,
   saveConnection,
@@ -91,7 +93,21 @@ async function connectionFormFlow(
     p.note(errors.join("\n"), "Validation Errors");
     return;
   }
-
+  const existing = findConnectionByKey(connectionKey(connection));
+  if (existing) connection.id = existing.id;
+  const conflict = loadConnections().find(
+    (item) =>
+      item.id !== connection.id &&
+      item.port === connection.port &&
+      getStatus(item) === "running",
+  );
+  if (conflict) {
+    p.note(
+      `Port ${connection.port} sedang dipakai oleh tunnel aktif (${conflict.sshTarget})`,
+      "Port Conflict Error",
+    );
+    return;
+  }
   const s = p.spinner();
   s.start("Connecting tunnel...");
   try {

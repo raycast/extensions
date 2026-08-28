@@ -1,7 +1,7 @@
 import { execFileSync, spawn } from "child_process";
 import fs from "fs";
 import { buildArgs } from "./core";
-import { readState, writeState } from "./store";
+import { readState, updateState } from "./store";
 import type { Connection } from "./store";
 
 export type Status = "running" | "stopped";
@@ -20,22 +20,47 @@ function pidAlive(pid: number): boolean {
   }
 }
 
-function pidMatches(pid: number, connection: Connection): boolean {
+function processStartTime(pid: number): number | undefined {
+  try {
+    const lstart = execFileSync(
+      "/bin/ps",
+      ["-p", String(pid), "-o", "lstart="],
+      { encoding: "utf8" },
+    ).trim();
+    if (!lstart) return undefined;
+    const time = Date.parse(lstart);
+    return Number.isNaN(time) ? undefined : time;
+  } catch {
+    return undefined;
+  }
+}
+
+function pidMatches(
+  pid: number,
+  connection: Connection,
+  startedAt?: number,
+): boolean {
   try {
     const command = execFileSync(
       "/bin/ps",
       ["-p", String(pid), "-o", "command="],
       { encoding: "utf8" },
     );
-    return (
-      command.includes("ssh") &&
-      command.includes(
-        connection.mode === "socks5"
-          ? `-D ${connection.port}`
-          : `${connection.port}:${connection.remoteHost}:${connection.port}`,
-      ) &&
-      command.includes(connection.sshTarget)
-    );
+    if (!command.includes("ssh")) return false;
+
+    const expectedArgs = buildArgs(connection);
+    for (const arg of expectedArgs) {
+      if (!command.includes(arg)) return false;
+    }
+
+    if (startedAt) {
+      const procStart = processStartTime(pid);
+      if (procStart && procStart < startedAt - 5000) {
+        return false;
+      }
+    }
+
+    return true;
   } catch {
     return false;
   }
@@ -48,15 +73,19 @@ export function processSpec(connection: Connection): string {
 }
 
 export function getStatus(connection: Connection): Status {
-  const state = readState();
-  const entry = state[connection.id];
-  if (entry && pidAlive(entry.pid) && pidMatches(entry.pid, connection))
-    return "running";
-  if (entry) {
-    delete state[connection.id];
-    writeState(state);
-  }
-  return "stopped";
+  return updateState((state) => {
+    const entry = state[connection.id];
+    if (
+      entry &&
+      pidAlive(entry.pid) &&
+      pidMatches(entry.pid, connection, entry.startedAt)
+    )
+      return "running";
+    if (entry) {
+      delete state[connection.id];
+    }
+    return "stopped";
+  });
 }
 
 export function getPid(connection: Connection): number | undefined {
@@ -68,6 +97,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export async function startTunnel(connection: Connection): Promise<void> {
   if (getStatus(connection) === "running") return;
 
+  const startTime = Date.now();
   const args = buildArgs(connection);
   const proc = spawn(SSH_BIN, args, {
     detached: true,
@@ -76,19 +106,19 @@ export async function startTunnel(connection: Connection): Promise<void> {
   proc.unref();
   if (!proc.pid) throw new Error("SSH gagal dijalankan");
 
-  const state = readState();
-  state[connection.id] = {
-    pid: proc.pid,
-    spec: processSpec(connection),
-    startedAt: Date.now(),
-  };
-  writeState(state);
+  updateState((state) => {
+    state[connection.id] = {
+      pid: proc.pid!,
+      spec: processSpec(connection),
+      startedAt: startTime,
+    };
+  });
 
   await sleep(1200);
   if (!pidAlive(proc.pid)) {
-    const nextState = readState();
-    delete nextState[connection.id];
-    writeState(nextState);
+    updateState((state) => {
+      delete state[connection.id];
+    });
     throw new Error(
       "SSH gagal terhubung. Pastikan SSH key/agent dan host benar.",
     );
@@ -96,11 +126,13 @@ export async function startTunnel(connection: Connection): Promise<void> {
 }
 
 export async function stopTunnel(connection: Connection): Promise<void> {
-  const state = readState();
-  const entry = state[connection.id];
+  const entry = readState()[connection.id];
   if (!entry) return;
 
-  if (pidAlive(entry.pid) && pidMatches(entry.pid, connection)) {
+  if (
+    pidAlive(entry.pid) &&
+    pidMatches(entry.pid, connection, entry.startedAt)
+  ) {
     try {
       process.kill(entry.pid, "SIGTERM");
     } catch {
@@ -108,12 +140,17 @@ export async function stopTunnel(connection: Connection): Promise<void> {
     }
     for (
       let i = 0;
-      i < 20 && pidAlive(entry.pid) && pidMatches(entry.pid, connection);
+      i < 20 &&
+      pidAlive(entry.pid) &&
+      pidMatches(entry.pid, connection, entry.startedAt);
       i += 1
     ) {
       await sleep(100);
     }
-    if (pidAlive(entry.pid) && pidMatches(entry.pid, connection)) {
+    if (
+      pidAlive(entry.pid) &&
+      pidMatches(entry.pid, connection, entry.startedAt)
+    ) {
       try {
         process.kill(entry.pid, "SIGKILL");
       } catch {
@@ -122,8 +159,9 @@ export async function stopTunnel(connection: Connection): Promise<void> {
     }
   }
 
-  delete state[connection.id];
-  writeState(state);
+  updateState((state) => {
+    delete state[connection.id];
+  });
 }
 
 export function uptime(connection: Connection): string | undefined {

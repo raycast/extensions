@@ -38,11 +38,13 @@ function withLock<T>(file: string, fn: () => T): T {
   const lockFile = `${file}.lock`;
   const maxAttempts = 50;
   let attempts = 0;
+  let acquired = false;
 
   while (attempts < maxAttempts) {
     try {
       const fd = fs.openSync(lockFile, "wx");
       fs.closeSync(fd);
+      acquired = true;
       break;
     } catch (err: unknown) {
       if ((err as { code?: string })?.code === "EEXIST") {
@@ -65,13 +67,19 @@ function withLock<T>(file: string, fn: () => T): T {
     }
   }
 
+  if (!acquired) {
+    throw new Error(`Gagal memperoleh lock untuk ${file}`);
+  }
+
   try {
     return fn();
   } finally {
-    try {
-      fs.unlinkSync(lockFile);
-    } catch {
-      // ignore
+    if (acquired) {
+      try {
+        fs.unlinkSync(lockFile);
+      } catch {
+        // ignore
+      }
     }
   }
 }
@@ -149,4 +157,15 @@ export function readState(): Record<string, StateEntry> {
 
 export function writeState(state: Record<string, StateEntry>): void {
   atomicWriteFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+}
+
+export function updateState<T>(
+  fn: (state: Record<string, StateEntry>) => T,
+): T {
+  return withLock(STATE_FILE, () => {
+    const state = readState();
+    const result = fn(state);
+    writeState(state);
+    return result;
+  });
 }
