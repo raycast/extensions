@@ -3,41 +3,43 @@ import { useAtom } from "jotai";
 import { notesAtom } from "../services/atoms";
 import { getTintColor } from "../utils/utils";
 
-const DeleteNoteAction = ({ createdAt }: { createdAt?: Date }) => {
+const DeleteAllNotesAction = () => {
   const [notes, setNotes] = useAtom(notesAtom);
-  const deleteNote = async () => {
+
+  const deleteAll = async () => {
+    if (notes.length === 0) {
+      return;
+    }
     const alertOptions = {
       icon: { source: Icon.Trash, tintColor: Color.Red },
-      title: "Are you sure?",
-      message: "Deleting your note cannot be undone.",
+      title: "Delete all notes?",
+      message: `This will delete all ${notes.length} notes and cannot be undone.`,
       primaryAction: {
-        title: "Confirm",
+        title: "Delete All",
         style: Alert.ActionStyle.Destructive,
       },
     };
 
     if (await confirmAlert(alertOptions)) {
-      const updatedNotes = notes.filter((n) => n.createdAt !== createdAt);
-      await setNotes(updatedNotes);
+      await setNotes([]);
       showToast({
         style: Toast.Style.Success,
-        title: "Deleted Note",
+        title: "Deleted All Notes",
       });
     }
   };
 
-  if (!createdAt) return null;
   return (
     <Action
-      title="Delete Note"
+      title="Delete All Notes"
       icon={{
         source: Icon.Trash,
         tintColor: getTintColor("red"),
       }}
-      shortcut={Keyboard.Shortcut.Common.Remove}
-      onAction={deleteNote}
+      shortcut={Keyboard.Shortcut.Common.RemoveAll}
+      onAction={deleteAll}
     />
   );
 };
 
-export default DeleteNoteAction;
+export default DeleteAllNotesAction;
