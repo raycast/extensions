@@ -3,6 +3,8 @@ import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { CaskActionPanel } from "./actionPanels";
 import { Cask, brewName, brewFetchCaskInfo, uiLogger, ensureError } from "../utils";
 import { Dependencies } from "./dependencies";
+import { PackageAnalyticsMetadata, PackageStatusMetadata } from "./packageMetadata";
+import { usePackageDetail } from "../hooks/usePackageDetail";
 
 /**
  * Check if a cask has minimal data (from fast list) vs full data.
@@ -22,6 +24,9 @@ export function CaskInfo({
   onAction: (result: boolean) => void;
 }) {
   const { pop } = useNavigation();
+  // Fetched once here and shared by both metadata blocks below. Always executed:
+  // unlike a list row, this view exists only because the user opened it.
+  const packageDetail = usePackageDetail(initialCask.token, true, true);
   const [cask, setCask] = useState<Cask>(initialCask);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -97,6 +102,7 @@ export function CaskInfo({
       navigationTitle={`Cask Info: ${brewName(cask)}`}
       metadata={
         <Detail.Metadata>
+          <PackageStatusMetadata detail={packageDetail} />
           <Detail.Metadata.Label title="Id" text={cask.token || "Loading..."} />
           {cask.homepage ? (
             <Detail.Metadata.Link title="Homepage" text={cask.homepage} target={cask.homepage} />
@@ -108,6 +114,7 @@ export function CaskInfo({
           <CaskDependencies cask={cask} />
           <Dependencies title="Conflicts With" dependencies={cask.conflicts_with?.cask} isInstalled={isInstalled} />
           <Detail.Metadata.Label title="Auto Updates" text={cask.auto_updates ? "Yes" : "No"} />
+          <PackageAnalyticsMetadata detail={packageDetail} />
         </Detail.Metadata>
       }
       actions={

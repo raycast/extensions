@@ -3,7 +3,7 @@
 ## [Install statistics & popularity sort] - {PR_MERGE_DATE}
 
 - Search: "Sort by Popularity" (⇧⌘P) orders results by installs over the last 30 days, ranking every match before the list is truncated — so the top rows are the most installed overall, not of the first hundred. An empty query lists the most installed packages outright.
-- The detail sidebar now shows a package's install counts for 30, 90 and 365 days, plus build errors, matching the analytics table on its formulae.brew.sh page. Only the selected package is fetched.
+- The detail sidebar and the Details view both show a package's install counts for 30, 90 and 365 days, plus build errors, matching the analytics table on its formulae.brew.sh page. Only the selected package is fetched.
 - Deprecated and disabled packages carry a warning at the top of the sidebar, with the reason, the date, and the replacement package where Homebrew names one.
 - "Hide Description" (⇧⌘Y) drops the description pane and shows the sidebar as a pure metadata list, with a Caveats indicator; the full caveats text stays in Show Details, which renders it as prose.
 - "Show Details" is now offered even when the sidebar is open. It previously disappeared in that state, leaving "Show in Finder" as the default action on an installed package. Install and Upgrade remain the default where they apply.

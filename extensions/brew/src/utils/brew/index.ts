@@ -50,6 +50,7 @@ export {
 // Analytics
 export {
   packageAnalyticsURL,
+  analyticsRows,
   totalForPeriod,
   packageStatus,
   fetchPopularityRanks,
@@ -59,6 +60,7 @@ export {
 } from "./analytics";
 export type {
   AnalyticsPeriod,
+  AnalyticsRow,
   AnalyticsCounts,
   PackageAnalytics,
   PackageDetailResponse,

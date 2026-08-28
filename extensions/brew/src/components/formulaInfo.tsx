@@ -3,6 +3,8 @@ import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
 import { Formula, brewIsInstalled, brewPrefix, brewFetchFormulaInfo, uiLogger, ensureError } from "../utils";
 import { Dependencies } from "./dependencies";
+import { PackageAnalyticsMetadata, PackageStatusMetadata } from "./packageMetadata";
+import { usePackageDetail } from "../hooks/usePackageDetail";
 
 /**
  * Check if a formula has minimal data (from fast list) vs full data.
@@ -18,6 +20,9 @@ export function FormulaInfo(props: {
   onAction: (result: boolean) => void;
 }) {
   const { pop } = useNavigation();
+  // Fetched once here and shared by both metadata blocks below. Always executed:
+  // unlike a list row, this view exists only because the user opened it.
+  const packageDetail = usePackageDetail(props.formula.name, false, true);
   const [formula, setFormula] = useState<Formula>(props.formula);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -91,6 +96,7 @@ export function FormulaInfo(props: {
       markdown={formatInfo(formula)}
       metadata={
         <Detail.Metadata>
+          <PackageStatusMetadata detail={packageDetail} />
           {formula.homepage ? (
             <Detail.Metadata.Link title="Homepage" text={formula.homepage} target={formula.homepage} />
           ) : (
@@ -108,6 +114,7 @@ export function FormulaInfo(props: {
           <Dependencies title="Conflicts With" dependencies={formula.conflicts_with} isInstalled={props.isInstalled} />
           {formula.pinned && <Detail.Metadata.Label title="Pinned" text="Yes" />}
           {formula.keg_only && <Detail.Metadata.Label title="Keg Only" text="Yes" />}
+          <PackageAnalyticsMetadata detail={packageDetail} />
         </Detail.Metadata>
       }
       actions={

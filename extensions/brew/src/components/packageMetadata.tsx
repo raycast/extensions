@@ -1,0 +1,51 @@
+/**
+ * Statistics and lifecycle rows for the pushed Details view.
+ *
+ * `Detail.Metadata.Label` and `List.Item.Detail.Metadata.Label` are different
+ * components, so the JSX cannot be shared with listItemDetail — but everything
+ * that decides WHAT to show is (analyticsRows, packageStatus), so the two views
+ * cannot drift in content.
+ *
+ * Both take the ALREADY-FETCHED detail rather than calling usePackageDetail
+ * themselves: two hook instances in one view would request the same document
+ * twice, which is the duplication the shared hook exists to prevent.
+ */
+
+import { Color, Detail, Icon } from "@raycast/api";
+import { analyticsRows, PackageDetailResponse, packageStatus } from "../utils";
+
+/**
+ * Deprecation or disablement, above everything else because it changes whether
+ * a package is worth installing at all. Rendered only when there is something
+ * to say.
+ */
+export function PackageStatusMetadata(props: { detail?: PackageDetailResponse }) {
+  const status = packageStatus(props.detail);
+
+  if (!status) {
+    return null;
+  }
+
+  return (
+    <>
+      <Detail.Metadata.Label
+        title={status.title}
+        text={{ value: status.text, color: Color.Orange }}
+        icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+      />
+      <Detail.Metadata.Separator />
+    </>
+  );
+}
+
+/** Install counts, matching the analytics table on the package's brew.sh page. */
+export function PackageAnalyticsMetadata(props: { detail?: PackageDetailResponse }) {
+  return (
+    <>
+      <Detail.Metadata.Separator />
+      {analyticsRows(props.detail).map((row) => (
+        <Detail.Metadata.Label key={row.key} title={row.title} text={row.text} />
+      ))}
+    </>
+  );
+}

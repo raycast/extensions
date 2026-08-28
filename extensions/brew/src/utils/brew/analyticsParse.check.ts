@@ -11,7 +11,14 @@
  */
 
 import assert from "assert";
-import { POPULARITY_PERIOD, byPopularity, packageStatus, parseRanks, totalForPeriod } from "./analyticsParse";
+import {
+  POPULARITY_PERIOD,
+  analyticsRows,
+  byPopularity,
+  packageStatus,
+  parseRanks,
+  totalForPeriod,
+} from "./analyticsParse";
 
 /// Fixtures
 
@@ -112,6 +119,28 @@ function assertReproducesFileOrder(
   nonIncreasing(retained, "the published file");
   nonIncreasing([...retained].sort(byPopularity(ranks)), "our re-sort");
 }
+
+// Statistics rows are reserved before the fetch lands, so the panel does not
+// reflow underneath the user when it does. Same row count, same titles, either
+// way — only the values change.
+const pending = analyticsRows(undefined);
+const loaded = analyticsRows({ analytics: { install: { "30d": { asc: 1 }, "90d": { asc: 2 }, "365d": { asc: 3 } } } });
+assert.equal(pending.length, 3, "install rows must be reserved while loading");
+assert.deepEqual(
+  pending.map((r) => r.title),
+  loaded.map((r) => r.title),
+);
+assert.deepEqual(
+  pending.map((r) => r.text),
+  ["—", "—", "—"],
+);
+assert.deepEqual(
+  loaded.map((r) => r.text),
+  ["1", "2", "3"],
+);
+// Build errors stay conditional — a permanent "0" row would be noise.
+assert.equal(analyticsRows({ analytics: { install: {}, build_error: { "30d": { asc: 7 } } } }).length, 4);
+assert.equal(analyticsRows({ analytics: { install: {}, build_error: { "30d": {} } } }).length, 3);
 
 /// Live API — the shape assumptions above, against the real thing
 

@@ -111,6 +111,47 @@ export const analyticsCacheFiles = [
 ];
 
 /** Package name -> installs over POPULARITY_PERIOD. */
+/** One row of the statistics block, ready for either metadata namespace. */
+export interface AnalyticsRow {
+  key: string;
+  title: string;
+  text: string;
+}
+
+// "365 Days" rather than "1 Year": the API's bucket is a trailing 365-day
+// window, which "last year" reads as either the previous calendar year or the
+// year to date.
+const analyticsPeriodTitles: [AnalyticsPeriod, string][] = [
+  ["30d", "Installs (30 Days)"],
+  ["90d", "Installs (90 Days)"],
+  ["365d", "Installs (365 Days)"],
+];
+
+/**
+ * Rows for the statistics block.
+ *
+ * The three install rows are ALWAYS returned — carrying an em dash when the
+ * count isn't known yet — so the metadata panel reserves their height and does
+ * not reflow when the lazily-fetched analytics arrive underneath the user.
+ * Build errors stay conditional: they are absent for almost every package, and
+ * a permanent "0" row would be noise.
+ */
+export function analyticsRows(detail?: PackageDetailResponse): AnalyticsRow[] {
+  const installs = detail?.analytics?.install;
+
+  const rows: AnalyticsRow[] = analyticsPeriodTitles.map(([period, title]) => {
+    const total = totalForPeriod(installs, period);
+    return { key: period, title, text: total == undefined ? "—" : total.toLocaleString() };
+  });
+
+  const buildErrors = totalForPeriod(detail?.analytics?.build_error, "30d");
+  if (buildErrors != undefined && buildErrors > 0) {
+    rows.push({ key: "build_error", title: "Build Errors (30 Days)", text: buildErrors.toLocaleString() });
+  }
+
+  return rows;
+}
+
 export interface PopularityRanks {
   formulae: Map<string, number>;
   casks: Map<string, number>;

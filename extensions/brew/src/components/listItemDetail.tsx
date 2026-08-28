@@ -7,15 +7,14 @@
 
 import { Color, Icon, List } from "@raycast/api";
 import {
-  AnalyticsPeriod,
   Cask,
   Formula,
   PackageDetailResponse,
   brewIsInstalled,
   brewName,
   brewPrefix,
+  analyticsRows,
   packageStatus,
-  totalForPeriod,
 } from "../utils";
 import { usePackageDetail } from "../hooks/usePackageDetail";
 
@@ -188,15 +187,6 @@ function formulaCaveatsText(formula: Formula): string | undefined {
   return parts.length > 0 ? parts.join("\n\n") : undefined;
 }
 
-// "365 Days" rather than "1 Year": the API's bucket is a trailing 365-day
-// window, which "last year" reads as either the previous calendar year or the
-// year to date.
-const analyticsPeriodTitles: [AnalyticsPeriod, string][] = [
-  ["30d", "Installs (30 Days)"],
-  ["90d", "Installs (90 Days)"],
-  ["365d", "Installs (365 Days)"],
-];
-
 /**
  * Deprecation or disablement, first in the panel because it changes whether a
  * package is worth installing at all.
@@ -227,31 +217,16 @@ function StatusMetadata(props: { detail?: PackageDetailResponse }) {
  * Install counts from formulae.brew.sh, matching the analytics table on a
  * package's page there.
  *
- * The numbers are not in the bulk formula/cask index the extension caches, so
- * they come from the per-package endpoint via usePackageDetail.
+ * Rows are always rendered — see analyticsRows. Returning null until the fetch
+ * landed made the panel jump as the rows appeared beneath the user's cursor.
  */
 function AnalyticsMetadata(props: { detail?: PackageDetailResponse }) {
-  const installs = props.detail?.analytics?.install;
-  const buildErrors = totalForPeriod(props.detail?.analytics?.build_error, "30d");
-
-  // No analytics at all: a brand new package, or one below the reporting
-  // threshold. Render nothing rather than a column of em dashes.
-  if (!installs) {
-    return null;
-  }
-
   return (
     <>
       <List.Item.Detail.Metadata.Separator />
-      {analyticsPeriodTitles.map(([period, title]) => {
-        const total = totalForPeriod(installs, period);
-        return total == undefined ? null : (
-          <List.Item.Detail.Metadata.Label key={period} title={title} text={total.toLocaleString()} />
-        );
-      })}
-      {buildErrors != undefined && buildErrors > 0 && (
-        <List.Item.Detail.Metadata.Label title="Build Errors (30 Days)" text={buildErrors.toLocaleString()} />
-      )}
+      {analyticsRows(props.detail).map((row) => (
+        <List.Item.Detail.Metadata.Label key={row.key} title={row.title} text={row.text} />
+      ))}
     </>
   );
 }
