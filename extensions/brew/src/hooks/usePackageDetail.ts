@@ -10,14 +10,20 @@
 import { useFetch } from "@raycast/utils";
 import { PackageDetailResponse, fetchLogger, packageAnalyticsURL } from "../utils";
 
+/** What the detail panels need: the record, and whether fetching it failed. */
+export interface PackageDetailState {
+  data?: PackageDetailResponse;
+  failed: boolean;
+}
+
 /**
  * Fetch a package's API record.
  *
  * Gated on `isSelected`: Raycast constructs the detail element for every row in
  * the list, so an ungated fetch would fire once per visible result.
  */
-export function usePackageDetail(name: string, isCask: boolean, isSelected: boolean) {
-  const { data } = useFetch<PackageDetailResponse>(packageAnalyticsURL(name, isCask), {
+export function usePackageDetail(name: string, isCask: boolean, isSelected: boolean): PackageDetailState {
+  const { data, error } = useFetch<PackageDetailResponse>(packageAnalyticsURL(name, isCask), {
     execute: isSelected,
     // Deliberately NOT keepPreviousData. These numbers render under a package
     // name, so stale data here is data attributed to the wrong package — the
@@ -30,5 +36,9 @@ export function usePackageDetail(name: string, isCask: boolean, isSelected: bool
     },
   });
 
-  return data;
+  // `failed` is reported separately so the rows can distinguish a request that
+  // failed from a package that genuinely reports no installs — both would
+  // otherwise render as an em dash forever. It only counts as failed when
+  // there is no data to show instead.
+  return { data, failed: error != undefined && data == undefined };
 }

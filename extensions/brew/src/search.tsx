@@ -28,7 +28,12 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
   const [showDetails, setShowDetails] = useState(showMetadataPanel);
 
   // Install rankings for the whole index, loaded only when the sort is on.
-  const { isLoading: isLoadingRanks, data: ranks, revalidate: revalidateRanks } = usePopularityRanks(sortByPopularity);
+  const {
+    isLoading: isLoadingRanks,
+    data: ranks,
+    revalidate: revalidateRanks,
+    version: ranksVersion,
+  } = usePopularityRanks(sortByPopularity);
 
   // The toggle is on well before the ~3MB download lands. Until it does, the
   // list is still relevance-ordered, so only the *applied* state may describe
@@ -51,6 +56,7 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
     searchText,
     installed,
     ranks: sortByPopularity ? ranks : undefined,
+    ranksVersion,
     onCacheCleared: revalidateRanks,
   });
 

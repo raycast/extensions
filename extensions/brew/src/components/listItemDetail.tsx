@@ -6,17 +6,8 @@
  */
 
 import { Color, Icon, List } from "@raycast/api";
-import {
-  Cask,
-  Formula,
-  PackageDetailResponse,
-  brewIsInstalled,
-  brewName,
-  brewPrefix,
-  analyticsRows,
-  packageStatus,
-} from "../utils";
-import { usePackageDetail } from "../hooks/usePackageDetail";
+import { Cask, Formula, brewIsInstalled, brewName, brewPrefix, analyticsRows, packageStatus } from "../utils";
+import { PackageDetailState, usePackageDetail } from "../hooks/usePackageDetail";
 
 interface FormulaListItemDetailProps {
   formula: Formula;
@@ -50,7 +41,7 @@ export function FormulaListItemDetail({
       markdown={showDescription ? formatFormulaMarkdown(formula) : undefined}
       metadata={
         <List.Item.Detail.Metadata>
-          <StatusMetadata detail={detail} />
+          <StatusMetadata state={detail} />
           {/* With the markdown hidden the description has nowhere else to go. */}
           {!showDescription && (
             <MarkdownOnlyMetadata description={formula.desc} caveats={formulaCaveatsText(formula)} />
@@ -101,7 +92,7 @@ export function FormulaListItemDetail({
               <List.Item.Detail.Metadata.Label title="Keg Only" text="Yes" />
             </>
           )}
-          <AnalyticsMetadata detail={detail} />
+          <AnalyticsMetadata state={detail} />
         </List.Item.Detail.Metadata>
       }
     />
@@ -119,7 +110,7 @@ export function CaskListItemDetail({ cask, isInstalled, isSelected, showDescript
       markdown={showDescription ? formatCaskMarkdown(cask) : undefined}
       metadata={
         <List.Item.Detail.Metadata>
-          <StatusMetadata detail={detail} />
+          <StatusMetadata state={detail} />
           {!showDescription && <MarkdownOnlyMetadata description={cask.desc} caveats={cask.caveats} />}
           <List.Item.Detail.Metadata.Label title="Id" text={cask.token || "—"} />
           <List.Item.Detail.Metadata.Separator />
@@ -140,7 +131,7 @@ export function CaskListItemDetail({ cask, isInstalled, isSelected, showDescript
           />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Auto Updates" text={cask.auto_updates ? "Yes" : "No"} />
-          <AnalyticsMetadata detail={detail} />
+          <AnalyticsMetadata state={detail} />
         </List.Item.Detail.Metadata>
       }
     />
@@ -194,8 +185,8 @@ function formulaCaveatsText(formula: Formula): string | undefined {
  * Rendered only when there is something to say — a row reading "Status: Active"
  * on every healthy package is noise, and this is a warning, not a field.
  */
-function StatusMetadata(props: { detail?: PackageDetailResponse }) {
-  const status = packageStatus(props.detail);
+function StatusMetadata(props: { state: PackageDetailState }) {
+  const status = packageStatus(props.state.data);
 
   if (!status) {
     return null;
@@ -220,11 +211,11 @@ function StatusMetadata(props: { detail?: PackageDetailResponse }) {
  * Rows are always rendered — see analyticsRows. Returning null until the fetch
  * landed made the panel jump as the rows appeared beneath the user's cursor.
  */
-function AnalyticsMetadata(props: { detail?: PackageDetailResponse }) {
+function AnalyticsMetadata(props: { state: PackageDetailState }) {
   return (
     <>
       <List.Item.Detail.Metadata.Separator />
-      {analyticsRows(props.detail).map((row) => (
+      {analyticsRows(props.state.data, props.state.failed).map((row) => (
         <List.Item.Detail.Metadata.Label key={row.key} title={row.title} text={row.text} />
       ))}
     </>

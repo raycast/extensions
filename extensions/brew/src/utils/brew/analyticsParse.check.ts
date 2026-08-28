@@ -12,6 +12,7 @@
 
 import assert from "assert";
 import {
+  AnalyticsCounts,
   POPULARITY_PERIOD,
   analyticsRows,
   byPopularity,
@@ -24,7 +25,8 @@ import {
 
 // Counts are bucketed by invocation, so a total sums `asc` and `asc --HEAD`.
 assert.equal(totalForPeriod({ "30d": { asc: 2752, "asc --HEAD": 6 } }, "30d"), 2758);
-// An unreported period is absent, not zero — the UI omits the row.
+// An unreported period is absent, not zero. The UI reserves the row and shows
+// an em dash rather than omitting it — see analyticsRows.
 assert.equal(totalForPeriod({ "30d": { asc: 1 } }, "365d"), undefined);
 assert.equal(totalForPeriod(undefined, "30d"), undefined);
 
@@ -141,6 +143,17 @@ assert.deepEqual(
 // Build errors stay conditional — a permanent "0" row would be noise.
 assert.equal(analyticsRows({ analytics: { install: {}, build_error: { "30d": { asc: 7 } } } }).length, 4);
 assert.equal(analyticsRows({ analytics: { install: {}, build_error: { "30d": {} } } }).length, 3);
+
+// A failed fetch must not read as "this package has no installs".
+assert.deepEqual(
+  analyticsRows(undefined, true).map((r) => r.text),
+  ["Unavailable", "Unavailable", "Unavailable"],
+);
+
+// The bucket is untyped JSON at runtime: string values must not concatenate.
+assert.equal(totalForPeriod({ "30d": { asc: "1" } } as unknown as AnalyticsCounts, "30d"), undefined);
+assert.equal(totalForPeriod({ "30d": { a: 1, b: "x" } } as unknown as AnalyticsCounts, "30d"), 1);
+assert.equal(totalForPeriod({ "30d": {} }, "30d"), undefined);
 
 /// Live API — the shape assumptions above, against the real thing
 

@@ -14,6 +14,12 @@ interface UsePopularityRanksResult {
   data: PopularityRanks | undefined;
   /** Re-run the load. Needed after Clear Cache deletes the files underneath it. */
   revalidate: () => void;
+  /**
+   * Increments on every successful load. Callers that cache against the ranks
+   * must key on this, not on whether ranks merely exist — a refresh replaces
+   * the maps without changing that they are present.
+   */
+  version: number;
 }
 
 /**
@@ -26,6 +32,7 @@ export function usePopularityRanks(enabled: boolean): UsePopularityRanksResult {
   // Without this, turning the sort off (or leaving the view) mid-download lets
   // both ~1.3MB files run to completion with the toast still spinning.
   const abortable = useRef<AbortController>(null);
+  const versionRef = useRef(0);
 
   // usePromise, NOT useCachedPromise: the latter persists `data` through
   // JSON.stringify, which turns these Maps into `{}` — a second launch would
@@ -46,7 +53,7 @@ export function usePopularityRanks(enabled: boolean): UsePopularityRanksResult {
       const percentByURL = new Map<string, number>();
 
       try {
-        return await fetchPopularityRanks((progress) => {
+        const ranks = await fetchPopularityRanks((progress) => {
           if (progress.percent < 0) {
             return;
           }
@@ -60,6 +67,8 @@ export function usePopularityRanks(enabled: boolean): UsePopularityRanksResult {
           // unhandled rejection, so it is logged rather than thrown or dropped.
           toast.then((t) => (t.message = `${Math.round(combined)}%`)).catch(logToastFailure);
         }, abortable.current?.signal);
+        versionRef.current += 1;
+        return ranks;
       } finally {
         // Logged, not swallowed: a toast that fails to hide after a SUCCESSFUL
         // download has no other reporting path — the awaited chain above only
@@ -77,7 +86,7 @@ export function usePopularityRanks(enabled: boolean): UsePopularityRanksResult {
     },
   );
 
-  return { isLoading: enabled && isLoading, data, revalidate };
+  return { isLoading: enabled && isLoading, data, revalidate, version: versionRef.current };
 }
 
 function logToastFailure(error: unknown): void {

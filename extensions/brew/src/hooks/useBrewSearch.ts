@@ -31,6 +31,13 @@ interface UseBrewSearchOptions {
   /** When given, results are ordered by install count instead of relevance. */
   ranks?: PopularityRanks;
   /**
+   * Bumped whenever `ranks` is replaced. Part of the cache key, because a
+   * refreshed set of rankings is a different result even though the previous
+   * key ("ranks exist") is unchanged — without it, Clear Cache & Retry would
+   * keep serving results ordered by the rankings it just deleted.
+   */
+  ranksVersion?: number;
+  /**
    * Called after Clear Cache has deleted the on-disk caches. The rank hook owns
    * its own copy of the rankings, so clearing the module-level cache alone would
    * leave the hook serving data parsed from files that no longer exist.
@@ -126,7 +133,7 @@ const defaultFileProgress: FileDownloadProgress = {
  *    installed data changes, ensuring we always have the latest combination
  */
 export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResult {
-  const { searchText, limit = 100, installed, ranks, onCacheCleared } = options;
+  const { searchText, limit = 100, installed, ranks, ranksVersion = 0, onCacheCleared } = options;
 
   // Track if we've ever received data (for initial load detection)
   const hasEverLoadedRef = useRef(false);
@@ -175,8 +182,9 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     data: rawData,
     mutate,
   } = useCachedPromise(
-    async (query: string, useRanks: boolean) => {
-      searchLogger.log("Starting search", { query, useRanks, isInitialLoad: !hasEverLoadedRef.current });
+    async (query: string, ranksKey: number) => {
+      const useRanks = ranksKey > 0;
+      searchLogger.log("Starting search", { query, ranksKey, isInitialLoad: !hasEverLoadedRef.current });
 
       // Reset progress at start of search
       setDownloadProgress({ phase: "casks" });
@@ -212,11 +220,11 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
       // brewSearch reports phase: "complete" with final totals via onProgress
       return result;
     },
-    // Whether ranks are in play is part of the cache key: turning the
-    // popularity sort on (or having its data arrive) has to re-run the search
-    // rather than reuse the previously ordered results. The Maps themselves are
-    // closed over — they are not serializable into a cache key.
-    [searchText, ranks != undefined],
+    // The ranks VERSION is part of the cache key, not merely whether ranks
+    // exist: turning the sort on, its data arriving, and its data being
+    // REPLACED all have to re-run the search. The Maps themselves are closed
+    // over — they are not serializable into a cache key.
+    [searchText, ranks == undefined ? 0 : ranksVersion || 1],
     {
       abortable,
       keepPreviousData: true,

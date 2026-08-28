@@ -96,7 +96,7 @@ export function FormulaInfo(props: {
       markdown={formatInfo(formula)}
       metadata={
         <Detail.Metadata>
-          <PackageStatusMetadata detail={packageDetail} />
+          <PackageStatusMetadata state={packageDetail} />
           {formula.homepage ? (
             <Detail.Metadata.Link title="Homepage" text={formula.homepage} target={formula.homepage} />
           ) : (
@@ -114,7 +114,7 @@ export function FormulaInfo(props: {
           <Dependencies title="Conflicts With" dependencies={formula.conflicts_with} isInstalled={props.isInstalled} />
           {formula.pinned && <Detail.Metadata.Label title="Pinned" text="Yes" />}
           {formula.keg_only && <Detail.Metadata.Label title="Keg Only" text="Yes" />}
-          <PackageAnalyticsMetadata detail={packageDetail} />
+          <PackageAnalyticsMetadata state={packageDetail} />
         </Detail.Metadata>
       }
       actions={

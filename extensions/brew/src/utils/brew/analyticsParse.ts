@@ -82,13 +82,22 @@ export function packageStatus(detail: PackageDetailResponse | undefined): { titl
   return undefined;
 }
 
-/** Total count for a period, summed across invocations. Undefined if unreported. */
+/**
+ * Total count for a period, summed across invocations. Undefined if unreported.
+ *
+ * The bucket is untyped JSON at runtime — useFetch does no schema validation —
+ * so values are filtered to finite numbers before summing. A plain `+` over
+ * `{"asc": "1"}` concatenates to the string "01" and renders as a statistic.
+ */
 export function totalForPeriod(counts: AnalyticsCounts | undefined, period: AnalyticsPeriod): number | undefined {
   const bucket = counts?.[period];
   if (!bucket) {
     return undefined;
   }
-  return Object.values(bucket).reduce((sum, count) => sum + count, 0);
+  const values = Object.values(bucket).filter(
+    (count): count is number => typeof count === "number" && Number.isFinite(count),
+  );
+  return values.length === 0 ? undefined : values.reduce((sum, count) => sum + count, 0);
 }
 
 /**
@@ -133,15 +142,24 @@ const analyticsPeriodTitles: [AnalyticsPeriod, string][] = [
  * The three install rows are ALWAYS returned — carrying an em dash when the
  * count isn't known yet — so the metadata panel reserves their height and does
  * not reflow when the lazily-fetched analytics arrive underneath the user.
- * Build errors stay conditional: they are absent for almost every package, and
- * a permanent "0" row would be noise.
+ *
+ * This stabilises the COMMON case only, deliberately. Two rows are still added
+ * after the fetch: build errors (absent for almost every package, and a
+ * permanent "0" row would be noise) and the deprecation warning, which is rarer
+ * still and cannot be usefully reserved — a blank warning slot on every healthy
+ * package is a worse trade than a rare shift.
  */
-export function analyticsRows(detail?: PackageDetailResponse): AnalyticsRow[] {
+export function analyticsRows(detail?: PackageDetailResponse, failed = false): AnalyticsRow[] {
   const installs = detail?.analytics?.install;
 
   const rows: AnalyticsRow[] = analyticsPeriodTitles.map(([period, title]) => {
     const total = totalForPeriod(installs, period);
-    return { key: period, title, text: total == undefined ? "—" : total.toLocaleString() };
+    // An em dash covers both "still loading" and "this package reports none",
+    // which are indistinguishable to the user and equally uninteresting. A
+    // FAILED fetch is different — saying nothing there implies the package has
+    // no installs, so it says so.
+    const text = total != undefined ? total.toLocaleString() : failed ? "Unavailable" : "—";
+    return { key: period, title, text };
   });
 
   const buildErrors = totalForPeriod(detail?.analytics?.build_error, "30d");
@@ -152,6 +170,7 @@ export function analyticsRows(detail?: PackageDetailResponse): AnalyticsRow[] {
   return rows;
 }
 
+/** Package name -> installs over POPULARITY_PERIOD, per category. */
 export interface PopularityRanks {
   formulae: Map<string, number>;
   casks: Map<string, number>;

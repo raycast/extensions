@@ -12,15 +12,16 @@
  */
 
 import { Color, Detail, Icon } from "@raycast/api";
-import { analyticsRows, PackageDetailResponse, packageStatus } from "../utils";
+import { analyticsRows, packageStatus } from "../utils";
+import { PackageDetailState } from "../hooks/usePackageDetail";
 
 /**
  * Deprecation or disablement, above everything else because it changes whether
  * a package is worth installing at all. Rendered only when there is something
  * to say.
  */
-export function PackageStatusMetadata(props: { detail?: PackageDetailResponse }) {
-  const status = packageStatus(props.detail);
+export function PackageStatusMetadata(props: { state: PackageDetailState }) {
+  const status = packageStatus(props.state.data);
 
   if (!status) {
     return null;
@@ -39,11 +40,11 @@ export function PackageStatusMetadata(props: { detail?: PackageDetailResponse })
 }
 
 /** Install counts, matching the analytics table on the package's brew.sh page. */
-export function PackageAnalyticsMetadata(props: { detail?: PackageDetailResponse }) {
+export function PackageAnalyticsMetadata(props: { state: PackageDetailState }) {
   return (
     <>
       <Detail.Metadata.Separator />
-      {analyticsRows(props.detail).map((row) => (
+      {analyticsRows(props.state.data, props.state.failed).map((row) => (
         <Detail.Metadata.Label key={row.key} title={row.title} text={row.text} />
       ))}
     </>

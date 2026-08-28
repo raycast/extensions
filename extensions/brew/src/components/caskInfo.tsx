@@ -102,7 +102,7 @@ export function CaskInfo({
       navigationTitle={`Cask Info: ${brewName(cask)}`}
       metadata={
         <Detail.Metadata>
-          <PackageStatusMetadata detail={packageDetail} />
+          <PackageStatusMetadata state={packageDetail} />
           <Detail.Metadata.Label title="Id" text={cask.token || "Loading..."} />
           {cask.homepage ? (
             <Detail.Metadata.Link title="Homepage" text={cask.homepage} target={cask.homepage} />
@@ -114,7 +114,7 @@ export function CaskInfo({
           <CaskDependencies cask={cask} />
           <Dependencies title="Conflicts With" dependencies={cask.conflicts_with?.cask} isInstalled={isInstalled} />
           <Detail.Metadata.Label title="Auto Updates" text={cask.auto_updates ? "Yes" : "No"} />
-          <PackageAnalyticsMetadata detail={packageDetail} />
+          <PackageAnalyticsMetadata state={packageDetail} />
         </Detail.Metadata>
       }
       actions={
