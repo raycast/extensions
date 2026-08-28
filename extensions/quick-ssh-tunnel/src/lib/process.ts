@@ -100,19 +100,28 @@ export async function stopTunnel(connection: Connection): Promise<void> {
   const entry = state[connection.id];
   if (!entry) return;
 
-  try {
-    process.kill(entry.pid, "SIGTERM");
-  } catch {
-    // Process already exited.
-  }
-  for (let i = 0; i < 20 && pidAlive(entry.pid); i += 1) await sleep(100);
-  if (pidAlive(entry.pid)) {
+  if (pidAlive(entry.pid) && pidMatches(entry.pid, connection)) {
     try {
-      process.kill(entry.pid, "SIGKILL");
+      process.kill(entry.pid, "SIGTERM");
     } catch {
       // Process already exited.
     }
+    for (
+      let i = 0;
+      i < 20 && pidAlive(entry.pid) && pidMatches(entry.pid, connection);
+      i += 1
+    ) {
+      await sleep(100);
+    }
+    if (pidAlive(entry.pid) && pidMatches(entry.pid, connection)) {
+      try {
+        process.kill(entry.pid, "SIGKILL");
+      } catch {
+        // Process already exited.
+      }
+    }
   }
+
   delete state[connection.id];
   writeState(state);
 }

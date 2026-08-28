@@ -33,6 +33,55 @@ function ensureDir(): void {
   fs.mkdirSync(CONFIG_DIR, { recursive: true });
 }
 
+function withLock<T>(file: string, fn: () => T): T {
+  ensureDir();
+  const lockFile = `${file}.lock`;
+  const maxAttempts = 50;
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    try {
+      const fd = fs.openSync(lockFile, "wx");
+      fs.closeSync(fd);
+      break;
+    } catch (err: unknown) {
+      if ((err as { code?: string })?.code === "EEXIST") {
+        try {
+          const stat = fs.statSync(lockFile);
+          if (Date.now() - stat.mtimeMs > 5000) {
+            fs.unlinkSync(lockFile);
+          }
+        } catch {
+          // ignore error if lock was already removed
+        }
+        attempts += 1;
+        const start = Date.now();
+        while (Date.now() - start < 10) {
+          // busy spin 10ms
+        }
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  try {
+    return fn();
+  } finally {
+    try {
+      fs.unlinkSync(lockFile);
+    } catch {
+      // ignore
+    }
+  }
+}
+
+function atomicWriteFileSync(file: string, data: string): void {
+  ensureDir();
+  const tmp = `${file}.${process.pid}.${crypto.randomUUID()}.tmp`;
+  fs.writeFileSync(tmp, data);
+  fs.renameSync(tmp, file);
+}
 export function newId(): string {
   return crypto.randomUUID();
 }
@@ -54,20 +103,20 @@ export function loadConnections(): Connection[] {
 }
 
 function saveConnections(connections: Connection[]): void {
-  ensureDir();
-  const tmp = `${HISTORY_FILE}.tmp`;
-  fs.writeFileSync(tmp, JSON.stringify({ connections }, null, 2));
-  fs.renameSync(tmp, HISTORY_FILE);
+  atomicWriteFileSync(HISTORY_FILE, JSON.stringify({ connections }, null, 2));
 }
 
 export function saveConnection(connection: Connection): Connection[] {
-  const key = connectionKey(connection);
-  const connections = loadConnections().filter(
-    (item) => item.id !== connection.id && connectionKey(item) !== key,
-  );
-  connections.unshift(connection);
-  saveConnections(connections.slice(0, MAX_HISTORY));
-  return connections.slice(0, MAX_HISTORY);
+  return withLock(HISTORY_FILE, () => {
+    const key = connectionKey(connection);
+    const connections = loadConnections().filter(
+      (item) => item.id !== connection.id && connectionKey(item) !== key,
+    );
+    connections.unshift(connection);
+    const updated = connections.slice(0, MAX_HISTORY);
+    saveConnections(updated);
+    return updated;
+  });
 }
 
 export function findConnectionByKey(key: string): Connection | undefined {
@@ -77,11 +126,13 @@ export function findConnectionByKey(key: string): Connection | undefined {
 }
 
 export function removeConnection(id: string): Connection[] {
-  const connections = loadConnections().filter(
-    (connection) => connection.id !== id,
-  );
-  saveConnections(connections);
-  return connections;
+  return withLock(HISTORY_FILE, () => {
+    const connections = loadConnections().filter(
+      (connection) => connection.id !== id,
+    );
+    saveConnections(connections);
+    return connections;
+  });
 }
 
 export function readState(): Record<string, StateEntry> {
@@ -97,8 +148,5 @@ export function readState(): Record<string, StateEntry> {
 }
 
 export function writeState(state: Record<string, StateEntry>): void {
-  ensureDir();
-  const tmp = `${STATE_FILE}.tmp`;
-  fs.writeFileSync(tmp, JSON.stringify(state, null, 2));
-  fs.renameSync(tmp, STATE_FILE);
+  atomicWriteFileSync(STATE_FILE, JSON.stringify(state, null, 2));
 }

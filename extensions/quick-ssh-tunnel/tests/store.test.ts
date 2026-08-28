@@ -64,4 +64,34 @@ describe("connection history", () => {
     expect(clone.id).not.toBe(original.id);
     expect(store.loadConnections()).toEqual([]);
   });
+
+  test("handles atomic writes with unique temp files", () => {
+    const store = freshStore();
+    const conn1 = {
+      id: "1",
+      mode: "forward" as const,
+      sshTarget: "user@host1",
+      port: 1001,
+      remoteHost: "127.0.0.1",
+      compression: true,
+      lastUsedAt: 1,
+    };
+    const conn2 = {
+      id: "2",
+      mode: "forward" as const,
+      sshTarget: "user@host2",
+      port: 1002,
+      remoteHost: "127.0.0.1",
+      compression: true,
+      lastUsedAt: 2,
+    };
+
+    store.saveConnection(conn1);
+    store.saveConnection(conn2);
+
+    const connections = store.loadConnections();
+    expect(connections).toHaveLength(2);
+    expect(connections[0].id).toBe("2");
+    expect(connections[1].id).toBe("1");
+  });
 });

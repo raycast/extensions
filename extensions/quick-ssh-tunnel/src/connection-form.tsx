@@ -8,7 +8,7 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { connectionKey, validateConnection } from "./lib/core";
-import { getStatus, startTunnel } from "./lib/process";
+import { getStatus, startTunnel, stopTunnel } from "./lib/process";
 import {
   Connection,
   findConnectionByKey,
@@ -82,6 +82,9 @@ export default function ConnectionForm({
       title: "Menghubungkan SSH",
     });
     try {
+      if (initial && getStatus(initial) === "running") {
+        await stopTunnel(initial);
+      }
       await startTunnel(connection);
       saveConnection(connection);
       toast.style = Toast.Style.Success;
