@@ -1,8 +1,8 @@
 # Clipfile — Raycast Extension
 
 Browse your **Clipfile** list, read saved articles, and save the current
-browser tab — without leaving Raycast. Your list stays in sync with the Research
-Sync apps on iOS, macOS, and the browser via a hosted sync service.
+browser tab — without leaving Raycast. Your list stays in sync with the Clipfile
+apps on iOS, macOS, and the browser via a hosted sync service.
 
 ## Commands
 
