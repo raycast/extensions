@@ -175,6 +175,27 @@ describe("getLimitRows", () => {
     ).toMatchObject([{ label: "Opus", utilization: 80, decimals: 0 }]);
   });
 
+  it("keeps the weekly flat-field row when the limits array scopes that model to another period", () => {
+    expect(
+      scopedRows({
+        ...baseData,
+        seven_day_opus: { utilization: 82.4, resets_at: WEEKLY_RESET },
+        limits: [
+          {
+            kind: "session_scoped",
+            group: "session",
+            percent: 7,
+            resets_at: SESSION_RESET,
+            scope: { model: { id: null, display_name: "Opus" } },
+          },
+        ],
+      }),
+    ).toMatchObject([
+      { label: "Opus", period: "session", utilization: 7 },
+      { label: "Opus", period: "weekly", utilization: 82.4 },
+    ]);
+  });
+
   it("keeps a flat-field model the limits array does not name", () => {
     expect(
       scopedRows({

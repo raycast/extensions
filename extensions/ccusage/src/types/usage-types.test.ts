@@ -236,4 +236,17 @@ describe("UsageLimitDataSchema", () => {
 
     expect(result.limits).toBeUndefined();
   });
+
+  it.each([
+    { name: "omits the model id", model: { display_name: "Fable" } },
+    { name: "omits the display name", model: { id: "model_01" } },
+    { name: "carries neither", model: {} },
+  ])("parses a scoped entry whose model $name", ({ model }) => {
+    const result = UsageLimitDataSchema.safeParse({
+      ...windows,
+      limits: [{ kind: "weekly_scoped", group: "weekly", percent: 15, resets_at: null, scope: { model } }],
+    });
+
+    expect(result.success).toBe(true);
+  });
 });

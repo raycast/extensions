@@ -37,16 +37,18 @@ const getScopedRows = (data: UsageLimitData): LimitRow[] => {
     ];
   });
 
-  const named = new Set(fromLimits.map((row) => row.label));
+  const seen = new Set(fromLimits.map((row) => row.key));
 
   const fromFlatFields = [
     { label: "Sonnet", window: data.seven_day_sonnet },
     { label: "Opus", window: data.seven_day_opus },
-  ].flatMap(({ label, window }) =>
-    window && !named.has(label)
+  ].flatMap(({ label, window }) => {
+    const key = `weekly:${label}`;
+
+    return window && !seen.has(key)
       ? [
           {
-            key: `weekly:${label}`,
+            key,
             label,
             period: "weekly",
             utilization: window.utilization,
@@ -55,8 +57,8 @@ const getScopedRows = (data: UsageLimitData): LimitRow[] => {
             windowHours: null,
           },
         ]
-      : [],
-  );
+      : [];
+  });
 
   return [...fromLimits, ...fromFlatFields];
 };
@@ -69,8 +71,8 @@ const getScopedRows = (data: UsageLimitData): LimitRow[] => {
  * utilization where `limits[].percent` is already rounded to an integer.
  *
  * Per-model windows come from `limits[]`, plus the flat `seven_day_sonnet` / `seven_day_opus`
- * fields for any model `limits[]` does not name. An account served both shapes at once keeps
- * every window it reports and renders none of them twice.
+ * fields for any weekly window `limits[]` does not already carry. An account served both shapes
+ * at once keeps every window it reports and renders none of them twice.
  */
 export const getLimitRows = (data: UsageLimitData | null | undefined): LimitRow[] => {
   if (!data) return [];

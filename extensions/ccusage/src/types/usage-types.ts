@@ -130,7 +130,9 @@ export const LimitWindowSchema = z.object({
  * - `scope.model.display_name` names the model a scoped bucket applies to
  *
  * Entries are self-describing, so a window for a model or period not seen here still parses.
- * Fields beyond those four are nullish because the response omits them on some accounts.
+ * Every field but those four is nullish, because the response omits them on some accounts and
+ * one unreadable entry must not fail the parse for the whole payload. An entry that names no
+ * model is dropped when the rows are derived rather than rejected here.
  */
 export const LimitEntrySchema = z.object({
   kind: z.string(),
@@ -141,7 +143,7 @@ export const LimitEntrySchema = z.object({
   is_active: z.boolean().nullish(),
   scope: z
     .object({
-      model: z.object({ id: z.string().nullable(), display_name: z.string() }).nullish(),
+      model: z.object({ id: z.string().nullish(), display_name: z.string().nullish() }).nullish(),
       surface: z.unknown().nullish(),
     })
     .nullish(),
