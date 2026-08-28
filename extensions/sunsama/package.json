@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sunsama",
+  "description": "Create, Edit, View, and Delete Tasks in Sunsama",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.8"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Add a task to Sunsama, optionally linked to a URL (Trello, GitHub, Todoist, ClickUp, ...)",
+      "subtitle": "Sunsama",
+      "icon": "extension-icon.png",
+      "keywords": [
+        "create",
+        "create task",
+        "new task",
+        "todo",
+        "task"
+      ],
+      "preferences": [
+        {
+          "name": "defaultPosition",
+          "type": "dropdown",
+          "required": false,
+          "default": "top",
+          "title": "Default Position",
+          "description": "Where new tasks are placed in the day by default.",
+          "data": [
+            {
+              "title": "Top of day",
+              "value": "top"
+            },
+            {
+              "title": "Bottom of day",
+              "value": "bottom"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "view-today",
+      "title": "View Today's Tasks",
+      "description": "View, edit, delete, and add subtasks to today's tasks",
+      "subtitle": "Sunsama",
+      "icon": "extension-icon.png",
+      "preferences": [
+        {
+          "name": "showCompleted",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show completed tasks",
+          "description": "Show today's completed tasks (at the bottom of the list)."
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "set-default-channel",
+      "title": "Set Default Channel",
+      "description": "Choose the channel new tasks default to",
+      "subtitle": "Sunsama",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "title": "Sunsama",
+  "author": "artistro08",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ]
+}
