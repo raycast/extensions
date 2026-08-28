@@ -153,14 +153,17 @@ enum BridgeError: LocalizedError {
         throw BridgeError.applicationUnavailable
     }
 
-    if !application.isActive {
+    if !isActiveApplication(application) {
         application.activate(options: [])
-        for _ in 0..<30 where !application.isActive && !application.isTerminated {
-            Thread.sleep(forTimeInterval: 0.05)
+        for _ in 0..<30 where !isActiveApplication(application) && !application.isTerminated {
+            // NSRunningApplication state is refreshed on a run-loop turn.
+            // Sleeping here leaves `isActive` stuck at its pre-activation
+            // value and makes successfully activated apps look unavailable.
+            RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.05))
         }
     }
 
-    guard application.isActive, !application.isTerminated else {
+    guard isActiveApplication(application), !application.isTerminated else {
         throw BridgeError.applicationCouldNotActivate(command.appName)
     }
 
@@ -172,6 +175,11 @@ enum BridgeError: LocalizedError {
         try AccessibilityUIReader().resolveAndPerform(menuCommand, in: application)
     }
     return ExecutionResponse(ok: true)
+}
+
+private func isActiveApplication(_ application: NSRunningApplication) -> Bool {
+    application.isActive ||
+        NSWorkspace.shared.frontmostApplication?.processIdentifier == application.processIdentifier
 }
 
 private func scan(

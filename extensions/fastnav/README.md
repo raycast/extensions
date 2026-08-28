@@ -1,14 +1,16 @@
 # FastNav for Raycast
 
-FastNav for Raycast brings the existing FastNav accessibility search into the Raycast bar. It lists menu commands, menu paths, displayed keyboard shortcuts, and optionally visible actionable controls from the focused window.
+FastNav for Raycast brings the existing FastNav accessibility search into the Raycast bar. It searches menu commands, menu paths, displayed keyboard shortcuts, and optionally visible actionable controls across all running applications, while ranking the previously focused application higher.
 
 ## Features
 
 - Searches every standard menu command exposed through macOS Accessibility.
 - Includes displayed keyboard shortcuts in results and search matching.
 - Optionally searches visible buttons, links, tabs, rows, and other actionable controls.
+- Searches all running applications by default and boosts actions from the previously focused application.
+- Shows shared Apple-menu and Services actions only once in cross-application results.
 - Runs the selected accessibility action directly instead of replaying its shortcut.
-- Switches between running applications with Raycast's `⌘ P` application picker.
+- Filters to an individual running application with Raycast's `⌘ P` application picker.
 - Preserves disabled states and learns from frequently and recently used actions.
 - Uses the same Swift accessibility readers as the FastNav macOS app.
 
@@ -16,16 +18,16 @@ FastNav for Raycast brings the existing FastNav accessibility search into the Ra
 
 On first use, choose **Request Accessibility Access**. In **System Settings → Privacy & Security → Accessibility**, enable the FastNav bridge, then return to Raycast and refresh the command.
 
-FastNav uses Accessibility only to read and run actions in the application you select. The bridge runs locally, does not use the network, and is built from the Swift source included with this extension.
+FastNav uses Accessibility only to read and run actions in your running applications. The bridge runs locally, does not use the network, and is built from the Swift source included with this extension.
 
-Visible interface search is on by default. To change it, open **Raycast Settings → Extensions → FastNav** and switch **Include Visible Interface Elements** on or off.
+Cross-application search and visible interface search are on by default. To change either behavior, open **Raycast Settings → Extensions → FastNav** and use **Search Across All Applications** or **Include Visible Interface Elements**. Turning off cross-application search starts each command session with only the previously focused application; the application picker can still switch to another running app.
 
 ## Install for Local Development
 
 Local development requires macOS 14 or newer, Raycast, Node.js, and Xcode 16.3 or newer.
 
 ```sh
-cd "raycast extension"
+cd raycast_extension
 npm install
 npm run dev
 ```

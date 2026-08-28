@@ -23,7 +23,7 @@
     {
       "name": "search-app-actions",
       "title": "Search App Actions",
-      "description": "Search the accessibility tree, menu commands, and keyboard shortcuts of a running app.",
+      "description": "Search accessibility actions, menu commands, and keyboard shortcuts across running apps.",
       "mode": "view",
       "keywords": [
         "menu",
@@ -36,9 +36,18 @@
   ],
   "preferences": [
     {
+      "name": "searchAllApplications",
+      "title": "Search Across All Applications",
+      "description": "Search every running application and rank actions from the previously focused application higher. Turn this off to search only the previously focused application.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Search actions from all running applications"
+    },
+    {
       "name": "includeInterfaceElements",
       "title": "Include Visible Interface Elements",
-      "description": "Include actionable buttons, links, tabs, rows, and controls from the focused window.",
+      "description": "Include actionable buttons, links, tabs, rows, and controls from each app's focused window.",
       "type": "checkbox",
       "required": false,
       "default": true,

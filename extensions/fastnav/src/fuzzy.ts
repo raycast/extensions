@@ -6,6 +6,11 @@ export interface RankedCommand {
   score: number;
 }
 
+const maximumEmptyQueryUsageBonus = 35;
+const maximumSearchUsageBonus = 25;
+const minimumFocusedApplicationEmptyBonus = maximumEmptyQueryUsageBonus + 5;
+const minimumFocusedApplicationSearchBonus = maximumSearchUsageBonus + 5;
+
 function normalize(value: string): string {
   return value
     .normalize("NFKD")
@@ -91,24 +96,33 @@ function matchScore(
 function focusedApplicationBonus(
   command: FastNavCommand,
   hasQuery: boolean,
+  focusedApplicationPID?: number,
 ): number {
-  const bridgeBonus = hasQuery
-    ? command.focusedApplicationBonusSearch
-    : command.focusedApplicationBonusEmpty;
-  if (bridgeBonus !== undefined) return bridgeBonus;
+  if (command.pid !== focusedApplicationPID) return 0;
 
-  // Cached results from older builds do not carry the bridge-provided score.
   const rootMenu = command.menuPath[0]?.toLocaleLowerCase();
   const isAppleSystemMenu =
     command.source === "menu" && (rootMenu === "apple" || rootMenu === "");
   if (isAppleSystemMenu) return 0;
-  return hasQuery ? 8 : 40;
+
+  const bridgeBonus = hasQuery
+    ? command.focusedApplicationBonusSearch
+    : command.focusedApplicationBonusEmpty;
+  const minimumBonus = hasQuery
+    ? minimumFocusedApplicationSearchBonus
+    : minimumFocusedApplicationEmptyBonus;
+
+  // Older bridge builds used a search bonus that was weaker than one recent
+  // usage entry. Keep the live app ahead for equally relevant commands while
+  // still allowing a substantially better fuzzy match from another app to win.
+  return Math.max(bridgeBonus ?? 0, minimumBonus);
 }
 
 export function rankCommands(
   commands: FastNavCommand[],
   query: string,
   usage: UsageMap,
+  focusedApplicationPID?: number,
 ): RankedCommand[] {
   const hasQuery = query.trim().length > 0;
 
@@ -120,9 +134,13 @@ export function rankCommands(
       const enabledBonus = command.isEnabled ? 3 : -30;
       const rawUsageBonus = usageBonus(usage[usageKey(command)]);
       const adjustedUsageBonus = hasQuery
-        ? Math.min(25, rawUsageBonus * 0.2)
-        : rawUsageBonus;
-      const focusBonus = focusedApplicationBonus(command, hasQuery);
+        ? Math.min(maximumSearchUsageBonus, rawUsageBonus * 0.2)
+        : Math.min(maximumEmptyQueryUsageBonus, rawUsageBonus);
+      const focusBonus = focusedApplicationBonus(
+        command,
+        hasQuery,
+        focusedApplicationPID,
+      );
       return [
         {
           command,

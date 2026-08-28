@@ -9,6 +9,7 @@ import {
   List,
   open,
   openExtensionPreferences,
+  PopToRootType,
   showHUD,
   showToast,
   Toast,
@@ -25,11 +26,70 @@ import {
   scanMenuCommands,
 } from "./bridge";
 import { rankCommands } from "./fuzzy";
+import { collapseSharedSystemCommands } from "./system-command-filter";
 import { loadUsage, recordUsage, UsageMap } from "./usage";
 
 const accessibilitySettingsURL =
   "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
 const commandCache = new Cache({ namespace: "actions-v3" });
+const startupCache = new Cache({ namespace: "startup-v1" });
+const allApplicationsScope = "all";
+const focusedApplicationScope = "focused";
+const maximumConcurrentApplicationScans = 4;
+
+interface ApplicationScanResult {
+  application: RunningApplication;
+  menuResult: PromiseSettledResult<FastNavCommand[]>;
+  interfaceResult: PromiseSettledResult<FastNavCommand[]>;
+}
+
+interface FastNavPreferences {
+  searchAllApplications: boolean;
+  includeInterfaceElements: boolean;
+}
+
+interface StartupSnapshot {
+  applications: RunningApplication[];
+  commands: FastNavCommand[];
+}
+
+function startupCacheKey(includesInterface: boolean): string {
+  return includesInterface ? "all" : "menu";
+}
+
+function readStartupSnapshot(
+  includesInterface: boolean,
+): StartupSnapshot | undefined {
+  const cached = startupCache.get(startupCacheKey(includesInterface));
+  if (!cached) return undefined;
+
+  try {
+    const snapshot = JSON.parse(cached) as StartupSnapshot;
+    if (
+      !Array.isArray(snapshot.applications) ||
+      !Array.isArray(snapshot.commands)
+    ) {
+      return undefined;
+    }
+    return snapshot;
+  } catch {
+    return undefined;
+  }
+}
+
+function writeStartupSnapshot(
+  applicationState: ApplicationsResponse,
+  commands: FastNavCommand[],
+  includesInterface: boolean,
+) {
+  startupCache.set(
+    startupCacheKey(includesInterface),
+    JSON.stringify({
+      applications: applicationState.applications,
+      commands,
+    } satisfies StartupSnapshot),
+  );
+}
 
 function cacheKey(
   application: RunningApplication,
@@ -79,68 +139,100 @@ function deduplicateCommands(commands: FastNavCommand[]): FastNavCommand[] {
 function replaceSource(
   current: FastNavCommand[],
   replacement: FastNavCommand[],
+  pid: number,
   source: FastNavCommand["source"],
 ): FastNavCommand[] {
   return deduplicateCommands([
-    ...current.filter((command) => command.source !== source),
+    ...current.filter(
+      (command) => command.pid !== pid || command.source !== source,
+    ),
     ...replacement,
   ]);
-}
-
-function iconForCommand(command: FastNavCommand): Icon {
-  if (command.source === "menu") return Icon.CommandSymbol;
-
-  switch (command.role) {
-    case "AXButton":
-    case "AXCheckBox":
-    case "AXRadioButton":
-      return Icon.Mouse;
-    case "AXLink":
-      return Icon.Link;
-    case "AXTextField":
-    case "AXTextArea":
-      return Icon.TextCursor;
-    case "AXRow":
-    case "AXCell":
-    case "AXList":
-    case "AXOutline":
-    case "AXTable":
-      return Icon.List;
-    default:
-      return Icon.AppWindow;
-  }
 }
 
 function applicationIcon(application: RunningApplication) {
   return application.path ? { fileIcon: application.path } : Icon.AppWindow;
 }
 
+function applicationForCommand(
+  applications: RunningApplication[],
+  command: FastNavCommand,
+): RunningApplication | undefined {
+  if (command.bundleIdentifier) {
+    return applications.find(
+      (application) =>
+        application.bundleIdentifier === command.bundleIdentifier,
+    );
+  }
+
+  return (
+    applications.find(
+      (application) =>
+        application.pid === command.pid && application.name === command.appName,
+    ) ??
+    applications.find((application) => application.name === command.appName)
+  );
+}
+
+async function getCurrentApplicationState(): Promise<ApplicationsResponse> {
+  return getRunningApplications();
+}
+
 export default function SearchAppActions() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<FastNavPreferences>();
+  const [startupSnapshot] = useState(() =>
+    preferences.searchAllApplications
+      ? readStartupSnapshot(preferences.includeInterfaceElements)
+      : undefined,
+  );
   const [applicationState, setApplicationState] =
     useState<ApplicationsResponse>();
-  const [selectedPID, setSelectedPID] = useState<number>();
-  const [commands, setCommands] = useState<FastNavCommand[]>([]);
+  const [focusedApplicationPID, setFocusedApplicationPID] = useState<number>();
+  const [applicationScope, setApplicationScope] = useState(() =>
+    preferences.searchAllApplications
+      ? allApplicationsScope
+      : focusedApplicationScope,
+  );
+  const [commands, setCommands] = useState<FastNavCommand[]>(
+    () => startupSnapshot?.commands ?? [],
+  );
   const [usage, setUsage] = useState<UsageMap>({});
   const [searchText, setSearchText] = useState("");
+  const [selectedItemID, setSelectedItemID] = useState<string>();
   const [isLoadingApplications, setIsLoadingApplications] = useState(true);
   const [isLoadingCommands, setIsLoadingCommands] = useState(false);
   const [error, setError] = useState<string>();
   const scanRevision = useRef(0);
+  const commandsRef = useRef(commands);
 
   const refreshApplications = useCallback(async () => {
     setIsLoadingApplications(true);
     setError(undefined);
     try {
-      const response = await getRunningApplications();
+      const response = await getCurrentApplicationState();
+      setFocusedApplicationPID(response.defaultPid);
       setApplicationState(response);
-      setSelectedPID((currentPID) =>
-        response.applications.some(
-          (application) => application.pid === currentPID,
+      setApplicationScope((currentScope) => {
+        const focusedPID = response.defaultPid ?? response.applications[0]?.pid;
+        const focusedScope = focusedPID
+          ? String(focusedPID)
+          : focusedApplicationScope;
+        if (
+          currentScope === focusedApplicationScope ||
+          (!preferences.searchAllApplications &&
+            currentScope === allApplicationsScope)
+        ) {
+          return focusedScope;
+        }
+        if (currentScope === allApplicationsScope) return currentScope;
+        return response.applications.some(
+          (application) => String(application.pid) === currentScope,
         )
-          ? currentPID
-          : (response.defaultPid ?? response.applications[0]?.pid),
-      );
+          ? currentScope
+          : preferences.searchAllApplications
+            ? allApplicationsScope
+            : focusedScope;
+      });
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
@@ -150,90 +242,195 @@ export default function SearchAppActions() {
     } finally {
       setIsLoadingApplications(false);
     }
-  }, []);
+  }, [preferences.searchAllApplications]);
 
   const refreshCommands = useCallback(async () => {
     const revision = scanRevision.current + 1;
     scanRevision.current = revision;
-    const selectedApplication = applicationState?.applications.find(
-      (application) => application.pid === selectedPID,
-    );
-    if (!selectedPID || !selectedApplication || !applicationState?.trusted) {
+    const currentApplicationState = applicationState;
+    // Keep the startup snapshot visible while the live application list is
+    // still loading. Clearing it here makes the list disappear and then
+    // reappear as soon as refreshApplications finishes.
+    if (!currentApplicationState) return;
+
+    const targetApplications =
+      applicationScope === allApplicationsScope
+        ? currentApplicationState.applications
+        : currentApplicationState.applications.filter(
+            (application) => String(application.pid) === applicationScope,
+          );
+    if (!targetApplications.length || !currentApplicationState.trusted) {
+      commandsRef.current = [];
       setCommands([]);
       setIsLoadingCommands(false);
       return;
     }
+    const scanningApplicationState: ApplicationsResponse =
+      currentApplicationState;
 
-    const cachedCommands = readCachedCommands(
-      selectedApplication,
-      preferences.includeInterfaceElements,
+    const cachedCommandsByPID = new Map(
+      targetApplications.map((application) => [
+        application.pid,
+        readCachedCommands(application, preferences.includeInterfaceElements),
+      ]),
     );
+    const cachedCommands = [...cachedCommandsByPID.values()].flat();
+    commandsRef.current = cachedCommands;
     setCommands(cachedCommands);
+    if (applicationScope === allApplicationsScope) {
+      writeStartupSnapshot(
+        scanningApplicationState,
+        cachedCommands,
+        preferences.includeInterfaceElements,
+      );
+    }
     setIsLoadingCommands(true);
     setError(undefined);
 
-    const menuRequest = scanMenuCommands(selectedPID);
-    const interfaceRequest = preferences.includeInterfaceElements
-      ? scanInterfaceCommands(selectedPID)
-      : Promise.resolve([]);
+    async function scanApplication(
+      application: RunningApplication,
+    ): Promise<ApplicationScanResult> {
+      const menuRequest = scanMenuCommands(application.pid);
+      const interfaceRequest = preferences.includeInterfaceElements
+        ? scanInterfaceCommands(application.pid)
+        : Promise.resolve([] as FastNavCommand[]);
 
-    void menuRequest.then(
-      (menuCommands) => {
-        if (scanRevision.current !== revision) return;
-        setCommands((current) => replaceSource(current, menuCommands, "menu"));
-      },
-      () => undefined,
-    );
-    void interfaceRequest.then(
-      (interfaceCommands) => {
-        if (scanRevision.current !== revision) return;
-        setCommands((current) =>
-          replaceSource(current, interfaceCommands, "interface"),
-        );
-      },
-      () => undefined,
-    );
-
-    const [menuResult, interfaceResult] = await Promise.allSettled([
-      menuRequest,
-      interfaceRequest,
-    ]);
-    if (scanRevision.current !== revision) return;
-
-    const menuCommands =
-      menuResult.status === "fulfilled"
-        ? menuResult.value
-        : cachedCommands.filter((command) => command.source === "menu");
-    const interfaceCommands = preferences.includeInterfaceElements
-      ? interfaceResult.status === "fulfilled"
-        ? interfaceResult.value
-        : cachedCommands.filter((command) => command.source === "interface")
-      : [];
-    const nextCommands = deduplicateCommands([
-      ...menuCommands,
-      ...interfaceCommands,
-    ]);
-    setCommands(nextCommands);
-
-    if (
-      menuResult.status === "fulfilled" ||
-      interfaceResult.status === "fulfilled"
-    ) {
-      commandCache.set(
-        cacheKey(selectedApplication, preferences.includeInterfaceElements),
-        JSON.stringify(nextCommands),
+      void menuRequest.then(
+        (menuCommands) => {
+          if (scanRevision.current !== revision) return;
+          const nextCommands = replaceSource(
+            commandsRef.current,
+            menuCommands,
+            application.pid,
+            "menu",
+          );
+          commandsRef.current = nextCommands;
+          setCommands(nextCommands);
+          commandCache.set(
+            cacheKey(application, preferences.includeInterfaceElements),
+            JSON.stringify(
+              nextCommands.filter((command) => command.pid === application.pid),
+            ),
+          );
+          if (
+            applicationScope === allApplicationsScope &&
+            application.pid === scanningApplicationState.defaultPid
+          ) {
+            writeStartupSnapshot(
+              scanningApplicationState,
+              nextCommands,
+              preferences.includeInterfaceElements,
+            );
+          }
+        },
+        () => undefined,
       );
-    } else if (!cachedCommands.length) {
-      const reason =
-        menuResult.status === "rejected"
-          ? menuResult.reason
-          : interfaceResult.status === "rejected"
-            ? interfaceResult.reason
-            : "The accessibility scan failed.";
+      void interfaceRequest.then(
+        (interfaceCommands) => {
+          if (scanRevision.current !== revision) return;
+          const nextCommands = replaceSource(
+            commandsRef.current,
+            interfaceCommands,
+            application.pid,
+            "interface",
+          );
+          commandsRef.current = nextCommands;
+          setCommands(nextCommands);
+          commandCache.set(
+            cacheKey(application, preferences.includeInterfaceElements),
+            JSON.stringify(
+              nextCommands.filter((command) => command.pid === application.pid),
+            ),
+          );
+        },
+        () => undefined,
+      );
+
+      const [menuResult, interfaceResult] = await Promise.allSettled([
+        menuRequest,
+        interfaceRequest,
+      ]);
+      return { application, menuResult, interfaceResult };
+    }
+
+    const scanResults: ApplicationScanResult[] = [];
+    for (
+      let index = 0;
+      index < targetApplications.length;
+      index += maximumConcurrentApplicationScans
+    ) {
+      const batch = targetApplications.slice(
+        index,
+        index + maximumConcurrentApplicationScans,
+      );
+      scanResults.push(...(await Promise.all(batch.map(scanApplication))));
+      if (scanRevision.current !== revision) return;
+    }
+
+    let successfulScans = 0;
+    const failures: unknown[] = [];
+    const nextCommands = deduplicateCommands(
+      scanResults.flatMap(({ application, menuResult, interfaceResult }) => {
+        const cachedApplicationCommands =
+          cachedCommandsByPID.get(application.pid) ?? [];
+        const menuCommands =
+          menuResult.status === "fulfilled"
+            ? menuResult.value
+            : cachedApplicationCommands.filter(
+                (command) => command.source === "menu",
+              );
+        const interfaceCommands = preferences.includeInterfaceElements
+          ? interfaceResult.status === "fulfilled"
+            ? interfaceResult.value
+            : cachedApplicationCommands.filter(
+                (command) => command.source === "interface",
+              )
+          : [];
+        const applicationCommands = deduplicateCommands([
+          ...menuCommands,
+          ...interfaceCommands,
+        ]);
+
+        if (menuResult.status === "fulfilled") successfulScans += 1;
+        else failures.push(menuResult.reason);
+        if (preferences.includeInterfaceElements) {
+          if (interfaceResult.status === "fulfilled") successfulScans += 1;
+          else failures.push(interfaceResult.reason);
+        }
+
+        if (
+          menuResult.status === "fulfilled" ||
+          (preferences.includeInterfaceElements &&
+            interfaceResult.status === "fulfilled")
+        ) {
+          commandCache.set(
+            cacheKey(application, preferences.includeInterfaceElements),
+            JSON.stringify(applicationCommands),
+          );
+        }
+        return applicationCommands;
+      }),
+    );
+    commandsRef.current = nextCommands;
+    setCommands(nextCommands);
+    if (applicationScope === allApplicationsScope) {
+      writeStartupSnapshot(
+        scanningApplicationState,
+        nextCommands,
+        preferences.includeInterfaceElements,
+      );
+    }
+
+    if (successfulScans === 0 && !cachedCommands.length) {
+      const reason = failures[0] ?? "The accessibility scan failed.";
       setError(reason instanceof Error ? reason.message : String(reason));
     }
     setIsLoadingCommands(false);
-  }, [applicationState, preferences.includeInterfaceElements, selectedPID]);
+  }, [
+    applicationScope,
+    applicationState,
+    preferences.includeInterfaceElements,
+  ]);
 
   useEffect(() => {
     void loadUsage().then(setUsage);
@@ -241,19 +438,67 @@ export default function SearchAppActions() {
   }, [refreshApplications]);
 
   useEffect(() => {
+    if (!preferences.searchAllApplications) return;
+
+    let cancelled = false;
+    const refreshFocusedApplication = async () => {
+      const currentApplicationState = await getRunningApplications().catch(
+        () => undefined,
+      );
+      if (cancelled || !currentApplicationState?.defaultPid) return;
+      setFocusedApplicationPID((currentPID) =>
+        currentPID === currentApplicationState.defaultPid
+          ? currentPID
+          : currentApplicationState.defaultPid,
+      );
+    };
+
+    void refreshFocusedApplication();
+    const interval = setInterval(() => void refreshFocusedApplication(), 750);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [preferences.searchAllApplications]);
+
+  useEffect(() => {
     void refreshCommands();
   }, [refreshCommands]);
 
   const selectedApplication = applicationState?.applications.find(
-    (application) => application.pid === selectedPID,
+    (application) => String(application.pid) === applicationScope,
+  );
+  const searchesAllApplications = applicationScope === allApplicationsScope;
+  const displayedApplications =
+    applicationState?.applications ?? startupSnapshot?.applications ?? [];
+  const searchableCommands = useMemo(
+    () =>
+      searchesAllApplications
+        ? collapseSharedSystemCommands(commands, focusedApplicationPID)
+        : commands,
+    [commands, focusedApplicationPID, searchesAllApplications],
   );
   const results = useMemo(
-    () => rankCommands(commands, searchText, usage).slice(0, 150),
-    [commands, searchText, usage],
+    () =>
+      rankCommands(
+        searchableCommands,
+        searchText,
+        usage,
+        focusedApplicationPID,
+      ).slice(0, 150),
+    [focusedApplicationPID, searchText, searchableCommands, usage],
   );
+  const selectionResetKey = `${applicationScope}\0${focusedApplicationPID ?? ""}\0${searchText}`;
+  const previousSelectionResetKey = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (previousSelectionResetKey.current === selectionResetKey) return;
+    previousSelectionResetKey.current = selectionResetKey;
+    setSelectedItemID(results[0]?.command.id);
+  }, [results, selectionResetKey]);
 
   async function run(command: FastNavCommand) {
-    await closeMainWindow();
+    await closeMainWindow({ popToRootType: PopToRootType.Immediate });
     try {
       await executeCommand(command);
       const updatedUsage = await recordUsage(command, usage);
@@ -295,7 +540,6 @@ export default function SearchAppActions() {
       shortcut={Keyboard.Shortcut.Common.Refresh}
       onAction={async () => {
         await refreshApplications();
-        await refreshCommands();
       }}
     />
   );
@@ -327,7 +571,7 @@ export default function SearchAppActions() {
         }
       />
     );
-  } else if (error) {
+  } else if (error && commands.length === 0) {
     content = (
       <List.EmptyView
         icon={Icon.ExclamationMark}
@@ -355,7 +599,11 @@ export default function SearchAppActions() {
       <List.EmptyView
         icon={Icon.MagnifyingGlass}
         title="No Searchable Actions"
-        description="This application did not expose menu commands or visible controls through Accessibility."
+        description={
+          searchesAllApplications
+            ? "The running applications did not expose menu commands or visible controls through Accessibility."
+            : "This application did not expose menu commands or visible controls through Accessibility."
+        }
         actions={
           <ActionPanel>
             {refreshAction}
@@ -367,32 +615,62 @@ export default function SearchAppActions() {
   } else {
     content = results.map(({ command }) => {
       const breadcrumb = command.menuPath.join(" › ");
+      const commandApplication = applicationForCommand(
+        displayedApplications,
+        command,
+      );
+      const liveApplication = applicationForCommand(
+        applicationState?.applications ?? [],
+        command,
+      );
+      const liveCommand = liveApplication
+        ? {
+            ...command,
+            pid: liveApplication.pid,
+            appName: liveApplication.name,
+            bundleIdentifier: liveApplication.bundleIdentifier,
+          }
+        : undefined;
       return (
         <List.Item
           key={command.id}
           id={command.id}
-          icon={iconForCommand(command)}
+          icon={
+            commandApplication
+              ? applicationIcon(commandApplication)
+              : Icon.AppWindow
+          }
           title={command.title}
           subtitle={breadcrumb}
           accessories={[
             ...(command.source === "interface" ? [{ tag: "Interface" }] : []),
             ...(command.shortcut
-              ? [{ text: command.shortcut, tooltip: "Keyboard shortcut" }]
+              ? [
+                  {
+                    tag: command.shortcut,
+                    tooltip: `Keyboard shortcut: ${command.shortcut}`,
+                  },
+                ]
               : []),
             ...(!command.isEnabled ? [{ text: "Unavailable" }] : []),
           ]}
           actions={
             <ActionPanel>
-              {command.isEnabled ? (
+              {command.isEnabled && liveCommand ? (
                 <Action
                   title="Run Action"
                   icon={Icon.Play}
-                  onAction={() => run(command)}
+                  onAction={() => run(liveCommand)}
                 />
               ) : null}
               <Action.CopyToClipboard
                 title="Copy Action Details"
-                content={[command.title, breadcrumb, command.shortcut]
+                content={[
+                  command.appName,
+                  command.title,
+                  breadcrumb,
+                  command.shortcut,
+                ]
                   .filter(Boolean)
                   .join(" — ")}
               />
@@ -408,23 +686,37 @@ export default function SearchAppActions() {
   return (
     <List
       filtering={false}
-      isLoading={isLoadingApplications || isLoadingCommands}
+      isLoading={
+        commands.length === 0 && (isLoadingApplications || isLoadingCommands)
+      }
       searchBarPlaceholder={
         selectedApplication
           ? `Search ${selectedApplication.name} actions…`
-          : "Search app actions…"
+          : searchesAllApplications
+            ? "Search actions across all apps…"
+            : "Search focused app actions…"
       }
       onSearchTextChange={setSearchText}
+      searchText={searchText}
+      selectedItemId={selectedItemID}
+      onSelectionChange={(id) => setSelectedItemID(id ?? undefined)}
       searchBarAccessory={
         applicationState?.applications.length ? (
           <List.Dropdown
-            tooltip="Choose Running Application"
-            value={selectedPID ? String(selectedPID) : undefined}
-            onChange={(pid) => {
+            tooltip="Choose Application Scope"
+            value={applicationScope}
+            onChange={(scope) => {
               setSearchText("");
-              setSelectedPID(Number(pid));
+              setApplicationScope(scope);
             }}
           >
+            {preferences.searchAllApplications ? (
+              <List.Dropdown.Item
+                value={allApplicationsScope}
+                title="All Applications"
+                icon={Icon.Globe}
+              />
+            ) : null}
             {applicationState.applications.map((application) => (
               <List.Dropdown.Item
                 key={application.pid}
