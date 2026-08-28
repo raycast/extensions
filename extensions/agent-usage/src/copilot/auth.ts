@@ -29,21 +29,32 @@ function extractMarkedValue(output: string, startMarker: string, endMarker: stri
 }
 
 function parseShellLookupOutput(output: string): { githubToken: string | null; ghToken: string | null } {
+  const githubToken = extractMarkedValue(output, GITHUB_TOKEN_START_MARKER, GITHUB_TOKEN_END_MARKER);
+  const ghToken = extractMarkedValue(output, GH_TOKEN_START_MARKER, GH_TOKEN_END_MARKER);
+
   return {
-    githubToken: extractMarkedValue(output, GITHUB_TOKEN_START_MARKER, GITHUB_TOKEN_END_MARKER),
-    ghToken: extractMarkedValue(output, GH_TOKEN_START_MARKER, GH_TOKEN_END_MARKER),
+    githubToken: githubToken === "%GITHUB_TOKEN%" ? null : githubToken,
+    ghToken: ghToken === "%GH_TOKEN%" ? null : ghToken,
   };
 }
 
 async function readShellEnvTokens(): Promise<{ githubToken: string | null; ghToken: string | null }> {
   try {
-    const shell = process.env.SHELL || "/bin/zsh";
-    const lookupScript = [
-      `printf '${GITHUB_TOKEN_START_MARKER}%s${GITHUB_TOKEN_END_MARKER}\\n' "$GITHUB_TOKEN"`,
-      `printf '${GH_TOKEN_START_MARKER}%s${GH_TOKEN_END_MARKER}\\n' "$GH_TOKEN"`,
-    ].join("; ");
+    const shell = process.env.SHELL || (process.platform === "win32" ? process.env.ComSpec || "cmd.exe" : "/bin/zsh");
+    const shellName = shell.replaceAll("\\", "/").split("/").pop()?.toLowerCase() ?? "";
+    const isCommandShell = shellName === "cmd.exe" || shellName.endsWith(".cmd") || shellName.endsWith(".bat");
+    const lookupScript = isCommandShell
+      ? `echo ${GITHUB_TOKEN_START_MARKER}%GITHUB_TOKEN%${GITHUB_TOKEN_END_MARKER} & echo ${GH_TOKEN_START_MARKER}%GH_TOKEN%${GH_TOKEN_END_MARKER}`
+      : [
+          `printf '${GITHUB_TOKEN_START_MARKER}%s${GITHUB_TOKEN_END_MARKER}\\n' "$GITHUB_TOKEN"`,
+          `printf '${GH_TOKEN_START_MARKER}%s${GH_TOKEN_END_MARKER}\\n' "$GH_TOKEN"`,
+        ].join("; ");
+    const shellArgs = isCommandShell ? ["/d", "/s", "/c", lookupScript] : ["-ilc", lookupScript];
+    const isBatchShell = shellName.endsWith(".cmd") || shellName.endsWith(".bat");
+    const executable = isBatchShell ? process.env.ComSpec || "cmd.exe" : shell;
+    const executableArgs = isBatchShell ? ["/d", "/c", shell] : shellArgs;
 
-    const { stdout } = await execFileAsync(shell, ["-ilc", lookupScript], {
+    const { stdout } = await execFileAsync(executable, executableArgs, {
       encoding: "utf-8",
       timeout: SHELL_LOOKUP_TIMEOUT_MS,
       maxBuffer: 64 * 1024,
@@ -55,44 +66,22 @@ async function readShellEnvTokens(): Promise<{ githubToken: string | null; ghTok
   }
 }
 
-async function readLocalToken(): Promise<string | null> {
-  const direct = cleanToken(process.env.GITHUB_TOKEN) ?? cleanToken(process.env.GH_TOKEN);
-  if (direct) {
-    return direct;
+export interface CopilotAuthTokens {
+  githubToken: string | null;
+  ghToken: string | null;
+}
+
+export async function resolveCopilotAuthTokens(): Promise<CopilotAuthTokens> {
+  const directGithubToken = cleanToken(process.env.GITHUB_TOKEN);
+  const directGhToken = cleanToken(process.env.GH_TOKEN);
+  if (directGithubToken && directGhToken) {
+    return { githubToken: directGithubToken, ghToken: directGhToken };
   }
 
   const { githubToken, ghToken } = await readShellEnvTokens();
-  return githubToken ?? ghToken;
-}
-
-interface ResolveCopilotAuthTokensResult {
-  primaryToken: string | null;
-  localToken: string | null;
-  preferenceToken: string | null;
-}
-
-export async function resolveCopilotAuthTokens(
-  options: { preferenceToken?: string } = {},
-): Promise<ResolveCopilotAuthTokensResult> {
-  const localToken = await readLocalToken();
-  const preferenceToken = cleanToken(options.preferenceToken);
 
   return {
-    primaryToken: localToken ?? preferenceToken,
-    localToken,
-    preferenceToken,
+    githubToken: directGithubToken ?? githubToken,
+    ghToken: directGhToken ?? ghToken,
   };
-}
-
-export function shouldFallbackToPreferenceToken(options: {
-  localToken: string | null;
-  preferenceToken: string | null;
-  errorType?: string;
-}): boolean {
-  return (
-    options.errorType === "unauthorized" &&
-    options.localToken !== null &&
-    options.preferenceToken !== null &&
-    options.localToken !== options.preferenceToken
-  );
 }

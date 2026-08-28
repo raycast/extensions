@@ -26,7 +26,7 @@ Track usage across your AI coding agents in one place.
 | **Claude**      | Anthropic OAuth Usage API   |     —      |    ✓     |    —    |       —       | Auto-detected after `claude` login                                                               |
 | **ClinePass**   | Cline API                   |     ✓      |    —     |    —    |       ✓       | Auto-detected from the local Cline login, or add a user ID and API key via Manage Accounts       |
 | **Codex**       | OpenAI API                  |     ✓      |    —     |    —    |       ✓       | Run `codex login`, add additional `CODEX_HOME` paths in preferences, or paste a token manually   |
-| **Copilot**     | GitHub Copilot internal API |     —      |    —     |    ✓    |       —       | Auto-detected from `GH_TOKEN`/`GITHUB_TOKEN`, or paste token in preferences                      |
+| **Copilot**     | GitHub Copilot internal API |     ✓      |    —     |    ✓    |       ✓       | Add named accounts via Manage Accounts, or use `GH_TOKEN`/`GITHUB_TOKEN`                         |
 | **Cursor**      | Cursor API                  |     ✓      |    —     |    —    |       —       | Auto-detected from Cursor app login, or paste cookie header in preferences                       |
 | **DeepSeek**    | DeepSeek balance API        |     ✓      |    ✓     |    ✓    |       —       | Use OpenCode `deepseek`, set `DEEPSEEK_API_KEY`/`DEEPSEEK_KEY`, or paste an API key              |
 | **Droid**       | Factory AI API              |     —      |    —     |    —    |       —       | Run `droid` command to login                                                                     |
@@ -81,9 +81,11 @@ This works by comparing your stored account tokens with the keys configured in `
 ### Copilot Token
 
 1. Use a GitHub OAuth token that the Copilot internal API accepts, such as the token from `gh auth token`
-2. Standard personal access tokens may not work with `https://api.github.com/copilot_internal/user`
-3. Set that token in `GH_TOKEN` or `GITHUB_TOKEN`; if Raycast doesn't inherit shell env, Agent Usage will resolve it from your login shell
-4. Optional fallback: paste the same OAuth token in extension preferences (`Copilot Authorization Token`)
+2. Add each token as a named account with the in-view **Manage Accounts** action
+3. `GH_TOKEN` and `GITHUB_TOKEN` are also shown as separate auto-detected accounts; Agent Usage resolves them from your login shell when Raycast doesn't inherit the shell environment
+4. Standard personal access tokens may not work with `https://api.github.com/copilot_internal/user`
+
+The legacy `Copilot Authorization Token` preference remains supported as a `Preference` account.
 
 ## Preferences
 

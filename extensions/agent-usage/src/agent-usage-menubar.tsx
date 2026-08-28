@@ -20,7 +20,7 @@ import {
   useClaudeUsage,
   useClinePassAccounts,
   useCodexAccounts,
-  useCopilotUsage,
+  useCopilotAccounts,
   useCursorUsage,
   useDeepSeekUsage,
   useDroidUsage,
@@ -107,7 +107,7 @@ export default function MenuBarCommand() {
   const claudeState = useClaudeUsage(isClaudeVisible);
   const clinePassState = useClinePassAccounts(isClinePassVisible);
   const codexState = useCodexAccounts(isCodexVisible);
-  const copilotState = useCopilotUsage(isCopilotVisible);
+  const copilotState = useCopilotAccounts(isCopilotVisible);
   const cursorState = useCursorUsage(isCursorVisible);
   const deepseekState = useDeepSeekUsage(isDeepSeekVisible);
   const droidState = useDroidUsage(isDroidVisible);
@@ -153,16 +153,6 @@ export default function MenuBarCommand() {
         accessory: getClaudeAccessory(claudeState.usage, claudeState.error, claudeState.isLoading),
         revalidate: claudeState.revalidate,
         lastFetchedAt: claudeState.lastFetchedAt,
-      },
-      {
-        id: "copilot",
-        name: "Copilot",
-        icon: getThemeIcon("copilot-icon.svg"),
-        visible: isCopilotVisible,
-        isLoading: copilotState.isLoading,
-        accessory: getCopilotAccessory(copilotState.usage, copilotState.error, copilotState.isLoading),
-        revalidate: copilotState.revalidate,
-        lastFetchedAt: copilotState.lastFetchedAt,
       },
       {
         id: "cursor",
@@ -259,7 +249,6 @@ export default function MenuBarCommand() {
       isAihubmixVisible,
       isAmpVisible,
       isClaudeVisible,
-      isCopilotVisible,
       isCursorVisible,
       isDeepSeekVisible,
       isDroidVisible,
@@ -281,11 +270,6 @@ export default function MenuBarCommand() {
       claudeState.error,
       claudeState.revalidate,
       claudeState.lastFetchedAt,
-      copilotState.isLoading,
-      copilotState.usage,
-      copilotState.error,
-      copilotState.revalidate,
-      copilotState.lastFetchedAt,
       cursorState.isLoading,
       cursorState.usage,
       cursorState.error,
@@ -389,6 +373,33 @@ export default function MenuBarCommand() {
     }));
   }, [isCodexVisible, codexState]);
 
+  const copilotAgents = useMemo<MenuBarAgent[]>(() => {
+    if (!isCopilotVisible) return [];
+    if (copilotState.isLoading) {
+      return [
+        {
+          id: "copilot" as AgentId,
+          name: "Copilot",
+          icon: getThemeIcon("copilot-icon.svg"),
+          visible: true,
+          isLoading: true,
+          accessory: getCopilotAccessory(null, null, true),
+          revalidate: copilotState.revalidate,
+        },
+      ];
+    }
+    return copilotState.accounts.map((account) => ({
+      id: `copilot-${account.accountId}` as AgentId,
+      name: account.label === "Default" ? "Copilot" : `Copilot • ${account.label}`,
+      icon: getThemeIcon("copilot-icon.svg"),
+      visible: true,
+      isLoading: account.isLoading,
+      accessory: getCopilotAccessory(account.usage, account.error, account.isLoading),
+      revalidate: account.revalidate,
+      lastFetchedAt: account.lastFetchedAt,
+    }));
+  }, [isCopilotVisible, copilotState]);
+
   const kimiAgents = useMemo<MenuBarAgent[]>(() => {
     if (!isKimiVisible) return [];
     if (kimiState.isLoading) {
@@ -476,11 +487,17 @@ export default function MenuBarCommand() {
   const visibleAgents = useMemo(
     () =>
       sortByDefaultAgentOrder(
-        [...singleAgents, ...clinePassAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter(
-          (a) => a.visible,
-        ),
+        [
+          ...singleAgents,
+          ...clinePassAgents,
+          ...codexAgents,
+          ...copilotAgents,
+          ...kimiAgents,
+          ...syntheticAgents,
+          ...zaiAgents,
+        ].filter((a) => a.visible),
       ),
-    [singleAgents, clinePassAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
+    [singleAgents, clinePassAgents, codexAgents, copilotAgents, kimiAgents, syntheticAgents, zaiAgents],
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 

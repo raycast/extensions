@@ -13,7 +13,8 @@
     "garrick_zhang",
     "EDM115",
     "chingweih",
-    "jalenzz"
+    "jalenzz",
+    "Jakoss"
   ],
   "type": "module",
   "scripts": {
@@ -141,8 +142,8 @@
     {
       "name": "copilotAuthToken",
       "type": "password",
-      "title": "Copilot Authorization Token (Optional)",
-      "description": "Optional fallback OAuth token for Copilot usage. Usually auto-detected from GH_TOKEN or GITHUB_TOKEN (for example from 'gh auth token'). Standard PATs may not work.",
+      "title": "Legacy Copilot Token (Optional)",
+      "description": "Existing single-account token. Add new named Copilot accounts with the Manage Accounts action. GH_TOKEN and GITHUB_TOKEN are also auto-detected. Standard PATs may not work.",
       "required": false
     },
     {
