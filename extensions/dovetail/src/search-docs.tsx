@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { DataDetail } from "./components/DataDetail";
-import { endpoints } from "./api/endpoints";
+import { DocDetail } from "./components/DocDetail";
 import { useSearch } from "./hooks/useSearch";
 import { formatFullDate, formatRelativeDate } from "./utils/formatting";
+import { endpoints } from "./api/endpoints";
 
-export default function SearchData() {
-  const { data, isLoading, onQueryChange, numberOfResults, pagination } = useSearch(endpoints.data);
+export default function SearchDocs() {
+  const { data, isLoading, onQueryChange, numberOfResults, pagination } = useSearch(endpoints.docs);
   const { push } = useNavigation();
 
   return (
@@ -13,27 +13,32 @@ export default function SearchData() {
       isLoading={isLoading}
       onSearchTextChange={onQueryChange}
       throttle
-      searchBarPlaceholder="Search for data in any project..."
+      searchBarPlaceholder="Search for docs in any project..."
       pagination={pagination}
     >
       <List.Section title="Most relevant" subtitle={numberOfResults}>
         {data.map((item) => (
           <List.Item
             key={item.id}
-            title={item.title ?? "Untitled"}
-            icon={Icon.Document}
-            accessories={[{ text: formatRelativeDate(item.created_at), tooltip: formatFullDate(item.created_at) }]}
+            title={item.title || "Untitled doc"}
+            icon={Icon.Stars}
+            accessories={[
+              {
+                text: formatRelativeDate(item.created_at),
+                tooltip: formatFullDate(item.created_at),
+              },
+            ]}
             actions={
               <ActionPanel>
-                <Action title="Show Details" onAction={() => push(<DataDetail dataId={item.id} />)} />
+                <Action title="Show Details" onAction={() => push(<DocDetail docId={item.id} />)} />
                 <Action.OpenInBrowser
-                  url={item.url ?? `https://dovetail.com/data/${item.id}`}
+                  url={item.url ?? `https://dovetail.com/docs/${item.id}`}
                   title="Open in Dovetail"
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                 />
                 <Action.CopyToClipboard
                   title="Copy Link"
-                  content={item.url ?? `https://dovetail.com/data/${item.id}`}
+                  content={item.url ?? `https://dovetail.com/docs/${item.id}`}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
               </ActionPanel>
