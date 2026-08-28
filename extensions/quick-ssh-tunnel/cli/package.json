@@ -1,0 +1,19 @@
+{
+  "name": "quick-ssh-tunnel",
+  "version": "1.0.2",
+  "description": "Connect and manage SSH tunnels interactively from your terminal.",
+  "license": "MIT",
+  "author": "fadlee",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fadlee/quick-ssh-tunnel.git"
+  },
+  "bin": {
+    "quick-ssh-tunnel": "./bin/cli.js"
+  },
+  "files": [
+    "bin/cli.js",
+    "README.md"
+  ],
+  "dependencies": {}
+}
