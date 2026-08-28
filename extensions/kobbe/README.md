@@ -20,6 +20,7 @@ Then open a Kobbe command in Raycast and set the extension preferences:
 - API Token: your `kbpat...` token
 - Kobbe Base URL: `https://app.kobbe.io`
 - Default Range: usually `Last 7 days`
+- Primary Action: what Enter does on a site — open the dashboard in the browser (default) or view the overview in Raycast
 
 ## Commands
 

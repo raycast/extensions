@@ -71,6 +71,24 @@
       "default": "https://app.kobbe.io"
     },
     {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "What pressing Enter on a site does.",
+      "type": "dropdown",
+      "required": false,
+      "default": "open-dashboard",
+      "data": [
+        {
+          "title": "Open Dashboard in Browser",
+          "value": "open-dashboard"
+        },
+        {
+          "title": "View Overview in Raycast",
+          "value": "view-overview"
+        }
+      ]
+    },
+    {
       "name": "defaultRange",
       "title": "Default Range",
       "description": "Default analytics range for overview commands.",

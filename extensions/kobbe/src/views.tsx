@@ -102,11 +102,22 @@ export function SiteActions(props: {
   onRefresh?: () => void;
   hideOverview?: boolean;
 }) {
-  const range = props.range ?? getKobbePreferences().defaultRange;
+  const preferences = getKobbePreferences();
+  const range = props.range ?? preferences.defaultRange;
+  const overviewFirst = preferences.primaryAction === "view-overview" && !props.hideOverview;
+
+  const overviewAction = props.hideOverview ? null : (
+    <Action.Push
+      title="View Overview"
+      icon={Icon.BarChart}
+      target={<SiteOverviewDetail site={props.site} range={range} />}
+    />
+  );
 
   return (
     <ActionPanel>
       <ActionPanel.Section>
+        {overviewFirst ? overviewAction : null}
         <Action.OpenInBrowser title="Open Dashboard" url={dashboardUrl(props.site.id, range)} />
         <Action.Push
           title="View Top Pages"
@@ -118,13 +129,7 @@ export function SiteActions(props: {
           icon={Icon.Coins}
           target={<RevenueDetail site={props.site} range={range} />}
         />
-        {props.hideOverview ? null : (
-          <Action.Push
-            title="View Overview"
-            icon={Icon.BarChart}
-            target={<SiteOverviewDetail site={props.site} range={range} />}
-          />
-        )}
+        {overviewFirst ? null : overviewAction}
         <Action.Push title="View Sources" icon={Icon.Globe} target={<SourcesList site={props.site} range={range} />} />
         <Action.Push title="View Setup Health" icon={Icon.Heartbeat} target={<SetupHealthList site={props.site} />} />
       </ActionPanel.Section>

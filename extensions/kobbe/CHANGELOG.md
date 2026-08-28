@@ -8,6 +8,7 @@
 - Add a time range switcher to overview, top pages, and sources views.
 - Add site favicons and tinted metric icons for a richer dashboard feel.
 - Cache API responses so commands open instantly with the latest known data.
+- Add a Primary Action preference to choose whether Enter on a site opens the dashboard in the browser (default) or the overview in Raycast.
 
 ## [Update] - 2026-06-19
 
