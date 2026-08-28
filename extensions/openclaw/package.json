@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openclaw",
   "title": "OpenClaw",
-  "description": "Chat with your local OpenClaw AI assistant",
+  "description": "Chat with your OpenClaw AI assistant (local or remote gateway)",
   "icon": "icon.png",
   "author": "leveragedrobot",
   "contributors": [
-    "asaph_kotzin"
+    "asaph_kotzin",
+    "RaviTharuma"
   ],
   "categories": [
     "Productivity",
@@ -71,9 +72,9 @@
     {
       "name": "token",
       "title": "API Token",
-      "description": "Find in ~/.openclaw/openclaw.json under gateway.auth.token",
+      "description": "gateway.auth.token on the gateway host, or gateway.remote.token on a node (~/.openclaw/openclaw.json). Leave empty to use the file.",
       "type": "password",
-      "required": true
+      "required": false
     },
     {
       "name": "agentId",

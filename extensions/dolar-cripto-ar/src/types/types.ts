@@ -17,6 +17,11 @@ export interface CryptoPriceResponse {
   // Add any other currencies if present in the actual response
 }
 
+export interface CoinGeckoPriceResponse {
+  bitcoin?: { usd: number };
+  ethereum?: { usd: number };
+}
+
 export interface StablePriceResponse {
   ask: number;
 }

@@ -1,6 +1,7 @@
 import { getPreferenceValues, launchCommand, LaunchType, LocalStorage, showHUD } from "@raycast/api";
 import { execSync, spawn } from "node:child_process";
 import { Schedule } from "./interfaces";
+import { windowsIsCaffeinateRunning, windowsStartCaffeinate, windowsStopCaffeinate } from "./windowsApi";
 
 export type { Schedule };
 
@@ -15,9 +16,13 @@ export async function startCaffeinate(updates: Updates, hudMessage?: string, add
   }
   await stopCaffeinate({ menubar: false, status: false });
 
-  const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
-  const child = spawn("/usr/bin/caffeinate", args, { detached: true, stdio: "ignore" });
-  child.unref();
+  if (process.platform === "win32") {
+    await windowsStartCaffeinate(additionalArgs);
+  } else {
+    const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
+    const child = spawn("/usr/bin/caffeinate", args, { detached: true, stdio: "ignore" });
+    child.unref();
+  }
 
   await update(updates, true);
 }
@@ -26,7 +31,11 @@ export async function stopCaffeinate(updates: Updates, hudMessage?: string) {
   if (hudMessage) {
     await showHUD(hudMessage);
   }
-  execSync("/usr/bin/killall caffeinate || true");
+  if (process.platform === "win32") {
+    await windowsStopCaffeinate();
+  } else {
+    execSync("/usr/bin/killall caffeinate || true");
+  }
   await update(updates, false);
 }
 
@@ -35,11 +44,14 @@ async function update(updates: Updates, caffeinated: boolean) {
     await tryLaunchCommand("index", { caffeinated });
   }
   if (updates.status) {
-    await tryLaunchCommand("status", { caffeinated });
+    await tryLaunchCommand("status", { caffeinated, skipScheduleMonitorHeartbeat: true });
   }
 }
 
-async function tryLaunchCommand(commandName: string, context: { caffeinated: boolean }) {
+async function tryLaunchCommand(
+  commandName: string,
+  context: { caffeinated: boolean; skipScheduleMonitorHeartbeat?: boolean },
+) {
   try {
     await launchCommand({ name: commandName, type: LaunchType.Background, context });
   } catch {
@@ -62,7 +74,14 @@ function generateArgs(additionalArgs?: string) {
   return parts.join(" ");
 }
 
-export function isCaffeinateRunning(): boolean {
+export function deviceName(): "PC" | "Mac" {
+  return process.platform === "win32" ? "PC" : "Mac";
+}
+
+export async function isCaffeinateRunning(): Promise<boolean> {
+  if (process.platform === "win32") {
+    return await windowsIsCaffeinateRunning();
+  }
   try {
     execSync("pgrep caffeinate");
     return true;
@@ -85,6 +104,27 @@ export async function getSchedule() {
 
   const schedule: Schedule = JSON.parse(getSchedule);
   return schedule;
+}
+
+export function parseSchedule(value: string | number | boolean): Schedule | undefined {
+  if (typeof value !== "string") return undefined;
+
+  try {
+    const schedule = JSON.parse(value) as Partial<Schedule>;
+    if (
+      typeof schedule.day === "string" &&
+      typeof schedule.from === "string" &&
+      typeof schedule.to === "string" &&
+      typeof schedule.IsManuallyDecafed === "boolean" &&
+      typeof schedule.IsRunning === "boolean"
+    ) {
+      return schedule as Schedule;
+    }
+  } catch {
+    // Ignore unrelated local storage values.
+  }
+
+  return undefined;
 }
 
 export async function changeScheduleState(operation: string, schedule: Schedule) {

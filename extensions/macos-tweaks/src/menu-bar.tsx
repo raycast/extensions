@@ -1,4 +1,4 @@
-import { Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
+import { Icon, launchCommand, LaunchType, MenuBarExtra, showHUD } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { ALL_TWEAKS } from "./tweaks";
 import { CATEGORY_META } from "./types";
@@ -71,12 +71,20 @@ export default function TweaksMenuBar() {
         <MenuBarExtra.Item
           title="Browse All Tweaks..."
           icon={Icon.MagnifyingGlass}
-          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Undolog/macos-tweaks/browse-tweaks`)}
+          onAction={() => {
+            launchCommand({ name: "browse-tweaks", type: LaunchType.UserInitiated }).catch(() =>
+              showHUD("Could not open Browse All Tweaks"),
+            );
+          }}
         />
         <MenuBarExtra.Item
           title="My Tweaks..."
           icon={Icon.List}
-          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Undolog/macos-tweaks/my-tweaks`)}
+          onAction={() => {
+            launchCommand({ name: "my-tweaks", type: LaunchType.UserInitiated }).catch(() =>
+              showHUD("Could not open My Tweaks"),
+            );
+          }}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

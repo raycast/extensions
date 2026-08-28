@@ -13,7 +13,7 @@ import {
   Toast,
 } from "@raycast/api";
 import Fuse from "fuse.js";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -27,24 +27,14 @@ type Wojak = {
   sourcePageUrl?: string;
 };
 
-type ManifestWojak = {
-  id?: string;
-  name?: string;
-  category?: string;
-  filename?: string;
-  thumbUrl?: string;
-  fullUrl?: string;
-  sourcePageUrl?: string;
-};
-
+const libraryBaseUrl = "https://cdn.jsdelivr.net/gh/itsMeOnli/wojak-assets@main";
 const allCategoriesLabel = "All Categories";
 const pageSize = 100;
 const searchDebounceMs = 150;
 const resultCache = new Cache({ namespace: "search-wojaks" });
 const metadataTtlMs = 24 * 60 * 60 * 1000;
-const metadataCacheKey = "wojak-picker.metadata.v1";
+const metadataCacheKey = "wojak-picker.library-metadata.v1";
 const imageCacheDirectory = join(environment.supportPath, "image-cache");
-const manifestPath = join(environment.assetsPath, "wojaks.json");
 
 function createFuse(items: Wojak[]) {
   return new Fuse(items, {
@@ -102,83 +92,60 @@ function getCachedSearchResults(cacheKey: string, wojaksById: Map<string, Wojak>
   }
 }
 
-function mapManifestWojak(item: ManifestWojak): Wojak {
-  return {
-    id: item.id || "",
-    name: item.name || "",
-    category: item.category || "",
-    filename: item.filename || "",
-    thumbUrl: item.thumbUrl || item.fullUrl || "",
-    fullUrl: item.fullUrl || "",
-    sourcePageUrl: item.sourcePageUrl || "",
-  };
-}
-
-function loadWojaksFromManifest() {
-  if (!existsSync(manifestPath)) {
-    throw new Error('Missing assets/wojaks.json. Run "npm run scrape" in the extension folder, then restart dev.');
-  }
-
-  const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as ManifestWojak[];
-  return manifest
-    .map((item) => mapManifestWojak(item))
-    .filter((item) => item.id && item.name && item.filename && item.fullUrl);
-}
-
 function getCachePayload(rawValue?: string | null) {
   if (!rawValue) {
     return undefined;
   }
 
   try {
-    return JSON.parse(rawValue) as { expiresAt?: number; data?: Wojak[] };
+    return JSON.parse(rawValue);
   } catch {
     return undefined;
   }
 }
 
-async function request(url: string, context: string) {
-  const response = await fetch(url);
+type RemoteWojak = {
+  id?: string;
+  name?: string;
+  category?: string;
+  filename?: string;
+  thumb_url?: string;
+  thumbUrl?: string;
+  full_url?: string;
+  fullUrl?: string;
+  source_page_url?: string;
+  sourcePageUrl?: string;
+};
+
+function mapRemoteWojak(item: RemoteWojak): Wojak {
+  const fullUrl = item.full_url || item.fullUrl || "";
+  const thumbUrl = item.thumb_url || item.thumbUrl || fullUrl;
+  return {
+    id: item.id || "",
+    name: item.name || "",
+    category: item.category || "",
+    filename: item.filename || "",
+    thumbUrl,
+    fullUrl,
+    sourcePageUrl: item.source_page_url || item.sourcePageUrl || "",
+  };
+}
+
+async function fetchWojaksFromLibrary() {
+  const response = await fetch(`${libraryBaseUrl}/wojaks.json`, {
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
   if (!response.ok) {
-    throw new Error(`${context} (HTTP ${response.status})`);
+    throw new Error(`Library metadata fetch failed with HTTP ${response.status}`);
   }
 
-  return response;
-}
-
-async function loadWojaks() {
-  const cachedValue = getCachePayload(await LocalStorage.getItem<string>(metadataCacheKey));
-  const isFresh = cachedValue?.expiresAt && cachedValue.expiresAt > Date.now();
-
-  if (isFresh && cachedValue?.data?.length) {
-    return { data: cachedValue.data, stale: false };
-  }
-
-  const data = loadWojaksFromManifest();
-  await LocalStorage.setItem(
-    metadataCacheKey,
-    JSON.stringify({
-      expiresAt: Date.now() + metadataTtlMs,
-      data,
-    }),
-  );
-
-  return { data, stale: false };
-}
-
-async function ensureCachedImage(wojak: Wojak) {
-  mkdirSync(imageCacheDirectory, { recursive: true });
-  const assetPath = join(imageCacheDirectory, wojak.filename);
-
-  if (existsSync(assetPath)) {
-    return { assetPath, fromCache: true };
-  }
-
-  const response = await request(wojak.fullUrl, "Image download failed");
-  const arrayBuffer = await response.arrayBuffer();
-  writeFileSync(assetPath, Buffer.from(arrayBuffer));
-
-  return { assetPath, fromCache: false };
+  const data = (await response.json()) as RemoteWojak[];
+  return data
+    .map((item: RemoteWojak) => mapRemoteWojak(item))
+    .filter((item: Wojak) => item.id && item.name && item.filename && item.fullUrl);
 }
 
 function useStoredCategory() {
@@ -213,13 +180,63 @@ function useStoredCategory() {
   return { value, setValue: setStoredValue, isLoading };
 }
 
+async function loadWojaks() {
+  const cachedValue = getCachePayload(await LocalStorage.getItem<string>(metadataCacheKey));
+  const cachedData = cachedValue?.data?.map?.(mapRemoteWojak).filter((item: Wojak) => item.id && item.fullUrl) ?? [];
+  const isFresh = cachedValue?.expiresAt && Number(cachedValue.expiresAt) > Date.now();
+
+  if (isFresh && cachedData.length > 0) {
+    return { data: cachedData, source: "cache", stale: false };
+  }
+
+  try {
+    const remoteData = await fetchWojaksFromLibrary();
+    await LocalStorage.setItem(
+      metadataCacheKey,
+      JSON.stringify({
+        expiresAt: Date.now() + metadataTtlMs,
+        data: remoteData,
+      }),
+    );
+    return { data: remoteData, source: "remote", stale: false };
+  } catch (error) {
+    if (cachedData.length > 0) {
+      return { data: cachedData, source: "cache", stale: true };
+    }
+
+    throw error;
+  }
+}
+
+async function ensureCachedImage(wojak: Wojak) {
+  mkdirSync(imageCacheDirectory, { recursive: true });
+  const assetPath = join(imageCacheDirectory, wojak.filename);
+
+  if (existsSync(assetPath)) {
+    return { assetPath, fromCache: true };
+  }
+
+  const response = await fetch(wojak.fullUrl);
+  if (!response.ok) {
+    throw new Error(`Image download failed with HTTP ${response.status}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  writeFileSync(assetPath, Buffer.from(arrayBuffer));
+
+  return { assetPath, fromCache: false };
+}
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [visibleCount, setVisibleCount] = useState(pageSize);
   const [isCopying, setIsCopying] = useState(false);
-  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isLoadingRemoteData, setIsLoadingRemoteData] = useState(true);
+  // Kept separate on purpose: loadError means we have nothing to show, while isOffline
+  // means the library loaded from cache and is perfectly usable.
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
   const [wojaks, setWojaks] = useState<Wojak[]>([]);
   const { value: storedCategory, setValue: setStoredCategory, isLoading: isCategoryLoading } = useStoredCategory();
 
@@ -244,22 +261,24 @@ export default function Command() {
     let cancelled = false;
 
     async function run() {
-      setIsLoadingData(true);
+      setIsLoadingRemoteData(true);
       setLoadError(null);
 
       try {
         const result = await loadWojaks();
         if (!cancelled) {
           setWojaks(result.data);
+          setIsOffline(result.stale);
         }
       } catch (error) {
         if (!cancelled) {
           setLoadError(error instanceof Error ? error.message : String(error));
+          setIsOffline(false);
           setWojaks([]);
         }
       } finally {
         if (!cancelled) {
-          setIsLoadingData(false);
+          setIsLoadingRemoteData(false);
         }
       }
     }
@@ -315,7 +334,7 @@ export default function Command() {
   }, [filteredWojaks, visibleCount]);
 
   const hasMore = visibleWojaks.length < filteredWojaks.length;
-  const isFiltering = searchText !== debouncedSearchText || isCategoryLoading || isLoadingData;
+  const isFiltering = searchText !== debouncedSearchText || isCategoryLoading || isLoadingRemoteData;
 
   async function handleCopy(wojak: Wojak) {
     setIsCopying(true);
@@ -341,6 +360,7 @@ export default function Command() {
       columns={6}
       inset={Grid.Inset.Small}
       isLoading={isCopying || isFiltering}
+      navigationTitle={isOffline ? "Search Wojaks (offline — showing last synced library)" : undefined}
       searchBarPlaceholder="Search wojaks by name or category"
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -362,7 +382,7 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {loadError && visibleWojaks.length === 0 ? (
+      {loadError ? (
         <Grid.EmptyView icon={Icon.ExclamationMark} title="Couldn't load wojaks" description={loadError} />
       ) : visibleWojaks.length === 0 ? (
         <Grid.EmptyView

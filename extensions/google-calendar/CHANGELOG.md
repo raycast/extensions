@@ -1,5 +1,30 @@
 # Google Calendar Changelog
 
+## [Fix AI contact search caching] - 2026-08-27
+
+- Key AI contact-search results by query and retry empty results so the tool matches the regular Search Contacts command.
+
+## [Create All-Day Events] - 2026-08-14
+
+- Add all-day event creation to Create Event and Create Quick Event, including natural-language date-only phrases and “all day”
+- Create all-day events using Google Calendar's date fields and correct exclusive end-date semantics
+
+## [Show Event Location in List Events] - 2026-08-06
+
+- Add an opt-in "Show location" preference to the List Events command that shows the event's location as an accessory, with the full location in the tooltip
+
+## [Expand AI Calendar API Support] - 2026-07-20
+
+- Expand the AI extension to support rich event creation and editing, including all-day and recurring events, attendees, reminders, visibility, availability, conferencing, attachments, special event types, imports, and recurring instances
+- Add AI tools for event details, invitation responses, suggested meeting times, event moves, quick add, custom event labels, calendar management, calendar-list preferences, sharing rules, settings, and live color palettes
+- Support Google Calendar's custom event labels and colors with `eventLabelId` and `eventLabelVersion=1` while retaining legacy `colorId` compatibility
+- Use safe partial event updates to preserve fields the user did not change, and return consistent rich event data from event tools
+- Upgrade `@googleapis/calendar` to v15 and add unit tests plus expanded AI eval coverage for the new workflows
+
+## [Revert Narrow OAuth Scope] - 2026-07-15
+
+- Revert [#28925](https://github.com/raycast/extensions/pull/28925) and restore the broad `calendar` OAuth scope to avoid forcing re-authentication for existing users
+
 ## [Narrow OAuth Scope] - 2026-07-08
 
 - Narrow OAuth scope from `calendar` (full read/write) to `calendar.events` + `calendar.calendarlist.readonly` + `calendar.freebusy` for least-privilege access

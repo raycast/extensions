@@ -13,10 +13,15 @@ import { SORT_LABELS, SortOption } from "./constants";
 import { useVessloData } from "./utils/useVessloData";
 import { isUpdatableApp, updateRouteGroup } from "./utils/update-filter";
 import { normalizeBrewCaskToken } from "./utils/brew";
+import {
+  auditReviewMarkdown,
+  auditWarningAccessory,
+} from "./utils/audit-warning";
 
 export default function Updates() {
   const { data, isLoading } = useVessloData();
   const [sortBy, setSortBy] = useState<SortOption>("source");
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   const appsWithUpdates = useMemo(() => {
     if (!data) return [];
@@ -58,6 +63,7 @@ export default function Updates() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail={isShowingDetail}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Sort By"
@@ -88,28 +94,48 @@ export default function Updates() {
           {homebrewApps.length > 0 && (
             <List.Section title={`Homebrew (${homebrewApps.length})`}>
               {homebrewApps.map((app) => (
-                <UpdateListItem key={app.id} app={app} />
+                <UpdateListItem
+                  key={app.id}
+                  app={app}
+                  isShowingDetail={isShowingDetail}
+                  onToggleDetails={() => setIsShowingDetail((value) => !value)}
+                />
               ))}
             </List.Section>
           )}
           {sparkleApps.length > 0 && (
             <List.Section title={`Sparkle (${sparkleApps.length})`}>
               {sparkleApps.map((app) => (
-                <UpdateListItem key={app.id} app={app} />
+                <UpdateListItem
+                  key={app.id}
+                  app={app}
+                  isShowingDetail={isShowingDetail}
+                  onToggleDetails={() => setIsShowingDetail((value) => !value)}
+                />
               ))}
             </List.Section>
           )}
           {appStoreApps.length > 0 && (
             <List.Section title={`App Store (${appStoreApps.length})`}>
               {appStoreApps.map((app) => (
-                <UpdateListItem key={app.id} app={app} />
+                <UpdateListItem
+                  key={app.id}
+                  app={app}
+                  isShowingDetail={isShowingDetail}
+                  onToggleDetails={() => setIsShowingDetail((value) => !value)}
+                />
               ))}
             </List.Section>
           )}
           {otherApps.length > 0 && (
             <List.Section title={`Manual (${otherApps.length})`}>
               {otherApps.map((app) => (
-                <UpdateListItem key={app.id} app={app} />
+                <UpdateListItem
+                  key={app.id}
+                  app={app}
+                  isShowingDetail={isShowingDetail}
+                  onToggleDetails={() => setIsShowingDetail((value) => !value)}
+                />
               ))}
             </List.Section>
           )}
@@ -120,7 +146,12 @@ export default function Updates() {
           title={`Updates (${sortedApps.length}) - ${SORT_LABELS[sortBy]}`}
         >
           {sortedApps.map((app) => (
-            <UpdateListItem key={app.id} app={app} />
+            <UpdateListItem
+              key={app.id}
+              app={app}
+              isShowingDetail={isShowingDetail}
+              onToggleDetails={() => setIsShowingDetail((value) => !value)}
+            />
           ))}
         </List.Section>
       )}
@@ -128,7 +159,15 @@ export default function Updates() {
   );
 }
 
-function UpdateListItem({ app }: { app: VessloApp }) {
+function UpdateListItem({
+  app,
+  isShowingDetail,
+  onToggleDetails,
+}: {
+  app: VessloApp;
+  isShowingDetail: boolean;
+  onToggleDetails: () => void;
+}) {
   const versionInfo = `${app.version} → ${app.targetVersion}`;
 
   // Create icon from base64 or use default
@@ -158,13 +197,22 @@ function UpdateListItem({ app }: { app: VessloApp }) {
   } else if (isAppStore) {
     sourceBadge = { value: "appStore", color: Color.Blue };
   }
+  const accessories: List.Item.Accessory[] = [
+    { text: versionInfo },
+    { tag: sourceBadge },
+  ];
+  const auditAccessory = auditWarningAccessory(app);
+  if (auditAccessory) {
+    accessories.push(auditAccessory);
+  }
 
   return (
     <List.Item
       icon={icon}
       title={app.name}
       subtitle={app.developer ?? ""}
-      accessories={[{ text: versionInfo }, { tag: sourceBadge }]}
+      accessories={accessories}
+      detail={<List.Item.Detail markdown={auditReviewMarkdown(app)} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Recommended">
@@ -189,6 +237,17 @@ function UpdateListItem({ app }: { app: VessloApp }) {
             ) : (
               <Action.Open title="Open App" target={app.path} />
             )}
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Details">
+            <Action
+              title={
+                isShowingDetail ? "Hide Review Details" : "Show Review Details"
+              }
+              icon={isShowingDetail ? Icon.EyeDisabled : Icon.Sidebar}
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+              onAction={onToggleDetails}
+            />
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Alternative">

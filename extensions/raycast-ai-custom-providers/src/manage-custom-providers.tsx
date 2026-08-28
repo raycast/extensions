@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Icon, Alert, confirmAlert, Color } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Alert, confirmAlert, Color, Toast, showToast } from "@raycast/api";
 import { useProviders } from "./hooks/useProviders";
 import { ProviderForm } from "./components/views/ProviderForm";
 import { ModelForm } from "./components/views/ModelForm";
@@ -6,7 +6,7 @@ import { PROVIDERS_FILE_PATH } from "./utils/yaml-handler";
 import { Provider, Model } from "./types";
 
 export default function Command() {
-  const { providers, isLoading, error, removeProvider, removeModel, revalidate } = useProviders();
+  const { providers, isLoading, error, removeProvider, removeModel, revalidate, syncProviderModels } = useProviders();
 
   return (
     <List
@@ -42,6 +42,7 @@ export default function Command() {
                   <ActionPanel>
                     <ActionPanel.Section title={provider.name}>
                       <AddNewModelAction provider={provider} onSave={revalidate} />
+                      <SyncProviderModelsAction provider={provider} syncProviderModels={syncProviderModels} />
                       <EditProviderAction provider={provider} onSave={revalidate} />
                       <RemoveProviderAction provider={provider} removeProvider={removeProvider} />
                     </ActionPanel.Section>
@@ -136,6 +137,7 @@ export default function Command() {
 
                     <ActionPanel.Section title={provider.name}>
                       <AddNewModelAction provider={provider} onSave={revalidate} />
+                      <SyncProviderModelsAction provider={provider} syncProviderModels={syncProviderModels} />
                       <EditProviderAction provider={provider} onSave={revalidate} />
                       <RemoveProviderAction provider={provider} removeProvider={removeProvider} />
                     </ActionPanel.Section>
@@ -230,6 +232,34 @@ function RemoveModelAction({
         });
         if (confirmed) {
           removeModel(provider.id, model.id);
+        }
+      }}
+    />
+  );
+}
+
+function SyncProviderModelsAction({
+  provider,
+  syncProviderModels,
+}: {
+  provider: Provider;
+  syncProviderModels: (provider: Provider, signal?: AbortSignal) => Promise<number>;
+}) {
+  return (
+    <Action
+      title="Sync Models"
+      icon={Icon.ArrowClockwise}
+      onAction={async () => {
+        const toast = await showToast({ style: Toast.Style.Animated, title: `Syncing ${provider.name} models` });
+        try {
+          const count = await syncProviderModels(provider);
+          toast.style = Toast.Style.Success;
+          toast.title = `Synced ${count} models`;
+          toast.message = provider.name;
+        } catch (error) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Model sync failed";
+          toast.message = error instanceof Error ? error.message : "Unknown error";
         }
       }}
     />

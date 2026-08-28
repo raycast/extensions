@@ -1,7 +1,7 @@
-import { stopCaffeinate, getSchedule } from "../utils";
+import { stopCaffeinate, getSchedule, deviceName } from "../utils";
 
 /**
- * Turns off caffeination, allowing your Mac to go to sleep normally
+ * Turns off caffeination, allowing your computer to go to sleep normally
  */
 export default async function () {
   const schedule = await getSchedule();
@@ -11,5 +11,5 @@ export default async function () {
 
   await stopCaffeinate({ menubar: true, status: true }, undefined);
 
-  return "Mac sleep prevention has been disabled";
+  return `${deviceName()} sleep prevention has been disabled`;
 }

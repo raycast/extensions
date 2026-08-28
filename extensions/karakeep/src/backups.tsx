@@ -1,11 +1,14 @@
-import { Action, ActionPanel, Color, confirmAlert, Icon, List, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Icon, List, open, showToast, Toast, Keyboard } from "@raycast/api";
 import { useEffect, useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchCreateBackup, fetchDeleteBackup, fetchGetAllBackups, fetchGetBackupDownloadUrl } from "./apis";
 import { useTranslation } from "./hooks/useTranslation";
+import { connectionGuard } from "./components/ConnectionErrorView";
+import { handleFetchError } from "./utils/fetchError";
+import { useLiveData } from "./hooks/useLiveData";
 import { formatBytes } from "./utils/formatting";
-import { runWithToast } from "./utils/toast";
+import { attachCopyDetail, runWithToast } from "./utils/toast";
 
 const log = logger.child("[Backups]");
 
@@ -13,13 +16,19 @@ const POLL_INTERVAL_MS = 5000;
 
 export default function Backups() {
   const { t } = useTranslation();
-  const { isLoading, data, revalidate } = useCachedPromise(async () => {
-    log.log("Fetching backups");
-    const result = await fetchGetAllBackups();
-    log.info("Backups fetched", { count: result.backups?.length ?? 0 });
-    return result.backups || [];
-  });
+  const { isLoading, data, error, revalidate } = useCachedPromise(
+    async () => {
+      log.log("Fetching backups");
+      const result = await fetchGetAllBackups();
+      log.info("Backups fetched", { count: result.backups?.length ?? 0 });
+      return result.backups || [];
+    },
+    [],
+    // Suppresses Raycast's built-in "Failed to fetch latest data" toast.
+    { onError: handleFetchError("backups") },
+  );
 
+  const hasLiveData = useLiveData(isLoading, error);
   const backups = data || [];
   const hasPending = backups.some((b) => b.status === "pending");
 
@@ -51,14 +60,35 @@ export default function Backups() {
   const prevBackupsRef = useRef<typeof backups>([]);
   useEffect(() => {
     const prev = prevBackupsRef.current;
-    for (const backup of backups) {
-      const prevBackup = prev.find((b) => b.id === backup.id);
-      if (prevBackup?.status === "pending" && backup.status === "failure") {
-        log.error("Backup failed", { backupId: backup.id });
-        showToast({ style: Toast.Style.Failure, title: t("backups.toast.failure") });
+    const newlyFailed = backups.filter(
+      (backup) => prev.find((b) => b.id === backup.id)?.status === "pending" && backup.status === "failure",
+    );
+    // Advance the baseline before any early return, or a poll that shows no
+    // toast would leave the previous snapshot in place and re-report next time.
+    prevBackupsRef.current = backups;
+    if (newlyFailed.length === 0) return;
+
+    log.error("Backup failed", { backupIds: newlyFailed.map((backup) => backup.id) });
+
+    // ONE toast for the whole batch. showToast REPLACES whatever is on screen, so
+    // a toast per backup leaves only the last one visible — and awaiting it here
+    // rather than chaining .then() means the Copy Error action lands on the toast
+    // we actually showed, and a rejection can't escape as an unhandled promise.
+    // The failure arrives as a status field, not an exception, so there is nothing
+    // to unwrap — the backup ids are what make this reportable.
+    async function notifyFailed() {
+      try {
+        const toast = await showToast({ style: Toast.Style.Failure, title: t("backups.toast.failure") });
+        attachCopyDetail(
+          toast,
+          newlyFailed.map((backup) => `Backup ${backup.id} moved from pending to failure.`).join("\n"),
+        );
+      } catch (error) {
+        log.error("Could not show the backup failure toast", { error });
       }
     }
-    prevBackupsRef.current = backups;
+
+    notifyFailed();
   }, [backups, t]);
 
   async function handleCreate() {
@@ -106,9 +136,12 @@ export default function Backups() {
       title={t("backups.createBackup")}
       icon={Icon.Plus}
       onAction={handleCreate}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={Keyboard.Shortcut.Common.New}
     />
   );
+
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
 
   return (
     <List
@@ -164,7 +197,7 @@ export default function Backups() {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={() => handleDelete(backup.id)}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

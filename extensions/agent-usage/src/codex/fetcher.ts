@@ -1,14 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { CodexUsage, CodexError } from "./types";
-import { listCodexOAuthAccounts, resolveCodexAuthTokens } from "./auth";
-import { buildCodexAccountCandidates } from "./accounts";
-import { httpFetch } from "../agents/http";
-import { parseDate } from "../agents/format";
-import { loadAccounts } from "../accounts/storage";
-import type { AccountUsageState } from "../accounts/types";
+import { parseDate } from "../agents/format.ts";
+import { httpFetch } from "../agents/http.ts";
+import type { CodexUsage, CodexError, CodexAdditionalRateLimit, CodexRateLimitWindow } from "./types.ts";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
 const CODEX_RESET_CREDITS_API = "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits";
+const CODEX_USER_SETTINGS_API = "https://chatgpt.com/backend-api/wham/settings/user";
+const CODEX_PROFILE_API = "https://chatgpt.com/backend-api/calpico/chatgpt/profile";
 
 const CODEX_HEADERS = {
   Accept: "application/json",
@@ -17,9 +14,14 @@ const CODEX_HEADERS = {
 };
 
 const CODEX_PLAN_NAMES: Record<string, string> = {
+  plus: "Plus",
   pro: "Pro 20x",
   prolite: "Pro 5x",
   team: "Team",
+  business: "Business",
+  enterprise: "Enterprise",
+  free: "Free",
+  edu: "Edu",
 };
 
 interface CodexResetCreditsResult {
@@ -40,8 +42,51 @@ export async function fetchCodexUsage(
   });
   if (error) return { usage: null, error };
 
-  const { resetCredits, error: resetCreditsError } = await fetchCodexResetCredits(token, accountId);
-  return parseCodexApiResponse(data, resetCredits ?? { availableCount: null, expiresAtList: [] }, resetCreditsError);
+  const [{ resetCredits, error: resetCreditsError }, displayName] = await Promise.all([
+    fetchCodexResetCredits(token, accountId),
+    fetchCodexDisplayName(token, accountId),
+  ]);
+  return parseCodexApiResponse(
+    data,
+    resetCredits ?? { availableCount: null, expiresAtList: [] },
+    resetCreditsError,
+    displayName,
+  );
+}
+
+export function parseCodexUserId(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const userId = (data as { user_id?: unknown }).user_id;
+  return typeof userId === "string" && userId.trim() ? userId.trim() : null;
+}
+
+export function parseCodexDisplayName(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const displayName = (data as { display_name?: unknown }).display_name;
+  return typeof displayName === "string" && displayName.trim() ? displayName.trim() : null;
+}
+
+export async function fetchCodexDisplayName(
+  token: string,
+  accountId?: string | null,
+  request: typeof httpFetch = httpFetch,
+): Promise<string | null> {
+  const commonOptions = {
+    token,
+    headers: { ...CODEX_HEADERS, ...getCodexAccountHeaders(accountId) },
+    timeoutMs: 2500,
+    unauthorizedMessage: "Authorization token expired or invalid. Run 'codex login' to refresh credentials.",
+  };
+  const userResult = await request({ url: CODEX_USER_SETTINGS_API, ...commonOptions });
+  if (userResult.error) return null;
+  const userId = parseCodexUserId(userResult.data);
+  if (!userId) return null;
+
+  const profileResult = await request({
+    url: `${CODEX_PROFILE_API}/${encodeURIComponent(userId)}`,
+    ...commonOptions,
+  });
+  return profileResult.error ? null : parseCodexDisplayName(profileResult.data);
 }
 
 async function fetchCodexResetCredits(token: string, accountId?: string | null): Promise<CodexResetCreditsResult> {
@@ -112,6 +157,7 @@ function parseCodexApiResponse(
   data: unknown,
   resetCredits: CodexUsage["resetCredits"] | null = null,
   resetCreditsError: CodexError | null = null,
+  displayName: string | null = null,
 ): { usage: CodexUsage | null; error: CodexError | null } {
   try {
     if (!data || typeof data !== "object") {
@@ -127,38 +173,24 @@ function parseCodexApiResponse(
     const response = data as {
       plan_type?: string;
       rate_limit?: {
-        primary_window?: {
-          used_percent: number;
-          limit_window_seconds: number;
-          reset_after_seconds?: number;
-          reset_at?: number;
-        };
-        secondary_window?: {
-          used_percent: number;
-          limit_window_seconds: number;
-          reset_after_seconds?: number;
-          reset_at?: number;
-        };
+        primary_window?: CodexRateWindow | null;
+        secondary_window?: CodexRateWindow | null;
       };
       code_review_rate_limit?: {
-        primary_window?: {
-          used_percent: number;
-          limit_window_seconds: number;
-          reset_after_seconds?: number;
-          reset_at?: number;
-        };
-      };
+        primary_window?: CodexRateWindow | null;
+      } | null;
+      additional_rate_limits?: unknown;
       credits?: {
-        has_credits: boolean;
-        unlimited: boolean;
-        balance: string;
+        has_credits?: boolean;
+        unlimited?: boolean;
+        balance?: string;
       };
     };
 
     const primaryWindow = response.rate_limit?.primary_window;
     const secondaryWindow = response.rate_limit?.secondary_window;
 
-    if (!primaryWindow || !secondaryWindow) {
+    if (!primaryWindow && !secondaryWindow) {
       return {
         usage: null,
         error: {
@@ -168,18 +200,15 @@ function parseCodexApiResponse(
       };
     }
 
+    const fiveHourLimit = toLimit(pickWindow(primaryWindow, secondaryWindow, "fiveHour"));
+    const weeklyLimit = toLimit(pickWindow(primaryWindow, secondaryWindow, "weekly"));
+
     const usage: CodexUsage = {
       account: formatCodexPlanName(response.plan_type),
-      fiveHourLimit: {
-        percentageRemaining: 100 - primaryWindow.used_percent,
-        resetsInSeconds: getResetsInSeconds(primaryWindow),
-        limitWindowSeconds: primaryWindow.limit_window_seconds,
-      },
-      weeklyLimit: {
-        percentageRemaining: 100 - secondaryWindow.used_percent,
-        resetsInSeconds: getResetsInSeconds(secondaryWindow),
-        limitWindowSeconds: secondaryWindow.limit_window_seconds,
-      },
+      displayName: displayName ?? undefined,
+      fiveHourLimit,
+      weeklyLimit,
+      additionalRateLimits: parseAdditionalRateLimits(response.additional_rate_limits),
       credits: {
         hasCredits: response.credits?.has_credits || false,
         unlimited: response.credits?.unlimited || false,
@@ -189,13 +218,9 @@ function parseCodexApiResponse(
       resetCreditsError: resetCreditsError?.message,
     };
 
-    if (response.code_review_rate_limit?.primary_window) {
-      const reviewWindow = response.code_review_rate_limit.primary_window;
-      usage.codeReviewLimit = {
-        percentageRemaining: 100 - reviewWindow.used_percent,
-        resetsInSeconds: getResetsInSeconds(reviewWindow),
-        limitWindowSeconds: reviewWindow.limit_window_seconds,
-      };
+    const reviewWindow = response.code_review_rate_limit?.primary_window;
+    if (reviewWindow) {
+      usage.codeReviewLimit = toLimit(reviewWindow);
     }
 
     return { usage, error: null };
@@ -208,6 +233,102 @@ function parseCodexApiResponse(
       },
     };
   }
+}
+
+interface CodexRateWindow {
+  used_percent: number;
+  limit_window_seconds: number;
+  reset_after_seconds?: number;
+  reset_at?: number;
+}
+
+function parseAdditionalRateLimits(value: unknown): CodexAdditionalRateLimit[] {
+  if (!Array.isArray(value)) return [];
+
+  const limits: CodexAdditionalRateLimit[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const entry = item as {
+      limit_name?: unknown;
+      metered_feature?: unknown;
+      rate_limit?: {
+        primary_window?: unknown;
+        secondary_window?: unknown;
+      } | null;
+    };
+    const name = typeof entry.limit_name === "string" ? entry.limit_name.trim() : "";
+    if (!name) continue;
+
+    const windows = [entry.rate_limit?.primary_window, entry.rate_limit?.secondary_window]
+      .map(parseRateWindow)
+      .filter((window): window is CodexRateWindow => window !== null)
+      .map((window) => toLimit(window))
+      .filter((window): window is CodexRateLimitWindow => window !== undefined);
+    if (windows.length === 0) continue;
+
+    const meteredFeature =
+      typeof entry.metered_feature === "string" && entry.metered_feature.trim()
+        ? entry.metered_feature.trim()
+        : undefined;
+    limits.push({ name, meteredFeature, windows });
+  }
+  return limits;
+}
+
+function parseRateWindow(value: unknown): CodexRateWindow | null {
+  if (!value || typeof value !== "object") return null;
+  const window = value as Record<string, unknown>;
+  if (
+    typeof window.used_percent !== "number" ||
+    !Number.isFinite(window.used_percent) ||
+    typeof window.limit_window_seconds !== "number" ||
+    !Number.isFinite(window.limit_window_seconds) ||
+    window.limit_window_seconds <= 0
+  ) {
+    return null;
+  }
+  return {
+    used_percent: window.used_percent,
+    limit_window_seconds: window.limit_window_seconds,
+    reset_after_seconds:
+      typeof window.reset_after_seconds === "number" && Number.isFinite(window.reset_after_seconds)
+        ? window.reset_after_seconds
+        : undefined,
+    reset_at: typeof window.reset_at === "number" && Number.isFinite(window.reset_at) ? window.reset_at : undefined,
+  };
+}
+
+function toLimit(window: CodexRateWindow | null): CodexUsage["fiveHourLimit"] {
+  if (!window) return undefined;
+  return {
+    percentageRemaining: 100 - window.used_percent,
+    resetsInSeconds: getResetsInSeconds(window),
+    limitWindowSeconds: window.limit_window_seconds,
+  };
+}
+
+const SINGLE_WINDOW_FIVE_HOUR_THRESHOLD_SECONDS = 86400;
+
+function pickWindow(
+  primary: CodexRateWindow | null | undefined,
+  secondary: CodexRateWindow | null | undefined,
+  which: "fiveHour" | "weekly",
+): CodexRateWindow | null {
+  const a = primary ?? null;
+  const b = secondary ?? null;
+  if (a && b) {
+    return which === "fiveHour"
+      ? a.limit_window_seconds <= b.limit_window_seconds
+        ? a
+        : b
+      : a.limit_window_seconds > b.limit_window_seconds
+        ? a
+        : b;
+  }
+  const only = a ?? b;
+  if (!only) return null;
+  const isFiveHour = only.limit_window_seconds <= SINGLE_WINDOW_FIVE_HOUR_THRESHOLD_SECONDS;
+  return which === "fiveHour" ? (isFiveHour ? only : null) : isFiveHour ? null : only;
 }
 
 function getResetsInSeconds(window: { reset_after_seconds?: number; reset_at?: number }): number {
@@ -223,185 +344,4 @@ function getResetsInSeconds(window: { reset_after_seconds?: number; reset_at?: n
   return resetAt ? Math.max(0, Math.floor((resetAt.getTime() - Date.now()) / 1000)) : 0;
 }
 
-export { formatDuration } from "../agents/format";
-
-export function useCodexUsage(enabled = true) {
-  const [usage, setUsage] = useState<CodexUsage | null>(null);
-  const [error, setError] = useState<CodexError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-  const requestIdRef = useRef(0);
-
-  const fetchData = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-
-    setIsLoading(true);
-    setError(null);
-
-    const { primaryToken: token, primaryAccountId } = resolveCodexAuthTokens();
-
-    if (!token) {
-      setUsage(null);
-      setError({
-        type: "not_configured",
-        message: "Codex is not configured. Run 'codex login' to authenticate.",
-      });
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
-    }
-
-    const result = await fetchCodexUsage(token, primaryAccountId);
-    if (requestId !== requestIdRef.current) {
-      return;
-    }
-
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setUsage(null);
-      setError(null);
-      setIsLoading(false);
-      setHasInitialFetch(false);
-      return;
-    }
-
-    if (!hasInitialFetch) {
-      fetchData();
-    }
-  }, [enabled, hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    if (!enabled) {
-      return;
-    }
-
-    await fetchData();
-  }, [enabled, fetchData]);
-
-  return {
-    isLoading: enabled ? isLoading : false,
-    usage: enabled ? usage : null,
-    error: enabled ? error : null,
-    revalidate,
-  };
-}
-
-/**
- * Returns one UsageState per discovered or manually configured Codex account.
- * File-backed Codex OAuth accounts are preferred so refreshed local tokens are used.
- *
- * Each entry in the returned array corresponds to one account.
- */
-export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, CodexError>[] {
-  const [accountStates, setAccountStates] = useState<AccountUsageState<CodexUsage, CodexError>[]>([]);
-  const requestIdRef = useRef(0);
-
-  const fetchAll = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-
-    const discoveredAccounts = listCodexOAuthAccounts();
-    const manualAccounts = await loadAccounts("codex");
-    const accounts = buildCodexAccountCandidates(discoveredAccounts, manualAccounts);
-
-    // Fallback: if no accounts at all, show not configured
-    if (accounts.length === 0) {
-      setAccountStates([
-        {
-          accountId: "none",
-          label: "Default",
-          token: "",
-          isLoading: false,
-          usage: null,
-          error: {
-            type: "not_configured",
-            message:
-              "Codex is not configured. Run 'codex login' to authenticate or add an account via Manage Accounts.",
-          },
-          revalidate: async () => {
-            await fetchAll();
-          },
-        },
-      ]);
-      return;
-    }
-
-    // Kick off all fetches in parallel
-    const results = await Promise.all(
-      accounts.map(async (account) => {
-        if (account.needsAccountId) {
-          return {
-            account,
-            result: {
-              usage: null,
-              error: {
-                type: "not_configured" as const,
-                message:
-                  "Add the ChatGPT account ID for this manual Codex account, or run 'codex login' and let Agent Usage read the OAuth account from CODEX_HOME.",
-              },
-            },
-          };
-        }
-
-        const result = await fetchCodexUsage(account.token, account.accountId);
-        return { account, result };
-      }),
-    );
-
-    if (requestId !== requestIdRef.current) return;
-
-    setAccountStates(
-      results.map(({ account, result }) => ({
-        accountId: account.id,
-        label: account.label,
-        token: account.token,
-        isLoading: false,
-        usage: result.usage,
-        error: result.error,
-        isOpenCodeActive: false,
-        revalidate: async () => {
-          await fetchAll();
-        },
-      })),
-    );
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setAccountStates([]);
-      return;
-    }
-    void fetchAll();
-  }, [enabled, fetchAll]);
-
-  // Set initial loading state only if no data exists
-  useEffect(() => {
-    if (!enabled) return;
-    setAccountStates((prev) =>
-      prev.length === 0 || prev.some((s) => s.accountId === "none")
-        ? [
-            {
-              accountId: "loading",
-              label: "Loading…",
-              token: "",
-              isLoading: true,
-              usage: null,
-              error: null,
-              revalidate: async () => {
-                await fetchAll();
-              },
-            },
-          ]
-        : prev,
-    );
-  }, [enabled, fetchAll]);
-
-  return accountStates;
-}
+export { parseCodexApiResponse };

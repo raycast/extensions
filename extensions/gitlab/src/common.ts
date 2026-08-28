@@ -5,30 +5,19 @@ import fetch from "node-fetch";
 
 import os from "os";
 import path from "path";
-import { getHttpAgent, GitLab } from "./gitlabapi";
+import { Credential, getHttpAgent, GitLab } from "./gitlabapi";
 import { authorize, refreshToken } from "./oauth";
-import {
-  getInstance,
-  getPreferences,
-  isOAuthEnabled,
-  parseCommaSeparatedPreference,
-  requirePersonalAccessToken,
-} from "./utils";
+import { getInstance, getPersonalAccessToken, getPreferences, parseCommaSeparatedPreference } from "./utils";
 
 let gitlabClient: GitLab | undefined;
 
-export async function resolveToken(): Promise<string> {
-  if (isOAuthEnabled()) return authorize();
-  return requirePersonalAccessToken();
+export async function resolveCredential(): Promise<Credential> {
+  const token = getPersonalAccessToken();
+  return token === undefined ? { authType: "oauth", token: await authorize() } : { authType: "pat", token };
 }
 
 function createGitLabClient(): GitLab {
-  return new GitLab(
-    getInstance(),
-    isOAuthEnabled()
-      ? { authType: "oauth", resolve: resolveToken, refresh: refreshToken }
-      : { authType: "pat", resolve: resolveToken },
-  );
+  return new GitLab(getInstance(), { resolve: resolveCredential, refresh: refreshToken });
 }
 
 function getGitLabClient(): GitLab {
@@ -59,25 +48,44 @@ function createGitLabGQLClient(): GitLabGQL {
   });
 
   const authLink = setContext(async (_, prevContext) => {
-    const token = await resolveToken();
+    const credential = await resolveCredential();
     return {
+      // Carried so the 401 retry below gates on the credential this request
+      // actually sent rather than re-reading preferences that may have changed.
+      gitlabAuthType: credential.authType,
       headers: {
         ...(prevContext.headers ?? {}),
-        authorization: token ? `Bearer ${token}` : "",
+        authorization: `Bearer ${credential.token}`,
       },
     };
+  });
+
+  const requestLogLink = new ApolloLink((operation, forward) => {
+    console.log(
+      `GitLab GraphQL → ${operation.operationName ?? "anonymous"}`,
+      operation.variables && Object.keys(operation.variables).length > 0 ? operation.variables : "",
+    );
+    return forward(operation);
   });
 
   const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
     if (graphQLErrors) {
       for (const error of graphQLErrors) {
-        console.warn(`GitLab GraphQL: ${error.message}`);
+        console.warn(
+          `GitLab GraphQL ${operation.operationName ?? "anonymous"}: ${error.message}`,
+          error.path ? { path: error.path, extensions: error.extensions } : error.extensions,
+        );
       }
     }
     if (networkError) {
       const statusCode = "statusCode" in networkError ? networkError.statusCode : undefined;
-      console.warn(`GitLab GraphQL network error${statusCode ? ` ${statusCode}` : ""}: ${networkError.message}`);
-      if (statusCode === 401 && isOAuthEnabled() && !operation.getContext().gitlabAuthRetried && forward) {
+      const result = "result" in networkError ? networkError.result : undefined;
+      console.warn(
+        `GitLab GraphQL network error${statusCode ? ` ${statusCode}` : ""} (${operation.operationName ?? "anonymous"}): ${networkError.message}`,
+        result ?? "",
+      );
+      const context = operation.getContext();
+      if (statusCode === 401 && context.gitlabAuthType === "oauth" && !context.gitlabAuthRetried && forward) {
         operation.setContext({ gitlabAuthRetried: true });
         return fromPromise(refreshToken()).flatMap(() => forward(operation));
       }
@@ -85,7 +93,7 @@ function createGitLabGQLClient(): GitLabGQL {
   });
 
   const client = new ApolloClient({
-    link: ApolloLink.from([errorLink, authLink, httpLink]),
+    link: ApolloLink.from([errorLink, requestLogLink, authLink, httpLink]),
     cache: new InMemoryCache(),
     defaultOptions: {
       query: {

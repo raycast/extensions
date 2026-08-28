@@ -13,8 +13,8 @@ import {
   AliasesCreateRequest,
   APIHeaders,
   BodyRequest,
+  AliasesDeleteRequest,
 } from "./types";
-import fetch from "node-fetch";
 import { API_TOKEN, API_URL } from "./constants";
 
 const headers: APIHeaders = {
@@ -54,10 +54,10 @@ const callApi = async (endpoint: string, method: APIMethod, body?: BodyRequest, 
       return errorObject;
     }
 
-    const response = await apiResponse.json();
+    const response = apiResponse.status === 204 ? undefined : await apiResponse.json();
     await showToast(Toast.Style.Success, `Success`);
     return response;
-  } catch (err) {
+  } catch {
     const error = "Failed to execute request. Please try again later.";
     await showToast(Toast.Style.Failure, `Error`, error);
     return { error };
@@ -74,18 +74,20 @@ export async function createToken({ email, password, totp }: TokenRequest) {
 export async function getDomains({ page_size, page }: DomainsRequestParameters) {
   const searchParams = new URLSearchParams({ page_size, page });
   return (await callApi(`domains?${searchParams}`, "GET", undefined, "Fetching Domains")) as
-    | ErrorResponseObject
-    | DomainsResponse;
+    ErrorResponseObject | DomainsResponse;
 }
 
 // ALIASES
 export async function getAliases({ page_size, page }: AliasesRequestParameters) {
   const searchParams = new URLSearchParams({ page_size, page });
   return (await callApi(`aliases?${searchParams}`, "GET", undefined, "Fetching Aliases")) as
-    | ErrorResponseObject
-    | AliasesResponse;
+    ErrorResponseObject | AliasesResponse;
 }
 export async function createAlias({ local_part, domain }: AliasesCreateRequest) {
   const body = local_part && domain ? { local_part, domain } : {};
   return (await callApi(`aliases`, "POST", body, "Creating Alias")) as ErrorResponseObject | Alias;
+}
+export async function deleteAlias({ address }: AliasesDeleteRequest) {
+  return (await callApi(`aliases/${encodeURIComponent(address)}`, "DELETE", undefined, "Deleting Alias")) as
+    ErrorResponseObject | undefined;
 }

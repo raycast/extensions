@@ -1,5 +1,11 @@
 # Vesslo Changelog
 
+## [Show Vesslo Review Warnings] - 2026-07-14
+
+- Show Vesslo audit warnings as clear Security, Source Check, or Review badges in the updates list
+- Add a review details preview with warning reasons, update-source health, and Vesslo action context
+- Keep update actions anchored to Vesslo's eligibility export while preserving legacy exports
+
 ## [Align Update Actions with Vesslo Eligibility] - 2026-06-29
 
 - Align update filtering with Vesslo's eligibility export so deleted, skipped, and ignored apps stay out of update views

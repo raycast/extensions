@@ -4,7 +4,6 @@ import {
   defaultBraveProfilePath,
   defaultBraveBetaProfilePath,
   defaultBraveNightlyProfilePath,
-  defaultBraveStatePath,
 } from "../constants";
 import { getPreferenceValues } from "@raycast/api";
 
@@ -34,7 +33,7 @@ const userLibraryDirectoryPath = () => {
 export const getHistoryDbPath = (profile?: string) =>
   path.join(userLibraryDirectoryPath(), ...prefProfile, profile ?? DEFAULT_BRAVE_PROFILE_ID, "History");
 
-export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...defaultBraveStatePath);
+export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...prefProfile, "Local State");
 
 export const getBookmarksFilePath = (profile?: string) =>
   path.join(userLibraryDirectoryPath(), ...prefProfile, profile ?? DEFAULT_BRAVE_PROFILE_ID, "Bookmarks");

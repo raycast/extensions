@@ -1,4 +1,4 @@
-import { readOpencodeAuthToken } from "./opencode-auth";
+import { readOpencodeAuthToken } from "./opencode-auth.ts";
 
 /**
  * Returns true if the given token matches the OpenCode-configured token

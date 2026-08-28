@@ -287,7 +287,7 @@
     "bignumber.js": "^9.1.2",
     "dayjs": "^1.11.13",
     "lodash": "^4.17.23",
-    "uuid": "^9.0.1"
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
@@ -308,6 +308,7 @@
   },
   "overrides": {
     "minimatch": "^10.0.1",
-    "picomatch": "^4.0.4"
+    "picomatch": "^4.0.4",
+    "uuid": "^11.1.1"
   }
 }

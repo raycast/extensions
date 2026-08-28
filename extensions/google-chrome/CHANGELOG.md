@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Add Search Windows Command] - 2026-08-16
+
+- Add a new Search Windows command to search and select open Google Chrome windows.
+
 ## [Bugfix] - 2026-05-28
 
 - Reset stale cached profile selections so history search does not show Chrome as missing.
@@ -72,14 +76,17 @@
 - Add support for entering URLs or search terms in a single input field, mimicking Chrome's Omnibox behavior.
 
 ## [Add Copy Title action for Search Tab] - 2025-04-22
+
 - Add the ability to create new incognito window.
 
 ## [Add Copy Title action for Search Tab] - 2025-02-11
+
 - Add Copy Title action for Search Tab command.
 
 ## [Add AI Tools] - 2025-02-21
 
 ## [Allow to configure profile path] - 2025-01-18
+
 - The path for your profile can be configured in the settings. This allows you to use a different profile than the default one.
 
 ## [Fix] - 2025-01-09

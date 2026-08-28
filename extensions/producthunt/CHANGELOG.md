@@ -1,5 +1,17 @@
 # Product Hunt Changelog
 
+## [3.1] - 2026-07-14
+
+- Replace API Key/Secret setup with "Sign in with Product Hunt" ([secret-less OAuth PKCE](https://api.producthunt.com/v2/docs#pkce)); one sign-in unlocks votes, comments, makers, and your own upvotes
+- Without signing in, the extension still shows the basic public feed
+- Remove the API Key and API Secret preferences
+- When signed in, show your upvote state (▲ / △) on each launch and beside the vote count in the detail view
+- Add review count with a star rating, daily/weekly/monthly/yearly rank, and maker-reply count to the launch detail
+- Show follower counts in the View Topics menu
+- Relabel the launch submitter as "Hunted by"
+- Label the signed-out list "Recent Launches" (the public feed is the most recent launches, not a single day)
+- Remove the unused Username preference
+
 ## [3.0] - 2026-06-02
 
 - Remove the legacy HTML scraper and the `cheerio` dependency; all data now comes from the official Product Hunt API or the public Atom feed

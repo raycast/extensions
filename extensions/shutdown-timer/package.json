@@ -15,7 +15,7 @@
             "title": "Remaining Time",
             "description": "Tells you how much time remaining",
             "mode": "no-view",
-            "interval": "30s"
+            "interval": "1m"
         },
         {
             "name": "schedule-shutdown",

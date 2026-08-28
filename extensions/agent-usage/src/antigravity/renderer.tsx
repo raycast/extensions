@@ -1,5 +1,7 @@
-import React from "react";
 import { List } from "@raycast/api";
+import React from "react";
+
+import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -7,9 +9,9 @@ import {
   getNoDataAccessory,
   generatePieIcon,
   generateAsciiBar,
-} from "../agents/ui";
-import { AntigravityError, AntigravityUsage } from "./types";
-import type { Accessory } from "../agents/types";
+} from "../agents/ui.tsx";
+import { effectiveAntigravityPercent } from "./effective-remaining.ts";
+import type { AntigravityError, AntigravityUsage } from "./types.ts";
 
 export function formatAntigravityUsageText(usage: AntigravityUsage | null, error: AntigravityError | null): string {
   const fallback = formatErrorOrNoData("Antigravity", usage, error);
@@ -143,22 +145,22 @@ export function getAntigravityAccessory(
   let tooltip = "";
 
   if (quotaGroups.length > 0) {
-    const buckets = quotaGroups.flatMap((g) => g.buckets);
-    const percents = buckets.map((b) => b.percentLeft);
-    if (percents.length > 0) {
-      percent = Math.min(...percents);
-    }
+    // Badge reflects the first-party (Gemini) binding constraint only; third-party
+    // pools (Claude/GPT) are excluded so their independently-exhausted limits can't
+    // drag a healthy Gemini account to zero. Their per-group numbers still appear in
+    // the tooltip below and in the detail panel.
+    percent = effectiveAntigravityPercent(quotaGroups);
     tooltip = quotaGroups
       .map((g) => {
-        const parts = g.buckets.map((b) => `${b.displayName}: ${b.percentLeft}%`);
-        return `${g.displayName} [${parts.join(" | ")}]`;
+        const parts = g.buckets.map((b) => `  ${b.displayName}: ${b.percentLeft}%`);
+        return `${g.displayName}\n${parts.join("\n")}`;
       })
-      .join(" | ");
+      .join("\n");
   } else if (usage.primaryModel) {
     percent = usage.primaryModel.percentLeft;
     const secondary = usage.secondaryModel;
     tooltip = secondary
-      ? `${usage.primaryModel.label}: ${usage.primaryModel.percentLeft}% | ${secondary.label}: ${secondary.percentLeft}%`
+      ? `${usage.primaryModel.label}: ${usage.primaryModel.percentLeft}%\n${secondary.label}: ${secondary.percentLeft}%`
       : `${usage.primaryModel.label}: ${usage.primaryModel.percentLeft}%`;
   }
 

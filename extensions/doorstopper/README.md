@@ -7,7 +7,32 @@ Doorstopper is a Raycast extension which prevents your MacBook from going to sle
 
 > **Note:**  
 > The underlying commands need to be run with `sudo` privileges.  
-> The extension will prompt you for your password.
+> The extension will prompt you for your password by default.
+
+## Authenticate with Touch ID
+
+Doorstopper can use Touch ID instead of a password when Touch ID authentication is enabled for `sudo`. This changes `sudo` authentication globally, not just within Raycast.
+
+### macOS Sonoma (14) and Later
+
+1. Copy `/etc/pam.d/sudo_local.template` to `/etc/pam.d/sudo_local`:
+   ```bash
+   sudo cp /etc/pam.d/sudo_local.template /etc/pam.d/sudo_local
+   ```
+2. Uncomment the following line in `/etc/pam.d/sudo_local`:
+   ```text
+   auth       sufficient     pam_tid.so
+   ```
+
+### macOS Ventura (13) and Earlier
+
+Add the following line to the `auth` entries in `/etc/pam.d/sudo`:
+
+```text
+auth       sufficient     pam_tid.so
+```
+
+Changes to `/etc/pam.d/sudo` can be overwritten by macOS updates. If Touch ID is unavailable or not enabled for `sudo`, Doorstopper will continue to use the administrator password prompt.
 
 ## Installation 🛠️
 

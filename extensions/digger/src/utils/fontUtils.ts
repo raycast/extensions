@@ -1,5 +1,6 @@
 import { FontAsset, FontProvider } from "../types";
 import { getLogger } from "./logger";
+import { redactUrlForLog } from "./urlUtils";
 
 const log = getLogger("fonts");
 
@@ -217,7 +218,7 @@ export function extractGoogleFonts(url: string): FontAsset[] {
       }
     }
   } catch (e) {
-    log.error("fonts:extract-google-fonts-error", { url, error: e });
+    log.error("fonts:extract-google-fonts-error", { url: redactUrlForLog(url), error: e });
   }
 
   log.log("fonts:extracted-google-fonts", { url, count: fonts.length, families: fonts.map((f) => f.family) });
@@ -258,7 +259,7 @@ export function extractAdobeFonts(url: string): FontAsset[] {
       ];
     }
   } catch (e) {
-    log.error("fonts:extract-adobe-fonts-error", { url, error: e });
+    log.error("fonts:extract-adobe-fonts-error", { url: redactUrlForLog(url), error: e });
   }
   return [];
 }

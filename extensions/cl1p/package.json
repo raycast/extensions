@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cl1p",
+  "title": "cl1p.net",
+  "description": "Save text to cl1p.net and copy the resulting URL",
+  "icon": "icon.png",
+  "author": "meslva",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "save",
+      "title": "Save to cl1p.net",
+      "subtitle": "cl1p",
+      "description": "Save text to a cl1p.net title and copy the URL",
+      "mode": "view",
+      "keywords": [
+        "clip",
+        "clipboard",
+        "paste",
+        "pastebin",
+        "share"
+      ]
+    },
+    {
+      "name": "save-selected",
+      "title": "Save Selected Text to cl1p.net",
+      "subtitle": "cl1p",
+      "description": "Save the currently selected text to a cl1p.net note and copy the URL",
+      "mode": "no-view",
+      "keywords": [
+        "clip",
+        "clipboard",
+        "paste",
+        "pastebin",
+        "share",
+        "selected",
+        "selection"
+      ],
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Note Name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your cl1p.net API access token (cl1papitoken), generated from the Preferences page on cl1p.net",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9"
+  }
+}

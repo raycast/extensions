@@ -1,6 +1,8 @@
 import { logger } from "@chrismessina/raycast-logger";
 import { ApiResponse, Backup, Bookmark, GetBookmarksParams, Highlight, List, Tag, UserStats } from "../types";
 import { getApiConfig } from "../utils/config";
+import { describeConnectionError, getConnectionErrorCode, isConnectionError } from "../utils/connection";
+import { toErrorMessage } from "../utils/toast";
 
 const log = logger.child("[API]");
 
@@ -10,51 +12,125 @@ interface FetchOptions {
   headers?: Record<string, string>;
 }
 
+interface FetchResult<T> {
+  data: T;
+  status: number;
+}
+
+export interface CreateBookmarkResult {
+  bookmark: Bookmark;
+  wasCreated: boolean;
+}
+
+interface ZodIssue {
+  path?: (string | number)[];
+  message?: string;
+}
+
+/**
+ * Turn an error body into something a toast can actually show. Karakeep
+ * serializes validation failures as `{ error: { name: "ZodError", message } }`
+ * where `message` is itself a JSON string holding the issue array — so the
+ * useful part is two levels of encoding deep, and reading `error.issues`
+ * alone leaves you with a bare "HTTP 400".
+ */
+function describeApiError(body: string, status: number): string {
+  try {
+    const parsed = JSON.parse(body);
+
+    // The /api/trpc endpoints (search, summarize) answer a `batch=1` request
+    // with a top-level ARRAY, so the error hides one index deeper and under a
+    // `json` envelope. Reading `parsed.error` on an array yields undefined,
+    // which is how these two commands ended up reporting a bare status code.
+    const entry = Array.isArray(parsed) ? parsed[0] : parsed;
+    const err = entry?.error?.json ?? entry?.error;
+
+    let issues: ZodIssue[] | undefined = Array.isArray(err?.issues) ? err.issues : undefined;
+    if (!issues && typeof err?.message === "string") {
+      try {
+        const nested = JSON.parse(err.message);
+        if (Array.isArray(nested)) issues = nested;
+      } catch {
+        // error.message is prose, not encoded issues — handled below.
+      }
+    }
+
+    const described = issues
+      ?.map((issue) => (issue.path?.length ? `${issue.path.join(".")}: ${issue.message}` : issue.message))
+      .filter(Boolean);
+    if (described?.length) return described.join("; ");
+
+    if (typeof err === "string") return err;
+    if (typeof err?.message === "string") return err.message;
+    if (typeof entry?.message === "string") return entry.message;
+  } catch {
+    // body is not JSON, fall through to the status line
+  }
+  return `HTTP ${status}`;
+}
+
 export async function fetchWithAuth<T = unknown>(path: string, options: FetchOptions = {}): Promise<T> {
+  const result = await fetchWithAuthResult<T>(path, options);
+  return result.data;
+}
+
+async function fetchWithAuthResult<T>(path: string, options: FetchOptions = {}): Promise<FetchResult<T>> {
   const { apiUrl, apiKey } = await getApiConfig();
   const url = new URL(path, apiUrl);
   const method = options.method || "GET";
   log.log(`${method} ${path}`);
   const done = log.time(`${method} ${path}`);
 
-  const response = await fetch(url.toString(), {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      "User-Agent": "Raycast Extension",
-      Authorization: `Bearer ${apiKey}`,
-      ...options.headers,
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(url.toString(), {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "Raycast Extension",
+        Authorization: `Bearer ${apiKey}`,
+        ...options.headers,
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+  } catch (error) {
+    // A transport failure rejects with `TypeError: fetch failed`, which carries
+    // no detail and serializes to `{}` — logging it raw loses the cause
+    // entirely. Log the real code and re-throw the ORIGINAL error so callers
+    // can still inspect `error.cause` via isConnectionError().
+    if (isConnectionError(error)) {
+      // `errorCode`, not `code`. raycast-logger 1.2.x masked any key named
+      // `code` as a 2FA code, which is how ECONNREFUSED went missing from the
+      // logs. 1.3.0's head-noun matching no longer does that, but the explicit
+      // name is clearer about what this holds and cannot regress.
+      done({ error: "connection" });
+      log.error(`${method} ${path} could not connect`, {
+        errorCode: getConnectionErrorCode(error) ?? "unknown",
+        detail: describeConnectionError(error, apiUrl),
+      });
+    } else {
+      done({ error: "request" });
+      log.error(`${method} ${path} request failed`, { error: toErrorMessage(error) });
+    }
+    throw error;
+  }
 
   const data = await response.text();
 
   if (!response.ok) {
+    // Closed here as well as on success: the failure cases are the ones whose
+    // timing you actually want when diagnosing a slow or hanging server.
+    done({ status: response.status });
     log.error(`${method} ${path} failed`, { status: response.status, body: data });
-    let message = `HTTP ${response.status}`;
-    try {
-      const parsed = JSON.parse(data);
-      const issue = parsed?.error?.issues?.[0]?.message;
-      if (issue) {
-        message = issue;
-      } else if (parsed?.message) {
-        message = parsed.message;
-      } else if (parsed?.error && typeof parsed.error === "string") {
-        message = parsed.error;
-      }
-    } catch {
-      // body is not JSON, use status only
-    }
-    throw new Error(message);
+    throw new Error(describeApiError(data, response.status));
   }
 
   done({ status: response.status });
 
   try {
-    return JSON.parse(data) as T;
+    return { data: JSON.parse(data) as T, status: response.status };
   } catch {
-    return data as T;
+    return { data: data as T, status: response.status };
   }
 }
 
@@ -97,10 +173,16 @@ export async function fetchGetAllBookmarks({
 }
 
 export async function fetchCreateBookmark(payload: object): Promise<Bookmark> {
-  return fetchWithAuth<Bookmark>("/api/v1/bookmarks", {
+  const result = await fetchCreateBookmarkResult(payload);
+  return result.bookmark;
+}
+
+export async function fetchCreateBookmarkResult(payload: object): Promise<CreateBookmarkResult> {
+  const result = await fetchWithAuthResult<Bookmark>("/api/v1/bookmarks", {
     method: "POST",
     body: payload,
   });
+  return { bookmark: result.data, wasCreated: result.status === 201 };
 }
 
 export async function fetchGetSingleBookmark(id: string): Promise<Bookmark> {
@@ -148,7 +230,8 @@ export async function fetchGetSingleListBookmarks(
 
 export async function fetchCreateList(payload: {
   name: string;
-  icon?: string;
+  /** Required by the API (`z.string()`), not optional — omitting it is a 400. */
+  icon: string;
   description?: string;
   parentId?: string;
   type?: "manual" | "smart";

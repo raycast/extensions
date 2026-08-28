@@ -1,11 +1,11 @@
 import { execFile } from "child_process";
-import { promisify } from "util";
+import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import * as fs from "fs";
-import { AmpUsage, AmpError } from "./types";
-import { parseAmpUsage } from "./parser";
-import { createSimpleHook } from "../agents/hooks";
+import { promisify } from "util";
+
+import { parseAmpUsage } from "./parser.ts";
+import type { AmpUsage, AmpError } from "./types.ts";
 
 const execFileAsync = promisify(execFile);
 let cachedAmpPath: string | null = null;
@@ -67,7 +67,7 @@ function getExecFailureMessage(error: unknown): string {
   return stderr || stdout || execError.message;
 }
 
-async function fetchAmpUsage(): Promise<{ usage: AmpUsage | null; error: AmpError | null }> {
+export async function fetchAmpUsage(): Promise<{ usage: AmpUsage | null; error: AmpError | null }> {
   try {
     const ampPath = await detectAmpPath();
     const { stdout } = await execFileAsync(ampPath, ["usage"], { encoding: "utf-8", timeout: 10000 });
@@ -80,5 +80,3 @@ async function fetchAmpUsage(): Promise<{ usage: AmpUsage | null; error: AmpErro
     };
   }
 }
-
-export const useAmpUsage = createSimpleHook<AmpUsage, AmpError>({ fetcher: fetchAmpUsage });

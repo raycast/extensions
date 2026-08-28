@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix Authenticator TOTP] - 2026-07-13
+
+- Fix authenticator failing when TOTP secrets contain spaces
+
 ## [Fix sync session handling] - 2026-05-28
 
 - Fixed failed sync attempts immediately clearing the active session before cached vault data can load.

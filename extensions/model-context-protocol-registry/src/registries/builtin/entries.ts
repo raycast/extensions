@@ -135,6 +135,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "glif",
+    title: "Glif",
+    description:
+      "Glif is a media-generation agent: generate images, video, and audio, transcribe, and chain multi-step media workflows from natural language. Hosted remote server with OAuth sign-in.",
+    icon: "https://glif.app/glif-icon-512.png",
+    homepage: "https://glif.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://glif.app/api/mcp"],
+    },
+  },
+  {
     name: "e2b",
     title: "E2B Code Interpreter",
     description: "A Model Context Protocol server for running code in a secure sandbox by [E2B](https://e2b.dev/).",
@@ -289,6 +301,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "posteverywhere",
+    title: "PostEverywhere",
+    description:
+      "Social media publishing MCP server. Schedule and post to 11 platforms (Instagram, TikTok, YouTube, LinkedIn, X, Facebook, Threads, Pinterest, Bluesky, Telegram, Discord) with media upload, AI captions, campaigns, and analytics through natural language.",
+    icon: "https://app.posteverywhere.ai/favicon.svg",
+    homepage: "https://developers.posteverywhere.ai/integrations/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@posteverywhere/mcp"],
+      env: {
+        POSTEVERYWHERE_API_KEY: "<YOUR_API_KEY_HERE>",
+      },
+    },
+  },
+  {
     name: "prisma",
     title: "Prisma",
     description:
@@ -331,6 +358,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         npm_config_yes: "true",
       },
+    },
+  },
+  {
+    name: "webhound",
+    title: "Webhound",
+    description:
+      "Run private, budgeted reports and datasets with Hound, Webhound's research harness built with DeepSeek V4 Pro and GPT-5.4. The user's dollar budget controls research effort, and each connection authenticates to that user's own Webhound account through OAuth.",
+    icon: "https://www.webhound.ai/favicon.ico",
+    homepage: "https://github.com/WebhoundAI/webhound-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.webhound.ai/api/v2/mcp"],
     },
   },
   {
@@ -444,6 +483,30 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.thena.ai/sse"],
+    },
+  },
+  {
+    name: "trends-mcp",
+    title: "Trends MCP",
+    description:
+      "Live cross-platform trend data for AI agents. Query Google, YouTube, TikTok, Reddit, Amazon, Wikipedia, news, npm, Steam, and more: historical series, growth rates, and live leaderboards in one connection. Free API key at trendsmcp.ai.",
+    icon: "https://www.trendsmcp.ai/static/pages/trendsmcp/assets/trend.svg",
+    homepage: "https://trendsmcp.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.trendsmcp.ai/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
+    },
+  },
+  {
+    name: "tripsy",
+    title: "Tripsy",
+    description:
+      "Tripsy's official MCP server connects AI assistants to your Tripsy account so you can create trips and manage flights, stays, activities, expenses, and itinerary details through natural language.",
+    icon: "https://framerusercontent.com/images/4xxcLxeTur6SPIrEG8pq54OT3Y.png",
+    homepage: "https://tripsy.app",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tripsy.app"],
     },
   },
   {
@@ -719,12 +782,122 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "plori",
     title: "plori",
     description:
-      "Give your AI agent its own cloud computer. plori hosts agents on persistent machines with a real disk, tools, and memory that survives between sessions; idle agents scale to zero. This server creates and drives those agents: invoke an agent and read its reply, answer human-in-the-loop questions, and schedule deferred runs. Sign-in happens in the browser on first use (OAuth), or use an API key for headless setups.",
+      "Create and drive cloud AI agents in persistent environments with durable disks, real CLI tools, and memory. Supports runs, human input, scheduling, connections, and workflows over remote MCP. Sign in with OAuth 2.1, or use an API key for headless setups.",
     icon: "https://plori.ai/icon-512.png",
     homepage: "https://plori.ai/mcp",
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://api.plori.ai/mcp"],
+    },
+  },
+  {
+    name: "appwrite",
+    title: "Appwrite",
+    description:
+      "The official Appwrite MCP server lets AI assistants securely inspect and manage Appwrite projects and resources through Appwrite's API.",
+    icon: "https://mcp.appwrite.io/favicon.svg",
+    homepage: "https://github.com/appwrite/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.appwrite.io/"],
+    },
+  },
+  {
+    name: "agentcard",
+    title: "Agentcard",
+    description:
+      "Prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Connects to the remote Agentcard MCP server over OAuth 2.0.",
+    icon: "https://www.agentcard.sh/logo-icon.png",
+    homepage: "https://agentcard.sh",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.agentcard.sh/mcp"],
+    },
+  },
+  {
+    name: "usemycontext",
+    title: "UseMyContext",
+    description:
+      "The personal context layer for AI: one user-owned profile plus files, read by any MCP client so you never re-introduce yourself. Tools for profile, file search and reads, cited answers from your documents, and exact table queries. Connects to the remote UseMyContext server over OAuth 2.1.",
+    icon: "usemycontext.svg",
+    homepage: "https://usemycontext.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.usemycontext.ai/mcp"],
+    },
+  },
+  {
+    name: "jobyap",
+    title: "JobYap",
+    description:
+      "Search job postings aggregated from companies' official careers sites — salaries, locations, and a community discussion thread on every job. Remote Streamable HTTP MCP server; no auth required.",
+    icon: "https://raw.githubusercontent.com/jobyap/agent-skills/main/assets/logo.png",
+    homepage: "https://jobyap.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.jobyap.com/mcp"],
+    },
+  },
+  {
+    name: "tendem",
+    title: "Tendem",
+    description:
+      "Delegate tasks to vetted human experts - research, competitive analysis, fact-checking, copywriting, editing, design review, presentation polish, data cleaning and list building. Submit a task in natural language; Tendem's orchestrator scopes it and quotes a transparent price, and after explicit approval a vetted human expert executes it and returns verified results as markdown plus files. Remote Streamable HTTP MCP server with OAuth 2.0 sign-in on first use.",
+    icon: "https://framerusercontent.com/images/EGNlwavPB2tW8etz63vecfpJu0.png",
+    homepage: "https://github.com/Toloka/tendem-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tendem.ai/mcp?utm_hash=66fdb1535f"],
+    },
+  },
+  {
+    name: "structured",
+    title: "Structured",
+    description:
+      "Structured is an all-in-one day planner that combines tasks and to-dos in a visual timeline. Its MCP server lets AI assistants view schedules and inbox tasks, and create, update, complete, delete, and manage recurring tasks. Remote Streamable HTTP server with Structured Cloud OAuth sign-in; some features require Structured Pro.",
+    icon: "https://web.structured.app/logo512.png",
+    homepage: "https://mcp.structured.app",
+    configuration: {
+      command: "npx",
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://mcp.structured.app/mcp",
+        "36933",
+        "--transport",
+        "http-only",
+        "--static-oauth-client-info",
+        '{"client_id":"4b33fb93-0eac-489f-974b-1a9fa108f4e9"}',
+        "--static-oauth-client-metadata",
+        '{"scope":"email"}',
+      ],
+    },
+  },
+  {
+    name: "one",
+    title: "One",
+    description:
+      "One is an MCP server that connects your AI tools to 700+ apps like Gmail, Slack, Stripe, Shopify, HubSpot, Notion, and Linear. Four tools cover everything: list your connected accounts, search a platform's actions, read an action's real API documentation, and execute it. Remote Streamable HTTP server with One OAuth sign-in, so no API keys are stored locally.",
+    icon: "https://assets.withone.ai/logos/one-logo.png",
+    homepage: "https://www.withone.ai/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.withone.ai/mcp"],
+      env: {
+        npm_config_yes: "true",
+      },
+    },
+  },
+  {
+    name: "smart-me",
+    title: "smart-me",
+    description:
+      "Your building's energy in real time: live meter readings, quarter-hourly load profiles and daily series, EV charging stations with their sessions and load-management groups, and the tariffs, invoice positions and ZEV (tenant) billing of a property on the smart-me platform. The remote Streamable HTTP server uses smart-me OAuth sign-in through an `mcp-remote` bridge.",
+    icon: "https://web.smart-me.com/wp-content/uploads/2025/09/sm_favicon.png",
+    homepage: "https://github.com/eCarUp/smart-me-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.smart-me.com/mcp"],
     },
   },
 ];

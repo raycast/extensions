@@ -1,12 +1,11 @@
-import { parseAntigravityCommandModelConfigsResponse, parseAntigravityUserStatusResponse } from "./parser";
-import { AntigravityError, AntigravityUsage } from "./types";
-import { createSimpleHook } from "../agents/hooks";
+import { parseAntigravityCommandModelConfigsResponse, parseAntigravityUserStatusResponse } from "./parser.ts";
 import {
   AntigravityProbeError,
-  AntigravityProbeResult,
-  AntigravityProbeSource,
+  type AntigravityProbeResult,
+  type AntigravityProbeSource,
   fetchAntigravityRawStatus,
-} from "./probe";
+} from "./probe.ts";
+import type { AntigravityError, AntigravityUsage } from "./types.ts";
 
 type ProbeFetcher = (preferredSource?: AntigravityProbeSource) => Promise<AntigravityProbeResult>;
 
@@ -101,7 +100,3 @@ export function mapAntigravityError(error: unknown): AntigravityError {
     message: "Unknown error while fetching Antigravity usage",
   };
 }
-
-export const useAntigravityUsage = createSimpleHook<AntigravityUsage, AntigravityError>({
-  fetcher: fetchAntigravityUsage,
-});

@@ -38,8 +38,9 @@ export function ImageDetailView({ product, imageUrl, imageIndex, allImages }: Im
         <ImageDetailView product={product} imageUrl={prevImageUrl} imageIndex={prevIndex} allImages={allImages} />,
       );
     } else {
+      // Boundary notice, not an error — no message to "Copy Error", so use a neutral success style.
       showToast({
-        style: Toast.Style.Failure,
+        style: Toast.Style.Success,
         title: "This is the first image",
       });
     }
@@ -57,8 +58,9 @@ export function ImageDetailView({ product, imageUrl, imageIndex, allImages }: Im
         <ImageDetailView product={product} imageUrl={nextImageUrl} imageIndex={nextIndex} allImages={allImages} />,
       );
     } else {
+      // Boundary notice, not an error — no message to "Copy Error", so use a neutral success style.
       showToast({
-        style: Toast.Style.Failure,
+        style: Toast.Style.Success,
         title: "This is the last image",
       });
     }
@@ -98,7 +100,7 @@ export function ImageDetailView({ product, imageUrl, imageIndex, allImages }: Im
             <Action
               title="Back to Product Detail"
               icon={Icon.Document}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
               onAction={() => {
                 // Push a new product detail view
                 navigation.push(<ProductDetailView product={product} />);

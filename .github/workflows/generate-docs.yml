@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 2
           sparse-checkout: |
@@ -21,9 +21,9 @@ jobs:
             scripts/
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20.15.1
+          node-version: 22.22.2
 
       - name: Setup git
         uses: raycast/github-actions/setup-git@master

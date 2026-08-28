@@ -2,7 +2,7 @@ import { Clipboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { analyzeWebPageText } from "./analyze-text";
 import { BrowserTabError, getActiveBrowserTab } from "./browser-tab";
 import { FetchPageError, fetchPageAsPlainText } from "./fetch-page-text";
-import { parseModelPreference } from "./model";
+import { parseModelPreference, resolvedModelPreference } from "./model";
 import { formatVisionError } from "./analyze-image";
 import { formatUsageHint } from "./token-usage";
 
@@ -12,7 +12,7 @@ export default async function quickBrowserCommand() {
   const defaultPrompt =
     prefs.defaultPrompt?.trim() ||
     "Describe what you see on the screen. Call out any text, UI elements, errors, or notable details.";
-  const modelPref = prefs.model?.trim() || "openai:gpt-4o-mini";
+  const modelPref = resolvedModelPreference(prefs.model);
   const usageOpts = {
     modelValue: modelPref,
     showEstimatedCost: showTok && prefs.showEstimatedCost === true,

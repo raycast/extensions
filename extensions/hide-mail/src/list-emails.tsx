@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  closeMainWindow,
-  Icon,
-  List,
-  popToRoot,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 
 import { listAllAliases } from "./utils/list";
 import { toggleAlias } from "./utils/toggle";
@@ -88,7 +77,6 @@ const ListEmails = () => {
                     icon={Icon.XMarkCircle}
                   />
                 )}
-                {}
               </ActionPanel>
             }
           />

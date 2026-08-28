@@ -1,10 +1,11 @@
-import { Detail } from '@raycast/api';
+import { Detail, getPreferenceValues } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 import { useMemo } from 'react';
 import { dailyChallengeQuery, endpoint } from './api';
 import { DailyChallenge, DailyChallengeResponse } from './types';
 import { formatProblemMarkdown } from './utils';
 import { useProblemTemplateActions } from './useProblemTemplateActions';
+import { useProblemRatings } from './ratings';
 
 export default function Command() {
   const { isLoading: isDailyChallengeLoading, data: dailyChallenge } = useFetch<
@@ -27,9 +28,14 @@ export default function Command() {
     },
   });
 
+  const { showProblemRatings } = getPreferenceValues<Preferences>();
+  const { ratings, isRatingsLoading } = useProblemRatings(showProblemRatings);
+  const ratingsLoaded = showProblemRatings && ratings != null;
+  const rating = ratingsLoaded ? ratings[dailyChallenge?.problem.titleSlug ?? ''] : undefined;
+
   const problemMarkdown = useMemo(
-    () => formatProblemMarkdown(dailyChallenge?.problem, dailyChallenge?.date),
-    [dailyChallenge],
+    () => formatProblemMarkdown(dailyChallenge?.problem, dailyChallenge?.date, rating, ratingsLoaded),
+    [dailyChallenge, rating, ratingsLoaded],
   );
 
   const actions = useProblemTemplateActions({
@@ -39,5 +45,7 @@ export default function Command() {
     linkUrl: `https://leetcode.com${dailyChallenge?.link}`,
   });
 
-  return <Detail isLoading={isDailyChallengeLoading} markdown={problemMarkdown} actions={actions} />;
+  return (
+    <Detail isLoading={isDailyChallengeLoading || isRatingsLoading} markdown={problemMarkdown} actions={actions} />
+  );
 }

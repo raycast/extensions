@@ -22,7 +22,7 @@
       "subtitle": "Sonos",
       "description": "Toggle the playback state of the active group",
       "mode": "no-view",
-      "interval": "5s"
+      "interval": "1m"
     },
     {
       "name": "set-group",
@@ -117,5 +117,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

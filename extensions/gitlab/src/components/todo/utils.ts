@@ -1,15 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getExcludeTodoAuthorUsernamesPreference, gitlab } from "../../common";
-import { MergeRequest, Project, Todo } from "../../gitlabapi";
+import { Project, Todo } from "../../gitlabapi";
 import { getErrorMessage } from "../../utils";
-
-export function findTodoForMR(todos: Todo[], mr: MergeRequest): Todo | undefined {
-  return todos.find(
-    (todo) =>
-      todo.target_type === "MergeRequest" &&
-      (todo.target?.id === mr.id || (todo.target?.iid === mr.iid && todo.target?.project_id === mr.project_id)),
-  );
-}
 
 export function useTodos(
   search?: string,

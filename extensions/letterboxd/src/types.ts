@@ -6,7 +6,22 @@ export interface Movie {
   released: string;
   detailsPage: string;
   thumbnail?: string;
-  rating?: string;
+  rating?: number;
+  runtime?: number;
+  genres?: string[];
+  top250Position?: number;
+  links: MovieLinks;
+}
+
+export interface MovieLinks {
+  letterboxd: string;
+  imdb?: string;
+  tmdb?: string;
+}
+
+export interface NamedLink {
+  name: string;
+  url?: string;
 }
 
 export interface Review {
@@ -15,12 +30,6 @@ export interface Review {
   reviewUrl?: string;
   rating?: string;
   commentCount?: number;
-}
-
-export interface MovieStatistics {
-  watches?: number;
-  lists?: number;
-  likes?: number;
 }
 
 export interface MovieRatingHistogram {
@@ -58,13 +67,16 @@ export interface MovieDetails extends Pick<Movie, "id" | "director" | "title"> {
   posterUrl?: string;
   description: string;
   released: string;
+  releaseDate?: string;
   runtime?: number;
-  stats?: MovieStatistics;
   ratingHistogram?: MovieRatingHistogram;
   releases: Array<ReleasesByType>;
   url: string;
   genres?: string[];
-  language?: string;
+  languages?: string[];
+  countries?: string[];
+  cast?: NamedLink[];
+  productionCompanies?: NamedLink[];
   reviews?: Array<Review>;
 }
 

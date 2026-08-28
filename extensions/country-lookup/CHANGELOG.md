@@ -1,5 +1,9 @@
 # Country Changelog
 
+## [Fix: Search Countries view] - 2026-07-16
+
+ - Fixed slow "Search Countries" view by making requests parallel instead of sequential.
+
 ## [Migrate to API v5] - 2026-07-03
 
 - Added Windows support

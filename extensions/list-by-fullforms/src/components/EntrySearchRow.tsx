@@ -17,8 +17,14 @@ import type { ReactNode } from "react";
 import { apiBase, apiHost } from "../lib/api";
 import type { SearchEntryResult, Tag } from "../lib/api";
 import { entryTypeLabel } from "../lib/entryTypes";
-import { iconForList, listVisibility } from "../lib/listIconCatalog";
-import { isMacOS } from "../lib/platform";
+import { renderImageCallouts } from "../lib/entryImages";
+import {
+  iconForList,
+  iconForWorkspace,
+  listVisibility,
+} from "../lib/listIconCatalog";
+import { mentionToken } from "../lib/descriptionMarkup";
+import { crossShortcut, isMacOS } from "../lib/platform";
 import { composeSpeakable, speakText, stopSpeaking } from "../lib/tts";
 import { EntryEditForm } from "./EntryEditForm";
 import { EntryNoteForm } from "./EntryNoteForm";
@@ -53,6 +59,22 @@ function accessoriesForEntry(entry: SearchEntryResult) {
   return items.length > 0 ? items : undefined;
 }
 
+// Turn every single newline into a markdown hard break so multi-line
+// prose keeps one line per line, matching the web. The web renders
+// descriptions and notes inside a `white-space: pre-wrap` container
+// (EntryDetailModal.vue `.modal__description`), where each newline is a
+// visual line break; Raycast's markdown pane instead treats a lone
+// newline as a soft break and collapses it to a space, which folds the
+// emoji-bullet lists entries commonly use into one run-on paragraph.
+// The regex only touches single newlines (a non-newline followed by one
+// `\n` that isn't followed by another), so blank-line paragraph breaks,
+// and the `\n\n`-spaced image blocks renderImageCallouts emits, stay
+// intact. Two trailing spaces before the newline is CommonMark's hard
+// break.
+function hardenLineBreaks(text: string): string {
+  return text.replace(/([^\n])\n(?!\n)/g, "$1  \n");
+}
+
 // Compose the detail markdown for an entry: H2 term, definition, then
 // the long-form description (if any), then the caller's private note
 // (if any) under a "Your note" header. Plain markdown so Raycast
@@ -76,7 +98,10 @@ function entryDetailMarkdown(entry: SearchEntryResult): string {
     lines.push("");
     lines.push("---");
     lines.push("");
-    lines.push(entry.description);
+    // Rewrite any `> Image:` callout lines into markdown images so the
+    // pane shows a bounded preview instead of a blockquoted URL, then
+    // harden single newlines so the prose lines don't collapse together.
+    lines.push(hardenLineBreaks(renderImageCallouts(entry.description)));
   }
   if (entry.myNote && entry.myNote.trim()) {
     lines.push("");
@@ -84,7 +109,7 @@ function entryDetailMarkdown(entry: SearchEntryResult): string {
     lines.push("");
     lines.push("### Your note");
     lines.push("");
-    lines.push(entry.myNote);
+    lines.push(hardenLineBreaks(entry.myNote));
   }
   return lines.join("\n");
 }
@@ -93,6 +118,7 @@ export function EntrySearchRow({
   entry,
   listIcon,
   listColor,
+  workspaceAvatarUrl,
   showingDetail,
   detailToggleAction,
   canEdit,
@@ -106,6 +132,12 @@ export function EntrySearchRow({
   // call site, which renders per-bucket).
   listIcon: string | null;
   listColor: string | null;
+  // The entry's workspace avatar URL, resolved by the parent from its
+  // /api/v1/workspaces fetch (the search rows don't carry it). Feeds
+  // iconForWorkspace for the "Workspace" metadata row: the circle-masked
+  // avatar when set, else a person/team glyph by workspace type. Null
+  // while the workspaces fetch is in flight or the id doesn't resolve.
+  workspaceAvatarUrl: string | null;
   showingDetail: boolean;
   // The shared Hide/Show Detail action element owned by the parent
   // (it flips parent state, so the parent constructs it).
@@ -167,6 +199,7 @@ export function EntrySearchRow({
               <List.Item.Detail.Metadata.Label
                 title="Workspace"
                 text={entry.workspaceName}
+                icon={iconForWorkspace(workspaceAvatarUrl, entry.workspaceType)}
               />
               {Array.isArray(entry.tags) && entry.tags.length > 0 && (
                 <List.Item.Detail.Metadata.TagList title="Tags">
@@ -188,7 +221,7 @@ export function EntrySearchRow({
           <Action.OpenInBrowser
             title="Open List"
             url={`${apiBase()}/${entry.listId}`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+            shortcut={crossShortcut(["cmd", "shift"], "o")}
           />
           {/* Edit the entry in place. Only shown when the caller has a
               writable role on this list; the edit form PATCHes
@@ -198,14 +231,21 @@ export function EntrySearchRow({
             <Action.Push
               title="Edit Entry"
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={crossShortcut(["cmd"], "e")}
               target={
                 <EntryEditForm
                   entry={{
                     id: entry.id,
                     entry: entry.entry,
                     definition: entry.definition,
-                    description: entry.description,
+                    // The RAW description (mention tokens intact), not
+                    // the stripped display copy this row renders: the
+                    // form PATCHes its field back verbatim, so seeding
+                    // it with the stripped copy would silently rewrite
+                    // every [label](#id) mention to its bare label on
+                    // save. Fallback covers a cached pre-20261018
+                    // response during a server deploy.
+                    description: entry.descriptionRaw ?? entry.description,
                     type: entry.type,
                     listName: entry.listName,
                     tags: entry.tags,
@@ -222,7 +262,7 @@ export function EntrySearchRow({
           <Action.Push
             title={hasNote ? "Edit Note" : "Add Note"}
             icon={Icon.Document}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+            shortcut={crossShortcut(["cmd", "shift"], "n")}
             target={
               <EntryNoteForm
                 entryId={entry.id}
@@ -240,7 +280,7 @@ export function EntrySearchRow({
           <Action.Push
             title="Report Entry"
             icon={Icon.Flag}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            shortcut={crossShortcut(["cmd", "shift"], "r")}
             target={
               <EntryReportForm entryId={entry.id} entryTerm={entry.entry} />
             }
@@ -252,7 +292,7 @@ export function EntrySearchRow({
                 ? Icon.StarDisabled
                 : { source: Icon.Star, tintColor: "#f59e0b" }
             }
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            shortcut={crossShortcut(["cmd"], "s")}
             onAction={onToggleStar}
           />
           {detailToggleAction}
@@ -260,7 +300,19 @@ export function EntrySearchRow({
           <Action.CopyToClipboard
             title="Copy Definition"
             content={entry.definition}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={crossShortcut(["cmd"], ".")}
+          />
+          {/* Copy the entry's mention token, the plain-text form the
+              web's @-mention picker inserts into descriptions. Raycast
+              forms can't host an inline @ popup (no keystroke or
+              cursor APIs on Form.TextArea), so the mention flow is
+              clipboard-shaped instead: copy the token here, paste it
+              at the caret in a description field. The web read view
+              renders it as a link to this entry. */}
+          <Action.CopyToClipboard
+            title="Copy as Mention"
+            content={mentionToken(entry.entry, entry.id)}
+            shortcut={crossShortcut(["cmd", "shift"], "m")}
           />
           {/* TTS via macOS's built-in `say`. Two granularities: Cmd+T
               speaks the full payload (term + definition + description),
@@ -277,7 +329,7 @@ export function EntrySearchRow({
               <Action
                 title="Speak Entry"
                 icon={Icon.SpeakerHigh}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                shortcut={crossShortcut(["cmd"], "t")}
                 onAction={() =>
                   speakText(
                     composeSpeakable(
@@ -291,13 +343,13 @@ export function EntrySearchRow({
               <Action
                 title="Speak Definition"
                 icon={Icon.SpeakerHigh}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                shortcut={crossShortcut(["cmd", "shift"], "t")}
                 onAction={() => speakText(entry.definition)}
               />
               <Action
                 title="Stop Speaking"
                 icon={Icon.SpeakerOff}
-                shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
+                shortcut={crossShortcut(["cmd", "opt"], "t")}
                 onAction={stopSpeaking}
               />
             </>

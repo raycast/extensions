@@ -13,14 +13,14 @@ export default function Trash() {
   const {
     isLoading,
     data,
+    pagination,
     revalidate: fetchTrash,
   } = useCachedPromise(
-    async () => {
-      const result = await remoApi.listNotes({ includeDeleted: true });
-      return result
-        .filter((n: Note) => n.deletedAt !== undefined)
-        .sort((a: Note, b: Note) => (b.deletedAt ?? b.updatedAt) - (a.deletedAt ?? a.updatedAt));
-    },
+    () =>
+      async ({ cursor }: { cursor?: string }) => {
+        const result = await remoApi.infiniteNotes({ view: "trash", cursor, numItems: 30 });
+        return { data: result.page, hasMore: !result.isDone, cursor: result.continueCursor };
+      },
     [],
     { onError: (error) => handleError(error, "Failed to fetch trash") },
   );
@@ -63,7 +63,12 @@ export default function Trash() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search deleted notes..." isShowingDetail={isShowingDetail}>
+    <List
+      isLoading={isLoading}
+      pagination={pagination}
+      searchBarPlaceholder="Search deleted notes..."
+      isShowingDetail={isShowingDetail}
+    >
       {notes.length === 0 && !isLoading ? (
         <List.EmptyView title="Trash is empty" icon={{ source: Icon.Trash, tintColor: Color.Green }} />
       ) : (

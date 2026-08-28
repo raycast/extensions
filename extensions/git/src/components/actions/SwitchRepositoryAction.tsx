@@ -35,6 +35,7 @@ export function SwitchRepositoryAction({
   }
 
   return (
+    // eslint-disable-next-line @raycast/prefer-common-shortcut -- keep Ctrl+R for Switch Repository; Common.Refresh is ⌘R and conflicts with view refresh
     <ActionPanel.Submenu title="Switch Repository" icon={Icon.Switch} shortcut={{ modifiers: ["ctrl"], key: "r" }}>
       {displayedRepositories.map((group) => (
         <ActionPanel.Section key={group.groupTitle} title={group.groupTitle}>

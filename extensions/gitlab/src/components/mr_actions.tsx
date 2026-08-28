@@ -8,7 +8,6 @@ import { MRCommitList } from "./commits/list";
 import { MREditForm } from "./mr_create";
 import { MRDiscussionList } from "./mr_discussion_list";
 import { MRPipelineList } from "./mr_pipelines";
-import { findTodoForMR, useTodos } from "./todo/utils";
 import { showFailureToast } from "@raycast/utils";
 
 async function createNote(mr: MergeRequest, body: string): Promise<void> {
@@ -201,20 +200,16 @@ function MRTodoAction(props: {
   shortcut?: Keyboard.Shortcut;
   finished?: () => void;
 }): React.ReactElement | null {
-  const { todos, performRefetch } = useTodos();
-  const existingTodo = findTodoForMR(todos, props.mr);
-
-  if (props.mr.state !== "opened" && !existingTodo) {
+  if (props.mr.state !== "opened" && !props.mr.todo_id) {
     return null;
   }
 
-  if (existingTodo) {
+  if (props.mr.todo_id) {
     async function markAsDone() {
       try {
         await showToast({ style: Toast.Style.Animated, title: "Marking Todo as done..." });
-        await gitlab.post(`todos/${existingTodo!.id}/mark_as_done`);
+        await gitlab.post(`todos/${props.mr.todo_id}/mark_as_done`);
         showToast(Toast.Style.Success, "Done", "Todo is now marked as done");
-        performRefetch();
         props.finished?.();
       } catch (error) {
         showFailureToast(error, { title: "Failed to mark Todo as done" });
@@ -235,7 +230,6 @@ function MRTodoAction(props: {
       await showToast({ style: Toast.Style.Animated, title: "Adding To-Do..." });
       await gitlab.post(`projects/${props.mr.project_id}/merge_requests/${props.mr.iid}/todo`);
       showToast(Toast.Style.Success, "To do created");
-      performRefetch();
       props.finished?.();
     } catch (error) {
       showFailureToast(error, { title: "Failed to add to do" });

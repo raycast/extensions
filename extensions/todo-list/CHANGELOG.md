@@ -1,5 +1,13 @@
 # Todo List Changelog
 
+## [New Preference Option: Group by priority] - 2026-07-22
+
+- Added preference option to group tasks by priority in both Todo and Completed sections.
+
+## [Fix Edit Due Date keyboard shortcut] - 2026-07-17
+
+- Previously "Edit Todo" and "Edit Due Date" had the same keyboard shortcut Cmd + E. Now "Edit Due Date" shortcut is Cmd + Shift + E.
+
 ## [New Preference Option: Throw confettis on task completion] - 2026-06-25
 
 - Added preference options for throwing Raycast confettis on task completion

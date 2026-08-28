@@ -23,7 +23,12 @@ import {
   type CustomPromptPreset,
 } from "./prompt-presets";
 import { type ChatTurn, continueConversation, type SessionContext } from "./continue-chat";
-import { effectiveModelPreference, MODEL_PREFERENCE_OPTIONS, parseModelPreference } from "./model";
+import {
+  effectiveModelPreference,
+  effectiveSessionModelPreference,
+  MODEL_PREFERENCE_OPTIONS,
+  parseModelPreference,
+} from "./model";
 import { regenerateLastTurn } from "./regenerate-turn";
 import { EXTENSION_DISPLAY_NAME } from "./extension-brand";
 import { exportChatConversationToFile } from "./export-chat";
@@ -59,7 +64,7 @@ export default function AnalyzeFileCommand() {
   const showTokenUsagePref = prefs.showTokenUsage === true;
   const showEstimatedCostPref = showTokenUsagePref && prefs.showEstimatedCost === true;
 
-  const effectiveSessionModel = sessionModel.trim() || prefs.model?.trim() || "openai:gpt-4o-mini";
+  const effectiveSessionModel = effectiveSessionModelPreference(sessionModel, prefs.model);
   const usageHintOpts = useMemo(
     () => ({ modelValue: effectiveSessionModel, showEstimatedCost: showEstimatedCostPref }),
     [effectiveSessionModel, showEstimatedCostPref],
