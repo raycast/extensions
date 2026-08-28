@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 
-import { formatResetTime } from "../agents/format.ts";
+import { formatResetTime, parseDate } from "../agents/format.ts";
 import type { Accessory } from "../agents/types.ts";
 import {
   formatErrorOrNoData,
@@ -35,6 +35,19 @@ export function formatGrokUsageText(usage: GrokUsage | null, error: GrokError | 
   text += `\nUsed: ${formatPercent(u.usedPercent)}%`;
   text += `\nResets In: ${formatReset(u.resetsAt)}`;
 
+  if (u.resetCredits) {
+    text += `\n\nLimit Reset Credits: ${formatResetCredits(u.resetCredits.availableCount)}`;
+    if (u.resetCredits.expiresAtList.length > 0) {
+      text += "\nExpires At:";
+      for (const expiresAt of u.resetCredits.expiresAtList) {
+        text += `\n- ${formatExpireTime(expiresAt)}`;
+      }
+    }
+    if (u.resetCreditsError) {
+      text += `\nReset Credits Error: ${u.resetCreditsError}`;
+    }
+  }
+
   return text;
 }
 
@@ -57,8 +70,49 @@ export function renderGrokDetail(usage: GrokUsage | null, error: GrokError | nul
       />
       <List.Item.Detail.Metadata.Label title="Used" text={`${formatPercent(u.usedPercent)}%`} />
       <List.Item.Detail.Metadata.Label title="Resets In" text={formatReset(u.resetsAt)} />
+
+      {u.resetCredits && (
+        <>
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Limit Reset Credits"
+            text={formatResetCredits(u.resetCredits.availableCount)}
+          />
+          {u.resetCredits.expiresAtList.map((expiresAt, index) => (
+            <List.Item.Detail.Metadata.Label
+              key={`${expiresAt}-${index}`}
+              title={`Manual Reset ${index + 1} Expires`}
+              text={formatExpireTime(expiresAt)}
+            />
+          ))}
+          {u.resetCreditsError && (
+            <List.Item.Detail.Metadata.Label title="Reset Credits Error" text={u.resetCreditsError} />
+          )}
+        </>
+      )}
     </List.Item.Detail.Metadata>
   );
+}
+
+function formatResetCredits(availableCount: number | null): string {
+  return availableCount === null
+    ? "Unavailable"
+    : `${availableCount} manual reset${availableCount === 1 ? "" : "s"} available`;
+}
+
+function formatExpireTime(value: string): string {
+  const date = parseDate(value);
+  if (!date) return "unknown";
+
+  const absoluteTime = date
+    .toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })
+    .replace(",", "");
+  return `${absoluteTime} (${formatResetTime(value)})`;
 }
 
 export function getGrokAccessory(usage: GrokUsage | null, error: GrokError | null, isLoading: boolean): Accessory {

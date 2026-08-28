@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Show Grok limit reset credits] - {PR_MERGE_DATE}
+
+### New Features
+
+- Show Grok manual usage-limit reset tokens in the detail view: remaining count and each expiration time, matching Codex
+
 ## [Fix Amp usage parse] - 2026-08-27
 
 ### Bug Fixes
