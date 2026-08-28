@@ -64,6 +64,13 @@ async function loadRanks(
 let cachedRanks: PopularityRanks | undefined;
 
 /**
+ * Bumped by every invalidation. A load that started before the bump must not
+ * install its result afterwards — it was parsed from files Clear Cache has
+ * since deleted, and without this it would silently repopulate stale ranks.
+ */
+let ranksGeneration = 0;
+
+/**
  * Drop the cached rankings so the next fetch re-reads from disk.
  *
  * Required after clearCache(): it deletes the files these were parsed from,
@@ -72,6 +79,7 @@ let cachedRanks: PopularityRanks | undefined;
  */
 export function invalidatePopularityRanks(): void {
   cachedRanks = undefined;
+  ranksGeneration++;
 }
 
 /**
@@ -90,16 +98,25 @@ export function fetchPopularityRanks(
     return Promise.resolve(cachedRanks);
   }
 
+  const generation = ranksGeneration;
+
   return Promise.all([
     loadRanks(formulaRanksRemote, onProgress, signal),
     loadRanks(caskRanksRemote, onProgress, signal),
   ]).then(([formulae, casks]) => {
+    const ranks = { formulae, casks };
     fetchLogger.log("Loaded popularity ranks", {
       period: POPULARITY_PERIOD,
       formulae: formulae.size,
       casks: casks.size,
+      stale: generation !== ranksGeneration,
     });
-    cachedRanks = { formulae, casks };
-    return cachedRanks;
+
+    // Invalidated while this load was in flight: hand the result to this caller
+    // but do not install it, so the next call re-reads from disk.
+    if (generation === ranksGeneration) {
+      cachedRanks = ranks;
+    }
+    return ranks;
   });
 }
