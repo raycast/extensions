@@ -30,7 +30,7 @@ will say so and take you straight to the setting.
 
 ## Notes
 
-- Badge counts refresh every 30 seconds in the background.
+- Badge counts refresh every 10 seconds in the background.
 - Only apps that appear in the Dock (pinned or currently running) are tracked.
 - If a preference change doesn't show up after the next refresh, toggle *Background Refresh* off and on
   in the command's settings.

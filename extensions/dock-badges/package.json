@@ -19,7 +19,7 @@
       "subtitle": "Dock Badges",
       "description": "Menu bar item showing the summed notification badge count of every app in your Dock.",
       "mode": "menu-bar",
-      "interval": "30s",
+      "interval": "10s",
       "preferences": [
         {
           "name": "symbol",
