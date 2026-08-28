@@ -1,6 +1,6 @@
 # Dovetail Changelog
 
-## [Workspace search, projects, and AI tools] - {PR_MERGE_DATE}
+## [Workspace search, projects, and AI tools] - 2026-08-28
 
 - Migrate the insights search command to the `/v1/docs` endpoint (renamed to "Search Docs"); `/v1/insights` is deprecated
 - Add "Search Projects" command
