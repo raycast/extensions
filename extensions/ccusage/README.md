@@ -17,7 +17,7 @@ Monitor your Claude Code usage with comprehensive real-time statistics:
 - **Session History**: View recent usage sessions with model-specific breakdown and icons
 - **Cost Analysis**: Detailed cost tracking with monthly projections and spending insights
 - **Model Statistics**: Usage analytics by Claude model (Fable, Opus, Sonnet, Haiku) with tier grouping
-- **Usage Limits**: OAuth-backed 5-hour and 7-day Claude usage limits when Claude Code is authenticated with Claude OAuth
+- **Usage Limits**: OAuth-backed 5-hour, 7-day, and per-model Claude usage limits when Claude Code is authenticated with Claude OAuth
 - **Menu Bar Integration**: Quick access to usage stats directly from your system menu bar
 - **Pie Chart Icon**: Menu bar icon that fills clockwise with a pie chart showing 5-hour usage utilization
 - **AI Extension Support**: Comprehensive integration with Raycast AI Extensions for Claude models
