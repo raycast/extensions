@@ -48,6 +48,17 @@ function serves(buffer: Buffer) {
   });
 }
 
+function slowTool(): string {
+  const dir = mkdtempSync(join(tmpdir(), "emotecast-bin-"));
+  const path = join(dir, "slowtool");
+  writeFileSync(
+    path,
+    '#!/bin/sh\nfor out; do :; done\nsleep 0.3\nprintf transcoded > "$out"\n',
+  );
+  chmodSync(path, 0o755);
+  return path;
+}
+
 function fakeTool(): string {
   const dir = mkdtempSync(join(tmpdir(), "emotecast-bin-"));
   const path = join(dir, "faketool");
@@ -151,6 +162,44 @@ describe("prepareEmoteFile", () => {
     await expect(
       prepareEmoteFile(emote(), 32, { cacheDir: cacheDir() }),
     ).rejects.toThrow("404");
+  });
+
+  it("leaves no output behind when the tool fails, so a retry can work", async () => {
+    vi.stubGlobal("fetch", serves(gifBuffer(108)));
+    const dir = cacheDir();
+    const failing = join(mkdtempSync(join(tmpdir(), "emotecast-bin-")), "fail");
+    writeFileSync(
+      failing,
+      '#!/bin/sh\nfor out; do :; done\nprintf truncated > "$out"\nexit 1\n',
+    );
+    chmodSync(failing, 0o755);
+
+    await expect(
+      prepareEmoteFile(emote(), 128, {
+        cacheDir: dir,
+        tools: { ffmpeg: failing },
+      }),
+    ).rejects.toThrow();
+
+    expect(existsSync(join(dir, "7tv-ABC-128.gif"))).toBe(false);
+    expect(readdirSync(dir)).toEqual([]);
+  });
+
+  it("keeps concurrent preparations from clobbering each other", async () => {
+    vi.stubGlobal("fetch", serves(gifBuffer(108)));
+    const dir = cacheDir();
+    const tools = { ffmpeg: slowTool() };
+
+    const files = await Promise.all([
+      prepareEmoteFile(emote({ key: "7tv:AAA" }), 128, { cacheDir: dir, tools }),
+      prepareEmoteFile(emote({ key: "7tv:BBB" }), 128, { cacheDir: dir, tools }),
+      prepareEmoteFile(emote({ key: "7tv:CCC" }), 32, { cacheDir: dir, tools }),
+    ]);
+
+    for (const file of files) {
+      expect(readFileSync(file).toString()).toBe("transcoded");
+    }
+    expect(readdirSync(dir).filter((f) => f.startsWith("."))).toEqual([]);
   });
 
   it("fails clearly when the emote exposes no variant", async () => {

@@ -1,6 +1,6 @@
 # Emotecast Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search 7TV, BetterTTV and FrankerFaceZ emotes from a single grid
 - Paste as a file at emoji size (`⏎`) or sticker size (`⇧⏎`), animation preserved

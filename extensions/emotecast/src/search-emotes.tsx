@@ -20,14 +20,8 @@ import { ToolMissing } from "./tool-missing";
 import { DEFAULT_SOURCE, SOURCES, sourceById } from "./sources";
 import { EMOJI_HEIGHT, type Emote, STICKER_HEIGHT } from "./types";
 
-type Preferences = {
-  showNsfw: boolean;
-  ffmpegPath: string;
-  magickPath: string;
-};
-
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchEmotes>();
   const { push } = useNavigation();
 
   const [sourceId, setSourceId] = useState<string>(DEFAULT_SOURCE);

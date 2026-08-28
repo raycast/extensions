@@ -36,7 +36,7 @@
     {
       "name": "showNsfw",
       "title": "NSFW Emotes",
-      "label": "Include NSFW emotes (blurred until selected)",
+      "label": "Include NSFW emotes, hidden until selected",
       "description": "When enabled, NSFW emotes appear hidden and are revealed on selection",
       "type": "checkbox",
       "required": false,
@@ -44,7 +44,7 @@
     },
     {
       "name": "ffmpegPath",
-      "title": "ffmpeg Path",
+      "title": "FFmpeg Path",
       "description": "Used to resize emotes that are not served at the exact target height. Leave empty to auto-detect.",
       "type": "textfield",
       "required": false,
@@ -53,7 +53,7 @@
     {
       "name": "magickPath",
       "title": "ImageMagick Path",
-      "description": "Used to decode animated WebP emotes, which ffmpeg cannot read. Leave empty to auto-detect.",
+      "description": "Used to decode animated WebP emotes, which most ffmpeg builds cannot read. Leave empty to auto-detect.",
       "type": "textfield",
       "required": false,
       "default": ""
