@@ -4,7 +4,7 @@ Open source has plenty of good advice. Remembering it is the hard part.
 
 OSS Guide of the Day puts one short lesson in Raycast, where you already work. Read the idea, try one small action, then get on with your day.
 
-![A guide about choosing an open source license](metadata/legal-guide.jpeg)
+![A guide about choosing an open source license](metadata/legal-guide.png)
 
 ## What you get
 
@@ -18,7 +18,7 @@ Press `↵` when you want another card. The order is shuffled but stable, so top
 
 Press `⌘ S` to snooze until midnight. If you change your mind, open the command and choose **Show Again**. Press `⌘ O` to read the original section.
 
-![The actions menu with keyboard shortcuts](metadata/actions.jpeg)
+![The actions menu with keyboard shortcuts](metadata/actions.png)
 
 ## It works offline
 
@@ -26,7 +26,7 @@ The lessons ship with the extension. No account, feed, or extension server is in
 
 The guide data and section index take about 104 KB uncompressed. Raycast stores only two small values on your device: today's position and the date you snoozed. Opening the original source is the only action that needs the internet.
 
-![A guide snoozed until local midnight](metadata/rest-mode.jpeg)
+![A guide snoozed until local midnight](metadata/rest-mode.png)
 
 ## Where the writing comes from
 
