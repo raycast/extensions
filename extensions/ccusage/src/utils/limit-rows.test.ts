@@ -134,7 +134,7 @@ describe("getLimitRows", () => {
     ).toMatchObject([{ label: "Fable", period: "session", utilization: 7 }]);
   });
 
-  it("falls back to the flat fields when the payload has no limits array", () => {
+  it("reports the flat-field models when the payload has no limits array", () => {
     expect(
       scopedRows({
         ...baseData,
@@ -147,7 +147,7 @@ describe("getLimitRows", () => {
     ]);
   });
 
-  it("falls back when the limits array holds no model-scoped entries", () => {
+  it("reports a flat-field model when the limits array names none", () => {
     expect(
       scopedRows({
         ...baseData,
@@ -157,14 +157,32 @@ describe("getLimitRows", () => {
     ).toMatchObject([{ label: "Opus", utilization: 82 }]);
   });
 
-  it("does not double render a model present in both the limits array and the flat fields", () => {
+  it("renders a model the limits array names once, not again from its flat field", () => {
+    expect(
+      scopedRows({
+        ...baseData,
+        seven_day_opus: { utilization: 82.4, resets_at: WEEKLY_RESET },
+        limits: [
+          {
+            kind: "weekly_scoped",
+            group: "weekly",
+            percent: 80,
+            resets_at: WEEKLY_RESET,
+            scope: { model: { id: null, display_name: "Opus" } },
+          },
+        ],
+      }),
+    ).toMatchObject([{ label: "Opus", utilization: 80, decimals: 0 }]);
+  });
+
+  it("keeps a flat-field model the limits array does not name", () => {
     expect(
       scopedRows({
         ...livePayload,
         seven_day_sonnet: { utilization: 45, resets_at: WEEKLY_RESET },
         seven_day_opus: { utilization: 82, resets_at: WEEKLY_RESET },
       }).map((row) => row.label),
-    ).toEqual(["Fable"]);
+    ).toEqual(["Fable", "Sonnet", "Opus"]);
   });
 
   it("returns only the account totals for a payload with neither scoped shape", () => {
