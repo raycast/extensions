@@ -118,7 +118,6 @@ async function fetchGrokResetCredits(accessToken: string): Promise<{
       body: EMPTY_GRPC_WEB_BODY,
       signal: controller.signal,
     });
-    clearTimeout(timeoutId);
 
     if (response.status === 401 || response.status === 403) {
       return {
@@ -169,7 +168,6 @@ async function fetchGrokResetCredits(accessToken: string): Promise<{
       };
     }
   } catch (error) {
-    clearTimeout(timeoutId);
     if (error instanceof Error && error.name === "AbortError") {
       return {
         resetCredits: null,
@@ -183,6 +181,8 @@ async function fetchGrokResetCredits(accessToken: string): Promise<{
         message: error instanceof Error ? error.message : "Network request failed",
       },
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
