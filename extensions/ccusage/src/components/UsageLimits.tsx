@@ -9,10 +9,13 @@ import {
   createProgressBar,
 } from "../utils/usage-limits-formatter";
 import { formatDuration } from "../utils/data-formatter";
+import { getScopedLimits } from "../utils/scoped-limits";
 import { showRemainingUsage } from "../preferences";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { STANDARD_ACCESSORIES } from "./common/accessories";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
+
+const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
 
 export function UsageLimits() {
   const {
@@ -36,6 +39,7 @@ export function UsageLimits() {
 
   const fiveHourUtil = data?.five_hour?.utilization ?? 0;
   const sevenDayUtil = data?.seven_day?.utilization ?? 0;
+  const scopedLimits = getScopedLimits(data);
   const preferRemaining = showRemainingUsage();
 
   const accessories: List.Item.Accessory[] =
@@ -174,6 +178,31 @@ export function UsageLimits() {
           }
           icon={Icon.ArrowClockwise}
         />
+
+        {scopedLimits.map((limit) => (
+          <React.Fragment key={`${limit.label}-${limit.period}`}>
+            <List.Item.Detail.Metadata.Separator />
+            <List.Item.Detail.Metadata.Label
+              title={`${limit.label} ${capitalize(limit.period)} Limit`}
+              icon={Icon.Calendar}
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Utilization"
+              text={`${limit.utilization.toFixed(0)}%`}
+              icon={{ source: Icon.BarChart, tintColor: getUtilizationColor(limit.utilization) }}
+            />
+            <List.Item.Detail.Metadata.Label title="Progress" text={createProgressBar(limit.utilization)} />
+            <List.Item.Detail.Metadata.Label
+              title="Resets in"
+              text={
+                limit.resets_at
+                  ? `${formatTimeRemaining(limit.resets_at)} · ${new Date(limit.resets_at).toLocaleString("en-US", { hour12: false })}`
+                  : "N/A"
+              }
+              icon={Icon.ArrowClockwise}
+            />
+          </React.Fragment>
+        ))}
 
         {isStale && !isLoading && (
           <>

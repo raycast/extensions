@@ -11,6 +11,7 @@ import { formatCost, formatCostDelta, formatDuration, formatTokensAsMTok } from 
 import { formatTimeRemaining, createProgressBar } from "./utils/usage-limits-formatter";
 import { pieIcon } from "./utils/pie-icon";
 import { formatTimeRemainingCustom } from "./utils/time-remaining-formatter";
+import { getScopedLimits } from "./utils/scoped-limits";
 import {
   showRemainingUsage,
   getMenuBarTitle,
@@ -32,6 +33,29 @@ const MOCK_LIMITS_DATA = {
   },
   seven_day_sonnet: { utilization: 45, resets_at: new Date(Date.now() + 6 * 24 * 3600 * 1000).toISOString() },
   seven_day_opus: { utilization: 82, resets_at: new Date(Date.now() + 5 * 24 * 3600 * 1000).toISOString() },
+  limits: [
+    {
+      kind: "session",
+      group: "session",
+      percent: 28,
+      resets_at: new Date(Date.now() + 23 * 60 * 1000).toISOString(),
+      scope: null,
+    },
+    {
+      kind: "weekly_all",
+      group: "weekly",
+      percent: 61,
+      resets_at: new Date(Date.now() + 6 * 24 * 3600 * 1000).toISOString(),
+      scope: null,
+    },
+    {
+      kind: "weekly_scoped",
+      group: "weekly",
+      percent: 15,
+      resets_at: new Date(Date.now() + 4 * 24 * 3600 * 1000).toISOString(),
+      scope: { model: { id: null, display_name: "Fable" } },
+    },
+  ],
 };
 
 export default function MenuBarccusage() {
@@ -140,12 +164,12 @@ export default function MenuBarccusage() {
   const limitIcon = (utilization: number): string | Icon => (usePies ? (pieIcon(utilization) as string) : Icon.Gauge);
 
   const menuBarTitlePref = getMenuBarTitle();
+  const scopedLimits = getScopedLimits(effectiveLimitsData);
   const highestUtilization = effectiveLimitsData
     ? Math.max(
         effectiveLimitsData.five_hour.utilization,
         effectiveLimitsData.seven_day.utilization,
-        effectiveLimitsData.seven_day_sonnet?.utilization ?? 0,
-        effectiveLimitsData.seven_day_opus?.utilization ?? 0,
+        ...scopedLimits.map((limit) => limit.utilization),
       )
     : null;
   const menuBarTitle = (() => {
@@ -259,28 +283,15 @@ export default function MenuBarccusage() {
                     icon={limitIcon(effectiveLimitsData.seven_day.utilization)}
                     onAction={revalidate}
                   />
-                  {effectiveLimitsData.seven_day_sonnet && (
+                  {scopedLimits.map((limit) => (
                     <MenuBarExtra.Item
-                      title={limitTitle("Sonnet", effectiveLimitsData.seven_day_sonnet.utilization)}
-                      subtitle={limitInfo(
-                        effectiveLimitsData.seven_day_sonnet.utilization,
-                        effectiveLimitsData.seven_day_sonnet.resets_at,
-                      )}
-                      icon={limitIcon(effectiveLimitsData.seven_day_sonnet.utilization)}
+                      key={`${limit.label}-${limit.period}`}
+                      title={limitTitle(limit.label, limit.utilization)}
+                      subtitle={limitInfo(limit.utilization, limit.resets_at)}
+                      icon={limitIcon(limit.utilization)}
                       onAction={revalidate}
                     />
-                  )}
-                  {effectiveLimitsData.seven_day_opus && (
-                    <MenuBarExtra.Item
-                      title={limitTitle("Opus", effectiveLimitsData.seven_day_opus.utilization)}
-                      subtitle={limitInfo(
-                        effectiveLimitsData.seven_day_opus.utilization,
-                        effectiveLimitsData.seven_day_opus.resets_at,
-                      )}
-                      icon={limitIcon(effectiveLimitsData.seven_day_opus.utilization)}
-                      onAction={revalidate}
-                    />
-                  )}
+                  ))}
                   {!limitsRateLimited && (
                     <MenuBarExtra.Item
                       title="Refresh"

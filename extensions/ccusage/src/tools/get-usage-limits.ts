@@ -1,5 +1,6 @@
 import { getClaudeAccessToken } from "../utils/keychain-access";
 import { fetchClaudeUsageLimits } from "../utils/claude-api-client";
+import { getScopedLimits } from "../utils/scoped-limits";
 
 type Input = {
   /** Include raw reset timestamps in ISO format */
@@ -7,7 +8,7 @@ type Input = {
 };
 
 /**
- * Get Claude API usage limits including 5-hour and 7-day utilization percentages
+ * Get Claude API usage limits including 5-hour, 7-day, and per-model weekly utilization percentages
  * @param input - Optional input parameters for formatting
  * @returns Usage limit data with utilization percentages and reset times
  * @throws Error when credentials are not found or API returns invalid data
@@ -23,6 +24,13 @@ export default async function getUsageLimits(input?: Input): Promise<{
     resetsAt: string;
     rawTimestamp?: string;
   };
+  scopedLimits?: Array<{
+    label: string;
+    period: string;
+    utilization: number;
+    resetsAt: string;
+    rawTimestamp?: string;
+  }>;
 }> {
   const token = await getClaudeAccessToken();
   const isUsageLimitsAvailable = typeof token === "string" && token.trim().length > 0;
@@ -69,6 +77,14 @@ export default async function getUsageLimits(input?: Input): Promise<{
     }
   };
 
+  const scopedLimits = getScopedLimits(usageLimitsData).map((limit) => ({
+    label: limit.label,
+    period: limit.period,
+    utilization: limit.utilization,
+    resetsAt: formatResetTime(limit.resets_at),
+    ...(input?.includeRawTimestamps && { rawTimestamp: limit.resets_at ?? undefined }),
+  }));
+
   return {
     fiveHour: {
       utilization: Math.round(usageLimitsData.five_hour.utilization * 10) / 10,
@@ -80,5 +96,6 @@ export default async function getUsageLimits(input?: Input): Promise<{
       resetsAt: formatResetTime(usageLimitsData.seven_day.resets_at),
       ...(input?.includeRawTimestamps && { rawTimestamp: usageLimitsData.seven_day.resets_at ?? undefined }),
     },
+    ...(scopedLimits.length > 0 && { scopedLimits }),
   };
 }

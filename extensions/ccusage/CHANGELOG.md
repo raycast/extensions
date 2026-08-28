@@ -1,5 +1,16 @@
 # Claude Usage (ccusage) Changelog
 
+## [Fable support and per-model limits] - {PR_MERGE_DATE}
+
+### Added
+
+- **Frontier model tier:** Model Statistics now groups Fable into a Frontier tier above Premium, so its higher per-token pricing is not averaged in with Opus. Tiers also render in a fixed order rather than in whatever order the models arrive.
+- **Per-model limits everywhere:** The Usage Limits detail view and the `get-usage-limits` AI tool now show per-model windows alongside the 5-hour and 7-day totals. Previously these appeared only in the menu bar.
+
+### Changed
+
+- Per-model limits are read from the usage endpoint's self-describing `limits` array, so a window for any model shows up under its own name and period without an extension update. Accounts still served the older response shape keep their existing Sonnet and Opus rows.
+
 ## [Rename to Claude Usage] - 2026-07-29
 
 ### Changed
