@@ -53,7 +53,6 @@ export {
   totalForPeriod,
   packageStatus,
   fetchPopularityRanks,
-  invalidatePopularityRanks,
   analyticsCacheFiles,
   POPULARITY_PERIOD,
 } from "./analytics";

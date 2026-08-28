@@ -6,7 +6,7 @@
 import { useRef } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { fetchPopularityRanks, PopularityRanks, showBrewFailureToast } from "../utils";
+import { fetchPopularityRanks, fetchLogger, PopularityRanks, showBrewFailureToast } from "../utils";
 
 interface UsePopularityRanksResult {
   isLoading: boolean;
@@ -55,13 +55,16 @@ export function usePopularityRanks(enabled: boolean): UsePopularityRanksResult {
           const combined = percents.reduce((sum, percent) => sum + percent, 0) / percents.length;
 
           toast ??= showToast({ style: Toast.Style.Animated, title: "Downloading Install Statistics" });
-          // Detached on purpose — a progress callback cannot await. The catch
-          // keeps a rejected showToast from surfacing as an unhandled rejection;
-          // the failure itself is reported by the awaited chain below.
-          toast.then((t) => (t.message = `${Math.round(combined)}%`)).catch(() => {});
+          // Detached on purpose — a progress callback cannot await. A failing
+          // toast must not take down the download, and must not surface as an
+          // unhandled rejection, so it is logged rather than thrown or dropped.
+          toast.then((t) => (t.message = `${Math.round(combined)}%`)).catch(logToastFailure);
         }, abortable.current?.signal);
       } finally {
-        await toast?.then((t) => t.hide()).catch(() => {});
+        // Logged, not swallowed: a toast that fails to hide after a SUCCESSFUL
+        // download has no other reporting path — the awaited chain above only
+        // carries download failures.
+        await toast?.then((t) => t.hide()).catch(logToastFailure);
       }
     },
     [],
@@ -75,4 +78,10 @@ export function usePopularityRanks(enabled: boolean): UsePopularityRanksResult {
   );
 
   return { isLoading: enabled && isLoading, data, revalidate };
+}
+
+function logToastFailure(error: unknown): void {
+  fetchLogger.error("Install statistics toast failed", {
+    error: error instanceof Error ? error.message : String(error),
+  });
 }

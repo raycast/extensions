@@ -57,44 +57,28 @@ async function loadRanks(
 /**
  * Fetch (and disk-cache) the bulk install rankings for formulae and casks.
  *
- * Memoized for the lifetime of the command process: the caller re-runs a search
- * on every keystroke, and each call would otherwise re-read ~3MB from disk.
- */
-let ranksPromise: Promise<PopularityRanks> | undefined;
-
-/**
- * Drop the memoized rankings, so the next fetch re-downloads.
+ * Deliberately NOT memoized in a module-level promise. There is one consumer
+ * (usePopularityRanks, which runs once per mount), so a shared promise bought
+ * nothing — and it meant a shared abort signal: whoever started the fetch owned
+ * cancellation for everyone who joined it, so one consumer aborting rejected
+ * another's load with an AbortError it never asked for.
  *
- * Required after clearCache(): it deletes the files underneath this promise,
- * which would otherwise keep serving rankings from a cache that no longer
- * exists on disk.
+ * Re-reading the cached files costs a disk read and a parse; the expensive part
+ * (the download) is already avoided by downloadRemoteToCache's freshness check.
  */
-export function invalidatePopularityRanks(): void {
-  ranksPromise = undefined;
-}
-
 export function fetchPopularityRanks(
   onProgress?: DownloadProgressCallback,
   signal?: AbortSignal,
 ): Promise<PopularityRanks> {
-  if (!ranksPromise) {
-    ranksPromise = Promise.all([
-      loadRanks(formulaRanksRemote, onProgress, signal),
-      loadRanks(caskRanksRemote, onProgress, signal),
-    ])
-      .then(([formulae, casks]) => {
-        fetchLogger.log("Loaded popularity ranks", {
-          period: POPULARITY_PERIOD,
-          formulae: formulae.size,
-          casks: casks.size,
-        });
-        return { formulae, casks };
-      })
-      .catch((error) => {
-        // Don't cache a failure — the next attempt should retry the download.
-        ranksPromise = undefined;
-        throw error;
-      });
-  }
-  return ranksPromise;
+  return Promise.all([
+    loadRanks(formulaRanksRemote, onProgress, signal),
+    loadRanks(caskRanksRemote, onProgress, signal),
+  ]).then(([formulae, casks]) => {
+    fetchLogger.log("Loaded popularity ranks", {
+      period: POPULARITY_PERIOD,
+      formulae: formulae.size,
+      casks: casks.size,
+    });
+    return { formulae, casks };
+  });
 }

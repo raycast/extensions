@@ -19,7 +19,6 @@ import {
   DownloadProgress,
   hasSearchCache,
   invalidateChunkedCacheMemory,
-  invalidatePopularityRanks,
   onIndexRefreshed,
   PopularityRanks,
 } from "../utils";
@@ -255,9 +254,8 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
                   // chunked cache from scratch rather than reusing entries
                   // that point at the chunk files we just deleted.
                   invalidateChunkedCacheMemory();
-                  // clearCache() removed the analytics files too; drop the
-                  // rankings memoized against them.
-                  invalidatePopularityRanks();
+                  // clearCache() removed the analytics files too; re-run the
+                  // rankings load so it downloads them again.
                   onCacheCleared?.();
                   await mutate();
                 },

@@ -67,6 +67,47 @@ assert.deepEqual(
 // A bare flag with no reason still says something useful.
 assert.equal(packageStatus({ deprecated: true })?.text, "No longer maintained");
 
+/**
+ * Prove the API's `number` rank is redundant with the count, which is what
+ * makes dropping it safe.
+ *
+ * Comparing positions one-by-one does NOT work: the file has ~21k adjacent
+ * ties, the API breaks them arbitrarily and this code breaks them by name, so a
+ * tie legitimately displaces every position after it. (That is exactly how the
+ * first version of this assertion failed — on `imath` vs `aws-c-cal`, both at
+ * 23,779.)
+ *
+ * The tie-independent form of the claim is monotonicity: the published file is
+ * non-increasing by count, and so is our re-sort of it. Two orders that are
+ * both non-increasing over the same counts differ only within ties.
+ */
+function assertReproducesFileOrder(
+  items: { formula?: string; cask?: string; count: string }[],
+  ranks: Map<string, number>,
+  label: string,
+): void {
+  const countOf = (entry: { id: string }) => ranks.get(entry.id);
+  const ids: { id: string }[] = items.map((i) => ({ id: (i.formula ?? i.cask) as string }));
+
+  const nonIncreasing = (sequence: { id: string }[], what: string) => {
+    for (let i = 0; i < sequence.length - 1; i++) {
+      const a = countOf(sequence[i]);
+      const b = countOf(sequence[i + 1]);
+      if (a === undefined || b === undefined) {
+        continue; // a row parseRanks dropped
+      }
+      assert.ok(
+        a >= b,
+        `${label}: ${what} is not ordered by count — ${sequence[i].id} (${a}) before ${sequence[i + 1].id} (${b})`,
+      );
+    }
+  };
+
+  assert.ok(ids.length > 1000, `${label}: only ${ids.length} rows — assertion is too weak`);
+  nonIncreasing(ids, "the published file");
+  nonIncreasing([...ids].sort(byPopularity(ranks)), "our re-sort");
+}
+
 /// Live API — the shape assumptions above, against the real thing
 
 async function checkLive() {
@@ -80,20 +121,22 @@ async function checkLive() {
   const bulk = await (await fetch(`https://formulae.brew.sh/api/analytics/install/${POPULARITY_PERIOD}.json`)).json();
   const parsed = parseRanks(bulk);
   assert.ok(parsed.size > 1000, `expected thousands of ranked formulae, got ${parsed.size}`);
-  // The bulk file is published in count order, so parsing then re-sorting by
-  // count must reproduce the file's own order — this is the assertion that the
-  // dropped `number` rank was redundant.
-  const top: { id: string }[] = bulk.items.slice(0, 25).map((i: { formula: string }) => ({ id: i.formula }));
-  assert.deepEqual(
-    [...top].sort(byPopularity(parsed)).map((e: { id: string }) => e.id),
-    top.map((e: { id: string }) => e.id),
-    "sorting by count must reproduce the API's own ranking",
-  );
+  // The bulk files are published in count order, so parsing and re-sorting by
+  // count must reproduce each file's own order. This is THE assertion that the
+  // dropped `number` rank was redundant, so it runs over the whole file and
+  // over both categories — the drop logic is shared by formulae and casks.
+  //
+  // Equal counts are the one legitimate difference: the API breaks those ties
+  // arbitrarily and we break them by name, so a pair is only a failure when the
+  // counts actually differ.
+  assertReproducesFileOrder(bulk.items, parsed, "formulae");
 
-  const casks = parseRanks(
-    await (await fetch(`https://formulae.brew.sh/api/analytics/cask-install/${POPULARITY_PERIOD}.json`)).json(),
-  );
+  const caskBulk = await (
+    await fetch(`https://formulae.brew.sh/api/analytics/cask-install/${POPULARITY_PERIOD}.json`)
+  ).json();
+  const casks = parseRanks(caskBulk);
   assert.ok(casks.size > 1000, `expected thousands of ranked casks, got ${casks.size}`);
+  assertReproducesFileOrder(caskBulk.items, casks, "casks");
 
   console.log(
     `ok — fixtures + live API, ranking period ${POPULARITY_PERIOD} (${parsed.size} formulae, ${casks.size} casks ranked)`,
