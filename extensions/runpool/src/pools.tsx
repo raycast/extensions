@@ -120,24 +120,28 @@ export default function Command() {
             {
               tag: { value: stateLabel(pool, status.paused), color: stateColor(pool, status.paused) },
               tooltip:
-                poolState(pool, status.paused) === "offline"
-                  ? "No runners connected. Normal for an on-demand pool; it wakes when a job queues."
-                  : poolState(pool, status.paused) === "unreachable"
-                    ? "GitHub has no online runners for this pool, so jobs will queue forever."
-                    : undefined,
+                poolState(pool, status.paused) === "paused"
+                  ? status.paused
+                    ? "All RunPool pools are globally paused. Use Manage Runner Pools to resume them."
+                    : "This pool is paused and will not wake until it is resumed."
+                  : poolState(pool, status.paused) === "offline"
+                    ? "No runners connected. Normal for an on-demand pool; it wakes when a job queues."
+                    : poolState(pool, status.paused) === "unreachable"
+                      ? "GitHub has no online runners for this pool, so jobs will queue forever."
+                      : undefined,
             },
           ]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
                 <Action.Push title="Show Repositories" icon={Icon.List} target={<PoolDetail pool={pool} />} />
-                {pool.running === 0 ? (
+                {!status.paused && !pool.paused && pool.running === 0 ? (
                   <Action
                     title="Start Pool"
                     icon={Icon.Play}
                     onAction={() => act(() => runpool(["up", pool.name]), "Starting…", `${pool.name} started`)}
                   />
-                ) : (
+                ) : !pool.paused && !status.paused ? (
                   <Action
                     title="Stop Pool"
                     icon={Icon.Stop}
@@ -156,7 +160,33 @@ export default function Command() {
                       act(() => runpool(["down", pool.name]), "Stopping…", `${pool.name} stopped`);
                     }}
                   />
-                )}
+                ) : null}
+                {!status.paused &&
+                  (pool.paused ? (
+                    <Action
+                      title="Resume Pool"
+                      icon={Icon.Play}
+                      onAction={() =>
+                        act(() => runpool(["resume", pool.name]), "Resuming…", `${pool.name} resumes on demand`)
+                      }
+                    />
+                  ) : (
+                    <Action
+                      title="Pause Pool"
+                      icon={Icon.Pause}
+                      style={Action.Style.Destructive}
+                      onAction={async () => {
+                        const confirmed = await confirmAlert({
+                          title: `Pause ${pool.name}?`,
+                          message:
+                            "Its runners will stand down and this pool will stop waking for queued work. Other RunPool pools are unchanged.",
+                          primaryAction: { title: "Pause Pool", style: Alert.ActionStyle.Destructive },
+                        });
+                        if (!confirmed) return;
+                        act(() => runpool(["pause", pool.name]), "Pausing…", `${pool.name} paused`);
+                      }}
+                    />
+                  ))}
                 {isUnreachable(pool) && (
                   <Action
                     title="Re-Register with GitHub"

@@ -21,6 +21,7 @@ export default async function tool() {
       runnersConfigured: pool.count,
       runnersUp: pool.running,
       jobsInFlight: pool.busy,
+      paused: pool.paused,
       githubRegistered: pool.github_registered,
       githubOnline: pool.github_online,
       repositories: pool.scope === "org" ? pool.watch : [pool.target],
@@ -28,14 +29,16 @@ export default async function tool() {
       // A pool with no runners up is resting, which is the normal state for an
       // on-demand pool and is not a fault.
       state: status.paused
-        ? "paused"
-        : pool.github_registered === 0
-          ? "not registered with GitHub, jobs will queue forever"
-          : pool.busy > 0
-            ? "running jobs"
-            : pool.running > 0
-              ? "up but idle"
-              : "resting, will wake when a job queues",
+        ? "globally paused"
+        : pool.paused
+          ? "paused until this pool is resumed"
+          : pool.github_registered === 0
+            ? "not registered with GitHub, jobs will queue forever"
+            : pool.busy > 0
+              ? "running jobs"
+              : pool.running > 0
+                ? "up but idle"
+                : "resting, will wake when a job queues",
     })),
   };
 }

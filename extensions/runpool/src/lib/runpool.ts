@@ -22,6 +22,8 @@ export interface Pool {
   running: number;
   /** Jobs in flight on this pool right now. */
   busy: number;
+  /** Persistent per-pool pause state. Distinct from the global status flag. */
+  paused: boolean;
   /** Null when the GitHub query was skipped or unreachable. */
   github_registered: number | null;
   github_online: number | null;
@@ -42,7 +44,7 @@ export interface Status {
   /** True when the GitHub query was skipped, so the github_* fields are null. */
   local: boolean;
   machine: Machine;
-  paths: { base: string; log: string; log_dir: string; telemetry: string };
+  paths: { base: string; cache: string; log: string; log_dir: string; telemetry: string };
   pools: Pool[];
 }
 
@@ -156,16 +158,17 @@ export async function getStatus(options?: { local?: boolean; signal?: AbortSigna
  */
 export type PoolState = "active" | "idle" | "offline" | "paused" | "unreachable";
 
-export function poolState(pool: Pool, paused: boolean): PoolState {
-  if (paused) return "paused";
+export function poolState(pool: Pool, globallyPaused: boolean): PoolState {
+  if (globallyPaused || pool.paused) return "paused";
   if (isUnreachable(pool)) return "unreachable";
   if (pool.busy > 0) return "active";
   if (pool.running > 0) return "idle";
   return "offline";
 }
 
-export function stateLabel(pool: Pool, paused: boolean): string {
-  switch (poolState(pool, paused)) {
+export function stateLabel(pool: Pool, globallyPaused: boolean): string {
+  if (globallyPaused) return "Paused Globally";
+  switch (poolState(pool, false)) {
     case "paused":
       return "Paused";
     case "unreachable":
@@ -223,6 +226,7 @@ export function isUnreachable(pool: Pool): boolean {
 /** One line summarising the whole machine, for a command subtitle. */
 export function summarise(status: Status): string {
   if (status.paused) return "Paused";
+  if (status.pools.length > 0 && status.pools.every((pool) => pool.paused)) return "Pools Paused";
   const running = status.pools.reduce((n, p) => n + p.running, 0);
   const busy = status.pools.reduce((n, p) => n + p.busy, 0);
   const slots = status.pools.reduce((n, p) => n + p.count, 0);

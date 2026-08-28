@@ -66,13 +66,20 @@ export default function Command() {
             key={pool.name}
             icon={
               colourIcon
-                ? { source: fillAsset(pool.busy, pool.count) }
-                : { source: fillAsset(pool.busy, pool.count), tintColor: Color.SecondaryText }
+                ? { source: status?.paused || pool.paused ? "bar-off.png" : fillAsset(pool.busy, pool.count) }
+                : {
+                    source: status?.paused || pool.paused ? "bar-off.png" : fillAsset(pool.busy, pool.count),
+                    tintColor: Color.SecondaryText,
+                  }
             }
             title={pool.name}
             // A fault is the one thing that earns different treatment: a
             // fraction would say "0/2" and hide that nothing can ever pick up.
-            subtitle={isUnreachable(pool) ? stateLabel(pool, false) : fraction(pool)}
+            subtitle={
+              status?.paused || pool.paused || isUnreachable(pool)
+                ? stateLabel(pool, status?.paused ?? false)
+                : fraction(pool)
+            }
             tooltip={pool.target}
             onAction={() => launchCommand({ name: "pools", type: LaunchType.UserInitiated })}
           />

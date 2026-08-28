@@ -1,5 +1,11 @@
 # RunPool Changelog
 
+## [Unreleased]
+
+- Show persistent per-pool pause state separately from the global pause
+- Add guarded Pause Pool and Resume Pool actions and AI tools
+- Prevent Start Pool from bypassing a persistent or global pause
+
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - List every runner pool against its owner's GitHub avatar, showing jobs running out of total runner slots

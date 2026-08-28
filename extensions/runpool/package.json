@@ -106,6 +106,16 @@
       "name": "toggle-pause",
       "title": "Pause or Resume Runner Pools",
       "description": "Pause stands every RunPool runner down and stops pools waking. Resume returns them to on-demand"
+    },
+    {
+      "name": "pause-pool",
+      "title": "Pause Pool",
+      "description": "Persistently pause one pool. It stops its runners and will not wake until resumed"
+    },
+    {
+      "name": "resume-pool",
+      "title": "Resume Pool",
+      "description": "Resume one persistently paused pool so it can wake for queued work"
     }
   ],
   "dependencies": {

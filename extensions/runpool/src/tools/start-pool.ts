@@ -19,11 +19,17 @@ type Input = {
  * themselves back down when idle.
  */
 export default async function tool(input: Input) {
-  const { pools } = await getStatus({ local: true });
+  const { paused, pools } = await getStatus({ local: true });
   const pool = pools.find((p) => p.name === input.pool);
 
   if (!pool) {
     throw new Error(`No pool named "${input.pool}". Available: ${pools.map((p) => p.name).join(", ") || "none"}.`);
+  }
+  if (paused) {
+    throw new Error("RunPool is globally paused. Resume it with the global pause control before starting a pool.");
+  }
+  if (pool.paused) {
+    throw new Error(`Pool "${pool.name}" is persistently paused. Resume that pool before starting it.`);
   }
   if (pool.running > 0) {
     return `Pool "${pool.name}" is already up with ${pool.running} of ${pool.count} runners.`;

@@ -8,13 +8,19 @@ instructions: |
   Blacksmith or GitHub workflows.
 
   Treat requests to pause, resume, disable or enable "local CI" as requests
-  to pause or resume RunPool runner pools. Use toggle-pause for those requests,
-  even when all pools are resting.
+  to pause or resume every RunPool runner pool. Use toggle-pause for those
+  requests, even when all pools are resting.
+
+  A request naming one pool is different: use pause-pool or resume-pool. A
+  pool pause persists until that pool is resumed, so do not use start-pool to
+  work around it. Read get-status first and distinguish the root paused field
+  from each pool's paused field.
 
   Read the state before changing it. get-status is cheap and tells you the pool
   names, which the other tools need.
 
-  A pool with no runners up is RESTING, which is the normal and correct state.
+  A pool with no runners up is RESTING, which is the normal and correct state
+  unless its per-pool paused field is true.
   Never describe it as broken, down in a worrying sense, or in need of starting.
   The one genuine fault is a pool GitHub does not have registered, because jobs
   then queue against it forever; get-status reports that in the state field.
@@ -118,3 +124,23 @@ evals:
           name: toggle-pause
           arguments:
             action: pause
+
+  - input: "@runpool pause the marfa pool"
+    mocks:
+      get-status:
+        paused: false
+        pools:
+          - name: marfa
+            scope: org
+            target: withmarfa
+            paused: false
+            runnersConfigured: 4
+            runnersUp: 0
+            jobsInFlight: 0
+            state: resting, will wake when a job queues
+      pause-pool: "Paused pool \"marfa\". It will not wake until resumed."
+    expected:
+      - callsTool:
+          name: pause-pool
+          arguments:
+            pool: marfa
