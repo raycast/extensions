@@ -7,7 +7,7 @@ import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useTranslation } from "./hooks/useTranslation";
 import { List } from "./types";
 import { isEmoji, makeSmartQueryValidator } from "./utils/formatting";
-import { ChooseIconAction, DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
+import { DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
 import { runWithToast } from "./utils/toast";
 import { labelLists } from "./utils/listLabels";
 import { ensureReachable } from "./utils/submitGuard";
@@ -91,7 +91,6 @@ export default function CreateListView({ onListCreated, showSuccessHUD = true }:
           <OpenSettingsAction unauthorized={unauthorized} />
           <StartKarakeepAction offline={offline} canStart={canStart} isRecovering={isRecovering} onStart={start} />
           <Action.SubmitForm title={t("list.createList")} onSubmit={handleSubmit} icon={Icon.Plus} />
-          <ChooseIconAction onPick={(emoji) => setValue("icon", emoji)} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
           )}

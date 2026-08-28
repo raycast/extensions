@@ -9,6 +9,7 @@
 - Error messages now carry what the server actually said — "HTTP 401 — Unauthorized" instead of a bare status code — with any credentials in the response redacted before they reach a toast or your clipboard
 - Refreshing a view no longer reports success when the refresh actually failed
 - The Backups view no longer retries every few seconds behind an error screen when the API key is what is wrong, and creating or deleting a backup that was rejected no longer follows the failure with a second, duplicate error
+- The list icon field now uses Raycast's own emoji picker instead of one bundled into the extension. [Raycast 2.1](https://www.raycast.com/changelog/macos/2-1) added an inline picker to every text field — type `:` followed by a name — which searches every emoji and follows your skin tone preference. The ⌘I grid it replaces has been removed, and the extension is a good deal smaller for it
 - Upgraded to Raycast API 2.1
 
 ## [2.4.4] - 2026-08-17

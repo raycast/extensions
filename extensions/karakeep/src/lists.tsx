@@ -12,7 +12,7 @@ import { useGetListsBookmarks } from "./hooks/useGetListsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
 import { connectionGuard } from "./components/ConnectionErrorView";
 import { isEmoji, makeSmartQueryValidator } from "./utils/formatting";
-import { ChooseIconAction, DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
+import { DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
 import { runWithToast } from "./utils/toast";
 import { revalidated } from "./utils/fetchError";
 import { labelLists } from "./utils/listLabels";
@@ -188,7 +188,6 @@ function CreateListForm({ lists, onCreated }: { lists: ListNode[]; onCreated: ()
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("list.createList")} onSubmit={handleSubmit} icon={Icon.Plus} />
-          <ChooseIconAction onPick={(emoji) => setValue("icon", emoji)} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
           )}
@@ -281,7 +280,6 @@ function EditListForm({ list, lists, onUpdated }: { list: ListNode; lists: ListN
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("list.editList")} onSubmit={handleSubmit} icon={Icon.Pencil} />
-          <ChooseIconAction onPick={(emoji) => setValue("icon", emoji)} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
           )}
