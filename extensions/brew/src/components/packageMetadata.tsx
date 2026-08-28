@@ -45,7 +45,12 @@ export function PackageAnalyticsMetadata(props: { state: PackageDetailState }) {
     <>
       <Detail.Metadata.Separator />
       {analyticsRows(props.state.data, props.state.failed).map((row) => (
-        <Detail.Metadata.Label key={row.key} title={row.title} text={row.text} />
+        <Detail.Metadata.Label
+          key={row.key}
+          title={row.title}
+          text={row.text}
+          icon={row.unavailable ? { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText } : undefined}
+        />
       ))}
     </>
   );

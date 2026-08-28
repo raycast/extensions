@@ -216,7 +216,12 @@ function AnalyticsMetadata(props: { state: PackageDetailState }) {
     <>
       <List.Item.Detail.Metadata.Separator />
       {analyticsRows(props.state.data, props.state.failed).map((row) => (
-        <List.Item.Detail.Metadata.Label key={row.key} title={row.title} text={row.text} />
+        <List.Item.Detail.Metadata.Label
+          key={row.key}
+          title={row.title}
+          text={row.text}
+          icon={row.unavailable ? { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText } : undefined}
+        />
       ))}
     </>
   );

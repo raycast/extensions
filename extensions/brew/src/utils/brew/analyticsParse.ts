@@ -125,6 +125,12 @@ export interface AnalyticsRow {
   key: string;
   title: string;
   text: string;
+  /**
+   * The value could not be fetched, as opposed to being absent or still
+   * loading. Carried as a flag rather than an icon so this module stays
+   * import-free — each metadata namespace attaches its own.
+   */
+  unavailable?: boolean;
 }
 
 // "365 Days" rather than "1 Year": the API's bucket is a trailing 365-day
@@ -158,8 +164,10 @@ export function analyticsRows(detail?: PackageDetailResponse, failed = false): A
     // which are indistinguishable to the user and equally uninteresting. A
     // FAILED fetch is different — saying nothing there implies the package has
     // no installs, so it says so.
-    const text = total != undefined ? total.toLocaleString() : failed ? "Unavailable" : "—";
-    return { key: period, title, text };
+    if (total != undefined) {
+      return { key: period, title, text: total.toLocaleString() };
+    }
+    return { key: period, title, text: failed ? "Unavailable" : "—", unavailable: failed };
   });
 
   const buildErrors = totalForPeriod(detail?.analytics?.build_error, "30d");

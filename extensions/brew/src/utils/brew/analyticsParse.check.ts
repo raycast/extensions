@@ -144,10 +144,25 @@ assert.deepEqual(
 assert.equal(analyticsRows({ analytics: { install: {}, build_error: { "30d": { asc: 7 } } } }).length, 4);
 assert.equal(analyticsRows({ analytics: { install: {}, build_error: { "30d": {} } } }).length, 3);
 
-// A failed fetch must not read as "this package has no installs".
+// A failed fetch must not read as "this package has no installs". The flag is
+// what the renderers hang Icon.QuestionMarkCircle off, so assert it too.
 assert.deepEqual(
   analyticsRows(undefined, true).map((r) => r.text),
   ["Unavailable", "Unavailable", "Unavailable"],
+);
+assert.deepEqual(
+  analyticsRows(undefined, true).map((r) => r.unavailable),
+  [true, true, true],
+);
+// Loading and no-data stay unmarked — no question mark on either.
+assert.deepEqual(
+  analyticsRows(undefined).map((r) => r.unavailable),
+  [false, false, false],
+);
+assert.equal(
+  analyticsRows({ analytics: { install: { "30d": { asc: 5 } } } }, true).find((r) => r.key === "30d")?.unavailable,
+  undefined,
+  "a period that DID load must not be marked unavailable",
 );
 
 // The bucket is untyped JSON at runtime: string values must not concatenate.
