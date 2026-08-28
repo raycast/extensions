@@ -1,5 +1,6 @@
-import { Form, Icon } from "@raycast/api";
+import { Action, Form, Icon } from "@raycast/api";
 import { Fragment } from "react";
+import { API_KEYS_URL, USERS_AND_ACCESS_URL } from "../Utils/appStoreConnect";
 
 export type KeyType = "team" | "individual";
 
@@ -67,6 +68,22 @@ export default function CredentialFields({
       {!isIndividualKey && <Form.TextField title="Issuer ID" {...issuerIDProps} />}
       <Form.TextField title="Key ID" {...apiKeyProps} info="The Key ID shown next to the key in App Store Connect." />
       <Form.FilePicker title="Private Key" allowMultipleSelection={false} {...privateKeyProps} />
+    </Fragment>
+  );
+}
+
+/**
+ * The links both credential forms offer.
+ *
+ * The docs link explains what a key IS; these two go to the pages where you actually get
+ * one, which is the thing you need while this form is on screen. Shared so the two forms
+ * cannot drift apart — the same reason the fields themselves live here.
+ */
+export function CredentialFormLinks() {
+  return (
+    <Fragment>
+      <Action.OpenInBrowser title="Open API Keys" icon={Icon.Key} url={API_KEYS_URL} />
+      <Action.OpenInBrowser title="Open Users and Access" icon={Icon.TwoPeople} url={USERS_AND_ACCESS_URL} />
     </Fragment>
   );
 }

@@ -57,10 +57,17 @@
     },
     {
       "name": "manageTeams",
-      "title": "Manage Teams",
+      "title": "Manage API Keys",
       "subtitle": "App Store Connect",
-      "description": "Show and manage teams",
-      "mode": "view"
+      "description": "Add, switch between, and remove App Store Connect API keys",
+      "mode": "view",
+      "keywords": [
+        "teams",
+        "manage teams",
+        "credentials",
+        "sign in",
+        "sign out"
+      ]
     }
   ],
   "dependencies": {

@@ -1,7 +1,12 @@
 import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { z } from "zod";
-import { isSameCredential, removeOneCredential } from "../Utils/credentials";
+import { isSameCredential, locateCredential, removeOneCredential } from "../Utils/credentials";
 import { useEffect, useState } from "react";
+
+// Naming rules live with the other credential-identity rules, which are Raycast-free and
+// covered by Utils/credentials.test.ts; re-exported so callers have one import.
+export { isUnnamed, keyDisplayName } from "../Utils/credentials";
 
 export const teamSchema = z.object({
   name: z.string(),
@@ -27,19 +32,6 @@ export const teamSchema = z.object({
 
 export type Team = z.infer<typeof teamSchema>;
 
-/**
- * The name is purely a local label for the credential picker — it is never sent to
- * Apple and has no equivalent in the API. So it is optional; when left blank, fall
- * back to something self-describing and unique (the key ID distinguishes entries).
- */
-export function credentialLabel(name: string, isIndividualKey: boolean, apiKey: string) {
-  const trimmed = name.trim();
-  if (trimmed.length > 0) {
-    return trimmed;
-  }
-  return `${isIndividualKey ? "Individual Key" : "Team Key"} (${apiKey})`;
-}
-
 export const teamSchemas = z.array(teamSchema);
 
 /**
@@ -50,6 +42,9 @@ export const teamSchemas = z.array(teamSchema);
  * at once can therefore lose one of two concurrent additions, and the selection is four
  * independent keys rather than one record, so interleaved selections could in principle
  * mix one credential's name with another's key material.
+ *
+ * `renameTeam` exercises this directly: it reads the selection, then writes it back, so a
+ * selection made by another command in between is overwritten. Same root cause, same fix.
  *
  * This is documented rather than papered over: closing it properly means storing the
  * selection as a single serialized record with a stable id, which is a storage-format
@@ -98,6 +93,53 @@ export const useTeams = () => {
         await selectCurrentTeam(remaining[remaining.length - 1]);
       }
     }
+  };
+
+  /**
+   * Forgets every stored credential and the selection — the "sign out" path.
+   *
+   * Local only, like deleteTeam: nothing is revoked at Apple, and every key can be added
+   * again. The whole `teams` key is removed rather than set to `[]` so storage matches a
+   * fresh install exactly.
+   */
+  const deleteAllTeams = async () => {
+    await LocalStorage.removeItem("teams");
+    setTeams([]);
+    await clearCurrentTeam();
+  };
+
+  /**
+   * Changes a credential's local label, in place.
+   *
+   * Rewrites the entry at its existing index rather than removing and re-adding, so the
+   * list does not reorder under the user. The name is part of a credential's identity
+   * (see Utils/credentials), so a renamed record no longer matches the flat selection
+   * keys — if this credential was selected, the selection is rewritten too.
+   *
+   * Takes the row's position, because content is not enough to identify it: two
+   * byte-identical records match each other, so searching by identity renames whichever
+   * comes first — the user clicks the second row and the first one changes. That is
+   * invisible for a REMOVAL (dropping either of two identical entries leaves the same
+   * list) but plainly wrong for a rename, which is what makes them different.
+   *
+   * The position comes from a previous render, so it is verified against content before
+   * it is used, and falls back to a search when storage has shifted underneath.
+   */
+  const renameTeam = async (team: Team, position: number, name: string) => {
+    const stored = await getTeams();
+    const index = locateCredential(stored, team, position);
+    if (index === -1) {
+      return undefined;
+    }
+    const renamed: Team = { ...stored[index], name: name.trim() };
+    const next = stored.map((candidate, i) => (i === index ? renamed : candidate));
+    await LocalStorage.setItem("teams", JSON.stringify(next));
+    setTeams(next);
+    const selected = await getCurrentTeam();
+    if (selected && isSameCredential(selected, team)) {
+      await selectCurrentTeam(renamed);
+    }
+    return renamed;
   };
 
   /** Reads storage fresh — a render-time snapshot may name a credential since deleted. */
@@ -173,11 +215,30 @@ export const useTeams = () => {
     }
   };
 
+  /**
+   * Re-reads storage.
+   *
+   * Each mount of this hook holds its own React state, so a write made by ANOTHER
+   * instance — the add-key form runs its own — is invisible to this one until it looks
+   * again. Callers that push such a form reload when it reports success.
+   */
+  const reload = async () => {
+    setTeams(await getTeams());
+    setCurrentTeam(await getCurrentTeam());
+  };
+
   useEffect(() => {
     (async () => {
-      setTeams(await getTeams());
-      setCurrentTeam(await getCurrentTeam());
-      setIsLoading(false);
+      try {
+        await reload();
+      } catch (error) {
+        // A stored list that cannot be parsed is a dead end for every command, so say so
+        // rather than sitting on a spinner: setIsLoading lives in `finally` because the
+        // throw used to skip it entirely and the command never stopped loading.
+        await showFailureToast(error, { title: "Couldn't Read Stored Keys" });
+      } finally {
+        setIsLoading(false);
+      }
     })();
   }, []);
 
@@ -190,5 +251,8 @@ export const useTeams = () => {
     selectCurrentTeam,
     removeCurrentTeam,
     hasStoredTeam,
+    deleteAllTeams,
+    renameTeam,
+    reload,
   };
 };

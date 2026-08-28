@@ -9,6 +9,7 @@ import {
   preReleaseVersionSchemas,
 } from "../Model/schemas";
 import BuildItem from "./BuildItem";
+import { testFlightUrl } from "../Utils/appStoreConnect";
 
 interface BuildListProps {
   app: App;
@@ -100,11 +101,7 @@ export default function BuildList({ app }: BuildListProps) {
           }
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open in App Store Connect"
-                icon={Icon.Globe}
-                url={`https://appstoreconnect.apple.com/apps/${app.id}/testflight/ios`}
-              />
+              <Action.OpenInBrowser title="Open in App Store Connect" icon={Icon.Globe} url={testFlightUrl(app.id)} />
             </ActionPanel>
           }
         />

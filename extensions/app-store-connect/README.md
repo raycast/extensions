@@ -4,7 +4,7 @@ Perform tasks from App Store Connect without leaving Raycast — check app revie
 
 ## Setup
 
-The extension talks to the App Store Connect API, which needs an API key. You are asked for one the first time you run any command, and you can add more later from **Manage Teams**.
+The extension talks to the App Store Connect API, which needs an API key. You are asked for one the first time you run any command, and you can add more later from **Manage API Keys**.
 
 Two kinds of key work, and they are configured differently.
 
@@ -39,7 +39,7 @@ Apple's documentation: [Creating API Keys for App Store Connect API](https://dev
 | **Manage Beta Groups** | Create and delete beta groups, add testers individually or in bulk, and control which builds a group can install |
 | **Edit Test Information** | Beta app review details, localized descriptions, and the beta license agreement |
 | **Manage Team Members** | View team members and their roles, invite new members, edit visible apps, and revoke invitations |
-| **Manage Teams** | Switch between configured API keys, add another, or remove one |
+| **Manage API Keys** | Switch between stored API keys, add another, or remove one |
 
 ## Troubleshooting
 

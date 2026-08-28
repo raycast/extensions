@@ -1,17 +1,18 @@
-import { ActionPanel, Form, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Form, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import fs from "fs";
-import CredentialFields, { KeyType, validateIssuerID } from "./CredentialFields";
-import { encodeBase64 } from "../Utils/base64";
+import CredentialFields, { CredentialFormLinks, KeyType, validateIssuerID } from "./CredentialFields";
+import { readPrivateKeyFile } from "../Utils/privateKeyFile";
+import { CREATING_API_KEYS_DOCS_URL } from "../Utils/appStoreConnect";
 import { fetchAppStoreConnect, ATCError, assertPrivateKeyUsable } from "../Hooks/useAppStoreConnect";
 import { presentError } from "../Utils/utils";
-import { useTeams, Team, credentialLabel } from "../Model/useTeams";
+import { useTeams, Team, keyDisplayName } from "../Model/useTeams";
 import { useForm, FormValidation } from "@raycast/utils";
 interface SignInProps {
   didSignIn: (team: Team) => void;
 }
 
 export default function AddTeam({ didSignIn }: SignInProps) {
+  const { pop } = useNavigation();
   const [isCheckConnection, setIsCheckConnection] = useState(false);
   const { selectCurrentTeam, addTeam, deleteTeam, currentTeam, hasStoredTeam } = useTeams();
   // Held outside useForm: the issuerID validator depends on it, and reading useForm's
@@ -34,10 +35,6 @@ export default function AddTeam({ didSignIn }: SignInProps) {
       name: "",
     },
     onSubmit: async (values) => {
-      const file = values.privateKey[0];
-      if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
-        return;
-      }
       setIsCheckConnection(true);
       // Captured before selecting the new key, so a rollback can restore it.
       const previouslySelectedTeam = currentTeam;
@@ -46,11 +43,13 @@ export default function AddTeam({ didSignIn }: SignInProps) {
       let addedTeam: Team | undefined;
 
       try {
-        const privateKeyContent = fs.readFileSync(file, "utf8");
-        const encodedPrivateKey = encodeBase64(privateKeyContent);
+        // A bad path used to return silently before the try, so submitting did nothing
+        // and said nothing; readPrivateKeyFile throws and the catch below reports it.
+        const encodedPrivateKey = readPrivateKeyFile(values.privateKey[0]);
 
         const team: Team = {
-          name: credentialLabel(values.name, isIndividualKey, values.apiKey),
+          // Stored as typed, blank included: an unnamed key is shown by its Key ID.
+          name: values.name.trim(),
           issuerID: isIndividualKey ? undefined : values.issuerID,
           apiKey: values.apiKey,
           privateKey: encodedPrivateKey,
@@ -65,10 +64,13 @@ export default function AddTeam({ didSignIn }: SignInProps) {
         await selectCurrentTeam(team);
         await fetchAppStoreConnect("/apps");
         didSignIn(team);
+        // Back to the key list, which now shows this key selected. Staying on a
+        // filled-in form after a success leaves nothing obvious to do next.
+        pop();
         showToast({
           style: Toast.Style.Success,
           title: "Key Added",
-          message: team.name,
+          message: keyDisplayName(team),
         });
       } catch (error) {
         // Roll back only the key just added, identified directly — `currentTeam` is the
@@ -98,21 +100,21 @@ export default function AddTeam({ didSignIn }: SignInProps) {
       apiKey: FormValidation.Required,
       // Required for a team key, meaningless for an individual one.
       issuerID: (value) => validateIssuerID(value, isIndividualKey),
-      // `name` is intentionally unvalidated — see credentialLabel().
+      // `name` is intentionally unvalidated — blank is valid; see keyDisplayName().
     },
   });
   return (
     <Form
       searchBarAccessory={
-        <Form.LinkAccessory
-          target="https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api"
-          text="Creating API Keys for App Store Connect API"
-        />
+        <Form.LinkAccessory target={CREATING_API_KEYS_DOCS_URL} text="Creating API Keys for App Store Connect API" />
       }
       isLoading={isCheckConnection}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Team" onSubmit={handleSubmit} />
+          {/* "Add Key", not "Add Team": this form takes an individual key too, which
+              belongs to a person rather than a team. */}
+          <Action.SubmitForm title="Add Key" onSubmit={handleSubmit} />
+          <CredentialFormLinks />
         </ActionPanel>
       }
     >

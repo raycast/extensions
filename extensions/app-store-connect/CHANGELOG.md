@@ -12,6 +12,22 @@
 - Fix testers being added with a missing invite type and state
 - Fix mutations silently doing nothing, and reporting success, when credentials are missing
 - Fix lists appending duplicate rows when paginating, and showing stale rows while switching apps
+- Fix one team's data being shown after switching to another team, by scoping the cache to the selected key
+- Fix an unreadable key file leaving the sign-in form loading with no error shown
+- Fix the "showing first N" notice never appearing when a list stopped at the page limit
+- Stop offering to remove the Account Holder, which App Store Connect always refuses
+- Rename "Delete Team" to "Remove from Raycast" and say what it does and does not affect
+- Make removal no longer the default action in Manage Teams
+- Show whether each stored credential is a team or individual key, and stop printing its Key ID twice
+- Add "Remove All Keys" to clear every stored credential at once
+- Add "Rename Key" so a stored credential can be given a meaningful label after it is added
+- Group stored credentials into Individual Keys and Team Keys sections
+- Show an unnamed credential by its Key ID rather than a generated name
+- Add actions to open App Store Connect's API Keys and Users and Access pages from the key form
+- Rename "Manage Teams" to "Manage API Keys", now that a credential can be an individual key
+- Return to the key list after adding a key, instead of leaving the form on screen
+- Add a loading and an empty state to Manage Teams
+- Name what is being removed in confirmation dialogs, rather than asking "Are you sure?"
 - Resolve app icons in one request per list instead of one per app
 - Failure toasts now offer a Copy Error action
 - Replace emoji in status labels with themed Raycast icons, and give statuses that shared an icon their own

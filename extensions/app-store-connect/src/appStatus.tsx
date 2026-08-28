@@ -3,6 +3,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useAppStoreConnectApi } from "./Hooks/useAppStoreConnect";
 import { appsWithVersionsResponseSchema, AppStatusVersion, AppWithVersions } from "./Model/schemas";
 import SignIn from "./Components/SignIn";
+import { appUrl } from "./Utils/appStoreConnect";
 import AppStatusListItem from "./Components/AppStatusListItem";
 
 export interface ProcessedAppVersion {
@@ -207,7 +208,7 @@ function processApps(apps: AppWithVersions[], includedVersions: AppStatusVersion
       name: app.attributes.name,
       bundleId: app.attributes.bundleId,
       versions,
-      appStoreConnectUrl: `https://appstoreconnect.apple.com/apps/${app.id}`,
+      appStoreConnectUrl: appUrl(app.id),
     };
   });
 }

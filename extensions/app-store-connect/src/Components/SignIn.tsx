@@ -1,11 +1,11 @@
 import { ActionPanel, Form, Action } from "@raycast/api";
 import { useEffect, useState, ReactNode } from "react";
-import fs from "fs";
-import CredentialFields, { KeyType, validateIssuerID } from "./CredentialFields";
-import { encodeBase64 } from "../Utils/base64";
+import CredentialFields, { CredentialFormLinks, KeyType, validateIssuerID } from "./CredentialFields";
+import { readPrivateKeyFile } from "../Utils/privateKeyFile";
+import { CREATING_API_KEYS_DOCS_URL } from "../Utils/appStoreConnect";
 import { fetchAppStoreConnect, ATCError, assertPrivateKeyUsable } from "../Hooks/useAppStoreConnect";
 import { presentError } from "../Utils/utils";
-import { useTeams, Team, credentialLabel } from "../Model/useTeams";
+import { useTeams, Team } from "../Model/useTeams";
 import { FormValidation, useForm } from "@raycast/utils";
 
 interface SignInProps {
@@ -46,10 +46,6 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
 
   const { handleSubmit, itemProps } = useForm<SignInFormValues>({
     onSubmit: async (values) => {
-      const file = values.privateKey[0];
-      if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
-        return;
-      }
       if (!values.apiKey || (!isIndividualKey && !values.issuerID)) {
         return;
       }
@@ -59,17 +55,20 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
       // if we failed before persisting anything.
       let addedTeam: Team | undefined;
 
-      const privateKeyContent = fs.readFileSync(file, "utf8");
-      const encodedPrivateKey = encodeBase64(privateKeyContent);
-
-      const team: Team = {
-        name: credentialLabel(values.name, isIndividualKey, values.apiKey),
-        issuerID: isIndividualKey ? undefined : values.issuerID,
-        apiKey: values.apiKey,
-        privateKey: encodedPrivateKey,
-      };
-
       try {
+        // Inside the try: reading the key file can fail (removed after picking, a
+        // directory, no permission), and outside it that threw past `finally` — leaving
+        // the form spinning forever with nothing said about why.
+        const encodedPrivateKey = readPrivateKeyFile(values.privateKey[0]);
+
+        const team: Team = {
+          // Stored as typed, blank included: an unnamed key is shown by its Key ID.
+          name: values.name.trim(),
+          issuerID: isIndividualKey ? undefined : values.issuerID,
+          apiKey: values.apiKey,
+          privateKey: encodedPrivateKey,
+        };
+
         // Parse the key before persisting anything: an unusable key throws with no HTTP
         // status, and a fully-populated stored key set makes the extension consider
         // itself signed in on next launch — hiding this form behind a key that can
@@ -98,7 +97,7 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
       }
     },
     validation: {
-      // `name` is intentionally unvalidated — see credentialLabel().
+      // `name` is intentionally unvalidated — blank is valid; see keyDisplayName().
       // Required for a team key, meaningless for an individual one.
       issuerID: (value) => validateIssuerID(value, isIndividualKey),
       apiKey: FormValidation.Required,
@@ -116,15 +115,13 @@ export default function SignIn({ children, didSignIn }: SignInProps) {
     return (
       <Form
         searchBarAccessory={
-          <Form.LinkAccessory
-            target="https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api"
-            text="Creating API Keys for App Store Connect API"
-          />
+          <Form.LinkAccessory target={CREATING_API_KEYS_DOCS_URL} text="Creating API Keys for App Store Connect API" />
         }
         isLoading={isCheckConnection}
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+            <Action.SubmitForm title="Sign In" onSubmit={handleSubmit} />
+            <CredentialFormLinks />
           </ActionPanel>
         }
       >
