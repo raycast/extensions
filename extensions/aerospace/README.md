@@ -57,15 +57,15 @@ The extension supports programmatic access via Raycast deeplinks using `launchCo
 ### Deeplink Format
 
 ```bash
-raycast://extensions/limonkufu/aerospace/switchApps?arguments={\"workspace\":\"all\"}&context={\"searchText\":\"AppName\"}
+raycast://extensions/limonkufu/aerospace/switchApps?context={\"workspace\":\"all\",\"searchText\":\"AppName\"}
 ```
 
 **Parameters:**
 
-- `arguments` - UI parameters, such as workspace selection
-- `context` - launch context passed without showing UI prompts, such as search text for pre-filtering
+- `context.workspace` - optional `focused`, `visible`, or `all` scope override
+- `context.searchText` - optional initial search text
 
-This enables external tools to trigger the app switcher with pre-filtered search without displaying argument input prompts.
+This enables external tools to choose a scope or pre-filter the app switcher without displaying argument input prompts. Normal launches open the command immediately and use the last scope selected inside it.
 
 ## Contributing
 

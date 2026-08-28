@@ -1,5 +1,10 @@
 # aerospace Changelog
 
+## [Open Window Switcher Directly] - 2026-08-28
+
+- Open Switch Apps in Workspace immediately without showing a launcher argument form
+- Keep optional scope and search overrides available to integrations through `launchContext`
+
 ## [Runtime, Configuration, and UX Upgrade] - 2026-08-27
 
 - Trigger shortcuts with AeroSpace's native `trigger-binding` command instead of AppleScript keyboard events

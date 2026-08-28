@@ -34,7 +34,7 @@ import { extractWorkspaceKeys, getConfigPath, loadConfig } from "./utils/config"
 import { createWindowRule } from "./utils/rules";
 import { resolveWindowScope, WINDOW_SCOPE_STORAGE_KEY } from "./utils/windowScope";
 
-type SwitchAppsLaunchContext = { searchText?: string };
+type SwitchAppsLaunchContext = { searchText?: string; workspace?: WindowScope };
 
 async function finishWindowAction(): Promise<void> {
   await popToRoot({ clearSearchBar: true });
@@ -188,11 +188,9 @@ function WindowActions({ window, onRefresh }: { window: WindowSnapshot; onRefres
   );
 }
 
-export default function Command(
-  props: LaunchProps<{ arguments: Arguments.SwitchApps; launchContext?: SwitchAppsLaunchContext }>,
-) {
+export default function Command(props: LaunchProps<{ launchContext?: SwitchAppsLaunchContext }>) {
   const { defaultWorkspace } = getPreferenceValues<Preferences.SwitchApps>();
-  const launchScope = props.arguments.workspace as WindowScope | undefined;
+  const launchScope = props.launchContext?.workspace;
   const { value: rememberedScope, setValue: rememberScope } = useLocalStorage<WindowScope>(WINDOW_SCOPE_STORAGE_KEY);
   const [sessionScope, setSessionScope] = useState<WindowScope>();
   const scope = resolveWindowScope(sessionScope, launchScope, rememberedScope, defaultWorkspace);

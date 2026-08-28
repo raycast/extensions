@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { resolveWindowScope } from "./windowScope";
 
 describe("window scope selection", () => {
-  it("prefers the current session, explicit launch argument, remembered value, then preference", () => {
+  it("prefers the current session, launch context, remembered value, then preference", () => {
     expect(resolveWindowScope("all", "visible", "focused", "focused")).toBe("all");
     expect(resolveWindowScope(undefined, "visible", "all", "focused")).toBe("visible");
     expect(resolveWindowScope(undefined, undefined, "all", "focused")).toBe("all");

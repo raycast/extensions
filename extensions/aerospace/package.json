@@ -93,27 +93,6 @@
             }
           ]
         }
-      ],
-      "arguments": [
-        {
-          "name": "workspace",
-          "placeholder": "Focused, Visible, or All",
-          "type": "dropdown",
-          "data": [
-            {
-              "title": "Focused",
-              "value": "focused"
-            },
-            {
-              "title": "Visible",
-              "value": "visible"
-            },
-            {
-              "title": "All",
-              "value": "all"
-            }
-          ]
-        }
       ]
     }
   ],
