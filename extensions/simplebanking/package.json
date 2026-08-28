@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simplebanking",
   "title": "Simplebanking",
-  "description": "Kontostand, Umsätze und Monatsübersicht aus simplebanking — liest den lokalen Bestand, ohne Bankabruf.",
+  "description": "Balances, transactions and a monthly overview from simplebanking — reads the local cache, without contacting a bank.",
   "icon": "icon.png",
   "author": "klotzbrocken",
   "categories": [
@@ -12,30 +12,30 @@
   "commands": [
     {
       "name": "saldo",
-      "title": "Kontostand",
+      "title": "Balance",
       "subtitle": "simplebanking",
-      "description": "Zeigt die Salden aller verbundenen Konten.",
+      "description": "Shows the balance of every connected account.",
       "mode": "view"
     },
     {
       "name": "umsaetze",
-      "title": "Umsätze",
+      "title": "Transactions",
       "subtitle": "simplebanking",
-      "description": "Die Buchungen der letzten 30 Tage, durchsuchbar.",
+      "description": "The bookings of the last 30 days, searchable.",
       "mode": "view"
     },
     {
       "name": "ausgaben",
-      "title": "Monatsübersicht",
+      "title": "Monthly Overview",
       "subtitle": "simplebanking",
-      "description": "Einnahmen, Ausgaben und Verteilung nach Kategorie.",
+      "description": "Income, spending and the split by category.",
       "mode": "view"
     },
     {
       "name": "aktualisieren",
-      "title": "Konten Aktualisieren",
+      "title": "Refresh Accounts",
       "subtitle": "simplebanking",
-      "description": "Ruft die Banken ab. Kann eine Freigabe verlangen.",
+      "description": "Asks the app to fetch from your banks. May require approval.",
       "mode": "no-view"
     }
   ],

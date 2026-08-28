@@ -1,42 +1,57 @@
-# simplebanking für Raycast
+# simplebanking for Raycast
 
-Kontostand, Umsätze und Monatsübersicht aus [simplebanking](https://www.simplebanking.de)
-direkt in Raycast.
+Balances, transactions and a monthly overview from
+[simplebanking](https://www.simplebanking.de) — right inside Raycast.
 
-## Wie es arbeitet
+simplebanking is a menu-bar banking app for macOS with access to German banks over PSD2.
+This extension is a read-only front-end for the data the app has already fetched. The
+extension's own interface is in German, matching the app and its audience.
 
-Die Erweiterung ruft das mitgelieferte Kommandozeilenwerkzeug `sb` auf und liest dessen
-JSON-Ausgabe. Sie spricht **nicht** selbst mit einer Bank und kennt keine Zugangsdaten.
+## How it works
 
-Gelesen wird der lokale Bestand, den simplebanking beim letzten Abruf abgelegt hat.
-Deshalb kostet keiner der Ansichts-Befehle eine TAN, und keiner öffnet ein Browserfenster.
+The extension runs the `sb` command-line tool that ships inside the app bundle and reads its
+JSON output. It does **not** talk to a bank itself and it never sees a credential.
 
-Die einzige Ausnahme ist **Konten aktualisieren** — der Befehl fordert die App zu einem
-echten Bankabruf auf und kann je nach Institut eine Freigabe verlangen. Er ist bewusst ein
-eigener Befehl, damit das nicht passiert, weil jemand nur den Saldo sehen wollte.
+What you see is the local cache simplebanking wrote on its last refresh. That is why none of
+the view commands costs an authentication step, and none opens a browser window.
 
-## Voraussetzungen
+The one exception is **Refresh Accounts** — it asks the app for a real fetch, which may
+require approval in your banking app. It is deliberately a command of its own, so that it
+never happens to someone who only wanted to glance at a balance.
 
-simplebanking muss installiert sein. Gesucht wird in dieser Reihenfolge:
+## Security
 
-1. `~/.local/bin/sb` — der Symlink, den simplebanking selbst anlegt
+- No network access. The extension has no HTTP client and no URLs; its only I/O is running
+  the local binary and reading its output.
+- No credentials and no preferences. There is nothing for the extension to store. Bank
+  credentials stay in the app, encrypted under a master password this extension never asks
+  for and could not use.
+- No shell. Commands run through `execFile` with a fixed argument list.
+- It cannot move money. Initiating a transfer is not exposed — payments stay in the app,
+  behind the master password and the bank's strong customer authentication.
+
+## Requirements
+
+simplebanking has to be installed. The binary is looked up in this order:
+
+1. `~/.local/bin/sb` — the symlink simplebanking offers to create
 2. `/usr/local/bin/sb`
 3. `/Applications/simplebanking.app/Contents/MacOS/simplebanking-cli`
-4. dasselbe unter `~/Applications`
+4. the same below `~/Applications`
 
-Der dritte und vierte Weg sind Absicht: Wer das CLI nie eingerichtet hat, soll die
-Erweiterung trotzdem benutzen können, ohne vorher etwas zu tun.
+The last two are intentional: someone who never set up the command-line tool should still be
+able to use the extension without doing anything first.
 
-## Befehle
+## Commands
 
-| Befehl | Was er zeigt | Bankabruf |
+| Command | What it shows | Contacts the bank |
 |---|---|---|
-| Kontostand | Salden aller Konten, Summe bei mehreren | nein |
-| Umsätze | Buchungen der letzten 30 Tage, durchsuchbar | nein |
-| Monatsübersicht | Einnahmen, Ausgaben, Saldo, Kategorien | nein |
-| Konten aktualisieren | — | **ja** |
+| Balance | Balance of every account, plus a total | no |
+| Transactions | Bookings of the last 30 days, searchable | no |
+| Monthly Overview | Income, spending, net, categories | no |
+| Refresh Accounts | — | **yes** |
 
-## Entwicklung
+## Development
 
 ```bash
 cd raycast
