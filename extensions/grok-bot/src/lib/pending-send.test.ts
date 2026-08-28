@@ -14,11 +14,17 @@ const piper = { id: agentId("a1"), name: "Piper" };
 const scout = { id: agentId("a2"), name: "Scout" };
 const sendPiper = { bot: "Piper", prompt: "Summarize this week's errors" };
 
+function drainPendingSend(args: { bot: string; prompt: string }): void {
+  while (takePendingSend(args) !== null) {
+    // drain queued confirmations between tests
+  }
+}
+
 describe("pending send bind", () => {
   beforeEach(() => {
-    takePendingSend(sendPiper);
-    takePendingSend({ bot: "Scout", prompt: sendPiper.prompt });
-    takePendingSend({ bot: " Piper ", prompt: ` ${sendPiper.prompt} ` });
+    drainPendingSend(sendPiper);
+    drainPendingSend({ bot: "Scout", prompt: sendPiper.prompt });
+    drainPendingSend({ bot: " Piper ", prompt: ` ${sendPiper.prompt} ` });
   });
 
   it("returns the confirmed recipient once", () => {
@@ -40,5 +46,15 @@ describe("pending send bind", () => {
     writePendingSend({ bot: " Piper ", prompt: ` ${sendPiper.prompt} `, target: piper });
 
     expect(takePendingSend(sendPiper)).toEqual(piper);
+  });
+
+  it("queues overlapping identical invocations in order", () => {
+    const piperAfterRosterChange = { id: agentId("a9"), name: "Piper" };
+    writePendingSend({ ...sendPiper, target: piper });
+    writePendingSend({ ...sendPiper, target: piperAfterRosterChange });
+
+    expect(takePendingSend(sendPiper)).toEqual(piper);
+    expect(takePendingSend(sendPiper)).toEqual(piperAfterRosterChange);
+    expect(takePendingSend(sendPiper)).toBeNull();
   });
 });

@@ -31,22 +31,51 @@ function parsePendingSend(raw: unknown): PendingSend | null {
   return { id: id.value, name: raw.name };
 }
 
-export function writePendingSend(args: { bot: string; prompt: string; target: PendingSend }): void {
-  cache.set(pendingKey(args), JSON.stringify({ id: args.target.id, name: args.target.name }));
-}
-
-export function takePendingSend(args: { bot: string; prompt: string }): PendingSend | null {
-  const key = pendingKey(args);
+function readQueue(key: string): PendingSend[] {
   const raw = cache.get(key);
-  cache.remove(key);
   if (raw === undefined) {
-    return null;
+    return [];
   }
 
   try {
     const parsed: unknown = JSON.parse(raw);
-    return parsePendingSend(parsed);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.flatMap((item) => {
+      const pending = parsePendingSend(item);
+      return pending ? [pending] : [];
+    });
   } catch {
+    return [];
+  }
+}
+
+function writeQueue(key: string, queue: PendingSend[]): void {
+  if (queue.length === 0) {
+    cache.remove(key);
+    return;
+  }
+
+  cache.set(key, JSON.stringify(queue));
+}
+
+export function writePendingSend(args: { bot: string; prompt: string; target: PendingSend }): void {
+  const key = pendingKey(args);
+  const queue = readQueue(key);
+  queue.push({ id: args.target.id, name: args.target.name });
+  writeQueue(key, queue);
+}
+
+export function takePendingSend(args: { bot: string; prompt: string }): PendingSend | null {
+  const key = pendingKey(args);
+  const queue = readQueue(key);
+  if (queue.length === 0) {
     return null;
   }
+
+  const [head, ...rest] = queue;
+  writeQueue(key, rest);
+  return head;
 }
