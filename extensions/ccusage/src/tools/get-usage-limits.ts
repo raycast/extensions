@@ -8,7 +8,7 @@ type Input = {
 };
 
 /**
- * Get Claude API usage limits including 5-hour, 7-day, and per-model weekly utilization percentages
+ * Get Claude API usage limits including the 5-hour and 7-day totals and any per-model windows
  * @param input - Optional input parameters for formatting
  * @returns Usage limit data with utilization percentages and reset times
  * @throws Error when credentials are not found or API returns invalid data

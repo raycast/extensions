@@ -14,8 +14,7 @@ import { showRemainingUsage } from "../preferences";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { STANDARD_ACCESSORIES } from "./common/accessories";
 import React, { ReactNode } from "react";
-
-const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
+import { capitalize } from "es-toolkit";
 
 const rowTitle = (label: string, period: string | null): string =>
   period ? `${label} ${capitalize(period)} Limit` : `${label} Usage Limit`;
