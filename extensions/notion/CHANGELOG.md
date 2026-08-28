@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Fix Open in App for notion.com URLs] - 2026-08-28
+
+- Fix `Open in App` deep-link generation only matching `notion.so` URLs: since Notion's domain migration, page URLs are served from `notion.com` hosts (e.g. `app.notion.com`), so the `notion://` deep link was never built and the desktop app opened the last viewed page instead of the target ([#30540](https://github.com/raycast/extensions/issues/30540))
+
 ## [Add Pin Pages Action] - 2026-05-19
 
 - Add a new action to pin a page in the `Search Page` command
