@@ -217,9 +217,9 @@
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-logger": "^1.2.2",
-    "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^2.2.2",
+    "@chrismessina/raycast-logger": "^1.4.0",
+    "@raycast/api": "^2.1.0",
+    "@raycast/utils": "^2.3.0",
     "@types/stream-json": "^1.7.8",
     "stream-chain": "^3.4.0",
     "stream-json": "^1.9.1"
@@ -245,6 +245,6 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.8"
+    "brace-expansion": "5.0.9"
   }
 }

@@ -3,6 +3,7 @@
  */
 
 import { useState } from "react";
+import { useCachedState } from "@raycast/utils";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { FormulaList } from "./components/list";
@@ -15,6 +16,7 @@ import { showInstalledPackages } from "./utils/installed";
 function InstalledContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
   const [showMetadataPanel, setShowMetadataPanel] = useState(false);
+  const [showDescription, setShowDescription] = useCachedState("show-description", true);
   const { isLoading, data: installed, revalidate } = useBrewInstalled();
   const [excludeDependencies] = useBrewDependencies();
   const { formulae, pinnedFormulae, casks } = showInstalledPackages(installed, filter, excludeDependencies);
@@ -44,7 +46,11 @@ function InstalledContent() {
       isLoading={isLoading}
       dataFetched={installed !== undefined}
       showMetadataPanel={showMetadataPanel}
-      onToggleDetails={() => setShowMetadataPanel((current) => !current)}
+      onToggleSidebar={() => setShowMetadataPanel((current) => !current)}
+      showDescription={showDescription}
+      onToggleDescription={() => setShowDescription((current) => !current)}
+      showInstalledDate
+      showDependenciesFilter
       isInstalled={(name) => isInstalled(name, installed)}
       onAction={() => {
         uiLogger.log("Revalidating installed packages");

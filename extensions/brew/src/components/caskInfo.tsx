@@ -113,7 +113,7 @@ export function CaskInfo({
       actions={
         <CaskActionPanel
           cask={cask}
-          showDetails={false}
+          showDetailsAction={false}
           isInstalled={isInstalled}
           onAction={(result) => {
             pop();

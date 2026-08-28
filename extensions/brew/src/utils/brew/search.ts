@@ -12,6 +12,7 @@ import { Cask, Formula, InstallableResults, DownloadProgress, IndexEntry } from 
 import { searchLogger } from "../logger";
 import { fetchFormulaIndex, fetchCaskIndex, fetchFormulaItems, fetchCaskItems } from "./fetch";
 import { brewCompare } from "./helpers";
+import { PopularityEntry, PopularityRanks, byPopularity } from "./analytics";
 
 /** Progress callback for search download phases */
 export interface SearchDownloadProgress {
@@ -33,6 +34,9 @@ export type SearchProgressCallback = (progress: SearchDownloadProgress) => void;
  * @param limit - Maximum number of results per category
  * @param signal - AbortSignal for cancellation
  * @param onProgress - Optional callback for progress updates
+ * @param ranks - When given, results are ordered by install count instead of
+ *   name relevance. Ranking happens on the full match set, *before* the limit
+ *   is applied, so the top results are the most installed matches overall.
  * @returns Matching formulae and casks
  */
 export async function brewSearch(
@@ -40,8 +44,9 @@ export async function brewSearch(
   limit?: number,
   signal?: AbortSignal,
   onProgress?: SearchProgressCallback,
+  ranks?: PopularityRanks,
 ): Promise<InstallableResults> {
-  searchLogger.log("Searching", { query: searchText, limit });
+  searchLogger.log("Searching", { query: searchText, limit, sortByPopularity: ranks != undefined });
 
   // Track progress for both downloads
   let casksProgress: DownloadProgress | undefined;
@@ -88,24 +93,34 @@ export async function brewSearch(
     const target = searchText.toLowerCase();
 
     // Filter formulae index by name, description, or aliases
-    matchingFormulaEntries = formulaIndex.entries
-      .filter((entry) => {
-        return (
-          entry.n.includes(target) || entry.d?.includes(target) || entry.a?.some((alias) => alias.includes(target))
-        );
-      })
-      .sort((a, b) => brewCompare(a.id, b.id, target));
+    matchingFormulaEntries = formulaIndex.entries.filter((entry) => {
+      return entry.n.includes(target) || entry.d?.includes(target) || entry.a?.some((alias) => alias.includes(target));
+    });
 
     // Filter casks index by token or description
-    matchingCaskEntries = caskIndex.entries
-      .filter((entry) => {
-        return entry.n.includes(target) || entry.d?.includes(target);
-      })
-      .sort((a, b) => brewCompare(a.id, b.id, target));
+    matchingCaskEntries = caskIndex.entries.filter((entry) => {
+      return entry.n.includes(target) || entry.d?.includes(target);
+    });
+
+    if (ranks) {
+      matchingFormulaEntries.sort(byPopularity(ranks.formulae));
+      matchingCaskEntries.sort(byPopularity(ranks.casks));
+    } else {
+      matchingFormulaEntries.sort((a, b) => brewCompare(a.id, b.id, target));
+      matchingCaskEntries.sort((a, b) => brewCompare(a.id, b.id, target));
+    }
   } else {
-    // No search text - return all entries (sorted alphabetically)
-    matchingFormulaEntries = [...formulaIndex.entries].sort((a, b) => a.id.localeCompare(b.id));
-    matchingCaskEntries = [...caskIndex.entries].sort((a, b) => a.id.localeCompare(b.id));
+    // No search text - every entry, ordered by popularity or alphabetically
+    matchingFormulaEntries = [...formulaIndex.entries];
+    matchingCaskEntries = [...caskIndex.entries];
+
+    if (ranks) {
+      matchingFormulaEntries.sort(byPopularity(ranks.formulae));
+      matchingCaskEntries.sort(byPopularity(ranks.casks));
+    } else {
+      matchingFormulaEntries.sort((a, b) => a.id.localeCompare(b.id));
+      matchingCaskEntries.sort((a, b) => a.id.localeCompare(b.id));
+    }
   }
 
   // Track total counts before slicing
@@ -129,6 +144,12 @@ export async function brewSearch(
     throw error;
   }
 
+  // Stamp install counts onto the results so the UI can show why this order.
+  if (ranks) {
+    applyPopularity(formulae, ranks.formulae, (formula) => formula.name);
+    applyPopularity(casks, ranks.casks, (cask) => cask.token);
+  }
+
   // Set totalLength for UI (shows "X of Y results")
   (formulae as Formula[] & { totalLength?: number }).totalLength = formulaeLen;
   (casks as Cask[] & { totalLength?: number }).totalLength = casksLen;
@@ -150,4 +171,16 @@ export async function brewSearch(
   });
 
   return { formulae, casks };
+}
+
+function applyPopularity<T extends { installs?: number; popularityRank?: number }>(
+  items: T[],
+  ranks: Map<string, PopularityEntry>,
+  id: (item: T) => string,
+): void {
+  for (const item of items) {
+    const entry = ranks.get(id(item));
+    item.installs = entry?.installs;
+    item.popularityRank = entry?.rank;
+  }
 }

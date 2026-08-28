@@ -5,28 +5,57 @@
  * when the split-view is enabled in search results.
  */
 
-import { Color, List } from "@raycast/api";
-import { Cask, Formula, brewIsInstalled, brewName, brewPrefix } from "../utils";
+import { Color, Icon, List } from "@raycast/api";
+import {
+  AnalyticsPeriod,
+  Cask,
+  Formula,
+  PackageDetailResponse,
+  brewIsInstalled,
+  brewName,
+  brewPrefix,
+  packageStatus,
+  totalForPeriod,
+} from "../utils";
+import { usePackageDetail } from "../hooks/usePackageDetail";
 
 interface FormulaListItemDetailProps {
   formula: Formula;
   isInstalled: (name: string) => boolean;
+  /** Only the selected row fetches its analytics — see AnalyticsMetadata. */
+  isSelected?: boolean;
+  /** When false, the panel drops the markdown and is metadata only. */
+  showDescription?: boolean;
 }
 
 interface CaskListItemDetailProps {
   cask: Cask;
   isInstalled: (name: string) => boolean;
+  isSelected?: boolean;
+  showDescription?: boolean;
 }
 
 /**
  * Detail panel for a formula in the split-view.
  */
-export function FormulaListItemDetail({ formula, isInstalled }: FormulaListItemDetailProps) {
+export function FormulaListItemDetail({
+  formula,
+  isInstalled,
+  isSelected,
+  showDescription = true,
+}: FormulaListItemDetailProps) {
+  const detail = usePackageDetail(formula.name, false, isSelected ?? false);
+
   return (
     <List.Item.Detail
-      markdown={formatFormulaMarkdown(formula)}
+      markdown={showDescription ? formatFormulaMarkdown(formula) : undefined}
       metadata={
         <List.Item.Detail.Metadata>
+          <StatusMetadata detail={detail} />
+          {/* With the markdown hidden the description has nowhere else to go. */}
+          {!showDescription && (
+            <MarkdownOnlyMetadata description={formula.desc} caveats={formulaCaveatsText(formula)} />
+          )}
           {formula.homepage ? (
             <List.Item.Detail.Metadata.Link title="Homepage" text={formula.homepage} target={formula.homepage} />
           ) : (
@@ -73,6 +102,7 @@ export function FormulaListItemDetail({ formula, isInstalled }: FormulaListItemD
               <List.Item.Detail.Metadata.Label title="Keg Only" text="Yes" />
             </>
           )}
+          <AnalyticsMetadata detail={detail} />
         </List.Item.Detail.Metadata>
       }
     />
@@ -82,12 +112,16 @@ export function FormulaListItemDetail({ formula, isInstalled }: FormulaListItemD
 /**
  * Detail panel for a cask in the split-view.
  */
-export function CaskListItemDetail({ cask, isInstalled }: CaskListItemDetailProps) {
+export function CaskListItemDetail({ cask, isInstalled, isSelected, showDescription = true }: CaskListItemDetailProps) {
+  const detail = usePackageDetail(cask.token, true, isSelected ?? false);
+
   return (
     <List.Item.Detail
-      markdown={formatCaskMarkdown(cask)}
+      markdown={showDescription ? formatCaskMarkdown(cask) : undefined}
       metadata={
         <List.Item.Detail.Metadata>
+          <StatusMetadata detail={detail} />
+          {!showDescription && <MarkdownOnlyMetadata description={cask.desc} caveats={cask.caveats} />}
           <List.Item.Detail.Metadata.Label title="Id" text={cask.token || "—"} />
           <List.Item.Detail.Metadata.Separator />
           {cask.homepage ? (
@@ -107,6 +141,7 @@ export function CaskListItemDetail({ cask, isInstalled }: CaskListItemDetailProp
           />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Auto Updates" text={cask.auto_updates ? "Yes" : "No"} />
+          <AnalyticsMetadata detail={detail} />
         </List.Item.Detail.Metadata>
       }
     />
@@ -114,6 +149,112 @@ export function CaskListItemDetail({ cask, isInstalled }: CaskListItemDetailProp
 }
 
 /// Private helpers
+
+/**
+ * Carry the markdown-only content into the metadata list.
+ *
+ * The description reads fine as a row. Caveats do not — they are multi-line
+ * shell instructions that a single metadata row truncates to uselessness — so
+ * this reports only whether there ARE any, and the full text stays one keypress
+ * away in the pushed Details view (⏎ / Show Details), which renders them as
+ * prose.
+ */
+function MarkdownOnlyMetadata(props: { description?: string; caveats?: string }) {
+  if (!props.description && !props.caveats) {
+    return null;
+  }
+  return (
+    <>
+      {props.description && <List.Item.Detail.Metadata.Label title="Description" text={props.description} />}
+      <List.Item.Detail.Metadata.Label
+        title="Caveats"
+        text={props.caveats ? "Yes" : "None"}
+        icon={props.caveats ? { source: Icon.Info, tintColor: Color.Blue } : undefined}
+      />
+      <List.Item.Detail.Metadata.Separator />
+    </>
+  );
+}
+
+/** Plain-text caveats, including the keg-only note the markdown synthesizes. */
+function formulaCaveatsText(formula: Formula): string | undefined {
+  const parts: string[] = [];
+  if (formula.keg_only) {
+    parts.push(`${formula.name} is keg-only, so it is not symlinked into ${brewPrefix}.`);
+  }
+  if (formula.caveats) {
+    parts.push(formula.caveats.trim());
+  }
+  return parts.length > 0 ? parts.join("\n\n") : undefined;
+}
+
+// "365 Days" rather than "1 Year": the API's bucket is a trailing 365-day
+// window, which "last year" reads as either the previous calendar year or the
+// year to date.
+const analyticsPeriodTitles: [AnalyticsPeriod, string][] = [
+  ["30d", "Installs (30 Days)"],
+  ["90d", "Installs (90 Days)"],
+  ["365d", "Installs (365 Days)"],
+];
+
+/**
+ * Deprecation or disablement, first in the panel because it changes whether a
+ * package is worth installing at all.
+ *
+ * Rendered only when there is something to say — a row reading "Status: Active"
+ * on every healthy package is noise, and this is a warning, not a field.
+ */
+function StatusMetadata(props: { detail?: PackageDetailResponse }) {
+  const status = packageStatus(props.detail);
+
+  if (!status) {
+    return null;
+  }
+
+  return (
+    <>
+      <List.Item.Detail.Metadata.Label
+        title={status.title}
+        text={{ value: status.text, color: Color.Orange }}
+        icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+      />
+      <List.Item.Detail.Metadata.Separator />
+    </>
+  );
+}
+
+/**
+ * Install counts from formulae.brew.sh, matching the analytics table on a
+ * package's page there.
+ *
+ * The numbers are not in the bulk formula/cask index the extension caches, so
+ * they come from the per-package endpoint via usePackageDetail.
+ */
+function AnalyticsMetadata(props: { detail?: PackageDetailResponse }) {
+  const installs = props.detail?.analytics?.install;
+  const buildErrors = totalForPeriod(props.detail?.analytics?.build_error, "30d");
+
+  // No analytics at all: a brand new package, or one below the reporting
+  // threshold. Render nothing rather than a column of em dashes.
+  if (!installs) {
+    return null;
+  }
+
+  return (
+    <>
+      <List.Item.Detail.Metadata.Separator />
+      {analyticsPeriodTitles.map(([period, title]) => {
+        const total = totalForPeriod(installs, period);
+        return total == undefined ? null : (
+          <List.Item.Detail.Metadata.Label key={period} title={title} text={total.toLocaleString()} />
+        );
+      })}
+      {buildErrors != undefined && buildErrors > 0 && (
+        <List.Item.Detail.Metadata.Label title="Build Errors (30 Days)" text={buildErrors.toLocaleString()} />
+      )}
+    </>
+  );
+}
 
 interface ListItemDependenciesProps {
   title: string;

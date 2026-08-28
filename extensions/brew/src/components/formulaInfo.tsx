@@ -113,7 +113,7 @@ export function FormulaInfo(props: {
       actions={
         <FormulaActionPanel
           formula={formula}
-          showDetails={false}
+          showDetailsAction={false}
           isInstalled={props.isInstalled}
           onAction={(result) => {
             pop();

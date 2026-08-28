@@ -18,6 +18,19 @@ export function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
   return (maybeCask as Cask).token !== undefined;
 }
 
+/**
+ * When a package was installed or last upgraded.
+ *
+ * Homebrew reports this per installed version (`installed[].time`) for formulae
+ * and as `installed_time` for casks, both in unix *seconds*. Undefined for a
+ * package that isn't installed, and while the fast `brew list --versions` path
+ * is still the source — it doesn't carry timestamps.
+ */
+export function brewInstalledDate(item: Cask | Formula): Date | undefined {
+  const seconds = isCask(item) ? item.installed_time : item.installed?.first()?.time;
+  return seconds == undefined ? undefined : new Date(seconds * 1000);
+}
+
 /// Identifiers
 
 /**

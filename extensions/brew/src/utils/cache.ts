@@ -18,6 +18,7 @@ import { streamArray } from "stream-json/streamers/StreamArray";
 import { pipeline as streamPipeline } from "stream/promises";
 import { DownloadProgressCallback, ChunkedCacheConfig, ChunkedCacheMeta, CacheIndex, IndexEntry } from "./types";
 import { cacheLogger, fetchLogger } from "./logger";
+import { analyticsCacheFiles } from "./brew/analyticsParse";
 import { NetworkError, ParseError, ensureError } from "./errors";
 
 /// Cache Paths
@@ -46,7 +47,13 @@ export function cachePath(name: string): string {
   return path.join(supportPath, name);
 }
 
-const CACHE_FILES = ["formula.json", "cask.json", "installedv2.json"];
+const CACHE_FILES = [
+  "formula.json",
+  "cask.json",
+  "installedv2.json",
+  // Bulk install analytics backing the popularity sort.
+  ...analyticsCacheFiles,
+];
 
 /**
  * Clear all cached data files (formulae, casks, installed packages).

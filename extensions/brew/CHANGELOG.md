@@ -1,5 +1,15 @@
 # Brew Changelog
 
+## [Install statistics & popularity sort] - {PR_MERGE_DATE}
+
+- Search: "Sort by Popularity" (⇧⌘P) orders results by installs over the last 30 days, ranking every match before the list is truncated — so the top rows are the most installed overall, not of the first hundred. An empty query lists the most installed packages outright.
+- The detail sidebar now shows a package's install counts for 30, 90 and 365 days, plus build errors, matching the analytics table on its formulae.brew.sh page. Only the selected package is fetched.
+- Deprecated and disabled packages carry a warning at the top of the sidebar, with the reason, the date, and the replacement package where Homebrew names one.
+- "Hide Description" (⇧⌘Y) drops the description pane and shows the sidebar as a pure metadata list, with a Caveats indicator; the full caveats text stays in Show Details, which renders it as prose.
+- "Show Details" is now offered even when the sidebar is open. It previously disappeared in that state, leaving "Show in Finder" as the default action on an installed package. Install and Upgrade remain the default where they apply.
+- Display toggles are grouped in a "View" section. "Toggle Details" is now "Toggle Sidebar" (⇧⌘D), and works in Search too; "Hide Dependencies" no longer appears in Search, where nothing filtered by it. Show Installed adds an install date and marks pinned formulae.
+- Updated to `@raycast/api` 2.x, and to a `brace-expansion` release without the denial-of-service advisory (GHSA-rgw5-rvv9-x895).
+
 ## [Upgrade View] - 2026-08-27
 
 - The Upgrade command now lists the outdated formulae & casks, matching the Show Outdated command, instead of a list of progress steps.

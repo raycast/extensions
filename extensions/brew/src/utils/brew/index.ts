@@ -47,6 +47,26 @@ export {
   onIndexRefreshed,
 } from "./fetch";
 
+// Analytics
+export {
+  packageAnalyticsURL,
+  totalForPeriod,
+  packageStatus,
+  fetchPopularityRanks,
+  invalidatePopularityRanks,
+  hasPopularityCache,
+  analyticsCacheFiles,
+  POPULARITY_PERIOD,
+} from "./analytics";
+export type {
+  AnalyticsPeriod,
+  AnalyticsCounts,
+  PackageAnalytics,
+  PackageDetailResponse,
+  PopularityEntry,
+  PopularityRanks,
+} from "./analytics";
+
 // Search
 export { brewSearch } from "./search";
 export type { SearchProgressCallback, SearchDownloadProgress } from "./search";
@@ -95,6 +115,7 @@ export {
   brewIsInstalled,
   brewInstallPath,
   brewFormatVersion,
+  brewInstalledDate,
   brewIdentifier,
   brewCaskOption,
   isCask,
