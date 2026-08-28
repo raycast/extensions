@@ -11,7 +11,7 @@ import { formatCost, formatCostDelta, formatDuration, formatTokensAsMTok } from 
 import { formatTimeRemaining, createProgressBar } from "./utils/usage-limits-formatter";
 import { pieIcon } from "./utils/pie-icon";
 import { formatTimeRemainingCustom } from "./utils/time-remaining-formatter";
-import { getScopedLimits } from "./utils/scoped-limits";
+import { getLimitRows } from "./utils/limit-rows";
 import {
   showRemainingUsage,
   getMenuBarTitle,
@@ -164,14 +164,8 @@ export default function MenuBarccusage() {
   const limitIcon = (utilization: number): string | Icon => (usePies ? (pieIcon(utilization) as string) : Icon.Gauge);
 
   const menuBarTitlePref = getMenuBarTitle();
-  const scopedLimits = getScopedLimits(effectiveLimitsData);
-  const highestUtilization = effectiveLimitsData
-    ? Math.max(
-        effectiveLimitsData.five_hour.utilization,
-        effectiveLimitsData.seven_day.utilization,
-        ...scopedLimits.map((limit) => limit.utilization),
-      )
-    : null;
+  const limitRows = getLimitRows(effectiveLimitsData);
+  const highestUtilization = limitRows.length > 0 ? Math.max(...limitRows.map((row) => row.utilization)) : null;
   const menuBarTitle = (() => {
     let title: string | undefined;
     if (menuBarTitlePref === "none") title = undefined;
@@ -265,30 +259,12 @@ export default function MenuBarccusage() {
               )}
               {effectiveLimitsData && (
                 <>
-                  <MenuBarExtra.Item
-                    title={limitTitle("5-Hour", effectiveLimitsData.five_hour.utilization)}
-                    subtitle={limitInfo(
-                      effectiveLimitsData.five_hour.utilization,
-                      effectiveLimitsData.five_hour.resets_at,
-                    )}
-                    icon={limitIcon(effectiveLimitsData.five_hour.utilization)}
-                    onAction={revalidate}
-                  />
-                  <MenuBarExtra.Item
-                    title={limitTitle("7-Day", effectiveLimitsData.seven_day.utilization)}
-                    subtitle={limitInfo(
-                      effectiveLimitsData.seven_day.utilization,
-                      effectiveLimitsData.seven_day.resets_at,
-                    )}
-                    icon={limitIcon(effectiveLimitsData.seven_day.utilization)}
-                    onAction={revalidate}
-                  />
-                  {scopedLimits.map((limit) => (
+                  {limitRows.map((row) => (
                     <MenuBarExtra.Item
-                      key={`${limit.label}-${limit.period}`}
-                      title={limitTitle(limit.label, limit.utilization)}
-                      subtitle={limitInfo(limit.utilization, limit.resets_at)}
-                      icon={limitIcon(limit.utilization)}
+                      key={row.key}
+                      title={limitTitle(row.label, row.utilization)}
+                      subtitle={limitInfo(row.utilization, row.resets_at)}
+                      icon={limitIcon(row.utilization)}
                       onAction={revalidate}
                     />
                   ))}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import type { UsageLimitData } from "../types/usage-types";
-import { getScopedLimits } from "./scoped-limits";
+import { getLimitRows } from "./limit-rows";
 
 const SESSION_RESET = "2026-08-28T09:00:00Z";
 const WEEKLY_RESET = "2026-08-31T06:00:00Z";
@@ -45,15 +45,54 @@ const livePayload: UsageLimitData = {
   ],
 };
 
-describe("getScopedLimits", () => {
-  it("surfaces the model-scoped window with the period the response reports", () => {
-    expect(getScopedLimits(livePayload)).toEqual([
-      { label: "Fable", period: "weekly", utilization: 15, resets_at: WEEKLY_RESET },
+const scopedRows = (data: UsageLimitData) => getLimitRows(data).filter((row) => row.period !== null);
+
+describe("getLimitRows", () => {
+  it("returns the account totals first, then the per-model windows", () => {
+    expect(getLimitRows(livePayload).map((row) => row.label)).toEqual(["5-Hour", "7-Day", "Fable"]);
+  });
+
+  it("keeps the fractional utilization the account totals report", () => {
+    const [fiveHour, sevenDay] = getLimitRows(livePayload);
+
+    expect(fiveHour.utilization).toBe(42.4);
+    expect(fiveHour.decimals).toBe(1);
+    expect(sevenDay.utilization).toBe(38.1);
+  });
+
+  it("takes the account totals from the flat fields, not their rounded limits[] counterparts", () => {
+    const rounded = getLimitRows(livePayload).filter((row) => row.utilization === 42 || row.utilization === 38);
+
+    expect(rounded).toEqual([]);
+  });
+
+  it("marks the account totals with their window length and no period", () => {
+    const [fiveHour, sevenDay] = getLimitRows(livePayload);
+
+    expect(fiveHour).toMatchObject({ period: null, windowHours: 5 });
+    expect(sevenDay).toMatchObject({ period: null, windowHours: 7 * 24 });
+  });
+
+  it("reports a per-model window with the period the response gives it", () => {
+    expect(scopedRows(livePayload)).toEqual([
+      {
+        key: "weekly:Fable",
+        label: "Fable",
+        period: "weekly",
+        utilization: 15,
+        decimals: 0,
+        resets_at: WEEKLY_RESET,
+        windowHours: null,
+      },
     ]);
   });
 
-  it("excludes the session and weekly_all totals, which name no model", () => {
-    expect(getScopedLimits(livePayload).map((limit) => limit.label)).toEqual(["Fable"]);
+  it("projects usage only across windows whose length is known", () => {
+    expect(getLimitRows(livePayload).map((row) => row.windowHours)).toEqual([5, 7 * 24, null]);
+  });
+
+  it("excludes the session and weekly_all entries, which name no model", () => {
+    expect(scopedRows(livePayload).map((row) => row.label)).toEqual(["Fable"]);
   });
 
   it("excludes the unlabeled codenamed windows the response also carries", () => {
@@ -66,12 +105,12 @@ describe("getScopedLimits", () => {
       ],
     };
 
-    expect(getScopedLimits(withCodenames).map((limit) => limit.label)).toEqual(["Fable"]);
+    expect(scopedRows(withCodenames).map((row) => row.label)).toEqual(["Fable"]);
   });
 
   it("ignores a scoped entry whose model carries no display name", () => {
     expect(
-      getScopedLimits({
+      scopedRows({
         ...baseData,
         limits: [{ kind: "weekly_scoped", group: "weekly", percent: 9, resets_at: WEEKLY_RESET, scope: {} }],
       }),
@@ -80,7 +119,7 @@ describe("getScopedLimits", () => {
 
   it("keeps a model-scoped window whose period the API does not send today", () => {
     expect(
-      getScopedLimits({
+      scopedRows({
         ...baseData,
         limits: [
           {
@@ -92,47 +131,53 @@ describe("getScopedLimits", () => {
           },
         ],
       }),
-    ).toEqual([{ label: "Fable", period: "session", utilization: 7, resets_at: SESSION_RESET }]);
+    ).toMatchObject([{ label: "Fable", period: "session", utilization: 7 }]);
   });
 
   it("falls back to the flat fields when the payload has no limits array", () => {
     expect(
-      getScopedLimits({
+      scopedRows({
         ...baseData,
         seven_day_sonnet: { utilization: 45, resets_at: WEEKLY_RESET },
         seven_day_opus: { utilization: 82, resets_at: WEEKLY_RESET },
       }),
-    ).toEqual([
-      { label: "Sonnet", period: "weekly", utilization: 45, resets_at: WEEKLY_RESET },
-      { label: "Opus", period: "weekly", utilization: 82, resets_at: WEEKLY_RESET },
+    ).toMatchObject([
+      { label: "Sonnet", period: "weekly", utilization: 45, decimals: 1 },
+      { label: "Opus", period: "weekly", utilization: 82, decimals: 1 },
     ]);
   });
 
   it("falls back when the limits array holds no model-scoped entries", () => {
     expect(
-      getScopedLimits({
+      scopedRows({
         ...baseData,
         seven_day_opus: { utilization: 82, resets_at: WEEKLY_RESET },
         limits: [{ kind: "weekly_all", group: "weekly", percent: 38, resets_at: WEEKLY_RESET, scope: null }],
       }),
-    ).toEqual([{ label: "Opus", period: "weekly", utilization: 82, resets_at: WEEKLY_RESET }]);
+    ).toMatchObject([{ label: "Opus", utilization: 82 }]);
   });
 
   it("does not double render a model present in both the limits array and the flat fields", () => {
     expect(
-      getScopedLimits({
+      scopedRows({
         ...livePayload,
         seven_day_sonnet: { utilization: 45, resets_at: WEEKLY_RESET },
         seven_day_opus: { utilization: 82, resets_at: WEEKLY_RESET },
-      }),
-    ).toEqual([{ label: "Fable", period: "weekly", utilization: 15, resets_at: WEEKLY_RESET }]);
+      }).map((row) => row.label),
+    ).toEqual(["Fable"]);
   });
 
-  it("returns nothing for a payload with neither shape", () => {
-    expect(getScopedLimits(baseData)).toEqual([]);
+  it("returns only the account totals for a payload with neither scoped shape", () => {
+    expect(getLimitRows(baseData).map((row) => row.label)).toEqual(["5-Hour", "7-Day"]);
+  });
+
+  it("gives every row a distinct key", () => {
+    const keys = getLimitRows(livePayload).map((row) => row.key);
+
+    expect(new Set(keys).size).toBe(keys.length);
   });
 
   it("returns nothing for null", () => {
-    expect(getScopedLimits(null)).toEqual([]);
+    expect(getLimitRows(null)).toEqual([]);
   });
 });

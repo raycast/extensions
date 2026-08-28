@@ -10,6 +10,7 @@
 ### Changed
 
 - Per-model limits are read from the usage endpoint's self-describing `limits` array, so a window for any model shows up under its own name and period without an extension update. Accounts still served the older response shape keep their existing Sonnet and Opus rows.
+- The menu bar and Usage Limits view render every limit window through one path instead of hardcoding a block per window, so the 5-hour, 7-day, and per-model rows stay consistent with each other.
 
 ## [Rename to Claude Usage] - 2026-07-29
 

@@ -1,6 +1,6 @@
 import { getClaudeAccessToken } from "../utils/keychain-access";
 import { fetchClaudeUsageLimits } from "../utils/claude-api-client";
-import { getScopedLimits } from "../utils/scoped-limits";
+import { getLimitRows } from "../utils/limit-rows";
 
 type Input = {
   /** Include raw reset timestamps in ISO format */
@@ -77,13 +77,19 @@ export default async function getUsageLimits(input?: Input): Promise<{
     }
   };
 
-  const scopedLimits = getScopedLimits(usageLimitsData).map((limit) => ({
-    label: limit.label,
-    period: limit.period,
-    utilization: limit.utilization,
-    resetsAt: formatResetTime(limit.resets_at),
-    ...(input?.includeRawTimestamps && { rawTimestamp: limit.resets_at ?? undefined }),
-  }));
+  const scopedLimits = getLimitRows(usageLimitsData).flatMap((row) =>
+    row.period === null
+      ? []
+      : [
+          {
+            label: row.label,
+            period: row.period,
+            utilization: row.utilization,
+            resetsAt: formatResetTime(row.resets_at),
+            ...(input?.includeRawTimestamps && { rawTimestamp: row.resets_at ?? undefined }),
+          },
+        ],
+  );
 
   return {
     fiveHour: {
