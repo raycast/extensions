@@ -36,7 +36,7 @@
     {
       "name": "dateFormat",
       "title": "Folder Name Format",
-      "description": "Tokens: yyyy, MM, dd, HH, mm, ss. Use / to create nested folders, e.g. yyyy/MM/dd.",
+      "description": "Tokens: yyyy, MM, dd, HH, mm, ss. Wrap words in single quotes to keep them literal, e.g. 'summer'-yyyy. Use / to create nested folders, e.g. yyyy/MM/dd.",
       "type": "textfield",
       "default": "yyyy-MM-dd",
       "placeholder": "yyyy-MM-dd",

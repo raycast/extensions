@@ -12,10 +12,11 @@ Run **Create Dated Folder**. That is it — the folder is created (or reused if 
 | --- | --- | --- |
 | **Parent Folder** | `Desktop/temp` | Where dated folders are created. It is created on first run if missing. On Windows the real Desktop location is used, even when OneDrive or a policy has moved it. |
 | **Terminal** | System default | Any installed app. When empty, macOS follows the terminal registered as the default handler for shell scripts — the setting apps like Ghostty, iTerm2, and Warp write when you accept "make this your default terminal" — and falls back to Terminal.app. Windows uses Windows Terminal when installed, otherwise Windows PowerShell. |
-| **Folder Name Format** | `yyyy-MM-dd` | Tokens: `yyyy`, `MM`, `dd`, `HH`, `mm`, `ss`. Use `/` to nest, e.g. `yyyy/MM/dd` creates `2026/08/28`. The result must stay inside the parent folder. |
+| **Folder Name Format** | `yyyy-MM-dd` | Tokens: `yyyy`, `MM`, `dd`, `HH`, `mm`, `ss`. Wrap words in single quotes to keep them literal, e.g. `'summer'-yyyy` → `summer-2026`. Use `/` to nest, e.g. `yyyy/MM/dd` creates `2026/08/28`. The result must stay inside the parent folder. |
 | **Reveal** | Off | Also reveal the folder in Finder / File Explorer. |
 
 ## Notes
 
+- **Folder name format** — tokens are expanded wherever they appear, so quote any word that contains one: `'add'-yyyy` rather than `add-yyyy`, which would otherwise read `dd` as the day. `''` produces a single quote.
 - **macOS** — the folder is opened with the chosen app via `open`, so any terminal that accepts a folder works (Terminal, iTerm2, Ghostty, Warp, kitty, WezTerm, …).
 - **Windows** — Windows Terminal is launched with `-d <folder>`; other apps and shells are started with the folder as their working directory. The code is in place but has not been verified on a real Windows machine yet, so the extension currently declares macOS only.

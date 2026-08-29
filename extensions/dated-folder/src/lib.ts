@@ -22,8 +22,16 @@ const TOKENS: Record<string, (date: Date) => number> = {
   ss: (d) => d.getSeconds(),
 };
 
+/**
+ * Expands the date tokens in `format`. Text wrapped in single quotes is kept literally, which is
+ * what makes names like `'summer'-yyyy` work: without the escape the `mm` inside `summer` reads as
+ * minutes, and every `dd`, `MM`, `HH` or `ss` sitting in an ordinary word turns into a number with
+ * nothing to warn the user. `''` yields a single quote, following the usual LDML convention.
+ */
 export function formatDate(format: string, date: Date): string {
-  return format.replace(/yyyy|MM|dd|HH|mm|ss/g, (token) => String(TOKENS[token](date)).padStart(2, "0"));
+  return format.replace(/'((?:[^']|'')*)'|yyyy|MM|dd|HH|mm|ss/g, (token, literal?: string) =>
+    literal === undefined ? String(TOKENS[token](date)).padStart(2, "0") : literal.replace(/''/g, "'") || "'",
+  );
 }
 
 /**
