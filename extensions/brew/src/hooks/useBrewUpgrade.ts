@@ -103,7 +103,7 @@ export function useBrewUpgrade(): BrewUpgrade {
                 toast.updateMessage("Updating Homebrew…");
                 break;
               case "check":
-                toast.updateMessage("Checking for outdated packages…");
+                toast.updateMessage("Checking for upgrades…");
                 break;
               case "start":
                 total = event.packages.length;

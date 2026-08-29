@@ -59,10 +59,13 @@
     },
     {
       "name": "outdated",
-      "title": "Show Outdated",
+      "title": "Show Upgrades",
       "subtitle": "Brew",
-      "description": "Show outdated brew formulae & casks",
-      "mode": "view"
+      "description": "Review available upgrades, choose which to apply, and run it",
+      "mode": "view",
+      "keywords": [
+        "outdated"
+      ]
     },
     {
       "name": "upgrade",

@@ -499,23 +499,23 @@ export function FormulaActionPanel(props: {
   }
 }
 
-export function OutdatedActionPanel(props: {
+interface OutdatedActionProps {
   outdated: OutdatedCask | OutdatedFormula;
   /** Called when the upgrade starts or finishes, e.g. to show its status in a list */
   onUpgrade?: (status: UpgradePackageStatus) => void;
-  /** Overrides the default "Upgrade All", e.g. to report progress per package */
-  onUpgradeAll?: () => void;
   onAction: (result: boolean) => void;
-}) {
-  const { outdated } = props;
-  const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+}
 
-  function isPinable(o: OutdatedCask | OutdatedFormula): o is OutdatedFormula {
-    return (o as OutdatedFormula).pinned != undefined;
-  }
+function isPinable(o: OutdatedCask | OutdatedFormula): o is OutdatedFormula {
+  return (o as OutdatedFormula).pinned != undefined;
+}
 
-  // When the caller shows the upgrade status itself, leave the list as-is:
-  // an upgraded package remains visible, with its status
+/**
+ * Per-package upgrade action, reporting status to the caller when it shows
+ * the upgrade status itself — an upgraded package then remains visible in the
+ * list, with its status — and refreshing the list otherwise.
+ */
+export function OutdatedUpgradeAction(props: OutdatedActionProps) {
   function onUpgradeAction(result: boolean) {
     if (props.onUpgrade) {
       props.onUpgrade(result ? "upgraded" : "failed");
@@ -525,16 +525,48 @@ export function OutdatedActionPanel(props: {
   }
 
   return (
-    <ActionPanel>
+    <Actions.FormulaUpgradeAction
+      formula={props.outdated}
+      onStart={() => props.onUpgrade?.("upgrading")}
+      onSkip={() => props.onUpgrade?.("skipped")}
+      onAction={onUpgradeAction}
+    />
+  );
+}
+
+/**
+ * Per-package sections shared by the outdated surfaces: single upgrade, pin,
+ * refresh, copy/terminal commands and uninstall. A fragment so Show Upgrades
+ * can append them beneath its selection actions.
+ */
+export function OutdatedActionSections(
+  props: OutdatedActionProps & {
+    /**
+     * Omit the per-package upgrade action from the sections. For rows that
+     * hoist that action to the panel's first slot (so a run action can take
+     * the second slot, where Raycast binds ⌘↩) without listing it twice.
+     */
+    omitUpgrade?: boolean;
+    /**
+     * Omit the pin action. For rows that hoist a selection-aware pin action
+     * of their own — two Pin entries with different selection behaviour would
+     * otherwise share the panel.
+     */
+    omitPin?: boolean;
+  },
+) {
+  const { outdated } = props;
+  const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+
+  return (
+    <>
       <ActionPanel.Section>
-        <Actions.FormulaUpgradeAction
-          formula={outdated}
-          onStart={() => props.onUpgrade?.("upgrading")}
-          onSkip={() => props.onUpgrade?.("skipped")}
-          onAction={onUpgradeAction}
-        />
-        <Actions.FormulaUpgradeAllAction onUpgradeAll={props.onUpgradeAll} onAction={props.onAction} />
-        {isPinable(outdated) && <Actions.FormulaPinAction formula={outdated} onAction={props.onAction} />}
+        {!props.omitUpgrade && (
+          <OutdatedUpgradeAction outdated={outdated} onUpgrade={props.onUpgrade} onAction={props.onAction} />
+        )}
+        {!props.omitPin && isPinable(outdated) && (
+          <Actions.FormulaPinAction formula={outdated} onAction={props.onAction} />
+        )}
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
@@ -551,7 +583,7 @@ export function OutdatedActionPanel(props: {
         <Action
           title={`Run Upgrade in ${terminalName}`}
           icon={terminalIcon}
-          shortcut={{ modifiers: ["cmd"], key: "return" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
           onAction={() => runCommandInTerminal(brewUpgradeCommand(outdated))}
         />
       </ActionPanel.Section>
@@ -570,6 +602,28 @@ export function OutdatedActionPanel(props: {
           onAction={() => runCommandInTerminal(brewUninstallCommand(outdated))}
         />
       </ActionPanel.Section>
+    </>
+  );
+}
+
+export function OutdatedActionPanel(
+  props: OutdatedActionProps & {
+    /** Overrides the default "Upgrade All", e.g. to report progress per package */
+    onUpgradeAll?: () => void;
+  },
+) {
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>
+        <OutdatedUpgradeAction outdated={props.outdated} onUpgrade={props.onUpgrade} onAction={props.onAction} />
+        <Actions.FormulaUpgradeAllAction onUpgradeAll={props.onUpgradeAll} onAction={props.onAction} />
+      </ActionPanel.Section>
+      <OutdatedActionSections
+        outdated={props.outdated}
+        onUpgrade={props.onUpgrade}
+        onAction={props.onAction}
+        omitUpgrade
+      />
     </ActionPanel>
   );
 }

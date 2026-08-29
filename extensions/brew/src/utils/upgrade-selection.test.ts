@@ -133,6 +133,16 @@ describe("mergeSelectionState", () => {
     expect(merged.get(selectionKey("formula", "jq"))).toBe(true);
   });
 
+  it("casks are default-selected like unpinned formulae — they carry no pin state before Homebrew 6", () => {
+    const packages: SelectablePackage[] = [
+      { kind: "formula", name: "wget", pinned: false },
+      { kind: "cask", name: "firefox" },
+    ];
+    const merged = mergeSelectionState(new Map(), packages);
+    expect(merged.get(selectionKey("cask", "firefox"))).toBe(true);
+    expect(selectedPackages(packages, merged)).toEqual(packages);
+  });
+
   it("drops packages that are no longer outdated", () => {
     const state = defaultSelectionState(toSelectable());
     const merged = mergeSelectionState(state, [{ kind: "formula", name: "zen", pinned: false }]);

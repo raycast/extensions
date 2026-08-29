@@ -116,7 +116,7 @@ export function OutdatedList(props: OutdatedListProps) {
       {props.isLoading && !props.outdated && (
         <List.EmptyView
           icon={getProgressIcon(0.5)}
-          title="Checking for outdated packages..."
+          title="Checking for upgrades…"
           description="Running brew outdated"
         />
       )}
