@@ -1,6 +1,6 @@
 # Kobbe Changelog
 
-## [Live Visitors and New Commands] - {PR_MERGE_DATE}
+## [Live Visitors and New Commands] - 2026-08-29
 
 - Add Live Visitors menu bar command showing who is online right now across your sites.
 - Add Top Sources command backed by the Kobbe sources endpoint.
