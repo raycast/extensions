@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Keep Set Status responsive in large workspaces] - {PR_MERGE_DATE}
+## [Keep Set Status responsive in large workspaces] - 2026-08-29
 
 - Load custom workspace emojis only when opening the emoji picker and render them in bounded slices to prevent Set Status from exceeding the extension memory limit.
 
