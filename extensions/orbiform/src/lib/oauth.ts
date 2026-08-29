@@ -136,6 +136,17 @@ async function refreshTokens(refreshToken: string, clientId: string): Promise<To
   return tokenResponse;
 }
 
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+// Dedupe concurrent authorize() calls *within this process*: a command that
+// fires off several API calls at once (each starting with `await
+// authorize()`) would otherwise kick off several independent refresh/login
+// flows against the same expired session. Sharing one in-flight promise
+// makes that case race-free outright, rather than just less likely to
+// collide — it's the one part of this problem we can actually fix
+// completely, since it doesn't depend on storage being atomic.
+let inFlightAuthorize: Promise<string> | null = null;
+
 /**
  * Returns a valid access token: runs the full login+consent flow the first
  * time (opens the system browser), silently refreshes on later runs once
@@ -143,6 +154,16 @@ async function refreshTokens(refreshToken: string, clientId: string): Promise<To
  * instantly. Call this at the top of every command before hitting the API.
  */
 export async function authorize(): Promise<string> {
+  if (inFlightAuthorize) return inFlightAuthorize;
+  inFlightAuthorize = doAuthorize();
+  try {
+    return await inFlightAuthorize;
+  } finally {
+    inFlightAuthorize = null;
+  }
+}
+
+async function doAuthorize(): Promise<string> {
   const existing = await client.getTokens();
   if (existing?.accessToken) {
     if (existing.refreshToken && existing.isExpired()) {
@@ -158,13 +179,23 @@ export async function authorize(): Promise<string> {
         });
         return refreshed.access_token;
       } catch (refreshError) {
-        // Two commands can race to refresh the same expired session: one
-        // refresh lands and overwrites storage with a fresh token tuple
-        // before the other's request comes back rejected (e.g. the server
-        // already rotated/invalidated the refresh_token this call sent).
-        // Re-check storage before wiping it — if it no longer matches what
-        // we tried to refresh, another call already fixed the session, so
-        // use that instead of deleting it out from under it.
+        // Two *separate* Raycast commands (separate processes — the
+        // in-flight guard above only covers one process) can still race to
+        // refresh the same expired session: one refresh lands and
+        // overwrites storage with a fresh token tuple right around when
+        // the other's request comes back rejected (e.g. the server already
+        // rotated/invalidated the refresh_token this call sent). Raycast's
+        // LocalStorage has no compare-and-delete, so a single re-check
+        // immediately before removeTokens() still has a window where the
+        // other process's write lands *after* our read but *before* our
+        // delete. Wait briefly first — long enough for a same-server token
+        // request that's already in flight to finish and persist — then
+        // re-check. This can't make the check-then-act atomic, but it
+        // shrinks the window from "any concurrent write" to "a write
+        // landing in this specific ~1s gap", which is what actually
+        // matters here since both requests started within moments of each
+        // other and hit the same token endpoint.
+        await delay(1000);
         const latest = await client.getTokens();
         if (
           latest?.accessToken &&
