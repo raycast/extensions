@@ -37,6 +37,14 @@ export default async function (input: Input) {
     const page = await getMessagePage(input);
 
     if (page.messages.length === 0) {
+      if (page.nextCursor) {
+        return {
+          messages: [],
+          nextCursor: page.nextCursor,
+          scannedMessageCount: page.scannedMessageCount,
+        };
+      }
+
       return "No messages were found.";
     }
 
