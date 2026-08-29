@@ -136,15 +136,11 @@ async function refreshTokens(refreshToken: string, clientId: string): Promise<To
   return tokenResponse;
 }
 
-const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
 // Dedupe concurrent authorize() calls *within this process*: a command that
 // fires off several API calls at once (each starting with `await
 // authorize()`) would otherwise kick off several independent refresh/login
 // flows against the same expired session. Sharing one in-flight promise
-// makes that case race-free outright, rather than just less likely to
-// collide — it's the one part of this problem we can actually fix
-// completely, since it doesn't depend on storage being atomic.
+// makes that case race-free outright.
 let inFlightAuthorize: Promise<string> | null = null;
 
 /**
@@ -161,6 +157,19 @@ export async function authorize(): Promise<string> {
   } finally {
     inFlightAuthorize = null;
   }
+}
+
+/**
+ * Forces a fresh login, discarding whatever is currently stored first. This
+ * is the ONLY place tokens get deleted — deliberately, so it must be
+ * triggered by an explicit user action (e.g. a "Reconnect Orbiform" command
+ * or a retry action on an auth-error screen), never automatically from
+ * inside a refresh failure. See the comment in doAuthorize()'s catch block
+ * for why deleting automatically there is unsafe.
+ */
+export async function reconnect(): Promise<string> {
+  await client.removeTokens();
+  return authorize();
 }
 
 async function doAuthorize(): Promise<string> {
@@ -180,35 +189,29 @@ async function doAuthorize(): Promise<string> {
         return refreshed.access_token;
       } catch (refreshError) {
         // Two *separate* Raycast commands (separate processes — the
-        // in-flight guard above only covers one process) can still race to
-        // refresh the same expired session: one refresh lands and
-        // overwrites storage with a fresh token tuple right around when
-        // the other's request comes back rejected (e.g. the server already
-        // rotated/invalidated the refresh_token this call sent). Raycast's
-        // LocalStorage has no compare-and-delete, so a single re-check
-        // immediately before removeTokens() still has a window where the
-        // other process's write lands *after* our read but *before* our
-        // delete. Wait briefly first — long enough for a same-server token
-        // request that's already in flight to finish and persist — then
-        // re-check. This can't make the check-then-act atomic, but it
-        // shrinks the window from "any concurrent write" to "a write
-        // landing in this specific ~1s gap", which is what actually
-        // matters here since both requests started within moments of each
-        // other and hit the same token endpoint.
-        await delay(1000);
-        const latest = await client.getTokens();
-        if (
-          latest?.accessToken &&
-          (latest.accessToken !== existing.accessToken || latest.refreshToken !== existing.refreshToken)
-        ) {
-          return latest.accessToken;
-        }
-
-        // Otherwise this really is a stored refresh_token that no longer
-        // matches its paired client_id. Clear it so the next call runs a
-        // full fresh authorize() instead of looping on a refresh that can
-        // never succeed.
-        await client.removeTokens();
+        // in-flight guard above only covers one process) can race to
+        // refresh the same expired session: one succeeds and persists a
+        // fresh token tuple around the same time the other's request comes
+        // back rejected (e.g. the server already rotated/invalidated the
+        // refresh_token this call sent). Raycast's LocalStorage exposes no
+        // compare-and-delete, so ANY read-then-conditionally-delete here —
+        // no matter how tight, even with a re-check right before the
+        // delete — has a window where the other process's write lands
+        // after our read but before our delete, and we'd erase the session
+        // it just fixed. That's not a window worth narrowing with a
+        // timeout; it's worth removing entirely.
+        //
+        // So: never delete here. A failed refresh just throws and leaves
+        // storage untouched. If this failure was caused by the race above,
+        // the other command's valid tokens are safe in storage and the
+        // very next authorize() call (this command's retry, or any other
+        // command) picks them up normally. If the refresh_token is
+        // genuinely dead (not a race), every call keeps failing the same
+        // way instead of silently self-healing — the user sees the error
+        // and can call reconnect() (e.g. via a "Reconnect Orbiform"
+        // action) to force a clean login. That's a deliberate, explicit
+        // deletion instead of an automatic one racing against other
+        // commands.
         throw refreshError;
       }
     }
