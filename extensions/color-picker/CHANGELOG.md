@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Favorite Colors & AI Tools] - {PR_MERGE_DATE}
+## [Favorite Colors & AI Tools] - 2026-08-29
 
 - Add a `Favorite Colors` command to view and use saved favorites
 - Add AI tools to convert, name, save, list, contrast-check, generate scales, and format palettes
