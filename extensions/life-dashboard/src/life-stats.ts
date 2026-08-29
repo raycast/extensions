@@ -202,18 +202,9 @@ export const fmtDate = (d: Date): string =>
 
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-export interface RawPrefs {
-  birthday?: string;
-  workStartDate?: string;
-  deathAge?: string;
-  paycheckCadence?: string;
-  weekStart?: string;
-  progressSymbol?: string;
-  showQuotes?: boolean;
-  showChristmas?: boolean;
-  showRamadan?: boolean;
-  showLunarYears?: boolean;
-}
+/** The manifest-generated preference type (raycast-env.d.ts), so the manifest
+ *  and source typing can't drift. */
+export type RawPrefs = ExtensionPreferences;
 
 /** Parse the extension preferences into a LifeInput (undefined = birthday missing/invalid). */
 export function parseLifeInput(p: RawPrefs): LifeInput | undefined {
@@ -231,10 +222,15 @@ export function parseLifeInput(p: RawPrefs): LifeInput | undefined {
 }
 
 function parseDate(s?: string): Date | undefined {
-  if (!s?.trim()) return undefined;
-  const t = Date.parse(s.trim());
-  if (Number.isNaN(t)) return undefined;
-  const d = new Date(t);
+  // Construct in local time: Date.parse("1995-01-01") yields UTC midnight,
+  // which local calendar getters read as the previous day west of UTC.
+  const match = s?.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return undefined;
+  const [, year, month, day] = match;
+  const d = new Date(Number(year), Number(month) - 1, Number(day));
+  if (d.getFullYear() !== Number(year) || d.getMonth() !== Number(month) - 1 || d.getDate() !== Number(day)) {
+    return undefined;
+  }
   return d.getTime() < Date.now() ? d : undefined;
 }
 
