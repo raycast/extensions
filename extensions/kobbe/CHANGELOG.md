@@ -1,5 +1,9 @@
 # Kobbe Changelog
 
+## [Fix Stale Live Count] - 2026-08-29
+
+- Hide the menu bar visitor count while a refresh has failed, instead of presenting the previous total as current.
+
 ## [Live Visitors and New Commands] - 2026-08-29
 
 - Add Live Visitors menu bar command showing who is online right now across your sites.
