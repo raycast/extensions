@@ -324,6 +324,8 @@ async function prepareProfileBridge(
   await mkdir(path.dirname(bridgePath), { recursive: true });
   await mkdir(socketDirectory, { recursive: true });
 
+  // This live link only makes the selected Chromium data discoverable. For the profile name we pass,
+  // agent-browser copies the selected profile to its own temporary user-data directory before launch.
   try {
     const entry = await lstat(bridgePath);
     if (!entry.isSymbolicLink()) throw new Error(`Profile bridge is not a symbolic link: ${bridgePath}`);

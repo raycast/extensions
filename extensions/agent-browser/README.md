@@ -14,7 +14,7 @@ Agent Browser is a Raycast extension that connects [agent-browser](https://agent
 
 - Open websites in visible or headless browser sessions.
 - Use an installed CDP-compatible Chromium browser, including Chrome, Brave, Edge, or Vivaldi.
-- Reuse a Chromium browser profile through a temporary read-only snapshot, open a live tab in a named Dia space, or open Safari tabs in the active Safari profile.
+- Reuse a Chromium browser profile through a temporary copy created by the local agent-browser CLI, open a live tab in a named Dia space, or open Safari tabs in the active Safari profile.
 - Keep tasks isolated with named sessions and reusable browser state.
 - Inspect accessibility snapshots, page content, element state, tabs, and navigation history.
 - Click, fill, type, select, scroll, and wait for page updates with explicit confirmation.
@@ -110,7 +110,11 @@ Opens a URL in a visible agent-browser session. Provide an optional session name
 
 Each task can use a named agent-browser session. A session keeps its own browser instance, tabs, cookies, storage, navigation history, and authentication state. Raycast AI chooses a short session name when it starts a task and reuses that name for every following step.
 
-Each session is bound to the browser and profile that opened it. Browser-owned profile data is copied to a temporary snapshot by agent-browser, so the original profile is not modified. Close the session before reusing its name with a different browser identity.
+Each session is bound to the browser and profile that opened it. For a selected Chrome, Chromium, Brave, Edge, or Vivaldi profile, the extension creates a temporary fake home with a live symbolic link to the browser's real user-data directory. The link is not enforced as read-only by the operating system; it exists so agent-browser can discover the selected browser's profiles at Chrome's standard data location.
+
+The extension passes the selected profile as a name, not the real user-data directory. agent-browser's named-profile flow reads through the link, copies `Local State` and the selected profile into its own temporary user-data directory, and launches Chromium against that copy. Normal browser writes therefore go to the temporary copy rather than the original profile. This protection applies to named profiles: if a directory path is supplied directly to agent-browser as `--profile`, agent-browser treats it as a persistent, writable profile instead.
+
+Close the session before reusing its name with a different browser identity.
 
 Dia is supported explicitly for opening live tabs in a named space and for inspecting or interacting with those pages through Dia's JavaScript automation API. Select Dia and enter the space name exactly as shown in Dia (for example, `BOT`). The first interactive session after upgrading requires quitting Dia once so Agent Browser can relaunch it with JavaScript automation enabled. Arc is still rejected because it exposes neither this API nor a compatible CDP endpoint.
 
