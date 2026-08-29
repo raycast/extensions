@@ -1,6 +1,6 @@
 # Is It Alive? Changelog
 
-## [Suggested Sites, OnlineOrNot, and FireHydrant] - {PR_MERGE_DATE}
+## [Suggested Sites, OnlineOrNot, and FireHydrant] - 2026-08-29
 
 - Add OnlineOrNot status pages through the public summary API. Look up hosted pages by subdomain and custom domains such as status.openrouter.ai by hostname
 - Add FireHydrant status pages (e.g. status.redis.io) via `/data/payload.json`
