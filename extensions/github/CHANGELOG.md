@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix Stats for Large Accounts] - 2026-08-29
+
+- Split aggregate and list GraphQL requests so My GitHub Stats loads for accounts with large histories
+
 ## [Search Repositories UX and Performance Fixes] - 2026-08-22
 
 - Search Repositories: Show **Recent Visited Repositories** when the search field is empty instead of running a blank API search.
