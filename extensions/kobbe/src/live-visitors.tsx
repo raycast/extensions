@@ -12,7 +12,7 @@ export default function LiveVisitors() {
   return (
     <MenuBarExtra
       icon={Icon.Livestream}
-      title={total != null ? `${total}${hasPartialFailures ? "+" : ""}` : undefined}
+      title={!live.error && total != null ? `${total}${hasPartialFailures ? "+" : ""}` : undefined}
       tooltip="Kobbe live visitors"
       isLoading={live.isLoading}
     >
