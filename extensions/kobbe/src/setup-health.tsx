@@ -1,22 +1,15 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 
-import { getKobbePreferences } from "./preferences";
-import { SiteOverviewDetail, SitesPicker } from "./views";
+import { SetupHealthList, SitesPicker } from "./views";
 
-export default function SiteOverview() {
-  const range = getKobbePreferences().defaultRange;
-
+export default function SetupHealth() {
   return (
     <SitesPicker
-      title="Kobbe Site Overview"
+      title="Kobbe Setup Health"
       searchBarPlaceholder="Choose a site..."
       renderActions={(site, revalidate) => (
         <ActionPanel>
-          <Action.Push
-            title="View Overview"
-            icon={Icon.BarChart}
-            target={<SiteOverviewDetail site={site} range={range} />}
-          />
+          <Action.Push title="View Setup Health" icon={Icon.Heartbeat} target={<SetupHealthList site={site} />} />
           <Action
             title="Refresh Sites"
             icon={Icon.ArrowClockwise}
