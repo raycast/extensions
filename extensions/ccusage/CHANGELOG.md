@@ -1,6 +1,6 @@
 # Claude Usage (ccusage) Changelog
 
-## [Fable support and per-model limits] - {PR_MERGE_DATE}
+## [Fable support and per-model limits] - 2026-08-29
 
 ### Added
 
