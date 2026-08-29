@@ -1,5 +1,13 @@
 # Tuya Smart Changelog
 
+## [Shortcuts and Siri Support] - {PR_MERGE_DATE}
+
+- Added a Control Device command that takes arguments, so devices can be controlled from
+  a deeplink through Apple Shortcuts and, through Shortcuts, from Siri. Thanks to
+  @anwarulislam, whose earlier pull request proposed this.
+- A name that matches several devices is refused rather than guessed at, and the HUD says
+  which ones matched. A multi-gang device needs its switch named for the same reason.
+
 ## [Redesigned List, Error Handling, Light Controls, Menu Bar and AI Tools] - {PR_MERGE_DATE}
 
 - Pinning is now per device rather than per switch, which is what the redesigned list

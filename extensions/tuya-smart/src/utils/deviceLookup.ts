@@ -34,6 +34,19 @@ export function findDeviceByName(devices: Device[], query: string): Device | und
   return matches.length === 1 ? matches[0] : undefined;
 }
 
+/**
+ * Only a device carrying exactly this name, or this id. Used where a loose match would be
+ * a misreading rather than a convenience, such as deciding whether a leading "open" is a
+ * verb or the first word of the device's own name.
+ */
+export function findDeviceByExactName(devices: Device[], query: string): Device | undefined {
+  const needle = normalize(query ?? "");
+  if (!needle) return undefined;
+
+  const matches = devices.filter((device) => device.id === query || normalize(device.name) === needle);
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
 /** Every switch on the device a name could plausibly mean, most specific tier first. */
 export function matchingSwitches(device: Device, query: string): FunctionItem[] {
   const switches = (device.status ?? []).filter(isSwitchStatus);

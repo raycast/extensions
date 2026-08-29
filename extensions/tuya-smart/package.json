@@ -25,6 +25,32 @@
       "title": "Tuya Smart Menu Bar",
       "description": "Toggle your pinned switches from the menu bar",
       "mode": "menu-bar"
+    },
+    {
+      "name": "control-device",
+      "title": "Control Device",
+      "description": "Turn a device on or off from a deeplink, for Shortcuts and Siri",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "turn on kitchen lamp",
+          "required": true
+        },
+        {
+          "name": "action",
+          "type": "text",
+          "placeholder": "on, off, stop or toggle",
+          "required": false
+        },
+        {
+          "name": "switchName",
+          "type": "text",
+          "placeholder": "which switch, for a multi-gang device",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [

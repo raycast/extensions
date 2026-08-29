@@ -83,6 +83,42 @@ Limitations, which are worth knowing before relying on it:
   extension once while the cloud works to refresh it.
 - Discovering new devices always needs the cloud.
 
+## Shortcuts and Siri
+
+The Control Device command takes arguments, so it can be opened as a deeplink from Apple
+Shortcuts, and through Shortcuts from Siri:
+
+```
+raycast://extensions/andresmorelos/tuya-smart/control-device?arguments={"query":"turn on kitchen lamp"}
+```
+
+Add an Open URLs action in Shortcuts with that URL, name the shortcut, and it becomes a
+Siri phrase. Percent encoding the argument JSON is more reliable in some Shortcuts
+versions, and both forms work.
+
+The action can be written into the phrase or passed separately, whichever suits the
+shortcut:
+
+```
+?arguments={"query":"turn on kitchen lamp"}
+?arguments={"query":"kitchen lamp","action":"on"}
+?arguments={"query":"living room curtain","action":"open"}
+```
+
+- `query` is the device name, optionally with the action in front of or behind it. A name
+  matches loosely, so "kitchen lamp" finds "Kitchen Lamp".
+- `action` accepts on, off, stop and toggle, along with the words people actually say:
+  open, close, enable, disable, start, shut, pause, flip.
+- `switchName` picks a gang on a multi-switch device, by its name or its data point code.
+
+A device name that could mean several devices is refused rather than guessed at, and the
+HUD says which ones matched. The same goes for a multi-gang device with no `switchName`:
+switching the wrong relay unattended is worse than doing nothing. Curtains need an
+explicit action, since there is no sensible opposite of a curtain's current position.
+
+Commands sent this way use the same cloud path as the rest of the extension, including
+the local network fallback described above.
+
 ## Troubleshooting
 
 ### If no devices show up
