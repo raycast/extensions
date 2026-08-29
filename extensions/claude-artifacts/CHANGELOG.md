@@ -1,6 +1,6 @@
 # Claude Artifacts Changelog
 
-## [Pin Artifacts] - {PR_MERGE_DATE}
+## [Pin Artifacts] - 2026-08-29
 
 - Added **Pin Artifact** (⌘.) — pinned artifacts collect in a **Pinned** section at the top of the list, which is what you want once you have enough of them that recency alone stops finding the one you keep coming back to
 - Pins hold inside a project filter too, so filtering does not scatter them back into the pile
