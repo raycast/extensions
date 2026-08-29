@@ -1,6 +1,6 @@
 # Coolify Changelog
 
-## [Deployment History] - {PR_MERGE_DATE}
+## [Deployment History] - 2026-08-29
 
 - Added Search Deployments to search recent deployment history across applications.
 - Added Menu Bar Deployments to view recent deployments from the menu bar.
