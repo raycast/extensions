@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Things 3.23 Compatibility] - {PR_MERGE_DATE}
+## [Things 3.23 Compatibility] - 2026-08-29
 
 - Fixed Today and Anytime missing to-dos whose scheduled date had arrived when the Unofficial API preference is enabled. Things 3.23 leaves such a to-do marked as scheduled, so the extension has to decide list membership by date.
 - Fixed Upcoming dropping repeating to-dos while an occurrence was pending. They now appear as dateless entries after the dated ones, matching Things, which computes the next date internally and does not expose it.
