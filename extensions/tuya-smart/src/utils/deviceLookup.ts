@@ -1,6 +1,6 @@
 import { Device, FunctionItem } from "./interfaces";
 import { isSwitchStatus } from "./filters";
-import { cleanName } from "./deviceSemantics";
+import { cleanName, statusLabel } from "./deviceSemantics";
 
 const normalize = (value: string) => value.trim().toLowerCase();
 
@@ -56,7 +56,11 @@ export function matchingSwitches(device: Device, query: string): FunctionItem[] 
   const tiers = [
     switches.filter((status) => normalize(status.name ?? "") === needle),
     switches.filter((status) => normalize(status.code) === needle),
+    // The label is what the UI and the AI tools show, so it is the name a request comes
+    // back with: an unnamed "switch_1" is asked for as "Switch 1".
+    switches.filter((status) => normalize(statusLabel(status)) === needle),
     switches.filter((status) => normalize(status.name ?? status.code).includes(needle)),
+    switches.filter((status) => normalize(statusLabel(status)).includes(needle)),
   ];
 
   return tiers.find((tier) => tier.length > 0) ?? [];
@@ -92,7 +96,7 @@ export function describeDeviceMiss(devices: Device[], query: string): string {
 }
 
 export function describeSwitchMiss(device: Device, query: string): string {
-  const all = (device.status ?? []).filter(isSwitchStatus).map((status) => status.name ?? status.code);
+  const all = (device.status ?? []).filter(isSwitchStatus).map(statusLabel);
   if (all.length === 0) {
     return `${cleanName(device.name)} has nothing that can be switched on or off.`;
   }
@@ -103,6 +107,6 @@ export function describeSwitchMiss(device: Device, query: string): string {
   if (matches.length === 0) {
     return `${cleanName(device.name)} has no switch called "${query}". It has: ${all.join(", ")}.`;
   }
-  const names = matches.map((status) => status.name ?? status.code).join(", ");
+  const names = matches.map(statusLabel).join(", ");
   return `"${query}" matches ${matches.length} switches on ${cleanName(device.name)}: ${names}. Ask the user which one they meant.`;
 }
