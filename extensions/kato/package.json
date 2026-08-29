@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Search Kato, manage your tasks, and join meetings from Raycast.",
   "main": "dist/search-kato.js",
-  "author": "kato",
+  "author": "devwithbobby",
   "license": "MIT",
   "scripts": {
     "build": "ray build -e dist",
@@ -19,9 +19,9 @@
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^22.15.30",
     "@types/react": "^19.1.6",
-    "@raycast/eslint-config": "^2.0.4",
     "eslint": "^9.28.0",
     "prettier": "^3.5.3",
     "react": "^19.1.0",
