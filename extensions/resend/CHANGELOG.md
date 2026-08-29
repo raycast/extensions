@@ -1,5 +1,15 @@
 # Resend Changelog
 
+## [Received Email and Expanded AI Tools] - {PR_MERGE_DATE}
+
+- Add a Received Emails command with inbound message details and attachment downloads
+- Add expiring share links and scheduled-email cancellation to the Emails command
+- Move contact workflows from deprecated audiences to segments and fix contact update semantics
+- Add AI tools for received email, temporary share links, email metrics, rescheduling, domains, templates, broadcasts, segments, topics, webhooks, and API logs
+- Improve email sending with text and HTML bodies, URL attachments, headers, topics, idempotency keys, and stricter input validation
+- Move AI instructions and evals to `ai.yaml` and expand coverage across core read, write, and safety workflows
+- Update the Resend SDK for current API coverage
+
 ## [OAuth Support] - 2026-07-09
 
 - This update brings OAuth support
@@ -10,16 +20,20 @@
 - We now use Resend Node SDK
 
 ### API Keys
+
 - Deletion is now optimistic
 
 ### Contacts
+
 - Deletion is now optimistic
 - Automatically reload after Update
 
 ### Domain
+
 - Deletion is now optimistic
 
 ### Emails
+
 - Resend now lets you fetch sent emails via API so no more need for local logging
 
 ## [Update Icons] - 2025-07-04

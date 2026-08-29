@@ -4,7 +4,9 @@ import React, { useState } from "react";
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Color,
+  confirmAlert,
   Detail,
   Form,
   Icon,
@@ -33,6 +35,49 @@ const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`
 export default withResend(Emails);
 function Emails() {
   const { isLoading, emails, error, pagination, mutate } = useEmails();
+
+  async function createShareLink(emailId: string) {
+    const confirmed = await confirmAlert({
+      title: "Create a Public Share Link?",
+      message: "Anyone with the link will be able to view this email until the link expires.",
+    });
+    if (!confirmed) return;
+
+    const toast = await showToast(Toast.Style.Animated, "Creating Share Link");
+    const { data, error } = await getResend().emails.share(emailId, { expiresIn: "48 hours" });
+    if (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could Not Create Share Link";
+      toast.message = error.message;
+      return;
+    }
+
+    await Clipboard.copy(data.url);
+    toast.style = Toast.Style.Success;
+    toast.title = "Copied Share Link";
+    toast.message = "The link expires in 48 hours.";
+  }
+
+  async function cancelScheduledEmail(emailId: string) {
+    const confirmed = await confirmAlert({
+      title: "Cancel Scheduled Email?",
+      message: "This email will no longer be sent.",
+    });
+    if (!confirmed) return;
+
+    const toast = await showToast(Toast.Style.Animated, "Canceling Email");
+    const { error } = await getResend().emails.cancel(emailId);
+    if (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could Not Cancel Email";
+      toast.message = error.message;
+      return;
+    }
+
+    await mutate();
+    toast.style = Toast.Style.Success;
+    toast.title = "Canceled Email";
+  }
 
   const getTintColor = (last_event: string) => {
     if (last_event === "delivered") return Color.Green;
@@ -84,6 +129,19 @@ function Emails() {
                     title="Open Email In Resend Dashboard"
                     url={`${RESEND_URL}emails/${email.id}`}
                   />
+                  <Action
+                    title="Create 48-Hour Share Link"
+                    icon={Icon.Link}
+                    onAction={() => createShareLink(email.id)}
+                  />
+                  {email.last_event === "scheduled" && (
+                    <Action
+                      title="Cancel Scheduled Email"
+                      icon={Icon.XMarkCircle}
+                      style={Action.Style.Destructive}
+                      onAction={() => cancelScheduledEmail(email.id)}
+                    />
+                  )}
                   <ActionPanel.Section>
                     <Action.Push
                       title="Send New Email"

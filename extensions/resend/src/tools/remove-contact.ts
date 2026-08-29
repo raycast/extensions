@@ -3,32 +3,30 @@ import { getResend, withResend } from "../lib/oauth";
 
 type Input = {
   /**
-   * The ID of the audience that contains the contact.
-   * This is required to identify which audience the contact belongs to.
-   * You can get this ID by using the list-audiences tool first.
+   * Legacy audience ID used to scope removal. Usually unnecessary.
    */
-  audienceId: string;
+  audienceId?: string;
 
   /**
    * The name of the audience.
    * This is used for confirmation purposes only.
    * You can get this from the list-audiences tool first.
    */
-  audienceName: string;
+  audienceName?: string;
 
   /**
    * The ID of the contact to remove.
    * This is required to identify which contact to delete.
    * You can get this ID by using the list-contacts tool first.
    */
-  contactId: string;
+  contactId?: string;
 
   /**
    * The email of the contact to remove.
    * This is used for confirmation purposes only.
    * You can get this email by using the list-contacts tool first.
    */
-  contactEmail: string;
+  contactEmail?: string;
 
   /**
    * The first name of the contact to remove.
@@ -45,15 +43,15 @@ type Input = {
   contactLastName?: string;
 };
 
-/**
- * In order to remove a contact, an audience ID is required.
- * If a contact exists in multiple audiences, you must ask the user to specify which audience to remove the contact from. But only asks for the audiences that the contact is in. You must first get the list of audiences that the contact is in using the list-contacts tool.
- */
 const tool = async (input: Input) => {
+  if (!input.contactId && !input.contactEmail) {
+    throw new Error("Provide contactId or contactEmail to identify the contact");
+  }
+
   const resend = getResend();
   const { data, error } = await resend.contacts.remove({
-    audienceId: input.audienceId,
-    id: input.contactId,
+    ...(input.audienceId ? { audienceId: input.audienceId } : {}),
+    ...(input.contactId ? { id: input.contactId } : { email: input.contactEmail as string }),
   });
 
   if (error) {
@@ -66,7 +64,7 @@ const tool = async (input: Input) => {
 export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   const infoItems = [];
 
-  infoItems.push({ name: "Audience", value: input.audienceName });
+  if (input.audienceName) infoItems.push({ name: "Audience", value: input.audienceName });
 
   if (input.contactFirstName) {
     infoItems.push({ name: "First Name", value: input.contactFirstName });
@@ -76,7 +74,8 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
     infoItems.push({ name: "Last Name", value: input.contactLastName });
   }
 
-  infoItems.push({ name: "Contact Email", value: input.contactEmail });
+  if (input.contactEmail) infoItems.push({ name: "Contact Email", value: input.contactEmail });
+  if (input.contactId) infoItems.push({ name: "Contact ID", value: input.contactId });
 
   return {
     title: "Remove Contact",
