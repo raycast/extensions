@@ -1,6 +1,6 @@
 # Parcel Changelog
 
-## [Fix Carrier Loading] - {PR_MERGE_DATE}
+## [Fix Carrier Loading] - 2026-08-29
 
 - Fixed the "Add Delivery" carrier dropdown failing to load after a change to Parcel's carrier list format
 - Carrier names display in "My Deliveries" again instead of falling back to carrier codes
