@@ -1,6 +1,6 @@
 # Clean Keyboard Changelog
 
-## [Fix Forever Duration] - {PR_MERGE_DATE}
+## [Fix Forever Duration] - 2026-08-29
 
 - Fixed the Forever option unlocking the keyboard after 15 seconds and ensured manual unlock exits its native handler
 
