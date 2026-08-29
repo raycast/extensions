@@ -48,6 +48,15 @@ export function FormulaUninstallAction(props: { formula: Cask | Nameable; onActi
   );
 }
 
+/**
+ * Upgrade a single package.
+ *
+ * A PINNED formula is skipped rather than attempted. `brew upgrade` refuses it
+ * outright — "Error: Not upgrading 1 pinned package" — so running it would
+ * surface a failure toast for a package the user deliberately froze. Upgrade
+ * All already skips pinned formulae and reports them as skipped; this makes the
+ * single-package action say the same thing, in every view that offers it.
+ */
 export function FormulaUpgradeAction(props: {
   formula: Cask | Nameable;
   /** Called when the upgrade starts, e.g. to show progress */
@@ -60,12 +69,26 @@ export function FormulaUpgradeAction(props: {
       icon={Icon.Hammer}
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       onAction={async () => {
+        if (isPinned(props.formula)) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Skipping Pinned Formulae Upgrades",
+            message: `${brewName(props.formula)} is pinned. Unpin it (⌘ .) to upgrade.`,
+          });
+          return;
+        }
+
         props.onStart?.();
         const result = await upgrade(props.formula);
         props.onAction(result);
       }}
     />
   );
+}
+
+/** Pinning is a formula-only concept; casks carry no such flag. */
+function isPinned(item: Cask | Nameable): boolean {
+  return (item as Formula).pinned === true;
 }
 
 export function FormulaUpgradeAllAction(props: {
