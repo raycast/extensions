@@ -125,7 +125,12 @@ export async function getLiveVisitors(): Promise<KobbeLiveSite[]> {
   }
   const sites = await listSites();
   return Promise.all(
-    sites.slice(0, LIVE_FALLBACK_SITE_LIMIT).map(async (site) => {
+    sites.map(async (site, index) => {
+      // Sites beyond the cap stay in the list with an unknown count (rendered as
+      // "Could not load" plus the "+" total indicator) instead of silently vanishing.
+      if (index >= LIVE_FALLBACK_SITE_LIMIT) {
+        return { site, online: null };
+      }
       try {
         const response = await getOverview(site.id, "today");
         return { site, online: parseCompactNumber(response.overview.kpis.online) };
