@@ -158,10 +158,22 @@ export async function authorize(): Promise<string> {
         });
         return refreshed.access_token;
       } catch (refreshError) {
-        // A stored refresh_token that no longer matches its paired
-        // client_id fails here every time otherwise. Clear it so the next
-        // call runs a full fresh authorize() instead of looping on a
-        // refresh that can never succeed.
+        // Two commands can race to refresh the same expired session: one
+        // refresh lands and overwrites storage with a fresh token tuple
+        // before the other's request comes back rejected (e.g. the server
+        // already rotated/invalidated the refresh_token this call sent).
+        // Re-check storage before wiping it — if it no longer matches what
+        // we tried to refresh, another call already fixed the session, so
+        // use that instead of deleting it out from under it.
+        const latest = await client.getTokens();
+        if (latest?.accessToken && latest.refreshToken !== existing.refreshToken) {
+          return latest.accessToken;
+        }
+
+        // Otherwise this really is a stored refresh_token that no longer
+        // matches its paired client_id. Clear it so the next call runs a
+        // full fresh authorize() instead of looping on a refresh that can
+        // never succeed.
         await client.removeTokens();
         throw refreshError;
       }
