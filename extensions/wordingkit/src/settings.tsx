@@ -98,7 +98,7 @@ export default function Settings() {
     }
   }
 
-  async function resetCorruptedModes() {
+  async function resetSavedModes() {
     const ui = getUiStrings();
     const confirmed = await confirmAlert({
       title: ui.resetModesQuestion,
@@ -138,6 +138,15 @@ export default function Settings() {
     />
   );
 
+  const resetAction = (
+    <Action
+      title={ui.resetModes}
+      icon={Icon.ArrowClockwise}
+      style={Action.Style.Destructive}
+      onAction={resetSavedModes}
+    />
+  );
+
   const sortAction = (
     <ActionPanel.Submenu title={ui.orderInRewrite} icon={Icon.List}>
       <Action
@@ -162,12 +171,7 @@ export default function Settings() {
           description={String(error)}
           actions={
             <ActionPanel>
-              <Action
-                title={ui.resetModes}
-                icon={Icon.ArrowClockwise}
-                style={Action.Style.Destructive}
-                onAction={resetCorruptedModes}
-              />
+              {resetAction}
               {createAction}
               <Action
                 title={ui.openPreferences}
@@ -219,6 +223,7 @@ export default function Settings() {
                 style={Action.Style.Destructive}
                 onAction={() => removeMode(mode)}
               />
+              {resetAction}
               <Action
                 title={ui.openPreferences}
                 icon={Icon.Gear}
@@ -237,6 +242,7 @@ export default function Settings() {
             <ActionPanel>
               {createAction}
               {sortAction}
+              {resetAction}
               <Action
                 title={ui.openPreferences}
                 icon={Icon.Gear}

@@ -10,8 +10,9 @@ import {
   launchCommand,
   LaunchType,
   List,
-  openExtensionPreferences,
   PopToRootType,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { rewriteText, type RewriteOptions } from "./providers";
 import {
@@ -87,10 +88,20 @@ export default function Command() {
   const sortedModes = sortModes(modes, sortMode);
   const ui = getUiStrings();
 
+  async function showRewriteFailure(message: string) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: ui.rewriteFailed,
+      message,
+    });
+  }
+
   async function rewrite(mode: EditingMode) {
     if (!text || viewState !== "ready") return;
     if (text.length > MAX_TEXT_LENGTH) {
-      setError(ui.selectedTextTooLong(text.length, MAX_TEXT_LENGTH));
+      await showRewriteFailure(
+        ui.selectedTextTooLong(text.length, MAX_TEXT_LENGTH),
+      );
       return;
     }
 
@@ -100,7 +111,6 @@ export default function Command() {
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     setIsRewriting(true);
-    setError(undefined);
     try {
       const preferences = getPreferenceValues<Preferences.Index>();
       const provider = getProviderDefinition(mode.provider);
@@ -139,13 +149,13 @@ export default function Command() {
       if (controller.signal.aborted) return;
       await Clipboard.paste(result);
     } catch (reason) {
-      setError(
-        controller.signal.aborted ? ui.rewriteCancelled : String(reason),
-      );
+      if (!controller.signal.aborted) await showRewriteFailure(String(reason));
     } finally {
       clearTimeout(timeoutId);
       if (abortRef.current === controller) abortRef.current = undefined;
       setIsRewriting(false);
+      if (controller.signal.aborted)
+        await showRewriteFailure(ui.rewriteCancelled);
     }
   }
 
@@ -164,7 +174,12 @@ export default function Command() {
               <Action
                 title={ui.openSettings}
                 icon={Icon.Gear}
-                onAction={openExtensionPreferences}
+                onAction={() =>
+                  launchCommand({
+                    name: "settings",
+                    type: LaunchType.UserInitiated,
+                  })
+                }
               />
             </ActionPanel>
           }
