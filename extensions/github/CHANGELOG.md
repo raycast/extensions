@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix Stats for Large Accounts] - {PR_MERGE_DATE}
+## [Fix Stats for Large Accounts] - 2026-08-29
 
 - Split aggregate and list GraphQL requests so My GitHub Stats loads for accounts with large histories
 
