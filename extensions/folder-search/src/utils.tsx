@@ -319,6 +319,42 @@ export const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
   `);
 };
 
+export const openNewFinderTab = async (targetPath: string) => {
+  const escapedPath = targetPath.replace(/"/g, '\\"');
+
+  await runAppleScript(`
+    set targetFolder to (POSIX file "${escapedPath}" as alias)
+    tell application "Finder"
+      if (count of Finder windows) > 0 then
+        activate
+        delay 0.2
+        tell application "System Events" to keystroke "t" using {command down}
+        delay 0.2
+        set target of front Finder window to targetFolder
+      else
+        open targetFolder
+        activate
+      end if
+    end tell
+  `);
+};
+
+export const openInCurrentFinderTab = async (targetPath: string) => {
+  const escapedPath = targetPath.replace(/"/g, '\\"');
+
+  await runAppleScript(`
+    set targetFolder to (POSIX file "${escapedPath}" as alias)
+    tell application "Finder"
+      if (count of Finder windows) > 0 then
+        set target of front Finder window to targetFolder
+      else
+        open targetFolder
+      end if
+      activate
+    end tell
+  `);
+};
+
 export const copyFolderToClipboard = (result: SpotlightSearchResult) => {
   runAppleScript(`set the clipboard to POSIX file "${result.path}"`);
 };
