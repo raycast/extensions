@@ -1,6 +1,6 @@
 # TinyPNG Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-08-29
 
 - Add support for Windows platform
 - Add `Resizing Destination Folder Path` and `Save Single File Next to Original` preferences
