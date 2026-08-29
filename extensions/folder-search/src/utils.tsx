@@ -306,7 +306,8 @@ export const enclosingFolderName = (result: SpotlightSearchResult) => {
     .join("/");
 };
 
-const escapeForAppleScript = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+const escapeForAppleScript = (value: string) =>
+  value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r");
 
 export const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
   popToRoot({ clearSearchBar: true });
