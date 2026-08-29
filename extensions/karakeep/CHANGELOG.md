@@ -1,6 +1,6 @@
 # Karakeep Changelog
 
-## [2.4.5] - {PR_MERGE_DATE}
+## [2.4.5] - 2026-08-29
 
 - A rejected API key now says so. Every command used to fail with a bare "HTTP 401" and no way to act on it — the lists showed "Couldn't load bookmarks", the forms showed "Couldn't create bookmark", and nothing pointed at the setting that was actually wrong. Bookmarks, Lists, Tags, Highlights, Backups and Stats now show an "Invalid API key" screen with Open Extension Settings as the default action, and every error toast in the extension offers the same
 - One bad key no longer produces a pile of unrelated errors. Opening Search Bookmarks reported "Couldn't load lists", from a request the command only makes to populate its filter dropdown. The key is now checked once before any dependent request runs, and the rest of a command's requests stop after the first rejection instead of each failing separately
