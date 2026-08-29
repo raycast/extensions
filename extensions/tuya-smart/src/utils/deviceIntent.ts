@@ -1,5 +1,6 @@
 import { Device, FunctionItem } from "./interfaces";
 import { isSwitchStatus } from "./filters";
+import { findSwitchOnDevice, matchingSwitches } from "./deviceLookup";
 import { actionableEnums, cleanName, enumOptionLabel } from "./deviceSemantics";
 import { parseEnumOptions } from "./lightFunctions";
 
@@ -139,50 +140,33 @@ function resolveSwitch(device: Device, switches: FunctionItem[], intent: Intent,
     return { kind: "refused", reason: `${cleanName(device.name)} cannot be stopped; it can only be turned on or off.` };
   }
 
-  if (!switchName && switches.length > 1) {
-    // Picking the first gang of a multi-outlet would switch something nobody asked for.
+  // One rule for which switch a request means, shared with the AI tools. Only the wording
+  // differs: those answer an assistant that can ask a follow-up, this answers a HUD.
+  const target = findSwitchOnDevice(device, switchName);
+
+  if (!target) {
     const names = switches.map((status) => status.name ?? status.code).join(", ");
-    return {
-      kind: "refused",
-      reason: `${cleanName(device.name)} has ${switches.length} switches: ${names}. Name one in the switch argument.`,
-    };
+    if (!switchName) {
+      return {
+        kind: "refused",
+        reason: `${cleanName(device.name)} has ${switches.length} switches: ${names}. Name one in the switch argument.`,
+      };
+    }
+    const detail =
+      matchingSwitches(device, switchName).length > 1 ? "matches more than one switch" : "matches no switch";
+    return { kind: "refused", reason: `"${switchName}" ${detail} on ${cleanName(device.name)}. It has: ${names}.` };
   }
 
-  const target = switchName
-    ? matchOne(switches, switchName)
-    : { hit: switches[0] as FunctionItem | undefined, ambiguous: [] as FunctionItem[] };
-
-  if (!target.hit) {
-    const names = switches.map((status) => status.name ?? status.code).join(", ");
-    const detail = target.ambiguous.length > 0 ? "matches more than one switch" : "matches no switch";
-    return {
-      kind: "refused",
-      reason: `"${switchName}" ${detail} on ${cleanName(device.name)}. It has: ${names}.`,
-    };
-  }
-
-  const value = intent === "toggle" ? target.hit.value !== true : intent === "on";
+  const value = intent === "toggle" ? target.value !== true : intent === "on";
   // On a multi-gang device the device name alone would not say what actually moved.
   const subject =
-    switches.length > 1 ? `${cleanName(device.name)} ${target.hit.name ?? target.hit.code}` : cleanName(device.name);
+    switches.length > 1 ? `${cleanName(device.name)} ${target.name ?? target.code}` : cleanName(device.name);
 
   return {
     kind: "command",
-    command: { ...target.hit, value },
+    command: { ...target, value },
     describe: `${subject} is now ${value ? "on" : "off"}`,
   };
-}
-
-/** The same refuse-when-ambiguous rule the AI tools use, applied to a switch name. */
-function matchOne(switches: FunctionItem[], query: string): { hit?: FunctionItem; ambiguous: FunctionItem[] } {
-  const needle = normalize(query);
-  const tiers = [
-    switches.filter((status) => normalize(status.name ?? "") === needle),
-    switches.filter((status) => normalize(status.code) === needle),
-    switches.filter((status) => normalize(status.name ?? status.code).includes(needle)),
-  ];
-  const matches = tiers.find((tier) => tier.length > 0) ?? [];
-  return matches.length === 1 ? { hit: matches[0], ambiguous: [] } : { ambiguous: matches };
 }
 
 function describeEnumMiss(device: Device, intent: Intent, enums: FunctionItem[]): string {

@@ -70,7 +70,9 @@ export function matchingSwitches(device: Device, query: string): FunctionItem[] 
 export function findSwitchOnDevice(device: Device, query?: string): FunctionItem | undefined {
   const switches = (device.status ?? []).filter(isSwitchStatus);
   if (switches.length === 0) return undefined;
-  if (!query) return switches[0];
+  // Omitting the name is only unambiguous when there is one switch to mean. On a
+  // multi-gang outlet, status order is Tuya's, not a statement of which one was meant.
+  if (!query) return switches.length === 1 ? switches[0] : undefined;
 
   const matches = matchingSwitches(device, query);
   return matches.length === 1 ? matches[0] : undefined;
@@ -93,6 +95,9 @@ export function describeSwitchMiss(device: Device, query: string): string {
   const all = (device.status ?? []).filter(isSwitchStatus).map((status) => status.name ?? status.code);
   if (all.length === 0) {
     return `${cleanName(device.name)} has nothing that can be switched on or off.`;
+  }
+  if (!query) {
+    return `${cleanName(device.name)} has ${all.length} switches: ${all.join(", ")}. Ask the user which one they meant.`;
   }
   const matches = matchingSwitches(device, query);
   if (matches.length === 0) {

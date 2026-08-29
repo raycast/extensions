@@ -1,14 +1,6 @@
 # Tuya Smart Changelog
 
-## [Shortcuts and Siri Support] - {PR_MERGE_DATE}
-
-- Added a Control Device command that takes arguments, so devices can be controlled from
-  a deeplink through Apple Shortcuts and, through Shortcuts, from Siri. Thanks to
-  @anwarulislam, whose earlier pull request proposed this.
-- A name that matches several devices is refused rather than guessed at, and the HUD says
-  which ones matched. A multi-gang device needs its switch named for the same reason.
-
-## [Redesigned List, Error Handling, Light Controls, Menu Bar and AI Tools] - {PR_MERGE_DATE}
+## [Redesigned List, Error Handling, Light Controls, Menu Bar, AI Tools and Shortcuts] - {PR_MERGE_DATE}
 
 - Pinning is now per device rather than per switch, which is what the redesigned list
   shows. Pins set in an earlier version are not carried over and need setting again.
@@ -55,7 +47,13 @@
   offers Open, Stop and Close again, and a light its work modes. The options come
   from the range each product reports rather than a list fixed per category.
 - Added a menu bar command to toggle pinned switches without opening Raycast.
+- Added a Control Device command that takes arguments, so a device can be controlled from
+  a deeplink through Apple Shortcuts and, through Shortcuts, by voice with Siri. Thanks to
+  @anwarulislam, who proposed this and wrote the first version of it.
 - Added AI tools to list devices, toggle a switch, and set brightness by voice or chat.
+- A request that names a device with several switches without saying which one is now
+  refused, whether it comes from an AI tool or a shortcut. The reply lists the switches to
+  choose from. It previously operated whichever switch the device happened to report first.
 - Fixed the device details view showing a meaningless "Active Time".
 - Fixed devices with identical names hiding each other in the list.
 - Fixed the On/Off filter not applying to the devices section.
