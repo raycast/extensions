@@ -178,7 +178,10 @@ interface OutdatedListItemProps {
 
 function OutdatedCaskListItem(props: OutdatedListItemProps & { outdated: OutdatedCask }) {
   const outdated = props.outdated;
-  const version = `${outdated.installed_versions} -> ${outdated.current_version}`;
+  let version = "";
+  if (outdated.installed_versions.length > 0) {
+    version = `${outdated.installed_versions[0]} -> ${outdated.current_version}`;
+  }
 
   return (
     <List.Item
