@@ -1,6 +1,6 @@
 # GitHub Repository Browser
 
-Browse repositories across your GitHub organizations and personal account.
+Browse and search repositories across your personal GitHub account and organizations. Switch between them, see open issue and pull-request counts at a glance, and open a repository, its issues, or its pull requests without leaving Raycast.
 
 ## Setup
 

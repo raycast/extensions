@@ -15,10 +15,6 @@ const USER_REPOS_KEY = "__user__";
 const cache = new Cache();
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
 
-interface Preferences {
-  token: string;
-}
-
 interface User {
   login: string;
   avatar_url: string;
@@ -43,8 +39,8 @@ interface Repository {
 }
 
 interface RepositoryWithCounts extends Repository {
-  issues_count: number;
-  prs_count: number;
+  issues_count?: number;
+  prs_count?: number;
 }
 
 interface CacheEntry {
@@ -91,9 +87,9 @@ async function fetchAllPages(url: string, headers: Record<string, string>): Prom
   return results;
 }
 
-async function getPrCount(fullName: string, headers: Record<string, string>): Promise<number> {
+async function getPrCount(fullName: string, headers: Record<string, string>): Promise<number | null> {
   const response = await fetch(`https://api.github.com/repos/${fullName}/pulls?state=open&per_page=1`, { headers });
-  if (!response.ok) return 0;
+  if (!response.ok) return null;
   const lastPage = getLastPageNumber(response.headers.get("Link"));
   if (lastPage !== null) return lastPage;
   const data = await response.json();
@@ -112,14 +108,17 @@ async function enrichRepos(
     for (let j = 0; j < chunk.length; j++) {
       const repo = chunk[j];
       const prs = prCounts[j];
-      all.push({ ...repo, prs_count: prs, issues_count: repo.open_issues_count - prs });
+      all.push({
+        ...repo,
+        ...(prs === null ? {} : { prs_count: prs, issues_count: repo.open_issues_count - prs }),
+      });
     }
   }
   return all;
 }
 
 export default function Command() {
-  const { token } = getPreferenceValues<Preferences>();
+  const { token } = getPreferenceValues<Preferences.GithubRepositoryBrowser>();
   const [selectedOrg, setSelectedOrg] = useCachedState("selected-org", USER_REPOS_KEY);
 
   const headers = { Authorization: `Bearer ${token}` };
