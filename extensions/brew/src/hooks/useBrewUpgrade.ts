@@ -12,6 +12,7 @@ import {
   brewUpgradeOutdated,
   ensureError,
   formatCount,
+  markOutdatedSnapshotDirty,
   preferences,
   showActionToast,
   showBrewFailureToast,
@@ -163,6 +164,11 @@ export function useBrewUpgrade(): BrewUpgrade {
           await showBrewFailureToast("Upgrade failed", error);
         }
       } finally {
+        // Whatever happened, the run changed what is outdated — its own
+        // `brew update` alone can, even on cancellation or failure. Mark the
+        // cached snapshot stale so the next launch waits for fresh data
+        // instead of flashing the pre-run list.
+        markOutdatedSnapshotDirty();
         isUpgradingRef.current = false;
         setIsUpgrading(false);
       }

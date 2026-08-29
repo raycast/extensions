@@ -10,6 +10,7 @@ import { getProgressIcon } from "@raycast/utils";
 import { OutdatedCask, OutdatedFormula, OutdatedResults, type UpgradePackageStatus } from "../utils";
 import type { PackageState } from "../hooks/useBrewUpgrade";
 import { OutdatedActionPanel } from "./actionPanels";
+import { OutdatedErrorView } from "./outdatedErrorView";
 import { InstallableFilterType, placeholder } from "./filter";
 import { UPDATE_AVAILABLE_ICON } from "./packageIcons";
 
@@ -46,6 +47,11 @@ export interface OutdatedListProps {
   /** Overrides the default "Upgrade All", e.g. to report progress per package */
   onUpgradeAll?: () => void;
   onAction: () => void;
+  /** Failed outdated fetch: shown as a failure view with a Retry action */
+  error?: Error;
+  onRetry?: () => void;
+  /** Actions for the "all up to date" empty state, e.g. a route to Show Installed */
+  emptyActions?: React.ComponentProps<typeof List.EmptyView>["actions"];
 }
 
 /**
@@ -101,6 +107,11 @@ export function OutdatedList(props: OutdatedListProps) {
       searchBarAccessory={props.searchBarAccessory}
       isLoading={props.isLoading}
     >
+      {/* Failed fetch, with nothing cached to show instead */}
+      {props.error && props.onRetry && !props.isLoading && !hasResults && (
+        <OutdatedErrorView error={props.error} onRetry={props.onRetry} />
+      )}
+
       {/* Loading state */}
       {props.isLoading && !props.outdated && (
         <List.EmptyView
@@ -111,10 +122,11 @@ export function OutdatedList(props: OutdatedListProps) {
       )}
 
       {/* Empty state when no outdated packages */}
-      {!props.isLoading && !hasResults && props.outdated !== undefined && (
+      {!props.isLoading && !props.error && !hasResults && props.outdated !== undefined && (
         <List.EmptyView
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
           title="All your packages are up to date"
+          actions={props.emptyActions}
         />
       )}
 
