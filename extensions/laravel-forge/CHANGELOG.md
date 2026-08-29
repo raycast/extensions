@@ -1,6 +1,6 @@
 # Laravel Forge Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-08-29
 
 - Show active deployments in the menu bar again, including ones waiting at pending or failed during the build
 - Show the last deploy's outcome in the site list and in AI Chat answers, even after the deploy ends
