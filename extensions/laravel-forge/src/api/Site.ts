@@ -22,20 +22,29 @@ export const Site = {
     );
   },
 
+  // Forge answers 200 for an archived server, so revoked is the only signal
   async getAll({ orgSlug, serverId, token }: ServerWithToken) {
-    if (!token) return [];
-    const endpoint = `orgs/${orgSlug}/servers/${serverId}/sites?include=latestDeployment`;
+    if (!token) return { sites: [] as ISite[], archived: false };
+    const endpoint = `orgs/${orgSlug}/servers/${serverId}/sites?include=server,latestDeployment`;
     const { items, included } = await getCollection(endpoint, token);
-    return sortAndFilterSites(
-      items.map((site) => {
-        const deployment = relatedResource(site, "latestDeployment", included);
-        return {
-          ...flatten<ISite>(site),
-          server_id: serverId,
-          latest_deployment: deployment && flatten<IDeployment>(deployment),
-        };
-      }),
-    );
+    const server = included.find((entry) => entry.type === "servers");
+    // A server with no sites includes nothing, so it costs one request to ask
+    const revoked = server
+      ? Boolean(server.attributes?.revoked)
+      : Boolean((await getResource(`orgs/${orgSlug}/servers/${serverId}`, token))?.attributes?.revoked);
+    return {
+      sites: sortAndFilterSites(
+        items.map((site) => {
+          const deployment = relatedResource(site, "latestDeployment", included);
+          return {
+            ...flatten<ISite>(site),
+            server_id: serverId,
+            latest_deployment: deployment && flatten<IDeployment>(deployment),
+          };
+        }),
+      ),
+      archived: revoked,
+    };
   },
 
   async deploy({ orgSlug, serverId, siteId, token }: ServerSiteWithToken) {

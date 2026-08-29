@@ -1,15 +1,24 @@
-import { findServer, sitesOnServer } from "./helpers";
+import { serverRecord } from "../lib/records";
+import { forgeLink, forgeServerUrl } from "../lib/url";
+import { included, serverIncludable } from "./fields";
+import { sitesOn } from "./sites-on-server";
 
 type Input = {
   /**
-   * The server's id as a string, for example "678350", or its exact name.
+   * A server id from list-servers, for example 678350.
    */
-  server: string;
+  serverId: number;
+  /**
+   * Field names withheld unless asked for, comma separated: local_public_key, credential_id.
+   */
+  include?: string;
 };
 
-export default async function tool({ server }: Input) {
-  const { server: found } = await findServer(server);
-  const sites = await sitesOnServer(found);
+export default async function tool({ serverId, include }: Input) {
+  const { server: found, account, org } = await serverRecord(serverId);
+
+  const sites = await sitesOn({ account, org, serverId });
+
   return {
     id: found.id,
     name: found.name,
@@ -35,6 +44,9 @@ export default async function tool({ server }: Input) {
     revoked: found.revoked,
     createdAt: found.created_at,
     updatedAt: found.updated_at,
+    forgeUrl: forgeLink(forgeServerUrl(found), `${found.name} on Forge`),
+    ...included(serverIncludable(found), include),
+    note: `${sites.length} site${sites.length === 1 ? "" : "s"} on this server. Pass a site id to any site tool.`,
     sites,
   };
 }

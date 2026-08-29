@@ -1,19 +1,17 @@
 import { Tool } from "@raycast/api";
 import { SERVICE_ACTIONS, Server, Service, ServiceAction } from "../api/Server";
-import { nameList, resolveForConfirmation, sitesOnServer, targetServer } from "./helpers";
+import { serverRecord } from "../lib/records";
+import { nameList } from "./helpers";
+import { siteNames, sitesOn } from "./sites-on-server";
 
 type Input = {
   /**
-   * The server's id as a string, or its exact name. Leave empty if you only know a site on it.
+   * A server id from list-servers, for example 678350.
    */
-  server?: string;
-  /**
-   * The site's id as a string, for example "2882133", or its exact name.
-   */
-  site?: string;
+  serverId: number;
   /**
    * Which service to act on. database acts on whichever engine the server runs;
-   * list-servers shows it under databaseType.
+   * get-server shows it under databaseType.
    */
   service: Service;
   /**
@@ -35,24 +33,22 @@ const allowedFor = (service: Service, action: ServiceAction) => {
   return action;
 };
 
-export const confirmation: Tool.Confirmation<Input> = async ({ server, site, service, action = "reboot" }) => {
-  const resolved = await resolveForConfirmation(() => targetServer({ server, site }));
-  if (!resolved) return { message: `Restart "${server ?? site}"?` };
-  const { server: found } = resolved;
-  const sites = await sitesOnServer(found);
+export const confirmation: Tool.Confirmation<Input> = async ({ serverId, service, action = "reboot" }) => {
+  const at = await serverRecord(serverId);
+  const sites = await sitesOn({ ...at, serverId });
   return {
-    message: `${action === "reboot" ? "Restart" : action} ${service} on ${found.name}?`,
+    message: `${action === "reboot" ? "Restart" : action} ${service} on ${at.server.name}?`,
     info: [
-      { name: `Sites affected (${sites.length})`, value: nameList(sites) },
-      { name: "Server", value: found.name ?? String(found.id) },
-      ...(service === "php" ? [{ name: "PHP version", value: found.php_version ?? "unknown" }] : []),
-      ...(service === "database" ? [{ name: "Database", value: found.database_type || "none installed" }] : []),
+      { name: `Sites affected (${sites.length})`, value: nameList(siteNames(sites)) },
+      { name: "Server", value: at.server.name ?? String(serverId) },
+      ...(service === "php" ? [{ name: "PHP version", value: at.server.php_version ?? "unknown" }] : []),
+      ...(service === "database" ? [{ name: "Database", value: at.server.database_type || "none installed" }] : []),
     ],
   };
 };
 
-export default async function tool({ server, site, service, action = "reboot" }: Input) {
-  const { server: found, token } = await targetServer({ server, site });
-  await Server.runAction({ server: found, token, action: allowedFor(service, action), service });
-  return { server: found.name, service, action, started: true };
+export default async function tool({ serverId, service, action = "reboot" }: Input) {
+  const { server, account } = await serverRecord(serverId);
+  await Server.runAction({ server, token: account.token, action: allowedFor(service, action), service });
+  return { server: server.name, serverId, service, action, started: true };
 }
