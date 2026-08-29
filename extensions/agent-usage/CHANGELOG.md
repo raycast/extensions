@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Copilot multi-account and AI credits] - {PR_MERGE_DATE}
+## [Copilot multi-account and AI credits] - 2026-08-29
 
 ### New Features
 
