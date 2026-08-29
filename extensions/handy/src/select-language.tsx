@@ -8,10 +8,12 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { getLanguagesForModel, LanguageOption } from "./lib/languages";
 import { getModelCapabilities } from "./lib/catalog";
 import { readSettings, writeSettings } from "./lib/settings";
+import { applySettingsAndReload, selectLanguageInHandy } from "./lib/handy";
 
 export default function SelectLanguage() {
   const [languages, setLanguages] = useState<LanguageOption[]>([]);
@@ -53,13 +55,40 @@ export default function SelectLanguage() {
 
   async function handleSelect(lang: LanguageOption) {
     try {
+      const currentDisplay =
+        currentCode === "auto"
+          ? "Auto (detect)"
+          : `${lang.native} · ${lang.label}`;
+      if (lang.code === currentCode) {
+        await showHUD(`${currentDisplay} is already set`);
+        return;
+      }
+      const { handyBinaryPath } = getPreferenceValues<Preferences>();
       writeSettings({ selected_language: lang.code });
       setCurrentCode(lang.code);
       const display =
         lang.code === "auto"
           ? "Auto (detect)"
           : `${lang.native} · ${lang.label}`;
-      await showHUD(`Language set to ${display}`);
+      const applied = await selectLanguageInHandy(lang.label);
+      if (applied) {
+        await showHUD(`Language set to ${display}`);
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Couldn't switch language in Handy",
+          message:
+            "Grant Raycast Accessibility access (System Settings → Privacy & Security), or restart Handy to apply.",
+          primaryAction: {
+            title: "Restart Handy",
+            onAction: () =>
+              applySettingsAndReload(
+                () => writeSettings({ selected_language: lang.code }),
+                handyBinaryPath,
+              ),
+          },
+        });
+      }
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,

@@ -1,5 +1,16 @@
 # Handy Changelog
 
+## [Fix live model & language selection] - {PR_MERGE_DATE}
+
+### Fixed
+
+- **Select Model** now actually switches the active model in the running Handy app, instead of only writing `settings_store.json` (which Handy only reads at launch, so the selection did nothing until a relaunch). The extension GUI-scripts Handy's tray model menu — the same path the in-app menu uses — so the model changes instantly with no restart. If Raycast lacks Accessibility permission, a "Restart Handy" toast offers the relaunch fallback.
+- **Select Language** now persists the choice and uses the same live-switch path, falling back to a relaunch when GUI scripting isn't available.
+
+### Changed
+
+- Hardened `settings_store.json` reading/writing to tolerate a missing file or a missing `settings` key (defaults `selected_model` to empty and `selected_language` to `auto`).
+
 ## [Improve Linux/Vicinae compatibility] - 2026-08-04
 
 ### Changed

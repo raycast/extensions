@@ -7,9 +7,11 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { getDownloadedModels, ModelInfo } from "./lib/models";
 import { readSettings, writeSettings } from "./lib/settings";
+import { applySettingsAndReload, selectModelInHandy } from "./lib/handy";
 
 export default function SelectModel() {
   const [models, setModels] = useState<ModelInfo[]>([]);
@@ -37,9 +39,32 @@ export default function SelectModel() {
 
   async function handleSelect(model: ModelInfo) {
     try {
+      if (model.id === currentId) {
+        await showHUD(`${model.name} is already active`);
+        return;
+      }
+      const { handyBinaryPath } = getPreferenceValues<Preferences>();
       writeSettings({ selected_model: model.id });
       setCurrentId(model.id);
-      await showHUD(`Model changed to ${model.name}`);
+      const applied = await selectModelInHandy(model.name);
+      if (applied) {
+        await showHUD(`Model changed to ${model.name}`);
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Couldn't switch model in Handy",
+          message:
+            "Grant Raycast Accessibility access (System Settings → Privacy & Security), or restart Handy to apply.",
+          primaryAction: {
+            title: "Restart Handy",
+            onAction: () =>
+              applySettingsAndReload(
+                () => writeSettings({ selected_model: model.id }),
+                handyBinaryPath,
+              ),
+          },
+        });
+      }
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,

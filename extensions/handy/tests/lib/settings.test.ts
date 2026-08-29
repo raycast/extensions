@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import { readSettings, writeSettings } from "../../src/lib/settings";
@@ -25,10 +25,6 @@ describe("readSettings", () => {
   it("reads selected_model", () => {
     writeFileSync(TMP_FILE, makeStore([], "moonshine-base"));
     expect(readSettings(TMP_FILE).selected_model).toBe("moonshine-base");
-  });
-
-  it("throws if file does not exist", () => {
-    expect(() => readSettings("/nonexistent.json")).toThrow();
   });
 
   it("throws if JSON is malformed", () => {
@@ -82,5 +78,35 @@ describe("writeSettings", () => {
     writeSettings({ selected_language: "fr" }, TMP_FILE);
     expect(readSettings(TMP_FILE).selected_language).toBe("fr");
     expect(readSettings(TMP_FILE).selected_model).toBe("small");
+  });
+
+  it("writes the file without leaving a temp file behind", () => {
+    writeFileSync(TMP_FILE, makeStore(["word"], "small"));
+    writeSettings({ selected_model: "turbo" }, TMP_FILE);
+    expect(existsSync(TMP_FILE + ".raycast-tmp")).toBe(false);
+    expect(readSettings(TMP_FILE).selected_model).toBe("turbo");
+  });
+
+  it("creates a settings envelope when the file has no settings key", () => {
+    writeFileSync(TMP_FILE, JSON.stringify({ some_other_key: "preserved" }));
+    writeSettings({ selected_model: "medium" }, TMP_FILE);
+    const raw = JSON.parse(readFileSync(TMP_FILE, "utf-8"));
+    expect(raw).toHaveProperty("settings");
+    expect(raw.settings.selected_model).toBe("medium");
+    expect(raw.some_other_key).toBe("preserved");
+  });
+
+  it("initialises the file when it does not exist", () => {
+    expect(existsSync(TMP_FILE)).toBe(false);
+    writeSettings({ selected_model: "large" }, TMP_FILE);
+    expect(existsSync(TMP_FILE)).toBe(true);
+    expect(readSettings(TMP_FILE).selected_model).toBe("large");
+  });
+
+  it("reads defaults when the file does not exist", () => {
+    expect(existsSync(TMP_FILE)).toBe(false);
+    const settings = readSettings(TMP_FILE);
+    expect(settings.selected_model).toBe("");
+    expect(settings.selected_language).toBe("auto");
   });
 });
