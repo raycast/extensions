@@ -1,6 +1,6 @@
 # Kobbe Changelog
 
-## [Fix Stale Live Count] - {PR_MERGE_DATE}
+## [Fix Stale Live Count] - 2026-08-29
 
 - Hide the menu bar visitor count while a refresh has failed, instead of presenting the previous total as current.
 
