@@ -166,7 +166,10 @@ export async function authorize(): Promise<string> {
         // we tried to refresh, another call already fixed the session, so
         // use that instead of deleting it out from under it.
         const latest = await client.getTokens();
-        if (latest?.accessToken && latest.refreshToken !== existing.refreshToken) {
+        if (
+          latest?.accessToken &&
+          (latest.accessToken !== existing.accessToken || latest.refreshToken !== existing.refreshToken)
+        ) {
           return latest.accessToken;
         }
 
