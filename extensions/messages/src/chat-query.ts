@@ -13,6 +13,7 @@ export type SQLChat = Omit<ChatParticipant, "is_group" | "latest_message_guid" |
   group_photo_path: string | null;
   last_message_timestamp: number | string | null;
   last_message_date: string;
+  unread_count?: number;
 };
 
 type ChatQueryOptions = {
@@ -71,6 +72,14 @@ export function buildChatQuery({
         )
         ELSE NULL
       END AS group_photo_path,
+      (
+        SELECT COUNT(*)
+        FROM chat_message_join unread_chat_message_join
+        JOIN message unread_message ON unread_chat_message_join.message_id = unread_message.ROWID
+        WHERE unread_chat_message_join.chat_id = chat.ROWID
+          AND unread_message.is_from_me = 0
+          AND unread_message.is_read = 0
+      ) AS unread_count,
       CASE
         WHEN EXISTS(SELECT 1 FROM pragma_table_info('chat') WHERE name='is_filtered')
         THEN chat.is_filtered

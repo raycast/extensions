@@ -9,11 +9,31 @@ import { buildChatQuery, type SQLChat } from "../chat-query";
 import { createContactMap } from "../contact-map-persist";
 import { buildChatSearchableText, getContactLookupIdentifiers, getContactOrGroupInfo, fuzzySearch } from "../helpers";
 import type { Chat } from "../open-chat-list";
-import type { ChatOrMessageInfo } from "../types";
+import type { ChatOrMessageInfo, Contact } from "../types";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
-export async function getChats(searchText: string = ""): Promise<Chat[]> {
+type GetChatsOptions = {
+  unreadOnly?: boolean;
+  from?: string;
+  to?: string;
+  limit?: number;
+  contacts?: Contact[];
+};
+
+export async function getChats(searchText: string = "", options: GetChatsOptions = {}): Promise<Chat[]> {
+  const limit = options.limit ?? 50;
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error("limit must be an integer between 1 and 100.");
+  }
+  const fromTime = options.from ? Date.parse(options.from) : undefined;
+  const toTime = options.to ? Date.parse(options.to) : undefined;
+  if (fromTime !== undefined && !Number.isFinite(fromTime)) throw new Error("from must be an ISO 8601 date-time.");
+  if (toTime !== undefined && !Number.isFinite(toTime)) throw new Error("to must be an ISO 8601 date-time.");
+  if (fromTime !== undefined && toTime !== undefined && fromTime > toTime) {
+    throw new Error("from must not be later than to.");
+  }
+
   const rawData = await executeSQL<SQLChat>(DB_PATH, buildChatQuery());
 
   if (!rawData) return [];
@@ -31,7 +51,7 @@ export async function getChats(searchText: string = ""): Promise<Chat[]> {
   }));
 
   const lookupIdentifiers = [...new Set(chatInfos.flatMap(({ info }) => getContactLookupIdentifiers(info)))];
-  const contacts = await fetchContactsForChatIdentifiers(lookupIdentifiers);
+  const contacts = options.contacts ?? (await fetchContactsForChatIdentifiers(lookupIdentifiers));
   const contactMap = createContactMap(contacts);
 
   const hydratedChats = chatInfos.map(({ chat, info }) => {
@@ -46,9 +66,15 @@ export async function getChats(searchText: string = ""): Promise<Chat[]> {
       searchableText: buildChatSearchableText(chat, displayName),
     };
   });
-  const chats = collapseChatRows(hydratedChats);
+  const chats = collapseChatRows(hydratedChats).filter((chat) => {
+    if (options.unreadOnly && !(Number(chat.unread_count) > 0)) return false;
+    const lastMessageTime = Date.parse(chat.last_message_date);
+    if (fromTime !== undefined && lastMessageTime < fromTime) return false;
+    if (toTime !== undefined && lastMessageTime >= toTime) return false;
+    return true;
+  });
 
-  if (!searchText) return chats.slice(0, 50);
+  if (!searchText) return chats.slice(0, limit);
 
   const searchTerms = searchText
     .toLowerCase()
@@ -60,5 +86,5 @@ export async function getChats(searchText: string = ""): Promise<Chat[]> {
       const searchString = c.searchableText ?? buildChatSearchableText(c, c.displayName);
       return fuzzySearch(searchString, searchTerms);
     })
-    .slice(0, 50);
+    .slice(0, limit);
 }

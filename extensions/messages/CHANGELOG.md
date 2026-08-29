@@ -1,5 +1,13 @@
 # Messages Changelog
 
+## [AI Message History and Activity] - {PR_MERGE_DATE}
+
+- Add stable cursor pagination, date and unread filters, attachment metadata, and plain-text fallback to AI message search
+- Add an AI tool for overall and per-chat sent/received activity
+- Use stable chat IDs for existing-conversation sends and report AppleScript send failures accurately
+- Add unread and date filters to AI chat search
+- Search the full Contacts catalog when an AI request names someone without a recent conversation
+
 ## [Faster chat and recipient search] - 2026-07-10
 
 - Show cached Send Message recipients immediately, grouped under `Recents` and `Contacts`
