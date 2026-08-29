@@ -11,7 +11,8 @@ import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { getDownloadedModels, ModelInfo } from "./lib/models";
 import { readSettings, writeSettings } from "./lib/settings";
-import { applySettingsAndReload, selectModelInHandy } from "./lib/handy";
+import { selectModelInHandy } from "./lib/handy";
+import { restartHandyAction } from "./lib/restart-handy";
 
 export default function SelectModel() {
   const [models, setModels] = useState<ModelInfo[]>([]);
@@ -55,14 +56,10 @@ export default function SelectModel() {
           title: "Couldn't switch model in Handy",
           message:
             "Grant Raycast Accessibility access (System Settings → Privacy & Security), or restart Handy to apply.",
-          primaryAction: {
-            title: "Restart Handy",
-            onAction: () =>
-              applySettingsAndReload(
-                () => writeSettings({ selected_model: model.id }),
-                handyBinaryPath,
-              ),
-          },
+          primaryAction: restartHandyAction(
+            () => writeSettings({ selected_model: model.id }),
+            handyBinaryPath,
+          ),
         });
       }
     } catch (err) {

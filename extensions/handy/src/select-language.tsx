@@ -13,7 +13,8 @@ import { useCallback, useEffect, useState } from "react";
 import { getLanguagesForModel, LanguageOption } from "./lib/languages";
 import { getModelCapabilities } from "./lib/catalog";
 import { readSettings, writeSettings } from "./lib/settings";
-import { applySettingsAndReload, selectLanguageInHandy } from "./lib/handy";
+import { selectLanguageInHandy } from "./lib/handy";
+import { restartHandyAction } from "./lib/restart-handy";
 
 export default function SelectLanguage() {
   const [languages, setLanguages] = useState<LanguageOption[]>([]);
@@ -79,14 +80,10 @@ export default function SelectLanguage() {
           title: "Couldn't switch language in Handy",
           message:
             "Grant Raycast Accessibility access (System Settings → Privacy & Security), or restart Handy to apply.",
-          primaryAction: {
-            title: "Restart Handy",
-            onAction: () =>
-              applySettingsAndReload(
-                () => writeSettings({ selected_language: lang.code }),
-                handyBinaryPath,
-              ),
-          },
+          primaryAction: restartHandyAction(
+            () => writeSettings({ selected_language: lang.code }),
+            handyBinaryPath,
+          ),
         });
       }
     } catch (err) {

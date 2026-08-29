@@ -1,7 +1,8 @@
 import { execa } from "execa";
-import { dirname } from "path";
 
-const HANDY_PROCESS_PATTERN = "Handy.app/Contents/MacOS/Handy";
+const DEFAULT_HANDY_BINARY_PATH =
+  "/Applications/Handy.app/Contents/MacOS/Handy";
+const HANDY_PROCESS_NAME = "Handy";
 
 /**
  * Handy is a single-instance Tauri app. Changing the model/language inside Handy
@@ -17,9 +18,33 @@ const HANDY_PROCESS_PATTERN = "Handy.app/Contents/MacOS/Handy";
  * loads the new value at launch.
  */
 
-function appBundlePathFromBinary(binaryPath: string): string {
-  // …/Handy.app/Contents/MacOS/Handy → …/Handy.app
-  return dirname(dirname(dirname(binaryPath)));
+function normalizedBinaryPath(binaryPath: string): string {
+  return binaryPath.trim() || DEFAULT_HANDY_BINARY_PATH;
+}
+
+function appBundlePathFromBinary(binaryPath: string): string | null {
+  const match = binaryPath.match(/^(.*\.app)\/Contents\/MacOS\/[^/]+$/);
+  return match?.[1] ?? null;
+}
+
+function escapeExtendedRegex(value: string): string {
+  return value.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
+}
+
+function processPatternsForBinary(binaryPath: string): string[] {
+  const normalized = normalizedBinaryPath(binaryPath);
+  const appPath = appBundlePathFromBinary(normalized);
+  return Array.from(
+    new Set(
+      [
+        normalized,
+        appPath ? `${appPath}/Contents/MacOS/${HANDY_PROCESS_NAME}` : null,
+        DEFAULT_HANDY_BINARY_PATH,
+      ]
+        .filter((pattern): pattern is string => Boolean(pattern))
+        .map(escapeExtendedRegex),
+    ),
+  );
 }
 
 async function handyProcessPath(): Promise<string | null> {
@@ -36,44 +61,93 @@ async function handyProcessPath(): Promise<string | null> {
   return null;
 }
 
-async function isHandyRunning(): Promise<boolean> {
+async function hasHandyApplicationProcess(): Promise<boolean> {
   try {
-    await execa("pgrep", ["-f", HANDY_PROCESS_PATTERN]);
+    const { stdout } = await execa("osascript", [
+      "-e",
+      `tell application "System Events" to exists application process "${HANDY_PROCESS_NAME}"`,
+    ]);
+    return stdout.trim() === "true";
+  } catch {
+    return false;
+  }
+}
+
+async function isHandyRunning(handyBinaryPath: string): Promise<boolean> {
+  if (await hasHandyApplicationProcess()) return true;
+
+  for (const pattern of processPatternsForBinary(handyBinaryPath)) {
+    try {
+      await execa("pgrep", ["-f", pattern]);
+      return true;
+    } catch {
+      // try the next process matcher
+    }
+  }
+
+  try {
+    await execa("pgrep", ["-x", HANDY_PROCESS_NAME]);
     return true;
   } catch {
     return false;
   }
 }
 
-async function quitHandy(): Promise<void> {
-  try {
-    await execa("osascript", ["-e", 'tell application "Handy" to quit']);
-    return;
-  } catch {
-    // App may ignore AppleScript quit (e.g. busy); force it.
+async function pkillHandy(
+  handyBinaryPath: string,
+  force = false,
+): Promise<void> {
+  for (const pattern of processPatternsForBinary(handyBinaryPath)) {
+    try {
+      await execa("pkill", [...(force ? ["-9"] : []), "-f", pattern]);
+    } catch {
+      // process may already be gone, or this pattern may not match this install
+    }
   }
   try {
-    await execa("pkill", ["-f", HANDY_PROCESS_PATTERN]);
+    await execa("pkill", [...(force ? ["-9"] : []), "-x", HANDY_PROCESS_NAME]);
   } catch {
-    // ignore — caller's waitForExit will time out and relaunch regardless
+    // process may already be gone
   }
 }
 
-async function waitForExit(timeoutMs = 6000): Promise<void> {
+async function quitHandy(handyBinaryPath: string): Promise<void> {
+  try {
+    await execa("osascript", ["-e", 'tell application "Handy" to quit']);
+  } catch {
+    // App may ignore AppleScript quit (e.g. busy); force it.
+  }
+  if (await waitForExit(handyBinaryPath)) return;
+
+  await pkillHandy(handyBinaryPath);
+  if (await waitForExit(handyBinaryPath)) return;
+
+  await pkillHandy(handyBinaryPath, true);
+  if (!(await waitForExit(handyBinaryPath))) {
+    throw new Error("Handy did not quit; restart canceled");
+  }
+}
+
+async function waitForExit(
+  handyBinaryPath: string,
+  timeoutMs = 6000,
+): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    if (!(await isHandyRunning())) return;
+    if (!(await isHandyRunning(handyBinaryPath))) return true;
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
+  return !(await isHandyRunning(handyBinaryPath));
 }
 
 async function launchHandy(handyBinaryPath: string): Promise<void> {
   const running = await handyProcessPath();
-  const appPath = running ?? appBundlePathFromBinary(handyBinaryPath);
+  const binaryPath = normalizedBinaryPath(handyBinaryPath);
+  const appPath = running ?? appBundlePathFromBinary(binaryPath) ?? binaryPath;
   try {
     await execa("open", [appPath]);
   } catch {
-    await execa("open", ["-a", "Handy"]);
+    await execa("open", ["-a", HANDY_PROCESS_NAME]);
   }
 }
 
@@ -87,13 +161,13 @@ export async function applySettingsAndReload(
   apply: () => void,
   handyBinaryPath: string,
 ): Promise<void> {
+  const binaryPath = normalizedBinaryPath(handyBinaryPath);
   apply();
-  if (await isHandyRunning()) {
-    await quitHandy();
-    await waitForExit();
+  if (await isHandyRunning(binaryPath)) {
+    await quitHandy(binaryPath);
   }
   apply();
-  await launchHandy(handyBinaryPath);
+  await launchHandy(binaryPath);
 }
 
 /**
