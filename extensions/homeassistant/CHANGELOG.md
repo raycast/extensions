@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Entity Customization] - {PR_MERGE_DATE}
+## [Entity Customization] - 2026-08-29
 
 - Add local rename, hide, and favorite actions for entities in list commands
 - Add Entity Settings command to manage hidden entities, custom display names, and favorites
