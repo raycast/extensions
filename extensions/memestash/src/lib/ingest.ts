@@ -55,7 +55,15 @@ function uniqueDestName(
   const stem = basename(srcBasename, ext);
   const preferred = `${stem}${ext}`;
   if (!existsSync(join(dir, preferred))) return preferred;
-  return `${stem}-${hash.slice(0, 8)}${ext}`;
+
+  const hashedStem = `${stem}-${hash.slice(0, 8)}`;
+  let candidate = `${hashedStem}${ext}`;
+  let suffix = 2;
+  while (existsSync(join(dir, candidate))) {
+    candidate = `${hashedStem}-${suffix}${ext}`;
+    suffix++;
+  }
+  return candidate;
 }
 
 export type AddResult = {
