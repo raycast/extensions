@@ -229,8 +229,12 @@ export default function Command() {
           title={repo.name}
           subtitle={repo.description || ""}
           accessories={[
-            ...(repo.issues_count > 0 ? [{ icon: Icon.Bug, text: String(repo.issues_count) }] : []),
-            ...(repo.prs_count > 0 ? [{ icon: Icon.SpeechBubble, text: String(repo.prs_count) }] : []),
+            ...(repo.issues_count && repo.issues_count > 0
+              ? [{ icon: Icon.Bug, text: String(repo.issues_count) }]
+              : []),
+            ...(repo.prs_count && repo.prs_count > 0
+              ? [{ icon: Icon.SpeechBubble, text: String(repo.prs_count) }]
+              : []),
             ...(repo.stargazers_count > 0 ? [{ icon: Icon.Star, text: String(repo.stargazers_count) }] : []),
           ]}
           actions={
