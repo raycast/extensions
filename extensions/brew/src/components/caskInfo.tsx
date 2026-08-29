@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { CaskActionPanel } from "./actionPanels";
 import { Cask, brewName, brewFetchCaskInfo, uiLogger, ensureError } from "../utils";
-import { Dependencies } from "./dependencies";
-import { PackageAnalyticsMetadata, PackageStatusMetadata } from "./packageMetadata";
+import { DetailMetadata, caskMetadataRows } from "./packageMetadata";
 import { usePackageDetail } from "../hooks/usePackageDetail";
 
 /**
@@ -101,21 +100,15 @@ export function CaskInfo({
       markdown={formatInfo(cask)}
       navigationTitle={`Cask Info: ${brewName(cask)}`}
       metadata={
-        <Detail.Metadata>
-          <PackageStatusMetadata state={packageDetail} />
-          <Detail.Metadata.Label title="Id" text={cask.token || "Loading..."} />
-          {cask.homepage ? (
-            <Detail.Metadata.Link title="Homepage" text={cask.homepage} target={cask.homepage} />
-          ) : (
-            <Detail.Metadata.Label title="Homepage" text="Loading..." />
-          )}
-          <Detail.Metadata.Label title="Tap" text={cask.tap || "Loading..."} />
-          <CaskVersion cask={cask} />
-          <CaskDependencies cask={cask} />
-          <Dependencies title="Conflicts With" dependencies={cask.conflicts_with?.cask} isInstalled={isInstalled} />
-          <Detail.Metadata.Label title="Auto Updates" text={cask.auto_updates ? "Yes" : "No"} />
-          <PackageAnalyticsMetadata state={packageDetail} />
-        </Detail.Metadata>
+        <DetailMetadata
+          rows={caskMetadataRows(cask, {
+            isInstalled,
+            detail: packageDetail,
+            // The markdown pane already renders the description and caveats.
+            showDescription: true,
+            isLoading,
+          })}
+        />
       }
       actions={
         <CaskActionPanel
@@ -133,31 +126,6 @@ export function CaskInfo({
 }
 
 /// Private
-
-function CaskDependencies({ cask }: { cask: Cask }) {
-  const macos = cask.depends_on?.macos;
-
-  if (!macos) {
-    return null;
-  }
-
-  return (
-    <Detail.Metadata.TagList title="macOS Version">
-      {Object.keys(macos).map((key) => {
-        const values = macos[key];
-        if (values) {
-          return <Detail.Metadata.TagList.Item key={key} text={`${key} ${values.join(", ")}`} />;
-        }
-        return null;
-      })}
-    </Detail.Metadata.TagList>
-  );
-}
-
-function CaskVersion({ cask }: { cask: Cask }) {
-  const version = cask.installed ? `${cask.installed} (installed)` : cask.version;
-  return version ? <Detail.Metadata.Label title="Version" text={version} /> : null;
-}
 
 function formatInfo(cask: Cask): string {
   return `

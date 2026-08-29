@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { Color, Icon, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { brewFormatVersion, brewInstalledDate, brewIsInstalled, brewName, Cask, Formula } from "../utils";
+import {
+  brewFormatVersion,
+  brewInstalledDate,
+  brewIsInstalled,
+  brewIsOutdated,
+  brewName,
+  Cask,
+  Formula,
+} from "../utils";
 import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
+import { installStateIcon, UPDATE_AVAILABLE_COLOR } from "./packageIcons";
 import { FormulaListItemDetail, CaskListItemDetail } from "./listItemDetail";
-
-const tertiaryTextColor: Color.Dynamic = {
-  light: "#00000066",
-  dark: "#FFFFFF66",
-};
 
 export interface FormulaListProps {
   isLoading: boolean;
@@ -160,21 +164,17 @@ export function FormulaListItem(props: {
   const formula = props.formula;
   const showMetadataPanel = props.showMetadataPanel ?? false;
   let version = formula.versions.stable;
-  let tintColor: Color.ColorLike = tertiaryTextColor;
-  let tooltip: string | undefined = undefined;
-  let iconMark: Icon = Icon.Circle;
 
-  if (brewIsInstalled(formula)) {
+  const formulaOutdated = brewIsOutdated(formula);
+  const installed = brewIsInstalled(formula);
+  if (installed) {
     version = brewFormatVersion(formula);
-    tintColor = formula.outdated ? Color.Red : Color.Green;
-    iconMark = Icon.CheckCircle;
-    tooltip = formula.outdated ? "Outdated" : "Up to date";
   }
 
-  const icon = { source: iconMark, tintColor: tintColor };
+  const icon = installStateIcon(installed, formulaOutdated);
   const accessories: List.Item.Accessory[] = [];
-  if (brewIsInstalled(formula) && formula.outdated) {
-    accessories.push({ tag: { value: "Outdated", color: Color.Red } });
+  if (installed && formulaOutdated) {
+    accessories.push({ tag: { value: "Outdated", color: UPDATE_AVAILABLE_COLOR } });
   }
   accessories.push({ text: version });
   pushAccessories(
@@ -190,7 +190,7 @@ export function FormulaListItem(props: {
       title={formula.name}
       subtitle={showMetadataPanel ? undefined : formula.desc}
       accessories={showMetadataPanel ? undefined : accessories}
-      icon={tooltip ? { value: icon, tooltip } : icon}
+      icon={icon}
       detail={
         showMetadataPanel ? (
           <FormulaListItemDetail
@@ -236,21 +236,17 @@ export function CaskListItem(props: {
   const cask = props.cask;
   const showMetadataPanel = props.showMetadataPanel ?? false;
   let version = cask.version;
-  let tintColor: Color.ColorLike = tertiaryTextColor;
-  let tooltip: string | undefined = undefined;
-  let iconMark: Icon = Icon.Circle;
 
-  if (brewIsInstalled(cask)) {
+  const caskOutdated = brewIsOutdated(cask);
+  const installed = brewIsInstalled(cask);
+  if (installed) {
     version = brewFormatVersion(cask);
-    tintColor = cask.outdated ? Color.Red : Color.Green;
-    iconMark = Icon.CheckCircle;
-    tooltip = cask.outdated ? "Outdated" : "Up to date";
   }
 
-  const icon = { source: iconMark, tintColor: tintColor };
+  const icon = installStateIcon(installed, caskOutdated);
   const accessories: List.Item.Accessory[] = [];
-  if (brewIsInstalled(cask) && cask.outdated) {
-    accessories.push({ tag: { value: "Outdated", color: Color.Red } });
+  if (installed && caskOutdated) {
+    accessories.push({ tag: { value: "Outdated", color: UPDATE_AVAILABLE_COLOR } });
   }
   accessories.push({ text: version });
   pushAccessories(accessories, props.showInstalledDate ? brewInstalledDate(cask) : undefined, cask.installs, false);
@@ -261,7 +257,7 @@ export function CaskListItem(props: {
       title={brewName(cask)}
       subtitle={showMetadataPanel ? undefined : cask.desc}
       accessories={showMetadataPanel ? undefined : accessories}
-      icon={tooltip ? { value: icon, tooltip } : icon}
+      icon={icon}
       detail={
         showMetadataPanel ? (
           <CaskListItemDetail

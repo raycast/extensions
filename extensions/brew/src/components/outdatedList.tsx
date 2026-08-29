@@ -11,6 +11,7 @@ import { OutdatedCask, OutdatedFormula, OutdatedResults, type UpgradePackageStat
 import type { PackageState } from "../hooks/useBrewUpgrade";
 import { OutdatedActionPanel } from "./actionPanels";
 import { InstallableFilterType, placeholder } from "./filter";
+import { UPDATE_AVAILABLE_ICON } from "./packageIcons";
 
 /** Icon for a list item, e.g. an upgrade status indicator. Defaults to `PENDING_ICON`. */
 export type OutdatedIcon = (
@@ -47,8 +48,14 @@ export interface OutdatedListProps {
   onAction: () => void;
 }
 
-/** Icon for a package which is outdated, but not (yet) upgraded. */
-export const PENDING_ICON = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
+/**
+ * Icon for a package which is outdated, but not (yet) upgraded.
+ *
+ * Shared with Search and Show Installed — every row in this list is an
+ * available update, and it used to be drawn with the same green-check glyph
+ * that means "upgraded", only greyed out.
+ */
+export const PENDING_ICON = UPDATE_AVAILABLE_ICON;
 
 /**
  * The list item icon, indicating the upgrade status of a package.

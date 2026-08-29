@@ -5,6 +5,7 @@ import {
   brewInstallCommand,
   brewInstallPath,
   brewIsInstalled,
+  brewIsOutdated,
   brewUninstallCommand,
   brewUpgradeCommand,
   type Cask,
@@ -157,7 +158,7 @@ export function CaskActionPanel(props: {
     return (
       <ActionPanel>
         <ActionPanel.Section>
-          {cask.outdated && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
+          {brewIsOutdated(cask) && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
           {(props.showDetailsAction ?? true) && (
             <Action.Push
               title="Show Details"
@@ -344,7 +345,7 @@ export function FormulaActionPanel(props: {
     return (
       <ActionPanel>
         <ActionPanel.Section>
-          {formula.outdated && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
+          {brewIsOutdated(formula) && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
           {(props.showDetailsAction ?? true) && (
             <Action.Push
               title="Show Details"

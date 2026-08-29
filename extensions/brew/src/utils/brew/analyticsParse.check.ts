@@ -11,6 +11,7 @@
  */
 
 import assert from "assert";
+import { compareVersions, isOutdatedVersion } from "./version";
 import {
   AnalyticsCounts,
   POPULARITY_PERIOD,
@@ -170,7 +171,35 @@ assert.equal(totalForPeriod({ "30d": { asc: "1" } } as unknown as AnalyticsCount
 assert.equal(totalForPeriod({ "30d": { a: 1, b: "x" } } as unknown as AnalyticsCounts, "30d"), 1);
 assert.equal(totalForPeriod({ "30d": {} }, "30d"), undefined);
 
-/// Live API — the shape assumptions above, against the real thing
+// Version comparison. Every case below is one Codex raised against the first
+// version of this, which used string INEQUALITY and so reported "different" as
+// "outdated" in both directions.
+assert.equal(isOutdatedVersion("2.3.2", "2.4.0", { stripRevision: true }), true, "ipatool: genuinely behind");
+assert.equal(isOutdatedVersion("2.4.0", "2.4.0", { stripRevision: true }), false);
+assert.equal(
+  isOutdatedVersion("1.23.1_1", "1.23.2", { stripRevision: true }),
+  true,
+  "libheif: behind, with a revision",
+);
+assert.equal(isOutdatedVersion("1.2.3_1", "1.2.3", { stripRevision: true }), false, "a rebuild is not an upgrade");
+assert.equal(isOutdatedVersion(undefined, "1.0"), false, "not installed is not outdated");
+assert.equal(isOutdatedVersion("1.0", undefined), false);
+
+// Installed NEWER than the index must never offer an upgrade — that would
+// downgrade. Inequality got this wrong.
+assert.equal(isOutdatedVersion("2.0", "1.0", { stripRevision: true }), false, "newer installed is not outdated");
+assert.equal(isOutdatedVersion("1.10", "1.9", { stripRevision: true }), false, "numeric, not lexical: 10 > 9");
+assert.equal(isOutdatedVersion("1.9", "1.10", { stripRevision: true }), true);
+assert.equal(isOutdatedVersion("1.2", "1.2.1", { stripRevision: true }), true, "a shorter prefix is older");
+assert.equal(isOutdatedVersion("1.2.1", "1.2", { stripRevision: true }), false);
+
+// Incomparable shapes must be "don't know", not "outdated". A cask version of
+// `latest` is the case that would otherwise offer an endless bogus upgrade.
+assert.equal(compareVersions("1.2.3", "latest"), undefined);
+assert.equal(isOutdatedVersion("1.2.3", "latest"), false, "cask `latest` must not read as outdated");
+assert.equal(isOutdatedVersion("1_2", "1_2"), false, "underscores are ordinary cask syntax");
+
+/// Live API — the shape assumptions above, against the real thing/// Live API — the shape assumptions above, against the real thing
 
 async function checkLive() {
   const formula = await (await fetch("https://formulae.brew.sh/api/formula/asc.json")).json();

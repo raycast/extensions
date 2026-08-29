@@ -8,6 +8,7 @@ import { join as path_join } from "path";
 import { Cask, Formula, Nameable } from "../types";
 import { preferences } from "../preferences";
 import { brewPath, brewExecutable } from "./paths";
+import { isOutdatedVersion } from "./version";
 
 /// Type Guards
 
@@ -29,6 +30,49 @@ export function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
 export function brewInstalledDate(item: Cask | Formula): Date | undefined {
   const seconds = isCask(item) ? item.installed_time : item.installed?.first()?.time;
   return seconds == undefined ? undefined : new Date(seconds * 1000);
+}
+
+/**
+ * The version currently installed, or undefined if the package is not installed.
+ */
+export function brewInstalledVersion(item: Cask | Formula): string | undefined {
+  return isCask(item) ? item.installed : item.installed?.first()?.version;
+}
+
+/**
+ * Is a newer version available?
+ *
+ * Trusting `outdated` alone is not enough for a FORMULA. That flag is captured
+ * by `brew info --json=v2 --installed` and cached, so it reports the state at
+ * capture time — a formula that went out of date since reads as current. The
+ * version comparison catches that, because the search index carries a freshly
+ * downloaded `versions.stable` alongside the cached installed version.
+ *
+ * **Casks are left to Homebrew's own flag, deliberately.** A cask version can
+ * be `latest`, or carry vendor syntax like `1.2.3,45678`, and an
+ * `auto_updates` cask is never upgraded through brew at all. Homebrew encodes
+ * that policy in `cask.outdated`; a string comparison does not, and would offer
+ * an Upgrade that either does nothing or is wrong.
+ */
+export function brewIsOutdated(item: Cask | Formula): boolean {
+  if (item.outdated) {
+    return true;
+  }
+
+  if (isCask(item)) {
+    return false;
+  }
+
+  const stable = item.versions?.stable;
+
+  // A formula can have several kegs installed. If ANY of them is the current
+  // version there is nothing to upgrade, whichever one happens to be first.
+  const installedVersions = (item.installed ?? []).map((keg) => keg.version);
+  if (installedVersions.some((version) => version.replace(/_\d+$/, "") === stable)) {
+    return false;
+  }
+
+  return installedVersions.some((version) => isOutdatedVersion(version, stable, { stripRevision: true }));
 }
 
 /// Identifiers

@@ -22,7 +22,7 @@ export type {
 } from "../types";
 
 // Paths
-export { brewPrefix, brewPath, brewExecutable } from "./paths";
+export { brewPrefix, brewPath, brewCachePrefix, brewExecutable } from "./paths";
 
 // Commands
 export { execBrew, execBrewEnv } from "./commands";
@@ -109,12 +109,17 @@ export {
 } from "./services";
 export type { Service, ServiceStatus, ServiceAction } from "./services";
 
+// Version comparison
+export { isOutdatedVersion } from "./version";
+
 // Helpers
 export {
   brewName,
   brewIsInstalled,
   brewInstallPath,
   brewFormatVersion,
+  brewInstalledVersion,
+  brewIsOutdated,
   brewInstalledDate,
   brewIdentifier,
   brewCaskOption,
