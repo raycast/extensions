@@ -55,6 +55,13 @@
       "mode": "view"
     },
     {
+      "name": "menu-bar",
+      "title": "Kato Menu Bar",
+      "description": "See what needs your attention from the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
       "name": "my-tasks",
       "title": "My Tasks",
       "description": "View and update your assigned Kato tasks",
