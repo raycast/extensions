@@ -1,6 +1,6 @@
 # Ejection Seat Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-29
 
 - Find the processes and open files that may prevent a volume from ejecting
 - Scan every mount under `/Volumes` up front, with a per-volume blocker count
