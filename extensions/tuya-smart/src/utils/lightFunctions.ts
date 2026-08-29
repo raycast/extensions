@@ -30,6 +30,23 @@ export function parseRange(values?: string): Range {
   }
 }
 
+/**
+ * An Enum data point declares its options in the same `values` field, as
+ * `{"range":["open","stop","close"]}`. A curtain's Open/Stop/Close and a light's work
+ * modes are both read from here, so the options offered are the ones the product itself
+ * reports rather than a hardcoded list per category.
+ */
+export function parseEnumOptions(values?: string): string[] {
+  if (!values) return [];
+  try {
+    const parsed = JSON.parse(values) as { range?: unknown };
+    if (!Array.isArray(parsed.range)) return [];
+    return parsed.range.filter((option): option is string => typeof option === "string" && option.length > 0);
+  } catch {
+    return [];
+  }
+}
+
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 export function percentToRaw(percent: number, range: Range): number {

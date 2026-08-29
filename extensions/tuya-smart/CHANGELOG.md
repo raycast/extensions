@@ -2,6 +2,8 @@
 
 ## [Redesigned List, Error Handling, Light Controls, Menu Bar and AI Tools] - {PR_MERGE_DATE}
 
+- Pinning is now per device rather than per switch, which is what the redesigned list
+  shows. Pins set in an earlier version are not carried over and need setting again.
 - Added a Temperature Unit preference. Temperatures follow the device's own setting by
   default, matching the Tuya app; Celsius or Fahrenheit can be forced for devices that
   never report one.
@@ -34,12 +36,16 @@
   22 rows of mostly base64 to the 11 that mean something.
 - Offline devices are now marked as such.
 - Device categories always show their readable name instead of codes like "cz".
-- Refreshing now takes one request for the whole account instead of one per device.
+- Refreshing is cheaper: instruction sets are now fetched in batches of twenty devices
+  instead of one request per device. The device list itself is still paginated.
 - Tuya API failures are now reported instead of being swallowed. An expired IoT Core
   subscription previously showed an endless loading spinner or an empty device list
   with no explanation; it now shows what went wrong and what to do about it.
 - Added brightness and colour temperature control for light devices, using each
   product's own reported range.
+- Restored the controls for data points that take one of a set of values: a curtain
+  offers Open, Stop and Close again, and a light its work modes. The options come
+  from the range each product reports rather than a list fixed per category.
 - Added a menu bar command to toggle pinned switches without opening Raycast.
 - Added AI tools to list devices, toggle a switch, and set brightness by voice or chat.
 - Fixed the device details view showing a meaningless "Active Time".

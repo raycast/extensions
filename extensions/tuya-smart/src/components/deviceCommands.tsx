@@ -1,22 +1,15 @@
 import type { JSX } from "react";
 import { Color, Icon, List } from "@raycast/api";
-import { Device, FunctionItem } from "../utils/interfaces";
+import { Device } from "../utils/interfaces";
 import { CommandActionPanel } from "./actionPanels";
 import {
+  actionableStatuses,
   applyCommandResult,
   formatStatusValue,
-  isNoiseStatus,
   statusLabel,
   cleanName,
   temperatureUnitOf,
 } from "../utils/deviceSemantics";
-
-/** Data points a user can act on: booleans to flip, numbers to set, enums to choose. */
-function actionableStatuses(device: Device): FunctionItem[] {
-  return (device.status ?? []).filter(
-    (status) => !isNoiseStatus(status) && (typeof status.value === "boolean" || typeof status.value === "number"),
-  );
-}
 
 export function DeviceCommands(props: { device: Device; onAction: (device: Device) => void }): JSX.Element {
   const device = props.device;
@@ -24,8 +17,8 @@ export function DeviceCommands(props: { device: Device; onAction: (device: Devic
   const commands = actionableStatuses(device);
 
   return (
-    <List navigationTitle={cleanName(device.name)} searchBarPlaceholder="Search switches by name">
-      <List.Section title="Switches" subtitle={String(commands.length)}>
+    <List navigationTitle={cleanName(device.name)} searchBarPlaceholder="Search controls by name">
+      <List.Section title="Controls" subtitle={String(commands.length)}>
         {commands.map((command) => (
           <List.Item
             key={command.code}

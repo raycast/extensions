@@ -2,7 +2,8 @@ import type { JSX } from "react";
 import { Action, ActionPanel, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { ShowToastError } from "../utils/functions";
 import { Device, FunctionItem } from "../utils/interfaces";
-import { parseRange, percentToRaw, rawToPercent } from "../utils/lightFunctions";
+import { parseEnumOptions, parseRange, percentToRaw, rawToPercent } from "../utils/lightFunctions";
+import { enumOptionLabel } from "../utils/deviceSemantics";
 import { controlDevice } from "../utils/deviceSource";
 import { Transport } from "../utils/deviceControl";
 
@@ -44,21 +45,37 @@ export function BooleanCommand(props: {
   );
 }
 
-export function TextCommand(props: {
+/**
+ * Enum data points such as a curtain's Open/Stop/Close or a light's work mode. The options
+ * come from the product's own declared range, so nothing is hardcoded per category.
+ */
+export function EnumCommand(props: {
   device: Device;
   command: FunctionItem;
-  value: string;
+  title?: string;
+  icon?: Icon;
   onAction: (props: CommandResult) => void;
 }): JSX.Element {
   const label = props.command.name ?? props.command.code;
+  const options = parseEnumOptions(props.command.values);
+  const current = props.command.value;
+
   return (
-    <Action
-      title={`Set ${props.value}`}
-      icon={Icon.Gear}
-      onAction={async () => {
-        props.onAction(await runCommand(props.device, { ...props.command, value: props.value }, label, props.value));
-      }}
-    />
+    <ActionPanel.Submenu title={props.title ?? label} icon={props.icon ?? Icon.Gear}>
+      {options.map((option) => {
+        const optionLabel = enumOptionLabel(props.command.code, option);
+        return (
+          <Action
+            key={option}
+            title={option === current ? `${optionLabel} (Current)` : optionLabel}
+            icon={option === current ? Icon.Check : undefined}
+            onAction={async () => {
+              props.onAction(await runCommand(props.device, { ...props.command, value: option }, label, optionLabel));
+            }}
+          />
+        );
+      })}
+    </ActionPanel.Submenu>
   );
 }
 

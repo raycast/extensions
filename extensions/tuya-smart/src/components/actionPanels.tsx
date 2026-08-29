@@ -3,7 +3,13 @@ import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { Device, FunctionItem } from "../utils/interfaces";
 import { findBrightness, findColorTemp } from "../utils/lightFunctions";
 import { isSwitchStatus } from "../utils/filters";
-import { applyCommandResult, classifyDevice, cleanName } from "../utils/deviceSemantics";
+import {
+  actionableEnums,
+  actionableStatuses,
+  applyCommandResult,
+  classifyDevice,
+  cleanName,
+} from "../utils/deviceSemantics";
 
 import { DeviceCommands } from "./deviceCommands";
 
@@ -21,6 +27,11 @@ export function DeviceActionPanel(props: {
   const brightness = findBrightness(device);
   const colorTemp = findColorTemp(device);
   const isControl = classifyDevice(device) === "control";
+  // A curtain has no boolean switch, so nothing else on this panel would reach its
+  // Open/Stop/Close. Devices that do have a switch keep their enums behind the push
+  // below, to leave settings like a socket's power-on behaviour out of the main panel.
+  const enums = switches.length === 0 ? actionableEnums(device) : [];
+  const commandCount = actionableStatuses(device).length;
 
   const apply = (outcome: Actions.CommandResult) => props.onAction(applyCommandResult(device, outcome));
 
@@ -30,9 +41,12 @@ export function DeviceActionPanel(props: {
         {isControl && switches.length === 1 && (
           <Actions.BooleanCommand device={device} command={switches[0]} onAction={apply} />
         )}
-        {switches.length > 1 && (
+        {enums.map((command) => (
+          <Actions.EnumCommand key={command.code} device={device} command={command} onAction={apply} />
+        ))}
+        {commandCount > 1 && (
           <Action.Push
-            title="Show Switches"
+            title="Show Controls"
             icon={Icon.Document}
             target={<DeviceCommands device={device} onAction={props.onAction} />}
           />
@@ -100,12 +114,7 @@ export function CommandActionPanel(props: {
           <Actions.BooleanCommand device={props.device} command={props.command} onAction={props.onAction} />
         )}
         {typeof commandValue === "string" && (
-          <Actions.TextCommand
-            device={props.device}
-            command={props.command}
-            value={commandValue}
-            onAction={props.onAction}
-          />
+          <Actions.EnumCommand device={props.device} command={props.command} onAction={props.onAction} />
         )}
         {typeof commandValue === "number" && (
           <Actions.LightLevelSubmenu

@@ -1,5 +1,6 @@
 import { Device, FunctionItem } from "./interfaces";
 import { isSwitchStatus } from "./filters";
+import { parseEnumOptions } from "./lightFunctions";
 import { temperatureUnitPreference } from "./preferences";
 
 export type DeviceKind = "control" | "sensor" | "lock";
@@ -193,10 +194,44 @@ export function formatStatusValue(status: FunctionItem, unit?: "c" | "f"): strin
   }
 
   if (typeof value === "string") {
-    return ENUM_LABELS[code]?.[value] ?? value;
+    return enumOptionLabel(code, value);
   }
 
   return "";
+}
+
+/**
+ * The wording for one option of an Enum data point. Shared by the list and by the action
+ * that sets it, so a curtain reading "Open" is set by an action also called "Open".
+ */
+export function enumOptionLabel(code: string, option: string): string {
+  return ENUM_LABELS[code]?.[option] ?? humanizeCode(option);
+}
+
+/**
+ * Enum data points a user can set, such as a curtain's Open/Stop/Close or a light's work
+ * mode.
+ *
+ * Requiring a declared option list is also what keeps read-only data points out. `values`
+ * reaches a status only through `getDeviceFunctions`, which merges it from the writable
+ * instruction set, so a reported-but-not-settable string such as a lock's `alarm_lock`
+ * never has one. Do not backfill `values` from the status payload.
+ */
+export function actionableEnums(device: Device): FunctionItem[] {
+  return (device.status ?? []).filter(
+    (status) =>
+      !isNoiseStatus(status) && typeof status.value === "string" && parseEnumOptions(status.values).length > 0,
+  );
+}
+
+/** Every data point a user can act on: booleans to flip, numbers to set, enums to choose. */
+export function actionableStatuses(device: Device): FunctionItem[] {
+  const enums = new Set(actionableEnums(device).map((status) => status.code));
+  return (device.status ?? []).filter(
+    (status) =>
+      !isNoiseStatus(status) &&
+      (typeof status.value === "boolean" || typeof status.value === "number" || enums.has(status.code)),
+  );
 }
 
 /** Turns a data point code into a readable label when the cloud gave us no name. */
