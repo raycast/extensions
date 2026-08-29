@@ -3,6 +3,7 @@ import type {
   KobbeLiveSite,
   KobbeRevenue,
   KobbeSite,
+  LiveResponse,
   OverviewResponse,
   RevenueResponse,
   SetupHealthResponse,
@@ -109,10 +110,22 @@ export async function getRevenueWithOverview(siteId: string, range: TimeRange) {
   return { revenueResponse, overviewResponse };
 }
 
+/** Fallback fan-out is capped so large accounts don't fire dozens of requests per refresh. */
+const LIVE_FALLBACK_SITE_LIMIT = 20;
+
 export async function getLiveVisitors(): Promise<KobbeLiveSite[]> {
+  try {
+    const response = await kobbeFetch<LiveResponse>("/api/agent/live");
+    return response.sites;
+  } catch (error) {
+    // Self-hosted servers predating the batch endpoint return 404; fall back to per-site requests.
+    if (!(error instanceof KobbeApiError && error.status === 404)) {
+      throw error;
+    }
+  }
   const sites = await listSites();
-  const overviews = await Promise.all(
-    sites.map(async (site) => {
+  return Promise.all(
+    sites.slice(0, LIVE_FALLBACK_SITE_LIMIT).map(async (site) => {
       try {
         const response = await getOverview(site.id, "today");
         return { site, online: parseCompactNumber(response.overview.kpis.online) };
@@ -122,17 +135,17 @@ export async function getLiveVisitors(): Promise<KobbeLiveSite[]> {
       }
     }),
   );
-  return overviews;
 }
 
-function parseCompactNumber(display: string): number {
+/** Parses display strings like "1,234" or "1.2K"; null when the format is unrecognized. */
+function parseCompactNumber(display: string): number | null {
   const match = /^([\d.,]+)\s*([KMB])?$/i.exec(display.trim());
   if (!match) {
-    return 0;
+    return null;
   }
   const base = Number(match[1].replace(/,/g, ""));
   if (!Number.isFinite(base)) {
-    return 0;
+    return null;
   }
   const multiplier = { K: 1_000, M: 1_000_000, B: 1_000_000_000 }[match[2]?.toUpperCase() ?? ""] ?? 1;
   return Math.round(base * multiplier);

@@ -95,6 +95,11 @@ export type SetupHealthResponse = {
 
 export type KobbeLiveSite = {
   site: KobbeSite;
-  /** Visitors online now, or null when the overview request for this site failed. */
+  /** Visitors online now, or null when the count for this site could not be loaded. */
   online: number | null;
+};
+
+export type LiveResponse = {
+  ok: true;
+  sites: Array<{ site: KobbeSite; online: number }>;
 };

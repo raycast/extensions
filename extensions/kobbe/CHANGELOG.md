@@ -9,6 +9,8 @@
 - Add site favicons and tinted metric icons for a richer dashboard feel.
 - Cache API responses so commands open instantly with the latest known data.
 - Add a Primary Action preference to choose whether Enter on a site opens the dashboard in the browser (default) or the overview in Raycast.
+- Fetch live visitor counts through a single batch endpoint instead of one request per site, with a capped per-site fallback for older self-hosted servers.
+- Resolve source favicons and titles from referrer origins so they display as clean hostnames.
 
 ## [Update] - 2026-06-19
 

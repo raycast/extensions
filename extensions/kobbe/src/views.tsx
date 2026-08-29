@@ -26,10 +26,6 @@ export const RANGE_OPTIONS: Array<{ title: string; value: TimeRange }> = [
   { title: "All Time", value: "all" },
 ];
 
-export function rangeTitle(range: TimeRange): string {
-  return RANGE_OPTIONS.find((option) => option.value === range)?.title ?? range;
-}
-
 function siteDomain(site: KobbeSite): string {
   return site.domain || "No domain";
 }
@@ -45,11 +41,29 @@ export function siteIcon(site: KobbeSite): Image.ImageLike {
   return "extension-icon.png";
 }
 
-function sourceIcon(source: KobbeSource): Image.ImageLike {
-  if (source.source.includes(".")) {
-    return getFavicon(`https://${source.source}`, { fallback: Icon.Globe });
+/**
+ * Kobbe returns sources as referrer origins ("https://google.com") or labels
+ * like "Direct / unknown". Extract a hostname when there is one so favicons
+ * resolve and titles read cleanly; otherwise fall back to the raw label.
+ */
+function sourceHostname(source: KobbeSource): string | null {
+  const raw = source.source.trim();
+  const candidate = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    const { hostname } = new URL(candidate);
+    return hostname.includes(".") ? hostname : null;
+  } catch {
+    return null;
   }
-  return Icon.Globe;
+}
+
+function sourceTitle(source: KobbeSource): string {
+  return sourceHostname(source) ?? source.source;
+}
+
+function sourceIcon(source: KobbeSource): Image.ImageLike {
+  const hostname = sourceHostname(source);
+  return hostname ? getFavicon(`https://${hostname}`, { fallback: Icon.Globe }) : Icon.Globe;
 }
 
 function useRange(initial?: TimeRange) {
@@ -309,7 +323,7 @@ export function SiteOverviewDetail(props: { site: KobbeSite; range?: TimeRange }
                   <List.Item
                     key={source.source}
                     icon={sourceIcon(source)}
-                    title={source.source}
+                    title={sourceTitle(source)}
                     accessories={topPageAccessories(source)}
                     actions={kpiActions}
                   />
@@ -393,7 +407,7 @@ export function SourcesList(props: { site: KobbeSite; range?: TimeRange }) {
         {sources.data?.sources.map((source) => (
           <List.Item
             key={source.source}
-            title={source.source}
+            title={sourceTitle(source)}
             icon={sourceIcon(source)}
             accessories={topPageAccessories(source)}
             actions={
@@ -495,7 +509,7 @@ export function RevenueDetail(props: { site: KobbeSite; range?: TimeRange }) {
         .slice(0, 5)
         .map(
           (source) =>
-            `- **${source.source}** · ${formatCompactNumber(
+            `- **${sourceTitle(source)}** · ${formatCompactNumber(
               source.visitors,
             )} visitors · ${formatCompactNumber(source.views)} views`,
         )
