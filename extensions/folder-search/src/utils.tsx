@@ -306,12 +306,14 @@ export const enclosingFolderName = (result: SpotlightSearchResult) => {
     .join("/");
 };
 
+const escapeForAppleScript = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+
 export const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
   popToRoot({ clearSearchBar: true });
   closeMainWindow({ clearRootSearch: true });
 
   runAppleScript(`
-    set result to (POSIX file "${result.path}") as alias
+    set result to (POSIX file "${escapeForAppleScript(result.path)}") as alias
     tell application "Finder"
       open information window of result
       activate
@@ -320,7 +322,7 @@ export const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
 };
 
 export const openNewFinderTab = async (targetPath: string) => {
-  const escapedPath = targetPath.replace(/"/g, '\\"');
+  const escapedPath = escapeForAppleScript(targetPath);
 
   await runAppleScript(`
     set targetFolder to (POSIX file "${escapedPath}" as alias)
@@ -340,7 +342,7 @@ export const openNewFinderTab = async (targetPath: string) => {
 };
 
 export const openInCurrentFinderTab = async (targetPath: string) => {
-  const escapedPath = targetPath.replace(/"/g, '\\"');
+  const escapedPath = escapeForAppleScript(targetPath);
 
   await runAppleScript(`
     set targetFolder to (POSIX file "${escapedPath}" as alias)
@@ -356,7 +358,7 @@ export const openInCurrentFinderTab = async (targetPath: string) => {
 };
 
 export const copyFolderToClipboard = (result: SpotlightSearchResult) => {
-  runAppleScript(`set the clipboard to POSIX file "${result.path}"`);
+  runAppleScript(`set the clipboard to POSIX file "${escapeForAppleScript(result.path)}"`);
 };
 
 export const maybeMoveResultToTrash = async (result: SpotlightSearchResult, resultWasTrashed: () => void) => {
