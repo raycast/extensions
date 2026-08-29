@@ -1,6 +1,6 @@
 # Folder Search Changelog
 
-## [Finder Open Behavior] - {PR_MERGE_DATE}
+## [Finder Open Behavior] - 2026-08-29
 
 - **enhanced** Added "Open Behavior" preference to open folders in a new Finder window, a new tab, or the current tab
 
