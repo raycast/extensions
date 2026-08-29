@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Action, ActionPanel, Clipboard, Form, open, popToRoot, showToast, Toast } from "@raycast/api";
 import { aiCreateForm } from "./lib/api";
+import { OrbiformAuthError, reconnect } from "./lib/oauth";
 
 /**
  * Same starter prompts as the Orbiform dashboard's "Ask AI" widget
@@ -40,9 +41,11 @@ export default function Command() {
       };
       await popToRoot();
     } catch (err) {
+      const isAuthError = err instanceof OrbiformAuthError;
       toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't create form";
+      toast.title = isAuthError ? "Orbiform session expired" : "Couldn't create form";
       toast.message = err instanceof Error ? err.message : String(err);
+      toast.primaryAction = isAuthError ? { title: "Reconnect Orbiform", onAction: () => reconnect() } : undefined;
     } finally {
       setIsLoading(false);
     }

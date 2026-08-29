@@ -160,12 +160,20 @@ export async function authorize(): Promise<string> {
 }
 
 /**
+ * Thrown when authorize() fails in a way that a plain retry can't fix —
+ * i.e. the stored refresh_token itself is bad. Commands can check for this
+ * with `error instanceof OrbiformAuthError` and offer a "Reconnect" action
+ * that calls reconnect(), instead of just showing a generic failure toast.
+ */
+export class OrbiformAuthError extends Error {}
+
+/**
  * Forces a fresh login, discarding whatever is currently stored first. This
  * is the ONLY place tokens get deleted — deliberately, so it must be
- * triggered by an explicit user action (e.g. a "Reconnect Orbiform" command
- * or a retry action on an auth-error screen), never automatically from
- * inside a refresh failure. See the comment in doAuthorize()'s catch block
- * for why deleting automatically there is unsafe.
+ * triggered by an explicit user action (e.g. the "Reconnect" action wired
+ * up in each command below, via OrbiformAuthError), never automatically
+ * from inside a refresh failure. See the comment in doAuthorize()'s catch
+ * block for why deleting automatically there is unsafe.
  */
 export async function reconnect(): Promise<string> {
   await client.removeTokens();
@@ -177,7 +185,7 @@ async function doAuthorize(): Promise<string> {
   if (existing?.accessToken) {
     if (existing.refreshToken && existing.isExpired()) {
       const { clientId } = decodeScope(existing.scope);
-      if (!clientId) throw new Error("Orbiform client_id not found — please reconnect.");
+      if (!clientId) throw new OrbiformAuthError("Orbiform client_id not found — please reconnect.");
       try {
         const refreshed = await refreshTokens(existing.refreshToken, clientId);
         await client.setTokens({
@@ -208,11 +216,12 @@ async function doAuthorize(): Promise<string> {
         // command) picks them up normally. If the refresh_token is
         // genuinely dead (not a race), every call keeps failing the same
         // way instead of silently self-healing — the user sees the error
-        // and can call reconnect() (e.g. via a "Reconnect Orbiform"
-        // action) to force a clean login. That's a deliberate, explicit
-        // deletion instead of an automatic one racing against other
-        // commands.
-        throw refreshError;
+        // and can trigger the "Reconnect" action (wired up in each command
+        // via OrbiformAuthError below) to force a clean login. That's a
+        // deliberate, explicit deletion instead of an automatic one racing
+        // against other commands.
+        const message = refreshError instanceof Error ? refreshError.message : String(refreshError);
+        throw new OrbiformAuthError(message);
       }
     }
     return existing.accessToken;
