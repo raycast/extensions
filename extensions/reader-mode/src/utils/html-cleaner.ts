@@ -177,7 +177,15 @@ const NEGATIVE_SELECTORS = [
   '[class*="cta"]',
   '[class*="donate"]',
   '[class*="donation"]',
-  '[class*="paywall"]',
+  // NOT paragraphs: Condé Nast sites (New Yorker, Wired, Vanity Fair…) serve the full
+  // article in the initial HTML and tag every body <p> with class="paywall" for their
+  // JS to gate client-side. A bare `[class*="paywall"]` deleted the entire article body,
+  // leaving only the dropcap intro and the cartoons. A real blocking overlay is a
+  // container (div/aside/section) with its own button/heading structure, so :not(p) still
+  // strips it; the tradeoff is that a rare gate built as a bare <p> would now survive — but
+  // detectPaywall still catches that page by its gating text, and losing whole articles is
+  // the far worse failure.
+  '[class*="paywall"]:not(p)',
   '[class*="upsell"]',
   '[class*="feedback"]',
 

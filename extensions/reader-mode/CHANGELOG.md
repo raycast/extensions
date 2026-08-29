@@ -1,5 +1,12 @@
 # Reader Mode Changelog
 
+## [Fix Paywall Extraction] - {PR_MERGE_DATE}
+
+### Fixed
+
+- The New Yorker and other Condé Nast sites (Wired, Vanity Fair) showed only the opening paragraph and the cartoons instead of the article. Reader was discarding the article body, which these sites tag with the same CSS class as their paywall overlay. The full article now renders.
+- The Paywall Hopper could stop at the first source that returned a page — including a "subscribe to read" wall — and never try the archive services that had the real text. It now checks each source's result and keeps going until it finds the full article.
+
 ## [Fix Crashes and Improve Performance] - 2026-07-15
 
 ### Fixed

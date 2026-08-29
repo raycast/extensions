@@ -27,6 +27,16 @@ import {
   PRIVATE_OPEN_FIXTURES,
 } from "./fixtures";
 import { parseHTML } from "linkedom";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
+import { tryBypassPaywall } from "../src/utils/paywall-hopper";
+import { loadArticleViaPaywallHopper } from "../src/utils/article-loader";
+import {
+  fetchHtmlAsGooglebot,
+  fetchHtmlAsBingbot,
+  GOOGLEBOT_USER_AGENT,
+  BINGBOT_USER_AGENT,
+} from "../src/utils/fetcher";
 
 /** Asserts a page's paywall verdict, given a loader for its HTML. */
 function assertPaywall(html: string, url: string, site: string, expected: boolean) {
@@ -131,7 +141,11 @@ describe("paywall detection", () => {
   const STYLESHEET_HIDDEN: Array<[string, string, string]> = [
     ["a class rule", `<style>.article-gate{display:none}</style>`, `<div class="article-gate">Subscribe</div>`],
     ["an id rule", `<style>#paywall{visibility:hidden}</style>`, `<div id="paywall" class="x">Subscribe</div>`],
-    ["a hidden ancestor rule", `<style>.wrap{display:none}</style>`, `<div class="wrap"><div class="paywall">Subscribe</div></div>`],
+    [
+      "a hidden ancestor rule",
+      `<style>.wrap{display:none}</style>`,
+      `<div class="wrap"><div class="paywall">Subscribe</div></div>`,
+    ],
   ];
 
   for (const [how, style, barrier] of STYLESHEET_HIDDEN) {
@@ -163,10 +177,7 @@ describe("paywall detection", () => {
     // aria-hidden removes from the a11y tree, not the page: a sighted reader still sees this.
     ["a barrier marked aria-hidden", `<div class="paywall" aria-hidden="true">members zone</div>`],
     // A page-level hide rule that targets an UNRELATED class must not suppress a real barrier.
-    [
-      "a visible barrier despite an unrelated hide rule",
-      `<div class="article-gate">members zone</div>`,
-    ],
+    ["a visible barrier despite an unrelated hide rule", `<div class="article-gate">members zone</div>`],
   ];
 
   for (const [how, barrier] of VISIBLE_BARRIERS) {
@@ -345,5 +356,205 @@ describe("article parsing", () => {
 
     const LIMIT = 100 * 1024 * 1024;
     assert.ok(used < LIMIT, `parse used ${(used / 1048576).toFixed(1)}MB of the 100MB budget`);
+  });
+});
+
+describe("crawler user agents", () => {
+  // Both crawler bypasses now share one fetch path, so the only thing separating them is the
+  // User-Agent string they claim. A copy-paste slip there is invisible — the fetch still
+  // succeeds, it just stops being a bypass. Assert what goes on the wire.
+  it("sends the exact User-Agent each bypass claims", async () => {
+    const seen: string[] = [];
+    const server = createServer((req, res) => {
+      seen.push(req.headers["user-agent"] ?? "");
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end("<html><body>ok</body></html>");
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address() as AddressInfo;
+    const url = `http://127.0.0.1:${address.port}/article`;
+
+    try {
+      for (const fetcher of [fetchHtmlAsGooglebot, fetchHtmlAsBingbot]) {
+        const result = await fetcher(url);
+        assert.ok(result.success, `${fetcher.name} failed against the local server`);
+      }
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+
+    assert.deepEqual(seen, [GOOGLEBOT_USER_AGENT, BINGBOT_USER_AGENT]);
+  });
+});
+
+describe("paywall waterfall", () => {
+  // Regression: tryBypassPaywall used to stop at the first HTTP-200 with any HTML. A method
+  // that answered with a challenge or the same truncated preview would win and suppress every
+  // later method. The validator now rejects such a candidate and the waterfall continues.
+  // Here the first method (Googlebot) gets a short page (rejected); the next (Bingbot) gets it.
+  it("skips a rejected candidate and keeps trying later methods", async () => {
+    const short = "<html><body>subscribe to read</body></html>";
+    const long = `<html><body><article>${"real article text. ".repeat(200)}</article></body></html>`;
+
+    // Order-independent: fail the FIRST request, serve content to every one after.
+    let hits = 0;
+    const server = createServer((_req, res) => {
+      hits += 1;
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(hits === 1 ? short : long);
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address() as AddressInfo;
+    const url = `http://127.0.0.1:${address.port}/article`;
+
+    try {
+      // Validator: accept only pages longer than the short preview.
+      const result = await tryBypassPaywall(url, undefined, (html) => (html.length > short.length ? html : null));
+
+      assert.equal(result.success, true, "waterfall should have found a usable candidate");
+      assert.equal(result.source, "bingbot", "should skip the rejected first method and accept the second");
+      assert.equal(result.validated, long, "should hand back the accepted candidate's payload");
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
+
+  it("without a validator, accepts the first method that returns content", async () => {
+    const body = "<html><body>anything</body></html>";
+    const server = createServer((_req, res) => {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(body);
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address() as AddressInfo;
+    const url = `http://127.0.0.1:${address.port}/article`;
+
+    try {
+      const result = await tryBypassPaywall(url);
+      assert.equal(result.success, true);
+      assert.equal(result.source, "googlebot", "first method wins when nothing rejects it");
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
+});
+
+describe("bypass candidate quality gate (loader level)", () => {
+  // The production validator must reject a bypass response that is ITSELF a paywall/challenge
+  // page — even though Readability happily extracts text from it — and let the waterfall reach
+  // a method that returns the real article. This exercises loadArticleViaPaywallHopper end to
+  // end: the real fetchers, the real validator (detectPaywall + parse), and buildBypassArticle.
+  it("rejects a parseable challenge page and accepts a later real article", async () => {
+    const challenge =
+      `<!doctype html><html><head><title>Members Only</title></head><body><article>` +
+      `<h1>Members Only</h1><p>Subscribe to read the rest of this story. Already a subscriber?</p>` +
+      `</article></body></html>`;
+    const real =
+      `<!doctype html><html><head><title>The Real Story</title></head><body><article><h1>The Real Story</h1>` +
+      `<p>${"This is the genuine article body with plenty of real reporting. ".repeat(60)}</p>` +
+      `</article></body></html>`;
+
+    // Fail the FIRST request (Googlebot) with the challenge page; the next (Bingbot) gets it.
+    let hits = 0;
+    const server = createServer((_req, res) => {
+      hits += 1;
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(hits === 1 ? challenge : real);
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address() as AddressInfo;
+    const url = `http://127.0.0.1:${address.port}/article`;
+
+    try {
+      const result = await loadArticleViaPaywallHopper(url, { showArticleImage: false });
+      assert.equal(result.status, "success", "should have accepted the real article");
+      assert.equal(result.status === "success" && result.article.archiveSource?.service, "bingbot");
+      assert.ok(
+        result.status === "success" && result.article.textContent.includes("genuine article body"),
+        "returned article should be the real one, not the challenge page",
+      );
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
+
+  // The text-only miss: a long teaser (>900 chars, so not short-body) with a VISIBLE barrier
+  // element but NO gating phrase or keyword. Only the DOM-based visible-barrier signal catches
+  // it, so the validator must pass `html` to detectPaywall. Without that, this teaser is
+  // accepted and suppresses the real article behind it.
+  it("rejects a text-clean candidate whose only paywall tell is a visible barrier element", async () => {
+    const neutral = "The valley road climbed past the old mill and the reservoir in the pale light. ".repeat(20);
+    const barriered =
+      `<!doctype html><html><head><title>Feature</title></head><body>` +
+      `<article><h1>Feature</h1><p>${neutral}</p></article>` +
+      `<div data-paywall style="position:fixed;inset:0">   </div>` + // visible overlay, no gating text
+      `</body></html>`;
+    const real =
+      `<!doctype html><html><head><title>The Real Story</title></head><body><article><h1>The Real Story</h1>` +
+      `<p>${"This is the genuine article body with plenty of real reporting. ".repeat(60)}</p>` +
+      `</article></body></html>`;
+
+    // Fail the FIRST request (Googlebot) with the barriered teaser; the next (Bingbot) gets it.
+    let hits = 0;
+    const server = createServer((_req, res) => {
+      hits += 1;
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(hits === 1 ? barriered : real);
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address() as AddressInfo;
+    const url = `http://127.0.0.1:${address.port}/article`;
+
+    try {
+      const result = await loadArticleViaPaywallHopper(url, { showArticleImage: false });
+      assert.equal(result.status, "success");
+      assert.equal(
+        result.status === "success" && result.article.archiveSource?.service,
+        "bingbot",
+        "the visibly-barriered teaser should be rejected in favor of the real article",
+      );
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
+});
+
+describe("Condé Nast paywall-class content", () => {
+  // Regression: the New Yorker (and other Condé Nast sites) serve the full article in the
+  // initial HTML and tag every body <p> with class="paywall" for client-side gating. The
+  // cleaner's `[class*="paywall"]` removal deleted every one of them — the reader showed the
+  // dropcap intro and the cartoons, and nothing else. The fix scopes the removal to :not(p).
+  it("keeps <p class='paywall'> body text but still strips overlay containers", () => {
+    // Many paragraphs so each is well under the cleaner's 30%-of-page protection threshold —
+    // exactly why the real page lost them: individually small, collectively the whole article.
+    const para = "The full article body that the site served for free in its HTML. ".repeat(12);
+    const paras = Array.from(
+      { length: 12 },
+      (_, i) => `<p class="${i === 0 ? "has-dropcap paywall" : "paywall"}">${para}</p>`,
+    ).join("");
+    const html =
+      `<html><body><article>${paras}` +
+      `<aside class="paywall-inline-barrier"><div class="consumer-marketing-unit--paywall-inline-barrier"></div></aside>` +
+      `</article></body></html>`;
+
+    const { document } = parseHTML(html);
+    preCleanHtml(document, "https://www.newyorker.com/magazine/2026/04/13/some-article");
+
+    const text = document.body?.textContent ?? "";
+    assert.ok(
+      text.includes("the site served for free"),
+      "body paragraphs tagged class='paywall' must survive cleaning",
+    );
+    assert.ok(text.length > 5000, `expected the full body to remain, got ${text.length} chars`);
+    assert.equal(
+      document.querySelector(".paywall-inline-barrier"),
+      null,
+      "the overlay container (an aside/div) should still be removed",
+    );
   });
 });
