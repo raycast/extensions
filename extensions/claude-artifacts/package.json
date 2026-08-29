@@ -24,7 +24,7 @@
   "tools": [],
   "dependencies": {
     "@chrismessina/raycast-kit": "^0.1.4",
-    "@raycast/api": "^2.0.6",
+    "@raycast/api": "^2.1.2",
     "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {

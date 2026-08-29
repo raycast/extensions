@@ -1,5 +1,11 @@
 # Claude Artifacts Changelog
 
+## [Pin Artifacts] - {PR_MERGE_DATE}
+
+- Added **Pin Artifact** (⌘.) — pinned artifacts collect in a **Pinned** section at the top of the list, which is what you want once you have enough of them that recency alone stops finding the one you keep coming back to
+- Pins hold inside a project filter too, so filtering does not scatter them back into the pile
+- Moved to `@raycast/api` 2.1
+
 ## [Tell You When Tracking Stops] - 2026-08-27
 
 - Added an **Artifact Tracking Is Off** row at the top of the list when the Claude Code hook is not registered — until now a list that had quietly stopped updating looked exactly like one that was up to date
