@@ -165,10 +165,20 @@ export const setTodoProperty = (todoId: string, key: WritableTodoProperty, value
   } else {
     valueExpr = `'${escapeJxa(value)}'`;
   }
+  // Things silently ignores status writes on a repeating to-do's template, so a
+  // status write reads the value back and throws when it did not take.
+  const verifyStatus =
+    key === 'status'
+      ? `
+  if (todo.status() !== ${valueExpr}) {
+    throw new Error("Things ignored the status change. If this is a repeating to-do, complete or cancel its scheduled occurrence instead.");
+  }`
+      : '';
   return executeJxa(
     `
   const things = Application('${preferences.thingsAppIdentifier}');
-  things.toDos.byId('${escapeJxa(todoId)}').${key} = ${valueExpr};
+  const todo = things.toDos.byId('${escapeJxa(todoId)}');
+  todo.${key} = ${valueExpr};${verifyStatus}
 `,
     'Set todo property',
   );
