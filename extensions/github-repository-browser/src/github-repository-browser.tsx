@@ -14,6 +14,7 @@ import { useCachedState, useFetch, usePromise } from "@raycast/utils";
 const USER_REPOS_KEY = "__user__";
 const cache = new Cache();
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+const RETRY_TTL = 5 * 60 * 1000;
 
 interface User {
   login: string;
@@ -99,22 +100,33 @@ async function getPrCount(fullName: string, headers: Record<string, string>): Pr
 async function enrichRepos(
   repos: Repository[],
   headers: Record<string, string>,
+  previousRepos?: RepositoryWithCounts[],
   concurrency = 10,
-): Promise<RepositoryWithCounts[]> {
+): Promise<{ data: RepositoryWithCounts[]; hadFailures: boolean }> {
+  const previousById = new Map(previousRepos?.map((repo) => [repo.id, repo]));
   const all: RepositoryWithCounts[] = [];
+  let hadFailures = false;
   for (let i = 0; i < repos.length; i += concurrency) {
     const chunk = repos.slice(i, i + concurrency);
     const prCounts = await Promise.all(chunk.map((r) => getPrCount(r.full_name, headers)));
     for (let j = 0; j < chunk.length; j++) {
       const repo = chunk[j];
       const prs = prCounts[j];
-      all.push({
-        ...repo,
-        ...(prs === null ? {} : { prs_count: prs, issues_count: Math.max(0, repo.open_issues_count - prs) }),
-      });
+      if (prs !== null) {
+        all.push({ ...repo, prs_count: prs, issues_count: Math.max(0, repo.open_issues_count - prs) });
+        continue;
+      }
+      // The PR count request failed (e.g. transient GitHub error). Fall back to the
+      // previously cached counts for this repo instead of erasing them, and flag this
+      // batch so the cache entry expires sooner and gets retried automatically.
+      hadFailures = true;
+      const previous = previousById.get(repo.id);
+      all.push(
+        previous ? { ...repo, prs_count: previous.prs_count, issues_count: previous.issues_count } : { ...repo },
+      );
     }
   }
-  return all;
+  return { data: all, hadFailures };
 }
 
 export default function Command() {
@@ -156,15 +168,21 @@ export default function Command() {
   } = usePromise(
     async (key: string, url: string) => {
       const raw = cache.get(key);
+      let previousEntry: CacheEntry | undefined;
       if (raw) {
-        const entry = JSON.parse(raw) as CacheEntry;
-        if (Date.now() - entry.timestamp < CACHE_TTL) {
-          return entry.data;
+        previousEntry = JSON.parse(raw) as CacheEntry;
+        if (Date.now() - previousEntry.timestamp < CACHE_TTL) {
+          return previousEntry.data;
         }
       }
       const rawRepos = await fetchAllPages(url, headers);
-      const data = await enrichRepos(rawRepos, headers);
-      const entry: CacheEntry = { timestamp: Date.now(), data };
+      const { data, hadFailures } = await enrichRepos(rawRepos, headers, previousEntry?.data);
+      const entry: CacheEntry = {
+        // If some repos failed to fetch fresh PR/issue counts, expire this entry sooner
+        // so it's automatically retried on the next load instead of being stuck for a week.
+        timestamp: hadFailures ? Date.now() - CACHE_TTL + RETRY_TTL : Date.now(),
+        data,
+      };
       setCachedEntry(entry);
       return data;
     },
