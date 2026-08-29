@@ -110,7 +110,7 @@ async function enrichRepos(
       const prs = prCounts[j];
       all.push({
         ...repo,
-        ...(prs === null ? {} : { prs_count: prs, issues_count: repo.open_issues_count - prs }),
+        ...(prs === null ? {} : { prs_count: prs, issues_count: Math.max(0, repo.open_issues_count - prs) }),
       });
     }
   }
