@@ -97,6 +97,25 @@ async function getPrCount(fullName: string, headers: Record<string, string>): Pr
   return Array.isArray(data) ? data.length : 0;
 }
 
+async function getOpenIssuesCount(fullName: string, headers: Record<string, string>): Promise<number | null> {
+  const response = await fetch(`https://api.github.com/repos/${fullName}`, { headers });
+  if (!response.ok) return null;
+  const data = await response.json();
+  return typeof data.open_issues_count === "number" ? data.open_issues_count : null;
+}
+
+// Fetch the PR count and the total open-issues count (which GitHub includes PRs in) together,
+// so both numbers reflect roughly the same instant. Combining a fresh count with one taken from
+// an earlier bulk list fetch can otherwise produce an inconsistent, incorrect issue count if a
+// PR or issue is opened/closed in between.
+async function getCounts(
+  fullName: string,
+  headers: Record<string, string>,
+): Promise<{ prs: number | null; totalOpen: number | null }> {
+  const [prs, totalOpen] = await Promise.all([getPrCount(fullName, headers), getOpenIssuesCount(fullName, headers)]);
+  return { prs, totalOpen };
+}
+
 async function enrichRepos(
   repos: Repository[],
   headers: Record<string, string>,
@@ -108,17 +127,17 @@ async function enrichRepos(
   let hadFailures = false;
   for (let i = 0; i < repos.length; i += concurrency) {
     const chunk = repos.slice(i, i + concurrency);
-    const prCounts = await Promise.all(chunk.map((r) => getPrCount(r.full_name, headers)));
+    const counts = await Promise.all(chunk.map((r) => getCounts(r.full_name, headers)));
     for (let j = 0; j < chunk.length; j++) {
       const repo = chunk[j];
-      const prs = prCounts[j];
-      if (prs !== null) {
-        all.push({ ...repo, prs_count: prs, issues_count: Math.max(0, repo.open_issues_count - prs) });
+      const { prs, totalOpen } = counts[j];
+      if (prs !== null && totalOpen !== null) {
+        all.push({ ...repo, prs_count: prs, issues_count: Math.max(0, totalOpen - prs) });
         continue;
       }
-      // The PR count request failed (e.g. transient GitHub error). Fall back to the
-      // previously cached counts for this repo instead of erasing them, and flag this
-      // batch so the cache entry expires sooner and gets retried automatically.
+      // One or both counts failed to fetch (e.g. transient GitHub error). Fall back to the
+      // previously cached counts for this repo instead of erasing or miscomputing them, and
+      // flag this batch so the cache entry expires sooner and gets retried automatically.
       hadFailures = true;
       const previous = previousById.get(repo.id);
       all.push(
