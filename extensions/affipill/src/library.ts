@@ -67,7 +67,7 @@ function resolveManagedPath(filePath: string, trackId: string, tracksDirectory: 
 
 async function relocateManagedFile(filePath: string, trackId: string, tracksDirectory: string): Promise<string> {
   const destinationPath = managedDestinationPath(filePath, trackId, tracksDirectory);
-  if (!destinationPath || resolve(filePath) === destinationPath) {
+  if (!destinationPath || isSameFilesystemPath(filePath, destinationPath)) {
     return filePath;
   }
 
@@ -94,6 +94,24 @@ function isValidFile(path: string): boolean {
     return statSync(path).isFile();
   } catch {
     return false;
+  }
+}
+
+function isSameFilesystemPath(left?: string, right?: string): boolean {
+  if (!left || !right) {
+    return false;
+  }
+
+  if (left === right || resolve(left) === resolve(right)) {
+    return true;
+  }
+
+  try {
+    const leftStat = statSync(left);
+    const rightStat = statSync(right);
+    return leftStat.dev === rightStat.dev && leftStat.ino === rightStat.ino;
+  } catch {
+    return resolve(left).toLowerCase() === resolve(right).toLowerCase();
   }
 }
 
@@ -260,7 +278,7 @@ export async function updateTrack(id: string, input: UpdateTrackInput): Promise<
   if (input.audioSourcePath) {
     const nextAudioPath = join(tracksDirectory, `${id}${extname(input.audioSourcePath)}`);
     await copyTrackFile(input.audioSourcePath, nextAudioPath);
-    if (existingTrack.audioPath !== nextAudioPath) {
+    if (!isSameFilesystemPath(existingTrack.audioPath, nextAudioPath)) {
       await removeFileIfExists(existingTrack.audioPath);
     }
     audioPath = nextAudioPath;
@@ -270,7 +288,7 @@ export async function updateTrack(id: string, input: UpdateTrackInput): Promise<
   if (input.coverSourcePath) {
     const nextCoverPath = join(tracksDirectory, `${id}-cover${extname(input.coverSourcePath)}`);
     await copyTrackFile(input.coverSourcePath, nextCoverPath);
-    if (existingTrack.coverPath !== nextCoverPath) {
+    if (!isSameFilesystemPath(existingTrack.coverPath, nextCoverPath)) {
       await removeFileIfExists(existingTrack.coverPath);
     }
     coverPath = nextCoverPath;
