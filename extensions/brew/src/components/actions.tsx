@@ -62,6 +62,12 @@ export function FormulaUpgradeAction(props: {
   formula: Cask | Nameable;
   /** Called when the upgrade starts, e.g. to show progress */
   onStart?: () => void;
+  /**
+   * Called instead of running the upgrade when the formula is pinned, so a view
+   * that tracks per-package status can mark the row as skipped. Views that show
+   * no status (Search, Show Installed) leave it undefined and rely on the toast.
+   */
+  onSkip?: () => void;
   onAction: (result: boolean) => void;
 }) {
   return (
@@ -71,6 +77,7 @@ export function FormulaUpgradeAction(props: {
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       onAction={async () => {
         if (isPinned(props.formula)) {
+          props.onSkip?.();
           await showToast({
             style: Toast.Style.Success,
             title: "Skipping Pinned Formulae Upgrades",

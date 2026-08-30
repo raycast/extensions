@@ -530,6 +530,7 @@ export function OutdatedActionPanel(props: {
         <Actions.FormulaUpgradeAction
           formula={outdated}
           onStart={() => props.onUpgrade?.("upgrading")}
+          onSkip={() => props.onUpgrade?.("skipped")}
           onAction={onUpgradeAction}
         />
         <Actions.FormulaUpgradeAllAction onUpgradeAll={props.onUpgradeAll} onAction={props.onAction} />
