@@ -87,11 +87,11 @@ try {
       $category = 'internal'
       if ($v.DriveType -eq 2 -or ($wmiInfo -and $wmiInfo.DriveType -eq 2) -or ($diskInfo -and $diskInfo.BusType -eq 'USB')) {
         $category = 'removable'
-      } elseif ($v.DriveType -eq 4 -or ($wmiInfo -and $wmiInfo.DriveType -eq 5)) {
+      } elseif ($v.DriveType -eq 5 -or ($wmiInfo -and $wmiInfo.DriveType -eq 5)) {
         $category = 'optical'
-      } elseif ($v.DriveType -eq 6 -or ($wmiInfo -and $wmiInfo.DriveType -eq 4) -or $netPath) {
+      } elseif ($v.DriveType -eq 4 -or ($wmiInfo -and $wmiInfo.DriveType -eq 4) -or $netPath) {
         $category = 'network'
-      } elseif ($diskInfo -and $diskInfo.BusType -eq 'File Backed Virtual') {
+      } elseif ($v.DriveType -eq 6 -or ($diskInfo -and $diskInfo.BusType -eq 'File Backed Virtual')) {
         $category = 'virtual'
       }
 

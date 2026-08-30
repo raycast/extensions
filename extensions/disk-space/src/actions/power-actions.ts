@@ -6,13 +6,10 @@ import {
   confirmAlert,
   Alert,
 } from "@raycast/api";
-import { exec, spawn } from "child_process";
-import { promisify } from "util";
+import { spawn } from "child_process";
 import { StorageDrive } from "../types/storage";
 import { formatBytes, formatPercent } from "../utils/formatters";
 import { getStorageProvider } from "../services/storage-factory";
-
-const execAsync = promisify(exec);
 
 /**
  * Opens the root folder of a drive in Windows File Explorer or macOS Finder.
@@ -53,6 +50,7 @@ export async function openDriveRoot(mountPoint: string): Promise<void> {
 
 /**
  * Spawns Windows Terminal (wt.exe) / PowerShell or macOS Terminal at the drive root path.
+ * Uses direct argument passing to avoid shell interpretation vulnerabilities.
  */
 export async function openInTerminal(drivePath: string): Promise<void> {
   const cleanPath = drivePath.trim();
@@ -84,7 +82,14 @@ export async function openInTerminal(drivePath: string): Promise<void> {
         message: cleanPath,
       });
     } else if (process.platform === "darwin") {
-      await execAsync(`open -a Terminal "${cleanPath}"`);
+      const child = spawn("open", ["-a", "Terminal", cleanPath], {
+        detached: true,
+        stdio: "ignore",
+      });
+      child.on("error", (err) => {
+        console.error("Failed to launch macOS Terminal:", err);
+      });
+      child.unref();
       await showToast({
         style: Toast.Style.Success,
         title: "Terminal Opened",
@@ -125,7 +130,14 @@ export async function launchDiskCleanup(driveLetter?: string): Promise<void> {
         message: `Targeting Drive (${letter}:)`,
       });
     } else if (process.platform === "darwin") {
-      await execAsync("open -b com.apple.StorageManagement");
+      const child = spawn("open", ["-b", "com.apple.StorageManagement"], {
+        detached: true,
+        stdio: "ignore",
+      });
+      child.on("error", (err) => {
+        console.error("Failed to open macOS StorageManagement:", err);
+      });
+      child.unref();
       await showToast({
         style: Toast.Style.Success,
         title: "Opening macOS Storage Management",
