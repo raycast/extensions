@@ -1,5 +1,12 @@
 # raycast-ollama Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Added prompt template editing in settings for all built-in commands. Commands fallback to their default prompt template if no custom one is defined.
+- Added tooltip information detailing supported curly braces placeholders (`{selection}`, `{source}`, `{target}`, `{browser-tab}`, and `{image}`) inside the prompt editing textareas.
+- Added a new command "Manage AI Commands" to view, customize prompts and model settings, or reset configurations back to default.
+- Separated settings for "Summarize Website" into its own command settings key so it can be customized independently of the tweet rephrasing command.
+
 ## [Fix] - 2026-06-16
 
 - [Fix] Command "Chat with Ollama" and "Answer" commands: fixed a bug in the thinking rendering during streaming. The thinking text could stop updating mid-generation while the stream continued and the final answer appeared. The root cause was a missing flush of the pending `textThinkingBuffer` on stream termination (`emitDone`) combined with a `else if` in the throttle path that prevented symmetric flushing of thinking and content buffers.
