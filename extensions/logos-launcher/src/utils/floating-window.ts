@@ -28,11 +28,9 @@ export async function floatActiveLogosPanel(platform: NodeJS.Platform = process.
   }
 
   if (platform === "win32") {
-    await execFileAsync(
-      "powershell.exe",
-      ["-NoProfile", "-NonInteractive", "-Command", WINDOWS_FLOAT_PANEL_SCRIPT],
-      { windowsHide: true },
-    );
+    await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", WINDOWS_FLOAT_PANEL_SCRIPT], {
+      windowsHide: true,
+    });
     return;
   }
 
