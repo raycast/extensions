@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { LOGOS_TOOL_GROUPS, type LogosTool } from "./data/logos-tools";
 import { extractErrorMessage } from "./utils/errors";
 import { LOGOS_BUNDLE_ID } from "./logos/constants";
+import { floatActiveLogosPanel } from "./utils/floating-window";
 
 export default function Command() {
   return (
@@ -33,6 +34,7 @@ function ToolListItem({ tool }: { tool: LogosTool }) {
 
 function ToolActions({ tool }: { tool: LogosTool }) {
   const uris = useMemo(() => buildToolUris(tool), [tool]);
+  const floatingUris = useMemo(() => uris.filter((uri) => !isHttpUri(uri)), [uris]);
   const primaryCommand = getPrimaryCommand(tool);
   const primaryUri = uris[0];
 
@@ -45,13 +47,22 @@ function ToolActions({ tool }: { tool: LogosTool }) {
           await launchTool(tool, uris);
         }}
       />
+      {floatingUris.length > 0 ? (
+        <Action
+          title="Open in Floating Window"
+          icon={Icon.AppWindow}
+          onAction={async () => {
+            await launchTool(tool, floatingUris, { floating: true });
+          }}
+        />
+      ) : null}
       <Action.CopyToClipboard title="Copy Command Text" content={primaryCommand} />
       {primaryUri ? <Action.CopyToClipboard title="Copy Launch URI" content={primaryUri} /> : null}
     </ActionPanel>
   );
 }
 
-async function launchTool(tool: LogosTool, uris?: string[]) {
+async function launchTool(tool: LogosTool, uris?: string[], options: { floating?: boolean } = {}) {
   const candidates = uris?.length ? uris : buildToolUris(tool);
   if (candidates.length === 0) {
     await showToast({
@@ -65,9 +76,20 @@ async function launchTool(tool: LogosTool, uris?: string[]) {
   let lastError: unknown;
   for (const uri of candidates) {
     try {
-      const isHttp = uri.startsWith("http://") || uri.startsWith("https://");
-      await open(uri, isHttp ? undefined : LOGOS_BUNDLE_ID);
-      await showHUD(`Opening ${tool.name}`);
+      await open(uri, isHttpUri(uri) ? undefined : LOGOS_BUNDLE_ID);
+      if (options.floating) {
+        try {
+          await floatActiveLogosPanel();
+        } catch (error) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Opened tool, but could not float panel",
+            message: `${extractErrorMessage(error)} Check automation or accessibility permissions and try again.`,
+          });
+          return;
+        }
+      }
+      await showHUD(options.floating ? `Opening ${tool.name} in a floating window` : `Opening ${tool.name}`);
       return;
     } catch (error) {
       lastError = error;
@@ -80,6 +102,10 @@ async function launchTool(tool: LogosTool, uris?: string[]) {
     title: "Could not open Logos",
     message: `${extractErrorMessage(lastError)} — Tried ${previewList}${candidates.length > 3 ? ", …" : ""}`,
   });
+}
+
+function isHttpUri(uri: string) {
+  return uri.startsWith("http://") || uri.startsWith("https://");
 }
 
 function buildToolUris(tool: LogosTool) {
