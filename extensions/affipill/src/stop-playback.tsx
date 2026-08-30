@@ -14,7 +14,15 @@ export default async function Command() {
   const tracks = await getTracks();
   const track = getTrackById(tracks, playback.trackId);
 
-  await stopPlayback();
+  try {
+    await stopPlayback();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Could not stop playback.";
+    await showHUD(message);
+    await closeMainWindow();
+    return;
+  }
+
   await showHUD(`Stopped ${track?.title ?? "track"}`);
   await closeMainWindow();
 }

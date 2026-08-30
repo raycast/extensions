@@ -58,8 +58,13 @@ export default function Command() {
         icon={Icon.Stop}
         shortcut={Keyboard.Shortcut.Common.Pin}
         onAction={async () => {
-          await stopPlayback();
-          await showHUD(`Stopped ${playingTrack.title}`);
+          try {
+            await stopPlayback();
+            await showHUD(`Stopped ${playingTrack.title}`);
+          } catch (error) {
+            const message = error instanceof Error ? error.message : "Could not stop playback.";
+            await showHUD(message);
+          }
         }}
       />
       <MenuBarExtra.Item

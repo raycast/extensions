@@ -129,7 +129,13 @@ export default function Command() {
   }
 
   async function handleStop(title?: string) {
-    await stopPlayback();
+    try {
+      await stopPlayback();
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not stop playback" });
+      return;
+    }
+
     setPlayback(null);
     await showHUD(title ? `Stopped ${title}` : "Stopped playback");
     await closeMainWindow();
@@ -150,7 +156,12 @@ export default function Command() {
     }
 
     if (playingTrackId === track.id) {
-      await stopPlayback();
+      try {
+        await stopPlayback();
+      } catch (error) {
+        await showFailureToast(error, { title: "Could not stop playback" });
+        return;
+      }
       setPlayback(null);
     }
 

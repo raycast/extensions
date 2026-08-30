@@ -16,9 +16,7 @@ export type PlaybackState = {
 type FieldLookup = { kind: "missing" } | { kind: "unknown" } | { kind: "found"; value: string };
 
 type ProcessLookup =
-  | { kind: "missing" }
-  | { kind: "unknown" }
-  | { kind: "found"; command: string; processStartedAt: string };
+  { kind: "missing" } | { kind: "unknown" } | { kind: "found"; command: string; processStartedAt: string };
 
 type Ownership = "owned" | "foreign" | "unknown";
 
@@ -90,10 +88,7 @@ function getPlaybackOwnership(state: PlaybackState): Ownership {
     return "foreign";
   }
 
-  if (
-    process.processStartedAt === state.processStartedAt &&
-    isAfplayCommand(process.command, state.audioPath)
-  ) {
+  if (process.processStartedAt === state.processStartedAt && isAfplayCommand(process.command, state.audioPath)) {
     return "owned";
   }
 
@@ -164,6 +159,8 @@ export async function getPlaybackState(): Promise<PlaybackState | null> {
   return state;
 }
 
+const PLAYBACK_LOOKUP_ERROR = "Could not confirm the current playback process. Try stopping again.";
+
 export async function stopPlayback(): Promise<void> {
   const state = await readPlaybackState();
   if (!state) {
@@ -171,12 +168,18 @@ export async function stopPlayback(): Promise<void> {
   }
 
   const ownership = getPlaybackOwnership(state);
-  if (ownership === "unknown") {
-    return;
-  }
-
-  if (ownership === "owned") {
-    killPlaybackProcess(state.pid);
+  switch (ownership) {
+    case "unknown":
+      throw new Error(PLAYBACK_LOOKUP_ERROR);
+    case "owned":
+      killPlaybackProcess(state.pid);
+      break;
+    case "foreign":
+      break;
+    default: {
+      const _exhaustive: never = ownership;
+      throw new Error(`Unhandled playback ownership: ${_exhaustive}`);
+    }
   }
 
   await clearPlaybackState();
