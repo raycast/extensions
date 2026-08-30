@@ -4,6 +4,7 @@ import { existsSync } from "fs";
 
 const PLAYBACK_KEY = "playback";
 const NOW_PLAYING_COMMAND = "now-playing";
+const PLAYBACK_LOOKUP_ERROR = "Could not confirm the current playback process. Try stopping again.";
 
 export type PlaybackState = {
   pid: number;
@@ -115,16 +116,26 @@ async function readPlaybackState(): Promise<PlaybackState | null> {
 
 function killPlaybackProcess(pid: number): void {
   try {
-    process.kill(-pid, "SIGKILL");
-    return;
-  } catch {
-    // Try the next kill strategy.
-  }
-
-  try {
     process.kill(pid, "SIGKILL");
   } catch {
     spawnSync("kill", ["-9", String(pid)]);
+  }
+}
+
+function stopOwnedPlayback(state: PlaybackState): void {
+  const confirmed = getPlaybackOwnership(state);
+  switch (confirmed) {
+    case "owned":
+      killPlaybackProcess(state.pid);
+      return;
+    case "unknown":
+      throw new Error(PLAYBACK_LOOKUP_ERROR);
+    case "foreign":
+      return;
+    default: {
+      const _exhaustive: never = confirmed;
+      throw new Error(`Unhandled playback ownership: ${_exhaustive}`);
+    }
   }
 }
 
@@ -159,8 +170,6 @@ export async function getPlaybackState(): Promise<PlaybackState | null> {
   return state;
 }
 
-const PLAYBACK_LOOKUP_ERROR = "Could not confirm the current playback process. Try stopping again.";
-
 export async function stopPlayback(): Promise<void> {
   const state = await readPlaybackState();
   if (!state) {
@@ -172,7 +181,7 @@ export async function stopPlayback(): Promise<void> {
     case "unknown":
       throw new Error(PLAYBACK_LOOKUP_ERROR);
     case "owned":
-      killPlaybackProcess(state.pid);
+      stopOwnedPlayback(state);
       break;
     case "foreign":
       break;
