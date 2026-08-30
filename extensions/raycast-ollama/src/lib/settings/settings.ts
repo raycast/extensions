@@ -100,6 +100,14 @@ export async function SetSettingsCommandAnswer(
 }
 
 /**
+ * Delete Settings for Command Answer from LocalStorage.
+ * @param command - command type.
+ */
+export async function DeleteSettingsCommandAnswer(command: Enum.CommandAnswer): Promise<void> {
+  await LocalStorage.removeItem(`settings_command_${command}`);
+}
+
+/**
  * Get Array of Chat Names.
  * @returns Array of Chat Names.
  */

@@ -28,6 +28,7 @@ export interface SettingsChatModels {
 export interface SettingsCommandAnswer {
   server: string;
   model: SettingsModels;
+  prompt?: string;
 }
 
 export interface LegacyRaycastChatMessage extends OllamaApiGenerateStats {

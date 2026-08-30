@@ -9,8 +9,8 @@ if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.OllamaTranslate }>): React.JSX.Element {
   const c = CommandAnswer.TRANSLATE;
-  const p = `You are a professional ${props.arguments.source} to ${props.arguments.target} translator. Your goal is to accurately convey the meaning and nuances of the original ${props.arguments.source} text while adhering to ${props.arguments.target} grammar, vocabulary, and cultural sensitivities.
-Produce only the ${props.arguments.target} translation, without any additional explanations or commentary. Please translate the following ${props.arguments.source} text into ${props.arguments.target}:
+  const p = `You are a professional {source} to {target} translator. Your goal is to accurately convey the meaning and nuances of the original {source} text while adhering to {target} grammar, vocabulary, and cultural sensitivities.
+Produce only the {target} translation, without any additional explanations or commentary. Please translate the following {source} text into {target}:
 
 
 {selection}`;
@@ -18,6 +18,10 @@ Produce only the ${props.arguments.target} translation, without any additional e
     <AnswerView
       command={c}
       prompt={p}
+      promptValues={{
+        source: props.arguments.source,
+        target: props.arguments.target,
+      }}
       creativity={Creativity.Low}
       capabilities={[OllamaApiModelCapability.COMPLETION]}
     />

@@ -36,6 +36,7 @@ export async function GetModel(command?: CommandAnswer, server?: string, model?:
     tag: m[0],
     thinking: settings?.model.main.thinking,
     keep_alive: settings?.model.main.keep_alive,
+    prompt: settings?.prompt,
   };
 }
 

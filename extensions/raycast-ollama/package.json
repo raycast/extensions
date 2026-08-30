@@ -4913,21 +4913,28 @@
       "subtitle": "Ollama",
       "description": "Manage configured MCP Server",
       "mode": "view"
+    },
+    {
+      "name": "ollama-commands",
+      "title": "Manage AI Commands",
+      "subtitle": "Ollama",
+      "description": "Manage prompts and model settings for all AI commands",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.26.0",
-    "@raycast/api": "^1.103.7",
-    "@raycast/utils": "^2.2.2",
-    "file-type": "^21.3.1"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@raycast/api": "^2.1.2",
+    "@raycast/utils": "^2.3.0",
+    "file-type": "^22.0.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/mime-types": "^2.1.4",
-    "@types/node": "^22.13.14",
-    "@types/react": "^19.2.6",
-    "eslint": "^8.57.0",
-    "prettier": "^3.8.3",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "^26.4.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -4936,5 +4943,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "contributors": [
+    "anwarulislam"
+  ]
 }

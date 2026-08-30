@@ -21,11 +21,7 @@ interface FormData {
 export default function Command(): React.JSX.Element {
   const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, []);
   const { itemProps } = useForm<FormData>({
-    onSubmit() {
-      () => {
-        return;
-      };
-    },
+    onSubmit() {},
     initialValues: {
       creativity: String(Creativity.Medium),
       thinking: String(ThinkingEffort.None),

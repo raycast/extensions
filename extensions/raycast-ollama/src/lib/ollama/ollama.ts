@@ -565,7 +565,6 @@ export class Ollama {
         let lastEmitTime = Date.now();
 
         try {
-          // eslint-disable-next-line no-constant-condition
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -657,7 +656,6 @@ export class Ollama {
         let textThinkingBuffer = "";
 
         try {
-          // eslint-disable-next-line no-constant-condition
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -672,10 +670,7 @@ export class Ollama {
                 if (j.trim() === "") continue;
 
                 let json:
-                  | Types.OllamaApiChatResponse
-                  | Types.OllamaApiGenerateResponse
-                  | Types.OllamaErrorResponse
-                  | undefined;
+                  Types.OllamaApiChatResponse | Types.OllamaApiGenerateResponse | Types.OllamaErrorResponse | undefined;
                 try {
                   json = JSON.parse(j);
                 } catch (err) {

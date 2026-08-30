@@ -19,6 +19,7 @@ interface props {
   creativity?: Creativity;
   thinking?: ThinkingEffort;
   keep_alive?: string;
+  promptValues?: Record<string, string>;
 }
 
 /**
@@ -55,9 +56,16 @@ export function AnswerView(props: props): React.JSX.Element {
 
   React.useEffect(() => {
     if (Model && !IsLoadingModel) {
+      let promptToRun = Model.prompt !== undefined ? Model.prompt : props.prompt;
+      if (props.promptValues) {
+        for (const [key, value] of Object.entries(props.promptValues)) {
+          const regex = new RegExp(`{[ ]*${key}[ ]*}`, "gi");
+          promptToRun = promptToRun.replace(regex, value);
+        }
+      }
       Run(
         Model,
-        props.prompt,
+        promptToRun,
         query,
         images,
         setLoading,
@@ -93,6 +101,7 @@ export function AnswerView(props: props): React.JSX.Element {
         model={!IsLoadingModel && Model ? Model.tag.name : undefined}
         thinking={!IsLoadingModel && Model ? Model.thinking : undefined}
         keep_alive={!IsLoadingModel && Model ? Model.keep_alive : undefined}
+        prompt={!IsLoadingModel && Model && Model.prompt !== undefined ? Model.prompt : props.prompt}
       />
     );
 

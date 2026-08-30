@@ -8,7 +8,7 @@ const pref = getPreferenceValues<Preferences>();
 if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 export default function Command(): React.JSX.Element {
-  const c = CommandAnswer.TWEET;
+  const c = CommandAnswer.BROWSER_SUMMARIZE;
   const p = `Summarize the provided website with the following format:
 """
 ## <concise and easy-to-read website title>

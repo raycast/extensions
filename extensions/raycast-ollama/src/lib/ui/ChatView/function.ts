@@ -190,7 +190,6 @@ async function Inference(
   const msgRequestBody: OllamaApiChatMessage[] = GetMessagesForInference(chat, query, image);
   let isFirstMessage = true;
 
-  /* eslint-disable-next-line no-constant-condition */
   while (true) {
     let thinkingStarted = false;
     let responseStarted = false;
