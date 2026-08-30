@@ -31,6 +31,10 @@ function escapeExtendedRegex(value: string): string {
   return value.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
 }
 
+function escapeAppleScriptString(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 function processPatternsForBinary(binaryPath: string): string[] {
   const normalized = normalizedBinaryPath(binaryPath);
   const appPath = appBundlePathFromBinary(normalized);
@@ -39,7 +43,6 @@ function processPatternsForBinary(binaryPath: string): string[] {
       [
         normalized,
         appPath ? `${appPath}/Contents/MacOS/${HANDY_PROCESS_NAME}` : null,
-        DEFAULT_HANDY_BINARY_PATH,
       ]
         .filter((pattern): pattern is string => Boolean(pattern))
         .map(escapeExtendedRegex),
@@ -47,35 +50,7 @@ function processPatternsForBinary(binaryPath: string): string[] {
   );
 }
 
-async function handyProcessPath(): Promise<string | null> {
-  try {
-    const { stdout } = await execa("osascript", [
-      "-e",
-      'tell application "System Events" to get posix path of (file of (application process "Handy"))',
-    ]);
-    const path = stdout.trim();
-    if (path) return path;
-  } catch {
-    // ignore — fall through to binary-path derivation
-  }
-  return null;
-}
-
-async function hasHandyApplicationProcess(): Promise<boolean> {
-  try {
-    const { stdout } = await execa("osascript", [
-      "-e",
-      `tell application "System Events" to exists application process "${HANDY_PROCESS_NAME}"`,
-    ]);
-    return stdout.trim() === "true";
-  } catch {
-    return false;
-  }
-}
-
 async function isHandyRunning(handyBinaryPath: string): Promise<boolean> {
-  if (await hasHandyApplicationProcess()) return true;
-
   for (const pattern of processPatternsForBinary(handyBinaryPath)) {
     try {
       await execa("pgrep", ["-f", pattern]);
@@ -84,13 +59,7 @@ async function isHandyRunning(handyBinaryPath: string): Promise<boolean> {
       // try the next process matcher
     }
   }
-
-  try {
-    await execa("pgrep", ["-x", HANDY_PROCESS_NAME]);
-    return true;
-  } catch {
-    return false;
-  }
+  return false;
 }
 
 async function pkillHandy(
@@ -104,16 +73,16 @@ async function pkillHandy(
       // process may already be gone, or this pattern may not match this install
     }
   }
-  try {
-    await execa("pkill", [...(force ? ["-9"] : []), "-x", HANDY_PROCESS_NAME]);
-  } catch {
-    // process may already be gone
-  }
 }
 
 async function quitHandy(handyBinaryPath: string): Promise<void> {
+  const binaryPath = normalizedBinaryPath(handyBinaryPath);
+  const appPath = appBundlePathFromBinary(binaryPath) ?? HANDY_PROCESS_NAME;
   try {
-    await execa("osascript", ["-e", 'tell application "Handy" to quit']);
+    await execa("osascript", [
+      "-e",
+      `tell application "${escapeAppleScriptString(appPath)}" to quit`,
+    ]);
   } catch {
     // App may ignore AppleScript quit (e.g. busy); force it.
   }
@@ -141,13 +110,12 @@ async function waitForExit(
 }
 
 async function launchHandy(handyBinaryPath: string): Promise<void> {
-  const running = await handyProcessPath();
   const binaryPath = normalizedBinaryPath(handyBinaryPath);
-  const appPath = running ?? appBundlePathFromBinary(binaryPath) ?? binaryPath;
+  const appPath = appBundlePathFromBinary(binaryPath) ?? binaryPath;
   try {
     await execa("open", [appPath]);
   } catch {
-    await execa("open", ["-a", HANDY_PROCESS_NAME]);
+    await execa("open", ["-a", appPath]);
   }
 }
 
