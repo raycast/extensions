@@ -1,6 +1,11 @@
 # Logos Search Changelog
 
-## [Unreleased] - 2026-06-25
+## [1.3.0] - 2026-08-30
+
+### Added
+
+- Added an "Open in Floating Window" action to the Logos Tools Launcher on macOS and Windows.
+- Uses Logos' documented floating-panel shortcuts after opening the selected tool with a native Logos URI.
 
 ### Fixed
 
