@@ -1,9 +1,10 @@
 # Calendly Changelog
 
-## [Maintenance] - 2026-08-30
+## [Meeting Management and Raycast AI] - {PR_MERGE_DATE}
 
-- Add support for Windows platform.
-- Bump all dependencies to the latest.
+- Browse upcoming meetings and event types, check availability, create single-use links, and book or cancel meetings directly from Raycast.
+- Manage Calendly through Raycast AI with tools for meetings, event types, availability, booking, and cancellation.
+- Add support for Windows.
 
 ## [Added event duration] - 2026-04-12
 
