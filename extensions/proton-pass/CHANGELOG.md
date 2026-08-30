@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-08-30
 
 - Add macOS and Windows x86_64 support with Proton Pass CLI 2.3.3
 - Stream secure browser login URLs and use platform-native keyboard shortcuts
