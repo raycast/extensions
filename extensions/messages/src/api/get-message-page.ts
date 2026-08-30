@@ -158,9 +158,9 @@ export async function getMessagePage(input: MessagePageInput): Promise<MessagePa
     }
 
     if (matches.length === limit) break;
+    // A full batch advances the internal scan position, but it does not prove that another page exists.
+    // Only expose that position when the result limit or bounded scan cap requires a continuation cursor.
     if (rawRows.length < queryLimit) break;
-    nextKey = position;
-    hasMore = true;
   }
 
   if (searchText && scannedMessageCount >= MAX_SEARCH_SCAN && position) {
