@@ -1,5 +1,9 @@
+import { homedir } from "os";
+import { join } from "path";
 import { Color, Icon } from "@raycast/api";
 import type { RegistryEntry } from "./types";
+
+const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
@@ -1119,7 +1123,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     homepage: "https://github.com/ariaxhan/metabrain",
     configuration: {
       command: "uvx",
-      args: ["--from", "metabrain[mcp]", "metabrain-mcp", "--db", "./agent.db"],
+      args: ["--from", "metabrain[mcp]", "metabrain-mcp", "--db", METABRAIN_DB_PATH],
     },
   },
   {
