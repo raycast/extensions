@@ -2,13 +2,13 @@ import {
   ActionPanel,
   Action,
   List,
-  open,
   Icon,
   showToast,
   Toast,
   getPreferenceValues,
   Keyboard,
   closeMainWindow,
+  Clipboard,
 } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { usePromise } from "@raycast/utils";
@@ -18,6 +18,7 @@ import { createBttClient } from "./btt";
 export default function Command() {
   const [showDisabledTriggers, setShowDisabledTriggers] = useState(false);
   const btt = useMemo(createBttClient, []);
+  const { triggerResultHandling } = getPreferenceValues<TriggerPreferences>();
   const { isLoading, data, revalidate } = usePromise(
     (client: Btt) => client.getTriggers<BTTTrigger>({ triggerId: 643 }),
     [btt],
@@ -49,7 +50,12 @@ export default function Command() {
     >
       <List.Section title="Results" subtitle={commands?.length + ""}>
         {commands?.map((triggerResult) => (
-          <TriggerItem key={triggerResult.BTTUUID} triggerResult={triggerResult} btt={btt} />
+          <TriggerItem
+            key={triggerResult.BTTUUID}
+            triggerResult={triggerResult}
+            btt={btt}
+            resultHandling={triggerResultHandling}
+          />
         ))}
       </List.Section>
     </List>
@@ -65,21 +71,21 @@ function TriggerDropdown({ onTriggerTypeChange }: { onTriggerTypeChange: (value:
   );
 }
 
-function TriggerItem({ triggerResult, btt }: { triggerResult: BTTTrigger; btt: Btt }) {
-  const preferences: Preferences.Trigger = getPreferenceValues();
-  const sharedSecret = preferences.bttSharedSecret;
-
+function TriggerItem({
+  triggerResult,
+  btt,
+  resultHandling,
+}: {
+  triggerResult: BTTTrigger;
+  btt: Btt;
+  resultHandling: TriggerResultHandling;
+}) {
   const triggerName = triggerResult.BTTTriggerName;
-  const url = `btt://trigger_named/?trigger_name=${encodeURIComponent(triggerName)}${
-    sharedSecret ? "&shared_secret=" + encodeURIComponent(sharedSecret) : ""
-  }`;
-  const handleTrigger = async () => {
-    await open(url);
-  };
 
   const handleRun = async () => {
     try {
-      await btt.triggerNamed(triggerName);
+      const result = await btt.triggerNamed(triggerName);
+      await handleTriggerResult(result, resultHandling);
     } catch (error) {
       showToast({
         title: "Failed to run trigger",
@@ -129,19 +135,12 @@ function TriggerItem({ triggerResult, btt }: { triggerResult: BTTTrigger; btt: B
           <ActionPanel.Section>
             <Action title="Run Trigger with BTT" onAction={handleRun} icon={Icon.PlayFilled} />
             <Action title="Run Trigger in Background" onAction={handleRunInBackground} icon={Icon.Play} />
-            <Action
-              title="Run Trigger with BTT via URL"
-              onAction={handleTrigger}
-              icon={Icon.Link}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy Trigger URL"
-              content={url}
+              title="Copy Trigger Name"
+              content={triggerName}
               shortcut={Keyboard.Shortcut.Common.Copy}
-              onCopy={() => console.log(triggerResult)}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -154,4 +153,26 @@ interface BTTTrigger extends TriggerJson {
   BTTGestureNotes?: string;
   BTTTriggerName: string;
   BTTUUID: string;
+}
+
+interface TriggerPreferences {
+  triggerResultHandling: TriggerResultHandling;
+}
+
+type TriggerResultHandling = "clipboard" | "ignore" | "toast";
+
+async function handleTriggerResult(result: string, handling: TriggerResultHandling) {
+  if (!result || handling === "ignore") return;
+
+  if (handling === "clipboard") {
+    await Clipboard.copy(result);
+    await showToast({ title: "Trigger result copied", style: Toast.Style.Success });
+    return;
+  }
+
+  await showToast({
+    title: "Trigger completed",
+    message: result.length > 200 ? `${result.slice(0, 197)}...` : result,
+    style: Toast.Style.Success,
+  });
 }

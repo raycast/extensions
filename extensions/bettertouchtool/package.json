@@ -24,6 +24,20 @@
       "subtitle": "Search for and run an action in BTT",
       "description": "Find an action in BetterTouchTool",
       "mode": "view"
+    },
+    {
+      "name": "variables",
+      "title": "Browse BTT Variables",
+      "subtitle": "Search, inspect, and change BTT variables",
+      "description": "Browse BetterTouchTool variables",
+      "mode": "view"
+    },
+    {
+      "name": "diagnostics",
+      "title": "BTT Connection Diagnostics",
+      "subtitle": "Inspect the BetterTouchTool connection",
+      "description": "Show BetterTouchTool connection and capability information",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -41,6 +55,28 @@
       "required": true,
       "default": "64472",
       "title": "Webserver Port"
+    },
+    {
+      "name": "triggerResultHandling",
+      "description": "What to do with non-empty results returned by named triggers",
+      "type": "dropdown",
+      "required": true,
+      "default": "ignore",
+      "title": "Named Trigger Results",
+      "data": [
+        {
+          "title": "Ignore",
+          "value": "ignore"
+        },
+        {
+          "title": "Show in Toast",
+          "value": "toast"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "clipboard"
+        }
+      ]
     }
   ],
   "dependencies": {
