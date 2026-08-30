@@ -248,83 +248,46 @@ final class AccessibilityUIReader: @unchecked Sendable {
         titled title: String,
         in application: NSRunningApplication
     ) throws {
+        let source = CGEventSource(stateID: .hidSystemState)
+        guard let mouseDown = CGEvent(
+            mouseEventSource: source,
+            mouseType: .leftMouseDown,
+            mouseCursorPosition: .zero,
+            mouseButton: .left
+        ) else {
+            throw AccessibilityMenuError.interfaceElementUnavailable(title)
+        }
+
+        guard let mouseUp = CGEvent(
+            mouseEventSource: source,
+            mouseType: .leftMouseUp,
+            mouseCursorPosition: .zero,
+            mouseButton: .left
+        ) else {
+            throw AccessibilityMenuError.interfaceElementUnavailable(title)
+        }
+
+        // Allocate both events first, then validate immediately before posting
+        // them back-to-back. Nothing fallible runs while the button is held, so
+        // a layout change cannot leave it down or redirect the release.
         let point = try waitForValidatedClickPoint(
             on: element,
             titled: title,
             in: application
         )
-        let source = CGEventSource(stateID: .hidSystemState)
-        guard let mouseDown = CGEvent(
-            mouseEventSource: source,
-            mouseType: .leftMouseDown,
-            mouseCursorPosition: point,
-            mouseButton: .left
-        ) else {
-            throw AccessibilityMenuError.interfaceElementUnavailable(title)
-        }
-
-        // Create the release event before posting mouse-down so cleanup cannot
-        // be blocked by event allocation after the button is held.
-        guard let mouseUp = CGEvent(
-            mouseEventSource: source,
-            mouseType: .leftMouseUp,
-            mouseCursorPosition: point,
-            mouseButton: .left
-        ) else {
-            throw AccessibilityMenuError.interfaceElementUnavailable(title)
-        }
-
-        var mouseDownPosted = false
-        var mouseUpPosted = false
-        defer {
-            if mouseDownPosted && !mouseUpPosted {
-                mouseUp.location = point
-                CGWarpMouseCursorPosition(point)
-                mouseUp.post(tap: .cghidEventTap)
-            }
-        }
-
         mouseDown.setIntegerValueField(.mouseEventClickState, value: 1)
         mouseUp.setIntegerValueField(.mouseEventClickState, value: 1)
-        let mouseDownCounter = CGEventSource.counterForEventType(
-            .hidSystemState,
-            eventType: .leftMouseDown
-        )
-        CGWarpMouseCursorPosition(point)
-        mouseDown.post(tap: .cghidEventTap)
-        mouseDownPosted = true
-        guard waitForEventDelivery(.leftMouseDown, after: mouseDownCounter) else {
-            throw AccessibilityMenuError.interfaceElementUnavailable(title)
-        }
-
-        // Revalidate the original coordinate instead of following a moving
-        // element. Mouse-down and mouse-up must stay paired at one point so a
-        // layout change cannot turn the click into a drag.
-        _ = try validatedClickPoint(
-            on: element,
-            titled: title,
-            in: application,
-            preferredPoint: point
-        )
-
-        let mouseUpCounter = CGEventSource.counterForEventType(
-            .hidSystemState,
-            eventType: .leftMouseUp
-        )
+        mouseDown.location = point
         mouseUp.location = point
         CGWarpMouseCursorPosition(point)
+        mouseDown.post(tap: .cghidEventTap)
         mouseUp.post(tap: .cghidEventTap)
-        mouseUpPosted = true
-        guard waitForEventDelivery(.leftMouseUp, after: mouseUpCounter) else {
-            throw AccessibilityMenuError.interfaceElementUnavailable(title)
-        }
     }
 
     private func validatedClickPoint(
         on element: AXUIElement,
         titled title: String,
-        in application: NSRunningApplication,
-        preferredPoint: CGPoint? = nil
+        in application: NSRunningApplication
     ) throws -> CGPoint {
         let applicationElement = AXUIElementCreateApplication(application.processIdentifier)
         let systemWideElement = AXUIElementCreateSystemWide()
@@ -350,10 +313,7 @@ final class AccessibilityUIReader: @unchecked Sendable {
             throw AccessibilityMenuError.interfaceElementUnavailable(title)
         }
 
-        let point = preferredPoint ?? visibleFrame.center
-        guard visibleFrame.contains(point) else {
-            throw AccessibilityMenuError.interfaceElementUnavailable(title)
-        }
+        let point = visibleFrame.center
         var hitElement: AXUIElement?
         guard AXUIElementCopyElementAtPosition(
             systemWideElement,
@@ -390,26 +350,6 @@ final class AccessibilityUIReader: @unchecked Sendable {
             )
         } while Date() < deadline
         throw AccessibilityMenuError.interfaceElementUnavailable(title)
-    }
-
-    private func waitForEventDelivery(
-        _ eventType: CGEventType,
-        after previousCounter: UInt32
-    ) -> Bool {
-        let deadline = Date(timeIntervalSinceNow: 0.08)
-        repeat {
-            if CGEventSource.counterForEventType(
-                .hidSystemState,
-                eventType: eventType
-            ) != previousCounter {
-                return true
-            }
-            _ = RunLoop.current.run(
-                mode: .default,
-                before: min(deadline, Date(timeIntervalSinceNow: 0.002))
-            )
-        } while Date() < deadline
-        return false
     }
 
     private func isActive(_ application: NSRunningApplication) -> Bool {
