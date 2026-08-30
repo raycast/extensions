@@ -1,6 +1,6 @@
 # Premier League Changelog
 
-## [Split Matches and Fixtures] - {PR_MERGE_DATE}
+## [Split Matches and Fixtures] - 2026-08-30
 
 - Add a Fixtures command covering matches in progress and still to come. Matches now holds completed games only, so a match moves from one command to the other at the final whistle.
 - Show the live clock on matches in any half, not only on ones the feed marks with a short code.
