@@ -320,7 +320,7 @@ function pushAccessories(
     });
   }
   if (pinned) {
-    accessories.push({ icon: Icon.Pin, tooltip: "Pinned" });
+    accessories.push({ icon: Icon.Tack, tooltip: "Pinned" });
   }
 }
 

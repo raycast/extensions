@@ -189,8 +189,12 @@ function OutdatedFormulaeListItem(props: OutdatedListItemProps & { outdated: Out
     <List.Item
       id={outdated.name}
       title={outdated.name}
-      subtitle={outdated.pinned ? "Pinned" : ""}
-      accessories={[{ text: version }]}
+      accessories={[
+        // The tack sits with the version rather than as a subtitle: it is a
+        // property of the row, not a second name for the package.
+        ...(outdated.pinned ? [{ icon: Icon.Tack, tooltip: "Pinned" }] : []),
+        { text: version },
+      ]}
       icon={props.icon?.(outdated, false) ?? PENDING_ICON}
       actions={
         props.actions?.(outdated, false) ?? (

@@ -73,7 +73,7 @@ export function FormulaUpgradeAction(props: {
   return (
     <Action
       title="Upgrade"
-      icon={Icon.Hammer}
+      icon={Icon.ArrowUpCircle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       onAction={async () => {
         if (isPinned(props.formula)) {
@@ -111,7 +111,7 @@ export function FormulaUpgradeAllAction(props: {
   return (
     <Action
       title="Upgrade All"
-      icon={Icon.Hammer}
+      icon={Icon.ArrowUpCircle}
       shortcut={{ modifiers: ["cmd", "opt"], key: "u" }}
       onAction={async () => {
         if (props.onUpgradeAll) {
@@ -130,7 +130,7 @@ export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; on
   return (
     <Action
       title={isPinned ? "Unpin" : "Pin"}
-      icon={Icon.Pin}
+      icon={isPinned ? Icon.TackDisabled : Icon.Tack}
       shortcut={Keyboard.Shortcut.Common.Pin}
       onAction={async () => {
         if (isPinned) {
