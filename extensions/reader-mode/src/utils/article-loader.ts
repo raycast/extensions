@@ -63,20 +63,39 @@ interface LoadArticleOptions {
  *    text is a subset of the HTML, so HTML no longer than the bar can't possibly clear it. For
  *    the hard-block and direct paths there is no preview to beat, so `minTextLength` is 0.
  *
- * 2. Paywall re-detection — a bypass returning HTTP 200 is not a win: sites answer a crawler
- *    UA with the very paywall/challenge page they gate browsers with, and Readability extracts
- *    text from it just fine. Left unchecked, that page would be accepted and would suppress
- *    every later method (archive.is, Wayback) that might have the real article. So a candidate
- *    that is itself still paywalled is rejected and the waterfall continues. `html` is passed
- *    so the check includes the conclusive visible-barrier signal — a long teaser whose only
- *    tell is a visible `.paywall`/`[data-paywall]` overlay, with no gating text, is caught.
+ * 2. Paywall re-detection. A bypass returning HTTP 200 is not a win: sites answer a crawler UA
+ *    with the very paywall/challenge page they gate browsers with, and Readability extracts text
+ *    from it fine. Left unchecked, that page is accepted and suppresses every later method
+ *    (archive.is, Wayback) that might have the real article. But `detectPaywall` answers "is this
+ *    page gated?", NOT "is this candidate usable?" — and those diverge, so the two conclusive
+ *    signals are treated differently:
  *
- *    Memory: this parses a second DOM (inside `findVisibleBarrier`), but sequentially — the
- *    parse above has already returned strings and released its DOM. Measured on the largest
- *    real fixture (vanityfair, 1.5MB): the second DOM adds ~1MB and total stays ~5MB over
- *    baseline, far under the 100MB budget. The July heap regression was three DOMs built
- *    inside ONE parse, not two sequential ones.
+ *    - **Gating phrases in the extracted text** ("subscribe to read", "already a subscriber?")
+ *      are checked ALWAYS. They never appear in a genuine article body; they appear in teasers,
+ *      challenge pages, and long subscription/upsell landing pages. This is what catches a long
+ *      non-article response and keeps the waterfall going.
+ *    - **The visible-barrier DOM element** (a `.paywall`/`[data-paywall]` overlay) is checked
+ *      ONLY for short candidates (< `FULL_ARTICLE_TEXT_FLOOR`). Archives and client-gated sites
+ *      (New Yorker, Wired) return the FULL article alongside a leftover overlay, so convicting a
+ *      long extraction on the overlay alone discards a complete article and drops back to the
+ *      truncated preview (or fails outright) — the Greptile failure class. For a short candidate
+ *      the overlay may be the only tell of a phraseless teaser, so there it still counts.
+ *
+ *    Concretely: short candidates run `detectPaywall` WITH `html` (overlay + text signals); long
+ *    candidates run it WITHOUT `html` (text signals only — no overlay, and no second DOM parse).
+ *
+ *    Memory: the short path parses a second DOM (inside `findVisibleBarrier`), but sequentially —
+ *    the parse above has already returned strings and released its DOM. Measured on the largest
+ *    real fixture (vanityfair, 1.5MB): the second DOM adds ~1MB, total ~5MB over baseline, far
+ *    under the 100MB budget. (The long path skips it entirely.)
  */
+// Below this many characters of extracted text, the visible-barrier DOM signal still counts (a
+// short teaser's only tell may be its overlay). At or above it, there is a real article's worth
+// of text: the overlay is ignored (a full article can carry a leftover one) and only gating
+// phrases in the text can still reject. Set clear of teaser range (a subscribe/challenge body is
+// a few hundred to ~1500 chars) and clear of the visible-barrier teaser at test:490 (~1580).
+const FULL_ARTICLE_TEXT_FLOOR = 2000;
+
 function validateBypassCandidate(url: string, minTextLength: number): (html: string) => ArticleContent | null {
   return (html: string) => {
     // Each rejection logs its reason: the caller (tryBypassPaywall) only records *that* a
@@ -106,8 +125,17 @@ function validateBypassCandidate(url: string, minTextLength: number): (html: str
       });
       return null;
     }
-    if (detectPaywall({ textContent, html, description }, url).isPaywalled) {
-      paywallLog.log("candidate:rejected", { url, reason: "still-paywalled", textLength: textContent.length });
+    // Short candidates: overlay DOM + text signals. Long: text signals only (a full article can
+    // carry a leftover overlay; a gating phrase in the body cannot). See the doc comment above.
+    const isShort = textContent.length < FULL_ARTICLE_TEXT_FLOOR;
+    const evidence = isShort ? { textContent, html, description } : { textContent, description };
+    if (detectPaywall(evidence, url).isPaywalled) {
+      paywallLog.log("candidate:rejected", {
+        url,
+        reason: "still-paywalled",
+        textLength: textContent.length,
+        checked: isShort ? "overlay+text" : "text-only",
+      });
       return null;
     }
     return parsed.article;

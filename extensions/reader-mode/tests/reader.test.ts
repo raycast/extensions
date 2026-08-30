@@ -522,6 +522,73 @@ describe("bypass candidate quality gate (loader level)", () => {
       await new Promise((resolve) => server.close(resolve));
     }
   });
+
+  // Greptile: a bypass (archive snapshot, Condé Nast page) can return the FULL article while
+  // still carrying a visible subscription overlay or a "subscribe" footer. detectPaywall flags
+  // that page as gated, but the article text is complete and usable — rejecting it on the
+  // marker alone discards real content and drops back to the truncated preview. A candidate
+  // with a full article's worth of text must be accepted despite residual paywall markup.
+  it("accepts a full article even when the page still carries a visible paywall overlay", async () => {
+    // Well over FULL_ARTICLE_TEXT_FLOOR (2000): unmistakably the article, not a teaser — yet the
+    // page still ships a VISIBLE .paywall overlay with a gating phrase, exactly what an archive
+    // snapshot or a Condé Nast page returns. Under the old "reject on any paywall signal" rule
+    // detectPaywall convicted it (barrier + phrase) and the whole flow failed; it must be kept.
+    const fullBody = "This is the complete article text, every paragraph present and correct. ".repeat(80);
+    const articleWithOverlay =
+      `<!doctype html><html><head><title>The Whole Story</title></head><body>` +
+      `<article><h1>The Whole Story</h1><p>${fullBody}</p></article>` +
+      `<div class="paywall" style="position:fixed;inset:0">Subscribe to read unlimited articles. Already a subscriber?</div>` +
+      `</body></html>`;
+
+    const server = createServer((_req, res) => {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(articleWithOverlay);
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address() as AddressInfo;
+    const url = `http://127.0.0.1:${address.port}/article`;
+
+    try {
+      const result = await loadArticleViaPaywallHopper(url, { showArticleImage: false });
+      assert.equal(result.status, "success", "a full article must not be discarded over residual paywall markup");
+      assert.ok(
+        result.status === "success" && result.article.textContent.includes("every paragraph present and correct"),
+        "the returned article should be the complete text, not a fallback",
+      );
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
+
+  // Codex (on the Greptile fix): a length floor alone would accept ANY long response, so a long
+  // subscription/upsell landing page (plan comparisons, FAQs, testimonials — easily >2000 chars)
+  // with conclusive gating language would be accepted as "the article" and suppress the archives.
+  // Gating phrases in the extracted text are therefore checked at every length; only the overlay
+  // DOM signal is relaxed for long content. A long upsell page must still be rejected.
+  it("rejects a long subscription/upsell page whose own text carries gating language", async () => {
+    // >2000 chars of marketing copy, and it is the article body (survives cleaning), including a
+    // conclusive barrier phrase. No real article body contains this.
+    const upsell =
+      `<!doctype html><html><head><title>Subscribe</title></head><body><article><h1>Choose your plan</h1>` +
+      `<p>Already a subscriber? Sign in. ${"Unlimited access to award-winning journalism, the daily crossword, and the complete archive — join thousands of readers who value independent reporting. ".repeat(20)}</p>` +
+      `</article></body></html>`;
+    const server = createServer((_req, res) => {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(upsell);
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address() as AddressInfo;
+    const url = `http://127.0.0.1:${address.port}/article`;
+
+    try {
+      const result = await loadArticleViaPaywallHopper(url, { showArticleImage: false });
+      assert.notEqual(result.status, "success", "a long upsell page must not be accepted as the article");
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
 });
 
 describe("Condé Nast paywall-class content", () => {

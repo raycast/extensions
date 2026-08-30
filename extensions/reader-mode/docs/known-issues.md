@@ -34,3 +34,15 @@ Additionally, relative image URLs (e.g., `/image.jpg`) are automatically convert
 A misclassification here sends the page through the Paywall Hopper bypass, but retrieved content **only replaces** the original when it is at least 20% longer than what was already parsed (`src/utils/article-loader.ts`). The false-positive case is, by definition, an _already-complete_ article, which is unlikely to gain 20% from an archive — so the realistic cost is a redundant (and slow) bypass attempt, not swapped-out content.
 
 If this is ever worth closing, the fix is a detection-layer redesign (e.g. an opt-in CSS fetch, or a corroboration model trained on a larger corpus), not a tweak to `isElementHidden`.
+
+## Accepting a bypass candidate that still carries an overlay
+
+When the Paywall Hopper retrieves a candidate, `validateBypassCandidate` (`src/utils/article-loader.ts`) has to decide whether it is the real article. It applies the same visible-barrier signal above, but **only to short candidates** (`< FULL_ARTICLE_TEXT_FLOOR`). For a candidate with a full article's worth of extracted text, a visible overlay is ignored and only gating **phrases in the text** can reject it.
+
+### Why
+
+Archives (archive.is, Wayback) and client-gated sites (New Yorker, Wired) routinely return the **complete** article with a leftover subscription overlay or "subscribe" footer still in the markup. Convicting those on the overlay alone discarded a full article and dropped the reader back to the truncated preview — the common, high-impact failure. A genuine article body never contains gating phrases ("subscribe to read", "already a subscriber?"), while teasers, challenge pages, and long upsell pages do — so the text-phrase check catches long non-articles without punishing real ones.
+
+### The residual, and why it's left open
+
+A long non-article whose **only** tell is a visible overlay — no gating phrase in its extracted text (image-only or non-English gating) — is accepted. This is the exact opposite horn of the full-article-with-overlay case above: the two are indistinguishable from the available signals (see "No reliable corroboration"). The choice deliberately favors **never discarding a complete article** over rejecting a rare phrase-free long teaser, because the former is common and costs the reader real content while the latter is rare and costs a partial render. Short candidates keep the overlay check, so a phrase-free short teaser is still caught.
