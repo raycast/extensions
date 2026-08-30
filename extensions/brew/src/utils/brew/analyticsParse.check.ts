@@ -171,9 +171,12 @@ assert.equal(totalForPeriod({ "30d": { asc: "1" } } as unknown as AnalyticsCount
 assert.equal(totalForPeriod({ "30d": { a: 1, b: "x" } } as unknown as AnalyticsCounts, "30d"), 1);
 assert.equal(totalForPeriod({ "30d": {} }, "30d"), undefined);
 
-// Version comparison. Every case below is one Codex raised against the first
-// version of this, which used string INEQUALITY and so reported "different" as
-// "outdated" in both directions.
+// Version comparison. Every case below is one an adversarial review raised
+// against an earlier attempt — first string INEQUALITY (which called any
+// difference "outdated", in both directions), then a hand-rolled segment
+// ranker (which mis-ordered prereleases, patch levels, case variants and
+// trailing zeros). The module now compares ONLY plain dotted numbers and
+// returns undefined for everything else.
 assert.equal(isOutdatedVersion("2.3.2", "2.4.0", { stripRevision: true }), true, "ipatool: genuinely behind");
 assert.equal(isOutdatedVersion("2.4.0", "2.4.0", { stripRevision: true }), false);
 assert.equal(
@@ -185,19 +188,35 @@ assert.equal(isOutdatedVersion("1.2.3_1", "1.2.3", { stripRevision: true }), fal
 assert.equal(isOutdatedVersion(undefined, "1.0"), false, "not installed is not outdated");
 assert.equal(isOutdatedVersion("1.0", undefined), false);
 
-// Installed NEWER than the index must never offer an upgrade — that would
-// downgrade. Inequality got this wrong.
+// Installed NEWER than the index must never offer an upgrade — that downgrades.
 assert.equal(isOutdatedVersion("2.0", "1.0", { stripRevision: true }), false, "newer installed is not outdated");
 assert.equal(isOutdatedVersion("1.10", "1.9", { stripRevision: true }), false, "numeric, not lexical: 10 > 9");
 assert.equal(isOutdatedVersion("1.9", "1.10", { stripRevision: true }), true);
 assert.equal(isOutdatedVersion("1.2", "1.2.1", { stripRevision: true }), true, "a shorter prefix is older");
 assert.equal(isOutdatedVersion("1.2.1", "1.2", { stripRevision: true }), false);
 
-// Incomparable shapes must be "don't know", not "outdated". A cask version of
-// `latest` is the case that would otherwise offer an endless bogus upgrade.
-assert.equal(compareVersions("1.2.3", "latest"), undefined);
-assert.equal(isOutdatedVersion("1.2.3", "latest"), false, "cask `latest` must not read as outdated");
-assert.equal(isOutdatedVersion("1_2", "1_2"), false, "underscores are ordinary cask syntax");
+// Trailing zeros are the SAME version, not a shorter, older one.
+assert.equal(compareVersions("5", "5.0"), 0, "5 and 5.0 are equal");
+assert.equal(compareVersions("5.0.0", "5"), 0);
+assert.equal(isOutdatedVersion("5", "5.0"), false, "5 must not read as behind 5.0");
+
+// Shapes this module refuses to rank. Each was mis-ordered by the previous
+// attempt; undefined means "ask brew", which is the correct answer here.
+for (const [a, b, why] of [
+  ["1.0b2", "1.0", "beta vs final"],
+  ["1.0", "1.0b2", "final vs beta"],
+  ["1.0-rc1", "1.0-p1", "release candidate vs patch level"],
+  ["1.0RC1", "1.0rc1", "case variants"],
+  ["2024-01-15", "2024-02-01", "date versions"],
+  ["1.2.3", "latest", "cask `latest`"],
+  ["1.2.3", "HEAD", "HEAD"],
+  ["1_2", "1_2", "underscores are ordinary cask syntax"],
+] as const) {
+  if (a !== b) {
+    assert.equal(compareVersions(a, b), undefined, `must refuse to rank: ${why}`);
+    assert.equal(isOutdatedVersion(a, b), false, `must not report outdated: ${why}`);
+  }
+}
 
 /// Live API — the shape assumptions above, against the real thing/// Live API — the shape assumptions above, against the real thing
 

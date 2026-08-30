@@ -8,7 +8,7 @@ import { join as path_join } from "path";
 import { Cask, Formula, Nameable } from "../types";
 import { preferences } from "../preferences";
 import { brewPath, brewExecutable } from "./paths";
-import { isOutdatedVersion } from "./version";
+import { isOutdatedVersion, stripRevision } from "./version";
 
 /// Type Guards
 
@@ -60,7 +60,15 @@ export function brewIsOutdated(item: Cask | Formula): boolean {
   }
 
   if (isCask(item)) {
-    return false;
+    // Homebrew's own rule for casks, which is inequality rather than ordering:
+    // cask versions are vendor strings and are not orderable. The exclusions
+    // are the ones brew itself only reports under `--greedy`, because it cannot
+    // upgrade them meaningfully: `latest` has no version to compare, and an
+    // auto-updating cask updates itself outside brew.
+    if (!item.installed || !item.version || item.version === "latest" || item.auto_updates) {
+      return false;
+    }
+    return item.installed !== item.version;
   }
 
   const stable = item.versions?.stable;
@@ -68,7 +76,7 @@ export function brewIsOutdated(item: Cask | Formula): boolean {
   // A formula can have several kegs installed. If ANY of them is the current
   // version there is nothing to upgrade, whichever one happens to be first.
   const installedVersions = (item.installed ?? []).map((keg) => keg.version);
-  if (installedVersions.some((version) => version.replace(/_\d+$/, "") === stable)) {
+  if (installedVersions.some((version) => stripRevision(version) === stable)) {
     return false;
   }
 

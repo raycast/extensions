@@ -19,6 +19,7 @@ import {
   brewInstalledVersion,
   brewIsInstalled,
   brewIsOutdated,
+  isCask,
   brewPrefix,
   analyticsRows,
   packageStatus,
@@ -58,18 +59,18 @@ export interface MetadataOptions {
  * version the user did not have.
  */
 export function formatPackageVersion(item: Cask | Formula): string {
-  const isCask = "token" in item;
-  const available = isCask ? item.version : item.versions.stable;
+  const cask = isCask(item);
+  const available = cask ? item.version : item.versions.stable;
   const installedVersion = brewInstalledVersion(item);
 
   const status: string[] = [];
-  if (!isCask && item.versions.bottle) {
+  if (!cask && item.versions.bottle) {
     status.push("bottled");
   }
   if (brewIsInstalled(item)) {
     status.push("installed");
   }
-  if (!isCask && item.installed?.first()?.installed_as_dependency) {
+  if (!cask && item.installed?.first()?.installed_as_dependency) {
     status.push("dependency");
   }
 
@@ -242,68 +243,49 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
 
 /// Renderers — one per metadata namespace, both driven by the rows above
 
+/**
+ * The two metadata namespaces, which are structurally interchangeable — the
+ * components accept the same props, they are just reached through different
+ * parents. Writing the switch twice was the last place these two views could
+ * drift, which is the whole thing this module exists to prevent.
+ *
+ * If Raycast ever diverges them, this stops compiling rather than silently
+ * rendering one view differently from the other.
+ */
+type MetadataNamespace = Pick<typeof Detail.Metadata, "Label" | "Link" | "TagList" | "Separator">;
+
+function renderRows(M: MetadataNamespace, rows: MetadataRow[]) {
+  return rows.map((row) => {
+    switch (row.kind) {
+      case "separator":
+        return <M.Separator key={row.key} />;
+      case "link":
+        return <M.Link key={row.key} title={row.title} text={row.text} target={row.target} />;
+      case "tags":
+        return (
+          <M.TagList key={row.key} title={row.title}>
+            {row.tags.map((tag) => (
+              <M.TagList.Item key={tag.text} text={tag.text} color={tag.color} />
+            ))}
+          </M.TagList>
+        );
+      case "label":
+        return (
+          <M.Label
+            key={row.key}
+            title={row.title}
+            text={row.color ? { value: row.text, color: row.color } : row.text}
+            icon={row.icon}
+          />
+        );
+    }
+  });
+}
+
 export function ListMetadata(props: { rows: MetadataRow[] }) {
-  return (
-    <List.Item.Detail.Metadata>
-      {props.rows.map((row) => {
-        switch (row.kind) {
-          case "separator":
-            return <List.Item.Detail.Metadata.Separator key={row.key} />;
-          case "link":
-            return (
-              <List.Item.Detail.Metadata.Link key={row.key} title={row.title} text={row.text} target={row.target} />
-            );
-          case "tags":
-            return (
-              <List.Item.Detail.Metadata.TagList key={row.key} title={row.title}>
-                {row.tags.map((tag) => (
-                  <List.Item.Detail.Metadata.TagList.Item key={tag.text} text={tag.text} color={tag.color} />
-                ))}
-              </List.Item.Detail.Metadata.TagList>
-            );
-          case "label":
-            return (
-              <List.Item.Detail.Metadata.Label
-                key={row.key}
-                title={row.title}
-                text={row.color ? { value: row.text, color: row.color } : row.text}
-                icon={row.icon}
-              />
-            );
-        }
-      })}
-    </List.Item.Detail.Metadata>
-  );
+  return <List.Item.Detail.Metadata>{renderRows(List.Item.Detail.Metadata, props.rows)}</List.Item.Detail.Metadata>;
 }
 
 export function DetailMetadata(props: { rows: MetadataRow[] }) {
-  return (
-    <Detail.Metadata>
-      {props.rows.map((row) => {
-        switch (row.kind) {
-          case "separator":
-            return <Detail.Metadata.Separator key={row.key} />;
-          case "link":
-            return <Detail.Metadata.Link key={row.key} title={row.title} text={row.text} target={row.target} />;
-          case "tags":
-            return (
-              <Detail.Metadata.TagList key={row.key} title={row.title}>
-                {row.tags.map((tag) => (
-                  <Detail.Metadata.TagList.Item key={tag.text} text={tag.text} color={tag.color} />
-                ))}
-              </Detail.Metadata.TagList>
-            );
-          case "label":
-            return (
-              <Detail.Metadata.Label
-                key={row.key}
-                title={row.title}
-                text={row.color ? { value: row.text, color: row.color } : row.text}
-                icon={row.icon}
-              />
-            );
-        }
-      })}
-    </Detail.Metadata>
-  );
+  return <Detail.Metadata>{renderRows(Detail.Metadata, props.rows)}</Detail.Metadata>;
 }

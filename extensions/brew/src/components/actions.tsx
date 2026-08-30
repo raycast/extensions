@@ -4,6 +4,7 @@ import {
   type BrewProgress,
   brewInstallWithProgress,
   brewName,
+  isCask,
   brewPinFormula,
   brewUninstall,
   brewUnpinFormula,
@@ -86,9 +87,13 @@ export function FormulaUpgradeAction(props: {
   );
 }
 
-/** Pinning is a formula-only concept; casks carry no such flag. */
+/**
+ * Pinning is formula-only. A cask is never treated as pinned even if the API
+ * hands one a `pinned` field — there is no Unpin action in the cask panel, so
+ * the toast would name a remedy the user cannot reach.
+ */
 function isPinned(item: Cask | Nameable): boolean {
-  return (item as Formula).pinned === true;
+  return !isCask(item) && (item as Formula).pinned === true;
 }
 
 export function FormulaUpgradeAllAction(props: {
