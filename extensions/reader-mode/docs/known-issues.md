@@ -46,3 +46,7 @@ Archives (archive.is, Wayback) and client-gated sites (New Yorker, Wired) routin
 ### The residual, and why it's left open
 
 A long non-article whose **only** tell is a visible overlay — no gating phrase in its extracted text (image-only or non-English gating) — is accepted. This is the exact opposite horn of the full-article-with-overlay case above: the two are indistinguishable from the available signals (see "No reliable corroboration"). The choice deliberately favors **never discarding a complete article** over rejecting a rare phrase-free long teaser, because the former is common and costs the reader real content while the latter is rare and costs a partial render. Short candidates keep the overlay check, so a phrase-free short teaser is still caught.
+
+### Embedded gate elements and the 30% guard
+
+Gate containers (`article-gate`, `content-gate`, `regwall`, `piano-*`, `[data-testid*=subscribe]`, …) are stripped before extraction so their gating text can't pollute the article and trip the phrase check (`src/utils/html-cleaner.ts`). One residual: the cleaner protects any element holding more than ~30% of the page's text (so a substring-matched selector can't gut the article). A gate that alone exceeds that share is therefore left in place — but such a page is overwhelmingly a challenge/teaser we want rejected anyway, not a complete article.

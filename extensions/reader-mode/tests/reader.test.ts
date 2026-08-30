@@ -589,6 +589,77 @@ describe("bypass candidate quality gate (loader level)", () => {
       await new Promise((resolve) => server.close(resolve));
     }
   });
+
+  // Greptile (2nd): a complete article can embed a gate element (article-gate, content-gate,
+  // regwall, piano-*, [data-testid*=subscribe]) whose gating text ("Subscribe to read…") would,
+  // if left in the extraction, trip the always-on phrase check and reject the whole article. The
+  // cleaner strips those gate containers before extraction, so a full article carrying one is kept
+  // and the gate text does not leak into the result.
+  it("accepts a full article with an embedded gate element, stripping the gate text", async () => {
+    const body = "The mountain path wound upward through pine and granite for the better part of a day. ".repeat(24);
+    const articleWithEmbeddedGate =
+      `<!doctype html><html><head><title>The Ascent</title></head><body><article><h1>The Ascent</h1>` +
+      `<p>${body}</p>` +
+      `<div class="content-gate">Subscribe to read the rest of this story. Already a subscriber? Sign in.</div>` +
+      `<p>${body}</p>` +
+      `</article></body></html>`;
+    const server = createServer((_req, res) => {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(articleWithEmbeddedGate);
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address() as AddressInfo;
+    const url = `http://127.0.0.1:${address.port}/article`;
+
+    try {
+      const result = await loadArticleViaPaywallHopper(url, { showArticleImage: false });
+      assert.equal(result.status, "success", "an embedded gate element must not sink a complete article");
+      assert.ok(
+        result.status === "success" && result.article.textContent.includes("wound upward through pine"),
+        "the real article body should be present",
+      );
+      assert.ok(
+        result.status === "success" && !result.article.textContent.includes("Already a subscriber"),
+        "the gate's text should have been stripped, not rendered into the article",
+      );
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
+
+  // Codex (on the gate-strip): real sites CAPITALIZE these class names, and the cleaner's
+  // matching was case-sensitive while the detector's is not — so a `Content-Gate` survived and
+  // still sank the article. The gate selectors are now case-insensitive; a capitalized embedded
+  // gate must be stripped too.
+  it("strips an embedded gate whose class is capitalized (case-insensitive)", async () => {
+    const body = "The river narrowed between the cliffs where the old ferry crossing had once stood. ".repeat(24);
+    const articleWithCapsGate =
+      `<!doctype html><html><head><title>The Crossing</title></head><body><article><h1>The Crossing</h1>` +
+      `<p>${body}</p>` +
+      `<div class="Content-Gate Piano-Barrier">Subscribe to read the rest of this story. Already a subscriber?</div>` +
+      `<p>${body}</p>` +
+      `</article></body></html>`;
+    const server = createServer((_req, res) => {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(articleWithCapsGate);
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address() as AddressInfo;
+    const url = `http://127.0.0.1:${address.port}/article`;
+
+    try {
+      const result = await loadArticleViaPaywallHopper(url, { showArticleImage: false });
+      assert.equal(result.status, "success", "a capitalized gate class must be stripped like a lowercase one");
+      assert.ok(
+        result.status === "success" && !result.article.textContent.includes("Already a subscriber"),
+        "the capitalized gate's text should have been stripped",
+      );
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
 });
 
 describe("Condé Nast paywall-class content", () => {

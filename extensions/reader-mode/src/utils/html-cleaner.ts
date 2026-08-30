@@ -36,6 +36,29 @@ const NEGATIVE_SELECTORS = [
   '[aria-label*="subscribe"]',
   '[class*="email-signup"]',
 
+  // Content gates / paywall barriers embedded in the article. Detection (paywall-detector's
+  // BARRIER_SELECTORS) recognizes these, but if a gate's text ("Subscribe to read the rest…")
+  // is left in the article body it lands in the extraction and trips the candidate validator's
+  // gating-phrase check — rejecting an otherwise-complete article. Gate UI is never article
+  // content, so strip it before extraction. (Detection still runs against the RAW html, so this
+  // does not weaken it.) Two guards, both mirroring the `[class*="paywall"]` rule below:
+  //   - case-insensitive (` i`), because the detector matches capitalized class names and real
+  //     sites capitalize them, so a case-sensitive cleaner would leave `Content-Gate` behind;
+  //   - `:not(p)` on the class selectors, so a site that (like Condé Nast's `paywall`) puts body
+  //     paragraphs on a gate class isn't gutted.
+  // `subscriber-only` is deliberately NOT here: sites use it to mark gated *content*, so deleting
+  // it would remove the article. Detection still scores it from the raw html.
+  '[class*="article-gate" i]:not(p)',
+  '[class*="content-gate" i]:not(p)',
+  '[class*="regwall" i]:not(p)',
+  '[class*="registration-wall" i]:not(p)',
+  '[class*="piano-" i]:not(p)',
+  '[class*="tp-modal" i]:not(p)',
+  '[class*="subscription-wall" i]:not(p)',
+  '[data-testid*="subscribe" i]',
+  '[data-testid*="paywall" i]',
+  "[data-paywall]",
+
   // Advertisements (enhanced from Defuddle)
   '[class*="advertisement"]',
   '[id*="advertisement"]',
