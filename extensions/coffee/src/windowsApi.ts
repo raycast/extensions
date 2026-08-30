@@ -39,8 +39,8 @@ export async function windowsStartCaffeinate(additionalArgs?: string): Promise<v
   });
 }
 
-export async function windowsStopCaffeinate(): Promise<void> {
-  await stop_caffeinate();
+export async function windowsStopCaffeinate(): Promise<boolean> {
+  return await stop_caffeinate();
 }
 
 export async function windowsIsCaffeinateRunning(): Promise<boolean> {

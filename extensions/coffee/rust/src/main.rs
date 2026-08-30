@@ -334,18 +334,38 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
 }
 
 /// Bridge: stop the keep-awake worker and release the execution state.
+/// Returns true when a worker was running and successfully terminated, or
+/// false when there was no running worker to stop. Propagates an error if a
+/// running worker could not be terminated.
 #[raycast]
-fn stop_caffeinate() -> Result<(), String> {
+fn stop_caffeinate() -> Result<bool, String> {
     let _ = write_stop_flag();
-    if let Some(state) = read_stored_state()? {
-        // Only terminate the worker if the recorded PID is still that worker;
-        // a reused PID must not be killed.
-        if pid_matches_worker(state.pid, state.start_ticks) {
-            let _ = terminate_process(state.pid);
+    let state = read_stored_state()?;
+    let had_worker = match &state {
+        Some(s) if pid_matches_worker(s.pid, s.start_ticks) => true,
+        _ => false,
+    };
+    if had_worker {
+        let pid = state.as_ref().unwrap().pid;
+        // Terminate the worker and give it a brief moment to exit, then confirm
+        // it is actually gone before reporting success.
+        let _ = terminate_process(pid);
+        for _ in 0..50 {
+            std::thread::sleep(Duration::from_millis(2));
+            match read_stored_state()? {
+                Some(cur) if pid_matches_worker(cur.pid, cur.start_ticks) => {}
+                _ => break,
+            }
+        }
+        if let Some(cur) = read_stored_state()? {
+            if pid_matches_worker(cur.pid, cur.start_ticks) {
+                let _ = clear_state();
+                return Err("failed to terminate caffeination worker".to_string());
+            }
         }
     }
     let _ = clear_state();
-    Ok(())
+    Ok(had_worker)
 }
 
 /// Bridge: report whether a keep-awake worker is currently running.
