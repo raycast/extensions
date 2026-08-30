@@ -9,8 +9,8 @@ use windows::Win32::System::Power::{
     SetThreadExecutionState, ES_CONTINUOUS, ES_DISPLAY_REQUIRED, ES_SYSTEM_REQUIRED, EXECUTION_STATE,
 };
 use windows::Win32::System::Threading::{
-    GetExitCodeProcess, GetProcessTimes, OpenProcess, TerminateProcess, PROCESS_QUERY_LIMITED_INFORMATION,
-    PROCESS_TERMINATE,
+    GetExitCodeProcess, GetProcessTimes, OpenProcess, QueryFullProcessImageNameW, TerminateProcess,
+    PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_TERMINATE,
 };
 
 const STILL_ACTIVE: u32 = 259;
@@ -183,6 +183,26 @@ fn process_creation_ticks(pid: u32) -> Option<u64> {
 /// the worker.
 fn pid_matches_worker(pid: u32, expected_ticks: u64) -> bool {
     process_creation_ticks(pid).is_some_and(|ticks| ticks == expected_ticks)
+}
+
+/// The full path of the executable backing `pid`, or `None` when it cannot be
+/// queried (e.g. an elevated process). Used by the picker to show app icons.
+fn process_image_path(pid: u32) -> Option<String> {
+    let handle = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid) };
+    let Ok(handle) = handle else {
+        return None;
+    };
+    let mut buf = [0u16; 1024];
+    let mut len = buf.len() as u32;
+    let ok = unsafe {
+        QueryFullProcessImageNameW(handle, PROCESS_NAME_WIN32, windows::core::PWSTR(buf.as_mut_ptr()), &mut len)
+    }
+    .is_ok();
+    unsafe { let _ = CloseHandle(handle); }
+    if !ok || len == 0 {
+        return None;
+    }
+    Some(String::from_utf16_lossy(&buf[..len as usize]))
 }
 
 /// Whether the tracked window is still open, on-screen, and owned by the
@@ -376,6 +396,7 @@ struct ProcessInfo {
     name: String,
     pid: u32,
     window_handle: usize,
+    path: Option<String>,
 }
 
 /// Bridge: list running applications that have a visible window, so the user
@@ -592,6 +613,7 @@ fn list_processes() -> Result<Vec<ProcessInfo>, String> {
                         name,
                         pid: entry.th32ProcessID,
                         window_handle: hwnd.0 as usize,
+                        path: process_image_path(entry.th32ProcessID),
                     });
                 }
                 if unsafe { Process32NextW(snapshot, &mut entry) }.is_err() {

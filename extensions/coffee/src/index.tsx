@@ -10,9 +10,22 @@ import {
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { formatDuration, startCaffeinate, stopCaffeinate, deviceName } from "./utils";
+import {
+  formatDuration,
+  startCaffeinate,
+  stopCaffeinate,
+  deviceName,
+  getSchedule,
+  pauseTodaysScheduleIfRunning,
+} from "./utils";
 import { maybeAutoCaffeinate } from "./status";
-import { CaffeinateStatus, get_caffeinate_state } from "rust:../rust";
+import { get_caffeinate_state } from "rust:../rust";
+
+interface CaffeinateStatus {
+  running: boolean;
+  startTime: number | null;
+  durationSeconds: number | null;
+}
 
 function parseEtime(etime: string): number {
   const parts = etime.split(":").reverse();
@@ -192,20 +205,33 @@ export default function Command(props: LaunchProps) {
   const handleStartFor = async (seconds: number | null, durationLabel: string) => {
     setLocalCaffeinateStatus(true);
     const additionalArgs = seconds === null ? undefined : `-t ${seconds}`;
+    const reason =
+      seconds === null
+        ? undefined
+        : { kind: "for" as const, endsAt: new Date(Date.now() + seconds * 1000).toISOString() };
     const hudMessage =
       seconds === null
         ? `Caffeinating your ${deviceName()} ${durationLabel}`
         : `Caffeinating your ${deviceName()} for ${durationLabel}`;
-    await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs), {
+    await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs, reason), {
       optimisticUpdate: () => ({ isRunning: true, totalSeconds: seconds, startTime: Date.now() }),
     });
   };
 
   const handleDeactivate = async () => {
     setLocalCaffeinateStatus(false);
-    await mutate(stopCaffeinate({ menubar: true, status: true }), {
-      optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
-    });
+    const schedule = await getSchedule();
+    const preferences = getPreferenceValues<Preferences.Index>();
+    if (schedule != undefined && schedule.IsRunning == true && preferences.decaffeinatePausesSchedules) {
+      await pauseTodaysScheduleIfRunning();
+      await mutate(stopCaffeinate({ menubar: true, status: true }, undefined, { pauseRunningSchedule: true }), {
+        optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
+      });
+    } else {
+      await mutate(stopCaffeinate({ menubar: true, status: true }, undefined), {
+        optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
+      });
+    }
     if (preferences.hidenWhenDecaffeinated) {
       showHUD(`Your ${deviceName()} is now decaffeinated`);
     }
