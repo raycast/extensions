@@ -3,7 +3,24 @@ import { useFetch } from "@raycast/utils";
 import { useEffect } from "react";
 import EndpointDetail from "./endpoint-detail";
 
-// ... interfaces inchangées
+interface Preferences {
+  gatusUrl: string;
+  authToken?: string;
+}
+
+interface GatusResult {
+  status: number;
+  duration: number; // nanoseconds
+  success: boolean;
+  timestamp: string;
+}
+
+interface GatusEndpoint {
+  name: string;
+  key: string;
+  group?: string;
+  results: GatusResult[];
+}
 
 export default function Command() {
   const { gatusUrl, authToken } = getPreferenceValues<Preferences>();
@@ -15,7 +32,10 @@ export default function Command() {
   });
 
   useEffect(() => {
-    const interval = setInterval(() => revalidate(), 30_000);
+    const interval = setInterval(() => {
+      revalidate();
+    }, 30_000);
+
     return () => clearInterval(interval);
   }, [revalidate]);
 
@@ -45,18 +65,24 @@ export default function Command() {
             return (
               <List.Item
                 key={endpoint.key}
-                icon={{ source: Icon.Circle, tintColor: isUp ? Color.Green : Color.Red }}
+                icon={{
+                  source: Icon.Circle,
+                  tintColor: isUp ? Color.Green : Color.Red,
+                }}
                 title={endpoint.name}
                 subtitle={lastResult ? `HTTP ${lastResult.status}` : "No data"}
                 accessories={[
                   {
-                    tag: { value: isUp ? "UP" : "DOWN", color: isUp ? Color.Green : Color.Red },
+                    tag: {
+                      value: isUp ? "UP" : "DOWN",
+                      color: isUp ? Color.Green : Color.Red,
+                    },
                   },
                 ]}
                 actions={
                   <ActionPanel>
                     <Action.Push
-                      title="See Details"
+                      title="See Détails"
                       icon={Icon.Sidebar}
                       target={
                         <EndpointDetail

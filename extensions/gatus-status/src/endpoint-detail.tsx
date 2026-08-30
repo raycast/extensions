@@ -86,11 +86,11 @@ ${lastResult?.success ? "🟢 **UP**" : "🔴 **DOWN**"}
 
 ---
 
-|  | Metrics |
+| | Metrics |
 |---|---|
 | **Uptime 24h** | ${uptime24h ?? "…"} |
-| **Uptime 7j** | ${uptime7d ?? "…"} |
-| **Avg ResponseTime (24h)** | ${responseTime24h ?? "…"} |
+| **Uptime 7d** | ${uptime7d ?? "…"} |
+| **avg ResponseTime (24h)** | ${responseTime24h ?? "…"} |
 `;
 
   return (
@@ -99,8 +99,8 @@ ${lastResult?.success ? "🟢 **UP**" : "🔴 **DOWN**"}
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Nom" text={endpointName} />
-          {data?.group && <Detail.Metadata.Label title="Groupe" text={data.group} />}
+          <Detail.Metadata.Label title="Name" text={endpointName} />
+          {data?.group && <Detail.Metadata.Label title="Group" text={data.group} />}
           <Detail.Metadata.Separator />
 
           {lastEvent && (
