@@ -126,6 +126,7 @@ function useWindowsCaffeinateInfo(execute: boolean) {
   }, [execute]);
 
   const mutate = async (ctx?: Promise<unknown>, options?: MutateOptions) => {
+    const previous = data;
     if (options?.optimisticUpdate) setData(options.optimisticUpdate());
     if (ctx) {
       try {
@@ -138,7 +139,8 @@ function useWindowsCaffeinateInfo(execute: boolean) {
       const info = await get_caffeinate_state();
       setData(applyState(info));
     } catch {
-      // Keep the optimistic value.
+      // Refresh failed: roll back the optimistic value rather than reporting stale state.
+      setData(previous);
     }
   };
 
