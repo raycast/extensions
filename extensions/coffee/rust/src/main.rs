@@ -347,19 +347,21 @@ fn stop_caffeinate() -> Result<bool, String> {
     };
     if had_worker {
         let pid = state.as_ref().unwrap().pid;
-        // Terminate the worker and give it a brief moment to exit, then confirm
-        // it is actually gone before reporting success.
-        let _ = terminate_process(pid);
-        for _ in 0..50 {
-            std::thread::sleep(Duration::from_millis(2));
-            match read_stored_state()? {
-                Some(cur) if pid_matches_worker(cur.pid, cur.start_ticks) => {}
-                _ => break,
+        if !terminate_process(pid) {
+            // The terminate call failed; give the worker a brief moment to exit
+            // on its own via the stop flag, then confirm it is gone.
+            for _ in 0..50 {
+                std::thread::sleep(Duration::from_millis(2));
+                match read_stored_state()? {
+                    Some(cur) if pid_matches_worker(cur.pid, cur.start_ticks) => {}
+                    _ => break,
+                }
             }
-        }
-        if let Some(cur) = read_stored_state()? {
-            if pid_matches_worker(cur.pid, cur.start_ticks) {
-                return Err("failed to terminate caffeination worker".to_string());
+            if let Some(cur) = read_stored_state()? {
+                if pid_matches_worker(cur.pid, cur.start_ticks) {
+                    // Preserve tracking state so a later stop can retry.
+                    return Err("failed to terminate caffeination worker".to_string());
+                }
             }
         }
     }
