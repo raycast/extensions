@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Add toggle to show filename being deleted permanently] - {PR_MERGE_DATE}
+## [Add toggle to show filename being deleted permanently] - 2026-08-30
 
 - Added a toggle to the preference to show/hide the latest downloaded file being permanently deleted.
 
