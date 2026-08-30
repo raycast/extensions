@@ -109,8 +109,10 @@ function isHttpUri(uri: string) {
 }
 
 function buildToolUris(tool: LogosTool) {
-  const uris: string[] = [];
+  const nativeUris: string[] = [];
+  const httpUris: string[] = [];
   const seen = new Set<string>();
+
   const add = (uri?: string) => {
     if (!uri) {
       return;
@@ -119,7 +121,11 @@ function buildToolUris(tool: LogosTool) {
       return;
     }
     seen.add(uri);
-    uris.push(uri);
+    if (isHttpUri(uri)) {
+      httpUris.push(uri);
+    } else {
+      nativeUris.push(uri);
+    }
   };
 
   tool.uriHints?.forEach(add);
@@ -130,10 +136,6 @@ function buildToolUris(tool: LogosTool) {
       continue;
     }
     const encodedKind = encodeURIComponent(trimmed);
-    add(`https://ref.ly/logos4/${encodedKind}`);
-    add(`https://ref.ly/logos4/Tools?kind=${encodedKind}`);
-    add(`https://ref.ly/logos4/Tool?kind=${encodedKind}`);
-    add(`https://ref.ly/logos4/Tools?kind=${encodedKind}&name=${encodedKind}`);
     add(`logos4:${trimmed}`);
     add(`logos4:${trimmed};Name=${trimmed}`);
     add(`logos4:Tools;Kind=${trimmed}`);
@@ -141,6 +143,10 @@ function buildToolUris(tool: LogosTool) {
     add(`logos4:Tool;Kind=${trimmed}`);
     add(`logos4:Tools;Name=${trimmed}`);
     add(`logos4:Tools;Tool=${trimmed}`);
+    add(`https://ref.ly/logos4/${encodedKind}`);
+    add(`https://ref.ly/logos4/Tools?kind=${encodedKind}`);
+    add(`https://ref.ly/logos4/Tool?kind=${encodedKind}`);
+    add(`https://ref.ly/logos4/Tools?kind=${encodedKind}&name=${encodedKind}`);
   }
 
   const interactiveSlugCandidates = new Set<string>();
@@ -158,10 +164,10 @@ function buildToolUris(tool: LogosTool) {
   }
   for (const slug of interactiveSlugCandidates) {
     const encodedSlug = encodeURIComponent(slug);
-    add(`https://ref.ly/logosres/interactive:${encodedSlug}`);
-    add(`https://ref.ly/logosres/interactive:${encodedSlug}?pos=index.html`);
     add(`logosres:interactive:${slug}`);
     add(`logosres:interactive:${slug}?pos=index.html`);
+    add(`https://ref.ly/logosres/interactive:${encodedSlug}`);
+    add(`https://ref.ly/logosres/interactive:${encodedSlug}?pos=index.html`);
   }
 
   for (const interactiveId of tool.interactiveIds ?? []) {
@@ -170,24 +176,24 @@ function buildToolUris(tool: LogosTool) {
       continue;
     }
     const encodedInteractive = encodeURIComponent(trimmed);
-    add(`https://ref.ly/logos4/Interactive?name=${encodedInteractive}`);
     add(`logos4:Interactive;Name=${trimmed}`);
     add(`logos4:Interactive;name=${trimmed}`);
     add(`logos4:Interactive;Id=${trimmed}`);
+    add(`https://ref.ly/logos4/Interactive?name=${encodedInteractive}`);
   }
 
   for (const command of buildCommandCandidates(tool)) {
     const encodedCommand = encodeURIComponent(command);
-    add(`https://ref.ly/logos4/Command?q=${encodedCommand}`);
-    add(`https://ref.ly/logos4/Command?text=${encodedCommand}`);
     add(`logos4:Command?text=${encodedCommand}`);
     add(`logos4:Command;Command=${command}`);
     add(`logos4:Command;Name=Open;Text=${encodedCommand}`);
     add(`logos4-command://command/open?text=${encodedCommand}`);
     add(`logos4-command://command?text=${encodedCommand}`);
+    add(`https://ref.ly/logos4/Command?q=${encodedCommand}`);
+    add(`https://ref.ly/logos4/Command?text=${encodedCommand}`);
   }
 
-  return uris;
+  return [...nativeUris, ...httpUris];
 }
 
 function getPrimaryCommand(tool: LogosTool) {
