@@ -1,4 +1,4 @@
-import { link, lstat, open, readlink, rename, symlink, unlink } from "node:fs/promises";
+import { link, lstat, readlink, rename, symlink, unlink } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
 import { LIMITS } from "./limits";
 import type { FilenameStyle } from "./preferences";
@@ -68,7 +68,7 @@ export async function renameFile(path: string, title: string, style: FilenameSty
   throw new Error("Too many files in this folder already use that name.");
 }
 
-/** Errors that mean the volume cannot do the atomic move, not that it refused. */
+/** Errors that mean the volume cannot create the extra name used for a safe move. */
 const UNSUPPORTED_LINK_CODES = new Set(["EPERM", "ENOTSUP", "EOPNOTSUPP", "EMLINK", "EXDEV", "ENOSYS"]);
 
 /**
@@ -76,9 +76,9 @@ const UNSUPPORTED_LINK_CODES = new Set(["EPERM", "ENOTSUP", "EOPNOTSUPP", "EMLIN
  *
  * `link` and `symlink` are what make this safe: POSIX refuses both with EEXIST
  * when the name exists, so the name is tested and taken in the same instant and
- * nothing can slip in between. `rename` has no such refusal — it replaces
- * whatever it lands on — so it is only reached on a volume that cannot create
- * the extra name at all, such as the FAT filesystem of a memory card.
+ * nothing can slip in between. A volume that cannot create the extra name is
+ * rejected because Node's `rename` replaces an existing target and offers no
+ * no-replace option.
  */
 async function takeName(path: string, target: string): Promise<boolean> {
   const source = await lstat(path);
@@ -95,7 +95,7 @@ async function takeName(path: string, target: string): Promise<boolean> {
     const code = (error as NodeJS.ErrnoException | null)?.code;
     if (code === "EEXIST") return false;
     if (!code || !UNSUPPORTED_LINK_CODES.has(code)) throw error;
-    return claimAndRename(path, target);
+    throw new Error("This file cannot be renamed safely on its current volume.", { cause: error });
   }
 
   try {
@@ -104,42 +104,6 @@ async function takeName(path: string, target: string): Promise<boolean> {
     // The file answers to both names at this point. Drop the one just added, so
     // a failure here leaves the file where it started rather than duplicated.
     await unlink(target).catch(() => undefined);
-    throw error;
-  }
-  return true;
-}
-
-/**
- * The fallback for a volume with no second name to give: claim `target` with an
- * exclusive create, then rename over that claim.
- *
- * This cannot be made atomic — `rename` will replace whatever holds the name by
- * the time it runs — so it is kept for the volumes that leave no alternative.
- */
-async function claimAndRename(path: string, target: string): Promise<boolean> {
-  let claimed;
-  try {
-    // "wx" fails when anything already holds the name, which is the check that
-    // fs.rename does not perform — it would overwrite the other file silently.
-    claimed = await open(target, "wx");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException | null)?.code === "EEXIST") return false;
-    throw error;
-  }
-
-  const placeholder = await claimed.stat();
-  await claimed.close();
-
-  try {
-    await rename(path, target);
-  } catch (error) {
-    // Only the placeholder this call created may be removed. Anything else now
-    // holding the name belongs to someone else, and deleting it would be the
-    // very loss this function exists to prevent.
-    const held = await lstat(target).catch(() => null);
-    if (held && held.ino === placeholder.ino && held.dev === placeholder.dev) {
-      await unlink(target).catch(() => undefined);
-    }
     throw error;
   }
   return true;
