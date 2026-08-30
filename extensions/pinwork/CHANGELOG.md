@@ -1,4 +1,4 @@
-## [Update for the Pinwork App Store release] - {PR_MERGE_DATE}
+## [Update for the Pinwork App Store release] - 2026-08-30
 
 - Replace beta installation instructions with the released App Store download
 - Refresh the extension description and natural-language examples
