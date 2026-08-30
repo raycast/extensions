@@ -12,14 +12,7 @@ import {
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import {
-  formatDuration,
-  startCaffeinate,
-  stopCaffeinate,
-  deviceName,
-  getSchedule,
-  pauseTodaysScheduleIfRunning,
-} from "./utils";
+import { formatDuration, startCaffeinate, stopCaffeinate, deviceName, getSchedule } from "./utils";
 import { maybeAutoCaffeinate } from "./status";
 import { get_caffeinate_state } from "rust:../rust";
 
@@ -225,7 +218,6 @@ export default function Command(props: LaunchProps) {
     const preferences = getPreferenceValues<Preferences.Index>();
     if (schedule != undefined && schedule.IsRunning == true) {
       if (preferences.decaffeinatePausesSchedules) {
-        await pauseTodaysScheduleIfRunning();
         setLocalCaffeinateStatus(false);
         await mutate(stopCaffeinate({ menubar: true, status: true }, undefined, { pauseRunningSchedule: true }), {
           optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),

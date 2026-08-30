@@ -245,7 +245,6 @@
       "type": "checkbox",
       "required": false,
       "default": false,
-      "title": "Launch",
       "label": "Start caffeination when Raycast starts"
     },
     {
