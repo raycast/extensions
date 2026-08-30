@@ -1,6 +1,6 @@
 # 1Bookmark Changelog
 
-## [Subscribed Tag Check Icon] - {PR_MERGE_DATE}
+## [Subscribed Tag Check Icon] - 2026-08-30
 
 - 0.14.0
 - 👥 Team spaces now have a **Copy Invitation Link** action (`⌘I`). Share the link and teammates can join the space directly from the web after signing in.
