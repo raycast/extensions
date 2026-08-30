@@ -79,9 +79,16 @@ export function statusIcon(state?: PackageState): React.ComponentProps<typeof Li
 }
 
 export function OutdatedList(props: OutdatedListProps) {
-  const formulae = props.filterType != InstallableFilterType.casks ? (props.outdated?.formulae ?? []) : [];
+  const allFormulae = props.filterType != InstallableFilterType.casks ? (props.outdated?.formulae ?? []) : [];
   const casks = props.filterType != InstallableFilterType.formulae ? (props.outdated?.casks ?? []) : [];
-  const hasResults = formulae.length > 0 || casks.length > 0;
+
+  // Pinned formulae are separated out the way Show Installed separates them.
+  // Here it also carries meaning: a pinned formula is one `brew upgrade` will
+  // refuse and Upgrade All skips, so keeping it out of the actionable list says
+  // that without needing the row to explain itself.
+  const formulae = allFormulae.filter((formula) => !formula.pinned);
+  const pinnedFormulae = allFormulae.filter((formula) => formula.pinned);
+  const hasResults = allFormulae.length > 0 || casks.length > 0;
 
   // Determine search bar placeholder based on loading state
   const searchBarPlaceholder =
@@ -140,6 +147,21 @@ export function OutdatedList(props: OutdatedListProps) {
               />
             ))}
           </List.Section>
+          {pinnedFormulae.length > 0 && (
+            <List.Section title="Pinned Formulae" subtitle={`${pinnedFormulae.length}`}>
+              {pinnedFormulae.map((formula) => (
+                <OutdatedFormulaeListItem
+                  key={formula.name}
+                  outdated={formula}
+                  icon={props.icon}
+                  actions={props.actions}
+                  onUpgrade={props.onUpgrade}
+                  onUpgradeAll={props.onUpgradeAll}
+                  onAction={props.onAction}
+                />
+              ))}
+            </List.Section>
+          )}
         </>
       )}
     </List>
