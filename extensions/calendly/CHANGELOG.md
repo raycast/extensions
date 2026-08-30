@@ -1,5 +1,10 @@
 # Calendly Changelog
 
+## [Maintenance] - 2026-08-30
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Added event duration] - 2026-04-12
 
 - Display event duration as a right-aligned accessory on each event type
@@ -15,4 +20,4 @@
 
 ## [Update] - 2022-09-12
 
- - OAuth Support 🎉
+- OAuth Support 🎉
