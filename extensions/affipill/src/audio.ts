@@ -10,27 +10,63 @@ export type PlaybackState = {
   trackId: string;
   audioPath: string;
   startedAt: number;
+  processStartedAt: string;
 };
 
-function getProcessCommandLine(pid: number): string | undefined {
-  const result = spawnSync("ps", ["-p", String(pid), "-ww", "-o", "command="], {
+type FieldLookup = { kind: "missing" } | { kind: "unknown" } | { kind: "found"; value: string };
+
+type ProcessLookup =
+  | { kind: "missing" }
+  | { kind: "unknown" }
+  | { kind: "found"; command: string; processStartedAt: string };
+
+type Ownership = "owned" | "foreign" | "unknown";
+
+function readProcessField(pid: number, field: string): FieldLookup {
+  const result = spawnSync("ps", ["-p", String(pid), "-ww", "-o", `${field}=`], {
     encoding: "utf8",
   });
 
-  if (result.status !== 0) {
-    return undefined;
+  if (result.error) {
+    return { kind: "unknown" };
   }
 
-  const command = result.stdout.trim();
-  return command || undefined;
+  if (result.status !== 0) {
+    return { kind: "missing" };
+  }
+
+  const value = result.stdout.trim();
+  if (!value) {
+    return { kind: "missing" };
+  }
+
+  return { kind: "found", value };
 }
 
-function isOwnedPlaybackProcess(pid: number, audioPath: string): boolean {
-  const command = getProcessCommandLine(pid);
-  if (!command) {
-    return false;
+function inspectProcess(pid: number): ProcessLookup {
+  const started = readProcessField(pid, "lstart");
+  if (started.kind !== "found") {
+    return started;
   }
 
+  const command = readProcessField(pid, "command");
+  if (command.kind !== "found") {
+    return command;
+  }
+
+  return {
+    kind: "found",
+    command: command.value,
+    processStartedAt: started.value,
+  };
+}
+
+function getProcessStartTime(pid: number): string | undefined {
+  const started = readProcessField(pid, "lstart");
+  return started.kind === "found" ? started.value : undefined;
+}
+
+function isAfplayCommand(command: string, audioPath: string): boolean {
   const executable = command.split(/\s+/, 1)[0];
   const isAfplay = executable === "afplay" || executable.endsWith("/afplay");
   if (!isAfplay) {
@@ -38,6 +74,30 @@ function isOwnedPlaybackProcess(pid: number, audioPath: string): boolean {
   }
 
   return command.slice(executable.length).trim() === audioPath;
+}
+
+function getPlaybackOwnership(state: PlaybackState): Ownership {
+  if (!state.processStartedAt) {
+    return "foreign";
+  }
+
+  const process = inspectProcess(state.pid);
+  if (process.kind === "unknown") {
+    return "unknown";
+  }
+
+  if (process.kind === "missing") {
+    return "foreign";
+  }
+
+  if (
+    process.processStartedAt === state.processStartedAt &&
+    isAfplayCommand(process.command, state.audioPath)
+  ) {
+    return "owned";
+  }
+
+  return "foreign";
 }
 
 async function clearPlaybackState(): Promise<void> {
@@ -90,7 +150,12 @@ export async function getPlaybackState(): Promise<PlaybackState | null> {
     return null;
   }
 
-  if (!isOwnedPlaybackProcess(state.pid, state.audioPath)) {
+  const ownership = getPlaybackOwnership(state);
+  if (ownership === "unknown") {
+    return state;
+  }
+
+  if (ownership === "foreign") {
     await clearPlaybackState();
     await refreshNowPlayingMenuBar();
     return null;
@@ -105,9 +170,15 @@ export async function stopPlayback(): Promise<void> {
     return;
   }
 
-  if (isOwnedPlaybackProcess(state.pid, state.audioPath)) {
+  const ownership = getPlaybackOwnership(state);
+  if (ownership === "unknown") {
+    return;
+  }
+
+  if (ownership === "owned") {
     killPlaybackProcess(state.pid);
   }
+
   await clearPlaybackState();
   await refreshNowPlayingMenuBar();
 }
@@ -123,11 +194,22 @@ export async function playTrack(trackId: string, audioPath: string): Promise<voi
     detached: true,
     stdio: "ignore",
   });
-  child.unref();
 
   if (!child.pid) {
     throw new Error("Failed to start playback.");
   }
+
+  const processStartedAt = getProcessStartTime(child.pid);
+  if (!processStartedAt) {
+    try {
+      child.kill("SIGKILL");
+    } catch {
+      killPlaybackProcess(child.pid);
+    }
+    throw new Error("Failed to start playback.");
+  }
+
+  child.unref();
 
   await LocalStorage.setItem(
     PLAYBACK_KEY,
@@ -136,6 +218,7 @@ export async function playTrack(trackId: string, audioPath: string): Promise<voi
       trackId,
       audioPath,
       startedAt: Date.now(),
+      processStartedAt,
     } satisfies PlaybackState),
   );
 
