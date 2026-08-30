@@ -1,11 +1,11 @@
 # Logos Search Changelog
 
-## [1.3.0] - 2026-08-30
+## [Floating Window Action & Scheme Priorities] - {PR_MERGE_DATE}
 
-### Added
+- Added an "Open in Floating Window" action to the Logos Tools Launcher on macOS and Windows using Logos' documented shortcuts (`Option+Command+F` on macOS and `Ctrl+F11` on Windows).
+- Prioritized native Logos deep-link schemes (`logos4:...`, `logosres:...`) over `https://ref.ly/...` URLs in the tools launcher so tools open directly within Logos without opening the browser.
 
-- Added an "Open in Floating Window" action to the Logos Tools Launcher on macOS and Windows.
-- Uses Logos' documented floating-panel shortcuts after opening the selected tool with a native Logos URI.
+## [Unreleased] - 2026-06-25
 
 ### Fixed
 
