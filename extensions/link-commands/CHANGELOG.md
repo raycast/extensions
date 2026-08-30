@@ -1,6 +1,6 @@
 # Link Commands Changelog
 
-## [Surface Routers] - {PR_MERGE_DATE}
+## [Surface Routers] - 2026-08-30
 
 ### Added
 
