@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-08-30
 
 - Add reason to `Caffeinate Status`, showing 4 types, examples: 
   - `Caffeinate Until`: until 2:00 PM
