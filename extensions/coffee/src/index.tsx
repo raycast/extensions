@@ -128,11 +128,12 @@ function useWindowsCaffeinateInfo(execute: boolean) {
   const mutate = async (ctx?: Promise<unknown>, options?: MutateOptions) => {
     const previous = data;
     if (options?.optimisticUpdate) setData(options.optimisticUpdate());
+    let error: unknown;
     if (ctx) {
       try {
         await ctx;
-      } catch {
-        // Ignore: the status refresh below reports the actual state.
+      } catch (e) {
+        error = e;
       }
     }
     try {
@@ -141,7 +142,9 @@ function useWindowsCaffeinateInfo(execute: boolean) {
     } catch {
       // Refresh failed: roll back the optimistic value rather than reporting stale state.
       setData(previous);
+      error = error ?? new Error("Failed to refresh caffeinate state");
     }
+    if (error) throw error;
   };
 
   return { isLoading, data, mutate };
@@ -210,38 +213,47 @@ export default function Command(props: LaunchProps) {
       seconds === null
         ? `Caffeinating your ${deviceName()} ${durationLabel}`
         : `Caffeinating your ${deviceName()} for ${durationLabel}`;
-    await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs, reason), {
-      optimisticUpdate: () => ({ isRunning: true, totalSeconds: seconds, startTime: Date.now() }),
-    });
+    try {
+      await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs, reason), {
+        optimisticUpdate: () => ({ isRunning: true, totalSeconds: seconds, startTime: Date.now() }),
+      });
+    } catch {
+      setLocalCaffeinateStatus(null);
+    }
   };
 
   const handleDeactivate = async () => {
     const schedule = await getSchedule();
     const preferences = getPreferenceValues<Preferences.Index>();
-    if (schedule != undefined && schedule.IsRunning == true) {
-      if (preferences.decaffeinatePausesSchedules) {
-        setLocalCaffeinateStatus(false);
-        await mutate(stopCaffeinate({ menubar: true, status: true }, undefined, { pauseRunningSchedule: true }), {
-          optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
-        });
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Caffeination schedule running",
-          message: "Pause to decaffeinate",
-          primaryAction: {
-            title: "Open Schedules",
-            onAction: () => launchCommand({ name: "addSchedule", type: LaunchType.UserInitiated }),
-          },
-        });
-        return;
-      }
-    } else {
-      setLocalCaffeinateStatus(false);
-      await mutate(stopCaffeinate({ menubar: true, status: true }, undefined), {
-        optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
+    if (schedule != undefined && schedule.IsRunning == true && !preferences.decaffeinatePausesSchedules) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Caffeination schedule running",
+        message: "Pause to decaffeinate",
+        primaryAction: {
+          title: "Open Schedules",
+          onAction: () => launchCommand({ name: "addSchedule", type: LaunchType.UserInitiated }),
+        },
       });
+      return;
     }
+    try {
+      await mutate(
+        stopCaffeinate({ menubar: true, status: true }, undefined, {
+          pauseRunningSchedule: schedule != undefined && schedule.IsRunning == true,
+        }),
+        { optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }) },
+      );
+    } catch {
+      setLocalCaffeinateStatus(null);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to decaffeinate",
+        message: "Caffeination may still be running",
+      });
+      return;
+    }
+    setLocalCaffeinateStatus(false);
     if (preferences.hidenWhenDecaffeinated) {
       showHUD(`Your ${deviceName()} is now decaffeinated`);
     }
