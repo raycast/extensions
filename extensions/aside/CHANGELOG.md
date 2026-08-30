@@ -1,6 +1,6 @@
 # Aside Changelog
 
-## [Search Improvements] - {PR_MERGE_DATE}
+## [Search Improvements] - 2026-08-30
 
 - Added profile-aware bookmark results to Search Aside, with shared ranking and a five-item preview before typing.
 - Collapsed Chromium redirect chains to their final destinations without hiding independent visits that share a title or timestamp.
