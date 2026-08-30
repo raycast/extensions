@@ -274,13 +274,12 @@ final class AccessibilityUIReader: @unchecked Sendable {
             throw AccessibilityMenuError.interfaceElementUnavailable(title)
         }
 
-        var releasePoint = point
         var mouseDownPosted = false
         var mouseUpPosted = false
         defer {
             if mouseDownPosted && !mouseUpPosted {
-                mouseUp.location = releasePoint
-                CGWarpMouseCursorPosition(releasePoint)
+                mouseUp.location = point
+                CGWarpMouseCursorPosition(point)
                 mouseUp.post(tap: .cghidEventTap)
             }
         }
@@ -298,18 +297,22 @@ final class AccessibilityUIReader: @unchecked Sendable {
             throw AccessibilityMenuError.interfaceElementUnavailable(title)
         }
 
-        releasePoint = try validatedClickPoint(
+        // Revalidate the original coordinate instead of following a moving
+        // element. Mouse-down and mouse-up must stay paired at one point so a
+        // layout change cannot turn the click into a drag.
+        _ = try validatedClickPoint(
             on: element,
             titled: title,
-            in: application
+            in: application,
+            preferredPoint: point
         )
 
         let mouseUpCounter = CGEventSource.counterForEventType(
             .hidSystemState,
             eventType: .leftMouseUp
         )
-        mouseUp.location = releasePoint
-        CGWarpMouseCursorPosition(releasePoint)
+        mouseUp.location = point
+        CGWarpMouseCursorPosition(point)
         mouseUp.post(tap: .cghidEventTap)
         mouseUpPosted = true
         guard waitForEventDelivery(.leftMouseUp, after: mouseUpCounter) else {
@@ -320,7 +323,8 @@ final class AccessibilityUIReader: @unchecked Sendable {
     private func validatedClickPoint(
         on element: AXUIElement,
         titled title: String,
-        in application: NSRunningApplication
+        in application: NSRunningApplication,
+        preferredPoint: CGPoint? = nil
     ) throws -> CGPoint {
         let applicationElement = AXUIElementCreateApplication(application.processIdentifier)
         let systemWideElement = AXUIElementCreateSystemWide()
@@ -346,7 +350,10 @@ final class AccessibilityUIReader: @unchecked Sendable {
             throw AccessibilityMenuError.interfaceElementUnavailable(title)
         }
 
-        let point = visibleFrame.center
+        let point = preferredPoint ?? visibleFrame.center
+        guard visibleFrame.contains(point) else {
+            throw AccessibilityMenuError.interfaceElementUnavailable(title)
+        }
         var hitElement: AXUIElement?
         guard AXUIElementCopyElementAtPosition(
             systemWideElement,
