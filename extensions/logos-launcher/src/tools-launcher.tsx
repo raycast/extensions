@@ -47,6 +47,8 @@ function ToolActions({ tool }: { tool: LogosTool }) {
           await launchTool(tool, uris);
         }}
       />
+      <Action.CopyToClipboard title="Copy Command Text" content={primaryCommand} />
+      {primaryUri ? <Action.CopyToClipboard title="Copy Launch URI" content={primaryUri} /> : null}
       {floatingUris.length > 0 ? (
         <Action
           title="Open in Floating Window"
@@ -56,8 +58,6 @@ function ToolActions({ tool }: { tool: LogosTool }) {
           }}
         />
       ) : null}
-      <Action.CopyToClipboard title="Copy Command Text" content={primaryCommand} />
-      {primaryUri ? <Action.CopyToClipboard title="Copy Launch URI" content={primaryUri} /> : null}
     </ActionPanel>
   );
 }
