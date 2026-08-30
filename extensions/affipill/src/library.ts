@@ -1,10 +1,10 @@
 import { randomUUID } from "crypto";
 import { execFile } from "child_process";
-import { copyFile, mkdir, unlink } from "fs/promises";
+import { copyFile, mkdir, rename, unlink } from "fs/promises";
 import { existsSync, statSync } from "fs";
-import { basename, extname, join } from "path";
+import { basename, extname, join, resolve } from "path";
 import { promisify } from "util";
-import { environment, LocalStorage } from "@raycast/api";
+import { environment, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { metadataFromFilename } from "./filenames";
 import { Track } from "./types";
 
@@ -28,14 +28,65 @@ async function getAudioDurationSeconds(audioPath: string): Promise<number | unde
   }
 }
 
-function getTracksDirectory(): string {
+function getDefaultTracksDirectory(): string {
   return join(environment.supportPath, "tracks");
 }
 
-async function ensureTracksDirectory(): Promise<string> {
+export function getTracksDirectory(): string {
+  const { libraryFolder } = getPreferenceValues<{ libraryFolder?: string }>();
+  const configured = libraryFolder?.trim();
+  return configured ? resolve(configured) : getDefaultTracksDirectory();
+}
+
+export async function ensureTracksDirectory(): Promise<string> {
   const tracksDirectory = getTracksDirectory();
   await mkdir(tracksDirectory, { recursive: true });
   return tracksDirectory;
+}
+
+function isManagedLibraryFile(filePath: string, trackId: string): boolean {
+  return basename(filePath).startsWith(trackId);
+}
+
+function managedDestinationPath(filePath: string, trackId: string, tracksDirectory: string): string | undefined {
+  if (!isManagedLibraryFile(filePath, trackId)) {
+    return undefined;
+  }
+
+  return join(tracksDirectory, basename(filePath));
+}
+
+function resolveManagedPath(filePath: string, trackId: string, tracksDirectory: string): string {
+  if (isValidFile(filePath)) {
+    return filePath;
+  }
+
+  const destinationPath = managedDestinationPath(filePath, trackId, tracksDirectory);
+  return destinationPath && isValidFile(destinationPath) ? destinationPath : filePath;
+}
+
+async function relocateManagedFile(filePath: string, trackId: string, tracksDirectory: string): Promise<string> {
+  const destinationPath = managedDestinationPath(filePath, trackId, tracksDirectory);
+  if (!destinationPath || resolve(filePath) === destinationPath) {
+    return filePath;
+  }
+
+  if (isValidFile(destinationPath)) {
+    return destinationPath;
+  }
+
+  if (!isValidFile(filePath)) {
+    return filePath;
+  }
+
+  try {
+    await rename(filePath, destinationPath);
+  } catch {
+    await copyFile(filePath, destinationPath);
+    await removeFileIfExists(filePath);
+  }
+
+  return destinationPath;
 }
 
 function isValidFile(path: string): boolean {
@@ -54,21 +105,37 @@ export async function getTracks(): Promise<Track[]> {
 
   try {
     const tracks = JSON.parse(data) as Track[];
-    const availableTracks = tracks.filter((track) => isValidFile(track.audioPath));
+    const tracksDirectory = await ensureTracksDirectory();
+    const resolvedTracks = tracks.map((track) => ({
+      ...track,
+      audioPath: resolveManagedPath(track.audioPath, track.id, tracksDirectory),
+      coverPath: track.coverPath ? resolveManagedPath(track.coverPath, track.id, tracksDirectory) : undefined,
+    }));
+    const availableTracks = resolvedTracks.filter((track) => isValidFile(track.audioPath));
 
+    let didRelocateFiles = false;
     let didBackfillDuration = false;
     const tracksWithDuration = await Promise.all(
       availableTracks.map(async (track) => {
+        const audioPath = await relocateManagedFile(track.audioPath, track.id, tracksDirectory);
+        const coverPath = track.coverPath
+          ? await relocateManagedFile(track.coverPath, track.id, tracksDirectory)
+          : undefined;
+
+        if (audioPath !== track.audioPath || coverPath !== track.coverPath) {
+          didRelocateFiles = true;
+        }
+
         if (track.durationSeconds !== undefined) {
-          return track;
+          return { ...track, audioPath, coverPath };
         }
 
         didBackfillDuration = true;
-        return { ...track, durationSeconds: await getAudioDurationSeconds(track.audioPath) };
+        return { ...track, audioPath, coverPath, durationSeconds: await getAudioDurationSeconds(audioPath) };
       }),
     );
 
-    if (availableTracks.length !== tracks.length || didBackfillDuration) {
+    if (availableTracks.length !== tracks.length || didRelocateFiles || didBackfillDuration) {
       await saveTracks(tracksWithDuration);
     }
 

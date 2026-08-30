@@ -7,6 +7,8 @@ import {
   Icon,
   Image,
   List,
+  open,
+  openExtensionPreferences,
   showHUD,
   showToast,
   Toast,
@@ -20,7 +22,7 @@ import { getPlaybackState, PlaybackState, playTrack, stopPlayback } from "./audi
 import { EditTrackForm } from "./edit-track-form";
 import { formatDuration } from "./format";
 import { ImportFolder } from "./import-folder";
-import { deleteTrack, getTrackById, getTracks } from "./library";
+import { deleteTrack, ensureTracksDirectory, getTrackById, getTracks } from "./library";
 import { Track } from "./types";
 
 function getTrackIcon(track: Track, isPlaying: boolean): Image.ImageLike {
@@ -37,19 +39,38 @@ function getTrackIcon(track: Track, isPlaying: boolean): Image.ImageLike {
 
 function TrackLibraryActions({ onSaved }: { onSaved: () => void }) {
   return (
-    <ActionPanel.Section>
-      <Action.Push
-        title="Import Tracks"
-        icon={Icon.NewDocument}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-        target={<ImportFolder onSaved={onSaved} />}
+    <>
+      <ActionPanel.Section>
+        <Action.Push
+          title="Import Tracks"
+          icon={Icon.NewDocument}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          target={<ImportFolder onSaved={onSaved} />}
+        />
+        <Action.Push
+          title="Add Track"
+          icon={Icon.Plus}
+          shortcut={Keyboard.Shortcut.Common.New}
+          target={<AddTrackForm onSaved={onSaved} />}
+        />
+      </ActionPanel.Section>
+      <LibraryFolderActions />
+    </>
+  );
+}
+
+function LibraryFolderActions() {
+  return (
+    <ActionPanel.Section title="Library Folder">
+      <Action
+        title="Open Library Folder"
+        icon={Icon.Finder}
+        onAction={async () => {
+          const directory = await ensureTracksDirectory();
+          await open(directory);
+        }}
       />
-      <Action.Push
-        title="Add Track"
-        icon={Icon.Plus}
-        shortcut={Keyboard.Shortcut.Common.New}
-        target={<AddTrackForm onSaved={onSaved} />}
-      />
+      <Action title="Change Library Folder" icon={Icon.Gear} onAction={openExtensionPreferences} />
     </ActionPanel.Section>
   );
 }

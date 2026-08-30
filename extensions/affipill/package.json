@@ -12,6 +12,15 @@
     "Media"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "libraryFolder",
+      "title": "Library Folder",
+      "type": "directory",
+      "required": false,
+      "description": "Folder where Affipill stores audio and cover files. Leave empty to use the default Affipill folder. Existing library files move here the next time you open Affipill."
+    }
+  ],
   "commands": [
     {
       "name": "affipill",
