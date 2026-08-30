@@ -1,5 +1,9 @@
 # OpenQR Changelog
 
+## [Ownership Transfer] - 2026-08-30
+
+- Extension ownership transferred to the OpenQR organisation.
+
 ## [Fixes] - 2026-08-28
 
 - Manage Dynamic QR Codes: a failed load (invalid API key, network error) now shows the error on the list with a Retry action, instead of looking like an empty account.
