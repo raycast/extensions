@@ -78,9 +78,9 @@ export const setToken = (pToken: string) => {
 };
 
 export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) => {
-  // 세션이 서버에서 무효화된 경우(웹에서 세션 제거, 계정 탈퇴 등) 토큰과 함께
-  // 로그인 상태를 정리한다. 토큰이 비워지면 use-logged-out-status.hook 이
-  // 보안 민감 캐시(me/bookmarks/tags)를 즉시 클리어하고 로그인 뷰로 전환한다.
+  // When the session is invalidated by the server (session removed on the web, account deleted, etc.),
+  // clear the token along with the login state. Once the token is emptied, use-logged-out-status.hook
+  // immediately clears security-sensitive caches (me/bookmarks/tags) and switches to the login view.
   const handleSessionExpired = () => {
     setToken("");
     setSessionToken("");
@@ -129,9 +129,9 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
                     const httpStatus = error.error.json.data.httpStatus;
                     const logDetail = `${errorRouterName}: ${errorMessage} (${httpStatus})`;
 
-                    // 로그인된 상태에서 401(UNAUTHORIZED)을 받으면 세션이 서버에서
-                    // 무효화된 것이므로 로그아웃 처리한다. 첫 에러가 다른 종류여도
-                    // batch 안에 401이 섞여 있을 수 있으므로 전체를 검사한다.
+                    // Receiving a 401 (UNAUTHORIZED) while logged in means the session was
+                    // invalidated by the server, so log out. Even if the first error is of a
+                    // different kind, a 401 may be mixed into the batch, so check all of them.
                     const has401 = errors.some(
                       (e: { error: { json: { data?: { httpStatus?: number } } } }) =>
                         e.error.json.data?.httpStatus === 401,
@@ -142,7 +142,7 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
                       return res.data;
                     }
 
-                    // 사용자에게는 서버가 내려준 사용자용 메시지만 보여주고, 라우터/상태코드는 로그에만 남긴다.
+                    // Show the user only the server's user-facing message; router/status code go to the log only.
                     showFailureToast(new Error(`tRPC error in batch results -> ${logDetail}`), { title: errorMessage });
                     console.error("tRPC Error(batch):");
                     console.error(logDetail);
@@ -176,10 +176,10 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
                 return { ok: false, json: async () => trpcError.response?.data };
               }
 
-              // 로그인된 상태에서 401(UNAUTHORIZED)을 받으면 세션이 서버에서
-              // 무효화된 것(웹에서 세션 제거, 계정 탈퇴 등)이므로 로그아웃 처리한다.
-              // Bearer 토큰 경로는 middleware를 통과하므로 SESSION_EXPIRED 분기를 타지 않는다.
-              // HTTP 상태가 다른 에러(예: 500)여도 batch 응답 안에 401이 섞여 있을 수 있어 함께 검사한다.
+              // Receiving a 401 (UNAUTHORIZED) while logged in means the session was invalidated
+              // by the server (session removed on the web, account deleted, etc.), so log out.
+              // The Bearer token path passes through the middleware, so it never hits the SESSION_EXPIRED branch.
+              // Even with a different HTTP status (e.g. 500), a 401 may be mixed into the batch response, so check it.
               const dataErrors = Array.isArray(trpcError.response?.data) ? trpcError.response.data : [];
               const has401 =
                 trpcError.response?.status === 401 || dataErrors.some((e) => e?.error?.json?.data?.httpStatus === 401);
@@ -198,7 +198,7 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
               const routerName = middlewareErrorMessage ? "Middleware" : errorRouterName;
               const logDetail = `${routerName}: ${errorMessage} (${httpStatus})`;
 
-              // 사용자에게는 서버가 내려준 사용자용 메시지만 보여주고, 라우터/상태코드는 로그에만 남긴다.
+              // Show the user only the server's user-facing message; router/status code go to the log only.
               (err as Error).message = (err as Error).message + ` -> ${logDetail}`;
               showFailureToast(err, { title: errorMessage });
               console.error("tRPC Error:");

@@ -19,7 +19,7 @@ export const SpaceItemActionPanel = (props: {
 }) => {
   const { spaceId, refetch, type, enabled, authenticated, toggleSpace, myRole } = props;
 
-  // 팀 스페이스 초대 링크. 팀원에게 공유하면 로그인 후 해당 스페이스에 가입할 수 있다.
+  // Team space invitation link. Share it with teammates so they can join the space after logging in.
   const invitationLink = new URL(`/invite/${spaceId}`, API_URL).toString();
   const spaceWebUrl = new URL(`/spaces/${spaceId}`, API_URL).toString();
 

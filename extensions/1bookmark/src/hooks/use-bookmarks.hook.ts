@@ -1,5 +1,5 @@
 import { trpc } from "@/utils/trpc.util";
-import { CachedMyBookmarks } from "../types";
+import { Bookmark, CachedMyBookmarks } from "../types";
 import { useEffect, useMemo } from "react";
 import { useCachedState } from "@raycast/utils";
 import {
@@ -9,8 +9,6 @@ import {
 } from "@/utils/constants.util";
 import { useEnabledSpaces } from "./use-enabled-spaces.hook";
 
-// 스키마 버전 필드 없이 북마크 배열이 그대로 저장되던 구버전 캐시까지 고려해
-// 현재 스키마 버전과 호환되는 캐시인지 런타임에 검사한다.
 const isCompatibleCache = (cached: unknown): cached is CachedMyBookmarks => {
   if (typeof cached !== "object" || cached === null || Array.isArray(cached)) {
     return false;
@@ -20,9 +18,38 @@ const isCompatibleCache = (cached: unknown): cached is CachedMyBookmarks => {
   return schemaVersion === MY_BOOKMARKS_CACHE_SCHEMA_VERSION && Array.isArray(bookmarks);
 };
 
+// Versions up to 0.13.x stored the bare bookmark array without a schema version.
+// The listAll response shape has not changed since then, so that cache is migrated into
+// the current envelope instead of being discarded. Dropping it would leave a user who
+// upgrades while offline with no cached bookmarks to show.
+const migrateLegacyCache = (cached: unknown): CachedMyBookmarks | null => {
+  if (!Array.isArray(cached) || cached.length === 0) {
+    return null;
+  }
+
+  // Caches written before 0.3.0 have no tags field and cannot be used.
+  const [first] = cached as Partial<Bookmark>[];
+  if (!Array.isArray(first?.tags)) {
+    return null;
+  }
+
+  return { schemaVersion: MY_BOOKMARKS_CACHE_SCHEMA_VERSION, bookmarks: cached as Bookmark[] };
+};
+
+// Returns the cache in the current schema, or null when it cannot be used.
+// An incompatible cache is left in place rather than deleted; a successful fetch overwrites it.
+const toCompatibleCache = (cached: unknown): CachedMyBookmarks | null => {
+  if (isCompatibleCache(cached)) {
+    return cached;
+  }
+
+  return migrateLegacyCache(cached);
+};
+
 export const useMyBookmarks = () => {
   const [sessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
   const [cached, setCached] = useCachedState<CachedMyBookmarks | null>(CACHED_KEY_MY_BOOKMARKS, null);
+  const compatibleCache = useMemo(() => toCompatibleCache(cached), [cached]);
 
   const { enabledSpaceIds } = useEnabledSpaces();
 
@@ -33,19 +60,12 @@ export const useMyBookmarks = () => {
     {
       enabled: !!sessionToken && !!enabledSpaceIds,
       initialData: () => {
-        if (!cached) {
-          return undefined;
-        }
-
-        // 확장 업데이트로 캐시 스키마가 바뀐 경우(버전 불일치 또는 버전 필드 부재)
-        // 캐시를 폐기하고 서버에서 다시 가져온다.
-        if (!isCompatibleCache(cached)) {
-          setCached(null);
+        if (!compatibleCache) {
           return undefined;
         }
 
         console.info("Cache hit useBookmarks");
-        return cached.bookmarks;
+        return compatibleCache.bookmarks;
       },
     },
   );
