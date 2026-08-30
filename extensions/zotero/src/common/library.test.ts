@@ -1,10 +1,30 @@
 import { describe, it, expect } from "vitest";
-import { zoteroSelectUri, zoteroOpenPdfUri } from "./library";
+import { itemIdentity, zoteroSelectUri, zoteroOpenPdfUri } from "./library";
 import type { RefData } from "./zoteroApi";
 
-const userItem: RefData = { key: "ABCD1234", library: 1, libraryType: "user" };
-const groupItem: RefData = { key: "WXYZ5678", library: 2, libraryType: "group", groupID: 6518241 };
+const userItem: RefData = { id: 10, key: "ABCD1234", library: 1, libraryType: "user" };
+const groupItem: RefData = { id: 20, key: "WXYZ5678", library: 2, libraryType: "group", groupID: 6518241 };
 const legacyItem: RefData = { key: "OLD0000", library: 1 }; // cache built before library fields existed
+
+describe("itemIdentity", () => {
+  it("prefers the globally unique database item id", () => {
+    expect(itemIdentity(userItem)).toBe("id:10");
+    expect(itemIdentity(groupItem)).toBe("id:20");
+  });
+
+  it("gives distinct ids to items that share a Zotero key across libraries", () => {
+    const personal: RefData = { id: 10, key: "SAMEKEY", library: 1 };
+    const group: RefData = { id: 20, key: "SAMEKEY", library: 2 };
+    expect(itemIdentity(personal)).not.toBe(itemIdentity(group));
+  });
+
+  it("falls back to library+key when the database id is missing", () => {
+    const personal: RefData = { key: "SAMEKEY", library: 1 };
+    const group: RefData = { key: "SAMEKEY", library: 2 };
+    expect(itemIdentity(personal)).toBe("1:SAMEKEY");
+    expect(itemIdentity(group)).toBe("2:SAMEKEY");
+  });
+});
 
 describe("zoteroSelectUri", () => {
   it("uses the /library/ path for personal-library items", () => {

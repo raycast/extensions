@@ -14,6 +14,16 @@ export interface LibraryRef {
 
 export const USER_LIBRARY_NAME = "My Library";
 
+// Globally-unique identity for an item. Zotero item *keys* are unique only
+// within a library, so a personal item and a group item can share a key while
+// being different papers. Prefer the local items.itemID (unique in this
+// database); fall back to library+key for caches built before the id field
+// existed. Used for search dedupe and React row keys so the two cannot drift.
+export function itemIdentity(item: RefData): string {
+  if (item.id != null) return `id:${item.id}`;
+  return `${item.library ?? "?"}:${item.key}`;
+}
+
 // Build the zotero:// URI that selects an item in Zotero. Group items require
 // the /groups/<groupID>/ form; everything else (personal library, or a cache
 // built before group support) uses /library/. See Zotero's documented scheme:

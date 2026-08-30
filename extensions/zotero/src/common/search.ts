@@ -1,4 +1,5 @@
 import fuzzysort from "fuzzysort";
+import { itemIdentity } from "./library";
 import type { RefData } from "./zoteroApi";
 
 export interface ParsedQuery {
@@ -29,7 +30,7 @@ export interface RankOptions {
   // Include the Better BibTeX citekey as a (highest-weight) search field.
   bibtexSearch?: boolean;
   // If provided, keep only items belonging to at least one of these collections,
-  // identified by collection key.
+  // identified by library-qualified collection id (`collectionId`).
   collections?: string[];
   // If provided, keep only items whose libraryID is in this set. Used to scope
   // search to the personal library (default) plus any opted-in group libraries.
@@ -114,25 +115,25 @@ function recency(item: RefData): number {
 }
 
 function inCollections(item: RefData, allowed: Set<string>): boolean {
-  // Filter on collection keys, not names: distinct collections can share a name
-  // but never a key, so this never conflates same-named collections.
+  // Filter on library-qualified collection ids, not names or bare keys: distinct
+  // collections can share a name or a key across libraries, so only
+  // `collectionId(library, key)` keeps them independent.
   if (!item.collectionKeys || item.collectionKeys.length === 0) return false;
   return item.collectionKeys.some((k) => allowed.has(k));
 }
 
 // Rank items against a query. Pure: no Raycast / DB access, so it is the tested
 // seam. Empty query -> most-recent first. Non-empty -> relevance-ranked with
-// AND semantics across terms and exact-ish tag filters. Always deduped by key.
+// AND semantics across terms and exact-ish tag filters. Always deduped by the
+// globally unique item identity so personal and group items that share a
+// Zotero key both survive.
 export function rankResults(items: RefData[], query: string, opts: RankOptions = {}): RefData[] {
   const limit = opts.limit ?? DEFAULT_LIMIT;
   const threshold = opts.threshold ?? DEFAULT_THRESHOLD;
 
-  // Dedupe by the globally-unique item id (items.itemID). Zotero item *keys* are
-  // unique only within a library, so a personal item and a group item can share
-  // a key while being different papers; keying dedupe on the id keeps both.
   const seen = new Set<string>();
   let pool = items.filter((it) => {
-    const k = it.id != null ? `id:${it.id}` : `${it.library ?? "?"}:${it.key}`;
+    const k = itemIdentity(it);
     if (seen.has(k)) return false;
     seen.add(k);
     return true;

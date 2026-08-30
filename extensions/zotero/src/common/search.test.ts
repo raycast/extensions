@@ -123,6 +123,13 @@ describe("rankResults", () => {
     expect(out.map((i) => i.title).sort()).toEqual(["Group", "Personal"]);
   });
 
+  it("keeps two items that share a key when the database id is missing", () => {
+    const personal = item({ id: undefined, key: "SAMEKEY", library: 1, title: "Personal" });
+    const group = item({ id: undefined, key: "SAMEKEY", library: 2, title: "Group" });
+    const out = rankResults([personal, group], "", {});
+    expect(out.map((i) => i.title).sort()).toEqual(["Group", "Personal"]);
+  });
+
   it("matches a whole-word term inside a long abstract (substring, not subsequence)", () => {
     const hit = item({ title: "Unrelated", abstractNote: "a long discussion of superconductivity and more" });
     const out = rankResults([hit], "superconductivity", {});
@@ -149,6 +156,13 @@ describe("rankResults", () => {
     const a = item({ title: "A", collectionKeys: ["PAPERS_A"] });
     const b = item({ title: "B", collectionKeys: ["PAPERS_B"] });
     const out = rankResults([a, b], "", { collections: ["PAPERS_A"] });
+    expect(out.map((i) => i.title)).toEqual(["A"]);
+  });
+
+  it("does not conflate collections that share a key across libraries", () => {
+    const a = item({ title: "A", collectionKeys: ["1:SAMEKEY"] });
+    const b = item({ title: "B", collectionKeys: ["2:SAMEKEY"] });
+    const out = rankResults([a, b], "", { collections: ["1:SAMEKEY"] });
     expect(out.map((i) => i.title)).toEqual(["A"]);
   });
 

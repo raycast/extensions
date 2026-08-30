@@ -48,9 +48,9 @@ export interface RefData {
   attachment?: Attachment;
   // Human-readable collection names (for display).
   collection?: string[];
-  // Collection keys (globally unique), used for filtering. Distinct collections
-  // that happen to share a name have different keys, so filtering by key never
-  // conflates them.
+  // Library-qualified collection ids (`collectionId(library, key)`), used for
+  // filtering. Distinct collections that share a name or a bare key across
+  // libraries stay independent.
   collectionKeys?: string[];
   [key: string]: any;
 }

@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { dirname, join } from "path";
 import { RefData, Preferences, resolveHome, MAX_RENDER_RESULTS } from "./zoteroApi";
-import { LibraryRef, zoteroSelectUri, zoteroOpenPdfUri } from "./library";
+import { LibraryRef, itemIdentity, zoteroSelectUri, zoteroOpenPdfUri } from "./library";
 import type { CollectionOption } from "./collections";
 import { useVisitedUrls } from "./useVisitedUrls";
 import {
@@ -274,8 +274,8 @@ export const View = ({
             const attachmentFilePath = resolveAttachmentPath(item, preferences.zotero_path);
             return (
               <List.Item
-                key={item.id ?? item.key}
-                id={`${item.id}`}
+                key={itemIdentity(item)}
+                id={itemIdentity(item)}
                 title={
                   item.title +
                   (item.libraryType === "group" && item.libraryName ? ` · ${item.libraryName}` : "") +
