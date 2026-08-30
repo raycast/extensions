@@ -7,6 +7,8 @@ import {
   getPreferenceValues,
   launchCommand,
   showHUD,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -222,16 +224,28 @@ export default function Command(props: LaunchProps) {
     setLocalCaffeinateStatus(false);
     const schedule = await getSchedule();
     const preferences = getPreferenceValues<Preferences.Index>();
-    if (schedule != undefined && schedule.IsRunning == true && preferences.decaffeinatePausesSchedules) {
-      await pauseTodaysScheduleIfRunning();
-      await mutate(stopCaffeinate({ menubar: true, status: true }, undefined, { pauseRunningSchedule: true }), {
-        optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
-      });
-    } else {
-      await mutate(stopCaffeinate({ menubar: true, status: true }, undefined), {
-        optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
-      });
+    if (schedule != undefined && schedule.IsRunning == true) {
+      if (preferences.decaffeinatePausesSchedules) {
+        await pauseTodaysScheduleIfRunning();
+        await mutate(stopCaffeinate({ menubar: true, status: true }, undefined, { pauseRunningSchedule: true }), {
+          optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Caffeination schedule running",
+          message: "Pause to decaffeinate",
+          primaryAction: {
+            title: "Open Schedules",
+            onAction: () => launchCommand({ name: "addSchedule", type: LaunchType.UserInitiated }),
+          },
+        });
+        return;
+      }
     }
+    await mutate(stopCaffeinate({ menubar: true, status: true }, undefined), {
+      optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
+    });
     if (preferences.hidenWhenDecaffeinated) {
       showHUD(`Your ${deviceName()} is now decaffeinated`);
     }

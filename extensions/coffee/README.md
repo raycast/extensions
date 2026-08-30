@@ -4,7 +4,6 @@
 </p>
 
 **Coffee** is a Raycast extension designed to manage the caffeination of your computer. Whether you want to keep your computer awake for a specific period, while a particular app is running, or on a schedule, Coffee has you covered.
-**Coffee** is a Raycast extension designed to manage the caffeination of your computer. Whether you want to keep your computer awake for a specific period, while a particular app is running, or on a schedule, Coffee has you covered.
 
 ## Installation 🛠️
 
@@ -35,7 +34,6 @@ Toggle between keeping your computer caffeinated and in a decaffeinated state.
 ### 3. **Caffeinate For**
 
 Caffeinate your computer for a specified amount of time.
-Caffeinate your computer for a specified amount of time.
 
 <p align="center">
   <img src="./metadata/coffee-2.png" alt="Caffeinate For Command">
@@ -43,7 +41,6 @@ Caffeinate your computer for a specified amount of time.
 
 ### 4. **Caffeinate While**
 
-Keep your computer awake as long as a specific app is running.
 Keep your computer awake as long as a specific app is running.
 
 <p align="center">
@@ -82,7 +79,6 @@ Get the status of current caffeination in your menu bar.
 
 ### 8. **Auto-Caffeinate on Launch**
 
-Optionally have Coffee start caffeinating your computer (indefinitely) automatically whenever Raycast launches. Enable the **Start caffeination when Raycast starts** toggle under the **Launch** section in the extension's preferences.
 Optionally have Coffee start caffeinating your computer (indefinitely) automatically whenever Raycast launches. Enable the **Start caffeination when Raycast starts** toggle under the **Launch** section in the extension's preferences.
 
 > **Requirements:** Either the _Caffeinate Status_ command (15 s background interval) or the _Caffeinate Status Menu Bar_ command (1 m background interval) must be enabled in Raycast — the auto-start feature piggybacks on these background ticks.
