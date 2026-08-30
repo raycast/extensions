@@ -6,6 +6,7 @@
 - Added tooltip information detailing supported curly braces placeholders (`{selection}`, `{source}`, `{target}`, `{browser-tab}`, and `{image}`) inside the prompt editing textareas.
 - Added a new command "Manage AI Commands" to view, customize prompts and model settings, or reset configurations back to default.
 - Separated settings for "Summarize Website" into its own command settings key so it can be customized independently of the tweet rephrasing command.
+- Added global preferences to define a default model tag and choose whether it should be used as a fallback when command settings are not configured.
 
 ## [Fix] - 2026-06-16
 

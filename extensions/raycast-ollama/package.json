@@ -66,6 +66,23 @@
       "type": "password",
       "required": false,
       "title": "Ollama API Key"
+    },
+    {
+      "name": "ollamaDefaultModel",
+      "description": "Specify the global default model tag to use (e.g., llama3)",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Model Tag",
+      "placeholder": "llama3"
+    },
+    {
+      "name": "ollamaUseDefaultModelAsFallback",
+      "description": "Use the default model as fallback when command settings are not configured instead of showing the model selection form",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use Default Model as Fallback",
+      "label": "Use default model as fallback",
+      "default": false
     }
   ],
   "tools": [
