@@ -53,7 +53,7 @@
     "@typescript-eslint/parser": "^8.68.0",
     "eslint": "^10.9.1",
     "eslint-config-prettier": "^10.1.8",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
