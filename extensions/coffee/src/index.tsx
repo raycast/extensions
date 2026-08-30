@@ -221,12 +221,12 @@ export default function Command(props: LaunchProps) {
   };
 
   const handleDeactivate = async () => {
-    setLocalCaffeinateStatus(false);
     const schedule = await getSchedule();
     const preferences = getPreferenceValues<Preferences.Index>();
     if (schedule != undefined && schedule.IsRunning == true) {
       if (preferences.decaffeinatePausesSchedules) {
         await pauseTodaysScheduleIfRunning();
+        setLocalCaffeinateStatus(false);
         await mutate(stopCaffeinate({ menubar: true, status: true }, undefined, { pauseRunningSchedule: true }), {
           optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
         });
@@ -242,10 +242,12 @@ export default function Command(props: LaunchProps) {
         });
         return;
       }
+    } else {
+      setLocalCaffeinateStatus(false);
+      await mutate(stopCaffeinate({ menubar: true, status: true }, undefined), {
+        optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
+      });
     }
-    await mutate(stopCaffeinate({ menubar: true, status: true }, undefined), {
-      optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
-    });
     if (preferences.hidenWhenDecaffeinated) {
       showHUD(`Your ${deviceName()} is now decaffeinated`);
     }
