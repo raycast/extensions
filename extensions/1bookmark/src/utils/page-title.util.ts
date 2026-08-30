@@ -7,6 +7,23 @@ const FETCH_TIMEOUT_MS = 5000;
 const BROWSER_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
+type PageTitleFetchFailure = "timeout" | "redirect" | "network";
+
+function getErrorText(error: unknown): string {
+  if (!(error instanceof Error)) return String(error);
+
+  const cause = "cause" in error ? (error as Error & { cause?: unknown }).cause : undefined;
+  return `${error.name} ${error.message} ${cause ? getErrorText(cause) : ""}`.toLowerCase();
+}
+
+function classifyFetchFailure(error: unknown): PageTitleFetchFailure {
+  const errorText = getErrorText(error);
+
+  if ((error instanceof Error && error.name === "AbortError") || errorText.includes("timeout")) return "timeout";
+  if (errorText.includes("redirect")) return "redirect";
+  return "network";
+}
+
 const HTML_ENTITIES: Record<string, string> = {
   amp: "&",
   lt: "<",
@@ -70,7 +87,9 @@ export async function fetchPageTitle(pageUrl: string): Promise<string | null> {
     if (!ct.includes("text/html") && !ct.includes("application/xhtml")) return null;
     const html = await res.text();
     return extractTitle(html);
-  } catch {
+  } catch (error) {
+    // URL 전체는 query string 등에 민감한 정보가 있을 수 있어 hostname만 기록한다.
+    console.warn(`Page title fetch failed (${classifyFetchFailure(error)}): ${parsed.hostname}`);
     return null;
   } finally {
     clearTimeout(timer);

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCachedState } from "@raycast/utils";
 import { RouterOutputs } from "@/utils/trpc.util";
+import { CachedMyBookmarks } from "../types";
 import { cache } from "../utils/cache.util";
 import {
   CACHED_KEY_SESSION_TOKEN,
@@ -17,7 +18,7 @@ export const useLoggedOutStatus = () => {
   const [sessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
   // 서버 데이터의 로컬 미러. 다른 유저에게 노출되면 안 되므로 로그아웃 시 즉시 클리어.
   const [, setMe] = useCachedState<RouterOutputs["user"]["me"] | null>(CACHED_KEY_ME, null);
-  const [, setBookmarks] = useCachedState<RouterOutputs["bookmark"]["listAll"] | null>(CACHED_KEY_MY_BOOKMARKS, null);
+  const [, setBookmarks] = useCachedState<CachedMyBookmarks | null>(CACHED_KEY_MY_BOOKMARKS, null);
   const [, setTags] = useCachedState<RouterOutputs["tag"]["list"] | null>(CACHED_KEY_MY_TAGS, null);
   // 단기 인증 흐름의 임시 상태 — 로그아웃 시 즉시 클리어.
   const [, setSpaceVerifyingAuthEmail] = useCachedState<string | undefined>(

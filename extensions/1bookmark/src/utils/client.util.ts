@@ -5,6 +5,7 @@ import SuperJSON from "superjson";
 import { API_URL_TRPC } from "./constants.util.js";
 import axios, { isAxiosError } from "axios";
 import { showFailureToast } from "@raycast/utils";
+import { showToast, Toast } from "@raycast/api";
 
 interface TRPCError {
   response?: {
@@ -23,9 +24,41 @@ interface TRPCError {
 }
 
 let token = "";
+let lastNetworkToastAt = 0;
 
 let queryClientSingleton: QueryClient | undefined = undefined;
 let trpcClientSingleton: ReturnType<typeof trpc.createClient> | undefined = undefined;
+
+const API_TIMEOUT_MS = 15_000;
+const NETWORK_ERROR_CODES = new Set([
+  "ERR_NETWORK",
+  "ECONNABORTED",
+  "ETIMEDOUT",
+  "ENOTFOUND",
+  "ECONNREFUSED",
+  "ECONNRESET",
+  "EAI_AGAIN",
+]);
+
+const isNetworkUnavailableError = (error: unknown) => {
+  if (!isAxiosError(error)) return false;
+
+  // Axios only omits response when the request never reached an HTTP response
+  // (offline, DNS, connection refusal/reset, or timeout).
+  return !error.response || (error.code ? NETWORK_ERROR_CODES.has(error.code) : false);
+};
+
+const showNetworkUnavailableToast = () => {
+  const now = Date.now();
+  if (now - lastNetworkToastAt < 15_000) return;
+
+  lastNetworkToastAt = now;
+  showToast({
+    style: Toast.Style.Failure,
+    title: "Connection Unavailable",
+    message: "Showing cached data. Connect to the internet to refresh.",
+  });
+};
 
 export const getQueryClient = () => {
   if (!queryClientSingleton) {
@@ -76,6 +109,7 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
                 url: url as string,
                 method: options?.method,
                 data: options?.body,
+                timeout: API_TIMEOUT_MS,
                 // signal: options?.signal!,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 headers: headers as any,
@@ -120,6 +154,17 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
               // When a single request fails, the error gets caught here.
               const trpcError = err as TRPCError;
               const errorRouterName = (url as string).split("?")[0].split("/").pop()?.split(",")[0];
+
+              if (isNetworkUnavailableError(err)) {
+                const networkError = err as Error & { code?: string };
+                showNetworkUnavailableToast();
+                console.warn(
+                  `tRPC network unavailable -> ${errorRouterName} (${networkError.code || networkError.name})`,
+                );
+
+                return { ok: false, json: async () => undefined };
+              }
+
               const axiosErrorMessage = isAxiosError(err) ? `AxiosError [${err.stack?.split("\n")[0]}]` : "";
               const middlewareErrorMessage = (trpcError.response?.data as { middlewareErrorMessage?: string })
                 ?.middlewareErrorMessage;

@@ -80,6 +80,21 @@ export function Body() {
     rankingEntries,
   });
 
+  // Raycast List는 항목이 재정렬돼도 이전에 선택된 항목(id 기준)을 그대로 유지한다.
+  // 그래서 "o" → "ok" 처럼 타이핑 중 순위가 바뀌면 최상위가 아닌 항목이 선택된 채 남는다.
+  // 키워드가 바뀌면 검색 결과의 첫 항목을 선택하고, 같은 키워드 안에서의 수동 이동은 그대로 존중한다.
+  const firstItemId = searchedTaggedList[0]?.id ?? searchedUntaggedList[0]?.id;
+  const [selection, setSelection] = useState<{ keyword: string; itemId?: string }>({ keyword: "" });
+  const selectedItemId = selection.keyword === keyword ? selection.itemId : firstItemId;
+  const handleSelectionChange = useCallback(
+    (itemId: string | null) => {
+      // 리스트 갱신 중 일시적으로 null 이 올 수 있어 무시한다.
+      if (itemId === null) return;
+      setSelection({ keyword, itemId });
+    },
+    [keyword],
+  );
+
   const { hasSpaceFilter, hasCreatorFilter, hasTagFilter } = filteredData;
   const hasFilter = hasSpaceFilter || hasCreatorFilter || hasTagFilter;
   const filterText = useMemo(() => {
@@ -164,6 +179,8 @@ export function Body() {
       searchBarAccessory={me.data && enabledSpaceIds && <BookmarkFilter spaceIds={enabledSpaceIds} me={me.data} />}
       searchText={keyword}
       onSearchTextChange={setKeyword}
+      selectedItemId={selectedItemId}
+      onSelectionChange={handleSelectionChange}
     >
       {/* Display search results */}
       {searchedTaggedList.length > 0 && (

@@ -39,6 +39,7 @@ export const BookmarkItem = (props: {
 
   return (
     <List.Item
+      id={bookmark.id}
       icon={icon}
       title={name}
       subtitle={isShowingDetail ? undefined : url.replace(/^https?:\/\//, "")}
