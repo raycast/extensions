@@ -12,13 +12,32 @@ export type PlaybackState = {
   startedAt: number;
 };
 
-function isProcessRunning(pid: number): boolean {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch {
+function getProcessCommandLine(pid: number): string | undefined {
+  const result = spawnSync("ps", ["-p", String(pid), "-ww", "-o", "command="], {
+    encoding: "utf8",
+  });
+
+  if (result.status !== 0) {
+    return undefined;
+  }
+
+  const command = result.stdout.trim();
+  return command || undefined;
+}
+
+function isOwnedPlaybackProcess(pid: number, audioPath: string): boolean {
+  const command = getProcessCommandLine(pid);
+  if (!command) {
     return false;
   }
+
+  const executable = command.split(/\s+/, 1)[0];
+  const isAfplay = executable === "afplay" || executable.endsWith("/afplay");
+  if (!isAfplay) {
+    return false;
+  }
+
+  return command.slice(executable.length).trim() === audioPath;
 }
 
 async function clearPlaybackState(): Promise<void> {
@@ -39,7 +58,7 @@ async function readPlaybackState(): Promise<PlaybackState | null> {
   }
 }
 
-function killPlaybackProcess(pid: number, audioPath?: string): void {
+function killPlaybackProcess(pid: number): void {
   try {
     process.kill(-pid, "SIGKILL");
     return;
@@ -49,23 +68,8 @@ function killPlaybackProcess(pid: number, audioPath?: string): void {
 
   try {
     process.kill(pid, "SIGKILL");
-    return;
   } catch {
-    // Try the next kill strategy.
-  }
-
-  const killResult = spawnSync("kill", ["-9", String(pid)]);
-  if (killResult.status === 0) {
-    return;
-  }
-
-  const pkillResult = spawnSync("pkill", ["-P", String(pid)]);
-  if (pkillResult.status === 0) {
-    return;
-  }
-
-  if (audioPath) {
-    spawnSync("pkill", ["-f", audioPath]);
+    spawnSync("kill", ["-9", String(pid)]);
   }
 }
 
@@ -86,7 +90,7 @@ export async function getPlaybackState(): Promise<PlaybackState | null> {
     return null;
   }
 
-  if (!isProcessRunning(state.pid)) {
+  if (!isOwnedPlaybackProcess(state.pid, state.audioPath)) {
     await clearPlaybackState();
     await refreshNowPlayingMenuBar();
     return null;
@@ -101,7 +105,9 @@ export async function stopPlayback(): Promise<void> {
     return;
   }
 
-  killPlaybackProcess(state.pid, state.audioPath);
+  if (isOwnedPlaybackProcess(state.pid, state.audioPath)) {
+    killPlaybackProcess(state.pid);
+  }
   await clearPlaybackState();
   await refreshNowPlayingMenuBar();
 }

@@ -193,7 +193,9 @@ export async function updateTrack(id: string, input: UpdateTrackInput): Promise<
   if (input.audioSourcePath) {
     const nextAudioPath = join(tracksDirectory, `${id}${extname(input.audioSourcePath)}`);
     await copyTrackFile(input.audioSourcePath, nextAudioPath);
-    await removeFileIfExists(existingTrack.audioPath);
+    if (existingTrack.audioPath !== nextAudioPath) {
+      await removeFileIfExists(existingTrack.audioPath);
+    }
     audioPath = nextAudioPath;
     durationSeconds = await getAudioDurationSeconds(audioPath);
   }
@@ -201,7 +203,9 @@ export async function updateTrack(id: string, input: UpdateTrackInput): Promise<
   if (input.coverSourcePath) {
     const nextCoverPath = join(tracksDirectory, `${id}-cover${extname(input.coverSourcePath)}`);
     await copyTrackFile(input.coverSourcePath, nextCoverPath);
-    await removeFileIfExists(existingTrack.coverPath);
+    if (existingTrack.coverPath !== nextCoverPath) {
+      await removeFileIfExists(existingTrack.coverPath);
+    }
     coverPath = nextCoverPath;
   } else if (input.removeCover) {
     await removeFileIfExists(existingTrack.coverPath);
