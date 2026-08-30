@@ -128,23 +128,25 @@ function useWindowsCaffeinateInfo(execute: boolean) {
   const mutate = async (ctx?: Promise<unknown>, options?: MutateOptions) => {
     const previous = data;
     if (options?.optimisticUpdate) setData(options.optimisticUpdate());
-    let error: unknown;
+    let operationError: unknown;
     if (ctx) {
       try {
         await ctx;
       } catch (e) {
-        error = e;
+        operationError = e;
       }
+    }
+    if (operationError) {
+      setData(previous);
+      throw operationError;
     }
     try {
       const info = await get_caffeinate_state();
       setData(applyState(info));
     } catch {
-      // Refresh failed: roll back the optimistic value rather than reporting stale state.
-      setData(previous);
-      error = error ?? new Error("Failed to refresh caffeinate state");
+      // The operation succeeded but the refresh failed; keep the optimistic
+      // value, which reflects the completed operation, until a later refresh.
     }
-    if (error) throw error;
   };
 
   return { isLoading, data, mutate };

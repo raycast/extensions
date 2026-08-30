@@ -359,7 +359,6 @@ fn stop_caffeinate() -> Result<bool, String> {
         }
         if let Some(cur) = read_stored_state()? {
             if pid_matches_worker(cur.pid, cur.start_ticks) {
-                let _ = clear_state();
                 return Err("failed to terminate caffeination worker".to_string());
             }
         }
