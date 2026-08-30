@@ -5,6 +5,8 @@ import path from "node:path";
 import { PASS_CLI_VERSION, resolveArtifact } from "./core/artifact";
 import { installArtifact } from "./core/installer";
 
+let installPromise: Promise<string> | undefined;
+
 export function passCliDirectory(): string {
   return path.join(environment.supportPath, "cli", PASS_CLI_VERSION);
 }
@@ -19,14 +21,7 @@ export function isCliInstalled(): boolean {
   return artifact.requiredFiles.every((file) => fs.existsSync(path.join(passCliDirectory(), file)));
 }
 
-export async function ensureCli(): Promise<string> {
-  const artifact = resolveArtifact(process.platform, process.arch);
-  const cli = path.join(passCliDirectory(), artifact.binaryName);
-  if (isCliInstalled()) {
-    console.log("pass-cli already installed at:", cli);
-    return cli;
-  }
-
+async function installCli(artifact: ReturnType<typeof resolveArtifact>): Promise<string> {
   const installToast = await showToast({
     style: Toast.Style.Animated,
     title: "Installing Proton Pass CLI",
@@ -57,6 +52,23 @@ export async function ensureCli(): Promise<string> {
     installToast.title = "Failed to Install Proton Pass CLI";
     installToast.message = error instanceof Error ? error.message : String(error);
     throw new Error(`Could not install pass-cli: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+export async function ensureCli(): Promise<string> {
+  const artifact = resolveArtifact(process.platform, process.arch);
+  const cli = path.join(passCliDirectory(), artifact.binaryName);
+  if (isCliInstalled()) {
+    console.log("pass-cli already installed at:", cli);
+    return cli;
+  }
+
+  const currentInstall = installPromise ?? installCli(artifact);
+  installPromise = currentInstall;
+  try {
+    return await currentInstall;
+  } finally {
+    if (installPromise === currentInstall) installPromise = undefined;
   }
 }
 

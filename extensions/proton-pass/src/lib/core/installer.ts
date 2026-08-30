@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { access, chmod, cp, mkdir, rm, writeFile } from "node:fs/promises";
+import { access, chmod, mkdir, mkdtemp, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { Artifact } from "./artifact";
@@ -19,15 +19,16 @@ export interface InstallArtifactOptions {
 export async function installArtifact(options: InstallArtifactOptions): Promise<string> {
   const { artifact, download, destDir, tmpDir, platform } = options;
   const binaryPath = path.join(destDir, artifact.binaryName);
+  let attemptDir: string | undefined;
   try {
-    await rm(tmpDir, { recursive: true, force: true });
+    await mkdir(path.dirname(tmpDir), { recursive: true });
+    attemptDir = await mkdtemp(`${tmpDir}-`);
     const buffer = await download(artifact.url);
     const hash = createHash("sha256").update(buffer).digest("hex");
     if (hash !== artifact.sha256) {
       throw new Error(`SHA256 hash mismatch. Expected: ${artifact.sha256}, Got: ${hash}`);
     }
-    await mkdir(tmpDir, { recursive: true });
-    const stagedDir = path.join(tmpDir, "install");
+    const stagedDir = path.join(attemptDir, "install");
     await mkdir(stagedDir, { recursive: true });
     const stagedBinary = path.join(stagedDir, artifact.binaryName);
     if (artifact.kind === "raw") {
@@ -43,22 +44,27 @@ export async function installArtifact(options: InstallArtifactOptions): Promise<
       }
     }
 
-    await mkdir(destDir, { recursive: true });
-    await cp(stagedDir, destDir, { recursive: true });
-
     if (platform === "darwin") {
-      await chmod(binaryPath, 0o755);
+      await chmod(stagedBinary, 0o755);
       try {
-        await execFileAsync("/usr/bin/xattr", ["-d", "com.apple.quarantine", binaryPath]);
+        await execFileAsync("/usr/bin/xattr", ["-d", "com.apple.quarantine", stagedBinary]);
       } catch {
         // Quarantine attribute may not exist.
       }
     }
+
+    await mkdir(path.dirname(destDir), { recursive: true });
+    try {
+      await rename(stagedDir, destDir);
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== "EEXIST" && code !== "ENOTEMPTY") throw error;
+      for (const requiredFile of artifact.requiredFiles) {
+        await access(path.join(destDir, requiredFile));
+      }
+    }
     return binaryPath;
-  } catch (error) {
-    await rm(destDir, { recursive: true, force: true });
-    throw error;
   } finally {
-    await rm(tmpDir, { recursive: true, force: true });
+    if (attemptDir) await rm(attemptDir, { recursive: true, force: true });
   }
 }

@@ -91,6 +91,43 @@ test("cleans partial paths when download fails", async () => {
   });
 });
 
+test("a concurrent failed install does not erase a successful install", async () => {
+  await withPaths(async (destDir, tempDir) => {
+    let markDownloadStarted: () => void = () => undefined;
+    const downloadStarted = new Promise<void>((resolve) => {
+      markDownloadStarted = resolve;
+    });
+    let rejectDownload: (error: Error) => void = () => undefined;
+    const failedInstall = installArtifact({
+      artifact: rawArtifact,
+      download: async () => {
+        markDownloadStarted();
+        return new Promise<Buffer>((_resolve, reject) => {
+          rejectDownload = reject;
+        });
+      },
+      destDir,
+      tmpDir: tempDir,
+      platform: "darwin",
+    });
+    const failedResult = assert.rejects(failedInstall, /download unavailable/);
+
+    await downloadStarted;
+    const binary = Buffer.from("fake macOS binary!!!");
+    const installed = await installArtifact({
+      artifact: rawArtifact,
+      download: async () => binary,
+      destDir,
+      tmpDir: tempDir,
+      platform: "darwin",
+    });
+
+    rejectDownload(new Error("download unavailable"));
+    await failedResult;
+    assert.deepEqual(await readFile(installed), binary);
+  });
+});
+
 test("does not install files left by an interrupted previous attempt", async () => {
   await withPaths(async (destDir, tempDir) => {
     await mkdir(path.join(tempDir, "install"), { recursive: true });
