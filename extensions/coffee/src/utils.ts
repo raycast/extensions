@@ -88,13 +88,27 @@ export async function stopCaffeinate(
   if (hudMessage) {
     await showHUD(hudMessage);
   }
-  if (process.platform === "win32") {
-    await windowsStopCaffeinate();
-  } else {
-    execSync("/usr/bin/killall caffeinate || true");
-  }
+  let pausedSchedule: Schedule | undefined;
   if (options?.pauseRunningSchedule) {
-    await pauseTodaysScheduleIfRunning();
+    const schedule = await getSchedule();
+    if (schedule && isTodaysSchedule(schedule) && schedule.IsRunning) {
+      pausedSchedule = schedule;
+      await changeScheduleState("decaffeinate", schedule);
+    }
+  }
+  try {
+    if (process.platform === "win32") {
+      await windowsStopCaffeinate();
+    } else {
+      execSync("/usr/bin/killall caffeinate || true");
+    }
+  } catch (e) {
+    if (pausedSchedule) {
+      pausedSchedule.IsManuallyDecafed = false;
+      pausedSchedule.IsRunning = true;
+      await LocalStorage.setItem(pausedSchedule.day, JSON.stringify(pausedSchedule));
+    }
+    throw e;
   }
   await setCaffeinationReason(undefined);
   await update(updates, false);
