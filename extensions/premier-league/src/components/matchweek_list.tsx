@@ -118,7 +118,10 @@ export default function MatchweekList(props: {
     };
   }, [competition, direction, isEPL, matchweek, month, season, team]);
 
-  const { isLoading, data, pagination } = usePromise(
+  const requestKey = request ? JSON.stringify(request) : "";
+  const [resolvedRequestKey, setResolvedRequestKey] = useState("");
+
+  const { data, pagination } = usePromise(
     (request?: MatchRequest) =>
       async ({ cursor }: { cursor?: string | number }) => {
         if (!request) {
@@ -145,8 +148,7 @@ export default function MatchweekList(props: {
           };
         }
 
-        const week =
-          typeof cursor === "number" ? cursor : (request.matchweek as number);
+        const week = typeof cursor === "number" ? cursor : request.matchweek;
 
         const page = await getMatches({
           competition: request.competition,
@@ -163,7 +165,12 @@ export default function MatchweekList(props: {
 
         return { data: page.data.filter(keep), hasMore, cursor: next };
       },
-    [request],
+    [request as MatchRequest],
+    {
+      execute: Boolean(request),
+      onData: () => setResolvedRequestKey(requestKey),
+      onError: () => setResolvedRequestKey(requestKey),
+    },
   );
 
   const matchday = groupBy(data, (f) =>
@@ -237,7 +244,7 @@ export default function MatchweekList(props: {
   return (
     <List
       throttle
-      isLoading={isLoading || !request}
+      isLoading={!request || resolvedRequestKey !== requestKey}
       navigationTitle={
         isEPL
           ? `Matchweek ${matchweek ?? ""} | ${navigationTitle}`
@@ -257,6 +264,16 @@ export default function MatchweekList(props: {
         />
       }
     >
+      <List.EmptyView
+        icon="premier-league.svg"
+        title="No Matches"
+        description={
+          isEPL
+            ? `No matches in Matchweek ${matchweek ?? ""}`
+            : `No matches in ${getMonthName(month)}`
+        }
+        actions={<ActionPanel>{actions}</ActionPanel>}
+      />
       {Object.entries(matchday).map(([day, matches]) => {
         return (
           <Matchday

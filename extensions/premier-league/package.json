@@ -5,19 +5,20 @@
   "description": "Get instant access to Premier League data right from your Raycast menu. Easily search for teams, players, fixtures, results, standings and awards.",
   "icon": "icon.png",
   "author": "anhthang",
-  "license": "MIT",
   "contributors": [
-    "stelo"
+    "stelo",
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Data",
     "Other",
     "Fun"
   ],
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "table",
