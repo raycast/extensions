@@ -1,5 +1,5 @@
 # Flameshot Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-30
 
 Initial version
