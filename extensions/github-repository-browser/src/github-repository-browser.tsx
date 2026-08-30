@@ -59,18 +59,6 @@ function getNextPageUrl(linkHeader: string | null): string | null {
   return null;
 }
 
-function getLastPageNumber(linkHeader: string | null): number | null {
-  if (!linkHeader) return null;
-  for (const link of linkHeader.split(",")) {
-    const parts = link.split(";");
-    if (parts.some((part) => part.trim() === 'rel="last"')) {
-      const page = new URL(parts[0].trim().slice(1, -1)).searchParams.get("page");
-      return page ? parseInt(page, 10) : null;
-    }
-  }
-  return null;
-}
-
 async function fetchAllPages(url: string, headers: Record<string, string>): Promise<Repository[]> {
   const results: Repository[] = [];
   let nextUrl: string | null = url;
@@ -88,32 +76,37 @@ async function fetchAllPages(url: string, headers: Record<string, string>): Prom
   return results;
 }
 
-async function getPrCount(fullName: string, headers: Record<string, string>): Promise<number | null> {
-  const response = await fetch(`https://api.github.com/repos/${fullName}/pulls?state=open&per_page=1`, { headers });
-  if (!response.ok) return null;
-  const lastPage = getLastPageNumber(response.headers.get("Link"));
-  if (lastPage !== null) return lastPage;
-  const data = await response.json();
-  return Array.isArray(data) ? data.length : 0;
-}
-
-async function getOpenIssuesCount(fullName: string, headers: Record<string, string>): Promise<number | null> {
-  const response = await fetch(`https://api.github.com/repos/${fullName}`, { headers });
-  if (!response.ok) return null;
-  const data = await response.json();
-  return typeof data.open_issues_count === "number" ? data.open_issues_count : null;
-}
-
-// Fetch the PR count and the total open-issues count (which GitHub includes PRs in) together,
-// so both numbers reflect roughly the same instant. Combining a fresh count with one taken from
-// an earlier bulk list fetch can otherwise produce an inconsistent, incorrect issue count if a
-// PR or issue is opened/closed in between.
+// Fetch the open issue count and open PR count for a repo in a single GraphQL query, so both
+// numbers come from the same point-in-time snapshot on GitHub's side. Two separate REST calls
+// (even fired concurrently) can each observe a different state if an issue or PR changes in
+// between, producing an inconsistent, incorrect result. GraphQL also models issues and pull
+// requests as distinct types, so no subtraction is needed to exclude PRs from the issue count.
 async function getCounts(
   fullName: string,
   headers: Record<string, string>,
-): Promise<{ prs: number | null; totalOpen: number | null }> {
-  const [prs, totalOpen] = await Promise.all([getPrCount(fullName, headers), getOpenIssuesCount(fullName, headers)]);
-  return { prs, totalOpen };
+): Promise<{ prs: number | null; issues: number | null }> {
+  const [owner, name] = fullName.split("/");
+  const response = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `query($owner: String!, $name: String!) {
+        repository(owner: $owner, name: $name) {
+          issues(states: OPEN) { totalCount }
+          pullRequests(states: OPEN) { totalCount }
+        }
+      }`,
+      variables: { owner, name },
+    }),
+  });
+  if (!response.ok) return { prs: null, issues: null };
+  const json = await response.json();
+  const repository = json?.data?.repository;
+  if (!repository || json.errors) return { prs: null, issues: null };
+  return {
+    prs: typeof repository.pullRequests?.totalCount === "number" ? repository.pullRequests.totalCount : null,
+    issues: typeof repository.issues?.totalCount === "number" ? repository.issues.totalCount : null,
+  };
 }
 
 async function enrichRepos(
@@ -130,9 +123,9 @@ async function enrichRepos(
     const counts = await Promise.all(chunk.map((r) => getCounts(r.full_name, headers)));
     for (let j = 0; j < chunk.length; j++) {
       const repo = chunk[j];
-      const { prs, totalOpen } = counts[j];
-      if (prs !== null && totalOpen !== null) {
-        all.push({ ...repo, prs_count: prs, issues_count: Math.max(0, totalOpen - prs) });
+      const { prs, issues } = counts[j];
+      if (prs !== null && issues !== null) {
+        all.push({ ...repo, prs_count: prs, issues_count: issues });
         continue;
       }
       // One or both counts failed to fetch (e.g. transient GitHub error). Fall back to the
