@@ -1,8 +1,8 @@
 import { Tool, getPreferenceValues } from "@raycast/api";
 import fs from "fs";
-import path from "path";
 import { Attachment, Tag } from "resend";
 import { getResend, withResend } from "../lib/oauth";
+import { parseAttachmentReferences } from "./email-attachments";
 
 // Get preferences
 const preferences = getPreferenceValues<{
@@ -58,7 +58,7 @@ type Input = {
    * Attachments to include with the email.
    * Two formats are supported:
    * 1. File paths: Absolute paths to files on the local system
-   * 2. Hosted files: URLs to files hosted online (format: "url:https://example.com/file.pdf")
+   * 2. Hosted files: HTTPS URLs to files hosted online (format: "url:https://example.com/file.pdf")
    * Each line represents one attachment.
    */
   attachments?: string;
@@ -72,7 +72,7 @@ type Input = {
   headers?: string;
   /** Subscription topic ID to associate with the email. Use list-topics to discover it. */
   topicId?: string;
-  /** A unique key that prevents accidental duplicate sends when retrying the same request. */
+  /** A unique key for this send. Reuse the same key when retrying an identical request. */
   idempotencyKey?: string;
   /**
    * When to send the email.
@@ -89,30 +89,12 @@ const tool = async (input: Input) => {
     throw new Error("Provide html or text content for the email");
   }
 
-  const attachments: Attachment[] = [];
-  if (input.attachments) {
-    const attachmentLines = input.attachments
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
-
-    for (const line of attachmentLines) {
-      if (line.startsWith("url:") || line.startsWith("https://") || line.startsWith("http://")) {
-        const url = line.startsWith("url:") ? line.substring(4).trim() : line;
-        const filename = path.basename(new URL(url).pathname) || "attachment";
-        attachments.push({ filename, path: url });
-      } else {
-        const filePath = line;
-        if (fs.existsSync(filePath) && fs.lstatSync(filePath).isFile()) {
-          const content = fs.readFileSync(filePath);
-          const filename = path.basename(filePath);
-          attachments.push({ filename, content });
-        } else {
-          throw new Error(`Attachment file not found: ${filePath}`);
-        }
-      }
-    }
-  }
+  const attachmentReferences = parseAttachmentReferences(input.attachments);
+  const attachments: Attachment[] = attachmentReferences.map((attachment) =>
+    attachment.kind === "hosted"
+      ? { filename: attachment.filename, path: attachment.source }
+      : { filename: attachment.filename, content: fs.readFileSync(attachment.source) },
+  );
 
   const tags: Tag[] | undefined = input.tags ? parsePairs(input.tags, "tag") : undefined;
   const headers = input.headers
@@ -169,8 +151,10 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   if (input.topicId) infoItems.push({ name: "Topic ID", value: input.topicId });
 
   if (input.attachments) {
-    const attachmentCount = input.attachments.split("\n").filter((line) => line.trim()).length;
-    infoItems.push({ name: "Attachments", value: `${attachmentCount} file(s)` });
+    const attachments = parseAttachmentReferences(input.attachments);
+    attachments.forEach((attachment, index) => {
+      infoItems.push({ name: `Attachment ${index + 1}`, value: attachment.source });
+    });
   }
 
   return {
