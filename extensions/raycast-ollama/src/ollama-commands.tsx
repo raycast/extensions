@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import * as React from "react";
-import { CommandAnswer } from "./lib/settings/enum";
+import { ThinkingEffort as ThinkingEffortOllama } from "./lib/ollama/types";
 import { COMMANDS_INFO } from "./lib/settings/defaultPrompts";
+import { CommandAnswer } from "./lib/settings/enum";
 import { DeleteSettingsCommandAnswer, GetSettingsCommandAnswer } from "./lib/settings/settings";
 import { EditModel } from "./lib/ui/AnswerView/form/EditModel";
-import { ThinkingEffort as ThinkingEffortOllama } from "./lib/ollama/types";
 
 export default function Command(): React.JSX.Element {
   const {
@@ -72,7 +72,6 @@ export default function Command(): React.JSX.Element {
     <List isLoading={isLoading} searchBarPlaceholder="Search AI commands...">
       {commands?.map((item) => {
         const promptPreview = item.customPrompt || item.defaultPrompt;
-        const subtitle = item.description;
 
         const accessories: List.Item.Accessory[] = [];
         if (item.hasCustomSettings) {
@@ -89,7 +88,7 @@ export default function Command(): React.JSX.Element {
 
         if (item.customPrompt) {
           accessories.push({
-            tag: { value: "Custom Prompt", color: "blue" },
+            tag: { value: "Custom Prompt", color: "green" },
             tooltip: "Using a customized prompt template",
           });
         } else {
@@ -109,7 +108,6 @@ export default function Command(): React.JSX.Element {
           <List.Item
             key={item.command}
             title={item.title}
-            subtitle={subtitle}
             accessories={accessories}
             actions={
               <ActionPanel>
