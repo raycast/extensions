@@ -38,14 +38,26 @@ describe("restartHandy", () => {
     expect(toast.title).toBe("Handy restarted");
   });
 
-  it("reports the failure instead of leaving the rejection unhandled", async () => {
+  it("calls onApplied only after a successful restart", async () => {
+    applySettingsAndReloadMock.mockResolvedValue(undefined);
+    const onApplied = vi.fn();
+    const toast = makeToast();
+
+    await restartHandy(vi.fn(), BINARY_PATH, toast, onApplied);
+
+    expect(onApplied).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not mark the selection current when restart fails", async () => {
     applySettingsAndReloadMock.mockRejectedValue(
       new Error("Handy did not quit; restart canceled"),
     );
+    const onApplied = vi.fn();
     const toast = makeToast();
 
-    await restartHandy(vi.fn(), BINARY_PATH, toast);
+    await restartHandy(vi.fn(), BINARY_PATH, toast, onApplied);
 
+    expect(onApplied).not.toHaveBeenCalled();
     expect(toast.style).toBe(Toast.Style.Failure);
     expect(toast.title).toBe("Couldn't restart Handy");
     expect(toast.message).toBe("Handy did not quit; restart canceled");

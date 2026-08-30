@@ -3,16 +3,14 @@ import {
   ActionPanel,
   Icon,
   List,
-  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
-import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { getDownloadedModels, ModelInfo } from "./lib/models";
 import { readSettings, writeSettings } from "./lib/settings";
 import { selectModelInHandy } from "./lib/handy";
-import { restartHandyAction } from "./lib/restart-handy";
+import { applyLiveOrRestart } from "./lib/apply-selection";
 
 export default function SelectModel() {
   const [models, setModels] = useState<ModelInfo[]>([]);
@@ -40,28 +38,15 @@ export default function SelectModel() {
 
   async function handleSelect(model: ModelInfo) {
     try {
-      if (model.id === currentId) {
-        await showHUD(`${model.name} is already active`);
-        return;
-      }
-      const { handyBinaryPath } = getPreferenceValues<Preferences>();
-      writeSettings({ selected_model: model.id });
-      setCurrentId(model.id);
-      const applied = await selectModelInHandy(model.name);
-      if (applied) {
-        await showHUD(`Model changed to ${model.name}`);
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Couldn't switch model in Handy",
-          message:
-            "Grant Raycast Accessibility access (System Settings → Privacy & Security), or restart Handy to apply.",
-          primaryAction: restartHandyAction(
-            () => writeSettings({ selected_model: model.id }),
-            handyBinaryPath,
-          ),
-        });
-      }
+      await applyLiveOrRestart({
+        isCurrent: model.id === currentId,
+        alreadyActiveMessage: `${model.name} is already active`,
+        persist: () => writeSettings({ selected_model: model.id }),
+        markCurrent: () => setCurrentId(model.id),
+        liveSwitch: () => selectModelInHandy(model.name),
+        successMessage: `Model changed to ${model.name}`,
+        failureTitle: "Couldn't switch model in Handy",
+      });
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,

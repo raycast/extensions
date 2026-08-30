@@ -13,8 +13,12 @@ function makeStore(custom_words: string[], selected_model: string) {
   });
 }
 
-beforeEach(() => { mkdirSync(TMP_DIR, { recursive: true }); });
-afterEach(() => { rmSync(TMP_DIR, { recursive: true, force: true }); });
+beforeEach(() => {
+  mkdirSync(TMP_DIR, { recursive: true });
+});
+afterEach(() => {
+  rmSync(TMP_DIR, { recursive: true, force: true });
+});
 
 describe("readSettings", () => {
   it("reads custom_words through settings envelope", () => {
@@ -33,9 +37,16 @@ describe("readSettings", () => {
   });
 
   it("reads selected_language", () => {
-    writeFileSync(TMP_FILE, JSON.stringify({
-      settings: { custom_words: [], selected_model: "small", selected_language: "it" }
-    }));
+    writeFileSync(
+      TMP_FILE,
+      JSON.stringify({
+        settings: {
+          custom_words: [],
+          selected_model: "small",
+          selected_language: "it",
+        },
+      }),
+    );
     expect(readSettings(TMP_FILE).selected_language).toBe("it");
   });
 
@@ -52,7 +63,9 @@ describe("writeSettings", () => {
     const result = readSettings(TMP_FILE);
     expect(result.custom_words).toEqual(["new1", "new2"]);
     expect(result.selected_model).toBe("small");
-    expect((result as Record<string, unknown>)["some_other_key"]).toBe("preserved");
+    expect((result as Record<string, unknown>)["some_other_key"]).toBe(
+      "preserved",
+    );
   });
 
   it("updates selected_model without touching other keys", () => {
@@ -72,9 +85,16 @@ describe("writeSettings", () => {
   });
 
   it("updates selected_language without touching other keys", () => {
-    writeFileSync(TMP_FILE, JSON.stringify({
-      settings: { custom_words: ["w"], selected_model: "small", selected_language: "en" }
-    }));
+    writeFileSync(
+      TMP_FILE,
+      JSON.stringify({
+        settings: {
+          custom_words: ["w"],
+          selected_model: "small",
+          selected_language: "en",
+        },
+      }),
+    );
     writeSettings({ selected_language: "fr" }, TMP_FILE);
     expect(readSettings(TMP_FILE).selected_language).toBe("fr");
     expect(readSettings(TMP_FILE).selected_model).toBe("small");

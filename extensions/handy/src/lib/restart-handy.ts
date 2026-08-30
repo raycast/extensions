@@ -13,12 +13,14 @@ export async function restartHandy(
   apply: () => void,
   handyBinaryPath: string,
   toast: Toast,
+  onApplied?: () => void,
 ): Promise<void> {
   toast.style = Toast.Style.Animated;
   toast.title = "Restarting Handy…";
   toast.message = undefined;
   try {
     await applySettingsAndReload(apply, handyBinaryPath);
+    onApplied?.();
     toast.style = Toast.Style.Success;
     toast.title = "Handy restarted";
   } catch (err) {
@@ -32,11 +34,12 @@ export async function restartHandy(
 export function restartHandyAction(
   apply: () => void,
   handyBinaryPath: string,
+  onApplied?: () => void,
 ): Toast.ActionOptions {
   return {
     title: "Restart Handy",
     onAction: (toast) => {
-      void restartHandy(apply, handyBinaryPath, toast);
+      void restartHandy(apply, handyBinaryPath, toast, onApplied);
     },
   };
 }

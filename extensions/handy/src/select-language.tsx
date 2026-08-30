@@ -4,17 +4,15 @@ import {
   closeMainWindow,
   Icon,
   List,
-  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
-import { getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { getLanguagesForModel, LanguageOption } from "./lib/languages";
 import { getModelCapabilities } from "./lib/catalog";
 import { readSettings, writeSettings } from "./lib/settings";
 import { selectLanguageInHandy } from "./lib/handy";
-import { restartHandyAction } from "./lib/restart-handy";
+import { applyLiveOrRestart } from "./lib/apply-selection";
 
 export default function SelectLanguage() {
   const [languages, setLanguages] = useState<LanguageOption[]>([]);
@@ -60,32 +58,19 @@ export default function SelectLanguage() {
         currentCode === "auto"
           ? "Auto (detect)"
           : `${lang.native} · ${lang.label}`;
-      if (lang.code === currentCode) {
-        await showHUD(`${currentDisplay} is already set`);
-        return;
-      }
-      const { handyBinaryPath } = getPreferenceValues<Preferences>();
-      writeSettings({ selected_language: lang.code });
-      setCurrentCode(lang.code);
       const display =
         lang.code === "auto"
           ? "Auto (detect)"
           : `${lang.native} · ${lang.label}`;
-      const applied = await selectLanguageInHandy(lang.label);
-      if (applied) {
-        await showHUD(`Language set to ${display}`);
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Couldn't switch language in Handy",
-          message:
-            "Grant Raycast Accessibility access (System Settings → Privacy & Security), or restart Handy to apply.",
-          primaryAction: restartHandyAction(
-            () => writeSettings({ selected_language: lang.code }),
-            handyBinaryPath,
-          ),
-        });
-      }
+      await applyLiveOrRestart({
+        isCurrent: lang.code === currentCode,
+        alreadyActiveMessage: `${currentDisplay} is already set`,
+        persist: () => writeSettings({ selected_language: lang.code }),
+        markCurrent: () => setCurrentCode(lang.code),
+        liveSwitch: () => selectLanguageInHandy(lang.label),
+        successMessage: `Language set to ${display}`,
+        failureTitle: "Couldn't switch language in Handy",
+      });
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,

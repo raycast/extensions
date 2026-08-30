@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
@@ -114,13 +115,13 @@ export default function SearchTranscripts() {
                       entry.saved ? "Remove from Saved" : "Save Transcript"
                     }
                     icon={entry.saved ? Icon.StarDisabled : Icon.Star}
-                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                    shortcut={Keyboard.Shortcut.Common.Save}
                     onAction={() => handleToggleSaved(entry)}
                   />
                   <Action.ShowInFinder
                     title="Reveal Recording"
                     icon={Icon.Finder}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                     path={join(RECORDINGS_DIR, entry.file_name)}
                   />
                   <Action

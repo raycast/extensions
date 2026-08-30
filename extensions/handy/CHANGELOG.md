@@ -4,8 +4,8 @@
 
 ### Fixed
 
-- **Select Model** now actually switches the active model in the running Handy app, instead of only writing `settings_store.json` (which Handy only reads at launch, so the selection did nothing until a relaunch). The extension GUI-scripts Handy's tray model menu — the same path the in-app menu uses — so the model changes instantly with no restart. If Raycast lacks Accessibility permission, a "Restart Handy" toast offers the relaunch fallback.
-- **Select Language** now persists the choice and uses the same live-switch path, falling back to a relaunch when GUI scripting isn't available.
+- **Select Model** now actually switches the active model in the running Handy app, instead of only writing `settings_store.json` (which Handy only reads at launch, so the selection did nothing until a relaunch). The extension GUI-scripts Handy's tray model menu — the same path the in-app menu uses — so the model changes instantly with no restart. If Raycast lacks Accessibility permission, a "Restart Handy" toast offers the relaunch fallback. The store is updated only after Handy accepts the live switch (or after a successful restart), so a failed switch stays retryable.
+- **Select Language** now uses the same live-switch path and persist-after-success ordering, falling back to a relaunch when GUI scripting isn't available.
 
 ### Changed
 
