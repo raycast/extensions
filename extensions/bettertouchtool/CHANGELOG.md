@@ -1,5 +1,11 @@
 # BetterTouchTool Changelog
 
+## [Replace legacy scripting calls] - {PR_MERGE_DATE}
+
+- Replace AppleScript and JXA calls with the official typed BetterTouchTool JavaScript client
+- Prefer the local Unix socket with a configurable webserver fallback
+- Run background triggers asynchronously
+
 ## Error handling - 2024-04-28
 
 - Update dependencies and use `runAppleScript` function from utils

@@ -1,16 +1,9 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  getPreferenceValues,
-  closeMainWindow,
-  Form,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon, closeMainWindow, Form, useNavigation } from "@raycast/api";
 import actions from "./actions.json";
 import icons from "./icons";
-import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
+import { actions as bttActions } from "bettertouchtool";
+import { createBttClient } from "./btt";
 
 interface ActionResult {
   id: string;
@@ -35,19 +28,13 @@ export default function Command() {
 
 function ActionInput({ actionResult }: { actionResult: ActionResult }) {
   async function handleSubmit(values: { param: string }) {
-    const preferences: Preferences.Action = getPreferenceValues();
-    const shared_secret = preferences.bttSharedSecret;
-
-    const jsxCommand = `
-      var BetterTouchTool = Application('BetterTouchTool');
-      var actionDefinition = {
-        "BTTPredefinedActionType": ${actionResult.type},
-        ${actionResult.param ? `"${actionResult.param}": "${values.param}"` : ""}
-      };
-      BetterTouchTool.trigger_action(JSON.stringify(actionDefinition), { shared_secret: "${shared_secret}" });
-    `;
-
-    await runAppleScript(jsxCommand, { language: "JavaScript" });
+    try {
+      await createBttClient().triggerAction(
+        bttActions.action(actionResult.type, actionResult.param ? { [actionResult.param]: values.param } : {})
+      );
+    } catch (error) {
+      await showFailureToast(error, { title: "Failed to run action" });
+    }
   }
   return (
     <Form
@@ -64,9 +51,6 @@ function ActionInput({ actionResult }: { actionResult: ActionResult }) {
 
 function ActionItem({ actionResult }: { actionResult: ActionResult }) {
   const { push } = useNavigation();
-  const preferences: Preferences.Action = getPreferenceValues();
-  const shared_secret = preferences.bttSharedSecret;
-  const sharedSecretString = shared_secret ? `shared_secret "${shared_secret}"` : "";
   const handleRun = async (closeWindow = false) => {
     if (actionResult.param) {
       return push(<ActionInput actionResult={actionResult} />);
@@ -76,11 +60,9 @@ function ActionItem({ actionResult }: { actionResult: ActionResult }) {
     }
 
     try {
-      const osaCommand = `tell application "BetterTouchTool" to trigger_action "{\\"BTTPredefinedActionType\\":${actionResult.type}}" ${sharedSecretString}`;
-      await runAppleScript(osaCommand);
+      await createBttClient().triggerAction(bttActions.action(actionResult.type));
     } catch (error) {
-      console.error(error);
-      showFailureToast(error);
+      await showFailureToast(error, { title: "Failed to run action" });
     }
   };
 
