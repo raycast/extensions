@@ -30,8 +30,8 @@ import { loadUsage, recordUsage, UsageMap } from "./usage";
 
 const accessibilitySettingsURL =
   "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
-const commandCache = new Cache({ namespace: "actions-v4" });
-const startupCache = new Cache({ namespace: "startup-v2" });
+const commandCache = new Cache({ namespace: "actions-v5" });
+const startupCache = new Cache({ namespace: "startup-v3" });
 const allApplicationsScope = "all";
 const focusedApplicationScope = "focused";
 const maximumConcurrentApplicationScans = 4;
@@ -108,21 +108,36 @@ function readCachedCommands(
     const commands = JSON.parse(cached) as FastNavCommand[];
     if (!Array.isArray(commands)) return [];
     return deduplicateCommands(
-      commands.map((command) => ({
-        ...command,
-        id: [
-          application.bundleIdentifier ?? String(application.pid),
-          command.source === "menu"
-            ? "menu"
-            : `interface:${command.role ?? ""}`,
-          command.menuPath.join(" › "),
-          command.title,
-          command.order,
-        ].join("|"),
-        pid: application.pid,
-        appName: application.name,
-        bundleIdentifier: application.bundleIdentifier,
-      })),
+      commands
+        // Interface locators are intentionally scoped to one app process. A
+        // restarted app needs a live scan before its cached controls are safe
+        // to run; menu commands still use their exact semantic identity.
+        .filter(
+          (command) =>
+            command.source !== "interface" || command.pid === application.pid,
+        )
+        .map((command) => ({
+          ...command,
+          id: command.accessibilityLocator
+            ? [
+                application.bundleIdentifier ?? String(application.pid),
+                `interface:${command.role ?? ""}`,
+                command.accessibilityLocator,
+                command.action,
+              ].join("|")
+            : [
+                application.bundleIdentifier ?? String(application.pid),
+                command.source === "menu"
+                  ? "menu"
+                  : `interface:${command.role ?? ""}`,
+                command.menuPath.join(" › "),
+                command.title,
+                command.order,
+              ].join("|"),
+          pid: application.pid,
+          appName: application.name,
+          bundleIdentifier: application.bundleIdentifier,
+        })),
     );
   } catch {
     return [];
@@ -624,14 +639,16 @@ export default function SearchAppActions() {
         applicationState?.applications ?? [],
         command,
       );
-      const liveCommand = liveApplication
-        ? {
-            ...command,
-            pid: liveApplication.pid,
-            appName: liveApplication.name,
-            bundleIdentifier: liveApplication.bundleIdentifier,
-          }
-        : undefined;
+      const liveCommand =
+        liveApplication &&
+        (command.source === "menu" || command.pid === liveApplication.pid)
+          ? {
+              ...command,
+              pid: liveApplication.pid,
+              appName: liveApplication.name,
+              bundleIdentifier: liveApplication.bundleIdentifier,
+            }
+          : undefined;
       return (
         <List.Item
           key={command.id}

@@ -42,6 +42,7 @@ final class AccessibilityUIReader: @unchecked Sendable {
         let isEnabled: Bool
         let order: Int
         let isWebBacked: Bool
+        let accessibilityLocator: String?
     }
 
     private let maximumNodes = 900
@@ -55,16 +56,22 @@ final class AccessibilityUIReader: @unchecked Sendable {
         let firstPass = try scanCommands(for: application, diagnostics: diagnostics)
 
         // Web-based apps can briefly publish an incomplete AX tree while focus moves
-        // to FastNav. Keep actions seen in either of two close snapshots.
+        // to FastNav. Keep actions seen in either close snapshot, but identify an
+        // element by its process-scoped AX locator so a title update cannot create
+        // a stale duplicate.
         Thread.sleep(forTimeInterval: 0.04)
         let secondPass = try scanCommands(for: application, diagnostics: diagnostics)
         var merged: [MenuCommand] = []
         var identities = Set<String>()
+        var accessibilityLocators = Set<String>()
         for command in secondPass + firstPass {
             let identity = commandIdentity(command)
-            if identities.insert(identity).inserted {
-                merged.append(command)
+            guard identities.insert(identity).inserted else { continue }
+            if let accessibilityLocator = command.accessibilityLocator,
+               !accessibilityLocators.insert(accessibilityLocator).inserted {
+                continue
             }
+            merged.append(command)
         }
         return merged
     }
@@ -204,7 +211,10 @@ final class AccessibilityUIReader: @unchecked Sendable {
                 order: 10_000 + candidate.order,
                 source: .interface(role: candidate.role),
                 action: candidate.action,
-                isWebBacked: candidate.isWebBacked
+                isWebBacked: candidate.isWebBacked,
+                accessibilityLocator: candidate.accessibilityLocator.map {
+                    "\(application.processIdentifier)|\($0)"
+                }
             )
         }
     }
@@ -253,38 +263,55 @@ final class AccessibilityUIReader: @unchecked Sendable {
             throw AccessibilityMenuError.interfaceElementUnavailable(title)
         }
 
+        // Create the release event before posting mouse-down so cleanup cannot
+        // be blocked by event allocation after the button is held.
+        guard let mouseUp = CGEvent(
+            mouseEventSource: source,
+            mouseType: .leftMouseUp,
+            mouseCursorPosition: point,
+            mouseButton: .left
+        ) else {
+            throw AccessibilityMenuError.interfaceElementUnavailable(title)
+        }
+
+        var releasePoint = point
+        var mouseDownPosted = false
+        var mouseUpPosted = false
+        defer {
+            if mouseDownPosted && !mouseUpPosted {
+                mouseUp.location = releasePoint
+                CGWarpMouseCursorPosition(releasePoint)
+                mouseUp.post(tap: .cghidEventTap)
+            }
+        }
+
         mouseDown.setIntegerValueField(.mouseEventClickState, value: 1)
+        mouseUp.setIntegerValueField(.mouseEventClickState, value: 1)
         let mouseDownCounter = CGEventSource.counterForEventType(
             .hidSystemState,
             eventType: .leftMouseDown
         )
         CGWarpMouseCursorPosition(point)
         mouseDown.post(tap: .cghidEventTap)
+        mouseDownPosted = true
         guard waitForEventDelivery(.leftMouseDown, after: mouseDownCounter) else {
             throw AccessibilityMenuError.interfaceElementUnavailable(title)
         }
 
-        let releasePoint = try validatedClickPoint(
+        releasePoint = try validatedClickPoint(
             on: element,
             titled: title,
             in: application
         )
-        guard let mouseUp = CGEvent(
-            mouseEventSource: source,
-            mouseType: .leftMouseUp,
-            mouseCursorPosition: releasePoint,
-            mouseButton: .left
-        ) else {
-            throw AccessibilityMenuError.interfaceElementUnavailable(title)
-        }
 
-        mouseUp.setIntegerValueField(.mouseEventClickState, value: 1)
         let mouseUpCounter = CGEventSource.counterForEventType(
             .hidSystemState,
             eventType: .leftMouseUp
         )
+        mouseUp.location = releasePoint
         CGWarpMouseCursorPosition(releasePoint)
         mouseUp.post(tap: .cghidEventTap)
+        mouseUpPosted = true
         guard waitForEventDelivery(.leftMouseUp, after: mouseUpCounter) else {
             throw AccessibilityMenuError.interfaceElementUnavailable(title)
         }
@@ -411,7 +438,8 @@ final class AccessibilityUIReader: @unchecked Sendable {
                 context: Array(context.suffix(3)),
                 isEnabled: boolAttribute(target.element, kAXEnabledAttribute) ?? true,
                 order: candidates.count,
-                isWebBacked: target.isWebBacked
+                isWebBacked: target.isWebBacked,
+                accessibilityLocator: accessibilityLocator(for: target.element)
             )
         )
     }
@@ -443,13 +471,39 @@ final class AccessibilityUIReader: @unchecked Sendable {
     }
 
     private func commandIdentity(_ command: MenuCommand) -> String {
-        [
+        return [
             command.bundleIdentifier ?? String(command.pid),
             command.source.storageKey,
             command.breadcrumb,
             command.title,
             command.action
         ].joined(separator: "|")
+    }
+
+    private func accessibilityLocator(for element: AXUIElement) -> String? {
+        if let identifier = stringAttribute(element, kAXIdentifierAttribute),
+           !identifier.isEmpty {
+            return "AXIdentifier:\(identifier)"
+        }
+        if let domIdentifier = stringAttribute(element, "AXDOMIdentifier"),
+           !domIdentifier.isEmpty {
+            return "AXDOMIdentifier:\(domIdentifier)"
+        }
+        if let chromeNodeID = rawAttribute(element, "ChromeAXNodeId") as? NSNumber {
+            return "ChromeAXNodeId:\(chromeNodeID.stringValue)"
+        }
+        if let frame = elementFrame(element),
+           frame.width >= 2,
+           frame.height >= 2 {
+            return String(
+                format: "AXFrame:%.0f,%.0f,%.0f,%.0f",
+                frame.origin.x,
+                frame.origin.y,
+                frame.width,
+                frame.height
+            )
+        }
+        return nil
     }
 
     private func bestLabel(for element: AXUIElement, role: String) -> String? {

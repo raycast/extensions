@@ -40,9 +40,17 @@ struct BridgeCommand: Codable {
     let focusedApplicationBonusEmpty: Double?
     let focusedApplicationBonusSearch: Double?
     let isWebBacked: Bool?
+    let accessibilityLocator: String?
 
     init(_ command: MenuCommand) {
-        id = "\(command.usageKey)|\(command.order)"
+        id = command.accessibilityLocator.map {
+            [
+                command.bundleIdentifier ?? String(command.pid),
+                command.source.storageKey,
+                $0,
+                command.action
+            ].joined(separator: "|")
+        } ?? "\(command.usageKey)|\(command.order)"
         pid = Int(command.pid)
         appName = command.appName
         bundleIdentifier = command.bundleIdentifier
@@ -55,6 +63,7 @@ struct BridgeCommand: Codable {
         focusedApplicationBonusEmpty = command.focusedApplicationBonus(hasQuery: false)
         focusedApplicationBonusSearch = command.focusedApplicationBonus(hasQuery: true)
         isWebBacked = command.isWebBacked
+        accessibilityLocator = command.accessibilityLocator
 
         switch command.source {
         case .menu:
@@ -83,7 +92,8 @@ struct BridgeCommand: Codable {
             order: order,
             source: commandSource,
             action: action,
-            isWebBacked: isWebBacked ?? false
+            isWebBacked: isWebBacked ?? false,
+            accessibilityLocator: accessibilityLocator
         )
     }
 }
@@ -92,6 +102,7 @@ enum BridgeError: LocalizedError {
     case applicationUnavailable
     case applicationCouldNotActivate(String)
     case commandCouldNotStart(String)
+    case commandCouldNotComplete(String)
     case commandDisabled
     case permissionRequired
 
@@ -103,6 +114,8 @@ enum BridgeError: LocalizedError {
             return "\(name) could not be brought to the front."
         case .commandCouldNotStart(let title):
             return "The command “\(title)” could not be started."
+        case .commandCouldNotComplete(let title):
+            return "The command “\(title)” could not be completed."
         case .commandDisabled:
             return "That command is currently unavailable."
         case .permissionRequired:
@@ -194,6 +207,14 @@ private func launchDeferredCommand(_ command: BridgeCommand) throws {
         try process.run()
     } catch {
         throw BridgeError.commandCouldNotStart(command.title)
+    }
+
+    // The generated bridge exits nonzero when the deferred function throws.
+    // Wait for that result so callers only observe success after the action ran.
+    process.waitUntilExit()
+    guard process.terminationReason == .exit,
+          process.terminationStatus == 0 else {
+        throw BridgeError.commandCouldNotComplete(command.title)
     }
 }
 

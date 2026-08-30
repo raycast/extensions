@@ -113,7 +113,8 @@ final class AccessibilityMenuReader: @unchecked Sendable {
                         order: order,
                         source: .menu,
                         action: kAXPressAction,
-                        isWebBacked: false
+                        isWebBacked: false,
+                        accessibilityLocator: nil
                     )
                 )
                 order += 1

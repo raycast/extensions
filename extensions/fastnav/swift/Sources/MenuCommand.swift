@@ -53,6 +53,7 @@ struct MenuCommand: Identifiable {
     let source: CommandSource
     let action: String
     let isWebBacked: Bool
+    let accessibilityLocator: String?
 
     var breadcrumb: String {
         menuPath.joined(separator: " › ")
@@ -77,10 +78,40 @@ struct MenuCommand: Identifiable {
     }
 
     func hasSameIdentity(as other: MenuCommand) -> Bool {
-        bundleIdentifier == other.bundleIdentifier &&
-        title == other.title &&
-        menuPath == other.menuPath &&
-        shortcut == other.shortcut &&
-        source == other.source
+        guard bundleIdentifier == other.bundleIdentifier,
+              source == other.source,
+              action == other.action else {
+            return false
+        }
+
+        if let accessibilityLocator,
+           let otherLocator = other.accessibilityLocator,
+           accessibilityLocator == otherLocator {
+            if accessibilityLocator.contains("|AXFrame:") {
+                return hasCompatibleDynamicTitle(as: other)
+            }
+            return true
+        }
+
+        return title == other.title &&
+            menuPath == other.menuPath &&
+            shortcut == other.shortcut
+    }
+
+    private func hasCompatibleDynamicTitle(as other: MenuCommand) -> Bool {
+        let ignoredWords: Set<String> = [
+            "a", "an", "and", "for", "of", "the", "to", "with"
+        ]
+        func contentWords(in value: String) -> Set<String> {
+            Set(
+                value
+                    .lowercased()
+                    .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                    .filter { !$0.isEmpty && !ignoredWords.contains($0) }
+            )
+        }
+
+        let ownWords = contentWords(in: title)
+        return !ownWords.isEmpty && ownWords == contentWords(in: other.title)
     }
 }
