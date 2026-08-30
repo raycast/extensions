@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Group libraries, fuzzy search, and BibTeX-key search] - {PR_MERGE_DATE}
+## [Group libraries, fuzzy search, and BibTeX-key search] - 2026-08-30
 
 - Search now uses a subsequence fuzzy finder (fuzzysort) instead of near-exact matching, so typing `qsim` finds "Quantum Simulation". Results are ranked by how well they match, and the most recent items show for an empty query.
 - Added a "Search by BibTeX Citation Key" preference. With it on, typing a citation key like `smith2020quantum` returns that item.
