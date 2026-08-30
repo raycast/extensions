@@ -728,7 +728,13 @@ function FilePickerView({ onSubmit }: { onSubmit: (paths: string[]) => Promise<v
         </ActionPanel>
       }
     >
-      <Form.FilePicker id="files" title="Files" allowMultipleSelection canChooseDirectories={false} />
+      <Form.FilePicker
+        id="files"
+        title="Files"
+        info="Choose one or more files to rename."
+        allowMultipleSelection
+        canChooseDirectories={false}
+      />
     </Form>
   );
 }
@@ -759,6 +765,7 @@ function EditTitleView({ item, onSubmit }: { item: RenameItem; onSubmit: (title:
       <Form.TextField
         id="title"
         title="Title"
+        placeholder="Enter a new title"
         info="The extension is added automatically."
         defaultValue={item.proposedTitle ?? ""}
       />

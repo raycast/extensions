@@ -42,7 +42,7 @@ export async function renameFile(path: string, title: string, style: FilenameSty
   // over is the only move that works — but only once the target is known to be
   // this same file, because a case-sensitive volume can hold a second file
   // under the other spelling, and renaming over that one would destroy it.
-  if (normalized(desired).toLocaleLowerCase() === normalized(originalName).toLocaleLowerCase()) {
+  if (normalized(desired).toLocaleLowerCase("en-US") === normalized(originalName).toLocaleLowerCase("en-US")) {
     const target = join(directory, desired);
     if (await isSameFile(path, target)) {
       await rename(path, target);
@@ -187,8 +187,8 @@ function styleStem(value: string, style: FilenameStyle): string {
     .filter(Boolean);
 
   if (words.length === 0) return "";
-  if (style === "kebab") return words.join("-").toLocaleLowerCase();
-  if (style === "snake") return words.join("_").toLocaleLowerCase();
+  if (style === "kebab") return words.join("-").toLocaleLowerCase("en-US");
+  if (style === "snake") return words.join("_").toLocaleLowerCase("en-US");
   // A leading dot would hide the file; a trailing one confuses the extension.
   return words
     .join(" ")
