@@ -145,22 +145,31 @@ function readProcessIdentity(pid: number): ProcessIdentity | null {
   }
 }
 
-function identityMatches(state: RunningCaffeineState, identity: ProcessIdentity | null) {
-  if (!identity || identity.createdAtMs === null || state.helperCreatedAtMs === undefined) {
-    // Without a recorded creation time we cannot prove the PID was reused, so we
-    // fall back to the previous behavior instead of blocking legitimate stops.
-    return true;
-  }
+/**
+ * Result of checking whether the process currently holding the tracked PID is
+ * still the helper we spawned:
+ *
+ * - "alive": identity verified — the process is our helper.
+ * - "dead": the helper exited, or the PID was recycled by another process.
+ * - "unverifiable": a process exists but its identity could not be read (or the
+ *   state predates creation-time tracking). The process is never terminated in
+ *   this case so an unrelated process that reused the PID is left alone.
+ */
+type TrackedProcessCheck = "alive" | "dead" | "unverifiable";
 
-  return Math.abs(identity.createdAtMs - state.helperCreatedAtMs) <= PROCESS_IDENTITY_TOLERANCE_MS;
-}
-
-function isTrackedProcessAlive(state: RunningCaffeineState) {
+function checkTrackedProcess(state: RunningCaffeineState): TrackedProcessCheck {
   if (!isProcessRunning(state.pid)) {
-    return false;
+    return "dead";
   }
 
-  return identityMatches(state, readProcessIdentity(state.pid));
+  const identity = readProcessIdentity(state.pid);
+  if (!identity || identity.createdAtMs === null || state.helperCreatedAtMs === undefined) {
+    // Without comparable creation timestamps we cannot rule out PID reuse, so
+    // we fail closed instead of risking an unrelated process.
+    return "unverifiable";
+  }
+
+  return Math.abs(identity.createdAtMs - state.helperCreatedAtMs) <= PROCESS_IDENTITY_TOLERANCE_MS ? "alive" : "dead";
 }
 
 function killTrackedProcess(pid: number) {
@@ -304,7 +313,9 @@ export async function getRunningState() {
     return null;
   }
 
-  if (!isTrackedProcessAlive(savedState)) {
+  // Only forget the state once we know the tracked process is gone. When its
+  // identity is unverifiable we keep tracking it so it can still be stopped.
+  if (checkTrackedProcess(savedState) === "dead") {
     clearStateFile();
     return null;
   }
@@ -402,22 +413,29 @@ export async function stopCaffeine() {
     return false;
   }
 
+  const check = checkTrackedProcess(savedState);
+
   // Only terminate the process when it is still the one we spawned. If the PID
-  // was recycled by another process, leave it alone and just forget the state.
-  if (isTrackedProcessAlive(savedState)) {
+  // was recycled by another process, leave it alone. When the identity cannot
+  // be verified, keep the state file so the stop can be retried later.
+  if (check === "alive") {
     killTrackedProcess(savedState.pid);
   }
 
-  clearStateFile();
+  if (check !== "unverifiable") {
+    clearStateFile();
+  }
+
   return true;
 }
 
 export async function resetCaffeineState() {
-  const snapshot = getProcessSnapshot();
   const savedState = readTrackedState();
 
-  if (snapshot?.isRunning && savedState && identityMatches(savedState, readProcessIdentity(snapshot.pid))) {
-    killTrackedProcess(snapshot.pid);
+  // Even on an explicit force reset we only terminate the process when its
+  // identity is verified; otherwise we just forget the tracked state.
+  if (savedState && checkTrackedProcess(savedState) === "alive") {
+    killTrackedProcess(savedState.pid);
   }
 
   clearStateFile();
