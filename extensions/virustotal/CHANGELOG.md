@@ -1,6 +1,6 @@
 # VirusTotal Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-08-30
 
 - Fixed URL input without a scheme (e.g. `google.com`, `google.com/path`) being rejected as invalid; it's now accepted and submitted to VirusTotal unmodified
 
