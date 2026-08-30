@@ -68,18 +68,6 @@ export async function startCaffeinate(
   await update(updates, true);
 }
 
-/**
- * Marks today's schedule as manually decaffeinated when it is currently
- * running, mirroring the "Pause" action in Schedule Caffeination. Returns true
- * when a running schedule was paused.
- */
-export async function pauseTodaysScheduleIfRunning(): Promise<boolean> {
-  const schedule = await getSchedule();
-  if (!schedule || !isTodaysSchedule(schedule) || !schedule.IsRunning) return false;
-  await changeScheduleState("decaffeinate", schedule);
-  return true;
-}
-
 export async function stopCaffeinate(
   updates: Updates,
   hudMessage?: string,

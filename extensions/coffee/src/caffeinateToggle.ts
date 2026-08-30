@@ -1,11 +1,4 @@
-import {
-  isCaffeinateRunning,
-  startCaffeinate,
-  stopCaffeinate,
-  deviceName,
-  getSchedule,
-  pauseTodaysScheduleIfRunning,
-} from "./utils";
+import { isCaffeinateRunning, startCaffeinate, stopCaffeinate, deviceName, getSchedule } from "./utils";
 import { getPreferenceValues, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 
 export default async () => {
@@ -16,10 +9,10 @@ export default async () => {
     const preferences = getPreferenceValues<Preferences>();
     if (schedule != undefined && schedule.IsRunning == true) {
       if (preferences.decaffeinatePausesSchedules) {
-        await pauseTodaysScheduleIfRunning();
         await stopCaffeinate(
           { menubar: true, status: true },
           `Your ${deviceName()} is now decaffeinated (schedule paused)`,
+          { pauseRunningSchedule: true },
         );
       } else {
         await showToast({
