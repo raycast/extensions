@@ -8,6 +8,7 @@ import { collapseChatRows } from "../chat-collapse";
 import { buildChatQuery, type SQLChat } from "../chat-query";
 import { createContactMap } from "../contact-map-persist";
 import { buildChatSearchableText, getContactLookupIdentifiers, getContactOrGroupInfo, fuzzySearch } from "../helpers";
+import { dateToAppleNanoseconds } from "../message-pagination";
 import type { Chat } from "../open-chat-list";
 import type { ChatOrMessageInfo, Contact } from "../types";
 
@@ -26,15 +27,19 @@ export async function getChats(searchText: string = "", options: GetChatsOptions
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
     throw new Error("limit must be an integer between 1 and 100.");
   }
-  const fromTime = options.from ? Date.parse(options.from) : undefined;
-  const toTime = options.to ? Date.parse(options.to) : undefined;
-  if (fromTime !== undefined && !Number.isFinite(fromTime)) throw new Error("from must be an ISO 8601 date-time.");
-  if (toTime !== undefined && !Number.isFinite(toTime)) throw new Error("to must be an ISO 8601 date-time.");
-  if (fromTime !== undefined && toTime !== undefined && fromTime > toTime) {
+  const fromNanoseconds = options.from ? dateToAppleNanoseconds(options.from, "from") : undefined;
+  const toNanoseconds = options.to ? dateToAppleNanoseconds(options.to, "to") : undefined;
+  if (fromNanoseconds && toNanoseconds && BigInt(fromNanoseconds) > BigInt(toNanoseconds)) {
     throw new Error("from must not be later than to.");
   }
 
-  const rawData = await executeSQL<SQLChat>(DB_PATH, buildChatQuery());
+  const rawData = await executeSQL<SQLChat>(
+    DB_PATH,
+    buildChatQuery({
+      activityFromNanoseconds: fromNanoseconds,
+      activityToNanoseconds: toNanoseconds,
+    }),
+  );
 
   if (!rawData) return [];
 
@@ -68,9 +73,6 @@ export async function getChats(searchText: string = "", options: GetChatsOptions
   });
   const chats = collapseChatRows(hydratedChats).filter((chat) => {
     if (options.unreadOnly && !(Number(chat.unread_count) > 0)) return false;
-    const lastMessageTime = Date.parse(chat.last_message_date);
-    if (fromTime !== undefined && lastMessageTime < fromTime) return false;
-    if (toTime !== undefined && lastMessageTime >= toTime) return false;
     return true;
   });
 

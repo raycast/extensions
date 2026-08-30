@@ -79,14 +79,12 @@ export async function hydrateMessages(rawData: SQLMessage[]): Promise<Message[]>
 
 export function deduplicateReplyContext(messages: Message[]): Message[] {
   let prevReply: string | null = null;
-  for (const message of messages) {
+  return messages.map((message) => {
     const originalReply = message.replyingTo ?? null;
-    if (message.replyingTo && message.replyingTo === prevReply) {
-      message.replyingTo = null;
-    }
+    const replyingTo = originalReply && originalReply === prevReply ? null : message.replyingTo;
     prevReply = originalReply;
-  }
-  return messages;
+    return { ...message, replyingTo };
+  });
 }
 
 export function messageMatchesSearch(message: Message, searchText: string): boolean {

@@ -5,8 +5,8 @@
 - Add stable cursor pagination, date and unread filters, attachment metadata, and plain-text fallback to AI message search
 - Add an AI tool for overall and per-chat sent/received activity
 - Use stable chat IDs for existing-conversation sends and report AppleScript send failures accurately
-- Add unread and date filters to AI chat search
-- Search the full Contacts catalog when an AI request names someone without a recent conversation
+- Add unread filters and message-activity date ranges to AI chat search
+- Search a cached full Contacts catalog when an AI request names someone without a recent conversation
 
 ## [Faster chat and recipient search] - 2026-07-10
 

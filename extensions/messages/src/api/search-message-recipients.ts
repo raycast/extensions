@@ -1,6 +1,8 @@
 import { fetchAllContacts } from "swift:../../swift/contacts";
 
+import { persistedCatalogToContacts } from "../contact-catalog-persist";
 import { fuzzySearch } from "../helpers";
+import { createMessagesCache, loadPersistedContactCatalog, savePersistedContactCatalog } from "../messages-cache";
 import { buildRecipientSections, type Recipient } from "../recipient-catalog";
 import type { Contact } from "../types";
 
@@ -12,6 +14,9 @@ type SearchMessageRecipientsOptions = {
   to?: string;
   limit?: number;
 };
+
+const CONTACT_CATALOG_MAX_AGE_MS = 5 * 60 * 1000;
+let pendingContactCatalog: Promise<Contact[]> | undefined;
 
 export type MessageRecipientSearchResult = {
   kind: "chat" | "contact";
@@ -27,6 +32,23 @@ export type MessageRecipientSearchResult = {
 
 function searchTerms(value: string): string[] {
   return value.toLowerCase().split(/\s+/).filter(Boolean);
+}
+
+async function getContactCatalog(): Promise<Contact[]> {
+  const cache = createMessagesCache();
+  const persisted = loadPersistedContactCatalog(cache);
+  if (persisted.updatedAtEpochMs > Date.now() - CONTACT_CATALOG_MAX_AGE_MS) {
+    return persistedCatalogToContacts(persisted);
+  }
+
+  pendingContactCatalog ??= (async () => {
+    const contacts = (await fetchAllContacts()) as Contact[];
+    savePersistedContactCatalog(cache, contacts);
+    return contacts;
+  })().finally(() => {
+    pendingContactCatalog = undefined;
+  });
+  return pendingContactCatalog;
 }
 
 function mapRecipient(recipient: Recipient): MessageRecipientSearchResult {
@@ -50,7 +72,7 @@ export async function searchMessageRecipients(
   const limit = options.limit ?? 50;
   const hasActivityFilters = Boolean(options.unreadOnly || options.from || options.to);
   const terms = searchTerms(searchText);
-  const contacts = terms.length && !hasActivityFilters ? ((await fetchAllContacts()) as Contact[]) : undefined;
+  const contacts = terms.length && !hasActivityFilters ? await getContactCatalog() : undefined;
   const chats = await getChats(searchText, { ...options, contacts });
 
   if (!terms.length || hasActivityFilters) {
