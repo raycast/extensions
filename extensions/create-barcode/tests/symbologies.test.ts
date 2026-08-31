@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { MAX_DATA_LENGTH } from "../src/lib/barcode.ts";
 import { encode as encodeCodabar } from "../src/lib/codabar.ts";
 import { encode as encodeCode128 } from "../src/lib/code128.ts";
 import { encode as encodeCode39 } from "../src/lib/code39.ts";
@@ -355,5 +356,66 @@ describe("fileBaseName", () => {
     assert.ok(result.ok);
     const name = fileBaseName(result.barcode);
     assert.match(name, /^CODE128_A-B-C_[0-9a-f]{8}$/);
+  });
+});
+
+describe("入力の長さの上限", () => {
+  it("上限ちょうどは通る", () => {
+    assert.equal(encodeCode128("A".repeat(MAX_DATA_LENGTH)).ok, true);
+    assert.equal(encodeCode39("A".repeat(MAX_DATA_LENGTH)).ok, true);
+    assert.equal(encodeCodabar("1".repeat(MAX_DATA_LENGTH)).ok, true);
+    assert.equal(encodeItf("1".repeat(MAX_DATA_LENGTH)).ok, true);
+  });
+
+  it("上限を超えるとエラーになる", () => {
+    const over = MAX_DATA_LENGTH + 1;
+    assert.equal(encodeCode128("A".repeat(over)).ok, false);
+    assert.equal(encodeCode39("A".repeat(over)).ok, false);
+    assert.equal(encodeCodabar("1".repeat(over)).ok, false);
+    assert.equal(encodeItf("1".repeat(over)).ok, false);
+  });
+
+  it("上限まで入れてもプレビューの画素数が現実的な範囲に収まる", () => {
+    // プレビューは 8倍解像度の PNG を同期的に組み立てる。
+    // 上限がないとここが数百MBに膨らんで UI が固まる。
+    const result = encodeCode128("A".repeat(MAX_DATA_LENGTH));
+    assert.ok(result.ok);
+
+    const layout = buildLayout(result.barcode);
+    const pixels = layout.width * 8 * (layout.height * 8);
+    assert.ok(pixels < 8 * 1024 * 1024, `${(pixels / 1024 / 1024).toFixed(1)}MB は大きすぎる`);
+  });
+});
+
+describe("前後の空白", () => {
+  it("CODE128 は前後の空白を落としたことを知らせる", () => {
+    const result = encodeCode128(" AB ");
+    assert.ok(result.ok);
+    assert.equal(result.barcode.code, "AB");
+    assert.equal(result.barcode.notice, "Spaces Trimmed");
+  });
+
+  it("CODE128 は文字列の内側の空白はそのまま符号化する", () => {
+    const result = encodeCode128("A B");
+    assert.ok(result.ok);
+    assert.equal(result.barcode.code, "A B");
+    assert.equal(result.barcode.notice, undefined);
+  });
+
+  it("CODE39 も内側の空白は残す", () => {
+    const result = encodeCode39("A B");
+    assert.ok(result.ok);
+    assert.equal(result.barcode.code, "A B");
+    assert.equal(result.barcode.notice, undefined);
+  });
+
+  it("注記が複数あるときは中黒でつなぐ", () => {
+    const trimmedAndUppercased = encodeCode39(" ab ");
+    assert.ok(trimmedAndUppercased.ok);
+    assert.equal(trimmedAndUppercased.barcode.notice, "Spaces Trimmed · Uppercased");
+
+    const trimmedAndCodeSetC = encodeCode128(" 1234 ");
+    assert.ok(trimmedAndCodeSetC.ok);
+    assert.equal(trimmedAndCodeSetC.barcode.notice, "Spaces Trimmed · Code Set C Used");
   });
 });

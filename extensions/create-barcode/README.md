@@ -25,6 +25,8 @@ Use the search bar dropdown (`⌘P`) to pin a single symbology. The default is *
 
 EAN-13 and ITF also accept input containing hyphens, spaces and full-width digits (`4912-3456 7890` becomes `4912345678904`).
 
+Values are limited to 80 characters (80 digits for ITF). CODE128 and CODE39 have no length limit in their specifications, but a symbol that long is already too wide for real scanners to read.
+
 ## Preferences
 
 - **Save Folder** — where PNG / SVG files are written. Defaults to the Downloads folder when empty.

@@ -7,7 +7,7 @@
  */
 
 import type { Barcode, BarcodeDetail, EncodeResult } from "./barcode.ts";
-import { DEFAULT_QUIET, toHalfWidth, widthsToModules } from "./barcode.ts";
+import { DEFAULT_QUIET, joinNotices, MAX_DATA_LENGTH, toHalfWidth, tooLong, widthsToModules } from "./barcode.ts";
 
 export const CODE128_LABEL = "CODE128";
 
@@ -123,10 +123,15 @@ function calcCheckValue(startValue: number, values: number[]): number {
 
 /** 入力文字列から CODE128 バーコードを生成する */
 export function encode(input: string): EncodeResult {
-  const data = toHalfWidth(input).trim();
+  const halfWidth = toHalfWidth(input);
+  // CODE128 は半角スペースも符号化できるので、落としたことは notice で知らせる
+  const data = halfWidth.trim();
 
   if (data.length === 0) {
     return { ok: false, message: "Enter a CODE128 value", hint: "Printable ASCII characters" };
+  }
+  if (data.length > MAX_DATA_LENGTH) {
+    return tooLong(CODE128_LABEL, data.length);
   }
 
   const invalid = Array.from(data).find((char) => {
@@ -164,7 +169,10 @@ export function encode(input: string): EncodeResult {
     quietLeft: DEFAULT_QUIET,
     quietRight: DEFAULT_QUIET,
     textLayout: "centered",
-    notice: usedSets.has("C") ? "Code Set C Used" : undefined,
+    notice: joinNotices(
+      data !== halfWidth ? "Spaces Trimmed" : undefined,
+      usedSets.has("C") ? "Code Set C Used" : undefined,
+    ),
     details,
     checkDigit: String(checkValue),
     completed: true,

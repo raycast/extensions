@@ -6,7 +6,7 @@
  */
 
 import type { Barcode, EncodeResult } from "./barcode.ts";
-import { DEFAULT_QUIET, patternToWidths, toHalfWidth, widthsToModules } from "./barcode.ts";
+import { DEFAULT_QUIET, MAX_DATA_LENGTH, patternToWidths, toHalfWidth, tooLong, widthsToModules } from "./barcode.ts";
 
 export const NW7_LABEL = "NW-7";
 
@@ -65,6 +65,9 @@ export function encode(input: string): EncodeResult {
 
   if (data.length === 0) {
     return { ok: false, message: "NW-7 needs data between the start and stop characters", hint: "Example: A123456B" };
+  }
+  if (data.length > MAX_DATA_LENGTH) {
+    return tooLong(NW7_LABEL, data.length);
   }
 
   const invalid = Array.from(data).find((char) => !DATA_CHARS.includes(char));

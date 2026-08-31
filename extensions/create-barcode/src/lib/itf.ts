@@ -6,7 +6,7 @@
  */
 
 import type { Barcode, EncodeResult } from "./barcode.ts";
-import { DEFAULT_QUIET, patternToWidths, widthsToModules } from "./barcode.ts";
+import { DEFAULT_QUIET, MAX_DATA_LENGTH, patternToWidths, tooLong, widthsToModules } from "./barcode.ts";
 
 export const ITF_LABEL = "ITF";
 
@@ -52,6 +52,9 @@ export function encode(input: string): EncodeResult {
   }
   if (normalized.length === 0) {
     return { ok: false, message: "Enter digits", hint: "An even number of digits" };
+  }
+  if (normalized.length > MAX_DATA_LENGTH) {
+    return tooLong(ITF_LABEL, normalized.length, "digits");
   }
 
   // 奇数桁は先頭に 0 を足して偶数にそろえる

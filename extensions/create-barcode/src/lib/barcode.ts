@@ -69,8 +69,36 @@ export function patternToWidths(pattern: string): number[] {
   return Array.from(pattern, (bit) => (bit === "1" ? WIDE_RATIO : 1));
 }
 
-/** 全角英数字・記号を半角に直し、前後の空白を落とす */
+/** 全角英数字・記号を半角に直す。前後の空白は呼び出し側で必要に応じて落とす */
 export function toHalfWidth(input: string): string {
   // ！-～ は全角の ! から ~ まで。u+3000 の全角スペースも半角に直す
   return input.replace(/[！-～]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0)).replace(/\u3000/g, " ");
+}
+
+/**
+ * 1シンボルに詰め込めるデータの上限。
+ *
+ * CODE128 と CODE39 は規格上いくらでも長くできるが、実際のスキャナが読めるのは
+ * せいぜい数十文字で、それ以上は印字幅が伸びるだけで実用にならない。
+ * 加えてプレビューは 8倍解像度の PNG を同期的に組み立てるため、長い文字列を
+ * そのまま受けるとキャンバスが数百MBに膨らんで UI が固まる。
+ */
+export const MAX_DATA_LENGTH = 80;
+
+/** 長さ超過を伝える共通のエラー */
+export function tooLong(label: string, length: number, unit = "characters"): EncodeResult {
+  return {
+    ok: false,
+    message: `${label} is limited to ${MAX_DATA_LENGTH} ${unit} (got ${length})`,
+    hint: "Shorten the value so the barcode stays scannable",
+  };
+}
+
+/**
+ * 一覧行のタグに出す注記をまとめる。
+ * 入力に手を入れたことは複数同時に起こりうるので、中黒でつないで1つのタグにする。
+ */
+export function joinNotices(...notices: (string | undefined)[]): string | undefined {
+  const kept = notices.filter((notice): notice is string => notice !== undefined);
+  return kept.length > 0 ? kept.join(" · ") : undefined;
 }

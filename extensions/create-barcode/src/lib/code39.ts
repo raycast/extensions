@@ -7,7 +7,15 @@
  */
 
 import type { Barcode, EncodeResult } from "./barcode.ts";
-import { DEFAULT_QUIET, patternToWidths, toHalfWidth, widthsToModules } from "./barcode.ts";
+import {
+  DEFAULT_QUIET,
+  joinNotices,
+  MAX_DATA_LENGTH,
+  patternToWidths,
+  toHalfWidth,
+  tooLong,
+  widthsToModules,
+} from "./barcode.ts";
 
 export const CODE39_LABEL = "CODE39";
 
@@ -69,10 +77,16 @@ const START_STOP = "*";
  * 英小文字は大文字に直してから符号化する（CODE39 に小文字はない）。
  */
 export function encode(input: string): EncodeResult {
-  const data = toHalfWidth(input).trim().toUpperCase();
+  const halfWidth = toHalfWidth(input);
+  // CODE39 は半角スペースも符号化できるので、落としたことは notice で知らせる
+  const trimmed = halfWidth.trim();
+  const data = trimmed.toUpperCase();
 
   if (data.length === 0) {
     return { ok: false, message: "Enter a CODE39 value", hint: "Digits, A-Z, and - . space $ / + %" };
+  }
+  if (data.length > MAX_DATA_LENGTH) {
+    return tooLong(CODE39_LABEL, data.length);
   }
 
   const invalid = Array.from(data).find((char) => char === START_STOP || !ALPHABET.includes(char));
@@ -103,7 +117,10 @@ export function encode(input: string): EncodeResult {
     quietLeft: DEFAULT_QUIET,
     quietRight: DEFAULT_QUIET,
     textLayout: "centered",
-    notice: data !== toHalfWidth(input).trim() ? "Uppercased" : undefined,
+    notice: joinNotices(
+      trimmed !== halfWidth ? "Spaces Trimmed" : undefined,
+      data !== trimmed ? "Uppercased" : undefined,
+    ),
     details: [
       { title: "Characters", text: `${data.length}` },
       { title: "Start / Stop", text: "* / *" },
