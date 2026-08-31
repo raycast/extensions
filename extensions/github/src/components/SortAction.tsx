@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, MenuBarExtra } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, MenuBarExtra } from "@raycast/api";
 
 type SortType = { title: string; value: string };
 
@@ -12,19 +12,19 @@ export type SortActionProps = Partial<{
 type SortActionDataProps = { data: SortType[] } & SortActionProps;
 
 export const SortAction = ({ sortQuery, setSortQuery, data }: SortActionDataProps) =>
-  sortQuery && setSortQuery ? (
-    <ActionPanel.Submenu title={"Sort By"} icon={Icon.ArrowUp} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
+  setSortQuery ? (
+    <ActionPanel.Submenu title={"Sort by"} icon={Icon.ArrowUp} shortcut={Keyboard.Shortcut.Common.Duplicate}>
       {data
         .filter(({ value }) => !value.startsWith("sort:reaction"))
         .map(({ title, value }) => (
-          <SortActionItem key={value} {...{ title, value, sortQuery, setSortQuery }} />
+          <SortActionItem key={value || "relevance"} {...{ title, value, sortQuery: sortQuery ?? "", setSortQuery }} />
         ))}
       {data.some(({ value }) => value.startsWith("sort:reaction")) && (
         <ActionPanel.Section title={"Most Reactions"}>
           {data
             .filter(({ value }) => value.startsWith("sort:reaction"))
             .map(({ title, value }) => (
-              <SortActionItem key={value} {...{ title, value, sortQuery, setSortQuery }} />
+              <SortActionItem key={value} {...{ title, value, sortQuery: sortQuery ?? "", setSortQuery }} />
             ))}
         </ActionPanel.Section>
       )}
@@ -47,19 +47,19 @@ const SortActionItem = ({
 );
 
 export const SortMenuBarAction = ({ sortQuery, setSortQuery, data }: SortActionDataProps) =>
-  sortQuery && setSortQuery ? (
+  setSortQuery ? (
     <MenuBarExtra.Submenu title="Sort By" icon={Icon.ArrowUp}>
       {data
         .filter(({ value }) => !value.startsWith("sort:reaction"))
         .map(({ title, value }) => (
-          <SortMenuBarItem key={value} {...{ title, value, sortQuery, setSortQuery }} />
+          <SortMenuBarItem key={value || "relevance"} {...{ title, value, sortQuery: sortQuery ?? "", setSortQuery }} />
         ))}
       {data.some(({ value }) => value.startsWith("sort:reaction")) && (
         <MenuBarExtra.Section title="Most Reactions">
           {data
             .filter(({ value }) => value.startsWith("sort:reaction"))
             .map(({ title, value }) => (
-              <SortMenuBarItem key={value} {...{ title, value, sortQuery, setSortQuery }} />
+              <SortMenuBarItem key={value} {...{ title, value, sortQuery: sortQuery ?? "", setSortQuery }} />
             ))}
         </MenuBarExtra.Section>
       )}

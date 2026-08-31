@@ -47,6 +47,28 @@
       "description": "A Twos API key from Settings → Advanced → API Keys.",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "openIn",
+      "title": "Open Results In",
+      "description": "Where search results open. Automatic uses the NewTwos desktop app when it's installed and the browser otherwise.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic (desktop app if installed)",
+          "value": "auto"
+        },
+        {
+          "title": "NewTwos Desktop App",
+          "value": "app"
+        },
+        {
+          "title": "Browser",
+          "value": "browser"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -67,5 +89,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

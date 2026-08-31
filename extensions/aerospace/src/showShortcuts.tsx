@@ -1,57 +1,83 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Action, ActionPanel, Keyboard, List } from "@raycast/api";
-import { getConfig, handleConfigError } from "./utils/config";
-import { normalizeKey } from "./utils/keys";
-import { executeShortcut, extractKeyboardShortcuts } from "./utils/shortcuts";
+import { Action, ActionPanel, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
+import { useMemo } from "react";
+import { useShortcuts } from "./hooks/useConfig";
+import { parseShortcutKey } from "./utils/keys";
+import { executeShortcutInMode } from "./utils/executeShortcut";
+import { AeroSpaceRecoveryActions } from "./components/AeroSpaceRecoveryActions";
+import { SHORTCUT_CATEGORY_ORDER, visibleShortcuts } from "./utils/config";
 
 export default function Command() {
-  const { config, error } = getConfig();
-  if (error) {
-    handleConfigError(error);
-  }
-  if (config) {
-    const keyboardShortcuts = extractKeyboardShortcuts(config);
+  const { shortcuts, isLoading, error, revalidate } = useShortcuts();
+  const { showFullBindings } = getPreferenceValues<Preferences>();
+  const grouped = useMemo(() => {
+    const visible = visibleShortcuts(shortcuts, showFullBindings !== false);
+    return SHORTCUT_CATEGORY_ORDER.map((category) => ({
+      category,
+      shortcuts: visible.filter((shortcut) => shortcut.category === category),
+    })).filter((group) => group.shortcuts.length > 0);
+  }, [shortcuts, showFullBindings]);
+  const visibleCount = grouped.reduce((count, group) => count + group.shortcuts.length, 0);
 
-    console.debug("Keyboard shortcuts:", keyboardShortcuts);
-
-    return (
-      <List navigationTitle="Keyboard Shortcuts" searchBarPlaceholder="Search your shortcuts">
-        {Object.entries(keyboardShortcuts).map(([key, value]) => {
-          const shortcutParts = value.shortcut.split("-");
-          const modifiers = shortcutParts.slice(0, -1); // all parts except last as modifiers
-          // Change alt to opt in modifiers using the normalizeKey function
-          const normalizedModifiers = modifiers.map((modifier) => normalizeKey(modifier));
-          // console.log("Modifiers:", modifiers);
-          const keyPart = normalizeKey(shortcutParts[shortcutParts.length - 1]); // last part as key
-          // console.log("Key:", keyPart);
-          // If the key is esc set it to nothing to avoid conflict with raycast api
-
-          return (
-            <List.Item
-              key={key}
-              icon={"list-icon.png"}
-              title={value.description}
-              subtitle={value.shortcut}
-              accessories={[{ text: value.mode }]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Activate"
-                    onAction={() => {
-                      console.log("Activated", value.description);
-                      executeShortcut(value.shortcut);
-                    }}
-                    shortcut={{
-                      modifiers: normalizedModifiers.map((modifier) => modifier as Keyboard.KeyModifier),
-                      key: keyPart === "escape" ? "home" : (keyPart as Keyboard.KeyEquivalent),
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List>
-    );
-  }
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Search shortcuts, keys, or modes">
+      {!isLoading && visibleCount === 0 && (
+        <List.EmptyView
+          icon={error ? Icon.Warning : Icon.Keyboard}
+          title={error ? "Failed to Load Shortcuts" : "No Shortcuts Found"}
+          description={
+            error
+              ? error.message
+              : "No key bindings were found in your AeroSpace config. Add a [mode.main.binding] section to get started."
+          }
+          actions={
+            error ? (
+              <AeroSpaceRecoveryActions error={error} onRetry={revalidate} />
+            ) : (
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title="Open AeroSpace Binding Guide"
+                  url="https://nikitabobko.github.io/AeroSpace/guide#binding-modes"
+                />
+              </ActionPanel>
+            )
+          }
+        />
+      )}
+      {grouped.map((group) => (
+        <List.Section key={group.category} title={group.category}>
+          {group.shortcuts.map((shortcut) => {
+            const parsed = parseShortcutKey(shortcut.key);
+            return (
+              <List.Item
+                key={`${shortcut.mode}-${shortcut.key}`}
+                icon={Icon.ChevronRight}
+                title={shortcut.title}
+                subtitle={shortcut.command}
+                keywords={[shortcut.mode, shortcut.key, shortcut.category, shortcut.command]}
+                accessories={[{ text: shortcut.key }, ...(shortcut.mode !== "main" ? [{ tag: shortcut.mode }] : [])]}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Activate Binding"
+                      shortcut={parsed ?? undefined}
+                      onAction={() => executeShortcutInMode(shortcut)}
+                    />
+                    <Action.CopyToClipboard title="Copy Raw Command" content={shortcut.command} />
+                    <Action
+                      title="Refresh Shortcuts"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
+                      onAction={async () => {
+                        await revalidate();
+                      }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      ))}
+    </List>
+  );
 }

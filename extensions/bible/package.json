@@ -99,5 +99,11 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "update-bible-versions": "node ./scripts/updateBibleVersions.mts ./assets/bible-versions.json"
+  },
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
+    "undici": "7.29.0"
   }
 }

@@ -20,21 +20,25 @@
       "title": "Search Libraries",
       "description": "Search for libraries on cdnjs",
       "mode": "view",
-      "preferences": [{
-        "name": "limit",
-        "title": "Limit",
-        "description": "The number of results to return",
-        "type": "textfield",
-        "default": "20",
-        "required": false
-      }],
-      "arguments": [{
-        "name": "library",
-        "placeholder": "Library",
-        "type": "text",
-        "description": "The library to search for",
-        "required": false
-      }]
+      "preferences": [
+        {
+          "name": "limit",
+          "title": "Limit",
+          "description": "The number of results to return",
+          "type": "textfield",
+          "default": "20",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "library",
+          "placeholder": "Library",
+          "type": "text",
+          "description": "The library to search for",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -56,5 +60,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

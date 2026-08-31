@@ -37,7 +37,7 @@ Note: Make sure to choose an app type that supports PKCE. Some providers still s
 
 An extension can initiate the OAuth flow and authorize by using the methods on [OAuth.PKCEClient](#oauth.pkceclient).
 
-You can create a new client and configure it with a provider name, icon and description that will be shown in the OAuth overlay. You can also choose between different redirect methods; depending on which method you choose, you need to configure this value as redirect URI in your provider's registered OAuth app. (See the [OAuth.RedirectMethod](#oauth.redirectmethod) docs for each method to get concrete examples for supported redirect URI.) If you can choose, use `OAuth.RedirectMethod.Web` and enter `https://raycast.com/redirect?packageName=Extension` (whether you have to add the `?packageName=Extension` depends on the provider).
+You can create a new client and configure it with a provider name, icon and description that will be shown in the OAuth overlay. You can also choose between different redirect methods; depending on which method you choose, you need to configure this value as redirect URI in your provider's registered OAuth app. (See the [OAuth.RedirectMethod](#oauth.redirectmethod) docs for each method to get concrete examples for supported redirect URI.) If you can choose, use `OAuth.RedirectMethod.Web` and enter `https://raycast.com/redirect?packageName=Extension` (whether you have to add the `?packageName=Extension` depends on the provider). For providers that support OAuth Client ID Metadata Documents (CIMD), use `OAuth.RedirectMethod.ClientIdMetadataDocument`; Raycast automatically uses `OAuth.clientIdMetadataDocument` (`https://www.raycast.com/.well-known/oauth-client-metadata/raycast.json`) as the authorization request `clientId` when one is not provided.
 
 ```typescript
 import { OAuth } from "@raycast/api";
@@ -50,7 +50,7 @@ const client = new OAuth.PKCEClient({
 });
 ```
 
-Next you create an authorization request with the authorization endpoint, client ID, and scope values. You receive all values from your provider's docs and when you register a new OAuth app.
+Next you create an authorization request with the authorization endpoint, client ID, and scope values. You receive all values from your provider's docs and when you register a new OAuth app. If your client uses `OAuth.RedirectMethod.ClientIdMetadataDocument`, you can omit `clientId` to use Raycast's hosted metadata document.
 
 The returned [AuthorizationRequest](#oauth.authorizationrequest) contains parameters such as the code challenge, verifier, state and redirect URI as standard OAuth authorization request. You can also customize the authorization URL through [OAuth.AuthorizationOptions](#oauth.authorizationoptions) if you need to.
 
@@ -79,7 +79,7 @@ Now that you have received the authorization code, you can exchange this code fo
 ```typescript
 async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
-  params.append("client_id", "YourClientId");
+  params.append("client_id", authRequest.clientId);
   params.append("code", authCode);
   params.append("code_verifier", authRequest.codeVerifier);
   params.append("grant_type", "authorization_code");
@@ -203,7 +203,10 @@ The generated code challenge for the PKCE request uses the S256 method.
 
 ```typescript
 authorizationRequest(options: AuthorizationRequestOptions): Promise<AuthorizationRequest>;
+authorizationRequest(options: ClientIdMetadataDocumentAuthorizationRequestOptions): Promise<AuthorizationRequest>;
 ```
+
+The `ClientIdMetadataDocumentAuthorizationRequestOptions` overload is only available for clients created with `OAuth.RedirectMethod.ClientIdMetadataDocument`.
 
 #### Example
 
@@ -219,7 +222,7 @@ const authRequest = await client.authorizationRequest({
 
 | Name                                      | Type                                                                           | Description                                           |
 | :---------------------------------------- | :----------------------------------------------------------------------------- | :---------------------------------------------------- |
-| options<mark style="color:red;">\*</mark> | <code>[AuthorizationRequestOptions](#oauth.authorizationrequestoptions)</code> | The options used to create the authorization request. |
+| options<mark style="color:red;">\*</mark> | <code>[AuthorizationRequestOptions](#oauth.authorizationrequestoptions)</code> \| <code>[ClientIdMetadataDocumentAuthorizationRequestOptions](#oauth.clientidmetadatadocumentauthorizationrequestoptions)</code> | The options used to create the authorization request. |
 
 #### Return
 
@@ -335,21 +338,29 @@ The options for creating a new [PKCEClient](#oauth.pkceclient).
 
 ### OAuth.RedirectMethod
 
-Defines the supported redirect methods for the OAuth flow. You can choose between web and app-scheme redirect methods, depending on what the provider requires when setting up the OAuth app. For examples on what redirect URI you need to configure, see the docs for each method.
+Defines the supported redirect methods for the OAuth flow. You can choose between web, app-scheme, and client metadata document redirect methods, depending on what the provider requires when setting up the OAuth app. For examples on what redirect URI you need to configure, see the docs for each method.
 
 #### Enumeration members
 
-| Name   | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| :----- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Web    | Use this type for a redirect back to the Raycast website, which will then open the extension. In the OAuth app, configure `https://raycast.com/redirect?packageName=Extension`<br>(This is a static redirect URL for all extensions.)<br>If the provider does not accept query parameters in redirect URLs, you can alternatively use `https://raycast.com/redirect/extension` and then customize the [AuthorizationRequest](#oauth.authorizationrequest) via its `extraParameters` property. For example add: `extraParameters: { "redirect_uri": "https://raycast.com/redirect/extension" }` |
-| App    | Use this type for an app-scheme based redirect that directly opens Raycast. In the OAuth app, configure `raycast://oauth?package_name=Extension`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| AppURI | Use this type for a URI-style app scheme that directly opens Raycast. In the OAuth app, configure `com.raycast:/oauth?package_name=Extension`<br>(Note the single slash – Google, for example, would require this flavor for an OAuth app where the Bundle ID is `com.raycast`)                                                                                                                                                                                                                                                                                                                |
+| Name                     | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Web                      | Use this type for a redirect back to the Raycast website, which will then open the extension. In the OAuth app, configure `https://raycast.com/redirect?packageName=Extension`<br>(This is a static redirect URL for all extensions.)<br>If the provider does not accept query parameters in redirect URLs, you can alternatively use `https://raycast.com/redirect/extension` and then customize the [AuthorizationRequest](#oauth.authorizationrequest) via its `extraParameters` property. For example add: `extraParameters: { "redirect_uri": "https://raycast.com/redirect/extension" }` |
+| App                      | Use this type for an app-scheme based redirect that directly opens Raycast. In the OAuth app, configure `raycast://oauth?package_name=Extension`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| AppURI                   | Use this type for a URI-style app scheme that directly opens Raycast. In the OAuth app, configure `com.raycast:/oauth?package_name=Extension`<br>(Note the single slash – Google, for example, would require this flavor for an OAuth app where the Bundle ID is `com.raycast`)                                                                                                                                                                                                                                                                                                                |
+| ClientIdMetadataDocument | Use this type for providers that support OAuth Client ID Metadata Documents (CIMD). When the authorization request omits `clientId`, Raycast uses `OAuth.clientIdMetadataDocument` (`https://www.raycast.com/.well-known/oauth-client-metadata/raycast.json`).                                                                                                                                                                                                                                                                                                                                  |
 
 ### OAuth.AuthorizationRequestOptions
 
 The options for an authorization request via [authorizationRequest](#oauth.authorizationrequest).
 
 <InterfaceTableFromJSDoc name="OAuth.AuthorizationRequestOptions" />
+
+### OAuth.ClientIdMetadataDocumentAuthorizationRequestOptions
+
+The options for a client ID metadata document authorization request via [authorizationRequest](#oauth.authorizationrequest).
+Only clients created with `OAuth.RedirectMethod.ClientIdMetadataDocument` can omit `clientId`.
+
+<InterfaceTableFromJSDoc name="OAuth.ClientIdMetadataDocumentAuthorizationRequestOptions" />
 
 ### OAuth.AuthorizationRequestURLParams
 

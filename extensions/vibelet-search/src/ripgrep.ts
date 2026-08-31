@@ -88,10 +88,32 @@ async function installRipgrep(): Promise<string> {
   }
 }
 
+/** Resolve the ripgrep binary, downloading it once into Raycast's support dir if needed. */
 export function ensureRipgrep(): Promise<string> {
   ensurePromise ??= installRipgrep().catch((error) => {
     ensurePromise = undefined;
     throw error;
   });
   return ensurePromise;
+}
+
+/**
+ * Run ripgrep and return its stdout.
+ * Exit code 1 means "no matches" — normal, returns "".
+ * Anything else (timeouts, OOM, ENOENT, code >= 2) is surfaced as an error.
+ */
+export async function execRipgrep(rgPath: string, args: string[]): Promise<string> {
+  try {
+    const { stdout } = await execFileAsync(rgPath, args, {
+      encoding: "utf-8",
+      maxBuffer: 2 * 1024 * 1024,
+      timeout: 15000,
+    });
+    return stdout;
+  } catch (err) {
+    const e = err as { code?: number; stderr?: string | Buffer; message?: string };
+    if (e.code === 1) return "";
+    const stderrText = typeof e.stderr === "string" ? e.stderr : e.stderr?.toString();
+    throw new Error(stderrText || e.message || "ripgrep search failed");
+  }
 }

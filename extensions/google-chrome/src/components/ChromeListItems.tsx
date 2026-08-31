@@ -1,4 +1,4 @@
-import { HistoryEntry, Tab } from "../interfaces";
+import { HistoryEntry, Tab, ChromeWindow } from "../interfaces";
 import { ReactElement } from "react";
 import { getFavicon } from "@raycast/utils";
 import { List, Icon, Color } from "@raycast/api";
@@ -7,6 +7,7 @@ import { ChromeActions } from ".";
 export class ChromeListItems {
   public static TabList = TabListItem;
   public static TabHistory = HistoryItem;
+  public static WindowList = WindowListItem;
 }
 
 // Helper function to safely get favicon for potentially invalid URLs
@@ -72,6 +73,27 @@ function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; onTabClosed
       keywords={[props.tab.urlWithoutScheme()]}
       actions={<ChromeActions.TabList tab={props.tab} onTabClosed={props.onTabClosed} />}
       icon={props.useOriginalFavicon ? props.tab.realFavicon() : props.tab.googleFavicon()}
+    />
+  );
+}
+
+function WindowListItem(props: { window: ChromeWindow; refreshWindowsListOnFailure?: () => void }) {
+  let icon: List.Item.Props["icon"] = Icon.Window;
+  if (props.window.activeTabUrl) {
+    const safeFavicon = getSafeFavicon(props.window.activeTabUrl);
+    icon = safeFavicon.isInvalid ? { source: Icon.Globe, tintColor: Color.SecondaryText } : safeFavicon.icon;
+  }
+
+  return (
+    <List.Item
+      title={props.window.title}
+      icon={icon}
+      actions={
+        <ChromeActions.WindowList
+          window={props.window}
+          refreshWindowsListOnFailure={props.refreshWindowsListOnFailure}
+        />
+      }
     />
   );
 }

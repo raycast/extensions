@@ -1,8 +1,8 @@
-import { httpFetch } from "../agents/http";
-import { resolveCursorAppAuthSession } from "./auth";
-import { parseCursorUsage } from "./parser";
-import type { CursorRequestUsageResponse, CursorUsageSummary, CursorUserInfo } from "./parser";
-import type { CursorError, CursorUsage } from "./types";
+import { httpFetch } from "../agents/http.ts";
+import { resolveCursorAppAuthSession } from "./auth.ts";
+import { parseCursorUsage } from "./parser.ts";
+import type { CursorRequestUsageResponse, CursorUsageSummary, CursorUserInfo } from "./parser.ts";
+import type { CursorError, CursorUsage } from "./types.ts";
 
 const CURSOR_BASE_URL = "https://cursor.com";
 const CURSOR_HEADERS = {

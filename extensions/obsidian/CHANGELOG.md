@@ -1,5 +1,25 @@
 # Obsidian Changelog
 
+## [Fix Open Note on Creation] - 2026-08-27
+
+- Open the created note in Obsidian before the command window closes, so the "Open on creation" preference works reliably
+
+## [Exact Content Match Navigation] - 2026-08-27
+
+- Show each exact content occurrence as a separate result with highlighted context and line and column information
+- Open Obsidian at the selected occurrence using the official Obsidian CLI
+- Exclude fuzzy-only candidates without a literal title, path, or content match
+
+## [Fix Plugin Configuration Permission Errors] - 2026-08-19
+
+- Prevent plugin checks from crashing when Obsidian configuration files cannot be read
+
+## [Fix AI searchNote OOM on oversized Markdown] - 2026-08-15
+
+- Skip Markdown files larger than 1 MiB during full-content search instead of reading them into the 100 MB extension heap
+- Limit tag search on oversized files to a growing prefix (64 KiB steps, 1 MiB cap) so YAML tags still match when frontmatter crosses the first chunk
+- Default the AI `searchNote` `searchContent` parameter to `false`, matching the UI Search Note command
+
 ## [Fix Delete Note Shortcut] - 2026-07-18
 
 - Update the Delete Note action to use the common `Keyboard.Shortcut.Common.Remove` shortcut

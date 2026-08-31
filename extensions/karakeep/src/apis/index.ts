@@ -1,6 +1,9 @@
 import { logger } from "@chrismessina/raycast-logger";
 import { ApiResponse, Backup, Bookmark, GetBookmarksParams, Highlight, List, Tag, UserStats } from "../types";
+import { ApiError, clearRejectedKey, describeApiError, isRejectedKey, markKeyRejected } from "../utils/apiError";
 import { getApiConfig } from "../utils/config";
+import { describeConnectionError, getConnectionErrorCode, isConnectionError } from "../utils/connection";
+import { toErrorMessage } from "../utils/toast";
 
 const log = logger.child("[API]");
 
@@ -10,51 +13,102 @@ interface FetchOptions {
   headers?: Record<string, string>;
 }
 
+interface FetchResult<T> {
+  data: T;
+  status: number;
+}
+
+export interface CreateBookmarkResult {
+  bookmark: Bookmark;
+  wasCreated: boolean;
+}
+
 export async function fetchWithAuth<T = unknown>(path: string, options: FetchOptions = {}): Promise<T> {
-  const { apiUrl, apiKey } = await getApiConfig();
-  const url = new URL(path, apiUrl);
+  const result = await fetchWithAuthResult<T>(path, options);
+  return result.data;
+}
+
+async function fetchWithAuthResult<T>(path: string, options: FetchOptions = {}): Promise<FetchResult<T>> {
+  // getApiConfig throws a plain Error when apiUrl or apiKey is blank, which
+  // isAuthError() cannot recognise — so every view fell back to a generic
+  // "Couldn't load bookmarks" instead of the screen that points at Settings.
+  // probeApi already classifies this case as unauthorized; the fetch layer has
+  // to agree, or the two disagree about the same broken config.
+  let apiUrl: string;
+  let apiKey: string;
+  try {
+    ({ apiUrl, apiKey } = await getApiConfig());
+  } catch (error) {
+    throw new ApiError(error instanceof Error ? error.message : "API configuration is not initialized", 401);
+  }
   const method = options.method || "GET";
+
+  // Short-circuit rather than send a request we already know the answer to. The
+  // thrown error is the same shape a real 401 produces, so every caller — guard,
+  // toast, form notice — behaves identically whether it was first or fiftieth.
+  if (isRejectedKey(apiKey)) {
+    log.log(`${method} ${path} skipped — this API key was already rejected`);
+    throw new ApiError("HTTP 401 — Unauthorized", 401);
+  }
+
+  const url = new URL(path, apiUrl);
   log.log(`${method} ${path}`);
   const done = log.time(`${method} ${path}`);
 
-  const response = await fetch(url.toString(), {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      "User-Agent": "Raycast Extension",
-      Authorization: `Bearer ${apiKey}`,
-      ...options.headers,
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(url.toString(), {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "Raycast Extension",
+        Authorization: `Bearer ${apiKey}`,
+        ...options.headers,
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+  } catch (error) {
+    // A transport failure rejects with `TypeError: fetch failed`, which carries
+    // no detail and serializes to `{}` — logging it raw loses the cause
+    // entirely. Log the real code and re-throw the ORIGINAL error so callers
+    // can still inspect `error.cause` via isConnectionError().
+    if (isConnectionError(error)) {
+      // `errorCode`, not `code`. raycast-logger 1.2.x masked any key named
+      // `code` as a 2FA code, which is how ECONNREFUSED went missing from the
+      // logs. 1.3.0's head-noun matching no longer does that, but the explicit
+      // name is clearer about what this holds and cannot regress.
+      done({ error: "connection" });
+      log.error(`${method} ${path} could not connect`, {
+        errorCode: getConnectionErrorCode(error) ?? "unknown",
+        detail: describeConnectionError(error, apiUrl),
+      });
+    } else {
+      done({ error: "request" });
+      log.error(`${method} ${path} request failed`, { error: toErrorMessage(error) });
+    }
+    throw error;
+  }
 
   const data = await response.text();
 
   if (!response.ok) {
+    // Closed here as well as on success: the failure cases are the ones whose
+    // timing you actually want when diagnosing a slow or hanging server.
+    done({ status: response.status });
+    if (response.status === 401) markKeyRejected(apiKey);
     log.error(`${method} ${path} failed`, { status: response.status, body: data });
-    let message = `HTTP ${response.status}`;
-    try {
-      const parsed = JSON.parse(data);
-      const issue = parsed?.error?.issues?.[0]?.message;
-      if (issue) {
-        message = issue;
-      } else if (parsed?.message) {
-        message = parsed.message;
-      } else if (parsed?.error && typeof parsed.error === "string") {
-        message = parsed.error;
-      }
-    } catch {
-      // body is not JSON, use status only
-    }
-    throw new Error(message);
+    throw new ApiError(describeApiError(data, response.status), response.status);
   }
 
   done({ status: response.status });
+  // A key that works cannot also be a rejected one — clears the latch if the
+  // server was briefly returning 401 for a reason other than the credential.
+  clearRejectedKey(apiKey);
 
   try {
-    return JSON.parse(data) as T;
+    return { data: JSON.parse(data) as T, status: response.status };
   } catch {
-    return data as T;
+    return { data: data as T, status: response.status };
   }
 }
 
@@ -97,10 +151,16 @@ export async function fetchGetAllBookmarks({
 }
 
 export async function fetchCreateBookmark(payload: object): Promise<Bookmark> {
-  return fetchWithAuth<Bookmark>("/api/v1/bookmarks", {
+  const result = await fetchCreateBookmarkResult(payload);
+  return result.bookmark;
+}
+
+export async function fetchCreateBookmarkResult(payload: object): Promise<CreateBookmarkResult> {
+  const result = await fetchWithAuthResult<Bookmark>("/api/v1/bookmarks", {
     method: "POST",
     body: payload,
   });
+  return { bookmark: result.data, wasCreated: result.status === 201 };
 }
 
 export async function fetchGetSingleBookmark(id: string): Promise<Bookmark> {
@@ -148,7 +208,8 @@ export async function fetchGetSingleListBookmarks(
 
 export async function fetchCreateList(payload: {
   name: string;
-  icon?: string;
+  /** Required by the API (`z.string()`), not optional — omitting it is a 400. */
+  icon: string;
   description?: string;
   parentId?: string;
   type?: "manual" | "smart";

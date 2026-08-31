@@ -30,8 +30,15 @@ export const insertIntoSection = (
 };
 
 export function sortTodoItem(a: TodoItem, b: TodoItem) {
-  const { sortOrder } = preferences;
-  if ((a.priority || b.priority) && a.priority != b.priority) {
+  const { sortOrder, groupByPriority = "group_todo_completed" } = preferences;
+  let shouldGroupByPriority = false;
+
+  if (a.completed && b.completed && ["group_completed", "group_todo_completed"].includes(groupByPriority)) {
+    shouldGroupByPriority = true;
+  } else if (!a.completed && !b.completed && ["group_todo", "group_todo_completed"].includes(groupByPriority)) {
+    shouldGroupByPriority = true;
+  }
+  if (shouldGroupByPriority && (a.priority || b.priority) && a.priority != b.priority) {
     return (b.priority ?? 0) - (a.priority ?? 0);
   }
   if ((a.dueDate || b.dueDate) && a.dueDate != b.dueDate) {

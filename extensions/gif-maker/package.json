@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gif-maker",
+  "title": "GIF Maker",
+  "description": "Convert videos to GIFs with control over size, frame rate, trimming, and compression. Powered by ffmpeg.",
+  "icon": "extension-icon.png",
+  "author": "tristan_gabl",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-gif",
+      "title": "Create GIF",
+      "description": "Convert a video to a GIF with control over size, frame rate, and trimming",
+      "mode": "view"
+    },
+    {
+      "name": "quick-gif",
+      "title": "Quick GIF from Finder",
+      "description": "Convert the video selected in Finder to a GIF using your default settings",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultSize",
+      "title": "Quick GIF Size",
+      "description": "Longest side of the output, used by Quick GIF from Finder",
+      "type": "dropdown",
+      "required": false,
+      "default": "480",
+      "data": [
+        { "title": "Small (320 px longest side)", "value": "320" },
+        { "title": "Medium (480 px longest side)", "value": "480" },
+        { "title": "Large (800 px longest side)", "value": "800" },
+        { "title": "Original size", "value": "original" }
+      ]
+    },
+    {
+      "name": "defaultFps",
+      "title": "Quick GIF Frame Rate",
+      "description": "Frame rate used by Quick GIF from Finder",
+      "type": "dropdown",
+      "required": false,
+      "default": "15",
+      "data": [
+        { "title": "10 fps", "value": "10" },
+        { "title": "15 fps", "value": "15" },
+        { "title": "24 fps", "value": "24" },
+        { "title": "30 fps", "value": "30" }
+      ]
+    },
+    {
+      "name": "defaultOptimize",
+      "title": "Quick GIF Compression",
+      "description": "gifsicle post-processing used by Quick GIF from Finder. Ignored if gifsicle is not installed.",
+      "type": "dropdown",
+      "required": false,
+      "default": "aggressive",
+      "data": [
+        { "title": "Off", "value": "off" },
+        { "title": "Balanced (~10% smaller)", "value": "balanced" },
+        { "title": "Aggressive (~30% smaller)", "value": "aggressive" },
+        { "title": "Maximum (~45% smaller)", "value": "maximum" }
+      ]
+    },
+    {
+      "name": "defaultDenoise",
+      "title": "Defaults",
+      "label": "Reduce grain",
+      "description": "Whether grain reduction is on by default. Helps on camera footage, not on screen recordings.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "defaultLoop",
+      "label": "Loop forever",
+      "description": "Whether new GIFs loop by default",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "defaultReveal",
+      "label": "Reveal in Finder when done",
+      "description": "Whether to open Finder with the new GIF selected",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "ffmpeg Path",
+      "description": "Optional. Leave blank to auto-detect Homebrew and system locations.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/ffmpeg"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}

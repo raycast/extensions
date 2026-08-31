@@ -1,5 +1,9 @@
 # WIP Changelog
 
+## [Fix] - 2026-08-21
+
+- Reduced background streak refreshes to once per minute.
+
 ## [Improved authentication error handling] - 2025-06-16
 
 - Improve authentication error handling

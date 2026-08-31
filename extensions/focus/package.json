@@ -150,43 +150,96 @@
       {
         "input": "@focus Am I currently focusing?",
         "mocks": {
-          "get-status": { "isFocusing": true, "isOnBreak": false, "activeProfile": "Work", "availableProfiles": ["Work", "Study"] }
+          "get-status": {
+            "isFocusing": true,
+            "isOnBreak": false,
+            "activeProfile": "Work",
+            "availableProfiles": [
+              "Work",
+              "Study"
+            ]
+          }
         },
         "expected": [
-          { "callsTool": "get-status" },
-          { "meetsCriteria": "Confirms a focus session is active with the Work profile" }
+          {
+            "callsTool": "get-status"
+          },
+          {
+            "meetsCriteria": "Confirms a focus session is active with the Work profile"
+          }
         ]
       },
       {
         "input": "@focus Start a 25-minute focus session",
         "mocks": {
-          "get-status": { "isFocusing": false, "isOnBreak": false, "activeProfile": null, "availableProfiles": ["Work"] },
+          "get-status": {
+            "isFocusing": false,
+            "isOnBreak": false,
+            "activeProfile": null,
+            "availableProfiles": [
+              "Work"
+            ]
+          },
           "start-focus": "Focus session started (25m)."
         },
         "expected": [
-          { "callsTool": "get-status" },
-          { "callsTool": { "name": "start-focus", "arguments": { "minutes": 25 } } }
+          {
+            "callsTool": "get-status"
+          },
+          {
+            "callsTool": {
+              "name": "start-focus",
+              "arguments": {
+                "minutes": 25
+              }
+            }
+          }
         ]
       },
       {
         "input": "@focus Stop my focus session",
         "mocks": {
-          "get-status": { "isFocusing": true, "isOnBreak": false, "activeProfile": "Work", "availableProfiles": ["Work"] },
+          "get-status": {
+            "isFocusing": true,
+            "isOnBreak": false,
+            "activeProfile": "Work",
+            "availableProfiles": [
+              "Work"
+            ]
+          },
           "stop-focus": "Focus session stopped."
         },
         "expected": [
-          { "callsTool": "get-status" },
-          { "callsTool": "stop-focus" }
+          {
+            "callsTool": "get-status"
+          },
+          {
+            "callsTool": "stop-focus"
+          }
         ]
       },
       {
         "input": "@focus Take a 10 minute break",
         "mocks": {
-          "get-status": { "isFocusing": true, "isOnBreak": false, "activeProfile": "Work", "availableProfiles": ["Work"] },
+          "get-status": {
+            "isFocusing": true,
+            "isOnBreak": false,
+            "activeProfile": "Work",
+            "availableProfiles": [
+              "Work"
+            ]
+          },
           "take-break": "10-minute break started."
         },
         "expected": [
-          { "callsTool": { "name": "take-break", "arguments": { "minutes": 10 } } }
+          {
+            "callsTool": {
+              "name": "take-break",
+              "arguments": {
+                "minutes": 10
+              }
+            }
+          }
         ]
       }
     ]
@@ -213,5 +266,12 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
+    "js-yaml@3": "3.15.1",
+    "fast-uri": "3.1.5"
+  }
 }

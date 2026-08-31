@@ -1,5 +1,99 @@
 # Agent Usage Changelog
 
+## [Copilot multi-account and AI credits] - 2026-08-29
+
+### New Features
+
+- Support unlimited named GitHub Copilot accounts, with separate rows in the main list and menu bar
+- Add Copilot accounts through the existing **Manage Accounts** action
+- Prefer the active GitHub CLI token from `gh auth token`, then fall back to `GITHUB_TOKEN` and `GH_TOKEN` as separate auto-detected accounts while retaining the legacy preference token
+
+### Improvements
+
+- Rename Copilot's Premium Interactions quota to AI Credits
+- Show the remaining AI Credits as both a percentage and a credit balance, such as `24 / 300 credits`
+- Support GitHub token discovery from Windows command shells as well as Unix login shells
+
+## [Fix Amp usage parse] - 2026-08-27
+
+### Bug Fixes
+
+- Parse `amp usage` when labels are markdown-bold (`**Amp Free:**`), which is what the CLI emits when it is not attached to a TTY (Raycast's fetch path)
+- Parse Amp Megawatt/Gigawatt subscription remaining (other usage + orb usage) in the detail view
+- List and menu bar still show Amp Free when present; if Amp Free is absent they use the tighter subscription pool instead of 0%
+
+## [Add AIHubMix Usage] - 2026-08-22
+
+- Add AIHubMix balance monitoring to the main list and menu bar
+- Query account remaining and used balances with an Access Key from https://console.aihubmix.com/setting, or `AIHUBMIX_ACCESS_KEY`
+
+## [Add MinimaxCN support] - 2026-08-21
+
+### New Features
+
+- Add MinimaxCN (Chinese-region MiniMax) to the main list and menu bar
+- Coding-plan quota window: 5h interval + weekly, with `current_interval_remaining_percent` fallback when counts are 0
+
+## [Show Cursor Auto and API percentages] - 2026-08-16
+
+### Improvements
+
+- Show Auto and API remaining percentages together on the Cursor list and menu bar when both windows are available
+- Color the Cursor usage pie from the tighter of the two windows
+
+## [Add support for multiple CODEX_HOME] - 2026-08-15
+
+- Support additional CODEX_HOME in preferences, letting users read from multiple active codex account
+
+## [Add DeepSeek Usage] - 2026-08-14
+
+- Add DeepSeek balance monitoring to the main list and menu bar
+- Show total, topped-up, and granted balances
+- Automatically detect API keys from OpenCode or environment variables, with manual setup available in Preferences
+
+## [Fix Antigravity detection on 2.7+] - 2026-08-13
+
+### Bug Fixes
+
+- Detect the suffix-less `language_server` binary shipped by Antigravity 2.7+, which left the Antigravity row stuck on "Not Running" while the app was running
+
+## [Fix ClinePass usage limits windows] - 2026-08-12
+
+### Bug Fixes
+
+- Restore the 5h Limit "Resets At" field, display the full usage limit window when no value have been returned (when the window haven't been consumed yet)
+
+## [Add support for ClinePass] - 2026-08-10
+
+### New Features
+
+- Support the ClinePass subscription
+  - Display the 5h (also in the progress pie), weekly and monthly limits
+  - Also display your regular Cline credits if you have any
+  - Allow to add multiple accounts just like Codex
+  - Reads data from `~/.cline` (install the CLI or IDE extension & login) with support for manual User ID & API Key entry
+- Show the Codex Display Name in the agents list in place of the email when possible (users might need to go on ChatGPT -> Profile to mint a new CloudFlare token as the endpoint is protected)
+- Allow to reset manual Agents order
+- Additional Codex rate-limits like 5.3-Codex-Spark now display
+
+### Improvements
+
+- Agents icons are now legible on dark mode (auto-generated dark variants couldn't be resolved on Windows so they're now bundled)
+- Agents are now sorted by name by default (you might need to reset the order to benefit from it)
+- Reduce the progressbar from 15 to 12 segments to avoid it being clipped on monitors with different resolutions/DPI/scale factors
+- Display error messages in a Markdown box so they're not clipped
+
+### Bug Fixes
+
+- Usage pie charts now display again on Windows
+- First-selected agent when you open the extension is the actual first of the list, not the first alphabetically
+
+## [Support Claude Fable Usage Limits] - 2026-07-22
+
+### Improvements
+
+- Support Claude Fable and future model-scoped weekly usage limits from the Claude API structured `limits` array
+
 ## [Antigravity badge] - 2026-07-15
 
 ### Fixed

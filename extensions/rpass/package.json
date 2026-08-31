@@ -1,0 +1,141 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rpass",
+  "description": "Search, edit, generate, and sync your pass-compatible passwords from Raycast.",
+  "categories": [
+    "Productivity",
+    "Security"
+  ],
+  "license": "MIT",
+  "author": "rxtsel",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "tsx --test src/rpass/application/rpass-client.test.ts src/vault/domain/vault-entry-content.test.ts src/vault/domain/entry-folders.test.ts src/vault/domain/vault-item.test.ts src/vault/application/filter-vault-items.test.ts src/vault/application/gpg-unlock-session.test.ts",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "tsx": "^4.23.1",
+    "typescript": "~6.0.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "vault",
+      "title": "Vault",
+      "description": "Browse, decrypt, and copy passwords from your pass-compatible vault.",
+      "subtitle": "RPass"
+    },
+    {
+      "mode": "view",
+      "name": "new-entry",
+      "title": "New Entry",
+      "description": "Generate and insert a new password or passphrase.",
+      "subtitle": "RPass"
+    },
+    {
+      "mode": "view",
+      "name": "sync-vault",
+      "title": "Sync Vault",
+      "description": "Inspect and sync the password store Git repository.",
+      "subtitle": "RPass"
+    }
+  ],
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "rpassExecutablePath",
+      "type": "textfield",
+      "title": "rpass Executable Path",
+      "description": "Path to the rpass binary. Leave empty if rpass is in PATH.",
+      "required": false
+    },
+    {
+      "name": "gpgExecutablePath",
+      "type": "textfield",
+      "title": "GPG Executable Path",
+      "description": "Path to the gpg binary. Leave empty to auto-detect Homebrew/system paths.",
+      "required": false
+    },
+    {
+      "name": "passwordStoreDir",
+      "type": "directory",
+      "title": "Password Store Directory",
+      "description": "Path to your password store. Default: ~/.password-store.",
+      "required": false
+    },
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "title": "Default Action",
+      "description": "Primary action when selecting a password entry.",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste in Active App",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "clipboardTimeout",
+      "type": "dropdown",
+      "title": "Clear Clipboard After",
+      "description": "Automatically clear the clipboard after copying a password.",
+      "required": false,
+      "default": "45",
+      "data": [
+        {
+          "title": "Never",
+          "value": "0"
+        },
+        {
+          "title": "10 seconds",
+          "value": "10"
+        },
+        {
+          "title": "30 seconds",
+          "value": "30"
+        },
+        {
+          "title": "45 seconds",
+          "value": "45"
+        },
+        {
+          "title": "90 seconds",
+          "value": "90"
+        },
+        {
+          "title": "2 minutes",
+          "value": "120"
+        }
+      ]
+    }
+  ],
+  "title": "RPass",
+  "overrides": {
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9"
+  }
+}

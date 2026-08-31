@@ -4,6 +4,7 @@ import {
   deleteFileOrFolder,
   getDeletionBehavior,
   getPermanentDeleteConfirmationChoice,
+  getShowDeletingFilenameBehavior,
 } from "./utils";
 import { closeMainWindow, environment, LaunchType, PopToRootType, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
@@ -30,6 +31,8 @@ export default async function main() {
 
   const deletionBehavior = await getDeletionBehavior();
   const permanentDeleteChoice = isBackgroundLaunch ? await getPermanentDeleteConfirmationChoice() : undefined;
+  const showDeletingFilenameBehavior = await getShowDeletingFilenameBehavior();
+  const deletionFilenameText = showDeletingFilenameBehavior ? `:\n${latestDownload.path}?\n` : " the latest download? ";
 
   if (isBackgroundLaunch && deletionBehavior !== "trash" && permanentDeleteChoice !== "delete") {
     return;
@@ -37,8 +40,7 @@ export default async function main() {
 
   try {
     await deleteFileOrFolder(latestDownload.path, {
-      confirmationMessage:
-        "Are you sure you want to permanently delete the latest download? This action cannot be undone.",
+      confirmationMessage: `Are you sure you want to permanently delete${deletionFilenameText}This action cannot be undone.`,
       deletionBehavior,
       feedback: isBackgroundLaunch ? "none" : "hud",
       skipConfirmation: isBackgroundLaunch && permanentDeleteChoice === "delete",

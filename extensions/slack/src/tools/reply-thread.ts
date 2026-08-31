@@ -19,6 +19,10 @@ type Input = {
    * The text to post as a reply in the thread. Standard Markdown is supported, including headings, lists, task lists, tables, links, block quotes, and code blocks. Use Slack IDs for native mentions, such as `<@U12345678>` for a person and `<#C12345678>` for a channel.
    */
   text: string;
+  /**
+   * Also send the reply to the channel. Use this sparingly when the reply is important enough for everyone in the channel to see.
+   */
+  replyBroadcast?: boolean;
 };
 
 async function replyThread(input: Input) {
@@ -36,12 +40,12 @@ async function replyThread(input: Input) {
   }
 
   const slackWebClient = getSlackWebClient();
-  const response = await slackWebClient.chat.postMessage({
-    channel: input.channel,
-    thread_ts: input.threadTs,
-    text,
-    blocks: getAiMessageBlocks(text),
-  });
+  const blocks = getAiMessageBlocks(text);
+  const message = blocks ? { channel: input.channel, text, blocks } : { channel: input.channel, text };
+  const thread = input.replyBroadcast
+    ? { thread_ts: input.threadTs, reply_broadcast: true as const }
+    : { thread_ts: input.threadTs, reply_broadcast: false as const };
+  const response = await slackWebClient.chat.postMessage({ ...message, ...thread });
 
   if (response.error) {
     throw new Error(response.error);
@@ -52,6 +56,7 @@ async function replyThread(input: Input) {
     threadTs: input.threadTs,
     ts: response.ts,
     text: response.message?.text ?? text,
+    replyBroadcast: input.replyBroadcast ?? false,
   };
 }
 

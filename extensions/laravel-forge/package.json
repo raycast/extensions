@@ -38,14 +38,1070 @@
       "interval": "10s"
     }
   ],
+  "ai": {
+    "instructions": "Every site and server tool takes an id. Given a name, get the id first: a server name goes to list-servers, a site name to list-sites, and both match on part of a name. No other tool searches, and list-orgs is not a name lookup.\nAn organization holds servers and a server holds sites. A server can have multiple sites, so a name you are given could be either and you may need to check both.\nDeployments belong to sites, not servers.\nDeploy failed? deployment-status, then deployment-log.\nSite down or erroring? site-online, then site-config.\nServer problem? server-events.\nOnly deploy, restart or reboot if the user asks.\nEnv file or deploy settings? Call get-site and give the user the Forge link it returns. site-config cannot read them.\nA server's SSH public key or credential id is withheld until you name it in get-server's include.\nList rows are short. Call probe-api for the field names, then pass the ones you need to list-sites or list-servers in fields. Do not guess a field name; a wrong one returns nothing.\nPass the cursor string back exactly as it was given to get the next page.\nAlways write a URL as a markdown link: [Deployment settings](url), never a bare URL. Do not open links yourself.",
+    "evals": [
+      {
+        "input": "@laravel-forge deploy acme-store",
+        "mocks": {
+          "list-sites": {
+            "note": "3 sites on this page. Rows are short. Call probe-api for the field names, then pass them in fields. Pass an id to get-site for the full record, or to any site tool.",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5002,
+                "name": "acme-blog.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5003,
+                "name": "shop.example.test",
+                "serverId": 9002,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              }
+            ]
+          },
+          "deploy-site": {
+            "site": "acme-store.com",
+            "siteId": 5001,
+            "started": true,
+            "note": "Call deployment-status or deployment-log to follow it."
+          },
+          "list-orgs": {
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
+            "orgs": [
+              {
+                "account": "laravel_forge_api_token",
+                "org": "acme-inc"
+              }
+            ]
+          },
+          "probe-api": {
+            "target": "site",
+            "fields": {
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. This extension never returns it; the get tool gives a Forge link instead."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
+            "filters": [
+              "name"
+            ],
+            "sorts": [
+              "name",
+              "created_at",
+              "updated_at"
+            ]
+          },
+          "get-site": {
+            "id": 5001,
+            "name": "acme-store.com",
+            "server": {
+              "id": 9001,
+              "name": "web-1"
+            },
+            "url": "https://acme-store.com",
+            "status": "installed",
+            "phpVersion": "PHP 8.3",
+            "quickDeploy": true,
+            "zeroDowntimeDeployments": false,
+            "deploymentStatus": "finished",
+            "forgeUrl": "[acme-store.com on Forge](https://forge.laravel.com/acme-inc/web-1/5001)",
+            "environment": "Not returned by this extension. The user can read or edit it at [Environment](https://forge.laravel.com/acme-inc/web-1/5001/environment).",
+            "deploymentScript": "Not returned by this extension. The user can read or edit it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments).",
+            "deploymentUrl": "Not returned by this extension. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments)."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-sites"
+          },
+          {
+            "callsTool": {
+              "name": "deploy-site",
+              "arguments": {
+                "siteId": 5001
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge restart the database on web-2",
+        "mocks": {
+          "list-servers": {
+            "note": "2 servers on this page. Rows are short. Call probe-api for the field names, then pass them in fields. Pass an id to get-server for the full record, or to any server tool.",
+            "servers": [
+              {
+                "id": 9001,
+                "name": "web-1",
+                "connectionStatus": "successful"
+              },
+              {
+                "id": 9002,
+                "name": "web-2",
+                "connectionStatus": "successful"
+              }
+            ]
+          },
+          "restart-service": {
+            "server": "web-2",
+            "serverId": 9002,
+            "service": "database",
+            "action": "reboot",
+            "started": true
+          },
+          "list-orgs": {
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
+            "orgs": [
+              {
+                "account": "laravel_forge_api_token",
+                "org": "acme-inc"
+              }
+            ]
+          },
+          "probe-api": {
+            "target": "server",
+            "fields": {
+              "ubuntu_version": "The Ubuntu release on the server.",
+              "database_type": "The database engine installed, like mysql8 or postgres16.",
+              "local_public_key": "The server's own SSH public key. A git host uses it as a deploy key. Withheld unless you name it in include."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-servers in fields, or to get-server in include.",
+            "filters": [
+              "name",
+              "region",
+              "provider",
+              "php_version",
+              "database_type"
+            ],
+            "sorts": [
+              "name",
+              "created_at"
+            ]
+          },
+          "get-server": {
+            "id": 9002,
+            "name": "web-2",
+            "provider": "ocean2",
+            "region": "nyc1",
+            "ubuntuVersion": "22.04",
+            "phpVersion": "php84",
+            "databaseType": "postgres16",
+            "connectionStatus": "successful",
+            "isReady": true,
+            "forgeUrl": "[web-2 on Forge](https://forge.laravel.com/acme-inc/web-2)",
+            "localPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDexample",
+            "note": "1 site on this server. Pass a site id to any site tool.",
+            "sites": [
+              {
+                "id": 5003,
+                "name": "shop.example.test"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-servers"
+          },
+          {
+            "callsTool": {
+              "name": "restart-service",
+              "arguments": {
+                "serverId": 9002,
+                "service": "database"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge what ubuntu version is web-2 on?",
+        "mocks": {
+          "list-servers": {
+            "note": "2 servers on this page. Rows are short. Call probe-api for the field names, then pass them in fields. Pass an id to get-server for the full record, or to any server tool.",
+            "servers": [
+              {
+                "id": 9001,
+                "name": "web-1",
+                "connectionStatus": "successful"
+              },
+              {
+                "id": 9002,
+                "name": "web-2",
+                "connectionStatus": "successful"
+              }
+            ]
+          },
+          "get-server": {
+            "id": 9002,
+            "name": "web-2",
+            "provider": "ocean2",
+            "region": "nyc1",
+            "ubuntuVersion": "22.04",
+            "phpVersion": "php84",
+            "databaseType": "postgres16",
+            "connectionStatus": "successful",
+            "isReady": true,
+            "forgeUrl": "[web-2 on Forge](https://forge.laravel.com/acme-inc/web-2)",
+            "localPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDexample",
+            "note": "1 site on this server. Pass a site id to any site tool.",
+            "sites": [
+              {
+                "id": 5003,
+                "name": "shop.example.test"
+              }
+            ]
+          },
+          "list-orgs": {
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
+            "orgs": [
+              {
+                "account": "laravel_forge_api_token",
+                "org": "acme-inc"
+              }
+            ]
+          },
+          "probe-api": {
+            "target": "server",
+            "fields": {
+              "ubuntu_version": "The Ubuntu release on the server.",
+              "database_type": "The database engine installed, like mysql8 or postgres16.",
+              "local_public_key": "The server's own SSH public key. A git host uses it as a deploy key. Withheld unless you name it in include."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-servers in fields, or to get-server in include.",
+            "filters": [
+              "name",
+              "region",
+              "provider",
+              "php_version",
+              "database_type"
+            ],
+            "sorts": [
+              "name",
+              "created_at"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-server",
+              "arguments": {
+                "serverId": 9002
+              }
+            }
+          },
+          {
+            "includes": "22.04"
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge does acme-store have zero downtime deploys?",
+        "mocks": {
+          "list-sites": {
+            "note": "3 sites on this page. Rows are short. Call probe-api for the field names, then pass them in fields. Pass an id to get-site for the full record, or to any site tool.",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5002,
+                "name": "acme-blog.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5003,
+                "name": "shop.example.test",
+                "serverId": 9002,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              }
+            ]
+          },
+          "get-site": {
+            "id": 5001,
+            "name": "acme-store.com",
+            "server": {
+              "id": 9001,
+              "name": "web-1"
+            },
+            "url": "https://acme-store.com",
+            "status": "installed",
+            "phpVersion": "PHP 8.3",
+            "quickDeploy": true,
+            "zeroDowntimeDeployments": false,
+            "deploymentStatus": "finished",
+            "forgeUrl": "[acme-store.com on Forge](https://forge.laravel.com/acme-inc/web-1/5001)",
+            "environment": "Not returned by this extension. The user can read or edit it at [Environment](https://forge.laravel.com/acme-inc/web-1/5001/environment).",
+            "deploymentScript": "Not returned by this extension. The user can read or edit it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments).",
+            "deploymentUrl": "Not returned by this extension. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments)."
+          },
+          "probe-api": {
+            "target": "site",
+            "fields": {
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. This extension never returns it; the get tool gives a Forge link instead."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
+            "filters": [
+              "name"
+            ],
+            "sorts": [
+              "name",
+              "created_at",
+              "updated_at"
+            ]
+          },
+          "list-orgs": {
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
+            "orgs": [
+              {
+                "account": "laravel_forge_api_token",
+                "org": "acme-inc"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "matches": "(does not|not enabled|not have|disabled|Disabled|off)"
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge which sites have zero downtime deploys turned off?",
+        "mocks": {
+          "probe-api": {
+            "target": "site",
+            "fields": {
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. This extension never returns it; the get tool gives a Forge link instead."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
+            "filters": [
+              "name"
+            ],
+            "sorts": [
+              "name",
+              "created_at",
+              "updated_at"
+            ]
+          },
+          "list-sites": {
+            "note": "3 sites on this page. Pass an id to get-site for the full record, or to any site tool.",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "zeroDowntimeDeployments": false
+              },
+              {
+                "id": 5002,
+                "name": "acme-blog.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "zeroDowntimeDeployments": false
+              },
+              {
+                "id": 5003,
+                "name": "shop.example.test",
+                "serverId": 9002,
+                "status": "installed",
+                "deploymentStatus": "finished",
+                "zeroDowntimeDeployments": true
+              }
+            ]
+          },
+          "list-orgs": {
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
+            "orgs": [
+              {
+                "account": "laravel_forge_api_token",
+                "org": "acme-inc"
+              }
+            ]
+          },
+          "get-site": {
+            "id": 5001,
+            "name": "acme-store.com",
+            "server": {
+              "id": 9001,
+              "name": "web-1"
+            },
+            "url": "https://acme-store.com",
+            "status": "installed",
+            "phpVersion": "PHP 8.3",
+            "quickDeploy": true,
+            "zeroDowntimeDeployments": false,
+            "deploymentStatus": "finished",
+            "forgeUrl": "[acme-store.com on Forge](https://forge.laravel.com/acme-inc/web-1/5001)",
+            "environment": "Not returned by this extension. The user can read or edit it at [Environment](https://forge.laravel.com/acme-inc/web-1/5001/environment).",
+            "deploymentScript": "Not returned by this extension. The user can read or edit it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments).",
+            "deploymentUrl": "Not returned by this extension. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments)."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "probe-api"
+          },
+          {
+            "callsTool": {
+              "name": "list-sites",
+              "arguments": {
+                "fields": {
+                  "matches": "[dD]owntime"
+                }
+              }
+            }
+          },
+          {
+            "includes": "acme-store.com"
+          },
+          {
+            "not": {
+              "includes": "shop.example.test"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge what is the ssh public key for web-2?",
+        "mocks": {
+          "list-servers": {
+            "note": "2 servers on this page. Rows are short. Call probe-api for the field names, then pass them in fields. Pass an id to get-server for the full record, or to any server tool.",
+            "servers": [
+              {
+                "id": 9001,
+                "name": "web-1",
+                "connectionStatus": "successful"
+              },
+              {
+                "id": 9002,
+                "name": "web-2",
+                "connectionStatus": "successful"
+              }
+            ]
+          },
+          "probe-api": {
+            "target": "server",
+            "fields": {
+              "ubuntu_version": "The Ubuntu release on the server.",
+              "database_type": "The database engine installed, like mysql8 or postgres16.",
+              "local_public_key": "The server's own SSH public key. A git host uses it as a deploy key. Withheld unless you name it in include."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-servers in fields, or to get-server in include.",
+            "filters": [
+              "name",
+              "region",
+              "provider",
+              "php_version",
+              "database_type"
+            ],
+            "sorts": [
+              "name",
+              "created_at"
+            ]
+          },
+          "get-server": {
+            "id": 9002,
+            "name": "web-2",
+            "provider": "ocean2",
+            "region": "nyc1",
+            "ubuntuVersion": "22.04",
+            "phpVersion": "php84",
+            "databaseType": "postgres16",
+            "connectionStatus": "successful",
+            "isReady": true,
+            "forgeUrl": "[web-2 on Forge](https://forge.laravel.com/acme-inc/web-2)",
+            "localPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDexample",
+            "note": "1 site on this server. Pass a site id to any site tool.",
+            "sites": [
+              {
+                "id": 5003,
+                "name": "shop.example.test"
+              }
+            ]
+          },
+          "list-orgs": {
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
+            "orgs": [
+              {
+                "account": "laravel_forge_api_token",
+                "org": "acme-inc"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-server",
+              "arguments": {
+                "include": {
+                  "includes": "public"
+                }
+              }
+            }
+          },
+          {
+            "includes": "ssh-rsa"
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge show me the env for acme-store",
+        "mocks": {
+          "list-sites": {
+            "note": "3 sites on this page. Rows are short. Call probe-api for the field names, then pass them in fields. Pass an id to get-site for the full record, or to any site tool.",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5002,
+                "name": "acme-blog.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5003,
+                "name": "shop.example.test",
+                "serverId": 9002,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              }
+            ]
+          },
+          "get-site": {
+            "id": 5001,
+            "name": "acme-store.com",
+            "server": {
+              "id": 9001,
+              "name": "web-1"
+            },
+            "url": "https://acme-store.com",
+            "status": "installed",
+            "phpVersion": "PHP 8.3",
+            "quickDeploy": true,
+            "zeroDowntimeDeployments": false,
+            "deploymentStatus": "finished",
+            "forgeUrl": "[acme-store.com on Forge](https://forge.laravel.com/acme-inc/web-1/5001)",
+            "environment": "Not returned by this extension. The user can read or edit it at [Environment](https://forge.laravel.com/acme-inc/web-1/5001/environment).",
+            "deploymentScript": "Not returned by this extension. The user can read or edit it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments).",
+            "deploymentUrl": "Not returned by this extension. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments)."
+          },
+          "list-orgs": {
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
+            "orgs": [
+              {
+                "account": "laravel_forge_api_token",
+                "org": "acme-inc"
+              }
+            ]
+          },
+          "probe-api": {
+            "target": "site",
+            "fields": {
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. This extension never returns it; the get tool gives a Forge link instead."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
+            "filters": [
+              "name"
+            ],
+            "sorts": [
+              "name",
+              "created_at",
+              "updated_at"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-site"
+          },
+          {
+            "not": {
+              "callsTool": "site-config"
+            }
+          },
+          {
+            "matches": "\\[[^\\]]+\\]\\(https://forge\\.laravel\\.com/\\S*/environment\\)"
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge show me the deploy script for acme-store",
+        "mocks": {
+          "list-sites": {
+            "note": "3 sites on this page. Rows are short. Call probe-api for the field names, then pass them in fields. Pass an id to get-site for the full record, or to any site tool.",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5002,
+                "name": "acme-blog.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5003,
+                "name": "shop.example.test",
+                "serverId": 9002,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              }
+            ]
+          },
+          "get-site": {
+            "id": 5001,
+            "name": "acme-store.com",
+            "server": {
+              "id": 9001,
+              "name": "web-1"
+            },
+            "url": "https://acme-store.com",
+            "status": "installed",
+            "phpVersion": "PHP 8.3",
+            "quickDeploy": true,
+            "zeroDowntimeDeployments": false,
+            "deploymentStatus": "finished",
+            "forgeUrl": "[acme-store.com on Forge](https://forge.laravel.com/acme-inc/web-1/5001)",
+            "environment": "Not returned by this extension. The user can read or edit it at [Environment](https://forge.laravel.com/acme-inc/web-1/5001/environment).",
+            "deploymentScript": "Not returned by this extension. The user can read or edit it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments).",
+            "deploymentUrl": "Not returned by this extension. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments)."
+          },
+          "list-orgs": {
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
+            "orgs": [
+              {
+                "account": "laravel_forge_api_token",
+                "org": "acme-inc"
+              }
+            ]
+          },
+          "probe-api": {
+            "target": "site",
+            "fields": {
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. This extension never returns it; the get tool gives a Forge link instead."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
+            "filters": [
+              "name"
+            ],
+            "sorts": [
+              "name",
+              "created_at",
+              "updated_at"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-site"
+          },
+          {
+            "not": {
+              "callsTool": "deployment-log"
+            }
+          },
+          {
+            "matches": "\\[[^\\]]+\\]\\(https://forge\\.laravel\\.com/\\S*/settings/deployments\\)"
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge anything deploying?",
+        "mocks": {
+          "deployment-status": {
+            "note": "Nothing is deploying right now. Forge only marks a site while a deploy runs.",
+            "deploying": [],
+            "failed": []
+          },
+          "list-orgs": {
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
+            "orgs": [
+              {
+                "account": "laravel_forge_api_token",
+                "org": "acme-inc"
+              }
+            ]
+          },
+          "probe-api": {
+            "target": "site",
+            "fields": {
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. This extension never returns it; the get tool gives a Forge link instead."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
+            "filters": [
+              "name"
+            ],
+            "sorts": [
+              "name",
+              "created_at",
+              "updated_at"
+            ]
+          },
+          "list-sites": {
+            "note": "3 sites on this page. Rows are short. Call probe-api for the field names, then pass them in fields. Pass an id to get-site for the full record, or to any site tool.",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5002,
+                "name": "acme-blog.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5003,
+                "name": "shop.example.test",
+                "serverId": 9002,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              }
+            ]
+          },
+          "get-site": {
+            "id": 5001,
+            "name": "acme-store.com",
+            "server": {
+              "id": 9001,
+              "name": "web-1"
+            },
+            "url": "https://acme-store.com",
+            "status": "installed",
+            "phpVersion": "PHP 8.3",
+            "quickDeploy": true,
+            "zeroDowntimeDeployments": false,
+            "deploymentStatus": "finished",
+            "forgeUrl": "[acme-store.com on Forge](https://forge.laravel.com/acme-inc/web-1/5001)",
+            "environment": "Not returned by this extension. The user can read or edit it at [Environment](https://forge.laravel.com/acme-inc/web-1/5001/environment).",
+            "deploymentScript": "Not returned by this extension. The user can read or edit it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments).",
+            "deploymentUrl": "Not returned by this extension. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments)."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "deployment-status"
+          },
+          {
+            "not": {
+              "callsTool": "deploy-site"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge deploy site 5001",
+        "mocks": {
+          "deploy-site": {
+            "error": "This extension has no coordinates for site 5001. Call list-sites now, then retry with an id it returns."
+          },
+          "list-sites": {
+            "note": "3 sites on this page. Rows are short. Call probe-api for the field names, then pass them in fields. Pass an id to get-site for the full record, or to any site tool.",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5002,
+                "name": "acme-blog.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5003,
+                "name": "shop.example.test",
+                "serverId": 9002,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              }
+            ]
+          },
+          "list-orgs": {
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
+            "orgs": [
+              {
+                "account": "laravel_forge_api_token",
+                "org": "acme-inc"
+              }
+            ]
+          },
+          "probe-api": {
+            "target": "site",
+            "fields": {
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. This extension never returns it; the get tool gives a Forge link instead."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
+            "filters": [
+              "name"
+            ],
+            "sorts": [
+              "name",
+              "created_at",
+              "updated_at"
+            ]
+          },
+          "get-site": {
+            "id": 5001,
+            "name": "acme-store.com",
+            "server": {
+              "id": 9001,
+              "name": "web-1"
+            },
+            "url": "https://acme-store.com",
+            "status": "installed",
+            "phpVersion": "PHP 8.3",
+            "quickDeploy": true,
+            "zeroDowntimeDeployments": false,
+            "deploymentStatus": "finished",
+            "forgeUrl": "[acme-store.com on Forge](https://forge.laravel.com/acme-inc/web-1/5001)",
+            "environment": "Not returned by this extension. The user can read or edit it at [Environment](https://forge.laravel.com/acme-inc/web-1/5001/environment).",
+            "deploymentScript": "Not returned by this extension. The user can read or edit it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments).",
+            "deploymentUrl": "Not returned by this extension. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments)."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-sites"
+          }
+        ]
+      },
+      {
+        "input": "@laravel-forge list all my sites, every page",
+        "mocks": {
+          "list-sites": {
+            "note": "3 sites on this page. More to come: pass cursor back exactly as given for the next page.",
+            "cursor": "laravel_forge_api_token/acme-inc=eyJpZCI6NTAwM30",
+            "sites": [
+              {
+                "id": 5001,
+                "name": "acme-store.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5002,
+                "name": "acme-blog.com",
+                "serverId": 9001,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              },
+              {
+                "id": 5003,
+                "name": "shop.example.test",
+                "serverId": 9002,
+                "status": "installed",
+                "deploymentStatus": "finished"
+              }
+            ]
+          },
+          "list-orgs": {
+            "note": "Organizations you can reach. The list and get tools use these on their own. You do not pass one.",
+            "orgs": [
+              {
+                "account": "laravel_forge_api_token",
+                "org": "acme-inc"
+              }
+            ]
+          },
+          "probe-api": {
+            "target": "site",
+            "fields": {
+              "status": "How far the install got, like installed or installing.",
+              "php_version": "The PHP version the site runs, formatted like PHP 8.3.",
+              "zero_downtime_deployments": "Whether deploys swap in an atomic release.",
+              "environment": "The site's env file. Forge keeps it on a separate endpoint. This extension never returns it; the get tool gives a Forge link instead."
+            },
+            "note": "These are field names, not values. Pass the ones you want to list-sites in fields. get-site returns every site field it can.",
+            "filters": [
+              "name"
+            ],
+            "sorts": [
+              "name",
+              "created_at",
+              "updated_at"
+            ]
+          },
+          "get-site": {
+            "id": 5001,
+            "name": "acme-store.com",
+            "server": {
+              "id": 9001,
+              "name": "web-1"
+            },
+            "url": "https://acme-store.com",
+            "status": "installed",
+            "phpVersion": "PHP 8.3",
+            "quickDeploy": true,
+            "zeroDowntimeDeployments": false,
+            "deploymentStatus": "finished",
+            "forgeUrl": "[acme-store.com on Forge](https://forge.laravel.com/acme-inc/web-1/5001)",
+            "environment": "Not returned by this extension. The user can read or edit it at [Environment](https://forge.laravel.com/acme-inc/web-1/5001/environment).",
+            "deploymentScript": "Not returned by this extension. The user can read or edit it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments).",
+            "deploymentUrl": "Not returned by this extension. The user can find or change it at [Deployment settings](https://forge.laravel.com/acme-inc/web-1/5001/settings/deployments)."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-sites",
+              "arguments": {
+                "cursor": "laravel_forge_api_token/acme-inc=eyJpZCI6NTAwM30"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "tools": [
+    {
+      "name": "list-orgs",
+      "title": "List Organizations",
+      "description": "List the Forge organizations your tokens can reach. The other tools use these on their own."
+    },
+    {
+      "name": "list-servers",
+      "title": "List Servers",
+      "description": "List or filter your Forge servers and get their ids. Start here for anything about a server."
+    },
+    {
+      "name": "list-sites",
+      "title": "List Sites",
+      "description": "List or search your Forge sites and get their ids. Start here for anything about a site."
+    },
+    {
+      "name": "get-site",
+      "title": "Get a Site",
+      "description": "Everything Forge knows about one site. Takes a site id from list-sites."
+    },
+    {
+      "name": "get-server",
+      "title": "Get a Server",
+      "description": "Everything Forge knows about one server, and the sites on it. Takes a server id from list-servers."
+    },
+    {
+      "name": "deployment-status",
+      "title": "Check Deployment Status",
+      "description": "Which sites are deploying or have failed, across every organization."
+    },
+    {
+      "name": "deployment-history",
+      "title": "Get Deployment History",
+      "description": "Recent deploys for one site. Takes a site id."
+    },
+    {
+      "name": "deployment-log",
+      "title": "Read Deployment Log",
+      "description": "The output of one deploy. Takes a site id."
+    },
+    {
+      "name": "server-events",
+      "title": "Get Server Events",
+      "description": "Recent Forge events for one server, and their output. Takes a server id."
+    },
+    {
+      "name": "site-online",
+      "title": "Check If a Site Is Online",
+      "description": "Check whether one site answers over HTTP. Takes a site id."
+    },
+    {
+      "name": "site-config",
+      "title": "Read Site Config or Logs",
+      "description": "Read a site nginx config or log file. Takes a site id."
+    },
+    {
+      "name": "deploy-site",
+      "title": "Deploy a Site",
+      "description": "Deploy one site now. Takes a site id."
+    },
+    {
+      "name": "restart-service",
+      "title": "Restart a Service",
+      "description": "Restart, stop or reload a service on one server. Takes a server id."
+    },
+    {
+      "name": "reboot-server",
+      "title": "Reboot a Server",
+      "description": "Reboot one server. Takes a server id."
+    },
+    {
+      "name": "probe-api",
+      "title": "Probe the Forge API",
+      "description": "List every field name a site or server has, and what Forge can filter and sort on."
+    }
+  ],
   "preferences": [
     {
-      "name": "laravel_forge_api_key",
+      "name": "laravel_forge_api_token",
       "type": "password",
       "required": true,
-      "title": "Laravel Forge API Key",
+      "title": "Forge API Token (v2)",
       "description": "Generate from your Laravel Forge profile",
-      "placeholder": "API Key"
+      "placeholder": "API Token"
     },
     {
       "name": "laravel_forge_ssh_user",
@@ -57,12 +1113,12 @@
       "placeholder": "SSH User"
     },
     {
-      "name": "laravel_forge_api_key_two",
+      "name": "laravel_forge_api_token_two",
       "type": "password",
       "required": false,
-      "title": "Laravel Forge API Key 2 (optional)",
+      "title": "Forge API Token 2 (optional)",
       "description": "Optionally add a second account.",
-      "placeholder": "API Key (optional)"
+      "placeholder": "API Token (optional)"
     },
     {
       "name": "laravel_forge_ssh_user_two",
@@ -70,41 +1126,48 @@
       "required": false,
       "title": "Laravel Forge SSH User 2 (optional)",
       "default": "forge",
-      "description": "Change the SSH user to login with ont he second account",
+      "description": "Change the SSH user to login with on the second account",
       "placeholder": "SSH User"
+    },
+    {
+      "name": "laravel_forge_ai_protected_values",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "AI Access",
+      "label": "Let AI read protected values",
+      "description": "Allow probe-api to return values it otherwise withholds, like the deploy script and the deploy URL that needs no sign-in."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
-    "@raycast/utils": "^1.5.2",
-    "date-fns": "^2.29.3",
+    "@raycast/api": "^2.0.5",
+    "date-fns": "^4.4.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.1",
-    "run-applescript": "^6.1.0",
-    "swr": "^2.1.3"
+    "run-applescript": "^7.1.0",
+    "swr": "^2.5.1"
   },
   "devDependencies": {
-    "@faker-js/faker": "^7.6.0",
-    "@raycast/eslint-config": "1.0.5",
-    "@types/lodash": "^4.14.194",
-    "@types/node": "~18.15.11",
-    "@types/react": "^18.0.35",
-    "@typescript-eslint/eslint-plugin": "^5.58.0",
-    "@typescript-eslint/parser": "^5.58.0",
-    "eslint": "^8.38.0",
-    "eslint-config-prettier": "^8.8.0",
-    "node-ray": "^1.19.4",
-    "prettier": "2.8.7",
-    "typescript": "^5.0.4"
+    "@faker-js/faker": "^10.5.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/lodash": "^4.17.25",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

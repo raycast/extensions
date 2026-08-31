@@ -3,6 +3,7 @@ import { usePromise } from "@raycast/utils";
 import { readProvidersFile, writeProvidersFile } from "../utils/yaml-handler";
 import { Provider, Model } from "../types";
 import { showFailureToast } from "@raycast/utils";
+import { fetchProviderModels } from "../utils/model-sync";
 
 /**
  * Hook for managing AI providers configuration
@@ -37,6 +38,20 @@ export function useProviders() {
       }
     },
     [revalidate],
+  );
+
+  /**
+   * Replaces a provider's configured models with its live OpenAI-compatible catalog.
+   * The provider file is written only after the full response has been validated.
+   */
+  const syncProviderModels = useCallback(
+    async (provider: Provider, signal?: AbortSignal) => {
+      const models = await fetchProviderModels(provider, signal);
+      const updatedProviders = data.map((item) => (item.id === provider.id ? { ...item, models } : item));
+      saveProviders(updatedProviders);
+      return models.length;
+    },
+    [data, saveProviders],
   );
 
   /**
@@ -158,5 +173,6 @@ export function useProviders() {
     removeModel,
     putProvider,
     putModel,
+    syncProviderModels,
   };
 }

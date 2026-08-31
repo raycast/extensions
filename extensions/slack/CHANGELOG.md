@@ -1,5 +1,34 @@
 # Slack Changelog
 
+## [Keep Set Status responsive in large workspaces] - 2026-08-29
+
+- Load custom workspace emojis only when opening the emoji picker and render them in bounded slices to prevent Set Status from exceeding the extension memory limit.
+
+## [Fix Search Emojis crash in large workspaces] - 2026-08-12
+
+- Fix a "Worker terminated due to reaching memory limit: JS heap out of memory" crash in the Search Emojis command by rendering emojis in slices with a "Show More" item instead of rendering every custom emoji at once.
+
+## [Add expiration argument to Set Status] - 2026-08-12
+
+- The **Set Status** command now accepts an optional `expiration` argument — any number of minutes, or `today` / `week` — so a deep link or Quicklink can set a self-clearing status in one step (e.g. `"expiration":"90"` for an hour and a half).
+
+## [Broadcast Slack thread replies to channels] - 2026-07-21
+
+- Add an optional `replyBroadcast` flag to the `reply-thread` AI tool to also send important thread replies to the channel.
+
+## [Add Slack reaction AI tool] - 2026-07-21
+
+- Add an `add-reaction` AI tool that adds an emoji reaction to a Slack message and returns its permalink.
+- Request Slack's `reactions:write` OAuth scope for adding reactions.
+
+## [Add Slack group DM AI tool] - 2026-07-21
+
+- Add an `open-group-dm` AI tool that opens or resumes a group DM with 2 to 8 users and returns its conversation ID for messaging or file uploads.
+
+## [Add Slack Huddle link AI tool] - 2026-07-21
+
+- Add a `get-huddle-link` AI tool that returns a Huddle join link for a channel, DM, group DM, or user.
+
 ## [Fix AI signatures on file uploads] - 2026-07-21
 
 - Show the “Sent via Raycast” signature on Slack messages that include uploaded files.

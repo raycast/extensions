@@ -4,10 +4,6 @@ import { shellQuote } from "./shell";
 const quoteAppleScriptString = (value: string) =>
   `"${value.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
 
-export async function openTerminalAtPath(path: string): Promise<void> {
-  await runTerminalCommand(`cd ${shellQuote(path)}`);
-}
-
 export async function openTerminalAtPathWithCommand(
   path: string,
   command: string,

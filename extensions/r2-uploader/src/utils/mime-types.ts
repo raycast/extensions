@@ -89,3 +89,12 @@ export function isCompressedImageFormat(filePath: string): boolean {
   const ext = filePath.toLowerCase().substring(filePath.lastIndexOf("."));
   return ext === ".webp" || ext === ".avif";
 }
+
+/**
+ * Check if a MIME type (as returned by getMimeType) is any kind of image, for preview purposes
+ * @param mimeType MIME type string
+ * @returns True if the MIME type starts with "image/"
+ */
+export function isImageMimeType(mimeType: string): boolean {
+  return mimeType.startsWith("image/");
+}

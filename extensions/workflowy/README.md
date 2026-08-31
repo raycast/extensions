@@ -14,6 +14,7 @@ Search, capture, and manage your Workflowy account from Raycast.
 
 ## Requirements
 
+- Raycast for macOS or Windows
 - A Workflowy account
 - A Workflowy API key from https://workflowy.com/api-key/
 
@@ -45,7 +46,7 @@ Search, capture, and manage your Workflowy account from Raycast.
 
 ## How it works
 
-- Search, tag browsing, and many navigation flows run against a local cache on your Mac.
+- Search, tag browsing, and many navigation flows run against a local cache on your computer.
 - Full-account sync uses Workflowy's `nodes-export` endpoint and is rate-limited to once per minute.
 - Writes go through Workflowy's documented write endpoints and update the local cache after success.
 - The extension always uses full UUIDs for write operations.
@@ -64,6 +65,20 @@ npm run build
 npm run lint
 npm run dev
 ```
+
+## Windows testing
+
+1. Install the current Raycast for Windows beta and Node.js 22.22.2 or newer.
+2. Extract the extension source archive and open that folder in a terminal.
+3. Run `npm install`.
+4. Run `npm run test:sync-worker` to verify the local SQLite sync worker.
+5. Run `npm run dev`; Raycast should import the extension in development mode.
+6. Add your Workflowy API key in the extension preferences.
+7. Run **Sync Workflowy Cache**, then verify search, capture, task completion, and opening a Workflowy location.
+
+If the sync fails, capture the terminal output from `npm run dev` so the SQLite worker error can be diagnosed.
+
+The GitHub Actions workflow also runs the sync-worker integration test and a production Raycast build on a native Windows runner for every push and pull request.
 
 ## Architecture reference
 

@@ -15,12 +15,22 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 
 import { isWingetAvailable } from "../cli/commands";
-import { indexMtime, isCatalogFresh, loadIndex, migrateLegacyIndex, type PackageIndex } from "../core/index-store";
+import {
+  clearIndex,
+  indexMtime,
+  isCatalogFresh,
+  loadIndex,
+  migrateLegacyIndex,
+  type PackageIndex,
+} from "../core/index-store";
 import { DEFAULT_ENV } from "../core/lock";
+import { inspectOperationGate } from "../core/operations";
 import { supportPath } from "../core/paths";
 import { getCatalogValidityMs } from "../core/prefs";
-import { MUTABLE_STALENESS_MS, rebuildFullIndex, refreshMutableSlices } from "../core/refresh";
+import { isMutableDataStale, rebuildFullIndex, refreshMutableSlices } from "../core/refresh";
 import { getIndexPaths } from "../core/runner";
+
+import { clearIconCache } from "./usePackageIcons";
 
 const TICK_MS = 1_000;
 
@@ -37,6 +47,8 @@ interface UseIndexResult {
   wingetAvailable: boolean | null;
   /** Manual "Update Index": full staged rebuild with toast feedback. */
   updateIndex: () => Promise<void>;
+  /** Manual "Clean Index": discard cached data, then rebuild it. */
+  cleanIndex: () => Promise<void>;
 }
 
 function useIndex(options: UseIndexOptions = {}): UseIndexResult {
@@ -86,7 +98,7 @@ function useIndex(options: UseIndexOptions = {}): UseIndexResult {
       const stillStale = () => {
         const current = loadIndex(paths);
         if (mode === "mutable") {
-          return !current || current.mutableAt === null || Date.now() - current.mutableAt > MUTABLE_STALENESS_MS;
+          return isMutableDataStale(current);
         }
         return !isCatalogFresh(current, getCatalogValidityMs(), Date.now());
       };
@@ -127,6 +139,10 @@ function useIndex(options: UseIndexOptions = {}): UseIndexResult {
           style: Toast.Style.Failure,
           title: "Failed to refresh package data",
           message,
+          primaryAction: {
+            title: "Retry",
+            onAction: () => void runRefresh(mode, runOptions),
+          },
         });
       }
     } finally {
@@ -146,9 +162,8 @@ function useIndex(options: UseIndexOptions = {}): UseIndexResult {
       if (!available) return;
 
       const current = loadIndex(paths);
-      const now = Date.now();
-      const catalogStale = !isCatalogFresh(current, getCatalogValidityMs(), now);
-      const mutableStale = !current || current.mutableAt === null || now - current.mutableAt > MUTABLE_STALENESS_MS;
+      const catalogStale = !isCatalogFresh(current, getCatalogValidityMs(), Date.now());
+      const mutableStale = isMutableDataStale(current);
 
       if (needsCatalog) {
         if (catalogStale) {
@@ -174,7 +189,37 @@ function useIndex(options: UseIndexOptions = {}): UseIndexResult {
 
   const updateIndex = useCallback(() => runRefresh("full", { manual: true }), [runRefresh]);
 
-  return { index, isLoading, isRefreshing, wingetAvailable, updateIndex };
+  /**
+   * Emptying the index while an operation runs would destroy the state that
+   * operation is patching, and the rebuild would be refused as busy — leaving
+   * nothing at all. The gate check belongs here, where the refresh policy
+   * lives, rather than in the action that offers it.
+   */
+  const cleanIndex = useCallback(async () => {
+    if (inspectOperationGate().status === "busy") {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "An operation is running",
+        message: "Wait for it to finish, then clean the index",
+      });
+      return;
+    }
+    try {
+      clearIndex(paths, DEFAULT_ENV);
+      clearIconCache();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not clean the index",
+        message: error instanceof Error ? error.message : undefined,
+      });
+      return;
+    }
+    setIndex(loadIndex(paths));
+    await runRefresh("cold", { manual: true });
+  }, [runRefresh]);
+
+  return { index, isLoading, isRefreshing, wingetAvailable, updateIndex, cleanIndex };
 }
 
 export { useIndex, type UseIndexOptions, type UseIndexResult };

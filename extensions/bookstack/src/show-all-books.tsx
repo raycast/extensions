@@ -1,6 +1,6 @@
 // src/show-all-books.tsx
 import React, { useState, useEffect } from "react";
-import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Keyboard } from "@raycast/api";
 import { getAllBooks, SearchResultItem, baseUrl } from "./bookstack-api";
 import { stripHtmlTags } from "./utils";
 
@@ -35,6 +35,11 @@ export default function ShowAllBooks() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`${baseUrl}${book.url}`} />
+              <Action.CopyToClipboard
+                title="Copy Link"
+                content={`${baseUrl}${book.url}`}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
             </ActionPanel>
           }
         />

@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fx-coding-agent",
+  "title": "Fx Coding Agent",
+  "description": "Run fx coding agent commands, inspect sessions, and delegate work from Raycast AI",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-sessions",
+      "title": "Search Sessions",
+      "subtitle": "fx",
+      "description": "Search, inspect, and resume local fx sessions",
+      "mode": "view"
+    },
+    {
+      "name": "ask-fx",
+      "title": "Ask Fx",
+      "subtitle": "fx",
+      "description": "Run a noninteractive request in a selected workspace",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "Ask fx…",
+          "required": false,
+          "percentEncoded": false
+        }
+      ]
+    },
+    {
+      "name": "start-session",
+      "title": "Open Fx Session",
+      "subtitle": "fx",
+      "description": "Start, resume, or choose an interactive fx session",
+      "mode": "view"
+    },
+    {
+      "name": "check-fx",
+      "title": "Check Fx Health",
+      "subtitle": "fx",
+      "description": "View fx status and local health checks",
+      "mode": "view"
+    },
+    {
+      "name": "view-usage",
+      "title": "View Fx Usage",
+      "subtitle": "fx",
+      "description": "View locally recorded fx token usage and spend",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-fx-sessions",
+      "title": "List Fx Sessions",
+      "description": "Lists saved fx coding agent sessions across one or all workspaces"
+    },
+    {
+      "name": "inspect-fx-session",
+      "title": "Inspect Fx Session",
+      "description": "Reads the metadata and conversation history of an exact fx session"
+    },
+    {
+      "name": "ask-fx",
+      "title": "Ask Fx",
+      "description": "Delegates a confirmed coding request to fx within a specific workspace"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fxPath",
+      "title": "Fx Executable",
+      "description": "Command name or full path to the fx executable",
+      "type": "textfield",
+      "required": true,
+      "default": "fx",
+      "placeholder": "/Users/you/.local/bin/fx"
+    },
+    {
+      "name": "defaultWorkspace",
+      "title": "Default Workspace",
+      "description": "Optional workspace used by health, usage, and AI tools when a workspace is not supplied",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

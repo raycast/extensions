@@ -147,9 +147,21 @@ query issueDetails($nodeId: ID!) {
   }
 }
 
-query searchIssues($query: String!, $numberOfItems: Int!) {
-  search(query: $query, type: ISSUE, first: $numberOfItems) {
+query searchIssues($query: String!, $numberOfItems: Int!, $after: String) {
+  search(query: $query, type: ISSUE, first: $numberOfItems, after: $after) {
     nodes {
+      ...IssueFields
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+query issueByNumber($owner: String!, $name: String!, $issueNumber: Int!) {
+  repository(owner: $owner, name: $name) {
+    issue(number: $issueNumber) {
       ...IssueFields
     }
   }

@@ -1,5 +1,9 @@
 # App Updates Changelog
 
+## [Raycast 2 Compatibility] - 2026-08-27
+
+- Updated to `@raycast/api` 2.x and `@raycast/utils` 2.x
+
 ## [Initial Version] - 2026-05-06
 
 - Scan installed apps for available updates via three sources: Sparkle, Homebrew Cask, and Mac App Store

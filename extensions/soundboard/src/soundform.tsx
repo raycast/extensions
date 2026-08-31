@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
 import { Item } from "./types";
 import { useForm, FormValidation } from "@raycast/utils";
-import { nanoid } from "nanoid";
+import { randomUUID } from "node:crypto";
 import { useEffect, useState } from "react";
 
 interface SignUpFormValues {
@@ -10,7 +10,10 @@ interface SignUpFormValues {
   path: string[];
   favourite: string;
   last_favourite: string;
+  icon: string;
 }
+
+const icons = Object.entries(Icon) as Array<[keyof typeof Icon, Icon]>;
 
 export function SoundForm(props: { item?: Item; items?: Item[]; onEdit: (item: Item) => void }) {
   const { pop } = useNavigation();
@@ -20,7 +23,7 @@ export function SoundForm(props: { item?: Item; items?: Item[]; onEdit: (item: I
       props.onEdit(
         props?.item
           ? { ...values, id: props.item.id, last_favourite: props.item.favourite }
-          : { ...values, id: nanoid() }
+          : { ...values, id: randomUUID() },
       );
       pop();
     },
@@ -32,6 +35,7 @@ export function SoundForm(props: { item?: Item; items?: Item[]; onEdit: (item: I
       title: props.item?.title,
       path: props.item?.path,
       favourite: props.item?.favourite,
+      icon: props.item?.icon ?? "Music",
     },
   });
 
@@ -45,7 +49,7 @@ export function SoundForm(props: { item?: Item; items?: Item[]; onEdit: (item: I
         // Find the item with the same favourite
         const item = props.items?.find((item) => item.favourite === values.favourite);
         setFavoriteInUse(
-          `Favorite #${values.favourite} is already assigned - if you continue, it will be removed from "${item?.title}" `
+          `Favorite #${values.favourite} is already assigned - if you continue, it will be removed from "${item?.title}" `,
         );
       } else {
         setFavoriteInUse("");
@@ -71,6 +75,12 @@ export function SoundForm(props: { item?: Item; items?: Item[]; onEdit: (item: I
     >
       <Form.TextField title="Title" placeholder="Enter Title" {...itemProps.title} />
       <Form.FilePicker allowMultipleSelection={false} info="Select an audio file" {...itemProps.path} />
+      <Form.Separator />
+      <Form.Dropdown title="Icon" info="Choose an icon for the sound" {...itemProps.icon}>
+        {icons.map(([name, icon]) => (
+          <Form.Dropdown.Item key={name} title={name} value={name} icon={icon} />
+        ))}
+      </Form.Dropdown>
       <Form.Separator />
       <Form.Description text="If you want to bind the sound to a hotkey you can then bind it to a favourite and give it a hotkey" />
       <Form.Dropdown title="Favorite" {...itemProps.favourite}>

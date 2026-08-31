@@ -1,5 +1,13 @@
 # Google Translate Changelog
 
+## [Fix translations failing with JSON parse error] - 2026-08-24
+
+- Switched the Google Translate API client identifier from `gtx` to `dict-chrome-ex` to avoid Google's 429 HTML block page for non-browser clients
+
+## [Update] - 2026-08-10
+
+- Added a "Prioritize cross-language translations" preference to optionally move same-language results to the bottom
+
 ## [Feature] - 2026-06-18
 
 - Added preferences for "Translate from" (source), "Primary Language" (target), and "Secondary Language" (fallback target)

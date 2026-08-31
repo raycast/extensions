@@ -17,9 +17,13 @@ import { preferences } from "../utils";
  *
  * This shows potentially stale data immediately, then updates with fresh data.
  *
+ * @param options.backgroundRefresh - Run brew update & refresh in the background (default: true).
+ *   Disable this when the caller runs its own brew command, since brew does not
+ *   support concurrent processes.
  * @returns Object containing loading state, data, isRefreshing flag, and revalidate function
  */
-export function useBrewOutdated() {
+export function useBrewOutdated(options?: { backgroundRefresh?: boolean }) {
+  const backgroundRefresh = options?.backgroundRefresh ?? true;
   const [isRefreshing, setIsRefreshing] = useState(false);
   const hasRefreshedRef = useRef(false);
 
@@ -98,10 +102,10 @@ export function useBrewOutdated() {
 
   // Start background refresh after initial data loads
   useEffect(() => {
-    if (!result.isLoading && result.data && !hasRefreshedRef.current) {
+    if (backgroundRefresh && !result.isLoading && result.data && !hasRefreshedRef.current) {
       refreshInBackground();
     }
-  }, [result.isLoading, result.data, refreshInBackground]);
+  }, [backgroundRefresh, result.isLoading, result.data, refreshInBackground]);
 
   return {
     ...result,

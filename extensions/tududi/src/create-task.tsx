@@ -1,125 +1,98 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
-
-interface Project {
-  id: number;
-  uid: string;
-  name: string;
-}
-
-interface Tag {
-  uid: string;
-  name: string;
-}
+import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import { createTask, fetchProjects, fetchTags } from "./lib/api";
+import { isInTodayPlan, parsePriority, TASK_STATUS } from "./lib/constants";
 
 export default function Command() {
-  const preferences = getPreferenceValues<{ apiUrl: string; token: string }>();
   const [name, setName] = useState("");
   const [priority, setPriority] = useState("medium");
   const [dueDate, setDueDate] = useState<Date | null>(null);
-  const [status, setStatus] = useState<string>("0");
+  const [status, setStatus] = useState("0");
   const [note, setNote] = useState("");
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [selectedProject, setSelectedProject] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [today, setToday] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // Fetch projects
-        const projectsRes = await fetch(`${preferences.apiUrl}/api/projects`, {
-          headers: { Authorization: `Bearer ${preferences.token}` },
-        });
-
-        if (projectsRes.ok) {
-          const projectsData = (await projectsRes.json()) as { projects: Project[] };
-          setProjects(projectsData.projects.filter((p: Project) => p && p.id != null && p.name));
-        }
-
-        // Fetch tags
-        const tagsRes = await fetch(`${preferences.apiUrl}/api/tags`, {
-          headers: { Authorization: `Bearer ${preferences.token}` },
-        });
-        if (tagsRes.ok) {
-          const tagsData = (await tagsRes.json()) as Tag[];
-          setTags(tagsData.filter((t: Tag) => t && t.uid != null && t.name));
-        }
-      } catch (error) {
-        console.error("Failed to load projects/tags:", error);
-      }
-    }
-
-    loadData();
-  }, [preferences.apiUrl, preferences.token]);
+  const { data: projects = [], isLoading: projectsLoading } = useCachedPromise(fetchProjects);
+  const { data: tags = [], isLoading: tagsLoading } = useCachedPromise(fetchTags);
 
   async function handleSubmit() {
+    if (!name.trim()) {
+      showToast({ style: Toast.Style.Failure, title: "Name is required" });
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      // Create task
-      const selectedTagObjects = selectedTags.map((uid) => tags.find((t) => t.uid === uid)).filter(Boolean);
-      const body = {
-        name,
-        priority,
+      const selectedTagObjects = selectedTags
+        .map((uid) => tags.find((t) => t.uid === uid))
+        .filter((t): t is NonNullable<typeof t> => Boolean(t));
+
+      // Tududi removed the boolean `today` field. Tasks appear in Today's plan when
+      // status is planned / in_progress / waiting. Only rewrite statuses that aren't
+      // already in the plan (e.g. Not Started, Done) so In Progress / Waiting are kept.
+      let resolvedStatus = Number.parseInt(status, 10);
+      if (today && !isInTodayPlan(resolvedStatus)) {
+        resolvedStatus = TASK_STATUS.PLANNED;
+      }
+
+      await createTask({
+        name: name.trim(),
+        priority: parsePriority(priority),
         ...(dueDate ? { due_date: dueDate.toISOString() } : {}),
-        status: parseInt(status),
+        status: resolvedStatus,
         note,
-        ...(selectedProject ? { project_id: parseInt(selectedProject) } : {}),
-        ...(selectedTagObjects.length > 0 ? { tags: selectedTagObjects } : {}),
-        today,
-      };
-      const response = await fetch(`${preferences.apiUrl}/api/task`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${preferences.token}`,
-        },
-        body: JSON.stringify(body),
+        ...(selectedProject ? { project_id: Number.parseInt(selectedProject, 10) } : {}),
+        ...(selectedTagObjects.length > 0 ? { tags: selectedTagObjects.map((t) => ({ name: t.name })) } : {}),
       });
 
-      if (response.ok) {
-        showToast({ title: "Task created successfully", style: Toast.Style.Success });
-        // Reset form
-        setName("");
-        setPriority("medium");
-        setDueDate(null);
-        setStatus("0");
-        setNote("");
-        setSelectedProject("");
-        setSelectedTags([]);
-        setToday(true);
-      } else {
-        showToast({ title: "Failed to create task", message: response.statusText, style: Toast.Style.Failure });
-      }
+      showToast({ style: Toast.Style.Success, title: "Task created successfully" });
+      setName("");
+      setPriority("medium");
+      setDueDate(null);
+      setStatus("0");
+      setNote("");
+      setSelectedProject("");
+      setSelectedTags([]);
+      setToday(true);
     } catch (error) {
-      showToast({ title: "Error", message: (error as Error).message, style: Toast.Style.Failure });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to create task",
+        message: (error as Error).message,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
     <Form
+      isLoading={projectsLoading || tagsLoading || isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Description text="Create a new Tududi task." />
       <Form.TextField id="name" title="Name" placeholder="Enter task name" value={name} onChange={setName} />
-
       <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
         <Form.Dropdown.Item value="low" title="Low" />
         <Form.Dropdown.Item value="medium" title="Medium" />
         <Form.Dropdown.Item value="high" title="High" />
       </Form.Dropdown>
-
       <Form.DatePicker id="dueDate" title="Due Date" value={dueDate} onChange={(date) => setDueDate(date || null)} />
       <Form.Dropdown id="status" title="Status" value={status} onChange={setStatus}>
-        <Form.Dropdown.Item value={"0"} title="Not Started" />
-        <Form.Dropdown.Item value={"1"} title="In Progress" />
-        <Form.Dropdown.Item value={"2"} title="Done" />
-        <Form.Dropdown.Item value={"3"} title="Archived" />
-        <Form.Dropdown.Item value={"4"} title="Waiting" />
+        <Form.Dropdown.Item value="0" title="Not Started" />
+        <Form.Dropdown.Item value="1" title="In Progress" />
+        <Form.Dropdown.Item value="6" title="Planned" />
+        <Form.Dropdown.Item value="4" title="Waiting" />
+        <Form.Dropdown.Item value="2" title="Done" />
+        <Form.Dropdown.Item value="3" title="Archived" />
+        <Form.Dropdown.Item value="5" title="Cancelled" />
       </Form.Dropdown>
       <Form.Dropdown id="project" title="Project" value={selectedProject} onChange={setSelectedProject}>
         <Form.Dropdown.Item value="" title="No Project" />
@@ -133,7 +106,13 @@ export default function Command() {
         ))}
       </Form.TagPicker>
       <Form.TextArea id="note" title="Note" placeholder="Enter task note" value={note} onChange={setNote} />
-      <Form.Checkbox id="today" label="Today" value={today} onChange={setToday} />
+      <Form.Checkbox
+        id="today"
+        label="Add to Today Plan"
+        value={today}
+        onChange={setToday}
+        info="Sets status to Planned so the task appears on Tududi's Today page"
+      />
     </Form>
   );
 }

@@ -1,23 +1,28 @@
-import { Action, ActionPanel, List, useNavigation } from "@raycast/api";
-import { Emoji } from "../../types/emoji.type";
-import { useMemo, useState } from "react";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useCallback, useMemo, useState } from "react";
+import { SlackClient } from "../../shared/client";
+import { SLACK_EMOJI_CODE_MAP } from "../../constants/emoji.constants";
 
 interface EmojiPickerProps {
-  emojis: Emoji;
   onSelect: (emoji: { name: string; value: string }) => void;
 }
 
-function EmojiPicker({ emojis, onSelect }: EmojiPickerProps) {
-  const { pop } = useNavigation();
+const DISPLAY_LIMIT = 1000;
 
+function EmojiPicker({ onSelect }: EmojiPickerProps) {
+  const { pop } = useNavigation();
   const [searchText, setSearchText] = useState("");
+  const [displayLimit, setDisplayLimit] = useState(DISPLAY_LIMIT);
+  const { data: workspaceEmojis, isLoading } = useCachedPromise(SlackClient.getWorkspaceEmojis);
 
   const emojiEntries = useMemo(() => {
+    const emojis = { ...workspaceEmojis, ...SLACK_EMOJI_CODE_MAP };
     return Object.entries(emojis).map(([name, value]) => ({
       name,
       value,
     }));
-  }, [emojis]);
+  }, [workspaceEmojis]);
 
   const filtered = useMemo(() => {
     const normalized = searchText.replace(/^:/, "").toLowerCase();
@@ -26,9 +31,22 @@ function EmojiPicker({ emojis, onSelect }: EmojiPickerProps) {
     return emojiEntries.filter((emoji) => emoji.name.toLowerCase().includes(normalized));
   }, [searchText, emojiEntries]);
 
+  const visibleEmojis = useMemo(() => filtered.slice(0, displayLimit), [filtered, displayLimit]);
+  const hiddenCount = filtered.length - visibleEmojis.length;
+
+  const handleSearchTextChange = useCallback((value: string) => {
+    setSearchText(value);
+    setDisplayLimit(DISPLAY_LIMIT);
+  }, []);
+
   return (
-    <List onSearchTextChange={setSearchText} searchBarPlaceholder={"Search emoji (e.g. :smile)"} throttle>
-      {filtered.map((emoji) => (
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={handleSearchTextChange}
+      searchBarPlaceholder={"Search emoji (e.g. :smile)"}
+      throttle
+    >
+      {visibleEmojis.map((emoji) => (
         <List.Item
           key={emoji.name}
           title={emoji.name}
@@ -46,6 +64,18 @@ function EmojiPicker({ emojis, onSelect }: EmojiPickerProps) {
           }
         />
       ))}
+      {hiddenCount > 0 && (
+        <List.Item
+          title="Show More"
+          subtitle={`${hiddenCount} more`}
+          icon={Icon.Ellipsis}
+          actions={
+            <ActionPanel>
+              <Action title="Show More" onAction={() => setDisplayLimit((limit) => limit + DISPLAY_LIMIT)} />
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
 }

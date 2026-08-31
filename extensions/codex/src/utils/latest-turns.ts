@@ -11,7 +11,7 @@ function createTextCodeBlock(value: string): string {
 export function renderLatestTurnsMarkdown(turns: LatestTurn[]): string {
   return turns
     .flatMap((turn, index) => [
-      `### ${turn.heading}`,
+      `#### ${turn.heading}`,
       "",
       createTextCodeBlock(turn.body),
       ...(index === turns.length - 1 ? [] : [""]),

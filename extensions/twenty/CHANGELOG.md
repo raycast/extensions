@@ -1,5 +1,12 @@
 # Twenty Changelog
 
+## [Fix] - 2026-07-28
+
+- Fixed "Invalid input: expected object, received array" on newer Twenty versions, which changed the metadata API response shape
+- Objects beyond the first page are no longer silently dropped — the metadata API now paginates at 60 objects by default
+- Objects and fields no longer disappear when optional metadata flags are absent
+- API errors now show the message returned by Twenty instead of a raw validation dump
+
 ## [Fix Bug] - 2025-11-27
 
 - Fixed issue when adding API Key, it would not work

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`renderWordMarkdown renders a full entry stably 1`] = `
+"# casa
+
+## Meaning 1
+**Origin:** Del lat. casa 'choza'.
+
+1. *sust. f. (España)* Edificio para habitar. *Una casa de ocho plantas.*
+_Synonyms_: vivienda, hogar
+
+2. *sust. f. coloq.* Familia.
+
+### Expressions
+
+**echar la casa por la ventana**
+
+1. *verbo* Gastar con exceso."
+`;

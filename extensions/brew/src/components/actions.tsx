@@ -48,13 +48,19 @@ export function FormulaUninstallAction(props: { formula: Cask | Nameable; onActi
   );
 }
 
-export function FormulaUpgradeAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }) {
+export function FormulaUpgradeAction(props: {
+  formula: Cask | Nameable;
+  /** Called when the upgrade starts, e.g. to show progress */
+  onStart?: () => void;
+  onAction: (result: boolean) => void;
+}) {
   return (
     <Action
       title="Upgrade"
       icon={Icon.Hammer}
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       onAction={async () => {
+        props.onStart?.();
         const result = await upgrade(props.formula);
         props.onAction(result);
       }}
@@ -62,13 +68,21 @@ export function FormulaUpgradeAction(props: { formula: Cask | Nameable; onAction
   );
 }
 
-export function FormulaUpgradeAllAction(props: { onAction: (result: boolean) => void }) {
+export function FormulaUpgradeAllAction(props: {
+  /** Overrides the default upgrade, e.g. to report progress per package */
+  onUpgradeAll?: () => void;
+  onAction: (result: boolean) => void;
+}) {
   return (
     <Action
       title="Upgrade All"
       icon={Icon.Hammer}
       shortcut={{ modifiers: ["cmd", "opt"], key: "u" }}
       onAction={async () => {
+        if (props.onUpgradeAll) {
+          props.onUpgradeAll();
+          return;
+        }
         const result = await upgradeAll();
         props.onAction(result);
       }}

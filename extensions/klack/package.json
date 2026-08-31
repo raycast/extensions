@@ -5,8 +5,14 @@
   "description": "Control Klack for macOS with Raycast",
   "icon": "icon.png",
   "author": "henrikruscon",
-  "contributors": ["jace"],
-  "categories": ["Applications", "Media", "Fun"],
+  "contributors": [
+    "jace"
+  ],
+  "categories": [
+    "Applications",
+    "Media",
+    "Fun"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -15,7 +21,9 @@
       "subtitle": "Klack",
       "description": "Toggles Klack on or off",
       "mode": "no-view",
-      "keywords": ["toggle"]
+      "keywords": [
+        "toggle"
+      ]
     },
     {
       "name": "turn-on",
@@ -23,7 +31,9 @@
       "subtitle": "Klack",
       "description": "Explicitly enables Klack",
       "mode": "no-view",
-      "keywords": ["enable"]
+      "keywords": [
+        "enable"
+      ]
     },
     {
       "name": "turn-off",
@@ -31,7 +41,10 @@
       "subtitle": "Klack",
       "description": "Explicitly disables Klack",
       "mode": "no-view",
-      "keywords": ["disable", "mute"]
+      "keywords": [
+        "disable",
+        "mute"
+      ]
     },
     {
       "name": "wake-up",
@@ -39,7 +52,9 @@
       "subtitle": "Klack",
       "description": "Wakes Klack from sleep",
       "mode": "no-view",
-      "keywords": ["sleep"]
+      "keywords": [
+        "sleep"
+      ]
     },
     {
       "name": "set-switch",
@@ -47,7 +62,11 @@
       "subtitle": "Klack",
       "description": "Pick a mechanical-switch sound set",
       "mode": "view",
-      "keywords": ["switch", "sound", "pack"]
+      "keywords": [
+        "switch",
+        "sound",
+        "pack"
+      ]
     },
     {
       "name": "set-volume",
@@ -55,7 +74,9 @@
       "subtitle": "Klack",
       "description": "Pick a volume between 0 and 100",
       "mode": "view",
-      "keywords": ["loudness"]
+      "keywords": [
+        "loudness"
+      ]
     },
     {
       "name": "set-soft-volume",
@@ -63,7 +84,9 @@
       "subtitle": "Klack",
       "description": "Sets volume to Soft (30%)",
       "mode": "no-view",
-      "keywords": ["quiet"]
+      "keywords": [
+        "quiet"
+      ]
     },
     {
       "name": "set-balanced-volume",
@@ -71,7 +94,9 @@
       "subtitle": "Klack",
       "description": "Sets volume to Balanced (60%)",
       "mode": "no-view",
-      "keywords": ["medium"]
+      "keywords": [
+        "medium"
+      ]
     },
     {
       "name": "set-loud-volume",
@@ -79,7 +104,9 @@
       "subtitle": "Klack",
       "description": "Sets volume to Loud (90%)",
       "mode": "no-view",
-      "keywords": ["high"]
+      "keywords": [
+        "high"
+      ]
     },
     {
       "name": "stats",
@@ -87,7 +114,12 @@
       "subtitle": "Klack",
       "description": "Live keystroke, ding, click, and favourite switch counts",
       "mode": "view",
-      "keywords": ["stats", "statistics", "usage", "keystrokes"]
+      "keywords": [
+        "stats",
+        "statistics",
+        "usage",
+        "keystrokes"
+      ]
     }
   ],
   "tools": [
@@ -146,5 +178,13 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "platforms": ["macOS"]
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

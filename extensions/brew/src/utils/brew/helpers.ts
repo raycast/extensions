@@ -182,6 +182,15 @@ export function brewInstallCommand(installable: Cask | Formula | Nameable): stri
 }
 
 /**
+ * Get the brew adopt command string for a package.
+ * Runs `brew install --adopt` to reclaim an existing externally-installed package.
+ */
+export function brewAdoptCommand(installable: Cask | Formula | Nameable): string {
+  const identifier = brewIdentifier(installable);
+  return `${brewExecutable()} install --adopt ${brewCaskOption(installable)} ${identifier}`.replace(/ +/g, " ");
+}
+
+/**
  * Get the brew uninstall command string for a package.
  */
 export function brewUninstallCommand(installable: Cask | Formula | Nameable): string {

@@ -1,6 +1,7 @@
 import { HistoryData } from "../types";
+import { isTransientError, TIMEOUTS, withRetry } from "./config";
 import { getLogger } from "./logger";
-import { TIMEOUTS, withRetry, isTransientError } from "./config";
+import { redactUrlForLog } from "./urlUtils";
 
 const log = getLogger("wayback");
 const ARCHIVE_BASE_URL = "https://archive.org";
@@ -38,7 +39,7 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
 
     // Check for rate limiting (429) or server errors
     if (response.status === 429) {
-      log.warn("wayback:rate-limited", { url, status: response.status });
+      log.warn("wayback:rate-limited", { url: redactUrlForLog(url), status: response.status });
       return {
         rateLimited: true,
         archiveUrl: `${WAYBACK_BASE_URL}/web/*/${url}`,
@@ -46,7 +47,7 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
     }
 
     if (!response.ok) {
-      log.warn("wayback:error", { url, status: response.status });
+      log.warn("wayback:error", { url: redactUrlForLog(url), status: response.status });
       return undefined;
     }
 
@@ -85,7 +86,7 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
 
       // Check for rate limiting on CDX API
       if (cdxCountResponse.status === 429) {
-        log.warn("wayback:cdx-rate-limited", { url, status: cdxCountResponse.status });
+        log.warn("wayback:cdx-rate-limited", { url: redactUrlForLog(url), status: cdxCountResponse.status });
         rateLimited = true;
       } else if (cdxCountResponse.ok) {
         const countText = await cdxCountResponse.text();
@@ -95,12 +96,12 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
           log.log("wayback:cdx-page-count", { url, pageCount });
         }
       } else {
-        log.warn("wayback:cdx-count-error", { url, status: cdxCountResponse.status });
+        log.warn("wayback:cdx-count-error", { url: redactUrlForLog(url), status: cdxCountResponse.status });
         rateLimited = true;
       }
     } catch (cdxCountErr) {
       log.warn("wayback:cdx-count-fetch-error", {
-        url,
+        url: redactUrlForLog(url),
         error: cdxCountErr instanceof Error ? cdxCountErr.message : String(cdxCountErr),
       });
       rateLimited = true;
@@ -135,7 +136,7 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
         } catch (preciseErr) {
           const isTimeout = preciseErr instanceof Error && preciseErr.name === "AbortError";
           log.warn("wayback:precise-fetch-error", {
-            url,
+            url: redactUrlForLog(url),
             error: preciseErr instanceof Error ? preciseErr.message : String(preciseErr),
             isTimeout,
           });
@@ -167,7 +168,7 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
             }
           } catch (timestampErr) {
             log.warn("wayback:cdx-first-error", {
-              url,
+              url: redactUrlForLog(url),
               error: timestampErr instanceof Error ? timestampErr.message : String(timestampErr),
             });
           }
@@ -195,7 +196,7 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
     });
     return result;
   } catch (err) {
-    log.warn("wayback:error", { url, error: err instanceof Error ? err.message : String(err) });
+    log.warn("wayback:error", { url: redactUrlForLog(url), error: err instanceof Error ? err.message : String(err) });
     return undefined;
   }
 }

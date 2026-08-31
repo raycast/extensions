@@ -1,6 +1,5 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-
-const SIGNATURE = "Created with <a href='https://raycast.com'>Raycast</a>";
+import { addRaycastSignature } from "./event-values";
 
 const preferences = getPreferenceValues();
 
@@ -10,15 +9,7 @@ export function roundUpTime(date = new Date(), roundMins = 15) {
 }
 
 export function addSignature(description: string | undefined) {
-  if (!preferences.addSignature) {
-    return description;
-  }
-
-  if (!description) {
-    return SIGNATURE;
-  }
-
-  return `${description}\n<hr>${SIGNATURE}`;
+  return addRaycastSignature(description, Boolean(preferences.addSignature));
 }
 
 function parseRRule(rrule: string): string {

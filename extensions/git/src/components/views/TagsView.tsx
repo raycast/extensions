@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { RepositoryContext, NavigationContext } from "../../open-repository";
 import { WorkspaceNavigationActions, WorkspaceNavigationDropdown } from "../actions/WorkspaceNavigationActions";
 import { RemoteFetchAction } from "../actions/RemoteActions";
@@ -21,7 +21,7 @@ export default function TagsView(context: RepositoryContext & NavigationContext)
   return (
     <List
       isLoading={context.tags.isLoading}
-      navigationTitle={context.gitManager.repoName}
+      navigationTitle={context.gitManager.worktreeOrigin?.displayName ?? context.gitManager.repoName}
       searchBarPlaceholder="Search tags by name..."
       selectedItemId={selectedTagId || undefined}
       searchBarAccessory={WorkspaceNavigationDropdown(context)}
@@ -31,7 +31,7 @@ export default function TagsView(context: RepositoryContext & NavigationContext)
             <TagCreateAction
               {...context}
               ref={context.branches.data.currentBranch.name}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           )}
 
@@ -125,7 +125,7 @@ function TagListItem(
             <TagCreateAction
               {...context}
               ref={context.branches.data.currentBranch.name}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           )}
 
@@ -149,7 +149,7 @@ function RefreshTagsAction(context: RepositoryContext & NavigationContext) {
       title="Refresh"
       icon={Icon.ArrowClockwise}
       onAction={context.tags.revalidate}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
     />
   );
 }

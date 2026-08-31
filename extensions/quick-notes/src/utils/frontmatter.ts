@@ -7,6 +7,7 @@ const FRONTMATTER_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 export interface ParsedMarkdownNote {
   title?: string;
+  icon?: string;
   tags?: string[];
   createdAt?: Date;
   body: string;
@@ -55,6 +56,9 @@ export const serializeNoteToMarkdown = (note: Note): string => {
     `title: ${quoteYamlValue(note.title)}`,
     `date: ${format(new Date(note.createdAt), FRONTMATTER_DATE_FORMAT)}`,
   ];
+  if (note.icon) {
+    lines.push(`icon: ${quoteYamlValue(note.icon)}`);
+  }
   if (note.tags.length > 0) {
     lines.push(`tags: [${note.tags.map(quoteYamlValue).join(", ")}]`);
   }
@@ -87,6 +91,8 @@ export const parseMarkdownNote = (content: string): ParsedMarkdownNote => {
       const [, key, value] = kv;
       if (key === "title") {
         result.title = unquoteYamlValue(value);
+      } else if (key === "icon") {
+        result.icon = unquoteYamlValue(value);
       } else if (key === "tags") {
         result.tags = value.trim() === "" ? parseYamlBlockList(fmLines, i + 1) : parseYamlList(value);
       } else if (key === "date") {

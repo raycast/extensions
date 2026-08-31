@@ -15,8 +15,10 @@
 // Empty-state rendering stays at the call site (a `Detail` with a
 // CTA when `total === 0`) because each command's copy differs:
 // "no editable lists" vs "no accessible lists". The auto-select-
-// first-list useEffect also stays at the call site because it
-// needs the caller's useForm setValue.
+// first-list effect and the "pick a list first" submit guard, which
+// both commands share verbatim, live here as useAutoSelectFirstList
+// and requireListId (parameterised on the caller's useForm setValue /
+// field value) so the two commands can't drift.
 //
 // Ordering preserved end-to-end: workspaces RPC sorts personal-
 // first then team alphabetical, lists RPC sorts updated_at desc
@@ -33,6 +35,7 @@
 
 import { Toast, showToast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { useEffect } from "react";
 import { apiBase, authHeaders } from "./api";
 import type {
   ListRow,
@@ -53,6 +56,12 @@ export interface UseListPickerResult {
   // false, render the "no accessible lists" detail instead of an
   // empty Form.Dropdown.
   total: number;
+  // Count of ALL accessible lists BEFORE the role filter. Lets an
+  // empty-state branch tell "member of nothing at all" (a brand-new
+  // account that just needs to create a list) apart from "a member
+  // somewhere but view-only everywhere" (which also has the Suggest
+  // Entry path open to it). Equals `total` when no filter is passed.
+  accessibleTotal: number;
   // Flat filtered list, handy for resolving a selectedList by id
   // (selectedList = lists.find(l => String(l.id) === values.listId)).
   lists: ListRow[];
@@ -101,5 +110,39 @@ export function useListPicker(
     .filter((b) => b.lists.length > 0);
   const total = buckets.reduce((n, b) => n + b.lists.length, 0);
 
-  return { buckets, total, lists, isLoading };
+  return { buckets, total, accessibleTotal: rawLists.length, lists, isLoading };
+}
+
+// Default the list dropdown to the first list once the picker's data
+// lands. The workspaces RPC sorts personal-first then team-alphabetical
+// and the lists RPC sorts updated_at desc, so buckets[0].lists[0] is the
+// user's most recently edited list inside their primary workspace, the
+// natural default. Watching the primitive firstListId (not the array)
+// keeps the effect cheap and dodges referential-equality re-fires; the
+// `!currentListId` guard means it only fills an empty field and never
+// fights the user's manual pick. Shared by Quick Add Entry and Suggest
+// Entry, which pass their own useForm setValue + current field value.
+export function useAutoSelectFirstList(
+  firstListId: number | undefined,
+  currentListId: string,
+  setValue: (id: "listId", value: string) => void,
+): void {
+  useEffect(() => {
+    if (firstListId !== undefined && !currentListId) {
+      setValue("listId", String(firstListId));
+    }
+  }, [firstListId, currentListId, setValue]);
+}
+
+// Submit-handler guard for a list-picking form: parse the dropdown's
+// string value into a numeric list id, returning null (after a "Pick a
+// list first" toast) when it isn't a finite number. Shared so Quick Add
+// Entry and Suggest Entry validate the selection identically.
+export async function requireListId(rawListId: string): Promise<number | null> {
+  const listId = Number(rawListId);
+  if (!Number.isFinite(listId)) {
+    await showToast({ style: Toast.Style.Failure, title: "Pick a list first" });
+    return null;
+  }
+  return listId;
 }
