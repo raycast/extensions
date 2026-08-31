@@ -96,6 +96,11 @@ export default function Command() {
                 />
               )}
               <Action.OpenInBrowser title="Open Website" url={`https://${s.domain}`} />
+              <Action.OpenInBrowser
+                title="Browse the Full Signal 500"
+                url="https://feeds.bar/signal-500/"
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+              />
               <Action.CopyToClipboard
                 title="Copy Feed URL"
                 content={s.feed_url}
@@ -105,11 +110,6 @@ export default function Command() {
                 title="Copy Website URL"
                 content={`https://${s.domain}`}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              />
-              <Action.OpenInBrowser
-                title="Browse the Full Signal 500"
-                url="https://feeds.bar/signal-500/"
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
             </ActionPanel>
           }
