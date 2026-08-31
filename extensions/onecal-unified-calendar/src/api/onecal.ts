@@ -253,9 +253,9 @@ const MEETING_HOST_SUFFIXES = [
   "chime.aws",
 ];
 
-/** hostnameの完全一致または「.suffix」境界つきサブドメインのみ許可する */
+/** httpsのみ・hostnameの完全一致または「.suffix」境界つきサブドメインのみ許可する */
 function isMeetingUrl(candidate: string): boolean {
-  const url = parseHttpUrl(candidate);
+  const url = parseHttpsUrl(candidate);
   if (!url) {
     return false;
   }
@@ -268,12 +268,11 @@ function isMeetingUrl(candidate: string): boolean {
   );
 }
 
-function parseHttpUrl(candidate: string): URL | undefined {
+// 許可ホストでもhttp://は平文で改竄・盗聴されうるため、会議URLはhttpsのみ受け付ける
+function parseHttpsUrl(candidate: string): URL | undefined {
   try {
     const url = new URL(candidate);
-    return url.protocol === "https:" || url.protocol === "http:"
-      ? url
-      : undefined;
+    return url.protocol === "https:" ? url : undefined;
   } catch {
     return undefined;
   }

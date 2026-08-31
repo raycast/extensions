@@ -27,14 +27,14 @@ View your [OneCal Unified Calendar View](https://app.onecal.io/calendar-view) in
 1. Open [OneCal](https://app.onecal.io) → **Settings → MCP Config**
 2. Click **Create Client** and enter:
    - Name: `Raycast` (or anything you like)
-   - **Redirect URI**: `http://localhost:51703/callback` (loopback flow; must match `LOOPBACK_PORT` in `src/api/oauth.ts`)
+   - **Redirect URI**: `https://raycast.com/redirect/extension`
    - Scopes: **Read your calendar events** (read-only is sufficient)
 3. Copy the generated **Client ID** and **Client Secret** (the secret is shown only once)
 
 > ⚠️ OneCal **strips the query string from redirect URIs** both at registration and at redirect time,
-> so Raycast's standard web redirect (`https://raycast.com/redirect?packageName=Extension`) does not work
+> so Raycast's default query-based redirect (`https://raycast.com/redirect?packageName=Extension`) does not work
 > (the `packageName` parameter is lost and the flow can never return to the extension).
-> This is why the extension uses an RFC 8252 loopback redirect instead.
+> This is why the extension uses Raycast's query-free `https://raycast.com/redirect/extension` redirect instead.
 
 ### 2. Run the extension
 
