@@ -48,3 +48,7 @@ export function getInitialSelectedRowId(
 
   return rows[0]?.rowId;
 }
+
+export function getRequestedSelectedRowId(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}

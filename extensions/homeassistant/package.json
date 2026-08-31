@@ -26,6 +26,13 @@
       "mode": "view"
     },
     {
+      "name": "entity-settings",
+      "title": "Entity Settings",
+      "subtitle": "Home Assistant",
+      "description": "Manage hidden entities and custom display names",
+      "mode": "view"
+    },
+    {
       "name": "customentities",
       "title": "Custom Entities",
       "subtitle": "Home Assistant",

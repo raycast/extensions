@@ -25,10 +25,10 @@ const headers = (token: string) => ({
   Authorization: `Bearer ${token}`,
 });
 
-export const getCollection = async (path: string, token: string, { pages = PAGE_LIMIT } = {}) => {
+export const getCollection = async (path: string, token: string, { pages = PAGE_LIMIT, from = "" } = {}) => {
   const items: ForgeResource[] = [];
   const included: ForgeResource[] = [];
-  let cursor: string | null | undefined;
+  let cursor: string | null | undefined = from || undefined;
 
   for (let page = 0; page < pages; page++) {
     const url = new URL(`${FORGE_API_URL}/${path}`);
@@ -40,7 +40,7 @@ export const getCollection = async (path: string, token: string, { pages = PAGE_
     if (!cursor) break;
   }
 
-  return { items, included };
+  return { items, included, nextCursor: cursor };
 };
 
 export const getResource = async (path: string, token: string) => {

@@ -1185,7 +1185,7 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts",
-    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts",
+    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts src/api/viewerStats.test.ts",
     "update-schema": "node scripts/update-graphql-schema.mjs"
   },
   "platforms": [

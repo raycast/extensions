@@ -4,7 +4,12 @@
 
 # Coolify
 
-This is a Raycast extension for [Coolify](https://coolify.io/) - _An open-source & self-hostable **Heroku** / **Netlify** / **Vercel** alternative_. With this extension you can view Servers, Server Details, Resources, Teams, Team Members, Projects, Environments, Private Keys and more in your Coolify instance.
+This is a Raycast extension for [Coolify](https://coolify.io/) - _An open-source & self-hostable **Heroku** / **Netlify** / **Vercel** alternative_. With this extension you can view Servers, Server Details, Resources, Teams, Team Members, Projects, Environments, Private Keys, and deployment history in your Coolify instance.
+
+## Commands
+
+- **Search Deployments**: Search up to 100 recent deployments for each application in your Coolify instance.
+- **Menu Bar Deployments**: View recent deployments from the menu bar. Configure the maximum number of items in the command preferences.
 
 ## ❗ Supported Versions
 

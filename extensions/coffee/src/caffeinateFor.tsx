@@ -27,5 +27,6 @@ export default async function Command(props: { arguments: Arguments.CaffeinateFo
     { menubar: true, status: true },
     `Caffeinating your ${deviceName()} for ${formattedTime}`,
     `-t ${totalSeconds}`,
+    { kind: "for", endsAt: new Date(Date.now() + totalSeconds * 1000).toISOString() },
   );
 }
