@@ -1,5 +1,10 @@
 # Premier League Changelog
 
+## [Move Jump to Matchweek off Enter] - 2026-08-31
+
+- Move the "Jump to…" shortcut from `Enter` to `J`. `Enter` already opens Match Commentary on the selected match, so the two were competing.
+- Submit the matchweek form with `Enter` once a number is typed, rather than `Cmd+Enter`.
+
 ## [Split Matches and Fixtures] - 2026-08-30
 
 - Add a Fixtures command covering matches in progress and still to come. Matches now holds completed games only, so a match moves from one command to the other at the final whistle.

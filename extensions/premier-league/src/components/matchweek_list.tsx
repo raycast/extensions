@@ -218,7 +218,7 @@ export default function MatchweekList(props: {
       <Action.Push
         title="Jump to…"
         icon={Icon.MagnifyingGlass}
-        shortcut={{ modifiers: [], key: "return" }}
+        shortcut={{ modifiers: [], key: "j" }}
         target={
           <JumpToMatchweek current={matchweek} onJump={setSelectedMatchweek} />
         }
