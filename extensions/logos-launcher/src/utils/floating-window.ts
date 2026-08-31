@@ -14,15 +14,22 @@ repeat with attempt from 1 to 20
   tell application "System Events"
     tell process "Logos"
       try
-        set currentTitle to name of front window
-        if currentTitle contains targetTool then
-          set panelReady to true
-          exit repeat
+        if exists front window then
+          set currentTitle to name of front window
+          if currentTitle contains targetTool then
+            set panelReady to true
+            exit repeat
+          end if
         end if
         repeat with w in windows
           if name of w contains targetTool then
-            set panelReady to true
-            exit repeat
+            perform action "AXRaise" of w
+            set frontmost of process "Logos" to true
+            delay 0.1
+            if (name of front window) contains targetTool then
+              set panelReady to true
+              exit repeat
+            end if
           end if
         end repeat
         if panelReady then exit repeat
