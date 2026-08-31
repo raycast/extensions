@@ -14,23 +14,69 @@
     {
       "name": "trigger",
       "title": "Run BTT Named Trigger",
-      "subtitle": "Search for and run named trigger in BTT",
-      "description": "Find a named trigger in BetterTouchTool",
+      "subtitle": "BetterTouchTool",
+      "description": "Find and run named triggers in BetterTouchTool",
+      "mode": "view"
+    },
+    {
+      "name": "browse-triggers",
+      "title": "Browse BTT Triggers",
+      "subtitle": "BetterTouchTool",
+      "description": "Find and manage configured triggers across BetterTouchTool",
       "mode": "view"
     },
     {
       "name": "action",
       "title": "Run BTT Action",
-      "subtitle": "Search for and run an action in BTT",
-      "description": "Find an action in BetterTouchTool",
+      "subtitle": "BetterTouchTool",
+      "description": "Find and run actions in BetterTouchTool",
       "mode": "view"
     },
     {
       "name": "variables",
       "title": "Browse BTT Variables",
-      "subtitle": "Search, inspect, and change BTT variables",
+      "subtitle": "BetterTouchTool",
       "description": "Browse BetterTouchTool variables",
       "mode": "view"
+    },
+    {
+      "name": "clipboard-manager",
+      "title": "Search BTT Clipboard",
+      "subtitle": "BetterTouchTool",
+      "description": "Search and paste items from BetterTouchTool's Clipboard Manager",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-named-triggers",
+      "title": "Search Named Triggers",
+      "description": "Find BetterTouchTool named triggers by name, group, assigned action, or enabled state"
+    },
+    {
+      "name": "run-named-trigger",
+      "title": "Run Named Trigger",
+      "description": "Run an enabled BetterTouchTool named trigger selected by its exact UUID"
+    },
+    {
+      "name": "search-actions",
+      "title": "Search Actions",
+      "description": "Search BetterTouchTool's built-in action catalog and discover supported parameters"
+    },
+    {
+      "name": "run-action",
+      "title": "Run Action",
+      "description": "Run a BetterTouchTool built-in action selected from the action catalog"
+    },
+    {
+      "name": "get-variable",
+      "title": "Get Variable",
+      "description": "Read the value and type of an exact BetterTouchTool variable"
+    },
+    {
+      "name": "set-variable",
+      "title": "Set Variable",
+      "description": "Set a temporary or persistent BetterTouchTool string or number variable"
     }
   ],
   "preferences": [
@@ -93,7 +139,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
-    "test": "tsx --test src/*.test.ts"
+    "test": "tsx --test src/*.test.ts",
+    "evals": "ray evals"
   },
   "platforms": [
     "macOS"

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { filterNamedTriggers, isTriggerEnabled } from "./trigger-utils";
+import { filterNamedTriggers, isTriggerEnabled, parseNamedTriggerReferences } from "./trigger-utils";
 
 describe("named trigger state", () => {
   it("treats omitted enabled flags as enabled", () => {
@@ -24,15 +24,39 @@ describe("named trigger filtering", () => {
 
   it("shows enabled named triggers by default", () => {
     assert.deepEqual(
-      filterNamedTriggers(triggers, false).map((trigger) => trigger.id),
+      filterNamedTriggers(triggers, "enabled").map((trigger) => trigger.id),
       [1, 2],
     );
   });
 
-  it("includes disabled named triggers when requested", () => {
+  it("shows only disabled named triggers when requested", () => {
     assert.deepEqual(
-      filterNamedTriggers(triggers, true).map((trigger) => trigger.id),
+      filterNamedTriggers(triggers, "disabled").map((trigger) => trigger.id),
+      [3],
+    );
+  });
+
+  it("includes enabled and disabled named triggers when showing all", () => {
+    assert.deepEqual(
+      filterNamedTriggers(triggers, "all").map((trigger) => trigger.id),
       [1, 2, 3],
     );
+  });
+});
+
+describe("named trigger reference cache", () => {
+  it("parses valid trigger references and drops malformed entries", () => {
+    assert.deepEqual(
+      parseNamedTriggerReferences(
+        JSON.stringify([{ name: "First", uuid: "first-uuid" }, { name: "Missing UUID" }, null]),
+      ),
+      [{ name: "First", uuid: "first-uuid" }],
+    );
+  });
+
+  it("handles missing or invalid cache data", () => {
+    assert.deepEqual(parseNamedTriggerReferences(undefined), []);
+    assert.deepEqual(parseNamedTriggerReferences("not json"), []);
+    assert.deepEqual(parseNamedTriggerReferences("{}"), []);
   });
 });
