@@ -2,6 +2,7 @@ import { ActionPanel, List, Icon, Action, closeMainWindow, getPreferenceValues, 
 
 import { getFirefoxProfiles } from "./lib/firefox";
 import { getChromiumProfiles } from "./lib/chromium";
+import { getOrionProfiles } from "./lib/orion";
 import { launchBrowser } from "./lib/browsers";
 import { useEffect, useState } from "react";
 
@@ -11,8 +12,9 @@ export default function Command(props: LaunchProps<{ launchContext: { type: stri
 
   const chromiumProfiles = getChromiumProfiles(enabledBrowsers);
   const firefoxProfiles = getFirefoxProfiles(enabledBrowsers);
+  const orionProfiles = getOrionProfiles(enabledBrowsers);
 
-  const browsers = [...chromiumProfiles, ...firefoxProfiles];
+  const browsers = [...chromiumProfiles, ...firefoxProfiles, ...orionProfiles];
 
   const [launched, setLaunched] = useState(false);
   useEffect(() => {
