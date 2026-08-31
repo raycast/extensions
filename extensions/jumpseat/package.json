@@ -12,7 +12,8 @@
     "Applications"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {
@@ -60,11 +61,12 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "^22.18.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "@types/node": "^26.0.0",
     "@types/react": "^19.1.12",
     "eslint": "^10.9.1",
     "prettier": "^3.6.2",
-    "typescript": "^5.9.2",
+    "typescript": "npm:@typescript/typescript6@^6.0.3",
     "vitest": "^4.1.10"
   }
 }

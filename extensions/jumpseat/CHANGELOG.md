@@ -7,3 +7,4 @@
 - Add secure browser sign-in with authorization code and PKCE.
 - Store and automatically refresh Raycast-scoped Jumpseat credentials.
 - Call Jumpseat's authenticated upcoming-flights endpoint directly.
+- Support Upcoming Flights on Windows while keeping the menu bar command exclusive to macOS.
