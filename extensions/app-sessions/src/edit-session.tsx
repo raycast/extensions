@@ -104,7 +104,6 @@ export function EditGroupForm({ group, revalidate }: Props) {
     emptyCommand(),
   ]);
   const [isLoadingShortcuts, setIsLoadingShortcuts] = useState(true);
-  const [isLoadingApps, setIsLoadingApps] = useState(true);
   const [shortcutListFailed, setShortcutListFailed] = useState(false);
   const startShortcut = normalizeShortcutValue(group?.startShortcut);
   const quitShortcut = normalizeShortcutValue(group?.quitShortcut);
@@ -132,8 +131,7 @@ export function EditGroupForm({ group, revalidate }: Props) {
         );
         setApps([...byBundleId.values()].sort((a, b) => a.name.localeCompare(b.name)));
       })
-      .catch(() => undefined)
-      .finally(() => setIsLoadingApps(false));
+      .catch(() => undefined);
   }, []);
 
   function updateCommand(
@@ -259,7 +257,6 @@ export function EditGroupForm({ group, revalidate }: Props) {
         title="Apps"
         info="Apps to open when starting and quit when ending this session"
         defaultValue={group?.apps.map((app) => app.bundleId) ?? []}
-        isLoading={isLoadingApps}
       >
         {apps.map((app) => (
           <Form.TagPicker.Item key={app.bundleId} value={app.bundleId} title={app.name} icon={{ fileIcon: app.path }} />

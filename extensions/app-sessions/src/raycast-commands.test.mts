@@ -20,7 +20,9 @@ test("parses and executes Raycast command deeplinks in order", async () => {
       { id: "1", deeplink: caffeinate, waitBeforeMs: 0 },
       { id: "2", deeplink: decaffeinate, waitBeforeMs: 0 },
     ],
-    async (command) => launched.push(command.name),
+    async (command) => {
+      launched.push(command.name);
+    },
   );
 
   assert.deepEqual(launched, ["caffeinate", "decaffeinate"]);
