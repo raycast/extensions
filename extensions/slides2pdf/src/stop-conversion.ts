@@ -1,13 +1,14 @@
 import { showToast, Toast, closeMainWindow } from "@raycast/api";
-import { isConversionRunning, requestStop } from "./utils/stop-signal";
+import { requestStop } from "./utils/stop-signal";
 
+// Stateless by design: the command doesn't know whether a conversion is running (tracking that
+// across processes is where the bugs were), it just records the request. A run that exists picks
+// it up between files; if none exists, the timestamp is inert.
 export default async function Command() {
-  if (!(await isConversionRunning())) {
-    // A no-view toast renders its title only, so the whole message goes there.
-    await showToast(Toast.Style.Failure, "No conversion is running");
-    return;
-  }
   await requestStop();
   await closeMainWindow().catch(() => {});
-  await showToast(Toast.Style.Success, "Stopping — the current file finishes, the rest is skipped");
+  await showToast(
+    Toast.Style.Success,
+    "Stop requested — a running conversion finishes its current file and skips the rest",
+  );
 }

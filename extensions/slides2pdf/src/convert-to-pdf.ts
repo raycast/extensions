@@ -2,7 +2,7 @@ import { showToast, Toast, getSelectedFinderItems, open, getPreferenceValues, cl
 import fs from "fs";
 import path from "path";
 import { detectBackends, rankBackendsForFile, convertFile, fileCategory, FileCategory } from "./utils/backends";
-import { beginConversion, endConversion, isStopRequested, markAlive } from "./utils/stop-signal";
+import { isStopRequested } from "./utils/stop-signal";
 
 export default async function Command() {
   // The API throws both when nothing is selected and on real failures (e.g. missing
@@ -46,90 +46,83 @@ export default async function Command() {
   let stopped = false;
   let skipped = 0;
   const toast = await showToast(Toast.Style.Animated, "Converting…");
-  const startedAt = await beginConversion();
+  const startedAt = Date.now();
 
-  try {
-    for (const [index, item] of selected.entries()) {
-      // The heartbeat tells the Stop Conversion command that there is something to stop.
-      await markAlive();
-      if (await isStopRequested(startedAt)) {
-        stopped = true;
-        skipped = selected.length - index;
-        break;
-      }
-      const src = path.resolve(item.path);
-      // statSync throws on paths that vanished since selection — that must fail this
-      // file only, not abort the whole batch.
-      let isDirectory: boolean;
+  for (const [index, item] of selected.entries()) {
+    if (await isStopRequested(startedAt)) {
+      stopped = true;
+      skipped = selected.length - index;
+      break;
+    }
+    const src = path.resolve(item.path);
+    // statSync throws on paths that vanished since selection — that must fail this
+    // file only, not abort the whole batch.
+    let isDirectory: boolean;
+    try {
+      isDirectory = fs.statSync(src).isDirectory();
+    } catch {
+      errors.push({ base: path.basename(src), message: "File not found — was it moved or deleted?" });
+      continue;
+    }
+    if (isDirectory) {
+      errors.push({ base: path.basename(src), message: "Folders can't be converted" });
+      continue;
+    }
+    const ext = path.extname(src);
+    const base = path.basename(src, ext);
+    const dir = path.dirname(src);
+
+    // Friendlier than the "no engine" error the capability layer would produce —
+    // .pdf is also in BUILTIN_EXCLUDED_EXTS (backends.ts) so no engine ever claims it.
+    // Its name needs no reservation: it exists on disk, so `taken` below blocks it.
+    if (ext.toLowerCase() === ".pdf") {
+      skippedPdfs.push(base + ext);
+      continue;
+    }
+
+    // Strip leading dots and spaces so converting a dotfile (.zshrc) doesn't produce a
+    // Finder-hidden output. A name made only of dots leaves nothing to keep, so it gets a
+    // neutral one rather than a hidden file — the collision handling below makes it unique.
+    const outName = base.replace(/^[.\s]+/, "").trimEnd() || "converted";
+    let outputPath = path.join(dir, `${outName}.pdf`);
+    // The extension tag only helps when there is one — ".", the extension of a name made of
+    // dots, would tag the file with an empty pair of brackets.
+    if (taken(outputPath) && ext.length > 1) outputPath = path.join(dir, `${outName} (${ext.slice(1)}).pdf`);
+    for (let n = 2; taken(outputPath); n++) outputPath = path.join(dir, `${outName} (${n}).pdf`);
+    targeted.add(outputPath);
+
+    const backends = rankBackendsForFile(preferred[fileCategory(ext)], available, ext);
+
+    if (backends.length === 0) {
+      const msg = `No engine supports ${ext} files — install LibreOffice for full format support.`;
+      console.error(`[slides2pdf] ${msg}`);
+      errors.push({ base, message: msg });
+      continue;
+    }
+
+    // Try each capable engine in order — a flaky native app falls back to the next one.
+    toast.title = selected.length > 1 ? `Converting ${index + 1}/${selected.length}: ${base}` : `Converting ${base}`;
+    const attemptErrors: string[] = [];
+    let converted = false;
+    for (const backend of backends) {
       try {
-        isDirectory = fs.statSync(src).isDirectory();
-      } catch {
-        errors.push({ base: path.basename(src), message: "File not found — was it moved or deleted?" });
-        continue;
-      }
-      if (isDirectory) {
-        errors.push({ base: path.basename(src), message: "Folders can't be converted" });
-        continue;
-      }
-      const ext = path.extname(src);
-      const base = path.basename(src, ext);
-      const dir = path.dirname(src);
-
-      // Friendlier than the "no engine" error the capability layer would produce —
-      // .pdf is also in BUILTIN_EXCLUDED_EXTS (backends.ts) so no engine ever claims it.
-      // Its name needs no reservation: it exists on disk, so `taken` below blocks it.
-      if (ext.toLowerCase() === ".pdf") {
-        skippedPdfs.push(base + ext);
-        continue;
-      }
-
-      // Strip leading dots and spaces so converting a dotfile (.zshrc) doesn't produce a
-      // Finder-hidden output. A name made only of dots leaves nothing to keep, so it gets a
-      // neutral one rather than a hidden file — the collision handling below makes it unique.
-      const outName = base.replace(/^[.\s]+/, "").trimEnd() || "converted";
-      let outputPath = path.join(dir, `${outName}.pdf`);
-      // The extension tag only helps when there is one — ".", the extension of a name made of
-      // dots, would tag the file with an empty pair of brackets.
-      if (taken(outputPath) && ext.length > 1) outputPath = path.join(dir, `${outName} (${ext.slice(1)}).pdf`);
-      for (let n = 2; taken(outputPath); n++) outputPath = path.join(dir, `${outName} (${n}).pdf`);
-      targeted.add(outputPath);
-
-      const backends = rankBackendsForFile(preferred[fileCategory(ext)], available, ext);
-
-      if (backends.length === 0) {
-        const msg = `No engine supports ${ext} files — install LibreOffice for full format support.`;
-        console.error(`[slides2pdf] ${msg}`);
-        errors.push({ base, message: msg });
-        continue;
-      }
-
-      // Try each capable engine in order — a flaky native app falls back to the next one.
-      toast.title = selected.length > 1 ? `Converting ${index + 1}/${selected.length}: ${base}` : `Converting ${base}`;
-      const attemptErrors: string[] = [];
-      let converted = false;
-      for (const backend of backends) {
-        try {
-          toast.message = `via ${backend.label}`;
-          await convertFile(backend, src, outputPath);
-          producedFiles.push(outputPath);
-          converted = true;
-          break;
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          console.error(`[slides2pdf] ${backend.label} failed for "${base}":`, message);
-          attemptErrors.push(`${backend.label}: ${message}`);
-        }
-      }
-
-      if (!converted) {
-        errors.push({ base, message: attemptErrors.join(" · ") });
-      } else if (selected.length === 1 && prefs.openAfterConvertSingle) {
-        await open(outputPath).catch(() => {});
+        toast.message = `via ${backend.label}`;
+        await convertFile(backend, src, outputPath);
+        producedFiles.push(outputPath);
+        converted = true;
+        break;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`[slides2pdf] ${backend.label} failed for "${base}":`, message);
+        attemptErrors.push(`${backend.label}: ${message}`);
       }
     }
-  } finally {
-    // Leaving the heartbeat behind would make Stop Conversion claim a run is still going.
-    await endConversion();
+
+    if (!converted) {
+      errors.push({ base, message: attemptErrors.join(" · ") });
+    } else if (selected.length === 1 && prefs.openAfterConvertSingle) {
+      await open(outputPath).catch(() => {});
+    }
   }
 
   // Opening the results after a deliberate stop would work against what the user just asked for.
