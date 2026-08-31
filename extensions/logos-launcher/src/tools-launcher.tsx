@@ -79,7 +79,7 @@ async function launchTool(tool: LogosTool, uris?: string[], options: { floating?
       await open(uri, isHttpUri(uri) ? undefined : LOGOS_BUNDLE_ID);
       if (options.floating) {
         try {
-          await floatActiveLogosPanel();
+          await floatActiveLogosPanel(tool.name);
         } catch (error) {
           await showToast({
             style: Toast.Style.Failure,
