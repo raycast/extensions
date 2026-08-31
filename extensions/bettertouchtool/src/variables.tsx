@@ -1,4 +1,17 @@
-import { Action, ActionPanel, Detail, Form, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Detail,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { homedir } from "node:os";
@@ -12,16 +25,29 @@ import { DevelopmentDiagnosticsSection } from "./diagnostics";
 import { type VariableDefinition } from "./variable-definitions";
 import {
   filterVariableDefinitions,
+  formatVariableValuePreview,
   getPersistentVariableNames,
+  isVariableSet,
   mergeVariableDefinitions,
+  parseNewVariable,
+  type NewVariableFormValues,
   type VariableFilter,
+  type WritableVariableType,
 } from "./variable-utils";
 
 const execFileAsync = promisify(execFile);
 const userVariablesPath = join(homedir(), "Library/Application Support/BetterTouchTool/btt_user_variables.plist");
+const variableValueBatchSize = 8;
+const clearValueShortcut: Keyboard.Shortcut = { modifiers: ["ctrl"], key: "x" };
+
+interface SetVariableData {
+  names: string[];
+  values: Array<{ name: string; value: string | number }>;
+}
 
 export default function Command() {
   const [variableFilter, setVariableFilter] = useState<VariableFilter>("all");
+  const [createdVariableNames, setCreatedVariableNames] = useState<string[]>([]);
   const btt = useMemo(createBttClient, []);
   const {
     isLoading,
@@ -30,7 +56,36 @@ export default function Command() {
   } = usePromise(loadVariableDefinitions, [], {
     failureToastOptions: { title: "Could not load BTT variables" },
   });
-  const filteredVariables = useMemo(() => filterVariableDefinitions(data, variableFilter), [data, variableFilter]);
+  const variables = useMemo(
+    () =>
+      mergeVariableDefinitions([
+        ...data.filter((variable) => variable.persistent).map((variable) => variable.name),
+        ...createdVariableNames,
+      ]),
+    [createdVariableNames, data],
+  );
+  const {
+    isLoading: isLoadingSetVariables,
+    data: setVariableData,
+    revalidate: revalidateSetVariables,
+  } = usePromise(loadSetVariableData, [btt, variables], {
+    execute: variableFilter === "set" && variables.length > 0,
+    failureToastOptions: { title: "Could not determine which BTT variables are set" },
+  });
+  const setVariableValues = useMemo(
+    () => new Map(setVariableData?.values.map(({ name, value }) => [name, value])),
+    [setVariableData],
+  );
+  const filteredVariables = useMemo(
+    () => filterVariableDefinitions(variables, variableFilter, new Set(setVariableData?.names)),
+    [setVariableData, variableFilter, variables],
+  );
+  const existingVariableNames = useMemo(() => new Set(variables.map((variable) => variable.name)), [variables]);
+
+  async function refreshVariables() {
+    await revalidate();
+    if (variableFilter === "set") await revalidateSetVariables();
+  }
 
   async function showAllVariablesInBtt() {
     try {
@@ -40,22 +95,39 @@ export default function Command() {
     }
   }
 
+  async function handleVariableCreated(name: string) {
+    setCreatedVariableNames((currentNames) => (currentNames.includes(name) ? currentNames : [...currentNames, name]));
+    setVariableFilter("persistent");
+    await revalidate();
+  }
+
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || (variableFilter === "set" && isLoadingSetVariables)}
       searchBarPlaceholder="Search BTT variables..."
       searchBarAccessory={<VariableFilterDropdown value={variableFilter} onChange={setVariableFilter} />}
       throttle
       actions={
         <ActionPanel>
-          <Action title="Refresh Variables" onAction={revalidate} icon={Icon.RotateClockwise} />
-          <Action title="Show All Variables in BTT" onAction={showAllVariablesInBtt} icon={Icon.AppWindowList} />
+          <CreateVariableAction btt={btt} existingNames={existingVariableNames} onCreated={handleVariableCreated} />
+          <ActionPanel.Section>
+            <RefreshVariablesAction onRefresh={refreshVariables} />
+            <Action title="Show All Variables in BTT" onAction={showAllVariablesInBtt} icon={Icon.AppWindowList} />
+          </ActionPanel.Section>
           <DevelopmentDiagnosticsSection />
         </ActionPanel>
       }
     >
       {filteredVariables.map((variable) => (
-        <VariableItem key={variable.name} variable={variable} btt={btt} />
+        <VariableItem
+          key={variable.name}
+          variable={variable}
+          btt={btt}
+          previewValue={variableFilter === "set" ? setVariableValues.get(variable.name) : undefined}
+          existingNames={existingVariableNames}
+          onVariableCreated={handleVariableCreated}
+          onRefresh={refreshVariables}
+        />
       ))}
     </List>
   );
@@ -75,6 +147,7 @@ function VariableFilterDropdown({
       onChange={(newValue) => onChange(newValue as VariableFilter)}
     >
       <List.Dropdown.Item title="All Variables" value="all" />
+      <List.Dropdown.Item title="Set Variables" value="set" />
       <List.Dropdown.Item title="Dynamic" value="dynamic" />
       <List.Dropdown.Item title="Context" value="context" />
       <List.Dropdown.Item title="Persistent" value="persistent" />
@@ -82,13 +155,30 @@ function VariableFilterDropdown({
   );
 }
 
-function VariableItem({ variable, btt }: { variable: VariableDefinition; btt: Btt }) {
+function VariableItem({
+  variable,
+  btt,
+  previewValue,
+  existingNames,
+  onVariableCreated,
+  onRefresh,
+}: {
+  variable: VariableDefinition;
+  btt: Btt;
+  previewValue?: string | number;
+  existingNames: ReadonlySet<string>;
+  onVariableCreated: (name: string) => Promise<void>;
+  onRefresh: () => Promise<void>;
+}) {
   return (
     <List.Item
       title={variable.name}
       subtitle={variable.description}
       keywords={[variable.category, variable.persistent ? "persistent" : "dynamic"]}
       accessories={[
+        ...(previewValue !== undefined
+          ? [{ text: formatVariableValuePreview(previewValue), tooltip: String(previewValue) }]
+          : []),
         { tag: variable.category },
         ...(variable.readOnly ? [{ icon: Icon.Lock, tooltip: "Read only" }] : []),
       ]}
@@ -101,16 +191,150 @@ function VariableItem({ variable, btt }: { variable: VariableDefinition; btt: Bt
           />
           {!variable.readOnly ? (
             <Action.Push
-              title="Change Value"
+              title="Edit Value"
               target={<LoadVariableEditor variable={variable} btt={btt} />}
               icon={Icon.Pencil}
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
           ) : null}
+          {!variable.readOnly && variable.persistent ? (
+            <ClearVariableValueAction variable={variable} btt={btt} onCleared={onRefresh} />
+          ) : null}
           <Action.CopyToClipboard title="Copy Variable Name" content={variable.name} />
+          <ActionPanel.Section>
+            <CreateVariableAction btt={btt} existingNames={existingNames} onCreated={onVariableCreated} />
+            <RefreshVariablesAction onRefresh={onRefresh} />
+          </ActionPanel.Section>
           <DevelopmentDiagnosticsSection />
         </ActionPanel>
       }
     />
+  );
+}
+
+function CreateVariableAction({
+  btt,
+  existingNames,
+  onCreated,
+}: {
+  btt: Btt;
+  existingNames: ReadonlySet<string>;
+  onCreated: (name: string) => Promise<void>;
+}) {
+  return (
+    <Action.Push
+      title="Create New Variable"
+      target={<CreateVariableForm btt={btt} existingNames={existingNames} onCreated={onCreated} />}
+      icon={Icon.Plus}
+      shortcut={Keyboard.Shortcut.Common.New}
+    />
+  );
+}
+
+function RefreshVariablesAction({ onRefresh }: { onRefresh: () => Promise<void> }) {
+  return (
+    <Action
+      title="Refresh Variables"
+      onAction={onRefresh}
+      icon={Icon.RotateClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+    />
+  );
+}
+
+function ClearVariableValueAction({
+  variable,
+  btt,
+  onCleared,
+}: {
+  variable: VariableDefinition;
+  btt: Btt;
+  onCleared: () => Promise<unknown>;
+}) {
+  async function handleClear() {
+    const confirmed = await confirmAlert({
+      title: `Clear ${variable.name}?`,
+      message: "The variable will remain available, but its value will be replaced with an empty string.",
+      icon: Icon.Eraser,
+      primaryAction: { title: "Clear Value", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
+    try {
+      await btt.vars.set(variable.name, "", { persistent: true });
+      await onCleared();
+      await showToast({ title: "Variable value cleared", message: variable.name, style: Toast.Style.Success });
+    } catch (error) {
+      await showBttFailureToast(error, `Could not clear ${variable.name}`);
+    }
+  }
+
+  return (
+    <Action
+      title="Clear Value"
+      onAction={handleClear}
+      icon={Icon.Eraser}
+      shortcut={clearValueShortcut}
+      style={Action.Style.Destructive}
+    />
+  );
+}
+
+function CreateVariableForm({
+  btt,
+  existingNames,
+  onCreated,
+}: {
+  btt: Btt;
+  existingNames: ReadonlySet<string>;
+  onCreated: (name: string) => Promise<void>;
+}) {
+  const { pop } = useNavigation();
+  const [type, setType] = useState<WritableVariableType>("string");
+
+  async function handleSubmit(values: NewVariableFormValues) {
+    const parsed = parseNewVariable(values, existingNames);
+    if (!parsed.success) {
+      await showToast({ title: parsed.error, style: Toast.Style.Failure });
+      return;
+    }
+
+    try {
+      await btt.vars.set(parsed.name, parsed.value, { persistent: true });
+      await onCreated(parsed.name);
+      await showToast({ title: "Variable created", message: parsed.name, style: Toast.Style.Success });
+      pop();
+    } catch (error) {
+      await showBttFailureToast(error, `Could not create ${parsed.name}`);
+    }
+  }
+
+  return (
+    <Form
+      navigationTitle="Create BTT Variable"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Create Variable" onSubmit={handleSubmit} icon={Icon.Plus} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text="New variables are persistent so they remain available after BetterTouchTool restarts." />
+      <Form.TextField id="name" title="Variable Name" placeholder="Enter a unique name" autoFocus />
+      <Form.Dropdown
+        id="type"
+        title="Type"
+        value={type}
+        onChange={(newType) => setType(newType as WritableVariableType)}
+      >
+        <Form.Dropdown.Item title="Text" value="string" />
+        <Form.Dropdown.Item title="Number" value="number" />
+      </Form.Dropdown>
+      {type === "number" ? (
+        <Form.TextField id="value" title="Value" placeholder="Enter a number" />
+      ) : (
+        <Form.TextArea id="value" title="Value" placeholder="Enter text" />
+      )}
+    </Form>
   );
 }
 
@@ -137,10 +361,14 @@ function VariableDetail({ variable, btt }: { variable: VariableDefinition; btt: 
         <ActionPanel>
           {!variable.readOnly && data ? (
             <Action.Push
-              title="Change Value"
+              title="Edit Value"
               target={<VariableEditor variable={variable} btt={btt} initialValue={formattedValue} type={data.type} />}
               icon={Icon.Pencil}
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
+          ) : null}
+          {!variable.readOnly && variable.persistent ? (
+            <ClearVariableValueAction variable={variable} btt={btt} onCleared={revalidate} />
           ) : null}
           {data ? <Action.CopyToClipboard title="Copy Value" content={formattedValue} /> : null}
           <Action title="Refresh Value" onAction={revalidate} icon={Icon.RotateClockwise} />
@@ -216,6 +444,32 @@ async function readPersistentVariableNames(): Promise<string[]> {
   } catch {
     return [];
   }
+}
+
+async function loadSetVariableData(btt: Btt, variables: VariableDefinition[]): Promise<SetVariableData> {
+  const names = variables.filter((variable) => variable.persistent).map((variable) => variable.name);
+  const values: SetVariableData["values"] = [];
+
+  for (let index = 0; index < variables.length; index += variableValueBatchSize) {
+    const batch = variables.slice(index, index + variableValueBatchSize);
+    const batchValues = await Promise.all(
+      batch.map(async (variable) => {
+        try {
+          const { value, type } = await loadVariableValue(btt, variable.name);
+          return isVariableSet(variable, value, type) ? { name: variable.name, value } : undefined;
+        } catch {
+          return undefined;
+        }
+      }),
+    );
+    for (const result of batchValues) {
+      if (!result) continue;
+      if (!names.includes(result.name)) names.push(result.name);
+      values.push(result);
+    }
+  }
+
+  return { names, values };
 }
 
 async function loadVariableValue(btt: Btt, name: string) {
