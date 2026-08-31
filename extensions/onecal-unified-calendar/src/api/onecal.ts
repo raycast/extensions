@@ -245,7 +245,13 @@ const MEETING_HOSTS_EXACT = new Set([
   "teams.microsoft.com",
   "teams.live.com",
 ]);
-const MEETING_HOST_SUFFIXES = ["zoom.us", "webex.com", "whereby.com"];
+const MEETING_HOST_SUFFIXES = [
+  "zoom.us",
+  "webex.com",
+  "whereby.com",
+  "gotomeeting.com",
+  "chime.aws",
+];
 
 /** hostnameの完全一致または「.suffix」境界つきサブドメインのみ許可する */
 function isMeetingUrl(candidate: string): boolean {
@@ -282,8 +288,8 @@ function findMeetingUrlInText(text: string | undefined): string | undefined {
  * nativeEvent（プロバイダー生イベント）内のGoogle/Outlook形式か、location/description中のURLから拾う。
  */
 function extractMeetingUrl(raw: Record<string, unknown>): string | undefined {
-  // 構造化フィールド（プロバイダーが設定する会議リンク）はhttp(s)であることのみ検証して採用する。
-  // 自由記述（location/description等）は攻撃者が任意に書けるため、hostname許可リストで厳格に検証する。
+  // 構造化フィールド・自由記述を問わず、すべての会議URL候補をhostname許可リスト（isMeetingUrl）で検証する。
+  // 会議URLはイベント作成者が任意に設定できるため、出所によらずfail-closedにする。
   const direct = str(raw, [
     "meetingUrl",
     "conferenceUrl",
@@ -292,7 +298,7 @@ function extractMeetingUrl(raw: Record<string, unknown>): string | undefined {
     "joinUrl",
     "onlineMeetingUrl",
   ]);
-  if (direct && parseHttpUrl(direct)) {
+  if (direct && isMeetingUrl(direct)) {
     return direct;
   }
   const native =
@@ -302,7 +308,7 @@ function extractMeetingUrl(raw: Record<string, unknown>): string | undefined {
   if (native) {
     // Google Calendar形式
     const hangout = str(native, ["hangoutLink"]);
-    if (hangout && parseHttpUrl(hangout)) {
+    if (hangout && isMeetingUrl(hangout)) {
       return hangout;
     }
     const conf =
@@ -315,7 +321,7 @@ function extractMeetingUrl(raw: Record<string, unknown>): string | undefined {
       const video =
         entryPoints.find((p) => p.entryPointType === "video") ?? entryPoints[0];
       const uri = video ? str(video, ["uri"]) : undefined;
-      if (uri && parseHttpUrl(uri)) {
+      if (uri && isMeetingUrl(uri)) {
         return uri;
       }
     }
@@ -327,7 +333,7 @@ function extractMeetingUrl(raw: Record<string, unknown>): string | undefined {
     const joinUrl =
       (om ? str(om, ["joinUrl"]) : undefined) ??
       str(native, ["onlineMeetingUrl", "joinUrl"]);
-    if (joinUrl && parseHttpUrl(joinUrl)) {
+    if (joinUrl && isMeetingUrl(joinUrl)) {
       return joinUrl;
     }
     // テキストフィールド中のURL（自由記述のため許可リスト検証つき）

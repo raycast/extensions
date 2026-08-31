@@ -16,18 +16,12 @@ import { connectMcp } from "./api/mcp";
 import { fetchUnifiedCalendar, filterClones, OneCalEvent } from "./api/onecal";
 import { buildMockData } from "./api/mock";
 
-interface Preferences {
-  clientId: string;
-  daysAhead: string;
-  hideClones: boolean;
-}
-
 const CACHE_VERSION = "v2";
 
 export default function UnifiedCalendar(
-  props: LaunchProps<{ arguments: { date?: string } }>,
+  props: LaunchProps<{ arguments: Arguments.UnifiedCalendar }>,
 ) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.UnifiedCalendar>();
   const [hideClones, setHideClones] = useState(preferences.hideClones);
   const [calendarFilter, setCalendarFilter] = useState<string>("all");
 
