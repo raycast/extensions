@@ -261,6 +261,23 @@ export function isUnreachable(pool: Pool): boolean {
 }
 
 /**
+ * How many registrations GitHub holds beyond what a pool expects, or null.
+ *
+ * Only meaningful for a repository pool. An organisation scope counts every
+ * runner in the organisation, including other pools and other machines, so a
+ * number above this pool's count is entirely normal there and means nothing.
+ * runpool draws the same distinction, in prose, where it reports the mismatch.
+ *
+ * Not a fault, and deliberately not styled as one. It is the lasting trace of
+ * a shrink that removed runners locally but could not reach GitHub to
+ * deregister them, which otherwise appears only as a toast at the time.
+ */
+export function surplusRegistrations(pool: Pool): number | null {
+  if (pool.scope !== "repo" || pool.github_registered === null) return null;
+  return pool.github_registered > pool.count ? pool.github_registered - pool.count : null;
+}
+
+/**
  * True when a read that should have asked GitHub came back without its answer.
  *
  * `runpool status` treats an unusable `gh` as "GitHub could not be asked" and

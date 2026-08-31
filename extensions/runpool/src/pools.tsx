@@ -30,6 +30,7 @@ import {
   Pool,
   poolState,
   runpool,
+  surplusRegistrations,
   stateLabel,
   Status,
 } from "./lib/runpool";
@@ -129,9 +130,14 @@ export default function Command() {
       // long as it takes to read, and a pool can be resized from another
       // window, the AI tools or a terminal in that time, so writing the number
       // worked out before the question could deregister runners nobody agreed
-      // to. Check once more, as late as possible, and abandon rather than
-      // guess. This leaves only the width of the call itself; closing that
-      // would need a compare-and-swap in runpool.
+      // to.
+      //
+      // `--if-count` below is what actually settles this: runpool 0.9.0 refuses
+      // the write unless the pool is still where the decision was made, and
+      // holds a lock so two resizes cannot interleave. This read stays for two
+      // reasons: it says something better than a command failure when the pool
+      // has obviously moved, and an older runpool ignores the flag, where it is
+      // then the only check there is.
       const settled = (await getStatus({ local: true })).pools.find((candidate) => candidate.name === pool.name);
       if (settled?.count !== current.count) {
         await showFailureToast(
@@ -146,7 +152,7 @@ export default function Command() {
       }
 
       await act(
-        () => runpool(["set-count", pool.name, String(count)]),
+        () => runpool(["set-count", pool.name, String(count), "--if-count", String(current.count)]),
         `Resizing to ${count}…`,
         `${pool.name} now has ${count} runners`,
       );
@@ -212,6 +218,16 @@ export default function Command() {
           subtitle={fraction(pool)}
           accessories={[
             { text: pool.target },
+            // A note rather than a state, because it is not a fault. Repository
+            // pools only: an org scope counts other pools and other machines.
+            ...(surplusRegistrations(pool) !== null
+              ? [
+                  {
+                    icon: { source: Icon.Info, tintColor: Color.SecondaryText },
+                    tooltip: `GitHub has ${pool.github_registered} runners registered for ${pool.target}, but this pool expects ${pool.count}. Usually runners a shrink removed locally without reaching GitHub to deregister them.`,
+                  },
+                ]
+              : []),
             {
               tag: { value: stateLabel(pool, status.paused), color: stateColor(pool, status.paused) },
               tooltip:

@@ -9,6 +9,8 @@
 - Replace the fixed capacity actions with one step either way plus Set Runner Count, so a pool registered above the old range can be restored
 - Refuse to resize a pool with jobs in flight before asking to confirm, rather than after
 - Abandon a resize, rather than write it, if the pool was changed elsewhere while the confirmation was open
+- Hand the expected count to runpool, so a resize is refused by the tool itself rather than only by this extension
+- Note when GitHub holds more runner registrations for a repository pool than the pool expects
 - Offer a way back from the dependency screens, so correcting the executable path in preferences takes effect without relaunching the command
 - Stop the Get Pool Status AI tool reporting a pool as resting when GitHub could not be asked whether it is still registered
 - Remove the Machine Load command

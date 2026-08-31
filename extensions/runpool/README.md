@@ -11,7 +11,7 @@ brew install aicayzer/tap/runpool
 brew install gh && gh auth login
 ```
 
-[`runpool`](https://github.com/aicayzer/runpool) is what this extension drives. The [GitHub CLI](https://cli.github.com) is what `runpool` registers and deregisters runners through, and what this extension reads workflow history through, so an unauthenticated `gh` is not a partial setup — it is no setup at all.
+[`runpool`](https://github.com/aicayzer/runpool) is what this extension drives, version 0.9.0 or newer. Older versions work, but changing a pool's runner count is then guarded only by this extension rather than by runpool itself, so a pool resized from somewhere else at the same moment can be shrunk by an action meant to grow it. The [GitHub CLI](https://cli.github.com) is what `runpool` registers and deregisters runners through, and what this extension reads workflow history through, so an unauthenticated `gh` is not a partial setup — it is no setup at all.
 
 The extension tells you which one is missing and how to fix it, so there is no harm in trying it first.
 
