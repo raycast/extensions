@@ -31,19 +31,10 @@ export interface Pool {
   watch: string[];
 }
 
-export interface Machine {
-  /** One-minute load average: processes running or waiting for a CPU. */
-  load: number;
-  cores: number;
-  /** The contention threshold runpool itself warns above. */
-  load_warn: number;
-}
-
 export interface Status {
   paused: boolean;
   /** True when the GitHub query was skipped, so the github_* fields are null. */
   local: boolean;
-  machine: Machine;
   paths: { base: string; cache: string; log: string; log_dir: string; telemetry: string };
   pools: Pool[];
 }
@@ -56,10 +47,33 @@ export class RunpoolNotFoundError extends Error {
   }
 }
 
+/**
+ * The GitHub CLI is missing or signed out.
+ *
+ * A distinct type rather than a message, because both are ordinary setup
+ * states with a one-line remedy, and the views answer them with a screen
+ * rather than an error string. Which of the two it is decides the remedy, so
+ * it is carried on the error rather than re-derived by matching on prose.
+ */
+export class GitHubCliError extends Error {
+  constructor(readonly reason: "missing" | "unauthenticated") {
+    super(
+      reason === "missing"
+        ? "GitHub CLI (gh) is not installed, or is not on the path this extension searched."
+        : "GitHub CLI is installed but not signed in to GitHub.",
+    );
+    this.name = "GitHubCliError";
+  }
+}
+
 // A Raycast command does not inherit an interactive shell, so PATH is minimal
 // and `runpool` alone will usually not resolve. Look where it actually
 // installs to, after whatever the user told us.
 const CANDIDATE_PATHS = [`${homedir()}/.local/bin/runpool`, "/opt/homebrew/bin/runpool", "/usr/local/bin/runpool"];
+
+// The same problem for `gh`, which runpool itself requires and which this
+// extension also calls directly for workflow history.
+const GH_CANDIDATE_PATHS = ["/opt/homebrew/bin/gh", "/usr/local/bin/gh", "/usr/bin/gh"];
 
 /**
  * Where the executable is, resolved on every call rather than memoised.
@@ -78,6 +92,18 @@ export function findRunpool(): string | null {
     return existsSync(explicit) ? explicit : null;
   }
   return CANDIDATE_PATHS.find((p) => existsSync(p)) ?? null;
+}
+
+/**
+ * Where the GitHub CLI is, or null.
+ *
+ * runpool requires an authenticated `gh` and so does this extension, but the
+ * two fail differently: `runpool status` swallows a broken `gh` and reports
+ * the GitHub fields as null, while a direct `gh api` call fails outright.
+ * Resolved the same way as runpool, and for the same reason.
+ */
+export function findGh(): string | null {
+  return GH_CANDIDATE_PATHS.find((p) => existsSync(p)) ?? null;
 }
 
 /** Absolute path to the executable, or throw so the caller can offer install help. */
@@ -113,21 +139,32 @@ export async function runpool(args: string[], signal?: AbortSignal): Promise<str
  * work from Raycast's deliberately minimal environment.
  */
 export async function github(args: string[], signal?: AbortSignal): Promise<string> {
+  const bin = findGh();
+  if (!bin) throw new GitHubCliError("missing");
+
   try {
-    const { stdout } = await execFileAsync("gh", args, {
+    const { stdout } = await execFileAsync(bin, args, {
       signal,
       env: COMMAND_ENV,
       maxBuffer: 4 * 1024 * 1024,
     });
     return stdout;
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      throw new Error("GitHub CLI (gh) is required. Install it, then run: gh auth login");
-    }
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") throw new GitHubCliError("missing");
 
+    // Sign-in is checked here rather than up front. `gh auth status` validates
+    // the token against the API, so pre-flighting it would add a network call
+    // to every launch to learn what the first real request reports anyway.
+    //
+    // Two different messages, because there are two different failures. No
+    // credentials at all gets gh's own "please run: gh auth login"; a token
+    // that has expired or been revoked gets GitHub's "Bad credentials (HTTP
+    // 401)" passed straight through. Matching only the first left the second
+    // arriving as a raw API error, which is the state a token lands in on its
+    // own after being set up correctly once.
     const stderr = (error as { stderr?: string } | null)?.stderr ?? "";
-    if (/auth login|not logged|authentication/i.test(stderr)) {
-      throw new Error("GitHub CLI is not authenticated. Run: gh auth login");
+    if (/auth login|not logged|authentication|bad credentials|http 401/i.test(stderr)) {
+      throw new GitHubCliError("unauthenticated");
     }
     throw error;
   }
@@ -223,6 +260,19 @@ export function isUnreachable(pool: Pool): boolean {
   return pool.running > 0 && pool.github_online === 0;
 }
 
+/**
+ * True when a read that should have asked GitHub came back without its answer.
+ *
+ * `runpool status` treats an unusable `gh` as "GitHub could not be asked" and
+ * reports those fields as null rather than failing. That is right for the CLI
+ * and quietly wrong here: `isUnreachable` can then never return true, so the
+ * one state worth acting on stops being detected while every pool still reads
+ * as healthy. The list says so rather than showing a reassuring lie.
+ */
+export function githubUnchecked(status: Status): boolean {
+  return !status.local && status.pools.some((pool) => pool.github_registered === null);
+}
+
 /** One line summarising the whole machine, for a command subtitle. */
 export function summarise(status: Status): string {
   if (status.paused) return "Paused";
@@ -233,19 +283,6 @@ export function summarise(status: Status): string {
   if (busy > 0) return `Active ${busy}/${slots}`;
   if (running === 0) return "Offline";
   return "Idle";
-}
-
-/**
- * Load average against core count.
- *
- * Both numbers, spelled out, because neither means anything alone: 38.9 is
- * unreadable without knowing the machine, and a bare core count is a fact
- * nobody needs. Written as prose rather than a fraction on purpose, since a
- * fraction implies the numerator cannot exceed the denominator and load
- * routinely does.
- */
-export function loadLabel(machine: Machine): string {
-  return `Load ${machine.load.toFixed(1)} across ${machine.cores} cores`;
 }
 
 /**

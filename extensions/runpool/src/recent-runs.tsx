@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { NotInstalled } from "./components/NotInstalled";
+import { Requirements } from "./components/Requirements";
 import {
   configuredRepositories,
   enrichWorkflowRuns,
@@ -11,7 +11,7 @@ import {
   WorkflowRun,
   WorkflowRunPager,
 } from "./lib/github";
-import { errorMessage, findRunpool, getStatus, githubAvatar, Pool } from "./lib/runpool";
+import { errorMessage, findGh, findRunpool, getStatus, githubAvatar, GitHubCliError, Pool } from "./lib/runpool";
 import { WorkflowRunDetail } from "./workflow-run-detail";
 
 type HistoryState = {
@@ -77,6 +77,7 @@ function replaceRuns(current: WorkflowRun[], enriched: WorkflowRun[]): WorkflowR
 
 export default function Command() {
   const installed = findRunpool() !== null;
+  const ghInstalled = findGh() !== null;
   const pager = useRef<WorkflowRunPager | undefined>(undefined);
   const abort = useRef<AbortController | undefined>(undefined);
   const [revision, setRevision] = useState(0);
@@ -113,7 +114,7 @@ export default function Command() {
   }, [enrich, state.pools]);
 
   useEffect(() => {
-    if (!installed) return;
+    if (!installed || !ghInstalled) return;
 
     abort.current?.abort();
     const controller = new AbortController();
@@ -134,6 +135,11 @@ export default function Command() {
         const next = await nextPager.next(controller.signal);
         if (controller.signal.aborted) return;
         if (next.runs.length === 0 && next.failures.length === repositories.length) {
+          // Every source failed for the same reason when that reason is the
+          // GitHub CLI itself. Rethrow it rather than flattening it into a
+          // string, so the view can answer it with a screen.
+          const cli = next.failures.find((failure) => failure.error instanceof GitHubCliError)?.error;
+          if (cli) throw cli;
           throw new Error(next.failures.map((failure) => failure.message).join("\n"));
         }
         setState({
@@ -152,9 +158,13 @@ export default function Command() {
 
     void initialise();
     return () => controller.abort();
-  }, [enrich, installed, revision]);
+  }, [enrich, ghInstalled, installed, revision]);
 
-  if (!installed) return <NotInstalled />;
+  if (!installed) return <Requirements missing="runpool" />;
+  if (!ghInstalled) return <Requirements missing="gh" />;
+  if (state.error instanceof GitHubCliError) {
+    return <Requirements missing={state.error.reason === "missing" ? "gh" : "gh-auth"} />;
+  }
 
   const warning = state.failures.length
     ? `Could not read ${state.failures.map((failure) => failure.repository).join(", ")}`

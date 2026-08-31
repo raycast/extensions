@@ -77,6 +77,8 @@ export type WorkflowJob = {
 export type SourceFailure = {
   repository: string;
   message: string;
+  /** The rejection itself, so a caller can tell a setup problem from a bad repo. */
+  error: unknown;
 };
 
 type Source = {
@@ -199,7 +201,11 @@ export class WorkflowRunPager {
       }
 
       source.hasMore = false;
-      this.failures.push({ repository: source.repository, message: errorText(result.reason) });
+      this.failures.push({
+        repository: source.repository,
+        message: errorText(result.reason),
+        error: result.reason,
+      });
     }
   }
 }

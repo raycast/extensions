@@ -14,13 +14,16 @@ import {
   Toast,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { NotInstalled } from "./components/NotInstalled";
 import { PoolDetail } from "./components/PoolDetail";
+import { Requirements } from "./components/Requirements";
+import { SetRunnerCount } from "./components/SetRunnerCount";
 import { useStatus } from "./hooks/useStatus";
 import {
   errorMessage,
+  findGh,
   fraction,
   getStatus,
+  githubUnchecked,
   isUnreachable,
   ownerAvatar,
   Pool,
@@ -56,7 +59,7 @@ function stateColor(pool: Pool, paused: boolean): Color {
 export default function Command() {
   const { status, isLoading, hasFetched, installed, error, revalidate } = useStatus();
 
-  if (!installed) return <NotInstalled />;
+  if (!installed) return <Requirements missing="runpool" />;
 
   async function act(action: () => Promise<unknown>, pending: string, done: string) {
     const toast = await showToast({ style: Toast.Style.Animated, title: pending });
@@ -78,6 +81,20 @@ export default function Command() {
       // count captured when the list row rendered.
       const current = (await getStatus({ local: true })).pools.find((candidate) => candidate.name === pool.name);
       if (!current) throw new Error(`Pool "${pool.name}" no longer exists.`);
+      if (count === current.count) return;
+
+      // runpool refuses to resize a pool mid-job rather than failing the jobs.
+      // Say so before asking anything, rather than after a confirmation that
+      // was never going to be acted on.
+      if (current.busy > 0) {
+        await showFailureToast(
+          new Error("runpool refuses to resize a busy pool, because it would fail those jobs. Wait, then try again."),
+          {
+            title: `${pool.name} is running ${current.busy} ${current.busy === 1 ? "job" : "jobs"}`,
+          },
+        );
+        return;
+      }
 
       if (count < current.count) {
         const confirmed = await confirmAlert({
@@ -99,8 +116,41 @@ export default function Command() {
     }
   }
 
+  const ghMissing = findGh() === null;
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter pools">
+      {/* `runpool status` treats an unusable `gh` as "GitHub could not be
+          asked" and reports those fields as null rather than failing, so
+          without this the list would go on showing every pool as healthy
+          while the registration check it relies on was not running at all.
+          A row rather than a whole screen: everything else here is local and
+          still works. */}
+      {status && githubUnchecked(status) && (
+        <List.Section title="GitHub could not be asked">
+          <List.Item
+            icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+            title={ghMissing ? "GitHub CLI is not installed" : "GitHub did not answer"}
+            subtitle="Registrations are not being checked, so an unreachable pool still reads as healthy"
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Show What to Do"
+                  icon={Icon.Info}
+                  target={<Requirements missing={ghMissing ? "gh" : "gh-auth"} />}
+                />
+                <Action
+                  title="Try Again"
+                  icon={Icon.ArrowClockwise}
+                  onAction={revalidate}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+
       {status?.pools.map((pool) => (
         <List.Item
           key={pool.name}
@@ -199,21 +249,30 @@ export default function Command() {
               </ActionPanel.Section>
 
               <ActionPanel.Section title="Capacity">
-                {/* A plain range rather than a curated list. Which number is
-                    right for a given machine is genuinely unmeasured, so
-                    offering 2, 4, 6, 8 implied a view this has no basis for
-                    and put 1 and 3 out of reach for no reason. */}
-                {[1, 2, 3, 4, 5, 6]
-                  .filter((n) => n !== pool.count)
-                  .map((n) => (
-                    <Action
-                      key={n}
-                      title={`Set to ${n} Runners`}
-                      icon={Icon.Gauge}
-                      style={n < pool.count ? Action.Style.Destructive : Action.Style.Regular}
-                      onAction={() => setPoolCount(pool, n)}
-                    />
-                  ))}
+                {/* One step either way, titled with where it lands, because a
+                    step is the change people actually make. A fixed list of
+                    numbers was a ceiling as well as a menu: runpool takes 1 to
+                    9999, so a pool registered above whatever the list stopped
+                    at could be shrunk here and never restored. The form has no
+                    ceiling, which is the only way to close that properly. */}
+                <Action
+                  title={`Increase to ${pool.count + 1} Runners`}
+                  icon={Icon.Plus}
+                  onAction={() => setPoolCount(pool, pool.count + 1)}
+                />
+                {pool.count > 1 && (
+                  <Action
+                    title={`Decrease to ${pool.count - 1} ${pool.count - 1 === 1 ? "Runner" : "Runners"}`}
+                    icon={Icon.Minus}
+                    style={Action.Style.Destructive}
+                    onAction={() => setPoolCount(pool, pool.count - 1)}
+                  />
+                )}
+                <Action.Push
+                  title="Set Runner Count…"
+                  icon={Icon.Gauge}
+                  target={<SetRunnerCount pool={pool} onSubmit={(count) => setPoolCount(pool, count)} />}
+                />
               </ActionPanel.Section>
 
               <ActionPanel.Section>

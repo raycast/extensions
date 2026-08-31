@@ -46,7 +46,7 @@
       "name": "menubar",
       "title": "Runner Status in Menu Bar",
       "subtitle": "RunPool",
-      "description": "Show how much of the pool is awake in the menu bar, as a fill level",
+      "description": "Show how much of your runner capacity is busy, as a fill level in the menu bar",
       "mode": "menu-bar",
       "interval": "1m",
       "disabledByDefault": true,
@@ -61,15 +61,6 @@
           "default": false
         }
       ]
-    },
-    {
-      "name": "load",
-      "title": "Machine Load",
-      "subtitle": "RunPool",
-      "description": "Keep the machine's load average in this command's subtitle",
-      "mode": "no-view",
-      "interval": "1m",
-      "disabledByDefault": true
     }
   ],
   "preferences": [
