@@ -1,6 +1,6 @@
 # Agent Browser Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-31
 
 * Open links in a visible browser session directly from Raycast.
 * Use Raycast AI to open, view, control, and close browser sessions.
