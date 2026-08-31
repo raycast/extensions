@@ -1,4 +1,5 @@
 import { ActionPanel, Action, List, Icon, closeMainWindow, Form, useNavigation } from "@raycast/api";
+import { useMemo, useState } from "react";
 import { actions } from "bettertouchtool";
 import { actionCatalog, type ActionDefinition } from "bettertouchtool/catalog";
 import {
@@ -8,19 +9,69 @@ import {
   type FormValues,
   type ParameterField,
 } from "./action-parameters";
+import { getActionCategoryIconName, getActionIconName } from "./action-icons";
 import { createBttClient } from "./btt";
 import { showBttFailureToast } from "./btt-toast";
 import { DevelopmentDiagnosticsSection } from "./diagnostics";
 
+const allCategories = "all";
+
 export default function Command() {
+  const [category, setCategory] = useState(allCategories);
+  const categories = useMemo(
+    () =>
+      [...new Set(actionCatalog.all.map((actionDefinition) => actionDefinition.category))].sort((left, right) =>
+        left.localeCompare(right),
+      ),
+    [],
+  );
+  const filteredActions = useMemo(
+    () =>
+      category === allCategories
+        ? actionCatalog.all
+        : actionCatalog.all.filter((actionDefinition) => actionDefinition.category === category),
+    [category],
+  );
+
   return (
-    <List searchBarPlaceholder="Search actions..." throttle>
-      <List.Section title="Actions" subtitle={String(actionCatalog.all.length)}>
-        {actionCatalog.all.map((actionDefinition) => (
+    <List
+      searchBarPlaceholder="Search actions..."
+      searchBarAccessory={<CategoryDropdown categories={categories} value={category} onChange={setCategory} />}
+      throttle
+    >
+      <List.Section
+        title={category === allCategories ? "All Actions" : category}
+        subtitle={String(filteredActions.length)}
+      >
+        {filteredActions.map((actionDefinition) => (
           <ActionItem key={actionDefinition.id} actionDefinition={actionDefinition} />
         ))}
       </List.Section>
     </List>
+  );
+}
+
+function CategoryDropdown({
+  categories,
+  value,
+  onChange,
+}: {
+  categories: string[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <List.Dropdown tooltip="Filter by action category" value={value} onChange={onChange}>
+      <List.Dropdown.Item title="All Categories" value={allCategories} icon={Icon.List} />
+      {categories.map((category) => (
+        <List.Dropdown.Item
+          key={category}
+          title={category}
+          value={category}
+          icon={Icon[getActionCategoryIconName(category)]}
+        />
+      ))}
+    </List.Dropdown>
   );
 }
 
@@ -131,7 +182,7 @@ function ActionItem({ actionDefinition }: { actionDefinition: ActionDefinition }
       id={String(actionDefinition.id)}
       title={actionDefinition.name}
       subtitle={actionDefinition.description}
-      icon={Icon.CommandSymbol}
+      icon={Icon[getActionIconName(actionDefinition)]}
       accessories={[{ tag: actionDefinition.category }, { text: String(actionDefinition.id), icon: Icon.Hashtag }]}
       keywords={[actionDefinition.slug, actionDefinition.category]}
       actions={
