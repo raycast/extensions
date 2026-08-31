@@ -17,6 +17,64 @@
       "subtitle": "Calendly",
       "description": "Copy Meeting URL",
       "mode": "view"
+    },
+    {
+      "name": "upcoming-meetings",
+      "title": "Upcoming Meetings",
+      "subtitle": "Calendly",
+      "description": "Browse upcoming Calendly meetings, join calls, reschedule, or cancel with confirmation",
+      "mode": "view"
+    },
+    {
+      "name": "event-types",
+      "title": "Event Types",
+      "subtitle": "Calendly",
+      "description": "Browse active Calendly event types, share scheduling links, and check availability",
+      "mode": "view"
+    },
+    {
+      "name": "book-meeting",
+      "title": "Book Meeting",
+      "subtitle": "Calendly",
+      "description": "Book an invitee into a verified available Calendly time slot with confirmation",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-meetings",
+      "title": "List Meetings",
+      "description": "List the authenticated user's Calendly meetings in a date range, defaulting to active meetings in the next 30 days"
+    },
+    {
+      "name": "get-meeting",
+      "title": "Get Meeting",
+      "description": "Get a Calendly meeting and its invitees, including reschedule and cancel URLs, using a meeting URI or UUID from List Meetings"
+    },
+    {
+      "name": "list-event-types",
+      "title": "List Event Types",
+      "description": "List the authenticated user's active Calendly event types with their URIs, durations, locations, and scheduling URLs"
+    },
+    {
+      "name": "get-available-times",
+      "title": "Find Available Times",
+      "description": "Find available start times for a Calendly event type in a date range of at most 7 days. Use this before booking a meeting"
+    },
+    {
+      "name": "create-single-use-link",
+      "title": "Create Single-Use Link",
+      "description": "Create a single-use Calendly scheduling link for an event type with confirmation"
+    },
+    {
+      "name": "book-meeting",
+      "title": "Book Meeting",
+      "description": "Book an invitee into a Calendly start time returned by Find Available Times, rechecking availability and requiring confirmation"
+    },
+    {
+      "name": "cancel-meeting",
+      "title": "Cancel Meeting",
+      "description": "Cancel a Calendly meeting and notify its invitees, with destructive confirmation and an optional cancellation reason"
     }
   ],
   "dependencies": {
@@ -49,6 +107,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/lodash": "^4.17.25",
+    "@types/node": "^22.19.17",
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.68.0",
     "eslint": "^10.9.1",
