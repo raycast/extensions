@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Requirements } from "./components/Requirements";
+import { useRequirements } from "./hooks/useRequirements";
 import {
   configuredRepositories,
   enrichWorkflowRuns,
@@ -11,7 +12,7 @@ import {
   WorkflowRun,
   WorkflowRunPager,
 } from "./lib/github";
-import { errorMessage, findGh, findRunpool, getStatus, githubAvatar, GitHubCliError, Pool } from "./lib/runpool";
+import { errorMessage, getStatus, githubAvatar, GitHubCliError, Pool } from "./lib/runpool";
 import { WorkflowRunDetail } from "./workflow-run-detail";
 
 type HistoryState = {
@@ -76,8 +77,8 @@ function replaceRuns(current: WorkflowRun[], enriched: WorkflowRun[]): WorkflowR
 }
 
 export default function Command() {
-  const installed = findRunpool() !== null;
-  const ghInstalled = findGh() !== null;
+  // Every row here comes from `gh api`, so a broken gh leaves nothing to show.
+  const { missing } = useRequirements({ needsGh: true });
   const pager = useRef<WorkflowRunPager | undefined>(undefined);
   const abort = useRef<AbortController | undefined>(undefined);
   const [revision, setRevision] = useState(0);
@@ -113,8 +114,10 @@ export default function Command() {
     }
   }, [enrich, state.pools]);
 
+  const retry = useCallback(() => setRevision((current) => current + 1), []);
+
   useEffect(() => {
-    if (!installed || !ghInstalled) return;
+    if (missing) return;
 
     abort.current?.abort();
     const controller = new AbortController();
@@ -158,12 +161,11 @@ export default function Command() {
 
     void initialise();
     return () => controller.abort();
-  }, [enrich, ghInstalled, installed, revision]);
+  }, [enrich, missing, revision]);
 
-  if (!installed) return <Requirements missing="runpool" />;
-  if (!ghInstalled) return <Requirements missing="gh" />;
+  if (missing) return <Requirements missing={missing} onRecheck={retry} />;
   if (state.error instanceof GitHubCliError) {
-    return <Requirements missing={state.error.reason === "missing" ? "gh" : "gh-auth"} />;
+    return <Requirements missing={state.error.reason === "missing" ? "gh" : "gh-auth"} onRecheck={retry} />;
   }
 
   const warning = state.failures.length
@@ -220,11 +222,7 @@ export default function Command() {
                   url={`https://github.com/${run.repository}`}
                 />
                 <Action.CopyToClipboard title="Copy Run URL" content={run.url} />
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  onAction={() => setRevision((current) => current + 1)}
-                />
+                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={retry} />
               </ActionPanel>
             }
           />

@@ -82,7 +82,7 @@ Then run \`runpool doctor\`, which checks the authentication along with the regi
  * state rather than an error, and it deserves an answer rather than a red
  * banner that disappears.
  */
-export function Requirements({ missing }: { missing: Requirement }) {
+export function Requirements({ missing, onRecheck }: { missing: Requirement; onRecheck?: () => void }) {
   const screen = SCREENS[missing];
 
   return (
@@ -91,6 +91,11 @@ export function Requirements({ missing }: { missing: Requirement }) {
       markdown={screen.markdown}
       actions={
         <ActionPanel>
+          {/* First, because by the time anyone is reading this screen a second
+              time they have gone and fixed the thing. Without a way back the
+              command sits here until it is relaunched, since nothing else
+              re-runs the lookup. */}
+          {onRecheck && <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRecheck} />}
           <Action.CopyToClipboard title="Copy Command" content={screen.command} icon={Icon.Clipboard} />
           <Action.OpenInBrowser
             title={missing === "runpool" ? "Open Runpool on GitHub" : "Open GitHub CLI Website"}

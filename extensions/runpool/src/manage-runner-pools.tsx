@@ -1,13 +1,15 @@
 import { Action, ActionPanel, Alert, Color, Icon, List, confirmAlert, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { Requirements } from "./components/Requirements";
+import { useRequirements } from "./hooks/useRequirements";
 import { useStatus } from "./hooks/useStatus";
-import { findRunpool, runpool } from "./lib/runpool";
+import { runpool } from "./lib/runpool";
 
 export default function Command() {
-  const { status, isLoading, installed, revalidate } = useStatus({ local: true });
+  const { status, isLoading, revalidate } = useStatus({ local: true });
+  const { missing, recheck } = useRequirements();
 
-  if (!installed || !findRunpool()) return <Requirements missing="runpool" />;
+  if (missing) return <Requirements missing={missing} onRecheck={recheck} />;
 
   const paused = status?.paused ?? false;
 

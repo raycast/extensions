@@ -17,6 +17,7 @@ import { showFailureToast } from "@raycast/utils";
 import { PoolDetail } from "./components/PoolDetail";
 import { Requirements } from "./components/Requirements";
 import { SetRunnerCount } from "./components/SetRunnerCount";
+import { useRequirements } from "./hooks/useRequirements";
 import { useStatus } from "./hooks/useStatus";
 import {
   errorMessage,
@@ -57,9 +58,10 @@ function stateColor(pool: Pool, paused: boolean): Color {
 }
 
 export default function Command() {
-  const { status, isLoading, hasFetched, installed, error, revalidate } = useStatus();
+  const { status, isLoading, hasFetched, error, revalidate } = useStatus();
+  const { missing, recheck } = useRequirements();
 
-  if (!installed) return <Requirements missing="runpool" />;
+  if (missing) return <Requirements missing={missing} onRecheck={recheck} />;
 
   async function act(action: () => Promise<unknown>, pending: string, done: string) {
     const toast = await showToast({ style: Toast.Style.Animated, title: pending });

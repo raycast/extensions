@@ -8,6 +8,8 @@
 - Answer a missing or signed-out GitHub CLI with a screen and the command that fixes it, and say so on the pool list when runner registrations are going unchecked as a result
 - Replace the fixed capacity actions with one step either way plus Set Runner Count, so a pool registered above the old range can be restored
 - Refuse to resize a pool with jobs in flight before asking to confirm, rather than after
+- Offer a way back from the dependency screens, so correcting the executable path in preferences takes effect without relaunching the command
+- Stop the Get Pool Status AI tool reporting a pool as resting when GitHub could not be asked whether it is still registered
 - Remove the Machine Load command
 
 ## [Initial Version] - {PR_MERGE_DATE}
