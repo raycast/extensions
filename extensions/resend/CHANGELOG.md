@@ -1,6 +1,6 @@
 # Resend Changelog
 
-## [Received Email and Expanded AI Tools] - {PR_MERGE_DATE}
+## [Received Email and Expanded AI Tools] - 2026-08-31
 
 - Add a Received Emails command with inbound message details and attachment downloads
 - Add expiring share links and scheduled-email cancellation to the Emails list and detail views, with request failure handling
