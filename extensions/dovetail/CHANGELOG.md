@@ -1,6 +1,6 @@
 # Dovetail Changelog
 
-## [Fix store build] - {PR_MERGE_DATE}
+## [Fix store build] - 2026-08-31
 
 - Pin `react`/`@types/react` to the exact versions `@raycast/api` nests internally, fixing a TypeScript type-checking failure in the automated store build caused by two incompatible copies of React's type definitions
 
