@@ -1,6 +1,6 @@
 # Portreaper Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-31
 
 - List every process listening on a TCP port, plus **orphaned dev processes that hold no port at all** (an `electron-vite` main process left behind when its parent `node` was killed is invisible to a port scan, but is exactly the kind of residue worth reaping)
 - Zombie-suspect classification with confidence tiers (`confirmed` / `likely` / `possible`) and the evidence behind each verdict
