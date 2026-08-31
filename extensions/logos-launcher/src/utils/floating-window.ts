@@ -6,7 +6,7 @@ const execFileAsync = promisify(execFile);
 export function getMacOSFloatPanelScript(toolName?: string): string {
   const toolCheck = toolName
     ? `
--- Wait for the requested tool panel to receive focus if window title reflects it
+-- Wait for the requested tool panel itself to receive focus.
 set targetTool to "${toolName.replace(/"/g, '\\"')}"
 set panelReady to false
 
@@ -14,19 +14,12 @@ repeat with attempt from 1 to 20
   tell application "System Events"
     tell process "Logos"
       try
-        if exists front window then
-          set currentTitle to name of front window
-          if currentTitle contains targetTool then
-            set panelReady to true
-            exit repeat
-          end if
-        end if
         repeat with w in windows
           if name of w contains targetTool then
             perform action "AXRaise" of w
             set frontmost of process "Logos" to true
             delay 0.1
-            if (name of front window) contains targetTool then
+            if frontmost and focused of w then
               set panelReady to true
               exit repeat
             end if
@@ -80,6 +73,22 @@ Add-Type -AssemblyName UIAutomationTypes -ErrorAction SilentlyContinue
 $targetName = "${toolName.replace(/"/g, '`"')}"
 $panelReady = $false
 
+function Test-PanelOwnsFocus {
+  param($panel)
+
+  try {
+    $focused = [System.Windows.Automation.AutomationElement]::FocusedElement
+    while ($focused -ne $null) {
+      if ([System.Windows.Automation.Automation]::Compare($focused, $panel)) {
+        return $true
+      }
+      $focused = [System.Windows.Automation.TreeWalker]::RawViewWalker.GetParent($focused)
+    }
+  } catch {}
+
+  return $false
+}
+
 for ($i = 0; $i -lt 20; $i++) {
   try {
     if ($logos.MainWindowHandle -ne [IntPtr]::Zero) {
@@ -90,22 +99,12 @@ for ($i = 0; $i -lt 20; $i++) {
         if ($elem -ne $null) {
           $elem.SetFocus()
           Start-Sleep -Milliseconds 100
-          $focused = [System.Windows.Automation.AutomationElement]::FocusedElement
-          if ($focused -ne $null -and ($focused.Current.Name -like "*$targetName*" -or $elem.Current.HasKeyboardFocus)) {
+          if (Test-PanelOwnsFocus $elem) {
             $panelReady = $true
             break
           }
         }
       }
-    }
-  } catch {}
-
-  try {
-    $proc = Get-Process -Id $logos.Id -ErrorAction SilentlyContinue
-    if ($proc -and $proc.MainWindowTitle -like "*$targetName*") {
-      [void] $shell.AppActivate($logos.Id)
-      $panelReady = $true
-      break
     }
   } catch {}
 
