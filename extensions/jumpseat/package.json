@@ -5,7 +5,6 @@
   "description": "See your upcoming Jumpseat flights at a glance.",
   "icon": "extension-icon.png",
   "author": "chefski",
-  "owner": "altitute",
   "access": "public",
   "license": "MIT",
   "version": "0.1.0",
