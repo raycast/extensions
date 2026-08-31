@@ -124,6 +124,27 @@ export default function Command() {
         if (!confirmed) return;
       }
 
+      // Everything above decided from `current`, and `set-count` writes an
+      // absolute number rather than a change. A confirmation sits open for as
+      // long as it takes to read, and a pool can be resized from another
+      // window, the AI tools or a terminal in that time, so writing the number
+      // worked out before the question could deregister runners nobody agreed
+      // to. Check once more, as late as possible, and abandon rather than
+      // guess. This leaves only the width of the call itself; closing that
+      // would need a compare-and-swap in runpool.
+      const settled = (await getStatus({ local: true })).pools.find((candidate) => candidate.name === pool.name);
+      if (settled?.count !== current.count) {
+        await showFailureToast(
+          new Error(
+            settled
+              ? `It now has ${settled.count} ${settled.count === 1 ? "runner" : "runners"}. Nothing was changed, so run this again against the current figure.`
+              : "It no longer exists. Nothing was changed.",
+          ),
+          { title: `${pool.name} was resized somewhere else` },
+        );
+        return;
+      }
+
       await act(
         () => runpool(["set-count", pool.name, String(count)]),
         `Resizing to ${count}…`,
