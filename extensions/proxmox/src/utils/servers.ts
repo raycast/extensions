@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, open, readFile, stat, unlink } from "node:fs/promises";
+import { mkdir, open, readdir, rm, rmdir, stat, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import { useCallback, useEffect, useMemo } from "react";
 import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
@@ -41,8 +41,12 @@ async function writeStoredServer(server: StoredServer) {
 /**
  * Command instances do not share module state, and LocalStorage has no CAS, so
  * overlapping update/remove of one server is coordinated with an exclusive
- * lock file under the extension support path. Legacy migration writes those
+ * lock directory under the extension support path. Legacy migration writes those
  * same keys and must take the same per-server lock.
+ *
+ * The lock is a directory plus a uniquely named token file. Release only unlinks
+ * that token and rmdirs if empty, so a stale owner cannot delete a replacement
+ * command's lock between a content check and unlink.
  */
 const LOCK_DIR = "server-locks";
 const LOCK_STALE_MS = 8_000;
@@ -58,16 +62,87 @@ function serverLockPath(id: string): string {
   return join(environment.supportPath, LOCK_DIR, `${safeId}.lock`);
 }
 
+async function newestLockActivity(lockPath: string): Promise<number | undefined> {
+  let info;
+  try {
+    info = await stat(lockPath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return undefined;
+    }
+    throw error;
+  }
+
+  if (!info.isDirectory()) {
+    return info.mtimeMs;
+  }
+
+  let entries: string[];
+  try {
+    entries = await readdir(lockPath);
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT" || code === "ENOTDIR") {
+      return undefined;
+    }
+    throw error;
+  }
+
+  if (entries.length === 0) {
+    return 0;
+  }
+
+  let newest = 0;
+  for (const entry of entries) {
+    try {
+      const { mtimeMs } = await stat(join(lockPath, entry));
+      newest = Math.max(newest, mtimeMs);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
+  return newest;
+}
+
 async function withSharedServerLock<T>(id: string, mutation: () => Promise<T>): Promise<T> {
   await mkdir(join(environment.supportPath, LOCK_DIR), { recursive: true });
-  const path = serverLockPath(id);
+  const lockPath = serverLockPath(id);
   const deadline = Date.now() + LOCK_WAIT_MS;
+  const ownerToken = randomUUID();
+  const tokenPath = join(lockPath, ownerToken);
 
   while (Date.now() < deadline) {
     try {
-      const handle = await open(path, "wx");
-      const ownerToken = randomUUID();
-      let heartbeat: ReturnType<typeof setInterval> | undefined;
+      await mkdir(lockPath);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
+        throw error;
+      }
+
+      try {
+        const mtimeMs = await newestLockActivity(lockPath);
+        if (mtimeMs === undefined) {
+          continue;
+        }
+        if (Date.now() - mtimeMs > LOCK_STALE_MS) {
+          await rm(lockPath, { recursive: true, force: true }).catch(() => undefined);
+          continue;
+        }
+      } catch (statError) {
+        if ((statError as NodeJS.ErrnoException).code !== "ENOENT") {
+          throw statError;
+        }
+      }
+
+      await sleep(20 + Math.random() * 40);
+      continue;
+    }
+
+    let heartbeat: ReturnType<typeof setInterval> | undefined;
+    try {
+      const handle = await open(tokenPath, "wx");
       try {
         await handle.writeFile(ownerToken);
         heartbeat = setInterval(() => {
@@ -79,32 +154,15 @@ async function withSharedServerLock<T>(id: string, mutation: () => Promise<T>): 
           clearInterval(heartbeat);
         }
         await handle.close().catch(() => undefined);
-        try {
-          if ((await readFile(path, "utf8")) === ownerToken) {
-            await unlink(path);
-          }
-        } catch {
-          // The lock may have been replaced after this owner went stale.
-        }
+        await unlink(tokenPath).catch(() => undefined);
       }
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
-        throw error;
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        continue;
       }
-
-      try {
-        const { mtimeMs } = await stat(path);
-        if (Date.now() - mtimeMs > LOCK_STALE_MS) {
-          await unlink(path).catch(() => undefined);
-          continue;
-        }
-      } catch (statError) {
-        if ((statError as NodeJS.ErrnoException).code !== "ENOENT") {
-          throw statError;
-        }
-      }
-
-      await sleep(20 + Math.random() * 40);
+      throw error;
+    } finally {
+      await rmdir(lockPath).catch(() => undefined);
     }
   }
 
