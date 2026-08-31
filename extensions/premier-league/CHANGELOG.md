@@ -1,6 +1,6 @@
 # Premier League Changelog
 
-## [Move Jump to Matchweek off Enter] - {PR_MERGE_DATE}
+## [Move Jump to Matchweek off Enter] - 2026-08-31
 
 - Move the "Jump to…" shortcut from `Enter` to `J`. `Enter` already opens Match Commentary on the selected match, so the two were competing.
 - Submit the matchweek form with `Enter` once a number is typed, rather than `Cmd+Enter`.
