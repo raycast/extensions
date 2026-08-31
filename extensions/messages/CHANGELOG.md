@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [AI Message History and Activity] - {PR_MERGE_DATE}
+## [AI Message History and Activity] - 2026-08-31
 
 - Add stable cursor pagination, date and unread filters, attachment metadata, and plain-text fallback to AI message search
 - Add an AI tool for overall and per-chat sent/received activity
