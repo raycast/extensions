@@ -14,6 +14,14 @@ export class NotAuthorizedError extends Error {
   }
 }
 
+/** Thrown when a sign-out cancelled an in-flight refresh. Not a dead grant. */
+export class SignedOutError extends NotAuthorizedError {
+  constructor(message = "Signed out during refresh") {
+    super(message);
+    this.name = "SignedOutError";
+  }
+}
+
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Reassign",
@@ -92,6 +100,8 @@ export async function authorize(): Promise<string> {
     try {
       return await refresh(tokens.refreshToken);
     } catch (error) {
+      // A sign-out cancelled the refresh — respect the logout, never re-authenticate.
+      if (error instanceof SignedOutError) throw error;
       // A dead grant means re-consent; a transient error must not pop a browser.
       if (!(error instanceof NotAuthorizedError)) throw error;
     }
@@ -160,7 +170,7 @@ async function refresh(refreshToken: string): Promise<string> {
       // epoch catches one that started before a sign-out then intervening state.
       return await withTokenLock(async () => {
         if (signedOut || logoutEpoch !== epoch) {
-          throw new NotAuthorizedError("Signed out during refresh");
+          throw new SignedOutError();
         }
         await client.setTokens(tokens);
         return tokens.access_token;
