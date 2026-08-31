@@ -24,21 +24,13 @@ function streamingResponse(content: string, chunkSize = 7): Response {
 
 describe("normalizeBaseUrl", () => {
   it("normalizes endpoint suffixes and trailing slashes", () => {
-    expect(normalizeBaseUrl(" http://localhost:1234/api/v1/ ")).toBe(
-      "http://localhost:1234",
-    );
-    expect(normalizeBaseUrl("https://example.test/lm-studio/v1")).toBe(
-      "https://example.test/lm-studio",
-    );
+    expect(normalizeBaseUrl(" http://localhost:1234/api/v1/ ")).toBe("http://localhost:1234");
+    expect(normalizeBaseUrl("https://example.test/lm-studio/v1")).toBe("https://example.test/lm-studio");
   });
 
   it("rejects credentials and unsupported protocols", () => {
-    expect(() => normalizeBaseUrl("ftp://localhost:1234")).toThrow(
-      LMStudioError,
-    );
-    expect(() => normalizeBaseUrl("http://user:pass@localhost:1234")).toThrow(
-      /API token/,
-    );
+    expect(() => normalizeBaseUrl("ftp://localhost:1234")).toThrow(LMStudioError);
+    expect(() => normalizeBaseUrl("http://user:pass@localhost:1234")).toThrow(/API token/);
   });
 });
 
@@ -91,9 +83,7 @@ describe("LMStudioClient", () => {
             quantization: { name: "Q4_K_M", bits_per_weight: 4 },
             size_bytes: 20,
             params_string: "7B",
-            loaded_instances: [
-              { id: "qwen/chat", config: { context_length: 4096 } },
-            ],
+            loaded_instances: [{ id: "qwen/chat", config: { context_length: 4096 } }],
             max_context_length: 32768,
             format: "gguf",
             capabilities: {
@@ -111,10 +101,7 @@ describe("LMStudioClient", () => {
     });
 
     const models = await client.listModels();
-    expect(models.map((model) => model.displayName)).toEqual([
-      "Nomic Embed",
-      "Qwen Chat",
-    ]);
+    expect(models.map((model) => model.displayName)).toEqual(["Nomic Embed", "Qwen Chat"]);
     expect(models[1]).toMatchObject({
       key: "qwen/chat",
       sizeBytes: 20,
@@ -124,10 +111,7 @@ describe("LMStudioClient", () => {
         reasoning: { allowedOptions: ["off", "on"] },
       },
     });
-    expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:1234/api/v1/models",
-      expect.any(Object),
-    );
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:1234/api/v1/models", expect.any(Object));
   });
 
   it("uses chat.end as canonical output and keeps reasoning/errors separate", async () => {
@@ -138,9 +122,7 @@ describe("LMStudioClient", () => {
       'event: error\ndata: {"type":"error","error":{"type":"plugin_connection_error","message":"Plugin unavailable"}}\n\n',
       'event: chat.end\ndata: {"type":"chat.end","result":{"model_instance_id":"qwen","output":[{"type":"reasoning","content":"canonical thought"},{"type":"message","content":"canonical answer"}],"stats":{"input_tokens":4,"total_output_tokens":5,"reasoning_output_tokens":2,"tokens_per_second":12.5,"time_to_first_token_seconds":0.1},"response_id":"resp_123"}}\n\n',
     ].join("");
-    const fetchMock = vi.fn(async () =>
-      streamingResponse(stream),
-    ) as unknown as typeof fetch;
+    const fetchMock = vi.fn(async () => streamingResponse(stream)) as unknown as typeof fetch;
     const events: string[] = [];
     const client = new LMStudioClient({
       baseUrl: "http://localhost:1234",
@@ -160,20 +142,12 @@ describe("LMStudioClient", () => {
       },
     });
 
-    expect(events).toEqual([
-      "chat.start",
-      "reasoning.delta",
-      "message.delta",
-      "error",
-      "chat.end",
-    ]);
+    expect(events).toEqual(["chat.start", "reasoning.delta", "message.delta", "error", "chat.end"]);
     expect(result).toMatchObject({
       text: "canonical answer",
       reasoning: "canonical thought",
       responseId: "resp_123",
-      errors: [
-        { type: "plugin_connection_error", message: "Plugin unavailable" },
-      ],
+      errors: [{ type: "plugin_connection_error", message: "Plugin unavailable" }],
       stats: { inputTokens: 4, tokensPerSecond: 12.5 },
     });
     const init = fetchMock.mock.calls[0][1] as RequestInit;
@@ -286,9 +260,7 @@ describe("LMStudioClient", () => {
     await expect(client.unloadModel("qwen-instance")).resolves.toEqual({
       instanceId: "qwen-instance",
     });
-    await expect(
-      client.downloadModel({ model: "publisher/model" }),
-    ).resolves.toMatchObject({
+    await expect(client.downloadModel({ model: "publisher/model" })).resolves.toMatchObject({
       jobId: "job_123",
       status: "downloading",
       totalSizeBytes: 100,
@@ -304,9 +276,7 @@ describe("LMStudioClient", () => {
       flash_attention: true,
       echo_load_config: true,
     });
-    expect(fetchMock.mock.calls[3][0]).toBe(
-      "http://localhost:1234/api/v1/models/download/status/job_123",
-    );
+    expect(fetchMock.mock.calls[3][0]).toBe("http://localhost:1234/api/v1/models/download/status/job_123");
   });
 
   it("surfaces typed HTTP errors", async () => {

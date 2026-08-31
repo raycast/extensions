@@ -7,9 +7,20 @@
   "icon": "icon.png",
   "author": "vineeth_sai_narajala",
   "license": "MIT",
-  "platforms": ["macOS"],
-  "categories": ["Productivity", "Developer Tools"],
-  "keywords": ["ai", "llm", "local", "chat", "offline"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "ai",
+    "llm",
+    "local",
+    "chat",
+    "offline"
+  ],
   "commands": [
     {
       "name": "chat",

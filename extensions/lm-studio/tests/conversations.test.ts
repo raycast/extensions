@@ -25,11 +25,7 @@ async function temporaryDirectory(): Promise<string> {
 }
 
 afterEach(async () => {
-  await Promise.all(
-    temporaryDirectories
-      .splice(0)
-      .map((directory) => rm(directory, { recursive: true, force: true })),
-  );
+  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
 });
 
 describe("conversation branches", () => {
@@ -59,9 +55,7 @@ describe("conversation branches", () => {
       parentId: null,
     });
     expect(edited.turns).toHaveLength(3);
-    expect(
-      edited.turns.find((turn) => turn.id === "assistant_1")?.content,
-    ).toBe("Original answer");
+    expect(edited.turns.find((turn) => turn.id === "assistant_1")?.content).toBe("Original answer");
   });
 
   it("supports regeneration, deletion, and selecting a prior branch", () => {
@@ -129,20 +123,11 @@ describe("ConversationStore", () => {
     expect(await store.get(conversation.id)).toMatchObject({
       title: "Local test",
     });
-    expect(await store.list()).toMatchObject([
-      { id: conversation.id, turnCount: 1, preview: "Hello" },
-    ]);
-    const exported = await store.exportConversation(
-      conversation.id,
-      "markdown",
-    );
+    expect(await store.list()).toMatchObject([{ id: conversation.id, turnCount: 1, preview: "Hello" }]);
+    const exported = await store.exportConversation(conversation.id, "markdown");
     expect(await readFile(exported, "utf8")).toContain("## You\n\nHello");
 
-    const primary = path.join(
-      supportPath,
-      "conversations",
-      `${conversation.id}.json`,
-    );
+    const primary = path.join(supportPath, "conversations", `${conversation.id}.json`);
     await writeFile(primary, "not-json");
     const recovered = await store.get(conversation.id);
     expect(recovered?.title).toBe("Local test");
@@ -174,10 +159,7 @@ describe("ConversationStore", () => {
     };
     // The first store operation creates all support directories.
     await store.list();
-    await writeFile(
-      path.join(store.conversationsPath, "legacy.json"),
-      JSON.stringify(legacy),
-    );
+    await writeFile(path.join(store.conversationsPath, "legacy.json"), JSON.stringify(legacy));
 
     const migrated = await store.get("legacy");
     expect(migrated).toMatchObject({
@@ -194,18 +176,11 @@ describe("ConversationStore", () => {
   it("copies only supported image content and creates data URLs", async () => {
     const supportPath = await temporaryDirectory();
     const sourcePath = path.join(supportPath, "tiny.png");
-    await writeFile(
-      sourcePath,
-      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    );
+    await writeFile(sourcePath, Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
     const store = new ConversationStore(supportPath);
-    const [attachment] = await store.copyAttachments("conversation", [
-      sourcePath,
-    ]);
+    const [attachment] = await store.copyAttachments("conversation", [sourcePath]);
     expect(attachment).toMatchObject({ mimeType: "image/png", sizeBytes: 8 });
-    await expect(store.attachmentDataUrl(attachment)).resolves.toMatch(
-      /^data:image\/png;base64,/,
-    );
+    await expect(store.attachmentDataUrl(attachment)).resolves.toMatch(/^data:image\/png;base64,/);
   });
 });
 
@@ -217,11 +192,9 @@ describe("conversation export", () => {
       content: "Answer",
       reasoning: "Private chain of thought",
     });
-    expect(serializeConversationMarkdown(conversation)).not.toContain(
+    expect(serializeConversationMarkdown(conversation)).not.toContain("Private chain of thought");
+    expect(serializeConversationMarkdown(conversation, { includeReasoning: true })).toContain(
       "Private chain of thought",
     );
-    expect(
-      serializeConversationMarkdown(conversation, { includeReasoning: true }),
-    ).toContain("Private chain of thought");
   });
 });
