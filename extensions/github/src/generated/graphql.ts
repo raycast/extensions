@@ -894,11 +894,14 @@ export type PullRequestCommitFieldsFragment = {
         statusCheckRollup: { state: Types.StatusState } | null;
       };
     } | null> | null;
+    pageInfo: { hasPreviousPage: boolean; startCursor: string | null };
   };
 };
 
 export type PullRequestCommitsQueryVariables = Exact<{
   nodeId: string | number;
+  numberOfItems: number;
+  before?: string | null | undefined;
 }>;
 
 export type PullRequestCommitsQuery = {
@@ -919,6 +922,7 @@ export type PullRequestCommitsQuery = {
               statusCheckRollup: { state: Types.StatusState } | null;
             };
           } | null> | null;
+          pageInfo: { hasPreviousPage: boolean; startCursor: string | null };
         };
       }
     | Record<PropertyKey, never>
@@ -1164,6 +1168,7 @@ export type SearchRepositoriesQuery = {
 
 export type MyLatestRepositoriesQueryVariables = Exact<{
   numberOfItems: number;
+  after?: string | null | undefined;
   orderByField: Types.RepositoryOrderField;
   orderByDirection: Types.OrderDirection;
 }>;
@@ -1186,6 +1191,7 @@ export type MyLatestRepositoriesQuery = {
         owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
         primaryLanguage: { id: string; name: string; color: string | null } | null;
       } | null> | null;
+      pageInfo: { endCursor: string | null; hasNextPage: boolean };
     };
   };
 };
@@ -2003,7 +2009,7 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
 `;
 export const PullRequestCommitFieldsFragmentDoc = gql`
   fragment PullRequestCommitFields on PullRequest {
-    commits(last: 100) {
+    commits(last: $numberOfItems, before: $before) {
       totalCount
       nodes {
         commit {
@@ -2022,6 +2028,10 @@ export const PullRequestCommitFieldsFragmentDoc = gql`
           url
           treeUrl
         }
+      }
+      pageInfo {
+        hasPreviousPage
+        startCursor
       }
     }
   }
@@ -2359,7 +2369,7 @@ export const RepositoryProjectsForPullRequestsDocument = gql`
   }
 `;
 export const PullRequestCommitsDocument = gql`
-  query pullRequestCommits($nodeId: ID!) {
+  query pullRequestCommits($nodeId: ID!, $numberOfItems: Int!, $before: String) {
     node(id: $nodeId) {
       ...PullRequestCommitFields
     }
@@ -2544,13 +2554,22 @@ export const SearchRepositoriesDocument = gql`
 export const MyLatestRepositoriesDocument = gql`
   query myLatestRepositories(
     $numberOfItems: Int!
+    $after: String
     $orderByField: RepositoryOrderField!
     $orderByDirection: OrderDirection!
   ) {
     viewer {
-      repositories(first: $numberOfItems, orderBy: { field: $orderByField, direction: $orderByDirection }) {
+      repositories(
+        first: $numberOfItems
+        after: $after
+        orderBy: { field: $orderByField, direction: $orderByDirection }
+      ) {
         nodes {
           ...ExtendedRepositoryFields
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
         }
       }
     }

@@ -33,6 +33,11 @@
 - README: added a **Cloning and Downloading Repositories** section describing when to use each flow.
 - Normalized action titles to Title Case (`Enable Auto-Merge`, `Re-Run Workflow`, `Sort by`).
 
+## [Load GitHub lists incrementally] - 2026-08-10
+
+- Added native pagination to repository, issue, pull request, discussion, release, notification, workflow run, and commit lists so initial results render sooner and later pages load on demand.
+- Limited GraphQL page sizes to 25 items while honoring smaller configured limits to reduce large-request failures.
+
 ## [Show CI status in pull request details] - 2026-08-10
 
 - Added a "Checks" row to pull request details showing successful, failed, or pending CI status.
