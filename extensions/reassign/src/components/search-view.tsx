@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { SearchEvent, searchEvents } from "../lib/api";
@@ -45,11 +45,7 @@ export function SearchView(props: { initialQuery?: string }) {
               accessories={[{ text: `${event.start}–${event.end}` }]}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Open Block in Reassign"
-                    icon={Icon.Globe}
-                    onAction={() => open(webDayUrl(event.date, event.id))}
-                  />
+                  <Action.OpenInBrowser title="Open Block in Reassign" url={webDayUrl(event.date, event.id)} />
                   <Action.OpenInBrowser title="Open Reassign" url={WEB_BASE} />
                   <Action
                     title="Refresh"

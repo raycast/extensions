@@ -7,10 +7,8 @@ import {
   Keyboard,
   launchCommand,
   LaunchType,
-  open,
   showToast,
   Toast,
-  useNavigation,
 } from "@raycast/api";
 import { signOut } from "../lib/oauth";
 import type { MutatePromise } from "@raycast/utils";
@@ -192,21 +190,20 @@ export function AgendaActions(props: {
   nav: ReactNode;
 }) {
   const { event, date, areas, activityTypes, mutate, onEdit, lastUndoToken, runUndo, nav } = props;
-  const { push } = useNavigation();
   const editable = !event.readOnly;
   const meeting = eventMeeting(event);
   return (
     <ActionPanel>
       <ActionPanel.Section>
         {meeting && (
-          <Action
+          <Action.OpenInBrowser
             title={meeting.label ? `Join ${meeting.label}` : "Join Meeting"}
             icon={Icon.Video}
             shortcut={{ modifiers: ["cmd"], key: "j" }}
-            onAction={() => open(meeting.url)}
+            url={meeting.url}
           />
         )}
-        <Action title="Open Block in Reassign" icon={Icon.Globe} onAction={() => open(webDayUrl(date, event.id))} />
+        <Action.OpenInBrowser title="Open Block in Reassign" url={webDayUrl(date, event.id)} />
         {editable && (
           <>
             <Action
@@ -230,28 +227,24 @@ export function AgendaActions(props: {
       </ActionPanel.Section>
       {editable && (
         <ActionPanel.Section title="Adjust">
-          <Action
+          <Action.Push
             title="Edit Details…"
             icon={Icon.Pencil}
             shortcut={Keyboard.Shortcut.Common.Edit}
-            onAction={() =>
-              push(
-                <EditForm
-                  event={event}
-                  areas={areas}
-                  activityTypes={activityTypes}
-                  onSubmit={(patch) => onEdit(event.id, patch)}
-                />,
-              )
+            target={
+              <EditForm
+                event={event}
+                areas={areas}
+                activityTypes={activityTypes}
+                onSubmit={(patch) => onEdit(event.id, patch)}
+              />
             }
           />
-          <Action
+          <Action.Push
             title="Move to Another Time…"
             icon={Icon.Clock}
             shortcut={{ modifiers: ["cmd"], key: "m" }}
-            onAction={() =>
-              push(<MoveForm event={event} onMove={(op) => mutate("Moving…", "Moved the block", [op])} />)
-            }
+            target={<MoveForm event={event} onMove={(op) => mutate("Moving…", "Moved the block", [op])} />}
           />
           <Action
             title="Shift 15 Min Later"
@@ -292,7 +285,7 @@ export function AgendaActions(props: {
           />
         )}
         <Action.OpenInBrowser title="Open Reassign" url={WEB_BASE} />
-        <Action title="Send Feedback" icon={Icon.Envelope} onAction={() => push(<FeedbackForm />)} />
+        <Action.Push title="Send Feedback" icon={Icon.Envelope} target={<FeedbackForm />} />
       </ActionPanel.Section>
       {nav}
     </ActionPanel>

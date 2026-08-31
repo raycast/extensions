@@ -6,12 +6,11 @@ import {
   Icon,
   LaunchProps,
   List,
-  open,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { type ReactNode, useEffect, useState } from "react";
 import { backlogCapture, confirmSchedule, createEvent, getSchedule, planSchedule, updateEvent } from "./lib/api";
 import { applyUndoToast, failToast, runMutation } from "./lib/feedback";
@@ -25,7 +24,8 @@ import {
   parseDuration,
   todayISO,
 } from "./lib/format";
-import { ProRequiredView, SignedOutView } from "./components/states";
+import { refusalView } from "./components/states";
+import { reassignProvider } from "./lib/oauth";
 import {
   CALENDAR_DEFAULT,
   CalendarFields,
@@ -73,7 +73,7 @@ function optionalFields(values: FormValues): {
  * other. A named day with no time ("lunch tomorrow") defaults to Schedule so the
  * user picks a time.
  */
-export default function Command(props: LaunchProps<{ arguments: { text?: string }; launchContext?: ScheduleContext }>) {
+function Command(props: LaunchProps<{ arguments: { text?: string }; launchContext?: ScheduleContext }>) {
   const ctx = props.launchContext;
   const argText = props.arguments?.text?.trim() ?? "";
   const initial = argText || (ctx?.name ?? "");
@@ -212,10 +212,9 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string 
   // A definitive auth or Pro refusal gates the form, like the other commands.
   // Other errors fall through — the pickers stay empty and the submit toast tells.
   if (taxonomy && !taxonomy.ok) {
-    if (taxonomy.code === "unauthenticated" || taxonomy.code === "unauthorized") {
-      return <SignedOutView onSignedIn={revalidate} />;
+    if (taxonomy.code === "unauthenticated" || taxonomy.code === "unauthorized" || taxonomy.code === "permission") {
+      return refusalView(taxonomy, revalidate);
     }
-    if (taxonomy.code === "permission") return <ProRequiredView />;
   }
 
   // Recurrence is out of scope. Route the user to the web.
@@ -225,7 +224,7 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string 
         navigationTitle="Schedule a Block"
         actions={
           <ActionPanel>
-            <Action title="Open Reassign" icon={Icon.Globe} onAction={() => open(WEB_BASE)} />
+            <Action.OpenInBrowser title="Open Reassign" url={WEB_BASE} />
           </ActionPanel>
         }
       >
@@ -303,6 +302,8 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string 
     </Form>
   );
 }
+
+export default withAccessToken(reassignProvider)(Command);
 
 interface FlexibleArgs {
   name: string;

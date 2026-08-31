@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, open, useNavigation } from "@raycast/api";
-import { useCachedPromise, useLocalStorage } from "@raycast/utils";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, List } from "@raycast/api";
+import { useCachedPromise, useLocalStorage, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import {
   AgendaActions,
@@ -11,6 +11,7 @@ import {
 import { AgendaItem } from "./components/agenda-item";
 import { SearchView } from "./components/search-view";
 import { refusalView } from "./components/states";
+import { reassignProvider } from "./lib/oauth";
 import { ApiError, getSchedule, getScheduleRange, WriteOp } from "./lib/api";
 import { addDaysISO, addMinutesHM, relativeDayLabel, todayISO } from "./lib/format";
 import {
@@ -44,7 +45,7 @@ interface KindFilter {
 }
 
 /** The Agenda command: a single day (default) or the next week, one toggle apart. */
-export default function Command() {
+function Command() {
   // Persist the scope and kind toggles across launches (useState resets on close).
   const { value: storedScope, setValue: setScope } = useLocalStorage<AgendaScope>("agenda.scope", "week");
   const scope = storedScope ?? "week";
@@ -98,13 +99,12 @@ function KindFilterActions(props: KindFilter) {
 
 /** Open the full-text search over every block, from inside the agenda. */
 function SearchAction() {
-  const { push } = useNavigation();
   return (
-    <Action
+    <Action.Push
       title="Search All Blocks…"
       icon={Icon.MagnifyingGlass}
       shortcut={{ modifiers: ["cmd"], key: "f" }}
-      onAction={() => push(<SearchView />)}
+      target={<SearchView />}
     />
   );
 }
@@ -413,7 +413,7 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
           icon={Icon.Plus}
           onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated })}
         />
-        <Action title="Open Day in Reassign" icon={Icon.Globe} onAction={() => open(webDayUrl(date))} />
+        <Action.OpenInBrowser title="Open Day in Reassign" url={webDayUrl(date)} />
         {navSection()}
       </ActionPanel>
     );
@@ -467,6 +467,8 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
     </List>
   );
 }
+
+export default withAccessToken(reassignProvider)(Command);
 
 type WeekResult = { ok: true; todayIso: string; days: WeekDay[] } | ApiError;
 

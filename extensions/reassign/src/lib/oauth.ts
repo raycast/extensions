@@ -84,6 +84,27 @@ export async function signIn(): Promise<void> {
   });
 }
 
+/** Return a valid token for `withAccessToken`, and start the native OAuth flow when no session lives. */
+export async function authorize(): Promise<string> {
+  const tokens = await client.getTokens();
+  if (tokens?.accessToken && !tokens.isExpired()) return tokens.accessToken;
+  if (tokens?.refreshToken) {
+    try {
+      return await refresh(tokens.refreshToken);
+    } catch (error) {
+      // A dead grant means re-consent; a transient error must not pop a browser.
+      if (!(error instanceof NotAuthorizedError)) throw error;
+    }
+  }
+  await signIn();
+  const fresh = await client.getTokens();
+  if (!fresh?.accessToken) throw new Error("Sign-in returned no token");
+  return fresh.accessToken;
+}
+
+/** The provider that `withAccessToken` wraps each view command with. */
+export const reassignProvider = { client, authorize };
+
 /** Clear the stored session. The next call forces a new sign-in. */
 export async function signOut(): Promise<void> {
   // Set the guards synchronously so a refresh that starts now already sees them;

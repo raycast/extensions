@@ -1,22 +1,39 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
 import type { ApiError } from "../lib/api";
-import { signIn } from "../lib/oauth";
+import { signIn, signOut } from "../lib/oauth";
 import { BILLING_URL } from "../lib/wire";
 
-/**
- * The right screen for an API refusal: sign-in for an auth error, the Pro gate
- * for `permission`, else a retryable error. `onRecover` re-runs the load.
- */
+/** Pick the screen for an API refusal: re-auth, the Pro gate, or a retry. */
 export function refusalView(error: ApiError, onRecover: () => void) {
   if (error.code === "unauthenticated" || error.code === "unauthorized") {
-    return <SignedOutView onSignedIn={onRecover} />;
+    return <ReauthView onSignedIn={onRecover} />;
   }
   if (error.code === "permission") return <ProRequiredView />;
   return <ErrorView message={error.message} onRetry={onRecover} />;
 }
 
-/** Shown when there is no live session. */
-export function SignedOutView(props: { onSignedIn: () => void }) {
+/** Re-run the native OAuth after a mid-session grant loss; clear the stale token first. */
+function ReauthView(props: { onSignedIn: () => void }) {
+  const started = useRef(false);
+  const [failed, setFailed] = useState(false);
+  // A cancelled or failed flow shows a manual retry, not a stuck spinner.
+  async function reauth() {
+    setFailed(false);
+    try {
+      await signOut();
+      await signIn();
+      props.onSignedIn();
+    } catch {
+      setFailed(true);
+    }
+  }
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    reauth();
+  }, []);
+  if (!failed) return <List isLoading />;
   return (
     <List>
       <List.EmptyView
@@ -25,19 +42,7 @@ export function SignedOutView(props: { onSignedIn: () => void }) {
         description="Connect your Reassign account to see and plan your day."
         actions={
           <ActionPanel>
-            <Action
-              title="Sign in"
-              icon={Icon.Key}
-              onAction={async () => {
-                try {
-                  await signIn();
-                  props.onSignedIn();
-                } catch {
-                  // The user cancelled the browser flow, or it failed. Return
-                  // quietly to the signed-out view instead of a raw error.
-                }
-              }}
-            />
+            <Action title="Sign in to Reassign" icon={Icon.Key} onAction={reauth} />
           </ActionPanel>
         }
       />

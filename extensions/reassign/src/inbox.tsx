@@ -1,28 +1,18 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  Keyboard,
-  launchCommand,
-  LaunchType,
-  List,
-  useNavigation,
-} from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, Keyboard, launchCommand, LaunchType, List } from "@raycast/api";
+import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import { AgendaNavActions } from "./components/agenda-actions";
 import { BacklogScheduleForm } from "./components/backlog-schedule-form";
 import { refusalView } from "./components/states";
+import { reassignProvider } from "./lib/oauth";
 import { getScheduleWithBacklog, manageBacklog } from "./lib/api";
 import { runMutation } from "./lib/feedback";
 import { humanHours, isIsoDate, relativeDayLabel, todayISO } from "./lib/format";
 import { Area, ActivityType, areaActivityNames, BacklogItem, resolveActivity, resolveArea } from "./lib/schedule-model";
 import { WEB_BASE } from "./lib/wire";
 
-export default function Command() {
+function Command() {
   const [showingDetail, setShowingDetail] = useState(true);
-  const { push } = useNavigation();
   const { data, isLoading, revalidate } = useCachedPromise(getScheduleWithBacklog, [todayISO()], {
     keepPreviousData: true,
   });
@@ -56,12 +46,10 @@ export default function Command() {
   function itemActions(item: BacklogItem) {
     return (
       <ActionPanel>
-        <Action
+        <Action.Push
           title="Schedule This Idea…"
           icon={Icon.Calendar}
-          onAction={() =>
-            push(<BacklogScheduleForm item={item} onSubmit={(date, start) => scheduleItem(item.id, date, start)} />)
-          }
+          target={<BacklogScheduleForm item={item} onSubmit={(date, start) => scheduleItem(item.id, date, start)} />}
         />
         <Action.OpenInBrowser title="Open Reassign" url={WEB_BASE} />
         <Action
@@ -133,6 +121,8 @@ export default function Command() {
     </List>
   );
 }
+
+export default withAccessToken(reassignProvider)(Command);
 
 /** The right-hand pane: notes plus a duration / planned-date / area table. */
 function BacklogDetail(props: { item: BacklogItem; areas: Area[]; activityTypes: ActivityType[]; todayIso: string }) {
