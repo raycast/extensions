@@ -8,7 +8,7 @@ import { NotInstalledError } from "../components";
 // Bookmarks live in the same places.sqlite as the history (moz_bookmarks.type = 1 → bookmark).
 const getBookmarkQuery = (query?: string) =>
   `SELECT b.id AS id, p.url AS url, b.title AS title,
-          datetime(b.dateAdded/1000000,'unixepoch') AS lastVisited
+          datetime(b.dateAdded/1000000,'unixepoch','localtime') AS lastVisited
    FROM moz_bookmarks b
    JOIN moz_places p ON b.fk = p.id
    WHERE b.type = 1

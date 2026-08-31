@@ -7,7 +7,7 @@ import { NotInstalledError } from "../components";
 
 const getHistoryQuery = (query?: string) =>
   `SELECT id, url, title,
-          datetime(last_visit_date/1000000,'unixepoch') AS lastVisited
+          datetime(last_visit_date/1000000,'unixepoch','localtime') AS lastVisited
    FROM moz_places
    WHERE last_visit_date IS NOT NULL AND hidden = 0
    ${searchWhereClause(query, "title", "url")}

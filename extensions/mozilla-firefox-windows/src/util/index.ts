@@ -30,7 +30,7 @@ export const getProfileName = (userDirectoryPath: string): string => {
 
   const bySuffix = (suffix: string) => profiles.find((profile) => profile.endsWith(suffix));
 
-  const { profileDirectorySuffix } = getPreferenceValues<{ profileDirectorySuffix?: string }>();
+  const { profileDirectorySuffix } = getPreferenceValues<Preferences>();
   const customSuffix = profileDirectorySuffix?.trim();
   const customProfile = customSuffix ? bySuffix(customSuffix) : undefined;
   if (customProfile) {

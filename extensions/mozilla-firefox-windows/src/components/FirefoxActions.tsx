@@ -13,8 +13,8 @@ const getNewTabTarget = (query?: string): string => {
   if (!query) {
     return "about:newtab";
   }
-  const { searchEngine } = getPreferenceValues<{ searchEngine?: string }>();
-  const base = SEARCH_ENGINE_URLS[searchEngine ?? ""] ?? SEARCH_ENGINE_URLS.Google;
+  const { searchEngine } = getPreferenceValues<Preferences.NewTab>();
+  const base = SEARCH_ENGINE_URLS[searchEngine] ?? SEARCH_ENGINE_URLS.Google;
   return base + encodeURIComponent(query);
 };
 
