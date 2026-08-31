@@ -97,9 +97,7 @@ const tool = async (input: Input) => {
   );
 
   const tags: Tag[] | undefined = input.tags ? parsePairs(input.tags, "tag") : undefined;
-  const headers = input.headers
-    ? Object.fromEntries(parsePairs(input.headers, "header").map(({ name, value }) => [name, value]))
-    : undefined;
+  const headers = parseHeaders(input.headers);
   const scheduledAt = input.sendAt ? parseScheduledAt(input.sendAt) : undefined;
 
   const resend = getResend();
@@ -150,6 +148,13 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
     infoItems.push({ name: "Scheduled For", value: new Date(parseScheduledAt(input.sendAt)).toLocaleString() });
   if (input.topicId) infoItems.push({ name: "Topic ID", value: input.topicId });
 
+  const headers = parseHeaders(input.headers);
+  if (headers) {
+    for (const [name, value] of Object.entries(headers)) {
+      infoItems.push({ name: `Header: ${name}`, value });
+    }
+  }
+
   if (input.attachments) {
     const attachments = parseAttachmentReferences(input.attachments);
     attachments.forEach((attachment, index) => {
@@ -165,6 +170,10 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
     info: infoItems,
   };
 };
+
+function parseHeaders(value?: string) {
+  return value ? Object.fromEntries(parsePairs(value, "header").map(({ name, value }) => [name, value])) : undefined;
+}
 
 function parsePairs(value: string, label: string) {
   return value

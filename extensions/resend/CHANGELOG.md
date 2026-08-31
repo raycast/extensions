@@ -3,10 +3,11 @@
 ## [Received Email and Expanded AI Tools] - {PR_MERGE_DATE}
 
 - Add a Received Emails command with inbound message details and attachment downloads
-- Add expiring share links and scheduled-email cancellation to the Emails command
-- Move contact workflows from deprecated audiences to segments and fix contact update semantics
+- Add expiring share links and scheduled-email cancellation to the Emails list and detail views, with request failure handling
+- Move contact workflows from deprecated audiences to segments, fix contact update semantics, and keep account deletion as a separate action
 - Add AI tools for received email, temporary share links, email metrics, rescheduling, domains, templates, broadcasts, segments, topics, webhooks, and API logs
 - Improve email sending with text and HTML bodies, URL attachments, headers, topics, idempotency keys, and stricter input validation
+- Show custom headers in the send-email confirmation
 - Move AI instructions and evals to `ai.yaml` and expand coverage across core read, write, and safety workflows
 - Update the Resend SDK for current API coverage
 

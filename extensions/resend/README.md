@@ -43,14 +43,15 @@ This extension provides the following commands:
   - Browse contacts by segment
   - Create and update contacts
   - Remove contacts from a segment
+  - Permanently delete contacts from the account with a separate Delete Contact action
 - Domains
   - View Domains
   - Add New Domain
 - Emails
   - View Sent Emails
   - Send New Email
-  - Create expiring share links
-  - Cancel scheduled email
+  - Create expiring share links from the list or email details
+  - Cancel scheduled email from the list or email details
 - Received Emails
   - Read inbound email
   - Open received attachments

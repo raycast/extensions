@@ -63,6 +63,36 @@ function Segments() {
     }
   }
 
+  async function confirmAndDelete(contact: Contact) {
+    const confirmed = await confirmAlert({
+      title: `Delete '${contact.email}'?`,
+      message: "This permanently deletes the contact from your Resend account and all segments. This cannot be undone.",
+      primaryAction: { title: "Delete Contact", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
+    const toast = await showToast(Toast.Style.Animated, "Deleting Contact", contact.email);
+    try {
+      await mutateContacts(
+        getResend()
+          .contacts.remove({ id: contact.id })
+          .then(({ error }) => {
+            if (error) throw new Error(error.message, { cause: error.name });
+          }),
+        {
+          optimisticUpdate(data) {
+            return data.filter((c) => c.id !== contact.id);
+          },
+          shouldRevalidateAfter: false,
+        },
+      );
+      toast.style = Toast.Style.Success;
+      toast.title = "Deleted Contact";
+    } catch (error) {
+      await onError(error as Error);
+    }
+  }
+
   const error = errorSegments || errorContacts;
   return error && isApiError(error) ? (
     <ErrorComponent error={error} />
@@ -130,6 +160,14 @@ function Segments() {
                   onAction={mutateContacts}
                 />
               )}
+              <ActionPanel.Section>
+                <Action
+                  title="Delete Contact"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={() => confirmAndDelete(contact)}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

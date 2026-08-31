@@ -81,7 +81,7 @@
       "name": "contacts",
       "title": "Contacts",
       "subtitle": "Resend",
-      "description": "View, create, update, and organize contacts in segments",
+      "description": "View, create, update, and delete contacts, or organize them in segments",
       "mode": "view"
     }
   ],
@@ -271,6 +271,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
