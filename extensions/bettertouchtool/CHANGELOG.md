@@ -1,5 +1,22 @@
 # BetterTouchTool Changelog
 
+## [Expanded trigger and clipboard access] - {PR_MERGE_DATE}
+
+- Generate typed forms for named triggers that declare text, number, or selectable input variables
+- Add a separate command for browsing, running, revealing, enabling, and disabling all configured BTT triggers
+- Add a command for searching, copying, and pasting recent BTT Clipboard Manager items
+- Add category filtering to the BTT action search
+- Restore action-specific icons and infer fallbacks from dynamically loaded action names and categories
+- Add actions for creating, editing, clearing, and refreshing persistent variables
+
+## [Raycast AI support] - {PR_MERGE_DATE}
+
+- Add AI tools for finding and running named triggers and built-in actions
+- Add AI tools for reading and changing temporary or persistent variables
+- Confirm trigger, action, and variable side effects before execution
+- Validate exact trigger UUIDs, catalog action IDs, action parameters, and numeric values
+- Add unit tests and Raycast AI evals for common read, search, and mutation flows
+
 ## [Replace legacy scripting calls] - {PR_MERGE_DATE}
 
 - Replace AppleScript and JXA calls with the official typed BetterTouchTool JavaScript client
