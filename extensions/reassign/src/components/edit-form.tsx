@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import type { Scope, UpdateEventPatch } from "../lib/api";
 import type { ActivityType, Area, ScheduleEvent } from "../lib/schedule-model";
-import { minutesFromClock, resolveActivity, resolveArea } from "../lib/schedule-model";
+import { minutesFromClock, minutesFromTime, resolveActivity, resolveArea } from "../lib/schedule-model";
 import { CALENDAR_NONE, CalendarFields, CalendarFormValues, calendarEditFields, useCalendars } from "./calendar-fields";
 
 interface EditFormValues extends CalendarFormValues {
@@ -59,7 +59,8 @@ export function EditForm(props: {
       // An end at or before the start crosses midnight — mark it, or the server
       // reads the wrapped range as invalid. Send the flag either way, so moving
       // an end back to the same day also clears a previous overnight marker.
-      const startMin = minutesFromClock(event.start);
+      // The start may arrive as a clock or a decimal hour, so parse both.
+      const startMin = minutesFromTime(event.start);
       const endMin = minutesFromClock(end);
       if (startMin !== null && endMin !== null) patch.endNextDay = endMin < startMin;
     }

@@ -134,6 +134,16 @@ export function minutesFromClock(clock: string | undefined): number | null {
   return Number(match[1]) * 60 + Number(match[2]);
 }
 
+/** Minutes since midnight from a clock ("HH:MM") or a decimal-hour value. */
+export function minutesFromTime(value: string | number | undefined | null): number | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value === "number") return Number.isFinite(value) ? Math.round(value * 60) : null;
+  const clock = minutesFromClock(value);
+  if (clock !== null) return clock;
+  const decimal = Number(value);
+  return value.trim() !== "" && Number.isFinite(decimal) ? Math.round(decimal * 60) : null;
+}
+
 /** Start/end minutes, extending end past midnight when the block crosses it. */
 export function eventRange(event: ScheduleEvent): { start: number; end: number } | null {
   const start = minutesFromClock(event.start);
