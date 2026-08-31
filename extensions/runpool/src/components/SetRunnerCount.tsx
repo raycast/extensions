@@ -15,6 +15,12 @@ const MAX_RUNNERS = 9999;
  *
  * Submitting pops first, so the confirmation for a shrink lands over the list
  * rather than over a form the decision has already left.
+ *
+ * It does not short-circuit when the number is unchanged. `pool` is whatever
+ * the row held when the form opened, so an equality test here is against a
+ * count something else may have moved since; submitting 4 to a pool that has
+ * become 6 would look like a no-op and silently drop the resize. The caller
+ * makes that decision from a fresh read instead.
  */
 export function SetRunnerCount({ pool, onSubmit }: { pool: Pool; onSubmit: (count: number) => Promise<void> }) {
   const { pop } = useNavigation();
@@ -32,10 +38,6 @@ export function SetRunnerCount({ pool, onSubmit }: { pool: Pool; onSubmit: (coun
               const count = Number(values.count.trim());
               if (!Number.isInteger(count) || count < 1 || count > MAX_RUNNERS) {
                 setError(`A whole number from 1 to ${MAX_RUNNERS}`);
-                return;
-              }
-              if (count === pool.count) {
-                pop();
                 return;
               }
               pop();
