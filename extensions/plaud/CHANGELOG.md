@@ -1,6 +1,6 @@
 # Plaud Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-31
 
 - Search Recordings command: browse and fuzzy-search your Plaud recordings
 - Copy link to a recording, open it in the browser, or copy its title
