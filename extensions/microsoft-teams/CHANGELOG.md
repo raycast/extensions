@@ -1,6 +1,6 @@
 # Microsoft Teams Changelog
 
-## [AI Tools and Reliability Improvements] - {PR_MERGE_DATE}
+## [AI Tools and Reliability Improvements] - 2026-08-31
 
 - Added AI tools to search people and chats, read and update presence, and set or clear status messages.
 - Added AI tools for the signed-in profile, recent chats, chat messages, new-chat links, and audio or video call links.
