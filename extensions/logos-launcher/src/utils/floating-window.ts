@@ -74,6 +74,9 @@ end tell
 export function getWindowsFloatPanelScript(toolName?: string): string {
   const toolCheck = toolName
     ? `
+Add-Type -AssemblyName UIAutomationClient -ErrorAction SilentlyContinue
+Add-Type -AssemblyName UIAutomationTypes -ErrorAction SilentlyContinue
+
 $targetName = "${toolName.replace(/"/g, '`"')}"
 $panelReady = $false
 
@@ -83,6 +86,22 @@ for ($i = 0; $i -lt 20; $i++) {
     $panelReady = $true
     break
   }
+
+  try {
+    if ($logos.MainWindowHandle -ne [IntPtr]::Zero) {
+      $root = [System.Windows.Automation.AutomationElement]::FromHandle($logos.MainWindowHandle)
+      if ($root -ne $null) {
+        $cond = New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::NameProperty, $targetName)
+        $elem = $root.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond)
+        if ($elem -ne $null) {
+          try { [void] $elem.SetFocus() } catch {}
+          $panelReady = $true
+          break
+        }
+      }
+    }
+  } catch {}
+
   Start-Sleep -Milliseconds 250
 }
 
