@@ -81,12 +81,6 @@ $targetName = "${toolName.replace(/"/g, '`"')}"
 $panelReady = $false
 
 for ($i = 0; $i -lt 20; $i++) {
-  $currentTitle = (Get-Process -Id $logos.Id -ErrorAction SilentlyContinue).MainWindowTitle
-  if ($targetName -and $currentTitle -and $currentTitle -like "*$targetName*") {
-    $panelReady = $true
-    break
-  }
-
   try {
     if ($logos.MainWindowHandle -ne [IntPtr]::Zero) {
       $root = [System.Windows.Automation.AutomationElement]::FromHandle($logos.MainWindowHandle)
@@ -94,11 +88,24 @@ for ($i = 0; $i -lt 20; $i++) {
         $cond = New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::NameProperty, $targetName)
         $elem = $root.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond)
         if ($elem -ne $null) {
-          try { [void] $elem.SetFocus() } catch {}
-          $panelReady = $true
-          break
+          $elem.SetFocus()
+          Start-Sleep -Milliseconds 100
+          $focused = [System.Windows.Automation.AutomationElement]::FocusedElement
+          if ($focused -ne $null -and ($focused.Current.Name -like "*$targetName*" -or $elem.Current.HasKeyboardFocus)) {
+            $panelReady = $true
+            break
+          }
         }
       }
+    }
+  } catch {}
+
+  try {
+    $proc = Get-Process -Id $logos.Id -ErrorAction SilentlyContinue
+    if ($proc -and $proc.MainWindowTitle -like "*$targetName*") {
+      [void] $shell.AppActivate($logos.Id)
+      $panelReady = $true
+      break
     }
   } catch {}
 
