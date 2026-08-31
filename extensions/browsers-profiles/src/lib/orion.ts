@@ -10,12 +10,7 @@ type BrowserProfiles = {
   profiles: BrowserProfile[];
 };
 
-const orionProfilesPath = path.join(
-  os.homedir(),
-  "Applications",
-  "Orion",
-  "Orion Profiles",
-);
+const orionProfilesPath = path.join(os.homedir(), "Applications", "Orion", "Orion Profiles");
 
 const findProfileApplications = (directory: string): string[] => {
   const applications: string[] = [];
@@ -34,9 +29,7 @@ const findProfileApplications = (directory: string): string[] => {
 };
 
 export const getOrionProfiles = (filter: string[]) => {
-  if (
-    !filter.some((value) => "Orion".includes(value) || "ORION".includes(value))
-  ) {
+  if (!filter.some((value) => "Orion".includes(value) || "ORION".includes(value))) {
     return [];
   }
 
@@ -70,7 +63,5 @@ export const getOrionProfiles = (filter: string[]) => {
 
   sortProfiles(profiles);
 
-  return profiles.length > 0
-    ? ([{ name: "Orion", profiles }] satisfies BrowserProfiles[])
-    : [];
+  return profiles.length > 0 ? ([{ name: "Orion", profiles }] satisfies BrowserProfiles[]) : [];
 };
