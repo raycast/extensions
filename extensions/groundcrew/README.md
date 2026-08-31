@@ -40,16 +40,24 @@ Raycast launches tools with a **stripped environment**: a bare `PATH` (`/usr/bin
 
 The reliable fix is a small **shim** that restores the environment, with **Groundcrew Executable Path** pointed at it. Create `~/.local/bin/crew-raycast`:
 
+Tweak the two marked lines for your machine, then paste the whole block into a terminal:
+
 ```sh
 mkdir -p ~/.local/bin
 cat > ~/.local/bin/crew-raycast <<'EOF'
 #!/bin/sh
 # Restore the environment crew needs under Raycast's stripped PATH.
-[ -f "$HOME/.secrets" ] && . "$HOME/.secrets"   # provider keys, e.g. GROUNDCREW_LINEAR_API_KEY
 
-# Directories holding node (your version manager) + git/gh/cmux/tmux (Homebrew).
-# Swap the first entry for your node install: dirname "$(readlink -f "$(command -v node)")"
-export PATH="$HOME/.local/share/fnm/node-versions/v24.14.1/installation/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+# TWEAK 1 — source the file that exports your provider keys (delete this line if
+# you don't use one). Common choices: ~/.secrets, ~/.zshenv, ~/.config/groundcrew/env.
+[ -f "$HOME/.secrets" ] && . "$HOME/.secrets"   # e.g. exports GROUNDCREW_LINEAR_API_KEY
+
+# TWEAK 2 — put YOUR node directory first, then the dir holding git/gh/cmux/tmux.
+#   node dir:  dirname "$(readlink -f "$(command -v node)")"
+#   the rest:  dirname "$(command -v cmux)"   (Homebrew is usually /opt/homebrew/bin)
+# Use the stable install path, NOT a version manager's per-shell dir (e.g. fnm's
+# ~/.local/state/fnm_multishells/<id>/bin), which vanishes when the shell exits.
+export PATH="/path/to/your/node/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 # Absolute node + crew so the `#!/usr/bin/env node` shebang never has to be found.
 exec "$(command -v node)" "$(command -v crew)" "$@"
