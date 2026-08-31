@@ -98,14 +98,10 @@ async function takeName(path: string, target: string): Promise<boolean> {
     throw new Error("This file cannot be renamed safely on its current volume.", { cause: error });
   }
 
-  try {
-    await unlink(path);
-  } catch (error) {
-    // The file answers to both names at this point. Drop the one just added, so
-    // a failure here leaves the file where it started rather than duplicated.
-    await unlink(target).catch(() => undefined);
-    throw error;
-  }
+  // Do not remove `target` if source cleanup fails. Another process could have
+  // replaced that directory entry, and deleting it would lose unrelated data.
+  // Leaving the original link in place is the only safe failure mode available.
+  await unlink(path);
   return true;
 }
 
