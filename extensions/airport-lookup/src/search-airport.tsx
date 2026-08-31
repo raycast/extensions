@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
 
 import airports from "./airports.json";
 
@@ -125,14 +125,15 @@ function AirportDetail({ airport }: { airport: Airport }) {
   );
 }
 
-export default function Command() {
-  const [query, setQuery] = useState("");
+export default function Command(props: LaunchProps) {
+  const [query, setQuery] = useState(props.fallbackText ?? "");
   const results = useMemo(() => filterAirports(query), [query]);
 
   return (
     <List
       isShowingDetail
       searchBarPlaceholder="Search by ICAO, IATA, name, or city (e.g. KJFK, LHR, Tokyo)"
+      searchText={query}
       onSearchTextChange={setQuery}
       throttle
     >
