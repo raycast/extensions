@@ -8,17 +8,33 @@ export function getMacOSFloatPanelScript(toolName?: string): string {
     ? `
 -- Wait for the requested tool panel to receive focus if window title reflects it
 set targetTool to "${toolName.replace(/"/g, '\\"')}"
-repeat with attempt from 1 to 10
+set panelReady to false
+
+repeat with attempt from 1 to 20
   tell application "System Events"
     tell process "Logos"
       try
         set currentTitle to name of front window
-        if currentTitle contains targetTool then exit repeat
+        if currentTitle contains targetTool then
+          set panelReady to true
+          exit repeat
+        end if
+        repeat with w in windows
+          if name of w contains targetTool then
+            set panelReady to true
+            exit repeat
+          end if
+        end repeat
+        if panelReady then exit repeat
       end try
     end tell
   end tell
-  delay 0.3
+  delay 0.25
 end repeat
+
+if not panelReady then
+  error "Timed out waiting for " & targetTool & " panel to become active in Logos."
+end if
 `
     : `
 -- Allow Logos time to process the deep link and focus the newly opened panel
@@ -52,12 +68,19 @@ export function getWindowsFloatPanelScript(toolName?: string): string {
   const toolCheck = toolName
     ? `
 $targetName = "${toolName.replace(/"/g, '`"')}"
-for ($i = 0; $i -lt 10; $i++) {
+$panelReady = $false
+
+for ($i = 0; $i -lt 20; $i++) {
   $currentTitle = (Get-Process -Id $logos.Id -ErrorAction SilentlyContinue).MainWindowTitle
   if ($targetName -and $currentTitle -and $currentTitle -like "*$targetName*") {
+    $panelReady = $true
     break
   }
-  Start-Sleep -Milliseconds 300
+  Start-Sleep -Milliseconds 250
+}
+
+if (-not $panelReady) {
+  throw "Timed out waiting for $targetName panel to become active in Logos."
 }
 `
     : `

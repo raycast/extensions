@@ -17,13 +17,17 @@ describe("floating window automation", () => {
     expect(WINDOWS_FLOAT_PANEL_SCRIPT).toContain("$shell.SendKeys('^{F11}')");
   });
 
-  it("includes tool-specific window readiness check when tool name is provided", () => {
+  it("gates shortcut delivery on tool panel readiness and errors on timeout", () => {
     const macScript = getMacOSFloatPanelScript("Atlas");
     expect(macScript).toContain('set targetTool to "Atlas"');
-    expect(macScript).toContain("if currentTitle contains targetTool then exit repeat");
+    expect(macScript).toContain("if not panelReady then");
+    expect(macScript).toContain('error "Timed out waiting for " & targetTool & " panel to become active in Logos."');
+    expect(macScript).toContain('keystroke "f" using {command down, option down}');
 
     const winScript = getWindowsFloatPanelScript("Atlas");
     expect(winScript).toContain('$targetName = "Atlas"');
-    expect(winScript).toContain('$currentTitle -like "*$targetName*"');
+    expect(winScript).toContain("if (-not $panelReady)");
+    expect(winScript).toContain('throw "Timed out waiting for $targetName panel to become active in Logos."');
+    expect(winScript).toContain("$shell.SendKeys('^{F11}')");
   });
 });
