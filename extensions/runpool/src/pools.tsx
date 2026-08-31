@@ -74,14 +74,30 @@ export default function Command() {
     }
   }
 
-  async function setPoolCount(pool: Pool, count: number) {
+  /**
+   * Resize a pool, deciding what to do from a fresh read rather than from the
+   * count the row was rendered with.
+   *
+   * The target is a function of that fresh read, not a number, because the two
+   * ways in here want different things when the pool has moved underneath the
+   * list. The form asks for an absolute count and means it. The step actions
+   * ask for one more or one fewer, and only that intent survives: resolving
+   * their target from the row meant "Decrease to 3" grew a pool that had since
+   * dropped to 2, silently, because growing needs no confirmation.
+   */
+  async function applyPoolCount(pool: Pool, target: (current: Pool) => number) {
     try {
-      // Capacity can be changed outside this view. Refresh before deciding
-      // whether this selection deregisters runners, rather than trusting the
-      // count captured when the list row rendered.
       const current = (await getStatus({ local: true })).pools.find((candidate) => candidate.name === pool.name);
       if (!current) throw new Error(`Pool "${pool.name}" no longer exists.`);
+
+      const count = target(current);
       if (count === current.count) return;
+      if (count < 1) {
+        await showFailureToast(new Error("A pool cannot have fewer than one runner."), {
+          title: `${pool.name} is already at one runner`,
+        });
+        return;
+      }
 
       // runpool refuses to resize a pool mid-job rather than failing the jobs.
       // Say so before asking anything, rather than after a confirmation that
@@ -115,6 +131,12 @@ export default function Command() {
       await showFailureToast(error, { title: "Could Not Read Current Pool Capacity" });
     }
   }
+
+  /** One more or one fewer than the pool actually has, not than the row shows. */
+  const stepPoolCount = (pool: Pool, delta: number) => applyPoolCount(pool, (current) => current.count + delta);
+
+  /** Exactly the number the form was given. */
+  const setPoolCount = (pool: Pool, count: number) => applyPoolCount(pool, () => count);
 
   const ghMissing = findGh() === null;
 
@@ -258,14 +280,14 @@ export default function Command() {
                 <Action
                   title={`Increase to ${pool.count + 1} Runners`}
                   icon={Icon.Plus}
-                  onAction={() => setPoolCount(pool, pool.count + 1)}
+                  onAction={() => stepPoolCount(pool, 1)}
                 />
                 {pool.count > 1 && (
                   <Action
                     title={`Decrease to ${pool.count - 1} ${pool.count - 1 === 1 ? "Runner" : "Runners"}`}
                     icon={Icon.Minus}
                     style={Action.Style.Destructive}
-                    onAction={() => setPoolCount(pool, pool.count - 1)}
+                    onAction={() => stepPoolCount(pool, -1)}
                   />
                 )}
                 <Action.Push
