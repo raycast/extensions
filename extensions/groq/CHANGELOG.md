@@ -1,5 +1,9 @@
 # Groq Changelog
 
+## [Updated Models] - {PR_MERGE_DATE}
+
+- Added `Qwen 3.8 27B 131k`
+
 ## [Updated Models] - 2026-07-12
 
 - Added `Qwen 3.6 27B 131k`
