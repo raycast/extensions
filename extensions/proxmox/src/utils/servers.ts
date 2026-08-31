@@ -88,11 +88,9 @@ async function newestLockActivity(lockPath: string): Promise<number | undefined>
     throw error;
   }
 
-  if (entries.length === 0) {
-    return 0;
-  }
-
-  let newest = 0;
+  // Seed with the directory mtime so the window between mkdir and the token
+  // file is not treated as immediately stale (mtime 0 is the Unix epoch).
+  let newest = info.mtimeMs;
   for (const entry of entries) {
     try {
       const { mtimeMs } = await stat(join(lockPath, entry));
