@@ -14,10 +14,6 @@ export interface CreateGroundcrewClientOptions {
   executablePath?: string;
   environment?: NodeJS.ProcessEnv;
   versionTimeoutMs?: number;
-  /** Colon-separated directories prepended to PATH when running crew (and for discovery). */
-  additionalPath?: string;
-  /** Provided to crew as `GROUNDCREW_LINEAR_API_KEY`. */
-  apiKey?: string;
 }
 
 export interface LifecycleOptions {
@@ -238,44 +234,8 @@ async function validateGroundcrewVersion(
   return assertCompatibleVersion(versionResult.stdout, MINIMUM_GROUNDCREW_VERSION);
 }
 
-/** Expands a leading `~`/`$HOME`/`${HOME}` in each colon-separated PATH segment. */
-function expandPathSegments(value: string, home: string | undefined): string {
-  return value
-    .split(":")
-    .map((segment) => segment.trim())
-    .filter((segment) => segment.length > 0)
-    .map((segment) => {
-      if (home === undefined || home.length === 0) {
-        return segment;
-      }
-      if (segment === "~") {
-        return home;
-      }
-      if (segment.startsWith("~/")) {
-        return `${home}${segment.slice(1)}`;
-      }
-      return segment.replace(/\$\{HOME\}/g, home).replace(/\$HOME\b/g, home);
-    })
-    .join(":");
-}
-
 export async function createGroundcrewClient(options: CreateGroundcrewClientOptions = {}): Promise<GroundcrewClient> {
   const environment = { ...(options.environment ?? process.env) };
-  // Inject the configured Additional PATH so crew (and the tools it shells out to —
-  // node, gh, cmux, tmux) resolve under Raycast's stripped environment. Also feeds discovery.
-  const extraPath = options.additionalPath?.trim();
-  if (extraPath !== undefined && extraPath.length > 0) {
-    const expanded = expandPathSegments(extraPath, environment.HOME);
-    if (expanded.length > 0) {
-      environment.PATH =
-        environment.PATH === undefined || environment.PATH.length === 0 ? expanded : `${expanded}:${environment.PATH}`;
-    }
-  }
-  // Provide the Linear API key so provider-backed commands work without a shell-sourced env.
-  const apiKey = options.apiKey?.trim();
-  if (apiKey !== undefined && apiKey.length > 0) {
-    environment.GROUNDCREW_LINEAR_API_KEY = apiKey;
-  }
   const executablePath = await resolveCrewExecutable({
     configuredPath: options.executablePath,
     environment,

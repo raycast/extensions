@@ -11,4 +11,3 @@
 - Open an existing pull request or branch in a Groundcrew worktree.
 - Groundcrew Doctor command that surfaces `crew doctor` diagnostics, reachable from setup errors.
 - Configurable Groundcrew executable path and editor application, with automatic discovery from PATH and common install locations.
-- Configurable Additional PATH and Linear API Key preferences that inject the directories and key `crew` needs into its environment, avoiding a wrapper script under Raycast's stripped PATH.
