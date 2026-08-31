@@ -7,6 +7,7 @@ import { loadGroups } from "./storage";
 import { runAppleShortcut } from "./apple-shortcuts";
 import { normalizeShortcutValue } from "./shortcut-values";
 import { executeRaycastCommandSteps } from "./raycast-commands";
+import { escapeAppleScriptString } from "./apple-script";
 
 export default function QuitGroupCommand() {
   const [groups, setGroups] = useState<AppGroup[]>([]);
@@ -23,7 +24,7 @@ export default function QuitGroupCommand() {
     await closeMainWindow();
 
     for (const app of group.apps) {
-      const safeName = app.name.replace(/"/g, '\\"');
+      const safeName = escapeAppleScriptString(app.name);
       execFile("osascript", ["-e", `tell application "${safeName}" to quit`]);
     }
 

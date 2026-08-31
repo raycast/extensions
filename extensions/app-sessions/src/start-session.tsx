@@ -32,7 +32,7 @@ export default function LaunchGroupCommand() {
   async function launchGroup(group: AppGroup) {
     await closeMainWindow();
 
-    const { launchDelay } = getPreferenceValues<{ launchDelay: string }>();
+    const { launchDelay } = getPreferenceValues<Preferences.StartSession>();
     const delay = parseInt(launchDelay, 10);
     const failedApps: string[] = [];
     let firstLaunchError: unknown;
