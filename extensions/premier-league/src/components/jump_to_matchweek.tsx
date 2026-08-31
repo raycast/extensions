@@ -41,6 +41,7 @@ export default function JumpToMatchweek(props: {
           <Action.SubmitForm
             title="Jump to Matchweek"
             icon={Icon.ArrowRight}
+            shortcut={{ modifiers: [], key: "return" }}
             onSubmit={onSubmit}
           />
         </ActionPanel>
