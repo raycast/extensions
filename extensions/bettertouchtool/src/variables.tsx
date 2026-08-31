@@ -1,18 +1,27 @@
 import { Action, ActionPanel, Detail, Form, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { useMemo } from "react";
-import { actions, type Btt } from "bettertouchtool";
+import { useMemo, useState } from "react";
+import { actions, ActionType, type Btt } from "bettertouchtool";
 import { createBttClient } from "./btt";
-import { STANDARD_VARIABLES, type VariableDefinition } from "./variable-definitions";
+import { showBttFailureToast } from "./btt-toast";
+import { DevelopmentDiagnosticsSection } from "./diagnostics";
+import { type VariableDefinition } from "./variable-definitions";
+import {
+  filterVariableDefinitions,
+  getPersistentVariableNames,
+  mergeVariableDefinitions,
+  type VariableFilter,
+} from "./variable-utils";
 
 const execFileAsync = promisify(execFile);
 const userVariablesPath = join(homedir(), "Library/Application Support/BetterTouchTool/btt_user_variables.plist");
 
 export default function Command() {
+  const [variableFilter, setVariableFilter] = useState<VariableFilter>("all");
   const btt = useMemo(createBttClient, []);
   const {
     isLoading,
@@ -21,12 +30,13 @@ export default function Command() {
   } = usePromise(loadVariableDefinitions, [], {
     failureToastOptions: { title: "Could not load BTT variables" },
   });
+  const filteredVariables = useMemo(() => filterVariableDefinitions(data, variableFilter), [data, variableFilter]);
 
   async function showAllVariablesInBtt() {
     try {
-      await btt.triggerAction(actions.action(523));
+      await btt.triggerAction(actions.action(ActionType.SHOW_VARIABLES_VIEW));
     } catch (error) {
-      await showFailureToast(error, { title: "Could not open BTT Variables" });
+      await showBttFailureToast(error, "Could not open BTT Variables");
     }
   }
 
@@ -34,18 +44,41 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search BTT variables..."
+      searchBarAccessory={<VariableFilterDropdown value={variableFilter} onChange={setVariableFilter} />}
       throttle
       actions={
         <ActionPanel>
           <Action title="Refresh Variables" onAction={revalidate} icon={Icon.RotateClockwise} />
           <Action title="Show All Variables in BTT" onAction={showAllVariablesInBtt} icon={Icon.AppWindowList} />
+          <DevelopmentDiagnosticsSection />
         </ActionPanel>
       }
     >
-      {data.map((variable) => (
+      {filteredVariables.map((variable) => (
         <VariableItem key={variable.name} variable={variable} btt={btt} />
       ))}
     </List>
+  );
+}
+
+function VariableFilterDropdown({
+  value,
+  onChange,
+}: {
+  value: VariableFilter;
+  onChange: (value: VariableFilter) => void;
+}) {
+  return (
+    <List.Dropdown
+      tooltip="Filter variables by type"
+      value={value}
+      onChange={(newValue) => onChange(newValue as VariableFilter)}
+    >
+      <List.Dropdown.Item title="All Variables" value="all" />
+      <List.Dropdown.Item title="Dynamic" value="dynamic" />
+      <List.Dropdown.Item title="Context" value="context" />
+      <List.Dropdown.Item title="Persistent" value="persistent" />
+    </List.Dropdown>
   );
 }
 
@@ -74,6 +107,7 @@ function VariableItem({ variable, btt }: { variable: VariableDefinition; btt: Bt
             />
           ) : null}
           <Action.CopyToClipboard title="Copy Variable Name" content={variable.name} />
+          <DevelopmentDiagnosticsSection />
         </ActionPanel>
       }
     />
@@ -151,7 +185,7 @@ function VariableEditor({
       await showToast({ title: "Variable updated", style: Toast.Style.Success });
       pop();
     } catch (error) {
-      await showFailureToast(error, { title: `Could not update ${variable.name}` });
+      await showBttFailureToast(error, `Could not update ${variable.name}`);
     }
   }
 
@@ -172,28 +206,13 @@ function VariableEditor({
 
 async function loadVariableDefinitions(): Promise<VariableDefinition[]> {
   const persistentNames = await readPersistentVariableNames();
-  const variables = new Map(STANDARD_VARIABLES.map((variable) => [variable.name, variable]));
-
-  for (const name of persistentNames) {
-    variables.set(name, {
-      name,
-      category: "Persistent",
-      persistent: true,
-      readOnly: false,
-    });
-  }
-
-  return [...variables.values()].sort((a, b) => a.name.localeCompare(b.name));
+  return mergeVariableDefinitions(persistentNames);
 }
 
 async function readPersistentVariableNames(): Promise<string[]> {
   try {
     const { stdout } = await execFileAsync("plutil", ["-convert", "json", "-o", "-", userVariablesPath]);
-    const root = JSON.parse(stdout) as Record<string, unknown>;
-    const nestedVariables = root.BTTUserVariables;
-    const variables =
-      nestedVariables && typeof nestedVariables === "object" ? (nestedVariables as Record<string, unknown>) : root;
-    return Object.keys(variables);
+    return getPersistentVariableNames(JSON.parse(stdout) as unknown);
   } catch {
     return [];
   }

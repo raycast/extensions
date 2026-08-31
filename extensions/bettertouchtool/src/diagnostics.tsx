@@ -1,10 +1,19 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, environment } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { type Btt } from "bettertouchtool";
 import { useMemo } from "react";
 import { createBttClient } from "./btt";
+import { formatDiagnostics, loadDiagnostics } from "./diagnostics-model";
 
-export default function Command() {
+export function DevelopmentDiagnosticsSection() {
+  if (!environment.isDevelopment) return null;
+  return (
+    <ActionPanel.Section title="Debug">
+      <Action.Push title="Show Connection Diagnostics" target={<DiagnosticsDetail />} icon={Icon.Heartbeat} />
+    </ActionPanel.Section>
+  );
+}
+
+function DiagnosticsDetail() {
   const btt = useMemo(createBttClient, []);
   const { isLoading, data, revalidate } = usePromise(loadDiagnostics, [btt], {
     failureToastOptions: { title: "Could not connect to BetterTouchTool" },
@@ -21,30 +30,4 @@ export default function Command() {
       }
     />
   );
-}
-
-async function loadDiagnostics(btt: Btt) {
-  const info = await btt.info();
-  const transport = await btt.transport();
-  return { info, transportKind: transport.kind, transportDescription: transport.describe() };
-}
-
-function formatDiagnostics({ info, transportKind, transportDescription }: Awaited<ReturnType<typeof loadDiagnostics>>) {
-  return [
-    "# BetterTouchTool Diagnostics",
-    "## Connection",
-    `- Transport: **${transportKind}**`,
-    `- Endpoint: \`${transportDescription}\``,
-    "## BetterTouchTool",
-    info
-      ? [
-          `- Version: **${info.version}** (${info.build})`,
-          `- macOS: ${info.macOS ?? "Unknown"}`,
-          `- Socket server: ${info.socketServerEnabled ? "Enabled" : "Disabled"}`,
-          `- Available scripting functions: ${info.routes.length}`,
-          `- JSON POST support: ${info.http?.jsonBody ? "Yes" : "No"}`,
-          `- Secret header support: ${info.http?.secretHeader ? "Yes" : "No"}`,
-        ].join("\n")
-      : "BTT responded, but capability information requires BetterTouchTool 6.735 or newer.",
-  ].join("\n\n");
 }

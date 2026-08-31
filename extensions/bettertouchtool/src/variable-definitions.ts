@@ -142,22 +142,18 @@ const DESCRIPTIONS: Record<string, string> = {
 };
 
 export const STANDARD_VARIABLES: VariableDefinition[] = [
-  ...DYNAMIC_VARIABLES.map(
-    (name): VariableDefinition => ({
-      name,
-      category: "Dynamic",
-      description: DESCRIPTIONS[name],
-      persistent: false,
-      readOnly: !WRITABLE_VARIABLES.has(name),
-    })
-  ),
-  ...CONTEXT_VARIABLES.map(
-    (name): VariableDefinition => ({
-      name,
-      category: "Context",
-      description: DESCRIPTIONS[name],
-      persistent: false,
-      readOnly: true,
-    })
-  ),
+  ...DYNAMIC_VARIABLES.map((name): VariableDefinition => ({
+    name,
+    category: "Dynamic",
+    description: DESCRIPTIONS[name],
+    persistent: false,
+    readOnly: !WRITABLE_VARIABLES.has(name),
+  })),
+  ...CONTEXT_VARIABLES.map((name): VariableDefinition => ({
+    name,
+    category: "Context",
+    description: DESCRIPTIONS[name],
+    persistent: false,
+    readOnly: true,
+  })),
 ];

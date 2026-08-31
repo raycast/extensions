@@ -14,6 +14,9 @@ import { useMemo, useState } from "react";
 import { usePromise } from "@raycast/utils";
 import { Btt, type TriggerJson } from "bettertouchtool";
 import { createBttClient } from "./btt";
+import { showBttFailureToast } from "./btt-toast";
+import { DevelopmentDiagnosticsSection } from "./diagnostics";
+import { filterNamedTriggers, isTriggerEnabled } from "./trigger-utils";
 
 export default function Command() {
   const [showDisabledTriggers, setShowDisabledTriggers] = useState(false);
@@ -22,12 +25,9 @@ export default function Command() {
   const { isLoading, data, revalidate } = usePromise(
     (client: Btt) => client.getTriggers<BTTTrigger>({ triggerId: 643 }),
     [btt],
-    { failureToastOptions: { title: "Could not load named triggers" } }
+    { failureToastOptions: { title: "Could not load named triggers" } },
   );
-  const commands = (data ?? []).filter(
-    (trigger) =>
-      !!trigger.BTTTriggerName && (showDisabledTriggers || (trigger.BTTEnabled === 1 && trigger.BTTEnabled2 === 1))
-  );
+  const commands = filterNamedTriggers(data ?? [], showDisabledTriggers);
 
   return (
     <List
@@ -41,10 +41,11 @@ export default function Command() {
             <Action
               title="Refresh"
               onAction={revalidate}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               icon={Icon.RotateClockwise}
             />
           </ActionPanel.Section>
+          <DevelopmentDiagnosticsSection />
         </ActionPanel>
       }
     >
@@ -55,6 +56,7 @@ export default function Command() {
             triggerResult={triggerResult}
             btt={btt}
             resultHandling={triggerResultHandling}
+            onTriggerChanged={revalidate}
           />
         ))}
       </List.Section>
@@ -65,8 +67,8 @@ export default function Command() {
 function TriggerDropdown({ onTriggerTypeChange }: { onTriggerTypeChange: (value: string) => void }) {
   return (
     <List.Dropdown tooltip="Determine if disabled triggers should be shown" onChange={onTriggerTypeChange}>
-      <List.Dropdown.Item key="true" title="Show all triggers" value="true" icon={Icon.Eye} />
-      <List.Dropdown.Item key="false" title="Only show enabled triggers" value="" icon={Icon.EyeDisabled} />
+      <List.Dropdown.Item key="true" title="Show all triggers" value="true" icon={Icon.List} />
+      <List.Dropdown.Item key="false" title="Only show enabled triggers" value="" icon={Icon.CheckCircle} />
     </List.Dropdown>
   );
 }
@@ -75,23 +77,23 @@ function TriggerItem({
   triggerResult,
   btt,
   resultHandling,
+  onTriggerChanged,
 }: {
   triggerResult: BTTTrigger;
   btt: Btt;
   resultHandling: TriggerResultHandling;
+  onTriggerChanged: () => Promise<unknown>;
 }) {
   const triggerName = triggerResult.BTTTriggerName;
+  const triggerHandle = btt.trigger(triggerResult.BTTUUID);
+  const enabled = isTriggerEnabled(triggerResult);
 
   const handleRun = async () => {
     try {
-      const result = await btt.triggerNamed(triggerName);
+      const result = await triggerHandle.invoke();
       await handleTriggerResult(result, resultHandling);
     } catch (error) {
-      showToast({
-        title: "Failed to run trigger",
-        message: error && String(error) !== "null" ? String(error) : "",
-        style: Toast.Style.Failure,
-      });
+      await showBttFailureToast(error, "Failed to run trigger");
     }
   };
 
@@ -100,15 +102,34 @@ function TriggerItem({
     try {
       await btt.triggerNamedAsync(triggerName);
     } catch (error) {
-      showToast({
-        title: "Failed to run trigger",
-        message: error && String(error) !== "null" ? String(error) : "",
-        style: Toast.Style.Failure,
-      });
+      await showBttFailureToast(error, "Failed to run trigger");
+    }
+  };
+
+  const handleReveal = async () => {
+    try {
+      await triggerHandle.reveal();
+    } catch (error) {
+      await showBttFailureToast(error, "Could not show trigger in BetterTouchTool");
+    }
+  };
+
+  const handleToggleEnabled = async () => {
+    try {
+      if (enabled) {
+        await triggerHandle.disable();
+      } else {
+        await triggerHandle.enable();
+      }
+      await showToast({ title: enabled ? "Trigger disabled" : "Trigger enabled", style: Toast.Style.Success });
+      await onTriggerChanged();
+    } catch (error) {
+      await showBttFailureToast(error, enabled ? "Could not disable trigger" : "Could not enable trigger");
     }
   };
 
   const accessories: List.Item.Accessory[] = [];
+  if (!enabled) accessories.push({ tag: "Disabled" });
   if (triggerResult.BTTGestureNotes && triggerResult.BTTGestureNotes !== "Named Trigger: " + triggerName) {
     accessories.push({ text: triggerResult.BTTGestureNotes, icon: Icon.Info, tooltip: triggerResult.BTTGestureNotes });
   }
@@ -121,8 +142,8 @@ function TriggerItem({
         typeof actionConfig === "string"
           ? actionConfig
           : actionConfig
-          ? JSON.stringify(actionConfig)
-          : triggerResult.BTTPredefinedActionName,
+            ? JSON.stringify(actionConfig)
+            : triggerResult.BTTPredefinedActionName,
     });
   }
 
@@ -136,6 +157,14 @@ function TriggerItem({
             <Action title="Run Trigger with BTT" onAction={handleRun} icon={Icon.PlayFilled} />
             <Action title="Run Trigger in Background" onAction={handleRunInBackground} icon={Icon.Play} />
           </ActionPanel.Section>
+          <ActionPanel.Section title="BetterTouchTool">
+            <Action title="Show in BetterTouchTool" onAction={handleReveal} icon={Icon.AppWindow} />
+            <Action
+              title={enabled ? "Disable Trigger" : "Enable Trigger"}
+              onAction={handleToggleEnabled}
+              icon={enabled ? Icon.XMarkCircle : Icon.CheckCircle}
+            />
+          </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Trigger Name"
@@ -143,6 +172,7 @@ function TriggerItem({
               shortcut={Keyboard.Shortcut.Common.Copy}
             />
           </ActionPanel.Section>
+          <DevelopmentDiagnosticsSection />
         </ActionPanel>
       }
     />

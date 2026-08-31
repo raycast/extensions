@@ -12,7 +12,7 @@ Search the complete action catalog generated from BetterTouchTool's reference do
 
 ### Named triggers
 
-Find and run named triggers. The type of associated action will be displayed and in some cases you can hover over the action to see a preview of the code/file that will be executed.
+Find and run named triggers by their exact UUID. The type of associated action will be displayed and in some cases you can hover over the action to see a preview of the code/file that will be executed. Named triggers can also be revealed in BetterTouchTool or enabled and disabled from Raycast.
 
 Named triggers can optionally show their returned value in a toast or copy it to the clipboard. Configure this under the extension's **Named Trigger Results** preference.
 
@@ -24,4 +24,4 @@ BTT does not currently expose a scripting API that enumerates every live tempora
 
 ### Diagnostics
 
-Inspect the active connection transport, BTT version, socket state, and available scripting capabilities.
+When running the extension with `npm run dev`, choose **Show Connection Diagnostics** from any command's action panel to inspect the active transport, BTT version, socket state, and available scripting capabilities. This action is hidden in production builds.

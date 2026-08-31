@@ -5,9 +5,10 @@
 - Replace AppleScript and JXA calls with the official typed BetterTouchTool JavaScript client
 - Prefer the local Unix socket with a configurable webserver fallback
 - Run background triggers asynchronously
+- Run selected triggers by UUID and add reveal, enable, and disable actions
 - Replace the static action list with BTT's generated action catalog and parameter forms
 - Add optional named-trigger result handling
-- Add searchable variables and connection diagnostics commands
+- Add searchable variables and development-only connection diagnostics
 - Remove trigger URLs that embedded the BTT shared secret
 
 ## Error handling - 2024-04-28

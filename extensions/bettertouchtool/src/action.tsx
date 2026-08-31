@@ -1,18 +1,16 @@
 import { ActionPanel, Action, List, Icon, closeMainWindow, Form, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { actions } from "bettertouchtool";
-import { actionCatalog, type ActionDefinition, type ActionParamDoc } from "bettertouchtool/catalog";
+import { actionCatalog, type ActionDefinition } from "bettertouchtool/catalog";
+import {
+  formatInitialValue,
+  getParameterFields,
+  parseFormValue,
+  type FormValues,
+  type ParameterField,
+} from "./action-parameters";
 import { createBttClient } from "./btt";
-
-type FormValue = string | boolean;
-type FormValues = Record<string, FormValue>;
-type ParameterKind = "boolean" | "json" | "number" | "text";
-
-interface ParameterField {
-  definition: ActionParamDoc;
-  initialValue: unknown;
-  kind: ParameterKind;
-}
+import { showBttFailureToast } from "./btt-toast";
+import { DevelopmentDiagnosticsSection } from "./diagnostics";
 
 export default function Command() {
   return (
@@ -38,7 +36,7 @@ function ActionForm({ actionDefinition }: { actionDefinition: ActionDefinition }
 
       await createBttClient().triggerAction(actions.action(actionDefinition.id, extra));
     } catch (error) {
-      await showFailureToast(error, { title: "Failed to run action" });
+      await showBttFailureToast(error, "Failed to run action");
     }
   }
 
@@ -48,6 +46,7 @@ function ActionForm({ actionDefinition }: { actionDefinition: ActionDefinition }
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Run Action" onSubmit={handleSubmit} icon={Icon.PlayFilled} />
+          <DevelopmentDiagnosticsSection />
         </ActionPanel>
       }
     >
@@ -74,14 +73,23 @@ function ParameterInput({ field }: { field: ParameterField }) {
     );
   }
 
-  if (kind === "json") {
+  if (kind === "json" || kind === "raw-json") {
     return (
       <Form.TextArea
         id={definition.key}
         title={definition.key}
-        info={definition.description}
+        info={
+          kind === "raw-json"
+            ? [
+                definition.description,
+                "The catalog does not identify a reliable type. Enter a valid JSON value; quote string values.",
+              ]
+                .filter(Boolean)
+                .join(" ")
+            : definition.description
+        }
         defaultValue={formatInitialValue(initialValue, kind)}
-        placeholder="JSON object or array"
+        placeholder={kind === "json" ? "JSON object or array" : 'JSON value, e.g. "text", 42, or true'}
       />
     );
   }
@@ -114,7 +122,7 @@ function ActionItem({ actionDefinition }: { actionDefinition: ActionDefinition }
     try {
       await createBttClient().triggerAction(actions.action(actionDefinition.id), { waitForReply: !closeWindow });
     } catch (error) {
-      await showFailureToast(error, { title: "Failed to run action" });
+      await showBttFailureToast(error, "Failed to run action");
     }
   }
 
@@ -138,51 +146,9 @@ function ActionItem({ actionDefinition }: { actionDefinition: ActionDefinition }
               <Action title="Run Action in Background" onAction={() => handleRun(true)} icon={Icon.Play} />
             ) : null}
           </ActionPanel.Section>
+          <DevelopmentDiagnosticsSection />
         </ActionPanel>
       }
     />
   );
-}
-
-function getParameterFields(actionDefinition: ActionDefinition): ParameterField[] {
-  const parameters = new Map<string, ActionParamDoc>();
-  for (const parameter of actionDefinition.params) {
-    if (parameter.key !== "BTTPredefinedActionType" && !parameters.has(parameter.key)) {
-      parameters.set(parameter.key, parameter);
-    }
-  }
-
-  return [...parameters.values()].map((definition) => {
-    const initialValue = actionDefinition.example?.[definition.key];
-    return { definition, initialValue, kind: inferParameterKind(definition, initialValue) };
-  });
-}
-
-function inferParameterKind(definition: ActionParamDoc, initialValue: unknown): ParameterKind {
-  if (typeof initialValue === "boolean" || /boolean/i.test(definition.description)) return "boolean";
-  if (definition.children?.length || (initialValue !== null && typeof initialValue === "object")) return "json";
-  if (typeof initialValue === "number" || /\b(number|seconds|amount|duration)\b/i.test(definition.description)) {
-    return "number";
-  }
-  return "text";
-}
-
-function formatInitialValue(value: unknown, kind: ParameterKind): string {
-  if (value === undefined || value === null) return "";
-  if (kind === "json") return JSON.stringify(value, null, 2);
-  return String(value);
-}
-
-function parseFormValue(value: FormValue | undefined, field: ParameterField): unknown {
-  if (field.kind === "boolean") {
-    return field.initialValue === undefined && value === false ? undefined : Boolean(value);
-  }
-  if (typeof value !== "string" || value.trim() === "") return undefined;
-  if (field.kind === "json") return JSON.parse(value);
-  if (field.kind === "number") {
-    const number = Number(value);
-    if (!Number.isFinite(number)) throw new Error(`${field.definition.key} must be a valid number`);
-    return number;
-  }
-  return value;
 }
