@@ -35,10 +35,18 @@ export interface PlatformAdapter {
   extractClipboardPng(): Promise<string>;
 
   /**
-   * 클립보드의 텍스트 (없으면 ""). macOS는 Raycast API 그대로 — Windows는 Clipboard.readText()가
-   * 외부 프로세스가 갓 복사한 텍스트를 놓치는(빈 값 반환) 실측 이슈가 있어 OS에서 직접 읽는다.
+   * 클립보드의 텍스트 (없으면 ""). 양 플랫폼 모두 Raycast API 대신 OS에서 직접 읽는다 —
+   * macOS는 이미지 클립보드에 "Image (WxH)" 플레이스홀더를 돌려주고, Windows는 외부
+   * 프로세스가 갓 복사한 텍스트를 놓치는 실측 이슈가 각각 있다 (어댑터 주석 참조).
    */
   readClipboardText(): Promise<string>;
+
+  /**
+   * 최전면 앱에서 블록 지정된 텍스트 (없으면 ""). 미지정·앱 미지원·접근성 권한 없음을
+   * 구분하지 않고 전부 ""로 접는다 — 호출부는 "선택 텍스트를 쓸 수 있는가"만 알면 되고,
+   * 못 쓰면 클립보드 경로로 조용히 넘어가야 하기 때문이다.
+   */
+  readSelectedText(): Promise<string>;
 
   /** alias 키로 PW 영구 저장 (Keychain / DPAPI blob) */
   savePassword(alias: string, password: string): Promise<void>;

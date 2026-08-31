@@ -61,3 +61,33 @@ describe("parseSelectorContext", () => {
     expect(parseSelectorContext("finder")).toEqual({ payload: "none" });
   });
 });
+
+describe("parseSelectorContext — remote-clipboard", () => {
+  it("원격 클립보드 위임을 인식한다", () => {
+    expect(parseSelectorContext({ payload: "remote-clipboard" })).toEqual({
+      payload: "remote-clipboard",
+    });
+  });
+  it("전송 데이터는 context로 받지 않는다 — 실행 시점 클립보드가 유일한 출처", () => {
+    expect(
+      parseSelectorContext({ payload: "remote-clipboard", text: "injected" }),
+    ).toEqual({ payload: "remote-clipboard" });
+  });
+});
+
+describe("parseSelectorContext — remote-clipboard 선택 텍스트", () => {
+  it("선택 텍스트를 전달받는다 — 셀렉터에서는 다시 읽을 수 없다", () => {
+    expect(
+      parseSelectorContext({
+        payload: "remote-clipboard",
+        selectedText: "  indented\n",
+      }),
+    ).toEqual({ payload: "remote-clipboard", selectedText: "  indented\n" });
+  });
+  it("공백만·비문자열은 버린다 (비신뢰 입력)", () => {
+    for (const bad of ["   ", "", 42, null, { a: 1 }])
+      expect(
+        parseSelectorContext({ payload: "remote-clipboard", selectedText: bad }),
+      ).toEqual({ payload: "remote-clipboard" });
+  });
+});

@@ -1,4 +1,4 @@
-import { Clipboard, environment } from "@raycast/api";
+import { Clipboard, environment, getSelectedText } from "@raycast/api";
 import { execFile, spawn } from "child_process";
 import {
   chmodSync,
@@ -27,6 +27,7 @@ const SECURITY = "/usr/bin/security";
 const SSH_COPY_ID = "/usr/bin/ssh-copy-id";
 const SSH_KEYGEN = "/usr/bin/ssh-keygen";
 const MKFIFO = "/usr/bin/mkfifo";
+const PBPASTE = "/usr/bin/pbpaste";
 
 const PNG_APPLESCRIPT = `on run argv
     set outPath to item 1 of argv
@@ -86,8 +87,38 @@ export const darwinAdapter: PlatformAdapter = {
     return out;
   },
 
+  /**
+   * Raycast의 Clipboard.readText()는 **이미지만 있는 클립보드**에 "Image (321x97)" 같은
+   * 설명 문자열을 돌려준다(실측 — 로컬 pasteboard에 텍스트 flavor가 전혀 없는 상태에서
+   * 그 문자열이 원격으로 전송됐다). 그대로 두면 이미지를 보내려던 사용자에게 플레이스홀더
+   * 문자열이 대신 전송된다. OS에서 직접 읽어 **실제 텍스트 flavor가 있을 때만** 텍스트로
+   * 취급한다 (Windows 어댑터가 다른 실측 이슈로 이미 OS 직접 읽기를 쓰는 것과 같은 조치).
+   * LC_ALL 고정: Raycast 프로세스의 locale이 C면 pbpaste가 비ASCII를 흘린다.
+   */
   async readClipboardText(): Promise<string> {
-    return (await Clipboard.readText()) ?? "";
+    try {
+      const { stdout } = await execFileP(PBPASTE, [], {
+        encoding: "utf8",
+        maxBuffer: 32 * 1024 * 1024, // 텍스트 상한 20MB + 여유
+        env: { ...process.env, LC_ALL: "en_US.UTF-8" },
+      });
+      return stdout;
+    } catch {
+      return (await Clipboard.readText()) ?? ""; // 헬퍼 실행 실패 시에만 폴백
+    }
+  },
+
+  /**
+   * getSelectedText()는 선택이 없거나 앱이 지원하지 않거나 접근성 권한이 없으면 reject한다.
+   * 셋을 구분하지 않고 ""로 접는다 — 어느 쪽이든 클립보드 경로로 넘어가는 것이 정답이고,
+   * "권한을 켜라"는 진단을 여기서 내면 선택을 안 한 대다수 실행에서 오탐이 된다.
+   */
+  async readSelectedText(): Promise<string> {
+    try {
+      return await getSelectedText();
+    } catch {
+      return "";
+    }
   },
 
   async savePassword(alias: string, password: string): Promise<void> {

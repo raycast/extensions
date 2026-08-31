@@ -1,5 +1,12 @@
 # SSH Image Drop Changelog
 
+## [Send Clipboard to Clipboard] - {PR_MERGE_DATE}
+
+- New command: **Send Clipboard to Clipboard** — puts your clipboard straight onto a macOS server's clipboard over SSH, so a Screen Sharing session can paste it. Works around Screen Sharing's own clipboard sync dropping text
+- Sends highlighted text straight from the frontmost app — no copy step. Falls back to the clipboard when nothing is selected, so apps that don't expose a selection keep working
+- Text and images both supported; nothing is left behind on the server. When the clipboard holds both, the text wins — the toast and HUD name what was sent and how big it was
+- Non-macOS servers and SSH users without a GUI session are detected before any data is sent, each with its own message instead of a generic connection error
+
 ## [Store Listing Update] - 2026-08-13
 
 - Redrawn extension icon — the arrow fills more of the canvas, so it stays legible at store list size

@@ -36,6 +36,8 @@ import {
 import {
   AuthMode,
   buildIsDirArgs,
+  buildRemoteClipboardArgs,
+  ClipboardKind,
   buildMkdirArgs,
   buildPullArgs,
   buildSendArgs,
@@ -47,12 +49,14 @@ import { dedupeByBasename, isTransferable } from "../lib/finderFiles";
 import { mergeHosts } from "../lib/mergeHosts";
 import {
   looksLikeWindowsServer,
+  remoteExitMessage,
   WINDOWS_SERVER_MESSAGE,
 } from "../lib/serverKind";
 import {
   AppRef,
   basenameIssue,
   clipboardImageSizeIssue,
+  clipboardTextSizeIssue,
   expandTilde,
   isPasteSafePath,
   isSameApp,
@@ -61,6 +65,9 @@ import {
   isValidName,
   isValidPort,
   localBasename,
+  normalizeClipboardText,
+  PayloadSource,
+  pickPayloadSource,
   remoteBasename,
   sanitizeLocalName,
   validateRemotePath,
@@ -673,4 +680,132 @@ export async function runSendFiles(
 
 export async function revealInFinder(p: string): Promise<void> {
   await platform.revealInFileManager(p);
+}
+
+// ---------- remote clipboard ----------
+
+/**
+ * 전송할 클립보드 내용의 스냅샷. 딥링크 경로는 확인 알림을 띄우기 **전에** 이걸 떠 두고
+ * 확인 후 그대로 보낸다 — 확인창이 열린 사이 클립보드가 비밀번호로 바뀌면 사용자가 승인한
+ * 것과 다른 값이 나가 동의가 무력화되기 때문이다.
+ */
+export type ClipboardSnapshot = { source: PayloadSource; bytes: number } & (
+  { kind: "text"; text: string } | { kind: "image"; pngPath: string }
+);
+
+/** 문자열 payload 스냅샷 — 선택 텍스트·클립보드 텍스트가 공유한다 (원격에선 둘 다 pbcopy) */
+function textSnapshot(
+  source: "selection" | "text",
+  text: string,
+): ClipboardSnapshot {
+  const bytes = Buffer.byteLength(text, "utf8");
+  const issue = clipboardTextSizeIssue(bytes);
+  if (issue) throw new Error(issue);
+  return { source, kind: "text", text, bytes };
+}
+
+/**
+ * 보낼 내용 캡처 — **선택 텍스트 우선**, 없으면 클립보드(텍스트 → 이미지) 순.
+ * 보낼 것이 없으면 null, 크기 상한 초과는 throw(전송 시작 전 거부).
+ * 이미지 스냅샷은 임시 PNG를 남기므로 호출부가 반드시 releaseClipboardSnapshot으로 정리한다.
+ *
+ * 존재 판별은 전부 trim 기준이되 **전송값은 trim 이전 원문**이다 — 들여쓴 코드 조각의
+ * 선행 공백이 보존되어야 한다. 공백만 있는 입력은 "없음"으로 본다.
+ */
+export async function captureClipboard(
+  /**
+   * 이미 캡처해 둔 선택 텍스트. 셀렉터 위임 경로에서 쓴다 — Raycast 창이 열리면 원래 앱의
+   * 선택이 풀려 여기서 다시 읽으면 항상 빈 값이 되기 때문이다. 미지정이면 지금 읽는다.
+   */
+  preselected?: string,
+): Promise<ClipboardSnapshot | null> {
+  // 선택 텍스트를 먼저 본다. 실패(미지정·앱 미지원·권한 없음)는 어댑터가 ""로 접으므로
+  // 이 기능이 안 되는 환경에서도 아래 클립보드 경로가 그대로 동작한다.
+  const selected = normalizeClipboardText(
+    preselected ?? (await platform.readSelectedText()),
+  );
+  const hasSelection = selected.trim() !== "";
+
+  // 선택이 있으면 클립보드는 읽지 않는다 — 어차피 쓰지 않을 값이고, 이미지 추출은 비싸다
+  const text = hasSelection
+    ? ""
+    : normalizeClipboardText(await platform.readClipboardText());
+  const hasText = text.trim() !== "";
+
+  let pngPath: string | null = null;
+  if (!hasSelection && !hasText) {
+    try {
+      pngPath = await platform.extractClipboardPng();
+    } catch {
+      pngPath = null; // NO_IMAGE
+    }
+  }
+
+  const source = pickPayloadSource({
+    hasSelection,
+    hasText,
+    hasImage: pngPath !== null,
+  });
+  if (source === null) return null;
+  if (source === "selection") return textSnapshot("selection", selected);
+  if (source === "text") return textSnapshot("text", text);
+
+  const png = pngPath as string;
+  const bytes = statSync(png).size;
+  const issue = clipboardImageSizeIssue(bytes);
+  if (issue) {
+    rmSync(dirname(png), { recursive: true, force: true });
+    throw new Error(issue);
+  }
+  return { source: "image", kind: "image", pngPath: png, bytes };
+}
+
+/** 이미지 스냅샷의 임시 디렉토리 정리 — 전송 성공·실패·사용자 취소 모두에서 호출한다 */
+export function releaseClipboardSnapshot(snap: ClipboardSnapshot | null): void {
+  if (snap?.kind === "image")
+    rmSync(dirname(snap.pngPath), { recursive: true, force: true });
+}
+
+/**
+ * 스냅샷을 원격 GUI 세션 클립보드로 주입. 원격 명령은 상수이고 데이터는 stdin만 탄다.
+ * 실패 진단은 exit code 단독이 아니라 code + 원격이 낸 stderr sentinel 조합으로 한다 —
+ * 126/127은 sh·env 자신도 낼 수 있어 코드만으로는 원인을 단정할 수 없다(fail-closed).
+ */
+export async function runSyncClipboard(
+  host: string,
+  mode: AuthMode,
+  snap: ClipboardSnapshot,
+): Promise<void> {
+  if (!isValidHost(host)) throw new Error("Invalid host");
+  const kind: ClipboardKind = snap.kind;
+  const args = buildRemoteClipboardArgs(host, kind, mode);
+  const env =
+    mode === "keychain" ? platform.credentialEnv(host) : platform.baseEnv();
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn(platform.ssh, args, {
+      env,
+      stdio: ["pipe", "ignore", "pipe"],
+    });
+    let stderr = "";
+    child.stderr.on("data", (d) => (stderr += d));
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) return resolve();
+      const msg = remoteExitMessage(code, stderr);
+      reject(msg ? new Error(msg) : sshFailure(stderr, mode));
+    });
+    // ssh 조기 종료 시 EPIPE — close 핸들러가 실패를 보고하므로 crash만 방지.
+    // 선행 체크(원격 명령)가 비-macOS를 즉시 끊으므로 이 경로는 오히려 잦다.
+    child.stdin.on("error", () => undefined);
+    if (snap.kind === "text") {
+      child.stdin.end(Buffer.from(snap.text, "utf8"));
+    } else {
+      createReadStream(snap.pngPath)
+        .on("error", (e) => {
+          child.kill();
+          reject(e);
+        })
+        .pipe(child.stdin);
+    }
+  });
 }

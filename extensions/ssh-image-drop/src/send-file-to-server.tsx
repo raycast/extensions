@@ -19,10 +19,17 @@ import { useState } from "react";
 import { deleteServerFlow, ServerForm } from "./components/ServerForm";
 import { parseSelectorContext, SelectorContext } from "./lib/launchContext";
 import { HostEntry, mergeHosts } from "./lib/mergeHosts";
-import { isValidHost, remoteBasename } from "./lib/validate";
+import {
+  clipboardKindLabel,
+  EMPTY_CLIPBOARD_HINT,
+  isValidHost,
+  remoteBasename,
+} from "./lib/validate";
 import { addRecent, getAuthMode, getRecents } from "./runtime/store";
 import { platform } from "./runtime/platform";
 import {
+  captureClipboard,
+  ClipboardSnapshot,
   confirmFolderPull,
   confirmFolderSend,
   deliverPath,
@@ -30,9 +37,11 @@ import {
   ensureKnownHost,
   prefs,
   readAllHosts,
+  releaseClipboardSnapshot,
   runPull,
   runSend,
   runSendFiles,
+  runSyncClipboard,
 } from "./runtime/system";
 
 /**
@@ -42,6 +51,7 @@ import {
 const TITLES: Record<SelectorContext["payload"], string> = {
   finder: "Send File to Server",
   clipboard: "Send Clipboard Image",
+  "remote-clipboard": "Send Clipboard to Clipboard",
   pull: "Pull File from Server",
   none: "Send File to Server",
 };
@@ -62,11 +72,23 @@ const NO_SERVERS_HINT =
  * 소비 측이 isValidHost + ensureKnownHost로 재검증한다.
  * finder는 서버만 고정 — 파일은 실행 시점 Finder 선택으로 읽는다.
  */
-function quicklinkFor(payload: "finder" | "clipboard" | "pull", host: string) {
+function quicklinkFor(
+  payload: "finder" | "clipboard" | "remote-clipboard" | "pull",
+  host: string,
+) {
   if (payload === "pull") {
     return {
       name: `Pull from ${host}`,
       link: createDeeplink({ command: "pull-file", context: { host } }),
+    };
+  }
+  if (payload === "remote-clipboard") {
+    return {
+      name: `Sync Clipboard to ${host}`,
+      link: createDeeplink({
+        command: "send-clipboard-to-clipboard",
+        context: { host },
+      }),
     };
   }
   if (payload === "finder") {
@@ -134,7 +156,11 @@ async function resolveContext(raw: unknown): Promise<ResolvedContext> {
   // 위임 context는 payload 필드로만 식별 — 직접 실행(undefined)·빈 객체({})는 파일 전송 폼으로
   if (raw && typeof raw === "object" && "payload" in raw) {
     const ctx = parseSelectorContext(raw);
-    if (ctx.payload === "clipboard" || ctx.payload === "pull")
+    if (
+      ctx.payload === "clipboard" ||
+      ctx.payload === "remote-clipboard" ||
+      ctx.payload === "pull"
+    )
       return { ctx, files: [] };
     // finder(host 고정 Quicklink 포함)·none(비정상 context 정규화 결과) — 파일 전송 폼으로
     return {
@@ -148,6 +174,55 @@ async function resolveContext(raw: unknown): Promise<ResolvedContext> {
     files: await finderPrefill(),
     needsPicker: true,
   };
+}
+
+/**
+ * 클립보드 → 원격 GUI 클립보드 주입 코어 (셀렉터 경로). 서버를 고르는 행위 자체가 동의이므로
+ * 추가 확인 없이 **선택 시점의 최신 클립보드**를 보낸다 — 목록을 여는 동안 클립보드가 바뀌었다면
+ * 사용자가 마지막으로 복사한 쪽이 의도다. 자체적으로 에러를 toast로 처리하고 throw하지 않는다.
+ */
+async function performClipboardSync(
+  host: string,
+  /** 호출 커맨드가 위임 시점에 잡아 넘긴 선택 텍스트 — 여기서는 다시 읽을 수 없다 */
+  selectedText?: string,
+): Promise<void> {
+  const mode = await getAuthMode(host);
+  let snap: ClipboardSnapshot | null = null;
+  let animated: Toast | undefined;
+  try {
+    snap = await captureClipboard(selectedText);
+    if (!snap) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Nothing to send",
+        message: EMPTY_CLIPBOARD_HINT,
+      });
+      return;
+    }
+    // 무엇이 나가는지 항상 보여준다 — 혼합 클립보드에서 텍스트를 택하는 trade-off를
+    // 방어 코드 없이 인지시키는 유일한 수단이다
+    const label = clipboardKindLabel(snap.source, snap.bytes);
+    animated = await showToast({
+      style: Toast.Style.Animated,
+      title: `Syncing clipboard to ${host}…`,
+      message: label,
+    });
+    await runSyncClipboard(host, mode, snap);
+    // 주입은 끝났다 — 부가 처리 실패가 전송 실패로 보고되면 안 된다
+    await addRecent(host).catch(() => undefined);
+    await animated.hide().catch(() => undefined);
+    animated = undefined;
+    await showHUD(`✅ ${label} → ${host}`);
+  } catch (e) {
+    if (animated) await animated.hide();
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Sync to ${host} failed`,
+      message: (e as Error).message,
+    });
+  } finally {
+    releaseClipboardSnapshot(snap); // 이미지 임시 PNG — 성공·실패 무관하게 회수
+  }
 }
 
 /**
@@ -385,6 +460,11 @@ export default function SendFileToServer(props: LaunchProps) {
         title: "Invalid host",
         message: "Allowed: letters, digits, . _ - @",
       });
+      return;
+    }
+    // 원격 클립보드 주입은 스냅샷 정리(finally)가 필요해 전용 코어로 분리
+    if (ctx.payload === "remote-clipboard") {
+      await performClipboardSync(host, ctx.selectedText);
       return;
     }
     const mode = await getAuthMode(host);

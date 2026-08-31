@@ -1,4 +1,4 @@
-import { Clipboard, environment } from "@raycast/api";
+import { Clipboard, environment, getSelectedText } from "@raycast/api";
 import { execFile, spawn } from "child_process";
 import {
   mkdirSync,
@@ -216,6 +216,14 @@ export const win32Adapter: PlatformAdapter = {
     }
   },
 
+  /** darwin과 동일 계약 — 실패는 전부 ""로 접어 클립보드 경로로 넘긴다 */
+  async readSelectedText(): Promise<string> {
+    try {
+      return await getSelectedText();
+    } catch {
+      return "";
+    }
+  },
   async savePassword(alias: string, password: string): Promise<void> {
     await savePasswordBlob(credBlobPath(alias), password);
   },

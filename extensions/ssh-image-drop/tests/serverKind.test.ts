@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { looksLikeWindowsServer } from "../src/lib/serverKind";
+import {
+  classifyRemoteExit,
+  looksLikeWindowsServer,
+  remoteExitMessage,
+} from "../src/lib/serverKind";
 
 describe("looksLikeWindowsServer", () => {
   it("detects cmd.exe unknown-command / bad-switch errors", () => {
@@ -47,5 +51,40 @@ describe("looksLikeWindowsServer", () => {
       "could not create C:\\Users\\x\\tmp",
     ])
       expect(looksLikeWindowsServer(s)).toBe(false);
+  });
+});
+
+describe("classifyRemoteExit", () => {
+  it("code와 sentinel이 모두 맞을 때만 전용 진단", () => {
+    expect(classifyRemoteExit(127, "SSHIMGDROP_NOMAC\n")).toBe("non-mac");
+    expect(classifyRemoteExit(126, "SSHIMGDROP_NOGUI\n")).toBe("no-gui");
+  });
+  it("sentinel 없는 126/127은 other — sh·env 자신도 그 코드를 낸다 (fail-closed)", () => {
+    expect(classifyRemoteExit(127, "bash: foo: command not found")).toBe(
+      "other",
+    );
+    expect(classifyRemoteExit(126, "permission denied")).toBe("other");
+  });
+  it("code와 sentinel이 어긋나면 other", () => {
+    expect(classifyRemoteExit(126, "SSHIMGDROP_NOMAC")).toBe("other");
+    expect(classifyRemoteExit(255, "SSHIMGDROP_NOGUI")).toBe("other");
+  });
+  it("정상·null 종료", () => {
+    expect(classifyRemoteExit(0, "")).toBe("other");
+    expect(classifyRemoteExit(null, "")).toBe("other");
+  });
+});
+
+describe("remoteExitMessage", () => {
+  it("전용 진단이 있는 경우만 메시지 — 매핑이 뒤바뀌는 회귀를 잡는다", () => {
+    expect(remoteExitMessage(127, "SSHIMGDROP_NOMAC")).toMatch(/macOS server/);
+    expect(remoteExitMessage(126, "SSHIMGDROP_NOGUI")).toMatch(
+      /no GUI session/,
+    );
+  });
+  it("그 외는 null — 호출부가 기존 sshFailure로 넘긴다", () => {
+    expect(remoteExitMessage(255, "Permission denied (publickey).")).toBeNull();
+    expect(remoteExitMessage(127, "bash: x: command not found")).toBeNull();
+    expect(remoteExitMessage(0, "")).toBeNull();
   });
 });

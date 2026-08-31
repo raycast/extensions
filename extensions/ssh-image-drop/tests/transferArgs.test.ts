@@ -7,6 +7,7 @@ import {
 } from "../src/lib/transferArgs";
 import {
   buildIsDirArgs,
+  buildRemoteClipboardArgs,
   buildMkdirArgs,
   buildSendFileArgs,
 } from "../src/lib/transferArgs";
@@ -214,5 +215,57 @@ describe("buildMkdirArgs", () => {
   it("bare ~ / ~/ 는 홈 자체 (리터럴 ~ 디렉토리 없음)", () => {
     expect(buildMkdirArgs("mac", "~/", "key").slice(-1)[0]).toBe("mkdir -p ~");
     expect(buildMkdirArgs("mac", "~", "key").slice(-1)[0]).toBe("mkdir -p ~");
+  });
+});
+
+describe("buildRemoteClipboardArgs", () => {
+  // 실서버(macOS 26.5 / Ubuntu)에서 그대로 실행해 검증한 명령이다. 문자열이 바뀌면
+  // 원격 동작이 바뀐 것이므로 fixture로 고정한다 — quote 실수는 전체 실패로 이어진다.
+  const TEXT_CMD =
+    `/bin/sh -c '[ -x /usr/bin/pbcopy ] || { echo SSHIMGDROP_NOMAC >&2; exit 127; }; ` +
+    `/bin/launchctl print gui/$(/usr/bin/id -u) >/dev/null 2>&1 || { echo SSHIMGDROP_NOGUI >&2; exit 126; }; ` +
+    `exec /usr/bin/env LC_ALL=en_US.UTF-8 /usr/bin/pbcopy'`;
+
+  it("text: 절대경로 + sentinel + 127→126 순서로 고정", () => {
+    const args = buildRemoteClipboardArgs("mm", "text", "key");
+    expect(args[args.length - 2]).toBe("mm");
+    expect(args[args.length - 1]).toBe(TEXT_CMD);
+  });
+
+  it("image: PNG를 stdin으로 받아 osascript로 주입, trap으로 회수", () => {
+    const cmd = buildRemoteClipboardArgs("mm", "image", "key").at(-1) as string;
+    expect(cmd).toContain("[ -x /usr/bin/osascript ]");
+    expect(cmd).toContain("mktemp -d -t ssh-image-drop");
+    expect(cmd).toContain('trap "/bin/rm -rf $D" EXIT');
+    expect(cmd).toContain("«class PNGf»");
+  });
+
+  it("원격 명령에 개행이 없다 — tcsh는 작은따옴표가 raw newline을 넘지 못한다", () => {
+    for (const kind of ["text", "image"] as const)
+      expect(buildRemoteClipboardArgs("mm", kind, "key").at(-1)).not.toContain(
+        "\n",
+      );
+  });
+
+  it("LC_ALL을 쓴다 — 원격 rc의 LC_ALL=C가 LANG을 무시해 한글이 소실된다(실측)", () => {
+    for (const kind of ["text", "image"] as const) {
+      const cmd = buildRemoteClipboardArgs("mm", kind, "key").at(-1) as string;
+      expect(cmd).toContain("LC_ALL=en_US.UTF-8");
+      expect(cmd).not.toMatch(/(^|[^_])LANG=/);
+    }
+  });
+
+  it("검사 순서는 127(바이너리) → 126(GUI) — 뒤집으면 Linux가 126으로 오진된다", () => {
+    const cmd = buildRemoteClipboardArgs("mm", "text", "key").at(-1) as string;
+    expect(cmd.indexOf("exit 127")).toBeLessThan(cmd.indexOf("exit 126"));
+  });
+
+  it("auth 모드는 기존 전송과 동일한 옵션을 탄다", () => {
+    expect(buildRemoteClipboardArgs("mm", "text", "key")).toContain(
+      "BatchMode=yes",
+    );
+    expect(buildRemoteClipboardArgs("mm", "text", "keychain")).toContain(
+      "PubkeyAuthentication=no",
+    );
   });
 });

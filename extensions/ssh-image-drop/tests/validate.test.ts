@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   basenameIssue,
   CLIPBOARD_IMAGE_MAX_BYTES,
+  CLIPBOARD_TEXT_MAX_BYTES,
   clipboardImageSizeIssue,
+  clipboardKindLabel,
+  clipboardTextSizeIssue,
+  normalizeClipboardText,
+  pickClipboardKind,
+  pickPayloadSource,
   expandTilde,
   isPasteSafePath,
   isSameApp,
@@ -369,5 +375,84 @@ describe("isSameApp", () => {
     expect(isSameApp(undefined, { name: "Warp" })).toBe(false);
     expect(isSameApp({ name: "Warp" }, undefined)).toBe(false);
     expect(isSameApp({}, {})).toBe(false);
+  });
+});
+
+describe("normalizeClipboardText", () => {
+  it("CRLF → LF (Windows 클립보드가 원격에 ^M을 남기는 것 방지)", () => {
+    expect(normalizeClipboardText("a\r\nb\r\nc")).toBe("a\nb\nc");
+  });
+  it("단독 CR은 보존 — 의도적으로 넣은 원문까지 바꾸지 않는다", () => {
+    expect(normalizeClipboardText("a\rb")).toBe("a\rb");
+    expect(normalizeClipboardText("a\r\nb\rc")).toBe("a\nb\rc");
+  });
+  it("선행 공백과 후행 개행 없음을 그대로 유지 (들여쓴 코드 조각 보존)", () => {
+    expect(normalizeClipboardText("    indented")).toBe("    indented");
+    expect(normalizeClipboardText("no trailing newline")).toBe(
+      "no trailing newline",
+    );
+  });
+});
+
+describe("clipboardTextSizeIssue", () => {
+  it("상한 이하는 통과", () => {
+    expect(clipboardTextSizeIssue(0)).toBeNull();
+    expect(clipboardTextSizeIssue(CLIPBOARD_TEXT_MAX_BYTES)).toBeNull();
+  });
+  it("상한 초과는 사유 문구", () => {
+    expect(clipboardTextSizeIssue(CLIPBOARD_TEXT_MAX_BYTES + 1)).toContain(
+      "20 MB",
+    );
+  });
+});
+
+describe("pickClipboardKind", () => {
+  it("텍스트만 / 이미지만", () => {
+    expect(pickClipboardKind({ hasText: true, hasImage: false })).toBe("text");
+    expect(pickClipboardKind({ hasText: false, hasImage: true })).toBe("image");
+  });
+  it("혼합은 텍스트 — 이 기능의 존재 이유가 문자열 붙여넣기다 (의도적 trade-off)", () => {
+    expect(pickClipboardKind({ hasText: true, hasImage: true })).toBe("text");
+  });
+  it("둘 다 없으면 null", () => {
+    expect(pickClipboardKind({ hasText: false, hasImage: false })).toBeNull();
+  });
+});
+
+
+describe("clipboardKindLabel", () => {
+  it("무엇이 얼마나 나갔는지 보여준다 (오라우팅 인지 수단)", () => {
+    expect(clipboardKindLabel("selection", 42)).toBe("Selection (42 B)");
+    expect(clipboardKindLabel("text", 512)).toBe("Text (512 B)");
+    expect(clipboardKindLabel("text", 2048)).toBe("Text (2.0 KB)");
+    expect(clipboardKindLabel("image", 3 * 1024 * 1024)).toBe("Image (3.0 MB)");
+  });
+});
+
+describe("pickPayloadSource", () => {
+  it("블록 지정이 있으면 클립보드보다 우선 — 지정은 명시적 의도다", () => {
+    expect(
+      pickPayloadSource({ hasSelection: true, hasText: true, hasImage: true }),
+    ).toBe("selection");
+    expect(
+      pickPayloadSource({ hasSelection: true, hasText: false, hasImage: false }),
+    ).toBe("selection");
+  });
+  it("선택이 없으면 기존 클립보드 순서(텍스트 → 이미지) 그대로", () => {
+    expect(
+      pickPayloadSource({ hasSelection: false, hasText: true, hasImage: true }),
+    ).toBe("text");
+    expect(
+      pickPayloadSource({ hasSelection: false, hasText: false, hasImage: true }),
+    ).toBe("image");
+  });
+  it("아무것도 없으면 null", () => {
+    expect(
+      pickPayloadSource({
+        hasSelection: false,
+        hasText: false,
+        hasImage: false,
+      }),
+    ).toBeNull();
   });
 });

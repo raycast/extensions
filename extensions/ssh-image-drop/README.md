@@ -12,6 +12,7 @@ Typical use: push config files or skill folders to whichever box your agent runs
 | ------------------------- | ---------------------------------------------------------------------------------------------- |
 | **Send File to Server**   | Pick files or folders and a server, hit Enter. Pre-filled from your Finder selection on macOS. |
 | **Send Clipboard Image**  | Sends the clipboard image, copies the remote path back.                                        |
+| **Send Clipboard to Clipboard** | Puts selected text — or your clipboard — onto a **macOS** server's clipboard, so you can paste it there in a Screen Sharing session. |
 | **Pull File from Server** | Takes a remote path from the clipboard, downloads it, reveals it in Finder / Explorer.         |
 | **Manage Servers**        | Add, edit, and delete servers. Reads `~/.ssh/config`.                                          |
 
@@ -46,6 +47,9 @@ Pulled files land in your Download Directory (`~/Downloads` by default) — ofte
 - **Remote servers must run macOS or Linux.** Windows is supported as the client only.
 - Default remote directory is `/tmp/ssh-image-drop`. On a shared server, set a private path in preferences.
 - Clipboard images are capped at 20 MB and rejected before the transfer starts, rather than uploading for minutes.
+- **Send Clipboard to Clipboard** needs a macOS server, and the SSH user must be the one logged in on that Mac's screen. Without a GUI session `pbcopy` still exits 0 while nothing lands on the clipboard you are looking at, so the command checks for the session up front and tells you instead of silently doing nothing.
+- **Send Clipboard to Clipboard** sends whatever text you have highlighted in the frontmost app, falling back to the clipboard when nothing is selected. Highlighting is the more deliberate act, so it wins; the toast and HUD always name the source (`Selection (42 B)`). Apps that don't expose their selection just fall through to the clipboard.
+- When the clipboard holds both text and an image (spreadsheet cells, some browser copies), **Send Clipboard to Clipboard sends the text** — that is the case this command exists for. The toast and HUD always name what went out (`Text (1.2 KB)`), and `Send Clipboard Image` remains the image-only path.
 - Auto-paste is opt-in and covers Send Clipboard Image only; file sends and pulls always copy. It pastes into whichever field has focus in the app you picked, and only while that app is frontmost as the transfer finishes — anywhere else the path is just copied.
 - Adds one `Include` line to `~/.ssh/config`, with your consent and after a timestamped backup. Managed servers live only in the included file.
 - Deleting a server removes its config block and stored password, but not the public key already in that server's `authorized_keys`.

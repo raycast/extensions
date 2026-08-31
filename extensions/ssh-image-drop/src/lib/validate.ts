@@ -183,3 +183,94 @@ export function isSameApp(
   if (a.path && b.path) return a.path === b.path;
   return !!a.name && a.name === b.name;
 }
+
+/**
+ * 클립보드 텍스트 정규화 — CRLF → LF. 단독 CR은 건드리지 않는다(의도적으로 CR을 넣은
+ * 원문까지 바꾸면 변형 범위가 Windows 문제보다 넓어진다).
+ * Windows 클립보드 텍스트는 CRLF이고, 그대로 pbcopy에 흘리면 원격 붙여넣기마다 ^M이 섞인다.
+ */
+export function normalizeClipboardText(s: string): string {
+  return s.replace(/\r\n/g, "\n");
+}
+
+/** 클립보드 텍스트 크기 상한 — 이미지와 동일. 무제한은 Raycast 메모리·stdin 버퍼·원격 pasteboard를 함께 압박한다 */
+export const CLIPBOARD_TEXT_MAX_BYTES = 20 * 1024 * 1024;
+
+/** 상한 초과 시 알림 문구, 이하면 null. 크기는 정규화 후 실제 전송 바이트 기준 */
+export function clipboardTextSizeIssue(bytes: number): string | null {
+  if (bytes <= CLIPBOARD_TEXT_MAX_BYTES) return null;
+  const limit = CLIPBOARD_TEXT_MAX_BYTES / 1024 / 1024;
+  return `Clipboard text is ${(bytes / 1024 / 1024).toFixed(1)} MB — the limit is ${limit} MB`;
+}
+
+/**
+ * 원격 클립보드에 무엇을 보낼지 — 텍스트 우선. 순수 케이스는 상호 배타적이라 순서가 무관하고,
+ * 갈리는 것은 혼합 클립보드(스프레드시트 셀·서식 텍스트)뿐이다. 거기서 이미지를 택하면
+ * 이 기능의 존재 이유인 "문자열 붙여넣기"가 무너지므로 텍스트를 택한다 (의도적 trade-off —
+ * 브라우저 이미지 복사처럼 텍스트를 동반하는 이미지는 텍스트로 간다).
+ */
+export function pickClipboardKind(has: {
+  hasText: boolean;
+  hasImage: boolean;
+}): "text" | "image" | null {
+  if (has.hasText) return "text";
+  return has.hasImage ? "image" : null;
+}
+
+/** 전송량 표기 — 원격 클립보드 HUD·확인 알림용 */
+export function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(1)} MB`;
+}
+
+/**
+ * 전송할 내용의 출처. 원격 명령은 selection·text를 똑같이 pbcopy로 보내지만(둘 다 문자열),
+ * 사용자에게는 구분해 보여준다 — 블록을 지정해 둔 채 실행했는데 클립보드가 갔다면
+ * 그 사실을 즉시 알아야 하기 때문이다.
+ */
+export type PayloadSource = "selection" | "text" | "image";
+
+const SOURCE_LABEL: Record<PayloadSource, string> = {
+  selection: "Selection",
+  text: "Text",
+  image: "Image",
+};
+
+/**
+ * "Selection (42 B)" / "Text (1.2 KB)" / "Image (34.0 KB)" — 무엇이 나갔는지 즉시 알게 한다.
+ * 선택 텍스트를 클립보드보다 우선하는 것도, 혼합 클립보드에서 텍스트를 택하는 것도
+ * 의도적 선택이므로(pickPayloadSource·pickClipboardKind), 오라우팅을 방어 코드 대신
+ * 이 표기로 인지시킨다.
+ */
+export function clipboardKindLabel(
+  source: PayloadSource,
+  bytes: number,
+): string {
+  return `${SOURCE_LABEL[source]} (${formatBytes(bytes)})`;
+}
+
+/**
+ * 보낼 내용의 출처 결정 — 선택 텍스트 우선. 블록 지정은 "이걸 보내겠다"는 명시적 행위라
+ * 클립보드(과거에 복사해 둔 것)보다 지금 의도에 가깝다. 지정해 둔 채 실행했는데 클립보드가
+ * 가는 쪽이 더 놀랍다.
+ *
+ * 선택 텍스트가 없는 경우(미지정·앱 미지원·권한 없음)는 전부 "없음"으로 접히고 기존
+ * 클립보드 경로가 그대로 동작한다 — 이 기능이 실패해도 커맨드가 퇴화하지 않는다.
+ */
+export function pickPayloadSource(has: {
+  hasSelection: boolean;
+  hasText: boolean;
+  hasImage: boolean;
+}): PayloadSource | null {
+  if (has.hasSelection) return "selection";
+  return pickClipboardKind(has);
+}
+
+/**
+ * 보낼 텍스트도 이미지도 없을 때의 안내. "빈 클립보드"와 "지원하지 않는 형식"(PDF-only,
+ * file promise 등)을 구분하지 않는다 — 구분하려면 플랫폼별 pasteboard 타입 열거 API가
+ * 필요한데 어댑터 계약에 없고, 그것만을 위해 어댑터를 넓힐 이득이 없다.
+ */
+export const EMPTY_CLIPBOARD_HINT =
+  "Copy some text or an image first — the clipboard has nothing this command can send.";

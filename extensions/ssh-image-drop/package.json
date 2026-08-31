@@ -58,6 +58,21 @@
       "mode": "no-view"
     },
     {
+      "name": "send-clipboard-to-clipboard",
+      "title": "Send Clipboard to Clipboard",
+      "description": "Put the clipboard onto a macOS server's clipboard over SSH — paste it there in a Screen Sharing session",
+      "keywords": [
+        "clipboard",
+        "paste",
+        "screen sharing",
+        "vnc",
+        "sync",
+        "remote",
+        "pbcopy"
+      ],
+      "mode": "no-view"
+    },
+    {
       "name": "pull-file",
       "title": "Pull File from Server",
       "description": "Download the remote file or folder whose path is in the clipboard, reveal it in the file manager, and copy the local path",
