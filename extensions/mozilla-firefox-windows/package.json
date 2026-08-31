@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mozilla-firefox-windows",
+  "title": "Mozilla Firefox (Windows)",
+  "description": "Search and open tabs from bookmarks and history in Mozilla Firefox on Windows.",
+  "icon": "firefox-logo.png",
+  "author": "rockschtar",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Mozilla Firefox",
+      "description": "Open a new Mozilla Firefox tab.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "searchEngine",
+          "type": "dropdown",
+          "required": false,
+          "title": "Search Engine",
+          "description": "Search Engine for query (default: Google).",
+          "default": "Google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "Google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "DuckDuckGo"
+            },
+            {
+              "title": "Bing",
+              "value": "Bing"
+            },
+            {
+              "title": "Baidu",
+              "value": "Baidu"
+            },
+            {
+              "title": "Brave",
+              "value": "Brave"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Mozilla Firefox",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Mozilla Firefox",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "profileDirectorySuffix",
+      "type": "textfield",
+      "required": false,
+      "title": "Profile Directory Suffix",
+      "description": "Use the Firefox profile whose directory name ends with this suffix (see about:profiles). Leave empty to auto-detect the default profile."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.1.2",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
