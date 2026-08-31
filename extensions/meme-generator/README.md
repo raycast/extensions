@@ -5,7 +5,7 @@ Generate memes with the help of Imgflip API using shared user.
 ### Live Preview
 
 Pick a template and the meme is rendered next to the search bar while you type. Templates with more than one
-text box use ⌘↵ (or ⌘⇧N / ⌘⇧B) to move between them, and the current value of every box is listed under the preview.
+text box use ⌘↵ and ⌘⇧↵ to move between them, and the current value of every box is listed under the preview.
 
 ### Custom API User
 

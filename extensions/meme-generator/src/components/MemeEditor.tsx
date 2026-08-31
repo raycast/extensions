@@ -143,7 +143,7 @@ export default function MemeEditor({ id, title, url, boxCount, apiModule }: Meme
                   icon={Icon.ArrowDown}
                   title="Next Text Box"
                   onAction={() => switchBox(1)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                  shortcut={{ modifiers: ["cmd"], key: "return" }}
                 />
               )}
               {boxCount > 1 && (
@@ -151,7 +151,7 @@ export default function MemeEditor({ id, title, url, boxCount, apiModule }: Meme
                   icon={Icon.ArrowUp}
                   title="Previous Text Box"
                   onAction={() => switchBox(-1)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
                 />
               )}
             </ActionPanel.Section>
