@@ -169,7 +169,8 @@ const REMOTE_CLIPBOARD_SCRIPT: Record<ClipboardKind, string> = {
   image:
     `[ -x /usr/bin/osascript ] ${GUARD}` +
     `D=$(/usr/bin/mktemp -d -t ssh-image-drop) || exit 1; ` +
-    `trap "/bin/rm -rf $D" EXIT; ` +
+    `cleanup() { /bin/rm -rf "$D"; }; trap cleanup EXIT; ` +
+    `trap 'cleanup; exit 1' HUP INT TERM; ` +
     `/bin/cat > "$D/c.png" || exit 1; ` +
     `/usr/bin/env LC_ALL=en_US.UTF-8 /usr/bin/osascript ` +
     `-e "on run argv" ` +

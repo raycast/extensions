@@ -685,9 +685,9 @@ export async function revealInFinder(p: string): Promise<void> {
 // ---------- remote clipboard ----------
 
 /**
- * 전송할 클립보드 내용의 스냅샷. 딥링크 경로는 확인 알림을 띄우기 **전에** 이걸 떠 두고
- * 확인 후 그대로 보낸다 — 확인창이 열린 사이 클립보드가 비밀번호로 바뀌면 사용자가 승인한
- * 것과 다른 값이 나가 동의가 무력화되기 때문이다.
+ * 전송할 내용의 스냅샷. 판정(무엇을 보낼지)과 전송을 한 시점에 묶어, 그 사이 클립보드가
+ * 바뀌어도 사용자가 HUD에서 본 종류·크기와 실제로 나간 것이 갈리지 않게 한다.
+ * 이미지는 임시 PNG를 물고 있으므로 소유자가 releaseClipboardSnapshot으로 반드시 회수한다.
  */
 export type ClipboardSnapshot = { source: PayloadSource; bytes: number } & (
   { kind: "text"; text: string } | { kind: "image"; pngPath: string }
@@ -714,8 +714,11 @@ function textSnapshot(
  */
 export async function captureClipboard(
   /**
-   * 이미 캡처해 둔 선택 텍스트. 셀렉터 위임 경로에서 쓴다 — Raycast 창이 열리면 원래 앱의
-   * 선택이 풀려 여기서 다시 읽으면 항상 빈 값이 되기 때문이다. 미지정이면 지금 읽는다.
+   * 이미 캡처해 둔 선택 텍스트. 셀렉터 위임 경로가 쓴다 — Raycast 창이 열리면 원래 앱의
+   * 선택이 풀리기 때문이다. **빈 문자열도 유효한 값**으로 취급해 이 경로에서는 절대 다시
+   * 읽지 않는다(위임 시점에 "선택 없음"으로 판정됐다면 그 판정이 최종이다). 위임 시점 판정과
+   * 실제 전송이 갈리면 사용자가 확인한 종류와 다른 내용이 나간다.
+   * `undefined`(직접 실행)일 때만 지금 읽는다.
    */
   preselected?: string,
 ): Promise<ClipboardSnapshot | null> {
@@ -751,13 +754,17 @@ export async function captureClipboard(
   if (source === "text") return textSnapshot("text", text);
 
   const png = pngPath as string;
-  const bytes = statSync(png).size;
-  const issue = clipboardImageSizeIssue(bytes);
-  if (issue) {
+  // 추출 이후의 어떤 실패(statSync throw 포함)에서도 임시 디렉토리를 회수한다 —
+  // 정상 반환분만 releaseClipboardSnapshot이 책임지므로 여기서 새면 회수 주체가 없다
+  try {
+    const bytes = statSync(png).size;
+    const issue = clipboardImageSizeIssue(bytes);
+    if (issue) throw new Error(issue);
+    return { source: "image", kind: "image", pngPath: png, bytes };
+  } catch (e) {
     rmSync(dirname(png), { recursive: true, force: true });
-    throw new Error(issue);
+    throw e;
   }
-  return { source: "image", kind: "image", pngPath: png, bytes };
 }
 
 /** 이미지 스냅샷의 임시 디렉토리 정리 — 전송 성공·실패·사용자 취소 모두에서 호출한다 */

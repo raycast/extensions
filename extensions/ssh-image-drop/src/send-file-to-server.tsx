@@ -25,7 +25,12 @@ import {
   isValidHost,
   remoteBasename,
 } from "./lib/validate";
-import { addRecent, getAuthMode, getRecents } from "./runtime/store";
+import {
+  addRecent,
+  getAuthMode,
+  getRecents,
+  takePendingSelection,
+} from "./runtime/store";
 import { platform } from "./runtime/platform";
 import {
   captureClipboard,
@@ -178,19 +183,22 @@ async function resolveContext(raw: unknown): Promise<ResolvedContext> {
 
 /**
  * 클립보드 → 원격 GUI 클립보드 주입 코어 (셀렉터 경로). 서버를 고르는 행위 자체가 동의이므로
- * 추가 확인 없이 **선택 시점의 최신 클립보드**를 보낸다 — 목록을 여는 동안 클립보드가 바뀌었다면
- * 사용자가 마지막으로 복사한 쪽이 의도다. 자체적으로 에러를 toast로 처리하고 throw하지 않는다.
+ * 추가 확인을 두지 않는다. 자체적으로 에러를 toast로 처리하고 throw하지 않는다.
+ *
+ * 무엇을 보내는지는 진입 경로에 따라 다르다. 선택 텍스트를 들고 위임돼 왔다면 **위임 시점의
+ * 그 선택**을 보낸다(Raycast 창이 뜬 뒤에는 원래 앱의 선택을 읽을 수 없다). 그 밖에는 서버를
+ * 고른 시점의 최신 클립보드를 읽는다 — 목록을 여는 동안 바뀌었다면 마지막에 복사한 쪽이 의도다.
  */
-async function performClipboardSync(
-  host: string,
-  /** 호출 커맨드가 위임 시점에 잡아 넘긴 선택 텍스트 — 여기서는 다시 읽을 수 없다 */
-  selectedText?: string,
-): Promise<void> {
-  const mode = await getAuthMode(host);
+async function performClipboardSync(host: string): Promise<void> {
   let snap: ClipboardSnapshot | null = null;
   let animated: Toast | undefined;
   try {
-    snap = await captureClipboard(selectedText);
+    // getAuthMode도 try 안에 — 밖에 두면 저장소 오류가 이 함수의 "throw하지 않는다" 계약을 깬다
+    const mode = await getAuthMode(host);
+    // 위임 커맨드가 LocalStorage에 남긴 선택 텍스트를 1회성으로 소비한다. 여기서 직접
+    // 읽으면 Raycast 창이 최전면이라 빈 값이 되고, 사용자가 지정한 블록 대신 클립보드가 간다.
+    // null(핸드오프 없음 = 직접 진입)이면 "" — 이 화면에서는 어차피 선택을 읽을 수 없다.
+    snap = await captureClipboard((await takePendingSelection()) ?? "");
     if (!snap) {
       await showToast({
         style: Toast.Style.Failure,
@@ -212,9 +220,11 @@ async function performClipboardSync(
     await addRecent(host).catch(() => undefined);
     await animated.hide().catch(() => undefined);
     animated = undefined;
-    await showHUD(`✅ ${label} → ${host}`);
+    // 성공 알림 실패가 catch로 떨어져 "전송 실패"로 보고되면 안 된다 — 주입은 이미 끝났다
+    await showHUD(`✅ ${label} → ${host}`).catch(() => undefined);
   } catch (e) {
-    if (animated) await animated.hide();
+    // hide 실패로 정작 실패 알림을 못 띄우면 실패가 조용히 묻힌다 — 성공 경로와 동일하게 best-effort
+    if (animated) await animated.hide().catch(() => undefined);
     await showToast({
       style: Toast.Style.Failure,
       title: `Sync to ${host} failed`,
@@ -464,7 +474,7 @@ export default function SendFileToServer(props: LaunchProps) {
     }
     // 원격 클립보드 주입은 스냅샷 정리(finally)가 필요해 전용 코어로 분리
     if (ctx.payload === "remote-clipboard") {
-      await performClipboardSync(host, ctx.selectedText);
+      await performClipboardSync(host);
       return;
     }
     const mode = await getAuthMode(host);

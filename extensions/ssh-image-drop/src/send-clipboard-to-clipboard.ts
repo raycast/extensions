@@ -12,7 +12,7 @@ import {
   EMPTY_CLIPBOARD_HINT,
   isValidHost,
 } from "./lib/validate";
-import { addRecent, getAuthMode } from "./runtime/store";
+import { addRecent, getAuthMode, putPendingSelection } from "./runtime/store";
 import {
   captureClipboard,
   ClipboardSnapshot,
@@ -56,15 +56,17 @@ export default async function main(props: LaunchProps) {
     }
     // 선택 텍스트는 지금 잡은 것을 넘긴다 — 셀렉터가 뜨면 원래 앱의 선택이 풀려
     // 거기서 다시 읽으면 빈 값이 되고, 사용자가 지정한 블록 대신 클립보드가 전송된다.
-    const selectedText =
-      probe.source === "selection" && probe.kind === "text"
-        ? probe.text
-        : undefined;
+    // 경로는 LocalStorage — launchContext는 비신뢰라 조작된 딥링크가 같은 payload로
+    // 공격자 문자열을 "사용자가 지정한 텍스트"로 위장해 보낼 수 있다.
+    // 항상 쓴다(선택이 아니면 빈 문자열) — 이전 실행의 stale 값이 남아 소비되는 것을 막는다.
+    await putPendingSelection(
+      probe.source === "selection" && probe.kind === "text" ? probe.text : "",
+    ).catch(() => undefined);
     try {
       await launchCommand({
         name: "send-file-to-server",
         type: LaunchType.UserInitiated,
-        context: { payload: "remote-clipboard", selectedText },
+        context: { payload: "remote-clipboard" },
       });
     } catch (e) {
       // 대상 커맨드가 비활성화되어 있으면 launchCommand가 throw
@@ -113,9 +115,11 @@ export default async function main(props: LaunchProps) {
     await addRecent(host).catch(() => undefined);
     await toast.hide().catch(() => undefined);
     toast = undefined;
-    await showHUD(`✅ ${label} → ${host}`);
+    // 성공 알림 실패가 catch로 떨어져 "전송 실패"로 보고되면 안 된다 — 주입은 이미 끝났다
+    await showHUD(`✅ ${label} → ${host}`).catch(() => undefined);
   } catch (e) {
-    if (toast) await toast.hide();
+    // hide 실패로 정작 실패 알림을 못 띄우면 실패가 조용히 묻힌다 — 성공 경로와 동일하게 best-effort
+    if (toast) await toast.hide().catch(() => undefined);
     await showToast({
       style: Toast.Style.Failure,
       title: `Sync to ${host} failed`,

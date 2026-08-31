@@ -196,6 +196,13 @@ export function normalizeClipboardText(s: string): string {
 /** 클립보드 텍스트 크기 상한 — 이미지와 동일. 무제한은 Raycast 메모리·stdin 버퍼·원격 pasteboard를 함께 압박한다 */
 export const CLIPBOARD_TEXT_MAX_BYTES = 20 * 1024 * 1024;
 
+/**
+ * 클립보드 텍스트를 아예 읽지 못할 만큼 큰 경우의 문구. 어댑터가 크기를 재기 전에 실패하므로
+ * 실제 바이트를 알 수 없어 clipboardTextSizeIssue와 문구가 갈린다.
+ */
+export const CLIPBOARD_TEXT_TOO_LARGE =
+  "Clipboard text is too large to send — copy a smaller selection.";
+
 /** 상한 초과 시 알림 문구, 이하면 null. 크기는 정규화 후 실제 전송 바이트 기준 */
 export function clipboardTextSizeIssue(bytes: number): string | null {
   if (bytes <= CLIPBOARD_TEXT_MAX_BYTES) return null;

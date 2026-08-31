@@ -1,4 +1,5 @@
-import { Clipboard, environment, getSelectedText } from "@raycast/api";
+import { environment, getSelectedText } from "@raycast/api";
+import { CLIPBOARD_TEXT_TOO_LARGE } from "../../lib/validate";
 import { execFile, spawn } from "child_process";
 import {
   chmodSync,
@@ -103,8 +104,15 @@ export const darwinAdapter: PlatformAdapter = {
         env: { ...process.env, LC_ALL: "en_US.UTF-8" },
       });
       return stdout;
-    } catch {
-      return (await Clipboard.readText()) ?? ""; // 헬퍼 실행 실패 시에만 폴백
+    } catch (e) {
+      // 크기 초과는 "텍스트 없음"이 아니다 — 접으면 "보낼 게 없다"는 정반대 안내가 나가고,
+      // 이미지가 함께 있으면 텍스트 우선 규칙까지 깨고 이미지가 전송된다.
+      if ((e as { code?: string }).code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER")
+        throw new Error(CLIPBOARD_TEXT_TOO_LARGE);
+      // 그 밖의 실패만 텍스트 없음으로 접는다. Clipboard.readText()로 폴백하지 않는 이유는
+      // 그것이 바로 플레이스홀더를 돌려주는 API라, 이미지 클립보드 + pbpaste 실패가 겹치면
+      // 없애려던 경로가 다시 열리기 때문이다.
+      return "";
     }
   },
 

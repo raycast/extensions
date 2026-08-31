@@ -4,6 +4,7 @@ import { RECENTS_CAP } from "../lib/mergeHosts";
 
 const RECENTS_KEY = "recents";
 const AUTH_KEY = "authMode";
+const PENDING_SELECTION_KEY = "pendingSelection";
 
 async function readJson<T>(key: string, fallback: T): Promise<T> {
   const raw = await LocalStorage.getItem<string>(key);
@@ -61,4 +62,23 @@ export async function forgetHost(alias: string): Promise<void> {
       JSON.stringify(recents.filter((h) => h !== alias)),
     );
   }
+}
+
+/**
+ * 셀렉터 위임용 선택 텍스트 핸드오프. launchContext로 넘기지 않는 이유는 그것이 **비신뢰
+ * 입력**이기 때문이다 — 조작된 raycast:// 딥링크가 같은 payload로 셀렉터를 열면 공격자
+ * 문자열이 "내가 지정한 텍스트"인 양 원격 클립보드로 나간다(HUD 라벨이 오히려 신뢰를 보강한다).
+ * LocalStorage는 확장 자신만 쓸 수 있어 딥링크로는 세울 수 없다.
+ *
+ * 소비는 1회성 — 읽는 즉시 지운다. 남겨두면 다음 실행이 stale 선택을 보낸다.
+ */
+export async function putPendingSelection(text: string): Promise<void> {
+  await LocalStorage.setItem(PENDING_SELECTION_KEY, text);
+}
+
+/** 핸드오프 소비 — 없으면 null. 읽는 즉시 삭제하며, 삭제 실패는 무시(값은 이미 손에 있다) */
+export async function takePendingSelection(): Promise<string | null> {
+  const raw = await LocalStorage.getItem<string>(PENDING_SELECTION_KEY);
+  await LocalStorage.removeItem(PENDING_SELECTION_KEY).catch(() => undefined);
+  return typeof raw === "string" ? raw : null;
 }

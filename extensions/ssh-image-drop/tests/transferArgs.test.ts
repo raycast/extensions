@@ -236,8 +236,16 @@ describe("buildRemoteClipboardArgs", () => {
     const cmd = buildRemoteClipboardArgs("mm", "image", "key").at(-1) as string;
     expect(cmd).toContain("[ -x /usr/bin/osascript ]");
     expect(cmd).toContain("mktemp -d -t ssh-image-drop");
-    expect(cmd).toContain('trap "/bin/rm -rf $D" EXIT');
+    // 함수로 감싸 실행 시점에 인용된 확장 — trap 본문에 $D를 그대로 박으면
+    // 원격 TMPDIR에 공백·glob이 있을 때 rm 인자가 쪼개진다
+    expect(cmd).toContain('cleanup() { /bin/rm -rf "$D"; }; trap cleanup EXIT');
     expect(cmd).toContain("«class PNGf»");
+  });
+
+  it("image: 시그널에도 원격 임시 PNG를 회수한다 — EXIT trap만으로는 SIGHUP에 안 돈다", () => {
+    const cmd = buildRemoteClipboardArgs("mm", "image", "key").at(-1) as string;
+    // shQuote가 스크립트 전체를 감싸므로 내부 작은따옴표는 '\'' 로 이스케이프된다
+    expect(cmd).toContain(`trap '\\''cleanup; exit 1'\\'' HUP INT TERM`);
   });
 
   it("원격 명령에 개행이 없다 — tcsh는 작은따옴표가 raw newline을 넘지 못한다", () => {

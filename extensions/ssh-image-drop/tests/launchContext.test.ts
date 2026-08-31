@@ -75,19 +75,18 @@ describe("parseSelectorContext — remote-clipboard", () => {
   });
 });
 
-describe("parseSelectorContext — remote-clipboard 선택 텍스트", () => {
-  it("선택 텍스트를 전달받는다 — 셀렉터에서는 다시 읽을 수 없다", () => {
+describe("parseSelectorContext — remote-clipboard는 전송 대상을 context로 받지 않는다", () => {
+  it("selectedText가 실려 와도 무시한다 — 조작된 딥링크가 공격자 문자열을 '사용자가 지정한 텍스트'로 위장할 수 있다", () => {
     expect(
       parseSelectorContext({
         payload: "remote-clipboard",
-        selectedText: "  indented\n",
+        selectedText: "attacker-controlled",
       }),
-    ).toEqual({ payload: "remote-clipboard", selectedText: "  indented\n" });
+    ).toEqual({ payload: "remote-clipboard" });
   });
-  it("공백만·비문자열은 버린다 (비신뢰 입력)", () => {
-    for (const bad of ["   ", "", 42, null, { a: 1 }])
-      expect(
-        parseSelectorContext({ payload: "remote-clipboard", selectedText: bad }),
-      ).toEqual({ payload: "remote-clipboard" });
+  it("payload만 통과 — 실제 선택 텍스트는 LocalStorage 핸드오프로 넘어온다", () => {
+    expect(parseSelectorContext({ payload: "remote-clipboard" })).toEqual({
+      payload: "remote-clipboard",
+    });
   });
 });
