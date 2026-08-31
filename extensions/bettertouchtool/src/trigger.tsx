@@ -32,22 +32,29 @@ import {
   type NamedTriggerReference,
   type TriggerFilter,
 } from "./trigger-utils";
+import { sortPinnedItems } from "./pinning";
+import { usePinnedIds } from "./use-pinned-ids";
 
 const namedTriggerCacheKey = "known-named-triggers";
+const pinnedNamedTriggerIdsStorageKey = "pinned-named-trigger-ids";
 const triggerFetchBatchSize = 8;
 
 export default function Command() {
   const [triggerFilter, setTriggerFilter] = useState<TriggerFilter>("enabled");
   const btt = useMemo(createBttClient, []);
+  const { isLoading: isLoadingPins, pinnedIds, togglePinned } = usePinnedIds(pinnedNamedTriggerIdsStorageKey);
   const { triggerResultHandling } = getPreferenceValues<TriggerPreferences>();
   const { isLoading, data, revalidate } = usePromise(loadNamedTriggers, [btt], {
     failureToastOptions: { title: "Could not load named triggers" },
   });
-  const commands = filterNamedTriggers(data ?? [], triggerFilter);
+  const commands = useMemo(
+    () => sortPinnedItems(filterNamedTriggers(data ?? [], triggerFilter), pinnedIds, (trigger) => trigger.BTTUUID),
+    [data, pinnedIds, triggerFilter],
+  );
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingPins}
       searchBarPlaceholder="Search named triggers..."
       searchBarAccessory={<TriggerDropdown value={triggerFilter} onChange={setTriggerFilter} />}
       throttle
@@ -73,6 +80,8 @@ export default function Command() {
             btt={btt}
             resultHandling={triggerResultHandling}
             onTriggerChanged={revalidate}
+            isPinned={pinnedIds.has(triggerResult.BTTUUID)}
+            onTogglePinned={() => togglePinned(triggerResult.BTTUUID)}
           />
         ))}
       </List.Section>
@@ -99,11 +108,15 @@ function TriggerItem({
   btt,
   resultHandling,
   onTriggerChanged,
+  isPinned,
+  onTogglePinned,
 }: {
   triggerResult: BTTTrigger;
   btt: Btt;
   resultHandling: TriggerResultHandling;
   onTriggerChanged: () => Promise<unknown>;
+  isPinned: boolean;
+  onTogglePinned: () => Promise<void>;
 }) {
   const triggerName = triggerResult.BTTTriggerName;
   const triggerHandle = btt.trigger(triggerResult.BTTUUID);
@@ -151,6 +164,7 @@ function TriggerItem({
   };
 
   const accessories: List.Item.Accessory[] = [];
+  if (isPinned) accessories.push({ icon: Icon.Pin, tooltip: "Pinned" });
   if (!enabled) accessories.push({ tag: "Disabled" });
   if (triggerResult.BTTGestureNotes && triggerResult.BTTGestureNotes !== "Named Trigger: " + triggerName) {
     accessories.push({ text: triggerResult.BTTGestureNotes, icon: Icon.Info, tooltip: triggerResult.BTTGestureNotes });
@@ -195,6 +209,14 @@ function TriggerItem({
                 <Action title="Run Trigger in Background" onAction={handleRunInBackground} icon={Icon.Play} />
               </>
             )}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title={isPinned ? "Unpin Named Trigger" : "Pin Named Trigger"}
+              onAction={onTogglePinned}
+              icon={isPinned ? Icon.PinDisabled : Icon.Pin}
+              shortcut={Keyboard.Shortcut.Common.Pin}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="BetterTouchTool">
             <Action

@@ -7,6 +7,7 @@
 - Add a command for searching, copying, and pasting recent BTT Clipboard Manager items
 - Add category filtering to the BTT action search
 - Restore action-specific icons and infer fallbacks from dynamically loaded action names and categories
+- Allow actions, named triggers, and variables to be pinned to the top with Command-Shift-P
 - Add actions for creating, editing, clearing, and refreshing persistent variables
 
 ## [Raycast AI support] - {PR_MERGE_DATE}

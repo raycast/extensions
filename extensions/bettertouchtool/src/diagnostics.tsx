@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, environment } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, environment } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { createBttClient } from "./btt";
@@ -25,7 +25,12 @@ function DiagnosticsDetail() {
       markdown={data ? formatDiagnostics(data) : "# BetterTouchTool Diagnostics\n\nConnecting..."}
       actions={
         <ActionPanel>
-          <Action title="Run Diagnostics Again" onAction={revalidate} icon={Icon.RotateClockwise} />
+          <Action
+            title="Run Diagnostics Again"
+            onAction={revalidate}
+            icon={Icon.RotateClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+          />
         </ActionPanel>
       }
     />

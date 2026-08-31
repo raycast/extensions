@@ -22,6 +22,8 @@ import { actions, ActionType, type Btt } from "bettertouchtool";
 import { createBttClient } from "./btt";
 import { showBttFailureToast } from "./btt-toast";
 import { DevelopmentDiagnosticsSection } from "./diagnostics";
+import { sortPinnedItems } from "./pinning";
+import { usePinnedIds } from "./use-pinned-ids";
 import { type VariableDefinition } from "./variable-definitions";
 import {
   filterVariableDefinitions,
@@ -38,7 +40,7 @@ import {
 const execFileAsync = promisify(execFile);
 const userVariablesPath = join(homedir(), "Library/Application Support/BetterTouchTool/btt_user_variables.plist");
 const variableValueBatchSize = 8;
-const clearValueShortcut: Keyboard.Shortcut = { modifiers: ["ctrl"], key: "x" };
+const pinnedVariableIdsStorageKey = "pinned-variable-ids";
 
 interface SetVariableData {
   names: string[];
@@ -49,6 +51,7 @@ export default function Command() {
   const [variableFilter, setVariableFilter] = useState<VariableFilter>("all");
   const [createdVariableNames, setCreatedVariableNames] = useState<string[]>([]);
   const btt = useMemo(createBttClient, []);
+  const { isLoading: isLoadingPins, pinnedIds, togglePinned } = usePinnedIds(pinnedVariableIdsStorageKey);
   const {
     isLoading,
     data = [],
@@ -77,8 +80,13 @@ export default function Command() {
     [setVariableData],
   );
   const filteredVariables = useMemo(
-    () => filterVariableDefinitions(variables, variableFilter, new Set(setVariableData?.names)),
-    [setVariableData, variableFilter, variables],
+    () =>
+      sortPinnedItems(
+        filterVariableDefinitions(variables, variableFilter, new Set(setVariableData?.names)),
+        pinnedIds,
+        (variable) => variable.name,
+      ),
+    [pinnedIds, setVariableData, variableFilter, variables],
   );
   const existingVariableNames = useMemo(() => new Set(variables.map((variable) => variable.name)), [variables]);
 
@@ -103,7 +111,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoading || (variableFilter === "set" && isLoadingSetVariables)}
+      isLoading={isLoading || isLoadingPins || (variableFilter === "set" && isLoadingSetVariables)}
       searchBarPlaceholder="Search BTT variables..."
       searchBarAccessory={<VariableFilterDropdown value={variableFilter} onChange={setVariableFilter} />}
       throttle
@@ -127,6 +135,8 @@ export default function Command() {
           existingNames={existingVariableNames}
           onVariableCreated={handleVariableCreated}
           onRefresh={refreshVariables}
+          isPinned={pinnedIds.has(variable.name)}
+          onTogglePinned={() => togglePinned(variable.name)}
         />
       ))}
     </List>
@@ -162,6 +172,8 @@ function VariableItem({
   existingNames,
   onVariableCreated,
   onRefresh,
+  isPinned,
+  onTogglePinned,
 }: {
   variable: VariableDefinition;
   btt: Btt;
@@ -169,6 +181,8 @@ function VariableItem({
   existingNames: ReadonlySet<string>;
   onVariableCreated: (name: string) => Promise<void>;
   onRefresh: () => Promise<void>;
+  isPinned: boolean;
+  onTogglePinned: () => Promise<void>;
 }) {
   return (
     <List.Item
@@ -176,6 +190,7 @@ function VariableItem({
       subtitle={variable.description}
       keywords={[variable.category, variable.persistent ? "persistent" : "dynamic"]}
       accessories={[
+        ...(isPinned ? [{ icon: Icon.Pin, tooltip: "Pinned" }] : []),
         ...(previewValue !== undefined
           ? [{ text: formatVariableValuePreview(previewValue), tooltip: String(previewValue) }]
           : []),
@@ -200,7 +215,19 @@ function VariableItem({
           {!variable.readOnly && variable.persistent ? (
             <ClearVariableValueAction variable={variable} btt={btt} onCleared={onRefresh} />
           ) : null}
-          <Action.CopyToClipboard title="Copy Variable Name" content={variable.name} />
+          <ActionPanel.Section>
+            <Action
+              title={isPinned ? "Unpin Variable" : "Pin Variable"}
+              onAction={onTogglePinned}
+              icon={isPinned ? Icon.PinDisabled : Icon.Pin}
+              shortcut={Keyboard.Shortcut.Common.Pin}
+            />
+            <Action.CopyToClipboard
+              title="Copy Variable Name"
+              content={variable.name}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
+          </ActionPanel.Section>
           <ActionPanel.Section>
             <CreateVariableAction btt={btt} existingNames={existingNames} onCreated={onVariableCreated} />
             <RefreshVariablesAction onRefresh={onRefresh} />
@@ -274,7 +301,7 @@ function ClearVariableValueAction({
       title="Clear Value"
       onAction={handleClear}
       icon={Icon.Eraser}
-      shortcut={clearValueShortcut}
+      shortcut={Keyboard.Shortcut.Common.Remove}
       style={Action.Style.Destructive}
     />
   );
@@ -370,8 +397,19 @@ function VariableDetail({ variable, btt }: { variable: VariableDefinition; btt: 
           {!variable.readOnly && variable.persistent ? (
             <ClearVariableValueAction variable={variable} btt={btt} onCleared={revalidate} />
           ) : null}
-          {data ? <Action.CopyToClipboard title="Copy Value" content={formattedValue} /> : null}
-          <Action title="Refresh Value" onAction={revalidate} icon={Icon.RotateClockwise} />
+          {data ? (
+            <Action.CopyToClipboard
+              title="Copy Value"
+              content={formattedValue}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
+          ) : null}
+          <Action
+            title="Refresh Value"
+            onAction={revalidate}
+            icon={Icon.RotateClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+          />
         </ActionPanel>
       }
     />
@@ -422,7 +460,12 @@ function VariableEditor({
       navigationTitle={variable.name}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Value" onSubmit={handleSubmit} icon={Icon.Check} />
+          <Action.SubmitForm
+            title="Save Value"
+            onSubmit={handleSubmit}
+            icon={Icon.Check}
+            shortcut={Keyboard.Shortcut.Common.Save}
+          />
         </ActionPanel>
       }
     >

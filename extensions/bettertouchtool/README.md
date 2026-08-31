@@ -8,11 +8,11 @@ Enable the socket server in BetterTouchTool under **Settings → Scripting BTT �
 
 ### Run BTT actions
 
-Search the complete action catalog generated from BetterTouchTool's reference documentation. Actions with parameters open a generated form; nested configuration is entered as JSON.
+Search the complete action catalog generated from BetterTouchTool's reference documentation. Actions with parameters open a generated form; nested configuration is entered as JSON. Pin frequently used actions to the top with **⌘⇧P**.
 
 ### Named triggers
 
-Find and run configured named triggers. The type of associated action will be displayed and in some cases you can hover over the action to see a preview of the code/file that will be executed. Named triggers can also be revealed in BetterTouchTool or enabled and disabled from Raycast.
+Find and run configured named triggers. The type of associated action will be displayed and in some cases you can hover over the action to see a preview of the code/file that will be executed. Named triggers can also be revealed in BetterTouchTool, enabled and disabled from Raycast, or pinned to the top with **⌘⇧P**.
 
 Named triggers that declare text or number variables open a generated form before running. Variables with a defined set of options are shown as dropdowns. Named triggers can optionally show their returned value in a toast or copy it to the clipboard. Configure this under the extension's **Named Trigger Results** preference.
 
@@ -26,7 +26,7 @@ Search recent text items from BTT's Clipboard Manager, copy them, or paste them 
 
 ### Variables
 
-Search BTT's documented dynamic and context variables alongside your persistent user variables. Open a variable to load and copy its current value. Writable variables include an **Edit Value** action, and **Create New Variable** opens a typed form for creating persistent text or number variables.
+Search BTT's documented dynamic and context variables alongside your persistent user variables. Open a variable to load and copy its current value, or pin it to the top with **⌘⇧P**. Writable variables include an **Edit Value** action, and **Create New Variable** opens a typed form for creating persistent text or number variables.
 
 BTT does not currently expose a scripting API that enumerates every live temporary variable, so the command reads persistent variable names from BTT's local variables file and supplements them with the documented standard-variable catalog. Use **Show All Variables in BTT** to open BTT's complete live view.
 

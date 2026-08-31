@@ -183,7 +183,11 @@ function TriggerItem({
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy Trigger UUID" content={trigger.BTTUUID} />
+            <Action.CopyToClipboard
+              title="Copy Trigger UUID"
+              content={trigger.BTTUUID}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
           </ActionPanel.Section>
           <DevelopmentDiagnosticsSection />
         </ActionPanel>

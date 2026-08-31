@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, closeMainWindow, Form, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard, closeMainWindow, Form, useNavigation } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { actions } from "bettertouchtool";
 import { actionCatalog, type ActionDefinition } from "bettertouchtool/catalog";
@@ -13,11 +13,15 @@ import { getActionCategoryIconName, getActionIconName } from "./action-icons";
 import { createBttClient } from "./btt";
 import { showBttFailureToast } from "./btt-toast";
 import { DevelopmentDiagnosticsSection } from "./diagnostics";
+import { sortPinnedItems } from "./pinning";
+import { usePinnedIds } from "./use-pinned-ids";
 
 const allCategories = "all";
+const pinnedActionIdsStorageKey = "pinned-action-ids";
 
 export default function Command() {
   const [category, setCategory] = useState(allCategories);
+  const { isLoading: isLoadingPins, pinnedIds, togglePinned } = usePinnedIds(pinnedActionIdsStorageKey);
   const categories = useMemo(
     () =>
       [...new Set(actionCatalog.all.map((actionDefinition) => actionDefinition.category))].sort((left, right) =>
@@ -25,16 +29,17 @@ export default function Command() {
       ),
     [],
   );
-  const filteredActions = useMemo(
-    () =>
+  const filteredActions = useMemo(() => {
+    const actions =
       category === allCategories
         ? actionCatalog.all
-        : actionCatalog.all.filter((actionDefinition) => actionDefinition.category === category),
-    [category],
-  );
+        : actionCatalog.all.filter((actionDefinition) => actionDefinition.category === category);
+    return sortPinnedItems(actions, pinnedIds, (actionDefinition) => String(actionDefinition.id));
+  }, [category, pinnedIds]);
 
   return (
     <List
+      isLoading={isLoadingPins}
       searchBarPlaceholder="Search actions..."
       searchBarAccessory={<CategoryDropdown categories={categories} value={category} onChange={setCategory} />}
       throttle
@@ -44,7 +49,12 @@ export default function Command() {
         subtitle={String(filteredActions.length)}
       >
         {filteredActions.map((actionDefinition) => (
-          <ActionItem key={actionDefinition.id} actionDefinition={actionDefinition} />
+          <ActionItem
+            key={actionDefinition.id}
+            actionDefinition={actionDefinition}
+            isPinned={pinnedIds.has(String(actionDefinition.id))}
+            onTogglePinned={() => togglePinned(String(actionDefinition.id))}
+          />
         ))}
       </List.Section>
     </List>
@@ -156,7 +166,15 @@ function ParameterInput({ field }: { field: ParameterField }) {
   );
 }
 
-function ActionItem({ actionDefinition }: { actionDefinition: ActionDefinition }) {
+function ActionItem({
+  actionDefinition,
+  isPinned,
+  onTogglePinned,
+}: {
+  actionDefinition: ActionDefinition;
+  isPinned: boolean;
+  onTogglePinned: () => Promise<void>;
+}) {
   const { push } = useNavigation();
   const fields = getParameterFields(actionDefinition);
 
@@ -183,7 +201,11 @@ function ActionItem({ actionDefinition }: { actionDefinition: ActionDefinition }
       title={actionDefinition.name}
       subtitle={actionDefinition.description}
       icon={Icon[getActionIconName(actionDefinition)]}
-      accessories={[{ tag: actionDefinition.category }, { text: String(actionDefinition.id), icon: Icon.Hashtag }]}
+      accessories={[
+        ...(isPinned ? [{ icon: Icon.Pin, tooltip: "Pinned" }] : []),
+        { tag: actionDefinition.category },
+        { text: String(actionDefinition.id), icon: Icon.Hashtag },
+      ]}
       keywords={[actionDefinition.slug, actionDefinition.category]}
       actions={
         <ActionPanel>
@@ -196,6 +218,14 @@ function ActionItem({ actionDefinition }: { actionDefinition: ActionDefinition }
             {fields.length === 0 ? (
               <Action title="Run Action in Background" onAction={() => handleRun(true)} icon={Icon.Play} />
             ) : null}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title={isPinned ? "Unpin Action" : "Pin Action"}
+              onAction={onTogglePinned}
+              icon={isPinned ? Icon.PinDisabled : Icon.Pin}
+              shortcut={Keyboard.Shortcut.Common.Pin}
+            />
           </ActionPanel.Section>
           <DevelopmentDiagnosticsSection />
         </ActionPanel>

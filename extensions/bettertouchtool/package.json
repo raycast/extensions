@@ -5,6 +5,9 @@
   "description": "Run BTT actions from Raycast",
   "icon": "command-icon.png",
   "author": "dnnsmnstrr",
+  "contributors": [
+    "kmusick"
+  ],
   "categories": [
     "Applications",
     "Productivity"
