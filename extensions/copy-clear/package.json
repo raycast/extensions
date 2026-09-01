@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "copy-clear",
+  "title": "Copy Clear",
+  "description": "Display selected text as a large, easy-to-read character grid.",
+  "icon": "command-icon.png",
+  "author": "navio",
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "show-selected-text",
+      "title": "Show Selected Text Clearly",
+      "subtitle": "Large character grid",
+      "description": "Show selected text from the frontmost app in a large, indexed character grid.",
+      "mode": "no-view"
+    },
+    {
+      "name": "display-selected-text",
+      "title": "Internal: Copy Clear Display",
+      "description": "Internal command used to render freshly captured selected text.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fontStyle",
+      "type": "dropdown",
+      "title": "Font Style",
+      "description": "Use a monospaced font to make similar characters easier to compare.",
+      "default": "monospace",
+      "required": false,
+      "data": [
+        {
+          "title": "Monospaced",
+          "value": "monospace"
+        },
+        {
+          "title": "Sans Serif",
+          "value": "sans-serif"
+        }
+      ]
+    },
+    {
+      "name": "colorCode",
+      "type": "checkbox",
+      "title": "Color Code Characters",
+      "label": "Highlight numbers and punctuation",
+      "description": "Numbers and punctuation receive distinct colours.",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "graphemer": "^1.4.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^18.3.12",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.9.6",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "format": "prettier --write .",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
