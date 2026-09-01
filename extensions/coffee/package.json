@@ -89,27 +89,7 @@
       "title": "Caffeinate for ...",
       "subtitle": "Coffee",
       "description": "Prevent your computer from sleeping for a certain time",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "hours",
-          "placeholder": "Hours",
-          "type": "text",
-          "required": false
-        },
-        {
-          "name": "minutes",
-          "placeholder": "Minutes",
-          "type": "text",
-          "required": false
-        },
-        {
-          "name": "seconds",
-          "placeholder": "Seconds",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "caffeinateUntil",
