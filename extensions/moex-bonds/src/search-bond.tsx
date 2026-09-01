@@ -13,6 +13,8 @@ const MIN_QUERY = 2;
 interface ListRow {
   ref: BondRef;
   quote: Quote | undefined;
+  /** Котировка не пришла из-за ошибки запроса, а не из-за отсутствия сделок. */
+  failed: boolean;
 }
 
 function favoriteToRef(item: FavoriteItem): BondRef {
@@ -41,8 +43,8 @@ export default function Command() {
       const signal = abortable.current?.signal;
       const refs = q.length >= MIN_QUERY ? await searchBonds(q, signal) : favs.map(favoriteToRef);
       if (refs.length === 0) return [];
-      const quotes = await fetchQuotes(refs, signal);
-      return refs.map((ref) => ({ ref, quote: quotes.get(ref.secid) }));
+      const { quotes, failed } = await fetchQuotes(refs, signal);
+      return refs.map((ref) => ({ ref, quote: quotes.get(ref.secid), failed: failed.has(ref.secid) }));
     },
     [query, favorites ?? []],
     { abortable, keepPreviousData: true, initialData: [] },
@@ -76,11 +78,13 @@ export default function Command() {
         <EmptyState query={query} error={error} favorites={favorites ?? []} onRetry={revalidate} />
       ) : (
         <List.Section title={searching ? `Найдено: ${rows.length}` : "Избранное"}>
-          {rows.map(({ ref, quote }) => (
+          {rows.map(({ ref, quote, failed }) => (
             <BondListItem
               key={ref.secid}
               bondRef={ref}
               quote={quote}
+              failed={failed}
+              onRefresh={revalidate}
               starred={isFavoriteSecid(favorites ?? [], ref.secid)}
               onToggleFavorite={() => onToggleFavorite(ref)}
               onFavoritesChange={reloadFavorites}
@@ -144,15 +148,19 @@ function EmptyState({
 function BondListItem({
   bondRef,
   quote,
+  failed,
   starred,
   onToggleFavorite,
   onFavoritesChange,
+  onRefresh,
 }: {
   bondRef: BondRef;
   quote: Quote | undefined;
+  failed: boolean;
   starred: boolean;
   onToggleFavorite: () => void;
   onFavoritesChange: () => void;
+  onRefresh: () => void;
 }) {
   const moex = moexUrl(bondRef.secid, quote?.boardid ?? bondRef.boardid);
   const smartLab = smartLabUrl(bondRef.secid);
@@ -162,7 +170,7 @@ function BondListItem({
       icon={starred ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.Coin}
       title={bondRef.shortname}
       subtitle={bondRef.emitent ?? bondRef.fullname ?? bondRef.secid}
-      accessories={buildAccessories(quote)}
+      accessories={buildAccessories(quote, failed)}
       actions={
         <ActionPanel>
           <Action.Push
@@ -184,6 +192,12 @@ function BondListItem({
             shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             onAction={onToggleFavorite}
           />
+          <Action
+            title="Обновить котировки"
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={onRefresh}
+          />
           <ActionPanel.Section title="Скопировать">
             {bondRef.isin ? (
               <Action.CopyToClipboard title="ISIN" content={bondRef.isin} shortcut={Keyboard.Shortcut.Common.Copy} />
@@ -200,7 +214,18 @@ function BondListItem({
   );
 }
 
-function buildAccessories(quote: Quote | undefined): List.Item.Accessory[] {
+function buildAccessories(quote: Quote | undefined, failed = false): List.Item.Accessory[] {
+  if (failed) {
+    // Отличаем «запрос не дошёл» от «по бумаге нет сделок»: прочерк на месте обеих
+    // ситуаций выдаёт недоступный MOEX за пустые данные.
+    return [
+      {
+        tag: { value: "нет данных", color: Color.Orange },
+        icon: { source: Icon.ExclamationMark, tintColor: Color.Orange },
+        tooltip: "Котировки не загрузились. ⌘R — обновить",
+      },
+    ];
+  }
   if (!quote) return [{ text: DASH }];
 
   const accessories: List.Item.Accessory[] = [];

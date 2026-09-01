@@ -10,6 +10,7 @@ import {
   PricePick,
   Quote,
   QuoteRef,
+  QuotesResult,
   Row,
 } from "./types";
 import { parseIsoDate, todayMsk } from "./format";
@@ -233,15 +234,19 @@ function chunk<T>(items: T[], size: number): T[][] {
  * Цены пачкой для списка. Один упавший кусок не должен обнулять весь список —
  * поэтому allSettled и частичный результат.
  */
-export async function fetchQuotes(refs: QuoteRef[], signal?: AbortSignal): Promise<Map<string, Quote>> {
+export async function fetchQuotes(refs: QuoteRef[], signal?: AbortSignal): Promise<QuotesResult> {
   const quotes = new Map<string, Quote>();
-  if (refs.length === 0) return quotes;
+  const failed = new Set<string>();
+  if (refs.length === 0) return { quotes, failed };
 
   const preferredBoards = new Map(refs.map((ref) => [ref.secid, ref.boardid ?? null]));
-  const secids = refs.map((ref) => ref.secid);
+  const parts = chunk(
+    refs.map((ref) => ref.secid),
+    QUOTE_CHUNK,
+  );
 
   const results = await Promise.allSettled(
-    chunk(secids, QUOTE_CHUNK).map((part) =>
+    parts.map((part) =>
       issFetch(
         "/engines/stock/markets/bonds/securities.json",
         {
@@ -262,17 +267,21 @@ export async function fetchQuotes(refs: QuoteRef[], signal?: AbortSignal): Promi
     throw (rejected[0] as PromiseRejectedResult).reason;
   }
 
-  for (const result of results) {
-    if (result.status !== "fulfilled") continue;
+  results.forEach((result, index) => {
+    if (result.status !== "fulfilled") {
+      // Помечаем поимённо: прочерк «нет сделок» и «данные не доехали» — разные вещи.
+      for (const secid of parts[index]) failed.add(secid);
+      return;
+    }
     const securities = groupBySecid(toRows(result.value.securities));
     const marketdata = groupBySecid(toRows(result.value.marketdata));
     for (const [secid, secRows] of securities) {
       const { security, market } = alignBoards(secRows, marketdata.get(secid) ?? [], preferredBoards.get(secid));
       quotes.set(secid, buildQuote(security, market, secid));
     }
-  }
+  });
 
-  return quotes;
+  return { quotes, failed };
 }
 
 /**

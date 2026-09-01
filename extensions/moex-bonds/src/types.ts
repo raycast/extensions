@@ -50,6 +50,13 @@ export interface Quote {
   matDate: string | null;
 }
 
+/** Итог батч-запроса котировок: что дошло и по каким бумагам запрос не дошёл вовсе. */
+export interface QuotesResult {
+  quotes: Map<string, Quote>;
+  /** Эти бумаги остались без данных из-за ошибки, а не потому что по ним нет сделок. */
+  failed: Set<string>;
+}
+
 /** Полная карточка: справочные поля + рыночные. */
 export interface BondDetail extends Quote {
   shortname: string;

@@ -284,7 +284,13 @@ test("полный отказ котировок пробрасывается, �
       return new Response(emptyPayload, { status: 200 });
     }) as typeof fetch;
     const partial = await fetchQuotes(many);
-    assert.equal(partial.size, 1, "частичный результат должен дожить до списка");
+    assert.equal(partial.quotes.size, 1, "частичный результат должен дожить до списка");
+    // Упавший кусок — первые 30 бумаг: они помечены как «данные не дошли»,
+    // чтобы список не выдал их за бумаги без сделок.
+    assert.equal(partial.failed.size, 30);
+    assert.ok(partial.failed.has("SEC0"));
+    assert.ok(partial.failed.has("SEC29"));
+    assert.equal(partial.failed.has("SEC30"), false, "уцелевший кусок помечать нельзя");
   } finally {
     globalThis.fetch = realFetch;
   }
