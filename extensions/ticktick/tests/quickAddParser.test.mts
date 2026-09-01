@@ -17,6 +17,7 @@ test("parses natural-language dates, multi-word lists, and priorities", () => {
   assert.equal(parsed.priority, "5");
   assert.equal(parsed.isAllDay, false);
   assert.deepEqual(parsed.dueDate, new Date(2026, 7, 21, 9));
+  assert.equal(parsed.requiresConfirmation, true);
 });
 
 test("parses explicit all-day dates and the legacy list marker", () => {
@@ -26,7 +27,8 @@ test("parses explicit all-day dates and the legacy list marker", () => {
   assert.equal(parsed.projectId, "inbox");
   assert.equal(parsed.priority, "3");
   assert.equal(parsed.isAllDay, true);
-  assert.deepEqual(parsed.dueDate, new Date(2026, 7, 24));
+  assert.deepEqual(parsed.dueDate, new Date(2026, 7, 31));
+  assert.equal(parsed.requiresConfirmation, false);
 });
 
 test("treats a time without a date as today", () => {
@@ -41,6 +43,17 @@ test("treats a time without a date as today", () => {
     assert.equal(parsed.title, "Call client", input);
     assert.equal(parsed.isAllDay, false, input);
     assert.deepEqual(parsed.dueDate, expectedDate, input);
+    assert.equal(parsed.requiresConfirmation, !input.includes("*"), input);
+  }
+});
+
+test("only requires confirmation for unmarked date and time parsing", () => {
+  for (const input of ["Monday report", "Call client at 9", "Send proposal tomorrow at 9"]) {
+    assert.equal(parseQuickAdd(input, projects, now).requiresConfirmation, true, input);
+  }
+
+  for (const input of ["Monday report *Friday", "Call client *9am", "Task ~Inbox !high", "Plain task"]) {
+    assert.equal(parseQuickAdd(input, projects, now).requiresConfirmation, false, input);
   }
 });
 
@@ -89,6 +102,7 @@ test("parses bare weekdays in titles like TickTick", () => {
     ["Friday deployment checklist", "deployment checklist", new Date(2026, 7, 21)],
     ["Prepare Monday report for Friday", "Prepare report for Friday", new Date(2026, 7, 24)],
     ["Move Tuesday meeting to Thursday", "Move meeting to Thursday", new Date(2026, 7, 25)],
+    ["Thursday status", "status", new Date(2026, 7, 20)],
   ];
 
   for (const [input, expectedTitle, expectedDate] of cases) {
@@ -96,6 +110,31 @@ test("parses bare weekdays in titles like TickTick", () => {
     assert.equal(parsed.title, expectedTitle, input);
     assert.deepEqual(parsed.dueDate, expectedDate, input);
   }
+});
+
+test("treats next weekdays as weekdays in the following calendar week", () => {
+  const cases: Array<[string, Date]> = [
+    ["Task next Thursday", new Date(2026, 7, 27)],
+    ["Task next Monday", new Date(2026, 7, 31)],
+  ];
+
+  for (const [input, expectedDate] of cases) {
+    const parsed = parseQuickAdd(input, projects, now);
+    assert.equal(parsed.title, "Task", input);
+    assert.deepEqual(parsed.dueDate, expectedDate, input);
+  }
+});
+
+test("matches TickTick's relative-week and tonight defaults", () => {
+  const nextWeek = parseQuickAdd("Plan next week", projects, now);
+  assert.equal(nextWeek.title, "Plan");
+  assert.equal(nextWeek.isAllDay, true);
+  assert.deepEqual(nextWeek.dueDate, new Date(2026, 7, 27));
+
+  const tonight = parseQuickAdd("Read tonight", projects, now);
+  assert.equal(tonight.title, "Read");
+  assert.equal(tonight.isAllDay, false);
+  assert.deepEqual(tonight.dueDate, new Date(2026, 7, 20, 20));
 });
 
 test("uses the first project without consuming later project metadata", () => {

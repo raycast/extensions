@@ -16,8 +16,9 @@ The **Quick Add Task** command recognizes a practical subset of TickTick's quick
 | `Fix production issue !high`      | High-priority task                 |
 
 Both `~List Name` and `^List Name` select a list. Priorities can be written as `!high`, `!medium`,
-`!low`, `!1`, `!2`, `!3`, or repeated exclamation marks. Date-only phrases create all-day tasks, while a
-time without a date means today.
+`!low`, `!1`, `!2`, `!3`, or `!none`. Date-only phrases create all-day tasks, while a time without a date
+means today. Natural-language dates and times are previewed for confirmation before the task is created;
+dates and times prefixed with `*` are treated as explicit and created immediately.
 
 Tags, recurring dates, and assignees are not parsed because the TickTick macOS AppleScript interface does
 not expose those fields when creating a task.

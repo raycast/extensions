@@ -7,6 +7,7 @@ export interface ParsedQuickAdd {
   dueDate?: Date;
   isAllDay: boolean;
   priority?: "0" | "1" | "3" | "5";
+  requiresConfirmation: boolean;
 }
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -77,16 +78,19 @@ const resolveDate = (dateText: string, timeText: string | undefined, now: Date) 
   if (normalized === "today" || normalized === "tonight") date = moment(now);
   else if (normalized === "tomorrow") date = moment(now).add(1, "day");
   else if (normalized === "day after tomorrow") date = moment(now).add(2, "days");
-  else if (normalized === "next week") date = moment(now).add(1, "week").startOf("isoWeek");
+  else if (normalized === "next week") date = moment(now).add(1, "week");
   else if (/^in \d+ (?:days?|weeks?)$/.test(normalized)) {
     const relative = normalized.match(/^in (\d+) (days?|weeks?)$/);
     if (!relative) return undefined;
     date = moment(now).add(Number(relative[1]), relative[2].startsWith("week") ? "weeks" : "days");
   } else if (/^(?:next )?(?:mon|tue|wed|thu|fri|sat|sun)/.test(normalized)) {
+    const isFollowingWeek = normalized.startsWith("next ");
     const weekday = normalized.replace(/^next /, "").slice(0, 3);
     const weekdays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
     let daysAhead = (weekdays.indexOf(weekday) - moment(now).day() + 7) % 7;
-    if (daysAhead === 0) daysAhead += 7;
+    // TickTick treats a bare weekday matching today as today, while "next"
+    // always selects that weekday in the following calendar week.
+    if (isFollowingWeek) daysAhead += 7;
     date = moment(now).add(daysAhead, "days");
   } else {
     const formats = [
@@ -137,28 +141,50 @@ const resolveDate = (dateText: string, timeText: string | undefined, now: Date) 
       if (!parsedTime.isValid()) return undefined;
       date.hour(parsedTime.hour()).minute(parsedTime.minute());
     }
+  } else if (normalized === "tonight") {
+    date.hour(20);
   }
   return date.toDate();
 };
 
 const parseDate = (text: string, now: Date) => {
   const patterns = [
-    new RegExp(`(?:^|\\s)\\*\\s*(${EXPLICIT_DATE_SOURCE})(?:\\s+(?:at\\s+)?(${TIME_SOURCE}))?(?=\\s|$|[,.;!?])`, "i"),
-    new RegExp(`(?:^|\\s)(?:at\\s+)?(${TIME_SOURCE})\\s+(${DATE_SOURCE})(?=\\s|$|[,.;!?])`, "i"),
-    new RegExp(`(?:^|\\s)(${DATE_SOURCE})(?:\\s+(?:at\\s+)?(${TIME_SOURCE}))?(?=\\s|$|[,.;!?])`, "i"),
+    {
+      pattern: new RegExp(
+        `(?:^|\\s)\\*\\s*(${EXPLICIT_DATE_SOURCE})(?:\\s+(?:at\\s+)?(${TIME_SOURCE}))?(?=\\s|$|[,.;!?])`,
+        "i"
+      ),
+      dateGroup: 1,
+      timeGroup: 2,
+      requiresConfirmation: false,
+    },
+    {
+      pattern: new RegExp(`(?:^|\\s)(?:at\\s+)?(${TIME_SOURCE})\\s+(${DATE_SOURCE})(?=\\s|$|[,.;!?])`, "i"),
+      dateGroup: 2,
+      timeGroup: 1,
+      requiresConfirmation: true,
+    },
+    {
+      pattern: new RegExp(`(?:^|\\s)(${DATE_SOURCE})(?:\\s+(?:at\\s+)?(${TIME_SOURCE}))?(?=\\s|$|[,.;!?])`, "i"),
+      dateGroup: 1,
+      timeGroup: 2,
+      requiresConfirmation: true,
+    },
   ];
 
-  for (const [index, pattern] of patterns.entries()) {
+  for (const { pattern, dateGroup, timeGroup, requiresConfirmation } of patterns) {
     const match = pattern.exec(text);
     if (!match || match.index === undefined) continue;
-    const dateText = index === 1 ? match[2] : match[1];
-    const timeText = index === 1 ? match[1] : match[2];
+    const dateText = match[dateGroup];
+    const timeText = match[timeGroup];
     const dueDate = resolveDate(dateText, timeText, now);
     if (!dueDate) continue;
+    const hasImplicitTime = dateText.toLowerCase() === "tonight";
     return {
       text: `${text.slice(0, match.index)} ${text.slice(match.index + match[0].length)}`,
       dueDate,
-      isAllDay: !timeText,
+      isAllDay: !timeText && !hasImplicitTime,
+      requiresConfirmation,
     };
   }
 
@@ -177,11 +203,12 @@ const parseDate = (text: string, now: Date) => {
         text: `${text.slice(0, timeOnlyMatch.index)} ${text.slice(timeOnlyMatch.index + timeOnlyMatch[0].length)}`,
         dueDate,
         isAllDay: false,
+        requiresConfirmation: !timeOnlyMatch[0].trimStart().startsWith("*"),
       };
     }
   }
 
-  return { text, isAllDay: false };
+  return { text, isAllDay: false, requiresConfirmation: false };
 };
 
 /** Parse the subset of TickTick quick-add syntax supported by the macOS AppleScript API. */
@@ -209,5 +236,6 @@ export const parseQuickAdd = (input: string, projects: Project[], now = new Date
     dueDate: date.dueDate,
     isAllDay: date.isAllDay,
     priority: priorityValue,
+    requiresConfirmation: date.requiresConfirmation,
   };
 };
