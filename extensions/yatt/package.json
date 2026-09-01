@@ -1,0 +1,311 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yatt",
+  "title": "Yet Another Timezone Tool",
+  "description": "Type a time or a meeting window the way you say it (15-17 sf, tomorrow 9 utc, thu 17 et) and see it in every place you care about.",
+  "icon": "extension-icon.png",
+  "author": "alexbartok",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert Time",
+      "description": "Type a time, a window or a date with a place (15-17 sf, tomorrow 9 utc) and see it in every location. Empty shows the current time.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "expression",
+          "placeholder": "19-21 utc",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultAnchor",
+          "title": "Default Anchor Zone",
+          "description": "The zone a typed time is in when you name no place.",
+          "type": "dropdown",
+          "required": false,
+          "default": "local",
+          "data": [
+            {
+              "title": "Local (this Mac's zone)",
+              "value": "local"
+            },
+            {
+              "title": "UTC",
+              "value": "utc"
+            },
+            {
+              "title": "Home location",
+              "value": "home"
+            },
+            {
+              "title": "Last used",
+              "value": "last"
+            }
+          ]
+        },
+        {
+          "name": "popToRootAfterCopy",
+          "title": "After Copying",
+          "description": "Go back to Raycast's root search after copying, whatever Raycast's own Pop to Root setting says.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Return to root search"
+        },
+        {
+          "name": "showLocalRow",
+          "title": "Local Row",
+          "description": "Show a Local row when none of your locations is in this Mac's zone.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Always show local time"
+        },
+        {
+          "name": "dateOrder",
+          "title": "Numeric Date Order",
+          "description": "How to read a date typed as 3/9. Dates like 2026-09-03 always work.",
+          "type": "dropdown",
+          "required": false,
+          "default": "dmy",
+          "data": [
+            {
+              "title": "Day/Month (3/9 = 3 September)",
+              "value": "dmy"
+            },
+            {
+              "title": "Month/Day (3/9 = 9 March)",
+              "value": "mdy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "menu-bar-clock",
+      "title": "Menu Bar Clock",
+      "description": "Show the time in chosen locations in the menu bar, with all locations in the dropdown. Run it once from the root search to place it.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "menuBarTemplate",
+          "title": "Menu Bar Template",
+          "description": "Format of one location in the menu bar. Placeholders as in Copy Template. A location can override this in Manage Locations.",
+          "type": "textfield",
+          "required": false,
+          "default": "{code} {time}"
+        },
+        {
+          "name": "menuBarSeparator",
+          "title": "Menu Bar Separator",
+          "description": "Text between locations in the menu bar.",
+          "type": "textfield",
+          "required": false,
+          "default": " • "
+        },
+        {
+          "name": "menuBarIcon",
+          "title": "Menu Bar Icon",
+          "description": "Show the clock icon before the text. The icon always shows when no location is flagged.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show icon"
+        }
+      ]
+    },
+    {
+      "name": "manage-locations",
+      "title": "Manage Locations",
+      "description": "Add, remove, order and alias the cities and time zones that Convert Time shows.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "onlineLookup",
+          "title": "Online Lookup",
+          "description": "Search OpenStreetMap when a place is not in the built-in list.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Search OpenStreetMap for unknown places"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "description": "How times are shown and copied. You can type either form: 15:00 or 3pm.",
+      "type": "dropdown",
+      "required": false,
+      "default": "24h",
+      "data": [
+        {
+          "title": "24-hour (19:00)",
+          "value": "24h"
+        },
+        {
+          "title": "12-hour (7:00 PM)",
+          "value": "12h"
+        }
+      ]
+    },
+    {
+      "name": "copyTemplate",
+      "title": "Copy Template",
+      "description": "Format of one location in copied text. Placeholders: {time} {label} {code} {abbr} {date} {day} {offset} {tz}. {abbr} is left out when it repeats {code}, and empty brackets are removed: UTC copies as '11:15 UTC', not '11:15 UTC (UTC)'.",
+      "type": "textfield",
+      "required": false,
+      "default": "{time} {code} ({abbr})"
+    },
+    {
+      "name": "copySeparator",
+      "title": "Copy Separator",
+      "description": "Text between locations when copying all rows as one line.",
+      "type": "textfield",
+      "required": false,
+      "default": " / "
+    },
+    {
+      "name": "sortOrder",
+      "title": "Sort Locations",
+      "description": "Order of rows in Convert Time and in the menu bar dropdown.",
+      "type": "dropdown",
+      "required": false,
+      "default": "offset",
+      "data": [
+        {
+          "title": "West to east (by UTC offset)",
+          "value": "offset"
+        },
+        {
+          "title": "East to west (by UTC offset)",
+          "value": "offsetDesc"
+        },
+        {
+          "title": "Manual (as arranged in Manage Locations)",
+          "value": "manual"
+        }
+      ]
+    },
+    {
+      "name": "businessHours",
+      "title": "Business Hours",
+      "description": "Hours shown green, as start-end in 24-hour time, e.g. 9-18. Each location can override this.",
+      "type": "textfield",
+      "required": false,
+      "default": "9-18"
+    },
+    {
+      "name": "shoulderHours",
+      "title": "Shoulder Hours",
+      "description": "Hours shown yellow around the business day, as start-end, e.g. 7-21. Other hours are red.",
+      "type": "textfield",
+      "required": false,
+      "default": "7-21"
+    },
+    {
+      "name": "colorBusiness",
+      "title": "Business Hours Colour",
+      "description": "Hex colour for the business-hours dot, time and strip cells, e.g. #34C759. Empty uses Raycast's green.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "#RRGGBB"
+    },
+    {
+      "name": "colorShoulder",
+      "title": "Shoulder Hours Colour",
+      "description": "Hex colour for the shoulder-hours dot, time and strip cells, e.g. #FFCC00. Empty uses Raycast's yellow.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "#RRGGBB"
+    },
+    {
+      "name": "colorOff",
+      "title": "Off Hours Colour",
+      "description": "Hex colour for the off-hours dot, time and strip cells, e.g. #FF3B30. Empty uses Raycast's red.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "#RRGGBB"
+    },
+    {
+      "name": "stripColorBusiness",
+      "title": "Hour Strip: Business Colour",
+      "description": "Hex colour for business-hours cells in the hour strip. Empty uses the strip's own green.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "#RRGGBB"
+    },
+    {
+      "name": "stripColorShoulder",
+      "title": "Hour Strip: Shoulder Colour",
+      "description": "Hex colour for shoulder-hours cells in the hour strip. Empty uses the strip's own ochre.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "#RRGGBB"
+    },
+    {
+      "name": "stripColorOff",
+      "title": "Hour Strip: Off Colour",
+      "description": "Hex colour for off-hours cells in the hour strip. Empty uses a quiet grey, so the strip is calmer than the dots; set it to your off-hours colour to match.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "#RRGGBB"
+    },
+    {
+      "name": "locationsFile",
+      "title": "Locations File",
+      "description": "Optional. A JSON file that holds your location list, for example in iCloud Drive, so two Macs share it. Leave empty to store the list in Raycast on this Mac. ~ is allowed.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "~/Library/Mobile Documents/com~apple~CloudDocs/Raycast/yatt.json"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.1.2",
+    "@raycast/utils": "^2.3.0",
+    "tz-lookup": "^6.1.25"
+  },
+  "devDependencies": {
+    "@geoapify/un-locode": "^1.0.3",
+    "@raycast/eslint-config": "^2.0.4",
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@vvo/tzdb": "^6.198.0",
+    "cldr-core": "^48.2.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "generate-data": "tsx scripts/generate-data.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
