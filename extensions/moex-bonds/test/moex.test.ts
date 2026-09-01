@@ -5,6 +5,7 @@ import { test } from "node:test";
 
 import {
   alignBoards,
+  fetchQuotes,
   hasAmortization,
   isYieldMisleading,
   issFetch,
@@ -255,4 +256,36 @@ test("короткий горизонт помечается как обманч
   assert.equal(isYieldMisleading(431, 31.6), false);
   assert.equal(isYieldMisleading(null, 15), false);
   assert.equal(isYieldMisleading(1, null), false);
+});
+
+test("полный отказ котировок пробрасывается, частичный — нет", async () => {
+  const realFetch = globalThis.fetch;
+  const many = Array.from({ length: 45 }, (_, i) => ({ secid: `SEC${i}`, boardid: "TQCB" }));
+  const emptyPayload = JSON.stringify({
+    securities: { columns: ["SECID", "BOARDID"], data: [["SEC0", "TQCB"]] },
+    marketdata: { columns: ["SECID", "BOARDID"], data: [["SEC0", "TQCB"]] },
+  });
+
+  try {
+    // Упало всё — список обязан показать ошибку, а не пустоту.
+    globalThis.fetch = (async () => {
+      throw new TypeError("fetch failed");
+    }) as typeof fetch;
+    await assert.rejects(fetchQuotes(many), (error: Error) => {
+      assert.equal(error.name, "IssError");
+      return true;
+    });
+
+    // 45 бумаг — это два куска по 30; роняем только первый.
+    let call = 0;
+    globalThis.fetch = (async () => {
+      call += 1;
+      if (call === 1) throw new TypeError("fetch failed");
+      return new Response(emptyPayload, { status: 200 });
+    }) as typeof fetch;
+    const partial = await fetchQuotes(many);
+    assert.equal(partial.size, 1, "частичный результат должен дожить до списка");
+  } finally {
+    globalThis.fetch = realFetch;
+  }
 });

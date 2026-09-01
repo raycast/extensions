@@ -255,6 +255,13 @@ export async function fetchQuotes(refs: QuoteRef[], signal?: AbortSignal): Promi
     ),
   );
 
+  // Частичный отказ переживаем, полный — нет: иначе недоступный MOEX выглядит как
+  // успешно загруженный список из одних прочерков, и пользователь не увидит «Повторить».
+  const rejected = results.filter((result) => result.status === "rejected");
+  if (rejected.length > 0 && rejected.length === results.length) {
+    throw (rejected[0] as PromiseRejectedResult).reason;
+  }
+
   for (const result of results) {
     if (result.status !== "fulfilled") continue;
     const securities = groupBySecid(toRows(result.value.securities));
