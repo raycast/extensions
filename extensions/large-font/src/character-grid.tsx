@@ -1,16 +1,12 @@
 import { Detail, environment, getPreferenceValues } from "@raycast/api";
 import Graphemer from "graphemer";
 
-type Preferences = {
-  fontStyle: "monospace" | "sans-serif";
-  colorCode: boolean;
-};
-
 type CharacterGridProps = { text?: string };
 
 const CHARS_PER_ROW = 8;
 const CELL_WIDTH = 125;
 const CELL_HEIGHT = 190;
+const MAX_DISPLAYED_CHARACTERS = 240;
 
 function escapeSvg(value: string): string {
   return value
@@ -39,7 +35,9 @@ function characterColor(character: string, colorCode: boolean, darkMode: boolean
 
 function gridMarkdown(text: string, preferences: Preferences): string {
   const splitter = new Graphemer();
-  const characters = splitter.splitGraphemes(text);
+  const allCharacters = splitter.splitGraphemes(text);
+  const characters = allCharacters.slice(0, MAX_DISPLAYED_CHARACTERS);
+  const truncatedCount = allCharacters.length - characters.length;
   const darkMode = environment.theme === "dark";
   const foreground = darkMode ? "#FFFFFF" : "#151515";
   const background = darkMode ? "#1B1B1B" : "#FFFFFF";
@@ -72,7 +70,11 @@ function gridMarkdown(text: string, preferences: Preferences): string {
   });
 
   svg += "</svg>";
-  return `![Selected text character grid](data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")})`;
+
+  const image = `![Selected text character grid](data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")})`;
+  if (truncatedCount <= 0) return image;
+
+  return `${image}\n\nShowing first ${characters.length} characters. ${truncatedCount} additional characters were omitted for performance.`;
 }
 
 export function CharacterGrid({ text }: CharacterGridProps) {
