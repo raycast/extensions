@@ -6,18 +6,18 @@ The extension does not parse the `.ai` file itself. It drives Illustrator's own 
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
-| **Convert AI to PDF** | Form with a file picker (pre-filled from the Finder selection), the bleed choice, your PDF presets and an output folder. |
+| Command                                         | What it does                                                                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Convert AI to PDF**                           | Form with a file picker (pre-filled from the Finder selection), the bleed choice, your PDF presets and an output folder.        |
 | **Convert Finder Selection with Its Own Bleed** | Converts the `.ai` files selected in Finder, each with the bleed its own document defines. Assign a hotkey for one-key exports. |
-| **Convert Finder Selection with Custom Bleed** | Same, using the custom bleed from the preferences. |
-| **Convert Finder Selection Without Bleed** | Same, at trim size. |
+| **Convert Finder Selection with Custom Bleed**  | Same, using the custom bleed from the preferences.                                                                              |
+| **Convert Finder Selection Without Bleed**      | Same, at trim size.                                                                                                             |
 
 ## Bleed
 
 Every command offers the same three choices, and nothing else:
 
-- **From the file** *(default)* — reads the bleed the `.ai` document itself defines and exports with exactly that. Convert a folder of mixed files in one go and each PDF gets its own document's bleed.
+- **From the file** _(default)_ — reads the bleed the `.ai` document itself defines and exports with exactly that. Convert a folder of mixed files in one go and each PDF gets its own document's bleed.
 - **Custom** — a bleed you type in millimetres. The preferences hold the default value.
 - **Off** — exports at trim size, no bleed at all.
 
@@ -31,7 +31,7 @@ Illustrator truncates a bleed handed to it by a script to whole points. A docume
 
 There is one route to a bleed that is exact to the fraction: a PDF preset saved with **Use Document Bleed Settings**. Illustrator then reads the bleed from the document itself and writes it out unrounded. Combined with **From the file**, such a preset reproduces the document's bleed precisely — a 3 mm document exports with a TrimBox at 8.50394 pt, exactly 3.000 mm.
 
-So if the bleed has to land on the millimetre, pick a preset with that option enabled and set the bleed to **From the file**. Those presets are marked *document bleed only* in the preset list, because they always use the document's bleed: combined with **Custom** or **Off** they would silently ignore what you asked, so those combinations are refused with an explanation.
+So if the bleed has to land on the millimetre, pick a preset with that option enabled and set the bleed to **From the file**. Those presets are marked _document bleed only_ in the preset list, because they always use the document's bleed: combined with **Custom** or **Off** they would silently ignore what you asked, so those combinations are refused with an explanation.
 
 The bleed shown in the bleed menu is the one the document defines, not the rounded export value, and the result screen reports the bleed the PDF actually ended up with.
 
@@ -44,22 +44,22 @@ Illustrator is launched automatically if it isn't running; the first conversion 
 
 ## Preferences
 
-| Preference | Default | Notes |
-| --- | --- | --- |
-| Default bleed | From the file | Which of the three choices the commands start with. |
-| Custom bleed | `3` | Millimetres used by the Custom choice. A comma decimal (`2,5`) works too. |
-| Default PDF preset | `[PDF/X-4:2008]` | Any Illustrator PDF preset, including your own. Leave empty for Illustrator's current settings. |
-| Suffix with / without bleed | `_bleed` / none | Appended to the file name, e.g. `Flyer_bleed.pdf`. |
-| Output folder | next to the `.ai` | |
-| Existing files | number them | Off by default, so nothing is silently overwritten. |
-| Timeout per file | `180` s | Raise it for very heavy documents. |
+| Preference                  | Default           | Notes                                                                                           |
+| --------------------------- | ----------------- | ----------------------------------------------------------------------------------------------- |
+| Default bleed               | From the file     | Which of the three choices the commands start with.                                             |
+| Custom bleed                | `3`               | Millimetres used by the Custom choice. A comma decimal (`2,5`) works too.                       |
+| Default PDF preset          | `[PDF/X-4:2008]`  | Any Illustrator PDF preset, including your own. Leave empty for Illustrator's current settings. |
+| Suffix with / without bleed | `_bleed` / none   | Appended to the file name, e.g. `Flyer_bleed.pdf`.                                              |
+| Output folder               | next to the `.ai` |                                                                                                 |
+| Existing files              | number them       | Off by default, so nothing is silently overwritten.                                             |
+| Timeout per file            | `180` s           | Raise it for very heavy documents.                                                              |
 
 ## Behaviour worth knowing
 
 - **No printer's marks, ever.** Trim marks, registration marks, colour bars and page information are switched off explicitly after the preset is applied, so a preset that has them enabled cannot slip them into the PDF.
 - The original `.ai` file is never modified.
 - A file already open in Illustrator is never touched: a working copy is made next to it, converted, and removed again, so your document keeps its window, selection and undo history. Because the copy comes from disk, unsaved edits are not in the PDF — Illustrator gives no reliable way to detect those, since a document counts as modified after nothing more than a selection.
-- Every PDF is measured after export and rejected if its bleed is not what was asked for. Illustrator's *current settings* — the option that applies no preset — can carry "Use Document Bleed Settings" with no way to know beforehand, and a print file with the wrong bleed should not be handed over quietly.
+- Every PDF is measured after export and rejected if its bleed is not what was asked for. Illustrator's _current settings_ — the option that applies no preset — can carry "Use Document Bleed Settings" with no way to know beforehand, and a print file with the wrong bleed should not be handed over quietly.
 - A document with several artboards becomes one multi-page PDF, one page per artboard.
 - Files are converted one at a time, since Illustrator runs one script at a time.
 

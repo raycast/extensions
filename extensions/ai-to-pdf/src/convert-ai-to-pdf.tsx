@@ -125,7 +125,7 @@ export default function Command() {
       isLoading={isConverting || isLoadingPresets}
       actions={
         <ActionPanel>
-          {/* eslint-disable-next-line @raycast/prefer-title-case */}
+          {}
           <Action.SubmitForm title="Convert to PDF" icon={Icon.Document} onSubmit={handleSubmit} />
         </ActionPanel>
       }
@@ -245,7 +245,6 @@ function ResultDetail({ results }: { results: JobResult[] }) {
             content={failed.map((result) => `${basename(result.input)}: ${result.error}`).join("\n")}
           />
           {succeeded.length > 0 && "output" in succeeded[0] && (
-            // eslint-disable-next-line @raycast/prefer-title-case
             <Action.ShowInFinder title="Show PDF in Finder" path={succeeded[0].output} />
           )}
         </ActionPanel>

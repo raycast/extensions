@@ -2,7 +2,7 @@ import { execFile } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import { mkdtemp, rm, writeFile } from "fs/promises";
 import { homedir, tmpdir } from "os";
-import { join } from "path";
+import { dirname, join } from "path";
 import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
@@ -171,13 +171,16 @@ for (var i = 0; i < names.length; i++) { parts.push(q(names[i])); }
 
 export async function convertFile(options: ConvertOptions): Promise<ConvertResult> {
   const started = Date.now();
+  // Same folder as the source so relative linked images still resolve. Node
+  // deletes this in `finally` so an Illustrator crash or timeout cannot leave
+  // `~ai-to-pdf-….ai` in a production folder.
+  const scratchPath = join(dirname(options.input), `~ai-to-pdf-${process.pid}-${Date.now()}.ai`);
   const params = {
     input: options.input,
     output: options.output,
     bleed: options.bleedPt,
     preset: options.preset,
-    // Only used when the source is already open in Illustrator; see the script below.
-    scratchName: `~ai-to-pdf-${process.pid}-${Date.now()}.ai`,
+    scratchPath,
   };
 
   const jsx = `${JSX_PRELUDE}
@@ -203,7 +206,7 @@ try {
     // The copy comes from disk, so unsaved edits are not in the PDF. Illustrator
     // offers no reliable way to know: doc.saved already reads false after nothing
     // more than a selection, so blocking on it would refuse most open documents.
-    scratch = new File(source.path + "/" + P.scratchName);
+    scratch = new File(P.scratchPath);
     if (!source.copy(scratch)) throw new Error("Could not create a working copy next to the file.");
     doc = app.open(scratch);
   } else {
@@ -246,8 +249,12 @@ if (scratch && scratch.exists) {
 error === null ? '{"ok":true}' : '{"ok":false,"error":' + q(error) + '}';
 `;
 
-  await runJsx(jsx, options.timeoutMs, true);
-  return { output: options.output, durationMs: Date.now() - started };
+  try {
+    await runJsx(jsx, options.timeoutMs, true);
+    return { output: options.output, durationMs: Date.now() - started };
+  } finally {
+    await rm(scratchPath, { force: true }).catch(() => undefined);
+  }
 }
 
 /**
