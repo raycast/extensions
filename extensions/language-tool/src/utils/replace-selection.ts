@@ -41,8 +41,12 @@ export async function replaceSelectionWith(
   ) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "The selection is no longer the text that was checked",
-      message: "Select the text again and check it afresh",
+      title: checked.fromSelection
+        ? "The selection is no longer the text that was checked"
+        : "The clipboard is no longer the text that was checked",
+      message: checked.fromSelection
+        ? "Select the text again and check it afresh"
+        : "Copy the text again and check it afresh",
     });
     return false;
   }
@@ -53,4 +57,16 @@ export async function replaceSelectionWith(
   // been replaced, against a selection that is no longer there.
   await closeMainWindow({ popToRootType: PopToRootType.Immediate });
   return true;
+}
+
+/**
+ * What the replacement will actually do, in the reader's words.
+ *
+ * The text is not always a selection: with nothing selected the command falls
+ * back to the clipboard, as Check Text Instant does, and then there is nothing
+ * to replace — the result is pasted wherever the cursor is. Calling that
+ * "Replace Selection" would promise something the command cannot deliver.
+ */
+export function replaceActionTitle(fromSelection: boolean): string {
+  return fromSelection ? "Replace Selection" : "Paste Corrected Text";
 }

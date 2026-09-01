@@ -12,7 +12,10 @@ import { API_ENDPOINTS } from "./config/api";
 import { useCorrectionChoices } from "./hooks/use-correction-choices";
 import { useSelectedTextCheck } from "./hooks/use-selected-text-check";
 import { resultWithAllMarked } from "./utils/match-display";
-import { replaceSelectionWith } from "./utils/replace-selection";
+import {
+  replaceActionTitle,
+  replaceSelectionWith,
+} from "./utils/replace-selection";
 import { onBothPlatforms } from "./utils/shortcuts";
 import type { Language } from "./types";
 
@@ -119,7 +122,9 @@ export default function Command() {
                 can come back showing the previous run, and a view has no way
                 to notice, so the way to refresh is put in reach of the mouse
                 as well as of Cmd+Shift+R. */}
-            <Detail.Metadata.TagList title="Selection">
+            <Detail.Metadata.TagList
+              title={fromSelection ? "Selection" : "Clipboard"}
+            >
               <Detail.Metadata.TagList.Item
                 text="Check again"
                 color={Color.Blue}
@@ -133,7 +138,7 @@ export default function Command() {
         canReplace ? (
           <ActionPanel>
             <Action
-              title="Replace Selection"
+              title={replaceActionTitle(fromSelection)}
               icon={Icon.Text}
               onAction={replaceSelection}
             />
@@ -167,7 +172,11 @@ export default function Command() {
               ))}
             </ActionPanel.Submenu>
             <Action
-              title="Check the Selection Again"
+              title={
+                fromSelection
+                  ? "Check the Selection Again"
+                  : "Check the Clipboard Again"
+              }
               icon={Icon.ArrowClockwise}
               onAction={rereadSelection}
               shortcut={onBothPlatforms("r", "shift")}

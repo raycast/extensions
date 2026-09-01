@@ -10,7 +10,10 @@ import { useCachedState, useFetch } from "@raycast/utils";
 import { API_ENDPOINTS } from "../config/api";
 import { useCorrectionChoices } from "../hooks/use-correction-choices";
 import { fragmentOf, resultWithMatchLinked } from "../utils/match-display";
-import { replaceSelectionWith } from "../utils/replace-selection";
+import {
+  replaceActionTitle,
+  replaceSelectionWith,
+} from "../utils/replace-selection";
 import type { CheckTextResponse, Language } from "../types";
 
 const AUTO_DETECT = "auto";
@@ -102,7 +105,7 @@ export function CorrectionsList({
         actions={
           <ActionPanel>
             <Action
-              title="Replace Selection"
+              title={replaceActionTitle(fromSelection)}
               icon={Icon.Text}
               onAction={onReplaceSelection}
             />
@@ -201,7 +204,7 @@ export function CorrectionsList({
                     that slot — going back a screen just to accept the text
                     would be a poor exit. */}
                 <Action
-                  title="Replace Selection"
+                  title={replaceActionTitle(fromSelection)}
                   icon={Icon.Text}
                   onAction={onReplaceSelection}
                 />
