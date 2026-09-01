@@ -71,7 +71,15 @@ export async function runSowiksCommand(host: string): Promise<void> {
 /** Opens a Sowiks web page. No app needed, so no checks. */
 export async function openSowiksPage(url: string): Promise<void> {
   await closeMainWindow();
-  await open(url);
+
+  try {
+    await open(url);
+  } catch {
+    // Same reasoning as above: the window is gone, so a HUD is the only
+    // feedback left. Far less likely to happen here, but a browser that
+    // refuses to launch should not fail silently either.
+    await showHUD("Could not open the page in your browser");
+  }
 }
 
 async function findSowiks(): Promise<Application | undefined> {
