@@ -165,7 +165,8 @@ export const menubarTweaks: TweakDefinition[] = [
   {
     id: "menubar-accent-graphite",
     title: "Graphite Appearance",
-    description: "Use the graphite accent and highlight colour instead of the blue one",
+    description:
+      "Use the graphite accent and highlight colour instead of the blue one. Apps pick up the new colour as you relaunch them",
     category: "menubar",
     domain: "NSGlobalDomain",
     key: "AppleAquaColorVariant",
@@ -175,7 +176,6 @@ export const menubarTweaks: TweakDefinition[] = [
       { title: "Blue", value: 1 },
       { title: "Graphite", value: 6 },
     ],
-    requiresRestart: "the current app",
     risk: "safe",
     tags: ["appearance", "accent", "colour", "graphite"],
   },

@@ -28,7 +28,7 @@
 
 ### New Tweaks
 
-- **Desktop & Spaces** — a modifier key for each of the four hot corners, so they no longer trigger by accident; wallpaper tinting in windows; switch to an app's space when activating it
+- **Desktop & Spaces** — a modifier key for each of the four hot corners, so they no longer trigger by accident; reduce wallpaper tinting in windows; switch to an app's space when activating it
 - **Menu Bar & UI** — keep the menu bar visible in full screen; graphite appearance
 - **Keyboard & Input** — smart quote styles for double and single quotes, with presets for English, French/Italian, German and Japanese
 - **Screenshots** — show mouse clicks in screen recordings; screenshot destination (file, clipboard, Preview, Mail, Messages)

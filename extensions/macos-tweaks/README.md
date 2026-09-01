@@ -36,7 +36,7 @@ Discover and toggle hidden macOS settings without the Terminal. Browse a curated
 | Finder                  |     22 | Hidden files, path bar, POSIX path in title, .DS_Store on network/USB, allow quitting, drives on desktop    |
 | Dock                    |     16 | Autohide delay & speed, magnification + size, minimize effect, hide recents, static-only, launch bounce     |
 | Menu Bar & UI           |     13 | Clock format, Control Center icons, menu bar in full screen, graphite appearance                            |
-| Desktop & Spaces        |     12 | Hot corners and their modifier keys, auto-rearrange Spaces, wallpaper tinting, switch Space on activation   |
+| Desktop & Spaces        |     12 | Hot corners and their modifier keys, auto-rearrange Spaces, reduce wallpaper tinting, switch Space          |
 | Keyboard & Input        |     10 | Key repeat rate, press-and-hold, full keyboard access, auto-correct, smart quote styles                     |
 | Windows & Stage Manager |      9 | Click wallpaper to show desktop, Stage Manager and its strip, hide desktop icons and widgets, tiled margins |
 | Animations              |      8 | Window/Finder/Launchpad animations, Mission Control speed, Reduce Motion & Transparency                     |

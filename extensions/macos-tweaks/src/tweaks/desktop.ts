@@ -133,9 +133,9 @@ export const desktopTweaks: TweakDefinition[] = [
   },
   {
     id: "desktop-reduce-wallpaper-tinting",
-    title: "Allow Wallpaper Tinting in Windows",
+    title: "Reduce Wallpaper Tinting in Windows",
     description:
-      "Let the wallpaper colour tint the windows on top of it. Turn this off for flat, untinted window backgrounds",
+      "Stop the wallpaper colour from tinting the windows on top of it, for flat, untinted window backgrounds. Off leaves the tinting macOS applies by default",
     category: "desktop",
     domain: "NSGlobalDomain",
     key: "AppleReduceDesktopTinting",
