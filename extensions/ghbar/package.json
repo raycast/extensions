@@ -1,0 +1,250 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ghbar",
+  "title": "GHBar",
+  "description": "Pull requests and issues other people opened on your repositories, in the menu bar. The contributions people send you, without the rest of the notification inbox.",
+  "icon": "extension-icon.png",
+  "author": "denizyoldas",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ghbar",
+      "title": "GHBar",
+      "subtitle": "GitHub",
+      "description": "Shows pull requests and issues waiting on you in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "configure-scope",
+      "title": "Configure Scope",
+      "subtitle": "GHBar",
+      "description": "Pick which organizations and repositories GHBar watches, from your live GitHub lists.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "title": "GitHub Token",
+      "description": "Optional. Leave empty to sign in with GitHub through Raycast instead.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "includePrivateRepos",
+      "title": "Scope",
+      "label": "Include private repositories",
+      "description": "Requests the broader 'repo' scope so private repositories are searched too. Only applies to the Raycast sign-in, not to a personal access token.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showChangesRequested",
+      "title": "Sections",
+      "label": "Changes Requested",
+      "description": "Your own pull requests where a reviewer asked for changes.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showReviewRequested",
+      "label": "Review Requested",
+      "description": "Pull requests waiting on your review.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showPullRequests",
+      "label": "Pull Requests",
+      "description": "Pull requests other people opened on your repositories.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showIssues",
+      "label": "Issues",
+      "description": "Issues other people opened on your repositories.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showMyPullRequests",
+      "label": "My Pull Requests",
+      "description": "Your own open pull requests, anywhere.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showDrafts",
+      "title": "Filters",
+      "label": "Show draft pull requests",
+      "description": "Draft pull requests are still work in progress; hide them if they are noise.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showBots",
+      "label": "Show bots (Dependabot, Renovate, …)",
+      "description": "Dependabot, Renovate and friends. Off by default — automated pull requests are not contributions people sent you.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "accounts",
+      "title": "Watched Accounts",
+      "description": "Comma-separated GitHub logins whose repositories to watch. '@me' is you. Ignored while organizations are set.",
+      "type": "textfield",
+      "default": "@me",
+      "placeholder": "@me",
+      "required": false
+    },
+    {
+      "name": "organizations",
+      "title": "Organizations",
+      "description": "Comma-separated organization logins. When set, GHBar shows work ASSIGNED to you inside those organizations and the watched accounts are ignored — GitHub search ANDs 'user:' with 'org:' and would always return nothing.",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "acme, widgets",
+      "required": false
+    },
+    {
+      "name": "repositoryFilterMode",
+      "title": "Repository Filter",
+      "description": "How the repository list below is applied.",
+      "type": "dropdown",
+      "default": "off",
+      "required": false,
+      "data": [
+        {
+          "title": "Off — watch everything",
+          "value": "off"
+        },
+        {
+          "title": "Only these repositories",
+          "value": "allow"
+        },
+        {
+          "title": "Everything except these",
+          "value": "deny"
+        }
+      ]
+    },
+    {
+      "name": "repositoryList",
+      "title": "Repository List",
+      "description": "Comma-separated repositories. A bare name like 'webapp' is completed with the first organization, or the first watched account. Ignored while the filter above is off.",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "alice/webapp, noisy",
+      "required": false
+    },
+    {
+      "name": "repoGroupThreshold",
+      "title": "Group Noisy Repositories",
+      "description": "A repository with more open items than this collapses into a single submenu, at the position of its newest item.",
+      "type": "dropdown",
+      "default": "3",
+      "required": false,
+      "data": [
+        {
+          "title": "More than 3 items",
+          "value": "3"
+        },
+        {
+          "title": "More than 5 items",
+          "value": "5"
+        },
+        {
+          "title": "More than 10 items",
+          "value": "10"
+        },
+        {
+          "title": "Never group",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "name": "maxRowsPerSection",
+      "title": "Rows per Section",
+      "description": "How many rows a section shows before the rest move into a 'more…' submenu.",
+      "type": "dropdown",
+      "default": "5",
+      "required": false,
+      "data": [
+        {
+          "title": "3 rows",
+          "value": "3"
+        },
+        {
+          "title": "5 rows",
+          "value": "5"
+        },
+        {
+          "title": "10 rows",
+          "value": "10"
+        },
+        {
+          "title": "20 rows",
+          "value": "20"
+        }
+      ]
+    },
+    {
+      "name": "rateLimitVisibility",
+      "title": "Rate Limit Row",
+      "description": "The remaining GitHub API quota. Always reachable from the Refresh item's tooltip.",
+      "type": "dropdown",
+      "default": "whenLow",
+      "required": false,
+      "data": [
+        {
+          "title": "Only when low",
+          "value": "whenLow"
+        },
+        {
+          "title": "Always",
+          "value": "always"
+        },
+        {
+          "title": "Never",
+          "value": "never"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}

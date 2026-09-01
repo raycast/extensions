@@ -1,0 +1,17 @@
+node_modules
+raycast-env.d.ts
+.eslintcache
+dist
+.DS_Store
+
+# AI assistant scratch — planning notes, transcripts, tool config
+PLAN.md
+CLAUDE.md
+AGENTS.md
+.claude/
+.cursor/
+.cursorrules
+.windsurfrules
+.aider*
+.github/copilot-instructions.md
+**/__pycache__/
