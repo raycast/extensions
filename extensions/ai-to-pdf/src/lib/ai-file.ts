@@ -19,19 +19,49 @@ export function detectBleed(path: string): DetectedBleed | undefined {
   return detectIn(readHead(path));
 }
 
+export type ExportedBoxes = {
+  bleed?: DetectedBleed;
+  /** Width and height of the MediaBox: the sheet the PDF really is, bleed included. */
+  mediaSize?: [number, number];
+};
+
 /**
  * The same reading, over the whole file. Illustrator puts the page dictionary of a
  * PDF it writes wherever it lands, which in a heavy print file is well past the
  * head slice — and a check on the bleed that just gives up is worse than none.
+ *
+ * Not every PDF setting writes a TrimBox and a BleedBox; a MediaBox is always
+ * there, so the sheet size is collected in the same pass as a second opinion.
  */
-export function detectExportedBleed(path: string): DetectedBleed | undefined {
+export function readExportedBoxes(path: string): ExportedBoxes {
+  const found: ExportedBoxes = {};
   for (const chunk of readChunks(path)) {
-    const found = detectIn(chunk);
-    if (found) {
-      return found;
+    found.bleed ??= detectIn(chunk);
+    found.mediaSize ??= sizeOf(findBox(chunk, "MediaBox"));
+    if (found.bleed && found.mediaSize) {
+      break;
+    }
+  }
+  return found;
+}
+
+/**
+ * Width and height of the artboard the source document defines. Read over the
+ * whole file, since this only runs when the exported bleed needs a second
+ * opinion — not on the form's path, where every picked file is measured.
+ */
+export function detectArtboardSize(path: string): [number, number] | undefined {
+  for (const chunk of readChunks(path)) {
+    const size = sizeOf(findBox(chunk, "TrimBox"));
+    if (size) {
+      return size;
     }
   }
   return undefined;
+}
+
+function sizeOf(box: Box | undefined): [number, number] | undefined {
+  return box ? [box[2] - box[0], box[3] - box[1]] : undefined;
 }
 
 function detectIn(text: string | undefined): DetectedBleed | undefined {

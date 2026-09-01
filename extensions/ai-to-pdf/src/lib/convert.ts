@@ -1,6 +1,6 @@
 import { existsSync, statSync, unlinkSync } from "fs";
 import { basename, dirname, extname, join } from "path";
-import { detectExportedBleed } from "./ai-file";
+import { detectArtboardSize, readExportedBoxes } from "./ai-file";
 import { describeBleedPt, resolveBleed, type BleedChoice } from "./bleed";
 import { convertFile, presetUsesDocumentBleed } from "./illustrator";
 import type { Settings } from "./settings";
@@ -48,18 +48,24 @@ export function buildOutputPath(input: string, suffix: string, settings: Setting
  * Bleed Settings" without any way to read that beforehand, and a wrong bleed is
  * not something a print file should be trusted to have silently.
  */
-function verifyBleed(output: string, expectedPt: number, preset: string): void {
-  const produced = detectExportedBleed(output);
+function verifyBleed(input: string, output: string, expectedPt: number, preset: string): void {
+  const { bleed: produced, mediaSize } = readExportedBoxes(output);
 
   if (!produced) {
-    // No TrimBox/BleedBox pair at all means no bleed was written, which is the
-    // right outcome when none was asked for. Every named preset has already been
-    // vetted through its .joboptions, so a bleed that was asked for and cannot be
-    // read back is only unexplained under Illustrator's current settings — the
-    // one case this check exists for, and not one to report as a finished file.
-    if (expectedPt > 0 && !preset) {
+    // Not every PDF setting writes a TrimBox and a BleedBox. The sheet is still
+    // the artboard plus the bleed on either side — printer's marks are forced
+    // off — so the MediaBox says what the bleed came out as, and a match is proof
+    // enough. Anything short of that is left unproven rather than assumed right.
+    if (sheetMatches(mediaSize, detectArtboardSize(input), expectedPt)) {
+      return;
+    }
+    // A named preset is vetted through its .joboptions beforehand, so it exports
+    // the bleed it was handed. Illustrator's current settings are the one route
+    // to an override no one can see coming, and a print file whose bleed nobody
+    // could confirm should not be reported as finished.
+    if (!preset) {
       throw new Error(
-        `${basename(output)} was written, but its bleed could not be read back, so it is not certain it has ${describeBleedPt(expectedPt)}. ` +
+        `${basename(output)} was written, but its bleed could not be confirmed as ${describeBleedPt(expectedPt)}. ` +
           `Pick an explicit PDF preset instead of Illustrator's current settings.`,
       );
     }
@@ -79,6 +85,24 @@ function verifyBleed(output: string, expectedPt: number, preset: string): void {
         `The PDF settings in use override the bleed — pick an explicit PDF preset instead of Illustrator's current settings.`,
     );
   }
+}
+
+/**
+ * True when the exported sheet is exactly the artboard with the expected bleed on
+ * all four sides. Compared as an unordered pair of edges, so a page Illustrator
+ * happens to write rotated does not read as a wrong bleed.
+ */
+function sheetMatches(
+  mediaSize: [number, number] | undefined,
+  artboard: [number, number] | undefined,
+  expectedPt: number,
+): boolean {
+  if (!mediaSize || !artboard) {
+    return false;
+  }
+  const sheet = [...mediaSize].sort((a, b) => a - b);
+  const expected = artboard.map((edge) => edge + 2 * expectedPt).sort((a, b) => a - b);
+  return sheet.every((edge, index) => Math.abs(edge - expected[index]) < 1);
 }
 
 export async function runJob(job: Job, settings: Settings): Promise<JobResult> {
@@ -111,7 +135,7 @@ export async function runJob(job: Job, settings: Settings): Promise<JobResult> {
     if (!existsSync(output)) {
       throw new Error("Illustrator reported success but no PDF was written.");
     }
-    verifyBleed(output, actualPt, job.preset);
+    verifyBleed(job.input, output, actualPt, job.preset);
     return { input: job.input, output, bleedPt: actualPt, exact, source: job.bleed.mode };
   } catch (error) {
     return { input: job.input, error: error instanceof Error ? error.message : String(error) };
