@@ -1,0 +1,6 @@
+node_modules
+.DS_Store
+raycast-env.d.ts
+dist
+/*.js
+!eslint.config.js

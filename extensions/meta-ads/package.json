@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "meta-ads",
+  "title": "Meta Ads",
+  "description": "meta-ads CLI로 캠페인, 광고세트, 광고, 크리에이티브를 관리합니다.",
+  "icon": "meta-icon.png",
+  "author": "parker",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "meta-ads",
+      "title": "Meta Ads",
+      "owner" : "Bluesignum",
+      "description": "캠페인, 광고세트, 광고, 크리에이티브를 조회하고 만듭니다.",
+      "mode": "view",
+      "keywords": [
+        "campaign",
+        "adset",
+        "ad",
+        "creative",
+        "캠페인",
+        "광고세트",
+        "광고",
+        "크리에이티브",
+        "템플릿",
+        "자격 증명",
+        "token"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist && node -e \"const fs=require('fs');const path=require('path');for(const f of fs.readdirSync('dist')){if(!f.endsWith('.js'))continue;fs.copyFileSync(path.join('dist',f),f);}\"",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "overrides": {
+    "@types/react": "19.0.10",
+    "@types/node": "22.19.17"
+  }
+}
