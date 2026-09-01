@@ -18,6 +18,18 @@ type Input = {
 };
 
 /**
+ * What the confirmation read, so the write can be refused if the pool moved
+ * while the question sat open.
+ *
+ * `Tool.Confirmation` returns a message and nothing else, so there is no
+ * argument to carry this in. Both halves run in this module, in order, which
+ * makes a module-scoped note the only channel between them. It is treated as a
+ * hint rather than a guarantee: if it is absent the fresh read below stands on
+ * its own, and `--if-count` is doing the real work either way.
+ */
+let confirmed: { pool: string; count: number } | undefined;
+
+/**
  * Always confirm. Growing registers new runners with GitHub and downloads the
  * runner binary; shrinking deregisters them, which is not undone by setting
  * the number back.
@@ -26,6 +38,8 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const { pools } = await getStatus({ local: true });
   const pool = pools.find((p) => p.name === input.pool);
   const from = pool ? `${pool.count}` : "its current count";
+
+  confirmed = pool ? { pool: input.pool, count: pool.count } : undefined;
 
   const shrinking = pool !== undefined && input.count < pool.count;
 
@@ -61,6 +75,27 @@ export default async function tool(input: Input) {
     );
   }
 
-  await runpool(["set-count", pool.name, String(input.count)]);
+  // The user agreed to a change framed by the count the confirmation read, and
+  // `set-count` writes an absolute number rather than a difference. A question
+  // sits open for as long as it takes to read, and the list command, another
+  // window or a terminal can resize the pool in that time, which turns approved
+  // growth into a shrink that deregisters runners nobody agreed to.
+  const agreed = confirmed?.pool === pool.name ? confirmed.count : pool.count;
+  confirmed = undefined;
+
+  if (agreed !== pool.count) {
+    throw new Error(
+      `Pool "${pool.name}" was resized somewhere else while this was waiting: it had ${agreed} ${
+        agreed === 1 ? "runner" : "runners"
+      } and now has ${pool.count}. Nothing was changed. Ask again against the current figure.`,
+    );
+  }
+
+  // `--if-count` is what settles it: runpool refuses the write unless the pool
+  // is still where the decision was made, and holds a lock so two resizes
+  // cannot interleave. The check above says something better than a command
+  // failure when the pool has obviously moved, and is the only check there is
+  // against a runpool old enough to ignore the flag.
+  await runpool(["set-count", pool.name, String(input.count), "--if-count", String(pool.count)]);
   return `Pool "${pool.name}" now has ${input.count} runners, changed from ${pool.count}.`;
 }
