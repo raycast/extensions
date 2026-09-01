@@ -62,7 +62,7 @@ export function useHistory() {
   };
 }
 
-export function addToHistory(color: HistoryColor) {
+export function addToHistory(color: HistoryColor, options?: { isFavorite?: boolean }) {
   const cache = new Cache();
 
   const serializedHistory = cache.get("history");
@@ -74,7 +74,7 @@ export function addToHistory(color: HistoryColor) {
     date: new Date().toISOString(),
     color,
     title: previousHistoryItem?.title,
-    isFavorite: previousHistoryItem?.isFavorite,
+    isFavorite: options?.isFavorite ?? previousHistoryItem?.isFavorite,
   };
   const history = previousHistoryItem?.isFavorite
     ? previousHistory.map((item) => (getFormattedColor(item.color) === colorKey ? historyItem : item))

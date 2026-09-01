@@ -4,6 +4,7 @@ import {
   DailyUsageCommandResponseSchema,
   MonthlyUsageCommandResponseSchema,
   SessionUsageCommandResponseSchema,
+  UsageLimitDataSchema,
   WeeklyUsageCommandResponseSchema,
 } from "./usage-types";
 
@@ -194,5 +195,58 @@ describe("BlocksCommandResponseSchema", () => {
     });
 
     expect(result.blocks[0].burnRate).toBeUndefined();
+  });
+});
+
+describe("UsageLimitDataSchema", () => {
+  const windows = {
+    five_hour: { utilization: 42.4, resets_at: "2026-08-28T09:00:00Z" },
+    seven_day: { utilization: 38.1, resets_at: "2026-08-31T06:00:00Z" },
+  };
+
+  it("parses a payload carrying the self-describing `limits` array", () => {
+    const result = UsageLimitDataSchema.parse({
+      ...windows,
+      seven_day_opus: null,
+      seven_day_sonnet: null,
+      limits: [
+        { kind: "session", group: "session", percent: 42, resets_at: "2026-08-28T09:00:00Z", scope: null },
+        {
+          kind: "weekly_scoped",
+          group: "weekly",
+          percent: 15,
+          severity: "low",
+          is_active: true,
+          resets_at: "2026-08-31T06:00:00Z",
+          scope: { model: { id: "claude-fable-5", display_name: "Fable" }, surface: null },
+        },
+        { kind: "nimbus_quill", group: "weekly", percent: 0, resets_at: null, scope: null },
+      ],
+    });
+
+    expect(result.limits?.[1].scope?.model?.display_name).toBe("Fable");
+  });
+
+  it("parses a cached payload written before `limits` existed", () => {
+    const result = UsageLimitDataSchema.parse({
+      ...windows,
+      seven_day_sonnet: { utilization: 45, resets_at: "2026-08-31T06:00:00Z" },
+      seven_day_opus: { utilization: 82, resets_at: "2026-08-31T06:00:00Z" },
+    });
+
+    expect(result.limits).toBeUndefined();
+  });
+
+  it.each([
+    { name: "omits the model id", model: { display_name: "Fable" } },
+    { name: "omits the display name", model: { id: "model_01" } },
+    { name: "carries neither", model: {} },
+  ])("parses a scoped entry whose model $name", ({ model }) => {
+    const result = UsageLimitDataSchema.safeParse({
+      ...windows,
+      limits: [{ kind: "weekly_scoped", group: "weekly", percent: 15, resets_at: null, scope: { model } }],
+    });
+
+    expect(result.success).toBe(true);
   });
 });

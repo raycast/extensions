@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Add toggle to show filename being deleted permanently] - 2026-08-30
+
+- Added a toggle to the preference to show/hide the latest downloaded file being permanently deleted.
+
 ## [Fix download management reliability] - 2026-08-25
 
 - Fixed moving downloads to Trash on macOS when the Downloads folder is backed by iCloud Drive, including keeping the list accurate when only some selected items move successfully ([#29951](https://github.com/raycast/extensions/issues/29951), [#30503](https://github.com/raycast/extensions/issues/30503)).

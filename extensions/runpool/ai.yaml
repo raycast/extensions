@@ -1,0 +1,146 @@
+instructions: |
+  runpool manages pools of self-hosted GitHub Actions runners on this Mac.
+
+  A pool is a set of runners bound to one GitHub scope. Pools are on-demand:
+  they wake within about a minute of a job queueing and stand down when idle.
+
+  "Local CI" means these RunPool runner pools. Pausing them does not affect
+  Blacksmith or GitHub workflows.
+
+  Treat requests to pause, resume, disable or enable "local CI" as requests
+  to pause or resume every RunPool runner pool. Use toggle-pause for those
+  requests, even when all pools are resting.
+
+  A request naming one pool is different: use pause-pool or resume-pool. A
+  pool pause persists until that pool is resumed, so do not use start-pool to
+  work around it. Read get-status first and distinguish the root paused field
+  from each pool's paused field.
+
+  Read the state before changing it. get-status is cheap and tells you the pool
+  names, which the other tools need.
+
+  A pool with no runners up is RESTING, which is the normal and correct state
+  unless its per-pool paused field is true.
+  Never describe it as broken, down in a worrying sense, or in need of starting.
+  The one genuine fault is a pool GitHub does not have registered, because jobs
+  then queue against it forever; get-status reports that in the state field.
+
+  Runner count is not a simple throughput dial. A single test job commonly
+  forks one worker per CPU core, so several at once may oversubscribe the
+  machine rather than get through the work faster. Treat that as the standard
+  argument rather than an established fact: it depends on the machine and the
+  workload, and `runpool stats` is what measures it. If asked to "add more
+  runners to make CI faster", say it may not help and ask what problem they
+  are seeing.
+
+  Never guess a pool name. If the user is ambiguous and there is more than one
+  pool, ask which.
+
+# Every expectation here is a tool call, deliberately. The `meetsCriteria`
+# form, which has AI judge the wording of the answer, errors out on this
+# machine whatever the criterion says: the same eval scores 100% with the
+# criterion removed and errors with a trivially true one. The behaviour those
+# criteria described is stated in `instructions` above, which is where it
+# actually takes effect rather than merely being checked.
+
+evals:
+  - input: "@runpool what's the state of my runners?"
+    mocks:
+      get-status:
+        paused: false
+        pools:
+          - name: marfa
+            scope: org
+            target: withmarfa
+            runnersConfigured: 4
+            runnersUp: 4
+            jobsInFlight: 2
+            state: running jobs
+    expected:
+      - callsTool: get-status
+
+  - input: "@runpool is anything building right now?"
+    mocks:
+      get-status:
+        paused: false
+        pools:
+          - name: arbr
+            scope: repo
+            target: aicayzer/arbr
+            runnersConfigured: 2
+            runnersUp: 0
+            jobsInFlight: 0
+            state: resting, will wake when a job queues
+    expected:
+      - callsTool: get-status
+
+  - input: "@runpool stop the marfa pool"
+    mocks:
+      get-status:
+        paused: false
+        pools:
+          - name: marfa
+            scope: org
+            target: withmarfa
+            runnersConfigured: 4
+            runnersUp: 4
+            jobsInFlight: 0
+            state: up but idle
+      stop-pool: "Stood down pool \"marfa\". It stays registered and will wake when a job queues."
+    expected:
+      - callsTool:
+          name: stop-pool
+          arguments:
+            pool: marfa
+
+  - input: "@runpool set marfa to 6 runners"
+    mocks:
+      get-status:
+        paused: false
+        pools:
+          - name: marfa
+            scope: org
+            target: withmarfa
+            runnersConfigured: 4
+            runnersUp: 0
+            jobsInFlight: 0
+            state: resting, will wake when a job queues
+      set-pool-count: "Pool \"marfa\" now has 6 runners, changed from 4."
+    expected:
+      - callsTool:
+          name: set-pool-count
+          arguments:
+            pool: marfa
+            count: 6
+
+  - input: "@runpool pause local CI, I need the machine"
+    mocks:
+      get-status:
+        paused: false
+        pools: []
+      toggle-pause: "Paused. Every runner is down and jobs will queue until you resume."
+    expected:
+      - callsTool:
+          name: toggle-pause
+          arguments:
+            action: pause
+
+  - input: "@runpool pause the marfa pool"
+    mocks:
+      get-status:
+        paused: false
+        pools:
+          - name: marfa
+            scope: org
+            target: withmarfa
+            paused: false
+            runnersConfigured: 4
+            runnersUp: 0
+            jobsInFlight: 0
+            state: resting, will wake when a job queues
+      pause-pool: "Paused pool \"marfa\". It will not wake until resumed."
+    expected:
+      - callsTool:
+          name: pause-pool
+          arguments:
+            pool: marfa

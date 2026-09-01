@@ -51,6 +51,7 @@ async function caffeinateUntilTarget(target: Date) {
     { menubar: true, status: true },
     `Caffeinating your ${deviceName()} until ${dayLabel}${formattedTime}`,
     `-t ${totalSeconds}`,
+    { kind: "until", until: target.toISOString() },
   );
 }
 

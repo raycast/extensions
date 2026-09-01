@@ -13,7 +13,8 @@
     "garrick_zhang",
     "EDM115",
     "chingweih",
-    "jalenzz"
+    "jalenzz",
+    "Jakoss"
   ],
   "type": "module",
   "scripts": {
@@ -24,7 +25,7 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'",
+    "test": "node --test --experimental-strip-types \"src/**/*.test.ts\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -141,8 +142,8 @@
     {
       "name": "copilotAuthToken",
       "type": "password",
-      "title": "Copilot Authorization Token (Optional)",
-      "description": "Optional fallback OAuth token for Copilot usage. Usually auto-detected from GH_TOKEN or GITHUB_TOKEN (for example from 'gh auth token'). Standard PATs may not work.",
+      "title": "Legacy Copilot Token (Optional)",
+      "description": "Existing single-account token. Add named accounts with Manage Accounts. Authentication is auto-detected from GitHub CLI first, then GH_TOKEN or GITHUB_TOKEN. Standard PATs may not work.",
       "required": false
     },
     {

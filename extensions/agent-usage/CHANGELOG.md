@@ -1,5 +1,19 @@
 # Agent Usage Changelog
 
+## [Copilot multi-account and AI credits] - 2026-08-29
+
+### New Features
+
+- Support unlimited named GitHub Copilot accounts, with separate rows in the main list and menu bar
+- Add Copilot accounts through the existing **Manage Accounts** action
+- Prefer the active GitHub CLI token from `gh auth token`, then fall back to `GITHUB_TOKEN` and `GH_TOKEN` as separate auto-detected accounts while retaining the legacy preference token
+
+### Improvements
+
+- Rename Copilot's Premium Interactions quota to AI Credits
+- Show the remaining AI Credits as both a percentage and a credit balance, such as `24 / 300 credits`
+- Support GitHub token discovery from Windows command shells as well as Unix login shells
+
 ## [Fix Amp usage parse] - 2026-08-27
 
 ### Bug Fixes
