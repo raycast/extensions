@@ -1595,3 +1595,167 @@ export async function invokeCloudFunction(
   const body = await response.text();
   return { statusCode: response.status, body };
 }
+
+// ============================================================================
+// Cloud SQL Admin API
+// ============================================================================
+
+export const SQLADMIN_API = "https://sqladmin.googleapis.com/v1";
+
+export interface CloudSqlBackupConfiguration {
+  enabled?: boolean;
+  startTime?: string;
+  location?: string;
+  pointInTimeRecoveryEnabled?: boolean;
+  transactionLogRetentionDays?: number;
+  backupRetentionSettings?: {
+    retentionUnit?: string;
+    retainedBackups?: number;
+  };
+}
+
+export interface CloudSqlInstance {
+  name: string;
+  project?: string;
+  region?: string;
+  state?: string;
+  databaseVersion?: string;
+  databaseInstalledVersion?: string;
+  instanceType?: string;
+  backendType?: string;
+  connectionName?: string;
+  gceZone?: string;
+  secondaryGceZone?: string;
+  createTime?: string;
+  serviceAccountEmailAddress?: string;
+  ipAddresses?: Array<{ type: string; ipAddress: string; timeToRetire?: string }>;
+  settings?: {
+    tier?: string;
+    edition?: string;
+    availabilityType?: string;
+    activationPolicy?: string;
+    dataDiskSizeGb?: string;
+    dataDiskType?: string;
+    deletionProtectionEnabled?: boolean;
+    backupConfiguration?: CloudSqlBackupConfiguration;
+    maintenanceWindow?: {
+      day?: number;
+      hour?: number;
+      updateTrack?: string;
+    };
+    ipConfiguration?: {
+      ipv4Enabled?: boolean;
+      privateNetwork?: string;
+      sslMode?: string;
+      requireSsl?: boolean;
+      authorizedNetworks?: Array<{ name?: string; value: string }>;
+    };
+    userLabels?: Record<string, string>;
+  };
+}
+
+export async function listCloudSqlInstances(
+  gcloudPath: string,
+  projectId: string,
+  options?: { fields?: string; maxResults?: number },
+): Promise<CloudSqlInstance[]> {
+  const params = new URLSearchParams();
+  if (options?.fields) params.set("fields", options.fields);
+  if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const url = `${SQLADMIN_API}/projects/${projectId}/instances${qs}`;
+  const response = await gcpFetch<{ items?: CloudSqlInstance[] }>(gcloudPath, url);
+  return response.items || [];
+}
+
+export async function getCloudSqlInstance(
+  gcloudPath: string,
+  projectId: string,
+  instanceId: string,
+): Promise<CloudSqlInstance> {
+  const url = `${SQLADMIN_API}/projects/${projectId}/instances/${instanceId}`;
+  return gcpFetch<CloudSqlInstance>(gcloudPath, url);
+}
+
+export interface CloudSqlDatabase {
+  name: string;
+  charset?: string;
+  collation?: string;
+  instance?: string;
+  project?: string;
+}
+
+export async function listCloudSqlDatabases(
+  gcloudPath: string,
+  projectId: string,
+  instanceId: string,
+): Promise<CloudSqlDatabase[]> {
+  const url = `${SQLADMIN_API}/projects/${projectId}/instances/${instanceId}/databases`;
+  const response = await gcpFetch<{ items?: CloudSqlDatabase[] }>(gcloudPath, url);
+  return response.items || [];
+}
+
+export interface CloudSqlUser {
+  name: string;
+  host?: string;
+  instance?: string;
+  project?: string;
+  type?: string;
+  iamStatus?: string;
+}
+
+export async function listCloudSqlUsers(
+  gcloudPath: string,
+  projectId: string,
+  instanceId: string,
+): Promise<CloudSqlUser[]> {
+  const url = `${SQLADMIN_API}/projects/${projectId}/instances/${instanceId}/users`;
+  const response = await gcpFetch<{ items?: CloudSqlUser[] }>(gcloudPath, url);
+  return response.items || [];
+}
+
+export interface CloudSqlBackupRun {
+  id: string;
+  status?: string;
+  type?: string;
+  backupKind?: string;
+  description?: string;
+  location?: string;
+  databaseVersion?: string;
+  enqueuedTime?: string;
+  startTime?: string;
+  endTime?: string;
+  windowStartTime?: string;
+  error?: { code?: number; message?: string };
+}
+
+export async function listCloudSqlBackupRuns(
+  gcloudPath: string,
+  projectId: string,
+  instanceId: string,
+  options?: { maxResults?: number },
+): Promise<CloudSqlBackupRun[]> {
+  const params = new URLSearchParams();
+  if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const url = `${SQLADMIN_API}/projects/${projectId}/instances/${instanceId}/backupRuns${qs}`;
+  const response = await gcpFetch<{ items?: CloudSqlBackupRun[] }>(gcloudPath, url);
+  return response.items || [];
+}
+
+export interface CloudSqlOperation {
+  name?: string;
+  status?: string;
+  operationType?: string;
+  error?: { errors?: Array<{ code?: string; message?: string }> };
+}
+
+export async function createCloudSqlBackupRun(
+  gcloudPath: string,
+  projectId: string,
+  instanceId: string,
+  description?: string,
+): Promise<CloudSqlOperation> {
+  const url = `${SQLADMIN_API}/projects/${projectId}/instances/${instanceId}/backupRuns`;
+  return gcpPost<CloudSqlOperation>(gcloudPath, url, description ? { description } : {});
+}

@@ -27,13 +27,15 @@ import NetworkView from "./services/network/NetworkView";
 import SecretListView from "./services/secrets/SecretListView";
 import { CloudRunView } from "./services/cloudrun";
 import { CloudFunctionsView } from "./services/cloudfunctions";
+import { CloudSqlView } from "./services/cloudsql";
 import { LogsView } from "./services/logs-service";
 import { StreamerModeAction } from "./components/StreamerModeAction";
 import { CloudShellAction } from "./components/CloudShellAction";
 
 const execFilePromise = promisify(execFile);
 
-type ViewMode = "hub" | "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "cloudfunctions" | "logs";
+type ViewMode =
+  "hub" | "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "cloudfunctions" | "cloudsql" | "logs";
 
 interface ServiceInfo {
   id: ResourceType;
@@ -59,6 +61,13 @@ const SERVICES: ServiceInfo[] = [
     description: "Serverless functions",
     icon: Icon.Code,
     color: Color.Orange,
+  },
+  {
+    id: "cloudsql",
+    name: "Cloud SQL",
+    description: "Managed databases",
+    icon: Icon.HardDrive,
+    color: Color.Magenta,
   },
   {
     id: "iam",
@@ -349,6 +358,8 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
         return <CloudRunView projectId={selectedProject} gcloudPath={gcloudPath} />;
       case "cloudfunctions":
         return <CloudFunctionsView projectId={selectedProject} gcloudPath={gcloudPath} />;
+      case "cloudsql":
+        return <CloudSqlView projectId={selectedProject} gcloudPath={gcloudPath} />;
       case "iam":
         return <IAMView projectId={selectedProject} gcloudPath={gcloudPath} />;
       case "network":
