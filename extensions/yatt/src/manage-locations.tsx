@@ -5,6 +5,7 @@ import {
   Clipboard,
   Color,
   confirmAlert,
+  environment,
   Form,
   Icon,
   List,
@@ -14,6 +15,7 @@ import {
   useNavigation,
   Keyboard,
 } from "@raycast/api";
+import path from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { parseHourRange } from "./core/business";
 import { searchDataset, type SearchResult } from "./core/dataset";
@@ -103,6 +105,11 @@ export default function ManageLocations() {
         onAction={resetSeed}
       />
       <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+      <Action.Open
+        title="Data Sources and Licences"
+        icon={Icon.Document}
+        target={path.join(environment.assetsPath, "NOTICE.md")}
+      />
     </ActionPanel.Section>
   );
 

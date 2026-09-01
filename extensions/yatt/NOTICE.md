@@ -1,6 +1,6 @@
 # Notices
 
-Yet Another Timezone Tool (YATT) is MIT-licensed code (see LICENSE). The files in `assets/data/` are derived from the sources below and remain subject to their terms. A copy of this file ships inside the extension as `assets/NOTICE.md`.
+Yet Another Timezone Tool (YATT) is MIT-licensed code (see LICENSE). The files in `assets/data/` are derived from the sources below and remain subject to their terms. A copy of this file ships inside the extension as `assets/NOTICE.md`; Manage Locations opens it with "Data Sources and Licences".
 
 Generated with: GeoNames dump as of the generation date in each JSON file · UN/LOCODE release 2024-2 via `@geoapify/un-locode` 1.0.3 · `@vvo/tzdb` 6.198.0 · `cldr-core` 48.2.0 · `tz-lookup` 6.1.25.
 
