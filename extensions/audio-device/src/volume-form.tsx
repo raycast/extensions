@@ -231,11 +231,25 @@ export function SilentVolume({ ioType, level }: { ioType: IOType; level: string 
       try {
         const device = await config.getDefault();
         const deviceId = String(device.id);
+
+        if ((await config.getVolume(deviceId)) == null) {
+          await showToast(
+            Toast.Style.Failure,
+            "Volume not supported",
+            `${device.name} does not support volume control`,
+          );
+          return;
+        }
+
         if (clamped > 0) await config.setMute(deviceId, false).catch(() => {});
         await config.setVolume(deviceId, clamped / 100);
         await showHUD(`${device.name}: ${clamped}%`);
       } catch (error) {
-        await showToast(Toast.Style.Failure, `Failed to set ${ioType} volume`, String(error));
+        await showToast(
+          Toast.Style.Failure,
+          `Failed to set ${ioType} volume`,
+          error instanceof Error ? error.message : String(error),
+        );
       }
     })();
   }, [ioType, level]);
