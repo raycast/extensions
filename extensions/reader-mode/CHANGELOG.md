@@ -1,6 +1,6 @@
 # Reader Mode Changelog
 
-## [Fix Paywall Extraction] - {PR_MERGE_DATE}
+## [Fix Paywall Extraction] - 2026-09-01
 
 ### Fixed
 
