@@ -1,6 +1,6 @@
 # OneCal Unified Calendar Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-01
 
 - Unified calendar view: list events from all synced OneCal calendars, grouped by day
 - Hide clone events created by OneCal Sync (server-side `isClone` flag, toggle with ⌘⇧H)
