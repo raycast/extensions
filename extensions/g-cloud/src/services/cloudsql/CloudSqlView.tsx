@@ -1,16 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  showToast,
-  Toast,
-  Icon,
-  Color,
-  Detail,
-  useNavigation,
-  confirmAlert,
-  Alert,
-} from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, Color, Detail, useNavigation, Form } from "@raycast/api";
 import { useState, useEffect } from "react";
 import {
   listCloudSqlInstances,
@@ -684,6 +672,7 @@ function BackupsView({ projectId, gcloudPath, instanceName }: SubViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [backups, setBackups] = useState<CloudSqlBackupRun[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { push } = useNavigation();
 
   useEffect(() => {
     fetchBackups();
@@ -705,37 +694,15 @@ function BackupsView({ projectId, gcloudPath, instanceName }: SubViewProps) {
     }
   }
 
-  async function handleCreateBackup() {
-    const confirmed = await confirmAlert({
-      title: "Create On-Demand Backup",
-      message: `Start a backup of "${instanceName}" now? On-demand backups are retained until you delete them and are billed as storage.`,
-      primaryAction: {
-        title: "Create Backup",
-        style: Alert.ActionStyle.Default,
-      },
-    });
-
-    if (!confirmed) return;
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Starting backup...",
-      message: instanceName,
-    });
-
-    try {
-      await createCloudSqlBackupRun(gcloudPath, projectId, instanceName, "On-demand backup from Raycast");
-      toast.style = Toast.Style.Success;
-      toast.title = "Backup started";
-      toast.message = "It may take a few minutes to complete";
-      fetchBackups();
-    } catch (err) {
-      console.error("Error creating backup:", err);
-      const friendly = friendlyErrorMessage(err, "Failed to create backup");
-      toast.style = Toast.Style.Failure;
-      toast.title = friendly.title;
-      toast.message = friendly.message;
-    }
+  function handleCreateBackup() {
+    push(
+      <CreateBackupForm
+        projectId={projectId}
+        gcloudPath={gcloudPath}
+        instanceName={instanceName}
+        onCreated={fetchBackups}
+      />,
+    );
   }
 
   if (error) {
@@ -820,5 +787,70 @@ function BackupsView({ projectId, gcloudPath, instanceName }: SubViewProps) {
         })
       )}
     </List>
+  );
+}
+
+interface CreateBackupFormProps {
+  projectId: string;
+  gcloudPath: string;
+  instanceName: string;
+  onCreated: () => void;
+}
+
+function CreateBackupForm({ projectId, gcloudPath, instanceName, onCreated }: CreateBackupFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const { pop } = useNavigation();
+
+  async function handleSubmit(values: { description: string }) {
+    setIsLoading(true);
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Starting backup...",
+      message: instanceName,
+    });
+
+    try {
+      // An empty description is valid; send none rather than an empty string.
+      const description = values.description.trim();
+      await createCloudSqlBackupRun(gcloudPath, projectId, instanceName, description || undefined);
+      toast.style = Toast.Style.Success;
+      toast.title = "Backup started";
+      toast.message = "It may take a few minutes to complete";
+      onCreated();
+      pop();
+    } catch (err) {
+      console.error("Error creating backup:", err);
+      const friendly = friendlyErrorMessage(err, "Failed to create backup");
+      toast.style = Toast.Style.Failure;
+      toast.title = friendly.title;
+      toast.message = friendly.message;
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <Form
+      isLoading={isLoading}
+      navigationTitle={`Create Backup - ${instanceName}`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Create Backup" icon={Icon.Plus} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description
+        title="Instance"
+        text={`${instanceName}\n\nOn-demand backups are retained until you delete them and are billed as storage.`}
+      />
+      <Form.TextField
+        id="description"
+        title="Description"
+        placeholder="e.g. before schema migration"
+        defaultValue="On-demand backup from Raycast"
+        info="Shown in the backup list — use it to tell on-demand backups apart later"
+        autoFocus
+      />
+    </Form>
   );
 }

@@ -5,7 +5,7 @@
 ### New Features
 - Added **Cloud SQL** to the service hub — browse instances with engine, machine type, region, high-availability and running state
 - Added an instance detail view covering connectivity (connection name, IP addresses, authorized networks, SSL mode), backup configuration, and the maintenance window
-- Added per-instance **databases** and **users** listings, and a **backups** view that lists backup runs and can trigger an on-demand backup
+- Added per-instance **databases** and **users** listings, and a **backups** view that lists backup runs and can trigger an on-demand backup with a custom description
 - Added copy actions for the instance name, connection name, public IP, and a ready-to-run `gcloud sql connect` command
 
 ## [Fix Empty Project Dropdown on Accounts with Many Projects] - 2026-09-02
