@@ -15,15 +15,7 @@ export type Job = {
 };
 
 export type JobResult =
-  | {
-      input: string;
-      output: string;
-      bleedPt: number;
-      exact: boolean;
-      source: BleedChoice["mode"];
-      /** False when the exported bleed could not be measured; see `verifyBleed`. */
-      confirmed: boolean;
-    }
+  | { input: string; output: string; bleedPt: number; exact: boolean; source: BleedChoice["mode"] }
   | { input: string; error: string };
 
 export function isAiFile(path: string): boolean {
@@ -62,11 +54,12 @@ function verifyBleed(
   expectedPt: number,
   preset: string,
   artboardSize: [number, number] | undefined,
-): boolean {
+): void {
   const { bleed: produced, mediaSize } = readExportedBoxes(output);
 
   if (produced) {
-    return settle(output, produced.maxPt, expectedPt, 0.5);
+    settle(output, produced.maxPt, expectedPt, 0.5);
+    return;
   }
 
   // Not every PDF setting writes a TrimBox and a BleedBox. The sheet is still the
@@ -76,21 +69,29 @@ function verifyBleed(
   // stands in for a document with several artboards, where Illustrator does not.
   const artboard = artboardSize ?? detectArtboardSize(input);
   if (mediaSize && artboard) {
-    return settle(output, sheetBleedPt(mediaSize, artboard), expectedPt, 1);
+    settle(output, sheetBleedPt(mediaSize, artboard), expectedPt, 1);
+    return;
   }
 
-  // Nothing left to measure with. Failing to measure is not the same as a wrong
-  // bleed, so a PDF that may well be perfect is not thrown away over it. A named
+  // Nothing left to measure with — a document of several artboards saved without
+  // PDF compatibility, exported by settings that write no page boxes. A named
   // preset is vetted through its .joboptions beforehand and exports the bleed it
-  // was handed; only Illustrator's current settings leave an export nobody can
-  // vouch for, and that is said out loud rather than reported as a checked file.
-  return preset !== "";
+  // was handed, so there is nothing to check. Illustrator's current settings are
+  // the one route to an override nobody can see coming, and an unmeasured print
+  // file is not something to report as done. The PDF itself is left alone: it may
+  // be perfectly good, and that is for the person who asked for it to decide.
+  if (!preset) {
+    throw new Error(
+      `${basename(output)} was written, but its bleed could not be measured, so it is not certain it has ${describeBleedPt(expectedPt)}. ` +
+        `Pick an explicit PDF preset instead of Illustrator's current settings.`,
+    );
+  }
 }
 
 /** Accepts a measured bleed, or removes the PDF and says what it came out as. */
-function settle(output: string, producedPt: number, expectedPt: number, tolerancePt: number): boolean {
+function settle(output: string, producedPt: number, expectedPt: number, tolerancePt: number): void {
   if (Math.abs(producedPt - expectedPt) <= tolerancePt) {
-    return true;
+    return;
   }
   // A print file with the wrong bleed is worse than no file, so it does not get to
   // sit on disk looking finished.
@@ -146,8 +147,8 @@ export async function runJob(job: Job, settings: Settings): Promise<JobResult> {
     if (!existsSync(output)) {
       throw new Error("Illustrator reported success but no PDF was written.");
     }
-    const confirmed = verifyBleed(job.input, output, actualPt, job.preset, artboardSize);
-    return { input: job.input, output, bleedPt: actualPt, exact, source: job.bleed.mode, confirmed };
+    verifyBleed(job.input, output, actualPt, job.preset, artboardSize);
+    return { input: job.input, output, bleedPt: actualPt, exact, source: job.bleed.mode };
   } catch (error) {
     return { input: job.input, error: error instanceof Error ? error.message : String(error) };
   }
@@ -175,9 +176,5 @@ export function summarize(results: JobResult[]): { succeeded: JobResult[]; faile
 
 /** Describes the bleed actually applied to a converted file. */
 export function describeBleed(result: JobResult): string {
-  if ("error" in result) {
-    return "";
-  }
-  // An unconfirmed bleed is not a failure, but it is not a promise either.
-  return result.confirmed ? describeBleedPt(result.bleedPt) : `${describeBleedPt(result.bleedPt)}, not confirmed`;
+  return "error" in result ? "" : describeBleedPt(result.bleedPt);
 }
