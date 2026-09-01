@@ -1,6 +1,6 @@
 # AI to PDF Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-01
 
 - Convert `.ai` files to PDF through Illustrator's own PDF export
 - Three bleed choices: read from the file, a custom size, or off
