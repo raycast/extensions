@@ -23,9 +23,16 @@ export async function captureAndPaste(screen: Screen, preferences: ScreenshotPre
 
   const file = screenshotFilePath(CAPTURE_DIRECTORY, captureTimestamp());
   await captureScreen(screen, file);
-  const pastedFile =
-    preferences.afterPaste === "save" ? await saveCapture(file, preferences.screenshotDirectory) : file;
-  await pasteScreenshot(pastedFile, preferences.pasteMode);
+  const wasSaved = preferences.afterPaste === "save";
+  const pastedFile = wasSaved ? await saveCapture(file, preferences.screenshotDirectory) : file;
+  try {
+    await pasteScreenshot(pastedFile, preferences.pasteMode);
+  } catch (error) {
+    if (wasSaved) {
+      await saveCapture(pastedFile, CAPTURE_DIRECTORY).catch(() => undefined);
+    }
+    throw error;
+  }
   await removeAfterPaste(pastedFile, preferences.pasteMode, preferences.afterPaste);
   await showHUD("✅ Screenshot pasted");
 }

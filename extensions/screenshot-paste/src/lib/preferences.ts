@@ -5,13 +5,6 @@ import path from "node:path";
 export type PasteMode = "file" | "image";
 export type AfterPaste = "save" | "discard";
 
-type ExtensionPreferences = {
-  screenshotDirectory: string;
-  pasteMode: PasteMode;
-  afterPaste: AfterPaste;
-  captureDelayMs: string;
-};
-
 export type ScreenshotPreferences = {
   screenshotDirectory: string;
   pasteMode: PasteMode;
@@ -37,7 +30,7 @@ function parseCaptureDelay(value: string): number {
 }
 
 export function getScreenshotPreferences(): ScreenshotPreferences {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   return {
     screenshotDirectory: expandHome(preferences.screenshotDirectory),
