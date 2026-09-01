@@ -1,7 +1,7 @@
 import { LocalStorage, PopToRootType, Toast, closeMainWindow, open, showToast } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { useMemo } from "react";
-import { Engine } from "./engines";
+import { Engine, getAllEngines } from "./engines";
 
 const MULTI_SEARCH_ENABLED_KEY = "multi-search-enabled";
 const MULTI_SEARCH_ENGINES_KEY = "multi-search-engines";
@@ -29,18 +29,16 @@ export async function getStoredMultiSearchEngineIds(): Promise<string[]> {
   }
   try {
     const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? (parsed as string[]) : DEFAULT_MULTI_ENGINES;
+    return Array.isArray(parsed) ? (parsed as string[]) : DEFAULT_MULTI_ENGINES;
   } catch {
     return DEFAULT_MULTI_ENGINES;
   }
 }
 
-export async function getStoredMultiSearchEngines(availableEngines: Engine[]): Promise<Engine[]> {
+export async function getStoredMultiSearchEngines(availableEngines?: Engine[]): Promise<Engine[]> {
+  const engines = availableEngines ?? (await getAllEngines());
   const ids = await getStoredMultiSearchEngineIds();
-  const matched = ids
-    .map((id) => availableEngines.find((e) => e.id === id))
-    .filter((e): e is Engine => e !== undefined);
-  return matched.length > 0 ? matched : [availableEngines[0]];
+  return ids.map((id) => engines.find((e) => e.id === id)).filter((e): e is Engine => e !== undefined);
 }
 
 export async function executeMultiSearch(
@@ -72,10 +70,9 @@ export function useMultiSearch(availableEngines: Engine[]) {
   const selectedEngineIds = engineIdsVal ?? DEFAULT_MULTI_ENGINES;
 
   const selectedEngines: Engine[] = useMemo(() => {
-    const matched = selectedEngineIds
+    return selectedEngineIds
       .map((id) => availableEngines.find((e) => e.id === id))
       .filter((e): e is Engine => e !== undefined);
-    return matched.length > 0 ? matched : [availableEngines[0]];
   }, [selectedEngineIds, availableEngines]);
 
   async function toggleMultiSearch() {

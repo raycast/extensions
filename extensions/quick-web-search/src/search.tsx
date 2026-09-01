@@ -98,7 +98,7 @@ export default function Command(props: LaunchProps) {
     (async () => {
       const isMulti = await getStoredMultiSearchEnabled();
       if (isMulti) {
-        const multiEngines = await getStoredMultiSearchEngines(engines);
+        const multiEngines = await getStoredMultiSearchEngines();
         await Promise.all([
           history.add(fallbackQuery),
           (async () => {
@@ -123,7 +123,11 @@ export default function Command(props: LaunchProps) {
 
   const isMulti = multiSearch.isEnabled;
   const multiTitle = multiSearch.selectedEngines.map((e) => e.title).join(", ");
-  const activeSubtitle = isMulti ? `Multi-Search (${multiTitle})` : `Search ${engine.title}`;
+  const activeSubtitle = isMulti
+    ? multiTitle
+      ? `Multi-Search (${multiTitle})`
+      : "Multi-Search"
+    : `Search ${engine.title}`;
 
   return (
     <List
@@ -137,7 +141,9 @@ export default function Command(props: LaunchProps) {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       filtering={false}
-      searchBarPlaceholder={isMulti ? `Multi-Search (${multiTitle})…` : `Search ${engine.title}…`}
+      searchBarPlaceholder={
+        isMulti ? (multiTitle ? `Multi-Search (${multiTitle})…` : "Multi-Search…") : `Search ${engine.title}…`
+      }
       searchBarAccessory={
         <List.Dropdown
           tooltip="Search Engine"
@@ -248,7 +254,7 @@ export default function Command(props: LaunchProps) {
       ) : (
         <List.EmptyView
           icon={isMulti ? Icon.Layers : Icon.MagnifyingGlass}
-          title={isMulti ? `Multi-Search (${multiTitle})` : `Search ${engine.title}`}
+          title={isMulti ? (multiTitle ? `Multi-Search (${multiTitle})` : "Multi-Search") : `Search ${engine.title}`}
           description={
             isMulti
               ? "Type a query to search all selected engines simultaneously in order."

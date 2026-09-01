@@ -199,6 +199,11 @@ export async function rememberEngine(id: string): Promise<void> {
   await LocalStorage.setItem(LAST_ENGINE_KEY, JSON.stringify(id));
 }
 
+export async function getAllEngines(): Promise<Engine[]> {
+  const customList = await getStoredCustomEngines();
+  return [...ENGINES, ...customList.map(createCustomEngine)];
+}
+
 export async function getLastEngine(fallbackId: string): Promise<Engine> {
   const raw = await LocalStorage.getItem<string>(LAST_ENGINE_KEY);
   let targetId: string = fallbackId;
@@ -210,8 +215,7 @@ export async function getLastEngine(fallbackId: string): Promise<Engine> {
       targetId = raw;
     }
   }
-  const customList = await getStoredCustomEngines();
-  const allEngines = [...ENGINES, ...customList.map(createCustomEngine)];
+  const allEngines = await getAllEngines();
 
   return (
     allEngines.find((engine) => engine.id === targetId) ??
