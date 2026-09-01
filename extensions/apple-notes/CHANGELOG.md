@@ -1,6 +1,6 @@
 # Apple Notes Changelog
 
-## [AI Extension Improvements] - {PR_MERGE_DATE}
+## [AI Extension Improvements] - 2026-09-01
 
 - Add `delete-note`, `restore-note`, `move-note`, `append-to-note`, and `list-folders` AI tools
 - Add tag filtering to the `search-notes` AI tool
