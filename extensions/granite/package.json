@@ -10,6 +10,7 @@
     "Documentation"
   ],
   "license": "MIT",
+  "platforms": ["macOS"],
   "commands": [
     {
       "name": "search-vault",
@@ -86,7 +87,7 @@
     {
       "name": "apiKey",
       "title": "API Token",
-      "description": "Your gra_live_… Personal Access Token from Granite → Settings → Developer → Access tokens. Treat it like a password.",
+      "description": "Your gra_live_… Personal Access Token from Granite → Settings → Apps & API → Access tokens. Treat it like a password.",
       "type": "password",
       "required": true
     },
