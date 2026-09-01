@@ -1,6 +1,6 @@
 # Spike Changelog
 
-## [New Logo and Bug Fixes] - {PR_MERGE_DATE}
+## [New Logo and Bug Fixes] - 2026-09-01
 
 - Updated the extension icon and menu bar icon to Spike's new logo
 - Menu bar icon now adapts to light and dark appearance
