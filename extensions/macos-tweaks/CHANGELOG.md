@@ -1,6 +1,6 @@
 # macOS Tweaks Changelog
 
-## [Windows & Stage Manager] - {PR_MERGE_DATE}
+## [Windows & Stage Manager] - 2026-09-01
 
 ### New Category
 
