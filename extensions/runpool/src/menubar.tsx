@@ -1,6 +1,9 @@
 import { Color, Icon, MenuBarExtra, getPreferenceValues, launchCommand, LaunchType, open } from "@raycast/api";
-import { errorMessage, fillAsset, fraction, isUnreachable, stateLabel } from "./lib/runpool";
+import { errorMessage, fillIcon, fraction, isUnreachable, stateLabel } from "./lib/runpool";
 import { useStatus } from "./hooks/useStatus";
+
+/** The mark's own blue, not Raycast's. Only used when the preference asks for it. */
+const RUNPOOL_BLUE = "#0A84FF";
 
 /**
  * Optional menu bar readout.
@@ -48,11 +51,13 @@ export default function Command() {
   const busy = status?.pools.reduce((n, p) => n + p.busy, 0) ?? 0;
   const slots = status?.pools.reduce((n, p) => n + p.count, 0) ?? 0;
 
-  // Monochrome by default, tinted to the menu bar's own text colour so it is
-  // dark on a light bar and light on a dark one, the way every native item
-  // behaves. A flat single-colour mark tints cleanly.
-  const source = status?.paused ? "bar-off.png" : fillAsset(busy, slots);
-  const icon = colourIcon ? { source } : { source, tintColor: Color.PrimaryText };
+  // Monochrome by default, and deliberately untinted: a built-in icon left
+  // alone is redrawn per display in that menu bar's own ink, which is the only
+  // way to be dark on a light bar and light on a dark one at the same time.
+  // Naming any colour here, `Color.PrimaryText` included, resolves to a single
+  // value for every screen and strands the icon on whichever one disagrees.
+  const source = status?.paused ? Icon.CircleDisabled : fillIcon(busy, slots);
+  const icon = colourIcon ? { source, tintColor: RUNPOOL_BLUE } : source;
 
   return (
     <MenuBarExtra
@@ -64,14 +69,12 @@ export default function Command() {
         {status?.pools.map((pool) => (
           <MenuBarExtra.Item
             key={pool.name}
-            icon={
-              colourIcon
-                ? { source: status?.paused || pool.paused ? "bar-off.png" : fillAsset(pool.busy, pool.count) }
-                : {
-                    source: status?.paused || pool.paused ? "bar-off.png" : fillAsset(pool.busy, pool.count),
-                    tintColor: Color.SecondaryText,
-                  }
-            }
+            // A row lives inside the menu, which is drawn in one place, so
+            // naming a colour here is safe in a way it is not on the bar.
+            icon={{
+              source: status?.paused || pool.paused ? Icon.CircleDisabled : fillIcon(pool.busy, pool.count),
+              tintColor: colourIcon ? RUNPOOL_BLUE : Color.SecondaryText,
+            }}
             title={pool.name}
             // A fault is the one thing that earns different treatment: a
             // fraction would say "0/2" and hide that nothing can ever pick up.

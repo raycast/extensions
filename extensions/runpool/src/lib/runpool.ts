@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Icon } from "@raycast/api";
 import { execFile } from "child_process";
 import { existsSync } from "fs";
 import { homedir } from "os";
@@ -235,18 +235,38 @@ export function fraction(pool: Pool): string {
   return `${pool.busy}/${pool.count}`;
 }
 
+// Built-in icons rather than bundled images, on purpose. A menu bar is drawn
+// once per display and macOS takes the ink from the wallpaper behind each one,
+// so on a second screen with a dark backdrop every native item turns white.
+// Raycast redraws its own icons to match; a bundled PNG is a fixed bitmap and
+// cannot, which left the mark black and invisible there. Tinting with
+// `Color.PrimaryText` does not help either: it resolves to one colour for every
+// display at once.
+const FILL_STEPS = [
+  Icon.Circle,
+  Icon.CircleProgress25,
+  Icon.CircleProgress50,
+  Icon.CircleProgress75,
+  Icon.CircleProgress100,
+] as const;
+
 /**
  * The fill variant for a given proportion of work, rounded to the nearest
- * quarter. Assets exist at 0, 25, 50, 75 and 100, plus `bar-off` for disabled.
+ * quarter. Raycast ships an exact five-step set, so the buckets map one to one.
  *
  * Always driven by the same figure as `fraction`, so the icon and the text can
  * never contradict each other. An earlier version filled by runners awake,
  * which put a full pool next to the word "Idle".
  */
-export function fillAsset(busy: number, total: number): string {
-  const level = total === 0 ? 0 : busy / total;
-  const step = Math.round(Math.min(1, Math.max(0, level)) * 4) * 25;
-  return `bar-${step}.png`;
+export function fillIcon(busy: number, total: number): Icon {
+  if (total <= 0 || busy <= 0) return FILL_STEPS[0];
+  if (busy >= total) return FILL_STEPS[FILL_STEPS.length - 1];
+  // Empty and full are reserved for the two states they claim, because those
+  // are the only readings that can be flatly wrong rather than approximate.
+  // Nearest-quarter alone rounds 1 of 9 down to an empty mark and 8 of 9 up to
+  // a full one, each of which says the opposite of what is happening.
+  const step = Math.round((busy / total) * 4);
+  return FILL_STEPS[Math.min(FILL_STEPS.length - 2, Math.max(1, step))];
 }
 
 /**
