@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Show Upgrades: reviewed, selective upgrading] - {PR_MERGE_DATE}
+## [Show Upgrades: reviewed, selective upgrading] - 2026-09-01
 
 - **Show Outdated is now Show Upgrades**: the outdated list has grown into a review surface — ↩ toggles a package (formula or cask) in or out of the upgrade, **⌘↩ runs it from any row** ("Upgrade All" with the default full selection, "Upgrade N Selected" once narrowed) and ⌘⇧A selects or deselects everything upgradable. The default selection is everything not pinned — exactly what a plain `brew upgrade` would do. Every per-package action the view offered (single upgrade, pin, copy/terminal commands, uninstall) remains on each row, and the command still answers to "outdated" in search
 - A reviewed run upgrades exactly the selected packages: each is upgraded individually by name, so deselected packages are simply left out — nothing is pinned, held or otherwise touched on their behalf. Packages that become outdated during the run's own `brew update` are not upgraded unreviewed; they remain visible — and selectable for a follow-up run — in the list afterwards
@@ -14,7 +14,7 @@
 - Fixed the `OutdatedCask.installed_versions` type: `brew outdated --json=v2` returns an array for casks, not a string
 - Added a test suite (vitest, dev-only) covering the selection logic
 
-## [Install statistics & popularity sort] - {PR_MERGE_DATE}
+## [Install statistics & popularity sort] - 2026-09-01
 
 - Search: "Sort by Popularity" (⇧⌘P) orders results by installs over the last 30 days, ranking every match before the list is truncated — so the top rows are the most installed overall, not of the first hundred. An empty query lists the most installed packages outright.
 - The detail sidebar and the Details view both show a package's install counts for 30, 90 and 365 days, plus build errors, matching the analytics table on its formulae.brew.sh page. Only the selected package is fetched.
