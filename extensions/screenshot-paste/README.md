@@ -15,7 +15,13 @@ Bind a hotkey in **Raycast Settings → Extensions → Screenshot Paste** by sel
 
 ## Permissions
 
-Enable **Raycast** in **System Settings → Privacy & Security → Screen Recording**. macOS labels this permission **Screen & System Audio Recording**, but the extension never records audio. The **Image (pixel data)** paste mode also requires **Accessibility** permission so System Events can send Command-V.
+| Permission | Needed for | Without it you will see |
+| --- | --- | --- |
+| Screen Recording (macOS calls it **Screen & System Audio Recording**; no audio is ever recorded) | Every capture | “Capture failed. Allow Raycast in System Settings > Privacy & Security > Screen Recording.” |
+| Accessibility | Only the **Paste As: Image** mode (the extension presses Cmd-V for you) | “Pressing Cmd-V failed. Allow Raycast in System Settings > Privacy & Security > Accessibility (required by the Image paste mode).” |
+
+The default **File** mode needs no Accessibility permission, and macOS shows each consent prompt only once—if you dismissed it, grant it manually in System Settings.
+
 
 ## Preferences
 
