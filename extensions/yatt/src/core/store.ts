@@ -4,6 +4,8 @@ import type { Location } from "./types";
 export interface StorageBackend {
   read(): Promise<string | undefined>;
   write(text: string): Promise<void>;
+  /** Read-modify-write as one step, under a lock where the backend has one. Optional: `read` + `write` otherwise. */
+  update?(fn: (text: string | undefined) => string): Promise<void>;
 }
 
 export type LocationsFile = { version: 1; locations: Location[]; lastAnchor?: string };
@@ -53,15 +55,41 @@ export function serializeLocationsFile(file: LocationsFile): string {
  * damaged file is reported rather than replaced.
  */
 export async function loadLocationsFile(backend: StorageBackend, seed: Location[]): Promise<LocationsFile> {
-  const text = await backend.read();
+  const current = currentOrSeed(await backend.read(), seed);
+  if (!current.seeded) return current.file;
+  // Seed under the lock, re-reading inside it: another command may have seeded or written meanwhile.
+  return updateLocationsFile(backend, seed, () => ({}));
+}
+
+/** The stored file, or a seeded one when the store is missing or empty. Throws when the store is damaged. */
+function currentOrSeed(text: string | undefined, seed: Location[]): { file: LocationsFile; seeded: boolean } {
   if (text !== undefined && text.trim() !== "") {
     const parsed = parseLocationsFile(text);
     if (!parsed) throw new Error("The locations file is not valid locations JSON; fix or remove it.");
-    return parsed;
+    return { file: parsed, seeded: false };
   }
-  const file: LocationsFile = { version: 1, locations: normalizeLocations(seed) };
-  await backend.write(serializeLocationsFile(file));
-  return file;
+  return { file: { version: 1, locations: normalizeLocations(seed) }, seeded: true };
+}
+
+/**
+ * Applies a change to the stored file and returns the result. Reading and writing happen inside the backend's
+ * `update` when it has one, so a change made by another process between the two is never overwritten.
+ */
+export async function updateLocationsFile(
+  backend: StorageBackend,
+  seed: Location[],
+  change: (current: LocationsFile) => Partial<LocationsFile>,
+): Promise<LocationsFile> {
+  let result: LocationsFile | undefined;
+  const apply = (text: string | undefined) => {
+    const current = currentOrSeed(text, seed).file;
+    const merged = { ...current, ...change(current) };
+    result = { ...merged, locations: normalizeLocations(merged.locations) };
+    return serializeLocationsFile(result);
+  };
+  if (backend.update) await backend.update(apply);
+  else await backend.write(apply(await backend.read()));
+  return result!;
 }
 
 export async function saveLocationsFile(backend: StorageBackend, file: LocationsFile): Promise<void> {

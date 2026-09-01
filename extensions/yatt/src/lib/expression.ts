@@ -38,7 +38,10 @@ function hhmm(h: number, m: number): string {
 
 /** Shortest token that resolves back to this location: a 3-letter alias, else the label. */
 export function zoneTokenFor(l: Location): string {
-  return l.aliases.find((a) => /^[a-z]{2,4}$/.test(a)) ?? l.label.toLowerCase();
+  const alias = l.aliases.find((a) => /^[a-z]{2,5}$/.test(a) || a.includes("/"));
+  if (alias) return alias;
+  // A zone label such as "Central European Time (CET)" is not an expression token; the IANA name is.
+  return /[()]/.test(l.label) ? l.tz : l.label.toLowerCase();
 }
 
 /** Zone token to keep when rewriting: what the user typed, or a fixed offset. */

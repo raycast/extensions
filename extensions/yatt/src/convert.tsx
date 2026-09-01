@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Clipboard,
   Color,
+  environment,
   Icon,
   LaunchProps,
   LaunchType,
@@ -76,7 +77,10 @@ export default function Convert(props: LaunchProps<{ arguments: { expression?: s
   const prefs = useMemo(getPrefs, []);
   const zones = useMemo(loadZones, []);
   const local = useMemo(localZone, []);
-  const { file, locations, isLoading, save } = useLocations();
+  const { file, locations, isLoading, save, error } = useLocations();
+  useEffect(() => {
+    if (error) void showToast({ style: Toast.Style.Failure, title: "Could not load locations", message: error });
+  }, [error]);
   const [text, setText] = useState(props.arguments?.expression ?? "");
   const [dropdown, setDropdown] = useState<string>();
   const [showDetail, setShowDetail] = useState(false);
@@ -158,7 +162,9 @@ export default function Convert(props: LaunchProps<{ arguments: { expression?: s
     }));
     if (localRow) list.push({ location: localRow, transient: true });
     const t = resolved.anchor.transient;
-    if (t && !list.some((r) => r.location.tz === t.tz && r.location.id === t.id) && !(t.id === LOCAL_ID && localRow)) {
+    // The Local row appears only when the preference allows it (and only once).
+    const hideLocal = t?.id === LOCAL_ID && (localRow !== undefined || !prefs.showLocalRow);
+    if (t && !hideLocal && !list.some((r) => r.location.id === t.id)) {
       list.push({ location: t, transient: true });
     }
     const indexed = list.map((r, i) => ({ ...r, i }));
@@ -234,12 +240,13 @@ export default function Convert(props: LaunchProps<{ arguments: { expression?: s
           tz: r.location.tz,
         }),
       );
-    return `${anchorCopy} = ${items.join(prefs.copySeparator)}`;
+    return items.length ? `${anchorCopy} = ${items.join(prefs.copySeparator)}` : anchorCopy;
   }, [rows, anchorTz, anchorCopy, prefs]);
 
   const strip = useMemo(() => {
     if (!showDetail) return "";
     return stripMarkdown({
+      dark: environment.appearance === "dark",
       start: resolved.start,
       end: resolved.end,
       anchorTz,
@@ -259,19 +266,20 @@ export default function Convert(props: LaunchProps<{ arguments: { expression?: s
 
   const copy = async (text: string) => {
     await Clipboard.copy(text);
-    await rememberAnchor();
+    rememberAnchor();
     await showHUD("Copied to Clipboard", {
       popToRootType: prefs.popToRootAfterCopy ? PopToRootType.Immediate : PopToRootType.Default,
     });
   };
 
-  const rememberAnchor = async () => {
+  /** Remembers the anchor for the "last used" default; a bookkeeping write, so no menu bar refresh and no wait. */
+  const rememberAnchor = () => {
     if (
       prefs.defaultAnchor === "last" &&
       resolved.anchor.location &&
       !resolved.anchor.location.id.startsWith(LOCAL_ID)
     ) {
-      await save({ lastAnchor: resolved.anchor.location.id }).catch(() => undefined);
+      void save({ lastAnchor: resolved.anchor.location.id }, { refreshMenuBar: false }).catch(() => undefined);
     }
   };
 
@@ -339,7 +347,7 @@ export default function Convert(props: LaunchProps<{ arguments: { expression?: s
           onChange={(v) => {
             setDropdown(v);
             if (prefs.defaultAnchor === "last" && v !== LOCAL_ID && v !== "utc")
-              void save({ lastAnchor: v }).catch(() => undefined);
+              void save({ lastAnchor: v }, { refreshMenuBar: false }).catch(() => undefined);
           }}
         >
           <List.Dropdown.Item title={`Local · ${local}`} value={LOCAL_ID} icon={Icon.Monitor} />
@@ -481,11 +489,11 @@ export default function Convert(props: LaunchProps<{ arguments: { expression?: s
       </List.Section>
       {!isLoading && rows.length === 0 && (
         <List.EmptyView
-          title="No locations yet"
-          description="Add cities or time zones with Manage Locations"
+          title={error ? "Could not load locations" : "No locations yet"}
+          description={error ?? "Add cities or time zones with Manage Locations"}
           actions={
             <ActionPanel>
-              <Action title="Manage Locations" onAction={() => openCommand("manage-locations")} />
+              <Action title="Manage Locations" icon={Icon.List} onAction={() => openCommand("manage-locations")} />
             </ActionPanel>
           }
         />

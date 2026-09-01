@@ -104,7 +104,8 @@
           "description": "Format of one location in the menu bar. Placeholders as in Copy Template. A location can override this in Manage Locations.",
           "type": "textfield",
           "required": false,
-          "default": "{code} {time}"
+          "default": "{code} {time}",
+          "placeholder": "{code} {time}"
         },
         {
           "name": "menuBarSeparator",
@@ -112,7 +113,8 @@
           "description": "Text between locations in the menu bar.",
           "type": "textfield",
           "required": false,
-          "default": " • "
+          "default": " • ",
+          "placeholder": "•"
         },
         {
           "name": "menuBarIcon",
@@ -168,7 +170,8 @@
       "description": "Format of one location in copied text. Placeholders: {time} {label} {code} {abbr} {date} {day} {offset} {tz}. {abbr} is left out when it repeats {code}, and empty brackets are removed: UTC copies as '11:15 UTC', not '11:15 UTC (UTC)'.",
       "type": "textfield",
       "required": false,
-      "default": "{time} {code} ({abbr})"
+      "default": "{time} {code} ({abbr})",
+      "placeholder": "{time} {code} ({abbr})"
     },
     {
       "name": "copySeparator",
@@ -176,7 +179,8 @@
       "description": "Text between locations when copying all rows as one line.",
       "type": "textfield",
       "required": false,
-      "default": " / "
+      "default": " / ",
+      "placeholder": "/"
     },
     {
       "name": "sortOrder",
@@ -206,7 +210,8 @@
       "description": "Hours shown green, as start-end in 24-hour time, e.g. 9-18. Each location can override this.",
       "type": "textfield",
       "required": false,
-      "default": "9-18"
+      "default": "9-18",
+      "placeholder": "9-18"
     },
     {
       "name": "shoulderHours",
@@ -214,12 +219,13 @@
       "description": "Hours shown yellow around the business day, as start-end, e.g. 7-21. Other hours are red.",
       "type": "textfield",
       "required": false,
-      "default": "7-21"
+      "default": "7-21",
+      "placeholder": "7-21"
     },
     {
       "name": "colorBusiness",
       "title": "Business Hours Colour",
-      "description": "Hex colour for the business-hours dot, time and strip cells, e.g. #34C759. Empty uses Raycast's green.",
+      "description": "Hex colour for the business-hours dot in Convert Time and the menu bar, e.g. #34C759. Empty uses Raycast's green. When set, the time text shows in the plain text colour.",
       "type": "textfield",
       "required": false,
       "default": "",
@@ -228,7 +234,7 @@
     {
       "name": "colorShoulder",
       "title": "Shoulder Hours Colour",
-      "description": "Hex colour for the shoulder-hours dot, time and strip cells, e.g. #FFCC00. Empty uses Raycast's yellow.",
+      "description": "Hex colour for the shoulder-hours dot in Convert Time and the menu bar, e.g. #FFCC00. Empty uses Raycast's yellow. When set, the time text shows in the plain text colour.",
       "type": "textfield",
       "required": false,
       "default": "",
@@ -237,7 +243,7 @@
     {
       "name": "colorOff",
       "title": "Off Hours Colour",
-      "description": "Hex colour for the off-hours dot, time and strip cells, e.g. #FF3B30. Empty uses Raycast's red.",
+      "description": "Hex colour for the off-hours dot in Convert Time and the menu bar, e.g. #FF3B30. Empty uses Raycast's red. When set, the time text shows in the plain text colour.",
       "type": "textfield",
       "required": false,
       "default": "",
@@ -273,7 +279,7 @@
     {
       "name": "locationsFile",
       "title": "Locations File",
-      "description": "Optional. A JSON file that holds your location list, for example in iCloud Drive, so two Macs share it. Leave empty to store the list in Raycast on this Mac. ~ is allowed.",
+      "description": "Optional. A JSON file that holds your location list, for example in iCloud Drive, so two Macs share it. Leave empty to store the list in Raycast on this Mac. Use a full path or one starting with ~.",
       "type": "textfield",
       "required": false,
       "default": "",

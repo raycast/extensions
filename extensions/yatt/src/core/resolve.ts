@@ -48,10 +48,10 @@ export function matchLocations(query: string, locations: Location[], zones: Zone
 export function matchZone(query: string, zones: ZoneInfo[]): ZoneTarget | undefined {
   const raw = query.trim();
   const upper = raw.toUpperCase();
-  if (["UTC", "Z", "ZULU", "GMT"].includes(upper)) return zoneTarget("UTC", "UTC");
+  if (["UTC", "Z", "ZULU", "GMT"].includes(upper)) return zoneTarget("UTC", "UTC", raw);
   const iana = zones.find((z) => z.name.toLowerCase() === raw.toLowerCase());
-  if (iana) return zoneTarget(iana.name, iana.long === iana.name ? iana.name : `${iana.long}`);
-  if (raw.includes("/") && isValidZone(raw)) return zoneTarget(raw, raw);
+  if (iana) return zoneTarget(iana.name, iana.long === iana.name ? iana.name : `${iana.long}`, raw);
+  if (raw.includes("/") && isValidZone(raw)) return zoneTarget(raw, raw, raw);
   if (/^[A-Z]{2,5}$/.test(upper)) {
     const hits = zones.filter((z) => z.abbr.includes(upper) && z.canonical === z.name);
     if (hits.length) {
@@ -63,20 +63,21 @@ export function matchZone(query: string, zones: ZoneInfo[]): ZoneTarget | undefi
         (z.golden ? 1e11 : 0) +
         (z.pop ?? 0);
       hits.sort((a, b) => rank(b) - rank(a));
-      return zoneTarget(hits[0].name, `${hits[0].long} (${upper})`);
+      return zoneTarget(hits[0].name, `${hits[0].long} (${upper})`, raw);
     }
   }
   const q = fold(raw);
   if (q.length >= 4) {
     const long = zones.filter((z) => z.canonical === z.name && fold(z.long).startsWith(q));
     long.sort((a, b) => (b.golden ? 1e11 : 0) + (b.pop ?? 0) - ((a.golden ? 1e11 : 0) + (a.pop ?? 0)));
-    if (long.length) return zoneTarget(long[0].name, long[0].long);
+    if (long.length) return zoneTarget(long[0].name, long[0].long, raw);
   }
   return undefined;
 }
 
-export function zoneTarget(tz: string, label: string): ZoneTarget {
-  const transient: Location = { id: `tz:${tz}`, kind: "zone", label, tz, aliases: [] };
+/** A zone anchor outside the configured list. `token` is what the user typed, kept as an alias so re-anchoring can rewrite it. */
+export function zoneTarget(tz: string, label: string, token?: string): ZoneTarget {
+  const transient: Location = { id: `tz:${tz}`, kind: "zone", label, tz, aliases: token ? [token.toLowerCase()] : [] };
   return { tz, label, transient };
 }
 

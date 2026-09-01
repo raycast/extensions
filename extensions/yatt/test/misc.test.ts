@@ -5,7 +5,7 @@ import { loadLocationsFile, normalizeLocations, parseLocationsFile } from "../sr
 import { fold } from "../src/core/text";
 import { wallToInstant } from "../src/core/time";
 import { renderStripSvg, stripText } from "../src/core/strip";
-import { formatExpression } from "../src/lib/expression";
+import { formatExpression, zoneTokenFor } from "../src/lib/expression";
 
 describe("business hours", () => {
   const b = parseHourRange("9-18")!;
@@ -113,6 +113,15 @@ describe("strip", () => {
     const txt = stripText({ start, anchorTz: "UTC", rows, fmt: "24h" });
     expect(txt).toContain("Berlin");
     expect(txt).toContain("^");
+  });
+});
+
+describe("zone tokens for re-anchoring", () => {
+  it("prefers a short alias, then the IANA name for zone labels", () => {
+    expect(zoneTokenFor({ id: "gn:1", kind: "city", label: "London", tz: "Europe/London", aliases: ["lon", "lhr"] })).toBe("lon");
+    expect(zoneTokenFor({ id: "tz:Europe/Berlin", kind: "zone", label: "Central European Time (CET)", tz: "Europe/Berlin", aliases: ["cet"] })).toBe("cet");
+    expect(zoneTokenFor({ id: "tz:Europe/Berlin", kind: "zone", label: "Central European Time (CET)", tz: "Europe/Berlin", aliases: [] })).toBe("Europe/Berlin");
+    expect(zoneTokenFor({ id: "gn:2", kind: "city", label: "New York", tz: "America/New_York", aliases: [] })).toBe("new york");
   });
 });
 

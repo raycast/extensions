@@ -61,9 +61,12 @@ export default function ManageLocations() {
       <AddLocation
         existing={list}
         onAdd={async (l, home) => {
+          const makeHome = home || l.isHome === true;
           await update((current) => {
-            const next = home ? current.map((x) => ({ ...x, isHome: false })) : [...current];
-            if (!next.some((x) => x.id === l.id)) next.push({ ...l, isHome: home || undefined });
+            const next = makeHome ? current.map((x) => ({ ...x, isHome: false })) : [...current];
+            const at = next.findIndex((x) => x.id === l.id);
+            if (at === -1) next.push({ ...l, isHome: makeHome || undefined });
+            else if (makeHome) next[at] = { ...next[at], isHome: true };
             return next;
           }, `Added ${l.label}`);
         }}
@@ -125,7 +128,7 @@ export default function ManageLocations() {
         title={`${list.length} location${list.length === 1 ? "" : "s"}`}
         subtitle={storage.file ? `file: ${storage.file}` : "stored in Raycast on this Mac"}
       >
-        {list.map((l, i) => (
+        {list.map((l) => (
           <List.Item
             key={l.id}
             icon={
@@ -146,14 +149,20 @@ export default function ManageLocations() {
               <ActionPanel>
                 <ActionPanel.Section>
                   <Action
-                    title="Edit"
+                    title="Edit…"
                     icon={Icon.Pencil}
                     onAction={() =>
                       push(
                         <EditLocation
                           location={l}
                           onSave={(edited) =>
-                            update((current) => current.map((x) => (x.id === l.id ? edited : x)), "Saved")
+                            update(
+                              (current) =>
+                                current.map((x) =>
+                                  x.id === l.id ? edited : edited.isHome ? { ...x, isHome: false } : x,
+                                ),
+                              "Saved",
+                            )
                           }
                         />,
                       )
@@ -191,13 +200,10 @@ export default function ManageLocations() {
                     icon={Icon.ArrowUp}
                     shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
                     onAction={() =>
-                      update((current) =>
-                        moveItem(
-                          current,
-                          current.findIndex((x) => x.id === l.id),
-                          i - 1,
-                        ),
-                      )
+                      update((current) => {
+                        const from = current.findIndex((x) => x.id === l.id);
+                        return moveItem(current, from, from - 1);
+                      })
                     }
                   />
                   <Action
@@ -205,13 +211,10 @@ export default function ManageLocations() {
                     icon={Icon.ArrowDown}
                     shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
                     onAction={() =>
-                      update((current) =>
-                        moveItem(
-                          current,
-                          current.findIndex((x) => x.id === l.id),
-                          i + 1,
-                        ),
-                      )
+                      update((current) => {
+                        const from = current.findIndex((x) => x.id === l.id);
+                        return moveItem(current, from, from + 1);
+                      })
                     }
                   />
                   <Action
