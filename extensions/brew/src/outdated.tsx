@@ -199,7 +199,7 @@ function ShowUpgradesContent() {
           isCask={isCask}
           pinned={!isCask && (pinOverrides.get(key) ?? (item as OutdatedFormula).pinned) === true}
           included={reviewSelection.get(key) === true}
-          runTitle={runTitle}
+          runTitle={selectedCount > 0 ? runTitle : undefined}
           allSelected={allSelected}
           onToggle={() => toggle(key)}
           onToggleAll={toggleAll}
@@ -215,6 +215,7 @@ function ShowUpgradesContent() {
       pinOverrides,
       reviewSelection,
       runTitle,
+      selectedCount,
       allSelected,
       toggle,
       toggleAll,
@@ -264,7 +265,9 @@ function ReviewActionPanel(props: {
   isCask: boolean;
   pinned: boolean;
   included: boolean;
-  runTitle: string;
+  /** Absent when nothing is selected — the run action then gives way to a
+      guidance action rather than offering an upgrade of zero packages. */
+  runTitle?: string;
   allSelected: boolean;
   onToggle: () => void;
   onToggleAll: () => void;
@@ -274,8 +277,17 @@ function ReviewActionPanel(props: {
   onAction: (result: boolean) => void;
 }) {
   // The second action in the panel is where Raycast binds ⌘↩ — the run
-  // action sits there on every row, so it is reachable from anywhere.
-  const runAction = <Action title={props.runTitle} icon={Icon.Hammer} onAction={props.onStart} />;
+  // action sits there on every row, so it is reachable from anywhere. That
+  // binding is positional, so the slot must never fall through to Select All:
+  // with nothing selected, a muscle-memory ⌘↩ would silently overwrite the
+  // deliberately empty selection, and a second ⌘↩ would launch a full
+  // upgrade. A guidance action holds the slot instead — pressing it surfaces
+  // the Nothing Selected toast via onStart.
+  const runAction = props.runTitle ? (
+    <Action title={props.runTitle} icon={Icon.ArrowUpCircle} onAction={props.onStart} />
+  ) : (
+    <Action title="Select Packages to Upgrade" icon={Icon.CheckCircle} onAction={props.onStart} />
+  );
   const toggleAllAction = (
     <Action
       title={props.allSelected ? "Deselect All" : "Select All"}
