@@ -7,7 +7,8 @@
 import { environment, showToast, Toast } from "@raycast/api";
 import path from "path";
 import fs from "fs";
-import { rm, mkdir, readFile, writeFile, rename, unlink } from "fs/promises";
+import { rm, mkdir, readdir, readFile, writeFile, rename, unlink } from "fs/promises";
+import { randomUUID } from "crypto";
 import { stat } from "fs/promises";
 import { Readable } from "stream";
 import { ReadableStream } from "stream/web";
@@ -18,6 +19,7 @@ import { streamArray } from "stream-json/streamers/StreamArray";
 import { pipeline as streamPipeline } from "stream/promises";
 import { DownloadProgressCallback, ChunkedCacheConfig, ChunkedCacheMeta, CacheIndex, IndexEntry } from "./types";
 import { cacheLogger, fetchLogger } from "./logger";
+import { analyticsCacheFiles } from "./brew/analyticsParse";
 import { NetworkError, ParseError, ensureError } from "./errors";
 
 /// Cache Paths
@@ -46,7 +48,13 @@ export function cachePath(name: string): string {
   return path.join(supportPath, name);
 }
 
-const CACHE_FILES = ["formula.json", "cask.json", "installedv2.json"];
+const CACHE_FILES = [
+  "formula.json",
+  "cask.json",
+  "installedv2.json",
+  // Bulk install analytics backing the popularity sort.
+  ...analyticsCacheFiles,
+];
 
 /**
  * Clear all cached data files (formulae, casks, installed packages).
@@ -95,6 +103,11 @@ export async function clearCache(): Promise<void> {
       rm(path.join(environment.supportPath, "cask"), { recursive: true, force: true }).catch(() => {}),
       rm(path.join(environment.supportPath, "formula.partial"), { recursive: true, force: true }).catch(() => {}),
       rm(path.join(environment.supportPath, "cask.partial"), { recursive: true, force: true }).catch(() => {}),
+      // Sweep download temps by suffix rather than by name: they carry a random
+      // component, so they cannot be listed, and one can be left behind if a
+      // rename fails. `recursive` so this also covers the chunked cache's
+      // `.partial` DIRECTORIES if they are ever renamed.
+      clearPartials(),
     ]);
 
     cacheLogger.log("Cache clear completed", {
@@ -107,6 +120,23 @@ export async function clearCache(): Promise<void> {
     const error = ensureError(err);
     cacheLogger.error("Failed to clear cache", { error: error.message });
     await showToast(Toast.Style.Failure, "Failed to clear cache", error.message);
+  }
+}
+
+/** Remove every `*.partial` left in the support directory by an interrupted download. */
+async function clearPartials(): Promise<void> {
+  try {
+    const entries = await readdir(environment.supportPath);
+    await Promise.all(
+      entries
+        .filter((entry) => entry.endsWith(".partial"))
+        .map((entry) =>
+          rm(path.join(environment.supportPath, entry), { recursive: true, force: true }).catch(() => {}),
+        ),
+    );
+  } catch (err) {
+    // Report it: "cache cleared" must not be printed over a sweep that never ran.
+    cacheLogger.warn("Could not sweep download temp files", { error: ensureError(err).message });
   }
 }
 
@@ -199,7 +229,17 @@ export async function downloadRemoteToCache(
     complete: false,
   });
 
-  const writeStream = fs.createWriteStream(cachePath);
+  // Stream to a UNIQUE sibling temp file and rename into place.
+  //
+  // The rename is atomic, so a reader never observes a half-written cache file.
+  // The name must be unique per invocation, not just per destination: with a
+  // shared `${cachePath}.partial`, two concurrent downloads of the same URL
+  // still open the same descriptor, and whichever renames first pulls the
+  // pathname out from under the other. A random suffix gives each its own file;
+  // both then rename onto the destination and the last writer wins, with every
+  // intermediate state a complete file.
+  const partialPath = `${cachePath}.${randomUUID()}.partial`;
+  const writeStream = fs.createWriteStream(partialPath);
 
   try {
     if (onProgress) {
@@ -237,7 +277,7 @@ export async function downloadRemoteToCache(
   } catch (streamError) {
     writeStream.destroy();
     try {
-      fs.unlinkSync(cachePath);
+      fs.unlinkSync(partialPath);
     } catch {
       // Ignore cleanup errors
     }
@@ -252,10 +292,24 @@ export async function downloadRemoteToCache(
   // a progress callback is supplied, so it can't be trusted here.
   const bytesWritten = writeStream.bytesWritten;
   if (totalBytes > 0 && bytesWritten < totalBytes) {
-    await unlink(cachePath).catch(() => {});
+    await unlink(partialPath).catch(() => {});
     throw new NetworkError(`Truncated download: got ${bytesWritten} of ${totalBytes} bytes`, {
       url,
     });
+  }
+
+  // Only now does the file become visible at its real path.
+  //
+  // Two concurrent downloads of the same URL both rename here and the last one
+  // wins. That is accepted, not overlooked: both are complete responses for the
+  // same URL fetched moments apart, so arbitrating by mtime would add a
+  // read-then-rename window — a new race — to choose between two files whose
+  // contents match.
+  try {
+    await rename(partialPath, cachePath);
+  } catch (renameError) {
+    await unlink(partialPath).catch(() => {});
+    throw renameError;
   }
 
   onProgress?.({

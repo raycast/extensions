@@ -9,6 +9,7 @@
  */
 
 import * as fs from "fs/promises";
+import path from "path";
 import {
   Cask,
   Formula,
@@ -32,7 +33,7 @@ import {
   IndexExtractor,
   CHUNKED_CACHE_VERSION,
 } from "../cache";
-import { brewPath } from "./paths";
+import { brewPath, brewCachePrefix } from "./paths";
 import { execBrew } from "./commands";
 import { brewLogger, cacheLogger } from "../logger";
 
@@ -322,6 +323,15 @@ export async function brewFetchInstallableResults(
     return (await fs.stat(path)).mtimeMs;
   }
 
+  /** 0 when the path does not exist, so a missing marker never blocks a refresh. */
+  async function mtimeMsOrZero(path: string): Promise<number> {
+    try {
+      return await mtimeMs(path);
+    } catch {
+      return 0;
+    }
+  }
+
   async function readCache(): Promise<InstallableResults> {
     const cacheTime = await mtimeMs(installedCachePath);
     // 'var/homebrew/locks' is updated after installed keg_only or linked formula.
@@ -339,7 +349,23 @@ export async function brewFetchInstallableResults(
     // Because '/var/homebrew/pinned can be removed, we need to also check the parent directory'
     const homebrewTime = await mtimeMs(brewPath("var/homebrew"));
 
-    if (homebrewTime < cacheTime && caskroomTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
+    // Everything above tracks LOCAL state — what is installed, linked, pinned.
+    // None of it moves when `brew update` learns that an installed package has
+    // a newer version, so without the two below the cached `outdated` flags
+    // stay false forever and Search reports an outdated package as current.
+    // Since Homebrew 4 the index is the JSON API cache; the repo's FETCH_HEAD
+    // covers a git-based install. Either may be absent, hence OrZero.
+    const apiIndexTime = await mtimeMsOrZero(path.join(brewCachePrefix, "api"));
+    const fetchHeadTime = await mtimeMsOrZero(brewPath(".git/FETCH_HEAD"));
+
+    if (
+      homebrewTime < cacheTime &&
+      caskroomTime < cacheTime &&
+      locksTime < cacheTime &&
+      pinnedTime < cacheTime &&
+      apiIndexTime < cacheTime &&
+      fetchHeadTime < cacheTime
+    ) {
       const cacheBuffer = await fs.readFile(installedCachePath);
       const cached = JSON.parse(cacheBuffer.toString()) as InstallableResults;
       cacheLogger.log("Using cached installed data", {

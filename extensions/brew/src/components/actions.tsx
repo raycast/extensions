@@ -4,6 +4,7 @@ import {
   type BrewProgress,
   brewInstallWithProgress,
   brewName,
+  isCask,
   brewPinFormula,
   brewUninstall,
   brewUnpinFormula,
@@ -48,24 +49,58 @@ export function FormulaUninstallAction(props: { formula: Cask | Nameable; onActi
   );
 }
 
+/**
+ * Upgrade a single package.
+ *
+ * A PINNED formula is skipped rather than attempted. `brew upgrade` refuses it
+ * outright — "Error: Not upgrading 1 pinned package" — so running it would
+ * surface a failure toast for a package the user deliberately froze. Upgrade
+ * All already skips pinned formulae and reports them as skipped; this makes the
+ * single-package action say the same thing, in every view that offers it.
+ */
 export function FormulaUpgradeAction(props: {
   formula: Cask | Nameable;
   /** Called when the upgrade starts, e.g. to show progress */
   onStart?: () => void;
+  /**
+   * Called instead of running the upgrade when the formula is pinned, so a view
+   * that tracks per-package status can mark the row as skipped. Views that show
+   * no status (Search, Show Installed) leave it undefined and rely on the toast.
+   */
+  onSkip?: () => void;
   onAction: (result: boolean) => void;
 }) {
   return (
     <Action
       title="Upgrade"
-      icon={Icon.Hammer}
+      icon={Icon.ArrowUpCircle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       onAction={async () => {
+        if (isPinned(props.formula)) {
+          props.onSkip?.();
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Skipping Pinned Formulae Upgrades",
+            message: `${brewName(props.formula)} is pinned. Unpin it (⌘ .) to upgrade.`,
+          });
+          return;
+        }
+
         props.onStart?.();
         const result = await upgrade(props.formula);
         props.onAction(result);
       }}
     />
   );
+}
+
+/**
+ * Pinning is formula-only. A cask is never treated as pinned even if the API
+ * hands one a `pinned` field — there is no Unpin action in the cask panel, so
+ * the toast would name a remedy the user cannot reach.
+ */
+function isPinned(item: Cask | Nameable): boolean {
+  return !isCask(item) && (item as Formula).pinned === true;
 }
 
 export function FormulaUpgradeAllAction(props: {
@@ -76,7 +111,7 @@ export function FormulaUpgradeAllAction(props: {
   return (
     <Action
       title="Upgrade All"
-      icon={Icon.Hammer}
+      icon={Icon.ArrowUpCircle}
       shortcut={{ modifiers: ["cmd", "opt"], key: "u" }}
       onAction={async () => {
         if (props.onUpgradeAll) {
@@ -95,7 +130,7 @@ export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; on
   return (
     <Action
       title={isPinned ? "Unpin" : "Pin"}
-      icon={Icon.Pin}
+      icon={isPinned ? Icon.TackDisabled : Icon.Tack}
       shortcut={Keyboard.Shortcut.Common.Pin}
       onAction={async () => {
         if (isPinned) {

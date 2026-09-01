@@ -1,5 +1,23 @@
 # Brew Changelog
 
+## [Install statistics & popularity sort] - {PR_MERGE_DATE}
+
+- Search: "Sort by Popularity" (⇧⌘P) orders results by installs over the last 30 days, ranking every match before the list is truncated — so the top rows are the most installed overall, not of the first hundred. An empty query lists the most installed packages outright.
+- The detail sidebar and the Details view both show a package's install counts for 30, 90 and 365 days, plus build errors, matching the analytics table on its formulae.brew.sh page. Only the selected package is fetched.
+- Deprecated and disabled packages carry a warning at the top of the sidebar, with the reason, the date, and the replacement package where Homebrew names one.
+- "Hide Description" (⇧⌘Y) drops the description pane and shows the sidebar as a pure metadata list, with a Caveats indicator; the full caveats text stays in Show Details, which renders it as prose.
+- "Show Details" is now offered even when the sidebar is open. It previously disappeared in that state, leaving "Show in Finder" as the default action on an installed package. Install and Upgrade remain the default where they apply.
+- Display toggles are grouped in a "View" section. "Toggle Details" is now "Toggle Sidebar" (⇧⌘D), and works in Search too; "Hide Dependencies" no longer appears in Search, where nothing filtered by it. Show Installed adds an install date and marks pinned formulae.
+- Search now marks an installed package as outdated when an update exists, and offers Upgrade on it. Previously only Show Outdated knew, because the installed cache never expired on `brew update` — its freshness test watched only local install state.
+- Show Outdated groups pinned formulae into their own section, as Show Installed does. They are the ones `brew upgrade` refuses and Upgrade All skips, so keeping them out of the actionable list says so without the row having to.
+- Pinning uses a tack rather than a map pin, and Show Outdated marks a pinned formula with that icon in place of the word "Pinned". Upgrade actions carry the same up-arrow as the row they act on, instead of a hammer.
+- Upgrading a pinned formula now says so instead of failing. `brew upgrade` refuses a pinned package outright, so the action surfaced its error; it now skips with an explanation, matching Upgrade All which already skipped them.
+- An available update is now marked the same way everywhere — a yellow up-arrow, replacing a red check in Search that clashed with the red used for a failed upgrade, and a grey check in Show Outdated that was the "upgraded" glyph greyed out.
+- The Details view and the search sidebar now show the same metadata, built from one definition. They had drifted: statistics, the deprecation warning and the corrected version line each landed in one and not the other.
+- The version row leads with the version you actually have, showing `installed → available` when they differ. It previously showed the available version labelled "installed", so an outdated package read as current.
+- Cached downloads are now written atomically, so an interrupted one can no longer leave a partial file that later fails to load. This covers the package index every command depends on, not just the new statistics. Clear Cache removes leftover temporary files too.
+- Updated to `@raycast/api` 2.x, and to a `brace-expansion` release without the denial-of-service advisory (GHSA-rgw5-rvv9-x895).
+
 ## [Upgrade View] - 2026-08-27
 
 - The Upgrade command now lists the outdated formulae & casks, matching the Show Outdated command, instead of a list of progress steps.
@@ -34,7 +52,7 @@
 - Added a "Manage Services" command to list Homebrew services and start, stop, or restart them individually or all at once. Actions update the list optimistically so it reflects the new state immediately.
 - Added a "Services Menu Bar" command to control Homebrew services from the menu bar, with a submenu per service and start/stop/restart all. The menu refreshes on a configurable interval.
 
-## [Bug fix] -  2026-05-21
+## [Bug fix] - 2026-05-21
 
 - Improves reliability of index cache
 - Improves toast error message if fetch fails
