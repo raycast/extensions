@@ -1,6 +1,6 @@
 # Tuya Smart Changelog
 
-## [Redesigned List, Error Handling, Light Controls, Menu Bar, AI Tools and Shortcuts] - {PR_MERGE_DATE}
+## [Redesigned List, Error Handling, Light Controls, Menu Bar, AI Tools and Shortcuts] - 2026-09-01
 
 - Pinning is now per device rather than per switch, which is what the redesigned list
   shows. Pins set in an earlier version are not carried over and need setting again.
