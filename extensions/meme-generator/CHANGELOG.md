@@ -1,6 +1,6 @@
 # Meme generator Changelog
 
-## [Live Meme Preview] - {PR_MERGE_DATE}
+## [Live Meme Preview] - 2026-09-01
 
 - Selecting a template now opens a live editor that renders the meme while you type
 - Switch between text boxes with ⌘↵ / ⌘⇧↵, the current value of each one is listed next to the preview
