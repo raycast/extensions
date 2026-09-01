@@ -43,7 +43,7 @@ export default async function QuickAddTask(props: LaunchProps) {
           ? "Low"
           : "None";
       const confirmed = await confirmAlert({
-        title: "Create Parsed Task?",
+        title: "Create This Task?",
         message: [`Title: ${parsed.title}`, `Due: ${dueDate}`, `List: ${projectName}`, `Priority: ${priority}`].join(
           "\n"
         ),
