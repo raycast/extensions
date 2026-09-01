@@ -1,6 +1,6 @@
 # Handy Changelog
 
-## [Fix live model & language selection] - {PR_MERGE_DATE}
+## [Fix live model & language selection] - 2026-09-01
 
 ### Fixed
 
