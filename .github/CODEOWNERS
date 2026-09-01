@@ -47,6 +47,7 @@
 /extensions/ai-screenshot                                           @jochemloedeman
 /extensions/ai-stats                                                @JonathanRReed
 /extensions/ai-text-to-calendar                                     @izm51 @ViGeng
+/extensions/ai-to-pdf                                               @guuskaashoek
 /extensions/ai-usage-tracker                                        @cdeligny
 /extensions/ai-voice-studio                                         @xwzhangSZU
 /extensions/aimeflux                                                @erdiegoant
@@ -106,7 +107,7 @@
 /extensions/app-creator                                             @EvanZhouDev
 /extensions/app-icon-generator                                      @hunter-ji @pernielsentikaer @0xdhrv
 /extensions/app-keeper-manager                                      @onlysunjun
-/extensions/app-store-connect                                       @bangerang @danilorequena
+/extensions/app-store-connect                                       @bangerang @danilorequena @chrismessina
 /extensions/app-tag-manager                                         @ZainCheung
 /extensions/app-updates                                             @gfazioli
 /extensions/appcleaner                                              @tborychowski
@@ -2084,7 +2085,7 @@
 /extensions/porkbun                                                 @xmok @djpowers
 /extensions/port                                                    @etayalony
 /extensions/port-from-project-name                                  @Vethya
-/extensions/port-manager                                            @lucaschultz @Sheraff @ridemountainpig @pernielsentikaer @0xdhrv
+/extensions/port-manager                                            @lucaschultz @Sheraff @ridemountainpig @pernielsentikaer @0xdhrv @MaaxGr
 /extensions/portal-wholesale                                        @nickdichev
 /extensions/portfolio-tracker                                       @FilipSwiatczak @ridemountainpig
 /extensions/portless                                                @nbaglivo
@@ -2385,6 +2386,7 @@
 /extensions/ruler                                                   @anwarulislam @yusifaliyevpro
 /extensions/runcloud                                                @octoxan
 /extensions/running-page                                            @bxb100
+/extensions/runpool                                                 @aicayzer
 /extensions/rusbase                                                 @khlebobul
 /extensions/rust-docs                                               @Patrick-Ehimen @Faria22
 /extensions/rut-generator                                           @esteban03

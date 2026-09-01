@@ -33,7 +33,7 @@
     "@raycast/api": "^1.79.1",
     "@raycast/utils": "^1.16.3",
     "colord": "^2.9.3",
-    "nanoid": "^5.0.7",
+    "nanoid": "^5.1.16",
     "p-queue": "^8.0.1"
   },
   "devDependencies": {
