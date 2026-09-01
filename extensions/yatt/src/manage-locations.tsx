@@ -31,7 +31,7 @@ import { flag, locationSubtitle } from "./lib/ui";
 
 export default function ManageLocations() {
   const prefs = useMemo(getPrefs, []);
-  const { locations, isLoading, setLocations, error } = useLocations();
+  const { locations, isLoading, save, error } = useLocations();
   const { push } = useNavigation();
   const list = locations ?? [];
   const storage = useMemo(currentBackend, []);
@@ -41,10 +41,14 @@ export default function ManageLocations() {
     if (error) void showToast({ style: Toast.Style.Failure, title: "Could not load locations", message: error });
   }, [error]);
 
-  /** Saves; returns the menu bar's refresh error, if any. Save failures are already shown by the store. */
-  const update = async (next: Location[], message?: string): Promise<string | undefined> => {
+  /**
+   * Applies a change to the list as it is on disk at that moment, not to the copy this view loaded, so edits
+   * made meanwhile from another command or another Mac survive. Returns the menu bar's refresh error, if any.
+   * Save failures are already shown by the store.
+   */
+  const update = async (change: (current: Location[]) => Location[], message?: string): Promise<string | undefined> => {
     try {
-      const menuBarError = await setLocations(normalizeLocations(next));
+      const menuBarError = await save((f) => ({ locations: normalizeLocations(change(f.locations)) }));
       if (message) await showToast({ style: Toast.Style.Success, title: message });
       return menuBarError;
     } catch {
@@ -57,9 +61,11 @@ export default function ManageLocations() {
       <AddLocation
         existing={list}
         onAdd={async (l, home) => {
-          const next = home ? list.map((x) => ({ ...x, isHome: false })) : [...list];
-          next.push({ ...l, isHome: home || undefined });
-          await update(next, `Added ${l.label}`);
+          await update((current) => {
+            const next = home ? current.map((x) => ({ ...x, isHome: false })) : [...current];
+            if (!next.some((x) => x.id === l.id)) next.push({ ...l, isHome: home || undefined });
+            return next;
+          }, `Added ${l.label}`);
         }}
       />,
     );
@@ -80,7 +86,7 @@ export default function ManageLocations() {
       title: `Replace ${list.length} locations with ${parsed.locations.length} from the clipboard?`,
       primaryAction: { title: "Replace", style: Alert.ActionStyle.Destructive },
     });
-    if (ok) await update(parsed.locations, "Imported locations");
+    if (ok) await update(() => parsed.locations, "Imported locations");
   };
 
   const resetSeed = async () => {
@@ -89,7 +95,7 @@ export default function ManageLocations() {
       message: "Your current list will be replaced.",
       primaryAction: { title: "Reset", style: Alert.ActionStyle.Destructive },
     });
-    if (ok) await update(loadSeed(), "Reset to defaults");
+    if (ok) await update(() => loadSeed(), "Reset to defaults");
   };
 
   const commonActions = (
@@ -147,10 +153,7 @@ export default function ManageLocations() {
                         <EditLocation
                           location={l}
                           onSave={(edited) =>
-                            update(
-                              list.map((x) => (x.id === l.id ? edited : x)),
-                              "Saved",
-                            )
+                            update((current) => current.map((x) => (x.id === l.id ? edited : x)), "Saved")
                           }
                         />,
                       )
@@ -160,15 +163,17 @@ export default function ManageLocations() {
                     title={l.isHome ? "Unset Home" : "Set as Home"}
                     icon={Icon.House}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
-                    onAction={() => update(list.map((x) => ({ ...x, isHome: x.id === l.id ? !l.isHome : false })))}
+                    onAction={() =>
+                      update((current) => current.map((x) => ({ ...x, isHome: x.id === l.id ? !x.isHome : false })))
+                    }
                   />
                   <Action
                     title={l.menuBar?.show ? "Hide from Menu Bar" : "Show in Menu Bar"}
                     icon={Icon.AppWindow}
                     shortcut={{ modifiers: ["cmd"], key: "m" }}
                     onAction={async () => {
-                      const error = await update(
-                        list.map((x) =>
+                      const error = await update((current) =>
+                        current.map((x) =>
                           x.id === l.id ? { ...x, menuBar: { ...x.menuBar, show: !x.menuBar?.show } } : x,
                         ),
                       );
@@ -185,25 +190,36 @@ export default function ManageLocations() {
                     title="Move up"
                     icon={Icon.ArrowUp}
                     shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
-                    onAction={() => update(moveItem(list, i, i - 1))}
+                    onAction={() =>
+                      update((current) =>
+                        moveItem(
+                          current,
+                          current.findIndex((x) => x.id === l.id),
+                          i - 1,
+                        ),
+                      )
+                    }
                   />
                   <Action
                     title="Move Down"
                     icon={Icon.ArrowDown}
                     shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-                    onAction={() => update(moveItem(list, i, i + 1))}
+                    onAction={() =>
+                      update((current) =>
+                        moveItem(
+                          current,
+                          current.findIndex((x) => x.id === l.id),
+                          i + 1,
+                        ),
+                      )
+                    }
                   />
                   <Action
                     title="Remove"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                    onAction={() =>
-                      update(
-                        list.filter((x) => x.id !== l.id),
-                        `Removed ${l.label}`,
-                      )
-                    }
+                    onAction={() => update((current) => current.filter((x) => x.id !== l.id), `Removed ${l.label}`)}
                   />
                 </ActionPanel.Section>
                 {commonActions}

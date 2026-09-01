@@ -282,7 +282,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^2.1.2",
-    "@raycast/utils": "^2.3.0",
     "tz-lookup": "^6.1.25"
   },
   "devDependencies": {
