@@ -15,7 +15,7 @@
 - Stop the Get Pool Status AI tool reporting a pool as resting when GitHub could not be asked whether it is still registered
 - Remove the Machine Load command
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-01
 
 - List every runner pool against its owner's GitHub avatar, showing jobs running out of total runner slots
 - Start and stop pools, and change how many runners each has
