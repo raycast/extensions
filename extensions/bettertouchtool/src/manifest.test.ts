@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 
 interface ExtensionManifest {
-  commands: Array<{ name: string }>;
+  commands: Array<{ name: string; preferences?: Array<{ name: string }> }>;
   tools: Array<{ name: string }>;
   dependencies: Record<string, string>;
 }
@@ -27,6 +27,14 @@ describe("extension manifest", () => {
 
   it("keeps the BetterTouchTool client pinned", () => {
     assert.equal(manifest.dependencies.bettertouchtool, "1.0.0-alpha.7");
+  });
+
+  it("allows custom terminal commands to be configured for the clipboard manager", () => {
+    const clipboardCommand = manifest.commands.find((command) => command.name === "clipboard-manager");
+    assert.deepEqual(
+      clipboardCommand?.preferences?.map((preference) => preference.name),
+      ["clipboardCommandWhitelist"],
+    );
   });
 
   it("exposes the complete Raycast AI tool surface", () => {

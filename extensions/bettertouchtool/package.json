@@ -47,7 +47,16 @@
       "title": "Search BTT Clipboard",
       "subtitle": "BetterTouchTool",
       "description": "Search and paste items from BetterTouchTool's Clipboard Manager",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "clipboardCommandWhitelist",
+          "description": "Comma-separated executable names to recognize as terminal commands in addition to the built-in list",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Terminal Commands"
+        }
+      ]
     }
   ],
   "tools": [
