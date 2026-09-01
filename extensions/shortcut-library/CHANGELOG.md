@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-01
 
 - Browse and fuzzy-search your own custom keyboard shortcuts
 - Add / edit / duplicate / delete shortcuts
