@@ -1,6 +1,6 @@
 # App Store Connect Changelog
 
-## [Individual API Keys, Fixes and Modernization] - {PR_MERGE_DATE}
+## [Individual API Keys, Fixes and Modernization] - 2026-09-01
 
 - Add support for Apple's individual API keys, which have no Issuer ID
 - Fix removing a team member or revoking an invitation clearing the entire list
