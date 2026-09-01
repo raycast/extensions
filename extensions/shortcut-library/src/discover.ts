@@ -72,9 +72,23 @@ export function parseAppPreferences(json: unknown, appName: string, sourceFile?:
   return out.sort((a, b) => a.title.localeCompare(b.title));
 }
 
-export function pairKey(s: Pick<Shortcut, "category" | "title">): string {
-  const norm = (v: string) => v.toLowerCase().replace(/\s+/g, " ").trim();
-  return `${norm(s.category ?? UNCATEGORIZED)}|${norm(s.title)}`;
+function normalizeKey(v: string): string {
+  return v.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function pairKey(s: Pick<Shortcut, "category" | "title">): string {
+  return `${normalizeKey(s.category ?? UNCATEGORIZED)}|${normalizeKey(s.title)}`;
+}
+
+/** Same menu item: prefer the plist path so Spotlight/app-name churn cannot retarget rows. */
+export function isSameDiscoverItem(
+  a: Pick<Shortcut, "category" | "title" | "sourceFile">,
+  b: Pick<Shortcut, "category" | "title" | "sourceFile">
+): boolean {
+  if (a.sourceFile && b.sourceFile) {
+    return a.sourceFile === b.sourceFile && normalizeKey(a.title) === normalizeKey(b.title);
+  }
+  return pairKey(a) === pairKey(b);
 }
 
 export interface DiscoveryOutcome {
@@ -93,8 +107,9 @@ export interface DiscoveryOutcome {
  * silently mis-attributes entries. A freshly-read file with zero shortcuts is
  * still evidence its bindings were removed, so its stale rows get cleaned up;
  * files that were unreadable, absent, or user-detached are never touched.
- * sweep=false (single import): only touches discover-sourced entries sharing the
- * incoming items' category+title.
+ * sweep=false (single import): only touches discover-sourced entries for the
+ * same source plist + menu title (falling back to category+title when a row
+ * has no sourceFile yet).
  */
 export function applyDiscovery(
   existing: Shortcut[],
@@ -119,8 +134,7 @@ export function applyDiscovery(
       return freshByFile.get(file)?.has(entryKey(e)) ?? false; // read but gone → remove
     });
   } else {
-    const targets = new Set(incoming.map(pairKey));
-    keep = existing.filter((e) => e.source !== SOURCE_DISCOVER || !targets.has(pairKey(e)));
+    keep = existing.filter((e) => e.source !== SOURCE_DISCOVER || !incoming.some((s) => isSameDiscoverItem(e, s)));
   }
 
   const removed = existing.filter((e) => !keep.includes(e));
@@ -130,8 +144,4 @@ export function applyDiscovery(
 
 function entryKey(s: Pick<Shortcut, "title" | "keys">): string {
   return `${normalizeKey(s.title)}|${normalizeKey(s.keys)}`;
-}
-
-function normalizeKey(v: string): string {
-  return v.toLowerCase().replace(/\s+/g, " ").trim();
 }

@@ -83,12 +83,20 @@ export async function discoverMenuShortcuts(): Promise<ScanResult> {
       // positive evidence the user removed their customizations, which Import All
       // needs so stale rows from this file are cleaned up instead of lingering
       readFiles.push(path);
-      if (shortcuts.length > 0 && shortcuts[0].category) apps.push({ app: shortcuts[0].category, shortcuts });
+      if (shortcuts.length > 0 && shortcuts[0].category) {
+        const appName = shortcuts[0].category;
+        const bucket = apps.find((a) => a.app === appName);
+        if (bucket) bucket.shortcuts.push(...shortcuts);
+        else apps.push({ app: appName, shortcuts });
+      }
     } catch {
       // unreadable plist → skip domain; its file is simply absent from the sweep's
       // freshly-read set, so entries imported from it are never removed
       failedFiles.push(path);
     }
+  }
+  for (const app of apps) {
+    app.shortcuts.sort((a, b) => a.title.localeCompare(b.title));
   }
   apps.sort((a, b) => a.app.localeCompare(b.app));
   return { apps, failedApps: failedFiles, readFiles };

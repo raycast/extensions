@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { platform } from "os";
 import { discoverMenuShortcuts } from "./scanner";
 import type { DiscoveredApp } from "./scanner";
-import { applyDiscovery, pairKey } from "./discover";
+import { applyDiscovery, isSameDiscoverItem } from "./discover";
 import type { Shortcut } from "./types";
 import { loadShortcuts, saveShortcuts } from "./data";
 
@@ -64,7 +64,7 @@ export default function Command() {
     scan.existing.some(
       (e) =>
         e.source === "discover" &&
-        pairKey(e) === pairKey(s) &&
+        isSameDiscoverItem(e, s) &&
         e.keys.toLowerCase().replace(/\s+/g, " ").trim() !== s.keys.toLowerCase().replace(/\s+/g, " ").trim()
     );
 
@@ -96,7 +96,11 @@ export default function Command() {
   return (
     <List navigationTitle="Discover Shortcuts" searchBarPlaceholder="Filter discovered shortcuts...">
       {scan.apps.map((app) => (
-        <List.Section key={app.app} title={app.app} subtitle={`${app.shortcuts.length}`}>
+        <List.Section
+          key={app.shortcuts[0]?.sourceFile ?? app.app}
+          title={app.app}
+          subtitle={`${app.shortcuts.length}`}
+        >
           {app.shortcuts.map((s) => (
             <List.Item
               key={s.id}

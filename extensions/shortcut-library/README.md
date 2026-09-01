@@ -13,9 +13,9 @@ Raycast extension to manage and fuzzy-search your own custom keyboard shortcuts,
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| Browse Shortcuts | Grouped, fuzzy-searchable list. `⌘N` add, `⌘E` or `Enter` edit, `⌘K` for all actions. |
+| Command            | Description                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| Browse Shortcuts   | Grouped, fuzzy-searchable list. `⌘N` add, `⌘E` or `Enter` edit, `⌘K` for all actions. |
 | Discover Shortcuts | Scans app preferences for menu shortcut customizations and imports them after review. |
 
 ## Discovering shortcuts

@@ -42,12 +42,18 @@ test("parseAppPreferences extracts valid entries with app category", () => {
     [
       ["Toggle Sidebar", "Cmd + Ctrl + S"],
       ["Zoom In", "Cmd + ="],
-    ],
+    ]
   );
   for (const s of items) {
     assert.equal(s.category, "Terminal");
     assert.equal(s.source, SOURCE_DISCOVER);
   }
+});
+
+test("parseAppPreferences stamps the source plist path", () => {
+  const items = parseAppPreferences({ NSUserKeyEquivalents: { Zoom: "@=" } }, "Terminal", FILE_A);
+  assert.equal(items.length, 1);
+  assert.equal(items[0].sourceFile, FILE_A);
 });
 
 test("parseAppPreferences returns empty for missing/garbage payload", () => {
@@ -75,13 +81,10 @@ test("applyDiscovery sweep replaces changed keys and drops vanished entries", ()
   const incoming = [disc("Toggle Sidebar", "Cmd + Shift + S", FILE_A), disc("New Menu", "Cmd + N", FILE_A)];
   const { next, added, removed } = applyDiscovery(existing, incoming, true, [FILE_A]);
 
-  assert.deepEqual(
-    added.map((s) => s.title).sort(),
-    ["New Menu", "Toggle Sidebar"],
-  );
+  assert.deepEqual(added.map((s) => s.title).sort(), ["New Menu", "Toggle Sidebar"]);
   assert.deepEqual(
     removed.map((s) => s.title),
-    ["Toggle Sidebar", "Old Menu"],
+    ["Toggle Sidebar", "Old Menu"]
   );
 
   const titles = next.map((s) => s.title);
@@ -97,7 +100,13 @@ test("applyDiscovery keeps entries from files not re-read this run", () => {
   // UpNote's plist was unreadable this run, so FILE_UP is not among the freshly
   // read files; its stored row must survive untouched even though it matches no
   // incoming item.
-  const up = normalizeShortcut({ category: "UpNote", title: "Sidebar", keys: "Cmd + Shift + S", source: SOURCE_DISCOVER, sourceFile: FILE_UP });
+  const up = normalizeShortcut({
+    category: "UpNote",
+    title: "Sidebar",
+    keys: "Cmd + Shift + S",
+    source: SOURCE_DISCOVER,
+    sourceFile: FILE_UP,
+  });
   const incoming = [disc("Zoom", "Cmd + Shift + Z", FILE_A)];
 
   const { next, removed } = applyDiscovery([up], incoming, true, [FILE_A]);
@@ -111,12 +120,26 @@ test("applyDiscovery clears rows from a file that now has no shortcuts left", ()
   // so it yields zero incoming entries. Its stale rows must be cleaned up rather
   // than lingering forever.
   const stale = disc("Old Menu", "Cmd + O", FILE_A);
-  const incoming = [normalizeShortcut({ category: "Mail", title: "Reply", keys: "Cmd + R", source: SOURCE_DISCOVER, sourceFile: FILE_MAIL })];
+  const incoming = [
+    normalizeShortcut({
+      category: "Mail",
+      title: "Reply",
+      keys: "Cmd + R",
+      source: SOURCE_DISCOVER,
+      sourceFile: FILE_MAIL,
+    }),
+  ];
 
   const { next, removed } = applyDiscovery([stale], incoming, true, [FILE_A, FILE_MAIL]);
 
-  assert.deepEqual(removed.map((s) => s.title), ["Old Menu"]);
-  assert.deepEqual(next.map((s) => s.title), ["Reply"]);
+  assert.deepEqual(
+    removed.map((s) => s.title),
+    ["Old Menu"]
+  );
+  assert.deepEqual(
+    next.map((s) => s.title),
+    ["Reply"]
+  );
 });
 
 test("applyDiscovery single import only touches same title pair", () => {
@@ -125,7 +148,10 @@ test("applyDiscovery single import only touches same title pair", () => {
   const { next, added, removed } = applyDiscovery(existing, incoming, false);
 
   assert.equal(added.length, 1);
-  assert.deepEqual(removed.map((s) => s.title), ["A"]);
+  assert.deepEqual(
+    removed.map((s) => s.title),
+    ["A"]
+  );
   assert.deepEqual(next.map((s) => s.keys).sort(), ["Cmd + B", "Cmd + Shift + A"]);
 });
 
@@ -147,8 +173,15 @@ test("applyDiscovery sweeps per file when one copy of a bundle reads and a sibli
 
   const { next, removed } = applyDiscovery([zoomOld, legacyFromFileB], incoming, true, [FILE_A]);
 
-  assert.deepEqual(removed.map((s) => s.title), ["Zoom"], "readable file's stale row swept");
-  assert.ok(next.some((s) => s.title === "Legacy Menu"), "unreadable file's row retained");
+  assert.deepEqual(
+    removed.map((s) => s.title),
+    ["Zoom"],
+    "readable file's stale row swept"
+  );
+  assert.ok(
+    next.some((s) => s.title === "Legacy Menu"),
+    "unreadable file's row retained"
+  );
   const zooms = next.filter((s) => s.title === "Zoom");
   assert.equal(zooms.length, 1, "exactly one Zoom, no stale+updated coexistence");
   assert.equal(zooms[0].keys, "Cmd + Shift + Z");
@@ -157,16 +190,120 @@ test("applyDiscovery sweeps per file when one copy of a bundle reads and a sibli
 test("applyDiscovery sweep removes only entries absent from their own re-read file", () => {
   // Mail's file was also read this run but no longer customizes Old Compose,
   // while keeping another shortcut — so exactly the vanished row is removed.
-  const staleMail = normalizeShortcut({ category: "Mail", title: "Old Compose", keys: "Cmd + N", source: SOURCE_DISCOVER, sourceFile: FILE_MAIL });
-  const keptMail = normalizeShortcut({ category: "Mail", title: "Reply", keys: "Cmd + R", source: SOURCE_DISCOVER, sourceFile: FILE_MAIL });
+  const staleMail = normalizeShortcut({
+    category: "Mail",
+    title: "Old Compose",
+    keys: "Cmd + N",
+    source: SOURCE_DISCOVER,
+    sourceFile: FILE_MAIL,
+  });
+  const keptMail = normalizeShortcut({
+    category: "Mail",
+    title: "Reply",
+    keys: "Cmd + R",
+    source: SOURCE_DISCOVER,
+    sourceFile: FILE_MAIL,
+  });
   const incoming = [
     disc("New Menu", "Cmd + Shift + O", FILE_A),
-    normalizeShortcut({ category: "Mail", title: "Reply", keys: "Cmd + R", source: SOURCE_DISCOVER, sourceFile: FILE_MAIL }),
+    normalizeShortcut({
+      category: "Mail",
+      title: "Reply",
+      keys: "Cmd + R",
+      source: SOURCE_DISCOVER,
+      sourceFile: FILE_MAIL,
+    }),
   ];
 
   const { next, removed } = applyDiscovery([staleMail, keptMail], incoming, true, [FILE_A, FILE_MAIL]);
 
-  assert.deepEqual(removed.map((s) => s.title), ["Old Compose"]);
+  assert.deepEqual(
+    removed.map((s) => s.title),
+    ["Old Compose"]
+  );
   assert.ok(next.some((s) => s.title === "Reply"));
   assert.ok(next.some((s) => s.title === "New Menu"));
+});
+
+test("applyDiscovery keeps the same plist row when Spotlight display name changes", () => {
+  const stored = normalizeShortcut({
+    category: "Terminal",
+    title: "Zoom",
+    keys: "Cmd + =",
+    source: SOURCE_DISCOVER,
+    sourceFile: FILE_A,
+  });
+  const incoming = [
+    normalizeShortcut({
+      category: "com.apple.Terminal",
+      title: "Zoom",
+      keys: "Cmd + =",
+      source: SOURCE_DISCOVER,
+      sourceFile: FILE_A,
+    }),
+  ];
+
+  const { next, added, removed } = applyDiscovery([stored], incoming, true, [FILE_A]);
+
+  assert.equal(added.length, 0);
+  assert.equal(removed.length, 0);
+  assert.equal(next.length, 1);
+  assert.equal(next[0].sourceFile, FILE_A);
+});
+
+test("applyDiscovery still drops a re-keyed binding when the display name changes", () => {
+  const stored = normalizeShortcut({
+    category: "Terminal",
+    title: "Zoom",
+    keys: "Cmd + =",
+    source: SOURCE_DISCOVER,
+    sourceFile: FILE_A,
+  });
+  const incoming = [
+    normalizeShortcut({
+      category: "com.apple.Terminal",
+      title: "Zoom",
+      keys: "Cmd + Shift + Z",
+      source: SOURCE_DISCOVER,
+      sourceFile: FILE_A,
+    }),
+  ];
+
+  const { next, removed } = applyDiscovery([stored], incoming, true, [FILE_A]);
+
+  assert.deepEqual(
+    removed.map((s) => s.keys),
+    ["Cmd + ="]
+  );
+  const zooms = next.filter((s) => s.title === "Zoom");
+  assert.equal(zooms.length, 1, "no stale+updated coexistence after a name change");
+  assert.equal(zooms[0].keys, "Cmd + Shift + Z");
+});
+
+test("applyDiscovery single import matches by source file, not display name", () => {
+  const stored = normalizeShortcut({
+    category: "Terminal",
+    title: "Zoom",
+    keys: "Cmd + =",
+    source: SOURCE_DISCOVER,
+    sourceFile: FILE_A,
+  });
+  const incoming = [
+    normalizeShortcut({
+      category: "com.apple.Terminal",
+      title: "Zoom",
+      keys: "Cmd + Shift + Z",
+      source: SOURCE_DISCOVER,
+      sourceFile: FILE_A,
+    }),
+  ];
+
+  const { next, removed } = applyDiscovery([stored], incoming, false);
+
+  assert.deepEqual(
+    removed.map((s) => s.keys),
+    ["Cmd + ="]
+  );
+  assert.equal(next.length, 1);
+  assert.equal(next[0].keys, "Cmd + Shift + Z");
 });
