@@ -16,7 +16,25 @@ type Box = [number, number, number, number];
  * sits around it. The gap between the two is the document bleed.
  */
 export function detectBleed(path: string): DetectedBleed | undefined {
-  const text = readHead(path);
+  return detectIn(readHead(path));
+}
+
+/**
+ * The same reading, over the whole file. Illustrator puts the page dictionary of a
+ * PDF it writes wherever it lands, which in a heavy print file is well past the
+ * head slice — and a check on the bleed that just gives up is worse than none.
+ */
+export function detectExportedBleed(path: string): DetectedBleed | undefined {
+  for (const chunk of readChunks(path)) {
+    const found = detectIn(chunk);
+    if (found) {
+      return found;
+    }
+  }
+  return undefined;
+}
+
+function detectIn(text: string | undefined): DetectedBleed | undefined {
   if (!text) {
     return undefined;
   }
@@ -48,19 +66,47 @@ export function detectBleed(path: string): DetectedBleed | undefined {
   return { sides: clamped, maxPt, uniform };
 }
 
+const CHUNK = 2 * 1024 * 1024;
+/** Enough for a page dictionary that happens to straddle two chunks. */
+const OVERLAP = 64 * 1024;
+
 /**
- * The page dictionary sits in the PDF part near the front of the file, so reading a
- * slice keeps this cheap even for the very large `.ai` files print work produces.
+ * In an `.ai` the page dictionary sits in the PDF part near the front of the file,
+ * so reading a slice keeps this cheap even for the very large files print work
+ * produces — and this runs for every file picked in the form.
  */
 function readHead(path: string): string | undefined {
-  const CHUNK = 2 * 1024 * 1024;
+  return read(path, 0, CHUNK);
+}
+
+/** Walks the file in overlapping slices, so nothing is held in memory whole. */
+function* readChunks(path: string): Generator<string> {
+  let size: number;
+  try {
+    size = statSync(path).size;
+  } catch {
+    return;
+  }
+  for (let offset = 0; offset < size; offset += CHUNK - OVERLAP) {
+    const chunk = read(path, offset, CHUNK);
+    if (!chunk) {
+      return;
+    }
+    yield chunk;
+  }
+}
+
+function read(path: string, offset: number, length: number): string | undefined {
   try {
     const size = statSync(path).size;
-    const length = Math.min(size, CHUNK);
-    const buffer = Buffer.allocUnsafe(length);
+    const wanted = Math.min(length, Math.max(0, size - offset));
+    if (wanted === 0) {
+      return undefined;
+    }
+    const buffer = Buffer.allocUnsafe(wanted);
     const fd = openSync(path, "r");
     try {
-      readSync(fd, buffer, 0, length, 0);
+      readSync(fd, buffer, 0, wanted, offset);
     } finally {
       closeSync(fd);
     }

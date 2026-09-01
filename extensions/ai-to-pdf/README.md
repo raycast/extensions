@@ -59,7 +59,7 @@ Illustrator is launched automatically if it isn't running; the first conversion 
 - **No printer's marks, ever.** Trim marks, registration marks, colour bars and page information are switched off explicitly after the preset is applied, so a preset that has them enabled cannot slip them into the PDF.
 - The original `.ai` file is never modified.
 - A file already open in Illustrator is never touched: a working copy is made next to it, converted, and removed again, so your document keeps its window, selection and undo history. Because the copy comes from disk, unsaved edits are not in the PDF — Illustrator gives no reliable way to detect those, since a document counts as modified after nothing more than a selection.
-- Every PDF is measured after export and rejected if its bleed is not what was asked for. Illustrator's _current settings_ — the option that applies no preset — can carry "Use Document Bleed Settings" with no way to know beforehand, and a print file with the wrong bleed should not be handed over quietly.
+- Every PDF is measured after export and rejected if its bleed is not what was asked for; under Illustrator's _current settings_ a bleed that cannot be read back from the finished PDF is reported too, rather than passed off as correct. Those current settings — the option that applies no preset — can carry "Use Document Bleed Settings" with no way to know beforehand, and a print file with the wrong bleed should not be handed over quietly.
 - A document with several artboards becomes one multi-page PDF, one page per artboard.
 - Files are converted one at a time, since Illustrator runs one script at a time.
 

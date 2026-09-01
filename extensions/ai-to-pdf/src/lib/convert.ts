@@ -1,6 +1,6 @@
 import { existsSync, statSync, unlinkSync } from "fs";
 import { basename, dirname, extname, join } from "path";
-import { detectBleed } from "./ai-file";
+import { detectExportedBleed } from "./ai-file";
 import { describeBleedPt, resolveBleed, type BleedChoice } from "./bleed";
 import { convertFile, presetUsesDocumentBleed } from "./illustrator";
 import type { Settings } from "./settings";
@@ -48,11 +48,24 @@ export function buildOutputPath(input: string, suffix: string, settings: Setting
  * Bleed Settings" without any way to read that beforehand, and a wrong bleed is
  * not something a print file should be trusted to have silently.
  */
-function verifyBleed(output: string, expectedPt: number): void {
-  const produced = detectBleed(output);
+function verifyBleed(output: string, expectedPt: number, preset: string): void {
+  const produced = detectExportedBleed(output);
+
   if (!produced) {
+    // No TrimBox/BleedBox pair at all means no bleed was written, which is the
+    // right outcome when none was asked for. Every named preset has already been
+    // vetted through its .joboptions, so a bleed that was asked for and cannot be
+    // read back is only unexplained under Illustrator's current settings — the
+    // one case this check exists for, and not one to report as a finished file.
+    if (expectedPt > 0 && !preset) {
+      throw new Error(
+        `${basename(output)} was written, but its bleed could not be read back, so it is not certain it has ${describeBleedPt(expectedPt)}. ` +
+          `Pick an explicit PDF preset instead of Illustrator's current settings.`,
+      );
+    }
     return;
   }
+
   if (Math.abs(produced.maxPt - expectedPt) > 0.5) {
     // A print file with the wrong bleed is worse than no file, so it does not
     // get to sit on disk looking finished.
@@ -98,7 +111,7 @@ export async function runJob(job: Job, settings: Settings): Promise<JobResult> {
     if (!existsSync(output)) {
       throw new Error("Illustrator reported success but no PDF was written.");
     }
-    verifyBleed(output, actualPt);
+    verifyBleed(output, actualPt, job.preset);
     return { input: job.input, output, bleedPt: actualPt, exact, source: job.bleed.mode };
   } catch (error) {
     return { input: job.input, error: error instanceof Error ? error.message : String(error) };

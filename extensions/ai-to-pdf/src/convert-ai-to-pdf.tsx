@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { basename } from "path";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { detectBleed } from "./lib/ai-file";
 import { formatMm } from "./lib/bleed";
 import { describeBleed, isAiFile, runJobs, summarize, type BleedChoice, type Job, type JobResult } from "./lib/convert";
@@ -54,8 +54,17 @@ export default function Command() {
     { initialData: [] as string[], keepPreviousData: true },
   );
 
-  const presetOptions = Array.from(new Set([...(presets ?? []), settings.pdfPreset].filter(Boolean)));
-  const detected = describeDetected(files);
+  // Both of these read from disk — the preset files and the picked .ai files — so
+  // they are kept out of the render path that a keystroke in the form triggers.
+  const presetOptions = useMemo(
+    () =>
+      Array.from(new Set([...(presets ?? []), settings.pdfPreset].filter(Boolean))).map((preset) => ({
+        name: preset,
+        documentBleedOnly: presetUsesDocumentBleed(preset),
+      })),
+    [presets, settings.pdfPreset],
+  );
+  const detected = useMemo(() => describeDetected(files), [files]);
 
   async function handleSubmit(values: { bleed: string; customBleedMm: string; preset: string; destination: string[] }) {
     const aiFiles = files.filter(isAiFile);
@@ -125,7 +134,6 @@ export default function Command() {
       isLoading={isConverting || isLoadingPresets}
       actions={
         <ActionPanel>
-          {}
           <Action.SubmitForm title="Convert to PDF" icon={Icon.Document} onSubmit={handleSubmit} />
         </ActionPanel>
       }
@@ -180,18 +188,14 @@ export default function Command() {
         storeValue
         info="Illustrator's own PDF export presets. Start Illustrator to see your custom presets here."
       >
-        {presetOptions.map((preset) =>
-          presetUsesDocumentBleed(preset) ? (
-            <Form.Dropdown.Item
-              key={preset}
-              value={preset}
-              title={`${preset} — document bleed only`}
-              icon={Icon.Info}
-            />
-          ) : (
-            <Form.Dropdown.Item key={preset} value={preset} title={preset} />
-          ),
-        )}
+        {presetOptions.map((preset) => (
+          <Form.Dropdown.Item
+            key={preset.name}
+            value={preset.name}
+            title={preset.documentBleedOnly ? `${preset.name} — document bleed only` : preset.name}
+            icon={preset.documentBleedOnly ? Icon.Info : undefined}
+          />
+        ))}
         <Form.Dropdown.Item value={KEEP_CURRENT_SETTINGS} title="Illustrator's current settings" />
       </Form.Dropdown>
 

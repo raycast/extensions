@@ -2,18 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 export type BleedMode = "file" | "custom" | "off";
 
-export type Preferences = {
-  defaultBleedMode?: string;
-  customBleedMm?: string;
-  pdfPreset?: string;
-  suffixBleed?: string;
-  suffixNoBleed?: string;
-  destination?: string;
-  overwrite?: boolean;
-  revealInFinder?: boolean;
-  timeoutSeconds?: string;
-};
-
 export type Settings = {
   defaultBleedMode: BleedMode;
   customBleedMm: number;

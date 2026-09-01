@@ -45,6 +45,9 @@ export function presetUsesDocumentBleed(preset: string): boolean {
   return false;
 }
 
+/** Illustrator only has to close a document and delete a file for this one. */
+const SCRATCH_CLEANUP_TIMEOUT_MS = 15_000;
+
 export type ConvertOptions = {
   input: string;
   output: string;
@@ -142,6 +145,16 @@ function appleScriptString(value: string): string {
   return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
+/**
+ * JSON leaves U+2028 and U+2029 raw, and ExtendScript reads those as line breaks
+ * — a file name containing one would tear the generated script in half.
+ */
+function jsxJson(value: unknown): string {
+  return JSON.stringify(value)
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
+
 /** ExtendScript predates JSON, so the reply is assembled by hand. */
 const JSX_PRELUDE = `
 function q(s) {
@@ -171,9 +184,9 @@ for (var i = 0; i < names.length; i++) { parts.push(q(names[i])); }
 
 export async function convertFile(options: ConvertOptions): Promise<ConvertResult> {
   const started = Date.now();
-  // Same folder as the source so relative linked images still resolve. Node
-  // deletes this in `finally` so an Illustrator crash or timeout cannot leave
-  // `~ai-to-pdf-….ai` in a production folder.
+  // Same folder as the source so relative linked images still resolve. The script
+  // removes it itself; `discardScratch` is the fallback for a crash or a timeout,
+  // so a failed run does not leave `~ai-to-pdf-….ai` in a production folder.
   const scratchPath = join(dirname(options.input), `~ai-to-pdf-${process.pid}-${Date.now()}.ai`);
   const params = {
     input: options.input,
@@ -184,7 +197,7 @@ export async function convertFile(options: ConvertOptions): Promise<ConvertResul
   };
 
   const jsx = `${JSX_PRELUDE}
-var P = ${JSON.stringify(params)};
+var P = ${jsxJson(params)};
 var doc = null, scratch = null, error = null;
 
 try {
@@ -219,6 +232,10 @@ try {
     catch (e) { throw new Error("PDF preset not found in Illustrator: " + P.preset); }
   }
   opts.viewAfterSaving = false;
+  // A preset or Illustrator's current settings can have this on, which writes one
+  // numbered PDF per artboard instead of the single file the rest of the flow —
+  // naming, collision checks, the success message — is built around.
+  opts.saveMultipleArtboards = false;
   opts.bleedLink = true;
   opts.bleedOffsetRect = [P.bleed, P.bleed, P.bleed, P.bleed];
   // Printer's marks are never wanted here, and a preset may well switch them on,
@@ -253,8 +270,48 @@ error === null ? '{"ok":true}' : '{"ok":false,"error":' + q(error) + '}';
     await runJsx(jsx, options.timeoutMs, true);
     return { output: options.output, durationMs: Date.now() - started };
   } finally {
-    await rm(scratchPath, { force: true }).catch(() => undefined);
+    await discardScratch(scratchPath);
   }
+}
+
+/**
+ * Clears away the working copy after a run that did not get to its own cleanup.
+ * The file is never deleted while Illustrator may still have it open: a document
+ * whose file has gone cannot be saved back and has to be sorted out by hand,
+ * where a leftover `~ai-to-pdf-….ai` is merely a file to drag to the bin. So
+ * Illustrator is asked to close the copy first, and after a timeout — where
+ * Illustrator is still busy with the conversion script, which removes the copy
+ * itself once it finishes — the copy is left where it is.
+ */
+async function discardScratch(scratchPath: string): Promise<void> {
+  if (!existsSync(scratchPath)) {
+    return;
+  }
+
+  if (await isIllustratorRunning()) {
+    const jsx = `${JSX_PRELUDE}
+var P = ${jsxJson({ scratchPath })};
+try {
+  for (var i = app.documents.length - 1; i >= 0; i--) {
+    var candidate = app.documents[i], candidatePath = null;
+    try { candidatePath = candidate.fullName.fsName; } catch (e) { candidatePath = null; }
+    if (candidatePath === P.scratchPath) {
+      try { candidate.close(SaveOptions.DONOTSAVECHANGES); } catch (e2) {}
+    }
+  }
+  var copy = new File(P.scratchPath);
+  if (copy.exists) copy.remove();
+} catch (e3) {}
+'{"ok":true}';
+`;
+    try {
+      await runJsx(jsx, SCRATCH_CLEANUP_TIMEOUT_MS);
+    } catch {
+      return;
+    }
+  }
+
+  await rm(scratchPath, { force: true }).catch(() => undefined);
 }
 
 /**
