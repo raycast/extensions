@@ -16,35 +16,35 @@
   "commands": [
     {
       "name": "trigger",
-      "title": "Run BTT Named Trigger",
+      "title": "Run Named Trigger",
       "subtitle": "BetterTouchTool",
       "description": "Find and run named triggers in BetterTouchTool",
       "mode": "view"
     },
     {
       "name": "browse-triggers",
-      "title": "Browse BTT Triggers",
+      "title": "Browse Triggers",
       "subtitle": "BetterTouchTool",
       "description": "Find and manage configured triggers across BetterTouchTool",
       "mode": "view"
     },
     {
       "name": "action",
-      "title": "Run BTT Action",
+      "title": "Run Action",
       "subtitle": "BetterTouchTool",
       "description": "Find and run actions in BetterTouchTool",
       "mode": "view"
     },
     {
       "name": "variables",
-      "title": "Browse BTT Variables",
+      "title": "Browse Variables",
       "subtitle": "BetterTouchTool",
       "description": "Browse BetterTouchTool variables",
       "mode": "view"
     },
     {
       "name": "clipboard-manager",
-      "title": "Search BTT Clipboard",
+      "title": "Search Clipboard",
       "subtitle": "BetterTouchTool",
       "description": "Search and paste items from BetterTouchTool's Clipboard Manager",
       "mode": "view",

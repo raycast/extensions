@@ -14,7 +14,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { usePromise } from "@raycast/utils";
+import { useForm, usePromise } from "@raycast/utils";
 import { actions, Btt, type TriggerJson } from "bettertouchtool";
 import { createBttClient } from "./btt";
 import { showBttFailureToast } from "./btt-toast";
@@ -272,7 +272,7 @@ function NamedTriggerInputForm({
 }) {
   const { pop } = useNavigation();
 
-  async function handleSubmit(values: Record<string, string>) {
+  async function submitTrigger(values: Record<string, string>) {
     const parsed = parseNamedTriggerInputValues(definitions, values);
     if (!parsed.success) {
       await showToast({ title: parsed.error, style: Toast.Style.Failure });
@@ -291,6 +291,25 @@ function NamedTriggerInputForm({
     }
   }
 
+  const { handleSubmit, itemProps } = useForm<Record<string, string>>({
+    initialValues: Object.fromEntries(
+      definitions.map((definition, index) => [getNamedTriggerInputFieldId(index), definition.options[0] ?? ""]),
+    ),
+    validation: Object.fromEntries(
+      definitions.map((definition, index) => [
+        getNamedTriggerInputFieldId(index),
+        (value: string | undefined) => {
+          if (definition.type !== "number") return undefined;
+          const numberValue = Number(value);
+          return value?.trim() && Number.isFinite(numberValue)
+            ? undefined
+            : `“${definition.name}” must be a finite number.`;
+        },
+      ]),
+    ),
+    onSubmit: submitTrigger,
+  });
+
   return (
     <Form
       navigationTitle={triggerName}
@@ -306,13 +325,7 @@ function NamedTriggerInputForm({
         const fieldId = getNamedTriggerInputFieldId(index);
         if (definition.options.length > 0) {
           return (
-            <Form.Dropdown
-              key={fieldId}
-              id={fieldId}
-              title={definition.name}
-              info={definition.description}
-              defaultValue={definition.options[0]}
-            >
+            <Form.Dropdown key={fieldId} title={definition.name} info={definition.description} {...itemProps[fieldId]}>
               {definition.options.map((option, optionIndex) => (
                 <Form.Dropdown.Item key={`${optionIndex}-${option}`} title={option} value={option} />
               ))}
@@ -323,10 +336,10 @@ function NamedTriggerInputForm({
         return (
           <Form.TextField
             key={fieldId}
-            id={fieldId}
             title={definition.name}
             info={definition.description ?? (definition.type === "number" ? "Number" : "Text")}
             placeholder={definition.type === "number" ? "Enter a number" : "Enter text"}
+            {...itemProps[fieldId]}
           />
         );
       })}

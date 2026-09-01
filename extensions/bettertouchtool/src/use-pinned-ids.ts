@@ -1,5 +1,5 @@
-import { LocalStorage, Toast, showToast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { LocalStorage } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { parsePinnedIds, togglePinnedId } from "./pinning";
 
@@ -20,8 +20,8 @@ export function usePinnedIds(storageKey: string) {
         optimisticUpdate: () => nextPinnedIds,
         shouldRevalidateAfter: false,
       });
-    } catch {
-      await showToast({ title: "Could not update pinned items", style: Toast.Style.Failure });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not update pinned items" });
     }
   }
 

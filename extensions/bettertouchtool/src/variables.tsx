@@ -12,8 +12,9 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useForm, usePromise } from "@raycast/utils";
 import { execFile } from "node:child_process";
+import { access } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -319,7 +320,7 @@ function CreateVariableForm({
   const { pop } = useNavigation();
   const [type, setType] = useState<WritableVariableType>("string");
 
-  async function handleSubmit(values: NewVariableFormValues) {
+  async function createVariable(values: NewVariableFormValues) {
     const parsed = parseNewVariable(values, existingNames);
     if (!parsed.success) {
       await showToast({ title: parsed.error, style: Toast.Style.Failure });
@@ -336,6 +337,21 @@ function CreateVariableForm({
     }
   }
 
+  const { handleSubmit, itemProps, setValidationError } = useForm<NewVariableFormValues>({
+    onSubmit: createVariable,
+    validation: {
+      name: (value) => {
+        if (!value?.trim()) return "Enter a variable name.";
+        if (existingNames.has(value)) return `A variable named “${value}” already exists.`;
+        return undefined;
+      },
+      value: (value) => {
+        if (type !== "number") return undefined;
+        return value?.trim() && Number.isFinite(Number(value)) ? undefined : "Enter a finite number.";
+      },
+    },
+  });
+
   return (
     <Form
       navigationTitle="Create BTT Variable"
@@ -346,20 +362,23 @@ function CreateVariableForm({
       }
     >
       <Form.Description text="New variables are persistent so they remain available after BetterTouchTool restarts." />
-      <Form.TextField id="name" title="Variable Name" placeholder="Enter a unique name" autoFocus />
+      <Form.TextField title="Variable Name" placeholder="Enter a unique name" autoFocus {...itemProps.name} />
       <Form.Dropdown
         id="type"
         title="Type"
         value={type}
-        onChange={(newType) => setType(newType as WritableVariableType)}
+        onChange={(newType) => {
+          setType(newType as WritableVariableType);
+          setValidationError("value", undefined);
+        }}
       >
         <Form.Dropdown.Item title="Text" value="string" />
         <Form.Dropdown.Item title="Number" value="number" />
       </Form.Dropdown>
       {type === "number" ? (
-        <Form.TextField id="value" title="Value" placeholder="Enter a number" />
+        <Form.TextField title="Value" placeholder="Enter a number" {...itemProps.value} />
       ) : (
-        <Form.TextArea id="value" title="Value" placeholder="Enter text" />
+        <Form.TextArea title="Value" placeholder="Enter text" {...itemProps.value} />
       )}
     </Form>
   );
@@ -439,7 +458,7 @@ function VariableEditor({
 }) {
   const { pop } = useNavigation();
 
-  async function handleSubmit(values: { value: string }) {
+  async function updateVariable(values: { value: string }) {
     const value = type === "number" ? Number(values.value) : values.value;
     if (type === "number" && !Number.isFinite(value)) {
       await showToast({ title: "Enter a valid number", style: Toast.Style.Failure });
@@ -454,6 +473,15 @@ function VariableEditor({
       await showBttFailureToast(error, `Could not update ${variable.name}`);
     }
   }
+
+  const { handleSubmit, itemProps } = useForm<{ value: string }>({
+    initialValues: { value: initialValue },
+    onSubmit: updateVariable,
+    validation: {
+      value: (value) =>
+        type !== "number" || (value?.trim() && Number.isFinite(Number(value))) ? undefined : "Enter a valid number.",
+    },
+  });
 
   return (
     <Form
@@ -470,7 +498,7 @@ function VariableEditor({
       }
     >
       <Form.Description text={`Type: ${type || "string"}${variable.persistent ? " · Persistent" : ""}`} />
-      <Form.TextArea id="value" title="Value" defaultValue={initialValue} autoFocus />
+      <Form.TextArea title="Value" autoFocus {...itemProps.value} />
     </Form>
   );
 }
@@ -482,11 +510,14 @@ async function loadVariableDefinitions(): Promise<VariableDefinition[]> {
 
 async function readPersistentVariableNames(): Promise<string[]> {
   try {
-    const { stdout } = await execFileAsync("plutil", ["-convert", "json", "-o", "-", userVariablesPath]);
-    return getPersistentVariableNames(JSON.parse(stdout) as unknown);
-  } catch {
-    return [];
+    await access(userVariablesPath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw error;
   }
+
+  const { stdout } = await execFileAsync("plutil", ["-convert", "json", "-o", "-", userVariablesPath]);
+  return getPersistentVariableNames(JSON.parse(stdout) as unknown);
 }
 
 async function loadSetVariableData(btt: Btt, variables: VariableDefinition[]): Promise<SetVariableData> {

@@ -1,5 +1,6 @@
 import { ActionPanel, Action, List, Icon, Keyboard, closeMainWindow, Form, useNavigation } from "@raycast/api";
 import { useMemo, useState } from "react";
+import { useForm } from "@raycast/utils";
 import { actions } from "bettertouchtool";
 import { actionCatalog, type ActionDefinition } from "bettertouchtool/catalog";
 import {
@@ -88,7 +89,7 @@ function CategoryDropdown({
 function ActionForm({ actionDefinition }: { actionDefinition: ActionDefinition }) {
   const fields = getParameterFields(actionDefinition);
 
-  async function handleSubmit(values: FormValues) {
+  async function submitAction(values: FormValues) {
     try {
       const extra = fields.reduce<Record<string, unknown>>((result, field) => {
         const value = parseFormValue(values[field.definition.key], field);
@@ -100,6 +101,27 @@ function ActionForm({ actionDefinition }: { actionDefinition: ActionDefinition }
       await showBttFailureToast(error, "Failed to run action");
     }
   }
+
+  const textFields = fields.filter((field) => field.kind !== "boolean");
+  const { handleSubmit, itemProps } = useForm<Record<string, string>>({
+    initialValues: Object.fromEntries(
+      textFields.map((field) => [field.definition.key, formatInitialValue(field.initialValue, field.kind)]),
+    ),
+    validation: Object.fromEntries(
+      textFields.map((field) => [
+        field.definition.key,
+        (value: string | undefined) => {
+          try {
+            parseFormValue(value, field);
+            return undefined;
+          } catch (error) {
+            return error instanceof Error ? error.message : "Enter a valid value";
+          }
+        },
+      ]),
+    ),
+    onSubmit: (values) => submitAction(values as FormValues),
+  });
 
   return (
     <Form
@@ -114,13 +136,19 @@ function ActionForm({ actionDefinition }: { actionDefinition: ActionDefinition }
       <Form.Description title={actionDefinition.name} text={actionDefinition.description} />
       <Form.Separator />
       {fields.map((field) => (
-        <ParameterInput key={field.definition.key} field={field} />
+        <ParameterInput key={field.definition.key} field={field} itemProps={itemProps[field.definition.key]} />
       ))}
     </Form>
   );
 }
 
-function ParameterInput({ field }: { field: ParameterField }) {
+function ParameterInput({
+  field,
+  itemProps,
+}: {
+  field: ParameterField;
+  itemProps: Partial<Form.ItemProps<string>> & { id: string };
+}) {
   const { definition, initialValue, kind } = field;
 
   if (kind === "boolean") {
@@ -137,7 +165,6 @@ function ParameterInput({ field }: { field: ParameterField }) {
   if (kind === "json" || kind === "raw-json") {
     return (
       <Form.TextArea
-        id={definition.key}
         title={definition.key}
         info={
           kind === "raw-json"
@@ -149,19 +176,18 @@ function ParameterInput({ field }: { field: ParameterField }) {
                 .join(" ")
             : definition.description
         }
-        defaultValue={formatInitialValue(initialValue, kind)}
         placeholder={kind === "json" ? "JSON object or array" : 'JSON value, e.g. "text", 42, or true'}
+        {...itemProps}
       />
     );
   }
 
   return (
     <Form.TextField
-      id={definition.key}
       title={definition.key}
       info={definition.description}
-      defaultValue={formatInitialValue(initialValue, kind)}
       placeholder={kind === "number" ? "Enter a number" : "Enter a value"}
+      {...itemProps}
     />
   );
 }
