@@ -99,10 +99,13 @@ export async function frontmostPage(appName: string | undefined): Promise<PageSo
     return undefined;
   }
 
-  const [url, title] = output.split("\t");
+  // Only the first tab separates the two fields: a page title is free to contain tabs of its
+  // own, and a two-element split would file the capture with everything after the first one
+  // thrown away.
+  const [url, ...titleParts] = output.split("\t");
   const page: PageSource = {
     url: url?.trim() || undefined,
-    title: title?.trim() || undefined,
+    title: titleParts.join("\t").trim() || undefined,
   };
   return page.url === undefined && page.title === undefined ? undefined : page;
 }

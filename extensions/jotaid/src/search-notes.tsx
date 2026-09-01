@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, Keyboard, List, getPreferenceValues } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { Note, NoteType, findDatabasePath, highlightTerm, matchContext, notesQuery } from "./lib/db";
@@ -48,6 +48,39 @@ function subtitle(note: Note, searchText: string, showPreview: boolean): string 
   return showPreview ? undefined : (note.groupName ?? undefined);
 }
 
+/**
+ * What fills the list when it has no rows.
+ *
+ * A failed read has to say so: the query returning nothing and the database refusing to answer
+ * look identical from the outside, and reading "No Notes Yet" over a library that is in fact
+ * full sends the user looking for the wrong problem. The driver's own message follows, since
+ * it is the one thing here that names the actual fault.
+ */
+function emptyState(
+  error: Error | undefined,
+  searchText: string,
+): { icon: Image.ImageLike; title: string; description: string } {
+  if (error !== undefined) {
+    return {
+      icon: { source: Icon.Warning, tintColor: Color.Red },
+      title: "Could Not Read Your Jotaid Library",
+      description: error.message,
+    };
+  }
+  if (searchText.length > 0) {
+    return {
+      icon: Icon.MagnifyingGlass,
+      title: "No Matching Notes",
+      description: "Try a different search term.",
+    };
+  }
+  return {
+    icon: Icon.MagnifyingGlass,
+    title: "No Notes Yet",
+    description: "Notes you write in Jotaid will show up here.",
+  };
+}
+
 export default function Command() {
   const { searchContent, showPreview } = getPreferenceValues<Preferences.SearchNotes>();
   const [searchText, setSearchText] = useState("");
@@ -55,7 +88,7 @@ export default function Command() {
   const databasePath = useMemo(() => findDatabasePath(), []);
   const query = useMemo(() => notesQuery(searchText, searchContent), [searchText, searchContent]);
 
-  const { data, isLoading, permissionView } = useSQL<Note>(databasePath ?? "", query, {
+  const { data, isLoading, error, permissionView } = useSQL<Note>(databasePath ?? "", query, {
     execute: databasePath !== undefined,
     permissionPriming: "This is required to search your Jotaid notes.",
   });
@@ -89,13 +122,7 @@ export default function Command() {
       isShowingDetail={showPreview && notes.length > 0}
       throttle
     >
-      <List.EmptyView
-        icon={Icon.MagnifyingGlass}
-        title={searchText.length > 0 ? "No Matching Notes" : "No Notes Yet"}
-        description={
-          searchText.length > 0 ? "Try a different search term." : "Notes you write in Jotaid will show up here."
-        }
-      />
+      <List.EmptyView {...emptyState(error, searchText)} />
       {notes.map((note) => (
         <List.Item
           key={note.id}
