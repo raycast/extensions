@@ -85,7 +85,7 @@ function replaceRuns(current: WorkflowRun[], enriched: WorkflowRun[]): WorkflowR
 
 export default function Command() {
   // Every row here comes from `gh api`, so a broken gh leaves nothing to show.
-  const { missing } = useRequirements({ needsGh: true });
+  const { missing, recheck } = useRequirements({ needsGh: true });
   const pager = useRef<WorkflowRunPager | undefined>(undefined);
   const abort = useRef<AbortController | undefined>(undefined);
   const [revision, setRevision] = useState(0);
@@ -121,7 +121,14 @@ export default function Command() {
     }
   }, [enrich, state.pools]);
 
-  const retry = useCallback(() => setRevision((current) => current + 1), []);
+  // `recheck` as well as a re-render: the runpool version is probed once and
+  // cached, so without forgetting it this screen keeps reporting the CLI as
+  // outdated after it has been upgraded, which is the moment the button exists
+  // for. Bumping the revision alone re-runs the fetch and not the lookup.
+  const retry = useCallback(() => {
+    recheck();
+    setRevision((current) => current + 1);
+  }, [recheck]);
 
   useEffect(() => {
     if (missing) return;

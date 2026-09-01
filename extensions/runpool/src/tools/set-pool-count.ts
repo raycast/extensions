@@ -1,5 +1,5 @@
 import { Action, Tool } from "@raycast/api";
-import { getStatus, runpool } from "../lib/runpool";
+import { MINIMUM_RUNPOOL, getStatus, runpool, runpoolTooOld } from "../lib/runpool";
 
 type Input = {
   /** The name of the pool to resize, as reported by get-status. */
@@ -61,6 +61,19 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 export default async function tool(input: Input) {
   if (!Number.isInteger(input.count) || input.count < 1) {
     throw new Error(`Runner count must be a whole number of at least 1, not "${input.count}".`);
+  }
+
+  // The version gate lives in the requirements hook, which is a React hook that
+  // only the view commands mount. An AI tool never renders anything, so it
+  // reached the CLI without ever passing that check. This is the one command
+  // where the difference is dangerous: `--if-count` is ignored rather than
+  // rejected by older versions, so the resize below would read as guarded and
+  // not be. Everything else this extension runs fails loudly on an old CLI.
+  const outdated = runpoolTooOld();
+  if (outdated) {
+    throw new Error(
+      `runpool ${outdated} is too old to resize safely. The guard that stops a resize acting on a stale count arrived in ${MINIMUM_RUNPOOL}, and older versions ignore it instead of refusing, so this change could deregister runners it was never meant to. Upgrade with: brew upgrade runpool`,
+    );
   }
 
   const { pools } = await getStatus({ local: true });
