@@ -65,5 +65,8 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "minimatch@9": "9.0.9"
+  }
 }
