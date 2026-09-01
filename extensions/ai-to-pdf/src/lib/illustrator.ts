@@ -63,6 +63,13 @@ export type ConvertResult = {
   output: string;
   /** Milliseconds Illustrator spent on the file. */
   durationMs: number;
+  /**
+   * Width and height of the artboard in points, straight from Illustrator — the
+   * only source that does not need the file to be PDF-compatible. Left out for a
+   * document with more than one artboard, where the PDF has a page per artboard
+   * and a single size says nothing.
+   */
+  artboardSize?: [number, number];
 };
 
 class IllustratorError extends Error {}
@@ -198,7 +205,7 @@ export async function convertFile(options: ConvertOptions): Promise<ConvertResul
 
   const jsx = `${JSX_PRELUDE}
 var P = ${jsxJson(params)};
-var doc = null, scratch = null, error = null;
+var doc = null, scratch = null, error = null, artboard = "";
 
 try {
   var source = new File(P.input);
@@ -225,6 +232,16 @@ try {
   } else {
     doc = app.open(source);
   }
+
+  // Illustrator knows the artboard whether or not the file is PDF-compatible, and
+  // it is the yardstick for the exported sheet if the PDF turns out to carry no
+  // TrimBox. One artboard only: more of them means a page each, of any size.
+  try {
+    if (doc.artboards.length === 1) {
+      var rect = doc.artboards[0].artboardRect;
+      artboard = ',"artboard":[' + Math.abs(rect[2] - rect[0]) + ',' + Math.abs(rect[1] - rect[3]) + ']';
+    }
+  } catch (e) {}
 
   var opts = new PDFSaveOptions();
   if (P.preset) {
@@ -263,12 +280,12 @@ if (scratch && scratch.exists) {
   try { scratch.remove(); } catch (e3) {}
 }
 
-error === null ? '{"ok":true}' : '{"ok":false,"error":' + q(error) + '}';
+error === null ? '{"ok":true' + artboard + '}' : '{"ok":false,"error":' + q(error) + '}';
 `;
 
   try {
-    await runJsx(jsx, options.timeoutMs, true);
-    return { output: options.output, durationMs: Date.now() - started };
+    const reply = await runJsx<{ artboard?: [number, number] }>(jsx, options.timeoutMs, true);
+    return { output: options.output, durationMs: Date.now() - started, artboardSize: reply.artboard };
   } finally {
     await discardScratch(scratchPath);
   }
@@ -278,10 +295,10 @@ error === null ? '{"ok":true}' : '{"ok":false,"error":' + q(error) + '}';
  * Clears away the working copy after a run that did not get to its own cleanup.
  * The file is never deleted while Illustrator may still have it open: a document
  * whose file has gone cannot be saved back and has to be sorted out by hand,
- * where a leftover `~ai-to-pdf-….ai` is merely a file to drag to the bin. So
- * Illustrator is asked to close the copy first, and after a timeout — where
- * Illustrator is still busy with the conversion script, which removes the copy
- * itself once it finishes — the copy is left where it is.
+ * where a leftover `~ai-to-pdf-….ai` is merely a file to drag to the bin. So the
+ * copy only goes once Illustrator confirms the document is closed — not when the
+ * close failed, and not after a timeout, where Illustrator is still busy with the
+ * conversion script that removes the copy itself once it finishes.
  */
 async function discardScratch(scratchPath: string): Promise<void> {
   if (!existsSync(scratchPath)) {
@@ -291,22 +308,35 @@ async function discardScratch(scratchPath: string): Promise<void> {
   if (await isIllustratorRunning()) {
     const jsx = `${JSX_PRELUDE}
 var P = ${jsxJson({ scratchPath })};
+var stillOpen = false, error = null;
+
 try {
   for (var i = app.documents.length - 1; i >= 0; i--) {
     var candidate = app.documents[i], candidatePath = null;
     try { candidatePath = candidate.fullName.fsName; } catch (e) { candidatePath = null; }
-    if (candidatePath === P.scratchPath) {
-      try { candidate.close(SaveOptions.DONOTSAVECHANGES); } catch (e2) {}
-    }
+    if (candidatePath !== P.scratchPath) continue;
+    // A document that will not close — a dialog of its own, say — keeps its file.
+    try { candidate.close(SaveOptions.DONOTSAVECHANGES); } catch (e2) { stillOpen = true; }
   }
-  var copy = new File(P.scratchPath);
-  if (copy.exists) copy.remove();
-} catch (e3) {}
-'{"ok":true}';
+  if (!stillOpen) {
+    var copy = new File(P.scratchPath);
+    if (copy.exists && !copy.remove()) throw new Error("Could not remove the working copy.");
+  }
+} catch (e3) {
+  error = (e3 && e3.message) ? e3.message : String(e3);
+}
+
+error === null
+  ? '{"ok":true,"stillOpen":' + (stillOpen ? 'true' : 'false') + '}'
+  : '{"ok":false,"error":' + q(error) + '}';
 `;
+    let reply: { stillOpen?: boolean };
     try {
-      await runJsx(jsx, SCRATCH_CLEANUP_TIMEOUT_MS);
+      reply = await runJsx<{ stillOpen?: boolean }>(jsx, SCRATCH_CLEANUP_TIMEOUT_MS);
     } catch {
+      return;
+    }
+    if (reply.stillOpen) {
       return;
     }
   }

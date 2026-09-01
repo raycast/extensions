@@ -15,7 +15,15 @@ export type Job = {
 };
 
 export type JobResult =
-  | { input: string; output: string; bleedPt: number; exact: boolean; source: BleedChoice["mode"] }
+  | {
+      input: string;
+      output: string;
+      bleedPt: number;
+      exact: boolean;
+      source: BleedChoice["mode"];
+      /** False when the exported bleed could not be measured; see `verifyBleed`. */
+      confirmed: boolean;
+    }
   | { input: string; error: string };
 
 export function isAiFile(path: string): boolean {
@@ -48,61 +56,64 @@ export function buildOutputPath(input: string, suffix: string, settings: Setting
  * Bleed Settings" without any way to read that beforehand, and a wrong bleed is
  * not something a print file should be trusted to have silently.
  */
-function verifyBleed(input: string, output: string, expectedPt: number, preset: string): void {
+function verifyBleed(
+  input: string,
+  output: string,
+  expectedPt: number,
+  preset: string,
+  artboardSize: [number, number] | undefined,
+): boolean {
   const { bleed: produced, mediaSize } = readExportedBoxes(output);
 
-  if (!produced) {
-    // Not every PDF setting writes a TrimBox and a BleedBox. The sheet is still
-    // the artboard plus the bleed on either side — printer's marks are forced
-    // off — so the MediaBox says what the bleed came out as, and a match is proof
-    // enough. Anything short of that is left unproven rather than assumed right.
-    if (sheetMatches(mediaSize, detectArtboardSize(input), expectedPt)) {
-      return;
-    }
-    // A named preset is vetted through its .joboptions beforehand, so it exports
-    // the bleed it was handed. Illustrator's current settings are the one route
-    // to an override no one can see coming, and a print file whose bleed nobody
-    // could confirm should not be reported as finished.
-    if (!preset) {
-      throw new Error(
-        `${basename(output)} was written, but its bleed could not be confirmed as ${describeBleedPt(expectedPt)}. ` +
-          `Pick an explicit PDF preset instead of Illustrator's current settings.`,
-      );
-    }
-    return;
+  if (produced) {
+    return settle(output, produced.maxPt, expectedPt, 0.5);
   }
 
-  if (Math.abs(produced.maxPt - expectedPt) > 0.5) {
-    // A print file with the wrong bleed is worse than no file, so it does not
-    // get to sit on disk looking finished.
-    try {
-      unlinkSync(output);
-    } catch {
-      // Leaving it is still better than failing the conversion for a second reason.
-    }
-    throw new Error(
-      `The PDF came out with ${describeBleedPt(produced.maxPt)} instead of ${describeBleedPt(expectedPt)}. ` +
-        `The PDF settings in use override the bleed — pick an explicit PDF preset instead of Illustrator's current settings.`,
-    );
+  // Not every PDF setting writes a TrimBox and a BleedBox. The sheet is still the
+  // artboard plus the bleed on either side — printer's marks are forced off — so
+  // the MediaBox says what the bleed came out as. Illustrator reports the artboard
+  // itself, whether or not the file is PDF-compatible; the file's own PDF part
+  // stands in for a document with several artboards, where Illustrator does not.
+  const artboard = artboardSize ?? detectArtboardSize(input);
+  if (mediaSize && artboard) {
+    return settle(output, sheetBleedPt(mediaSize, artboard), expectedPt, 1);
   }
+
+  // Nothing left to measure with. Failing to measure is not the same as a wrong
+  // bleed, so a PDF that may well be perfect is not thrown away over it. A named
+  // preset is vetted through its .joboptions beforehand and exports the bleed it
+  // was handed; only Illustrator's current settings leave an export nobody can
+  // vouch for, and that is said out loud rather than reported as a checked file.
+  return preset !== "";
+}
+
+/** Accepts a measured bleed, or removes the PDF and says what it came out as. */
+function settle(output: string, producedPt: number, expectedPt: number, tolerancePt: number): boolean {
+  if (Math.abs(producedPt - expectedPt) <= tolerancePt) {
+    return true;
+  }
+  // A print file with the wrong bleed is worse than no file, so it does not get to
+  // sit on disk looking finished.
+  try {
+    unlinkSync(output);
+  } catch {
+    // Leaving it is still better than failing the conversion for a second reason.
+  }
+  throw new Error(
+    `The PDF came out with ${describeBleedPt(producedPt)} instead of ${describeBleedPt(expectedPt)}. ` +
+      `The PDF settings in use override the bleed — pick an explicit PDF preset instead of Illustrator's current settings.`,
+  );
 }
 
 /**
- * True when the exported sheet is exactly the artboard with the expected bleed on
- * all four sides. Compared as an unordered pair of edges, so a page Illustrator
+ * The bleed the exported sheet works out at: half of what it is wider than the
+ * artboard. Edges are paired by size rather than by order, so a page Illustrator
  * happens to write rotated does not read as a wrong bleed.
  */
-function sheetMatches(
-  mediaSize: [number, number] | undefined,
-  artboard: [number, number] | undefined,
-  expectedPt: number,
-): boolean {
-  if (!mediaSize || !artboard) {
-    return false;
-  }
+function sheetBleedPt(mediaSize: [number, number], artboard: [number, number]): number {
   const sheet = [...mediaSize].sort((a, b) => a - b);
-  const expected = artboard.map((edge) => edge + 2 * expectedPt).sort((a, b) => a - b);
-  return sheet.every((edge, index) => Math.abs(edge - expected[index]) < 1);
+  const trim = [...artboard].sort((a, b) => a - b);
+  return Math.max(0, ...sheet.map((edge, index) => (edge - trim[index]) / 2));
 }
 
 export async function runJob(job: Job, settings: Settings): Promise<JobResult> {
@@ -124,7 +135,7 @@ export async function runJob(job: Job, settings: Settings): Promise<JobResult> {
     const suffix = actualPt > 0 ? settings.suffixBleed : settings.suffixNoBleed;
     const output = buildOutputPath(job.input, suffix, settings, job.destination);
 
-    await convertFile({
+    const { artboardSize } = await convertFile({
       input: job.input,
       output,
       bleedPt: requestPt,
@@ -135,8 +146,8 @@ export async function runJob(job: Job, settings: Settings): Promise<JobResult> {
     if (!existsSync(output)) {
       throw new Error("Illustrator reported success but no PDF was written.");
     }
-    verifyBleed(job.input, output, actualPt, job.preset);
-    return { input: job.input, output, bleedPt: actualPt, exact, source: job.bleed.mode };
+    const confirmed = verifyBleed(job.input, output, actualPt, job.preset, artboardSize);
+    return { input: job.input, output, bleedPt: actualPt, exact, source: job.bleed.mode, confirmed };
   } catch (error) {
     return { input: job.input, error: error instanceof Error ? error.message : String(error) };
   }
@@ -164,5 +175,9 @@ export function summarize(results: JobResult[]): { succeeded: JobResult[]; faile
 
 /** Describes the bleed actually applied to a converted file. */
 export function describeBleed(result: JobResult): string {
-  return "error" in result ? "" : describeBleedPt(result.bleedPt);
+  if ("error" in result) {
+    return "";
+  }
+  // An unconfirmed bleed is not a failure, but it is not a promise either.
+  return result.confirmed ? describeBleedPt(result.bleedPt) : `${describeBleedPt(result.bleedPt)}, not confirmed`;
 }
