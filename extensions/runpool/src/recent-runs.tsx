@@ -54,7 +54,14 @@ function runnerText(run: WorkflowRun): string | undefined {
   if (run.locations) {
     if (run.locations.length === 1) return run.locations[0];
     if (run.locations.length > 1) return `${run.locations[0]} +${run.locations.length - 1}`;
-    return "Runner not assigned";
+    // Jobs exist and none of them ran on a runner. That is only worth saying
+    // while a run is still waiting for one, which is the failure this view
+    // exists to surface. A run that finished without a runner was skipped or
+    // cancelled, and its conclusion already says so: "Runner not assigned"
+    // beside the word "skipped" reads as a capacity problem that is not there.
+    // It is also the longest thing on the row, and pushed the conclusion off
+    // the end of it.
+    return run.status === "completed" ? undefined : "Runner not assigned";
   }
   return run.status === "queued" ? "Runner not assigned" : undefined;
 }
