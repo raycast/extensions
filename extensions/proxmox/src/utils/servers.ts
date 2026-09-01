@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, open, readdir, rm, rmdir, stat, unlink } from "node:fs/promises";
+import { mkdir, open, readdir, rmdir, stat, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import { useCallback, useEffect, useMemo } from "react";
 import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
@@ -44,9 +44,10 @@ async function writeStoredServer(server: StoredServer) {
  * lock directory under the extension support path. Legacy migration writes those
  * same keys and must take the same per-server lock.
  *
- * The lock is a directory plus a uniquely named token file. Release only unlinks
- * that token and rmdirs if empty, so a stale owner cannot delete a replacement
- * command's lock between a content check and unlink.
+ * The lock is a directory plus a uniquely named token file. Release and stale
+ * reclaim only unlink tokens they own or that are still stale, then rmdir if
+ * empty, so neither a finishing owner nor a delayed reclaim can delete a
+ * replacement command's lock.
  */
 const LOCK_DIR = "server-locks";
 const LOCK_STALE_MS = 8_000;
@@ -104,6 +105,51 @@ async function newestLockActivity(lockPath: string): Promise<number | undefined>
   return newest;
 }
 
+async function reclaimStaleLock(lockPath: string): Promise<void> {
+  let info;
+  try {
+    info = await stat(lockPath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return;
+    }
+    throw error;
+  }
+
+  if (!info.isDirectory()) {
+    await unlink(lockPath).catch(() => undefined);
+    return;
+  }
+
+  let entries: string[];
+  try {
+    entries = await readdir(lockPath);
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT" || code === "ENOTDIR") {
+      return;
+    }
+    throw error;
+  }
+
+  for (const entry of entries) {
+    const tokenPath = join(lockPath, entry);
+    try {
+      const { mtimeMs } = await stat(tokenPath);
+      if (Date.now() - mtimeMs > LOCK_STALE_MS) {
+        await unlink(tokenPath);
+      }
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== "ENOENT" && code !== "EPERM" && code !== "EISDIR") {
+        throw error;
+      }
+    }
+  }
+
+  await rmdir(lockPath).catch(() => undefined);
+}
+
 async function withSharedServerLock<T>(id: string, mutation: () => Promise<T>): Promise<T> {
   await mkdir(join(environment.supportPath, LOCK_DIR), { recursive: true });
   const lockPath = serverLockPath(id);
@@ -125,7 +171,7 @@ async function withSharedServerLock<T>(id: string, mutation: () => Promise<T>): 
           continue;
         }
         if (Date.now() - mtimeMs > LOCK_STALE_MS) {
-          await rm(lockPath, { recursive: true, force: true }).catch(() => undefined);
+          await reclaimStaleLock(lockPath);
           continue;
         }
       } catch (statError) {
