@@ -175,7 +175,7 @@ export default function Command() {
 
   const {
     isLoading: isReposLoading,
-    data: repos,
+    data: reposResult,
     revalidate,
   } = usePromise(
     async (key: string, url: string) => {
@@ -184,7 +184,7 @@ export default function Command() {
       if (raw) {
         previousEntry = JSON.parse(raw) as CacheEntry;
         if (Date.now() - previousEntry.timestamp < CACHE_TTL) {
-          return previousEntry.data;
+          return { key, data: previousEntry.data };
         }
       }
       const rawRepos = await fetchAllPages(url, headers);
@@ -196,10 +196,15 @@ export default function Command() {
         data,
       };
       setCachedEntry(entry);
-      return data;
+      return { key, data };
     },
     [cacheKey, reposUrl],
   );
+  // usePromise keeps returning the previous org's data while a new fetch is in flight. Only
+  // trust it if it actually belongs to the currently selected org, otherwise fall back to the
+  // cache (which is already keyed correctly) or nothing, so switching orgs on a cold cache
+  // shows a loading state instead of the previous org's repositories.
+  const repos = reposResult?.key === cacheKey ? reposResult.data : undefined;
 
   function handleRefresh() {
     if (cachedEntry) {
