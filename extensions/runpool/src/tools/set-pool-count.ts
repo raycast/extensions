@@ -93,9 +93,8 @@ export default async function tool(input: Input) {
 
   // `--if-count` is what settles it: runpool refuses the write unless the pool
   // is still where the decision was made, and holds a lock so two resizes
-  // cannot interleave. The check above says something better than a command
-  // failure when the pool has obviously moved, and is the only check there is
-  // against a runpool old enough to ignore the flag.
+  // cannot interleave. The check above stays because it says something better
+  // than a command failure when the pool has obviously moved.
   await runpool(["set-count", pool.name, String(input.count), "--if-count", String(pool.count)]);
   return `Pool "${pool.name}" now has ${input.count} runners, changed from ${pool.count}.`;
 }

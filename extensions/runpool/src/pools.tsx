@@ -132,12 +132,12 @@ export default function Command() {
       // worked out before the question could deregister runners nobody agreed
       // to.
       //
-      // `--if-count` below is what actually settles this: runpool 0.9.0 refuses
-      // the write unless the pool is still where the decision was made, and
-      // holds a lock so two resizes cannot interleave. This read stays for two
-      // reasons: it says something better than a command failure when the pool
-      // has obviously moved, and an older runpool ignores the flag, where it is
-      // then the only check there is.
+      // `--if-count` below is what actually settles this: runpool refuses the
+      // write unless the pool is still where the decision was made, and holds a
+      // lock so two resizes cannot interleave. This read stays because it says
+      // something better than a command failure when the pool has obviously
+      // moved. Anything older than 0.9.0 ignores the flag rather than rejecting
+      // it, which is why the requirements check refuses those outright.
       const settled = (await getStatus({ local: true })).pools.find((candidate) => candidate.name === pool.name);
       if (settled?.count !== current.count) {
         await showFailureToast(

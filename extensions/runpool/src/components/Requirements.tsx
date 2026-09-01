@@ -1,9 +1,11 @@
 import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
+import { MINIMUM_RUNPOOL } from "../lib/runpool";
 
 /** What is missing. Each has one command that fixes it. */
-export type Requirement = "runpool" | "gh" | "gh-auth";
+export type Requirement = "runpool" | "runpool-outdated" | "gh" | "gh-auth";
 
 const INSTALL_RUNPOOL = "brew install aicayzer/tap/runpool";
+const UPGRADE_RUNPOOL = "brew upgrade runpool";
 const INSTALL_GH = "brew install gh";
 const AUTH_GH = "gh auth login";
 
@@ -33,6 +35,25 @@ runpool schedule install
 ## Already installed?
 
 If it lives somewhere unusual, set the full path in this extension's preferences.
+`,
+  },
+
+  "runpool-outdated": {
+    title: "runpool Is Too Old",
+    command: UPGRADE_RUNPOOL,
+    markdown: `# runpool needs to be ${MINIMUM_RUNPOOL} or newer
+
+## Upgrade it
+
+\`\`\`bash
+${UPGRADE_RUNPOOL}
+\`\`\`
+
+## Why this is a refusal rather than a warning
+
+Changing a pool's runner count writes an absolute number, so every capacity action here decides what to write from the count it just read. \`runpool ${MINIMUM_RUNPOOL}\` added \`--if-count\`, which refuses the write unless the pool is still where that decision was made.
+
+Older versions do not reject the flag. They ignore it. A resize would look guarded and would not be, and a pool changed from another window in the meantime gets shrunk by an action meant to grow it, deregistering runners that setting the number back does not restore.
 `,
   },
 
@@ -84,6 +105,7 @@ Then run \`runpool doctor\`, which checks the authentication along with the regi
  */
 export function Requirements({ missing, onRecheck }: { missing: Requirement; onRecheck?: () => void }) {
   const screen = SCREENS[missing];
+  const isRunpool = missing === "runpool" || missing === "runpool-outdated";
 
   return (
     <Detail
@@ -98,10 +120,10 @@ export function Requirements({ missing, onRecheck }: { missing: Requirement; onR
           {onRecheck && <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRecheck} />}
           <Action.CopyToClipboard title="Copy Command" content={screen.command} icon={Icon.Clipboard} />
           <Action.OpenInBrowser
-            title={missing === "runpool" ? "Open Runpool on GitHub" : "Open GitHub CLI Website"}
-            url={missing === "runpool" ? "https://github.com/aicayzer/runpool" : "https://cli.github.com"}
+            title={isRunpool ? "Open Runpool on GitHub" : "Open GitHub CLI Website"}
+            url={isRunpool ? "https://github.com/aicayzer/runpool" : "https://cli.github.com"}
           />
-          {missing === "runpool" && (
+          {isRunpool && (
             // No shortcut: cmd+, is reserved by Raycast for preferences and
             // would be ignored anyway.
             <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />

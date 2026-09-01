@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { Requirement } from "../components/Requirements";
-import { findGh, findRunpool } from "../lib/runpool";
+import { findGh, findRunpool, forgetRunpoolVersion, runpoolTooOld } from "../lib/runpool";
 
 /**
  * Which dependency is missing, re-checkable without relaunching the command.
@@ -21,9 +21,13 @@ export function useRequirements(options?: { needsGh?: boolean }): {
   recheck: () => void;
 } {
   const [, bump] = useState(0);
-  const recheck = useCallback(() => bump((n) => n + 1), []);
+  const recheck = useCallback(() => {
+    forgetRunpoolVersion();
+    bump((n) => n + 1);
+  }, []);
 
   if (findRunpool() === null) return { missing: "runpool", recheck };
+  if (runpoolTooOld() !== null) return { missing: "runpool-outdated", recheck };
   if (options?.needsGh && findGh() === null) return { missing: "gh", recheck };
   return { missing: null, recheck };
 }

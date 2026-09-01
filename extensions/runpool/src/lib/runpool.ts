@@ -1,5 +1,5 @@
 import { getPreferenceValues, Icon } from "@raycast/api";
-import { execFile } from "child_process";
+import { execFile, execFileSync } from "child_process";
 import { existsSync } from "fs";
 import { homedir } from "os";
 import { promisify } from "util";
@@ -92,6 +92,68 @@ export function findRunpool(): string | null {
     return existsSync(explicit) ? explicit : null;
   }
   return CANDIDATE_PATHS.find((p) => existsSync(p)) ?? null;
+}
+
+/** The oldest runpool this extension will drive. See `runpoolTooOld`. */
+export const MINIMUM_RUNPOOL = "0.9.0";
+
+const versionCache = new Map<string, string | null>();
+
+/** Forget the probed versions, so a `Try Again` re-runs them. */
+export function forgetRunpoolVersion(): void {
+  versionCache.clear();
+}
+
+/**
+ * Whether the resolved runpool is too old to guard a resize.
+ *
+ * `set-count --if-count` arrived in 0.9.0. Older versions do not reject the
+ * flag, they ignore it: `_rp_set_count` reads two positional arguments and
+ * never looks past them. So a resize that reads as guarded here is not one
+ * there, and a pool changed from another window between the confirmation and
+ * the write is shrunk by an action meant to grow it, deregistering runners
+ * nobody agreed to. A silently ignored safety flag is worse than a missing
+ * one, so this refuses rather than degrading.
+ *
+ * Probed once per resolved path and cached, because the hook that calls this
+ * is synchronous and runs on every render. A version cannot change under a
+ * running command, and `Try Again` clears the cache.
+ */
+export function runpoolTooOld(): string | null {
+  const bin = findRunpool();
+  if (!bin) return null;
+
+  if (!versionCache.has(bin)) {
+    let found: string | null = null;
+    try {
+      const out = execFileSync(bin, ["--version"], {
+        env: COMMAND_ENV,
+        encoding: "utf8",
+        timeout: 2000,
+      });
+      found = /(\d+)\.(\d+)\.(\d+)/.exec(out)?.[0] ?? null;
+    } catch {
+      // Unreadable is not old. A binary that cannot answer --version has a
+      // different problem, and every later call reports it properly.
+      found = null;
+    }
+    versionCache.set(bin, found);
+  }
+
+  const version = versionCache.get(bin) ?? null;
+  if (!version) return null;
+  return compareVersions(version, MINIMUM_RUNPOOL) < 0 ? version : null;
+}
+
+/** -1, 0 or 1. Three numeric parts only, which is all runpool ever emits. */
+function compareVersions(a: string, b: string): number {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    const d = (pa[i] ?? 0) - (pb[i] ?? 0);
+    if (d !== 0) return d < 0 ? -1 : 1;
+  }
+  return 0;
 }
 
 /**
