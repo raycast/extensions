@@ -6,7 +6,10 @@ import { existsSync, statSync, unlinkSync, writeFileSync } from "fs";
 
 const exec = promisify(execCb);
 
-export function getTempFilePath(prefix = "circle_search", ext = ".png"): string {
+export function getTempFilePath(
+  prefix = "circle_search",
+  ext = ".png",
+): string {
   const timestamp = Date.now();
   const random = Math.floor(Math.random() * 10000);
   return join(tmpdir(), `${prefix}_${timestamp}_${random}${ext}`);
@@ -518,7 +521,9 @@ export async function captureFullScreen(): Promise<string | null> {
         $g.Dispose();
         $bmp.Dispose();
       `;
-      await exec(`powershell.exe -NoProfile -Command "${psScript.replace(/\r?\n/g, " ")}"`);
+      await exec(
+        `powershell.exe -NoProfile -Command "${psScript.replace(/\r?\n/g, " ")}"`,
+      );
     } else {
       await exec(`/usr/sbin/screencapture -x "${outputPath}"`);
     }
@@ -553,7 +558,9 @@ export async function getClipboardImage(): Promise<string | null> {
           exit 1;
         }
       `;
-      await exec(`powershell.exe -NoProfile -Command "${psScript.replace(/\r?\n/g, " ")}"`);
+      await exec(
+        `powershell.exe -NoProfile -Command "${psScript.replace(/\r?\n/g, " ")}"`,
+      );
     } else {
       const osaScript = `
         set pngPath to POSIX file "${outputPath}"

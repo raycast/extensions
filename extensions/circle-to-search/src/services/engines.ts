@@ -1,10 +1,6 @@
 import { open, getPreferenceValues } from "@raycast/api";
 
-export type SearchEngine = "google" | "bing" | "yandex" | "tineye" | "baidu" | "all";
-
-interface ExtensionPreferences {
-  searchEngine?: SearchEngine;
-}
+export type SearchEngine = Preferences["searchEngine"];
 
 export const SEARCH_ENGINES: Record<
   Exclude<SearchEngine, "all">,
@@ -12,22 +8,25 @@ export const SEARCH_ENGINES: Record<
 > = {
   google: {
     name: "Google Lens",
-    getUrl: (url: string) => `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(url)}`,
+    getUrl: (url: string) =>
+      `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(url)}`,
   },
   bing: {
     name: "Bing Visual Search",
     getUrl: (url: string) =>
       `https://www.bing.com/images/search?view=detailv2&iss=sbi&FORM=SBIHRP&sbisrc=UrlPaste&q=imgurl:${encodeURIComponent(
-        url
+        url,
       )}`,
   },
   yandex: {
     name: "Yandex Images",
-    getUrl: (url: string) => `https://yandex.com/images/search?rpt=imageview&url=${encodeURIComponent(url)}`,
+    getUrl: (url: string) =>
+      `https://yandex.com/images/search?rpt=imageview&url=${encodeURIComponent(url)}`,
   },
   tineye: {
     name: "TinEye",
-    getUrl: (url: string) => `https://tineye.com/search?url=${encodeURIComponent(url)}`,
+    getUrl: (url: string) =>
+      `https://tineye.com/search?url=${encodeURIComponent(url)}`,
   },
   baidu: {
     name: "Baidu Visual Search",
@@ -40,18 +39,23 @@ export const SEARCH_ENGINES: Record<
  * Gets the configured search engine from user preferences (defaults to 'google').
  */
 export function getSelectedEngine(): SearchEngine {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   return prefs.searchEngine || "google";
 }
 
 /**
  * Opens search results in the browser for the configured engine(s).
  */
-export async function openVisualSearch(imageUrl: string, engine?: SearchEngine): Promise<string> {
+export async function openVisualSearch(
+  imageUrl: string,
+  engine?: SearchEngine,
+): Promise<string> {
   const selected = engine || getSelectedEngine();
 
   if (selected === "all") {
-    const promises = Object.values(SEARCH_ENGINES).map((eng) => open(eng.getUrl(imageUrl)));
+    const promises = Object.values(SEARCH_ENGINES).map((eng) =>
+      open(eng.getUrl(imageUrl)),
+    );
     await Promise.all(promises);
     return "All Engines";
   }

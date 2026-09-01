@@ -26,7 +26,8 @@ export default async function Command() {
     const engineName = await openVisualSearch(imageUrl);
     await showHUD(`✨ Opened in ${engineName}`);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to search screen";
+    const message =
+      error instanceof Error ? error.message : "Failed to search screen";
     await showToast({
       style: Toast.Style.Failure,
       title: "Search Failed",

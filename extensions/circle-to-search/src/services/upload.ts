@@ -52,7 +52,10 @@ async function uploadToTmpFiles(filePath: string): Promise<string> {
     throw new Error(`TmpFiles returned HTTP ${response.status}`);
   }
 
-  const json = (await response.json()) as { status: string; data?: { url?: string } };
+  const json = (await response.json()) as {
+    status: string;
+    data?: { url?: string };
+  };
   if (json.status === "success" && json.data?.url) {
     // TmpFiles returns page URL like https://tmpfiles.org/123/img.png
     // The direct image URL format is https://tmpfiles.org/dl/123/img.png
@@ -60,7 +63,9 @@ async function uploadToTmpFiles(filePath: string): Promise<string> {
     return pageUrl.replace("tmpfiles.org/", "tmpfiles.org/dl/");
   }
 
-  throw new Error(`Unexpected TmpFiles response format: ${JSON.stringify(json)}`);
+  throw new Error(
+    `Unexpected TmpFiles response format: ${JSON.stringify(json)}`,
+  );
 }
 
 /**
@@ -72,7 +77,10 @@ export async function uploadImage(filePath: string): Promise<string> {
   try {
     return await uploadToCatbox(filePath);
   } catch (primaryErr) {
-    console.warn("Primary upload failed, falling back to backup host:", primaryErr);
+    console.warn(
+      "Primary upload failed, falling back to backup host:",
+      primaryErr,
+    );
     return await uploadToTmpFiles(filePath);
   }
 }
