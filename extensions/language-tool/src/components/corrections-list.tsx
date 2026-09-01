@@ -17,6 +17,7 @@ const AUTO_DETECT = "auto";
 
 type CorrectionsListProps = {
   textChecked: string;
+  fromSelection: boolean;
   result: CheckTextResponse;
 };
 
@@ -25,7 +26,11 @@ type CorrectionsListProps = {
  * acts on the row being reviewed, as it does everywhere else in Raycast; the
  * text is replaced from the screen this was opened from.
  */
-export function CorrectionsList({ textChecked, result }: CorrectionsListProps) {
+export function CorrectionsList({
+  textChecked,
+  fromSelection,
+  result,
+}: CorrectionsListProps) {
   // Read the shared state rather than take it as props: this view is pushed
   // onto the navigation stack, so props captured at push time never update.
   const {
@@ -37,7 +42,12 @@ export function CorrectionsList({ textChecked, result }: CorrectionsListProps) {
     toggleChoice,
   } = useCorrectionChoices(textChecked, result);
 
-  const onReplaceSelection = () => replaceSelectionWith(correctedText);
+  // The same guard as the screen this was opened from: this path used to
+  // paste without checking that the selection was still the text reviewed.
+  // Refusing here leaves the reader on the list, where Escape goes back to the
+  // screen that can check the selection again.
+  const onReplaceSelection = () =>
+    replaceSelectionWith(correctedText, { textChecked, fromSelection });
 
   const { pop } = useNavigation();
   const { data: languages } = useFetch<Language[]>(API_ENDPOINTS.LANGUAGES);

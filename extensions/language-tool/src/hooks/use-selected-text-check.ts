@@ -47,6 +47,7 @@ export function useSelectedTextCheck(language: string) {
     revalidate: rereadSelection,
   } = usePromise(readInputText, []);
   const textChecked = input?.text ?? "";
+  const fromSelection = input?.fromSelection ?? false;
 
   const {
     data: result,
@@ -84,7 +85,10 @@ export function useSelectedTextCheck(language: string) {
   );
 
   return {
-    textChecked: textChecked ?? "",
+    textChecked,
+    // Where the text came from, which the replacement has to match: pasting
+    // over a selection that is no longer there lands at the cursor instead.
+    fromSelection,
     result: result ?? EMPTY_RESULT,
     isLoading: isReadingText || isChecking,
     error,

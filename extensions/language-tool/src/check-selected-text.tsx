@@ -1,25 +1,18 @@
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Color,
   Detail,
   Icon,
-  PopToRootType,
-  Toast,
-  closeMainWindow,
-  showToast,
   useNavigation,
 } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { CorrectionsList } from "./components/corrections-list";
 import { API_ENDPOINTS } from "./config/api";
 import { useCorrectionChoices } from "./hooks/use-correction-choices";
-import {
-  readInputText,
-  useSelectedTextCheck,
-} from "./hooks/use-selected-text-check";
+import { useSelectedTextCheck } from "./hooks/use-selected-text-check";
 import { resultWithAllMarked } from "./utils/match-display";
+import { replaceSelectionWith } from "./utils/replace-selection";
 import { onBothPlatforms } from "./utils/shortcuts";
 import type { Language } from "./types";
 
@@ -43,35 +36,29 @@ export default function Command() {
   );
 
   const { data: languages } = useFetch<Language[]>(API_ENDPOINTS.LANGUAGES);
-  const { textChecked, result, isLoading, error, rereadSelection } =
-    useSelectedTextCheck(language);
+  const {
+    textChecked,
+    fromSelection,
+    result,
+    isLoading,
+    error,
+    rereadSelection,
+  } = useSelectedTextCheck(language);
   const { matches, applied, correctedText } = useCorrectionChoices(
     textChecked,
     result,
     { resetOnMount: true },
   );
 
-  // Raycast can bring a dismissed command back exactly as it was, and gives a
-  // view no way to notice. Reading the selection again here is the one place
-  // it matters: it stops a stale result from being pasted over whatever the
-  // user has selected now.
+  // The helper refuses when the selection is no longer the text that was
+  // checked; checking it again here is what makes that refusal recoverable
+  // rather than a dead end.
   async function replaceSelection() {
-    const current = await readInputText();
-    if (current.text && current.text !== textChecked) {
-      await rereadSelection();
-      await showToast({
-        style: Toast.Style.Success,
-        title: "The selection changed",
-        message: "Checked it again — press Enter to replace it",
-      });
-      return;
-    }
-
-    await Clipboard.paste(correctedText);
-    // Pop to root as well as closing: the text has been placed and this run is
-    // over, so reopening Raycast should start from the search bar rather than
-    // resume this command on a selection that is no longer there.
-    await closeMainWindow({ popToRootType: PopToRootType.Immediate });
+    const replaced = await replaceSelectionWith(correctedText, {
+      textChecked,
+      fromSelection,
+    });
+    if (!replaced) await rereadSelection();
   }
 
   // The API returns variants such as "English (US)"; one entry per code is enough
@@ -80,7 +67,13 @@ export default function Command() {
   ).sort((a, b) => a.name.localeCompare(b.name));
 
   function reviewCorrections() {
-    push(<CorrectionsList textChecked={textChecked} result={result} />);
+    push(
+      <CorrectionsList
+        textChecked={textChecked}
+        fromSelection={fromSelection}
+        result={result}
+      />,
+    );
   }
 
   function body(): string {
