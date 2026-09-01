@@ -1,11 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Btt } from "bettertouchtool";
 
-interface Preferences {
-  bttSharedSecret?: string;
-  bttWebserverPort: string;
-}
-
 export function createBttClient() {
   const preferences = getPreferenceValues<Preferences>();
   const port = Number(preferences.bttWebserverPort);
