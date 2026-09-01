@@ -60,12 +60,20 @@ async function resolveAppName(bundleId: string, fallback: string): Promise<strin
   return fallback;
 }
 
-export async function discoverMenuShortcuts(): Promise<ScanResult> {
+export async function discoverMenuShortcuts(files: string[] = plistCandidates()): Promise<ScanResult> {
   const hits: string[] = [];
   const failedFiles: string[] = [];
-  for (const p of plistCandidates()) {
+  const readFiles: string[] = [];
+  for (const p of files) {
     try {
-      if (readFileSync(p).includes(MARKER)) hits.push(p);
+      if (readFileSync(p).includes(MARKER)) {
+        hits.push(p);
+      } else {
+        // Readable, but macOS dropped NSUserKeyEquivalents after the last
+        // customization was deleted. Skip plutil, still record an empty read
+        // so Import All can drop stale rows from this file.
+        readFiles.push(p);
+      }
     } catch {
       // unreadable at prefilter → its stored entries stay untouched by the sweep
       failedFiles.push(p);
@@ -73,7 +81,6 @@ export async function discoverMenuShortcuts(): Promise<ScanResult> {
   }
 
   const apps: DiscoveredApp[] = [];
-  const readFiles: string[] = [];
   for (const path of hits) {
     const fallbackName = basename(path, ".plist");
     try {
