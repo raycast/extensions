@@ -1,4 +1,15 @@
-import { showToast, Toast, Form, ActionPanel, Action, Icon, launchCommand, LaunchType } from "@raycast/api";
+import {
+  showToast,
+  showHUD,
+  Toast,
+  Detail,
+  Form,
+  ActionPanel,
+  Action,
+  Icon,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import { usePromise, useForm } from "@raycast/utils";
 import {
   type AudioDevice,
@@ -15,7 +26,7 @@ import {
   setInputDeviceMute,
 } from "./audio-device";
 import { getPinnedVolume, setPinnedVolume, clearPinnedVolume } from "./device-preferences";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const ioConfig = {
   output: {
@@ -202,4 +213,32 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
       />
     </Form>
   );
+}
+
+export function SilentVolume({ ioType, level }: { ioType: IOType; level: string }) {
+  useEffect(() => {
+    (async () => {
+      const config = ioConfig[ioType];
+      const parsed = parseInt(level, 10);
+
+      if (isNaN(parsed)) {
+        await showToast(Toast.Style.Failure, "Invalid volume", `"${level}" is not a number between 0 and 100`);
+        return;
+      }
+
+      const clamped = Math.max(0, Math.min(100, parsed));
+
+      try {
+        const device = await config.getDefault();
+        const deviceId = String(device.id);
+        if (clamped > 0) await config.setMute(deviceId, false).catch(() => {});
+        await config.setVolume(deviceId, clamped / 100);
+        await showHUD(`${device.name}: ${clamped}%`);
+      } catch (error) {
+        await showToast(Toast.Style.Failure, `Failed to set ${ioType} volume`, String(error));
+      }
+    })();
+  }, [ioType, level]);
+
+  return <Detail isLoading markdown="" />;
 }
