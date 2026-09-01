@@ -56,7 +56,7 @@ That is the whole setup. The choice lives in Sowiks → Settings → Integration
 
 **Backgrounds worth posting.** Gradients, your own images, nine positions to place the shot. Arrows, callouts, numbered steps and blur on top. The difference between a raw screenshot and something that belongs in a blog post or a launch tweet.
 
-![Annotation tools and background gradients](./media/backgrounds.png)
+![Annotation tools over a screenshot on a gradient background](./media/backgrounds.png)
 
 **A link instead of an attachment.** Uploading a 4 MB PNG into a chat and waiting for it to preview is a bad way to answer a question. Share to the cloud and paste one link — it opens instantly for whoever you sent it to.
 
