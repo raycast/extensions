@@ -1,5 +1,15 @@
 # System Monitor Changelog
 
+## [Compact Layout] - {PR_MERGE_DATE}
+
+- Restructure the main view as a sectioned entity list (Overview / CPU / Memory / Disk / Power / Network) with colored percentage tags on the CPU, Memory, Disk and Power rows
+- Show every mounted volume as its own Disk row with a capacity tag; the boot volume's pane carries SMART status, physical-disk details and the live I/O rate (the "Disk" default tab opens on the boot volume)
+- Render per-core CPU usage as one wrapping row of colored tags, labeled by Performance/Efficiency cluster on Apple Silicon when the mapping can be verified via IORegistry (plain `C1…Cn` otherwise)
+- Compact the CPU and Memory panes so they fit a default Raycast window without scrolling: one-row temperature, fans and load average, paired memory breakdown, top 3 processes directly under usage
+- Lead System Info with live uptime and process count (polled only while the row is selected), pair related spec-sheet rows, and fold the storage rows into the boot volume's Disk pane
+- Color CPU temperature by severity and load average by load ÷ core count; add row icons to System Info
+- Color the Memory tags from macOS's own memory-pressure level instead of the used percentage
+
 ## [Disk Tab] - 2026-08-05
 
 - Add a Disk tab with capacity, per-volume breakdown, APFS volume details and live disk I/O rates via `iostat`
