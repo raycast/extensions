@@ -23,6 +23,10 @@ export type WifiReport = {
 	active_ssid: string;
 	known_networks: string[];
 	passwords: Record<string, string>;
+	/** Whether the link is up. Older rcc did not say; then it is inferred from the SSID. */
+	connected: boolean;
+	/** Up, but macOS withholds the name from command-line tools. */
+	ssid_hidden: boolean;
 };
 
 export function parseWifi(stdout: string): WifiReport {
@@ -30,6 +34,11 @@ export function parseWifi(stdout: string): WifiReport {
 	return {
 		interface: typeof r.interface === "string" ? r.interface : "",
 		active_ssid: typeof r.active_ssid === "string" ? r.active_ssid : "",
+		connected:
+			typeof r.connected === "boolean"
+				? r.connected
+				: typeof r.active_ssid === "string" && r.active_ssid !== "",
+		ssid_hidden: r.ssid_hidden === true,
 		known_networks: Array.isArray(r.known_networks)
 			? r.known_networks.filter((n): n is string => typeof n === "string")
 			: [],

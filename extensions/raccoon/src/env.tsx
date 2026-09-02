@@ -89,9 +89,10 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 							]}
 							actions={
 								<RowActions all={allBroken} shared={actions}>
-									{/* The entry lives in a shell startup file
-									    whose shape only the reader knows, so
-									    this copies it rather than editing. */}
+									{/* The entry lives in a shell startup file,
+									    or in /etc/paths.d — 6 of 14 here did —
+									    and only the reader knows which, so this
+									    copies it rather than editing. */}
 									<Action.CopyToClipboard
 										title="Copy Path Entry"
 										content={p.path}

@@ -6,6 +6,7 @@ import {
 	conditionHealth,
 	cycleHealth,
 	parseBattery,
+	chargingLabel,
 } from "./battery-json.ts";
 
 const full = JSON.stringify({
@@ -88,4 +89,25 @@ test("output that is not JSON says so", () => {
 	);
 	assert.throws(() => parseBattery("   "), /printed nothing/);
 	assert.throws(() => parseBattery("[1,2]"), /not a report object/);
+});
+
+test("on AC and not charging is holding the charge, not running on battery", () => {
+	const base = {
+		present: true,
+		power_source: "ac" as const,
+		cycle_count: 694,
+		max_capacity_percent: 85,
+		condition: "Normal",
+		charging: false,
+		fully_charged: false,
+		charge_percent: 83,
+	};
+	assert.match(chargingLabel(base), /on AC/);
+	assert.equal(
+		chargingLabel({ ...base, power_source: "battery" }),
+		"No, on battery",
+	);
+	// An rcc that did not say where the power comes from gets no guess.
+	assert.equal(chargingLabel({ ...base, power_source: null }), "No");
+	assert.equal(chargingLabel({ ...base, charging: true }), "Yes");
 });

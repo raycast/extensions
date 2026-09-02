@@ -23,7 +23,20 @@ function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 	const row = <RowActions one={net} all={net} shared={actions} />;
 	const real = n.interfaces.filter((i) => !isNoise(i));
 	const loopback = n.interfaces.filter(isNoise);
-	const firewallOn = n.firewall.application === "enabled";
+	// "unknown" is the tool not answering, which is neither on nor off: the
+	// old row painted it red as "disabled".
+	const firewallTint =
+		n.firewall.application === "enabled"
+			? Color.Green
+			: n.firewall.application === "disabled"
+				? Color.Red
+				: Color.SecondaryText;
+	const firewallIcon =
+		n.firewall.application === "enabled"
+			? Icon.Shield
+			: n.firewall.application === "disabled"
+				? Icon.ExclamationMark
+				: Icon.QuestionMarkCircle;
 	return (
 		<>
 			<List.Section title="Addresses" subtitle={`${real.length}`}>
@@ -110,16 +123,54 @@ function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 
 			<List.Section title="Status">
 				<List.Item
-					icon={{
-						source: firewallOn ? Icon.Shield : Icon.ExclamationMark,
-						tintColor: firewallOn ? Color.Green : Color.Red,
-					}}
+					icon={{ source: firewallIcon, tintColor: firewallTint }}
 					title="Application firewall"
+					subtitle={
+						n.firewall.application === "unknown"
+							? "socketfilterfw did not answer"
+							: undefined
+					}
 					accessories={[
 						{
 							tag: {
-								value: n.firewall.application,
-								color: firewallOn ? Color.Green : Color.Red,
+								value:
+									n.firewall.application === "unknown"
+										? "not checked"
+										: n.firewall.application,
+								color: firewallTint,
+							},
+						},
+					]}
+					actions={row}
+				/>
+				{/* pf needs administrator rights to read; without them rcc says
+				    unknown, and that is worth a row rather than silence. */}
+				<List.Item
+					icon={{
+						source: Icon.Shield,
+						tintColor:
+							n.firewall.pf === "enabled"
+								? Color.Green
+								: Color.SecondaryText,
+					}}
+					title="Packet filter (pf)"
+					subtitle={
+						n.firewall.pf === "unknown" || n.firewall.pf === ""
+							? "needs administrator rights to read"
+							: undefined
+					}
+					accessories={[
+						{
+							tag: {
+								value:
+									n.firewall.pf === "unknown" ||
+									n.firewall.pf === ""
+										? "not checked"
+										: n.firewall.pf,
+								color:
+									n.firewall.pf === "enabled"
+										? Color.Green
+										: Color.SecondaryText,
 							},
 						},
 					]}

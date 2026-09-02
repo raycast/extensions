@@ -1,20 +1,27 @@
 import { Icon } from "@raycast/api";
-import { ProgressList } from "./progress-list";
+import { DryRunFirst } from "./dry-run-first";
 
 /**
- * `rcc upgrade` — brew, pip, npm, pnpm, bun, uv, go, cargo, one after another.
- *
- * Nothing here but the shape: the screen is ProgressList, because `apps` is the
- * same command in a different domain and one of them having a better view than
- * the other would be an accident, not a decision.
+ * `rcc upgrade` — brew, pip, npm, pnpm, bun, uv, go, nvm, rustup, gem, docker,
+ * claude, one after another. Opens in `--dry-run`, like `apps`: it is the
+ * other command here that rewrites what is installed, and it used to start the
+ * moment the screen opened.
  */
 export default function Command() {
 	return (
-		<ProgressList
-			args={["upgrade"]}
-			title="Upgrade"
+		<DryRunFirst
+			command="upgrade"
+			subject="Packages"
 			unit="package managers"
 			idleIcon={Icon.Download}
+			confirm={{
+				title: "Upgrade the packages of every manager on this Mac?",
+				message:
+					"Raccoon will run the brew, pip, npm, pnpm, bun, uv, go, nvm, " +
+					"rustup, gem and Docker upgrades in turn. Tools you are using may " +
+					"change version under you, and some managers ask for Touch ID.",
+				action: "Upgrade Packages",
+			}}
 		/>
 	);
 }

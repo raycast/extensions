@@ -57,3 +57,14 @@ test("the plain output between markers belongs to the manager running then", () 
 test("output with no markers yields no rows rather than one empty one", () => {
 	assert.deepEqual(managersFrom("just some text\nand more"), []);
 });
+
+test("a dry run leaves a manager previewed, neither working nor done", () => {
+	const run = [
+		"__RCC_PROGRESS__:0:30:brew: checking...",
+		"__RCC_PROGRESS__:1:30:brew: dry run",
+		"==> Would upgrade 3 outdated packages",
+	].join("\n");
+	const [brew] = managersFrom(run);
+	assert.equal(brew.state, "previewed");
+	assert.match(brew.log, /Would upgrade/);
+});

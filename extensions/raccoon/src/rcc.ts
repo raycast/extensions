@@ -47,7 +47,7 @@ function isExecutable(path: string): boolean {
 
 /** Resolve the rcc binary: user preference first, then the usual install dirs. */
 export function resolveRcc(): string {
-	const { rccPath } = getPreferenceValues<{ rccPath?: string }>();
+	const { rccPath } = getPreferenceValues<Preferences>();
 	const candidates = [
 		rccPath,
 		...RCC_SEARCH_PATHS.map((dir) => `${dir}/rcc`),
@@ -85,10 +85,11 @@ function stream(
 	args: string[],
 	onData: (chunk: RccChunk) => void,
 	signal?: AbortSignal,
+	path: string = RUNTIME_PATH,
 ): Promise<RccExit> {
 	return new Promise((resolve, reject) => {
 		const child = spawn(file, args, {
-			env: { ...process.env, NO_COLOR: "1", PATH: RUNTIME_PATH },
+			env: { ...process.env, NO_COLOR: "1", PATH: path },
 			stdio: ["ignore", "pipe", "pipe"],
 		});
 
@@ -112,13 +113,62 @@ function stream(
 	});
 }
 
+/**
+ * Commands whose subject is the reader's own PATH.
+ *
+ * Under RUNTIME_PATH they would audit this extension's seven directories
+ * instead of the forty the reader's shell has — which is what the Environment
+ * screen did: nothing missing, nothing duplicated, on a machine with fourteen
+ * and eight.
+ */
+const PATH_COMMANDS = new Set(["env", "overlap"]);
+
+const PATH_MARKER = "__RCC_PATH__";
+let loginPath: Promise<string> | undefined;
+
+/**
+ * The PATH the reader's own terminal has: what their login shell builds from
+ * its startup files. Read once per process, since it costs a shell start.
+ */
+export function loginShellPath(): Promise<string> {
+	loginPath ??= (async () => {
+		const shell = process.env.SHELL || "/bin/zsh";
+		let out = "";
+		// Login and interactive, because PATH edits live in .zprofile and
+		// .zshrc alike. The marker keeps a chatty startup file's output out of
+		// the answer; stdin is closed so a prompt in one cannot wait forever.
+		await stream(
+			shell,
+			["-lic", `printf "\\n${PATH_MARKER}%s\\n" "$PATH"`],
+			(chunk) => {
+				if (chunk.source === "stdout") out += chunk.text;
+			},
+			AbortSignal.timeout(20_000),
+		);
+		const line = out
+			.split("\n")
+			.reverse()
+			.find((l) => l.startsWith(PATH_MARKER));
+		if (!line) throw new Error(`${shell} did not report its PATH.`);
+		return line.slice(PATH_MARKER.length);
+	})();
+	return loginPath;
+}
+
+/** The PATH `rcc <command>` should run under. */
+export function pathFor(command: string): Promise<string> {
+	return PATH_COMMANDS.has(command)
+		? loginShellPath()
+		: Promise.resolve(RUNTIME_PATH);
+}
+
 /** Stream `rcc <args>`. */
 export async function streamRcc(
 	args: string[],
 	onData: (chunk: RccChunk) => void,
 	signal?: AbortSignal,
 ): Promise<RccExit> {
-	return stream(resolveRcc(), args, onData, signal);
+	return stream(resolveRcc(), args, onData, signal, await pathFor(args[0]));
 }
 
 /** Stream the Homebrew install of rcc, for the first-run setup screen. */
@@ -132,7 +182,7 @@ export async function streamInstall(
 /** Run `rcc <args>` and return its stdout in one go (for short, scripted uses). */
 export async function runRcc(args: string[]): Promise<string> {
 	const { stdout } = await execFileAsync(resolveRcc(), args, {
-		env: { ...process.env, NO_COLOR: "1", PATH: RUNTIME_PATH },
+		env: { ...process.env, NO_COLOR: "1", PATH: await pathFor(args[0]) },
 		maxBuffer: 10 * 1024 * 1024,
 	});
 	return stdout;

@@ -8,13 +8,13 @@ import {
 	openExtensionPreferences,
 	useNavigation,
 } from "@raycast/api";
-import { useExec } from "@raycast/utils";
+import { useExec, usePromise } from "@raycast/utils";
 import { JSON_TIMEOUT_MS, readJson } from "./json-out.ts";
 import type { ReactNode } from "react";
 import { findCommand } from "./commands";
 import { MissingRcc, REPO_URL } from "./missing-rcc";
 import { RccDetail } from "./rcc-detail";
-import { RccNotFoundError, resolveRcc, RUNTIME_PATH } from "./rcc";
+import { pathFor, RccNotFoundError, resolveRcc, RUNTIME_PATH } from "./rcc";
 
 /**
  * The scaffolding every list view repeats: resolve rcc, run it with --json,
@@ -51,12 +51,20 @@ export function RccList<T>({
 		resolveError = error;
 	}
 
+	// `env` and `overlap` are about the reader's own PATH, so they run under
+	// it; everything else runs under the one rcc's tools need. See pathFor.
+	const path = usePromise(pathFor, [command]);
+
 	const { isLoading, data, error, revalidate } = useExec(
 		rccPath ?? "rcc",
 		[command, "--json"],
 		{
-			execute: rccPath !== null,
-			env: { ...process.env, NO_COLOR: "1", PATH: RUNTIME_PATH },
+			execute: rccPath !== null && path.data !== undefined,
+			env: {
+				...process.env,
+				NO_COLOR: "1",
+				PATH: path.data ?? RUNTIME_PATH,
+			},
 			timeout: JSON_TIMEOUT_MS,
 			parseOutput: readJson(command, parse),
 		},
@@ -99,13 +107,20 @@ export function RccList<T>({
 
 	if (resolveError instanceof RccNotFoundError) return <MissingRcc />;
 
-	if (error) {
+	// A PATH that could not be read is not a PATH with nothing on it: the
+	// screen says so instead of auditing the wrong one.
+	const failure = path.error ?? error;
+	if (failure) {
 		return (
 			<List>
 				<List.EmptyView
 					icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-					title={`rcc ${command} could not be read`}
-					description={error.message}
+					title={
+						path.error
+							? "Your shell's PATH could not be read"
+							: `rcc ${command} could not be read`
+					}
+					description={failure.message}
 					actions={actions}
 				/>
 			</List>
@@ -114,13 +129,17 @@ export function RccList<T>({
 
 	return (
 		<List
-			isLoading={isLoading}
+			isLoading={isLoading || path.isLoading}
 			navigationTitle={navigationTitle(data)}
 			searchBarPlaceholder={searchBarPlaceholder}
 		>
 			<List.EmptyView
 				icon={{ source: emptyIcon, tintColor: Color.SecondaryText }}
-				title={isLoading ? `Running rcc ${command}` : emptyTitle}
+				title={
+					isLoading || path.isLoading
+						? `Running rcc ${command}`
+						: emptyTitle
+				}
 				actions={actions}
 			/>
 			{data ? children(data, sharedActions) : null}

@@ -19,7 +19,7 @@ const PROGRESS = /^__RCC_PROGRESS__:(\d+):(\d+):(.*)$/;
 const STEP = /^([a-z][a-z0-9+-]*):\s*(.*)$/i;
 
 export type ManagerState =
-	"checking" | "updating" | "done" | "absent" | "unknown";
+	"checking" | "updating" | "previewed" | "done" | "absent" | "unknown";
 
 export type Manager = {
 	name: string;
@@ -38,6 +38,8 @@ function stateOf(detail: string): ManagerState {
 	}
 	if (text.includes("up to date") || text.includes("up-to-date"))
 		return "done";
+	// `--dry-run` reports what a manager would do and stops there.
+	if (text.includes("dry run")) return "previewed";
 	if (text.includes("updating") || text.includes("upgrading")) {
 		return "updating";
 	}

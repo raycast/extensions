@@ -17,8 +17,10 @@ import {
 	type MemoryProcess,
 	type Weight,
 	displayName,
+	gigabytes,
 	megabytes,
 	parseMemory,
+	pressure,
 	weight,
 } from "./memory-json";
 import { MissingRcc, REPO_URL } from "./missing-rcc";
@@ -61,8 +63,8 @@ export default function Command() {
 
 	if (resolveError instanceof RccNotFoundError) return <MissingRcc />;
 
-	const processes: MemoryProcess[] = data ?? [];
-	const totalMb = processes.reduce((sum, p) => sum + megabytes(p.rss), 0);
+	const processes: MemoryProcess[] = data?.processes ?? [];
+	const machine = data?.memory ?? null;
 
 	// Quitting is the resolution here: the list exists because something is
 	// holding memory. `kill` and not `kill -9` — a process that is asked to
@@ -76,7 +78,7 @@ export default function Command() {
 					detail: processes
 						.map(
 							(p) =>
-								`${displayName(p.command)} (${megabytes(p.rss)} MB)`,
+								`${displayName(p.command)} (${megabytes(p.footprint_kb)} MB)`,
 						)
 						.join("\n"),
 					destructive: true,
@@ -92,7 +94,7 @@ export default function Command() {
 						? {
 								title: `Quit ${displayName(process.command)}`,
 								command: killPids([process.pid]),
-								detail: `pid ${process.pid}, holding ${megabytes(process.rss)} MB. Unsaved work in it is lost.`,
+								detail: `pid ${process.pid}, holding ${megabytes(process.footprint_kb)} MB. Unsaved work in it is lost.`,
 								destructive: true,
 							}
 						: undefined
@@ -161,9 +163,11 @@ export default function Command() {
 		<List
 			isLoading={isLoading}
 			navigationTitle={
-				processes.length > 0
-					? `Memory — ${processes.length} processes, ${totalMb} MB`
-					: "Memory"
+				machine
+					? `Memory — ${gigabytes(machine.used_mb)} of ${gigabytes(machine.total_mb)} GB in use`
+					: processes.length > 0
+						? `Memory — ${processes.length} processes`
+						: "Memory"
 			}
 			searchBarPlaceholder="Search processes by name"
 		>
@@ -175,26 +179,84 @@ export default function Command() {
 				title={isLoading ? "Reading memory" : "No processes reported"}
 				actions={actions(null)}
 			/>
-			{processes.map((process) => {
-				const w = weight(process.rss);
-				return (
+			{/* Whether the machine is short, before which process to blame:
+			    swap in use means it already ran out once. */}
+			{machine ? (
+				<List.Section title="This Mac">
 					<List.Item
-						key={process.pid}
-						icon={{ source: ICON[w], tintColor: TINT[w] }}
-						title={displayName(process.command)}
-						subtitle={`PID ${process.pid}`}
+						key="pressure"
+						icon={{
+							source: ICON[pressure(machine)],
+							tintColor: TINT[pressure(machine)],
+						}}
+						title="In use"
+						subtitle={`wired ${gigabytes(machine.wired_mb)}, active ${gigabytes(machine.active_mb)}, compressed ${gigabytes(machine.compressed_mb)} GB`}
 						accessories={[
 							{
 								tag: {
-									value: `${megabytes(process.rss)} MB`,
-									color: TINT[w],
+									value: `${gigabytes(machine.used_mb)} of ${gigabytes(machine.total_mb)} GB`,
+									color: TINT[pressure(machine)],
 								},
 							},
 						]}
-						actions={actions(process)}
+						actions={actions(null)}
 					/>
-				);
-			})}
+					<List.Item
+						key="swap"
+						icon={{
+							source: Icon.HardDrive,
+							tintColor:
+								machine.swap_used_mb > 0
+									? Color.Orange
+									: Color.SecondaryText,
+						}}
+						title="Swap"
+						subtitle={
+							machine.swap_used_mb > 0
+								? "Memory has already spilled to disk"
+								: "Nothing on disk"
+						}
+						accessories={[
+							{
+								text: `${gigabytes(machine.swap_used_mb)} of ${gigabytes(machine.swap_total_mb)} GB`,
+							},
+						]}
+						actions={actions(null)}
+					/>
+				</List.Section>
+			) : null}
+			<List.Section
+				title="By footprint"
+				subtitle="what each process costs, compressed pages included"
+			>
+				{processes.map((process) => {
+					const w = weight(process.footprint_kb);
+					return (
+						<List.Item
+							key={process.pid}
+							icon={{ source: ICON[w], tintColor: TINT[w] }}
+							title={displayName(process.command)}
+							subtitle={`PID ${process.pid}`}
+							accessories={[
+								...(process.rss_kb !== process.footprint_kb
+									? [
+											{
+												text: `${megabytes(process.rss_kb)} MB resident`,
+											},
+										]
+									: []),
+								{
+									tag: {
+										value: `${megabytes(process.footprint_kb)} MB`,
+										color: TINT[w],
+									},
+								},
+							]}
+							actions={actions(process)}
+						/>
+					);
+				})}
+			</List.Section>
 		</List>
 	);
 }

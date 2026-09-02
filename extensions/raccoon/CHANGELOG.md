@@ -2,6 +2,17 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Opening a screen does not act. `Apps` and `Upgrade` open in `--dry-run`; doing
+  it for real is a separate, confirmed action.
+- Environment and PATH Overlaps run under the login shell's PATH, not the
+  extension's own, so what they audit is the PATH you actually have.
+- Ports tells a listening socket from a connection in progress: only doors are
+  reachable, and only doors are in the bulk close. A row says what lsof, as
+  you, cannot see, and offers to list every user's ports in Terminal.
+- Certificates are removed by SHA-256 from the login keychain only; Startup
+  stops agents by their launchd label and lists what apps register in the
+  background; Memory ranks by footprint and shows the machine's swap and
+  compressor first; Wi-Fi tells connected from named.
 - Twenty-one commands, each with a list built for what it reports rather than a
   rendered table: disk, memory, open ports, battery, network, Wi-Fi, SSH keys,
   certificates, startup items, fonts, PATH overlaps, shell history, Docker,

@@ -14,6 +14,10 @@ export type Certificate = {
 	expires: string;
 	status: CertStatus;
 	self_signed: boolean;
+	/** Where it lives. Empty from an rcc older than 0.19. */
+	keychain: string;
+	/** Its SHA-256, which is how it is addressed: names repeat, hashes do not. */
+	sha256: string;
 };
 
 export type CertsReport = {
@@ -57,6 +61,8 @@ export function parseCerts(stdout: string): CertsReport {
 						expires: str(x.expires),
 						status: status(x.status),
 						self_signed: x.self_signed === true,
+						keychain: str(x.keychain),
+						sha256: str(x.sha256),
 					};
 				})
 			: [],
@@ -64,6 +70,23 @@ export function parseCerts(stdout: string): CertsReport {
 			? r.keychains.filter((k): k is string => typeof k === "string")
 			: [],
 	};
+}
+
+/**
+ * Whether the reader may remove this certificate from a list: it has expired,
+ * rcc said which keychain it is in and that keychain is the login one, and it
+ * has a hash to be addressed by. The System keychain holds roots other
+ * software trusts; an expired one there opens Keychain Access instead. An rcc
+ * too old to report the hash gets no delete action at all — by name, `security
+ * delete-certificate` takes the first match, and on one Mac that was a valid
+ * certificate sharing its name with the expired one.
+ */
+export function isRemovable(cert: Certificate): boolean {
+	return (
+		cert.status === "expired" &&
+		cert.sha256 !== "" &&
+		/\/login\.keychain(-db)?$/.test(cert.keychain)
+	);
 }
 
 /** Expired first, then expiring, then the rest. Alphabetical inside each. */

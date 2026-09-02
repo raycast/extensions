@@ -5,6 +5,7 @@ import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
 import {
 	byUrgency,
+	isRemovable,
 	parseCerts,
 	type CertStatus,
 	type CertsReport,
@@ -34,20 +35,17 @@ function Rows({ c, actions }: { c: CertsReport; actions: React.ReactNode }) {
 	// expired there is not the reader's to remove from a list. A valid or
 	// expiring certificate opens Keychain Access instead — the decision to
 	// renew or replace is not one keystroke's worth.
-	const expired = useMemo(
-		() => sorted.filter((cert) => cert.status === "expired"),
-		[sorted],
-	);
+	const removable = useMemo(() => sorted.filter(isRemovable), [sorted]);
 	const clearAll =
-		expired.length > 0
+		removable.length > 0
 			? {
-					title: `Remove ${expired.length} Expired Certificates`,
+					title: `Remove ${removable.length} Expired Certificates`,
 					command: deleteCertificates(
-						expired.map((cert) => cert.name),
+						removable.map((cert) => cert.sha256),
 					),
-					detail: "From the login keychain only. The System keychain is left alone.",
+					detail: "From the login keychain only, each by its SHA-256. The System keychain is left alone.",
 					destructive: true,
-					count: expired.length,
+					count: removable.length,
 				}
 			: undefined;
 	return (
@@ -64,6 +62,10 @@ function Rows({ c, actions }: { c: CertsReport; actions: React.ReactNode }) {
 					keywords={[cert.status, cert.expires]}
 					accessories={[
 						{ text: cert.expires },
+						...(cert.keychain &&
+						!/login\.keychain/.test(cert.keychain)
+							? [{ tag: { value: "System keychain" } }]
+							: []),
 						...(cert.self_signed
 							? [{ tag: { value: "self-signed" } }]
 							: []),
@@ -77,18 +79,24 @@ function Rows({ c, actions }: { c: CertsReport; actions: React.ReactNode }) {
 					actions={
 						<RowActions
 							one={
-								cert.status === "expired"
+								isRemovable(cert)
 									? {
 											title: "Remove This Certificate",
 											command: deleteCertificates([
-												cert.name,
+												cert.sha256,
 											]),
-											detail: `Expired ${cert.expires}. Removed from the login keychain only.`,
+											detail: `Expired ${cert.expires}. Removed from the login keychain by its SHA-256.`,
 											destructive: true,
 										}
 									: {
 											title: "Open Keychain Access",
 											command: openApp("Keychain Access"),
+											detail:
+												cert.status === "expired"
+													? cert.keychain
+														? `Lives in ${cert.keychain}, which is not the reader's to edit from a list.`
+														: "This rcc does not report the certificate's hash, so it cannot be removed from here."
+													: undefined,
 										}
 							}
 							all={clearAll}

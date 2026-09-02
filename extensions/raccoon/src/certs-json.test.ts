@@ -1,6 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { byUrgency, parseCerts, type Certificate } from "./certs-json.ts";
+import {
+	byUrgency,
+	isRemovable,
+	parseCerts,
+	type Certificate,
+} from "./certs-json.ts";
 
 const report = (certs: unknown[]) =>
 	JSON.stringify({
@@ -43,6 +48,8 @@ test("expired sorts first, then expiring, then the rest", () => {
 		expires: "",
 		status,
 		self_signed: false,
+		keychain: "",
+		sha256: "",
 	});
 	const sorted = [
 		cert("b", "valid"),
@@ -57,4 +64,31 @@ test("expired sorts first, then expiring, then the rest", () => {
 
 test("output that is not JSON says so", () => {
 	assert.throws(() => parseCerts("-- Certificates"), /did not print JSON/);
+});
+
+test("only an expired certificate in the login keychain, with a hash, can be removed", () => {
+	const SHA =
+		"28BC2356366BA59A498573A93284E67BC751D6FB618A7C8BA7A5D57C2E99AFD1";
+	const base: Certificate = {
+		name: "Apple Worldwide Developer Relations Certification Authority",
+		issuer: "Apple Root CA",
+		expires: "Feb  7 21:48:47 2023 GMT",
+		status: "expired",
+		self_signed: false,
+		keychain: "/Users/me/Library/Keychains/login.keychain-db",
+		sha256: SHA,
+	};
+	assert.equal(isRemovable(base), true);
+	// The System keychain is not the reader's to edit from a list.
+	assert.equal(
+		isRemovable({
+			...base,
+			keychain: "/Library/Keychains/System.keychain",
+		}),
+		false,
+	);
+	// An rcc that did not say which keychain, or the hash, gets no delete.
+	assert.equal(isRemovable({ ...base, keychain: "" }), false);
+	assert.equal(isRemovable({ ...base, sha256: "" }), false);
+	assert.equal(isRemovable({ ...base, status: "expiring" }), false);
 });

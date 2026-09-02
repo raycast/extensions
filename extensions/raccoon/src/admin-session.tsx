@@ -20,7 +20,7 @@ import {
 } from "./sudoers";
 
 function selectedSession(): SudoSession {
-	const { sudoSession } = getPreferenceValues<{ sudoSession?: string }>();
+	const { sudoSession } = getPreferenceValues<Preferences.AdminSession>();
 	return sudoSession === "-1" ? "-1" : "60";
 }
 

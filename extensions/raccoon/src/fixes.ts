@@ -1,4 +1,4 @@
-import { shellQuote } from "./terminal.ts";
+import { appleScriptQuote, shellQuote } from "./terminal.ts";
 
 /**
  * The shell command behind Enter and Cmd+Enter, one builder per command that
@@ -23,7 +23,14 @@ export function killPids(pids: number[]): string {
 	return `kill ${valid.join(" ")}`;
 }
 
-/** Empty the Trash through Finder, so it behaves like emptying it by hand. */
+/**
+ * Empty the Trash through Finder, so it behaves like emptying it by hand.
+ *
+ * Not Raycast's `trash()`: that API moves a path *into* the Trash and has no
+ * counterpart for emptying it. Finder is the one thing on the system that
+ * empties every volume's Trash at once and honours the reader's own settings
+ * for it.
+ */
 export function emptyTrash(): string {
 	return `osascript -e 'tell application "Finder" to empty trash'`;
 }
@@ -63,10 +70,13 @@ export function forgetNetworks(iface: string, ssids: string[]): string {
 /** Remove an item from Login Items, the same list System Settings shows. */
 export function removeLoginItems(names: string[]): string {
 	if (names.length === 0) throw new Error("No login item to remove.");
+	// Quoted twice on purpose: once as an AppleScript string, then the whole
+	// script as one shell argument. A name with an apostrophe in it used to end
+	// the shell quote early and run whatever followed it.
 	return names
 		.map(
 			(n) =>
-				`osascript -e 'tell application "System Events" to delete login item ${JSON.stringify(n)}'`,
+				`osascript -e ${q(`tell application "System Events" to delete login item ${appleScriptQuote(n)}`)}`,
 		)
 		.join("; ");
 }
@@ -86,18 +96,21 @@ export function bootoutAgents(labels: string[]): string {
 }
 
 /**
- * Delete an expired certificate from the login keychain.
+ * Delete an expired certificate from the login keychain, by SHA-256.
  *
  * Scoped to login.keychain-db on purpose: the System keychain holds roots that
  * other software depends on, and an expired one there is not the reader's to
- * clean up from a list.
+ * clean up from a list. By hash, not by name: `-c NAME` deletes the first
+ * certificate with that name, and names repeat — the expired WWDR root on one
+ * Mac shares its name with a valid one.
  */
-export function deleteCertificates(names: string[]): string {
-	if (names.length === 0) throw new Error("No certificate to delete.");
-	return names
+export function deleteCertificates(sha256s: string[]): string {
+	const valid = sha256s.filter((h) => /^[0-9A-Fa-f]{64}$/.test(h));
+	if (valid.length === 0) throw new Error("No certificate to delete.");
+	return valid
 		.map(
-			(n) =>
-				`security delete-certificate -c ${q(n)} ~/Library/Keychains/login.keychain-db`,
+			(h) =>
+				`security delete-certificate -Z ${q(h)} ~/Library/Keychains/login.keychain-db`,
 		)
 		.join("; ");
 }
@@ -110,6 +123,16 @@ export function dockerPrune(): string {
 /** Start a Time Machine backup now. */
 export function startBackup(): string {
 	return "tmutil startbackup --auto";
+}
+
+/**
+ * The port list as root. lsof shows a non-root caller only its own sockets
+ * and does not say so: sshd on 22 is invisible from the list a port check
+ * exists to produce. This is the one screen whose answer needs the other
+ * half, and the other half needs a terminal to ask for the password.
+ */
+export function portsAsRoot(rcc: string): string {
+	return `sudo ${q(rcc)} ports`;
 }
 
 /** Show every place a name resolves from, in PATH order. */

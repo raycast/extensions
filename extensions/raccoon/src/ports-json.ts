@@ -18,8 +18,11 @@ export type Port = {
 	state: string;
 };
 
-/** Reachable from another machine, only from this one, or nothing bound. */
-export type Exposure = "exposed" | "local" | "idle";
+/**
+ * Reachable from another machine, only from this one, a connection already in
+ * progress, or nothing bound.
+ */
+export type Exposure = "exposed" | "local" | "connected" | "idle";
 
 export function parsePorts(stdout: string): Port[] {
 	return expectArray(stdout, "ports").map((value, index) => {
@@ -50,6 +53,12 @@ export function parsePorts(stdout: string): Port[] {
  */
 export function exposure(port: Port): Exposure {
 	if (port.port === "*") return "idle";
+	// A TCP socket that is not listening is a conversation this Mac is having,
+	// not a door: nothing can knock on it. Labelling those "reachable" put 81
+	// outbound connections — the browser's, the shell's — in the bulk kill.
+	if (isTcp(port) && port.state !== "" && port.state !== "LISTEN") {
+		return "connected";
+	}
 	const address = port.address;
 	if (address.startsWith("127.0.0.1") || address.startsWith("[::1]")) {
 		return "local";
@@ -59,10 +68,20 @@ export function exposure(port: Port): Exposure {
 	return address === "" ? "idle" : "exposed";
 }
 
+function isTcp(port: Port): boolean {
+	return port.proto.toUpperCase().startsWith("TCP");
+}
+
+const RANK: Record<Exposure, number> = {
+	exposed: 0,
+	local: 1,
+	connected: 2,
+	idle: 3,
+};
+
 /** Listening sockets first: an open door matters more than a conversation. */
 export function byInterest(a: Port, b: Port): number {
-	const rank = (p: Port) =>
-		exposure(p) === "exposed" ? 0 : exposure(p) === "local" ? 1 : 2;
+	const rank = (p: Port) => RANK[exposure(p)];
 	const byRank = rank(a) - rank(b);
 	if (byRank !== 0) return byRank;
 	const numeric = Number(a.port) - Number(b.port);

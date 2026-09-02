@@ -11,7 +11,7 @@ import {
 import { useExec } from "@raycast/utils";
 import { JSON_TIMEOUT_MS, readJson } from "./json-out.ts";
 import { useMemo } from "react";
-import { killPids } from "./fixes";
+import { killPids, portsAsRoot } from "./fixes";
 import { ResolveActions } from "./resolve";
 import { findCommand } from "./commands";
 import { MissingRcc, REPO_URL } from "./missing-rcc";
@@ -28,18 +28,21 @@ import { RccNotFoundError, resolveRcc, RUNTIME_PATH } from "./rcc";
 const TINT: Record<Exposure, Color> = {
 	exposed: Color.Orange,
 	local: Color.Green,
+	connected: Color.Blue,
 	idle: Color.SecondaryText,
 };
 
 const ICON: Record<Exposure, Icon> = {
 	exposed: Icon.Globe,
 	local: Icon.House,
+	connected: Icon.Link,
 	idle: Icon.Circle,
 };
 
 const LABEL: Record<Exposure, string> = {
 	exposed: "Reachable",
 	local: "This Mac only",
+	connected: "Connected",
 	idle: "Not bound",
 };
 
@@ -173,7 +176,7 @@ export default function Command() {
 			isLoading={isLoading}
 			navigationTitle={
 				ports.length > 0
-					? `Ports — ${ports.length} open, ${reachable} reachable`
+					? `Ports — ${reachable} reachable, ${ports.length} sockets`
 					: "Ports"
 			}
 			searchBarPlaceholder="Search by port, process or address"
@@ -183,6 +186,28 @@ export default function Command() {
 				title={isLoading ? "Reading open ports" : "No ports open"}
 				actions={actions(null)}
 			/>
+			{/* Not a row from rcc: what rcc, as this user, cannot see. */}
+			{!isLoading && rccPath ? (
+				<List.Item
+					key="scope"
+					icon={{ source: Icon.Eye, tintColor: Color.SecondaryText }}
+					title="Sockets of other users are not listed"
+					subtitle="lsof shows only yours without administrator rights: root's sshd on 22 would be missing here"
+					actions={
+						<ActionPanel>
+							<ResolveActions
+								one={{
+									title: "List Every User's Ports in Terminal",
+									command: portsAsRoot(rccPath),
+									detail: "Runs rcc ports with sudo. Terminal asks for your password or Touch ID.",
+								}}
+							>
+								{actions(null).props.children}
+							</ResolveActions>
+						</ActionPanel>
+					}
+				/>
+			) : null}
 			{ports.map((port, index) => {
 				const e = exposure(port);
 				return (

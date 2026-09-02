@@ -10,6 +10,8 @@ import { expectObject } from "./json-out.ts";
 
 export type BatteryReport = {
 	present: boolean;
+	/** "ac", "battery", or null from an rcc that did not say. */
+	power_source: "ac" | "battery" | null;
 	cycle_count: number | null;
 	max_capacity_percent: number | null;
 	condition: string | null;
@@ -31,6 +33,10 @@ export function parseBattery(stdout: string): BatteryReport {
 			typeof r.present === "boolean"
 				? r.present
 				: num(r.cycle_count) !== null,
+		power_source:
+			r.power_source === "ac" || r.power_source === "battery"
+				? r.power_source
+				: null,
 		cycle_count: num(r.cycle_count),
 		max_capacity_percent: num(r.max_capacity_percent),
 		condition: typeof r.condition === "string" ? r.condition : null,
@@ -61,6 +67,24 @@ export function cycleHealth(cycles: number | null): Health {
 	if (cycles < 500) return "good";
 	if (cycles < 800) return "fair";
 	return "poor";
+}
+
+/**
+ * What the charging row says. "Not charging" on its own hid the difference
+ * between a MacBook on its adapter with macOS holding the charge — the
+ * ordinary desk state — and one running down; the old row called both "on
+ * battery".
+ */
+export function chargingLabel(b: BatteryReport): string {
+	if (b.fully_charged) {
+		return b.power_source === "ac"
+			? "No, full and on AC"
+			: "No, fully charged";
+	}
+	if (b.charging) return "Yes";
+	if (b.power_source === "ac") return "No, on AC and holding the charge";
+	if (b.power_source === "battery") return "No, on battery";
+	return "No";
 }
 
 /** How much is left right now. */

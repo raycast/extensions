@@ -48,11 +48,27 @@ test("a login item name is passed as a quoted AppleScript string", () => {
 	assert.match(removeLoginItems(['He said "hi"']), /\\"hi\\"/);
 });
 
-test("certificate deletion is scoped to the login keychain", () => {
-	const cmd = deleteCertificates(["Adobe Content Certificate 10-6"]);
+test("a login item name with an apostrophe cannot break out of the shell quote", () => {
+	const cmd = removeLoginItems(["Alex's Helper"]);
+	// The whole AppleScript is one single-quoted shell argument, and the
+	// apostrophe inside it is the '\'' dance, never a bare quote.
+	assert.equal(
+		cmd,
+		`osascript -e 'tell application "System Events" to delete login item "Alex'\\''s Helper"'`,
+	);
+});
+
+test("certificate deletion is scoped to the login keychain and goes by hash", () => {
+	const sha =
+		"28BC2356366BA59A498573A93284E67BC751D6FB618A7C8BA7A5D57C2E99AFD1";
+	const cmd = deleteCertificates([sha]);
 	assert.ok(cmd.includes("login.keychain-db"));
+	assert.ok(cmd.includes(`-Z '${sha}'`));
 	// Never the System keychain: other software depends on its roots.
 	assert.ok(!cmd.includes("/System/"));
+	// Never by name: a name picks the first match, and names repeat.
+	assert.ok(!cmd.includes("-c "));
+	assert.throws(() => deleteCertificates(["Adobe Content Certificate 10-6"]));
 });
 
 test("stopping an agent addresses this login session, not the whole machine", () => {

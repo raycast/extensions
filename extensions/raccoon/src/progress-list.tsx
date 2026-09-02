@@ -44,6 +44,7 @@ const LOOK: Record<ManagerState, { icon: Icon; tint: Color; label: string }> = {
 		tint: Color.Blue,
 		label: "Checking",
 	},
+	previewed: { icon: Icon.Eye, tint: Color.SecondaryText, label: "Dry run" },
 	done: { icon: Icon.CheckCircle, tint: Color.Green, label: "Up to date" },
 	// Neither a failure nor a warning: something you have not installed is not
 	// a problem to solve, so it must not be dressed as one.

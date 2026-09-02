@@ -15,6 +15,7 @@ import {
 	type Health,
 	capacityHealth,
 	chargeHealth,
+	chargingLabel,
 	conditionHealth,
 	cycleHealth,
 	parseBattery,
@@ -95,12 +96,11 @@ function rows(b: BatteryReport): Row[] {
 		{
 			id: "charging",
 			title: "Charging",
-			value: b.fully_charged
-				? "No, fully charged"
-				: b.charging
-					? "Yes"
-					: "No, on battery",
-			icon: b.charging ? Icon.Bolt : Icon.BoltDisabled,
+			value: chargingLabel(b),
+			icon:
+				b.charging || b.power_source === "ac"
+					? Icon.Bolt
+					: Icon.BoltDisabled,
 			health: "neutral",
 		},
 	];
