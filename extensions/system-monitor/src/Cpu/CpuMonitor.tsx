@@ -1,21 +1,32 @@
-import { cpuUsage, sysUptime } from "os-utils";
+import { cpuUsage } from "os-utils";
 import { Icon, List, getPreferenceValues } from "@raycast/api";
-import { loadavg } from "os";
+import { cpus, loadavg } from "os";
 import { useEffect } from "react";
 import { useInterval } from "usehooks-ts";
 import { usePromise } from "@raycast/utils";
 
 import { Actions } from "../components/Actions";
-import { MetadataLabel, MetadataSection, coloredAccessoryText } from "../components/MetadataLabel";
+import { colorForPressurePercent, MetadataLabel } from "../components/MetadataLabel";
+import {
+  pendingText,
+  percentTagAccessory,
+  PerCoreTagRows,
+  TOP_PROCESS_ROWS,
+  TopProcessRows,
+  UsageTag,
+} from "../components/CompactMetadata";
 import { getFanData, getFanStatusLabel } from "../Fan/FanUtils";
 import { ProcessInfo } from "../Interfaces";
+import { getCoreClusterTypes, shortCores } from "../lib/cpu-cores";
 import { getPerCoreCpuUsage } from "../lib/cpu-stats";
+import { loadPressurePercent } from "../lib/load-average";
 import { resetCpuTabBaselines } from "../lib/tab-baseline-reset";
 import { getHardwareInfo } from "../SystemInfo/SystemUtils";
-import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
-import { getTemperatureData, formatTemperature } from "../Temperature/TemperatureUtils";
+import { getTopCpuProcess, getUptimeLabel } from "./CpuUtils";
+import { formatTemperature, getTemperatureData, temperatureColor } from "../Temperature/TemperatureUtils";
 
 const { displayModeCpu } = getPreferenceValues<ExtensionPreferences>();
+const CORE_COUNT = cpus().length;
 
 export default function CpuMonitor({ isActive = false }: { isActive?: boolean }) {
   useEffect(() => {
@@ -39,7 +50,7 @@ export default function CpuMonitor({ isActive = false }: { isActive?: boolean })
     data: topProcess,
     revalidate: revalidateTopProcess,
     isLoading: isLoadingTopProcess,
-  } = usePromise(() => getTopCpuProcess(5), [], { execute: isActive });
+  } = usePromise(() => getTopCpuProcess(TOP_PROCESS_ROWS), [], { execute: isActive });
 
   useInterval(() => {
     if (isActive) {
@@ -58,14 +69,12 @@ export default function CpuMonitor({ isActive = false }: { isActive?: boolean })
       title="CPU"
       icon={Icon.Monitor}
       accessories={[
-        {
-          text: !cpu
-            ? { value: isActive ? "Loading…" : "—", color: undefined }
-            : coloredAccessoryText(
-                displayModeCpu === "free" ? `${100 - +cpu} %` : `${cpu} %`,
-                displayModeCpu === "free" ? "free" : "usage",
-              ),
-        },
+        !cpu
+          ? { text: pendingText(isActive) }
+          : percentTagAccessory(
+              displayModeCpu === "free" ? 100 - +cpu : +cpu,
+              displayModeCpu === "free" ? "free" : "usage",
+            ),
       ]}
       detail={
         <CpuMonitorDetail
@@ -92,6 +101,8 @@ function CpuMonitorDetail({
   isActive: boolean;
 }) {
   const { data: hardware, isLoading: isLoadingHardware } = usePromise(getHardwareInfo, [], { execute: isActive });
+
+  const { data: clusterTypes } = usePromise(() => getCoreClusterTypes(), [], { execute: isActive });
 
   const {
     data: perCoreUsage,
@@ -133,7 +144,7 @@ function CpuMonitorDetail({
     data: uptime,
     revalidate: revalidateUptime,
     isLoading: isLoadingUptimes,
-  } = usePromise(async () => getRelativeTime(sysUptime()), [], { execute: isActive });
+  } = usePromise(async () => getUptimeLabel(), [], { execute: isActive });
 
   useInterval(() => {
     if (isActive) {
@@ -178,65 +189,56 @@ function CpuMonitorDetail({
       }
       metadata={
         <List.Item.Detail.Metadata>
-          <MetadataLabel title="Chip" text={hardware?.chip ?? "Loading…"} />
-          <MetadataLabel title="CPU Cores" text={hardware?.totalCores ?? "Loading…"} />
+          <MetadataLabel
+            title="Chip · Cores"
+            text={hardware ? `${hardware.chip} · ${shortCores(hardware.totalCores)}` : "Loading…"}
+          />
           <MetadataLabel title="GPU Memory" text={hardware?.gpuMemory ?? "Loading…"} />
           <List.Item.Detail.Metadata.Separator />
-          <MetadataLabel title="Usage" text={cpu ? `${cpu} %` : "Loading…"} percentMode={cpu ? "usage" : undefined} />
+          {cpu ? <UsageTag title="Usage" percent={+cpu} /> : <MetadataLabel title="Usage" text="Loading…" />}
           <List.Item.Detail.Metadata.Separator />
-          <MetadataSection title="Top Processes" />
-          {topProcess?.length ? (
-            topProcess.map((process, index) => (
-              <MetadataLabel
-                key={process.pid}
-                title={`#${index + 1} · ${process.name} (PID ${process.pid})`}
-                text={process.metric}
-              />
-            ))
-          ) : (
-            <MetadataLabel title="Status" text="Collecting sample…" />
-          )}
+          <TopProcessRows processes={topProcess} />
           <List.Item.Detail.Metadata.Separator />
-          <MetadataSection title="Per-Core Usage" />
           {perCoreUsage?.hasPreviousSample ? (
-            perCoreUsage.cores.map((core) => (
-              <MetadataLabel key={core.core} title={`Core ${core.core}`} text={`${core.usage} %`} />
-            ))
+            <PerCoreTagRows cores={perCoreUsage.cores} clusterTypes={clusterTypes} />
           ) : (
-            <MetadataLabel title="Status" text="Collecting sample…" />
+            <MetadataLabel title="Per-Core" text="Collecting sample…" />
           )}
           <List.Item.Detail.Metadata.Separator />
-          {temperature?.sensorAvailable && (
-            <>
-              <MetadataSection title="Temperature" />
-              <MetadataLabel title="Average" text={formatTemperature(temperature.cpuAverage)} />
-              <MetadataLabel title="Maximum" text={formatTemperature(temperature.cpuMax)} />
-              <List.Item.Detail.Metadata.Separator />
-            </>
+          {temperature?.sensorAvailable ? (
+            <List.Item.Detail.Metadata.TagList title="Temperature">
+              <List.Item.Detail.Metadata.TagList.Item
+                text={`${formatTemperature(temperature.cpuAverage)} avg`}
+                color={temperatureColor(temperature.cpuAverage)}
+              />
+              <List.Item.Detail.Metadata.TagList.Item
+                text={`${formatTemperature(temperature.cpuMax)} max`}
+                color={temperatureColor(temperature.cpuMax)}
+              />
+            </List.Item.Detail.Metadata.TagList>
+          ) : null}
+          {fanData?.available && fanData.fans.length ? (
+            <MetadataLabel
+              title="Fans"
+              text={fanData.fans.map((fan) => `${fan.actualRpm} RPM (${fan.minRpm}–${fan.maxRpm})`).join(" · ")}
+            />
+          ) : (
+            <MetadataLabel title="Fans" text={fanData ? getFanStatusLabel(fanData.status) : "Loading…"} />
           )}
-          {fanData?.available ? (
-            <>
-              <MetadataSection title="Fans" />
-              {fanData.fans.map((fan) => (
-                <MetadataLabel
-                  key={fan.index}
-                  title={`Fan ${fan.index + 1}`}
-                  text={`${fan.actualRpm} RPM (${fan.minRpm}-${fan.maxRpm})`}
+          <List.Item.Detail.Metadata.Separator />
+          {avgLoad ? (
+            <List.Item.Detail.Metadata.TagList title="Average Load (1 · 5 · 15 min)">
+              {avgLoad.map((load, index) => (
+                <List.Item.Detail.Metadata.TagList.Item
+                  key={index}
+                  text={load}
+                  color={colorForPressurePercent(loadPressurePercent(+load, CORE_COUNT))}
                 />
               ))}
-              <List.Item.Detail.Metadata.Separator />
-            </>
+            </List.Item.Detail.Metadata.TagList>
           ) : (
-            <>
-              <MetadataLabel title="Fans" text={fanData ? getFanStatusLabel(fanData.status) : "Loading…"} />
-              <List.Item.Detail.Metadata.Separator />
-            </>
+            <MetadataLabel title="Average Load (1 · 5 · 15 min)" text="Loading…" />
           )}
-          <MetadataSection title="Average Load" />
-          <MetadataLabel title="1 min" text={avgLoad?.[0] ?? "Loading…"} />
-          <MetadataLabel title="5 min" text={avgLoad?.[1] ?? "Loading…"} />
-          <MetadataLabel title="15 min" text={avgLoad?.[2] ?? "Loading…"} />
-          <List.Item.Detail.Metadata.Separator />
           <MetadataLabel title="Uptime" text={uptime ?? "Loading…"} />
         </List.Item.Detail.Metadata>
       }
