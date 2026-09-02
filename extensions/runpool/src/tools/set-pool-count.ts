@@ -25,12 +25,16 @@ type Input = {
  * argument to carry this in. Both halves run in this module, in order, which
  * makes a module-scoped note the only channel between them. One note was not
  * enough: a second confirmation overwrote the first, so growth approved
- * against one count could be written as a shrink against another. Keying by
- * pool and target count keeps overlapping questions apart, and the only
- * collision left is two questions asking for the same change to the same pool,
- * where either answer describes something that was genuinely confirmed.
+ * against one count could be written as a shrink against another.
+ *
+ * A note records that a question was asked, not that it was answered, because
+ * this half runs to build the dialog and the user replies afterwards. So two
+ * questions about the same change that saw different sizes leave no way to
+ * tell which size the approval belonged to, and one of them may have been
+ * declined. Every size seen is kept, and the write proceeds only when they
+ * agree with each other and with the pool as it stands.
  */
-const confirmedFrom = new Map<string, number>();
+const confirmedFrom = new Map<string, Set<number>>();
 
 const noteKey = (pool: string, count: number) => `${pool}\u0000${count}`;
 
@@ -53,7 +57,9 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 
   const key = noteKey(input.pool, input.count);
   if (pool) {
-    confirmedFrom.set(key, pool.count);
+    const seen = confirmedFrom.get(key);
+    if (seen) seen.add(pool.count);
+    else confirmedFrom.set(key, new Set([pool.count]));
     if (confirmedFrom.size > MAX_NOTES) {
       const oldest = confirmedFrom.keys().next().value;
       if (oldest !== undefined) confirmedFrom.delete(oldest);
@@ -115,23 +121,26 @@ export default async function tool(input: Input) {
   // window or a terminal can resize the pool in that time, which turns approved
   // growth into a shrink that deregisters runners nobody agreed to.
   const key = noteKey(pool.name, input.count);
-  const agreed = confirmedFrom.get(key);
+  const seen = confirmedFrom.get(key);
   confirmedFrom.delete(key);
 
-  if (agreed === undefined) {
-    // No confirmation for this exact change is still in this process, so
-    // nothing here can show that a shrink was approved. Growth is left alone:
-    // it deregisters nothing, and `--if-count` still keeps the write atomic.
+  if (seen === undefined) {
+    // No question about this exact change is still on record, so nothing here
+    // can show that a shrink was put to the user. Growth is left alone: it
+    // deregisters nothing, and `--if-count` still keeps the write atomic.
     if (input.count < pool.count) {
       throw new Error(
         `Nothing here can show that shrinking "${pool.name}" from ${pool.count} to ${input.count} was confirmed, and the surplus runners would be deregistered from GitHub rather than just stopped. Nothing was changed. Ask again.`,
       );
     }
-  } else if (agreed !== pool.count) {
+  } else if (seen.size !== 1 || !seen.has(pool.count)) {
+    const only = seen.size === 1 ? [...seen][0] : undefined;
     throw new Error(
-      `Pool "${pool.name}" was resized somewhere else while this was waiting: it had ${agreed} ${
-        agreed === 1 ? "runner" : "runners"
-      } and now has ${pool.count}. Nothing was changed. Ask again against the current figure.`,
+      only !== undefined
+        ? `Pool "${pool.name}" was resized somewhere else while this was waiting: it had ${only} ${
+            only === 1 ? "runner" : "runners"
+          } and now has ${pool.count}. Nothing was changed. Ask again against the current figure.`
+        : `Pool "${pool.name}" was asked about more than once while this was waiting and its size changed in between, so which reading this approval belongs to cannot be told apart. Nothing was changed. Ask again against the current figure.`,
     );
   }
 

@@ -2,8 +2,8 @@
 
 ## [Fix a resize that could act on the wrong count] - {PR_MERGE_DATE}
 
-- Record each resize confirmation against the change it asked about, so two open at once cannot swap starting counts and turn approved growth into a shrink
-- Refuse a shrink that cannot be tied to a confirmation, rather than falling back to the current count
+- Record every size a resize confirmation was shown, so two questions open at once cannot swap starting counts and turn approved growth into a shrink
+- Refuse the change when those questions disagree about the pool's size, or when a shrink cannot be tied to a confirmation at all
 
 ## [Initial Version] - 2026-09-01
 
