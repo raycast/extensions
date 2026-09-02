@@ -1,6 +1,20 @@
 # Brew Changelog
 
-## [Install statistics & popularity sort] - {PR_MERGE_DATE}
+## [Show Upgrades: reviewed, selective upgrading] - 2026-09-01
+
+- **Show Outdated is now Show Upgrades**: the outdated list has grown into a review surface — ↩ toggles a package (formula or cask) in or out of the upgrade, **⌘↩ runs it from any row** ("Upgrade All" with the default full selection, "Upgrade N Selected" once narrowed) and ⌘⇧A selects or deselects everything upgradable. The default selection is everything not pinned — exactly what a plain `brew upgrade` would do. Every per-package action the view offered (single upgrade, pin, copy/terminal commands, uninstall) remains on each row, and the command still answers to "outdated" in search
+- A reviewed run upgrades exactly the selected packages: each is upgraded individually by name, so deselected packages are simply left out — nothing is pinned, held or otherwise touched on their behalf. Packages that become outdated during the run's own `brew update` are not upgraded unreviewed; they remain visible — and selectable for a follow-up run — in the list afterwards
+- A pin is a lock, matching brew's own behaviour: pinned formulae cannot be selected, and upgrading one means unpinning it — ↩ on a pinned row unpins and selects it in one step. Pinning from the review (⌘.) deselects
+- Refreshing mid-review (⌘R) keeps the selections you have already made; a formula pinned outside the extension is deselected on refresh — the lock always wins
+- Casks are selectable exactly like formulae. Cask *pinning* (the lock semantics) waits on Homebrew 6's `brew pin --cask` and ships in a follow-up
+- Running the upgrade cancels the review's in-flight background `brew update` (and waits for it to release Homebrew's update lock) instead of asking the user to try again in a moment
+- Reopening either upgrade command after a run no longer flashes the pre-run list: a snapshot the run made stale is withheld until fresh data lands
+- A failed check-for-upgrades now shows a failure screen with a Retry action instead of a blank list (Show Upgrades) or a stuck checking placeholder (Upgrade); with cached packages still on screen the failure arrives as a toast instead, and with nothing outdated the empty screen offers a route to Show Installed
+- "Run Upgrade in Terminal" on outdated rows moved from ⌘↩ to ⌘⇧T, and the single-package Upgrade action moved from ↩ into the action panel — ↩ now toggles selection and ⌘↩ starts the run on every row
+- Fixed the `OutdatedCask.installed_versions` type: `brew outdated --json=v2` returns an array for casks, not a string
+- Added a test suite (vitest, dev-only) covering the selection logic
+
+## [Install statistics & popularity sort] - 2026-09-01
 
 - Search: "Sort by Popularity" (⇧⌘P) orders results by installs over the last 30 days, ranking every match before the list is truncated — so the top rows are the most installed overall, not of the first hundred. An empty query lists the most installed packages outright.
 - The detail sidebar and the Details view both show a package's install counts for 30, 90 and 365 days, plus build errors, matching the analytics table on its formulae.brew.sh page. Only the selected package is fetched.

@@ -18,19 +18,24 @@ function UpgradeContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
   // The upgrade runs its own brew update, so skip the hook's background refresh:
   // brew does not support concurrent processes.
-  const { isLoading, data, revalidate } = useBrewOutdated({ backgroundRefresh: false });
+  const { isLoading, data, error, revalidate } = useBrewOutdated({ backgroundRefresh: false });
   const upgrade = useBrewUpgrade();
   const { upgradeAll } = upgrade;
   const hasStartedRef = useRef(false);
 
   // Start once the (cached) outdated packages are listed, so the upgrade
-  // doesn't run concurrently with the initial brew outdated fetch.
+  // doesn't run concurrently with the initial brew outdated fetch. Not after
+  // a failed fetch with nothing to show: the failure view with Retry is the
+  // recovery path, and a run started under it would bury it behind a toast.
+  // "Nothing to show" must mean no packages, not no data — a cached empty
+  // result is truthy yet renders the same failure view.
+  const hasCachedPackages = data !== undefined && (data.formulae.length > 0 || data.casks.length > 0);
   useEffect(() => {
-    if (!isLoading && !hasStartedRef.current) {
+    if (!isLoading && !hasStartedRef.current && !(error && !hasCachedPackages)) {
       hasStartedRef.current = true;
       upgradeAll();
     }
-  }, [isLoading, upgradeAll]);
+  }, [isLoading, error, hasCachedPackages, upgradeAll]);
 
   const handleAction = useCallback(() => {
     // Show the refreshed results, rather than those fetched by the upgrade
@@ -53,6 +58,8 @@ function UpgradeContent() {
         upgrade.isUpgrading ? (item) => <UpgradingActionPanel outdated={item} onCancel={upgrade.cancel} /> : undefined
       }
       onAction={handleAction}
+      error={error}
+      onRetry={revalidate}
     />
   );
 }
