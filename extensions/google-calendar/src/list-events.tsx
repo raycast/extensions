@@ -86,12 +86,12 @@ function getIcon(event: calendar_v3.Schema$Event) {
 }
 
 function compareEventsByDateAndType(a: calendar_v3.Schema$Event, b: calendar_v3.Schema$Event): number {
-  const getTime = (e: calendar_v3.Schema$Event) =>
-    new Date(e.start?.dateTime ?? e.start?.date ?? 0).getTime();
+  const getSortTime = (e: calendar_v3.Schema$Event) =>
+    new Date(e.start?.dateTime ?? (e.start?.date ? `${e.start.date}T00:00:00` : 0)).getTime();
 
   return (
-    getTime(a) - getTime(b) ||
-    Number(Boolean(a.start?.dateTime)) - Number(Boolean(b.start?.dateTime)) || // For midnight vs. Allday event.
+    getSortTime(a) - getSortTime(b) ||
+    Number(Boolean(a.start?.date)) - Number(Boolean(b.start?.date)) ||
     (a.summary ?? "").localeCompare(b.summary ?? "")
   );
 }

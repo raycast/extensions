@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## [Fix event sorting for undated events] - 2026-09-02
+
+- Sort events by their normalized start time, then place events without a start date before dated events when they share the same timestamp.
+
 ## [Fix AI contact search caching] - 2026-08-27
 
 - Key AI contact-search results by query and retry empty results so the tool matches the regular Search Contacts command.
