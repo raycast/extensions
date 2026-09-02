@@ -16,6 +16,7 @@ import { promisify } from "util";
 import { ProjectDropdown } from "./components/ProjectDropdown";
 import { CacheManager, RecentResource, ResourceType, ServiceCounts } from "./utils/CacheManager";
 import { authenticateWithBrowser, fetchResourceCounts } from "./gcloud";
+import { clearTokenCache } from "./utils/gcpApi";
 import { detectGcloudPath, getInstallInstructions, getPlatform } from "./utils/gcloudDetect";
 import DoctorView from "./components/DoctorView";
 
@@ -90,6 +91,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
   const [viewMode, setViewMode] = useState<ViewMode>(initialService || "hub");
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gcloudPath, setGcloudPath] = useState<string>(configuredGcloudPath || "gcloud");
 
@@ -186,21 +188,42 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
       );
       if (mountCancelledRef.current) return;
 
-      if (stdout.trim()) {
-        setIsAuthenticated(true);
-        CacheManager.saveAuthStatus(true, stdout.trim());
-
-        // Load cached project
-        const cachedProject = CacheManager.getSelectedProject();
-        if (cachedProject) {
-          setSelectedProject(cachedProject.projectId);
-        }
-
-        setIsLoading(false);
-      } else {
+      if (!stdout.trim()) {
         setIsAuthenticated(false);
         setIsLoading(false);
+        return;
       }
+
+      // An account keeps being listed as ACTIVE after its refresh token expires, so
+      // confirm the credentials still work. Without this an expired session looks
+      // authenticated and every list silently comes back empty.
+      try {
+        await execFilePromise(pathToUse, ["auth", "print-access-token"], { timeout: 15000 });
+      } catch (err) {
+        if (mountCancelledRef.current) return;
+        if (isReauthRequired(err)) {
+          CacheManager.clearAuthCache();
+          clearTokenCache();
+          setSessionExpired(true);
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+        // Anything else — a network blip, a timeout — is not proof the session is gone,
+        // so fall through and let the individual views surface the real error.
+      }
+
+      setIsAuthenticated(true);
+      setSessionExpired(false);
+      CacheManager.saveAuthStatus(true, stdout.trim());
+
+      // Load cached project
+      const cachedProject = CacheManager.getSelectedProject();
+      if (cachedProject) {
+        setSelectedProject(cachedProject.projectId);
+      }
+
+      setIsLoading(false);
     } catch {
       if (mountCancelledRef.current) return;
       setIsAuthenticated(false);
@@ -334,9 +357,16 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
     return (
       <List>
         <List.EmptyView
-          title="Not authenticated"
-          description="Please authenticate with Google Cloud"
-          icon={{ source: Icon.Person, tintColor: Color.Blue }}
+          title={sessionExpired ? "Session Expired" : "Not authenticated"}
+          description={
+            sessionExpired
+              ? "Your gcloud credentials need to be refreshed — sign in again to continue"
+              : "Please authenticate with Google Cloud"
+          }
+          icon={{
+            source: sessionExpired ? Icon.Clock : Icon.Person,
+            tintColor: sessionExpired ? Color.Orange : Color.Blue,
+          }}
           actions={
             <ActionPanel>
               <Action title="Authenticate" icon={Icon.Key} onAction={authenticate} />
@@ -532,6 +562,25 @@ function AuthenticationView({ gcloudPath, onAuthenticated }: AuthenticationViewP
         }
       />
     </Form>
+  );
+}
+
+/**
+ * `gcloud auth list` keeps reporting an account as ACTIVE after its refresh token has
+ * expired, so an expired session is only detectable from the error a real credential
+ * call returns. gcloud always points at `gcloud auth login` when a re-login is needed.
+ */
+function isReauthRequired(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  // execFile surfaces the CLI's stderr on the error object as well as in the message.
+  const stderr = (error as Error & { stderr?: string }).stderr ?? "";
+  const detail = `${error.message} ${stderr}`.toLowerCase();
+
+  return (
+    detail.includes("reauthentication failed") ||
+    detail.includes("invalid_grant") ||
+    detail.includes("valid credentials") ||
+    detail.includes("gcloud auth login")
   );
 }
 

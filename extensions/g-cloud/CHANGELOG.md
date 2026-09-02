@@ -1,5 +1,9 @@
 # Google Cloud CLI Changelog
 
+## [Fix Silent Empty Lists When gcloud Credentials Expire] - {PR_MERGE_DATE}
+
+- Fixed an expired gcloud session being treated as authenticated. `gcloud auth list` keeps reporting an account as `ACTIVE` after its refresh token has expired, so the extension stayed on the hub and every list — including the project dropdown — silently came back empty with no explanation. It now confirms the credentials still work and shows a **Session Expired** screen wired to the existing sign-in action. Failures that are not credential-related (a timeout, a network blip) are left alone so they still surface as real errors.
+
 ## [Add Cloud SQL] - {PR_MERGE_DATE}
 
 ### New Features
