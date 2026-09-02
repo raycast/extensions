@@ -1,37 +1,58 @@
-import { LaunchProps, showHUD, showToast, Toast, Clipboard } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, LaunchProps } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { createElement } from "react";
 import { evaluateExpression } from "./utils/soulver-cli";
 
-interface CommandArguments {
-  expression?: string;
+interface Calculation {
+  expression: string;
+  result: string;
 }
 
-export default async function main(props: LaunchProps<{ arguments: CommandArguments }>) {
-  let expr = props.arguments.expression?.trim();
+export default function main(props: LaunchProps<{ arguments: Arguments.Soulver }>) {
+  const {
+    data: calculation,
+    error,
+    isLoading,
+  } = usePromise(async (): Promise<Calculation> => {
+    let expression: string | undefined = props.arguments.expression?.trim();
 
-  if (!expr) {
-    const clipboardText = await Clipboard.readText();
-    expr = clipboardText?.trim();
-  }
+    if (!expression) {
+      const clipboardText = await Clipboard.readText();
+      expression = clipboardText?.trim();
+    }
 
-  if (!expr) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "No expression provided",
-      message: "Pass an argument or copy an expression to your clipboard.",
-    });
-    return;
-  }
+    if (!expression) {
+      throw new Error("Pass an argument or copy an expression to your clipboard.");
+    }
 
-  try {
-    const result = await evaluateExpression(expr);
-    await Clipboard.copy(result);
-    await showHUD(`= ${result}`);
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to calculate expression";
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Soulver Error",
-      message,
-    });
-  }
+    const result = await evaluateExpression(expression);
+    return { expression, result };
+  });
+
+  const errorMessage = error instanceof Error ? error.message : undefined;
+
+  return createElement(Detail, {
+    isLoading,
+    markdown: errorMessage
+      ? `# Unable to calculate\n\n${errorMessage}`
+      : calculation
+        ? `# ${calculation.result}`
+        : "# Calculating...",
+    metadata: calculation
+      ? createElement(
+          Detail.Metadata,
+          null,
+          createElement(Detail.Metadata.Label, { title: "Expression", text: calculation.expression }),
+          createElement(Detail.Metadata.Label, { title: "Result", text: calculation.result }),
+        )
+      : undefined,
+    actions: calculation
+      ? createElement(
+          ActionPanel,
+          null,
+          createElement(Action.CopyToClipboard, { title: "Copy Result", content: calculation.result }),
+          createElement(Action.CopyToClipboard, { title: "Copy Expression", content: calculation.expression }),
+        )
+      : undefined,
+  });
 }

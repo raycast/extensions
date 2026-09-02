@@ -18,7 +18,7 @@
       "title": "Solve Expression",
       "subtitle": "Soulver CLI",
       "description": "Runs Soulver CLI to evaluate passed expression or clipboard contents",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "expression",
