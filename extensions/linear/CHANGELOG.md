@@ -5,7 +5,7 @@
 - Connect any number of Linear workspaces (Manage Workspaces command: add, switch, re-authenticate, log out)
 - Workspace dropdown on every list command, workspace field on Create Issue / Create Project (with per-workspace remembered defaults), optional one-shot `workspace` argument on Quick Add Comment to Issue, and a dedicated Create Issue for Myself in Workspace command
 - Menu bar notifications aggregate all connected workspaces
-- AI tools (including the expanded list-*/get-*/save-* tools) accept a `workspaceId` and a new `get-workspaces` tool lists the connected ones
+- AI tools (including the expanded `list-*`/`get-*`/`save-*` tools) accept a `workspaceId` and a new `get-workspaces` tool lists the connected ones
 
 ## [AI Comment Reliability] - 2026-09-02
 

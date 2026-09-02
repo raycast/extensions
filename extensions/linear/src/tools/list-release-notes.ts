@@ -1,9 +1,7 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { afterDate, client, collect, PageInput, resolveRelease, resolveReleasePipeline } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 type ReleaseNoteFilter = NonNullable<Parameters<LinearClient["releaseNotes"]>[0]>["filter"];
 
@@ -19,9 +17,11 @@ interface Input extends PageInput {
   createdAt?: string;
   updatedAt?: string;
   includeArchived?: boolean;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   const pipeline = input.pipeline ? await resolveReleasePipeline(input.pipeline) : undefined;
   const release = input.release ? await resolveRelease(input.release) : undefined;
   const createdAfter = afterDate(input.createdAt);

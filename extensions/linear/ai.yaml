@@ -2179,9 +2179,21 @@ evals:
           identifier: ENG-1
           title: Test multi
           url: https://linear.app/floxdotdev/issue/ENG-1
+      save-issue:
+        success: true
+        issue:
+          id: issue-1
+          identifier: ENG-1
+          title: Test multi
+          url: https://linear.app/floxdotdev/issue/ENG-1
     expected:
       - callsTool: get-workspaces
-      - callsTool:
-          name: create-issue
-          arguments:
-            workspaceId: org-b:user-2
+      - or:
+          - callsTool:
+              name: save-issue
+              arguments:
+                workspaceId: org-b:user-2
+          - callsTool:
+              name: create-issue
+              arguments:
+                workspaceId: org-b:user-2

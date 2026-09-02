@@ -1,10 +1,12 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { resolveRelease } from "./linearUtils";
-type Input = { id: string; includeReleaseNotes?: boolean };
-export default withAccessToken(linear)(async ({ id, includeReleaseNotes }: Input) => {
+import { withToolAuth } from "./resolveToolWorkspace";
+type Input = {
+  id: string;
+  includeReleaseNotes?: boolean;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
+};
+export default withToolAuth(async ({ id, includeReleaseNotes }: Input) => {
   const release = await resolveRelease(id);
   return { ...release, releaseNotes: includeReleaseNotes ? release.releaseNotes : undefined };
 });

@@ -16,8 +16,8 @@ function parseWorkspaceId(workspaceId: string): { orgId: string; userId: string 
 // AI-tool wrapper (replaces withWorkspaceAuth for tools — §4.3: AI tools NEVER trigger
 // an OAuth browser flow). Bootstraps the active workspace non-interactively so the sync
 // fast path serves workspaceId-less calls; when the call names its target explicitly,
-// a dead ACTIVE workspace must not block it (resolveToolClient resolves the target
-// independently), so bootstrap failure is tolerated in that case.
+// withToolAuth activates it itself (see the activation block below), so a dead ACTIVE
+// workspace must not block it — bootstrap failure is tolerated in that case.
 export function withToolAuth<T extends { workspaceId?: string }, R>(
   fn: (inputs: T) => Promise<R>,
 ): (inputs: T) => Promise<R> {

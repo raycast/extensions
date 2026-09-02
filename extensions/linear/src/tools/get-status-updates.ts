@@ -1,9 +1,7 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { afterDate, client, collect, PageInput, resolveInitiative, resolveProject, resolveUser } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 type ProjectUpdateFilter = NonNullable<Parameters<LinearClient["projectUpdates"]>[0]>["filter"];
 type InitiativeUpdateFilter = NonNullable<Parameters<LinearClient["initiativeUpdates"]>[0]>["filter"];
@@ -20,9 +18,11 @@ interface Input extends PageInput {
   createdAt?: string;
   updatedAt?: string;
   includeArchived?: boolean;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   if (input.id)
     return input.type === "project" ? client().projectUpdate(input.id) : client().initiativeUpdate(input.id);
   const project = input.project ? await resolveProject(input.project) : undefined;
