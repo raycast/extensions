@@ -10,7 +10,6 @@
     "Documentation"
   ],
   "license": "MIT",
-  "platforms": ["macOS"],
   "commands": [
     {
       "name": "search-vault",

@@ -13,11 +13,11 @@ limiting happen server-side in the API; this extension just renders the endpoint
 
 These three work entirely on their own — **no Raycast AI / Pro required.**
 
-| command | what it does |
-|---|---|
-| **Search Vault** | ranked search (hybrid / keyword / semantic) → open any result with its full fields |
-| **Ask Vault** | ask a question → a synthesized answer with sources (Granite's own AI, not Raycast's) |
-| **Browse Documents** | scroll your whole vault, paginated, newest pages loaded on demand |
+| command              | what it does                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| **Search Vault**     | ranked search (hybrid / keyword / semantic) → open any result with its full fields   |
+| **Ask Vault**        | ask a question → a synthesized answer with sources (Granite's own AI, not Raycast's) |
+| **Browse Documents** | scroll your whole vault, paginated, newest pages loaded on demand                    |
 
 ## AI tools (optional)
 
@@ -40,13 +40,13 @@ for Claude/Cursor. Dropping them changes nothing about the three commands above.
 
 ## Troubleshooting
 
-| what you see | what it means |
-|---|---|
-| "Missing API token" | No token set. Paste your `gra_live_…` value into the extension's preferences. |
-| "This needs a paid Granite plan" | The Agent API is part of Granite Paid. Your account is Free or canceled. |
-| "Invalid or expired token" | The token is wrong, revoked, or past its 1-year expiry. Mint a fresh one and re-paste it. |
-| "Your token is missing the `vault:ask` scope" | Search works, Ask doesn't. Scopes are fixed at creation — make a new token with both. |
-| "Rate limited" | 60 requests/min, 500 reads/day, 200 asks/day. Give it a minute. |
+| what you see                                  | what it means                                                                             |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| "Missing API token"                           | No token set. Paste your `gra_live_…` value into the extension's preferences.             |
+| "This needs a paid Granite plan"              | The Agent API is part of Granite Paid. Your account is Free or canceled.                  |
+| "Invalid or expired token"                    | The token is wrong, revoked, or past its 1-year expiry. Mint a fresh one and re-paste it. |
+| "Your token is missing the `vault:ask` scope" | Search works, Ask doesn't. Scopes are fixed at creation — make a new token with both.     |
+| "Rate limited"                                | 60 requests/min, 500 reads/day, 200 asks/day. Give it a minute.                           |
 
 ## Links
 
