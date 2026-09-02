@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "parallels-vm-switcher",
+  "title": "Parallels VM Switcher",
+  "description": "Start, resume, or focus the exact Parallels VM across macOS Spaces.",
+  "icon": "parallels-vm-switcher.png",
+  "author": "sound_kanade",
+  "pastContributors": [
+    "danpalmer",
+    "jacpd",
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open or Switch Virtual Machine",
+      "subtitle": "Parallels Desktop",
+      "description": "Search registered virtual machines and reliably start, resume, or focus the selected VM.",
+      "keywords": [
+        "show",
+        "open",
+        "launch",
+        "switch",
+        "start",
+        "resume",
+        "parallels",
+        "vm"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "open",
+      "title": "Switch Virtual Machine by Name",
+      "subtitle": "Parallels Desktop",
+      "description": "Reliably start, resume, or focus a virtual machine by name or UUID.",
+      "keywords": [
+        "open",
+        "launch",
+        "switch",
+        "start",
+        "resume",
+        "parallels",
+        "vm"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "VM name or UUID",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.1.3",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.23.13",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
