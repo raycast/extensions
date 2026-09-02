@@ -1,6 +1,6 @@
 # BetterTouchTool Changelog
 
-## [Expanded BetterTouchTool integration] - {PR_MERGE_DATE}
+## [Expanded BetterTouchTool integration] - 2026-09-02
 
 - Replace AppleScript and JXA calls with the official typed BetterTouchTool JavaScript client
 - Prefer the local Unix socket with a configurable webserver fallback
