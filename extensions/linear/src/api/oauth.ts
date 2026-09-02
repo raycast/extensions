@@ -79,7 +79,7 @@ export async function refreshNonDestructive(
     });
     if (!response.ok) return { status: "failed" };
     const next = (await response.json()) as { access_token: string; refresh_token?: string; expires_in?: number };
-    await service.client.setTokens(next);
+    await service.client.setTokens({ ...next, refresh_token: next.refresh_token ?? tokens.refreshToken });
     return { status: "ok", accessToken: next.access_token };
   } catch {
     return { status: "failed" };

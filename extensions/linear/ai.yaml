@@ -2145,28 +2145,29 @@ evals:
         - workspaceId: org-a:user-1
           name: ConceptM
           urlKey: conceptm
-          userEmail: steve@conceptm.com
+          userEmail: alex@example.com
           isActive: true
         - workspaceId: org-b:user-2
           name: flox
           urlKey: floxdotdev
-          userEmail: stevemorin@flox.dev
+          userEmail: sam@example.com
           isActive: false
     expected:
       - callsTool: get-workspaces
 
   - input: '@linear create an issue titled "Test multi" in the flox workspace for team ENG'
+    usedAsExample: false
     mocks:
       get-workspaces:
         - workspaceId: org-a:user-1
           name: ConceptM
           urlKey: conceptm
-          userEmail: steve@conceptm.com
+          userEmail: alex@example.com
           isActive: true
         - workspaceId: org-b:user-2
           name: flox
           urlKey: floxdotdev
-          userEmail: stevemorin@flox.dev
+          userEmail: sam@example.com
           isActive: false
       get-teams:
         - id: team-eng
@@ -2205,12 +2206,12 @@ evals:
         - workspaceId: org-a:user-1
           name: ConceptM
           urlKey: conceptm
-          userEmail: steve@conceptm.com
+          userEmail: alex@example.com
           isActive: true
         - workspaceId: org-b:user-2
           name: flox
           urlKey: floxdotdev
-          userEmail: stevemorin@flox.dev
+          userEmail: sam@example.com
           isActive: false
       list-issues:
         nodes: []

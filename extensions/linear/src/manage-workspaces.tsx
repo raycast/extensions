@@ -282,7 +282,7 @@ export default function ManageWorkspaces() {
         failed.push(`${row.entry.orgName} (${step}: ${error instanceof Error ? error.message : String(error)})`);
       }
     }
-    clearWorkspaceNotificationsCache(); // drop this entry's cached notification rows now, not at the next 15-min refresh
+    clearWorkspaceNotificationsCache(); // drop every workspace's cached notification rows now, not at the next 15-min refresh
     if (failed.length === 0) {
       await showToast({ style: Toast.Style.Success, title: "Logged out of all workspaces" });
     } else {

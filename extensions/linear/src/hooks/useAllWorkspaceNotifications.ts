@@ -5,7 +5,7 @@ import { getNotifications, NotificationResult } from "../api/getNotifications";
 import { getLinearClientFor } from "../api/linearClient";
 import { migrateIfNeeded, WorkspaceEntry } from "../api/workspaces";
 
-// No client on the row: useCachedPromise JSON-serializes this result to Raycast's
+// No client on the row: useCachedState JSON-serializes this result to Raycast's
 // UNENCRYPTED cache. A LinearClient instance carries its bearer token in an
 // Authorization header — persisting it here would write the token to disk, and a
 // rehydrated cache row would carry a method-less plain object anyway. Actions resolve

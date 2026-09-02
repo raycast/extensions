@@ -39,3 +39,5 @@ connected under two different accounts.
   at Linear expires on its own within 24 hours.
 - **Preferences** (like a preferred team key) apply per command and are matched inside
   whichever workspace the command acts in.
+- **AI:** ask `@linear` to act in a named workspace. Every tool accepts a `workspaceId`
+  from the `get-workspaces` tool; omit it to use the active workspace.

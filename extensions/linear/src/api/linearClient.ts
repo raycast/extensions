@@ -204,7 +204,7 @@ export async function bootstrapWorkspaceAuth(options?: { interactive?: boolean }
   // Fire-and-forget, cosmetic only: nothing downstream depends on this completing, and
   // awaiting it would add a getTokens+setTokens round-trip to every foreground launch
   // until the one-time flag is set (D-fix, slot-0 relabel touch).
-  void relabelSlot0Once(activeEntry);
+  if (options?.interactive !== false) void relabelSlot0Once(activeEntry);
   // View-bootstrap reconciliation (§4.2): entries whose tokens vanished surface as
   // "Needs re-authentication" in ordinary command UI via the snapshot.
   const reconciled = await reconcileEntries(registry);
