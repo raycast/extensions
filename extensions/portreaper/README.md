@@ -49,9 +49,9 @@ The classification logic lives in a small command-line binary, `portreaper-cli`.
 
 If you already have it (built from source, or installed via `cargo install`), the extension finds it automatically. To point at a copy in an unusual location, set **Portreaper CLI Path** in the extension preferences.
 
-## Why verdict reasons look like `ppid1_orphan`
+## How verdicts are explained
 
-Reason codes are shown exactly as the engine emits them. This extension is for developers, and `ppid1_orphan` carries more information than a vague paraphrase — it names the precise signal that fired. The desktop app's detail panel explains each code in prose.
+Each verdict comes with the evidence behind it in plain English — "Whatever launched it has exited", "Looks like a dev server". Every phrase maps one-to-one onto a signal emitted by the engine, and that mapping is machine-checked against the engine's reason enum in CI, so the wording can never drift from what the engine actually decided. The desktop app's detail panel additionally explains each signal in depth.
 
 ## Links
 

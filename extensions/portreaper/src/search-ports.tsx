@@ -4,16 +4,19 @@
  * 与桌面版的分工：这里是「快速处置」——找到残留、一键终止、加星豁免。判定的
  * 完整解释（证据链、启动链、豁免理由的双语文案）留给桌面版的详情面板。
  *
- * 关于理由为什么显示成 `ppid1_orphan` 这样的机器码：翻译属于「表达」，是前端的
- * 事；而桌面版的文案住在 `src/i18n.ts`，那个模块在顶层访问 localStorage /
- * navigator，Node 环境 import 不进来。与其为 Raycast 复制第二份文案（第二份真相
- * 源 + 第二条漂移路径），不如诚实地显示引擎的原始判定码 —— 本扩展的用户是开发者，
- * `ppid1_orphan` 比一句含糊的翻译更有信息量。
+ * 判定理由展示成普通用户能读的英文短语 + 一句解释（`REASON_LABEL` /
+ * `REASON_TIP`），不再是 `ppid1_orphan` 这样的机器码。曾刻意显示原始码，理由是
+ * 「在守卫覆盖不到的目录里手抄码名 = 无守卫的漂移路径」—— 现在漂移路径由守卫
+ * 收口：`scripts/check-reason-parity.mjs` 解析这两张词表并各自与 Rust ReasonCode
+ * 枚举做**集合相等**校验（CI + pre-push），引擎增删判定码而这里没跟上会直接
+ * 翻红。词表只是「表达」，判定语义仍 100% 来自引擎；桌面版 `src/i18n.ts` 的
+ * 双语完整解释不变（那个模块顶层访问 localStorage / navigator，Node 环境本也
+ * import 不进来）。
  *
- * 同一条原则约束着本文件的每个分支：**行的外观只能由引擎发出的结构化字段驱动**
+ * 行为分支的原则不变：**行的外观只能由引擎发出的结构化字段驱动**
  * （`confidence` / `is_zombie_suspect` / `ports` / `duplicate_of` / `state`），
- * 绝不按 `zombie_reasons` 里的具体码名分叉 —— `scripts/check-reason-parity.mjs`
- * 不覆盖本目录，在这里手抄一份码名就是一条没有守卫的漂移路径。
+ * 绝不按 `zombie_reasons` 里的具体码名分叉 —— `REASON_LABEL` / `REASON_TIP`
+ * 是本目录唯一被认可的码名消费点，除它们之外手抄码名仍是无守卫的漂移路径。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -76,6 +79,100 @@ const CONFIDENCE_COLOR: Record<Confidence, Color> = {
   likely: Color.Orange,
   possible: Color.Yellow,
   none: Color.SecondaryText,
+};
+
+/**
+ * ReasonCode → 一句普通用户能读懂的英文短语（Store 只收美式英语，无 i18n）。
+ *
+ * 键集合与 Rust ReasonCode 枚举的**集合相等**由 scripts/check-reason-parity.mjs
+ * 守卫（引擎增删码这里没跟上 ⇒ CI 红），所以这张表允许存在而不构成漂移路径。
+ * 保持平铺字面量、值单行 —— 守卫按行解析，认不出的行会响亮报错。
+ */
+const REASON_LABEL: Record<string, string> = {
+  defunct: "Already dead, never cleaned up",
+  ppid1_orphan: "Whatever launched it has exited",
+  parent_exited: "Its parent process has exited",
+  pid_slot_reused: "Its original parent is dead",
+  orphaned_chain: "The terminal that started it is gone",
+  orphaned_session: "Its terminal session is dead",
+  nonstandard_path: "Runs from an unusual location",
+  dev_server_keyword: "Looks like a dev server",
+  duplicate_dev_server: "The same dev server is running twice",
+  automation_instance: "Headless browser left behind by automation",
+  debugger_attached: "A client is actively driving it",
+  launchd_managed: "Managed by macOS (launchd)",
+  brew_service_path: "Runs as a Homebrew service",
+  installed_app: "A properly installed app",
+  pm2_managed: "Managed by pm2",
+  just_reparented: "Just started — still settling",
+};
+
+/** 兜底：引擎比扩展新、发来未知码时退回原始码 —— 不好看，但比空白诚实。 */
+const reasonLabel = (code: string): string => REASON_LABEL[code] ?? code;
+
+/**
+ * ReasonCode → 一句「为什么」的完整解释（详情面板 Evidence 节）。
+ * 措辞以桌面版 `src/i18n.ts` 的英文 `reasonTip.*` 为底稿 —— 两个前端对同一个码
+ * 的解释必须同口径。与 REASON_LABEL 同受 check-reason-parity.mjs 的集合相等
+ * 校验，同样保持平铺字面量、值单行。
+ */
+const REASON_TIP: Record<string, string> = {
+  defunct: "It has already exited but was never cleaned up by its parent — a textbook zombie.",
+  ppid1_orphan:
+    "Its parent exited, so the system adopted it — the terminal or IDE that started it is gone.",
+  parent_exited: "Whatever launched it no longer exists in the process table.",
+  pid_slot_reused: "Its recorded parent is a newer, unrelated process — the real parent is dead.",
+  orphaned_chain:
+    "Walking up its ancestry reaches the system root without meeting any live app — the shell that launched it is dead.",
+  orphaned_session:
+    "It belongs to a terminal session whose leader is gone — the terminal likely crashed or was killed.",
+  nonstandard_path:
+    "It does not run from a standard install location like /Applications or the system directories.",
+  dev_server_keyword:
+    "Its command line looks like a development server (vite, node, uvicorn and friends).",
+  duplicate_dev_server:
+    "Another copy of the same project's dev server is already running — usually a forgotten earlier launch.",
+  automation_instance:
+    "It is a headless browser session (Playwright, Puppeteer or similar) that outlived the script that started it.",
+  debugger_attached:
+    "Something is connected to its debugging port right now — a live session, not residue.",
+  launchd_managed:
+    "launchd supervises it on purpose (a LaunchAgent or brew service) — not residue.",
+  brew_service_path: "It runs from a Homebrew service path, so it is treated as a managed service.",
+  installed_app: "It runs from a standard install location, which leftover dev processes never do.",
+  pm2_managed: "The pm2 daemon supervises it on purpose — intentionally long-running.",
+  just_reparented:
+    "It started (or changed parents) less than 10 seconds ago — could be a restart in flight, so judgement is on hold.",
+};
+
+/** Confidence → Verdict 徽标/提示文字。`Record<Confidence, …>` 由 tsc 兜全。 */
+const VERDICT_TEXT: Record<Confidence, string> = {
+  confirmed: "Zombie",
+  likely: "Likely a zombie",
+  possible: "Worth a look",
+  none: "Healthy",
+};
+
+/** app_category → 可读名称；未知类别原样显示（引擎新增类别时的兜底，与桌面版同策略）。 */
+const CATEGORY_LABEL: Record<string, string> = {
+  "installed-app": "Installed app",
+  system: "System process",
+  "dev-script": "Dev script",
+  "automation-instance": "Automation browser",
+  "user-binary": "User binary",
+  unknown: "Unknown",
+};
+
+/** ps state 首字母 → 可读状态（与桌面版 `stateKey` 同口径：只映射首字母，修饰位
+ *  是平台细节；认不出的整串原样显示 —— 原始码正是懂 ps 的用户想要的证据）。 */
+const STATE_TEXT: Record<string, string> = {
+  R: "Running",
+  S: "Running (sleeping)",
+  I: "Idle",
+  T: "Suspended (Ctrl-Z)",
+  U: "Waiting on I/O",
+  D: "Waiting on I/O",
+  Z: "Dead, not yet reaped",
 };
 
 /** 终止后的存活确认：多久开始探、每隔多久探一次、最多探到什么时候。
@@ -587,8 +684,8 @@ function Row({ entry, ...shared }: { entry: ProcessEntry } & SharedProps) {
           color: entry.is_whitelisted ? Color.SecondaryText : CONFIDENCE_COLOR[entry.confidence],
         },
         tooltip: entry.is_whitelisted
-          ? `Exempt by your star — the engine's verdict was ${entry.confidence}`
-          : `Verdict: ${entry.confidence} — ${entry.zombie_reasons.join(", ")}`,
+          ? `Exempt by your star — the engine's verdict was “${VERDICT_TEXT[entry.confidence]}”`
+          : `${VERDICT_TEXT[entry.confidence]} — ${entry.zombie_reasons.map(reasonLabel).join(" · ")}`,
       });
     }
     // 子树 CPU 而非行内 CPU：headless 浏览器把 CPU 全烧在子进程里，
@@ -625,7 +722,7 @@ function Row({ entry, ...shared }: { entry: ProcessEntry } & SharedProps) {
 function rowTooltip(e: ProcessEntry): string {
   if (e.is_whitelisted) return "Starred — exempt from suspicion";
   if (!e.is_zombie_suspect) return "Healthy — a live launcher owns this process";
-  return `${e.confidence}: ${e.zombie_reasons.join(", ")}`;
+  return `${VERDICT_TEXT[e.confidence]} — ${e.zombie_reasons.map(reasonLabel).join(" · ")}`;
 }
 
 /**
@@ -642,9 +739,80 @@ function fenced(text: string): string {
   return `${fence}\n${text}\n${fence}`;
 }
 
+/** 「能不能安全终止」—— 措辞锚定引擎的清扫策略（confirmed/likely 进一键清扫、
+ *  possible 与重复实例永不、星标/健康不在目标集），不是前端自创的安全承诺。
+ *  颜色是**动作**的信号灯（绿 = 可以下手），与 Verdict 的「进程好坏」着色维度
+ *  刻意相反。 */
+function safeToTerminate(e: ProcessEntry): { text: string; color: Color } {
+  if (e.is_whitelisted) return { text: "Exempt by your star", color: Color.SecondaryText };
+  if (!e.is_zombie_suspect) {
+    return { text: "Not recommended — it has a live owner", color: Color.Red };
+  }
+  if (e.duplicate_of !== null) {
+    return { text: "Your call — keep the copy you're using", color: Color.Yellow };
+  }
+  if (e.confidence === "possible") {
+    return { text: "Check the command first — evidence is weak", color: Color.Yellow };
+  }
+  return { text: "Yes — nothing owns it any more", color: Color.Green };
+}
+
+/** 「谁启动的」。链根是 launchd/System 时它只是**收养者**：凡引擎给出判定的行
+ *  （含星标豁免但 confidence 仍在的行）都隐藏本行 —— 首行结论与 Launcher chain
+ *  已经把「启动者死了」讲清楚；只有真正由系统启动的健康行（brew 服务等）才写
+ *  The system。 */
+function startedByText(e: ProcessEntry): string | null {
+  if (!e.launcher_label || e.launcher_label === "?") return null;
+  if (e.launcher_label === "launchd" || e.launcher_label === "System") {
+    return e.confidence === "none" ? "The system" : null;
+  }
+  return e.launcher_label;
+}
+
+/** start_unix → "Aug 31, 9:12 PM"。Uptime 回答「跑了多久」，这里回答「几点开始」——
+ *  普通用户认「是不是昨晚忘关的那个」靠的是后者。 */
+function startedAtText(e: ProcessEntry): string | null {
+  if (e.start_unix == null) return null;
+  return new Date(e.start_unix * 1000).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+/** 详情面板首行：先说结论，再摆证据 —— 普通用户最想知道的是「这行要不要管」。
+ *  嫌疑行取 zombie_reasons[0] 作主理由：classify 按「孤儿信号 → 佐证」的顺序
+ *  push，首项就是最强信号。 */
+function headline(entry: ProcessEntry): string {
+  if (entry.is_whitelisted) {
+    return "**Starred** — you marked this as expected, so it is never flagged or swept.";
+  }
+  if (!entry.is_zombie_suspect) return "**Healthy** — a live launcher owns this process.";
+  const why = entry.zombie_reasons.length > 0 ? ` ${reasonLabel(entry.zombie_reasons[0])}.` : "";
+  return `**${VERDICT_TEXT[entry.confidence]}.**${why}`;
+}
+
 function Detail({ entry }: { entry: ProcessEntry }) {
-  const chain = entry.parent_chain.map((p) => `${p.label} (${p.pid})`).join(" → ");
+  // 引擎给的链序是「父 → … → 根」；箭头的自然读法是「A 启动了 B」，
+  // 所以反转成「根 → … → 本进程」，沿箭头读就是谁启动了谁。
+  const chain = [...entry.parent_chain]
+    .reverse()
+    .map((p) => `${p.label} (${p.pid})`)
+    .join(" → ");
+  // 每条判定理由 = 短语 + 一句「为什么」。未知码（引擎比扩展新）只有原始码，
+  // 没有解释可给 —— 不硬造。
+  const evidence = entry.zombie_reasons.map((r) => {
+    const tip = REASON_TIP[r];
+    return tip ? `- **${reasonLabel(r)}** — ${tip}` : `- **${reasonLabel(r)}**`;
+  });
+  const safe = safeToTerminate(entry);
+  const startedBy = startedByText(entry);
+  const startedAt = startedAtText(entry);
   const md = [
+    headline(entry),
+    "",
+    ...(evidence.length > 0 ? ["## Evidence", "", ...evidence, ""] : []),
     "## Command",
     "",
     fenced(entry.full_command || entry.command),
@@ -659,7 +827,9 @@ function Detail({ entry }: { entry: ProcessEntry }) {
       : []),
     "## Launcher chain",
     "",
-    chain ? fenced(chain) : "_No live ancestor — this process was reparented to init._",
+    chain
+      ? fenced(`${chain} → this process`)
+      : "_Nothing above it is alive — whatever started this process is gone._",
   ].join("\n");
 
   return (
@@ -668,44 +838,53 @@ function Detail({ entry }: { entry: ProcessEntry }) {
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.TagList title="Verdict">
+            {entry.is_whitelisted && (
+              <List.Item.Detail.Metadata.TagList.Item text="Starred" color={Color.Yellow} />
+            )}
             <List.Item.Detail.Metadata.TagList.Item
-              text={entry.is_whitelisted ? `${entry.confidence} (starred)` : entry.confidence}
+              text={VERDICT_TEXT[entry.confidence]}
               color={
                 entry.is_whitelisted ? Color.SecondaryText : CONFIDENCE_COLOR[entry.confidence]
               }
             />
           </List.Item.Detail.Metadata.TagList>
-          {entry.zombie_reasons.length > 0 && (
-            // 判定理由**只着色、不翻译** —— 文字保持引擎发出的原始码。
-            // 在这里写一份英文释义就是第二份真相源，正是 core 拆分要根除的东西；
-            // 完整解释留给桌面版的详情面板（那里的双语文案有 parity 守卫）。
-            <List.Item.Detail.Metadata.TagList title="Why it is listed">
-              {entry.zombie_reasons.map((r) => (
-                <List.Item.Detail.Metadata.TagList.Item
-                  key={r}
-                  text={r}
-                  color={CONFIDENCE_COLOR[entry.confidence]}
-                />
-              ))}
-            </List.Item.Detail.Metadata.TagList>
-          )}
+          {/* 判定理由的完整解释在左侧 markdown 的 Evidence 节（短语 + 为什么）；
+              这里不再重复一遍短语徽标，右列只回答「那我能不能动手」 */}
+          <List.Item.Detail.Metadata.TagList title="Safe to terminate?">
+            <List.Item.Detail.Metadata.TagList.Item text={safe.text} color={safe.color} />
+          </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="PID" text={String(entry.pid)} />
-          <List.Item.Detail.Metadata.Label
-            title="State"
-            text={isStopped(entry) ? `${entry.state} · stopped` : entry.state || "—"}
-          />
-          <List.Item.Detail.Metadata.Label title="Category" text={entry.app_category} />
+          {startedBy !== null && (
+            <List.Item.Detail.Metadata.Label title="Started by" text={startedBy} />
+          )}
+          {entry.duplicate_of !== null && (
+            <List.Item.Detail.Metadata.Label
+              title="Duplicate of"
+              text={`PID ${entry.duplicate_of}`}
+            />
+          )}
           <List.Item.Detail.Metadata.Label
             title="Ports"
-            text={entry.ports.length > 0 ? formatPorts(entry.ports) : "none"}
+            text={entry.ports.length > 0 ? formatPorts(entry.ports) : "None — holds no port"}
           />
           <List.Item.Detail.Metadata.Label title="Uptime" text={formatUptime(entry.elapsed_secs)} />
-          <List.Item.Detail.Metadata.Label
-            title="CPU (self / tree)"
-            text={`${pct(entry.cpu_percent)} / ${pct(entry.cpu_percent_tree)}`}
-          />
+          {startedAt !== null && (
+            <List.Item.Detail.Metadata.Label title="Started" text={startedAt} />
+          )}
+          <List.Item.Detail.Metadata.Label title="CPU" text={cpuText(entry)} />
           <List.Item.Detail.Metadata.Label title="Memory" text={mb(entry.mem_mb)} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="PID" text={String(entry.pid)} />
+          {entry.state !== "" && (
+            <List.Item.Detail.Metadata.Label
+              title="State"
+              text={STATE_TEXT[entry.state[0]] ?? entry.state}
+            />
+          )}
+          <List.Item.Detail.Metadata.Label
+            title="Type"
+            text={CATEGORY_LABEL[entry.app_category] ?? entry.app_category}
+          />
           <List.Item.Detail.Metadata.Label title="User" text={entry.user || "—"} />
           <List.Item.Detail.Metadata.Label title="Executable" text={entry.exe_path || "—"} />
         </List.Item.Detail.Metadata>
@@ -1067,6 +1246,16 @@ function pct(v: number): string {
 
 function mb(v: number): string {
   return Number.isFinite(v) ? `${v.toFixed(0)} MB` : "—";
+}
+
+/** 行内 CPU 与整棵子树只在有实质差别时并排 —— headless 浏览器把 CPU 烧在
+ *  `--type=gpu-process` 子进程里，主进程读数 ~0%（cpu_percent_tree 存在的原因）；
+ *  而对绝大多数行，两个几乎相同的百分比并排只是噪音。 */
+function cpuText(e: ProcessEntry): string {
+  if (!Number.isFinite(e.cpu_percent_tree) || e.cpu_percent_tree - e.cpu_percent < 0.5) {
+    return pct(e.cpu_percent);
+  }
+  return `${pct(e.cpu_percent)} (${pct(e.cpu_percent_tree)} with children)`;
 }
 
 function formatUptime(secs: number): string {
