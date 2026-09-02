@@ -11,7 +11,7 @@ import {
 import { useCachedState, usePromise } from "@raycast/utils";
 
 export default function Command() {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const maxResults = preferences.maxResults;
 
   const [searchText, setSearchText] = useState("");
