@@ -48,5 +48,5 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
       message: `Are you sure you want to delete global variable "${input.name}"?`,
     };
   }
-  return false;
+  return undefined;
 };
