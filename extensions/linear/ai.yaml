@@ -2197,3 +2197,27 @@ evals:
               name: create-issue
               arguments:
                 workspaceId: org-b:user-2
+
+  - input: "@linear list open issues assigned to me in the flox workspace"
+    usedAsExample: false
+    mocks:
+      get-workspaces:
+        - workspaceId: org-a:user-1
+          name: ConceptM
+          urlKey: conceptm
+          userEmail: steve@conceptm.com
+          isActive: true
+        - workspaceId: org-b:user-2
+          name: flox
+          urlKey: floxdotdev
+          userEmail: stevemorin@flox.dev
+          isActive: false
+      list-issues:
+        nodes: []
+    expected:
+      - callsTool: get-workspaces
+      - callsTool:
+          name: list-issues
+          arguments:
+            assignee: me
+            workspaceId: org-b:user-2
