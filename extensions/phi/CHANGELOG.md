@@ -1,5 +1,10 @@
 # Changelog
 
+## [New Kiosk Window and Incognito Space] - {PR_MERGE_DATE}
+
+- Add a command to open a Kiosk window with an optional URL.
+- Add a command to create and activate a new Incognito Space.
+
 ## [Initial Version] - 2026-08-19
 
 - Search and activate Phi Spaces.

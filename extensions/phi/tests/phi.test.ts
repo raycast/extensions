@@ -22,6 +22,13 @@ const version = JSON.stringify({
   version: MINIMUM_PHI_VERSION,
   build: "456",
 });
+const version2 = JSON.stringify({
+  schemaVersion: 1,
+  ok: true,
+  apiVersion: 2,
+  version: MINIMUM_PHI_VERSION,
+  build: "456",
+});
 const acknowledgement = JSON.stringify({ schemaVersion: 1, ok: true });
 const chromiumDataDirectory = JSON.stringify({
   schemaVersion: 1,
@@ -167,25 +174,68 @@ describe("Phi AppleScript adapter", () => {
     expect(runner.mock.calls[2]?.[0]).toContain("to open bookmark");
   });
 
-  it("routes normal and incognito window commands without arguments", async () => {
+  it("routes window and Incognito Space commands through their native APIs", async () => {
+    const requestedURL = 'https://example.com/quoted?value="safe"';
     const runner = vi
       .fn<AppleScriptRunner>()
-      .mockResolvedValueOnce(version)
+      .mockResolvedValueOnce(version2)
+      .mockResolvedValueOnce(acknowledgement)
+      .mockResolvedValueOnce(acknowledgement)
       .mockResolvedValueOnce(acknowledgement)
       .mockResolvedValueOnce(acknowledgement);
     const client = new PhiClient(runner, "canary");
 
     await client.newWindow();
     await client.newIncognitoWindow();
+    await client.newKioskWindow(requestedURL);
+    await client.newIncognitoSpace();
 
     expect(runner.mock.calls[1]?.[0]).toContain("to create phi window");
     expect(runner.mock.calls[2]?.[0]).toContain(
       "to create phi incognito window",
     );
+    expect(runner.mock.calls[3]?.[0]).toContain(
+      "to create phi kiosk window url requestedURL",
+    );
+    expect(runner.mock.calls[3]?.[0]).not.toContain(requestedURL);
+    expect(runner.mock.calls[4]?.[0]).toContain(
+      "to create phi incognito space",
+    );
     expect(runner.mock.calls.slice(1).map((call) => call[1])).toEqual([
       [expect.any(String)],
       [expect.any(String)],
+      [requestedURL, expect.any(String)],
+      [expect.any(String)],
     ]);
+  });
+
+  it("requires scripting API version 2 for Kiosk windows", async () => {
+    const runner = vi.fn<AppleScriptRunner>().mockResolvedValue(version);
+    const client = new PhiClient(runner, "canary");
+
+    await expect(client.newKioskWindow()).rejects.toMatchObject({
+      kind: "unsupportedVersion",
+      message: "Update Phi to a version that supports scripting API version 2.",
+    });
+    expect(runner).toHaveBeenCalledOnce();
+  });
+
+  it("requires Phi 2.9.0 for the new commands on Stable", async () => {
+    const stableVersion = JSON.stringify({
+      schemaVersion: 1,
+      ok: true,
+      apiVersion: 2,
+      version: "2.8.9",
+      build: "455",
+    });
+    const runner = vi.fn<AppleScriptRunner>().mockResolvedValue(stableVersion);
+    const client = new PhiClient(runner, "stable");
+
+    await expect(client.newIncognitoSpace()).rejects.toMatchObject({
+      kind: "minimumVersionNotMet",
+      message: "Phi 2.9.0 or later is required. Update Phi and try again.",
+    });
+    expect(runner).toHaveBeenCalledOnce();
   });
 
   it("queries the running Phi process for its Chromium data directory", async () => {
