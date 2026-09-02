@@ -1,5 +1,9 @@
+import { homedir } from "os";
+import { join } from "path";
 import { Color, Icon } from "@raycast/api";
 import type { RegistryEntry } from "./types";
+
+const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
@@ -916,6 +920,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "agentmailkit",
+    title: "AgentMailKit",
+    description:
+      "Email job runner for agents. Tools: list_jobs, run_job, preview_job, list_plugins. Email sends are defined as named jobs, run_job renders a preview and defaults to dry_run true, and delivery happens only when dry_run is set false. SMTP credentials come from the environment.",
+    icon: "https://github.com/ariaxhan.png",
+    homepage: "https://github.com/ariaxhan/agentmailkit",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "agentmailkit[mcp]", "agentmailkit", "mcp"],
+    },
+  },
+  {
     name: "airbnb",
     title: "Airbnb",
     description: "MCP Server for searching Airbnb and get listing details.",
@@ -1099,6 +1115,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "metabrain",
+    title: "Metabrain",
+    description:
+      "Persistent memory for coding agents. Tools: learn, recall, verdict, hypotheses, start_brief, stats, capture_error. Lessons, failures and hypotheses are written to a local SQLite file and retrieved by keyword before the next task. No API key and no network call.",
+    icon: "https://github.com/ariaxhan.png",
+    homepage: "https://github.com/ariaxhan/metabrain",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "metabrain[mcp]", "metabrain-mcp", "--db", METABRAIN_DB_PATH],
+    },
+  },
+  {
     name: "monday",
     title: "Monday",
     description:
@@ -1152,6 +1180,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         PAPERLESS_URL: "http://your-paperless-instance:8000",
         PAPERLESS_API_KEY: "your-api-token",
       },
+    },
+  },
+  {
+    name: "site-spec",
+    title: "Site Spec",
+    description:
+      "Website audit and repair. Tools: audit_site, fix_issue, compile_spec, list_checks. 40 checks across SEO, accessibility, privacy, structured data and AI searchability, each finding returned with the file and the fix. No API key required.",
+    icon: "https://github.com/ariaxhan.png",
+    homepage: "https://github.com/ariaxhan/site-spec",
+    configuration: {
+      command: "npx",
+      args: ["-y", "site-spec-mcp"],
     },
   },
   {
