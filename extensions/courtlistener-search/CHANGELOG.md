@@ -1,6 +1,6 @@
 # CourtListener Search Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-02
 
 - Search CourtListener's case law database from Raycast
 - Semantic search on `⌘⇧M`, ranking by what a query means rather than which of its words appear
