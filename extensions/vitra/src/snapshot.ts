@@ -72,13 +72,21 @@ export type LoadResult =
   | { kind: "unsupported"; found: number }
   | { kind: "unreadable"; message: string };
 
-export function load(): LoadResult {
+export function load(paths: string[] = candidatePaths()): LoadResult {
   let lastError = "";
-  for (const p of candidatePaths()) {
+  for (const p of paths) {
     let raw: string;
     try {
       raw = fs.readFileSync(p, "utf8");
-    } catch {
+    } catch (e) {
+      // "Not here" and "here but I cannot read it" need different answers. The
+      // first is the ordinary case — Vitra names its folder differently on this
+      // machine, so try the next candidate. The second is a real fault the user
+      // can act on, and telling them no snapshot exists would send them to open
+      // an app that is already running and already writing the file.
+      if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
+        lastError = e instanceof Error ? e.message : String(e);
+      }
       continue; // not this path — try the next
     }
     try {

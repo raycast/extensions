@@ -1,9 +1,13 @@
 import { describe, it, expect } from "vitest";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import {
   deltaHoursText,
   deltaText,
   fmtHours,
   fmtSigned,
+  load,
   relativeTime,
   summaryLine,
 } from "./snapshot";
@@ -118,5 +122,61 @@ describe("staleness is described honestly", () => {
     expect(relativeTime(new Date(Date.now() + 60_000).toISOString())).toBe(
       "just now",
     );
+  });
+});
+
+describe("the loader tells the four cases apart", () => {
+  // These four map to four different pieces of advice on screen. Collapsing any
+  // two of them sends the user to fix something that is not broken, so the
+  // classification is worth testing even though the formatting is the part that
+  // usually goes wrong.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "vitra-load-"));
+  const at = (name: string, body: string) => {
+    const p = path.join(dir, name);
+    fs.writeFileSync(p, body, "utf8");
+    return p;
+  };
+
+  it("reads a good snapshot", () => {
+    const r = load([at("ok.json", JSON.stringify(base))]);
+    expect(r.kind).toBe("ok");
+  });
+
+  it("calls a file that is simply not there missing", () => {
+    expect(load([path.join(dir, "nope.json")]).kind).toBe("missing");
+  });
+
+  it("keeps looking past a path that does not exist", () => {
+    // Vitra's folder is "Vitra" or "vitra" depending on the machine, so an
+    // ENOENT on the first candidate is the ordinary case, not a failure.
+    const r = load([
+      path.join(dir, "nope.json"),
+      at("second.json", JSON.stringify(base)),
+    ]);
+    expect(r.kind).toBe("ok");
+  });
+
+  it("does not call an unreadable file missing", () => {
+    // The bug this exists to prevent: a permissions or I/O error read as "no
+    // snapshot yet", which tells the user to open an app that is already open
+    // and already writing the file. A directory stands in for the fault — it is
+    // the one read error that behaves the same on every platform.
+    const sub = path.join(dir, "a-directory");
+    fs.mkdirSync(sub, { recursive: true });
+    const r = load([sub]);
+    expect(r.kind).toBe("unreadable");
+  });
+
+  it("reports a corrupt file rather than pretending it is absent", () => {
+    const r = load([at("bad.json", "{ not json")]);
+    expect(r.kind).toBe("unreadable");
+  });
+
+  it("refuses a schema it was not written for", () => {
+    // Rendering half of a newer shape would look like Vitra had broken a field.
+    const r = load([
+      at("future.json", JSON.stringify({ ...base, schema: 99 })),
+    ]);
+    expect(r).toEqual({ kind: "unsupported", found: 99 });
   });
 });
