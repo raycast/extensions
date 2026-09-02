@@ -3,7 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 export interface DockTile {
   /** Dock tile name as shown in the Dock (usually the app name). */
   name: string;
-  /** Raw badge label: digits, "•" for dot badges, or "" when there is no badge. */
+  /** Raw badge label: a number such as "12" or "1,234", "•" for dot badges, or "" when there is no badge. */
   badge: string;
   /** Numeric badge value. Dot / non-numeric badges count as 1. */
   count: number;
@@ -14,7 +14,10 @@ export class AccessibilityError extends Error {}
 
 const SEP = "|~|"; // never appears in app names
 
-// Reads every tile in the Dock's application list and its AXStatusLabel (the badge).
+// Reads every application tile in the Dock's list and its AXStatusLabel (the badge).
+// Only AXApplicationDockItem tiles are emitted: the Handoff tile (AXHandoffDockItem) carries the
+// source device's identifier, e.g. "com.apple.iphone-13-pro-1", in its status label, and folders,
+// the separator and Trash never have badges.
 // Works even when the Dock is auto-hidden. Requires Accessibility permission for Raycast.
 const SCRIPT = `
 set out to ""
@@ -22,7 +25,11 @@ tell application "System Events"
   tell process "Dock"
     repeat with e in UI elements of list 1
       set n to name of e
-      if n is not missing value then
+      set sub to ""
+      try
+        set sub to subrole of e
+      end try
+      if n is not missing value and sub is "AXApplicationDockItem" then
         set s to ""
         try
           set s to value of attribute "AXStatusLabel" of e
@@ -68,11 +75,15 @@ export async function readDockTiles(): Promise<DockTile[]> {
     });
 }
 
+/**
+ * Numeric value of a badge label. Only labels that are entirely a number (allowing locale grouping
+ * separators such as "1,234" or "1.234") are parsed; anything else with a badge counts as 1, so a
+ * label that merely contains digits is never misread as a count.
+ */
 export function badgeToCount(badge: string): number {
   const trimmed = badge.trim();
   if (!trimmed) return 0;
-  const digits = trimmed.replace(/[^\d]/g, "");
-  if (digits) return parseInt(digits, 10);
+  if (/^\d[\d,.\s']*$/.test(trimmed)) return parseInt(trimmed.replace(/\D/g, ""), 10);
   return 1; // "•" or any other non-numeric badge
 }
 

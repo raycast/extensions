@@ -31,9 +31,6 @@ const BADGE_RED = "#FF3B30";
 
 const ACCESSIBILITY_SETTINGS = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
 
-// Dock tiles that are never applications.
-const NON_APP_TILES = new Set(["Downloads", "Trash", "Applications", "Documents"]);
-
 /**
  * Menu bar glyph for the chosen symbol and style. Circle uses Raycast's built-in icons; Bell and App use
  * the SF Symbol SVGs in assets/icons ({bell,app}[-badge][-fill].svg). All are tinted at render time.
@@ -52,9 +49,7 @@ function sameName(a: string, b: string): boolean {
 }
 
 function resolveApps(tiles: DockTile[], applications: Application[]): DockApp[] {
-  return tiles
-    .filter((tile) => !NON_APP_TILES.has(tile.name))
-    .map((tile) => ({ tile, application: applications.find((a) => sameName(a.name, tile.name)) }));
+  return tiles.map((tile) => ({ tile, application: applications.find((a) => sameName(a.name, tile.name)) }));
 }
 
 export default function Command() {

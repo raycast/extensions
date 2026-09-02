@@ -7,3 +7,4 @@
 - Circle, Bell or App symbol in Filled or Outline style; monochrome when idle, red when notifications are waiting
 - Options to show the total count and to hide the item while no app has a badge
 - Background refresh every 10 seconds
+- Only application tiles are counted, so the Handoff tile's device identifier is never misread as a badge count
