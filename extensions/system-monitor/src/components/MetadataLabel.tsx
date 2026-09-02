@@ -101,86 +101,19 @@ function metadataText(value: string | undefined | null): MetadataText {
   const trimmed = value.trim();
   const color = colorForStatusValue(trimmed);
 
-  if (color) {
-    return { value: trimmed, color };
-  }
-
-  return trimmed;
-}
-
-function coloredPercentText(value: string, displayMode: PercentDisplayMode = "usage"): MetadataText {
-  const match = value.trim().match(/^([\d.]+)\s*%/);
-  if (!match) {
-    return metadataText(value);
-  }
-
-  const displayed = parseFloat(match[1]);
-  const pressure = pressureFromDisplay(displayed, displayMode);
-
-  return { value: value.trim(), color: colorForPressurePercent(pressure) };
-}
-
-function coloredMemoryMetricText(memoryRss: string, memoryPercent: string): MetadataText {
-  const percentColored = coloredPercentText(memoryPercent, "usage");
-  if (typeof percentColored === "string") {
-    return memoryRss;
-  }
-
-  return { value: memoryRss, color: percentColored.color };
-}
-
-export function coloredAccessoryText(
-  text: string,
-  displayMode: PercentDisplayMode = "usage",
-): string | { value: string; color?: Color } {
-  if (text === "Loading…" || text === "Collecting sample…") {
-    return { value: text, color: Color.SecondaryText };
-  }
-
-  const match = text.match(/^([\d.]+)\s*%/);
-  if (!match) {
-    return metadataText(text);
-  }
-
-  const displayed = parseFloat(match[1]);
-  const pressure = pressureFromDisplay(displayed, displayMode);
-
-  return { value: text, color: colorForPressurePercent(pressure) };
-}
-
-export function coloredMemoryMetricAccessory(
-  memoryRss: string,
-  memoryPercent: string,
-): string | { value: string; color?: Color } {
-  return coloredMemoryMetricText(memoryRss, memoryPercent);
+  return color ? { value: trimmed, color } : trimmed;
 }
 
 export function MetadataLabel({
   title,
   text,
-  percentMode,
-  colorMemoryFromPercent,
   icon,
 }: {
   title: string;
   text?: string | null;
-  percentMode?: PercentDisplayMode;
-  colorMemoryFromPercent?: string;
   icon?: React.ComponentProps<typeof List.Item.Detail.Metadata.Label>["icon"];
 }) {
-  let resolved: MetadataText;
-
-  if (text === undefined || text === null) {
-    resolved = metadataText(text);
-  } else if (colorMemoryFromPercent) {
-    resolved = coloredMemoryMetricText(text, colorMemoryFromPercent);
-  } else if (percentMode) {
-    resolved = coloredPercentText(text, percentMode);
-  } else {
-    resolved = metadataText(text);
-  }
-
-  return <List.Item.Detail.Metadata.Label title={title} text={resolved} icon={icon} />;
+  return <List.Item.Detail.Metadata.Label title={title} text={metadataText(text)} icon={icon} />;
 }
 
 export function MetadataSection({ title }: { title: string }) {
