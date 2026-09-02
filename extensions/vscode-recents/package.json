@@ -1,0 +1,40 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "vscode-recents",
+    "title": "vsc",
+    "description": "Quickly open recent VS Code projects using code CLI",
+    "icon": "icon.png",
+    "author": "huid",
+    "categories": [
+        "Developer Tools"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "index",
+            "title": "Search vscode Recent Projects",
+            "description": "List and open recent VS Code projects with code",
+            "icon": "icon.png",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.70.0",
+        "@raycast/utils": "^1.14.0",
+        "sqlite-parser": "^1.0.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "@types/react": "18.2.45",
+        "sharp": "^0.35.4",
+        "typescript": "^5.0.0"
+    },
+    "overrides": {
+        "@types/react": "18.2.45"
+    },
+    "scripts": {
+        "build:dist": "ray build -o dist",
+        "build": "ray build -e dist",
+        "dev": "ray develop"
+    }
+}
