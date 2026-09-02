@@ -313,7 +313,7 @@ export default function Command() {
                     />
                   }
                   icon={Icon.PlusCircle}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                 />
               )}
             </ActionPanel>
@@ -445,7 +445,7 @@ export default function Command() {
                             />
                           }
                           icon={Icon.PlusCircle}
-                          shortcut={{ modifiers: ["cmd"], key: "n" }}
+                          shortcut={Keyboard.Shortcut.Common.New}
                         />
                       </ActionPanel.Section>
                     )}

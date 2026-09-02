@@ -1,5 +1,9 @@
 # HideMyEmail Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added support for Raycast on Windows and update shortcuts
+
 ## [Update] - 2026-03-17
 
 - Updated response message upon failed login
