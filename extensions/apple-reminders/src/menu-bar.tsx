@@ -1,5 +1,4 @@
 import {
-  Alert,
   Color,
   Icon,
   MenuBarExtra,
@@ -194,6 +193,8 @@ export default function Command() {
     title = truncate(`${timePrefix}${addPriorityToTitle(firstReminder.title, firstReminder.priority)}`, 30);
   }
 
+  const now = new Date();
+
   return (
     <MenuBarExtra isLoading={isLoading} icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }} title={title}>
       {displayReminderTitle ? (
@@ -265,11 +266,13 @@ export default function Command() {
                         await showToast({
                           style: Toast.Style.Failure,
                           title: `Unable to open ${failedCount} URL${failedCount > 1 ? "s" : ""}`,
+                          message: `${attachedUrls.length - failedCount} of ${attachedUrls.length} URLs opened successfully`,
                         });
                       }
                     }}
                   />
                 ) : null}
+
                 <MenuBarExtra.Item
                   title={reminder.isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
                   icon={reminder.isCompleted ? Icon.Circle : Icon.Checkmark}
@@ -279,92 +282,96 @@ export default function Command() {
                       await mutate();
                       await showToast({
                         style: Toast.Style.Success,
-                        title: reminder.isCompleted ? "Marked reminder as incomplete" : "Marked reminder as complete",
+                        title: reminder.isCompleted ? "Marked reminder as incomplete" : "Completed Reminder",
                         message: reminder.title,
                       });
                     } catch {
                       await showToast({
                         style: Toast.Style.Failure,
-                        title: reminder.isCompleted
-                          ? "Unable to mark reminder as incomplete"
-                          : "Unable to mark reminder as complete",
+                        title: `Unable to mark reminder as ${reminder.isCompleted ? "incomplete" : "complete"}`,
                         message: reminder.title,
                       });
                     }
                   }}
                 />
+
                 <MenuBarExtra.Submenu title="Change Due Date" icon={Icon.Calendar}>
                   <MenuBarExtra.Item
                     title="Today"
+                    icon={Icon.Clock}
                     onAction={() => setDueDate(reminder.id, startOfToday())}
-                    icon={Icon.Calendar}
                   />
                   <MenuBarExtra.Item
                     title="Tomorrow"
+                    icon={Icon.Sunrise}
                     onAction={() => setDueDate(reminder.id, startOfTomorrow())}
-                    icon={Icon.Sun}
+                  />
+                  <MenuBarExtra.Item
+                    title="This Week-End"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() => setDueDate(reminder.id, endOfWeek(now, { weekStartsOn: 1 }))}
                   />
                   <MenuBarExtra.Item
                     title="Next Week"
-                    onAction={() =>
-                      setDueDate(reminder.id, startOfWeek(addWeeks(startOfToday(), 1), { weekStartsOn: 1 }))
-                    }
                     icon={Icon.Calendar}
-                  />
-                  <MenuBarExtra.Item
-                    title="This Weekend"
-                    onAction={() => setDueDate(reminder.id, endOfWeek(startOfToday(), { weekStartsOn: 1 }))}
-                    icon={Icon.Calendar}
+                    onAction={() => setDueDate(reminder.id, startOfWeek(addWeeks(now, 1), { weekStartsOn: 1 }))}
                   />
                   <MenuBarExtra.Item
                     title="No Due Date"
-                    onAction={() => setDueDate(reminder.id, null)}
                     icon={Icon.XMarkCircle}
+                    onAction={() => setDueDate(reminder.id, null)}
                   />
                 </MenuBarExtra.Submenu>
+
                 <MenuBarExtra.Submenu title="Set Priority" icon={Icon.Exclamationmark}>
+                  <MenuBarExtra.Item title="None" onAction={() => setPriority(reminder.id, null)} />
                   <MenuBarExtra.Item
                     title="High"
-                    onAction={() => setPriority(reminder.id, "high")}
                     icon={getPriorityIcon("high")}
+                    onAction={() => setPriority(reminder.id, "high")}
                   />
                   <MenuBarExtra.Item
                     title="Medium"
-                    onAction={() => setPriority(reminder.id, "medium")}
                     icon={getPriorityIcon("medium")}
+                    onAction={() => setPriority(reminder.id, "medium")}
                   />
                   <MenuBarExtra.Item
                     title="Low"
-                    onAction={() => setPriority(reminder.id, "low")}
                     icon={getPriorityIcon("low")}
-                  />
-                  <MenuBarExtra.Item
-                    title="None"
-                    onAction={() => setPriority(reminder.id, null)}
-                    icon={Icon.XMarkCircle}
+                    onAction={() => setPriority(reminder.id, "low")}
                   />
                 </MenuBarExtra.Submenu>
+
                 <MenuBarExtra.Item
-                  title="Delete Reminder..."
-                  onAction={() =>
-                    confirmAlert({
-                      title: "Delete Reminder",
-                      message: `Are you sure you want to delete "${reminder.title}"?`,
-                      icon: { source: Icon.Trash, tintColor: Color.Red },
-                      primaryAction: {
-                        title: "Delete",
-                        style: Alert.ActionStyle.Destructive,
-                        onAction: () => deleteReminder(reminder),
-                      },
-                    })
-                  }
+                  title="Delete Reminder…"
                   icon={Icon.Trash}
+                  onAction={async () => {
+                    if (
+                      await confirmAlert({
+                        title: "Delete Reminder",
+                        message: "Are you sure you want to delete this reminder?",
+                        icon: { source: Icon.Trash, tintColor: Color.Red },
+                      })
+                    ) {
+                      await deleteReminder(reminder);
+                    }
+                  }}
+                  alternate={
+                    <MenuBarExtra.Item
+                      title="Delete Reminder"
+                      icon={Icon.Trash}
+                      onAction={() => deleteReminder(reminder)}
+                    />
+                  }
                 />
               </MenuBarExtra.Submenu>
             );
           })}
         </MenuBarExtra.Section>
       ))}
+
+      {remindersCount === 0 ? <MenuBarExtra.Item title="You don't have any reminders." /> : null}
+
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Create Reminder"
@@ -372,20 +379,22 @@ export default function Command() {
           shortcut={Keyboard.Shortcut.Common.New}
           onAction={() => launchCommand({ name: "create-reminder", type: LaunchType.UserInitiated })}
         />
+
         <MenuBarExtra.Submenu
           title={`Select List (${list?.title ?? "All"})`}
-          icon={{ source: Icon.Circle, tintColor: list?.color }}
+          icon={list ? { source: Icon.Circle, tintColor: list.color } : Icon.Tray}
         >
-          <MenuBarExtra.Item title="All" icon={Icon.Circle} onAction={() => handleListChange()} />
-          {data?.lists.map((l) => (
+          <MenuBarExtra.Item title="All" onAction={() => handleListChange(undefined)} icon={Icon.Tray} />
+          {data?.lists.map((list) => (
             <MenuBarExtra.Item
-              key={l.id}
-              title={l.title}
-              icon={{ source: Icon.Circle, tintColor: l.color }}
-              onAction={() => handleListChange(l.id)}
+              key={list.id}
+              title={list.title}
+              onAction={() => handleListChange(list.id)}
+              icon={{ source: Icon.Circle, tintColor: list.color }}
             />
           ))}
         </MenuBarExtra.Submenu>
+
         <MenuBarExtra.Item
           title="Configure Command"
           icon={Icon.Gear}
@@ -395,11 +404,12 @@ export default function Command() {
           }
         />
       </MenuBarExtra.Section>
+
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Open Reminders"
           icon={{ fileIcon: REMINDERS_FILE_ICON }}
-          onAction={() => open("x-apple-reminderkit://", "com.apple.reminders")}
+          onAction={() => open("home", "com.apple.reminders")}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

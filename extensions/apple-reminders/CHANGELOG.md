@@ -1,12 +1,9 @@
 # Apple Reminders Changelog
 
-## [Display due time in menu bar] - 2026-08-27
+## [Display due time in menu bar] - {PR_MERGE_DATE}
 
 - Display scheduled due time before reminder titles in menu bar items.
-
-## [Fix Menu Bar Reminders title truncation] - 2026-08-27
-
-- Truncate menu bar reminder titles by Unicode character instead of UTF-16 code units so emoji and other multi-byte characters are not split.
+- Add "Display Exact Due Time" preference to My Reminders to show exact due time in list accessories.
 
 ## [Fix natural-language due dates] - 2026-08-19
 

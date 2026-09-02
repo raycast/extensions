@@ -8,8 +8,8 @@ export function isFullDay(date: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(date);
 }
 
-export function formatReminderTime(reminder: Reminder): string {
-  if (!reminder.dueDate || isFullDay(reminder.dueDate)) {
+export function formatReminderTime(reminder?: Reminder | null): string {
+  if (!reminder?.dueDate || isFullDay(reminder.dueDate)) {
     return "";
   }
 
@@ -102,13 +102,11 @@ export function getLocationDescription(location: Location) {
 }
 
 export function truncate(str: string, maxLength = 45): string {
-  const characters = Array.from(str);
-
-  if (characters.length <= maxLength) {
+  if (str.length <= maxLength) {
     return str;
   }
 
-  return characters.slice(0, maxLength).join("") + "…";
+  return str.substring(0, maxLength) + "…";
 }
 
 export function getIntervalValidationError(interval?: string): string | undefined {

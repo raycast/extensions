@@ -2,7 +2,14 @@ import { Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
 
-import { displayDueDate, getLocationDescription, getPriorityIcon, isFullDay, isOverdue } from "../helpers";
+import {
+  displayDueDate,
+  formatReminderTime,
+  getLocationDescription,
+  getPriorityIcon,
+  isFullDay,
+  isOverdue,
+} from "../helpers";
 import { Reminder, List as TList } from "../hooks/useData";
 import { ViewProps } from "../hooks/useViewReminders";
 
@@ -55,12 +62,7 @@ export default function ReminderListItem({
     if (isFullDay(dueDate)) {
       valueText = displayDueDate(dueDate);
     } else if (displayDueDateWithTime) {
-      // Show exact time (e.g. 10:00 AM)
-      const dateObj = new Date(dueDate);
-      valueText = new Intl.DateTimeFormat(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(dateObj);
+      valueText = formatReminderTime(reminder);
     } else {
       valueText = formatDistanceToNow(dueDate, { addSuffix: true });
     }
