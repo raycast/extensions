@@ -28,6 +28,7 @@ import {
   WorkspaceRegistry,
 } from "./api/workspaces";
 import { refreshQuickCommandSubtitles } from "./helpers/refreshQuickSubtitles";
+import { clearWorkspaceNotificationsCache } from "./hooks/useAllWorkspaceNotifications";
 
 type Row = { entry: WorkspaceEntry; hasToken: boolean };
 
@@ -228,6 +229,7 @@ export default function ManageWorkspaces() {
       await service.client.removeTokens(); // default: local deletion (S7)
       step = "removing the workspace from the list";
       await removeWorkspaceEntry(ref);
+      clearWorkspaceNotificationsCache(); // drop this entry's cached notification rows now, not at the next 15-min refresh
       let after = await readRegistry();
       if (after.workspaces.some((w) => entryKey(w) === entryKey(ref))) {
         // Removal did not persist — retry once before treating it as a hard failure.
@@ -280,6 +282,7 @@ export default function ManageWorkspaces() {
         failed.push(`${row.entry.orgName} (${step}: ${error instanceof Error ? error.message : String(error)})`);
       }
     }
+    clearWorkspaceNotificationsCache(); // drop this entry's cached notification rows now, not at the next 15-min refresh
     if (failed.length === 0) {
       await showToast({ style: Toast.Style.Success, title: "Logged out of all workspaces" });
     } else {
