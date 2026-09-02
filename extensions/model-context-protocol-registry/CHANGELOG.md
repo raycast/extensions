@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Stellary MCP Server] - {PR_MERGE_DATE}
+
+Add Stellary to the community registry: AI-native project piloting and project management (open beta). Remote Streamable HTTP MCP server via mcp-remote; Bearer PAT required.
+
 ## [Refresh plori MCP Server] - 2026-08-24
 
 Refresh plori's description for its current persistent-environment positioning and support for runs, human input, scheduling, connections, and workflows.
