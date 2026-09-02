@@ -85,6 +85,17 @@ function getIcon(event: calendar_v3.Schema$Event) {
   };
 }
 
+function compareEventsByDateAndType(a: calendar_v3.Schema$Event, b: calendar_v3.Schema$Event): number {
+  const getTime = (e: calendar_v3.Schema$Event) =>
+    new Date(e.start?.dateTime ?? e.start?.date ?? 0).getTime();
+
+  return (
+    getTime(a) - getTime(b) ||
+    Number(Boolean(a.start?.dateTime)) - Number(Boolean(b.start?.dateTime)) || // For midnight vs. Allday event.
+    (a.summary ?? "").localeCompare(b.summary ?? "")
+  );
+}
+
 export function getEventSection(date: Date, now = new Date()) {
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -203,7 +214,7 @@ function Command(props: LaunchProps) {
       }
     >
       {sectionOrder.map((section) => {
-        const events = sections[section];
+        const events = sections[section].sort(compareEventsByDateAndType);
         if (!events?.length) return null;
 
         return (
