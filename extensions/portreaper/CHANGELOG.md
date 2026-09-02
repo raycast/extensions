@@ -1,6 +1,6 @@
 # Portreaper Changelog
 
-## [Plain-English detail panel] - {PR_MERGE_DATE}
+## [Plain-English detail panel] - 2026-09-02
 
 - The detail panel now leads with a plain-English conclusion and explains every verdict signal in a full sentence ("Whatever launched it has exited") instead of raw engine codes — every phrase maps one-to-one onto an engine signal, machine-checked in CI so the wording can never drift from what the engine decided
 - New "Safe to terminate?" answer anchored to the engine's sweep policy: green when nothing owns the process any more, yellow when it is a duplicate or the evidence is weak, red when a live launcher still owns it
