@@ -1,6 +1,6 @@
 # Contrast Lab Changelog
 
-## [README Cleanup] - {PR_MERGE_DATE}
+## [README Cleanup] - 2026-09-02
 
 - Removed outdated screenshots from the README
 
