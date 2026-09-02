@@ -1,5 +1,28 @@
 # `Easydict` Changelog
 
+## [v3.2.0] - {PR_MERGE_DATE}
+
+### ⚠️ Behavioral Changes
+
+#### 🆕 Custom AI Providers
+
+- Connect LLMs through Raycast AI or any OpenAI-compatible endpoint for translation and word lookup.
+- **No action is required after updating.** Existing OpenAI and Gemini preferences continue to work and are treated as legacy until imported.
+- **Migration is optional and explicit.** Open **Manage Providers** and choose **Import Legacy AI Settings** to import the configured OpenAI and Gemini settings; merely opening the page does not migrate anything.
+- **Migration remains reversible.** After import, the imported provider replaces its legacy counterpart to avoid duplicate requests. Deleting it restores the legacy provider from the existing preferences, and it can be imported again later.
+- **Provider ordering is now managed in Manage Providers.** Built-in and AI providers share one order and can be moved together with the **Move Up**/**Move Down** actions. The **Legacy Service List Order** preference only initializes this order until it is saved.
+
+### ✨ New Features
+
+#### AI-Generated Dictionary Entries
+
+- For each provider, choose Plain Translation or AI-Generated Dictionary Entry in Word & Term Results.
+- Dictionary mode applies to words and terms; other input remains plain translation. Some models may have structured-output compatibility issues, and dictionary generation may take longer.
+
+#### Chinese Stroke Order
+
+- Use **Show Stroke Order** from live or saved translation results to view stroke-order diagrams for Chinese characters.
+
 ## [v3.1.0] - 2026-08-12
 
 ### ✨ New Features
