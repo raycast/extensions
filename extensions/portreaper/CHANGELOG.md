@@ -1,5 +1,13 @@
 # Portreaper Changelog
 
+## [Plain-English detail panel] - 2026-09-02
+
+- The detail panel now leads with a plain-English conclusion and explains every verdict signal in a full sentence ("Whatever launched it has exited") instead of raw engine codes — every phrase maps one-to-one onto an engine signal, machine-checked in CI so the wording can never drift from what the engine decided
+- New "Safe to terminate?" answer anchored to the engine's sweep policy: green when nothing owns the process any more, yellow when it is a duplicate or the evidence is weak, red when a live launcher still owns it
+- "Started by", the absolute start time, and the duplicate peer's PID now show in the metadata column
+- The launcher chain reads launcher-first and ends at "this process", so following the arrows reads as who-started-whom
+- Friendlier verdict, state, and type labels throughout
+
 ## [Initial Version] - 2026-08-31
 
 - List every process listening on a TCP port, plus **orphaned dev processes that hold no port at all** (an `electron-vite` main process left behind when its parent `node` was killed is invisible to a port scan, but is exactly the kind of residue worth reaping)
