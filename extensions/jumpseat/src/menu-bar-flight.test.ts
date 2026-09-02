@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { UpcomingFlight } from "./api";
 import {
-  ACTIVE_REFRESH_INTERVAL_MS,
-  DISTANT_REFRESH_INTERVAL_MS,
-  EMPTY_REFRESH_INTERVAL_MS,
-  menuBarRefreshInterval,
   menuBarTitle,
   resolveMenuBarLoadState,
   selectMenuBarFlight,
@@ -175,38 +171,6 @@ describe("menu-bar title formatting", () => {
 
     expect(menuBarTitle(boarding, now)).toBe("Boarding");
     expect(menuBarTitle(delayed, now)).toBe("Delayed 25m");
-  });
-});
-
-describe("adaptive menu-bar refresh", () => {
-  const now = new Date("2026-08-29T12:00:00.000Z");
-
-  it("refreshes active and near flights every minute", () => {
-    const active = flight(
-      "11111111-1111-4111-8111-111111111111",
-      "2026-08-29T11:30:00.000Z",
-      { flightPhase: "in_flight" },
-    );
-    const near = flight(
-      "22222222-2222-4222-8222-222222222222",
-      "2026-08-29T18:00:00.000Z",
-    );
-
-    expect(menuBarRefreshInterval(active, now)).toBe(
-      ACTIVE_REFRESH_INTERVAL_MS,
-    );
-    expect(menuBarRefreshInterval(near, now)).toBe(ACTIVE_REFRESH_INTERVAL_MS);
-  });
-
-  it("refreshes distant flights in five minutes and no flight in fifteen", () => {
-    const distant = flight(
-      "11111111-1111-4111-8111-111111111111",
-      "2026-08-30T12:00:01.000Z",
-    );
-    expect(menuBarRefreshInterval(distant, now)).toBe(
-      DISTANT_REFRESH_INTERVAL_MS,
-    );
-    expect(menuBarRefreshInterval(null, now)).toBe(EMPTY_REFRESH_INTERVAL_MS);
   });
 });
 

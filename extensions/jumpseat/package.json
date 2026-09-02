@@ -32,25 +32,8 @@
       "name": "next-flight-in-menu-bar",
       "title": "Next Flight in Menu Bar",
       "description": "Keep your next Jumpseat flight in the menu bar",
-      "mode": "menu-bar"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "apiBaseUrl",
-      "title": "Jumpseat API URL",
-      "description": "The Jumpseat API used by the extension.",
-      "type": "textfield",
-      "default": "https://api.withjumpseat.com",
-      "required": true
-    },
-    {
-      "name": "webBaseUrl",
-      "title": "Jumpseat Web URL",
-      "description": "The Jumpseat website used for secure browser sign-in.",
-      "type": "textfield",
-      "default": "https://app.withjumpseat.com",
-      "required": true
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "scripts": {

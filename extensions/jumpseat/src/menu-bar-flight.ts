@@ -6,12 +6,6 @@ import {
   formatFlightStatus,
 } from "./format";
 
-export const ACTIVE_REFRESH_INTERVAL_MS = 60_000;
-export const DISTANT_REFRESH_INTERVAL_MS = 5 * 60_000;
-export const EMPTY_REFRESH_INTERVAL_MS = 15 * 60_000;
-
-const SIX_HOURS_MS = 6 * 60 * 60_000;
-
 function normalizedStatusValues(flight: UpcomingFlight): string[] {
   return [
     flight.flight.boardState,
@@ -116,19 +110,6 @@ export function menuBarTitle(flight: UpcomingFlight, now = new Date()): string {
   const city =
     flight.arrivalAirport?.city?.trim() || airportCode(flight.arrivalAirport);
   return `${city} in ${formatCompactCountdown(effectiveDeparture(flight), now)}`;
-}
-
-export function menuBarRefreshInterval(
-  flight: UpcomingFlight | null,
-  now = new Date(),
-): number {
-  if (!flight) return EMPTY_REFRESH_INTERVAL_MS;
-  if (isActiveFlight(flight)) return ACTIVE_REFRESH_INTERVAL_MS;
-
-  const untilDeparture = effectiveDeparture(flight).getTime() - now.getTime();
-  return untilDeparture <= SIX_HOURS_MS
-    ? ACTIVE_REFRESH_INTERVAL_MS
-    : DISTANT_REFRESH_INTERVAL_MS;
 }
 
 export type MenuBarLoadState =

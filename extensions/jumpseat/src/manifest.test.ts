@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import manifest from "../package.json";
 
 describe("platform command availability", () => {
+  it("does not expose editable backend origins", () => {
+    expect("preferences" in manifest).toBe(false);
+  });
+
   it("supports both macOS and Windows", () => {
     expect(manifest.platforms).toEqual(["macOS", "Windows"]);
   });
@@ -21,5 +25,6 @@ describe("platform command availability", () => {
     expect(macOSOnlyCommands.map((command) => command.name)).toEqual([
       "next-flight-in-menu-bar",
     ]);
+    expect(macOSOnlyCommands[0]?.interval).toBe("1m");
   });
 });
