@@ -1,6 +1,6 @@
 # BOOX Companion Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-02
 
 - Browse the BOOX library, notes, media, and internal storage over BOOXDrop.
 - Transfer files, manage folders, export notes, and add documents to Library shelves.
