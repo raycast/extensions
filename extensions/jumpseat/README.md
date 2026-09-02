@@ -1,10 +1,10 @@
 # Jumpseat for Raycast
 
-See your upcoming Jumpseat flights without leaving Raycast, or keep your next flight in the menu bar with an adaptive countdown and live operational status.
+See your and your friends' upcoming Jumpseat flights without leaving Raycast, or keep your next flight in the menu bar with an adaptive countdown and live operational status.
 
-View routes, flight numbers, departure times, airports, gates, terminals, seats, booking information, and aircraft details at a glance.
+View routes, flight numbers, departure times, airports, gates, terminals, and aircraft details at a glance. Your own flight view also includes your private seat and booking information; friends' booking details are never requested or displayed.
 
-Upcoming Flights is available on macOS and Windows. The Next Flight menu bar command is available on macOS only because Raycast menu bar commands are not supported on Windows.
+Upcoming Flights and Friends' Upcoming Flights are available on macOS and Windows. The Next Flight menu bar command is available on macOS only because Raycast menu bar commands are not supported on Windows.
 
 ## Local development
 

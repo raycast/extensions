@@ -1,18 +1,18 @@
 import { usePromise, withAccessToken } from "@raycast/utils";
 import { useEffect } from "react";
-import { fetchUpcomingFlights } from "./api";
+import { fetchFriendUpcomingFlights } from "./api";
 import { FlightsList } from "./flights-list";
 import { getJumpseatAccessToken, jumpseatOAuthClient } from "./oauth";
 
 const ACTIVE_REFRESH_INTERVAL_MS = 60_000;
 
-function UpcomingFlightsCommand() {
+function FriendsUpcomingFlightsCommand() {
   const {
     data: flights = [],
     error,
     isLoading,
     revalidate,
-  } = usePromise(fetchUpcomingFlights);
+  } = usePromise(fetchFriendUpcomingFlights);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -27,7 +27,7 @@ function UpcomingFlightsCommand() {
       error={error}
       isLoading={isLoading}
       revalidate={revalidate}
-      kind="personal"
+      kind="friends"
     />
   );
 }
@@ -35,4 +35,4 @@ function UpcomingFlightsCommand() {
 export default withAccessToken({
   authorize: getJumpseatAccessToken,
   client: jumpseatOAuthClient,
-})(UpcomingFlightsCommand);
+})(FriendsUpcomingFlightsCommand);

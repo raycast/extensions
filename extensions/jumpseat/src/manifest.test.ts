@@ -16,6 +16,7 @@ describe("platform command availability", () => {
 
     expect(windowsCommands.map((command) => command.name)).toEqual([
       "upcoming-flights",
+      "friends-upcoming-flights",
     ]);
     expect(macOSOnlyCommands.map((command) => command.name)).toEqual([
       "next-flight-in-menu-bar",

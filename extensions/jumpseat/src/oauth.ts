@@ -20,7 +20,8 @@ export const jumpseatOAuthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Jumpseat",
   providerIcon: "extension-icon.png",
-  description: "Connect your Jumpseat account to see your upcoming flights.",
+  description:
+    "Connect your Jumpseat account to see your and your friends' upcoming flights.",
 });
 
 export class JumpseatAuthenticationError extends Error {
