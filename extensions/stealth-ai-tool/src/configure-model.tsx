@@ -8,97 +8,69 @@ import {
   open,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { LLMService, Model } from "./utils/llm-service";
-
-const PROVIDERS = [
-  { value: "raycast", title: "Raycast AI (Default)" },
-  { value: "openai", title: "OpenAI" },
-  { value: "anthropic", title: "Anthropic" },
-  { value: "gemini", title: "Gemini" },
-  { value: "openrouter", title: "OpenRouter" },
-];
-
-const PROVIDER_URLS: Record<string, string> = {
-  openai: "https://platform.openai.com/docs/models",
-  anthropic: "https://docs.anthropic.com/en/docs/models-overview",
-  gemini: "https://ai.google.dev/gemini-api/docs/models/gemini",
-  openrouter: "https://openrouter.ai/models",
-  raycast: "https://raycast.com",
-};
-
-const STORAGE_KEYS = {
-  provider: "configured_provider",
-  apiKey: (p: string) => `api_key_${p}`,
-  model: (p: string) => `selected_model_${p}`,
-};
+import {
+  LLMService,
+  Model,
+  PROVIDERS,
+  STORAGE_KEYS,
+  defaultBaseUrl,
+  getProviderInfo,
+  isLocalProvider,
+  requiresApiKey,
+} from "./utils/llm-service";
 
 export default function ConfigureModelCommand() {
   const [ready, setReady] = useState(false);
   const [provider, setProvider] = useState("raycast");
   const [apiKey, setApiKey] = useState("");
+  const [baseUrl, setBaseUrl] = useState("");
   const [models, setModels] = useState<Model[]>([]);
   const [selectedModel, setSelectedModel] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load all saved data on mount
   useEffect(() => {
     (async () => {
       const p =
         (await LocalStorage.getItem<string>(STORAGE_KEYS.provider)) ||
         "raycast";
-      const key =
-        (await LocalStorage.getItem<string>(STORAGE_KEYS.apiKey(p))) || "";
-      const model =
-        (await LocalStorage.getItem<string>(STORAGE_KEYS.model(p))) || "";
-
-      setProvider(p);
-      setApiKey(key);
-      setSelectedModel(model);
-
-      if (p !== "raycast" && key) {
-        try {
-          const fetched = await LLMService.fetchModelsWithKey(p, key);
-          setModels(fetched);
-        } catch (e) {
-          console.error("Failed to fetch models on load", e);
-        }
-      }
-
-      setIsLoading(false);
+      await loadProvider(p);
       setReady(true);
     })();
   }, []);
 
-  async function onProviderChange(newProvider: string) {
-    setProvider(newProvider);
+  /** Pull the stored settings for a provider and, when possible, its model list. */
+  async function loadProvider(p: string) {
+    setProvider(p);
     setModels([]);
     setSelectedModel("");
     setIsLoading(true);
 
     try {
       const key =
-        (await LocalStorage.getItem<string>(
-          STORAGE_KEYS.apiKey(newProvider),
-        )) || "";
+        (await LocalStorage.getItem<string>(STORAGE_KEYS.apiKey(p))) || "";
       const model =
-        (await LocalStorage.getItem<string>(STORAGE_KEYS.model(newProvider))) ||
-        "";
+        (await LocalStorage.getItem<string>(STORAGE_KEYS.model(p))) || "";
+      const url =
+        (await LocalStorage.getItem<string>(STORAGE_KEYS.baseUrl(p))) ||
+        defaultBaseUrl(p);
+
       setApiKey(key);
+      setBaseUrl(url);
       setSelectedModel(model);
 
-      if (newProvider !== "raycast" && key) {
-        const fetched = await LLMService.fetchModelsWithKey(newProvider, key);
-        setModels(fetched);
+      // Local providers need no key, so their list can be loaded straight away.
+      if (p !== "raycast" && (key || isLocalProvider(p))) {
+        setModels(await LLMService.fetchModelsWithKey(p, key, url));
       }
     } catch (e) {
-      console.error("Failed to load provider data", e);
+      console.error(`Failed to load models for ${p}`, e);
     } finally {
       setIsLoading(false);
     }
   }
 
   async function handleFetchModels() {
-    if (!apiKey && provider !== "raycast") {
+    if (requiresApiKey(provider) && !apiKey) {
       await showToast({
         style: Toast.Style.Failure,
         title: "API Key Required",
@@ -106,16 +78,34 @@ export default function ConfigureModelCommand() {
       });
       return;
     }
+
     setIsLoading(true);
     try {
-      const fetched = await LLMService.fetchModelsWithKey(provider, apiKey);
+      const fetched = await LLMService.fetchModelsWithKey(
+        provider,
+        apiKey,
+        baseUrl,
+      );
       setModels(fetched);
-      await showToast({ style: Toast.Style.Success, title: "Models Loaded" });
+      if (fetched.length === 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No models found",
+          message: isLocalProvider(provider)
+            ? "The server is reachable but has no models available"
+            : "Provider returned an empty list",
+        });
+        return;
+      }
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Loaded ${fetched.length} model${fetched.length === 1 ? "" : "s"}`,
+      });
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch models",
-        message: String(e),
+        message: (e as Error).message,
       });
       setModels([]);
     } finally {
@@ -123,44 +113,63 @@ export default function ConfigureModelCommand() {
     }
   }
 
-  async function handleSubmit(values: {
-    provider: string;
-    apiKey: string;
-    modelId: string;
-  }) {
-    const p = values.provider;
-    const key = values.apiKey?.trim() || "";
+  async function handleSubmit(values: { modelId: string }) {
     const finalModel = values.modelId;
+    await LocalStorage.setItem(STORAGE_KEYS.provider, provider);
 
-    await LocalStorage.setItem(STORAGE_KEYS.provider, p);
-
-    if (p !== "raycast") {
-      if (key) {
-        await LocalStorage.setItem(STORAGE_KEYS.apiKey(p), key);
-      }
-      if (!finalModel) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "No Model",
-          message: "Please select a model",
-        });
-        return;
-      }
-      await LocalStorage.setItem(STORAGE_KEYS.model(p), finalModel);
+    if (provider === "raycast") {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Configuration Saved",
+        message: "Using Raycast AI",
+      });
+      return;
     }
+
+    const key = apiKey.trim();
+    if (requiresApiKey(provider) && !key) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "API Key Required",
+        message: `${provider} needs an API key`,
+      });
+      return;
+    }
+    if (!finalModel) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No Model",
+        message: "Fetch models (Cmd+R) and select one",
+      });
+      return;
+    }
+
+    await LocalStorage.setItem(STORAGE_KEYS.apiKey(provider), key);
+    if (isLocalProvider(provider)) {
+      await LocalStorage.setItem(
+        STORAGE_KEYS.baseUrl(provider),
+        baseUrl.trim(),
+      );
+    }
+    await LocalStorage.setItem(STORAGE_KEYS.model(provider), finalModel);
 
     await showToast({
       style: Toast.Style.Success,
       title: "Configuration Saved",
-      message: p === "raycast" ? "Using Raycast AI" : `${p}: ${finalModel}`,
+      message: `${provider}: ${finalModel}`,
     });
   }
 
-  if (!ready) {
-    return <Form isLoading={true} />;
-  }
+  if (!ready) return <Form isLoading={true} />;
 
+  const info = getProviderInfo(provider);
   const showModelFields = provider !== "raycast";
+  const local = isLocalProvider(provider);
+  // Guard against a stored model that is no longer in the fetched list, which
+  // would leave the dropdown with a value it cannot render.
+  const dropdownValue = models.some((m) => m.id === selectedModel)
+    ? selectedModel
+    : "";
 
   return (
     <Form
@@ -173,7 +182,7 @@ export default function ConfigureModelCommand() {
           />
           {showModelFields && (
             <Action
-              title="Fetch Models"
+              title={local ? "Connect and Fetch Models" : "Fetch Models"}
               onAction={handleFetchModels}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
@@ -181,7 +190,7 @@ export default function ConfigureModelCommand() {
           {showModelFields && (
             <Action
               title="Open Provider Docs"
-              onAction={() => open(PROVIDER_URLS[provider] || "")}
+              onAction={() => open(info?.docsUrl || "")}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
           )}
@@ -192,7 +201,7 @@ export default function ConfigureModelCommand() {
         id="provider"
         title="AI Provider"
         value={provider}
-        onChange={onProviderChange}
+        onChange={loadProvider}
       >
         {PROVIDERS.map((p) => (
           <Form.Dropdown.Item key={p.value} value={p.value} title={p.title} />
@@ -206,33 +215,63 @@ export default function ConfigureModelCommand() {
       {showModelFields && (
         <>
           <Form.Separator />
+
+          {local && (
+            <Form.TextField
+              id="baseUrl"
+              title="Server URL"
+              placeholder={defaultBaseUrl(provider)}
+              value={baseUrl}
+              onChange={setBaseUrl}
+              info="Base address of your local server. A trailing /v1 or /api is optional."
+            />
+          )}
+
           <Form.PasswordField
             id="apiKey"
-            title="API Key"
-            placeholder="Enter your API key"
+            title={local ? "API Key (optional)" : "API Key"}
+            placeholder={
+              local ? "Only if your server requires auth" : "Enter your API key"
+            }
             value={apiKey}
             onChange={setApiKey}
-            info="Your key is stored locally."
+            info="Stored locally on this machine."
           />
+
           <Form.Separator />
+
           <Form.Dropdown
             id="modelId"
             title="Select Model"
-            value={selectedModel}
+            value={dropdownValue}
             onChange={setSelectedModel}
           >
-            {models.length === 0 && !isLoading && (
-              <Form.Dropdown.Item value="" title="No models loaded" />
-            )}
+            <Form.Dropdown.Item
+              value=""
+              title={
+                models.length === 0 ? "No models loaded" : "Select a model…"
+              }
+            />
             {models.map((model) => (
               <Form.Dropdown.Item
                 key={model.id}
                 value={model.id}
-                title={`${model.name} (${model.id})`}
+                title={
+                  model.description
+                    ? `${model.name} — ${model.description}`
+                    : model.name
+                }
               />
             ))}
           </Form.Dropdown>
-          <Form.Description text="Press Cmd+R (or Ctrl+R) to refresh the models list." />
+
+          <Form.Description
+            text={
+              info?.hint
+                ? `${info.hint}\nPress Cmd+R to refresh the model list.`
+                : "Press Cmd+R (or Ctrl+R) to refresh the models list."
+            }
+          />
         </>
       )}
     </Form>
