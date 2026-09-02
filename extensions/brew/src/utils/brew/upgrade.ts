@@ -14,6 +14,7 @@
  */
 
 import { OutdatedResults } from "../types";
+import { restrictToSelection } from "../upgrade-selection";
 import { actionsLogger } from "../logger";
 import { execBrewWithProgress, BrewProgress, DEFAULT_STALE_TIMEOUT_MS } from "./progress";
 import { getErrorMessage, ensureError, StaleProcessError, BrewLockError } from "../errors";
@@ -91,6 +92,15 @@ export interface UpgradeOptions {
   onEvent?: UpgradeEventCallback;
   /** AbortSignal for cancellation */
   cancel?: AbortSignal;
+  /**
+   * Restrict the run to these packages. The run still resolves its own
+   * outdated list (after its own `brew update`) and upgrades the intersection
+   * of that list with the selection — a package that is no longer outdated is
+   * dropped, and one that became outdated during the update is not upgraded
+   * unreviewed. Packages outside the selection are left completely untouched.
+   * Omit to upgrade everything outdated.
+   */
+  selection?: UpgradePackage[];
 }
 
 /**
@@ -140,13 +150,19 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
   const outdated = JSON.parse(result.stdout) as OutdatedResults;
 
   // Pinned formulae cannot be upgraded, so exclude them from the run
-  const packages: UpgradePackage[] = [
+  let packages: UpgradePackage[] = [
     ...outdated.formulae.filter((formula) => !formula.pinned).map((formula) => ({ name: formula.name, isCask: false })),
     ...outdated.casks.map((cask) => ({ name: cask.name, isCask: true })),
   ];
   const pinned: UpgradePackage[] = outdated.formulae
     .filter((formula) => formula.pinned)
     .map((formula) => ({ name: formula.name, isCask: false }));
+
+  // Honour the selection: upgrade only the reviewed packages that are still
+  // outdated. Everything else stays untouched.
+  if (options?.selection) {
+    packages = restrictToSelection(packages, options.selection);
+  }
 
   onEvent?.({ type: "start", outdated, packages, skipped: pinned });
   for (const pkg of pinned) {
