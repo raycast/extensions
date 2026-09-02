@@ -1,10 +1,10 @@
 # Granite Changelog
 
-<!-- {PR_MERGE_DATE} belongs ONLY on a new, unshipped heading — Raycast's bot replaces
+<!-- 2026-09-02 belongs ONLY on a new, unshipped heading — Raycast's bot replaces
      it on merge. Leaving it on a shipped heading re-stamps that release with the next
      merge date. Shipped versions carry their real date. See docs/ops/api.md. -->
 
-## [Copy Value] - {PR_MERGE_DATE}
+## [Copy Value] - 2026-09-02
 
 - New Copy Value action on Ask answers: when a question is answered straight from an extracted field (an SSN, a policy number), copy the bare value without the surrounding answer text.
 - Fixed stray blank lines in Ask answers.
