@@ -91,7 +91,7 @@ function compareEventsByDateAndType(a: calendar_v3.Schema$Event, b: calendar_v3.
 
   return (
     getSortTime(a) - getSortTime(b) ||
-    Number(Boolean(a.start?.date)) - Number(Boolean(b.start?.date)) ||
+    Number(Boolean(b.start?.date)) - Number(Boolean(a.start?.date)) ||
     (a.summary ?? "").localeCompare(b.summary ?? "")
   );
 }
