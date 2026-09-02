@@ -2,6 +2,8 @@
 
 Control a [Kuando Busylight](https://www.plenom.com) from Raycast through the kuandoHUB HTTP API.
 
+![The commands in Raycast](media/raycast-commands.png)
+
 ## Commands
 
 | Command | Effect |
