@@ -268,12 +268,27 @@ export default function ManageWorkspaces() {
       primaryAction: { title: "Log Out of All", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
+    const failed: string[] = [];
     for (const row of rows) {
-      const service = getServiceForProviderId(row.entry.providerId, undefined, `Linear — ${row.entry.orgName}`);
-      await service.client.removeTokens();
-      await removeWorkspaceEntry({ orgId: row.entry.orgId, userId: row.entry.userId });
+      let step = "removing the stored token";
+      try {
+        const service = getServiceForProviderId(row.entry.providerId, undefined, `Linear — ${row.entry.orgName}`);
+        await service.client.removeTokens();
+        step = "removing the workspace from the list";
+        await removeWorkspaceEntry({ orgId: row.entry.orgId, userId: row.entry.userId });
+      } catch (error) {
+        failed.push(`${row.entry.orgName} (${step}: ${error instanceof Error ? error.message : String(error)})`);
+      }
     }
-    await showToast({ style: Toast.Style.Success, title: "Logged out of all workspaces" });
+    if (failed.length === 0) {
+      await showToast({ style: Toast.Style.Success, title: "Logged out of all workspaces" });
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Logged out of ${rows.length - failed.length} of ${rows.length} workspaces`,
+        message: `Failed: ${failed.join("; ")}`,
+      });
+    }
     refreshQuickCommandSubtitles(); // fire-and-forget: workspace membership changed, subtitles listing "others" are now stale
     await reload();
   }

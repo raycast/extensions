@@ -10,6 +10,7 @@ import {
   openExtensionPreferences,
   Keyboard,
 } from "@raycast/api";
+import { countBy } from "lodash";
 import React from "react";
 
 import { NotificationResult } from "./api/getNotifications";
@@ -90,6 +91,7 @@ function UnreadNotifications() {
   if (!preferences.alwaysShow && !isLoading && totalUnread.length === 0) return null;
 
   const multi = rows.length >= 2;
+  const entriesPerOrg = countBy(rows, (row) => row.entry.orgId);
 
   return (
     <MenuBarExtra
@@ -102,9 +104,7 @@ function UnreadNotifications() {
           key={entryKey(row.entry)}
           {...(multi
             ? {
-                title:
-                  row.entry.orgName +
-                  (rows.filter((r) => r.entry.orgId === row.entry.orgId).length > 1 ? ` (${row.entry.userEmail})` : ""),
+                title: row.entry.orgName + (entriesPerOrg[row.entry.orgId] > 1 ? ` (${row.entry.userEmail})` : ""),
               }
             : {})}
         >

@@ -31,11 +31,11 @@ export async function createIssueForMyself(
     }
 
     if (!teamId) {
-      teamId = teams[0].id;
-    }
-
-    if (!teamId) {
-      throw Error("No team found");
+      const [firstTeam] = teams;
+      if (!firstTeam) {
+        throw Error("No team found");
+      }
+      teamId = firstTeam.id;
     }
 
     let stateId: string | undefined;
