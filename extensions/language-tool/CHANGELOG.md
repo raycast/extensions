@@ -1,6 +1,6 @@
 # Changelog
 
-## [Check Selected Text] - {PR_MERGE_DATE}
+## [Check Selected Text] - 2026-09-02
 
 ### Added
 - New "Check Selected Text" command: checks the text selected in any application, lists every correction it found, and replaces the selection once they have been reviewed
