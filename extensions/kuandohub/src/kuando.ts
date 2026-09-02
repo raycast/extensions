@@ -4,13 +4,11 @@ export async function sendCommand(
   query: string,
   successMessage: string,
 ): Promise<void> {
-  const { baseUrl, accessToken } = getPreferenceValues<Preferences>();
+  const { baseUrl } = getPreferenceValues<Preferences>();
   const url = `${baseUrl.replace(/\/+$/, "")}/?${query}`;
 
   try {
-    const response = await fetch(url, {
-      headers: accessToken ? { http_token: accessToken } : undefined,
-    });
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`kuandoHUB responded with HTTP ${response.status}`);
     }

@@ -48,13 +48,6 @@
       "description": "Base URL of the kuandoHUB HTTP server (Advanced Settings in kuandoHUB)",
       "default": "http://localhost:8989",
       "placeholder": "http://localhost:8989"
-    },
-    {
-      "name": "accessToken",
-      "type": "password",
-      "required": false,
-      "title": "HTTP Server Access Token",
-      "description": "Only needed for remote access — localhost requests work without a token"
     }
   ],
   "dependencies": {

@@ -10,7 +10,7 @@ Control a [Kuando Busylight](https://www.plenom.com) from Raycast through the ku
 | --- | --- |
 | **Set Busy** | Light red (`action=light&red=100`) |
 | **Set Available** | Light green (`action=light&green=100`) |
-| **Turn Off Light** | Light off (`action=off`) |
+| **Turn Off Light** | Light off (`action=light` with all colors 0) |
 
 Each command fires a single GET request to the local kuandoHUB HTTP server and shows a HUD confirmation. No background process — the commands run on demand and exit.
 
@@ -31,8 +31,7 @@ npm run dev
 
 ## Preferences
 
-- **kuandoHUB URL** — base URL of the HTTP server. Default `http://localhost:8989`.
-- **HTTP Server Access Token** — only needed when targeting a remote machine; localhost requests need no token. Sent as the `http_token` header.
+- **KuandoHUB URL** — base URL of the HTTP server. Default `http://localhost:8989`. Local requests need no access token.
 
 ## kuandoHUB HTTP API notes
 
@@ -40,7 +39,7 @@ From the kuandoHUB manual (v2.0.0), appendix 7. Color values are 0–100.
 
 ```
 http://localhost:8989?action=light&red=100&green=0&blue=0
-http://localhost:8989?action=off
+http://localhost:8989?action=off               # releases HTTP priority (does NOT darken the light)
 http://localhost:8989?action=currentpresence   # running priority as JSON
 http://localhost:8989?action=busylightdevices  # connected devices
 ```
