@@ -564,3 +564,16 @@ export function getErrorMessage(error: unknown): string {
 
   return String(error);
 }
+
+/**
+ * The failure wording for a failed check-for-upgrades, shared by the
+ * full-screen failure view and the fetch-failure toast so the two surfaces
+ * cannot drift apart.
+ */
+export function outdatedFetchFailureCopy(error: unknown): { title: string; message: string } {
+  const isLock = isBrewLockError(error);
+  return {
+    title: isLock ? "Brew Is Busy" : "Failed to Check for Upgrades",
+    message: isLock ? "Another brew process is running. Please wait and try again." : getErrorMessage(error),
+  };
+}

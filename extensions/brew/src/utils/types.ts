@@ -96,7 +96,12 @@ export interface OutdatedFormula extends Outdated {
 }
 
 export interface OutdatedCask extends Outdated {
-  installed_versions: string;
+  /**
+   * Array of installed versions, same shape as for formulae.
+   * `brew outdated --json=v2` returns an array for casks; this was previously
+   * (incorrectly) declared as a string.
+   */
+  installed_versions: string[];
 }
 
 /// Result Types

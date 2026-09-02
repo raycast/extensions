@@ -253,7 +253,7 @@ async function upgradeAll(): Promise<boolean> {
   }
 }
 
-async function pin(formula: Formula | OutdatedFormula): Promise<boolean> {
+export async function pin(formula: Formula | OutdatedFormula): Promise<boolean> {
   showToast(Toast.Style.Animated, `Pinning ${brewName(formula)}`);
   try {
     await brewPinFormula(formula);
@@ -266,7 +266,7 @@ async function pin(formula: Formula | OutdatedFormula): Promise<boolean> {
   }
 }
 
-async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
+export async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
   showToast(Toast.Style.Animated, `Unpinning ${brewName(formula)}`);
   try {
     await brewUnpinFormula(formula);

@@ -2,6 +2,17 @@
 
 Search and manage your brew casks and formulae from [Raycast](https://raycast.com).
 
+## Commands
+
+- **Search** — search brew formulae & casks and install them
+- **Show Installed** — list installed formulae & casks, with pinned formulae in their own section
+- **Show Upgrades** (previously Show Outdated) — review outdated packages, choose which upgrade, and run it. The review opens with everything not pinned selected (exactly what a plain `brew upgrade` would do), so running immediately upgrades everything. A pin is a lock, matching brew's own behaviour: pinned formulae cannot be selected, and including one means unpinning it first — the primary action on a pinned row does both in one step. Casks are selectable exactly like formulae; cask pinning waits on Homebrew 6's `brew pin --cask` and ships in a follow-up.
+- **Upgrade** — upgrade everything outdated in one shot, no review step, with progress reported per package via the toast
+- **Manage Services** — start, stop & restart Homebrew services
+- **Services Menu Bar** — control Homebrew services from the menu bar
+- **Clean up** — clean files and packages from the cache that are older than 120 days
+- **Clear Cache** — clear the cached formulae, casks, and installed packages files
+
 ## Homebrew 5.0 Compatibility
 
 This extension is compatible with Homebrew 5.0 and later. Key changes in Homebrew 5.0:

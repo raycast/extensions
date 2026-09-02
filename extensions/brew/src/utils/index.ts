@@ -54,6 +54,7 @@ export {
   isUnsupportedMacOSError,
   isRecoverableError,
   getErrorMessage,
+  outdatedFetchFailureCopy,
   isBrewLockMessage,
   isDisabledPackageMessage,
   parseDisabledPackageMessage,
@@ -64,6 +65,7 @@ export {
 
 // Cache
 export { supportPath, bundleIdentifier, cachePath, clearCache } from "./cache";
+export { markOutdatedSnapshotDirty, clearOutdatedSnapshotDirty, isOutdatedSnapshotDirty } from "./outdated-dirty";
 
 // Toast
 export { showActionToast, showBrewFailureToast } from "./toast";
