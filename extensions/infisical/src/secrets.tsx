@@ -159,6 +159,21 @@ export default function Secrets({
                       />
                     }
                   />
+                  {/* A folder that holds only subfolders has no secret row, so without this
+                      there is no way to add a secret to the folder you are looking at. */}
+                  <Action.Push
+                    icon={Icon.Plus}
+                    title="Add Secret"
+                    target={
+                      <AddorEditSecret
+                        projectId={project.id}
+                        projectName={project.name}
+                        environment={environment}
+                        secretPath={secretPath}
+                      />
+                    }
+                    onPop={mutate}
+                  />
                 </ActionPanel>
               }
             />
