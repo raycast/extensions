@@ -1,3 +1,4 @@
+import { SHADE_DOT, type Shade } from "./business";
 import { dayNumber, formatOffset, wallParts, zoneAbbreviation, zoneOffset } from "./time";
 
 export type TimeFormat = "24h" | "12h";
@@ -68,6 +69,8 @@ export type TemplateVars = {
   day: string;
   offset: string;
   tz: string;
+  /** 🟢 🟡 🔴 for the shade at that time; empty when the caller has no shade. */
+  dot: string;
 };
 
 /** Fills placeholders; brackets left empty by a blank value ("()" / "[]") are removed with their spacing. */
@@ -88,6 +91,7 @@ export function templateVars(opts: {
   code?: string;
   abbrTable?: string[];
   fmt: TimeFormat;
+  shade?: Shade;
 }): TemplateVars {
   const shift = dayShift(opts.start, opts.tz, opts.anchorTz);
   const code = opts.code ?? opts.label;
@@ -102,5 +106,6 @@ export function templateVars(opts: {
     day: formatDayShift(shift),
     offset: relativeOffset(opts.start, opts.tz, opts.anchorTz),
     tz: opts.tz,
+    dot: opts.shade ? SHADE_DOT[opts.shade] : "",
   };
 }

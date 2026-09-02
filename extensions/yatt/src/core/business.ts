@@ -25,6 +25,9 @@ export function shadeOf(hour: number, business: HourRange, shoulder: HourRange):
   return "off";
 }
 
+/** Emoji for a shade, for places that take plain text only, such as the menu bar title (the {dot} placeholder). */
+export const SHADE_DOT: Record<Shade, string> = { business: "🟢", shoulder: "🟡", off: "🔴" };
+
 const RANK: Record<Shade, number> = { business: 0, shoulder: 1, off: 2 };
 
 /** Worst shade over a wall-clock window, sampled every 30 minutes. Window in fractional hours; end may exceed 24. */

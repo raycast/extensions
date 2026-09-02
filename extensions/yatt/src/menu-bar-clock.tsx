@@ -20,6 +20,10 @@ export default function MenuBar() {
       ? [...(locations ?? [])]
       : [...(locations ?? [])].sort((a, b) => dir * (zoneOffset(now, a.tz) - zoneOffset(now, b.tz)));
 
+  const shadeFor = (l: Location) => {
+    const w = wallParts(now, l.tz);
+    return shadeOf(w.h + w.min / 60, l.businessHours ?? prefs.business, prefs.shoulder);
+  };
   const vars = (l: Location) =>
     templateVars({
       start: now,
@@ -29,6 +33,7 @@ export default function MenuBar() {
       code: locationCode(l),
       abbrTable: zoneInfo(l.tz)?.abbr,
       fmt: prefs.timeFormat,
+      shade: shadeFor(l),
     });
 
   const flagged = list.filter((l) => l.menuBar?.show);
@@ -47,8 +52,7 @@ export default function MenuBar() {
       <MenuBarExtra.Section title={formatDateLong(now, local)}>
         {list.map((l) => {
           const v = vars(l);
-          const w = wallParts(now, l.tz);
-          const shade = shadeOf(w.h + w.min / 60, l.businessHours ?? prefs.business, prefs.shoulder);
+          const shade = shadeFor(l);
           return (
             <MenuBarExtra.Item
               key={l.id}

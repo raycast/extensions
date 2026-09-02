@@ -3,3 +3,4 @@ dist/
 raycast-env.d.ts
 .DS_Store
 scripts/.cache/
+build/

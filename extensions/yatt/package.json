@@ -101,7 +101,7 @@
         {
           "name": "menuBarTemplate",
           "title": "Menu Bar Template",
-          "description": "Format of one location in the menu bar. Placeholders as in Copy Template. A location can override this in Manage Locations.",
+          "description": "Format of one location in the menu bar. Placeholders as in Copy Template; {dot} {code} {time} adds a coloured dot for the hours there. A location can override this in Manage Locations.",
           "type": "textfield",
           "required": false,
           "default": "{code} {time}",
@@ -167,7 +167,7 @@
     {
       "name": "copyTemplate",
       "title": "Copy Template",
-      "description": "Format of one location in copied text. Placeholders: {time} {label} {code} {abbr} {date} {day} {offset} {tz}. {abbr} is left out when it repeats {code}, and empty brackets are removed: UTC copies as '11:15 UTC', not '11:15 UTC (UTC)'.",
+      "description": "Format of one location in copied text. Placeholders: {time} {label} {code} {abbr} {date} {day} {offset} {tz} {dot}. {dot} is 🟢 🟡 🔴 for business, shoulder and off hours. {abbr} is left out when it repeats {code}, and empty brackets are removed: UTC copies as '11:15 UTC', not '11:15 UTC (UTC)'.",
       "type": "textfield",
       "required": false,
       "default": "{time} {code} ({abbr})",

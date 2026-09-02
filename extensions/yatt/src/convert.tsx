@@ -17,7 +17,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { shadeOf, shadeOfWindow, type Shade } from "./core/business";
+import { SHADE_DOT, shadeOf, shadeOfWindow, type Shade } from "./core/business";
 import { lookupExact } from "./core/dataset";
 import { formatDate, formatDuration, formatWindow, renderTemplate, templateVars } from "./core/format";
 import { parseExpression } from "./core/parse";
@@ -192,6 +192,7 @@ export default function Convert(props: LaunchProps<{ arguments: { expression?: s
         code: locationCode(location),
         abbrTable: zoneInfo(location.tz)?.abbr,
         fmt: prefs.timeFormat,
+        shade,
       });
       return { location, transient, shade, text: v.time, abbr: v.abbr, offset: v.offset, day: v.day, date: v.date };
     });
@@ -211,6 +212,7 @@ export default function Convert(props: LaunchProps<{ arguments: { expression?: s
 
   const anchorCopy = useMemo(() => {
     const l = resolved.anchor.location ?? resolved.anchor.transient;
+    const anchorRow = rows.find((r) => r.location.id === l?.id);
     const v = templateVars({
       start: resolved.start,
       end: resolved.end,
@@ -220,9 +222,10 @@ export default function Convert(props: LaunchProps<{ arguments: { expression?: s
       code: l ? locationCode(l) : resolved.anchor.label,
       abbrTable: zoneInfo(anchorTz)?.abbr,
       fmt: prefs.timeFormat,
+      shade: anchorRow?.shade,
     });
     return renderTemplate(prefs.copyTemplate, v);
-  }, [resolved, anchorTz, prefs]);
+  }, [resolved, rows, anchorTz, prefs]);
 
   const copyAll = useMemo(() => {
     const anchorId = resolved.anchor.location?.id ?? resolved.anchor.transient?.id;
@@ -238,6 +241,7 @@ export default function Convert(props: LaunchProps<{ arguments: { expression?: s
           day: r.day,
           offset: r.offset,
           tz: r.location.tz,
+          dot: SHADE_DOT[r.shade],
         }),
       );
     return items.length ? `${anchorCopy} = ${items.join(prefs.copySeparator)}` : anchorCopy;
@@ -386,6 +390,7 @@ export default function Convert(props: LaunchProps<{ arguments: { expression?: s
             day: row.day,
             offset: row.offset,
             tz: row.location.tz,
+            dot: SHADE_DOT[row.shade],
           });
           const copyAllAction = (
             <Action title="Copy All as One Line" icon={Icon.Clipboard} onAction={() => copy(copyAll)} />

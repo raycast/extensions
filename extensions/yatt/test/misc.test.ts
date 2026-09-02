@@ -50,11 +50,13 @@ describe("format", () => {
     expect(relativeOffset(t, "America/Los_Angeles", "Europe/Berlin")).toBe("−9h");
   });
   it("templates", () => {
-    expect(renderTemplate("{time} {label}", { time: "19:00", label: "UTC", code: "", abbr: "", date: "", day: "", offset: "", tz: "" })).toBe("19:00 UTC");
-    expect(renderTemplate("{time} {nope}", { time: "1", label: "", code: "", abbr: "", date: "", day: "", offset: "", tz: "" })).toBe("1 {nope}");
-    const utc = { time: "11:15", label: "UTC", code: "UTC", abbr: "", date: "", day: "", offset: "", tz: "UTC" };
+    const utc = { time: "11:15", label: "UTC", code: "UTC", abbr: "", date: "", day: "", offset: "", tz: "UTC", dot: "" };
+    expect(renderTemplate("{time} {label}", { ...utc, time: "19:00" })).toBe("19:00 UTC");
+    expect(renderTemplate("{time} {nope}", { ...utc, time: "1" })).toBe("1 {nope}");
     expect(renderTemplate("{time} {code} ({abbr})", utc)).toBe("11:15 UTC");
     expect(renderTemplate("{time} {code} ({abbr})", { ...utc, code: "SFO", abbr: "PDT" })).toBe("11:15 SFO (PDT)");
+    expect(renderTemplate("{dot} {code} {time}", { ...utc, dot: "🟢" })).toBe("🟢 UTC 11:15");
+    expect(renderTemplate("{dot} {code} {time}", utc)).toBe("UTC 11:15");
   });
 });
 

@@ -1,9 +1,16 @@
-import { launchCommand, LaunchType, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Cache, launchCommand, LaunchType, LocalStorage, showToast, Toast } from "@raycast/api";
 import { homedir } from "node:os";
 import path from "node:path";
 import { useCallback, useEffect, useState } from "react";
 import { fileBackend } from "../core/file-backend";
-import { loadLocationsFile, updateLocationsFile, type LocationsFile, type StorageBackend } from "../core/store";
+import {
+  loadLocationsFile,
+  parseLocationsFile,
+  serializeLocationsFile,
+  updateLocationsFile,
+  type LocationsFile,
+  type StorageBackend,
+} from "../core/store";
 import type { Location } from "../core/types";
 import { loadSeed } from "./data";
 import { getPrefs } from "./prefs";
@@ -52,17 +59,47 @@ export async function refreshMenuBar(): Promise<string | undefined> {
 
 export type LocationsUpdate = Partial<LocationsFile> | ((current: LocationsFile) => Partial<LocationsFile>);
 
+/**
+ * The last list each backend produced, readable without waiting. Raycast re-runs a menu bar command every time
+ * its menu opens, so without this the first frame has no locations: the title collapses to the icon and the
+ * dropdown is empty until the store has been read, which shows as a flicker.
+ */
+const cache = new Cache({ namespace: "locations" });
+
+function cacheKey(): string | undefined {
+  try {
+    return currentBackend().file ?? "local";
+  } catch {
+    return undefined;
+  }
+}
+
+function cachedFile(): LocationsFile | undefined {
+  const key = cacheKey();
+  return key ? parseLocationsFile(cache.get(key)) : undefined;
+}
+
+function remember(file: LocationsFile): void {
+  const key = cacheKey();
+  if (key) cache.set(key, serializeLocationsFile(file));
+}
+
 // All writes go through one chain: each read-modify-write sees the previous one's result.
 let chain: Promise<unknown> = Promise.resolve();
 
 export function useLocations() {
-  const [file, setFile] = useState<LocationsFile>();
+  const [file, setFile] = useState<LocationsFile | undefined>(cachedFile);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
   useEffect(() => {
     let active = true;
     readLocations()
-      .then((f) => active && setFile(f))
-      .catch((e: unknown) => active && setError(e instanceof Error ? e.message : String(e)));
+      .then((f) => {
+        remember(f);
+        if (active) setFile(f);
+      })
+      .catch((e: unknown) => active && setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => active && setLoading(false));
     return () => {
       active = false;
     };
@@ -75,6 +112,7 @@ export function useLocations() {
         const merged = await updateLocationsFile(currentBackend().backend, loadSeed(), (current) =>
           typeof update === "function" ? update(current) : update,
         );
+        remember(merged);
         const menuBarError = options?.refreshMenuBar === false ? undefined : await refreshMenuBar();
         setFile(merged);
         return menuBarError;
@@ -96,5 +134,5 @@ export function useLocations() {
   );
 
   const setLocations = useCallback((locations: Location[]) => save({ locations }), [save]);
-  return { file, locations: file?.locations, isLoading: !file && !error, error, save, setLocations };
+  return { file, locations: file?.locations, isLoading: loading, error, save, setLocations };
 }

@@ -68,7 +68,7 @@ Press ⌘I for the **hour strip**: one column per location, one row per hour, wi
 | Enter, or ⌘1 – ⌘9 | the selected row, e.g. `06:00 SFO (PDT)` |
 | ⌘Enter | everything on one line, e.g. `15:00 LON (BST) = 07:00 SFO (PDT) / 10:00 NYC (EDT) / 14:00 UTC` |
 
-The format is a template you can change in Settings. `{time} {code} ({abbr})` is the default; `{label}`, `{tz}`, `{date}`, `{day}` and `{offset}` are also available. After copying, Raycast returns to its root search (there's a setting for that too).
+The format is a template you can change in Settings. `{time} {code} ({abbr})` is the default; `{label}`, `{tz}`, `{date}`, `{day}`, `{offset}` and `{dot}` (🟢 🟡 🔴 for the hours there) are also available. After copying, Raycast returns to its root search (there's a setting for that too).
 
 ## More keys in Convert Time
 
@@ -97,7 +97,7 @@ Cities you add bring their codes along as aliases, so `sfo` and `sf` work the mo
 
 ## Menu bar
 
-**Menu Bar Clock** puts the locations you choose in the menu bar, like `LON 13:15 • SFO 05:15`, with every location in its dropdown. Run the command once from the root search to place it, then pick locations with ⌘M in Manage Locations. The text format and separator are in Settings.
+**Menu Bar Clock** puts the locations you choose in the menu bar, like `LON 13:15 • SFO 05:15`, with every location in its dropdown. Run the command once from the root search to place it, then pick locations with ⌘M in Manage Locations. The text format and separator are in Settings; the menu bar cannot colour text, so `{dot} {code} {time}` puts a 🟢 🟡 🔴 in front of each location instead.
 
 ## Settings
 
