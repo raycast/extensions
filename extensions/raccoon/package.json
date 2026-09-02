@@ -1,0 +1,428 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "raccoon",
+	"title": "Raccoon",
+	"description": "macOS companion toolkit: disk, memory, ports, battery, network and a security audit, powered by the rcc CLI.",
+	"icon": "extension-icon.png",
+	"author": "eugenio",
+	"categories": [
+		"System",
+		"Developer Tools",
+		"Security"
+	],
+	"license": "MIT",
+	"platforms": [
+		"macOS"
+	],
+	"preferences": [
+		{
+			"name": "sudoSession",
+			"title": "Admin Session",
+			"description": "How long one Touch ID covers every Raccoon command. Apply it with the Configure Admin Session command.",
+			"type": "dropdown",
+			"required": false,
+			"default": "60",
+			"data": [
+				{
+					"title": "Expires after 60 minutes",
+					"value": "60"
+				},
+				{
+					"title": "Until restart",
+					"value": "-1"
+				}
+			]
+		},
+		{
+			"name": "rccPath",
+			"title": "Raccoon CLI",
+			"description": "Full path to the rcc binary. Leave empty to search the usual Homebrew locations.",
+			"type": "textfield",
+			"required": false,
+			"default": "",
+			"placeholder": "/opt/homebrew/bin/rcc"
+		}
+	],
+	"commands": [
+		{
+			"name": "index",
+			"title": "Search Raccoon Commands",
+			"subtitle": "Raccoon",
+			"description": "Browse and run every rcc subcommand.",
+			"keywords": [
+				"rcc",
+				"raccoon",
+				"cli",
+				"toolkit",
+				"system",
+				"mac",
+				"maintenance",
+				"diagnostics"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "disk",
+			"title": "Show Disk Space",
+			"subtitle": "Raccoon",
+			"description": "Volumes, how full they are, disk health and network mounts.",
+			"keywords": [
+				"disk",
+				"storage",
+				"space",
+				"free",
+				"full",
+				"volume",
+				"apfs",
+				"cleanup",
+				"gb"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "memory",
+			"title": "Show Memory Usage",
+			"subtitle": "Raccoon",
+			"description": "Memory pressure and the processes using the most RAM.",
+			"keywords": [
+				"memory",
+				"ram",
+				"pressure",
+				"swap",
+				"slow",
+				"beachball",
+				"hog",
+				"leak"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "ports",
+			"title": "List Open Ports",
+			"subtitle": "Raccoon",
+			"description": "Open TCP and UDP ports with the process behind each one.",
+			"keywords": [
+				"ports",
+				"port",
+				"listening",
+				"open",
+				"tcp",
+				"udp",
+				"lsof",
+				"socket",
+				"firewall"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "battery",
+			"title": "Show Battery Health",
+			"subtitle": "Raccoon",
+			"description": "Battery health, cycle count and charging status.",
+			"keywords": [
+				"battery",
+				"power",
+				"health",
+				"cycles",
+				"charge",
+				"capacity",
+				"wear"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "audit",
+			"title": "Run Security Audit",
+			"subtitle": "Raccoon",
+			"description": "Run the Raccoon security audit. Asks for admin rights via Touch ID.",
+			"keywords": [
+				"security",
+				"audit",
+				"hardening",
+				"firewall",
+				"filevault",
+				"sip",
+				"gatekeeper",
+				"checkup",
+				"vulnerability"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "admin-session",
+			"title": "Configure Admin Session",
+			"subtitle": "Raccoon",
+			"description": "Ask for Touch ID once instead of once per privileged command.",
+			"keywords": [
+				"touchid",
+				"touch id",
+				"sudo",
+				"fingerprint",
+				"auth",
+				"admin",
+				"root",
+				"password",
+				"privileges"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "trash",
+			"title": "Show Trash",
+			"subtitle": "Raccoon",
+			"description": "Trash size, item count and where it lives.",
+			"keywords": [
+				"trash",
+				"bin",
+				"delete",
+				"empty",
+				"space",
+				"cleanup",
+				"junk"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "wifi",
+			"title": "Show Wi-Fi Networks",
+			"subtitle": "Raccoon",
+			"description": "The network you are on and the ones this Mac remembers.",
+			"keywords": [
+				"wifi",
+				"wi-fi",
+				"network",
+				"ssid",
+				"wireless",
+				"password",
+				"airport"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "overlap",
+			"title": "Map PATH Overlaps",
+			"subtitle": "Raccoon",
+			"description": "Which manager is behind each PATH entry, and which names clash.",
+			"keywords": [
+				"path",
+				"overlap",
+				"shadow",
+				"brew",
+				"npm",
+				"cargo",
+				"which",
+				"duplicate"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "docker",
+			"title": "Show Docker Status",
+			"subtitle": "Raccoon",
+			"description": "Containers, images, volumes and reclaimable disk.",
+			"keywords": [
+				"docker",
+				"container",
+				"image",
+				"volume",
+				"desktop",
+				"daemon",
+				"compose"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "history",
+			"title": "Show Shell History",
+			"subtitle": "Raccoon",
+			"description": "How much each shell has recorded, and the last commands run.",
+			"keywords": [
+				"history",
+				"shell",
+				"zsh",
+				"bash",
+				"fish",
+				"commands",
+				"recent"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "certs",
+			"title": "Show Certificates",
+			"subtitle": "Raccoon",
+			"description": "Keychain certificates, expired and expiring first.",
+			"keywords": [
+				"certificate",
+				"cert",
+				"ssl",
+				"tls",
+				"keychain",
+				"expired",
+				"expiring",
+				"https"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "startup",
+			"title": "Show Startup Items",
+			"subtitle": "Raccoon",
+			"description": "What this Mac starts on its own: login items and launch agents.",
+			"keywords": [
+				"startup",
+				"login",
+				"launch",
+				"agent",
+				"daemon",
+				"boot",
+				"autostart",
+				"slow"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "fonts",
+			"title": "Show Fonts",
+			"subtitle": "Raccoon",
+			"description": "Where fonts live, duplicates, and any the system cannot read.",
+			"keywords": [
+				"font",
+				"fonts",
+				"typeface",
+				"duplicate",
+				"corrupted",
+				"fontbook",
+				"family"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "env",
+			"title": "Check Environment",
+			"subtitle": "Raccoon",
+			"description": "PATH entries, broken symlinks, duplicates and tool versions.",
+			"keywords": [
+				"env",
+				"path",
+				"symlink",
+				"broken",
+				"duplicate",
+				"version",
+				"tool",
+				"shell"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "network",
+			"title": "Show Network",
+			"subtitle": "Raccoon",
+			"description": "Your address, who resolves your names, and anything in between.",
+			"keywords": [
+				"network",
+				"ip",
+				"address",
+				"dns",
+				"vpn",
+				"proxy",
+				"firewall",
+				"wifi",
+				"internet"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "xcode",
+			"title": "Show Xcode Status",
+			"subtitle": "Raccoon",
+			"description": "Build caches worth reclaiming, simulators still running, what is installed.",
+			"keywords": [
+				"xcode",
+				"simulator",
+				"deriveddata",
+				"ios",
+				"build",
+				"cache",
+				"space",
+				"developer"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "backup",
+			"title": "Show Backup Status",
+			"subtitle": "Raccoon",
+			"description": "Whether this Mac is backed up, and how long ago.",
+			"keywords": [
+				"backup",
+				"time machine",
+				"timemachine",
+				"restore",
+				"snapshot",
+				"destination"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "git",
+			"title": "Check Git Repositories",
+			"subtitle": "Raccoon",
+			"description": "Repositories with work that is not committed, not pushed, or not on a branch.",
+			"keywords": [
+				"git",
+				"repo",
+				"repository",
+				"uncommitted",
+				"unpushed",
+				"stash",
+				"branch",
+				"upstream",
+				"detached"
+			],
+			"mode": "view"
+		},
+		{
+			"name": "ssh",
+			"title": "Check SSH Keys",
+			"subtitle": "Raccoon",
+			"description": "Private keys with no passphrase, wrong permissions, or no public half.",
+			"keywords": [
+				"ssh",
+				"key",
+				"keys",
+				"passphrase",
+				"permissions",
+				"id_rsa",
+				"ed25519",
+				"private",
+				"publickey"
+			],
+			"mode": "view"
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^2.1.0",
+		"@raycast/utils": "^2.3.0"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "^2.0.4",
+		"@types/node": "22.13.10",
+		"@types/react": "19.0.10",
+		"eslint": "^9.22.0",
+		"prettier": "^3.5.3",
+		"typescript": "^5.8.2"
+	},
+	"scripts": {
+		"build": "ray build",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"test": "node --test src/*.test.ts",
+		"prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+		"publish": "npx @raycast/api@latest publish"
+	},
+	"allowScripts": {
+		"esbuild@0.28.2": true
+	}
+}
