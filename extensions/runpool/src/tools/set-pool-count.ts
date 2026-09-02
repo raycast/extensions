@@ -18,16 +18,28 @@ type Input = {
 };
 
 /**
- * What the confirmation read, so the write can be refused if the pool moved
- * while the question sat open.
+ * What each confirmation read, keyed by the change it was asked about, so the
+ * write can be refused if the pool moved while the question sat open.
  *
  * `Tool.Confirmation` returns a message and nothing else, so there is no
  * argument to carry this in. Both halves run in this module, in order, which
- * makes a module-scoped note the only channel between them. It is treated as a
- * hint rather than a guarantee: if it is absent the fresh read below stands on
- * its own, and `--if-count` is doing the real work either way.
+ * makes a module-scoped note the only channel between them. One note was not
+ * enough: a second confirmation overwrote the first, so growth approved
+ * against one count could be written as a shrink against another. Keying by
+ * pool and target count keeps overlapping questions apart, and the only
+ * collision left is two questions asking for the same change to the same pool,
+ * where either answer describes something that was genuinely confirmed.
  */
-let confirmed: { pool: string; count: number } | undefined;
+const confirmedFrom = new Map<string, number>();
+
+const noteKey = (pool: string, count: number) => `${pool}\u0000${count}`;
+
+/**
+ * A declined confirmation never reaches the tool, so its note would otherwise
+ * sit here for the life of the process. Evicting the oldest fails in the safe
+ * direction: a missing note refuses a shrink rather than allowing one.
+ */
+const MAX_NOTES = 32;
 
 /**
  * Always confirm. Growing registers new runners with GitHub and downloads the
@@ -39,7 +51,16 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const pool = pools.find((p) => p.name === input.pool);
   const from = pool ? `${pool.count}` : "its current count";
 
-  confirmed = pool ? { pool: input.pool, count: pool.count } : undefined;
+  const key = noteKey(input.pool, input.count);
+  if (pool) {
+    confirmedFrom.set(key, pool.count);
+    if (confirmedFrom.size > MAX_NOTES) {
+      const oldest = confirmedFrom.keys().next().value;
+      if (oldest !== undefined) confirmedFrom.delete(oldest);
+    }
+  } else {
+    confirmedFrom.delete(key);
+  }
 
   const shrinking = pool !== undefined && input.count < pool.count;
 
@@ -93,10 +114,20 @@ export default async function tool(input: Input) {
   // sits open for as long as it takes to read, and the list command, another
   // window or a terminal can resize the pool in that time, which turns approved
   // growth into a shrink that deregisters runners nobody agreed to.
-  const agreed = confirmed?.pool === pool.name ? confirmed.count : pool.count;
-  confirmed = undefined;
+  const key = noteKey(pool.name, input.count);
+  const agreed = confirmedFrom.get(key);
+  confirmedFrom.delete(key);
 
-  if (agreed !== pool.count) {
+  if (agreed === undefined) {
+    // No confirmation for this exact change is still in this process, so
+    // nothing here can show that a shrink was approved. Growth is left alone:
+    // it deregisters nothing, and `--if-count` still keeps the write atomic.
+    if (input.count < pool.count) {
+      throw new Error(
+        `Nothing here can show that shrinking "${pool.name}" from ${pool.count} to ${input.count} was confirmed, and the surplus runners would be deregistered from GitHub rather than just stopped. Nothing was changed. Ask again.`,
+      );
+    }
+  } else if (agreed !== pool.count) {
     throw new Error(
       `Pool "${pool.name}" was resized somewhere else while this was waiting: it had ${agreed} ${
         agreed === 1 ? "runner" : "runners"
