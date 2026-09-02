@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lm-studio",
+  "version": "1.0.0",
+  "description": "Chat with, manage, and search local AI models running in LM Studio.",
+  "title": "LM Studio",
+  "icon": "icon.png",
+  "author": "vineeth_sai_narajala",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "ai",
+    "llm",
+    "local",
+    "chat",
+    "offline"
+  ],
+  "commands": [
+    {
+      "name": "chat",
+      "title": "Chat with LM Studio",
+      "subtitle": "Local AI",
+      "description": "Chat with a local model served by LM Studio",
+      "mode": "view"
+    },
+    {
+      "name": "quick-ask",
+      "title": "Ask LM Studio",
+      "subtitle": "Local AI",
+      "description": "Ask a local model using text, selected content, screenshots, images, or a JSON schema",
+      "mode": "view"
+    },
+    {
+      "name": "transform-text",
+      "title": "Transform Text",
+      "subtitle": "LM Studio",
+      "description": "Rewrite, summarize, translate, explain, or correct text with a local model",
+      "mode": "view"
+    },
+    {
+      "name": "manage-models",
+      "title": "Manage Models",
+      "subtitle": "LM Studio",
+      "description": "Inspect, load, unload, and download local models",
+      "mode": "view"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "LM Studio",
+      "description": "Semantically search explicitly indexed local notes",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "ask-local-model",
+      "title": "Ask Local Model",
+      "description": "Ask a local language model running in LM Studio and return its answer"
+    },
+    {
+      "name": "search-local-notes",
+      "title": "Search Local Notes",
+      "description": "Semantically search the user's explicitly indexed local note folders"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Server URL",
+      "description": "The URL of the LM Studio local server",
+      "type": "textfield",
+      "required": true,
+      "default": "http://localhost:1234"
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Optional token when LM Studio authentication is enabled",
+      "type": "password",
+      "required": false,
+      "placeholder": "Leave empty when authentication is disabled"
+    },
+    {
+      "name": "systemPrompt",
+      "title": "System Prompt",
+      "description": "Instructions included at the start of every new conversation",
+      "type": "textfield",
+      "required": false,
+      "default": "You are a helpful assistant."
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:live": "node --import tsx scripts/live-smoke.ts",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "ajv": "^8.20.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.15.3",
+    "@types/react": "19.1.2",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "tsx": "^4.20.6",
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.9"
+  }
+}

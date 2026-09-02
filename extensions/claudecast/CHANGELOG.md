@@ -1,18 +1,35 @@
 # ClaudeCast Changelog
 
-## [1.8.0] - 2026-05-08
+## [1.8.0] - 2026-08-24
 
 ### Added
 
+- **Persistent Deep Search Index**: Deep Search Sessions now keeps a versioned manifest and content corpus in Raycast's support directory. It reads unchanged transcripts once, indexes appended content from the last complete JSONL boundary, replaces rewritten sessions, removes deleted sessions, recovers interrupted corpus appends, supports `dir:` and `project:` filters, and exposes mentioned files as Open File actions.
+- **Permission Inbox**: Added one Raycast queue for `AskUserQuestion`, `PermissionRequest`, `ExitPlanMode`, and agent waiting events. It supports single-choice, multi-select, freeform, allow, deny with reason, plan approval, plan deferral, and direct Manage Agents access. The Node runner validates each event, uses private atomic files, preserves user hooks, and removes only ClaudeCast handlers during uninstall.
+- **Unified Session Inbox**: Browse Sessions and Deep Search now enrich Claude CLI transcripts with validated Claude Desktop, VS Code, and Conductor metadata. Source, title, branch, workspace, and archive state stay attached to each transcript, while duplicate session IDs remain distinct by source path.
+- **Exact Match Navigation**: Deep Search records stable message IDs, source byte boundaries, record indexes, and message indexes. View Details opens bounded context around the exact hit, validates referenced files, and embeds only local screenshots that remain inside approved roots after realpath checks.
+- **Manage Worktrees**: Added a Git worktree control command with dirty counts, diff summaries, agent ownership, lock and unlock, clean removal without force, and dry-run-confirmed pruning. Git discovery has one four-process limit and cancels older refreshes.
+- **WSL Sessions**: Added WSL history discovery, Browse and Deep Search integration, Quick Continue, Launch Project, resume, fork, exact detail, and usage scanning. ClaudeCast reads only contained `$HOME/.claude/projects` roots and moves large prompts through private files.
+- **Subscription Limits And Forecasts**: Usage Dashboard now reads the existing full-scope `claude auth login` credential and shows server-side five-hour and weekly utilization, remaining percentage, reset times, scoped model windows, refresh age, and stale fallback data. A 10-minute cache feeds bounded local snapshots and a weekly exhaustion forecast based on recent local weekday and hour usage rates. The dashboard keeps these limits separate from local token cost estimates and explains forecast confidence and data sufficiency.
+- **Manage Agents**: Added a native Claude Code background-agent control center. It groups live agents by state, shows waiting reasons, dispatches named agents with model, effort, and permission settings, and supports logs, terminal attach, stop, restart, and removal through Claude's documented CLI commands. Refresh stays manual so opening the command does not create a polling process.
+- **Native Windows Support**: Added Windows Terminal, PowerShell 7, Windows PowerShell, and Command Prompt launchers. ClaudeCast now repairs stale Windows PATH values from the registry when needed, discovers native and npm Claude installations, reads session histories and VS Code-family workspaces from Windows locations, uses File Explorer and Recycle Bin actions, and provides Windows keyboard shortcuts.
+- **Worktree Sessions**: Launch Project can start a new Claude Code session in an isolated Git worktree.
+- **Windows Ralph Loop**: Ralph Loop now writes a PowerShell runner and resume script on Windows while retaining the existing Bash workflow on macOS.
 - **cmux Terminal Support**: Added cmux ([cmux.com](https://cmux.com)) as a first-class terminal alongside Terminal, iTerm, Warp, kitty, and Ghostty. Sessions launch via the macOS open-handler so cwd is set as the shell's process pwd, then the command types and submits via cmux's own input pipeline (no Accessibility permission needed). cmux honors the global Open In preference: New Tab uses the open-handler path; New Window uses cmux's AppleScript `new window` verb plus a typed `cd "<cwd>" && <command>`.
 - **Usage Dashboard Revamp**: Real SVG bar chart for daily cost trend, side-by-side range comparison table, top projects table, top sessions table with project + first-message preview + cost. Sidebar metadata shows totals, token breakdowns, top projects as colored tags, and the most expensive session.
 - **Auth Gate for Claude API Commands**: Ask Claude Code, Git Actions, Transform Selection, and Agentic Workflows preflight authentication before invoking the CLI. The check accepts Raycast preferences (`anthropicApiKey`, `oauthToken`), the env vars `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` / `CLAUDE_CODE_OAUTH_TOKEN`, and existing credentials reported by `claude auth status --json`. When none are present the user gets a friendly "Add token in preferences" toast instead of seeing the CLI's `/login` prompt inside the spawned process.
 
 ### Fixed
 
-- **Session Path Resolution**: Session metadata, details, and search results now prefer the session JSONL `cwd` field when present, avoiding lossy fallback decoding for project paths with underscore-prefixed segments.
+- **Session Metadata Reliability**: Session lists and Deep Search prefer each transcript's validated `cwd`, metadata scanning continues until it reaches a user entry, and resolved-path cache entries expire after five minutes.
+- **Filesystem Error Reporting**: Permission, corruption, descriptor-limit, and stream errors now reach the command UI instead of appearing as empty or partial session results.
+- **Launch Failure Feedback**: Project launches recover from terminal failures, detail views distinguish unreadable sessions from missing sessions, and kitty reports when tab launch falls back to a new window.
+- **Interactive Prompt Arguments**: Terminal prompts now keep resume, fork, model, and permission flags. Prompt text moves through a temporary file and remains data when it contains quotes, newlines, shell operators, percent expressions, or Unicode.
+- **Windows Session Paths**: Project resolution now reads a validated `cwd` from bounded JSONL prefixes when `sessions-index.json` is missing, and handles native `C--Users-...` project-directory encoding.
+- **Cross-Platform Process and Git Commands**: Claude status checks, Git reads, and commit creation now pass executable arguments directly instead of relying on POSIX shell quoting.
+- **Current Model Pricing**: Added Fable 5, limited Mythos 5, Opus 5, Opus 4.8, and Sonnet 5 rates. Cache creation now separates 5-minute writes at 1.25x input price from 1-hour writes at 2x input price.
 - **Cost Calculation: Streaming Chunk Deduplication**: Anthropic streams response chunks where each chunk's `usage` is cumulative. Naive summing inflated session totals by 2x to 4x. Now deduped by `(message.id, requestId)` so per-message totals reflect the final cumulative value once per request.
-- **Cost Calculation: Sonnet 200K Token Tier**: Above 200K input tokens per message, Sonnet rates double across all token types (input, output, cache read, cache write). The pricing now applies a flat per-request high tier keyed off the message's input token count, matching Anthropic's billing.
+- **Cost Calculation: Sonnet 4.5 200K Token Tier**: Legacy Sonnet 4.5 requests above 200K input tokens use the request-wide long-context rate. Sonnet 4.6 and Sonnet 5 keep standard rates across their 1M context windows.
 - **Cost Calculation: Date-Range Filter Skips Timestampless Entries**: When a date range is active (today/week/month/daily chart), entries without a `timestamp` field are excluded. Previously they passed through the filter and inflated reported costs for users with older session files.
 - **Cost Calculation: Opus 4.7 Pricing Row**: Added an explicit `opus-4-7` row at the $5/$25 tier. Without it, Opus 4.7 sessions matched the older `opus` substring and were billed at the $15/$75 tier (3x overcharge).
 - **Cost Calculation: Daily Chart Bucketing**: Daily costs are now attributed to each day's actual usage timestamps. Previously a multi-day session stamped all of its cost on the file's last-modified date.
@@ -24,6 +41,11 @@
 - **Per-Project Path Resolution**: Memoized within each stats call so each unique project directory is resolved at most once per call instead of once per session.
 - **Session Detail View: Last 20 Messages**: Browse Sessions and Deep Search Sessions detail views now render the most recent 20 messages, with an accurate "Showing last N of M messages" notice keyed to the rendered count. The banner now appears for any session with more than 20 messages.
 - **Kitty Window Mode**: Restored `--single-instance` so window-mode launches reuse the running kitty instance rather than spawning a separate process.
+
+### Changed
+
+- **Menu Bar Refresh Interval**: Changed the background refresh interval from 30 seconds to one minute, matching Raycast's documented minimum and reducing process churn.
+- **Project Git Probes**: Limited concurrent Git status probes to four so large project lists do not create a process burst, especially under Windows Defender.
 
 ## [1.7.0] - 2026-05-05
 

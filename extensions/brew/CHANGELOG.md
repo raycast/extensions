@@ -1,5 +1,45 @@
 # Brew Changelog
 
+## [Show Upgrades: reviewed, selective upgrading] - 2026-09-01
+
+- **Show Outdated is now Show Upgrades**: the outdated list has grown into a review surface — ↩ toggles a package (formula or cask) in or out of the upgrade, **⌘↩ runs it from any row** ("Upgrade All" with the default full selection, "Upgrade N Selected" once narrowed) and ⌘⇧A selects or deselects everything upgradable. The default selection is everything not pinned — exactly what a plain `brew upgrade` would do. Every per-package action the view offered (single upgrade, pin, copy/terminal commands, uninstall) remains on each row, and the command still answers to "outdated" in search
+- A reviewed run upgrades exactly the selected packages: each is upgraded individually by name, so deselected packages are simply left out — nothing is pinned, held or otherwise touched on their behalf. Packages that become outdated during the run's own `brew update` are not upgraded unreviewed; they remain visible — and selectable for a follow-up run — in the list afterwards
+- A pin is a lock, matching brew's own behaviour: pinned formulae cannot be selected, and upgrading one means unpinning it — ↩ on a pinned row unpins and selects it in one step. Pinning from the review (⌘.) deselects
+- Refreshing mid-review (⌘R) keeps the selections you have already made; a formula pinned outside the extension is deselected on refresh — the lock always wins
+- Casks are selectable exactly like formulae. Cask *pinning* (the lock semantics) waits on Homebrew 6's `brew pin --cask` and ships in a follow-up
+- Running the upgrade cancels the review's in-flight background `brew update` (and waits for it to release Homebrew's update lock) instead of asking the user to try again in a moment
+- Reopening either upgrade command after a run no longer flashes the pre-run list: a snapshot the run made stale is withheld until fresh data lands
+- A failed check-for-upgrades now shows a failure screen with a Retry action instead of a blank list (Show Upgrades) or a stuck checking placeholder (Upgrade); with cached packages still on screen the failure arrives as a toast instead, and with nothing outdated the empty screen offers a route to Show Installed
+- "Run Upgrade in Terminal" on outdated rows moved from ⌘↩ to ⌘⇧T, and the single-package Upgrade action moved from ↩ into the action panel — ↩ now toggles selection and ⌘↩ starts the run on every row
+- Fixed the `OutdatedCask.installed_versions` type: `brew outdated --json=v2` returns an array for casks, not a string
+- Added a test suite (vitest, dev-only) covering the selection logic
+
+## [Install statistics & popularity sort] - 2026-09-01
+
+- Search: "Sort by Popularity" (⇧⌘P) orders results by installs over the last 30 days, ranking every match before the list is truncated — so the top rows are the most installed overall, not of the first hundred. An empty query lists the most installed packages outright.
+- The detail sidebar and the Details view both show a package's install counts for 30, 90 and 365 days, plus build errors, matching the analytics table on its formulae.brew.sh page. Only the selected package is fetched.
+- Deprecated and disabled packages carry a warning at the top of the sidebar, with the reason, the date, and the replacement package where Homebrew names one.
+- "Hide Description" (⇧⌘Y) drops the description pane and shows the sidebar as a pure metadata list, with a Caveats indicator; the full caveats text stays in Show Details, which renders it as prose.
+- "Show Details" is now offered even when the sidebar is open. It previously disappeared in that state, leaving "Show in Finder" as the default action on an installed package. Install and Upgrade remain the default where they apply.
+- Display toggles are grouped in a "View" section. "Toggle Details" is now "Toggle Sidebar" (⇧⌘D), and works in Search too; "Hide Dependencies" no longer appears in Search, where nothing filtered by it. Show Installed adds an install date and marks pinned formulae.
+- Search now marks an installed package as outdated when an update exists, and offers Upgrade on it. Previously only Show Outdated knew, because the installed cache never expired on `brew update` — its freshness test watched only local install state.
+- Show Outdated groups pinned formulae into their own section, as Show Installed does. They are the ones `brew upgrade` refuses and Upgrade All skips, so keeping them out of the actionable list says so without the row having to.
+- Pinning uses a tack rather than a map pin, and Show Outdated marks a pinned formula with that icon in place of the word "Pinned". Upgrade actions carry the same up-arrow as the row they act on, instead of a hammer.
+- Upgrading a pinned formula now says so instead of failing. `brew upgrade` refuses a pinned package outright, so the action surfaced its error; it now skips with an explanation, matching Upgrade All which already skipped them.
+- An available update is now marked the same way everywhere — a yellow up-arrow, replacing a red check in Search that clashed with the red used for a failed upgrade, and a grey check in Show Outdated that was the "upgraded" glyph greyed out.
+- The Details view and the search sidebar now show the same metadata, built from one definition. They had drifted: statistics, the deprecation warning and the corrected version line each landed in one and not the other.
+- The version row leads with the version you actually have, showing `installed → available` when they differ. It previously showed the available version labelled "installed", so an outdated package read as current.
+- Cached downloads are now written atomically, so an interrupted one can no longer leave a partial file that later fails to load. This covers the package index every command depends on, not just the new statistics. Clear Cache removes leftover temporary files too.
+- Updated to `@raycast/api` 2.x, and to a `brace-expansion` release without the denial-of-service advisory (GHSA-rgw5-rvv9-x895).
+
+## [Upgrade View] - 2026-08-27
+
+- The Upgrade command now lists the outdated formulae & casks, matching the Show Outdated command, instead of a list of progress steps.
+- Upgrade progress is reported via the toast/HUD, with the icon of each package reflecting its upgrade status.
+- "Upgrade All" now upgrades each package in turn, so its progress is reported per package.
+- Added a Refresh action to the outdated action panel.
+- Pinned formulae are skipped when upgrading.
+
 ## [Adopt] - 2026-08-19
 
 - Added "Copy Adopt Command" (⌘⇧⌥C) and "Run Adopt in <terminal>" (⌘⇧↵) actions in Search for packages not yet managed by Homebrew. They run `brew install --adopt` to reclaim an externally-installed package (e.g. installed via a .dmg or another package manager) into Homebrew so it is covered by `brew upgrade`.
@@ -26,7 +66,7 @@
 - Added a "Manage Services" command to list Homebrew services and start, stop, or restart them individually or all at once. Actions update the list optimistically so it reflects the new state immediately.
 - Added a "Services Menu Bar" command to control Homebrew services from the menu bar, with a submenu per service and start/stop/restart all. The menu refreshes on a configurable interval.
 
-## [Bug fix] -  2026-05-21
+## [Bug fix] - 2026-05-21
 
 - Improves reliability of index cache
 - Improves toast error message if fetch fails

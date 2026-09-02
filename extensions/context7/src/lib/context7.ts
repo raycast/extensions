@@ -273,12 +273,9 @@ async function requestJson<T>(url: URL, signal?: AbortSignal, redirectCount = 0)
   const apiKey = getApiKey();
   const startedAt = Date.now();
 
-  // The path is logged as SEGMENTS, not as one string: the logger's encoded-secret heuristic
-  // treats "/" as a base64 character, so a path like /api/v1/tailwindlabs/tailwindcss prints
-  // as "***". Short segments never reach the length threshold. Likewise `authenticated`
-  // rather than `auth`, which is in the logger's credential-key set.
-  logger.log("→ GET", {
-    path: pathSegments(url),
+  // `authenticated`, not `auth` — the latter is in the logger's credential-key set and would
+  // print as "***" regardless of its value.
+  logger.log(`→ GET ${url.pathname}`, {
     params: Object.fromEntries(url.searchParams),
     authenticated: Boolean(apiKey),
     ...(redirectCount > 0 ? { redirectCount } : {}),
@@ -349,15 +346,10 @@ function buildRateLimitMessage(response: Response, retryAfter: string | null) {
  * which endpoint answered, how long it took, and the quota headers Context7 returns on success
  * as well as failure. The API key lives in a header and is never logged.
  */
-function pathSegments(url: URL) {
-  return url.pathname.split("/").filter(Boolean);
-}
-
 function logResponse(url: URL, response: Response, durationMs: number) {
   const remaining = response.headers.get("ratelimit-remaining");
 
-  logger.log(`← ${response.status}`, {
-    path: pathSegments(url),
+  logger.log(`← ${response.status} ${url.pathname}`, {
     ms: durationMs,
     contentType: response.headers.get("content-type") ?? "unknown",
     ...(remaining === null

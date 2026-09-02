@@ -4,15 +4,13 @@ import {
   Color,
   Icon,
   List,
-  Toast,
   getPreferenceValues,
   launchCommand,
   LaunchType,
-  showToast,
   open,
 } from "@raycast/api";
 import { isValid, parse } from "date-fns";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Delivery, FilterMode, STATUS_DESCRIPTIONS, getStatusIcon } from "./api";
 import { useDeliveries } from "./hooks/useDeliveries";
 import { useCarriers } from "./hooks/useCarriers";
@@ -94,7 +92,7 @@ export default function Command() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.ACTIVE);
   const { ambiguousDotDateOrder } = getPreferenceValues<Preferences>();
   const ambiguousNumericMonthFirst = ambiguousDotDateOrder !== "day_month";
-  const { deliveries, isLoading, error } = useDeliveries(filterMode);
+  const { deliveries, isLoading, error, revalidate } = useDeliveries(filterMode);
   const { carriers } = useCarriers();
 
   /**
@@ -323,16 +321,6 @@ export default function Command() {
     );
   };
 
-  useEffect(() => {
-    if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load deliveries",
-        message: error.message,
-      });
-    }
-  }, [error]);
-
   return (
     <List
       isLoading={isLoading}
@@ -356,6 +344,7 @@ export default function Command() {
           description={error.message}
           actions={
             <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
               <Action
                 title="Open Parcel Web"
                 icon={Icon.Globe}

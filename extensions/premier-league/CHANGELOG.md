@@ -1,5 +1,29 @@
 # Premier League Changelog
 
+## [Move Jump to Matchweek off Enter] - 2026-08-31
+
+- Move the "Jump to…" shortcut from `Enter` to `J`. `Enter` already opens Match Commentary on the selected match, so the two were competing.
+- Submit the matchweek form with `Enter` once a number is typed, rather than `Cmd+Enter`.
+
+## [Split Matches and Fixtures] - 2026-08-30
+
+- Add a Fixtures command covering matches in progress and still to come. Matches now holds completed games only, so a match moves from one command to the other at the final whistle.
+- Show the live clock on matches in any half, not only on ones the feed marks with a short code.
+- Restore scrolling to load more, now in the direction each command is about: Matches works back through earlier matchweeks, Fixtures works forward through later ones.
+- Add a "Jump to…" action on both commands for moving straight to a matchweek, on `Enter`. The field starts on the matchweek you are viewing and only accepts 1 to 38, so there is nothing to get wrong.
+- Rename the matchweek actions to "Next: Matchweek n" and "Previous: Matchweek n". Each command starts with only the action that keeps you on its side of today, and offers the other one once you have moved.
+
+## [Matchweek Navigation] - 2026-08-26
+
+- Fix Matches loading fixtures from the earliest seasons on record while the current season was still resolving.
+- Land on the upcoming matchweek instead of the one the gameweek config reports, and list the previous matchweek above it until the upcoming one kicks off.
+- Fetch a whole matchweek in one request. Scrolling no longer pulls in more matches or repeats fixtures already on screen.
+- Rename the matchweek actions to "Next Matchweek (n)" and "Previous Matchweek (n)", and bind them to `]` and `[`.
+
+## [Fix Season Rollover] - 2026-08-21
+
+- Fix Matches, Table, Clubs and Squad showing the previous season once a new one kicks off. The season list the extension reads can trail the season it describes by months, so from July the active season is now read from the API and merged into that list.
+
 ## [Endpoint Exodus] - 2025-11-05
 
 - Upgrade to new Premier League API with cursor pagination and updated IDs.

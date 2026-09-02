@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Fix Menu Bar Reminders title truncation] - 2026-08-27
+
+- Truncate menu bar reminder titles by Unicode character instead of UTF-16 code units so emoji and other multi-byte characters are not split.
+
 ## [Fix natural-language due dates] - 2026-08-19
 
 - Restore relative due-date parsing in Create Reminder for `1h`, `1 hour`, `3 hours`, `in 10 minutes`, `3:45 pm`, `3 days`, and `1 year`.

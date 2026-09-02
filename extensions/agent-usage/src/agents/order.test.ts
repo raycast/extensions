@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getInitialSelectedRowId, sortByDefaultAgentOrder } from "./order.ts";
+import { getInitialSelectedRowId, getRequestedSelectedRowId, sortByDefaultAgentOrder } from "./order.ts";
 import type { AgentId } from "./types.ts";
 
 test("sortByDefaultAgentOrder uses the canonical provider order and keeps provider accounts together", () => {
@@ -22,12 +22,14 @@ test("sortByDefaultAgentOrder uses the canonical provider order and keeps provid
     { id: "claude", rowId: "claude" },
     { id: "antigravity", rowId: "antigravity" },
     { id: "amp", rowId: "amp" },
+    { id: "aihubmix", rowId: "aihubmix" },
     { id: "codex", rowId: "codex-2" },
   ];
 
   assert.deepEqual(
     sortByDefaultAgentOrder(agents).map((agent) => agent.rowId),
     [
+      "aihubmix",
       "amp",
       "antigravity",
       "claude",
@@ -69,4 +71,9 @@ test("getInitialSelectedRowId falls back to the first rendered row without a sav
 
   assert.equal(getInitialSelectedRowId(rows), "amp");
   assert.equal(getInitialSelectedRowId([]), undefined);
+});
+
+test("getRequestedSelectedRowId accepts dynamic account row IDs", () => {
+  assert.equal(getRequestedSelectedRowId("copilot-account-1"), "copilot-account-1");
+  assert.equal(getRequestedSelectedRowId(undefined), undefined);
 });

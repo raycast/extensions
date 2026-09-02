@@ -1,4 +1,4 @@
-A simple system-wide color picker. The color picker can be triggered with a standalone command or as part of the menu bar command. The menu bar shows the last nine picked colors. The Organize Colors command can be used to see all colors.
+A simple system-wide color picker. The color picker can be triggered with a standalone command or as part of the menu bar command. The menu bar shows favorite colors and the last nine picked colors. Use Favorite Colors to view just your favorites, or Organize Colors to manage all colors.
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 
@@ -6,6 +6,7 @@ A simple system-wide color picker. The color picker can be triggered with a stan
 
 - Pick a color on your desktop
 - Access your colors from the menu bar
+- View your favorite colors in a dedicated list
 - Organize your colors
 - Generate colors using UI
 - Pick a color using AI

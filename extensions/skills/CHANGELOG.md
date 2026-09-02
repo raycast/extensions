@@ -1,5 +1,10 @@
 # Skills Changelog
 
+## [Serialize Concurrent CLI Commands] - 2026-08-24
+
+- Prevent simultaneous Raycast commands from racing in the shared `npx` cache and intermittently failing with `ENOTEMPTY`
+- Read the installed-skill list and metadata from one locked snapshot so Manage Skills does not show mismatched data
+
 ## [Updated contributor] - 2026-08-18
 
 ## [Fix Runtime Detection and Skill Lookup] - 2026-07-30

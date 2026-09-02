@@ -3,23 +3,27 @@ import { useCallback, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { BookmarkList } from "./components/BookmarkList";
 import { connectionGuard } from "./components/ConnectionErrorView";
-import { useApiReachable } from "./hooks/useApiReachable";
+import { useApiReachable, type ReachabilityState } from "./hooks/useApiReachable";
 import { useGetAllBookmarks } from "./hooks/useGetAllBookmarks";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { List as BookmarkListType } from "./types";
 import { useGetListsBookmarks } from "./hooks/useGetListsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
 import { runWithToast } from "./utils/toast";
+import { revalidated } from "./utils/fetchError";
 
 const log = logger.child("[Bookmarks]");
 
-function ListFilterDropdown({ onChange }: { onChange: (listId: string) => void }) {
+function ListFilterDropdown({
+  onChange,
+  lists,
+  reachability,
+}: {
+  onChange: (listId: string) => void;
+  lists: BookmarkListType[];
+  reachability: ReachabilityState;
+}) {
   const { t } = useTranslation();
-  // The dropdown mounts alongside the bookmarks fetch, so against a dead server
-  // it fires its own doomed /api/v1/lists request and raises Raycast's opaque
-  // "fetch failed" toast over the top of our recovery view.
-  const { state: reachability } = useApiReachable();
-  const { lists } = useGetAllLists(reachability === "reachable");
 
   // Gating the FETCH isn't enough to hide the filter: useCachedPromise still
   // returns the previous run's lists from disk, so the dropdown would offer
@@ -56,7 +60,7 @@ function AllBookmarksView({
       action: async () => {
         try {
           log.log("Refreshing bookmarks");
-          await revalidate();
+          await revalidated(revalidate);
           log.info("Bookmarks refreshed");
         } catch (error) {
           log.error("Failed to refresh bookmarks", { error });
@@ -141,14 +145,20 @@ function ListBookmarksView({
 }
 
 export default function BookmarksList() {
-  // useCachedPromise caches the VALUE, not the request — it runs its promise
-  // once per hook instance — so this is a genuinely separate fetch from
-  // ListFilterDropdown's. Pass the result down rather than letting BookmarkList
-  // fetch a third copy for its Add to List submenu.
-  const { lists } = useGetAllLists();
+  // ONE probe for the whole command, passed down rather than called again in the
+  // dropdown: useCachedPromise caches the VALUE, not the request, so a second
+  // useApiReachable() here would fire a second /api/v1/users/me on every open.
+  const { state: reachability } = useApiReachable();
+  // Gated for the same reason the dropdown is: this fetch is what produced
+  // "Couldn't load lists HTTP 401" on a command the user opened to see
+  // BOOKMARKS. Pass the result down rather than letting BookmarkList fetch a
+  // third copy for its Add to List submenu.
+  const { lists } = useGetAllLists(reachability === "reachable");
   const [selectedListId, setSelectedListId] = useState("");
 
-  const searchBarAccessory = <ListFilterDropdown onChange={setSelectedListId} />;
+  const searchBarAccessory = (
+    <ListFilterDropdown onChange={setSelectedListId} lists={lists} reachability={reachability} />
+  );
 
   const selectedList = lists.find((l) => l.id === selectedListId);
 

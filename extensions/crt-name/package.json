@@ -1,0 +1,136 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "crt-name",
+  "title": "CRT Name",
+  "description": "Find subdomains indexed by crt.name and see when each one first appeared",
+  "icon": "crt-name-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-apex",
+      "title": "Search Apex",
+      "subtitle": "crt.name",
+      "description": "Find subdomains indexed for an apex domain",
+      "mode": "view",
+      "keywords": [
+        "certificate",
+        "transparency",
+        "ct",
+        "subdomain"
+      ],
+      "arguments": [
+        {
+          "name": "apex",
+          "type": "text",
+          "placeholder": "example.com",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-subdomains",
+      "title": "Search Subdomains",
+      "description": "Search crt.name's passive index for subdomains and first-seen dates. Results can be filtered, sorted, and limited; the tool is read-only and does not test DNS or host reachability."
+    }
+  ],
+  "ai": {
+    "instructions": "Use Search Subdomains when the user wants to enumerate, find, filter, count, or inspect first-seen dates for subdomains of an apex domain. Pass an eTLD+1 such as example.com, not a hostname such as www.example.com. Use contains for hostname filters, first-seen-descending for newest entries, and alphabetical when the user asks for alphabetical order. Treat results as passive crt.name index records: do not claim that a hostname currently resolves, is reachable, is owned by the apex owner, or expose certificate metadata. State when truncated is true and offer a narrower contains filter when helpful.",
+    "evals": [
+      {
+        "input": "@crt-name find subdomains for example.com",
+        "mocks": {
+          "search-subdomains": {
+            "apex": "example.com",
+            "totalIndexed": 3,
+            "matchingCount": 3,
+            "returnedCount": 3,
+            "truncated": false,
+            "results": [
+              {
+                "subdomain": "example.com",
+                "firstSeen": "2009-07-03T20:37:11Z"
+              },
+              {
+                "subdomain": "api.example.com",
+                "firstSeen": "2014-01-15T10:00:00Z"
+              },
+              {
+                "subdomain": "www.example.com",
+                "firstSeen": "2026-02-11T00:00:00Z"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-subdomains"
+          },
+          {
+            "includes": "api.example.com"
+          }
+        ]
+      },
+      {
+        "input": "@crt-name show me login-related subdomains for example.com",
+        "mocks": {
+          "search-subdomains": {
+            "apex": "example.com",
+            "totalIndexed": 50,
+            "matchingCount": 2,
+            "returnedCount": 2,
+            "truncated": false,
+            "results": [
+              {
+                "subdomain": "login.example.com",
+                "firstSeen": "2015-04-02T08:30:00Z"
+              },
+              {
+                "subdomain": "secure-login.example.com",
+                "firstSeen": "2018-09-10T13:45:00Z"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-subdomains"
+          },
+          {
+            "includes": "login.example.com"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

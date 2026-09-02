@@ -1,6 +1,7 @@
 import type { Image } from "@raycast/api";
 
 export type AgentId =
+  | "aihubmix"
   | "amp"
   | "claude"
   | "clinepass"
@@ -16,6 +17,7 @@ export type AgentId =
   | "antigravity"
   | "zai"
   | "minimax"
+  | "minimaxcn"
   | "opencode-go";
 
 export interface AgentDefinition {
@@ -42,6 +44,7 @@ export interface Accessory {
 }
 
 export interface AgentVisibilityPreferences {
+  showAihubmix: boolean;
   showAmp: boolean;
   showAntigravity: boolean;
   showClaude: boolean;
@@ -55,6 +58,7 @@ export interface AgentVisibilityPreferences {
   showGrok: boolean;
   showKimi: boolean;
   showMinimax: boolean;
+  showMinimaxCN: boolean;
   showOpencodeGo: boolean;
   showSynthetic: boolean;
   showZai: boolean;

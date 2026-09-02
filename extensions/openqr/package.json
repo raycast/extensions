@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openqr",
+  "title": "OpenQR",
+  "version": "1.1.0",
+  "description": "Generate QR codes and manage dynamic (editable) QR codes with scan analytics, straight from Raycast.",
+  "icon": "openqr-icon.png",
+  "author": "sam_moreton",
+  "categories": [
+    "Data",
+    "Productivity",
+    "Web",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "qr",
+    "qr-code",
+    "qrcode",
+    "dynamic-qr",
+    "openqr",
+    "short-link"
+  ],
+  "license": "MIT",
+  "homepage": "https://openqr.uk/api",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/open-qr/openqr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/open-qr/openqr/issues"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your OpenQR API key. Create one free at https://openqr.uk/api.",
+      "placeholder": "oqr_…"
+    }
+  ],
+  "commands": [
+    {
+      "name": "generate-static-qr",
+      "title": "Generate Static QR Code",
+      "subtitle": "OpenQR",
+      "description": "Encode text or a URL as a permanent QR code and copy or save the image. Never expires, works with no server.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-dynamic-qr",
+      "title": "Generate Dynamic QR Code",
+      "subtitle": "OpenQR",
+      "description": "Create an editable QR code you can re-point later without reprinting, and get its image.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-dynamic-qr-codes",
+      "title": "Manage Dynamic QR Codes",
+      "subtitle": "OpenQR",
+      "description": "Browse your dynamic QR codes: show their images, re-point destinations, view scan analytics, and delete.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@open-qr/sdk": "^0.2.0",
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

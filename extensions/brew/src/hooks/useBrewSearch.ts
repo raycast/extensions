@@ -19,13 +19,30 @@ import {
   DownloadProgress,
   hasSearchCache,
   invalidateChunkedCacheMemory,
+  invalidatePopularityRanks,
   onIndexRefreshed,
+  PopularityRanks,
 } from "../utils";
 
 interface UseBrewSearchOptions {
   searchText: string;
   limit?: number;
   installed?: InstalledMap;
+  /** When given, results are ordered by install count instead of relevance. */
+  ranks?: PopularityRanks;
+  /**
+   * Bumped whenever `ranks` is replaced. Part of the cache key, because a
+   * refreshed set of rankings is a different result even though the previous
+   * key ("ranks exist") is unchanged — without it, Clear Cache & Retry would
+   * keep serving results ordered by the rankings it just deleted.
+   */
+  ranksVersion?: number;
+  /**
+   * Called after Clear Cache has deleted the on-disk caches. The rank hook owns
+   * its own copy of the rankings, so clearing the module-level cache alone would
+   * leave the hook serving data parsed from files that no longer exist.
+   */
+  onCacheCleared?: () => void;
 }
 
 /** Download progress for a single file */
@@ -116,7 +133,7 @@ const defaultFileProgress: FileDownloadProgress = {
  *    installed data changes, ensuring we always have the latest combination
  */
 export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResult {
-  const { searchText, limit = 100, installed } = options;
+  const { searchText, limit = 100, installed, ranks, ranksVersion = 0, onCacheCleared } = options;
 
   // Track if we've ever received data (for initial load detection)
   const hasEverLoadedRef = useRef(false);
@@ -165,8 +182,9 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
     data: rawData,
     mutate,
   } = useCachedPromise(
-    async (query: string) => {
-      searchLogger.log("Starting search", { query, isInitialLoad: !hasEverLoadedRef.current });
+    async (query: string, ranksKey: number) => {
+      const useRanks = ranksKey > 0;
+      searchLogger.log("Starting search", { query, ranksKey, isInitialLoad: !hasEverLoadedRef.current });
 
       // Reset progress at start of search
       setDownloadProgress({ phase: "casks" });
@@ -174,29 +192,39 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
 
       // Fetch search results with progress tracking
       // Always track progress - the UI decides whether to show it based on hasCacheFiles
-      const result = await brewSearch(query, limit, abortable.current?.signal, (progress) => {
-        try {
-          if (abortable.current?.signal.aborted) return;
+      const result = await brewSearch(
+        query,
+        limit,
+        abortable.current?.signal,
+        (progress) => {
+          try {
+            if (abortable.current?.signal.aborted) return;
 
-          // Always update ref (no re-render cost)
-          downloadProgressRef.current = progress;
+            // Always update ref (no re-render cost)
+            downloadProgressRef.current = progress;
 
-          // Only trigger re-render on completion (not during concurrent downloads)
-          if (progress.phase === "complete") {
-            setDownloadProgress(progress);
+            // Only trigger re-render on completion (not during concurrent downloads)
+            if (progress.phase === "complete") {
+              setDownloadProgress(progress);
+            }
+          } catch (error) {
+            // Prevent callback errors from breaking the search
+            searchLogger.error("Progress callback error", {
+              error: error instanceof Error ? error.message : String(error),
+            });
           }
-        } catch (error) {
-          // Prevent callback errors from breaking the search
-          searchLogger.error("Progress callback error", {
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      });
+        },
+        useRanks ? ranks : undefined,
+      );
 
       // brewSearch reports phase: "complete" with final totals via onProgress
       return result;
     },
-    [searchText],
+    // The ranks VERSION is part of the cache key, not merely whether ranks
+    // exist: turning the sort on, its data arriving, and its data being
+    // REPLACED all have to re-run the search. The Maps themselves are closed
+    // over — they are not serializable into a cache key.
+    [searchText, ranks == undefined ? 0 : ranksVersion || 1],
     {
       abortable,
       keepPreviousData: true,
@@ -235,6 +263,10 @@ export function useBrewSearch(options: UseBrewSearchOptions): UseBrewSearchResul
                   // chunked cache from scratch rather than reusing entries
                   // that point at the chunk files we just deleted.
                   invalidateChunkedCacheMemory();
+                  // clearCache() removed the analytics files too: drop the
+                  // parsed copy, then re-run the load so it downloads again.
+                  invalidatePopularityRanks();
+                  onCacheCleared?.();
                   await mutate();
                 },
               }

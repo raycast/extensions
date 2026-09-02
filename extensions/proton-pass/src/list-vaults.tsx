@@ -1,10 +1,11 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Color, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { listVaults, listItems, checkAuth, loginWithBrowser } from "./lib/pass-cli";
 import { Vault, Item, PassCliError, VaultRole, PROTON_PASS_CLI_DOCS } from "./lib/types";
 import { getItemIcon } from "./lib/utils";
 import { getCachedVaults, setCachedVaults, getCachedItemsForVault, setCachedItemsForVault } from "./lib/cache";
 import { openTerminalForLogin } from "./lib/terminal";
+import { platformShortcut } from "./lib/shortcuts";
 
 function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgroundRefreshEnabled: boolean }) {
   const [items, setItems] = useState<Item[]>([]);
@@ -68,20 +69,20 @@ function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgro
                 <Action.CopyToClipboard
                   title="Copy Title"
                   content={item.title}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 {item.username && (
                   <Action.CopyToClipboard
                     title="Copy Username"
                     content={item.username}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                    shortcut={platformShortcut(["cmd", "shift"], "u")}
                   />
                 )}
                 {item.email && (
                   <Action.CopyToClipboard
                     title="Copy Email"
                     content={item.email}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    shortcut={platformShortcut(["cmd", "shift"], "e")}
                   />
                 )}
               </ActionPanel>
@@ -218,16 +219,22 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.Lock}
           title="Not Logged In"
-          description="Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
+          description={
+            process.platform === "darwin"
+              ? "Use browser login (default pass-cli flow). Terminal login remains available as a fallback."
+              : "Use browser login to authenticate with Proton Pass."
+          }
           actions={
             <ActionPanel>
               <Action title="Login with Browser" icon={Icon.Globe} onAction={handleBrowserLogin} />
-              <Action title="Open Terminal Login (Fallback)" icon={Icon.Terminal} onAction={openTerminalForLogin} />
+              {process.platform === "darwin" && (
+                <Action title="Open Terminal Login (Fallback)" icon={Icon.Terminal} onAction={openTerminalForLogin} />
+              )}
               <Action.OpenInBrowser
                 title="View CLI Documentation"
                 url={PROTON_PASS_CLI_DOCS}
                 icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={platformShortcut(["cmd"], "d")}
               />
             </ActionPanel>
           }
@@ -321,16 +328,20 @@ export default function Command() {
             icon={Icon.Folder}
             title={vault.name}
             accessories={[
-              { text: `${vault.itemCount} ${vault.itemCount === 1 ? "item" : "items"}` },
-              {
-                tag: {
-                  value: vault.role,
-                  color: getRoleColor(vault.role),
-                },
-                icon: getRoleIcon(vault.role),
-                tooltip: `Role: ${vault.role}`,
-              },
-            ]}
+              vault.itemCount === undefined
+                ? undefined
+                : { text: `${vault.itemCount} ${vault.itemCount === 1 ? "item" : "items"}` },
+              vault.role === undefined
+                ? undefined
+                : {
+                    tag: {
+                      value: vault.role,
+                      color: getRoleColor(vault.role),
+                    },
+                    icon: getRoleIcon(vault.role),
+                    tooltip: `Role: ${vault.role}`,
+                  },
+            ].filter((accessory) => accessory !== undefined)}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -341,12 +352,12 @@ export default function Command() {
                 <Action.CopyToClipboard
                   title="Copy Vault Name"
                   content={vault.name}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action.CopyToClipboard
                   title="Copy Share ID"
                   content={vault.shareId}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                  shortcut={platformShortcut(["cmd", "shift"], "i")}
                 />
               </ActionPanel>
             }

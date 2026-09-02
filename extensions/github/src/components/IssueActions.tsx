@@ -20,10 +20,10 @@ import {
   IssueFieldsFragment,
   UserFieldsFragment,
 } from "../generated/graphql";
+import { RevalidateList } from "../helpers";
 import { getErrorMessage } from "../helpers/errors";
 import { ISSUE_SORT_TYPES_TO_QUERIES } from "../helpers/issue";
 import { getGitHubUser } from "../helpers/users";
-import { useMyIssues } from "../hooks/useMyIssues";
 import { useViewer } from "../hooks/useViewer";
 
 import { SortAction, SortActionProps } from "./SortAction";
@@ -33,7 +33,7 @@ type Issue = IssueFieldsFragment | IssueDetailFieldsFragment;
 type IssueActionsProps = {
   issue: Issue;
   viewer?: UserFieldsFragment;
-  mutateList?: MutatePromise<IssueFieldsFragment[] | undefined> | ReturnType<typeof useMyIssues>["mutate"];
+  mutateList?: RevalidateList;
   mutateDetail?: MutatePromise<Issue>;
   children?: React.ReactNode;
 };
@@ -179,8 +179,13 @@ export default function IssueActions({
     try {
       await showToast({ style: Toast.Style.Animated, title: `Creating branch for issue #${issue.number}` });
 
+      const oid = issue.repository.defaultBranchRef?.target?.oid;
+      if (!oid) {
+        throw new Error("Repository default branch commit SHA is unavailable");
+      }
+
       const res = await github.createLinkedBranch({
-        input: { issueId: issue.id, oid: issue.repository.defaultBranchRef?.target?.oid },
+        input: { issueId: issue.id, oid },
       });
       const branchName = res.createLinkedBranch?.linkedBranch?.ref?.name;
       await mutate();

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dovetail",
   "title": "Dovetail",
-  "description": "Search for data in your Dovetail workspace from wherever you are.",
+  "description": "Search, browse, and create content across your Dovetail workspace.",
   "icon": "dovetail_icon.png",
   "author": "barlow",
   "categories": [
@@ -12,15 +12,33 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "search-workspace",
+      "title": "Search Workspace",
+      "description": "Search across all content in your workspace — docs, data, projects, highlights, tags and more.",
+      "mode": "view"
+    },
+    {
       "name": "search-data",
       "title": "Search Data",
       "description": "Search for data across your workspace.",
       "mode": "view"
     },
     {
-      "name": "search-insights",
-      "title": "Search Insights",
-      "description": "Search for insights across your workspace.",
+      "name": "search-docs",
+      "title": "Search Docs",
+      "description": "Search for docs across your workspace.",
+      "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "description": "Search for projects in your workspace.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-folders",
+      "title": "Browse Folders",
+      "description": "Browse your workspace's folders and drill into their contents.",
       "mode": "view"
     },
     {
@@ -28,8 +46,34 @@
       "title": "Search Contacts",
       "description": "Search for contacts in your workspace.",
       "mode": "view"
+    },
+    {
+      "name": "create-data-entry",
+      "title": "Create Data Entry",
+      "description": "Add a new data entry to a project in your workspace.",
+      "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-workspace",
+      "title": "Search Workspace",
+      "description": "Search across all content in the Dovetail workspace by full-text query."
+    },
+    {
+      "name": "get-content",
+      "title": "Get Doc or Data Content",
+      "description": "Fetch the full markdown content of a Dovetail doc or data entry by id."
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Generate an AI summary from a set of highlights, data, docs, or tags."
+    }
+  ],
+  "ai": {
+    "instructions": "When searching or referencing Dovetail content, prefer the search-workspace tool over guessing ids. Use get-content to read the full body of a specific doc or data entry before answering questions about its content. Always cite the Dovetail url of any item you reference."
+  },
   "preferences": [
     {
       "name": "dovetailApiToken",
@@ -53,10 +97,17 @@
     "@types/node": "20.8.10",
     "@types/node-fetch": "^2.6.12",
     "@types/qs": "^6.9.18",
-    "@types/react": "18.3.3",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
+    "react": "19.0.0",
     "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^9.0.9"
+    }
   },
   "scripts": {
     "build": "ray build",
@@ -65,5 +116,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

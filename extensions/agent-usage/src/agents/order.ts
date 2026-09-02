@@ -1,6 +1,7 @@
 import type { AgentId } from "./types.ts";
 
 export const DEFAULT_AGENT_ORDER = [
+  "aihubmix",
   "amp",
   "antigravity",
   "claude",
@@ -14,6 +15,7 @@ export const DEFAULT_AGENT_ORDER = [
   "grok",
   "kimi",
   "minimax",
+  "minimaxcn",
   "opencode-go",
   "synthetic",
   "zai",
@@ -45,4 +47,8 @@ export function getInitialSelectedRowId(
   }
 
   return rows[0]?.rowId;
+}
+
+export function getRequestedSelectedRowId(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
 }

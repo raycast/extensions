@@ -52,7 +52,7 @@ function changelogAlternate(item: StoreItem) {
 export default function Command() {
   // Seed from the synchronous Cache so the first render already has real data.
   const [items, setItems] = useState<StoreItem[]>(() => getStoredItemsSync());
-  const [isLoading, setIsLoading] = useState(() => getStoredItemsSync().length === 0);
+  const [isLoading, setIsLoading] = useState(() => items.length === 0);
   const [lastSeen, setLastSeenState] = useState<number>(() => getLastSeen());
 
   async function scan() {
