@@ -59,10 +59,13 @@
     },
     {
       "name": "outdated",
-      "title": "Show Outdated",
+      "title": "Show Upgrades",
       "subtitle": "Brew",
-      "description": "Show outdated brew formulae & casks",
-      "mode": "view"
+      "description": "Review available upgrades, choose which to apply, and run it",
+      "mode": "view",
+      "keywords": [
+        "outdated"
+      ]
     },
     {
       "name": "upgrade",
@@ -231,7 +234,8 @@
     "eslint": "^10.0.1",
     "prettier": "^3.8.1",
     "react": "^19.2.4",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -240,7 +244,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "check:analytics": "esbuild src/utils/brew/analyticsParse.check.ts --bundle --platform=node --outfile=node_modules/.cache/analytics-check.js --log-level=warning && node node_modules/.cache/analytics-check.js"
+    "check:analytics": "esbuild src/utils/brew/analyticsParse.check.ts --bundle --platform=node --outfile=node_modules/.cache/analytics-check.js --log-level=warning && node node_modules/.cache/analytics-check.js",
+    "test": "vitest run"
   },
   "platforms": [
     "macOS"
