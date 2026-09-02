@@ -6,7 +6,7 @@
 
 ## [Copy Value] - {PR_MERGE_DATE}
 
-- New Copy Value action on Ask answers: when a question is answered straight from an extracted field (an SSN, a policy number), copy the bare value in one keystroke.
+- New Copy Value action on Ask answers: when a question is answered straight from an extracted field (an SSN, a policy number), copy the bare value without the surrounding answer text.
 - Fixed stray blank lines in Ask answers.
 - Ask now shows the retrieval summary when no direct answer is found, instead of an empty view.
 
