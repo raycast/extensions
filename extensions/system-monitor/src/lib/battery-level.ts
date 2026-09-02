@@ -26,3 +26,13 @@ export function formatBatteryLevelValue(batteryLevel: string | undefined, mode: 
 
   return mode === "free" ? percent.toString() : (100 - percent).toString();
 }
+
+/** The charge percentage as the user asked to see it: remaining charge, or how much has been used. */
+export function batteryDisplayPercent(batteryLevel: string | undefined, mode: BatteryDisplayMode): number | null {
+  const percent = parseBatteryLevelPercent(batteryLevel);
+  if (percent === null) {
+    return null;
+  }
+
+  return mode === "free" ? percent : 100 - percent;
+}

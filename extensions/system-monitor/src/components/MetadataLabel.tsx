@@ -1,13 +1,13 @@
 import { Color, List } from "@raycast/api";
 
-import { getSeverity, severityColor } from "../Temperature/TemperatureUtils";
+import { temperatureColor } from "../Temperature/TemperatureUtils";
 
 type MetadataText = string | { value: string; color?: Color };
 
 /** How the percentage is labeled in the UI — used to derive resource pressure. */
 export type PercentDisplayMode = "usage" | "free";
 
-const WARNING_VALUES = new Set(["unknown", "inactive", "replace soon", "service battery"]);
+const WARNING_VALUES = new Set(["unknown", "inactive", "replace soon", "service battery", "urgent"]);
 const SUCCESS_VALUES = new Set(["active", "verified", "normal", "yes"]);
 const MUTED_VALUES = new Set([
   "not connected",
@@ -21,7 +21,7 @@ const MUTED_VALUES = new Set([
   "—",
   "no",
 ]);
-const CRITICAL_VALUES = new Set(["critical", "urgent", "replace now", "failing"]);
+const CRITICAL_VALUES = new Set(["critical", "replace now", "failing"]);
 
 function isNotApplicableValue(value: string): boolean {
   const lower = value.toLowerCase();
@@ -53,7 +53,12 @@ export function colorForPressurePercent(pressure: number): Color {
   return Color.Green;
 }
 
-function colorForValue(trimmed: string): Color | null {
+/**
+ * Health color for a status word (`Normal`, `Warning`, `Urgent`, `Critical`, `Verified`, `N/A`, …)
+ * or a lone temperature (`45 °C`); null when the value carries no health meaning.
+ */
+export function colorForStatusValue(value: string): Color | null {
+  const trimmed = value.trim();
   const lower = trimmed.toLowerCase();
 
   if (isNotApplicableValue(trimmed)) {
@@ -82,7 +87,7 @@ function colorForValue(trimmed: string): Color | null {
 
   const temperatureMatch = trimmed.match(/^(-?\d+)\s*°C$/);
   if (temperatureMatch) {
-    return severityColor(getSeverity(Number(temperatureMatch[1])));
+    return temperatureColor(Number(temperatureMatch[1]));
   }
 
   return null;
@@ -94,7 +99,7 @@ function metadataText(value: string | undefined | null): MetadataText {
   }
 
   const trimmed = value.trim();
-  const color = colorForValue(trimmed);
+  const color = colorForStatusValue(trimmed);
 
   if (color) {
     return { value: trimmed, color };
