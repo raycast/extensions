@@ -12,6 +12,13 @@ export type BackupReport = {
 	running: boolean;
 	last_backup: { date: string; hours_ago: number };
 	exclusions: string[];
+	/**
+	 * The hourly snapshots Time Machine keeps on the internal disk when the
+	 * backup drive is not attached. They are backups — a screen that counts
+	 * only the external destination told a reader with two dozen of them that
+	 * this Mac had never been backed up.
+	 */
+	local_snapshots: { available: boolean; count: number };
 };
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
@@ -19,6 +26,7 @@ const str = (v: unknown) => (typeof v === "string" ? v : "");
 export function parseBackup(stdout: string): BackupReport {
 	const r = expectObject(stdout, "backup");
 	const d = (r.destination ?? {}) as Record<string, unknown>;
+	const snap = (r.local_snapshots ?? {}) as Record<string, unknown>;
 	const l = (r.last_backup ?? {}) as Record<string, unknown>;
 	return {
 		destination: {
@@ -33,6 +41,10 @@ export function parseBackup(stdout: string): BackupReport {
 			// -1 means there has never been one, which is not the same as zero
 			// hours ago.
 			hours_ago: typeof l.hours_ago === "number" ? l.hours_ago : -1,
+		},
+		local_snapshots: {
+			available: snap.available === true,
+			count: typeof snap.count === "number" ? snap.count : 0,
 		},
 		exclusions: Array.isArray(r.exclusions)
 			? r.exclusions.filter((e): e is string => typeof e === "string")

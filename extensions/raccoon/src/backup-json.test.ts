@@ -50,3 +50,31 @@ test("the age is said the way a person says it", () => {
 test("output that is not JSON says so", () => {
 	assert.throws(() => parseBackup("-- Time Machine"), /did not print JSON/);
 });
+
+test("local snapshots are read: a Mac with 24 of them has been backed up", () => {
+	// The screen said "This Mac has never been backed up" while two dozen
+	// hourly Time Machine snapshots sat on the disk. They are not an external
+	// destination, but they are backups, and "never" was the wrong word.
+	const doc = JSON.stringify({
+		destination: { configured: false },
+		phase: "BackupNotRunning",
+		last_backup: { date: "", hours_ago: -1 },
+		local_snapshots: { available: true, count: 24 },
+		exclusions: [],
+	});
+	const r = parseBackup(doc);
+	assert.equal(r.local_snapshots.count, 24);
+	assert.equal(r.local_snapshots.available, true);
+});
+
+test("an rcc too old to report snapshots reads as not checked, not as none", () => {
+	const old = JSON.stringify({
+		destination: { configured: false },
+		phase: "BackupNotRunning",
+		last_backup: { date: "", hours_ago: -1 },
+		exclusions: [],
+	});
+	const r = parseBackup(old);
+	assert.equal(r.local_snapshots.available, false);
+	assert.equal(r.local_snapshots.count, 0);
+});

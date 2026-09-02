@@ -18,7 +18,10 @@ const TINT: Record<BackupHealth, Color> = {
 };
 
 const HEADLINE: Record<BackupHealth, string> = {
-	never: "This Mac has never been backed up",
+	// "never" is about the external destination, and it was the whole headline
+	// on a Mac holding two dozen hourly local snapshots — which are backups,
+	// and are why a disk does not empty. The row below tells the other half.
+	never: "No backup to an external disk",
 	fresh: "Backed up",
 	late: "Backup is a few days old",
 	overdue: "Backup is more than a week old",
@@ -73,6 +76,18 @@ function Rows({ b, actions }: { b: BackupReport; actions: React.ReactNode }) {
 					actions={row}
 				/>
 			</List.Section>
+
+			{b.local_snapshots.available && b.local_snapshots.count > 0 ? (
+				<List.Item
+					icon={{ source: Icon.Clock, tintColor: Color.Green }}
+					title={`${b.local_snapshots.count} local snapshots`}
+					subtitle="Hourly copies Time Machine keeps on this disk when the backup drive is away"
+					accessories={[
+						{ tag: { value: "on this Mac", color: Color.Green } },
+					]}
+					actions={row}
+				/>
+			) : null}
 
 			<List.Section title="Destination">
 				<List.Item
