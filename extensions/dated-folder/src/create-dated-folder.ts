@@ -20,8 +20,10 @@ async function openTerminalMac(target: string, app?: Application): Promise<strin
     return app.name;
   }
   // Follow the system default terminal; if the registered app is no longer installed, use Terminal.app.
-  const bundleId = await defaultTerminalBundleId();
-  const installed = (await getApplications()).find((candidate) => candidate.bundleId === bundleId);
+  // LaunchServices stores handler bundle ids lowercased (com.google.chrome for com.google.Chrome),
+  // so the comparison must ignore case or apps like Warp (dev.warp.Warp-Stable) are never matched.
+  const bundleId = (await defaultTerminalBundleId()).toLowerCase();
+  const installed = (await getApplications()).find((candidate) => candidate.bundleId?.toLowerCase() === bundleId);
   await open(target, installed ?? FALLBACK_TERMINAL_BUNDLE);
   return installed?.name ?? "Terminal";
 }
