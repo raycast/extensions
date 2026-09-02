@@ -1,6 +1,6 @@
 # Clipfile Changelog
 
-## [Renamed to Clipfile] - {PR_MERGE_DATE}
+## [Renamed to Clipfile] - 2026-09-02
 
 - Renamed to Clipfile, matching the browser extension and iOS app, with the new icon
 
