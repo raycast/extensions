@@ -1,6 +1,6 @@
 # RunPool Changelog
 
-## [Fix a resize that could act on the wrong count] - {PR_MERGE_DATE}
+## [Fix a resize that could act on the wrong count] - 2026-09-02
 
 - Record every size a resize confirmation was shown, so two questions open at once cannot swap starting counts and turn approved growth into a shrink
 - Refuse the change when those questions disagree about the pool's size, or when a shrink cannot be tied to a confirmation at all
