@@ -3,10 +3,6 @@ import { readdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { normalize, resolve, sep } from "node:path";
 
-type Preferences = {
-  folders: string;
-};
-
 export type FolderInspection =
   | {
       path: string;

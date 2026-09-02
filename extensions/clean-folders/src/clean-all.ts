@@ -1,26 +1,12 @@
-import { Alert, LaunchProps, confirmAlert, showHUD } from "@raycast/api";
-import { execFile } from "node:child_process";
+import { Alert, LaunchProps, confirmAlert, showHUD, trash } from "@raycast/api";
 import { join } from "node:path";
-import { promisify } from "node:util";
 import { getConfiguredFolders, getLaunchFolders, inspectFolder } from "./folders";
 
 type LaunchContext = {
   folders?: string[];
 };
 
-const execFileAsync = promisify(execFile);
-const trashBatchSize = 500;
-
 function getFailureMessage(error: unknown): string {
-  if (error && typeof error === "object" && "stderr" in error) {
-    const stderr = (error as { stderr?: string }).stderr;
-    const firstLine = stderr?.split(/\r?\n/).find(Boolean);
-
-    if (firstLine) {
-      return firstLine;
-    }
-  }
-
   return error instanceof Error ? error.message : "Unable to move items to Trash";
 }
 
@@ -55,9 +41,7 @@ export default async function Command(props: LaunchProps<{ launchContext: Launch
       return;
     }
 
-    for (let index = 0; index < itemPaths.length; index += trashBatchSize) {
-      await execFileAsync("/usr/bin/trash", itemPaths.slice(index, index + trashBatchSize), { encoding: "utf8" });
-    }
+    await trash(itemPaths);
 
     await showHUD(`🗑️ Moved ${itemPaths.length} items to Trash`);
   } catch (error) {
