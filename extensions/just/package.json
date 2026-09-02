@@ -61,7 +61,6 @@
       "name": "browse-justfiles",
       "title": "Browse Justfiles",
       "description": "Find recipes across your justfiles",
-      "subtitle": "Find recipes from justfiles",
       "arguments": [
         {
           "name": "folder",
@@ -91,5 +90,12 @@
   ],
   "categories": [
     "Developer Tools"
+  ],
+  "keywords": [
+    "just",
+    "justfile",
+    "makefile",
+    "recipes",
+    "task runner"
   ]
 }

@@ -29,7 +29,7 @@ The headless recipe runner runs a recipe silently and shows the result in a HUD 
 **Tip:** Use Raycast Quicklinks to bind a specific folder + recipe to a hotkey. Create a Quicklink with a deep link and assign it a global shortcut (e.g. `🌐 j`) to invoke a recipe instantly.
 
 ```txt
-raycast://extensions/alastair_scheuermann/just/run-recipe?arguments=%7B%22folder%22%3A%22project%22%2C%22recipe%22%3A%22pre-commit%22%7D
+raycast://extensions/alastairsounds/just/run-recipe?arguments=%7B%22folder%22%3A%22project%22%2C%22recipe%22%3A%22pre-commit%22%7D
 ```
 
 > [!NOTE]

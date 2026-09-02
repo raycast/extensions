@@ -113,6 +113,20 @@ const EXEC_ENV = {
   PATH: `/opt/homebrew/bin:/usr/local/bin:${process.env.PATH ?? ""}`,
 };
 
+export function ensureJustInstalled(): void {
+  try {
+    execFileSync("just", ["--version"], {
+      encoding: "utf8",
+      env: EXEC_ENV,
+      stdio: "ignore",
+    });
+  } catch {
+    throw new Error(
+      "just is not installed. Install it with `brew install just`.",
+    );
+  }
+}
+
 // json dump keys recipes by a BTreeMap (always alphabetical), so scrape the
 // plain `just --dump` output for declaration order instead.
 function getDeclarationOrder(justfilePath: string): string[] {

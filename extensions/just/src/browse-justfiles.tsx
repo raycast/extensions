@@ -7,7 +7,6 @@ import {
   Form,
   Icon,
   List,
-  LocalStorage,
   confirmAlert,
   getPreferenceValues,
   Keyboard,
@@ -16,22 +15,30 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import React, { useState, useEffect } from "react";
+import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
+import React, { useState, useEffect, useRef } from "react";
 import { execFile } from "node:child_process";
 import {
   getUserShell,
-  getAllJustfileFolders,
   getKnownJustfileFolders,
   restoreJustfileFoldersPreference,
   updateJustfileFolders,
-  findJustfiles,
-  parseRecipes,
   buildRecipeCmd,
   loadRecipesFromFolders,
   isPathLikeFolder,
   expandPath,
+  ensureJustInstalled,
+  getAllJustfileFolders,
   type JustRecipe,
 } from "./just-utils";
+
+async function loadBrowseData(justfileFoldersPref: string) {
+  ensureJustInstalled();
+  const paths = await getAllJustfileFolders(justfileFoldersPref);
+  const parseErrors: string[] = [];
+  const recipes = loadRecipesFromFolders(paths, (jf) => parseErrors.push(jf));
+  return { paths, recipes, parseErrors };
+}
 
 function buildDetailMarkdown(recipe: JustRecipe): string {
   const parts: string[] = [];
@@ -83,23 +90,29 @@ function RecipeOutput({
   recipe: JustRecipe;
   args: string[];
 }) {
-  const [markdown, setMarkdown] = useState("");
-  const [rawOutput, setRawOutput] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const cmd = buildRecipeCmd(recipe, args);
-    execFile(getUserShell(), ["-l", "-i", "-c", cmd], {}, (error, stdout) => {
-      if (error) {
-        setMarkdown(`**Error**\n~~~~\n${error.message}\n~~~~`);
-        setRawOutput(error.message);
-      } else {
-        setMarkdown(`~~~~\n${stdout}\n~~~~`);
-        setRawOutput(stdout);
-      }
-      setIsLoading(false);
-    });
-  }, []);
+  const cmd = buildRecipeCmd(recipe, args);
+  const { isLoading, data, error } = usePromise(
+    (command: string) =>
+      new Promise<string>((resolve, reject) => {
+        execFile(
+          getUserShell(),
+          ["-l", "-i", "-c", command],
+          {},
+          (err, stdout) => {
+            if (err) reject(err);
+            else resolve(stdout);
+          },
+        );
+      }),
+    [cmd],
+    { onError: () => undefined },
+  );
+  const rawOutput = error ? error.message : (data ?? "");
+  const markdown = error
+    ? `**Error**\n~~~~\n${rawOutput}\n~~~~`
+    : data !== undefined
+      ? `~~~~\n${data}\n~~~~`
+      : "";
 
   return (
     <Detail
@@ -108,7 +121,7 @@ function RecipeOutput({
       navigationTitle={`${recipe.folderName}: ${recipe.name}`}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Response" content={rawOutput} />
+          <Action.CopyToClipboard title="Copy Output" content={rawOutput} />
         </ActionPanel>
       }
     />
@@ -165,6 +178,7 @@ function RecipeParamForm({
     <Action.SubmitForm
       key="run"
       title="Run Recipe"
+      icon={Icon.Play}
       onSubmit={(values) => {
         const typed = values as Record<string, string>;
         const missing = findMissingRequiredParams(recipe, typed);
@@ -181,6 +195,7 @@ function RecipeParamForm({
     <Action.SubmitForm
       key="copy"
       title="Copy Command"
+      icon={Icon.Clipboard}
       shortcut={Keyboard.Shortcut.Common.Copy}
       onSubmit={(values) => {
         const typed = values as Record<string, string>;
@@ -221,7 +236,7 @@ function RecipeParamForm({
                 ? "Space-separated values (required)"
                 : p.defaultValue !== null
                   ? `Default: ${p.defaultValue}`
-                  : ""
+                  : "Required"
           }
           error={errors[p.name]}
           onChange={() => {
@@ -249,7 +264,7 @@ function ManageFoldersForm({
   const [knownPaths, setKnownPaths] = useState<string[]>(paths);
   useEffect(() => {
     getKnownJustfileFolders(justfileFoldersPref).then(setKnownPaths);
-  }, []);
+  }, [justfileFoldersPref]);
   return (
     <Form
       navigationTitle="Manage Folders"
@@ -257,6 +272,7 @@ function ManageFoldersForm({
         <ActionPanel>
           <Action.SubmitForm
             title="Save Folders"
+            icon={Icon.Check}
             onSubmit={(values) => {
               const kept = (values.folders as string[] | undefined) ?? [];
               const added = (values.newFolders as string[] | undefined) ?? [];
@@ -306,76 +322,78 @@ export default function Command(props: {
     silent: silentArgument,
   } = props.arguments;
   const { justfileFolders = "" } = getPreferenceValues<Preferences>();
-  const [recipes, setRecipes] = useState<JustRecipe[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading, error, revalidate } = useCachedPromise(
+    loadBrowseData,
+    [justfileFolders],
+    {
+      onData: (result) => {
+        if (
+          result.paths.length > 0 &&
+          result.recipes.length === 0 &&
+          result.parseErrors.length === 0
+        ) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "No justfiles found",
+            message: result.paths.join(", "),
+          });
+        }
+        for (const justfile of result.parseErrors) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Could not parse",
+            message: justfile,
+          });
+        }
+      },
+      failureToastOptions: { title: "just not found" },
+    },
+  );
+  const recipes = data?.recipes ?? [];
+  const effectivePaths = data?.paths ?? [];
   const [searchText, setSearchText] = useState(
     [folderArgument, recipeArgument].filter(Boolean).join(" "),
   );
-  const [selectedProject, setSelectedProject] = useState("");
-  useEffect(() => {
-    LocalStorage.getItem<string>("selectedProject").then((v) => {
-      if (v) setSelectedProject(v);
-    });
-  }, []);
-  // null = not yet loaded; gates the initial scan so it only runs once the
-  // effective (preference + picked, minus excluded) path list is known.
-  const [effectivePaths, setEffectivePaths] = useState<string[] | null>(null);
-  useEffect(() => {
-    getAllJustfileFolders(justfileFolders).then(setEffectivePaths);
-  }, []);
+  const [selectedProject, setSelectedProject] = useCachedState(
+    "selectedProject",
+    "",
+  );
   async function saveJustfileFolders(newPaths: string[]) {
-    const updated = await updateJustfileFolders(justfileFolders, newPaths);
-    setEffectivePaths(updated);
+    await updateJustfileFolders(justfileFolders, newPaths);
+    await revalidate();
   }
   async function restorePreferenceFolders() {
-    const updated = await restoreJustfileFoldersPreference(justfileFolders);
-    setEffectivePaths(updated);
+    await restoreJustfileFoldersPreference(justfileFolders);
+    await revalidate();
   }
   const [isShowingDetail, setIsShowingDetail] = useState(true);
-  const [sortAlphabetically, setSortAlphabetically] = useState(false);
-  useEffect(() => {
-    LocalStorage.getItem<string>("sortAlphabetically").then((v) => {
-      if (v) setSortAlphabetically(v === "true");
-    });
-  }, []);
-  const [silentOverrides, setSilentOverrides] = useState<
+  const [sortAlphabetically, setSortAlphabetically] = useCachedState(
+    "sortAlphabetically",
+    false,
+  );
+  const [silentOverrides, setSilentOverrides] = useCachedState<
     Record<string, boolean>
-  >({});
+  >("silentOverrides", {});
   const navigation = useNavigation();
-
-  useEffect(() => {
-    LocalStorage.allItems().then((items) => {
-      const overrides: Record<string, boolean> = {};
-      for (const [key, value] of Object.entries(items)) {
-        if (key.startsWith("silent_override:")) {
-          overrides[key.slice("silent_override:".length)] = value === "on";
-        }
-      }
-      setSilentOverrides(overrides);
-    });
-  }, []);
+  const didAutoRun = useRef(false);
 
   function isEffectivelySilent(recipe: JustRecipe): boolean {
     const key = `${recipe.filePath}:${recipe.name}`;
     return key in silentOverrides ? silentOverrides[key] : recipe.isSilent;
   }
 
-  async function toggleSilent(recipe: JustRecipe) {
+  function toggleSilent(recipe: JustRecipe) {
     const current = isEffectivelySilent(recipe);
     const next = !current;
     const key = `${recipe.filePath}:${recipe.name}`;
-    const storageKey = `silent_override:${key}`;
-    if (next === recipe.isSilent) {
-      await LocalStorage.removeItem(storageKey);
-      setSilentOverrides((prev) => {
+    setSilentOverrides((prev) => {
+      if (next === recipe.isSilent) {
         const updated = { ...prev };
         delete updated[key];
         return updated;
-      });
-    } else {
-      await LocalStorage.setItem(storageKey, next ? "on" : "off");
-      setSilentOverrides((prev) => ({ ...prev, [key]: next }));
-    }
+      }
+      return { ...prev, [key]: next };
+    });
   }
 
   async function runRecipe(
@@ -426,70 +444,44 @@ export default function Command(props: {
   }
 
   useEffect(() => {
-    if (effectivePaths === null) return;
-
-    const justfiles = findJustfiles(effectivePaths);
-
-    if (effectivePaths.length > 0 && justfiles.length === 0) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "No justfiles found",
-        message: effectivePaths.join(", "),
-      });
+    if (!data || didAutoRun.current || !folderArgument || !recipeArgument) {
+      return;
     }
-
-    const allRecipes: JustRecipe[] = [];
-    for (const justfile of justfiles) {
-      try {
-        allRecipes.push(...parseRecipes(justfile));
-      } catch {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Could not parse",
-          message: justfile,
-        });
+    didAutoRun.current = true;
+    const pathLike = isPathLikeFolder(folderArgument);
+    const candidates = pathLike
+      ? loadRecipesFromFolders([expandPath(folderArgument)])
+      : data.recipes;
+    const tokens = (
+      pathLike ? [recipeArgument] : [folderArgument, recipeArgument]
+    )
+      .join(" ")
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
+    const matches = candidates.filter((r) =>
+      tokens.every(
+        (token) =>
+          r.name.toLowerCase().includes(token) ||
+          r.folderName.toLowerCase().includes(token),
+      ),
+    );
+    if (matches.length === 1) {
+      const recipe = matches[0];
+      if (hasUnfulfilledRequired(recipe)) {
+        navigation.push(
+          <RecipeParamForm
+            recipe={recipe}
+            onSubmit={(args) => {
+              void runRecipe(recipe, args, silentArgument ? true : undefined);
+            }}
+          />,
+        );
+      } else {
+        void runRecipe(recipe, [], silentArgument ? true : undefined);
       }
     }
-
-    setRecipes(allRecipes);
-    setIsLoading(false);
-
-    if (folderArgument && recipeArgument) {
-      const pathLike = isPathLikeFolder(folderArgument);
-      const candidates = pathLike
-        ? loadRecipesFromFolders([expandPath(folderArgument)])
-        : allRecipes;
-      const tokens = (
-        pathLike ? [recipeArgument] : [folderArgument, recipeArgument]
-      )
-        .join(" ")
-        .toLowerCase()
-        .split(/\s+/)
-        .filter(Boolean);
-      const matches = candidates.filter((r) =>
-        tokens.every(
-          (token) =>
-            r.name.toLowerCase().includes(token) ||
-            r.folderName.toLowerCase().includes(token),
-        ),
-      );
-      if (matches.length === 1) {
-        const recipe = matches[0];
-        if (hasUnfulfilledRequired(recipe)) {
-          navigation.push(
-            <RecipeParamForm
-              recipe={recipe}
-              onSubmit={(args) => {
-                void runRecipe(recipe, args, silentArgument ? true : undefined);
-              }}
-            />,
-          );
-        } else {
-          void runRecipe(recipe, [], silentArgument ? true : undefined);
-        }
-      }
-    }
-  }, [effectivePaths]);
+  }, [data]);
 
   const projects = Array.from(new Set(recipes.map((r) => r.folderName))).sort();
 
@@ -524,11 +516,13 @@ export default function Command(props: {
           <ActionPanel>
             <Action
               title="Run Recipe"
+              icon={Icon.Play}
               onAction={() => handleRunAction(recipe)}
             />
             {hasUnfulfilledRequired(recipe) ? (
               <Action.Push
                 title="Copy Command"
+                icon={Icon.Clipboard}
                 shortcut={Keyboard.Shortcut.Common.Copy}
                 target={
                   <RecipeParamForm
@@ -557,6 +551,7 @@ export default function Command(props: {
             />
             <Action
               title={isShowingDetail ? "Hide Detail" : "Show Detail"}
+              icon={isShowingDetail ? Icon.EyeDisabled : Icon.Eye}
               onAction={() => setIsShowingDetail((v) => !v)}
               shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
             />
@@ -564,13 +559,8 @@ export default function Command(props: {
               title={
                 sortAlphabetically ? "Sort Naturally" : "Sort Alphabetically"
               }
-              onAction={() =>
-                setSortAlphabetically((v) => {
-                  const next = !v;
-                  LocalStorage.setItem("sortAlphabetically", String(next));
-                  return next;
-                })
-              }
+              icon={Icon.ArrowUp}
+              onAction={() => setSortAlphabetically((v) => !v)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
             />
             <Action.Push
@@ -578,7 +568,7 @@ export default function Command(props: {
               icon={Icon.Folder}
               target={
                 <ManageFoldersForm
-                  paths={effectivePaths ?? []}
+                  paths={effectivePaths}
                   justfileFoldersPref={justfileFolders}
                   onSave={saveJustfileFolders}
                   onRestorePreference={restorePreferenceFolders}
@@ -618,7 +608,7 @@ export default function Command(props: {
     listContent = filteredRecipes.map(renderRecipeItem);
   }
 
-  const showEmptyState = !isLoading && recipes.length === 0;
+  const showEmptyState = !isLoading && (Boolean(error) || recipes.length === 0);
 
   return (
     <List
@@ -632,10 +622,7 @@ export default function Command(props: {
         <List.Dropdown
           tooltip="Filter by project"
           value={selectedProject}
-          onChange={(v) => {
-            setSelectedProject(v);
-            LocalStorage.setItem("selectedProject", v);
-          }}
+          onChange={setSelectedProject}
         >
           <List.Dropdown.Item title="All Projects" value="" />
           {projects.map((name) => (
@@ -646,24 +633,30 @@ export default function Command(props: {
     >
       {showEmptyState ? (
         <List.EmptyView
-          title="No justfiles found"
-          description="Use Manage Folders, or set the Justfile Folders preference."
-          icon={Icon.Folder}
+          title={error ? "just not found" : "No justfiles found"}
+          description={
+            error
+              ? error.message
+              : "Use Manage Folders, or set the Justfile Folders preference."
+          }
+          icon={error ? Icon.Warning : Icon.Folder}
           actions={
-            <ActionPanel>
-              <Action.Push
-                title="Manage Folders"
-                icon={Icon.Folder}
-                target={
-                  <ManageFoldersForm
-                    paths={effectivePaths ?? []}
-                    justfileFoldersPref={justfileFolders}
-                    onSave={saveJustfileFolders}
-                    onRestorePreference={restorePreferenceFolders}
-                  />
-                }
-              />
-            </ActionPanel>
+            error ? undefined : (
+              <ActionPanel>
+                <Action.Push
+                  title="Manage Folders"
+                  icon={Icon.Folder}
+                  target={
+                    <ManageFoldersForm
+                      paths={effectivePaths}
+                      justfileFoldersPref={justfileFolders}
+                      onSave={saveJustfileFolders}
+                      onRestorePreference={restorePreferenceFolders}
+                    />
+                  }
+                />
+              </ActionPanel>
+            )
           }
         />
       ) : (

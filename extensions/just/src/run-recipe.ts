@@ -9,6 +9,7 @@ import {
   buildRecipeCmd,
   isPathLikeFolder,
   expandPath,
+  ensureJustInstalled,
 } from "./just-utils";
 
 export default async function Command(props: {
@@ -18,6 +19,13 @@ export default async function Command(props: {
 
   if (!folderArgument || !recipeArgument) {
     await showHUD("Provide folder and recipe arguments");
+    return;
+  }
+
+  try {
+    ensureJustInstalled();
+  } catch (e) {
+    await showHUD(e instanceof Error ? e.message : String(e));
     return;
   }
 
