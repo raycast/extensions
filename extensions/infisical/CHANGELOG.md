@@ -1,5 +1,9 @@
 # Infisical Changelog
 
+## [Keep copied secrets out of Clipboard History] - {PR_MERGE_DATE}
+
+- Copied secret values are now marked as concealed, so they are not recorded in Raycast's Clipboard History
+
 ## [Windows Support + Copy/Save as .env] - 2025-12-25
 
 - Added Windows support
