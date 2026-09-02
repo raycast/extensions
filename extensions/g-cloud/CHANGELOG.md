@@ -2,7 +2,7 @@
 
 ## [Fix Empty Project Dropdown on Accounts with Many Projects] - {PR_MERGE_DATE}
 
-- Fixed the project dropdown showing "No projects found" when `gcloud projects list` output exceeds 1 MB (roughly 3,500+ projects). `getProjects` relied on Node's default `execFile` `maxBuffer`, so the process was killed with `ERR_CHILD_PROCESS_STDIO_MAXBUFFER` and the rejection was swallowed into an empty list. It now passes an explicit `maxBuffer`, matching `executeCommand`.
+- Fixed the project dropdown showing "No projects found" when `gcloud projects list` output exceeds 1 MB (roughly 3,500+ projects). `getProjects` relied on Node's default `execFile` `maxBuffer`, so the process was killed with `ERR_CHILD_PROCESS_STDIO_MAXBUFFER` and the rejection was swallowed into an empty list. It now passes an explicit 64 MiB `maxBuffer`.
 
 ## [1.1.0] - 2026-04-16
 
