@@ -12,6 +12,14 @@ export interface DockTile {
 
 export class AccessibilityError extends Error {}
 
+/** Whether an AppleScript failure means Raycast lacks the Accessibility grant. */
+export function isAccessibilityError(error: unknown): boolean {
+  if (error instanceof AccessibilityError) return true;
+  const message = error instanceof Error ? error.message : String(error);
+  // -25211 / -1719 / "not allowed assistive access" all indicate a missing Accessibility grant.
+  return /assistive|accessibility|-25211|-1719|not allowed/i.test(message);
+}
+
 const SEP = "|~|"; // never appears in app names
 
 // Reads every application tile in the Dock's list and its AXStatusLabel (the badge).
@@ -53,10 +61,8 @@ export async function readDockTiles(): Promise<DockTile[]> {
   try {
     raw = await runAppleScript(SCRIPT, { timeout: 8000 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    // -25211 / -1719 / "not allowed assistive access" all indicate a missing Accessibility grant.
-    if (/assistive|accessibility|-25211|-1719|not allowed/i.test(message)) {
-      throw new AccessibilityError(message);
+    if (isAccessibilityError(error)) {
+      throw new AccessibilityError(error instanceof Error ? error.message : String(error));
     }
     throw error;
   }

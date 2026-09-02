@@ -8,3 +8,4 @@
 - Options to show the total count and to hide the item while no app has a badge
 - Background refresh every 10 seconds
 - Only application tiles are counted, so the Handoff tile's device identifier is never misread as a badge count
+- Show a HUD message when an app can't be opened from the dropdown, instead of failing silently

@@ -9,9 +9,17 @@ import {
   getPreferenceValues,
   open,
   openCommandPreferences,
+  showHUD,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { AccessibilityError, DockTile, clickDockTile, readDockTiles, readSystemDarkMode } from "./dock";
+import {
+  AccessibilityError,
+  DockTile,
+  clickDockTile,
+  isAccessibilityError,
+  readDockTiles,
+  readSystemDarkMode,
+} from "./dock";
 
 interface DockApp {
   tile: DockTile;
@@ -124,12 +132,24 @@ export default function Command() {
   );
 }
 
-/** Open the matched app; if that fails (unmatched or unusual bundle), click its Dock tile instead. */
+/**
+ * Open the matched app; if that fails (unmatched or unusual bundle), click its Dock tile instead.
+ * Menu bar commands have no Raycast window for a toast, so a failed fallback is reported via HUD.
+ */
 async function openDockApp({ tile, application }: DockApp): Promise<void> {
   try {
     await open(application?.path ?? `/Applications/${tile.name}.app`);
+    return;
   } catch {
+    // Fall through to the Dock tile.
+  }
+  try {
     await clickDockTile(tile.name);
+  } catch (error) {
+    const reason = isAccessibilityError(error)
+      ? "Raycast needs Accessibility permission"
+      : "its Dock tile could not be clicked";
+    await showHUD(`Couldn't open ${tile.name}: ${reason}`);
   }
 }
 
