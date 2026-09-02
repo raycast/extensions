@@ -23,7 +23,7 @@ import { duplicateScript, makeExecutable } from "./script-operations";
 import { discoverScriptCommands } from "./discover-script-commands";
 import { resolveIcon } from "./resolve-icon";
 import { languageForScript } from "./script-language";
-import type { DiscoveryResult, ScriptCommand } from "./types";
+import type { DiscoveryResult, ScriptArgument, ScriptCommand } from "./types";
 
 /**
  * Declared here rather than using the generated `Preferences` global: this view is shared by two
@@ -40,6 +40,16 @@ type SearchPreferences = {
 const BODY_PREVIEW_LINES = 300;
 
 const RAYCAST_DIRECTORY_SETTINGS = "Raycast Settings → Extensions → Script Commands → Add Directories";
+
+/**
+ * A dropdown's choices are the whole of what it tells you — a placeholder like "Surface" names the
+ * axis but not what you can pick along it. Text and password arguments have no choices, so they fall
+ * back to the placeholder they prompt with.
+ */
+const argumentTags = (argument: ScriptArgument, index: number) =>
+  argument.data?.length
+    ? argument.data.map((choice) => choice.title)
+    : [argument.placeholder ?? argument.type ?? `argument${index + 1}`];
 
 const sourceBlock = (command: ScriptCommand) => {
   const lines = command.body.split("\n");
@@ -108,12 +118,11 @@ const ScriptMetadata = ({ command }: { command: ScriptCommand }) => {
 
       {command.argumentsList.length > 0 ? (
         <List.Item.Detail.Metadata.TagList title="Prompts For">
-          {command.argumentsList.map((argument, index) => (
-            <List.Item.Detail.Metadata.TagList.Item
-              key={index}
-              text={argument.placeholder ?? argument.type ?? `argument${index + 1}`}
-            />
-          ))}
+          {command.argumentsList.flatMap((argument, index) =>
+            argumentTags(argument, index).map((text) => (
+              <List.Item.Detail.Metadata.TagList.Item key={`${index}-${text}`} text={text} />
+            )),
+          )}
         </List.Item.Detail.Metadata.TagList>
       ) : null}
 

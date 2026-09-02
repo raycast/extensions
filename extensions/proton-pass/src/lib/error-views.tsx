@@ -39,6 +39,14 @@ interface ErrorConfig {
 
 function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string): ErrorConfig {
   switch (errorType) {
+    case "unsupported_platform":
+      return {
+        icon: Icon.XMarkCircle,
+        title: "Unsupported Platform",
+        description: `Proton Pass supports macOS arm64/x64 and Windows x64. Current platform: ${process.platform}-${process.arch}.`,
+        showDocsLink: false,
+        showRetry: false,
+      };
     case "not_installed":
       return {
         icon: Icon.XMarkCircle,

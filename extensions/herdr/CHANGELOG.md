@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix Stuck Menu Bar Toast] - 2026-08-29
+
+- Report menu bar failures with a HUD instead of a toast held open across the action. Clicking an item unloads the menu bar command, which left the toast on screen with nothing to resolve it.
+
 ## [Bug Fixes] - 2026-08-18
 
 - Show a readable name for unnamed agents instead of the status-line glyph.

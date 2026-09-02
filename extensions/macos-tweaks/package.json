@@ -48,8 +48,31 @@
       "mode": "menu-bar"
     }
   ],
+  "tools": [
+    {
+      "name": "search-tweaks",
+      "title": "Search Tweaks",
+      "description": "Find the macOS settings this extension can change, with their current and default values. Use this first to get the id of a tweak before applying or resetting it."
+    },
+    {
+      "name": "get-modified-tweaks",
+      "title": "Get Modified Tweaks",
+      "description": "List every macOS setting that currently differs from its system default."
+    },
+    {
+      "name": "apply-tweak",
+      "title": "Apply Tweak",
+      "description": "Change a macOS setting to a given value. Asks the user to confirm the change first."
+    },
+    {
+      "name": "reset-tweak",
+      "title": "Reset Tweak",
+      "description": "Put a macOS setting back to its system default. Asks the user to confirm first."
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^2.1.0"
+    "@raycast/api": "^2.1.0",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

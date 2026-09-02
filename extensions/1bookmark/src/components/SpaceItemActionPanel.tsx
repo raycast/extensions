@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Clipboard, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { SpaceMembersView } from "../views/SpaceMembersView";
 import { NewSpaceForm } from "../views/NewSpaceForm";
 import { SpaceTagsView } from "../views/SpaceTagsView";
 import { SpaceDetailView } from "../views/SpaceDetailView";
-import { trpc } from "../utils/trpc.util";
+import { trpc, type RouterOutputs } from "../utils/trpc.util";
 import { SpaceAuthForm } from "../views/SpaceAuthForm";
+import { API_URL } from "../utils/constants.util";
 
 export const SpaceItemActionPanel = (props: {
   refetch: () => void;
@@ -12,10 +13,24 @@ export const SpaceItemActionPanel = (props: {
   enabled: boolean;
   authenticated: boolean;
   toggleSpace: (spaceId: string) => void;
+  myRole: RouterOutputs["user"]["me"]["associatedSpaces"][number]["myRole"];
   // TODO: Use Prisma Type here
   type: "PERSONAL" | "TEAM";
 }) => {
-  const { spaceId, refetch, type, enabled, authenticated, toggleSpace } = props;
+  const { spaceId, refetch, type, enabled, authenticated, toggleSpace, myRole } = props;
+
+  // Team space invitation link. Share it with teammates so they can join the space after logging in.
+  const invitationLink = new URL(`/invite/${spaceId}`, API_URL).toString();
+  const spaceWebUrl = new URL(`/spaces/${spaceId}`, API_URL).toString();
+
+  const handleCopyInvitationLink = async () => {
+    await Clipboard.copy(invitationLink);
+    showToast({
+      style: Toast.Style.Success,
+      title: "Invitation link copied",
+      message: invitationLink,
+    });
+  };
 
   const leave = trpc.space.leave.useMutation();
   const handleLeave = async () => {
@@ -54,6 +69,9 @@ export const SpaceItemActionPanel = (props: {
           target={<SpaceAuthForm spaceId={spaceId} needPop />}
           onPop={refetch}
         />
+        {myRole === "OWNER" && (
+          <Action.OpenInBrowser title="Manage Space on the Web" url={spaceWebUrl} icon={Icon.Globe} />
+        )}
         <Action
           title={"Leave Space"}
           shortcut={Keyboard.Shortcut.Common.Remove}
@@ -72,6 +90,9 @@ export const SpaceItemActionPanel = (props: {
         target={<SpaceDetailView spaceId={spaceId} />}
         onPop={refetch}
       />
+      {myRole === "OWNER" && (
+        <Action.OpenInBrowser title="Manage Space on the Web" url={spaceWebUrl} icon={Icon.Globe} />
+      )}
       <Action.Push
         title="Tags"
         icon={Icon.Tag}
@@ -95,6 +116,12 @@ export const SpaceItemActionPanel = (props: {
             target={<SpaceMembersView spaceId={spaceId} />}
           />
           <Action
+            title={"Copy Invitation Link"}
+            icon={Icon.Link}
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            onAction={handleCopyInvitationLink}
+          />
+          <Action
             title={"Leave Space"}
             shortcut={Keyboard.Shortcut.Common.Remove}
             icon={Icon.Xmark}
@@ -103,7 +130,6 @@ export const SpaceItemActionPanel = (props: {
         </>
       )}
       {/* TODO: Additional features planned */}
-      {/* <Action title={"Copy Invitation Link"} onAction={() => console.log("Copy invitation link")} /> */}
       {/* <Action title={"Delete Space"} onAction={() => console.log("Delete Space")} /> */}
       <ActionPanel.Section>
         <Action.Push

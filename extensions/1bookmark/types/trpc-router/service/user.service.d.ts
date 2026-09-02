@@ -4,6 +4,7 @@ export declare class UserService {
         associatedSpaces: {
             myTags: string[];
             myRole: import(".prisma/client").$Enums.TeamRole;
+            myStatus: import(".prisma/client").$Enums.TeamMemberStatus;
             myImage: string | null;
             myNickname: string | null;
             myAuthEmail: string | null;
@@ -24,32 +25,32 @@ export declare class UserService {
             id: string;
             createdAt: Date;
             name: string;
-            updatedAt: Date;
             image: string | null;
             slackTeamId: string | null;
+            updatedAt: Date;
         }[];
         createdAt: Date;
         name: string;
+        image: string | null;
         email: string;
         updatedAt: Date;
-        image: string | null;
     }>;
     listBySpaceId(spaceId: string): Promise<({
         user: {
             createdAt: Date;
             name: string;
+            image: string | null;
             email: string;
             updatedAt: Date;
-            image: string | null;
         };
     } & {
         status: import(".prisma/client").$Enums.TeamMemberStatus;
         spaceId: string;
         createdAt: Date;
-        email: string;
-        tags: string[];
-        updatedAt: Date;
         image: string | null;
+        email: string;
+        updatedAt: Date;
+        tags: string[];
         nickname: string | null;
         authEmail: string | null;
         role: import(".prisma/client").$Enums.TeamRole;

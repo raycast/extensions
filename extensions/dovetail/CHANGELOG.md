@@ -1,5 +1,9 @@
 # Dovetail Changelog
 
+## [Fix store build] - 2026-08-31
+
+- Pin `react`/`@types/react` to the exact versions `@raycast/api` nests internally, fixing a TypeScript type-checking failure in the automated store build caused by two incompatible copies of React's type definitions
+
 ## [Workspace search, projects, and AI tools] - 2026-08-28
 
 - Migrate the insights search command to the `/v1/docs` endpoint (renamed to "Search Docs"); `/v1/insights` is deprecated

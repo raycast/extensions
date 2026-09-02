@@ -3,9 +3,10 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useEffect, useMemo } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
-import { getBoundedPreferenceNumber } from "./components/Menu";
+import { getSearchPageSize } from "./components/Menu";
 import RepositoryListItem from "./components/RepositoryListItem";
-import { ExtendedRepositoryFieldsFragment, OrderDirection, RepositoryOrderField } from "./generated/graphql";
+import { OrderDirection, ExtendedRepositoryFieldsFragment, RepositoryOrderField } from "./generated/graphql";
+import { compactFragmentNodes, uniqueById } from "./helpers";
 import { MY_REPO_DEFAULT_SORT_QUERY, MY_REPO_SORT_TYPES_TO_QUERIES, useHistory } from "./helpers/repository";
 import { withGitHubClient } from "./helpers/withGithubClient";
 
@@ -22,39 +23,51 @@ function MyLatestRepositories() {
     data,
     isLoading,
     mutate: mutateList,
+    pagination,
   } = useCachedPromise(
-    async (sort: string) => {
-      const orderByField = sort.split(":")[0].toUpperCase() as RepositoryOrderField;
-      const orderByDirection = sort.split(":")[1].toUpperCase() as OrderDirection;
-      const result = await github.myLatestRepositories({
-        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 25 }),
-        orderByField,
-        orderByDirection,
-      });
+    (sort: string) =>
+      async ({ cursor }) => {
+        const orderByField = sort.split(":")[0].toUpperCase() as RepositoryOrderField;
+        const orderByDirection = sort.split(":")[1].toUpperCase() as OrderDirection;
+        const result = await github.myLatestRepositories({
+          numberOfItems: getSearchPageSize(),
+          after: cursor,
+          orderByField,
+          orderByDirection,
+        });
 
-      return result.viewer.repositories.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment);
-    },
+        return {
+          data: compactFragmentNodes<ExtendedRepositoryFieldsFragment>(result.viewer.repositories.nodes),
+          hasMore: result.viewer.repositories.pageInfo.hasNextPage,
+          cursor: result.viewer.repositories.pageInfo.endCursor ?? undefined,
+        };
+      },
     [sortQuery],
     { keepPreviousData: true },
   );
 
+  const repositories = useMemo(() => uniqueById(data ?? []), [data]);
+  const repositoryIds = useMemo(() => new Set(repositories.map((repository) => repository.id)), [repositories]);
+
   useEffect(
-    () => history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r))),
-    [data],
+    () => history.forEach((repository) => repositories.find((r) => r.id === repository.id && visitRepository(r))),
+    [repositories],
   );
 
   const validHistory = useMemo(
-    () => history.filter((repository) => data?.find((r) => r.id === repository.id)),
-    [data, history],
+    () => history.filter((repository) => repositoryIds.has(repository.id)),
+    [history, repositoryIds],
   );
 
+  const historyIds = useMemo(() => new Set(validHistory.map((repository) => repository.id)), [validHistory]);
+
   const myLatestRepositories = useMemo(
-    () => data?.filter((repository) => !validHistory.find((r) => r.id === repository.id)),
-    [data, validHistory],
+    () => repositories.filter((repository) => !historyIds.has(repository.id)),
+    [historyIds, repositories],
   );
 
   return (
-    <List isLoading={isLoading} throttle>
+    <List isLoading={isLoading} throttle pagination={pagination}>
       <List.Section title="Visited Repositories" subtitle={validHistory ? String(validHistory.length) : undefined}>
         {validHistory.map((repository) => (
           <RepositoryListItem
@@ -73,7 +86,7 @@ function MyLatestRepositories() {
         ))}
       </List.Section>
 
-      {myLatestRepositories ? (
+      {data ? (
         <List.Section title="My Latest Repositories" subtitle={`${myLatestRepositories.length}`}>
           {myLatestRepositories.map((repository) => {
             return (

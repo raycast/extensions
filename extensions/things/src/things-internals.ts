@@ -14,6 +14,19 @@
  *   - Sentinel values: special packed-date constants used as placeholders
  *   - Recurring deadline resolution: recurring tasks store a relative offset in a
  *     plist XML blob (rt1_recurrenceRule) instead of an absolute deadline
+ *   - Scheduled items: an item scheduled for a future date has start=2, and keeps
+ *     it once that date arrives and Things rolls it into Today. List membership
+ *     therefore follows startDate, not start.
+ *   - Repeating instances: Things materializes instance rows ahead of their date
+ *     (start=2 with a future startDate). While an open instance exists, the
+ *     master's rt1_nextInstanceStartDate is NULL and the date of the following
+ *     occurrence is computed internally, unavailable even via AppleScript/JXA.
+ *
+ * Watch item: TMTask carries `repeater`, `repeaterMigrationDate`, and
+ * `experimental` columns that Things leaves unpopulated. The schema assertion
+ * below checks that columns exist, so it cannot catch recurrence moving onto
+ * them while the rt1_* columns stay in place. If repeating data goes missing
+ * while assertions still pass, check whether `repeater` is populated.
  */
 
 import type { ResolvedDates } from './types';

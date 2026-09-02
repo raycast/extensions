@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "plaud",
+  "title": "Plaud",
+  "description": "Browse your Plaud AI recorder notes and copy links to them",
+  "icon": "icon.png",
+  "author": "patricklenz",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-recordings",
+      "title": "Search Recordings",
+      "description": "Browse and search your Plaud recordings",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^16.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,json,md}": "prettier --write",
+    "*.{ts,tsx}": "eslint --fix"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
