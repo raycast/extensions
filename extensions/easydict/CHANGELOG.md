@@ -22,13 +22,14 @@
 #### Chinese Stroke Order
 
 - Use **Show Stroke Order** from live or saved translation results to view stroke-order diagrams for Chinese characters.
+  - Thanks to [@MagEk1511](https://github.com/MagEk1511)
 
 ## [v3.1.0] - 2026-08-12
 
 ### ✨ New Features
 
 - Added favorite words: save translation results and browse/manage them in the favorites list.
-  - Thanks for @[TTsWorld](https://github.com/TTsWorld)
+  - Thanks to [@TTsWorld](https://github.com/TTsWorld)
 
 ### 🔧 Maintenance
 

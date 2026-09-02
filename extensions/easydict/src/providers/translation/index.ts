@@ -1,14 +1,25 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
+import { hasImportedLegacyAIProvider } from "@/ai-providers/legacy";
+import { getAIProviderQueryMode, resolveAIProviderIcon } from "@/ai-providers/runtime";
+import type { AIProviderProfile } from "@/ai-providers/types";
 import { myPreferences } from "@/consts";
 import { getLangCode } from "@/core/language/utils";
+import {
+  assignGlobalServiceOrder,
+  getAIProviderKey,
+  getBuiltinProviderCandidates,
+  getBuiltinProviderKey,
+  getProviderOrder,
+} from "@/core/query/providerOrder";
 import { getLingueeWebDictionaryURL } from "@/providers/dictionary/linguee/parse";
 import { getYoudaoWebDictionaryURL } from "@/providers/dictionary/youdao/utils";
 import { checkIsWord } from "@/providers/shared/utils";
 import { TranslationType } from "@/types/api";
 import type { BooleanPreferenceKey } from "@/types/preferences";
-import type { QueryInput } from "@/types/query";
+import type { QueryInput, RuntimeServiceConfig } from "@/types/query";
 
+import { createAITranslationProvider } from "./ai";
 import { AppleTranslateProvider } from "./apple";
 import { BaiduTranslateProvider } from "./baidu";
 import type { BaseTranslateProvider } from "./base";
@@ -22,16 +33,26 @@ import { TencentTranslateProvider } from "./tencent";
 import { VolcanoTranslateProvider } from "./volcano";
 import { YoudaoTranslateProvider } from "./youdao";
 
-export interface TranslationServiceConfig {
+export interface TranslationServiceConfig extends RuntimeServiceConfig {
   type: TranslationType;
-  preference: BooleanPreferenceKey;
-  provider: new () => BaseTranslateProvider;
+  /** Built-in provider's Extension Settings checkbox; dynamic AI providers omit this metadata. */
+  enabledInPreferences?: boolean;
+  enabled: (queryWordInfo: QueryInput) => boolean;
+  createProvider: () => BaseTranslateProvider;
   getWebUrl?: (queryWordInfo: QueryInput) => string | undefined;
-  isEnabled?: (queryWordInfo: QueryInput) => boolean;
 }
 
 /** Static registry — provider classes, instantiated by the engine. */
-export const translationServices: TranslationServiceConfig[] = [
+const staticTranslationServices: Array<
+  Omit<
+    TranslationServiceConfig,
+    "id" | "label" | "providerKey" | "enabledInPreferences" | "order" | "enabled" | "createProvider"
+  > & {
+    preference: BooleanPreferenceKey;
+    provider: new () => BaseTranslateProvider;
+    isEnabled?: (queryWordInfo: QueryInput) => boolean;
+  }
+> = [
   { type: TranslationType.Bing, preference: "enableBingTranslate", provider: BingTranslateProvider },
   {
     type: TranslationType.Baidu,
@@ -107,3 +128,73 @@ export const translationServices: TranslationServiceConfig[] = [
     provider: OpenAITranslateProvider,
   },
 ];
+
+const staticTranslationServicesWithOrder: TranslationServiceConfig[] = staticTranslationServices.map(
+  (service, order) => ({
+    id: `static:${service.type}`,
+    label: service.type,
+    providerKey: getBuiltinProviderKey("translation", service.type),
+    enabledInPreferences: myPreferences[service.preference],
+    order,
+    type: service.type,
+    enabled: service.isEnabled ?? (() => myPreferences[service.preference]),
+    createProvider: () => new service.provider(),
+    getWebUrl: service.getWebUrl,
+  }),
+);
+
+const categoryProviderOrder = getProviderOrder(
+  [],
+  undefined,
+  myPreferences.servicesOrder ? myPreferences.servicesOrder.split(",") : [],
+  getBuiltinProviderCandidates(staticTranslationServicesWithOrder),
+);
+export const translationServices = assignGlobalServiceOrder(staticTranslationServicesWithOrder, categoryProviderOrder);
+
+export const translationServicesBeforeAIProfilesLoad = translationServices.filter(
+  (service) => service.type !== TranslationType.OpenAI && service.type !== TranslationType.Gemini,
+);
+
+export function resolveTranslationServices(
+  profiles: AIProviderProfile[],
+  providerOrder?: string[],
+): TranslationServiceConfig[] {
+  const dynamicServices = profiles.map((profile): TranslationServiceConfig => {
+    const common = {
+      id: `profile:${profile.id}`,
+      label: profile.name,
+      providerKey: getAIProviderKey(profile),
+      order: profile.order,
+      type: TranslationType.OpenAI,
+      icon: resolveAIProviderIcon(profile),
+      enabled: (queryWordInfo: QueryInput) => getAIProviderQueryMode(profile, queryWordInfo) === "translation",
+    };
+
+    return {
+      ...common,
+      createProvider: () => createAITranslationProvider(profile),
+    };
+  });
+  const legacyServices = translationServices.filter((service) => {
+    // Keep the static legacy provider as a reversible fallback: this extension
+    // cannot write the imported profile back into Raycast preferences.
+    if (service.type === TranslationType.OpenAI) {
+      return !hasImportedLegacyAIProvider(profiles, "openai");
+    }
+    if (service.type === TranslationType.Gemini) {
+      return !hasImportedLegacyAIProvider(profiles, "gemini");
+    }
+    return true;
+  });
+  const servicesOrder = myPreferences.servicesOrder ? myPreferences.servicesOrder.split(",") : [];
+  const resolved = [...legacyServices, ...dynamicServices];
+  const resolvedProviderOrder =
+    providerOrder ??
+    getProviderOrder(
+      profiles,
+      undefined,
+      servicesOrder,
+      getBuiltinProviderCandidates(staticTranslationServicesWithOrder),
+    );
+  return assignGlobalServiceOrder(resolved, resolvedProviderOrder);
+}

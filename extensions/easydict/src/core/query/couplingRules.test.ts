@@ -18,6 +18,9 @@ function createTranslationResult(text = "translated"): TranslationQueryResult {
   };
 
   return {
+    serviceId: "static:deepl",
+    serviceLabel: TranslationType.DeepL,
+    serviceOrder: 0,
     type: TranslationType.DeepL,
     queryWordInfo,
     result: {},
@@ -44,6 +47,9 @@ function createLingueeResult(sectionCount = 1): DictionaryQueryResult {
   });
 
   return {
+    serviceId: "static:linguee",
+    serviceLabel: DictionaryType.Linguee,
+    serviceOrder: 0,
     type: DictionaryType.Linguee,
     queryWordInfo,
     result: {},

@@ -1,6 +1,6 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import type { FavoriteWord } from "@/types/favorite";
+import { type FavoriteWord, resolveFavoriteTranslations } from "@/types/favorite";
 
 /**
  * Render all favorites as tab-separated `word \t translation` lines for the
@@ -8,5 +8,5 @@ import type { FavoriteWord } from "@/types/favorite";
  * favorites without translations yield an empty right-hand column.
  */
 export function copyAllText(favorites: readonly FavoriteWord[]): string {
-  return favorites.map((f) => `${f.word}\t${f.translations?.join(", ") ?? ""}`).join("\n");
+  return favorites.map((f) => `${f.word}\t${resolveFavoriteTranslations(f)?.join(", ") ?? ""}`).join("\n");
 }
