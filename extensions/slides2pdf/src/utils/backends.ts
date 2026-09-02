@@ -52,9 +52,10 @@ const BACKEND_EXTS: Record<Exclude<BackendType, "builtin">, Set<string>> = {
   word: new Set([".docx", ".doc", ".odt", ".rtf"]),
   numbers: new Set([".numbers", ".xlsx", ".xls", ".csv"]),
   excel: new Set([".xlsx", ".xls", ".ods", ".csv"]),
+  // LibreOffice has no HEIC import filter; SVG opens in Draw, which no other engine can do.
   libreoffice: new Set(
-    [...PRESENTATION_EXTS, ...DOCUMENT_EXTS, ...SPREADSHEET_EXTS, ...IMAGE_EXTS].filter(
-      (e) => !APPLE_NATIVE_EXTS.has(e),
+    [...PRESENTATION_EXTS, ...DOCUMENT_EXTS, ...SPREADSHEET_EXTS, ...IMAGE_EXTS, ".svg"].filter(
+      (e) => !APPLE_NATIVE_EXTS.has(e) && e !== ".heic",
     ),
   ),
   sips: IMAGE_EXTS,
@@ -485,8 +486,17 @@ function moveFile(from: string, to: string): void {
 // creates there concurrently stays untouched), and a stale file can't pass the output check.
 // The staging name is random per run, so AppleScript's export-errors-on-existing-file rule
 // can't fire and the path can't be precomputed by anything else writing to the folder.
+// Thrown when the output name is taken. Not an engine failure: the caller must not retry the
+// file with the next engine, since every engine would run the whole conversion again and fail
+// the same way.
+export class OutputExistsError extends Error {
+  constructor(outputPath: string) {
+    super(`Output already exists: ${path.basename(outputPath)}`);
+  }
+}
+
 export async function convertFile(backend: Backend, src: string, outputPath: string): Promise<void> {
-  if (fs.existsSync(outputPath)) throw new Error(`Output already exists: ${path.basename(outputPath)}`);
+  if (fs.existsSync(outputPath)) throw new OutputExistsError(outputPath);
   const staging = `${outputPath}.converting-${crypto.randomBytes(6).toString("hex")}.pdf`;
   try {
     await runBackend(backend, src, staging);
@@ -515,9 +525,7 @@ async function publishFile(staging: string, outputPath: string): Promise<void> {
   try {
     await pipeline(source, fs.createWriteStream(outputPath, { flags: "wx" }));
   } catch (e) {
-    if ((e as NodeJS.ErrnoException).code === "EEXIST") {
-      throw new Error(`Output already exists: ${path.basename(outputPath)}`);
-    }
+    if ((e as NodeJS.ErrnoException).code === "EEXIST") throw new OutputExistsError(outputPath);
     // Any other failure comes after the exclusive create succeeded — remove the partial file.
     try {
       fs.rmSync(outputPath, { force: true });

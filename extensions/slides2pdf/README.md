@@ -10,7 +10,7 @@ Unlike converters built on cloud APIs, Slides2PDF never uploads your files anywh
 
 1. Select one or more files in Finder.
 2. Run **Convert to PDF**.
-3. Each PDF is written next to its source file. Existing files are never overwritten — if `report.pdf` already exists, the new file gets a suffix like `report (docx).pdf` or `report (2).pdf`.
+3. Each PDF is written next to its source file. Existing files are never overwritten — if `report.pdf` already exists, the new file gets a numbered suffix like `report (2).pdf`, then `report (3).pdf`, and so on.
 
 For every file, the extension picks the app that renders the format most faithfully (e.g. PowerPoint for `.pptx`, Keynote for `.key`, Word for `.docx`) and automatically falls back to the next capable engine if the first one fails.
 
@@ -34,13 +34,13 @@ Images convert out of the box via `sips`, which ships with macOS.
 
 ## Supported Formats
 
-| Category      | Extensions                                                         |
-| ------------- | ------------------------------------------------------------------ |
-| Presentations | `.pptx` `.ppt` `.pps` `.ppsx` `.key` `.odp`                        |
-| Documents     | `.docx` `.doc` `.pages` `.odt` `.rtf`                              |
-| Spreadsheets  | `.xlsx` `.xls` `.numbers` `.ods` `.csv`                            |
-| Images        | `.jpg` `.jpeg` `.png` `.gif` `.tiff` `.tif` `.bmp` `.heic` `.webp` |
-| Text & Code   | `.txt` `.json` `.md` `.xml` `.log` `.yaml` and any plain-text file |
+| Category      | Extensions                                                                              |
+| ------------- | --------------------------------------------------------------------------------------- |
+| Presentations | `.pptx` `.ppt` `.pps` `.ppsx` `.key` `.odp`                                             |
+| Documents     | `.docx` `.doc` `.pages` `.odt` `.rtf`                                                   |
+| Spreadsheets  | `.xlsx` `.xls` `.numbers` `.ods` `.csv`                                                 |
+| Images        | `.jpg` `.jpeg` `.png` `.gif` `.tiff` `.tif` `.bmp` `.heic` `.webp` `.svg` (LibreOffice) |
+| Text & Code   | `.txt` `.json` `.md` `.xml` `.log` `.yaml` and any plain-text file                      |
 
 iWork formats (`.key`, `.pages`, `.numbers`) require their own app — no other engine can open them. Text and code files are rendered by the built-in text renderer (monospaced, paginated) and need no installed apps.
 

@@ -1,7 +1,22 @@
-import { showToast, Toast, getSelectedFinderItems, open, getPreferenceValues, closeMainWindow } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  getSelectedFinderItems,
+  open,
+  getPreferenceValues,
+  closeMainWindow,
+  Clipboard,
+} from "@raycast/api";
 import fs from "fs";
 import path from "path";
-import { detectBackends, rankBackendsForFile, convertFile, fileCategory, FileCategory } from "./utils/backends";
+import {
+  detectBackends,
+  rankBackendsForFile,
+  convertFile,
+  fileCategory,
+  FileCategory,
+  OutputExistsError,
+} from "./utils/backends";
 import { isStopRequested } from "./utils/stop-signal";
 
 export default async function Command() {
@@ -35,10 +50,6 @@ export default async function Command() {
   const producedFiles: string[] = [];
   const errors: { base: string; message: string }[] = [];
   const skippedPdfs: string[] = [];
-  const targeted = new Set<string>();
-  // Never overwrite: a name is taken if another file in this batch targets it OR it
-  // already exists on disk — an existing report.pdf survives converting report.docx.
-  const taken = (p: string) => targeted.has(p) || fs.existsSync(p);
   // The Stop Conversion command asks this run to stop; it reaches this process through
   // LocalStorage, since Raycast gives every command its own. Only files that haven't started are
   // skipped — the running conversion is left to finish. The toast's close button is not a stop:
@@ -55,16 +66,13 @@ export default async function Command() {
       break;
     }
     const src = path.resolve(item.path);
-    // statSync throws on paths that vanished since selection — that must fail this
-    // file only, not abort the whole batch.
-    let isDirectory: boolean;
-    try {
-      isDirectory = fs.statSync(src).isDirectory();
-    } catch {
+    // A path that vanished since selection fails this file only, not the whole batch.
+    const stat = fs.statSync(src, { throwIfNoEntry: false });
+    if (!stat) {
       errors.push({ base: path.basename(src), message: "File not found — was it moved or deleted?" });
       continue;
     }
-    if (isDirectory) {
+    if (stat.isDirectory()) {
       errors.push({ base: path.basename(src), message: "Folders can't be converted" });
       continue;
     }
@@ -74,7 +82,6 @@ export default async function Command() {
 
     // Friendlier than the "no engine" error the capability layer would produce —
     // .pdf is also in BUILTIN_EXCLUDED_EXTS (backends.ts) so no engine ever claims it.
-    // Its name needs no reservation: it exists on disk, so `taken` below blocks it.
     if (ext.toLowerCase() === ".pdf") {
       skippedPdfs.push(base + ext);
       continue;
@@ -84,12 +91,11 @@ export default async function Command() {
     // Finder-hidden output. A name made only of dots leaves nothing to keep, so it gets a
     // neutral one rather than a hidden file — the collision handling below makes it unique.
     const outName = base.replace(/^[.\s]+/, "").trimEnd() || "converted";
+    // Never overwrite — an existing report.pdf survives converting report.docx. Finder-style
+    // suffixes: report.pdf, then report (2).pdf, report (3).pdf, … until free. Files are
+    // converted one at a time, so an earlier success in this batch is already on disk here.
     let outputPath = path.join(dir, `${outName}.pdf`);
-    // The extension tag only helps when there is one — ".", the extension of a name made of
-    // dots, would tag the file with an empty pair of brackets.
-    if (taken(outputPath) && ext.length > 1) outputPath = path.join(dir, `${outName} (${ext.slice(1)}).pdf`);
-    for (let n = 2; taken(outputPath); n++) outputPath = path.join(dir, `${outName} (${n}).pdf`);
-    targeted.add(outputPath);
+    for (let n = 2; fs.existsSync(outputPath); n++) outputPath = path.join(dir, `${outName} (${n}).pdf`);
 
     const backends = rankBackendsForFile(preferred[fileCategory(ext)], available, ext);
 
@@ -115,6 +121,8 @@ export default async function Command() {
         const message = error instanceof Error ? error.message : String(error);
         console.error(`[slides2pdf] ${backend.label} failed for "${base}":`, message);
         attemptErrors.push(`${backend.label}: ${message}`);
+        // Another run took the name meanwhile — no engine can change that.
+        if (error instanceof OutputExistsError) break;
       }
     }
 
@@ -134,6 +142,13 @@ export default async function Command() {
 
   const failed = errors.length > 0;
   toast.style = failed ? Toast.Style.Failure : Toast.Style.Success;
+  if (failed) {
+    // The toast has room for names only; the per-engine messages live in the clipboard.
+    toast.primaryAction = {
+      title: "Copy Error Details",
+      onAction: () => Clipboard.copy(errors.map((e) => `${e.base}: ${e.message}`).join("\n")),
+    };
+  }
   if (stopped) {
     toast.title = "Stopped";
     const done = producedFiles.length === 1 ? "1 file converted" : `${producedFiles.length} files converted`;
@@ -142,7 +157,7 @@ export default async function Command() {
     toast.title = `Failed: "${errors[0].base}"`;
     toast.message = errors[0].message;
   } else if (failed) {
-    toast.title = `${errors.length} file(s) failed`;
+    toast.title = errors.length === 1 ? "1 file failed" : `${errors.length} files failed`;
     toast.message = errors.map((e) => e.base).join(", ");
   } else if (producedFiles.length === 0) {
     toast.title = "Nothing to convert";
