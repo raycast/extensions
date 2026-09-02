@@ -35,7 +35,7 @@ export const Shortcut = {
   AlternateOpen: platformShortcut("enter", ["cmd", "shift"]),
   CopySecondary: platformShortcut(".", ["cmd", "shift"]),
   CopyTertiary: platformShortcut(",", ["cmd", "shift"]),
-  CreateQuickLink: platformShortcut("l", ["cmd"]),
+  CreateQuickLink: platformShortcut("s", ["cmd", "shift"]),
   OpenInBrowser: platformShortcut("b", ["cmd"]),
   OpenInTerminal: platformShortcut("o", ["cmd", "shift"]),
   RevealInFileManager: platformShortcut("f", ["cmd", "shift"]),

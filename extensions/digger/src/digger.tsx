@@ -1,26 +1,22 @@
-import { List, Clipboard, getPreferenceValues, getSelectedText, BrowserExtension } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { validateUrl, extractUrl } from "./utils/urlUtils";
-import { useFetchSite, LoadingProgress } from "./hooks/useFetchSite";
-import { Overview } from "./components/Overview";
-import { MetadataSemantics } from "./components/MetadataSemantics";
-import { Discoverability } from "./components/Discoverability";
-import { ResourcesAssets } from "./components/ResourcesAssets";
-import { HTTPHeaders } from "./components/HTTPHeaders";
-import { DNSCertificates } from "./components/DNSCertificates";
-import { WaybackMachine } from "./components/WaybackMachine";
+import { BrowserExtension, Clipboard, getPreferenceValues, getSelectedText, List } from "@raycast/api";
 import { DataFeedsAPI } from "./components/DataFeedsAPI";
+import { Discoverability } from "./components/Discoverability";
+import { DNSCertificates } from "./components/DNSCertificates";
 import { ErrorDisplay, PartialErrorBanner } from "./components/ErrorDisplay";
+import { HTTPHeaders } from "./components/HTTPHeaders";
+import { MetadataSemantics } from "./components/MetadataSemantics";
+import { Overview } from "./components/Overview";
+import { ResourcesAssets } from "./components/ResourcesAssets";
+import { WaybackMachine } from "./components/WaybackMachine";
+import { LoadingProgress, useFetchSite } from "./hooks/useFetchSite";
+import { extractUrl, validateUrl } from "./utils/urlUtils";
 
 export type { LoadingProgress };
 
-interface Arguments {
-  url?: string;
-}
+const preferences = getPreferenceValues<Preferences.Digger>();
 
-const preferences = getPreferenceValues();
-
-export default function Command(props: { arguments: Arguments }) {
+export default function Command(props: { arguments: Arguments.Digger }) {
   const { url: inputUrl } = props.arguments;
   const [url, setUrl] = useState<string | undefined>(inputUrl);
   const { data, isLoading, error, errorType, fetchErrors, fetchSite, refetch, certificateInfo, progress } =
@@ -88,17 +84,15 @@ export default function Command(props: { arguments: Arguments }) {
   // Check if we have partial data (some sections loaded successfully)
   const hasPartialData = !!(data && (data.overview || data.metadata || data.networking));
 
-  // Show full error state only if we have no partial data
+  // Show full error state only if we have no partial data.
+  //
+  // Deliberately a BARE List: no `isShowingDetail`. The two-pane layout exists to
+  // put a detail beside a selection, and an empty state has neither — keeping it
+  // reserved an empty half-window next to a centred message.
   if (error && !hasPartialData) {
     return (
-      <List isShowingDetail>
-        <ErrorDisplay
-          error={error}
-          errorType={errorType}
-          fetchErrors={fetchErrors}
-          onRetry={refetch}
-          hasPartialData={false}
-        />
+      <List>
+        <ErrorDisplay error={error} errorType={errorType} fetchErrors={fetchErrors} onRetry={refetch} url={url} />
       </List>
     );
   }

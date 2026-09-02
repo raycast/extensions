@@ -62,6 +62,9 @@ export type Tag = {
 export type Post = {
   text: string;
   media_ids?: string[];
+  quote_post_url?: string;
+  paid_partnership?: boolean;
+  made_with_ai?: boolean;
 };
 
 export type DraftPlatform = {
@@ -70,7 +73,14 @@ export type DraftPlatform = {
   settings?: Record<string, unknown> | null;
 };
 
-export type DraftCreatePlatforms = Partial<Record<PlatformKey, DraftPlatform | { enabled: false } | null>>;
+export type XArticlePlatform = {
+  content_markdown?: string;
+  cover_media_id?: string | null;
+};
+
+export type DraftCreatePlatforms = Partial<
+  Record<PlatformKey, DraftPlatform | { enabled: false } | null> & { x_article: XArticlePlatform | null }
+>;
 
 export type DraftCreateRequest = {
   platforms: DraftCreatePlatforms;
@@ -79,6 +89,7 @@ export type DraftCreateRequest = {
   tags?: string[];
   share?: boolean;
   publish_at?: string | null;
+  force_overwrite_comments?: boolean;
 };
 
 export type DraftUpdateRequest = {
@@ -88,6 +99,7 @@ export type DraftUpdateRequest = {
   tags?: string[] | null;
   share?: boolean | null;
   publish_at?: string | null;
+  force_overwrite_comments?: boolean;
 };
 
 export type DraftDetailPlatform = {
@@ -147,3 +159,11 @@ export type DraftListItem = {
   published_at?: string | null;
   scheduled_date?: string | null;
 };
+
+export type QueueRule = {
+  h: number;
+  m: number;
+  days: string[];
+};
+
+export type CommentThread = Record<string, unknown>;

@@ -2,7 +2,7 @@ import * as dns from "dns";
 import * as tls from "tls";
 import { promisify } from "util";
 import { DNSData } from "../types";
-import { TIMEOUTS, LIMITS } from "./config";
+import { LIMITS, TIMEOUTS } from "./config";
 
 const resolve4 = promisify(dns.resolve4);
 const resolve6 = promisify(dns.resolve6);

@@ -1,5 +1,9 @@
 # Network Diagnostics Changelog
 
+## [Update] - 2026-08-27
+
+- Fixed Wi-Fi info failing on macOS Tahoe, where the `airport` utility was removed; Wi-Fi details are now read via the CoreWLAN framework.
+
 ## [Update] - 2023-09-22
 
 - Added a new action inside local-network.tsx panel to open router IP address in browser (for accessing admin panel).

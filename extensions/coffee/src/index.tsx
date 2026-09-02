@@ -7,10 +7,20 @@ import {
   getPreferenceValues,
   launchCommand,
   showHUD,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { formatDuration, startCaffeinate, stopCaffeinate } from "./utils";
+import { formatDuration, startCaffeinate, stopCaffeinate, deviceName, getSchedule } from "./utils";
+import { maybeAutoCaffeinate } from "./status";
+import { get_caffeinate_state } from "rust:../rust";
+
+interface CaffeinateStatus {
+  running: boolean;
+  startTime: number | null;
+  durationSeconds: number | null;
+}
 
 function parseEtime(etime: string): number {
   const parts = etime.split(":").reverse();
@@ -46,6 +56,10 @@ const DURATION_PRESETS: { label: string; seconds: number }[] = [
 ];
 
 function useCaffeinateInfo(execute: boolean) {
+  if (process.platform === "win32") {
+    return useWindowsCaffeinateInfo(execute);
+  }
+
   const { isLoading, data, mutate } = useExec("ps -o etime,args= -p $(pgrep caffeinate) 2>/dev/null", [], {
     shell: true,
     execute,
@@ -74,6 +88,70 @@ function useCaffeinateInfo(execute: boolean) {
   };
 }
 
+type MutateOptions = { optimisticUpdate?: () => CaffeinateInfo };
+
+function useWindowsCaffeinateInfo(execute: boolean) {
+  const [isLoading, setIsLoading] = useState(execute);
+  const [data, setData] = useState<CaffeinateInfo>({ isRunning: false, totalSeconds: null, startTime: null });
+
+  const applyState = (info: CaffeinateStatus): CaffeinateInfo => ({
+    isRunning: info.running,
+    totalSeconds: info.durationSeconds,
+    startTime: info.startTime ? info.startTime * 1000 : null,
+  });
+
+  useEffect(() => {
+    if (!execute) return;
+    let disposed = false;
+
+    const refresh = async () => {
+      try {
+        const info = await get_caffeinate_state();
+        if (disposed) return;
+        setData(applyState(info));
+      } catch {
+        if (disposed) return;
+        setData({ isRunning: false, totalSeconds: null, startTime: null });
+      } finally {
+        if (!disposed) setIsLoading(false);
+      }
+    };
+
+    refresh();
+    const interval = setInterval(refresh, 5000);
+    return () => {
+      disposed = true;
+      clearInterval(interval);
+    };
+  }, [execute]);
+
+  const mutate = async (ctx?: Promise<unknown>, options?: MutateOptions) => {
+    const previous = data;
+    if (options?.optimisticUpdate) setData(options.optimisticUpdate());
+    let operationError: unknown;
+    if (ctx) {
+      try {
+        await ctx;
+      } catch (e) {
+        operationError = e;
+      }
+    }
+    if (operationError) {
+      setData(previous);
+      throw operationError;
+    }
+    try {
+      const info = await get_caffeinate_state();
+      setData(applyState(info));
+    } catch {
+      // The operation succeeded but the refresh failed; keep the optimistic
+      // value, which reflects the completed operation, until a later refresh.
+    }
+  };
+
+  return { isLoading, data, mutate };
+}
+
 export default function Command(props: LaunchProps) {
   const hasLaunchContext = props.launchContext?.caffeinated !== undefined;
 
@@ -91,6 +169,11 @@ export default function Command(props: LaunchProps) {
   useEffect(() => {
     setLocalCaffeinateStatus(null);
   }, [caffeinateStatus]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    void maybeAutoCaffeinate();
+  }, [isLoading]);
 
   useEffect(() => {
     if (!displayCaffeinateStatus || data.totalSeconds === null || data.startTime === null) return;
@@ -124,20 +207,57 @@ export default function Command(props: LaunchProps) {
   const handleStartFor = async (seconds: number | null, durationLabel: string) => {
     setLocalCaffeinateStatus(true);
     const additionalArgs = seconds === null ? undefined : `-t ${seconds}`;
+    const reason =
+      seconds === null
+        ? undefined
+        : { kind: "for" as const, endsAt: new Date(Date.now() + seconds * 1000).toISOString() };
     const hudMessage =
-      seconds === null ? `Caffeinating your Mac ${durationLabel}` : `Caffeinating your Mac for ${durationLabel}`;
-    await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs), {
-      optimisticUpdate: () => ({ isRunning: true, totalSeconds: seconds, startTime: Date.now() }),
-    });
+      seconds === null
+        ? `Caffeinating your ${deviceName()} ${durationLabel}`
+        : `Caffeinating your ${deviceName()} for ${durationLabel}`;
+    try {
+      await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs, reason), {
+        optimisticUpdate: () => ({ isRunning: true, totalSeconds: seconds, startTime: Date.now() }),
+      });
+    } catch {
+      setLocalCaffeinateStatus(null);
+    }
   };
 
   const handleDeactivate = async () => {
+    const schedule = await getSchedule();
+    const preferences = getPreferenceValues<Preferences.Index>();
+    if (schedule != undefined && schedule.IsRunning == true && !preferences.decaffeinatePausesSchedules) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Caffeination schedule running",
+        message: "Pause to decaffeinate",
+        primaryAction: {
+          title: "Open Schedules",
+          onAction: () => launchCommand({ name: "addSchedule", type: LaunchType.UserInitiated }),
+        },
+      });
+      return;
+    }
+    try {
+      await mutate(
+        stopCaffeinate({ menubar: true, status: true }, undefined, {
+          pauseRunningSchedule: schedule != undefined && schedule.IsRunning == true,
+        }),
+        { optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }) },
+      );
+    } catch {
+      setLocalCaffeinateStatus(null);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to decaffeinate",
+        message: "Caffeination may still be running",
+      });
+      return;
+    }
     setLocalCaffeinateStatus(false);
-    await mutate(stopCaffeinate({ menubar: true, status: true }), {
-      optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
-    });
     if (preferences.hidenWhenDecaffeinated) {
-      showHUD("Your Mac is now decaffeinated");
+      showHUD(`Your ${deviceName()} is now decaffeinated`);
     }
   };
 

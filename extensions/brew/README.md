@@ -2,6 +2,17 @@
 
 Search and manage your brew casks and formulae from [Raycast](https://raycast.com).
 
+## Commands
+
+- **Search** — search brew formulae & casks and install them
+- **Show Installed** — list installed formulae & casks, with pinned formulae in their own section
+- **Show Upgrades** (previously Show Outdated) — review outdated packages, choose which upgrade, and run it. The review opens with everything not pinned selected (exactly what a plain `brew upgrade` would do), so running immediately upgrades everything. A pin is a lock, matching brew's own behaviour: pinned formulae cannot be selected, and including one means unpinning it first — the primary action on a pinned row does both in one step. Casks are selectable exactly like formulae; cask pinning waits on Homebrew 6's `brew pin --cask` and ships in a follow-up.
+- **Upgrade** — upgrade everything outdated in one shot, no review step, with progress reported per package via the toast
+- **Manage Services** — start, stop & restart Homebrew services
+- **Services Menu Bar** — control Homebrew services from the menu bar
+- **Clean up** — clean files and packages from the cache that are older than 120 days
+- **Clear Cache** — clear the cached formulae, casks, and installed packages files
+
 ## Homebrew 5.0 Compatibility
 
 This extension is compatible with Homebrew 5.0 and later. Key changes in Homebrew 5.0:
@@ -20,6 +31,20 @@ This extension uses several optimizations to provide a fast experience:
 - **Two-Phase Loading**: Installed packages load quickly with basic info, then fetch full metadata in the background.
 - **Lazy Loading**: Package details are fetched on-demand when viewing, not upfront.
 - **Internal API Option**: When enabled, downloads are 96% smaller (~1 MB vs ~30 MB for formulae).
+
+## Install Statistics
+
+Selecting a package shows its install counts (30 / 90 / 365 days) and build errors, taken from the
+[formulae.brew.sh](https://formulae.brew.sh) analytics API. Only the selected package is fetched —
+about 5 KB per row you land on, and nothing at all for the rest of the list.
+
+**Sort by Popularity** (⇧⌘P in Search) is different: ranking every result requires Homebrew's bulk
+30-day rankings, about 2.6 MB for formulae and casks combined. That download happens the first time
+you enable the sort, is cached on disk, and is never fetched if you don't use the sort. While it is
+on, each row also shows its 30-day install count.
+
+Homebrew's analytics are anonymous and aggregate, and cover macOS installs; a package with no
+reported installs simply shows no statistics.
 
 ## Issue Tracker
 

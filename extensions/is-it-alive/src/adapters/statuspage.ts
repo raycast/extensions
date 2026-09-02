@@ -13,6 +13,10 @@ import {
   buildPageHistoryFromComponents,
   calcUptimePercent,
 } from "@/lib/uptime-chart";
+import {
+  componentUptimeFromData,
+  fetchStatuspageUptimeData,
+} from "@/lib/statuspage-uptime";
 import { StatuspageSummary, StatuspageIncident } from "@/types/statuspage";
 
 function isActiveStatuspageIncident(incident: { status: string }): boolean {
@@ -62,6 +66,13 @@ function impactToLevel(impact: string): DayStatus["level"] {
   }
 }
 
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function incidentAffectsComponent(
   incident: StatuspageIncident,
   componentId: string,
@@ -77,6 +88,7 @@ function incidentAffectsComponent(
   );
 }
 
+/** Fallback when `window.uptimeData` is unavailable. */
 function buildHistoryFromIncidents(
   incidents: StatuspageIncident[],
   days = 90,
@@ -89,7 +101,7 @@ function buildHistoryFromIncidents(
   for (let i = 0; i < days; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - (days - 1 - i));
-    dayMap.set(d.toISOString().slice(0, 10), "operational");
+    dayMap.set(formatLocalDate(d), "operational");
   }
 
   const severity: Record<DayStatus["level"], number> = {
@@ -111,7 +123,7 @@ function buildHistoryFromIncidents(
     endDay.setHours(0, 0, 0, 0);
 
     while (cursor <= endDay) {
-      const key = cursor.toISOString().slice(0, 10);
+      const key = formatLocalDate(cursor);
       const existing = dayMap.get(key);
       if (existing !== undefined && severity[level] > severity[existing]) {
         dayMap.set(key, level);
@@ -142,29 +154,42 @@ export const statuspageAdapter: StatusAdapter = {
     const fetchedAt = new Date().toISOString();
 
     try {
-      const [summary, allIncidents] = await Promise.all([
+      const [summary, allIncidents, uptimeData] = await Promise.all([
         fetchJson<StatuspageSummary>(`${origin}/api/v2/summary.json`),
         fetchJson<{ incidents: StatuspageIncident[] }>(
           `${origin}/api/v2/incidents.json`,
         ).catch(() => ({ incidents: [] as StatuspageIncident[] })),
+        fetchStatuspageUptimeData(normalized),
       ]);
 
-      const historyDays = buildHistoryFromIncidents(
-        allIncidents.incidents ?? [],
-      );
+      const incidents = allIncidents.incidents ?? [];
+      const fallbackHistory = buildHistoryFromIncidents(incidents);
 
       const components = (summary.components ?? [])
         .filter((c) => !c.group)
-        .map((c) => ({
-          id: c.id,
-          name: c.name,
-          status: c.status as ComponentStatusValue,
-          historyDays: buildHistoryFromIncidents(
-            (allIncidents.incidents ?? []).filter((incident) =>
-              incidentAffectsComponent(incident, c.id),
+        .map((c) => {
+          const fromUptime = componentUptimeFromData(uptimeData[c.id]);
+          if (fromUptime) {
+            return {
+              id: c.id,
+              name: c.name,
+              status: c.status as ComponentStatusValue,
+              historyDays: fromUptime.historyDays,
+              uptimePercent: fromUptime.uptimePercent,
+            };
+          }
+
+          return {
+            id: c.id,
+            name: c.name,
+            status: c.status as ComponentStatusValue,
+            historyDays: buildHistoryFromIncidents(
+              incidents.filter((incident) =>
+                incidentAffectsComponent(incident, c.id),
+              ),
             ),
-          ),
-        }));
+          };
+        });
 
       const pageHistoryDays = buildPageHistoryFromComponents(components);
       const uptimePercent =
@@ -175,7 +200,7 @@ export const statuspageAdapter: StatusAdapter = {
 
       const activeIncidents = resolveActiveIncidents(
         summary.incidents,
-        allIncidents.incidents ?? [],
+        incidents,
       );
 
       return {
@@ -185,7 +210,8 @@ export const statuspageAdapter: StatusAdapter = {
         indicator: summary.status.indicator,
         components,
         incidents: mapIncidents(activeIncidents),
-        historyDays: pageHistoryDays.length > 0 ? pageHistoryDays : historyDays,
+        historyDays:
+          pageHistoryDays.length > 0 ? pageHistoryDays : fallbackHistory,
         uptimePercent,
         fetchedAt,
       };

@@ -1,132 +1,169 @@
-import { Action, ActionPanel, List, Toast, closeMainWindow, popToRoot, showToast } from "@raycast/api";
-import { spawnSync } from "child_process";
-import { getConfig, handleConfigError } from "./utils/config";
-import { env } from "./utils/appSwitcher";
+import { Action, ActionPanel, closeMainWindow, Icon, Keyboard, List, popToRoot, showToast, Toast } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { AeroSpaceRecoveryActions } from "./components/AeroSpaceRecoveryActions";
+import {
+  buildWorkspaceCatalog,
+  failureToastOptions,
+  balanceWorkspace,
+  focusWorkspace,
+  listWindows,
+  listWorkspaces,
+  setWorkspaceRootLayout,
+  summonWorkspace,
+  TilingLayout,
+  WorkspaceCatalogItem,
+} from "./utils/aerospace";
+import { extractWorkspaceKeys, loadConfig } from "./utils/config";
 
-function getWorkspaceNames() {
-  const result = spawnSync("aerospace", ["list-workspaces", "--all"], {
-    env: env(),
-    encoding: "utf8",
-    timeout: 15000,
-  });
-
-  if (result.status !== 0) {
-    throw new Error(result.stderr.trim() || "Failed to list Aerospace workspaces");
-  }
-
-  return result.stdout.trim().split("\n").filter(Boolean);
+async function loadWorkspaceCatalog() {
+  const [workspaces, windows, config] = await Promise.all([
+    listWorkspaces(),
+    listWindows("all"),
+    loadConfig().catch(() => ({})),
+  ]);
+  return buildWorkspaceCatalog(workspaces, windows, extractWorkspaceKeys(config));
 }
 
-function getFocusedWorkspace() {
-  const result = spawnSync("aerospace", ["list-workspaces", "--focused"], {
-    env: env(),
-    encoding: "utf8",
-    timeout: 15000,
-  });
+const LAYOUTS: { title: string; value: TilingLayout }[] = [
+  { title: "Horizontal Tiles", value: "h_tiles" },
+  { title: "Vertical Tiles", value: "v_tiles" },
+  { title: "Horizontal Accordion", value: "h_accordion" },
+  { title: "Vertical Accordion", value: "v_accordion" },
+];
 
-  if (result.status !== 0) {
-    throw new Error(result.stderr.trim() || "Failed to determine focused workspace");
+async function runWorkspaceAction(
+  title: string,
+  workspace: WorkspaceCatalogItem,
+  operation: () => Promise<void>,
+  onRefresh: () => Promise<unknown>,
+) {
+  try {
+    await operation();
+    await showToast({ style: Toast.Style.Success, title, message: `Workspace ${workspace.name}` });
+    await onRefresh();
+  } catch (error) {
+    await showFailureToast(error, { title: `Could Not ${title}`, message: workspace.name });
   }
-
-  return result.stdout.trim();
 }
 
-function getWorkspaceShortcuts() {
-  const { config, error } = getConfig();
-
-  if (error) {
-    handleConfigError(error);
-    return {};
-  }
-
-  if (!config) {
-    return {};
-  }
-
-  // Build the shortcut map directly from raw config bindings instead of using
-  // extractKeyboardShortcuts, which replaces dashes with spaces in descriptions
-  // and would cause "my-project" to never match "my project".
-  const workspaceShortcuts: Record<string, string> = {};
-
-  if (config.mode) {
-    for (const mode of Object.keys(config.mode)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const bindings: Record<string, any> | undefined = config.mode[mode]?.binding as any;
-      if (bindings) {
-        for (const key of Object.keys(bindings)) {
-          const raw = bindings[key];
-          const command: string = Array.isArray(raw) ? String(raw[0]) : typeof raw === "string" ? raw : "";
-
-          if (command.startsWith("workspace ")) {
-            const workspaceName = command.slice("workspace ".length).trim();
-            if (!workspaceShortcuts[workspaceName]) {
-              workspaceShortcuts[workspaceName] = key;
-            }
+function WorkspaceActions({
+  workspace,
+  onRefresh,
+}: {
+  workspace: WorkspaceCatalogItem;
+  onRefresh: () => Promise<unknown>;
+}) {
+  return (
+    <ActionPanel>
+      <Action
+        title="Go to Workspace"
+        onAction={async () => {
+          try {
+            await focusWorkspace(workspace.name);
+            await popToRoot({ clearSearchBar: true });
+            await closeMainWindow({ clearRootSearch: true });
+          } catch (focusError) {
+            await showFailureToast(focusError, {
+              title: "Could Not Switch Workspace",
+              message: workspace.name,
+            });
           }
-        }
-      }
-    }
-  }
-
-  return workspaceShortcuts;
-}
-
-async function goToWorkspace(workspaceName: string) {
-  const result = spawnSync("aerospace", ["workspace", workspaceName], {
-    env: env(),
-    encoding: "utf8",
-    timeout: 15000,
-  });
-
-  if (result.status !== 0) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to switch workspace",
-      message: result.stderr.trim() || workspaceName,
-    });
-    return;
-  }
-
-  popToRoot({ clearSearchBar: true });
-  closeMainWindow({ clearRootSearch: true });
+        }}
+      />
+      <ActionPanel.Section title="Manage Workspace">
+        <Action
+          title="Summon to Current Monitor"
+          icon={Icon.Download}
+          onAction={() =>
+            runWorkspaceAction("Summoned Workspace", workspace, () => summonWorkspace(workspace.name), onRefresh)
+          }
+        />
+        <Action
+          title="Balance Window Sizes"
+          icon={Icon.Ruler}
+          onAction={() =>
+            runWorkspaceAction("Balanced Window Sizes", workspace, () => balanceWorkspace(workspace.name), onRefresh)
+          }
+        />
+        <ActionPanel.Submenu title="Set Root Layout…" icon={Icon.AppWindowGrid3x3}>
+          {LAYOUTS.map((layout) => (
+            <Action
+              key={layout.value}
+              title={layout.title}
+              onAction={() =>
+                runWorkspaceAction(
+                  `Set ${layout.title}`,
+                  workspace,
+                  () => setWorkspaceRootLayout(workspace.name, layout.value),
+                  onRefresh,
+                )
+              }
+            />
+          ))}
+        </ActionPanel.Submenu>
+      </ActionPanel.Section>
+      <Action
+        title="Refresh Workspaces"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={async () => {
+          await onRefresh();
+        }}
+      />
+    </ActionPanel>
+  );
 }
 
 export default function Command() {
-  try {
-    const workspaces = getWorkspaceNames();
-    const focusedWorkspace = getFocusedWorkspace();
-    const workspaceShortcuts = getWorkspaceShortcuts();
+  const {
+    data: workspaces = [],
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(loadWorkspaceCatalog, [], {
+    failureToastOptions: failureToastOptions("Failed to Load Workspaces"),
+  });
 
-    return (
-      <List navigationTitle="Go to Workspace" searchBarPlaceholder="Search workspaces">
-        {workspaces.map((workspaceName) => (
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Search workspaces or apps">
+      {!isLoading && workspaces.length === 0 && (
+        <List.EmptyView
+          icon={error ? Icon.Warning : Icon.AppWindowGrid3x3}
+          title={error ? "Failed to Load Workspaces" : "No Workspaces Found"}
+          description={
+            error ? error.message : "AeroSpace reported no workspaces. Make sure it is running and configured."
+          }
+          actions={error ? <AeroSpaceRecoveryActions error={error} onRetry={revalidate} /> : undefined}
+        />
+      )}
+      {workspaces.map((workspace) => {
+        const appNames = workspace.apps.map((app) => app.name);
+        const workspaceDetail = [
+          workspace.monitorName,
+          workspace.rootLayout ? workspace.rootLayout.replace("_", " ") : undefined,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+        return (
           <List.Item
-            key={workspaceName}
-            title={workspaceName}
-            subtitle={workspaceShortcuts[workspaceName]}
-            accessories={focusedWorkspace === workspaceName ? [{ tag: "focused" }] : []}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Go to Workspace"
-                  onAction={async () => {
-                    await goToWorkspace(workspaceName);
-                  }}
-                />
-              </ActionPanel>
-            }
+            key={workspace.name}
+            icon={workspace.isFocused ? Icon.Dot : workspace.isVisible ? Icon.Desktop : Icon.Circle}
+            title={workspace.name}
+            subtitle={appNames.length > 0 ? appNames.join(", ") : "No open apps"}
+            keywords={[
+              workspace.binding ?? "",
+              workspace.monitorName ?? "",
+              ...workspace.apps.flatMap((app) => [app.name, app.bundleId]),
+            ].filter(Boolean)}
+            accessories={[
+              ...(workspaceDetail ? [{ text: workspaceDetail }] : []),
+              ...(workspace.binding ? [{ text: workspace.binding }] : []),
+              ...(workspace.isFocused ? [{ tag: "focused" }] : workspace.isVisible ? [{ tag: "visible" }] : []),
+            ]}
+            actions={<WorkspaceActions workspace={workspace} onRefresh={revalidate} />}
           />
-        ))}
-      </List>
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown Aerospace error";
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Aerospace Error",
-      message,
-    });
-
-    return <List navigationTitle="Go to Workspace" />;
-  }
+        );
+      })}
+    </List>
+  );
 }

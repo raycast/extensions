@@ -1,6 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
 
-import type { ProjectRecord, TaskRecord, WorkspaceSummary } from "../api/types";
+import type { NavigableView, ProjectRecord, TaskRecord, WorkspaceSummary } from "../api/types";
 import { TASK_STATE_ICONS } from "../helpers/constants";
 import { getTaskState, isOverdue } from "../helpers/task-helpers";
 import { TaskActions } from "./task-actions";
@@ -9,11 +9,12 @@ interface TaskListItemProps {
   task: TaskRecord;
   projects: ProjectRecord[];
   revalidate: () => void;
+  view?: NavigableView;
   workspaces?: WorkspaceSummary[];
   showWorkspaceTag?: boolean;
 }
 
-export const TaskListItem = ({ task, projects, revalidate, workspaces, showWorkspaceTag }: TaskListItemProps) => {
+export const TaskListItem = ({ task, projects, revalidate, view, workspaces, showWorkspaceTag }: TaskListItemProps) => {
   const state = getTaskState(task);
   const project = task.projectId ? projects.find((p) => p.id === task.projectId) : undefined;
   const overdue = isOverdue(task);
@@ -41,7 +42,9 @@ export const TaskListItem = ({ task, projects, revalidate, workspaces, showWorks
   return (
     <List.Item
       accessories={accessories}
-      actions={<TaskActions projects={projects} revalidate={revalidate} task={task} workspaces={workspaces} />}
+      actions={
+        <TaskActions projects={projects} revalidate={revalidate} task={task} view={view} workspaces={workspaces} />
+      }
       icon={TASK_STATE_ICONS[state]}
       subtitle={task.description?.split("\n")[0] || undefined}
       title={task.title}

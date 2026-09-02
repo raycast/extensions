@@ -9,6 +9,7 @@ import { readZshrcFileRaw, writeZshrcFile, getZshrcPath } from "./zsh";
 import { clearCache } from "./cache";
 import { saveToHistory } from "./history";
 import type { EditItemConfig } from "./edit-item-form";
+import { SaveCancelledError } from "../utils/errors";
 
 /** Comment prefix used to disable entries */
 const COMMENT_PREFIX = "# ";
@@ -75,10 +76,7 @@ export async function toggleItem(key: string, config: EditItemConfig): Promise<b
     lines[foundIndex] = newLine;
     const updatedContent = lines.join("\n");
 
-    // Save to history before writing
     const action = isCurrentlyCommented ? "Enable" : "Disable";
-    await saveToHistory(`${action} ${config.itemType} "${key}"`);
-
     await writeZshrcFile(updatedContent);
     clearCache(getZshrcPath());
 
@@ -87,6 +85,10 @@ export async function toggleItem(key: string, config: EditItemConfig): Promise<b
     if (verify !== updatedContent) {
       throw new Error("Write verification failed: content mismatch after toggle");
     }
+
+    // Record history after the verified write, with the pre-change
+    // snapshot as the undo target
+    await saveToHistory(`${action} ${config.itemType} "${key}"`, zshrcContent);
 
     const newState = !isCurrentlyCommented;
     await showToast({
@@ -97,6 +99,9 @@ export async function toggleItem(key: string, config: EditItemConfig): Promise<b
 
     return newState;
   } catch (error) {
+    if (error instanceof SaveCancelledError) {
+      throw error;
+    }
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",

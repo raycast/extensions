@@ -1,6 +1,22 @@
 # Is It Alive? Changelog
 
-## [Restore Site Creation Fix] - {PR_MERGE_DATE}
+## [Suggested Sites, OnlineOrNot, and FireHydrant] - 2026-08-29
+
+- Add OnlineOrNot status pages through the public summary API. Look up hosted pages by subdomain and custom domains such as status.openrouter.ai by hostname
+- Add FireHydrant status pages (e.g. status.redis.io) via `/data/payload.json`
+- Follow incident.io status-page redirects so URLs like status.linear.app resolve to the canonical proxy JSON API
+- Add Developer Tools, Data, and Auth & Payments sections to the suggested sites list, along with more infrastructure and AI status pages
+- Fetch two status pages at a time and store compact list snapshots to stay under Raycast's memory limit. Fetch full history only in the detail view
+
+## [OutageDeck Support] - 2026-08-21
+
+- Add OutageDeck provider URLs for normalized vendor-published status, service details, and active incidents across cloud and SaaS providers
+
+## [Statuspage Uptime Accuracy] - 2026-07-26
+
+- Fix Statuspage 90-day uptime drift (e.g. claude.ai showing ~59% vs the site's ~99.4%) by using Statuspage's embedded per-second outage data instead of counting any incident day as full downtime
+
+## [Restore Site Creation Fix] - 2026-07-21
 
 - Restore adding sites in Raycast runtimes where the Web Crypto global is unavailable
 

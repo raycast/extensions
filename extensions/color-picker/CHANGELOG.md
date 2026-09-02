@@ -1,5 +1,10 @@
 # Color Picker Changelog
 
+## [Favorite Colors & AI Tools] - 2026-08-29
+
+- Add a `Favorite Colors` command to view and use saved favorites
+- Add AI tools to convert, name, save, list, contrast-check, generate scales, and format palettes
+
 ## [Fix] - 2026-06-20
 
 - Fix the `Color Wheel` command showing an oversized, clipped wheel by replacing the preview asset and rendering it at a smaller height

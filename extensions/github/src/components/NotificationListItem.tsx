@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 
+import { RevalidateList } from "../helpers";
 import { getNotificationSubtitle, getNotificationTooltip, getNotificationTypeTitle } from "../helpers/notifications";
 import { NotificationWithIcon } from "../notifications";
 
@@ -9,7 +9,7 @@ import NotificationActions from "./NotificationActions";
 type NotificationListItemProps = {
   notification: NotificationWithIcon;
   userId?: string;
-  mutateList: MutatePromise<NotificationWithIcon[] | undefined>;
+  mutateList: RevalidateList;
 };
 
 export default function NotificationListItem({ notification, userId, mutateList }: NotificationListItemProps) {

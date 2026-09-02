@@ -1,18 +1,32 @@
-import { List, Icon, ActionPanel, Action, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useFetch, showFailureToast } from "@raycast/utils";
-import { useState, useMemo, useEffect } from "react";
-import { Feed, GitHubPR, StoreItem, FilterValue } from "./types";
 import {
-  parseExtensionUrl,
-  fetchExtensionPackageInfo,
+  List,
+  Icon,
+  ActionPanel,
+  Action,
+  LaunchProps,
+  getPreferenceValues,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { useCachedPromise, useFetch } from "@raycast/utils";
+import { showError } from "@chrismessina/raycast-kit";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { Feed, FeedItem, GitHubPR, StoreItem, FilterValue } from "./types";
+import {
+  asArray,
   convertPRsToStoreItems,
-  getInstalledExtensionSlugs,
-  mapWithConcurrency,
-  githubHeaders,
   FEED_URL,
+  fetchExtensionPackageInfo,
+  fetchMergedPRs,
+  getInstalledExtensionSlugs,
   GITHUB_PRS_URL,
+  mapWithConcurrency,
+  parseExtensionUrl,
+  platformSupport,
 } from "./utils";
 import { ExtensionListItem } from "./components/ExtensionListItem";
+import { ChangelogDetail } from "./components/ChangelogDetail";
 import { useReadState } from "./hooks/useReadState";
 import { useFilterToggles } from "./hooks/useFilterToggles";
 import { useGitHubRateLimit } from "./hooks/useGitHubRateLimit";
@@ -21,7 +35,13 @@ import { useGitHubRateLimit } from "./hooks/useGitHubRateLimit";
 // Command
 // =============================================================================
 
-export default function Command() {
+/** Context the menu bar passes when ⌥-opening an item, to deep-link into its changelog. */
+export interface ViewStoreUpdatesContext {
+  changelogSlug?: string;
+  changelogTitle?: string;
+}
+
+export default function Command(props: LaunchProps<{ launchContext?: ViewStoreUpdatesContext }>) {
   const { trackReadStatus } = getPreferenceValues<Preferences>();
   const [filter, setFilter] = useState<FilterValue>("all");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
@@ -38,31 +58,48 @@ export default function Command() {
 
   const { checkRefreshAllowed, recordFetch, recordRateLimit } = useGitHubRateLimit();
 
+  // useCachedPromise, NOT useFetch: useFetch issues the HTTP request itself and only
+  // then hands the response to parseResponse, so the GraphQL branch used to run AFTER a
+  // REST call had already been spent — paying for both. fetchMergedPRs picks exactly one
+  // transport, so this hook must own the request rather than post-process someone else's.
   const {
     data: prsData,
     isLoading: prsLoading,
     revalidate: revalidatePRs,
-  } = useFetch<GitHubPR[]>(GITHUB_PRS_URL, {
+  } = useCachedPromise(fetchMergedPRs, [], {
     keepPreviousData: true,
-    headers: githubHeaders(),
-    async parseResponse(response) {
-      const resetHeader = response.headers.get("X-RateLimit-Reset");
-      const resetEpoch = resetHeader ? parseInt(resetHeader, 10) : undefined;
-      if (response.status === 403 || response.status === 429) {
-        const message = await recordRateLimit(resetEpoch);
-        // Throw so useFetch keeps the previously loaded PRs instead of clearing
-        // them to an empty list; surfaced to the user via onError below.
-        throw new Error(message);
-      }
-      const remainingHeader = response.headers.get("X-RateLimit-Remaining");
-      const remaining = remainingHeader != null ? parseInt(remainingHeader, 10) : undefined;
-      await recordFetch({ remaining, resetEpochSeconds: resetEpoch });
-      return response.json() as Promise<GitHubPR[]>;
+    initialData: [] as GitHubPR[],
+    async onData() {
+      // A successful fetch clears any stale rate-limit cooldown; without this the
+      // 5-minute block outlives the condition that set it.
+      await recordFetch({});
     },
-    onError(error) {
-      showFailureToast(error, { title: "Couldn't load store updates" });
+    async onError(error) {
+      const reset = (error as Error & { rateLimitReset?: number }).rateLimitReset;
+      if (reset !== undefined || /rate limit/i.test(error.message)) {
+        const message = await recordRateLimit(reset);
+        await showError(new Error(`${error.message} ${message}`), {
+          title: "Rate Limited by GitHub",
+          copyContext: `GET ${GITHUB_PRS_URL}`,
+        });
+        return;
+      }
+      await showError(error, { title: "Couldn't Load Store Updates", copyContext: `GET ${GITHUB_PRS_URL}` });
     },
   });
+
+  // Deep link from the menu bar's ⌥ action: push the changelog once, on mount.
+  // `push` must be called from an effect, not during render, and the ref guard keeps a
+  // re-render (or the dev renderer's double-effect pass) from stacking duplicate views.
+  const { push } = useNavigation();
+  const deepLinked = useRef(false);
+  const changelogSlug = props.launchContext?.changelogSlug;
+  const changelogTitle = props.launchContext?.changelogTitle;
+  useEffect(() => {
+    if (deepLinked.current || !changelogSlug) return;
+    deepLinked.current = true;
+    push(<ChangelogDetail slug={changelogSlug} title={changelogTitle ?? changelogSlug} items={[]} currentIndex={-1} />);
+  }, [changelogSlug, changelogTitle, push]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isProcessingNew, setIsProcessingNew] = useState(false);
@@ -74,9 +111,10 @@ export default function Command() {
   const handleRefresh = async () => {
     const blockedMessage = await checkRefreshAllowed();
     if (blockedMessage) {
+      // Not a failure — a cooldown is expected; Failure would owe a Copy Error action.
       await showToast({
-        style: Toast.Style.Failure,
-        title: "Please wait before refreshing",
+        style: Toast.Style.Animated,
+        title: "Please Wait Before Refreshing",
         message: blockedMessage,
       });
       return;
@@ -118,7 +156,9 @@ export default function Command() {
   useEffect(() => {
     if (!feedData) return;
     let cancelled = false;
-    const items = feedData.items ?? [];
+    // asArray, not `?? []`: a 200 body of {"items":{}} passes the null check and then
+    // throws in the mapper below.
+    const items = asArray<FeedItem>(feedData.items);
     setIsProcessingNew(true);
     mapWithConcurrency(items, 8, async (item) => {
       const parsed = parseExtensionUrl(item.url);
@@ -241,9 +281,7 @@ export default function Command() {
     // Removed extensions are exempt — their platform data is unavailable.
     items = items.filter((item) => {
       if (item.type === "removed") return true;
-      const platforms = item.platforms ?? ["macOS"];
-      const hasMac = platforms.some((p) => p.toLowerCase() === "macos");
-      const hasWindows = platforms.some((p) => p.toLowerCase() === "windows");
+      const { hasMac, hasWindows } = platformSupport(item.platforms);
       const isCrossPlatform = hasMac && hasWindows;
 
       if (isCrossPlatform) return true;

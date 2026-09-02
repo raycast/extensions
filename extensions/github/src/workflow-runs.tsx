@@ -10,6 +10,8 @@ import { withGitHubClient } from "./helpers/withGithubClient";
 
 export type WorkflowRunsResponse = RestEndpointMethodTypes["actions"]["listWorkflowRunsForRepo"]["response"];
 
+const WORKFLOW_RUNS_PAGE_SIZE = 25;
+
 function WorkflowRuns() {
   const { octokit } = getGitHubClient();
 
@@ -18,16 +20,31 @@ function WorkflowRuns() {
     data,
     isLoading,
     mutate: mutateList,
+    pagination,
   } = useCachedPromise(
-    (repository) => {
-      const [owner, repo] = repository.split("/");
-      return octokit.actions.listWorkflowRunsForRepo({ owner, repo });
-    },
+    (repository) =>
+      async ({ cursor }) => {
+        const [owner, repo] = repository.split("/");
+        const page = cursor ? Number(cursor) : 1;
+        const response = await octokit.actions.listWorkflowRunsForRepo({
+          owner,
+          repo,
+          per_page: WORKFLOW_RUNS_PAGE_SIZE,
+          page,
+        });
+        const hasMore = page * WORKFLOW_RUNS_PAGE_SIZE < response.data.total_count;
+
+        return {
+          data: response.data.workflow_runs,
+          hasMore,
+          cursor: hasMore ? String(page + 1) : undefined,
+        };
+      },
     [selectedRepository],
     { execute: !!selectedRepository },
   );
 
-  const workflowRuns = data?.data.workflow_runs;
+  const workflowRuns = [...new Map((data ?? []).map((workflowRun) => [workflowRun.id, workflowRun])).values()];
 
   return (
     <List
@@ -36,6 +53,7 @@ function WorkflowRuns() {
       searchBarAccessory={
         <RepositoriesDropdown setSelectedRepository={setSelectedRepository} withAllRepositories={false} />
       }
+      pagination={pagination}
     >
       {workflowRuns && workflowRuns.length > 0
         ? workflowRuns.map((workflowRun: WorkflowRun) => {

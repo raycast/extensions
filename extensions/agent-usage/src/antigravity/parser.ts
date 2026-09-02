@@ -1,11 +1,11 @@
-import {
+import { formatResetTime, parseDate } from "../agents/format.ts";
+import type {
   AntigravityError,
   AntigravityModelQuota,
   AntigravityQuotaBucket,
   AntigravityQuotaGroup,
   AntigravityUsage,
-} from "./types";
-import { formatResetTime, parseDate } from "../agents/format";
+} from "./types.ts";
 
 interface ParseResult {
   usage: AntigravityUsage | null;

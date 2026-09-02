@@ -5,8 +5,7 @@
   "description": "Mirror android device screen with scrcpy",
   "icon": "icon.png",
   "author": "zcfan",
-  "contributors": [
-  ],
+  "contributors": [],
   "pastContributors": [
     "Lemon"
   ],
@@ -60,5 +59,10 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.1",
+    "fast-uri": "3.1.5"
   }
 }

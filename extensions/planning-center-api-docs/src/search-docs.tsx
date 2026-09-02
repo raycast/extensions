@@ -5,6 +5,7 @@ import { copyDocsAsMarkdown } from "./copy-docs";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const copyMarkdownFirst = preferences.defaultAction === "copy-markdown";
   const [appFilter, setAppFilter] = React.useState<string>("all");
 
   const getAppIcon = (app: string) => {
@@ -105,13 +106,26 @@ export default function Command() {
             keywords={allKeywords}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={url} />
-                {doc.vertex && (
-                  <Action
-                    title="Copy Docs as Markdown"
-                    icon={Icon.Clipboard}
-                    onAction={() => copyDocsAsMarkdown(doc.app, appName, getVersion(doc.app), doc.vertex!)}
-                  />
+                {copyMarkdownFirst && doc.vertex ? (
+                  <>
+                    <Action
+                      title="Copy Docs as Markdown"
+                      icon={Icon.Clipboard}
+                      onAction={() => copyDocsAsMarkdown(doc.app, appName, getVersion(doc.app), doc.vertex!)}
+                    />
+                    <Action.OpenInBrowser url={url} />
+                  </>
+                ) : (
+                  <>
+                    <Action.OpenInBrowser url={url} />
+                    {doc.vertex && (
+                      <Action
+                        title="Copy Docs as Markdown"
+                        icon={Icon.Clipboard}
+                        onAction={() => copyDocsAsMarkdown(doc.app, appName, getVersion(doc.app), doc.vertex!)}
+                      />
+                    )}
+                  </>
                 )}
                 <Action.CopyToClipboard
                   title="Copy URL"

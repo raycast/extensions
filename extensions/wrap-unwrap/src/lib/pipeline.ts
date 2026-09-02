@@ -1,12 +1,4 @@
-import {
-  Clipboard,
-  Toast,
-  getSelectedText,
-  launchCommand,
-  popToRoot,
-  showHUD,
-  showToast,
-} from "@raycast/api";
+import { Clipboard, getSelectedText, launchCommand, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import type { LaunchProps, LaunchType } from "@raycast/api";
 
 export const MAX_INPUT = 1_000_000;
@@ -51,13 +43,8 @@ async function getSelection(): Promise<string> {
  * Read input from the user's preferred source, falling back to the other.
  * Throws `NoTextError` if neither has text.
  */
-export async function readContent(
-  preferredSource: "selection" | "clipboard",
-): Promise<string> {
-  const [clipboardRaw, selected] = await Promise.all([
-    Clipboard.readText(),
-    getSelection(),
-  ]);
+export async function readContent(preferredSource: "selection" | "clipboard"): Promise<string> {
+  const [clipboardRaw, selected] = await Promise.all([Clipboard.readText(), getSelection()]);
   const clipboard = clipboardRaw ?? "";
   if (preferredSource === "clipboard") {
     if (clipboard) return clipboard;
@@ -75,10 +62,7 @@ export function guardSize(input: string): void {
 }
 
 /** Toast for any failure path. ALWAYS includes Copy Error primaryAction. */
-export async function failureToast(
-  title: string,
-  message: string,
-): Promise<void> {
+export async function failureToast(title: string, message: string): Promise<void> {
   await showToast({
     style: Toast.Style.Failure,
     title,
@@ -92,26 +76,32 @@ export async function failureToast(
   });
 }
 
+/**
+ * Stringify an unknown thrown value for display. `String(value)` throws a
+ * TypeError on a null-prototype object or a Symbol, which would turn a HANDLED
+ * failure into an uncaught one and skip the required Copy-Error toast entirely —
+ * so the conversion itself has to be guarded.
+ */
+function stringifyUnknown(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  try {
+    return String(error);
+  } catch {
+    return "Unknown error";
+  }
+}
+
 /** Maps known error classes to user-facing failure toasts; falls back to `fallbackTitle`. */
-export async function reportFailure(
-  error: unknown,
-  fallbackTitle: string,
-): Promise<void> {
+export async function reportFailure(error: unknown, fallbackTitle: string): Promise<void> {
   if (error instanceof NoTextError) {
-    await failureToast(
-      "No text available",
-      "Select text or copy it to the clipboard.",
-    );
+    await failureToast("No text available", "Select text or copy it to the clipboard.");
     return;
   }
   if (error instanceof OversizeError) {
-    await failureToast(
-      "Text exceeds 1MB limit",
-      "Use a text editor for documents this large.",
-    );
+    await failureToast("Text exceeds 1MB limit", "Use a text editor for documents this large.");
     return;
   }
-  const message = error instanceof Error ? error.message : "Unknown error";
+  const message = stringifyUnknown(error);
   await failureToast(fallbackTitle, message);
 }
 
@@ -163,7 +153,12 @@ export async function deliver<C extends BaseLaunchContext>({
  * positive integer, falling back to 80 on NaN/non-positive input.
  */
 export function parseWidth(raw: string | undefined): number {
-  const n = Number.parseInt(raw ?? "", 10);
+  // Require the WHOLE trimmed value to be digits. `Number.parseInt` accepts a
+  // numeric prefix, so "12px" silently became 12 instead of falling back to 80 as
+  // the preference description promises.
+  const trimmed = (raw ?? "").trim();
+  if (!/^\d+$/.test(trimmed)) return 80;
+  const n = Number.parseInt(trimmed, 10);
   return Number.isFinite(n) && n > 0 ? n : 80;
 }
 

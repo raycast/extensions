@@ -11,15 +11,20 @@ interface DoltPackageRow {
   version: string;
 }
 
+function escapeSqlString(term: string): string {
+  return term.replace(/\\/g, "\\\\").replace(/'/g, "''");
+}
+
 export default function PackageList() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const abortable = useRef<AbortController | undefined>(undefined);
 
   const { isLoading, data, revalidate } = usePromise(
     async (): Promise<Package[]> => {
-      const url = `https://www.dolthub.com/api/v1alpha1/iloveitaly/pypi/main?q=SELECT+*+FROM+%60projects%60+WHERE+name+LIKE+%27${searchTerm}%25%27+LIMIT+50%3B`;
+      const query = `SELECT * FROM \`projects\` WHERE name LIKE '${escapeSqlString(searchTerm)}%' LIMIT 50;`;
+      const url = `https://www.dolthub.com/api/v1alpha1/iloveitaly/pypi/main?q=${encodeURIComponent(query)}`;
       const response = await fetch(url);
-      const packageJsonResponse = (await response.json()) as { rows: DoltPackageRow[] };
+      const packageJsonResponse = (await response.json()) as { rows?: DoltPackageRow[] };
 
       /*
       {
@@ -65,7 +70,7 @@ export default function PackageList() {
         }
        */
 
-      return packageJsonResponse["rows"].map((row: DoltPackageRow) => {
+      return (packageJsonResponse.rows ?? []).map((row: DoltPackageRow) => {
         return {
           name: row.name,
           description: row.summary,
@@ -111,7 +116,7 @@ export default function PackageList() {
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
-                      url={`https://pypi.org/search?q=${searchTerm}`}
+                      url={`https://pypi.org/search?q=${encodeURIComponent(searchTerm)}`}
                       title="View PyPI Search Results"
                     />
                   </ActionPanel>

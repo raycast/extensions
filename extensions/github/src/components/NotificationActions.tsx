@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Icon, LaunchType, Toast, launchCommand, open, showToast } from "@raycast/api";
-import { MutatePromise, usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Icon, LaunchType, Toast, launchCommand, open, showToast, Keyboard } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 
 import { getGitHubClient } from "../api/githubClient";
+import { RevalidateList } from "../helpers";
 import { getErrorMessage } from "../helpers/errors";
 import { getGitHubURL, getNotificationSubtitle, getNotificationTypeTitle } from "../helpers/notifications";
 import { NotificationWithIcon } from "../notifications";
@@ -9,7 +10,7 @@ import { NotificationWithIcon } from "../notifications";
 type NotificationActionsProps = {
   notification: NotificationWithIcon;
   userId?: string;
-  mutateList: MutatePromise<NotificationWithIcon[] | undefined>;
+  mutateList: RevalidateList;
 };
 
 export default function NotificationActions({ notification, userId, mutateList }: NotificationActionsProps) {
@@ -177,7 +178,7 @@ export default function NotificationActions({ notification, userId, mutateList }
       <Action
         title="Unsubscribe"
         icon={Icon.BellDisabled}
-        shortcut={{ modifiers: ["cmd"], key: "." }}
+        shortcut={Keyboard.Shortcut.Common.Pin}
         onAction={unsubscribe}
       />
       <ActionPanel.Section>
@@ -200,7 +201,7 @@ export default function NotificationActions({ notification, userId, mutateList }
           icon={Icon.ArrowClockwise}
           title="Refresh"
           onAction={mutateList}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </ActionPanel.Section>
     </ActionPanel>

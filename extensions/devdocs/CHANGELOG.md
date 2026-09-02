@@ -1,5 +1,10 @@
 # DevDocs Extension
 
+## [Fix] - 2026-07-27
+
+- Fix entry search by fetching documentation indexes from `documents.devdocs.io` instead of the removed `devdocs.io/docs/{slug}/index.json` endpoint
+- Fixes https://github.com/raycast/extensions/issues/29584
+
 ## [Fix] - 2026-07-02
 
 - Fix entry search selection so the top match is highlighted and opened when pressing Arrow Down or Enter

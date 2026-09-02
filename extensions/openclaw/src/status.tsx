@@ -133,19 +133,21 @@ ${
     ? `
 ## Troubleshooting
 
-1. **Check if OpenClaw gateway is running**
+If this Mac is only an OpenClaw **node**, do **not** start a local gateway. Point API Endpoint at the remote Tailscale HTTPS URL and use \`gateway.remote.token\`.
+
+1. **Confirm the HTTP API is enabled on the gateway host**
+   \`\`\`
+   openclaw config get gateway.http.endpoints.chatCompletions.enabled
+   \`\`\`
+
+2. **If OpenClaw is local on this Mac**, check the gateway process
    \`\`\`
    openclaw gateway status
    \`\`\`
 
-2. **Start the gateway if needed**
-   \`\`\`
-   openclaw gateway start
-   \`\`\`
+3. **Verify the endpoint** is \`https://<machine>.<tailnet>.ts.net\` for remote, not \`http://127.0.0.1:18789\` unless a local gateway actually answers.
 
-3. **Verify the endpoint URL** matches your gateway configuration
-
-4. **Check the API token** in extension preferences matches \`~/.openclaw/openclaw.json\`
+4. **Token** is \`gateway.auth.token\` on the gateway host, or \`gateway.remote.token\` on a node.
 `
     : ""
 }

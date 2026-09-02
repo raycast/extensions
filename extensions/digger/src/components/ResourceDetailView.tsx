@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 export interface ResourceDetailViewProps {

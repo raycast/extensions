@@ -5,7 +5,9 @@
   "description": "Chat with your local Hermes AI assistant",
   "icon": "icon.png",
   "author": "dailin4321",
-  "contributors": [],
+  "contributors": [
+    "RaviTharuma"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -69,14 +71,14 @@
     {
       "name": "token",
       "title": "API Token",
-      "description": "Find in API_SERVER_KEY environment variable or ~/.hermes/config.yaml",
+      "description": "Bearer token (Hermes API_SERVER_KEY). Required by /v1/models and chat when the server enforces auth.",
       "type": "password",
-      "required": true
+      "required": false
     },
     {
       "name": "modelName",
       "title": "Model Name",
-      "description": "Model identifier for API requests",
+      "description": "Model id for chat requests. Leave empty to use hermes-agent when the server lists it, otherwise the first id from GET /v1/models.",
       "type": "textfield",
       "default": "",
       "required": false

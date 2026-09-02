@@ -1,9 +1,9 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 test("mapAntigravityError maps probe not_running to user-facing error", async () => {
-  const { mapAntigravityError } = await import("./fetcher");
-  const { AntigravityProbeError } = await import("./probe");
+  const { mapAntigravityError } = await import("./fetcher.ts");
+  const { AntigravityProbeError } = await import("./probe.ts");
 
   const mapped = mapAntigravityError(new AntigravityProbeError("not_running", "not running"));
 
@@ -12,7 +12,7 @@ test("mapAntigravityError maps probe not_running to user-facing error", async ()
 });
 
 test("mapAntigravityError maps generic Error to unknown", async () => {
-  const { mapAntigravityError } = await import("./fetcher");
+  const { mapAntigravityError } = await import("./fetcher.ts");
 
   const mapped = mapAntigravityError(new Error("boom"));
 
@@ -21,7 +21,7 @@ test("mapAntigravityError maps generic Error to unknown", async () => {
 });
 
 test("fetchAntigravityUsage falls back to command model configs when user status cannot be parsed", async () => {
-  const { fetchAntigravityUsage } = await import("./fetcher");
+  const { fetchAntigravityUsage } = await import("./fetcher.ts");
 
   let callCount = 0;
 

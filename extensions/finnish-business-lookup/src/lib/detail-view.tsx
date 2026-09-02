@@ -2,20 +2,21 @@ import { Color, List } from "@raycast/api";
 import { formatDate, getStatusText } from "./format";
 import { escapeMarkdownText } from "./markdown";
 import { buildMapSearchLinks } from "./maps";
-import { getPrimaryAddressText } from "./selectors";
+import { getPrimaryAddressParts, getPrimaryAddressText } from "./selectors";
 import type { UiCompany } from "../types/ui";
 
-function buildNamePreview(names: string[], limit: number): string {
-  if (!names.length) {
-    return "None";
+const NAME_HISTORY_PREVIEW_LIMIT = 2;
+
+function getNameHistoryCount(previousCount: number, alternateCount: number): string {
+  const counts: string[] = [];
+  if (previousCount > 0) {
+    counts.push(`${previousCount} previous`);
+  }
+  if (alternateCount > 0) {
+    counts.push(`${alternateCount} alternate`);
   }
 
-  const preview = names.slice(0, limit).join(", ");
-  if (names.length <= limit) {
-    return preview;
-  }
-
-  return `${preview}, +${names.length - limit} more`;
+  return counts.join(", ");
 }
 
 export function buildSplitDetailMarkdown(company: UiCompany): string {
@@ -24,6 +25,7 @@ export function buildSplitDetailMarkdown(company: UiCompany): string {
 
 export function buildSplitDetailMetadata(company: UiCompany) {
   const primaryAddress = getPrimaryAddressText(company);
+  const addressParts = getPrimaryAddressParts(company);
   const mapLinks = buildMapSearchLinks(company.displayName, primaryAddress);
   const registrationDate = formatDate(company.registrationDate) ?? "Not available";
   const endDate = formatDate(company.endDate) ?? "Not available";
@@ -33,6 +35,10 @@ export function buildSplitDetailMetadata(company: UiCompany) {
   const tradeStatus = getStatusText(company.tradeRegisterStatusLabel, company.tradeRegisterStatusCode);
   const previousLegalNames = company.previousLegalNames ?? [];
   const alternateNames = company.alternateNames ?? [];
+  const previousNamePreview = previousLegalNames.slice(0, NAME_HISTORY_PREVIEW_LIMIT);
+  const alternateNamePreview = alternateNames.slice(0, NAME_HISTORY_PREVIEW_LIMIT);
+  const additionalNameCount =
+    previousLegalNames.length - previousNamePreview.length + (alternateNames.length - alternateNamePreview.length);
 
   return (
     <List.Item.Detail.Metadata>
@@ -43,15 +49,26 @@ export function buildSplitDetailMetadata(company: UiCompany) {
       ) : (
         <List.Item.Detail.Metadata.Label title="Website" text="Not available" />
       )}
-      {primaryAddress ? (
+      {addressParts?.streetAddress ? (
         mapLinks ? (
-          <List.Item.Detail.Metadata.Link title="Address" target={mapLinks.googleMaps} text={primaryAddress} />
+          <List.Item.Detail.Metadata.Link
+            title="Street Address"
+            target={mapLinks.googleMaps}
+            text={addressParts.streetAddress}
+          />
         ) : (
-          <List.Item.Detail.Metadata.Label title="Address" text={primaryAddress} />
+          <List.Item.Detail.Metadata.Label title="Street Address" text={addressParts.streetAddress} />
         )
       ) : (
-        <List.Item.Detail.Metadata.Label title="Address" text="Not available" />
+        <List.Item.Detail.Metadata.Label title="Street Address" text="Not available" />
       )}
+      {addressParts?.postOfficeBox ? (
+        <List.Item.Detail.Metadata.Label title="P.O. Box" text={addressParts.postOfficeBox} />
+      ) : null}
+      <List.Item.Detail.Metadata.Label title="Postal Code" text={addressParts?.postalCode ?? "Not available"} />
+      <List.Item.Detail.Metadata.Label title="City" text={addressParts?.city ?? "Not available"} />
+      {addressParts?.careOf ? <List.Item.Detail.Metadata.Label title="Care Of" text={addressParts.careOf} /> : null}
+      {addressParts?.country ? <List.Item.Detail.Metadata.Label title="Country" text={addressParts.country} /> : null}
       <List.Item.Detail.Metadata.Separator />
       <List.Item.Detail.Metadata.TagList title="Status">
         <List.Item.Detail.Metadata.TagList.Item
@@ -73,21 +90,30 @@ export function buildSplitDetailMetadata(company: UiCompany) {
       {currentLegalName.toLowerCase() !== company.displayName.toLowerCase() ? (
         <List.Item.Detail.Metadata.Label title="Current Legal Name" text={currentLegalName} />
       ) : null}
-      {(company.previousLegalNameCount ?? 0) > 0 || (company.alternateNameCount ?? 0) > 0 ? (
-        <List.Item.Detail.Metadata.TagList title="Name History">
-          {(company.previousLegalNameCount ?? 0) > 0 ? (
-            <List.Item.Detail.Metadata.TagList.Item
-              text={`Previous ${buildNamePreview(previousLegalNames, 2)}`}
-              color={Color.SecondaryText}
+      {previousLegalNames.length > 0 || alternateNames.length > 0 ? (
+        <>
+          <List.Item.Detail.Metadata.Label
+            title="Name History"
+            text={getNameHistoryCount(previousLegalNames.length, alternateNames.length)}
+          />
+          {previousNamePreview.map((name, index) => (
+            <List.Item.Detail.Metadata.Label
+              key={`previous-${name}`}
+              title={index === 0 ? "Previous Name" : `Previous Name ${index + 1}`}
+              text={name}
             />
-          ) : null}
-          {(company.alternateNameCount ?? 0) > 0 ? (
-            <List.Item.Detail.Metadata.TagList.Item
-              text={`Alternate ${buildNamePreview(alternateNames, 2)}`}
-              color={Color.SecondaryText}
+          ))}
+          {alternateNamePreview.map((name, index) => (
+            <List.Item.Detail.Metadata.Label
+              key={`alternate-${name}`}
+              title={index === 0 ? "Alternate Name" : `Alternate Name ${index + 1}`}
+              text={name}
             />
+          ))}
+          {additionalNameCount > 0 ? (
+            <List.Item.Detail.Metadata.Label title="More Names" text={`+${additionalNameCount} in View Details`} />
           ) : null}
-        </List.Item.Detail.Metadata.TagList>
+        </>
       ) : null}
       <List.Item.Detail.Metadata.Separator />
       {company.euVatNumber ? (

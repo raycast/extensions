@@ -6,7 +6,7 @@
 
 import { execSync } from "child_process";
 import { join as path_join } from "path";
-import { cpus } from "os";
+import { cpus, homedir } from "os";
 import { preferences } from "../preferences";
 
 /**
@@ -31,6 +31,24 @@ export const brewPrefix = (() => {
  * Get a path relative to the brew prefix.
  */
 export const brewPath = (suffix: string): string => path_join(brewPrefix, suffix);
+
+/**
+ * The Homebrew cache directory.
+ *
+ * Separate from the prefix: since Homebrew 4 the formula index is fetched from
+ * the JSON API into here, so this — not anything under the prefix — is what
+ * moves when `brew update` learns about new versions.
+ */
+export const brewCachePrefix = (() => {
+  try {
+    // Ask THIS brew, not whichever one is on PATH: with customBrewPath set they
+    // can be different installations, and watching the wrong one's cache means
+    // the freshness check never notices an update to the configured brew.
+    return execSync(`"${path_join(brewPrefix, "bin", "brew")}" --cache`, { encoding: "utf8" }).trim();
+  } catch {
+    return path_join(homedir(), "Library", "Caches", "Homebrew");
+  }
+})();
 
 /**
  * Get the path to the brew executable.

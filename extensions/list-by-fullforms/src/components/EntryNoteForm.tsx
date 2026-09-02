@@ -24,6 +24,7 @@ import {
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { apiFetch, errorMessage } from "../lib/api";
+import { crossShortcut } from "../lib/platform";
 
 interface FormValues {
   note: string;
@@ -100,7 +101,7 @@ export function EntryNoteForm({
               title="Delete Note"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              shortcut={crossShortcut(["cmd"], "backspace")}
               onAction={deleteNote}
             />
           )}

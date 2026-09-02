@@ -17,7 +17,9 @@ function sameKey(a: { id: string; source: string }, b: { id: string; source: str
 /**
  * Returns the patched slices, or null when there is nothing to patch (no-ops,
  * failures other than completed-with-reboot, kinds without per-package
- * effects like import/export/download/repair).
+ * effects like import/export/download/repair). Exception: an uninstall no-op
+ * means winget reported the package NOT installed — the index row that
+ * offered the action was a ghost, and removing it is exactly the patch.
  */
 function applyOperationPatch(
   kind: OperationKind,
@@ -26,7 +28,7 @@ function applyOperationPatch(
   result: WingetOperationResult,
   slices: MutableSlices,
 ): MutableSlices | null {
-  if (!result.success || result.noop || !target) {
+  if (!result.success || (result.noop && kind !== "uninstall") || !target) {
     return null;
   }
 

@@ -17,6 +17,7 @@ export default function PlaylistLikedTracksItem({ type }: PlaylistLikedTracksIte
   const icon: Image.ImageLike = { source: "https://misc.scdn.co/liked-songs/liked-songs-64.png" };
   const uri = `spotify:user:${meData?.id}:collection`;
   const { myLibraryData } = useYourLibrary({
+    category: "tracks",
     keepPreviousData: true,
   });
 

@@ -1,5 +1,19 @@
 # Visual Studio Code Changelog
 
+## [Fix: Opening workspaces on Windows] - 2026-08-19
+
+- Fixed `.code-workspace` entries on Windows opening as a new empty file instead of the workspace. The `file://` URI was passed to the editor as a positional argument, which the VS Code CLI interprets as a file path. Windows now opens all local entries by path, completing the revert in [#28913](https://github.com/raycast/extensions/pull/28913).
+
+## [Fixes] - 2026-08-03
+
+- Fix `saveEntries` failing on Windows with `spawn sqlite3 ENOENT` by writing to the VS Code state database through `node:sqlite`, with a fallback to the `sqlite3` CLI
+- Fix VSCodium - Insiders extensions folder and URL handler resolution
+- Fix `Open With VSCode` on network shares (UNC paths) and local drives
+- Fix the `Commands` command hanging on mid-write reads; now polls with a timeout and retries
+- Add `Copy Error` primary action to failure toasts.
+- Add icons to the recent projects entry type dropdown.
+- Bump all dependencies to the latest
+
 ## [Revert: Windows project opening] - 2026-06-21
 
 - `getSelectedFinderItems` works on Windows; reverted.

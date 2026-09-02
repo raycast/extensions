@@ -39,6 +39,8 @@ export interface Deployment {
   kind: "cloud" | "local";
   creator?: number;
   previewIdentifier?: string | null;
+  /** Actual deployment URL as returned by the API (may be region-scoped, e.g. https://name.eu-west-1.convex.cloud) */
+  deploymentUrl?: string;
   url?: string;
 }
 
@@ -68,6 +70,8 @@ async function callBigBrainAPI<T = unknown>(
     body?: unknown;
     pathParams?: Record<string, string | number>;
     queryParams?: Record<string, string | number | undefined | null>;
+    /** API prefix; defaults to the internal dashboard API */
+    basePath?: string;
   },
 ): Promise<T> {
   const {
@@ -76,6 +80,7 @@ async function callBigBrainAPI<T = unknown>(
     body,
     pathParams,
     queryParams,
+    basePath = BIG_BRAIN_DASHBOARD_PATH,
   } = options;
 
   // Replace path parameters
@@ -96,7 +101,7 @@ async function callBigBrainAPI<T = unknown>(
     }
   }
 
-  const url = `${BIG_BRAIN_URL}${BIG_BRAIN_DASHBOARD_PATH}${finalPath}${queryString.toString() ? `?${queryString.toString()}` : ""}`;
+  const url = `${BIG_BRAIN_URL}${basePath}${finalPath}${queryString.toString() ? `?${queryString.toString()}` : ""}`;
 
   const response = await fetch(url, {
     method,
@@ -144,29 +149,43 @@ export async function getProjects(
 }
 
 /**
- * Fetch all deployments for a project
+ * Fetch all deployments for a project.
+ * Uses the public Management API (the internal dashboard "instances" endpoint
+ * was removed and now returns 404).
  */
 export async function getDeployments(
   accessToken: string,
   projectId: number,
 ): Promise<Deployment[]> {
   const deployments = await callBigBrainAPI<Deployment[]>(
-    "/projects/{project_id}/instances",
+    "/projects/{project_id}/list_deployments",
     {
       accessToken,
       pathParams: { project_id: projectId },
+      basePath: "/v1",
     },
   );
 
   return deployments.map((deployment) => ({
     ...deployment,
-    url: deployment.url ?? `https://${deployment.name}.convex.cloud`,
+    // Prefer the URL reported by the API: newer deployments live on
+    // region-scoped domains where https://<name>.convex.cloud does not resolve
+    url:
+      deployment.url ??
+      deployment.deploymentUrl ??
+      `https://${deployment.name}.convex.cloud`,
   }));
 }
 
 /**
- * Fetch user profile
+ * Fetch user profile. Non-critical (only used for display), and the endpoint
+ * rejects CLI-style tokens these days — degrade to an empty profile on failure.
  */
 export async function getProfile(accessToken: string): Promise<UserProfile> {
-  return callBigBrainAPI<UserProfile>("/profile", { accessToken });
+  try {
+    return await callBigBrainAPI<UserProfile>("/profile", { accessToken });
+  } catch (error) {
+    console.error("Failed to fetch profile:", error);
+    return {};
+  }
 }

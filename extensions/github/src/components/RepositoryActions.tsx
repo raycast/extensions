@@ -1,6 +1,5 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { getFavicon, MutatePromise } from "@raycast/utils";
-import { format } from "date-fns";
 
 import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
@@ -12,12 +11,15 @@ import DownloadRepositoryForm from "./DownloadRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
+import RepositoryReadme from "./RepositoryReadme";
 import RepositoryReleases from "./RepositoryReleases";
 import { SortAction, SortActionProps, SortTypesDataProps } from "./SortAction";
 
 type RepositoryActionProps<T = ExtendedRepositoryFieldsFragment[] | undefined> = {
   repository: ExtendedRepositoryFieldsFragment;
   onVisit: (repository: ExtendedRepositoryFieldsFragment) => void;
+  onUpdate?: (repository: ExtendedRepositoryFieldsFragment) => void;
+  onRemove?: (repository: ExtendedRepositoryFieldsFragment) => void;
   mutateList: MutatePromise<T>;
 };
 
@@ -25,21 +27,39 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
   repository,
   mutateList,
   onVisit,
+  onUpdate,
+  onRemove,
   setSortQuery,
   sortQuery,
   sortTypesData,
 }: RepositoryActionProps<T> & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
   const { baseClonePath, repositoryCloneProtocol, application } = getPreferenceValues<Preferences.SearchRepositories>();
+  const { vscodeBuild } = getPreferenceValues<Preferences>();
+  const editorScheme = vscodeBuild || "vscode";
 
-  const updatedAt = new Date(repository.updatedAt);
+  function syncStarState(viewerHasStarred: boolean) {
+    const updatedRepository = {
+      ...repository,
+      viewerHasStarred,
+      stargazerCount: Math.max(0, repository.stargazerCount + (viewerHasStarred ? 1 : -1)),
+    };
+    onUpdate?.(updatedRepository);
+    return updatedRepository;
+  }
 
   async function star() {
     await showToast({ style: Toast.Style.Animated, title: "Starring repository", message: repository.name });
 
     try {
       await github.addStar({ repositoryId: repository.id });
-      await mutateList();
+      const updatedRepository = syncStarState(true);
+      await mutateList(undefined, {
+        optimisticUpdate(data) {
+          if (!Array.isArray(data)) return data;
+          return data.map((repo) => (repo.id === updatedRepository.id ? { ...repo, ...updatedRepository } : repo)) as T;
+        },
+      });
 
       await showToast({
         style: Toast.Style.Success,
@@ -64,7 +84,13 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
 
     try {
       await github.removeStar({ repositoryId: repository.id });
-      await mutateList();
+      const updatedRepository = syncStarState(false);
+      await mutateList(undefined, {
+        optimisticUpdate(data) {
+          if (!Array.isArray(data)) return data;
+          return data.map((repo) => (repo.id === updatedRepository.id ? { ...repo, ...updatedRepository } : repo)) as T;
+        },
+      });
 
       await showToast({
         style: Toast.Style.Success,
@@ -80,39 +106,19 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
     }
   }
 
-  const accessories: List.Item.Accessory[] = [
-    {
-      date: updatedAt,
-      tooltip: `Updated: ${format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm")}`,
-    },
-  ];
-
-  if (repository.primaryLanguage) {
-    accessories.unshift({
-      text: repository.primaryLanguage.name,
-      tooltip: `Language: ${repository.primaryLanguage.name}`,
-    });
-  }
-
-  if (repository.viewerHasStarred) {
-    accessories.unshift({
-      icon: { source: Icon.Star, tintColor: Color.Yellow },
-      tooltip: "You have starred this repository",
-    });
-  }
-
   return (
     <ActionPanel title={repository.nameWithOwner}>
       <ActionPanel.Section>
         <Action.OpenInBrowser url={repository.url} onOpen={() => onVisit(repository)} />
 
-        <ActionPanel.Submenu icon={Icon.Globe} title="Open in Web IDE">
+        <ActionPanel.Submenu icon={Icon.Globe} title="Open in Web IDE" shortcut={Keyboard.Shortcut.Common.Open}>
           {WEB_IDES.map((ide) => (
             <Action.OpenInBrowser
               title={ide.title}
               icon={ide.icon || getFavicon(ide.baseUrl)}
               key={ide.title}
               url={ide.baseUrl + repository.nameWithOwner}
+              shortcut={ide.shortcut}
               onOpen={() => onVisit(repository)}
             />
           ))}
@@ -121,74 +127,79 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
         {baseClonePath && application && (
           <Action
             icon={Icon.Terminal}
-            title="Clone and Open"
-            onAction={() => cloneAndOpen(repository)}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+            title="Clone and Open (Default Path)"
+            onAction={() => {
+              onVisit(repository);
+              cloneAndOpen(repository);
+            }}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
           />
         )}
         <Action.Push
           icon={Icon.Terminal}
-          title="Clone with Options"
+          title="Clone with Options (Choose Path)"
           target={<CloneRepositoryForm repository={repository} />}
           shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
+          onPush={() => onVisit(repository)}
         />
         <Action.Push
           icon={Icon.Download}
-          title="Download with Options"
+          title="Download as ZIP"
           target={<DownloadRepositoryForm repository={repository} />}
           shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          onPush={() => onVisit(repository)}
         />
         <Action.OpenInBrowser
           icon={{ source: "vscode.svg", tintColor: Color.PrimaryText }}
           title="Clone in VS Code"
-          url={`vscode://vscode.git/clone?url=${repository.url}`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          url={`${editorScheme}://vscode.git/clone?url=${repository.url}`}
+          shortcut={Keyboard.Shortcut.Common.Copy}
+          onOpen={() => onVisit(repository)}
         />
 
         {repository.viewerHasStarred ? (
-          <Action
-            title="Remove Star from Repository"
-            icon={Icon.StarDisabled}
-            onAction={removeStar}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          />
+          <Action title="Unstar" icon={Icon.Star} onAction={removeStar} shortcut={Keyboard.Shortcut.Common.Pin} />
         ) : (
-          <Action title="Star" icon={Icon.Star} onAction={star} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
+          <Action title="Star" icon="star-filled.svg" onAction={star} shortcut={Keyboard.Shortcut.Common.Pin} />
         )}
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Open in Raycast">
         <Action.Push
+          title="Show Readme"
+          icon={Icon.Book}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+          target={<RepositoryReadme repository={repository} />}
+          onPush={() => onVisit(repository)}
+        />
+        <Action.Push
           title="Show Issues"
           icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
+          shortcut={{ modifiers: ["cmd"], key: "i" }}
           target={<RepositoryIssueList repo={repository.nameWithOwner} />}
           onPush={() => onVisit(repository)}
         />
         <Action.Push
           title="Show Pull Requests"
           icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
+          shortcut={{ modifiers: ["cmd"], key: "m" }}
           target={<RepositoryPullRequestList repo={repository.nameWithOwner} />}
           onPush={() => onVisit(repository)}
         />
-        {repository.releases?.totalCount > 0 && (
-          <Action.Push
-            icon={Icon.List}
-            title="Show Releases"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            target={<RepositoryReleases repository={repository} />}
-          />
-        )}
-        {repository.hasDiscussionsEnabled && (
-          <Action.Push
-            icon={Icon.SpeechBubble}
-            title="Show Discussions"
-            shortcut={{ modifiers: ["cmd", "ctrl", "opt"], key: "d" }}
-            target={<RepositoryDiscussionList repository={repository.nameWithOwner} />}
-            onPush={() => onVisit(repository)}
-          />
-        )}
+        <Action.Push
+          icon={Icon.List}
+          title="Show Releases"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          target={<RepositoryReleases repository={repository} />}
+          onPush={() => onVisit(repository)}
+        />
+        <Action.Push
+          icon={Icon.SpeechBubble}
+          title="Show Discussions"
+          shortcut={{ modifiers: ["cmd", "ctrl", "opt"], key: "d" }}
+          target={<RepositoryDiscussionList repository={repository.nameWithOwner} />}
+          onPush={() => onVisit(repository)}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Open in Browser">
@@ -196,46 +207,46 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
           icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
           url={`${repository.url}/pulls`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
           onOpen={() => onVisit(repository)}
         />
 
-        {repository.hasIssuesEnabled ? (
-          <Action.OpenInBrowser
-            icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
-            title="Open Issues"
-            url={`${repository.url}/issues`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-            onOpen={() => onVisit(repository)}
-          />
-        ) : null}
+        <Action.OpenInBrowser
+          icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
+          title="Open Issues"
+          url={`${repository.url}/issues`}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+          onOpen={() => onVisit(repository)}
+        />
 
-        {repository.hasWikiEnabled ? (
-          <Action.OpenInBrowser
-            icon={{ source: "book.svg", tintColor: Color.PrimaryText }}
-            title="Open Wiki"
-            url={`${repository.url}/wiki`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-            onOpen={() => onVisit(repository)}
-          />
-        ) : null}
+        <Action.OpenInBrowser
+          icon={{ source: "book.svg", tintColor: Color.PrimaryText }}
+          title="Open Wiki"
+          url={`${repository.url}/wiki`}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+          onOpen={() => onVisit(repository)}
+        />
 
-        {repository.hasProjectsEnabled && (
-          <Action.OpenInBrowser
-            icon={{ source: "project.svg", tintColor: Color.PrimaryText }}
-            title="Open Projects"
-            url={`${repository.url}/projects`}
-            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "p" }}
-            onOpen={() => onVisit(repository)}
-          />
-        )}
+        <Action.OpenInBrowser
+          icon={{ source: "project.svg", tintColor: Color.PrimaryText }}
+          title="Open Projects"
+          url={`${repository.url}/projects`}
+          shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "p" }}
+          onOpen={() => onVisit(repository)}
+        />
+        <Action.OpenInBrowser
+          icon={Icon.SpeechBubble}
+          title="Open Discussions"
+          url={`${repository.url}/discussions`}
+          onOpen={() => onVisit(repository)}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>
         <Action.CopyToClipboard
           content={repository.url}
           title="Copy Repository URL"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          shortcut={Keyboard.Shortcut.Common.CopyPath}
         />
 
         <Action.CopyToClipboard
@@ -247,7 +258,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
         <Action.CopyToClipboard
           content={repository.nameWithOwner}
           title="Copy Name with Owner"
-          shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
         />
 
         <Action.CopyToClipboard content={repository.name} title="Copy Repository Name" />
@@ -258,6 +269,18 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
       <ActionPanel.Section>
         <SortAction {...{ data: sortTypesData, sortQuery, setSortQuery }} />
       </ActionPanel.Section>
+
+      {onRemove ? (
+        <ActionPanel.Section>
+          <Action
+            title="Remove from Recently Visited"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+            onAction={() => onRemove(repository)}
+          />
+        </ActionPanel.Section>
+      ) : null}
     </ActionPanel>
   );
 }
