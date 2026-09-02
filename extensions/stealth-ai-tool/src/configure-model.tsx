@@ -113,11 +113,13 @@ export default function ConfigureModelCommand() {
     }
   }
 
+  // Validate before persisting anything: switching the active provider on a
+  // rejected form would leave every action pointing at an unusable config.
   async function handleSubmit(values: { modelId: string }) {
     const finalModel = values.modelId;
-    await LocalStorage.setItem(STORAGE_KEYS.provider, provider);
 
     if (provider === "raycast") {
+      await LocalStorage.setItem(STORAGE_KEYS.provider, provider);
       await showToast({
         style: Toast.Style.Success,
         title: "Configuration Saved",
@@ -152,6 +154,8 @@ export default function ConfigureModelCommand() {
       );
     }
     await LocalStorage.setItem(STORAGE_KEYS.model(provider), finalModel);
+    // Switch the active provider only once its config is complete.
+    await LocalStorage.setItem(STORAGE_KEYS.provider, provider);
 
     await showToast({
       style: Toast.Style.Success,
