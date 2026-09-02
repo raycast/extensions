@@ -1,5 +1,9 @@
 # Neovim Changelog
 
+## [Fix keymap scanner nested-bracket framing] - 2026-09-02
+
+- Fix keymap scanner parsing a bracketed string value (e.g. `rhs "echo [1,2]"`) as the payload instead of the enclosing JSON array, which caused user keymaps to silently disappear.
+
 ## [Initial Version] - 2026-09-02
 
 - Search and open recent Neovim sessions (persistence.nvim sessions, recently opened directories)
