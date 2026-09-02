@@ -11,6 +11,7 @@ import {
 	showToast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { type Frequency, readSchedule } from "./audit-schedule";
 import { runRcc } from "./rcc";
 
 /**
@@ -24,24 +25,15 @@ import { runRcc } from "./rcc";
  * The CLI already knows more than that one command exposes: `audit schedule`
  * takes daily, weekly or monthly, reports its own status, and can remove
  * itself. So this shows the state first and offers the three real choices, each
- * behind a confirmation, with the installed one marked. Opening the screen runs
- * `schedule status`, which only looks.
+ * behind a confirmation, with the installed one marked. Opening the screen reads
+ * the plist and asks launchd; it runs no rcc command at all.
  */
-
-type Frequency = "daily" | "weekly" | "monthly";
 
 const WHEN: Record<Frequency, string> = {
 	daily: "Every day at 9:00",
 	weekly: "Sundays at 9:00",
 	monthly: "The 1st of each month at 9:00",
 };
-
-/** rcc answers `Active — weekly` or `No active schedule.` */
-async function readSchedule(): Promise<Frequency | undefined> {
-	const status = await runRcc(["audit", "schedule", "status"]);
-	const match = /active\s*[—-]\s*(daily|weekly|monthly)/i.exec(status);
-	return match ? (match[1].toLowerCase() as Frequency) : undefined;
-}
 
 export default function Command() {
 	const { data: active, isLoading, revalidate } = usePromise(readSchedule);
