@@ -42,14 +42,14 @@ export function ItemForm({ client, item, labelSettings, onSubmit }: Props) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="quantity" title="Quantity" defaultValue={String(item.quantity ?? 0)} />
+      <Form.TextField id="quantity" title="Quantity" placeholder="0" defaultValue={String(item.quantity ?? 0)} />
       <Form.Dropdown id="unitId" title="Unit" defaultValue={item.unitId ?? NONE}>
         <Form.Dropdown.Item value={NONE} title="No unit" />
         {units.map((unit) => (
           <Form.Dropdown.Item key={unit.id} value={unit.id} title={unit.name} />
         ))}
       </Form.Dropdown>
-      <Form.TextField id="note" title="Note" defaultValue={item.note ?? ""} />
+      <Form.TextField id="note" title="Note" placeholder="Any brand or detail" defaultValue={item.note ?? ""} />
       <Form.Dropdown id="labelId" title="Label" defaultValue={item.labelId ?? NONE}>
         <Form.Dropdown.Item value={NONE} title="No label" />
         {labelSettings.map((setting) => (

@@ -5,6 +5,9 @@
   "description": "Manage Mealie shopping lists and meal plans, import recipes and search your recipe collection.",
   "icon": "extension-icon.png",
   "author": "joschka_rick",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -73,7 +76,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.1.2",
+    "@raycast/api": "^2.1.3",
     "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {

@@ -37,7 +37,7 @@ export default function AddToShoppingList() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Pick a shopping list">
-      <List.EmptyView icon={Icon.Cart} title="No shopping lists found" />
+      {!isLoading && <List.EmptyView icon={Icon.Cart} title="No shopping lists found" />}
       {ordered.map((list) => (
         <List.Item
           key={list.id}

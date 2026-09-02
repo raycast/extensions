@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@rayc
 
 export function ConfigErrorView({ error }: { error: Error }) {
   return (
-    <List>
+    <List searchBarPlaceholder="Mealie">
       <List.EmptyView
         icon={Icon.Gear}
         title="Mealie is not configured yet"

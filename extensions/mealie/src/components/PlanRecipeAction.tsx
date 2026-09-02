@@ -52,7 +52,7 @@ function PickDay({ client, recipe }: { client: MealieClient; recipe: RecipeSumma
           actions={
             <ActionPanel>
               <Action icon={Icon.Plus} title="Plan as Dinner" onAction={() => plan(day, DEFAULT_TYPE)} />
-              <ActionPanel.Submenu icon={Icon.Tag} title="Plan as Another Meal">
+              <ActionPanel.Submenu icon={Icon.Tag} title="Plan as Another Meal…">
                 {PLAN_ENTRY_TYPES.filter((type) => type !== DEFAULT_TYPE).map((type) => (
                   <Action key={type} title={capitalize(type)} onAction={() => plan(day, type)} />
                 ))}

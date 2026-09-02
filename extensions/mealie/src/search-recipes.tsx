@@ -33,7 +33,12 @@ export default function SearchRecipes() {
       searchBarPlaceholder="Search your Mealie recipes"
       throttle
     >
-      <List.EmptyView icon={Icon.MagnifyingGlass} title={searchText ? "No recipes found" : "Start typing to search"} />
+      {!isLoading && (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title={searchText ? "No recipes found" : "Start typing to search"}
+        />
+      )}
       {data.map((recipe) => (
         <List.Item
           key={recipe.id}

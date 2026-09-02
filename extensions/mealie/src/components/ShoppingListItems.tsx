@@ -70,11 +70,20 @@ export function ShoppingListItems({ client, listId, listName }: Props) {
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
-    try {
-      await Promise.all(done.map((item) => deleteItem(client, item.id)));
-      revalidate();
-    } catch (error) {
-      await showFailureToast(error, { title: "Could not delete the checked items" });
+
+    // allSettled statt all: Promise.all bricht beim ersten Fehler ab, waehrend
+    // die uebrigen Loeschungen noch unterwegs sind. Ein revalidate() zu diesem
+    // Zeitpunkt liest einen Stand, der Sekundenbruchteile spaeter falsch ist.
+    // So sind alle Requests abgeschlossen, bevor die Liste neu geladen wird,
+    // und die Meldung nennt die tatsaechliche Zahl der Fehlschlaege.
+    const results = await Promise.allSettled(done.map((item) => deleteItem(client, item.id)));
+    revalidate();
+
+    const failed = results.filter((result): result is PromiseRejectedResult => result.status === "rejected");
+    if (failed.length > 0) {
+      await showFailureToast(failed[0]!.reason, {
+        title: failed.length + " of " + done.length + " items could not be deleted",
+      });
     }
   }
 
@@ -136,21 +145,23 @@ export function ShoppingListItems({ client, listId, listName }: Props) {
 
   return (
     <List isLoading={isLoading} navigationTitle={listName} searchBarPlaceholder={"Filter " + listName}>
-      <List.EmptyView
-        icon={Icon.Cart}
-        title="This list is empty"
-        actions={
-          <ActionPanel>
-            <Action
-              icon={Icon.Plus}
-              title="Add Item"
-              onAction={() =>
-                push(<FoodPicker client={client} listId={listId} listName={listName} onAdded={revalidate} />)
-              }
-            />
-          </ActionPanel>
-        }
-      />
+      {!isLoading && (
+        <List.EmptyView
+          icon={Icon.Cart}
+          title="This list is empty"
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.Plus}
+                title="Add Item"
+                onAction={() =>
+                  push(<FoodPicker client={client} listId={listId} listName={listName} onAdded={revalidate} />)
+                }
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {groups.map((group) => (
         <List.Section key={group.key} title={group.name} subtitle={String(group.items.length)}>
           {group.items.map((item) => (

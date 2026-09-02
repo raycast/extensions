@@ -62,11 +62,13 @@ export default function ShoppingLists() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter shopping lists">
-      <List.EmptyView
-        icon={Icon.Cart}
-        title="No shopping lists yet"
-        actions={<ActionPanel>{newListAction}</ActionPanel>}
-      />
+      {!isLoading && (
+        <List.EmptyView
+          icon={Icon.Cart}
+          title="No shopping lists yet"
+          actions={<ActionPanel>{newListAction}</ActionPanel>}
+        />
+      )}
       {data.map((list) => (
         <List.Item
           key={list.id}

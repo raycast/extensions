@@ -1,14 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 import { normalizeBaseUrl, type MealieConfig } from "./api/client";
 
-interface RawPreferences {
-  mealieUrl: string;
-  apiToken: string;
-  allowInsecureHttp?: boolean;
-}
-
+/**
+ * `Preferences` wird von Raycast aus der package.json nach raycast-env.d.ts
+ * generiert. Eine eigene Kopie des Schemas wuerde bei jeder Aenderung an den
+ * Preferences auseinanderlaufen, ohne dass der Typcheck es meldet.
+ */
 export function getMealieConfig(): MealieConfig {
-  const prefs = getPreferenceValues<RawPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   return {
     baseUrl: normalizeBaseUrl(prefs.mealieUrl),
     token: prefs.apiToken.trim(),

@@ -41,7 +41,7 @@ function PickList({ client, recipe }: { client: MealieClient; recipe: RecipeSumm
 
   return (
     <List isLoading={isLoading} navigationTitle={"Add " + recipe.name} searchBarPlaceholder="Pick a shopping list">
-      <List.EmptyView icon={Icon.Cart} title="No shopping lists found" />
+      {!isLoading && <List.EmptyView icon={Icon.Cart} title="No shopping lists found" />}
       {data.map((list) => (
         <List.Item
           key={list.id}

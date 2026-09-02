@@ -94,7 +94,7 @@ export default function MealPlan() {
   );
 
   return (
-    <List isLoading={isLoading} navigationTitle={"Meal Plan " + from + " to " + to} searchBarPlaceholder="Filter meals">
+    <List isLoading={isLoading} searchBarPlaceholder={"Filter meals from " + from + " to " + to}>
       {days.map((day) => {
         const iso = toIsoDate(day);
         const entries = data.filter((entry) => entry.date === iso);
@@ -127,11 +127,11 @@ export default function MealPlan() {
                       />
                     )}
                     <Action icon={Icon.Plus} title="Add Entry" onAction={() => addEntry(iso)} />
-                    <ActionPanel.Submenu icon={Icon.Tag} title="Change Meal Type">
+                    <ActionPanel.Submenu icon={Icon.Tag} title="Change Meal Type…">
                       {PLAN_ENTRY_TYPES.map((type) => (
                         <Action
                           key={type}
-                          title={type}
+                          title={capitalize(type)}
                           onAction={() =>
                             run(
                               () => updateMealPlanEntry(client!, entry, { entryType: type }),
@@ -172,6 +172,10 @@ export default function MealPlan() {
       })}
     </List>
   );
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 function entryTitle(entry: MealPlanEntry): string {

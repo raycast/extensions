@@ -26,7 +26,7 @@ export function NameForm({ title, submitTitle, initialValue = "", onSubmit }: Na
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Name" defaultValue={initialValue} autoFocus />
+      <Form.TextField id="name" title="Name" placeholder="Weekly groceries" defaultValue={initialValue} autoFocus />
     </Form>
   );
 }
