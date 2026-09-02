@@ -12,7 +12,13 @@ import {
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import { searchCities } from "./citySearch";
-import { formatDelta, formatGmtOffset, getCurrentTimeISO } from "./time-utils";
+import {
+  ClockFormatPreference,
+  formatDelta,
+  formatGmtOffset,
+  getCurrentTimeISO,
+  resolveTimeFormat,
+} from "./time-utils";
 import { TimelineView } from "./timeline-view";
 import { DEFAULT_TIME_ZONES, getCityName, getTimezone } from "./timezones";
 
@@ -30,6 +36,7 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const scrubMinutes = parseInt(preferences.defaultScrubMinutes, 10) || 60;
   const optionScrubMinutes = parseInt(preferences.optionScrubMinutes, 10) || 30;
+  const timeFormat = resolveTimeFormat(preferences.timeFormat as ClockFormatPreference);
 
   useEffect(() => {
     const load = async () => {
@@ -124,7 +131,7 @@ export default function Command() {
       const dt = DateTime.fromISO(baseISO).setZone(getTimezone(zoneId));
       const diffMinutes = dt.offset - base.offset;
       const cityName = getCityName(zoneId);
-      const paddedTime = padTime(dt.toFormat("h:mm a"));
+      const paddedTime = padTime(dt.toFormat(timeFormat));
       return {
         key: zoneId,
         title: `${paddedTime}  ${cityName}`,
@@ -134,11 +141,11 @@ export default function Command() {
         dateText: dt.toFormat("ccc, LLL d"),
       };
     });
-  }, [baseISO, base.offset, otherCities]);
+  }, [baseISO, base.offset, otherCities, timeFormat]);
 
   const baseRow = useMemo(() => {
     const cityName = baseCityId ? getCityName(baseCityId) : getCityName(baseZoneId);
-    const paddedTime = padTime(base.toFormat("h:mm a"));
+    const paddedTime = padTime(base.toFormat(timeFormat));
     const isSystemTz = !baseCityId;
     return {
       title: `${paddedTime}  ${cityName}`,
@@ -147,7 +154,7 @@ export default function Command() {
       timeColor: getTimeColor(base.hour),
       isSystemTz,
     };
-  }, [base, baseZoneId, baseCityId]);
+  }, [base, baseZoneId, baseCityId, timeFormat]);
 
   function shiftMinutes(delta: number) {
     setBaseISO((prev) => DateTime.fromISO(prev).plus({ minutes: delta }).toISO() || prev);
@@ -173,6 +180,7 @@ export default function Command() {
         onClearBase={clearBase}
         scrubMinutes={scrubMinutes}
         optionScrubMinutes={optionScrubMinutes}
+        timeFormat={timeFormat}
       />
     );
   }

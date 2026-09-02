@@ -1,5 +1,5 @@
 import { AI, environment } from "@raycast/api";
-import { getTranscript } from "./tuple";
+import { getCompactTranscript } from "./tuple";
 
 /** Cap the transcript fed to the model so very long calls don't blow the context window. */
 const MAX_TRANSCRIPT_CHARS = 50_000;
@@ -22,7 +22,7 @@ export function aiAvailable(): boolean {
 
 /** Load and trim a transcript for use as model context, noting truncation when it happens. */
 export async function transcriptContext(callId: string): Promise<string> {
-  const transcript = (await getTranscript(callId)).trim();
+  const transcript = (await getCompactTranscript(callId)).trim();
   if (transcript.length <= MAX_TRANSCRIPT_CHARS) {
     return transcript;
   }

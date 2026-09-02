@@ -1,0 +1,6 @@
+# Generated bundle from the site registry — never hand-formatted.
+src/catalog.gen.js
+src/catalog.gen.d.ts
+src/catalog.entry.ts
+dist
+node_modules

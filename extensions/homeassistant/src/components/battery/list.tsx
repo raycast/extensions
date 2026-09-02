@@ -1,14 +1,16 @@
-import { useHAStates } from "@components/hooks";
+import { useVisibleHAStates } from "@components/hooks";
 import { useStateSearch } from "@components/state/hooks";
 import { StateListItem } from "@components/state/list";
+import { partitionFavoriteStates, useEntityOverrides } from "@lib/entity-overrides";
 import { List, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
 import { sortBatteries } from "./utils";
 
 export function BatteryList(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, "", "battery", allStates);
+  const { states: allStates, error, isLoading } = useVisibleHAStates();
+  const { entityAliases, favoriteEntityIds } = useEntityOverrides();
+  const { states } = useStateSearch(searchText, "", "battery", allStates, entityAliases);
 
   if (error) {
     showToast({
@@ -22,12 +24,23 @@ export function BatteryList(): React.ReactElement {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
-  const sortedStates = sortBatteries(states);
+  const batteryStates = sortBatteries(states) ?? states;
+  const { favorites, others } = partitionFavoriteStates(batteryStates, favoriteEntityIds);
+
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {sortedStates?.map((state) => (
-        <StateListItem key={state.entity_id} state={state} />
-      ))}
+      {favorites.length > 0 && (
+        <List.Section title="Favorites" subtitle={`${favorites.length}`}>
+          {favorites.map((state) => (
+            <StateListItem key={state.entity_id} state={state} />
+          ))}
+        </List.Section>
+      )}
+      <List.Section title={favorites.length > 0 ? "Batteries" : undefined} subtitle={`${others.length}`}>
+        {others.map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
+      </List.Section>
     </List>
   );
 }

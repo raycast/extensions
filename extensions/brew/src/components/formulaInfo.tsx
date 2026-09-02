@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
-import { Formula, brewIsInstalled, brewPrefix, brewFetchFormulaInfo, uiLogger, ensureError } from "../utils";
-import { Dependencies } from "./dependencies";
+import { Formula, brewPrefix, brewFetchFormulaInfo, uiLogger, ensureError } from "../utils";
+import { DetailMetadata, formulaMetadataRows } from "./packageMetadata";
+import { usePackageDetail } from "../hooks/usePackageDetail";
 
 /**
  * Check if a formula has minimal data (from fast list) vs full data.
@@ -18,6 +19,9 @@ export function FormulaInfo(props: {
   onAction: (result: boolean) => void;
 }) {
   const { pop } = useNavigation();
+  // Fetched once here and shared by both metadata blocks below. Always executed:
+  // unlike a list row, this view exists only because the user opened it.
+  const packageDetail = usePackageDetail(props.formula.name, false, true);
   const [formula, setFormula] = useState<Formula>(props.formula);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -90,30 +94,20 @@ export function FormulaInfo(props: {
       isLoading={isLoading}
       markdown={formatInfo(formula)}
       metadata={
-        <Detail.Metadata>
-          {formula.homepage ? (
-            <Detail.Metadata.Link title="Homepage" text={formula.homepage} target={formula.homepage} />
-          ) : (
-            <Detail.Metadata.Label title="Homepage" text="Loading..." />
-          )}
-          {formula.license && <Detail.Metadata.Label title="License" text={formula.license} />}
-          <Detail.Metadata.Label title="Versions" text={formatVersions(formula)} />
-          {formula.versions.head && <Detail.Metadata.Label title="" text={formula.versions.head} />}
-          <Dependencies title="Dependencies" dependencies={formula.dependencies} isInstalled={props.isInstalled} />
-          <Dependencies
-            title="Build Dependencies"
-            dependencies={formula.build_dependencies}
-            isInstalled={props.isInstalled}
-          />
-          <Dependencies title="Conflicts With" dependencies={formula.conflicts_with} isInstalled={props.isInstalled} />
-          {formula.pinned && <Detail.Metadata.Label title="Pinned" text="Yes" />}
-          {formula.keg_only && <Detail.Metadata.Label title="Keg Only" text="Yes" />}
-        </Detail.Metadata>
+        <DetailMetadata
+          rows={formulaMetadataRows(formula, {
+            isInstalled: props.isInstalled,
+            detail: packageDetail,
+            // The markdown pane already renders the description and caveats.
+            showDescription: true,
+            isLoading,
+          })}
+        />
       }
       actions={
         <FormulaActionPanel
           formula={formula}
-          showDetails={false}
+          showDetailsAction={false}
           isInstalled={props.isInstalled}
           onAction={(result) => {
             pop();
@@ -134,21 +128,6 @@ ${formula.desc}
 
 ${formatCaveats(formula)}
   `;
-}
-
-function formatVersions(formula: Formula): string {
-  const versions = formula.versions;
-  const status = [];
-  if (versions.bottle) {
-    status.push("bottled");
-  }
-  if (brewIsInstalled(formula)) {
-    status.push("installed");
-  }
-  if (formula.installed.first()?.installed_as_dependency) {
-    status.push("dependency");
-  }
-  return `${versions.stable} ${status ? `(${status.join(", ")})` : ""}`;
 }
 
 function formatCaveats(formula: Formula): string {

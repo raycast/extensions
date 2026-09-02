@@ -5,19 +5,20 @@
   "description": "Get instant access to Premier League data right from your Raycast menu. Easily search for teams, players, fixtures, results, standings and awards.",
   "icon": "icon.png",
   "author": "anhthang",
-  "license": "MIT",
   "contributors": [
-    "stelo"
+    "stelo",
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Data",
     "Other",
     "Fun"
   ],
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "table",
@@ -28,7 +29,13 @@
     {
       "name": "match",
       "title": "Matches",
-      "description": "View fixtures, results, and archives in one place.",
+      "description": "Look back over completed matches, working back through the season.",
+      "mode": "view"
+    },
+    {
+      "name": "fixture",
+      "title": "Fixtures",
+      "description": "Follow matches in progress and browse what is still to come.",
       "mode": "view"
     },
     {
@@ -72,21 +79,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^2.2.2",
-    "axios": "^1.13.2",
-    "date-fns": "^4.1.0",
+    "@raycast/api": "^2.0.6",
+    "@raycast/utils": "^2.3.0",
+    "axios": "^1.20.0",
+    "date-fns": "^4.4.0",
     "json2md": "^2.0.3",
     "lodash.groupby": "^4.6.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/json2md": "^1.5.4",
     "@types/lodash.groupby": "^4.6.9",
-    "@types/react": "^19.2.2",
-    "eslint": "^9.39.1",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.3"
+    "@types/react": "^19.2.18",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",

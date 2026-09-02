@@ -1,11 +1,11 @@
-// 북마크 URL로부터 favicon URL을 resolve한다.
-// 서버가 내부망에 접근할 수 없기 때문에 클라이언트 측에서 수행한다.
-// 1) HTML을 fetch하여 <link rel="icon"> 등에서 href 추출
-// 2) 실패 시 <origin>/favicon.ico를 GET으로 확인
+// Resolves the favicon URL from a bookmark URL.
+// The server cannot reach internal networks, so this runs on the client side.
+// 1) Fetch the HTML and extract href from <link rel="icon"> etc.
+// 2) On failure, check <origin>/favicon.ico with a GET
 
 const FETCH_TIMEOUT_MS = 5000;
 
-// 일부 사이트는 Node 기본 UA로 오면 403/봇차단 → 브라우저 UA로 위장.
+// Some sites return 403 / block bots when hit with Node's default UA → disguise as a browser UA.
 const BROWSER_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
@@ -44,7 +44,7 @@ function extractIconHref(html: string): string | null {
   }
 
   if (candidates.length === 0) return null;
-  // 우선순위: icon > shortcut icon > apple-touch-icon
+  // Priority: icon > shortcut icon > apple-touch-icon
   const byRel = (r: string) => candidates.find((c) => c.rel.includes(r))?.href;
   return byRel("icon") || byRel("shortcut") || byRel("apple-touch") || candidates[0].href;
 }
@@ -53,14 +53,14 @@ export async function resolveFaviconUrl(pageUrl: string): Promise<string | null>
   let origin: string;
   try {
     const parsed = new URL(pageUrl);
-    // fetchPageTitle과 동일하게 웹 URL만 처리. mailto:, file:, data: 등은 fetch하지 않는다.
+    // Same as fetchPageTitle: handle web URLs only. Do not fetch mailto:, file:, data:, etc.
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
     origin = parsed.origin;
   } catch {
     return null;
   }
 
-  // 1) HTML 파싱 시도
+  // 1) Try parsing the HTML
   try {
     const res = await fetchWithTimeout(pageUrl);
     if (res.ok) {
@@ -70,21 +70,21 @@ export async function resolveFaviconUrl(pageUrl: string): Promise<string | null>
         try {
           return new URL(href, pageUrl).toString();
         } catch {
-          // href가 깨진 URL인 경우 무시하고 fallback으로.
+          // If href is a malformed URL, ignore it and go to the fallback.
         }
       }
     }
   } catch {
-    // 네트워크 실패 / 타임아웃 → fallback 시도
+    // Network failure / timeout → try the fallback
   }
 
-  // 2) /favicon.ico fallback. 일부 서버가 HEAD에 405를 주기 때문에 GET 사용.
+  // 2) /favicon.ico fallback. Use GET because some servers respond 405 to HEAD.
   try {
     const fallback = `${origin}/favicon.ico`;
     const res = await fetchWithTimeout(fallback);
     if (res.ok) return fallback;
   } catch {
-    // 무시
+    // Ignore
   }
 
   return null;

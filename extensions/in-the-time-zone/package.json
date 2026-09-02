@@ -23,6 +23,28 @@
   ],
   "preferences": [
     {
+      "name": "timeFormat",
+      "type": "dropdown",
+      "title": "Time Format",
+      "description": "Choose how times are displayed.",
+      "data": [
+        {
+          "title": "System Default",
+          "value": "system"
+        },
+        {
+          "title": "12-hour",
+          "value": "12-hour"
+        },
+        {
+          "title": "24-hour",
+          "value": "24-hour"
+        }
+      ],
+      "default": "system",
+      "required": false
+    },
+    {
       "name": "defaultScrubMinutes",
       "type": "dropdown",
       "title": "Arrow Key Scrub Minutes",

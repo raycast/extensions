@@ -18,14 +18,15 @@ import { ManageAccountsForm } from "./accounts/ManageAccountsForm.tsx";
 import type { AccountUsageState } from "./accounts/types.ts";
 import { formatErrorMarkdown } from "./agents/detail-format.ts";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
-import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId } from "./agents/order.ts";
+import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId, getRequestedSelectedRowId } from "./agents/order.ts";
 import {
+  useAihubmixUsage,
   useAmpUsage,
   useAntigravityUsage,
   useClaudeUsage,
   useClinePassAccounts,
   useCodexAccounts,
-  useCopilotUsage,
+  useCopilotAccounts,
   useCursorUsage,
   useDeepSeekUsage,
   useDroidUsage,
@@ -40,6 +41,8 @@ import {
 } from "./agents/provider-hooks.ts";
 import type { Accessory, AgentDefinition, AgentId, AgentVisibilityPreferences, UsageState } from "./agents/types.ts";
 import { getListIcon } from "./agents/ui.tsx";
+import { formatAihubmixUsageText, getAihubmixAccessory, renderAihubmixDetail } from "./aihubmix/renderer.tsx";
+import type { AihubmixError, AihubmixUsage } from "./aihubmix/types.ts";
 import { formatAmpUsageText, getAmpAccessory, renderAmpDetail } from "./amp/renderer.tsx";
 import type { AmpError, AmpUsage } from "./amp/types.ts";
 import {
@@ -93,9 +96,10 @@ interface AgentRegistryEntry<TUsage, TError extends ErrorLike> extends AgentDefi
 }
 
 /** Providers rendered from account rows — they have no single-usage hook. */
-type MultiAccountAgentId = "clinepass" | "codex" | "kimi" | "synthetic" | "zai";
+type MultiAccountAgentId = "clinepass" | "codex" | "copilot" | "kimi" | "synthetic" | "zai";
 
 interface AgentUsageById {
+  aihubmix: AihubmixUsage;
   amp: AmpUsage;
   claude: ClaudeUsage;
   clinepass: ClinePassUsage;
@@ -116,6 +120,7 @@ interface AgentUsageById {
 }
 
 interface AgentErrorById {
+  aihubmix: AihubmixError;
   amp: AmpError;
   claude: ClaudeError;
   clinepass: ClinePassError;
@@ -173,7 +178,7 @@ interface AccountedAgentView {
   /** The account id, for use in the manage-accounts form */
   accountId: string;
   /** The provider key, for use in the manage-accounts form */
-  provider: "clinepass" | "kimi" | "zai" | "codex" | "synthetic";
+  provider: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic";
   /** Whether this provider is supported (always true for accounted views) */
   isSupported: boolean;
   /** The API token for this account (for copying) */
@@ -184,6 +189,18 @@ interface AccountedAgentView {
 }
 
 const AGENT_REGISTRY: AgentRegistry = {
+  aihubmix: {
+    id: "aihubmix",
+    name: "AIHubMix",
+    icon: "aihubmix.svg",
+    description: "AIHubMix API Balance",
+    isSupported: true,
+    settingsUrl: "https://console.aihubmix.com/statistics",
+    useUsage: useAihubmixUsage,
+    renderDetail: renderAihubmixDetail,
+    getAccessory: getAihubmixAccessory,
+    formatUsageText: formatAihubmixUsageText,
+  },
   amp: {
     id: "amp",
     name: "Amp",
@@ -237,7 +254,6 @@ const AGENT_REGISTRY: AgentRegistry = {
     description: "GitHub Copilot",
     isSupported: true,
     settingsUrl: "https://github.com/settings/copilot",
-    useUsage: useCopilotUsage,
     renderDetail: renderCopilotDetail,
     getAccessory: getCopilotAccessory,
     formatUsageText: formatCopilotUsageText,
@@ -417,7 +433,7 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
   providerName: string,
   icon: string,
   settingsUrl: string | undefined,
-  provider: "clinepass" | "kimi" | "zai" | "codex" | "synthetic",
+  provider: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic",
   isVisible: boolean,
   accountStates: AccountUsageState<TUsage, TError>[],
   renderDetail: (usage: TUsage | null, error: TError | null) => React.ReactNode,
@@ -455,6 +471,7 @@ function getAccountedTitle(providerName: string, label: string): string {
 function getProviderName(agentId: MultiAccountAgentId): string {
   if (agentId === "clinepass") return "ClinePass";
   if (agentId === "codex") return "Codex";
+  if (agentId === "copilot") return "Copilot";
   if (agentId === "kimi") return "Kimi";
   if (agentId === "zai") return "z.ai";
   return "Synthetic";
@@ -465,9 +482,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const { push } = useNavigation();
 
   // Hooks must be called unconditionally at top level (React rules)
+  const aihubmixState = AGENT_REGISTRY.aihubmix.useUsage(Boolean(prefs.showAihubmix));
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
   const claudeState = AGENT_REGISTRY.claude.useUsage(Boolean(prefs.showClaude));
-  const copilotState = AGENT_REGISTRY.copilot.useUsage(Boolean(prefs.showCopilot));
   const cursorState = AGENT_REGISTRY.cursor.useUsage(Boolean(prefs.showCursor));
   const deepseekState = AGENT_REGISTRY.deepseek.useUsage(Boolean(prefs.showDeepSeek));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
@@ -481,14 +498,15 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   // Multi-account providers
   const clinePassState = useClinePassAccounts(Boolean(prefs.showClinePass));
   const codexState = useCodexAccounts(Boolean(prefs.showCodex));
+  const copilotState = useCopilotAccounts(Boolean(prefs.showCopilot));
   const kimiState = useKimiAccounts(Boolean(prefs.showKimi));
   const syntheticState = useSyntheticAccounts(Boolean(prefs.showSynthetic));
   const zaiState = useZaiAccounts(Boolean(prefs.showZai));
 
   const agentViews: Omit<Record<AgentId, AgentView>, MultiAccountAgentId> = {
+    aihubmix: createAgentView(AGENT_REGISTRY.aihubmix, aihubmixState, Boolean(prefs.showAihubmix)),
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
     claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
-    copilot: createAgentView(AGENT_REGISTRY.copilot, copilotState, Boolean(prefs.showCopilot)),
     cursor: createAgentView(AGENT_REGISTRY.cursor, cursorState, Boolean(prefs.showCursor)),
     deepseek: createAgentView(AGENT_REGISTRY.deepseek, deepseekState, Boolean(prefs.showDeepSeek)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
@@ -524,6 +542,19 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     renderKimiDetail,
     getKimiAccessory,
     formatKimiUsageText,
+  );
+
+  const copilotAccountedViews = createAccountedViews(
+    "copilot",
+    "Copilot",
+    AGENT_REGISTRY.copilot.icon,
+    AGENT_REGISTRY.copilot.settingsUrl,
+    "copilot",
+    Boolean(prefs.showCopilot),
+    copilotState.accounts,
+    renderCopilotDetail,
+    getCopilotAccessory,
+    formatCopilotUsageText,
   );
 
   const zaiAccountedViews = createAccountedViews(
@@ -621,6 +652,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
         if (agentId === "codex") {
           return codexAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
         }
+        if (agentId === "copilot") {
+          return copilotAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
+        }
         if (agentId === "kimi") {
           return kimiAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
         }
@@ -641,6 +675,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
       agentOrder,
       clinePassAccountedViews,
       codexAccountedViews,
+      copilotAccountedViews,
       kimiAccountedViews,
       syntheticAccountedViews,
       zaiAccountedViews,
@@ -650,9 +685,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   const requestedSelectedAgentId = props.launchContext?.selectedAgentId;
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(() =>
-    typeof requestedSelectedAgentId === "string" && isAgentId(requestedSelectedAgentId)
-      ? requestedSelectedAgentId
-      : undefined,
+    getRequestedSelectedRowId(requestedSelectedAgentId),
   );
 
   useEffect(() => {
@@ -677,7 +710,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   const isLoading =
     allRows.some((row) => row.view.isLoading) ||
-    [clinePassState, codexState, kimiState, syntheticState, zaiState].some((state) => state.isLoading);
+    [clinePassState, codexState, copilotState, kimiState, syntheticState, zaiState].some((state) => state.isLoading);
 
   const hasPromptedGeminiReauth = useRef(false);
 

@@ -1,6 +1,6 @@
 // src/show-all-shelves.tsx
 import React, { useState, useEffect } from "react";
-import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Keyboard } from "@raycast/api";
 import { getAllShelves, SearchResultItem, baseUrl } from "./bookstack-api";
 import { stripHtmlTags } from "./utils";
 
@@ -36,6 +36,11 @@ export default function ShowAllShelves() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`${baseUrl}${shelf.url}`} title="View Shelf" />
+              <Action.CopyToClipboard
+                title="Copy Link"
+                content={`${baseUrl}${shelf.url}`}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
             </ActionPanel>
           }
         />

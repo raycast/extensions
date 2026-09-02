@@ -42,7 +42,7 @@ export default function Command() {
       <List.Item
         icon={Icon.Desktop}
         title="Mac → External"
-        subtitle="Mirror the MacBook screen onto the primary external display (uses first external when multiple connected)"
+        subtitle="Mirror the Mac's main display onto the primary external display (uses first external when multiple connected)"
         actions={
           <ActionPanel>
             <Action title="Mirror Mac to External" icon={Icon.Desktop} onAction={() => handleAction("mac")} />
@@ -52,7 +52,7 @@ export default function Command() {
       <List.Item
         icon={Icon.Monitor}
         title="External → Mac"
-        subtitle="Mirror the primary external display onto the MacBook screen (uses first external when multiple connected)"
+        subtitle="Mirror the primary external display onto the Mac's main display (uses first external when multiple connected)"
         actions={
           <ActionPanel>
             <Action title="Mirror External to Mac" icon={Icon.Monitor} onAction={() => handleAction("external")} />

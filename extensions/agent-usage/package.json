@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-usage",
-  "description": "Monitor AI coding agent usage across Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, Synthetic and z.ai",
+  "description": "Monitor AI coding agent usage across AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, Synthetic and z.ai",
   "categories": [
     "Productivity"
   ],
@@ -12,7 +12,9 @@
     "adrianbonpin",
     "garrick_zhang",
     "EDM115",
-    "chingweih"
+    "chingweih",
+    "jalenzz",
+    "Jakoss"
   ],
   "type": "module",
   "scripts": {
@@ -23,7 +25,7 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'",
+    "test": "node --test --experimental-strip-types \"src/**/*.test.ts\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -66,9 +68,24 @@
   ],
   "preferences": [
     {
-      "name": "showAmp",
+      "name": "showAihubmix",
       "type": "checkbox",
       "title": "Visible Agents",
+      "label": "Show AIHubMix",
+      "description": "Show AIHubMix balance in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "aihubmixApiKey",
+      "type": "password",
+      "title": "AIHubMix Access Key (Optional)",
+      "description": "Copy the Access Key from https://console.aihubmix.com/setting, or set AIHUBMIX_ACCESS_KEY in your shell.",
+      "required": false
+    },
+    {
+      "name": "showAmp",
+      "type": "checkbox",
       "label": "Show Amp",
       "description": "Show Amp usage in the list",
       "default": true,
@@ -125,8 +142,8 @@
     {
       "name": "copilotAuthToken",
       "type": "password",
-      "title": "Copilot Authorization Token (Optional)",
-      "description": "Optional fallback OAuth token for Copilot usage. Usually auto-detected from GH_TOKEN or GITHUB_TOKEN (for example from 'gh auth token'). Standard PATs may not work.",
+      "title": "Legacy Copilot Token (Optional)",
+      "description": "Existing single-account token. Add named accounts with Manage Accounts. Authentication is auto-detected from GitHub CLI first, then GH_TOKEN or GITHUB_TOKEN. Standard PATs may not work.",
       "required": false
     },
     {

@@ -1,6 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 
 import { loadAccounts } from "../accounts/storage.ts";
+import { resolveAihubmixAccessKey } from "../aihubmix/auth.ts";
+import { fetchAihubmixUsage } from "../aihubmix/fetcher.ts";
+import type { AihubmixError, AihubmixUsage } from "../aihubmix/types.ts";
 import { fetchAmpUsage } from "../amp/fetcher.ts";
 import type { AmpError, AmpUsage } from "../amp/types.ts";
 import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
@@ -16,7 +19,8 @@ import { buildCodexAccountCandidates } from "../codex/accounts.ts";
 import { listCodexOAuthAccounts, parseAdditionalCodexHomes } from "../codex/auth.ts";
 import { fetchCodexUsage } from "../codex/fetcher.ts";
 import type { CodexError, CodexUsage } from "../codex/types.ts";
-import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "../copilot/auth.ts";
+import { buildCopilotAccountCandidates } from "../copilot/accounts.ts";
+import { resolveCopilotAuthTokens } from "../copilot/auth.ts";
 import { fetchCopilotUsage } from "../copilot/fetcher.ts";
 import type { CopilotError, CopilotUsage } from "../copilot/types.ts";
 import { fetchCursorUsage, resolveCursorCredential } from "../cursor/fetcher.ts";
@@ -60,6 +64,7 @@ import { readOpencodeAuthToken } from "./opencode-auth.ts";
 // Root-level preferences shared by both commands.
 type SharedPrefs = {
   additionalCodexHomes?: string;
+  aihubmixApiKey?: string;
   copilotAuthToken?: string;
   cursorCookieHeader?: string;
   deepseekApiKey?: string;
@@ -75,6 +80,25 @@ type SharedPrefs = {
 function prefValue(key: keyof SharedPrefs): string {
   return getPreferenceValues<SharedPrefs>()[key]?.trim() || "";
 }
+
+export const useAihubmixUsage = createUsageHook<AihubmixUsage, AihubmixError>({
+  agentId: "aihubmix",
+  resolveAuthKey: async () => (await resolveAihubmixAccessKey(prefValue("aihubmixApiKey"))) ?? "",
+  fetcher: async () => {
+    const accessKey = await resolveAihubmixAccessKey(prefValue("aihubmixApiKey"));
+    if (!accessKey) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "AIHubMix Access Key not configured. Copy it from https://console.aihubmix.com/setting, then paste it in extension settings (Cmd+,) or set AIHUBMIX_ACCESS_KEY in your shell.",
+        },
+      };
+    }
+    return fetchAihubmixUsage(accessKey);
+  },
+});
 
 export const useAmpUsage = createUsageHook<AmpUsage, AmpError>({
   agentId: "amp",
@@ -96,35 +120,26 @@ export const useClaudeUsage = createUsageHook<ClaudeUsage, ClaudeError>({
   },
 });
 
-async function resolveCopilotTokens() {
-  return resolveCopilotAuthTokens({ preferenceToken: prefValue("copilotAuthToken") });
-}
-
-export const useCopilotUsage = createUsageHook<CopilotUsage, CopilotError>({
+export const useCopilotAccounts = createAccountsHook<
+  CopilotUsage,
+  CopilotError,
+  ReturnType<typeof buildCopilotAccountCandidates>[number]
+>({
   agentId: "copilot",
-  resolveAuthKey: async () => {
-    const { primaryToken, preferenceToken } = await resolveCopilotTokens();
-    return `${primaryToken ?? ""}\n${preferenceToken ?? ""}`;
+  getAccounts: async () => {
+    const { cliToken, githubToken, ghToken } = await resolveCopilotAuthTokens();
+    return buildCopilotAccountCandidates({
+      manualAccounts: await loadAccounts("copilot"),
+      preferenceToken: prefValue("copilotAuthToken"),
+      cliToken,
+      githubToken,
+      ghToken,
+    });
   },
-  fetcher: async () => {
-    const { primaryToken, localToken, preferenceToken } = await resolveCopilotTokens();
-    if (!primaryToken) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message: "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add a token in extension settings (Cmd+,).",
-        },
-      };
-    }
-    let result = await fetchCopilotUsage(primaryToken);
-    if (
-      preferenceToken &&
-      shouldFallbackToPreferenceToken({ localToken, preferenceToken, errorType: result.error?.type })
-    ) {
-      result = await fetchCopilotUsage(preferenceToken);
-    }
-    return result;
+  fetcher: (account) => fetchCopilotUsage(account.token),
+  noAccountsError: {
+    type: "not_configured",
+    message: "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add an account via Manage Accounts.",
   },
 });
 

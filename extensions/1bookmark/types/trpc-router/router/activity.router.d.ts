@@ -31,7 +31,11 @@ export declare const activityRouter: import("@trpc/server").TRPCBuiltRouter<{
         input: {
             type: "BOOKMARK_OPEN" | "BOOKMARK_COPY";
             spaceId: string;
-            data: Record<string, string>;
+            data: {
+                bookmarkId: string;
+            } & {
+                [k: string]: string;
+            };
         };
         output: void;
         meta: object;

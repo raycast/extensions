@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Icon, List, popToRoot, Color } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, popToRoot, Color, closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import path from "path";
 import { useEffect, useState } from "react";
 import fs from "fs";
-import { folderName, log } from "../utils";
-import { SpotlightSearchResult } from "../types";
+import { folderName, log, openNewFinderTab, openInCurrentFinderTab } from "../utils";
+import { SpotlightSearchResult, SpotlightSearchPreferences } from "../types";
 import { useFolderSearch } from "../hooks/useFolderSearch";
 
 interface DirectoryProps {
@@ -151,6 +151,63 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
         {files.map((file) => {
           const filePath = path.join(directoryPath, file);
           const result = createSpotlightResult(filePath);
+          const { openBehaviour } = getPreferenceValues<SpotlightSearchPreferences>();
+
+          const openInNewWindowAction = (
+            <Action.Open
+              title="Open in New Finder Window"
+              icon={Icon.Folder}
+              target={filePath}
+              onOpen={() => {
+                handleReturn();
+                popToRoot({ clearSearchBar: true });
+              }}
+            />
+          );
+
+          const openInNewTabAction = (
+            <Action
+              title="Open in New Finder Tab"
+              icon={Icon.Finder}
+              onAction={async () => {
+                try {
+                  await closeMainWindow();
+                  await openNewFinderTab(filePath);
+                  handleReturn();
+                  popToRoot({ clearSearchBar: true });
+                } catch (error) {
+                  showFailureToast(error, { title: "Could not open folder in Finder" });
+                }
+              }}
+            />
+          );
+
+          const openInCurrentTabAction = (
+            <Action
+              title="Open in Current Finder Tab"
+              icon={Icon.AppWindow}
+              onAction={async () => {
+                try {
+                  await closeMainWindow();
+                  await openInCurrentFinderTab(filePath);
+                  handleReturn();
+                  popToRoot({ clearSearchBar: true });
+                } catch (error) {
+                  showFailureToast(error, { title: "Could not open folder in Finder" });
+                }
+              }}
+            />
+          );
+
+          const openActions = {
+            newWindow: openInNewWindowAction,
+            newTab: openInNewTabAction,
+            currentTab: openInCurrentTabAction,
+          };
+          const orderedOpenActions = [
+            openBehaviour,
+            ...(Object.keys(openActions) as (keyof typeof openActions)[]).filter((key) => key !== openBehaviour),
+          ];
 
           return (
             <List.Item
@@ -160,15 +217,9 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
               accessories={resultIsPinned(result) ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []}
               actions={
                 <ActionPanel title={folderName(result)}>
-                  <Action.Open
-                    title="Open in Finder"
-                    icon={Icon.Folder}
-                    target={filePath}
-                    onOpen={() => {
-                      handleReturn();
-                      popToRoot({ clearSearchBar: true });
-                    }}
-                  />
+                  {openActions[orderedOpenActions[0]]}
+                  {openActions[orderedOpenActions[1]]}
+                  {openActions[orderedOpenActions[2]]}
                   <Action.OpenWith
                     title="Open with…"
                     shortcut={{ modifiers: ["cmd"], key: "o" }}

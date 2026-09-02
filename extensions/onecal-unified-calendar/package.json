@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "onecal-unified-calendar",
+  "title": "OneCal Unified Calendar",
+  "description": "View your OneCal unified calendar in Raycast - all events across synced calendars, with clone events hidden",
+  "icon": "icon.png",
+  "author": "keito4",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "unified-calendar",
+      "title": "Unified Calendar",
+      "subtitle": "OneCal",
+      "description": "List events from all synced calendars (clone events hidden by default)",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "date",
+          "placeholder": "YYYY-MM-DD",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "OneCal MCP Client ID",
+      "description": "Client ID of the MCP client created in OneCal Settings > MCP Config",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "clientSecret",
+      "title": "OneCal MCP Client Secret",
+      "description": "Client Secret of the MCP client (shown only once at creation)",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "daysAhead",
+      "title": "Days to Show",
+      "description": "How many days of events to show from the start date",
+      "type": "dropdown",
+      "required": false,
+      "default": "7",
+      "data": [
+        {
+          "title": "1 day",
+          "value": "1"
+        },
+        {
+          "title": "3 days",
+          "value": "3"
+        },
+        {
+          "title": "7 days",
+          "value": "7"
+        },
+        {
+          "title": "14 days",
+          "value": "14"
+        }
+      ]
+    },
+    {
+      "name": "hideClones",
+      "title": "Clone Events",
+      "label": "Hide clone events created by OneCal Sync",
+      "description": "Same behavior as \"Hide Clone Events\" in the OneCal Unified Calendar View",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}

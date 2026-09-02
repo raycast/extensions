@@ -28,16 +28,20 @@ export const getIncidents = async (page = 1, perPage = 20) => {
 
 export const getOpenIncidents = async (page = 1, perPage = 20) => {
   const user = await getUser();
-  const response = await apiClient.post("/incidents/load-incident-table", {
-    query: {
-      org: user.org,
-      status: { $in: ["NACK", "ACK"] },
+  // Pagination has to travel in the query string: the route builds its reader from
+  // `req.query` and never reads the body, so page/perPage sent as body fields were
+  // silently dropped and every page came back as page 1 — the infinite scroll then
+  // appended the same rows over and over.
+  const response = await apiClient.post(
+    "/incidents/load-incident-table",
+    {
+      query: {
+        org: user.org,
+        status: { $in: ["NACK", "ACK"] },
+      },
     },
-    queryParams: {
-      page,
-      perPage,
-    },
-  });
+    { params: { page, perPage } },
+  );
   return response.data;
 };
 

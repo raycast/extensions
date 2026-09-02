@@ -68,9 +68,12 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.8",
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
     "ws": "^8.21.0",
     "js-yaml@4": "4.3.1",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.3",
+    "ip-address": "10.5.0"
   }
 }
