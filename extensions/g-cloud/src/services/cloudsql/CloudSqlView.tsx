@@ -28,12 +28,20 @@ interface StatusInfo {
 }
 
 /**
- * A stopped instance still reports state RUNNABLE; the stop is expressed as
+ * "stopped" is deliberately narrower than "not running": only a stopped instance can be
+ * started again with an activation-policy change, so only it should be offered that.
+ * A creating, failed or under-maintenance instance is transitional — it also cannot serve
+ * database and user listings, but telling someone to start it would be wrong.
+ *
+ * Note a stopped instance still reports state RUNNABLE; the stop is expressed as
  * settings.activationPolicy NEVER, which is what gcloud's own STATUS column reflects.
  */
-function isInstanceStopped(instance: CloudSqlInstance): boolean {
-  if (instance.settings?.activationPolicy === "NEVER") return true;
-  return instance.state !== undefined && instance.state !== "RUNNABLE";
+type InstanceAvailability = "running" | "stopped" | "transitional";
+
+function getInstanceAvailability(instance: CloudSqlInstance): InstanceAvailability {
+  if (instance.settings?.activationPolicy === "NEVER" || instance.state === "STOPPED") return "stopped";
+  if (instance.state === undefined || instance.state === "RUNNABLE") return "running";
+  return "transitional";
 }
 
 function getInstanceStatus(instance: CloudSqlInstance): StatusInfo {
@@ -124,31 +132,13 @@ function InstanceNavigationSection({ instance, projectId, gcloudPath, onViewDeta
         title="View Databases"
         icon={Icon.List}
         shortcut={{ modifiers: ["cmd"], key: "d" }}
-        onAction={() =>
-          push(
-            <DatabasesView
-              projectId={projectId}
-              gcloudPath={gcloudPath}
-              instanceName={instance.name}
-              instanceStopped={isInstanceStopped(instance)}
-            />,
-          )
-        }
+        onAction={() => push(<DatabasesView projectId={projectId} gcloudPath={gcloudPath} instance={instance} />)}
       />
       <Action
         title="View Users"
         icon={Icon.Person}
         shortcut={{ modifiers: ["cmd"], key: "u" }}
-        onAction={() =>
-          push(
-            <UsersView
-              projectId={projectId}
-              gcloudPath={gcloudPath}
-              instanceName={instance.name}
-              instanceStopped={isInstanceStopped(instance)}
-            />,
-          )
-        }
+        onAction={() => push(<UsersView projectId={projectId} gcloudPath={gcloudPath} instance={instance} />)}
       />
       <Action
         title="View Backups"
@@ -433,8 +423,13 @@ interface SubViewProps {
   projectId: string;
   gcloudPath: string;
   instanceName: string;
-  /** Databases and users can only be listed while the instance is actually running. */
-  instanceStopped?: boolean;
+}
+
+/** Databases and users can only be listed while the instance is actually running. */
+interface InstanceSubViewProps {
+  projectId: string;
+  gcloudPath: string;
+  instance: CloudSqlInstance;
 }
 
 /** The API rejects databases/users listings on a stopped instance with a 400. */
@@ -446,46 +441,68 @@ function isInstanceNotRunningError(message: string): boolean {
  * A stopped instance is an ordinary state, not a failure, so it gets an explanation
  * and a way forward rather than the generic API error screen.
  */
-function InstanceStoppedView({
-  instanceName,
+function InstanceNotRunningView({
+  instance,
   projectId,
   resource,
 }: {
-  instanceName: string;
+  instance: CloudSqlInstance;
   projectId: string;
   resource: string;
 }) {
+  const availability = getInstanceAvailability(instance);
+  const status = getInstanceStatus(instance);
+
+  // The third case is reached only via the error fallback, when the cached state still
+  // says RUNNABLE but the API has already rejected the request.
+  const { title, reason } =
+    availability === "stopped"
+      ? { title: "Instance Is Stopped", reason: "is stopped. Start the instance to see them." }
+      : availability === "transitional"
+        ? {
+            title: `Instance Is ${status.text}`,
+            reason: `is ${status.text.toLowerCase()}. Try again once it is running.`,
+          }
+        : { title: "Instance Is Not Running", reason: "is not running. Try again once it is running." };
+
   return (
     <List.EmptyView
-      title="Instance Is Stopped"
-      description={`Cloud SQL cannot list ${resource} while "${instanceName}" is stopped. Start the instance to see them.`}
-      icon={{ source: Icon.Stop, tintColor: Color.SecondaryText }}
+      title={title}
+      description={`Cloud SQL cannot list ${resource} while "${instance.name}" ${reason}`}
+      icon={{
+        source: availability === "stopped" ? Icon.Stop : Icon.Clock,
+        tintColor: availability === "stopped" ? Color.SecondaryText : status.color,
+      }}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Console"
-            url={`https://console.cloud.google.com/sql/instances/${instanceName}/overview?project=${projectId}`}
+            url={`https://console.cloud.google.com/sql/instances/${instance.name}/overview?project=${projectId}`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           />
-          <Action.CopyToClipboard
-            title="Copy Start Command"
-            content={`gcloud sql instances patch ${instanceName} --project=${projectId} --activation-policy=ALWAYS`}
-          />
+          {/* Only a stopped instance can be brought back with an activation-policy change. */}
+          {availability === "stopped" && (
+            <Action.CopyToClipboard
+              title="Copy Start Command"
+              content={`gcloud sql instances patch ${instance.name} --project=${projectId} --activation-policy=ALWAYS`}
+            />
+          )}
         </ActionPanel>
       }
     />
   );
 }
 
-function DatabasesView({ projectId, gcloudPath, instanceName, instanceStopped }: SubViewProps) {
+function DatabasesView({ projectId, gcloudPath, instance }: InstanceSubViewProps) {
+  const instanceName = instance.name;
   const [isLoading, setIsLoading] = useState(true);
   const [databases, setDatabases] = useState<CloudSqlDatabase[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const isStopped = instanceStopped === true;
+  const isRunning = getInstanceAvailability(instance) === "running";
 
   useEffect(() => {
     // Skip the request entirely when we already know it will be rejected.
-    if (isStopped) {
+    if (!isRunning) {
       setIsLoading(false);
       return;
     }
@@ -508,10 +525,10 @@ function DatabasesView({ projectId, gcloudPath, instanceName, instanceStopped }:
     }
   }
 
-  if (isStopped || (error && isInstanceNotRunningError(error))) {
+  if (!isRunning || (error && isInstanceNotRunningError(error))) {
     return (
       <List navigationTitle={`Databases - ${instanceName}`}>
-        <InstanceStoppedView instanceName={instanceName} projectId={projectId} resource="databases" />
+        <InstanceNotRunningView instance={instance} projectId={projectId} resource="databases" />
       </List>
     );
   }
@@ -564,16 +581,17 @@ function DatabasesView({ projectId, gcloudPath, instanceName, instanceStopped }:
   );
 }
 
-function UsersView({ projectId, gcloudPath, instanceName, instanceStopped }: SubViewProps) {
+function UsersView({ projectId, gcloudPath, instance }: InstanceSubViewProps) {
+  const instanceName = instance.name;
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState<CloudSqlUser[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { isEnabled: isStreamerMode } = useStreamerMode();
-  const isStopped = instanceStopped === true;
+  const isRunning = getInstanceAvailability(instance) === "running";
 
   useEffect(() => {
     // Skip the request entirely when we already know it will be rejected.
-    if (isStopped) {
+    if (!isRunning) {
       setIsLoading(false);
       return;
     }
@@ -596,10 +614,10 @@ function UsersView({ projectId, gcloudPath, instanceName, instanceStopped }: Sub
     }
   }
 
-  if (isStopped || (error && isInstanceNotRunningError(error))) {
+  if (!isRunning || (error && isInstanceNotRunningError(error))) {
     return (
       <List navigationTitle={`Users - ${instanceName}`}>
-        <InstanceStoppedView instanceName={instanceName} projectId={projectId} resource="users" />
+        <InstanceNotRunningView instance={instance} projectId={projectId} resource="users" />
       </List>
     );
   }

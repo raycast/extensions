@@ -1654,18 +1654,38 @@ export interface CloudSqlInstance {
   };
 }
 
+/** Guards against a malformed response looping forever; far above any realistic page count. */
+const SQLADMIN_MAX_PAGES = 50;
+
+/**
+ * `maxResults` means "cap the work" — the hub's bounded resource counts rely on that and
+ * stay a single page. Without it every page is followed, so nothing is silently truncated.
+ */
 export async function listCloudSqlInstances(
   gcloudPath: string,
   projectId: string,
   options?: { fields?: string; maxResults?: number },
 ): Promise<CloudSqlInstance[]> {
-  const params = new URLSearchParams();
-  if (options?.fields) params.set("fields", options.fields);
-  if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
-  const qs = params.toString() ? `?${params.toString()}` : "";
-  const url = `${SQLADMIN_API}/projects/${projectId}/instances${qs}`;
-  const response = await gcpFetch<{ items?: CloudSqlInstance[] }>(gcloudPath, url);
-  return response.items || [];
+  const paginate = !options?.maxResults;
+  const instances: CloudSqlInstance[] = [];
+  let pageToken: string | undefined;
+  let page = 0;
+
+  do {
+    const params = new URLSearchParams();
+    // A `fields` mask drops nextPageToken unless it is asked for explicitly.
+    if (options?.fields) params.set("fields", paginate ? `${options.fields},nextPageToken` : options.fields);
+    if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
+    if (pageToken) params.set("pageToken", pageToken);
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    const url = `${SQLADMIN_API}/projects/${projectId}/instances${qs}`;
+    const response = await gcpFetch<{ items?: CloudSqlInstance[]; nextPageToken?: string }>(gcloudPath, url);
+
+    instances.push(...(response.items || []));
+    pageToken = paginate ? response.nextPageToken : undefined;
+  } while (pageToken && ++page < SQLADMIN_MAX_PAGES);
+
+  return instances;
 }
 
 export async function getCloudSqlInstance(
@@ -1729,18 +1749,31 @@ export interface CloudSqlBackupRun {
   error?: { code?: number; message?: string };
 }
 
+/** Follows every page unless `maxResults` caps the request — see listCloudSqlInstances. */
 export async function listCloudSqlBackupRuns(
   gcloudPath: string,
   projectId: string,
   instanceId: string,
   options?: { maxResults?: number },
 ): Promise<CloudSqlBackupRun[]> {
-  const params = new URLSearchParams();
-  if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
-  const qs = params.toString() ? `?${params.toString()}` : "";
-  const url = `${SQLADMIN_API}/projects/${projectId}/instances/${instanceId}/backupRuns${qs}`;
-  const response = await gcpFetch<{ items?: CloudSqlBackupRun[] }>(gcloudPath, url);
-  return response.items || [];
+  const paginate = !options?.maxResults;
+  const backupRuns: CloudSqlBackupRun[] = [];
+  let pageToken: string | undefined;
+  let page = 0;
+
+  do {
+    const params = new URLSearchParams();
+    if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
+    if (pageToken) params.set("pageToken", pageToken);
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    const url = `${SQLADMIN_API}/projects/${projectId}/instances/${instanceId}/backupRuns${qs}`;
+    const response = await gcpFetch<{ items?: CloudSqlBackupRun[]; nextPageToken?: string }>(gcloudPath, url);
+
+    backupRuns.push(...(response.items || []));
+    pageToken = paginate ? response.nextPageToken : undefined;
+  } while (pageToken && ++page < SQLADMIN_MAX_PAGES);
+
+  return backupRuns;
 }
 
 export interface CloudSqlOperation {
