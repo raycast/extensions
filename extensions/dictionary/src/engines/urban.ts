@@ -24,8 +24,8 @@ type DefineList = {
   list: DefineItem[];
 };
 
-const prepareRequestUrl = (endpoint: Endpoint): ((query: string) => RequestInfo) => {
-  return (query: string): RequestInfo => {
+const prepareRequestUrl = (endpoint: Endpoint): ((query: string) => string) => {
+  return (query: string): string => {
     const term = query.replace(/ /g, "+");
     return `https://api.urbandictionary.com/v0/${endpoint}?term=${term}`;
   };
@@ -44,23 +44,22 @@ const parseListDef = (def: AutoCompleteItem) => {
       url: webUrl,
       nestedView: {
         type: "listDetail" as const,
-        depEngine: "urbandefne",
+        depEngine: "urbandefine",
       },
     },
   };
 };
 const parseDetailDef = (def: DefineItem) => {
-  const { definition, example, permalink, word, defid } = def;
+  const { definition, example, permalink, word, defid, thumbs_up, thumbs_down } = def;
   const regex = /\[([^\]]+)\]/g;
   const linkUrl = (term: string) => `${baseUrl}?term=${encodeURIComponent(term)}`;
   const encode = (str: string) => str.replace(regex, (_, term) => `[${term}](${linkUrl(term)})`);
+  const votes = thumbs_up || thumbs_down ? `\n#### 👍   ${thumbs_up}   |   👎   ${thumbs_down}\n` : "";
   const markdown = `#### Definition
 ## ${encode(definition)}
 #### Example
 > ${encode(example)}
-
-#### 👍   ${def.thumbs_up}   |   👎   ${def.thumbs_down}
-
+${votes}
 `;
   return {
     key: defid,
