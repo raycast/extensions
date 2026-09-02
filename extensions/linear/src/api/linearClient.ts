@@ -259,6 +259,25 @@ export async function activateWorkspaceInMemory(ref: EntryRef): Promise<Workspac
   return entry;
 }
 
+// AI-tool variant of activateWorkspaceInMemory (§4.3): NON-interactive, in-memory only.
+// Every AI tool call is a fresh process (spike S8), so pointing this process's sync fast
+// path at the target entry is enough for linearUtils.client() and every resolve* helper
+// to act in that workspace. A dead token throws (caller turns it into a Manage Workspaces
+// hint); nothing here ever opens a browser flow or deletes a token.
+export async function activateToolWorkspace(ref: EntryRef): Promise<WorkspaceEntry> {
+  const registry = await migrateIfNeeded({ allowWrite: false });
+  const entry = registry.workspaces.find((w) => entryKey(w) === entryKey(ref));
+  if (!entry) throw new Error(`No workspace registered for ${entryKey(ref)}`);
+  await getLinearClientFor(ref, { interactive: false });
+  activeProviderId = entry.providerId;
+  lastBootstrap = {
+    registry,
+    activeEntry: entry,
+    needsReauth: (lastBootstrap?.needsReauth ?? []).filter((key) => key !== entryKey(ref)),
+  };
+  return entry;
+}
+
 // Synchronous fast path — signature identical to today's; all 16 src/api/* callers
 // keep working unmodified in this slice.
 export function getLinearClient(): { linearClient: LinearClient; graphQLClient: LinearGraphQLClient } {

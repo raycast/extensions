@@ -1,6 +1,6 @@
 import { LinearClient } from "@linear/sdk";
 
-import { bootstrapWorkspaceAuth, getLinearClientFor } from "../api/linearClient";
+import { activateToolWorkspace, bootstrapWorkspaceAuth, getLinearClientFor } from "../api/linearClient";
 import { entryKey, getActiveEntry, migrateIfNeeded } from "../api/workspaces";
 
 function parseWorkspaceId(workspaceId: string): { orgId: string; userId: string } {
@@ -28,6 +28,24 @@ export function withToolAuth<T extends { workspaceId?: string }, R>(
       if (!inputs?.workspaceId) {
         throw new Error(
           "No authenticated Linear workspace is available. Ask the user to open the Manage Workspaces command in Raycast to sign in (or re-authenticate), or pass a workspaceId from get-workspaces to act in another workspace.",
+        );
+      }
+    }
+    if (inputs?.workspaceId) {
+      // Route the whole process at the target (D6/S8) so tools that reach the client through
+      // the sync fast path (linearUtils.client(), resolve* helpers) act in that workspace too.
+      const ref = parseWorkspaceId(inputs.workspaceId);
+      const registry = await migrateIfNeeded({ allowWrite: false });
+      if (!registry.workspaces.some((w) => entryKey(w) === inputs.workspaceId)) {
+        throw new Error(
+          `No connected workspace matches workspaceId "${inputs.workspaceId}". Call get-workspaces again and use one of its returned values.`,
+        );
+      }
+      try {
+        await activateToolWorkspace(ref);
+      } catch {
+        throw new Error(
+          `The workspace for "${inputs.workspaceId}" needs re-authentication. Ask the user to open the Manage Workspaces command in Raycast.`,
         );
       }
     }
