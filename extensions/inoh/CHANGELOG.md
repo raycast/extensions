@@ -1,5 +1,14 @@
 # Changelog
 
+## [Search Word from Screenshot] - {PR_MERGE_DATE}
+
+- New **Search Word from Screenshot** command: drag a box around a word
+  anywhere on screen and the search list opens with it looked up, for text that
+  can't be selected such as video captions, PDFs, and ebooks
+- Recognition runs on-device through Apple Vision, so no image leaves the Mac
+- Says so when a capture comes back blank, which is what DRM-protected video
+  and a missing Screen Recording permission both look like
+
 ## [iOS App Link] - 2026-08-22
 
 - The Apps section now opens the Inoh iOS app on the App Store instead of

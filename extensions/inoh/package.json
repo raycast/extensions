@@ -21,6 +21,12 @@
       "title": "Search Selected Word",
       "description": "Look up the selected word in Inoh dictionary",
       "mode": "view"
+    },
+    {
+      "name": "search-screenshot-word",
+      "title": "Search Word from Screenshot",
+      "description": "Capture a screen region and look up the text in it in Inoh",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
