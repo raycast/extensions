@@ -1,10 +1,5 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 
-interface Preferences {
-  baseUrl: string;
-  accessToken?: string;
-}
-
 export async function sendCommand(
   query: string,
   successMessage: string,

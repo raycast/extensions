@@ -6,8 +6,7 @@
   "icon": "extension-icon.png",
   "author": "lyager",
   "categories": [
-    "Productivity",
-    "System"
+    "Communication"
   ],
   "keywords": [
     "busylight",
@@ -45,7 +44,7 @@
       "name": "baseUrl",
       "type": "textfield",
       "required": false,
-      "title": "kuandoHUB URL",
+      "title": "KuandoHUB URL",
       "description": "Base URL of the kuandoHUB HTTP server (Advanced Settings in kuandoHUB)",
       "default": "http://localhost:8989",
       "placeholder": "http://localhost:8989"
