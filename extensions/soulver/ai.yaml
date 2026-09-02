@@ -1,0 +1,97 @@
+instructions: |
+  You are an assistant with access to Soulver CLI on macOS. You help users solve mathematical equations, financial calculations, currency and unit conversions, date calculations, and manage Soulver sheetbooks.
+
+  Guidelines:
+  - For quick one-off calculations, use the `solve` tool with natural language or mathematical expressions.
+  - When a sheet reference is ambiguous, inspect or list existing sheets (`list-sheets`, `read-sheet`, or `search-sheets`) before modifying or appending lines.
+  - Line numbers in Soulver sheets are 1-based indices. When updating or deleting lines (`update-line`, `delete-line`, `insert-line`), ensure you refer to the correct 1-based line number.
+  - Use `mark-line` to assign specialized behaviors to sheet lines such as `subtotal`, `running-total`, `running-budget`, `timepoint`, or standard `expression`.
+  - Use `manage-variables` for global variables shared across sheets, and `manage-definitions` for custom unit or conversion definitions.
+  - Present evaluation results clearly and concisely to the user.
+
+evals:
+  - input: "@soulver calculate a 15% tip on $86.40 and split the total between 3 people"
+    mocks:
+      solve:
+        - "33.12 USD per person"
+    expected:
+      - callsTool:
+          name: solve
+          arguments:
+            expression:
+              includes: "15% tip"
+
+  - input: "@soulver list my sheets"
+    mocks:
+      list-sheets:
+        - id: "budget-2026"
+          name: "September Budget"
+    expected:
+      - callsTool: list-sheets
+
+  - input: "@soulver add Coffee 4.50 USD to my September Budget sheet"
+    mocks:
+      append-line:
+        - id: "line-1"
+          text: "Coffee 4.50 USD"
+    expected:
+      - callsTool:
+          name: append-line
+          arguments:
+            sheet: "September Budget"
+            lineText:
+              matches: "Coffee 4[.,]50 USD"
+    usedAsExample: false
+
+  - input: "@soulver mark line 3 in September Budget as a subtotal"
+    mocks:
+      mark-line:
+        - lineNumber: 3
+          behaviour: "subtotal"
+    expected:
+      - callsTool:
+          name: mark-line
+          arguments:
+            sheet: "September Budget"
+            lineNumber: 3
+            behaviour: "subtotal"
+    usedAsExample: false
+
+  - input: "@soulver find Coffee in my sheets"
+    mocks:
+      search-sheets:
+        - sheet: "September Budget"
+          lineNumber: 1
+          text: "Coffee 4.50 USD"
+    expected:
+      - callsTool:
+          name: search-sheets
+          arguments:
+            query: "Coffee"
+
+  - input: "@soulver set my global testBudget variable to 100 USD"
+    mocks:
+      manage-variables:
+        - name: "testBudget"
+          value: "100 USD"
+    expected:
+      - callsTool:
+          name: manage-variables
+          arguments:
+            action: "set"
+            name: "testBudget"
+            value: "100 USD"
+    usedAsExample: false
+
+  - input: "@soulver export September Budget as CSV to ~/Desktop/september-budget.csv"
+    mocks:
+      export-sheet:
+        - 'Exported sheet "September Budget" as csv.'
+    expected:
+      - callsTool:
+          name: export-sheet
+          arguments:
+            sheet: "September Budget"
+            format: "csv"
+            outputPath: "~/Desktop/september-budget.csv"
+    usedAsExample: false
