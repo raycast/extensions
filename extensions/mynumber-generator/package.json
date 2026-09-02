@@ -1,28 +1,15 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mynumber-generator",
+  "title": "Mynumber Generator",
   "description": "Generate dummy but checksum-valid Mynumbers (Japanese Individual Numbers) for testing.",
+  "icon": "extension-icon.png",
+  "author": "serizawa",
   "categories": [
     "Data",
     "Developer Tools"
   ],
   "license": "MIT",
-  "author": "serizawa",
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "lint": "ray lint",
-    "fix-lint": "ray lint --fix",
-    "publish": "npx @raycast/api@latest publish"
-  },
-  "dependencies": {
-    "@raycast/api": "^1.104.24"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.6.0"
-  },
-  "icon": "extension-icon.png",
   "commands": [
     {
       "name": "generate-mynumber",
@@ -82,5 +69,25 @@
       "placeholder": "1"
     }
   ],
-  "title": "Mynumber Generator"
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "overrides": {
+    "esbuild": "0.28.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
 }

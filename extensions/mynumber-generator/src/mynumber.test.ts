@@ -1,11 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import {
-  calculateCheckDigit,
-  formatMyNumber,
-  generateMyNumber,
-  isValidMyNumber,
-} from "./mynumber.ts";
+import { calculateCheckDigit, formatMyNumber, generateMyNumber, isValidMyNumber } from "./mynumber.ts";
 
 test("calculateCheckDigit matches hand-calculated examples", () => {
   // Σ Pn×Qn = 212, 212 % 11 = 3 → 11 - 3 = 8（"123456789018" は有効なテスト用番号）

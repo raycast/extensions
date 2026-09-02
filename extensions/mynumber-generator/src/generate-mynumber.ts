@@ -1,20 +1,10 @@
-import {
-  Clipboard,
-  getPreferenceValues,
-  LaunchProps,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Clipboard, getPreferenceValues, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { formatMyNumber, generateMyNumber } from "./mynumber";
 
 const MY_NUMBERS_MAX_NUMBER = 10000;
 
-export default async function Command(
-  props: LaunchProps<{ arguments: Arguments.GenerateMynumber }>,
-) {
-  const { defaultAction, hyphenSeparated, defaultNumberOfMyNumbers } =
-    getPreferenceValues<Preferences>();
+export default async function Command(props: LaunchProps<{ arguments: Arguments.GenerateMynumber }>) {
+  const { defaultAction, hyphenSeparated, defaultNumberOfMyNumbers } = getPreferenceValues<Preferences>();
 
   const numberArg = props.arguments.numberOfMyNumbersToGenerate?.trim() || defaultNumberOfMyNumbers;
   const numberOfMyNumbers = Number(numberArg);
