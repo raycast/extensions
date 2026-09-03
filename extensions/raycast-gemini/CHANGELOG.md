@@ -11,8 +11,6 @@
 - 🧼 Auto-title chats using the latest flash-lite model from the live list, with a fallback to the default model.
 - 🐛 Fixed the broken `gemini-2.5-flash-lite` model which returned 404 for new users.
 
-
-
 ## [AI Chat UX & Naming Improvements] - 2026-04-03
 
 - 💬 Make `Enter` send messages in AI Chat instead of copying the current answer.
