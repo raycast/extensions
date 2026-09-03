@@ -1,5 +1,16 @@
 # Link Commands Changelog
 
+## [Sigils and Shared Icons] - {PR_MERGE_DATE}
+
+### Fixed
+
+- A `@scope` or `#category` typed into **Package** now moves to the control that owns it, instead of being taken as part of the brand. `Linear · @work` used to make a brand called literally that: it slugged into `linear-work.my-issues.sh` rather than `work.linear.my-issues.sh`, and the list read it back as a brand rather than a scope. A control you have already set is never overridden — a conflicting sigil is reported as dropped instead — and the move is confirmed in a line beneath the field, because the filename preview shows the outcome but never the edit.
+- Icons are stored under the package rather than the command, and an icon already in your script directory is used before the network is asked. A private or intranet host is invisible to any public favicon service, so a command for one fell back to a generic link glyph even when the right mark was already sitting beside it; storing per command also re-fetched the same image for every new command of a service.
+
+### Changed
+
+- Example values in source comments are neutral placeholders rather than names taken from one contributor's own command collection.
+
 ## [Surface Routers] - 2026-08-30
 
 ### Added

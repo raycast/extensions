@@ -5,8 +5,8 @@ import type { ScriptCommand } from "./types";
  * brand or category. Encoding three axes into those two strings is therefore a naming convention
  * rather than a schema, and this module is the one place that knows it:
  *
- *     title        @work · Abacus Board
- *     packageName  Jira
+ *     title        @work · Sprint Board
+ *     packageName  Linear
  *
  *     title        Watch Later
  *     packageName  YouTube · #media
@@ -57,6 +57,49 @@ export const facetsOf = (command: Pick<ScriptCommand, "title" | "packageName">):
   };
 };
 
+/**
+ * A whole field inside `packageName` that is nothing but a sigil and a token. Anchored as a complete
+ * field, so `Chat @ Mozilla` stays a brand.
+ */
+const TYPED_SIGIL_FIELD = /^([@#])([\p{L}\p{N}][\p{L}\p{N}_-]*)$/u;
+
+export type TypedPackage = {
+  /** What is left once any sigil field has been lifted out. Undefined when nothing remains. */
+  brand?: string;
+  environment?: string;
+  category?: string;
+};
+
+/**
+ * Splits a hand-typed `packageName` into the axes it is actually carrying, for the create form only.
+ * `Linear · @work` is someone reaching for the Environment control through the wrong field: taken
+ * literally it is a brand named `Linear · @work`, which slugs into a `linear-work.` filename the
+ * convention has no name for, and which the list view then reads back as a brand rather than a scope.
+ *
+ * Read-side parsing is deliberately untouched — `facetsOf` still takes the scope from the title, as
+ * the convention says. This describes what a person typed, never how a command on disk is interpreted.
+ */
+export const splitTypedPackage = (packageName: string | undefined): TypedPackage => {
+  const fields = (clean(packageName) ?? "")
+    .split(SEPARATOR)
+    .map((field) => field.trim())
+    .filter(Boolean);
+
+  const sigils = fields.map((field) => field.match(TYPED_SIGIL_FIELD)).filter((match) => match !== null);
+  const valueOf = (sigil: string) => sigils.find((match) => match[1] === sigil)?.[2].toLowerCase();
+
+  // The looser `Brand #category` form is honoured here too, because `facetsOf` honours it — a shape the
+  // reader accepts and the filename does not is the same disagreement in a smaller costume.
+  const rawBrand = fields.filter((field) => !TYPED_SIGIL_FIELD.test(field)).join(` ${SEPARATOR} `);
+  const categoryMatch = rawBrand.match(CATEGORY_PATTERN);
+
+  return {
+    brand: clean(categoryMatch ? categoryMatch[1] : rawBrand),
+    environment: valueOf("@"),
+    category: valueOf("#") ?? categoryMatch?.[2].toLowerCase(),
+  };
+};
+
 const titleCase = (value: string) =>
   value.replace(/[-_]+/g, " ").replace(/\p{L}+/gu, (word) => word[0].toUpperCase() + word.slice(1));
 
@@ -69,7 +112,7 @@ export const environmentName = (environment: string) => titleCase(environment);
 export const categoryName = (category: string) => titleCase(category);
 
 /**
- * A package is written by hand and carries its own capitalisation — `YouTube`, `The Orchard`, `npm`,
+ * A package is written by hand and carries its own capitalisation — `YouTube`, `The Guardian`, `npm`,
  * `france.tv` — so it is shown verbatim. Title-casing it would produce `Npm`. Environments and
  * categories are parsed lowercase out of a sigil, which is why only those two get cased.
  */

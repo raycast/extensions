@@ -15,11 +15,11 @@ import { access, chmod, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { useState } from "react";
 import { discoverScriptCommands, parseDirectoryPreference } from "./lib/discover-script-commands";
-import { facetCounts } from "./lib/convention";
+import { facetCounts, splitTypedPackage } from "./lib/convention";
 import { learnedPackages, packageForTarget } from "./lib/link-command";
 import { collapseHome } from "./lib/home-path";
 import { fetchFavicon } from "./lib/fetch-icon";
-import { brandFor, buildScript, domainOf, findPlaceholder, scriptFilename } from "./lib/generate-script";
+import { brandFor, buildScript, domainOf, findPlaceholder, scriptFilename, slugify } from "./lib/generate-script";
 
 /** Sentinel for the "New…" dropdown entry — a value no real environment or category can hold. */
 const NEW_VALUE = "\u0000new";
@@ -43,6 +43,14 @@ type CreateInput = {
   author?: string;
   authorURL?: string;
 };
+
+/**
+ * The mark a sibling command already fetched. Checked before the network: a private or intranet host is
+ * invisible to any public favicon service, so without this the second command for such a service falls to
+ * the generic link glyph even though the right icon already sits in the script directory.
+ */
+const brandIcon = async (directory: string, slug: string) =>
+  (await exists(join(directory, "assets", slug, "index.png"))) ? `./assets/${slug}/index.png` : undefined;
 
 const writeIcon = async (directory: string, slug: string, domain: string) => {
   const buffer = await fetchFavicon(domain);
@@ -72,12 +80,18 @@ const createScript = async (input: CreateInput) => {
   const destination = join(input.directory, filename);
   if (await exists(destination)) throw new Error(`${filename} already exists — edit it directly`);
 
-  // Keyed on the script's own filename rather than its title: two commands can share a title while
-  // differing in verb or tag, and a title-keyed asset folder would let the second overwrite the first's icon.
-  const assetKey = filename.replace(/\.[^.]+$/, "");
+  // Keyed on the brand, so every command for a service shares one mark. Keying on the title would let a
+  // second command overwrite the first's icon; keying on the filename, as this did, went too far the other
+  // way and gave each command a private copy — so a service's icon was re-fetched every time and
+  // byte-identical duplicates accumulated. Falls back to the filename where there is no brand to key on.
+  const brandSlug = draft.packageName ? slugify(draft.packageName) : "";
+  const assetKey = brandSlug || filename.replace(/\.[^.]+$/, "");
   const domain = domainOf(draft.target);
   const chosenIcon = input.icon.trim();
-  const iconReference = chosenIcon || (domain ? await writeIcon(input.directory, assetKey, domain) : undefined);
+  const iconReference =
+    chosenIcon ||
+    (await brandIcon(input.directory, assetKey)) ||
+    (domain ? await writeIcon(input.directory, assetKey, domain) : undefined);
 
   const { contents } = buildScript({ ...draft, iconReference });
 
@@ -101,6 +115,7 @@ const Command = () => {
   const [application, setApplication] = useState("");
   const [desktopApplication, setDesktopApplication] = useState("");
   const [icon, setIcon] = useState("");
+  const [hoisted, setHoisted] = useState("");
   const [directory, setDirectory] = useState(directories[0] ?? "");
 
   const { data: applications } = usePromise(getApplications);
@@ -127,6 +142,64 @@ const Command = () => {
   const chosenEnvironment = chosen(environment, newEnvironment);
   const chosenCategory = chosen(category, newCategory);
 
+  // Resolved once, here, and passed explicitly from now on. The brand keys the icon asset as well as the
+  // filename's brand segment, so two sides deriving it independently would file the mark under one slug
+  // while the subtitle claimed another.
+  const resolvedPackage = packageName.trim() || suggestedPackage || "";
+
+  /**
+   * A hoisted value this collection has never seen has no dropdown item to select, so it goes through the
+   * same "New…" sentinel a user would reach for by hand. Selecting a value with no matching item would
+   * leave the control showing nothing at all.
+   */
+  const selectOrCreate = (
+    value: string,
+    known: { value: string }[],
+    setValue: (next: string) => void,
+    setTyped: (next: string) => void,
+  ) => {
+    if (known.some((entry) => entry.value === value)) {
+      setValue(value);
+      return;
+    }
+
+    setValue(NEW_VALUE);
+    setTyped(value);
+  };
+
+  /**
+   * Package is the one field that drives the filename, and a sigil typed into it is someone reaching for a
+   * control that already exists a few rows away. Left alone, `Linear · @work` becomes a brand by that
+   * literal name: it slugs to `linear-work.` rather than the `work.linear.` the convention specifies, and
+   * the list reads it back as part of the brand rather than as a scope.
+   *
+   * The sigil therefore always leaves the brand. Where it lands defers to the user: a control they have
+   * already set is never overridden, and a conflicting sigil is reported as dropped instead. On blur rather
+   * than on change, because `@w` already matches and a per-keystroke hoist would swallow the token as it
+   * was being typed.
+   */
+  const hoistPackageFields = (typed: string) => {
+    const fields = splitTypedPackage(typed);
+    if (!fields.environment && !fields.category) return;
+
+    const notes: string[] = [];
+
+    if (fields.environment && environment) notes.push(`dropped @${fields.environment}, Environment is already set`);
+    if (fields.environment && !environment) {
+      selectOrCreate(fields.environment, facets.environments, setEnvironment, setNewEnvironment);
+      notes.push(`moved @${fields.environment} to Environment`);
+    }
+
+    if (fields.category && category) notes.push(`dropped #${fields.category}, Category is already set`);
+    if (fields.category && !category) {
+      selectOrCreate(fields.category, facets.categories, setCategory, setNewCategory);
+      notes.push(`moved #${fields.category} to Category`);
+    }
+
+    setPackageName(fields.brand ?? "");
+    setHoisted(`${notes.join(", ").replace(/^./, (first) => first.toUpperCase())}.`);
+  };
+
   const placeholder = findPlaceholder(target);
   const filename =
     title.trim() && target.trim()
@@ -134,7 +207,7 @@ const Command = () => {
           title,
           target,
           environment: chosenEnvironment || undefined,
-          packageName: packageName.trim() || suggestedPackage || undefined,
+          packageName: resolvedPackage || undefined,
         })
       : "";
   const preview = filename && placeholder ? `${filename} — prompts for “${placeholder}”` : filename;
@@ -158,7 +231,7 @@ const Command = () => {
         title,
         target,
         environment: chosenEnvironment,
-        packageName: packageName.trim() || suggestedPackage || "",
+        packageName: resolvedPackage,
         category: chosenCategory,
         application,
         desktopApplication,
@@ -238,8 +311,14 @@ Put {query} anywhere in a URL to make it a search command: Raycast prompts for t
         placeholder={suggestedPackage ?? "Netflix"}
         info="The app or service this belongs to, shown as the subtitle. Left empty it is taken from the target's domain. Commands sharing a package sit together in the list."
         value={packageName}
-        onChange={setPackageName}
+        onChange={(next) => {
+          setPackageName(next);
+          setHoisted("");
+        }}
+        onBlur={(event) => hoistPackageFields(event.target.value ?? "")}
       />
+
+      {hoisted ? <Form.Description text={hoisted} /> : null}
 
       <Form.Dropdown
         id="category"
