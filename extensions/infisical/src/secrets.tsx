@@ -176,7 +176,7 @@ export default function Secrets({ project }: { project: Workspace }) {
                   title={revealValues ? "Hide Values" : "Reveal Values"}
                   onAction={() => setRevealValues((reveal) => !reveal)}
                 />
-                <Action.CopyToClipboard title="Copy Secret" content={secret.secretValue} />
+                <Action.CopyToClipboard title="Copy Secret" content={secret.secretValue} concealed />
                 <Action.Push
                   icon={Icon.Pencil}
                   title="Edit Secret"
@@ -202,6 +202,7 @@ export default function Secrets({ project }: { project: Workspace }) {
                   // eslint-disable-next-line @raycast/prefer-title-case
                   title="Copy All as .env"
                   content={combineSecretsAsEnv(secrets)}
+                  concealed
                   shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action
