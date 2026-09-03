@@ -1,4 +1,4 @@
-import { Clipboard, closeMainWindow, launchCommand, LaunchType, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, launchCommand, LaunchType, open, showToast, Toast } from "@raycast/api";
 import { recognizeTextInScreenRegion } from "./lib/screen-ocr";
 
 /** Manifest name of the command that owns the search list. */
@@ -37,8 +37,9 @@ export default async function searchScreenshotWord() {
  * Hands the recognized text to the search list.
  *
  * Reason: `launchCommand` throws when Search Word is disabled, and by then the
- * capture is already spent, so fall back to the clipboard rather than making
- * the user drag the region again.
+ * capture is already spent, so offer the text as a copy the user can take
+ * rather than making them drag the region again. The copy stays an explicit
+ * choice, so screen text never lands in the clipboard on its own.
  */
 async function _searchRecognizedText(recognizedText: string): Promise<void> {
   try {
@@ -48,9 +49,23 @@ async function _searchRecognizedText(recognizedText: string): Promise<void> {
       context: { screenshotText: recognizedText },
     });
   } catch {
-    await Clipboard.copy(recognizedText);
-    await showHUD(`Copied "${recognizedText}" · enable the Search Word command to search it`);
+    await _showSearchWordDisabledToast(recognizedText);
   }
+}
+
+async function _showSearchWordDisabledToast(recognizedText: string): Promise<void> {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Search Word is disabled",
+    message: `Enable the Search Word command to search "${recognizedText}"`,
+    primaryAction: {
+      title: "Copy Text",
+      onAction: async (toast) => {
+        await Clipboard.copy(recognizedText);
+        await toast.hide();
+      },
+    },
+  });
 }
 
 async function _showNoTextFoundToast(): Promise<void> {
