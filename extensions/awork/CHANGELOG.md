@@ -1,6 +1,6 @@
 # awork Changelog
 
-## [Optimize shortcuts] - {PR_MERGE_DATE}
+## [Optimize shortcuts] - 2026-09-03
 
 - Changed URLs to use task and project keys
 - Optimize windows shortcuts
