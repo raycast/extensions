@@ -34,7 +34,7 @@ export default async function Command(props: LaunchProps<{ arguments: { title: s
     if (!list) {
       toast.style = Toast.Style.Failure;
       toast.title = "No list to write to";
-      toast.message = defaultList?.trim()
+      toast.message = defaultList.trim()
         ? `No list is named “${defaultList.trim()}”. Check the extension preferences.`
         : "This account has no list yet — create one in Hule first.";
       return;

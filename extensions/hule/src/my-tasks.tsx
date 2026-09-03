@@ -20,7 +20,13 @@ async function fetchMyTasks(seats: Array<{ workspaceId: string; memberId: string
     seats.map(({ workspaceId, memberId }) =>
       queryTasks(workspaceId, {
         combinator: "and",
-        rules: [{ field: "assigneeId", operator: "=", value: memberId }],
+        rules: [
+          { field: "assigneeId", operator: "=", value: memberId },
+          // Finished work is dropped by the SERVER, not below: the endpoint caps
+          // its answer at `limit`, so filtering afterwards would spend that cap on
+          // completed tasks and silently hide the open ones behind them.
+          { field: "statusGroup", operator: "!=", value: "done" },
+        ],
       }),
     ),
   );

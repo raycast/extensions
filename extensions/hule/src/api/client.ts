@@ -1,12 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import type { AvailableBundle, CreateTaskInput, FlatTaskResult, Priority, Task, UpdateTaskInput, User } from "./types";
 
-interface Preferences {
-  token: string;
-  apiUrl?: string;
-  defaultList?: string;
-}
-
 const DEFAULT_API_URL = "https://api.hule-do.com/api";
 
 /**
@@ -24,13 +18,18 @@ export class HuleError extends Error {
   }
 }
 
+/**
+ * `Preferences` is generated from the manifest into `raycast-env.d.ts` — never
+ * hand-written here, or a renamed preference would keep type-checking while
+ * reading `undefined` at runtime.
+ */
 export function preferences(): Preferences {
   return getPreferenceValues<Preferences>();
 }
 
 function apiBase(): string {
-  const raw = preferences().apiUrl?.trim();
-  return (raw && raw.length > 0 ? raw : DEFAULT_API_URL).replace(/\/+$/, "");
+  const raw = preferences().apiUrl.trim();
+  return (raw.length > 0 ? raw : DEFAULT_API_URL).replace(/\/+$/, "");
 }
 
 async function errorMessage(res: Response): Promise<string> {

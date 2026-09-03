@@ -1,6 +1,6 @@
 # Hule Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Quick Add Task: create a task from a single line, into a configurable default list
 - Create Task: list, title, description, priority, due date and assignee

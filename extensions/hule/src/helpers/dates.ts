@@ -10,14 +10,31 @@ export function toFloatingDay(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
+/**
+ * The calendar day a floating value names, as a local `Date` at midnight.
+ *
+ * Read off the STRING, never through `new Date(value)`: the API serialises a
+ * floating wall-clock date with a `Z` suffix (`2026-09-03T00:00:00.000Z`), so
+ * parsing it as an instant and then reading local components moves the day back
+ * for every viewer west of UTC — a task due today would read as overdue.
+ */
+function floatingDay(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  if (!match) return null;
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
 /** Whole calendar days from today to `dueDate`; null when there is no usable date. */
 export function daysUntil(dueDate: string | undefined): number | null {
   if (!dueDate) return null;
-  const due = new Date(dueDate);
-  if (Number.isNaN(due.getTime())) return null;
+  const due = floatingDay(dueDate);
+  if (!due) return null;
 
-  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  return Math.round((startOfDay(due) - startOfDay(new Date())) / 86_400_000);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  // Rounded rather than floored: across a daylight-saving change two local
+  // midnights sit 23 or 25 hours apart, which would otherwise lose a day.
+  return Math.round((due.getTime() - today.getTime()) / 86_400_000);
 }
 
 /** "Overdue", "Today", "Tomorrow", or the plain date — read at a glance. */
@@ -27,5 +44,5 @@ export function dueLabel(dueDate: string | undefined): string | undefined {
   if (days < 0) return "Overdue";
   if (days === 0) return "Today";
   if (days === 1) return "Tomorrow";
-  return new Date(dueDate as string).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  return floatingDay(dueDate as string)?.toLocaleDateString(undefined, { day: "numeric", month: "short" });
 }
