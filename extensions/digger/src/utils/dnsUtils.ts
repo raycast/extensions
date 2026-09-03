@@ -33,6 +33,15 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
   // code missing from that list is discarded as though nothing went wrong, which
   // is the same "a failed check reports as an empty one" defect this function
   // exists to avoid.
+  //
+  // The other 22 codes need no individual handling: 9 are genuine failures to
+  // complete ("Couldn't check" is exactly right), and 8 are client-side argument
+  // rejections that cannot arrive here — `hostname` comes from `new URL()`, and a
+  // name malformed enough to trip them fails the main fetch anyway, so the user
+  // already has a top-level error. ECANCELLED is the ONE code that would be
+  // mislabelled, since cancellation is not failure; it is unreachable today
+  // because this function takes no signal and never constructs a dns.Resolver.
+  // Give it one, and add ECANCELLED here at the same time.
   const BENIGN = new Set([
     "ENODATA", // the name resolves, but publishes no record of this type
     "ENOTFOUND", // the name is not in DNS at all
