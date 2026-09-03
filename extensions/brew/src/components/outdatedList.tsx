@@ -10,7 +10,9 @@ import { getProgressIcon } from "@raycast/utils";
 import { OutdatedCask, OutdatedFormula, OutdatedResults, type UpgradePackageStatus } from "../utils";
 import type { PackageState } from "../hooks/useBrewUpgrade";
 import { OutdatedActionPanel } from "./actionPanels";
+import { OutdatedErrorView } from "./outdatedErrorView";
 import { InstallableFilterType, placeholder } from "./filter";
+import { UPDATE_AVAILABLE_ICON } from "./packageIcons";
 
 /** Icon for a list item, e.g. an upgrade status indicator. Defaults to `PENDING_ICON`. */
 export type OutdatedIcon = (
@@ -45,10 +47,21 @@ export interface OutdatedListProps {
   /** Overrides the default "Upgrade All", e.g. to report progress per package */
   onUpgradeAll?: () => void;
   onAction: () => void;
+  /** Failed outdated fetch: shown as a failure view with a Retry action */
+  error?: Error;
+  onRetry?: () => void;
+  /** Actions for the "all up to date" empty state, e.g. a route to Show Installed */
+  emptyActions?: React.ComponentProps<typeof List.EmptyView>["actions"];
 }
 
-/** Icon for a package which is outdated, but not (yet) upgraded. */
-export const PENDING_ICON = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
+/**
+ * Icon for a package which is outdated, but not (yet) upgraded.
+ *
+ * Shared with Search and Show Installed — every row in this list is an
+ * available update, and it used to be drawn with the same green-check glyph
+ * that means "upgraded", only greyed out.
+ */
+export const PENDING_ICON = UPDATE_AVAILABLE_ICON;
 
 /**
  * The list item icon, indicating the upgrade status of a package.
@@ -72,9 +85,16 @@ export function statusIcon(state?: PackageState): React.ComponentProps<typeof Li
 }
 
 export function OutdatedList(props: OutdatedListProps) {
-  const formulae = props.filterType != InstallableFilterType.casks ? (props.outdated?.formulae ?? []) : [];
+  const allFormulae = props.filterType != InstallableFilterType.casks ? (props.outdated?.formulae ?? []) : [];
   const casks = props.filterType != InstallableFilterType.formulae ? (props.outdated?.casks ?? []) : [];
-  const hasResults = formulae.length > 0 || casks.length > 0;
+
+  // Pinned formulae are separated out the way Show Installed separates them.
+  // Here it also carries meaning: a pinned formula is one `brew upgrade` will
+  // refuse and Upgrade All skips, so keeping it out of the actionable list says
+  // that without needing the row to explain itself.
+  const formulae = allFormulae.filter((formula) => !formula.pinned);
+  const pinnedFormulae = allFormulae.filter((formula) => formula.pinned);
+  const hasResults = allFormulae.length > 0 || casks.length > 0;
 
   // Determine search bar placeholder based on loading state
   const searchBarPlaceholder =
@@ -87,20 +107,26 @@ export function OutdatedList(props: OutdatedListProps) {
       searchBarAccessory={props.searchBarAccessory}
       isLoading={props.isLoading}
     >
+      {/* Failed fetch, with nothing cached to show instead */}
+      {props.error && props.onRetry && !props.isLoading && !hasResults && (
+        <OutdatedErrorView error={props.error} onRetry={props.onRetry} />
+      )}
+
       {/* Loading state */}
       {props.isLoading && !props.outdated && (
         <List.EmptyView
           icon={getProgressIcon(0.5)}
-          title="Checking for outdated packages..."
+          title="Checking for upgrades…"
           description="Running brew outdated"
         />
       )}
 
       {/* Empty state when no outdated packages */}
-      {!props.isLoading && !hasResults && props.outdated !== undefined && (
+      {!props.isLoading && !props.error && !hasResults && props.outdated !== undefined && (
         <List.EmptyView
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
           title="All your packages are up to date"
+          actions={props.emptyActions}
         />
       )}
 
@@ -133,6 +159,21 @@ export function OutdatedList(props: OutdatedListProps) {
               />
             ))}
           </List.Section>
+          {pinnedFormulae.length > 0 && (
+            <List.Section title="Pinned Formulae" subtitle={`${pinnedFormulae.length}`}>
+              {pinnedFormulae.map((formula) => (
+                <OutdatedFormulaeListItem
+                  key={formula.name}
+                  outdated={formula}
+                  icon={props.icon}
+                  actions={props.actions}
+                  onUpgrade={props.onUpgrade}
+                  onUpgradeAll={props.onUpgradeAll}
+                  onAction={props.onAction}
+                />
+              ))}
+            </List.Section>
+          )}
         </>
       )}
     </List>
@@ -149,7 +190,10 @@ interface OutdatedListItemProps {
 
 function OutdatedCaskListItem(props: OutdatedListItemProps & { outdated: OutdatedCask }) {
   const outdated = props.outdated;
-  const version = `${outdated.installed_versions} -> ${outdated.current_version}`;
+  let version = "";
+  if (outdated.installed_versions.length > 0) {
+    version = `${outdated.installed_versions[0]} -> ${outdated.current_version}`;
+  }
 
   return (
     <List.Item
@@ -182,8 +226,12 @@ function OutdatedFormulaeListItem(props: OutdatedListItemProps & { outdated: Out
     <List.Item
       id={outdated.name}
       title={outdated.name}
-      subtitle={outdated.pinned ? "Pinned" : ""}
-      accessories={[{ text: version }]}
+      accessories={[
+        // The tack sits with the version rather than as a subtitle: it is a
+        // property of the row, not a second name for the package.
+        ...(outdated.pinned ? [{ icon: Icon.Tack, tooltip: "Pinned" }] : []),
+        { text: version },
+      ]}
       icon={props.icon?.(outdated, false) ?? PENDING_ICON}
       actions={
         props.actions?.(outdated, false) ?? (

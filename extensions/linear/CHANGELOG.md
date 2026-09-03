@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [AI Comment Reliability] - 2026-09-02
+
+- Prevent AI comment tools from retrying successful writes and creating duplicate comments.
+
 ## [Expanded AI Tools] - 2026-08-26
 
 - Expand the Linear AI extension with native tools for issues, projects, initiatives, documents, comments, teams, users, cycles, labels, milestones, releases, status updates, attachments, agent skills, and documentation search.

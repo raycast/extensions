@@ -11,7 +11,7 @@ import { useTranslation } from "./hooks/useTranslation";
 import { runWithToast } from "./utils/toast";
 import { ensureReachable } from "./utils/submitGuard";
 import { useApiReachable } from "./hooks/useApiReachable";
-import { OfflineFormNotice, StartKarakeepAction } from "./components/OfflineFormNotice";
+import { OfflineFormNotice, OpenSettingsAction, StartKarakeepAction } from "./components/OfflineFormNotice";
 
 const log = logger.child("[CreateNote]");
 
@@ -27,7 +27,15 @@ export default function CreateNoteView() {
   const { push } = useNavigation();
   const { t } = useTranslation();
   // Held until the API is known to be up — see useApiReachable.
-  const { state: reachability, reachable: apiReachable, offline, isRecovering, canStart, start } = useApiReachable();
+  const {
+    state: reachability,
+    reachable: apiReachable,
+    offline,
+    unauthorized,
+    isRecovering,
+    canStart,
+    start,
+  } = useApiReachable();
   const { lists } = useGetAllLists(apiReachable);
   const { tags } = useGetAllTags(apiReachable);
 
@@ -73,7 +81,7 @@ export default function CreateNoteView() {
     // be re-copied from a browser the way a URL can — so check reachability
     // (and start a stopped local container) before writing.
     const recovered = await ensureReachable(values.content);
-    if (recovered === "unreachable") return;
+    if (recovered !== "ok") return;
 
     try {
       const bookmark = await runWithToast({
@@ -122,12 +130,13 @@ export default function CreateNoteView() {
       actions={
         <ActionPanel>
           {/* First = bound to ↵ while offline; see OfflineFormNotice. */}
+          <OpenSettingsAction unauthorized={unauthorized} />
           <StartKarakeepAction offline={offline} canStart={canStart} isRecovering={isRecovering} onStart={start} />
           <Action.SubmitForm title={t("note.create")} onSubmit={onSubmit} />
         </ActionPanel>
       }
     >
-      <OfflineFormNotice offline={offline} canStart={canStart} />
+      <OfflineFormNotice offline={offline} canStart={canStart} unauthorized={unauthorized} />
 
       <Form.TextArea
         id="content"

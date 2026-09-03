@@ -1,10 +1,13 @@
 import { Cache, LocalStorage } from "@raycast/api";
 import { bodyOf, failIfNotOk, get } from "./api";
 
-interface CurrentUser {
+export interface CurrentUser {
   id: string;
   displayName: string;
-  mail: string;
+  mail?: string;
+  userPrincipalName?: string;
+  jobTitle?: string;
+  department?: string;
 }
 
 interface Users {
@@ -34,9 +37,19 @@ export function currentUserId() {
   return cache.get(cacheKeyCurrentUserId);
 }
 
+export async function getCurrentUser() {
+  const response = await get({
+    path: "/me",
+    queryParams: {
+      $select: "department,id,displayName,jobTitle,mail,userPrincipalName",
+    },
+  });
+  await failIfNotOk(response, "Getting current user");
+  return bodyOf<CurrentUser>(response);
+}
+
 export async function cacheCurrentUserId() {
-  const response = await get({ path: "/me" });
-  const user = await bodyOf<CurrentUser>(response);
+  const user = await getCurrentUser();
   cache.set(cacheKeyCurrentUserId, user.id);
 }
 

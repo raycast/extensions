@@ -19,6 +19,7 @@ export const ACCOUNTS_STORAGE_KEYS = {
   kimi: "kimi-accounts",
   zai: "zai-accounts",
   codex: "codex-accounts",
+  copilot: "copilot-accounts",
   clinepass: "clinepass-accounts",
   synthetic: "synthetic-accounts",
 } as const;

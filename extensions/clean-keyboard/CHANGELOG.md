@@ -1,5 +1,9 @@
 # Clean Keyboard Changelog
 
+## [Fix Forever Duration] - 2026-08-29
+
+- Fixed the Forever option unlocking the keyboard after 15 seconds and ensured manual unlock exits its native handler
+
 ## [Lock Fn Keys] - 2026-05-07
 
 - Added opt-in preference to also block the function row while cleaning (macOS Tahoe 26+ only)

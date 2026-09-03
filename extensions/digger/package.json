@@ -75,8 +75,8 @@
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-logger": "^1.3.0",
-    "@raycast/api": "^1.104.24",
+    "@chrismessina/raycast-logger": "^1.4.0",
+    "@raycast/api": "^2.1.3",
     "@raycast/utils": "^2.2.7",
     "cheerio": "^1.2.0",
     "raycast-cross-extension": "^0.2.3"
@@ -84,7 +84,7 @@
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "22.13.10",
+    "@types/node": "^22.19.17",
     "@types/react": "19.0.10",
     "eslint": "^9.39.5",
     "prettier": "^3.9.6",
@@ -97,5 +97,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "@humanfs/node": "^0.16.8"
   }
 }

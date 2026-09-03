@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 16",
+  "display": "Node 22",
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["es2021"],
@@ -12,6 +12,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["node"]
   }
 }

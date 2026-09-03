@@ -30,6 +30,11 @@ interface Installable {
   versions: Versions;
   outdated: boolean;
   caveats?: string;
+  /**
+   * Installs over the analytics ranking period, stamped on by `brewSearch`
+   * when results are sorted by popularity. Absent otherwise.
+   */
+  installs?: number;
 }
 
 /// Cask Types
@@ -39,6 +44,8 @@ export interface Cask extends Installable {
   name: string[];
   version: string;
   installed?: string; // version
+  /** Unix seconds when this cask was installed or last upgraded. */
+  installed_time?: number;
   auto_updates: boolean;
   depends_on: CaskDependency;
   conflicts_with?: { cask: string[] };
@@ -66,6 +73,8 @@ export interface InstalledVersion {
   version: string;
   installed_as_dependency: boolean;
   installed_on_request: boolean;
+  /** Unix seconds when this version was installed. Absent on the fast list path. */
+  time?: number;
 }
 
 export interface Versions {
@@ -87,7 +96,12 @@ export interface OutdatedFormula extends Outdated {
 }
 
 export interface OutdatedCask extends Outdated {
-  installed_versions: string;
+  /**
+   * Array of installed versions, same shape as for formulae.
+   * `brew outdated --json=v2` returns an array for casks; this was previously
+   * (incorrectly) declared as a string.
+   */
+  installed_versions: string[];
 }
 
 /// Result Types

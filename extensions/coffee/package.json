@@ -241,23 +241,30 @@
     },
     {
       "name": "startCaffeinateOnLaunch",
-      "description": "Automatically keep your computer awake (indefinitely) when Raycast starts. Requires the Caffeinate Status command (15 s interval) or the Caffeinate Status Menu Bar command (1 m interval) to be enabled.",
+      "description": "Automatically keep your computer awake (indefinitely) when Raycast starts. Requires the Caffeinate Status command (15 s interval) or the Caffeinate Status Menu Bar command (1 m interval) to be enabled (on macOS)",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "title": "Launch",
       "label": "Start caffeination when Raycast starts"
+    },
+    {
+      "name": "decaffeinatePausesSchedules",
+      "description": "When enabled, decaffeinating while a schedule is running will automatically pause the schedule instead of asking you to pause it first",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Decaffeinate pauses running schedules"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.0.5",
+    "@raycast/api": "^2.1.2",
     "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "26.2.0",
+    "@types/node": "26.4.0",
     "@types/react": "19.2.18",
-    "eslint": "^10.9.0",
+    "eslint": "^10.9.1",
     "prettier": "^3.9.6",
     "typescript": "^6.0.3"
   },
@@ -268,12 +275,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "overrides": {
-    "brace-expansion": "5.0.9",
-    "js-yaml@4": "4.3.1"
-  },
-  "allowScripts": {
-    "esbuild@0.28.2": true
   }
 }

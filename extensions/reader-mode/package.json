@@ -246,10 +246,10 @@
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-logger": "^1.2.2",
+    "@chrismessina/raycast-logger": "^1.4.0",
     "@mozilla/readability": "^0.6.0",
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^2.1.2",
+    "@raycast/utils": "^2.3.0",
     "linkedom": "^0.18.12",
     "marked": "^17.0.1",
     "turndown": "^7.2.2",

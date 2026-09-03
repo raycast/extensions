@@ -10,14 +10,15 @@ const WAYBACK_BASE_URL = "https://web.archive.org";
 /**
  * Fetch with timeout and retry - aborts if request takes too long, retries on transient failures
  */
-async function fetchWithTimeoutAndRetry(url: string, timeoutMs: number = TIMEOUTS.WAYBACK_FETCH): Promise<Response> {
+async function fetchWithTimeoutAndRetry(url: string, deadline: AbortSignal): Promise<Response> {
   return withRetry(
     async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.WAYBACK_FETCH);
 
       try {
-        const response = await fetch(url, { signal: controller.signal });
+        // Per-request timeout OR the lookup-wide deadline, whichever fires first.
+        const response = await fetch(url, { signal: AbortSignal.any([controller.signal, deadline]) });
         clearTimeout(timeoutId);
         return response;
       } catch (err) {
@@ -25,17 +26,38 @@ async function fetchWithTimeoutAndRetry(url: string, timeoutMs: number = TIMEOUT
         throw err;
       }
     },
-    { maxAttempts: 2, isRetryable: isTransientError },
+    // `signal` is what stops withRetry re-attempting once the budget is spent.
+    // A timeout counts as transient, so without it a dead host is retried at
+    // full cost at every one of the four call sites.
+    { maxAttempts: 2, isRetryable: isTransientError, signal: deadline },
   );
 }
 
-export async function fetchWaybackMachineData(url: string): Promise<HistoryData | undefined> {
+/**
+ * @param signal The CALLER's abort signal — the dig's controller. Distinct from
+ *   the internal budget: the budget bounds a slow archive.org, this stops work
+ *   for a dig nobody is waiting on any more. Without it a superseded dig kept
+ *   spending its full budget on requests whose result was already discarded,
+ *   and archive.org times out often enough for that to be the common case.
+ */
+export async function fetchWaybackMachineData(url: string, signal?: AbortSignal): Promise<HistoryData | undefined> {
   try {
     log.log("wayback:start", { url });
 
+    // One budget for the whole lookup. Each of the four requests below is
+    // sequential and independently retried, so bounding them individually
+    // bounds nothing.
+    const budget = AbortSignal.timeout(TIMEOUTS.WAYBACK_TOTAL);
+    // Stop on EITHER: the budget expiring, or the caller walking away. Compose
+    // for control flow, but keep the two sources readable — `deadline.aborted`
+    // alone cannot say WHICH fired, and reporting a supersession as a timeout
+    // sends the next reader hunting a slow archive.org that was never slow.
+    const deadline = signal ? AbortSignal.any([budget, signal]) : budget;
+    const abortReason = () => (signal?.aborted ? "superseded" : budget.aborted ? "budget-expired" : undefined);
+
     // First check if any snapshots exist
     const apiUrl = `${ARCHIVE_BASE_URL}/wayback/available?url=${encodeURIComponent(url)}`;
-    const response = await fetchWithTimeoutAndRetry(apiUrl);
+    const response = await fetchWithTimeoutAndRetry(apiUrl, deadline);
 
     // Check for rate limiting (429) or server errors
     if (response.status === 429) {
@@ -46,9 +68,12 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
       };
     }
 
+    // 429 above is a legitimate result with its own flag. Everything else that is
+    // not OK is a failure, and returning undefined made it indistinguishable from
+    // "this site has no archive".
     if (!response.ok) {
       log.warn("wayback:error", { url: redactUrlForLog(url), status: response.status });
-      return undefined;
+      throw new Error(`Wayback availability request failed with HTTP ${response.status}`);
     }
 
     const data = (await response.json()) as {
@@ -81,7 +106,7 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
     let isEstimate = false;
 
     try {
-      const cdxCountResponse = await fetchWithTimeoutAndRetry(cdxCountUrl);
+      const cdxCountResponse = await fetchWithTimeoutAndRetry(cdxCountUrl, deadline);
       log.log("wayback:cdx-count-response", { url, status: cdxCountResponse.status });
 
       // Check for rate limiting on CDX API
@@ -100,9 +125,15 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
         rateLimited = true;
       }
     } catch (cdxCountErr) {
+      // A blown budget is NOT a rate limit and NOT an empty archive. Rethrow so
+      // the section reads "Couldn't check" instead of reporting a count, or a
+      // rate-limit we never actually got told about, from a lookup that never
+      // finished.
+      if (deadline.aborted) throw cdxCountErr;
       log.warn("wayback:cdx-count-fetch-error", {
         url: redactUrlForLog(url),
         error: cdxCountErr instanceof Error ? cdxCountErr.message : String(cdxCountErr),
+        abortedBy: abortReason(),
       });
       rateLimited = true;
     }
@@ -119,8 +150,16 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
         log.log("wayback:precise-fetch-start", { url, pageCount });
         try {
           const preciseUrl = `${WAYBACK_BASE_URL}/cdx/search/cdx?url=${encodeURIComponent(url)}&output=json&fl=timestamp&collapse=timestamp:8`;
-          const preciseResponse = await fetchWithTimeoutAndRetry(preciseUrl);
-          if (preciseResponse.ok) {
+          const preciseResponse = await fetchWithTimeoutAndRetry(preciseUrl, deadline);
+          // A non-2xx is a FAILED check, not an empty archive. It does not throw
+          // on its own — fetch only rejects on transport errors — so without
+          // this a 429 or 500 fell straight through with snapshotCount 0 and the
+          // section read "No snapshots available" for a site we know has some:
+          // the page count that got us into this branch was greater than zero.
+          if (!preciseResponse.ok) {
+            throw new Error(`Wayback precise-count request failed with HTTP ${preciseResponse.status}`);
+          }
+          {
             const preciseData = await preciseResponse.json();
             if (Array.isArray(preciseData) && preciseData.length > 1) {
               // First row is header, so subtract 1
@@ -134,15 +173,20 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
             }
           }
         } catch (preciseErr) {
-          const isTimeout = preciseErr instanceof Error && preciseErr.name === "AbortError";
+          // No estimate exists for a small archive, so there is nothing to fall
+          // back TO. `pageCount * 5000` is the LARGE-archive formula: one page
+          // means somewhere between 1 and 5000 snapshots, and applying it here
+          // reported digg.xyz — 8 snapshots — as 5,000. That is not a degraded
+          // answer, it is a wrong one wearing an "estimate" label, and since
+          // archive.org times out often it was the common path, not the rare one.
+          // Rethrow so the section reads "Couldn't check".
           log.warn("wayback:precise-fetch-error", {
             url: redactUrlForLog(url),
             error: preciseErr instanceof Error ? preciseErr.message : String(preciseErr),
-            isTimeout,
+            isTimeout: preciseErr instanceof Error && preciseErr.name === "AbortError",
+            abortedBy: abortReason(),
           });
-          // Fall back to estimate
-          snapshotCount = pageCount * 5000;
-          isEstimate = true;
+          throw preciseErr;
         }
       } else {
         // Large archive: return estimate immediately, skip slow timestamp queries
@@ -158,7 +202,7 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
           try {
             const firstUrl = `${WAYBACK_BASE_URL}/cdx/search/cdx?url=${encodeURIComponent(url)}&output=json&fl=timestamp&limit=1`;
             log.log("wayback:cdx-first-start", { url });
-            const firstResponse = await fetchWithTimeoutAndRetry(firstUrl);
+            const firstResponse = await fetchWithTimeoutAndRetry(firstUrl, deadline);
             if (firstResponse.ok) {
               const firstData = await firstResponse.json();
               if (Array.isArray(firstData) && firstData.length > 1) {
@@ -196,8 +240,10 @@ export async function fetchWaybackMachineData(url: string): Promise<HistoryData 
     });
     return result;
   } catch (err) {
+    // Rethrow; withAbort(..., undefined) restores the old return value while
+    // letting the reason reach the error banner.
     log.warn("wayback:error", { url: redactUrlForLog(url), error: err instanceof Error ? err.message : String(err) });
-    return undefined;
+    throw err;
   }
 }
 

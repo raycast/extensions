@@ -929,15 +929,7 @@ export async function updateCloudRunService(
 // ============================================================================
 
 export type LogSeverity =
-  | "DEFAULT"
-  | "DEBUG"
-  | "INFO"
-  | "NOTICE"
-  | "WARNING"
-  | "ERROR"
-  | "CRITICAL"
-  | "ALERT"
-  | "EMERGENCY";
+  "DEFAULT" | "DEBUG" | "INFO" | "NOTICE" | "WARNING" | "ERROR" | "CRITICAL" | "ALERT" | "EMERGENCY";
 
 export interface LogEntry {
   logName: string;

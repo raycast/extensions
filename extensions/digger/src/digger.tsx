@@ -3,7 +3,7 @@ import { BrowserExtension, Clipboard, getPreferenceValues, getSelectedText, List
 import { DataFeedsAPI } from "./components/DataFeedsAPI";
 import { Discoverability } from "./components/Discoverability";
 import { DNSCertificates } from "./components/DNSCertificates";
-import { ErrorDisplay, PartialErrorBanner } from "./components/ErrorDisplay";
+import { ErrorDisplay } from "./components/ErrorDisplay";
 import { HTTPHeaders } from "./components/HTTPHeaders";
 import { MetadataSemantics } from "./components/MetadataSemantics";
 import { Overview } from "./components/Overview";
@@ -111,7 +111,6 @@ export default function Command(props: { arguments: Arguments.Digger }) {
 
   return (
     <List isLoading={isLoading} isShowingDetail>
-      {fetchErrors.length > 0 && <PartialErrorBanner fetchErrors={fetchErrors} onRetry={refetch} />}
       <Overview data={data} onRefresh={refetch} overallProgress={overallProgress} />
       <MetadataSemantics data={data} onRefresh={refetch} progress={progress.metadata} />
       <Discoverability data={data} onRefresh={refetch} progress={progress.discoverability} />

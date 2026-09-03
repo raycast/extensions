@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
 import { GalleryActionSection } from "./actions/gallery";
+import { PinAction, usePins } from "./actions/pin";
 import { RevealInFinderAction } from "./actions/reveal-in-finder";
 import { NoArtifactsEmptyView, NoMatchesEmptyView, emptyViewForProblem } from "./components/empty-views";
 import { HookNotRegisteredItem } from "./components/hook-setup";
@@ -28,7 +29,15 @@ const ARTIFACT_ICON: Image.ImageLike = {
 
 const EMPTY_RESULT: IndexResult = { artifacts: [], projects: [] };
 
-function ArtifactListItem({ artifact }: { artifact: Artifact }) {
+function ArtifactListItem({
+  artifact,
+  pinned,
+  togglePin,
+}: {
+  artifact: Artifact;
+  pinned: boolean;
+  togglePin: (id: string) => void;
+}) {
   const relative = formatRelativeDate(artifact.updated);
 
   const accessories: List.Item.Accessory[] = [];
@@ -70,6 +79,7 @@ function ArtifactListItem({ artifact }: { artifact: Artifact }) {
           {artifact.cwd ? (
             <RevealInFinderAction title="Open Folder" path={artifact.cwd} shortcut={Keyboard.Shortcut.Common.Open} />
           ) : null}
+          <PinAction id={artifact.id} pinned={pinned} togglePin={togglePin} />
           <GalleryActionSection />
           <ActionPanel.Section>
             <RevealInFinderAction
@@ -93,6 +103,7 @@ function ArtifactListItem({ artifact }: { artifact: Artifact }) {
 
 export default function Command() {
   const [project, setProject] = useState<string>(ALL_PROJECTS);
+  const { pinned, togglePin } = usePins();
 
   const { data = EMPTY_RESULT, isLoading } = useCachedPromise(readIndex, [], {
     initialData: EMPTY_RESULT,
@@ -129,6 +140,16 @@ export default function Command() {
   const visible = useMemo(
     () => (activeProject === ALL_PROJECTS ? artifacts : artifacts.filter((a) => a.project === activeProject)),
     [artifacts, activeProject],
+  );
+
+  // Partitioned AFTER the project filter, so pins float to the top of whatever
+  // is on screen rather than only of the unfiltered list. Both halves keep the
+  // index's recency order.
+  const pinnedVisible = visible.filter((a) => pinned.has(a.id));
+  const unpinnedVisible = visible.filter((a) => !pinned.has(a.id));
+
+  const renderItem = (artifact: Artifact) => (
+    <ArtifactListItem key={artifact.id} artifact={artifact} pinned={pinned.has(artifact.id)} togglePin={togglePin} />
   );
 
   // Only offer the dropdown once there is something to filter by; a
@@ -173,7 +194,15 @@ export default function Command() {
       ) : visible.length === 0 ? (
         <NoMatchesEmptyView />
       ) : (
-        visible.map((artifact) => <ArtifactListItem key={artifact.id} artifact={artifact} />)
+        <>
+          {/* An empty section renders nothing, so no guard is needed here. The
+              second section stays untitled until there is a "Pinned" heading
+              above it to distinguish itself from. */}
+          <List.Section title="Pinned">{pinnedVisible.map(renderItem)}</List.Section>
+          <List.Section title={pinnedVisible.length > 0 ? "Artifacts" : undefined}>
+            {unpinnedVisible.map(renderItem)}
+          </List.Section>
+        </>
       )}
     </List>
   );

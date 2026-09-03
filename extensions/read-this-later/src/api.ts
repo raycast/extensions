@@ -1,4 +1,4 @@
-// Thin wrapper around the Research Sync backend (Cloudflare Worker).
+// Thin wrapper around the Clipfile backend (Cloudflare Worker).
 // The Worker exposes a single POST /sync endpoint that merges the posted
 // items (last-write-wins by url) and returns the full item set. Posting an
 // empty array is therefore a safe read — it can't overwrite anything.
@@ -7,7 +7,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { BASE_URL, fetchWithTimeout } from "./service";
 
 const OFFLINE_MESSAGE =
-  "Couldn't reach the Research Sync service. Check your connection.";
+  "Couldn't reach the Clipfile service. Check your connection.";
 const AUTH_MESSAGE =
   "Sync token rejected. Set or update it in this extension's settings (⌘,).";
 
