@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Fix: Terminal shortcut conflict] - {PR_MERGE_DATE}
+## [Fix: Terminal shortcut conflict] - 2026-09-03
 
 - Changed the terminal action shortcut to `Cmd` + `Shift` + `T` on macOS and `Ctrl` + `Shift` + `T` on Windows to avoid conflicting with `Open With…`. Fixes [#28408](https://github.com/raycast/extensions/issues/28408).
 
