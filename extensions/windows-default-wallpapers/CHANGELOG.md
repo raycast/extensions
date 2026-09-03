@@ -1,6 +1,6 @@
 # Windows Default Wallpapers Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-09-03
 
 - Add `Preview Wallpaper` action
 - Bump all dependencies to the latest
