@@ -1,6 +1,6 @@
 # Laravel Forge Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-09-03
 
 - Name the extension in every request to Forge, so their support can trace calls this extension made
 
