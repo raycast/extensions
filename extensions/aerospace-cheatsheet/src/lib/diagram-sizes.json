@@ -1,0 +1,23 @@
+{
+  "join-right": [308, 102],
+  "join-down": [308, 102],
+  "join-left": [308, 102],
+  "join-up": [308, 102],
+  "focus-right": [308, 102],
+  "focus-left": [308, 102],
+  "focus-down": [308, 102],
+  "focus-up": [308, 102],
+  "move-right": [308, 102],
+  "move-left": [308, 102],
+  "move-down": [308, 102],
+  "move-up": [308, 102],
+  "root-columns": [308, 102],
+  "root-rows": [308, 102],
+  "flatten": [308, 102],
+  "balance": [308, 102],
+  "recipe-left-strip": [160, 100],
+  "recipe-2x2": [160, 100],
+  "recipe-three-columns": [160, 100],
+  "recipe-reset": [160, 100],
+  "recipe-left-strip-steps": [482, 90]
+}

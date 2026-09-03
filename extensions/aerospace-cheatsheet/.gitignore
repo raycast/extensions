@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.DS_Store
+raycast-env.d.ts
+tools/test/harness.mjs
+*.tsbuildinfo
+tools/.screenshot-build/
+.test-build/
