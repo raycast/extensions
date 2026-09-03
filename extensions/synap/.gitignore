@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.DS_Store
+*.js.map
+# Raycast Store CI is npm-only — do not commit pnpm-lock.yaml
+pnpm-lock.yaml

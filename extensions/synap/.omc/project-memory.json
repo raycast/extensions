@@ -1,0 +1,179 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1780780579729,
+  "projectRoot": "/Users/antoine/Documents/Code/synap/synap-raycast",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "pnpm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "cd /Users/antoine/Documents/Code/synap/synap-raycast\necho \"═══ JSON valid + tool/file parity ═══\"\npython3 -c \"\nimport json,os\nd=json.load(open('package.json'))\ntools=[t['name'] for t in d.get('tools',[])]\nfiles=[f[:-3] for f in os.listdir('src/tools') if f.endswith('.ts')]\nprint('  manifest tools:',len(tools))\nprint('  tool files:',len(files))\nmissing_file=[t for t in tools if t not in files]\norphan_file=[f for f in files if f not in tools]\nprint('  tools without a file:',missing_file)\nprint('  files without a manifest entry:',orphan_file)\nprint('  ask+capture present:', 'ask' in tools and 'capture' in tools)\nprint('  search-entities/recall-memory gone:', 'search-entities' not in tools and 'recall-memory' not in tools)\n\"\necho \"\"\necho \"═══ tsc ═══\"; npx tsc --noEmit 2>&1 | grep -c \"error TS\"\necho \"═══ residual stale refs (engineering_knowledge / search-entities) in src+manifest ═══\"\ngrep -rn \"engineering_knowledge\\|search-entities\\|recall-memory\" package.json src/ 2>/dev/null | grep -v \"node_modules\" | head",
+    "testCommand": null,
+    "lintCommand": "pnpm lint",
+    "devCommand": "pnpm dev",
+    "scripts": {
+      "build": "ray build",
+      "dev": "ray develop",
+      "fix-lint": "ray lint --fix",
+      "lint": "ray lint",
+      "publish": "npx @raycast/api@latest publish"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "assets",
+      "src"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "assets": {
+      "path": "assets",
+      "purpose": "Static assets",
+      "fileCount": 2,
+      "lastAccessed": 1780780579710,
+      "keyFiles": [
+        "README.md",
+        "extension-icon.png"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 7,
+      "lastAccessed": 1780780579711,
+      "keyFiles": [
+        "browser-capture.tsx",
+        "connect.tsx",
+        "create-task.tsx",
+        "entity-detail.tsx",
+        "menu-bar.tsx"
+      ]
+    },
+    "src/api": {
+      "path": "src/api",
+      "purpose": "API routes",
+      "fileCount": 2,
+      "lastAccessed": 1780780579713,
+      "keyFiles": [
+        "client.ts",
+        "types.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src/search-synap.tsx",
+      "accessCount": 9,
+      "lastAccessed": 1780781950294,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 7,
+      "lastAccessed": 1781971619049,
+      "type": "file"
+    },
+    {
+      "path": "src/entity-detail.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1780781957170,
+      "type": "file"
+    },
+    {
+      "path": "src/hooks/useEntities.ts",
+      "accessCount": 5,
+      "lastAccessed": 1780781916678,
+      "type": "file"
+    },
+    {
+      "path": "src/utils/formatters.ts",
+      "accessCount": 5,
+      "lastAccessed": 1780782400434,
+      "type": "file"
+    },
+    {
+      "path": "src/connect.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1780780614744,
+      "type": "file"
+    },
+    {
+      "path": "src/api/client.ts",
+      "accessCount": 2,
+      "lastAccessed": 1780780705837,
+      "type": "file"
+    },
+    {
+      "path": "src/create-entity.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1780780951547,
+      "type": "file"
+    },
+    {
+      "path": "src/utils/preferences.ts",
+      "accessCount": 2,
+      "lastAccessed": 1780786548395,
+      "type": "file"
+    },
+    {
+      "path": "src/create-task.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1780780654242,
+      "type": "file"
+    },
+    {
+      "path": "src/review-proposals.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1780780730304,
+      "type": "file"
+    },
+    {
+      "path": "src/switch-pod.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1780780743252,
+      "type": "file"
+    },
+    {
+      "path": "src/daily-briefing.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1780780769194,
+      "type": "file"
+    },
+    {
+      "path": "src/utils/cli-config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1780786376881,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
