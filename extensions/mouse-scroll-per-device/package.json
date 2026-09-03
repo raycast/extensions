@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mouse-scroll-per-device",
+  "title": "Per-Device Mouse Scroll",
+  "description": "Customize scroll direction and speed independently for each connected mouse.",
+  "author": "brandon",
+  "icon": "icon.png",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "keywords": [
+    "mouse",
+    "scroll",
+    "reverse",
+    "speed",
+    "natural scrolling",
+    "per device"
+  ],
+  "commands": [
+    {
+      "name": "change-mouse-scroll",
+      "title": "Change Mouse Scroll",
+      "description": "Customize scroll direction and speed for each connected mouse.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "publish": "ray publish",
+    "icon:check": "./scripts/validate-icon.sh",
+    "native:build": "./scripts/build-helper.sh",
+    "native:sign:release": "./scripts/sign-helper-release.sh",
+    "native:verify:store-release": "./scripts/verify-store-release-signing.sh",
+    "native:sign:integration-test": "./scripts/test-release-signing.sh",
+    "native:test": "./scripts/test-helper.sh",
+    "reviewer:manifest": "node ./scripts/generate-reviewer-artifact-manifest.mjs",
+    "reviewer:manifest:check": "node ./scripts/check-reviewer-artifact-manifest.mjs",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/**/*.test.ts",
+    "lint": "ray lint",
+    "build": "npm run native:build && ray build -e dist",
+    "check": "npm run native:test && npm run native:sign:integration-test && npm run reviewer:manifest:check && npm run format:check && npm run typecheck && npm run test && npm run lint && npm run build"
+  },
+  "dependencies": {
+    "@raycast/api": "2.0.5",
+    "react": "19.2.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.2.18",
+    "eslint": "9.39.2",
+    "prettier": "3.6.2",
+    "tsx": "4.20.6",
+    "typescript": "5.9.2"
+  }
+}

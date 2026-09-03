@@ -1,0 +1,6 @@
+node_modules
+dist
+.build
+native/MouseScrollHelper/.build
+assets/bin
+raycast-env.d.ts

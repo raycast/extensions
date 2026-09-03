@@ -1,0 +1,58 @@
+{
+  "command": "change-mouse-scroll",
+  "commandTitle": "Change Mouse Scroll",
+  "helper": {
+    "architectures": ["arm64", "x86_64"],
+    "sha256": "a7b0098718c331011dd1f1434295db279fb66ee64c9e6c5bf42722ec37960496",
+    "signature": {
+      "authority": null,
+      "strictVerified": false,
+      "teamIdentifier": "not set",
+      "notarizationEvidence": "not_provided",
+      "storeSigned": false
+    }
+  },
+  "icon": { "path": "icon.png", "sha256": "574ed67073b89189199945efd20b9b40bb1af7dbf795c4ff8e1190073b14e45f" },
+  "nativeSources": [
+    {
+      "path": "native/MouseScrollHelper/Package.swift",
+      "sha256": "404dc44c16b363725a5fb957d7767cc72c6d7018d214cc2895be8e28aec0f897"
+    },
+    {
+      "path": "native/MouseScrollHelper/Sources/MouseScrollHelper/CommandOutput.swift",
+      "sha256": "058608b5a1837341cb049af6a8da4baacbcbaa731b5accea66146e9c3e9752b9"
+    },
+    {
+      "path": "native/MouseScrollHelper/Sources/MouseScrollHelper/ConfigurationStore.swift",
+      "sha256": "8a04b543436629cc05ab485130fb6cea2a848416a5679ca5f8d818396c8cbcda"
+    },
+    {
+      "path": "native/MouseScrollHelper/Sources/MouseScrollHelper/DeviceMonitor.swift",
+      "sha256": "b1a0218662e97ae4137713d516c2d0523e0e6861e172f92bbc671f4393985d3e"
+    },
+    {
+      "path": "native/MouseScrollHelper/Sources/MouseScrollHelper/HelperRuntime.swift",
+      "sha256": "eb7cfc447e36b06c9fd5c718b517ab75d9719804ef19a1f21f66c59445a9ffa8"
+    },
+    {
+      "path": "native/MouseScrollHelper/Sources/MouseScrollHelper/Models.swift",
+      "sha256": "f63fb2efec24ddcbf6d4838e9cee1eee3661fb8b20840f1dacd33c4287f7d0af"
+    },
+    {
+      "path": "native/MouseScrollHelper/Sources/MouseScrollHelper/ScrollTransformer.swift",
+      "sha256": "477263bc69d4e53cee6fa6d04dd5de8fec7c25624c9540ca354205289c87bf20"
+    },
+    {
+      "path": "native/MouseScrollHelper/Sources/MouseScrollHelper/main.swift",
+      "sha256": "1b807d04602ee8b7dd98ef7172a7e9636b565ba99df5a58d1bc09c75cecb32de"
+    },
+    {
+      "path": "native/MouseScrollHelper/Tests/MouseScrollHelperTests/MouseScrollHelperTests.swift",
+      "sha256": "efc361dc8bb261ab48391dd8dc59a3a13424c06264cf7daee712b74e5a5c46dc"
+    }
+  ],
+  "package": { "sha256": "6338955593dfdbc131089c814c6c09972ec1266e43ecc14bcad1cb62d35171a1" },
+  "publicTitle": "Per-Device Mouse Scroll",
+  "slug": "mouse-scroll-per-device",
+  "toolchain": { "raycastApi": "2.0.5", "raycastEslintConfig": "2.2.0", "typescript": "5.9.2" }
+}
