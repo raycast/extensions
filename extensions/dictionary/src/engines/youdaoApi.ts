@@ -1,9 +1,7 @@
 import fs from "fs";
 import os from "os";
-import fetch from "cross-fetch";
 import { getPreferenceValues, Icon } from "@raycast/api";
 import crypto from "crypto";
-import { Url } from "url";
 import { knownPos } from "../constants";
 import { DefItem, DefsBody, DictionaryPreferences, LanguageCode } from "../types";
 import { EngineHookProps } from "./types";
@@ -29,17 +27,21 @@ interface JsonR {
   web?: WebItem[];
   translation: string[];
   basic?: Partial<Basic>;
-  speakUrl: Url;
+  speakUrl?: string;
+  tSpeakUrl?: string;
 }
 interface DefinitionItem {
   title: string;
   defItems: WebItem[] | string[];
 }
-const getOpts = (query: string, to: LanguageCode, apiKey?: string, from?: string): RequestInit => {
-  const salt = new Date().getTime().toString();
+const getOpts = (query: string, to: LanguageCode, _apiKey?: string, from?: string): RequestInit => {
+  const salt = crypto.randomUUID();
+  const curtime = Math.floor(Date.now() / 1000).toString();
   const { youdaoapiClientId, youdaoapiKey } = getPreferenceValues<DictionaryPreferences>();
-  //TODO: query should be truncated
-  const sign = generateSign(query, salt, youdaoapiClientId, youdaoapiKey);
+  if (!youdaoapiClientId || !youdaoapiKey) {
+    throw new Error("Set your Youdao Application ID and Secret Key in the extension preferences.");
+  }
+  const sign = generateSign(query, salt, curtime, youdaoapiClientId, youdaoapiKey);
   const transform = (code: LanguageCode): string => {
     //TODO: make return type as LanguageCode
     switch (code) {
@@ -57,9 +59,11 @@ const getOpts = (query: string, to: LanguageCode, apiKey?: string, from?: string
     from: from || "auto",
     to: transform(to),
     q: query,
-    appKey: "2e8cc14f1cdbab25",
+    appKey: youdaoapiClientId,
     salt,
     sign,
+    signType: "v3",
+    curtime,
   };
   return {
     headers: {
@@ -73,7 +77,7 @@ const getOpts = (query: string, to: LanguageCode, apiKey?: string, from?: string
 const parseData = (data: JsonR): DefsBody<DefinitionItem> => {
   if (data.errorCode !== "0") throw Error(`Error code: ${data.errorCode}`);
   const { l, web = [], basic: { explains } = {} } = data;
-  const [from, to] = l.split("2");
+  const [from] = l.split("2");
   const transform = (code: string): string => {
     //TODO: make return type as LanguageCode
     switch (code) {
@@ -89,22 +93,24 @@ const parseData = (data: JsonR): DefsBody<DefinitionItem> => {
     }
   };
   const definitions = [] as DefinitionItem[];
-  explains?.length &&
+  if (explains?.length) {
     definitions.push({
       title: "Definitions",
       defItems: explains,
     });
-  web.length &&
+  }
+  if (web.length) {
     definitions.push({
       title: "From Web",
       defItems: web,
     });
+  }
   const src = transform(from) as LanguageCode;
   return { definitions, src };
 };
 
 const getUrl = () => {
-  return (query: string): RequestInfo => {
+  return (): string => {
     return "https://openapi.youdao.com/api";
   };
 };
@@ -134,8 +140,8 @@ const parseDef = (def: DefinitionItem): DefItem[] => {
     }
   });
 };
-const parseHeader = (data: JsonR, transCode: LanguageCode = "en"): DefItem[] => {
-  const { basic = {}, translation, query } = data;
+const parseHeader = (data: JsonR): DefItem[] => {
+  const { basic = {}, translation, query, speakUrl, tSpeakUrl } = data;
   const { ["us-phonetic"]: phonetic } = basic;
   const trans = translation[0];
   const webUrl = "https://www.youdao.com/w/" + encodeURIComponent(query);
@@ -151,31 +157,48 @@ const parseHeader = (data: JsonR, transCode: LanguageCode = "en"): DefItem[] => 
       metaData: {
         toClipboard: [trans, query],
         url: webUrl,
-        supportTTS: [trans] as [string],
+        supportTTS: [tSpeakUrl ? trans : "", speakUrl ? query : ""],
       },
     },
   ];
 };
 
-const generateSign = (content: string, salt: string, app_key: string, app_secret: string) => {
-  const md5 = crypto.createHash("md5");
-  md5.update(app_key + content + salt + app_secret);
-  return md5.digest("hex").slice(0, 32).toUpperCase();
+const truncateForSignature = (content: string) => {
+  return content.length <= 20 ? content : `${content.slice(0, 10)}${content.length}${content.slice(-10)}`;
 };
 
-const parseTTS = async (_query: string, _transCode: LanguageCode, data: JsonR): Promise<[string]> => {
-  const { speakUrl, query: respQuery } = data;
-  const response = await fetch(`${speakUrl}`);
-  const ttsSrc = await response.arrayBuffer();
-  const srcPath = `${os.tmpdir()}/raycast-dictionary-trans.mp3`;
-  await fs.promises.writeFile(srcPath, Buffer.from(ttsSrc));
-  return [respQuery] as [string];
+const generateSign = (content: string, salt: string, curtime: string, appId: string, appSecret: string) => {
+  return crypto
+    .createHash("sha256")
+    .update(appId + truncateForSignature(content) + salt + curtime + appSecret)
+    .digest("hex");
+};
+
+const downloadSpeech = async (url: string, path: string) => {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Failed to load Youdao speech (${response.status})`);
+  await fs.promises.writeFile(path, Buffer.from(await response.arrayBuffer()));
+};
+
+const parseTTS = async (_query: string, _transCode: LanguageCode, data: JsonR): Promise<[string, string?]> => {
+  const { speakUrl, tSpeakUrl, query, translation } = data;
+  if (!speakUrl && !tSpeakUrl) throw new Error("Youdao did not return speech audio.");
+
+  if (speakUrl) {
+    await downloadSpeech(speakUrl, `${os.tmpdir()}/raycast-dictionary-source.mp3`);
+  }
+  if (tSpeakUrl) {
+    await downloadSpeech(tSpeakUrl, `${os.tmpdir()}/raycast-dictionary-trans.mp3`);
+  }
+
+  return [tSpeakUrl ? translation[0] : "", speakUrl ? query : undefined];
 };
 
 const YoudaoApiEngine: EngineHookProps<JsonR, DefinitionItem> = {
   key: "youdaoapi",
   baseUrl: "https://www.youdao.com",
   title: "Youdao API",
+  fallbackSearch: true,
   getUrl: getUrl(),
   getOpts,
   parseData,

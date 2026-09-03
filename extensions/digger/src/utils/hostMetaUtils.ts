@@ -25,9 +25,16 @@ export async function fetchHostMetadata(baseUrl: string): Promise<HostMetadataDa
 
     const { response, status } = await fetchWithTimeout(url.href, TIMEOUTS.HOST_META);
 
-    if (status !== 200) {
+    // 404/410 mean the host genuinely publishes no host-meta — a normal answer,
+    // not a failure. Any other non-200 (5xx, 403, a redirect loop) is an
+    // operational failure and must NOT be flattened into the same "unavailable"
+    // the UI shows for absence.
+    if (status === 404 || status === 410) {
       log.log("fetch:not-found", { status });
       return { available: false };
+    }
+    if (status !== 200) {
+      throw new Error(`host-meta request failed with HTTP ${status}`);
     }
 
     const contentType = response.headers.get("content-type") || "";
@@ -41,8 +48,11 @@ export async function fetchHostMetadata(baseUrl: string): Promise<HostMetadataDa
       return parseXRD(text);
     }
   } catch (error) {
+    // Rethrow. The caller wraps this in withAbort(..., undefined), which restores
+    // that exact fallback — so behaviour is unchanged for callers, but the reason
+    // survives instead of masquerading as "no host-meta published".
     log.error("fetch:error", { error: error instanceof Error ? error.message : String(error) });
-    return { available: false };
+    throw error;
   }
 }
 
@@ -76,8 +86,11 @@ function parseJRD(text: string): HostMetadataData {
 
     return result;
   } catch (error) {
+    // The server returned a document and we could not read it. That is a failure,
+    // not absence — flattening it to `available: false` is how a malformed
+    // host-meta became indistinguishable from a host that publishes none.
     log.error("parse:jrd:error", { error: error instanceof Error ? error.message : String(error) });
-    return { available: false };
+    throw error;
   }
 }
 
@@ -143,7 +156,10 @@ function parseXRD(text: string): HostMetadataData {
 
     return result;
   } catch (error) {
+    // The server returned a document and we could not read it. That is a failure,
+    // not absence — flattening it to `available: false` is how a malformed
+    // host-meta became indistinguishable from a host that publishes none.
     log.error("parse:xrd:error", { error: error instanceof Error ? error.message : String(error) });
-    return { available: false };
+    throw error;
   }
 }

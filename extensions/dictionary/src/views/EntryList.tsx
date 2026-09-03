@@ -40,23 +40,31 @@ const SearchDropdown = ({ selectedEngine, onChange: onSuperChange }: SearchDropd
 
 const EntryList = ({ initQuery = "" }: { initQuery: string }) => {
   const [query, setQuery] = useState(initQuery);
-  const [isShowingDetail, setShowingDetail] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [selectedEngine, setSelectedEngine] = useCachedState<EngineID>("engine");
   const [selectedPrimeLang = "en"] = useCachedState<LanguageCode | undefined>("primary_language");
   const activeEngine = getEngine(selectedEngine) as EngineHookProps<object, object>;
   const { isLoading, data, curTTS } = useEngine(query.trim(), activeEngine);
+  const isShowingDetail = Boolean(query.trim() && !query.startsWith("-") && selectedItemId?.startsWith("detail-"));
   const searchStatus = {
     curTTS,
     isShowingDetail,
   };
   useEffect(() => {
     setQuery(initQuery);
+    setSelectedItemId(null);
   }, [initQuery]);
 
-  const onSelectionChange = (id: string | null) => {
-    // BUG: here would cause double render
-    setShowingDetail(!!id?.startsWith("detail"));
+  const onSearchTextChange = (value: string) => {
+    setQuery(value);
+    setSelectedItemId(null);
   };
+
+  const onEngineChange = (value: EngineID) => {
+    setSelectedItemId(null);
+    setSelectedEngine(value);
+  };
+
   const emptyViewProps: { title: string; description: string } = (activeEngine.getEmptyViewProps &&
     activeEngine.getEmptyViewProps(selectedPrimeLang, query)) || {
     title: query
@@ -71,14 +79,14 @@ const EntryList = ({ initQuery = "" }: { initQuery: string }) => {
       isShowingDetail={isShowingDetail}
       isLoading={isLoading}
       searchBarPlaceholder="Look up any word, language auto detected"
-      onSearchTextChange={setQuery}
-      onSelectionChange={onSelectionChange}
+      onSearchTextChange={onSearchTextChange}
+      onSelectionChange={setSelectedItemId}
       searchText={query}
-      searchBarAccessory={<SearchDropdown selectedEngine={selectedEngine} onChange={setSelectedEngine} />}
+      searchBarAccessory={<SearchDropdown selectedEngine={selectedEngine} onChange={onEngineChange} />}
     >
-      <AutoCompleteList query={query} setQuery={setQuery} />
+      <AutoCompleteList query={query} setQuery={onSearchTextChange} />
       <SearchContext.Provider value={searchStatus}>
-        <SearchResultList data={(!query.startsWith("-") && data) || undefined} setQuery={setQuery} />
+        <SearchResultList data={(query && !query.startsWith("-") && data) || undefined} setQuery={onSearchTextChange} />
       </SearchContext.Provider>
       <List.EmptyView {...emptyViewProps} />
     </List>

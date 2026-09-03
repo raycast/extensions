@@ -231,7 +231,8 @@
       "name": "menu-bar",
       "title": "Agent Status in Menu Bar",
       "description": "Monitor and control Herdr agents from the menu bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "1m"
     },
     {
       "name": "open-herdr",
@@ -348,7 +349,7 @@
     {
       "name": "refreshInterval",
       "title": "Refresh Interval",
-      "description": "How often visible lists and the menu bar refresh.",
+      "description": "How often visible lists and the open menu bar refresh. The menu bar icon also refreshes in the background every minute.",
       "type": "dropdown",
       "required": false,
       "default": "5",

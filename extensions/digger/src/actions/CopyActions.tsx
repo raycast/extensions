@@ -186,14 +186,22 @@ function generateMarkdownReport(data: DiggerResult): string {
     if (discoverability.robots) {
       markdown += `- **Robots**: ${discoverability.robots}\n`;
     }
+    // Same distinction as the UI: "Not found" is only claimed when the server
+    // answered. A 5xx or a timeout reports as unchecked, not absent.
+    const resourceText = (status?: string) =>
+      status === "found" ? "Found" : status === "unavailable" ? "Couldn't check" : "Not found";
     if (discoverability.sitemap) {
       markdown += `- **Sitemap**: ${discoverability.sitemap}\n`;
+    } else if (discoverability.sitemapStatus !== undefined) {
+      // Printing the URL only on success meant a timed-out sitemap vanished from
+      // the report entirely — the reader could not tell it had been checked.
+      markdown += `- **Sitemap**: ${resourceText(discoverability.sitemapStatus)}\n`;
     }
     if (discoverability.robotsTxt !== undefined) {
-      markdown += `- **robots.txt**: ${discoverability.robotsTxt ? "Found" : "Not found"}\n`;
+      markdown += `- **robots.txt**: ${resourceText(discoverability.robotsTxt)}\n`;
     }
     if (discoverability.llmsTxt !== undefined) {
-      markdown += `- **llms.txt**: ${discoverability.llmsTxt ? "Found" : "Not found"}\n`;
+      markdown += `- **llms.txt**: ${resourceText(discoverability.llmsTxt)}\n`;
     }
     if (discoverability.contentSignals) {
       const cs = discoverability.contentSignals;
@@ -247,14 +255,8 @@ function generateMarkdownReport(data: DiggerResult): string {
     if (performance.loadTime) {
       markdown += `- **Load Time**: ${Math.round(performance.loadTime)}ms\n`;
     }
-    if (performance.ttfb) {
-      markdown += `- **TTFB**: ${Math.round(performance.ttfb)}ms\n`;
-    }
     if (performance.pageSize) {
       markdown += `- **Page Size**: ${formatBytes(performance.pageSize)}\n`;
-    }
-    if (performance.requestCount) {
-      markdown += `- **Requests**: ${performance.requestCount}\n`;
     }
     markdown += `\n`;
   }
