@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { ExecuteResponse, Preferences, ProbeResponse, SearchResponse } from "./types";
+import type { ExecuteResponse, ProbeResponse, SearchResponse } from "./types";
 
 const API_URLS = {
   global: "https://qveris.ai/api/v1",

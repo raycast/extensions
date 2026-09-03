@@ -1,10 +1,3 @@
-export type ApiRegion = "global" | "china";
-
-export interface Preferences {
-  apiKey: string;
-  apiRegion: ApiRegion;
-}
-
 export interface ToolParameter {
   name: string;
   type: "string" | "number" | "integer" | "boolean" | "array" | "object";
