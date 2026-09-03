@@ -1,5 +1,11 @@
 # Wispr Flow Changelog
 
+## [Fix Transcript Selection on Open] - 2026-09-03
+
+- Fixed Search Transcripts restoring the previously viewed transcript as the selected row, leaving the highlight below newly recorded entries
+- Fixed the selection landing in the last date section under the Oldest First, Longest Duration, and Most Words sort orders
+- Fixed the selection anchoring to an archived transcript after it left the results
+
 ## [Add Windows Support] - 2026-04-30
 
 ### Platform Support
