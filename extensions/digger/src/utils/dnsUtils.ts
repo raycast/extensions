@@ -13,14 +13,23 @@ const resolveCname = promisify(dns.resolveCname);
 
 export async function performDNSLookup(hostname: string): Promise<DNSData> {
   const dnsData: DNSData = {};
+  // A record type having no entries is normal — plenty of hosts have no AAAA or
+  // no MX — so each lookup below still swallows on its own. What is NOT normal is
+  // every type failing: that means the resolver is down or the name does not
+  // resolve, and it must reach the caller instead of returning an empty object
+  // the UI renders as "no records found".
+  let firstError: unknown;
+  const note = (e: unknown) => {
+    if (firstError === undefined) firstError = e;
+  };
 
   try {
     const aRecords = await resolve4(hostname);
     if (aRecords.length > 0) {
       dnsData.aRecords = aRecords;
     }
-  } catch {
-    // A records not found
+  } catch (e) {
+    note(e); // A records not found
   }
 
   try {
@@ -28,8 +37,8 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
     if (aaaaRecords.length > 0) {
       dnsData.aaaaRecords = aaaaRecords;
     }
-  } catch {
-    // AAAA records not found
+  } catch (e) {
+    note(e); // AAAA records not found
   }
 
   try {
@@ -37,8 +46,8 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
     if (mxRecords.length > 0) {
       dnsData.mxRecords = mxRecords;
     }
-  } catch {
-    // MX records not found
+  } catch (e) {
+    note(e); // MX records not found
   }
 
   try {
@@ -46,8 +55,8 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
     if (txtRecords.length > 0) {
       dnsData.txtRecords = txtRecords.map((record) => record.join(""));
     }
-  } catch {
-    // TXT records not found
+  } catch (e) {
+    note(e); // TXT records not found
   }
 
   try {
@@ -55,8 +64,8 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
     if (nsRecords.length > 0) {
       dnsData.nsRecords = nsRecords;
     }
-  } catch {
-    // NS records not found
+  } catch (e) {
+    note(e); // NS records not found
   }
 
   try {
@@ -64,8 +73,20 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
     if (cnameRecords.length > 0) {
       dnsData.cnameRecord = cnameRecords[0];
     }
-  } catch {
-    // CNAME records not found
+  } catch (e) {
+    note(e); // CNAME records not found
+  }
+
+  // Only a RESOLVER-level failure is worth reporting. "No such record" is not:
+  // `dns.resolve*` queries DNS directly, bypassing the OS resolver, so a host
+  // that works via /etc/hosts, mDNS, or an IP literal legitimately has no records
+  // and would otherwise banner an error on a page that loaded perfectly. A domain
+  // that genuinely does not exist is already reported by the main fetch failing,
+  // so nothing is lost by staying quiet here.
+  const RESOLVER_FAILURE = new Set(["ESERVFAIL", "ETIMEOUT", "ECONNREFUSED", "EREFUSED"]);
+  const code = (firstError as NodeJS.ErrnoException | undefined)?.code;
+  if (Object.keys(dnsData).length === 0 && code !== undefined && RESOLVER_FAILURE.has(code)) {
+    throw firstError;
   }
 
   return dnsData;
@@ -81,7 +102,7 @@ export interface CertificateInfo {
 }
 
 export async function getTLSCertificateInfo(hostname: string, port = LIMITS.TLS_PORT): Promise<CertificateInfo | null> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const socket = tls.connect(
       {
         host: hostname,
@@ -138,13 +159,29 @@ export async function getTLSCertificateInfo(hostname: string, port = LIMITS.TLS_
       },
     );
 
-    socket.on("error", () => {
-      resolve(null);
+    // Reject rather than resolve(null). The caller wraps this in withAbort(...,
+    // null), which turns a rejection back into exactly that null — so the value
+    // the UI sees is unchanged, but the reason survives and can be reported.
+    //
+    // EXCEPT when nothing is listening on 443. A site served over plain HTTP has
+    // no TLS to report on, and `normalizeUrl` keeps an explicit `http://` while
+    // `fetchHeadOnlyWithFallback` can also drop an https attempt down to http —
+    // so this is an ordinary, benign case, not a degraded HTTPS lookup. Treat it
+    // like the "peer presented no certificate" branch above: an answer, not a
+    // failure. Anything else (handshake rejected, bad cert, timeout) is real.
+    const NO_TLS_SERVICE = new Set(["ECONNREFUSED", "EHOSTUNREACH", "ENETUNREACH", "ENOTFOUND"]);
+    socket.on("error", (err) => {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code && NO_TLS_SERVICE.has(code)) {
+        resolve(null);
+        return;
+      }
+      reject(err);
     });
 
     socket.setTimeout(TIMEOUTS.TLS_SOCKET, () => {
       socket.destroy();
-      resolve(null);
+      reject(new Error(`TLS handshake timed out after ${TIMEOUTS.TLS_SOCKET}ms`));
     });
   });
 }

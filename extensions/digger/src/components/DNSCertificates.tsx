@@ -1,7 +1,7 @@
 import { Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { Actions } from "../actions";
-import { DiggerResult } from "../types";
+import { DiggerResult, ResourceStatus } from "../types";
 import { CertificateInfo } from "../utils/dnsUtils";
 import { truncateText } from "../utils/formatters";
 
@@ -38,7 +38,14 @@ export function DNSCertificates({ data, onRefresh, certificateInfo, progress }: 
     <List.Item
       title="DNS & Certificates"
       icon={Icon.Lock}
-      detail={<DNSCertificatesDetail dns={dns} certificateInfo={certificateInfo} />}
+      detail={
+        <DNSCertificatesDetail
+          dns={dns}
+          certificateInfo={certificateInfo}
+          dnsStatus={data.lookups?.dns}
+          certStatus={data.lookups?.certificate}
+        />
+      }
       actions={<Actions data={data} url={data.url} onRefresh={onRefresh} />}
     />
   );
@@ -47,9 +54,11 @@ export function DNSCertificates({ data, onRefresh, certificateInfo, progress }: 
 interface DNSCertificatesDetailProps {
   dns: DiggerResult["dns"];
   certificateInfo?: CertificateInfo | null;
+  dnsStatus?: ResourceStatus;
+  certStatus?: ResourceStatus;
 }
 
-function DNSCertificatesDetail({ dns, certificateInfo }: DNSCertificatesDetailProps) {
+function DNSCertificatesDetail({ dns, certificateInfo, dnsStatus, certStatus }: DNSCertificatesDetailProps) {
   const getCertIcon = (daysUntilExpiry?: number) => {
     if (daysUntilExpiry === undefined) return { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
     if (daysUntilExpiry < 0) return { source: Icon.Xmark, tintColor: Color.Red };
@@ -62,6 +71,17 @@ function DNSCertificatesDetail({ dns, certificateInfo }: DNSCertificatesDetailPr
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="DNS Records" />
+
+          {/* A failed resolver lookup is not "no records found" — say so here
+              rather than letting every row below assert an absence we never
+              established. */}
+          {dnsStatus === "unavailable" && (
+            <List.Item.Detail.Metadata.Label
+              title="Lookup"
+              text="Couldn't check"
+              icon={{ source: Icon.QuestionMarkCircle, tintColor: Color.Orange }}
+            />
+          )}
 
           <List.Item.Detail.Metadata.Label
             title="A Records (IPv4)"
@@ -111,7 +131,13 @@ function DNSCertificatesDetail({ dns, certificateInfo }: DNSCertificatesDetailPr
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="TLS Certificate" />
 
-          {certificateInfo ? (
+          {certStatus === "unavailable" ? (
+            <List.Item.Detail.Metadata.Label
+              title="Status"
+              text="Couldn't check"
+              icon={{ source: Icon.QuestionMarkCircle, tintColor: Color.Orange }}
+            />
+          ) : certificateInfo ? (
             <>
               <List.Item.Detail.Metadata.Label
                 title="Status"

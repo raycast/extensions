@@ -11,6 +11,15 @@ export interface DiggerResult {
   dataFeeds?: DataFeedsData;
   hostMetadata?: HostMetadataData;
   botProtection?: BotProtectionData;
+  /**
+   * Outcome of each auxiliary lookup, so a section can say "Couldn't check"
+   * itself rather than relying on a banner.
+   *
+   * This lives on the RESULT, not in component state, precisely so it survives
+   * caching: `fetchErrors` does not, which is why a cached partial failure used
+   * to show failed rows with nothing left on screen to explain them.
+   */
+  lookups?: Partial<Record<FetchCategory, ResourceStatus>>;
   fetchedAt: number;
 }
 
@@ -36,7 +45,6 @@ export interface OverviewData {
   title?: string;
   description?: string;
   favicon?: string;
-  screenshot?: string;
   language?: string;
   charset?: string;
 }
@@ -80,14 +88,26 @@ export interface PaymentSignalsData {
   paymentResponseRaw?: string;
 }
 
+/**
+ * Outcome of fetching a well-known resource (robots.txt, llms.txt, sitemap.xml).
+ *
+ * `absent` and `unavailable` are deliberately distinct. A 404 is a real answer —
+ * the site publishes no robots.txt. A 500, a timeout, or a refused connection is
+ * NOT an answer: we do not know what the site publishes. Collapsing both into
+ * "Not found" states something we never established.
+ */
+export type ResourceStatus = "found" | "absent" | "unavailable";
+
 export interface DiscoverabilityData {
   robots?: string;
-  robotsTxt?: boolean;
+  robotsTxt?: ResourceStatus;
   canonical?: string;
   /** Language/region alternate links (hreflang). Feed alternates are in DataFeedsData. */
   alternates?: Array<{ href: string; hreflang?: string; type?: string }>;
   sitemap?: string;
-  llmsTxt?: boolean;
+  /** Outcome of fetching sitemap.xml, independent of whether the HTML declared one. */
+  sitemapStatus?: ResourceStatus;
+  llmsTxt?: ResourceStatus;
   /** Parsed Content-Signal directives from robots.txt (IETF aipref / Cloudflare Content Signals) */
   contentSignals?: ContentSignalsData;
   /** x402 payment-required signals detected from HTTP response */
@@ -160,11 +180,9 @@ export interface ResourcesData {
 }
 
 export interface NetworkingData {
-  ipAddress?: string;
   server?: string;
   headers?: Record<string, string>;
   statusCode?: number;
-  redirects?: Array<{ from: string; to: string; status: number }>;
   finalUrl?: string;
 }
 
@@ -179,10 +197,7 @@ export interface DNSData {
 
 export interface PerformanceData {
   loadTime?: number;
-  ttfb?: number;
-  domContentLoaded?: number;
   pageSize?: number;
-  requestCount?: number;
 }
 
 export interface HistoryData {
