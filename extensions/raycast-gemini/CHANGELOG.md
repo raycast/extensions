@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Update Models] - {PR_MERGE_DATE}
+## [Update Models] - 2026-09-03
 
 - 🆕 Updated model list: removed unavailable models, added Gemini 3.x models.
 
