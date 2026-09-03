@@ -19,17 +19,28 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
   // resolve, and it must reach the caller instead of returning an empty object
   // the UI renders as "no records found".
   //
-  // Keep the first RESOLVER-level error, not the first error of any kind. Every
-  // query below can fail benignly (ENODATA/ENOTFOUND for a type this host simply
-  // does not publish), and those arrive in query order — so remembering "the
-  // first error" means one benign A-record miss permanently masks a resolver
-  // that died on the five queries after it. The lookup then returns {} and the
-  // UI reports "no records found" for a check that never completed.
-  const RESOLVER_FAILURE = new Set(["ESERVFAIL", "ETIMEOUT", "ECONNREFUSED", "EREFUSED"]);
+  // Keep the first error that is NOT benign, rather than the first error of any
+  // kind. Every query below can fail benignly, and those arrive in query order —
+  // so remembering "the first error" would let one harmless A-record miss
+  // permanently mask a resolver that died on the five queries after it, and the
+  // lookup would return {} to be rendered as "no records found".
+  //
+  // The BENIGN set is the closed one, so it is the one to enumerate. Node
+  // surfaces 24 distinct DNS error codes and only these two mean "DNS answered,
+  // and the answer is that this record does not exist"; the other 22 — EBADRESP,
+  // EFORMERR, ENOMEM, ECANCELLED, ENOTINITIALIZED and the rest — all mean the
+  // check did not complete. Listing the FAILURE codes instead is fail-open: any
+  // code missing from that list is discarded as though nothing went wrong, which
+  // is the same "a failed check reports as an empty one" defect this function
+  // exists to avoid.
+  const BENIGN = new Set([
+    "ENODATA", // the name resolves, but publishes no record of this type
+    "ENOTFOUND", // the name is not in DNS at all
+  ]);
   let resolverError: unknown;
   const note = (e: unknown) => {
     const code = (e as NodeJS.ErrnoException | undefined)?.code;
-    if (resolverError === undefined && code !== undefined && RESOLVER_FAILURE.has(code)) {
+    if (resolverError === undefined && (code === undefined || !BENIGN.has(code))) {
       resolverError = e;
     }
   };
@@ -95,6 +106,10 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
   // that genuinely does not exist is already reported by the main fetch failing,
   // so nothing is lost by staying quiet here.
   // Records from ANY query mean the resolver worked; report what we got.
+  // Every query failing benignly stays quiet: `dns.resolve*` bypasses the OS
+  // resolver, so a host reachable via /etc/hosts, mDNS, or an IP literal
+  // legitimately publishes nothing and must not banner an error on a page that
+  // loaded perfectly.
   if (Object.keys(dnsData).length === 0 && resolverError !== undefined) {
     throw resolverError;
   }
