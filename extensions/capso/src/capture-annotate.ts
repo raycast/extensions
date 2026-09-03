@@ -1,4 +1,5 @@
 import { triggerCapsoAction } from "./utils";
+
 export default async function Command() {
-  await triggerCapsoAction("captureAreaAndAnnotate", 28, "Capture Area & Annotate");
+  await triggerCapsoAction("capso://grab/annotate", "Capture Area & Annotate");
 }

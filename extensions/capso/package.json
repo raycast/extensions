@@ -68,6 +68,22 @@
       ]
     },
     {
+      "name": "capture-previous-area",
+      "title": "Capture Previous Area",
+      "subtitle": "Capso",
+      "description": "Capture the previously selected screen area",
+      "icon": "capture-previous-area.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "capture",
+        "previous",
+        "last",
+        "area",
+        "replay"
+      ]
+    },
+    {
       "name": "capture-ocr",
       "title": "Capture Text (OCR)",
       "subtitle": "Capso",

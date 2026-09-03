@@ -1,4 +1,5 @@
 import { triggerCapsoAction } from "./utils";
+
 export default async function Command() {
-  await triggerCapsoAction("captureWindow", 20, "Capture Window");
+  await triggerCapsoAction("capso://grab/window", "Capture Window");
 }

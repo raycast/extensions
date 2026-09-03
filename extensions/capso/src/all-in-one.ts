@@ -1,4 +1,5 @@
 import { triggerCapsoAction } from "./utils";
+
 export default async function Command() {
-  await triggerCapsoAction("captureAllInOne", 29, "All-in-One");
+  await triggerCapsoAction("capso://grab/all-in-one", "All-in-One");
 }

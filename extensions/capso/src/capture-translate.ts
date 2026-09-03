@@ -1,4 +1,5 @@
 import { triggerCapsoAction } from "./utils";
+
 export default async function Command() {
-  await triggerCapsoAction("captureAndTranslate", 17, "Capture & Translate");
+  await triggerCapsoAction("capso://grab/translate", "Capture & Translate");
 }
