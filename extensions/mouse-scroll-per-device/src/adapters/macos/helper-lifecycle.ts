@@ -9,6 +9,20 @@ import { NativeHelperClient, RawAccessStatus } from "../native/native-helper-cli
 
 const execFileAsync = promisify(execFile);
 
+export interface CommandResult {
+  stdout: string;
+  stderr: string;
+}
+
+export type CommandRunner = (
+  executable: string,
+  arguments_: string[],
+  timeoutMilliseconds?: number,
+) => Promise<CommandResult>;
+
+const defaultCommandRunner: CommandRunner = async (executable, arguments_, timeoutMilliseconds = 5_000) =>
+  execFileAsync(executable, arguments_, { timeout: timeoutMilliseconds });
+
 export interface HelperPaths {
   installedExecutable: string;
   config: string;
@@ -120,6 +134,13 @@ export function repairDisposition(state: HelperStatus["state"]): "install" | "st
   return state === "stale" ? "stopThenInstall" : state === "identityMismatch" ? "refuse" : "install";
 }
 
+export function staleRuntimeRecordCleanupDisposition(
+  state: HelperStatus["state"],
+  launchAgentState: "bootedOut" | "alreadyAbsent" | "failed",
+): "clearRecord" | "preserveRecord" {
+  return state === "stale" && launchAgentState !== "failed" ? "clearRecord" : "preserveRecord";
+}
+
 export class MacOSHelperLifecycle implements HelperController {
   constructor(
     private readonly client: NativeHelperClient,
@@ -127,6 +148,7 @@ export class MacOSHelperLifecycle implements HelperController {
     private readonly openURL: (url: string) => Promise<void> = async (url) => {
       await execFileAsync("/usr/bin/open", [url], { timeout: 5_000 });
     },
+    private readonly runCommand: CommandRunner = defaultCommandRunner,
   ) {}
 
   private async exists(path: string): Promise<boolean> {
@@ -154,10 +176,8 @@ export class MacOSHelperLifecycle implements HelperController {
       }
     }
     try {
-      await execFileAsync("/usr/bin/codesign", ["--verify", "--strict", "--verbose=2", path], { timeout: 5_000 });
-      const { stdout, stderr } = await execFileAsync("/usr/bin/codesign", ["-dv", "--verbose=4", path], {
-        timeout: 5_000,
-      });
+      await this.runCommand("/usr/bin/codesign", ["--verify", "--strict", "--verbose=2", path]);
+      const { stdout, stderr } = await this.runCommand("/usr/bin/codesign", ["-dv", "--verbose=4", path]);
       const inspected = inspectCodesignIdentity(`${stdout}\n${stderr}`, path, expectedPath);
       if (inspected.state !== "valid") return inspected;
       return {
@@ -299,7 +319,7 @@ export class MacOSHelperLifecycle implements HelperController {
 
   private async launchAgentPrintState(service: string): Promise<{ state: LaunchAgentPrintState; error?: string }> {
     try {
-      await execFileAsync("/bin/launchctl", ["print", service], { timeout: 5_000 });
+      await this.runCommand("/bin/launchctl", ["print", service]);
       return { state: "present" };
     } catch (error) {
       const message = commandErrorMessage(error);
@@ -331,8 +351,8 @@ export class MacOSHelperLifecycle implements HelperController {
       const probe = await this.launchAgentPrintState(service);
       if (probe.state === "failed") return { status: "failed", error: probe.error ?? "Could not inspect LaunchAgent." };
       if (probe.state === "missing")
-        await execFileAsync("/bin/launchctl", ["bootstrap", domain, this.paths.launchAgent], { timeout: 5_000 });
-      await execFileAsync("/bin/launchctl", ["kickstart", "-k", service], { timeout: 5_000 });
+        await this.runCommand("/bin/launchctl", ["bootstrap", domain, this.paths.launchAgent]);
+      await this.runCommand("/bin/launchctl", ["kickstart", "-k", service]);
       return this.status();
     } catch (error) {
       return { status: "failed", error: commandErrorMessage(error) };
@@ -342,19 +362,39 @@ export class MacOSHelperLifecycle implements HelperController {
   async stop(): Promise<OperationResult<HelperStatus>> {
     const current = await this.status();
     if (current.status !== "succeeded") return current;
-    if (!["running", "stale", "identityMismatch"].includes(current.value.state))
+    if (current.value.state === "identityMismatch")
+      return {
+        status: "unavailable",
+        reason: "The running process ownership cannot be proven.",
+        recovery: "Stop the mismatched process manually, then refresh before repairing.",
+      };
+    if (!["running", "stale"].includes(current.value.state))
       return {
         status: "unavailable",
         reason: "No valid installed helper process can be stopped.",
         recovery: "Refresh status or repair the helper.",
       };
     const domain = `gui/${process.getuid?.() ?? 0}`;
+    let launchAgentState: "bootedOut" | "alreadyAbsent" | "failed" = "bootedOut";
     try {
-      await execFileAsync("/bin/launchctl", ["bootout", `${domain}/${this.paths.label}`], { timeout: 5_000 });
+      await this.runCommand("/bin/launchctl", ["bootout", `${domain}/${this.paths.label}`]);
     } catch (error) {
       const message = commandErrorMessage(error);
-      if (!message.includes("Could not find service") && !message.includes("No such process"))
+      if (!message.includes("Could not find service") && !message.includes("No such process")) {
+        launchAgentState = "failed";
         return { status: "failed", error: message };
+      }
+      launchAgentState = "alreadyAbsent";
+    }
+    if (staleRuntimeRecordCleanupDisposition(current.value.state, launchAgentState) === "clearRecord") {
+      try {
+        await unlink(this.paths.state);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+          return { status: "failed", error: commandErrorMessage(error) };
+        }
+      }
+      return this.status();
     }
     const dispatched = await this.client.stop();
     if (dispatched.status !== "succeeded") return dispatched;

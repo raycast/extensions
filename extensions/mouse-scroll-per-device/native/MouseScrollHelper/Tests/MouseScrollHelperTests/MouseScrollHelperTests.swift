@@ -21,6 +21,23 @@ final class MouseScrollHelperTests: XCTestCase {
         XCTAssertNil(correlator.match(axis: .vertical, eventTimestampNanoseconds: 190))
     }
 
+    func testSameDeviceSamplesContinueToCorrelate() {
+        var correlator = ScrollCorrelator(maximumAgeNanoseconds: 20, futureToleranceNanoseconds: 2)
+        correlator.record(HIDScrollSample(device: serialMouse, axis: .vertical, timestampNanoseconds: 100))
+        correlator.record(HIDScrollSample(device: serialMouse, axis: .vertical, timestampNanoseconds: 110))
+        XCTAssertEqual(correlator.match(axis: .vertical, eventTimestampNanoseconds: 111), serialMouse)
+        XCTAssertEqual(correlator.match(axis: .vertical, eventTimestampNanoseconds: 111), serialMouse)
+    }
+
+    func testCrossDeviceCandidatesFailClosedAndAreConsumed() {
+        let otherMouse = DeviceIdentity(name: "Other Mouse", vendorID: 1, productID: 3, serialNumber: "other", locationID: nil)
+        var correlator = ScrollCorrelator(maximumAgeNanoseconds: 20, futureToleranceNanoseconds: 2)
+        correlator.record(HIDScrollSample(device: serialMouse, axis: .vertical, timestampNanoseconds: 100))
+        correlator.record(HIDScrollSample(device: otherMouse, axis: .vertical, timestampNanoseconds: 110))
+        XCTAssertNil(correlator.match(axis: .vertical, eventTimestampNanoseconds: 111))
+        XCTAssertNil(correlator.match(axis: .vertical, eventTimestampNanoseconds: 111))
+    }
+
     func testDeviceKeyPrefersSerialThenLocation() {
         XCTAssertEqual(serialMouse.profileKey, "0001:0002:serial:abc")
         let locationMouse = DeviceIdentity(name: "Mouse", vendorID: 1, productID: 2, serialNumber: nil, locationID: 12)

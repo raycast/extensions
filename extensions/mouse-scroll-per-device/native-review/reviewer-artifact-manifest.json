@@ -3,7 +3,7 @@
   "commandTitle": "Change Mouse Scroll",
   "helper": {
     "architectures": ["arm64", "x86_64"],
-    "sha256": "a7b0098718c331011dd1f1434295db279fb66ee64c9e6c5bf42722ec37960496",
+    "sha256": "b5fb930711bbbc123d394f4b137527a5b88cea73dca8423dd2eed77db165bda5",
     "signature": {
       "authority": null,
       "strictVerified": false,
@@ -40,7 +40,7 @@
     },
     {
       "path": "native/MouseScrollHelper/Sources/MouseScrollHelper/ScrollTransformer.swift",
-      "sha256": "477263bc69d4e53cee6fa6d04dd5de8fec7c25624c9540ca354205289c87bf20"
+      "sha256": "788dc569b618e32f815dffa5e3d0dd27817073ec15a36a9517b03001b9860e08"
     },
     {
       "path": "native/MouseScrollHelper/Sources/MouseScrollHelper/main.swift",
@@ -48,7 +48,7 @@
     },
     {
       "path": "native/MouseScrollHelper/Tests/MouseScrollHelperTests/MouseScrollHelperTests.swift",
-      "sha256": "efc361dc8bb261ab48391dd8dc59a3a13424c06264cf7daee712b74e5a5c46dc"
+      "sha256": "c5bc33194a731646b0bf19bf3320b72b2fccd504856e79dc7c29e93df7b64621"
     }
   ],
   "package": { "sha256": "6338955593dfdbc131089c814c6c09972ec1266e43ecc14bcad1cb62d35171a1" },

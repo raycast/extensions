@@ -34,6 +34,10 @@ function subject(document: ProfileDocument = { version: 1, profiles: {} }) {
         saved = next;
         return { status: "succeeded" as const, value: undefined };
       },
+      async upsert(profileKey, profile) {
+        saved = { ...document, profiles: { ...document.profiles, [profileKey]: profile } };
+        return { status: "succeeded" as const, value: undefined };
+      },
     },
     {
       async status() {

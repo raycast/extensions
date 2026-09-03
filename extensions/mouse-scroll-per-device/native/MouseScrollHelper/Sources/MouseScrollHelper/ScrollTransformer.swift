@@ -55,12 +55,23 @@ struct ScrollCorrelator: Sendable {
 
     mutating func match(axis: ScrollAxis, eventTimestampNanoseconds: UInt64) -> DeviceIdentity? {
         let lowerBound = eventTimestampNanoseconds > maximumAgeNanoseconds ? eventTimestampNanoseconds - maximumAgeNanoseconds : 0
-        guard let index = samples.lastIndex(where: {
-            $0.axis == axis &&
-                $0.timestampNanoseconds >= lowerBound &&
-                $0.timestampNanoseconds <= eventTimestampNanoseconds + futureToleranceNanoseconds
-        }) else { return nil }
-        return samples.remove(at: index).device
+        let upperBound: UInt64
+        let future = eventTimestampNanoseconds.addingReportingOverflow(futureToleranceNanoseconds)
+        upperBound = future.overflow ? UInt64.max : future.partialValue
+        let eligible = samples.indices.filter {
+            samples[$0].axis == axis &&
+                samples[$0].timestampNanoseconds >= lowerBound &&
+                samples[$0].timestampNanoseconds <= upperBound
+        }
+        guard let newestIndex = eligible.last else { return nil }
+
+        // Multiple physical devices in one Quartz correlation window cannot be attributed safely.
+        // Consume every candidate in this window so a later event cannot select a stale other-device sample.
+        if Set(eligible.map { samples[$0].device.key }).count > 1 {
+            for index in eligible.reversed() { samples.remove(at: index) }
+            return nil
+        }
+        return samples.remove(at: newestIndex).device
     }
 }
 

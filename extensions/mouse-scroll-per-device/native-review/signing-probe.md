@@ -12,6 +12,7 @@ shasum -a 256 assets/bin/mouse-scroll-helper
 Observed result for the reviewed artifact:
 
 - architectures: `arm64 x86_64`
+- SHA-256: `b5fb930711bbbc123d394f4b137527a5b88cea73dca8423dd2eed77db165bda5`
 - signature: ad-hoc
 - Team Identifier: not set
 - strict verification: unsuccessful

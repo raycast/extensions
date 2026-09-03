@@ -3,7 +3,6 @@ import {
   HelperStatus,
   MouseDevice,
   OperationResult,
-  ProfileDocument,
   ScrollProfile,
   validateProfile,
 } from "../domain/models";
@@ -55,13 +54,7 @@ export class ManageMouseScroll {
     }
     const invalid = validateProfile(profile);
     if (invalid) return { status: "failed", error: invalid };
-    const loaded = await this.profiles.load();
-    if (loaded.status !== "succeeded") return loaded;
-    const next: ProfileDocument = {
-      ...loaded.value,
-      profiles: { ...loaded.value.profiles, [device.profileKey]: profile },
-    };
-    return this.profiles.save(next);
+    return this.profiles.upsert(device.profileKey, profile);
   }
 
   start(): Promise<OperationResult<HelperStatus>> {
