@@ -46,7 +46,7 @@ export default function Command() {
 
 function MemoryReview({ cli }: { cli: string }) {
   const [selectedIDs, setSelectedIDs] = useState<Set<string>>(new Set());
-  const initializedSession = useRef<string>();
+  const initializedSession = useRef<string | undefined>(undefined);
   const { data, error, isLoading, revalidate } = usePromise(async () =>
     runMintSurface<MemoryScanResponse>(cli, { action: "memory.scan" }, 60_000),
   );
@@ -237,7 +237,7 @@ function MemorySection({
                   onAction={() => toggle(item)}
                 />
               ) : null}
-              <Action title="Release Selected" icon={Icon.MemoryChip} onAction={run} disabled={!canRun} />
+              {canRun ? <Action title="Release Selected" icon={Icon.MemoryChip} onAction={run} /> : null}
               <ActionPanel.Section>
                 <Action title="Select All Releasable" icon={Icon.Checkmark} onAction={selectAll} />
                 <Action title="Deselect All" icon={Icon.Circle} onAction={clearAll} />

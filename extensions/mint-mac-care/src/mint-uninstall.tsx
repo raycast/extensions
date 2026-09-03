@@ -105,7 +105,7 @@ function InstalledApps({ cli }: { cli: string }) {
 function UninstallReview({ cli, app }: { cli: string; app: InstalledApp }) {
   const { pop } = useNavigation();
   const [selectedIDs, setSelectedIDs] = useState<Set<string>>(new Set());
-  const initializedSession = useRef<string>();
+  const initializedSession = useRef<string | undefined>(undefined);
   const { data, error, isLoading } = usePromise(async () =>
     runMintSurface<UninstallScanResponse>(cli, { action: "uninstall.scan", path: app.path }, 5 * 60_000),
   );
@@ -229,13 +229,14 @@ function UninstallReview({ cli, app }: { cli: string; app: InstalledApp }) {
                       onAction={() => toggle(item)}
                     />
                   ) : null}
-                  <Action
-                    title={includesApp ? `Uninstall ${app.name}` : "Remove Selected App Data"}
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    onAction={removeSelected}
-                    disabled={selected.length === 0}
-                  />
+                  {selected.length > 0 ? (
+                    <Action
+                      title={includesApp ? `Uninstall ${app.name}` : "Remove Selected App Data"}
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      onAction={removeSelected}
+                    />
+                  ) : null}
                   <ActionPanel.Section>
                     <Action
                       title="Select Safe Leftovers"

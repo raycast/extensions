@@ -126,7 +126,7 @@ export default function Command() {
 function DiskReview({ cli, options }: { cli: string; options: ScanOptions }) {
   const { pop } = useNavigation();
   const [selectedIDs, setSelectedIDs] = useState<Set<string>>(new Set());
-  const initializedSession = useRef<string>();
+  const initializedSession = useRef<string | undefined>(undefined);
   const { data, error, isLoading } = usePromise(async () =>
     runMintSurface<DiskScanResponse>(
       cli,
@@ -332,13 +332,9 @@ function ReviewActions({
         icon={selected ? Icon.XMarkCircle : Icon.CheckCircle}
         onAction={toggle}
       />
-      <Action
-        title="Clean and Optimize Selected"
-        icon={Icon.Trash}
-        style={Action.Style.Destructive}
-        onAction={run}
-        disabled={!canRun}
-      />
+      {canRun ? (
+        <Action title="Clean and Optimize Selected" icon={Icon.Trash} style={Action.Style.Destructive} onAction={run} />
+      ) : null}
       <ActionPanel.Section>
         <Action title="Select All" icon={Icon.Checkmark} onAction={selectAll} />
         <Action title="Deselect All" icon={Icon.Circle} onAction={clearAll} />

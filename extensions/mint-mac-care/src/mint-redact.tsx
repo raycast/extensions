@@ -88,7 +88,7 @@ export default function Command() {
 function RedactReview({ cli, sourcePath, outputPath }: { cli: string; sourcePath: string; outputPath?: string }) {
   const { pop } = useNavigation();
   const [selectedIDs, setSelectedIDs] = useState<Set<string>>(new Set());
-  const initializedSession = useRef<string>();
+  const initializedSession = useRef<string | undefined>(undefined);
   const { data, error, isLoading } = usePromise(async () =>
     runMintSurface<RedactScanResponse>(cli, { action: "redact.scan", path: sourcePath, confirmed: true }, 30 * 60_000),
   );
@@ -180,12 +180,9 @@ function RedactReview({ cli, sourcePath, outputPath }: { cli: string; sourcePath
                     icon={selectedIDs.has(item.id) ? Icon.Eye : Icon.EyeDisabled}
                     onAction={() => toggle(item.id)}
                   />
-                  <Action
-                    title="Save Redacted Copy"
-                    icon={Icon.SaveDocument}
-                    onAction={exportSelected}
-                    disabled={selectedIDs.size === 0}
-                  />
+                  {selectedIDs.size > 0 ? (
+                    <Action title="Save Redacted Copy" icon={Icon.SaveDocument} onAction={exportSelected} />
+                  ) : null}
                   <ActionPanel.Section>
                     <Action
                       title="Cover All Detected Areas"

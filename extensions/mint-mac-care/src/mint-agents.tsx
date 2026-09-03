@@ -149,7 +149,7 @@ export default function Command() {
       {codex ? (
         <List.Section title="Codex Archive" subtitle="Actions stay in Mint">
           <List.Item
-            icon={{ source: Icon.Archive, tintColor: Color.Green }}
+            icon={{ source: Icon.Folder, tintColor: Color.Green }}
             title={`${codex.archivedConversations ?? 0} archived conversations`}
             subtitle={
               codex.measuredConversations
