@@ -57,7 +57,7 @@
       "description": "Uncheck for Disable Certificate Validation",
       "type": "checkbox",
       "required": false,
-      "default": false,
+      "default": true,
       "label": "Certificate Validation Enabled"
     },
     {

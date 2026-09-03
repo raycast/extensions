@@ -10,6 +10,7 @@ export interface Tool {
 export interface ToolResult {
   tool_name: string;
   content: string;
+  tool_call_id?: string;
 }
 
 /* Convert Tool Array to OllamaApiTool Array */

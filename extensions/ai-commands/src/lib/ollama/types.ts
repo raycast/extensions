@@ -227,6 +227,7 @@ export interface OllamaApiChatMessage {
   thinking?: string;
   images?: string[];
   tool_name?: string;
+  tool_call_id?: string;
   tool_calls?: OllamaApiChatMessageToolCall[];
 }
 

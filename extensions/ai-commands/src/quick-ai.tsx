@@ -8,7 +8,7 @@ import { formatCustomServerName, isCustomServer } from "./lib/providers/unified-
 import { loadCustomProviders } from "./lib/providers/storage";
 
 const pref = getPreferenceValues<Preferences>();
-if (!pref.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+if (pref.ollamaCertificateValidation === false) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.QuickAi }>) {
   const [query, setQuery] = React.useState<string | undefined>(props.arguments?.query || props.fallbackText);

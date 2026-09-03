@@ -252,14 +252,39 @@ async function Inference(
         const toolsFormatted = canUseTools ? GetOllamaApiTools(tools) : undefined;
         emiter = await client.chatStream({
           model: model.tag,
-          messages: msgRequestBody.map((m) => ({
-            role: m.role as "system" | "user" | "assistant" | "tool",
-            content: m.content,
-            images: m.images ? m.images.map((base64) => ({ path: "", html: "", base64 })) : undefined,
-            tool_calls: m.tool_calls,
-            tool_name: m.tool_name,
-            tool_call_id: m.tool_name,
-          })),
+          messages: msgRequestBody.map((m, index) => {
+            let toolCallId = m.tool_call_id;
+            if (m.role === OllamaApiChatMessageRole.Tool && !toolCallId) {
+              const prevAssistant = msgRequestBody
+                .slice(0, index)
+                .findLast(
+                  (prev) =>
+                    prev.role === OllamaApiChatMessageRole.Assistant && prev.tool_calls && prev.tool_calls.length > 0,
+                );
+              const assistantIdx = prevAssistant ? msgRequestBody.indexOf(prevAssistant) : -1;
+              const toolMsgsSince =
+                assistantIdx >= 0
+                  ? msgRequestBody
+                      .slice(assistantIdx + 1, index)
+                      .filter((prev) => prev.role === OllamaApiChatMessageRole.Tool)
+                  : [];
+              const toolCallIndex = toolMsgsSince.length;
+              if (prevAssistant?.tool_calls && prevAssistant.tool_calls[toolCallIndex]) {
+                toolCallId = prevAssistant.tool_calls[toolCallIndex].id;
+              } else {
+                const matchingToolCall = prevAssistant?.tool_calls?.find((tc) => tc.function?.name === m.tool_name);
+                toolCallId = matchingToolCall?.id;
+              }
+            }
+            return {
+              role: m.role as "system" | "user" | "assistant" | "tool",
+              content: m.content,
+              images: m.images ? m.images.map((base64) => ({ path: "", html: "", base64 })) : undefined,
+              tool_calls: m.tool_calls,
+              tool_name: m.tool_name,
+              tool_call_id: toolCallId,
+            };
+          }),
           temperature: 0.7,
           tools: toolsFormatted,
         });
@@ -315,7 +340,29 @@ async function Inference(
           /* Push Tool Function into Array */
           for (const toolcall of data) {
             const tool = tools.find((v) => v.name === toolcall.function.name);
-            if (tool) toolCalls.push(tool.fn(toolcall.function.arguments));
+            if (tool) {
+              toolCalls.push(
+                tool
+                  .fn(toolcall.function.arguments)
+                  .then((res) => ({
+                    ...res,
+                    tool_call_id: toolcall.id,
+                  }))
+                  .catch((err) => ({
+                    tool_name: toolcall.function.name,
+                    content: `Error executing tool '${toolcall.function.name}': ${err instanceof Error ? err.message : String(err)}`,
+                    tool_call_id: toolcall.id,
+                  })),
+              );
+            } else {
+              toolCalls.push(
+                Promise.resolve({
+                  tool_name: toolcall.function.name,
+                  content: `Error: Tool '${toolcall.function.name}' not found`,
+                  tool_call_id: toolcall.id,
+                }),
+              );
+            }
           }
         });
 
@@ -403,7 +450,12 @@ async function Inference(
 
             const promises = await Promise.all(toolCalls);
             const toolMessages: OllamaApiChatMessage[] = promises.map(
-              (v) => <OllamaApiChatMessage>{ ...v, role: OllamaApiChatMessageRole.Tool },
+              (v) =>
+                <OllamaApiChatMessage>{
+                  ...v,
+                  role: OllamaApiChatMessageRole.Tool,
+                  tool_call_id: v.tool_call_id,
+                },
             );
             msgRequestBody.push(...toolMessages);
 
