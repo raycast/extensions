@@ -1135,7 +1135,7 @@ export function GeoDashboard({ organization, project }: GeoDashboardProps) {
     >
       {error ? (
         <List.EmptyView icon={Icon.Warning} title="Could Not Load GEO" description={error.message} actions={actions} />
-      ) : data && data.configured === false && !isLoading ? (
+      ) : data && data.errors.length === 0 && data.configured === false && !isLoading ? (
         <List.EmptyView
           icon={Icon.Gauge}
           title="GEO Is Not Configured"
@@ -1144,6 +1144,22 @@ export function GeoDashboard({ organization, project }: GeoDashboardProps) {
         />
       ) : data ? (
         <>
+          {data.errors.length > 0 ? (
+            <List.Section title="Incomplete Data">
+              <List.Item
+                icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+                title="Some GEO Data Could Not Load"
+                subtitle={`${data.errors.length} of 17 API sections unavailable`}
+                accessories={[{ tag: { value: "Partial", color: Color.Orange } }]}
+                detail={
+                  <List.Item.Detail
+                    markdown={`## Incomplete GEO Data\n\nThe available analytics are shown below, but these sections could not be loaded:\n\n${data.errors.map((message) => `- ${escapeMarkdown(message)}`).join("\n")}\n\nRefresh to try loading the missing data again.`}
+                  />
+                }
+                actions={actions}
+              />
+            </List.Section>
+          ) : null}
           <List.Section title={project.name} subtitle={`${days} days`}>
             <List.Item
               icon={data.settings.settings?.isScanning ? Icon.CircleProgress : Icon.Gauge}

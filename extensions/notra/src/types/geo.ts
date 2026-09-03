@@ -432,6 +432,7 @@ export interface GeoDashboardData {
   competitors: GeoCompetitorsResponse;
   competitorShare: GeoCompetitorShareResponse;
   configured: boolean | null;
+  errors: string[];
   gaps: GeoContentGapsResponse;
   ingestSetup: GeoIngestSetupResponse | null;
   languageShare: GeoLanguageShareResponse;

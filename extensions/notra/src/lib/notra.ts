@@ -185,25 +185,7 @@ export async function getGeoDashboard(projectId: string, days: number): Promise<
   const window = `days=${days}`;
   const signal = AbortSignal.timeout(15_000);
   const request = <T>(path: string) => notraRequest<T>(path, { signal });
-  const [
-    settings,
-    overview,
-    timeseries,
-    competitorShare,
-    languageShare,
-    promptResults,
-    traffic,
-    prompts,
-    sequences,
-    competitors,
-    gaps,
-    briefs,
-    readiness,
-    trafficLog,
-    trafficJourneys,
-    trafficPages,
-    ingestSetup,
-  ] = await Promise.all([
+  const results = await Promise.allSettled([
     request<GeoSettingsResponse>(`${projectPath}/settings`),
     request<GeoVisibilityOverviewResponse>(`${projectPath}/visibility/overview?${window}`),
     request<GeoVisibilityTimeseriesResponse>(`${projectPath}/visibility/timeseries?${window}`),
@@ -222,26 +204,87 @@ export async function getGeoDashboard(projectId: string, days: number): Promise<
     request<GeoTrafficPagesResponse>(`${projectPath}/traffic/pages?${window}&limit=100`),
     request<GeoIngestSetupResponse>("/v1/geo/ingest/setup"),
   ] as const);
+  const firstFulfilled = results.find((result) => result.status === "fulfilled");
+  if (!firstFulfilled) {
+    const reason = results[0].status === "rejected" ? results[0].reason : null;
+    throw reason instanceof Error ? reason : new Error("Could not load GEO data");
+  }
+
+  const organization = firstFulfilled.value.organization;
+  const errors: string[] = [];
+  const valueOr = <T>(label: string, result: PromiseSettledResult<T>, fallback: T): T => {
+    if (result.status === "fulfilled") {
+      return result.value;
+    }
+
+    errors.push(`${label}: ${result.reason instanceof Error ? result.reason.message : "Request failed"}`);
+    return fallback;
+  };
+  const [
+    settingsResult,
+    overviewResult,
+    timeseriesResult,
+    competitorShareResult,
+    languageShareResult,
+    promptResultsResult,
+    trafficResult,
+    promptsResult,
+    sequencesResult,
+    competitorsResult,
+    gapsResult,
+    briefsResult,
+    readinessResult,
+    trafficLogResult,
+    trafficJourneysResult,
+    trafficPagesResult,
+    ingestSetupResult,
+  ] = results;
+  const configurationResults = [settingsResult, overviewResult, promptResultsResult] as const;
+  const configured = configurationResults.some((result) => result.status === "fulfilled" && result.value.configured)
+    ? true
+    : configurationResults.every((result) => result.status === "fulfilled" && !result.value.configured)
+      ? false
+      : null;
 
   return {
-    briefs,
-    competitors,
-    competitorShare,
-    configured: settings.configured || overview.configured || promptResults.configured,
-    gaps,
-    ingestSetup,
-    languageShare,
-    overview,
-    prompts,
-    promptResults,
-    readiness,
-    sequences,
-    settings,
-    timeseries,
-    traffic,
-    trafficJourneys,
-    trafficLog,
-    trafficPages,
+    configured,
+    settings: valueOr("Settings", settingsResult, { configured: false, organization, settings: null }),
+    overview: valueOr("Visibility", overviewResult, { configured: false, engines: [], organization }),
+    timeseries: valueOr("Visibility trend", timeseriesResult, { configured: false, organization, points: [] }),
+    competitorShare: valueOr("Share of voice", competitorShareResult, {
+      configured: false,
+      organization,
+      points: [],
+      timeseries: [],
+    }),
+    languageShare: valueOr("Languages", languageShareResult, { configured: false, organization, points: [] }),
+    promptResults: valueOr("Prompt results", promptResultsResult, {
+      configured: false,
+      organization,
+      results: [],
+    }),
+    traffic: valueOr("Traffic overview", trafficResult, {
+      configured: false,
+      organization,
+      points: [],
+      sources: [],
+      totals: { aiReferral: 0, crawler: 0 },
+    }),
+    prompts: valueOr("Prompts", promptsResult, { configured: false, organization, prompts: [] }),
+    sequences: valueOr("Sequences", sequencesResult, { organization, sequences: [] }),
+    competitors: valueOr("Competitors", competitorsResult, { competitors: [], organization }),
+    gaps: valueOr("Content gaps", gapsResult, { hasScanData: false, organization, promptGaps: [], searchGaps: [] }),
+    briefs: valueOr("Content briefs", briefsResult, { briefs: [], organization }),
+    readiness: valueOr("Agent readiness", readinessResult, null),
+    trafficLog: valueOr("Traffic log", trafficLogResult, { configured: false, log: [], organization, total: 0 }),
+    trafficJourneys: valueOr("Traffic journeys", trafficJourneysResult, {
+      configured: false,
+      journeys: [],
+      organization,
+    }),
+    trafficPages: valueOr("Traffic pages", trafficPagesResult, { configured: false, organization, pages: [] }),
+    ingestSetup: valueOr("Traffic setup", ingestSetupResult, null),
+    errors,
   };
 }
 
