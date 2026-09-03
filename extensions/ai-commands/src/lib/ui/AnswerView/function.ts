@@ -10,6 +10,7 @@ export { GetPromptTokenSelectionText };
 import { Creativity } from "../../enum";
 import { RaycastChat, RaycastChatMessage, SettingsCommandAnswer } from "../../settings/types";
 import { RaycastImage } from "../../types";
+import { MessageRole } from "../../inference/types";
 import { formatCustomServerName, getCustomModel, getCustomProvider } from "../../providers/unified-provider";
 import { createLanguageModel, reasoningOptions, toModelMessages } from "../../providers/ai-sdk";
 import { generateText, streamText } from "ai";
@@ -113,12 +114,12 @@ export async function convertAnswerToChat(
       {
         messages: [
           {
-            role: "user",
+            role: MessageRole.USER,
             content: query ? query : "",
             images,
           },
           {
-            role: "assistant",
+            role: MessageRole.ASSISTANT,
             reasoning: thinking,
             content: answer,
           },
@@ -165,7 +166,7 @@ async function Inference(
       model: createLanguageModel(provider)(model.tag.name),
       messages: toModelMessages([
         {
-          role: "user",
+          role: MessageRole.USER,
           content: prompt,
           images: images ? images.map((base64) => ({ path: "", html: "", base64 })) : undefined,
         },
@@ -279,7 +280,7 @@ export async function RunBackgroundInference(
     model: createLanguageModel(provider)(model.tag.name),
     messages: toModelMessages([
       {
-        role: "user",
+        role: MessageRole.USER,
         content: prompt,
         images: base64Images ? base64Images.map((base64) => ({ path: "", html: "", base64 })) : undefined,
       },
@@ -399,12 +400,12 @@ export async function convertExchangesToChat(
   const messages: RaycastChatMessage[] = exchanges.map((ex) => ({
     messages: [
       {
-        role: "user",
+        role: MessageRole.USER,
         content: ex.query,
         images: ex.images,
       },
       {
-        role: "assistant",
+        role: MessageRole.ASSISTANT,
         reasoning: ex.thinking,
         content: ex.answer,
       },

@@ -4,7 +4,7 @@ import { stepCountIs, streamText } from "ai";
 import { AddSettingsCommandChat, GetSettingsCommandChatByIndex } from "../../settings/settings";
 import { RaycastChat } from "../../settings/types";
 import { RaycastImage } from "../../types";
-import { ChatMessage } from "../../inference/types";
+import { ChatMessage, MessageRole } from "../../inference/types";
 import { GetModels, PromptTokenParser } from "../function";
 import { McpServerConfig } from "../types";
 import { getCustomProvider } from "../../providers/unified-provider";
@@ -58,9 +58,10 @@ export function ClipboardConversation(chat?: RaycastChat): string {
   return chat.messages
     .flatMap((group) => group.messages)
     .map((message) => {
-      if (message.role === "user") return `Question:\n${message.content}\n`;
-      if (message.role === "assistant") return `Answer:\n${message.content}\n`;
-      if (message.role === "tool" && message.toolName) return `Tool Call: ${message.toolName}\n${message.content}\n`;
+      if (message.role === MessageRole.USER) return `Question:\n${message.content}\n`;
+      if (message.role === MessageRole.ASSISTANT) return `Answer:\n${message.content}\n`;
+      if (message.role === MessageRole.TOOL && message.toolName)
+        return `Tool Call: ${message.toolName}\n${message.content}\n`;
       return "";
     })
     .join("\n");
@@ -68,9 +69,9 @@ export function ClipboardConversation(chat?: RaycastChat): string {
 
 function inferenceMessages(chat: RaycastChat, query: string, images?: RaycastImage[]): ChatMessage[] {
   return [
-    { role: "system", content: getSystemPrompt() },
+    { role: MessageRole.SYSTEM, content: getSystemPrompt() },
     ...chat.messages.slice(-Number(preferences.chatHistoryMessagesNumber)).flatMap((group) => group.messages),
-    { role: "user", content: query, images },
+    { role: MessageRole.USER, content: query, images },
   ];
 }
 
@@ -107,7 +108,7 @@ function appendChatToken(
   if (!chat) return undefined;
   const messages = chat.messages.map((group, index, groups) => {
     if (index !== groups.length - 1) return group;
-    const lastAssistant = group.messages.findLastIndex((message) => message.role === "assistant");
+    const lastAssistant = group.messages.findLastIndex((message) => message.role === MessageRole.ASSISTANT);
     return {
       ...group,
       messages: group.messages.map((message, messageIndex) =>
@@ -116,6 +117,68 @@ function appendChatToken(
     };
   });
   return { ...chat, messages };
+}
+
+function appendToolCall(
+  chat: RaycastChat | undefined,
+  toolCall: { id: string; name: string; arguments: Record<string, unknown> },
+): RaycastChat | undefined {
+  if (!chat) return undefined;
+  return {
+    ...chat,
+    messages: chat.messages.map((group, index, groups) => {
+      if (index !== groups.length - 1) return group;
+      const assistantIndex = group.messages.findLastIndex((message) => message.role === MessageRole.ASSISTANT);
+      if (assistantIndex < 0) return group;
+      return {
+        ...group,
+        messages: group.messages.map((message, messageIndex) => {
+          if (messageIndex !== assistantIndex) return message;
+          const toolCalls = message.toolCalls || [];
+          if (toolCalls.some((call) => call.id === toolCall.id)) return message;
+          return { ...message, toolCalls: [...toolCalls, toolCall] };
+        }),
+      };
+    }),
+  };
+}
+
+function appendToolResult(
+  chat: RaycastChat | undefined,
+  toolResult: { id: string; name: string; content: string },
+): RaycastChat | undefined {
+  if (!chat) return undefined;
+  return {
+    ...chat,
+    messages: chat.messages.map((group, index, groups) => {
+      if (index !== groups.length - 1) return group;
+      const result = {
+        role: MessageRole.TOOL,
+        content: toolResult.content,
+        toolName: toolResult.name,
+        toolCallId: toolResult.id,
+      };
+      const existingIndex = group.messages.findIndex(
+        (message) => message.role === MessageRole.TOOL && message.toolCallId === toolResult.id,
+      );
+      return {
+        ...group,
+        messages:
+          existingIndex < 0
+            ? [...group.messages, result]
+            : group.messages.map((message, messageIndex) => (messageIndex === existingIndex ? result : message)),
+      };
+    }),
+  };
+}
+
+function serializeToolOutput(output: unknown): string {
+  if (typeof output === "string") return output;
+  try {
+    return JSON.stringify(output);
+  } catch {
+    return String(output);
+  }
 }
 
 async function Inference(
@@ -146,8 +209,8 @@ async function Inference(
             images,
             done: false,
             messages: [
-              { role: "user", content: query, images },
-              { role: "assistant", content: "" },
+              { role: MessageRole.USER, content: query, images },
+              { role: MessageRole.ASSISTANT, content: "" },
             ],
           },
         ],
@@ -182,6 +245,33 @@ async function Inference(
       if (!textStarted) await showToast({ style: Toast.Style.Animated, title: "✍️ Typing..." });
       textStarted = true;
       setChat((current) => appendChatToken(current, "content", part.text));
+    }
+    if (part.type === "tool-call") {
+      setChat((current) =>
+        appendToolCall(current, {
+          id: part.toolCallId,
+          name: part.toolName,
+          arguments: (part.input || {}) as Record<string, unknown>,
+        }),
+      );
+    }
+    if (part.type === "tool-result" && !part.preliminary) {
+      setChat((current) =>
+        appendToolResult(current, {
+          id: part.toolCallId,
+          name: part.toolName,
+          content: serializeToolOutput(part.output),
+        }),
+      );
+    }
+    if (part.type === "tool-error") {
+      setChat((current) =>
+        appendToolResult(current, {
+          id: part.toolCallId,
+          name: part.toolName,
+          content: serializeToolOutput(part.error),
+        }),
+      );
     }
   }
   setChat(

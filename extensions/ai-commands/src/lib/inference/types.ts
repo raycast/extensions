@@ -1,6 +1,11 @@
 import { RaycastImage } from "../types";
 
-export type MessageRole = "system" | "user" | "assistant" | "tool";
+export enum MessageRole {
+  SYSTEM = "system",
+  USER = "user",
+  ASSISTANT = "assistant",
+  TOOL = "tool",
+}
 
 export interface ToolCall {
   id: string;

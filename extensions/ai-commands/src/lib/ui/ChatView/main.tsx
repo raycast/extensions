@@ -14,7 +14,7 @@ import { FormModel } from "./form/Model";
 import { FormRenameChat } from "./form/RenameChat";
 import { GetImage } from "../function";
 import { RaycastImage } from "../../types";
-import { ToolCall } from "../../inference/types";
+import { MessageRole, ToolCall } from "../../inference/types";
 
 interface ChatViewProps {
   initialQuery?: string;
@@ -85,7 +85,7 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
   // Save Chat To LocalStoarge on Inference Done.
   React.useEffect(() => {
     if (!IsLoading && Chat && Chat.messages.length > 0 && Chat.messages[Chat.messages.length - 1].done) {
-      const firstQuestion = Chat.messages[0]?.messages.find((message) => message.role === "user")?.content;
+      const firstQuestion = Chat.messages[0]?.messages.find((message) => message.role === MessageRole.USER)?.content;
       const updatedChat =
         Chat.messages.length === 1 && Chat.name === "New Chat" && firstQuestion
           ? { ...Chat, name: `${firstQuestion.substring(0, 25)}...` }
@@ -144,8 +144,8 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
    * @returns Action Panel
    */
   function ActionMessage(props: { message?: RaycastChatMessage }): React.JSX.Element {
-    const question = props.message?.messages.find((v) => v.role === "user");
-    const answer = props.message?.messages.find((v) => v.role === "assistant");
+    const question = props.message?.messages.find((v) => v.role === MessageRole.USER);
+    const answer = props.message?.messages.find((v) => v.role === MessageRole.ASSISTANT);
     return (
       <ActionPanel>
         {!IsLoading && Query && Chat && ChatModelsAvailable && (
@@ -288,9 +288,9 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
   function MarkdownMessage(item: RaycastChatMessage): string {
     let markdown = "";
     for (const msg of item.messages) {
-      if (msg.role === "assistant" && msg.reasoning)
+      if (msg.role === MessageRole.ASSISTANT && msg.reasoning)
         markdown += `<details><summary><b>💡 Thinking... (click to expand)</b></summary>\n\n${msg.reasoning}\n\n</details>\n\n`;
-      if (msg.role === "assistant" && msg.content !== "") markdown += msg.content;
+      if (msg.role === MessageRole.ASSISTANT && msg.content !== "") markdown += msg.content;
     }
     return markdown;
   }
@@ -298,7 +298,7 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
   function AccessoryMessage(message: RaycastChatMessage): List.Item.Accessory[] {
     const accessory: List.Item.Accessory[] = [];
 
-    const toolUsed = message.messages.filter((v) => v.role === "tool");
+    const toolUsed = message.messages.filter((v) => v.role === MessageRole.TOOL);
     if (toolUsed.length)
       accessory.push({ icon: Icon.Hammer, tooltip: toolUsed.map((v) => `${v.toolName}`).join(", ") });
 

@@ -1,15 +1,8 @@
 import { dynamicTool, jsonSchema, ModelMessage, ToolSet } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { ToolCall } from "../inference/types";
+import { MessageRole, ToolCall } from "../inference/types";
 import { getProviderApiKey } from "./model-sync";
 import { CustomModel, CustomProvider, UnifiedChatMessage } from "./types";
-
-export enum AiSdkMessageRole {
-  SYSTEM = "system",
-  USER = "user",
-  ASSISTANT = "assistant",
-  TOOL = "tool",
-}
 
 export enum AiSdkContentType {
   TEXT = "text",
@@ -48,10 +41,10 @@ export function toModelMessages(messages: UnifiedChatMessage[]): ModelMessage[] 
 
   for (const message of messages) {
     // AI SDK accepts system content through `instructions`, not `messages`.
-    if (message.role === AiSdkMessageRole.SYSTEM) continue;
-    if (message.role === AiSdkMessageRole.USER && message.images?.length) {
+    if (message.role === MessageRole.SYSTEM) continue;
+    if (message.role === MessageRole.USER && message.images?.length) {
       modelMessages.push({
-        role: AiSdkMessageRole.USER,
+        role: MessageRole.USER,
         content: [
           ...(message.content ? [{ type: AiSdkContentType.TEXT as "text", text: message.content }] : []),
           ...message.images.map((image) => ({
@@ -62,10 +55,10 @@ export function toModelMessages(messages: UnifiedChatMessage[]): ModelMessage[] 
       });
       continue;
     }
-    if (message.role === AiSdkMessageRole.ASSISTANT && message.toolCalls?.length) {
+    if (message.role === MessageRole.ASSISTANT && message.toolCalls?.length) {
       pendingToolCalls.push(...message.toolCalls);
       modelMessages.push({
-        role: AiSdkMessageRole.ASSISTANT,
+        role: MessageRole.ASSISTANT,
         content: [
           ...(message.content ? [{ type: AiSdkContentType.TEXT as "text", text: message.content }] : []),
           ...message.toolCalls.map((call) => ({
@@ -78,7 +71,7 @@ export function toModelMessages(messages: UnifiedChatMessage[]): ModelMessage[] 
       });
       continue;
     }
-    if (message.role === AiSdkMessageRole.TOOL) {
+    if (message.role === MessageRole.TOOL) {
       const persistedId = message.toolCallId || message.tool_call_id;
       const toolName = message.toolName || message.tool_name;
       const matchedIndex = persistedId
@@ -92,7 +85,7 @@ export function toModelMessages(messages: UnifiedChatMessage[]): ModelMessage[] 
       // actual preceding call, so an unresolvable persisted result is omitted.
       if (!matchedCall) continue;
       modelMessages.push({
-        role: AiSdkMessageRole.TOOL,
+        role: MessageRole.TOOL,
         content: [
           {
             type: AiSdkContentType.TOOL_RESULT as "tool-result",
@@ -111,7 +104,7 @@ export function toModelMessages(messages: UnifiedChatMessage[]): ModelMessage[] 
 
 export function toInstructions(messages: UnifiedChatMessage[]): string | undefined {
   const instructions = messages
-    .filter((message) => message.role === AiSdkMessageRole.SYSTEM && message.content.trim())
+    .filter((message) => message.role === MessageRole.SYSTEM && message.content.trim())
     .map((message) => message.content.trim());
   return instructions.length ? instructions.join("\n\n") : undefined;
 }
