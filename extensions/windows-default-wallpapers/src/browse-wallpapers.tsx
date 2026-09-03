@@ -111,13 +111,13 @@ export default function Command() {
                   {primaryAction === "setWallpaper" ? (
                     <>
                       <SetWallpaperAction itemPath={item.path} />
-                      <PreviewWallpaperAction itemPath={item.path} />
+                      <PreviewWallpaperAction wallpaper={item} />
                       <CopyWallpaperAction itemPath={item.path} />
                     </>
                   ) : primaryAction === "copyWallpaper" ? (
                     <>
                       <CopyWallpaperAction itemPath={item.path} />
-                      <PreviewWallpaperAction itemPath={item.path} />
+                      <PreviewWallpaperAction wallpaper={item} />
                       <SetWallpaperAction
                         itemPath={item.path}
                         shortcut={{
@@ -128,7 +128,7 @@ export default function Command() {
                     </>
                   ) : (
                     <>
-                      <PreviewWallpaperAction itemPath={item.path} />
+                      <PreviewWallpaperAction wallpaper={item} />
                       <SetWallpaperAction itemPath={item.path} />
                       <CopyWallpaperAction itemPath={item.path} />
                     </>

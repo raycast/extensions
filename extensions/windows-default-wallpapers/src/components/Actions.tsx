@@ -1,13 +1,19 @@
 import { Action, Clipboard, Detail, Icon, Keyboard, showHUD } from "@raycast/api";
 import setWallpaper from "../utils/wallpaper";
 import { showFailureToast } from "@raycast/utils";
+import { Wallpaper } from "../types";
 
-export function PreviewWallpaperAction({ itemPath }: { itemPath: string }) {
+export function PreviewWallpaperAction({ wallpaper }: { wallpaper: Wallpaper }) {
   return (
     <Action.Push
       icon={Icon.Eye}
       title="Preview Wallpaper"
-      target={<Detail markdown={`![](file:///${encodeURI(itemPath.replaceAll("\\", "/"))})`} />}
+      target={
+        <Detail
+          markdown={`![](file:///${encodeURI(wallpaper.path.replaceAll("\\", "/"))})`}
+          navigationTitle={`${wallpaper.name} — Preview`}
+        />
+      }
     />
   );
 }
