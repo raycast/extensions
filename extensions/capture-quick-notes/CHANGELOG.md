@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-03
 
 - Add captures with an optional Capture list.
 - Save notes directly from Raycast's root search or the clipboard.
