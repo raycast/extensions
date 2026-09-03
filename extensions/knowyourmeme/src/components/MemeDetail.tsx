@@ -57,7 +57,7 @@ export function MemeDetail({ meme }: { meme: MemeResult }) {
         data
           ? buildMarkdown(data, showNsfw)
           : isLoading
-            ? "## Loading…"
+            ? "## _Loading…_"
             : error
               ? "## Failed to load meme\n\nThis meme's details couldn't be fetched. It may be a temporary network issue."
               : "# No data found"
