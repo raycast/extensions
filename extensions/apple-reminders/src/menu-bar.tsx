@@ -158,6 +158,8 @@ export default function Command() {
     }
   }, [reminders, countType]);
 
+  const now = new Date();
+
   function addPriorityToTitle(title: string, priority: Priority) {
     switch (priority) {
       case "high":
@@ -192,8 +194,6 @@ export default function Command() {
     const timePrefix = formattedTime ? `${formattedTime}  ` : "";
     title = truncate(`${timePrefix}${addPriorityToTitle(firstReminder.title, firstReminder.priority)}`, 30);
   }
-
-  const now = new Date();
 
   return (
     <MenuBarExtra isLoading={isLoading} icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }} title={title}>
