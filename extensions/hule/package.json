@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hule",
+  "title": "Hule",
+  "description": "Create, find and update Hule tasks without leaving your keyboard.",
+  "icon": "icon.png",
+  "author": "tony_hule",
+  "categories": ["Productivity"],
+  "keywords": ["hule", "task", "tasks", "todo", "project management"],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
+      "subtitle": "Hule",
+      "description": "Create a task from a single line, straight into your default list.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Task title",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Hule",
+      "description": "Create a task with a list, description, priority, due date and assignee.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "subtitle": "Hule",
+      "description": "Search tasks across a workspace and act on the results.",
+      "mode": "view"
+    },
+    {
+      "name": "my-tasks",
+      "title": "My Tasks",
+      "subtitle": "Hule",
+      "description": "Tasks assigned to you, grouped by when they are due.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Personal API Token",
+      "description": "A hule_pat_… token from Settings → API tokens in Hule.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "apiUrl",
+      "title": "API URL",
+      "description": "Only change this if you run a self-hosted Hule.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.hule-do.com/api"
+    },
+    {
+      "name": "defaultList",
+      "title": "Default List",
+      "description": "List name that Quick Add Task writes to. Leave empty to use your first list.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.1.3",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "type-check": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}
