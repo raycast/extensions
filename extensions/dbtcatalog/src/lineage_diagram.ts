@@ -3,7 +3,46 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import { fetchModelsWithLineage, fetchSources } from "./api";
+import { escapeHtml, escapeInlineScript, safeJson } from "./html_utils";
 import { ModelNode, SourceNode } from "./types";
+
+// Bundle diagram libraries locally so generated HTML does not depend on third-party CDNs at runtime.
+const loadBundledScript = (modulePath: string): string => {
+  try {
+    return escapeInlineScript(fs.readFileSync(require.resolve(modulePath), "utf8"));
+  } catch (error) {
+    console.error(`Failed to load bundled lineage asset: ${modulePath}`, error);
+    return "";
+  }
+};
+
+const CYTOSCAPE_SCRIPT = loadBundledScript("cytoscape/dist/cytoscape.min.js");
+const DAGRE_SCRIPT = loadBundledScript("dagre/dist/dagre.min.js");
+const CYTOSCAPE_DAGRE_SCRIPT = loadBundledScript("cytoscape-dagre/cytoscape-dagre.js");
+
+interface LineageDiagramNodeData {
+  id: string;
+  label: string;
+  type: string;
+  uniqueId: string;
+  database?: string;
+  schema?: string;
+  materialization?: string;
+  description?: string;
+  tags?: string[];
+  isSelected?: boolean;
+}
+
+interface LineageDiagramNode {
+  data: LineageDiagramNodeData;
+}
+
+interface LineageDiagramEdge {
+  data: {
+    source: string;
+    target: string;
+  };
+}
 
 // Generate dbt Cloud-style interactive lineage diagram using Cytoscape.js with FULL project DAG
 export async function openDbtCloudLineageDiagram(
@@ -31,7 +70,7 @@ export async function openDbtCloudLineageDiagram(
     }
   >();
   const edgesSet = new Set<string>();
-  const edges: Array<{ data: { source: string; target: string } }> = [];
+  const edges: LineageDiagramEdge[] = [];
 
   // Add all sources first
   for (const source of allSources) {
@@ -84,8 +123,8 @@ export async function openDbtCloudLineageDiagram(
             label: ancestor.sourceName ? `${ancestor.sourceName}.${ancestor.name}` : ancestor.name,
             type: ancestor.resourceType?.toLowerCase() || "model",
             uniqueId: ancestor.uniqueId,
-            database: (ancestor as any).database,
-            schema: (ancestor as any).schema,
+            database: ancestor.database,
+            schema: ancestor.schema,
           });
         }
 
@@ -143,6 +182,11 @@ export async function openDbtCloudLineageDiagram(
     nodeId(selectedUniqueId)
   );
 
+  if (!CYTOSCAPE_SCRIPT || !DAGRE_SCRIPT || !CYTOSCAPE_DAGRE_SCRIPT) {
+    await showToast(Toast.Style.Failure, "Could not load lineage renderer", "Missing bundled diagram assets");
+    return;
+  }
+
   // Write to temp file and open
   const tempDir = os.tmpdir();
   const fileName = `dbt-cloud-lineage-${nodeId(selectedLabel)}-${Date.now()}.html`;
@@ -180,26 +224,14 @@ export async function openEnvironmentLineageDiagram(
   await showToast(Toast.Style.Success, "Lineage opened in browser");
 }
 
-const escapeHtml = (value: string): string =>
-  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-// JSON.stringify does not escape "<", so raw output can terminate the enclosing <script> block.
-const safeJson = (value: unknown): string =>
-  JSON.stringify(value)
-    .replace(/</g, "\\u003c")
-    .replace(/>/g, "\\u003e")
-    .replace(/&/g, "\\u0026")
-    .replace(/\u2028/g, "\\u2028")
-    .replace(/\u2029/g, "\\u2029");
-
 function generateLineageHtml(
   selectedLabel: string,
   environmentName: string,
   modelCount: number,
   sourceCount: number,
   edgeCount: number,
-  nodes: any[],
-  edges: any[],
+  nodes: LineageDiagramNode[],
+  edges: LineageDiagramEdge[],
   initialSelectedId: string
 ): string {
   return `<!DOCTYPE html>
@@ -208,10 +240,9 @@ function generateLineageHtml(
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lineage: ${escapeHtml(selectedLabel)} | ${escapeHtml(environmentName)}</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
-  <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>${CYTOSCAPE_SCRIPT}</script>
+  <script>${DAGRE_SCRIPT}</script>
+  <script>${CYTOSCAPE_DAGRE_SCRIPT}</script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {

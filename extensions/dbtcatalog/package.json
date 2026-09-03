@@ -306,7 +306,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19"
+    "@raycast/api": "^1.104.19",
+    "cytoscape": "^3.28.1",
+    "cytoscape-dagre": "^2.5.0",
+    "dagre": "^0.8.5"
   },
   "devDependencies": {
     "@types/node": "20.8.10",

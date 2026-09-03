@@ -1,8 +1,39 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { Preferences, DiscoveryResponse, ModelNode, SourceNode } from "./types";
+import { DiscoveryResponse, ModelNode, RunModel, SourceNode } from "./types";
 
 // Get fresh preferences each time to support live updates
-const getPreferences = (): Preferences => getPreferenceValues();
+const getPreferences = (): Preferences => getPreferenceValues<Preferences>();
+
+const MAX_REST_PAGES = 20;
+const MAX_DISCOVERY_PAGES = 20;
+
+interface RestPagination {
+  limit?: number;
+  offset?: number;
+  count?: number;
+  total_count?: number;
+  totalCount?: number;
+  next_offset?: number;
+  nextOffset?: number;
+  next?: string | null;
+}
+
+interface RestResponse<T> {
+  data?: T[];
+  extra?: {
+    pagination?: RestPagination;
+  };
+}
+
+interface DiscoveryPageInfo {
+  hasNextPage: boolean;
+  endCursor: string | null;
+}
+
+interface DiscoveryConnection<T> {
+  edges: Array<{ node: T }>;
+  pageInfo?: DiscoveryPageInfo;
+}
 
 // Requests carry a bearer token, so never allow a custom endpoint to downgrade to plaintext.
 const toHttpsUrl = (value: string): string =>
@@ -79,23 +110,90 @@ const getHeaders = () => ({
   Authorization: `Bearer ${getToken()}`,
 });
 
+const getNumber = (value: number | string | undefined | null): number | null => {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const getNextRestPageUrl = (currentUrl: URL, pagination: RestPagination | undefined, pageSize: number): URL | null => {
+  if (!pagination) {
+    return null;
+  }
+
+  if (pagination.next) {
+    return new URL(pagination.next, currentUrl);
+  }
+
+  const limit = getNumber(pagination.limit ?? currentUrl.searchParams.get("limit")) ?? pageSize;
+  const offset = getNumber(pagination.offset ?? currentUrl.searchParams.get("offset")) ?? 0;
+  const count = getNumber(pagination.count) ?? pageSize;
+  const totalCount = getNumber(pagination.total_count ?? pagination.totalCount);
+  const nextOffset = getNumber(pagination.next_offset ?? pagination.nextOffset);
+
+  if (nextOffset !== null) {
+    const nextUrl = new URL(currentUrl.toString());
+    nextUrl.searchParams.set("offset", String(nextOffset));
+    if (!nextUrl.searchParams.has("limit")) {
+      nextUrl.searchParams.set("limit", String(limit));
+    }
+    return nextUrl;
+  }
+
+  if (totalCount !== null && offset + count >= totalCount) {
+    return null;
+  }
+
+  if (count < limit) {
+    return null;
+  }
+
+  const nextUrl = new URL(currentUrl.toString());
+  nextUrl.searchParams.set("offset", String(offset + limit));
+  if (!nextUrl.searchParams.has("limit")) {
+    nextUrl.searchParams.set("limit", String(limit));
+  }
+  return nextUrl;
+};
+
 export async function fetchFromApi<T>(endpoint: string, errorMessage = "Could not fetch from API"): Promise<T[]> {
   const baseUrl = getBaseUrl();
 
   try {
-    const response = await fetch(`${baseUrl}${endpoint}`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
+    let nextUrl: URL | null = new URL(endpoint, baseUrl);
+    const results: T[] = [];
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    for (let page = 0; nextUrl && page < MAX_REST_PAGES; page++) {
+      const response = await fetch(nextUrl.toString(), {
+        method: "GET",
+        headers: getHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const json = (await response.json()) as RestResponse<T>;
+      const pageData = Array.isArray(json.data) ? json.data : [];
+      results.push(...pageData);
+
+      if (pageData.length === 0) {
+        break;
+      }
+
+      nextUrl = getNextRestPageUrl(nextUrl, json.extra?.pagination, pageData.length);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const json: any = await response.json();
-    return json["data"] as T[];
+    if (nextUrl) {
+      console.warn(`REST pagination stopped after ${MAX_REST_PAGES} pages for ${endpoint}`);
+    }
+
+    return results;
   } catch (error) {
+    console.error("GET Error:", error);
     showToast(Toast.Style.Failure, "An error occurred", errorMessage);
     return [];
   }
@@ -257,6 +355,36 @@ export const getStatusText = (status: number): string => {
 // ============================================
 
 // Generic GraphQL query function
+async function fetchDiscoveryConnection<TNode, TData>(
+  query: string,
+  baseVariables: Record<string, unknown>,
+  getConnection: (data: TData) => DiscoveryConnection<TNode> | undefined,
+  errorMessage: string
+): Promise<TNode[]> {
+  const results: TNode[] = [];
+  let after: string | null = null;
+
+  for (let page = 0; page < MAX_DISCOVERY_PAGES; page++) {
+    const data: TData | null = await queryDiscoveryApi<TData>(query, { ...baseVariables, after }, errorMessage);
+    const connection: DiscoveryConnection<TNode> | undefined = data ? getConnection(data) : undefined;
+
+    if (!connection?.edges) {
+      return page === 0 ? [] : results;
+    }
+
+    results.push(...connection.edges.map((edge: { node: TNode }) => edge.node));
+
+    if (!connection.pageInfo?.hasNextPage || !connection.pageInfo.endCursor) {
+      return results;
+    }
+
+    after = connection.pageInfo.endCursor;
+  }
+
+  console.warn(`Discovery pagination stopped after ${MAX_DISCOVERY_PAGES} pages`);
+  return results;
+}
+
 export async function queryDiscoveryApi<T>(
   query: string,
   variables: Record<string, unknown>,
@@ -297,10 +425,10 @@ export async function queryDiscoveryApi<T>(
 
 // GraphQL Queries - Using only fields that exist in the Discovery API schema
 export const MODELS_QUERY = `
-query GetModels($environmentId: BigInt!, $first: Int!) {
+query GetModels($environmentId: BigInt!, $first: Int!, $after: String) {
   environment(id: $environmentId) {
     applied {
-      models(first: $first) {
+      models(first: $first, after: $after) {
         edges {
           node {
             uniqueId
@@ -333,6 +461,10 @@ query GetModels($environmentId: BigInt!, $first: Int!) {
               columnName
             }
           }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
         }
       }
     }
@@ -405,10 +537,10 @@ query GetModelWithLineage($environmentId: BigInt!, $uniqueId: String!) {
 
 // Query to fetch all models with their lineage relationships (for full DAG)
 export const MODELS_WITH_LINEAGE_QUERY = `
-query GetModelsWithLineage($environmentId: BigInt!, $first: Int!) {
+query GetModelsWithLineage($environmentId: BigInt!, $first: Int!, $after: String) {
   environment(id: $environmentId) {
     applied {
-      models(first: $first) {
+      models(first: $first, after: $after) {
         edges {
           node {
             uniqueId
@@ -423,6 +555,7 @@ query GetModelsWithLineage($environmentId: BigInt!, $first: Int!) {
             access
             group
             materializedType
+            compiledCode
             ancestors(types: [Model, Source, Seed, Snapshot]) {
               uniqueId
               name
@@ -443,6 +576,10 @@ query GetModelsWithLineage($environmentId: BigInt!, $first: Int!) {
             }
           }
         }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
       }
     }
   }
@@ -450,10 +587,10 @@ query GetModelsWithLineage($environmentId: BigInt!, $first: Int!) {
 `;
 
 export const SOURCES_QUERY = `
-query GetSources($environmentId: BigInt!, $first: Int!) {
+query GetSources($environmentId: BigInt!, $first: Int!, $after: String) {
   environment(id: $environmentId) {
     applied {
-      sources(first: $first) {
+      sources(first: $first, after: $after) {
         edges {
           node {
             uniqueId
@@ -482,6 +619,10 @@ query GetSources($environmentId: BigInt!, $first: Int!) {
             }
           }
         }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
       }
     }
   }
@@ -493,24 +634,17 @@ export async function fetchModels(environmentId: number, first = 100): Promise<M
   interface ModelsResponse {
     environment: {
       applied: {
-        models: {
-          edges: Array<{ node: ModelNode }>;
-        };
+        models: DiscoveryConnection<ModelNode>;
       };
     };
   }
 
-  const data = await queryDiscoveryApi<ModelsResponse>(
+  return fetchDiscoveryConnection<ModelNode, ModelsResponse>(
     MODELS_QUERY,
     { environmentId, first },
+    (data) => data.environment?.applied?.models,
     "Could not fetch models"
   );
-
-  if (!data?.environment?.applied?.models?.edges) {
-    return [];
-  }
-
-  return data.environment.applied.models.edges.map((edge) => edge.node);
 }
 
 // Fetch ALL models with their lineage relationships (for full DAG visualization)
@@ -518,24 +652,17 @@ export async function fetchModelsWithLineage(environmentId: number, first = 500)
   interface ModelsResponse {
     environment: {
       applied: {
-        models: {
-          edges: Array<{ node: ModelNode }>;
-        };
+        models: DiscoveryConnection<ModelNode>;
       };
     };
   }
 
-  const data = await queryDiscoveryApi<ModelsResponse>(
+  return fetchDiscoveryConnection<ModelNode, ModelsResponse>(
     MODELS_WITH_LINEAGE_QUERY,
     { environmentId, first },
+    (data) => data.environment?.applied?.models,
     "Could not fetch models with lineage"
   );
-
-  if (!data?.environment?.applied?.models?.edges) {
-    return [];
-  }
-
-  return data.environment.applied.models.edges.map((edge) => edge.node);
 }
 
 // Fetch model with full lineage
@@ -568,24 +695,17 @@ export async function fetchSources(environmentId: number, first = 100): Promise<
   interface SourcesResponse {
     environment: {
       applied: {
-        sources: {
-          edges: Array<{ node: SourceNode }>;
-        };
+        sources: DiscoveryConnection<SourceNode>;
       };
     };
   }
 
-  const data = await queryDiscoveryApi<SourcesResponse>(
+  return fetchDiscoveryConnection<SourceNode, SourcesResponse>(
     SOURCES_QUERY,
     { environmentId, first },
+    (data) => data.environment?.applied?.sources,
     "Could not fetch sources"
   );
-
-  if (!data?.environment?.applied?.sources?.edges) {
-    return [];
-  }
-
-  return data.environment.applied.sources.edges.map((edge) => edge.node);
 }
 
 // Resource type icons
@@ -675,15 +795,15 @@ export const buildLineageUrl = (projectId: number, uniqueId: string): string => 
 // ============================================
 
 // Fetch job run details including timing information
-export async function fetchJobRunDetails(jobId: number, limit = 50): Promise<any[]> {
+export async function fetchJobRunDetails(jobId: number, limit = 50): Promise<RunModel[]> {
   const endpoint = buildApiUrl(`/jobs/${jobId}/runs/`, {
     limit,
     order_by: "-finished_at",
-    include_related: JSON.stringify(["trigger", "job", "environment"]),
+    include_related: "trigger,job,environment",
   });
 
   try {
-    const runs = await fetchFromApi<any>(endpoint, "Could not fetch job run details");
+    const runs = await fetchFromApi<RunModel>(endpoint, "Could not fetch job run details");
     return runs;
   } catch (error) {
     showToast(Toast.Style.Failure, "Failed to fetch job run details");
@@ -695,7 +815,7 @@ export async function fetchJobRunDetails(jobId: number, limit = 50): Promise<any
 export async function fetchJobRunMetrics(jobId: number, limit = 50) {
   const runs = await fetchJobRunDetails(jobId, limit);
 
-  return runs.map((run: any) => ({
+  return runs.map((run) => ({
     runId: run.id,
     jobId: run.job_definition_id,
     jobName: run.job?.name || "Unknown",

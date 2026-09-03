@@ -15,8 +15,5 @@ compiled_raycast_swift
 # misc
 .DS_Store
 
-# build output
-/dist
-
 # local editor settings
 /.vscode
