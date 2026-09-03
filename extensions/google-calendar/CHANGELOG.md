@@ -1,8 +1,10 @@
 # Google Calendar Changelog
 
-## [Fix event sorting for undated events] - 2026-09-02
+## [Fix event list month sorting and multi-year grouping] - 2026-09-03
 
-- Sort events by their normalized start time, then place events without a start date before dated events when they share the same timestamp.
+- Fix chronological sorting of month sections in List Events so months are no longer sorted alphabetically.
+- Include the year in month section titles for future years so recurring events in different years are not merged together.
+- Parse all-day event dates at local midnight so events are not shifted to the previous day in timezones behind UTC.
 
 ## [Fix AI contact search caching] - 2026-08-27
 
