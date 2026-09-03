@@ -1278,6 +1278,16 @@ export function useFetchSite(url?: string) {
         // One heads-up, then get out of the way. The durable record is each
         // section's own row, which survives a cache hit; this is only so a
         // failure is not silent on the run that produced it.
+        //
+        // Only WHOLE-SUBSYSTEM failures escalate to a toast, which is why this
+        // reads `lookups` and not the discoverability statuses. DNS, the
+        // certificate, Wayback and host metadata each stand for a subsystem, and
+        // losing one is worth interrupting for. A robots.txt or sitemap.xml that
+        // could not be fetched is a detail INSIDE a section the reader is already
+        // going to review row by row, and its row says "Couldn't check" on its
+        // own. Wiring those into this toast reads like a fix for an asymmetry;
+        // it is not one — it just makes the interruption cheaper and therefore
+        // easier to ignore. Deliberate, decided 2026-09-02.
         const failed = (Object.keys(lookups) as FetchCategory[]).filter((c) => lookups[c] === "unavailable");
         if (failed.length > 0 && ownsView()) {
           const names = failed.map(getCategoryDescription);
