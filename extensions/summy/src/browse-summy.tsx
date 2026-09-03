@@ -15,7 +15,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SummyItem, SummyAPIError, deleteItem, friendlyError, getItem, listItems, regenerateItem } from "./api";
 
 type TypeFilter = "all" | SummyItem["type"];
@@ -37,6 +37,9 @@ const typeIcons: Record<SummyItem["type"], Icon> = {
   audio: Icon.Waveform,
   text: Icon.Text,
 };
+
+const SUMMARY_POLL_INTERVAL_MS = 2_000;
+const SUMMARY_POLL_ATTEMPTS = 30;
 
 export default function Command() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
@@ -214,13 +217,27 @@ function ItemDetail(props: {
   const { pop } = useNavigation();
   const [currentItem, setCurrentItem] = useState(item);
   const [isLoading, setIsLoading] = useState(false);
+  const pollGeneration = useRef(0);
+
+  useEffect(
+    () => () => {
+      pollGeneration.current += 1;
+    },
+    [],
+  );
+
+  async function loadCurrentItem(generation?: number) {
+    const refreshedItem = await getItem(item.id);
+    if (generation !== undefined && pollGeneration.current !== generation) return undefined;
+    setCurrentItem(refreshedItem);
+    await onRefresh();
+    return refreshedItem;
+  }
 
   async function refreshItem() {
     setIsLoading(true);
     try {
-      const refreshedItem = await getItem(item.id);
-      setCurrentItem(refreshedItem);
-      await onRefresh();
+      await loadCurrentItem();
     } finally {
       setIsLoading(false);
     }
@@ -229,7 +246,40 @@ function ItemDetail(props: {
   async function regenerateCurrentItem() {
     await onRegenerate();
     setCurrentItem((current) => ({ ...current, status: "processing", error: null }));
-    await refreshItem().catch(() => undefined);
+    const generation = ++pollGeneration.current;
+    void pollForSummary(generation);
+  }
+
+  async function pollForSummary(generation: number) {
+    let reportedRefreshFailure = false;
+
+    for (let attempt = 0; attempt < SUMMARY_POLL_ATTEMPTS; attempt += 1) {
+      await delay(SUMMARY_POLL_INTERVAL_MS);
+      if (pollGeneration.current !== generation) return;
+
+      try {
+        const refreshedItem = await loadCurrentItem(generation);
+        if (!refreshedItem) return;
+        if (refreshedItem.status === "done" || refreshedItem.status === "error") return;
+      } catch (error) {
+        if (!reportedRefreshFailure) {
+          reportedRefreshFailure = true;
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Summary Started, but Refresh Was Delayed",
+            message: `${friendlyError(error)} Summy will keep trying.`,
+          });
+        }
+      }
+    }
+
+    if (pollGeneration.current === generation) {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Still Summarising",
+        message: "Use Refresh to check again.",
+      });
+    }
   }
 
   return (
@@ -342,4 +392,8 @@ function formatDate(value: string): string {
 
 function escapeMarkdown(value: string): string {
   return value.replace(/([\\`*_{}[\]()<>#+\-.!|])/g, "\\$1");
+}
+
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
