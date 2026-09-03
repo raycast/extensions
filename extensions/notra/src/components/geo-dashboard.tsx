@@ -914,9 +914,6 @@ function DashboardItems({ actions, data, days, onViewChange, projectId, view }: 
     const trafficSetup = data.ingestSetup
       ? `\n\n### AI Traffic Setup\n\n**Ingest URL:** ${escapeMarkdown(data.ingestSetup.ingestUrl)}\n\n#### Next.js\n\`\`\`tsx\n${data.ingestSetup.snippets.next}\n\`\`\`\n\n#### Nuxt\n\`\`\`ts\n${data.ingestSetup.snippets.nuxt}\n\`\`\`\n\n#### Netlify\n\`\`\`ts\n${data.ingestSetup.snippets.netlify}\n\`\`\``
       : "";
-    const dataIssues = data.errors.length
-      ? `\n\n### Data Issues\n${data.errors.map((error) => `- ${escapeMarkdown(error)}`).join("\n")}`
-      : "";
     return (
       <List.Section title="Tracking Configuration">
         <List.Item
@@ -926,7 +923,7 @@ function DashboardItems({ actions, data, days, onViewChange, projectId, view }: 
           accessories={[{ tag: settings.enabled ? "Live" : "Paused" }]}
           detail={
             <List.Item.Detail
-              markdown={`## ${escapeMarkdown(settings.companyName)}\n\n### Engines\n${settings.engines.map((engine) => `- ${escapeMarkdown(formatModelName(engine))}`).join("\n") || "None"}\n\n### Languages\n${settings.languages.map((language) => `- ${escapeMarkdown(language)}`).join("\n") || "None"}\n\n### Brand Aliases\n${settings.aliases.map((alias) => `- ${escapeMarkdown(alias)}`).join("\n") || "None"}\n\n### Approved Non-ZDR Engines\n${settings.nonZdrApprovedEngines.map((engine) => `- ${escapeMarkdown(formatModelName(engine))}`).join("\n") || "None"}${trafficSetup}${dataIssues}`}
+              markdown={`## ${escapeMarkdown(settings.companyName)}\n\n### Engines\n${settings.engines.map((engine) => `- ${escapeMarkdown(formatModelName(engine))}`).join("\n") || "None"}\n\n### Languages\n${settings.languages.map((language) => `- ${escapeMarkdown(language)}`).join("\n") || "None"}\n\n### Brand Aliases\n${settings.aliases.map((alias) => `- ${escapeMarkdown(alias)}`).join("\n") || "None"}\n\n### Approved Non-ZDR Engines\n${settings.nonZdrApprovedEngines.map((engine) => `- ${escapeMarkdown(formatModelName(engine))}`).join("\n") || "None"}${trafficSetup}`}
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="Status" text={settings.enabled ? "Live" : "Paused"} />
@@ -937,11 +934,6 @@ function DashboardItems({ actions, data, days, onViewChange, projectId, view }: 
                   />
                   <List.Item.Detail.Metadata.Label title="Last scan" text={formatGeoDate(settings.lastScanAt)} />
                   <List.Item.Detail.Metadata.Label title="Updated" text={formatGeoDate(settings.updatedAt)} />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="API sections"
-                    text={`${17 - data.errors.length} of 17 loaded`}
-                  />
                 </List.Item.Detail.Metadata>
               }
             />

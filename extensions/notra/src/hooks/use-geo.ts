@@ -25,7 +25,7 @@ export function useGeoProjects() {
 }
 
 export function useGeoDashboard(projectId: string, days: number) {
-  return useCachedPromise(getGeoDashboard, [projectId, days], { keepPreviousData: true });
+  return useCachedPromise(getGeoDashboard, [projectId, days]);
 }
 
 export function useGeoContentBrief(projectId: string, briefId: string) {
