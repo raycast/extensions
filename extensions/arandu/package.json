@@ -5,7 +5,9 @@
   "description": "Manage your day in Arandu — today's plan, agenda, habits, tasks, reminders, and your assistant.",
   "icon": "extension-icon.png",
   "author": "luiz_vi",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
