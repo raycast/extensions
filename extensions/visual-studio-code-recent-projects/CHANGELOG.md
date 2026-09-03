@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix: Terminal shortcut conflict] - {PR_MERGE_DATE}
+
+- Changed the terminal action shortcut to `Cmd` + `Shift` + `T` on macOS and `Ctrl` + `Shift` + `T` on Windows to avoid conflicting with `Open With…`. Fixes [#28408](https://github.com/raycast/extensions/issues/28408).
+
 ## [Fix: Opening workspaces on Windows] - 2026-08-19
 
 - Fixed `.code-workspace` entries on Windows opening as a new empty file instead of the workspace. The `file://` URI was passed to the editor as a positional argument, which the VS Code CLI interprets as a file path. Windows now opens all local entries by path, completing the revert in [#28913](https://github.com/raycast/extensions/pull/28913).
