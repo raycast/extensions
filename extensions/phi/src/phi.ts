@@ -4,6 +4,7 @@ import { serializePhiInvocationContext } from "./invocation-context";
 import {
   ApplicationChannel,
   PHI_API_VERSION,
+  PHI_SCRIPTING_API_V2,
   PhiError,
   PhiSpace,
   PhiTab,
@@ -20,6 +21,7 @@ const APPLE_SCRIPT_TIMEOUT_MS = 5_000;
 const APPLE_SCRIPT_PERMISSION_TIMEOUT_MS = 30_000;
 const PHI_NOT_RUNNING_RESULT = "__PHI_NOT_RUNNING__";
 export const MINIMUM_PHI_VERSION = "2.4.0";
+export const PHI_SCRIPTING_API_V2_MINIMUM_VERSION = "2.9.0";
 
 function updatePhiMessage(minimumVersion: string): string {
   return `Phi ${minimumVersion} or later is required. Update Phi and try again.`;
@@ -191,6 +193,17 @@ function commandScripts(channel: ApplicationChannel) {
       0,
       '  tell application id "__PHI_APPLICATION_ID__" to create phi incognito window client context requestedClientContext',
     ),
+    newKioskWindow: commandScript(
+      channel,
+      1,
+      `  set requestedURL to item 1 of argv
+  tell application id "__PHI_APPLICATION_ID__" to create phi kiosk window url requestedURL client context requestedClientContext`,
+    ),
+    newIncognitoSpace: commandScript(
+      channel,
+      0,
+      '  tell application id "__PHI_APPLICATION_ID__" to create phi incognito space client context requestedClientContext',
+    ),
   };
 }
 
@@ -294,8 +307,9 @@ export class PhiClient {
 
   requireVersion(
     minimumVersion: string = MINIMUM_PHI_VERSION,
+    minimumAPIVersion: number = PHI_API_VERSION,
   ): Promise<PhiVersion> {
-    return this.ensureCompatible(minimumVersion);
+    return this.ensureCompatible(minimumVersion, minimumAPIVersion);
   }
 
   async getSpaces(): Promise<PhiSpace[]> {
@@ -419,8 +433,31 @@ export class PhiClient {
     );
   }
 
+  async newKioskWindow(url?: string): Promise<void> {
+    await this.ensureCompatible(
+      PHI_SCRIPTING_API_V2_MINIMUM_VERSION,
+      PHI_SCRIPTING_API_V2,
+    );
+    parseAcknowledgement(
+      await this.execute(commandScripts(this.channel).newKioskWindow, [
+        url ?? "",
+      ]),
+    );
+  }
+
+  async newIncognitoSpace(): Promise<void> {
+    await this.ensureCompatible(
+      PHI_SCRIPTING_API_V2_MINIMUM_VERSION,
+      PHI_SCRIPTING_API_V2,
+    );
+    parseAcknowledgement(
+      await this.execute(commandScripts(this.channel).newIncognitoSpace, []),
+    );
+  }
+
   private ensureCompatible(
     minimumVersion: string = MINIMUM_PHI_VERSION,
+    minimumAPIVersion: number = PHI_API_VERSION,
   ): Promise<PhiVersion> {
     if (!this.compatibilityCheck) {
       this.compatibilityCheck = this.getVersion().catch((error: unknown) => {
@@ -439,10 +476,10 @@ export class PhiClient {
             updatePhiMessage(minimumVersion),
           );
         }
-        if (version.apiVersion < PHI_API_VERSION) {
+        if (version.apiVersion < minimumAPIVersion) {
           throw new PhiError(
             "unsupportedVersion",
-            "Update Phi to a version that supports scripting API version 1.",
+            `Update Phi to a version that supports scripting API version ${minimumAPIVersion}.`,
           );
         }
         return version;
@@ -558,8 +595,10 @@ function client(): PhiClient {
 export const getSpaces = () => client().getSpaces();
 export const getChromiumDataDirectoryIfRunning = () =>
   client().getChromiumDataDirectoryIfRunning();
-export const requirePhiVersion = (minimumVersion: string) =>
-  client().requireVersion(minimumVersion);
+export const requirePhiVersion = (
+  minimumVersion: string,
+  minimumAPIVersion?: number,
+) => client().requireVersion(minimumVersion, minimumAPIVersion);
 export const getTabs = (scope?: TabScope) => client().getTabs(scope);
 export const activateSpace = (spaceId: string) =>
   client().activateSpace(spaceId);
@@ -581,3 +620,5 @@ export const openTab = (address: string, spaceId?: string) =>
   client().openTab(address, spaceId);
 export const newWindow = () => client().newWindow();
 export const newIncognitoWindow = () => client().newIncognitoWindow();
+export const newKioskWindow = (url?: string) => client().newKioskWindow(url);
+export const newIncognitoSpace = () => client().newIncognitoSpace();

@@ -1,8 +1,14 @@
-import { MINIMUM_PHI_VERSION, requirePhiVersion } from "./phi";
+import {
+  MINIMUM_PHI_VERSION,
+  PHI_SCRIPTING_API_V2_MINIMUM_VERSION,
+  requirePhiVersion,
+} from "./phi";
 import { runWithPhiInvocation } from "./invocation-context";
+import { PHI_SCRIPTING_API_V2 } from "./types";
 
 export interface PhiVersionRequirement {
   minimumPhiVersion: string;
+  minimumPhiAPIVersion?: number;
 }
 
 export const PHI_COMMAND_REQUIREMENTS = {
@@ -14,6 +20,14 @@ export const PHI_COMMAND_REQUIREMENTS = {
   "new-tab": { minimumPhiVersion: MINIMUM_PHI_VERSION },
   "new-window": { minimumPhiVersion: MINIMUM_PHI_VERSION },
   "new-incognito-window": { minimumPhiVersion: MINIMUM_PHI_VERSION },
+  "new-kiosk-window": {
+    minimumPhiVersion: PHI_SCRIPTING_API_V2_MINIMUM_VERSION,
+    minimumPhiAPIVersion: PHI_SCRIPTING_API_V2,
+  },
+  "new-incognito-space": {
+    minimumPhiVersion: PHI_SCRIPTING_API_V2_MINIMUM_VERSION,
+    minimumPhiAPIVersion: PHI_SCRIPTING_API_V2,
+  },
 } as const satisfies Record<string, PhiVersionRequirement>;
 
 export type PhiCommandName = keyof typeof PHI_COMMAND_REQUIREMENTS;
@@ -22,7 +36,14 @@ export async function runPhiVersionedOperation<Result>(
   requirement: PhiVersionRequirement,
   operation: () => Promise<Result> | Result,
 ): Promise<Result> {
-  await requirePhiVersion(requirement.minimumPhiVersion);
+  if (requirement.minimumPhiAPIVersion === undefined) {
+    await requirePhiVersion(requirement.minimumPhiVersion);
+  } else {
+    await requirePhiVersion(
+      requirement.minimumPhiVersion,
+      requirement.minimumPhiAPIVersion,
+    );
+  }
   return operation();
 }
 
