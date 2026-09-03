@@ -5,6 +5,7 @@ import {
   escapeMarkdown,
   formatSignedBytes,
   isCompatibleMintCLIVersion,
+  parseMintAgentsJSON,
   parseJSON,
   parseMintCommandJSON,
   shortPath,
@@ -16,7 +17,7 @@ const compatibleVersion: MintCLIVersion = {
   appVersion: "1.0.10",
   appBuild: "16",
   schemaVersion: 2,
-  capabilities: ["scan-lite.v1", "scan.v1", "status.v1", "why.v1"],
+  capabilities: ["scan-lite.v1", "scan.v1", "status.v1", "why.v1", "surface.v1"],
 };
 
 test("accepts the current Mint CLI compatibility contract", () => {
@@ -41,6 +42,17 @@ test("accepts only schema-2 output for the expected command capability", () => {
   assert.equal(parseMintCommandJSON(scan, "status.v1"), undefined);
   assert.equal(parseMintCommandJSON('{"schemaVersion":1,"capability":"status.v1"}', "status.v1"), undefined);
   assert.equal(parseMintCommandJSON('{"schemaVersion":2}', "why.v1"), undefined);
+});
+
+test("accepts only structurally valid AI-agent storage output", () => {
+  const available = JSON.stringify({ available: true, totalBytes: 1024, tools: [] });
+  const unavailable = JSON.stringify({ available: false, reason: "Run a scan in Mint." });
+
+  assert.equal(parseMintAgentsJSON<{ totalBytes?: number }>(available)?.totalBytes, 1024);
+  assert.equal(parseMintAgentsJSON<{ reason?: string }>(unavailable)?.reason, "Run a scan in Mint.");
+  assert.equal(parseMintAgentsJSON('{"available":true,"tools":[]}'), undefined);
+  assert.equal(parseMintAgentsJSON('{"available":true,"totalBytes":1024}'), undefined);
+  assert.equal(parseMintAgentsJSON('{"available":"yes"}'), undefined);
 });
 
 test("shortens only the home directory and its descendants", () => {
