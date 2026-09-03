@@ -1,6 +1,6 @@
 # Changelog
 
-## [New Kiosk Window and Incognito Space] - {PR_MERGE_DATE}
+## [New Kiosk Window and Incognito Space] - 2026-09-03
 
 - Add a command to open a Kiosk window with an optional URL.
 - Add a command to create and activate a new Incognito Space.
