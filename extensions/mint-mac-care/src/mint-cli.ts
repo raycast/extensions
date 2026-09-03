@@ -5,7 +5,7 @@ import { homedir } from "node:os";
 export const MINT_TEAM_ID = "DRV5ZMT5U8";
 export const MINIMUM_SCHEMA_VERSION = 2;
 
-const REQUIRED_CAPABILITIES = ["scan-lite.v1", "status.v1", "why.v1", "surface.v1"];
+const REQUIRED_CAPABILITIES = ["scan-lite.v1", "status.v1", "why.v1", "surface.v1", "agents.v1"];
 const SIGNING_REQUIREMENT = `=anchor apple generic and identifier "mint-cli" and certificate leaf[subject.OU] = "${MINT_TEAM_ID}"`;
 const inFlightSurfaceRequests = new Map<string, Promise<MintSurfaceResponse>>();
 

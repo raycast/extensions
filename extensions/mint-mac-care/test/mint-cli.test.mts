@@ -17,13 +17,20 @@ const compatibleVersion: MintCLIVersion = {
   appVersion: "1.0.10",
   appBuild: "16",
   schemaVersion: 2,
-  capabilities: ["scan-lite.v1", "scan.v1", "status.v1", "why.v1", "surface.v1"],
+  capabilities: ["scan-lite.v1", "scan.v1", "status.v1", "why.v1", "surface.v1", "agents.v1"],
 };
 
 test("accepts the current Mint CLI compatibility contract", () => {
   assert.equal(isCompatibleMintCLIVersion(compatibleVersion), true);
   assert.equal(isCompatibleMintCLIVersion({ ...compatibleVersion, schemaVersion: 0 }), false);
   assert.equal(isCompatibleMintCLIVersion({ ...compatibleVersion, capabilities: ["status.v1"] }), false);
+  assert.equal(
+    isCompatibleMintCLIVersion({
+      ...compatibleVersion,
+      capabilities: compatibleVersion.capabilities?.filter((capability) => capability !== "agents.v1"),
+    }),
+    false,
+  );
 });
 
 test("parses valid JSON and rejects malformed output", () => {
