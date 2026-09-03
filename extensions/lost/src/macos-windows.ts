@@ -116,6 +116,9 @@ export async function focusWindow(window: AppWindow): Promise<void> {
   if (!existsSync(path)) {
     throw new Error(`Window helper missing at ${path}. Run npm run build:swift.`);
   }
+  if (!window.unixId) {
+    throw new Error("Couldn't focus window: the app is no longer running.");
+  }
 
   await new Promise<void>((resolve, reject) => {
     const child = spawn(path, ["focus", String(window.unixId), String(window.windowId ?? 0), window.title], {

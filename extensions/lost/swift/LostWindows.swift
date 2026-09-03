@@ -198,7 +198,7 @@ private func cleanedTitle(_ raw: String, appName: String) -> String {
 
 private func listWindows() -> [WindowDTO] {
     guard let info = CGWindowListCopyWindowInfo([.optionAll], kCGNullWindowID) as? [[String: Any]] else {
-        return listRunningApps()
+        return []
     }
 
     let spaceTitles = windowTitlesFromSpaces()
@@ -290,32 +290,7 @@ private func listWindows() -> [WindowDTO] {
         )
     }
 
-    return results.isEmpty ? listRunningApps() : results
-}
-
-private func listRunningApps() -> [WindowDTO] {
-    NSWorkspace.shared.runningApplications
-        .filter { app in
-            app.activationPolicy == .regular &&
-                app.bundleIdentifier != "com.raycast.macos" &&
-                !(app.localizedName ?? "").isEmpty
-        }
-        .map { app in
-            WindowDTO(
-                appName: app.localizedName ?? "App",
-                bundleId: app.bundleIdentifier ?? "",
-                unixId: Int(app.processIdentifier),
-                title: app.localizedName ?? "App",
-                index: 1,
-                minimized: false,
-                appPath: app.bundleURL?.path,
-                localizedName: app.localizedName,
-                width: 0,
-                height: 0,
-                windowId: 0,
-                thumbnail: nil
-            )
-        }
+    return results
 }
 
 private func thumbnailDirectory() -> URL {
@@ -424,7 +399,6 @@ private func axValue(_ element: AXUIElement, _ attribute: String) -> AnyObject? 
     return error == .success ? value : nil
 }
 
-@discardableResult
 private func raiseAXWindow(pid: pid_t, title: String, windowId: Int) -> Bool {
     let app = AXUIElementCreateApplication(pid)
     guard let windows = axValue(app, kAXWindowsAttribute as String) as? [AXUIElement], !windows.isEmpty else {
@@ -697,15 +671,7 @@ private func emitError(_ message: String) {
     FileHandle.standardError.write(Data("\(message)\n".utf8))
 }
 
-@discardableResult
 private func activateProcess(unixId: Int32, windowId: UInt32) -> Bool {
-    if windowId == 0 {
-        guard let runningApp = NSRunningApplication(processIdentifier: unixId) else {
-            return false
-        }
-        return runningApp.activate(options: [.activateIgnoringOtherApps, .activateAllWindows])
-    }
-
     var psn = Darwin.ProcessSerialNumber()
     guard let hiServices = dlopen("/System/Library/Frameworks/ApplicationServices.framework/Frameworks/HIServices.framework/HIServices", RTLD_LAZY)
         ?? dlopen("/System/Library/Frameworks/ApplicationServices.framework/ApplicationServices", RTLD_LAZY),
@@ -730,9 +696,33 @@ private func activateProcess(unixId: Int32, windowId: UInt32) -> Bool {
     return true
 }
 
+private func focusSyntheticApp(unixId: Int32, title: String) -> Bool {
+    guard let runningApp = NSRunningApplication(processIdentifier: unixId), !runningApp.isTerminated else {
+        emitError("That app is no longer running.")
+        return false
+    }
+    guard runningApp.activate(options: [.activateIgnoringOtherApps, .activateAllWindows]) else {
+        emitError("Couldn't activate the application.")
+        return false
+    }
+    guard raiseAXWindow(pid: unixId, title: title, windowId: 0) else {
+        emitError("Couldn't raise the window. Grant Accessibility access to Raycast.")
+        return false
+    }
+    Thread.sleep(forTimeInterval: 0.05)
+    guard let front = NSRunningApplication(processIdentifier: unixId), !front.isTerminated, front.isActive else {
+        emitError("Couldn't focus a window for that app.")
+        return false
+    }
+    return true
+}
+
 private func focus(unixId: Int32, windowId: UInt32, title: String) -> Bool {
     // Let Raycast finish dismissing so it does not steal the space/window back.
     Thread.sleep(forTimeInterval: 0.12)
+    if windowId == 0 {
+        return focusSyntheticApp(unixId: unixId, title: title)
+    }
     if switchToWindowSpace(windowId) == .failed {
         emitError("Couldn't switch to the window's Space.")
         return false
