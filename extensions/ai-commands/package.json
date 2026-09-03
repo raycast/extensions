@@ -311,9 +311,9 @@
     {
       "name": "models",
       "icon": "models.png",
-      "title": "Manage Models",
+      "title": "Manage Ollama Models",
       "subtitle": "AI Command",
-      "description": "Manage installed models",
+      "description": "Pull, inspect, and manage Ollama models",
       "mode": "view"
     },
     {
@@ -366,11 +366,13 @@
     }
   ],
   "dependencies": {
+    "@ai-sdk/openai-compatible": "^3.0.43",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "@raycast/api": "^2.1.2",
     "@raycast/utils": "^2.3.0",
+    "ai": "^7.0.92",
     "file-type": "^22.0.2",
-    "yaml": "^2.9.0"
+    "ollama": "^0.6.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

@@ -26,7 +26,8 @@ export function getModelsEndpoint(baseUrl: string): string {
   if (!normalized) {
     throw new Error("Provider base URL is required");
   }
-  return `${normalized}/models`;
+  const root = normalized.endsWith("/chat/completions") ? normalized.slice(0, -"/chat/completions".length) : normalized;
+  return `${root}/models`;
 }
 
 /**

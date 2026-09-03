@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { hasYamlFile, importFromYaml, loadCustomProviders, saveCustomProviders } from "./storage";
+import { loadCustomProviders, saveCustomProviders } from "./storage";
 import { CustomModel, CustomProvider } from "./types";
 import { fetchProviderModels } from "./model-sync";
 
@@ -38,7 +38,7 @@ export function useProviders() {
     async (provider: CustomProvider, signal?: AbortSignal) => {
       const models = await fetchProviderModels(provider, signal);
       const updatedProviders = data.map((item) => (item.id === provider.id ? { ...item, models } : item));
-      saveProviders(updatedProviders);
+      await saveProviders(updatedProviders);
       return models.length;
     },
     [data, saveProviders],
@@ -47,7 +47,7 @@ export function useProviders() {
   const removeProvider = useCallback(
     (providerId: string) => {
       const updatedProviders = data.filter((p) => p.id !== providerId);
-      saveProviders(updatedProviders);
+      return saveProviders(updatedProviders);
     },
     [data, saveProviders],
   );
@@ -64,7 +64,7 @@ export function useProviders() {
         }
         return provider;
       });
-      saveProviders(updatedProviders);
+      return saveProviders(updatedProviders);
     },
     [data, saveProviders],
   );
@@ -84,7 +84,7 @@ export function useProviders() {
         updatedProviders.push(provider);
       }
 
-      saveProviders(updatedProviders);
+      return saveProviders(updatedProviders);
     },
     [data, saveProviders],
   );
@@ -120,12 +120,6 @@ export function useProviders() {
     [data, saveProviders],
   );
 
-  const handleImportFromYaml = useCallback(async () => {
-    const count = await importFromYaml();
-    revalidate();
-    return count;
-  }, [revalidate]);
-
   return {
     providers: data,
     isLoading,
@@ -137,7 +131,5 @@ export function useProviders() {
     putProvider,
     putModel,
     syncProviderModels,
-    importFromYaml: handleImportFromYaml,
-    hasYamlFile: hasYamlFile(),
   };
 }

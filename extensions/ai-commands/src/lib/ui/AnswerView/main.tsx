@@ -1,10 +1,17 @@
 import * as React from "react";
 import { Action, ActionPanel, Detail, getPreferenceValues, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { convertExchangesToChat, GetModel, Run, GetPromptTokenSelectionText } from "./function";
+import {
+  AnswerInferenceMetadata,
+  convertExchangesToChat,
+  GetModel,
+  Run,
+  GetPromptTokenSelectionText,
+} from "./function";
 import { Shortcut } from "../shortcut";
 import { CommandAnswer } from "../../settings/enum";
-import { OllamaApiGenerateResponse, OllamaApiTagsResponseModel, ThinkingEffort } from "../../ollama/types";
+import { ThinkingEffort } from "../../ollama/types";
+import { UiModelTag } from "./types";
 import { EditModel } from "./form/EditModel";
 import { Creativity, ModelCapability } from "../../enum";
 import { RaycastImage } from "../../types";
@@ -27,7 +34,7 @@ interface Exchange {
   query: string;
   answer: string;
   thinking: string;
-  metadata?: OllamaApiGenerateResponse;
+  metadata?: AnswerInferenceMetadata;
   images?: RaycastImage[];
 }
 
@@ -81,13 +88,13 @@ export function AnswerView(props: props): React.JSX.Element {
     });
   };
 
-  const setAnswerMetadata = (value: React.SetStateAction<OllamaApiGenerateResponse>) => {
+  const setAnswerMetadata = (value: React.SetStateAction<AnswerInferenceMetadata>) => {
     setExchanges((prev) => {
       const next = [...prev];
       if (next.length === 0) return prev;
       const current = next[next.length - 1];
       const newMetadata =
-        typeof value === "function" ? value((current.metadata || {}) as OllamaApiGenerateResponse) : value;
+        typeof value === "function" ? value((current.metadata || {}) as AnswerInferenceMetadata) : value;
       next[next.length - 1] = { ...current, metadata: newMetadata };
       return next;
     });
@@ -232,13 +239,13 @@ export function AnswerView(props: props): React.JSX.Element {
       });
     };
 
-    const onAnswerMetadata = (value: React.SetStateAction<OllamaApiGenerateResponse>) => {
+    const onAnswerMetadata = (value: React.SetStateAction<AnswerInferenceMetadata>) => {
       setExchanges((prev) => {
         const next = [...prev];
         if (next.length === 0) return prev;
         const current = next[0];
         const newMetadata =
-          typeof value === "function" ? value((current.metadata || {}) as OllamaApiGenerateResponse) : value;
+          typeof value === "function" ? value((current.metadata || {}) as AnswerInferenceMetadata) : value;
         next[0] = { ...current, metadata: newMetadata };
         return next;
       });
@@ -273,57 +280,17 @@ export function AnswerView(props: props): React.JSX.Element {
   };
 
   /**
-   * Answer Metadata.
-   * @param prop.answer - Ollama Generate Response.
-   * @param prop.tag - Ollama Model Tag Response.
+   * Answer metadata shared by all configured providers.
    */
-  function AnswerMetadata(prop: {
-    answer: OllamaApiGenerateResponse;
-    tag: OllamaApiTagsResponseModel;
-  }): React.JSX.Element {
+  function AnswerMetadata(prop: { answer: AnswerInferenceMetadata; tag: UiModelTag }): React.JSX.Element {
     return (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Model" text={prop.tag.name} />
-        <Detail.Metadata.Label title="Family" text={prop.tag.details.family} />
-        {prop.tag.details.families && prop.tag.details.families.length > 0 && (
-          <Detail.Metadata.TagList title="Families">
-            {prop.tag.details.families.map((f) => (
-              <Detail.Metadata.TagList.Item text={f} key={f} />
-            ))}
-          </Detail.Metadata.TagList>
-        )}
-        <Detail.Metadata.Label title="Parameter Size" text={prop.tag.details.parameter_size} />
-        <Detail.Metadata.Label title="Quantization Level" text={prop.tag.details.quantization_level} />
-        <Detail.Metadata.Separator />
-        {prop.answer.eval_count && prop.answer.eval_duration ? (
-          <Detail.Metadata.Label
-            title="Generation Speed"
-            text={`${(prop.answer.eval_count / (prop.answer.eval_duration / 1e9)).toFixed(2)} token/s`}
-          />
-        ) : null}
-        {prop.answer.total_duration ? (
-          <Detail.Metadata.Label
-            title="Total Inference Duration"
-            text={`${(prop.answer.total_duration / 1e9).toFixed(2)}s`}
-          />
-        ) : null}
-        {prop.answer.load_duration ? (
-          <Detail.Metadata.Label title="Load Duration" text={`${(prop.answer.load_duration / 1e9).toFixed(2)}s`} />
-        ) : null}
         {prop.answer.prompt_eval_count ? (
-          <Detail.Metadata.Label title="Prompt Eval Count" text={`${prop.answer.prompt_eval_count}`} />
-        ) : null}
-        {prop.answer.prompt_eval_duration ? (
-          <Detail.Metadata.Label
-            title="Prompt Eval Duration"
-            text={`${(prop.answer.prompt_eval_duration / 1e9).toFixed(2)}s`}
-          />
+          <Detail.Metadata.Label title="Input Tokens" text={`${prop.answer.prompt_eval_count}`} />
         ) : null}
         {prop.answer.eval_count ? (
-          <Detail.Metadata.Label title="Eval Count" text={`${prop.answer.eval_count}`} />
-        ) : null}
-        {prop.answer.eval_duration ? (
-          <Detail.Metadata.Label title="Eval Duration" text={`${(prop.answer.eval_duration / 1e9).toFixed(2)}s`} />
+          <Detail.Metadata.Label title="Output Tokens" text={`${prop.answer.eval_count}`} />
         ) : null}
       </Detail.Metadata>
     );

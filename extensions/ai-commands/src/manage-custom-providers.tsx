@@ -4,19 +4,10 @@ import { ProviderForm } from "./lib/ui/CustomProviderView/ProviderForm";
 import { ModelForm } from "./lib/ui/CustomProviderView/ModelForm";
 import { CustomProvider, CustomModel } from "./lib/providers/types";
 import { Shortcut } from "./lib/ui/shortcut";
+import { OLLAMA_LOCAL_PROVIDER_ID } from "./lib/providers/storage";
 
 export default function Command() {
-  const {
-    providers,
-    isLoading,
-    error,
-    removeProvider,
-    removeModel,
-    revalidate,
-    syncProviderModels,
-    importFromYaml,
-    hasYamlFile,
-  } = useProviders();
+  const { providers, isLoading, error, removeProvider, removeModel, revalidate, syncProviderModels } = useProviders();
 
   return (
     <List
@@ -25,7 +16,6 @@ export default function Command() {
       actions={
         <ActionPanel>
           {!error && <AddNewProviderAction onSave={revalidate} />}
-          {hasYamlFile && <ImportFromYamlAction importFromYaml={importFromYaml} />}
           <ReloadConfigAction onReload={revalidate} />
         </ActionPanel>
       }
@@ -38,35 +28,39 @@ export default function Command() {
         />
       )}
       {!isLoading && !error && providers.length === 0 && (
-        <List.EmptyView
-          title="No custom providers found"
-          description={
-            hasYamlFile
-              ? "Add a new provider or import existing ones from Raycast providers.yaml"
-              : "Add a new provider to get started"
-          }
-        />
+        <List.EmptyView title="No custom providers found" description={"Add a provider to get started"} />
       )}
       {providers.length > 0 &&
         providers.map((provider) => (
-          <List.Section key={provider.id} title={provider.name} subtitle={`${provider.models.length} models`}>
+          <List.Section
+            key={provider.id}
+            title={provider.name}
+            subtitle={provider.id === OLLAMA_LOCAL_PROVIDER_ID ? "Built-in" : `${provider.models.length} models`}
+          >
             {provider.models.length === 0 && (
               <List.Item
                 key={`${provider.id}-add-model`}
-                title="Add Model"
+                title={provider.id === OLLAMA_LOCAL_PROVIDER_ID ? "Set Up Ollama" : "Add Model"}
                 icon={Icon.Plus}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title={provider.name}>
-                      <AddNewModelAction provider={provider} onSave={revalidate} />
+                      {provider.id !== OLLAMA_LOCAL_PROVIDER_ID && (
+                        <AddNewModelAction provider={provider} onSave={revalidate} />
+                      )}
                       <SyncProviderModelsAction provider={provider} syncProviderModels={syncProviderModels} />
-                      <EditProviderAction provider={provider} onSave={revalidate} />
-                      <RemoveProviderAction provider={provider} removeProvider={removeProvider} />
+                      <EditProviderAction
+                        provider={provider}
+                        onSave={revalidate}
+                        title={provider.id === OLLAMA_LOCAL_PROVIDER_ID ? "Configure Ollama" : undefined}
+                      />
+                      {provider.id !== OLLAMA_LOCAL_PROVIDER_ID && (
+                        <RemoveProviderAction provider={provider} removeProvider={removeProvider} />
+                      )}
                     </ActionPanel.Section>
 
                     <ActionPanel.Section title="Configuration">
                       <AddNewProviderAction onSave={revalidate} />
-                      {hasYamlFile && <ImportFromYamlAction importFromYaml={importFromYaml} />}
                       <ReloadConfigAction onReload={revalidate} />
                     </ActionPanel.Section>
                   </ActionPanel>
@@ -159,7 +153,6 @@ export default function Command() {
 
                     <ActionPanel.Section title="Configuration">
                       <AddNewProviderAction onSave={revalidate} />
-                      {hasYamlFile && <ImportFromYamlAction importFromYaml={importFromYaml} />}
                       <ReloadConfigAction onReload={revalidate} />
                     </ActionPanel.Section>
                   </ActionPanel>
@@ -218,28 +211,6 @@ function DuplicateModelAction({
   );
 }
 
-function ImportFromYamlAction({ importFromYaml }: { importFromYaml: () => Promise<number> }) {
-  return (
-    <Action
-      title="Import from Raycast YAML"
-      icon={Icon.Download}
-      onAction={async () => {
-        const toast = await showToast({ style: Toast.Style.Animated, title: "Importing providers from YAML" });
-        try {
-          const count = await importFromYaml();
-          toast.style = Toast.Style.Success;
-          toast.title = `Imported ${count} provider(s)`;
-          toast.message = "Saved to extension settings";
-        } catch (error) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Import failed";
-          toast.message = error instanceof Error ? error.message : "Unknown error";
-        }
-      }}
-    />
-  );
-}
-
 function RemoveModelAction({
   provider,
   model,
@@ -265,7 +236,7 @@ function RemoveModelAction({
           },
         });
         if (confirmed) {
-          removeModel(provider.id, model.id);
+          await removeModel(provider.id, model.id);
         }
       }}
     />
@@ -300,10 +271,18 @@ function SyncProviderModelsAction({
   );
 }
 
-function EditProviderAction({ provider, onSave }: { provider: CustomProvider; onSave: () => void }) {
+function EditProviderAction({
+  provider,
+  onSave,
+  title = "Edit Provider",
+}: {
+  provider: CustomProvider;
+  onSave: () => void;
+  title?: string;
+}) {
   return (
     <Action.Push
-      title="Edit Provider"
+      title={title}
       icon={{ source: Icon.Pencil }}
       target={<ProviderForm provider={provider} onSave={onSave} />}
       shortcut={Shortcut.EditProvider}
@@ -334,7 +313,7 @@ function RemoveProviderAction({
           },
         });
         if (confirmed) {
-          removeProvider(provider.id);
+          await removeProvider(provider.id);
         }
       }}
     />

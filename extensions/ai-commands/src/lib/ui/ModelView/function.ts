@@ -1,24 +1,27 @@
 import * as Types from "./types";
 import { DeleteOllamaServers, GetOllamaServers } from "../../settings/settings";
-import { Ollama } from "../../ollama/ollama";
+import { OllamaManager } from "../../ollama/ollama";
+import { OllamaModelInfo } from "../../ollama/types";
 import { showToast, Toast } from "@raycast/api";
-import { GetServerClass } from "../function";
-import { OllamaApiShowModelfile, OllamaApiShowResponse } from "../../ollama/types";
-
-const showCache = new Map<string, { show: OllamaApiShowResponse; modelfile?: OllamaApiShowModelfile }>();
-
 export function ClearModelShowCache(): void {
-  showCache.clear();
+  // Model details are intentionally loaded from the compact list response.
+  // Keeping full modelfiles/templates for every model can exceed Raycast's heap limit.
 }
 
 /**
  * Get Ollama Server Class.
  * @returns Server Map.
  */
-export async function GetServerClassByName(name: string): Promise<Ollama> {
+export async function GetServerClassByName(name: string): Promise<OllamaManager> {
   const s = await GetOllamaServers();
   if (!s.has(name)) throw new Error("Ollama Server Not Configured");
-  return new Ollama(s.get(name));
+  return new OllamaManager(s.get(name));
+}
+
+/** Fetch full metadata only for the model currently being inspected. */
+export async function GetModelDetails(model: Types.UiModel | undefined): Promise<OllamaModelInfo | undefined> {
+  if (!model?.server.ollama) return undefined;
+  return model.server.ollama.show(model.detail.name);
 }
 
 /**
@@ -41,76 +44,10 @@ export async function DeleteServer(
     });
 }
 
-import { formatCustomServerName, isCustomServer } from "../../providers/unified-provider";
-import { loadCustomProviders } from "../../providers/storage";
-import { ModelCapability } from "../../enum";
-
-async function getCustomUiModels(serverFilter: string): Promise<Types.UiModel[]> {
-  const providers = await loadCustomProviders();
-  const result: Types.UiModel[] = [];
-
-  for (const provider of providers) {
-    const formattedName = formatCustomServerName(provider);
-    if (
-      serverFilter !== "All" &&
-      serverFilter !== formattedName &&
-      serverFilter !== provider.name &&
-      serverFilter !== provider.id
-    ) {
-      continue;
-    }
-
-    for (const model of provider.models) {
-      const caps: ModelCapability[] = [ModelCapability.Completion];
-      if (model.abilities?.vision?.supported) caps.push(ModelCapability.Vision);
-      if (model.abilities?.tools?.supported) caps.push(ModelCapability.Tools);
-      if (model.abilities?.reasoning_effort?.supported) caps.push(ModelCapability.Thinking);
-
-      result.push({
-        server: {
-          name: formattedName,
-          isCustom: true,
-        },
-        detail: {
-          name: model.id,
-          modified_at: "",
-          size: model.context || 0,
-          digest: "",
-          details: {
-            parent_model: "",
-            format: "custom",
-            family: provider.name,
-            families: [provider.name],
-            parameter_size: "",
-            quantization_level: "",
-          },
-        },
-        show: {
-          license: "",
-          modelfile: "",
-          parameters: "",
-          template: "",
-          system: model.description || "",
-          details: {
-            parent_model: "",
-            format: "custom",
-            family: provider.name,
-            families: [provider.name],
-            parameter_size: "",
-            quantization_level: "",
-          },
-          capabilities: caps,
-        },
-      });
-    }
-  }
-
-  return result;
-}
-
 /**
- * Get Ollama and Custom Provider Available Models.
- * @param server - Ollama Server Name or Custom Provider Name.
+ * Get models managed by Ollama's lifecycle API. Provider inference configuration
+ * intentionally lives elsewhere; cloud/custom models cannot be pulled or unloaded.
+ * @param server - Ollama lifecycle server name.
  * @returns Array of Available Models.
  */
 export async function GetModels(server: string | undefined): Promise<Types.UiModel[]> {
@@ -118,59 +55,35 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
 
   if (server === undefined) return o;
 
-  // 1. Fetch Ollama models if server is "All" or a configured Ollama server
-  if (server === "All" || !isCustomServer(server)) {
-    let s = await GetServerClass();
+  {
+    let s = new Map<string, OllamaManager>();
+    const configured = await GetOllamaServers();
+    configured.forEach((value, key) => s.set(key, new OllamaManager(value)));
     if (server !== "All" && s.has(server)) {
-      s = new Map([[server, s.get(server) as Ollama]]);
+      s = new Map([[server, s.get(server) as OllamaManager]]);
     } else if (server !== "All") {
       s = new Map();
     }
     const ollamaModels = await Promise.all(
       [...s.entries()].map(async (s): Promise<Types.UiModel[]> => {
-        const tag = await s[1].OllamaApiTags().catch(async (e: Error) => {
+        const tag = await s[1].list().catch(async (e: Error) => {
           await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
           return undefined;
         });
-        const ps = await s[1].OllamaApiPs().catch(async (e: Error) => {
+        const ps = await s[1].running().catch(async (e: Error) => {
           await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
           return undefined;
         });
         if (!tag) return await Promise.resolve([] as Types.UiModel[]);
-        return await Promise.all(
-          tag.models.map(async (v): Promise<Types.UiModel> => {
-            const cacheKey = `${s[0]}::${v.name}::${v.digest || v.modified_at}`;
-            let cached = showCache.get(cacheKey);
-            if (!cached) {
-              const show = await s[1].OllamaApiShow(v.name);
-              cached = {
-                show,
-                modelfile: s[1].OllamaApiShowParseModelfile(show),
-              };
-              showCache.set(cacheKey, cached);
-            }
-            return {
-              server: {
-                name: s[0],
-                ollama: s[1],
-                isCustom: false,
-              },
-              detail: v,
-              show: cached.show,
-              modelfile: cached.modelfile,
-              ps: ps && ps.models.filter((ps) => ps.name === v.name)[0],
-            };
-          }),
-        );
+        return tag.map((v): Types.UiModel => ({
+          server: { name: s[0], ollama: s[1], isCustom: false },
+          detail: v,
+          show: {},
+          ps: ps?.find((ps) => ps.name === v.name),
+        }));
       }),
     );
     ollamaModels.forEach((v) => (o = o.concat(v)));
-  }
-
-  // 2. Fetch Custom Provider models if server is "All" or a custom server
-  if (server === "All" || isCustomServer(server)) {
-    const customModels = await getCustomUiModels(server);
-    o = o.concat(customModels);
   }
 
   return o;
@@ -199,7 +112,7 @@ export async function UpdateModel(
 export async function DeleteModel(model: Types.UiModel, revalidate: CallableFunction): Promise<void> {
   if (!model.server.ollama) return;
   await model.server.ollama
-    .OllamaApiDelete(model.detail.name)
+    .delete(model.detail.name)
     .then(async () => {
       ClearModelShowCache();
       await showToast({
@@ -220,52 +133,39 @@ export async function DeleteModel(model: Types.UiModel, revalidate: CallableFunc
  * @param revalidate - RevalidateModel Function.
  */
 export async function PullModel(
-  ollama: Ollama,
+  ollama: OllamaManager,
   server: string,
   model: string,
   setDownload: React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>,
   revalidate: CallableFunction,
 ): Promise<void> {
-  const e = await ollama.OllamaApiPull(model).catch(async (err): Promise<undefined> => {
-    await showToast({ style: Toast.Style.Failure, title: err.message });
-    return undefined;
-  });
-
-  if (e) {
-    e.on("message", async (data) => {
-      await showToast({ style: Toast.Style.Animated, title: data });
+  try {
+    await ollama.pull(model, (progress) => {
+      if (progress.status) void showToast({ style: Toast.Style.Animated, title: progress.status });
+      if (progress.total && progress.completed !== undefined) {
+        const data = (progress.completed / progress.total) * 100;
+        const currentDownload = data.toFixed(2);
+        setDownload((prev) => {
+          const i = prev.findIndex((v) => v.server === server && v.name === model);
+          if (i < 0) {
+            prev.push({ server: server, name: model, download: Number(currentDownload) });
+            return [...prev];
+          }
+          if (currentDownload !== prev[i].download.toFixed(2)) {
+            prev[i].download = Number(currentDownload);
+            return [...prev];
+          }
+          return prev;
+        });
+      }
     });
-    e.on("downloading", (data: number) => {
-      const currentDownload = data.toFixed(2);
-      setDownload((prev) => {
-        const i = prev.findIndex((v) => v.server === server && v.name === model);
-        if (i < 0) {
-          prev.push({ server: server, name: model, download: Number(currentDownload) });
-          return [...prev];
-        }
-        if (currentDownload !== prev[i].download.toFixed(2)) {
-          prev[i].download = Number(currentDownload);
-          return [...prev];
-        }
-        return prev;
-      });
-    });
-    e.on("done", async () => {
-      ClearModelShowCache();
-      setDownload((prev) => {
-        const n = prev.filter((v) => v.server !== server && v.name !== model);
-        return [...n];
-      });
-      revalidate();
-      await showToast({ style: Toast.Style.Success, title: `Model '${model}' Downloaded on '${server}' Server.` });
-    });
-    e.on("error", async (data) => {
-      setDownload((prev) => {
-        prev.filter((v) => v.server !== server && v.name !== model);
-        return [...prev];
-      });
-      await showToast({ style: Toast.Style.Failure, title: data });
-    });
+    ClearModelShowCache();
+    setDownload((prev) => prev.filter((v) => v.server !== server || v.name !== model));
+    revalidate();
+    await showToast({ style: Toast.Style.Success, title: `Model '${model}' Downloaded on '${server}' Server.` });
+  } catch (error) {
+    setDownload((prev) => prev.filter((v) => v.server !== server || v.name !== model));
+    await showToast({ style: Toast.Style.Failure, title: error instanceof Error ? error.message : String(error) });
   }
 }
 
@@ -281,10 +181,7 @@ export async function LoadModel(model: Types.UiModel, revalidate: CallableFuncti
   });
   if (!model.server.ollama) throw new Error("Ollama client unavailable");
   await model.server.ollama
-    .OllamaApiGenerateNoStream({
-      model: model.detail.name,
-      keep_alive: -1,
-    })
+    .setLoaded(model.detail.name, -1)
     .then(async () => {
       await showToast({
         style: Toast.Style.Success,
@@ -307,10 +204,7 @@ export async function UnloadModel(model: Types.UiModel, revalidate: CallableFunc
   });
   if (!model.server.ollama) throw new Error("Ollama client unavailable");
   await model.server.ollama
-    .OllamaApiGenerateNoStream({
-      model: model.detail.name,
-      keep_alive: 0,
-    })
+    .setLoaded(model.detail.name, 0)
     .then(async () => {
       /* '/api/ps' do not update immidiatly after unloading the model so a delay of 500ms is necessary */
       await new Promise<void>((res) => setTimeout(res, 500));

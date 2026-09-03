@@ -14,8 +14,7 @@ import { FormModel } from "./form/Model";
 import { FormRenameChat } from "./form/RenameChat";
 import { GetImage } from "../function";
 import { RaycastImage } from "../../types";
-import { OllamaApiChatMessageRole } from "../../ollama/enum";
-import { OllamaApiChatMessageToolCall } from "../../ollama/types";
+import { ToolCall } from "../../inference/types";
 
 interface ChatViewProps {
   initialQuery?: string;
@@ -49,13 +48,15 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
   const [ShowAnswerMetadata, SetShowAnswerMetadata] = React.useState(false);
   const [shouldAutoSubmit, setShouldAutoSubmit] = React.useState(!!props.initialQuery);
   const [hasCreatedNewChat, setHasCreatedNewChat] = React.useState(false);
+  const savedChatRef = React.useRef<string | undefined>(undefined);
+  const chatLoadVersion = React.useRef(0);
 
   const [Image, SetImage]: [
     RaycastImage[] | undefined,
     React.Dispatch<React.SetStateAction<RaycastImage[] | undefined>>,
   ] = React.useState();
 
-  const [UseToolsOllamaApi, SetUseToolsOllamaApi] = useCachedState("chat-use-tools-ollama-api", true);
+  const [useWebSearch, setUseWebSearch] = useCachedState("chat-use-web-search", true);
 
   // Create new chat for Quick AI with initial query
   React.useEffect(() => {
@@ -74,7 +75,7 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
   React.useEffect(() => {
     if (shouldAutoSubmit && props.initialQuery && Chat && ChatModelsAvailable && !IsLoading && hasCreatedNewChat) {
       setShouldAutoSubmit(false);
-      Run(props.initialQuery, Image, UseToolsOllamaApi, Chat, SetChat, SetIsLoading).catch(async (e: Error) => {
+      Run(props.initialQuery, Image, useWebSearch, Chat, SetChat, SetIsLoading).catch(async (e: Error) => {
         await showToast({ style: Toast.Style.Failure, title: "Error:", message: e.message });
         SetIsLoading(false);
       });
@@ -84,31 +85,44 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
   // Save Chat To LocalStoarge on Inference Done.
   React.useEffect(() => {
     if (!IsLoading && Chat && Chat.messages.length > 0 && Chat.messages[Chat.messages.length - 1].done) {
+      const firstQuestion = Chat.messages[0]?.messages.find((message) => message.role === "user")?.content;
+      const updatedChat =
+        Chat.messages.length === 1 && Chat.name === "New Chat" && firstQuestion
+          ? { ...Chat, name: `${firstQuestion.substring(0, 25)}...` }
+          : Chat;
+
+      // Rename first, then persist the renamed object on the next render.
+      // Persisting every rendered completed chat revalidated the history list,
+      // which loaded a new Chat object and started this effect again.
+      if (updatedChat !== Chat) {
+        SetChat(updatedChat);
+        return;
+      }
+
+      const latestMessage = Chat.messages[Chat.messages.length - 1];
+      const saveKey = `${ChatNameIndex}:${Chat.name}:${Chat.messages.length}:${latestMessage.created_at || ""}`;
+      if (savedChatRef.current === saveKey) return;
+      savedChatRef.current = saveKey;
+
       SetQuery("");
-      SetIsLoading(false);
       if (Image) SetImage(undefined);
-      if (Chat.messages.length === 1 && Chat.name === "New Chat")
-        SetChat((prevValue) => {
-          if (prevValue && prevValue.messages.length > 0) {
-            const name = `${prevValue.messages[0].messages[0].content.substring(0, 25)}...`;
-            if (ChatNames) ChatNames[ChatNameIndex] = name;
-            return { ...prevValue, name: name };
-          }
-          return prevValue;
-        });
-      SetSettingsCommandChatByIndex(ChatNameIndex, Chat);
+      void SetSettingsCommandChatByIndex(ChatNameIndex, Chat).then(RevalidateChatNames);
     }
   }, [Chat, IsLoading]);
 
-  // Change Chat on new ChatNames or new ChatNameIndex
+  // Load only when the selected index changes, or when the history transitions
+  // between different sizes. A name refresh must not reload the active chat.
   React.useEffect(() => {
     if (!ChatNames || ChatNameIndex === -1) return;
     if (ChatNameIndex > ChatNames.length - 1) {
       SetChatNameIndex(ChatNames.length - 1);
       return;
     }
-    ChangeChat(ChatNameIndex, SetChat, SetChatModelsAvailable, setShowFormModel);
-  }, [ChatNames, ChatNameIndex]);
+    const loadVersion = ++chatLoadVersion.current;
+    void ChangeChat(ChatNameIndex, SetChat, SetChatModelsAvailable, setShowFormModel, () => {
+      return chatLoadVersion.current === loadVersion;
+    });
+  }, [ChatNameIndex, ChatNames?.length]);
 
   // Change Chat Index to the last one when Chat change.
   React.useEffect(() => {
@@ -130,8 +144,8 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
    * @returns Action Panel
    */
   function ActionMessage(props: { message?: RaycastChatMessage }): React.JSX.Element {
-    const question = props.message?.messages.find((v) => v.role === OllamaApiChatMessageRole.User);
-    const answer = props.message?.messages.find((v) => v.role === OllamaApiChatMessageRole.Assistant);
+    const question = props.message?.messages.find((v) => v.role === "user");
+    const answer = props.message?.messages.find((v) => v.role === "assistant");
     return (
       <ActionPanel>
         {!IsLoading && Query && Chat && ChatModelsAvailable && (
@@ -139,7 +153,7 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
             title="Get Answer"
             icon={Icon.SpeechBubbleActive}
             onAction={() => {
-              Run(Query, Image, UseToolsOllamaApi, Chat, SetChat, SetIsLoading).catch(async (e: Error) => {
+              Run(Query, Image, useWebSearch, Chat, SetChat, SetIsLoading).catch(async (e: Error) => {
                 await showToast({ style: Toast.Style.Failure, title: "Error:", message: e.message });
                 SetIsLoading(false);
               });
@@ -166,7 +180,7 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
             />
           )}
           {props.message && <Action.CopyToClipboard title="Copy Conversation" content={ClipboardConversation(Chat)} />}
-          {Chat && Chat.name !== "New Chat" && (
+          {Chat && (
             <Action
               title="New Chat"
               icon={Icon.NewDocument}
@@ -182,6 +196,14 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
               shortcut={Shortcut.Edit}
             />
           )}
+          {!Chat && (
+            <Action
+              title="Configure Chat"
+              icon={Icon.Box}
+              onAction={() => setShowFormModel(true)}
+              shortcut={Shortcut.ChangeModel}
+            />
+          )}
           {Chat && (
             <ActionPanel.Submenu title="Delete Chat" icon={Icon.Trash} shortcut={Shortcut.Remove}>
               <Action
@@ -189,7 +211,10 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
                 icon={Icon.Trash}
                 onAction={() => {
                   DeleteSettingsCommandChatByIndex(ChatNameIndex).then(() => {
-                    RevalidateChatNames();
+                    SetChat(undefined);
+                    SetChatModelsAvailable(false);
+                    savedChatRef.current = undefined;
+                    void RevalidateChatNames();
                   });
                 }}
               />
@@ -230,9 +255,9 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
         )}
         <ActionPanel.Section title="Tools">
           <Action
-            title={UseToolsOllamaApi ? "Disable Internet Search" : "Enable Internet Search"}
+            title={useWebSearch ? "Disable Internet Search" : "Enable Internet Search"}
             icon={Icon.Globe}
-            onAction={() => SetUseToolsOllamaApi((prevState) => (prevState = !prevState))}
+            onAction={() => setUseWebSearch((enabled) => !enabled)}
           />
         </ActionPanel.Section>
         <ActionPanel.Section title="Settings">
@@ -263,9 +288,9 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
   function MarkdownMessage(item: RaycastChatMessage): string {
     let markdown = "";
     for (const msg of item.messages) {
-      if (msg.role === OllamaApiChatMessageRole.Assistant && msg.thinking)
-        markdown += `<details><summary><b>💡 Thinking... (click to expand)</b></summary>\n\n${msg.thinking}\n\n</details>\n\n`;
-      if (msg.role === OllamaApiChatMessageRole.Assistant && msg.content !== "") markdown += msg.content;
+      if (msg.role === "assistant" && msg.reasoning)
+        markdown += `<details><summary><b>💡 Thinking... (click to expand)</b></summary>\n\n${msg.reasoning}\n\n</details>\n\n`;
+      if (msg.role === "assistant" && msg.content !== "") markdown += msg.content;
     }
     return markdown;
   }
@@ -273,9 +298,9 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
   function AccessoryMessage(message: RaycastChatMessage): List.Item.Accessory[] {
     const accessory: List.Item.Accessory[] = [];
 
-    const toolUsed = message.messages.filter((v) => v.role === OllamaApiChatMessageRole.Tool);
+    const toolUsed = message.messages.filter((v) => v.role === "tool");
     if (toolUsed.length)
-      accessory.push({ icon: Icon.Hammer, tooltip: toolUsed.map((v) => `${v.tool_name}`).join(", ") });
+      accessory.push({ icon: Icon.Hammer, tooltip: toolUsed.map((v) => `${v.toolName}`).join(", ") });
 
     return accessory;
   }
@@ -285,10 +310,10 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
    * @returns JSX Element
    */
   function DetailMetadataMessage(props: { message: RaycastChatMessage }): React.JSX.Element {
-    const toolCalls: OllamaApiChatMessageToolCall[] = [];
-    for (const value of props.message.messages.filter((v) => v.tool_calls)) {
-      if (value.tool_calls)
-        for (const tool of value.tool_calls) {
+    const toolCalls: ToolCall[] = [];
+    for (const value of props.message.messages.filter((v) => v.toolCalls)) {
+      if (value.toolCalls)
+        for (const tool of value.toolCalls) {
           toolCalls.push(tool);
         }
     }
@@ -336,10 +361,7 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
           <React.Fragment>
             <Detail.Metadata.Separator />
             {toolCalls.map((v) => (
-              <Detail.Metadata.Label
-                title={`Tool Call: ${v.function.name}`}
-                text={JSON.stringify(v.function.arguments)}
-              />
+              <Detail.Metadata.Label title={`Tool Call: ${v.name}`} text={JSON.stringify(v.arguments)} />
             ))}
           </React.Fragment>
         )}
@@ -385,7 +407,18 @@ export function ChatView(props: ChatViewProps = {}): React.JSX.Element {
           <List.Dropdown
             tooltip="Chat History"
             value={String(ChatNameIndex)}
-            onChange={(v) => SetChatNameIndex(Number(v))}
+            onChange={(v) => {
+              // A streamed response updates the active chat incrementally. Do
+              // not let it write into a different chat while it is in flight.
+              const nextIndex = Number(v);
+              // Raycast can emit onChange again when the dropdown re-renders
+              // after its labels refresh. That is not a chat switch.
+              if (!IsLoading && nextIndex !== ChatNameIndex) {
+                SetChat(undefined);
+                SetChatModelsAvailable(false);
+                SetChatNameIndex(nextIndex);
+              }
+            }}
           >
             {ChatNames.map((n, i) => (
               <List.Dropdown.Item key={i} title={n} value={String(i)} />

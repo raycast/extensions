@@ -1,5 +1,4 @@
-import { OllamaApiChatMessageToolCall } from "../ollama/types";
-import { RaycastImage } from "../types";
+import { ChatMessage, InferenceMetadata } from "../inference/types";
 
 /**
  * Model abilities matching providers.yaml schema
@@ -41,7 +40,13 @@ export interface CustomProvider {
   id: string;
   name: string;
   base_url: string;
+  /** The OpenAI-compatible API is the common inference transport. */
+  api_kind?: "openai-compatible";
+  /** Enables Ollama-only model lifecycle actions; never changes inference transport. */
+  lifecycle?: "ollama";
   api_keys?: Record<string, string>;
+  /** Extra request headers for providers that do not use bearer authentication. */
+  headers?: Record<string, string>;
   additional_parameters?: Record<string, unknown>;
   models: CustomModel[];
 }
@@ -49,27 +54,9 @@ export interface CustomProvider {
 /**
  * Common chat message representation across providers
  */
-export interface UnifiedChatMessage {
-  role: "system" | "user" | "assistant" | "tool";
-  content: string;
-  thinking?: string;
-  images?: RaycastImage[];
-  tool_calls?: OllamaApiChatMessageToolCall[];
-  tool_name?: string;
-  tool_call_id?: string;
-}
+export type UnifiedChatMessage = ChatMessage;
 
 /**
  * Stream event data for chat / completion
  */
-export interface UnifiedStreamDoneMetadata {
-  model?: string;
-  created_at?: string;
-  done?: boolean;
-  total_duration?: number;
-  load_duration?: number;
-  prompt_eval_count?: number;
-  prompt_eval_duration?: number;
-  eval_count?: number;
-  eval_duration?: number;
-}
+export type UnifiedStreamDoneMetadata = InferenceMetadata;

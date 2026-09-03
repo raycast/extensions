@@ -1,25 +1,26 @@
 import * as Types from "./types";
 import * as React from "react";
-import { Ollama } from "../../ollama/ollama";
-import { OllamaApiGenerateRequestBody, OllamaApiGenerateResponse, ThinkingEffort } from "../../ollama/types";
+import { ThinkingEffort } from "../../ollama/types";
 import { CommandAnswer } from "../../settings/enum";
 import { COMMANDS_INFO } from "../../settings/defaultPrompts";
-import { AddSettingsCommandChat, GetOllamaServerByName, GetSettingsCommandAnswer } from "../../settings/settings";
+import { AddSettingsCommandChat, GetSettingsCommandAnswer } from "../../settings/settings";
 import { Clipboard, getPreferenceValues, launchCommand, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
 import { GetAvailableModel, PromptTokenImageParser, PromptTokenParser, GetPromptTokenSelectionText } from "../function";
 export { GetPromptTokenSelectionText };
 import { Creativity } from "../../enum";
 import { RaycastChat, RaycastChatMessage, SettingsCommandAnswer } from "../../settings/types";
-import { OllamaApiChatMessageRole } from "../../ollama/enum";
 import { RaycastImage } from "../../types";
-import {
-  formatCustomServerName,
-  getCustomClient,
-  getCustomModel,
-  getCustomProvider,
-  isCustomServer,
-} from "../../providers/unified-provider";
-import { OpenAiClient } from "../../providers/openai-client";
+import { formatCustomServerName, getCustomModel, getCustomProvider } from "../../providers/unified-provider";
+import { createLanguageModel, reasoningOptions, toModelMessages } from "../../providers/ai-sdk";
+import { generateText, streamText } from "ai";
+
+export interface AnswerInferenceMetadata {
+  model: string;
+  created_at: string;
+  done: boolean;
+  prompt_eval_count?: number;
+  eval_count?: number;
+}
 
 /**
  * Get Types.UiModel.
@@ -46,9 +47,8 @@ export async function GetModel(command?: CommandAnswer, server?: string, model?:
     }
   } else if (!server || !model) throw new Error("server and model need to be defined");
 
-  if (isCustomServer(server)) {
-    const customProvider = await getCustomProvider(server);
-    if (!customProvider) throw new Error(`Custom provider '${server}' not found`);
+  const customProvider = await getCustomProvider(server);
+  if (customProvider) {
     let customModel = getCustomModel(customProvider, model);
     if (!customModel) {
       customModel = {
@@ -64,26 +64,11 @@ export async function GetModel(command?: CommandAnswer, server?: string, model?:
       };
     }
 
-    const client = new OpenAiClient(customProvider, customModel);
     return {
       server: {
         name: formatCustomServerName(customProvider),
-        customClient: client,
       },
-      tag: {
-        name: customModel.id,
-        modified_at: "",
-        size: customModel.context || 0,
-        digest: "",
-        details: {
-          parent_model: "",
-          format: "",
-          family: "",
-          families: [],
-          parameter_size: "",
-          quantization_level: "",
-        },
-      },
+      tag: { name: customModel.id, context: customModel.context },
       thinking: settings?.model.main.thinking,
       keep_alive: settings?.model.main.keep_alive,
       prompt: settings?.prompt,
@@ -91,13 +76,11 @@ export async function GetModel(command?: CommandAnswer, server?: string, model?:
     };
   }
 
-  const s = await GetOllamaServerByName(server);
   const m = (await GetAvailableModel(server)).filter((m) => m.name === model);
   if (m.length < 1) throw new Error("Model unavailable on given server");
   return {
     server: {
       name: server,
-      ollama: new Ollama(s),
     },
     tag: m[0],
     thinking: settings?.model.main.thinking,
@@ -108,12 +91,12 @@ export async function GetModel(command?: CommandAnswer, server?: string, model?:
 }
 
 /**
- * Convert answer into chat for continue conversation on "Chat with Ollama" command.
+ * Convert an answer into a chat.
  * @param model
  * @param query
  * @param answer
  * @param answerMeta
- * @param openCommand? - `false` for avoiding open "Chat with Ollama" command.
+ * @param openCommand? - `false` to avoid opening the chat command.
  */
 export async function convertAnswerToChat(
   model: Types.UiModel,
@@ -121,17 +104,15 @@ export async function convertAnswerToChat(
   images: RaycastImage[] | undefined,
   thinking: string | undefined,
   answer: string,
-  answerMeta: OllamaApiGenerateResponse,
+  answerMeta: AnswerInferenceMetadata,
   openCommand = true,
   thinkingEffort?: ThinkingEffort,
 ): Promise<void> {
-  const isCustom = isCustomServer(model.server.name);
-  const server = isCustom ? undefined : await GetOllamaServerByName(model.server.name);
   const chat: RaycastChat = {
     name: query ? `${query.substring(0, 25)}...` : "New Chat",
     models: {
       main: {
-        server: server,
+        server: undefined,
         server_name: model.server.name,
         tag: model.tag.name,
         keep_alive: model.keep_alive,
@@ -142,13 +123,13 @@ export async function convertAnswerToChat(
       {
         messages: [
           {
-            role: OllamaApiChatMessageRole.User,
+            role: "user",
             content: query ? query : "",
-            images: images ? images.map((i) => i.base64) : undefined,
+            images,
           },
           {
-            role: OllamaApiChatMessageRole.Assistant,
-            thinking: thinking,
+            role: "assistant",
+            reasoning: thinking,
             content: answer,
           },
         ],
@@ -168,7 +149,7 @@ export async function convertAnswerToChat(
 }
 
 /**
- * Start Inference with Ollama API.
+ * Start inference through the configured OpenAI-compatible provider.
  */
 async function Inference(
   model: Types.UiModel,
@@ -176,81 +157,54 @@ async function Inference(
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setThinking: React.Dispatch<React.SetStateAction<string>>,
   setAnswer: React.Dispatch<React.SetStateAction<string>>,
-  setAnswerMetadata: React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>,
+  setAnswerMetadata: React.Dispatch<React.SetStateAction<AnswerInferenceMetadata>>,
   images: string[] | undefined = undefined,
   creativity: Creativity = Creativity.Medium,
   thinking: ThinkingEffort = false,
-  keep_alive?: string,
+  keepAlive?: string,
 ): Promise<void> {
+  void keepAlive;
   let thinkingStarted = false;
   let responseStarted = false;
 
-  const body: OllamaApiGenerateRequestBody = {
-    model: model.tag.name,
-    prompt: prompt,
-    images: images,
-    think: thinking,
-    options: {
-      temperature: creativity,
-    },
-  };
-  if (keep_alive) body.keep_alive = keep_alive;
-
   await showToast({ style: Toast.Style.Animated, title: "💾 Loading..." });
   try {
-    let emiter;
-    if (model.server.customClient || isCustomServer(model.server.name)) {
-      const client = model.server.customClient || (await getCustomClient(model.server.name, model.tag.name));
-      if (!client) throw new Error(`Could not initialize client for ${model.server.name}`);
-      emiter = await client.chatStream({
-        model: model.tag.name,
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-            images: images ? images.map((base64) => ({ path: "", html: "", base64 })) : undefined,
-          },
-        ],
-        temperature: creativity,
-      });
-    } else {
-      if (!model.server.ollama) throw new Error("Ollama client unavailable");
-      emiter = await model.server.ollama.OllamaApiGenerate(body);
-    }
-
-    const processEmiter = () => {
-      // Get Thinking Text
-      emiter.on("thinking", async (data) => {
-        // showToast when thinking process started
-        if (!thinkingStarted) {
-          thinkingStarted = true;
-          await showToast({ style: Toast.Style.Animated, title: "🤔 Thinking..." });
-        }
-        setThinking((prevState) => prevState + data);
-      });
-
-      // Get Response Text
-      emiter.on("data", async (data) => {
-        // showToast when  process started
-        if (!responseStarted) {
-          responseStarted = true;
-          await showToast({ style: Toast.Style.Animated, title: "✍️ Typing..." });
-        }
-        setAnswer((prevState) => prevState + data);
-      });
-    };
-    processEmiter();
-
-    // Get Metadata
-    await new Promise<void>((resolve) => {
-      emiter.on("done", async (data) => {
-        await showToast({ style: Toast.Style.Success, title: "👍 Done." });
-        setAnswerMetadata(data);
-        setLoading(false);
-        emiter.removeAllListeners();
-        resolve();
-      });
+    const provider = await getCustomProvider(model.server.name);
+    if (!provider) throw new Error(`Provider '${model.server.name}' not found`);
+    const result = streamText({
+      model: createLanguageModel(provider)(model.tag.name),
+      messages: toModelMessages([
+        {
+          role: "user",
+          content: prompt,
+          images: images ? images.map((base64) => ({ path: "", html: "", base64 })) : undefined,
+        },
+      ]) as never,
+      temperature: creativity,
+      providerOptions: reasoningOptions(provider, thinking === false ? "none" : thinking),
     });
+    for await (const part of result.fullStream) {
+      if (part.type === "reasoning-delta") {
+        if (!thinkingStarted) await showToast({ style: Toast.Style.Animated, title: "🤔 Thinking..." });
+        thinkingStarted = true;
+        setThinking((current) => current + part.text);
+      }
+      if (part.type === "text-delta") {
+        if (!responseStarted) await showToast({ style: Toast.Style.Animated, title: "✍️ Typing..." });
+        responseStarted = true;
+        setAnswer((current) => current + part.text);
+      }
+    }
+    const usage = await result.usage;
+    setAnswerMetadata({
+      model: model.tag.name,
+      created_at: new Date().toISOString(),
+      done: true,
+      prompt_eval_count: usage.inputTokens,
+      eval_count: usage.outputTokens,
+    });
+    await showToast({ style: Toast.Style.Success, title: "👍 Done." });
+    setLoading(false);
   } catch (err) {
     if (err instanceof Error) await showToast({ style: Toast.Style.Failure, title: err.message });
     setLoading(false);
@@ -269,7 +223,7 @@ export async function Run(
   setImageView: React.Dispatch<React.SetStateAction<string>>,
   setThinking: React.Dispatch<React.SetStateAction<string>>,
   setAnswer: React.Dispatch<React.SetStateAction<string>>,
-  setAnswerMetadata: React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>,
+  setAnswerMetadata: React.Dispatch<React.SetStateAction<AnswerInferenceMetadata>>,
   creativity: Creativity = Creativity.Medium,
   thinking: ThinkingEffort = false,
   keep_alive?: string,
@@ -310,15 +264,16 @@ export async function Run(
 }
 
 /**
- * Run background inference with Ollama API.
+ * Run background inference through the configured provider.
  */
 export async function RunBackgroundInference(
   model: Types.UiModel,
   prompt: string,
   creativity: Creativity = Creativity.Medium,
   thinking: ThinkingEffort = false,
-  keep_alive?: string,
+  keepAlive?: string,
 ): Promise<string> {
+  void keepAlive;
   const pts = await PromptTokenParser(prompt);
   prompt = pts;
 
@@ -328,36 +283,21 @@ export async function RunBackgroundInference(
     base64Images = imgs[1].map((i) => i.base64);
   }
 
-  if (model.server.customClient || isCustomServer(model.server.name)) {
-    const client = model.server.customClient || (await getCustomClient(model.server.name, model.tag.name));
-    if (!client) throw new Error(`Could not initialize client for ${model.server.name}`);
-    return await client.chatNoStream({
-      model: model.tag.name,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-          images: base64Images ? base64Images.map((base64) => ({ path: "", html: "", base64 })) : undefined,
-        },
-      ],
-      temperature: creativity,
-    });
-  }
-
-  const body: OllamaApiGenerateRequestBody = {
-    model: model.tag.name,
-    prompt: prompt,
-    images: base64Images,
-    think: thinking,
-    options: {
-      temperature: creativity,
-    },
-  };
-  if (keep_alive) body.keep_alive = keep_alive;
-
-  if (!model.server.ollama) throw new Error("Ollama client unavailable");
-  const res = await model.server.ollama.OllamaApiGenerateNoStream(body);
-  return res.response;
+  const provider = await getCustomProvider(model.server.name);
+  if (!provider) throw new Error(`Provider '${model.server.name}' not found`);
+  const result = await generateText({
+    model: createLanguageModel(provider)(model.tag.name),
+    messages: toModelMessages([
+      {
+        role: "user",
+        content: prompt,
+        images: base64Images ? base64Images.map((base64) => ({ path: "", html: "", base64 })) : undefined,
+      },
+    ]) as never,
+    temperature: creativity,
+    providerOptions: reasoningOptions(provider, thinking === false ? "none" : thinking),
+  });
+  return result.text;
 }
 
 /**
@@ -461,24 +401,21 @@ export async function convertExchangesToChat(
     query: string;
     answer: string;
     thinking: string;
-    metadata?: OllamaApiGenerateResponse;
+    metadata?: AnswerInferenceMetadata;
     images?: RaycastImage[];
   }[],
   thinkingEffort?: ThinkingEffort,
 ): Promise<void> {
-  const isCustom = isCustomServer(model.server.name);
-  const server = isCustom ? undefined : await GetOllamaServerByName(model.server.name);
-
   const messages: RaycastChatMessage[] = exchanges.map((ex) => ({
     messages: [
       {
-        role: OllamaApiChatMessageRole.User,
+        role: "user",
         content: ex.query,
-        images: ex.images ? ex.images.map((i) => i.base64) : undefined,
+        images: ex.images,
       },
       {
-        role: OllamaApiChatMessageRole.Assistant,
-        thinking: ex.thinking,
+        role: "assistant",
+        reasoning: ex.thinking,
         content: ex.answer,
       },
     ],
@@ -493,7 +430,7 @@ export async function convertExchangesToChat(
     name: exchanges[0]?.query ? `${exchanges[0].query.substring(0, 25)}...` : "New Chat",
     models: {
       main: {
-        server: server,
+        server: undefined,
         server_name: model.server.name,
         tag: model.tag.name,
         keep_alive: model.keep_alive,

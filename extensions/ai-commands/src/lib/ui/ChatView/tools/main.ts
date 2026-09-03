@@ -1,5 +1,3 @@
-import { OllamaApiTool } from "../../../ollama/types";
-
 export interface Tool {
   name: string;
   description?: string;
@@ -11,19 +9,4 @@ export interface ToolResult {
   tool_name: string;
   content: string;
   tool_call_id?: string;
-}
-
-/* Convert Tool Array to OllamaApiTool Array */
-export function GetOllamaApiTools(tools: Tool[]): OllamaApiTool[] {
-  return tools.map(
-    (tools) =>
-      <OllamaApiTool>{
-        type: "function",
-        function: {
-          name: tools.name,
-          description: tools.description,
-          parameters: tools.parameters,
-        },
-      },
-  );
 }

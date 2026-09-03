@@ -64,7 +64,7 @@ export function ModelForm({ provider, model, onSave }: ModelFormProps) {
     };
 
     try {
-      putModel(provider.id, modelData, model?.id);
+      await putModel(provider.id, modelData, model?.id);
 
       await showToast({
         style: Toast.Style.Success,

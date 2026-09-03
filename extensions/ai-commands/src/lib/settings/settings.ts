@@ -169,8 +169,6 @@ export async function DeleteSettingsCommandChatByIndex(i: number): Promise<void>
 async function GetSettingsCommandChat(): Promise<Types.RaycastChat[]> {
   const j = await LocalStorage.getItem(`setting_command_chat`);
   if (j) return JSON.parse(j as string);
-  const jl = await GetLegacySettingsCommandChat().catch(() => undefined);
-  if (jl) return jl;
   throw new Error("No saved chat");
 }
 
@@ -179,60 +177,6 @@ async function GetSettingsCommandChat(): Promise<Types.RaycastChat[]> {
  */
 async function SetSettingsCommandChat(chat: Types.RaycastChat[]): Promise<void> {
   await LocalStorage.setItem(`setting_command_chat`, JSON.stringify(chat));
-}
-
-/**
- * Get Legacy Settings dor Command Chat from LocalStorage.
- * @returns Command Chat Settings.
- */
-async function GetLegacySettingsCommandChat(): Promise<Types.RaycastChat[]> {
-  const jh = await LocalStorage.getItem("chat_history");
-  if (jh) await LocalStorage.removeItem("chat_history");
-  const jm = await LocalStorage.getItem("chat_model_generate");
-  if (jm) await LocalStorage.removeItem("chat_model_generate");
-  const je = await LocalStorage.getItem("chat_model_embedding");
-  if (je) await LocalStorage.removeItem("chat_model_embedding");
-  const ji = await LocalStorage.getItem("chat_model_image");
-  if (ji) await LocalStorage.removeItem("chat_model_image");
-  if (jh && jm) {
-    const lh: Map<string, Types.LegacyRaycastChatMessage[]> = new Map(JSON.parse(jh as string));
-    return [...lh.entries()].map((v): Types.RaycastChat => {
-      return {
-        name: v[0],
-        models: {
-          main: {
-            server_name: "Local",
-            server: {
-              url: "http://127.0.0.1:11434",
-            },
-            tag: String(jm),
-          },
-          embedding: je
-            ? {
-                server_name: "Local",
-                server: {
-                  url: "http://127.0.0.1:11434",
-                },
-                tag: String(je),
-              }
-            : undefined,
-          vision: ji
-            ? {
-                server_name: "Local",
-                server: {
-                  url: "http://127.0.0.1:11434",
-                },
-                tag: String(ji),
-              }
-            : undefined,
-        },
-        messages: v[1].map((v): Types.RaycastChatMessage => {
-          return { images: v.images, files: v.sources, ...v };
-        }),
-      };
-    });
-  }
-  throw new Error("No saved chat");
 }
 
 /**

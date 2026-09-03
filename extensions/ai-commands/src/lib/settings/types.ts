@@ -1,4 +1,5 @@
-import { OllamaApiChatMessage, OllamaApiGenerateStats, OllamaServer, ThinkingEffort } from "../ollama/types";
+import { OllamaServer, ThinkingEffort } from "../ollama/types";
+import { ChatMessage } from "../inference/types";
 import { RaycastImage } from "../types";
 
 export interface SettingsModel {
@@ -32,14 +33,6 @@ export interface SettingsCommandAnswer {
   action?: "view" | "replace";
 }
 
-export interface LegacyRaycastChatMessage extends OllamaApiGenerateStats {
-  tags?: string[];
-  sources?: string[];
-  images?: RaycastImage[];
-
-  messages: OllamaApiChatMessage[];
-}
-
 export interface RaycastChat {
   name: string;
   models: SettingsChatModels;
@@ -47,10 +40,20 @@ export interface RaycastChat {
   mcp_server?: string[];
 }
 
-export interface RaycastChatMessage extends OllamaApiGenerateStats {
+/** A persisted conversation turn, independent of its inference provider. */
+export interface RaycastChatMessage {
+  model?: string;
+  created_at?: string;
+  done?: boolean;
+  total_duration?: number;
+  load_duration?: number;
+  prompt_eval_count?: number;
+  prompt_eval_duration?: number;
+  eval_count?: number;
+  eval_duration?: number;
   images?: RaycastImage[];
   files?: string[];
-  messages: OllamaApiChatMessage[];
+  messages: ChatMessage[];
 }
 
 export interface CustomCommand {

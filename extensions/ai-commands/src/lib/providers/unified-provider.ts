@@ -1,18 +1,9 @@
 import { UiModelDetails } from "../ui/types";
 import { CustomModel, CustomProvider } from "./types";
 import { getCachedProviders, loadCustomProviders } from "./storage";
-import { OpenAiClient } from "./openai-client";
 
-const CUSTOM_PREFIX = "Custom: ";
-
-/**
- * Returns formatted server display name for a custom provider
- */
 export function formatCustomServerName(provider: CustomProvider): string {
-  if (provider.name.startsWith(CUSTOM_PREFIX)) {
-    return provider.name;
-  }
-  return `${CUSTOM_PREFIX}${provider.name}`;
+  return provider.name;
 }
 
 /**
@@ -20,35 +11,18 @@ export function formatCustomServerName(provider: CustomProvider): string {
  */
 export function isCustomServer(serverName?: string): boolean {
   if (!serverName) return false;
-  if (serverName.startsWith(CUSTOM_PREFIX) || serverName.startsWith("custom:")) {
-    return true;
-  }
-
-  // Also check if serverName matches any custom provider id or name directly
   const providers = getCachedProviders();
   return providers.some((p) => p.id === serverName || p.name === serverName);
 }
 
 /**
- * Finds a custom provider by server name (supports "Custom: Name", "custom:id", name, or id)
+ * Finds a provider by stable ID or display name.
  */
 export async function getCustomProvider(serverName?: string): Promise<CustomProvider | undefined> {
   if (!serverName) return undefined;
 
-  let cleaned = serverName;
-  if (cleaned.startsWith(CUSTOM_PREFIX)) {
-    cleaned = cleaned.substring(CUSTOM_PREFIX.length).trim();
-  } else if (cleaned.startsWith("custom:")) {
-    cleaned = cleaned.substring("custom:".length).trim();
-  }
-
   const providers = await loadCustomProviders();
-  return (
-    providers.find((p) => p.name === cleaned || p.id === cleaned) ||
-    providers.find(
-      (p) => p.name.toLowerCase() === cleaned.toLowerCase() || p.id.toLowerCase() === cleaned.toLowerCase(),
-    )
-  );
+  return providers.find((provider) => provider.id === serverName || provider.name === serverName);
 }
 
 /**
@@ -57,20 +31,8 @@ export async function getCustomProvider(serverName?: string): Promise<CustomProv
 export function getCustomProviderSync(serverName?: string): CustomProvider | undefined {
   if (!serverName) return undefined;
 
-  let cleaned = serverName;
-  if (cleaned.startsWith(CUSTOM_PREFIX)) {
-    cleaned = cleaned.substring(CUSTOM_PREFIX.length).trim();
-  } else if (cleaned.startsWith("custom:")) {
-    cleaned = cleaned.substring("custom:".length).trim();
-  }
-
   const providers = getCachedProviders();
-  return (
-    providers.find((p) => p.name === cleaned || p.id === cleaned) ||
-    providers.find(
-      (p) => p.name.toLowerCase() === cleaned.toLowerCase() || p.id.toLowerCase() === cleaned.toLowerCase(),
-    )
-  );
+  return providers.find((provider) => provider.id === serverName || provider.name === serverName);
 }
 
 /**
@@ -83,30 +45,6 @@ export function getCustomModel(provider: CustomProvider, modelId: string): Custo
     provider.models.find((m) => m.id === modelId || m.name === modelId) ||
     provider.models.find((m) => m.id.trim().toLowerCase() === target || m.name.trim().toLowerCase() === target)
   );
-}
-
-/**
- * Instantiates an OpenAiClient for a custom provider
- */
-export async function getCustomClient(serverName: string, modelId?: string): Promise<OpenAiClient | undefined> {
-  const provider = await getCustomProvider(serverName);
-  if (!provider) return undefined;
-
-  let model = modelId ? getCustomModel(provider, modelId) : undefined;
-  if (!model && modelId) {
-    model = {
-      id: modelId,
-      name: modelId,
-      context: 128000,
-      abilities: {
-        temperature: { supported: true },
-        vision: { supported: true },
-        tools: { supported: true },
-        system_message: { supported: true },
-      },
-    };
-  }
-  return new OpenAiClient(provider, model);
 }
 
 /**

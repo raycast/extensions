@@ -2,11 +2,11 @@ import * as Types from "./types";
 import * as React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getProgressIcon, usePromise, useLocalStorage } from "@raycast/utils";
-import { DeleteModel, DeleteServer, GetModels, LoadModel, UnloadModel, UpdateModel } from "./function";
+import { DeleteModel, DeleteServer, GetModelDetails, GetModels, LoadModel, UnloadModel, UpdateModel } from "./function";
 import { Shortcut } from "../shortcut";
 import { FormPullModel } from "./form/PullModel";
 import { FormEditServer } from "./form/EditServer";
-import { FormatOllamaPsModelExpireAtFormat, GetServerArray } from "../function";
+import { FormatOllamaPsModelExpireAtFormat } from "../function";
 import { GetOllamaServers } from "../../settings/settings";
 import { isCustomServer } from "../../providers/unified-provider";
 
@@ -31,8 +31,13 @@ export function ModelView(): React.JSX.Element {
     setValue: setSelectedServer,
     isLoading: isLoadingSelectedServer,
   } = useLocalStorage<string>("ollama_server_selected", "Local");
-  const { data: Servers, isLoading: IsLoadingServers, revalidate: RevalidateServers } = usePromise(GetServerArray);
   const { data: ServersSettings, revalidate: RevalidateServersSettings } = usePromise(GetOllamaServers);
+  const Servers = React.useMemo(() => {
+    const names = [...(ServersSettings?.keys() || [])].sort();
+    return names.length > 1 ? ["All", ...names] : names;
+  }, [ServersSettings]);
+  const IsLoadingServers = !ServersSettings;
+  const RevalidateServers = RevalidateServersSettings;
   const {
     data: Models,
     isLoading: IsLoadingModels,
@@ -43,6 +48,7 @@ export function ModelView(): React.JSX.Element {
     React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>,
   ] = React.useState([] as Types.UiModelDownload[]);
   const [showDetail, setShowDetail]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
+  const [selectedModelId, setSelectedModelId] = React.useState<string | null>(null);
 
   function SearchBarAccessory(): React.JSX.Element {
     return (
@@ -57,9 +63,6 @@ export function ModelView(): React.JSX.Element {
             } else if (s === "Local") {
               icon = Icon.ComputerChip;
               displayTitle = "Ollama (Local)";
-            } else if (isCustomServer(s)) {
-              icon = Icon.Cloud;
-              displayTitle = s;
             }
             return <List.Dropdown.Item key={s} title={displayTitle} value={s} icon={icon} />;
           })}
@@ -73,6 +76,8 @@ export function ModelView(): React.JSX.Element {
    * @returns List.Item.Detail
    */
   function ModelDetail(prop: { model: Types.UiModel }): React.JSX.Element {
+    const { data: details, isLoading } = usePromise(GetModelDetails, [prop.model]);
+    const modelInfo = details || prop.model.show;
     return (
       <List.Item.Detail
         metadata={
@@ -134,23 +139,29 @@ export function ModelView(): React.JSX.Element {
               />
             )}
             <List.Item.Detail.Metadata.Separator />
+            {isLoading && <List.Item.Detail.Metadata.Label title="Model Metadata" text="Loading…" />}
             {prop.model.detail.details.format && prop.model.detail.details.format !== "custom" && (
               <List.Item.Detail.Metadata.Label title="Format" text={prop.model.detail.details.format} />
             )}
             {prop.model.detail.details.family && (
               <List.Item.Detail.Metadata.Label title="Family" text={prop.model.detail.details.family} />
             )}
-            {prop.model.show.capabilities && prop.model.show.capabilities.length > 0 && (
+            {modelInfo.capabilities && modelInfo.capabilities.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Capabilities">
-                {prop.model.show.capabilities.map((c) => (
-                  <List.Item.Detail.Metadata.TagList.Item icon={IconsCapabilities[c]} text={c} color={Color.Purple} />
+                {modelInfo.capabilities.map((c) => (
+                  <List.Item.Detail.Metadata.TagList.Item
+                    key={c}
+                    icon={IconsCapabilities[c]}
+                    text={c}
+                    color={Color.Purple}
+                  />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             )}
             {prop.model.detail.details.families && prop.model.detail.details.families.length > 0 && (
               <List.Item.Detail.Metadata.TagList title="Families">
                 {prop.model.detail.details.families.map((f) => (
-                  <List.Item.Detail.Metadata.TagList.Item text={f} />
+                  <List.Item.Detail.Metadata.TagList.Item key={f} text={f} />
                 ))}
               </List.Item.Detail.Metadata.TagList>
             )}
@@ -170,34 +181,20 @@ export function ModelView(): React.JSX.Element {
                 text={new Date(prop.model.detail.modified_at).toLocaleString(locale)}
               />
             ) : null}
-            {prop.model.show.system && (
+            {modelInfo.system && (
               <React.Fragment>
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
                   title={prop.model.server.isCustom ? "Description" : "System Prompt"}
-                  text={prop.model.show.system}
+                  text={modelInfo.system}
                 />
               </React.Fragment>
             )}
-            {prop.model.show.template && (
-              <List.Item.Detail.Metadata.Label title="Template" text={prop.model.show.template} />
-            )}
-            {prop.model.modelfile && Object.keys(prop.model.modelfile.parameter).length > 0 && (
+            {modelInfo.template && <List.Item.Detail.Metadata.Label title="Template" text={modelInfo.template} />}
+            {modelInfo.license && (
               <React.Fragment>
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.TagList title="Parameters">
-                  {Object.keys(prop.model.modelfile.parameter).map((p, i) => (
-                    <List.Item.Detail.Metadata.TagList.Item
-                      text={`${p} ${prop.model.modelfile && Object.values(prop.model.modelfile?.parameter)[i]}`}
-                    />
-                  ))}
-                </List.Item.Detail.Metadata.TagList>
-              </React.Fragment>
-            )}
-            {prop.model.show.license && (
-              <React.Fragment>
-                <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="License" text={prop.model.show.license} />
+                <List.Item.Detail.Metadata.Label title="License" text={modelInfo.license} />
               </React.Fragment>
             )}
           </List.Item.Detail.Metadata>
@@ -218,7 +215,10 @@ export function ModelView(): React.JSX.Element {
           <Action
             title={showDetail ? "Hide Detail" : "Show Detail"}
             icon={showDetail ? Icon.EyeDisabled : Icon.Eye}
-            onAction={() => setShowDetail((prevState) => !prevState)}
+            onAction={() => {
+              if (!showDetail) setSelectedModelId(`${prop.model.server.name}_${prop.model.detail.name}`);
+              setShowDetail((visible) => !visible);
+            }}
             shortcut={Shortcut.ToggleQuickLook}
           />
           <Action.CopyToClipboard
@@ -269,7 +269,7 @@ export function ModelView(): React.JSX.Element {
             shortcut={Shortcut.OpenLibrary}
           />
         </ActionPanel.Section>
-        {!prop.model.server.isCustom && SelectedServer !== "All" && !isCustomServer(SelectedServer) && (
+        {SelectedServer !== "All" && (
           <ActionPanel.Section title="Ollama Server">
             <Action title="Add Server" icon={Icon.NewDocument} onAction={() => setShowNewServerForm(true)} />
             {SelectedServer !== "Local" && (
@@ -355,10 +355,6 @@ export function ModelView(): React.JSX.Element {
     if (!IsLoadingServers && SelectedServer) RevalidateModels();
   }, [SelectedServer, IsLoadingServers]);
 
-  React.useEffect(() => {
-    if (!IsLoadingServers && Servers) RevalidateServersSettings();
-  }, [IsLoadingServers, Servers]);
-
   const [showPullModelForm, setShowPullModelForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
   const [showNewServerForm, setShowNewServerForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
@@ -382,7 +378,11 @@ export function ModelView(): React.JSX.Element {
             : ["unloaded", "not loaded", "offline", item.server.name]
         }
         actions={<ModelAction model={item} />}
-        detail={<ModelDetail model={item} />}
+        detail={
+          showDetail && selectedModelId === `${item.server.name}_${item.detail.name}` ? (
+            <ModelDetail model={item} />
+          ) : undefined
+        }
         accessories={ModelAccessories(SelectedServer, item)}
       />
     );
@@ -417,6 +417,7 @@ export function ModelView(): React.JSX.Element {
     <List
       isLoading={isLoadingSelectedServer || IsLoadingModels || IsLoadingServers}
       isShowingDetail={showDetail}
+      onSelectionChange={setSelectedModelId}
       searchBarAccessory={SearchBarAccessory()}
       actions={
         <ActionPanel>

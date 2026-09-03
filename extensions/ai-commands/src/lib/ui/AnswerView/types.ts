@@ -1,13 +1,12 @@
-import { Ollama } from "../../ollama/ollama";
-import { OllamaApiTagsResponseModel, ThinkingEffort } from "../../ollama/types";
-import { OpenAiClient } from "../../providers/openai-client";
+import { ThinkingEffort } from "../../ollama/types";
 
-export type UiModelTag = OllamaApiTagsResponseModel;
+export interface UiModelTag {
+  name: string;
+  context?: number;
+}
 
 export interface UiServer {
   name: string;
-  ollama?: Ollama;
-  customClient?: OpenAiClient;
 }
 
 export interface UiModel {

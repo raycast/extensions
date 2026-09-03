@@ -13,13 +13,6 @@ export enum ThinkingEffort {
   High = "high",
 }
 
-export enum ChatMessageRole {
-  System = "system",
-  User = "user",
-  Assistant = "assistant",
-  Tool = "tool",
-}
-
 export enum ModelCapability {
   Completion = "completion",
   Tools = "tools",

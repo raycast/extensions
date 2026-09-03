@@ -6,8 +6,6 @@ import {
   getSelectedFinderItems,
   BrowserExtension,
 } from "@raycast/api";
-import { Ollama } from "../ollama/ollama";
-import { GetOllamaServerByName, GetOllamaServers } from "../settings/settings";
 import { RaycastImage } from "../types";
 import {
   ErrorRaycastBrowserExtantion,
@@ -18,27 +16,45 @@ import {
 } from "./error";
 import fs from "fs";
 import { fileTypeFromBuffer } from "file-type";
-import { OllamaApiTagsResponseModel } from "../ollama/types";
+import { OllamaManager } from "../ollama/ollama";
+import { ModelCapability } from "../enum";
 import { UiModelDetails } from "./types";
-import {
-  getCustomProvider,
-  isCustomServer,
-  loadCustomModelsMap,
-  loadCustomServerNames,
-} from "../providers/unified-provider";
+import { getCustomProvider, getCustomModelsMap, loadCustomServerNames } from "../providers/unified-provider";
+import { fetchProviderModels } from "../providers/model-sync";
+import { loadCustomProviders } from "../providers/storage";
+
+async function enrichOllamaCapabilities(provider: import("../providers/types").CustomProvider): Promise<void> {
+  if (provider.lifecycle !== "ollama" || provider.models.length === 0) return;
+  const baseUrl = provider.base_url.replace(/\/v1\/?$/, "");
+  const ollama = new OllamaManager({ url: baseUrl });
+  provider.models = await Promise.all(
+    provider.models.map(async (model) => {
+      try {
+        const details = await ollama.show(model.id);
+        const capabilities = details.capabilities || [];
+        return {
+          ...model,
+          abilities: {
+            ...model.abilities,
+            vision: { supported: capabilities.includes(ModelCapability.Vision) },
+            tools: { supported: capabilities.includes(ModelCapability.Tools) },
+            reasoning_effort: { supported: capabilities.includes(ModelCapability.Thinking) },
+          },
+        };
+      } catch {
+        return model;
+      }
+    }),
+  );
+}
 
 /**
  * Get Ollama and Custom Provider Server Array.
  * @returns Servers Names Array.
  */
 export async function GetServerArray(): Promise<string[]> {
-  const s = await GetOllamaServers();
-  const a = [...s.keys()].sort();
-  const al = a.filter((v) => v === "Local");
-  const ao = a.filter((v) => v !== "Local");
   const custom = (await loadCustomServerNames()).sort();
-  if (a.length > 1 || custom.length > 0) return ["All", ...al, ...ao, ...custom];
-  return [...al, ...ao, ...custom];
+  return custom.length > 1 ? ["All", ...custom] : custom;
 }
 
 /**
@@ -78,50 +94,24 @@ export function FormatOllamaPsModelExpireAtFormat(expires_at: string): string {
  * Get Ollama Server Class.
  * @returns Server Map.
  */
-export async function GetServerClass(): Promise<Map<string, Ollama>> {
-  const o: Map<string, Ollama> = new Map();
-  const s = await GetOllamaServers();
-  s.forEach((s, k) => o.set(k, new Ollama(s)));
-  return o;
-}
-
 /**
- * Get Ollama and Custom Provider Available Models.
+ * Get available models from OpenAI-compatible providers. Model discovery is
+ * best-effort so an offline provider does not hide manually configured models.
  * @returns Map with All Available Model.
  */
 export async function GetModels(): Promise<Map<string, UiModelDetails[]>> {
-  const o = new Map<string, UiModelDetails[]>();
-  const s = await GetServerClass();
+  const providers = await loadCustomProviders();
   await Promise.all(
-    [...s.entries()].map(async (s): Promise<void> => {
-      const tags = await s[1].OllamaApiTags().catch(async () => {
-        return undefined;
-      });
-      if (tags)
-        o.set(
-          s[0],
-          await Promise.all(
-            tags.models.map(async (tag): Promise<UiModelDetails> => {
-              const show = await s[1].OllamaApiShow(tag.name).catch(async () => {
-                return undefined;
-              });
-              return {
-                name: tag.name,
-                capabilities: show && show.capabilities,
-              };
-            }),
-          ),
-        );
+    providers.map(async (provider) => {
+      try {
+        provider.models = await fetchProviderModels(provider);
+        await enrichOllamaCapabilities(provider);
+      } catch {
+        // Retain configured models when discovery is not supported or offline.
+      }
     }),
   );
-
-  // Merge Custom Providers
-  const customModels = await loadCustomModelsMap();
-  customModels.forEach((models, serverName) => {
-    o.set(serverName, models);
-  });
-
-  return o;
+  return getCustomModelsMap(providers);
 }
 
 /**
@@ -129,30 +119,16 @@ export async function GetModels(): Promise<Map<string, UiModelDetails[]>> {
  * @param server - Ollama Server Name or Custom Provider Name.
  * @param List of Available Models.
  */
-export async function GetAvailableModel(server: string): Promise<OllamaApiTagsResponseModel[]> {
-  if (isCustomServer(server)) {
-    const provider = await getCustomProvider(server);
-    if (!provider) throw new Error(`Custom provider '${server}' not found`);
-    return provider.models.map((m) => ({
-      name: m.id,
-      modified_at: "",
-      size: m.context || 0,
-      digest: "",
-      details: {
-        parent_model: "",
-        format: "",
-        family: "",
-        families: [],
-        parameter_size: "",
-        quantization_level: "",
-      },
-    }));
+export async function GetAvailableModel(server: string): Promise<Array<{ name: string; context?: number }>> {
+  const provider = await getCustomProvider(server);
+  if (!provider) throw new Error(`Provider '${server}' not found`);
+  try {
+    provider.models = await fetchProviderModels(provider);
+    await enrichOllamaCapabilities(provider);
+  } catch {
+    // A manually added provider can be used without a discoverable /models endpoint.
   }
-
-  const s = await GetOllamaServerByName(server);
-  const o = new Ollama(s);
-  const m = await o.OllamaApiTags();
-  return m.models;
+  return provider.models.map((model) => ({ name: model.id, context: model.context }));
 }
 
 /**

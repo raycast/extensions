@@ -1,12 +1,12 @@
 import { CommandAnswer } from "./enum";
-import { OllamaApiModelCapability } from "../ollama/enum";
+import { ModelCapability } from "../enum";
 
 export interface CommandInfo {
   title: string;
   icon?: string;
   description: string;
   defaultPrompt: string;
-  capabilities: OllamaApiModelCapability[];
+  capabilities: ModelCapability[];
 }
 
 export const COMMANDS_INFO: Record<CommandAnswer, CommandInfo> = {
@@ -14,7 +14,7 @@ export const COMMANDS_INFO: Record<CommandAnswer, CommandInfo> = {
     title: "Ask Selected Text",
     icon: "ask-selected.png",
     description: "Ask AI a question about the selected text",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a question answering assistant. Answer the question based only on the provided text.
 
 Strictly follow these rules:
@@ -34,7 +34,7 @@ Answer:`,
     title: "Ask Webpage",
     icon: "ask-web.png",
     description: "Ask AI a question about the current webpage",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a question answering assistant. Answer the question based only on the provided webpage content.
 
 Strictly follow these rules:
@@ -55,7 +55,7 @@ Answer:`,
     title: "Change Tone to Casual",
     icon: "icon.png",
     description: "Make selected text more casual",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a content writer and editor. (replyWithRewrittenText)
 
 Strictly follow these rules:
@@ -78,7 +78,7 @@ Rewritten text:`,
     title: "Explain Code Step by Step",
     icon: "icon.png",
     description: "Explain the selected code step by step",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a software engineer with deep understanding of any programming language and it's documentation. Explain how the code works step by step in a list. Be concise with a casual tone of voice and write it as documentation for others.
 
 Code: {selection}
@@ -89,7 +89,7 @@ Explanation:`,
     title: "Change Tone to Confident",
     icon: "confident.png",
     description: "Make selected text more confident",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a content writer and editor. (replyWithRewrittenText)
 
 Strictly follow these rules:
@@ -111,7 +111,7 @@ Rewritten text:`,
     title: "Explain This in Simple Terms",
     icon: "explain.png",
     description: "Explain selected text in simple terms",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a dictionary and encyclopedia, providing clear and concise explanations for given words or concepts.
 
 Strictly follow these rules:
@@ -133,7 +133,7 @@ Explanation:`,
     title: "Fix Spelling and Grammar",
     icon: "icon.png",
     description: "Fix selected text from spelling and grammar error",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a spelling corrector and improver. (replyWithRewrittenText)
 
 Strictly follow these rules:
@@ -151,7 +151,7 @@ Fixed Text:`,
     title: "Change Tone to Friendly",
     icon: "friendly.png",
     description: "Make selected text more friendly",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a content writer and editor. (replyWithRewrittenText)
 
 Strictly follow these rules:
@@ -170,21 +170,21 @@ Rewritten text:`,
     title: "Describe Content of Image",
     icon: "icon.png",
     description: "Describe content of the image on the clipboard or selected from finder",
-    capabilities: [OllamaApiModelCapability.Vision],
+    capabilities: [ModelCapability.Vision],
     defaultPrompt: `Describe the content on the following images. {image}\n`,
   },
   [CommandAnswer.IMAGE_TO_TEXT]: {
     title: "Get Text from Image",
     icon: "icon.png",
     description: "Get text from image on the clipboard or selected from finder",
-    capabilities: [OllamaApiModelCapability.Vision],
+    capabilities: [ModelCapability.Vision],
     defaultPrompt: `Extract all the text from the following images. {image}\n`,
   },
   [CommandAnswer.IMPROVE]: {
     title: "Improve Writing",
     icon: "improve.png",
     description: "Improve writing of selected text",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a spelling corrector, content writer, and text improver/editor. Reply to each message only with the rewritten text
 Stricly follow these rules:
 - Correct spelling, grammar, and punctuation errors in the given text
@@ -207,7 +207,7 @@ Improved Text:`,
     title: "Make Longer",
     icon: "icon.png",
     description: "Make selected text longer",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a professional content writer tasked with expanding a client's text while maintaining its essence and style. (replyWithRewrittenText)
 
 Stictly follow these rules:
@@ -226,7 +226,7 @@ Expanded text:`,
     title: "Change Tone to Professional",
     icon: "icon.png",
     description: "Make selected text more professional",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a professional content writer and editor. (replyWithRewrittenText)
 
 Strictly follow these rules:
@@ -248,7 +248,7 @@ Rewritten text:`,
     title: "Make Shorter",
     icon: "icon.png",
     description: "Make selected text shorter",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Act as a professional content writer tasked with shortening a client's text while maintaining its essence and style. (replyWithRewrittenText)
 
 Strictly follow these rules:
@@ -268,7 +268,7 @@ Shortened text:`,
     title: "Translate",
     icon: "translate.png",
     description: "Translate selected text",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `You are a professional {source} to {target} translator. Your goal is to accurately convey the meaning and nuances of the original {source} text while adhering to {target} grammar, vocabulary, and cultural sensitivities.
 Produce only the {target} translation, without any additional explanations or commentary. Please translate the following {source} text into {target}:
 
@@ -279,7 +279,7 @@ Produce only the {target} translation, without any additional explanations or co
     title: "Rephrase as Tweet",
     icon: "icon.png",
     description: "Rephrase selected text as Tweet",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `You're an expert in the field and have the perfect opportunity to share your ideas and insights with a huge audience!. Rewrite the text as a tweet that is:
 - Casual and upbeat
 - Creative and catchy
@@ -304,7 +304,7 @@ Tweet:`,
     title: "Summarize Website",
     icon: "summarize-web.png",
     description: "Summarize content from current Website.",
-    capabilities: [OllamaApiModelCapability.Completion],
+    capabilities: [ModelCapability.Completion],
     defaultPrompt: `Summarize the provided website with the following format:
 """
 ## <concise and easy-to-read website title>

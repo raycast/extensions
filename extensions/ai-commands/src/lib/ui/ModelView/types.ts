@@ -1,23 +1,17 @@
-import { Ollama } from "../../ollama/ollama";
-import {
-  OllamaApiPsModel,
-  OllamaApiShowModelfile,
-  OllamaApiShowResponse,
-  OllamaApiTagsResponseModel,
-} from "../../ollama/types";
+import { OllamaManager } from "../../ollama/ollama";
+import { OllamaModel, OllamaModelInfo, OllamaRunningModel } from "../../ollama/types";
 
 export interface UiServer {
   name: string;
-  ollama?: Ollama;
+  ollama?: OllamaManager;
   isCustom?: boolean;
 }
 
 export interface UiModel {
   server: UiServer;
-  detail: OllamaApiTagsResponseModel;
-  show: OllamaApiShowResponse;
-  modelfile?: OllamaApiShowModelfile;
-  ps?: OllamaApiPsModel;
+  detail: OllamaModel;
+  show: OllamaModelInfo;
+  ps?: OllamaRunningModel;
 }
 
 export interface UiModelDownload {

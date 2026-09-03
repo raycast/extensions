@@ -39,9 +39,9 @@ export function FormRenameChat(props: props): React.JSX.Element {
   );
 
   async function Submit(values: FormData): Promise<void> {
-    props.Chat.name = values.name;
-    props.SetChat(props.Chat);
-    await SetSettingsCommandChatByIndex(props.ChatNameIndex, props.Chat);
+    const chat = { ...props.Chat, name: values.name.trim() };
+    props.SetChat(chat);
+    await SetSettingsCommandChatByIndex(props.ChatNameIndex, chat);
     await props.revalidate();
     props.SetShow(false);
   }

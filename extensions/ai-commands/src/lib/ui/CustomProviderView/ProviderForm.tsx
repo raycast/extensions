@@ -99,12 +99,15 @@ export function ProviderForm({ provider, onSave }: ProviderFormProps) {
       name: name.trim(),
       base_url: baseUrl.trim(),
       ...(Object.keys(apiKeysObj).length > 0 && { api_keys: apiKeysObj }),
+      ...(provider?.api_kind && { api_kind: provider.api_kind }),
+      ...(provider?.lifecycle && { lifecycle: provider.lifecycle }),
+      ...(provider?.headers && { headers: provider.headers }),
       ...(additionalParams && { additional_parameters: additionalParams }),
       models: provider ? provider.models : [],
     };
 
     try {
-      putProvider(providerData, provider?.id);
+      await putProvider(providerData, provider?.id);
 
       await showToast({
         style: Toast.Style.Success,
@@ -203,6 +206,11 @@ export function ProviderForm({ provider, onSave }: ProviderFormProps) {
         value={baseUrl}
         onChange={setBaseUrl}
         error={getBaseUrlError(baseUrl)}
+        info={
+          provider?.lifecycle === "ollama"
+            ? "Ollama uses its OpenAI-compatible endpoint (/v1) for inference"
+            : undefined
+        }
       />
 
       <Form.Separator />
