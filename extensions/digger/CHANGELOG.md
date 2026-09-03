@@ -1,6 +1,6 @@
 # Digger Changelog
 
-## [Report failed DNS, certificate, Wayback and host-metadata lookups] - {PR_MERGE_DATE}
+## [Report failed DNS, certificate, Wayback and host-metadata lookups] - 2026-09-03
 
 ### Added
 
