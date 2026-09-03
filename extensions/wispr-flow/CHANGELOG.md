@@ -1,6 +1,6 @@
 # Wispr Flow Changelog
 
-## [Fix Transcript Selection on Open] - {PR_MERGE_DATE}
+## [Fix Transcript Selection on Open] - 2026-09-03
 
 - Fixed Search Transcripts restoring the previously viewed transcript as the selected row, leaving the highlight below newly recorded entries
 - Fixed the selection landing in the last date section under the Oldest First, Longest Duration, and Most Words sort orders
