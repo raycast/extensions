@@ -1,62 +1,86 @@
 <div align="center">
   <picture>
-    <img alt="logo" height="128px" src="assets/icon@dark.png">
+    <img alt="AI Commands icon" height="128" src="assets/icon@dark.png">
   </picture>
-  <h1 align="center">Raycast Ollama</h1>
+  <h1>AI Commands for Raycast</h1>
 </div>
 
-Use [Ollama](https://ollama.ai) for local llama inference on Raycast. This application is not directly affiliated with Ollama.ai.
+Run prompts, chats, and custom commands through providers you configure in Raycast. The extension uses the Vercel AI SDK with an OpenAI-compatible transport, so the same inference flow works with local Ollama and compatible hosted providers.
 
-## Requirements
+Ollama is optional. When used, it is a built-in local provider for inference and a separate lifecycle integration for downloading, inspecting, loading, and removing local models.
 
-[Ollama](https://ollama.ai) installed and running on your mac. At least one model need to be installed throw Ollama cli tools or with 'Manage Models' Command. You can find all available model [here](https://ollama.ai/library).
+## Getting started
 
-> [!WARNING]
-> On the current Windows (Beta) there are the following limitations:
->
-> - The commands “Describe Content of Image”, “Get Text from Image”, “Custom Command”, and “Chat with Ollama” support loading images only via image path.
-> - The input source “Selected Text” is not supported; use the "Clipboard" instead.
+1. Open **Manage Custom Providers**.
+2. Configure a provider and add or sync its models. Providers must expose an OpenAI-compatible API.
+3. Configure a model for an AI command or create a new chat in **AI Chat**.
+4. Run any built-in command, a custom command, Quick AI, or a chat.
 
-## How to Use
+### Local Ollama
 
-### AI Extension: Ollama Search API
+The extension creates an **Ollama (Local)** provider automatically, using `http://127.0.0.1:11434/v1`. Install and run Ollama separately, then configure or sync models in **Manage Custom Providers**.
 
-Use [Ollama Web Search](https://ollama.com/blog/web-search) on Raycast Quick AI and Chat.
+Use **Manage Ollama Models** for Ollama-only lifecycle tasks such as pulling, deleting, inspecting, and loading models into memory. These operations do not change how chat or command inference is sent: inference always goes through the configured provider path.
 
-> [!WARNING]
-> For this feature an Ollama API Key is required. Create it from your [Ollama Account](https://ollama.com/settings/keys) and copy it on Extension Setting "Ollama API Key".
+## Features
 
-### Command: Manage Models
+### AI Chat
 
-View, add, and remove models that are installed locally or on a configured remote Ollama Server. To manage and utilize models from the remote server, use the **_Add Server_** action.
+Create conversations with a configured provider and model. Chat supports:
 
-### Command: Chat With Ollama
+- Provider-neutral conversation history and automatic chat naming.
+- Text selection, clipboard, browser-tab, and image prompt tokens.
+- Vision models, tool-capable models, and MCP servers when configured.
+- Configurable chat-memory depth in extension preferences.
+- Per-message reasoning and token metadata when returned by the provider.
 
-Chat with your preferred model from Raycast, with the following features:
+Quick AI opens a fresh AI Chat by default. Its single-result mode uses the primary model from the most recent configured chat, so a provider and model are always selected together.
 
-- **_CMD+M (macOS) CTRL+M (Windows)_**, _Change Model_: change model when you want and use different one for vision or embedding.
-- **_CMD+T (macOS) CTRL+T (Windows)_**, _Selection_: Add text from selection or clipboard to the prompt.
-- **_CMD+B (macOS) CTRL+B (Windows)_**, _Browser Selection Tab_: Add content from selected tab to the prompt. Raycast Browser Extension is required.
-- **_CMD+I (macOS) CTRL+I (Windows)_**, _Image From Clipboard_: Add jpeg or png image to the prompt. A Model with vision capabilities is required.
-- _Disable Internet Search/Enable Internet Search_: Disable/Enable Ollama Search API Tools.
+### Built-in and custom commands
 
-> [!WARNING]
-> For Internet Search feature an Ollama API Key is required. Create it from your [Ollama Account](https://ollama.com/settings/keys) and copy it on Extension Setting "Ollama API Key".
+Built-in commands cover writing, translation, summarization, code explanation, image understanding, and more. Use **Manage AI Commands** to choose a provider/model, adjust prompts, or change whether a command displays a result or replaces the current selection.
 
-From extentions preferences you can chose how many messages use as memory. By default it use the last 20 messages.
+Use **Create AI Command** to create reusable custom commands and Raycast quicklinks.
 
-### Command: Create Custom Commands
+Prompts support these tokens:
 
-All preconfigured commands are crafted for general use. This command allow you to create a custom command for your specific needs.
+- `{selection}`: selected text, with clipboard fallback when enabled.
+- `{browser-tab}`: the active browser tab. Use `{browser-tab format="html"}` or `{browser-tab format="text"}` for a specific format.
+- `{image}`: an image from the clipboard or Finder; requires a vision-capable model.
 
-Prompt use [Raycast Prompt Explorer](https://prompts.ray.so/) format with the following tags supported:
+### Tools and web access
 
-- **_{selection}_**: Add text from selection or clipboard to the prompt.
-- **_{browser-tab}_**: Add content from selected tab to the prompt. Raycast Browser Extension is required. Page format can be changed between: markdown {browser-tab}, html {browser-tab format="html"}, text {browser-tab format="text"}.
-- **_{image}_**: Add jpeg or png image to the prompt. A Model with vision capabilities is required.
+MCP servers can expose tools to tool-capable models in AI Chat.
 
-### Command: Manage Mcp Server
+The optional Internet Search toggle uses Ollama Web Search and Web Fetch. It requires an **Ollama Web API Key** in extension preferences. This web service is independent of local Ollama inference; disable the toggle if you do not use it.
 
-View, add, and remove MCP servers for use with "Chat With Ollama." Currently, only tools are supported. A model with tool capabilities is required.
+## Preferences
 
-This feature was tested with [duckduckgo-mcp-server](https://github.com/nickclyde/duckduckgo-mcp-server), which allows the model to search information on DuckDuckGo.
+- **Input Source** and **Enable Input Source Fallback** control how `{selection}` is resolved.
+- **Chat Memory Messages** controls how many recent turns are included in each chat request.
+- **Quick AI View Mode** chooses chat or single-result Quick AI behavior.
+- **Certificate Validation Enabled** is on by default. Disabling it permits invalid TLS certificates for compatible providers and should only be used with a trusted development server.
+- **Ollama Web API Key** is only required for Ollama Web Search/Fetch tools.
+
+## Platform notes
+
+On Windows, selected-text access and clipboard/image handling can be constrained by Raycast and system permissions. If selected text is unavailable, set **Input Source** to Clipboard.
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+Useful checks:
+
+```bash
+npm run lint
+npm run build
+npx tsc --noEmit
+```
+
+## License
+
+[MIT](LICENSE)
