@@ -19,25 +19,7 @@
       "type": "file",
       "required": false,
       "title": "Portless Executable",
-      "description": "Pick a Portless executable, such as a project's node_modules/portless/dist/cli.js. Leave empty to resolve portless from PATH."
-    },
-    {
-      "name": "primaryAction",
-      "type": "dropdown",
-      "required": false,
-      "default": "copy",
-      "title": "Primary Action",
-      "description": "Action run when pressing Enter on a route. The other action moves to Cmd+Enter.",
-      "data": [
-        {
-          "title": "Copy URL",
-          "value": "copy"
-        },
-        {
-          "title": "Open in Browser",
-          "value": "open"
-        }
-      ]
+      "description": "Pick a Portless executable, such as a project's node_modules/.bin/portless. Leave empty to resolve portless from PATH."
     }
   ],
   "commands": [
@@ -45,7 +27,27 @@
       "name": "list",
       "title": "List Active Routes",
       "description": "List active routes created by Portless",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "required": false,
+          "default": "copy",
+          "title": "Primary Action",
+          "description": "Action to run when pressing Enter on a route. The other action moves to Cmd+Enter.",
+          "data": [
+            {
+              "title": "Copy URL",
+              "value": "copy"
+            },
+            {
+              "title": "Open in Browser",
+              "value": "open"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
