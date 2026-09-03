@@ -16,7 +16,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { SummyItem, SummyAPIError, deleteItem, friendlyError, listItems, regenerateItem } from "./api";
+import { SummyItem, SummyAPIError, deleteItem, friendlyError, getItem, listItems, regenerateItem } from "./api";
 
 type TypeFilter = "all" | SummyItem["type"];
 
@@ -160,7 +160,17 @@ function ItemActions(props: {
           title="Refresh"
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
-          onAction={onRefresh}
+          onAction={async () => {
+            try {
+              await onRefresh();
+            } catch (error) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Couldn’t Refresh Summary",
+                message: friendlyError(error),
+              });
+            }
+          }}
         />
         <Action title="Open Summy Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </ActionPanel.Section>
@@ -202,29 +212,53 @@ function ItemDetail(props: {
 }) {
   const { item, onRegenerate, onDelete, onRefresh } = props;
   const { pop } = useNavigation();
+  const [currentItem, setCurrentItem] = useState(item);
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function refreshItem() {
+    setIsLoading(true);
+    try {
+      const refreshedItem = await getItem(item.id);
+      setCurrentItem(refreshedItem);
+      await onRefresh();
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function regenerateCurrentItem() {
+    await onRegenerate();
+    setCurrentItem((current) => ({ ...current, status: "processing", error: null }));
+    await refreshItem().catch(() => undefined);
+  }
 
   return (
     <Detail
-      markdown={detailMarkdown(item)}
+      isLoading={isLoading}
+      markdown={detailMarkdown(currentItem)}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Type" text={typeNames[item.type]} icon={typeIcons[item.type]} />
-          <Detail.Metadata.Label title="Status" text={statusName(item)} icon={statusIcon(item)} />
-          <Detail.Metadata.Label title="Saved" text={formatDate(item.createdAt)} icon={Icon.Calendar} />
-          {item.sourceUrl ? (
-            <Detail.Metadata.Link title="Source" text={sourceHost(item) ?? "Open original"} target={item.sourceUrl} />
+          <Detail.Metadata.Label title="Type" text={typeNames[currentItem.type]} icon={typeIcons[currentItem.type]} />
+          <Detail.Metadata.Label title="Status" text={statusName(currentItem)} icon={statusIcon(currentItem)} />
+          <Detail.Metadata.Label title="Saved" text={formatDate(currentItem.createdAt)} icon={Icon.Calendar} />
+          {currentItem.sourceUrl ? (
+            <Detail.Metadata.Link
+              title="Source"
+              text={sourceHost(currentItem) ?? "Open original"}
+              target={currentItem.sourceUrl}
+            />
           ) : null}
         </Detail.Metadata>
       }
       actions={
         <ItemActions
-          item={item}
-          onRegenerate={onRegenerate}
+          item={currentItem}
+          onRegenerate={regenerateCurrentItem}
           onDelete={async () => {
             await onDelete();
             pop();
           }}
-          onRefresh={onRefresh}
+          onRefresh={refreshItem}
           showsOpenSummary={false}
         />
       }

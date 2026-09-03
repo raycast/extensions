@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showToast } from "@raycast/api";
+import path from "node:path";
 import { useState } from "react";
-import { createLink, createText, friendlyError, saveFile } from "./api";
+import { canSaveFile, createLink, createText, friendlyError, saveFile } from "./api";
 
 type SaveKind = "url" | "text" | "file";
 
@@ -15,6 +16,7 @@ interface SaveFormValues {
 export default function Command() {
   const [kind, setKind] = useState<SaveKind>("url");
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
   async function save(values: SaveFormValues) {
     if (isSaving) return;
@@ -34,8 +36,18 @@ export default function Command() {
       } else if (values.kind === "text") {
         await createText(values.text.trim(), values.title.trim() || undefined);
       } else {
-        for (const filePath of values.files) {
-          await saveFile(filePath);
+        const results = await Promise.allSettled(values.files.map(saveFile));
+        const savedFiles = values.files.filter((_, index) => results[index].status === "fulfilled");
+        const failedFiles = values.files.filter((_, index) => results[index].status === "rejected");
+
+        if (failedFiles.length > 0) {
+          setSelectedFiles(failedFiles);
+          toast.style = Toast.Style.Failure;
+          toast.title = savedFiles.length
+            ? `${savedFiles.length} of ${values.files.length} Files Saved`
+            : "Couldn’t Save Files";
+          toast.message = partialSaveMessage(savedFiles, failedFiles);
+          return;
         }
       }
 
@@ -83,7 +95,14 @@ export default function Command() {
       ) : null}
 
       {kind === "file" ? (
-        <Form.FilePicker id="files" title="Files" allowMultipleSelection canChooseDirectories={false} />
+        <Form.FilePicker
+          id="files"
+          title="Files"
+          value={selectedFiles}
+          onChange={setSelectedFiles}
+          allowMultipleSelection
+          canChooseDirectories={false}
+        />
       ) : null}
 
       <Form.Description text="Summy will save your selection and start summarising it straight away." />
@@ -104,7 +123,11 @@ function validate(values: SaveFormValues): string | undefined {
   }
 
   if (values.kind === "text" && !values.text?.trim()) return "Enter some text to save.";
-  if (values.kind === "file" && !values.files?.length) return "Choose at least one file.";
+  if (values.kind === "file") {
+    if (!values.files?.length) return "Choose at least one file.";
+    const unsupportedFiles = values.files.filter((filePath) => !canSaveFile(filePath));
+    if (unsupportedFiles.length > 0) return `Summy cannot import ${fileNames(unsupportedFiles)} yet.`;
+  }
   return undefined;
 }
 
@@ -112,4 +135,15 @@ function successTitle(values: SaveFormValues): string {
   if (values.kind === "url") return "Link Saved";
   if (values.kind === "text") return "Text Saved";
   return values.files.length === 1 ? "File Saved" : `${values.files.length} Files Saved`;
+}
+
+function partialSaveMessage(savedFiles: string[], failedFiles: string[]): string {
+  if (savedFiles.length === 0) return `${fileNames(failedFiles)} could not be saved and remain selected.`;
+  return `Saved ${fileNames(savedFiles)}. ${fileNames(failedFiles)} failed and remain selected.`;
+}
+
+function fileNames(filePaths: string[]): string {
+  const names = filePaths.map((filePath) => path.basename(filePath));
+  if (names.length <= 2) return names.join(" and ");
+  return `${names.slice(0, 2).join(", ")} and ${names.length - 2} more`;
 }

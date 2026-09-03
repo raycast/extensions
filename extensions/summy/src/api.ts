@@ -31,11 +31,18 @@ export interface SummyItem {
   updatedAt: string;
 }
 
-interface Preferences {
-  sessionToken: string;
-}
-
 const API_BASE_URL = "https://summy-api.pat-barlow.workers.dev";
+const IMAGE_MEDIA_TYPES: Record<string, string> = {
+  ".avif": "image/avif",
+  ".gif": "image/gif",
+  ".heic": "image/heic",
+  ".heif": "image/heif",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+};
+const TEXT_EXTENSIONS = new Set([".csv", ".json", ".md", ".markdown", ".txt"]);
 
 export class SummyAPIError extends Error {
   constructor(
@@ -112,24 +119,23 @@ export async function saveFile(filePath: string): Promise<SummyItem> {
 
   if (extension === ".pdf") return uploadFile(filePath, "pdf", "application/pdf");
 
-  const imageTypes: Record<string, string> = {
-    ".avif": "image/avif",
-    ".gif": "image/gif",
-    ".heic": "image/heic",
-    ".heif": "image/heif",
-    ".jpeg": "image/jpeg",
-    ".jpg": "image/jpeg",
-    ".png": "image/png",
-    ".webp": "image/webp",
-  };
-  if (imageTypes[extension]) return uploadFile(filePath, "image", imageTypes[extension]);
+  if (IMAGE_MEDIA_TYPES[extension]) return uploadFile(filePath, "image", IMAGE_MEDIA_TYPES[extension]);
 
-  if ([".csv", ".json", ".md", ".markdown", ".txt"].includes(extension)) {
+  if (TEXT_EXTENSIONS.has(extension)) {
     const text = await readFile(filePath, "utf8");
     return createText(text, name);
   }
 
   throw new Error(`Summy cannot import ${extension || "this file type"} yet.`);
+}
+
+export function canSaveFile(filePath: string): boolean {
+  const extension = path.extname(filePath).toLowerCase();
+  return extension === ".pdf" || extension in IMAGE_MEDIA_TYPES || TEXT_EXTENSIONS.has(extension);
+}
+
+export async function getItem(id: string): Promise<SummyItem> {
+  return request<SummyItem>(`items/${id}`);
 }
 
 export async function regenerateItem(id: string): Promise<void> {
