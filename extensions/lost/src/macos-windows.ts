@@ -119,12 +119,16 @@ export async function focusWindow(window: AppWindow): Promise<void> {
 
   await new Promise<void>((resolve, reject) => {
     const child = spawn(path, ["focus", String(window.unixId), String(window.windowId ?? 0), window.title], {
-      detached: true,
       stdio: "ignore",
     });
     child.once("error", reject);
-    child.unref();
-    resolve();
+    child.once("exit", (code, signal) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+      reject(new Error(`Window helper exited with code ${code ?? "null"}${signal ? ` (signal: ${signal})` : ""}`));
+    });
   });
 }
 

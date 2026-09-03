@@ -439,8 +439,21 @@ private func raiseAXWindow(pid: pid_t, title: String, windowId: Int) {
         return unsafeBitCast(symbol, to: AXUIElementGetWindowFn.self)
     }()
 
+    // For "synthetic" list entries (windowId == 0) we can't match a CoreGraphics window reliably.
+    // In that case, raise the first AX window (preferring ones with a non-empty title).
+    if windowId == 0 {
+        let titled = windows.first { window in
+            let windowTitle = axValue(window, kAXTitleAttribute as String) as? String ?? ""
+            return !windowTitle.isEmpty
+        }
+        if let match = titled ?? windows.first {
+            AXUIElementPerformAction(match, kAXRaiseAction as CFString)
+        }
+        return
+    }
+
     let match = windows.first { window in
-        if windowId != 0, let getWindow {
+        if let getWindow {
             var cgID: UInt32 = 0
             if getWindow(window, &cgID) == 0, cgID == UInt32(windowId) {
                 return true
@@ -678,6 +691,12 @@ private func focus(unixId: Int32, windowId: UInt32, title: String) {
     Thread.sleep(forTimeInterval: 0.12)
 
     var psn = Darwin.ProcessSerialNumber()
+    // "Synthetic" list entries use windowId == 0. We still need to activate the process
+    // so macOS brings its windows forward (and likely switches spaces).
+    if windowId == 0, let runningApp = NSRunningApplication(processIdentifier: unixId) {
+        runningApp.activate(options: [.activateIgnoringOtherApps, .activateAllWindows])
+    }
+
     if windowId != 0,
        let hiServices = dlopen("/System/Library/Frameworks/ApplicationServices.framework/Frameworks/HIServices.framework/HIServices", RTLD_LAZY)
         ?? dlopen("/System/Library/Frameworks/ApplicationServices.framework/ApplicationServices", RTLD_LAZY),
