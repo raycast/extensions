@@ -1,13 +1,15 @@
+import { environment } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 export interface DockTile {
   /** Dock tile name as shown in the Dock (usually the app name). */
   name: string;
-  /** Raw badge label: a number such as "12" or "1,234", "•" for dot badges, or "" when there is no badge. */
+  /** Raw badge label: a number such as "12" or "1,234", "99+", "•" for dot badges, or "" when there is no badge. */
   badge: string;
-  /** Numeric badge value. Dot / non-numeric badges count as 1. */
+  /** Numeric badge value. Capped labels such as "99+" use the leading number; dots and other text count as 1. */
   count: number;
-  isRunning: boolean;
+  /** POSIX path from the tile's AXURL, when the Dock exposes one. */
+  path?: string;
 }
 
 export class AccessibilityError extends Error {}
@@ -20,9 +22,9 @@ export function isAccessibilityError(error: unknown): boolean {
   return /assistive|accessibility|-25211|-1719|not allowed/i.test(message);
 }
 
-const SEP = "|~|"; // never appears in app names
+const SEP = "|~|"; // never appears in app names or file URLs
 
-// Reads every application tile in the Dock's list and its AXStatusLabel (the badge).
+// Reads every application tile in the Dock's list, its AXStatusLabel (the badge), and AXURL.
 // Only AXApplicationDockItem tiles are emitted: the Handoff tile (AXHandoffDockItem) carries the
 // source device's identifier, e.g. "com.apple.iphone-13-pro-1", in its status label, and folders,
 // the separator and Trash never have badges.
@@ -43,12 +45,12 @@ tell application "System Events"
           set s to value of attribute "AXStatusLabel" of e
         end try
         if s is missing value then set s to ""
-        set r to false
+        set u to ""
         try
-          set r to value of attribute "AXIsApplicationRunning" of e
+          set u to (value of attribute "AXURL" of e) as string
         end try
-        if r is missing value then set r to false
-        set out to out & n & "${SEP}" & s & "${SEP}" & r & linefeed
+        if u is missing value then set u to ""
+        set out to out & n & "${SEP}" & s & "${SEP}" & u & linefeed
       end if
     end repeat
   end tell
@@ -71,26 +73,40 @@ export async function readDockTiles(): Promise<DockTile[]> {
     .split("\n")
     .filter((line) => line.length > 0)
     .map((line) => {
-      const [name = "", badge = "", running = ""] = line.split(SEP);
+      const [name = "", badge = "", url = ""] = line.split(SEP);
       return {
         name,
         badge,
         count: badgeToCount(badge),
-        isRunning: running === "true",
+        path: posixPathFromDockUrl(url),
       };
     });
 }
 
 /**
- * Numeric value of a badge label. Only labels that are entirely a number (allowing locale grouping
- * separators such as "1,234" or "1.234") are parsed; anything else with a badge counts as 1, so a
- * label that merely contains digits is never misread as a count.
+ * Numeric value of a badge label. Labels that are entirely a number — including locale grouping
+ * separators such as "1,234" / "1.234" and a trailing cap such as "99+" — are parsed; anything
+ * else with a badge counts as 1, so a label that merely contains digits is never misread as a count.
  */
 export function badgeToCount(badge: string): number {
   const trimmed = badge.trim();
   if (!trimmed) return 0;
-  if (/^\d[\d,.\s']*$/.test(trimmed)) return parseInt(trimmed.replace(/\D/g, ""), 10);
+  if (/^\d[\d,.\s']*\+?$/.test(trimmed)) return parseInt(trimmed.replace(/\D/g, ""), 10);
   return 1; // "•" or any other non-numeric badge
+}
+
+/** POSIX path from a Dock AXURL (`file:///…` / `file://localhost/…`) or an already-absolute path. */
+function posixPathFromDockUrl(url: string): string | undefined {
+  const trimmed = url.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.startsWith("/")) return trimmed.replace(/\/+$/, "") || undefined;
+  const match = /^file:\/\/(?:localhost)?(\/[^]*)$/i.exec(trimmed);
+  if (!match?.[1]) return undefined;
+  try {
+    return decodeURIComponent(match[1]).replace(/\/+$/, "") || undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Whether macOS is in Dark appearance. Menu bar dropdowns follow this, not Raycast's own theme. */
@@ -102,15 +118,15 @@ export async function readSystemDarkMode(): Promise<boolean> {
     );
     return out.trim() === "true";
   } catch {
-    return false;
+    return environment.appearance === "dark";
   }
 }
 
-/** Clicks a Dock tile via Accessibility, activating whatever it represents. */
+/** Clicks an application Dock tile via Accessibility, activating whatever it represents. */
 export async function clickDockTile(name: string): Promise<void> {
   const escaped = name.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   await runAppleScript(
-    `tell application "System Events" to tell process "Dock" to click UI element "${escaped}" of list 1`,
+    `tell application "System Events" to tell process "Dock" to click (first UI element of list 1 whose name is "${escaped}" and subrole is "AXApplicationDockItem")`,
     { timeout: 5000 },
   );
 }

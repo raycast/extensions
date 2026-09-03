@@ -1,11 +1,11 @@
 import {
-  Application,
   Color,
   Icon,
   Image,
   Keyboard,
+  LaunchType,
   MenuBarExtra,
-  getApplications,
+  environment,
   getPreferenceValues,
   open,
   openCommandPreferences,
@@ -20,11 +20,6 @@ import {
   readDockTiles,
   readSystemDarkMode,
 } from "./dock";
-
-interface DockApp {
-  tile: DockTile;
-  application?: Application;
-}
 
 // Built-in icons in the dropdown are tinted against Raycast's app theme rather than the menu's
 // appearance, so tint them explicitly for the system Light/Dark appearance the menu actually uses.
@@ -52,28 +47,32 @@ function iconSource(
   return `icons/${symbol}${badged ? "-badge" : ""}${filled ? "-fill" : ""}.svg`;
 }
 
-function sameName(a: string, b: string): boolean {
-  return a.localeCompare(b, undefined, { sensitivity: "accent" }) === 0;
-}
-
-function resolveApps(tiles: DockTile[], applications: Application[]): DockApp[] {
-  return tiles.map((tile) => ({ tile, application: applications.find((a) => sameName(a.name, tile.name)) }));
+function notificationLabel(total: number): string {
+  return `${total} notification${total === 1 ? "" : "s"}`;
 }
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences.ShowDockBadges>();
+  const menuOpen = environment.launchType === LaunchType.UserInitiated;
 
   const { data, isLoading, error, revalidate } = useCachedPromise(readDockTiles, [], {
     keepPreviousData: true,
+    // Errors are shown in the dropdown; skip the default "Failed to fetch latest data" toast.
+    onError: () => undefined,
   });
-  const { data: applications } = useCachedPromise(getApplications, [], { keepPreviousData: true });
-  const { data: darkMode = false } = useCachedPromise(readSystemDarkMode, [], { keepPreviousData: true });
+  const { data: darkMode = environment.appearance === "dark" } = useCachedPromise(readSystemDarkMode, [], {
+    keepPreviousData: true,
+    execute: menuOpen,
+  });
 
-  const badged = resolveApps(data ?? [], applications ?? []).filter((app) => app.tile.count > 0);
-  const total = badged.reduce((sum, app) => sum + app.tile.count, 0);
+  const badged = (data ?? []).filter((tile) => tile.count > 0);
+  const total = badged.reduce((sum, tile) => sum + tile.count, 0);
   const hasBadges = total > 0;
 
-  if (preferences.hideWhenClear && data && !error && !hasBadges) {
+  // Returning null ends a menu-bar run (there is no isLoading to wait on), so only hide after
+  // a completed read. Otherwise a cached empty list can tear the command down before a new badge
+  // is seen, and Hide When Clear would stay blank until the user opens it by hand.
+  if (preferences.hideWhenClear && !isLoading && data && !error && !hasBadges) {
     return null;
   }
 
@@ -89,6 +88,7 @@ export default function Command() {
     <MenuBarExtra
       icon={icon}
       title={preferences.showCount && hasBadges ? String(total) : undefined}
+      tooltip={error ? error.message : hasBadges ? notificationLabel(total) : "No notifications"}
       isLoading={isLoading}
     >
       {accessibilityDenied ? (
@@ -109,9 +109,9 @@ export default function Command() {
           />
         </MenuBarExtra.Section>
       ) : (
-        <MenuBarExtra.Section title={hasBadges ? `${total} notification${total === 1 ? "" : "s"}` : "No notifications"}>
-          {badged.map((app) => (
-            <AppItem key={app.tile.name} app={app} darkMode={darkMode} />
+        <MenuBarExtra.Section title={hasBadges ? notificationLabel(total) : "No notifications"}>
+          {badged.map((tile, index) => (
+            <AppItem key={`${tile.name}-${index}`} tile={tile} darkMode={darkMode} />
           ))}
         </MenuBarExtra.Section>
       )}
@@ -133,15 +133,17 @@ export default function Command() {
 }
 
 /**
- * Open the matched app; if that fails (unmatched or unusual bundle), click its Dock tile instead.
+ * Open the app at the tile's AXURL; if that is missing or fails, click its Dock tile instead.
  * Menu bar commands have no Raycast window for a toast, so a failed fallback is reported via HUD.
  */
-async function openDockApp({ tile, application }: DockApp): Promise<void> {
-  try {
-    await open(application?.path ?? `/Applications/${tile.name}.app`);
-    return;
-  } catch {
-    // Fall through to the Dock tile.
+async function openDockApp(tile: DockTile): Promise<void> {
+  if (tile.path) {
+    try {
+      await open(tile.path);
+      return;
+    } catch {
+      // Fall through to the Dock tile.
+    }
   }
   try {
     await clickDockTile(tile.name);
@@ -153,14 +155,13 @@ async function openDockApp({ tile, application }: DockApp): Promise<void> {
   }
 }
 
-function AppItem({ app, darkMode }: { app: DockApp; darkMode: boolean }) {
-  const { tile, application } = app;
+function AppItem({ tile, darkMode }: { tile: DockTile; darkMode: boolean }) {
   return (
     <MenuBarExtra.Item
       title={tile.name}
       subtitle={tile.badge}
-      icon={application ? { fileIcon: application.path } : menuIcon(Icon.AppWindow, darkMode)}
-      onAction={() => openDockApp(app)}
+      icon={tile.path ? { fileIcon: tile.path } : menuIcon(Icon.AppWindow, darkMode)}
+      onAction={() => openDockApp(tile)}
     />
   );
 }
