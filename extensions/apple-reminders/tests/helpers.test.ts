@@ -1,7 +1,7 @@
 import * as assert from "node:assert";
 import { describe, it } from "node:test";
 
-import { formatReminderTime } from "../src/helpers";
+import { formatReminderTime, truncate } from "../src/helpers";
 
 describe("formatReminderTime", () => {
   it("returns empty string for all-day dates (YYYY-MM-DD)", () => {
@@ -29,5 +29,20 @@ describe("formatReminderTime", () => {
     assert.strictEqual(formatReminderTime({}), "");
     assert.strictEqual(formatReminderTime(null), "");
     assert.strictEqual(formatReminderTime(undefined), "");
+  });
+});
+
+describe("truncate", () => {
+  it("does not truncate strings shorter than maxLength", () => {
+    assert.strictEqual(truncate("Short string", 20), "Short string");
+  });
+
+  it("truncates ASCII strings and appends ellipsis", () => {
+    assert.strictEqual(truncate("1234567890", 5), "12345…");
+  });
+
+  it("does not split multi-byte Unicode characters / emoji", () => {
+    const emojiStr = "🚀🔥✨🎉❤️👍";
+    assert.strictEqual(truncate(emojiStr, 3), "🚀🔥✨…");
   });
 });

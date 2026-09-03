@@ -794,7 +794,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "test": "node --import ./tests/register-mocks.mjs --test tests/**/*.test.ts"
+    "test": "node --experimental-strip-types --import ./tests/register-mocks.mjs --test tests/**/*.test.ts"
   },
   "platforms": [
     "macOS"
