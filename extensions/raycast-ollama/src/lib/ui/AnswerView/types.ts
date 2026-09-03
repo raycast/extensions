@@ -11,4 +11,5 @@ export interface UiModel {
   tag: OllamaApiTagsResponseModel;
   thinking?: ThinkingEffort;
   keep_alive?: string;
+  prompt?: string;
 }

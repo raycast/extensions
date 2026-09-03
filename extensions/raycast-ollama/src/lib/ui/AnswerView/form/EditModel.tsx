@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import * as React from "react";
 import { OllamaApiModelCapability } from "../../../ollama/enum";
@@ -13,7 +13,7 @@ import { ThinkingEffort } from "../../../enum";
 import { ThinkingEffort as ThinkingEffortOllama } from "../../../ollama/types";
 
 interface props {
-  setShow: React.Dispatch<React.SetStateAction<boolean>>;
+  setShow?: React.Dispatch<React.SetStateAction<boolean>>;
   revalidate: CallableFunction;
   command: CommandAnswer;
   capabilities?: OllamaApiModelCapability[];
@@ -21,6 +21,7 @@ interface props {
   model?: string;
   thinking?: ThinkingEffortOllama;
   keep_alive?: string;
+  prompt?: string;
 }
 
 interface FormData {
@@ -28,9 +29,11 @@ interface FormData {
   model: string;
   thinking: string;
   keep_alive: string;
+  prompt: string;
 }
 
 export function EditModel(props: props): React.JSX.Element {
+  const { pop } = useNavigation();
   const InfoThinking = "Thinking Effort";
 
   const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, [], {
@@ -53,6 +56,7 @@ export function EditModel(props: props): React.JSX.Element {
         });
         if (models?.some((model) => model.name === props.model)) setValue("model", props.model);
         setValue("thinking", props.thinking === false ? "false" : (props.thinking as string));
+        if (props.prompt !== undefined) setValue("prompt", props.prompt);
       }
     },
   });
@@ -62,12 +66,14 @@ export function EditModel(props: props): React.JSX.Element {
     },
     initialValues: {
       keep_alive: props.keep_alive ? props.keep_alive : "5m",
+      prompt: props.prompt ? props.prompt : "",
     },
     validation: {
       server: FormValidation.Required,
       model: FormValidation.Required,
       thinking: ValidationThinking,
       keep_alive: (value) => ValidationKeepAlive(CheckboxAdvanced, value),
+      prompt: FormValidation.Required,
     },
   });
 
@@ -77,7 +83,17 @@ export function EditModel(props: props): React.JSX.Element {
   const ActionView = (
     <ActionPanel>
       <Action.SubmitForm onSubmit={handleSubmit} />
-      <Action title="Close" icon={Icon.Xmark} onAction={() => props.setShow(false)} />
+      <Action
+        title="Close"
+        icon={Icon.Xmark}
+        onAction={() => {
+          if (props.setShow) {
+            props.setShow(false);
+          } else {
+            pop();
+          }
+        }}
+      />
     </ActionPanel>
   );
 
@@ -93,10 +109,15 @@ export function EditModel(props: props): React.JSX.Element {
           keep_alive: CheckboxAdvanced ? values.keep_alive : undefined,
         },
       },
+      prompt: values.prompt,
     };
     await SetSettingsCommandAnswer(props.command, o);
     props.revalidate();
-    props.setShow(false);
+    if (props.setShow) {
+      props.setShow(false);
+    } else {
+      pop();
+    }
   }
 
   return (
@@ -155,6 +176,20 @@ export function EditModel(props: props): React.JSX.Element {
           />
         )}
       </Form.Dropdown>
+      <Form.TextArea
+        title="Prompt"
+        placeholder="Enter custom prompt"
+        info={
+          "Supports placeholders inside curly braces:\n" +
+          "- {selection}: Selected text or clipboard content\n" +
+          (props.command === CommandAnswer.TRANSLATE
+            ? "- {source}: Source language\n- {target}: Target language\n"
+            : "") +
+          "- {browser-tab}: Active browser tab content (Raycast Browser Extension required)\n" +
+          "- {image}: Image from clipboard or Finder (requires vision model)"
+        }
+        {...itemProps.prompt}
+      />
       <Form.Checkbox
         id="advanced"
         label="Advanced Settings"

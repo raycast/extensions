@@ -4,7 +4,7 @@ import { Ollama } from "../../ollama/ollama";
 import { OllamaApiGenerateRequestBody, OllamaApiGenerateResponse, ThinkingEffort } from "../../ollama/types";
 import { CommandAnswer } from "../../settings/enum";
 import { AddSettingsCommandChat, GetOllamaServerByName, GetSettingsCommandAnswer } from "../../settings/settings";
-import { launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { GetAvailableModel, PromptTokenImageParser, PromptTokenParser } from "../function";
 import { Creativity } from "../../enum";
 import { RaycastChat, SettingsCommandAnswer } from "../../settings/types";
@@ -21,9 +21,19 @@ import { RaycastImage } from "../../types";
 export async function GetModel(command?: CommandAnswer, server?: string, model?: string): Promise<Types.UiModel> {
   let settings: SettingsCommandAnswer | undefined;
   if (command) {
-    settings = await GetSettingsCommandAnswer(command);
-    server = settings.server;
-    model = settings.model.main.tag;
+    try {
+      settings = await GetSettingsCommandAnswer(command);
+      server = settings.server;
+      model = settings.model.main.tag;
+    } catch (e) {
+      const pref = getPreferenceValues<Preferences>();
+      if (pref.ollamaUseDefaultModelAsFallback && pref.ollamaDefaultModel) {
+        server = "Local";
+        model = pref.ollamaDefaultModel;
+      } else {
+        throw e;
+      }
+    }
   } else if (!server || !model) throw new Error("server and model need to be defined");
   const s = await GetOllamaServerByName(server);
   const m = (await GetAvailableModel(server)).filter((m) => m.name === model);
@@ -36,6 +46,7 @@ export async function GetModel(command?: CommandAnswer, server?: string, model?:
     tag: m[0],
     thinking: settings?.model.main.thinking,
     keep_alive: settings?.model.main.keep_alive,
+    prompt: settings?.prompt,
   };
 }
 

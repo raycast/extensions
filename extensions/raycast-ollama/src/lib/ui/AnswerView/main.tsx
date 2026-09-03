@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { convertAnswerToChat, GetModel, Run } from "./function";
 import { Shortcut } from "../shortcut";
@@ -19,6 +19,7 @@ interface props {
   creativity?: Creativity;
   thinking?: ThinkingEffort;
   keep_alive?: string;
+  promptValues?: Record<string, string>;
 }
 
 /**
@@ -32,10 +33,13 @@ export function AnswerView(props: props): React.JSX.Element {
     isLoading: IsLoadingModel,
   } = usePromise(GetModel, [props.command, props.server, props.model], {
     onError: (e) => {
+      const pref = getPreferenceValues<Preferences>();
+      const hasFallback = pref.ollamaUseDefaultModelAsFallback && pref.ollamaDefaultModel;
       if (
-        e.message === "Settings for this Command unavailable" ||
-        e.message === "Model unavailable on given server" ||
-        e.message == "Verify Ollama is Installed and Currently Running."
+        !hasFallback &&
+        (e.message === "Settings for this Command unavailable" ||
+          e.message === "Model unavailable on given server" ||
+          e.message == "Verify Ollama is Installed and Currently Running.")
       )
         setShowSelectModelForm(true);
       showToast({ style: Toast.Style.Failure, title: e.message });
@@ -55,9 +59,16 @@ export function AnswerView(props: props): React.JSX.Element {
 
   React.useEffect(() => {
     if (Model && !IsLoadingModel) {
+      let promptToRun = Model.prompt !== undefined ? Model.prompt : props.prompt;
+      if (props.promptValues) {
+        for (const [key, value] of Object.entries(props.promptValues)) {
+          const regex = new RegExp(`{[ ]*${key}[ ]*}`, "gi");
+          promptToRun = promptToRun.replace(regex, value);
+        }
+      }
       Run(
         Model,
-        props.prompt,
+        promptToRun,
         query,
         images,
         setLoading,
@@ -93,6 +104,7 @@ export function AnswerView(props: props): React.JSX.Element {
         model={!IsLoadingModel && Model ? Model.tag.name : undefined}
         thinking={!IsLoadingModel && Model ? Model.thinking : undefined}
         keep_alive={!IsLoadingModel && Model ? Model.keep_alive : undefined}
+        prompt={!IsLoadingModel && Model && Model.prompt !== undefined ? Model.prompt : props.prompt}
       />
     );
 
@@ -102,7 +114,8 @@ export function AnswerView(props: props): React.JSX.Element {
   function AnswerAction(): React.JSX.Element {
     return (
       <ActionPanel title="Actions">
-        <Action.CopyToClipboard content={answer} />
+        <Action.Paste content={answer} />
+        <Action.CopyToClipboard shortcut={Shortcut.Copy} content={answer} />
         <Action
           title={showAnswerMetadata ? "Hide Metadata" : "Show Metadata"}
           icon={showAnswerMetadata ? Icon.EyeDisabled : Icon.Eye}
