@@ -16,9 +16,18 @@ import {
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { basename } from "node:path";
 import { useState } from "react";
-import { categoryLabel, categoryName, environmentLabel, environmentName, facetsOf, packageLabel } from "./convention";
+import {
+  categoryLabel,
+  categoryName,
+  environmentLabel,
+  environmentName,
+  type Facets,
+  facetsOf,
+  packageLabel,
+} from "./convention";
 import { ALL_FILTER, filterOptions, sectionsFor } from "./grouping";
 import { isLinkCommand, linkTargetOf } from "./link-command";
+import { domainOf } from "./generate-script";
 import { duplicateScript, makeExecutable } from "./script-operations";
 import { discoverScriptCommands } from "./discover-script-commands";
 import { resolveIcon } from "./resolve-icon";
@@ -35,6 +44,40 @@ type SearchPreferences = {
   showBodyPreview: boolean;
   groupCommands: boolean;
   terminalApplication?: Application;
+};
+
+/** A leading title segment that is a hostname — so `Chat · Mozilla` is left alone. */
+const HOST_SEGMENT = /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/i;
+
+/**
+ * `netflix.com · Watch Later` → `Watch Later`.
+ *
+ * The convention leads a web row's title with its host, and it is right to: in Raycast's own launcher a
+ * row appears among apps and extensions, and a leading domain says *this opens a browser* before the rest
+ * is read. That is a signal about strangers, and in this list there are none — every row is already a link
+ * command, already grouped, already sorted by package. Firing on every row, it answers nothing while
+ * spending the front of the only column that can differ: three rows on one service share their leading characters
+ * and render identically. The host is not discarded, it moves to the subtitle, where it does the
+ * verification job instead. Nothing searchable is lost either — `keywords` still carries the whole title.
+ */
+const nameWithoutHost = (name: string) => {
+  const separator = name.indexOf(" · ");
+  if (separator < 0) return name;
+
+  return HOST_SEGMENT.test(name.slice(0, separator)) ? name.slice(separator + 3) : name;
+};
+
+/**
+ * The host, because once the title stops carrying it that is what tells two rows of one brand apart. The
+ * package stays where it is still the more useful word: a title that is nothing but a host already shows
+ * the destination, and a command with no link target has no host to show at all.
+ */
+const rowSubtitle = (command: ScriptCommand, facets: Facets) => {
+  const target = linkTargetOf(command)?.target;
+  const host = target ? domainOf(target) : undefined;
+  if (host && !HOST_SEGMENT.test(facets.name)) return host;
+
+  return facets.brand ? packageLabel(facets.brand) : undefined;
 };
 
 const BODY_PREVIEW_LINES = 300;
@@ -368,8 +411,8 @@ export const SearchView = ({ linksOnly }: SearchViewProps) => {
             <List.Item
               key={command.path}
               icon={resolveIcon(command)}
-              title={facets.name}
-              subtitle={facets.brand ? packageLabel(facets.brand) : undefined}
+              title={nameWithoutHost(facets.name)}
+              subtitle={rowSubtitle(command, facets)}
               keywords={[
                 command.title,
                 command.filename,
