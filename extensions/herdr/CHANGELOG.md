@@ -1,6 +1,6 @@
 # Changelog
 
-## [Menu Bar Background Refresh] - {PR_MERGE_DATE}
+## [Menu Bar Background Refresh] - 2026-09-03
 
 - Refresh the menu bar in the background every minute instead of only when it is opened.
 
