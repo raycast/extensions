@@ -1,7 +1,7 @@
 import { Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { Actions } from "../actions";
-import { DiggerResult, ResourceStatus } from "../types";
+import { DiggerResult, DNSData, DNSRecordKind, ResourceStatus } from "../types";
 import { CertificateInfo } from "../utils/dnsUtils";
 import { truncateText } from "../utils/formatters";
 
@@ -10,6 +10,46 @@ interface DNSCertificatesProps {
   onRefresh: () => void;
   certificateInfo?: CertificateInfo | null;
   progress: number;
+}
+
+const countText = (n?: number) => (n ? `${n} ${n === 1 ? "record" : "records"}` : undefined);
+
+/**
+ * One DNS record row, three-valued like every other lookup in the extension.
+ *
+ * The empty case is NOT automatically "none published": if that record type's
+ * query failed, we never learned what the host publishes, and saying "No mail
+ * servers found" there states a fact we do not have. Only `unchecked` can tell
+ * those apart, so the row consults it before falling back to the absent copy.
+ */
+function recordRow(
+  title: string,
+  kind: DNSRecordKind,
+  dns: DNSData | undefined,
+  found: string | undefined,
+  absent: string,
+) {
+  if (found) {
+    return (
+      <List.Item.Detail.Metadata.Label
+        title={title}
+        text={found}
+        icon={{ source: Icon.Check, tintColor: Color.Green }}
+      />
+    );
+  }
+  if (dns?.unchecked?.includes(kind)) {
+    return (
+      <List.Item.Detail.Metadata.Label
+        title={title}
+        text="Couldn't check"
+        icon={{ source: Icon.QuestionMarkCircle, tintColor: Color.Orange }}
+      />
+    );
+  }
+  return (
+    <List.Item.Detail.Metadata.Label title={title} text={absent} icon={{ source: Icon.Xmark, tintColor: Color.Red }} />
+  );
 }
 
 export function DNSCertificates({ data, onRefresh, certificateInfo, progress }: DNSCertificatesProps) {
@@ -83,50 +123,18 @@ function DNSCertificatesDetail({ dns, certificateInfo, dnsStatus, certStatus }: 
             />
           )}
 
-          <List.Item.Detail.Metadata.Label
-            title="A Records (IPv4)"
-            text={dns?.aRecords?.length ? dns.aRecords.slice(0, 3).join(", ") : "No IPv4 addresses found"}
-            icon={
-              dns?.aRecords?.length
-                ? { source: Icon.Check, tintColor: Color.Green }
-                : { source: Icon.Xmark, tintColor: Color.Red }
-            }
-          />
-
-          <List.Item.Detail.Metadata.Label
-            title="AAAA Records (IPv6)"
-            text={dns?.aaaaRecords?.length ? dns.aaaaRecords.slice(0, 2).join(", ") : "No IPv6 addresses found"}
-            icon={
-              dns?.aaaaRecords?.length
-                ? { source: Icon.Check, tintColor: Color.Green }
-                : { source: Icon.Xmark, tintColor: Color.Red }
-            }
-          />
-
-          <List.Item.Detail.Metadata.Label title="CNAME" text={dns?.cnameRecord || "No CNAME record"} />
-
-          <List.Item.Detail.Metadata.Label
-            title="MX Records"
-            text={
-              dns?.mxRecords?.length
-                ? `${dns.mxRecords.length} ${dns.mxRecords.length === 1 ? "record" : "records"}`
-                : "No mail servers found"
-            }
-          />
-
-          <List.Item.Detail.Metadata.Label
-            title="NS Records"
-            text={dns?.nsRecords?.length ? dns.nsRecords.slice(0, 2).join(", ") : "No nameservers found"}
-          />
-
-          <List.Item.Detail.Metadata.Label
-            title="TXT Records"
-            text={
-              dns?.txtRecords?.length
-                ? `${dns.txtRecords.length} ${dns.txtRecords.length === 1 ? "record" : "records"}`
-                : "No TXT records found"
-            }
-          />
+          {recordRow("A Records (IPv4)", "a", dns, dns?.aRecords?.slice(0, 3).join(", "), "No IPv4 addresses found")}
+          {recordRow(
+            "AAAA Records (IPv6)",
+            "aaaa",
+            dns,
+            dns?.aaaaRecords?.slice(0, 2).join(", "),
+            "No IPv6 addresses found",
+          )}
+          {recordRow("CNAME", "cname", dns, dns?.cnameRecord, "No CNAME record")}
+          {recordRow("MX Records", "mx", dns, countText(dns?.mxRecords?.length), "No mail servers found")}
+          {recordRow("NS Records", "ns", dns, dns?.nsRecords?.slice(0, 2).join(", "), "No nameservers found")}
+          {recordRow("TXT Records", "txt", dns, countText(dns?.txtRecords?.length), "No TXT records found")}
 
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="TLS Certificate" />

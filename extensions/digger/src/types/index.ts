@@ -186,6 +186,9 @@ export interface NetworkingData {
   finalUrl?: string;
 }
 
+/** The record types a DNS lookup queries, used to report which ones failed. */
+export type DNSRecordKind = "a" | "aaaa" | "cname" | "mx" | "ns" | "txt";
+
 export interface DNSData {
   aRecords?: string[];
   aaaaRecords?: string[];
@@ -193,6 +196,14 @@ export interface DNSData {
   txtRecords?: string[];
   nsRecords?: string[];
   cnameRecord?: string;
+  /**
+   * Record types whose query failed for a non-benign reason. An empty result for
+   * a type listed here means "we could not check", NOT "the host publishes none"
+   * — the two render differently and only one of them is a fact about the host.
+   * Absent on entries cached before this field existed, which reads as "nothing
+   * known to have failed" and matches the old behaviour.
+   */
+  unchecked?: DNSRecordKind[];
 }
 
 export interface PerformanceData {

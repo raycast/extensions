@@ -1,7 +1,7 @@
 import * as dns from "dns";
 import * as tls from "tls";
 import { promisify } from "util";
-import { DNSData } from "../types";
+import { DNSData, DNSRecordKind } from "../types";
 import { LIMITS, TIMEOUTS } from "./config";
 
 const resolve4 = promisify(dns.resolve4);
@@ -47,11 +47,16 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
     "ENOTFOUND", // the name is not in DNS at all
   ]);
   let resolverError: unknown;
-  const note = (e: unknown) => {
+  // Which record types we failed to CHECK, as opposed to checked and found empty.
+  // Recorded per type because one failed query does not invalidate the others:
+  // a host can answer for A and time out for MX, and reporting "no mail servers"
+  // there is a claim about the host we did not earn.
+  const unchecked: DNSRecordKind[] = [];
+  const note = (kind: DNSRecordKind, e: unknown) => {
     const code = (e as NodeJS.ErrnoException | undefined)?.code;
-    if (resolverError === undefined && (code === undefined || !BENIGN.has(code))) {
-      resolverError = e;
-    }
+    if (code !== undefined && BENIGN.has(code)) return;
+    unchecked.push(kind);
+    if (resolverError === undefined) resolverError = e;
   };
 
   try {
@@ -60,7 +65,7 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
       dnsData.aRecords = aRecords;
     }
   } catch (e) {
-    note(e); // A records not found
+    note("a", e);
   }
 
   try {
@@ -69,7 +74,7 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
       dnsData.aaaaRecords = aaaaRecords;
     }
   } catch (e) {
-    note(e); // AAAA records not found
+    note("aaaa", e);
   }
 
   try {
@@ -78,7 +83,7 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
       dnsData.mxRecords = mxRecords;
     }
   } catch (e) {
-    note(e); // MX records not found
+    note("mx", e);
   }
 
   try {
@@ -87,7 +92,7 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
       dnsData.txtRecords = txtRecords.map((record) => record.join(""));
     }
   } catch (e) {
-    note(e); // TXT records not found
+    note("txt", e);
   }
 
   try {
@@ -96,7 +101,7 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
       dnsData.nsRecords = nsRecords;
     }
   } catch (e) {
-    note(e); // NS records not found
+    note("ns", e);
   }
 
   try {
@@ -105,7 +110,7 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
       dnsData.cnameRecord = cnameRecords[0];
     }
   } catch (e) {
-    note(e); // CNAME records not found
+    note("cname", e);
   }
 
   // Only a RESOLVER-level failure is worth reporting. "No such record" is not:
@@ -121,6 +126,14 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
   // loaded perfectly.
   if (Object.keys(dnsData).length === 0 && resolverError !== undefined) {
     throw resolverError;
+  }
+
+  // Records from SOME queries and failures on others is a partial result, not a
+  // whole one. Throwing would discard records we actually have; returning
+  // silently would present the unchecked types as absent. Carry the list instead
+  // so each row can say which it is.
+  if (unchecked.length > 0) {
+    dnsData.unchecked = unchecked;
   }
 
   return dnsData;
