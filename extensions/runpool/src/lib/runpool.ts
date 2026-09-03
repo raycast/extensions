@@ -376,9 +376,12 @@ export function githubUnchecked(status: Status): boolean {
 export function summarise(status: Status): string {
   if (status.paused) return "Paused";
   if (status.pools.length > 0 && status.pools.every((pool) => pool.paused)) return "Pools Paused";
-  const running = status.pools.reduce((n, p) => n + p.running, 0);
-  const busy = status.pools.reduce((n, p) => n + p.busy, 0);
-  const slots = status.pools.reduce((n, p) => n + p.count, 0);
+  // Same reasoning as the menu bar mark: a paused pool's slots are not
+  // enabled capacity, so they are excluded rather than counted as idle.
+  const activePools = status.pools.filter((pool) => !pool.paused);
+  const running = activePools.reduce((n, p) => n + p.running, 0);
+  const busy = activePools.reduce((n, p) => n + p.busy, 0);
+  const slots = activePools.reduce((n, p) => n + p.count, 0);
   if (busy > 0) return `Active ${busy}/${slots}`;
   if (running === 0) return "Offline";
   return "Idle";
