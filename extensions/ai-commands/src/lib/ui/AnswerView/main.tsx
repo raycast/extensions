@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import {
   AnswerInferenceMetadata,
@@ -46,13 +46,10 @@ export function AnswerView(props: props): React.JSX.Element {
     isLoading: IsLoadingModel,
   } = usePromise(GetModel, [props.command, props.server, props.model], {
     onError: (e) => {
-      const pref = getPreferenceValues<Preferences>();
-      const hasFallback = pref.ollamaUseDefaultModelAsFallback && pref.ollamaDefaultModel;
       if (
-        !hasFallback &&
-        (e.message === "Settings for this Command unavailable" ||
-          e.message === "Model unavailable on given server" ||
-          e.message == "Verify Ollama is Installed and Currently Running.")
+        e.message === "Settings for this Command unavailable" ||
+        e.message === "Model unavailable on given server" ||
+        e.message == "Verify Ollama is Installed and Currently Running."
       )
         setShowSelectModelForm(true);
       showToast({ style: Toast.Style.Failure, title: e.message });

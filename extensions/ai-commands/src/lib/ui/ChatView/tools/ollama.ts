@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { Tool, ToolResult } from "./main";
 
 const pref = getPreferenceValues<Preferences>();
-const key = pref.ollamaApiKey;
+const key = pref.ollamaWebApiKey;
 
 /**
  * Generic Ollama Web API Post Request.

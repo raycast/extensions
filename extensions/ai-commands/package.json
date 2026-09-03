@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-commands",
   "title": "AI Commands",
-  "description": "Perform inference with Ollama and Custom Providers",
+  "description": "Run AI commands through configured providers, with optional Ollama model management",
   "icon": "icon.png",
   "author": "anwarulislam",
   "platforms": [
@@ -19,7 +19,7 @@
   },
   "preferences": [
     {
-      "name": "ollamaResultViewInput",
+      "name": "resultViewInput",
       "description": "Choose preferred input source",
       "type": "dropdown",
       "required": false,
@@ -37,7 +37,7 @@
       "default": "SelectedText"
     },
     {
-      "name": "ollamaResultViewInputFallback",
+      "name": "resultViewInputFallback",
       "description": "If there isn't text on main input source enable this option permit to fallback to other input source",
       "type": "checkbox",
       "required": false,
@@ -45,7 +45,7 @@
       "label": "Check for enable input fallback"
     },
     {
-      "name": "ollamaChatHistoryMessagesNumber",
+      "name": "chatHistoryMessagesNumber",
       "description": "Number of last messages to use as memory",
       "type": "textfield",
       "required": false,
@@ -53,7 +53,7 @@
       "default": "20"
     },
     {
-      "name": "ollamaCertificateValidation",
+      "name": "certificateValidation",
       "description": "Uncheck for Disable Certificate Validation",
       "type": "checkbox",
       "required": false,
@@ -61,31 +61,14 @@
       "label": "Certificate Validation Enabled"
     },
     {
-      "name": "ollamaApiKey",
+      "name": "ollamaWebApiKey",
       "description": "Ollama API Key used by Web Search Tools",
       "type": "password",
       "required": false,
-      "title": "Ollama API Key"
+      "title": "Ollama Web API Key"
     },
     {
-      "name": "ollamaDefaultModel",
-      "description": "Specify the global default model tag to use (e.g., llama3)",
-      "type": "textfield",
-      "required": false,
-      "title": "Default Model Tag",
-      "placeholder": "llama3"
-    },
-    {
-      "name": "ollamaUseDefaultModelAsFallback",
-      "description": "Use the default model as fallback when command settings are not configured instead of showing the model selection form",
-      "type": "checkbox",
-      "required": false,
-      "title": "Use Default Model as Fallback",
-      "label": "Use default model as fallback",
-      "default": false
-    },
-    {
-      "name": "ollamaQuickAIView",
+      "name": "quickAIView",
       "description": "Choose how Quick AI displays results",
       "type": "dropdown",
       "required": false,
@@ -101,14 +84,6 @@
         }
       ],
       "default": "chat"
-    },
-    {
-      "name": "ollamaQuickAIModel",
-      "description": "Specify the model tag to use for Quick AI (e.g., llama3). If not set, uses the default model.",
-      "type": "textfield",
-      "required": false,
-      "title": "Quick AI Model Tag",
-      "placeholder": "llama3"
     }
   ],
   "tools": [

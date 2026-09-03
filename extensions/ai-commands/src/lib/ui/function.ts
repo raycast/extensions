@@ -294,12 +294,12 @@ async function GetClipboardText(fallback = false): Promise<string | undefined> {
 export async function GetPromptTokenSelectionText(): Promise<string | undefined> {
   let query: string | undefined;
   const p = getPreferenceValues<Preferences>();
-  switch (p.ollamaResultViewInput) {
+  switch (p.resultViewInput) {
     case "SelectedText":
-      query = await GetSelectedText(p.ollamaResultViewInputFallback);
+      query = await GetSelectedText(p.resultViewInputFallback);
       break;
     case "Clipboard":
-      query = await GetClipboardText(p.ollamaResultViewInputFallback);
+      query = await GetClipboardText(p.resultViewInputFallback);
       break;
   }
   return query;

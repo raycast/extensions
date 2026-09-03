@@ -69,7 +69,7 @@ export function ClipboardConversation(chat?: RaycastChat): string {
 function inferenceMessages(chat: RaycastChat, query: string, images?: RaycastImage[]): ChatMessage[] {
   return [
     { role: "system", content: getSystemPrompt() },
-    ...chat.messages.slice(-Number(preferences.ollamaChatHistoryMessagesNumber)).flatMap((group) => group.messages),
+    ...chat.messages.slice(-Number(preferences.chatHistoryMessagesNumber)).flatMap((group) => group.messages),
     { role: "user", content: query, images },
   ];
 }

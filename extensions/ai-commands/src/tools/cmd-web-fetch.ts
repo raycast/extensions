@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
 const pref = getPreferenceValues<Preferences>();
-const key = pref.ollamaApiKey;
+const key = pref.ollamaWebApiKey;
 
 type Input = {
   /**

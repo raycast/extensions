@@ -32,19 +32,9 @@ export interface AnswerInferenceMetadata {
 export async function GetModel(command?: CommandAnswer, server?: string, model?: string): Promise<Types.UiModel> {
   let settings: SettingsCommandAnswer | undefined;
   if (command) {
-    try {
-      settings = await GetSettingsCommandAnswer(command);
-      server = settings.server;
-      model = settings.model.main.tag;
-    } catch (e) {
-      const pref = getPreferenceValues<Preferences>();
-      if (pref.ollamaUseDefaultModelAsFallback && pref.ollamaDefaultModel) {
-        server = "Local";
-        model = pref.ollamaDefaultModel;
-      } else {
-        throw e;
-      }
-    }
+    settings = await GetSettingsCommandAnswer(command);
+    server = settings.server;
+    model = settings.model.main.tag;
   } else if (!server || !model) throw new Error("server and model need to be defined");
 
   const customProvider = await getCustomProvider(server);
@@ -309,7 +299,7 @@ export async function handleNoViewCommand(
   customPrompt?: string,
 ): Promise<void> {
   const pref = getPreferenceValues<Preferences>();
-  if (pref.ollamaCertificateValidation === false) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+  if (pref.certificateValidation === false) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
   const defaultPrompt = customPrompt || COMMANDS_INFO[command]?.defaultPrompt || "";
 
