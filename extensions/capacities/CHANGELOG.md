@@ -1,6 +1,6 @@
 # Capacities Changelog
 
-## [Return to root search after capturing] - {PR_MERGE_DATE}
+## [Return to root search after capturing] - 2026-09-03
 
 - Fixed the Create Task, Save Weblink and Save to Daily Note commands leaving the form on the navigation stack after a successful save, so reopening Raycast returned to the filled-in form instead of the root search.
 - Replaced the redundant `showHUD` + `closeMainWindow` pair with a single `showHUD(..., { clearRootSearch: true, popToRootType: PopToRootType.Immediate })` call.
