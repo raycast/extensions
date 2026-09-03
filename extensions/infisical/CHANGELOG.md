@@ -1,6 +1,6 @@
 # Infisical Changelog
 
-## [Folder support] - {PR_MERGE_DATE}
+## [Folder support] - 2026-09-03
 
 - Added folder navigation, so secrets outside an environment's root folder are reachable
 - Fixed create, edit and delete targeting the root folder regardless of which folder was open
