@@ -17,6 +17,9 @@ export interface ChatMessage {
   toolCalls?: ToolCall[];
   toolName?: string;
   toolCallId?: string;
+  /** Read-only aliases accepted when loading older persisted tool results. */
+  tool_name?: string;
+  tool_call_id?: string;
 }
 
 export interface InferenceMetadata {

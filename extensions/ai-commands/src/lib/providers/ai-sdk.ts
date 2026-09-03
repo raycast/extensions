@@ -1,5 +1,6 @@
 import { dynamicTool, jsonSchema, ModelMessage, ToolSet } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { ToolCall } from "../inference/types";
 import { getProviderApiKey } from "./model-sync";
 import { CustomModel, CustomProvider, UnifiedChatMessage } from "./types";
 
@@ -42,56 +43,70 @@ export function createLanguageModel(provider: CustomProvider, model?: CustomMode
 }
 
 export function toModelMessages(messages: UnifiedChatMessage[]): ModelMessage[] {
-  return messages.flatMap<ModelMessage>((message) => {
+  const modelMessages: ModelMessage[] = [];
+  const pendingToolCalls: ToolCall[] = [];
+
+  for (const message of messages) {
     // AI SDK accepts system content through `instructions`, not `messages`.
-    if (message.role === AiSdkMessageRole.SYSTEM) return [];
+    if (message.role === AiSdkMessageRole.SYSTEM) continue;
     if (message.role === AiSdkMessageRole.USER && message.images?.length) {
-      return [
-        {
-          role: AiSdkMessageRole.USER,
-          content: [
-            ...(message.content ? [{ type: AiSdkContentType.TEXT as "text", text: message.content }] : []),
-            ...message.images.map((image) => ({
-              type: AiSdkContentType.IMAGE as "image",
-              image: image.base64.startsWith("data:") ? image.base64 : `data:image/jpeg;base64,${image.base64}`,
-            })),
-          ],
-        },
-      ];
+      modelMessages.push({
+        role: AiSdkMessageRole.USER,
+        content: [
+          ...(message.content ? [{ type: AiSdkContentType.TEXT as "text", text: message.content }] : []),
+          ...message.images.map((image) => ({
+            type: AiSdkContentType.IMAGE as "image",
+            image: image.base64.startsWith("data:") ? image.base64 : `data:image/jpeg;base64,${image.base64}`,
+          })),
+        ],
+      });
+      continue;
     }
     if (message.role === AiSdkMessageRole.ASSISTANT && message.toolCalls?.length) {
-      return [
-        {
-          role: AiSdkMessageRole.ASSISTANT,
-          content: [
-            ...(message.content ? [{ type: AiSdkContentType.TEXT as "text", text: message.content }] : []),
-            ...message.toolCalls.map((call) => ({
-              type: AiSdkContentType.TOOL_CALL as "tool-call",
-              toolCallId: call.id,
-              toolName: call.name,
-              input: call.arguments,
-            })),
-          ],
-        },
-      ];
+      pendingToolCalls.push(...message.toolCalls);
+      modelMessages.push({
+        role: AiSdkMessageRole.ASSISTANT,
+        content: [
+          ...(message.content ? [{ type: AiSdkContentType.TEXT as "text", text: message.content }] : []),
+          ...message.toolCalls.map((call) => ({
+            type: AiSdkContentType.TOOL_CALL as "tool-call",
+            toolCallId: call.id,
+            toolName: call.name,
+            input: call.arguments,
+          })),
+        ],
+      });
+      continue;
     }
     if (message.role === AiSdkMessageRole.TOOL) {
-      return [
-        {
-          role: AiSdkMessageRole.TOOL,
-          content: [
-            {
-              type: AiSdkContentType.TOOL_RESULT as "tool-result",
-              toolCallId: message.toolCallId || "call_1",
-              toolName: message.toolName || "tool",
-              output: { type: AiSdkContentType.TEXT as "text", value: message.content },
-            },
-          ],
-        },
-      ];
+      const persistedId = message.toolCallId || message.tool_call_id;
+      const toolName = message.toolName || message.tool_name;
+      const matchedIndex = persistedId
+        ? pendingToolCalls.findIndex((call) => call.id === persistedId)
+        : toolName
+          ? pendingToolCalls.findIndex((call) => call.name === toolName)
+          : 0;
+      const matchedCall = matchedIndex >= 0 ? pendingToolCalls.splice(matchedIndex, 1)[0] : undefined;
+
+      // Never invent a tool-call ID. Providers require results to reference an
+      // actual preceding call, so an unresolvable persisted result is omitted.
+      if (!matchedCall) continue;
+      modelMessages.push({
+        role: AiSdkMessageRole.TOOL,
+        content: [
+          {
+            type: AiSdkContentType.TOOL_RESULT as "tool-result",
+            toolCallId: matchedCall.id,
+            toolName: toolName || matchedCall.name,
+            output: { type: AiSdkContentType.TEXT as "text", value: message.content },
+          },
+        ],
+      });
+      continue;
     }
-    return [{ role: message.role, content: message.content }];
-  });
+    modelMessages.push({ role: message.role, content: message.content });
+  }
+  return modelMessages;
 }
 
 export function toInstructions(messages: UnifiedChatMessage[]): string | undefined {
