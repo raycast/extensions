@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Support Next And Previous Actions For Episodes] - 2026-09-03
+## [Fix Support Next And Previous Actions For Episodes] - {PR_MERGE_DATE}
 
 - Support Next and Previous actions for episodes not just songs.
 
