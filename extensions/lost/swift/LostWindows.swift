@@ -424,10 +424,11 @@ private func axValue(_ element: AXUIElement, _ attribute: String) -> AnyObject? 
     return error == .success ? value : nil
 }
 
-private func raiseAXWindow(pid: pid_t, title: String, windowId: Int) {
+@discardableResult
+private func raiseAXWindow(pid: pid_t, title: String, windowId: Int) -> Bool {
     let app = AXUIElementCreateApplication(pid)
-    guard let windows = axValue(app, kAXWindowsAttribute as String) as? [AXUIElement] else {
-        return
+    guard let windows = axValue(app, kAXWindowsAttribute as String) as? [AXUIElement], !windows.isEmpty else {
+        return false
     }
 
     let getWindow: AXUIElementGetWindowFn? = {
@@ -439,33 +440,30 @@ private func raiseAXWindow(pid: pid_t, title: String, windowId: Int) {
         return unsafeBitCast(symbol, to: AXUIElementGetWindowFn.self)
     }()
 
-    // For "synthetic" list entries (windowId == 0) we can't match a CoreGraphics window reliably.
-    // In that case, raise the first AX window (preferring ones with a non-empty title).
+    let match: AXUIElement?
     if windowId == 0 {
-        let titled = windows.first { window in
+        // Synthetic list entries can't match a CoreGraphics window. Raise a real AX window instead.
+        match = windows.first { window in
             let windowTitle = axValue(window, kAXTitleAttribute as String) as? String ?? ""
             return !windowTitle.isEmpty
-        }
-        if let match = titled ?? windows.first {
-            AXUIElementPerformAction(match, kAXRaiseAction as CFString)
-        }
-        return
-    }
-
-    let match = windows.first { window in
-        if let getWindow {
-            var cgID: UInt32 = 0
-            if getWindow(window, &cgID) == 0, cgID == UInt32(windowId) {
-                return true
+        } ?? windows.first
+    } else {
+        match = windows.first { window in
+            if let getWindow {
+                var cgID: UInt32 = 0
+                if getWindow(window, &cgID) == 0, cgID == UInt32(windowId) {
+                    return true
+                }
             }
+            let windowTitle = axValue(window, kAXTitleAttribute as String) as? String ?? ""
+            return !title.isEmpty && !windowTitle.isEmpty && (windowTitle == title || windowTitle.contains(title) || title.contains(windowTitle))
         }
-        let windowTitle = axValue(window, kAXTitleAttribute as String) as? String ?? ""
-        return !title.isEmpty && !windowTitle.isEmpty && (windowTitle == title || windowTitle.contains(title) || title.contains(windowTitle))
     }
 
-    if let match {
-        AXUIElementPerformAction(match, kAXRaiseAction as CFString)
+    guard let match else {
+        return false
     }
+    return AXUIElementPerformAction(match, kAXRaiseAction as CFString) == .success
 }
 
 private func cfArray(_ ptr: UnsafeRawPointer?) -> CFArray? {
@@ -617,17 +615,26 @@ private func postDockSwipe(towardHigherIndex: Bool) {
     }
 }
 
-private func switchToWindowSpace(_ windowId: UInt32) {
-    guard windowId != 0, let cid = skyConnection() else {
-        return
+private enum SpaceSwitchResult {
+    case skipped
+    case switched
+    case failed
+}
+
+private func switchToWindowSpace(_ windowId: UInt32) -> SpaceSwitchResult {
+    guard windowId != 0 else {
+        return .skipped
+    }
+    guard let cid = skyConnection() else {
+        return .failed
     }
 
     let windowSpaces = spacesForWindow(windowId, cid: cid)
     guard let target = windowSpaces.first else {
-        return
+        return .skipped
     }
     if windowSpaces.count > 1 {
-        return
+        return .skipped
     }
 
     let displays = managedDisplays(cid: cid)
@@ -635,7 +642,7 @@ private func switchToWindowSpace(_ windowId: UInt32) {
     let uuid = location?.uuid ?? displayUUID(for: target, cid: cid, displays: displays) ?? "Main"
     let current = location?.current ?? currentSpace(cid: cid, displayUUID: uuid)
     if current == target {
-        return
+        return .skipped
     }
 
     let focused = activeSpace(cid: cid)
@@ -659,6 +666,8 @@ private func switchToWindowSpace(_ windowId: UInt32) {
         setCurrentSpace(cid: cid, displayUUID: uuid, targetSpace: target)
         Thread.sleep(forTimeInterval: 0.28)
     }
+
+    return currentSpace(cid: cid, displayUUID: uuid) == target ? .switched : .failed
 }
 
 private func postMakeKeyEvents(psn: inout Darwin.ProcessSerialNumber, windowId: UInt32, post: SLPSPostEventRecordToFn) {
@@ -684,36 +693,63 @@ private func postMakeKeyEvents(psn: inout Darwin.ProcessSerialNumber, windowId: 
     }
 }
 
-private func focus(unixId: Int32, windowId: UInt32, title: String) {
-    // Let Raycast finish dismissing so it does not steal the space/window back.
-    Thread.sleep(forTimeInterval: 0.12)
-    switchToWindowSpace(windowId)
-    Thread.sleep(forTimeInterval: 0.12)
+private func emitError(_ message: String) {
+    FileHandle.standardError.write(Data("\(message)\n".utf8))
+}
+
+@discardableResult
+private func activateProcess(unixId: Int32, windowId: UInt32) -> Bool {
+    if windowId == 0 {
+        guard let runningApp = NSRunningApplication(processIdentifier: unixId) else {
+            return false
+        }
+        return runningApp.activate(options: [.activateIgnoringOtherApps, .activateAllWindows])
+    }
 
     var psn = Darwin.ProcessSerialNumber()
-    // "Synthetic" list entries use windowId == 0. We still need to activate the process
-    // so macOS brings its windows forward (and likely switches spaces).
-    if windowId == 0, let runningApp = NSRunningApplication(processIdentifier: unixId) {
-        runningApp.activate(options: [.activateIgnoringOtherApps, .activateAllWindows])
-    }
-
-    if windowId != 0,
-       let hiServices = dlopen("/System/Library/Frameworks/ApplicationServices.framework/Frameworks/HIServices.framework/HIServices", RTLD_LAZY)
+    guard let hiServices = dlopen("/System/Library/Frameworks/ApplicationServices.framework/Frameworks/HIServices.framework/HIServices", RTLD_LAZY)
         ?? dlopen("/System/Library/Frameworks/ApplicationServices.framework/ApplicationServices", RTLD_LAZY),
-       let getProcess = dlsym(hiServices, "GetProcessForPID")
-    {
-        let getPSN = unsafeBitCast(getProcess, to: GetProcessForPIDFn.self)
-        if getPSN(unixId, &psn) == 0 {
-            if let setFront: SLPSSetFrontProcessWithOptionsFn = skySym("_SLPSSetFrontProcessWithOptions") {
-                _ = setFront(&psn, windowId, 0x200)
-            }
-            if let post: SLPSPostEventRecordToFn = skySym("SLPSPostEventRecordTo") {
-                postMakeKeyEvents(psn: &psn, windowId: windowId, post: post)
-            }
-        }
+        let getProcess = dlsym(hiServices, "GetProcessForPID")
+    else {
+        return false
     }
 
-    raiseAXWindow(pid: unixId, title: title, windowId: Int(windowId))
+    let getPSN = unsafeBitCast(getProcess, to: GetProcessForPIDFn.self)
+    guard getPSN(unixId, &psn) == 0 else {
+        return false
+    }
+    guard let setFront: SLPSSetFrontProcessWithOptionsFn = skySym("_SLPSSetFrontProcessWithOptions") else {
+        return false
+    }
+    guard setFront(&psn, windowId, 0x200) == 0 else {
+        return false
+    }
+    if let post: SLPSPostEventRecordToFn = skySym("SLPSPostEventRecordTo") {
+        postMakeKeyEvents(psn: &psn, windowId: windowId, post: post)
+    }
+    return true
+}
+
+private func focus(unixId: Int32, windowId: UInt32, title: String) -> Bool {
+    // Let Raycast finish dismissing so it does not steal the space/window back.
+    Thread.sleep(forTimeInterval: 0.12)
+    if switchToWindowSpace(windowId) == .failed {
+        emitError("Couldn't switch to the window's Space.")
+        return false
+    }
+    Thread.sleep(forTimeInterval: 0.12)
+
+    if !activateProcess(unixId: unixId, windowId: windowId) {
+        emitError("Couldn't activate the application.")
+        return false
+    }
+
+    if !raiseAXWindow(pid: unixId, title: title, windowId: Int(windowId)) {
+        emitError("Couldn't raise the window. Grant Accessibility access to Raycast.")
+        return false
+    }
+
+    return true
 }
 
 private struct FrontDTO: Codable {
@@ -783,7 +819,9 @@ if args.count >= 3, args[1] == "focus" {
     let unixId = Int32(args[2]) ?? 0
     let windowId = args.count > 3 ? (UInt32(args[3]) ?? 0) : 0
     let title = args.count > 4 ? args[4...].joined(separator: " ") : ""
-    focus(unixId: unixId, windowId: windowId, title: title)
+    if !focus(unixId: unixId, windowId: windowId, title: title) {
+        exit(1)
+    }
 } else if args.count >= 3, args[1] == "thumb" {
     struct ThumbDTO: Codable {
         let thumbnail: String?
