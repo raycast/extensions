@@ -1,3 +1,7 @@
+# pre-commit.ci has no Node runtime, so the npx-based hooks run locally only.
+ci:
+  skip: [ray-lint, ray-build]
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
