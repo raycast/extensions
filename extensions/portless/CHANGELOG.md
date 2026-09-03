@@ -1,10 +1,10 @@
 # Portless Changelog
 
-## [Configurable Primary Action] - {PR_MERGE_DATE}
+## [Configurable Primary Action] - 2026-09-03
 
 - Add a preference to swap the Enter and Cmd+Enter actions between copying a route's URL and opening it in the browser.
 
-## [Configurable Executable] - {PR_MERGE_DATE}
+## [Configurable Executable] - 2026-09-03
 
 - Add a preference for project-local Portless executables.
 - Show command execution failures instead of reporting no active routes.
