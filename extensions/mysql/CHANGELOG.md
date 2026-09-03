@@ -1,6 +1,6 @@
 # MySQL Client Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-03
 
 - Run Query with a results table and JSON / CSV copy
 - Command Palette with common MySQL commands
