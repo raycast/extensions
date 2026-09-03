@@ -13,6 +13,33 @@
   "platforms": [
     "macOS"
   ],
+  "preferences": [
+    {
+      "name": "portlessExecutable",
+      "type": "file",
+      "required": false,
+      "title": "Portless Executable",
+      "description": "Pick a Portless executable, such as a project's node_modules/portless/dist/cli.js. Leave empty to resolve portless from PATH."
+    },
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "title": "Primary Action",
+      "description": "Action run when pressing Enter on a route. The other action moves to Cmd+Enter.",
+      "data": [
+        {
+          "title": "Copy URL",
+          "value": "copy"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "open"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "list",
@@ -38,7 +65,11 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "test": "node --test tests/*.test.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "contributors": [
+    "drewmcdonald"
+  ]
 }
