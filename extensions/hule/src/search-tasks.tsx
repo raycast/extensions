@@ -8,6 +8,7 @@ import { TaskListItem } from "./components/TaskListItem";
 import { useHule } from "./hooks/useHule";
 
 const RECENTS_LIMIT = 25;
+const PAGE_SIZE = 50;
 const ALL = "all";
 
 /**
@@ -19,21 +20,33 @@ const ALL = "all";
  * in is rarely what you remember about it. The ids arrive as a plain array —
  * they double as this promise's cache key.
  */
-async function fetchTasks(workspaceIds: string[], term: string): Promise<{ tasks: Task[]; recents: boolean }> {
-  if (workspaceIds.length === 0) return { tasks: [], recents: true };
-  const query = term.trim();
+function fetchTasks(workspaceIds: string[], term: string) {
+  return async ({ page }: { page: number }): Promise<{ data: Task[]; hasMore: boolean }> => {
+    if (workspaceIds.length === 0) return { data: [], hasMore: false };
+    const query = term.trim();
 
-  if (query.length === 0) {
-    const perWorkspace = await Promise.all(workspaceIds.map((id) => queryTasks(id, undefined, RECENTS_LIMIT)));
-    const merged = perWorkspace
-      .flat()
-      .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
-      .slice(0, RECENTS_LIMIT);
-    return { tasks: merged, recents: true };
-  }
+    // An empty bar is not a search but "what moved recently" — one window of the
+    // freshest rows, deliberately unpaged: a recents list nobody scrolls past
+    // twenty-five would only pay for the extra round trips.
+    if (query.length === 0) {
+      if (page > 0) return { data: [], hasMore: false };
+      const perWorkspace = await Promise.all(workspaceIds.map((id) => queryTasks(id, undefined, RECENTS_LIMIT)));
+      const merged = perWorkspace
+        .flat()
+        .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
+        .slice(0, RECENTS_LIMIT);
+      return { data: merged, hasMore: false };
+    }
 
-  const perWorkspace = await Promise.all(workspaceIds.map((id) => searchTasks(id, query)));
-  return { tasks: perWorkspace.flatMap((result) => result.items ?? []), recents: false };
+    const perWorkspace = await Promise.all(workspaceIds.map((id) => searchTasks(id, query, PAGE_SIZE, page + 1)));
+    return {
+      data: perWorkspace.flatMap((result) => result.items ?? []),
+      // Search is offset-paginated AND reports a total, so "is there more" is an
+      // answer rather than a guess: a workspace whose window has not reached its
+      // own total still owes rows.
+      hasMore: perWorkspace.some((result) => result.page * result.limit < result.total),
+    };
+  };
 }
 
 export default function Command() {
@@ -44,15 +57,17 @@ export default function Command() {
   const workspaces = useMemo(() => context?.bundle.workspaces ?? [], [context]);
   const workspaceIds = useMemo(() => (scope === ALL ? workspaces.map((w) => w.id) : [scope]), [scope, workspaces]);
 
-  const { data, isLoading, revalidate } = useCachedPromise(fetchTasks, [workspaceIds, query], {
+  const { data, isLoading, revalidate, pagination } = useCachedPromise(fetchTasks, [workspaceIds, query], {
     execute: workspaceIds.length > 0,
     keepPreviousData: true,
   });
 
   if (error) return <ConnectionError message={error.message} onRetry={reloadContext} />;
 
-  const tasks = data?.tasks ?? [];
-  const recents = data?.recents ?? true;
+  const tasks = data ?? [];
+  // Which mode the list is in follows from the bar, not from the answer: the
+  // reply is a flat page either way.
+  const recents = query.trim().length === 0;
   const refresh = () => {
     revalidate();
     reloadContext();
@@ -61,6 +76,7 @@ export default function Command() {
   return (
     <List
       isLoading={contextLoading || isLoading}
+      pagination={pagination}
       onSearchTextChange={setQuery}
       searchBarPlaceholder="Search tasks…"
       throttle

@@ -96,10 +96,11 @@ export function getMe(): Promise<User> {
   return request<User>("GET", "/auth/me");
 }
 
-export function searchTasks(workspaceId: string, term: string, limit = 50): Promise<FlatTaskResult> {
+export function searchTasks(workspaceId: string, term: string, limit = 50, page = 1): Promise<FlatTaskResult> {
   // The search term travels as `q` — the API's own name for it, and 1–200 chars.
+  // `page` is 1-based here, as everywhere in the API's own pagination.
   return request<FlatTaskResult>("GET", `/workspaces/${encodeURIComponent(workspaceId)}/tasks/search`, {
-    query: { q: term.slice(0, 200), limit },
+    query: { q: term.slice(0, 200), limit, page },
   });
 }
 
@@ -108,11 +109,16 @@ export function queryTasks(
   workspaceId: string,
   filter?: { combinator: "and" | "or"; rules: Array<{ field: string; operator: string; value?: unknown }> },
   limit = 100,
+  page = 1,
 ): Promise<Task[]> {
   // `scope` is a LIST of nodes, not one node: a view may be rooted at several
   // lists or folders at once, and the endpoint takes the same shape either way.
+  //
+  // `page` is ignored by servers older than the change that added it, and the
+  // answer carries neither a total nor a cursor to notice that with — so the
+  // caller compares pages instead (see `my-tasks`).
   return request<Task[]>("POST", "/tasks/query", {
-    body: { scope: [{ type: "workspace", id: workspaceId }], filter, limit },
+    body: { scope: [{ type: "workspace", id: workspaceId }], filter, limit, page },
   });
 }
 
