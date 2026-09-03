@@ -1,5 +1,10 @@
 # awork Changelog
 
+## [Optimize shortcuts] - 2026-09-03
+
+- Changed URLs to use task and project keys
+- Optimize windows shortcuts
+
 ## [Create and edit tasks] - 2026-08-19
 
 - Added the **Create Task** command for project and private tasks, including status, task list, parent task, assignees, dates, planned effort and priority. Press `⌘⏎` to create a task or `⌘⇧⏎` to create it and open it in the browser. Use `⌃C` in the project or task search to create a task or subtask.
