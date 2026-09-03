@@ -1,0 +1,393 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dbtcatalog",
+  "version": "1.0.0",
+  "title": "dbt Catalog",
+  "description": "Browse dbt models, explore lineage, view runs, manage jobs, and access the full catalog",
+  "icon": "icon.png",
+  "author": "gavin-burns-US",
+  "contributors": [
+    "zsombor-flds"
+  ],
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "tools": [
+    {
+      "name": "search-models",
+      "title": "Search Models",
+      "description": "Search dbt models by name, description, or tags in the catalog"
+    },
+    {
+      "name": "get-model-details",
+      "title": "Get Model Details",
+      "description": "Get detailed information about a specific dbt model including columns, tests, and lineage"
+    },
+    {
+      "name": "search-sources",
+      "title": "Search Sources",
+      "description": "Search dbt sources with freshness status"
+    },
+    {
+      "name": "get-lineage",
+      "title": "Get Lineage",
+      "description": "Get upstream and downstream lineage for a model or source"
+    },
+    {
+      "name": "list-jobs",
+      "title": "List Jobs",
+      "description": "List dbt Cloud jobs"
+    },
+    {
+      "name": "get-job-runs",
+      "title": "Get Job Runs",
+      "description": "Get recent runs for a dbt Cloud job"
+    },
+    {
+      "name": "trigger-job",
+      "title": "Trigger Job",
+      "description": "Trigger a dbt Cloud job run"
+    },
+    {
+      "name": "list-environments",
+      "title": "List Environments",
+      "description": "List dbt Cloud environments (PROD, STG, DEV)"
+    }
+  ],
+  "ai": {
+    "instructions": "You are a helpful assistant for dbt Cloud. When users ask about models, sources, jobs, or runs, use the appropriate tools to fetch information. Always format model and source names in backticks like `model_name`. When showing lineage, list upstream dependencies before downstream. For job operations, confirm the job name with the user before triggering. Use search-models to find models when the user mentions a partial name.",
+    "evals": [
+      {
+        "input": "@dbtcatalog find models related to orders",
+        "expected": [
+          {
+            "callsTool": "search-models"
+          }
+        ],
+        "mocks": {
+          "search-models": {
+            "count": 2,
+            "models": [
+              {
+                "name": "orders",
+                "description": "Core orders table"
+              },
+              {
+                "name": "order_items",
+                "description": "Line items for orders"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@dbtcatalog what are the upstream dependencies of fact_revenue?",
+        "expected": [
+          {
+            "callsTool": "get-lineage"
+          }
+        ],
+        "mocks": {
+          "get-lineage": {
+            "resource": {
+              "name": "fact_revenue",
+              "type": "model"
+            },
+            "upstream": [
+              {
+                "name": "stg_orders",
+                "type": "model"
+              },
+              {
+                "name": "raw.payments",
+                "type": "source"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@dbtcatalog show me production jobs",
+        "expected": [
+          {
+            "callsTool": "list-jobs"
+          }
+        ],
+        "mocks": {
+          "list-jobs": {
+            "count": 3,
+            "jobs": [
+              {
+                "id": 123,
+                "name": "Daily Refresh",
+                "isScheduled": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@dbtcatalog what columns are in the customers model?",
+        "expected": [
+          {
+            "callsTool": "get-model-details"
+          }
+        ],
+        "mocks": {
+          "get-model-details": {
+            "name": "customers",
+            "columns": [
+              {
+                "name": "customer_id",
+                "type": "INT64"
+              },
+              {
+                "name": "email",
+                "type": "STRING"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@dbtcatalog trigger the nightly job",
+        "expected": [
+          {
+            "callsTool": "list-jobs"
+          },
+          {
+            "callsTool": "trigger-job"
+          }
+        ],
+        "mocks": {
+          "list-jobs": {
+            "jobs": [
+              {
+                "id": 456,
+                "name": "Nightly Build"
+              }
+            ]
+          },
+          "trigger-job": {
+            "success": true,
+            "runId": 789
+          }
+        }
+      }
+    ]
+  },
+  "commands": [
+    {
+      "name": "quick_search",
+      "title": "Quick Search",
+      "subtitle": "dbt Cloud",
+      "description": "Search across all dbt Cloud resources - projects, jobs, environments, and runs",
+      "mode": "view",
+      "keywords": [
+        "search",
+        "find",
+        "dbt"
+      ]
+    },
+    {
+      "name": "catalog_index",
+      "title": "Browse Models (Catalog)",
+      "subtitle": "dbt Cloud Discovery",
+      "description": "Browse dbt models with columns, tests, lineage and metadata from the Discovery API",
+      "mode": "view",
+      "keywords": [
+        "models",
+        "catalog",
+        "columns",
+        "schema",
+        "discovery"
+      ]
+    },
+    {
+      "name": "sources_index",
+      "title": "Browse Sources",
+      "subtitle": "dbt Cloud Discovery",
+      "description": "Browse data sources with freshness status and downstream dependencies",
+      "mode": "view",
+      "keywords": [
+        "sources",
+        "freshness",
+        "data"
+      ]
+    },
+    {
+      "name": "lineage_index",
+      "title": "Explore Lineage",
+      "subtitle": "dbt Cloud Discovery",
+      "description": "Explore upstream and downstream lineage for models and sources",
+      "mode": "view",
+      "keywords": [
+        "lineage",
+        "dag",
+        "dependencies",
+        "upstream",
+        "downstream"
+      ]
+    },
+    {
+      "name": "trigger_job",
+      "title": "Trigger Job",
+      "subtitle": "dbt Cloud",
+      "description": "Quickly trigger a dbt Cloud job run",
+      "mode": "view",
+      "keywords": [
+        "run",
+        "trigger",
+        "execute",
+        "start"
+      ]
+    },
+    {
+      "name": "runs_index",
+      "title": "Show Job Runs",
+      "subtitle": "dbt Cloud",
+      "description": "View recent job runs with status filtering and detailed information",
+      "mode": "view",
+      "keywords": [
+        "runs",
+        "history",
+        "status"
+      ]
+    },
+    {
+      "name": "projects_index",
+      "title": "Show Projects",
+      "subtitle": "dbt Cloud",
+      "description": "Browse your dbt Cloud projects with repository and connection details",
+      "mode": "view",
+      "keywords": [
+        "projects",
+        "repos"
+      ]
+    },
+    {
+      "name": "jobs_index",
+      "title": "Show Jobs",
+      "subtitle": "dbt Cloud",
+      "description": "Browse, view, and trigger dbt Cloud jobs",
+      "mode": "view",
+      "keywords": [
+        "jobs",
+        "schedules",
+        "triggers"
+      ]
+    },
+    {
+      "name": "environments_index",
+      "title": "Show Environments",
+      "subtitle": "dbt Cloud",
+      "description": "Browse your dbt Cloud environments and their configurations",
+      "mode": "view",
+      "keywords": [
+        "environments",
+        "deploy",
+        "development"
+      ]
+    },
+    {
+      "name": "job_performance_index",
+      "title": "Show Job Performance",
+      "subtitle": "dbt Cloud",
+      "description": "View per-job execution metrics, run history, and performance trends",
+      "mode": "view",
+      "keywords": [
+        "performance",
+        "metrics",
+        "duration",
+        "runs"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "node-fetch": "^3.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.6.1",
+    "typescript": "^4.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "dbtCloudAPIToken",
+      "title": "dbt Cloud API Token",
+      "description": "Your dbt Cloud Personal Access Token (PAT). Get it from Account Settings > API Access",
+      "type": "password",
+      "default": "",
+      "required": true,
+      "placeholder": "Enter your API Token"
+    },
+    {
+      "name": "dbtCloudAccountID",
+      "title": "dbt Cloud Account ID",
+      "description": "Your dbt Cloud Account ID (found in account settings URL)",
+      "type": "textfield",
+      "default": "",
+      "required": true,
+      "placeholder": "12345"
+    },
+    {
+      "name": "dbtCloudRegion",
+      "title": "dbt Cloud Region",
+      "description": "Select your dbt Cloud hosting region",
+      "type": "dropdown",
+      "default": "us",
+      "required": true,
+      "data": [
+        {
+          "title": "🇺🇸 US (cloud.getdbt.com)",
+          "value": "us"
+        },
+        {
+          "title": "🇪🇺 EMEA / Europe (emea.dbt.com)",
+          "value": "emea"
+        },
+        {
+          "title": "🇦🇺 Australia (au.dbt.com)",
+          "value": "au"
+        },
+        {
+          "title": "🏢 Custom Instance",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "dbtCloudCustomUrl",
+      "title": "Custom dbt Cloud URL",
+      "description": "Your custom dbt Cloud instance URL (e.g., abc123.us1.dbt.com). Only used when Region is set to 'Custom Instance'",
+      "type": "textfield",
+      "default": "",
+      "required": false,
+      "placeholder": "abc123.us1.dbt.com"
+    },
+    {
+      "name": "dbtCloudCustomDiscoveryUrl",
+      "title": "Custom Discovery API URL",
+      "description": "Override the Discovery API (metadata) URL. Only needed if the auto-detected URL is incorrect. Example: https://metadata.cloud.getdbt.com/graphql",
+      "type": "textfield",
+      "default": "",
+      "required": false,
+      "placeholder": "https://metadata.cloud.getdbt.com/graphql"
+    }
+  ]
+}

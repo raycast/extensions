@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "lib": [ "es2020" ],
+        "module": "commonjs",
+        "target": "es2020",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "outDir": "dist",
+        "declaration": true
+    },
+    "include": [ "src/**/*", "raycast-env.d.ts" ]
+}
