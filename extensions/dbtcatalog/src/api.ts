@@ -1,10 +1,15 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
-import { URLSearchParams } from "url";
 import { Preferences, DiscoveryResponse, ModelNode, SourceNode } from "./types";
 
 // Get fresh preferences each time to support live updates
 const getPreferences = (): Preferences => getPreferenceValues();
+
+// Requests carry a bearer token, so never allow a custom endpoint to downgrade to plaintext.
+const toHttpsUrl = (value: string): string =>
+  `https://${value
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/$/, "")}`;
 
 export const getBaseUrl = (): string => {
   const preferences = getPreferences();
@@ -19,8 +24,7 @@ export const getBaseUrl = (): string => {
     case "custom":
       // Support custom dbt Cloud instances (e.g., abc123.us1.dbt.com)
       if (preferences.dbtCloudCustomUrl) {
-        const customUrl = preferences.dbtCloudCustomUrl.replace(/\/$/, ""); // Remove trailing slash
-        return customUrl.startsWith("http") ? customUrl : `https://${customUrl}`;
+        return toHttpsUrl(preferences.dbtCloudCustomUrl);
       }
       return "https://cloud.getdbt.com";
     default:
@@ -42,8 +46,7 @@ export const getDiscoveryApiUrl = (): string => {
     case "custom":
       // Allow explicit override for edge cases
       if (preferences.dbtCloudCustomDiscoveryUrl) {
-        const url = preferences.dbtCloudCustomDiscoveryUrl.replace(/\/$/, "");
-        return url.startsWith("http") ? url : `https://${url}`;
+        return toHttpsUrl(preferences.dbtCloudCustomDiscoveryUrl);
       }
       // For cell-based instances, map cell prefix to the shared regional metadata endpoint
       // e.g., abc123.us1.dbt.com -> metadata.cloud.getdbt.com/graphql

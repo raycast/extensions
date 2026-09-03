@@ -1,0 +1,31 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=3072"]
+      - id: check-merge-conflict
+      - id: check-json
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: ray-lint
+        name: Raycast lint (ESLint + Prettier)
+        entry: npx ray lint --fix
+        language: system
+        pass_filenames: false
+        files: \.(ts|tsx|json|md)$
+      - id: ray-build
+        name: Raycast build (TypeScript + manifest validation)
+        entry: npx ray build -e dist
+        language: system
+        pass_filenames: false
+        files: \.(ts|tsx|json)$

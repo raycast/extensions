@@ -368,7 +368,7 @@ ${mermaidCode}
     <button class="btn btn-primary" onclick="location.reload()">🔄 Refresh</button>
   </div>
   <script>
-    mermaid.initialize({ 
+    mermaid.initialize({
       startOnLoad: true,
       theme: 'base',
       themeVariables: {
@@ -547,7 +547,7 @@ async function openDbtCloudLineageDiagram(
       height: 100vh;
       overflow: hidden;
     }
-    
+
     /* Header */
     .header {
       background: #161b22;
@@ -591,7 +591,7 @@ async function openDbtCloudLineageDiagram(
     }
     .stats-bar .stat { display: flex; align-items: center; gap: 4px; }
     .stats-bar .stat-value { color: #58a6ff; font-weight: 600; }
-    
+
     /* Legend */
     .legend {
       display: flex;
@@ -612,7 +612,7 @@ async function openDbtCloudLineageDiagram(
       justify-content: center;
       font-size: 10px;
     }
-    
+
     /* Main container */
     #cy {
       position: absolute;
@@ -622,7 +622,7 @@ async function openDbtCloudLineageDiagram(
       bottom: 0;
       background: #0d1117;
     }
-    
+
     /* Right Panel */
     .side-panel {
       position: fixed;
@@ -765,7 +765,7 @@ async function openDbtCloudLineageDiagram(
       font-size: 13px;
       font-style: italic;
     }
-    
+
     /* Controls */
     .controls {
       position: fixed;
@@ -793,7 +793,7 @@ async function openDbtCloudLineageDiagram(
       background: #21262d;
       border-color: #58a6ff;
     }
-    
+
     /* Search */
     .search-container {
       position: fixed;
@@ -847,14 +847,14 @@ async function openDbtCloudLineageDiagram(
     .search-result-item:last-child {
       border-bottom: none;
     }
-    
+
     /* Node colors */
     .source-color { background: #1f6feb; }
     .model-color { background: #238636; }
     .seed-color { background: #a371f7; }
     .snapshot-color { background: #f85149; }
     .selected-color { background: #ff694a; }
-    
+
     /* Keyboard shortcuts */
     .shortcuts {
       position: fixed;
@@ -921,18 +921,18 @@ async function openDbtCloudLineageDiagram(
       </div>
     </div>
   </div>
-  
+
   <div class="search-container">
     <input type="text" class="search-input" id="search-input" placeholder="Search models and sources... (⌘K)">
     <div class="search-results" id="search-results"></div>
   </div>
-  
+
   <div id="cy"></div>
-  
+
   <div class="side-panel" id="side-panel">
     <!-- Populated by JS -->
   </div>
-  
+
   <div class="controls">
     <button class="ctrl-btn" onclick="cy.fit(50)" title="Fit to view (F)">⊡</button>
     <button class="ctrl-btn" onclick="cy.zoom(cy.zoom() * 1.2)" title="Zoom in (+)">+</button>
@@ -940,23 +940,23 @@ async function openDbtCloudLineageDiagram(
     <button class="ctrl-btn" onclick="centerOnSelected()" title="Center on selected (C)">◎</button>
     <button class="ctrl-btn" onclick="resetView()" title="Reset view (R)">↺</button>
   </div>
-  
+
   <div class="shortcuts">
     <div class="shortcut"><span class="key">Scroll</span> Zoom</div>
     <div class="shortcut"><span class="key">Drag</span> Pan</div>
     <div class="shortcut"><span class="key">Click</span> Select</div>
     <div class="shortcut"><span class="key">⌘K</span> Search</div>
   </div>
-  
+
   <script>
     const nodesData = ${JSON.stringify(nodes)};
     const edgesData = ${JSON.stringify(edges)};
     const initialSelectedId = '${nodeId(selectedModel.uniqueId)}';
-    
+
     // Build lookup maps
     const nodeDataMap = new Map();
     nodesData.forEach(n => nodeDataMap.set(n.data.id, n.data));
-    
+
     const cy = cytoscape({
       container: document.getElementById('cy'),
       elements: [...nodesData, ...edgesData],
@@ -1045,9 +1045,9 @@ async function openDbtCloudLineageDiagram(
       maxZoom: 4,
       wheelSensitivity: 0.3,
     });
-    
+
     let selectedNodeId = initialSelectedId;
-    
+
     function getTypeIcon(type) {
       switch(type) {
         case 'source': return '🗄️';
@@ -1056,7 +1056,7 @@ async function openDbtCloudLineageDiagram(
         default: return '📦';
       }
     }
-    
+
     function getTypeColor(type) {
       switch(type) {
         case 'source': return 'source-color';
@@ -1065,24 +1065,24 @@ async function openDbtCloudLineageDiagram(
         default: return 'model-color';
       }
     }
-    
+
     function getUpstreamNodes(nodeId) {
       return cy.getElementById(nodeId).incomers('node').map(n => n.data());
     }
-    
+
     function getDownstreamNodes(nodeId) {
       return cy.getElementById(nodeId).outgoers('node').map(n => n.data());
     }
-    
+
     function updateSidePanel(nodeId) {
       const data = nodeDataMap.get(nodeId);
       if (!data) return;
-      
+
       const upstream = getUpstreamNodes(nodeId);
       const downstream = getDownstreamNodes(nodeId);
-      
+
       document.getElementById('current-node-name').textContent = data.label;
-      
+
       const panel = document.getElementById('side-panel');
       panel.innerHTML = \`
         <div class="panel-section">
@@ -1093,14 +1093,14 @@ async function openDbtCloudLineageDiagram(
             \${data.materialization ? \`<span class="model-type-badge">\${data.materialization}</span>\` : ''}
           </div>
         </div>
-        
+
         \${data.description ? \`
         <div class="panel-section">
           <div class="panel-title">Description</div>
           <div class="description">\${data.description}</div>
         </div>
         \` : ''}
-        
+
         <div class="panel-section">
           <div class="panel-title">Location</div>
           <div class="info-grid">
@@ -1114,7 +1114,7 @@ async function openDbtCloudLineageDiagram(
             </div>
           </div>
         </div>
-        
+
         <div class="panel-section">
           <div class="panel-title">Upstream <span class="count">\${upstream.length}</span></div>
           <div class="dep-list">
@@ -1126,7 +1126,7 @@ async function openDbtCloudLineageDiagram(
             \`).join('') : '<div class="no-data">No upstream dependencies</div>'}
           </div>
         </div>
-        
+
         <div class="panel-section">
           <div class="panel-title">Downstream <span class="count">\${downstream.length}</span></div>
           <div class="dep-list">
@@ -1138,7 +1138,7 @@ async function openDbtCloudLineageDiagram(
             \`).join('') : '<div class="no-data">No downstream dependencies</div>'}
           </div>
         </div>
-        
+
         \${data.tags && data.tags.length > 0 ? \`
         <div class="panel-section">
           <div class="panel-title">Tags</div>
@@ -1147,44 +1147,44 @@ async function openDbtCloudLineageDiagram(
           </div>
         </div>
         \` : ''}
-        
+
         <div class="panel-section">
           <div class="panel-title">Unique ID</div>
           <div class="info-value" style="font-size:11px;word-break:break-all;">\${data.uniqueId}</div>
         </div>
       \`;
     }
-    
+
     function selectNode(nodeId) {
       // Remove previous selection
       cy.nodes().removeClass('selected');
       cy.elements().removeClass('dimmed path');
-      
+
       // Add new selection
       const node = cy.getElementById(nodeId);
       if (node.length > 0) {
         node.addClass('selected');
         selectedNodeId = nodeId;
-        
+
         // Highlight path (all connected nodes)
         const connected = node.predecessors().union(node.successors()).union(node);
         cy.elements().addClass('dimmed');
         connected.removeClass('dimmed');
         connected.edges().removeClass('dimmed').addClass('highlighted');
         node.removeClass('dimmed');
-        
+
         // Center on node
         cy.animate({
           center: { eles: node },
           zoom: Math.min(cy.zoom(), 1.5),
           duration: 300
         });
-        
+
         // Update panel
         updateSidePanel(nodeId);
       }
     }
-    
+
     function centerOnSelected() {
       const node = cy.getElementById(selectedNodeId);
       if (node.length > 0) {
@@ -1195,58 +1195,58 @@ async function openDbtCloudLineageDiagram(
         });
       }
     }
-    
+
     function resetView() {
       cy.elements().removeClass('dimmed path highlighted');
       cy.fit(50);
     }
-    
+
     // Initialize
     cy.ready(function() {
       selectNode(initialSelectedId);
     });
-    
+
     // Click to select node
     cy.on('tap', 'node', function(e) {
       selectNode(e.target.id());
     });
-    
+
     // Click on background to reset dimming
     cy.on('tap', function(e) {
       if (e.target === cy) {
         cy.elements().removeClass('dimmed highlighted');
       }
     });
-    
+
     // Hover to highlight edges
     cy.on('mouseover', 'node', function(e) {
       if (!cy.elements().hasClass('dimmed')) {
         e.target.connectedEdges().addClass('highlighted');
       }
     });
-    
+
     cy.on('mouseout', 'node', function(e) {
       if (!cy.elements().hasClass('dimmed')) {
         e.target.connectedEdges().removeClass('highlighted');
       }
     });
-    
+
     // Search functionality
     const searchInput = document.getElementById('search-input');
     const searchResults = document.getElementById('search-results');
-    
+
     searchInput.addEventListener('input', function(e) {
       const query = e.target.value.toLowerCase();
       if (query.length < 2) {
         searchResults.classList.remove('active');
         return;
       }
-      
+
       const matches = nodesData
-        .filter(n => n.data.label.toLowerCase().includes(query) || 
+        .filter(n => n.data.label.toLowerCase().includes(query) ||
                      (n.data.uniqueId && n.data.uniqueId.toLowerCase().includes(query)))
         .slice(0, 10);
-      
+
       if (matches.length > 0) {
         searchResults.innerHTML = matches.map(n => \`
           <div class="search-result-item" onclick="selectNode('\${n.data.id}'); searchInput.value = ''; searchResults.classList.remove('active');">
@@ -1259,11 +1259,11 @@ async function openDbtCloudLineageDiagram(
         searchResults.classList.remove('active');
       }
     });
-    
+
     searchInput.addEventListener('blur', function() {
       setTimeout(() => searchResults.classList.remove('active'), 200);
     });
-    
+
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {

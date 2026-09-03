@@ -180,6 +180,18 @@ export async function openEnvironmentLineageDiagram(
   await showToast(Toast.Style.Success, "Lineage opened in browser");
 }
 
+const escapeHtml = (value: string): string =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+// JSON.stringify does not escape "<", so raw output can terminate the enclosing <script> block.
+const safeJson = (value: unknown): string =>
+  JSON.stringify(value)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+
 function generateLineageHtml(
   selectedLabel: string,
   environmentName: string,
@@ -195,7 +207,7 @@ function generateLineageHtml(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lineage: ${selectedLabel} | ${environmentName}</title>
+  <title>Lineage: ${escapeHtml(selectedLabel)} | ${escapeHtml(environmentName)}</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
   <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
@@ -513,7 +525,7 @@ function generateLineageHtml(
         dbt Cloud Lineage
       </div>
       <div class="breadcrumb">
-        ${environmentName} / <span id="current-node-name">${selectedLabel}</span>
+        ${escapeHtml(environmentName)} / <span id="current-node-name">${escapeHtml(selectedLabel)}</span>
       </div>
       <div class="stats-bar">
         <div class="stat">📦 Models: <span class="stat-value">${modelCount}</span></div>
@@ -549,12 +561,12 @@ function generateLineageHtml(
     <div class="shortcut"><span class="key">⌘K</span> Search</div>
   </div>
   <script>
-    const nodesData = ${JSON.stringify(nodes)};
-    const edgesData = ${JSON.stringify(edges)};
-    const initialSelectedId = '${initialSelectedId}';
+    const nodesData = ${safeJson(nodes)};
+    const edgesData = ${safeJson(edges)};
+    const initialSelectedId = ${safeJson(initialSelectedId)};
     const nodeDataMap = new Map();
     nodesData.forEach(n => nodeDataMap.set(n.data.id, n.data));
-    
+
     const cy = cytoscape({
       container: document.getElementById('cy'),
       elements: [...nodesData, ...edgesData],
@@ -597,13 +609,14 @@ function generateLineageHtml(
       maxZoom: 4,
       wheelSensitivity: 0.3,
     });
-    
+
     let selectedNodeId = initialSelectedId;
     function getTypeIcon(type) { return { source: '🗄️', seed: '🌱', snapshot: '📸' }[type] || '📦'; }
     function getTypeColor(type) { return { source: 'source-color', seed: 'seed-color', snapshot: 'snapshot-color' }[type] || 'model-color'; }
+    function esc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
     function getUpstreamNodes(nodeId) { return cy.getElementById(nodeId).incomers('node').map(n => n.data()); }
     function getDownstreamNodes(nodeId) { return cy.getElementById(nodeId).outgoers('node').map(n => n.data()); }
-    
+
     function updateSidePanel(nodeId) {
       const data = nodeDataMap.get(nodeId);
       if (!data) return;
@@ -614,37 +627,37 @@ function generateLineageHtml(
       panel.innerHTML = \`
         <div class="panel-section">
           <div class="panel-title">Selected Node</div>
-          <div class="model-name">\${data.label}</div>
+          <div class="model-name">\${esc(data.label)}</div>
           <div class="model-type">
-            <span class="model-type-badge \${data.type}">\${data.type}</span>
-            \${data.materialization ? \`<span class="model-type-badge">\${data.materialization}</span>\` : ''}
+            <span class="model-type-badge \${esc(data.type)}">\${esc(data.type)}</span>
+            \${data.materialization ? \`<span class="model-type-badge">\${esc(data.materialization)}</span>\` : ''}
           </div>
         </div>
-        \${data.description ? \`<div class="panel-section"><div class="panel-title">Description</div><div class="description">\${data.description}</div></div>\` : ''}
+        \${data.description ? \`<div class="panel-section"><div class="panel-title">Description</div><div class="description">\${esc(data.description)}</div></div>\` : ''}
         <div class="panel-section">
           <div class="panel-title">Location</div>
           <div class="info-grid">
-            <div class="info-item"><div class="info-label">Database</div><div class="info-value">\${data.database || 'N/A'}</div></div>
-            <div class="info-item"><div class="info-label">Schema</div><div class="info-value">\${data.schema || 'N/A'}</div></div>
+            <div class="info-item"><div class="info-label">Database</div><div class="info-value">\${esc(data.database || 'N/A')}</div></div>
+            <div class="info-item"><div class="info-label">Schema</div><div class="info-value">\${esc(data.schema || 'N/A')}</div></div>
           </div>
         </div>
         <div class="panel-section">
           <div class="panel-title">Upstream <span class="count">\${upstream.length}</span></div>
           <div class="dep-list">
-            \${upstream.length > 0 ? upstream.map(n => \`<div class="dep-item" onclick="selectNode('\${n.id}')"><div class="dep-icon \${getTypeColor(n.type)}">\${getTypeIcon(n.type)}</div><span class="dep-item-name">\${n.label}</span></div>\`).join('') : '<div class="no-data">No upstream dependencies</div>'}
+            \${upstream.length > 0 ? upstream.map(n => \`<div class="dep-item" onclick="selectNode('\${esc(n.id)}')"><div class="dep-icon \${getTypeColor(n.type)}">\${getTypeIcon(n.type)}</div><span class="dep-item-name">\${esc(n.label)}</span></div>\`).join('') : '<div class="no-data">No upstream dependencies</div>'}
           </div>
         </div>
         <div class="panel-section">
           <div class="panel-title">Downstream <span class="count">\${downstream.length}</span></div>
           <div class="dep-list">
-            \${downstream.length > 0 ? downstream.map(n => \`<div class="dep-item" onclick="selectNode('\${n.id}')"><div class="dep-icon \${getTypeColor(n.type)}">\${getTypeIcon(n.type)}</div><span class="dep-item-name">\${n.label}</span></div>\`).join('') : '<div class="no-data">No downstream dependencies</div>'}
+            \${downstream.length > 0 ? downstream.map(n => \`<div class="dep-item" onclick="selectNode('\${esc(n.id)}')"><div class="dep-icon \${getTypeColor(n.type)}">\${getTypeIcon(n.type)}</div><span class="dep-item-name">\${esc(n.label)}</span></div>\`).join('') : '<div class="no-data">No downstream dependencies</div>'}
           </div>
         </div>
-        \${data.tags && data.tags.length > 0 ? \`<div class="panel-section"><div class="panel-title">Tags</div><div style="display:flex;flex-wrap:wrap;gap:6px;">\${data.tags.map(t => \`<span class="tag">\${t}</span>\`).join('')}</div></div>\` : ''}
-        <div class="panel-section"><div class="panel-title">Unique ID</div><div class="info-value" style="font-size:11px;word-break:break-all;">\${data.uniqueId}</div></div>
+        \${data.tags && data.tags.length > 0 ? \`<div class="panel-section"><div class="panel-title">Tags</div><div style="display:flex;flex-wrap:wrap;gap:6px;">\${data.tags.map(t => \`<span class="tag">\${esc(t)}</span>\`).join('')}</div></div>\` : ''}
+        <div class="panel-section"><div class="panel-title">Unique ID</div><div class="info-value" style="font-size:11px;word-break:break-all;">\${esc(data.uniqueId)}</div></div>
       \`;
     }
-    
+
     function selectNode(nodeId) {
       cy.nodes().removeClass('selected');
       cy.elements().removeClass('dimmed path');
@@ -661,23 +674,23 @@ function generateLineageHtml(
         updateSidePanel(nodeId);
       }
     }
-    
+
     function centerOnSelected() {
       const node = cy.getElementById(selectedNodeId);
       if (node.length > 0) cy.animate({ center: { eles: node }, zoom: 1.5, duration: 300 });
     }
-    
+
     function resetView() {
       cy.elements().removeClass('dimmed path highlighted');
       cy.fit(50);
     }
-    
+
     cy.ready(function() { selectNode(initialSelectedId); });
     cy.on('tap', 'node', function(e) { selectNode(e.target.id()); });
     cy.on('tap', function(e) { if (e.target === cy) cy.elements().removeClass('dimmed highlighted'); });
     cy.on('mouseover', 'node', function(e) { if (!cy.elements().hasClass('dimmed')) e.target.connectedEdges().addClass('highlighted'); });
     cy.on('mouseout', 'node', function(e) { if (!cy.elements().hasClass('dimmed')) e.target.connectedEdges().removeClass('highlighted'); });
-    
+
     const searchInput = document.getElementById('search-input');
     const searchResults = document.getElementById('search-results');
     searchInput.addEventListener('input', function(e) {
@@ -685,7 +698,7 @@ function generateLineageHtml(
       if (query.length < 2) { searchResults.classList.remove('active'); return; }
       const matches = nodesData.filter(n => n.data.label.toLowerCase().includes(query) || (n.data.uniqueId && n.data.uniqueId.toLowerCase().includes(query))).slice(0, 10);
       if (matches.length > 0) {
-        searchResults.innerHTML = matches.map(n => \`<div class="search-result-item" onclick="selectNode('\${n.data.id}'); searchInput.value = ''; searchResults.classList.remove('active');"><div class="dep-icon \${getTypeColor(n.data.type)}">\${getTypeIcon(n.data.type)}</div><span>\${n.data.label}</span></div>\`).join('');
+        searchResults.innerHTML = matches.map(n => \`<div class="search-result-item" onclick="selectNode('\${esc(n.data.id)}'); searchInput.value = ''; searchResults.classList.remove('active');"><div class="dep-icon \${getTypeColor(n.data.type)}">\${getTypeIcon(n.data.type)}</div><span>\${esc(n.data.label)}</span></div>\`).join('');
         searchResults.classList.add('active');
       } else { searchResults.classList.remove('active'); }
     });

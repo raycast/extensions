@@ -39,7 +39,9 @@ export default async function tool(input: Input) {
 
   // Determine if this is a source or model
   const resourceName = input.resourceName.toLowerCase();
-  const isSource = resourceName.startsWith("source.") || resourceName.includes(".");
+  // "source.<pkg>.<name>.<table>" or bare "source_name.table_name"; model uniqueIds start with "model."
+  const isSource =
+    resourceName.startsWith("source.") || (!resourceName.startsWith("model.") && resourceName.split(".").length === 2);
 
   if (isSource && !resourceName.startsWith("source.")) {
     // This might be a source in "source_name.table_name" format
