@@ -4,3 +4,6 @@ dist/
 *.js.map
 # Raycast Store CI is npm-only — do not commit pnpm-lock.yaml
 pnpm-lock.yaml
+# Local agent session junk — never ship to the Store
+.omc/
+

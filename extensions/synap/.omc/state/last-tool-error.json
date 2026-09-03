@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"synap capture \\\"Testing CLI from Claude Code session - Raycast extension new features implemented: review-proposals, switch-pod, daily-briefing, create-entity, inline edit, semantic search...",
-  "error": "Exit code 1\nerror: required option '--type <type>' not specified",
-  "timestamp": "2026-06-06T22:45:37.546Z",
-  "retry_count": 1
-}
