@@ -162,10 +162,10 @@ function navigationTitle(selected: number, total: number, exportedAt: Date | und
  * Screens lists everything it discovers on the local network, so a fresh archive is mostly hosts
  * the user has never opened.
  *
- * Each entry is judged on its own rather than the archive as a whole, so one hand-added connection
- * cannot make a first import look like a re-import. An entry the user has already accepted stays
- * selected, one they already declined stays deselected, and one they have yet to see falls back to
- * whether Screens records them connecting to it.
+ * Each entry is judged on its own, so one hand-added connection cannot make a first import look
+ * like a re-import. An entry the user has already accepted stays selected, one they already
+ * declined stays deselected, and one they have yet to see falls back to whether Screens records
+ * them connecting to it.
  */
 function defaultSelection(archive: Archive | undefined, saved: SavedConnection[], reviewed: Set<string>): Set<string> {
   if (!archive) return new Set();

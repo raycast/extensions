@@ -122,12 +122,11 @@ export function supportsScreenSharing(target: ConnectTarget, clientProtocol: Cli
   return !(target.kind === "direct" && target.url.toLowerCase().startsWith("ssh://"));
 }
 
-/** What the target actually addresses, for display and for copying. */
 export function describeTarget(target: ConnectTarget): string {
   return target.kind === "direct" ? target.url : target.identifier;
 }
 
-/** The direct address of the host itself. Only VNC has an ad-hoc URL scheme. */
+/** Only VNC has an ad-hoc URL scheme. */
 function directUrl(connection: Connection): string | undefined {
   if (connection.clientProtocol !== "vnc") return undefined;
 

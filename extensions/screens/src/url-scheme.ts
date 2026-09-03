@@ -10,5 +10,4 @@ export function isConnectableUrl(url: string): boolean {
   return scheme !== null && CONNECTABLE_SCHEMES.includes(scheme[1].toLowerCase());
 }
 
-/** How the allowed schemes read in a message to the user. */
 export const CONNECTABLE_SCHEME_LIST = CONNECTABLE_SCHEMES.map((scheme) => `${scheme}://`).join(", ");

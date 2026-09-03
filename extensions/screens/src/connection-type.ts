@@ -63,16 +63,11 @@ export function connectionAccessories(
   return [...leading, status ?? { icon: null }, { icon: TYPE_ICONS[type], tooltip: sectionTitle(type) }];
 }
 
-/**
- * The type to store for a section the user picked. An imported connection keeps the more specific
- * type it came in with whenever that still belongs to the chosen section.
- */
 export function typeForSection(title: string, current: ConnectionType): ConnectionType {
   const section = TYPE_SECTIONS.find((entry) => entry.title === title) ?? TYPE_SECTIONS[0];
   return section.types.includes(current) ? current : section.types[0];
 }
 
-/** How a row reaches its host, when that is worth calling out. */
 export function targetStatus(target: ConnectTarget): List.Item.Accessory | undefined {
   if (target.kind === "direct") {
     return {

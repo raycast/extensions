@@ -7,7 +7,7 @@ import { connectableUrl, requiredText } from "./validation";
 
 /**
  * Every dropdown reports a plain string, so the fields they back are typed as one and narrowed on
- * submit rather than carrying a union the form itself cannot honour.
+ * submit.
  */
 type FormValues = {
   name: string;
