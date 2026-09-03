@@ -9,8 +9,8 @@ export type PasswordType = "random" | "passphrase";
 export interface Vault {
   shareId: string;
   name: string;
-  itemCount: number;
-  role: VaultRole;
+  itemCount?: number;
+  role?: VaultRole;
 }
 
 export interface Item {
@@ -56,6 +56,7 @@ export interface PasswordScore {
 }
 
 export type PassCliErrorType =
+  | "unsupported_platform"
   | "not_installed"
   | "not_authenticated"
   | "network_error"

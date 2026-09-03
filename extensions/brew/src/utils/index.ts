@@ -54,6 +54,7 @@ export {
   isUnsupportedMacOSError,
   isRecoverableError,
   getErrorMessage,
+  outdatedFetchFailureCopy,
   isBrewLockMessage,
   isDisabledPackageMessage,
   parseDisabledPackageMessage,
@@ -64,6 +65,7 @@ export {
 
 // Cache
 export { supportPath, bundleIdentifier, cachePath, clearCache } from "./cache";
+export { markOutdatedSnapshotDirty, clearOutdatedSnapshotDirty, isOutdatedSnapshotDirty } from "./outdated-dirty";
 
 // Toast
 export { showActionToast, showBrewFailureToast } from "./toast";
@@ -93,7 +95,13 @@ export type { MemorySnapshot, MemoryDelta, MemoryTrackingResult, CallerInfo } fr
 export * from "./brew";
 
 // Re-export upgrade types for convenience
-export type { UpgradeStep, UpgradeStepStatus, UpgradeProgressCallback, UpgradeResult } from "./brew/upgrade";
+export type {
+  UpgradePackage,
+  UpgradePackageStatus,
+  UpgradeEvent,
+  UpgradeEventCallback,
+  UpgradeSummary,
+} from "./brew/upgrade";
 
 // Re-export progress types and constants for convenience
 export type { BrewPhase, BrewProgress, ProgressCallback, ExecBrewWithProgressOptions } from "./brew/progress";

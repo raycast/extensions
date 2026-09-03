@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, popToRoot } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { list_processes } from "rust:../rust";
@@ -8,6 +8,7 @@ interface Process {
   name: string;
   pid: string;
   windowHandle?: number;
+  iconPath?: string;
 }
 
 async function getRunningProcesses(): Promise<Process[]> {
@@ -17,6 +18,7 @@ async function getRunningProcesses(): Promise<Process[]> {
       name: process.name,
       pid: String(process.pid),
       windowHandle: process.windowHandle,
+      iconPath: process.path ?? undefined,
     }));
   }
 
@@ -31,7 +33,36 @@ async function getRunningProcesses(): Promise<Process[]> {
     )
   ).split(", ");
 
-  return names.map((name, index) => ({ name, pid: ids[index] }));
+  // Best-effort app icons: resolve each process's executable back to its .app
+  // bundle. Anything unexpected simply falls back to a generic window icon.
+  let bundles: (string | undefined)[] | undefined;
+  try {
+    const files = (
+      await runAppleScript(
+        `tell application "System Events" to get the file of every process whose background only is false`,
+      )
+    )
+      .split(", ")
+      .map(decodeFileBundlePath);
+    if (files.every((file) => file === undefined)) files.length = 0; // all unusable
+    bundles = files.some((file) => file !== undefined) ? files : undefined;
+  } catch {
+    bundles = undefined;
+  }
+
+  return names.map((name, index) => ({
+    name,
+    pid: ids[index],
+    iconPath: bundles?.[index],
+  }));
+}
+
+function decodeFileBundlePath(file: string): string | undefined {
+  const path = decodeURIComponent(file.replace(/^file:\/\/(localhost)?/, ""));
+  const marker = "/Contents/MacOS/";
+  const markerIndex = path.indexOf(marker);
+  const bundlePath = markerIndex > 0 ? path.slice(0, markerIndex) : path;
+  return bundlePath.endsWith(".app") ? bundlePath : undefined;
 }
 
 export default function Command() {
@@ -66,6 +97,7 @@ export default function Command() {
                 { menubar: true, status: true },
                 "Caffeinate process started",
                 `-w ${data.process}${windowArg}`,
+                process ? { kind: "while", appName: process.name } : undefined,
               );
               popToRoot();
             }}
@@ -75,7 +107,12 @@ export default function Command() {
     >
       <Form.Dropdown id="process" title="Application">
         {processes.map((process) => (
-          <Form.Dropdown.Item key={process.pid} value={process.pid} title={process.name} />
+          <Form.Dropdown.Item
+            key={process.pid}
+            value={process.pid}
+            title={process.name}
+            icon={process.iconPath ? { fileIcon: process.iconPath } : Icon.AppWindow}
+          />
         ))}
       </Form.Dropdown>
     </Form>

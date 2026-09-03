@@ -9,7 +9,8 @@
     "FeernandoOFF"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Security",
@@ -133,7 +134,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "rm -rf .test-build && tsc -p tsconfig.test.json && node --test .test-build/src/lib/pass-cli-normalize.test.js",
+    "test": "node -e \"require('node:fs').rmSync('.test-build',{recursive:true,force:true})\" && tsc -p tsconfig.test.json && node -e \"const{readdirSync}=require('node:fs'),{join}=require('node:path'),{spawnSync}=require('node:child_process');const tests=readdirSync('.test-build',{recursive:true}).filter(f=>f.endsWith('.test.js')).map(f=>join('.test-build',f));process.exit(spawnSync(process.execPath,['--test',...tests],{stdio:'inherit'}).status??1)\"",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

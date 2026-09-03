@@ -5,6 +5,9 @@
   "description": "Search any word with multiple online dictionaries or translation engines in one place—lightweight, zero dependencies.",
   "icon": "icon.png",
   "author": "DrChai",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Data",
@@ -21,9 +24,9 @@
     },
     {
       "name": "fromSelected",
-      "title": "Search From Cursor Selection",
+      "title": "Search from Cursor Selection",
       "description": "Search your current cursor-selected words.",
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -45,30 +48,27 @@
       "name": "youdaoapiClientId",
       "type": "textfield",
       "required": false,
-      "description": "The client ID to use the Youdao API",
-      "title": "Youdao Client ID"
+      "description": "The application ID to use the Youdao API",
+      "title": "Youdao Application ID"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.5.2"
+    "@raycast/api": "^2.1.3",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.57.0",
-    "@typescript-eslint/parser": "^5.57.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.8.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

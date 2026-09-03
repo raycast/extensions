@@ -4,7 +4,7 @@ export default [
     name: "WPKirk-Boilerplate",
     title: "Starter Boilerplate",
     subtitle: "The most used starting point for WP Bones plugins",
-    icon: "star.svg",
+    icon: "star.png",
     shortcut: { modifiers: ["cmd", "shift"], key: "b" },
     keywords: ["starter", "routes"],
   },
@@ -13,7 +13,7 @@ export default [
     name: "WPKirk-API-Boilerplate",
     title: "API",
     subtitle: "How to create a REST API for WP Bones",
-    icon: "api.svg",
+    icon: "api.png",
     keywords: ["api", "rest", "json", "endpoint", "endpoints"],
   },
   {
@@ -29,7 +29,7 @@ export default [
     name: "WPKirk-Database-Boilerplate",
     title: "Database",
     subtitle: "How to manage database in WP Bones",
-    icon: "database-cog.svg",
+    icon: "database-cog.png",
     keywords: [
       "db",
       "database",
@@ -64,7 +64,7 @@ export default [
     name: "WPKirk-Internationalization-Boilerplate",
     title: "Internationalization",
     subtitle: "How to localize your WP Bones plugin",
-    icon: "language.svg",
+    icon: "language.png",
     keywords: ["internationalization", "localize", "localization", "languages"],
   },
   {
@@ -72,7 +72,7 @@ export default [
     name: "WPKirk-Mantine-Boilerplate",
     title: "Mantine UI",
     subtitle: "How to use Mantine UI with WP Bones",
-    icon: "brand-mantine.svg",
+    icon: "brand-mantine.png",
     keywords: ["reactjs", "react", "javascript", "jsx", "components", "mantine", "ui"],
   },
   {
@@ -80,7 +80,7 @@ export default [
     name: "WPKirk-ReactJS-Boilerplate",
     title: "ReactJS",
     subtitle: "How to use ReactJS with WP Bones",
-    icon: "brand-react.svg",
+    icon: "brand-react.png",
     keywords: ["reactjs", "react", "javascript", "jsx", "components"],
   },
   {
@@ -88,7 +88,7 @@ export default [
     name: "WPKirk-Routes-Boilerplate",
     title: "Routes",
     subtitle: "How to handle routes for WP Bones",
-    icon: "arrow-guide.svg",
+    icon: "arrow-guide.png",
     keywords: ["starter", "routes"],
   },
   {

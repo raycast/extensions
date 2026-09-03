@@ -19,7 +19,8 @@ import { buildCodexAccountCandidates } from "../codex/accounts.ts";
 import { listCodexOAuthAccounts, parseAdditionalCodexHomes } from "../codex/auth.ts";
 import { fetchCodexUsage } from "../codex/fetcher.ts";
 import type { CodexError, CodexUsage } from "../codex/types.ts";
-import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "../copilot/auth.ts";
+import { buildCopilotAccountCandidates } from "../copilot/accounts.ts";
+import { resolveCopilotAuthTokens } from "../copilot/auth.ts";
 import { fetchCopilotUsage } from "../copilot/fetcher.ts";
 import type { CopilotError, CopilotUsage } from "../copilot/types.ts";
 import { fetchCursorUsage, resolveCursorCredential } from "../cursor/fetcher.ts";
@@ -119,35 +120,26 @@ export const useClaudeUsage = createUsageHook<ClaudeUsage, ClaudeError>({
   },
 });
 
-async function resolveCopilotTokens() {
-  return resolveCopilotAuthTokens({ preferenceToken: prefValue("copilotAuthToken") });
-}
-
-export const useCopilotUsage = createUsageHook<CopilotUsage, CopilotError>({
+export const useCopilotAccounts = createAccountsHook<
+  CopilotUsage,
+  CopilotError,
+  ReturnType<typeof buildCopilotAccountCandidates>[number]
+>({
   agentId: "copilot",
-  resolveAuthKey: async () => {
-    const { primaryToken, preferenceToken } = await resolveCopilotTokens();
-    return `${primaryToken ?? ""}\n${preferenceToken ?? ""}`;
+  getAccounts: async () => {
+    const { cliToken, githubToken, ghToken } = await resolveCopilotAuthTokens();
+    return buildCopilotAccountCandidates({
+      manualAccounts: await loadAccounts("copilot"),
+      preferenceToken: prefValue("copilotAuthToken"),
+      cliToken,
+      githubToken,
+      ghToken,
+    });
   },
-  fetcher: async () => {
-    const { primaryToken, localToken, preferenceToken } = await resolveCopilotTokens();
-    if (!primaryToken) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message: "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add a token in extension settings (Cmd+,).",
-        },
-      };
-    }
-    let result = await fetchCopilotUsage(primaryToken);
-    if (
-      preferenceToken &&
-      shouldFallbackToPreferenceToken({ localToken, preferenceToken, errorType: result.error?.type })
-    ) {
-      result = await fetchCopilotUsage(preferenceToken);
-    }
-    return result;
+  fetcher: (account) => fetchCopilotUsage(account.token),
+  noAccountsError: {
+    type: "not_configured",
+    message: "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add an account via Manage Accounts.",
   },
 });
 

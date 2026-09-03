@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "just",
+  "description": "Quickly access justfile recipes from Raycast",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "version": "0.1.0",
+  "icon": "command.png",
+  "preferences": [
+    {
+      "name": "justfileFolders",
+      "title": "Justfile Folders",
+      "description": "Comma-separated directories to scan for justfiles (e.g. ~/dotfiles, ~/projects). Use Manage Folders in Browse Justfiles to add or remove folders without editing this field.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/dotfiles, ~/projects"
+    }
+  ],
+  "commands": [
+    {
+      "mode": "no-view",
+      "name": "run-recipe",
+      "title": "Run Recipe",
+      "description": "Run a justfile recipe silently via HUD",
+      "arguments": [
+        {
+          "name": "folder",
+          "placeholder": "Folder",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "recipe",
+          "placeholder": "Recipe",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "browse-justfiles",
+      "title": "Browse Justfiles",
+      "description": "Find recipes across your justfiles",
+      "arguments": [
+        {
+          "name": "folder",
+          "placeholder": "Folder",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "recipe",
+          "placeholder": "Recipe",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "silent",
+          "placeholder": "silent",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "title": "Just",
+  "author": "alastairsounds",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "just",
+    "justfile",
+    "makefile",
+    "recipes",
+    "task runner"
+  ]
+}

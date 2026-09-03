@@ -197,6 +197,9 @@ export async function sendTranslateRequest({
         default:
           await copyTranslatedText(translation, isHtml);
           await showToast(Toast.Style.Success, "Copied as rich text", "Paste with ⌘V");
+          if (onTranslateAction !== "none") {
+            await delayedCloseWindow(closeRaycastAfterTranslation);
+          }
           break;
       }
       return { translation, detectedSourceLanguage, isHtml };

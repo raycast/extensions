@@ -26,6 +26,7 @@
     "tofrankie",
     "alexi.build",
     "veilwalker",
+    "swhl",
     "raulkolaric"
   ],
   "license": "MIT",
@@ -723,5 +724,5 @@
     "macOS",
     "Windows"
   ],
-  "version": "1.0.2"
+  "version": "1.0.3"
 }

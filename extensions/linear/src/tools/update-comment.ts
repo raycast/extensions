@@ -5,6 +5,8 @@ import { withAccessToken } from "@raycast/utils";
 import { appendFileAttachments } from "../api/attachments";
 import { getLinearClient, linear } from "../api/linearClient";
 
+import { serializeComment } from "./commentUtils";
+
 type Input = {
   /** The comment content in markdown format */
   body: string;
@@ -21,10 +23,10 @@ export default withAccessToken(linear)(async (inputs: Input) => {
   const body = await appendFileAttachments(inputs.body, inputs.attachmentPaths);
   const result = await linearClient.updateComment(inputs.id, { body });
 
-  if (!result.success) {
+  if (!result.success || !result.comment) {
     throw new Error("Failed to update comment");
   }
-  return result.comment;
+  return serializeComment(await result.comment);
 });
 
 export const confirmation = withAccessToken(linear)(async ({ id, body, attachmentPaths }: Input) => {

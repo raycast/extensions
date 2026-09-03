@@ -55,13 +55,22 @@ query searchRepositories($query: String!, $numberOfItems: Int!, $after: String) 
 
 query myLatestRepositories(
   $numberOfItems: Int!
+  $after: String
   $orderByField: RepositoryOrderField!
   $orderByDirection: OrderDirection!
 ) {
   viewer {
-    repositories(first: $numberOfItems, orderBy: { field: $orderByField, direction: $orderByDirection }) {
+    repositories(
+      first: $numberOfItems
+      after: $after
+      orderBy: { field: $orderByField, direction: $orderByDirection }
+    ) {
       nodes {
         ...ExtendedRepositoryFields
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }
