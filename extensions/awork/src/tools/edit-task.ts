@@ -160,6 +160,6 @@ export default async (input: Input) => {
     id: task.id,
     taskIdentifier: task.taskIdentifier,
     name: values.name,
-    url: workspaceUrl ? `${workspaceUrl.replace(/\/$/, "")}/tasks/${task.id}` : undefined,
+    url: workspaceUrl ? `${workspaceUrl.replace(/\/$/, "")}/tasks/${task.taskIdentifier ?? task.id}` : undefined,
   };
 };
