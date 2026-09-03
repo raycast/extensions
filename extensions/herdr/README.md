@@ -53,6 +53,8 @@ The extension finds Herdr in `PATH`, `~/.local/bin`, `/opt/homebrew/bin`, and `/
 
 Pane navigation, splitting, zoom, and tab creation are available as disabled-by-default commands for custom global hotkeys.
 
+Agent Status in Menu Bar refreshes in the background every minute once Background Refresh is enabled for it. It turns on the first time you open the command, and the toggle lives in Raycast Settings → Extensions → Herdr → Agent Status in Menu Bar.
+
 Start Agent Quicklinks preserve the form configuration except environment variables.
 
 ## Terminal support

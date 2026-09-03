@@ -324,10 +324,11 @@
 /extensions/cangjie                                                 @jimmyclchu
 /extensions/canva                                                   @xmok
 /extensions/canvascast                                              @YodaLightsabr @yug2005
-/extensions/capacities                                              @sbleh @xmok
+/extensions/capacities                                              @sbleh @xmok @mikolajadamowicz
 /extensions/capd                                                    @jamiedavenport
 /extensions/capture                                                 @syhchen
 /extensions/capture-fullpage-of-website                             @Coun1er @j3lte @ridemountainpig
+/extensions/capture-quick-notes                                     
 /extensions/capture-raycast-metadata                                @koinzhang
 /extensions/carbon-raycast                                          @adelowo
 /extensions/cardpointers                                            @emcro
@@ -527,6 +528,7 @@
 /extensions/count-numbers                                           @XInTheDark
 /extensions/counter                                                 @EvanZhouDev @pernielsentikaer
 /extensions/country-lookup                                          @pernielsentikaer @yusifaliyevpro @j3lte @xmok
+/extensions/courtlistener-search                                    @cro64
 /extensions/cove-cast                                               @frogeth
 /extensions/cover-art-search                                        @louaymd
 /extensions/covert-color                                            @YFAnt
@@ -1243,7 +1245,7 @@
 /extensions/indiehackers                                            @xmok
 /extensions/inertiajs-documentation                                 @danyelkeddah
 /extensions/infakt                                                  @teziovsky
-/extensions/infisical                                               @xmok
+/extensions/infisical                                               @xmok @aicayzer
 /extensions/infomaniak                                              @xmok
 /extensions/ingredients-lister                                      @Visual-Studio-Coder
 /extensions/initium                                                 @toto-minai
@@ -1324,6 +1326,7 @@
 /extensions/jump                                                    @SKaplanOfficial @j3lte
 /extensions/jupiter-aggregator                                      @stevedylandev
 /extensions/jurassic-ninja-site-generator                           @keoshi
+/extensions/just                                                    @alastairsounds
 /extensions/just-breathe                                            @khlebobul
 /extensions/just-delete-me                                          @andreaselia @pernielsentikaer @xmok
 /extensions/just-focus                                              @koinzhang @jiengup
@@ -1808,7 +1811,7 @@
 /extensions/notion-url-to-id                                        @samdsgn-studio
 /extensions/notion_researcher                                       @razgaon
 /extensions/notis                                                   @mindtheflo
-/extensions/notra                                                   @mezotv
+/extensions/notra                                                   @mezotv @janburzinski
 /extensions/noun-project                                            @RobErskine
 /extensions/nouns                                                   @peduarte
 /extensions/novu                                                    @djabarovgeorge
