@@ -24,14 +24,13 @@
       "name": "clear-xcode-derived-data",
       "title": "Clear Xcode Derived Data",
       "subtitle": "Xcode Companion",
-      "description": "Instantly purge ~/Library/Developer/Xcode/DerivedData to fix broken builds",
-      "mode": "view"
+      "description": "Purge ~/Library/Developer/Xcode/DerivedData to fix broken builds",
+      "mode": "no-view"
     }
   ],
   "tools": [],
   "dependencies": {
-    "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/api": "^1.104.20"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

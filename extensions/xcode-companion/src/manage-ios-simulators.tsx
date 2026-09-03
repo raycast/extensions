@@ -1,4 +1,16 @@
-import { List, ActionPanel, Action, showToast, Toast, Icon, Color, LocalStorage, Keyboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { execSync } from "child_process";
 import { useState, useEffect } from "react";
 
@@ -43,14 +55,15 @@ export default function Command() {
 
           data.devices[runtimeKey].forEach((dev: RawDevice) => {
             if (dev.isAvailable) {
+              const udid = dev.udid || "N/A";
               list.push({
-                udid: dev.udid || "N/A",
+                udid,
                 name: dev.name || "Unnamed Device",
                 state: dev.state || "Shutdown",
                 runtime: runtimeName,
                 isAvailable: dev.isAvailable,
                 deviceType: dev.deviceTypeIdentifier || "Apple Device",
-                lastUsed: historyMap[dev.udid] || 0,
+                lastUsed: historyMap[udid] || 0,
               });
             }
           });
@@ -128,7 +141,14 @@ export default function Command() {
     }
   };
 
-  const eraseSimulator = (sim: Simulator) => {
+  const eraseSimulator = async (sim: Simulator) => {
+    const confirmed = await confirmAlert({
+      title: `Erase ${sim.name}?`,
+      message: "Apps, settings and user data on this simulator will be permanently erased.",
+      primaryAction: { title: "Erase Simulator", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
     try {
       execSync(`xcrun simctl erase ${sim.udid}`);
       showToast({ style: Toast.Style.Success, title: `Erased ${sim.name}` });
