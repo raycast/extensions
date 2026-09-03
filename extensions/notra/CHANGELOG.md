@@ -1,6 +1,6 @@
 # Notra Changelog
 
-## [GEO Analytics and Raycast 2] - {PR_MERGE_DATE}
+## [GEO Analytics and Raycast 2] - 2026-09-03
 
 - Added project-based GEO dashboards with visibility, competitors, languages, prompts, content gaps, briefs, agent readiness, settings, and AI traffic views
 - Added local, privacy-preserving charts with 7, 30, 90, and 365-day ranges
