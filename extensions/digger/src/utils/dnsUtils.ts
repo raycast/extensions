@@ -18,9 +18,20 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
   // every type failing: that means the resolver is down or the name does not
   // resolve, and it must reach the caller instead of returning an empty object
   // the UI renders as "no records found".
-  let firstError: unknown;
+  //
+  // Keep the first RESOLVER-level error, not the first error of any kind. Every
+  // query below can fail benignly (ENODATA/ENOTFOUND for a type this host simply
+  // does not publish), and those arrive in query order — so remembering "the
+  // first error" means one benign A-record miss permanently masks a resolver
+  // that died on the five queries after it. The lookup then returns {} and the
+  // UI reports "no records found" for a check that never completed.
+  const RESOLVER_FAILURE = new Set(["ESERVFAIL", "ETIMEOUT", "ECONNREFUSED", "EREFUSED"]);
+  let resolverError: unknown;
   const note = (e: unknown) => {
-    if (firstError === undefined) firstError = e;
+    const code = (e as NodeJS.ErrnoException | undefined)?.code;
+    if (resolverError === undefined && code !== undefined && RESOLVER_FAILURE.has(code)) {
+      resolverError = e;
+    }
   };
 
   try {
@@ -83,10 +94,9 @@ export async function performDNSLookup(hostname: string): Promise<DNSData> {
   // and would otherwise banner an error on a page that loaded perfectly. A domain
   // that genuinely does not exist is already reported by the main fetch failing,
   // so nothing is lost by staying quiet here.
-  const RESOLVER_FAILURE = new Set(["ESERVFAIL", "ETIMEOUT", "ECONNREFUSED", "EREFUSED"]);
-  const code = (firstError as NodeJS.ErrnoException | undefined)?.code;
-  if (Object.keys(dnsData).length === 0 && code !== undefined && RESOLVER_FAILURE.has(code)) {
-    throw firstError;
+  // Records from ANY query mean the resolver worked; report what we got.
+  if (Object.keys(dnsData).length === 0 && resolverError !== undefined) {
+    throw resolverError;
   }
 
   return dnsData;
