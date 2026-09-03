@@ -12,6 +12,8 @@ interface DNSCertificatesProps {
   progress: number;
 }
 
+const ALL_RECORD_KINDS: DNSRecordKind[] = ["a", "aaaa", "cname", "mx", "ns", "txt"];
+
 const countText = (n?: number) => (n ? `${n} ${n === 1 ? "record" : "records"}` : undefined);
 
 /**
@@ -98,7 +100,14 @@ interface DNSCertificatesDetailProps {
   certStatus?: ResourceStatus;
 }
 
-function DNSCertificatesDetail({ dns, certificateInfo, dnsStatus, certStatus }: DNSCertificatesDetailProps) {
+function DNSCertificatesDetail({ dns: rawDns, certificateInfo, dnsStatus, certStatus }: DNSCertificatesDetailProps) {
+  // A section-level failure has to reach every ROW, not just add a line above
+  // them. A failed lookup resolves with the empty fallback, and an empty record
+  // set reads as "none published" — so a summary label saying "Couldn't check"
+  // sat here while all six rows below it still asserted "No IPv4 addresses
+  // found" and friends: exactly the absence we never established.
+  const dns: DNSData | undefined = dnsStatus === "unavailable" ? { ...rawDns, unchecked: ALL_RECORD_KINDS } : rawDns;
+
   const getCertIcon = (daysUntilExpiry?: number) => {
     if (daysUntilExpiry === undefined) return { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
     if (daysUntilExpiry < 0) return { source: Icon.Xmark, tintColor: Color.Red };
@@ -111,17 +120,6 @@ function DNSCertificatesDetail({ dns, certificateInfo, dnsStatus, certStatus }: 
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="DNS Records" />
-
-          {/* A failed resolver lookup is not "no records found" — say so here
-              rather than letting every row below assert an absence we never
-              established. */}
-          {dnsStatus === "unavailable" && (
-            <List.Item.Detail.Metadata.Label
-              title="Lookup"
-              text="Couldn't check"
-              icon={{ source: Icon.QuestionMarkCircle, tintColor: Color.Orange }}
-            />
-          )}
 
           {recordRow("A Records (IPv4)", "a", dns, dns?.aRecords?.slice(0, 3).join(", "), "No IPv4 addresses found")}
           {recordRow(
