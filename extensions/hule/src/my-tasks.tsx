@@ -1,12 +1,20 @@
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { queryTasks } from "./api/client";
+import { queryTasks, webBase } from "./api/client";
 import { ConnectionError } from "./components/ConnectionError";
 import { TaskListItem } from "./components/TaskListItem";
 import { useHule, type HuleContext } from "./hooks/useHule";
 import type { Task } from "./api/types";
 import { daysUntil } from "./helpers/dates";
+
+/**
+ * Hard ceiling of `POST /tasks/query`: it is the widget endpoint, it caps
+ * `limit` at 100 server-side and answers with a bare array — no total, no
+ * cursor. A workspace therefore cannot be paged through, and the only honest
+ * thing a client can do is NOTICE the ceiling and say so (see `truncated`).
+ */
+const PER_WORKSPACE_LIMIT = 100;
 
 /**
  * Tasks assigned to me in every workspace I belong to, open ones only.
@@ -15,22 +23,31 @@ import { daysUntil } from "./helpers/dates";
  * arguments of `useCachedPromise` become its cache key by way of JSON, so what
  * travels through here should be small and plain.
  */
-async function fetchMyTasks(seats: Array<{ workspaceId: string; memberId: string }>): Promise<Task[]> {
+async function fetchMyTasks(
+  seats: Array<{ workspaceId: string; memberId: string }>,
+): Promise<{ tasks: Task[]; truncated: boolean }> {
   const perWorkspace = await Promise.all(
     seats.map(({ workspaceId, memberId }) =>
-      queryTasks(workspaceId, {
-        combinator: "and",
-        rules: [
-          { field: "assigneeId", operator: "=", value: memberId },
-          // Finished work is dropped by the SERVER, not below: the endpoint caps
-          // its answer at `limit`, so filtering afterwards would spend that cap on
-          // completed tasks and silently hide the open ones behind them.
-          { field: "statusGroup", operator: "!=", value: "done" },
-        ],
-      }),
+      queryTasks(
+        workspaceId,
+        {
+          combinator: "and",
+          rules: [
+            { field: "assigneeId", operator: "=", value: memberId },
+            // Finished work is dropped by the SERVER, not below: the endpoint caps
+            // its answer at `limit`, so filtering afterwards would spend that cap on
+            // completed tasks and silently hide the open ones behind them.
+            { field: "statusGroup", operator: "!=", value: "done" },
+          ],
+        },
+        PER_WORKSPACE_LIMIT,
+      ),
     ),
   );
-  return perWorkspace.flat().filter((task) => task.completedAt === null);
+  return {
+    tasks: perWorkspace.flat().filter((task) => task.completedAt === null),
+    truncated: perWorkspace.some((tasks) => tasks.length >= PER_WORKSPACE_LIMIT),
+  };
 }
 
 /** Where I am a member, and under which membership id. */
@@ -57,15 +74,14 @@ function bucketOf(task: Task): Bucket {
 export default function Command() {
   const { data: context, isLoading: contextLoading, error, revalidate: reloadContext } = useHule();
   const seats = useMemo(() => seatsOf(context), [context]);
-  const {
-    data: tasks,
-    isLoading,
-    revalidate,
-  } = useCachedPromise(fetchMyTasks, [seats], { execute: seats.length > 0, keepPreviousData: true });
+  const { data, isLoading, revalidate } = useCachedPromise(fetchMyTasks, [seats], {
+    execute: seats.length > 0,
+    keepPreviousData: true,
+  });
 
   if (error) return <ConnectionError message={error.message} onRetry={reloadContext} />;
 
-  const all = tasks ?? [];
+  const all = data?.tasks ?? [];
   const refresh = () => {
     revalidate();
     reloadContext();
@@ -87,6 +103,20 @@ export default function Command() {
           </List.Section>
         );
       })}
+      {data?.truncated && (
+        <List.Section title="Not everything fits">
+          <List.Item
+            icon={Icon.Info}
+            title={`Showing the first ${PER_WORKSPACE_LIMIT} tasks per workspace`}
+            subtitle="Open Hule to see the rest"
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser title="Open in Hule" url={webBase()} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
     </List>
   );
 }

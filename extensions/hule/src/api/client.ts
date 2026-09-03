@@ -145,11 +145,14 @@ export function deleteTask(taskId: string): Promise<void> {
  * self-hosted setup that splits the two differently gets a link it can correct
  * by hand (documented in the README).
  */
-export function taskUrl(task: Task): string {
-  const web = apiBase()
+export function webBase(): string {
+  return apiBase()
     .replace(/\/api$/, "")
     .replace("//api.", "//app.");
-  return `${web}/tasks/${task.id}`;
+}
+
+export function taskUrl(task: Task): string {
+  return `${webBase()}/tasks/${task.id}`;
 }
 
 /**
