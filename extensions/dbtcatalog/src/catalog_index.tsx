@@ -15,21 +15,16 @@ import { useEffect, useState } from "react";
 import {
   fetchModels,
   fetchModelWithLineage,
+  fetchModelsWithLineage,
   buildDocsUrl,
   buildLineageUrl,
   getResourceTypeIcon,
   getMaterializationIcon,
   getAccessColor,
-  buildApiUrl,
-  fetchFromApi,
 } from "./api";
-import { ModelNode, EnvironmentModel, LineageNode, ProjectModel, EnvironmentDeploymentType } from "./types";
+import { ModelNode, LineageNode } from "./types";
+import { fetchProductionEnvironments, selectOneEnvPerProject } from "./environment_utils";
 import { openEnvironmentLineageDiagram } from "./lineage_diagram";
-
-// Extended environment with project name
-interface EnvironmentWithProject extends EnvironmentModel {
-  projectName: string;
-}
 
 // Model extended with project/environment context for flat catalog view
 interface CatalogModel extends ModelNode {
@@ -37,70 +32,6 @@ interface CatalogModel extends ModelNode {
   projectId: number;
   environmentId: number;
   environmentName: string;
-}
-
-// Infer deployment type from environment name if not explicitly set
-function inferDeploymentType(env: EnvironmentModel): EnvironmentDeploymentType {
-  // First check if explicitly set
-  if (env.deployment_type) {
-    return env.deployment_type;
-  }
-
-  // Infer from environment name
-  const nameLower = env.name.toLowerCase();
-  if (nameLower.includes("prod") || nameLower === "production") {
-    return "production";
-  }
-  if (nameLower.includes("stag") || nameLower === "staging" || nameLower === "stg") {
-    return "staging";
-  }
-  if (nameLower.includes("dev") || nameLower === "development") {
-    return "development";
-  }
-  return "general";
-}
-
-// Fetch environments and projects, then join and group them
-async function fetchProductionEnvironments(): Promise<EnvironmentWithProject[]> {
-  const envEndpoint = buildApiUrl("/environments/");
-  const projectEndpoint = buildApiUrl("/projects/");
-
-  const [environments, projects] = await Promise.all([
-    fetchFromApi<EnvironmentModel>(envEndpoint, "Could not fetch environments"),
-    fetchFromApi<ProjectModel>(projectEndpoint, "Could not fetch projects"),
-  ]);
-
-  // Create a map of project ID to name
-  const projectMap = new Map<number, string>();
-  projects.forEach((p) => projectMap.set(p.id, p.name));
-
-  // Filter to deployment environments and add project name
-  return environments
-    .filter((env) => env.type === "deployment")
-    .map((env) => ({
-      ...env,
-      projectName: projectMap.get(env.project_id) || env.project?.name || "Unknown Project",
-    }));
-}
-
-// Select one environment per project for catalog browsing
-// Priority: staging > production > any deployment env
-function selectOneEnvPerProject(environments: EnvironmentWithProject[]): EnvironmentWithProject[] {
-  const projectEnvs = new Map<number, EnvironmentWithProject[]>();
-  for (const env of environments) {
-    if (!projectEnvs.has(env.project_id)) {
-      projectEnvs.set(env.project_id, []);
-    }
-    projectEnvs.get(env.project_id)!.push(env);
-  }
-
-  const selected: EnvironmentWithProject[] = [];
-  for (const [, envs] of projectEnvs) {
-    const staging = envs.find((e) => inferDeploymentType(e) === "staging");
-    const production = envs.find((e) => inferDeploymentType(e) === "production");
-    selected.push(staging || production || envs[0]);
-  }
-  return selected;
 }
 
 // Interface for expanded lineage CTE
@@ -114,12 +45,12 @@ interface ExpandedCTE {
   alias: string | null;
 }
 
-// Recursively fetch all upstream models and build expanded CTE
-async function buildExpandedLineageCTE(
-  environmentId: number,
+// Recursively walk upstream models and build expanded CTEs from a preloaded lineage map
+function buildExpandedLineageCTE(
+  modelsByUniqueId: Map<string, ModelNode>,
   model: ModelNode,
   visited: Set<string> = new Set()
-): Promise<ExpandedCTE[]> {
+): ExpandedCTE[] {
   const ctes: ExpandedCTE[] = [];
 
   if (!model.ancestors || model.ancestors.length === 0) {
@@ -139,11 +70,11 @@ async function buildExpandedLineageCTE(
     visited.add(ancestor.uniqueId);
 
     // Only fetch models (sources don't have compiled code)
-    if (ancestor.resourceType === "model") {
-      const ancestorModel = await fetchModelWithLineage(environmentId, ancestor.uniqueId);
+    if (ancestor.resourceType?.toLowerCase() === "model") {
+      const ancestorModel = modelsByUniqueId.get(ancestor.uniqueId);
       if (ancestorModel) {
         // Recursively get upstream CTEs first
-        const upstreamCTEs = await buildExpandedLineageCTE(environmentId, ancestorModel, visited);
+        const upstreamCTEs = buildExpandedLineageCTE(modelsByUniqueId, ancestorModel, visited);
         ctes.push(...upstreamCTEs);
 
         // Add this model's CTE
@@ -283,8 +214,10 @@ function ExpandedLineageView({ model, environmentId }: { model: ModelNode; envir
       showToast(Toast.Style.Animated, "Building expanded lineage...", "Fetching upstream models");
 
       try {
-        // Fetch full model with lineage first
-        const fullModel = await fetchModelWithLineage(environmentId, model.uniqueId);
+        const modelsWithLineage = await fetchModelsWithLineage(environmentId);
+        const modelsByUniqueId = new Map(modelsWithLineage.map((item) => [item.uniqueId, item] as const));
+        const fullModel =
+          modelsByUniqueId.get(model.uniqueId) || (await fetchModelWithLineage(environmentId, model.uniqueId));
         if (!fullModel) {
           setExpandedSQL("-- Error: Could not fetch model details");
           setIsLoading(false);
@@ -292,7 +225,7 @@ function ExpandedLineageView({ model, environmentId }: { model: ModelNode; envir
         }
 
         // Build the expanded CTEs
-        const ctes = await buildExpandedLineageCTE(environmentId, fullModel);
+        const ctes = buildExpandedLineageCTE(modelsByUniqueId, fullModel);
         setCteCount(ctes.length);
 
         // Generate the full SQL
@@ -655,7 +588,10 @@ export default function CatalogIndex() {
     if (!grouped.has(key)) {
       grouped.set(key, []);
     }
-    grouped.get(key)!.push(model);
+    const sectionModels = grouped.get(key);
+    if (sectionModels) {
+      sectionModels.push(model);
+    }
   }
   for (const [key, sectionModels] of Array.from(grouped.entries()).sort(([a], [b]) => a.localeCompare(b))) {
     sections.push({

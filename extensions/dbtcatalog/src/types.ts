@@ -1,16 +1,4 @@
 // ============================================
-// Preferences
-// ============================================
-
-export interface Preferences {
-  dbtCloudAPIToken: string;
-  dbtCloudAccountID: string;
-  dbtCloudRegion: "us" | "emea" | "au" | "custom";
-  dbtCloudCustomUrl?: string;
-  dbtCloudCustomDiscoveryUrl?: string;
-}
-
-// ============================================
 // Discovery API (GraphQL) Types
 // ============================================
 
