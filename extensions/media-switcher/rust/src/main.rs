@@ -131,7 +131,14 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
 
             match &chosen {
                 Some((pid, raw)) => (unsafe { exe_path_from_pid(*pid) }.unwrap_or_default(), String::new(), format_app_name(raw)),
-                None => (String::new(), String::new(), format_app_name(&app_id)),
+                // No process matched the AUMID (e.g. Chromium-family browsers
+                // whose exe is chrome.exe but AUMID is "Helium.{hash}"). Fall
+                // back to the app's Start Menu shortcut target for the icon.
+                None => {
+                    let app_name = format_app_name(&app_id);
+                    let exe = exe_path_from_shortcut_name(&app_name);
+                    (exe.unwrap_or_default(), String::new(), app_name)
+                }
             }
         };
 
@@ -730,15 +737,28 @@ fn collect_shortcuts(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
 // target executable path to the shortcut's own file name (e.g. an exe with
 // no embedded metadata still shows the name users see in the Start menu).
 fn start_menu_shortcut_names() -> std::collections::HashMap<String, String> {
-    static CACHE: std::sync::Mutex<Option<std::collections::HashMap<String, String>>> =
+    let (by_exe, _) = start_menu_shortcuts();
+    by_exe
+}
+
+// Start Menu <-> executable mapping, memoized. First map: target exe path ->
+// shortcut stem (for display names). Second map: shortcut stem -> target exe
+// path (for recovering an exe from an app name, e.g. Chromium-family browsers
+// whose AUMID doesn't match their chrome.exe process).
+fn start_menu_shortcuts() -> (
+    std::collections::HashMap<String, String>,
+    std::collections::HashMap<String, String>,
+) {
+    static CACHE: std::sync::Mutex<Option<(std::collections::HashMap<String, String>, std::collections::HashMap<String, String>)>> =
         std::sync::Mutex::new(None);
     if let Ok(guard) = CACHE.lock() {
-        if let Some(map) = guard.as_ref() {
-            return map.clone();
+        if let Some(pair) = guard.as_ref() {
+            return pair.clone();
         }
     }
 
-    let mut map: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+    let mut by_exe: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+    let mut by_name: std::collections::HashMap<String, String> = std::collections::HashMap::new();
     use std::os::windows::ffi::OsStrExt;
     unsafe {
         use windows::core::{Interface, PCWSTR};
@@ -778,20 +798,31 @@ fn start_menu_shortcut_names() -> std::collections::HashMap<String, String> {
                 continue;
             }
             let len = target.iter().position(|c| *c == 0).unwrap_or(target.len());
-            let exe_path = String::from_utf16_lossy(&target[..len]).to_lowercase();
+            let orig_path = String::from_utf16_lossy(&target[..len]);
+            let exe_path = orig_path.to_lowercase();
             if exe_path.is_empty() || !exe_path.ends_with(".exe") {
                 continue;
             }
             if let Some(stem) = lnk.file_stem().and_then(|s| s.to_str()) {
-                map.entry(exe_path).or_insert_with(|| stem.to_string());
+                by_exe.entry(exe_path).or_insert_with(|| stem.to_string());
+                by_name.entry(stem.to_lowercase()).or_insert_with(|| orig_path);
             }
         }
     }
 
     if let Ok(mut guard) = CACHE.lock() {
-        *guard = Some(map.clone());
+        *guard = Some((by_exe.clone(), by_name.clone()));
     }
-    map
+    (by_exe, by_name)
+}
+
+// Recover an executable path from an app's display/shortcut name (e.g.
+// "Helium" -> "...\Helium\Application\chrome.exe") via its Start Menu
+// shortcut. Used when the AUMID matches neither a running process nor a
+// registered AppUserModelId (Chromium-family browsers).
+fn exe_path_from_shortcut_name(name: &str) -> Option<String> {
+    let (_, by_name) = start_menu_shortcuts();
+    by_name.get(&name.to_lowercase()).cloned()
 }
 
 fn xml_attr(manifest: &str, attr: &str) -> Option<String> {
