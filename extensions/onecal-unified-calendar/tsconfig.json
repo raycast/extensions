@@ -12,7 +12,8 @@
     "jsx": "react-jsx",
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
   "include": [
     "raycast-env.d.ts",
