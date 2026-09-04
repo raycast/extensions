@@ -17,6 +17,7 @@ import { useState } from "react";
 import { discoverScriptCommands, parseDirectoryPreference } from "./lib/discover-script-commands";
 import { facetCounts, splitTypedPackage } from "./lib/convention";
 import { learnedPackages, packageForTarget } from "./lib/link-command";
+import { reusableIcon } from "./lib/reuse-icon";
 import { collapseHome } from "./lib/home-path";
 import { fetchFavicon } from "./lib/fetch-icon";
 import { brandFor, buildScript, domainOf, findPlaceholder, scriptFilename, slugify } from "./lib/generate-script";
@@ -40,6 +41,8 @@ type CreateInput = {
   application: string;
   desktopApplication: string;
   icon: string;
+  /** A mark a command of this package already shows, resolved against the collection before submit. */
+  reuseIcon?: string;
   author?: string;
   authorURL?: string;
 };
@@ -88,8 +91,16 @@ const createScript = async (input: CreateInput) => {
   const assetKey = brandSlug || filename.replace(/\.[^.]+$/, "");
   const domain = domainOf(draft.target);
   const chosenIcon = input.icon.trim();
+
+  // A sibling's declared mark comes before the package's own asset path: it is what the list already shows
+  // for this brand, hand-set icons included, whereas a bare file under the key may be a stale auto-fetch.
+  // Re-checked here rather than trusted, since a header can point at a file that has since been deleted.
+  const reusable =
+    input.reuseIcon && (await exists(join(input.directory, input.reuseIcon))) ? input.reuseIcon : undefined;
+
   const iconReference =
     chosenIcon ||
+    reusable ||
     (await brandIcon(input.directory, assetKey)) ||
     (domain ? await writeIcon(input.directory, assetKey, domain) : undefined);
 
@@ -184,17 +195,23 @@ const Command = () => {
 
     const notes: string[] = [];
 
-    if (fields.environment && environment) notes.push(`dropped @${fields.environment}, Environment is already set`);
-    if (fields.environment && !environment) {
+    // Tested against the resolved value, not the raw control: "New…" holds a sentinel that is truthy while
+    // its text field is still empty, so reading the control directly would call an unset field set and
+    // report the sigil dropped rather than moving it.
+    if (fields.environment && chosenEnvironment)
+      notes.push(`dropped @${fields.environment}, Environment is already set`);
+    if (fields.environment && !chosenEnvironment) {
       selectOrCreate(fields.environment, facets.environments, setEnvironment, setNewEnvironment);
       notes.push(`moved @${fields.environment} to Environment`);
     }
 
-    if (fields.category && category) notes.push(`dropped #${fields.category}, Category is already set`);
-    if (fields.category && !category) {
+    if (fields.category && chosenCategory) notes.push(`dropped #${fields.category}, Category is already set`);
+    if (fields.category && !chosenCategory) {
       selectOrCreate(fields.category, facets.categories, setCategory, setNewCategory);
       notes.push(`moved #${fields.category} to Category`);
     }
+
+    for (const extra of fields.extras) notes.push(`dropped ${extra}, only the first of each sigil is used`);
 
     setPackageName(fields.brand ?? "");
     setHoisted(`${notes.join(", ").replace(/^./, (first) => first.toUpperCase())}.`);
@@ -230,6 +247,7 @@ const Command = () => {
         directory,
         title,
         target,
+        reuseIcon: await reusableIcon(discovered?.commands ?? [], directory, resolvedPackage),
         environment: chosenEnvironment,
         packageName: resolvedPackage,
         category: chosenCategory,

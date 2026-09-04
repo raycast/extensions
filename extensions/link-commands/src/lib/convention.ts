@@ -68,6 +68,13 @@ export type TypedPackage = {
   brand?: string;
   environment?: string;
   category?: string;
+  /**
+   * Sigil fields beyond the first of their kind, as typed. Each axis holds one value, so a second `@` has
+   * nowhere to go — but it still has to leave the brand, or it reaches the filename. Returned rather than
+   * discarded so the form can say so: a token removed from the field with no note is the silent loss this
+   * whole split exists to prevent.
+   */
+  extras: string[];
 };
 
 /**
@@ -86,7 +93,9 @@ export const splitTypedPackage = (packageName: string | undefined): TypedPackage
     .filter(Boolean);
 
   const sigils = fields.map((field) => field.match(TYPED_SIGIL_FIELD)).filter((match) => match !== null);
-  const valueOf = (sigil: string) => sigils.find((match) => match[1] === sigil)?.[2].toLowerCase();
+  const firstOf = (sigil: string) => sigils.find((match) => match[1] === sigil);
+  const valueOf = (sigil: string) => firstOf(sigil)?.[2].toLowerCase();
+  const extras = sigils.filter((match) => match !== firstOf(match[1])).map((match) => match[0]);
 
   // The looser `Brand #category` form is honoured here too, because `facetsOf` honours it — a shape the
   // reader accepts and the filename does not is the same disagreement in a smaller costume.
@@ -97,6 +106,7 @@ export const splitTypedPackage = (packageName: string | undefined): TypedPackage
     brand: clean(categoryMatch ? categoryMatch[1] : rawBrand),
     environment: valueOf("@"),
     category: valueOf("#") ?? categoryMatch?.[2].toLowerCase(),
+    extras,
   };
 };
 
