@@ -1,6 +1,6 @@
 # RunPool Changelog
 
-## [Stop a paused pool's slots counting toward the busy fraction] - {PR_MERGE_DATE}
+## [Stop a paused pool's slots counting toward the busy fraction] - 2026-09-04
 
 - Exclude paused pools from the menu bar icon, its tooltip, and the root subtitle's busy/slot totals, so a fully busy pool no longer reads as partial because a sibling pool is paused
 
