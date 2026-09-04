@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screens",
+  "title": "Screens",
+  "description": "Connect to the computers you use in Screens 5, plus ad-hoc VNC and SSH connections",
+  "icon": "screens-icon.png",
+  "author": "bendrucker",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "search-connections",
+      "title": "Search Connections",
+      "subtitle": "Screens",
+      "description": "Search your imported Screens connections and connect to one",
+      "mode": "view"
+    },
+    {
+      "name": "quick-connect",
+      "title": "Quick Connect",
+      "subtitle": "Screens",
+      "description": "Connect to a computer that isn't in your Screens library",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "host",
+          "placeholder": "Host name or IP address",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "protocol",
+          "placeholder": "Protocol",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "VNC",
+              "value": "vnc"
+            },
+            {
+              "title": "SSH",
+              "value": "ssh"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "import-connections",
+      "title": "Import Connections",
+      "subtitle": "Screens",
+      "description": "Pick which connections from an exported Screens archive to keep in Raycast",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "eslint": "^10.6.0",
+    "typescript": "^6.0.3"
+  },
+  "version": "1.0.0",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
