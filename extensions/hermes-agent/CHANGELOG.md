@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [AI Tools] - {PR_MERGE_DATE}
 
 - Add AI Tools for Raycast AI integration:
   - `ask-hermes`: Send questions to Hermes and get answers

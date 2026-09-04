@@ -36,9 +36,13 @@ export default async function (): Promise<{
     const ids = (data.data ?? [])
       .map((m) => m.id)
       .filter((id): id is string => typeof id === "string" && id.length > 0);
-    const model = ids.includes("hermes-agent")
-      ? "hermes-agent"
-      : (ids[0] ?? "hermes-agent");
+
+    const configured = (prefs.modelName || "").trim();
+    const model =
+      configured ||
+      (ids.includes("hermes-agent")
+        ? "hermes-agent"
+        : (ids[0] ?? "hermes-agent"));
 
     return {
       enabled: true,
