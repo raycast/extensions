@@ -23,18 +23,20 @@ import type { SearchEngine } from "./types";
 import { resolveDefaultSearchEngine, useDefaultSearchEngine } from "./data/cache";
 import Fuse from "fuse.js";
 import AddCustomSearchEngine from "./add-custom-search-engine";
+import { getEngineTriggerPreference } from "./preferences";
 
 type FilterType = "all" | "custom" | "builtin";
 
-const getCustomEngineTag = (engine: SearchEngine) => {
+const getCustomEngineTag = (engine: SearchEngine, triggerPrefix: string) => {
   const overriddenBuiltin = getBuiltinSearchEngine(engine.t);
   if (!overriddenBuiltin) return "Custom";
   return overriddenBuiltin.t === engine.t
     ? `Overrides ${overriddenBuiltin.s}`
-    : `Overrides !${engine.t} (${overriddenBuiltin.s} alias)`;
+    : `Overrides ${triggerPrefix}${engine.t} (${overriddenBuiltin.s} alias)`;
 };
 
 export default function BrowseSearchEngines() {
+  const { triggerPrefix, warning } = getEngineTriggerPreference();
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState<FilterType>("all");
   const [customSearchEngines, setCustomSearchEngines] = useState<SearchEngine[]>(getCustomSearchEngines);
@@ -103,7 +105,10 @@ export default function BrowseSearchEngines() {
     [defaultSearchEngine, customSearchEngines],
   );
 
-  const trimmedSearch = searchText.replace(/!/g, "").trim();
+  const query = searchText.trim();
+  const trimmedSearch = (query.startsWith(triggerPrefix) ? query.slice(triggerPrefix.length) : query)
+    .replace(/!/g, "")
+    .trim();
   const filteredSearchEngines = useMemo(() => {
     if (!trimmedSearch) {
       return filteredByType.slice(0, 20);
@@ -119,7 +124,7 @@ export default function BrowseSearchEngines() {
     setDefaultSearchEngine(searchEngine);
     await showToast({
       title: `Default search engine set to ${searchEngine.s}`,
-      message: `!${searchEngine.t}`,
+      message: `${triggerPrefix}${searchEngine.t}`,
     });
   };
 
@@ -138,7 +143,7 @@ export default function BrowseSearchEngines() {
   const handleDeleteEngine = async (name: string, trigger: string) => {
     const options: Alert.Options = {
       title: "Delete Custom Search Engine",
-      message: `Are you sure you want to delete the search engine "${name} [!${trigger}]"?`,
+      message: `Are you sure you want to delete the search engine "${name} [${triggerPrefix}${trigger}]"?`,
       primaryAction: {
         title: "Delete",
         style: Alert.ActionStyle.Destructive,
@@ -151,7 +156,7 @@ export default function BrowseSearchEngines() {
       await showToast({
         style: Toast.Style.Success,
         title: "Search engine deleted",
-        message: `${name} [!${trigger}]`,
+        message: `${name} [${triggerPrefix}${trigger}]`,
       });
     }
   };
@@ -198,17 +203,18 @@ export default function BrowseSearchEngines() {
           </ActionPanel>
         }
       />
+      {warning && <List.Item title="Invalid Engine Trigger Prefix" subtitle={warning} icon={Icon.Warning} />}
       {filteredSearchEngines.map((searchEngine) => {
         const isOverridden = !searchEngine.isCustom && customTriggers.has(searchEngine.t);
         const isDefault = searchEngine === effectiveDefaultSearchEngine;
         const aliases = getAliases(searchEngine);
-        const aliasShortcuts = aliases.map((alias) => `!${alias}`);
+        const aliasShortcuts = aliases.map((alias) => `${triggerPrefix}${alias}`);
 
         return (
           <List.Item
             key={searchEngine.t}
             title={searchEngine.s}
-            subtitle={`!${searchEngine.t}`}
+            subtitle={`${triggerPrefix}${searchEngine.t}`}
             accessories={[
               { tag: searchEngine.ad || searchEngine.d },
               ...(aliases.length
@@ -220,7 +226,7 @@ export default function BrowseSearchEngines() {
                   ]
                 : []),
               { text: searchEngine.urls && searchEngine.urls.length > 1 ? `${searchEngine.urls.length} URLs` : "" },
-              { tag: searchEngine.isCustom ? getCustomEngineTag(searchEngine) : undefined },
+              { tag: searchEngine.isCustom ? getCustomEngineTag(searchEngine, triggerPrefix) : undefined },
               { text: isDefault ? "Default" : "" },
               { icon: isDefault ? Icon.CheckCircle : undefined },
             ]}
@@ -279,7 +285,7 @@ export default function BrowseSearchEngines() {
                   {!isOverridden && (
                     <Action.CopyToClipboard
                       title="Copy Search Engine Shortcut"
-                      content={`!${searchEngine.t}`}
+                      content={`${triggerPrefix}${searchEngine.t}`}
                       shortcut={{
                         macOS: { modifiers: ["cmd", "shift"], key: "s" },
                         Windows: { modifiers: ["ctrl", "shift"], key: "s" },
@@ -288,8 +294,8 @@ export default function BrowseSearchEngines() {
                   )}
                   {aliases.length > 0 && (
                     <ActionPanel.Submenu title="Copy Alias" icon={Icon.CopyClipboard}>
-                      {aliases.map((alias) => (
-                        <Action.CopyToClipboard key={alias} title={`Copy !${alias}`} content={`!${alias}`} />
+                      {aliasShortcuts.map((shortcut) => (
+                        <Action.CopyToClipboard key={shortcut} title={`Copy ${shortcut}`} content={shortcut} />
                       ))}
                     </ActionPanel.Submenu>
                   )}

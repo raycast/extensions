@@ -112,10 +112,10 @@ async function submit(trigger, engine) {
   const action = elements(form).find((element) => element.type === "SubmitForm");
   await action.props.onSubmit({ name: "Override", trigger, url_0: "https://custom.example/?q={{{s}}}" });
 }
-function row(trigger, filter) {
+function row(trigger, filter, prefix = "!") {
   stateValues = [trigger, filter];
   const item = elements(Browse()).find(
-    (element) => element.type === "Item" && element.props.subtitle === `!${trigger}`,
+    (element) => element.type === "Item" && element.props.subtitle === `${prefix}${trigger}`,
   );
   assert.ok(item, `${filter} row for ${trigger}`);
   return item;
@@ -143,6 +143,13 @@ function findByAlias(alias, primary, filter = "all") {
   const item = elements(list).find((element) => element.type === "Item" && element.props.subtitle === `!${primary}`);
   assert.ok(item, `${filter} search for alias ${alias} finds ${primary}`);
   return item;
+}
+
+function browseResults(query) {
+  stateValues = [query, "all"];
+  return elements(Browse())
+    .filter((element) => element.type === "Item")
+    .map((element) => element.props.title);
 }
 
 async function search(query) {
@@ -477,6 +484,113 @@ async function search(query) {
     assert.equal(openedUrls.length, 1, "repeated effects do not run the initial query again");
   }
   console.log("Cheat sheet override labels and immediate argument/fallback launches passed.");
+
+  const browseQueries = ["w", "yt", "wikipedia.org"].map((query) => [query, browseResults(query)]);
+  for (const preference of ["!", ".", " . ", "engine:", "[.]", "", "   "]) {
+    const prefix = preference.trim();
+    cache.clear();
+    mocks["@raycast/api"].getPreferenceValues = () => ({ engineTriggerPrefix: preference });
+    const descriptions = elements(Search({ arguments: {} })).filter((element) => element.type === "Description");
+    for (const [title, example] of [
+      ["Everyday", `${prefix}w Bangkok — Wikipedia`],
+      ["Code & forums", `${prefix}gh markdown parser — GitHub`],
+    ]) {
+      assert.ok(descriptions.find((element) => element.props.title === title).props.text.includes(example));
+    }
+    const tips = descriptions.find((element) => element.props.title === "Tips").props.text;
+    assert.ok(tips.includes(`A trigger alone opens its website: ${prefix}w`));
+    assert.ok(tips.includes("Legacy !bangs still work mid-query or at the end: cats !g"));
+    assert.ok(tips.includes("markdown parser @gh"));
+    assert.equal(tips.includes("redirect plain text"), prefix === "");
+    for (const [query, expected] of browseQueries) {
+      for (const input of [query, `${prefix}${query}`, ` ${prefix}${query} `, `!${query}`]) {
+        assert.deepEqual(browseResults(input), expected, `Browse ${input} with prefix ${prefix}`);
+      }
+    }
+    const item = row("wikipedia", "all", prefix);
+    const accessory = item.props.accessories.find((accessory) => accessory.tooltip);
+    assert.ok(accessory.text.startsWith(`Aliases: ${prefix}wiki, ${prefix}w, `));
+    assert.ok(accessory.tooltip.split(", ").includes(`${prefix}w`));
+    const copyAlias = elements(item).find((element) => element.props.title === `Copy ${prefix}w`);
+    assert.equal(copyAlias?.props.content, `${prefix}w`);
+    for (const query of [`${prefix}w cats`, "!w cats"]) {
+      const url = await search(query);
+      assert.equal(url.hostname, "wikipedia.org");
+      assert.equal(url.searchParams.get("search"), "cats");
+    }
+    for (const [query, expected] of [
+      ["go tutorials !g", "go tutorials"],
+      ["go tutorials !G @so", "go tutorials site:stackoverflow.com"],
+    ]) {
+      const url = await search(query);
+      assert.equal(url.hostname, "www.google.com");
+      assert.equal(url.searchParams.get("q"), expected);
+    }
+    if (!prefix) {
+      for (const query of ["tutorials", "tutorials !unknown-shortcut-for-testing"]) {
+        const url = await search(`go ${query}`);
+        assert.equal(url.hostname, "mail.google.com");
+        assert.equal(decodeURIComponent(url.hash), `#search/${query}`);
+      }
+    } else if (prefix !== "!") {
+      const url = await search(`${prefix}w cats !g`);
+      assert.equal(url.hostname, "wikipedia.org");
+      assert.equal(url.searchParams.get("search"), "cats !g", "explicit custom prefix still takes precedence");
+    }
+    await submit("w");
+    assert.equal(tag(row("w", "custom", prefix)), `Overrides ${prefix}w (Wikipedia alias)`);
+  }
+  console.log("Alias presentation, Browse filtering, examples, tips, and routing passed for all prefixes.");
+
+  for (const preference of ["@", " @ ", "my prefix", "my\tprefix", "my\nprefix", "my\u00a0prefix"]) {
+    cache.clear();
+    mocks["@raycast/api"].getPreferenceValues = () => ({ engineTriggerPrefix: preference });
+    for (const [query, host, parameter, expected] of [
+      ["plain query", "www.google.com", "q", "plain query"],
+      ["!w cats", "wikipedia.org", "search", "cats"],
+      ["cats @so", "www.google.com", "q", "cats site:stackoverflow.com"],
+      ["@w cats", "www.google.com", "q", "cats site:wikipedia.org"],
+    ]) {
+      const url = await search(query);
+      assert.equal(url.hostname, host);
+      assert.equal(url.searchParams.get(parameter), expected);
+    }
+    assert.equal(elements(row("wikipedia", "all")).find((x) => x.props.title === "Copy !w").props.content, "!w");
+    assert.ok(browseResults("!w").includes("Wikipedia"));
+    for (const view of [Search({ arguments: {} }), Browse(), Add({ onEngineAdded() {} })]) {
+      const warning = elements(view).find((x) => x.props.title === "Invalid Engine Trigger Prefix");
+      assert.ok((warning?.props.text ?? warning?.props.subtitle)?.includes("Using ! instead"));
+    }
+    for (const props of [{ arguments: { query: "!w cats" } }, { arguments: {}, fallbackText: "!w cats" }]) {
+      effects = [];
+      openedUrls = [];
+      closedWindows = 0;
+      Search(props);
+      effects.forEach((effect) => effect());
+      await new Promise(setImmediate);
+      assert.equal(openedUrls.length, 1);
+      assert.equal(new URL(openedUrls[0]).hostname, "wikipedia.org");
+      assert.equal(closedWindows, 1);
+    }
+  }
+  console.log("Invalid prefixes fall back consistently without blocking searches or site filters.");
+
+  const saveError = new Error("Cache write failed");
+  const originalSet = mocks["@raycast/api"].Cache.prototype.set;
+  const originalFailureToast = mocks["@raycast/utils"].showFailureToast;
+  const failures = [];
+  try {
+    mocks["@raycast/api"].Cache.prototype.set = () => {
+      throw saveError;
+    };
+    mocks["@raycast/utils"].showFailureToast = async (...args) => failures.push(args);
+    await submit("w");
+    assert.deepEqual(failures, [[saveError, { title: "Failed to save search engine" }]]);
+    assert.equal(getCustomSearchEngines().length, 0);
+  } finally {
+    mocks["@raycast/api"].Cache.prototype.set = originalSet;
+    mocks["@raycast/utils"].showFailureToast = originalFailureToast;
+  }
   console.log(
     "Review regression checks passed for defaults, cache reads, alias discovery, labels, and Unicode overrides.",
   );
