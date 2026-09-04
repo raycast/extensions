@@ -390,10 +390,7 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
               icon={getQueryTypeIcon(service.type)}
               title={service.label}
               subtitle={isLegacy ? "Legacy Settings" : undefined}
-              accessories={[
-                { tag: isLegacy ? "Legacy" : "Built-in" },
-                { tag: getBuiltinPreferenceStatusTag(service.enabledInPreferences) },
-              ]}
+              accessories={[{ tag: isLegacy ? "Legacy" : "Built-in" }, { tag: getBuiltinPreferenceStatusTag(service) }]}
               actions={
                 <ActionPanel>
                   {isLegacy && importLegacyAction(row.provider)}
@@ -504,8 +501,14 @@ function getAIProviderAccessories(profile: AIProviderProfile, runnable: boolean,
   ];
 }
 
-function getBuiltinPreferenceStatusTag(enabled: boolean | undefined) {
-  return enabled ? { value: "Enabled", color: Color.Green } : { value: "Disabled", color: Color.SecondaryText };
+function getBuiltinPreferenceStatusTag(service: BuiltinProviderService) {
+  const indirectlyEnabledBy = "implicitlyEnabledBy" in service ? service.implicitlyEnabledBy : undefined;
+  if (!service.enabledInPreferences && indirectlyEnabledBy) {
+    return { value: `Enabled via ${indirectlyEnabledBy}`, color: Color.Green };
+  }
+  return service.enabledInPreferences
+    ? { value: "Enabled", color: Color.Green }
+    : { value: "Disabled", color: Color.SecondaryText };
 }
 
 function getConfigurationErrorMessage(controller: AIProvidersController): string {

@@ -37,10 +37,15 @@ import { TencentTranslateProvider } from "./tencent";
 import { VolcanoTranslateProvider } from "./volcano";
 import { YoudaoTranslateProvider } from "./youdao";
 
+const deepLEnabledByLinguee = myPreferences.enableLingueeDictionary && Boolean(myPreferences.deepLAuthKey);
+const youdaoEnabledByDictionary = myPreferences.enableYoudaoDictionary;
+
 export interface TranslationServiceConfig extends RuntimeServiceConfig {
   type: TranslationType;
   /** Built-in provider's Extension Settings checkbox; dynamic AI providers omit this metadata. */
   enabledInPreferences?: boolean;
+  /** Another enabled built-in setting that can conditionally run this provider. */
+  implicitlyEnabledBy?: string;
   enabled: (queryWordInfo: QueryInput) => boolean;
   createProvider: () => BaseTranslateProvider;
   getWebUrl?: (queryWordInfo: QueryInput) => string | undefined;
@@ -94,12 +99,10 @@ const staticTranslationServices: Array<
     preference: "enableDeepLTranslate",
     isEnabled: (q) => {
       const explicitlyEnabled = myPreferences.enableDeepLTranslate;
-      const implicitlyEnabledByLinguee =
-        myPreferences.enableLingueeDictionary &&
-        !!myPreferences.deepLAuthKey &&
-        getLingueeWebDictionaryURL(q) !== undefined;
+      const implicitlyEnabledByLinguee = deepLEnabledByLinguee && getLingueeWebDictionaryURL(q) !== undefined;
       return explicitlyEnabled || implicitlyEnabledByLinguee;
     },
+    implicitlyEnabledBy: deepLEnabledByLinguee ? "Linguee" : undefined,
     provider: DeepLTranslateProvider,
     getWebUrl: (q) => {
       const text = encodeURIComponent(q.word);
@@ -126,9 +129,10 @@ const staticTranslationServices: Array<
     isEnabled: (q) => {
       const explicitlyEnabled = myPreferences.enableYoudaoTranslate;
       const implicitlyEnabledByDictionary =
-        myPreferences.enableYoudaoDictionary && getYoudaoWebDictionaryURL(q) !== undefined && checkIsWord(q);
+        youdaoEnabledByDictionary && getYoudaoWebDictionaryURL(q) !== undefined && checkIsWord(q);
       return explicitlyEnabled || implicitlyEnabledByDictionary;
     },
+    implicitlyEnabledBy: youdaoEnabledByDictionary ? "Youdao Dictionary" : undefined,
     provider: YoudaoTranslateProvider,
   },
   {
@@ -145,6 +149,7 @@ const staticTranslationServicesWithOrder: TranslationServiceConfig[] = staticTra
     label: service.type,
     providerKey: getBuiltinProviderKey("translation", service.type),
     enabledInPreferences: myPreferences[service.preference],
+    implicitlyEnabledBy: service.implicitlyEnabledBy,
     order,
     type: service.type,
     enabled: service.isEnabled ?? (() => myPreferences[service.preference]),
