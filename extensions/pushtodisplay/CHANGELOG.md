@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-04
 
 - **Send Update** — compose a styled update: board picker, message, panel (1–4),
   spacing, full-panel mode, and per-block text size, weight, and colors.
