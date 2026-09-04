@@ -1,6 +1,6 @@
 # KnowYourMeme Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-09-04
 
 - Update extension icon
 - Combine image copy/download actions into `Get Images` submenu
