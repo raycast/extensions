@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Kyma API MCP Server] - {PR_MERGE_DATE}
+
+Add Kyma API to the community registry: hosted MCP server for one endpoint across open and frontier models, with measured per-model uptime, public usage rankings, and a spend-capped chat tool. OAuth 2.1 sign-in via the `@kyma-api/mcp-server` stdio bridge.
+
 ## [Add Stellary MCP Server] - 2026-09-02
 
 Add Stellary to the community registry: AI-native project piloting and project management (open beta). Remote Streamable HTTP MCP server via mcp-remote; Bearer PAT required.
