@@ -173,7 +173,7 @@
     },
     {
       "name": "cmd-code-explain",
-      "icon": "icon.png",
+      "icon": "code.png",
       "title": "Explain Code Step by Step",
       "subtitle": "AI Command",
       "description": "Explain the selected code step by step",
@@ -197,7 +197,7 @@
     },
     {
       "name": "cmd-fix-spelling-grammar",
-      "icon": "icon.png",
+      "icon": "grammar.png",
       "title": "Fix Spelling and Grammar",
       "subtitle": "AI Command",
       "description": "Fix selected text from spelling and grammar error",
@@ -213,7 +213,7 @@
     },
     {
       "name": "cmd-image-describe",
-      "icon": "icon.png",
+      "icon": "image-describe.png",
       "title": "Describe Content of Image",
       "subtitle": "AI Command",
       "description": "Describe content of the image on the clipboard or selected from finder",
@@ -221,7 +221,7 @@
     },
     {
       "name": "cmd-image-to-text",
-      "icon": "icon.png",
+      "icon": "image-to-text.png",
       "title": "Get Text from Image",
       "subtitle": "AI Command",
       "description": "Get text from image on the clipboard or selected from finder",
@@ -245,7 +245,7 @@
     },
     {
       "name": "cmd-professional",
-      "icon": "icon.png",
+      "icon": "professional.png",
       "title": "Change Tone to Professional",
       "subtitle": "AI Command",
       "description": "Make selected text more professional",
@@ -301,7 +301,7 @@
     },
     {
       "name": "mcp-server",
-      "icon": "icon.png",
+      "icon": "mcp.png",
       "title": "Manage MCP Server",
       "subtitle": "AI Command",
       "description": "Manage configured MCP Server",

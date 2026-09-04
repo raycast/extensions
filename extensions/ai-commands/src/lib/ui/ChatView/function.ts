@@ -174,8 +174,9 @@ function appendToolResult(
 
 function serializeToolOutput(output: unknown): string {
   if (typeof output === "string") return output;
+  if (output instanceof Error) return output.message ? `${output.name}: ${output.message}` : output.name;
   try {
-    return JSON.stringify(output);
+    return JSON.stringify(output) ?? String(output);
   } catch {
     return String(output);
   }
