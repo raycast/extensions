@@ -1,6 +1,6 @@
 # VMware vCenter Changelog
 
-## [Fix] - 2026-09-04
+## [Fix] - {PR_MERGE_DATE}
 
 - Fixed "Open Console" failing with `vim.fault.InvalidLocale` by sending an explicit `Accept-Language` header when creating the vCenter session.
 
