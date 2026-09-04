@@ -55,41 +55,18 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
   if (server !== "All" && !s.has(server)) return [];
   if (server !== "All") s = new Map([[server, s.get(server) as Ollama]]);
   const tagFailures: { name: string; error: Error }[] = [];
-  (
-    await Promise.all(
-      [...s.entries()].map(async (s): Promise<Types.UiModel[]> => {
-        const tag = await s[1].OllamaApiTags().catch((e: Error) => {
-          if (server !== "All") throw e;
-          tagFailures.push({ name: s[0], error: e });
-          return undefined;
-        });
-        if (!tag) return [];
-        const ps = await s[1].OllamaApiPs().catch(async (e: Error) => {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: `'${s[0]}' Server`,
-            message: e.message,
-          });
-          return undefined;
-        });
-        return await Promise.all(
-          tag.models.map(async (v): Promise<Types.UiModel> => {
-            const show = await s[1].OllamaApiShow(v.name);
-            return {
-              server: {
-                name: s[0],
-                ollama: s[1],
-              },
-              detail: v,
-              show: show,
-              modelfile: s[1].OllamaApiShowParseModelfile(show),
-              ps: ps && ps.models.filter((ps) => ps.name === v.name)[0],
-            };
-          }),
-        );
-      }),
-    )
-  ).forEach((v) => (o = o.concat(v)));
+  const tagResults = await Promise.all(
+    [...s.entries()].map(async ([name, ollama]) => {
+      try {
+        return { name, ollama, tag: await ollama.OllamaApiTags() };
+      } catch (e) {
+        const error = e instanceof Error ? e : new Error(String(e));
+        if (server !== "All") throw error;
+        tagFailures.push({ name, error });
+        return undefined;
+      }
+    }),
+  );
   if (server === "All" && s.size > 0 && tagFailures.length === s.size) {
     throw tagFailures[0].error;
   }
@@ -102,6 +79,52 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
       }),
     ),
   );
+  const enrichmentFailures: Error[] = [];
+  (
+    await Promise.all(
+      tagResults.map(async (result): Promise<Types.UiModel[]> => {
+        if (!result) return [];
+        try {
+          const ps = await result.ollama.OllamaApiPs().catch(async (e: Error) => {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: `'${result.name}' Server`,
+              message: e.message,
+            });
+            return undefined;
+          });
+          return await Promise.all(
+            result.tag.models.map(async (v): Promise<Types.UiModel> => {
+              const show = await result.ollama.OllamaApiShow(v.name);
+              return {
+                server: {
+                  name: result.name,
+                  ollama: result.ollama,
+                },
+                detail: v,
+                show: show,
+                modelfile: result.ollama.OllamaApiShowParseModelfile(show),
+                ps: ps && ps.models.filter((ps) => ps.name === v.name)[0],
+              };
+            }),
+          );
+        } catch (e) {
+          const error = e instanceof Error ? e : new Error(String(e));
+          if (server !== "All") throw error;
+          enrichmentFailures.push(error);
+          await showToast({
+            style: Toast.Style.Failure,
+            title: `'${result.name}' Server`,
+            message: error.message,
+          });
+          return [];
+        }
+      }),
+    )
+  ).forEach((v) => (o = o.concat(v)));
+  if (server === "All" && s.size > 0 && o.length === 0 && tagFailures.length + enrichmentFailures.length === s.size) {
+    throw tagFailures[0]?.error ?? enrichmentFailures[0];
+  }
   return o;
 }
 

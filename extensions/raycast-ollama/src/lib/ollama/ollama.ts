@@ -165,6 +165,7 @@ export class Ollama {
       body: JSON.stringify({
         name: model,
       }),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     };
 
     const data = await fetch(url, req)
@@ -882,31 +883,26 @@ export class Ollama {
     const req: RequestInit = {
       method: "GET",
       headers: this._headers,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     };
-    let ps: Types.OllamaApiPsResponse | undefined;
+    const data = await fetch(url, req)
+      .then(async (response) => {
+        if (!response.ok) {
+          const message = (await response.json()) as Types.OllamaErrorResponse;
+          this._ErrorHandlerOllamaServer(route, response.status, message, req);
+        }
+        return response.json();
+      })
+      .then((output): Types.OllamaApiPsResponse => {
+        return output as Types.OllamaApiPsResponse;
+      })
+      .catch((err: Error | Error) => {
+        this._ErrorLogger(err);
+        if (err instanceof TypeError && err.cause && (err.cause as NodeJS.ErrnoException).code === "ECONNREFUSED")
+          throw Errors.OllamaNotInstalledOrRunning;
+        throw err;
+      });
 
-    while (ps === undefined) {
-      ps = await fetch(url, req)
-        .then(async (response) => {
-          if (!response.ok) {
-            const message = (await response.json()) as Types.OllamaErrorResponse;
-            this._ErrorHandlerOllamaServer(route, response.status, message, req);
-          }
-          return response.json();
-        })
-        .then(async (response) => {
-          if (response === undefined) {
-            return undefined;
-          }
-          return response as Types.OllamaApiPsResponse;
-        })
-        .catch((err: Error | Error) => {
-          this._ErrorLogger(err);
-          if (err instanceof TypeError && err.cause && (err.cause as NodeJS.ErrnoException).code === "ECONNREFUSED")
-            throw Errors.OllamaNotInstalledOrRunning;
-          throw err;
-        });
-    }
-    return ps;
+    return data;
   }
 }

@@ -4922,7 +4922,7 @@
     "@modelcontextprotocol/sdk": "^1.30.0",
     "@raycast/api": "^2.2.0",
     "@raycast/utils": "^2.3.1",
-    "file-type": "^22.0.2"
+    "file-type": "^21.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
