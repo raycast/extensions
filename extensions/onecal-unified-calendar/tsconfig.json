@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["ES2023"],
+    "lib": [
+      "ES2023"
+    ],
     "module": "commonjs",
     "target": "ES2022",
     "strict": true,
@@ -9,7 +11,11 @@
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "allowImportingTsExtensions": true
   },
-  "include": ["raycast-env.d.ts", "src/**/*"]
+  "include": [
+    "raycast-env.d.ts",
+    "src/**/*"
+  ]
 }
