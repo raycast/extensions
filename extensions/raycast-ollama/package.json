@@ -5,6 +5,9 @@
   "description": "Perform Local Inference with Ollama",
   "icon": "icon.png",
   "author": "massimiliano_pasquini",
+  "contributors": [
+    "0xdhrv"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -4916,18 +4919,18 @@
     }
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.26.0",
-    "@raycast/api": "^1.103.7",
-    "@raycast/utils": "^2.2.2",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.1",
     "file-type": "^21.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/mime-types": "^2.1.4",
-    "@types/node": "^22.13.14",
-    "@types/react": "^19.2.6",
-    "eslint": "^8.57.0",
-    "prettier": "^3.8.3",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3"
   },
   "scripts": {

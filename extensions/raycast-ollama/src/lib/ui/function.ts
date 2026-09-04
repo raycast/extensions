@@ -90,7 +90,11 @@ export async function GetModels(): Promise<Map<string, UiModelDetails[]>> {
   await Promise.all(
     [...s.entries()].map(async (s): Promise<void> => {
       const tags = await s[1].OllamaApiTags().catch(async (e: Error) => {
-        await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `'${s[0]}' Server`,
+          message: e.message,
+        });
         return undefined;
       });
       if (tags)
@@ -99,7 +103,11 @@ export async function GetModels(): Promise<Map<string, UiModelDetails[]>> {
           await Promise.all(
             tags.models.map(async (tag): Promise<UiModelDetails> => {
               const show = await s[1].OllamaApiShow(tag.name).catch(async (e: Error) => {
-                await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: `'${s[0]}' Server`,
+                  message: e.message,
+                });
                 return undefined;
               });
               return {
