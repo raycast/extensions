@@ -6,12 +6,13 @@ import {
   LaunchProps,
   List,
   confirmAlert,
+  openExtensionPreferences,
   showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Task } from "./parser";
+import { Task, getDailyNotePath } from "./parser";
 import { getAppPreferences } from "./preferences";
 import {
   TaskSource,
@@ -48,7 +49,12 @@ export default function StartTimerCommand(
 }
 
 function TaskListView({ completion }: { completion?: CompletionContext }) {
-  const { pomoDuration, breakDuration } = getAppPreferences();
+  const prefs = getAppPreferences();
+  const { pomoDuration, breakDuration } = prefs;
+  // Daily Note mode without a directory: show setup guidance instead of an
+  // empty (or crashing) list.
+  const needsDailyNoteDir =
+    prefs.taskMode === "dailynote" && prefs.dailyNotePath === "";
 
   const [groups, setGroups] = useState<TaskGroup[]>([]);
   const [searchText, setSearchText] = useState("");
@@ -64,22 +70,27 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
   const [taskSource] = useState<TaskSource>(() => createTaskSource());
   const isManual = getTaskMode() === "manual";
 
+  // Timer state shown by the view; called on mount and after every change,
+  // since the view stays open behind the HUD and must not go stale.
+  async function refresh() {
+    const { running, finished } = await settle();
+    setActiveTimer(running);
+    // Opened directly (not via the menu bar) after a session ran out:
+    // show the completion prompt just the same.
+    if (finished) setCompletedType(completedTypeOf(finished));
+    const last = await getLastLog();
+    setLastTask(
+      last
+        ? { taskTitle: last.taskTitle, subtaskTitle: last.subtaskTitle }
+        : null,
+    );
+  }
+
   // Re-run when relaunched with a new completion context while already open.
   useEffect(() => {
     setCompletedType(completion?.completedType);
     taskSource.getTasks().then(setGroups);
-    settle().then(async ({ running, finished }) => {
-      setActiveTimer(running);
-      // Opened directly (not via the menu bar) after a session ran out:
-      // show the completion prompt just the same.
-      if (finished) setCompletedType(completedTypeOf(finished));
-      const last = await getLastLog();
-      setLastTask(
-        last
-          ? { taskTitle: last.taskTitle, subtaskTitle: last.subtaskTitle }
-          : null,
-      );
-    });
+    refresh();
   }, [completion]);
 
   async function handleStartPomodoro(task: Task, subtaskTitle?: string) {
@@ -102,6 +113,8 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
 
     const label = subtaskTitle || task.title;
     await startTimer(task.title, minutes, subtaskTitle);
+    setCompletedType(undefined);
+    await refresh();
     await showHUD(`🍅 ${label} — ${Math.ceil(minutes)}min`);
   }
 
@@ -109,6 +122,7 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
     await stopRunning();
     await startBreak(breakDuration);
     setCompletedType(undefined);
+    await refresh();
     await showHUD(`☕ Break — ${breakDuration}min`);
   }
 
@@ -117,14 +131,15 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
     await stopRunning();
     await startTimer(lastTask.taskTitle, pomoDuration, lastTask.subtaskTitle);
     setCompletedType(undefined);
+    await refresh();
     const label = lastTask.subtaskTitle || lastTask.taskTitle;
     await showHUD(`🍅 ${label} — ${pomoDuration}min`);
   }
 
   async function handleStopTimer() {
     await stopRunning();
+    await refresh();
     await showToast({ style: Toast.Style.Success, title: "Timer stopped" });
-    setActiveTimer(null);
   }
 
   async function handleMarkDone(task: Task) {
@@ -181,6 +196,27 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
   const timerDisplay = activeTimer
     ? `${activeTimer.subtaskTitle || activeTimer.taskTitle} (${formatRemaining(getRemainingMs(activeTimer))})`
     : null;
+
+  if (needsDailyNoteDir) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Folder}
+          title="Daily Note Directory is not set"
+          description="Daily Note mode reads tasks from your notes folder. Set the directory in the extension preferences, or switch Task Mode to Manual."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Extension Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   return (
     <List
@@ -297,6 +333,28 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
           <List.Item
             title="No tasks yet — type above to add one"
             icon={Icon.Message}
+          />
+        </List.Section>
+      )}
+
+      {groups.filter((g) => g.tasks.length > 0).length === 0 && !isManual && (
+        <List.Section title="📝 Tasks">
+          <List.Item
+            title="No tasks found in today's note"
+            subtitle={getDailyNotePath(
+              prefs.dailyNotePath,
+              prefs.dailyNoteFormat,
+            )}
+            icon={Icon.Document}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Open Extension Preferences"
+                  icon={Icon.Gear}
+                  onAction={openExtensionPreferences}
+                />
+              </ActionPanel>
+            }
           />
         </List.Section>
       )}

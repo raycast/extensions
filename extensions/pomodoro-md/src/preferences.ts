@@ -15,31 +15,23 @@ export interface AppPreferences {
   enableLogging: boolean;
 }
 
-// Raycast returns every textfield as a string and taskMode as plain string.
-type RawPreferences = Omit<
-  AppPreferences,
-  "taskMode" | "breakKeywords" | "pomoDuration" | "breakDuration"
-> & {
-  taskMode: string;
-  breakKeywords: string;
-  pomoDuration: string;
-  breakDuration: string;
-};
-
 const DEFAULT_POMO_MINUTES = 25;
 const DEFAULT_BREAK_MINUTES = 5;
 
-// Whole minutes only; anything else (empty, "0", "-5", "abc") falls back.
+// Whole minutes only ("25"); anything else ("", "0", "30.5", "30 min") falls back.
 function parseMinutes(value: string | undefined, fallback: number): number {
-  const minutes = parseInt((value ?? "").trim(), 10);
-  return Number.isInteger(minutes) && minutes >= 1 ? minutes : fallback;
+  const trimmed = (value ?? "").trim();
+  if (!/^\d+$/.test(trimmed)) return fallback;
+  const minutes = Number(trimmed);
+  return minutes >= 1 ? minutes : fallback;
 }
 
 export function getAppPreferences(): AppPreferences {
-  const raw = getPreferenceValues<RawPreferences>();
+  // `Preferences` is generated from package.json by the Raycast CLI.
+  const raw = getPreferenceValues<Preferences>();
   return {
-    taskMode: (raw.taskMode as "manual" | "dailynote") || "manual",
-    dailyNotePath: raw.dailyNotePath || "",
+    taskMode: raw.taskMode === "dailynote" ? "dailynote" : "manual",
+    dailyNotePath: (raw.dailyNotePath ?? "").trim(),
     dailyNoteFormat: raw.dailyNoteFormat || DEFAULT_DAILY_NOTE_FORMAT,
     pomoDuration: parseMinutes(raw.pomoDuration, DEFAULT_POMO_MINUTES),
     breakDuration: parseMinutes(raw.breakDuration, DEFAULT_BREAK_MINUTES),

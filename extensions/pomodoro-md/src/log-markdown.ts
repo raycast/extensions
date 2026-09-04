@@ -1,4 +1,4 @@
-import { stripMarkdownLinks } from "./parser";
+import { isHeadingLine, stripMarkdownLinks } from "./parser";
 
 export interface LogHeaders {
   pomodoroLogHeader: string; // e.g. "### Pomodoro Log"
@@ -23,7 +23,7 @@ export function appendLogEntry(
 ): string {
   const lines = content.split("\n");
   const headerIdx = lines.findIndex((l) =>
-    l.startsWith(headers.pomodoroLogHeader),
+    isHeadingLine(l, headers.pomodoroLogHeader),
   );
 
   if (headerIdx === -1) {
@@ -74,7 +74,7 @@ function insertNewSection(
   // Inside the work-log section, after any callout / blank lines that
   // directly follow its heading.
   const sectionIdx = lines.findIndex((l) =>
-    l.startsWith(headers.logSectionHeader),
+    isHeadingLine(l, headers.logSectionHeader),
   );
   if (sectionIdx !== -1) {
     let insertAt = sectionIdx + 1;

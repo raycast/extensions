@@ -57,6 +57,14 @@ function headingLevel(header: string): number {
 }
 
 /**
+ * Whether a line is exactly the configured heading (ignoring surrounding
+ * whitespace), so "# Timetable" never matches "# Timetable Archive".
+ */
+export function isHeadingLine(line: string, header: string): boolean {
+  return line.trim() === header.trim();
+}
+
+/**
  * [start, end) line range of the timetable section body, or null if the
  * header is not found. The section ends at the next heading of the same or
  * higher level as the timetable header.
@@ -66,7 +74,7 @@ export function findTimetableRange(
   timetableHeader: string,
 ): [number, number] | null {
   const level = headingLevel(timetableHeader);
-  const start = lines.findIndex((l) => l.startsWith(timetableHeader));
+  const start = lines.findIndex((l) => isHeadingLine(l, timetableHeader));
   if (start === -1) return null;
   let end = start + 1;
   while (end < lines.length) {

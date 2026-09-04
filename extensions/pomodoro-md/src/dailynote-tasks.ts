@@ -20,13 +20,11 @@ export class DailyNoteTaskSource implements TaskSource {
 
   constructor() {
     const prefs = getAppPreferences();
-    if (!prefs.dailyNotePath) {
-      throw new Error("Daily Note Directory is required for Daily Note mode");
-    }
-    this.filePath = getDailyNotePath(
-      prefs.dailyNotePath,
-      prefs.dailyNoteFormat,
-    );
+    // No directory configured: behave as an empty note. The task list shows
+    // setup guidance instead of this source throwing during render.
+    this.filePath = prefs.dailyNotePath
+      ? getDailyNotePath(prefs.dailyNotePath, prefs.dailyNoteFormat)
+      : "";
     this.parseOptions = {
       timetableHeader: prefs.timetableHeader,
       breakKeywords: prefs.breakKeywords,
