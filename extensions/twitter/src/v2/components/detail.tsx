@@ -1,14 +1,18 @@
-import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
-import { ReactElement } from "react";
+import { Action, ActionPanel, Detail, Keyboard, showToast, Toast } from "@raycast/api";
+import { ReactElement, useEffect } from "react";
 import { Tweet } from "../lib/twitter";
 import { clientV2, Fetcher, useRefresher } from "../lib/twitterapi_v2";
 import {
   DeleteTweetAction,
+  BookmarkTweetAction,
   LikeTweetAction,
   OpenTweetInBrowerAction,
   OpenUserProfileInBrowserAction,
   ReplyTweetAction,
+  QuoteTweetAction,
   RetweetAction,
+  SetReplyHiddenAction,
+  ShowPostEngagementAction,
   ShowAuthorTweetsAction,
   UnlikeTweetAction,
 } from "./actions";
@@ -35,7 +39,7 @@ function getCleanTweetText(tweet: Tweet): string | undefined {
 
 export function getMarkdownFromTweet(tweet: Tweet, withMeta: boolean): string {
   const t = tweet;
-  const retweetedText = isRetweet(t) ? " retweeted" : "";
+  const retweetedText = isRetweet(t) ? " reposted" : "";
 
   const parts = [`## ${t.user.name} \`@${t.user.username}\`${retweetedText}`, getCleanTweetText(t) || ""];
   if (t.image_url) {
@@ -45,8 +49,9 @@ export function getMarkdownFromTweet(tweet: Tweet, withMeta: boolean): string {
     if (t.created_at) {
       parts.push(`\`${new Date(t.created_at).toLocaleString()}\``);
     }
-    const states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.like_count}`];
-    parts.push(states.join("   "));
+    parts.push(
+      `Replies: ${t.reply_count || 0} · Reposts: ${t.retweet_count} · Likes: ${t.like_count} · Quotes: ${t.quote_count ?? 0} · Bookmarks: ${t.bookmark_count ?? 0} · Impressions: ${t.impression_count ?? 0}`,
+    );
   }
   const md = parts.join("\n\n");
   return md;
@@ -56,10 +61,10 @@ function TweetRefreshAction(props: { tweet: Tweet; fetcher: Fetcher }): ReactEle
   const handle = async () => {
     await props.fetcher.updateInline();
   };
-  return <Action title="Refresh Tweet" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={handle} />;
+  return <Action title="Refresh Post" shortcut={Keyboard.Shortcut.Common.Refresh} onAction={handle} />;
 }
 
-export function TweetDetail(props: { tweet: Tweet }) {
+export function TweetDetail(props: { tweet: Tweet; fetcher?: Fetcher }) {
   const tweet = props.tweet;
   const { data, error, isLoading, fetcher } = useRefresher<Tweet | undefined>(async (): Promise<Tweet | undefined> => {
     if (data === undefined) {
@@ -71,9 +76,9 @@ export function TweetDetail(props: { tweet: Tweet }) {
       }
     }
   });
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
-  }
+  useEffect(() => {
+    if (error) showToast({ style: Toast.Style.Failure, title: "Could not refresh post", message: error });
+  }, [error]);
   const t = data || tweet;
   const md = getMarkdownFromTweet(t, true);
   return (
@@ -82,14 +87,26 @@ export function TweetDetail(props: { tweet: Tweet }) {
       markdown={md}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Tweet">
+          <ActionPanel.Section title="Post">
             <ReplyTweetAction tweet={t} />
+            <QuoteTweetAction tweet={t} />
             <OpenTweetInBrowerAction tweet={t} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <LikeTweetAction tweet={t} />
             <UnlikeTweetAction tweet={t} />
             <RetweetAction tweet={t} />
+            <BookmarkTweetAction tweet={t} fetcher={props.fetcher} />
+            <BookmarkTweetAction tweet={t} remove fetcher={props.fetcher} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Engagement">
+            <ShowPostEngagementAction tweet={t} kind="likes" />
+            <ShowPostEngagementAction tweet={t} kind="reposts" />
+            <ShowPostEngagementAction tweet={t} kind="quotes" />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Moderation">
+            <SetReplyHiddenAction tweet={t} hidden />
+            <SetReplyHiddenAction tweet={t} hidden={false} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Author">
             <ShowAuthorTweetsAction tweet={t} />
