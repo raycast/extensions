@@ -22,7 +22,7 @@ Pomodoro.md uses plain markdown as its interface instead. Your daily plan is a m
 
 It becomes a task list in Raycast. Pick a task, run pomodoros:
 
-![Pick a task and start a pomodoro](metadata/pomodoro-md-1.png)
+![Pick a task and start a pomodoro](media/task-list.png)
 
 …and the log is written back into the same note:
 
@@ -63,15 +63,15 @@ Type anything into the search bar to start it as an ad-hoc task (in Manual mode 
 
 If a pomodoro is already running, picking another task asks for confirmation and **carries the remaining time over** rather than restarting the clock.
 
-![A running pomodoro, with the remaining time at the top of the list](metadata/pomodoro-md-2.png)
+![A running pomodoro, with the remaining time at the top of the list](media/running.png)
 
 ### Start Break
 
 Stops the current pomodoro, writes its log entry, and starts a break — **remembering the task you were on**. When the break ends, the task list opens with a one-key **Resume** action for that task, so you don't have to find it again.
 
-![Pomodoro complete: the finished task, with Start Break as the next action](metadata/pomodoro-md-3.png)
+![Pomodoro complete: the finished task, with Start Break as the next action](media/complete.png)
 
-![Break's over: a one-key Resume for the task you were on](metadata/pomodoro-md-4.png)
+![Break's over: a one-key Resume for the task you were on](media/resume.png)
 
 ### Quick Start
 
@@ -93,7 +93,7 @@ Keeps the remaining time in the menu bar while you work, with the current task n
 
 The default, and the one to use if you just want a pomodoro timer. Tasks live inside Raycast: type a name into **Start Pomodoro** to add one and start it, then **Mark as Done** or **Remove Task** from the action panel (`⌘K`). No files are written, so there is no setup — switch to Daily Note mode whenever you want the log in your notes.
 
-![Manual mode: a task list kept inside Raycast](metadata/pomodoro-md-5.png)
+![Manual mode: a task list kept inside Raycast](media/manual.png)
 
 ## Daily Note Setup
 
