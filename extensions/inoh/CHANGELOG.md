@@ -1,6 +1,6 @@
 # Changelog
 
-## [Search Word from Screenshot] - {PR_MERGE_DATE}
+## [Search Word from Screenshot] - 2026-09-04
 
 - New **Search Word from Screenshot** command: drag a box around a word
   anywhere on screen and the search list opens with it looked up, for text that
