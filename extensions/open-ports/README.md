@@ -14,15 +14,15 @@
 
 |                 Open Ports                  |                Port Details                 |
 | :-----------------------------------------: | :-----------------------------------------: |
-|    ![Open Ports](metadata/open-ports-1.png)    |  ![Port Details](metadata/open-ports-2.png)    |
+|    ![Open Ports](media/open-ports-1.png)    |  ![Port Details](media/open-ports-2.png)    |
 
 |            Owned by Another User            |             Filter by Exposure              |
 | :-----------------------------------------: | :-----------------------------------------: |
-| ![Owned by Another User](metadata/open-ports-3.png) | ![Filter by Exposure](metadata/open-ports-4.png) |
+| ![Owned by Another User](media/open-ports-3.png) | ![Filter by Exposure](media/open-ports-4.png) |
 
 |               Kill a Process                |                 Kill by PID                 |
 | :-----------------------------------------: | :-----------------------------------------: |
-| ![Kill a Process](metadata/open-ports-5.png)   |   ![Kill by PID](metadata/open-ports-6.png)    |
+| ![Kill a Process](media/open-ports-5.png)   |   ![Kill by PID](media/open-ports-6.png)    |
 
 ## Commands
 
@@ -153,8 +153,9 @@ npm run lint    # manifest validation, ESLint and Prettier
 npm run build   # production build
 ```
 
-Store screenshots live in `metadata/` and are captured with Raycast's Window Capture (2000 x 1250, "Save to
-Metadata"). The README renders the same files, so there is nothing to keep in sync.
+Store screenshots live in `metadata/` (captured with Raycast's Window Capture at 2000 x 1250). The Store
+reads that folder directly, so README assets must live elsewhere: `npm run sync-screenshots` mirrors them
+into `media/`, which is what this README renders.
 
 The code is split along one boundary: **`src/core` never imports `@raycast/api`**, so all the branching logic
 can be tested without Raycast running.

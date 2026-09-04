@@ -1,6 +1,6 @@
 # Open Ports Changelog
 
-## [Initial Version] - 2026-08-30
+## [Initial Version] - {PR_MERGE_DATE}
 
 - View Open Ports: browse listening TCP ports with process, PID, user, bind address and IP version, filter by
   exposure or IP version, and inspect the full command line and raw `lsof` output in the detail panel.
