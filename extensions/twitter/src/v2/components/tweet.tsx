@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { ReactElement, useState } from "react";
 import { shouldShowListWithDetails } from "../../common";
 import { deduplicateById, Tweet } from "../lib/twitter";
-import { Fetcher } from "../lib/twitterapi_v2";
+import { clientV2, Fetcher } from "../lib/twitterapi_v2";
 import { compactNumberFormat, padStart, replaceAll } from "../../utils";
 import {
   DeleteTweetAction as DeleteTweetAction,
@@ -152,6 +153,17 @@ function getCleanTweetText(tweet: Tweet): string {
   return text;
 }
 
+export function useModeratableReplyIds(tweets: readonly Tweet[] | undefined): ReadonlySet<string> {
+  const replies = (tweets ?? []).filter((tweet) => tweet.conversation_id && tweet.conversation_id !== tweet.id);
+  const replyKey = replies.map((tweet) => `${tweet.id}:${tweet.conversation_id}`).join(",");
+  const { data } = usePromise(
+    async (currentReplyKey: string) => (currentReplyKey ? await clientV2.getModeratableReplyIds(replies) : []),
+    [replyKey],
+    { execute: replies.length > 0 },
+  );
+  return replies.length > 0 ? new Set(data ?? []) : new Set();
+}
+
 export function TweetListItem(props: {
   tweet: Tweet;
   fetcher?: Fetcher;
@@ -160,6 +172,7 @@ export function TweetListItem(props: {
   maxFavDigits?: number;
   millifyState?: boolean;
   withDetail?: boolean;
+  canModerateReply?: boolean;
   onToggleDetails?: (isShowingDetail: boolean) => void;
 }) {
   const t = props.tweet;
@@ -245,10 +258,12 @@ export function TweetListItem(props: {
             <ShowPostEngagementAction tweet={t} kind="reposts" />
             <ShowPostEngagementAction tweet={t} kind="quotes" />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Moderation">
-            <SetReplyHiddenAction tweet={t} hidden />
-            <SetReplyHiddenAction tweet={t} hidden={false} />
-          </ActionPanel.Section>
+          {props.canModerateReply && (
+            <ActionPanel.Section title="Moderation">
+              <SetReplyHiddenAction tweet={t} hidden />
+              <SetReplyHiddenAction tweet={t} hidden={false} />
+            </ActionPanel.Section>
+          )}
           <ActionPanel.Section>
             <ShowAuthorTweetsAction tweet={t} />
             <OpenUserProfileInBrowserAction user={t.user} />
@@ -293,6 +308,7 @@ export function TweetList(props: {
   error?: Error;
 }) {
   const tweets = deduplicateById(props.tweets);
+  const moderatableReplyIds = useModeratableReplyIds(tweets);
   const [isShowingDetail, setIsShowingDetail] = useState(shouldShowListWithDetails);
   const millifyState = props.millifyState !== undefined ? props.millifyState : true;
   let maxFavDigits = 1;
@@ -358,6 +374,7 @@ export function TweetList(props: {
           key={tweet.id}
           tweet={tweet}
           fetcher={props.fetcher}
+          canModerateReply={moderatableReplyIds.has(tweet.id)}
           maxCommentDigits={maxCDigits}
           maxFavDigits={maxFavDigits}
           maxRTDigits={maxRTDigits}

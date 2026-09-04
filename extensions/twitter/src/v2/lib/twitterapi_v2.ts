@@ -506,6 +506,39 @@ export class ClientV2 {
     });
   }
 
+  async getModeratableReplyIds(tweets: readonly Tweet[]): Promise<string[]> {
+    const replies = tweets.filter((tweet) => tweet.conversation_id && tweet.conversation_id !== tweet.id);
+    if (replies.length === 0) return [];
+
+    const currentUser = await this.me();
+    const conversationIds = new Set(replies.map((tweet) => tweet.conversation_id as string));
+    const ownerByConversationId = new Map<string, string>();
+
+    for (const tweet of tweets) {
+      if (conversationIds.has(tweet.id)) ownerByConversationId.set(tweet.id, tweet.user.id);
+    }
+
+    const missingConversationIds = [...conversationIds].filter((id) => !ownerByConversationId.has(id)).sort();
+    if (missingConversationIds.length > 0) {
+      const fetchedOwners = await this.cachedRead(
+        `conversation-owners:${missingConversationIds.join(",")}`,
+        async (api) => {
+          const result = await api.v2.tweets(missingConversationIds, { "tweet.fields": ["author_id"] });
+          return Object.fromEntries(
+            (result.data ?? []).flatMap((tweet) => (tweet.author_id ? [[tweet.id, tweet.author_id]] : [])),
+          );
+        },
+      );
+      for (const [conversationId, ownerId] of Object.entries(fetchedOwners)) {
+        ownerByConversationId.set(conversationId, ownerId);
+      }
+    }
+
+    return replies
+      .filter((tweet) => ownerByConversationId.get(tweet.conversation_id as string) === currentUser.id)
+      .map((tweet) => tweet.id);
+  }
+
   async getMyTweets(nextToken?: string): Promise<PaginatedResult<Tweet>> {
     const me = await this.me();
     const cacheKey = `my-analytics:${nextToken ?? "first"}`;

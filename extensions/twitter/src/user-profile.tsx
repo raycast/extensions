@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Image, Keyboard, LaunchProps, List, showToas
 import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { shouldShowListWithDetails } from "./common";
-import { ToggleDetailsAction, TweetListItem } from "./v2/components/tweet";
+import { ToggleDetailsAction, TweetListItem, useModeratableReplyIds } from "./v2/components/tweet";
 import { deduplicateById } from "./v2/lib/twitter";
 import { clientV2, TwitterUserNotFoundError } from "./v2/lib/twitterapi_v2";
 
@@ -55,6 +55,7 @@ export default function UserProfileCommand(props: LaunchProps<{ arguments: Argum
     { execute: Boolean(currentUser) },
   );
   const uniquePosts = deduplicateById(posts);
+  const moderatableReplyIds = useModeratableReplyIds(uniquePosts);
 
   useEffect(() => {
     if (postsError) {
@@ -135,6 +136,7 @@ export default function UserProfileCommand(props: LaunchProps<{ arguments: Argum
             <TweetListItem
               key={tweet.id}
               tweet={tweet}
+              canModerateReply={moderatableReplyIds.has(tweet.id)}
               withDetail={isShowingDetail}
               onToggleDetails={setIsShowingDetail}
             />

@@ -72,6 +72,16 @@ async function ensureOAuthClientMigration(): Promise<void> {
 
 export async function authorize(): Promise<void> {
   await ensureOAuthClientMigration();
+
+  authorizationPromise ??= authorizeWithOAuthClient().finally(() => {
+    authorizationPromise = undefined;
+  });
+  await authorizationPromise;
+}
+
+let authorizationPromise: Promise<void> | undefined;
+
+async function authorizeWithOAuthClient(): Promise<void> {
   const tokenSet = await oauthClient.getTokens();
   if (tokenSet?.accessToken) {
     if (!tokenSet.isExpired()) {

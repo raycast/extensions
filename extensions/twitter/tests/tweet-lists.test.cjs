@@ -35,6 +35,7 @@ const Icon = {
   Person: "person",
 };
 const Keyboard = { Shortcut: { Common: { Refresh: "refresh-shortcut" } } };
+const SetReplyHiddenAction = () => {};
 const commonDependencies = {
   "react/jsx-runtime": { jsx: element, jsxs: element },
   react: { useState: (initial) => [typeof initial === "function" ? initial() : initial, () => {}], useEffect() {} },
@@ -212,14 +213,16 @@ test("username lookup validates handles before making a billed request", async (
 
 const tweetComponents = loadComponent("src/v2/components/tweet.tsx", {
   ...commonDependencies,
+  "@raycast/utils": { usePromise: () => ({ data: ["eligible-reply"] }) },
   "../../common": { shouldShowListWithDetails: () => false },
   "../lib/twitter": twitter,
+  "../lib/twitterapi_v2": { clientV2: {} },
   "../../utils": {
     compactNumberFormat: String,
     padStart: (text, length) => text.padStart(length),
     replaceAll: (text, pattern, replacement) => text.replaceAll(pattern, replacement),
   },
-  "./actions": {},
+  "./actions": { SetReplyHiddenAction },
   "./detail": {},
 });
 const pagination = { pageSize: 20, hasMore: true, onLoadMore() {} };
@@ -249,6 +252,74 @@ function rows(tree) {
 function post(id, text = id) {
   return Object.freeze({ id, text, user: { id: "user-1" }, like_count: 0, retweet_count: 0 });
 }
+
+function elementsOfType(tree, type) {
+  if (Array.isArray(tree)) return tree.flatMap((item) => elementsOfType(item, type));
+  if (!tree || typeof tree !== "object") return [];
+  const matches = tree.type === type ? [tree] : [];
+  return matches.concat(elementsOfType(tree.props?.children, type));
+}
+
+test("moderation actions are only rendered for eligible replies", () => {
+  const tweet = post("reply");
+  const ineligible = tweetComponents.TweetListItem({ tweet, canModerateReply: false });
+  assert.equal(elementsOfType(ineligible.props.actions, SetReplyHiddenAction).length, 0);
+
+  const eligible = tweetComponents.TweetListItem({ tweet, canModerateReply: true });
+  assert.deepEqual(
+    elementsOfType(eligible.props.actions, SetReplyHiddenAction).map((action) => action.props.hidden),
+    [true, false],
+  );
+});
+
+test("post lists pass resolved moderation eligibility to each row", () => {
+  const tree = tweetComponents.TweetList({
+    tweets: [
+      { ...post("eligible-reply"), conversation_id: "root" },
+      { ...post("ordinary-post"), conversation_id: "ordinary-post" },
+    ],
+  });
+  assert.deepEqual(
+    rows(tree).map((row) => row.props.canModerateReply),
+    [true, false],
+  );
+});
+
+test("moderation eligibility follows the authenticated conversation owner", async () => {
+  const client = new ClientV2();
+  client.me = async () => ({ id: "current-user" });
+  const lookups = [];
+  client.cachedRead = async (_key, operation) =>
+    operation({
+      v2: {
+        tweets: async (ids, options) => {
+          lookups.push({ ids, options });
+          return {
+            data: [
+              { id: "foreign-root", author_id: "someone-else" },
+              { id: "owned-root", author_id: "current-user" },
+            ],
+          };
+        },
+      },
+    });
+
+  const tweets = [
+    { ...post("visible-owned-root"), conversation_id: "visible-owned-root", user: { id: "current-user" } },
+    { ...post("visible-owned-reply"), conversation_id: "visible-owned-root", user: { id: "someone-else" } },
+    { ...post("nested-owned-reply"), conversation_id: "owned-root", user: { id: "someone-else" } },
+    { ...post("foreign-reply"), conversation_id: "foreign-root", user: { id: "someone-else" } },
+    { ...post("ordinary-post"), conversation_id: undefined, user: { id: "someone-else" } },
+  ];
+
+  assert.deepEqual(await client.getModeratableReplyIds(tweets), ["visible-owned-reply", "nested-owned-reply"]);
+  assert.deepEqual(lookups, [
+    {
+      ids: ["foreign-root", "owned-root"],
+      options: { "tweet.fields": ["author_id"] },
+    },
+  ]);
+});
 
 function profileEmptyView(username) {
   const tree = Profile({ arguments: { username } });
