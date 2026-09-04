@@ -7,8 +7,12 @@ import { TranslationType } from "@/types/api";
 import { resolveTranslationServices } from "./index";
 
 const preferences = vi.hoisted(() => ({
+  enableOpenAITranslate: true,
+  enableGeminiTranslate: true,
+  openAIAPIKey: "openai-placeholder",
   openAIAPIURL: "https://api.openai.com/v1",
   openAIModel: "gpt-4.1-mini",
+  geminiAPIKey: "gemini-placeholder",
   geminiAPIURL: "https://generativelanguage.googleapis.com",
   geminiModel: "gemini-2.5-flash",
   forceMaxCompletionTokens: false,
@@ -36,8 +40,7 @@ vi.mock("@raycast/api", () => ({
 }));
 
 const legacy: LegacyAIProviderConfiguration = {
-  openAI: {
-    configured: true,
+  openai: {
     enabled: true,
     endpoint: "https://api.openai.com/v1/chat/completions",
     model: "gpt-4.1-mini",
@@ -45,7 +48,6 @@ const legacy: LegacyAIProviderConfiguration = {
     forceMaxCompletionTokens: false,
   },
   gemini: {
-    configured: true,
     enabled: true,
     endpoint: "https://generativelanguage.googleapis.com",
     model: "gemini-2.5-flash",
@@ -54,15 +56,31 @@ const legacy: LegacyAIProviderConfiguration = {
 };
 
 describe("translation service compatibility", () => {
-  it("restores legacy services after all imported profiles are deleted", () => {
+  it("keeps legacy services retired after their replacement profiles are deleted", () => {
     const imported = importLegacyAIProviders({ version: 1, profiles: [] }, legacy);
 
-    const servicesWithImportedProfiles = resolveTranslationServices(imported.profiles);
+    const servicesWithImportedProfiles = resolveTranslationServices(
+      imported.profiles,
+      undefined,
+      imported.legacyProviderAssignments,
+    );
     expect(servicesWithImportedProfiles.map((service) => service.id)).not.toContain(`static:${TranslationType.OpenAI}`);
     expect(servicesWithImportedProfiles.map((service) => service.id)).not.toContain(`static:${TranslationType.Gemini}`);
 
-    const servicesAfterAllProfilesAreDeleted = resolveTranslationServices([]);
-    expect(servicesAfterAllProfilesAreDeleted.map((service) => service.id)).toEqual(
+    const servicesAfterAllProfilesAreDeleted = resolveTranslationServices(
+      [],
+      undefined,
+      imported.legacyProviderAssignments,
+    );
+    expect(servicesAfterAllProfilesAreDeleted.map((service) => service.id)).not.toContain(
+      `static:${TranslationType.OpenAI}`,
+    );
+    expect(servicesAfterAllProfilesAreDeleted.map((service) => service.id)).not.toContain(
+      `static:${TranslationType.Gemini}`,
+    );
+
+    const servicesAfterRestore = resolveTranslationServices([]);
+    expect(servicesAfterRestore.map((service) => service.id)).toEqual(
       expect.arrayContaining([`static:${TranslationType.OpenAI}`, `static:${TranslationType.Gemini}`]),
     );
   });

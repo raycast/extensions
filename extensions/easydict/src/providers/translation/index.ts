@@ -1,8 +1,12 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { hasImportedLegacyAIProvider } from "@/ai-providers/legacy";
+import {
+  getLegacyAIProviderName,
+  isLegacyAIProviderAvailable,
+  isLegacyAIProviderConfigured,
+} from "@/ai-providers/legacyConfiguration";
 import { getAIProviderQueryMode, resolveAIProviderIcon } from "@/ai-providers/runtime";
-import type { AIProviderProfile } from "@/ai-providers/types";
+import type { AIProviderProfile, StoredAIProviderStateV1 } from "@/ai-providers/types";
 import { myPreferences } from "@/consts";
 import { getLangCode } from "@/core/language/utils";
 import {
@@ -68,7 +72,12 @@ const staticTranslationServices: Array<
   { type: TranslationType.Tencent, preference: "enableTencentTranslate", provider: TencentTranslateProvider },
   { type: TranslationType.Volcano, preference: "enableVolcanoTranslate", provider: VolcanoTranslateProvider },
   { type: TranslationType.Caiyun, preference: "enableCaiyunTranslate", provider: CaiyunTranslateProvider },
-  { type: TranslationType.Gemini, preference: "enableGeminiTranslate", provider: GeminiTranslateProvider },
+  {
+    type: TranslationType.Gemini,
+    preference: "enableGeminiTranslate",
+    provider: GeminiTranslateProvider,
+    isEnabled: () => myPreferences.enableGeminiTranslate && isLegacyAIProviderConfigured("gemini"),
+  },
   {
     type: TranslationType.Google,
     preference: "enableGoogleTranslate",
@@ -126,6 +135,7 @@ const staticTranslationServices: Array<
     type: TranslationType.OpenAI,
     preference: "enableOpenAITranslate",
     provider: OpenAITranslateProvider,
+    isEnabled: () => myPreferences.enableOpenAITranslate && isLegacyAIProviderConfigured("openai"),
   },
 ];
 
@@ -158,12 +168,13 @@ export const translationServicesBeforeAIProfilesLoad = translationServices.filte
 export function resolveTranslationServices(
   profiles: AIProviderProfile[],
   providerOrder?: string[],
+  assignments?: StoredAIProviderStateV1["legacyProviderAssignments"],
 ): TranslationServiceConfig[] {
   const dynamicServices = profiles.map((profile): TranslationServiceConfig => {
     const common = {
       id: `profile:${profile.id}`,
       label: profile.name,
-      providerKey: getAIProviderKey(profile),
+      providerKey: getAIProviderKey(profile, assignments),
       order: profile.order,
       type: TranslationType.OpenAI,
       icon: resolveAIProviderIcon(profile),
@@ -175,19 +186,12 @@ export function resolveTranslationServices(
       createProvider: () => createAITranslationProvider(profile),
     };
   });
-  const legacyServices = translationServices.filter((service) => {
-    // Keep the static legacy provider as a reversible fallback: this extension
-    // cannot write the imported profile back into Raycast preferences.
-    if (service.type === TranslationType.OpenAI) {
-      return !hasImportedLegacyAIProvider(profiles, "openai");
-    }
-    if (service.type === TranslationType.Gemini) {
-      return !hasImportedLegacyAIProvider(profiles, "gemini");
-    }
-    return true;
+  const availableBuiltinServices = translationServices.filter((service) => {
+    const legacyProvider = getLegacyAIProviderName(service.type);
+    return legacyProvider ? isLegacyAIProviderAvailable(legacyProvider, profiles, assignments) : true;
   });
   const servicesOrder = myPreferences.servicesOrder ? myPreferences.servicesOrder.split(",") : [];
-  const resolved = [...legacyServices, ...dynamicServices];
+  const resolved = [...availableBuiltinServices, ...dynamicServices];
   const resolvedProviderOrder =
     providerOrder ??
     getProviderOrder(
@@ -195,6 +199,7 @@ export function resolveTranslationServices(
       undefined,
       servicesOrder,
       getBuiltinProviderCandidates(staticTranslationServicesWithOrder),
+      assignments,
     );
   return assignGlobalServiceOrder(resolved, resolvedProviderOrder);
 }

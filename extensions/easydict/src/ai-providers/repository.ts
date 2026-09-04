@@ -7,6 +7,7 @@ import { createTimer } from "@/utils/logger";
 import {
   type AIProviderProfile,
   type JSONOutputMode,
+  type LegacyAIProviderAssignment,
   PROVIDER_ICON_NAMES,
   type ProviderIconConfig,
   type StoredAIProviderStateV1,
@@ -16,6 +17,7 @@ import {
 
 export const AI_PROVIDER_STORAGE_KEY = "ai-provider-profiles";
 const LOG_LABEL = "AI Providers";
+let profileUpdateQueue = Promise.resolve();
 
 export type AIProviderLoadResult =
   | { kind: "missing"; state: StoredAIProviderStateV1 }
@@ -68,15 +70,57 @@ export async function saveAIProviderState(state: StoredAIProviderStateV1): Promi
   await LocalStorage.setItem(AI_PROVIDER_STORAGE_KEY, JSON.stringify(state));
 }
 
+export function fallbackAIProviderToPromptJSON(profileId: string): Promise<boolean> {
+  const update = profileUpdateQueue.then(async () => {
+    const result = await loadAIProviderState();
+    if (result.kind !== "ready") return false;
+
+    const profileIndex = result.state.profiles.findIndex((profile) => profile.id === profileId);
+    const profile = result.state.profiles[profileIndex];
+    if (!profile || profile.adapter !== "openai-compatible") return false;
+    if (profile.jsonOutputMode === "prompt") return true;
+
+    const profiles = [...result.state.profiles];
+    profiles[profileIndex] = { ...profile, jsonOutputMode: "prompt" };
+    await saveAIProviderState({ ...result.state, profiles });
+    return true;
+  });
+  profileUpdateQueue = update.then(
+    () => undefined,
+    () => undefined,
+  );
+  return update;
+}
+
 export function isStoredAIProviderStateV1(value: unknown): value is StoredAIProviderStateV1 {
   if (!isRecord(value) || value.version !== 1 || !Array.isArray(value.profiles)) return false;
   if (value.providerOrder !== undefined && !isProviderOrder(value.providerOrder)) return false;
-  if (value.migration !== undefined) {
-    if (!isRecord(value.migration) || typeof value.migration.legacyPreferencesImported !== "boolean") return false;
-  }
+  if (value.legacyProviderAssignments !== undefined && !isLegacyProviderAssignments(value.legacyProviderAssignments))
+    return false;
   if (!value.profiles.every(isAIProviderProfile)) return false;
   const profileIds = value.profiles.map((profile) => profile.id);
   return new Set(profileIds).size === profileIds.length;
+}
+
+function isLegacyProviderAssignments(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  const allowedProviders = new Set(["openai", "gemini"]);
+  const assignedProfileIds = new Set<string>();
+  for (const [provider, assignment] of Object.entries(value)) {
+    if (!allowedProviders.has(provider) || !isLegacyProviderAssignment(assignment)) return false;
+    if (assignment.kind === "profile") {
+      if (assignedProfileIds.has(assignment.profileId)) return false;
+      assignedProfileIds.add(assignment.profileId);
+    }
+  }
+  return true;
+}
+
+function isLegacyProviderAssignment(value: unknown): value is LegacyAIProviderAssignment {
+  if (!isRecord(value)) return false;
+  return (
+    value.kind === "retired" || (value.kind === "profile" && typeof value.profileId === "string" && !!value.profileId)
+  );
 }
 
 function isProviderOrder(value: unknown): value is string[] {

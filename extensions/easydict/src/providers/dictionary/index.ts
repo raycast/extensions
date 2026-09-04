@@ -1,7 +1,7 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
 import { getAIProviderQueryMode, resolveAIProviderIcon } from "@/ai-providers/runtime";
-import type { AIProviderProfile } from "@/ai-providers/types";
+import type { AIProviderProfile, StoredAIProviderStateV1 } from "@/ai-providers/types";
 import { myPreferences } from "@/consts";
 import { getLanguageOfTwoExceptChinese } from "@/core/language/utils";
 import {
@@ -18,7 +18,7 @@ import { DictionaryType } from "@/types/api";
 import type { BooleanPreferenceKey } from "@/types/preferences";
 import type { QueryInput, RuntimeServiceConfig } from "@/types/query";
 
-import { createAIDictionaryProvider } from "./ai";
+import { createAIDictionaryProvider, type NativeJSONUnsupportedHandler } from "./ai";
 import type { BaseDictionaryProvider } from "./base";
 import { LingueeDictionaryProvider } from "./linguee";
 import { YoudaoDictionaryProvider } from "./youdao";
@@ -86,18 +86,20 @@ export const dictionaryProviderServices = assignGlobalServiceOrder(
 export function resolveDictionaryServices(
   profiles: AIProviderProfile[],
   providerOrder?: string[],
+  onNativeJSONUnsupported?: NativeJSONUnsupportedHandler,
+  assignments?: StoredAIProviderStateV1["legacyProviderAssignments"],
 ): DictionaryServiceConfig[] {
   const dynamicServices = profiles
     .filter((profile) => profile.wordResultMode === "dictionary")
     .map((profile): DictionaryServiceConfig => ({
       id: `profile:${profile.id}:dictionary`,
       label: profile.name,
-      providerKey: getAIProviderKey(profile),
+      providerKey: getAIProviderKey(profile, assignments),
       order: profile.order,
       type: DictionaryType.AI,
       icon: resolveAIProviderIcon(profile),
       enabled: (queryWordInfo) => getAIProviderQueryMode(profile, queryWordInfo) === "dictionary",
-      createProvider: () => createAIDictionaryProvider(profile),
+      createProvider: () => createAIDictionaryProvider(profile, onNativeJSONUnsupported),
       canTriggerAutomaticAudio: false,
     }));
   const servicesOrder = myPreferences.servicesOrder ? myPreferences.servicesOrder.split(",") : [];
@@ -108,6 +110,7 @@ export function resolveDictionaryServices(
       undefined,
       servicesOrder,
       getBuiltinProviderCandidates(staticDictionaryServicesWithOrder),
+      assignments,
     );
   return assignGlobalServiceOrder([...dictionaryProviderServices, ...dynamicServices], resolvedProviderOrder);
 }

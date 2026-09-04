@@ -18,23 +18,38 @@ import {
 import { useState } from "react";
 
 import {
-  hasLegacyAIProvidersToImport,
+  getEffectiveLegacyAIProviderAssignment,
+  getImportableLegacyAIProviderNames,
+  getLegacyAIProviderReplacement,
   importLegacyAIProviders,
-  type LegacyAIProviderConfiguration,
+  LEGACY_AI_PROVIDER_NAMES,
+  normalizeLegacyAIProviderAssignments,
 } from "@/ai-providers/legacy";
+import {
+  getLegacyAIProviderConfiguration,
+  getLegacyAIProviderName,
+  isLegacyAIProviderAvailable,
+  isLegacyAIProviderConfigured,
+} from "@/ai-providers/legacyConfiguration";
 import { getDefaultRaycastAIModel } from "@/ai-providers/modelCatalog";
 import { OPENAI_COMPATIBLE_PRESETS, type OpenAICompatiblePresetName } from "@/ai-providers/presets";
 import { createEmptyAIProviderState } from "@/ai-providers/repository";
 import { isAIProviderProfileRunnable } from "@/ai-providers/runtime";
 import type {
   AIProviderProfile,
+  LegacyAIProviderName,
   OpenAICompatibleProfile,
   RaycastAIProfile,
   StoredAIProviderStateV1,
 } from "@/ai-providers/types";
 import { getProviderIcon, getQueryTypeIcon } from "@/components/ui/Icons";
 import { myPreferences } from "@/consts";
-import { getAIProviderKey, reconcileProviderOrder, syncAIProviderOrders } from "@/core/query/providerOrder";
+import {
+  getAIProviderKey,
+  reconcileAIProviderReplacementOrder,
+  reconcileProviderOrder,
+  syncAIProviderOrders,
+} from "@/core/query/providerOrder";
 import type { useAIProviderProfiles } from "@/hooks/useAIProviderProfiles";
 import {
   type BuiltinProviderService,
@@ -42,59 +57,85 @@ import {
   getCombinedAvailableProviderKeys,
   getCombinedProviderOrder,
 } from "@/providers/registry";
-import { ProviderConfig } from "@/providers/shared/config";
 
-import { AIProviderForm } from "./AIProviderForm";
+import { AIProviderForm, type LegacyReplacementOption } from "./AIProviderForm";
 
 type AIProvidersController = ReturnType<typeof useAIProviderProfiles>;
-type SaveProfilesOptions = Pick<StoredAIProviderStateV1, "providerOrder" | "migration">;
+type SaveProfilesOptions = Pick<StoredAIProviderStateV1, "providerOrder" | "legacyProviderAssignments">;
 
-type ProviderRow = { kind: "builtin"; service: BuiltinProviderService } | { kind: "ai"; profile: AIProviderProfile };
+type ProviderRow =
+  | { kind: "builtin"; service: BuiltinProviderService }
+  | { kind: "legacy"; service: BuiltinProviderService; provider: LegacyAIProviderName }
+  | { kind: "ai"; profile: AIProviderProfile };
 
 export default function ProviderManagementPage({ controller }: { controller: AIProvidersController }) {
   const [selectedProviderKey, setSelectedProviderKey] = useState<string>();
   const profiles = controller.profiles ?? [];
   const legacyConfiguration = getLegacyAIProviderConfiguration();
-  const hasLegacySettingsToImport = controller.storedState
-    ? hasLegacyAIProvidersToImport(controller.storedState, legacyConfiguration)
-    : false;
-  const canImportLegacy = !controller.storedState?.migration?.legacyPreferencesImported && hasLegacySettingsToImport;
-  const canReimportLegacy =
-    controller.storedState?.migration?.legacyPreferencesImported === true && hasLegacySettingsToImport;
+  const assignments = controller.storedState?.legacyProviderAssignments;
+  const importableLegacyProviders = controller.storedState
+    ? getImportableLegacyAIProviderNames(controller.storedState, legacyConfiguration)
+    : [];
+  const restorableLegacyProviders = LEGACY_AI_PROVIDER_NAMES.filter(
+    (provider) =>
+      isLegacyAIProviderConfigured(provider, legacyConfiguration) &&
+      getEffectiveLegacyAIProviderAssignment(provider, profiles, assignments)?.kind === "retired",
+  );
 
   const servicesOrder = myPreferences.servicesOrder ? myPreferences.servicesOrder.split(",") : [];
-  const providerOrder = getCombinedProviderOrder(profiles, controller.storedState?.providerOrder, servicesOrder);
-  const importedProviderKeys = new Set(profiles.map(getAIProviderKey));
-  const builtinServices = builtinProviderServices
-    .filter((service) => !importedProviderKeys.has(service.providerKey))
-    .map((service) => ({ kind: "builtin" as const, service }));
+  const providerOrder = getCombinedProviderOrder(
+    profiles,
+    controller.storedState?.providerOrder,
+    servicesOrder,
+    assignments,
+  );
+  const builtinServices = builtinProviderServices.flatMap((service): ProviderRow[] => {
+    const legacyProvider = getLegacyAIProviderName(service.type);
+    if (!legacyProvider) return [{ kind: "builtin", service }];
+    if (!isLegacyAIProviderAvailable(legacyProvider, profiles, assignments, legacyConfiguration)) return [];
+    return [{ kind: "legacy", service, provider: legacyProvider }];
+  });
   const rows: ProviderRow[] = [
     ...builtinServices,
     ...profiles.map((profile) => ({ kind: "ai" as const, profile })),
   ].sort((left, right) => {
-    const leftKey = left.kind === "builtin" ? left.service.providerKey : getAIProviderKey(left.profile);
-    const rightKey = right.kind === "builtin" ? right.service.providerKey : getAIProviderKey(right.profile);
+    const leftKey = left.kind === "ai" ? getAIProviderKey(left.profile, assignments) : left.service.providerKey;
+    const rightKey = right.kind === "ai" ? getAIProviderKey(right.profile, assignments) : right.service.providerKey;
     return providerOrder.indexOf(leftKey) - providerOrder.indexOf(rightKey);
   });
+  const visibleProviderKeys = rows.map((row) =>
+    row.kind === "ai" ? getAIProviderKey(row.profile, assignments) : row.service.providerKey,
+  );
   async function saveProfiles(nextProfiles: AIProviderProfile[], options: SaveProfilesOptions = {}) {
     const storedState = controller.storedState;
     if (!storedState) return;
+    const nextAssignments = normalizeLegacyAIProviderAssignments(
+      nextProfiles,
+      options.legacyProviderAssignments ?? storedState.legacyProviderAssignments,
+    );
     const savedOrder = options.providerOrder ?? storedState.providerOrder;
-    const fallbackOrder = getCombinedProviderOrder(nextProfiles, undefined, servicesOrder);
-    const previousFallbackOrder = getCombinedProviderOrder(storedState.profiles, undefined, servicesOrder);
-    const previousKeys = new Set(getCombinedAvailableProviderKeys(storedState.profiles));
+    const fallbackOrder = getCombinedProviderOrder(nextProfiles, undefined, servicesOrder, nextAssignments);
+    const previousFallbackOrder = getCombinedProviderOrder(
+      storedState.profiles,
+      undefined,
+      servicesOrder,
+      storedState.legacyProviderAssignments,
+    );
+    const previousKeys = new Set(
+      getCombinedAvailableProviderKeys(storedState.profiles, storedState.legacyProviderAssignments),
+    );
     const appendNewKeys = fallbackOrder.filter((key) => !previousKeys.has(key));
     const nextProviderOrder = reconcileProviderOrder(
       savedOrder,
-      getCombinedAvailableProviderKeys(nextProfiles),
+      getCombinedAvailableProviderKeys(nextProfiles, nextAssignments),
       savedOrder ? fallbackOrder : [...previousFallbackOrder, ...appendNewKeys],
     );
-    const normalizedProfiles = syncAIProviderOrders(nextProfiles, nextProviderOrder);
+    const normalizedProfiles = syncAIProviderOrders(nextProfiles, nextProviderOrder, nextAssignments);
     await controller.update({
       ...storedState,
       profiles: normalizedProfiles,
       providerOrder: nextProviderOrder,
-      migration: options.migration ?? storedState.migration,
+      legacyProviderAssignments: nextAssignments,
     });
     if (normalizedProfiles.filter((profile) => profile.adapter === "raycast-ai" && profile.enabled).length > 1) {
       await showToast({
@@ -105,6 +146,57 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
     }
   }
 
+  async function saveProfileWithReplacement(
+    savedProfile: AIProviderProfile,
+    replacement: LegacyAIProviderName | undefined,
+    isNewProvider: boolean,
+  ) {
+    const currentReplacement = getLegacyAIProviderReplacement(savedProfile.id, assignments);
+    const nextProfiles = isNewProvider
+      ? [...profiles, savedProfile]
+      : profiles.map((candidate) => (candidate.id === savedProfile.id ? savedProfile : candidate));
+    if (currentReplacement === replacement) {
+      await saveProfiles(nextProfiles);
+      return;
+    }
+
+    const nextAssignments = { ...assignments };
+    if (currentReplacement) delete nextAssignments[currentReplacement];
+    if (replacement) {
+      const existing = getEffectiveLegacyAIProviderAssignment(replacement, profiles, assignments);
+      if (existing?.kind === "profile" && existing.profileId !== savedProfile.id) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `${getLegacyProviderTitle(replacement)} is already replaced`,
+        });
+        return;
+      }
+      nextAssignments[replacement] = { kind: "profile", profileId: savedProfile.id };
+    }
+
+    const nextOrder = reconcileAIProviderReplacementOrder(providerOrder, savedProfile, currentReplacement, replacement);
+
+    await saveProfiles(nextProfiles, {
+      providerOrder: nextOrder,
+      legacyProviderAssignments: nextAssignments,
+    });
+    if (currentReplacement && savedProfile.enabled && legacyConfiguration[currentReplacement].enabled) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Legacy provider restored",
+        message: `${savedProfile.name} and ${getLegacyProviderTitle(currentReplacement)} are both enabled.`,
+      });
+    }
+  }
+
+  function getReplacementOptions(profileId: string): LegacyReplacementOption[] {
+    const currentReplacement = getLegacyAIProviderReplacement(profileId, assignments);
+    return LEGACY_AI_PROVIDER_NAMES.filter((provider) => {
+      if (provider === currentReplacement) return true;
+      return isLegacyAIProviderAvailable(provider, profiles, assignments, legacyConfiguration);
+    }).map((provider) => ({ value: provider, title: `${getLegacyProviderTitle(provider)} (Legacy Settings)` }));
+  }
+
   function addAction(title: string, profile: AIProviderProfile, icon = Icon.Plus, showPresetSelector = false) {
     return (
       <Action.Push
@@ -113,44 +205,43 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
         target={
           <AIProviderForm
             profile={profile}
+            isNewProvider
             showPresetSelector={showPresetSelector}
-            onSave={(saved) => saveProfiles([...profiles, saved])}
+            legacyReplacementOptions={getReplacementOptions(profile.id)}
+            onSave={(saved, replacement) => saveProfileWithReplacement(saved, replacement, true)}
           />
         }
       />
     );
   }
 
-  const legacyImportAction = canImportLegacy ? (
-    <Action
-      title="✨ Import Legacy AI Settings"
-      icon={Icon.Download}
-      onAction={async () => {
-        if (!controller.storedState) return;
-        const imported = importLegacyAIProviders(controller.storedState, legacyConfiguration);
-        await saveProfiles(imported.profiles, {
-          providerOrder: imported.providerOrder,
-          migration: imported.migration,
-        });
-        await showToast({ style: Toast.Style.Success, title: "Legacy AI providers imported" });
-      }}
-    />
-  ) : null;
-  const legacyReimportAction = canReimportLegacy ? (
-    <Action
-      title="Re-Import Legacy AI Settings"
-      icon={Icon.Download}
-      onAction={async () => {
-        if (!controller.storedState) return;
-        const imported = importLegacyAIProviders(controller.storedState, legacyConfiguration);
-        await saveProfiles(imported.profiles, {
-          providerOrder: imported.providerOrder,
-          migration: imported.migration,
-        });
-        await showToast({ style: Toast.Style.Success, title: "Missing legacy AI providers restored" });
-      }}
-    />
-  ) : null;
+  async function importLegacyProviders(providerNames: LegacyAIProviderName[]) {
+    if (!controller.storedState) return;
+    const imported = importLegacyAIProviders(controller.storedState, legacyConfiguration, providerNames);
+    await saveProfiles(imported.profiles, {
+      providerOrder: imported.providerOrder,
+      legacyProviderAssignments: imported.legacyProviderAssignments,
+    });
+    const importedNames = providerNames.map(getLegacyProviderTitle).join(" and ");
+    await showToast({ style: Toast.Style.Success, title: `${importedNames} imported` });
+  }
+
+  async function restoreLegacyProvider(provider: LegacyAIProviderName) {
+    const nextAssignments = { ...assignments };
+    delete nextAssignments[provider];
+    await saveProfiles(profiles, { legacyProviderAssignments: nextAssignments });
+    await showToast({ style: Toast.Style.Success, title: `${getLegacyProviderTitle(provider)} restored` });
+  }
+
+  function importLegacyAction(provider: LegacyAIProviderName) {
+    return (
+      <Action
+        title={`Import ${getLegacyProviderTitle(provider)} as AI Provider`}
+        icon={Icon.Download}
+        onAction={() => importLegacyProviders([provider])}
+      />
+    );
+  }
 
   if (!controller.storedState && !controller.isLoading) {
     const message = getConfigurationErrorMessage(controller);
@@ -183,9 +274,12 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
   }
 
   async function moveProvider(providerKey: string, offset: -1 | 1) {
+    const visibleIndex = visibleProviderKeys.indexOf(providerKey);
+    const adjacentKey = visibleProviderKeys[visibleIndex + offset];
+    if (visibleIndex < 0 || !adjacentKey) return;
     const currentIndex = providerOrder.indexOf(providerKey);
-    const nextIndex = currentIndex + offset;
-    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= providerOrder.length) return;
+    const nextIndex = providerOrder.indexOf(adjacentKey);
+    if (currentIndex < 0 || nextIndex < 0) return;
     const nextOrder = [...providerOrder];
     [nextOrder[currentIndex], nextOrder[nextIndex]] = [nextOrder[nextIndex], nextOrder[currentIndex]];
     setSelectedProviderKey(providerKey);
@@ -194,7 +288,7 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
   }
 
   function moveActions(providerKey: string) {
-    const index = providerOrder.indexOf(providerKey);
+    const index = visibleProviderKeys.indexOf(providerKey);
     return (
       <>
         {index > 0 && (
@@ -205,7 +299,7 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
             onAction={() => moveProvider(providerKey, -1)}
           />
         )}
-        {index < providerOrder.length - 1 && (
+        {index < visibleProviderKeys.length - 1 && (
           <Action
             title="Move Down"
             icon={Icon.ArrowDown}
@@ -217,12 +311,35 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
     );
   }
 
-  function legacySettingsSection() {
-    if (!legacyImportAction && !legacyReimportAction) return null;
+  function legacySettingsSection(excludedImport?: LegacyAIProviderName) {
+    const visibleImports = importableLegacyProviders.filter((provider) => provider !== excludedImport);
+    if (visibleImports.length === 0 && restorableLegacyProviders.length === 0 && importableLegacyProviders.length < 2)
+      return null;
     return (
       <ActionPanel.Section title="Legacy Settings">
-        {legacyImportAction}
-        {legacyReimportAction}
+        {visibleImports.map((provider) => (
+          <Action
+            key={`import-${provider}`}
+            title={`Import ${getLegacyProviderTitle(provider)} as AI Provider`}
+            icon={Icon.Download}
+            onAction={() => importLegacyProviders([provider])}
+          />
+        ))}
+        {importableLegacyProviders.length > 1 && (
+          <Action
+            title="Import All Legacy AI Settings"
+            icon={Icon.Download}
+            onAction={() => importLegacyProviders(importableLegacyProviders)}
+          />
+        )}
+        {restorableLegacyProviders.map((provider) => (
+          <Action
+            key={`restore-${provider}`}
+            title={`Restore Legacy ${getLegacyProviderTitle(provider)}`}
+            icon={Icon.RotateClockwise}
+            onAction={() => restoreLegacyProvider(provider)}
+          />
+        ))}
       </ActionPanel.Section>
     );
   }
@@ -248,8 +365,12 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
           key="provider-actions"
           id="provider-actions"
           icon={Icon.Plus}
-          title={legacyImportAction || legacyReimportAction ? "Add or Import Providers" : "Add Providers"}
-          subtitle="Create an AI provider or restore legacy settings"
+          title={
+            importableLegacyProviders.length > 0 || restorableLegacyProviders.length > 0
+              ? "Add, Import, or Restore Providers"
+              : "Add Providers"
+          }
+          subtitle="Create an AI provider or manage legacy settings"
           actions={
             <ActionPanel>
               {addProviderSection()}
@@ -259,19 +380,27 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
         />
       )}
       {rows.map((row) => {
-        if (row.kind === "builtin") {
+        if (row.kind !== "ai") {
           const { service } = row;
+          const isLegacy = row.kind === "legacy";
           return (
             <List.Item
               key={service.providerKey}
               id={service.providerKey}
               icon={getQueryTypeIcon(service.type)}
               title={service.label}
-              accessories={[{ tag: "Built-in" }, { tag: getBuiltinPreferenceStatusTag(service.enabledInPreferences) }]}
+              subtitle={isLegacy ? "Legacy Settings" : undefined}
+              accessories={[
+                { tag: isLegacy ? "Legacy" : "Built-in" },
+                { tag: getBuiltinPreferenceStatusTag(service.enabledInPreferences) },
+              ]}
               actions={
                 <ActionPanel>
+                  {isLegacy && importLegacyAction(row.provider)}
                   <Action title="Open Extension Settings" icon={Icon.Gear} onAction={openExtensionPreferences} />
                   {moveActions(service.providerKey)}
+                  {addProviderSection()}
+                  {legacySettingsSection(isLegacy ? row.provider : undefined)}
                 </ActionPanel>
               }
             />
@@ -280,7 +409,8 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
 
         const { profile } = row;
         const runnable = isAIProviderProfileRunnable(profile);
-        const providerKey = getAIProviderKey(profile);
+        const replacement = getLegacyAIProviderReplacement(profile.id, assignments);
+        const providerKey = getAIProviderKey(profile, assignments);
         return (
           <List.Item
             key={providerKey}
@@ -288,7 +418,7 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
             icon={getProviderIcon(profile.icon, profile.name)}
             title={profile.name}
             subtitle={`${profile.adapter === "raycast-ai" ? "Raycast AI" : "OpenAI-Compatible"} · ${profile.model}`}
-            accessories={getAIProviderAccessories(profile, runnable)}
+            accessories={getAIProviderAccessories(profile, runnable, replacement)}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -297,9 +427,9 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
                   target={
                     <AIProviderForm
                       profile={profile}
-                      onSave={(saved) =>
-                        saveProfiles(profiles.map((candidate) => (candidate.id === saved.id ? saved : candidate)))
-                      }
+                      legacyReplacement={replacement}
+                      legacyReplacementOptions={getReplacementOptions(profile.id)}
+                      onSave={(saved, nextReplacement) => saveProfileWithReplacement(saved, nextReplacement, false)}
                     />
                   }
                 />
@@ -332,12 +462,21 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
                   onAction={async () => {
                     const confirmed = await confirmAlert({
                       title: `Delete ${profile.name}?`,
-                      message: "This removes the saved provider and its API key.",
+                      message: replacement
+                        ? `This removes the saved provider and its API key. Legacy ${getLegacyProviderTitle(replacement)} will remain retired until you restore it manually.`
+                        : "This removes the saved provider and its API key.",
                       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
                     });
                     if (confirmed) {
                       setSelectedProviderKey(undefined);
-                      await saveProfiles(profiles.filter((candidate) => candidate.id !== profile.id));
+                      const nextAssignments = { ...assignments };
+                      if (replacement) nextAssignments[replacement] = { kind: "retired" };
+                      await saveProfiles(
+                        profiles.filter((candidate) => candidate.id !== profile.id),
+                        {
+                          legacyProviderAssignments: nextAssignments,
+                        },
+                      );
                     }
                   }}
                 />
@@ -357,8 +496,12 @@ function getAIProviderStatusTag(profile: AIProviderProfile, runnable: boolean) {
   return profile.enabled ? { value: "Enabled", color: Color.Green } : { value: "Disabled", color: Color.SecondaryText };
 }
 
-function getAIProviderAccessories(profile: AIProviderProfile, runnable: boolean) {
-  return [{ tag: "AI Provider" }, { tag: getAIProviderStatusTag(profile, runnable) }];
+function getAIProviderAccessories(profile: AIProviderProfile, runnable: boolean, replacement?: LegacyAIProviderName) {
+  return [
+    { tag: "AI Provider" },
+    ...(replacement ? [{ tag: `Replaces ${getLegacyProviderTitle(replacement)}` }] : []),
+    { tag: getAIProviderStatusTag(profile, runnable) },
+  ];
 }
 
 function getBuiltinPreferenceStatusTag(enabled: boolean | undefined) {
@@ -387,7 +530,6 @@ function createOpenAIProfile(presetName: OpenAICompatiblePresetName, order: numb
     order,
     apiKey: "",
     wordResultMode: "translation",
-    jsonOutputMode: "prompt",
     ...preset,
   };
 }
@@ -405,22 +547,6 @@ function createRaycastAIProfile(order: number): RaycastAIProfile {
   };
 }
 
-function getLegacyAIProviderConfiguration(): LegacyAIProviderConfiguration {
-  return {
-    openAI: {
-      configured: Boolean(ProviderConfig.openAIAPIKey),
-      enabled: myPreferences.enableOpenAITranslate,
-      endpoint: ProviderConfig.openAIEndpoint,
-      model: ProviderConfig.openAIModel,
-      apiKey: ProviderConfig.openAIAPIKey ?? "",
-      forceMaxCompletionTokens: ProviderConfig.forceMaxCompletionTokens,
-    },
-    gemini: {
-      configured: Boolean(ProviderConfig.geminiAPIKey),
-      enabled: myPreferences.enableGeminiTranslate,
-      endpoint: ProviderConfig.geminiEndpoint,
-      model: ProviderConfig.geminiModel,
-      apiKey: ProviderConfig.geminiAPIKey ?? "",
-    },
-  };
+function getLegacyProviderTitle(provider: LegacyAIProviderName): string {
+  return provider === "openai" ? "OpenAI" : "Gemini";
 }

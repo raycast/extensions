@@ -52,11 +52,13 @@ export interface OpenAICompatibleProfile extends AIProviderProfileBase {
 
 export type AIProviderProfile = RaycastAIProfile | OpenAICompatibleProfile;
 
+export type LegacyAIProviderName = "openai" | "gemini";
+
+export type LegacyAIProviderAssignment = { kind: "profile"; profileId: string } | { kind: "retired" };
+
 export interface StoredAIProviderStateV1 {
   version: 1;
   profiles: AIProviderProfile[];
   providerOrder?: string[];
-  migration?: {
-    legacyPreferencesImported: boolean;
-  };
+  legacyProviderAssignments?: Partial<Record<LegacyAIProviderName, LegacyAIProviderAssignment>>;
 }

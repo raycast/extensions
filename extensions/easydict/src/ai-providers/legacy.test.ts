@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { hasImportedLegacyAIProvider, importLegacyAIProviders } from "./legacy";
+import {
+  getEffectiveLegacyAIProviderAssignment,
+  getImportableLegacyAIProviderNames,
+  getLegacyAIProviderReplacement,
+  importLegacyAIProviders,
+} from "./legacy";
 import type { StoredAIProviderStateV1 } from "./types";
 
 const legacy = {
-  openAI: {
-    configured: true,
+  openai: {
     enabled: true,
     endpoint: "https://api.openai.com/v1/chat/completions",
     model: "gpt-4.1-mini",
@@ -13,7 +17,6 @@ const legacy = {
     forceMaxCompletionTokens: false,
   },
   gemini: {
-    configured: true,
     enabled: false,
     endpoint: "https://generativelanguage.googleapis.com",
     model: "gemini-2.5-flash",
@@ -22,43 +25,58 @@ const legacy = {
 };
 
 describe("legacy AI provider import", () => {
-  it("normalizes endpoints, preserves enablement, and is idempotent", () => {
+  it("creates ordinary profiles, preserves enablement, and assigns each legacy provider once", () => {
     const initial: StoredAIProviderStateV1 = { version: 1, profiles: [] };
     const converted = importLegacyAIProviders(initial, legacy);
+    const [openAIProfile, geminiProfile] = converted.profiles;
 
     expect(converted.profiles).toMatchObject([
       {
-        id: "legacy-openai",
         enabled: true,
-        wordResultMode: "translation",
         endpoint: "https://api.openai.com/v1",
         tokenLimitMode: "max-tokens",
         jsonOutputMode: "prompt",
       },
       {
-        id: "legacy-gemini",
         enabled: false,
-        wordResultMode: "translation",
         endpoint: "https://generativelanguage.googleapis.com/v1beta/openai",
         tokenLimitMode: "max-tokens",
         jsonOutputMode: "prompt",
       },
     ]);
+    expect(converted.legacyProviderAssignments).toEqual({
+      openai: { kind: "profile", profileId: openAIProfile.id },
+      gemini: { kind: "profile", profileId: geminiProfile.id },
+    });
+    expect(getLegacyAIProviderReplacement(geminiProfile.id, converted.legacyProviderAssignments)).toBe("gemini");
     expect(importLegacyAIProviders(converted, legacy)).toBe(converted);
   });
 
-  it("restores only a deleted legacy provider after migration", () => {
+  it("treats a missing assigned profile as retired until the user restores it", () => {
     const converted = importLegacyAIProviders({ version: 1, profiles: [] }, legacy);
-    const withoutOpenAI: StoredAIProviderStateV1 = {
-      ...converted,
-      profiles: converted.profiles.filter((profile) => profile.id !== "legacy-openai"),
-    };
+    const withoutProfile: StoredAIProviderStateV1 = { ...converted, profiles: [] };
 
-    const restored = importLegacyAIProviders(withoutOpenAI, legacy);
-    expect(hasImportedLegacyAIProvider(withoutOpenAI.profiles, "openai")).toBe(false);
-    expect(hasImportedLegacyAIProvider(withoutOpenAI.profiles, "gemini")).toBe(true);
-    expect(restored.migration?.legacyPreferencesImported).toBe(true);
-    expect(restored.profiles.map((profile) => profile.id)).toEqual(["legacy-gemini", "legacy-openai"]);
-    expect(restored.profiles.map((profile) => profile.order)).toEqual([1, 2]);
+    expect(
+      getEffectiveLegacyAIProviderAssignment(
+        "openai",
+        withoutProfile.profiles,
+        withoutProfile.legacyProviderAssignments,
+      ),
+    ).toEqual({ kind: "retired" });
+    expect(getImportableLegacyAIProviderNames(withoutProfile, legacy)).not.toContain("openai");
+
+    const restored: StoredAIProviderStateV1 = { ...withoutProfile, legacyProviderAssignments: undefined };
+    expect(getImportableLegacyAIProviderNames(restored, legacy)).toEqual(["openai", "gemini"]);
+  });
+
+  it("imports only the legacy provider selected by the user", () => {
+    const converted = importLegacyAIProviders({ version: 1, profiles: [] }, legacy, ["gemini"]);
+    const [geminiProfile] = converted.profiles;
+
+    expect(converted.profiles).toHaveLength(1);
+    expect(geminiProfile.name).toBe("Gemini");
+    expect(converted.legacyProviderAssignments).toEqual({
+      gemini: { kind: "profile", profileId: geminiProfile.id },
+    });
   });
 });

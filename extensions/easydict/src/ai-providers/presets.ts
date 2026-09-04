@@ -1,6 +1,6 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import type { ProviderIconConfig, TokenLimitMode } from "./types";
+import type { JSONOutputMode, ProviderIconConfig, TokenLimitMode } from "./types";
 
 export interface OpenAICompatiblePreset {
   name: string;
@@ -9,6 +9,7 @@ export interface OpenAICompatiblePreset {
   model: string;
   icon: ProviderIconConfig;
   tokenLimitMode: TokenLimitMode;
+  jsonOutputMode: JSONOutputMode;
 }
 
 export const OPENAI_COMPATIBLE_PRESETS = {
@@ -18,6 +19,7 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "",
     icon: { kind: "initials" },
     tokenLimitMode: "max-tokens",
+    jsonOutputMode: "prompt",
   },
   openai: {
     name: "OpenAI",
@@ -26,6 +28,7 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "gpt-5.4-mini",
     icon: { kind: "preset", name: "openai" },
     tokenLimitMode: "max-completion-tokens",
+    jsonOutputMode: "json-object",
   },
   gemini: {
     name: "Gemini",
@@ -34,6 +37,7 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "gemini-3.5-flash",
     icon: { kind: "preset", name: "gemini" },
     tokenLimitMode: "max-tokens",
+    jsonOutputMode: "prompt",
   },
   deepseek: {
     name: "DeepSeek",
@@ -42,6 +46,7 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "deepseek-v4-flash",
     icon: { kind: "preset", name: "deepseek" },
     tokenLimitMode: "max-tokens",
+    jsonOutputMode: "json-object",
   },
   openrouter: {
     name: "OpenRouter",
@@ -50,6 +55,7 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "openrouter/free",
     icon: { kind: "preset", name: "openrouter" },
     tokenLimitMode: "max-tokens",
+    jsonOutputMode: "prompt",
   },
   siliconflow: {
     name: "SiliconFlow",
@@ -58,6 +64,7 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "deepseek-ai/DeepSeek-V3",
     icon: { kind: "preset", name: "siliconflow" },
     tokenLimitMode: "max-tokens",
+    jsonOutputMode: "json-object",
   },
   zhipu: {
     name: "Zhipu GLM",
@@ -66,6 +73,7 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "glm-5.2",
     icon: { kind: "preset", name: "zhipu" },
     tokenLimitMode: "max-tokens",
+    jsonOutputMode: "json-object",
   },
   kimi: {
     name: "Kimi",
@@ -74,6 +82,7 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "kimi-k2.6",
     icon: { kind: "preset", name: "kimi" },
     tokenLimitMode: "max-completion-tokens",
+    jsonOutputMode: "json-object",
   },
   minimax: {
     name: "MiniMax",
@@ -82,6 +91,7 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "MiniMax-M2.7",
     icon: { kind: "preset", name: "minimax" },
     tokenLimitMode: "max-tokens",
+    jsonOutputMode: "prompt",
   },
   mimo: {
     name: "Xiaomi MiMo",
@@ -90,6 +100,7 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "mimo-v2.5",
     icon: { kind: "preset", name: "mimo" },
     tokenLimitMode: "max-tokens",
+    jsonOutputMode: "json-object",
   },
   opencodeZen: {
     name: "OpenCode Zen",
@@ -98,6 +109,7 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "deepseek-v4-flash",
     icon: { kind: "favicon", website: "https://opencode.ai" },
     tokenLimitMode: "max-tokens",
+    jsonOutputMode: "prompt",
   },
   opencodeGo: {
     name: "OpenCode Go",
@@ -106,7 +118,17 @@ export const OPENAI_COMPATIBLE_PRESETS = {
     model: "deepseek-v4-flash",
     icon: { kind: "favicon", website: "https://opencode.ai" },
     tokenLimitMode: "max-tokens",
+    jsonOutputMode: "prompt",
   },
 } as const satisfies Record<string, OpenAICompatiblePreset>;
 
 export type OpenAICompatiblePresetName = keyof typeof OPENAI_COMPATIBLE_PRESETS;
+
+export function getOpenAICompatiblePresetSelection(presetName: OpenAICompatiblePresetName) {
+  const preset = OPENAI_COMPATIBLE_PRESETS[presetName];
+  return {
+    ...preset,
+    website: "website" in preset ? preset.website : "",
+    apiKey: "" as const,
+  };
+}

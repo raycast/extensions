@@ -1,5 +1,5 @@
-import { LEGACY_GEMINI_PROFILE_ID, LEGACY_OPENAI_PROFILE_ID } from "@/ai-providers/legacy";
-import type { AIProviderProfile } from "@/ai-providers/types";
+import { getLegacyAIProviderReplacement } from "@/ai-providers/legacy";
+import type { AIProviderProfile, LegacyAIProviderName, StoredAIProviderStateV1 } from "@/ai-providers/types";
 import { DictionaryType, TranslationType } from "@/types/api";
 
 export type BuiltinProviderCategory = "dictionary" | "translation";
@@ -43,25 +43,30 @@ export function getBuiltinProviderKey(category: BuiltinProviderCategory, type: s
   return `builtin:${category}:${type}`;
 }
 
-export function getAIProviderKey(profile: AIProviderProfile): string {
-  if (profile.id === LEGACY_OPENAI_PROFILE_ID) {
-    return getBuiltinProviderKey("translation", TranslationType.OpenAI);
-  }
-  if (profile.id === LEGACY_GEMINI_PROFILE_ID) {
-    return getBuiltinProviderKey("translation", TranslationType.Gemini);
-  }
+export function getLegacyAIProviderKey(provider: LegacyAIProviderName): string {
+  const type = provider === "openai" ? TranslationType.OpenAI : TranslationType.Gemini;
+  return getBuiltinProviderKey("translation", type);
+}
+
+export function getAIProviderKey(
+  profile: AIProviderProfile,
+  assignments?: StoredAIProviderStateV1["legacyProviderAssignments"],
+): string {
+  const replacement = getLegacyAIProviderReplacement(profile.id, assignments);
+  if (replacement) return getLegacyAIProviderKey(replacement);
   return `ai:${profile.id}`;
 }
 
 export function getProviderOrderCandidates(
   profiles: AIProviderProfile[],
   builtinCandidates: ProviderOrderCandidate[] = [],
+  assignments?: StoredAIProviderStateV1["legacyProviderAssignments"],
 ): ProviderOrderCandidate[] {
   const candidates = [...builtinCandidates];
   const staticKeys = new Set(candidates.map((candidate) => candidate.providerKey));
 
   for (const profile of profiles) {
-    const providerKey = getAIProviderKey(profile);
+    const providerKey = getAIProviderKey(profile, assignments);
     if (staticKeys.has(providerKey)) continue;
     candidates.push({
       providerKey,
@@ -77,8 +82,9 @@ export function getProviderOrderCandidates(
 export function getAvailableProviderKeys(
   profiles: AIProviderProfile[],
   builtinCandidates: ProviderOrderCandidate[] = [],
+  assignments?: StoredAIProviderStateV1["legacyProviderAssignments"],
 ): string[] {
-  return getProviderOrderCandidates(profiles, builtinCandidates).map((candidate) => candidate.providerKey);
+  return getProviderOrderCandidates(profiles, builtinCandidates, assignments).map((candidate) => candidate.providerKey);
 }
 
 export function getLegacyServiceTypeOrder(servicesOrder: string[]): string[] {
@@ -171,13 +177,29 @@ export function reconcileProviderOrder(
   return result;
 }
 
+export function reconcileAIProviderReplacementOrder(
+  providerOrder: string[],
+  profile: AIProviderProfile,
+  previousReplacement: LegacyAIProviderName | undefined,
+  nextReplacement: LegacyAIProviderName | undefined,
+): string[] {
+  if (previousReplacement === nextReplacement) return providerOrder;
+  const nextOrder = providerOrder.filter((key) => key !== getAIProviderKey(profile));
+  if (nextReplacement || !previousReplacement) return nextOrder;
+
+  const legacyIndex = nextOrder.indexOf(getLegacyAIProviderKey(previousReplacement));
+  nextOrder.splice(legacyIndex < 0 ? nextOrder.length : legacyIndex + 1, 0, getAIProviderKey(profile));
+  return nextOrder;
+}
+
 export function getProviderOrder(
   profiles: AIProviderProfile[],
   savedOrder: string[] | undefined,
   servicesOrder: string[] = [],
   builtinCandidates: ProviderOrderCandidate[] = [],
+  assignments?: StoredAIProviderStateV1["legacyProviderAssignments"],
 ): string[] {
-  const candidates = getProviderOrderCandidates(profiles, builtinCandidates);
+  const candidates = getProviderOrderCandidates(profiles, builtinCandidates, assignments);
   const fallbackOrder = getInitialProviderOrder(candidates, servicesOrder);
   return reconcileProviderOrder(
     savedOrder,
@@ -197,8 +219,12 @@ export function assignGlobalServiceOrder<T extends { providerKey: string; order:
   }));
 }
 
-export function syncAIProviderOrders(profiles: AIProviderProfile[], providerOrder: string[]): AIProviderProfile[] {
-  const profileKeys = new Set(profiles.map(getAIProviderKey));
+export function syncAIProviderOrders(
+  profiles: AIProviderProfile[],
+  providerOrder: string[],
+  assignments?: StoredAIProviderStateV1["legacyProviderAssignments"],
+): AIProviderProfile[] {
+  const profileKeys = new Set(profiles.map((profile) => getAIProviderKey(profile, assignments)));
   const orderByKey = new Map<string, number>();
   let profileOrder = 0;
   for (const key of providerOrder) {
@@ -210,6 +236,6 @@ export function syncAIProviderOrders(profiles: AIProviderProfile[], providerOrde
 
   return profiles.map((profile) => ({
     ...profile,
-    order: orderByKey.get(getAIProviderKey(profile)) ?? profile.order,
+    order: orderByKey.get(getAIProviderKey(profile, assignments)) ?? profile.order,
   }));
 }

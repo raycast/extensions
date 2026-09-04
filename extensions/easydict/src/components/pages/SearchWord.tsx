@@ -1,8 +1,10 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
 import { getSelectedText, Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { fallbackAIProviderToPromptJSON } from "@/ai-providers/repository";
+import type { OpenAICompatibleProfile } from "@/ai-providers/types";
 import { ListActionPanel } from "@/components/ui/ActionPanel";
 import { getListItemIcon } from "@/components/ui/Icons";
 import { getWordAccessories } from "@/components/ui/WordAccessories";
@@ -42,9 +44,31 @@ export default function SearchWord({ initialQueryText, fallbackText }: SearchWor
   const { isInstalledEudic } = useInstalledEudic();
   const { has, toggle } = useFavoriteWords();
   const aiProviderProfiles = useAIProviderProfiles();
+  const handleNativeJSONUnsupported = useCallback(
+    async (fallbackProfile: OpenAICompatibleProfile) => {
+      try {
+        const saved = await fallbackAIProviderToPromptJSON(fallbackProfile.id);
+        if (saved) await aiProviderProfiles.revalidate();
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Native JSON is unsupported",
+          message: saved
+            ? `${fallbackProfile.name} was switched to Prompt-Based JSON.`
+            : `${fallbackProfile.name} used Prompt-Based JSON for this request. Update the saved provider manually.`,
+        });
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Native JSON is unsupported",
+          message: `${fallbackProfile.name} used Prompt-Based JSON for this request, but its saved setting could not be updated.`,
+        });
+      }
+    },
+    [aiProviderProfiles.revalidate],
+  );
   const resolvedServiceSnapshot = useMemo(() => {
-    if (aiProviderProfiles.profiles) {
-      return resolveProviderServices(aiProviderProfiles.profiles, aiProviderProfiles.storedState?.providerOrder);
+    if (aiProviderProfiles.storedState) {
+      return resolveProviderServices(aiProviderProfiles.storedState, handleNativeJSONUnsupported);
     }
     return {
       translationServices:
@@ -53,7 +77,7 @@ export default function SearchWord({ initialQueryText, fallbackText }: SearchWor
           : builtinTranslationServices,
       dictionaryServices: builtinDictionaryProviderServices,
     };
-  }, [aiProviderProfiles.profiles, aiProviderProfiles.state.kind]);
+  }, [aiProviderProfiles.profiles, aiProviderProfiles.state.kind, handleNativeJSONUnsupported]);
 
   const {
     displaySections,

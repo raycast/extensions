@@ -63,11 +63,14 @@ describe("combined provider registry", () => {
 
   it("passes one combined order to both category resolvers", () => {
     const expectedOrder = getCombinedProviderOrder([]);
-    const snapshot = resolveProviderServices([]);
+    const snapshot = resolveProviderServices({ version: 1, profiles: [] });
     const services = [...snapshot.dictionaryServices, ...snapshot.translationServices];
 
     expect(services.map((service) => service.order)).toEqual(
       services.map((service) => expectedOrder.indexOf(service.providerKey)),
+    );
+    expect(snapshot.translationServices.map((service) => service.type)).not.toEqual(
+      expect.arrayContaining(["OpenAI Translate", "Gemini Translate"]),
     );
   });
 });

@@ -26,12 +26,13 @@ newProvider: {
   model: "provider-model-id",
   icon: { kind: "initials" },
   tokenLimitMode: "max-tokens",
+  jsonOutputMode: "prompt",
 },
 ```
 
-`name`, `endpoint`, `website`, `model`, `icon`, and `tokenLimitMode` are form defaults. The preset uses the shared OpenAI-compatible adapter at runtime; do not add provider-specific request code for a standard-compatible endpoint. `tokenLimitMode` selects the corresponding token parameter. The provider form validates the name, endpoint, and model; whether model discovery or inference requires an API key depends on the provider. OpenCode Zen and OpenCode Go can load their model catalogs anonymously, but their inference requests still require the provider API key.
+`name`, `endpoint`, `website`, `model`, `icon`, `tokenLimitMode`, and `jsonOutputMode` are form defaults. The preset uses the shared OpenAI-compatible adapter at runtime; do not add provider-specific request code for a standard-compatible endpoint. `tokenLimitMode` selects the corresponding token parameter. Set `jsonOutputMode` to `json-object` only when the preset's endpoint and model are documented to support it; otherwise use `prompt`. The provider form validates the name, endpoint, and model; whether model discovery or inference requires an API key depends on the provider. OpenCode Zen and OpenCode Go can load their model catalogs anonymously, but their inference requests still require the provider API key.
 
-Providers created from a preset receive a stable saved-order key and appear alongside built-in services once added. Do not derive that key from a display label or reorder the built-in registry casually, because saved orders and legacy migrations depend on stable keys.
+Providers created from a preset receive an ID-based saved-order key and appear alongside built-in services once added. A provider that explicitly replaces a legacy OpenAI or Gemini configuration occupies that legacy service's stable ordering slot instead. Do not derive keys from display labels or reorder the built-in registry casually, because saved orders and legacy replacements depend on stable keys.
 
 The runtime normalizes the endpoint with `normalizeOpenAICompatibleEndpoint`, including a pasted trailing `/chat/completions` path, before making requests.
 

@@ -148,9 +148,9 @@ npm install && npm run dev
 
 ### 管理 Provider
 
-使用 **Manage Providers** 统一调整内置 Provider 和 AI Provider 的顺序。列表会标明 Built-in 或 AI Provider 类型，并显示 Enabled/Disabled 状态（AI Provider 还可能显示 Invalid）；可在 macOS 上用 `Cmd+Shift+Up/Down`、Windows 上用 `Ctrl+Shift+Up/Down` 调整顺序。在此编辑、测试、启用、停用、复制或删除 AI Provider；内置 Provider 在 Extension Settings 中配置。AI Provider可使用 Raycast AI 或自定义 OpenAI 兼容接口。预设包括 OpenAI、Gemini、DeepSeek、OpenRouter、SiliconFlow、Zhipu GLM、Kimi、MiniMax、Xiaomi MiMo、OpenCode Zen 和 OpenCode Go。
+使用 **Manage Providers** 统一调整内置 Provider、已配置的旧版 Provider 和 AI Provider 的顺序。列表会标明 Provider 类型，并显示 Enabled/Disabled 状态（AI Provider 还可能显示 Invalid）；可在 macOS 上用 `Cmd+Shift+Up/Down`、Windows 上用 `Ctrl+Shift+Up/Down` 调整顺序。在此编辑、测试、启用、停用、复制或删除 AI Provider；内置 Provider 在 Extension Settings 中配置。AI Provider 可使用 Raycast AI 或自定义 OpenAI 兼容接口。预设包括 OpenAI、Gemini、DeepSeek、OpenRouter、SiliconFlow、Zhipu GLM、Kimi、MiniMax、Xiaomi MiMo、OpenCode Zen 和 OpenCode Go。
 
-可选择 **Plain Translation** 或 **AI-Generated Dictionary Entry**。支持时会自动发现模型，也可以手动输入模型名称。现有的 OpenAI 和 Gemini 设置可以从旧版配置导入。部分模型可能无法返回有效的结构化词典结果而需要重试，生成词典内容也可能耗时更长。
+可选择 **Plain Translation** 或 **AI-Generated Dictionary Entry**。支持时会自动发现模型，也可以手动输入模型名称。已配置的旧版 OpenAI 和 Gemini 设置可以单独或一起导入；导入后的 AI Provider 会显式替代对应旧版位置。删除替代项不会让旧版 Provider 自动恢复，必须由用户手动 Restore。新建 Provider 或修改连接相关配置后会默认提供 Test & Save，同时仍可选择 Save Without Testing。JSON 输出模式会根据预设选择默认值。部分模型可能无法返回有效的结构化词典结果而需要重试，生成词典内容也可能耗时更长。
 
 ### 偏好语言
 

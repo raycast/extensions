@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { LEGACY_GEMINI_PROFILE_ID, LEGACY_OPENAI_PROFILE_ID } from "@/ai-providers/legacy";
 import { DictionaryType, TranslationType } from "@/types/api";
 
 import {
@@ -9,6 +8,7 @@ import {
   getBuiltinProviderKey,
   getInitialProviderOrder,
   getProviderOrder,
+  reconcileAIProviderReplacementOrder,
   reconcileProviderOrder,
 } from "./providerOrder";
 
@@ -93,41 +93,26 @@ describe("provider ordering", () => {
     ).toEqual([existing, newProvider]);
   });
 
-  it("uses legacy profile IDs as stable built-in keys", () => {
+  it("uses explicit legacy assignments as stable built-in keys", () => {
     const openAIKey = getBuiltinProviderKey("translation", TranslationType.OpenAI);
     const geminiKey = getBuiltinProviderKey("translation", TranslationType.Gemini);
-    expect(
-      getAIProviderKey({
-        id: LEGACY_OPENAI_PROFILE_ID,
-        adapter: "openai-compatible",
-        name: "OpenAI",
-        enabled: true,
-        order: 0,
-        icon: { kind: "preset", name: "openai" },
-        wordResultMode: "translation",
-        endpoint: "https://api.openai.com/v1",
-        model: "model",
-        apiKey: "key",
-        tokenLimitMode: "max-tokens",
-        jsonOutputMode: "prompt",
-      }),
-    ).toBe(openAIKey);
-    expect(
-      getAIProviderKey({
-        id: LEGACY_GEMINI_PROFILE_ID,
-        adapter: "openai-compatible",
-        name: "Gemini",
-        enabled: true,
-        order: 0,
-        icon: { kind: "preset", name: "gemini" },
-        wordResultMode: "translation",
-        endpoint: "https://example.com/v1",
-        model: "model",
-        apiKey: "key",
-        tokenLimitMode: "max-tokens",
-        jsonOutputMode: "prompt",
-      }),
-    ).toBe(geminiKey);
+    const profile = {
+      id: "profile",
+      adapter: "openai-compatible" as const,
+      name: "Provider",
+      enabled: true,
+      order: 0,
+      icon: { kind: "preset" as const, name: "openai" as const },
+      wordResultMode: "translation" as const,
+      endpoint: "https://api.openai.com/v1",
+      model: "model",
+      apiKey: "key",
+      tokenLimitMode: "max-tokens" as const,
+      jsonOutputMode: "prompt" as const,
+    };
+
+    expect(getAIProviderKey(profile, { openai: { kind: "profile", profileId: profile.id } })).toBe(openAIKey);
+    expect(getAIProviderKey(profile, { gemini: { kind: "profile", profileId: profile.id } })).toBe(geminiKey);
   });
 
   it("keeps an imported legacy provider in the same position as its built-in row", () => {
@@ -144,7 +129,7 @@ describe("provider ordering", () => {
     const afterImport = getProviderOrder(
       [
         {
-          id: LEGACY_OPENAI_PROFILE_ID,
+          id: "profile-openai",
           adapter: "openai-compatible",
           name: "OpenAI",
           enabled: true,
@@ -161,8 +146,37 @@ describe("provider ordering", () => {
       undefined,
       [],
       builtinCandidates,
+      { openai: { kind: "profile", profileId: "profile-openai" } },
     );
 
     expect(afterImport.indexOf(openAIKey)).toBe(beforeImport.indexOf(openAIKey));
+  });
+
+  it("places a profile immediately after the legacy slot when replacement stops", () => {
+    const profile = {
+      id: "profile-gemini",
+      adapter: "raycast-ai" as const,
+      name: "Raycast AI",
+      enabled: true,
+      order: 0,
+      icon: { kind: "preset" as const, name: "raycast" as const },
+      wordResultMode: "translation" as const,
+      model: "model",
+    };
+    const googleKey = getBuiltinProviderKey("translation", TranslationType.Google);
+    const geminiKey = getBuiltinProviderKey("translation", TranslationType.Gemini);
+    const deepLKey = getBuiltinProviderKey("translation", TranslationType.DeepL);
+
+    expect(reconcileAIProviderReplacementOrder([googleKey, geminiKey, deepLKey], profile, "gemini", undefined)).toEqual(
+      [googleKey, geminiKey, getAIProviderKey(profile), deepLKey],
+    );
+    expect(
+      reconcileAIProviderReplacementOrder(
+        [googleKey, geminiKey, getAIProviderKey(profile), deepLKey],
+        profile,
+        undefined,
+        "gemini",
+      ),
+    ).toEqual([googleKey, geminiKey, deepLKey]);
   });
 });

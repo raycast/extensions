@@ -8,16 +8,16 @@
 
 - Connect LLMs through Raycast AI or any OpenAI-compatible endpoint for translation and word lookup.
 - **No action is required after updating.** Existing OpenAI and Gemini preferences continue to work and are treated as legacy until imported.
-- **Migration is optional and explicit.** Open **Manage Providers** and choose **Import Legacy AI Settings** to import the configured OpenAI and Gemini settings; merely opening the page does not migrate anything.
-- **Migration remains reversible.** After import, the imported provider replaces its legacy counterpart to avoid duplicate requests. Deleting it restores the legacy provider from the existing preferences, and it can be imported again later.
-- **Provider ordering is now managed in Manage Providers.** Built-in and AI providers share one order and can be moved together with the **Move Up**/**Move Down** actions. The **Legacy Service List Order** preference only initializes this order until it is saved.
+- **Migration is optional and explicit.** Open **Manage Providers** and import configured OpenAI or Gemini settings individually or together; merely opening the page does not migrate anything.
+- **Migration remains explicit and reversible.** Imported providers replace their legacy counterparts without changing the old preferences. Removing a replacement keeps the legacy provider retired until it is restored manually, so deleted providers do not silently return.
+- **Provider ordering is now managed in Manage Providers.** Built-in, configured legacy, and AI providers share one order and can be moved together with the **Move Up**/**Move Down** actions. AI providers may explicitly replace an available legacy OpenAI or Gemini slot. The **Legacy Service List Order** preference only initializes this order until it is saved.
 
 ### ✨ New Features
 
 #### AI-Generated Dictionary Entries
 
 - For each provider, choose Plain Translation or AI-Generated Dictionary Entry in Word & Term Results.
-- Dictionary mode applies to words and terms; other input remains plain translation. Some models may have structured-output compatibility issues, and dictionary generation may take longer.
+- Dictionary mode applies to words and terms; other input remains plain translation. New or connection-related provider changes offer Test & Save by default, with Save Without Testing still available. JSON output defaults follow provider presets. Explicitly unsupported native JSON switches the provider to prompt-based output and shows a notice; malformed output is retried once without changing the setting. Dictionary generation may take longer.
 
 #### Chinese Stroke Order
 

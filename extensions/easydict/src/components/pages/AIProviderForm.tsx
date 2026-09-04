@@ -4,12 +4,18 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { type AIModelOption, resolveAIProviderModelCatalog } from "@/ai-providers/modelCatalog";
-import { OPENAI_COMPATIBLE_PRESETS, type OpenAICompatiblePresetName } from "@/ai-providers/presets";
+import {
+  getOpenAICompatiblePresetSelection,
+  OPENAI_COMPATIBLE_PRESETS,
+  type OpenAICompatiblePresetName,
+} from "@/ai-providers/presets";
 import { getAIProviderProfileValidationError, normalizeAIProviderProfile } from "@/ai-providers/profile";
 import { isAIProviderProfileRunnable } from "@/ai-providers/runtime";
+import { getAIProviderTestFingerprint } from "@/ai-providers/testFingerprint";
 import type {
   AIProviderProfile,
   JSONOutputMode,
+  LegacyAIProviderName,
   ProviderIconConfig,
   TokenLimitMode,
   WordResultMode,
@@ -22,14 +28,25 @@ import { logTrace, logWarn } from "@/utils/logger";
 type IconSelection =
   Exclude<ProviderIconConfig["kind"], "preset"> | Extract<ProviderIconConfig, { kind: "preset" }>["name"];
 
+export interface LegacyReplacementOption {
+  value: LegacyAIProviderName;
+  title: string;
+}
+
 export function AIProviderForm({
   profile,
   onSave,
+  isNewProvider = false,
   showPresetSelector = false,
+  legacyReplacement,
+  legacyReplacementOptions = [],
 }: {
   profile: AIProviderProfile;
-  onSave: (profile: AIProviderProfile) => Promise<void>;
+  onSave: (profile: AIProviderProfile, legacyReplacement?: LegacyAIProviderName) => Promise<void>;
+  isNewProvider?: boolean;
   showPresetSelector?: boolean;
+  legacyReplacement?: LegacyAIProviderName;
+  legacyReplacementOptions?: LegacyReplacementOption[];
 }) {
   const { pop } = useNavigation();
   const [name, setName] = useState(profile.name);
@@ -49,6 +66,9 @@ export function AIProviderForm({
   );
   const [iconURL, setIconURL] = useState(profile.icon.kind === "remote" ? profile.icon.url : "");
   const [presetName, setPresetName] = useState<OpenAICompatiblePresetName>("custom");
+  const [selectedLegacyReplacement, setSelectedLegacyReplacement] = useState<LegacyAIProviderName | "">(
+    legacyReplacement ?? "",
+  );
   const [modelSearchText, setModelSearchText] = useState("");
   const modelCatalog = useMemo(
     () =>
@@ -63,15 +83,20 @@ export function AIProviderForm({
   const modelAbortController = useRef<AbortController | null>(null);
   const loadedModelsKey = useRef<string | null>(null);
   const loadingModelsKey = useRef<string | null>(null);
+  const [lastTestedFingerprint, setLastTestedFingerprint] = useState<string | undefined>(() =>
+    isNewProvider ? undefined : getAIProviderTestFingerprint(profile),
+  );
 
   function selectPreset(nextPresetName: OpenAICompatiblePresetName) {
-    const preset = OPENAI_COMPATIBLE_PRESETS[nextPresetName];
+    const preset = getOpenAICompatiblePresetSelection(nextPresetName);
     setPresetName(nextPresetName);
     setName(preset.name);
     setEndpoint(preset.endpoint);
-    setWebsite("website" in preset ? preset.website : "");
+    setWebsite(preset.website);
     setModel(preset.model);
+    setAPIKey(preset.apiKey);
     setTokenLimitMode(preset.tokenLimitMode);
+    setJSONOutputMode(preset.jsonOutputMode);
     setIconSelection(preset.icon.kind === "preset" ? preset.icon.name : preset.icon.kind);
   }
 
@@ -96,31 +121,22 @@ export function AIProviderForm({
     );
   }
 
-  async function submit() {
-    const saved = buildDraftProfile();
-    if (!isAIProviderProfileRunnable(saved)) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Provider configuration is incomplete",
-        message: getAIProviderProfileValidationError(saved) ?? "Choose an available Raycast AI model.",
-      });
+  async function submit(testBeforeSaving: boolean) {
+    let saved = buildDraftProfile();
+    if (testBeforeSaving) {
+      const tested = await testProvider(saved);
+      if (!tested) return;
+      saved = tested;
+    } else if (!(await ensureProviderRunnable(saved))) {
       return;
     }
 
-    await onSave(saved);
+    await onSave(saved, selectedLegacyReplacement || undefined);
     pop();
   }
 
-  async function testProvider() {
-    const draft = buildDraftProfile();
-    if (!isAIProviderProfileRunnable(draft)) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Provider configuration is incomplete",
-        message: getAIProviderProfileValidationError(draft) ?? "Choose an available Raycast AI model.",
-      });
-      return;
-    }
+  async function testProvider(draft = buildDraftProfile()): Promise<AIProviderProfile | undefined> {
+    if (!(await ensureProviderRunnable(draft))) return undefined;
 
     testAbortController.current?.abort();
     const abortController = new AbortController();
@@ -130,10 +146,14 @@ export function AIProviderForm({
       title: `Testing ${draft.name || "AI provider"}...`,
     });
 
+    let testedDraft = draft;
     try {
       let translation: string;
       if (draft.wordResultMode === "dictionary") {
-        const result = await createAIDictionaryProvider(draft).request(
+        const result = await createAIDictionaryProvider(draft, (fallbackProfile) => {
+          testedDraft = fallbackProfile;
+          setJSONOutputMode("prompt");
+        }).request(
           { word: "Hello", fromLanguage: "en", toLanguage: "zh-CHS", isWord: true },
           { signal: abortController.signal },
         );
@@ -154,19 +174,35 @@ export function AIProviderForm({
       }
       if (!translation) throw new Error("The provider returned an empty translation.");
 
+      setLastTestedFingerprint(getAIProviderTestFingerprint(testedDraft));
+      const usedPromptFallback = testedDraft !== draft;
       toast.style = Toast.Style.Success;
-      toast.title = "Provider test succeeded";
-      toast.message = `Hello → ${translation}`;
+      toast.title = usedPromptFallback ? "Provider test succeeded with fallback" : "Provider test succeeded";
+      toast.message = usedPromptFallback
+        ? "Native JSON is unsupported. Switched this draft to Prompt-Based JSON."
+        : `Hello → ${translation}`;
+      return testedDraft;
     } catch (error) {
-      if (abortController.signal.aborted) return;
+      if (abortController.signal.aborted) return undefined;
       toast.style = Toast.Style.Failure;
       toast.title = "Provider test failed";
       toast.message = normalizeError(error).message;
+      return undefined;
     } finally {
       if (testAbortController.current === abortController) {
         testAbortController.current = null;
       }
     }
+  }
+
+  async function ensureProviderRunnable(draft: AIProviderProfile): Promise<boolean> {
+    if (isAIProviderProfileRunnable(draft)) return true;
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Provider configuration is incomplete",
+      message: getAIProviderProfileValidationError(draft) ?? "Choose an available Raycast AI model.",
+    });
+    return false;
   }
 
   const loadModels = useCallback(async () => {
@@ -253,13 +289,21 @@ export function AIProviderForm({
 
   const customModel = modelSearchText.trim();
   const modelOptions = mergeModelOptions(model, availableModels, modelCatalog.allowsCustomModel);
+  const draftNeedsTesting = lastTestedFingerprint !== getAIProviderTestFingerprint(buildDraftProfile());
 
   return (
     <Form
       navigationTitle={profile.name}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Provider" icon={Icon.SaveDocument} onSubmit={submit} />
+          <Action.SubmitForm
+            title={draftNeedsTesting ? "Test & Save Provider" : "Save Provider"}
+            icon={draftNeedsTesting ? Icon.Bolt : Icon.SaveDocument}
+            onSubmit={() => submit(draftNeedsTesting)}
+          />
+          {draftNeedsTesting && (
+            <Action.SubmitForm title="Save Without Testing" icon={Icon.SaveDocument} onSubmit={() => submit(false)} />
+          )}
           <Action
             title="Test Provider"
             icon={Icon.Bolt}
@@ -267,7 +311,7 @@ export function AIProviderForm({
               macOS: { modifiers: ["cmd"], key: "t" },
               Windows: { modifiers: ["ctrl"], key: "t" },
             }}
-            onAction={testProvider}
+            onAction={() => void testProvider()}
           />
         </ActionPanel>
       }
@@ -285,6 +329,19 @@ export function AIProviderForm({
         </Form.Dropdown>
       )}
       <Form.TextField id="name" title="Name" value={name} onChange={setName} />
+      {(legacyReplacement !== undefined || legacyReplacementOptions.length > 0) && (
+        <Form.Dropdown
+          id="legacyReplacement"
+          title="Replace Legacy Provider"
+          value={selectedLegacyReplacement}
+          onChange={(value) => setSelectedLegacyReplacement(value as LegacyAIProviderName | "")}
+        >
+          <Form.Dropdown.Item title="None" value="" />
+          {legacyReplacementOptions.map((option) => (
+            <Form.Dropdown.Item key={option.value} title={option.title} value={option.value} />
+          ))}
+        </Form.Dropdown>
+      )}
       {profile.adapter === "openai-compatible" && (
         <>
           <Form.TextField id="endpoint" title="API Base URL" value={endpoint} onChange={setEndpoint} />
@@ -346,7 +403,7 @@ export function AIProviderForm({
       {wordResultMode === "dictionary" && (
         <Form.Description
           title="Compatibility"
-          text="Some models may return invalid structured output, causing errors or retries. Dictionary generation may also take longer."
+          text="Some models may fail to return valid structured dictionary output and require a retry. Easydict uses a compatible fallback when possible. Dictionary generation may also take longer."
         />
       )}
       {profile.adapter === "openai-compatible" && wordResultMode === "dictionary" && (
@@ -356,8 +413,8 @@ export function AIProviderForm({
           value={jsonOutputMode}
           onChange={(value) => setJSONOutputMode(value as JSONOutputMode)}
         >
-          <Form.Dropdown.Item title="Prompt-Based JSON (Compatible)" value="prompt" />
           <Form.Dropdown.Item title="Native JSON Object (If Supported)" value="json-object" />
+          <Form.Dropdown.Item title="Prompt-Based JSON (Compatible)" value="prompt" />
         </Form.Dropdown>
       )}
       <Form.Dropdown

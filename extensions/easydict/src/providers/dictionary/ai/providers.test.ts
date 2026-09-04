@@ -17,7 +17,7 @@ vi.mock("@raycast/api", () => ({
     Model: { Test_Model: "test-model" },
     ask: testDoubles.ask,
   },
-  environment: { canAccess: testDoubles.canAccess },
+  environment: { canAccess: testDoubles.canAccess, isDevelopment: false },
 }));
 vi.mock("@xsai/stream-text", () => ({ streamText: testDoubles.streamText }));
 vi.mock("@/utils/http", () => ({ timedFetch: { native: testDoubles.nativeFetch } }));
@@ -25,6 +25,7 @@ vi.mock("@/utils/logger", () => ({
   createTimer: () => ({ done: vi.fn(), fail: vi.fn() }),
   logError: vi.fn(),
   logTrace: vi.fn(),
+  logWarn: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -77,6 +78,52 @@ describe("AI dictionary provider adapters", () => {
 
     expect(testDoubles.streamText).toHaveBeenCalledWith(expect.not.objectContaining({ apiKey: expect.anything() }));
   });
+
+  it("falls back from unsupported native JSON and reports the configuration change", async () => {
+    const response = JSON.stringify(createResponse());
+    const onNativeJSONUnsupported = vi.fn();
+    testDoubles.streamText
+      .mockReturnValueOnce({
+        textStream: createFailingTextStream(new Error("response_format json_object is not supported")),
+      })
+      .mockReturnValueOnce({ textStream: createTextStream([response]) });
+
+    const profile = createOpenAIProfile();
+    await new OpenAICompatibleDictionaryProvider(profile, onNativeJSONUnsupported).request(createQuery());
+
+    expect(testDoubles.streamText).toHaveBeenCalledTimes(2);
+    expect(testDoubles.streamText.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ responseFormat: { type: "json_object" } }),
+    );
+    expect(testDoubles.streamText.mock.calls[1][0]).not.toHaveProperty("responseFormat");
+    expect(onNativeJSONUnsupported).toHaveBeenCalledWith({ ...profile, jsonOutputMode: "prompt" });
+  });
+
+  it("retries malformed native JSON without changing the configuration", async () => {
+    const response = JSON.stringify(createResponse());
+    const onNativeJSONUnsupported = vi.fn();
+    testDoubles.streamText
+      .mockReturnValueOnce({ textStream: createTextStream(["not-json"]) })
+      .mockReturnValueOnce({ textStream: createTextStream([response]) });
+
+    const profile = createOpenAIProfile();
+    await new OpenAICompatibleDictionaryProvider(profile, onNativeJSONUnsupported).request(createQuery());
+
+    expect(testDoubles.streamText).toHaveBeenCalledTimes(2);
+    expect(testDoubles.streamText.mock.calls[1][0]).not.toHaveProperty("responseFormat");
+    expect(onNativeJSONUnsupported).not.toHaveBeenCalled();
+  });
+
+  it("does not fall back for unrelated request errors", async () => {
+    testDoubles.streamText.mockReturnValue({
+      textStream: createFailingTextStream(new Error("401 Invalid API key")),
+    });
+
+    await expect(new OpenAICompatibleDictionaryProvider(createOpenAIProfile()).request(createQuery())).rejects.toThrow(
+      "401 Invalid API key",
+    );
+    expect(testDoubles.streamText).toHaveBeenCalledTimes(1);
+  });
 });
 
 function createQuery() {
@@ -127,4 +174,14 @@ function createOpenAIProfile(apiKey = "test-key"): OpenAICompatibleProfile {
 
 async function* createTextStream(chunks: string[]) {
   yield* chunks;
+}
+
+function createFailingTextStream(error: Error): AsyncIterable<string> {
+  return {
+    [Symbol.asyncIterator]() {
+      return {
+        next: () => Promise.reject(error),
+      };
+    },
+  };
 }
