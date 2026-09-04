@@ -1,5 +1,9 @@
 # RunPool Changelog
 
+## [Stop a paused pool's slots counting toward the busy fraction] - 2026-09-04
+
+- Exclude paused pools from the menu bar icon, its tooltip, and the root subtitle's busy/slot totals, so a fully busy pool no longer reads as partial because a sibling pool is paused
+
 ## [Fix a resize that could act on the wrong count] - 2026-09-02
 
 - Record every size a resize confirmation was shown, so two questions open at once cannot swap starting counts and turn approved growth into a shrink
