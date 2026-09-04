@@ -40,6 +40,7 @@ export function buildMockData(): UnifiedCalendarData {
     {
       id: "demo-1",
       calendarId: "work",
+      accountEmail: "work@example.com",
       calendarName: "Work",
       title: "Product Sync",
       start: at(-20),
@@ -51,6 +52,7 @@ export function buildMockData(): UnifiedCalendarData {
     {
       id: "demo-2",
       calendarId: "team",
+      accountEmail: "team@example.com",
       calendarName: "Team",
       title: "1on1 Meeting",
       start: at(4),
@@ -62,6 +64,7 @@ export function buildMockData(): UnifiedCalendarData {
     {
       id: "demo-3",
       calendarId: "work",
+      accountEmail: "work@example.com",
       calendarName: "Work",
       title: "Design Review",
       start: at(120),
@@ -73,6 +76,7 @@ export function buildMockData(): UnifiedCalendarData {
     {
       id: "demo-4",
       calendarId: "work",
+      accountEmail: "work@example.com",
       calendarName: "Work",
       title: "Focus Block",
       start: at(240),
@@ -83,6 +87,7 @@ export function buildMockData(): UnifiedCalendarData {
     {
       id: "demo-5",
       calendarId: "personal",
+      accountEmail: "personal@example.com",
       calendarName: "Personal",
       title: "Gym",
       start: at(600),
@@ -93,6 +98,7 @@ export function buildMockData(): UnifiedCalendarData {
     {
       id: "demo-6",
       calendarId: "team",
+      accountEmail: "team@example.com",
       calendarName: "Team",
       title: "Quarterly Planning Review",
       start: `${dayStr(1)}T10:00:00+09:00`,
@@ -104,6 +110,7 @@ export function buildMockData(): UnifiedCalendarData {
     {
       id: "demo-7",
       calendarId: "personal",
+      accountEmail: "personal@example.com",
       calendarName: "Personal",
       title: "Dentist Appointment",
       start: `${dayStr(1)}T15:00:00+09:00`,
@@ -115,6 +122,7 @@ export function buildMockData(): UnifiedCalendarData {
     {
       id: "demo-8",
       calendarId: "work",
+      accountEmail: "work@example.com",
       calendarName: "Work",
       title: "Team Offsite",
       start: dayStr(2),
@@ -125,6 +133,7 @@ export function buildMockData(): UnifiedCalendarData {
     {
       id: "demo-1-clone",
       calendarId: "personal",
+      accountEmail: "personal@example.com",
       calendarName: "Personal",
       title: "Product Sync",
       start: at(-20),
@@ -135,6 +144,7 @@ export function buildMockData(): UnifiedCalendarData {
     {
       id: "demo-3-clone",
       calendarId: "personal",
+      accountEmail: "personal@example.com",
       calendarName: "Personal",
       title: "Design Review",
       start: at(120),

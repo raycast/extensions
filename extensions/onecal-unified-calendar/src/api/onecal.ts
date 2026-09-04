@@ -15,6 +15,8 @@ export interface OneCalEvent {
   id: string;
   calendarId?: string;
   calendarName?: string;
+  /** 所属カレンダーのアカウントメール。Google系会議URLのauthuser付与に使う */
+  accountEmail?: string;
   title: string;
   start: string; // ISO日時 or YYYY-MM-DD（終日）
   end?: string;
@@ -227,6 +229,7 @@ function normalizeEvent(
       `${start}-${str(raw, ["title", "summary"]) ?? ""}`,
     calendarId,
     calendarName: calendar?.name ?? str(raw, ["calendarName", "calendar"]),
+    accountEmail: calendar?.accountEmail,
     title: str(raw, ["title", "summary", "subject", "name"]) ?? "(untitled)",
     start: start ?? "",
     end,
@@ -252,6 +255,31 @@ const MEETING_HOST_SUFFIXES = [
   "gotomeeting.com",
   "chime.aws",
 ];
+
+/**
+ * Google Meetの会議URLに、イベント所属カレンダーのアカウントを authuser クエリで付与する。
+ * ブラウザが複数Googleアカウントにログインしていても、その予定のアカウントで開けるようにするため。
+ * Google以外のホスト（Zoom/Teams等）は認証機構が異なるためそのまま返す。
+ * コピー用途には使わない（他人に共有するURLへ自分のメールを混ぜないため、開く直前のみ適用する）。
+ */
+export function withAuthUser(
+  meetingUrl: string,
+  accountEmail?: string,
+): string {
+  if (!accountEmail) {
+    return meetingUrl;
+  }
+  try {
+    const url = new URL(meetingUrl);
+    if (url.hostname.toLowerCase() === "meet.google.com") {
+      url.searchParams.set("authuser", accountEmail);
+      return url.toString();
+    }
+  } catch {
+    // 不正URLはそのまま返す（呼び出し側は検証済みのはずだが防御的に）
+  }
+  return meetingUrl;
+}
 
 /** httpsのみ・hostnameの完全一致または「.suffix」境界つきサブドメインのみ許可する */
 function isMeetingUrl(candidate: string): boolean {
