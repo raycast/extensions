@@ -25,10 +25,7 @@ function isSecureBaseUrl(baseUrl: string): boolean {
 
 function prefs(): { token: string; baseUrl: string } {
   const p = getPreferenceValues<Preferences>();
-  const baseUrl = (p.baseUrl?.trim() || "https://arandu.lvdev.com.br").replace(
-    /\/+$/,
-    "",
-  );
+  const baseUrl = (p.baseUrl?.trim() || "https://arandu.lvdev.com.br").replace(/\/+$/, "");
   if (!isSecureBaseUrl(baseUrl)) {
     throw new AranduError(
       "Server URL must use HTTPS (plain HTTP is only allowed for localhost). Fix it in the extension preferences.",
@@ -44,10 +41,7 @@ const FRIENDLY: Record<number, string> = {
   403: "Access blocked. Open Arandu in the browser to resolve it (e.g. password change required).",
 };
 
-export async function request<T>(
-  path: string,
-  init?: RequestInit & { timeoutMs?: number },
-): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit & { timeoutMs?: number }): Promise<T> {
   const { token, baseUrl } = prefs();
   const { timeoutMs, ...rest } = init ?? {};
   const res = await fetch(`${baseUrl}${path}`, {
@@ -62,8 +56,7 @@ export async function request<T>(
   });
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   if (!res.ok) {
-    const serverMsg =
-      typeof data.error === "string" ? data.error : `${res.status} on ${path}`;
+    const serverMsg = typeof data.error === "string" ? data.error : `${res.status} on ${path}`;
     throw new AranduError(FRIENDLY[res.status] ?? serverMsg, res.status);
   }
   return data as T;
@@ -193,24 +186,13 @@ export const api = {
       method: "PUT",
       body: JSON.stringify({ completed: true }),
     }),
-  completeReminder: (id: string) =>
-    request<unknown>(`/api/reminders/${id}/complete`, { method: "POST" }),
-  createTask: (input: {
-    title: string;
-    body?: string;
-    priority?: "low" | "med" | "high" | "urgent";
-    dueAt?: number;
-  }) =>
+  completeReminder: (id: string) => request<unknown>(`/api/reminders/${id}/complete`, { method: "POST" }),
+  createTask: (input: { title: string; body?: string; priority?: "low" | "med" | "high" | "urgent"; dueAt?: number }) =>
     request<{ id: string }>("/api/tasks", {
       method: "POST",
       body: JSON.stringify(input),
     }),
-  createReminder: (input: {
-    title: string;
-    body?: string;
-    nextFireAt: number;
-    timezone?: string;
-  }) =>
+  createReminder: (input: { title: string; body?: string; nextFireAt: number; timezone?: string }) =>
     request<{ id: string }>("/api/reminders", {
       method: "POST",
       body: JSON.stringify(input),

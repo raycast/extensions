@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  Keyboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { api, type TodayResponse } from "./lib/client";
 
@@ -40,11 +31,7 @@ function priorityAccessory(priority?: string) {
 export default function Today() {
   const { data, isLoading, revalidate } = usePromise(api.today);
 
-  const completeTask = async (item: {
-    id: string;
-    source: string;
-    title: string;
-  }) => {
+  const completeTask = async (item: { id: string; source: string; title: string }) => {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Completing…",
@@ -90,18 +77,9 @@ export default function Today() {
     />
   );
 
-  const taskActions = (item: {
-    id: string;
-    source: string;
-    title: string;
-    url: string | null;
-  }) => (
+  const taskActions = (item: { id: string; source: string; title: string; url: string | null }) => (
     <ActionPanel>
-      <Action
-        title="Complete Task"
-        icon={Icon.CheckCircle}
-        onAction={() => void completeTask(item)}
-      />
+      <Action title="Complete Task" icon={Icon.CheckCircle} onAction={() => void completeTask(item)} />
       {item.url ? <Action.OpenInBrowser url={item.url} /> : null}
       {refreshAction}
     </ActionPanel>
@@ -156,9 +134,7 @@ export default function Today() {
               icon={{ source: Icon.Calendar, tintColor: Color.Purple }}
               title={e.title}
               subtitle={e.workBlock ? `Block · ${e.workBlock.label}` : e.origin}
-              accessories={[
-                { text: `${fmtTime(e.start)} – ${fmtTime(e.end)}` },
-              ]}
+              accessories={[{ text: `${fmtTime(e.start)} – ${fmtTime(e.end)}` }]}
               actions={
                 <ActionPanel>
                   {e.url ? <Action.OpenInBrowser url={e.url} /> : null}
@@ -178,10 +154,7 @@ export default function Today() {
               icon={{ source: Icon.Circle, tintColor: Color.Blue }}
               title={s.candidate.title}
               subtitle={s.candidate.origin}
-              accessories={[
-                ...priorityAccessory(s.candidate.priority),
-                { text: fmtTime(s.start) },
-              ]}
+              accessories={[...priorityAccessory(s.candidate.priority), { text: fmtTime(s.start) }]}
               actions={taskActions(s.candidate)}
             />
           ))}
@@ -200,9 +173,7 @@ export default function Today() {
               }
               title={r.title}
               accessories={[
-                ...(r.recurring
-                  ? [{ icon: Icon.Repeat, tooltip: "Recurring" }]
-                  : []),
+                ...(r.recurring ? [{ icon: Icon.Repeat, tooltip: "Recurring" }] : []),
                 { text: fmtTime(r.fireAt) },
               ]}
               actions={
@@ -246,8 +217,7 @@ export default function Today() {
                         await showToast({
                           style: Toast.Style.Failure,
                           title: "Failed to update habit",
-                          message:
-                            err instanceof Error ? err.message : String(err),
+                          message: err instanceof Error ? err.message : String(err),
                         });
                       }
                     }}
@@ -287,9 +257,7 @@ export default function Today() {
         d.scheduled.length === 0 &&
         d.reminders.length === 0 &&
         d.habitsToday.length === 0 &&
-        d.completedToday.length === 0 && (
-          <List.EmptyView icon={Icon.Sun} title="Nothing planned for today" />
-        )}
+        d.completedToday.length === 0 && <List.EmptyView icon={Icon.Sun} title="Nothing planned for today" />}
     </List>
   );
 }

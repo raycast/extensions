@@ -7,9 +7,7 @@ function dayLabel(iso: string): string {
   const today = new Date();
   const tomorrow = new Date(today.getTime() + 86_400_000);
   const sameDay = (a: Date, b: Date) =>
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate();
+    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   if (sameDay(d, today)) return "Today";
   if (sameDay(d, tomorrow)) return "Tomorrow";
   return d.toLocaleDateString(undefined, {
@@ -57,13 +55,9 @@ export default function Agenda() {
               title={e.title}
               subtitle={e.workBlock ? `Block · ${e.workBlock.label}` : e.origin}
               accessories={[
-                ...(e.location
-                  ? [{ icon: Icon.Pin, tooltip: e.location }]
-                  : []),
+                ...(e.location ? [{ icon: Icon.Pin, tooltip: e.location }] : []),
                 {
-                  text: e.allDay
-                    ? "All day"
-                    : `${fmtTime(e.start)} – ${fmtTime(e.end)}`,
+                  text: e.allDay ? "All day" : `${fmtTime(e.start)} – ${fmtTime(e.end)}`,
                 },
               ]}
               actions={
@@ -81,9 +75,7 @@ export default function Agenda() {
           ))}
         </List.Section>
       ))}
-      {!isLoading && upcoming.length === 0 && (
-        <List.EmptyView icon={Icon.Calendar} title="No upcoming events" />
-      )}
+      {!isLoading && upcoming.length === 0 && <List.EmptyView icon={Icon.Calendar} title="No upcoming events" />}
     </List>
   );
 }

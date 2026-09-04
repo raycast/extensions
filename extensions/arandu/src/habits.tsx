@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  Keyboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { api, type Habit } from "./lib/client";
 
@@ -57,9 +48,7 @@ export default function Habits() {
         subtitle={h.category ?? undefined}
         accessories={[
           ...(progress ? [{ text: progress }] : []),
-          ...(h.streak > 0
-            ? [{ tag: { value: `${h.streak}d streak`, color: Color.Orange } }]
-            : []),
+          ...(h.streak > 0 ? [{ tag: { value: `${h.streak}d streak`, color: Color.Orange } }] : []),
           { text: `${h.weekCount}/${h.target} this week` },
         ]}
         actions={
@@ -99,18 +88,10 @@ export default function Habits() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter habits…">
-      {pending.length > 0 && (
-        <List.Section title="To Do">{pending.map(item)}</List.Section>
-      )}
-      {done.length > 0 && (
-        <List.Section title="Done Today">{done.map(item)}</List.Section>
-      )}
+      {pending.length > 0 && <List.Section title="To Do">{pending.map(item)}</List.Section>}
+      {done.length > 0 && <List.Section title="Done Today">{done.map(item)}</List.Section>}
       {!isLoading && habits.length === 0 && (
-        <List.EmptyView
-          icon={Icon.BullsEye}
-          title="No active habits"
-          description="Create habits in Arandu first."
-        />
+        <List.EmptyView icon={Icon.BullsEye} title="No active habits" description="Create habits in Arandu first." />
       )}
     </List>
   );
