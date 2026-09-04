@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Show Grok limit reset credits] - {PR_MERGE_DATE}
+## [Show Grok limit reset credits] - 2026-09-04
 
 ### New Features
 
