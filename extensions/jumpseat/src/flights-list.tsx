@@ -6,6 +6,7 @@ import {
   Icon,
   Image,
   List,
+  open,
   openExtensionPreferences,
 } from "@raycast/api";
 import { trustedJumpseatAssetUrl, trustedProfilePictureUrl } from "./assets";
@@ -17,7 +18,7 @@ import {
 import { getJumpseatConfiguration } from "./config";
 import {
   airportLabel,
-  flightSummary,
+  jumpseatFlightUrl,
   valueOrFallback,
 } from "./flight-presentation";
 import {
@@ -59,10 +60,6 @@ function statusColor(status: string | null): Color {
   return Color.SecondaryText;
 }
 
-function friendName(friend: FriendSummary): string {
-  return friend.fullName?.trim() || `@${friend.handle}`;
-}
-
 function friendFirstName(friend: FriendSummary): string {
   return friend.fullName?.trim().split(/\s+/)[0] || "Friend";
 }
@@ -78,13 +75,13 @@ function FlightActions({
   flight: FlightListEntry;
   revalidate: () => void;
 }) {
-  const summary = flight.friend
-    ? `${friendName(flight.friend)}\n${flightSummary(flight)}`
-    : flightSummary(flight);
-
   return (
     <ActionPanel>
-      <Action.CopyToClipboard title="Copy Flight Summary" content={summary} />
+      <Action
+        title="Open Flight in Jumpseat"
+        icon={Icon.Globe}
+        onAction={() => open(jumpseatFlightUrl(flight))}
+      />
       <Action
         title="Refresh Flights"
         icon={Icon.ArrowClockwise}
