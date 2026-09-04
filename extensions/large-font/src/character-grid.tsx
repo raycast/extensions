@@ -33,11 +33,20 @@ function characterColor(character: string, colorCode: boolean, darkMode: boolean
   return darkMode ? "#FF8E8E" : "#C52222";
 }
 
-function gridMarkdown(text: string, preferences: Preferences): string {
+function boundedGraphemes(text: string): { characters: string[]; truncated: boolean } {
   const splitter = new Graphemer();
-  const allCharacters = splitter.splitGraphemes(text);
-  const characters = allCharacters.slice(0, MAX_DISPLAYED_CHARACTERS);
-  const truncatedCount = allCharacters.length - characters.length;
+  const characters: string[] = [];
+
+  for (const character of splitter.iterateGraphemes(text)) {
+    if (characters.length >= MAX_DISPLAYED_CHARACTERS) return { characters, truncated: true };
+    characters.push(character);
+  }
+
+  return { characters, truncated: false };
+}
+
+function gridMarkdown(text: string, preferences: Preferences): string {
+  const { characters, truncated } = boundedGraphemes(text);
   const darkMode = environment.theme === "dark";
   const foreground = darkMode ? "#FFFFFF" : "#151515";
   const background = darkMode ? "#1B1B1B" : "#FFFFFF";
@@ -72,9 +81,9 @@ function gridMarkdown(text: string, preferences: Preferences): string {
   svg += "</svg>";
 
   const image = `![Selected text character grid](data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")})`;
-  if (truncatedCount <= 0) return image;
+  if (!truncated) return image;
 
-  return `${image}\n\nShowing first ${characters.length} characters. ${truncatedCount} additional characters were omitted for performance.`;
+  return `${image}\n\nShowing first ${characters.length} characters. The rest was omitted for performance.`;
 }
 
 export function CharacterGrid({ text }: CharacterGridProps) {
