@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-session-manager",
+  "title": "Claude Sessions",
+  "description": "Manage, pin, search, and resume your Claude Code sessions from Raycast.",
+  "icon": "icon.png",
+  "author": "imranismail",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-claude-sessions",
+      "title": "Search Claude Sessions",
+      "description": "Search, pin, and resume Claude Code sessions",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "terminalApp",
+          "title": "Terminal",
+          "description": "App used to resume a session. Terminal and iTerm run the resume command automatically; any other app opens at the session's folder with the command copied to your clipboard.",
+          "type": "appPicker",
+          "required": false,
+          "default": "com.apple.Terminal"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "^1.4.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "demo:on": "touch ~/.claude-sessions-demo",
+    "demo:off": "rm -f ~/.claude-sessions-demo",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
