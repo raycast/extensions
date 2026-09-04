@@ -1,6 +1,6 @@
 # Arandu Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-04
 
 - View Today: events, scheduled tasks, reminders, habits, overdue and completed items
 - View Agenda: upcoming events grouped by day
