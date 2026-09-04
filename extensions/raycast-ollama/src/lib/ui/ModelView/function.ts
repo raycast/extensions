@@ -27,10 +27,17 @@ export async function DeleteServer(
     .then(async () => {
       setSelectedServer("Local");
       revalidate();
-      await showToast({ style: Toast.Style.Success, title: `Ollama Server '${name}' Deleted` });
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Ollama Server '${name}' Deleted`,
+      });
     })
     .catch(async (e) => {
-      await showToast({ style: Toast.Style.Failure, title: `Error Deleting Ollama Server '${name}'`, message: e });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Error Deleting Ollama Server '${name}'`,
+        message: e,
+      });
     });
 }
 
@@ -51,14 +58,23 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
     await Promise.all(
       [...s.entries()].map(async (s): Promise<Types.UiModel[]> => {
         const tag = await s[1].OllamaApiTags().catch(async (e: Error) => {
-          await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+          if (server !== "All") throw e;
+          await showToast({
+            style: Toast.Style.Failure,
+            title: `'${s[0]}' Server`,
+            message: e.message,
+          });
           return undefined;
         });
         const ps = await s[1].OllamaApiPs().catch(async (e: Error) => {
-          await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+          await showToast({
+            style: Toast.Style.Failure,
+            title: `'${s[0]}' Server`,
+            message: e.message,
+          });
           return undefined;
         });
-        if (!tag) return await Promise.resolve([] as Types.UiModel[]);
+        if (!tag) return [];
         return await Promise.all(
           tag.models.map(async (v): Promise<Types.UiModel> => {
             const show = await s[1].OllamaApiShow(v.name);
@@ -110,7 +126,14 @@ export async function DeleteModel(model: Types.UiModel, revalidate: CallableFunc
       });
       revalidate();
     })
-    .catch(async (e) => await showToast({ style: Toast.Style.Failure, title: "Error", message: e }));
+    .catch(
+      async (e) =>
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: e,
+        }),
+    );
 }
 
 /**
@@ -142,7 +165,11 @@ export async function PullModel(
       setDownload((prev) => {
         const i = prev.findIndex((v) => v.server === server && v.name === model);
         if (i < 0) {
-          prev.push({ server: server, name: model, download: Number(currentDownload) });
+          prev.push({
+            server: server,
+            name: model,
+            download: Number(currentDownload),
+          });
           return [...prev];
         }
         if (currentDownload !== prev[i].download.toFixed(2)) {
@@ -158,7 +185,10 @@ export async function PullModel(
         return [...n];
       });
       revalidate();
-      await showToast({ style: Toast.Style.Success, title: `Model '${model}' Downloaded on '${server}' Server.` });
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Model '${model}' Downloaded on '${server}' Server.`,
+      });
     });
     e.on("error", async (data) => {
       setDownload((prev) => {
@@ -192,7 +222,14 @@ export async function LoadModel(model: Types.UiModel, revalidate: CallableFuncti
       });
       revalidate();
     })
-    .catch(async (e) => await showToast({ style: Toast.Style.Failure, title: "Error", message: e }));
+    .catch(
+      async (e) =>
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: e,
+        }),
+    );
 }
 
 /**
@@ -219,5 +256,12 @@ export async function UnloadModel(model: Types.UiModel, revalidate: CallableFunc
       });
       revalidate();
     })
-    .catch(async (e) => await showToast({ style: Toast.Style.Failure, title: "Error", message: e }));
+    .catch(
+      async (e) =>
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: e,
+        }),
+    );
 }

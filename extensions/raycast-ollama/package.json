@@ -5,6 +5,9 @@
   "description": "Perform Local Inference with Ollama",
   "icon": "icon.png",
   "author": "massimiliano_pasquini",
+  "contributors": [
+    "0xdhrv"
+  ],
   "platforms": [
     "macOS",
     "Windows"

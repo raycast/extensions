@@ -18,7 +18,11 @@ const listErrorLegacyArguments: React.JSX.Element = (
 export default function Command(props: LaunchProps<{ arguments: Arguments.OllamaCustomCommand }>): React.JSX.Element {
   let server: string;
   let model: string;
-  let parameters: { creativity?: number; thinking?: string; keep_alive?: string };
+  let parameters: {
+    creativity?: number;
+    thinking?: string;
+    keep_alive?: string;
+  };
   try {
     const modelIndex = props.arguments.model.indexOf(":");
     server = props.arguments.model.substring(0, modelIndex);
@@ -26,7 +30,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Ollama
     parameters = JSON.parse(props.arguments.parameters);
   } catch (e: unknown) {
     console.error(e);
-    showToast({ style: Toast.Style.Failure, title: "Error", message: e instanceof Error ? e.message : String(e) });
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: e instanceof Error ? e.message : String(e),
+    });
     return listErrorLegacyArguments;
   }
   return (

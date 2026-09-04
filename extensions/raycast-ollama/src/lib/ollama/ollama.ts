@@ -3,10 +3,11 @@ import * as Enum from "./enum";
 import * as Errors from "./errors";
 import { EventEmitter } from "stream";
 
+const REQUEST_TIMEOUT_MS = 10_000;
+
 export class Ollama {
   private _server: string;
   private _headers: HeadersInit | undefined;
-  private _signal: AbortSignal;
 
   private _RouteApiVersion = `/api/version`;
   private _RouteApiTags = `/api/tags`;
@@ -22,7 +23,6 @@ export class Ollama {
    * @param server - Ollama Server Route, default value: { url: "http://127.0.0.1:11434" }.
    */
   constructor(server = { url: "http://127.0.0.1:11434" } as Types.OllamaServer) {
-    this._signal = AbortSignal.timeout(1800);
     this._server = server.url;
     if (server.auth && server.auth.mode === Enum.OllamaServerAuthorizationMethod.BASIC)
       this._headers = {
@@ -102,7 +102,7 @@ export class Ollama {
     const url = `${this._server}${route}`;
     const req: RequestInit = {
       headers: this._headers,
-      signal: this._signal,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     };
     const data = await fetch(url, req)
       .then((response) => response.json())
@@ -128,7 +128,7 @@ export class Ollama {
     const url = `${this._server}${route}`;
     const req: RequestInit = {
       headers: this._headers,
-      signal: this._signal,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     };
     const data = await fetch(url, req)
       .then(async (response) => {
