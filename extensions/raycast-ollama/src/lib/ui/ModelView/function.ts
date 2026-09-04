@@ -63,6 +63,7 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
           tagFailures.push({ name: s[0], error: e });
           return undefined;
         });
+        if (!tag) return [];
         const ps = await s[1].OllamaApiPs().catch(async (e: Error) => {
           await showToast({
             style: Toast.Style.Failure,
@@ -71,7 +72,6 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
           });
           return undefined;
         });
-        if (!tag) return [];
         return await Promise.all(
           tag.models.map(async (v): Promise<Types.UiModel> => {
             const show = await s[1].OllamaApiShow(v.name);
