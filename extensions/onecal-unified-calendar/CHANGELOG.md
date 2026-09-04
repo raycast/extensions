@@ -1,6 +1,6 @@
 # OneCal Unified Calendar Changelog
 
-## [Account-aware meeting links] - {PR_MERGE_DATE}
+## [Account-aware meeting links] - 2026-09-04
 
 - Open Google Meet links with the calendar's own Google account (via the `authuser` parameter), so meetings from a work calendar open with the work account even when the browser is signed in to multiple Google accounts. Copied URLs are left untouched
 
