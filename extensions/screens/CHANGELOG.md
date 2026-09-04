@@ -1,6 +1,6 @@
 # Screens Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-04
 
 - Search your connections and connect normally, in Observe Mode, or as a guest
 - Import connections from an exported `.screens` archive, choosing which ones to keep
