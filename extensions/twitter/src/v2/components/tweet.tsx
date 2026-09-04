@@ -241,7 +241,7 @@ export function TweetListItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ShowDetailV2Action tweet={t} fetcher={fetcher} />
+            <ShowDetailV2Action tweet={t} fetcher={fetcher} canModerateReply={props.canModerateReply} />
             <OpenTweetInBrowerAction tweet={t} />
           </ActionPanel.Section>
           <ActionPanel.Section>

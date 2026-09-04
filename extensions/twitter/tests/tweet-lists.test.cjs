@@ -36,6 +36,7 @@ const Icon = {
 };
 const Keyboard = { Shortcut: { Common: { Refresh: "refresh-shortcut" } } };
 const SetReplyHiddenAction = () => {};
+const ShowDetailV2Action = () => {};
 const commonDependencies = {
   "react/jsx-runtime": { jsx: element, jsxs: element },
   react: { useState: (initial) => [typeof initial === "function" ? initial() : initial, () => {}], useEffect() {} },
@@ -222,7 +223,7 @@ const tweetComponents = loadComponent("src/v2/components/tweet.tsx", {
     padStart: (text, length) => text.padStart(length),
     replaceAll: (text, pattern, replacement) => text.replaceAll(pattern, replacement),
   },
-  "./actions": { SetReplyHiddenAction },
+  "./actions": { SetReplyHiddenAction, ShowDetailV2Action },
   "./detail": {},
 });
 const pagination = { pageSize: 20, hasMore: true, onLoadMore() {} };
@@ -264,8 +265,38 @@ test("moderation actions are only rendered for eligible replies", () => {
   const tweet = post("reply");
   const ineligible = tweetComponents.TweetListItem({ tweet, canModerateReply: false });
   assert.equal(elementsOfType(ineligible.props.actions, SetReplyHiddenAction).length, 0);
+  assert.equal(elementsOfType(ineligible.props.actions, ShowDetailV2Action)[0].props.canModerateReply, false);
 
   const eligible = tweetComponents.TweetListItem({ tweet, canModerateReply: true });
+  assert.deepEqual(
+    elementsOfType(eligible.props.actions, SetReplyHiddenAction).map((action) => action.props.hidden),
+    [true, false],
+  );
+  assert.equal(elementsOfType(eligible.props.actions, ShowDetailV2Action)[0].props.canModerateReply, true);
+});
+
+const detailComponents = loadComponent("src/v2/components/detail.tsx", {
+  ...commonDependencies,
+  "@raycast/api": {
+    ...commonDependencies["@raycast/api"],
+    Detail: () => {},
+    showToast() {},
+    Toast: { Style: { Failure: "failure" } },
+  },
+  "../lib/twitter": twitter,
+  "../lib/twitterapi_v2": {
+    clientV2: {},
+    useRefresher: () => ({ data: undefined, error: undefined, isLoading: false, fetcher: {} }),
+  },
+  "./actions": { SetReplyHiddenAction },
+});
+
+test("post detail only renders moderation actions for eligible replies", () => {
+  const tweet = post("reply");
+  const ineligible = detailComponents.TweetDetail({ tweet, canModerateReply: false });
+  assert.equal(elementsOfType(ineligible.props.actions, SetReplyHiddenAction).length, 0);
+
+  const eligible = detailComponents.TweetDetail({ tweet, canModerateReply: true });
   assert.deepEqual(
     elementsOfType(eligible.props.actions, SetReplyHiddenAction).map((action) => action.props.hidden),
     [true, false],

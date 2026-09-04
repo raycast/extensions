@@ -18,12 +18,16 @@ export function LogoutAction(): ReactElement {
   return <Action title="Logout" icon={Icon.Logout} onAction={handle} />;
 }
 
-export function ShowDetailV2Action(props: { tweet: Tweet; fetcher?: Fetcher }): ReactElement {
+export function ShowDetailV2Action(props: {
+  tweet: Tweet;
+  fetcher?: Fetcher;
+  canModerateReply?: boolean;
+}): ReactElement {
   return (
     <Action.Push
       title="Show Post"
       icon={Icon.AppWindowSidebarRight}
-      target={<TweetDetail tweet={props.tweet} fetcher={props.fetcher} />}
+      target={<TweetDetail tweet={props.tweet} fetcher={props.fetcher} canModerateReply={props.canModerateReply} />}
     />
   );
 }

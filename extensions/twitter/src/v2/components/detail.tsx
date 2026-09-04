@@ -64,7 +64,7 @@ function TweetRefreshAction(props: { tweet: Tweet; fetcher: Fetcher }): ReactEle
   return <Action title="Refresh Post" shortcut={Keyboard.Shortcut.Common.Refresh} onAction={handle} />;
 }
 
-export function TweetDetail(props: { tweet: Tweet; fetcher?: Fetcher }) {
+export function TweetDetail(props: { tweet: Tweet; fetcher?: Fetcher; canModerateReply?: boolean }) {
   const tweet = props.tweet;
   const { data, error, isLoading, fetcher } = useRefresher<Tweet | undefined>(async (): Promise<Tweet | undefined> => {
     if (data === undefined) {
@@ -104,10 +104,12 @@ export function TweetDetail(props: { tweet: Tweet; fetcher?: Fetcher }) {
             <ShowPostEngagementAction tweet={t} kind="reposts" />
             <ShowPostEngagementAction tweet={t} kind="quotes" />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Moderation">
-            <SetReplyHiddenAction tweet={t} hidden />
-            <SetReplyHiddenAction tweet={t} hidden={false} />
-          </ActionPanel.Section>
+          {props.canModerateReply && (
+            <ActionPanel.Section title="Moderation">
+              <SetReplyHiddenAction tweet={t} hidden />
+              <SetReplyHiddenAction tweet={t} hidden={false} />
+            </ActionPanel.Section>
+          )}
           <ActionPanel.Section title="Author">
             <ShowAuthorTweetsAction tweet={t} />
             <OpenUserProfileInBrowserAction user={t.user} />
