@@ -55,10 +55,11 @@ const HOST_SEGMENT = /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/i;
  * The convention leads a web row's title with its host, and it is right to: in Raycast's own launcher a
  * row appears among apps and extensions, and a leading domain says *this opens a browser* before the rest
  * is read. That is a signal about strangers, and in this list there are none — every row is already a link
- * command, already grouped, already sorted by package. Firing on every row, it answers nothing while
- * spending the front of the only column that can differ: three rows on one service share their leading characters
- * and render identically. The host is not discarded, it moves to the subtitle, where it does the
- * verification job instead. Nothing searchable is lost either — `keywords` still carries the whole title.
+ * command, already sorted by package. Firing on every row, it answers nothing while spending the front of
+ * the only column that can differ: rows on one service share their leading characters and render
+ * identically once the column truncates them. The host is not discarded, it moves to the subtitle, where
+ * it does the verification job instead — and where it varies between neighbours that the package, being
+ * the sort key, cannot. Nothing searchable is lost either — `keywords` still carries the whole title.
  */
 const nameWithoutHost = (name: string) => {
   const separator = name.indexOf(" · ");
@@ -70,14 +71,20 @@ const nameWithoutHost = (name: string) => {
 /**
  * The host, because once the title stops carrying it that is what tells two rows of one brand apart. The
  * package stays where it is still the more useful word: a title that is nothing but a host already shows
- * the destination, and a command with no link target has no host to show at all.
+ * the destination, a command with no link target has no host to show at all, and a command with no icon
+ * has nothing else naming its brand — the mark normally carries that, so a row without one is the single
+ * case where the package still has to be read rather than seen. A declared-but-broken icon is not covered:
+ * telling one from a working icon needs the file system, and a subtitle is composed synchronously.
  */
 const rowSubtitle = (command: ScriptCommand, facets: Facets) => {
+  const brand = facets.brand ? packageLabel(facets.brand) : undefined;
+  if (HOST_SEGMENT.test(facets.name)) return brand;
+
   const target = linkTargetOf(command)?.target;
   const host = target ? domainOf(target) : undefined;
-  if (host && !HOST_SEGMENT.test(facets.name)) return host;
+  if (!host) return brand;
 
-  return facets.brand ? packageLabel(facets.brand) : undefined;
+  return command.icon?.trim() ? host : (brand ?? host);
 };
 
 const BODY_PREVIEW_LINES = 300;
