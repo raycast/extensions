@@ -54,16 +54,13 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
   let s = await GetServerClass();
   if (server !== "All" && !s.has(server)) return [];
   if (server !== "All") s = new Map([[server, s.get(server) as Ollama]]);
+  const tagFailures: { name: string; error: Error }[] = [];
   (
     await Promise.all(
       [...s.entries()].map(async (s): Promise<Types.UiModel[]> => {
-        const tag = await s[1].OllamaApiTags().catch(async (e: Error) => {
+        const tag = await s[1].OllamaApiTags().catch((e: Error) => {
           if (server !== "All") throw e;
-          await showToast({
-            style: Toast.Style.Failure,
-            title: `'${s[0]}' Server`,
-            message: e.message,
-          });
+          tagFailures.push({ name: s[0], error: e });
           return undefined;
         });
         const ps = await s[1].OllamaApiPs().catch(async (e: Error) => {
@@ -93,6 +90,18 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
       }),
     )
   ).forEach((v) => (o = o.concat(v)));
+  if (server === "All" && s.size > 0 && tagFailures.length === s.size) {
+    throw tagFailures[0].error;
+  }
+  await Promise.all(
+    tagFailures.map((failure) =>
+      showToast({
+        style: Toast.Style.Failure,
+        title: `'${failure.name}' Server`,
+        message: failure.error.message,
+      }),
+    ),
+  );
   return o;
 }
 
