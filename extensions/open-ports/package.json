@@ -89,7 +89,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "test": "tsc -p tsconfig.test.json && node --test .test-build/tests",
+    "test": "[ -f raycast-env.d.ts ] || ray build -e dev; tsc -p tsconfig.test.json && node --test .test-build/tests",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1",
     "sync-screenshots": "cp metadata/*.png media/"
   }

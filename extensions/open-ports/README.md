@@ -131,15 +131,17 @@ and are covered by tests:
 
 - **No shell.** Commands run through `execFile`, so arguments reach the process via `execve` and are never
   parsed by a shell. The one exception is the macOS authentication dialog, which takes a single string; there
-  the argument vector is POSIX-quoted, then AppleScript-quoted, and control characters are rejected outright.
+  every dynamic value is POSIX-quoted, then AppleScript-quoted, and control characters are rejected outright.
 - **Absolute paths, minimal environment.** Child processes get `PATH=/usr/sbin:/usr/bin:/bin:/sbin` and
   `LC_ALL=C` only, so nothing from your shell profile can redirect `lsof` or `kill`.
 - **Validated PIDs.** `kill(0, …)` signals the caller's whole process group and `kill(-1, …)` signals every
   process you own — only positive safe integers ever reach `process.kill`.
 - **Allowlisted signals.** A preference value that is not `SIGTERM`, `SIGINT` or `SIGKILL` falls back to
   `SIGTERM` instead of being interpolated into a command.
-- **PID reuse is checked.** A PID captured when the list was drawn may belong to a different process by the
-  time you press a kill action, so the process start time is re-read and compared first.
+- **PID reuse is checked, including under the auth dialog.** A PID captured when the list was drawn may belong
+  to a different process by the time you press a kill action, so the process start time is re-read and compared
+  first. For an administrator kill that comparison is carried *into* the privileged command and runs immediately
+  before the signal, because the authentication dialog can sit on screen long enough for a PID to be recycled.
 - **Untrusted text is escaped.** Process names come from other users' processes; they are Markdown-escaped or
   wrapped in a fence long enough that they cannot break out of it.
 

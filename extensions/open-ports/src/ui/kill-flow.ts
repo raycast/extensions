@@ -7,6 +7,7 @@ import {
   KillSignal,
   NoSuchProcessError,
   PermissionDeniedError,
+  ProcessIdentityChangedError,
   processExists,
   sendSignal,
   sendSignalAsAdmin,
@@ -71,7 +72,7 @@ async function runKill(target: KillTarget, signal: KillSignal, options: KillOpti
 
   try {
     if (admin) {
-      await sendSignalAsAdmin(target.pid, signal, target.name);
+      await sendSignalAsAdmin(target.pid, signal, target.name, target.startedAt);
     } else {
       await sendSignal(target.pid, signal);
     }
@@ -117,6 +118,14 @@ async function handleSignalError(
 ): Promise<boolean> {
   if (error instanceof UserCancelledError) {
     toast.hide();
+    return false;
+  }
+
+  if (error instanceof ProcessIdentityChangedError) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Nothing was killed";
+    toast.message = `PID ${target.pid} was taken over by another process while you authenticated`;
+    options.onChanged?.();
     return false;
   }
 

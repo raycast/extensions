@@ -14,9 +14,16 @@ describe("browserUrl", () => {
     assert.equal(browserUrl(listener), "http://[::1]:8080");
   });
 
-  it("brackets an IPv6 literal so the URL stays well formed", () => {
+  // RFC 6874: the colons of an IPv6 literal stay literal inside the brackets and only the
+  // zone separator is percent-encoded. Encoding the whole host yields a URL no browser opens.
+  it("brackets an IPv6 literal and encodes only the zone separator", () => {
     const [listener] = listenersFrom(row({ ipVersion: "IPv6", address: "[fe80::1%en0]:9999" }));
-    assert.equal(browserUrl(listener), "http://[fe80%3A%3A1%25en0]:9999");
+    assert.equal(browserUrl(listener), "http://[fe80::1%25en0]:9999");
+  });
+
+  it("leaves a zoneless IPv6 literal untouched", () => {
+    const [listener] = listenersFrom(row({ ipVersion: "IPv6", address: "[2001:db8::5]:8080" }));
+    assert.equal(browserUrl(listener), "http://[2001:db8::5]:8080");
   });
 
   it("keeps a specific IPv4 interface address as typed", () => {

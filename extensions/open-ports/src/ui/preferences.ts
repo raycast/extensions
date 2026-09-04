@@ -8,11 +8,12 @@ export interface Settings {
 }
 
 /**
- * Preference values are read back as plain JSON, so they are validated here rather than
- * trusted. In particular the signal must be one this extension knows how to send.
+ * Values come from the manifest-generated `Preferences` type, so a renamed preference is a
+ * compile error rather than a silent `undefined`. They are still validated at runtime: the
+ * stored value predates any manifest change and the signal must be one we know how to send.
  */
 export function getSettings(): Settings {
-  const raw = getPreferenceValues<Partial<Record<keyof Settings, unknown>>>();
+  const raw = getPreferenceValues<Preferences>();
 
   return {
     confirmKill: raw.confirmKill !== false,

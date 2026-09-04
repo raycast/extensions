@@ -85,9 +85,19 @@ export async function runCommand(file: string, args: readonly string[]): Promise
  */
 export async function runCommandAsAdmin(file: string, args: readonly string[], prompt: string): Promise<string> {
   assertAbsolutePath(file);
-  assertPlainArguments([...args, prompt]);
+  assertPlainArguments(args);
 
-  const command = [file, ...args].map(shellQuote).join(" ");
+  return runShellAsAdmin([file, ...args].map(shellQuote).join(" "), prompt);
+}
+
+/**
+ * Runs a shell script behind the macOS authentication dialog, for the rare operation that
+ * genuinely needs shell control flow. The caller must pass every dynamic value through
+ * `shellQuote`; prefer `runCommandAsAdmin` whenever a plain argument vector will do.
+ */
+export async function runShellAsAdmin(command: string, prompt: string): Promise<string> {
+  assertPlainArguments([command, prompt]);
+
   const script =
     `do shell script ${appleScriptQuote(command)} ` +
     `with prompt ${appleScriptQuote(prompt)} with administrator privileges`;
@@ -107,7 +117,8 @@ export async function runCommandAsAdmin(file: string, args: readonly string[], p
     if (typeof failure.stdout === "string" && failure.stdout.length > 0) {
       return failure.stdout;
     }
-    throw new CommandError((failure.stderr ?? "Authentication failed").trim(), file);
+    // The exit status matters to callers that encode a meaning in it, so keep stderr intact.
+    throw new CommandError((failure.stderr ?? failure.message ?? "Authentication failed").trim(), "/usr/bin/osascript");
   }
 }
 

@@ -64,7 +64,9 @@ export function browserUrl(listener: Listener): string {
 function reachableHost(listener: Listener): string {
   if (listener.exposure === "specific") {
     const binding = listener.bindings[0];
-    return binding.ipVersion === "IPv6" ? `[${encodeURIComponent(binding.host)}]` : binding.host;
+    // RFC 6874: an IPv6 literal keeps its colons inside the brackets; only the zone
+    // separator is percent-encoded. Encoding the whole host would produce a broken URL.
+    return binding.ipVersion === "IPv6" ? `[${binding.host.replace("%", "%25")}]` : binding.host;
   }
   // A wildcard or loopback binding is always reachable over the loopback interface,
   // via IPv4 when the process bound it and via IPv6 otherwise.

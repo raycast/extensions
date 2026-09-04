@@ -1,6 +1,19 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import { existsSync, rmSync } from "node:fs";
 import { describe, it } from "node:test";
-import { InvalidTargetError, isKillSignal, isValidPid, processExists, sendSignal } from "../src/core/signals";
+import { promisify } from "node:util";
+import { fetchStartTime } from "../src/core/ps";
+import {
+  InvalidTargetError,
+  buildGuardedKill,
+  isKillSignal,
+  isValidPid,
+  processExists,
+  sendSignal,
+} from "../src/core/signals";
+
+const execFileAsync = promisify(execFile);
 
 describe("isValidPid", () => {
   it("accepts only positive safe integers", () => {
@@ -53,5 +66,43 @@ describe("processExists", () => {
     assert.equal(processExists(process.pid), true);
     assert.equal(processExists(0), false);
     assert.equal(processExists(-1), false);
+  });
+});
+
+describe("buildGuardedKill", () => {
+  // Signal 0 runs the existence and permission check without delivering anything, so the
+  // generated script can be executed for real against this very process.
+  const CHECK_ONLY = 0;
+
+  it("signals when the PID still holds the same process", async () => {
+    const started = await fetchStartTime(process.pid);
+    assert.ok(started);
+
+    const script = buildGuardedKill(process.pid, CHECK_ONLY, started);
+    const { stdout } = await execFileAsync("/bin/sh", ["-c", `${script} && echo signalled`]);
+
+    assert.match(stdout, /signalled/);
+  });
+
+  // This is the window the macOS authentication dialog opens: the PID may have been handed
+  // to a different process by the time the password is typed.
+  it("refuses to signal when the start time no longer matches", async () => {
+    const script = buildGuardedKill(process.pid, CHECK_ONLY, "Mon Jan 1 00:00:00 1970");
+
+    await assert.rejects(
+      () => execFileAsync("/bin/sh", ["-c", `${script} && echo signalled`]),
+      // execFile surfaces a non-zero exit status as a numeric `code`.
+      (error: unknown) => (error as { code?: unknown }).code === 87,
+    );
+  });
+
+  it("cannot be extended through the expected start time", async () => {
+    const marker = `/tmp/open-ports-guard-${process.pid}`;
+    rmSync(marker, { force: true });
+
+    const script = buildGuardedKill(process.pid, CHECK_ONLY, `x'; touch ${marker}; echo '`);
+    await execFileAsync("/bin/sh", ["-c", script]).catch(() => undefined);
+
+    assert.equal(existsSync(marker), false, "the quoted value must not be able to run a command");
   });
 });
