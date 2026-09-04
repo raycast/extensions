@@ -29,3 +29,24 @@ function isIpv6(literal: string): boolean {
 export function isAuthorityPort(port: number): boolean {
   return Number.isInteger(port) && port >= 1 && port <= 65535;
 }
+
+/**
+ * The host and port an authority names, or undefined when it names something unreachable.
+ * `authority` is what sits between the scheme and the path, with any userinfo already removed.
+ * The host comes back unbracketed, which is the form the rest of the extension stores and compares.
+ */
+export function parseAuthority(authority: string): { host: string; port?: string } | undefined {
+  const bracketed = /^\[([^\]]+)\](?::(\d+))?$/.exec(authority);
+  if (bracketed) {
+    const [, literal, port] = bracketed;
+    if (port !== undefined && !isAuthorityPort(Number(port))) return undefined;
+    return isAuthorityHost(`[${literal}]`) ? { host: literal, port } : undefined;
+  }
+
+  const parts = authority.split(":");
+  const port = parts.length === 2 && /^\d+$/.test(parts[1]) ? parts[1] : undefined;
+  if (port !== undefined && !isAuthorityPort(Number(port))) return undefined;
+
+  const host = port === undefined ? authority : parts[0];
+  return isAuthorityHost(host) ? { host, port } : undefined;
+}

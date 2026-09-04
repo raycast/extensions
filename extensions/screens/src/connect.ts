@@ -1,5 +1,5 @@
 import { ClientProtocol, Connection } from "./archive";
-import { isAuthorityHost, isAuthorityPort } from "./authority";
+import { isAuthorityHost, isAuthorityPort, parseAuthority } from "./authority";
 
 export interface ConnectOptions {
   observe?: boolean;
@@ -55,25 +55,10 @@ export function parseHostSpec(spec: string): HostSpec | undefined {
   const username = separator === -1 ? undefined : rest.slice(0, separator);
   const authority = rest.slice(separator + 1);
 
-  const parsed = splitAuthority(authority);
-  if (!parsed || !isAuthorityHost(parsed.host)) return undefined;
+  const parsed = parseAuthority(authority);
+  if (!parsed) return undefined;
 
   return { ...parsed, protocol, username };
-}
-
-function splitAuthority(authority: string): { host: string; port?: string } | undefined {
-  const bracketed = /^\[([^\]]+)\](?::(\d+))?$/.exec(authority);
-  if (bracketed) {
-    if (bracketed[2] !== undefined && !isValidPort(bracketed[2])) return undefined;
-    return { host: bracketed[1], port: bracketed[2] };
-  }
-
-  const parts = authority.split(":");
-  if (parts.length === 2 && /^\d+$/.test(parts[1])) {
-    return isValidPort(parts[1]) ? { host: parts[0], port: parts[1] } : undefined;
-  }
-
-  return { host: authority };
 }
 
 /**

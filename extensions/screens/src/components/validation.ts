@@ -1,6 +1,6 @@
 import { isAuthorityHost } from "../authority";
 import { isValidPort } from "../connect";
-import { CONNECTABLE_SCHEME_LIST, isConnectableUrl } from "../url-scheme";
+import { CONNECTABLE_SCHEME_LIST, hasConnectableScheme, isConnectableUrl } from "../url-scheme";
 
 const BARE_HOST = "Enter the host on its own, without a user, port, or path";
 
@@ -12,11 +12,15 @@ export function requiredText(value: string | undefined): string | undefined {
   return value?.trim() ? undefined : "Required";
 }
 
-/** An address this extension can open, so a row never hands an unrelated scheme to another app. */
+/**
+ * An address this extension can open, so a row never hands an unrelated scheme to another app and
+ * never opens a URL whose authority reaches no machine.
+ */
 export function connectableUrl(value: string | undefined): string | undefined {
   const missing = requiredText(value);
   if (missing || !value) return missing;
-  return isConnectableUrl(value) ? undefined : `Must start with ${CONNECTABLE_SCHEME_LIST}`;
+  if (!hasConnectableScheme(value)) return `Must start with ${CONNECTABLE_SCHEME_LIST}`;
+  return isConnectableUrl(value) ? undefined : "Enter a host, optionally with a port between 1 and 65535";
 }
 
 /**
