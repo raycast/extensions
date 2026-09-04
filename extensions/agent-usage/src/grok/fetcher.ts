@@ -8,11 +8,18 @@ import {
   refreshGrokAccessToken,
   type GrokCredentials,
 } from "./auth.ts";
-import { grpcWebTrailerFields, parseGrokWebBillingResponse, primaryWindowLabel } from "./parser.ts";
+import {
+  grpcWebTrailerFields,
+  parseGrokResetCreditsResponse,
+  parseGrokWebBillingResponse,
+  primaryWindowLabel,
+} from "./parser.ts";
 import type { GrokError, GrokUsage } from "./types.ts";
 
 const GROK_BILLING_URL = "https://grok.com/grok_api_v2.GrokBuildBilling/GetGrokCreditsConfig";
+const GROK_RESET_CREDITS_URL = "https://grok.com/prod_mc_billing.ConsumerUiSvc/GetRemainingResets";
 const REQUEST_TIMEOUT_MS = 15000;
+const RESET_CREDITS_TIMEOUT_MS = 4000;
 
 /** Empty gRPC-web frame: flags=0, length=0 (empty protobuf message). */
 const EMPTY_GRPC_WEB_BODY = new Uint8Array([0x00, 0x00, 0x00, 0x00, 0x00]);
@@ -26,7 +33,26 @@ function clampPercent(value: number): number {
   return Math.min(100, Math.max(0, value));
 }
 
-function buildUsage(credentials: GrokCredentials, usedPercent: number, resetsAt: Date | null): GrokUsage {
+function grokGrpcHeaders(accessToken: string): Record<string, string> {
+  return {
+    Authorization: `Bearer ${accessToken}`,
+    Accept: "*/*",
+    "Content-Type": "application/grpc-web+proto",
+    "x-grpc-web": "1",
+    "x-user-agent": "connect-es/2.1.1",
+    Origin: "https://grok.com",
+    Referer: "https://grok.com/?_s=usage",
+    "User-Agent": "AgentUsage/1.0",
+  };
+}
+
+function buildUsage(
+  credentials: GrokCredentials,
+  usedPercent: number,
+  resetsAt: Date | null,
+  resetCredits: GrokUsage["resetCredits"] | null = null,
+  resetCreditsError: string | undefined = undefined,
+): GrokUsage {
   const used = clampPercent(usedPercent);
   return {
     usedPercent: used,
@@ -38,6 +64,8 @@ function buildUsage(credentials: GrokCredentials, usedPercent: number, resetsAt:
     teamId: credentials.teamId,
     loginMethod: getGrokLoginMethod(credentials),
     source: "auth.json",
+    resetCredits: resetCredits ?? undefined,
+    resetCreditsError,
   };
 }
 
@@ -76,6 +104,88 @@ function errorFromGrpcStatus(status: number, message: string): GrokError {
   };
 }
 
+async function fetchGrokResetCredits(accessToken: string): Promise<{
+  resetCredits: GrokUsage["resetCredits"] | null;
+  error: GrokError | null;
+}> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), RESET_CREDITS_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(GROK_RESET_CREDITS_URL, {
+      method: "POST",
+      headers: grokGrpcHeaders(accessToken),
+      body: EMPTY_GRPC_WEB_BODY,
+      signal: controller.signal,
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        resetCredits: null,
+        error: {
+          type: "unauthorized",
+          message: "Grok session expired or invalid. Run `grok login` to refresh credentials.",
+        },
+      };
+    }
+
+    if (!response.ok) {
+      return {
+        resetCredits: null,
+        error: {
+          type: "unknown",
+          message: `Grok reset-credit request failed with HTTP ${response.status}: ${response.statusText}`,
+        },
+      };
+    }
+
+    const headerStatus = grpcStatusFromHeaders(response.headers);
+    if (headerStatus && headerStatus.status !== 0) {
+      return {
+        resetCredits: null,
+        error: errorFromGrpcStatus(headerStatus.status, headerStatus.message),
+      };
+    }
+
+    const buffer = new Uint8Array(await response.arrayBuffer());
+    const bodyStatus = grpcStatusFromBody(buffer);
+    if (bodyStatus && bodyStatus.status !== 0) {
+      return {
+        resetCredits: null,
+        error: errorFromGrpcStatus(bodyStatus.status, bodyStatus.message),
+      };
+    }
+
+    try {
+      return { resetCredits: parseGrokResetCreditsResponse(buffer), error: null };
+    } catch (error) {
+      return {
+        resetCredits: null,
+        error: {
+          type: "parse_error",
+          message: error instanceof Error ? error.message : "Could not parse Grok reset-credit response",
+        },
+      };
+    }
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      return {
+        resetCredits: null,
+        error: { type: "network_error", message: "Request timeout. Please check your network connection." },
+      };
+    }
+    return {
+      resetCredits: null,
+      error: {
+        type: "network_error",
+        message: error instanceof Error ? error.message : "Network request failed",
+      },
+    };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function fetchGrokWebBilling(accessToken: string): Promise<{
   usage: GrokUsage | null;
   error: GrokError | null;
@@ -87,16 +197,7 @@ async function fetchGrokWebBilling(accessToken: string): Promise<{
   try {
     const response = await fetch(GROK_BILLING_URL, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "*/*",
-        "Content-Type": "application/grpc-web+proto",
-        "x-grpc-web": "1",
-        "x-user-agent": "connect-es/2.1.1",
-        Origin: "https://grok.com",
-        Referer: "https://grok.com/?_s=usage",
-        "User-Agent": "AgentUsage/1.0",
-      },
+      headers: grokGrpcHeaders(accessToken),
       body: EMPTY_GRPC_WEB_BODY,
       signal: controller.signal,
     });
@@ -206,13 +307,19 @@ export async function fetchGrokUsage(): Promise<{ usage: GrokUsage | null; error
   // Proactive refresh when near/past expiry; still attempt billing if refresh fails.
   credentials = await ensureFreshCredentials(credentials);
 
-  let result = await fetchGrokWebBilling(credentials.accessToken);
+  let [result, resetResult] = await Promise.all([
+    fetchGrokWebBilling(credentials.accessToken),
+    fetchGrokResetCredits(credentials.accessToken),
+  ]);
 
   if (result.error?.type === "unauthorized") {
     const retried = await refreshAfterUnauthorized(credentials);
     if (retried) {
       credentials = retried;
-      result = await fetchGrokWebBilling(credentials.accessToken);
+      [result, resetResult] = await Promise.all([
+        fetchGrokWebBilling(credentials.accessToken),
+        fetchGrokResetCredits(credentials.accessToken),
+      ]);
     }
   }
 
@@ -224,7 +331,13 @@ export async function fetchGrokUsage(): Promise<{ usage: GrokUsage | null; error
   }
 
   return {
-    usage: buildUsage(credentials, result.snapshot.usedPercent, result.snapshot.resetsAt),
+    usage: buildUsage(
+      credentials,
+      result.snapshot.usedPercent,
+      result.snapshot.resetsAt,
+      resetResult.resetCredits ?? { availableCount: null, expiresAtList: [] },
+      resetResult.error?.message,
+    ),
     error: null,
   };
 }
