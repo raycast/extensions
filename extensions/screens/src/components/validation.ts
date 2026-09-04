@@ -1,3 +1,4 @@
+import { isAuthorityHost } from "../authority";
 import { isValidPort } from "../connect";
 import { CONNECTABLE_SCHEME_LIST, isConnectableUrl } from "../url-scheme";
 
@@ -31,15 +32,9 @@ export function optionalPort(value: string | undefined): string | undefined {
 /**
  * A host on its own. This field supplies the authority of a URL built from separate parts, so a
  * value carrying its own user, port, or path would address a machine other than the one named.
- * An IPv6 literal is the one form allowed to hold colons.
  */
 export function connectableHost(value: string | undefined): string | undefined {
   const missing = requiredText(value);
   if (missing || !value) return missing;
-
-  const host = value.trim();
-  if (/[@/?#\s]/.test(host)) return BARE_HOST;
-
-  const literal = host.startsWith("[") && host.endsWith("]") ? host.slice(1, -1) : host;
-  return literal.includes(":") && !/^[0-9a-f:]+$/i.test(literal) ? BARE_HOST : undefined;
+  return isAuthorityHost(value) ? undefined : BARE_HOST;
 }

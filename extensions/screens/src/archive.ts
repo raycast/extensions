@@ -1,5 +1,6 @@
 import { statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { isAuthorityPort } from "./authority";
 import { isConnectableUrl } from "./url-scheme";
 
 const CONNECTION_TYPES = ["local", "remote", "tailscale", "url", "saved", "recent"] as const;
@@ -14,7 +15,7 @@ export interface Connection {
   hostname: string;
   type: ConnectionType;
   clientProtocol: ClientProtocol;
-  port: number;
+  port?: number;
   publicIpAddress?: string;
   publicPort?: number;
   sourceURL?: string;
@@ -128,9 +129,9 @@ function parseConnection(value: unknown): Connection | undefined {
     hostname,
     type: parseType(raw.type),
     clientProtocol: raw.clientProtocol === "rdp" ? "rdp" : "vnc",
-    port: typeof raw.port === "number" ? raw.port : 0,
+    port: parsePort(raw.port),
     publicIpAddress: nonEmptyString(raw.publicIpAddress),
-    publicPort: typeof raw.publicPort === "number" && raw.publicPort > 0 ? raw.publicPort : undefined,
+    publicPort: parsePort(raw.publicPort),
     sourceURL,
     username: parseUsername(raw.users),
     lastConnectionDate: parseCoreDataDate(raw.lastConnectionDate),
@@ -155,6 +156,15 @@ function parseCoreDataDate(value: unknown): Date | undefined {
   if (typeof value !== "number" || value === NEVER_CONNECTED) return undefined;
   const date = new Date((value + CORE_DATA_EPOCH_OFFSET_SECONDS) * 1000);
   return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
+/**
+ * A recorded port, kept only when a URL authority can carry it. Screens writes 0 for a connection
+ * that reaches the protocol's default port, and an archive is a file the user picked, so anything
+ * outside the range is treated the same as unrecorded.
+ */
+function parsePort(value: unknown): number | undefined {
+  return typeof value === "number" && isAuthorityPort(value) ? value : undefined;
 }
 
 function nonEmptyString(value: unknown): string | undefined {

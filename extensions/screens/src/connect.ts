@@ -1,4 +1,5 @@
 import { ClientProtocol, Connection } from "./archive";
+import { isAuthorityHost, isAuthorityPort } from "./authority";
 
 export interface ConnectOptions {
   observe?: boolean;
@@ -15,10 +16,10 @@ export type AdHocProtocol = "vnc" | "ssh";
 
 export const DEFAULT_PORTS: Record<AdHocProtocol, number> = { vnc: 5900, ssh: 22 };
 
-/** A port a URL authority can carry. Anything else addresses a different machine than intended. */
+/** A typed port a URL authority can carry. Anything else addresses a different machine than intended. */
 export function isValidPort(port: string): boolean {
   const trimmed = port.trim();
-  return /^\d+$/.test(trimmed) && Number(trimmed) >= 1 && Number(trimmed) <= 65535;
+  return /^\d+$/.test(trimmed) && isAuthorityPort(Number(trimmed));
 }
 
 /** A connection target as someone would type it. */
@@ -54,22 +55,25 @@ export function parseHostSpec(spec: string): HostSpec | undefined {
   const username = separator === -1 ? undefined : rest.slice(0, separator);
   const authority = rest.slice(separator + 1);
 
+  const parsed = splitAuthority(authority);
+  if (!parsed || !isAuthorityHost(parsed.host)) return undefined;
+
+  return { ...parsed, protocol, username };
+}
+
+function splitAuthority(authority: string): { host: string; port?: string } | undefined {
   const bracketed = /^\[([^\]]+)\](?::(\d+))?$/.exec(authority);
   if (bracketed) {
     if (bracketed[2] !== undefined && !isValidPort(bracketed[2])) return undefined;
-    return { host: bracketed[1], port: bracketed[2], protocol, username };
+    return { host: bracketed[1], port: bracketed[2] };
   }
 
   const parts = authority.split(":");
   if (parts.length === 2 && /^\d+$/.test(parts[1])) {
-    if (!isValidPort(parts[1])) return undefined;
-    return parts[0] ? { host: parts[0], port: parts[1], protocol, username } : undefined;
+    return isValidPort(parts[1]) ? { host: parts[0], port: parts[1] } : undefined;
   }
 
-  // Anything left holding a colon is only a host if it reads as an unbracketed IPv6 literal.
-  if (authority.includes(":") && !/^[0-9a-f:]+$/i.test(authority)) return undefined;
-
-  return authority ? { host: authority, protocol, username } : undefined;
+  return { host: authority };
 }
 
 /**
@@ -80,7 +84,6 @@ export function parseHostSpec(spec: string): HostSpec | undefined {
  * whole library, so a name dropped at import time can still collide.
  */
 export function resolveTarget(connection: Connection, all: Connection[]): ConnectTarget {
-  // A url-type connection stores the exact target it was created from. Nothing to guess.
   if (connection.sourceURL) {
     return { kind: "direct", url: connection.sourceURL };
   }
@@ -144,15 +147,16 @@ function directUrl(connection: Connection): string | undefined {
  * the network's public address on those, but that routes out to the WAN, and every machine behind
  * one router shares it. Tailscale and remote connections are reached at the recorded address,
  * because their hostname is a display name, e.g. `Front Desk iMac`.
+ *
+ * Both fields arrive from a file the user picked, so each is held to what a URL authority can
+ * carry. A display label fails that test, as does an address that would splice itself into the URL.
  */
-function directAddress(connection: Connection): { host: string; port: number } | undefined {
+function directAddress(connection: Connection): { host: string; port?: number } | undefined {
   const hostname = normalizeHostname(connection.hostname);
-  // Screens stores a display label such as `Front Desk iMac` in this field on some connections, so
-  // only a hostname free of whitespace counts as an address.
-  const byHostname = hostname && !/\s/.test(hostname) ? { host: hostname, port: connection.port } : undefined;
+  const byHostname = isAuthorityHost(hostname) ? { host: hostname, port: connection.port } : undefined;
 
   if (connection.type === "local") return byHostname;
-  if (connection.publicIpAddress) {
+  if (connection.publicIpAddress && isAuthorityHost(connection.publicIpAddress)) {
     return { host: connection.publicIpAddress, port: connection.publicPort ?? connection.port };
   }
   return byHostname;
