@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-radios",
+  "title": "Quick Radios",
+  "description": "Control Wi-Fi and Bluetooth connections directly from Raycast search.",
+  "icon": "icon.png",
+  "author": "tejas911",
+  "categories": [
+    "System",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "wifi",
+      "title": "Manage Wi-Fi",
+      "subtitle": "Quick Radios",
+      "description": "View status, connect to networks, and manage Wi-Fi.",
+      "mode": "view"
+    },
+    {
+      "name": "bluetooth",
+      "title": "Manage Bluetooth",
+      "subtitle": "Quick Radios",
+      "description": "View status, connect paired devices, and manage Bluetooth.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-wifi",
+      "title": "Toggle Wi-Fi",
+      "subtitle": "Quick Radios",
+      "description": "Instantly turn Wi-Fi on or off.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-bluetooth",
+      "title": "Toggle Bluetooth",
+      "subtitle": "Quick Radios",
+      "description": "Instantly turn Bluetooth on or off.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react": "19.0.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
