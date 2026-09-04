@@ -1,0 +1,179 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pomodoro-md",
+  "title": "Pomodoro.md",
+  "description": "Markdown-native pomodoro timer for the LLM era",
+  "icon": "icon.png",
+  "author": "yukitomo26",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "pomodoro",
+    "timer",
+    "markdown",
+    "obsidian",
+    "daily note",
+    "focus"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-timer",
+      "title": "Start Pomodoro",
+      "description": "Pick a task from your list and start a pomodoro",
+      "mode": "view"
+    },
+    {
+      "name": "start-break",
+      "title": "Start Break",
+      "description": "Start a break timer (stops the current pomodoro if running)",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-start",
+      "title": "Quick Start",
+      "description": "Start a pomodoro with the configured quick start task",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "description": "Stop the current pomodoro or break timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Pomodoro.md Timer",
+      "description": "Show current pomodoro status in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "taskMode",
+      "title": "Task Mode",
+      "description": "Manual: manage tasks in Raycast. Daily Note: load from Obsidian daily notes.",
+      "type": "dropdown",
+      "default": "manual",
+      "required": true,
+      "data": [
+        {
+          "title": "Manual",
+          "value": "manual"
+        },
+        {
+          "title": "Daily Note",
+          "value": "dailynote"
+        }
+      ]
+    },
+    {
+      "name": "dailyNotePath",
+      "title": "Daily Note Directory",
+      "description": "Obsidian daily notes directory (required for Daily Note mode)",
+      "type": "textfield",
+      "placeholder": "~/Obsidian/daily",
+      "required": false
+    },
+    {
+      "name": "dailyNoteFormat",
+      "title": "Daily Note Filename",
+      "description": "Path of today's note relative to the directory. YYYY, MM, DD are replaced with today's date (e.g. YYYY-MM-DD.md or YYYYMM/YYYY-MM-DD.md)",
+      "type": "textfield",
+      "default": "YYYY-MM-DD.md",
+      "required": false
+    },
+    {
+      "name": "pomoDuration",
+      "title": "Pomodoro Duration (min)",
+      "description": "Duration of one pomodoro in minutes",
+      "type": "textfield",
+      "default": "25",
+      "required": false
+    },
+    {
+      "name": "breakDuration",
+      "title": "Break Duration (min)",
+      "description": "Duration of break in minutes",
+      "type": "textfield",
+      "default": "5",
+      "required": false
+    },
+    {
+      "name": "timetableHeader",
+      "title": "Timetable Header",
+      "description": "Section header for timetable in daily notes",
+      "type": "textfield",
+      "default": "# Timetable",
+      "required": false
+    },
+    {
+      "name": "logSectionHeader",
+      "title": "Log Section Header",
+      "description": "Section header for work log in daily notes",
+      "type": "textfield",
+      "default": "## Work Log",
+      "required": false
+    },
+    {
+      "name": "pomodoroLogHeader",
+      "title": "Pomodoro Log Header",
+      "description": "Sub-header for pomodoro log entries",
+      "type": "textfield",
+      "default": "### Pomodoro Log",
+      "required": false
+    },
+    {
+      "name": "breakKeywords",
+      "title": "Break Keywords",
+      "description": "Comma-separated keywords to identify break blocks",
+      "type": "textfield",
+      "default": "Break,Lunch",
+      "required": false
+    },
+    {
+      "name": "quickStartTask",
+      "title": "Quick Start Task Name",
+      "description": "Default task name for Quick Start command",
+      "type": "textfield",
+      "default": "Morning Routine",
+      "required": false
+    },
+    {
+      "name": "enableLogging",
+      "title": "Enable Logging",
+      "description": "Write pomodoro log to Daily Note after each session",
+      "label": "Write log to Daily Note",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.14.0",
+    "@types/react": "19.1.0",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}
