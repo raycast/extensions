@@ -1,6 +1,6 @@
 # Mint Changelog
 
-## [AI Agent Storage and Mac Care] - {PR_MERGE_DATE}
+## [AI Agent Storage and Mac Care] - 2026-09-04
 
 - Review what Codex, Claude Code, Claude Desktop, Cursor, and other AI tools keep on this Mac.
 - See conversation age, archived Codex storage, and media Mint could compress while keeping the text readable.
