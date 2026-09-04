@@ -116,7 +116,7 @@
     {
       "name": "process-text",
       "title": "Process Text with Hermes",
-      "description": "Run a text transformation via Hermes: summarize, explain, fix grammar, improve writing, simplify, expand, translate, or review code. Use for private or sensitive text since nothing leaves the user's machine.",
+      "description": "Run a text transformation via your own Hermes server: summarize, explain, fix grammar, improve writing, simplify, expand, translate, or review code. Text is sent to the configured Hermes endpoint (local by default).",
       "icon": "icon.png"
     },
     {

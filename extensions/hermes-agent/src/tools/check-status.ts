@@ -1,4 +1,8 @@
-import { getPreferences, resolveModelName } from "../api";
+import { getPreferences } from "../api";
+
+interface ModelsList {
+  data?: { id?: string }[];
+}
 
 /**
  * Check whether the Hermes API server is reachable and return the resolved
@@ -11,8 +15,31 @@ export default async function (): Promise<{
   message: string;
 }> {
   const prefs = getPreferences();
+  const base = prefs.endpoint.replace(/\/+$/, "");
+
   try {
-    const model = await resolveModelName(prefs);
+    const headers: Record<string, string> = {};
+    if (prefs.token) {
+      headers.Authorization = `Bearer ${prefs.token}`;
+    }
+
+    const response = await fetch(`${base}/v1/models`, {
+      method: "GET",
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = (await response.json()) as ModelsList;
+    const ids = (data.data ?? [])
+      .map((m) => m.id)
+      .filter((id): id is string => typeof id === "string" && id.length > 0);
+    const model = ids.includes("hermes-agent")
+      ? "hermes-agent"
+      : (ids[0] ?? "hermes-agent");
+
     return {
       enabled: true,
       endpoint: prefs.endpoint,
