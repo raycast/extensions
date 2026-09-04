@@ -1,6 +1,6 @@
 # raycast-ollama Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-04
 
 - Fixed model discovery timing out too quickly and showing connection failures as an empty installed-model list.
 - Fixed Manage Models and Loaded Models crashing when a remote Ollama server omits a loaded model's context length.
