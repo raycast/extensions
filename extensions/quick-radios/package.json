@@ -10,6 +10,10 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "wifi",
@@ -41,11 +45,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.25"
+    "@raycast/api": "^1.104.25",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "22.19.17",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",

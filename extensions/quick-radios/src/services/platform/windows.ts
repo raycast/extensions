@@ -573,6 +573,25 @@ export async function getWindowsWifiNetworks(
   }
 }
 
+function escapeXml(unsafe: string): string {
+  return unsafe.replace(/[<>&'"]/g, (c) => {
+    switch (c) {
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case "&":
+        return "&amp;";
+      case "'":
+        return "&apos;";
+      case '"':
+        return "&quot;";
+      default:
+        return c;
+    }
+  });
+}
+
 /**
  * Connects to a Wi-Fi network by SSID. If a password is provided for an unsaved network,
  * creates a temporary XML profile.
@@ -582,13 +601,16 @@ export async function connectWindowsWifi(
   password?: string,
 ): Promise<void> {
   if (password) {
-    const sanitizedSsid = ssid.replace(/[<>&'"]/g, "");
+    const escapedSsid = escapeXml(ssid);
+    const escapedPassword = escapeXml(password);
+    const hexSsid = Buffer.from(ssid, "utf-8").toString("hex");
     const profileXml = `<?xml version="1.0"?>
 <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
-    <name>${sanitizedSsid}</name>
+    <name>${escapedSsid}</name>
     <SSIDConfig>
         <SSID>
-            <name>${sanitizedSsid}</name>
+            <hex>${hexSsid}</hex>
+            <name>${escapedSsid}</name>
         </SSID>
     </SSIDConfig>
     <connectionType>ESS</connectionType>
@@ -603,7 +625,7 @@ export async function connectWindowsWifi(
             <sharedKey>
                 <keyType>passPhrase</keyType>
                 <protected>false</protected>
-                <keyMaterial>${password}</keyMaterial>
+                <keyMaterial>${escapedPassword}</keyMaterial>
             </sharedKey>
         </security>
     </MSM>

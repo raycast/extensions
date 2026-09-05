@@ -1,4 +1,5 @@
 import { Color, Icon, List } from "@raycast/api";
+import QRCode from "qrcode";
 import { WifiNetwork, WifiStatus } from "../services/types";
 
 interface WifiDetailProps {
@@ -66,8 +67,10 @@ export function WifiDetail({
       savedPassword,
       network.authentication,
     );
-    const qrUrl = getWifiQrCodeImageUrl(qrString);
-    markdown += `\n---\n### 📱 Scan to Join\n![Wi-Fi QR Code](${qrUrl})\n`;
+    const qrDataUrl = generateLocalWifiQrDataUrl(qrString);
+    if (qrDataUrl) {
+      markdown += `\n---\n### 📱 Scan to Join\n![Wi-Fi QR Code](${qrDataUrl})\n`;
+    }
     if (savedPassword) {
       markdown += `\n**Password**: \`${savedPassword}\`  \n`;
     }
@@ -211,6 +214,27 @@ function generateWifiQrString(
   return `WIFI:T:${auth};S:${escapedSsid};P:${escapedPassword};;`;
 }
 
-function getWifiQrCodeImageUrl(wifiQrString: string): string {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=140x140&margin=2&data=${encodeURIComponent(wifiQrString)}`;
+function generateLocalWifiQrDataUrl(wifiQrString: string): string {
+  try {
+    const qr = QRCode.create(wifiQrString, { errorCorrectionLevel: "M" });
+    const size = qr.modules.size;
+    const data = qr.modules.data;
+    const margin = 2;
+    const totalSize = size + margin * 2;
+
+    let pathData = "";
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (data[r * size + c]) {
+          pathData += `M${c},${r}h1v1h-1z `;
+        }
+      }
+    }
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 ${totalSize} ${totalSize}" shape-rendering="crispEdges"><rect width="${totalSize}" height="${totalSize}" fill="#ffffff"/><path d="${pathData.trim()}" transform="translate(${margin}, ${margin})" fill="#000000"/></svg>`;
+    const base64 = Buffer.from(svg).toString("base64");
+    return `data:image/svg+xml;base64,${base64}`;
+  } catch {
+    return "";
+  }
 }

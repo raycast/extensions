@@ -135,12 +135,17 @@ export function calculateSessionUsage(
     };
   }
 
-  // If new network or baseline not set yet
-  if (!activeBaseline || activeBaseline.ssid !== ssid) {
+  // If new network, baseline not set yet, or interface counters reset
+  if (
+    !activeBaseline ||
+    activeBaseline.ssid !== ssid ||
+    currentBytesIn < activeBaseline.baselineIn ||
+    currentBytesOut < activeBaseline.baselineOut
+  ) {
     activeBaseline = {
       ssid,
-      baselineIn: 0,
-      baselineOut: 0,
+      baselineIn: currentBytesIn,
+      baselineOut: currentBytesOut,
     };
   }
 
