@@ -821,13 +821,6 @@ function FolderActions({
             void launchAgent(folder.path, terminalAgent).then(onRefresh);
         }}
       />
-      {folder.repositoryRoot ? (
-        <Action.Push
-          title="Git Actions"
-          icon={Icon.Code}
-          target={<GitActions folder={folder} onRefresh={onRefresh} />}
-        />
-      ) : null}
       <Action
         title="Open in Visual Studio Code"
         icon={Icon.Code}
@@ -918,6 +911,13 @@ function FolderActions({
           onRefresh?.();
         }}
       />
+      {folder.repositoryRoot ? (
+        <Action.Push
+          title="Git Actions"
+          icon={Icon.Code}
+          target={<GitActions folder={folder} onRefresh={onRefresh} />}
+        />
+      ) : null}
     </ActionPanel>
   );
 }
