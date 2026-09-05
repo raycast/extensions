@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-usage-monitor",
+  "title": "AI Usage Monitor",
+  "description": "Watch Claude Code and Codex rate limits in one keyboard-first dashboard, and get notified before you hit one.",
+  "icon": "command-icon.png",
+  "author": "kedrzu",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "show-usage",
+      "title": "Show AI Usage",
+      "subtitle": "Claude Code \u00b7 Codex",
+      "description": "Show every AI limit at a glance: session, weekly and per-model windows.",
+      "mode": "view"
+    },
+    {
+      "name": "monitor",
+      "title": "Monitor AI Usage",
+      "subtitle": "Claude Code \u00b7 Codex",
+      "description": "Check usage in the background and notify when a threshold is crossed.",
+      "mode": "no-view",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showClaude",
+      "title": "Providers",
+      "label": "Claude Code",
+      "description": "Show Claude Code usage.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showCodex",
+      "title": "",
+      "label": "Codex",
+      "description": "Show Codex usage.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "notifyHUD",
+      "title": "Notifications",
+      "label": "Raycast HUD",
+      "description": "Show a Raycast HUD when a threshold is crossed.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "notifyNotificationCenter",
+      "title": "",
+      "label": "macOS Notification Center",
+      "description": "Post a macOS notification when a threshold is crossed.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "sessionThresholds",
+      "title": "Session Thresholds",
+      "description": "Comma-separated percentages that trigger a session notification.",
+      "type": "textfield",
+      "required": false,
+      "default": "50, 75, 90, 95"
+    },
+    {
+      "name": "weeklyThresholds",
+      "title": "Weekly Thresholds",
+      "description": "Comma-separated percentages that trigger a weekly notification.",
+      "type": "textfield",
+      "required": false,
+      "default": "75, 90"
+    },
+    {
+      "name": "resetWarnings",
+      "title": "Reset Warnings",
+      "description": "Comma-separated minutes before a limit resets. Only fires while that window is actually in use. Leave empty to disable.",
+      "type": "textfield",
+      "required": false,
+      "default": "30, 10"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^2.1.8"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
