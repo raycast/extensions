@@ -1,6 +1,6 @@
 # Mealie Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-05
 
 - Search recipes and open them in Mealie
 - Plan a recipe for a day with `Cmd+M`, defaulting to dinner
