@@ -123,3 +123,20 @@ The proxy URL is resolved in the following order:
 
 - Proxy support applies to **Slack API calls only**. The OAuth login flow uses Raycast's built-in networking, which does not go through the configured proxy.
 - If you are on a corporate network that blocks OAuth, use a **personal access token** instead (see above). Token-based authentication bypasses OAuth entirely and all subsequent API calls will use the proxy.
+
+## Slack API rate limits
+
+Slack applies Web API rate limits **per API method, per workspace, per app**, using one-minute windows. The published tier number is a guaranteed floor rather than a fixed maximum; Slack allows some bursts and may change the exact allowance. Signing in again or clearing Raycast's extension cache does not reset these workspace-level app limits.
+
+The limits most relevant to this extension are:
+
+| Extension operation                     | Slack method                                                                         | Published limit                                                                  |
+| --------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Search workspace members                | [`users.list`](https://docs.slack.dev/reference/methods/users.list/)                 | Tier 2: 20+ requests per minute                                                  |
+| Search channels and group conversations | [`conversations.list`](https://docs.slack.dev/reference/methods/conversations.list/) | Tier 2: 20+ requests per minute                                                  |
+| Search messages                         | [`search.messages`](https://docs.slack.dev/reference/methods/search.messages/)       | Tier 2: 20+ requests per minute                                                  |
+| Send messages                           | [`chat.postMessage`](https://docs.slack.dev/reference/methods/chat.postMessage/)     | Special: generally 1 message per second per channel, plus a workspace-wide limit |
+
+`users.list` and `conversations.list` are cursor-paginated, and every page is another request against that method's rate limit. Normal directory loading uses Slack's recommended 200-item page size. A focused directory search can request up to 999 items per transient page (Slack requires the value to remain below 1,000), immediately discarding the full API page after retaining only compact matches. This reduces request pressure in very large workspaces without rebuilding the previous unbounded in-memory directory.
+
+When a limit is exceeded, Slack responds with HTTP `429` and a `Retry-After` header containing the number of seconds to wait. The extension shows that delay in Raycast, pauses the affected Slack API request, and retries it automatically. Calls to other Slack API methods can continue because each method has its own rate-limit bucket. See [Slack's rate-limit overview](https://docs.slack.dev/apis/web-api/rate-limits/) for the full tier definitions and current policy.

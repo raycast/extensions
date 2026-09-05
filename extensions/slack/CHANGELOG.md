@@ -1,5 +1,12 @@
 # Slack Changelog
 
+## [Fix recipient search in large workspaces] - {PR_MERGE_DATE}
+
+- Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.
+- Continue member searches past hidden-profile matches so people whose visible names occur later in Slack's unordered directory can still be found.
+- Correctly recognize Slack member IDs that begin with `W` so those people appear as message recipients instead of channels.
+- Show Slack's requested retry delay when API calls are rate-limited, then retry automatically instead of failing immediately.
+
 ## [Keep Set Status responsive in large workspaces] - 2026-08-29
 
 - Load custom workspace emojis only when opening the emoji picker and render them in bounded slices to prevent Set Status from exceeding the extension memory limit.

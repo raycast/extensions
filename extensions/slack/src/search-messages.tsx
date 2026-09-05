@@ -157,7 +157,7 @@ function Search() {
                   <Action.Push
                     title={`Message ${user.name}`}
                     icon={Icon.Message}
-                    target={<SendMessage recipient={user?.id} />}
+                    target={<SendMessage recipient={user.id} recipientName={user.name} />}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   />
                 )}

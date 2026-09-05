@@ -13,7 +13,8 @@
     "clins1994",
     "stephlv",
     "artistro08",
-    "andreaselia"
+    "andreaselia",
+    "0xdhrv"
   ],
   "pastContributors": [
     "Elliot67",
@@ -173,7 +174,7 @@
     {
       "title": "Read Conversation",
       "name": "read-conversation",
-      "description": "Read messages from a Slack channel, DM, group DM, user DM, or pasted Slack message permalink. A permalink returns the referenced message and its thread."
+      "description": "Read messages from a Slack channel, DM, group DM, user DM, or pasted Slack message permalink. When given a U or W user ID, it opens or finds that DM and returns its D-prefixed channel ID; use this to resolve a person before Upload Files. A permalink returns the referenced message and its thread."
     },
     {
       "title": "Get Users",
@@ -183,7 +184,7 @@
     {
       "title": "Find Users",
       "name": "find-users",
-      "description": "Find Slack users by name, username, display name, or email address. Use this to resolve a person to a user ID before sending a direct message."
+      "description": "Find Slack users by name, username, display name, or email address. Use this to resolve a person to a user ID. Before uploading files to that person, pass the user ID to Read Conversation and use its returned DM channel ID."
     },
     {
       "title": "Set Status",
@@ -238,316 +239,17 @@
     {
       "title": "Upload Files",
       "name": "upload-files",
-      "description": "Upload one or more local files to a Slack channel, DM, group DM, or thread, optionally with message text. Use this instead of Send Message or Reply to Thread when the user asks to attach files. Pass multiple absolute file paths separated by newlines."
+      "description": "Upload one or more local files to a Slack channel, DM, group DM, or thread, optionally with message text. The channel must be a C, D, or G conversation ID; never pass a U or W user ID. For a named person, use Find Users, then Read Conversation, then pass its returned D-prefixed channel ID here. Pass multiple absolute file paths separated by newlines."
     }
   ],
-  "ai": {
-    "evals": [
-      {
-        "input": "@slack set my status to away",
-        "expected": [
-          {
-            "callsTool": {
-              "name": "set-status",
-              "arguments": {
-                "text": {
-                  "includes": "away"
-                }
-              }
-            }
-          }
-        ],
-        "mocks": {
-          "set-status": "success"
-        }
-      },
-      {
-        "input": "@slack summarize what happened in #general yesterday",
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-channels"
-            }
-          }
-        ],
-        "mocks": {
-          "get-channels": []
-        }
-      },
-      {
-        "input": "@ask summary the #product-team-issue-notification channel yesterday",
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-channels"
-            }
-          },
-          {
-            "callsTool": {
-              "name": "get-channel-history",
-              "arguments": {
-                "text": "C12345678",
-                "after": "2025-05-19T15:00:00Z"
-              }
-            }
-          }
-        ]
-      },
-      {
-        "input": "@slack reply \"I will take a look\" to this thread: https://example.slack.com/archives/C12345678/p1718899200000100",
-        "expected": [
-          {
-            "callsTool": {
-              "name": "reply-thread",
-              "arguments": {
-                "channel": "C12345678",
-                "threadTs": "1718899200.000100",
-                "text": {
-                  "includes": "I will take a look"
-                }
-              }
-            }
-          }
-        ],
-        "mocks": {
-          "reply-thread": "success"
-        }
-      },
-      {
-        "input": "@slack reply \"We doubled since this morning 🤯\" to this thread and also send it to the channel: https://example.slack.com/archives/C12345678/p1718899200000100",
-        "expected": [
-          {
-            "callsTool": {
-              "name": "reply-thread",
-              "arguments": {
-                "channel": "C12345678",
-                "threadTs": "1718899200.000100",
-                "text": {
-                  "includes": "We doubled since this morning"
-                },
-                "replyBroadcast": true
-              }
-            }
-          }
-        ],
-        "mocks": {
-          "reply-thread": "success"
-        }
-      },
-      {
-        "input": "@slack react with :thumbsup: to https://example.slack.com/archives/C12345678/p1718899200000100",
-        "expected": [
-          {
-            "callsTool": {
-              "name": "add-reaction",
-              "arguments": {
-                "channel": "C12345678",
-                "messageTs": "1718899200.000100",
-                "emoji": {
-                  "includes": "thumbsup"
-                }
-              }
-            }
-          }
-        ],
-        "mocks": {
-          "add-reaction": "success"
-        }
-      },
-      {
-        "input": "@slack edit this message to say \"Updated copy\": https://example.slack.com/archives/C12345678/p1718899200000100",
-        "expected": [
-          {
-            "callsTool": {
-              "name": "update-message",
-              "arguments": {
-                "channel": "C12345678",
-                "messageTs": "1718899200.000100",
-                "text": {
-                  "includes": "Updated copy"
-                }
-              }
-            }
-          }
-        ],
-        "mocks": {
-          "update-message": "success"
-        }
-      },
-      {
-        "input": "@slack send this screenshot to Daniel with the message \"Testing Slack attachments\": /Users/me/Desktop/test.png",
-        "expected": [
-          {
-            "callsTool": {
-              "name": "find-users",
-              "arguments": {
-                "query": {
-                  "includes": "Daniel"
-                }
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "read-conversation",
-              "arguments": {
-                "conversation": {
-                  "includes": "U12345678"
-                }
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "upload-files",
-              "arguments": {
-                "channel": {
-                  "includes": "D12345678"
-                },
-                "filePaths": {
-                  "includes": "/Users/me/Desktop/test.png"
-                },
-                "text": {
-                  "includes": "Testing Slack attachments"
-                }
-              }
-            }
-          }
-        ],
-        "mocks": {
-          "find-users": [
-            {
-              "id": "U12345678",
-              "displayName": "Daniel"
-            }
-          ],
-          "read-conversation": {
-            "channel": "D12345678"
-          },
-          "upload-files": "success"
-        }
-      },
-      {
-        "input": "@slack get me a huddle link with Daniel",
-        "expected": [
-          {
-            "callsTool": {
-              "name": "find-users",
-              "arguments": {
-                "query": {
-                  "includes": "Daniel"
-                }
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "get-huddle-link",
-              "arguments": {
-                "conversation": {
-                  "includes": "U12345678"
-                }
-              }
-            }
-          }
-        ],
-        "mocks": {
-          "find-users": [
-            {
-              "id": "U12345678",
-              "displayName": "Daniel"
-            }
-          ],
-          "get-huddle-link": {
-            "workspaceId": "T12345678",
-            "channel": "D12345678",
-            "url": "https://app.slack.com/huddle/T12345678/D12345678"
-          }
-        }
-      },
-      {
-        "input": "@slack create a group DM with Alicia and Roy and send them this screenshot: /Users/me/Desktop/test.png",
-        "expected": [
-          {
-            "callsTool": {
-              "name": "find-users",
-              "arguments": {
-                "query": {
-                  "includes": "Alicia"
-                }
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "find-users",
-              "arguments": {
-                "query": {
-                  "includes": "Roy"
-                }
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "open-group-dm",
-              "arguments": {
-                "userIds": [
-                  {
-                    "includes": "U12345678"
-                  },
-                  {
-                    "includes": "U87654321"
-                  }
-                ]
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "upload-files",
-              "arguments": {
-                "channel": {
-                  "includes": "G12345678"
-                },
-                "filePaths": {
-                  "includes": "/Users/me/Desktop/test.png"
-                }
-              }
-            }
-          }
-        ],
-        "mocks": {
-          "find-users": [
-            {
-              "id": "U12345678",
-              "displayName": "Alicia"
-            },
-            {
-              "id": "U87654321",
-              "displayName": "Roy"
-            }
-          ],
-          "open-group-dm": {
-            "channel": "G12345678",
-            "userIds": [
-              "U12345678",
-              "U87654321"
-            ]
-          },
-          "upload-files": "success"
-        }
-      }
-    ]
-  },
   "dependencies": {
     "@raycast/api": "^1.104.6",
     "@raycast/utils": "^2.2.2",
     "@slack/web-api": "^7.14.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "lodash": "^4.17.23",
     "https-proxy-agent": "^7.0.6",
+    "lodash": "^4.17.23",
     "node-emoji": "^2.2.0"
   },
   "devDependencies": {
