@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fastnav",
+  "title": "FastNav",
+  "description": "Search and run commands and visible controls from any running macOS application.",
+  "icon": "icon.png",
+  "author": "uriafranko",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "accessibility",
+    "actions",
+    "commands",
+    "menus",
+    "navigation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-app-actions",
+      "title": "Search App Actions",
+      "description": "Search accessibility actions, menu commands, and keyboard shortcuts across running apps.",
+      "mode": "view",
+      "keywords": [
+        "menu",
+        "command",
+        "shortcut",
+        "accessibility",
+        "actions"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchAllApplications",
+      "title": "Search Across All Applications",
+      "description": "Search every running application and rank actions from the previously focused application higher. Turn this off to search only the previously focused application.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Search actions from all running applications"
+    },
+    {
+      "name": "includeInterfaceElements",
+      "title": "Include Visible Interface Elements",
+      "description": "Include actionable buttons, links, tabs, rows, and controls from each app's focused window.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Include visible buttons, links, tabs, rows, and controls"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  }
+}
