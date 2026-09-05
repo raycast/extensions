@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "blade-icons",
+  "title": "Blade Icons",
+  "description": "Search 100,000+ icons from blade-ui-kit.com and copy them as Blade components, directives, helpers, Filament enums or plain SVG.",
+  "icon": "icon.png",
+  "author": "blemli",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Blade Icons",
+      "description": "Search icons on blade-ui-kit.com, filter by icon set and style.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "The copy action performed when pressing Enter on an icon.",
+      "type": "dropdown",
+      "required": false,
+      "default": "name",
+      "data": [
+        { "title": "Copy Name", "value": "name" },
+        { "title": "Copy Component", "value": "component" },
+        { "title": "Copy Directive", "value": "directive" },
+        { "title": "Copy Helper", "value": "helper" },
+        { "title": "Copy Enum (Guava Icons)", "value": "enum" },
+        { "title": "Copy Installer Command", "value": "installer" },
+        { "title": "Copy SVG", "value": "svg" },
+        { "title": "Copy SVG Source", "value": "svg-source" },
+        { "title": "Copy PNG", "value": "png" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "scrape-sets": "node scripts/scrape-sets.mjs"
+  }
+}
