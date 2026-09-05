@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "smb-share-mounter",
+  "title": "SMB Share Mounter",
+  "description": "Mount user-configured SMB shares.",
+  "icon": "icon.png",
+  "author": "pankajpopli",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "smb",
+    "samba",
+    "network",
+    "server",
+    "mount"
+  ],
+  "commands": [
+    {
+      "name": "mount-shares",
+      "title": "Mount SMB Shares",
+      "description": "Mount all configured reachable SMB shares.",
+      "mode": "no-view"
+    },
+    {
+      "name": "unmount-shares",
+      "title": "Unmount SMB Shares",
+      "description": "Unmount all currently connected SMB shares.",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-server",
+      "title": "Add SMB Server",
+      "description": "Save a new SMB server entry.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-servers",
+      "title": "Manage SMB Servers",
+      "description": "View, connect, edit, or remove saved SMB server entries.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.100.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}
