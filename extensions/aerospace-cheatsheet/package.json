@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aerospace-cheatsheet",
+  "title": "AeroSpace Cheatsheet",
+  "description": "Look up, learn, run, and edit your AeroSpace keybindings. Reads your own config, so every key it shows is one you actually have.",
+  "icon": "icon.png",
+  "platforms": [
+    "macOS"
+  ],
+  "author": "nmcv",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cheatsheet",
+      "title": "AeroSpace Cheatsheet",
+      "subtitle": "AeroSpace",
+      "description": "Your bindings, grouped and named, with layout diagrams, recipes, and in-place editing",
+      "mode": "view"
+    },
+    {
+      "name": "goToWorkspace",
+      "title": "Go to Workspace",
+      "subtitle": "AeroSpace",
+      "description": "Jump to a workspace, with the apps on each one shown",
+      "mode": "view"
+    },
+    {
+      "name": "switchApps",
+      "title": "Switch Windows",
+      "subtitle": "AeroSpace",
+      "description": "Focus any window across all workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "showConfig",
+      "title": "Show AeroSpace Config",
+      "subtitle": "AeroSpace",
+      "description": "Read the raw aerospace.toml with syntax highlighting",
+      "mode": "view"
+    },
+    {
+      "name": "moveWindowToWorkspace",
+      "title": "Move Window to Workspace",
+      "subtitle": "AeroSpace",
+      "description": "Send the focused window to a workspace, creating it if the name is new",
+      "mode": "view"
+    },
+    {
+      "name": "bringWorkspaceHere",
+      "title": "Bring Workspace to This Display",
+      "subtitle": "AeroSpace",
+      "description": "Pull a workspace onto the display you are looking at",
+      "mode": "view"
+    },
+    {
+      "name": "toggleAerospace",
+      "title": "Toggle AeroSpace",
+      "subtitle": "AeroSpace",
+      "description": "Pause or resume tiling",
+      "mode": "no-view"
+    },
+    {
+      "name": "reloadConfig",
+      "title": "Reload AeroSpace Config",
+      "subtitle": "AeroSpace",
+      "description": "Re-read aerospace.toml, checking it parses first",
+      "mode": "no-view"
+    },
+    {
+      "name": "menubar",
+      "title": "AeroSpace Menu Bar",
+      "subtitle": "AeroSpace",
+      "description": "Current workspace and layout actions in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "aerospacePath",
+      "title": "AeroSpace Binary",
+      "description": "Path to the aerospace executable. Leave blank unless you installed AeroSpace somewhere other than Homebrew or /Applications.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "/opt/homebrew/bin/aerospace"
+    },
+    {
+      "name": "configPath",
+      "title": "Config File",
+      "description": "Path to your aerospace.toml. Leave blank to use the location AeroSpace reports, falling back to ~/.aerospace.toml.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "~/.aerospace.toml"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.1.3",
+    "@raycast/utils": "^2.3.0",
+    "smol-toml": "^1.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "diagrams": "node tools/gen-diagrams.mjs",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "icon": "node tools/gen-icon.mjs",
+    "screenshots": "node tools/gen-screenshots.mjs",
+    "test": "node tools/run-tests.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "verify": "npm run typecheck && npm run test && ray lint"
+  }
+}
