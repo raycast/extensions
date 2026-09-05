@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { collectPaginatedItems } from '../src/pagination.ts';
+import { ensureServiceInitialized } from '../src/service-initialization.ts';
 import {
   buildCreateDnsConfirmationDetails,
   buildPurgeConfirmationDetails,
@@ -42,6 +43,54 @@ describe('destructive tool confirmations', () => {
       { name: 'Zone ID', value: 'zone-123' },
       { name: 'Record', value: 'A api.example.com' },
     ]);
+  });
+});
+
+describe('confirmation authentication', () => {
+  it('reuses an already initialized service', async () => {
+    const existingService = { accessToken: 'existing-token' };
+    const service = await ensureServiceInitialized({
+      currentService: existingService,
+      authorize: async () => {
+        throw new Error('OAuth should not run');
+      },
+      initialize: () => {
+        throw new Error('Service should not be reinitialized');
+      },
+    });
+
+    assert.equal(service, existingService);
+  });
+
+  it('authorizes and initializes a cold service before confirmation lookups', async () => {
+    const calls = [];
+    const service = await ensureServiceInitialized({
+      currentService: undefined,
+      authorize: async () => {
+        calls.push('authorize');
+        return 'oauth-token';
+      },
+      initialize: (accessToken) => {
+        calls.push(`initialize:${accessToken}`);
+        return { accessToken };
+      },
+    });
+
+    assert.deepEqual(calls, ['authorize', 'initialize:oauth-token']);
+    assert.deepEqual(service, { accessToken: 'oauth-token' });
+  });
+
+  it('initializes from a personal token without starting OAuth', async () => {
+    const service = await ensureServiceInitialized({
+      currentService: undefined,
+      personalAccessToken: 'personal-token',
+      authorize: async () => {
+        throw new Error('OAuth should not run');
+      },
+      initialize: (accessToken) => ({ accessToken }),
+    });
+
+    assert.deepEqual(service, { accessToken: 'personal-token' });
   });
 });
 

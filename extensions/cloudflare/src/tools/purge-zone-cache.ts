@@ -4,7 +4,7 @@ import {
   buildPurgeConfirmationDetails,
   selectedPurgeModes,
 } from '../tool-confirmations';
-import { resolveZone } from './helpers';
+import { resolveAuthenticatedZone, resolveZone } from './helpers';
 
 interface Input {
   /** Zone ID returned by List Zones. */
@@ -20,7 +20,7 @@ interface Input {
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const context = await resolveZone(input.zoneId);
+  const context = await resolveAuthenticatedZone(input.zoneId);
   const modes = selectedPurgeModes(input);
   return {
     style: modes.length === 0 ? Action.Style.Destructive : Action.Style.Regular,

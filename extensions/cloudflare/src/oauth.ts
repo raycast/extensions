@@ -1,6 +1,7 @@
 import { getPreferenceValues, OAuth } from '@raycast/api';
 import { OAuthService, withAccessToken } from '@raycast/utils';
 import Service from './service';
+import { ensureServiceInitialized } from './service-initialization';
 
 const AUTHORIZE_URL = 'https://dash.cloudflare.com/oauth2/auth';
 const TOKEN_URL = 'https://dash.cloudflare.com/oauth2/token';
@@ -23,6 +24,7 @@ export const CLOUDFLARE_OAUTH_SCOPES = [
 ] as const;
 
 const { token } = getPreferenceValues<ExtensionPreferences>();
+const personalAccessToken = token?.trim() || undefined;
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -34,6 +36,11 @@ const client = new OAuth.PKCEClient({
 
 let service: Service | undefined;
 
+function initializeCloudflareService(accessToken: string): Service {
+  service = new Service(accessToken);
+  return service;
+}
+
 export const cloudflare = new OAuthService({
   client,
   clientId: CLOUDFLARE_OAUTH_CLIENT_ID,
@@ -42,9 +49,9 @@ export const cloudflare = new OAuthService({
   tokenUrl: TOKEN_URL,
   refreshTokenUrl: TOKEN_URL,
   bodyEncoding: 'url-encoded',
-  personalAccessToken: token?.trim() || undefined,
+  personalAccessToken,
   onAuthorize({ token: accessToken }: { token: string }) {
-    service = new Service(accessToken);
+    initializeCloudflareService(accessToken);
   },
 });
 
@@ -56,4 +63,13 @@ export function getCloudflareService(): Service {
   }
 
   return service;
+}
+
+export async function getAuthenticatedCloudflareService(): Promise<Service> {
+  return ensureServiceInitialized({
+    currentService: service,
+    personalAccessToken,
+    authorize: cloudflare.authorize,
+    initialize: initializeCloudflareService,
+  });
 }

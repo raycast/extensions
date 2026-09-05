@@ -1,4 +1,8 @@
-import { getCloudflareService } from '../oauth';
+import {
+  getAuthenticatedCloudflareService,
+  getCloudflareService,
+} from '../oauth';
+import type Service from '../service';
 import type { Account, DnsRecord, Zone } from '../service';
 
 export interface ZoneContext {
@@ -6,11 +10,13 @@ export interface ZoneContext {
   zone: Zone;
 }
 
-export async function listZoneContexts(): Promise<ZoneContext[]> {
-  const accounts = await getCloudflareService().listAccounts();
+async function listZoneContextsWithService(
+  service: Service,
+): Promise<ZoneContext[]> {
+  const accounts = await service.listAccounts();
   const groups = await Promise.all(
     accounts.map(async (account) =>
-      (await getCloudflareService().listZones(account)).map((zone) => ({
+      (await service.listZones(account)).map((zone) => ({
         account,
         zone,
       })),
@@ -19,8 +25,11 @@ export async function listZoneContexts(): Promise<ZoneContext[]> {
   return groups.flat();
 }
 
-export async function resolveZone(zoneId: string): Promise<ZoneContext> {
-  const context = (await listZoneContexts()).find(
+async function resolveZoneWithService(
+  zoneId: string,
+  service: Service,
+): Promise<ZoneContext> {
+  const context = (await listZoneContextsWithService(service)).find(
     ({ zone }) => zone.id === zoneId,
   );
   if (!context) {
@@ -29,6 +38,23 @@ export async function resolveZone(zoneId: string): Promise<ZoneContext> {
     );
   }
   return context;
+}
+
+export async function listZoneContexts(): Promise<ZoneContext[]> {
+  return listZoneContextsWithService(getCloudflareService());
+}
+
+export async function resolveZone(zoneId: string): Promise<ZoneContext> {
+  return resolveZoneWithService(zoneId, getCloudflareService());
+}
+
+export async function resolveAuthenticatedZone(
+  zoneId: string,
+): Promise<ZoneContext> {
+  return resolveZoneWithService(
+    zoneId,
+    await getAuthenticatedCloudflareService(),
+  );
 }
 
 export async function resolveDnsRecord(
