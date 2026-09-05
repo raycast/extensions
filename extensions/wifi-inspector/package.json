@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wifi-inspector",
+  "title": "Wi-Fi Inspector",
+  "description": "Scan nearby Wi-Fi, inspect your connection (SSID, signal, channel, security), and automatically measure download, upload, and latency.",
+  "icon": "extension-icon.png",
+  "author": "thilip_lindseth",
+  "platforms": ["macOS"],
+  "categories": ["System"],
+  "license": "MIT",
+  "keywords": [
+    "wifi",
+    "wi-fi",
+    "ssid",
+    "bssid",
+    "rssi",
+    "network",
+    "scan",
+    "airport",
+    "macwifi",
+    "speedtest",
+    "download",
+    "upload"
+  ],
+  "commands": [
+    {
+      "name": "scan-networks",
+      "title": "Scan Nearby Networks",
+      "subtitle": "Wi-Fi Inspector",
+      "description": "List nearby Wi-Fi networks with signal, channel, band, and security. Automatically speed-tests your connected network when you view its details.",
+      "mode": "view"
+    },
+    {
+      "name": "current-connection",
+      "title": "Current Connection",
+      "subtitle": "Wi-Fi Inspector",
+      "description": "Inspect your active Wi-Fi network and automatically measure download, upload, and latency.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "macwifiCliPath",
+      "title": "macwifi-cli Path",
+      "description": "Optional absolute path to the macwifi-cli binary. Leave empty to auto-detect or download from GitHub Releases.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/macwifi-cli"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t⚠️ MAKE SURE YOU RUN THIS FROM YOUR LOCAL MACHINE, NOT A CI ENVIRONMENT ⚠️\\n\\n\\n\"",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
