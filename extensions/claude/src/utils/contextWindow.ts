@@ -114,7 +114,7 @@ export interface BuildBoundedRequestResult {
  * ceiling rather than the `max_tokens` the request actually asks for.
  */
 export function computeInputBudget(
-  availableModel: Pick<AvailableModel, "max_tokens" | "max_input_tokens"> | undefined
+  availableModel: Pick<AvailableModel, "max_tokens" | "max_input_tokens"> | undefined,
 ): number {
   const maxInputTokens = availableModel?.max_input_tokens ?? DEFAULT_INPUT_WINDOW_TOKENS;
   // A pathological or absent advertised window must never produce a non-positive budget.
@@ -173,7 +173,7 @@ function fallbackResult(
   turnPairs: Message[][],
   system: string,
   question: string,
-  budget: number
+  budget: number,
 ): BuildBoundedRequestResult {
   let keptPairs = Math.min(turnPairs.length, FALLBACK_TURN_CAP);
   // Drop oldest-first until the estimate fits. Stops at 1 rather than 0: an over-budget

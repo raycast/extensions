@@ -5,16 +5,10 @@
 <h1 align="center">Claude by Anthropic</h1>
 
 <h3 align="center">
-Interact with Anthropic's Claude right from your command bar
+Interact with Claude right from Raycast
 </h3>
 
-<p align="center">
-<a href="https://github.com/raycast/extensions/tree/main/extensions/claude" title="Claude Raycast extension latest source code">Latest source code
-</a>
-</p>
-
-
-![All Commands](metadata/all_commands.png)
+![All Commands](media/00-all-commands.png)
 
 # Features
 
@@ -22,62 +16,86 @@ Interact with Anthropic's Claude right from your command bar
 
 Straight from your command bar, ask anything you want answered.
 
-![Ask anything](metadata/ask.png)
+![Ask anything](media/01-ask.png)
 
 ## Personalized for you
 
 Customize the model to your liking.
 
-![Custom models](metadata/custom_models.png)
+![Presets](media/05-edit-preset.png)
+
+Each preset pairs a model with a system prompt, temperature, and output limit. The model
+picker also offers every model your key can reach, so you can ask a one-off question
+without creating a preset for it.
+
+![Choosing a model](media/06-edit-preset-models.png)
 
 ## Continue talking
 
-Continue talking, right from where you left off.
+Continue talking, right from where you left off. **Recents** replaces the old
+Conversations command, and folds in Saved Answers and History — pin, archive, rename, or
+delete a conversation right from the list, with an Active/Archived/All filter.
 
-![Continue talking](metadata/continue.png)
+![Recents](media/02-recents.png)
 
-## Save answers
+Ask a follow-up in an existing conversation — the new answer is selected as it streams,
+and each turn shows the model or preset it was asked with.
 
-Got the answer that you wanted? Great.
+![Ask a follow-up](media/04-ask-follow-up.png)
 
-![Saved answers](metadata/saved_answers.png)
+Not happy with an answer? Regenerate it with a different preset or model — the new answer
+is appended, so you keep both and can compare.
 
-# Models available
+![Regenerate an answer](media/03-regenerate.png)
 
-## Claude 4
+## Exporting your history
 
-- `claude-sonnet-4-20250514`
+Deleting a conversation in Recents is permanent — it's removed everywhere, including
+anything carried over from an earlier version, with nothing left behind to recover. **Export History to
+JSON** (⌘⇧E) writes every conversation — active and archived, regardless of the current
+filter — to a timestamped file in your Downloads folder before you delete anything, or
+just to keep a copy of your data. There is no import for this file yet; it's export only.
 
-## Claude 3.7
+If Recents ever comes up empty when it shouldn't, that same shortcut offers **Export
+Stored Data to JSON** instead, which writes everything the extension has in storage —
+including anything an upgrade could not fully read and set aside — so your conversations
+are recoverable by hand rather than only visible through a list that isn't showing them.
 
-- `claude-3-7-sonnet-latest`
-- `claude-3-7-sonnet-20250219`
+# Models and presets
 
-## Claude 3.5
+Models are fetched live from the Anthropic API, so new releases appear without an
+extension update. The model picker has two sections:
 
-- `claude-3-5-haiku-latest`
-- `claude-3-5-haiku-20241022`
-- `claude-3-5-sonnet-latest`
-- `claude-3-5-sonnet-20241022`
-- `claude-3-5-sonnet-20240620`
+- **Presets** — a saved model pairing: a system prompt, temperature, and max output
+  tokens. The extension ships starter presets (Deep Reasoning, Balanced, Quick Answer,
+  Code) built from the newest Opus, Sonnet, and Haiku your account can access. Manage
+  them with the **Presets** command.
+- **Models** — every model available to your API key, for a one-off question using the
+  default prompt.
 
-## Claude 3
+## Backing up and sharing presets
 
-- `claude-3-haiku-20240307`
-- `claude-3-sonnet-20240229`
-- `claude-3-opus-20240229`
+Presets can leave the extension as a YAML file and come back in, so you can keep a backup,
+edit them in a text editor, or move them to another machine. Both actions live in the
+**Presets** command:
 
+- **Export Presets to YAML** (⌘⇧E) writes every preset — name, model, system prompt,
+  temperature, and max output tokens — to a file you choose.
+- **Import Presets…** (⌘⇧I) reads one back. When a preset in the file has the same name as
+  one you already have, the importer asks what to do rather than overwriting silently:
+  skip the incoming one or replace yours. Whichever you choose applies to every name
+  collision in that file, and the result is reported as a tally.
 
-## Claude 2
-
-- `claude-2.0`
-- `claude-2.1`
+The importer also accepts a **Raycast Agent JSON** file, mapping each agent's instructions
+and model onto a preset. Treat this as provisional: it is built from sample export files
+rather than a verified round trip against Raycast itself, so an agent file whose shape
+differs may import incompletely. Plain YAML is the supported path, and there is no Agent
+JSON export — only import.
 
 # How to use
 
-This package requires a valid API key from [Anthropic](https://docs.anthropic.com/claude/reference/getting-started-with-the-api).
-
-![Initial set-up](metadata/set-up.png)
+This extension requires a valid Anthropic API key. Create one at
+[console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys).
 
 > All the preferences value will be stored locally using [Preferences API](https://developers.raycast.com/api-reference/preferences)
 
@@ -85,10 +103,9 @@ This package requires a valid API key from [Anthropic](https://docs.anthropic.co
 
 All preferences properties list that can be customize through `Raycast Settings > Extensions > Claude`
 
-| Properties               | Label                  | Value                               | Required | Default | Description                                                                                                      |
-| ------------------------ | ---------------------- | ----------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal Anthropic API key |
-| `useStream`              | Stream Responses        | `boolean`                           | `true`   | `true`  | Stream responses from Claude in real-time |                                                                         
-| `isAutoLoadText`         | Auto-load              | `boolean`                           | `false`  | `false` | Load selected text from your front most application to the `question bar` or `full text input form` automatically |
-| `isAutoFullInput`        | Use Full Text Input    | `boolean`                           | `false`  | `false` | Switch to `full text input form` from `question bar` automatically whenever you want to ask or type a question   |
----
+| Properties        | Label               | Value     | Required | Default | Description                                                                                                       |
+| ----------------- | ------------------- | --------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| `apiKey`          | API Key             | `string`  | `true`   | `empty` | Create a key at console.anthropic.com/settings/keys, then paste it here.                                          |
+| `useStream`       | Stream Responses    | `boolean` | `true`   | `true`  | Stream responses from Claude in real-time                                                                         |
+| `isAutoLoad`      | Auto-load           | `boolean` | `false`  | `false` | Load selected text from your front most application to the question bar automatically                             |
+| `isAutoFullInput` | Full Text Input     | `boolean` | `false`  | `false` | Always start questions in the multi-line form instead of the search bar                                           |

@@ -1,5 +1,7 @@
 import { List } from "@raycast/api";
-import { Model } from "../../type";
+import type { ReactNode } from "react";
+import type { Model } from "../../type";
+import { shortModelName, supportsTemperature } from "../../utils/models";
 
 export const ModelListView = ({
   title,
@@ -10,14 +12,18 @@ export const ModelListView = ({
   title: string;
   models: Model[];
   selectedModel: string | null;
-  actionPanel: (model: Model) => JSX.Element;
-}) => (
-  <List.Section title={title} subtitle={models.length.toLocaleString()}>
-    {models.map((model) => (
-      <ModelListItem key={model.id} model={model} selectedModel={selectedModel} actionPanel={actionPanel} />
-    ))}
-  </List.Section>
-);
+  actionPanel: (model: Model) => ReactNode;
+}) =>
+  // Gate the section on non-empty, matching the Pinned-header pattern in `src/recents.tsx`:
+  // an empty `List.Section` still renders its header/subtitle, which showed a "Pinned — 0"
+  // (or "Presets — 0") header with nothing under it.
+  models.length === 0 ? null : (
+    <List.Section title={title} subtitle={models.length.toLocaleString()}>
+      {models.map((model) => (
+        <ModelListItem key={model.id} model={model} selectedModel={selectedModel} actionPanel={actionPanel} />
+      ))}
+    </List.Section>
+  );
 
 export const ModelListItem = ({
   model,
@@ -26,14 +32,13 @@ export const ModelListItem = ({
 }: {
   model: Model;
   selectedModel: string | null;
-  actionPanel: (model: Model) => JSX.Element;
+  actionPanel: (model: Model) => ReactNode;
 }) => {
   return (
     <List.Item
       id={model.id}
       key={model.id}
-      title={model.name}
-      accessories={[{ text: new Date(model.updated_at ?? 0).toLocaleDateString() }]}
+      title={shortModelName(model.name)}
       detail={<ModelDetailView model={model} />}
       actions={selectedModel === model.id ? actionPanel(model) : undefined}
     />
@@ -51,7 +56,12 @@ const ModelDetailView = (props: { model: Model; markdown?: string | null | undef
           <List.Item.Detail.Metadata.TagList title="Model">
             <List.Item.Detail.Metadata.TagList.Item text={model.option} />
           </List.Item.Detail.Metadata.TagList>
-          <List.Item.Detail.Metadata.Label title="Temperature" text={model.temperature.toLocaleString()} />
+          {/* Sampling parameters were removed on Claude Opus 4.7 and later — showing a
+              stale temperature value for those models would misrepresent what the
+              request actually sends. Mirrors the same gate in the form (form.tsx). */}
+          {supportsTemperature(model.option) && (
+            <List.Item.Detail.Metadata.Label title="Temperature" text={model.temperature.toLocaleString()} />
+          )}
           {model.max_tokens && (
             <List.Item.Detail.Metadata.Label title="Max tokens" text={model.max_tokens.toLocaleString()} />
           )}

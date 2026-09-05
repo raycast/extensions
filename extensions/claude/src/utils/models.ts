@@ -1,4 +1,43 @@
 import type { AvailableModel } from "../api/models";
+import type { Model } from "../type";
+
+/**
+ * Marks a dropdown selection as a bare model rather than a saved preset. Raw selections
+ * are ephemeral — they are never written to the preset store.
+ */
+export const RAW_MODEL_PREFIX = "model:";
+
+export function isRawModelSelection(selectionId: string): boolean {
+  return selectionId.startsWith(RAW_MODEL_PREFIX);
+}
+
+/**
+ * Builds a throwaway Model for a bare model selection, carrying the default prompt and
+ * the model's own output ceiling. Falls back to the model id as a display name when the
+ * live list has no entry for it (stale stored selection).
+ */
+export function buildRawModel(selectionId: string, availableModels: AvailableModel[], defaults: Model): Model {
+  const modelId = selectionId.slice(RAW_MODEL_PREFIX.length);
+  const liveModel = availableModels.find((model) => model.id === modelId);
+
+  return {
+    ...defaults,
+    id: selectionId,
+    name: liveModel?.display_name ?? modelId,
+    option: modelId,
+    max_tokens: getMaxTokensForModel(modelId, availableModels).toString(),
+    pinned: false,
+  };
+}
+
+/**
+ * Strips the redundant "Claude" prefix for display in tight UI — every model in this
+ * extension is a Claude model, so the word only costs horizontal space. Display only:
+ * never use this for matching, storage, or anything the API sees.
+ */
+export function shortModelName(displayName: string): string {
+  return displayName.replace(/^Claude\s+/i, "");
+}
 
 /** Claude model families, ordered from most to least capable. */
 export type ModelTier = "opus" | "sonnet" | "haiku";
@@ -141,7 +180,7 @@ export function buildModelRequestParams(
     temperature: string;
     max_tokens: string;
   },
-  { streaming }: { streaming: boolean }
+  { streaming }: { streaming: boolean },
 ) {
   const requested = Number(model.max_tokens) || 4096;
 
@@ -156,4 +195,20 @@ export function buildModelRequestParams(
     // `temperature` to those models is a 400, so only include it where supported.
     ...(supportsTemperature(model.option) ? { temperature: Number(model.temperature) } : {}),
   };
+}
+
+/**
+ * Picks the newest model in a family from the live model list. Returns null when the
+ * family isn't present, so callers can fall back rather than guess at an id.
+ */
+export function findNewestModelInTier(models: AvailableModel[], tier: ModelTier): AvailableModel | null {
+  const candidates = models.filter((model) => getModelTier(model.id) === tier);
+  if (candidates.length === 0) return null;
+
+  return candidates.reduce((newest, model) => {
+    const byGeneration = getModelGeneration(model.id) - getModelGeneration(newest.id);
+    if (byGeneration !== 0) return byGeneration > 0 ? model : newest;
+    // Same generation (e.g. dated snapshots of one release): prefer the later release date.
+    return new Date(model.created_at) > new Date(newest.created_at) ? model : newest;
+  });
 }

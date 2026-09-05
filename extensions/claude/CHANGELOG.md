@@ -1,5 +1,102 @@
 # Claude Changelog
 
+## [Recents, presets, and a new storage layer] - {PR_MERGE_DATE}
+
+- Removed: The **History** and **Saved Answers** commands are gone. Everything they showed
+  now lives in the new Recents command, and your saved answers become pinned conversations
+  there automatically. If you had a hotkey or Quicklink pointing at either command, it will
+  stop working and needs to be re-pointed at Recents
+- Feature: **Recents** replaces Conversations, History, and Saved Answers with one list.
+  Your past conversations, saved answers, and history are folded together the first time you
+  open it — nothing to do on your end. Adds an Active/Archived/All filter, and Pin, Archive,
+  Rename, and Delete on every conversation
+- Improved: The **Models** command is now **Presets** — it manages a saved model + system
+  prompt + temperature + token limit, not a model, and the label was the odd one out among
+  the extension's own copy, which called that same thing a preset everywhere else. The
+  command itself is unchanged, so an existing hotkey keeps working
+- Improved: "Save Answer" is now **Pin Conversation**. "Save" had come to mean two different
+  things — Export History writes an actual file, while this only flags a conversation to keep
+  it at the top of Recents. The whole extension now uses one pin icon for it instead of a
+  star here and a pushpin there
+- Fix: Deleting a conversation in Recents now removes it everywhere — including your history
+  and saved answers — instead of leaving the text behind in a place you couldn't see it
+- Fix: Archiving, renaming, and unpinning a conversation now stick. If you had existing
+  conversations, every one of those changes was silently undone the next time you opened
+  Recents, and a conversation carried over from Saved Answers could not be unpinned at all
+- Fix: Conversations, saved answers, and history can no longer be erased by a write that
+  lands before the initial read
+- Feature: Recents can export your entire conversation history to a JSON file (⌘⇧E),
+  regardless of the current filter, so you have a copy before deleting anything or moving to
+  another machine. There is no import yet — this is export only
+- Feature: If Recents comes up empty when it shouldn't, that same shortcut offers **Export
+  Stored Data to JSON**, which writes everything the extension has in storage — including
+  anything an upgrade couldn't fully read and set aside — so your conversations are
+  recoverable by hand rather than only reachable through a list that isn't showing them
+- Fix: The model you pick in Ask is now the model your question is actually sent to. Picking
+  a preset, quitting Raycast, and reopening Ask previously showed the preset you chose while
+  sending the request on the default model
+- Fix: Asking a follow-up now selects the new answer. The list is newest-first, so a follow-up
+  appeared at the top while the highlight and the detail pane stayed on the previous question
+  — it looked like nothing had happened
+- Improved: "Continue Ask" in Recents is now **Ask a Follow-up**, and on an answer you are
+  reading, Enter opens the question input rather than copying the answer. Copy Answer moved
+  to ⌘⇧C
+- Fix: The search bar is cleared after you ask, so the answer view reads as a place to ask the
+  next question instead of the results of the last one. Starting a new conversation clears it
+  too, instead of leaving the previous question sitting there
+- Fix: An answer that came back empty or as nothing but whitespace is no longer saved, or sent
+  back to Claude as context on your next question
+- Fix: A failed or cancelled request no longer leaves a blank answer in the transcript
+- Fix: Conversation transcripts are no longer stored in reverse. Sorting for display mutated
+  the underlying chat list, so a conversation was labeled with its first question instead of
+  its latest — and from the third question on, prior turns were sent to Claude in reverse
+  order. Existing reversed conversations are repaired on load
+- Fix: "Start New Conversation" mid-session now actually saves that conversation; previously
+  it was created but never recorded
+- Fix: A conversation with no messages no longer crashes the list
+- Fix: Returning from a conversation now refreshes the list, instead of showing a stale empty
+  list until the command is reopened
+- Fix: Dismissing a view mid-answer no longer leaves a toast animating forever
+- Fix: Lists no longer spin forever on first run — the loading state resolves when there is
+  nothing stored yet, so the empty state actually appears — and the Presets list no longer
+  flashes an empty state before your presets load
+- Fix: Searching with no matches now shows an explanatory empty state instead of a blank list
+- Fix: With "Use Full Text Input" enabled, starting a new conversation no longer opens the
+  question form twice and leaves a duplicate screen behind the first back press
+- Fix: Switching models while an answer is still streaming no longer discards the switch
+- Fix: Saving a new preset no longer leaves a spinner running forever after it succeeded
+- Feature: Presets can be exported to and imported from a YAML file (⌘⇧E and ⌘⇧I in the
+  Presets command), so you can back them up, edit them in a text editor, or move them to
+  another machine. Importing asks what to do when a preset name already exists — skip it,
+  or replace it — instead of silently overwriting your work
+- Feature: The preset importer also accepts a Raycast Agent JSON file, mapping each agent's
+  instructions and model onto a preset. This one is provisional: it is built from sample
+  export files rather than a verified live export, so an agent file whose shape differs may
+  import incompletely
+- Feature: The model picker now offers every model from the live API alongside your saved
+  presets, so you can pick a bare model without creating one
+- Feature: Ships starter presets (Deep Reasoning, Balanced, Quick Answer, Code) built from the
+  newest Opus, Sonnet, and Haiku available to your account
+- Feature: The built-in preset tracks the newest Sonnet and is named for the model it actually
+  calls, instead of a generic "Default Model" pinned to an older release
+- Improved: Seeded preset prompts follow Anthropic's published Claude Opus 5 prompting
+  guidance — step-by-step and self-verification instructions removed (the model does this
+  unprompted, and asking for it wastes tokens), with explicit conciseness and scope wording in
+  their place
+- Feature: Empty states use the Claude icon and offer actions — including "Start New
+  Conversation" when you have none
+- Feature: Added a "Get an API Key" action and a link to the console in the API key preference
+  description
+- Feature: Failure toasts carry a "Copy Error" action, and route to preferences or billing when
+  the error is an auth or quota problem
+- Improved: Model names drop the redundant "Claude" prefix in pickers and lists
+- Improved: Conversations show a message count alongside the date, and the presets list drops
+  its date column — those dates remain in the preset's detail panel
+- Fix: The model list is re-fetched after this update rather than reused from an older cache,
+  so per-model output and context limits take effect immediately instead of on the next refresh
+- Chore: Updated `@raycast/utils` (1 → 2), ESLint 9 with flat config, TypeScript 5.9, Prettier
+  3, and React 19 types; removed the unused `raycast` and `cross-fetch` dependencies
+
 ## [API compatibility fixes] - 2026-08-19
 
 - Fix: Asking a question on Claude Opus 4.7 or newer (including Opus 4.7, Sonnet 5, and Opus 5) failed with a 400 error. Sampling parameters were removed on those models, and the extension was still sending `temperature` on every request.
