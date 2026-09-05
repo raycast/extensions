@@ -10,6 +10,14 @@
 2. Token ID: `Follow` instructions in next section
 3. Token Secret: `Follow` instructions in next section
 
+### 🖥️ Multiple Servers
+
+You can manage more than one Proxmox server (e.g. multiple non-clustered nodes) with the **Manage Servers** command:
+
+- The server from the extension preferences (if configured) always shows up as the first server
+- Additional servers can be added, edited and removed in **Manage Servers**
+- The **Manage VMs** and **Manage Storage** commands show the resources of all configured servers, grouped per server
+
 ### 🔐 API
 
 The exact steps may vary based on your Proxmox version. In **8.4.6.**:
@@ -27,11 +35,13 @@ The exact steps may vary based on your Proxmox version. In **8.4.6.**:
 ### Troubleshooting
 
 #### Empty list of VMs/LXCs
+
 If you have an empty list of VMs/LXCs (while your account can see them in Proxmox), check your API token permissions:
 
 > **Privilege Separation**: Unchecked
 
 ### HTTPS certificate
+
 You need to setup a trusted certificate to work properly. You can do this by following the instructions here:
 https://pve.proxmox.com/wiki/Certificate_Management
 

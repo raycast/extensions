@@ -1,19 +1,19 @@
 import { Action, ActionPanel, Color, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
-import type { MutatePromise } from "@raycast/utils";
 import { showFailureToast } from "@raycast/utils";
-import type { PveVm, VmAction } from "@/types";
+import type { PveVm, VmAction, WithServer } from "@/types";
 import { PveVmStatus, PveVmTypes } from "@/types";
+import type { useVmList } from "@/hooks/use-vm-list";
 import { ALL_ACTIONS } from "@/utils/const";
 import { formatBrowserUrl } from "@/utils/format";
 
 type VmActionPanelProps = {
-  vm: PveVm;
+  vm: WithServer<PveVm>;
   revalidate: () => void;
-  mutate: MutatePromise<PveVm[] | undefined>;
+  mutate: ReturnType<typeof useVmList>["mutate"];
 };
 
 export const VmActionPanel = ({ vm, revalidate, mutate }: VmActionPanelProps) => {
-  const handleAction = async (vm: PveVm, { title, labels, func, needConfirm = true }: VmAction) => {
+  const handleAction = async (vm: WithServer<PveVm>, { title, labels, func, needConfirm = true }: VmAction) => {
     const confirm =
       !needConfirm ||
       (await confirmAlert({
@@ -90,7 +90,7 @@ export const VmActionPanel = ({ vm, revalidate, mutate }: VmActionPanelProps) =>
       </ActionPanel.Section>
       <ActionPanel.Section title="Browser">
         <Action.OpenInBrowser
-          url={formatBrowserUrl(`#v1:0:=${vm.type}/${vm.vmid}`)}
+          url={formatBrowserUrl(vm.server, `#v1:0:=${vm.type}/${vm.vmid}`)}
           title="Open Dashboard"
           icon={Icon.Globe}
         />
