@@ -2,6 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import { clearDiscoveredCache } from "./discovered";
 import { clearSharedIndexCache } from "./shared-index";
 import { clearUsageCache } from "./usage-cache";
+import { withIndexingLock } from "./indexing-lock";
 
 /** Counts of extension data removed from Raycast storage. */
 export type Erased = {
@@ -45,21 +46,25 @@ export function describeErased(erased: Erased): string {
 }
 
 /** Clears all extension-owned Raycast storage without touching user files. */
-export async function eraseEverything(): Promise<Erased> {
-  const items = await LocalStorage.allItems();
+export async function eraseEverything(): Promise<Erased | undefined> {
+  return withIndexingLock(async (assertOwned) => {
+    const items = await LocalStorage.allItems();
 
-  const erased: Erased = {
-    visits: countEntries(items["visits"]),
-    pins: countEntries(items["pins"]),
-    searches: countEntries(items["searches"]),
-    abbreviations: countEntries(items["abbreviations"]),
-    keys: Object.keys(items).length,
-    cacheBytes: 0,
-  };
+    const erased: Erased = {
+      visits: countEntries(items["visits"]),
+      pins: countEntries(items["pins"]),
+      searches: countEntries(items["searches"]),
+      abbreviations: countEntries(items["abbreviations"]),
+      keys: Object.keys(items).length,
+      cacheBytes: 0,
+    };
 
-  await LocalStorage.clear();
-  erased.cacheBytes = clearDiscoveredCache() + clearSharedIndexCache();
-  clearUsageCache();
+    assertOwned();
+    await LocalStorage.clear();
+    assertOwned();
+    erased.cacheBytes = clearDiscoveredCache() + clearSharedIndexCache();
+    clearUsageCache();
 
-  return erased;
+    return erased;
+  }, "deletion");
 }

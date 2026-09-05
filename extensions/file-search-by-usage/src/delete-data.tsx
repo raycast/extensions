@@ -16,6 +16,7 @@ export default async function Command() {
   if (!confirmed) return;
 
   const erased = await eraseEverything();
+  if (!erased) return;
   await showToast({
     style: Toast.Style.Success,
     title: "Deleted everything",

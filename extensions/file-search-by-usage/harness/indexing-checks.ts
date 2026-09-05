@@ -5,19 +5,29 @@ import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { transformSync } from "esbuild";
 import type { ShortcutIndex } from "../src/lib/drive-shortcuts";
+import type { SharedIndex } from "../src/lib/shared-scan";
 
 const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 /** Loads real command/storage code while replacing Raycast and slow Drive scans. */
 function loadCommand(supportPath: string) {
   const storage = new Map<string, string>();
-  const cache = new Map<string, string>();
+  const caches = new Map<string, Map<string, string>>();
+  const shared: SharedIndex = {
+    paths: ["/foo/bar"],
+    scannedAt: 1,
+    available: true,
+    partial: false,
+  };
+  const clearing = { before: async () => {} };
   const scans: ((index: ShortcutIndex) => void)[] = [];
   const failures: ((error: Error) => void)[] = [];
   const toasts: { title: string; message?: string; style: string }[] = [];
   const api = {
     environment: { supportPath, launchType: "user" },
     LaunchType: { UserInitiated: "user" },
+    Alert: { ActionStyle: { Destructive: "destructive" } },
+    confirmAlert: async () => true,
     Toast: {
       Style: { Animated: "animated", Failure: "failure", Success: "success" },
     },
@@ -30,13 +40,26 @@ function loadCommand(supportPath: string) {
       setItem: async (key: string, value: string) => {
         storage.set(key, value);
       },
+      allItems: async () => Object.fromEntries(storage),
+      clear: async () => {
+        await clearing.before();
+        storage.clear();
+      },
     },
     Cache: class {
+      private cache: Map<string, string>;
+      constructor({ namespace }: { namespace: string }) {
+        if (!caches.has(namespace)) caches.set(namespace, new Map());
+        this.cache = caches.get(namespace)!;
+      }
       get(key: string) {
-        return cache.get(key);
+        return this.cache.get(key);
       }
       set(key: string, value: string) {
-        cache.set(key, value);
+        this.cache.set(key, value);
+      }
+      clear() {
+        this.cache.clear();
       }
     },
   };
@@ -58,12 +81,7 @@ function loadCommand(supportPath: string) {
         };
       if (id.endsWith("/shared-scan"))
         return {
-          scanSharedFolders: async () => ({
-            paths: ["/foo/bar"],
-            scannedAt: 1,
-            available: true,
-            partial: false,
-          }),
+          scanSharedFolders: async () => shared,
         };
       if (!id.startsWith(".")) return nativeRequire(id);
       const base = path.resolve(path.dirname(file), id);
@@ -89,7 +107,22 @@ function loadCommand(supportPath: string) {
       default: () => Promise<void>;
     }
   ).default;
-  return { command, storage, scans, failures, toasts };
+  const deleteCommand = (
+    load(path.resolve("src/delete-data.tsx")) as {
+      default: () => Promise<void>;
+    }
+  ).default;
+  return {
+    command,
+    deleteCommand,
+    storage,
+    caches,
+    shared,
+    clearing,
+    scans,
+    failures,
+    toasts,
+  };
 }
 
 export async function indexingChecks(
@@ -131,6 +164,155 @@ export async function indexingChecks(
       available: true,
       partial: false,
     };
+    for (const reason of ["time-limit", "depth-limit", "item-limit"] as const) {
+      const bounded = loadCommand(path.join(root, reason));
+      bounded.storage.set("shortcuts", JSON.stringify(good));
+      bounded.caches.get("shared-folders")!.set(
+        "index",
+        JSON.stringify({
+          paths: ["/foo/bar", "/foo/baz"],
+          scannedAt: 1,
+          available: true,
+          partial: false,
+        }),
+      );
+      Object.assign(bounded.shared, {
+        paths: ["/foo/bar"],
+        scannedAt: 2,
+        partial: true,
+        partialReason: reason,
+      });
+      const refresh = bounded.command();
+      await flush();
+      bounded.scans[0]({
+        ...good,
+        shortcuts: [],
+        scannedAt: 2,
+        partial: true,
+        partialReason: reason,
+      });
+      await refresh;
+      assert(
+        JSON.parse(bounded.storage.get("shortcuts")!).shortcuts.length === 1,
+        `${reason} refresh preserves a complete shortcut index`,
+      );
+      assert(
+        JSON.parse(bounded.caches.get("shared-folders")!.get("index")!).paths
+          .length === 2,
+        `${reason} refresh preserves a complete shared-folder index`,
+      );
+      assert(
+        bounded.toasts.some((t) => /kept/i.test(t.message ?? "")),
+        `${reason} refresh explains that saved indexes were kept`,
+      );
+    }
+
+    const evolving = loadCommand(path.join(root, "evolving"));
+    const initial = evolving.command();
+    await flush();
+    Object.assign(evolving.shared, {
+      partial: true,
+      partialReason: "time-limit",
+    });
+    evolving.scans[0]({ ...good, partial: true, partialReason: "time-limit" });
+    await initial;
+    assert(
+      JSON.parse(evolving.storage.get("shortcuts")!).shortcuts.length === 1,
+      "a first partial scan provides searchable shortcuts",
+    );
+    assert(
+      JSON.parse(evolving.caches.get("shared-folders")!.get("index")!).paths
+        .length === 1,
+      "a first partial scan provides searchable shared-folder paths",
+    );
+    const improved = evolving.command();
+    await flush();
+    evolving.shared.paths = ["/foo/bar", "/foo/baz"];
+    evolving.scans[1]({
+      ...good,
+      shortcuts: [
+        ...good.shortcuts,
+        { path: "/baz", name: "baz", target: "/bar" },
+      ],
+      partial: true,
+    });
+    await improved;
+    assert(
+      JSON.parse(evolving.storage.get("shortcuts")!).shortcuts.length === 2 &&
+        JSON.parse(evolving.caches.get("shared-folders")!.get("index")!).paths
+          .length === 2,
+      "a later partial scan can refresh an already partial index",
+    );
+    const complete = evolving.command();
+    await flush();
+    Object.assign(evolving.shared, { paths: [], partial: false });
+    evolving.scans[2]({ ...good, shortcuts: [] });
+    await complete;
+    assert(
+      JSON.parse(evolving.storage.get("shortcuts")!).shortcuts.length === 0 &&
+        JSON.parse(evolving.caches.get("shared-folders")!.get("index")!).paths
+          .length === 0,
+      "a complete empty scan removes stale paths from previous partial indexes",
+    );
+
+    const deletion = loadCommand(path.join(root, "deletion"));
+    deletion.storage.set("pins", JSON.stringify(["/foo"]));
+    const activeScan = deletion.command();
+    await flush();
+    await deletion.deleteCommand();
+    assert(
+      deletion.storage.has("pins"),
+      "deletion leaves data untouched while indexing holds the lock",
+    );
+    assert(
+      !deletion.toasts.some((t) => t.title === "Deleted everything"),
+      "blocked deletion never reports success",
+    );
+    deletion.scans[0](good);
+    await activeScan;
+    await deletion.deleteCommand();
+    assert(
+      deletion.storage.size === 0 &&
+        [...deletion.caches.values()].every((c) => c.size === 0),
+      "retrying deletion after indexing clears every store",
+    );
+    assert(
+      deletion.toasts.some((t) => t.title === "Deleted everything"),
+      "completed deletion reports success",
+    );
+
+    let finishClear!: () => void;
+    deletion.clearing.before = () =>
+      new Promise<void>((resolve) => {
+        finishClear = resolve;
+      });
+    const activeDelete = deletion.deleteCommand();
+    await flush();
+    const blockedScan = deletion.command();
+    await flush();
+    assert(
+      deletion.scans.length === 1,
+      "indexing cannot start while deletion holds the lock",
+    );
+    // Let an incorrectly started scan finish so a regression cannot hang the harness.
+    deletion.scans[1]?.(good);
+    await blockedScan;
+    finishClear();
+    await activeDelete;
+    deletion.toasts.length = 0;
+    deletion.clearing.before = async () => {
+      throw new Error("Synthetic storage failure");
+    };
+    await deletion.deleteCommand();
+    assert(
+      !deletion.toasts.some((t) => t.title === "Deleted everything") &&
+        deletion.toasts.some((t) => t.style === "failure"),
+      "a storage deletion failure reports failure rather than success",
+    );
+    assert(
+      !fs.existsSync(path.join(root, "deletion", "google-drive-indexing.lock")),
+      "a deletion failure releases the shared lock",
+    );
     // Without exclusion, a later scan completes before the older unavailable run.
     if (test.scans.length > 1) {
       test.scans[1](good);
@@ -152,9 +334,11 @@ export async function indexingChecks(
     );
     assert(
       test.toasts.some(
-        (toast) => toast.title === "Google Drive indexing is already running",
+        (toast) =>
+          toast.style === "failure" &&
+          /Wait for indexing/.test(toast.message ?? ""),
       ),
-      "a duplicate request explains that indexing is already running",
+      "a duplicate request explains that it must wait for indexing or deletion",
     );
 
     const failed = test.command();

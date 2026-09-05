@@ -857,12 +857,13 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
           // Bound interactive indexing so a cold mount cannot block indefinitely.
           const previousShortcuts = await loadShortcutIndex();
           const index = await scanShortcuts({ maxDepth: 6, budgetMs: 20_000 });
-          if (
-            shouldReplaceIndex(
-              previousShortcuts.shortcuts.length,
-              index.available,
-            )
-          ) {
+          const replaceShortcuts = shouldReplaceIndex(
+            previousShortcuts.shortcuts.length,
+            index.available,
+            index.partial,
+            previousShortcuts.partial,
+          );
+          if (replaceShortcuts) {
             assertOwned();
             await saveShortcutIndex(index);
           }
@@ -872,18 +873,23 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
             toast.message = "The previous index was kept.";
             return;
           }
+          const activeShortcuts = replaceShortcuts ? index : previousShortcuts;
           setShortcuts(
-            index.shortcuts
+            activeShortcuts.shortcuts
               .map((sc) => statEntry(sc.path))
               .filter((e): e is Entry => e !== undefined),
           );
-          setShortcutsScannedAt(index.scannedAt);
+          setShortcutsScannedAt(activeShortcuts.scannedAt);
 
           const previousShared = loadSharedIndex();
           const shared = await scanSharedFolders({ budgetMs: 20_000 });
-          if (
-            shouldReplaceIndex(previousShared.paths.length, shared.available)
-          ) {
+          const replaceShared = shouldReplaceIndex(
+            previousShared.paths.length,
+            shared.available,
+            shared.partial,
+            previousShared.partial,
+          );
+          if (replaceShared) {
             assertOwned();
             saveSharedIndex(shared);
           }
@@ -893,15 +899,27 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
             toast.message = "The previous index was kept.";
             return;
           }
-          setSharedIndex(shared.paths);
-          const indexCaveat = driveIndexCaveat(index, shared);
-          setDriveIndexMessage(indexCaveat);
+          const activeShared = replaceShared ? shared : previousShared;
+          setSharedIndex(activeShared.paths);
+          setDriveIndexMessage(driveIndexCaveat(activeShortcuts, activeShared));
 
           toast.style = Toast.Style.Success;
-          toast.title = `${shared.paths.length} items in shared folders`;
-          toast.message = indexCaveat
-            ? `${index.shortcuts.length} shortcuts. ${indexCaveat}.`
-            : `${index.shortcuts.length} shortcuts indexed.`;
+          const indexCaveat = driveIndexCaveat(index, shared);
+          if (!replaceShortcuts || !replaceShared) {
+            const kept = [
+              !replaceShortcuts && "shortcut",
+              !replaceShared && "shared-folder",
+            ]
+              .filter(Boolean)
+              .join(" and ");
+            toast.title = "Google Drive refresh incomplete";
+            toast.message = `Previous ${kept} index kept. ${indexCaveat}.`;
+          } else {
+            toast.title = `${shared.paths.length} items in shared folders`;
+            toast.message = indexCaveat
+              ? `${index.shortcuts.length} shortcuts. ${indexCaveat}.`
+              : `${index.shortcuts.length} shortcuts indexed.`;
+          }
         });
       },
       onToggleDetail: () => setShowingDetail((v) => !v),
@@ -934,6 +952,7 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
         if (!confirmed) return;
 
         const erased = await eraseEverything();
+        if (!erased) return;
         // Rebuild component state from the cleared stores.
         setReloadKey((k) => k + 1);
 

@@ -22,14 +22,14 @@ src/lib/spotlight.ts        mdfind search and mdls usage metadata
 src/lib/walk.ts             bounded fallback directory walks
 src/lib/drive-shortcuts.ts  Google Drive shortcut scan
 src/lib/shared-scan.ts      Google Drive shared-folder scan
-src/lib/index-refresh.ts    unavailable-index replacement policy
-src/lib/indexing-lock.ts    cross-process exclusion for indexing runs
+src/lib/index-refresh.ts    unavailable and partial index replacement policy
+src/lib/indexing-lock.ts    cross-process exclusion for indexing and deletion
 src/lib/store.ts            LocalStorage persistence
 src/lib/*-index.ts          cached indexes
 src/lib/progress.ts         search-stage model
 harness/rank-harness.ts     synthetic tests and opt-in live diagnostics
 harness/performance-checks.ts  freshness, cancellation, and ordering regressions
-harness/indexing-checks.ts  command-level indexing overlap regressions
+harness/indexing-checks.ts  index preservation and indexing/deletion overlap tests
 ```
 
 The filesystem scans do not import `@raycast/api`, which lets the harness exercise them outside Raycast.
@@ -142,9 +142,11 @@ Both scans report progress after each breadth-first level. When no earlier index
 
 The standalone command allows four minutes and eight levels for shortcuts, followed by two minutes and six levels for shared-folder contents. The action-panel version allows twenty seconds per scan and six levels, without saving intermediate checkpoints. These deadlines are checked between batches; an individual cloud-provider read can take longer.
 
-Both entry points hold the same `proper-lockfile` lock in Raycast's support directory throughout scanning and saving. A second request reports that indexing is already running without reading or replacing the indexes. The lock heartbeat runs every second; a lock left by a crashed process expires after ten minutes. Each write checks ownership, and the lock is released when the run finishes or throws.
+Both entry points hold the same `proper-lockfile` lock in Raycast's support directory throughout scanning and saving. Data deletion holds this lock too. A competing request reports that the data is busy without reading or changing the stores. The lock heartbeat runs every second; a lock left by a crashed process expires after ten minutes. Each write checks ownership, and the lock is released when the operation finishes or throws.
 
 Each scan also reports whether every traversed Drive directory remained readable. If the drive is offline, unmounted, or fails during traversal, the refresh keeps the previous non-empty index rather than replacing it with an incomplete result.
+
+A readable but partial scan cannot replace a complete, non-empty index either. Partial scans can populate an empty index or refresh an already partial one; a complete scan can replace either. The browser uses the retained index's entries, timestamp, and completeness notice. The refresh toast separately explains any scan limit and which previous index was kept.
 
 Searching while already inside an unindexed shared folder uses `walkSearch` instead of `mdfind`. Folder expansion, hidden-folder walks, and this fallback all propagate truncation to the UI.
 
@@ -170,6 +172,8 @@ For a symbolic link, `Entry.storagePath` contains the resolved target. Visit cou
 `readUsageMetaResult` processes paths in chunks of 25 and has a 250 ms default deadline. Completed chunks are kept. If one path makes a chunk fail, the chunk is divided until the bad path is isolated; metadata from the other paths is retained and the result is partial. A timeout is also partial. A process failure affecting every path, or malformed output, remains an error. The `readUsageMeta` wrapper is available when a caller needs only the metadata map.
 
 **Delete All Data and Cache…** clears LocalStorage and each Cache namespace for this extension. It does not delete files. Clearing the whole extension store avoids leaving behind a key added by a future version.
+
+Deletion acquires the indexing lock before reading or clearing stores, so an in-flight indexing run cannot write its results after deletion succeeds. If the lock is busy, nothing is deleted. Both deletion entry points report success only after the locked operation returns its deletion counts.
 
 ## Performance notes
 

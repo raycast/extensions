@@ -40,12 +40,17 @@ export function driveIndexCaveat(
   return [shortcutMessage, sharedMessage].filter(Boolean).join(" · ");
 }
 
-/** Keeps a useful index when its replacement source is unavailable. */
+/** A bounded refresh must not discard a complete, non-empty index. */
 export function shouldReplaceIndex(
   existingCount: number,
   sourceAvailable: boolean,
+  sourcePartial = false,
+  existingPartial = false,
 ): boolean {
-  return sourceAvailable || existingCount === 0;
+  return (
+    existingCount === 0 ||
+    (sourceAvailable && (!sourcePartial || existingPartial))
+  );
 }
 
 /** Saves partial progress only when there is no useful index to protect. */

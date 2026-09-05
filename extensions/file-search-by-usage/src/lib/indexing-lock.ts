@@ -5,10 +5,11 @@ import { environment, showToast, Toast } from "@raycast/api";
 
 const STALE_MS = 600_000;
 
-/** Shares one lock across command processes and action-panel indexing runs. */
-export async function withIndexingLock(
-  work: (assertOwned: () => void) => Promise<void>,
-): Promise<void> {
+/** Excludes indexing and data deletion across commands and action panels. */
+export async function withIndexingLock<T>(
+  work: (assertOwned: () => void) => Promise<T>,
+  operation: "indexing" | "deletion" = "indexing",
+): Promise<T | undefined> {
   const target = path.join(environment.supportPath, "google-drive-indexing");
   const lockPath = `${target}.lock`;
   let release: (() => void) | undefined;
@@ -64,7 +65,7 @@ export async function withIndexingLock(
         throw new Error("Indexing lock was lost");
       }
     };
-    await work(assertOwned);
+    return await work(assertOwned);
   } catch (error) {
     const busy =
       !release &&
@@ -73,11 +74,17 @@ export async function withIndexingLock(
     await showToast({
       style: Toast.Style.Failure,
       title: busy
-        ? "Google Drive indexing is already running"
-        : "Google Drive indexing stopped",
+        ? operation === "deletion"
+          ? "Data was not deleted"
+          : "Google Drive data is busy"
+        : operation === "deletion"
+          ? "Data deletion stopped"
+          : "Google Drive indexing stopped",
       message: busy
-        ? "Wait for the current run to finish. After a crash, try again in ten minutes."
-        : "Previously saved results are still available. Try indexing again.",
+        ? "Wait for indexing or data deletion to finish, then retry. After a crash, try again in ten minutes."
+        : operation === "deletion"
+          ? "Some data may already have been removed. Try deleting again."
+          : "Previously saved results are still available. Try indexing again.",
     });
   } finally {
     if (release && !compromised) {

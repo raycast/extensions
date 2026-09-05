@@ -33,12 +33,13 @@ export default async function Command() {
           toast.message = `${partial.shortcuts.length} shortcuts so far…`;
       },
     });
-    if (
-      shouldReplaceIndex(
-        previousShortcuts.shortcuts.length,
-        shortcuts.available,
-      )
-    ) {
+    const replaceShortcuts = shouldReplaceIndex(
+      previousShortcuts.shortcuts.length,
+      shortcuts.available,
+      shortcuts.partial,
+      previousShortcuts.partial,
+    );
+    if (replaceShortcuts) {
       assertOwned();
       await saveShortcutIndex(shortcuts);
     }
@@ -62,7 +63,13 @@ export default async function Command() {
           toast.message = `${partial.paths.length} items in shared folders…`;
       },
     });
-    if (shouldReplaceIndex(previousShared.paths.length, shared.available)) {
+    const replaceShared = shouldReplaceIndex(
+      previousShared.paths.length,
+      shared.available,
+      shared.partial,
+      previousShared.partial,
+    );
+    if (replaceShared) {
       assertOwned();
       saveSharedIndex(shared);
     }
@@ -79,10 +86,21 @@ export default async function Command() {
     if (toast) {
       const indexCaveat = driveIndexCaveat(shortcuts, shared);
       toast.style = Toast.Style.Success;
-      toast.title = `Indexed ${shared.paths.length} items in shared folders`;
-      toast.message = indexCaveat
-        ? `${shortcuts.shortcuts.length} shortcuts. ${indexCaveat}.`
-        : `${shortcuts.shortcuts.length} shortcuts. All searchable by name now.`;
+      if (!replaceShortcuts || !replaceShared) {
+        const kept = [
+          !replaceShortcuts && "shortcut",
+          !replaceShared && "shared-folder",
+        ]
+          .filter(Boolean)
+          .join(" and ");
+        toast.title = "Google Drive refresh incomplete";
+        toast.message = `Previous ${kept} index kept. ${indexCaveat}.`;
+      } else {
+        toast.title = `Indexed ${shared.paths.length} items in shared folders`;
+        toast.message = indexCaveat
+          ? `${shortcuts.shortcuts.length} shortcuts. ${indexCaveat}.`
+          : `${shortcuts.shortcuts.length} shortcuts. All searchable by name now.`;
+      }
     }
   });
 }

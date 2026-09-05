@@ -120,6 +120,8 @@ Searching inside one of those folders reads it directly, so changes can appear b
 
 If Google Drive is offline, unmounted, or becomes unreadable during an indexing run, the extension keeps the previous index and reports that the refresh failed.
 
+If a refresh reaches its time, depth, or item limit, a previous complete, non-empty index is kept. The notice explains which index was kept and why the refresh stopped. When there is no complete index to protect, the partial results remain searchable.
+
 Only one indexing run can be active at a time, including runs started from the action panel. A second request leaves the current run alone. After a crash, a leftover lock expires within ten minutes.
 
 A shortcut keeps its familiar display path, while visits and pins use the resolved target. This prevents the same folder from accumulating separate usage scores through its two paths.
@@ -158,5 +160,7 @@ The extension code does not send analytics, telemetry, filenames, or usage histo
 Stored data includes usage scores, pins, search history, learned query shortcuts, cached Spotlight metadata, remembered Spotlight paths, and the Google Drive index.
 
 **Clear All Rankings…** removes recorded usage only. **Delete All Data and Cache…** removes everything stored by the extension. Both are available from the action panel, and the full delete is also available as a standalone command.
+
+Indexing and data deletion cannot run at the same time. If indexing is active, deletion leaves the data untouched and asks you to retry once indexing finishes.
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for architecture, tests, and the release checklist.
