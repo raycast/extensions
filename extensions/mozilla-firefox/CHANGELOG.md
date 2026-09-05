@@ -1,5 +1,13 @@
 # Mozilla Firefox Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows support for all three commands: New Tab, Search History, Search Bookmarks
+- Firefox profile directory is resolved from `%APPDATA%\Mozilla\Firefox\Profiles` on Windows
+- URLs and new tabs are opened by spawning the Firefox executable directly via `child_process.spawn` on Windows
+- All Firefox variants (Firefox, Firefox Nightly, Firefox ESR, Firefox Developer Edition) are supported on Windows via known install path detection with automatic fallback to PATH
+- "Install with Winget" action replaces "Install with Homebrew" when Firefox is not detected on Windows
+
 ## [1.0.1] - 2026-04-23
 
 ### What's Changed

@@ -1,8 +1,14 @@
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { getPreferenceValues } from "@raycast/api";
 
 const userDataDirectoryPath = () => {
+  if (process.platform === "win32") {
+    const appData = process.env.APPDATA ?? path.join(os.homedir(), "AppData", "Roaming");
+    return path.join(appData, "Mozilla", "Firefox", "Profiles");
+  }
+
   if (!process.env.HOME) {
     throw new Error("$HOME environment variable is not set.");
   }
@@ -11,6 +17,10 @@ const userDataDirectoryPath = () => {
 };
 
 const NON_PROFILE_ENTRIES = new Set(["Crash Reports", "Pending Pings", "installs.ini", "profiles.ini"]);
+
+const VARIANT_SPECIFIC_SUFFIXES = [".default-release", ".default-nightly", ".default-esr", ".dev-edition-default"];
+
+const DEFAULT_PROFILE_SUFFIX = "default-release";
 
 const getProfileName = (userDirectoryPath: string) => {
   let profiles: string[];
@@ -22,26 +32,37 @@ const getProfileName = (userDirectoryPath: string) => {
 
   const preferences = getPreferenceValues<Preferences>();
 
-  const customProfile = profiles.filter((profile) => profile.endsWith(preferences.profileDirectorySuffix))[0];
-  const releaseProfile = profiles.filter((profile) => profile.endsWith(".default-release"))[0];
-  const nightlyProfile = profiles.filter((profile) => profile.endsWith(".default-nightly"))[0];
-  const esrProfile = profiles.filter((profile) => profile.endsWith(".default-esr"))[0];
-  const defaultProfile = profiles.filter((profile) => profile.endsWith(".default"))[0];
-
-  if (customProfile) {
-    return customProfile;
-  } else if (releaseProfile) {
-    return releaseProfile;
-  } else if (nightlyProfile) {
-    return nightlyProfile;
-  } else if (esrProfile) {
-    return esrProfile;
-  } else if (defaultProfile) {
-    return defaultProfile;
+  const suffix = preferences.profileDirectorySuffix;
+  if (suffix && suffix !== DEFAULT_PROFILE_SUFFIX) {
+    const customProfile = profiles.find((profile) => profile.endsWith(suffix));
+    if (customProfile) return customProfile;
   }
+
+  const releaseProfile = profiles.find((profile) => profile.endsWith(".default-release"));
+  const nightlyProfile = profiles.find((profile) => profile.endsWith(".default-nightly"));
+  const esrProfile = profiles.find((profile) => profile.endsWith(".default-esr"));
+  const devProfile = profiles.find((profile) => profile.endsWith(".dev-edition-default"));
+  const defaultProfile = profiles.find((profile) => profile.endsWith(".default"));
+
+  const browserApp = preferences.browserApp;
+  if (browserApp === "Firefox Nightly" && nightlyProfile) return nightlyProfile;
+  if (browserApp === "Firefox ESR" && esrProfile) return esrProfile;
+  if (browserApp === "Firefox Developer Edition" && devProfile) return devProfile;
+
+  const isNonReleaseVariant =
+    browserApp === "Firefox Nightly" || browserApp === "Firefox ESR" || browserApp === "Firefox Developer Edition";
+  const variantProfile = isNonReleaseVariant
+    ? undefined
+    : (releaseProfile ?? nightlyProfile ?? esrProfile ?? devProfile ?? defaultProfile);
+  if (variantProfile) return variantProfile;
 
   const fallback = profiles
     .filter((entry) => !NON_PROFILE_ENTRIES.has(entry))
+    .filter((entry) => {
+      if (isNonReleaseVariant && VARIANT_SPECIFIC_SUFFIXES.some((s) => entry.endsWith(s))) return false;
+      if (isNonReleaseVariant && entry.endsWith(".default")) return false;
+      return true;
+    })
     .filter((entry) => {
       try {
         return fs.statSync(path.join(userDirectoryPath, entry)).isDirectory();
@@ -76,19 +97,14 @@ export const getSessionManagerExtensionPath = (extensionId: string) => {
   );
 };
 
-export const getSessionInactivePath = async () => {
+export const getSessionInactivePath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore.jsonlz4");
 };
 
-export const getSessionActivePath = async () => {
+export const getSessionActivePath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
-  return path.join(
-    userDirectoryPath,
-    await getProfileName(userDirectoryPath),
-    "sessionstore-backups",
-    "recovery.jsonlz4",
-  );
+  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore-backups", "recovery.jsonlz4");
 };
 
 export function decodeLZ4(buffer: Buffer) {
