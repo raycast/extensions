@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gam-tools",
+  "title": "GAM Tools",
+  "description": "Quick commands to manage Google Workspace via GAM CLI",
+  "icon": "extension-icon.png",
+  "author": "jdietz02",
+  "owner": "dietzstudio",
+  "access": "public",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "user",
+      "title": "Manage Google User",
+      "subtitle": "GAM User Tools",
+      "description": "Manage domain users (info, create, update, suspend, list)",
+      "mode": "view",
+      "icon": "person.png"
+    },
+    {
+      "name": "group",
+      "title": "Manage Goolge Groups",
+      "subtitle": "GAM Group Tools",
+      "description": "Creating or Deleting Groups, add or remove members, add or remove managers, add or remove owners, and modify Grous using GAM",
+      "mode": "view",
+      "icon": "two-people.png"
+    },
+    {
+      "name": "drive",
+      "title": "Manage Googgle Drive",
+      "subtitle": "GAM Drive Tools",
+      "description": "Find and purge files, folders, or empty trash for users in a Google Group",
+      "mode": "view",
+      "icon": "delete-drive.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gamPath",
+      "type": "textfield",
+      "required": false,
+      "title": "GAM Binary Path",
+      "description": "Full path to GAM binary (defaults to ~/bin/gam/gam or /usr/local/bin/gam)",
+      "placeholder": "/User/%%Username%%/bin/gam/gam",
+      "default": "~/bin/gam/gam"
+    },
+    {
+      "name": "domains",
+      "type": "textfield",
+      "required": false,
+      "title": "Google Workspace Domains",
+      "description": "Comma-separated list of domains (e.g. domain.com, sub.domain.com)",
+      "placeholder": "domain.com, sub.domain.com"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
