@@ -1,0 +1,166 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "web-to-md",
+  "title": "Web to Markdown",
+  "description": "Convert webpages to Markdown — save to a file, copy to the clipboard, or preview inside Raycast. Works with the active browser tab or any URL.",
+  "icon": "extension-icon.png",
+  "author": "BryanB",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "preferences": [
+    {
+      "name": "outputDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Output Directory",
+      "description": "Where to save generated .md files.",
+      "default": {
+        "macOS": "~/Downloads"
+      }
+    },
+    {
+      "name": "fileNameStyle",
+      "type": "dropdown",
+      "required": false,
+      "title": "Filename Style",
+      "description": "How to name the generated file.",
+      "default": "title-slug",
+      "data": [
+        {
+          "title": "Title Slug",
+          "value": "title-slug"
+        },
+        {
+          "title": "Date + Title Slug",
+          "value": "date-title-slug"
+        }
+      ]
+    },
+    {
+      "name": "includeFrontmatter",
+      "type": "checkbox",
+      "required": false,
+      "title": "Frontmatter",
+      "description": "Add the page title and author to the YAML frontmatter. The source URL and saved date are always included.",
+      "label": "Include title & author",
+      "default": false
+    },
+    {
+      "name": "externalFallbackEnabled",
+      "type": "checkbox",
+      "required": false,
+      "title": "External Fallback",
+      "description": "If local extraction fails, optionally fetch content from an external reader service (sends the URL to a third party).",
+      "label": "Enable external fallback",
+      "default": false
+    },
+    {
+      "name": "externalFallbackPrefix",
+      "type": "textfield",
+      "required": false,
+      "title": "External Fallback Prefix",
+      "description": "Prefix the page URL is appended to, e.g. https://r.jina.ai/ — include the scheme and any trailing slash.",
+      "placeholder": "https://r.jina.ai/",
+      "default": ""
+    }
+  ],
+  "commands": [
+    {
+      "name": "convert-tab-to-file",
+      "title": "Save Tab to File",
+      "description": "Convert the active browser tab to Markdown and save it to your output directory.",
+      "mode": "no-view",
+      "browser-extension": "required"
+    },
+    {
+      "name": "convert-tab-to-clipboard",
+      "title": "Copy Tab to Clipboard",
+      "description": "Convert the active browser tab to Markdown and copy it to the clipboard.",
+      "mode": "no-view",
+      "browser-extension": "required"
+    },
+    {
+      "name": "convert-url-to-file",
+      "title": "Save URL to File",
+      "description": "Convert a URL to Markdown and save it to your output directory. Falls back to clipboard if no URL is given.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "required": false,
+          "placeholder": "URL (defaults to clipboard)"
+        }
+      ]
+    },
+    {
+      "name": "convert-url-to-clipboard",
+      "title": "Copy URL to Clipboard",
+      "description": "Convert a URL to Markdown and copy it to the clipboard. Falls back to clipboard URL if no URL is given.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "required": false,
+          "placeholder": "URL (defaults to clipboard)"
+        }
+      ]
+    },
+    {
+      "name": "display-tab",
+      "title": "Display Tab as Markdown",
+      "description": "Preview the active browser tab as Markdown inside Raycast, then copy or save.",
+      "mode": "view",
+      "browser-extension": "required"
+    },
+    {
+      "name": "display-url",
+      "title": "Display URL as Markdown",
+      "description": "Preview any URL as Markdown inside Raycast, then copy or save. Falls back to clipboard or a form when no URL is given.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "required": false,
+          "placeholder": "URL (optional)"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "@raycast/api": "^1.104.23",
+    "linkedom": "^0.18.0",
+    "sanitize-filename": "^1.6.3",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1",
+    "filelist": "^2.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/turndown": "^5.0.5",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -o dist",
+    "lint": "ray lint",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "format": "prettier --write src test",
+    "format:check": "prettier --check src test",
+    "test": "node --import tsx --test \"test/**/*.test.ts\"",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
