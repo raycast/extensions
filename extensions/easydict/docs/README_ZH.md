@@ -30,7 +30,9 @@ _原作者为 [tisfeng](https://github.com/tisfeng)，目前由 [maxchang3](http
 
 ## Raycast Easydict（易词典）
 
-`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 [Linguee](https://www.linguee.com/) 和[有道词典](https://www.youdao.com/)查询，支持 OpenAI, 🍎**苹果系统翻译**，[DeepL](https://www.deepl.com/translator)，[谷歌](https://translate.google.com)，[Bing](https://www.bing.com/translator), [百度](https://fanyi.baidu.com/)，[腾讯](https://fanyi.qq.com/)，[火山](https://www.volcengine.com/product/machine-translation)，[有道](https://fanyi.youdao.com/)和[彩云翻译](https://fanyi.caiyunapp.com/#/)。
+`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 [Linguee](https://www.linguee.com/) 和[有道词典](https://www.youdao.com/)查询。
+
+翻译支持 🍎**苹果系统翻译**、[DeepL](https://www.deepl.com/translator)、[谷歌](https://translate.google.com)、[Bing](https://www.bing.com/translator)、[百度](https://fanyi.baidu.com/)、[腾讯](https://fanyi.qq.com/)、[火山](https://www.volcengine.com/product/machine-translation)、[有道](https://fanyi.youdao.com/)和[彩云翻译](https://fanyi.caiyunapp.com/#/)，还支持使用 Raycast AI 或自定义 OpenAI 兼容端点的 LLM 进行翻译与查词。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1671806758.png" width="49%" />
@@ -40,6 +42,7 @@ _原作者为 [tisfeng](https://github.com/tisfeng)，目前由 [maxchang3](http
 ## 功能
 
 - [x] 🆕 支持 Windows 版 Raycast（已适配绝大多数功能）。
+- [x] 🆕 支持接入 Raycast AI 或任意 OpenAI 兼容端点中的 LLM 进行翻译与查词。
 - [x] 开箱即用，便捷查找单词或翻译文本。
 - [x] 自动识别输入语言，并自动查询偏好目标语言。
 - [x] 提供丰富的单词查询信息，包括基本翻译、发音、考试词频、多种词性和释义、形式和时态、网络翻译和网络短语。
@@ -54,12 +57,27 @@ _原作者为 [tisfeng](https://github.com/tisfeng)，目前由 [maxchang3](http
 - [x] 支持系统代理。
 - [x] 支持 Linguee 和有道词典查询。
 - [x] 支持 macOS 系统翻译。详情请看 [如何在 Easydict 中使用 🍎 macOS 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
-- [x] 支持 OpenAI、Gemini、DeepL、Google、Bing、百度、腾讯、火山、有道和彩云翻译。
+- [x] 🆕 支持将完整查询结果保存为收藏单词，离线浏览和管理。
+- [x] 🆕 支持从实时查询和收藏结果中查看汉字笔顺图。
 - [x] 支持 48+ 种语言。
 
 **如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)**
 
 ## 截图展示
+
+### 管理 Provider
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/bace6248-bf41-4561-88c8-b6ba7e2b7ee2" width="49%" />
+  <img src="https://github.com/user-attachments/assets/bb908545-5a5c-45f7-8712-4e3943dfa243" width="49%" />
+</p>
+
+
+### 收藏单词
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/be9efa47-1a19-443e-ab49-b0813a830f26" width="49%" />
+</p>
 
 ### Arguments
 
@@ -128,6 +146,12 @@ npm install && npm run dev
 
 ![setting](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/setting-1660917402.png)
 
+### 管理 Provider
+
+使用 **Manage Providers** 统一调整内置 Provider、已配置的旧版 Provider 和 AI Provider 的顺序。列表会标明 Provider 类型，并显示 Enabled/Disabled 状态（AI Provider 还可能显示 Invalid）；可在 macOS 上用 `Cmd+Shift+Up/Down`、Windows 上用 `Ctrl+Shift+Up/Down` 调整顺序。在此编辑、测试、启用、停用、复制或删除 AI Provider；内置 Provider 在 Extension Settings 中配置。AI Provider 可使用 Raycast AI 或自定义 OpenAI 兼容接口。预设包括 OpenAI、Gemini、DeepSeek、OpenRouter、SiliconFlow、Zhipu GLM、Kimi、MiniMax、Xiaomi MiMo、OpenCode Zen 和 OpenCode Go。
+
+可选择 **Plain Translation** 或 **AI-Generated Dictionary Entry**。支持时会自动发现模型，也可以手动输入模型名称。已配置的旧版 OpenAI 和 Gemini 设置可以单独或一起导入；导入后的 AI Provider 会显式替代对应旧版位置。删除替代项不会让旧版 Provider 自动恢复，必须由用户手动 Restore。新建 Provider 或修改连接相关配置后会默认提供 Test & Save，同时仍可选择 Save Without Testing。JSON 输出模式会根据预设选择默认值。部分模型可能无法返回有效的结构化词典结果而需要重试，生成词典内容也可能耗时更长。
+
 ### 偏好语言
 
 默认偏好语言为简体中文和英文。您可以根据自己的喜好进行更改。
@@ -188,21 +212,6 @@ npm install && npm run dev
 <p>
 
 默认情况下，扩展将自动选择偏好语言作为目标翻译语言。但有时如果您想手动指定某一种语言作为目标语言，您就可以在偏好设置中开启该选项，然后就能在操作面板中临时选择另一种目标语言。
-
-</p>
-
-</details>
-
-### 手动排序查询结果
-
-<details> <summary> 你可以按照自己的偏好对查询结果显示进行排序，默认是 Youao Dictionary, Linguee dictionary, OpenAI, Gemini, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun。 </summary>
-
-<p>
-
-大小写不敏感，使用逗号分隔开。例如：`youdao dictionary, linguee dictionary, openai, gemini, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun`。
-也可仅指定部分排序，如：`youdao dictionary, apple, tencent`，此时程序实际排序是：`youdao dictionary, apple, tencent, linguee dictionary, openai, gemini, deepl, google, bing, baidu, volcano, youdao, caiyun`。
-
-> 注意：以上排序是总体排序，若某项翻译服务未开启，排序会自动忽略。
 
 </p>
 

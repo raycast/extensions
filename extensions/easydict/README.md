@@ -32,7 +32,7 @@ _Originally developed by [tisfeng](https://github.com/tisfeng), currently mainta
 
 `Easydict` is a simple and easy-to-use dictionary app for looking up words and translating text. It works out of the box, automatically detects the input language, and supports [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/) for dictionary lookup.
 
-For translation, it supports OpenAI, macOS System Translation, [DeepL](https://www.deepl.com/translator), [Google Translate](https://translate.google.com), [Bing Translator](https://www.bing.com/translator), [Baidu Translate](https://fanyi.baidu.com/), [Tencent Translate](https://fanyi.qq.com/), [Volcano Engine Translation](https://www.volcengine.com/product/machine-translation), [Youdao Translate](https://fanyi.youdao.com/), and [Caiyun Translate](https://fanyi.caiyunapp.com/#/).
+For translation, it supports macOS System Translation, [DeepL](https://www.deepl.com/translator), [Google Translate](https://translate.google.com), [Bing Translator](https://www.bing.com/translator), [Baidu Translate](https://fanyi.baidu.com/), [Tencent Translate](https://fanyi.qq.com/), [Volcano Engine Translation](https://www.volcengine.com/product/machine-translation), [Youdao Translate](https://fanyi.youdao.com/), and [Caiyun Translate](https://fanyi.caiyunapp.com/#/). You can also use LLMs from Raycast AI or custom OpenAI-compatible endpoints for translation and word lookup.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1671806758.png" width="49%" />
@@ -61,6 +61,7 @@ npm install && npm run dev
 ## Features
 
 - [x] 🆕 Support Raycast for Windows (most features are adapted).
+- [x] 🆕 Supports using LLMs from Raycast AI or custom OpenAI-compatible endpoints for translation and word lookup.
 - [x] Works out of the box for easily looking up words or translating text.
 - [x] Automatically detects input languages and queries your preferred target language.
 - [x] Provides rich query information, including basic translations, pronunciations, exam coverage, parts of speech, tenses, and web phrases.
@@ -75,12 +76,28 @@ npm install && npm run dev
 - [x] Supports system proxies.
 - [x] Supports Linguee and Youdao Dictionary.
 - [x] Supports macOS System Translation. (_Please see [How to use 🍎 macOS system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)_)
-- [x] Supports OpenAI, Gemini, DeepL, Google, Bing, Baidu, Tencent, Volcano, Youdao, and Caiyun translation.
 - [x] Supports 48+ languages.
+- [x] 🆕 Supports saving completed results as Favorite Words for offline browsing and management.
+- [x] 🆕 Supports viewing stroke-order diagrams for Chinese characters from live and saved translation results.
 
 **_If you like this extension, please give it a [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️, thanks!_**
 
 ## Screenshots
+
+
+### Manage Providers
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/bace6248-bf41-4561-88c8-b6ba7e2b7ee2" width="49%" />
+  <img src="https://github.com/user-attachments/assets/bb908545-5a5c-45f7-8712-4e3943dfa243" width="49%" />
+</p>
+
+
+### Favorite Words
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/be9efa47-1a19-443e-ab49-b0813a830f26" width="49%" />
+</p>
 
 ### Arguments
 
@@ -126,6 +143,12 @@ npm install && npm run dev
 ## Configuration
 
 Easydict works well out of the box. The following options help you customize its behavior.
+
+### Manage Providers
+
+Use **Manage Providers** to reorder built-in, configured legacy, and AI providers. The list labels each provider type and shows Enabled/Disabled status (AI providers can also be Invalid); reorder with `Cmd+Shift+Up/Down` on macOS or `Ctrl+Shift+Up/Down` on Windows. Edit, test, enable, disable, duplicate, or delete AI providers there; configure built-in providers in Extension Settings. AI providers can use Raycast AI or custom OpenAI-compatible endpoints. Presets include OpenAI, Gemini, DeepSeek, OpenRouter, SiliconFlow, Zhipu GLM, Kimi, MiniMax, Xiaomi MiMo, OpenCode Zen, and OpenCode Go.
+
+Choose **Plain Translation** or **AI-Generated Dictionary Entry**. Models are discovered automatically when available; you can also enter a model name manually. Configured legacy OpenAI and Gemini settings can be imported individually or together; the imported AI provider explicitly replaces the legacy slot. Removing it keeps the legacy provider retired until you restore it manually. New or connection-related provider changes offer Test & Save by default, with Save Without Testing still available. JSON output defaults are selected per preset. Some models may fail to return valid structured dictionary output and require a retry, and dictionary generation may take longer.
 
 ### Preferred Languages
 
@@ -190,21 +213,6 @@ Use `Cmd + S` to play the pronunciation of words manually.
 <p>
 
 By default, the extension will automatically select the preferred language as the target translation language. However, sometimes if you want to manually specify a language as the target language, you can turn on this option in the preferences and then you can temporarily select another target language in the action panel.
-
-</p>
-
-</details>
-
-### Sort Query Results Manually
-
-<details> <summary> You can sort query results by your preference, default is Youao Dictionary, Linguee Dictionary, OpenAI, Gemini, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun. </summary>
-
-<p>
-
-Name case are insensitive, use comma to separate. Example: `youdao dictionary, linguee dictionary, openai, gemini, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun`.
-You can also specify a part of the sort, for example: `youdao dictionary, apple, tencent`，the actual sort is: `youdao dictionary, apple, tencent, linguee dictionary, openai, gemini, deepl, google, bing, baidu, volcano, youdao, caiyun`.
-
-> Note: This sort is the overall sort, if a translation service is not enabled, the sort will be automatically ignored.
 
 </p>
 
