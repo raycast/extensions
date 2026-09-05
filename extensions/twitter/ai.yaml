@@ -1,0 +1,443 @@
+instructions: |
+  Use search-posts for public posts published within the last seven days. Pass X search operators exactly when they help narrow the request. Never use it to search the authenticated user's older post history.
+  When a personal-context request names a person without an exact @username, always use search-my-connections with only the identifying name or profile terms before search-my-posts. This is required even if the remembered name might match post text. The tool searches following first and automatically falls back to followers only when following has no matches. Use the matching name or username as a search-my-posts term, and do not treat a connection match as proof that the person is the intended one when multiple profiles are plausible.
+  Use search-my-posts when the user wants to find one of their own posts or replies by its content, mentioned account, or remembered details. Pass one to eight precise terms that must all match; names and usernames are searchable even when only the @mention appears in the post. This tool automatically paginates through the retrievable personal timeline, excluding reposts, up to X's limit of 3,200 recent authored posts. If it returns reachedEnd false, explain that X's timeline retrieval limit was reached rather than claiming no older post exists.
+  Use get-timeline for the authenticated user's home timeline. Each read is billed and each tool call returns exactly one page. Never pass a nextToken or retrieve another page unless the user explicitly asks for more results. Never invent or alter a continuation token.
+  Use get-bookmarks for posts saved by the authenticated user. Use get-bookmark-folders to list folders or, with a folderId, read posts in one folder. A folder page needs one additional batch lookup to resolve its post IDs into post details; it does not fetch additional folder pages. Use get-my-posts for the authenticated user's posts and private analytics from the last 30 days, including impressions, profile clicks, link clicks, and video views when X returns them. These reads return exactly one page. Pass a returned nextToken only when the user explicitly asks for more, including when a folder page has no available posts but still returns a nextToken.
+  Use get-mentions to triage posts that mention the authenticated user. Use get-post-engagement when the user asks who liked or reposted a post, or which posts quote it. Read only one page unless the user explicitly asks for more.
+  Use get-user with an exact username. Omit includeRecentPosts for profile-only questions because recent posts require an additional billed read. Set includeRecentPosts only when the user asks for that account's recent posts. Use a returned nextToken only when the user explicitly asks for more.
+  Use get-user-connections to list any specified account's followers or following, not only the authenticated user's. It returns one page of up to 20 profiles; pass a returned nextToken only when the user explicitly asks for more, keeping the same username and relationship. Never infer that a relationship is absent because a user is missing from one page.
+  Use check-follow-relationship for "does A follow B?" or participant follow verification, setting sourceUsername to A and targetUsername to B. This read-only tool checks exact user IDs and can scan up to ten pages of 1,000 following entries, stopping early on a match or the end of the list. Unlike list tools, this bounded internal pagination is part of an explicit verification request. Do not substitute search-my-connections, reverse the direction, or infer a follow from a profile count, like, repost, or mention. Use only exact handles provided by the user or resolved with get-user; never silently replace an unfamiliar handle with a better-known account. Report following as yes, not_following as no, and unverified as unverified, including in CSV exports. When CSV is requested, return comma-separated rows in a csv code block, not a Markdown table. Keep API failures, incomplete data, and page limits unverified and explain the reason; never claim a failed lookup means no. Do not automatically retry a capped or failed check or start an unbounded scan.
+  Use post only when the user explicitly asks to publish a new post. It can attach local media paths, quote a post, add a two-to-four-option poll, and control who can reply. Polls cannot be combined with media or quote posts. Quote posting requires X Enterprise API access; report X's error if the account does not have it. Use post-thread for an explicit multi-post thread. Use reply-to-post only for an explicit public reply and include the numeric target post ID. Use delete-post only for an explicit request to permanently delete the authenticated user's own post.
+  Use set-like, set-repost, set-bookmark, and set-reply-hidden only when the user explicitly asks for that interaction on one identified post. Set the boolean to false for unlike, undo-repost, remove-bookmark, and unhide requests. Never infer engagement or moderation from a general opinion or summary request, and never batch, repeat, schedule, or autonomously perform these interactions.
+  Use send-dm only when the user explicitly asks to privately message specific recipients who have clearly indicated that they want to hear from the user, and numeric recipient user IDs are known. Never use it for unsolicited outreach, bulk messaging, recurring follow-ups, or infer a DM from a request to draft, summarize, or suggest text. It supports one media attachment and creates a group when given multiple recipients.
+  Every write tool presents its exact side effect in Raycast's confirmation UI. Do not ask for an additional chat confirmation; call the tool and let its confirmation obtain approval. Never claim a write succeeded until the tool returns successfully.
+  X posts are limited to 280 characters. Ask the user to shorten or split text that exceeds the limit instead of silently truncating it.
+  Prefer the term "post" in responses, while recognizing "tweet" as a synonym in user requests.
+evals:
+  - input: "@twitter List @participant's followers."
+    mocks:
+      get-user-connections:
+        user:
+          id: "100"
+          username: "participant"
+        relationship: "followers"
+        items:
+          - id: "200"
+            name: "Casey"
+            username: "casey"
+        nextToken: "followers-next-1"
+    expected:
+      - callsTool:
+          name: "get-user-connections"
+          arguments:
+            username:
+              includes: "participant"
+            relationship: "followers"
+  - input: "@twitter Who does @participant follow? Show one page."
+    mocks:
+      get-user-connections:
+        user:
+          id: "100"
+          username: "participant"
+        relationship: "following"
+        items:
+          - id: "201"
+            name: "Raycast"
+            username: "raycast"
+        nextToken: "following-next-1"
+    expected:
+      - callsTool:
+          name: "get-user-connections"
+          arguments:
+            username:
+              includes: "participant"
+            relationship: "following"
+  - input: "@twitter Does @participant follow @raycast? Check those exact accounts, not my connections."
+    mocks:
+      check-follow-relationship:
+        sourceUsername: "participant"
+        targetUsername: "raycast"
+        sourceUserId: "100"
+        targetUserId: "201"
+        status: "following"
+        reason: "match_found"
+        pagesChecked: 2
+        usersChecked: 1200
+        reachedEnd: false
+        maxPages: 10
+    expected:
+      - callsTool:
+          name: "check-follow-relationship"
+          arguments:
+            sourceUsername:
+              includes: "participant"
+            targetUsername: "raycast"
+      - not:
+          callsTool: "search-my-connections"
+  - input: "@twitter Is @participant followed by @nuphystudio?"
+    mocks:
+      check-follow-relationship:
+        sourceUsername: "nuphystudio"
+        targetUsername: "participant"
+        sourceUserId: "202"
+        targetUserId: "100"
+        status: "not_following"
+        reason: "complete_list"
+        pagesChecked: 1
+        usersChecked: 150
+        reachedEnd: true
+        maxPages: 10
+    expected:
+      - callsTool:
+          name: "check-follow-relationship"
+          arguments:
+            sourceUsername:
+              includes: "nuphystudio"
+            targetUsername:
+              includes: "participant"
+  - input: "@twitter Check whether @participant follows @nuphystudio using at most one page. Return source,target,follows as CSV and keep unresolved checks unverified."
+    mocks:
+      check-follow-relationship:
+        sourceUsername: "participant"
+        targetUsername: "nuphystudio"
+        sourceUserId: "100"
+        targetUserId: "202"
+        status: "unverified"
+        reason: "page_limit"
+        pagesChecked: 1
+        usersChecked: 1000
+        reachedEnd: false
+        maxPages: 1
+    expected:
+      - callsTool:
+          name: "check-follow-relationship"
+          arguments:
+            sourceUsername:
+              includes: "participant"
+            targetUsername:
+              includes: "nuphystudio"
+            maxPages: 1
+      - matches: '"?@?participant"?\s*,\s*"?@?nuphystudio"?\s*,\s*"?unverified"?'
+      - not:
+          matches: '"?@?participant"?\s*,\s*"?@?nuphystudio"?\s*,\s*"?(no|false)\b'
+  - input: "@twitter Verify whether @privateperson follows @raycast for the participant CSV."
+    mocks:
+      check-follow-relationship:
+        sourceUsername: "privateperson"
+        targetUsername: "raycast"
+        sourceUserId: "300"
+        targetUserId: "201"
+        status: "unverified"
+        reason: "lookup_failed"
+        pagesChecked: 0
+        usersChecked: 0
+        reachedEnd: false
+        maxPages: 10
+        error: "X denied this request: Not authorized to access this protected account's following."
+    expected:
+      - callsTool:
+          name: "check-follow-relationship"
+          arguments:
+            sourceUsername:
+              includes: "privateperson"
+            targetUsername: "raycast"
+      - includes: "unverified"
+      - not:
+          matches: '"?@?privateperson"?\s*,\s*"?@?raycast"?\s*,\s*"?(no|false)\b'
+  - input: "@twitter Search X for posts about Raycast extensions."
+    mocks:
+      search-posts:
+        items:
+          - id: "post-101"
+            text: "Building a new Raycast extension"
+            created_at: "2026-08-28T08:00:00.000Z"
+            user:
+              id: "user-101"
+              name: "Taylor"
+              username: "taylor"
+            retweet_count: 2
+            like_count: 8
+        nextToken: "search-next-1"
+    expected:
+      - callsTool:
+          name: "search-posts"
+          arguments:
+            query:
+              includes: "Raycast"
+  - input: "@twitter What is on my X timeline?"
+    mocks:
+      get-timeline:
+        items:
+          - id: "post-201"
+            text: "Timeline update"
+            created_at: "2026-08-28T07:00:00.000Z"
+            user:
+              id: "user-201"
+              name: "Morgan"
+              username: "morgan"
+            retweet_count: 0
+            like_count: 3
+        nextToken: "timeline-next-1"
+    expected:
+      - callsTool: "get-timeline"
+  - input: "@twitter Find my post reply about having tea with Pedro Duarte."
+    mocks:
+      search-my-connections:
+        relationshipsSearched:
+          - "following"
+        items:
+          - id: "user-102"
+            name: "Pedro Duarte"
+            username: "peduarte"
+            description: "Designer"
+        pagesSearched: 1
+        usersSearched: 420
+        reachedEnd: true
+        retrievalLimitPerRelationship: 10000
+      search-my-posts:
+        items:
+          - id: "1540290063044866048"
+            text: "Having tea with @peduarte and talking about variants"
+            created_at: "2022-06-24T12:00:00.000Z"
+            user:
+              id: "me-102"
+              name: "Me"
+              username: "me"
+            retweet_count: 0
+            like_count: 4
+        pagesSearched: 12
+        postsSearched: 1134
+        reachedEnd: true
+        retrievalLimit: 3200
+    expected:
+      - callsTool:
+          name: "search-my-connections"
+          arguments:
+            terms:
+              includes: "Pedro Duarte"
+      - callsTool:
+          name: "search-my-posts"
+          arguments:
+            terms:
+              includes: "tea"
+  - input: "@twitter Help me find my reply about Juliette's ASCII art tool."
+    mocks:
+      search-my-connections:
+        relationshipsSearched:
+          - "following"
+        items:
+          - id: "user-202"
+            name: "Juliette"
+            username: "juliette_codes"
+            description: "Making playful developer tools"
+        pagesSearched: 1
+        usersSearched: 420
+        reachedEnd: true
+        retrievalLimitPerRelationship: 10000
+      search-my-posts:
+        items:
+          - id: "post-202"
+            text: "@juliette_codes This ASCII art tool is delightful"
+            created_at: "2026-08-20T12:00:00.000Z"
+            user:
+              id: "me-202"
+              name: "Me"
+              username: "me"
+            retweet_count: 0
+            like_count: 2
+        pagesSearched: 4
+        postsSearched: 386
+        reachedEnd: true
+        retrievalLimit: 3200
+    expected:
+      - callsTool:
+          name: "search-my-connections"
+          arguments:
+            terms:
+              includes: "Juliette"
+      - callsTool:
+          name: "search-my-posts"
+  - input: "@twitter Get the profile for @raycastapp without fetching their posts."
+    mocks:
+      get-user:
+        user:
+          id: "user-301"
+          name: "Raycast"
+          username: "raycastapp"
+          description: "Supercharged productivity"
+          verified: true
+    expected:
+      - callsTool:
+          name: "get-user"
+          arguments:
+            username:
+              includes: "raycastapp"
+  - input: "@twitter Post: Shipping the new Raycast extension today!"
+    mocks:
+      post:
+        posted: true
+        text: "Shipping the new Raycast extension today!"
+    expected:
+      - callsTool:
+          name: "post"
+          arguments:
+            text: "Shipping the new Raycast extension today!"
+  - input: "@twitter Show my X bookmarks."
+    mocks:
+      get-bookmarks:
+        items:
+          - id: "post-401"
+            text: "Saved for later"
+            user:
+              id: "user-401"
+              name: "Jordan"
+              username: "jordan"
+        nextToken: "bookmarks-next-1"
+    expected:
+      - callsTool: "get-bookmarks"
+  - input: "@twitter Show the posts I recently published."
+    mocks:
+      get-my-posts:
+        items:
+          - id: "post-501"
+            text: "My latest update"
+            user:
+              id: "me-501"
+              name: "Me"
+              username: "me"
+        nextToken: "my-posts-next-1"
+    expected:
+      - callsTool: "get-my-posts"
+  - input: '@twitter Reply "Thanks for sharing!" to X post 1234567890123456789.'
+    mocks:
+      reply-to-post:
+        replied: true
+        postId: "1234567890123456789"
+        text: "Thanks for sharing!"
+    expected:
+      - callsTool:
+          name: "reply-to-post"
+          arguments:
+            postId: "1234567890123456789"
+            text: "Thanks for sharing!"
+  - input: "@twitter Delete my X post 1234567890123456789."
+    mocks:
+      delete-post:
+        deleted: true
+        postId: "1234567890123456789"
+    expected:
+      - callsTool:
+          name: "delete-post"
+          arguments:
+            postId: "1234567890123456789"
+  - input: "@twitter Unlike X post 1234567890123456789."
+    mocks:
+      set-like:
+        postId: "1234567890123456789"
+        liked: false
+    expected:
+      - callsTool:
+          name: "set-like"
+          arguments:
+            postId: "1234567890123456789"
+            liked: false
+  - input: "@twitter Undo my repost of X post 1234567890123456789."
+    mocks:
+      set-repost:
+        postId: "1234567890123456789"
+        reposted: false
+    expected:
+      - callsTool:
+          name: "set-repost"
+          arguments:
+            postId: "1234567890123456789"
+            reposted: false
+  - input: "@twitter Post this screenshot /tmp/launch.png with the text: Shipped the new launch flow. Only people I follow should reply."
+    mocks:
+      post:
+        posted: true
+        postId: "post-601"
+        text: "Shipped the new launch flow."
+    expected:
+      - callsTool:
+          name: "post"
+          arguments:
+            text:
+              includes: "Shipped the new launch flow"
+            mediaPaths:
+              includes: "/tmp/launch.png"
+            replySettings: "following"
+  - input: "@twitter Create a poll asking 'Which icon?' with options Circle, Square, Triangle for one day."
+    mocks:
+      post:
+        posted: true
+        postId: "post-602"
+        text: "Which icon?"
+    expected:
+      - callsTool:
+          name: "post"
+          arguments:
+            pollOptions:
+              includes: "Circle"
+            pollDurationMinutes: 1440
+  - input: "@twitter Show who liked X post 1234567890123456789."
+    mocks:
+      get-post-engagement:
+        items:
+          - id: "user-701"
+            name: "Casey"
+            username: "casey"
+    expected:
+      - callsTool:
+          name: "get-post-engagement"
+          arguments:
+            postId: "1234567890123456789"
+            kind: "likes"
+  - input: "@twitter Show recent posts mentioning me."
+    mocks:
+      get-mentions:
+        items:
+          - id: "post-702"
+            text: "@me this is useful"
+            user:
+              id: "user-702"
+              name: "Avery"
+              username: "avery"
+    expected:
+      - callsTool: "get-mentions"
+  - input: "@twitter Remove my bookmark from X post 1234567890123456789."
+    mocks:
+      set-bookmark:
+        postId: "1234567890123456789"
+        bookmarked: false
+    expected:
+      - callsTool:
+          name: "set-bookmark"
+          arguments:
+            postId: "1234567890123456789"
+            bookmarked: false
+  - input: "@twitter Hide reply 1234567890123456789 from my conversation."
+    mocks:
+      set-reply-hidden:
+        postId: "1234567890123456789"
+        hidden: true
+    expected:
+      - callsTool:
+          name: "set-reply-hidden"
+          arguments:
+            postId: "1234567890123456789"
+            hidden: true
+  - input: "@twitter Send a DM saying 'Thanks for the report' to user ID 9876543210."
+    mocks:
+      send-dm:
+        sent: true
+        conversationId: "dm-801"
+        eventId: "event-801"
+    expected:
+      - callsTool:
+          name: "send-dm"
+          arguments:
+            recipientUserIds:
+              includes: "9876543210"
+            text: "Thanks for the report"
