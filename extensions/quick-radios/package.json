@@ -63,6 +63,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
+    "test": "node --experimental-strip-types tests/session-data-test.mjs",
     "publish": "npx @raycast/api@latest publish"
   }
 }

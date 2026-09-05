@@ -3,7 +3,7 @@ import { promisify } from "util";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import {
+import type {
   WifiStatus,
   WifiNetwork,
   BluetoothStatus,
@@ -13,7 +13,7 @@ import {
 import {
   calculateSessionUsage,
   getCachedInternetSpeed,
-  SessionDataUsage,
+  type SessionDataUsage,
 } from "../speedService";
 
 let environmentAssetsPath: string | undefined;
@@ -215,6 +215,68 @@ if ($radio) {
   return result === "On" || result === "1";
 }
 
+export function parseSubinterfaceBytes(
+  output: string,
+  ifaceName: string,
+): { bytesIn: number; bytesOut: number } | undefined {
+  try {
+    const lines = output.split("\n").map((l) => l.trim());
+    const targetIfaceLower = ifaceName.toLowerCase();
+
+    // Pass 1: exact match
+    for (const line of lines) {
+      const parts = line.split(/\s+/);
+      if (parts.length >= 5) {
+        const lineIface = parts.slice(4).join(" ").toLowerCase();
+        if (lineIface === targetIfaceLower) {
+          const bytesIn = parseInt(parts[2], 10);
+          const bytesOut = parseInt(parts[3], 10);
+          if (!isNaN(bytesIn) && !isNaN(bytesOut)) {
+            return {
+              bytesIn: Math.max(0, bytesIn),
+              bytesOut: Math.max(0, bytesOut),
+            };
+          }
+        }
+      }
+    }
+
+    // Pass 2: fallback substring matching, avoiding virtual / direct adapter false matches
+    const targetIsVirtualOrDirect =
+      targetIfaceLower.includes("direct") ||
+      targetIfaceLower.includes("virtual");
+
+    for (const line of lines) {
+      const parts = line.split(/\s+/);
+      if (parts.length >= 5) {
+        const lineIface = parts.slice(4).join(" ").toLowerCase();
+        const isVirtualOrDirect =
+          lineIface.includes("direct") || lineIface.includes("virtual");
+        if (isVirtualOrDirect !== targetIsVirtualOrDirect) {
+          continue;
+        }
+        if (
+          lineIface.includes(targetIfaceLower) ||
+          targetIfaceLower.includes(lineIface) ||
+          (targetIfaceLower.includes("wi-fi") && lineIface.includes("wi-fi"))
+        ) {
+          const bytesIn = parseInt(parts[2], 10);
+          const bytesOut = parseInt(parts[3], 10);
+          if (!isNaN(bytesIn) && !isNaN(bytesOut)) {
+            return {
+              bytesIn: Math.max(0, bytesIn),
+              bytesOut: Math.max(0, bytesOut),
+            };
+          }
+        }
+      }
+    }
+  } catch {
+    // Return undefined on parsing failure
+  }
+  return undefined;
+}
+
 /**
  * Retrieves the current Wi-Fi connection and interface status.
  */
@@ -237,31 +299,36 @@ export async function getWindowsWifiStatus(): Promise<WifiStatus> {
       return { isOn: false, isConnected: false };
     }
 
-    const isConnected = /State\s*:\s*connected/i.test(interfacesOutput);
-    const ssidMatch = interfacesOutput.match(/SSID\s*:\s*(.+)/i);
-    const bssidMatch = interfacesOutput.match(/AP BSSID\s*:\s*(.+)/i);
-    const signalMatch = interfacesOutput.match(/Signal\s*:\s*(\d+)%/i);
-    const bandMatch = interfacesOutput.match(/Band\s*:\s*(.+)/i);
-    const channelMatch = interfacesOutput.match(/Channel\s*:\s*(\d+)/i);
-    const radioTypeMatch = interfacesOutput.match(/Radio type\s*:\s*(.+)/i);
-    const authMatch = interfacesOutput.match(/Authentication\s*:\s*(.+)/i);
-    const cipherMatch = interfacesOutput.match(/Cipher\s*:\s*(.+)/i);
-    const macMatch = interfacesOutput.match(/Physical address\s*:\s*(.+)/i);
-    const rxMatch = interfacesOutput.match(
-      /Receive rate \(Mbps\)\s*:\s*([\d.]+)/i,
-    );
-    const txMatch = interfacesOutput.match(
-      /Transmit rate \(Mbps\)\s*:\s*([\d.]+)/i,
-    );
+    // Segment output into individual interface blocks to correctly target the connected adapter
+    const interfaceBlocks = interfacesOutput
+      .split(/(?=(?:^|\r?\n)\s*Name\s*:)/i)
+      .filter((b) => /Name\s*:/i.test(b));
+
+    const activeBlock =
+      interfaceBlocks.find((b) => /State\s*:\s*connected/i.test(b)) ||
+      interfaceBlocks[0] ||
+      interfacesOutput;
+
+    const isConnected = /State\s*:\s*connected/i.test(activeBlock);
+    const ifaceMatch = activeBlock.match(/^\s*Name\s*:\s*(.+)$/m);
+    const ifaceName = ifaceMatch ? ifaceMatch[1].trim() : "Wi-Fi";
+    const ssidMatch = activeBlock.match(/SSID\s*:\s*(.+)/i);
+    const bssidMatch = activeBlock.match(/AP BSSID\s*:\s*(.+)/i);
+    const signalMatch = activeBlock.match(/Signal\s*:\s*(\d+)%/i);
+    const bandMatch = activeBlock.match(/Band\s*:\s*(.+)/i);
+    const channelMatch = activeBlock.match(/Channel\s*:\s*(\d+)/i);
+    const radioTypeMatch = activeBlock.match(/Radio type\s*:\s*(.+)/i);
+    const authMatch = activeBlock.match(/Authentication\s*:\s*(.+)/i);
+    const cipherMatch = activeBlock.match(/Cipher\s*:\s*(.+)/i);
+    const macMatch = activeBlock.match(/Physical address\s*:\s*(.+)/i);
+    const rxMatch = activeBlock.match(/Receive rate \(Mbps\)\s*:\s*([\d.]+)/i);
+    const txMatch = activeBlock.match(/Transmit rate \(Mbps\)\s*:\s*([\d.]+)/i);
 
     let ipAddress: string | undefined;
     let gateway: string | undefined;
     let sessionData: SessionDataUsage | undefined;
 
     if (isConnected) {
-      const ifaceMatch = interfacesOutput.match(/^\s*Name\s*:\s*(.+)$/m);
-      const ifaceName = ifaceMatch ? ifaceMatch[1].trim() : "Wi-Fi";
-
       // 1. IP Address from Node.js in-memory network interfaces (0ms)
       const netIfaces = os.networkInterfaces();
       const ifaceAddrs = netIfaces[ifaceName];
@@ -291,9 +358,10 @@ export async function getWindowsWifiStatus(): Promise<WifiStatus> {
       }
 
       // 2. Gateway and session data in parallel via fast native netsh commands (~100ms total)
-      const [ipv4ConfigRes, subRes] = await Promise.allSettled([
+      const [ipv4ConfigRes, ipv4SubRes, ipv6SubRes] = await Promise.allSettled([
         runNetsh(["interface", "ipv4", "show", "config", ifaceName]),
         runNetsh(["interface", "ipv4", "show", "subinterfaces"]),
+        runNetsh(["interface", "ipv6", "show", "subinterfaces"]),
       ]);
 
       if (ipv4ConfigRes.status === "fulfilled" && ipv4ConfigRes.value) {
@@ -327,35 +395,41 @@ export async function getWindowsWifiStatus(): Promise<WifiStatus> {
         }
       }
 
-      if (subRes.status === "fulfilled" && subRes.value && ssidMatch) {
-        try {
-          const lines = subRes.value.split("\n").map((l) => l.trim());
-          const targetIfaceLower = ifaceName.toLowerCase();
-          for (const line of lines) {
-            const parts = line.split(/\s+/);
-            if (parts.length >= 5) {
-              const lineIface = parts.slice(4).join(" ").toLowerCase();
-              if (
-                lineIface === targetIfaceLower ||
-                lineIface.includes(targetIfaceLower) ||
-                (targetIfaceLower.includes("wi-fi") &&
-                  lineIface.includes("wi-fi"))
-              ) {
-                const bytesIn = parseInt(parts[2], 10);
-                const bytesOut = parseInt(parts[3], 10);
-                if (!isNaN(bytesIn) && !isNaN(bytesOut)) {
-                  sessionData = calculateSessionUsage(
-                    ssidMatch[1].trim(),
-                    bytesIn,
-                    bytesOut,
-                  );
-                  break;
-                }
-              }
-            }
+      if (ssidMatch) {
+        let totalBytesIn = 0;
+        let totalBytesOut = 0;
+        let hasValidCounters = false;
+
+        if (ipv4SubRes.status === "fulfilled" && ipv4SubRes.value) {
+          const ipv4Counters = parseSubinterfaceBytes(
+            ipv4SubRes.value,
+            ifaceName,
+          );
+          if (ipv4Counters) {
+            totalBytesIn += ipv4Counters.bytesIn;
+            totalBytesOut += ipv4Counters.bytesOut;
+            hasValidCounters = true;
           }
-        } catch {
-          // Fallback if subinterface query fails
+        }
+
+        if (ipv6SubRes.status === "fulfilled" && ipv6SubRes.value) {
+          const ipv6Counters = parseSubinterfaceBytes(
+            ipv6SubRes.value,
+            ifaceName,
+          );
+          if (ipv6Counters) {
+            totalBytesIn += ipv6Counters.bytesIn;
+            totalBytesOut += ipv6Counters.bytesOut;
+            hasValidCounters = true;
+          }
+        }
+
+        if (hasValidCounters) {
+          sessionData = calculateSessionUsage(
+            ssidMatch[1].trim(),
+            totalBytesIn,
+            totalBytesOut,
+          );
         }
       }
     }
@@ -872,11 +946,22 @@ export async function toggleWindowsBluetoothDeviceConnection(
     throw new Error("Quick Radios helper executable not found");
   }
 
-  const { stdout } = await execFileAsync(
-    helperExe,
-    [connect ? "connect" : "disconnect", macHex],
-    { windowsHide: true },
-  );
+  let stdout = "";
+  try {
+    const res = await execFileAsync(
+      helperExe,
+      [connect ? "connect" : "disconnect", macHex],
+      { windowsHide: true },
+    );
+    stdout = res.stdout;
+  } catch (err: unknown) {
+    const execErr = err as { stdout?: string | Buffer; message?: string };
+    stdout = (execErr?.stdout ?? "").toString();
+    if (!stdout && err instanceof Error) {
+      throw err;
+    }
+  }
+
   const trimmed = stdout.trim();
   if (connect) {
     if (trimmed.includes("Connected")) {
@@ -890,13 +975,18 @@ export async function toggleWindowsBluetoothDeviceConnection(
     if (trimmed.startsWith("Error:")) {
       throw new Error(trimmed);
     }
+    throw new Error(trimmed || "Failed to connect device");
   } else {
     if (trimmed.includes("Disconnected")) {
       return;
     }
+    if (trimmed.includes("FailedToDisconnect")) {
+      throw new Error("Failed to disconnect device");
+    }
     if (trimmed.startsWith("Error:")) {
       throw new Error(trimmed);
     }
+    throw new Error(trimmed || "Failed to disconnect device");
   }
 }
 

@@ -1,3 +1,5 @@
+import { Cache } from "@raycast/api";
+
 export interface InternetSpeedResult {
   downloadMbps: number;
   uploadMbps: number;
@@ -113,12 +115,16 @@ export function getCachedInternetSpeed(): InternetSpeedResult | undefined {
 /**
  * Tracks session baseline data usage for a specific Wi-Fi SSID connection.
  */
-interface StoredBaseline {
+export interface StoredBaseline {
   ssid: string;
   baselineIn: number;
   baselineOut: number;
+  firstObservedTime: number;
+  lastUpdatedTime: number;
 }
 
+const sessionCache = new Cache({ namespace: "wifi-session-usage" });
+const LAST_SSID_KEY = "__active_ssid__";
 let activeBaseline: StoredBaseline | undefined;
 
 export function calculateSessionUsage(
@@ -126,44 +132,124 @@ export function calculateSessionUsage(
   currentBytesIn: number,
   currentBytesOut: number,
 ): SessionDataUsage {
-  if (!ssid || (currentBytesIn === 0 && currentBytesOut === 0)) {
+  const safeBytesIn =
+    Number.isFinite(currentBytesIn) && currentBytesIn >= 0
+      ? Math.floor(currentBytesIn)
+      : 0;
+  const safeBytesOut =
+    Number.isFinite(currentBytesOut) && currentBytesOut >= 0
+      ? Math.floor(currentBytesOut)
+      : 0;
+
+  if (!ssid) {
     return {
       downloadedBytes: 0,
       uploadedBytes: 0,
-      totalBytesIn: currentBytesIn,
-      totalBytesOut: currentBytesOut,
+      totalBytesIn: safeBytesIn,
+      totalBytesOut: safeBytesOut,
     };
   }
 
-  // If new network, baseline not set yet, or interface counters reset
-  if (
-    !activeBaseline ||
-    activeBaseline.ssid !== ssid ||
-    currentBytesIn < activeBaseline.baselineIn ||
-    currentBytesOut < activeBaseline.baselineOut
-  ) {
-    activeBaseline = {
-      ssid,
-      baselineIn: currentBytesIn,
-      baselineOut: currentBytesOut,
-    };
+  const now = Date.now();
+  let baseline: StoredBaseline | undefined;
+
+  try {
+    const lastActiveSsid = sessionCache.get(LAST_SSID_KEY);
+    const cachedStr = sessionCache.get(ssid);
+    if (cachedStr) {
+      try {
+        baseline = JSON.parse(cachedStr) as StoredBaseline;
+      } catch {
+        baseline = undefined;
+      }
+    }
+
+    const isSsidSwitched =
+      lastActiveSsid !== undefined && lastActiveSsid !== ssid;
+    const countersWrapped =
+      baseline !== undefined &&
+      (safeBytesIn < baseline.baselineIn ||
+        safeBytesOut < baseline.baselineOut);
+
+    if (!baseline || isSsidSwitched || countersWrapped) {
+      baseline = {
+        ssid,
+        baselineIn: safeBytesIn,
+        baselineOut: safeBytesOut,
+        firstObservedTime: now,
+        lastUpdatedTime: now,
+      };
+      sessionCache.set(ssid, JSON.stringify(baseline));
+    } else {
+      baseline.lastUpdatedTime = now;
+      sessionCache.set(ssid, JSON.stringify(baseline));
+    }
+
+    sessionCache.set(LAST_SSID_KEY, ssid);
+    activeBaseline = baseline;
+  } catch {
+    // If Cache encounters an issue, fallback gracefully to in-memory state
+    if (
+      !activeBaseline ||
+      activeBaseline.ssid !== ssid ||
+      safeBytesIn < activeBaseline.baselineIn ||
+      safeBytesOut < activeBaseline.baselineOut
+    ) {
+      activeBaseline = {
+        ssid,
+        baselineIn: safeBytesIn,
+        baselineOut: safeBytesOut,
+        firstObservedTime: now,
+        lastUpdatedTime: now,
+      };
+    } else {
+      activeBaseline.lastUpdatedTime = now;
+    }
+    baseline = activeBaseline;
   }
 
-  const downloadedBytes = Math.max(
-    0,
-    currentBytesIn - activeBaseline.baselineIn,
-  );
-  const uploadedBytes = Math.max(
-    0,
-    currentBytesOut - activeBaseline.baselineOut,
-  );
+  const downloadedBytes = Math.max(0, safeBytesIn - baseline.baselineIn);
+  const uploadedBytes = Math.max(0, safeBytesOut - baseline.baselineOut);
 
   return {
     downloadedBytes,
     uploadedBytes,
-    totalBytesIn: currentBytesIn,
-    totalBytesOut: currentBytesOut,
+    totalBytesIn: safeBytesIn,
+    totalBytesOut: safeBytesOut,
   };
+}
+
+/**
+ * Dynamically formats byte counts into human-readable strings (B, KB, MB, GB, TB, PB)
+ * with adaptive decimal precision.
+ */
+export function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return "0 B";
+  }
+
+  const units = ["B", "KB", "MB", "GB", "TB", "PB"];
+  let unitIndex = 0;
+  let val = bytes;
+
+  while (val >= 1024 && unitIndex < units.length - 1) {
+    val /= 1024;
+    unitIndex++;
+  }
+
+  if (unitIndex === 0) {
+    if (Math.round(val) >= 1024) {
+      return "1.00 KB";
+    }
+    return `${Math.round(val)} B`;
+  }
+
+  if (parseFloat(val.toFixed(2)) >= 1024 && unitIndex < units.length - 1) {
+    val /= 1024;
+    unitIndex++;
+  }
+
+  return `${val.toFixed(2)} ${units[unitIndex]}`;
 }
 
 export function formatGigaBytes(bytes: number): string {

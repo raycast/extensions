@@ -52,7 +52,10 @@ export async function openWifiSettings(): Promise<void> {
 export {
   getInternetSpeed,
   getCachedInternetSpeed,
+  formatBytes,
   formatGigaBytes,
+  calculateSessionUsage,
   type InternetSpeedResult,
   type SessionDataUsage,
+  type StoredBaseline,
 } from "./speedService";

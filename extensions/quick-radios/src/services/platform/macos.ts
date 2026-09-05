@@ -1,12 +1,17 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
-import {
+import type {
   WifiStatus,
   WifiNetwork,
   BluetoothStatus,
   BluetoothDevice,
   BluetoothDeviceCategory,
 } from "../types";
+import {
+  calculateSessionUsage,
+  getCachedInternetSpeed,
+  type SessionDataUsage,
+} from "../speedService";
 
 const execFileAsync = promisify(execFile);
 
@@ -31,6 +36,73 @@ async function getMacWifiDevice(): Promise<string> {
   }
 }
 
+export function parseNetstatBytes(
+  output: string,
+  device: string,
+): { bytesIn: number; bytesOut: number } | undefined {
+  try {
+    const lines = output
+      .trim()
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+    if (lines.length < 2) return undefined;
+
+    const header = lines[0].split(/\s+/);
+    let ibytesIdx = header.findIndex((h) => /^ibytes$/i.test(h));
+    let obytesIdx = header.findIndex((h) => /^obytes$/i.test(h));
+
+    if (ibytesIdx === -1 || obytesIdx === -1) {
+      ibytesIdx = 6;
+      obytesIdx = 9;
+    }
+
+    const deviceLower = device.toLowerCase();
+
+    // Look for Link row first (e.g. contains <Link) which carries cumulative hardware counters
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(/\s+/);
+      if (parts.length > Math.max(ibytesIdx, obytesIdx)) {
+        const lineDev = parts[0].toLowerCase();
+        if (lineDev === deviceLower || lineDev === deviceLower + "*") {
+          if (parts.some((p) => p.includes("<Link"))) {
+            const bytesIn = parseInt(parts[ibytesIdx], 10);
+            const bytesOut = parseInt(parts[obytesIdx], 10);
+            if (!isNaN(bytesIn) && !isNaN(bytesOut)) {
+              return {
+                bytesIn: Math.max(0, bytesIn),
+                bytesOut: Math.max(0, bytesOut),
+              };
+            }
+          }
+        }
+      }
+    }
+
+    // If no Link row matched, parse the first row matching the device name
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(/\s+/);
+      if (parts.length > Math.max(ibytesIdx, obytesIdx)) {
+        const lineDev = parts[0].toLowerCase();
+        if (lineDev === deviceLower || lineDev === deviceLower + "*") {
+          const bytesIn = parseInt(parts[ibytesIdx], 10);
+          const bytesOut = parseInt(parts[obytesIdx], 10);
+          if (!isNaN(bytesIn) && !isNaN(bytesOut)) {
+            return {
+              bytesIn: Math.max(0, bytesIn),
+              bytesOut: Math.max(0, bytesOut),
+            };
+          }
+        }
+      }
+    }
+  } catch {
+    // Netstat parse error fallback
+  }
+
+  return undefined;
+}
+
 export async function getMacWifiStatus(): Promise<WifiStatus> {
   try {
     const device = await getMacWifiDevice();
@@ -48,13 +120,33 @@ export async function getMacWifiStatus(): Promise<WifiStatus> {
     try {
       infoOutput = await runExecFile(AIRPORT_PATH, ["-I"]);
     } catch {
-      // If airport utility is not accessible
+      // If airport utility is not accessible (e.g. deprecated/removed on Sonoma/Sequoia)
     }
 
     const ssidMatch = infoOutput.match(/\s+SSID:\s*(.+)/);
     const bssidMatch = infoOutput.match(/\s+BSSID:\s*(.+)/);
     const channelMatch = infoOutput.match(/\s+channel:\s*(\d+)/);
     const rssiMatch = infoOutput.match(/\s+agrCtlRSSI:\s*(-?\d+)/);
+
+    let ssid: string | undefined = ssidMatch ? ssidMatch[1].trim() : undefined;
+    if (!ssid) {
+      try {
+        const netsetupOutput = await runExecFile("networksetup", [
+          "-getairportnetwork",
+          device,
+        ]);
+        const m = netsetupOutput.match(/Current Wi-Fi Network:\s*(.+)/i);
+        if (
+          m &&
+          m[1].trim() &&
+          !m[1].toLowerCase().includes("not associated")
+        ) {
+          ssid = m[1].trim();
+        }
+      } catch {
+        // Fallback failed
+      }
+    }
 
     let signalPercent: number | undefined;
     if (rssiMatch) {
@@ -70,16 +162,39 @@ export async function getMacWifiStatus(): Promise<WifiStatus> {
       // IP query fallback
     }
 
-    const isConnected = Boolean(ssidMatch && ssidMatch[1].trim());
+    const isConnected = Boolean(ssid);
+
+    let sessionData: SessionDataUsage | undefined;
+    if (isConnected && ssid) {
+      try {
+        const netstatOutput = await runExecFile("netstat", [
+          "-b",
+          "-I",
+          device,
+        ]);
+        const counters = parseNetstatBytes(netstatOutput, device);
+        if (counters) {
+          sessionData = calculateSessionUsage(
+            ssid,
+            counters.bytesIn,
+            counters.bytesOut,
+          );
+        }
+      } catch {
+        // Netstat query fallback
+      }
+    }
 
     return {
       isOn: true,
       isConnected,
-      ssid: ssidMatch ? ssidMatch[1].trim() : undefined,
+      ssid,
       bssid: bssidMatch ? bssidMatch[1].trim() : undefined,
       channel: channelMatch ? channelMatch[1].trim() : undefined,
       signalPercent,
       ipAddress,
+      sessionData,
+      internetSpeed: isConnected ? getCachedInternetSpeed() : undefined,
     };
   } catch {
     return { isOn: false, isConnected: false };
@@ -234,7 +349,30 @@ export async function getMacBluetoothStatus(): Promise<BluetoothStatus> {
     }
   }
 
-  // Stock macOS native check 1: defaults read
+  // Stock macOS native check 1: JXA bridge to IOBluetooth framework
+  try {
+    const output = await runExecFile("osascript", [
+      "-l",
+      "JavaScript",
+      "-e",
+      `ObjC.import('IOBluetooth');
+       try {
+         ObjC.bindFunction('IOBluetoothPreferenceGetControllerPowerState', ['int', []]);
+         $.IOBluetoothPreferenceGetControllerPowerState();
+       } catch (_) {
+         ObjC.bindFunction('IOBluetoothPreferenceGetControllerPowerState', ['i', []]);
+         $.IOBluetoothPreferenceGetControllerPowerState();
+       }`,
+    ]);
+    const trimmed = output.trim();
+    if (trimmed === "1" || trimmed === "0") {
+      return { isOn: trimmed === "1" };
+    }
+  } catch {
+    // Fallback to defaults read
+  }
+
+  // Stock macOS native check 2: defaults read
   try {
     const output = await runExecFile("defaults", [
       "read",
@@ -246,7 +384,7 @@ export async function getMacBluetoothStatus(): Promise<BluetoothStatus> {
     // Fallback to system_profiler
   }
 
-  // Stock macOS native check 2: system_profiler
+  // Stock macOS native check 3: system_profiler
   try {
     const output = await runExecFile("system_profiler", [
       "SPBluetoothDataType",
@@ -270,23 +408,92 @@ export async function toggleMacBluetooth(
   const current = await getMacBluetoothStatus();
   const next = targetState !== undefined ? targetState : !current.isOn;
 
+  // 1. If blueutil is installed, use it
   const blueutil = await getBlueutilPath();
   if (blueutil) {
-    await runExecFile(blueutil, ["--power", next ? "1" : "0"]);
-    return next;
+    try {
+      await runExecFile(blueutil, ["--power", next ? "1" : "0"]);
+      return next;
+    } catch {
+      // Fallback to stock native methods
+    }
   }
 
-  // Stock macOS: attempt toggle using native Shortcuts CLI
+  // 2. Stock macOS native method: JXA bridge to IOBluetooth framework
+  try {
+    await runExecFile("osascript", [
+      "-l",
+      "JavaScript",
+      "-e",
+      `ObjC.import('IOBluetooth');
+       var state = ${next ? 1 : 0};
+       try {
+         ObjC.bindFunction('IOBluetoothPreferenceSetControllerPowerState', ['void', ['int']]);
+         $.IOBluetoothPreferenceSetControllerPowerState(state);
+       } catch (_) {
+         ObjC.bindFunction('IOBluetoothPreferenceSetControllerPowerState', ['v', ['i']]);
+         $.IOBluetoothPreferenceSetControllerPowerState(state);
+       }`,
+    ]);
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const verified = await getMacBluetoothStatus();
+    if (verified.isOn === next) {
+      return next;
+    }
+  } catch {
+    // Fallback to UI automation
+  }
+
+  // 3. Stock macOS native method: Control Center UI automation
+  try {
+    const script = `tell application "System Events"
+      tell process "ControlCenter"
+        set cc to (first menu bar item of menu bar 1 whose description is "Control Center" or description is "Control Centre")
+        if exists cc then
+          click cc
+          delay 0.3
+          try
+            click (first checkbox of group 1 of window "Control Center" whose title is "Bluetooth" or description is "Bluetooth")
+          on error
+            try
+              click checkbox 3 of group 1 of window "Control Center"
+            end try
+          end try
+          delay 0.2
+          key code 53
+        end if
+      end tell
+    end tell`;
+
+    await runExecFile("osascript", ["-e", script]);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    const verified = await getMacBluetoothStatus();
+    if (verified.isOn === next) {
+      return next;
+    }
+  } catch {
+    // Fallback to Shortcuts if available
+  }
+
+  // 4. Fallback: check if user configured a Shortcut
   try {
     const shortcutName = next ? "Turn Bluetooth On" : "Turn Bluetooth Off";
     await runExecFile("shortcuts", ["run", shortcutName]);
+    await new Promise((resolve) => setTimeout(resolve, 300));
     return next;
   } catch {
-    // Shortcuts not configured
+    // No shortcut
+  }
+
+  // 5. Final state check
+  const finalCheck = await getMacBluetoothStatus();
+  if (finalCheck.isOn === next) {
+    return next;
   }
 
   throw new Error(
-    "Toggling Bluetooth on macOS requires 'blueutil'. Please install it using 'brew install blueutil' or toggle Bluetooth via macOS Control Center.",
+    `Failed to turn Bluetooth ${next ? "ON" : "OFF"}. Please check system permissions or toggle Bluetooth via Control Center.`,
   );
 }
 

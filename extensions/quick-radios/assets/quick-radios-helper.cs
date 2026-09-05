@@ -220,6 +220,38 @@ class QuickRadiosHelper {
         }
     }
 
+    private static volatile bool _operationComplete = false;
+    private static int _exitOnce = 0;
+
+    private static void CompleteSuccess(string message) {
+        if (Interlocked.Exchange(ref _exitOnce, 1) == 0) {
+            _operationComplete = true;
+            Console.WriteLine(message);
+            try {
+                Console.Out.Flush();
+            } catch {}
+            Environment.Exit(0);
+        }
+    }
+
+    private static int GetDeviceConnectionState(ulong address) {
+        try {
+            var op = BluetoothDevice.FromBluetoothAddressAsync(address);
+            var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
+            if (task.Wait(350)) {
+                if (task.Result != null) {
+                    var isConn = task.Result.ConnectionStatus == BluetoothConnectionStatus.Connected;
+                    try {
+                        task.Result.Dispose();
+                    } catch {}
+                    return isConn ? 1 : 0;
+                }
+                return -1;
+            }
+        } catch {}
+        return -1;
+    }
+
     private static int GetServicePriority(Guid g) {
         string s = g.ToString().ToLowerInvariant();
         if (s.StartsWith("0000110b")) return 100; // Audio Sink (A2DP)
@@ -276,19 +308,29 @@ class QuickRadiosHelper {
             }
         } catch {}
 
-        // 3. Fallback standard profiles
-        string[] standardProfiles = new string[] {
-            "0000110b-0000-1000-8000-00805f9b34fb", // Audio Sink (A2DP)
-            "0000111e-0000-1000-8000-00805f9b34fb", // Hands-Free (HFP)
-            "00001124-0000-1000-8000-00805f9b34fb", // Human Interface Device (HID)
-            "0000110a-0000-1000-8000-00805f9b34fb", // Audio Source
-            "00001108-0000-1000-8000-00805f9b34fb", // Headset (HSP)
-            "0000110c-0000-1000-8000-00805f9b34fb", // A/V Remote Control Target
-            "0000110e-0000-1000-8000-00805f9b34fb"  // A/V Remote Control
-        };
-        foreach (string prof in standardProfiles) {
-            Guid g = new Guid(prof);
-            if (seen.Add(g)) guids.Add(g);
+        // 3. Fallback standard profiles only if no primary connection profile exists
+        bool hasHighPriorityService = false;
+        foreach (Guid g in guids) {
+            if (GetServicePriority(g) >= 70) {
+                hasHighPriorityService = true;
+                break;
+            }
+        }
+
+        if (!hasHighPriorityService) {
+            string[] standardProfiles = new string[] {
+                "0000110b-0000-1000-8000-00805f9b34fb", // Audio Sink (A2DP)
+                "0000111e-0000-1000-8000-00805f9b34fb", // Hands-Free (HFP)
+                "00001124-0000-1000-8000-00805f9b34fb", // Human Interface Device (HID)
+                "0000110a-0000-1000-8000-00805f9b34fb", // Audio Source
+                "00001108-0000-1000-8000-00805f9b34fb", // Headset (HSP)
+                "0000110c-0000-1000-8000-00805f9b34fb", // A/V Remote Control Target
+                "0000110e-0000-1000-8000-00805f9b34fb"  // A/V Remote Control
+            };
+            foreach (string prof in standardProfiles) {
+                Guid g = new Guid(prof);
+                if (seen.Add(g)) guids.Add(g);
+            }
         }
 
         guids.Sort((a, b) => {
@@ -300,18 +342,15 @@ class QuickRadiosHelper {
         return guids;
     }
 
+    private static bool IsConnectionProfile(Guid g) {
+        return GetServicePriority(g) >= 70;
+    }
+
     private static int ConnectDevice(ulong address, string cleanHex) {
         try {
             // Check if already connected
-            BluetoothDevice btDev = null;
-            try {
-                var op = BluetoothDevice.FromBluetoothAddressAsync(address);
-                var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
-                if (task.Wait(2000)) btDev = task.Result;
-            } catch {}
-
-            if (btDev != null && btDev.ConnectionStatus == BluetoothConnectionStatus.Connected) {
-                Console.WriteLine("Connected");
+            if (GetDeviceConnectionState(address) == 1) {
+                CompleteSuccess("Connected");
                 return 0;
             }
 
@@ -319,46 +358,130 @@ class QuickRadiosHelper {
             btdi.dwSize = (uint)Marshal.SizeOf(typeof(BLUETOOTH_DEVICE_INFO));
             btdi.Address = address;
 
-            List<Guid> services = GetDeviceServices(address, cleanHex);
+            List<Guid> allServices = GetDeviceServices(address, cleanHex);
+            if (allServices.Count == 0) {
+                Console.WriteLine("Timeout");
+                return 1;
+            }
+
+            // Only attempt profiles that actually initiate connection (A2DP, HFP, HID, Audio Source, HSP)
+            List<Guid> services = new List<Guid>();
+            foreach (Guid g in allServices) {
+                if (IsConnectionProfile(g)) {
+                    services.Add(g);
+                }
+            }
+            if (services.Count == 0) {
+                services = allServices;
+            }
+
+            _operationComplete = false;
+            _exitOnce = 0;
+
+            // Start background watcher to detect connection early
+            var watcherThread = new Thread(() => {
+                while (!_operationComplete) {
+                    if (GetDeviceConnectionState(address) == 1) {
+                        CompleteSuccess("Connected");
+                        return;
+                    }
+                    Thread.Sleep(100);
+                }
+            });
+            watcherThread.IsBackground = true;
+            watcherThread.Start();
+
+            // Try connection profiles in prioritized order
+            bool hasCycledPrimary = false;
             foreach (Guid g in services) {
+                if (_operationComplete) break;
+
                 Guid currentGuid = g;
                 uint res = BluetoothSetServiceState(IntPtr.Zero, ref btdi, ref currentGuid, 1u);
-                if (res == 87) { // ERROR_INVALID_PARAMETER: already enabled, cycle to trigger connection
+                if (res == 87 && !hasCycledPrimary) {
+                    // ERROR_INVALID_PARAMETER: profile is already enabled.
+                    // Cycle once on the highest-priority profile to trigger Windows outbound connection
+                    hasCycledPrimary = true;
                     BluetoothSetServiceState(IntPtr.Zero, ref btdi, ref currentGuid, 0u);
-                    Thread.Sleep(150);
+                    Thread.Sleep(100);
+                    if (_operationComplete) break;
                     BluetoothSetServiceState(IntPtr.Zero, ref btdi, ref currentGuid, 1u);
+                }
+
+                // Poll early for connection (up to 2.5s for top primary profile, 500ms for secondary/ancillary profiles)
+                int prio = GetServicePriority(g);
+                int pollLimit = (!hasCycledPrimary || prio == 100) ? 2500 : 500;
+                int pollElapsed = 0;
+                while (pollElapsed < pollLimit) {
+                    if (_operationComplete) break;
+                    if (GetDeviceConnectionState(address) == 1) {
+                        CompleteSuccess("Connected");
+                        return 0;
+                    }
+                    Thread.Sleep(150);
+                    pollElapsed += 150;
+                }
+
+                if (_operationComplete) break;
+            }
+
+            if (_operationComplete || GetDeviceConnectionState(address) == 1) {
+                CompleteSuccess("Connected");
+                return 0;
+            }
+
+            // Fallback: trigger RFCOMM discovery only if device has no primary audio or input profiles
+            bool hasAudioOrInput = false;
+            foreach (Guid g in services) {
+                if (GetServicePriority(g) >= 80) {
+                    hasAudioOrInput = true;
+                    break;
                 }
             }
 
-            // Also trigger RFCOMM discovery if btDev is available
-            if (btDev != null) {
-                try {
-                    var rfcommOp = btDev.GetRfcommServicesAsync();
-                    var rfcommTask = System.WindowsRuntimeSystemExtensions.AsTask(rfcommOp);
-                    rfcommTask.Wait(1500);
-                } catch {}
-            }
-
-            // Poll for connection status (up to 7.5 seconds)
-            int maxWaitMs = 7500;
-            int elapsed = 0;
-            int interval = 250;
-            while (elapsed < maxWaitMs) {
-                Thread.Sleep(interval);
-                elapsed += interval;
-
+            if (!hasAudioOrInput) {
                 try {
                     var op = BluetoothDevice.FromBluetoothAddressAsync(address);
                     var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
-                    if (task.Wait(1000) && task.Result != null) {
-                        if (task.Result.ConnectionStatus == BluetoothConnectionStatus.Connected) {
-                            Console.WriteLine("Connected");
+                    if (task.Wait(800) && task.Result != null) {
+                        var btDev = task.Result;
+                        if (btDev.ConnectionStatus == BluetoothConnectionStatus.Connected) {
+                            try { btDev.Dispose(); } catch {}
+                            CompleteSuccess("Connected");
                             return 0;
                         }
+
+                        var rfcommOp = btDev.GetRfcommServicesAsync();
+                        var rfcommTask = System.WindowsRuntimeSystemExtensions.AsTask(rfcommOp);
+                        int rfcommElapsed = 0;
+                        while (rfcommElapsed < 1500) {
+                            if (_operationComplete) break;
+                            if (GetDeviceConnectionState(address) == 1) {
+                                try { btDev.Dispose(); } catch {}
+                                CompleteSuccess("Connected");
+                                return 0;
+                            }
+                            if (rfcommTask.Wait(200)) break;
+                            rfcommElapsed += 200;
+                        }
+                        try { btDev.Dispose(); } catch {}
                     }
                 } catch {}
             }
 
+            // Final polling loop (up to 1.5s)
+            int finalElapsed = 0;
+            while (finalElapsed < 1500) {
+                if (_operationComplete) break;
+                if (GetDeviceConnectionState(address) == 1) {
+                    CompleteSuccess("Connected");
+                    return 0;
+                }
+                Thread.Sleep(150);
+                finalElapsed += 150;
+            }
+
+            _operationComplete = true;
             Console.WriteLine("Timeout");
             return 1;
         } catch (Exception ex) {
@@ -369,11 +492,20 @@ class QuickRadiosHelper {
 
     private static int DisconnectDevice(ulong address, string cleanHex) {
         try {
+            // Check if already disconnected
+            if (GetDeviceConnectionState(address) == 0) {
+                CompleteSuccess("Disconnected");
+                return 0;
+            }
+
             BLUETOOTH_DEVICE_INFO btdi = new BLUETOOTH_DEVICE_INFO();
             btdi.dwSize = (uint)Marshal.SizeOf(typeof(BLUETOOTH_DEVICE_INFO));
             btdi.Address = address;
 
-            // Enumerate and disable all installed services
+            // Enumerate installed services
+            var servicesToDisable = new List<Guid>();
+            var seen = new HashSet<Guid>();
+
             uint numServices = 0;
             BluetoothEnumerateInstalledServices(IntPtr.Zero, ref btdi, ref numServices, null);
             if (numServices > 0) {
@@ -382,49 +514,100 @@ class QuickRadiosHelper {
                     for (int i = 0; i < numServices; i++) {
                         byte[] single = new byte[16];
                         Array.Copy(buffer, i * 16, single, 0, 16);
-                        Guid g = new Guid(single);
-                        BluetoothSetServiceState(IntPtr.Zero, ref btdi, ref g, 0u);
+                        var g = new Guid(single);
+                        if (seen.Add(g)) servicesToDisable.Add(g);
                     }
                 }
             }
 
-            // Also disable standard profiles
-            string[] standardProfiles = new string[] {
-                "0000110b-0000-1000-8000-00805f9b34fb",
-                "0000110a-0000-1000-8000-00805f9b34fb",
-                "0000111e-0000-1000-8000-00805f9b34fb",
-                "00001108-0000-1000-8000-00805f9b34fb",
-                "00001124-0000-1000-8000-00805f9b34fb",
-                "0000110c-0000-1000-8000-00805f9b34fb",
-                "0000110e-0000-1000-8000-00805f9b34fb"
-            };
-            foreach (string prof in standardProfiles) {
-                try {
+            // Fall back to standard profiles if no primary connection profiles were found in installed services
+            bool hasPrimaryProfile = false;
+            foreach (Guid g in servicesToDisable) {
+                if (GetServicePriority(g) >= 70) {
+                    hasPrimaryProfile = true;
+                    break;
+                }
+            }
+
+            if (!hasPrimaryProfile) {
+                string[] standardProfiles = new string[] {
+                    "0000110b-0000-1000-8000-00805f9b34fb", // Audio Sink
+                    "0000111e-0000-1000-8000-00805f9b34fb", // Hands-Free
+                    "00001124-0000-1000-8000-00805f9b34fb", // HID
+                    "0000110a-0000-1000-8000-00805f9b34fb", // Audio Source
+                    "00001108-0000-1000-8000-00805f9b34fb", // Headset
+                    "0000110c-0000-1000-8000-00805f9b34fb", // A/V Remote Control Target
+                    "0000110e-0000-1000-8000-00805f9b34fb"  // A/V Remote Control
+                };
+                foreach (string prof in standardProfiles) {
                     Guid g = new Guid(prof);
-                    BluetoothSetServiceState(IntPtr.Zero, ref btdi, ref g, 0u);
-                } catch {}
+                    if (seen.Add(g)) servicesToDisable.Add(g);
+                }
             }
 
-            // Poll for disconnection (up to 4 seconds)
-            int maxWaitMs = 4000;
-            int elapsed = 0;
-            while (elapsed < maxWaitMs) {
-                try {
-                    var op = BluetoothDevice.FromBluetoothAddressAsync(address);
-                    var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
-                    if (task.Wait(1000) && task.Result != null) {
-                        if (task.Result.ConnectionStatus == BluetoothConnectionStatus.Disconnected) {
-                            Console.WriteLine("Disconnected");
-                            return 0;
-                        }
+            // Prioritize primary connection services first (A2DP, HFP, HID...)
+            servicesToDisable.Sort((a, b) => {
+                int scoreA = GetServicePriority(a);
+                int scoreB = GetServicePriority(b);
+                return scoreB.CompareTo(scoreA);
+            });
+
+            _operationComplete = false;
+            _exitOnce = 0;
+
+            // Start background watcher to detect disconnection immediately
+            var watcherThread = new Thread(() => {
+                while (!_operationComplete) {
+                    if (GetDeviceConnectionState(address) == 0) {
+                        CompleteSuccess("Disconnected");
+                        return;
                     }
-                } catch {}
-                Thread.Sleep(200);
-                elapsed += 200;
+                    Thread.Sleep(100);
+                }
+            });
+            watcherThread.IsBackground = true;
+            watcherThread.Start();
+
+            // Disable services sequentially, checking early after each
+            foreach (Guid g in servicesToDisable) {
+                if (_operationComplete) break;
+
+                Guid currentGuid = g;
+                BluetoothSetServiceState(IntPtr.Zero, ref btdi, ref currentGuid, 0u);
+
+                // Early check: after disabling this service, poll briefly up to 1000ms
+                int elapsed = 0;
+                while (elapsed < 1000) {
+                    if (_operationComplete) break;
+                    if (GetDeviceConnectionState(address) == 0) {
+                        CompleteSuccess("Disconnected");
+                        return 0;
+                    }
+                    Thread.Sleep(150);
+                    elapsed += 150;
+                }
             }
 
-            Console.WriteLine("Disconnected");
-            return 0;
+            // Final polling loop (up to 2 seconds)
+            int finalWait = 0;
+            while (finalWait < 2000) {
+                if (_operationComplete) break;
+                if (GetDeviceConnectionState(address) == 0) {
+                    CompleteSuccess("Disconnected");
+                    return 0;
+                }
+                Thread.Sleep(200);
+                finalWait += 200;
+            }
+
+            _operationComplete = true;
+            if (GetDeviceConnectionState(address) == 0) {
+                CompleteSuccess("Disconnected");
+                return 0;
+            }
+
+            Console.WriteLine("FailedToDisconnect");
+            return 1;
         } catch (Exception ex) {
             Console.WriteLine("Error: " + ex.Message);
             return 2;
@@ -494,6 +677,7 @@ class QuickRadiosHelper {
                             var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
                             if (task.Wait(400) && task.Result != null) {
                                 isConnected = (task.Result.ConnectionStatus == BluetoothConnectionStatus.Connected);
+                                try { task.Result.Dispose(); } catch {}
                             }
                         } catch {}
 

@@ -37,6 +37,7 @@ export default function BluetoothCommand() {
   const isMountedRef = useRef(true);
   const isScanningRef = useRef(false);
   const isActionInProgressRef = useRef(false);
+  const pendingDeviceIdRef = useRef<string | null>(null);
   const actionSeqRef = useRef(0);
   const timeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
   const pendingRefreshRef = useRef<{ showNotification?: boolean } | null>(null);
@@ -100,9 +101,22 @@ export default function BluetoothCommand() {
         setStatus((prev) =>
           prev.isOn === currentStatus.isOn ? prev : currentStatus,
         );
-        setDevices((prev) =>
-          areBluetoothDevicesEqual(prev, deviceList) ? prev : deviceList,
-        );
+        setDevices((prev) => {
+          const currentPending = pendingDeviceIdRef.current;
+          if (currentPending) {
+            const preserved = deviceList.map((d) => {
+              if (d.id === currentPending) {
+                const existing = prev.find((p) => p.id === currentPending);
+                return existing
+                  ? { ...d, isConnected: existing.isConnected }
+                  : d;
+              }
+              return d;
+            });
+            return areBluetoothDevicesEqual(prev, preserved) ? prev : preserved;
+          }
+          return areBluetoothDevicesEqual(prev, deviceList) ? prev : deviceList;
+        });
 
         if (showNotification && !isBackground) {
           await showToast({
@@ -186,6 +200,7 @@ export default function BluetoothCommand() {
     const actionName = targetConnected ? "Connecting" : "Disconnecting";
 
     // Instant 0ms optimistic UI update: move item and mark pending immediately
+    pendingDeviceIdRef.current = device.id;
     setPendingDeviceId(device.id);
     setPendingAction(targetConnected ? "connecting" : "disconnecting");
     setDevices((prev) =>
@@ -205,7 +220,7 @@ export default function BluetoothCommand() {
       const toast = await toastPromise;
       toast.style = Toast.Style.Success;
       toast.title = `${targetConnected ? "Connected" : "Disconnected"} "${device.name}"`;
-      scheduleTimeout(() => refresh({ isBackground: true }), 1500);
+      scheduleTimeout(() => refresh({ isBackground: true }), 1000);
     } catch (error) {
       if (!isMountedRef.current) return;
       // Revert optimistic update upon failure
@@ -220,6 +235,7 @@ export default function BluetoothCommand() {
       toast.message = error instanceof Error ? error.message : String(error);
       refresh({ isBackground: true });
     } finally {
+      pendingDeviceIdRef.current = null;
       if (isMountedRef.current) {
         setPendingDeviceId(null);
         setPendingAction(null);
