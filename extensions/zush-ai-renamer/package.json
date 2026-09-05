@@ -1,0 +1,395 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zush-ai-renamer",
+  "title": "Zush AI Renamer",
+  "description": "Batch rename files by their content with AI. Images, screenshots, PDFs, Office documents, text and code get clear, searchable names from Google Gemini.",
+  "icon": "extension-icon.png",
+  "author": "lirik",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "rename",
+    "renaming",
+    "filename",
+    "finder",
+    "ai",
+    "zush",
+    "bulk rename",
+    "auto rename",
+    "photos"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "rename-files",
+      "title": "Rename Files with AI",
+      "subtitle": "Zush",
+      "description": "Batch rename the files you selected in Finder by their content.",
+      "mode": "view",
+      "keywords": [
+        "smart rename",
+        "batch rename"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Gemini API Key",
+      "description": "Get one at aistudio.google.com/apikey. Sent only to Google.",
+      "placeholder": "Paste your key from aistudio.google.com/apikey",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Gemini model used for title generation. Leave empty to use gemini-3.1-flash-lite.",
+      "type": "textfield",
+      "required": false,
+      "default": "gemini-3.1-flash-lite",
+      "placeholder": "gemini-3.1-flash-lite"
+    },
+    {
+      "name": "filenameStyle",
+      "title": "Filename Style",
+      "description": "How the generated title is written to disk.",
+      "type": "dropdown",
+      "required": false,
+      "default": "title",
+      "data": [
+        {
+          "title": "Title Case With Spaces",
+          "value": "title"
+        },
+        {
+          "title": "kebab-case",
+          "value": "kebab"
+        },
+        {
+          "title": "snake_case",
+          "value": "snake"
+        }
+      ]
+    },
+    {
+      "name": "titleLanguage",
+      "title": "Title Language",
+      "description": "Language for generated titles. System Language follows this Mac.",
+      "type": "dropdown",
+      "required": false,
+      "default": "system",
+      "data": [
+        {
+          "title": "System Language",
+          "value": "system"
+        },
+        {
+          "title": "Afrikaans",
+          "value": "Afrikaans"
+        },
+        {
+          "title": "Albanian",
+          "value": "Albanian"
+        },
+        {
+          "title": "Amharic",
+          "value": "Amharic"
+        },
+        {
+          "title": "Arabic",
+          "value": "Arabic"
+        },
+        {
+          "title": "Armenian",
+          "value": "Armenian"
+        },
+        {
+          "title": "Azerbaijani",
+          "value": "Azerbaijani"
+        },
+        {
+          "title": "Basque",
+          "value": "Basque"
+        },
+        {
+          "title": "Belarusian",
+          "value": "Belarusian"
+        },
+        {
+          "title": "Bengali",
+          "value": "Bengali"
+        },
+        {
+          "title": "Bosnian",
+          "value": "Bosnian"
+        },
+        {
+          "title": "Bulgarian",
+          "value": "Bulgarian"
+        },
+        {
+          "title": "Catalan",
+          "value": "Catalan"
+        },
+        {
+          "title": "Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "Croatian",
+          "value": "Croatian"
+        },
+        {
+          "title": "Czech",
+          "value": "Czech"
+        },
+        {
+          "title": "Danish",
+          "value": "Danish"
+        },
+        {
+          "title": "Dutch",
+          "value": "Dutch"
+        },
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Estonian",
+          "value": "Estonian"
+        },
+        {
+          "title": "Finnish",
+          "value": "Finnish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "Galician",
+          "value": "Galician"
+        },
+        {
+          "title": "Georgian",
+          "value": "Georgian"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "Greek",
+          "value": "Greek"
+        },
+        {
+          "title": "Gujarati",
+          "value": "Gujarati"
+        },
+        {
+          "title": "Hebrew",
+          "value": "Hebrew"
+        },
+        {
+          "title": "Hindi",
+          "value": "Hindi"
+        },
+        {
+          "title": "Hungarian",
+          "value": "Hungarian"
+        },
+        {
+          "title": "Icelandic",
+          "value": "Icelandic"
+        },
+        {
+          "title": "Indonesian",
+          "value": "Indonesian"
+        },
+        {
+          "title": "Irish",
+          "value": "Irish"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Kannada",
+          "value": "Kannada"
+        },
+        {
+          "title": "Kazakh",
+          "value": "Kazakh"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        },
+        {
+          "title": "Latvian",
+          "value": "Latvian"
+        },
+        {
+          "title": "Lithuanian",
+          "value": "Lithuanian"
+        },
+        {
+          "title": "Macedonian",
+          "value": "Macedonian"
+        },
+        {
+          "title": "Malay",
+          "value": "Malay"
+        },
+        {
+          "title": "Malayalam",
+          "value": "Malayalam"
+        },
+        {
+          "title": "Maltese",
+          "value": "Maltese"
+        },
+        {
+          "title": "Marathi",
+          "value": "Marathi"
+        },
+        {
+          "title": "Mongolian",
+          "value": "Mongolian"
+        },
+        {
+          "title": "Nepali",
+          "value": "Nepali"
+        },
+        {
+          "title": "Norwegian",
+          "value": "Norwegian"
+        },
+        {
+          "title": "Persian",
+          "value": "Persian"
+        },
+        {
+          "title": "Polish",
+          "value": "Polish"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Punjabi",
+          "value": "Punjabi"
+        },
+        {
+          "title": "Romanian",
+          "value": "Romanian"
+        },
+        {
+          "title": "Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "Serbian",
+          "value": "Serbian"
+        },
+        {
+          "title": "Slovak",
+          "value": "Slovak"
+        },
+        {
+          "title": "Slovenian",
+          "value": "Slovenian"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "Swahili",
+          "value": "Swahili"
+        },
+        {
+          "title": "Swedish",
+          "value": "Swedish"
+        },
+        {
+          "title": "Tamil",
+          "value": "Tamil"
+        },
+        {
+          "title": "Telugu",
+          "value": "Telugu"
+        },
+        {
+          "title": "Thai",
+          "value": "Thai"
+        },
+        {
+          "title": "Turkish",
+          "value": "Turkish"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "Ukrainian"
+        },
+        {
+          "title": "Urdu",
+          "value": "Urdu"
+        },
+        {
+          "title": "Uzbek",
+          "value": "Uzbek"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "Vietnamese"
+        },
+        {
+          "title": "Welsh",
+          "value": "Welsh"
+        }
+      ]
+    },
+    {
+      "name": "customInstructions",
+      "title": "Naming Instructions",
+      "description": "Extra guidance for the model, for example \"always start invoices with the vendor name\".",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Optional"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.23",
+    "@raycast/utils": "2.2.7",
+    "fflate": "0.8.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "10.8.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

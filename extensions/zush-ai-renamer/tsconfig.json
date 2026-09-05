@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["src/**/*", "raycast-env.d.ts"],
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "commonjs",
+    "target": "ES2023",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    // TypeScript 6 no longer pulls in every @types package on its own, and the
+    // Raycast template predates it: without these two lines tsc cannot find
+    // node's own modules, and it treats the template's node10 resolution as an
+    // error rather than a warning. Both come out when the template moves on.
+    "types": ["node", "react"],
+    "ignoreDeprecations": "6.0"
+  }
+}
