@@ -26,14 +26,12 @@ export default function SearchOddsCommand() {
     },
   );
 
-  // Only render results while the query is one we actually search for.
-  // `keepPreviousData` is here to stop the list flashing empty between
-  // keystrokes, but it also retains the last response when `execute` goes
-  // false -- and once it is false no fetch will ever reconcile it, so
-  // clearing the search bar left the previous matchups on screen and still
-  // actionable. Gating on the same condition as `execute` keeps the
-  // anti-flicker behaviour while tying what is shown to what was asked.
-  const games = useMemo(() => (query.length >= 2 ? dedupeGames(data?.results ?? []) : []), [data, query]);
+  // Cached data can belong to an earlier query while a new request is pending
+  // or after it fails. Only matching responses may create matchup actions.
+  const games = useMemo(
+    () => (query.length >= 2 && data?.query === query ? dedupeGames(data.results ?? []) : []),
+    [data, query],
+  );
 
   return (
     <List
@@ -248,7 +246,8 @@ function fullBoardMarkdown(e: OddsEvent): string {
       if (!market || market.outcomes.length === 0) continue;
       if (!headerCols) headerCols = market.outcomes.map((o) => o.name);
       const cells = headerCols.map((name) => {
-        const o = market.outcomes.find((x) => x.name === name) ?? market.outcomes[0];
+        const o = market.outcomes.find((x) => x.name === name);
+        if (!o) return "Not available";
         const point = o.point !== undefined ? `${o.point > 0 && section.key === "spreads" ? "+" : ""}${o.point} ` : "";
         return `${point}${formatAmerican(o.price)}`;
       });
