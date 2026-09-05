@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quicknote",
+  "title": "Quick Note",
+  "description": "Quickly append notes to a daily Markdown file locally or over SSH.",
+  "version": "1.0.0",
+  "author": "owenps",
+  "license": "MIT",
+  "icon": "icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "quicknote",
+      "title": "Quick Note",
+      "description": "Append a note to today's daily Markdown file locally or over SSH.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "note",
+          "type": "text",
+          "placeholder": "Note",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "storageMode",
+      "type": "dropdown",
+      "required": false,
+      "default": "local",
+      "title": "Storage",
+      "description": "Choose where QuickNote writes notes.",
+      "data": [
+        {
+          "title": "Local",
+          "value": "local"
+        },
+        {
+          "title": "SSH",
+          "value": "ssh"
+        }
+      ]
+    },
+    {
+      "name": "fileMode",
+      "type": "dropdown",
+      "required": false,
+      "default": "daily",
+      "title": "File Mode",
+      "description": "Use a new file each day or one fixed file.",
+      "data": [
+        {
+          "title": "Daily",
+          "value": "daily"
+        },
+        {
+          "title": "Static",
+          "value": "static"
+        }
+      ]
+    },
+    {
+      "name": "staticFilename",
+      "type": "textfield",
+      "required": false,
+      "title": "Static Filename",
+      "description": "Used in Static mode, e.g. inbox.md"
+    },
+    {
+      "name": "localFolder",
+      "type": "directory",
+      "required": false,
+      "title": "Local Notes Folder",
+      "description": "Used when Storage is Local, e.g. ~/Notes"
+    },
+    {
+      "name": "remoteShell",
+      "type": "dropdown",
+      "required": false,
+      "default": "posix",
+      "title": "Remote Shell",
+      "description": "Choose the shell used by the SSH host.",
+      "data": [
+        { "title": "POSIX Shell (Linux/macOS)", "value": "posix" },
+        { "title": "PowerShell (Windows)", "value": "powershell" }
+      ]
+    },
+    {
+      "name": "sshTarget",
+      "type": "textfield",
+      "required": false,
+      "title": "SSH Target",
+      "description": "Used when Storage is SSH, e.g. user@host or an SSH config alias"
+    },
+    {
+      "name": "remoteFolder",
+      "type": "textfield",
+      "required": false,
+      "title": "Remote Notes Folder",
+      "description": "Used when Storage is SSH; path on the remote host"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.9",
+    "@types/node": "^22.10.2",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}
