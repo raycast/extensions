@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../tsconfig.json",
+  "include": ["./**/*.ts", "./**/*.mts", "../src/**/*"],
+  "compilerOptions": {
+    "noEmit": true,
+    // Os testes rodam sob `node --test` com remoção nativa de tipos: os arquivos são
+    // carregados como ESM (top-level await) e o especificador leva a extensão `.ts`
+    // literal, enquanto `src/lib/**` importa sem extensão porque compila para commonjs.
+    // `module: "preserve"` é o único modo que aceita as duas formas ao mesmo tempo.
+    "module": "preserve",
+    "allowImportingTsExtensions": true,
+    // Os duplos de `@raycast/api` são `.mjs`; entram como JavaScript, sem checagem própria.
+    "allowJs": true,
+    "checkJs": false,
+    "types": ["node"]
+  }
+}
