@@ -1,5 +1,9 @@
 # TickTick Changelog
 
+## [Added] - {PR_MERGE_DATE}
+
+- `Quick Add Task` now parses natural-language and `*` dates, `~list`/`^list`, and `!priority` syntax.
+
 ## [Fixed] - 2026-07-21
 
 - Added `Later` section in date group
