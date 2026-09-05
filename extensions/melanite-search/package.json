@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "melanite-search",
+  "title": "Melanite Search",
+  "description": "Search your Melanite library by file name and tag name, with thumbnail previews.",
+  "icon": "extension-icon.png",
+  "author": "masuipeo",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "subtitle": "Melanite",
+      "description": "Filter the items of a Melanite library by file name, tag name and memo.",
+      "mode": "view",
+      "keywords": [
+        "melanite",
+        "tag",
+        "library",
+        "file",
+        "thumbnail"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "libraryPath",
+      "type": "directory",
+      "required": true,
+      "title": "Library Folder",
+      "description": "The .melanite folder to read. melanite.db inside it is opened read-only."
+    },
+    {
+      "name": "sortOrder",
+      "type": "dropdown",
+      "required": false,
+      "title": "Sort By",
+      "description": "Order of the results.",
+      "default": "modified",
+      "data": [
+        {
+          "title": "Modified Date (Newest First)",
+          "value": "modified"
+        },
+        {
+          "title": "Imported Date (Newest First)",
+          "value": "imported"
+        },
+        {
+          "title": "Created Date (Newest First)",
+          "value": "created"
+        },
+        {
+          "title": "Name (A → Z)",
+          "value": "name"
+        }
+      ]
+    },
+    {
+      "name": "resultLimit",
+      "type": "dropdown",
+      "required": false,
+      "title": "Result Limit",
+      "description": "Maximum number of items shown at once.",
+      "default": "100",
+      "data": [
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        },
+        {
+          "title": "200",
+          "value": "200"
+        },
+        {
+          "title": "500",
+          "value": "500"
+        }
+      ]
+    },
+    {
+      "name": "searchMemo",
+      "type": "checkbox",
+      "required": false,
+      "title": "Search Scope",
+      "label": "Also match the item memo",
+      "default": true,
+      "description": "Match the search text against the memo in addition to file name and tag name."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.6",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "25.9.5",
+    "@types/react": "19.2.18",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
