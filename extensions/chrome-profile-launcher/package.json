@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chrome-profile-launcher",
+  "title": "Chrome Profile Launcher",
+  "description": "Open any Google Chrome profile in a new window without switching virtual desktops.",
+  "icon": "extension-icon.png",
+  "author": "sanjan_sen",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-profile",
+      "title": "Open Chrome Profile",
+      "description": "open profile in your current desktop without switching",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-profiles",
+      "title": "Chrome Profiles Menu Bar",
+      "description": "launch a Chrome profile from the menu bar without opening Raycast",
+      "mode": "menu-bar",
+      "interval": "1d"
+    },
+    {
+      "name": "launch-profile",
+      "title": "Launch Profile",
+      "description": "launch a specific Chrome profile by name (for quicklinks and global hotkeys)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "profile",
+          "type": "text",
+          "placeholder": "Profile name or directory",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
