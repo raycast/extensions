@@ -82,6 +82,10 @@
           "default": "title",
           "data": [
             {
+              "title": "Workspace",
+              "value": "workspaceKey"
+            },
+            {
               "title": "Team",
               "value": "teamId"
             },
@@ -245,6 +249,59 @@
       ]
     },
     {
+      "name": "create-issue-for-myself-in-workspace",
+      "title": "Create Issue for Myself in Workspace",
+      "description": "Create and assign a new issue to yourself in a specific workspace.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "preferredTeamKey",
+          "type": "textfield",
+          "title": "Preferred Team",
+          "placeholder": "RAY",
+          "description": "Specify the Key (e.g. RAY) of the preferred team. If not specified, the first team is used.",
+          "required": false
+        },
+        {
+          "name": "preferredStatusName",
+          "type": "textfield",
+          "title": "Preferred Status",
+          "placeholder": "Todo",
+          "description": "Specify the name of the preferred status for new issues (e.g. Todo, Backlog). If not specified, uses Linear's default.",
+          "required": false
+        },
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "workspace",
+          "placeholder": "Workspace",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "quick-add-comment-to-issue",
       "title": "Quick Add Comment to Issue",
       "description": "Quickly add a comment to an issue using its ID.",
@@ -272,6 +329,12 @@
           "placeholder": "Issue ID",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "workspace",
+          "placeholder": "Workspace",
+          "type": "text",
+          "required": false
         }
       ]
     },
@@ -279,6 +342,12 @@
       "name": "favorites",
       "title": "Favorites",
       "description": "Browse through your Linear favorites.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-workspaces",
+      "title": "Manage Workspaces",
+      "description": "Add, switch, re-authenticate, or log out of Linear workspaces.",
       "mode": "view"
     }
   ],
@@ -447,6 +516,11 @@
       "name": "get-workspace",
       "title": "Get Workspace",
       "description": "Retrieve the connected Linear workspace"
+    },
+    {
+      "name": "get-workspaces",
+      "title": "Get Workspaces",
+      "description": "List the connected Linear workspaces with their workspaceId, name, URL key, account email, and which one is active. Call this before acting in a specific workspace and pass its workspaceId to other tools."
     },
     {
       "name": "list-release-pipelines",

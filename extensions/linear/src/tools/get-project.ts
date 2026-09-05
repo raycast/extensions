@@ -1,10 +1,14 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { resolveProject } from "./linearUtils";
-type Input = { query: string; includeMilestones?: boolean; includeMembers?: boolean; includeResources?: boolean };
-export default withAccessToken(linear)(async (input: Input) => {
+import { withToolAuth } from "./resolveToolWorkspace";
+type Input = {
+  query: string;
+  includeMilestones?: boolean;
+  includeMembers?: boolean;
+  includeResources?: boolean;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
+};
+export default withToolAuth(async (input: Input) => {
   const project = await resolveProject(input.query);
   return {
     ...project,

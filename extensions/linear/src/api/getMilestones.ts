@@ -1,6 +1,6 @@
-import { ProjectMilestone } from "@linear/sdk";
+import { LinearClient, ProjectMilestone } from "@linear/sdk";
 
-import { getLinearClient } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 
 export type MilestoneResult = Pick<
   ProjectMilestone,
@@ -23,8 +23,8 @@ const milestoneFragment = `
   updatedAt
 `;
 
-export async function getMilestones(projectId?: string) {
-  const { graphQLClient } = getLinearClient();
+export async function getMilestones(projectId?: string, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   if (projectId) {
     const { data } = await graphQLClient.rawRequest<

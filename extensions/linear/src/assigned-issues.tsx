@@ -5,6 +5,12 @@ import { getMyIssuesByView, MyIssuesView } from "./api/getIssues";
 import CreateIssueForm from "./components/CreateIssueForm";
 import StateIssueList from "./components/StateIssueList";
 import View from "./components/View";
+import { useWorkspaces } from "./components/WorkspaceContext";
+import {
+  isWorkspaceDropdownValue,
+  workspaceValueToKey,
+  WorkspaceDropdownSection,
+} from "./components/WorkspaceDropdown";
 import useIssues from "./hooks/useIssues";
 import useMe from "./hooks/useMe";
 import usePriorities from "./hooks/usePriorities";
@@ -32,6 +38,7 @@ const views: { id: MyIssuesView; title: string; icon: Icon; emptyDescription: st
 
 function MyIssues() {
   const [view, setView] = useState<MyIssuesView>("assigned");
+  const { switchWorkspace } = useWorkspaces();
 
   const { issues, isLoadingIssues, mutateList } = useIssues(getMyIssuesByView, [view]);
   const { priorities, isLoadingPriorities } = usePriorities();
@@ -45,7 +52,18 @@ function MyIssues() {
       searchBarPlaceholder="Filter by ID, title, status, assignee or priority"
       filtering={{ keepSectionOrder: true }}
       searchBarAccessory={
-        <List.Dropdown tooltip="Change View" value={view} onChange={(value) => setView(value as MyIssuesView)}>
+        <List.Dropdown
+          tooltip="Change View"
+          value={view}
+          onChange={(value) => {
+            if (isWorkspaceDropdownValue(value)) {
+              switchWorkspace(workspaceValueToKey(value));
+              return;
+            }
+            setView(value as MyIssuesView);
+          }}
+        >
+          <WorkspaceDropdownSection />
           {views.map(({ id, title, icon }) => (
             <List.Dropdown.Item key={id} value={id} title={title} icon={icon} />
           ))}

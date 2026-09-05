@@ -1,7 +1,4 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { serializeComment } from "./commentUtils";
 import {
@@ -14,6 +11,7 @@ import {
   resolveProject,
   tryGet,
 } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 interface Input extends PageInput {
   /** Max results (default 50, max 250) */ limit?: number;
@@ -26,11 +24,13 @@ interface Input extends PageInput {
   /** Milestone UUID. Provide exactly one parent. */ milestoneId?: string;
   /** Status update UUID. Provide exactly one parent. */ statusUpdateId?: string;
   /** Status update type */ statusUpdateType?: "project" | "initiative";
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 }
 
 type CommentFilter = NonNullable<Parameters<LinearClient["comments"]>[0]>["filter"];
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   if (input.statusUpdateType && !input.statusUpdateId) {
     throw new Error("statusUpdateType requires statusUpdateId.");
   }

@@ -1,9 +1,7 @@
-import { withAccessToken } from "@raycast/utils";
-
 import { uploadFile } from "../api/attachments";
-import { linear } from "../api/linearClient";
 
 import { client, resolveIssue } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 type Input = {
   issue: string;
@@ -11,9 +9,11 @@ type Input = {
   filePath: string;
   title?: string;
   subtitle?: string;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   const issue = await resolveIssue(input.issue);
   const file = await uploadFile(input.filePath);
   const result = await client().createAttachment({

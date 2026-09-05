@@ -1,7 +1,3 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import {
   applyPatch,
   client,
@@ -13,6 +9,7 @@ import {
   resolveProject,
   resolveTeam,
 } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 type Input = {
   id?: string;
@@ -35,9 +32,11 @@ type Input = {
   team?: string;
   icon?: string;
   color?: string;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   if (input.content !== undefined && input.patch) throw new Error("Pass content or patch, not both.");
   const parentCount = [input.project, input.issue, input.initiative, input.cycle, input.team && !input.cycle].filter(
     Boolean,

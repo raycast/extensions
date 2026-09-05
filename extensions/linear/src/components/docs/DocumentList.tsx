@@ -7,7 +7,10 @@ import { getProjectIcon } from "../../helpers/projects";
 import { useDocuments } from "../../hooks/useDocuments";
 import { useInitiatives } from "../../hooks/useInitiatives";
 import useProjects from "../../hooks/useProjects";
+import { useWorkspaceCachedState } from "../../hooks/useWorkspaceCachedState";
 import { DocumentEntity } from "../../tools/get-documents";
+import { useWorkspaces } from "../WorkspaceContext";
+import { isWorkspaceDropdownValue, workspaceValueToKey, WorkspaceDropdownSection } from "../WorkspaceDropdown";
 
 import { Document } from "./Document";
 
@@ -17,10 +20,33 @@ type DocumentListProps = {
 
 export function DocumentList({ project }: DocumentListProps) {
   const [query, setQuery] = useState<string>("");
-  const [entity, setEntity] = useState<DocumentEntity>({ projectId: "" });
+  const { showSwitcher, switchWorkspace } = useWorkspaces();
+  const [storedEntity, setStoredEntity] = useWorkspaceCachedState<string>("document-list-entity", "");
 
   const { projects, isLoadingProjects } = useProjects();
   const { initiatives, isLoadingInitiatives } = useInitiatives();
+
+  // Restore validation: the stored value is used only if its id still exists in the
+  // loaded initiatives/projects — otherwise "" (All Documents). A pushed "Project
+  // Documents" view (`project` set) never reads persisted state — it stays pinned to
+  // its launch project, the dropdown isn't even rendered for it.
+  const validatedEntityValue = useMemo(() => {
+    if (project) return "";
+    if (storedEntity.startsWith("initiative:")) {
+      const id = storedEntity.replace("initiative:", "");
+      return (initiatives ?? []).some((initiative) => initiative.id === id) ? storedEntity : "";
+    }
+    if (storedEntity.startsWith("project:")) {
+      const id = storedEntity.replace("project:", "");
+      return (projects ?? []).some((p) => p.id === id) ? storedEntity : "";
+    }
+    return "";
+  }, [project, storedEntity, initiatives, projects]);
+
+  const entity: DocumentEntity = validatedEntityValue.startsWith("initiative:")
+    ? { initiativeId: validatedEntityValue.replace("initiative:", "") }
+    : { projectId: validatedEntityValue.replace("project:", "") };
+
   const { docs, isLoadingDocs, supportsDocTypeahead, mutateDocs } = useDocuments(query, entity);
 
   const filteredDocs = useMemo(() => {
@@ -50,19 +76,21 @@ export function DocumentList({ project }: DocumentListProps) {
     <List
       isLoading={isLoadingProjects || isLoadingDocs || isLoadingInitiatives}
       navigationTitle={project ? `${project.name} Documents` : undefined}
-      {...(!project && ((projects ?? []).length > 0 || (initiatives ?? []).length > 0)
+      {...(!project && ((projects ?? []).length > 0 || (initiatives ?? []).length > 0 || showSwitcher)
         ? {
             searchBarAccessory: (
               <List.Dropdown
                 tooltip="Change Entity"
+                value={validatedEntityValue}
                 onChange={(newValue) => {
-                  const entity: DocumentEntity = newValue.startsWith("initiative:")
-                    ? { initiativeId: newValue.replace("initiative:", "") }
-                    : { projectId: newValue.replace("project:", "") };
-                  setEntity(entity);
+                  if (isWorkspaceDropdownValue(newValue)) {
+                    switchWorkspace(workspaceValueToKey(newValue));
+                    return;
+                  }
+                  if (newValue !== validatedEntityValue) setStoredEntity(newValue);
                 }}
-                storeValue
               >
+                <WorkspaceDropdownSection />
                 <List.Dropdown.Item value="" title="All Documents" />
 
                 {(initiatives ?? []).length > 0 && (

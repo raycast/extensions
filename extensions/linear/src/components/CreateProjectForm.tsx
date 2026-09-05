@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, open, Toast, showToast, Keyboard } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { getLinearClient } from "../api/linearClient";
 import { getErrorMessage } from "../helpers/errors";
@@ -11,8 +11,12 @@ import { getUserIcon } from "../helpers/users";
 import useProjectStatuses from "../hooks/useProjectStatuses";
 import useTeams from "../hooks/useTeams";
 import useUsers from "../hooks/useUsers";
+import { useWorkspaceCachedState } from "../hooks/useWorkspaceCachedState";
+
+import { WorkspaceFormDropdown } from "./WorkspaceDropdown";
 
 export type CreateProjectValues = {
+  workspaceKey?: string;
   teamIds: string[];
   name: string;
   description: string;
@@ -23,7 +27,13 @@ export type CreateProjectValues = {
   statusId: string;
 };
 
-export default function CreateProjectForm({ draftValues }: { draftValues?: CreateProjectValues }) {
+export default function CreateProjectForm({
+  draftValues,
+  isLoading,
+}: {
+  draftValues?: CreateProjectValues;
+  isLoading?: boolean;
+}) {
   const { linearClient } = getLinearClient();
 
   const { teams, org, isLoadingTeams } = useTeams();
@@ -33,7 +43,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
   const { users: leads, supportsUserTypeahead, isLoadingUsers: isLoadingLeads } = useUsers(leadQuery);
   const { states, isLoadingStates } = useProjectStatuses();
 
-  const { handleSubmit, itemProps, focus, reset } = useForm<CreateProjectValues>({
+  const { handleSubmit, itemProps, values, setValue, focus, reset } = useForm<CreateProjectValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating project" });
 
@@ -100,16 +110,72 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
     },
   });
 
+  type StoredProjectDefaults = Partial<Pick<CreateProjectValues, "statusId" | "leadId">>;
+  const [storedDefaults, setStoredDefaults] = useWorkspaceCachedState<StoredProjectDefaults>(
+    "create-project-defaults",
+    {},
+  );
+  const restoredRef = useRef(false);
+  // PER-FIELD READINESS, same semantics as CreateIssueForm: a field's value is written
+  // back only once that field's own restore has completed (see that file for the full
+  // rationale).
+  const readyFieldsRef = useRef<Set<keyof StoredProjectDefaults>>(new Set());
+
+  useEffect(() => {
+    if (!restoredRef.current) return;
+    const ready = readyFieldsRef.current;
+    setStoredDefaults({
+      ...storedDefaults,
+      ...(ready.has("statusId") ? { statusId: values.statusId } : {}),
+      ...(ready.has("leadId") ? { leadId: values.leadId } : {}),
+    });
+    // storedDefaults intentionally omitted from deps: it's only read here (via the
+    // spread above) to preserve fields not yet ready, and including it would loop this
+    // effect against its own setStoredDefaults call.
+  }, [values.statusId, values.leadId]);
+
+  // Status and Lead load independently here (no team-dependency chain like
+  // CreateIssueForm), so each restores once its own option list has loaded, validated
+  // against THIS workspace's data (discard-on-restore, §4.5), then marks itself ready
+  // regardless of whether a value applied.
+  useEffect(() => {
+    if (readyFieldsRef.current.has("statusId") || isLoadingStates) return;
+    // Draft launches mark nothing ready (I4): the persist effect above only writes
+    // fields in readyFieldsRef, so leaving it unset here keeps a draft launch from ever
+    // clobbering the remembered per-workspace defaults.
+    if (!draftValues) {
+      if (storedDefaults.statusId && states?.some((status) => status.id === storedDefaults.statusId)) {
+        setValue("statusId", storedDefaults.statusId);
+      }
+      readyFieldsRef.current.add("statusId");
+    }
+    restoredRef.current = true;
+  }, [isLoadingStates, states]);
+
+  useEffect(() => {
+    if (readyFieldsRef.current.has("leadId") || isLoadingLeads) return;
+    // Draft launches mark nothing ready (I4) — see the statusId restore effect above.
+    if (!draftValues) {
+      if (storedDefaults.leadId && leads?.some((user) => user.id === storedDefaults.leadId)) {
+        setValue("leadId", storedDefaults.leadId);
+      }
+      readyFieldsRef.current.add("leadId");
+    }
+    restoredRef.current = true;
+  }, [isLoadingLeads, leads]);
+
   return (
     <Form
       enableDrafts
-      isLoading={isLoadingTeams || isLoadingUsers || isLoadingLeads || isLoadingStates}
+      isLoading={isLoadingTeams || isLoadingUsers || isLoadingLeads || isLoadingStates || isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Project" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
+      <WorkspaceFormDropdown />
+
       <Form.TagPicker title="Team(s)" placeholder="Add team" {...itemProps.teamIds}>
         {teams?.map((team) => (
           <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team, org)} />
@@ -128,7 +194,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
       <Form.Separator />
 
-      <Form.Dropdown title="Status" storeValue {...itemProps.statusId}>
+      <Form.Dropdown title="Status" {...itemProps.statusId}>
         {states?.map((status) => (
           <Form.Dropdown.Item
             key={status.id}
@@ -141,7 +207,6 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
       <Form.Dropdown
         title="Lead"
-        storeValue
         {...itemProps.leadId}
         {...(supportsUserTypeahead && { onSearchTextChange: setLeadQuery, throttle: true, isLoading: isLoadingLeads })}
       >

@@ -1,15 +1,14 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { client, resolveIssue } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 type Input = {
   /** Issue ID or identifier (e.g. LIN-123). */
   id: string;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 
-export default withAccessToken(linear)(async ({ id }: Input) => {
+export default withToolAuth(async ({ id }: Input) => {
   const issue = await resolveIssue(id);
   const result = await client().deleteIssue(issue.id);
 
@@ -24,7 +23,7 @@ export default withAccessToken(linear)(async ({ id }: Input) => {
   };
 });
 
-export const confirmation = withAccessToken(linear)(async ({ id }: Input) => {
+export const confirmation = withToolAuth(async ({ id }: Input) => {
   const issue = await resolveIssue(id);
 
   return {
