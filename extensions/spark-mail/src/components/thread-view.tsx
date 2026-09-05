@@ -185,7 +185,8 @@ function renderThread(records: ParsedRecord[], subject?: string): string {
     const who = neutralizeRemoteImages(
       senderName(h.from ?? h.sender ?? "Unknown"),
     );
-    const when = h.date ? toRelative(h.date) : "";
+    // toRelativeは不正な日付ヘッダーを原文のまま返すため、ここも送信者制御の文字列として扱う
+    const when = h.date ? neutralizeRemoteImages(toRelative(h.date)) : "";
     const header = [`**${who}**`, when && `· ${when}`]
       .filter(Boolean)
       .join(" ");
