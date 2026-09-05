@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-usage-forecast",
+  "title": "Claude Usage Forecast",
+  "description": "Weekly Claude Code rate-limit usage with a day-of-week-aware forecast of when you will hit the limit.",
+  "icon": "icon.png",
+  "author": "vinri2z",
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Usage Menu Bar",
+      "description": "Shows weekly Claude limit usage in the menu bar and samples it in the background.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "weekly-usage",
+      "title": "Weekly Usage",
+      "description": "Weekly usage graph with trendline and predicted limit-hit time.",
+      "mode": "view"
+    },
+    {
+      "name": "methodology",
+      "title": "Forecast Methodology",
+      "description": "How the forecast is built: real vs projected, the day-by-day breakdown, and what is learned per weekday and per hour.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lookbackDays",
+      "type": "textfield",
+      "title": "History Lookback (days)",
+      "description": "How far back to scan ~/.claude/projects to learn your day-of-week usage pattern.",
+      "required": false,
+      "default": "70"
+    },
+    {
+      "name": "warnAt",
+      "type": "textfield",
+      "title": "Warn Threshold (%)",
+      "description": "Menu bar turns orange at or above this weekly utilization.",
+      "required": false,
+      "default": "75"
+    },
+    {
+      "name": "dangerAt",
+      "type": "textfield",
+      "title": "Danger Threshold (%)",
+      "description": "Menu bar turns red at or above this weekly utilization.",
+      "required": false,
+      "default": "90"
+    },
+    {
+      "name": "chartMode",
+      "type": "dropdown",
+      "title": "Chart Rendering",
+      "description": "How to draw the graph in the detail view.",
+      "required": false,
+      "default": "dataUri",
+      "data": [
+        { "title": "SVG (embedded data URI)", "value": "dataUri" },
+        { "title": "SVG (temp file)", "value": "file" },
+        { "title": "Text blocks only", "value": "blocks" }
+      ]
+    },
+    {
+      "name": "menuBarShow",
+      "type": "dropdown",
+      "title": "Menu Bar Title",
+      "description": "What to display in the menu bar.",
+      "required": false,
+      "default": "weekly",
+      "data": [
+        { "title": "Weekly %", "value": "weekly" },
+        { "title": "Weekly % + projected %", "value": "both" },
+        { "title": "Weekly % + sparkline", "value": "spark" },
+        { "title": "Icon only", "value": "icon" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
