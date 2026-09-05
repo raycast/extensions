@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reassign",
+  "title": "Reassign",
+  "description": "See your day, schedule new blocks, and check off your plan.",
+  "icon": "icon.png",
+  "author": "smuk3c",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "agenda",
+      "title": "Agenda",
+      "description": "See your plan for the day or the week, and check off each block.",
+      "mode": "view"
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "description": "See the ideas you saved without a time, and give them a slot.",
+      "mode": "view"
+    },
+    {
+      "name": "add",
+      "title": "Schedule a Block",
+      "description": "Type a block in plain words to schedule it. Without a time, it goes to your Inbox.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "deep work tomorrow 9-11",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "now",
+      "title": "Now",
+      "description": "Show the current block in the menu bar, and remind you when the next one starts.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showBlockName",
+      "title": "Menu Bar",
+      "label": "Show the block name in the menu bar",
+      "description": "Turn this off to show only the end time. Your block names stay hidden when you share your screen.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "notifyTransitions",
+      "title": "Notifications",
+      "label": "Notify me when a block starts",
+      "description": "Send a notification when each block starts, and a short warning before it.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "chrono-node": "^2.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
