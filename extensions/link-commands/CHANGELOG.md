@@ -1,5 +1,12 @@
 # Link Commands Changelog
 
+## [Readable Rows] - {PR_MERGE_DATE}
+
+### Changed
+
+- A list row leads with the command's name and carries its host in the subtitle, rather than the other way round. Leading with the host is right in Raycast's own launcher, where a row appears among apps and extensions and the domain says _this opens a browser_ before anything else is read — but in a list where every row is already a link command that signal fires on all of them and distinguishes none, while spending the front of the only column that can differ. Several commands on one service shared their leading characters and rendered as near-identical rows. The host is not lost: it moves to the subtitle, where it answers _is this the one I want_ instead. A title that is only a host keeps it, and shows its package in the subtitle as before — as does a command with no icon, since the mark is what normally names the brand and a row without one has nothing else carrying it.
+- Nothing searchable changed. The full title, the filename and the package name are all still matched, so every command is found by exactly what found it before.
+
 ## [Surface Routers] - 2026-08-30
 
 ### Added
