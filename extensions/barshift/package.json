@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "barshift",
+  "title": "BarShift",
+  "description": "Toggle between or directly choose macOS menu bar visibility modes.",
+  "icon": "menu-bar-toggle.png",
+  "author": "0xAdriaTorralba",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-menu-bar-auto-hide",
+      "title": "Toggle Menu Bar Mode",
+      "description": "Switch between two menu bar visibility modes selected in command preferences.",
+      "mode": "no-view",
+      "interval": "1m",
+      "keywords": [
+        "menu",
+        "bar",
+        "fullscreen",
+        "auto-hide"
+      ],
+      "preferences": [
+        {
+          "name": "firstMode",
+          "title": "First Mode",
+          "description": "The first of the two modes to toggle between.",
+          "type": "dropdown",
+          "required": true,
+          "default": "never",
+          "data": [
+            {
+              "title": "Always",
+              "value": "always"
+            },
+            {
+              "title": "On Desktop Only",
+              "value": "desktop-only"
+            },
+            {
+              "title": "In Full Screen Only",
+              "value": "fullscreen-only"
+            },
+            {
+              "title": "Never",
+              "value": "never"
+            }
+          ]
+        },
+        {
+          "name": "secondMode",
+          "title": "Second Mode",
+          "description": "The second of the two modes to toggle between.",
+          "type": "dropdown",
+          "required": true,
+          "default": "fullscreen-only",
+          "data": [
+            {
+              "title": "Always",
+              "value": "always"
+            },
+            {
+              "title": "On Desktop Only",
+              "value": "desktop-only"
+            },
+            {
+              "title": "In Full Screen Only",
+              "value": "fullscreen-only"
+            },
+            {
+              "title": "Never",
+              "value": "never"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "select-menu-bar-mode",
+      "title": "Set Menu Bar Mode",
+      "description": "Choose one of the four macOS menu bar visibility modes.",
+      "mode": "view",
+      "keywords": [
+        "menu",
+        "bar",
+        "fullscreen",
+        "auto-hide",
+        "select",
+        "choose"
+      ]
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "scripts": {
+    "build:native": "xcrun clang -fobjc-arc -std=c11 -Wall -Wextra -Werror -O2 -arch arm64 -arch x86_64 -mmacosx-version-min=13.0 -framework Foundation native/menu-bar-auto-hide-native.m -o assets/menu-bar-auto-hide-native && codesign --force --sign - assets/menu-bar-auto-hide-native",
+    "build": "npm run build:native && ray build -e dist",
+    "dev": "npm run build:native && ray develop --target x",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo 'Use npm run publish for the Raycast Store' && exit 1",
+    "publish": "npm run build:native && npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "19.2.18",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0"
+  }
+}
