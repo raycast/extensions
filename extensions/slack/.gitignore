@@ -12,6 +12,7 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+.test-dist
 
 .raycast-swift-build
 .swiftpm
