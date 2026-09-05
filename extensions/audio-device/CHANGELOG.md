@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added an optional `volume` argument to the Set Output Volume and Set Input Volume commands, so a volume can be set silently from a hotkey or deeplink (e.g. `raycast://extensions/benvp/audio-device/set-volume?arguments=%7B%22volume%22%3A%2220%22%7D`)
+
 ## [Fix] - 2026-08-21
 
 - Reduce background device enforcement refreshes from every 10 seconds to every minute.
