@@ -1,6 +1,6 @@
 # Sunsama Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-05
 
 Manage your Sunsama tasks from Raycast, over Sunsama's official MCP server.
 
