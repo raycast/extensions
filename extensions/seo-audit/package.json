@@ -1,0 +1,263 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "seo-audit",
+  "title": "SEO Audit",
+  "description": "Crawl a site\u2019s whole sitemap and check every page for the SEO, metadata and structured-data problems single-URL graders miss.",
+  "icon": "icon.png",
+  "author": "nurkamol",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "preview",
+      "title": "Preview Site",
+      "description": "How big is this site, and is it the right one \u2014 three requests, about a second.",
+      "mode": "view"
+    },
+    {
+      "name": "audit",
+      "title": "Audit Site",
+      "description": "Crawl a site and list what to change, worst first.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "site",
+          "placeholder": "example.com",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "reports",
+      "title": "Recent Reports",
+      "description": "Runs kept by the macOS app and by this extension.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "limit",
+      "title": "Pages per run",
+      "description": "A launcher is a poor place to wait out a crawl of a thousand pages. Big sites belong in the app or the terminal.",
+      "type": "textfield",
+      "default": "25",
+      "required": false
+    },
+    {
+      "name": "speed",
+      "title": "Speed",
+      "description": "Gentle is one connection at a time \u2014 the setting that gets through a site answering HTTP 429.",
+      "type": "dropdown",
+      "default": "normal",
+      "required": false,
+      "data": [
+        {
+          "title": "Gentle \u2014 1 connection",
+          "value": "gentle"
+        },
+        {
+          "title": "Normal \u2014 6 connections",
+          "value": "normal"
+        },
+        {
+          "title": "Fast \u2014 12 connections",
+          "value": "fast"
+        }
+      ]
+    },
+    {
+      "name": "checkExternal",
+      "title": "Outbound links",
+      "label": "Check that links to other sites still resolve",
+      "description": "Slower, and only a 404, 410 or no answer is reported.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "sitemap",
+      "title": "Sitemap",
+      "description": "Only when a sitemap is somewhere the usual names do not find it. It has to be on the site being audited.",
+      "type": "textfield",
+      "placeholder": "Found automatically",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "exclude",
+      "title": "Exclude",
+      "description": "URL patterns to keep out of the crawl, one per line or comma separated. * stops at a slash, ** does not. What is skipped is always reported.",
+      "type": "textfield",
+      "placeholder": "/tag/**, /collections/*/products/*",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "since",
+      "title": "Only what changed since",
+      "description": "A date. Crawls only URLs the sitemap says changed on or after it. Refuses, and checks everything, when lastmod cannot answer.",
+      "type": "textfield",
+      "placeholder": "2026-08-17",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "browser",
+      "title": "Identify as",
+      "description": "Some sites answer a crawler differently from a browser.",
+      "type": "dropdown",
+      "default": "",
+      "required": false,
+      "data": [
+        {
+          "title": "This machine",
+          "value": ""
+        },
+        {
+          "title": "Chrome",
+          "value": "chrome"
+        },
+        {
+          "title": "Firefox",
+          "value": "firefox"
+        },
+        {
+          "title": "Safari",
+          "value": "safari"
+        },
+        {
+          "title": "Edge",
+          "value": "edge"
+        },
+        {
+          "title": "Googlebot",
+          "value": "googlebot"
+        },
+        {
+          "title": "Googlebot desktop",
+          "value": "googlebot-desktop"
+        },
+        {
+          "title": "Bingbot",
+          "value": "bingbot"
+        }
+      ]
+    },
+    {
+      "name": "os",
+      "title": "On",
+      "description": "A combination that cannot exist \u2014 Safari on Windows \u2014 is refused by the engine and the run goes ahead as itself.",
+      "type": "dropdown",
+      "default": "",
+      "required": false,
+      "data": [
+        {
+          "title": "This machine",
+          "value": ""
+        },
+        {
+          "title": "Macos",
+          "value": "macos"
+        },
+        {
+          "title": "Windows",
+          "value": "windows"
+        },
+        {
+          "title": "Linux",
+          "value": "linux"
+        },
+        {
+          "title": "Android",
+          "value": "android"
+        },
+        {
+          "title": "Ios",
+          "value": "ios"
+        }
+      ]
+    },
+    {
+      "name": "userAgent",
+      "title": "Or a user agent of your own",
+      "description": "Wins over the two menus above. Bounded and stripped of control characters, because it ends up in a request header.",
+      "type": "textfield",
+      "placeholder": "MyBot/1.0",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "performance",
+      "title": "Performance",
+      "description": "Google measures it in a real browser over its own network. This never estimates it. Each page is a few seconds, which is why it is sampled.",
+      "type": "dropdown",
+      "default": "off",
+      "required": false,
+      "data": [
+        {
+          "title": "Off",
+          "value": "off"
+        },
+        {
+          "title": "Home page",
+          "value": "homepage"
+        },
+        {
+          "title": "A sample",
+          "value": "sample"
+        }
+      ]
+    },
+    {
+      "name": "performanceSample",
+      "title": "Pages to measure",
+      "description": "When Performance is set to a sample. Spread across the site rather than the first few.",
+      "type": "textfield",
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "performanceDesktop",
+      "title": "Desktop",
+      "label": "Measure as a desktop browser",
+      "description": "Mobile otherwise, which is what Google indexes with.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "ignore",
+      "title": "Silenced checks",
+      "description": "Check ids to leave out, comma separated. Copy one from any finding with \u2318. \u2014 a report still says how many were silenced.",
+      "type": "textfield",
+      "placeholder": "thin-content, img-srcset",
+      "default": "",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@nurkamol/seo-audit": "^1.38.1",
+    "@raycast/api": "^1.77.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
