@@ -341,6 +341,7 @@ export async function fetchResourceCounts(
   secrets: number;
   cloudrun: number;
   cloudfunctions: number;
+  cloudsql: number;
   cloudbuild: number;
 }> {
   // Import REST API functions dynamically to avoid circular dependencies
@@ -352,6 +353,7 @@ export async function fetchResourceCounts(
     listSecrets,
     listCloudRunServices,
     listCloudFunctions,
+    listCloudSqlInstances,
     listBuildTriggers,
   } = await import("./utils/gcpApi");
 
@@ -367,6 +369,7 @@ export async function fetchResourceCounts(
     secretsResult,
     cloudrunResult,
     cloudfunctionsResult,
+    cloudsqlResult,
     cloudbuildResult,
   ] = await Promise.allSettled([
     listComputeInstances(gcloudPath, projectId, undefined, {
@@ -385,6 +388,7 @@ export async function fetchResourceCounts(
     listSecrets(gcloudPath, projectId, { pageSize: countLimit }),
     listCloudRunServices(gcloudPath, projectId, { pageSize: countLimit }),
     listCloudFunctions(gcloudPath, projectId, undefined, { pageSize: countLimit }),
+    listCloudSqlInstances(gcloudPath, projectId, { fields: "items/name", maxResults: countLimit }),
     listBuildTriggers(gcloudPath, projectId, { pageSize: countLimit }),
   ]);
 
@@ -410,6 +414,7 @@ export async function fetchResourceCounts(
     secrets: getArrayCount(secretsResult as PromiseSettledResult<unknown[]>),
     cloudrun: getArrayCount(cloudrunResult as PromiseSettledResult<unknown[]>),
     cloudfunctions: getArrayCount(cloudfunctionsResult as PromiseSettledResult<unknown[]>),
+    cloudsql: getArrayCount(cloudsqlResult as PromiseSettledResult<unknown[]>),
     cloudbuild: getArrayCount(cloudbuildResult as PromiseSettledResult<unknown[]>),
   };
 }

@@ -1,5 +1,17 @@
 # Google Cloud CLI Changelog
 
+## [Fix Silent Empty Lists When gcloud Credentials Expire] - {PR_MERGE_DATE}
+
+- Fixed an expired gcloud session being treated as authenticated. `gcloud auth list` keeps reporting an account as `ACTIVE` after its refresh token has expired, so the extension stayed on the hub and every list — including the project dropdown — silently came back empty with no explanation. It now confirms the credentials still work and shows a **Session Expired** screen wired to the existing sign-in action. Failures that are not credential-related (a timeout, a network blip) are left alone so they still surface as real errors.
+
+## [Add Cloud SQL] - {PR_MERGE_DATE}
+
+### New Features
+- Added **Cloud SQL** to the service hub — browse instances with engine, machine type, region, high-availability and running state
+- Added an instance detail view covering connectivity (connection name, IP addresses, authorized networks, SSL mode), backup configuration, and the maintenance window
+- Added per-instance **databases** and **users** listings, and a **backups** view that lists backup runs and can trigger an on-demand backup with a custom description
+- Added copy actions for the instance name, connection name, public IP, and a ready-to-run `gcloud sql connect` command
+
 ## [Fix Empty Project Dropdown on Accounts with Many Projects] - 2026-09-02
 
 - Fixed the project dropdown showing "No projects found" when `gcloud projects list` output exceeds 1 MB (roughly 3,500+ projects). `getProjects` relied on Node's default `execFile` `maxBuffer`, so the process was killed with `ERR_CHILD_PROCESS_STDIO_MAXBUFFER` and the rejection was swallowed into an empty list. It now passes an explicit 64 MiB `maxBuffer`.
