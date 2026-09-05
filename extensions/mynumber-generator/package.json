@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mynumber-generator",
+  "title": "Mynumber Generator",
+  "description": "Generate dummy but checksum-valid Mynumbers (Japanese Individual Numbers) for testing.",
+  "icon": "extension-icon.png",
+  "author": "serizawa",
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-mynumber",
+      "title": "Generate Mynumbers",
+      "description": "Generate dummy Mynumbers with a valid check digit and copy or paste them.",
+      "keywords": [
+        "mynumber",
+        "my number",
+        "マイナンバー"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfMyNumbersToGenerate",
+          "placeholder": "Number of Mynumbers",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "title": "Default Action",
+      "description": "The default action to perform with the generated Mynumbers.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Current Window",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "hyphenSeparated",
+      "title": "Format",
+      "label": "Insert hyphens (XXXX-XXXX-XXXX)",
+      "description": "Format the generated Mynumbers with hyphens every 4 digits.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "defaultNumberOfMyNumbers",
+      "title": "Default Number of Mynumbers",
+      "description": "The number of Mynumbers to generate when no argument is given.",
+      "type": "textfield",
+      "required": false,
+      "default": "1",
+      "placeholder": "1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "overrides": {
+    "esbuild": "0.28.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
