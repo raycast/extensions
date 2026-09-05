@@ -1,6 +1,6 @@
 # LastPass Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-05
 
 - Stop passing the master password on the command line, so it no longer shows up in the process list
 - Stop writing the master password and the decrypted vault contents to the extension's console output
