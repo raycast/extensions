@@ -1,0 +1,4 @@
+# Normalise to LF in the repository so Windows checkouts do not create noisy diffs.
+* text=auto eol=lf
+
+assets/*.png binary
