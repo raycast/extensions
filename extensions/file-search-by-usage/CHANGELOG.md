@@ -12,4 +12,6 @@
 - Report unreadable folders and Spotlight failures without discarding existing results.
 - Keep valid usage metadata when one item cannot be read, and report the result as partial.
 - Keep the previous Google Drive index when the drive is offline or unmounted.
+- Prevent overlapping manual indexing runs from replacing each other's results.
+- Refresh open folders asynchronously and cancel obsolete Spotlight queries.
 - Keep usage data and indexes on the Mac, with actions to reset rankings or delete all extension data.

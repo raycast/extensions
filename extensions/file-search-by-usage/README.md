@@ -11,12 +11,12 @@ You can open a result, move into a folder with `⌘→`, or start from the folde
 
 ## Commands
 
-| Command                        | Purpose                                                                                   |
-| ------------------------------ | ----------------------------------------------------------------------------------------- |
-| Search Files and Folders       | Search local and cloud storage                                                            |
-| Search Finder's Current Folder | Search the frontmost Finder folder and its descendants                                    |
-| Index Google Drive             | Index shortcuts and shared-folder contents that Spotlight cannot see; runs every 12 hours |
-| Delete All Data and Cache      | Remove everything stored by the extension without touching your files                     |
+| Command                        | Purpose                                                               |
+| ------------------------------ | --------------------------------------------------------------------- |
+| Search Files and Folders       | Search local and cloud storage                                        |
+| Search Finder's Current Folder | Search the frontmost Finder folder and its descendants                |
+| Index Google Drive             | Index shortcuts and shared-folder contents that Spotlight cannot see  |
+| Delete All Data and Cache      | Remove everything stored by the extension without touching your files |
 
 Assign a Raycast hotkey to **Search Files and Folders** if you use it often.
 
@@ -26,7 +26,7 @@ Give Raycast **Full Disk Access** under System Settings › Privacy & Security �
 
 **Search Finder's Current Folder** also needs permission to control Finder. macOS asks the first time you run the command. If permission is missing or no Finder window is open, the extension explains the problem and offers to search everywhere instead.
 
-If you use Google Drive shortcuts or shared folders, run **Index Google Drive** once. The command runs automatically every 12 hours after that. A cold or network-backed drive can make the first run take longer.
+If you use Google Drive shortcuts or shared folders, run **Index Google Drive** after installation and whenever those folders change. A cold or network-backed drive can make indexing take longer.
 
 ## Searching
 
@@ -76,6 +76,8 @@ Hidden files are controlled by the **Show hidden files** preference and by dot-p
 
 Whole-disk Spotlight search begins after three characters. Inside a folder, search begins after two. Immediate history and cached results do not wait for Spotlight.
 
+Open folder listings refresh automatically when files change. Cloud drives may take up to five seconds to trigger a refresh if they do not send a change notification; reading the updated listing can take longer. Press `⌘R` to request a refresh immediately.
+
 ## Results and status
 
 Results arrive in one list even though they come from different sources. A better Spotlight match may move above an earlier result when the delayed search finishes.
@@ -117,6 +119,8 @@ Google Drive represents some shared folders as symbolic links under a location S
 Searching inside one of those folders reads it directly, so changes can appear before the next indexing run. The scan is bounded by time, depth, and result count. If a bound is reached, the UI says that the result or index is incomplete.
 
 If Google Drive is offline, unmounted, or becomes unreadable during an indexing run, the extension keeps the previous index and reports that the refresh failed.
+
+Only one indexing run can be active at a time, including runs started from the action panel. A second request leaves the current run alone. After a crash, a leftover lock expires within ten minutes.
 
 A shortcut keeps its familiar display path, while visits and pins use the resolved target. This prevents the same folder from accumulating separate usage scores through its two paths.
 

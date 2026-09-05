@@ -7,23 +7,29 @@ This document covers the implementation details needed to maintain and release F
 ```text
 src/search.tsx              whole-disk search command
 src/browse-finder.tsx       search scoped to the frontmost Finder folder
-src/index-shortcuts.tsx     scheduled Google Drive indexing command
+src/index-shortcuts.tsx     manual Google Drive indexing command
 src/delete-data.tsx         standalone data-deletion command
 src/components/browser.tsx  shared search and navigation view
 src/components/row.tsx      result row and action panel
+src/components/use-directory-listing.ts  watched folder-listing subscription
 src/lib/query.ts            parsing, filters, and match tiers
 src/lib/score.ts            ranking weights
 src/lib/history.ts          exponential usage history and abbreviations
 src/lib/read-dir.ts         directory reads, path helpers, and cloud locations
+src/lib/directory-listing.ts  asynchronous metadata reads, watching, and polling
+src/lib/name-order.ts       shared numeric filename collation
 src/lib/spotlight.ts        mdfind search and mdls usage metadata
 src/lib/walk.ts             bounded fallback directory walks
 src/lib/drive-shortcuts.ts  Google Drive shortcut scan
 src/lib/shared-scan.ts      Google Drive shared-folder scan
 src/lib/index-refresh.ts    unavailable-index replacement policy
+src/lib/indexing-lock.ts    cross-process exclusion for indexing runs
 src/lib/store.ts            LocalStorage persistence
 src/lib/*-index.ts          cached indexes
 src/lib/progress.ts         search-stage model
 harness/rank-harness.ts     synthetic tests and opt-in live diagnostics
+harness/performance-checks.ts  freshness, cancellation, and ordering regressions
+harness/indexing-checks.ts  command-level indexing overlap regressions
 ```
 
 The filesystem scans do not import `@raycast/api`, which lets the harness exercise them outside Raycast.
@@ -42,7 +48,7 @@ The global Spotlight threshold is three characters. Scoped search uses two becau
 
 The shortlist is 60 entries. A broad three-character query can produce thousands of paths, so statting every Spotlight result would add cost without improving the visible list. Candidates are graded before the shortlist is taken; taking the first 60 paths in index order can discard the best match.
 
-`mdfind` processes are not canceled when a React effect is replaced. The debounce limits the number of overlapping searches while keeping the in-memory pass immediate.
+Replacing a search aborts its `mdfind` process and any pending `mdls` enrichment. Cancellation discards the obsolete result without showing a failure. The 420 ms debounce still limits how often a new Spotlight search starts.
 
 ### Completion state
 
@@ -127,12 +133,16 @@ The approach draws on:
 
 Google Drive places shortcut targets under `.shortcut-targets-by-id`. Spotlight may catalog neither the shortcut nor the target contents.
 
-The scheduled **Index Google Drive** command performs two bounded scans:
+The **Index Google Drive** command performs two bounded scans:
 
 - `scanShortcuts` records symbolic links and the names shown in My Drive.
 - `scanSharedFolders` records paths inside shared folders.
 
-Both scans report progress after each breadth-first level. When no earlier index exists, these checkpoints provide a useful partial index. A bounded scan records whether it reached its time, depth, or item limit, and the UI reports that reason. Older saved indexes without a reason use a neutral “stopped early” message. The command runs every 12 hours and can be started from a result's action panel.
+Both scans report progress after each breadth-first level. When no earlier index exists, these checkpoints provide a useful partial index. A bounded scan records whether it reached its time, depth, or item limit, and the UI reports that reason. Older saved indexes without a reason use a neutral “stopped early” message. Indexing runs only when the user starts the command, either from Raycast's root search or from a result's action panel.
+
+The standalone command allows four minutes and eight levels for shortcuts, followed by two minutes and six levels for shared-folder contents. The action-panel version allows twenty seconds per scan and six levels, without saving intermediate checkpoints. These deadlines are checked between batches; an individual cloud-provider read can take longer.
+
+Both entry points hold the same `proper-lockfile` lock in Raycast's support directory throughout scanning and saving. A second request reports that indexing is already running without reading or replacing the indexes. The lock heartbeat runs every second; a lock left by a crashed process expires after ten minutes. Each write checks ownership, and the lock is released when the run finishes or throws.
 
 Each scan also reports whether every traversed Drive directory remained readable. If the drive is offline, unmounted, or fails during traversal, the refresh keeps the previous non-empty index rather than replacing it with an incomplete result.
 
@@ -162,6 +172,10 @@ For a symbolic link, `Entry.storagePath` contains the resolved target. Visit cou
 **Delete All Data and Cache…** clears LocalStorage and each Cache namespace for this extension. It does not delete files. Clearing the whole extension store avoids leaving behind a key added by a future version.
 
 ## Performance notes
+
+Open folder listings are read asynchronously in batches of eight. Typing a filename prefix filters the existing listing in memory. A filesystem watcher refreshes changed entries; a five-second poll covers missed cloud-provider events and unavailable watchers. Changing the directory, changing hidden-file visibility, or pressing Refresh starts a new subscription. Closing it stops the watcher and polling and discards unfinished reads.
+
+Filename sorting reuses one numeric `Intl.Collator`. Candidate metadata uses the `lstat` result directly for ordinary entries and follows the target only for symbolic links. Search tiers, score weights, and result limits are unchanged by these optimizations.
 
 Representative measurements from one Mac:
 
@@ -203,7 +217,7 @@ Run the deterministic suite:
 npm run harness
 ```
 
-It uses temporary synthetic files and directories. It covers query parsing, fuzzy matching, ranking, exponential decay, progress and failure states, path handling, symlink identity, bounded walks, index preservation, hidden folders, and filter expansion. It does not enumerate or print the user's files.
+It uses temporary synthetic files and directories. It covers query parsing, fuzzy matching, ranking, exponential decay, progress and failure states, path handling, symlink identity, bounded walks, overlapping indexing, index preservation, directory freshness, process cancellation, hidden folders, and filter expansion. It does not enumerate or print the user's files.
 
 Live diagnostics are explicit:
 
@@ -233,5 +247,7 @@ Update `CHANGELOG.md`, then run the verification commands above. Publish with:
 ```bash
 npm run publish
 ```
+
+Before submitting, open the distribution build in Raycast and check search, delayed results, folder navigation, keyboard shortcuts, and Finder permissions. Keep `@raycast/api` current and commit the updated lockfile. Running the publisher again updates the existing PR; check its submitted files, complete the description and screenshots or screencast, and mark it ready for review after verification.
 
 Raycast's publisher authenticates with GitHub and opens a pull request against the public extensions repository. See the official guides for [preparing an extension](https://developers.raycast.com/basics/prepare-an-extension-for-store), [contributing](https://developers.raycast.com/basics/contribute-to-an-extension), and [publishing](https://developers.raycast.com/basics/publish-an-extension).

@@ -293,8 +293,9 @@ export function splitPathQuery(
 
 export function statEntry(full: string): Entry | undefined {
   try {
-    const isSymlink = fs.lstatSync(full).isSymbolicLink();
-    const stats = fs.statSync(full);
+    const linkStats = fs.lstatSync(full);
+    const isSymlink = linkStats.isSymbolicLink();
+    const stats = isSymlink ? fs.statSync(full) : linkStats;
     return {
       name: path.basename(full),
       path: full,

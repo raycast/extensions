@@ -21,15 +21,29 @@ export type UsageMetaResult = {
   complete: boolean;
   partial?: string;
   error?: string;
+  cancelled?: boolean;
 };
 export type SearchPathResult = {
   paths: string[];
   truncated: boolean;
   error?: string;
+  cancelled?: boolean;
 };
-type SearchOptions = { scope?: string; showHidden?: boolean; max?: number };
-type SpotlightRunner = (args: string[]) => Promise<string>;
-type MetadataRunner = (args: string[], timeoutMs: number) => Promise<string>;
+type SearchOptions = {
+  scope?: string;
+  showHidden?: boolean;
+  max?: number;
+  signal?: AbortSignal;
+};
+type SpotlightRunner = (
+  args: string[],
+  signal?: AbortSignal,
+) => Promise<string>;
+type MetadataRunner = (
+  args: string[],
+  timeoutMs: number,
+  signal?: AbortSignal,
+) => Promise<string>;
 
 function isTimeout(error: unknown): boolean {
   if (typeof error !== "object" || error === null) return false;
@@ -58,12 +72,13 @@ function parseMdlsDate(value: string): number | undefined {
 export async function readUsageMetaResult(
   paths: string[],
   /** Deadline for optional metadata enrichment. */
-  opts: { timeoutMs?: number } = {},
-  runner: MetadataRunner = async (args, timeoutMs) => {
+  opts: { timeoutMs?: number; signal?: AbortSignal } = {},
+  runner: MetadataRunner = async (args, timeoutMs, signal) => {
     const { stdout } = await exec("mdls", args, {
       maxBuffer: 1 << 24,
       timeout: timeoutMs,
       killSignal: "SIGKILL",
+      signal,
     });
     return stdout;
   },
@@ -101,7 +116,8 @@ export async function readUsageMetaResult(
 
   const readChunk = async (
     chunk: string[],
-  ): Promise<"done" | "timeout" | "invalid"> => {
+  ): Promise<"done" | "timeout" | "invalid" | "cancelled"> => {
+    if (opts.signal?.aborted) return "cancelled";
     const remaining = deadline - Date.now();
     if (remaining <= 0) return "timeout";
 
@@ -109,8 +125,9 @@ export async function readUsageMetaResult(
     try {
       const args = ["-raw", "-nullMarker", NULL_MARKER];
       for (const a of ATTRS) args.push("-name", a);
-      stdout = await runner([...args, ...chunk], remaining);
+      stdout = await runner([...args, ...chunk], remaining, opts.signal);
     } catch (error) {
+      if (opts.signal?.aborted) return "cancelled";
       if (isTimeout(error)) return "timeout";
       hadProcessFailure = true;
       if (chunk.length === 1) return "done";
@@ -122,11 +139,14 @@ export async function readUsageMetaResult(
       return readChunk(chunk.slice(middle));
     }
 
+    if (opts.signal?.aborted) return "cancelled";
     return mergeChunk(chunk, stdout) ? "done" : "invalid";
   };
 
   for (let i = 0; i < paths.length; i += CHUNK) {
     const result = await readChunk(paths.slice(i, i + CHUNK));
+    if (result === "cancelled")
+      return { meta: out, complete: false, cancelled: true };
     if (result === "timeout") {
       if (hadProcessFailure && !hadSuccessfulBatch) {
         return {
@@ -202,6 +222,12 @@ export async function runSpotlightSearch(
   runner: SpotlightRunner,
 ): Promise<SearchPathResult> {
   const { scope } = opts;
+  const cancelled: SearchPathResult = {
+    paths: [],
+    truncated: false,
+    cancelled: true,
+  };
+  if (opts.signal?.aborted) return cancelled;
   if (query.trim() === "") return { paths: [], truncated: false };
 
   const args = ["-0"];
@@ -209,8 +235,11 @@ export async function runSpotlightSearch(
   args.push("-name", query);
 
   try {
-    return collectSearchPaths((await runner(args)).split(SEP), opts);
+    const stdout = await runner(args, opts.signal);
+    if (opts.signal?.aborted) return cancelled;
+    return collectSearchPaths(stdout.split(SEP), opts);
   } catch {
+    if (opts.signal?.aborted) return cancelled;
     return {
       paths: [],
       truncated: false,
@@ -223,11 +252,12 @@ export async function searchPathResult(
   query: string,
   opts: SearchOptions = {},
 ): Promise<SearchPathResult> {
-  return runSpotlightSearch(query, opts, async (args) => {
+  return runSpotlightSearch(query, opts, async (args, signal) => {
     const { stdout } = await exec("mdfind", args, {
       maxBuffer: 1 << 26,
       timeout: 15_000,
       killSignal: "SIGKILL",
+      signal,
     });
     return stdout;
   });

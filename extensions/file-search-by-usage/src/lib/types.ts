@@ -45,8 +45,3 @@ export const SORT_MODES: { value: SortMode; title: string }[] = [
   { value: "name", title: "Name" },
   { value: "size", title: "Size" },
 ];
-
-export type Prefs = {
-  showHidden: boolean;
-  showScores: boolean;
-};

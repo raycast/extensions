@@ -16,7 +16,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import os from "node:os";
 import path from "node:path";
-import { Entry, Prefs, SORT_MODES, SortMode, VisitLog } from "../lib/types";
+import { Entry, SORT_MODES, SortMode, VisitLog } from "../lib/types";
 import { describeErased, eraseEverything } from "../lib/erase";
 import {
   deriveProgress,
@@ -30,7 +30,6 @@ import {
   hiddenDirsMatching,
   isDirectory,
   normalizeDir,
-  readDirectory,
   locationLabel,
   relativeDepth,
   sharedCloudFolders,
@@ -74,6 +73,10 @@ import {
 import { Row, RowHandlers } from "./row";
 import { entryStoragePath, rowIdForEntry } from "../lib/entry-identity";
 import { relativeTime } from "../lib/format";
+import { compareNames } from "../lib/name-order";
+import { DirectorySnapshot, statEntryAsync } from "../lib/directory-listing";
+import { useDirectoryListing } from "./use-directory-listing";
+import { withIndexingLock } from "../lib/indexing-lock";
 
 /** Minimum query lengths before Spotlight runs. */
 const MIN_QUERY_GLOBAL = 3;
@@ -96,7 +99,7 @@ type Ranked = { entry: Entry; tier: number; score: ScoreParts };
 
 export function Browser({ dir: rawDir, depth = 0 }: Props) {
   const dir = rawDir === undefined ? undefined : normalizeDir(rawDir);
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
 
   const [searchText, setSearchText] = useState("");
@@ -126,12 +129,16 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
 
   const query = searchText.trim();
   /** A leading / or ~/ activates the path bar in global mode. */
-  const pathQuery = dir ? undefined : splitPathQuery(searchText);
+  const pathQuery = useMemo(
+    () => (dir ? undefined : splitPathQuery(searchText)),
+    [dir, searchText],
+  );
   /** Name fragment used by path-bar results. */
   const effectiveQuery = pathQuery ? pathQuery.prefix : query;
   const parsed = useMemo(() => parseQuery(searchText), [searchText]);
   // Dot-prefixed queries temporarily include hidden entries.
   const showHidden = prefs.showHidden || parsed.hidden;
+  const directoryListing = useDirectoryListing(dir, showHidden, reloadKey);
   const minQuery = dir ? MIN_QUERY_SCOPED : MIN_QUERY_GLOBAL;
   const places = useMemo(() => standardPlaces(), []);
   const [sharedFolders, setSharedFolders] = useState<Entry[]>([]);
@@ -223,7 +230,8 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
       return;
     }
     let cancelled = false;
-    const read = readDirectory(dir, showHidden);
+    const controller = new AbortController();
+    const read = directoryListing;
     setFolderEntriesOmitted(read.truncated);
     setFolderError(read.error);
     setFolderMetaError(undefined);
@@ -255,7 +263,9 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
         setChildrenUsagePending(false);
         return;
       }
-      const result = await readUsageMetaResult(missing);
+      const result = await readUsageMetaResult(missing, {
+        signal: controller.signal,
+      });
       if (cancelled) return;
       setChildrenUsagePending(false);
       setFolderMetaError(result.error);
@@ -273,8 +283,16 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
-  }, [dir, showHidden, reloadKey]);
+  }, [
+    dir,
+    showHidden,
+    reloadKey,
+    directoryListing.entries,
+    directoryListing.error,
+    directoryListing.truncated,
+  ]);
 
   // Rank paths first, then stat only the best Spotlight candidates.
   useEffect(() => {
@@ -289,6 +307,7 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
       return;
     }
     let cancelled = false;
+    const controller = new AbortController();
     setSearching(true);
     setResultsTruncated(false);
 
@@ -311,7 +330,9 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
           const result = await searchPathResult(parsed.longest, {
             scope: dir,
             showHidden,
+            signal: controller.signal,
           });
+          if (cancelled) return;
           paths = result.paths;
           truncated = result.truncated;
           failure = result.error;
@@ -398,6 +419,7 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
         try {
           const result = await readUsageMetaResult(
             shortlist.map((e) => e.path),
+            { signal: controller.signal },
           );
           if (cancelled) return;
           setFoundUsageError(result.error);
@@ -418,6 +440,7 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
 
     return () => {
       cancelled = true;
+      controller.abort();
       clearTimeout(timer);
     };
     // Visit changes affect local ranking and should not rerun Spotlight.
@@ -520,31 +543,69 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
   );
 
   /** Hidden Home entries shown for a bare dot in global mode. */
-  const hiddenHome = useMemo(() => {
-    if (dir || pathQuery || !hiddenOnly(parsed)) return [];
-    return readDirectory(os.homedir(), true).entries;
-  }, [dir, pathQuery, parsed]);
+  const hiddenListing = useDirectoryListing(
+    !dir && !pathQuery && hiddenOnly(parsed) ? os.homedir() : undefined,
+    true,
+    reloadKey,
+  );
+  const hiddenHome = hiddenListing.entries;
 
   /** Children of the typed directory, plus the directory itself if it exists. */
-  const pathListing = useMemo(() => {
-    if (!pathQuery)
-      return {
-        rows: [] as Entry[],
-        omitted: 0,
-        error: undefined as string | undefined,
-      };
-    const out: Entry[] = [];
-    const exact =
-      pathQuery.prefix === ""
-        ? pathQuery.dir
-        : path.join(pathQuery.dir, pathQuery.prefix);
-    const self = statEntry(exact);
-    if (self) out.push(self);
-    const listing = readDirectory(pathQuery.dir, showHidden);
-    out.push(...listing.entries);
-    return { rows: out, omitted: listing.truncated, error: listing.error };
-    // Use split values because pathQuery is recreated on every render.
-  }, [pathQuery?.dir, pathQuery?.prefix, showHidden]);
+  const typedDirectory = useDirectoryListing(
+    pathQuery?.dir,
+    showHidden,
+    reloadKey,
+  );
+  const exactPath = pathQuery
+    ? pathQuery.prefix === ""
+      ? pathQuery.dir
+      : path.join(pathQuery.dir, pathQuery.prefix)
+    : undefined;
+  const [exactEntry, setExactEntry] = useState<{
+    path: string;
+    listing: DirectorySnapshot;
+    entry?: Entry;
+    reloadKey: number;
+  }>();
+  useEffect(() => {
+    if (exactPath === undefined) return;
+    let cancelled = false;
+    const listed = typedDirectory.entries.find(
+      (entry) => entry.path === exactPath,
+    );
+    const read = listed ? Promise.resolve(listed) : statEntryAsync(exactPath);
+    void read.then((entry) => {
+      if (!cancelled)
+        setExactEntry({
+          path: exactPath,
+          listing: typedDirectory,
+          entry,
+          reloadKey,
+        });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [exactPath, typedDirectory, reloadKey]);
+  const exactReady =
+    exactPath === undefined ||
+    (exactEntry?.path === exactPath &&
+      exactEntry.listing === typedDirectory &&
+      exactEntry.reloadKey === reloadKey);
+  const pathListing = useMemo(
+    () => ({
+      rows: pathQuery
+        ? [
+            ...(exactReady && exactEntry?.entry ? [exactEntry.entry] : []),
+            ...typedDirectory.entries,
+          ]
+        : [],
+      omitted: typedDirectory.truncated,
+      error: typedDirectory.error,
+      pending: typedDirectory.pending || !exactReady,
+    }),
+    [pathQuery, exactReady, exactEntry, typedDirectory],
+  );
   const pathRows = pathListing.rows;
 
   const compare = useCallback(
@@ -558,15 +619,11 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
         case "size":
           return b.entry.size - a.entry.size;
         case "name":
-          return a.entry.name.localeCompare(b.entry.name, undefined, {
-            numeric: true,
-          });
+          return compareNames(a.entry.name, b.entry.name);
         default:
           if (b.score.total !== a.score.total)
             return b.score.total - a.score.total;
-          return a.entry.name.localeCompare(b.entry.name, undefined, {
-            numeric: true,
-          });
+          return compareNames(a.entry.name, b.entry.name);
       }
     },
     [sortMode],
@@ -792,54 +849,60 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
               });
             },
       onReindexShortcuts: async () => {
-        const toast = await showToast({
-          style: Toast.Style.Animated,
-          title: "Indexing Google Drive…",
+        await withIndexingLock(async (assertOwned) => {
+          const toast = await showToast({
+            style: Toast.Style.Animated,
+            title: "Indexing Google Drive…",
+          });
+          // Bound interactive indexing so a cold mount cannot block indefinitely.
+          const previousShortcuts = await loadShortcutIndex();
+          const index = await scanShortcuts({ maxDepth: 6, budgetMs: 20_000 });
+          if (
+            shouldReplaceIndex(
+              previousShortcuts.shortcuts.length,
+              index.available,
+            )
+          ) {
+            assertOwned();
+            await saveShortcutIndex(index);
+          }
+          if (!index.available) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Google Drive is unavailable";
+            toast.message = "The previous index was kept.";
+            return;
+          }
+          setShortcuts(
+            index.shortcuts
+              .map((sc) => statEntry(sc.path))
+              .filter((e): e is Entry => e !== undefined),
+          );
+          setShortcutsScannedAt(index.scannedAt);
+
+          const previousShared = loadSharedIndex();
+          const shared = await scanSharedFolders({ budgetMs: 20_000 });
+          if (
+            shouldReplaceIndex(previousShared.paths.length, shared.available)
+          ) {
+            assertOwned();
+            saveSharedIndex(shared);
+          }
+          if (!shared.available) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Google Drive shared folders are unavailable";
+            toast.message = "The previous index was kept.";
+            return;
+          }
+          setSharedIndex(shared.paths);
+          const indexCaveat = driveIndexCaveat(index, shared);
+          setDriveIndexMessage(indexCaveat);
+
+          toast.style = Toast.Style.Success;
+          toast.title = `${shared.paths.length} items in shared folders`;
+          toast.message = indexCaveat
+            ? `${index.shortcuts.length} shortcuts. ${indexCaveat}.`
+            : `${index.shortcuts.length} shortcuts indexed.`;
         });
-        // Bound interactive indexing so a cold mount cannot block indefinitely.
-        const previousShortcuts = await loadShortcutIndex();
-        const index = await scanShortcuts({ maxDepth: 6, budgetMs: 20_000 });
-        if (
-          shouldReplaceIndex(
-            previousShortcuts.shortcuts.length,
-            index.available,
-          )
-        ) {
-          await saveShortcutIndex(index);
-        }
-        if (!index.available) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Google Drive is unavailable";
-          toast.message = "The previous index was kept.";
-          return;
-        }
-        setShortcuts(
-          index.shortcuts
-            .map((sc) => statEntry(sc.path))
-            .filter((e): e is Entry => e !== undefined),
-        );
-        setShortcutsScannedAt(index.scannedAt);
-
-        const previousShared = loadSharedIndex();
-        const shared = await scanSharedFolders({ budgetMs: 20_000 });
-        if (shouldReplaceIndex(previousShared.paths.length, shared.available)) {
-          saveSharedIndex(shared);
-        }
-        if (!shared.available) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Google Drive shared folders are unavailable";
-          toast.message = "The previous index was kept.";
-          return;
-        }
-        setSharedIndex(shared.paths);
-        const indexCaveat = driveIndexCaveat(index, shared);
-        setDriveIndexMessage(indexCaveat);
-
-        toast.style = Toast.Style.Success;
-        toast.title = `${shared.paths.length} items in shared folders`;
-        toast.message = indexCaveat
-          ? `${index.shortcuts.length} shortcuts. ${indexCaveat}.`
-          : `${index.shortcuts.length} shortcuts indexed.`;
       },
       onToggleDetail: () => setShowingDetail((v) => !v),
       onRefresh: () => setReloadKey((k) => k + 1),
@@ -911,15 +974,18 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
   }, []);
 
   const rankingReady = !isLoading;
+  const directoryPending =
+    directoryListing.pending || pathListing.pending || hiddenListing.pending;
+  const visibleFolderError = folderError ?? hiddenListing.error;
 
   // All search-status indicators derive from this shared progress model.
   const progress = deriveProgress({
     rankingReady,
     backgroundPending,
-    scoped: dir !== undefined,
-    folderMetaPending: childrenUsagePending,
+    scoped: dir !== undefined || hiddenOnly(parsed),
+    folderMetaPending: childrenUsagePending || directoryPending,
     folderFailed:
-      folderError !== undefined ||
+      visibleFolderError !== undefined ||
       folderMetaError !== undefined ||
       pathListing.error !== undefined,
     folderPartial: folderMetaPartial !== undefined,
@@ -938,8 +1004,12 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
   const light = statusLight(progress);
 
   // Report incomplete results separately from progress completion.
-  const omittedEntries = pathQuery ? pathListing.omitted : folderEntriesOmitted;
-  const caveat = folderError
+  const omittedEntries = pathQuery
+    ? pathListing.omitted
+    : hiddenOnly(parsed) && !dir
+      ? hiddenListing.truncated
+      : folderEntriesOmitted;
+  const caveat = visibleFolderError
     ? "this folder could not be read"
     : pathListing.error
       ? "this location could not be read"
@@ -1050,34 +1120,44 @@ export function Browser({ dir: rawDir, depth = 0 }: Props) {
           title="Loading your usage history…"
           description="Nothing can be ranked until it is read."
         />
-      ) : rows.length === 0 && !searching ? (
+      ) : rows.length === 0 && (!searching || directoryPending) ? (
         <List.EmptyView
-          icon={tooShort ? Icon.Keyboard : Icon.MagnifyingGlass}
+          icon={
+            directoryPending
+              ? Icon.Clock
+              : tooShort
+                ? Icon.Keyboard
+                : Icon.MagnifyingGlass
+          }
           title={
-            folderError
-              ? "Folder could not be read"
-              : pathListing.error
-                ? "Location could not be read"
-                : searchError
-                  ? "Search failed"
-                  : tooShort
-                    ? `Keep typing — ${minQuery} characters minimum`
-                    : query === ""
-                      ? "Nothing to show yet"
-                      : `Nothing matching “${query}”`
+            directoryPending
+              ? "Reading folder…"
+              : visibleFolderError
+                ? "Folder could not be read"
+                : pathListing.error
+                  ? "Location could not be read"
+                  : searchError
+                    ? "Search failed"
+                    : tooShort
+                      ? `Keep typing — ${minQuery} characters minimum`
+                      : query === ""
+                        ? "Nothing to show yet"
+                        : `Nothing matching “${query}”`
           }
           description={
-            folderError
-              ? "Check that the folder still exists and that Raycast can access it."
-              : pathListing.error
-                ? "Check that the location still exists and that Raycast can access it."
-                : searchError
-                  ? "Check Spotlight and Raycast permissions, then try Refresh."
-                  : tooShort
-                    ? `The fast results are here already; a whole-disk search waits for ${minQuery} characters.`
-                    : shortcutsScannedAt === 0
-                      ? `Searched ${scopeLabel}. Google Drive is not indexed yet — run Index Google Drive from this panel.`
-                      : `Searched ${scopeLabel}. Drive shortcuts last indexed ${relativeTime(shortcutsScannedAt)}.`
+            directoryPending
+              ? "You can keep typing while the folder loads."
+              : visibleFolderError
+                ? "Check that the folder still exists and that Raycast can access it."
+                : pathListing.error
+                  ? "Check that the location still exists and that Raycast can access it."
+                  : searchError
+                    ? "Check Spotlight and Raycast permissions, then try Refresh."
+                    : tooShort
+                      ? `The fast results are here already; a whole-disk search waits for ${minQuery} characters.`
+                      : shortcutsScannedAt === 0
+                        ? `Searched ${scopeLabel}. Google Drive is not indexed yet — run Index Google Drive from this panel.`
+                        : `Searched ${scopeLabel}. Drive shortcuts last indexed ${relativeTime(shortcutsScannedAt)}.`
           }
           actions={
             <ActionPanel>

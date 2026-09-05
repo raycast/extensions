@@ -11,6 +11,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { performanceChecks } from "./performance-checks";
+import { indexingChecks } from "./indexing-checks";
 import {
   canonicalPath,
   hiddenDirsMatching,
@@ -132,6 +134,8 @@ function fake(name: string, ageDays: number): Entry {
 }
 
 async function main() {
+  await indexingChecks(assert);
+  await performanceChecks(assert);
   const live = process.argv.includes("--live");
   const targetArg = process.argv.slice(2).find((arg) => arg !== "--live");
   const target = targetArg
@@ -468,7 +472,32 @@ async function main() {
     "the child-process timeout shape used by Raycast is partial",
   );
 
+  console.log("\n=== generated preference contract ===");
+  const browserSource = fs.readFileSync(
+    path.join(process.cwd(), "src/components/browser.tsx"),
+    "utf8",
+  );
+  const typesSource = fs.readFileSync(
+    path.join(process.cwd(), "src/lib/types.ts"),
+    "utf8",
+  );
+  assert(
+    browserSource.includes("getPreferenceValues<Preferences>()") &&
+      !typesSource.includes("export type Prefs"),
+    "preferences come from Raycast's generated manifest types",
+  );
+
   console.log("\n=== index refresh preservation ===");
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8"),
+  ) as { commands?: { name?: string; interval?: string }[] };
+  const indexCommand = manifest.commands?.find(
+    (command) => command.name === "index-shortcuts",
+  );
+  assert(
+    indexCommand !== undefined && indexCommand.interval === undefined,
+    "Google Drive indexing runs only when the user starts it",
+  );
   assert(
     !shouldReplaceIndex(12, false),
     "an unavailable refresh does not replace an existing index",
