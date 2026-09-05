@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openai-compatible-chat",
+  "title": "OpenAI Compatible Chat",
+  "description": "Chat with OpenAI-compatible models from Raycast, including GLM, Ollama, LM Studio, and custom providers.",
+  "icon": "icon.png",
+  "author": "ctacta621",
+  "platforms": ["Windows"],
+  "categories": ["Productivity", "Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-ai",
+      "title": "Ask AI",
+      "subtitle": "OpenAI Compatible Chat",
+      "description": "Ask a question or continue a private AI chat",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "Ask anything",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "chat-history",
+      "title": "Chat History",
+      "subtitle": "OpenAI Compatible Chat",
+      "description": "Browse and continue saved AI conversations",
+      "mode": "view"
+    },
+    {
+      "name": "manage-providers",
+      "title": "Manage AI Providers",
+      "subtitle": "OpenAI Compatible Chat",
+      "description": "Configure OpenAI-compatible endpoints and models",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "publish": "ray publish"
+  }
+}
