@@ -1,0 +1,154 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-agent-sessions",
+  "title": "Agent Session Search",
+  "description": "Full-text search for finding and resuming local Claude and Codex sessions.",
+  "icon": "icon.png",
+  "author": "akshath",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "claude",
+    "claude code",
+    "codex",
+    "openai",
+    "anthropic",
+    "cli",
+    "agent",
+    "session",
+    "transcript",
+    "resume",
+    "history",
+    "conversation"
+  ],
+  "commands": [
+    {
+      "name": "search-agent-sessions",
+      "title": "Search Agent Sessions",
+      "description": "Full-text search across agent transcripts",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchRoot",
+      "title": "Search Root",
+      "description": "Where you keep your projects, such as ~/code or ~/dev. Sessions whose working directory sits outside it are hidden; enter ~ to search your whole home directory",
+      "type": "textfield",
+      "placeholder": "~/code",
+      "required": true
+    },
+    {
+      "name": "ignoreList",
+      "title": "Ignored Directories",
+      "description": "Comma-separated directory names. A session is hidden when its working directory has one as a path component; exact and case-sensitive, so dist does not match distributed. Remove an entry if it is a real project of yours",
+      "type": "textfield",
+      "default": "node_modules,.git,tmp,Downloads,.Trash,Library,Caches,.cache,dist,build,target,out,.next,vendor,.venv,venv,site-packages,DerivedData,Pods,coverage",
+      "required": false
+    },
+    {
+      "name": "terminalApp",
+      "title": "Resume Sessions In",
+      "description": "The terminal that runs the resume command. Only terminals this extension can drive are listed. Pick Orca to reattach to a session already running rather than starting a second one",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "system"
+        },
+        {
+          "title": "Orca",
+          "value": "com.stablyai.orca"
+        },
+        {
+          "title": "Ghostty",
+          "value": "com.mitchellh.ghostty"
+        },
+        {
+          "title": "WezTerm",
+          "value": "com.github.wez.wezterm"
+        },
+        {
+          "title": "Kitty",
+          "value": "net.kovidgoyal.kitty"
+        },
+        {
+          "title": "Alacritty",
+          "value": "org.alacritty"
+        },
+        {
+          "title": "iTerm",
+          "value": "com.googlecode.iterm2"
+        }
+      ]
+    },
+    {
+      "name": "editorApp",
+      "title": "Open Files With",
+      "description": "Opens the files a transcript names. Pick Orca to open those inside a registered worktree in it; raw transcripts live outside every worktree, so they always go to the editors below. Images, PDFs and documents go to whichever app macOS has for them",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Orca",
+          "value": "com.stablyai.orca"
+        },
+        {
+          "title": "Visual Studio Code",
+          "value": "com.microsoft.VSCode"
+        },
+        {
+          "title": "Cursor",
+          "value": "com.todesktop.230313mzl4w4u92"
+        },
+        {
+          "title": "Zed",
+          "value": "dev.zed.Zed"
+        },
+        {
+          "title": "VSCodium",
+          "value": "com.visualstudio.code.oss"
+        },
+        {
+          "title": "Sublime Text",
+          "value": "com.sublimetext.4"
+        },
+        {
+          "title": "TextEdit",
+          "value": "com.apple.TextEdit"
+        },
+        {
+          "title": "System Default",
+          "value": "system"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "bench": "tsc -p tsconfig.bench.json && node .bench/scripts/bench.js",
+    "test": "tsc -p tsconfig.test.json && node --expose-gc --test '.build/tests/**/*.test.js'"
+  }
+}
