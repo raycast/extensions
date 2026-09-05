@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "salesforce-quick-search",
+  "title": "Salesforce Quick Search",
+  "description": "Search Salesforce Lightning global search, or open the Lightning home page, without any admin setup or API access.",
+  "icon": "icon.png",
+  "author": "TravisBuchan",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Salesforce",
+      "description": "Open Salesforce global search for a query, or the Lightning home page if no query is given.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Search term",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instanceDomain",
+      "type": "textfield",
+      "title": "Salesforce Instance Domain",
+      "description": "Your Salesforce instance domain, e.g. mycompany.lightning.force.com (no https://).",
+      "placeholder": "mycompany.lightning.force.com",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
