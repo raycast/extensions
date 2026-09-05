@@ -1,0 +1,95 @@
+{
+  "name": "kato",
+  "title": "Kato",
+  "version": "0.1.0",
+  "description": "Search Kato, manage your tasks, and join meetings from Raycast.",
+  "main": "dist/search-kato.js",
+  "author": "devwithbobby",
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.1.6",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "react": "^19.1.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.2"
+  },
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "icon": "kato-ios-icon-transparent.png",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search-kato",
+      "title": "Search Workspace",
+      "description": "Search tasks, records, and meetings",
+      "mode": "view"
+    },
+    {
+      "name": "objects",
+      "title": "Objects",
+      "description": "Browse Kato objects and their records",
+      "mode": "view"
+    },
+    {
+      "name": "my-day",
+      "title": "My Day",
+      "description": "See today's meetings, tasks, and notifications",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Kato Menu Bar",
+      "description": "See what needs your attention from the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "my-tasks",
+      "title": "My Tasks",
+      "description": "View and update your assigned Kato tasks",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create a task in Kato",
+      "mode": "view"
+    },
+    {
+      "name": "upcoming-meetings",
+      "title": "Upcoming Meetings",
+      "description": "View and join your upcoming Kato meetings",
+      "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "description": "Triage mentions, assignments, and updates",
+      "mode": "view"
+    },
+    {
+      "name": "connection",
+      "title": "Current Workspace",
+      "description": "View your connection or switch Kato workspaces",
+      "mode": "view"
+    }
+  ]
+}
