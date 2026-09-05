@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grok-bot",
+  "title": "Grok Bot",
+  "description": "Unofficial Grok Bot client for Raycast on macOS (macOS only). Not on Raycast for iOS or Windows. Not affiliated with xAI.",
+  "icon": "grok-bot.png",
+  "author": "maxence_maisonnat",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "bots",
+      "title": "List Bots",
+      "subtitle": "Grok Bot",
+      "description": "Search your Grok Bot teammates and send a task",
+      "icon": "grok-bot.png",
+      "mode": "view",
+      "keywords": [
+        "teammates",
+        "roster",
+        "agents"
+      ]
+    },
+    {
+      "name": "ask",
+      "title": "Ask Bot",
+      "subtitle": "Grok Bot",
+      "description": "Send a task to a Grok Bot teammate",
+      "icon": "grok-bot.png",
+      "mode": "view",
+      "keywords": [
+        "send",
+        "task",
+        "message"
+      ],
+      "arguments": [
+        {
+          "name": "question",
+          "type": "text",
+          "required": false,
+          "placeholder": "Task for the bot"
+        },
+        {
+          "name": "bot",
+          "type": "text",
+          "required": false,
+          "placeholder": "Bot name"
+        }
+      ]
+    },
+    {
+      "name": "open-grok-bot",
+      "title": "Open Grok Bot",
+      "subtitle": "Grok Bot",
+      "description": "Open the Grok Bot desktop app",
+      "icon": "grok-bot.png",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gatewayUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Gateway URL",
+      "placeholder": "https://your-box.ts.net",
+      "description": "Tailscale Serve URL for the Sand gateway, for example https://box.ts.net"
+    },
+    {
+      "name": "gatewayToken",
+      "type": "password",
+      "required": false,
+      "title": "Gateway Token",
+      "description": "Bearer token from gateway.json on the Bot computer. Treat it like a password."
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-bots",
+      "title": "List Bots",
+      "description": "List Grok Bot teammates. Optional query filters by name or title."
+    },
+    {
+      "name": "send-to-bot",
+      "title": "Send to Bot",
+      "description": "Send a prompt to a named Grok Bot teammate. Call list-bots when the name is unclear."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "eslint src && prettier --check \"**/*.{ts,tsx,md}\"",
+    "fix-lint": "eslint src --fix && prettier --write \"**/*.{ts,tsx,md}\"",
+    "lint:store": "ray lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MaisonnatM/grok-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MaisonnatM/grok-bot/issues"
+  },
+  "homepage": "https://github.com/MaisonnatM/grok-bot"
+}
