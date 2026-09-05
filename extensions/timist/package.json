@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timist",
+  "title": "Timist",
+  "description": "Track your time with Timist: start and stop timers and contexts, review today's blocks, and keep an eye on what's running from the menu bar.",
+  "icon": "extension-icon.png",
+  "author": "benedictbartsch",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-status",
+      "title": "Show Status",
+      "description": "See what's running and today's blocks.",
+      "mode": "view",
+      "icon": "rc-status.png"
+    },
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "description": "Create and start a new block.",
+      "mode": "view",
+      "icon": "rc-play.png"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "description": "Stop the running timer.",
+      "mode": "no-view",
+      "icon": "rc-stop-timer.png"
+    },
+    {
+      "name": "start-context",
+      "title": "Start Context",
+      "description": "Start a context from recents or a new combination.",
+      "mode": "view",
+      "icon": "rc-context.png"
+    },
+    {
+      "name": "stop-context",
+      "title": "Stop Context",
+      "description": "Stop the running context.",
+      "mode": "no-view",
+      "icon": "rc-stop-context.png"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Timist Menu Bar Status",
+      "description": "Show the running timer or context in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "icon": "rc-menu-bar.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Timist API key (timist_sk_…).",
+      "type": "password",
+      "required": true,
+      "placeholder": "timist_sk_…"
+    },
+    {
+      "name": "baseUrl",
+      "title": "API Base URL",
+      "description": "Override the API base URL for local development.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://timist.app/api/v1",
+      "placeholder": "https://timist.app/api/v1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
