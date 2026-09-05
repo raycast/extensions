@@ -1,0 +1,2 @@
+# Introducing the System Status Raycast extension!
+Ever wanted to hide that pesky taskbar, but always found yourself turning it back on? Whether it be to see your Wi-Fi connection, volume, battery, or just the time or date, we always need our taskbar to quickly see these things - **until now**. With the new **System Status** Raycast extension, you can view all of this information right from Raycast! Set a hotkey to instantly view your information.
