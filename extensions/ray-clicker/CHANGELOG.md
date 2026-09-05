@@ -1,6 +1,6 @@
 # Ray Clicker Changelog
 
-## [Windows support and maintenance] - {PR_MERGE_DATE}
+## [Windows support and maintenance] - 2026-09-05
 
 - Enable Windows installation and add Control shortcuts with matching hints.
 - Update the Raycast API, remove unused utilities, and refresh the dependency lockfile.
