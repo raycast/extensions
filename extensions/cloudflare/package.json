@@ -16,7 +16,8 @@
     "xmok",
     "taken",
     "nbbaier",
-    "ilian"
+    "ilian",
+    "ray.dhruv"
   ],
   "commands": [
     {
@@ -27,10 +28,66 @@
       "mode": "view"
     },
     {
+      "name": "view-zone-analytics",
+      "title": "View Zone Analytics",
+      "subtitle": "Cloudflare",
+      "description": "View traffic, bandwidth, cache, visitor, and threat metrics",
+      "mode": "view"
+    },
+    {
+      "name": "view-zone-settings",
+      "title": "View Zone Settings",
+      "subtitle": "Cloudflare",
+      "description": "Review SSL, protocol, security, performance, and cache settings",
+      "mode": "view"
+    },
+    {
+      "name": "view-ssl-certificates",
+      "title": "View SSL Certificates",
+      "subtitle": "Cloudflare",
+      "description": "Inspect certificate status, expiry, hosts, issuer, and validation errors",
+      "mode": "view"
+    },
+    {
+      "name": "search-dns-records",
+      "title": "Search DNS Records",
+      "subtitle": "Cloudflare",
+      "description": "Search and edit DNS records across all zones",
+      "mode": "view"
+    },
+    {
+      "name": "quick-create-dns-record",
+      "title": "Quick Create DNS Record",
+      "subtitle": "Cloudflare",
+      "description": "Create a DNS record in any accessible zone",
+      "mode": "view"
+    },
+    {
+      "name": "dns-toolkit",
+      "title": "DNS Toolkit",
+      "subtitle": "Cloudflare",
+      "description": "Check DNS health, manage DNSSEC, and import, export, or bulk edit records",
+      "mode": "view"
+    },
+    {
+      "name": "purge-cache",
+      "title": "Purge Cache",
+      "subtitle": "Cloudflare",
+      "description": "Purge cached content for a zone",
+      "mode": "view"
+    },
+    {
       "name": "view-pages",
       "title": "View Pages",
       "subtitle": "Cloudflare",
       "description": "Lists your page projects",
+      "mode": "view"
+    },
+    {
+      "name": "view-deployments",
+      "title": "View Deployments",
+      "subtitle": "Cloudflare",
+      "description": "View recent Pages and Workers deployments",
       "mode": "view"
     },
     {
@@ -41,21 +98,137 @@
       "mode": "view"
     },
     {
+      "name": "view-audit-logs",
+      "title": "View Audit Logs",
+      "subtitle": "Cloudflare",
+      "description": "View recent Cloudflare account activity",
+      "mode": "view"
+    },
+    {
       "name": "view-workers",
       "title": "View Workers",
       "subtitle": "Cloudflare",
       "description": "Lists your workers",
       "mode": "view"
+    },
+    {
+      "name": "view-worker-routes",
+      "title": "View Worker Routes",
+      "subtitle": "Cloudflare",
+      "description": "Inspect route patterns and the Workers attached to them",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-zones",
+      "title": "List Zones",
+      "description": "List accessible Cloudflare zones and account IDs for use with other Cloudflare tools"
+    },
+    {
+      "name": "find-dns-records",
+      "title": "Find DNS Records",
+      "description": "Search Cloudflare DNS records by name, content, or type across one zone or all accessible zones"
+    },
+    {
+      "name": "update-dns-record",
+      "title": "Update DNS Record",
+      "description": "Update a verified Cloudflare DNS record after showing the user a confirmation"
+    },
+    {
+      "name": "delete-dns-record",
+      "title": "Delete DNS Record",
+      "description": "Permanently delete a verified Cloudflare DNS record after showing a destructive confirmation"
+    },
+    {
+      "name": "check-dns-health",
+      "title": "Check DNS Health",
+      "description": "Check a Cloudflare zone for DNSSEC, SPF, DMARC, duplicate, conflict, and unproxied-origin concerns"
+    },
+    {
+      "name": "get-dnssec-status",
+      "title": "Get DNSSEC Status",
+      "description": "Get DNSSEC status, DS record, and registrar details for a verified Cloudflare zone"
+    },
+    {
+      "name": "get-zone-analytics",
+      "title": "Get Zone Analytics",
+      "description": "Get request, bandwidth, cache, visitor, page-view, and threat metrics for a verified zone"
+    },
+    {
+      "name": "get-zone-settings",
+      "title": "Get Zone Settings",
+      "description": "Inspect SSL, TLS, protocol, security, performance, and cache settings for a verified zone"
+    },
+    {
+      "name": "list-ssl-certificates",
+      "title": "List SSL Certificates",
+      "description": "List SSL certificate packs, expiry, hosts, issuer, and validation health for a verified zone"
+    },
+    {
+      "name": "set-dnssec-status",
+      "title": "Set DNSSEC Status",
+      "description": "Enable or disable DNSSEC for a verified Cloudflare zone after showing a confirmation"
+    },
+    {
+      "name": "list-pages-projects",
+      "title": "List Pages Projects",
+      "description": "List Cloudflare Pages projects, source repositories, deployment status, and autopublish settings"
+    },
+    {
+      "name": "list-deployments",
+      "title": "List Deployments",
+      "description": "List recent Cloudflare Pages and Workers deployments, optionally filtered by account or product"
+    },
+    {
+      "name": "get-pages-deployment-logs",
+      "title": "Get Pages Deployment Logs",
+      "description": "Get recent build-log lines and metadata for a verified Cloudflare Pages deployment"
+    },
+    {
+      "name": "list-workers",
+      "title": "List Workers",
+      "description": "List Cloudflare Workers and their runtime, compatibility, and asset metadata"
+    },
+    {
+      "name": "list-worker-routes",
+      "title": "List Worker Routes",
+      "description": "List route patterns and attached Worker scripts for a verified Cloudflare zone"
+    },
+    {
+      "name": "inspect-worker",
+      "title": "Inspect Worker",
+      "description": "Inspect the newest or a specific Worker version, including bindings without secret values"
+    },
+    {
+      "name": "list-account-members",
+      "title": "List Account Members",
+      "description": "List members, roles, and membership status for accessible Cloudflare accounts"
+    },
+    {
+      "name": "list-audit-logs",
+      "title": "List Audit Logs",
+      "description": "List recent Cloudflare account activity without exposing actor IP addresses"
+    },
+    {
+      "name": "create-dns-record",
+      "title": "Create DNS Record",
+      "description": "Create a Cloudflare DNS record after showing the user a confirmation"
+    },
+    {
+      "name": "purge-zone-cache",
+      "title": "Purge Zone Cache",
+      "description": "Purge Cloudflare cache by URL, hostname, tag, prefix, or the entire zone after confirmation"
     }
   ],
   "preferences": [
     {
       "name": "token",
       "type": "password",
-      "required": true,
-      "title": "API Token",
-      "description": "API token",
-      "placeholder": "Your token"
+      "required": false,
+      "title": "API Token (Optional)",
+      "description": "Use an API token instead of OAuth",
+      "placeholder": "Your API token"
     }
   ],
   "dependencies": {
@@ -78,6 +251,7 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "platforms": [

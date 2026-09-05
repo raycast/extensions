@@ -1,8 +1,4 @@
-import {
-  getPreferenceValues,
-  Icon,
-  openExtensionPreferences,
-} from '@raycast/api';
+import { Icon, openExtensionPreferences } from '@raycast/api';
 import { AxiosError } from 'axios';
 import {
   DeploymentStatus,
@@ -14,11 +10,6 @@ import {
 import { showFailureToast } from '@raycast/utils';
 
 const CLOUDFLARE_BASE = 'https://dash.cloudflare.com';
-
-function getToken() {
-  const { token } = getPreferenceValues<ExtensionPreferences>();
-  return token;
-}
 
 function getSiteStatusIcon(status: ZoneStatus): Icon {
   switch (status) {
@@ -112,7 +103,7 @@ async function handleNetworkError(e: unknown): Promise<void> {
   const response = error.response;
   const toast = await showFailureToast('Please try again later.');
   if (!response) {
-    toast.title = 'Unknown error';
+    toast.title = e instanceof Error ? e.message : 'Unknown error';
     return;
   }
 
@@ -124,23 +115,30 @@ async function handleNetworkError(e: unknown): Promise<void> {
 
   if (status === 401) {
     toast.title = 'Failed to authorize';
-    toast.message = 'Please make sure that your API token is valid.';
+    toast.message = 'Reconnect Cloudflare or check your API token.';
     toast.primaryAction = {
       title: 'Open Extension Preferences',
       onAction: openExtensionPreferences,
     };
+  } else if (status === 403) {
+    toast.title = 'Permission required';
+    toast.message =
+      'Reconnect Cloudflare and grant the optional permission needed for this action.';
   } else {
     const data = response.data as {
-      errors: Array<{ code: number; message: string }>;
+      errors?: Array<{ code: number; message: string }>;
     };
-    const error = data.errors[0];
-    toast.title = `${error.code} error`;
-    toast.message = error.message;
+    const apiError = data.errors?.[0];
+    if (apiError) {
+      toast.title = `${apiError.code} error`;
+      toast.message = apiError.message;
+    } else {
+      toast.title = `Cloudflare request failed (${status})`;
+    }
   }
 }
 
 export {
-  getToken,
   getSiteStatusIcon,
   getDeploymentStatusIcon,
   getDomainStatusIcon,

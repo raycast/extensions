@@ -1,0 +1,658 @@
+instructions: |
+  Cloudflare tools operate on the authenticated user's accounts and zones.
+  Resolve zone and account IDs with list-zones before calling tools that require IDs. Use list-pages-projects and list-workers to resolve project and Worker names.
+  Use find-dns-records before updating or deleting a record. Pass the exact zone ID, record ID, and current record name returned by that search. Do not delete and recreate a record when update-dns-record can make the requested change.
+  DNS record creation, updates, deletion, DNSSEC changes, and cache purging require built-in confirmation. Deletion, disabling DNSSEC, and whole-zone cache purges are destructive. Never imply that a mutation succeeded until its tool returns successfully.
+  If a user asks whether they should change or delete something, inspect and explain first; do not run a mutation tool unless they explicitly ask to make the change.
+  Purging without URLs, hostnames, tags, or prefixes purges the entire zone and must only be used when the user explicitly requests a full purge. Prefer the narrowest requested purge mode.
+  Clearly distinguish heuristic DNS health suggestions from confirmed failures. When enabling DNSSEC, remind the user to publish the returned DS record at the registrar. Before disabling DNSSEC, remind them to remove the registrar DS record first.
+  Use get-dnssec-status when asked about current DNSSEC state or registrar details. To diagnose a Pages deployment, resolve the project and deployment with list-pages-projects and list-deployments before calling get-pages-deployment-logs.
+  Use get-zone-analytics for request, bandwidth, cache, visitor, page-view, or threat trends. Treat analytics as an aggregate for the requested 24-hour, 7-day, or 30-day window.
+  Use get-zone-settings to inspect the current SSL/TLS mode, minimum TLS version, HTTPS redirects, HTTP versions, security level, cache settings, Brotli, and development mode. These settings are read-only in this extension.
+  Use list-ssl-certificates for certificate expiry, issuer, covered hostnames, status, and validation errors. A warning means an active certificate expires within 30 days; an error means the certificate pack is not active.
+  Use list-worker-routes to explain which Worker handles a hostname or URL pattern. A route without a Worker name is disabled.
+  Use inspect-worker after list-workers. Omit versionId to inspect the newest version. Worker binding names, types, and resource identifiers are available, but secret values are never returned.
+  Audit-log results intentionally omit actor IP addresses. Never invent account IDs, zone IDs, record IDs, deployment IDs, DNS values, or Cloudflare URLs.
+evals:
+  - input: "@cloudflare find the DNS records for www on example.com"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      find-dns-records:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          id: "record-1"
+          type: "A"
+          name: "www.example.com"
+          content: "192.0.2.1"
+          ttl: 1
+          proxied: true
+          tags: []
+    expected:
+      - callsTool: list-zones
+      - callsTool:
+          name: find-dns-records
+          arguments:
+            query: "www"
+            zoneId: "zone-1"
+
+  - input: "@cloudflare check the DNS health of example.com"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      check-dns-health:
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        score: 85
+        findings:
+          - severity: "warning"
+            title: "DNSSEC is not active"
+            description: "Enable DNSSEC and publish the DS record."
+            affectedRecordIds: []
+    expected:
+      - callsTool: list-zones
+      - callsTool: check-dns-health
+
+  - input: "@cloudflare show my recent Pages deployments"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      list-pages-projects:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          name: "website"
+          subdomain: "website.pages.dev"
+          status: "success"
+      list-deployments:
+        - product: "pages"
+          accountId: "account-1"
+          accountName: "Example Account"
+          project: "website"
+          id: "deployment-1"
+          status: "success"
+          environment: "production"
+          branch: "main"
+          commitHash: "abc123"
+          commitMessage: "Ship homepage"
+          createdOn: "2026-09-04T10:00:00.000Z"
+          url: "https://deployment.pages.dev"
+    expected:
+      - callsTool:
+          name: list-deployments
+          arguments:
+            product: "pages"
+
+  - input: "@cloudflare purge everything cached for example.com"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      purge-zone-cache:
+        success: true
+        zoneId: "zone-1"
+        mode: "everything"
+        purgeId: "purge-1"
+        errors: []
+    expected:
+      - callsTool: list-zones
+      - callsTool: purge-zone-cache
+
+  - input: "@cloudflare list my Cloudflare domains and show which ones are active"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-2"
+          zoneName: "example.net"
+          status: "pending"
+          nameServers: ["bob.ns.cloudflare.com"]
+    expected:
+      - callsTool: list-zones
+
+  - input: "@cloudflare create a TXT record named _verify on example.com with value verification-123"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      create-dns-record:
+        created: true
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        record:
+          id: "record-new"
+          type: "TXT"
+          name: "_verify.example.com"
+          content: '"verification-123"'
+          ttl: 1
+    expected:
+      - callsTool: list-zones
+      - callsTool:
+          name: create-dns-record
+          arguments:
+            zoneId: "zone-1"
+            type: "TXT"
+            name: "_verify"
+            content: "verification-123"
+
+  - input: "@cloudflare change the TTL of www.example.com to 300 seconds"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      find-dns-records:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          id: "record-www"
+          type: "A"
+          name: "www.example.com"
+          content: "192.0.2.1"
+          ttl: 1
+          proxied: true
+          tags: []
+      update-dns-record:
+        updated: true
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        record:
+          id: "record-www"
+          type: "A"
+          name: "www.example.com"
+          content: "192.0.2.1"
+          ttl: 300
+          proxied: true
+          tags: []
+    expected:
+      - callsTool: list-zones
+      - callsTool: find-dns-records
+      - callsTool:
+          name: update-dns-record
+          arguments:
+            zoneId: "zone-1"
+            recordId: "record-www"
+            recordName: "www.example.com"
+            ttl: 300
+
+  - input: "@cloudflare permanently delete old.example.com"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      find-dns-records:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          id: "record-old"
+          type: "CNAME"
+          name: "old.example.com"
+          content: "legacy.example.net"
+          ttl: 300
+          proxied: false
+          tags: []
+      delete-dns-record:
+        deleted: true
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        record:
+          id: "record-old"
+          type: "CNAME"
+          name: "old.example.com"
+          content: "legacy.example.net"
+    expected:
+      - callsTool: list-zones
+      - callsTool: find-dns-records
+      - callsTool:
+          name: delete-dns-record
+          arguments:
+            zoneId: "zone-1"
+            recordId: "record-old"
+            recordName: "old.example.com"
+
+  - input: "@cloudflare should I delete old.example.com? First tell me what it points to"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      find-dns-records:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          id: "record-old"
+          type: "CNAME"
+          name: "old.example.com"
+          content: "legacy.example.net"
+          ttl: 300
+          proxied: false
+          tags: []
+    expected:
+      - callsTool: find-dns-records
+      - not:
+          callsTool: delete-dns-record
+
+  - input: "@cloudflare purge https://example.com/pricing from cache"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      purge-zone-cache:
+        success: true
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        mode: "URLs"
+        purgeId: "purge-2"
+        errors: []
+    expected:
+      - callsTool: list-zones
+      - callsTool:
+          name: purge-zone-cache
+          arguments:
+            zoneId: "zone-1"
+            urls: ["https://example.com/pricing"]
+
+  - input: "@cloudflare enable DNSSEC for example.com"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      get-dnssec-status:
+        accountId: "account-1"
+        accountName: "Example Account"
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        status: "disabled"
+      set-dnssec-status:
+        updated: true
+        accountId: "account-1"
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        status: "active"
+        ds: "2371 13 2 example-digest"
+    expected:
+      - callsTool: list-zones
+      - callsTool:
+          name: set-dnssec-status
+          arguments:
+            zoneId: "zone-1"
+            zoneName: "example.com"
+            status: "active"
+
+  - input: "@cloudflare list my Pages projects"
+    mocks:
+      list-pages-projects:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          name: "website"
+          subdomain: "website.pages.dev"
+          status: "success"
+          source:
+            type: "github"
+            owner: "example"
+            repository: "website"
+            autopublishEnabled: true
+    expected:
+      - callsTool: list-pages-projects
+
+  - input: "@cloudflare inspect the newest version of the api Worker in account account-1"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      list-account-members:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          email: "owner@example.com"
+          status: "accepted"
+          role: "Super Administrator"
+      list-workers:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          name: "api"
+          modifiedOn: "2026-09-04T10:00:00.000Z"
+          compatibilityDate: "2026-08-08"
+          compatibilityFlags: ["nodejs_compat"]
+          handlers: ["fetch"]
+          hasModules: true
+          hasAssets: false
+      inspect-worker:
+        accountId: "account-1"
+        accountName: "Example Account"
+        worker:
+          name: "api"
+          modifiedOn: "2026-09-04T10:00:00.000Z"
+          compatibilityDate: "2026-08-08"
+          compatibilityFlags: ["nodejs_compat"]
+        selectedVersion:
+          id: "version-3"
+          number: 3
+          createdOn: "2026-09-04T10:00:00.000Z"
+          source: "wrangler"
+          bindings:
+            - name: "DB"
+              type: "d1"
+              resource: "database-1"
+        availableVersions:
+          - id: "version-3"
+            number: 3
+            createdOn: "2026-09-04T10:00:00.000Z"
+            source: "wrangler"
+    expected:
+      - callsTool: list-zones
+      - callsTool:
+          name: list-workers
+          arguments:
+            accountId: "account-1"
+      - callsTool:
+          name: inspect-worker
+          arguments:
+            accountId: "account-1"
+            workerName: "api"
+
+  - input: "@cloudflare list the members of account account-1"
+    mocks:
+      list-account-members:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          email: "owner@example.com"
+          status: "accepted"
+          role: "Super Administrator"
+    expected:
+      - callsTool:
+          name: list-account-members
+          arguments:
+            accountId: "account-1"
+
+  - input: "@cloudflare show the five most recent audit-log events for account account-1"
+    mocks:
+      list-audit-logs:
+        - id: "audit-1"
+          accountId: "account-1"
+          accountName: "Example Account"
+          time: "2026-09-04T10:00:00.000Z"
+          action: "Update DNS Record"
+          actionType: "update"
+          result: "success"
+          actorEmail: "owner@example.com"
+          resource:
+            id: "record-www"
+            product: "dns"
+            type: "record"
+          zone:
+            id: "zone-1"
+            name: "example.com"
+    expected:
+      - callsTool:
+          name: list-audit-logs
+          arguments:
+            accountId: "account-1"
+            limit: 5
+
+  - input: "@cloudflare show the current DNSSEC status and registrar details for example.com"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      get-dnssec-status:
+        accountId: "account-1"
+        accountName: "Example Account"
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        status: "active"
+        ds: "2371 13 2 example-digest"
+        algorithm: "13"
+        digest: "example-digest"
+        digestType: "2"
+        keyTag: 2371
+    expected:
+      - callsTool: list-zones
+      - callsTool:
+          name: get-dnssec-status
+          arguments:
+            zoneId: "zone-1"
+
+  - input: "@cloudflare show why the latest website Pages deployment failed"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      list-pages-projects:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          name: "website"
+          subdomain: "website.pages.dev"
+          status: "failure"
+      list-deployments:
+        - product: "pages"
+          accountId: "account-1"
+          accountName: "Example Account"
+          project: "website"
+          id: "deployment-failed"
+          status: "failure"
+          environment: "production"
+          branch: "main"
+          commitHash: "def456"
+          commitMessage: "Update dependencies"
+          createdOn: "2026-09-04T11:00:00.000Z"
+          url: "https://deployment-failed.pages.dev"
+      get-pages-deployment-logs:
+        accountId: "account-1"
+        accountName: "Example Account"
+        projectName: "website"
+        deployment:
+          id: "deployment-failed"
+          status: "failure"
+          environment: "production"
+          branch: "main"
+          commitHash: "def456"
+          commitMessage: "Update dependencies"
+          createdOn: "2026-09-04T11:00:00.000Z"
+          url: "https://deployment-failed.pages.dev"
+        totalLines: 2
+        returnedLines: 2
+        truncated: false
+        logs:
+          - timestamp: "2026-09-04T11:01:00.000Z"
+            line: "npm run build"
+          - timestamp: "2026-09-04T11:01:10.000Z"
+            line: "Error: TypeScript compilation failed"
+    expected:
+      - callsTool: list-pages-projects
+      - callsTool:
+          name: list-deployments
+          arguments:
+            accountId: "account-1"
+            product: "pages"
+      - callsTool:
+          name: get-pages-deployment-logs
+          arguments:
+            accountId: "account-1"
+            projectName: "website"
+            deploymentId: "deployment-failed"
+
+  - input: "@cloudflare show traffic and cache analytics for example.com over the last 7 days"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      get-zone-analytics:
+        accountId: "account-1"
+        accountName: "Example Account"
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        period: "7d"
+        requests: 10000
+        cachedRequests: 7500
+        requestCacheRatio: 0.75
+        bandwidth: 1000000000
+        cachedBandwidth: 800000000
+        bandwidthCacheRatio: 0.8
+        pageViews: 6000
+        uniqueVisitors: 2000
+        threats: 25
+    expected:
+      - callsTool: list-zones
+      - callsTool:
+          name: get-zone-analytics
+          arguments:
+            zoneId: "zone-1"
+            period: "7d"
+
+  - input: "@cloudflare check the SSL and security settings for example.com"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      get-zone-settings:
+        accountId: "account-1"
+        accountName: "Example Account"
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        settings:
+          - id: "ssl"
+            name: "SSL/TLS Mode"
+            value: "strict"
+            editable: true
+          - id: "security_level"
+            name: "Security Level"
+            value: "medium"
+            editable: true
+    expected:
+      - callsTool: list-zones
+      - callsTool:
+          name: get-zone-settings
+          arguments:
+            zoneId: "zone-1"
+
+  - input: "@cloudflare are any SSL certificates for example.com expiring or failing validation?"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      list-ssl-certificates:
+        accountId: "account-1"
+        accountName: "Example Account"
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        certificatePacks:
+          - id: "cert-pack-1"
+            hosts: ["example.com", "*.example.com"]
+            status: "active"
+            health: "healthy"
+            type: "universal"
+            certificateAuthority: "Let's Encrypt"
+            validationErrors: []
+            certificates:
+              - id: "cert-1"
+                hosts: ["example.com", "*.example.com"]
+                status: "active"
+                expiresOn: "2026-12-01T00:00:00.000Z"
+                issuer: "Let's Encrypt"
+    expected:
+      - callsTool: list-zones
+      - callsTool:
+          name: list-ssl-certificates
+          arguments:
+            zoneId: "zone-1"
+
+  - input: "@cloudflare which Worker routes handle example.com?"
+    mocks:
+      list-zones:
+        - accountId: "account-1"
+          accountName: "Example Account"
+          zoneId: "zone-1"
+          zoneName: "example.com"
+          status: "active"
+          nameServers: ["anna.ns.cloudflare.com"]
+      list-worker-routes:
+        accountId: "account-1"
+        accountName: "Example Account"
+        zoneId: "zone-1"
+        zoneName: "example.com"
+        routes:
+          - id: "route-1"
+            pattern: "example.com/api/*"
+            workerName: "api"
+            enabled: true
+    expected:
+      - callsTool: list-zones
+      - callsTool:
+          name: list-worker-routes
+          arguments:
+            zoneId: "zone-1"

@@ -1,5 +1,18 @@
 # Cloudflare Changelog
 
+## [OAuth Support] - {PR_MERGE_DATE}
+
+- Added OAuth sign-in with secure token storage and automatic token refresh while preserving API tokens as an optional fallback.
+- Added commands for searching and editing DNS records, viewing account audit logs, browsing recent Pages and Workers deployments, and purging cache directly.
+- Added Pages deployment logs and Worker deployment/version history to the existing project and Worker views.
+- Added a DNS Toolkit with DNSSEC management, heuristic health checks, BIND import/export, and confirmed bulk TTL, proxy, tag, copy, and delete operations.
+- Added Quick Create DNS Record plus richer Pages deployment timelines and Worker version inspection/comparison.
+- Added Raycast AI tools for zones, DNS search and health, deployments, confirmed record creation, and confirmed cache purging.
+- Expanded Raycast AI with confirmed DNS updates/deletion and DNSSEC changes, plus Pages project, Worker version, member, and audit-log inspection.
+- Added broader AI eval coverage for discovery, targeted and destructive operations, safe advisory behavior, and account-level workflows.
+- Added read-only commands for zone traffic analytics, SSL certificate health, zone settings, and Worker routes.
+- Added matching Raycast AI tools and evals for analytics, certificate expiry and validation, settings review, and route discovery.
+
 ## [Fix] - 2026-06-25
 
 - Prevent View Pages from crashing when a Pages project has no latest deployment.
