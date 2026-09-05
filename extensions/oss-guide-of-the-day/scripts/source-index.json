@@ -1,0 +1,1569 @@
+{
+  "source": "https://opensource.guide/",
+  "license": {
+    "name": "CC-BY-4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "entryCount": 137,
+  "guides": [
+    {
+      "title": "Accessibility Best Practices for Your Project",
+      "url": "https://opensource.guide/accessibility-best-practices-for-your-project/",
+      "sections": [
+        {
+          "title": "Partner with people with disabilities",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#partner-with-people-with-disabilities",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Put it into practice",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#put-it-into-practice",
+          "level": 3,
+          "parents": [
+            "Partner with people with disabilities"
+          ]
+        },
+        {
+          "title": "Accessibility benefits everyone",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#accessibility-benefits-everyone",
+          "level": 3,
+          "parents": [
+            "Partner with people with disabilities"
+          ]
+        },
+        {
+          "title": "Start with an accessibility statement",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#start-with-an-accessibility-statement",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Goals",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#goals",
+          "level": 3,
+          "parents": [
+            "Start with an accessibility statement"
+          ]
+        },
+        {
+          "title": "Contributor requirements",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#contributor-requirements",
+          "level": 3,
+          "parents": [
+            "Start with an accessibility statement"
+          ]
+        },
+        {
+          "title": "Supported environments",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#supported-environments",
+          "level": 3,
+          "parents": [
+            "Start with an accessibility statement"
+          ]
+        },
+        {
+          "title": "Reporting accessibility bugs",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#reporting-accessibility-bugs",
+          "level": 3,
+          "parents": [
+            "Start with an accessibility statement"
+          ]
+        },
+        {
+          "title": "Why separate accessibility from your general issue process?",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#why-separate-accessibility-from-your-general-issue-process",
+          "level": 4,
+          "parents": [
+            "Start with an accessibility statement",
+            "Reporting accessibility bugs"
+          ]
+        },
+        {
+          "title": "Make docs accessible by default",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#make-docs-accessible-by-default",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Structure and semantics",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#structure-and-semantics",
+          "level": 3,
+          "parents": [
+            "Make docs accessible by default"
+          ]
+        },
+        {
+          "title": "Images, diagrams and videos",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#images-diagrams-and-videos",
+          "level": 3,
+          "parents": [
+            "Make docs accessible by default"
+          ]
+        },
+        {
+          "title": "Tables",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#tables",
+          "level": 3,
+          "parents": [
+            "Make docs accessible by default"
+          ]
+        },
+        {
+          "title": "Code blocks",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#code-blocks",
+          "level": 3,
+          "parents": [
+            "Make docs accessible by default"
+          ]
+        },
+        {
+          "title": "Design accessible interfaces",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#design-accessible-interfaces",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Keyboard support",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#keyboard-support",
+          "level": 3,
+          "parents": [
+            "Design accessible interfaces"
+          ]
+        },
+        {
+          "title": "Semantics first",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#semantics-first",
+          "level": 3,
+          "parents": [
+            "Design accessible interfaces"
+          ]
+        },
+        {
+          "title": "Names, labels, instructions",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#names-labels-instructions",
+          "level": 3,
+          "parents": [
+            "Design accessible interfaces"
+          ]
+        },
+        {
+          "title": "Color and contrast",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#color-and-contrast",
+          "level": 3,
+          "parents": [
+            "Design accessible interfaces"
+          ]
+        },
+        {
+          "title": "Motion and animation",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#motion-and-animation",
+          "level": 3,
+          "parents": [
+            "Design accessible interfaces"
+          ]
+        },
+        {
+          "title": "Dynamic content",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#dynamic-content",
+          "level": 3,
+          "parents": [
+            "Design accessible interfaces"
+          ]
+        },
+        {
+          "title": "Dependencies and patterns",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#dependencies-and-patterns",
+          "level": 3,
+          "parents": [
+            "Design accessible interfaces"
+          ]
+        },
+        {
+          "title": "Mobile considerations",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#mobile-considerations",
+          "level": 3,
+          "parents": [
+            "Design accessible interfaces"
+          ]
+        },
+        {
+          "title": "Make tools accessible",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#make-tools-accessible",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "CLI Tools",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#cli-tools",
+          "level": 3,
+          "parents": [
+            "Make tools accessible"
+          ]
+        },
+        {
+          "title": "Terminals, logs, and dashboards",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#terminals-logs-and-dashboards",
+          "level": 3,
+          "parents": [
+            "Make tools accessible"
+          ]
+        },
+        {
+          "title": "Build accessibility into contribution workflows",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#build-accessibility-into-contribution-workflows",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Add issue labels and template",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#add-issue-labels-and-template",
+          "level": 3,
+          "parents": [
+            "Build accessibility into contribution workflows"
+          ]
+        },
+        {
+          "title": "Add an accessibility checklist to pull requests (PRs)",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#add-an-accessibility-checklist-to-pull-requests-prs",
+          "level": 3,
+          "parents": [
+            "Build accessibility into contribution workflows"
+          ]
+        },
+        {
+          "title": "Define “done”",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#define-done",
+          "level": 3,
+          "parents": [
+            "Build accessibility into contribution workflows"
+          ]
+        },
+        {
+          "title": "Leverage GitHub Copilot",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#leverage-github-copilot",
+          "level": 3,
+          "parents": [
+            "Build accessibility into contribution workflows"
+          ]
+        },
+        {
+          "title": "Handle accessibility reported issues respectfully and effectively",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#handle-accessibility-reported-issues-respectfully-and-effectively",
+          "level": 3,
+          "parents": [
+            "Build accessibility into contribution workflows"
+          ]
+        },
+        {
+          "title": "Test accessibility continuously",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#test-accessibility-continuously",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Automated checks (good at catching regressions)",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#automated-checks-good-at-catching-regressions",
+          "level": 3,
+          "parents": [
+            "Test accessibility continuously"
+          ]
+        },
+        {
+          "title": "Manual testing (required for real confidence)",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#manual-testing-required-for-real-confidence",
+          "level": 3,
+          "parents": [
+            "Test accessibility continuously"
+          ]
+        },
+        {
+          "title": "Start with small wins this week",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#start-with-small-wins-this-week",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "You don’t have to do everything at once, start with a few quick improvements.",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#you-dont-have-to-do-everything-at-once-start-with-a-few-quick-improvements",
+          "level": 3,
+          "parents": [
+            "Start with small wins this week"
+          ]
+        },
+        {
+          "title": "Suggested file additions to help formalize your accessibility commitment.",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#suggested-file-additions-to-help-formalize-your-accessibility-commitment",
+          "level": 3,
+          "parents": [
+            "Start with small wins this week"
+          ]
+        },
+        {
+          "title": "Conclusion: A few steps for you, a huge improvement for your users",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#conclusion-a-few-steps-for-you-a-huge-improvement-for-your-users",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Contributors",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#contributors",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Many thanks to all the maintainers who shared their experiences and tips with us for this guide!",
+          "url": "https://opensource.guide/accessibility-best-practices-for-your-project/#many-thanks-to-all-the-maintainers-who-shared-their-experiences-and-tips-with-us-for-this-guide",
+          "level": 3,
+          "parents": [
+            "Contributors"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Best Practices for Maintainers",
+      "url": "https://opensource.guide/best-practices/",
+      "sections": [
+        {
+          "title": "What does it mean to be a maintainer?",
+          "url": "https://opensource.guide/best-practices/#what-does-it-mean-to-be-a-maintainer",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Documenting your processes",
+          "url": "https://opensource.guide/best-practices/#documenting-your-processes",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Write down your project’s vision",
+          "url": "https://opensource.guide/best-practices/#write-down-your-projects-vision",
+          "level": 3,
+          "parents": [
+            "Documenting your processes"
+          ]
+        },
+        {
+          "title": "Communicate your expectations",
+          "url": "https://opensource.guide/best-practices/#communicate-your-expectations",
+          "level": 3,
+          "parents": [
+            "Documenting your processes"
+          ]
+        },
+        {
+          "title": "Keep communication public",
+          "url": "https://opensource.guide/best-practices/#keep-communication-public",
+          "level": 3,
+          "parents": [
+            "Documenting your processes"
+          ]
+        },
+        {
+          "title": "Learning to say no",
+          "url": "https://opensource.guide/best-practices/#learning-to-say-no",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Keep the conversation friendly",
+          "url": "https://opensource.guide/best-practices/#keep-the-conversation-friendly",
+          "level": 3,
+          "parents": [
+            "Learning to say no"
+          ]
+        },
+        {
+          "title": "Be proactive",
+          "url": "https://opensource.guide/best-practices/#be-proactive",
+          "level": 3,
+          "parents": [
+            "Learning to say no"
+          ]
+        },
+        {
+          "title": "Embrace mentorship",
+          "url": "https://opensource.guide/best-practices/#embrace-mentorship",
+          "level": 3,
+          "parents": [
+            "Learning to say no"
+          ]
+        },
+        {
+          "title": "Leverage your community",
+          "url": "https://opensource.guide/best-practices/#leverage-your-community",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Share the workload",
+          "url": "https://opensource.guide/best-practices/#share-the-workload",
+          "level": 3,
+          "parents": [
+            "Leverage your community"
+          ]
+        },
+        {
+          "title": "Let others build the solutions they need",
+          "url": "https://opensource.guide/best-practices/#let-others-build-the-solutions-they-need",
+          "level": 3,
+          "parents": [
+            "Leverage your community"
+          ]
+        },
+        {
+          "title": "Bring in the robots",
+          "url": "https://opensource.guide/best-practices/#bring-in-the-robots",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Require tests and other checks to improve the quality of your code",
+          "url": "https://opensource.guide/best-practices/#require-tests-and-other-checks-to-improve-the-quality-of-your-code",
+          "level": 3,
+          "parents": [
+            "Bring in the robots"
+          ]
+        },
+        {
+          "title": "Use tools to automate basic maintenance tasks",
+          "url": "https://opensource.guide/best-practices/#use-tools-to-automate-basic-maintenance-tasks",
+          "level": 3,
+          "parents": [
+            "Bring in the robots"
+          ]
+        },
+        {
+          "title": "It’s okay to hit pause",
+          "url": "https://opensource.guide/best-practices/#its-okay-to-hit-pause",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Take care of yourself first!",
+          "url": "https://opensource.guide/best-practices/#take-care-of-yourself-first",
+          "level": 2,
+          "parents": []
+        }
+      ]
+    },
+    {
+      "title": "Building Welcoming Communities",
+      "url": "https://opensource.guide/building-community/",
+      "sections": [
+        {
+          "title": "Setting your project up for success",
+          "url": "https://opensource.guide/building-community/#setting-your-project-up-for-success",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Make people feel welcome",
+          "url": "https://opensource.guide/building-community/#make-people-feel-welcome",
+          "level": 3,
+          "parents": [
+            "Setting your project up for success"
+          ]
+        },
+        {
+          "title": "Document everything",
+          "url": "https://opensource.guide/building-community/#document-everything",
+          "level": 3,
+          "parents": [
+            "Setting your project up for success"
+          ]
+        },
+        {
+          "title": "Be responsive",
+          "url": "https://opensource.guide/building-community/#be-responsive",
+          "level": 3,
+          "parents": [
+            "Setting your project up for success"
+          ]
+        },
+        {
+          "title": "Give your community a place to congregate",
+          "url": "https://opensource.guide/building-community/#give-your-community-a-place-to-congregate",
+          "level": 3,
+          "parents": [
+            "Setting your project up for success"
+          ]
+        },
+        {
+          "title": "Growing your community",
+          "url": "https://opensource.guide/building-community/#growing-your-community",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Don’t tolerate bad actors",
+          "url": "https://opensource.guide/building-community/#dont-tolerate-bad-actors",
+          "level": 3,
+          "parents": [
+            "Growing your community"
+          ]
+        },
+        {
+          "title": "Meet contributors where they’re at",
+          "url": "https://opensource.guide/building-community/#meet-contributors-where-theyre-at",
+          "level": 3,
+          "parents": [
+            "Growing your community"
+          ]
+        },
+        {
+          "title": "Share ownership of your project",
+          "url": "https://opensource.guide/building-community/#share-ownership-of-your-project",
+          "level": 3,
+          "parents": [
+            "Growing your community"
+          ]
+        },
+        {
+          "title": "Resolving conflicts",
+          "url": "https://opensource.guide/building-community/#resolving-conflicts",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Set the bar for kindness",
+          "url": "https://opensource.guide/building-community/#set-the-bar-for-kindness",
+          "level": 3,
+          "parents": [
+            "Resolving conflicts"
+          ]
+        },
+        {
+          "title": "Treat your README as a constitution",
+          "url": "https://opensource.guide/building-community/#treat-your-readme-as-a-constitution",
+          "level": 3,
+          "parents": [
+            "Resolving conflicts"
+          ]
+        },
+        {
+          "title": "Focus on the journey, not the destination",
+          "url": "https://opensource.guide/building-community/#focus-on-the-journey-not-the-destination",
+          "level": 3,
+          "parents": [
+            "Resolving conflicts"
+          ]
+        },
+        {
+          "title": "Keep the conversation focused on action",
+          "url": "https://opensource.guide/building-community/#keep-the-conversation-focused-on-action",
+          "level": 3,
+          "parents": [
+            "Resolving conflicts"
+          ]
+        },
+        {
+          "title": "Pick your battles wisely",
+          "url": "https://opensource.guide/building-community/#pick-your-battles-wisely",
+          "level": 3,
+          "parents": [
+            "Resolving conflicts"
+          ]
+        },
+        {
+          "title": "Identify a community tiebreaker",
+          "url": "https://opensource.guide/building-community/#identify-a-community-tiebreaker",
+          "level": 3,
+          "parents": [
+            "Resolving conflicts"
+          ]
+        },
+        {
+          "title": "Community is the ❤️ of open source",
+          "url": "https://opensource.guide/building-community/#community-is-the-️-of-open-source",
+          "level": 2,
+          "parents": []
+        }
+      ]
+    },
+    {
+      "title": "Your Code of Conduct",
+      "url": "https://opensource.guide/code-of-conduct/",
+      "sections": [
+        {
+          "title": "Why do I need a code of conduct?",
+          "url": "https://opensource.guide/code-of-conduct/#why-do-i-need-a-code-of-conduct",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Establishing a code of conduct",
+          "url": "https://opensource.guide/code-of-conduct/#establishing-a-code-of-conduct",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Deciding how you’ll enforce your code of conduct",
+          "url": "https://opensource.guide/code-of-conduct/#deciding-how-youll-enforce-your-code-of-conduct",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Enforcing your code of conduct",
+          "url": "https://opensource.guide/code-of-conduct/#enforcing-your-code-of-conduct",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Gather information about the situation",
+          "url": "https://opensource.guide/code-of-conduct/#gather-information-about-the-situation",
+          "level": 3,
+          "parents": [
+            "Enforcing your code of conduct"
+          ]
+        },
+        {
+          "title": "Take appropriate action",
+          "url": "https://opensource.guide/code-of-conduct/#take-appropriate-action",
+          "level": 3,
+          "parents": [
+            "Enforcing your code of conduct"
+          ]
+        },
+        {
+          "title": "Your responsibilities as a maintainer",
+          "url": "https://opensource.guide/code-of-conduct/#your-responsibilities-as-a-maintainer",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Encourage the behavior you want to see in the world 🌎",
+          "url": "https://opensource.guide/code-of-conduct/#encourage-the-behavior-you-want-to-see-in-the-world-",
+          "level": 2,
+          "parents": []
+        }
+      ]
+    },
+    {
+      "title": "Finding Users for Your Project",
+      "url": "https://opensource.guide/finding-users/",
+      "sections": [
+        {
+          "title": "Spreading the word",
+          "url": "https://opensource.guide/finding-users/#spreading-the-word",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Figure out your message",
+          "url": "https://opensource.guide/finding-users/#figure-out-your-message",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Help people find and follow your project",
+          "url": "https://opensource.guide/finding-users/#help-people-find-and-follow-your-project",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Go where your project’s audience is (online)",
+          "url": "https://opensource.guide/finding-users/#go-where-your-projects-audience-is-online",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Go where your project’s audience is (offline)",
+          "url": "https://opensource.guide/finding-users/#go-where-your-projects-audience-is-offline",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Build a reputation",
+          "url": "https://opensource.guide/finding-users/#build-a-reputation",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Keep at it!",
+          "url": "https://opensource.guide/finding-users/#keep-at-it",
+          "level": 2,
+          "parents": []
+        }
+      ]
+    },
+    {
+      "title": "Getting Paid for Open Source Work",
+      "url": "https://opensource.guide/getting-paid/",
+      "sections": [
+        {
+          "title": "Why some people seek financial support",
+          "url": "https://opensource.guide/getting-paid/#why-some-people-seek-financial-support",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Funding your own time",
+          "url": "https://opensource.guide/getting-paid/#funding-your-own-time",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Finding funding for your project",
+          "url": "https://opensource.guide/getting-paid/#finding-funding-for-your-project",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Raise money for your work through crowdfunding campaigns or sponsorships",
+          "url": "https://opensource.guide/getting-paid/#raise-money-for-your-work-through-crowdfunding-campaigns-or-sponsorships",
+          "level": 3,
+          "parents": [
+            "Finding funding for your project"
+          ]
+        },
+        {
+          "title": "Create a revenue stream",
+          "url": "https://opensource.guide/getting-paid/#create-a-revenue-stream",
+          "level": 3,
+          "parents": [
+            "Finding funding for your project"
+          ]
+        },
+        {
+          "title": "Apply for grant funding",
+          "url": "https://opensource.guide/getting-paid/#apply-for-grant-funding",
+          "level": 3,
+          "parents": [
+            "Finding funding for your project"
+          ]
+        },
+        {
+          "title": "Building a case for financial support",
+          "url": "https://opensource.guide/getting-paid/#building-a-case-for-financial-support",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Impact",
+          "url": "https://opensource.guide/getting-paid/#impact",
+          "level": 3,
+          "parents": [
+            "Building a case for financial support"
+          ]
+        },
+        {
+          "title": "Traction",
+          "url": "https://opensource.guide/getting-paid/#traction",
+          "level": 3,
+          "parents": [
+            "Building a case for financial support"
+          ]
+        },
+        {
+          "title": "Value to funder",
+          "url": "https://opensource.guide/getting-paid/#value-to-funder",
+          "level": 3,
+          "parents": [
+            "Building a case for financial support"
+          ]
+        },
+        {
+          "title": "Use of funds",
+          "url": "https://opensource.guide/getting-paid/#use-of-funds",
+          "level": 3,
+          "parents": [
+            "Building a case for financial support"
+          ]
+        },
+        {
+          "title": "How you’ll receive the funds",
+          "url": "https://opensource.guide/getting-paid/#how-youll-receive-the-funds",
+          "level": 3,
+          "parents": [
+            "Building a case for financial support"
+          ]
+        },
+        {
+          "title": "Experiment and don’t give up",
+          "url": "https://opensource.guide/getting-paid/#experiment-and-dont-give-up",
+          "level": 2,
+          "parents": []
+        }
+      ]
+    },
+    {
+      "title": "How to Contribute to Open Source",
+      "url": "https://opensource.guide/how-to-contribute/",
+      "sections": [
+        {
+          "title": "Why contribute to open source?",
+          "url": "https://opensource.guide/how-to-contribute/#why-contribute-to-open-source",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Improve software you rely on",
+          "url": "https://opensource.guide/how-to-contribute/#improve-software-you-rely-on",
+          "level": 3,
+          "parents": [
+            "Why contribute to open source?"
+          ]
+        },
+        {
+          "title": "Improve existing skills",
+          "url": "https://opensource.guide/how-to-contribute/#improve-existing-skills",
+          "level": 3,
+          "parents": [
+            "Why contribute to open source?"
+          ]
+        },
+        {
+          "title": "Meet people who are interested in similar things",
+          "url": "https://opensource.guide/how-to-contribute/#meet-people-who-are-interested-in-similar-things",
+          "level": 3,
+          "parents": [
+            "Why contribute to open source?"
+          ]
+        },
+        {
+          "title": "Find mentors and teach others",
+          "url": "https://opensource.guide/how-to-contribute/#find-mentors-and-teach-others",
+          "level": 3,
+          "parents": [
+            "Why contribute to open source?"
+          ]
+        },
+        {
+          "title": "Build public artifacts that help you grow a reputation (and a career)",
+          "url": "https://opensource.guide/how-to-contribute/#build-public-artifacts-that-help-you-grow-a-reputation-and-a-career",
+          "level": 3,
+          "parents": [
+            "Why contribute to open source?"
+          ]
+        },
+        {
+          "title": "Learn people skills",
+          "url": "https://opensource.guide/how-to-contribute/#learn-people-skills",
+          "level": 3,
+          "parents": [
+            "Why contribute to open source?"
+          ]
+        },
+        {
+          "title": "It’s empowering to make changes, even small ones",
+          "url": "https://opensource.guide/how-to-contribute/#its-empowering-to-make-changes-even-small-ones",
+          "level": 3,
+          "parents": [
+            "Why contribute to open source?"
+          ]
+        },
+        {
+          "title": "What it means to contribute",
+          "url": "https://opensource.guide/how-to-contribute/#what-it-means-to-contribute",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "You don’t have to contribute code",
+          "url": "https://opensource.guide/how-to-contribute/#you-dont-have-to-contribute-code",
+          "level": 3,
+          "parents": [
+            "What it means to contribute"
+          ]
+        },
+        {
+          "title": "Do you like planning events?",
+          "url": "https://opensource.guide/how-to-contribute/#do-you-like-planning-events",
+          "level": 3,
+          "parents": [
+            "What it means to contribute"
+          ]
+        },
+        {
+          "title": "Do you like to design?",
+          "url": "https://opensource.guide/how-to-contribute/#do-you-like-to-design",
+          "level": 3,
+          "parents": [
+            "What it means to contribute"
+          ]
+        },
+        {
+          "title": "Do you like to write?",
+          "url": "https://opensource.guide/how-to-contribute/#do-you-like-to-write",
+          "level": 3,
+          "parents": [
+            "What it means to contribute"
+          ]
+        },
+        {
+          "title": "Do you like organizing?",
+          "url": "https://opensource.guide/how-to-contribute/#do-you-like-organizing",
+          "level": 3,
+          "parents": [
+            "What it means to contribute"
+          ]
+        },
+        {
+          "title": "Do you like to code?",
+          "url": "https://opensource.guide/how-to-contribute/#do-you-like-to-code",
+          "level": 3,
+          "parents": [
+            "What it means to contribute"
+          ]
+        },
+        {
+          "title": "Do you like helping people?",
+          "url": "https://opensource.guide/how-to-contribute/#do-you-like-helping-people",
+          "level": 3,
+          "parents": [
+            "What it means to contribute"
+          ]
+        },
+        {
+          "title": "Do you like helping others code?",
+          "url": "https://opensource.guide/how-to-contribute/#do-you-like-helping-others-code",
+          "level": 3,
+          "parents": [
+            "What it means to contribute"
+          ]
+        },
+        {
+          "title": "You don’t just have to work on software projects!",
+          "url": "https://opensource.guide/how-to-contribute/#you-dont-just-have-to-work-on-software-projects",
+          "level": 3,
+          "parents": [
+            "What it means to contribute"
+          ]
+        },
+        {
+          "title": "Orienting yourself to a new project",
+          "url": "https://opensource.guide/how-to-contribute/#orienting-yourself-to-a-new-project",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Anatomy of an open source project",
+          "url": "https://opensource.guide/how-to-contribute/#anatomy-of-an-open-source-project",
+          "level": 3,
+          "parents": [
+            "Orienting yourself to a new project"
+          ]
+        },
+        {
+          "title": "Finding a project to contribute to",
+          "url": "https://opensource.guide/how-to-contribute/#finding-a-project-to-contribute-to",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "A checklist before you contribute",
+          "url": "https://opensource.guide/how-to-contribute/#a-checklist-before-you-contribute",
+          "level": 3,
+          "parents": [
+            "Finding a project to contribute to"
+          ]
+        },
+        {
+          "title": "How to submit a contribution",
+          "url": "https://opensource.guide/how-to-contribute/#how-to-submit-a-contribution",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Communicating effectively",
+          "url": "https://opensource.guide/how-to-contribute/#communicating-effectively",
+          "level": 3,
+          "parents": [
+            "How to submit a contribution"
+          ]
+        },
+        {
+          "title": "Gathering context",
+          "url": "https://opensource.guide/how-to-contribute/#gathering-context",
+          "level": 3,
+          "parents": [
+            "How to submit a contribution"
+          ]
+        },
+        {
+          "title": "Opening an issue",
+          "url": "https://opensource.guide/how-to-contribute/#opening-an-issue",
+          "level": 3,
+          "parents": [
+            "How to submit a contribution"
+          ]
+        },
+        {
+          "title": "Opening a pull request",
+          "url": "https://opensource.guide/how-to-contribute/#opening-a-pull-request",
+          "level": 3,
+          "parents": [
+            "How to submit a contribution"
+          ]
+        },
+        {
+          "title": "What happens after you submit your contribution",
+          "url": "https://opensource.guide/how-to-contribute/#what-happens-after-you-submit-your-contribution",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "😭 You don’t get a response",
+          "url": "https://opensource.guide/how-to-contribute/#-you-dont-get-a-response",
+          "level": 3,
+          "parents": [
+            "What happens after you submit your contribution"
+          ]
+        },
+        {
+          "title": "🚧 Someone requests changes to your contribution",
+          "url": "https://opensource.guide/how-to-contribute/#-someone-requests-changes-to-your-contribution",
+          "level": 3,
+          "parents": [
+            "What happens after you submit your contribution"
+          ]
+        },
+        {
+          "title": "👎 Your contribution doesn’t get accepted",
+          "url": "https://opensource.guide/how-to-contribute/#-your-contribution-doesnt-get-accepted",
+          "level": 3,
+          "parents": [
+            "What happens after you submit your contribution"
+          ]
+        },
+        {
+          "title": "🎉 Your contribution gets accepted",
+          "url": "https://opensource.guide/how-to-contribute/#-your-contribution-gets-accepted",
+          "level": 3,
+          "parents": [
+            "What happens after you submit your contribution"
+          ]
+        },
+        {
+          "title": "You did it! 🎉",
+          "url": "https://opensource.guide/how-to-contribute/#you-did-it-",
+          "level": 2,
+          "parents": []
+        }
+      ]
+    },
+    {
+      "title": "Leadership and Governance",
+      "url": "https://opensource.guide/leadership-and-governance/",
+      "sections": [
+        {
+          "title": "Understanding governance for your growing project",
+          "url": "https://opensource.guide/leadership-and-governance/#understanding-governance-for-your-growing-project",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "What are examples of formal roles used in open source projects?",
+          "url": "https://opensource.guide/leadership-and-governance/#what-are-examples-of-formal-roles-used-in-open-source-projects",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "How do I formalize these leadership roles?",
+          "url": "https://opensource.guide/leadership-and-governance/#how-do-i-formalize-these-leadership-roles",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "When should I give someone commit access?",
+          "url": "https://opensource.guide/leadership-and-governance/#when-should-i-give-someone-commit-access",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "What are some of the common governance structures for open source projects?",
+          "url": "https://opensource.guide/leadership-and-governance/#what-are-some-of-the-common-governance-structures-for-open-source-projects",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Do I need governance docs when I launch my project?",
+          "url": "https://opensource.guide/leadership-and-governance/#do-i-need-governance-docs-when-i-launch-my-project",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "What happens if corporate employees start submitting contributions?",
+          "url": "https://opensource.guide/leadership-and-governance/#what-happens-if-corporate-employees-start-submitting-contributions",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Do I need a legal entity to support my project?",
+          "url": "https://opensource.guide/leadership-and-governance/#do-i-need-a-legal-entity-to-support-my-project",
+          "level": 2,
+          "parents": []
+        }
+      ]
+    },
+    {
+      "title": "The Legal Side of Open Source",
+      "url": "https://opensource.guide/legal/",
+      "sections": [
+        {
+          "title": "Understanding the legal implications of open source",
+          "url": "https://opensource.guide/legal/#understanding-the-legal-implications-of-open-source",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Why do people care so much about the legal side of open source?",
+          "url": "https://opensource.guide/legal/#why-do-people-care-so-much-about-the-legal-side-of-open-source",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Are public GitHub projects open source?",
+          "url": "https://opensource.guide/legal/#are-public-github-projects-open-source",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Just give me the TL;DR on what I need to protect my project.",
+          "url": "https://opensource.guide/legal/#just-give-me-the-tldr-on-what-i-need-to-protect-my-project",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Which open source license is appropriate for my project?",
+          "url": "https://opensource.guide/legal/#which-open-source-license-is-appropriate-for-my-project",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "What if I want to change the license of my project?",
+          "url": "https://opensource.guide/legal/#what-if-i-want-to-change-the-license-of-my-project",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Does my project need an additional contributor agreement?",
+          "url": "https://opensource.guide/legal/#does-my-project-need-an-additional-contributor-agreement",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "What does my company’s legal team need to know?",
+          "url": "https://opensource.guide/legal/#what-does-my-companys-legal-team-need-to-know",
+          "level": 2,
+          "parents": []
+        }
+      ]
+    },
+    {
+      "title": "Maintaining Balance for Open Source Maintainers",
+      "url": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/",
+      "sections": [
+        {
+          "title": "Tips for Self-Care and Avoiding Burnout as a Maintainer:",
+          "url": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#tips-for-self-care-and-avoiding-burnout-as-a-maintainer",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Identify your motivations for working in open source",
+          "url": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#identify-your-motivations-for-working-in-open-source",
+          "level": 3,
+          "parents": [
+            "Tips for Self-Care and Avoiding Burnout as a Maintainer:"
+          ]
+        },
+        {
+          "title": "Reflect on what causes you to get out of balance and stressed out",
+          "url": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#reflect-on-what-causes-you-to-get-out-of-balance-and-stressed-out",
+          "level": 3,
+          "parents": [
+            "Tips for Self-Care and Avoiding Burnout as a Maintainer:"
+          ]
+        },
+        {
+          "title": "Watch out for signs of burnout",
+          "url": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#watch-out-for-signs-of-burnout",
+          "level": 3,
+          "parents": [
+            "Tips for Self-Care and Avoiding Burnout as a Maintainer:"
+          ]
+        },
+        {
+          "title": "What would you need to continue sustaining yourself and your community?",
+          "url": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#what-would-you-need-to-continue-sustaining-yourself-and-your-community",
+          "level": 3,
+          "parents": [
+            "Tips for Self-Care and Avoiding Burnout as a Maintainer:"
+          ]
+        },
+        {
+          "title": "Additional Resources",
+          "url": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#additional-resources",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Contributors",
+          "url": "https://opensource.guide/maintaining-balance-for-open-source-maintainers/#contributors",
+          "level": 2,
+          "parents": []
+        }
+      ]
+    },
+    {
+      "title": "Open Source Metrics",
+      "url": "https://opensource.guide/metrics/",
+      "sections": [
+        {
+          "title": "Why measure anything?",
+          "url": "https://opensource.guide/metrics/#why-measure-anything",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Discovery",
+          "url": "https://opensource.guide/metrics/#discovery",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Usage",
+          "url": "https://opensource.guide/metrics/#usage",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Retention",
+          "url": "https://opensource.guide/metrics/#retention",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Maintainer activity",
+          "url": "https://opensource.guide/metrics/#maintainer-activity",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Use 📊 to learn about people",
+          "url": "https://opensource.guide/metrics/#use--to-learn-about-people",
+          "level": 2,
+          "parents": []
+        }
+      ]
+    },
+    {
+      "title": "Security Best Practices for your Project",
+      "url": "https://opensource.guide/security-best-practices-for-your-project/",
+      "sections": [
+        {
+          "title": "Ensure all privileged contributors have enabled Multi-Factor Authentication (MFA)",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#ensure-all-privileged-contributors-have-enabled-multi-factor-authentication-mfa",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "A malicious actor who manages to impersonate a privileged contributor to your project will cause catastrophic damages.",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#a-malicious-actor-who-manages-to-impersonate-a-privileged-contributor-to-your-project-will-cause-catastrophic-damages",
+          "level": 3,
+          "parents": [
+            "Ensure all privileged contributors have enabled Multi-Factor Authentication (MFA)"
+          ]
+        },
+        {
+          "title": "Secure your code as part of your development workflow",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#secure-your-code-as-part-of-your-development-workflow",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Security vulnerabilities in your code are cheaper to fix when detected early in the process than later, when they are used in production.",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#security-vulnerabilities-in-your-code-are-cheaper-to-fix-when-detected-early-in-the-process-than-later-when-they-are-used-in-production",
+          "level": 3,
+          "parents": [
+            "Secure your code as part of your development workflow"
+          ]
+        },
+        {
+          "title": "Don’t share your secrets",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#dont-share-your-secrets",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Sensitive data, such as API keys, tokens, and passwords, can sometimes accidentally get committed to your repository.",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#sensitive-data-such-as-api-keys-tokens-and-passwords-can-sometimes-accidentally-get-committed-to-your-repository",
+          "level": 3,
+          "parents": [
+            "Don’t share your secrets"
+          ]
+        },
+        {
+          "title": "Check and update your dependencies",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#check-and-update-your-dependencies",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Dependencies in your project can have vulnerabilities that compromise the security of your project. Manually keeping dependencies up to date can be a time-consuming task.",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#dependencies-in-your-project-can-have-vulnerabilities-that-compromise-the-security-of-your-project-manually-keeping-dependencies-up-to-date-can-be-a-time-consuming-task",
+          "level": 3,
+          "parents": [
+            "Check and update your dependencies"
+          ]
+        },
+        {
+          "title": "Understand and manage open source license risks",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#understand-and-manage-open-source-license-risks",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Open source licenses come with terms and ignoring them can lead to legal and reputational risks.",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#open-source-licenses-come-with-terms-and-ignoring-them-can-lead-to-legal-and-reputational-risks",
+          "level": 3,
+          "parents": [
+            "Understand and manage open source license risks"
+          ]
+        },
+        {
+          "title": "Avoid unwanted changes with protected branches",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#avoid-unwanted-changes-with-protected-branches",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Unrestricted access to your main branches can lead to accidental or malicious changes that may introduce vulnerabilities or disrupt the stability of your project.",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#unrestricted-access-to-your-main-branches-can-lead-to-accidental-or-malicious-changes-that-may-introduce-vulnerabilities-or-disrupt-the-stability-of-your-project",
+          "level": 3,
+          "parents": [
+            "Avoid unwanted changes with protected branches"
+          ]
+        },
+        {
+          "title": "Make it easy (and safe) to report security issues",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#make-it-easy-and-safe-to-report-security-issues",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "It’s a good practice to make it easy for your users to report bugs, but the big question is: when this bug has a security impact, how can they safely report them to you without putting a target on you for malicious hackers?",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#its-a-good-practice-to-make-it-easy-for-your-users-to-report-bugs-but-the-big-question-is-when-this-bug-has-a-security-impact-how-can-they-safely-report-them-to-you-without-putting-a-target-on-you-for-malicious-hackers",
+          "level": 3,
+          "parents": [
+            "Make it easy (and safe) to report security issues"
+          ]
+        },
+        {
+          "title": "Security Policy",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#security-policy",
+          "level": 3,
+          "parents": [
+            "Make it easy (and safe) to report security issues"
+          ]
+        },
+        {
+          "title": "Private Vulnerability Reporting",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#private-vulnerability-reporting",
+          "level": 3,
+          "parents": [
+            "Make it easy (and safe) to report security issues"
+          ]
+        },
+        {
+          "title": "Define your threat model to help users and researchers understand scope",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#define-your-threat-model-to-help-users-and-researchers-understand-scope",
+          "level": 3,
+          "parents": [
+            "Make it easy (and safe) to report security issues"
+          ]
+        },
+        {
+          "title": "Prepare a lightweight incident response process",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#prepare-a-lightweight-incident-response-process",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Having a basic incident response plan helps you stay calm and act efficiently, ensuring the safety of your users and consumers.",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#having-a-basic-incident-response-plan-helps-you-stay-calm-and-act-efficiently-ensuring-the-safety-of-your-users-and-consumers",
+          "level": 3,
+          "parents": [
+            "Prepare a lightweight incident response process"
+          ]
+        },
+        {
+          "title": "Treat security as a team effort",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#treat-security-as-a-team-effort",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Security isn’t a solo responsibility. It works best when shared across your project’s community.",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#security-isnt-a-solo-responsibility-it-works-best-when-shared-across-your-projects-community",
+          "level": 3,
+          "parents": [
+            "Treat security as a team effort"
+          ]
+        },
+        {
+          "title": "Conclusion: A few steps for you, a huge improvement for your users",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#conclusion-a-few-steps-for-you-a-huge-improvement-for-your-users",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Contributors",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#contributors",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Many thanks to all the maintainers who shared their experiences and tips with us for this guide!",
+          "url": "https://opensource.guide/security-best-practices-for-your-project/#many-thanks-to-all-the-maintainers-who-shared-their-experiences-and-tips-with-us-for-this-guide",
+          "level": 3,
+          "parents": [
+            "Contributors"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Starting an Open Source Project",
+      "url": "https://opensource.guide/starting-a-project/",
+      "sections": [
+        {
+          "title": "The “what” and “why” of open source",
+          "url": "https://opensource.guide/starting-a-project/#the-what-and-why-of-open-source",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "What does “open source” mean?",
+          "url": "https://opensource.guide/starting-a-project/#what-does-open-source-mean",
+          "level": 3,
+          "parents": [
+            "The “what” and “why” of open source"
+          ]
+        },
+        {
+          "title": "Why do people open source their work?",
+          "url": "https://opensource.guide/starting-a-project/#why-do-people-open-source-their-work",
+          "level": 3,
+          "parents": [
+            "The “what” and “why” of open source"
+          ]
+        },
+        {
+          "title": "Does open source mean “free of charge”?",
+          "url": "https://opensource.guide/starting-a-project/#does-open-source-mean-free-of-charge",
+          "level": 3,
+          "parents": [
+            "The “what” and “why” of open source"
+          ]
+        },
+        {
+          "title": "Should I launch my own open source project?",
+          "url": "https://opensource.guide/starting-a-project/#should-i-launch-my-own-open-source-project",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Setting your goals",
+          "url": "https://opensource.guide/starting-a-project/#setting-your-goals",
+          "level": 3,
+          "parents": [
+            "Should I launch my own open source project?"
+          ]
+        },
+        {
+          "title": "Contributing to other projects",
+          "url": "https://opensource.guide/starting-a-project/#contributing-to-other-projects",
+          "level": 3,
+          "parents": [
+            "Should I launch my own open source project?"
+          ]
+        },
+        {
+          "title": "Launching your own open source project",
+          "url": "https://opensource.guide/starting-a-project/#launching-your-own-open-source-project",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Choosing a license",
+          "url": "https://opensource.guide/starting-a-project/#choosing-a-license",
+          "level": 3,
+          "parents": [
+            "Launching your own open source project"
+          ]
+        },
+        {
+          "title": "Writing a README",
+          "url": "https://opensource.guide/starting-a-project/#writing-a-readme",
+          "level": 3,
+          "parents": [
+            "Launching your own open source project"
+          ]
+        },
+        {
+          "title": "Writing your contributing guidelines",
+          "url": "https://opensource.guide/starting-a-project/#writing-your-contributing-guidelines",
+          "level": 3,
+          "parents": [
+            "Launching your own open source project"
+          ]
+        },
+        {
+          "title": "Establishing a code of conduct",
+          "url": "https://opensource.guide/starting-a-project/#establishing-a-code-of-conduct",
+          "level": 3,
+          "parents": [
+            "Launching your own open source project"
+          ]
+        },
+        {
+          "title": "Naming and branding your project",
+          "url": "https://opensource.guide/starting-a-project/#naming-and-branding-your-project",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "Choosing the right name",
+          "url": "https://opensource.guide/starting-a-project/#choosing-the-right-name",
+          "level": 3,
+          "parents": [
+            "Naming and branding your project"
+          ]
+        },
+        {
+          "title": "Avoiding name conflicts",
+          "url": "https://opensource.guide/starting-a-project/#avoiding-name-conflicts",
+          "level": 3,
+          "parents": [
+            "Naming and branding your project"
+          ]
+        },
+        {
+          "title": "How you write (and code) affects your brand, too!",
+          "url": "https://opensource.guide/starting-a-project/#how-you-write-and-code-affects-your-brand-too",
+          "level": 3,
+          "parents": [
+            "Naming and branding your project"
+          ]
+        },
+        {
+          "title": "Your pre-launch checklist",
+          "url": "https://opensource.guide/starting-a-project/#your-pre-launch-checklist",
+          "level": 2,
+          "parents": []
+        },
+        {
+          "title": "You did it!",
+          "url": "https://opensource.guide/starting-a-project/#you-did-it",
+          "level": 2,
+          "parents": []
+        }
+      ]
+    }
+  ]
+}
