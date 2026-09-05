@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-code-projects",
+  "title": "Claude Code Projects",
+  "description": "Browse your Claude Code projects and resume sessions in your favorite Windows terminal.",
+  "icon": "icon.png",
+  "author": "almirb",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "platforms": ["Windows"],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Claude Code Projects",
+      "subtitle": "Claude Code",
+      "description": "List your Claude Code projects and open them in a terminal to resume a session.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminal",
+      "title": "Terminal",
+      "description": "Terminal used to open the project.",
+      "type": "dropdown",
+      "required": false,
+      "default": "windowsTerminal",
+      "data": [
+        { "title": "Windows Terminal — new tab", "value": "windowsTerminal" },
+        { "title": "PowerShell 7 (pwsh) — new window", "value": "pwsh" },
+        { "title": "Windows PowerShell — new window", "value": "powershell" },
+        { "title": "Command Prompt (cmd) — new window", "value": "cmd" }
+      ]
+    },
+    {
+      "name": "claudeArgs",
+      "title": "Extra Claude Arguments",
+      "description": "Arguments appended to the claude command (e.g. --model opus).",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
