@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "openai-compatible-chat",
-  "title": "OpenAI Compatible Chat",
+  "name": "ai-quick-chat",
+  "title": "AI Quick Chat",
   "description": "Chat with OpenAI-compatible models from Raycast, including GLM, Ollama, LM Studio, and custom providers.",
   "icon": "icon.png",
   "author": "ctacta621",
@@ -12,7 +12,7 @@
     {
       "name": "ask-ai",
       "title": "Ask AI",
-      "subtitle": "OpenAI Compatible Chat",
+      "subtitle": "AI Quick Chat",
       "description": "Ask a question or continue a private AI chat",
       "mode": "view",
       "arguments": [
@@ -27,14 +27,14 @@
     {
       "name": "chat-history",
       "title": "Chat History",
-      "subtitle": "OpenAI Compatible Chat",
+      "subtitle": "AI Quick Chat",
       "description": "Browse and continue saved AI conversations",
       "mode": "view"
     },
     {
       "name": "manage-providers",
       "title": "Manage AI Providers",
-      "subtitle": "OpenAI Compatible Chat",
+      "subtitle": "AI Quick Chat",
       "description": "Configure OpenAI-compatible endpoints and models",
       "mode": "view"
     }

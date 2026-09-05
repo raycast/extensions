@@ -1,4 +1,4 @@
-# OpenAI Compatible Chat
+# AI Quick Chat
 
 Use your own OpenAI-compatible AI providers directly inside Raycast for Windows. The extension includes streaming multi-turn chat, multiple provider profiles, model discovery, encrypted local history, and support for reasoning streams used by GLM and similar models.
 
