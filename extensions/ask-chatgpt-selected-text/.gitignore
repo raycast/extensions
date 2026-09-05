@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.DS_Store
+/work/
+
+# Working icon sources; the Store runtime icon lives in assets/.
+/extension-icon.png
+/extension-icon.ppm
+/extension-icon.svg

@@ -1,0 +1,64 @@
+{
+  "name": "ask-chatgpt-selected-text",
+  "title": "Ask GPT",
+  "version": "1.0.0",
+  "description": "从 Raycast 向 ChatGPT 发送问题或选中文字",
+  "icon": "extension-icon.png",
+  "author": "zl_h",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "ChatGPT",
+    "GPT",
+    "Ask",
+    "提问",
+    "AI"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.102.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.3",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "commands": [
+    {
+      "name": "ask-question",
+      "title": "Ask GPT",
+      "subtitle": "手动输入问题",
+      "description": "输入问题并发送给 ChatGPT",
+      "icon": "extension-icon.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "输入你想问 GPT 的问题",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ask-selected-text",
+      "title": "Ask GPT with Selected Text",
+      "subtitle": "快捷键直接发送当前选区",
+      "description": "读取当前应用选中的文字并发送给 ChatGPT",
+      "icon": "extension-icon.png",
+      "mode": "no-view"
+    }
+  ]
+}
