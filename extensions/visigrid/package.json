@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "visigrid",
+  "title": "VisiGrid",
+  "description": "Spreadsheet powers from your launcher: evaluate Excel formulas against clipboard data, peek inside xlsx/csv/sheet files, and open workbooks — via the VisiGrid CLI.",
+  "icon": "icon.png",
+  "author": "visigrid",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "spreadsheet",
+    "excel",
+    "csv",
+    "xlsx",
+    "formula",
+    "vgrid"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-calc",
+      "title": "Quick Calc",
+      "subtitle": "VisiGrid",
+      "description": "Run an Excel formula against CSV data from your clipboard.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "formula",
+          "placeholder": "=SUM(A1:A10)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "peek",
+      "title": "Peek Spreadsheet",
+      "subtitle": "VisiGrid",
+      "description": "Browse recent spreadsheets and preview them as a grid without opening anything.",
+      "mode": "view"
+    },
+    {
+      "name": "open-workbook",
+      "title": "Open Workbook",
+      "subtitle": "VisiGrid",
+      "description": "Search recent spreadsheet files and open them in VisiGrid.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vgridPath",
+      "title": "vgrid Path",
+      "description": "Path to the vgrid CLI binary. Leave empty to auto-detect (Homebrew locations).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/vgrid",
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
