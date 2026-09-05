@@ -1,5 +1,18 @@
 # Changelog
 
+## [Quick Add with Quick Add Magic] - {PR_MERGE_DATE}
+
+- New `Quick Add` command to create a task from a single line, with a live preview of the parsed result while typing
+- Quick Add Magic parsing for natural dates, `*label`, `+project`, `!priority`, `@assignee`, and repeat intervals such as "every week"
+- Press Enter to review the parsed result in a prefilled form, or Cmd+Enter to create the task right away
+- New "Quick Add Magic" preference to choose the prefix syntax (Vikunja, Todoist, or disabled)
+- New "Default Reminder" preference to add a reminder relative to the due date
+- Missing labels are created on submit, so cancelling the form leaves no unused labels behind
+- Assignees are matched against project members; names that do not match are reported and skipped instead of blocking creation
+- Repeat intervals can be adjusted in the confirmation form
+- Recent Quick Add inputs are offered when the search bar is empty
+- Fix project and label lookups only reading the first page of results, which could duplicate an existing label on instances with more than 50 labels
+
 ## [Updates] - 2026-04-28
 
 - Reorder actions in TaskList
