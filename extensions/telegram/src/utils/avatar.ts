@@ -1,4 +1,6 @@
 import { Icon, Image, Color } from "@raycast/api";
+import { existsSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 export interface AvatarOptions {
   photo?: string;
@@ -6,9 +8,31 @@ export interface AvatarOptions {
   type?: "private" | "group" | "supergroup" | "channel";
 }
 
+function getFallbackIcon(type: AvatarOptions["type"]): Icon {
+  switch (type) {
+    case "private":
+      return Icon.PersonCircle;
+    case "group":
+    case "supergroup":
+      return Icon.TwoPeople;
+    case "channel":
+      return Icon.Megaphone;
+    default:
+      return Icon.Message;
+  }
+}
+
 export function getAvatarIcon(options: AvatarOptions): Image.ImageLike {
-  if (options.photo) {
-    return { source: options.photo, mask: Image.Mask.Circle };
+  const fallbackIcon = getFallbackIcon(options.type);
+
+  if (options.photo && existsSync(options.photo)) {
+    return {
+      // Raycast's Windows renderer expects local images as file URLs. Passing
+      // the raw C:\\... path results in an empty placeholder icon.
+      source: pathToFileURL(options.photo).href,
+      fallback: fallbackIcon,
+      mask: Image.Mask.Circle,
+    };
   }
 
   // Generate a consistent color based on name
@@ -21,21 +45,8 @@ export function getAvatarIcon(options: AvatarOptions): Image.ImageLike {
   }
   const colorIndex = Math.abs(hash) % colors.length;
 
-  // Use different icons based on type
-  let iconSource: Icon;
-  switch (options.type) {
-    case "private":
-      iconSource = Icon.PersonCircle;
-      break;
-    case "group":
-      iconSource = Icon.Message;
-      break;
-    default:
-      iconSource = Icon.Message;
-  }
-
   return {
-    source: iconSource,
+    source: fallbackIcon,
     tintColor: colors[colorIndex],
   };
 }

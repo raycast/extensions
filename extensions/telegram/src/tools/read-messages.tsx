@@ -4,12 +4,13 @@ import { handleTelegramError } from "../utils/errors";
 
 interface Arguments {
   chatId: string;
+  topicId?: number;
   limit?: number;
 }
 
 export default async function ReadMessages(args: Arguments) {
   try {
-    const { chatId, limit = 20 } = args;
+    const { chatId, topicId, limit = 20 } = args;
 
     if (!chatId) {
       throw new Error("Chat ID is required");
@@ -21,7 +22,7 @@ export default async function ReadMessages(args: Arguments) {
     }
 
     const config = getConfig();
-    const messages = await getChatMessages({ config, chatId, limit, skipMediaDownload: true });
+    const messages = await getChatMessages({ config, chatId, topicId, limit, skipMediaDownload: true });
 
     return {
       messages: messages.map((msg) => ({
@@ -29,6 +30,7 @@ export default async function ReadMessages(args: Arguments) {
         text: msg.text,
         senderName: msg.senderName,
         senderId: msg.senderId,
+        isOutgoing: msg.isOutgoing,
         date: msg.date.toISOString(),
         media: msg.media
           ? {
