@@ -8,7 +8,7 @@ import {
   calculateUpgradeEffect,
   getMilestoneBonus,
 } from "./types";
-import { loadGameState, saveGameState, resetGameState } from "./storage";
+import { loadGameState, saveGameState } from "./storage";
 import { PRESTIGE_UPGRADES, calculatePrestigeUpgradeCost, calculatePrestigeUpgradeEffect } from "./prestigeUpgrades";
 import { ACHIEVEMENTS } from "./achievements";
 import { PRESTIGE_PP_DIVISOR } from "./constants";
@@ -36,6 +36,8 @@ export function useGameState(): UseGameStateReturn {
   const [lastClickTime, setLastClickTime] = useState<number>(0);
   const lastUpdateRef = useRef<number>(Date.now());
   const latestStateRef = useRef<GameState>(INITIAL_STATE);
+  const loadedRef = useRef(false);
+  const lastSaveRef = useRef(Date.now());
   // In-run counters (not persisted)
   const clickTimesRef = useRef<number[]>([]); // timestamps of last 30s
   const luckyTriggersRef = useRef<number>(0);
@@ -397,8 +399,12 @@ export function useGameState(): UseGameStateReturn {
           }
         }
 
+        lastUpdateRef.current = now;
         savedState.lastUpdate = now;
-        setGameState(calculateDerivedState(savedState));
+        const loadedState = calculateDerivedState(savedState);
+        latestStateRef.current = loadedState;
+        loadedRef.current = true;
+        setGameState(loadedState);
       } catch (error) {
         console.error("Failed to load game state:", error);
         setGameState(calculateDerivedState(INITIAL_STATE));
@@ -442,8 +448,9 @@ export function useGameState(): UseGameStateReturn {
               lastUpdate: now,
             };
             // Auto-save every ~5s (more reliable persistence)
-            if (now - prev >= 5000) {
-              saveGameState(newState);
+            if (now - lastSaveRef.current >= 5000) {
+              lastSaveRef.current = now;
+              void saveGameState(newState);
             }
             return newState;
           });
@@ -466,7 +473,7 @@ export function useGameState(): UseGameStateReturn {
   // Save once on unmount as a safety net
   useEffect(() => {
     return () => {
-      void saveGameState(latestStateRef.current);
+      if (loadedRef.current) void saveGameState(latestStateRef.current);
     };
   }, []);
 
@@ -768,14 +775,13 @@ export function useGameState(): UseGameStateReturn {
   // Reset game to initial state
   const reset = async () => {
     try {
-      await resetGameState();
-      const newState = {
-        ...INITIAL_STATE,
-        lastUpdate: Date.now(),
-      };
-      setGameState(calculateDerivedState(newState));
+      const derivedState = calculateDerivedState({ ...INITIAL_STATE, lastUpdate: Date.now() });
+      latestStateRef.current = derivedState;
+      lastUpdateRef.current = derivedState.lastUpdate;
+      setGameState(derivedState);
       setLastClickTime(0);
-      return newState;
+      await saveGameState(derivedState);
+      return derivedState;
     } catch (error) {
       showToast({
         title: "Failed to reset game",
