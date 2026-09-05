@@ -1,0 +1,33 @@
+{
+  "request_id": "request-current",
+  "data": {
+    "page": {
+      "page_id": 6410630422455,
+      "name": "DeepSeek",
+      "components": [
+        { "component_id": "api", "name": "API Service" },
+        { "component_id": "chat", "section_id": "chat-section", "name": "Chat Service" }
+      ],
+      "sections": [{ "section_id": "chat-section", "name": "Chat" }]
+    },
+    "active_changes": [
+      {
+        "change_id": 200,
+        "type": "incident",
+        "title": "Chat latency",
+        "status": "investigating",
+        "start_at_seconds": 1786460400,
+        "affected_components": [{ "component_id": "chat", "status": "degraded" }],
+        "updates": [
+          {
+            "update_id": "update-active",
+            "at_seconds": 1786461000,
+            "status": "investigating",
+            "description": "We are investigating chat latency.",
+            "component_changes": [{ "component_id": "chat", "status": "degraded" }]
+          }
+        ]
+      }
+    ]
+  }
+}

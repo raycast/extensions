@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": false,
+    "isolatedModules": false,
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "noEmit": false,
+    "outDir": "node_modules/.cache/ai-status-check-tests",
+    "rootDir": "."
+  },
+  "include": [
+    "src/domain/**/*.ts",
+    "src/providers/adapters/**/*.ts",
+    "src/providers/registry.ts",
+    "src/services/fetch-provider-statuses.ts",
+    "src/services/provider-request-order.ts",
+    "tests/**/*.ts"
+  ]
+}

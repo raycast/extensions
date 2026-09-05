@@ -1,0 +1,66 @@
+{
+  "summary": {
+    "display_uptime_mode": "chart_and_percentage",
+    "history_window_days": 3,
+    "components": [
+      { "id": "chat", "name": "Chat" },
+      { "id": "embed", "name": "Embed" },
+      { "id": "docs", "name": "Documentation" },
+      { "id": "internal", "name": "Internal", "hidden": true }
+    ],
+    "affected_components": [
+      { "component_id": "embed", "component_status": "degraded_performance" }
+    ],
+    "structure": {
+      "items": [
+        {
+          "group": {
+            "id": "endpoints",
+            "name": "Endpoints",
+            "hidden": false,
+            "components": [
+              {
+                "component_id": "chat",
+                "name": "Chat",
+                "hidden": false,
+                "display_uptime": true,
+                "data_available_since": "2026-08-01T00:00:00Z"
+              }
+            ]
+          }
+        },
+        {
+          "group": {
+            "id": "models",
+            "name": "Models",
+            "hidden": false,
+            "components": [
+              {
+                "component_id": "embed",
+                "name": "Embed",
+                "hidden": false,
+                "display_uptime": true,
+                "data_available_since": "2026-08-01T00:00:00Z"
+              }
+            ]
+          }
+        },
+        {
+          "component": {
+            "component_id": "docs",
+            "name": "Docs",
+            "hidden": false,
+            "display_uptime": false
+          }
+        },
+        {
+          "component": {
+            "component_id": "internal",
+            "name": "Internal",
+            "hidden": true
+          }
+        }
+      ]
+    }
+  }
+}

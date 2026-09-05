@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><item>
+  <title>Computer Sandbox Issue</title>
+  <description><![CDATA[
+    Type: Incident
+    Duration: 3 hours and 33 minutes
+
+    Affected Components: Computer
+    Aug 6, 18:03:00 GMT+0 - Resolved - This incident has been resolved. Aug 6, 14:30:00 GMT+0 - Investigating - We are currently investigating this incident.
+  ]]></description>
+  <pubDate>Thu, 6 Aug 2026 14:30:00 +0000</pubDate>
+  <link>https://status.example.com/incident/computer-incident</link>
+  <guid>https://status.example.com/incident/computer-incident</guid>
+</item></channel></rss>
