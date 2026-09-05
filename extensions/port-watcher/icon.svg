@@ -1,0 +1,41 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Source of the extension icon. It lives here, at the root, and NOT in
+       assets/ — that folder is bundled into the extension, and only what the
+       app loads at runtime belongs in it. Regenerate the PNG after any edit:
+
+           rsvg-convert -w 512 -h 512 icon.svg -o assets/extension-icon.png
+
+       The product's own visual language, enlarged: the green "running" dot from
+       the list. Rendered with radial gradients only — librsvg's gradient
+       support is solid where its filter support is not, so the glow is built
+       from stacked gradient discs rather than a blur filter. -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="80%">
+      <stop offset="0%" stop-color="#23272B"/>
+      <stop offset="100%" stop-color="#15181B"/>
+    </radialGradient>
+    <!-- Wide, faint halo: the light the dot casts on the background. -->
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#30D158" stop-opacity="0.55"/>
+      <stop offset="45%" stop-color="#30D158" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#30D158" stop-opacity="0"/>
+    </radialGradient>
+    <!-- The dot itself: bright core easing into its rim. -->
+    <radialGradient id="dot" cx="42%" cy="38%" r="75%">
+      <stop offset="0%" stop-color="#8CF2A6"/>
+      <stop offset="55%" stop-color="#30D158"/>
+      <stop offset="100%" stop-color="#1FA344"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- Faint idle ring: the grey "stopped" circle of the list, echoed behind the
+       live dot so the icon carries both states of the product. -->
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#3A4046" stroke-width="14"/>
+
+  <circle cx="256" cy="256" r="210" fill="url(#halo)"/>
+  <circle cx="256" cy="256" r="96" fill="url(#dot)"/>
+  <!-- Thin lit rim so the dot reads crisply against its own halo. -->
+  <circle cx="256" cy="256" r="96" fill="none" stroke="#5CE882" stroke-width="5" stroke-opacity="0.9"/>
+</svg>
