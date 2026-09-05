@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "layout-switcher",
+  "title": "Layout Switcher",
+  "description": "Fix text typed in the wrong keyboard layout — convert between Russian, Ukrainian or Belarusian and English.",
+  "icon": "extension-icon.png",
+  "author": "cbjok",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "convert-layout",
+      "title": "Convert Layout (Cyrillic ↔ EN)",
+      "subtitle": "Layout Switcher",
+      "description": "Fix text typed in the wrong layout. Converts the selection, or the whole field if nothing is selected.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "layout",
+          "title": "Cyrillic Layout",
+          "description": "Which macOS Cyrillic keyboard layout you type with. The mapping matches Apple's layouts (not Windows ЙЦУКЕН).",
+          "type": "dropdown",
+          "required": false,
+          "default": "russian",
+          "data": [
+            { "title": "Russian", "value": "russian" },
+            { "title": "Ukrainian", "value": "ukrainian" },
+            { "title": "Belarusian", "value": "belarusian" }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "dev:beta": "ray develop --target x",
+    "build:beta": "ray build -e dist --target x",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
