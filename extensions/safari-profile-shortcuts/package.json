@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "safari-profile-shortcuts",
+  "title": "Safari Profile Shortcuts",
+  "description": "Open new Safari windows for specific profiles using dedicated commands and keyboard shortcuts.",
+  "icon": "extension-icon-safari-colors.png",
+  "author": "Alph-L",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-private-window",
+      "title": "Open Private Safari Window",
+      "description": "Open a new private Safari window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-profile-window-1",
+      "title": "Open Safari Profile Window 1",
+      "description": "Open a new Safari window for the profile assigned to slot 1.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-profile-window-2",
+      "title": "Open Safari Profile Window 2",
+      "description": "Open a new Safari window for the profile assigned to slot 2.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-profile-window-3",
+      "title": "Open Safari Profile Window 3",
+      "description": "Open a new Safari window for the profile assigned to slot 3.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-profile-window-4",
+      "title": "Open Safari Profile Window 4",
+      "description": "Open a new Safari window for the profile assigned to slot 4.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-profile-window-5",
+      "title": "Open Safari Profile Window 5",
+      "description": "Open a new Safari window for the profile assigned to slot 5.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "profile1",
+      "title": "Profile Slot 1",
+      "description": "Must exactly match the Safari profile name.",
+      "type": "textfield",
+      "placeholder": "Safari profile name",
+      "default": "Personal",
+      "required": false
+    },
+    {
+      "name": "profile2",
+      "title": "Profile Slot 2",
+      "description": "Must exactly match the Safari profile name.",
+      "type": "textfield",
+      "placeholder": "Safari profile name",
+      "default": "School",
+      "required": false
+    },
+    {
+      "name": "profile3",
+      "title": "Profile Slot 3",
+      "description": "Must exactly match the Safari profile name.",
+      "type": "textfield",
+      "placeholder": "Safari profile name",
+      "default": "Work",
+      "required": false
+    },
+    {
+      "name": "profile4",
+      "title": "Profile Slot 4",
+      "description": "Must exactly match the Safari profile name.",
+      "type": "textfield",
+      "placeholder": "Safari profile name",
+      "required": false
+    },
+    {
+      "name": "profile5",
+      "title": "Profile Slot 5",
+      "description": "Must exactly match the Safari profile name.",
+      "type": "textfield",
+      "placeholder": "Safari profile name",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
