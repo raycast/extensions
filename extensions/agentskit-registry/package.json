@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "agentskit-registry",
+  "title": "AgentsKit Agents",
+  "description": "Run portable open-source AI agents with your own model provider",
+  "icon": "icon.png",
+  "author": "emerson_braun",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultProvider",
+      "title": "Default Provider",
+      "description": "Provider selected when opening the Run Agent form",
+      "type": "dropdown",
+      "required": false,
+      "default": "openrouter",
+      "data": [
+        {
+          "title": "OpenRouter",
+          "value": "openrouter"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "Ollama",
+          "value": "ollama"
+        }
+      ]
+    },
+    {
+      "name": "openrouterApiKey",
+      "title": "OpenRouter API Key",
+      "description": "Stored as a Raycast password preference and sent only to OpenRouter",
+      "type": "password",
+      "required": false,
+      "placeholder": "sk-or-v1-…"
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Stored as a Raycast password preference and sent only to Google Gemini",
+      "type": "password",
+      "required": false,
+      "placeholder": "Gemini API key"
+    },
+    {
+      "name": "ollamaBaseUrl",
+      "title": "Ollama Base URL",
+      "description": "Local or remote Ollama endpoint",
+      "type": "textfield",
+      "required": false,
+      "default": "http://localhost:11434",
+      "placeholder": "http://localhost:11434"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-agents",
+      "title": "Browse and Run Agents",
+      "subtitle": "AgentsKit",
+      "description": "Find and run portable agents with OpenRouter, Gemini, or Ollama",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@agentskit/adapters": "^0.14.1",
+    "@agentskit/core": "^1.12.6",
+    "@agentskit/runtime": "^0.10.13",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run --coverage",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
