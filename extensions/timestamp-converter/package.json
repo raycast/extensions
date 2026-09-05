@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timestamp-converter",
+  "title": "Timestamp Converter",
+  "description": "View and convert Unix timestamps across time zones",
+  "icon": "icon.png",
+  "author": "TwoMental",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "timestamp",
+    "unix",
+    "epoch",
+    "timezone",
+    "date",
+    "time"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-timestamp",
+      "title": "Convert Timestamp",
+      "description": "Convert Unix timestamps and date-time values across time zones",
+      "icon": "icon.png",
+      "keywords": [
+        "timestamp",
+        "unix",
+        "epoch",
+        "timezone",
+        "date"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
