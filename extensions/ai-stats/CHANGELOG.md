@@ -1,6 +1,6 @@
 # AI Stats Changelog
 
-## [Windows Support and Raycast Update] - {PR_MERGE_DATE}
+## [Windows Support and Raycast Update] - 2026-09-05
 
 - Add Windows support with platform-specific Ctrl and Alt shortcuts
 - Update Raycast dependencies and the required Node.js version
