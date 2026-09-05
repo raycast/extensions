@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "punch-clock",
+  "title": "Punch Clock",
+  "description": "Track your working hours: set a total work time and break length, then watch a live countdown in the macOS menu bar.",
+  "icon": "icon.png",
+  "author": "FL0R1AN",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-timer",
+      "title": "Start Work Timer",
+      "subtitle": "Punch Clock",
+      "description": "Enter your total working time and break length to start the countdown.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Work Timer",
+      "subtitle": "Punch Clock",
+      "description": "Shows the live countdown of your remaining working time in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
