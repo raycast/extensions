@@ -1,24 +1,24 @@
-import { MenuBarExtra, Clipboard, open, Cache, captureException } from "@raycast/api";
+import { MenuBarExtra, Clipboard, open, Cache, captureException, getPreferenceValues } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { formatDistance } from "date-fns/formatDistance";
 import { useFetchStoredReminders } from "./hooks/useFetchStoredReminders";
 import { hasFrequencyPredicate, hasNoFrequencyPredicate } from "./utils/arrayPredicates";
 import { getNextReminder } from "./utils/getNextReminder";
+import { formatReminderDate } from "./utils/formatReminderDate";
 import { Reminder } from "./types/reminder";
+import { SimpleReminderPreferences } from "./types/preferences";
 import { buildException } from "./utils/buildException";
 
 const addReminderDeeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/comoser/simple-reminder/index`;
 const raycastApplication = { name: "Raycast", path: "/Applications/Raycast.app" };
-const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000;
 const MAX_TOPIC_LENGTH = 30;
+
+const { menuBarDateFormat } = getPreferenceValues<SimpleReminderPreferences>();
 
 function getDateTimeStringForMenuBarTitle(date: Date): string {
   if (!date || !(date instanceof Date)) return "";
 
   try {
-    if (date.getTime() - new Date().getTime() < TWO_HOURS_IN_MS)
-      return formatDistance(date, new Date(), { addSuffix: true });
-    return date.toLocaleString();
+    return formatReminderDate(date, menuBarDateFormat);
   } catch (error) {
     captureException(
       buildException(error as Error, "Error getting date time string for menu bar title", {
@@ -74,7 +74,7 @@ export default function Command() {
             <MenuBarExtra.Item
               key={reminder.id}
               title={reminder.topic}
-              subtitle={`set to ${reminder.date.toLocaleString()} ${reminder.frequency ? `(happening ${reminder.frequency})` : ""}`}
+              subtitle={`set to ${formatReminderDate(reminder.date, menuBarDateFormat)} ${reminder.frequency ? `(happening ${reminder.frequency})` : ""}`}
               onAction={onCopyReminderTopicAction(reminder.topic)}
               icon="repeat.png"
             />
@@ -87,7 +87,7 @@ export default function Command() {
             <MenuBarExtra.Item
               key={reminder.id}
               title={reminder.topic}
-              subtitle={`set to ${reminder.date.toLocaleString()}`}
+              subtitle={`set to ${formatReminderDate(reminder.date, menuBarDateFormat)}`}
               onAction={onCopyReminderTopicAction(reminder.topic)}
               icon="bell.png"
             />

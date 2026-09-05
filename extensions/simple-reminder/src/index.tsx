@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
+import { Action, ActionPanel, Icon, List, LaunchProps } from "@raycast/api";
 import { randomUUID } from "crypto";
 import { useFetchStoredReminders } from "./hooks/useFetchStoredReminders";
 import { Reminder } from "./types/reminder";
@@ -13,16 +13,21 @@ import { setRecurrenceForReminder } from "./handlers/setRecurrenceForReminder";
 import { hasFrequencyPredicate, hasNoFrequencyPredicate } from "./utils/arrayPredicates";
 import { ListActionPanel } from "./components/listActionPanel";
 
-export default function Command() {
-  const [searchText, setSearchText] = useState("");
+type IndexArguments = {
+  reminder: string;
+};
+
+export default function Command(props: LaunchProps<{ arguments: IndexArguments }>) {
+  const [searchText, setSearchText] = useState(props.arguments.reminder ?? "");
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const hasAutoSubmittedRef = useRef(false);
 
   useFetchStoredReminders(setReminders, setIsLoading);
 
-  const onSetReminderAction = async () => {
+  const onSetReminderAction = async (inputText: string = searchText) => {
     try {
-      const { topic, date } = extractTopicAndDateFromInputText(searchText);
+      const { topic, date } = extractTopicAndDateFromInputText(inputText);
 
       await createNewReminder({
         reminder: {
@@ -38,6 +43,13 @@ export default function Command() {
       await showError("Reminder not set", "Oops. Did you specify a time you would like to be notified?");
     }
   };
+
+  useEffect(() => {
+    if (!isLoading && props.arguments.reminder && !hasAutoSubmittedRef.current) {
+      hasAutoSubmittedRef.current = true;
+      void onSetReminderAction(props.arguments.reminder);
+    }
+  }, [isLoading]);
 
   const onCopyReminderTopicAction = async (reminderTopic: string) => {
     try {

@@ -7,7 +7,8 @@
   "author": "comoser",
   "contributors": [
     "pernielsentikaer",
-    "miguel-felix1"
+    "miguel-felix1",
+    "bengt"
   ],
   "keywords": [
     "remind",
@@ -23,7 +24,15 @@
       "name": "index",
       "title": "Add Reminder",
       "description": "Add a new reminder or check existing ones. You will be notified when the reminder time is reached.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "reminder",
+          "placeholder": "remind me to speak with Joana tomorrow at 1pm",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "reminderNotifications",
@@ -75,14 +84,39 @@
       "placeholder": "Only use this if you're using a self-hosted ntfy server",
       "required": false,
       "title": "ntfy server access token"
+    },
+    {
+      "name": "menuBarDateFormat",
+      "description": "Choose how reminder dates are displayed in the menu bar",
+      "type": "dropdown",
+      "default": "relative",
+      "required": false,
+      "title": "Menu bar date format",
+      "data": [
+        {
+          "title": "Relative (e.g. \"in 5 minutes\")",
+          "value": "relative"
+        },
+        {
+          "title": "Short (e.g. \"Jul 24, 14:30\")",
+          "value": "short"
+        },
+        {
+          "title": "Long (e.g. \"Friday, July 24 2026, 14:30\")",
+          "value": "long"
+        },
+        {
+          "title": "ISO 8601 (e.g. \"2026-07-24 14:30\")",
+          "value": "iso"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.73.3",
     "@raycast/utils": "^1.15.0",
     "chrono-node": "^2.6.3",
-    "date-fns": "^3.6.0",
-    "natural": "^6.2.0"
+    "date-fns": "^3.6.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

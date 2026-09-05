@@ -1,5 +1,11 @@
 # Simple Reminder Changelog
 
+## [Multi-language input, inline add and menu bar date format] - {PR_MERGE_DATE}
+
+- Add multi-language support for natural language input (English, German, French, Spanish, Dutch, Portuguese, Japanese, Chinese and Russian)
+- Add a command argument so reminders can be added inline from Raycast's root search without opening the extension first
+- Add a "Menu bar date format" preference to control how reminder dates are displayed in the menu bar (relative, short, long or ISO 8601)
+
 ## [Mobile notifications] - 2024-11-29
 
 - Add new configuration for self-hosted ntfy servers
