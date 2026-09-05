@@ -1,0 +1,162 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paste-once",
+  "title": "Paste Once",
+  "description": "Flatten a copied multi-line shell snippet into one pasteable command. Also strips tracking from URLs, joins hard-wrapped markdown, and previews markdown as formatted text.",
+  "icon": "icon.png",
+  "author": "mikolaj_pietkiewicz",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "paste",
+    "flatten",
+    "oneliner",
+    "multiline",
+    "join",
+    "shell",
+    "command",
+    "clipboard",
+    "utm",
+    "url",
+    "markdown",
+    "reflow"
+  ],
+  "commands": [
+    {
+      "name": "paste-trimmed",
+      "title": "Paste Trimmed",
+      "subtitle": "Paste Once",
+      "description": "Flatten the clipboard as a shell command and paste it into the frontmost app.",
+      "mode": "no-view",
+      "keywords": [
+        "flatten",
+        "shell",
+        "command"
+      ]
+    },
+    {
+      "name": "copy-trimmed",
+      "title": "Copy Trimmed",
+      "subtitle": "Paste Once",
+      "description": "Flatten the clipboard as a shell command and copy the result.",
+      "mode": "no-view"
+    },
+    {
+      "name": "clean-url",
+      "title": "Clean URL",
+      "subtitle": "Paste Once",
+      "description": "Strip tracking query parameters from a typed or copied URL, then copy the result.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "render-markdown",
+      "title": "Render Markdown",
+      "subtitle": "Paste Once",
+      "description": "Preview copied markdown as formatted text, then copy or paste it into apps that do not read markdown.",
+      "mode": "view"
+    },
+    {
+      "name": "reflow-markdown",
+      "title": "Reflow Markdown",
+      "subtitle": "Paste Once",
+      "description": "Join hard-wrapped markdown from the clipboard while keeping headings, lists, blank lines, and fenced code.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "aggressiveness",
+      "title": "Sensitivity",
+      "description": "How eagerly multi-line text is treated as a shell command. These commands only run when you invoke them, so High is the default.",
+      "type": "dropdown",
+      "required": false,
+      "default": "high",
+      "data": [
+        {
+          "title": "Low (safer)",
+          "value": "low"
+        },
+        {
+          "title": "Normal",
+          "value": "normal"
+        },
+        {
+          "title": "High (more eager)",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "name": "preserveBlankLines",
+      "title": "Cleanup",
+      "description": "Keep blank lines when flattening a command.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Preserve blank lines"
+    },
+    {
+      "name": "removeBoxDrawing",
+      "title": "",
+      "description": "Strip box-drawing gutter characters copied from terminal output.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Remove box-drawing characters"
+    },
+    {
+      "name": "flattenClaudeCodePrompts",
+      "title": "",
+      "description": "Flatten Claude Code prompt decorations and wrapped slash commands.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Flatten Claude Code prompts"
+    },
+    {
+      "name": "extraUrlKeepRules",
+      "title": "Extra URL Keep Rules",
+      "description": "Additional content-identity query params. One rule per line: domain.com: param1, param2",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "example.com: id, slug"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "marked": "^18.0.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the prepublishOnly script and rerun \\\"npm publish\\\" to proceed.\\nIf you didn't, you were likely trying to publish the extension to the Raycast Store.\\n\\nUse \\\"npm run publish\\\" instead of \\\"npm publish\\\".\\n\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
