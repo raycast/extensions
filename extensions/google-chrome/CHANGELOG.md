@@ -1,5 +1,11 @@
 # Google Chrome Changelog
 
+## [Speed up Tab Search] - {PR_MERGE_DATE}
+
+- Read the open tabs from Chrome only once per command run instead of on every keystroke; filtering now happens in memory.
+- Fetch tab titles and URLs per window in a single Apple Event instead of two per tab.
+- Address tabs by Chrome's tab id instead of their position, so activating, reloading or closing a tab is unaffected by tabs being opened, closed or reordered in the meantime.
+
 ## [Add Search Windows Command] - 2026-08-16
 
 - Add a new Search Windows command to search and select open Google Chrome windows.
