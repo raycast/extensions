@@ -6,7 +6,7 @@ import useLoadable, { createLoadableContext, Loadable } from "./use-loader";
 const PreferencesContext = createLoadableContext<Preferences>();
 
 type PreferencesProviderProps = { children: ReactNode };
-export function PreferencesProvider({ children }: PreferencesProviderProps): JSX.Element {
+export function PreferencesProvider({ children }: PreferencesProviderProps): React.JSX.Element {
   const preferences = useLoadable(() => getPreferenceValues<Preferences>());
 
   return <PreferencesContext.Provider value={preferences}>{children}</PreferencesContext.Provider>;

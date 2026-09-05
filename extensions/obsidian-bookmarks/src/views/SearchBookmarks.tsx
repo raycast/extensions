@@ -1,10 +1,19 @@
-import { List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import Fuse from "fuse.js";
 import { useEffect, useMemo, useState } from "react";
 import useFiles from "../hooks/use-files";
+import { getFavorites, isFavorite } from "../helpers/favorites";
+import { completeTag, matchesTags, parseSearchQuery } from "../helpers/search-query";
+import { sanitizeUrl } from "../helpers/url-sanitizer";
 import { File } from "../types";
 import FileListItem from "./FileListItem";
 import path from "node:path";
+
+const MAX_TAG_SUGGESTIONS = 6;
+
+// Fuse's default threshold of 0.6 lets almost anything match on a field as long
+// as a note body, so results drown in near misses. This still forgives typos.
+const MATCH_THRESHOLD = 0.3;
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -15,7 +24,7 @@ function midnight(daysAgo: number): Date {
 }
 
 export default function SearchBookmarks() {
-  const { files, loading } = useFiles();
+  const { files, loading, updateFile } = useFiles();
   const [showDetail, setShowDetail] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -41,17 +50,36 @@ export default function SearchBookmarks() {
       .sort((a, b) => a.localeCompare(b)); // Sort the paths alphabetically
   }, [files]);
 
-  const fuse = useMemo(() => {
+  const { text, tags: searchTags, pendingTag } = useMemo(() => parseSearchQuery(search), [search]);
+
+  const urlFuse = useMemo(() => {
+    return new Fuse<File>(files, {
+      ignoreLocation: true,
+      threshold: MATCH_THRESHOLD,
+      keys: [{ name: "url", getFn: (file) => sanitizeUrl(file.attributes.source) }],
+    });
+  }, [files]);
+
+  const contentFuse = useMemo(() => {
     return new Fuse<File>(files, {
       fieldNormWeight: 1,
+      ignoreLocation: true,
+      threshold: MATCH_THRESHOLD,
       keys: [
-        { name: "title", weight: 5 },
-        { name: "tags", weight: 2 },
+        { name: "title", weight: 5, getFn: (file) => file.attributes.title },
+        { name: "tags", weight: 2, getFn: (file) => file.attributes.tags },
         { name: "body", weight: 2 },
-        { name: "url", weight: 1 },
       ],
     });
   }, [files]);
+
+  const tagSuggestions = useMemo(() => {
+    if (pendingTag == null) return [];
+    const query = pendingTag.toLowerCase();
+    return tagsByPopularity
+      .filter(([tag]) => tag.toLowerCase() !== query && tag.toLowerCase().includes(query))
+      .slice(0, MAX_TAG_SUGGESTIONS);
+  }, [pendingTag, tagsByPopularity]);
 
   useEffect(() => {
     const filtered = (input: File[]) => {
@@ -91,10 +119,23 @@ export default function SearchBookmarks() {
       }
     };
 
-    const items = search.trim() ? fuse.search(search).map(({ item }) => item) : files;
+    // URL matches (query params stripped) come first, then title/tags/body matches.
+    const searched = () => {
+      if (!text) return files;
+      const byUrl = urlFuse.search(text).map(({ item }) => item);
+      const matched = new Set(byUrl.map((file) => file.fullPath));
+      const byContent = contentFuse.search(text).map(({ item }) => item);
+      return [...byUrl, ...byContent.filter((file) => !matched.has(file.fullPath))];
+    };
+
+    const items = searched().filter((file) => matchesTags(file, searchTags));
     const filteredItems = filtered(items);
     setFileResult(filteredItems);
-  }, [search, filter, fuse]);
+  }, [text, searchTags, filter, urlFuse, contentFuse]);
+
+  const actionProps = { showDetail, setShowDetail, onFileUpdated: updateFile };
+  const favoriteResults = getFavorites(fileResult);
+  const otherResults = fileResult.filter((file) => !isFavorite(file));
 
   return (
     <List
@@ -127,20 +168,46 @@ export default function SearchBookmarks() {
       }
       isLoading={loading}
       navigationTitle="Search Bookmarks"
+      searchBarPlaceholder="Search bookmarks, use # to filter by tag"
       isShowingDetail={showDetail}
       searchText={search}
       onSearchTextChange={(text) => setSearch(text)}
       throttle
     >
-      {fileResult.map((file) => (
-        <FileListItem
-          file={file}
-          loading={loading}
-          showDetail={showDetail}
-          setShowDetail={setShowDetail}
-          key={file.fullPath}
-        />
-      ))}
+      {tagSuggestions.length > 0 && (
+        <List.Section title="Tags">
+          {tagSuggestions.map(([tag, count]) => (
+            <List.Item
+              id={`tag:${tag}`}
+              title={`#${tag}`}
+              accessories={[{ text: `${count}` }]}
+              icon={Icon.Hashtag}
+              key={`tag:${tag}`}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Complete Tag"
+                    icon={Icon.Hashtag}
+                    onAction={() => setSearch(completeTag(search, tag))}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+      {favoriteResults.length > 0 && (
+        <List.Section title="Favorites">
+          {favoriteResults.map((file) => (
+            <FileListItem file={file} files={files} loading={loading} key={file.fullPath} {...actionProps} />
+          ))}
+        </List.Section>
+      )}
+      <List.Section title={tagSuggestions.length > 0 || favoriteResults.length > 0 ? "Bookmarks" : undefined}>
+        {otherResults.map((file) => (
+          <FileListItem file={file} files={files} loading={loading} key={file.fullPath} {...actionProps} />
+        ))}
+      </List.Section>
     </List>
   );
 }

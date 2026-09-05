@@ -19,7 +19,7 @@ type OrderedActionGroupProps<P extends string> = {
   index: number;
   group: ActionGroup<P>;
 };
-function OrderedActionGroup<P extends string>({ group, index }: OrderedActionGroupProps<P>): JSX.Element {
+function OrderedActionGroup<P extends string>({ group, index }: OrderedActionGroupProps<P>): React.JSX.Element {
   const actionList = [...group.actions];
   const actions = actionList.map(([key, action]) => <Action key={key} icon={group.icon} {...action} />);
 
@@ -39,7 +39,7 @@ export function OrderedActionPanel<P extends string>({
   title,
   groups,
   defaultAction,
-}: OrderedActionPanelProps<P>): JSX.Element {
+}: OrderedActionPanelProps<P>): React.JSX.Element {
   let orderedGroups: ActionGroup<P>[];
 
   if (!defaultAction) {

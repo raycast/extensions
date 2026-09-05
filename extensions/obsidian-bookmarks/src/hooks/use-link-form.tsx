@@ -7,6 +7,7 @@ export interface LinkFormState {
   values: {
     title: string;
     url: string;
+    favicon: string;
     tags: string[];
     description: string;
   };
@@ -62,12 +63,20 @@ function reducer<Field extends FormField>(state: LinkFormState, action: LinkForm
   }
 }
 
-export default function useLinkForm(initialValues: Partial<LinkFormState["values"]> = {}) {
+export type LinkFormOptions = {
+  detectFrontmostLink?: boolean;
+};
+
+export default function useLinkForm(
+  initialValues: Partial<LinkFormState["values"]> = {},
+  { detectFrontmostLink = true }: LinkFormOptions = {}
+) {
   const initialState: LinkFormState = {
     dirty: false,
-    hasUpdatedWithLink: false,
+    hasUpdatedWithLink: !detectFrontmostLink,
     values: {
       description: "",
+      favicon: "",
       tags: [],
       title: "",
       url: "",
