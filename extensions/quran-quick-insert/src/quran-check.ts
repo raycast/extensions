@@ -41,13 +41,23 @@ assert.match(
 const asr_ayahs = [1, 2, 3].map((ayah_number) =>
   ayah_at({ surah_number: 103, ayah_number }),
 );
+const asr_options = {
+  text_style: "uthmani",
+  reference_style: "arabic",
+  prefix: "none",
+} as const;
+const asr_text = `﴿${asr_ayahs[0].text} (١) ${asr_ayahs[1].text} (٢) ${asr_ayahs[2].text} (٣)﴾`;
 assert.equal(
-  format_ayahs(
-    asr_ayahs,
-    { text_style: "uthmani", reference_style: "arabic", prefix: "none" },
-    "plain",
-  ),
-  `﴿${asr_ayahs[0].text} (١) ${asr_ayahs[1].text} (٢) ${asr_ayahs[2].text} (٣)﴾ [العصر: 1-3]`,
+  format_ayahs(asr_ayahs, asr_options, "plain"),
+  `${asr_text} [العصر: 1-3]`,
+);
+assert.equal(
+  format_ayahs(asr_ayahs, asr_options, "markdown"),
+  `> ${asr_text}\n\n**[العصر: 1-3]**`,
+);
+assert.equal(
+  format_ayahs(asr_ayahs, asr_options, "html"),
+  `<div dir="rtl"><p>${asr_text}</p><p>[العصر: 1-3]</p></div>`,
 );
 
 const sample_ayahs = [ayah_at({ surah_number: 1, ayah_number: 2 })];
