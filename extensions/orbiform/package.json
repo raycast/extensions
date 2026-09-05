@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orbiform",
+  "title": "Orbiform",
+  "description": "Manage your Orbiform forms from Raycast: list them, create new ones with AI, and check response stats \u2014 no browser tab required.",
+  "icon": "icon.png",
+  "author": "alexorbiform",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-forms",
+      "title": "List Forms",
+      "description": "List your Orbiform forms and open or copy their link",
+      "mode": "view"
+    },
+    {
+      "name": "create-form",
+      "title": "Create Form with AI",
+      "description": "Create a new Orbiform form from a plain-language description using AI",
+      "mode": "view"
+    },
+    {
+      "name": "form-stats",
+      "title": "Form Stats",
+      "description": "View a form's response count, conversion rate, and 7-day trend",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
