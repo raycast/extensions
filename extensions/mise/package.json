@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mise",
+  "title": "Mise Tool Manager",
+  "description": "Install, activate, upgrade, and remove development tools managed by mise.",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "author": "sander_spiegelaar",
+  "contributors": [],
+  "pastContributors": [],
+  "icon": "logo.png",
+  "commands": [
+    {
+      "name": "mise",
+      "title": "Manage Tools",
+      "subtitle": "mise",
+      "description": "View and manage installed development tools and versions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "react": "19.2.1",
+    "typescript": "^5.9.3"
+  }
+}
