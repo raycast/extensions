@@ -1,0 +1,169 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gh-review-raycast",
+  "title": "GH Review",
+  "description": "Keep an eye on the GitHub pull requests that matter to you — PRs needing your review, your team's review, your own open PRs, and threads awaiting your reply. Powered by the GitHub GraphQL API with a token borrowed from your local gh CLI.",
+  "icon": "icon.png",
+  "author": "vitoraguila",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pull-requests",
+      "title": "Pull Requests",
+      "subtitle": "GH Review",
+      "description": "Browse the PRs that need your attention, grouped into colour-coded categories and saved filters.",
+      "mode": "view",
+      "keywords": [
+        "pr",
+        "github",
+        "review",
+        "gh"
+      ]
+    },
+    {
+      "name": "activity",
+      "title": "Activity Inbox",
+      "subtitle": "GH Review",
+      "description": "Read the comments and replies the background watcher picked up, newest first, whether or not a banner fired.",
+      "mode": "view",
+      "keywords": [
+        "inbox",
+        "notifications",
+        "comments",
+        "replies"
+      ]
+    },
+    {
+      "name": "watch",
+      "title": "Watch for Activity",
+      "subtitle": "GH Review",
+      "description": "Checks GitHub on a schedule and records new review requests, comments, and replies. Notifies you only if you turn banners on.",
+      "mode": "no-view",
+      "interval": "10m",
+      "keywords": [
+        "background",
+        "notify",
+        "poll"
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "PR Menu Bar",
+      "subtitle": "GH Review",
+      "description": "Show a live count of the pull requests awaiting you in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "menuBarCategory",
+          "title": "Menu Bar Shows",
+          "description": "Which category drives the menu bar count.",
+          "type": "dropdown",
+          "required": false,
+          "default": "attention",
+          "data": [
+            {
+              "title": "Everything needing attention",
+              "value": "attention"
+            },
+            {
+              "title": "Needs my review",
+              "value": "review-requested"
+            },
+            {
+              "title": "Awaiting my reply",
+              "value": "awaiting-reply"
+            },
+            {
+              "title": "My open PRs",
+              "value": "my-prs"
+            }
+          ]
+        },
+        {
+          "name": "menuBarLimit",
+          "title": "Pull Requests Shown Inline",
+          "description": "How many to list directly in the menu before the rest move into a “more” submenu.",
+          "type": "textfield",
+          "required": false,
+          "default": "15",
+          "placeholder": "15"
+        },
+        {
+          "name": "hideWhenEmpty",
+          "title": "Menu Bar Icon",
+          "label": "Hide when there is nothing to review",
+          "description": "Remove the menu bar item entirely when the count is zero.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "title": "Configure GH Review",
+      "subtitle": "GH Review",
+      "description": "Choose organizations, watched repositories and teams, ignore bot authors, and manage saved filters.",
+      "mode": "view",
+      "keywords": [
+        "config",
+        "filters",
+        "orgs",
+        "ignore"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ghPath",
+      "title": "gh CLI Path",
+      "description": "Absolute path to the GitHub CLI binary. Leave empty to auto-detect (Homebrew, /usr/local/bin, PATH).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/gh"
+    },
+    {
+      "name": "host",
+      "title": "GitHub Host",
+      "description": "Use a GitHub Enterprise hostname to talk to a self-hosted instance. Defaults to github.com.",
+      "type": "textfield",
+      "required": false,
+      "default": "github.com",
+      "placeholder": "github.com"
+    },
+    {
+      "name": "maxResults",
+      "title": "Max Results per Category",
+      "description": "How many pull requests to load per category. Higher values cost more GitHub API quota.",
+      "type": "textfield",
+      "required": false,
+      "default": "50",
+      "placeholder": "50"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  }
+}
