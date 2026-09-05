@@ -27,7 +27,7 @@ export function ThreadView(props: { id: string; subject?: string }) {
   const args = withAttachments
     ? ["thread", "--download-attachments", id]
     : ["thread", id];
-  const { data, isLoading, error } = useExec(getSparkPath(), args, {
+  const { data, isLoading, error, revalidate } = useExec(getSparkPath(), args, {
     keepPreviousData: true,
   });
 
@@ -132,7 +132,13 @@ export function ThreadView(props: { id: string; subject?: string }) {
                       style: Toast.Style.Animated,
                       title: "Downloading attachments…",
                     });
-                    setWithAttachments(true);
+                    if (withAttachments) {
+                      // A previous download attempt failed: the flag is already set, so
+                      // flipping state again would not re-run the request — revalidate instead.
+                      revalidate();
+                    } else {
+                      setWithAttachments(true);
+                    }
                   }}
                 />
               ) : (
@@ -160,18 +166,32 @@ export function ThreadView(props: { id: string; subject?: string }) {
   );
 }
 
+/**
+ * Neutralize Markdown image syntax in untrusted email content. A sender could
+ * embed `![x](https://attacker.example/pixel)` and the Detail renderer would
+ * fetch the remote image when the thread is viewed, leaking that (and when)
+ * the mail was read. Escaping the bracket keeps the text visible but inert.
+ */
+function neutralizeRemoteImages(text: string): string {
+  return text.replaceAll("![", String.raw`!\[`);
+}
+
 function renderThread(records: ParsedRecord[], subject?: string): string {
   if (!records.length) return "";
   const parts: string[] = [];
-  if (subject) parts.push(`# ${subject}\n`);
+  if (subject) parts.push(`# ${neutralizeRemoteImages(subject)}\n`);
   for (const rec of records) {
     const h = rec.headers;
-    const who = senderName(h.from ?? h.sender ?? "Unknown");
+    const who = neutralizeRemoteImages(
+      senderName(h.from ?? h.sender ?? "Unknown"),
+    );
     const when = h.date ? toRelative(h.date) : "";
     const header = [`**${who}**`, when && `· ${when}`]
       .filter(Boolean)
       .join(" ");
-    parts.push(`---\n\n${header}\n\n${rec.body || "_(no content)_"}`);
+    parts.push(
+      `---\n\n${header}\n\n${neutralizeRemoteImages(rec.body) || "_(no content)_"}`,
+    );
   }
   return parts.join("\n\n");
 }

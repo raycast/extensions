@@ -30,15 +30,6 @@ function resolveSparkOnPath(): string | null {
   return null;
 }
 
-/**
- * Declared locally rather than relying on the ambient `Preferences` type: that
- * one lives in `raycast-env.d.ts`, which `ray build` generates and git ignores,
- * so CI's bare `tsc --noEmit` can't see it.
- */
-type Preferences = {
-  sparkPath?: string;
-};
-
 /** The configured `spark` path, if any (a non-empty preference value). */
 function sparkPathPreference(): string | undefined {
   return getPreferenceValues<Preferences>().sparkPath?.trim() || undefined;
