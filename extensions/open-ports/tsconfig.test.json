@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*", "tests/**/*", "raycast-env.d.ts"],
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": ".test-build",
+    "sourceMap": true
+  }
+}
