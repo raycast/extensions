@@ -2,7 +2,7 @@ import type { SlackConversation, SlackMember } from "./slackTypes";
 import type { Channel, Group } from "./conversation";
 import { toChannel, toGroup } from "./conversation";
 import type { CursorPage } from "./pagination";
-import { collectPaginatedResults, matchesAllWords } from "./pagination";
+import { collectPaginatedResults, matchesAllWords, matchesVisibleName } from "./pagination";
 import { toUserName } from "./member";
 
 type ConversationSearchOptions = {
@@ -15,20 +15,52 @@ type ConversationSearchOptions = {
 
 type ConversationSearchResult = { type: "channel"; value: Channel } | { type: "group"; value: Group };
 
-export async function loadUserNames(
-  loadPage: (cursor?: string) => Promise<CursorPage<SlackMember>>,
-  signal?: AbortSignal,
-): Promise<ReadonlyMap<string, string>> {
+type UserNameSearchOptions = {
+  query: string;
+  maxResults: number;
+  loadPage: (cursor?: string) => Promise<CursorPage<SlackMember>>;
+  signal?: AbortSignal;
+};
+
+/**
+ * Finds only the users relevant to the current conversation query. An empty query deliberately skips the user
+ * directory so the initial channel list does not depend on, or retain, the full workspace member directory.
+ */
+export async function searchUserNames({
+  query,
+  maxResults,
+  loadPage,
+  signal,
+}: UserNameSearchOptions): Promise<ReadonlyMap<string, string>> {
+  if (!query.trim()) return new Map();
+
   const userNameEntries = await collectPaginatedResults({
     loadPage,
-    transform: toUserName,
-    matches: () => true,
-    maxResults: Number.POSITIVE_INFINITY,
+    transform: (member) => {
+      const userName = toUserName(member);
+      if (!userName) return undefined;
+
+      return {
+        userName,
+        searchableValues: [
+          member.name,
+          member.real_name,
+          member.profile?.display_name,
+          member.profile?.real_name,
+          member.profile?.email,
+          member.profile?.title,
+        ],
+      };
+    },
+    matches: ({ searchableValues }) => matchesAllWords(searchableValues, query),
+    maxResults,
     scanAllPages: true,
     signal,
+    stopAfterPage: (pageResults) =>
+      pageResults.some(({ userName: [, displayName] }) => matchesVisibleName(displayName, query)),
   });
 
-  return new Map(userNameEntries);
+  return new Map(userNameEntries.map(({ userName }) => userName));
 }
 
 /**

@@ -1,20 +1,24 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { SlackConversation, SlackMember } from "./slackTypes";
-import { loadUserNames, searchConversationDirectory } from "./conversationSearch";
+import { searchConversationDirectory, searchUserNames } from "./conversationSearch";
 
 const teamId = "T1";
 
-test("matches and labels groups with member visible names from every user page", async () => {
+test("matches and labels groups with relevant member visible names from later user pages", async () => {
   const usersByCursor: Record<string, { items: SlackMember[]; nextCursor?: string }> = {
     first: {
-      items: [{ id: "U1", name: "alice", profile: { real_name: "Alice Smith" } }],
+      items: [{ id: "U2", name: "bob", profile: { real_name: "Bob Jones" } }],
       nextCursor: "users-2",
     },
-    "users-2": { items: [{ id: "U2", name: "bob", profile: { real_name: "Bob Jones" } }] },
+    "users-2": { items: [{ id: "U1", name: "alice", profile: { real_name: "Alice Smith" } }] },
   };
 
-  const userNames = await loadUserNames(async (cursor) => usersByCursor[cursor ?? "first"]);
+  const userNames = await searchUserNames({
+    query: "Alice Smith",
+    maxResults: 100,
+    loadPage: async (cursor) => usersByCursor[cursor ?? "first"],
+  });
   const [, groups] = await searchConversationDirectory({
     query: "Alice Smith",
     maxResultsPerType: 100,
@@ -33,8 +37,39 @@ test("matches and labels groups with member visible names from every user page",
 
   assert.deepEqual(
     groups.map((group) => group.name),
-    ["Alice Smith, Bob Jones"],
+    ["Alice Smith, bob"],
   );
+});
+
+test("skips the user directory for an empty conversation query", async () => {
+  let pageLoads = 0;
+
+  const userNames = await searchUserNames({
+    query: "   ",
+    maxResults: 100,
+    loadPage: async () => {
+      pageLoads += 1;
+      return { items: [{ id: "U1", name: "alice", profile: { real_name: "Alice Smith" } }] };
+    },
+  });
+
+  assert.equal(pageLoads, 0);
+  assert.equal(userNames.size, 0);
+});
+
+test("retains only user names matching the conversation query", async () => {
+  const userNames = await searchUserNames({
+    query: "Alice",
+    maxResults: 100,
+    loadPage: async () => ({
+      items: [
+        { id: "U1", name: "alice", profile: { real_name: "Alice Smith" } },
+        { id: "U2", name: "bob", profile: { real_name: "Bob Jones" } },
+      ],
+    }),
+  });
+
+  assert.deepEqual([...userNames], [["alice", "Alice Smith"]]);
 });
 
 test("continues searching after a page containing a matching conversation", async () => {

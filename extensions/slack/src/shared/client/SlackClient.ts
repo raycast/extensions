@@ -5,7 +5,7 @@ import { formatRelative } from "date-fns";
 import { Profile } from "@slack/web-api/dist/types/response/UsersProfileGetResponse";
 import { collectPaginatedResults, matchesAllWords, matchesVisibleName } from "./pagination";
 import { getDirectorySearchPageSize } from "./directory";
-import { loadUserNames, searchConversationDirectory } from "./conversationSearch";
+import { searchConversationDirectory, searchUserNames } from "./conversationSearch";
 import { toChannel, toGroup } from "./conversation";
 import type { Channel, Group } from "./conversation";
 import { toUserName } from "./member";
@@ -90,23 +90,6 @@ function toUser(member: SlackMember): User | undefined {
 }
 
 export class SlackClient {
-  private static userNamesPromise: Promise<ReadonlyMap<string, string>> | undefined;
-
-  private static getUserNames(): Promise<ReadonlyMap<string, string>> {
-    if (!SlackClient.userNamesPromise) {
-      const slackWebClient = getSlackWebClient();
-      SlackClient.userNamesPromise = loadUserNames(async (cursor) => {
-        const response = await slackWebClient.users.list({ limit: 999, cursor });
-        return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
-      }).catch((error) => {
-        SlackClient.userNamesPromise = undefined;
-        throw error;
-      });
-    }
-
-    return SlackClient.userNamesPromise;
-  }
-
   public static async getUsers(): Promise<User[]> {
     const slackWebClient = getSlackWebClient();
     const users = await collectPaginatedResults({
@@ -223,7 +206,18 @@ export class SlackClient {
 
   public static async searchConversations(query: string, signal?: AbortSignal): Promise<[Channel[], Group[]]> {
     const slackWebClient = getSlackWebClient();
-    const userNames = await SlackClient.getUserNames();
+    const userNames = await searchUserNames({
+      query,
+      maxResults: maxSearchResultsPerType,
+      loadPage: async (cursor) => {
+        const response = await slackWebClient.users.list({
+          limit: getDirectorySearchPageSize(query),
+          cursor,
+        });
+        return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
+      },
+      signal,
+    });
     signal?.throwIfAborted();
 
     const [channels, groups] = await searchConversationDirectory({
