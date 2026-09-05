@@ -1,6 +1,6 @@
 # Sowiks Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-05
 
 - Capture commands: area, fixed size, fullscreen, window, scrolling, OCR text, self-timer and collection
 - Screen recording: toggle, and pause or resume
