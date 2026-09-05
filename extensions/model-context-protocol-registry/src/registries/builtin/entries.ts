@@ -1068,6 +1068,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "kyma",
+    title: "Kyma API",
+    description:
+      "Kyma API's hosted MCP server: browse the live model catalog and pricing, check measured per-model uptime and public usage rankings, view your own credits and spend, and chat through a tool guarded by a spend cap you set. OAuth 2.1 sign-in, no key pasted into the client.",
+    icon: "https://raw.githubusercontent.com/kyma-api/kyma-mcp-plugin/main/assets/logo-400.png",
+    homepage: "https://kymaapi.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@kyma-api/mcp-server"],
+    },
+  },
+  {
     name: "lightdash",
     title: "Lightdash",
     description:
