@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "watts-up",
+  "title": "Watt's up",
+  "description": "Check your Mac's power adapter wattage, charging power, battery health and charge status. Shows the negotiated power (watts, voltage, current) your charger delivers, plus battery level, cycle count and temperature — in Raycast or your menu bar.",
+  "icon": "command-icon.png",
+  "keywords": [
+    "battery",
+    "charger",
+    "charge",
+    "charging",
+    "power",
+    "wattage",
+    "watt",
+    "energy",
+    "adapter"
+  ],
+  "author": "mrmartineau",
+  "license": "MIT",
+  "categories": [
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Power and Charger Info",
+      "subtitle": "Watts Up",
+      "description": "Show power adapter wattage, voltage, current and battery details",
+      "mode": "view"
+    },
+    {
+      "name": "energy-impact",
+      "title": "Show Energy Impact",
+      "subtitle": "Watts Up",
+      "description": "List the apps and processes using the most energy (runs a ~2s top sample only when launched)",
+      "mode": "view"
+    },
+    {
+      "name": "energy-settings",
+      "title": "Manage Energy Settings",
+      "subtitle": "Watts Up",
+      "description": "View and toggle Low Power Mode and Power Nap, see sleep timers and what's preventing sleep",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Power Wattage in Menu Bar",
+      "subtitle": "Watts Up",
+      "description": "Show the negotiated power adapter wattage — or the battery percentage when unplugged — in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.38.0",
+    "typescript": "^5.2.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
