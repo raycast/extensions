@@ -1,0 +1,60 @@
+{
+  "fetchedAt": "2026-08-11T01:01:10.589Z",
+  "forecast": {
+    "score": 64,
+    "latestResetAt": "2026-08-11T00:28:16.000Z",
+    "resetAnnounced": false,
+    "daysSinceReset": 0,
+    "hoursSinceReset": 0.55,
+    "breakdown": [
+      { "label": "baseline", "points": 12 },
+      { "label": "other incidents", "points": 4 }
+    ]
+  },
+  "history": [
+    {
+      "at": "2026-08-11T00:28:16.000Z",
+      "fromScore": 100,
+      "scoreDelta": 0,
+      "toScore": 100,
+      "changes": [
+        {
+          "delta": 0,
+          "label": "confirmed reset",
+          "details": [
+            {
+              "action": "Source post",
+              "kind": "tweet",
+              "name": "Usage limits have been reset.",
+              "url": "https://x.com/example/status/1"
+            },
+            {
+              "action": "Why it counted",
+              "name": "Explicit completed reset post."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-08-09T06:59:59.999Z",
+      "fromScore": 3,
+      "scoreDelta": 97,
+      "toScore": 100,
+      "changes": [
+        {
+          "delta": 97,
+          "label": "public reset announcement",
+          "details": [
+            {
+              "action": "Source post",
+              "kind": "tweet",
+              "name": "A reset is planned.",
+              "url": "https://x.com/example/status/2"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
