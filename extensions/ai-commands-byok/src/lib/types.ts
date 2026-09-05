@@ -20,14 +20,6 @@ export interface AICommand {
   updatedAt: number;
 }
 
-export interface ExtensionPrefs {
-  openaiApiKey?: string;
-  openaiModel?: string;
-  anthropicApiKey?: string;
-  anthropicModel?: string;
-  highlightChanges?: boolean;
-}
-
 export const DEFAULT_MODELS: Record<Provider, string> = {
   openai: "gpt-5.6-luna",
   anthropic: "claude-haiku-4-5",

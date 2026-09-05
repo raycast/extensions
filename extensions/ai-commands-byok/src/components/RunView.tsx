@@ -17,7 +17,8 @@ import { useEffect, useRef, useState } from "react";
 import { resolveModel, runCommand, tidy } from "../lib/ai";
 import { boldChanges, wordChanges } from "../lib/diff";
 import { readInput, type Input, type InputSource } from "../lib/input";
-import { PROVIDER_LABEL, type AICommand, type ExtensionPrefs } from "../lib/types";
+import { getCommand } from "../lib/store";
+import { PROVIDER_LABEL, type AICommand } from "../lib/types";
 import { CommandForm } from "./CommandForm";
 import { iconFor } from "./icons";
 
@@ -31,15 +32,17 @@ interface Props {
  * - paste:   closes Raycast and pastes as soon as the model is done.
  * - copy:    copies and shows a HUD.
  */
-export function RunView({ command }: Props) {
+export function RunView({ command: initial }: Props) {
   const { push } = useNavigation();
+  // Held in state so an edit made from this screen is what "Run Again" runs.
+  const [command, setCommand] = useState(initial);
   const [original, setOriginal] = useState("");
   const [source, setSource] = useState<InputSource | null>(null);
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
-  const [highlight, setHighlight] = useState(getPreferenceValues<ExtensionPrefs>().highlightChanges !== false);
+  const [highlight, setHighlight] = useState(getPreferenceValues<Preferences>().highlightChanges !== false);
   // Kept across "Run Again": once Raycast has focus the selection is gone, so re-reading it would fail.
   const inputRef = useRef<Input | null>(null);
 
@@ -50,7 +53,6 @@ export function RunView({ command }: Props) {
     setResult("");
 
     (async () => {
-      let notice: Toast | undefined;
       try {
         const input = inputRef.current ?? (await readInput());
         if (cancelled) return;
@@ -59,13 +61,6 @@ export function RunView({ command }: Props) {
         setSource(input.source);
         // Clipboard text is a guess at what the user meant. Never paste it anywhere unseen.
         const mode = input.source === "clipboard" && command.mode === "paste" ? "preview" : command.mode;
-        if (input.source === "clipboard" && inputRef.current === input) {
-          notice = await showToast({
-            style: Toast.Style.Failure,
-            title: "No selection, using clipboard",
-            message: input.reason,
-          });
-        }
 
         let acc = "";
         for await (const chunk of runCommand(command, input.text)) {
@@ -89,7 +84,6 @@ export function RunView({ command }: Props) {
         if (cancelled) return;
         const message = e instanceof Error ? e.message : String(e);
         setError(message);
-        await notice?.hide();
         await showToast({ style: Toast.Style.Failure, title: command.title, message });
       } finally {
         if (!cancelled) setLoading(false);
@@ -176,7 +170,17 @@ export function RunView({ command }: Props) {
               title="Edit Command"
               icon={Icon.Pencil}
               shortcut={Keyboard.Shortcut.Common.Edit}
-              onAction={() => push(<CommandForm command={command} />)}
+              onAction={() =>
+                push(
+                  <CommandForm
+                    command={command}
+                    onSaved={async () => {
+                      const fresh = await getCommand(command.id);
+                      if (fresh) setCommand(fresh);
+                    }}
+                  />,
+                )
+              }
             />
           </ActionPanel.Section>
         </ActionPanel>

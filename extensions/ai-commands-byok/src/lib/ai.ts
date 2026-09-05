@@ -1,10 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { Clipboard, getPreferenceValues } from "@raycast/api";
-import { DEFAULT_MODELS, type AICommand, type ExtensionPrefs } from "./types";
+import { DEFAULT_MODELS, type AICommand } from "./types";
 
 export function resolveModel(cmd: Pick<AICommand, "provider" | "model">): string {
-  const prefs = getPreferenceValues<ExtensionPrefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const fromPrefs = cmd.provider === "openai" ? prefs.openaiModel : prefs.anthropicModel;
   return cmd.model?.trim() || fromPrefs?.trim() || DEFAULT_MODELS[cmd.provider];
 }
@@ -18,12 +18,14 @@ export function resolveModel(cmd: Pick<AICommand, "provider" | "model">): string
  * tags, so instructions hidden inside the selection are treated as content.
  */
 export async function* runCommand(cmd: AICommand, text: string): AsyncGenerator<string> {
-  const prefs = getPreferenceValues<ExtensionPrefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const model = resolveModel(cmd);
-  const prompt = await expandPlaceholders(cmd.prompt);
-  const templated = prompt.includes("{selection}");
+  // Decide the shape from the template, never from substituted content: a
+  // clipboard that happens to contain "{selection}" must not change the mode.
+  const templated = /\{selection\}/.test(cmd.prompt);
+  const prompt = await expandPlaceholders(cmd.prompt, text);
   const system = templated ? undefined : prompt;
-  const user = templated ? prompt.split("{selection}").join(text) : `<text>\n${text}\n</text>`;
+  const user = templated ? prompt : `<text>\n${text}\n</text>`;
 
   if (cmd.provider === "anthropic") {
     if (!prefs.anthropicApiKey) throw new Error("Add your Anthropic API key in the extension preferences (⌘ ,).");
@@ -58,14 +60,41 @@ export async function* runCommand(cmd: AICommand, text: string): AsyncGenerator<
   }
 }
 
+const PLACEHOLDER = /\{(selection|clipboard|argument\b[^}]*)\}/g;
+
 /**
- * Raycast prompt placeholders we honour besides {selection}:
- * {clipboard} → current clipboard text, {argument name=x default="y"} → y.
+ * Replaces the placeholders we support in ONE pass, so text that comes in
+ * through one placeholder is never re-scanned for another:
+ * {selection} → the selected text, {clipboard} → clipboard text,
+ * {argument name=x default="y"} → y.
  */
-async function expandPlaceholders(prompt: string): Promise<string> {
-  let out = prompt.replace(/\{argument[^}]*?default="([^"]*)"[^}]*\}/g, "$1").replace(/\{argument[^}]*\}/g, "");
-  if (out.includes("{clipboard}")) out = out.split("{clipboard}").join((await Clipboard.readText()) ?? "");
-  return out;
+async function expandPlaceholders(prompt: string, selection: string): Promise<string> {
+  const clipboard = /\{clipboard\}/.test(prompt) ? ((await Clipboard.readText()) ?? "") : "";
+  return prompt.replace(PLACEHOLDER, (_, inner: string) => {
+    if (inner === "selection") return selection;
+    if (inner === "clipboard") return clipboard;
+    return /default="([^"]*)"/.exec(inner)?.[1] ?? "";
+  });
+}
+
+/**
+ * Raycast placeholders and mentions this extension cannot run. Used to refuse
+ * imports that would silently lose behaviour: {browser-tab}, {argument …}
+ * without a default, and @extension{…} tool mentions.
+ */
+export function unsupportedPlaceholders(prompt: string): string[] {
+  const found = new Set<string>();
+  // Mentions carry their own braces ({id=…}); take them out before scanning.
+  const mentions = prompt.matchAll(/@[\w-]+\{[^}]*\}/g);
+  for (const m of mentions) found.add(m[0].split("{")[0]);
+  const rest = prompt.replace(/@[\w-]+\{[^}]*\}/g, "");
+  for (const m of rest.matchAll(/\{([a-z-]+)(\b[^}]*)\}/gi)) {
+    const name = m[1].toLowerCase();
+    if (name === "selection" || name === "clipboard") continue;
+    if (name === "argument" && /default="/.test(m[2])) continue;
+    found.add(`{${name}}`);
+  }
+  return [...found];
 }
 
 /**

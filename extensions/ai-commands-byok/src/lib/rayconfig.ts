@@ -2,6 +2,7 @@ import { createDecipheriv, createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { gunzip } from "node:zlib";
 import { promisify } from "node:util";
+import { unsupportedPlaceholders } from "./ai";
 import { newCommand } from "./store";
 import type { AICommand, Provider } from "./types";
 
@@ -14,7 +15,13 @@ import type { AICommand, Provider } from "./types";
  */
 const gunzipAsync = promisify(gunzip);
 
-export async function readRayconfigCommands(path: string, password: string): Promise<AICommand[]> {
+export interface RayconfigImport {
+  commands: AICommand[];
+  /** Commands left out because their prompt needs something this extension cannot provide. */
+  skipped: { title: string; needs: string[] }[];
+}
+
+export async function readRayconfigCommands(path: string, password: string): Promise<RayconfigImport> {
   const key = createHash("sha256").update(password).digest();
   const iv = createHash("sha256")
     .update(Buffer.concat([key, Buffer.from(password)]))
@@ -32,7 +39,12 @@ export async function readRayconfigCommands(path: string, password: string): Pro
 
   const json = JSON.parse((await gunzipAsync(plain.subarray(start))).toString("utf8")) as Record<string, unknown>;
   const ai = json["builtin_package_open-ai"] as { aiCommands?: RawCommand[] } | undefined;
-  return (ai?.aiCommands ?? []).filter(isUsable).map(toCommand);
+  const usable = (ai?.aiCommands ?? []).filter(isUsable);
+  const skipped = usable
+    .map((c) => ({ title: c.title.trim(), needs: unsupportedPlaceholders(c.promptTemplate) }))
+    .filter((c) => c.needs.length > 0);
+  const commands = usable.filter((c) => unsupportedPlaceholders(c.promptTemplate).length === 0).map(toCommand);
+  return { commands, skipped };
 }
 
 type UsableCommand = RawCommand & { title: string; promptTemplate: string };

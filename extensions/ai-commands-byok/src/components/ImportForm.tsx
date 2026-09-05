@@ -17,7 +17,7 @@ export function ImportForm({ onDone }: { onDone?: () => void }) {
     async onSubmit(v) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Reading export…" });
       try {
-        const incoming = await readRayconfigCommands(v.file[0], v.password);
+        const { commands: incoming, skipped } = await readRayconfigCommands(v.file[0], v.password);
         const existing = await loadCommands();
         const seen = new Set(existing.map((c) => `${c.title}\n${c.prompt}`));
         let added = 0;
@@ -30,9 +30,17 @@ export function ImportForm({ onDone }: { onDone?: () => void }) {
         }
         toast.style = Toast.Style.Success;
         toast.title = added ? `Imported ${added} command${added === 1 ? "" : "s"}` : "Nothing new to import";
-        toast.message = incoming.length - added ? `${incoming.length - added} already existed` : undefined;
+        const dupes = incoming.length - added;
+        toast.message = dupes ? `${dupes} already existed` : undefined;
         onDone?.();
         pop();
+        if (skipped.length) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: `${skipped.length} command${skipped.length === 1 ? "" : "s"} not imported`,
+            message: skipped.map((c) => `${c.title} needs ${c.needs.join(", ")}`).join(" · "),
+          });
+        }
       } catch (e) {
         toast.style = Toast.Style.Failure;
         toast.title = "Import failed";
