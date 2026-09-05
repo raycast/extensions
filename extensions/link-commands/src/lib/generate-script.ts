@@ -21,7 +21,7 @@ export type ScriptDraft = {
   target: string;
   /** `work` becomes a `@work · ` prefix on the title and a `work.` prefix on the filename. */
   environment?: string;
-  /** The brand — `YouTube`, `The Orchard`. Defaults to the target's domain, humanised. */
+  /** The brand — `YouTube`, `The Guardian`. Defaults to the target's domain, humanised. */
   packageName?: string;
   /** `media` becomes ` · #media` on the subtitle. Never on the title. */
   category?: string;
