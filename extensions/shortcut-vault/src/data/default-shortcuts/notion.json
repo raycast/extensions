@@ -1,0 +1,232 @@
+{
+  "ownerName": "Notion",
+  "ownerType": "webapp",
+  "sourceUrl": "https://www.notion.com/help/keyboard-shortcuts",
+  "shortcuts": [
+    {
+      "id": "new-page",
+      "commandName": "New Page",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "webapp"
+    },
+    {
+      "id": "new-window",
+      "commandName": "Open New Notion Window",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "webapp"
+    },
+    {
+      "id": "new-tab",
+      "commandName": "Create New Notion Tab",
+      "modifiers": ["command"],
+      "key": "T",
+      "scope": "webapp"
+    },
+    {
+      "id": "search-or-jump",
+      "commandName": "Search or Jump to Page",
+      "modifiers": ["command"],
+      "key": "P",
+      "scope": "webapp"
+    },
+    {
+      "id": "go-back",
+      "commandName": "Go Back",
+      "modifiers": ["command"],
+      "key": "[",
+      "scope": "webapp"
+    },
+    {
+      "id": "go-forward",
+      "commandName": "Go Forward",
+      "modifiers": ["command"],
+      "key": "]",
+      "scope": "webapp"
+    },
+    {
+      "id": "go-up-page-hierarchy",
+      "commandName": "Go Up One Page Level",
+      "modifiers": ["command", "shift"],
+      "key": "U",
+      "scope": "webapp"
+    },
+    {
+      "id": "toggle-sidebar",
+      "commandName": "Toggle Sidebar",
+      "modifiers": ["command"],
+      "key": "\\",
+      "scope": "webapp"
+    },
+    {
+      "id": "bold",
+      "commandName": "Bold",
+      "modifiers": ["command"],
+      "key": "B",
+      "scope": "webapp"
+    },
+    {
+      "id": "italic",
+      "commandName": "Italic",
+      "modifiers": ["command"],
+      "key": "I",
+      "scope": "webapp"
+    },
+    {
+      "id": "underline",
+      "commandName": "Underline",
+      "modifiers": ["command"],
+      "key": "U",
+      "scope": "webapp"
+    },
+    {
+      "id": "strikethrough",
+      "commandName": "Strikethrough",
+      "modifiers": ["command", "shift"],
+      "key": "S",
+      "scope": "webapp"
+    },
+    {
+      "id": "code",
+      "commandName": "Inline Code",
+      "modifiers": ["command"],
+      "key": "E",
+      "scope": "webapp"
+    },
+    {
+      "id": "add-comment",
+      "commandName": "Add Comment",
+      "modifiers": ["command", "shift"],
+      "key": "M",
+      "scope": "webapp"
+    },
+    {
+      "id": "mention-person-page-date",
+      "commandName": "Mention Person, Page, or Date",
+      "modifiers": [],
+      "key": "@",
+      "scope": "webapp"
+    },
+    {
+      "id": "add-reminder",
+      "commandName": "Add Reminder",
+      "modifiers": [],
+      "key": "@",
+      "scope": "webapp",
+      "notes": "Type @remind followed by a date or time."
+    },
+    {
+      "id": "create-link",
+      "commandName": "Create Link",
+      "modifiers": ["command"],
+      "key": "K",
+      "scope": "webapp"
+    },
+    {
+      "id": "create-text",
+      "commandName": "Create Text Block",
+      "modifiers": ["command", "option"],
+      "key": "0",
+      "scope": "webapp"
+    },
+    {
+      "id": "create-h1",
+      "commandName": "Create H1 Heading",
+      "modifiers": ["command", "option"],
+      "key": "1",
+      "scope": "webapp"
+    },
+    {
+      "id": "create-h2",
+      "commandName": "Create H2 Heading",
+      "modifiers": ["command", "option"],
+      "key": "2",
+      "scope": "webapp"
+    },
+    {
+      "id": "create-h3",
+      "commandName": "Create H3 Heading",
+      "modifiers": ["command", "option"],
+      "key": "3",
+      "scope": "webapp"
+    },
+    {
+      "id": "create-to-do",
+      "commandName": "Create To-Do Checkbox",
+      "modifiers": ["command", "option"],
+      "key": "4",
+      "scope": "webapp"
+    },
+    {
+      "id": "create-bulleted-list",
+      "commandName": "Create Bulleted List",
+      "modifiers": ["command", "option"],
+      "key": "5",
+      "scope": "webapp"
+    },
+    {
+      "id": "create-numbered-list",
+      "commandName": "Create Numbered List",
+      "modifiers": ["command", "option"],
+      "key": "6",
+      "scope": "webapp"
+    },
+    {
+      "id": "create-toggle-list",
+      "commandName": "Create Toggle List",
+      "modifiers": ["command", "option"],
+      "key": "7",
+      "scope": "webapp"
+    },
+    {
+      "id": "create-code-block",
+      "commandName": "Create Code Block",
+      "modifiers": ["command", "option"],
+      "key": "8",
+      "scope": "webapp"
+    },
+    {
+      "id": "create-page-block",
+      "commandName": "Create Page Block",
+      "modifiers": ["command", "option"],
+      "key": "9",
+      "scope": "webapp"
+    },
+    {
+      "id": "zoom-in",
+      "commandName": "Zoom In",
+      "modifiers": ["command"],
+      "key": "+",
+      "scope": "webapp"
+    },
+    {
+      "id": "zoom-out",
+      "commandName": "Zoom Out",
+      "modifiers": ["command"],
+      "key": "-",
+      "scope": "webapp"
+    },
+    {
+      "id": "select-current-block",
+      "commandName": "Select Current Block",
+      "modifiers": [],
+      "key": "Esc",
+      "scope": "webapp"
+    },
+    {
+      "id": "select-block-cursor-is-in",
+      "commandName": "Select Block Cursor Is In",
+      "modifiers": ["command"],
+      "key": "A",
+      "scope": "webapp"
+    },
+    {
+      "id": "open-image-full-screen",
+      "commandName": "Open Selected Image Full Screen",
+      "modifiers": [],
+      "key": "Space",
+      "scope": "webapp"
+    }
+  ]
+}
