@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "record-so",
+  "title": "Record",
+  "description": "Start screen recordings and take screenshots with Record — the dead-simple screen recorder. No signup, no watermark, unlimited length.",
+  "icon": "icon.png",
+  "author": "devrecordso",
+  "categories": ["Productivity", "Media", "Communication"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "record-screen",
+      "title": "Record Screen",
+      "description": "Start recording your entire screen with the Record desktop app",
+      "mode": "no-view",
+      "keywords": ["screen", "capture", "video", "loom"]
+    },
+    {
+      "name": "record-window",
+      "title": "Record Window",
+      "description": "Pick a window and start recording it",
+      "mode": "no-view",
+      "keywords": ["window", "capture", "video"]
+    },
+    {
+      "name": "record-area",
+      "title": "Record Area",
+      "description": "Drag out a custom area of the screen and start recording it",
+      "mode": "no-view",
+      "keywords": ["area", "region", "capture", "video"]
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "description": "Stop the current recording — the share link opens in your browser",
+      "mode": "no-view",
+      "keywords": ["stop", "finish", "end"]
+    },
+    {
+      "name": "pause-resume",
+      "title": "Pause or Resume Recording",
+      "description": "Toggle pause on the current recording",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "keywords": ["pause", "resume"]
+    },
+    {
+      "name": "screenshot-area",
+      "title": "Screenshot Area",
+      "description": "Drag out an area and screenshot it — an instant share link, ready to paste",
+      "mode": "no-view",
+      "keywords": ["screenshot", "area", "region", "snip"]
+    },
+    {
+      "name": "screenshot-screen",
+      "title": "Screenshot Screen",
+      "description": "Screenshot your entire screen — an instant share link, ready to paste",
+      "mode": "no-view",
+      "keywords": ["screenshot", "screen", "capture"]
+    },
+    {
+      "name": "screenshot-window",
+      "title": "Screenshot Window",
+      "description": "Pick a window and screenshot it",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "keywords": ["screenshot", "window"]
+    },
+    {
+      "name": "open-record",
+      "title": "Open Record",
+      "description": "Open the Record desktop app panel",
+      "mode": "no-view",
+      "keywords": ["panel", "app", "launch"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "20.8.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

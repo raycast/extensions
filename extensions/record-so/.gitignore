@@ -1,0 +1,4 @@
+node_modules/
+dist/
+.raycast-swift-build/
+raycast-env.d.ts
