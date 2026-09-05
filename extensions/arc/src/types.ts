@@ -11,6 +11,7 @@ export type Tab = {
   url: string;
   title: string;
   location: TabLocation;
+  spaceName?: string;
 };
 
 export type TabLocation = "topApp" | "pinned" | "unpinned";
