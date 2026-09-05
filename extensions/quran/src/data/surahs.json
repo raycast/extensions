@@ -1,0 +1,800 @@
+[
+  {
+    "id": 1,
+    "name": "الفاتحة",
+    "transliteration": "Al-Fatihah",
+    "type": "meccan",
+    "total_verses": 7
+  },
+  {
+    "id": 2,
+    "name": "البقرة",
+    "transliteration": "Al-Baqarah",
+    "type": "medinan",
+    "total_verses": 286
+  },
+  {
+    "id": 3,
+    "name": "آل عمران",
+    "transliteration": "Ali 'Imran",
+    "type": "medinan",
+    "total_verses": 200
+  },
+  {
+    "id": 4,
+    "name": "النساء",
+    "transliteration": "An-Nisa",
+    "type": "medinan",
+    "total_verses": 176
+  },
+  {
+    "id": 5,
+    "name": "المائدة",
+    "transliteration": "Al-Ma'idah",
+    "type": "medinan",
+    "total_verses": 120
+  },
+  {
+    "id": 6,
+    "name": "الأنعام",
+    "transliteration": "Al-An'am",
+    "type": "meccan",
+    "total_verses": 165
+  },
+  {
+    "id": 7,
+    "name": "الأعراف",
+    "transliteration": "Al-A'raf",
+    "type": "meccan",
+    "total_verses": 206
+  },
+  {
+    "id": 8,
+    "name": "الأنفال",
+    "transliteration": "Al-Anfal",
+    "type": "medinan",
+    "total_verses": 75
+  },
+  {
+    "id": 9,
+    "name": "التوبة",
+    "transliteration": "At-Tawbah",
+    "type": "medinan",
+    "total_verses": 129
+  },
+  {
+    "id": 10,
+    "name": "يونس",
+    "transliteration": "Yunus",
+    "type": "meccan",
+    "total_verses": 109
+  },
+  {
+    "id": 11,
+    "name": "هود",
+    "transliteration": "Hud",
+    "type": "meccan",
+    "total_verses": 123
+  },
+  {
+    "id": 12,
+    "name": "يوسف",
+    "transliteration": "Yusuf",
+    "type": "meccan",
+    "total_verses": 111
+  },
+  {
+    "id": 13,
+    "name": "الرعد",
+    "transliteration": "Ar-Ra'd",
+    "type": "medinan",
+    "total_verses": 43
+  },
+  {
+    "id": 14,
+    "name": "ابراهيم",
+    "transliteration": "Ibrahim",
+    "type": "meccan",
+    "total_verses": 52
+  },
+  {
+    "id": 15,
+    "name": "الحجر",
+    "transliteration": "Al-Hijr",
+    "type": "meccan",
+    "total_verses": 99
+  },
+  {
+    "id": 16,
+    "name": "النحل",
+    "transliteration": "An-Nahl",
+    "type": "meccan",
+    "total_verses": 128
+  },
+  {
+    "id": 17,
+    "name": "الإسراء",
+    "transliteration": "Al-Isra",
+    "type": "meccan",
+    "total_verses": 111
+  },
+  {
+    "id": 18,
+    "name": "الكهف",
+    "transliteration": "Al-Kahf",
+    "type": "meccan",
+    "total_verses": 110
+  },
+  {
+    "id": 19,
+    "name": "مريم",
+    "transliteration": "Maryam",
+    "type": "meccan",
+    "total_verses": 98
+  },
+  {
+    "id": 20,
+    "name": "طه",
+    "transliteration": "Taha",
+    "type": "meccan",
+    "total_verses": 135
+  },
+  {
+    "id": 21,
+    "name": "الأنبياء",
+    "transliteration": "Al-Anbya",
+    "type": "meccan",
+    "total_verses": 112
+  },
+  {
+    "id": 22,
+    "name": "الحج",
+    "transliteration": "Al-Hajj",
+    "type": "medinan",
+    "total_verses": 78
+  },
+  {
+    "id": 23,
+    "name": "المؤمنون",
+    "transliteration": "Al-Mu'minun",
+    "type": "meccan",
+    "total_verses": 118
+  },
+  {
+    "id": 24,
+    "name": "النور",
+    "transliteration": "An-Nur",
+    "type": "medinan",
+    "total_verses": 64
+  },
+  {
+    "id": 25,
+    "name": "الفرقان",
+    "transliteration": "Al-Furqan",
+    "type": "meccan",
+    "total_verses": 77
+  },
+  {
+    "id": 26,
+    "name": "الشعراء",
+    "transliteration": "Ash-Shu'ara",
+    "type": "meccan",
+    "total_verses": 227
+  },
+  {
+    "id": 27,
+    "name": "النمل",
+    "transliteration": "An-Naml",
+    "type": "meccan",
+    "total_verses": 93
+  },
+  {
+    "id": 28,
+    "name": "القصص",
+    "transliteration": "Al-Qasas",
+    "type": "meccan",
+    "total_verses": 88
+  },
+  {
+    "id": 29,
+    "name": "العنكبوت",
+    "transliteration": "Al-'Ankabut",
+    "type": "meccan",
+    "total_verses": 69
+  },
+  {
+    "id": 30,
+    "name": "الروم",
+    "transliteration": "Ar-Rum",
+    "type": "meccan",
+    "total_verses": 60
+  },
+  {
+    "id": 31,
+    "name": "لقمان",
+    "transliteration": "Luqman",
+    "type": "meccan",
+    "total_verses": 34
+  },
+  {
+    "id": 32,
+    "name": "السجدة",
+    "transliteration": "As-Sajdah",
+    "type": "meccan",
+    "total_verses": 30
+  },
+  {
+    "id": 33,
+    "name": "الأحزاب",
+    "transliteration": "Al-Ahzab",
+    "type": "medinan",
+    "total_verses": 73
+  },
+  {
+    "id": 34,
+    "name": "سبإ",
+    "transliteration": "Saba",
+    "type": "meccan",
+    "total_verses": 54
+  },
+  {
+    "id": 35,
+    "name": "فاطر",
+    "transliteration": "Fatir",
+    "type": "meccan",
+    "total_verses": 45
+  },
+  {
+    "id": 36,
+    "name": "يس",
+    "transliteration": "Ya-Sin",
+    "type": "meccan",
+    "total_verses": 83
+  },
+  {
+    "id": 37,
+    "name": "الصافات",
+    "transliteration": "As-Saffat",
+    "type": "meccan",
+    "total_verses": 182
+  },
+  {
+    "id": 38,
+    "name": "ص",
+    "transliteration": "Sad",
+    "type": "meccan",
+    "total_verses": 88
+  },
+  {
+    "id": 39,
+    "name": "الزمر",
+    "transliteration": "Az-Zumar",
+    "type": "meccan",
+    "total_verses": 75
+  },
+  {
+    "id": 40,
+    "name": "غافر",
+    "transliteration": "Ghafir",
+    "type": "meccan",
+    "total_verses": 85
+  },
+  {
+    "id": 41,
+    "name": "فصلت",
+    "transliteration": "Fussilat",
+    "type": "meccan",
+    "total_verses": 54
+  },
+  {
+    "id": 42,
+    "name": "الشورى",
+    "transliteration": "Ash-Shuraa",
+    "type": "meccan",
+    "total_verses": 53
+  },
+  {
+    "id": 43,
+    "name": "الزخرف",
+    "transliteration": "Az-Zukhruf",
+    "type": "meccan",
+    "total_verses": 89
+  },
+  {
+    "id": 44,
+    "name": "الدخان",
+    "transliteration": "Ad-Dukhan",
+    "type": "meccan",
+    "total_verses": 59
+  },
+  {
+    "id": 45,
+    "name": "الجاثية",
+    "transliteration": "Al-Jathiyah",
+    "type": "meccan",
+    "total_verses": 37
+  },
+  {
+    "id": 46,
+    "name": "الأحقاف",
+    "transliteration": "Al-Ahqaf",
+    "type": "meccan",
+    "total_verses": 35
+  },
+  {
+    "id": 47,
+    "name": "محمد",
+    "transliteration": "Muhammad",
+    "type": "medinan",
+    "total_verses": 38
+  },
+  {
+    "id": 48,
+    "name": "الفتح",
+    "transliteration": "Al-Fath",
+    "type": "medinan",
+    "total_verses": 29
+  },
+  {
+    "id": 49,
+    "name": "الحجرات",
+    "transliteration": "Al-Hujurat",
+    "type": "medinan",
+    "total_verses": 18
+  },
+  {
+    "id": 50,
+    "name": "ق",
+    "transliteration": "Qaf",
+    "type": "meccan",
+    "total_verses": 45
+  },
+  {
+    "id": 51,
+    "name": "الذاريات",
+    "transliteration": "Adh-Dhariyat",
+    "type": "meccan",
+    "total_verses": 60
+  },
+  {
+    "id": 52,
+    "name": "الطور",
+    "transliteration": "At-Tur",
+    "type": "meccan",
+    "total_verses": 49
+  },
+  {
+    "id": 53,
+    "name": "النجم",
+    "transliteration": "An-Najm",
+    "type": "meccan",
+    "total_verses": 62
+  },
+  {
+    "id": 54,
+    "name": "القمر",
+    "transliteration": "Al-Qamar",
+    "type": "meccan",
+    "total_verses": 55
+  },
+  {
+    "id": 55,
+    "name": "الرحمن",
+    "transliteration": "Ar-Rahman",
+    "type": "medinan",
+    "total_verses": 78
+  },
+  {
+    "id": 56,
+    "name": "الواقعة",
+    "transliteration": "Al-Waqi'ah",
+    "type": "meccan",
+    "total_verses": 96
+  },
+  {
+    "id": 57,
+    "name": "الحديد",
+    "transliteration": "Al-Hadid",
+    "type": "medinan",
+    "total_verses": 29
+  },
+  {
+    "id": 58,
+    "name": "المجادلة",
+    "transliteration": "Al-Mujadila",
+    "type": "medinan",
+    "total_verses": 22
+  },
+  {
+    "id": 59,
+    "name": "الحشر",
+    "transliteration": "Al-Hashr",
+    "type": "medinan",
+    "total_verses": 24
+  },
+  {
+    "id": 60,
+    "name": "الممتحنة",
+    "transliteration": "Al-Mumtahanah",
+    "type": "medinan",
+    "total_verses": 13
+  },
+  {
+    "id": 61,
+    "name": "الصف",
+    "transliteration": "As-Saf",
+    "type": "medinan",
+    "total_verses": 14
+  },
+  {
+    "id": 62,
+    "name": "الجمعة",
+    "transliteration": "Al-Jumu'ah",
+    "type": "medinan",
+    "total_verses": 11
+  },
+  {
+    "id": 63,
+    "name": "المنافقون",
+    "transliteration": "Al-Munafiqun",
+    "type": "medinan",
+    "total_verses": 11
+  },
+  {
+    "id": 64,
+    "name": "التغابن",
+    "transliteration": "At-Taghabun",
+    "type": "medinan",
+    "total_verses": 18
+  },
+  {
+    "id": 65,
+    "name": "الطلاق",
+    "transliteration": "At-Talaq",
+    "type": "medinan",
+    "total_verses": 12
+  },
+  {
+    "id": 66,
+    "name": "التحريم",
+    "transliteration": "At-Tahrim",
+    "type": "medinan",
+    "total_verses": 12
+  },
+  {
+    "id": 67,
+    "name": "الملك",
+    "transliteration": "Al-Mulk",
+    "type": "meccan",
+    "total_verses": 30
+  },
+  {
+    "id": 68,
+    "name": "القلم",
+    "transliteration": "Al-Qalam",
+    "type": "meccan",
+    "total_verses": 52
+  },
+  {
+    "id": 69,
+    "name": "الحاقة",
+    "transliteration": "Al-Haqqah",
+    "type": "meccan",
+    "total_verses": 52
+  },
+  {
+    "id": 70,
+    "name": "المعارج",
+    "transliteration": "Al-Ma'arij",
+    "type": "meccan",
+    "total_verses": 44
+  },
+  {
+    "id": 71,
+    "name": "نوح",
+    "transliteration": "Nuh",
+    "type": "meccan",
+    "total_verses": 28
+  },
+  {
+    "id": 72,
+    "name": "الجن",
+    "transliteration": "Al-Jinn",
+    "type": "meccan",
+    "total_verses": 28
+  },
+  {
+    "id": 73,
+    "name": "المزمل",
+    "transliteration": "Al-Muzzammil",
+    "type": "meccan",
+    "total_verses": 20
+  },
+  {
+    "id": 74,
+    "name": "المدثر",
+    "transliteration": "Al-Muddaththir",
+    "type": "meccan",
+    "total_verses": 56
+  },
+  {
+    "id": 75,
+    "name": "القيامة",
+    "transliteration": "Al-Qiyamah",
+    "type": "meccan",
+    "total_verses": 40
+  },
+  {
+    "id": 76,
+    "name": "الانسان",
+    "transliteration": "Al-Insan",
+    "type": "medinan",
+    "total_verses": 31
+  },
+  {
+    "id": 77,
+    "name": "المرسلات",
+    "transliteration": "Al-Mursalat",
+    "type": "meccan",
+    "total_verses": 50
+  },
+  {
+    "id": 78,
+    "name": "النبإ",
+    "transliteration": "An-Naba",
+    "type": "meccan",
+    "total_verses": 40
+  },
+  {
+    "id": 79,
+    "name": "النازعات",
+    "transliteration": "An-Nazi'at",
+    "type": "meccan",
+    "total_verses": 46
+  },
+  {
+    "id": 80,
+    "name": "عبس",
+    "transliteration": "'Abasa",
+    "type": "meccan",
+    "total_verses": 42
+  },
+  {
+    "id": 81,
+    "name": "التكوير",
+    "transliteration": "At-Takwir",
+    "type": "meccan",
+    "total_verses": 29
+  },
+  {
+    "id": 82,
+    "name": "الإنفطار",
+    "transliteration": "Al-Infitar",
+    "type": "meccan",
+    "total_verses": 19
+  },
+  {
+    "id": 83,
+    "name": "المطففين",
+    "transliteration": "Al-Mutaffifin",
+    "type": "meccan",
+    "total_verses": 36
+  },
+  {
+    "id": 84,
+    "name": "الإنشقاق",
+    "transliteration": "Al-Inshiqaq",
+    "type": "meccan",
+    "total_verses": 25
+  },
+  {
+    "id": 85,
+    "name": "البروج",
+    "transliteration": "Al-Buruj",
+    "type": "meccan",
+    "total_verses": 22
+  },
+  {
+    "id": 86,
+    "name": "الطارق",
+    "transliteration": "At-Tariq",
+    "type": "meccan",
+    "total_verses": 17
+  },
+  {
+    "id": 87,
+    "name": "الأعلى",
+    "transliteration": "Al-A'la",
+    "type": "meccan",
+    "total_verses": 19
+  },
+  {
+    "id": 88,
+    "name": "الغاشية",
+    "transliteration": "Al-Ghashiyah",
+    "type": "meccan",
+    "total_verses": 26
+  },
+  {
+    "id": 89,
+    "name": "الفجر",
+    "transliteration": "Al-Fajr",
+    "type": "meccan",
+    "total_verses": 30
+  },
+  {
+    "id": 90,
+    "name": "البلد",
+    "transliteration": "Al-Balad",
+    "type": "meccan",
+    "total_verses": 20
+  },
+  {
+    "id": 91,
+    "name": "الشمس",
+    "transliteration": "Ash-Shams",
+    "type": "meccan",
+    "total_verses": 15
+  },
+  {
+    "id": 92,
+    "name": "الليل",
+    "transliteration": "Al-Layl",
+    "type": "meccan",
+    "total_verses": 21
+  },
+  {
+    "id": 93,
+    "name": "الضحى",
+    "transliteration": "Ad-Duhaa",
+    "type": "meccan",
+    "total_verses": 11
+  },
+  {
+    "id": 94,
+    "name": "الشرح",
+    "transliteration": "Ash-Sharh",
+    "type": "meccan",
+    "total_verses": 8
+  },
+  {
+    "id": 95,
+    "name": "التين",
+    "transliteration": "At-Tin",
+    "type": "meccan",
+    "total_verses": 8
+  },
+  {
+    "id": 96,
+    "name": "العلق",
+    "transliteration": "Al-'Alaq",
+    "type": "meccan",
+    "total_verses": 19
+  },
+  {
+    "id": 97,
+    "name": "القدر",
+    "transliteration": "Al-Qadr",
+    "type": "meccan",
+    "total_verses": 5
+  },
+  {
+    "id": 98,
+    "name": "البينة",
+    "transliteration": "Al-Bayyinah",
+    "type": "medinan",
+    "total_verses": 8
+  },
+  {
+    "id": 99,
+    "name": "الزلزلة",
+    "transliteration": "Az-Zalzalah",
+    "type": "medinan",
+    "total_verses": 8
+  },
+  {
+    "id": 100,
+    "name": "العاديات",
+    "transliteration": "Al-'Adiyat",
+    "type": "meccan",
+    "total_verses": 11
+  },
+  {
+    "id": 101,
+    "name": "القارعة",
+    "transliteration": "Al-Qari'ah",
+    "type": "meccan",
+    "total_verses": 11
+  },
+  {
+    "id": 102,
+    "name": "التكاثر",
+    "transliteration": "At-Takathur",
+    "type": "meccan",
+    "total_verses": 8
+  },
+  {
+    "id": 103,
+    "name": "العصر",
+    "transliteration": "Al-'Asr",
+    "type": "meccan",
+    "total_verses": 3
+  },
+  {
+    "id": 104,
+    "name": "الهمزة",
+    "transliteration": "Al-Humazah",
+    "type": "meccan",
+    "total_verses": 9
+  },
+  {
+    "id": 105,
+    "name": "الفيل",
+    "transliteration": "Al-Fil",
+    "type": "meccan",
+    "total_verses": 5
+  },
+  {
+    "id": 106,
+    "name": "قريش",
+    "transliteration": "Quraysh",
+    "type": "meccan",
+    "total_verses": 4
+  },
+  {
+    "id": 107,
+    "name": "الماعون",
+    "transliteration": "Al-Ma'un",
+    "type": "meccan",
+    "total_verses": 7
+  },
+  {
+    "id": 108,
+    "name": "الكوثر",
+    "transliteration": "Al-Kawthar",
+    "type": "meccan",
+    "total_verses": 3
+  },
+  {
+    "id": 109,
+    "name": "الكافرون",
+    "transliteration": "Al-Kafirun",
+    "type": "meccan",
+    "total_verses": 6
+  },
+  {
+    "id": 110,
+    "name": "النصر",
+    "transliteration": "An-Nasr",
+    "type": "medinan",
+    "total_verses": 3
+  },
+  {
+    "id": 111,
+    "name": "المسد",
+    "transliteration": "Al-Masad",
+    "type": "meccan",
+    "total_verses": 5
+  },
+  {
+    "id": 112,
+    "name": "الإخلاص",
+    "transliteration": "Al-Ikhlas",
+    "type": "meccan",
+    "total_verses": 4
+  },
+  {
+    "id": 113,
+    "name": "الفلق",
+    "transliteration": "Al-Falaq",
+    "type": "meccan",
+    "total_verses": 5
+  },
+  {
+    "id": 114,
+    "name": "الناس",
+    "transliteration": "An-Nas",
+    "type": "meccan",
+    "total_verses": 6
+  }
+]
