@@ -9,6 +9,7 @@ import type {
 } from "../types";
 import {
   calculateSessionUsage,
+  clearSessionBaseline,
   getCachedInternetSpeed,
   type SessionDataUsage,
 } from "../speedService";
@@ -167,11 +168,7 @@ export async function getMacWifiStatus(): Promise<WifiStatus> {
     let sessionData: SessionDataUsage | undefined;
     if (isConnected && ssid) {
       try {
-        const netstatOutput = await runExecFile("netstat", [
-          "-b",
-          "-I",
-          device,
-        ]);
+        const netstatOutput = await runExecFile("netstat", ["-ibn"]);
         const counters = parseNetstatBytes(netstatOutput, device);
         if (counters) {
           sessionData = calculateSessionUsage(
@@ -181,8 +178,10 @@ export async function getMacWifiStatus(): Promise<WifiStatus> {
           );
         }
       } catch {
-        // Netstat query fallback
+        // Fallback if netstat fails
       }
+    } else {
+      clearSessionBaseline();
     }
 
     return {
@@ -197,6 +196,7 @@ export async function getMacWifiStatus(): Promise<WifiStatus> {
       internetSpeed: isConnected ? getCachedInternetSpeed() : undefined,
     };
   } catch {
+    clearSessionBaseline();
     return { isOn: false, isConnected: false };
   }
 }
@@ -205,6 +205,9 @@ export async function toggleMacWifi(targetState?: boolean): Promise<boolean> {
   const device = await getMacWifiDevice();
   const current = await getMacWifiStatus();
   const nextState = targetState !== undefined ? targetState : !current.isOn;
+  if (!nextState) {
+    clearSessionBaseline();
+  }
   await runExecFile("networksetup", [
     "-setairportpower",
     device,
@@ -266,6 +269,7 @@ export async function connectMacWifi(
   ssid: string,
   password?: string,
 ): Promise<void> {
+  clearSessionBaseline();
   const device = await getMacWifiDevice();
   const args = ["-setairportnetwork", device, ssid];
   if (password) {
@@ -275,6 +279,7 @@ export async function connectMacWifi(
 }
 
 export async function disconnectMacWifi(): Promise<void> {
+  clearSessionBaseline();
   const device = await getMacWifiDevice();
 
   // 1. Try real disassociation via CoreWLAN (JXA)

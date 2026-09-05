@@ -12,6 +12,7 @@ const {
   formatBytes,
   formatGigaBytes,
   calculateSessionUsage,
+  clearSessionBaseline,
 } = await import("../src/services/speedService.ts");
 const { parseSubinterfaceBytes } = await import(
   "../src/services/platform/windows.ts"
@@ -153,6 +154,91 @@ assert.equal(resSanitized.totalBytesIn, 0);
 assert.equal(resSanitized.totalBytesOut, 0);
 assert.equal(resSanitized.downloadedBytes, 0);
 assert.equal(resSanitized.uploadedBytes, 0);
+
+// Test I: Disconnecting and reconnecting to the SAME SSID must establish a fresh session starting at zero
+const resSameInitial = calculateSessionUsage("WorkOffice", 50_000_000, 10_000_000);
+assert.equal(resSameInitial.downloadedBytes, 0, "Initial WorkOffice delta should be 0");
+assert.equal(resSameInitial.uploadedBytes, 0, "Initial WorkOffice delta should be 0");
+
+const resSameTraffic = calculateSessionUsage("WorkOffice", 56_000_000, 12_000_000);
+assert.equal(
+  resSameTraffic.downloadedBytes,
+  6_000_000,
+  "WorkOffice should accumulate 6MB downloaded in first session",
+);
+assert.equal(
+  resSameTraffic.uploadedBytes,
+  2_000_000,
+  "WorkOffice should accumulate 2MB uploaded in first session",
+);
+
+// User disconnects from Wi-Fi (disconnected state observation)
+const resDisconn = calculateSessionUsage(undefined, 56_000_000, 12_000_000);
+assert.equal(resDisconn.downloadedBytes, 0, "Disconnected state delta should be 0");
+assert.equal(resDisconn.uploadedBytes, 0, "Disconnected state delta should be 0");
+
+// User reconnects to the SAME SSID ("WorkOffice")
+const resSameReconnect = calculateSessionUsage(
+  "WorkOffice",
+  56_000_000,
+  12_000_000,
+);
+assert.equal(
+  resSameReconnect.downloadedBytes,
+  0,
+  "Reconnecting to the same SSID after disconnect must start Session Data at 0!",
+);
+assert.equal(
+  resSameReconnect.uploadedBytes,
+  0,
+  "Reconnecting to the same SSID after disconnect must start Session Data at 0!",
+);
+
+// User transfers data in the second session on "WorkOffice"
+const resSameNewTraffic = calculateSessionUsage(
+  "WorkOffice",
+  60_000_000,
+  13_500_000,
+);
+assert.equal(
+  resSameNewTraffic.downloadedBytes,
+  4_000_000,
+  "Second session on WorkOffice must only count new traffic (4MB), not prior connection traffic",
+);
+assert.equal(
+  resSameNewTraffic.uploadedBytes,
+  1_500_000,
+  "Second session on WorkOffice must only count new traffic (1.5MB), not prior connection traffic",
+);
+
+// Test J: Explicit clearSessionBaseline() resets active SSID and baseline
+clearSessionBaseline();
+const resAfterClear = calculateSessionUsage("WorkOffice", 65_000_000, 15_000_000);
+assert.equal(
+  resAfterClear.downloadedBytes,
+  0,
+  "Observation following explicit clearSessionBaseline() must start at 0",
+);
+// Test K: Reconnecting to SAME SSID with a new connectionKey (e.g. reconnect outside Raycast)
+const resKey1 = calculateSessionUsage("HomeFiber", 100_000_000, 20_000_000, "conn_0x1");
+assert.equal(resKey1.downloadedBytes, 0);
+
+const resKey1Traffic = calculateSessionUsage("HomeFiber", 110_000_000, 25_000_000, "conn_0x1");
+assert.equal(resKey1Traffic.downloadedBytes, 10_000_000);
+assert.equal(resKey1Traffic.uploadedBytes, 5_000_000);
+
+// Disconnect & reconnect occurred outside Raycast (new connectionKey without passing undefined)
+const resKey2 = calculateSessionUsage("HomeFiber", 110_000_000, 25_000_000, "conn_0x2");
+assert.equal(
+  resKey2.downloadedBytes,
+  0,
+  "New connectionKey on same SSID must establish fresh baseline at 0 even if undefined was never passed",
+);
+assert.equal(resKey2.uploadedBytes, 0);
+
+const resKey2Traffic = calculateSessionUsage("HomeFiber", 115_000_000, 27_000_000, "conn_0x2");
+assert.equal(resKey2Traffic.downloadedBytes, 5_000_000);
+assert.equal(resKey2Traffic.uploadedBytes, 2_000_000);
 
 console.log("✓ calculateSessionUsage Cache tests passed!");
 

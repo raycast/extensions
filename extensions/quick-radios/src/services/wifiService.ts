@@ -55,6 +55,7 @@ export {
   formatBytes,
   formatGigaBytes,
   calculateSessionUsage,
+  clearSessionBaseline,
   type InternetSpeedResult,
   type SessionDataUsage,
   type StoredBaseline,
