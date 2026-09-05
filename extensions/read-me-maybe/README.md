@@ -1,8 +1,10 @@
 # Read Me Maybe
 
+![Menu bar item](media/screenshot-menubar.png)
+
 > Time to ditch the dock and reclaim that extra screen real estate for your favorite apps.
 
-Read Me Maybe is an extension for showing and consolidating dock badges on macOS. Check the aggregated status in your menu bar, and view the breakdown per source in the **View Unreads** command.
+Read Me Maybe is an extension for showing and consolidating application badges on your macOS dock. Check the aggregated status in your menu bar to get an overview, and get the breakdown per source in the **View Unreads** command.
 
 ## Setup
 
@@ -11,7 +13,7 @@ Read Me Maybe is an extension for showing and consolidating dock badges on macOS
 3. Open **View Unreads** command and configure however many sources you desire. Each Source has an **Open** command, which defaults to `open` for that application's installed path, you can customize the open command if needed.
 4. The **Read Me Maybe** menu-bar now command refreshes approximately every 15 seconds. Timing can be delayed by Raycast or macOS energy management.
 
-![Privacy Settings](assets/privacy.png)
+![Privacy Settings](media/privacy.png)
 
 💡 Assign the **View Unreads** command to a hotkey (for example, `hyper+/`) and you won't need to touch your
 

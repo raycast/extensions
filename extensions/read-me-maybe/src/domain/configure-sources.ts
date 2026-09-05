@@ -59,7 +59,16 @@ export type SourceFormErrors = { appPath?: string };
 
 export function sourceFormErrors(draft: StoredSource, catalogRows: readonly StoredSource[]): SourceFormErrors {
   const reason = validateSourceRow(draft, catalogRows);
-  return reason === "Application is already in the Source Catalog" ? { appPath: reason } : {};
+  switch (reason) {
+    // The Dock Item Name derives from the Application, so a colliding Dock
+    // item name is also surfaced on the Application field — the only input
+    // that can resolve it.
+    case "Application is already in the Source Catalog":
+    case "Dock item name is already in the Source Catalog":
+      return { appPath: reason };
+    default:
+      return {};
+  }
 }
 
 export function addSourceRow(sources: readonly StoredSource[], values: AddSourceValues): StoredSource[] {

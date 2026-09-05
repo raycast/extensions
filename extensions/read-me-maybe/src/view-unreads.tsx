@@ -41,6 +41,7 @@ import {
   enabledSources,
   openCommandForSource,
   relativeFreshness,
+  sameEnabledSources,
   summarizeDockScan,
 } from "./domain/unread-count";
 import { messageIcon, sourceViewItems, type SourceViewItem, type ViewItemStatus } from "./domain/view-unreads";
@@ -82,7 +83,21 @@ export default function ViewUnreadsCommand() {
         const enabled = enabledSources(rows);
         if (enabled.length === 0 || !(await loadAccessCheckState()).setupGate) return;
         setRefreshing(true);
+        // A scan's data is no newer than its start: the menu's cycle can write
+        // a fresher snapshot and queued edits can reshape the Catalog while it
+        // runs, so this scan only persists while it is still the most recent
+        // reading of an unchanged Catalog.
+        const scanStartedAt = new Date();
         const scan = await dockScans.background(enabled);
+        await queuedEdits.current;
+        const [catalog, stored] = await Promise.all([loadSourceCatalog(), loadUnreadSnapshot()]);
+        if (!sameEnabledSources(enabled, catalog.sources)) return;
+        if (stored && stored.readAt > scanStartedAt) {
+          // A snapshot written mid-scan is the more recent reading; adopt it
+          // instead of regressing the store with this stale scan.
+          if (!cancelled) setSnapshot(stored);
+          return;
+        }
         const fresh: UnreadSnapshot = { result: summarizeDockScan(enabled, scan), readAt: new Date() };
         // A storage failure must not fail the refresh; the menu's next cycle
         // would rewrite the snapshot anyway.

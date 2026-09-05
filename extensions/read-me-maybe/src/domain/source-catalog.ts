@@ -44,6 +44,7 @@ export function parseSourceCatalog(raw: string | undefined): SourceCatalog | und
     sources.push(row);
   }
   if (!idsAreUnique(sources)) return undefined;
+  if (!dockNamesAreUnique(sources)) return undefined;
   return { version: sourceCatalogVersion, sources };
 }
 
@@ -52,13 +53,21 @@ export function idsAreUnique(sources: readonly StoredSource[]): boolean {
   return ids.size === sources.length;
 }
 
+/** Dock Item Name keys the Dock scan's outcomes, so two rows sharing one name would leave a row without an outcome. */
+export function dockNamesAreUnique(sources: readonly StoredSource[]): boolean {
+  const names = new Set(sources.map((row) => row.dockName));
+  return names.size === sources.length;
+}
+
 export function validateSourceRow(row: StoredSource, catalogRows: readonly StoredSource[]): string | undefined {
   if (row.name.trim() === "") return "Name is required";
   if (row.dockName.trim() === "") return "Dock item name is required";
-  const duplicate = catalogRows.some(
+  const duplicateApplication = catalogRows.some(
     (other) => other.id !== row.id && other.appPath !== undefined && other.appPath === row.appPath,
   );
-  if (duplicate) return "Application is already in the Source Catalog";
+  if (duplicateApplication) return "Application is already in the Source Catalog";
+  const duplicateDockName = catalogRows.some((other) => other.id !== row.id && other.dockName === row.dockName);
+  if (duplicateDockName) return "Dock item name is already in the Source Catalog";
   return undefined;
 }
 
