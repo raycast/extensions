@@ -14,6 +14,8 @@ import type { AgentConfig } from "@/types/extension";
 import ChatCommand from "@/chat";
 import { useNavigation } from "@raycast/api";
 import { STORAGE_KEYS } from "@/utils/storageKeys";
+import { AgentModeService } from "@/services/agentModeService";
+import type { AgentMode } from "@/types/entities";
 
 const logger = createLogger("StartChatForm");
 
@@ -37,6 +39,7 @@ interface LastChatConfig {
 interface FormValues {
   agentId: string;
   workingDirectory: string;
+  modeId?: string;
   favoriteId?: string;
   saveFavorite: boolean;
   favoriteName?: string;
@@ -52,12 +55,50 @@ export default function StartChatForm() {
   const [selectedFavoriteId, setSelectedFavoriteId] = useState<string>("");
   const [workingDirectory, setWorkingDirectory] = useState<string>("");
   const [shouldSaveFavorite, setShouldSaveFavorite] = useState(false);
+  // Modes are only known once an agent has opened a session at least once.
+  const [agentModes, setAgentModes] = useState<AgentMode[]>([]);
+  const [selectedModeId, setSelectedModeId] = useState<string>("");
 
   const configService = new ConfigService();
+  const agentModeService = new AgentModeService();
 
   useEffect(() => {
     loadInitialData();
   }, []);
+
+  // Offer the modes the selected agent reported last time, preselected with the
+  // default configured for it.
+  useEffect(() => {
+    let cancelled = false;
+
+    // Drop the previous agent's modes right away. Keeping them while the new ones
+    // load would show the wrong agent's modes, and submitting in that window would
+    // send a mode the new agent does not offer — silently starting in its default.
+    setAgentModes([]);
+    setSelectedModeId("");
+
+    async function loadModes() {
+      if (!selectedAgentId) {
+        return;
+      }
+
+      const [modes, defaultModeId] = await Promise.all([
+        agentModeService.getKnownModes(selectedAgentId),
+        agentModeService.getDefaultMode(selectedAgentId),
+      ]);
+
+      if (cancelled) return;
+
+      setAgentModes(modes);
+      setSelectedModeId(defaultModeId ?? "");
+    }
+
+    loadModes().catch((error) => logger.warn("Failed to load agent modes", { error }));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedAgentId]);
 
   async function loadInitialData() {
     try {
@@ -252,7 +293,9 @@ export default function StartChatForm() {
       await saveLastChatConfig(agentId, cwd);
 
       // Push to chat view
-      push(<ChatCommand initialAgentId={agentId} initialAgent={agentWithCwd} />);
+      push(
+        <ChatCommand initialAgentId={agentId} initialAgent={agentWithCwd} initialModeId={values.modeId || undefined} />,
+      );
 
       await showToast({
         style: Toast.Style.Success,
@@ -309,7 +352,9 @@ export default function StartChatForm() {
               title="Configure Agents"
               icon={Icon.Gear}
               shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/agent-client-protocol/configure-agents`)}
+              onAction={() =>
+                open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/agent-client-protocol/configure-agents`)
+              }
             />
             {selectedFavoriteId && (
               <Action
@@ -374,6 +419,22 @@ export default function StartChatForm() {
       </Form.Dropdown>
 
       {selectedAgent && selectedAgent.description && <Form.Description text={selectedAgent.description} />}
+
+      {/* Agent Mode — only offered once the agent has reported its modes at least once */}
+      {agentModes.length > 0 && (
+        <Form.Dropdown
+          id="modeId"
+          title="Agent Mode"
+          value={selectedModeId}
+          onChange={setSelectedModeId}
+          info="Applied before your first message, so the agent starts the conversation in this mode."
+        >
+          <Form.Dropdown.Item value="" title="Agent default" />
+          {agentModes.map((mode) => (
+            <Form.Dropdown.Item key={mode.id} value={mode.id} title={mode.name} />
+          ))}
+        </Form.Dropdown>
+      )}
 
       {/* Working Directory */}
       <Form.TextField

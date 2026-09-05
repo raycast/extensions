@@ -11,7 +11,7 @@
 import { ACPClient } from '@/services/acpClient';
 import { getBuiltInAgent } from '@/utils/builtInAgents';
 import type { AgentConfig } from '@/types/extension';
-import type * as acp from '@zed-industries/agent-client-protocol';
+import type * as acp from '@agentclientprotocol/sdk';
 
 const shouldRunAcpProtocolTests = process.env.RUN_ACP_PROTOCOL_TESTS === 'true';
 

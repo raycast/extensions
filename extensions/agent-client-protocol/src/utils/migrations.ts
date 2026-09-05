@@ -8,6 +8,7 @@
 import { LocalStorage } from "@raycast/api";
 import { STORAGE_VERSION, STORAGE_VERSION_KEY, STORAGE_KEYS } from "./storageKeys";
 import { createLogger } from "./logging";
+import { CLAUDE_ACP_COMMAND, LEGACY_CLAUDE_ACP_COMMAND } from "./builtInAgents";
 import type { ConversationSession } from "@/types/entities";
 
 const logger = createLogger("Migrations");
@@ -33,6 +34,7 @@ const MIGRATIONS: Record<string, MigrationFn> = {
   "1.0.0": migration_1_0_0,
   "1.1.0": migration_1_1_0,
   "1.2.0": migration_1_2_0,
+  "1.3.0": migration_1_3_0,
 };
 
 /**
@@ -265,6 +267,41 @@ async function migration_1_2_0(): Promise<void> {
     logger.info("Migration 1.2.0 completed", { conversationsUpdated: conversations.length });
   } catch (error) {
     logger.error("Migration 1.2.0 failed", { error });
+    throw error;
+  }
+}
+
+/**
+ * Migration: 1.3.0 - Point Claude agents at the maintained ACP adapter
+ *
+ * Zed's `claude-code-acp` was archived and republished by the ACP project as
+ * `@agentclientprotocol/claude-agent-acp`. Stored configurations still spawning the
+ * old binary would keep failing silently, so rewrite the command in place.
+ */
+async function migration_1_3_0(): Promise<void> {
+  logger.info("Running migration 1.3.0");
+
+  try {
+    const agentsJson = await LocalStorage.getItem(STORAGE_KEYS.AGENT_CONFIGS);
+    if (!agentsJson) return;
+
+    const agents = JSON.parse(String(agentsJson)) as Array<{ command?: string }>;
+
+    let updated = 0;
+    for (const agent of agents) {
+      if (agent.command === LEGACY_CLAUDE_ACP_COMMAND) {
+        agent.command = CLAUDE_ACP_COMMAND;
+        updated++;
+      }
+    }
+
+    if (updated > 0) {
+      await LocalStorage.setItem(STORAGE_KEYS.AGENT_CONFIGS, JSON.stringify(agents));
+    }
+
+    logger.info("Migration 1.3.0 completed", { agentsUpdated: updated });
+  } catch (error) {
+    logger.error("Migration 1.3.0 failed", { error });
     throw error;
   }
 }

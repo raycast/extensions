@@ -41,6 +41,7 @@ export enum ErrorCode {
 
   // Protocol-related errors
   ProtocolError = "PROTOCOL_ERROR",
+  AuthenticationRequired = "AUTHENTICATION_REQUIRED",
 
   // Session-related errors
   SessionNotFound = "SESSION_NOT_FOUND",

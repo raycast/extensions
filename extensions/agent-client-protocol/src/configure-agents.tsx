@@ -14,6 +14,8 @@ import { createLogger } from "@/utils/logging";
 import { getInstallationGuide, AGENT_TEMPLATES } from "@/utils/builtInAgents";
 import type { AgentConfig, AgentHealthRecord } from "@/types/extension";
 import { AddAgentForm, EditAgentForm } from "@/components/AgentConfig";
+import { AgentModeService } from "@/services/agentModeService";
+import type { AgentMode } from "@/types/entities";
 import { getAgentHealthAccessory } from "@/components/AgentSelector";
 
 const logger = createLogger("ConfigureAgentsCommand");
@@ -23,9 +25,13 @@ export default function ConfigureAgentsCommand() {
   const [defaultAgent, setDefaultAgent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [healthMap, setHealthMap] = useState<Record<string, AgentHealthRecord>>({});
+  // Modes an agent reported in an earlier session, plus the default chosen for it.
+  const [modeMap, setModeMap] = useState<Record<string, AgentMode[]>>({});
+  const [defaultModeMap, setDefaultModeMap] = useState<Record<string, string | undefined>>({});
 
   const configService = useMemo(() => new ConfigService(), []);
   const agentConfigService = useMemo(() => new AgentConfigService(), []);
+  const agentModeService = useMemo(() => new AgentModeService(), []);
 
   useEffect(() => {
     loadAgents();
@@ -47,11 +53,41 @@ export default function ConfigureAgentsCommand() {
       setDefaultAgent(defaultAgentId);
       const healthByAgent = Object.fromEntries(healthRecords.map((record) => [record.agentId, record] as const));
       setHealthMap(healthByAgent);
+
+      const modeEntries = await Promise.all(
+        agentConfigs.map(async (agent) => {
+          const [modes, defaultModeId] = await Promise.all([
+            agentModeService.getKnownModes(agent.id),
+            agentModeService.getDefaultMode(agent.id),
+          ]);
+          return [agent.id, modes, defaultModeId] as const;
+        }),
+      );
+      setModeMap(Object.fromEntries(modeEntries.map(([id, modes]) => [id, modes])));
+      setDefaultModeMap(Object.fromEntries(modeEntries.map(([id, , defaultModeId]) => [id, defaultModeId])));
+
       logger.info("Agent configurations loaded", { count: agentConfigs.length });
     } catch (error) {
       await ErrorHandler.handleError(error, "Loading agent configurations");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function setDefaultMode(agent: AgentConfig, modeId: string | undefined) {
+    try {
+      await agentModeService.setDefaultMode(agent.id, modeId);
+      setDefaultModeMap((current) => ({ ...current, [agent.id]: modeId }));
+
+      const modeName = modeId ? (modeMap[agent.id]?.find((mode) => mode.id === modeId)?.name ?? modeId) : null;
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: modeName ? `Default Mode: ${modeName}` : "Using the Agent's Own Default",
+        message: `New chats with ${agent.name} start in this mode.`,
+      });
+    } catch (error) {
+      await ErrorHandler.handleError(error, "Setting the default agent mode");
     }
   }
 
@@ -260,6 +296,23 @@ export default function ConfigureAgentsCommand() {
                 />
                 {agent.id !== defaultAgent && (
                   <Action title="Set as Default" icon={Icon.Star} onAction={() => setAsDefault(agent.id)} />
+                )}
+                {(modeMap[agent.id]?.length ?? 0) > 0 && (
+                  <ActionPanel.Submenu title="Set Default Mode" icon={Icon.Gauge}>
+                    <Action
+                      title="Agent Default"
+                      icon={defaultModeMap[agent.id] === undefined ? Icon.CheckCircle : Icon.Circle}
+                      onAction={() => setDefaultMode(agent, undefined)}
+                    />
+                    {modeMap[agent.id].map((mode) => (
+                      <Action
+                        key={mode.id}
+                        title={mode.name}
+                        icon={defaultModeMap[agent.id] === mode.id ? Icon.CheckCircle : Icon.Circle}
+                        onAction={() => setDefaultMode(agent, mode.id)}
+                      />
+                    ))}
+                  </ActionPanel.Submenu>
                 )}
                 {!agent.isBuiltIn && (
                   <Action

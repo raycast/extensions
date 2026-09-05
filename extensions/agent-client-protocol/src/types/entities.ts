@@ -114,6 +114,35 @@ export interface SessionRequest {
     /** Priority level */
     priority?: "low" | "normal" | "high";
   };
+
+  /**
+   * Observer for streaming messages, attached before the initial prompt is sent.
+   *
+   * Registering after `createSession` resolves would miss the whole first turn,
+   * because the agent streams its answer while the prompt call is still pending.
+   */
+  onMessage?: (message: SessionMessage) => void;
+
+  /**
+   * Mode to put the session into before the first prompt is sent.
+   *
+   * Switching afterwards is too late: the opening turn already ran under the
+   * agent's own default, prompting for permissions the chosen mode would have
+   * handled on its own.
+   */
+  modeId?: string;
+}
+
+/**
+ * A working mode an agent offers for a session (permission handling, planning, …).
+ */
+export interface AgentMode {
+  /** Mode identifier */
+  id: string;
+  /** Human-readable mode name */
+  name: string;
+  /** Optional description of what this mode does */
+  description?: string | null;
 }
 
 /**
@@ -154,6 +183,8 @@ export interface ConversationSession {
     priority?: "low" | "normal" | "high";
     /** Total token count (if available) */
     tokenCount?: number;
+    /** Context window size the agent reports for this session (if available) */
+    contextWindowSize?: number;
     /** Estimated cost (if available) */
     estimatedCost?: number;
   };
@@ -177,14 +208,7 @@ export interface ConversationSession {
   };
 
   /** Available modes for this agent session */
-  availableModes?: Array<{
-    /** Mode identifier */
-    id: string;
-    /** Human-readable mode name */
-    name: string;
-    /** Optional description of what this mode does */
-    description?: string | null;
-  }>;
+  availableModes?: AgentMode[];
 
   /** Available slash commands advertised by the agent */
   availableCommands?: AvailableCommand[];

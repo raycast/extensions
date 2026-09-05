@@ -81,15 +81,22 @@ type ChatCommandProps = {
   initialSessionId?: string;
   initialAgentId?: string;
   initialAgent?: AgentConfig; // Pre-configured agent with working directory
+  initialModeId?: string; // Mode to open the session in, chosen before the first message
 };
 
-export default function ChatCommand({ initialSessionId, initialAgentId, initialAgent }: ChatCommandProps = {}) {
+export default function ChatCommand({
+  initialSessionId,
+  initialAgentId,
+  initialAgent,
+  initialModeId,
+}: ChatCommandProps = {}) {
   const chat = useChatSession();
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(undefined);
   const [isLoadingAgents, setIsLoadingAgents] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [showToolCalls, setShowToolCalls] = useState(false);
 
   const configService = useMemo(() => new ConfigService(), []);
   const storageService = useMemo(() => new StorageService(), []);
@@ -488,7 +495,9 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
       return;
     }
 
-    await chat.sendMessage(message);
+    // The mode only takes effect while the session is opened, so it is passed on
+    // the first message and ignored afterwards.
+    await chat.sendMessage(message, chat.conversation ? undefined : initialModeId);
     setSearchText("");
   }
 
@@ -660,7 +669,12 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
     );
   });
 
-  const messageItems = chat.messages.map((message, index) => {
+  // Tool calls are kept in the conversation but hidden by default: a single turn can
+  // produce a dozen of them, which buries the agent's actual answer.
+  const toolCallCount = chat.messages.filter((message) => message.role === "tool").length;
+  const visibleMessages = showToolCalls ? chat.messages : chat.messages.filter((message) => message.role !== "tool");
+
+  const messageItems = visibleMessages.map((message, index) => {
     const speakerLabel =
       message.role === "user"
         ? "You"
@@ -719,6 +733,14 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
             )}
             {renderContextActions()}
             <ActionPanel.Section>
+              {toolCallCount > 0 && (
+                <Action
+                  title={showToolCalls ? "Hide Tool Calls" : `Show Tool Calls (${toolCallCount})`}
+                  icon={showToolCalls ? Icon.EyeDisabled : Icon.Eye}
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                  onAction={() => setShowToolCalls((shown) => !shown)}
+                />
+              )}
               <Action
                 title="Restart Conversation"
                 icon={Icon.Repeat}
@@ -776,7 +798,13 @@ export default function ChatCommand({ initialSessionId, initialAgentId, initialA
         </List.Section>
       )}
       {chat.messages.length > 0 ? (
-        <List.Section title={conversationTitle} subtitle={conversationSubtitle || `${chat.messages.length} messages`}>
+        <List.Section
+          title={conversationTitle}
+          subtitle={
+            conversationSubtitle ||
+            `${visibleMessages.length} messages${!showToolCalls && toolCallCount > 0 ? ` · ${toolCallCount} tool calls hidden` : ""}`
+          }
+        >
           {messageItems}
         </List.Section>
       ) : chat.contexts.length === 0 ? (

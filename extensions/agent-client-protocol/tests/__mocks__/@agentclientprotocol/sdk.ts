@@ -1,4 +1,4 @@
-// Mock implementation of @zed-industries/agent-client-protocol for testing
+// Mock implementation of @agentclientprotocol/sdk for testing
 
 export const Client = jest.fn();
 export const Transport = jest.fn();

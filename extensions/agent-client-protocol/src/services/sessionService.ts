@@ -9,7 +9,7 @@
  */
 
 import { v4 as uuidv4 } from "uuid";
-import { ACPError, ErrorCode } from "@/utils/errors";
+import { ACPError, ErrorCode, rpcErrorMessage } from "@/utils/errors";
 import { createLogger, PerformanceLogger } from "@/utils/logging";
 import type {
   ConversationSession,
@@ -29,6 +29,7 @@ import type {
   PlanUpdate,
   AvailableCommandsUpdate,
   CurrentModeUpdate,
+  UsageUpdate,
   ToolCallContent,
   ContentBlock,
   ToolCallStatus,
@@ -38,6 +39,7 @@ import type { StorageService } from "./storageService";
 import type { ACPClient } from "./acpClient";
 import { ContextService } from "./contextService";
 import { PersistenceService } from "./persistenceService";
+import { AgentModeService } from "./agentModeService";
 
 const logger = createLogger("SessionService");
 
@@ -45,6 +47,8 @@ export class SessionService implements SessionServiceInterface {
   private contextService: ContextService;
 
   private persistenceService: PersistenceService;
+
+  private agentModeService = new AgentModeService();
 
   private activeStreamingMessages: Map<string, Partial<Record<"assistant" | "user", { id: string; content: string }>>> =
     new Map();
@@ -135,49 +139,13 @@ export class SessionService implements SessionServiceInterface {
         },
       };
 
-      // Send initial prompt to agent via ACP
+      // Open the ACP session first. The prompt is deliberately sent later: the agent
+      // starts streaming the answer while `session/prompt` is still pending, so the
+      // session has to be stored and observed before we ask it anything.
+      let acpSession: Awaited<ReturnType<ACPClient["createSession"]>>;
       try {
-        const acpSession = await this.acpClient.createSession({
+        acpSession = await this.acpClient.createSession({
           cwd: request.context?.workingDirectory ?? process.cwd(),
-        });
-
-        await this.acpClient.sendPrompt(acpSession.sessionId, request.prompt);
-
-        // Note: Agent responses come via sessionUpdate callbacks, not in the prompt response
-        // The prompt response just indicates the request was accepted
-
-        session.agentSessionId = acpSession.sessionId;
-        session.context = {
-          ...session.context,
-          additionalContext: {
-            ...(session.context?.additionalContext ?? {}),
-            agentSessionId: acpSession.sessionId,
-          },
-        };
-
-        // Capture mode information if provided by the agent
-        if (acpSession.modes) {
-          const currentMode = acpSession.modes.availableModes.find((m) => m.id === acpSession.modes!.currentModeId);
-
-          session.currentMode = currentMode
-            ? {
-                id: currentMode.id,
-                name: currentMode.name,
-              }
-            : undefined;
-
-          session.availableModes = acpSession.modes.availableModes;
-
-          logger.info("Agent mode information captured", {
-            sessionId,
-            currentMode: session.currentMode,
-            availableModes: session.availableModes,
-          });
-        }
-
-        logger.info("Session created successfully", {
-          sessionId,
-          messageCount: session.messages.length,
         });
       } catch (error) {
         logger.error("Failed to create ACP session", {
@@ -186,33 +154,52 @@ export class SessionService implements SessionServiceInterface {
           error,
         });
 
-        throw new ACPError(
-          ErrorCode.ProtocolError,
-          "Failed to create session with agent",
-          error instanceof Error ? error.message : "Unknown ACP error",
-          { sessionId, agentConnectionId: request.agentConnectionId },
-        );
+        throw this.toAgentError(error, "Failed to create session with agent", {
+          sessionId,
+          agentConnectionId: request.agentConnectionId,
+        });
       }
 
-      // Save session to storage BEFORE processing pending updates
-      // This ensures the session exists when processPendingUpdates tries to find it
+      session.agentSessionId = acpSession.sessionId;
+      session.context = {
+        ...session.context,
+        additionalContext: {
+          ...(session.context?.additionalContext ?? {}),
+          agentSessionId: acpSession.sessionId,
+        },
+      };
+
+      // Capture mode information if provided by the agent
+      if (acpSession.modes) {
+        const currentMode = acpSession.modes.availableModes.find((m) => m.id === acpSession.modes!.currentModeId);
+
+        session.currentMode = currentMode
+          ? {
+              id: currentMode.id,
+              name: currentMode.name,
+            }
+          : undefined;
+
+        session.availableModes = acpSession.modes.availableModes;
+
+        logger.info("Agent mode information captured", {
+          sessionId,
+          currentMode: session.currentMode,
+          availableModes: session.availableModes,
+        });
+
+        // Remember them so the next chat with this agent can pick a mode up front
+        await this.agentModeService.rememberModes(request.agentConfigId, session.availableModes);
+
+        const requestedModeId = request.modeId ?? (await this.agentModeService.getDefaultMode(request.agentConfigId));
+        await this.applyInitialMode(session, requestedModeId);
+      }
+
       try {
         await this.storageService.saveConversation(session);
         await this.persistenceService.saveSessionSnapshot(session);
 
         logger.info("Session saved to storage", { sessionId });
-
-        // Process any buffered updates that arrived while session was being created
-        // Now that the session is saved, these updates can be properly applied
-        await this.processPendingUpdates(session.agentSessionId!, sessionId);
-
-        PerformanceLogger.end(operationId, {
-          success: true,
-          sessionId,
-          messageCount: session.messages.length,
-        });
-
-        return session;
       } catch (error) {
         logger.error("Failed to save session to storage", { sessionId, error });
 
@@ -223,13 +210,110 @@ export class SessionService implements SessionServiceInterface {
           { sessionId },
         );
       }
+
+      if (request.onMessage) {
+        this.onSessionMessage(sessionId, request.onMessage);
+      }
+
+      // Anything the agent already sent (e.g. its command list) can now be applied
+      await this.processPendingUpdates(session.agentSessionId, sessionId);
+
+      try {
+        await this.acpClient.sendPrompt(acpSession.sessionId, request.prompt);
+      } catch (error) {
+        logger.error("Failed to send initial prompt", {
+          sessionId,
+          agentSessionId: acpSession.sessionId,
+          error,
+        });
+
+        // The session itself is fine — `session/new` succeeded and only the prompt
+        // was refused, typically because the agent still needs a login. It stays
+        // stored and active so the user can retry from the conversation list once
+        // the cause is fixed, which is exactly what the error toast asks them to do.
+        // Marking it as failed here would make it non-resumable while persistence
+        // still lists it, leaving a conversation that rejects every message.
+        this.offSessionMessage(sessionId);
+
+        throw this.toAgentError(error, "Failed to send the first message to the agent", {
+          sessionId,
+          agentConnectionId: request.agentConnectionId,
+        });
+      }
+
+      logger.info("Session created successfully", {
+        sessionId,
+        messageCount: session.messages.length,
+      });
+
+      PerformanceLogger.end(operationId, {
+        success: true,
+        sessionId,
+        messageCount: session.messages.length,
+      });
+
+      // Return the stored session so streamed messages that landed during the first
+      // turn are included rather than the pre-prompt snapshot.
+      return (await this.storageService.getConversation(sessionId)) ?? session;
     } catch (error) {
       PerformanceLogger.end(operationId, {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: rpcErrorMessage(error),
       });
       throw error;
     }
+  }
+
+  /**
+   * Put a freshly opened session into the requested mode.
+   *
+   * Failing to switch must not sink the session — the chat still works, just under
+   * the agent's own default — so this reports rather than throws.
+   */
+  private async applyInitialMode(session: ConversationSession, modeId: string | undefined): Promise<void> {
+    if (!modeId || !session.agentSessionId || modeId === session.currentMode?.id) {
+      return;
+    }
+
+    const mode = session.availableModes?.find((m) => m.id === modeId);
+    if (!mode) {
+      logger.warn("Requested mode is not offered by the agent, keeping its default", {
+        sessionId: session.sessionId,
+        modeId,
+        availableModes: session.availableModes?.map((m) => m.id),
+      });
+      return;
+    }
+
+    try {
+      await this.acpClient.setSessionMode({ sessionId: session.agentSessionId, modeId });
+      session.currentMode = { id: mode.id, name: mode.name };
+
+      logger.info("Session started in requested mode", { sessionId: session.sessionId, modeId });
+    } catch (error) {
+      logger.warn("Failed to set the initial session mode", {
+        sessionId: session.sessionId,
+        modeId,
+        error: rpcErrorMessage(error),
+      });
+    }
+  }
+
+  /**
+   * Turn a failure from the ACP client into an ACPError, keeping the agent's own
+   * message and preserving an authentication demand as its own error code so the
+   * UI can offer a login instead of a generic protocol error.
+   */
+  private toAgentError(error: unknown, message: string, context: Record<string, unknown>): ACPError {
+    const agentCode = (error as { code?: unknown } | undefined)?.code;
+    const requiresAuth = agentCode === ErrorCode.AuthenticationRequired;
+
+    return new ACPError(
+      requiresAuth ? ErrorCode.AuthenticationRequired : ErrorCode.ProtocolError,
+      requiresAuth ? "The agent requires authentication" : message,
+      rpcErrorMessage(error, "ACP communication error"),
+      context,
+    );
   }
 
   /**
@@ -307,12 +391,7 @@ export class SessionService implements SessionServiceInterface {
 
       logger.error("Failed to end session", { sessionId, error });
 
-      throw new ACPError(
-        ErrorCode.SystemError,
-        "Failed to end session",
-        error instanceof Error ? error.message : "Unknown error",
-        { sessionId },
-      );
+      throw new ACPError(ErrorCode.SystemError, "Failed to end session", rpcErrorMessage(error), { sessionId });
     }
   }
 
@@ -522,12 +601,10 @@ export class SessionService implements SessionServiceInterface {
         } else {
           logger.error("Failed to send message to agent", { sessionId, error });
 
-          throw new ACPError(
-            ErrorCode.ProtocolError,
-            "Failed to send message to agent",
-            error instanceof Error ? error.message : "ACP communication error",
-            { sessionId, messageId: userMessage.id },
-          );
+          throw this.toAgentError(error, "Failed to send message to agent", {
+            sessionId,
+            messageId: userMessage.id,
+          });
         }
       }
 
@@ -567,7 +644,7 @@ export class SessionService implements SessionServiceInterface {
     } catch (error) {
       PerformanceLogger.end(operationId, {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: rpcErrorMessage(error),
       });
       throw error;
     }
@@ -611,12 +688,9 @@ export class SessionService implements SessionServiceInterface {
 
       logger.error("Failed to get session messages", { sessionId, error });
 
-      throw new ACPError(
-        ErrorCode.SystemError,
-        "Failed to retrieve session messages",
-        error instanceof Error ? error.message : "Unknown error",
-        { sessionId },
-      );
+      throw new ACPError(ErrorCode.SystemError, "Failed to retrieve session messages", rpcErrorMessage(error), {
+        sessionId,
+      });
     }
   }
 
@@ -665,8 +739,16 @@ export class SessionService implements SessionServiceInterface {
         modeId,
       });
 
-      logger.info("Session mode change requested", { sessionId, modeId });
-      // Note: The actual mode update will come via current_mode_update notification
+      // Apply the switch locally. Some agents (Claude among them) acknowledge
+      // `session/set_mode` without following up with a `current_mode_update`
+      // notification, and waiting for one would leave the UI on the old mode.
+      // `handleSessionUpdate` applies the same change idempotently for agents
+      // that do send it.
+      const newMode = session.availableModes?.find((m) => m.id === modeId);
+      session.currentMode = newMode ? { id: newMode.id, name: newMode.name } : { id: modeId, name: modeId };
+      await this.storageService.saveConversation(session);
+
+      logger.info("Session mode changed", { sessionId, modeId });
     } catch (error) {
       if (error instanceof ACPError) {
         throw error;
@@ -674,12 +756,10 @@ export class SessionService implements SessionServiceInterface {
 
       logger.error("Failed to set session mode", { sessionId, modeId, error });
 
-      throw new ACPError(
-        ErrorCode.SystemError,
-        "Failed to set session mode",
-        error instanceof Error ? error.message : "Unknown error",
-        { sessionId, modeId },
-      );
+      throw new ACPError(ErrorCode.SystemError, "Failed to set session mode", rpcErrorMessage(error), {
+        sessionId,
+        modeId,
+      });
     }
   }
 
@@ -712,12 +792,7 @@ export class SessionService implements SessionServiceInterface {
 
       logger.error("Failed to get session mode", { sessionId, error });
 
-      throw new ACPError(
-        ErrorCode.SystemError,
-        "Failed to get session mode",
-        error instanceof Error ? error.message : "Unknown error",
-        { sessionId },
-      );
+      throw new ACPError(ErrorCode.SystemError, "Failed to get session mode", rpcErrorMessage(error), { sessionId });
     }
   }
 
@@ -1236,7 +1311,7 @@ export class SessionService implements SessionServiceInterface {
         return jsonString === "{}" ? null : jsonString;
       } catch (error) {
         logger.debug("JSON stringification failed, falling back to toString", {
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: rpcErrorMessage(error),
         });
         // Fallback to toString or a descriptive message
         try {
@@ -1410,6 +1485,25 @@ export class SessionService implements SessionServiceInterface {
     }
   }
 
+  private async applyUsageUpdate(session: ConversationSession, usage: UsageUpdate): Promise<void> {
+    session.metadata = {
+      ...session.metadata,
+      tokenCount: usage.used,
+      contextWindowSize: usage.size,
+      estimatedCost: usage.cost?.amount ?? session.metadata?.estimatedCost,
+    };
+    session.lastActivity = new Date();
+
+    await this.storageService.saveConversation(session);
+
+    logger.debug("Session usage updated", {
+      sessionId: session.sessionId,
+      used: usage.used,
+      size: usage.size,
+      cost: usage.cost?.amount,
+    });
+  }
+
   private async handleSessionUpdate(update: SessionUpdateNotification): Promise<void> {
     const sessionId = update.sessionId;
 
@@ -1508,6 +1602,28 @@ export class SessionService implements SessionServiceInterface {
       return;
     }
 
+    // Usage updates carry context-window and cost figures rather than conversation
+    // content, so they go straight into the session metadata instead of the transcript.
+    if (update.update?.sessionUpdate === "usage_update") {
+      await this.applyUsageUpdate(session, update.update as UsageUpdate);
+      return;
+    }
+
+    // The agent's slash-command catalogue belongs on the session, not in the transcript.
+    if (update.update?.sessionUpdate === "available_commands_update") {
+      const commandsUpdate = update.update as AvailableCommandsUpdate;
+      session.availableCommands = commandsUpdate.availableCommands;
+
+      await this.storageService.saveConversation(session);
+      await this.persistenceService.saveSessionSnapshot(session);
+
+      logger.info("Available commands updated for session", {
+        sessionId,
+        commandCount: commandsUpdate.availableCommands.length,
+      });
+      return;
+    }
+
     const message = this.transformSessionUpdate(update, session.messages.length);
     if (!message) {
       logger.debug("No message produced from session update", {
@@ -1563,17 +1679,6 @@ export class SessionService implements SessionServiceInterface {
       }
     }
 
-    if (update.update?.sessionUpdate === "available_commands_update") {
-      const commandsUpdate = update.update as AvailableCommandsUpdate;
-      session.availableCommands = commandsUpdate.availableCommands;
-      forceFullSave = true;
-
-      logger.info("Available commands updated for session", {
-        sessionId,
-        commandCount: commandsUpdate.availableCommands.length,
-      });
-    }
-
     // For streaming text messages, merge content with the most recent streaming message of same role
     if (!messageUpdated && message.metadata.isStreaming) {
       let streamingIndex = -1;
@@ -1581,7 +1686,13 @@ export class SessionService implements SessionServiceInterface {
       if (roleKey) {
         const entry = streamingState[roleKey];
         if (entry) {
-          streamingIndex = session.messages.findIndex((candidate) => candidate.id === entry.id);
+          // Only keep appending while that message is still the last one. Once a
+          // tool call has been recorded behind it the turn has moved on, and
+          // merging into it would push the agent's final answer above the tool
+          // calls it is based on.
+          const isStillLast = session.messages[session.messages.length - 1]?.id === entry.id;
+          streamingIndex = isStillLast ? session.messages.length - 1 : -1;
+
           if (streamingIndex < 0) {
             delete streamingState[roleKey];
             if (!streamingState.assistant && !streamingState.user) {
@@ -1930,24 +2041,11 @@ export class SessionService implements SessionServiceInterface {
           },
         };
       }
-      case "available_commands_update": {
-        const commandsUpdate = payload as AvailableCommandsUpdate;
-        const commandText = commandsUpdate.availableCommands
-          .map((command) => `- ${command.name}${command.description ? `: ${command.description}` : ""}`)
-          .join("\n");
-
-        return {
-          id: `commands-${Date.now()}`,
-          role: "system",
-          content: `Available Commands:\n${commandText}`,
-          timestamp: new Date(),
-          metadata: {
-            source: "agent",
-            messageType: "text",
-            sequence,
-          },
-        };
-      }
+      case "available_commands_update":
+        // Not conversation content. Agents send their full slash-command catalogue
+        // right after the session opens; `handleSessionUpdate` stores it on the
+        // session, and putting it in the transcript would bury the first answer.
+        return null;
       case "current_mode_update": {
         const modeChange = payload as CurrentModeUpdate;
 
