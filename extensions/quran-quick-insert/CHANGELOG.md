@@ -1,6 +1,6 @@
 # Quran Quick Insert Changelog
 
-## [Improved Ayah Range Formatting] - {PR_MERGE_DATE}
+## [Improved Ayah Range Formatting] - 2026-09-05
 
 - Format copied ayah ranges as one passage with Arabic verse numbers.
 
