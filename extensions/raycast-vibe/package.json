@@ -1,0 +1,305 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-vibe",
+  "title": "Vibe",
+  "description": "Find projects, launch coding agents, and manage Git workflows",
+  "icon": "vibe-icon.png",
+  "author": "abgaryanharutyun",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "vibe",
+      "title": "Vibe",
+      "subtitle": "Projects & Coding Agents",
+      "description": "Open projects, launch coding agents, and manage Git safely",
+      "mode": "view",
+      "keywords": [
+        "vibe",
+        "project",
+        "workspace",
+        "developer",
+        "agent",
+        "claude",
+        "codex",
+        "gemini",
+        "git",
+        "github",
+        "terminal",
+        "folder"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "terminal",
+      "title": "Terminal",
+      "description": "Where Vibe opens projects",
+      "type": "dropdown",
+      "default": {
+        "macOS": "terminal",
+        "Windows": "windowsTerminal"
+      },
+      "data": [
+        {
+          "title": "macOS Terminal",
+          "value": "terminal"
+        },
+        {
+          "title": "Windows Terminal",
+          "value": "windowsTerminal"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "claudeEnabled",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enable Claude Code",
+      "description": "Enable or disable this option."
+    },
+    {
+      "name": "claudeCommand",
+      "title": "Claude Command",
+      "description": "Executable name or path",
+      "type": "textfield",
+      "default": "claude",
+      "required": false
+    },
+    {
+      "name": "claudeArgs",
+      "title": "Claude Arguments",
+      "description": "Optional startup arguments",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "claudeEnv",
+      "title": "Claude Environment Variables",
+      "description": "Optional KEY=value entries, one per line",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "codexEnabled",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enable Codex",
+      "description": "Enable or disable this option."
+    },
+    {
+      "name": "codexCommand",
+      "title": "Codex Command",
+      "description": "Executable name or path",
+      "type": "textfield",
+      "default": "codex",
+      "required": false
+    },
+    {
+      "name": "codexArgs",
+      "title": "Codex Arguments",
+      "description": "Optional startup arguments",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "codexEnv",
+      "title": "Codex Environment Variables",
+      "description": "Optional KEY=value entries, one per line",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "geminiEnabled",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enable Gemini CLI",
+      "description": "Enable or disable this option."
+    },
+    {
+      "name": "geminiCommand",
+      "title": "Gemini Command",
+      "description": "Executable name or path",
+      "type": "textfield",
+      "default": "gemini",
+      "required": false
+    },
+    {
+      "name": "geminiArgs",
+      "title": "Gemini Arguments",
+      "description": "Optional startup arguments",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "geminiEnv",
+      "title": "Gemini Environment Variables",
+      "description": "Optional KEY=value entries, one per line",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customEnabled",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Enable Custom Agent",
+      "description": "Enable or disable this option."
+    },
+    {
+      "name": "customName",
+      "title": "Custom Agent Name",
+      "type": "textfield",
+      "default": "Custom Agent",
+      "required": false,
+      "description": "Configure this extension option."
+    },
+    {
+      "name": "customCommand",
+      "title": "Custom Agent Command",
+      "description": "Executable name or path",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customArgs",
+      "title": "Custom Agent Arguments",
+      "description": "Optional startup arguments",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "customEnv",
+      "title": "Custom Agent Environment Variables",
+      "description": "Optional KEY=value entries, one per line",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "custom2Enabled",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Enable Custom Agent 2",
+      "description": "Enable or disable this custom agent."
+    },
+    {
+      "name": "custom2Name",
+      "title": "Custom Agent 2 Name",
+      "type": "textfield",
+      "default": "Custom Agent 2",
+      "required": false,
+      "description": "Display name for this custom agent."
+    },
+    {
+      "name": "custom2Command",
+      "title": "Custom Agent 2 Command",
+      "description": "Executable name or path",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "custom2Args",
+      "title": "Custom Agent 2 Arguments",
+      "description": "Optional startup arguments",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "custom2Env",
+      "title": "Custom Agent 2 Environment Variables",
+      "description": "Optional KEY=value entries, one per line",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "custom3Enabled",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Enable Custom Agent 3",
+      "description": "Enable or disable this custom agent."
+    },
+    {
+      "name": "custom3Name",
+      "title": "Custom Agent 3 Name",
+      "type": "textfield",
+      "default": "Custom Agent 3",
+      "required": false,
+      "description": "Display name for this custom agent."
+    },
+    {
+      "name": "custom3Command",
+      "title": "Custom Agent 3 Command",
+      "description": "Executable name or path",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "custom3Args",
+      "title": "Custom Agent 3 Arguments",
+      "description": "Optional startup arguments",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "custom3Env",
+      "title": "Custom Agent 3 Environment Variables",
+      "description": "Optional KEY=value entries, one per line",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    }
+  ],
+  "homepage": "https://github.com/abgaryanharutyun/raycast-vibe",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}
