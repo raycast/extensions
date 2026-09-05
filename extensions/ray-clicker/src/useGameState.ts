@@ -8,7 +8,7 @@ import {
   calculateUpgradeEffect,
   getMilestoneBonus,
 } from "./types";
-import { loadGameState, saveGameState, resetGameState } from "./storage";
+import { loadGameState, saveGameState } from "./storage";
 import { PRESTIGE_UPGRADES, calculatePrestigeUpgradeCost, calculatePrestigeUpgradeEffect } from "./prestigeUpgrades";
 import { ACHIEVEMENTS } from "./achievements";
 import { PRESTIGE_PP_DIVISOR } from "./constants";
@@ -775,14 +775,13 @@ export function useGameState(): UseGameStateReturn {
   // Reset game to initial state
   const reset = async () => {
     try {
-      await resetGameState();
-      const newState = {
-        ...INITIAL_STATE,
-        lastUpdate: Date.now(),
-      };
-      setGameState(calculateDerivedState(newState));
+      const derivedState = calculateDerivedState({ ...INITIAL_STATE, lastUpdate: Date.now() });
+      latestStateRef.current = derivedState;
+      lastUpdateRef.current = derivedState.lastUpdate;
+      setGameState(derivedState);
       setLastClickTime(0);
-      return newState;
+      await saveGameState(derivedState);
+      return derivedState;
     } catch (error) {
       showToast({
         title: "Failed to reset game",
