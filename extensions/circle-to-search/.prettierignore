@@ -1,0 +1,5 @@
+dist
+node_modules
+*.ps1
+assets/*.ps1
+src/scripts/*.ps1
