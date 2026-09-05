@@ -94,6 +94,11 @@ async function authorizeWithOAuthClient(): Promise<void> {
         return;
       } catch (error) {
         if (!isInvalidGrantError(error)) throw error;
+
+        const latestTokenSet = await oauthClient.getTokens();
+        if (latestTokenSet?.accessToken && !latestTokenSet.isExpired()) {
+          return;
+        }
       }
     }
 
