@@ -1,0 +1,3270 @@
+{
+  "source": {
+    "repository": "https://github.com/NousResearch/hermes-agent",
+    "commit": "acfd376d66836a2542f0b2d9bca0252f0663fdd1",
+    "generatedAt": "2026-07-30T16:08:17.334Z"
+  },
+  "items": [
+    {
+      "id": "command-hermes-cron",
+      "name": "hermes cron",
+      "description": "Inspect and tick the cron scheduler.",
+      "usage": "hermes cron",
+      "category": "automation",
+      "tags": ["cli", "terminal", "cron"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-cron-create-schedule-prompt",
+      "name": "hermes cron create <schedule> <prompt>",
+      "description": "Create a scheduled agent job.",
+      "usage": "hermes cron create <schedule> <prompt>",
+      "examples": [{ "title": "Example", "command": "hermes cron create \"every 2h\" \"Check server status\"" }],
+      "category": "automation",
+      "tags": ["cron", "automation", "scheduled"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/cron",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-cron-edit-job-id-or-name-flags",
+      "name": "hermes cron edit <job-id-or-name> [flags]",
+      "description": "Change a job's schedule, prompt, skills, workdir, or delivery.",
+      "usage": "hermes cron edit <job-id-or-name> [flags]",
+      "category": "automation",
+      "tags": ["cron", "automation", "scheduled"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/cron",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-cron-list",
+      "name": "hermes cron list",
+      "description": "List configured cron jobs.",
+      "usage": "hermes cron list",
+      "category": "automation",
+      "tags": ["cron", "automation", "scheduled"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/cron",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-cron-pause-job-id-or-name",
+      "name": "hermes cron pause <job-id-or-name>",
+      "description": "Keep a job but stop scheduling it.",
+      "usage": "hermes cron pause <job-id-or-name>",
+      "category": "automation",
+      "tags": ["cron", "automation", "scheduled"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/cron",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-cron-remove-job-id-or-name",
+      "name": "hermes cron remove <job-id-or-name>",
+      "description": "Delete a scheduled job.",
+      "usage": "hermes cron remove <job-id-or-name>",
+      "category": "automation",
+      "tags": ["cron", "automation", "scheduled"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/cron",
+      "platforms": ["Terminal"],
+      "statuses": ["CAUTION"]
+    },
+    {
+      "id": "command-hermes-cron-resume-job-id-or-name",
+      "name": "hermes cron resume <job-id-or-name>",
+      "description": "Re-enable a paused job and compute its next run.",
+      "usage": "hermes cron resume <job-id-or-name>",
+      "category": "automation",
+      "tags": ["cron", "automation", "scheduled"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/cron",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-cron-run-job-id-or-name",
+      "name": "hermes cron run <job-id-or-name>",
+      "description": "Trigger a job on the next scheduler tick.",
+      "usage": "hermes cron run <job-id-or-name>",
+      "category": "automation",
+      "tags": ["cron", "automation", "scheduled"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/cron",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-cron-status",
+      "name": "hermes cron status",
+      "description": "Show cron scheduler status.",
+      "usage": "hermes cron status",
+      "category": "automation",
+      "tags": ["cron", "automation", "scheduled"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/cron",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-cron-tick",
+      "name": "hermes cron tick",
+      "description": "Manually run one scheduler tick.",
+      "usage": "hermes cron tick",
+      "category": "automation",
+      "tags": ["cron", "automation", "scheduled"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/cron",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-kanban",
+      "name": "hermes kanban",
+      "description": "Multi-profile collaboration board (tasks, links, dispatcher).",
+      "usage": "hermes kanban",
+      "category": "automation",
+      "tags": ["cli", "terminal", "kanban"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-project",
+      "name": "hermes project",
+      "description": "Manage named, multi-folder workspaces (projects). Anchors desktop session grouping and, when bound to a kanban board, gives tasks a deterministic worktree + branch convention. State is per-profile.",
+      "usage": "hermes project",
+      "category": "automation",
+      "tags": ["cli", "terminal", "project"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-webhook",
+      "name": "hermes webhook",
+      "description": "Manage dynamic webhook subscriptions for event-driven activation.",
+      "usage": "hermes webhook",
+      "category": "automation",
+      "tags": ["cli", "terminal", "webhook"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-chat",
+      "name": "hermes chat",
+      "description": "Interactive or one-shot chat with the agent.",
+      "usage": "hermes chat",
+      "category": "cli",
+      "tags": ["cli", "terminal", "chat"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-claw",
+      "name": "hermes claw",
+      "description": "OpenClaw migration helpers.",
+      "usage": "hermes claw",
+      "category": "cli",
+      "tags": ["cli", "terminal", "claw"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-console",
+      "name": "hermes console",
+      "description": "Open the safe Hermes command console.",
+      "usage": "hermes console",
+      "category": "cli",
+      "tags": ["cli", "terminal", "console"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-dashboard",
+      "name": "hermes dashboard",
+      "description": "Launch the web dashboard for managing config, API keys, and sessions.",
+      "usage": "hermes dashboard",
+      "category": "cli",
+      "tags": ["cli", "terminal", "dashboard"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-desktop",
+      "name": "hermes desktop (alias gui)",
+      "description": "Build and launch the native Electron desktop app.",
+      "usage": "hermes desktop",
+      "category": "cli",
+      "tags": ["cli", "terminal", "desktop"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "aliases": ["gui"],
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-insights",
+      "name": "hermes insights",
+      "description": "Show token/cost/activity analytics.",
+      "usage": "hermes insights",
+      "category": "cli",
+      "tags": ["cli", "terminal", "insights"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-plugins",
+      "name": "hermes plugins",
+      "description": "Manage Hermes Agent plugins (install, enable, disable, remove).",
+      "usage": "hermes plugins",
+      "category": "cli",
+      "tags": ["cli", "terminal", "plugins"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-serve",
+      "name": "hermes serve",
+      "description": "Start the Hermes backend server (headless; powers the desktop app and remote backends).",
+      "usage": "hermes serve",
+      "category": "cli",
+      "tags": ["cli", "terminal", "serve"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-sessions",
+      "name": "hermes sessions",
+      "description": "Browse, export, prune, rename, and delete sessions.",
+      "usage": "hermes sessions",
+      "category": "cli",
+      "tags": ["cli", "terminal", "sessions"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-egress-setup-options",
+      "name": "Configure the egress proxy",
+      "description": "Generate the CA, credential mappings, proxy tokens, and proxy configuration used by remote sandboxes.",
+      "usage": "hermes egress setup [options]",
+      "examples": [
+        { "title": "Interactive Setup", "command": "hermes egress setup" },
+        { "title": "Custom Tunnel Port", "command": "hermes egress setup --tunnel-port 9091" },
+        { "title": "Use Bitwarden", "command": "hermes egress setup --from-bitwarden" },
+        { "title": "Use Environment Credentials", "command": "hermes egress setup --no-bitwarden" }
+      ],
+      "category": "configuration",
+      "tags": ["egress", "security", "sandbox", "credentials", "bitwarden"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"]
+    },
+    {
+      "id": "command-hermes-egress-disable",
+      "name": "Disable egress proxy injection",
+      "description": "Persist proxy.enabled = false for future sandboxes without stopping a running proxy daemon.",
+      "usage": "hermes egress disable",
+      "category": "configuration",
+      "tags": ["egress", "security", "sandbox", "disable"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy",
+      "warning": "Future Docker sandboxes will no longer receive proxy isolation and may receive real provider credentials instead.",
+      "platforms": ["Terminal"],
+      "statuses": ["CAUTION", "PERSISTS"]
+    },
+    {
+      "id": "command-hermes-p-hermes-profile",
+      "name": "hermes -p / hermes --profile",
+      "description": "Global flag to run any Hermes command under a specific profile without changing the sticky default. This overrides the active profile for the duration of the command.",
+      "usage": "hermes -p <name> <command> [options]",
+      "examples": [
+        { "title": "Configure a Profile", "command": "hermes -p work setup --portal" },
+        { "title": "Edit Profile Configuration", "command": "hermes -p work config edit" },
+        { "title": "Validate a Profile", "command": "hermes -p work doctor" },
+        { "title": "Chat with a Profile", "command": "hermes -p work chat" }
+      ],
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes--p--hermes---profile",
+      "aliases": ["hermes --profile <name> <command> [options]"],
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Target one profile for a command without changing the sticky default selected by hermes profile use.",
+        "parameters": [{ "name": "-p <name>, --profile <name>", "description": "Profile to use for this command." }],
+        "notes": ["The generated <name> command alias is equivalent to hermes -p <name>."]
+      }
+    },
+    {
+      "id": "command-hermes-approvals",
+      "name": "hermes approvals",
+      "description": "Approval-prompt tools — mine approval history into allowlist proposals.",
+      "usage": "hermes approvals",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "approvals"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-backup",
+      "name": "hermes backup",
+      "description": "Back up Hermes home directory to a zip file.",
+      "usage": "hermes backup",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "backup"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-checkpoints",
+      "name": "hermes checkpoints",
+      "description": "Inspect / prune / clear ~/.hermes/checkpoints/ (the shadow store used by /rollback). Run with no args for a status overview.",
+      "usage": "hermes checkpoints",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "checkpoints"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-completion",
+      "name": "hermes completion",
+      "description": "Generates shell completion scripts. Includes completions for profile names and profile subcommands.",
+      "usage": "hermes completion <shell>",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-completion",
+      "platforms": ["Terminal"],
+      "details": {
+        "whenToUse": "Generates shell completion scripts. Includes completions for profile names and profile subcommands.",
+        "parameters": [{ "name": "<shell>", "description": "Shell to generate completions for: bash, zsh, or fish." }]
+      }
+    },
+    {
+      "id": "command-hermes-config",
+      "name": "hermes config",
+      "description": "Show, edit, migrate, and query configuration files.",
+      "usage": "hermes config",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-config-check",
+      "name": "hermes config check",
+      "description": "Check for missing or stale configuration.",
+      "usage": "hermes config check",
+      "category": "configuration",
+      "tags": ["configuration", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-config-edit",
+      "name": "hermes config edit",
+      "description": "Open config.yaml in your editor.",
+      "usage": "hermes config edit",
+      "category": "configuration",
+      "tags": ["configuration", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-config-env-path",
+      "name": "hermes config env-path",
+      "description": "Print the active .env path.",
+      "usage": "hermes config env-path",
+      "category": "configuration",
+      "tags": ["configuration", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-config-get-key",
+      "name": "hermes config get <key>",
+      "description": "Read one configuration value.",
+      "usage": "hermes config get <key>",
+      "category": "configuration",
+      "tags": ["configuration", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-config-migrate",
+      "name": "hermes config migrate",
+      "description": "Add newly introduced configuration options interactively.",
+      "usage": "hermes config migrate",
+      "category": "configuration",
+      "tags": ["configuration", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-config-path",
+      "name": "hermes config path",
+      "description": "Print the active config.yaml path.",
+      "usage": "hermes config path",
+      "category": "configuration",
+      "tags": ["configuration", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-config-set-key-value",
+      "name": "hermes config set <key> <value>",
+      "description": "Set a configuration value; secrets are routed to .env automatically.",
+      "usage": "hermes config set <key> <value>",
+      "category": "configuration",
+      "tags": ["configuration", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-config-show",
+      "name": "hermes config show",
+      "description": "Show current configuration values.",
+      "usage": "hermes config show",
+      "category": "configuration",
+      "tags": ["configuration", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-config-unset-key",
+      "name": "hermes config unset <key>",
+      "description": "Remove an explicitly configured value.",
+      "usage": "hermes config unset <key>",
+      "category": "configuration",
+      "tags": ["configuration", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"],
+      "statuses": ["CAUTION"]
+    },
+    {
+      "id": "command-hermes-egress",
+      "name": "hermes egress",
+      "description": "Outbound credential-injection firewall for remote terminal sandboxes (iron-proxy). Disabled by default. See Egress proxy.",
+      "usage": "hermes egress",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "egress"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-egress-config",
+      "name": "hermes egress config",
+      "description": "Print the active proxy.yaml path for inspection.",
+      "usage": "hermes egress config",
+      "category": "configuration",
+      "tags": ["egress", "security", "sandbox", "iron-proxy"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-egress-reload",
+      "name": "hermes egress reload",
+      "description": "Hot-reload the egress ruleset without dropping connections.",
+      "usage": "hermes egress reload",
+      "category": "configuration",
+      "tags": ["egress", "security", "sandbox", "iron-proxy"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-egress-restart",
+      "name": "hermes egress restart",
+      "description": "Restart the egress proxy to apply credential or configuration changes.",
+      "usage": "hermes egress restart",
+      "category": "configuration",
+      "tags": ["egress", "security", "sandbox", "iron-proxy"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy",
+      "platforms": ["Terminal"],
+      "statuses": ["RESTART"]
+    },
+    {
+      "id": "command-hermes-egress-start",
+      "name": "hermes egress start",
+      "description": "Start the managed egress proxy daemon.",
+      "usage": "hermes egress start",
+      "category": "configuration",
+      "tags": ["egress", "security", "sandbox", "iron-proxy"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-egress-stop",
+      "name": "hermes egress stop",
+      "description": "Stop the managed egress proxy daemon.",
+      "usage": "hermes egress stop",
+      "category": "configuration",
+      "tags": ["egress", "security", "sandbox", "iron-proxy"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-hooks",
+      "name": "hermes hooks",
+      "description": "Inspect, approve, or remove shell-script hooks declared in config.yaml.",
+      "usage": "hermes hooks",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "hooks"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-import",
+      "name": "hermes import",
+      "description": "Restore a Hermes backup from a zip file.",
+      "usage": "hermes import",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "import"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-import-agent",
+      "name": "hermes import-agent",
+      "description": "Import a Claude Code (~/.claude) or Codex CLI (~/.codex) setup.",
+      "usage": "hermes import-agent",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "import-agent"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-logs",
+      "name": "hermes logs",
+      "description": "View, tail, and filter agent/gateway/error log files.",
+      "usage": "hermes logs",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "logs"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-migrate",
+      "name": "hermes migrate",
+      "description": "Diagnose and (optionally) rewrite config.yaml to replace references to retired models or deprecated settings (e.g. migrate xai).",
+      "usage": "hermes migrate",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "migrate"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-profile",
+      "name": "hermes profile",
+      "description": "Top-level command for managing profiles. Running hermes profile without a subcommand shows help.",
+      "usage": "hermes profile <subcommand>",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile",
+      "platforms": ["Terminal"],
+      "details": {
+        "whenToUse": "Top-level command for managing profiles. Running hermes profile without a subcommand shows help.",
+        "parameters": [
+          { "name": "list", "description": "List all profiles." },
+          { "name": "use", "description": "Set the active (default) profile." },
+          { "name": "create", "description": "Create a new profile." },
+          {
+            "name": "describe",
+            "description": "Read or set a profile's description (used by the kanban orchestrator for routing)."
+          },
+          { "name": "delete", "description": "Delete a profile." },
+          { "name": "show", "description": "Show details about a profile." },
+          { "name": "alias", "description": "Regenerate the shell alias for a profile." },
+          { "name": "rename", "description": "Rename a profile." },
+          { "name": "export", "description": "Export a profile to a tar.gz archive." },
+          { "name": "import", "description": "Import a profile from a tar.gz archive." },
+          {
+            "name": "install",
+            "description": "Install a profile distribution from a git URL or local directory. See Profile Distributions."
+          },
+          { "name": "update", "description": "Re-pull a distribution-managed profile and re-apply its bundle." },
+          {
+            "name": "info",
+            "description": "Show distribution metadata for a profile (origin URL, commit, last update)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-alias",
+      "name": "hermes profile alias",
+      "description": "Regenerates the shell alias script at ~/.local/bin/<name>. Useful if the alias was accidentally deleted or if you need to update it after moving your Hermes installation.",
+      "usage": "hermes profile alias <name> [options]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-alias",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Regenerates the shell alias script at ~/.local/bin/<name>. Useful if the alias was accidentally deleted or if you need to update it after moving your Hermes installation.",
+        "parameters": [
+          { "name": "<name>", "description": "Profile to create/update the alias for." },
+          { "name": "--remove", "description": "Remove the wrapper script instead of creating it." },
+          { "name": "--name <alias>", "description": "Custom alias name (default: profile name)." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-create-name",
+      "name": "hermes profile create",
+      "description": "Creates a new profile.",
+      "usage": "hermes profile create <name> [options]",
+      "examples": [
+        {
+          "title": "Blank Profile",
+          "command": "hermes profile create work",
+          "description": "Create an isolated profile that still needs model and credential setup."
+        },
+        {
+          "title": "Clone Current Configuration",
+          "command": "hermes profile create work --clone",
+          "description": "Copy config, credentials, SOUL.md, and skills while starting with fresh sessions and memory."
+        },
+        {
+          "title": "Clone a Specific Profile",
+          "command": "hermes profile create work --clone-from coder",
+          "description": "Use coder as the source instead of the active profile."
+        }
+      ],
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-create",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Create a separate Hermes agent for a role, project, identity, credential set, or messaging gateway without mixing its state with another profile.",
+        "prerequisites": ["Choose a unique profile name made from letters, numbers, hyphens, or underscores."],
+        "parameters": [
+          {
+            "name": "<name>",
+            "description": "Name for the new profile. Must be a valid directory name (alphanumeric, hyphens, underscores)."
+          },
+          { "name": "--clone", "description": "Copy config.yaml, .env, SOUL.md, and skills from the current profile." },
+          {
+            "name": "--clone-all",
+            "description": "Copy everything (config, memories, skills, cron, plugins) from the current profile. Excludes per-profile history: sessions, state.db, backups, state-snapshots, checkpoints."
+          },
+          {
+            "name": "--clone-from <profile>",
+            "description": "Clone config/skills/SOUL from a specific profile instead of the current one. Implies --clone unless paired with --clone-all."
+          },
+          { "name": "--no-alias", "description": "Skip wrapper script creation." },
+          {
+            "name": "--description \"<text>\"",
+            "description": "One- or two-sentence description of what this profile is good at. Used by the kanban orchestrator to route tasks based on role instead of profile name alone. Skip and add later via hermes profile describe. Persisted in <profile_dir>/profile.yaml."
+          },
+          {
+            "name": "--no-skills",
+            "description": "Create an empty profile with zero bundled skills enabled. Writes a .no-bundled-skills marker into the profile so future hermes update runs won't re-seed the bundled set, and refuses to combine with --clone, --clone-from, or --clone-all (which would copy skills in anyway). Useful for narrow orchestrator profiles or sandbox profiles that should not inherit the full skill catalog. To toggle this on an already-created profile (including the default ~/.hermes), use hermes skills opt-out / hermes skills opt-in."
+          }
+        ],
+        "workflow": [
+          {
+            "title": "1. Create the profile",
+            "command": "hermes profile create work --clone",
+            "description": "Clone the current setup or omit --clone to start blank."
+          },
+          {
+            "title": "2. Configure models and tools",
+            "command": "hermes -p work setup --portal",
+            "description": "Run setup explicitly inside the new profile."
+          },
+          {
+            "title": "3. Set its project directory",
+            "command": "hermes -p work config set terminal.cwd /absolute/path/to/project",
+            "description": "Profiles isolate state; terminal.cwd separately controls where shell commands begin."
+          },
+          {
+            "title": "4. Validate the profile",
+            "command": "hermes -p work doctor",
+            "description": "Check credentials, providers, dependencies, and runtime configuration."
+          },
+          {
+            "title": "5. Start using it",
+            "command": "hermes -p work chat",
+            "description": "Use -p for an explicit one-command selection or run work chat through its generated alias."
+          }
+        ],
+        "notes": [
+          "Use --clone for shared configuration with fresh sessions and memory.",
+          "Use --clone-all only when you need a fuller snapshot; per-profile history remains excluded."
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-delete",
+      "name": "hermes profile delete",
+      "description": "Deletes a profile and removes its shell alias.",
+      "usage": "hermes profile delete <name> [options]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-delete",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS", "CAUTION"],
+      "details": {
+        "whenToUse": "Deletes a profile and removes its shell alias.",
+        "parameters": [
+          { "name": "<name>", "description": "Profile to delete." },
+          { "name": "--yes, -y", "description": "Skip confirmation prompt." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-describe",
+      "name": "hermes profile describe",
+      "description": "Read or set a profile's description. The description is consumed by the kanban orchestrator to route tasks based on what each profile is good at, rather than guessing from the profile name alone. Persisted in <profile_dir>/profile.yaml so it survives reboots and is shared with the gateway.",
+      "usage": "hermes profile describe [<name>] [options]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-describe",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Read or set a profile's description. The description is consumed by the kanban orchestrator to route tasks based on what each profile is good at, rather than guessing from the profile name alone. Persisted in <profile_dir>/profile.yaml so it survives reboots and is shared with the gateway.",
+        "parameters": [
+          { "name": "<name>", "description": "Profile to describe. Required unless --all --auto is used." },
+          {
+            "name": "--text \"<text>\"",
+            "description": "Set the description to this exact text (user-authored). Overwrites any existing description."
+          },
+          {
+            "name": "--auto",
+            "description": "Auto-generate a 1-2 sentence description via the auxiliary LLM, based on the profile's installed skills, configured model, and name. Configure the model under auxiliary.profile_describer in config.yaml. Auto-generated descriptions are marked description_auto: true so the dashboard can flag them for review."
+          },
+          {
+            "name": "--overwrite",
+            "description": "With --auto, replace user-authored descriptions too (default: skip profiles whose description was set explicitly)."
+          },
+          { "name": "--all", "description": "With --auto, sweep every profile missing a description." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-export",
+      "name": "hermes profile export",
+      "description": "Exports a profile as a compressed tar.gz archive.",
+      "usage": "hermes profile export <name> [options]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-export",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Exports a profile as a compressed tar.gz archive.",
+        "parameters": [
+          { "name": "<name>", "description": "Profile to export." },
+          { "name": "-o, --output <path>", "description": "Output file path (default: <name>.tar.gz)." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-import",
+      "name": "hermes profile import",
+      "description": "Imports a profile from a tar.gz archive.",
+      "usage": "hermes profile import <archive> [options]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-import",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Imports a profile from a tar.gz archive.",
+        "parameters": [
+          { "name": "<archive>", "description": "Path to the tar.gz archive to import." },
+          { "name": "--name <name>", "description": "Name for the imported profile (default: inferred from archive)." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-info",
+      "name": "hermes profile info",
+      "description": "Prints the profile's distribution manifest — name, version, required Hermes version, author, env var requirements, the source URL/path, and the Installed: timestamp recorded when the distribution was last install-ed or update-d. Useful for checking what a shared profile needs before installing it, and for spotting \"this profile was installed 6 months ago and hasn't been updated.\"",
+      "usage": "hermes profile info <name>",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-info",
+      "platforms": ["Terminal"],
+      "details": {
+        "whenToUse": "Prints the profile's distribution manifest — name, version, required Hermes version, author, env var requirements, the source URL/path, and the Installed: timestamp recorded when the distribution was last install-ed or update-d. Useful for checking what a shared profile needs before installing it, and for spotting \"this profile was installed 6 months ago and hasn't been updated.\""
+      }
+    },
+    {
+      "id": "command-hermes-profile-install",
+      "name": "hermes profile install",
+      "description": "Installs a profile distribution from a git URL or a local directory.",
+      "usage": "hermes profile install <source> [--name <name>] [--alias] [--force] [--yes]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-install",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Installs a profile distribution from a git URL or a local directory.",
+        "parameters": [
+          {
+            "name": "<source>",
+            "description": "Git URL (github.com/user/repo, https://..., git@..., ssh://, git://) or a local directory containing distribution.yaml at its root."
+          },
+          { "name": "--name NAME", "description": "Override the profile name from the manifest." },
+          { "name": "--alias", "description": "Also create a shell wrapper (e.g. telemetry → hermes -p telemetry)." },
+          {
+            "name": "--force",
+            "description": "Overwrite an existing profile of the same name. User data is still preserved."
+          },
+          { "name": "-y, --yes", "description": "Skip the manifest-preview confirmation prompt." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-list",
+      "name": "hermes profile list",
+      "description": "Lists all profiles. The currently active profile is marked with *.",
+      "usage": "hermes profile list",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-list",
+      "platforms": ["Terminal"],
+      "details": { "whenToUse": "Lists all profiles. The currently active profile is marked with *." }
+    },
+    {
+      "id": "command-hermes-profile-rename",
+      "name": "hermes profile rename",
+      "description": "Renames a profile. Updates the directory and shell alias.",
+      "usage": "hermes profile rename <old-name> <new-name>",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-rename",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Renames a profile. Updates the directory and shell alias.",
+        "parameters": [
+          { "name": "<old-name>", "description": "Current profile name." },
+          { "name": "<new-name>", "description": "New profile name." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-show",
+      "name": "hermes profile show",
+      "description": "Displays details about a profile including its home directory, configured model, gateway status, skills count, and configuration file status.",
+      "usage": "hermes profile show <name>",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-show",
+      "platforms": ["Terminal"],
+      "details": {
+        "whenToUse": "Displays details about a profile including its home directory, configured model, gateway status, skills count, and configuration file status.",
+        "parameters": [{ "name": "<name>", "description": "Profile to inspect." }]
+      }
+    },
+    {
+      "id": "command-hermes-profile-update",
+      "name": "hermes profile update",
+      "description": "Re-clones the distribution from its recorded source and applies updates. Distribution-owned files (SOUL.md, skills/, cron/, mcp.json) are overwritten; user data (memories, sessions, auth, .env) is never touched.",
+      "usage": "hermes profile update <name> [--force-config] [--yes]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-update",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Re-clones the distribution from its recorded source and applies updates. Distribution-owned files (SOUL.md, skills/, cron/, mcp.json) are overwritten; user data (memories, sessions, auth, .env) is never touched."
+      }
+    },
+    {
+      "id": "command-hermes-profile-use-name",
+      "name": "hermes profile use",
+      "description": "Sets <name> as the active profile. All subsequent hermes commands (without -p) will use this profile.",
+      "usage": "hermes profile use <name>",
+      "examples": [
+        {
+          "title": "Select Work",
+          "command": "hermes profile use work",
+          "description": "Make work the sticky default for plain hermes commands."
+        },
+        {
+          "title": "Return to Default",
+          "command": "hermes profile use default",
+          "description": "Restore the base profile as the sticky default."
+        }
+      ],
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-use",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Choose a profile as the default for subsequent commands that do not include -p or --profile.",
+        "parameters": [
+          { "name": "<name>", "description": "Profile name to activate. Use default to return to the base profile." }
+        ],
+        "notes": ["Prefer hermes -p <name> for one-off commands when you do not want to change the sticky default."]
+      }
+    },
+    {
+      "id": "command-hermes-secrets",
+      "name": "hermes secrets",
+      "description": "Manage external secret sources (currently Bitwarden Secrets Manager) for pulling API keys at process startup instead of from ~/.hermes/.env.",
+      "usage": "hermes secrets",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "secrets"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-security-audit",
+      "name": "hermes security audit",
+      "description": "On-demand supply-chain audit (OSV.dev) for the venv, plugin requirements, and pinned MCP servers.",
+      "usage": "hermes security audit",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "security"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skin",
+      "name": "hermes skin",
+      "description": "List, switch, and tweak display skins.",
+      "usage": "hermes skin",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "skin"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-status",
+      "name": "hermes status",
+      "description": "Show agent, auth, and platform status.",
+      "usage": "hermes status",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "status"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-uninstall",
+      "name": "hermes uninstall",
+      "description": "Remove Hermes from the system.",
+      "usage": "hermes uninstall",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "uninstall"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"],
+      "statuses": ["CAUTION"]
+    },
+    {
+      "id": "command-hermes-version",
+      "name": "hermes version",
+      "description": "Show version information.",
+      "usage": "hermes version",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "version"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-egress-status-show-tokens",
+      "name": "Inspect egress proxy status",
+      "description": "Show binary, configuration, process, listener, and credential-mapping status with tokens redacted.",
+      "usage": "hermes egress status [--show-tokens]",
+      "examples": [{ "title": "Example", "command": "hermes egress status" }],
+      "category": "configuration",
+      "tags": ["egress", "security", "sandbox", "status", "tokens"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy",
+      "warning": "Use --show-tokens only in a private terminal because it prints proxy tokens in full.",
+      "platforms": ["Terminal"],
+      "statuses": ["CAUTION"]
+    },
+    {
+      "id": "command-hermes-egress-install-force",
+      "name": "Install the egress proxy",
+      "description": "Download the Hermes-pinned iron-proxy binary, optionally replacing an existing installation.",
+      "usage": "hermes egress install [--force]",
+      "examples": [
+        { "title": "Install", "command": "hermes egress install" },
+        {
+          "title": "Force Reinstall",
+          "command": "hermes egress install --force",
+          "description": "Re-download the managed binary even when a copy already exists."
+        }
+      ],
+      "category": "configuration",
+      "tags": ["egress", "security", "sandbox", "iron-proxy"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-egress-setup-rotate-tokens",
+      "name": "Rotate egress proxy tokens",
+      "description": "Mint fresh proxy tokens for every provider and persist the new mappings.",
+      "usage": "hermes egress setup --rotate-tokens",
+      "category": "configuration",
+      "tags": ["egress", "security", "sandbox", "credentials", "tokens", "rotation"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy",
+      "warning": "This invalidates the proxy tokens in every running sandbox. Restart those sandboxes before their next upstream request.",
+      "platforms": ["Terminal"],
+      "statuses": ["CAUTION", "PERSISTS", "RESTART"]
+    },
+    {
+      "id": "command-anthropic-api-key",
+      "name": "ANTHROPIC_API_KEY",
+      "description": "Anthropic API key for direct Claude access.",
+      "usage": "ANTHROPIC_API_KEY",
+      "examples": [{ "title": "Example", "command": "ANTHROPIC_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "anthropic_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-brave-search-api-key",
+      "name": "BRAVE_SEARCH_API_KEY",
+      "description": "Brave Search API subscription token.",
+      "usage": "BRAVE_SEARCH_API_KEY",
+      "examples": [{ "title": "Example", "command": "BRAVE_SEARCH_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "brave_search_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-browser-cdp-url",
+      "name": "BROWSER_CDP_URL",
+      "description": "Chrome DevTools Protocol URL for the local browser connection.",
+      "usage": "BROWSER_CDP_URL",
+      "examples": [{ "title": "Example", "command": "BROWSER_CDP_URL=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "browser_cdp_url"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-dashscope-api-key",
+      "name": "DASHSCOPE_API_KEY",
+      "description": "Alibaba Cloud DashScope API key for Qwen models.",
+      "usage": "DASHSCOPE_API_KEY",
+      "examples": [{ "title": "Example", "command": "DASHSCOPE_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "dashscope_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-daytona-api-key",
+      "name": "DAYTONA_API_KEY",
+      "description": "Daytona API key for cloud sandbox terminal backends.",
+      "usage": "DAYTONA_API_KEY",
+      "examples": [{ "title": "Example", "command": "DAYTONA_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "daytona_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-deepseek-api-key",
+      "name": "DEEPSEEK_API_KEY",
+      "description": "DeepSeek provider API key.",
+      "usage": "DEEPSEEK_API_KEY",
+      "examples": [{ "title": "Example", "command": "DEEPSEEK_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "deepseek_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-elevenlabs-api-key",
+      "name": "ELEVENLABS_API_KEY",
+      "description": "ElevenLabs API key for premium text-to-speech voices.",
+      "usage": "ELEVENLABS_API_KEY",
+      "examples": [{ "title": "Example", "command": "ELEVENLABS_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "elevenlabs_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-exa-api-key",
+      "name": "EXA_API_KEY",
+      "description": "Exa API key for AI-native web search and content retrieval.",
+      "usage": "EXA_API_KEY",
+      "examples": [{ "title": "Example", "command": "EXA_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "exa_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-fal-key",
+      "name": "FAL_KEY",
+      "description": "FAL API key for image generation.",
+      "usage": "FAL_KEY",
+      "examples": [{ "title": "Example", "command": "FAL_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "fal_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-firecrawl-api-key",
+      "name": "FIRECRAWL_API_KEY",
+      "description": "Firecrawl API key for web scraping and cloud browser tools.",
+      "usage": "FIRECRAWL_API_KEY",
+      "examples": [{ "title": "Example", "command": "FIRECRAWL_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "firecrawl_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-gemini-api-key",
+      "name": "GEMINI_API_KEY",
+      "description": "Alternative Google AI Studio API key variable for Gemini.",
+      "usage": "GEMINI_API_KEY",
+      "examples": [{ "title": "Example", "command": "GEMINI_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "gemini_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-github-token",
+      "name": "GITHUB_TOKEN",
+      "description": "GitHub token used by Skills Hub for rate limits and publishing.",
+      "usage": "GITHUB_TOKEN",
+      "examples": [{ "title": "Example", "command": "GITHUB_TOKEN=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "github_token"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-glm-api-key",
+      "name": "GLM_API_KEY",
+      "description": "Z.AI / GLM provider API key.",
+      "usage": "GLM_API_KEY",
+      "examples": [{ "title": "Example", "command": "GLM_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "glm_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-google-api-key",
+      "name": "GOOGLE_API_KEY",
+      "description": "Google AI Studio API key for Gemini models.",
+      "usage": "GOOGLE_API_KEY",
+      "examples": [{ "title": "Example", "command": "GOOGLE_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "google_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-groq-api-key",
+      "name": "GROQ_API_KEY",
+      "description": "Groq API key for Whisper speech-to-text.",
+      "usage": "GROQ_API_KEY",
+      "examples": [{ "title": "Example", "command": "GROQ_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "groq_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-hermes-home",
+      "name": "HERMES_HOME",
+      "description": "Override the active Hermes profile home directory.",
+      "usage": "HERMES_HOME",
+      "examples": [{ "title": "Example", "command": "HERMES_HOME=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "hermes_home"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-hermes-timezone",
+      "name": "HERMES_TIMEZONE",
+      "description": "IANA timezone override used by scheduling and time-aware behavior.",
+      "usage": "HERMES_TIMEZONE",
+      "examples": [{ "title": "Example", "command": "HERMES_TIMEZONE=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "hermes_timezone"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-hf-token",
+      "name": "HF_TOKEN",
+      "description": "Hugging Face unified router token.",
+      "usage": "HF_TOKEN",
+      "examples": [{ "title": "Example", "command": "HF_TOKEN=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "hf_token"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-honcho-api-key",
+      "name": "HONCHO_API_KEY",
+      "description": "Honcho API key for cross-session user modeling.",
+      "usage": "HONCHO_API_KEY",
+      "examples": [{ "title": "Example", "command": "HONCHO_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "honcho_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-kimi-api-key",
+      "name": "KIMI_API_KEY",
+      "description": "Kimi / Moonshot provider API key.",
+      "usage": "KIMI_API_KEY",
+      "examples": [{ "title": "Example", "command": "KIMI_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "kimi_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-nvidia-api-key",
+      "name": "NVIDIA_API_KEY",
+      "description": "NVIDIA NIM provider API key.",
+      "usage": "NVIDIA_API_KEY",
+      "examples": [{ "title": "Example", "command": "NVIDIA_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "nvidia_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-openai-api-key",
+      "name": "OPENAI_API_KEY",
+      "description": "OpenAI API key for direct OpenAI-compatible inference and tools.",
+      "usage": "OPENAI_API_KEY",
+      "examples": [{ "title": "Example", "command": "OPENAI_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "openai_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-openrouter-api-key",
+      "name": "OPENROUTER_API_KEY",
+      "description": "OpenRouter API key for multi-provider model routing.",
+      "usage": "OPENROUTER_API_KEY",
+      "examples": [{ "title": "Example", "command": "OPENROUTER_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "openrouter_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-searxng-url",
+      "name": "SEARXNG_URL",
+      "description": "URL of a self-hosted SearXNG instance for web search.",
+      "usage": "SEARXNG_URL",
+      "examples": [{ "title": "Example", "command": "SEARXNG_URL=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "searxng_url"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-sudo-password",
+      "name": "SUDO_PASSWORD",
+      "description": "Enable sudo commands without an interactive password prompt.",
+      "usage": "SUDO_PASSWORD",
+      "examples": [{ "title": "Example", "command": "SUDO_PASSWORD=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "sudo_password"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-tavily-api-key",
+      "name": "TAVILY_API_KEY",
+      "description": "Tavily API key for web search, extraction, and crawling.",
+      "usage": "TAVILY_API_KEY",
+      "examples": [{ "title": "Example", "command": "TAVILY_API_KEY=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "tavily_api_key"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-terminal-docker-image",
+      "name": "TERMINAL_DOCKER_IMAGE",
+      "description": "Container image used by the Docker terminal backend.",
+      "usage": "TERMINAL_DOCKER_IMAGE",
+      "examples": [{ "title": "Example", "command": "TERMINAL_DOCKER_IMAGE=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "terminal_docker_image"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-terminal-env",
+      "name": "TERMINAL_ENV",
+      "description": "Terminal backend: local, docker, ssh, singularity, modal, or daytona.",
+      "usage": "TERMINAL_ENV",
+      "examples": [{ "title": "Example", "command": "TERMINAL_ENV=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "terminal_env"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-terminal-timeout",
+      "name": "TERMINAL_TIMEOUT",
+      "description": "Command timeout in seconds for terminal operations.",
+      "usage": "TERMINAL_TIMEOUT",
+      "examples": [{ "title": "Example", "command": "TERMINAL_TIMEOUT=<value>" }],
+      "category": "environment",
+      "tags": ["environment variable", "env", "terminal_timeout"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+      "platforms": ["Environment"]
+    },
+    {
+      "id": "command-hermes-slack-manifest-options",
+      "name": "Generate a Slack app manifest",
+      "description": "Generate the Slack app manifest and native slash-command registrations. Use --long-description for inline text or --long-description-file to preserve a UTF-8 file exactly.",
+      "usage": "hermes slack manifest [options]",
+      "examples": [
+        { "title": "Print Manifest", "command": "hermes slack manifest" },
+        { "title": "Write Default File", "command": "hermes slack manifest --write" },
+        { "title": "Write Custom File", "command": "hermes slack manifest --write ./slack-manifest.json" },
+        {
+          "title": "Long Description from File",
+          "command": "hermes slack manifest --long-description-file AGENTS.md --write",
+          "description": "The source text must be between 175 and 4,000 characters."
+        },
+        { "title": "Slash Commands Only", "command": "hermes slack manifest --slashes-only" }
+      ],
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "slack", "manifest", "slash commands"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands#hermes-slack",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-gateway",
+      "name": "hermes gateway",
+      "description": "Run or manage the messaging gateway service.",
+      "usage": "hermes gateway",
+      "category": "gateway",
+      "tags": ["cli", "terminal", "gateway"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-gateway-install",
+      "name": "hermes gateway install",
+      "description": "Install the gateway as a systemd or launchd service.",
+      "usage": "hermes gateway install",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "install"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-gateway-list",
+      "name": "hermes gateway list",
+      "description": "List every profile and whether its gateway is running.",
+      "usage": "hermes gateway list",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "list"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-gateway-restart",
+      "name": "hermes gateway restart",
+      "description": "Restart the messaging gateway.",
+      "usage": "hermes gateway restart",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "restart"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"],
+      "statuses": ["RESTART"]
+    },
+    {
+      "id": "command-hermes-gateway-run",
+      "name": "hermes gateway run",
+      "description": "Run the messaging gateway in the foreground.",
+      "usage": "hermes gateway run",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "run"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-gateway-setup",
+      "name": "hermes gateway setup",
+      "description": "Configure messaging platforms interactively.",
+      "usage": "hermes gateway setup",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "setup"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-gateway-start",
+      "name": "hermes gateway start",
+      "description": "Start the installed systemd or launchd gateway service.",
+      "usage": "hermes gateway start",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "start"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-gateway-status",
+      "name": "hermes gateway status",
+      "description": "Show gateway service status.",
+      "usage": "hermes gateway status",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "status"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-gateway-stop",
+      "name": "hermes gateway stop",
+      "description": "Stop the gateway service or foreground process.",
+      "usage": "hermes gateway stop",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "stop"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-gateway-uninstall",
+      "name": "hermes gateway uninstall",
+      "description": "Remove the installed gateway service.",
+      "usage": "hermes gateway uninstall",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "uninstall"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"],
+      "statuses": ["CAUTION"]
+    },
+    {
+      "id": "command-hermes-pairing",
+      "name": "hermes pairing",
+      "description": "Approve or revoke messaging pairing codes.",
+      "usage": "hermes pairing",
+      "category": "gateway",
+      "tags": ["cli", "terminal", "pairing"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-pairing-approve-platform-code",
+      "name": "hermes pairing approve <platform> <code>",
+      "description": "Approve a messaging-platform pairing code.",
+      "usage": "hermes pairing approve <platform> <code>",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "<code>"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-pairing-list",
+      "name": "hermes pairing list",
+      "description": "Show pending and approved messaging users.",
+      "usage": "hermes pairing list",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "list"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-pairing-revoke-platform-user-id",
+      "name": "hermes pairing revoke <platform> <user-id>",
+      "description": "Revoke a user's messaging access.",
+      "usage": "hermes pairing revoke <platform> <user-id>",
+      "category": "gateway",
+      "tags": ["gateway", "messaging", "<user-id>"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging",
+      "platforms": ["Terminal"],
+      "statuses": ["CAUTION"]
+    },
+    {
+      "id": "command-hermes-send",
+      "name": "hermes send",
+      "description": "Send a one-shot message to a configured messaging platform (Telegram, Discord, Slack, Signal, SMS, …). Useful from shell scripts, cron jobs, CI hooks, and monitoring daemons — no agent loop, no LLM.",
+      "usage": "hermes send",
+      "category": "gateway",
+      "tags": ["cli", "terminal", "send"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-slack",
+      "name": "hermes slack",
+      "description": "Slack helpers (currently: generate the app manifest with every command as a native slash).",
+      "usage": "hermes slack",
+      "category": "gateway",
+      "tags": ["cli", "terminal", "slack"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-whatsapp",
+      "name": "hermes whatsapp",
+      "description": "Configure and pair the WhatsApp bridge.",
+      "usage": "hermes whatsapp",
+      "category": "gateway",
+      "tags": ["cli", "terminal", "whatsapp"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-whatsapp-cloud",
+      "name": "hermes whatsapp-cloud",
+      "description": "Configure the official Meta WhatsApp Business Cloud API adapter (Business account + public webhook required). Distinct from hermes whatsapp (Baileys personal-account bridge).",
+      "usage": "hermes whatsapp-cloud",
+      "category": "gateway",
+      "tags": ["cli", "terminal", "whatsapp-cloud"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-update-check",
+      "name": "Check for updates",
+      "description": "Preview whether a Hermes Agent update is available without installing it.",
+      "usage": "hermes update --check",
+      "category": "getting-started",
+      "tags": ["update", "maintenance", "check"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-setup",
+      "name": "hermes setup",
+      "description": "Interactive setup wizard for all or part of the configuration.",
+      "usage": "hermes setup",
+      "category": "getting-started",
+      "tags": ["cli", "terminal", "setup"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-update",
+      "name": "hermes update",
+      "description": "Pull latest code and reinstall dependencies. --check previews without installing; --backup takes a pre-pull HERMES_HOME snapshot.",
+      "usage": "hermes update",
+      "category": "getting-started",
+      "tags": ["cli", "terminal", "update"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-curl-fssl-https-hermes-agent-nousresearch-com-install-sh-bash",
+      "name": "Install on Linux, macOS, WSL2, or Termux",
+      "description": "Run the official installer for Unix-like systems.",
+      "usage": "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash",
+      "category": "getting-started",
+      "tags": ["install", "macos", "linux", "wsl", "termux"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/getting-started/quickstart",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-iex-irm-https-hermes-agent-nousresearch-com-install-ps1",
+      "name": "Install on Windows",
+      "description": "Run the official native Windows installer from PowerShell.",
+      "usage": "iex (irm https://hermes-agent.nousresearch.com/install.ps1)",
+      "category": "getting-started",
+      "tags": ["install", "windows", "powershell"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/getting-started/quickstart",
+      "platforms": ["PowerShell"]
+    },
+    {
+      "id": "command-hermes-setup-portal",
+      "name": "Quick setup with Nous Portal",
+      "description": "Sign in through OAuth, select Nous as the provider, and enable Tool Gateway routing.",
+      "usage": "hermes setup --portal",
+      "category": "getting-started",
+      "tags": ["setup", "nous", "oauth", "portal"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/getting-started/quickstart",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-source-zshrc",
+      "name": "Reload your shell",
+      "description": "Reload the shell configuration after installation so the hermes command is available.",
+      "usage": "source ~/.zshrc",
+      "examples": [{ "title": "Example", "command": "source ~/.bashrc" }],
+      "category": "getting-started",
+      "tags": ["install", "shell", "path"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/getting-started/quickstart",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-continue",
+      "name": "Resume the latest session",
+      "description": "Continue the most recent conversation from the current profile.",
+      "usage": "hermes --continue",
+      "examples": [{ "title": "Example", "command": "hermes -c" }],
+      "category": "getting-started",
+      "tags": ["resume", "continue", "session"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/getting-started/quickstart",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes",
+      "name": "Start the classic CLI",
+      "description": "Open an interactive Hermes conversation in the classic prompt_toolkit interface.",
+      "usage": "hermes",
+      "category": "getting-started",
+      "tags": ["start", "chat", "classic cli"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/getting-started/quickstart",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-tui",
+      "name": "Start the modern TUI",
+      "description": "Launch the modern terminal interface with overlays, mouse support, and non-blocking input.",
+      "usage": "hermes --tui",
+      "category": "getting-started",
+      "tags": ["start", "chat", "tui"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/getting-started/quickstart",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-alt-enter-ctrl-j-shift-enter",
+      "name": "Alt+Enter / Ctrl+J / Shift+Enter",
+      "description": "Insert a new line for multi-line input.",
+      "usage": "Alt+Enter / Ctrl+J / Shift+Enter",
+      "category": "keyboard",
+      "tags": ["keyboard", "shortcut", "keybinding"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-alt-v",
+      "name": "Alt+V",
+      "description": "Paste an image from the clipboard when the terminal supports it.",
+      "usage": "Alt+V",
+      "category": "keyboard",
+      "tags": ["keyboard", "shortcut", "keybinding"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-ctrl-b",
+      "name": "Ctrl+B",
+      "description": "Start or stop voice recording when voice mode is enabled.",
+      "usage": "Ctrl+B",
+      "category": "keyboard",
+      "tags": ["keyboard", "shortcut", "keybinding"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-ctrl-c",
+      "name": "Ctrl+C",
+      "description": "Interrupt the agent; press twice within two seconds to force exit.",
+      "usage": "Ctrl+C",
+      "category": "keyboard",
+      "tags": ["keyboard", "shortcut", "keybinding"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-ctrl-d",
+      "name": "Ctrl+D",
+      "description": "Exit Hermes.",
+      "usage": "Ctrl+D",
+      "category": "keyboard",
+      "tags": ["keyboard", "shortcut", "keybinding"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-ctrl-g",
+      "name": "Ctrl+G",
+      "description": "Open the current input buffer in $EDITOR.",
+      "usage": "Ctrl+G",
+      "category": "keyboard",
+      "tags": ["keyboard", "shortcut", "keybinding"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-ctrl-v",
+      "name": "Ctrl+V",
+      "description": "Paste text and opportunistically attach clipboard images.",
+      "usage": "Ctrl+V",
+      "category": "keyboard",
+      "tags": ["keyboard", "shortcut", "keybinding"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-ctrl-x-ctrl-e",
+      "name": "Ctrl+X Ctrl+E",
+      "description": "Open the current input buffer in $EDITOR using the Emacs-style binding.",
+      "usage": "Ctrl+X Ctrl+E",
+      "category": "keyboard",
+      "tags": ["keyboard", "shortcut", "keybinding"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-ctrl-z",
+      "name": "Ctrl+Z",
+      "description": "Suspend Hermes on Unix; run fg in the shell to resume.",
+      "usage": "Ctrl+Z",
+      "category": "keyboard",
+      "tags": ["keyboard", "shortcut", "keybinding"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-enter",
+      "name": "Enter",
+      "description": "Send the current message.",
+      "usage": "Enter",
+      "category": "keyboard",
+      "tags": ["keyboard", "shortcut", "keybinding"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-tab",
+      "name": "Tab",
+      "description": "Accept an auto-suggestion or autocomplete a slash command.",
+      "usage": "Tab",
+      "category": "keyboard",
+      "tags": ["keyboard", "shortcut", "keybinding"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/cli#keybindings",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-reload-mcp",
+      "name": "/reload-mcp",
+      "description": "Reload MCP servers from config.yaml without restarting Hermes.",
+      "usage": "/reload-mcp",
+      "category": "mcp",
+      "tags": ["mcp", "model context protocol", "integration"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-hermes-acp",
+      "name": "hermes acp",
+      "description": "Run Hermes as an ACP server for editor integration.",
+      "usage": "hermes acp",
+      "category": "mcp",
+      "tags": ["cli", "terminal", "acp"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-mcp",
+      "name": "hermes mcp",
+      "description": "Open the interactive catalog picker for approved MCP servers.",
+      "usage": "hermes mcp",
+      "category": "mcp",
+      "tags": ["mcp", "model context protocol", "integration"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-mcp-add-name-options",
+      "name": "hermes mcp add <name> [options]",
+      "description": "Add a custom stdio or HTTP MCP server and discover its tools.",
+      "usage": "hermes mcp add <name> [options]",
+      "category": "mcp",
+      "tags": ["mcp", "model context protocol", "integration"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-mcp-catalog",
+      "name": "hermes mcp catalog",
+      "description": "List approved MCP integrations in a scriptable format.",
+      "usage": "hermes mcp catalog",
+      "category": "mcp",
+      "tags": ["mcp", "model context protocol", "integration"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-mcp-configure-name",
+      "name": "hermes mcp configure <name>",
+      "description": "Change tool selection for an MCP server.",
+      "usage": "hermes mcp configure <name>",
+      "category": "mcp",
+      "tags": ["mcp", "model context protocol", "integration"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-mcp-install-name",
+      "name": "hermes mcp install <name>",
+      "description": "Install an approved MCP catalog entry.",
+      "usage": "hermes mcp install <name>",
+      "category": "mcp",
+      "tags": ["mcp", "model context protocol", "integration"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-mcp-list",
+      "name": "hermes mcp list",
+      "description": "List configured MCP servers.",
+      "usage": "hermes mcp list",
+      "category": "mcp",
+      "tags": ["mcp", "model context protocol", "integration"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-mcp-login-name",
+      "name": "hermes mcp login <name>",
+      "description": "Force OAuth re-authentication for an MCP server.",
+      "usage": "hermes mcp login <name>",
+      "category": "mcp",
+      "tags": ["mcp", "model context protocol", "integration"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-mcp-remove-name",
+      "name": "hermes mcp remove <name>",
+      "description": "Remove an MCP server from configuration.",
+      "usage": "hermes mcp remove <name>",
+      "category": "mcp",
+      "tags": ["mcp", "model context protocol", "integration"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+      "platforms": ["Terminal"],
+      "statuses": ["CAUTION"]
+    },
+    {
+      "id": "command-hermes-mcp-serve",
+      "name": "hermes mcp serve",
+      "description": "Expose Hermes conversations as an MCP server over stdio.",
+      "usage": "hermes mcp serve",
+      "category": "mcp",
+      "tags": ["mcp", "model context protocol", "server"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-mcp-test-name",
+      "name": "hermes mcp test <name>",
+      "description": "Test connection to a configured MCP server.",
+      "usage": "hermes mcp test <name>",
+      "category": "mcp",
+      "tags": ["mcp", "model context protocol", "integration"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-auth-status",
+      "name": "Check authentication status",
+      "description": "Inspect authentication health for configured providers.",
+      "usage": "hermes auth status",
+      "category": "models",
+      "tags": ["auth", "oauth", "status"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands#hermes-auth",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-auth",
+      "name": "hermes auth",
+      "description": "Manage credentials — add, list, remove, reset, status, logout. Handles OAuth flows for Codex/Nous/Anthropic.",
+      "usage": "hermes auth",
+      "category": "models",
+      "tags": ["cli", "terminal", "auth"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-fallback",
+      "name": "hermes fallback",
+      "description": "Manage fallback providers tried when the primary model errors.",
+      "usage": "hermes fallback",
+      "category": "models",
+      "tags": ["cli", "terminal", "fallback"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-login",
+      "name": "hermes login / logout",
+      "description": "Deprecated — use hermes auth instead.",
+      "usage": "hermes login",
+      "category": "models",
+      "tags": ["cli", "terminal", "login"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "aliases": ["logout"],
+      "platforms": ["Terminal"],
+      "statuses": ["DEPRECATED"]
+    },
+    {
+      "id": "command-hermes-moa",
+      "name": "hermes moa",
+      "description": "Configure named Mixture of Agents presets selectable from the model picker.",
+      "usage": "hermes moa",
+      "category": "models",
+      "tags": ["cli", "terminal", "moa"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-model",
+      "name": "hermes model",
+      "description": "Interactively choose the default provider and model.",
+      "usage": "hermes model",
+      "category": "models",
+      "tags": ["cli", "terminal", "model"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-portal",
+      "name": "hermes portal",
+      "description": "Nous Portal status, subscription link, and Tool Gateway routing. See Tool Gateway.",
+      "usage": "hermes portal",
+      "category": "models",
+      "tags": ["cli", "terminal", "portal"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-proxy",
+      "name": "hermes proxy",
+      "description": "Local OpenAI-compatible proxy that attaches OAuth provider credentials. See Subscription Proxy.",
+      "usage": "hermes proxy",
+      "category": "models",
+      "tags": ["cli", "terminal", "proxy"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-auth-list",
+      "name": "List configured credentials",
+      "description": "Show configured credential entries and their providers.",
+      "usage": "hermes auth list",
+      "category": "models",
+      "tags": ["auth", "credentials", "providers"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands#hermes-auth",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-model-model-name-provider-provider-global",
+      "name": "Set the global default model",
+      "description": "Switch model and save it as the new global default in config.yaml.",
+      "usage": "/model <model-name> --provider <provider> --global",
+      "examples": [
+        {
+          "title": "OpenAI Codex",
+          "command": "/model gpt-5.6-sol --provider openai-codex --global",
+          "description": "Example only: replace both values with a model and provider configured in your Hermes setup."
+        },
+        {
+          "title": "Anthropic",
+          "command": "/model claude-sonnet-4-6 --provider anthropic --global",
+          "description": "Example only: replace both values with a model and provider configured in your Hermes setup."
+        }
+      ],
+      "category": "models",
+      "tags": ["model", "provider", "global", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands#model-slash-command-mid-session",
+      "platforms": ["Interactive CLI", "Messaging"],
+      "statuses": ["PERSISTS"]
+    },
+    {
+      "id": "command-hermes-chat-model-model",
+      "name": "Switch model for the current run",
+      "description": "Override the configured model without changing the saved default.",
+      "usage": "hermes chat --model <model>",
+      "examples": [
+        { "title": "Example", "command": "hermes chat --provider openrouter --model anthropic/claude-sonnet-4.6" }
+      ],
+      "category": "models",
+      "tags": ["model", "provider", "override", "chat"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands#hermes-chat",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-bundles",
+      "name": "hermes bundles",
+      "description": "Group several skills under a single /<name> slash command. See Skill Bundles.",
+      "usage": "hermes bundles",
+      "category": "skills-memory",
+      "tags": ["cli", "terminal", "bundles"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-curator",
+      "name": "hermes curator",
+      "description": "Background skill maintenance — status, run, pause, pin. See Curator.",
+      "usage": "hermes curator",
+      "category": "skills-memory",
+      "tags": ["cli", "terminal", "curator"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-journey",
+      "name": "hermes journey (aliases learning, memory-graph)",
+      "description": "Timeline of learned skills + memories over time.",
+      "usage": "hermes journey",
+      "category": "skills-memory",
+      "tags": ["cli", "terminal", "journey"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "aliases": ["learning", "memory-graph"],
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-memory",
+      "name": "hermes memory",
+      "description": "Configure external memory provider. Plugin-specific subcommands (e.g. hermes honcho) register automatically when their provider is active.",
+      "usage": "hermes memory",
+      "category": "skills-memory",
+      "tags": ["cli", "terminal", "memory"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-memory-off",
+      "name": "hermes memory off",
+      "description": "Disable the external provider while keeping built-in memory active.",
+      "usage": "hermes memory off",
+      "category": "skills-memory",
+      "tags": ["memory", "persistent", "provider"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/memory",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-memory-setup",
+      "name": "hermes memory setup",
+      "description": "Select and configure an external memory provider.",
+      "usage": "hermes memory setup",
+      "category": "skills-memory",
+      "tags": ["memory", "persistent", "provider"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/memory",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-memory-status",
+      "name": "hermes memory status",
+      "description": "Show the current external memory provider configuration.",
+      "usage": "hermes memory status",
+      "category": "skills-memory",
+      "tags": ["memory", "persistent", "provider"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/memory",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-pets",
+      "name": "hermes pets",
+      "description": "Browse, install, and select petdex animated pets shown across the CLI, TUI, and desktop app. Subcommands: list, install, select, show, off, scale, remove, doctor.",
+      "usage": "hermes pets",
+      "category": "skills-memory",
+      "tags": ["cli", "terminal", "pets"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skills",
+      "name": "hermes skills",
+      "description": "Browse, install, publish, audit, and configure skills.",
+      "usage": "hermes skills",
+      "category": "skills-memory",
+      "tags": ["cli", "terminal", "skills"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skills-audit",
+      "name": "hermes skills audit",
+      "description": "Re-scan installed hub skills for security issues.",
+      "usage": "hermes skills audit",
+      "category": "skills-memory",
+      "tags": ["skills", "skill hub", "registry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skills-browse",
+      "name": "hermes skills browse",
+      "description": "Browse available skills from configured registries.",
+      "usage": "hermes skills browse",
+      "category": "skills-memory",
+      "tags": ["skills", "skill hub", "registry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skills-check",
+      "name": "hermes skills check",
+      "description": "Check installed hub skills for upstream updates.",
+      "usage": "hermes skills check",
+      "category": "skills-memory",
+      "tags": ["skills", "skill hub", "registry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skills-config",
+      "name": "hermes skills config",
+      "description": "Configure which skills are enabled per platform.",
+      "usage": "hermes skills config",
+      "category": "skills-memory",
+      "tags": ["skills", "skill hub", "registry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skills-inspect-identifier",
+      "name": "hermes skills inspect <identifier>",
+      "description": "Preview a skill without installing it.",
+      "usage": "hermes skills inspect <identifier>",
+      "category": "skills-memory",
+      "tags": ["skills", "skill hub", "registry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skills-install-identifier",
+      "name": "hermes skills install <identifier>",
+      "description": "Install a skill from a registry, repository, or direct SKILL.md URL.",
+      "usage": "hermes skills install <identifier>",
+      "category": "skills-memory",
+      "tags": ["skills", "skill hub", "registry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skills-list",
+      "name": "hermes skills list",
+      "description": "List installed skills.",
+      "usage": "hermes skills list",
+      "category": "skills-memory",
+      "tags": ["skills", "skill hub", "registry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skills-publish",
+      "name": "hermes skills publish",
+      "description": "Publish a skill to a configured registry.",
+      "usage": "hermes skills publish",
+      "category": "skills-memory",
+      "tags": ["skills", "skill hub", "registry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skills-search-query",
+      "name": "hermes skills search <query>",
+      "description": "Search skill registries.",
+      "usage": "hermes skills search <query>",
+      "category": "skills-memory",
+      "tags": ["skills", "skill hub", "registry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-skills-uninstall-identifier",
+      "name": "hermes skills uninstall <identifier>",
+      "description": "Remove a hub-installed skill.",
+      "usage": "hermes skills uninstall <identifier>",
+      "category": "skills-memory",
+      "tags": ["skills", "skill hub", "registry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+      "platforms": ["Terminal"],
+      "statuses": ["CAUTION"]
+    },
+    {
+      "id": "command-hermes-skills-update",
+      "name": "hermes skills update",
+      "description": "Reinstall hub skills that have upstream changes.",
+      "usage": "hermes skills update",
+      "category": "skills-memory",
+      "tags": ["skills", "skill hub", "registry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-agents",
+      "name": "/agents (alias: /tasks)",
+      "description": "Show active agents and running tasks across the current session.",
+      "usage": "/agents",
+      "category": "slash",
+      "tags": ["slash command", "session", "agents", "tasks"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "aliases": ["/tasks"],
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-approvals",
+      "name": "/approvals [manual|smart|off]",
+      "description": "Show or set the persistent dangerous-command approval mode.",
+      "usage": "/approvals [manual|smart|off]",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "approvals [manual|smart|off]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI"],
+      "statuses": ["PERSISTS"]
+    },
+    {
+      "id": "command-background",
+      "name": "/background <prompt> (alias: /bg, /btw)",
+      "description": "Run a prompt in a separate background session. The agent processes your prompt independently — your current session stays free for other work. Results appear as a panel when the task finishes. See CLI Background Sessions.",
+      "usage": "/background <prompt>",
+      "category": "slash",
+      "tags": ["slash command", "session", "background <prompt>", "bg", "btw"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "aliases": ["/bg", "/btw"],
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-battery",
+      "name": "/battery [on|off|status]",
+      "description": "Toggle a color-coded battery read-out as the first status-bar element (off by default; no-op without a battery).",
+      "usage": "/battery [on|off|status]",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "battery [on|off|status]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-blueprint",
+      "name": "/blueprint [name] [slot=value ...] (alias: /bp)",
+      "description": "Set up an automation from a blueprint template. Bare /blueprint lists the catalog; /blueprint <name> starts a guided slot-filling flow on the next agent turn; /blueprint <name> slot=value ... creates the job directly.",
+      "usage": "/blueprint [name] [slot=value ...]",
+      "examples": [{ "title": "Example 1", "command": "/blueprint" }],
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "blueprint [name] [slot=value ...]", "bp"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "aliases": ["/bp"],
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-branch",
+      "name": "/branch [name] (alias: /fork)",
+      "description": "Branch the current session (explore a different path)",
+      "usage": "/branch [name]",
+      "category": "slash",
+      "tags": ["slash command", "session", "branch [name]", "fork"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "aliases": ["/fork"],
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-browser",
+      "name": "/browser [connect|disconnect|status]",
+      "description": "Manage a local Chromium-family CDP connection. connect attaches browser tools to a running Chrome, Brave, Chromium, or Edge instance (default: http://127.0.0.1:9222). disconnect detaches. status shows current connection. Auto-launches a supported Chromium-family browser if no debugger is detected.",
+      "usage": "/browser [connect|disconnect|status]",
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "browser [connect|disconnect|status]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-bundles",
+      "name": "/bundles",
+      "description": "List configured skill bundles — /<name> slash aliases that preload several skills at once. Configure under bundles: in ~/.hermes/config.yaml. See Skill Bundles.",
+      "usage": "/bundles",
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "bundles"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-busy",
+      "name": "/busy [queue|steer|interrupt|status]",
+      "description": "CLI-only: control what pressing Enter does while Hermes is working — queue the new message, steer mid-turn, or interrupt immediately.",
+      "usage": "/busy [queue|steer|interrupt|status]",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "busy [queue|steer|interrupt|status]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-clear",
+      "name": "/clear",
+      "description": "Clear screen and start a new session",
+      "usage": "/clear",
+      "category": "slash",
+      "tags": ["slash command", "session", "clear"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-codex-runtime",
+      "name": "/codex-runtime [auto|codex_app_server|on|off]",
+      "description": "Toggle the optional Codex app-server runtime for OpenAI/Codex models. auto (default) uses Hermes' standard chat completions; codex_app_server hands turns to a codex app-server subprocess for native shell, apply_patch, ChatGPT subscription auth, and migrated Codex plugins. Effective on next session.",
+      "usage": "/codex-runtime [auto|codex_app_server|on|off]",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "codex-runtime [auto|codex_app_server|on|off]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI", "Messaging"],
+      "statuses": ["RESTART", "PERSISTS"]
+    },
+    {
+      "id": "command-compress",
+      "name": "/compress [here [N] | focus topic]",
+      "description": "Manually compress conversation context (flush memories + summarize). /compress here [N] summarizes everything except the most recent N exchanges (default 2), kept verbatim — pick your own compression boundary. A focus topic narrows what a full summary preserves.",
+      "usage": "/compress [here [N] | focus topic]",
+      "examples": [
+        { "title": "Keep Recent Exchanges", "command": "/compress here 4" },
+        { "title": "Focus the Summary", "command": "/compress focus deployment decisions" }
+      ],
+      "category": "slash",
+      "tags": ["slash command", "session", "compress [here [N] | focus topic]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-config",
+      "name": "/config",
+      "description": "Show current configuration",
+      "usage": "/config",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "config"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-context",
+      "name": "/context [all] (alias: /ctx)",
+      "description": "Visual context-window breakdown. On the CLI/TUI: a 5×20 glyph block grid (each cell ≈ 1% of the model window) plus an estimated per-category table — system prompt, tool definitions, rules, skills index, MCP, subagents, memory, conversation — versus free space. On messaging platforms: a usage gauge with auto-compression threshold/headroom, compression stats, cumulative throughput, and the same category table in plain text. /context all appends per-skill and per-toolset cost listings (index cost vs SKILL.md load cost; schema tokens per toolset). Read-only and computed locally — no LLM call, no prompt-cache impact.",
+      "usage": "/context [all]",
+      "examples": [{ "title": "Example 1", "command": "/context all" }],
+      "category": "slash",
+      "tags": ["slash command", "session", "context [all]", "ctx"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "aliases": ["/ctx"],
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-copy",
+      "name": "/copy [number]",
+      "description": "Copy the last assistant response to clipboard (or the Nth-from-last with a number). CLI-only.",
+      "usage": "/copy [number]",
+      "category": "slash",
+      "tags": ["slash command", "info", "copy [number]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-cron",
+      "name": "/cron",
+      "description": "Manage scheduled tasks (list, add/create, edit, pause, resume, run, remove)",
+      "usage": "/cron",
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "cron"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-curator",
+      "name": "/curator",
+      "description": "Background skill maintenance — status, run, pin, archive. See Curator.",
+      "usage": "/curator",
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "curator"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-debug",
+      "name": "/debug",
+      "description": "Upload debug report (system info + logs) and get shareable links. Also available in messaging.",
+      "usage": "/debug",
+      "category": "slash",
+      "tags": ["slash command", "info", "debug"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-diff",
+      "name": "/diff [staged|all|session] [--stat] [path...]",
+      "description": "Show git changes in the working directory. Default: unstaged changes plus untracked files. staged shows what's staged for commit, all everything since HEAD, and session the cumulative diff of everything Hermes changed here (from the earliest retained checkpoint baseline — requires checkpoints to be enabled; complements /rollback diff <N>). --stat prints just the changed-file summary; path arguments restrict the diff.",
+      "usage": "/diff [staged|all|session] [--stat] [path...]",
+      "category": "slash",
+      "tags": ["slash command", "session", "diff [staged|all|session] [--stat] [path...]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-egress",
+      "name": "/egress [status]",
+      "description": "Show Docker egress proxy status — enabled/configured/running state, credential source, token mappings, uncovered providers, and next remediation step. Works in CLI, TUI, Desktop chat, and messaging gateway.",
+      "usage": "/egress [status]",
+      "category": "slash",
+      "tags": ["slash command", "session", "egress [status]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-fast",
+      "name": "/fast [normal|fast|status] [--global]",
+      "description": "Toggle fast mode between normal and fast service tiers. Changes are session-scoped by default; use --global to save the selected tier to config.",
+      "usage": "/fast [normal|fast|status] [--global]",
+      "examples": [
+        { "title": "Enable Fast Mode", "command": "/fast fast" },
+        { "title": "Enable and Save Globally", "command": "/fast fast --global" },
+        { "title": "Return to Normal", "command": "/fast normal" },
+        { "title": "Check Status", "command": "/fast status" }
+      ],
+      "category": "slash",
+      "tags": ["slash command", "configuration", "fast [normal|fast|status]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI", "Messaging"],
+      "statuses": ["PERSISTS"]
+    },
+    {
+      "id": "command-focus",
+      "name": "/focus [on|off|status]",
+      "description": "Toggle focus view — a display-only reduced-output mode showing just your prompt and the final response. Composes with /verbose: turning it on snaps tool progress to off and remembers your previous mode, and /focus off restores it. Each turn ends with a dim recovery line (⋯ 7 tool lines hidden · /focus off to show) and a persistent ◉ focus badge sits in the status bar so you always know you're in the reduced view. Nothing is sent differently to the model — detail is hidden, never discarded.",
+      "usage": "/focus [on|off|status]",
+      "examples": [{ "title": "Example 1", "command": "/focus off" }],
+      "category": "slash",
+      "tags": ["slash command", "configuration", "focus [on|off|status]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI"],
+      "statuses": ["PERSISTS"]
+    },
+    {
+      "id": "command-footer",
+      "name": "/footer [on|off|status]",
+      "description": "Toggle the gateway runtime-metadata footer on final replies (shows model, context %, and cwd).",
+      "usage": "/footer [on|off|status]",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "footer [on|off|status]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-goal",
+      "name": "/goal <text>",
+      "description": "Set a standing goal Hermes works toward across turns — our take on the Ralph loop. After each turn an auxiliary judge model decides whether the goal is done; if not, Hermes auto-continues. Subcommands: /goal status, /goal pause, /goal resume, /goal clear. Budget defaults to 20 turns (goals.max_turns); any real user message preempts the continuation loop, and state survives /resume. See Persistent Goals for the full walkthrough.",
+      "usage": "/goal <text>",
+      "examples": [
+        { "title": "Example 1", "command": "/goal status" },
+        { "title": "Example 2", "command": "/goal pause" },
+        { "title": "Example 3", "command": "/goal resume" },
+        { "title": "Example 4", "command": "/goal clear" }
+      ],
+      "category": "slash",
+      "tags": ["slash command", "session", "goal <text>"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-handoff",
+      "name": "/handoff <platform>",
+      "description": "CLI only. Hand the current session off to a messaging platform (Telegram, Discord, Slack, WhatsApp, Signal, Matrix). The gateway picks it up immediately, creates a fresh thread on platforms that support threads (Telegram topics, Discord text-channel threads, Slack message-anchored threads), re-binds the destination to your CLI session_id so the full role-aware transcript replays, and forges a synthetic user turn so the agent confirms it's working in the new place. Your CLI exits cleanly on success with a /resume hint; resume locally any time with /resume <title>. Refused mid-turn. Requires the gateway to be running and a home channel configured for the target platform (/sethome from the destination chat). See Cross-Platform Handoff.",
+      "usage": "/handoff <platform>",
+      "category": "slash",
+      "tags": ["slash command", "session", "handoff <platform>"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-hatch",
+      "name": "/hatch <description> (alias: /generate-pet)",
+      "description": "Generate a brand-new petdex pet from a text description, using the configured image backend (OpenRouter / Nous Portal). See Pets.",
+      "usage": "/hatch <description>",
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "hatch <description>", "generate-pet"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "aliases": ["/generate-pet"],
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-help",
+      "name": "/help",
+      "description": "Show this help message",
+      "usage": "/help",
+      "category": "slash",
+      "tags": ["slash command", "info", "help"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-history",
+      "name": "/history",
+      "description": "Show conversation history (respects /timestamps)",
+      "usage": "/history",
+      "category": "slash",
+      "tags": ["slash command", "session", "history"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-image",
+      "name": "/image <path>",
+      "description": "Attach a local image file for your next prompt.",
+      "usage": "/image <path>",
+      "category": "slash",
+      "tags": ["slash command", "info", "image <path>"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-indicator",
+      "name": "/indicator [kaomoji|emoji|unicode|ascii]",
+      "description": "CLI-only: pick the TUI busy-indicator style.",
+      "usage": "/indicator [kaomoji|emoji|unicode|ascii]",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "indicator [kaomoji|emoji|unicode|ascii]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-init",
+      "name": "/init [notes]",
+      "description": "Generate or update AGENTS.md project instructions from a repo scan (port of Codex /init). The agent inspects manifests, layout, and toolchain configs with its read-only tools, then writes a concise AGENTS.md — or, if one exists, merge-updates it preserving your content. Optional notes steer the emphasis. Works in the CLI, the messaging gateway, and the TUI.",
+      "usage": "/init [notes]",
+      "examples": [{ "title": "Example 1", "command": "/init" }],
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "init [notes]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI", "Messaging"],
+      "statuses": ["PERSISTS"]
+    },
+    {
+      "id": "command-insights",
+      "name": "/insights",
+      "description": "Show usage insights and analytics (last 30 days)",
+      "usage": "/insights",
+      "category": "slash",
+      "tags": ["slash command", "info", "insights"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-journey",
+      "name": "/journey [list|delete <id>|edit <id>] (aliases: /learning, /memory-graph)",
+      "description": "Open the learning journey timeline of learned skills + memories. Works in the classic CLI, as a TUI overlay, and in the desktop app (Star Map panel). Not available on messaging platforms. See Learning Journey.",
+      "usage": "/journey [list|delete <id>|edit <id>]",
+      "category": "slash",
+      "tags": ["slash command", "session", "journey [list|delete <id>|edit <id>]", "learning", "memory-graph"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "aliases": ["/learning", "/memory-graph"],
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-kanban",
+      "name": "/kanban <action>",
+      "description": "Drive the multi-profile, multi-project collaboration board without leaving chat. Full hermes kanban surface is available: /kanban list, /kanban show t_abc, /kanban create \"title\" --assignee X, /kanban comment t_abc \"text\", /kanban unblock t_abc, /kanban dispatch, etc. Multi-board support included: /kanban boards list, /kanban boards create <slug>, /kanban boards switch <slug>, /kanban --board <slug> <action>. See Kanban slash command.",
+      "usage": "/kanban <action>",
+      "examples": [
+        { "title": "Example 1", "command": "/kanban list" },
+        { "title": "Example 2", "command": "/kanban show t_abc" },
+        { "title": "Example 3", "command": "/kanban create \"title\" --assignee X" },
+        { "title": "Example 4", "command": "/kanban comment t_abc \"text\"" },
+        { "title": "Example 5", "command": "/kanban unblock t_abc" },
+        { "title": "Example 6", "command": "/kanban dispatch" },
+        { "title": "Example 7", "command": "/kanban boards list" }
+      ],
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "kanban <action>"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-learn",
+      "name": "/learn <what to learn from>",
+      "description": "Distill a reusable skill from anything you describe — a directory, a URL, the workflow you just walked the agent through, or pasted notes. Open-ended: the agent gathers the sources with its own tools and authors a SKILL.md following the house authoring standards. Works in the CLI, the messaging gateway, the TUI, and the dashboard Skills page.",
+      "usage": "/learn <what to learn from>",
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "learn <what to learn from>"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-memory",
+      "name": "/memory [pending|approve|reject|approval]",
+      "description": "Review pending memory writes staged by the write-approval gate (memory.write_approval) and toggle the gate. See Controlling memory writes.",
+      "usage": "/memory [pending|approve|reject|approval]",
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "memory [pending|approve|reject|approval]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-moa",
+      "name": "/moa <prompt>",
+      "description": "Run a single prompt through the default Mixture of Agents preset, then restore your current model. One-shot — does not change your session model.",
+      "usage": "/moa <prompt>",
+      "category": "slash",
+      "tags": ["slash command", "session", "moa <prompt>"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-model",
+      "name": "/model [model-name]",
+      "description": "Show or change the current model. Use --provider to switch to an already configured provider, --global to save the default, --session to keep the change session-only, --once for one turn, or --refresh to reload model catalogs. Add providers with hermes model before starting a session. Switching models mid-conversation resets the prompt cache.",
+      "usage": "/model [model-name]",
+      "examples": [
+        {
+          "title": "Session-Only Switch",
+          "command": "/model gpt-5.6-sol --provider openai-codex --session",
+          "description": "Example only: replace the model and provider with your own values and keep the change session-scoped."
+        },
+        {
+          "title": "Switch and Save Globally",
+          "command": "/model gpt-5.6-sol --provider openai-codex --global",
+          "description": "Example only: replace the model and provider with your own values, then persist them in config.yaml."
+        },
+        {
+          "title": "One-Turn Switch",
+          "command": "/model gpt-5.6-sol --provider openai-codex --once",
+          "description": "Example only: replace the model and provider with your own values, use them once, then restore the previous model."
+        },
+        {
+          "title": "Refresh Available Models",
+          "command": "/model --refresh",
+          "description": "Refresh provider model catalogs before choosing a model."
+        }
+      ],
+      "category": "slash",
+      "tags": ["slash command", "configuration", "model [model-name]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "warning": "Switching models mid-conversation resets the prompt cache. The next turn re-reads the conversation at full input price.",
+      "platforms": ["Interactive CLI", "Messaging"],
+      "statuses": ["SESSION", "CAUTION"]
+    },
+    {
+      "id": "command-new",
+      "name": "/new [name] (alias: /reset)",
+      "description": "Start a new session (fresh session ID + history). Optional [name] sets the initial session title — e.g. /new my-experiment opens a fresh session already titled my-experiment so it's easy to find later with /resume or /sessions. Append now, --yes, or -y to skip the confirmation modal — e.g. /reset now, /new --yes my-experiment.",
+      "usage": "/new [name]",
+      "examples": [
+        { "title": "Named Session", "command": "/new my-experiment" },
+        { "title": "Skip Confirmation", "command": "/new --yes my-experiment" }
+      ],
+      "category": "slash",
+      "tags": ["slash command", "session", "new [name]", "reset"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "aliases": ["/reset"],
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-paste",
+      "name": "/paste",
+      "description": "Attach a clipboard image",
+      "usage": "/paste",
+      "category": "slash",
+      "tags": ["slash command", "info", "paste"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-personality",
+      "name": "/personality",
+      "description": "Set a predefined personality",
+      "usage": "/personality",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "personality"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-pet",
+      "name": "/pet [list|<slug>]",
+      "description": "Toggle or adopt a petdex mascot. /pet toggles the pane, /pet list shows installed pets, /pet <slug> adopts a specific one.",
+      "usage": "/pet [list|<slug>]",
+      "examples": [
+        { "title": "Example 1", "command": "/pet" },
+        { "title": "Example 2", "command": "/pet list" }
+      ],
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "pet [list|<slug>]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-platforms",
+      "name": "/platforms (alias: /gateway)",
+      "description": "Show gateway/messaging platform status (CLI-only summary view).",
+      "usage": "/platforms",
+      "category": "slash",
+      "tags": ["slash command", "info", "platforms", "gateway"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "aliases": ["/gateway"],
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-plugins",
+      "name": "/plugins",
+      "description": "List installed plugins and their status",
+      "usage": "/plugins",
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "plugins"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-profile",
+      "name": "/profile",
+      "description": "Show active profile name and home directory",
+      "usage": "/profile",
+      "category": "slash",
+      "tags": ["slash command", "info", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-prompt",
+      "name": "/prompt (alias: /compose)",
+      "description": "Compose your next prompt in $EDITOR (markdown) instead of the inline input — useful for long, multi-line, or carefully-formatted prompts.",
+      "usage": "/prompt",
+      "category": "slash",
+      "tags": ["slash command", "session", "prompt", "compose"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "aliases": ["/compose"],
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-queue",
+      "name": "/queue <prompt> (alias: /q)",
+      "description": "Queue a prompt for the next turn (doesn't interrupt the current agent response).",
+      "usage": "/queue <prompt>",
+      "category": "slash",
+      "tags": ["slash command", "session", "queue <prompt>", "q"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "aliases": ["/q"],
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-quit",
+      "name": "/quit",
+      "description": "Exit the CLI (also: /exit).",
+      "usage": "/quit",
+      "category": "slash",
+      "tags": ["slash command", "exit", "quit"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#exit",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-reasoning",
+      "name": "/reasoning [level|show|hide|full|clamp] [--global]",
+      "description": "Manage reasoning effort and display. Levels include none / minimal / low / medium / high / xhigh / max / ultra. show / hide (or on / off) toggle reasoning display; full and clamp adjust how reasoning is shown. --global persists effort to config.",
+      "usage": "/reasoning [level|show|hide|full|clamp] [--global]",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "reasoning [level|show|hide|full|clamp] [--global]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI", "Messaging"],
+      "statuses": ["PERSISTS"]
+    },
+    {
+      "id": "command-reload-skills",
+      "name": "/reload-skills (alias: /reload_skills)",
+      "description": "Re-scan ~/.hermes/skills/ for newly installed or removed skills",
+      "usage": "/reload-skills",
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "reload-skills", "reload_skills"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "aliases": ["/reload_skills"],
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-resume",
+      "name": "/resume [name]",
+      "description": "Resume a previously-named session",
+      "usage": "/resume [name]",
+      "category": "slash",
+      "tags": ["slash command", "session", "resume [name]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-retry",
+      "name": "/retry",
+      "description": "Retry the last message (resend to agent)",
+      "usage": "/retry",
+      "category": "slash",
+      "tags": ["slash command", "session", "retry"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-rollback",
+      "name": "/rollback",
+      "description": "List or restore filesystem checkpoints (usage: /rollback [number])",
+      "usage": "/rollback",
+      "category": "slash",
+      "tags": ["slash command", "session", "rollback"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-save",
+      "name": "/save",
+      "description": "Save the current conversation",
+      "usage": "/save",
+      "category": "slash",
+      "tags": ["slash command", "session", "save"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-sessions",
+      "name": "/sessions (TUI alias: /switch)",
+      "description": "Classic CLI: browse and resume previous sessions in an interactive picker. TUI: open the live session switcher for currently open TUI sessions. Use /sessions new in the TUI to start another live session immediately.",
+      "usage": "/sessions",
+      "examples": [{ "title": "Example 1", "command": "/sessions new" }],
+      "category": "slash",
+      "tags": ["slash command", "session", "sessions", "switch"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "aliases": ["/switch"],
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-skills",
+      "name": "/skills",
+      "description": "Search, install, inspect, or manage skills from online registries. Also the review surface for the skill write-approval gate: /skills pending, /skills diff <id>, /skills approve <id>, /skills reject <id>, /skills approval on|off. See Gating agent skill writes.",
+      "usage": "/skills",
+      "examples": [{ "title": "Example 1", "command": "/skills pending" }],
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "skills"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-skin",
+      "name": "/skin",
+      "description": "Show or change the display skin/theme",
+      "usage": "/skin",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "skin"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-snapshot",
+      "name": "/snapshot [create|restore <id>|prune] (alias: /snap)",
+      "description": "Create or restore state snapshots of Hermes config/state. create [label] saves a snapshot, restore <id> reverts to it, prune [N] removes old snapshots, or list all with no args.",
+      "usage": "/snapshot [create|restore <id>|prune]",
+      "category": "slash",
+      "tags": ["slash command", "session", "snapshot [create|restore <id>|prune]", "snap"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "aliases": ["/snap"],
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-status",
+      "name": "/status",
+      "description": "Show session info — model, provider, profile, session ID, working directory, title, created/updated timestamps, token totals, agent-running state — followed by a local Session recap block (recent user/assistant turn counts, tool result count, top tools used, last few files touched, the latest user prompt, and the latest assistant reply). The recap is computed locally from the in-memory conversation; no LLM call, no prompt-cache impact.",
+      "usage": "/status",
+      "category": "slash",
+      "tags": ["slash command", "session", "status"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-statusbar",
+      "name": "/statusbar (alias: /sb)",
+      "description": "Toggle the context/model status bar on or off",
+      "usage": "/statusbar",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "statusbar", "sb"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "aliases": ["/sb"],
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-steer",
+      "name": "/steer <prompt>",
+      "description": "Inject a mid-run note that arrives at the agent after the next tool call — no interrupt, no new user turn. The text is appended to the last tool result's content once the current tool completes, giving the agent new context without breaking the current tool-calling loop. Use this to nudge direction mid-task (e.g. \"focus on the auth module\" while the agent is running tests).",
+      "usage": "/steer <prompt>",
+      "category": "slash",
+      "tags": ["slash command", "session", "steer <prompt>"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-stop",
+      "name": "/stop",
+      "description": "Kill all running background processes",
+      "usage": "/stop",
+      "category": "slash",
+      "tags": ["slash command", "session", "stop"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-subgoal",
+      "name": "/subgoal <text>",
+      "description": "Append a user-supplied criterion to the active goal mid-loop. The continuation prompt surfaces all subgoals to the agent verbatim, and the judge factors them into its DONE/CONTINUE verdict — so the goal isn't marked done until the original goal and every subgoal are met. Subcommands: /subgoal (list), /subgoal remove <N>, /subgoal clear. Requires an active /goal.",
+      "usage": "/subgoal <text>",
+      "examples": [
+        { "title": "Example 1", "command": "/subgoal" },
+        { "title": "Example 2", "command": "/subgoal clear" }
+      ],
+      "category": "slash",
+      "tags": ["slash command", "session", "subgoal <text>"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-subscription",
+      "name": "/subscription (alias: /upgrade)",
+      "description": "CLI only. View your Nous plan and change it in the browser.",
+      "usage": "/subscription",
+      "category": "slash",
+      "tags": ["slash command", "info", "subscription", "upgrade"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "aliases": ["/upgrade"],
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-suggestions",
+      "name": "/suggestions [accept|dismiss N|catalog|clear] (alias: /suggest)",
+      "description": "Review suggested automations. Use /suggestions to list pending suggestions, /suggestions accept <id> to create the proposed automation, /suggestions dismiss <id> to reject one, /suggestions catalog to add curated starter automations, and /suggestions clear to clear resolved suggestion records. Accepted jobs preserve the current surface as the delivery origin.",
+      "usage": "/suggestions [accept|dismiss N|catalog|clear]",
+      "examples": [
+        { "title": "Example 1", "command": "/suggestions" },
+        { "title": "Example 2", "command": "/suggestions catalog" },
+        { "title": "Example 3", "command": "/suggestions clear" }
+      ],
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "suggestions [accept|dismiss N|catalog|clear]", "suggest"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "aliases": ["/suggest"],
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-timestamps",
+      "name": "/timestamps [on|off|status]",
+      "description": "CLI-only: toggle [HH:MM] timestamps on messages and in /history.",
+      "usage": "/timestamps [on|off|status]",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "timestamps [on|off|status]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-title",
+      "name": "/title",
+      "description": "Set a title for the current session (usage: /title My Session Name)",
+      "usage": "/title",
+      "category": "slash",
+      "tags": ["slash command", "session", "title"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-tools",
+      "name": "/tools [list|disable|enable] [name...]",
+      "description": "Manage tools: list available tools, or disable/enable specific tools for the current session. Disabling a tool removes it from the agent's toolset and triggers a session reset.",
+      "usage": "/tools [list|disable|enable] [name...]",
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "tools [list|disable|enable] [name...]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-toolsets",
+      "name": "/toolsets",
+      "description": "List available toolsets",
+      "usage": "/toolsets",
+      "category": "slash",
+      "tags": ["slash command", "tools & skills", "toolsets"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#tools--skills",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-topup",
+      "name": "/topup",
+      "description": "Show your Nous balance and manage billing on the portal (replaces the old /credits and /billing commands).",
+      "usage": "/topup",
+      "category": "slash",
+      "tags": ["slash command", "info", "topup"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-undo",
+      "name": "/undo",
+      "description": "Remove the last user/assistant exchange",
+      "usage": "/undo",
+      "category": "slash",
+      "tags": ["slash command", "session", "undo"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#session",
+      "platforms": ["Interactive CLI", "Messaging"],
+      "statuses": ["CAUTION"]
+    },
+    {
+      "id": "command-update",
+      "name": "/update",
+      "description": "Update Hermes Agent to the latest version.",
+      "usage": "/update",
+      "category": "slash",
+      "tags": ["slash command", "info", "update"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-usage",
+      "name": "/usage",
+      "description": "Show token usage, cost breakdown, session duration, and — when available from the active provider — an Account limits section with remaining quota / credits / plan usage pulled live from the provider's API.",
+      "usage": "/usage",
+      "category": "slash",
+      "tags": ["slash command", "info", "usage"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-verbose",
+      "name": "/verbose",
+      "description": "Cycle tool progress display: off → new → all → verbose. Can be enabled for messaging via config.",
+      "usage": "/verbose",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "verbose"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-version",
+      "name": "/version",
+      "description": "Show Hermes Agent version, build, and environment info.",
+      "usage": "/version",
+      "category": "slash",
+      "tags": ["slash command", "info", "version"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-voice",
+      "name": "/voice [on|off|tts|status]",
+      "description": "Toggle CLI voice mode and spoken playback. Recording uses voice.record_key (default: Ctrl+B).",
+      "usage": "/voice [on|off|tts|status]",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "voice [on|off|tts|status]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-wake",
+      "name": "/wake [on|off|status]",
+      "description": "CLI-only: toggle the \"Hey Hermes\" wake word listener.",
+      "usage": "/wake [on|off|status]",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "wake [on|off|status]"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-whoami",
+      "name": "/whoami",
+      "description": "Show your slash command access level (admin / user).",
+      "usage": "/whoami",
+      "category": "slash",
+      "tags": ["slash command", "info", "whoami"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#info",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-yolo",
+      "name": "/yolo",
+      "description": "Toggle YOLO mode — skip all dangerous command approval prompts.",
+      "usage": "/yolo",
+      "category": "slash",
+      "tags": ["slash command", "configuration", "yolo"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands#configuration",
+      "platforms": ["Interactive CLI", "Messaging"]
+    },
+    {
+      "id": "command-browser-connect",
+      "name": "/browser connect",
+      "description": "Attach browser tools to a Chromium-family browser over CDP.",
+      "usage": "/browser connect",
+      "category": "tools",
+      "tags": ["tools", "toolsets", "browser"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/tools",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-browser-disconnect",
+      "name": "/browser disconnect",
+      "description": "Detach the current local browser connection.",
+      "usage": "/browser disconnect",
+      "category": "tools",
+      "tags": ["tools", "toolsets", "browser"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/tools",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-tools-disable-name",
+      "name": "/tools disable <name>",
+      "description": "Disable one or more tools for the current session.",
+      "usage": "/tools disable <name>",
+      "category": "tools",
+      "tags": ["tools", "toolsets", "terminal"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/tools",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-tools-enable-name",
+      "name": "/tools enable <name>",
+      "description": "Enable one or more tools for the current session.",
+      "usage": "/tools enable <name>",
+      "category": "tools",
+      "tags": ["tools", "toolsets", "terminal"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/tools",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-tools-list",
+      "name": "/tools list",
+      "description": "List tools available in the current session.",
+      "usage": "/tools list",
+      "category": "tools",
+      "tags": ["tools", "toolsets", "terminal"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/tools",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-hermes-computer-use",
+      "name": "hermes computer-use",
+      "description": "Install or check the Computer Use (cua-driver) backend (macOS/Windows/Linux).",
+      "usage": "hermes computer-use",
+      "category": "tools",
+      "tags": ["cli", "terminal", "computer-use"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-computer-use-install",
+      "name": "hermes computer-use install",
+      "description": "Install the cua-driver backend for Computer Use.",
+      "usage": "hermes computer-use install",
+      "category": "tools",
+      "tags": ["tools", "toolsets", "terminal"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/tools",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-computer-use-status",
+      "name": "hermes computer-use status",
+      "description": "Check whether cua-driver is installed and show its version.",
+      "usage": "hermes computer-use status",
+      "category": "tools",
+      "tags": ["tools", "toolsets", "terminal"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/tools",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-lsp",
+      "name": "hermes lsp",
+      "description": "Manage Language Server Protocol integration (semantic diagnostics for write_file/patch).",
+      "usage": "hermes lsp",
+      "category": "tools",
+      "tags": ["cli", "terminal", "lsp"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-setup-tools",
+      "name": "hermes setup tools",
+      "description": "Open the tool selection step of the setup wizard.",
+      "usage": "hermes setup tools",
+      "category": "tools",
+      "tags": ["tools", "toolsets", "terminal"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/tools",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-tools",
+      "name": "hermes tools",
+      "description": "Configure enabled tools per platform.",
+      "usage": "hermes tools",
+      "category": "tools",
+      "tags": ["cli", "terminal", "tools"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-tools-summary",
+      "name": "hermes tools --summary",
+      "description": "Print the currently enabled toolsets and exit.",
+      "usage": "hermes tools --summary",
+      "category": "tools",
+      "tags": ["tools", "toolsets", "terminal"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/user-guide/features/tools",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-redraw",
+      "name": "/redraw",
+      "description": "Force a full terminal repaint after resize or rendering drift.",
+      "usage": "/redraw",
+      "category": "troubleshooting",
+      "tags": ["troubleshooting", "diagnostics", "support"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-reload",
+      "name": "/reload",
+      "description": "Reload .env values into the active session after adding or changing API keys.",
+      "usage": "/reload",
+      "category": "troubleshooting",
+      "tags": ["troubleshooting", "diagnostics", "support"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands",
+      "platforms": ["Interactive CLI"]
+    },
+    {
+      "id": "command-hermes-chat-safe-mode",
+      "name": "hermes chat --safe-mode",
+      "description": "Disable user config, rules, memory, plugins, hooks, and MCP servers to isolate customization issues.",
+      "usage": "hermes chat --safe-mode",
+      "category": "troubleshooting",
+      "tags": ["troubleshooting", "diagnostics", "support"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/faq",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-debug",
+      "name": "hermes debug",
+      "description": "Upload a debug report with system information and logs for support.",
+      "usage": "hermes debug",
+      "category": "troubleshooting",
+      "tags": ["troubleshooting", "diagnostics", "support"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/faq",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-doctor",
+      "name": "hermes doctor",
+      "description": "Diagnose configuration, provider, dependency, and runtime issues.",
+      "usage": "hermes doctor",
+      "category": "troubleshooting",
+      "tags": ["troubleshooting", "diagnostics", "support"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/faq",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-dump",
+      "name": "hermes dump",
+      "description": "Produce a copy-pasteable setup summary for support without exposing secrets.",
+      "usage": "hermes dump",
+      "category": "troubleshooting",
+      "tags": ["troubleshooting", "diagnostics", "support"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/faq",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-logs-tail",
+      "name": "hermes logs --tail",
+      "description": "Follow Hermes log output while reproducing a problem.",
+      "usage": "hermes logs --tail",
+      "category": "troubleshooting",
+      "tags": ["troubleshooting", "diagnostics", "support"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/faq",
+      "platforms": ["Terminal"]
+    },
+    {
+      "id": "command-hermes-prompt-size",
+      "name": "hermes prompt-size",
+      "description": "Break down system-prompt and tool-schema size to diagnose context pressure.",
+      "usage": "hermes prompt-size",
+      "category": "troubleshooting",
+      "tags": ["troubleshooting", "diagnostics", "support"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/faq",
+      "platforms": ["Terminal"]
+    }
+  ]
+}
