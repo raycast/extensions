@@ -1,0 +1,7 @@
+# Exclude dev-only files from git archive exports
+.gitattributes export-ignore
+.gitignore export-ignore
+.prettierrc export-ignore
+CLAUDE.md export-ignore
+.claude/** export-ignore
+eslint.config.js export-ignore
