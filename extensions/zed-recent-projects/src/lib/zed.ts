@@ -137,6 +137,43 @@ end tell
 }
 
 /**
+ * Bring an already-open Zed window to the front instead of opening a new one.
+ * Recent Zed versions open a new window for every CLI invocation, even when
+ * the workspace is already open, so focusing has to go through System Events.
+ *
+ * @param windowTitle - Title of the entry whose window should be focused
+ * @param bundleId - Bundle ID of the Zed build to target
+ * @returns true if a matching window was found and raised
+ */
+export async function focusZedWindow(windowTitle: string, bundleId: ZedBundleId): Promise<boolean> {
+  const processName = ZedProcessNameMapping[bundleId];
+  const escapedTitle = windowTitle.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+
+  const script = `
+tell application "System Events"
+  tell process "${processName}"
+    set frontmost to true
+    repeat with w in (every window)
+      if name of w contains "${escapedTitle}" then
+        perform action "AXRaise" of w
+        return "true"
+      end if
+    end repeat
+    return "false"
+  end tell
+end tell
+`;
+
+  try {
+    const result = await runAppleScript(script);
+    return result === "true";
+  } catch (error) {
+    console.error("Failed to focus Zed window:", error);
+    return false;
+  }
+}
+
+/**
  * Open a workspace with multiple paths using the Zed CLI.
  * This is required for multi-folder workspaces since the URI scheme only supports a single path.
  *

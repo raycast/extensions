@@ -1,5 +1,9 @@
 # Zed Recent Projects Changelog
 
+## [Focus Existing Window for Open Projects] - {PR_MERGE_DATE}
+
+- Add an opt-in "Focus Already-Open Projects" preference (macOS only, off by default): when enabled, selecting an already-open project raises its existing Zed window instead of invoking the CLI, which creates a new window on recent Zed versions.
+
 ## [Fix Project Launch in Raycast 2] - 2026-08-15
 
 - Open projects before closing Raycast so CLI launches complete reliably.
