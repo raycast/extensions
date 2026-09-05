@@ -1,0 +1,304 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "resize",
+  "title": "Resize",
+  "description": "Viewport-accurate Chrome window presets for responsive dev. DevTools-parity device sizes, live chrome measurement, honest about what a window resize can't simulate.",
+  "icon": "icon.png",
+  "author": "ali_reza_mohammad_poor",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "resize-to-preset",
+      "title": "Resize to Preset",
+      "description": "Resize the front Chrome window so its viewport matches a device preset",
+      "mode": "view"
+    },
+    {
+      "name": "apply-preset",
+      "title": "Apply Preset",
+      "description": "Apply a preset directly by id or name (for Quicklink hotkeys)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "preset",
+          "placeholder": "Preset id or name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "cycle-breakpoints",
+      "title": "Cycle Breakpoints",
+      "description": "Step through your pinned breakpoint sequence — bind to a hotkey and hit repeatedly",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-custom-preset",
+      "title": "Add Custom Preset",
+      "description": "Save a custom viewport preset to ~/.config/resize/presets.json",
+      "mode": "view"
+    },
+    {
+      "name": "measure-viewport",
+      "title": "Measure Viewport",
+      "description": "Show the current Chrome viewport, window bounds, chrome delta, and zoom state",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cycle1",
+      "title": "Cycle Slot 1",
+      "description": "First preset in the Cycle Breakpoints rotation. Ignored if ~/.config/resize/presets.json defines a cycle array.",
+      "type": "dropdown",
+      "required": false,
+      "default": "mbp14",
+      "data": [
+        {
+          "title": "MacBook Pro 16\" (1728×1117)",
+          "value": "mbp16"
+        },
+        {
+          "title": "MacBook Pro 14\" (1512×982)",
+          "value": "mbp14"
+        },
+        {
+          "title": "MacBook Air 15\" (1440×932)",
+          "value": "air15"
+        },
+        {
+          "title": "MacBook Air 13.6\" (1280×832)",
+          "value": "air13"
+        },
+        {
+          "title": "iPad Pro 13\" landscape (1376×1032)",
+          "value": "ipad-pro13-landscape"
+        },
+        {
+          "title": "iPad Pro 13\" portrait (1032×1376)",
+          "value": "ipad-pro13-portrait"
+        },
+        {
+          "title": "iPad Air 11\" landscape (1180×820)",
+          "value": "ipad-air11-landscape"
+        },
+        {
+          "title": "iPad Air 11\" portrait (820×1180)",
+          "value": "ipad-air11-portrait"
+        },
+        {
+          "title": "iPad mini landscape (1133×744)",
+          "value": "ipad-mini-landscape"
+        },
+        {
+          "title": "iPad Split ½ (678×1032)",
+          "value": "ipad-split-half"
+        },
+        {
+          "title": "iPad Split ⅓ (320×820)",
+          "value": "ipad-split-third"
+        },
+        {
+          "title": "iPhone Pro Max (440×956)",
+          "value": "iphone-pro-max"
+        },
+        {
+          "title": "iPhone standard (393×852)",
+          "value": "iphone-standard"
+        },
+        {
+          "title": "iPhone SE (375×667)",
+          "value": "iphone-se"
+        },
+        {
+          "title": "— skip —",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "cycle2",
+      "title": "Cycle Slot 2",
+      "description": "Second preset in the Cycle Breakpoints rotation.",
+      "type": "dropdown",
+      "required": false,
+      "default": "ipad-air11-portrait",
+      "data": [
+        {
+          "title": "MacBook Pro 16\" (1728×1117)",
+          "value": "mbp16"
+        },
+        {
+          "title": "MacBook Pro 14\" (1512×982)",
+          "value": "mbp14"
+        },
+        {
+          "title": "MacBook Air 15\" (1440×932)",
+          "value": "air15"
+        },
+        {
+          "title": "MacBook Air 13.6\" (1280×832)",
+          "value": "air13"
+        },
+        {
+          "title": "iPad Pro 13\" landscape (1376×1032)",
+          "value": "ipad-pro13-landscape"
+        },
+        {
+          "title": "iPad Pro 13\" portrait (1032×1376)",
+          "value": "ipad-pro13-portrait"
+        },
+        {
+          "title": "iPad Air 11\" landscape (1180×820)",
+          "value": "ipad-air11-landscape"
+        },
+        {
+          "title": "iPad Air 11\" portrait (820×1180)",
+          "value": "ipad-air11-portrait"
+        },
+        {
+          "title": "iPad mini landscape (1133×744)",
+          "value": "ipad-mini-landscape"
+        },
+        {
+          "title": "iPad Split ½ (678×1032)",
+          "value": "ipad-split-half"
+        },
+        {
+          "title": "iPad Split ⅓ (320×820)",
+          "value": "ipad-split-third"
+        },
+        {
+          "title": "iPhone Pro Max (440×956)",
+          "value": "iphone-pro-max"
+        },
+        {
+          "title": "iPhone standard (393×852)",
+          "value": "iphone-standard"
+        },
+        {
+          "title": "iPhone SE (375×667)",
+          "value": "iphone-se"
+        },
+        {
+          "title": "— skip —",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "cycle3",
+      "title": "Cycle Slot 3",
+      "description": "Third preset in the Cycle Breakpoints rotation.",
+      "type": "dropdown",
+      "required": false,
+      "default": "iphone-standard",
+      "data": [
+        {
+          "title": "MacBook Pro 16\" (1728×1117)",
+          "value": "mbp16"
+        },
+        {
+          "title": "MacBook Pro 14\" (1512×982)",
+          "value": "mbp14"
+        },
+        {
+          "title": "MacBook Air 15\" (1440×932)",
+          "value": "air15"
+        },
+        {
+          "title": "MacBook Air 13.6\" (1280×832)",
+          "value": "air13"
+        },
+        {
+          "title": "iPad Pro 13\" landscape (1376×1032)",
+          "value": "ipad-pro13-landscape"
+        },
+        {
+          "title": "iPad Pro 13\" portrait (1032×1376)",
+          "value": "ipad-pro13-portrait"
+        },
+        {
+          "title": "iPad Air 11\" landscape (1180×820)",
+          "value": "ipad-air11-landscape"
+        },
+        {
+          "title": "iPad Air 11\" portrait (820×1180)",
+          "value": "ipad-air11-portrait"
+        },
+        {
+          "title": "iPad mini landscape (1133×744)",
+          "value": "ipad-mini-landscape"
+        },
+        {
+          "title": "iPad Split ½ (678×1032)",
+          "value": "ipad-split-half"
+        },
+        {
+          "title": "iPad Split ⅓ (320×820)",
+          "value": "ipad-split-third"
+        },
+        {
+          "title": "iPhone Pro Max (440×956)",
+          "value": "iphone-pro-max"
+        },
+        {
+          "title": "iPhone standard (393×852)",
+          "value": "iphone-standard"
+        },
+        {
+          "title": "iPhone SE (375×667)",
+          "value": "iphone-se"
+        },
+        {
+          "title": "— skip —",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "phoneMode",
+      "title": "Phone Presets",
+      "description": "What iPhone-class presets do when applied",
+      "type": "dropdown",
+      "required": false,
+      "default": "resize",
+      "data": [
+        {
+          "title": "Resize browser window (geometry only — no touch/DPR 3)",
+          "value": "resize"
+        },
+        {
+          "title": "Always open DevTools device mode",
+          "value": "devtools"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
