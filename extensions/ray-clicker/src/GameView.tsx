@@ -1,16 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  confirmAlert,
-  Alert,
-  launchCommand,
-  LaunchType,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, confirmAlert, Alert, Keyboard } from "@raycast/api";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { formatNumber } from "./utils";
 import { UPGRADES, type GameState, UPGRADE_CATEGORIES, calculateUpgradeCost, calculateUpgradeEffect } from "./types";
@@ -24,7 +12,7 @@ type GameViewProps = {
   onUpgrade: (id: string) => void;
   onUpgradeMax: (id: string) => void;
   onEarn: () => void;
-  onReset: () => void;
+  onReset: () => Promise<GameState>;
   onPrestige: () => void;
   onShowStats: () => void;
   onShowPrestigeUpgrades: () => void;
@@ -165,32 +153,34 @@ export function GameView({
               source: isClicking ? Icon.StarCircle : Icon.Star,
               tintColor: isClicking ? Color.Yellow : undefined,
             }}
-            accessories={[{ text: "⌘C", icon: Icon.Keyboard, tooltip: "Click to Earn" }]}
+            accessories={[
+              { text: process.platform === "win32" ? "Ctrl+C" : "⌘C", icon: Icon.Keyboard, tooltip: "Click to Earn" },
+            ]}
             actions={
               <ActionPanel>
                 <Action
                   title="Click to Earn"
                   icon={Icon.Coins}
                   onAction={handleClick}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
                 />
-                <ActionPanel.Submenu title="Switch Category (⌘P)" icon={Icon.List}>
+                <ActionPanel.Submenu title="Switch Category" icon={Icon.List}>
                   <Action
                     title="Active"
                     icon={Icon.Star}
-                    shortcut={{ modifiers: ["cmd"], key: "1" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "1" }, Windows: { modifiers: ["ctrl"], key: "1" } }}
                     onAction={() => setActiveCategory("active")}
                   />
                   <Action
                     title="Idle"
                     icon={Icon.Clock}
-                    shortcut={{ modifiers: ["cmd"], key: "2" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "2" }, Windows: { modifiers: ["ctrl"], key: "2" } }}
                     onAction={() => setActiveCategory("idle")}
                   />
                   <Action
                     title="Efficiency"
                     icon={Icon.Gauge}
-                    shortcut={{ modifiers: ["cmd"], key: "3" }}
+                    shortcut={{ macOS: { modifiers: ["cmd"], key: "3" }, Windows: { modifiers: ["ctrl"], key: "3" } }}
                     onAction={() => setActiveCategory("efficiency")}
                   />
                 </ActionPanel.Submenu>
@@ -198,34 +188,19 @@ export function GameView({
                   title="Prestige Upgrades"
                   onAction={onShowPrestigeUpgrades}
                   icon={Icon.Stars}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                 />
                 <Action
                   title="Show Stats"
                   onAction={onShowStats}
                   icon={Icon.BarChart}
-                  shortcut={{ modifiers: ["cmd"], key: "s" }}
+                  shortcut={Keyboard.Shortcut.Common.Save}
                 />
                 <Action
                   title="Toggle Lucky Toasts"
                   onAction={onToggleLuckyToasts}
                   icon={Icon.Bell}
-                  shortcut={{ modifiers: ["cmd"], key: "t" }}
-                />
-                <Action
-                  title="Enable Background (Menu Bar)"
-                  icon={Icon.AppWindow}
-                  onAction={async () => {
-                    try {
-                      await launchCommand({ name: "menu-bar", type: LaunchType.UserInitiated });
-                    } catch (e) {
-                      await showToast({
-                        style: Toast.Style.Failure,
-                        title: "Failed to open Menu Bar",
-                        message: e instanceof Error ? e.message : String(e),
-                      });
-                    }
-                  }}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
                 />
                 {/* Category actions moved below Click to Earn; removed Cycle Category (reserved shortcut) */}
               </ActionPanel>
@@ -261,7 +236,7 @@ export function GameView({
                         primaryAction: { title: "Reset", style: Alert.ActionStyle.Destructive },
                       })
                     ) {
-                      onReset();
+                      await onReset();
                     }
                   }}
                   style={Action.Style.Destructive}
@@ -353,7 +328,11 @@ export function GameView({
                       } as const;
                     })(),
                     // Keyboard hint for Buy
-                    ...(!isMaxed ? ([{ text: "⌘B", icon: Icon.Keyboard, tooltip: "Buy" }] as const) : ([] as const)),
+                    ...(!isMaxed
+                      ? ([
+                          { text: process.platform === "win32" ? "Ctrl+B" : "⌘B", icon: Icon.Keyboard, tooltip: "Buy" },
+                        ] as const)
+                      : ([] as const)),
                     // Optional Buy Max preview
                     ...(hasBuyMax && estBuy > 0
                       ? ([{ text: `Buy Max → ${estBuy}`, icon: Icon.ArrowDownCircle }] as const)
@@ -366,7 +345,10 @@ export function GameView({
                           title={`Buy ${upgrade.name}`}
                           icon={Icon.Plus}
                           onAction={() => onUpgrade(upgrade.id)}
-                          shortcut={{ modifiers: ["cmd"], key: "b" }}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd"], key: "b" },
+                            Windows: { modifiers: ["ctrl"], key: "b" },
+                          }}
                         />
                       )}
                       {/* Buy 10 removed per request */}
@@ -375,26 +357,38 @@ export function GameView({
                           title={`Buy Max${estBuy > 0 ? ` (${estBuy})` : ""}`}
                           icon={Icon.ArrowDownCircle}
                           onAction={() => onUpgradeMax(upgrade.id)}
-                          shortcut={{ modifiers: ["cmd"], key: "m" }}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd"], key: "m" },
+                            Windows: { modifiers: ["ctrl"], key: "m" },
+                          }}
                         />
                       )}
-                      <ActionPanel.Submenu title="Switch Category (⌘P)" icon={Icon.List}>
+                      <ActionPanel.Submenu title="Switch Category" icon={Icon.List}>
                         <Action
                           title="Active"
                           icon={Icon.Star}
-                          shortcut={{ modifiers: ["cmd"], key: "1" }}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd"], key: "1" },
+                            Windows: { modifiers: ["ctrl"], key: "1" },
+                          }}
                           onAction={() => setActiveCategory("active")}
                         />
                         <Action
                           title="Idle"
                           icon={Icon.Clock}
-                          shortcut={{ modifiers: ["cmd"], key: "2" }}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd"], key: "2" },
+                            Windows: { modifiers: ["ctrl"], key: "2" },
+                          }}
                           onAction={() => setActiveCategory("idle")}
                         />
                         <Action
                           title="Efficiency"
                           icon={Icon.Gauge}
-                          shortcut={{ modifiers: ["cmd"], key: "3" }}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd"], key: "3" },
+                            Windows: { modifiers: ["ctrl"], key: "3" },
+                          }}
                           onAction={() => setActiveCategory("efficiency")}
                         />
                       </ActionPanel.Submenu>
@@ -402,7 +396,17 @@ export function GameView({
                       <Action title="Prestige Upgrades" onAction={onShowPrestigeUpgrades} icon={Icon.Stars} />
                       <Action
                         title="Reset Game"
-                        onAction={onReset}
+                        onAction={async () => {
+                          if (
+                            await confirmAlert({
+                              title: "Reset Game",
+                              message: "Are you sure you want to reset your game? This cannot be undone.",
+                              primaryAction: { title: "Reset", style: Alert.ActionStyle.Destructive },
+                            })
+                          ) {
+                            await onReset();
+                          }
+                        }}
                         style={Action.Style.Destructive}
                         icon={Icon.Trash}
                       />
