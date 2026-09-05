@@ -7,7 +7,8 @@
   "author": "gregoralbrecht",
   "contributors": [
     "emilsharier",
-    "michaelhaar"
+    "michaelhaar",
+    "oh.cactus"
   ],
   "license": "MIT",
   "commands": [
@@ -19,8 +20,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.0",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.42.0"
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",
