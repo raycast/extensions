@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claudescope",
+  "title": "ClaudeScope",
+  "description": "Search and open local AI coding-agent transcript history",
+  "icon": "extension-icon.png",
+  "author": "vladar107",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "preferences": [
+    {
+      "name": "executablePath",
+      "title": "ClaudeScope Executable",
+      "description": "Optional absolute path to the claudescope executable. Leave empty to discover it from your login shell.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/claudescope"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-claudescope",
+      "title": "Search ClaudeScope",
+      "description": "Search transcript history across supported coding agents",
+      "mode": "view"
+    },
+    {
+      "name": "recent-sessions",
+      "title": "Recent Sessions",
+      "description": "Browse and filter recently indexed coding-agent sessions",
+      "mode": "view"
+    },
+    {
+      "name": "open-claudescope",
+      "title": "Open ClaudeScope",
+      "description": "Open the local ClaudeScope web app",
+      "mode": "no-view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  }
+}
