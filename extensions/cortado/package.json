@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cortado",
+  "title": "Cortado",
+  "description": "Keep your PC from sleeping, indefinitely or on a timer, using PowerToys Awake",
+  "icon": "extension-icon.png",
+  "author": "kusogejp",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-awake",
+      "title": "Toggle Awake",
+      "subtitle": "Cortado",
+      "description": "Turn keep-awake on or off. Turning on uses your Toggle Behavior preference.",
+      "mode": "no-view"
+    },
+    {
+      "name": "keep-awake-for",
+      "title": "Keep Awake for…",
+      "subtitle": "Cortado",
+      "description": "Keeps the PC awake for a chosen duration via PowerToys Awake",
+      "mode": "view"
+    },
+    {
+      "name": "awake-status",
+      "title": "Awake Status",
+      "description": "Shows the current keep-awake state in this command's subtitle. Open once after installing to enable automatic updates.",
+      "mode": "no-view",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultDuration",
+      "title": "Default Duration",
+      "description": "Prefills \"Keep Awake for…\" and is used by \"Toggle Awake\" when Toggle Behavior is set to \"For the Default Duration\".",
+      "type": "dropdown",
+      "default": "60",
+      "required": false,
+      "data": [
+        { "title": "15 minutes", "value": "15" },
+        { "title": "30 minutes", "value": "30" },
+        { "title": "1 hour", "value": "60" },
+        { "title": "2 hours", "value": "120" },
+        { "title": "4 hours", "value": "240" },
+        { "title": "8 hours", "value": "480" }
+      ]
+    },
+    {
+      "name": "keepDisplayOn",
+      "title": "Display",
+      "description": "Prevents the display from turning off while keep-awake is active.",
+      "type": "checkbox",
+      "label": "Keep display on",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "toggleBehavior",
+      "title": "Toggle Behavior",
+      "description": "When Toggle Awake turns keep-awake on: stay awake indefinitely, or for your Default Duration.",
+      "type": "dropdown",
+      "default": "indefinite",
+      "required": false,
+      "data": [
+        { "title": "Indefinitely", "value": "indefinite" },
+        { "title": "For the Default Duration", "value": "timed" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
