@@ -1,0 +1,218 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "capso",
+  "title": "Capso",
+  "description": "Trigger Capso captures, OCR, recordings, and history directly from Raycast.",
+  "icon": "capso.png",
+  "author": "rcouto",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "all-in-one",
+      "title": "All-In-One",
+      "subtitle": "Capso",
+      "description": "Trigger Capso all-in-one capture overlay",
+      "icon": "all-in-one.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "capture",
+        "all",
+        "overlay"
+      ]
+    },
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "Capso",
+      "description": "Select and capture screen area",
+      "icon": "capture-area.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "capture",
+        "area",
+        "screenshot",
+        "crop"
+      ]
+    },
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Fullscreen",
+      "subtitle": "Capso",
+      "description": "Capture the entire screen",
+      "icon": "capture-fullscreen.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "capture",
+        "fullscreen",
+        "screen"
+      ]
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "Capso",
+      "description": "Capture a specific application window",
+      "icon": "capture-window.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "capture",
+        "window",
+        "app"
+      ]
+    },
+    {
+      "name": "capture-previous-area",
+      "title": "Capture Previous Area",
+      "subtitle": "Capso",
+      "description": "Capture the previously selected screen area",
+      "icon": "capture-previous-area.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "capture",
+        "previous",
+        "last",
+        "area",
+        "replay"
+      ]
+    },
+    {
+      "name": "capture-ocr",
+      "title": "Capture Text (OCR)",
+      "subtitle": "Capso",
+      "description": "Extract text directly from screen",
+      "icon": "capture-text.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "ocr",
+        "text",
+        "extract"
+      ]
+    },
+    {
+      "name": "capture-recording",
+      "title": "Start / Stop Recording",
+      "subtitle": "Capso",
+      "description": "Toggle screen video recording",
+      "icon": "record-screen.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "record",
+        "video",
+        "screen"
+      ]
+    },
+    {
+      "name": "capture-scrolling",
+      "title": "Scrolling Capture",
+      "subtitle": "Capso",
+      "description": "Capture scrolling webpage or document",
+      "icon": "scrolling-capture.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "scroll",
+        "scrolling",
+        "long"
+      ]
+    },
+    {
+      "name": "capture-clipboard",
+      "title": "Capture Area to Clipboard",
+      "subtitle": "Capso",
+      "description": "Capture area and copy directly to clipboard",
+      "icon": "clipboard.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "copy",
+        "clipboard"
+      ]
+    },
+    {
+      "name": "capture-annotate",
+      "title": "Capture Area & Annotate",
+      "subtitle": "Capso",
+      "description": "Capture area and open in Capso markup editor",
+      "icon": "annotate.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "annotate",
+        "edit",
+        "markup"
+      ]
+    },
+    {
+      "name": "screenshot-history",
+      "title": "Screenshot History",
+      "subtitle": "Capso",
+      "description": "Open Capso capture gallery and history",
+      "icon": "open-history.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "history",
+        "gallery",
+        "recent"
+      ]
+    },
+    {
+      "name": "capture-translate",
+      "title": "Capture & Translate",
+      "subtitle": "Capso",
+      "description": "Capture text and translate",
+      "icon": "capture-translate.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "translate",
+        "ocr",
+        "translation"
+      ]
+    },
+    {
+      "name": "translate-selected-text",
+      "title": "Translate Selected Text",
+      "subtitle": "Capso",
+      "description": "Translate currently selected text",
+      "icon": "capture-translate.png",
+      "mode": "no-view",
+      "keywords": [
+        "capso",
+        "translate",
+        "selection"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.2.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
