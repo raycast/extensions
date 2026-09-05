@@ -1,0 +1,136 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rime-manager",
+  "title": "Rime Manager",
+  "description": "Manage Rime schemas, candidate rules, per-app input modes, deployment, sync, and backups on macOS",
+  "icon": "icon.png",
+  "author": "HenryYu",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-rime",
+      "title": "Manage Rime",
+      "subtitle": "Rime Manager",
+      "description": "Access common Rime management actions and configuration files",
+      "keywords": [
+        "Squirrel",
+        "IME",
+        "input method"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "pin-candidates",
+      "title": "Pin Candidates",
+      "subtitle": "Rime",
+      "description": "Pin existing candidates for a code in any detected Rime schema",
+      "keywords": [
+        "order",
+        "priority",
+        "schema"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "remove-candidates",
+      "title": "Block or Demote Candidates",
+      "subtitle": "Rime",
+      "description": "Hide candidates completely or move intrusive candidates out of the top three",
+      "keywords": [
+        "remove",
+        "lower",
+        "privacy"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "application-modes",
+      "title": "Set Per-App Input Mode",
+      "subtitle": "Rime",
+      "description": "Choose installed apps and set their initial Chinese or Latin input mode",
+      "keywords": [
+        "application",
+        "ascii mode",
+        "language"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "reload-rime",
+      "title": "Deploy Rime",
+      "subtitle": "Rime",
+      "description": "Deploy Rime configuration changes",
+      "keywords": [
+        "reload",
+        "Squirrel"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "sync-rime",
+      "title": "Sync Rime User Data",
+      "subtitle": "Rime",
+      "description": "Sync Rime user dictionaries and configuration files",
+      "keywords": [
+        "Squirrel",
+        "dictionary"
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rimeUserDirectory",
+      "title": "Rime User Data Directory",
+      "description": "Leave empty to detect the Rime user data directory automatically",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "backupDirectory",
+      "title": "Backup Location",
+      "description": "Leave empty to store backups under .raycast-rime-manager/backups in the user data directory",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "reloadAfterChanges",
+      "title": "Deploy After Changes",
+      "description": "Deploy Rime automatically after changing candidate or per-app settings",
+      "type": "checkbox",
+      "label": "Automatically deploy changes",
+      "default": true,
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
