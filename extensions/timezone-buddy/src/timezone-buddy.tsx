@@ -12,6 +12,8 @@ import {
   Toast,
   Image,
   Color,
+  Detail,
+  getPreferenceValues,
 } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
@@ -25,6 +27,11 @@ import { getIconForTz } from "./helpers/getIconForTz";
 import { generateGuid } from "./helpers/guid";
 import { getCurrentTimeHeader } from "./helpers/getCurrentTimeHeader";
 import { getOffsetHrsDisplay } from "./helpers/getOffsetHrsDisplay";
+import { getHourStatus } from "./helpers/getHourStatus";
+import { getZoneAbbreviation } from "./helpers/getZoneAbbreviation";
+import { getCurrentDateForTz } from "./helpers/getCurrentDateForTz";
+import { getBuddyDetailMarkdown } from "./helpers/getBuddyDetailMarkdown";
+import { getCompareMarkdown } from "./helpers/getCompareMarkdown";
 
 const ALL_TIMEZONES = Intl.supportedValuesOf("timeZone");
 
@@ -161,6 +168,61 @@ function EditBuddyForm(props: {
   );
 }
 
+function CompareBuddies(props: { buddies: TimezoneBuddy[]; initialOffset: number }) {
+  const [offset, setOffset] = useState(props.initialOffset);
+
+  return (
+    <Detail
+      navigationTitle={getCurrentTimeHeader(offset)}
+      markdown={getCompareMarkdown(props.buddies, offset)}
+      actions={
+        <ActionPanel>
+          <Action
+            icon={Icon.Plus}
+            title="Add 1 Hour"
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "arrowRight" },
+              Windows: { modifiers: ["ctrl"], key: "arrowRight" },
+            }}
+            onAction={() => setOffset((o) => o + 1)}
+          />
+          <Action
+            icon={Icon.Minus}
+            title="Subtract 1 Hour"
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "arrowLeft" },
+              Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
+            }}
+            onAction={() => setOffset((o) => o - 1)}
+          />
+          {offset !== 0 && (
+            <Action
+              icon={Icon.ArrowCounterClockwise}
+              title="Reset to Now"
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "0" }, Windows: { modifiers: ["ctrl"], key: "0" } }}
+              onAction={() => setOffset(0)}
+            />
+          )}
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function CompareBuddiesAction(props: { buddies: TimezoneBuddy[]; offset: number }) {
+  return (
+    <Action.Push
+      icon={Icon.BarChart}
+      title="Compare All Buddies"
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "c" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+      }}
+      target={<CompareBuddies buddies={props.buddies} initialOffset={props.offset} />}
+    />
+  );
+}
+
 function CreateBuddyAction(props: { onCreate: (buddy: TimezoneBuddy) => void }) {
   return (
     <Action.Push
@@ -200,9 +262,12 @@ function DeleteBuddyAction(props: { onDelete: () => void }) {
 }
 
 export default function Command() {
+  const { push } = useNavigation();
   const [buddies, setBuddies] = useState<TimezoneBuddy[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentHrOffset, setCurrentHrOffset] = useState(0);
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [didAutoCompare, setDidAutoCompare] = useState(false);
   async function updateBuddies(newBuddies: TimezoneBuddy[]) {
     setBuddies(newBuddies);
     await LocalStorage.setItem("buddies", JSON.stringify(newBuddies));
@@ -221,6 +286,20 @@ export default function Command() {
 
     getBuddies();
   }, []);
+
+  // Honour the "open in compare view" preference: once buddies have loaded,
+  // push the compare grid straight away (but only once, so popping back to the
+  // list doesn't bounce the user forward again).
+  useEffect(() => {
+    if (loading || didAutoCompare || buddies.length === 0) {
+      return;
+    }
+    setDidAutoCompare(true);
+    const { openInCompareView } = getPreferenceValues<{ openInCompareView: boolean }>();
+    if (openInCompareView) {
+      push(<CompareBuddies buddies={buddies} initialOffset={currentHrOffset} />);
+    }
+  }, [loading, didAutoCompare, buddies, currentHrOffset, push]);
 
   async function handleCreate(buddy: TimezoneBuddy) {
     const toast = await showToast({
@@ -322,10 +401,12 @@ export default function Command() {
   return (
     <List
       isLoading={loading}
+      isShowingDetail={isShowingDetail}
       searchBarPlaceholder="Search your buddies..."
       actions={
         <ActionPanel>
           <CreateBuddyAction onCreate={handleCreate} />
+          {buddies.length > 0 && <CompareBuddiesAction buddies={buddies} offset={currentHrOffset} />}
         </ActionPanel>
       }
     >
@@ -335,33 +416,93 @@ export default function Command() {
             <List.Item
               key={buddy.id}
               title={buddy.name}
-              subtitle={getOffsetForTz(buddy.tz)}
+              subtitle={isShowingDetail ? undefined : getOffsetForTz(buddy.tz, currentHrOffset)}
               icon={{ source: buddy.avatar, mask: Image.Mask.Circle }}
-              accessories={[
-                {
-                  text: formatZoneName(buddy.tz),
-                },
-                {
-                  tag: {
-                    value: getCurrentTimeForTz(buddy.tz, currentHrOffset),
-                    color: getColorForTz(buddy.tz, currentHrOffset),
-                  },
-                  tooltip: getTooltipForTz(buddy.tz, currentHrOffset),
-                  icon: getIconForTz(buddy.tz, currentHrOffset),
-                },
-
-                // Show the current hour offset if it's not 0
-                ...(currentHrOffset
+              accessories={
+                isShowingDetail
                   ? [
                       {
-                        text: `(${getOffsetHrsDisplay(currentHrOffset)})`,
+                        tag: {
+                          value: getCurrentTimeForTz(buddy.tz, currentHrOffset),
+                          color: getColorForTz(buddy.tz, currentHrOffset),
+                        },
+                        icon: getIconForTz(buddy.tz, currentHrOffset),
                       },
                     ]
-                  : []),
-              ]}
+                  : [
+                      {
+                        text: formatZoneName(buddy.tz),
+                      },
+                      {
+                        tag: {
+                          value: getCurrentTimeForTz(buddy.tz, currentHrOffset),
+                          color: getColorForTz(buddy.tz, currentHrOffset),
+                        },
+                        tooltip: getTooltipForTz(buddy.tz, currentHrOffset),
+                        icon: getIconForTz(buddy.tz, currentHrOffset),
+                      },
+
+                      // Show the current hour offset if it's not 0
+                      ...(currentHrOffset
+                        ? [
+                            {
+                              text: `(${getOffsetHrsDisplay(currentHrOffset)})`,
+                            },
+                          ]
+                        : []),
+                    ]
+              }
+              detail={
+                <List.Item.Detail
+                  markdown={getBuddyDetailMarkdown(buddy, currentHrOffset)}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label
+                        title="Local time"
+                        text={getCurrentTimeForTz(buddy.tz, currentHrOffset)}
+                        icon={getIconForTz(buddy.tz, currentHrOffset)}
+                      />
+                      <List.Item.Detail.Metadata.Label
+                        title="Date"
+                        text={getCurrentDateForTz(buddy.tz, currentHrOffset)}
+                      />
+                      <List.Item.Detail.Metadata.TagList title="Status">
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text={getHourStatus(buddy.tz, currentHrOffset).label}
+                          color={getColorForTz(buddy.tz, currentHrOffset)}
+                        />
+                      </List.Item.Detail.Metadata.TagList>
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label title="Timezone" text={formatZoneName(buddy.tz)} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Zone"
+                        text={getZoneAbbreviation(buddy.tz, currentHrOffset)}
+                      />
+                      <List.Item.Detail.Metadata.Label
+                        title="Offset"
+                        text={getOffsetForTz(buddy.tz, currentHrOffset)}
+                      />
+                      {buddy.twitter_handle ? (
+                        <List.Item.Detail.Metadata.Link
+                          title="Twitter/X"
+                          text={`@${buddy.twitter_handle}`}
+                          target={`https://x.com/${buddy.twitter_handle}`}
+                        />
+                      ) : null}
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
+                    <Action
+                      icon={Icon.AppWindowSidebarLeft}
+                      title={isShowingDetail ? "Hide Details" : "Show Details"}
+                      shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "i" } }}
+                      onAction={() => setIsShowingDetail((s) => !s)}
+                    />
+                    <CompareBuddiesAction buddies={buddies} offset={currentHrOffset} />
                     <CreateBuddyAction onCreate={handleCreate} />
                     <EditBuddyAction index={index} buddy={buddy} onUpdate={handleUpdate} />
                   </ActionPanel.Section>
