@@ -1,4 +1,4 @@
-import os from "os";
+import os from "node:os";
 
 interface NetworkDevice {
   name: string;
@@ -35,7 +35,7 @@ export default async function Command(): Promise<NetworkInfo> {
     };
   } catch (error) {
     throw new Error(
-      `Failed to retrieve network information: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to retrieve network information: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }

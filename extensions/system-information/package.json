@@ -6,16 +6,22 @@
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
   "contributors": [
-    "nagauta"
+    "nagauta",
+    "muhammadrizo"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Developer Tools",
-    "Productivity"
+    "System"
   ],
   "keywords": [
     "system",
     "information",
     "macOS",
+    "Windows",
     "tools",
     "productivity",
     "storage",
@@ -42,7 +48,7 @@
     {
       "name": "check-system-info",
       "title": "Check System Info",
-      "description": "Get basic system information including hostname, chip, memory, macOS version, and serial number"
+      "description": "Get basic system information including hostname, chip/processor, memory, OS version, and serial number"
     },
     {
       "name": "check-network",
@@ -61,31 +67,35 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.96.1",
-    "macos-release": "^3.2.0",
+    "@raycast/api": "^2.1.0",
+    "macos-release": "^3.5.1",
     "macos-version": "^6.0.0",
-    "systeminformation": "^5.20.0"
+    "systeminformation": "^5.33.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "^26.4.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild": true
   },
   "ai": {
     "tools": [
       {
         "name": "check-system-info",
-        "description": "Get basic system information including hostname, chip, memory, macOS version, and serial number",
+        "description": "Get basic system information including hostname, chip/processor, memory, OS version, and serial number",
         "parameters": {}
       },
       {
@@ -122,7 +132,7 @@
     ],
     "evals": [
       {
-        "input": "@system-information What's the storage available on my Mac?",
+        "input": "@system-information What's the storage available on my computer?",
         "expected": [
           {
             "callsTool": "check-storage"
@@ -150,11 +160,11 @@
         "mocks": {
           "check-system-info": {
             "output": {
-              "hostname": "MacBook-Pro",
-              "chip": "Apple M1 Pro",
+              "hostname": "My-Computer",
+              "chip": "AMD Ryzen 7 7730U with Radeon Graphics",
               "memory": "16.00 GB",
-              "macOS": "macOS Sonoma (14.2.1)",
-              "kernel": "23.2.0",
+              "os": "Windows 11 Pro 25H2 (Build 26200.8973)",
+              "kernel": "10.0.26200",
               "serialNumber": "C02XG0FDJGH7"
             }
           }
@@ -172,11 +182,11 @@
             "output": {
               "devices": [
                 {
-                  "name": "en0",
+                  "name": "Ethernet",
                   "ip": "192.168.1.10"
                 },
                 {
-                  "name": "en1",
+                  "name": "Wi-Fi",
                   "ip": "192.168.1.11"
                 }
               ],
@@ -198,19 +208,19 @@
               "processes": [
                 {
                   "pid": 1234,
-                  "name": "Finder",
+                  "name": "explorer",
                   "cpu": 0.5,
                   "mem": 1.2
                 },
                 {
                   "pid": 5678,
-                  "name": "Safari",
+                  "name": "chrome",
                   "cpu": 3.2,
                   "mem": 5.7
                 },
                 {
                   "pid": 9012,
-                  "name": "Terminal",
+                  "name": "terminal",
                   "cpu": 0.1,
                   "mem": 0.8
                 }
