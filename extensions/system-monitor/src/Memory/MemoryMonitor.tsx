@@ -3,44 +3,57 @@ import { usePromise } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
 
 import { Actions } from "../components/Actions";
-import { MetadataLabel, MetadataSection, coloredAccessoryText } from "../components/MetadataLabel";
+import { MetadataLabel } from "../components/MetadataLabel";
+import {
+  pendingText,
+  percentTagAccessory,
+  TOP_PROCESS_ROWS,
+  TopProcessRows,
+  UsageTag,
+} from "../components/CompactMetadata";
 import { ProcessInfo } from "../Interfaces";
+import { colorForMemoryPressure } from "../lib/memory-pressure";
 import { formatMegabytesAsGigabytes } from "../utils";
 import { getTopRamProcess, getMemoryUsage } from "./MemoryUtils";
 
 const { displayModeMemory } = getPreferenceValues<ExtensionPreferences>();
+const memoryPercentMode = displayModeMemory === "free" ? "free" : "usage";
+
+/** Gigabytes to one decimal, without a unit, for paired rows (`3.3 · 4.3 GB`). */
+function gigabytes(megabytes: number): string {
+  return (megabytes / 1024).toFixed(1);
+}
+
+async function loadMemorySnapshot() {
+  const memoryUsage = await getMemoryUsage();
+  const usedPercent = Math.round((memoryUsage.memUsed * 100) / memoryUsage.memTotal);
+
+  return {
+    totalMem: Math.round(memoryUsage.memTotal / 1024),
+    usedMem: Math.round(memoryUsage.memUsed / 1024),
+    freeMem: Math.round((memoryUsage.memTotal - memoryUsage.memUsed) / 1024),
+    displayedPercent: memoryPercentMode === "free" ? 100 - usedPercent : usedPercent,
+    active: gigabytes(memoryUsage.active),
+    inactive: gigabytes(memoryUsage.inactive),
+    wired: gigabytes(memoryUsage.wired),
+    compressed: gigabytes(memoryUsage.compressed),
+    purgeable: formatMegabytesAsGigabytes(memoryUsage.purgeable),
+    swap: `${memoryUsage.swapUsed.toFixed(0)} MB / ${memoryUsage.swapTotal.toFixed(0)} MB`,
+    pressureLevel: memoryUsage.pressureLevel,
+    pressureColor: colorForMemoryPressure(memoryUsage.pressureLevel),
+  };
+}
+
+type MemorySnapshot = Awaited<ReturnType<typeof loadMemorySnapshot>>;
 
 export default function MemoryMonitor({ isActive = false }: { isActive?: boolean }) {
-  const { data, revalidate } = usePromise(
-    async () => {
-      const memoryUsage = await getMemoryUsage();
-      const memTotal = memoryUsage.memTotal;
-      const memUsed = memoryUsage.memUsed;
-      const freeMem = memTotal - memUsed;
-
-      return {
-        totalMem: Math.round(memTotal / 1024).toString(),
-        freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
-        freeMem: Math.round(freeMem / 1024).toString(),
-        wired: formatMegabytesAsGigabytes(memoryUsage.wired),
-        compressed: formatMegabytesAsGigabytes(memoryUsage.compressed),
-        active: formatMegabytesAsGigabytes(memoryUsage.active),
-        inactive: formatMegabytesAsGigabytes(memoryUsage.inactive),
-        purgeable: formatMegabytesAsGigabytes(memoryUsage.purgeable),
-        swapUsed: `${memoryUsage.swapUsed.toFixed(0)} MB`,
-        swapTotal: `${memoryUsage.swapTotal.toFixed(0)} MB`,
-        pressureLevel: memoryUsage.pressureLevel,
-      };
-    },
-    [],
-    { execute: true },
-  );
+  const { data, revalidate } = usePromise(loadMemorySnapshot, [], { execute: true });
 
   const {
     data: topProcess,
     revalidate: revalidateTopProcess,
     isLoading: isLoadingTopProcess,
-  } = usePromise(() => getTopRamProcess(), [], { execute: isActive });
+  } = usePromise(() => getTopRamProcess(TOP_PROCESS_ROWS), [], { execute: isActive });
 
   useInterval(() => {
     if (isActive) {
@@ -59,105 +72,53 @@ export default function MemoryMonitor({ isActive = false }: { isActive?: boolean
       title="Memory"
       icon={Icon.MemoryChip}
       accessories={[
-        {
-          text: !data
-            ? { value: isActive ? "Loading…" : "—", color: undefined }
-            : coloredAccessoryText(
-                displayModeMemory === "free"
-                  ? `${data.freeMemPercentage} % (~ ${data.freeMem} GB)`
-                  : `${100 - +data.freeMemPercentage} % (~ ${+data.totalMem - +data.freeMem} GB)`,
-                displayModeMemory === "free" ? "free" : "usage",
-              ),
-        },
+        data
+          ? percentTagAccessory(data.displayedPercent, memoryPercentMode, data.pressureColor)
+          : { text: pendingText(isActive) },
       ]}
-      detail={
-        <MemoryMonitorDetail
-          freeMem={data?.freeMem || ""}
-          freeMemPercentage={data?.freeMemPercentage || ""}
-          totalMem={data?.totalMem || ""}
-          wired={data?.wired || ""}
-          compressed={data?.compressed || ""}
-          active={data?.active || ""}
-          inactive={data?.inactive || ""}
-          purgeable={data?.purgeable || ""}
-          swapUsed={data?.swapUsed || ""}
-          swapTotal={data?.swapTotal || ""}
-          pressureLevel={data?.pressureLevel || ""}
-          topProcess={topProcess}
-          isLoadingTopProcess={isLoadingTopProcess}
-        />
-      }
+      detail={<MemoryMonitorDetail data={data} topProcess={topProcess} isLoadingTopProcess={isLoadingTopProcess} />}
       actions={<Actions radioButtonNumber={2} processes={topProcess} />}
     />
   );
 }
 
 function MemoryMonitorDetail({
-  freeMemPercentage,
-  freeMem,
-  totalMem,
-  wired,
-  compressed,
-  active,
-  inactive,
-  purgeable,
-  swapUsed,
-  swapTotal,
-  pressureLevel,
+  data,
   topProcess,
   isLoadingTopProcess,
 }: {
-  freeMemPercentage: string;
-  freeMem: string;
-  totalMem: string;
-  wired: string;
-  compressed: string;
-  active: string;
-  inactive: string;
-  purgeable: string;
-  swapUsed: string;
-  swapTotal: string;
-  pressureLevel: string;
+  data?: MemorySnapshot;
   topProcess?: ProcessInfo[];
   isLoadingTopProcess: boolean;
 }) {
   return (
     <List.Item.Detail
-      isLoading={!totalMem || (isLoadingTopProcess && !topProcess?.length)}
+      isLoading={!data || (isLoadingTopProcess && !topProcess?.length)}
       metadata={
         <List.Item.Detail.Metadata>
-          <MetadataLabel title="Total RAM" text={`${totalMem} GB`} />
-          {displayModeMemory === "free" ? (
-            <MetadataLabel title="Free RAM" text={`${freeMem} GB`} />
+          {data ? (
+            <UsageTag
+              title="Usage"
+              percent={data.displayedPercent}
+              displayMode={memoryPercentMode}
+              color={data.pressureColor}
+            />
           ) : (
-            <MetadataLabel title="Used RAM" text={`${+totalMem - +freeMem} GB`} />
+            <MetadataLabel title="Usage" text="Loading…" />
           )}
-          {displayModeMemory === "free" ? (
-            <MetadataLabel title="Free RAM %" text={`${freeMemPercentage} %`} percentMode="free" />
-          ) : (
-            <MetadataLabel title="Used RAM %" text={`${100 - +freeMemPercentage} %`} percentMode="usage" />
-          )}
+          <MetadataLabel title="Used" text={data ? `${data.usedMem} GB / ${data.totalMem} GB` : "Loading…"} />
+          <MetadataLabel title="Free" text={data ? `${data.freeMem} GB` : "Loading…"} />
+          <MetadataLabel title="Memory Pressure" text={data?.pressureLevel} />
           <List.Item.Detail.Metadata.Separator />
-          <MetadataLabel title="Active" text={active} />
-          <MetadataLabel title="Inactive" text={inactive} />
-          <MetadataLabel title="Wired" text={wired} />
-          <MetadataLabel title="Compressed" text={compressed} />
-          <MetadataLabel title="Purgeable" text={purgeable} />
-          <MetadataLabel title="Swap Used" text={`${swapUsed} / ${swapTotal}`} />
-          <MetadataLabel title="Memory Pressure" text={pressureLevel} />
+          <TopProcessRows processes={topProcess} />
           <List.Item.Detail.Metadata.Separator />
-          <MetadataSection title="Top Processes" />
-          {topProcess?.length ? (
-            topProcess.map((process, index) => (
-              <MetadataLabel
-                key={process.pid}
-                title={`#${index + 1} · ${process.name} (PID ${process.pid})`}
-                text={process.metric}
-              />
-            ))
-          ) : (
-            <MetadataLabel title="Status" text="Collecting sample…" />
-          )}
+          <MetadataLabel title="Active · Inactive" text={data ? `${data.active} · ${data.inactive} GB` : "Loading…"} />
+          <MetadataLabel
+            title="Wired · Compressed"
+            text={data ? `${data.wired} · ${data.compressed} GB` : "Loading…"}
+          />
+          <MetadataLabel title="Purgeable" text={data?.purgeable} />
+          <MetadataLabel title="Swap" text={data?.swap} />
         </List.Item.Detail.Metadata>
       }
     />
