@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Display the Space name in `Search Tabs` and `Search Arc` results to help distinguish tabs with identical names across different Spaces.
+
 ## [Fix SQL injection in history and download search] - 2026-06-23
 
 - Escape single quotes and LIKE wildcards (`%`, `_`) in search queries to prevent SQL injection
