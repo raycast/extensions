@@ -1,0 +1,253 @@
+{ title: "Writing Assistant"
+  icon: "✍️"
+  identifier: "writing-assistant-demo"
+  // Properties that can be referenced
+  style: "Clear and concise"
+  tone: "Professional yet friendly"
+  
+  // Dynamic options
+  task: [
+    "improve"
+    "proofread"
+    "summarize"
+    "expand"
+    "translate"
+  ]
+  
+  // Prefix/suffix properties
+  prefix: "requirements,context"
+  suffix: "signature"
+  
+  requirements: "Please maintain the original meaning while enhancing clarity"
+  context: "Target audience: General readers"
+  signature: "Enhanced by AI Writing Assistant"
+  
+  // Preferred actions use internal ids (copyToClipboard, paste, copyAsFile)
+  // or AppleScript filenames without extension.
+  actions: ["copyToClipboard", "paste"]
+  
+  // Nested subprompts
+  subprompts: [
+    { title: "Email Composer"
+      icon: "📧"
+      identifier: "email-composer"
+      content: 
+      '''
+      Compose a professional email based on:
+      
+      Purpose: {{i}}
+      Key points: {{s|c}}
+      
+      Recipient: {{option:recipient}}
+      '''
+      recipient: {
+        "Colleague": "informal but professional"
+        "Manager": "formal and respectful"
+        "Client": "professional and courteous"
+      }
+    }
+    { title: "Blog Post Optimizer"
+      icon: "📝"
+      content:
+      '''
+      Optimize this blog post for SEO and readability:
+      
+      {{s|c}}
+      
+      Target keywords: {{i}}
+      Reading level: {{readingLevel}}
+      '''
+      readingLevel: "Intermediate (8th grade)"
+      textInputs: {
+        "targetKeywords": "Enter your target keywords"
+        "metaDescription": "Write a meta description (150-160 chars)"
+      }
+    }
+    { title: "Creative Writing Helper"
+      icon: "🎨"
+      identifier: "creative-writing"
+      subprompts: [
+        { title: "Character Development"
+          content: 
+          '''
+          Help me develop a character with these traits:
+          {{i|s|c}}
+          
+          Include: {{option:aspects}}
+          '''
+          aspects: [
+            "Physical appearance"
+            "Personality traits"
+            "Background story"
+            "Motivations and goals"
+            "Strengths and weaknesses"
+          ]
+        }
+        { title: "Plot Generator"
+          content: 
+          '''
+          Generate a plot outline for a {{option:genre}} story with:
+          
+          Main theme: {{i}}
+          Setting: {{s|c}}
+          '''
+          genre: [
+            "Mystery"
+            "Science Fiction"
+            "Romance"
+            "Fantasy"
+            "Thriller"
+          ]
+        }
+      ]
+    }
+    { title: "Quick Templates"
+      icon: "⚡"
+      subprompts: [
+        { title: "Fix Grammar"
+          prefix: ""
+          content: "Fix grammar and punctuation: {{i|s|c}}"
+        }
+        {
+          title: "Make Concise"
+          prefix: ""
+          content: "Make this more concise: {{i|s|c}}"
+        }
+        { title: "Add Examples"
+          content: 
+          '''
+          Add relevant examples to illustrate this concept:
+          {{i|s|c}}
+          '''
+        }
+      ]
+    }
+    // These examples demonstrate the new fallback chain functionality with option: and file: directives
+    { title: "Smart Content Generator"
+      icon: "🤖"
+      identifier: "smart-content-generator"
+      content: 
+      '''
+      Generate content based on:
+      
+      Input: {{i|option:defaultInputTypes}}
+      Style: {{selection|option:stylePresets}}
+      Template: {{clipboard|file:./templates/default.md}}
+      
+      Additional context: {{i|file:./context/default.txt|option:fallbackContext}}
+      '''
+      
+      // These options will only show Configure Options when actually needed
+      defaultInputTypes: ["article", "blog post", "email", "report"]
+      stylePresets: ["professional", "casual", "technical", "creative"]
+      fallbackContext: ["No additional context needed", "Use general guidelines"]
+      
+      // Demonstrates: 
+      // - {{i|option:defaultInputTypes}} - shows options only if input is empty
+      // - {{selection|option:stylePresets}} - shows options only if selection is empty  
+      // - {{clipboard|file:...}} - file fallback when clipboard is empty
+      // - {{i|file:...|option:...}} - complex 3-level fallback chain
+    }
+    { title: "Adaptive Translator"
+      icon: "🌐"
+      identifier: "adaptive-translator"
+      content: 
+      '''
+      Translate the following text:
+      
+      Source: {{i|s|c|file:./input/sample.txt}}
+      Target language: {{input|option:languages}}
+      Tone: {{selection|option:tones|file:./presets/tone.txt}}
+      
+      Special instructions: {{clipboard|option:instructions}}
+      '''
+      
+      languages: ["English", "Chinese", "Japanese", "French", "Spanish"]
+      tones: ["formal", "informal", "business", "friendly"]
+      instructions: ["Keep original formatting", "Adapt cultural references", "Maintain technical terms"]
+      
+      // Demonstrates:
+      // - {{i|s|c|file:...}} - 4-level fallback with file at end
+      // - {{input|option:languages}} - using full name instead of alias
+      // - {{selection|option:...|file:...}} - option + file fallback
+      // - Smart Configure Options only when fallback reaches option
+    }
+    { title: "Document Processor" 
+      icon: "📄"
+      identifier: "document-processor"
+      content: 
+      '''
+      Process this document:
+      
+      Content: {{s|file:./documents/template.md|option:sampleContent}}
+      Processing type: {{i|option:processingTypes}}
+      Output format: {{clipboard|option:outputFormats|file:./formats/default.txt}}
+      
+      Quality level: {{selection|option:qualityLevels}}
+      '''
+      
+      sampleContent: ["No content provided", "Please select or provide content"]
+      processingTypes: ["summarize", "rewrite", "format", "analyze"]
+      outputFormats: ["markdown", "plain text", "HTML", "PDF-ready"]
+      qualityLevels: ["quick", "standard", "detailed", "comprehensive"]
+      
+      // Demonstrates complex fallback scenarios:
+      // - File as middle fallback option
+      // - Multiple independent option chains
+      // - Different fallback depths for different placeholders
+    }
+    { title: "Code Assistant"
+      icon: "💻"  
+      identifier: "code-assistant"
+      content: 
+      '''
+      Help with this code:
+      
+      Code: {{s|c|file:./code/example.js}}
+      Language: {{i|option:languages|file:./config/default-lang.txt}}
+      Task: {{input|option:tasks}}
+      Style guide: {{clipboard|file:./styles/coding-style.md|option:styleGuides}}
+      '''
+      
+      languages: ["JavaScript", "Python", "TypeScript", "Java", "Go"]
+      tasks: ["review", "optimize", "debug", "document", "refactor"]
+      styleGuides: ["Google Style", "Airbnb Style", "Standard", "Custom"]
+      
+      // Demonstrates:
+      // - Mixed file and option fallbacks
+      // - Different alias usage (i vs input)
+      // - Real-world code assistance scenario
+    }
+    { title: "Meeting Notes Assistant"
+      icon: "📝"
+      identifier: "meeting-notes"
+      content: 
+      '''
+      Process these meeting notes:
+      
+      Notes: {{s|c|option:sampleNotes}}
+      Meeting type: {{i|option:meetingTypes}}
+      Output style: {{selection|file:./templates/meeting-format.md|option:outputStyles}}
+      
+      Action items format: {{clipboard|option:actionFormats}}
+      '''
+      
+      sampleNotes: ["No notes provided - please add meeting content"]
+      meetingTypes: ["standup", "planning", "review", "brainstorming", "client meeting"]
+      outputStyles: ["summary", "detailed", "action-focused", "executive brief"]
+      actionFormats: ["bullet points", "numbered list", "table", "checkbox list"]
+      
+      // Demonstrates:
+      // - Option as first fallback (for required content)
+      // - File in middle of chain
+      // - Different fallback strategies for different fields
+    }
+  ]
+  
+  // File reference examples
+  ref: {
+    "styleGuide": "{{file:./writing-style-guide.md}}"
+    "templates": "{{file:./templates/}}"
+  }
+
+}
