@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "calliday",
+  "title": "Calliday",
+  "description": "Companion for Calliday, the automatic time tracker for macOS. Requires the Calliday app.",
+  "icon": "icon.png",
+  "author": "yaanisy",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "now",
+      "title": "Current Activity",
+      "subtitle": "Calliday",
+      "description": "What Calliday is tracking right now, with today's total.",
+      "mode": "view"
+    },
+    {
+      "name": "today",
+      "title": "Today's Report",
+      "subtitle": "Calliday",
+      "description": "Today by project, app, and site.",
+      "mode": "view"
+    },
+    {
+      "name": "tomatoes",
+      "title": "Tomatoes",
+      "subtitle": "Calliday",
+      "description": "Today's harvest, run by run — and the one on the vine.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Activity",
+      "subtitle": "Calliday",
+      "description": "Find a document or page in your tracked activity, then jump to it on the timeline or open it.",
+      "mode": "view"
+    },
+    {
+      "name": "start-tomato",
+      "title": "Start Tomato",
+      "subtitle": "Calliday",
+      "description": "Plant a pomodoro; Calliday notifies you when it's ripe.",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "subtitle": "Calliday",
+      "description": "Start a manual Calliday timer.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "What are you working on?",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "Calliday CLI Path",
+      "description": "Path to the calliday binary. The default is where the app installs it.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/Library/Application Support/Calliday/bin/calliday",
+      "default": "~/Library/Application Support/Calliday/bin/calliday"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.8.2",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "@raycast/eslint-config": "^2.0.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "fix-lint": "ray lint --fix"
+  },
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "time tracking",
+    "pomodoro",
+    "productivity",
+    "timer",
+    "focus"
+  ]
+}
