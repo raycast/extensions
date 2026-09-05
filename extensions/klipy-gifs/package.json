@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "klipy-gifs",
+  "title": "Klipy GIFs",
+  "description": "Search KLIPY's GIF library and copy, paste, download, or share GIFs.",
+  "icon": "extension-icon.png",
+  "author": "yashkotha",
+  "categories": ["Media", "Fun"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search GIFs",
+      "subtitle": "Klipy",
+      "description": "Search KLIPY for GIFs and act on them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Klipy App Key",
+      "description": "Your KLIPY app key. Get one free at https://partner.klipy.com (Add Platform → generate key).",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "customerId",
+      "title": "Customer ID",
+      "description": "Optional stable per-user id KLIPY uses for personalization and de-duplication. Leave blank if unsure.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "contentFilter",
+      "title": "Content Filter",
+      "description": "Safe-search level applied to all KLIPY requests.",
+      "type": "dropdown",
+      "required": false,
+      "default": "medium",
+      "data": [
+        { "title": "High (strictest)", "value": "high" },
+        { "title": "Medium", "value": "medium" },
+        { "title": "Low", "value": "low" },
+        { "title": "Off", "value": "off" }
+      ]
+    },
+    {
+      "name": "limit",
+      "title": "Results Per Search",
+      "description": "How many GIFs to fetch per query (8-50).",
+      "type": "textfield",
+      "required": false,
+      "default": "30"
+    },
+    {
+      "name": "gridColumns",
+      "title": "Grid Columns",
+      "description": "Number of columns in the GIF grid.",
+      "type": "dropdown",
+      "required": false,
+      "default": "4",
+      "data": [
+        { "title": "3", "value": "3" },
+        { "title": "4", "value": "4" },
+        { "title": "5", "value": "5" },
+        { "title": "6", "value": "6" }
+      ]
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "What Enter does on a selected GIF.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copyGifUrl",
+      "data": [
+        { "title": "Copy GIF URL", "value": "copyGifUrl" },
+        { "title": "Copy GIF File", "value": "copyGifFile" },
+        { "title": "Copy Markdown", "value": "copyMarkdown" },
+        { "title": "Paste GIF URL", "value": "pasteGifUrl" },
+        { "title": "Open in Browser", "value": "openInBrowser" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^1.17.0"
+  },
+  "overrides": {
+    "@types/react": "19.0.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "RAY_Target=x ray develop",
+    "dev:stable": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
