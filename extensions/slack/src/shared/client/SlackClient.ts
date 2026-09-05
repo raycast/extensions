@@ -2,6 +2,8 @@ import { Icon, Image } from "@raycast/api";
 import { getSlackWebClient, SlackConversation, SlackMember } from "./WebClient";
 import { formatRelative } from "date-fns";
 import { Profile } from "@slack/web-api/dist/types/response/UsersProfileGetResponse";
+import { collectPaginatedResults, matchesAllWords, matchesVisibleName } from "./pagination";
+import { getDirectorySearchPageSize } from "./directory";
 
 interface Item {
   id: string;
@@ -52,143 +54,241 @@ const sortNames = (a: string, b: string) => {
   return 0;
 };
 
+const pageSize = 200;
+const maxSearchResultsPerType = 100;
+
+function getConversationTeamId(conversation: SlackConversation): string {
+  return conversation.internal_team_ids?.[0] ?? conversation.shared_team_ids?.[0] ?? conversation.context_team_id ?? "";
+}
+
+function toUser(member: SlackMember): User | undefined {
+  const { id, name: username, profile, team_id: teamId, tz } = member;
+  if (!id || member.is_bot || member.is_workflow_bot || member.deleted || id === "USLACKBOT") return undefined;
+
+  const firstName = profile?.first_name ?? "";
+  const lastName = profile?.last_name ?? "";
+  const fullName = `${firstName} ${lastName}`.trim();
+  const displayName = [fullName, profile?.display_name, profile?.real_name, username].find((value) => value?.trim());
+
+  if (!displayName || !teamId) return undefined;
+
+  let statusExpiration = "";
+  if (profile?.status_expiration) {
+    const date = new Date(profile.status_expiration * 1000);
+    if (!isNaN(date.getTime())) {
+      statusExpiration = `Until ${formatRelative(date, new Date(), { weekStartsOn: 1 })}`;
+    }
+  }
+
+  return {
+    id,
+    name: displayName,
+    icon: profile?.image_24 ? { source: profile.image_24, mask: Image.Mask.Circle } : Icon.Person,
+    teamId,
+    username: username ?? "",
+    title: profile?.title ?? "",
+    statusEmoji: profile?.status_emoji || undefined,
+    statusText: profile?.status_text?.replace(/&amp;/g, "&") || undefined,
+    statusExpiration,
+    conversationId: undefined,
+    timezone: tz ?? "",
+  };
+}
+
+function toChannel(conversation: SlackConversation): Channel | undefined {
+  const teamId = getConversationTeamId(conversation);
+  if (!conversation.id || !conversation.name || !teamId) return undefined;
+
+  return {
+    id: conversation.id,
+    name: conversation.name,
+    teamId,
+    icon: conversation.is_private ? "channel-private.png" : "channel-public.png",
+  };
+}
+
+function toGroup(conversation: SlackConversation, userNames: Map<string, string>): Group | undefined {
+  const teamId = getConversationTeamId(conversation);
+  if (!conversation.id || !conversation.name || !teamId) return undefined;
+
+  const usernames = conversation.name
+    .replace(/^mpdm-/, "")
+    .replace(/-1$/, "")
+    .split("--");
+  const displayName = usernames.map((username) => userNames.get(username) ?? username).join(", ");
+  if (!displayName) return undefined;
+
+  return {
+    id: conversation.id,
+    name: displayName,
+    teamId,
+    icon: "channel-private.png",
+    groupName: conversation.name,
+  };
+}
+
 export class SlackClient {
   public static async getUsers(): Promise<User[]> {
-    const [slackMembers, dmConversations] = await Promise.all([
-      SlackClient.getSlackMembers(),
-      SlackClient.getConversations(["im"]),
-    ]);
-
-    const users =
-      slackMembers
-        .filter(
-          ({ is_bot, is_workflow_bot, deleted, id }) => !is_bot && !is_workflow_bot && !deleted && id !== "USLACKBOT",
-        )
-        .map(({ id, name: username, profile, team_id, tz }) => {
-          const firstName = profile?.first_name ?? "";
-          const lastName = profile?.last_name ?? "";
-          const name = `${firstName} ${lastName}`;
-          const jobTitle = profile?.title ?? "";
-          const statusEmoji = profile?.status_emoji ?? undefined;
-          const statusText = profile?.status_text?.replace(/&amp;/g, "&") ?? undefined;
-          const statusExpiration = profile?.status_expiration ?? undefined;
-          const timezone = tz ?? "";
-
-          let statusExpirationDate = "";
-
-          if (statusExpiration) {
-            const date = new Date(statusExpiration * 1000);
-            if (!isNaN(date.getTime())) {
-              statusExpirationDate = formatRelative(date, new Date(), { weekStartsOn: 1 });
-              statusExpirationDate = `Until ${statusExpirationDate}`;
-            }
-          }
-
-          const displayName = [name, profile?.display_name, profile?.real_name].find((x): x is string => !!x?.trim());
-
-          const conversation = dmConversations.find((c) => c.user === id);
-
-          return {
-            id,
-            name: displayName,
-            icon: profile?.image_24 ? { source: profile?.image_24, mask: Image.Mask.Circle } : Icon.Person,
-            teamId: team_id,
-            username,
-            title: jobTitle,
-            statusEmoji,
-            statusText,
-            statusExpiration: statusExpirationDate,
-            conversationId: conversation?.id,
-            timezone,
-          } as User;
-        })
-        .filter((i) => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
-        .sort((a, b) => sortNames(a.name, b.name)) ?? [];
-
-    return users;
-  }
-
-  private static async getSlackMembers(): Promise<SlackMember[]> {
     const slackWebClient = getSlackWebClient();
-    const slackMembers: SlackMember[] = [];
+    const users = await collectPaginatedResults({
+      loadPage: async (cursor) => {
+        const response = await slackWebClient.users.list({ limit: pageSize, cursor });
+        return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
+      },
+      transform: toUser,
+      matches: () => true,
+      maxResults: Number.POSITIVE_INFINITY,
+      scanAllPages: true,
+    });
 
-    let cursor: string | undefined;
-    do {
-      const response = await slackWebClient.users.list({
-        limit: 1000,
-        cursor,
-      });
-      slackMembers.push(...(response.members ?? []));
-      cursor = response.response_metadata?.next_cursor;
-    } while (cursor);
-
-    return slackMembers;
-  }
-
-  private static async getConversations(
-    type: ("public_channel" | "private_channel" | "mpim" | "im")[],
-  ): Promise<SlackConversation[]> {
-    const slackWebClient = getSlackWebClient();
-
-    const conversations: SlackConversation[] = [];
-
+    const usersById = new Map(users.map((user) => [user.id, user]));
     let cursor: string | undefined;
     do {
       const response = await slackWebClient.conversations.list({
         exclude_archived: true,
-        types: type.join(","),
-        limit: 1000,
+        types: "im",
+        limit: pageSize,
         cursor,
       });
-      conversations.push(...(response.channels ?? []));
-      cursor = response.response_metadata?.next_cursor;
+      for (const conversation of response.channels ?? []) {
+        const user = conversation.user ? usersById.get(conversation.user) : undefined;
+        if (user) user.conversationId = conversation.id;
+      }
+      cursor = response.response_metadata?.next_cursor || undefined;
     } while (cursor);
 
-    return conversations;
+    return users.sort((a, b) => sortNames(a.name, b.name));
   }
 
   public static async getChannels(): Promise<Channel[]> {
-    const channels = await SlackClient.getConversations(["public_channel", "private_channel"]);
+    const slackWebClient = getSlackWebClient();
+    const channels = await collectPaginatedResults({
+      loadPage: async (cursor) => {
+        const response = await slackWebClient.conversations.list({
+          exclude_archived: true,
+          types: "public_channel,private_channel",
+          limit: pageSize,
+          cursor,
+        });
+        return { items: response.channels ?? [], nextCursor: response.response_metadata?.next_cursor };
+      },
+      transform: toChannel,
+      matches: () => true,
+      maxResults: Number.POSITIVE_INFINITY,
+      scanAllPages: true,
+    });
 
-    return (
-      channels
-        .map(({ id, name, shared_team_ids, internal_team_ids, context_team_id, is_private }) => {
-          const teamIds = [
-            ...(internal_team_ids ?? []),
-            ...(shared_team_ids ?? []),
-            ...(context_team_id ? [context_team_id] : []),
-          ];
-          const teamId = teamIds.length > 0 ? teamIds[0] : "";
-          return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" } as Channel;
-        })
-        .filter((i) => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
-        .sort((a, b) => sortNames(a.name, b.name)) ?? []
-    );
+    return channels.sort((a, b) => sortNames(a.name, b.name));
   }
 
-  public static async getGroups(): Promise<Group[]> {
-    const users = await SlackClient.getUsers();
+  public static async getGroups(users: User[]): Promise<Group[]> {
+    const slackWebClient = getSlackWebClient();
+    const userNames = new Map(users.map((user) => [user.username, user.name]));
+    const groups = await collectPaginatedResults({
+      loadPage: async (cursor) => {
+        const response = await slackWebClient.conversations.list({
+          exclude_archived: true,
+          types: "mpim",
+          limit: pageSize,
+          cursor,
+        });
+        return { items: response.channels ?? [], nextCursor: response.response_metadata?.next_cursor };
+      },
+      transform: (conversation) => toGroup(conversation, userNames),
+      matches: () => true,
+      maxResults: Number.POSITIVE_INFINITY,
+      scanAllPages: true,
+    });
 
-    const conversations = await SlackClient.getConversations(["mpim"]);
+    return groups.sort((a, b) => sortNames(a.name, b.name));
+  }
 
-    const groups: Group[] =
-      conversations
-        .map(({ id, name, shared_team_ids, internal_team_ids }) => {
-          const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
-          const teamId = teamIds.length > 0 ? teamIds[0] : "";
+  public static async searchUsers(query: string, signal?: AbortSignal): Promise<User[]> {
+    const slackWebClient = getSlackWebClient();
+    const scanAllPages = query.trim().length > 0;
 
-          const userNames = name?.replace("mpdm-", "").replace("-1", "").split("--") ?? [];
-          const displayName = userNames
-            .map((username) => users.find((user) => user.username === username)?.name)
-            .filter((x) => !!x)
-            .join(", ");
+    const userMatches = await collectPaginatedResults({
+      loadPage: async (cursor) => {
+        const response = await slackWebClient.users.list({
+          limit: getDirectorySearchPageSize(query),
+          cursor,
+        });
+        return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
+      },
+      transform: (member) => {
+        const user = toUser(member);
+        if (!user) return undefined;
 
-          return { id, name: displayName, teamId, icon: "channel-private.png", groupName: name } as Group;
-        })
-        .filter((i) => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
-        .sort((a, b) => sortNames(a.name, b.name)) ?? [];
+        return {
+          user,
+          searchableValues: [
+            member.name,
+            member.real_name,
+            member.profile?.display_name,
+            member.profile?.real_name,
+            member.profile?.email,
+            member.profile?.title,
+          ],
+        };
+      },
+      matches: ({ searchableValues }) => matchesAllWords(searchableValues, query),
+      maxResults: maxSearchResultsPerType,
+      scanAllPages,
+      signal,
+      stopAfterPage: (pageResults) =>
+        scanAllPages && pageResults.some(({ user }) => matchesVisibleName(user.name, query)),
+    });
 
-    return groups;
+    return userMatches.map(({ user }) => user).sort((a, b) => sortNames(a.name, b.name));
+  }
+
+  public static async searchConversations(query: string, signal?: AbortSignal): Promise<[Channel[], Group[]]> {
+    const slackWebClient = getSlackWebClient();
+    const scanAllPages = query.trim().length > 0;
+
+    const userNames = new Map<string, string>();
+    const channels: Channel[] = [];
+    const groups: Group[] = [];
+    let cursor: string | undefined;
+
+    do {
+      signal?.throwIfAborted();
+      const resultCountBeforePage = channels.length + groups.length;
+      const response = await slackWebClient.conversations.list({
+        exclude_archived: true,
+        types: "public_channel,private_channel,mpim",
+        limit: getDirectorySearchPageSize(query),
+        cursor,
+      });
+      signal?.throwIfAborted();
+
+      for (const conversation of response.channels ?? []) {
+        if (conversation.is_mpim || conversation.name?.startsWith("mpdm-")) {
+          const group = toGroup(conversation, userNames);
+          if (
+            group &&
+            groups.length < maxSearchResultsPerType &&
+            matchesAllWords([group.name, group.groupName], query)
+          ) {
+            groups.push(group);
+          }
+        } else {
+          const channel = toChannel(conversation);
+          if (channel && channels.length < maxSearchResultsPerType && matchesAllWords([channel.name], query)) {
+            channels.push(channel);
+          }
+        }
+      }
+
+      cursor = response.response_metadata?.next_cursor || undefined;
+      if (scanAllPages && channels.length + groups.length > resultCountBeforePage) break;
+    } while (
+      cursor &&
+      scanAllPages &&
+      (channels.length < maxSearchResultsPerType || groups.length < maxSearchResultsPerType)
+    );
+
+    return [channels.sort((a, b) => sortNames(a.name, b.name)), groups.sort((a, b) => sortNames(a.name, b.name))];
   }
 
   public static async getPresence(): Promise<PresenceStatus> {

@@ -3,6 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { CodedError, ErrorCode } from "@slack/web-api";
 import { formatDistance } from "date-fns";
 import { slack } from "./client/WebClient";
+import { formatRetryAfter, getRetryAfter, isRateLimitError, slackRateLimitDocumentationUrl } from "./client/rateLimit";
 import * as emoji from "node-emoji";
 
 function convertSlackEmojiToUnicode(text: string): string {
@@ -57,14 +58,23 @@ const isCodedError = (error: unknown): error is CodedError => {
 };
 
 const handleError = async (error: CodedError | Error | unknown, title?: string) => {
-  if (isCodedError(error)) {
-    if (error.code === ErrorCode.RateLimitedError) {
-      return showFailureToast(error, {
-        title: "You've been rate-limited.",
-        message: "Please try again in a few seconds/minutes.",
-      });
-    }
+  const retryAfter = getRetryAfter(error);
+  const rateLimited = (isCodedError(error) && error.code === ErrorCode.RateLimitedError) || isRateLimitError(error);
 
+  if (rateLimited) {
+    return showFailureToast(error, {
+      title: "Slack rate limit exceeded",
+      message: retryAfter
+        ? `Slack asked us to wait ${formatRetryAfter(retryAfter)}. Please try again after that.`
+        : "Slack is temporarily limiting requests. Please wait and try again.",
+      primaryAction: {
+        title: "View Slack Rate Limits",
+        onAction: () => open(slackRateLimitDocumentationUrl),
+      },
+    });
+  }
+
+  if (isCodedError(error)) {
     if (error.message.includes("missing_scope")) {
       const isUsingOAuth = !!(await slack.client.getTokens());
 

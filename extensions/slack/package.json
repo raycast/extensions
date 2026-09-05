@@ -13,7 +13,8 @@
     "clins1994",
     "stephlv",
     "artistro08",
-    "andreaselia"
+    "andreaselia",
+    "0xdhrv"
   ],
   "pastContributors": [
     "Elliot67",
@@ -546,8 +547,8 @@
     "@slack/web-api": "^7.14.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "lodash": "^4.17.23",
     "https-proxy-agent": "^7.0.6",
+    "lodash": "^4.17.23",
     "node-emoji": "^2.2.0"
   },
   "devDependencies": {

@@ -1,7 +1,8 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import { formatRetryAfter, observeSlackRateLimits, slackRateLimitDocumentationUrl } from "./rateLimit";
 
 export interface SlackConversation {
   id?: string;
@@ -11,15 +12,18 @@ export interface SlackConversation {
   internal_team_ids?: string[];
   context_team_id?: string;
   is_private?: boolean;
+  is_mpim?: boolean;
 }
 
 export interface SlackMember {
   id?: string;
   team_id?: string;
   name?: string;
+  real_name?: string;
   profile?: {
     real_name?: string;
     display_name?: string;
+    email?: string;
     first_name?: string;
     last_name?: string;
     image_24?: string;
@@ -37,6 +41,40 @@ export interface SlackMember {
 
 const { accessToken, proxyUrl: proxyUrlPref } = getPreferenceValues<Preferences>();
 let slackWebClient: WebClient | null = null;
+let rateLimitToast: Toast | undefined;
+let rateLimitToastTimeout: ReturnType<typeof setTimeout> | undefined;
+
+async function showRateLimitToast(retryAfter: number) {
+  const message = `Slack requested a ${formatRetryAfter(retryAfter)} wait. Retrying automatically.`;
+
+  if (rateLimitToast) {
+    rateLimitToast.style = Toast.Style.Animated;
+    rateLimitToast.title = "Slack rate limit exceeded";
+    rateLimitToast.message = message;
+  } else {
+    rateLimitToast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Slack rate limit exceeded",
+      message,
+      primaryAction: {
+        title: "View Slack Rate Limits",
+        onAction: () => open(slackRateLimitDocumentationUrl),
+      },
+    });
+  }
+
+  if (rateLimitToastTimeout) clearTimeout(rateLimitToastTimeout);
+  const toast = rateLimitToast;
+  rateLimitToastTimeout = setTimeout(
+    () => {
+      if (rateLimitToast === toast) {
+        void toast.hide();
+        rateLimitToast = undefined;
+      }
+    },
+    Math.max(1, retryAfter) * 1000,
+  );
+}
 
 function getHttpProxy() {
   if (process.env.HTTPS_PROXY) return "HTTPS_PROXY";
@@ -60,7 +98,9 @@ export const slack = OAuthService.slack({
   personalAccessToken: accessToken,
   onAuthorize({ token }) {
     const agent = getProxyAgent();
-    slackWebClient = new WebClient(token, { rejectRateLimitedCalls: true, ...(agent && { agent }) });
+    slackWebClient = observeSlackRateLimits(new WebClient(token, { ...(agent && { agent }) }), (retryAfter) => {
+      void showRateLimitToast(retryAfter);
+    });
   },
 });
 
