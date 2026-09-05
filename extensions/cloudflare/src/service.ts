@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, isAxiosError } from 'axios';
 import { Cache } from '@raycast/api';
+import { collectPaginatedItems } from './pagination';
 
 interface Response<T> {
   result: T;
@@ -1040,12 +1041,18 @@ class Service {
     accountId: string,
     workerName: string,
   ): Promise<WorkerVersion[]> {
-    const response = await this.client.get<
-      Response<{ items?: WorkerVersionItem[] }>
-    >(`accounts/${accountId}/workers/scripts/${workerName}/versions`, {
-      params: { per_page: 25 },
+    const items = await collectPaginatedItems(async (page) => {
+      const response = await this.client.get<
+        Response<{ items?: WorkerVersionItem[] }>
+      >(`accounts/${accountId}/workers/scripts/${workerName}/versions`, {
+        params: { page, per_page: 25 },
+      });
+      return {
+        items: response.data.result.items ?? [],
+        totalPages: response.data.result_info.total_pages,
+      };
     });
-    return (response.data.result.items ?? []).map((item) => ({
+    return items.map((item) => ({
       id: item.id,
       number: item.number,
       createdOn: item.metadata?.created_on,

@@ -45,5 +45,39 @@ export function certificateHealth(
   if (status !== 'active' && status !== 'staging_active') return 'error';
   if (!expiresOn) return 'healthy';
   const remaining = new Date(expiresOn).getTime() - Date.now();
+  if (remaining <= 0) return 'error';
   return remaining <= 30 * 24 * 60 * 60 * 1000 ? 'warning' : 'healthy';
+}
+
+interface CertificateHealthEntry {
+  status: string;
+  expiresOn?: string;
+}
+
+export function certificatePackHealth(
+  packStatus: string,
+  certificates: CertificateHealthEntry[],
+  validationErrors: string[] = [],
+): {
+  health: 'healthy' | 'warning' | 'error';
+  earliestExpiresOn?: string;
+} {
+  const expirationDates = certificates
+    .map((certificate) => certificate.expiresOn)
+    .filter((value): value is string => Boolean(value))
+    .filter((value) => Number.isFinite(new Date(value).getTime()))
+    .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+  const healthStates = [
+    certificateHealth(packStatus),
+    ...certificates.map((certificate) =>
+      certificateHealth(certificate.status, certificate.expiresOn),
+    ),
+  ];
+  const health =
+    validationErrors.length > 0 || healthStates.includes('error')
+      ? 'error'
+      : healthStates.includes('warning')
+        ? 'warning'
+        : 'healthy';
+  return { health, earliestExpiresOn: expirationDates[0] };
 }

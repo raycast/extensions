@@ -1,19 +1,14 @@
 import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
-import { certificateHealth } from './insights-utils';
+import { certificatePackHealth } from './insights-utils';
 import { getCloudflareService, withCloudflareAccessToken } from './oauth';
-import type { CertificatePack } from './service';
 import { handleNetworkError } from './utils';
 import {
   ZoneResourceContext,
   ZoneResourcePicker,
 } from './zone-resource-picker';
 
-function statusColor(pack: CertificatePack): Color {
-  const health = certificateHealth(
-    pack.status,
-    pack.certificates[0]?.expiresOn,
-  );
+function statusColor(health: 'healthy' | 'warning' | 'error'): Color {
   if (health === 'healthy') return Color.Green;
   if (health === 'warning') return Color.Yellow;
   return Color.Red;
@@ -41,11 +36,40 @@ function CertificatesView({ context }: { context: ZoneResourceContext }) {
         />
       )}
       {packs.map((pack) => {
-        const certificate = pack.certificates[0];
+        const summary = certificatePackHealth(
+          pack.status,
+          pack.certificates,
+          pack.validationErrors,
+        );
+        const issuers = [
+          ...new Set(
+            pack.certificates
+              .map((certificate) => certificate.issuer)
+              .filter((issuer): issuer is string => Boolean(issuer)),
+          ),
+        ];
+        const signatures = [
+          ...new Set(
+            pack.certificates
+              .map((certificate) => certificate.signature)
+              .filter((signature): signature is string => Boolean(signature)),
+          ),
+        ];
+        const certificateDetails = pack.certificates
+          .map((certificate) => {
+            const expires = certificate.expiresOn
+              ? new Date(certificate.expiresOn).toLocaleString()
+              : 'expiry not provided';
+            return `${certificate.id}: ${certificate.status}, expires ${expires}`;
+          })
+          .join('\n');
         return (
           <List.Item
             key={pack.id}
-            icon={{ source: Icon.Lock, tintColor: statusColor(pack) }}
+            icon={{
+              source: Icon.Lock,
+              tintColor: statusColor(summary.health),
+            }}
             title={pack.hosts[0] ?? pack.type}
             subtitle={pack.hosts.slice(1).join(', ') || pack.type}
             keywords={[
@@ -54,12 +78,17 @@ function CertificatesView({ context }: { context: ZoneResourceContext }) {
               ...pack.hosts,
             ]}
             accessories={[
-              { tag: { value: pack.status, color: statusColor(pack) } },
-              ...(certificate?.expiresOn
+              {
+                tag: {
+                  value: summary.health,
+                  color: statusColor(summary.health),
+                },
+              },
+              ...(summary.earliestExpiresOn
                 ? [
                     {
-                      date: new Date(certificate.expiresOn),
-                      tooltip: `Expires: ${new Date(certificate.expiresOn).toLocaleString()}`,
+                      date: new Date(summary.earliestExpiresOn),
+                      tooltip: `Earliest expiry: ${new Date(summary.earliestExpiresOn).toLocaleString()}`,
                     },
                   ]
                 : []),
@@ -70,8 +99,8 @@ function CertificatesView({ context }: { context: ZoneResourceContext }) {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.TagList title="Status">
                       <List.Item.Detail.Metadata.TagList.Item
-                        text={pack.status}
-                        color={statusColor(pack)}
+                        text={`${pack.status} (${summary.health})`}
+                        color={statusColor(summary.health)}
                       />
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Label
@@ -81,20 +110,20 @@ function CertificatesView({ context }: { context: ZoneResourceContext }) {
                     <List.Item.Detail.Metadata.Label
                       title="Certificate Authority"
                       text={
-                        certificate?.issuer ??
-                        pack.certificateAuthority ??
+                        issuers.join(', ') ||
+                        pack.certificateAuthority ||
                         'Not provided'
                       }
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Signature"
-                      text={certificate?.signature ?? 'Not provided'}
+                      text={signatures.join(', ') || 'Not provided'}
                     />
                     <List.Item.Detail.Metadata.Label
-                      title="Expires"
+                      title="Earliest Expiry"
                       text={
-                        certificate?.expiresOn
-                          ? new Date(certificate.expiresOn).toLocaleString()
+                        summary.earliestExpiresOn
+                          ? new Date(summary.earliestExpiresOn).toLocaleString()
                           : 'Not provided'
                       }
                     />
@@ -106,6 +135,10 @@ function CertificatesView({ context }: { context: ZoneResourceContext }) {
                     <List.Item.Detail.Metadata.Label
                       title="Hosts"
                       text={pack.hosts.join(', ') || 'None'}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Certificates"
+                      text={certificateDetails || 'None'}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Validation Errors"

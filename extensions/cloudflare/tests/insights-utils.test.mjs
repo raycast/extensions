@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 
 import {
   certificateHealth,
+  certificatePackHealth,
   formatBytes,
   formatPercentage,
   formatZoneSettingValue,
@@ -40,6 +41,30 @@ describe('Cloudflare insight formatting', () => {
         new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
       ),
       'healthy',
+    );
+  });
+
+  it('uses the least healthy certificate and earliest expiry for a pack', () => {
+    const laterExpiry = new Date(
+      Date.now() + 90 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    const earlierExpiry = new Date(
+      Date.now() + 10 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    assert.deepEqual(
+      certificatePackHealth('active', [
+        { status: 'active', expiresOn: laterExpiry },
+        { status: 'active', expiresOn: earlierExpiry },
+      ]),
+      { health: 'warning', earliestExpiresOn: earlierExpiry },
+    );
+    assert.equal(
+      certificatePackHealth('active', [
+        { status: 'active', expiresOn: laterExpiry },
+        { status: 'inactive', expiresOn: earlierExpiry },
+      ]).health,
+      'error',
     );
   });
 });

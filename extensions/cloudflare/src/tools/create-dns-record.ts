@@ -5,6 +5,8 @@ import {
   normalizeDnsRecordName,
 } from '../dns-utils';
 import { withCloudflareAccessToken, getCloudflareService } from '../oauth';
+import { buildCreateDnsConfirmationDetails } from '../tool-confirmations';
+import { resolveZone } from './helpers';
 
 interface Input {
   /** Zone ID returned by List Zones. */
@@ -25,19 +27,14 @@ interface Input {
   comment?: string;
 }
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => ({
-  message: 'Create this Cloudflare DNS record?',
-  info: [
-    { name: 'Zone ID', value: input.zoneId },
-    { name: 'Record', value: `${input.type} ${input.name}` },
-    { name: 'Content', value: input.content },
-    { name: 'TTL', value: String(input.ttl ?? 1) },
-    {
-      name: 'Proxied',
-      value: input.proxied === undefined ? undefined : String(input.proxied),
-    },
-  ],
-});
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const context = await resolveZone(input.zoneId);
+  return buildCreateDnsConfirmationDetails(
+    input,
+    context.zone.name,
+    normalizeDnsRecordName(input.name, context.zone.name),
+  );
+};
 
 async function tool(input: Input) {
   const ttl = input.ttl ?? 1;
@@ -53,13 +50,7 @@ async function tool(input: Input) {
     throw new Error('priority is required for MX records.');
   }
 
-  const accounts = await getCloudflareService().listAccounts();
-  const zoneGroups = await Promise.all(
-    accounts.map(async (account) => getCloudflareService().listZones(account)),
-  );
-  const zone = zoneGroups.flat().find((zone) => zone.id === input.zoneId);
-  if (!zone)
-    throw new Error('zoneId is not accessible. Call List Zones first.');
+  const { zone } = await resolveZone(input.zoneId);
 
   const record = await getCloudflareService().createDnsRecord(zone.id, {
     type: input.type,

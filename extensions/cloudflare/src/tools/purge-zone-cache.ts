@@ -1,5 +1,10 @@
 import { Action, Tool } from '@raycast/api';
 import { withCloudflareAccessToken, getCloudflareService } from '../oauth';
+import {
+  buildPurgeConfirmationDetails,
+  selectedPurgeModes,
+} from '../tool-confirmations';
+import { resolveZone } from './helpers';
 
 interface Input {
   /** Zone ID returned by List Zones. */
@@ -14,59 +19,24 @@ interface Input {
   prefixes?: string[];
 }
 
-function selectedMode(input: Input) {
-  const modes = [
-    input.urls?.length ? 'URLs' : undefined,
-    input.hosts?.length ? 'hostnames' : undefined,
-    input.tags?.length ? 'tags' : undefined,
-    input.prefixes?.length ? 'prefixes' : undefined,
-  ].filter((value): value is string => Boolean(value));
-  return modes;
-}
-
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const modes = selectedMode(input);
+  const context = await resolveZone(input.zoneId);
+  const modes = selectedPurgeModes(input);
   return {
     style: modes.length === 0 ? Action.Style.Destructive : Action.Style.Regular,
-    message:
-      modes.length === 0
-        ? 'Purge everything cached for this Cloudflare zone?'
-        : `Purge cached content matching ${modes.join(', ')}?`,
-    info: [
-      { name: 'Zone ID', value: input.zoneId },
-      { name: 'URLs', value: input.urls?.join('\n') },
-      { name: 'Hostnames', value: input.hosts?.join('\n') },
-      { name: 'Tags', value: input.tags?.join(', ') },
-      { name: 'Prefixes', value: input.prefixes?.join('\n') },
-    ],
+    ...buildPurgeConfirmationDetails(input, context.zone.name),
   };
 };
 
 async function tool(input: Input) {
-  const modes = selectedMode(input);
+  const modes = selectedPurgeModes(input);
   if (modes.length > 1) {
     throw new Error(
       'Provide only one of urls, hosts, tags, or prefixes per purge request.',
     );
   }
 
-  const accounts = await getCloudflareService().listAccounts();
-  const zoneGroups = await Promise.all(
-    accounts.map(async (account) =>
-      (await getCloudflareService().listZones(account)).map((zone) => ({
-        account,
-        zone,
-      })),
-    ),
-  );
-  const context = zoneGroups
-    .flat()
-    .find(({ zone }) => zone.id === input.zoneId);
-  if (!context) {
-    throw new Error(
-      'zoneId is not accessible. Call List Zones to resolve a valid zone ID.',
-    );
-  }
+  const context = await resolveZone(input.zoneId);
 
   let result;
   if (input.urls?.length) {

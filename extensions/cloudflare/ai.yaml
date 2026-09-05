@@ -9,7 +9,7 @@ instructions: |
   Use get-dnssec-status when asked about current DNSSEC state or registrar details. To diagnose a Pages deployment, resolve the project and deployment with list-pages-projects and list-deployments before calling get-pages-deployment-logs.
   Use get-zone-analytics for request, bandwidth, cache, visitor, page-view, or threat trends. Treat analytics as an aggregate for the requested 24-hour, 7-day, or 30-day window.
   Use get-zone-settings to inspect the current SSL/TLS mode, minimum TLS version, HTTPS redirects, HTTP versions, security level, cache settings, Brotli, and development mode. These settings are read-only in this extension.
-  Use list-ssl-certificates for certificate expiry, issuer, covered hostnames, status, and validation errors. A warning means an active certificate expires within 30 days; an error means the certificate pack is not active.
+  Use list-ssl-certificates for certificate expiry, issuer, covered hostnames, status, and validation errors. A warning means at least one active certificate expires within 30 days; an error means the pack or any contained certificate is inactive, expired, or has validation errors. Use earliestExpiresOn for the pack's next expiry and inspect every certificate entry when explaining health.
   Use list-worker-routes to explain which Worker handles a hostname or URL pattern. A route without a Worker name is disabled.
   Use inspect-worker after list-workers. Omit versionId to inspect the newest version. Worker binding names, types, and resource identifiers are available, but secret values are never returned.
   Audit-log results intentionally omit actor IP addresses. Never invent account IDs, zone IDs, record IDs, deployment IDs, DNS values, or Cloudflare URLs.
