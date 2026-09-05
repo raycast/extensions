@@ -1,5 +1,12 @@
 # Toothpick Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows support for connecting, disconnecting, toggling, and refreshing Bluetooth headphones and speakers.
+- Windows connections turn Bluetooth on when needed and give the device you chose priority over automatic reconnections.
+- blueutil on macOS now turns Bluetooth on before connecting.
+- Removed the setup screen shown before first use.
+
 ## [Add Keyboard Shortcuts] - 2026-05-16
 
 - Added the standard Refresh keyboard shortcut to the **Refresh** action in Manage Bluetooth Connections.

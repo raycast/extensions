@@ -20,7 +20,13 @@ Connecting to your Bluetooth devices has never been faster :)
 ## Getting Started
 
 Visit this extension's [store page](https://www.raycast.com/VladCuciureanu/Toothpick) to get started.  
-After installing, follow the instructions on screen, and you should be good to go!
+After installing, open **Manage Bluetooth Connections** or configure a favorite device command.
+
+### Windows support
+
+Toothpick works on Windows without any extra software. You can connect, disconnect, toggle, and refresh Bluetooth
+headphones and speakers. Windows handles keyboards, mice, and similar devices, so Toothpick lists them without
+showing connection controls for them.
 
 ## Setting up favorite devices
 
@@ -31,7 +37,7 @@ After installing, follow the instructions on screen, and you should be good to g
 
 You should now be able to connect to your device of choice via the configured commands.
 
-## Enabling 'blueutil' backend
+## Enabling 'blueutil' backend on macOS
 
 The default 'AppleScript' Bluetooth backend works and is available out-of-the-box on modern macOS installs.  
 That said, AppleScript itself is flaky at best. Various device-specific issues popped up with no way to reproduce them.  
@@ -63,7 +69,7 @@ supported, all you need to do is:
 0. Connect your device
 1. Open this extension in Raycast
 2. Highlight your device
-3. Press 'Command + K'
+3. Press 'Command + K' on macOS or 'Ctrl + K' on Windows.
 4. Run 'Copy Device Data' command
 5. Paste your data in an issue using [this template](https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2Cfeature+request&template=extension_feature_request.yml&title=%5BToothpick%5D+Device+Support+Form&extension-url=https://www.raycast.com/VladCuciureanu/toothpick&description=%3Cb%3EDevice%20brand%20and%20model%3C%2Fb%3E%0AReplace%20this%20line%20with%20your%20device%27s%20brand%20name%20and%20model%0A%0A%3Cb%3EDevice%20data%3C%2Fb%3E%0AReplace%20this%20line%20with%20the%20copied%20data).
 6. ???
