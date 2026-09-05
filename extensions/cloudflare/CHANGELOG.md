@@ -1,6 +1,6 @@
 # Cloudflare Changelog
 
-## [OAuth Support] - {PR_MERGE_DATE}
+## [OAuth Support] - 2026-09-05
 
 - Added OAuth sign-in with secure token storage and automatic token refresh while preserving API tokens as an optional fallback.
 - Added commands for searching and editing DNS records, viewing account audit logs, browsing recent Pages and Workers deployments, and purging cache directly.
