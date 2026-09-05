@@ -41,14 +41,13 @@ import {
   enabledSources,
   openCommandForSource,
   relativeFreshness,
-  sameEnabledSources,
   summarizeDockScan,
 } from "./domain/unread-count";
 import { messageIcon, sourceViewItems, type SourceViewItem, type ViewItemStatus } from "./domain/view-unreads";
 import type { StoredSource } from "./domain/source-catalog";
 import { runOpenCommand } from "./open-source";
 import { loadSourceCatalog, saveSourceCatalog } from "./source-catalog-store";
-import { loadUnreadSnapshot, saveUnreadSnapshot } from "./unread-snapshot-store";
+import { loadUnreadSnapshot } from "./unread-snapshot-store";
 
 const dockScans = new DockScanCoordinator((sources, timeout) => scanDock(sources, timeout));
 
@@ -83,26 +82,10 @@ export default function ViewUnreadsCommand() {
         const enabled = enabledSources(rows);
         if (enabled.length === 0 || !(await loadAccessCheckState()).setupGate) return;
         setRefreshing(true);
-        // A scan's data is no newer than its start: the menu's cycle can write
-        // a fresher snapshot and queued edits can reshape the Catalog while it
-        // runs, so this scan only persists while it is still the most recent
-        // reading of an unchanged Catalog.
-        const scanStartedAt = new Date();
         const scan = await dockScans.background(enabled);
-        await queuedEdits.current;
-        const [catalog, stored] = await Promise.all([loadSourceCatalog(), loadUnreadSnapshot()]);
-        if (!sameEnabledSources(enabled, catalog.sources)) return;
-        if (stored && stored.readAt > scanStartedAt) {
-          // A snapshot written mid-scan is the more recent reading; adopt it
-          // instead of regressing the store with this stale scan.
-          if (!cancelled) setSnapshot(stored);
-          return;
-        }
-        const fresh: UnreadSnapshot = { result: summarizeDockScan(enabled, scan), readAt: new Date() };
-        // A storage failure must not fail the refresh; the menu's next cycle
-        // would rewrite the snapshot anyway.
-        await saveUnreadSnapshot(fresh).catch(() => undefined);
-        if (!cancelled) setSnapshot(fresh);
+        // The menu alone retains snapshots. Keep this on-demand reading local
+        // so it cannot replace a menu reading that completed concurrently.
+        if (!cancelled) setSnapshot({ result: summarizeDockScan(enabled, scan), readAt: new Date() });
       } catch {
         // A failed refresh keeps the retained snapshot on display.
       } finally {
@@ -115,7 +98,11 @@ export default function ViewUnreadsCommand() {
     // snapshot promptly and keeps the Active header's freshness honest.
     const poll = setInterval(() => {
       void loadUnreadSnapshot().then((storedSnapshot) => {
-        if (!cancelled) setSnapshot(storedSnapshot);
+        if (!cancelled && storedSnapshot) {
+          // A local on-demand scan may be fresher than the retained menu
+          // snapshot; never replace it with an older reading.
+          setSnapshot((current) => (!current || storedSnapshot.readAt > current.readAt ? storedSnapshot : current));
+        }
       });
     }, 30_000);
     return () => {

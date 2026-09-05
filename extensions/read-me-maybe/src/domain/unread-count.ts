@@ -65,26 +65,6 @@ export function enabledSources(catalogRows: readonly StoredSource[]): StoredSour
 }
 
 /**
- * Whether the enabled Sources a scan covered still match the Catalog. A scan's
- * summary embeds each enabled row's id, Name, Application path, and derived
- * Open Command, so it may only persist while that projection — same rows, same
- * order — is unchanged; any other Catalog edit makes the scan's summary
- * obsolete even though the scan itself succeeded.
- */
-export function sameEnabledSources(scanned: readonly StoredSource[], catalogRows: readonly StoredSource[]): boolean {
-  const projection = (rows: readonly StoredSource[]) =>
-    enabledSources(rows).map((source) =>
-      [source.id, source.name, source.appPath ?? "", openCommandForSource(source)].join("\u0000"),
-    );
-  const scannedProjection = projection(scanned);
-  const catalogProjection = projection(catalogRows);
-  return (
-    scannedProjection.length === catalogProjection.length &&
-    scannedProjection.every((entry, index) => entry === catalogProjection[index])
-  );
-}
-
-/**
  * The derived Open Command for an application: `open '<appPath>'`. Single
  * quotes keep app paths with spaces intact; embedded quotes are escaped
  * POSIX-style.
