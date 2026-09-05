@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-compare",
+  "title": "AI Compare",
+  "description": "Search from Raycast and compare answers across multiple AI sites. Requires the AI Compare Chrome extension.",
+  "icon": "command-icon.png",
+  "author": "AICompare",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search with AI Compare",
+      "description": "Send a Raycast query to AI Compare and compare answers across selected AI sites.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sites",
+      "title": "Default Sites",
+      "description": "Comma-separated site names passed to the compare page.",
+      "type": "textfield",
+      "placeholder": "ChatGPT,Claude,Gemini",
+      "required": false
+    },
+    {
+      "name": "siteType",
+      "title": "Site Type",
+      "description": "AI Compare site category passed as the type URL parameter.",
+      "type": "textfield",
+      "placeholder": "information",
+      "default": "information",
+      "required": false
+    },
+    {
+      "name": "openclawMode",
+      "title": "OpenClaw Mode",
+      "description": "Include openclaw=1 in the launch URL for automation/test runners.",
+      "type": "checkbox",
+      "label": "Enable OpenClaw URL mode",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
