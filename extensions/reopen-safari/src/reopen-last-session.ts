@@ -1,37 +1,18 @@
 import { closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
-// Localized menu item titles for "Reopen All Windows from Last Session".
-// Unmatched locales fall back to a structural lookup (see AppleScript below).
-const MENU_ITEM_NAMES = [
-  "Reopen All Windows from Last Session", // English
-  "마지막 세션에서 모든 윈도우 다시 열기", // Korean
-  "最後のセッションのすべてのウインドウを開き直す", // Japanese
-  "重新打开上次会话的所有窗口", // Chinese (Simplified)
-  "重新開啟上次工作階段的所有視窗", // Chinese (Traditional)
-  "Alle Fenster der letzten Sitzung erneut öffnen", // German
-  "Rouvrir toutes les fenêtres de la dernière session", // French
-  "Reabrir todas las ventanas de la última sesión", // Spanish
-  "Riapri tutte le finestre dell'ultima sessione", // Italian
-  "Reabrir Todas as Janelas da Última Sessão", // Portuguese
-  "Открыть все окна последнего сеанса", // Russian
-  "Alle vensters van vorige sessie opnieuw openen", // Dutch
-];
-
 const script = `
 on clickReopenItem()
   tell application "System Events"
     tell process "Safari"
-      set candidateNames to {${MENU_ITEM_NAMES.map((n) => JSON.stringify(n)).join(", ")}}
-
       -- The History menu is always the 6th menu bar item
       -- (Apple, Safari, File, Edit, View, History), regardless of locale.
       set historyMenu to menu 1 of menu bar item 6 of menu bar 1
 
-      -- 1) Match by localized menu item title.
+      -- 1) Match the menu item by its English title.
       repeat with mi in menu items of historyMenu
         set n to name of mi
-        if n is not missing value and candidateNames contains n then
+        if n is not missing value and n is "Reopen All Windows from Last Session" then
           if enabled of mi then
             click mi
             return "ok"
@@ -41,8 +22,9 @@ on clickReopenItem()
         end if
       end repeat
 
-      -- 2) Structural fallback for unmatched locales: the target sits two
-      -- items below "Recently Closed", the first submenu item in History.
+      -- 2) Locale-independent structural lookup for non-English systems: the
+      -- target sits two items below "Recently Closed", the first submenu item
+      -- in the History menu.
       set historyItems to menu items of historyMenu
       repeat with i from 1 to (count of historyItems)
         if exists menu 1 of (item i of historyItems) then
@@ -117,7 +99,9 @@ export default async function main() {
   await closeMainWindow();
 
   try {
-    const result = await runAppleScript(script, { timeout: 15000 });
+    // The script itself may wait up to ~25s (Safari launch, menu bar, restored
+    // windows), so the outer timeout must comfortably exceed that budget.
+    const result = await runAppleScript(script, { timeout: 45000 });
 
     switch (result.trim()) {
       case "ok":
