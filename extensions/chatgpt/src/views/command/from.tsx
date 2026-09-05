@@ -5,6 +5,7 @@ import { Command, CommandContentSource, CommandHook } from "../../type";
 
 import { getConfiguration } from "../../hooks/useChatGPT";
 import { useModel } from "../../hooks/useModel";
+import { orderModelOptionsForSelection } from "../../utils/model-support";
 
 export const CommandForm = (props: {
   cmd?: Command;
@@ -65,7 +66,7 @@ export const CommandForm = (props: {
     initialValues: {
       name: cmd?.name ?? props.name ?? "",
       temperature: cmd?.temperature.toString() ?? "1",
-      model: cmd?.model ?? "gpt-5-nano",
+      model: cmd?.model ?? "gpt-5.4-mini",
       prompt: cmd?.prompt ?? "",
       contentSource: cmd?.contentSource ?? "selectedText",
       isDisplayInput: cmd?.isDisplayInput ?? false,
@@ -92,7 +93,7 @@ export const CommandForm = (props: {
         <Form.TextField title="Model" placeholder="Custom model" {...itemProps.model} />
       ) : (
         <Form.Dropdown title="Model" placeholder="Choose model" {...itemProps.model}>
-          {models.option.map((option) => (
+          {orderModelOptionsForSelection(models.option).map((option) => (
             <Form.Dropdown.Item value={option} title={option} key={option} />
           ))}
         </Form.Dropdown>

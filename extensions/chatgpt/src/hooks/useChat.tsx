@@ -2,8 +2,11 @@ import { clearSearchBar, getPreferenceValues, showToast, Toast } from "@raycast/
 import { useCallback, useMemo, useRef, useState } from "react";
 import say from "say";
 import { v4 as uuidv4 } from "uuid";
-import { Chat, ChatHook, Model } from "../type";
+import { Chat, ChatHook, Message, Model } from "../type";
 import { buildUserMessage, chatTransformer } from "../utils";
+import { requestCodexResponse } from "../utils/codex-responses";
+import { resolveAuthStatus } from "../utils/auth";
+import { resolveModelOptionForAuth } from "../utils/model-support";
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
@@ -25,7 +28,7 @@ function hasUnsupportedReasoningEffortError(error: unknown): boolean {
   );
 }
 
-export function useChat<T extends Chat>(props: T[]): ChatHook {
+export function useChat<T extends Chat>(props: T[], initialCodexThreadId?: string | null): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
@@ -38,6 +41,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   });
   const [streamData, setStreamData] = useState<Chat | undefined>();
   const abortControllerRef = useRef<AbortController | null>(null);
+  const codexThreadRef = useRef<{ threadId: string | null; instructions: string }>({
+    threadId: initialCodexThreadId ?? null,
+    instructions: "",
+  });
 
   const [isHistoryPaused] = useState<boolean>(() => {
     return getPreferenceValues<{
@@ -48,11 +55,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   const history = useHistory();
   const isAutoTTS = useAutoTTS();
   const proxy = useProxy();
-  const chatGPT = useChatGPT();
+  const chatGPT = useChatGPT({ allowMissingApiKey: true });
 
   async function ask(question: string, files: string[], model: Model) {
     clearSearchBar();
 
+    setErrorMsg(null);
+    setIsAborted(false);
     setLoading(true);
     const toast = await showToast({
       title: "Getting your answer...",
@@ -80,7 +89,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         return { apiKey: {}, params: {} };
       }
       return {
-        apiKey: { "api-key": config.apiKey },
+        apiKey: { "api-key": config.apiKey ?? "" },
         params: { "api-version": "2023-06-01-preview" },
       };
     };
@@ -99,72 +108,130 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     const selectedReasoningEffort =
       model.enableReasoningEffortChange && model.reasoningEffort !== "none" ? model.reasoningEffort : undefined;
 
-    const createCompletion = (includeReasoningEffort: boolean) =>
-      chatGPT.chat.completions.create(
-        {
-          model: model.option,
-          temperature: Number(model.temperature),
-          ...(includeReasoningEffort && selectedReasoningEffort ? { reasoning_effort: selectedReasoningEffort } : {}),
-          messages: [
-            ...chatTransformer([...data].reverse(), model.prompt),
-            { role: "user", content: buildUserMessage(question, files) },
-          ],
-          stream: useStream,
-        },
-        requestOptions,
-      );
     let retriedWithoutReasoningEffort = false;
 
     try {
-      let res: ChatCompletion | Stream<ChatCompletionChunk>;
-      try {
-        res = await createCompletion(Boolean(selectedReasoningEffort));
-      } catch (error) {
-        if (selectedReasoningEffort && hasUnsupportedReasoningEffortError(error)) {
-          retriedWithoutReasoningEffort = true;
-          toast.title = "Reasoning effort not supported";
-          toast.message = "Retrying without effort setting...";
-          toast.style = Toast.Style.Animated;
-          res = await createCompletion(false);
-        } else {
-          throw error;
-        }
+      const auth = await resolveAuthStatus();
+      const modelOption = resolveModelOptionForAuth(model.option, auth.provider);
+
+      const messages: Message[] = [
+        ...chatTransformer([...data].reverse(), model.prompt),
+        { role: "user", content: buildUserMessage(question, files) },
+      ];
+
+      if (auth.provider === "chatgpt" && modelOption !== model.option) {
+        toast.message = `Using ${modelOption} for ChatGPT sign-in.`;
       }
 
-      if (useStream) {
-        const stream = res as Stream<ChatCompletionChunk>;
+      if (auth.provider === "chatgpt") {
+        const onDelta = (content: string) => {
+          if (!content) {
+            return;
+          }
+          chat.answer += content;
+          setStreamData({ ...chat, answer: chat.answer });
+        };
 
-        for await (const chunk of stream) {
-          try {
-            const content = chunk.choices[0]?.delta?.content;
+        const instructions = model.prompt;
+        const currentCodexThreadId =
+          codexThreadRef.current.instructions === instructions ? codexThreadRef.current.threadId : null;
 
-            if (content) {
-              chat.answer += chunk.choices[0].delta.content;
-              setStreamData({ ...chat, answer: chat.answer });
-            }
-          } catch (error) {
-            if (abortSignal.aborted) {
-              toast.title = "Request canceled";
-              toast.message = undefined;
-              setIsAborted(true);
-            } else {
-              const message = `Couldn't stream message: ${error}`;
-              toast.title = "Error";
-              toast.message = message;
-              setErrorMsg(message);
-            }
-            toast.style = Toast.Style.Failure;
-            setLoading(false);
+        const response = await requestCodexResponse({
+          model: modelOption,
+          messages,
+          instructions,
+          stream: useStream,
+          signal: abortSignal,
+          onDelta,
+          threadId: currentCodexThreadId,
+        });
+
+        codexThreadRef.current = {
+          threadId: response.threadId,
+          instructions,
+        };
+
+        chat = { ...chat, answer: response.text };
+
+        if (useStream) {
+          setTimeout(async () => {
+            setStreamData(undefined);
+          }, 5);
+        }
+      } else {
+        if (auth.provider === "none") {
+          throw new Error("You are not signed in. Add an API key in extension preferences or sign in with ChatGPT.");
+        }
+
+        if (!chatGPT) {
+          throw new Error("OpenAI API key is missing. Add it in extension preferences.");
+        }
+
+        const createCompletion = (includeReasoningEffort: boolean) =>
+          chatGPT.chat.completions.create(
+            {
+              model: modelOption,
+              temperature: Number(model.temperature),
+              ...(includeReasoningEffort && selectedReasoningEffort
+                ? { reasoning_effort: selectedReasoningEffort }
+                : {}),
+              messages,
+              stream: useStream,
+            },
+            requestOptions,
+          );
+
+        let response: ChatCompletion | Stream<ChatCompletionChunk>;
+        try {
+          response = await createCompletion(Boolean(selectedReasoningEffort));
+        } catch (error) {
+          if (selectedReasoningEffort && hasUnsupportedReasoningEffortError(error)) {
+            retriedWithoutReasoningEffort = true;
+            toast.title = "Reasoning effort not supported";
+            toast.message = "Retrying without effort setting...";
+            toast.style = Toast.Style.Animated;
+            response = await createCompletion(false);
+          } else {
+            throw error;
           }
         }
 
-        setTimeout(async () => {
-          setStreamData(undefined);
-        }, 5);
-      } else {
-        const completion = res as ChatCompletion;
-        chat = { ...chat, answer: completion.choices.map((x) => x.message)[0]?.content ?? "" };
+        if (useStream) {
+          const stream = response as Stream<ChatCompletionChunk>;
+
+          for await (const chunk of stream) {
+            try {
+              const content = chunk.choices[0]?.delta?.content;
+
+              if (content) {
+                chat.answer += content;
+                setStreamData({ ...chat, answer: chat.answer });
+              }
+            } catch (error) {
+              if (abortSignal.aborted) {
+                toast.title = "Request canceled";
+                toast.message = undefined;
+                setIsAborted(true);
+              } else {
+                const message = `Couldn't stream message: ${error}`;
+                toast.title = "Error";
+                toast.message = message;
+                setErrorMsg(message);
+              }
+              toast.style = Toast.Style.Failure;
+              setLoading(false);
+            }
+          }
+
+          setTimeout(async () => {
+            setStreamData(undefined);
+          }, 5);
+        } else {
+          const completion = response as ChatCompletion;
+          chat = { ...chat, answer: completion.choices.map((x) => x.message)[0]?.content ?? "" };
+        }
       }
+
       if (isAutoTTS) {
         say.stop();
         say.speak(chat.answer);
@@ -195,7 +262,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         await history.add(chat);
       }
     } catch (err) {
-      if (abortSignal.aborted) {
+      if (abortSignal.aborted || isAbortError(err)) {
         toast.title = "Request canceled";
         toast.message = undefined;
         setIsAborted(true);
@@ -224,11 +291,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
   const clear = useCallback(async () => {
     setData([]);
+    codexThreadRef.current = { threadId: null, instructions: "" };
   }, [setData]);
 
   return useMemo(
     () => ({
       data,
+      codexThreadId: codexThreadRef.current.threadId,
       errorMsg,
       setData,
       isLoading,
@@ -244,6 +313,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     }),
     [
       data,
+      codexThreadRef.current.threadId,
       errorMsg,
       setData,
       isLoading,
@@ -258,4 +328,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       abort,
     ],
   );
+}
+
+function isAbortError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const lowerMessage = error.message.toLowerCase();
+  return error.name === "AbortError" || lowerMessage.includes("abort") || lowerMessage.includes("canceled");
 }

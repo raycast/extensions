@@ -1,8 +1,7 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Model, ModelHook, ReasoningEffort } from "../type";
-import { getConfiguration, useChatGPT } from "./useChatGPT";
-import { useProxy } from "./useProxy";
+import { orderModelOptionsForSelection, CHATGPT_CODEX_SUPPORTED_MODELS } from "../utils/model-support";
 
 type StoredModel = Partial<Model> & Pick<Model, "id">;
 
@@ -12,7 +11,7 @@ export const DEFAULT_MODEL: Model = {
   created_at: new Date().toISOString(),
   name: "Default",
   prompt: "You are a helpful assistant.",
-  option: "gpt-5-nano",
+  option: "gpt-5.4-mini",
   temperature: "1",
   enableReasoningEffortChange: false,
   reasoningEffort: "medium",
@@ -56,62 +55,9 @@ function normalizeModels(models: Record<string, StoredModel>): Record<string, Mo
 export function useModel(): ModelHook {
   const [data, setData] = useState<Record<string, Model>>({});
   const [isLoading, setLoading] = useState<boolean>(true);
-  const [isFetching, setFetching] = useState<boolean>(true);
-  const gpt = useChatGPT();
-  const proxy = useProxy();
-  const { useAzure, isCustomModel } = getConfiguration();
-  const [option, setOption] = useState<Model["option"][]>(["gpt-5-nano", "gpt-5.2-chat-latest"]);
+  const [isFetching] = useState<boolean>(false);
+  const [option] = useState<Model["option"][]>(orderModelOptionsForSelection([...CHATGPT_CODEX_SUPPORTED_MODELS]));
   const isInitialMount = useRef(true);
-
-  useEffect(() => {
-    if (isCustomModel) {
-      // If choose to use custom model, we don't need to fetch models from the API
-      setFetching(false);
-      return;
-    }
-    if (!useAzure) {
-      gpt.models
-        .list({ httpAgent: proxy })
-        .then((res) => {
-          let models = res.data;
-          // some provider return text/plain content type
-          // and the sdk `defaultParseResponse` simply return `text`
-          if (models.length === 0) {
-            try {
-              const body = JSON.parse((res as unknown as { body: string }).body);
-              models = body.data;
-            } catch {
-              // ignore try to parse it
-            }
-          }
-          setOption(models.map((x) => x.id));
-        })
-        .catch(async (err) => {
-          console.error(err);
-          if (!(err instanceof Error || err.message)) {
-            return;
-          }
-          await showToast(
-            err.message.includes("401")
-              ? {
-                  title: "Could not authenticate to API",
-                  message: "Please ensure that your API token is valid",
-                  style: Toast.Style.Failure,
-                }
-              : {
-                  title: "Error",
-                  message: err.message,
-                  style: Toast.Style.Failure,
-                },
-          );
-        })
-        .finally(() => {
-          setFetching(false);
-        });
-    } else {
-      setFetching(false);
-    }
-  }, [gpt]);
 
   useEffect(() => {
     (async () => {
@@ -130,6 +76,15 @@ export function useModel(): ModelHook {
           modelsById = storedModels.reduce((acc, model) => ({ ...acc, [model.id]: model }), {});
         } else {
           modelsById = storedModels;
+        }
+        if (!modelsById[DEFAULT_MODEL.id]) {
+          modelsById[DEFAULT_MODEL.id] = DEFAULT_MODEL;
+        } else if (!CHATGPT_CODEX_SUPPORTED_MODELS.includes(modelsById[DEFAULT_MODEL.id].option?.trim() as never)) {
+          modelsById[DEFAULT_MODEL.id] = {
+            ...modelsById[DEFAULT_MODEL.id],
+            option: DEFAULT_MODEL.option,
+            updated_at: new Date().toISOString(),
+          };
         }
         setData(normalizeModels(modelsById));
       }

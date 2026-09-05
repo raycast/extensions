@@ -1,5 +1,11 @@
 # Changelog
 
+## [Feature] - 2026-03-17
+
+- Feature: Add dual authentication support for API key and ChatGPT codexauth sign-in, with auth-gated command views and codex-backed chat responses for ChatGPT sessions.
+- Feature: Filter model options for ChatGPT codexauth sessions, add compatibility fallback for unsupported selections, and keep image understanding commands restricted to API key auth.
+- Feature: Set `gpt-5.2` as the default model for models and AI commands, including migration from legacy `gpt-4o-mini` defaults.
+
 ## [Feature] - 2026-03-09
 
 - Feature: Added a per-model `Reasoning` toggle with an `Effort` selector (`none`, `low`, `medium`, `high`) in the model form.

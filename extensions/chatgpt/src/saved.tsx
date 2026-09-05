@@ -6,8 +6,17 @@ import { PreferencesActionSection } from "./actions/preferences";
 import { useSavedChat } from "./hooks/useSavedChat";
 import { Chat } from "./type";
 import { AnswerDetailView } from "./views/answer-detail";
+import { AuthGate } from "./views/auth-required";
 
 export default function Saved() {
+  return (
+    <AuthGate>
+      <SavedView />
+    </AuthGate>
+  );
+}
+
+function SavedView() {
   const savedChat = useSavedChat();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);

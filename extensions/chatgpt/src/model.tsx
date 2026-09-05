@@ -6,11 +6,20 @@ import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
 import { Model as ModelType } from "./type";
 import { ModelForm } from "./views/model/form";
 import { ModelListItem, ModelListView } from "./views/model/list";
+import { AuthGate } from "./views/auth-required";
 import { ExportData, ImportData } from "./utils/import-export";
 import { ImportForm } from "./views/import-form";
 import { COMMAND_MODEL_PREFIX } from "./hooks/useCommand";
 
 export default function Model() {
+  return (
+    <AuthGate>
+      <ModelView />
+    </AuthGate>
+  );
+}
+
+function ModelView() {
   const models = useModel();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);

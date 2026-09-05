@@ -5,9 +5,18 @@ import { Command, CommandHook } from "./type";
 import packageJson from "../package.json";
 import { DEFAULT_COMMANDS, useCommand } from "./hooks/useCommand";
 import { CommandForm, iconsByContentSource } from "./views/command/from";
+import { AuthGate } from "./views/auth-required";
 import CommandView, { CommandLaunchProps } from "./views/command/command-view";
 
 export default function EntryPoint(props: CommandLaunchProps) {
+  return (
+    <AuthGate>
+      <SearchAiCommandEntryPoint {...props} />
+    </AuthGate>
+  );
+}
+
+function SearchAiCommandEntryPoint(props: CommandLaunchProps) {
   const requestModelId = props.launchContext?.commandId;
   if (requestModelId) {
     return <CommandView {...props} />;

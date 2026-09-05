@@ -1,20 +1,46 @@
 import { List } from "@raycast/api";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { ChangeModelProp } from "../../type";
 import { CacheAdapter } from "../../utils/cache";
+import { orderModelsForSelection } from "../../utils/model-support";
 
 export const ModelDropdown = (props: ChangeModelProp) => {
   const { models, onModelChange, selectedModel } = props;
-  const separateDefaultModel = models.filter((x) => x.id !== "default");
-  const defaultModel = models.find((x) => x.id === "default");
+  const orderedModels = useMemo(() => orderModelsForSelection(models), [models]);
+  const separateDefaultModel = orderedModels.filter((x) => x.id !== "default");
+  const defaultModel = orderedModels.find((x) => x.id === "default");
 
   const cache = new CacheAdapter("select_model");
+
+  function getFallbackModelId() {
+    if (defaultModel) {
+      return defaultModel.id;
+    }
+
+    return separateDefaultModel[0]?.id ?? "default";
+  }
 
   // it should same as `DropDown.storeValue`
   useEffect(() => {
     const selectModel = cache.get();
-    onModelChange(selectModel ?? "default");
-  }, []);
+
+    if (selectModel && orderedModels.some((model) => model.id === selectModel)) {
+      onModelChange(selectModel);
+      return;
+    }
+
+    onModelChange(getFallbackModelId());
+  }, [orderedModels]);
+
+  useEffect(() => {
+    if (orderedModels.length === 0) {
+      return;
+    }
+
+    if (!orderedModels.some((model) => model.id === selectedModel)) {
+      onModelChange(getFallbackModelId());
+    }
+  }, [orderedModels, selectedModel]);
 
   useEffect(() => {
     cache.set(selectedModel);
