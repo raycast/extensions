@@ -38,6 +38,18 @@ assert.match(
   /^﴿[\s\S]+﴾\n\n\[البقرة: 255\]$/,
 );
 
+const asr_ayahs = [1, 2, 3].map((ayah_number) =>
+  ayah_at({ surah_number: 103, ayah_number }),
+);
+assert.equal(
+  format_ayahs(
+    asr_ayahs,
+    { text_style: "uthmani", reference_style: "arabic", prefix: "none" },
+    "plain",
+  ),
+  `﴿${asr_ayahs[0].text} (١) ${asr_ayahs[1].text} (٢) ${asr_ayahs[2].text} (٣)﴾ [العصر: 1-3]`,
+);
+
 const sample_ayahs = [ayah_at({ surah_number: 1, ayah_number: 2 })];
 const sample_options = {
   text_style: "imlai",
