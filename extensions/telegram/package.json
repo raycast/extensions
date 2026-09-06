@@ -19,7 +19,7 @@
       "type": "textfield",
       "required": true,
       "title": "API ID",
-      "description": "Get your API ID from https://my.telegram.org/apps (log in → API development tools → create app)",
+      "description": "Get your API ID from https://my.telegram.org/apps (log in \u2192 API development tools \u2192 create app)",
       "placeholder": "12345678",
       "link": "https://my.telegram.org/apps"
     },
@@ -116,7 +116,7 @@
     {
       "name": "send-message",
       "title": "Send Telegram Message",
-      "description": "Send a message to a specific Telegram chat with optional file attachment from clipboard. Always confirm with the user before sending messages. Use browse-chats tool first to get the chatId. If the user wants to send a file, ask them to copy it to the clipboard first (⌘C on the file in Finder), then set useClipboardFile to true.",
+      "description": "Send a message to a specific Telegram chat with optional file attachment from clipboard. Always confirm with the user before sending messages. Use browse-chats tool first to get the chatId. If the user wants to send a file, ask them to copy it to the clipboard first (\u2318C on the file in Finder), then set useClipboardFile to true.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -130,7 +130,7 @@
           },
           "useClipboardFile": {
             "type": "boolean",
-            "description": "Set to true to attach the file currently in the clipboard. The user must copy a file to the clipboard (⌘C) before calling this tool."
+            "description": "Set to true to attach the file currently in the clipboard. The user must copy a file to the clipboard (\u2318C) before calling this tool."
           }
         },
         "required": [
@@ -180,7 +180,8 @@
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
   },
   "scripts": {
     "build": "ray build",
@@ -188,6 +189,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
   }
 }

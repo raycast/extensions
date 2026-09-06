@@ -1,5 +1,9 @@
 # Telegram Changelog
 
+## [Add Unit Tests] - {PR_MERGE_DATE}
+
+- Add a `vitest` suite covering message content parsing, sender attribution, media type detection, detail-pane markdown, and chat and date grouping, runnable with `npm test`
+
 ## [Support Rich Messages from Bots] - {PR_MERGE_DATE}
 
 - Show messages from bots that use rich text. Their content is carried in a field added in Telegram API layer 228, which the extension did not read, so these messages appeared as "Unknown" or were dropped from the list entirely
