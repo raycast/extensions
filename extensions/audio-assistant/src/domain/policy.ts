@@ -1,4 +1,13 @@
-import type { Item, Library, Player, Queue, RepeatMode, View } from "./model";
+import type { Item, Library, Player, Queue, RepeatMode, Track, View } from "./model";
+
+/** Unknown positions follow numbered tracks; preserve server order for ties and unknowns. */
+export function albumTrackOrder(tracks: Track[]): Track[] {
+  const position = (value?: number) =>
+    value !== undefined && Number.isInteger(value) && value > 0 ? value : Number.MAX_SAFE_INTEGER;
+  return [...tracks].sort(
+    (a, b) => position(a.discNumber) - position(b.discNumber) || position(a.trackNumber) - position(b.trackNumber),
+  );
+}
 
 export class AudioAssistantError extends Error {
   constructor(
@@ -46,5 +55,10 @@ export function searchLibrary(library: Library, view: View, query: string): Item
   if (view === "artists") return artists;
   if (view === "tracks") return tracks;
   if (view === "albums") return albums;
-  return [...players, ...(words.length ? artists : artists.slice(0, 5)), ...tracks, ...albums];
+  return [
+    ...players.filter((player) => player.available),
+    ...(words.length ? artists : artists.slice(0, 5)),
+    ...tracks,
+    ...albums,
+  ];
 }

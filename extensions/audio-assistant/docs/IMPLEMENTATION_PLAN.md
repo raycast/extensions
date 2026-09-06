@@ -32,6 +32,16 @@ Implemented: authenticated HTTP runtime, server/user-scoped active player, stric
 
 ## M2 — Search, paging and collection navigation (next)
 
+Latest user decision: artist drilldown combines Albums and Tracks sections on one searchable List, replacing the nested Albums/Tracks dropdown. Preserve the keyboard/focus fixes from acb5748.
+
+End-of-pass status: related artist/album actions, album disc/track ordering, and partial All discovery recovery are implemented. Automated suite now has 28 passing tests; check/build pass in WSL. Remaining M2 work includes native paging/navigation verification, collection rendering pagination and determining a supported strategy for deeper typed provider search. Collections reuse full API results locally; they are not server-paginated.
+
+Artist navigation slice: nested Albums grid/Tracks list implemented, retaining the five root views. Collection filtering reuses completed results until refresh; live browse requests accept cancellation. Related-media actions and explicit album ordering remain pending.
+
+All discovery now pages tracks and albums independently using an opaque combined cursor. Players and the artist preview are returned only on the initial page; exhausted media types stop fetching. Typed provider search retains its verified bounded API behavior rather than sending an unsupported offset.
+
+2026-09-06 slice: List/Grid now consume service paging cursors through a tested cancellable pager with identity deduplication and stable row IDs. Live empty-query Tracks/Artists/Albums can load beyond their first page. All discovery and typed search still need their adapter paging policy; collection navigation remains unfinished. Validation: 22 tests plus check/build passed in WSL; native paging remains pending.
+
 Depends on M1. Files: `src/ui/music-browser.tsx`, new search hook, service paging types if necessary.
 
 1. Replace first-page-only UI with Raycast pagination. Do not load all tracks up front.
@@ -59,6 +69,8 @@ Depends on M1; M2 supplies large-library UI. Files: `src/ui/session.tsx`, `playe
 Acceptance: current media changes while Music is open, queue edits and duplicate songs behave correctly, repeat cycles through all three modes, no leaked sockets/timers, timeout never duplicates a queue mutation. Keyboard checks verify volume targets highlighted player while transport targets active player.
 
 ## M4 — Players, groups and Sendspin management
+
+User-prioritized slice implemented: three Players sections, available-only All, capability/compatibility decoding, additive group member join/removal, static-member protection, follower/active-group handling and refreshed queue ownership. Verified membership API and schema read-only on the configured server. Remaining: native and audible multi-player tests, permanent group creation and broader group editing UI. This slice takes precedence over earlier milestone ordering per the user's explicit request.
 
 Depends on M1 and M3 target resolution. Files: add grouping domain/service contract, `src/ui/group-editor.tsx`, Players details/actions and decoder fixtures.
 

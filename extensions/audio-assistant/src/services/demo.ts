@@ -3,10 +3,20 @@ import type { Album, Artist, PlaybackAction, QueueIntent, RepeatMode, SearchRequ
 import { AudioAssistantError, clampVolume, requirePlayer, requireQueue, searchLibrary } from "../domain/policy";
 import { demoData } from "./demo-data";
 import type { MusicService } from "./port";
+import { requireGroupChange } from "../domain/grouping";
 
 /** Deterministic in-memory preview. No network, audio output, or persisted queue simulation. */
 export class DemoMusicService implements MusicService {
   readonly mode = "demo";
+  async setGroupMember(playerId: string, memberId: string, joined: boolean) {
+    const { leader, member, unchanged } = requireGroupChange(this.data.library.players, playerId, memberId, joined);
+    if (unchanged) return;
+    leader.groupMemberIds = joined
+      ? [...leader.groupMemberIds, memberId]
+      : leader.groupMemberIds.filter((id) => id !== memberId);
+    member.groupLeaderId = joined ? leader.id : undefined;
+    member.queueId = joined ? leader.queueId : `demo-queue-${member.id.split("-").at(-1)}`;
+  }
   async getScope() {
     return "demo:v1";
   }

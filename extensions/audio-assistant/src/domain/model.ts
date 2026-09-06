@@ -16,9 +16,13 @@ export interface Track extends MediaBase {
   kind: "track";
   artist: string;
   artistUris: string[];
+  artists?: Artist[];
+  albumItem?: Album;
   albumUri?: string;
   album: string;
   duration: number;
+  discNumber?: number;
+  trackNumber?: number;
 }
 export interface Artist extends MediaBase {
   kind: "artist";
@@ -44,7 +48,9 @@ export interface Player {
   activeGroupId?: string;
   groupLeaderId?: string;
   groupMemberIds: string[];
-  capabilities: { volume: boolean; mute: boolean; grouping: boolean };
+  canGroupWith?: string[];
+  staticGroupMemberIds?: string[];
+  capabilities: { volume: boolean; mute: boolean; grouping: boolean; nextPrevious?: boolean };
 }
 export interface QueueEntry {
   /** Queue entry identity, NOT track URI: duplicates are legal. */
@@ -76,4 +82,6 @@ export interface SearchRequest {
 export interface SearchPage {
   items: Item[];
   nextCursor?: string;
+  /** Sanitized partial-source failures; usable results must remain visible. */
+  warnings?: string[];
 }

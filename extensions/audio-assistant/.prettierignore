@@ -3,3 +3,5 @@ dist
 .tools
 package-lock.json
 raycast-env.d.ts
+.publish
+.native-test

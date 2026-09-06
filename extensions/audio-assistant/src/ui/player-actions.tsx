@@ -32,7 +32,7 @@ function ChoosePlayerView() {
 
 /** Volume/mute target a highlighted player; transport/repeat/shuffle always target the saved active player. */
 export function PlayerActions({ highlighted }: { highlighted?: Player }) {
-  const { players, queues, activeId, controller, service, run } = useMusic();
+  const { players, queues, activeId, controller, service, run, bridge } = useMusic();
   const active = players.find((p) => p.id === activeId);
   const target = highlighted ?? active;
   const queue = queues.find((q) => q.id === active?.queueId);
@@ -44,7 +44,7 @@ export function PlayerActions({ highlighted }: { highlighted?: Player }) {
             title="Choose Active Player"
             icon={Icon.Speaker}
             target={
-              <SessionRoute>
+              <SessionRoute sessionBridge={bridge}>
                 <ChoosePlayerView />
               </SessionRoute>
             }
@@ -56,18 +56,22 @@ export function PlayerActions({ highlighted }: { highlighted?: Player }) {
           shortcut={shortcuts.playPause}
           onAction={() => run(() => controller.playback("play-pause"))}
         />
-        <Action
-          title="Next Track"
-          icon={Icon.Forward}
-          shortcut={shortcuts.next}
-          onAction={() => run(() => controller.playback("next"))}
-        />
-        <Action
-          title="Previous Track"
-          icon={Icon.Rewind}
-          shortcut={shortcuts.previous}
-          onAction={() => run(() => controller.playback("previous"))}
-        />
+        {active?.capabilities.nextPrevious && (
+          <>
+            <Action
+              title="Next Track"
+              icon={Icon.Forward}
+              shortcut={shortcuts.next}
+              onAction={() => run(() => controller.playback("next"))}
+            />
+            <Action
+              title="Previous Track"
+              icon={Icon.Rewind}
+              shortcut={shortcuts.previous}
+              onAction={() => run(() => controller.playback("previous"))}
+            />
+          </>
+        )}
         {queue && active && (
           <>
             <Action

@@ -11,7 +11,7 @@ export const activePlayerStore: ActivePlayerStore = {
   set: (scope, id) => LocalStorage.setItem(`active-player:${scope}`, id),
 };
 export function createRuntime(): { service: MusicService; controller: PlaybackController } {
-  const preferences = getPreferenceValues<{ demoMode: boolean; serverUrl?: string; accessToken?: string }>();
+  const preferences = getPreferenceValues<Preferences>();
   if (!preferences.demoMode) {
     if (!preferences.serverUrl?.trim() || !preferences.accessToken?.trim()) {
       throw new AudioAssistantError(

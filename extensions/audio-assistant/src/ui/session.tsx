@@ -1,4 +1,14 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
+import { SessionBridge } from "../services/session-bridge";
 import { Action, ActionPanel, Detail, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import type { Player, Queue } from "../domain/model";
 import { activePlayerStore, createRuntime } from "../runtime";
@@ -6,6 +16,7 @@ import { reportError } from "./feedback";
 
 type Runtime = ReturnType<typeof createRuntime>;
 interface Session extends Runtime {
+  bridge: SessionBridge<Session>;
   players: Player[];
   queues: Queue[];
   activeId?: string;
@@ -17,8 +28,28 @@ interface Session extends Runtime {
 }
 const Context = createContext<Session | null>(null);
 
-/** Raycast renders pushed targets outside their parent's React context tree. Give every route its own runtime/session. */
-export function SessionRoute({ children }: { children: ReactNode }) {
+/** Raycast renders pushed targets outside their parent's React tree; bridge them to the root-owned session. */
+export function SessionRoute({
+  children,
+  sessionBridge,
+}: {
+  children: ReactNode;
+  sessionBridge?: SessionBridge<Session>;
+}) {
+  return sessionBridge ? (
+    <SharedSession bridge={sessionBridge}>{children}</SharedSession>
+  ) : (
+    <RootSession>{children}</RootSession>
+  );
+}
+
+function SharedSession({ children, bridge }: { children: ReactNode; bridge: SessionBridge<Session> }) {
+  const session = useSyncExternalStore(bridge.subscribe, bridge.getSnapshot);
+  if (!session) return <Detail isLoading markdown="Loading music…" />;
+  return <Context.Provider value={session}>{children}</Context.Provider>;
+}
+
+function RootSession({ children }: { children: ReactNode }) {
   const [state] = useState(() => {
     try {
       return { runtime: createRuntime() };
@@ -41,6 +72,7 @@ export function SessionRoute({ children }: { children: ReactNode }) {
 }
 
 export function MusicSession({ runtime, children }: { runtime: Runtime; children: ReactNode }) {
+  const [bridge] = useState(() => new SessionBridge<Session>());
   const [players, setPlayers] = useState<Player[]>([]);
   const [queues, setQueues] = useState<Queue[]>([]);
   const [activeId, setActiveId] = useState<string>();
@@ -89,11 +121,11 @@ export function MusicSession({ runtime, children }: { runtime: Runtime; children
       setBusy(false);
     }
   }
-  return (
-    <Context.Provider value={{ ...runtime, players, queues, activeId, revision, loading, busy, run, refresh }}>
-      {children}
-    </Context.Provider>
-  );
+  const session = { ...runtime, players, queues, activeId, revision, loading, busy, run, refresh, bridge };
+  useEffect(() => {
+    bridge.publish(session);
+  });
+  return <Context.Provider value={session}>{children}</Context.Provider>;
 }
 export function useMusic() {
   const session = useContext(Context);

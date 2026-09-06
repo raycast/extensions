@@ -1,10 +1,34 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { clampVolume, nextRepeat, requirePlayer, requireQueue, searchLibrary } from "../src/domain/policy";
+import {
+  albumTrackOrder,
+  clampVolume,
+  nextRepeat,
+  requirePlayer,
+  requireQueue,
+  searchLibrary,
+} from "../src/domain/policy";
 import { demoData } from "../src/services/demo-data";
 import { DemoMusicService } from "../src/services/demo";
 import { PlaybackController } from "../src/services/controller";
 import type { ActivePlayerStore } from "../src/services/port";
+
+test("album order sorts discs and tracks, preserves ties and leaves the source untouched", () => {
+  const track = demoData().library.tracks[0]!;
+  const tracks = [
+    { ...track, name: "unknown" },
+    { ...track, name: "disc two", discNumber: 2, trackNumber: 1 },
+    { ...track, name: "second", discNumber: 1, trackNumber: 2 },
+    { ...track, name: "first", discNumber: 1, trackNumber: 1 },
+    { ...track, name: "tie", discNumber: 1, trackNumber: 1 },
+    { ...track, name: "invalid", discNumber: -1, trackNumber: 0 },
+  ];
+  assert.deepEqual(
+    albumTrackOrder(tracks).map((item) => item.name),
+    ["first", "tie", "second", "disc two", "unknown", "invalid"],
+  );
+  assert.equal(tracks[0]?.name, "unknown");
+});
 
 function storage(): ActivePlayerStore {
   const values = new Map<string, string>();
@@ -20,7 +44,6 @@ test("All preserves player → artist preview → tracks → albums ordering and
   assert.deepEqual(
     searchLibrary(library, "all", "").map((i) => i.kind),
     [
-      "player",
       "player",
       "player",
       "artist",

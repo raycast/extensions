@@ -10,5 +10,5 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*", "tests/**/*", "raycast-env.d.ts"]
+  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "raycast-env.d.ts"]
 }

@@ -3,14 +3,87 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import test from "node:test";
 import { LiveMusicService, type CommandClient } from "../src/services/live";
+import { decodeTrack } from "../src/services/wire";
+
+test("related collections retain canonical provider identities and tolerate incomplete mappings", () => {
+  const values = fixture("tracks");
+  assert.ok(Array.isArray(values));
+  const track = decodeTrack(values[0]);
+  assert.equal(track.artists?.[0]?.uri, "library://artist/artist-1");
+  assert.equal(track.artists?.[0]?.itemId, "artist-1");
+  assert.equal(track.albumItem?.provider, "library");
+  assert.equal(track.albumItem?.itemId, "album-1");
+  const partial = decodeTrack({
+    ...values[0],
+    artists: [{ name: "Unknown", uri: "incomplete" }],
+    album: { name: "Missing identity" },
+  });
+  assert.deepEqual(partial.artists, []);
+  assert.equal(partial.albumItem, undefined);
+  assert.equal(partial.artist, "Unknown");
+});
 
 const fixture = (name: string): unknown =>
   JSON.parse(readFileSync(join(__dirname, "fixtures", `${name}.json`), "utf8"));
+
+test("collection cancellation is forwarded to every artist and album request", async () => {
+  const signals: (AbortSignal | undefined)[] = [];
+  const fixtureClient = new FixtureClient();
+  const live = new LiveMusicService({
+    serverUrl: "https://music.example.test",
+    client: {
+      command: async (command, args, signal) => {
+        if (command.includes("artist_tracks") || command.includes("artist_albums") || command.includes("album_tracks"))
+          signals.push(signal);
+        return fixtureClient.command(command, args);
+      },
+    },
+  });
+  const page = await live.search({ query: "", view: "all", limit: 100 });
+  const artist = page.items.find((item) => item.kind === "artist");
+  const album = page.items.find((item) => item.kind === "album");
+  assert.ok(artist && album);
+  const abort = new AbortController();
+  await live.browse(artist, abort.signal);
+  await live.browse(album, abort.signal);
+  assert.equal(signals.length, 3);
+  assert.ok(signals.every((signal) => signal === abort.signal));
+});
 
 interface Call {
   command: string;
   args: Record<string, unknown>;
 }
+
+test("All discovery retains healthy sources when one library request fails", async () => {
+  const fixtureClient = new FixtureClient();
+  const live = new LiveMusicService({
+    serverUrl: "https://music.example.test",
+    client: {
+      command: async (command, args) => {
+        if (command === "music/albums/library_items") throw new Error("untrusted server body");
+        return fixtureClient.command(command, args);
+      },
+    },
+  });
+  const page = await live.search({ query: "", view: "all", limit: 100 });
+  assert.ok(page.items.some((item) => item.kind === "player"));
+  assert.ok(page.items.some((item) => item.kind === "track"));
+  assert.deepEqual(page.warnings, ["Albums could not load. Use Refresh to retry."]);
+  assert.equal(JSON.stringify(page).includes("untrusted server body"), false);
+});
+
+test("All discovery reports total failures instead of presenting an empty library", async () => {
+  const live = new LiveMusicService({
+    serverUrl: "https://music.example.test",
+    client: {
+      command: async () => {
+        throw new Error("offline");
+      },
+    },
+  });
+  await assert.rejects(live.search({ query: "", view: "all", limit: 100 }), /offline/);
+});
 
 class FixtureClient implements CommandClient {
   calls: Call[] = [];
@@ -40,6 +113,31 @@ class FixtureClient implements CommandClient {
 function lastCall(client: FixtureClient, command: string): Call | undefined {
   return [...client.calls].reverse().find((call) => call.command === command);
 }
+
+test("All discovery advances media independently without repeating players or artist previews", async () => {
+  class PagedClient extends FixtureClient {
+    override async command(command: string, args: Record<string, unknown> = {}): Promise<unknown> {
+      const result = await super.command(command, args);
+      if (command === "music/tracks/library_items" && Number(args.offset) > 0) return [];
+      return result;
+    }
+  }
+  const client = new PagedClient();
+  const live = new LiveMusicService({ serverUrl: "https://music.example.test", client });
+  const first = await live.search({ query: "", view: "all", limit: 2 });
+  assert.ok(first.nextCursor);
+  const second = await live.search({ query: "", view: "all", limit: 2, cursor: first.nextCursor });
+  assert.deepEqual(second.items, []);
+  assert.equal(second.nextCursor, undefined);
+  assert.equal(client.calls.filter((call) => call.command === "players/all").length, 1);
+  assert.equal(client.calls.filter((call) => call.command === "music/artists/library_items").length, 1);
+  assert.equal(client.calls.filter((call) => call.command === "music/albums/library_items").length, 1);
+  assert.equal(lastCall(client, "music/tracks/library_items")?.args.offset, 2);
+  await assert.rejects(
+    live.search({ query: "", view: "all", limit: 2, cursor: '{"tracks":-1}' }),
+    /Invalid discovery cursor/,
+  );
+});
 
 const service = (client = new FixtureClient()) => ({
   client,
@@ -127,8 +225,11 @@ test("queue and player mutations emit exact commands without replay", async () =
     media: "library://track/track-1",
     option: "next",
   });
-  await live.playback("kitchen", "next");
-  assert.deepEqual(lastCall(client, "players/cmd/next")?.args, { player_id: "kitchen" });
+  await assert.rejects(live.playback("kitchen", "next"), /does not support/);
+  await assert.rejects(live.playback("kitchen", "previous"), /does not support/);
+  assert.equal(lastCall(client, "players/cmd/next"), undefined);
+  await live.playback("living-room", "next");
+  assert.deepEqual(lastCall(client, "players/cmd/next")?.args, { player_id: "living-room" });
   await live.setVolume("living-room", 105);
   assert.deepEqual(lastCall(client, "players/cmd/volume_set")?.args, {
     player_id: "living-room",

@@ -1,10 +1,14 @@
 # Next-model handoff
 
-The repository contains a compiling demo UI plus an M1 live adapter tested against sanitized current-protocol fixtures. Start with **M2** in `IMPLEMENTATION_PLAN.md`; real-server M1 validation remains pending until a server URL/token are supplied through Raycast preferences.
+The extension has a live HTTP adapter and a submitted Raycast Store PR (#30819). Read-only checks against Music Assistant 2.10.2/schema 65 and user-reported playback testing are recorded separately from automated checks. Do not treat all native/cross-platform validation as complete.
 
-## Paste this into the next task
+## Next task
 
-> Continue Audio Assistant in this workspace. Read AGENTS.md, docs/PRODUCT_SPEC.md, docs/API_NOTES.md, and docs/IMPLEMENTATION_PLAN.md. Implement M2: paginated search and complete artist/album navigation over the existing MusicService boundary. Preserve exactly four commands, explicit active-player selection, player-first All ordering, the five dropdown views, and shortcut targets. Work in WSL with Node >=22.22.2. Keep server JSON decoding in services, protect credentials, and retain explicit demo labeling. Extend sanitized fixtures for paging and stale-response cases. Run npm run check, npm run build, and Raycast lint; update milestone and validation notes. Report mocked checks separately from real-server/native checks.
+Latest user-requested slice: synced group membership is now implemented in Players (Available, Group, Offline sections); All hides offline players. See GROUP_PLAYBACK_PLAN.md. Native and audible sync checks remain pending; full group creation is outside this slice.
+
+Read `IMPROVEMENT_ROADMAP.md`, `IMPLEMENTATION_PLAN.md`, `PRODUCT_SPEC.md`, and `VALIDATION.md`. Continue the remaining M2 work before M3. The September 6 improvement pass added paged List/Grid browsing, independent All discovery cursors, artist album grids/track lists, collection caching/cancellation, related-media actions, album ordering, and partial discovery recovery. Each feature has its own local commit. The user stopped this pass; do not assume authorization for further work or publication from this handoff.
+
+Remaining M2 work: native scrolling/selection/Back checks, collection rendering pagination, and a verified strategy for deeper typed provider searches (the current global search contract has no cursor). Keep unsupported API parameters out of requests. Final automated status: 28 tests and check/build passed in WSL; native validation remains pending.
 
 ## Code map
 
@@ -32,12 +36,12 @@ The repository contains a compiling demo UI plus an M1 live adapter tested again
 - Enter selects a player, plays a track now, or browses an artist/album.
 - Play Next and Add to Queue do not interrupt current playback. Repeat cycles Off/Track/Queue.
 - Sendspin support means controlling existing server endpoints/groups, not implementing a receiver in Raycast.
-- This source has no credentials and no live server fixture yet. Fake test tokens are not connection settings.
+- Source and fixtures contain no live credentials. Tokens belong only in the password preference; fake test tokens are not connection settings.
 
 ## Known unfinished areas
 
-The live adapter exists and Live Mode is the default, but it has not been exercised against the user's server. Search UI consumes only the first page. Group editor, authenticated artwork proxying, richer now-playing details, exact volume, seek, advanced queue actions, and event synchronization are planned. Demo shuffle/repeat only update state; they do not simulate audio timing. Demo active-player selection persists, but demo queues reset on reopen.
+Live Mode is the default. Empty-query library views and All discovery paginate; typed global provider search remains bounded. Collections cache full API results and offer artist album grids and track lists, but do not yet paginate rendering. Group editing, richer Now Playing details, exact volume, seek, advanced queue actions, and event synchronization remain planned. Demo queues reset on reopen, and demo repeat/shuffle do not simulate audio timing.
 
-The `MusicService` interface deliberately covers the implemented preview slice. Extend it with paging for collections/queues, capability-rich grouping and event subscriptions in the corresponding milestones. Do not squeeze all future operations into an untyped string-command escape hatch.
+Extend the typed MusicService boundary for queue paging, grouping and subscriptions in their milestones. Never add an untyped command escape hatch in React. Recent changes have not been pushed to GitHub or added to the submitted Store PR.
 
 WSL Linux packages/runtime are installed locally. `.tools` is ignored and can be regenerated. A native Windows/macOS Raycast import is still required to prove UI/keyboard behavior. Avoid mixing host and WSL dependencies in the same node_modules directory.

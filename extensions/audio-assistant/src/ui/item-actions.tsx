@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import type { Artist, Album, Item } from "../domain/model";
 import { SessionRoute, useMusic } from "./session";
 import { PlayerActions } from "./player-actions";
@@ -6,7 +6,7 @@ import { QueueView } from "./queue-view";
 import { shortcuts } from "./shortcuts";
 
 export function ItemActions({ item, openCollection }: { item?: Item; openCollection: (item: Artist | Album) => void }) {
-  const { controller, run, refresh } = useMusic();
+  const { controller, run, refresh, bridge } = useMusic();
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -47,13 +47,36 @@ export function ItemActions({ item, openCollection }: { item?: Item; openCollect
         )}
       </ActionPanel.Section>
       <PlayerActions highlighted={item?.kind === "player" ? item : undefined} />
+      {item?.kind === "track" && (
+        <ActionPanel.Section title="Related Music">
+          {item.albumItem && (
+            <Action title="Browse Track Album" icon={Icon.Cd} onAction={() => openCollection(item.albumItem!)} />
+          )}
+          {item.artists?.map((artist) => (
+            <Action
+              key={artist.uri}
+              title={`Browse Artist: ${artist.name}`}
+              icon={Icon.Person}
+              onAction={() => openCollection(artist)}
+            />
+          ))}
+          <Action
+            title="Copy Media URI"
+            icon={Icon.Clipboard}
+            onAction={async () => {
+              await Clipboard.copy(item.uri);
+              await showToast({ style: Toast.Style.Success, title: "Copied Media URI" });
+            }}
+          />
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section title="Workspace">
         <Action.Push
           title="Show Queue"
           icon={Icon.List}
           shortcut={shortcuts.queue}
           target={
-            <SessionRoute>
+            <SessionRoute sessionBridge={bridge}>
               <QueueView />
             </SessionRoute>
           }

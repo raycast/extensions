@@ -22,6 +22,8 @@ No implementation code or branding was copied from these extensions.
 
 ## Music Assistant sources
 
+Synced playback implementation: directly read the configured server's `/api-docs/commands.json` and `/api-docs/schemas.json` on 2026-09-06. Confirmed `players/cmd/set_members` accepts `target_player` and optional `player_ids_to_add` / `player_ids_to_remove` arrays. Confirmed `group_members`, `static_group_members`, `can_group_with`, `synced_to` and `active_group` fields. Official [2.10.2 player controller](https://github.com/music-assistant/server/blob/2.10.2/music_assistant/controllers/players/controller.py) verifies SET_MEMBERS and compares expanded compatible player IDs, with active-group redirection and automatic follower ungrouping. The extension guards follower changes and uses additive edits, then refetches membership; it does not infer compatibility from Sendspin branding.
+
 Source snapshots identified during this pass:
 
 - Frontend `main`: `4864bc46559f6eb29936fc8ae963f693dfc6932b`.
@@ -67,6 +69,10 @@ These names/arguments were inspected in the official frontend. Confirm against t
 In particular verify `playerCommand`'s generated path and each target server's decorators. Queue options should map `play-now` → `play`, `play-next` → `next`, `add` → `add` only after enum/behavior confirmation. Do not use `replace` for Enter on a track. Album expansion, playback start position and queue behavior require live integration fixtures.
 
 ## Identity, capability and state rules
+
+The inspected Track model also declares `disc_number` and `track_number` (zero when unknown). Album navigation sorts positive integer positions while preserving original order for ties/unknowns.
+
+Related-media navigation (2026-09-06): inspected `media_items/media_item.py` at models snapshot `290fb0beb611d83faeed7665099093662b343871` through GitHub. Track artists and album may be full objects or ItemMappings. Decode their provider/item/URI identities before offering navigation; malformed optional mappings omit that action without dropping the track. No extra server endpoint is needed.
 
 The official frontend's `playMedia` uses the active player's `active_source` when it identifies a known queue; otherwise it falls back to the player's ID. Grouping and non-Music-Assistant sources complicate this. Build one tested resolver, including grouped children and unsupported foreign sources; do not scatter `queue_id = player.id` throughout views.
 

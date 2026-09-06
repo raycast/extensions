@@ -20,7 +20,7 @@ export interface MusicService {
   getPlayers(): Promise<Player[]>;
   getQueues(): Promise<Queue[]>;
   search(request: SearchRequest, signal?: AbortSignal): Promise<SearchPage>;
-  browse(item: Artist | Album): Promise<Library>;
+  browse(item: Artist | Album, signal?: AbortSignal): Promise<Library>;
   enqueue(playerId: string, track: Track, intent: QueueIntent): Promise<void>;
   playback(playerId: string, action: PlaybackAction): Promise<void>;
   setVolume(playerId: string, volume: number): Promise<void>;
@@ -28,6 +28,7 @@ export interface MusicService {
   setRepeat(playerId: string, repeat: RepeatMode): Promise<void>;
   setShuffle(playerId: string, shuffle: boolean): Promise<void>;
   removeQueueEntry(playerId: string, entryId: string): Promise<void>;
+  setGroupMember(playerId: string, memberId: string, joined: boolean): Promise<void>;
   dispose(): void;
 }
 export interface ActivePlayerStore {

@@ -8,6 +8,8 @@ Exactly three additional commands are allowed: Play/Pause, Next Track, Previous 
 
 ## Views
 
+Artist drilldown now uses a single List with Albums followed by Tracks and one shared search bar. No nested Albums/Tracks dropdown is shown; Enter still browses an album or plays a track. Root Artists and Albums retain their grids.
+
 | Dropdown              | Layout                       | Contents and Enter behavior                                                                                                                                                                                                          |
 | --------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | All (initial default) | Compact sectioned List       | Players → up to five artists → tracks → albums. Enter selects a player, immediately plays a track, or browses an artist/album.                                                                                                       |
@@ -61,6 +63,8 @@ Play Now policy: play the chosen track immediately while preserving the queue, u
 Queue operations address **queue entry IDs**, not media URIs; the same song can appear more than once. Repeat Track affects automatic completion, not an explicit Next action. Repeat Queue loops the complete server queue, not just visible search results.
 
 ## Grouping / Sendspin
+
+Updated user decision: Players has Available Players, Group Players, then Offline Players. All excludes offline outputs for both discovery and typed searches. Enter in Available Players selects the primary output. Group Players shows only available endpoints compatible with the selected output; Enter adds a member without changing the saved primary. Linked members expose Remove from Synced Group. Unsupported outputs show "Current output does not support synced group playback." No selection or no compatible matches gets its own explanatory row. A selected synced follower must use its leader to edit membership; permanent group members cannot be removed here.
 
 Players view is the control surface for grouping. Expose current leader, members, compatible targets, group volume vs individual volume, and source. Use server-reported capabilities and compatibility to decide which actions exist. Do not infer grouping support from a provider name alone.
 

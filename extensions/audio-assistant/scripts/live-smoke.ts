@@ -6,12 +6,13 @@ const serverUrl = process.env.AUDIO_ASSISTANT_URL;
 if (!token || !serverUrl) throw new Error("Set AUDIO_ASSISTANT_URL and AUDIO_ASSISTANT_TOKEN.");
 
 async function main() {
-  const tokenShape = token.split(".").map((segment) => segment.length);
+  if (!token || !serverUrl) throw new Error("Set AUDIO_ASSISTANT_URL and AUDIO_ASSISTANT_TOKEN.");
   const authProbe = await fetch(`${normalizeServerUrl(serverUrl)}/auth/me`, {
     headers: { Authorization: `Bearer ${token}` },
     signal: AbortSignal.timeout(10_000),
+    redirect: "error",
   });
-  console.log(JSON.stringify({ authMeStatus: authProbe.status, tokenShape }));
+  console.log(JSON.stringify({ authMeStatus: authProbe.status }));
   if (!authProbe.ok) {
     process.exitCode = 1;
     return;
@@ -47,7 +48,6 @@ async function main() {
         scopeResolved: Boolean(await service.getScope()),
         players: players.map((player) => ({
           available: player.available,
-          powered: player.powered,
           provider: player.provider,
           state: player.state,
           hasQueue: Boolean(player.queueId),

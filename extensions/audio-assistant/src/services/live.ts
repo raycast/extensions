@@ -15,6 +15,7 @@ import type {
 import { AudioAssistantError, clampVolume, requirePlayer } from "../domain/policy";
 import { normalizeServerUrl } from "./http-client";
 import type { MusicService } from "./port";
+import { groupLeader, isGroupMember, requireGroupChange } from "../domain/grouping";
 import {
   decodeAlbum,
   decodeArray,
@@ -41,6 +42,25 @@ interface LiveOptions {
 }
 
 type LibraryKind = "tracks" | "artists" | "albums";
+
+interface DiscoveryCursor {
+  tracks?: string;
+  albums?: string;
+}
+
+function discoveryCursor(value: string): DiscoveryCursor {
+  const parsed: unknown = JSON.parse(value);
+  if (typeof parsed !== "object" || parsed === null) throw new Error("Invalid discovery cursor.");
+  const result: DiscoveryCursor = {};
+  for (const key of ["tracks", "albums"] as const) {
+    const cursor = Reflect.get(parsed, key);
+    if (cursor !== undefined) {
+      if (typeof cursor !== "string" || !/^\d+$/.test(cursor)) throw new Error("Invalid discovery cursor.");
+      result[key] = cursor;
+    }
+  }
+  return result;
+}
 
 export class LiveMusicService implements MusicService {
   readonly mode = "live";
@@ -90,17 +110,31 @@ export class LiveMusicService implements MusicService {
     const summaries = decodeArray(queueValue, "queues", decodeQueueSummary);
     return Promise.all(
       summaries.map(async (summary) => {
-        const itemValue = await this.options.client.command("player_queues/items", {
-          queue_id: summary.id,
-          limit: 200,
-          offset: 0,
-        });
+        const entries: Queue["entries"] = [];
+        do {
+          const itemValue = await this.options.client.command("player_queues/items", {
+            queue_id: summary.id,
+            limit: 200,
+            offset: entries.length,
+          });
+          const page = decodeArray(itemValue, `queueItems.${summary.id}`, (item, path) =>
+            decodeQueueEntry(item, path, this.serverUrl),
+          );
+          const known = new Set(entries.map((entry) => entry.id));
+          if (page.some((entry) => known.has(entry.id)))
+            throw new AudioAssistantError("not-ready", "The queue changed while loading. Refresh to load it again.");
+          entries.push(...page);
+          if (entries.length >= summary.itemCount) break;
+          if (!page.length || entries.length >= 10000)
+            throw new AudioAssistantError(
+              "not-ready",
+              "Could not load the complete queue. Refresh or shorten the queue in Music Assistant.",
+            );
+        } while (entries.length < summary.itemCount);
         return {
           id: summary.id,
           active: summary.active,
-          entries: decodeArray(itemValue, `queueItems.${summary.id}`, (item, path) =>
-            decodeQueueEntry(item, path, this.serverUrl),
-          ),
+          entries,
           currentIndex: summary.currentIndex,
           repeat: summary.repeat,
           shuffle: summary.shuffle,
@@ -149,14 +183,53 @@ export class LiveMusicService implements MusicService {
       if (request.view === "tracks") return this.library("tracks", request, signal);
       if (request.view === "artists") return this.library("artists", request, signal);
       if (request.view === "albums") return this.library("albums", request, signal);
-      const artistRequest = { ...request, view: "artists" as const, limit: Math.min(5, request.limit) };
-      const [players, artists, tracks, albums] = await Promise.all([
-        this.getPlayers(),
-        this.library("artists", artistRequest, signal),
-        this.library("tracks", { ...request, view: "tracks", limit: Math.min(50, request.limit) }, signal),
-        this.library("albums", { ...request, view: "albums", limit: Math.min(25, request.limit) }, signal),
+      const cursor = request.cursor ? discoveryCursor(request.cursor) : { tracks: "0", albums: "0" };
+      const artistRequest = {
+        ...request,
+        cursor: undefined,
+        view: "artists" as const,
+        limit: Math.min(5, request.limit),
+      };
+      const empty: SearchPage = { items: [] };
+      const results = await Promise.allSettled([
+        request.cursor ? Promise.resolve([]) : this.getPlayers(),
+        request.cursor ? Promise.resolve(empty) : this.library("artists", artistRequest, signal),
+        cursor.tracks === undefined
+          ? Promise.resolve(empty)
+          : this.library(
+              "tracks",
+              { ...request, cursor: cursor.tracks, view: "tracks", limit: Math.min(50, request.limit) },
+              signal,
+            ),
+        cursor.albums === undefined
+          ? Promise.resolve(empty)
+          : this.library(
+              "albums",
+              { ...request, cursor: cursor.albums, view: "albums", limit: Math.min(25, request.limit) },
+              signal,
+            ),
       ]);
-      return { items: [...players, ...artists.items, ...tracks.items, ...albums.items] };
+      if (results.every((result) => result.status === "rejected")) {
+        const failure = results.find((result) => result.status === "rejected");
+        if (failure?.status === "rejected") throw failure.reason;
+      }
+      const [playerResult, artistResult, trackResult, albumResult] = results;
+      const players = playerResult.status === "fulfilled" ? playerResult.value : [];
+      const artists = artistResult.status === "fulfilled" ? artistResult.value : empty;
+      const tracks = trackResult.status === "fulfilled" ? trackResult.value : empty;
+      const albums = albumResult.status === "fulfilled" ? albumResult.value : empty;
+      const labels = ["Players", "Artists", "Tracks", "Albums"];
+      const warnings = results.flatMap((result, index) =>
+        result.status === "rejected" ? [`${labels[index]} could not load. Use Refresh to retry.`] : [],
+      );
+      return {
+        items: [...players.filter((player) => player.available), ...artists.items, ...tracks.items, ...albums.items],
+        warnings: warnings.length ? warnings : undefined,
+        nextCursor:
+          tracks.nextCursor !== undefined || albums.nextCursor !== undefined
+            ? JSON.stringify({ tracks: tracks.nextCursor, albums: albums.nextCursor })
+            : undefined,
+      };
     }
 
     const [players, searchValue] = await Promise.all([
@@ -168,8 +241,10 @@ export class LiveMusicService implements MusicService {
       ),
     ]);
     const results = decodeSearchResults(searchValue, this.serverUrl);
-    const matchingPlayers = players.filter((player) =>
-      `${player.name} ${player.provider}`.toLocaleLowerCase().includes(request.query.toLocaleLowerCase()),
+    const matchingPlayers = players.filter(
+      (player) =>
+        player.available &&
+        `${player.name} ${player.provider}`.toLocaleLowerCase().includes(request.query.toLocaleLowerCase()),
     );
     if (request.view === "tracks") return { items: results.tracks };
     if (request.view === "artists") return { items: results.artists };
@@ -177,12 +252,12 @@ export class LiveMusicService implements MusicService {
     return { items: [...matchingPlayers, ...results.artists, ...results.tracks, ...results.albums] };
   }
 
-  async browse(item: Artist | Album): Promise<Library> {
+  async browse(item: Artist | Album, signal?: AbortSignal): Promise<Library> {
     if (item.kind === "artist") {
       const args = { item_id: item.itemId, provider_instance_id_or_domain: item.provider };
       const [trackValue, albumValue] = await Promise.all([
-        this.options.client.command("music/artists/artist_tracks", args),
-        this.options.client.command("music/artists/artist_albums", args),
+        this.options.client.command("music/artists/artist_tracks", args, signal),
+        this.options.client.command("music/artists/artist_albums", args, signal),
       ]);
       return {
         players: [],
@@ -191,11 +266,15 @@ export class LiveMusicService implements MusicService {
         albums: decodeArray(albumValue, "artistAlbums", (item, path) => decodeAlbum(item, path, this.serverUrl)),
       };
     }
-    const value = await this.options.client.command("music/albums/album_tracks", {
-      item_id: item.itemId,
-      provider_instance_id_or_domain: item.provider,
-      in_library_only: false,
-    });
+    const value = await this.options.client.command(
+      "music/albums/album_tracks",
+      {
+        item_id: item.itemId,
+        provider_instance_id_or_domain: item.provider,
+        in_library_only: false,
+      },
+      signal,
+    );
     return {
       players: [],
       artists: [],
@@ -228,6 +307,8 @@ export class LiveMusicService implements MusicService {
 
   async playback(playerId: string, action: PlaybackAction): Promise<void> {
     const player = await this.target(playerId, false);
+    if (action !== "play-pause" && !player.capabilities.nextPrevious)
+      throw new AudioAssistantError("unsupported", `${player.name} does not support Next or Previous Track.`);
     const command = action === "play-pause" ? "play_pause" : action;
     await this.options.client.command(`players/cmd/${command}`, { player_id: player.id });
   }
@@ -272,5 +353,22 @@ export class LiveMusicService implements MusicService {
 
   dispose() {
     // HTTP commands own no long-lived resources. M3 will close event subscriptions here.
+  }
+
+  async setGroupMember(playerId: string, memberId: string, joined: boolean): Promise<void> {
+    const { leader, unchanged } = requireGroupChange(await this.getPlayers(), playerId, memberId, joined);
+    if (unchanged) return;
+    await this.options.client.command("players/cmd/set_members", {
+      target_player: leader.id,
+      ...(joined ? { player_ids_to_add: [memberId] } : { player_ids_to_remove: [memberId] }),
+    });
+    const players = await this.getPlayers();
+    const currentLeader = groupLeader(players, playerId);
+    const member = players.find((player) => player.id === memberId);
+    if (!member || isGroupMember(currentLeader, member) !== joined)
+      throw new AudioAssistantError(
+        "not-ready",
+        "Membership change is not yet confirmed by the server. Refresh before trying again.",
+      );
   }
 }

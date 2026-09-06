@@ -97,9 +97,26 @@ export function decodeTrack(value: unknown, path = "track", serverUrl?: string):
     ...identity,
     artist: artistNames.join(", ") || "Unknown Artist",
     artistUris,
+    artists: artistValues.flatMap((artist, index) => {
+      try {
+        return [decodeArtist(artist, `${path}.artists.${index}`, serverUrl)];
+      } catch {
+        return [];
+      }
+    }),
+    albumItem: (() => {
+      if (!albumValue) return undefined;
+      try {
+        return decodeAlbum(albumValue, `${path}.album`, serverUrl);
+      } catch {
+        return undefined;
+      }
+    })(),
     album: mappingName(albumValue) ?? "Unknown Album",
     albumUri: mappingUri(albumValue),
     duration: optionalNumber(item.duration) ?? 0,
+    discNumber: optionalNumber(item.disc_number),
+    trackNumber: optionalNumber(item.track_number),
     artwork: primaryImage(item, serverUrl),
   };
 }
@@ -153,10 +170,12 @@ export function decodePlayer(value: unknown, path = "player"): DecodedPlayer {
     activeGroupId: optionalString(item.active_group),
     groupLeaderId: optionalString(item.synced_to),
     groupMemberIds: strings(item.group_members ?? item.group_childs),
+    staticGroupMemberIds: strings(item.static_group_members),
     capabilities: {
       volume: features.has("volume_set"),
       mute: features.has("volume_mute"),
-      grouping: features.has("set_members") || strings(item.can_group_with).length > 0,
+      grouping: features.has("set_members"),
+      nextPrevious: features.has("next_previous"),
     },
     canGroupWith: strings(item.can_group_with),
     hidden: boolean(item.hide_in_ui),
@@ -258,15 +277,26 @@ export function decodeConnectionIdentity(serverValue: unknown, userValue: unknow
 
 export function resolveEffectiveQueues(players: DecodedPlayer[], queues: QueueSummary[]): Player[] {
   const queueById = new Map(queues.map((queue) => [queue.id, queue]));
-  return players.map(({ canGroupWith: _canGroupWith, hidden: _hidden, private: _private, ...player }) => {
-    void _canGroupWith;
+  const playerById = new Map(players.map((player) => [player.id, player]));
+  const resolve = (player: DecodedPlayer, seen = new Set<string>()): string | undefined => {
+    if (seen.has(player.id)) return undefined;
+    const visited = new Set(seen).add(player.id);
+    for (const candidate of [player.activeSource, player.activeGroupId, player.groupLeaderId]) {
+      if (!candidate) continue;
+      if (queueById.has(candidate)) return candidate;
+      const parent = playerById.get(candidate);
+      if (parent) {
+        const inherited = resolve(parent, visited);
+        if (inherited) return inherited;
+      }
+    }
+    return queueById.get(player.id)?.active ? player.id : undefined;
+  };
+  return players.map(({ hidden: _hidden, private: _private, ...player }) => {
     void _hidden;
     void _private;
-    const candidates = [player.activeSource, player.activeGroupId, player.groupLeaderId];
-    const direct = candidates.find((candidate) => candidate && queueById.has(candidate));
-    const ownQueue = queueById.get(player.id);
-    // An inactive own queue means an external/native source has taken over. Do not mutate it.
-    const queueId = direct ?? (ownQueue?.active ? ownQueue.id : undefined);
+    const decoded = playerById.get(player.id)!;
+    const queueId = resolve(decoded);
     return { ...player, queueId };
   });
 }

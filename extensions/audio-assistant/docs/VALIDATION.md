@@ -1,5 +1,43 @@
 # Validation record
 
+## Combined artist view and Store screenshots — 2026-09-06
+
+Artist albums and tracks now share one searchable List, with Albums first. The hotkey/focus fixes in acb5748 are preserved. Check/build pass, including the shortcut regression suite. User-provided screenshots are prepared in metadata/audio-assistant-1.png through -3.png at the documented 2000×1250 PNG size; unchanged originals are retained in media. No computer use was performed for this update.
+
+## Greptile review fixes — 2026-09-06
+
+37 tests passed, including shared demo route state and queues with the current item beyond index 200. TypeScript now includes scripts; removed the invalid powered field and token-shape diagnostics. Generated Preferences replace handwritten settings types; Prettier explicitly uses double quotes. Next/Previous are hidden and rejected when unsupported. Check/build passed in WSL. Native Store screenshots remain outstanding; no synthetic screenshots are presented as Raycast captures.
+
+## Keyboard focus, text editing, and hotkey fixes — 2026-09-06
+
+38 automated tests passed; TypeScript, ESLint, Prettier, and all four commands built cleanly in WSL.
+
+- Removed controlled `selectedItemId: selectedId` and `onSelectionChange` from `<List>` / `<Grid>`, restoring native Raycast uncontrolled selection and keyboard focus so Shift (capital letters) and text editing shortcuts (Ctrl+A, Ctrl+C, Ctrl+V) work reliably in the search input without focus theft.
+- Removed root `actions={actions()}` from `<List>` and `<Grid>` to prevent Play/Pause from firing when pressing Enter on search bar accessories or during initial list loads.
+- Isolated search list results from playback/volume mutations (`revision`) so playback state changes do not reset or clear active search results.
+- Added explicit cross-platform `{ macOS, Windows }` keyboard shortcut mappings for all commands; eliminated collisions with standard text editing (Ctrl+A, Ctrl+C, Ctrl+V) and ActionPanel (Ctrl+K).
+- Added regression test `shortcuts declare explicit macOS and Windows mappings without conflicting with text editing or ActionPanel`.
+
+## Synced group playback slice — 2026-09-06
+
+35 automated tests passed; TypeScript, ESLint, Prettier, diff whitespace checks and all four production bundles passed in WSL. Seven new tests cover explicit compatibility, offline filtering, follower protection, active group resolution, capability decoding, demo join/removal, additive live membership commands, idempotence, no timeout replay, static members and inherited queue ownership including cyclic metadata.
+
+The configured server's command and schema endpoints were checked read-only and confirm the membership API used. No real player membership was changed during automated validation; audible synchronization and the native three-section layout require user testing. Permanent group creation is not part of this change.
+
+## Improvement pass — 2026-09-06
+
+Partial discovery recovery: 28 tests passed and check/build passed in WSL. Tests prove healthy player/track results survive an album failure, warnings exclude raw server error text, and total failure is not rendered as an empty library.
+
+Album ordering: 26 tests passed and check/build passed in WSL. Regression coverage proves multi-disc order, stable ties, invalid/missing positions and source-array preservation.
+
+Related media actions: 25 tests passed, check/build passed in WSL. Tests cover canonical identities and malformed optional mappings. Native action navigation remains pending.
+
+Artist collection layout/cache/cancellation: 24 tests passed with check/build in WSL. Added coverage that all artist/album command requests receive the caller's cancellation signal. Native grid/list switching, collection cache behavior and Back restoration still require host testing.
+
+Mixed discovery paging: 23 tests passed with check/build in WSL. Added a contract test for independent media exhaustion, offsets, bounded previews and invalid cursors. No live mutation or native UI checks were performed.
+
+Paged List/Grid browsing: 22 automated tests passed, TypeScript/ESLint/Prettier passed, and all four commands bundled in WSL. Four new tests cover page overlap, stale/aborted requests, concurrent load suppression, retained rows after failure, and repeated cursors. Native scrolling and selection behavior remain unverified. The build reports that Raycast is not running in WSL.
+
 Foundation verification on 2026-09-05, WSL Linux / Node 22.22.2 / Raycast API 2.2.0:
 
 | Check                              | Result                                                                             |

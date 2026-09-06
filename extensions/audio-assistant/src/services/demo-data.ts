@@ -46,7 +46,8 @@ export function demoData(): { library: Library; queues: Queue[] } {
     muted: false,
     queueId: `demo-queue-${i}`,
     groupMemberIds: [],
-    capabilities: { volume: true, mute: true, grouping: i === 0 },
+    canGroupWith: i < 2 ? [`demo-player-${1 - i}`] : [],
+    capabilities: { volume: true, mute: true, grouping: i === 0, nextPrevious: true },
   }));
   return {
     library: { artists, albums, tracks, players },
