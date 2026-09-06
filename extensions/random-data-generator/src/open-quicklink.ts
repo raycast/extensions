@@ -4,15 +4,16 @@ import { Clipboard, Toast, showHUD, showToast } from "@raycast/api";
 
 import fakerClient from "@/faker";
 
-export default async function openQuicklink(options: {
-  arguments: { id?: string; section?: string; mode?: "copy" | "paste"; locale?: string };
-}) {
-  const { id, section, mode, locale } = options.arguments;
+type QuicklinkContext = { id?: string; section?: string; mode?: "copy" | "paste"; locale?: string };
+
+export default async function openQuicklink(options: { launchContext?: QuicklinkContext }) {
+  const { id, section, mode, locale } = options.launchContext ?? {};
 
   if (!id || !section || !mode || !locale) {
     showToast({
-      title: "Missing Arguments",
-      message: "This command is not meant to be run directly. Instead, create a quicklink from the generate command.",
+      title: "Missing Quicklink Data",
+      message:
+        "This command is not meant to be run directly. Create a quicklink from the generate command, and recreate any quicklink saved before this update.",
       style: Toast.Style.Failure,
     });
     return;
