@@ -1,5 +1,13 @@
 # Random Data Generator Changelog
 
+## [Fix Quicklinks and Locale Switching] - 2026-09-06
+
+- Fixed quicklinks failing with a missing arguments error, by passing the quicklink data as launch context
+- Fixed the locale dropdown reverting to English instead of keeping the selection
+- Regenerated the listed values when the locale changes, so the command no longer needs relaunching
+
+Quicklinks saved before this update need to be recreated.
+
 ## [Fix] - 2026-01-13
 
 - Added shortcuts to the Windows version
