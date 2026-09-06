@@ -1,16 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  Keyboard,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DEFAULT_CITIES } from "./cities";
+import { DEFAULT_CITIES, getCityKey } from "./cities";
 import type { City } from "./cities";
 import { loadCities } from "./city-storage";
 import { ManageCities } from "./manage-cities";
@@ -20,7 +10,7 @@ import {
   formatTimeInZone,
   formatTimeZoneName,
   getCitySnapshot,
-  parseTimeQueryResult,
+  resolveTimeQueryEdit,
   shiftInstant,
 } from "./time";
 import type { TimeQueryIssue } from "./time";
@@ -96,7 +86,7 @@ function TimeTravelActions(props: {
         <Action.Push
           title="Manage Cities"
           icon={Icon.Gear}
-          target={<ManageCities onChange={onCitiesChange} />}
+          target={<ManageCities navigationTitle="Manage Cities" onChange={onCitiesChange} />}
         />
       </ActionPanel.Section>
     </ActionPanel>
@@ -192,17 +182,16 @@ export default function Command() {
         return;
       }
 
-      const base = queryBase.current ?? moment;
-      queryBase.current = base;
-      const result = parseTimeQueryResult(text, base, anchorCity.timeZone);
-      if (result.status === "invalid") {
-        setQueryState(result.reason);
+      const edit = resolveTimeQueryEdit(text, moment, queryBase.current, anchorCity.timeZone);
+      queryBase.current = edit.queryBase;
+      if (edit.result.status === "invalid") {
+        setQueryState(edit.result.reason);
         return;
       }
 
-      setMoment(result.date);
+      setMoment(edit.result.date);
       setQueryState("valid");
-      setIsLive(text.trim().toLowerCase() === "now");
+      setIsLive(edit.isLive);
     },
     [anchorCity, moment],
   );
@@ -231,7 +220,7 @@ export default function Command() {
               <Action.Push
                 title="Manage Cities"
                 icon={Icon.Gear}
-                target={<ManageCities onChange={updateCities} />}
+                target={<ManageCities navigationTitle="Manage Cities" onChange={updateCities} />}
               />
             </ActionPanel>
           }
@@ -249,15 +238,11 @@ export default function Command() {
   return (
     <List
       filtering={false}
-      navigationTitle="Timezone Travel"
       searchText={query}
       onSearchTextChange={changeQuery}
       searchBarPlaceholder={`Time in ${anchorCity.label}: 14:30, tomorrow 9am, +3h`}
     >
-      <List.Section
-        title={`${isLive ? "NOW" : "TIME TRAVEL"}  ·  ${moveShortcutHint} 1H`}
-        subtitle={sectionSubtitle}
-      >
+      <List.Section title={`${isLive ? "NOW" : "TIME TRAVEL"}  ·  ${moveShortcutHint} 1H`} subtitle={sectionSubtitle}>
         {readings.map((reading, index) => {
           const { city } = reading;
           const dayOffset = reading.daySerial - readings[0].daySerial;
@@ -265,7 +250,7 @@ export default function Command() {
 
           return (
             <List.Item
-              key={city.timeZone}
+              key={getCityKey(city)}
               icon={{
                 value: {
                   source: reading.hour >= 7 && reading.hour < 19 ? Icon.Sun : Icon.Moon,

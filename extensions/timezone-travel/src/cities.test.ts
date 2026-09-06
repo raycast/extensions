@@ -1,41 +1,48 @@
 import { describe, expect, it } from "vitest";
-import {
-  DEFAULT_CITIES,
-  addCity,
-  buildCityCatalog,
-  getCityCatalog,
-  makeAnchor,
-  parseStoredCities,
-  removeCity,
-} from "./cities";
+import { DEFAULT_CITIES, addCity, buildCityCatalog, makeAnchor, parseStoredCities, removeCity } from "./cities";
 
 describe("city catalog", () => {
   it("turns timezone identifiers into searchable city choices", () => {
     const catalog = buildCityCatalog(["America/New_York", "Europe/Warsaw", "Asia/Kolkata"]);
 
-    expect(catalog.map(({ label, timeZone }) => ({ label, timeZone }))).toEqual([
-      { label: "New York", timeZone: "America/New_York" },
-      { label: "Warsaw", timeZone: "Europe/Warsaw" },
-      { label: "Mumbai", timeZone: "Asia/Kolkata" },
-    ]);
-    expect(catalog[0].keywords).toEqual(expect.arrayContaining(["NYC", "Eastern Time"]));
-    expect(catalog[2].keywords).toEqual(expect.arrayContaining(["Kolkata", "New Delhi", "India"]));
+    expect(catalog).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "New York", timeZone: "America/New_York" }),
+        expect.objectContaining({ label: "Warsaw", timeZone: "Europe/Warsaw" }),
+        expect.objectContaining({ label: "Kolkata", timeZone: "Asia/Kolkata" }),
+        expect.objectContaining({ label: "Mumbai", timeZone: "Asia/Kolkata" }),
+        expect.objectContaining({ label: "New Delhi", timeZone: "Asia/Kolkata" }),
+      ]),
+    );
+    expect(catalog.find((city) => city.label === "New York")?.keywords).toEqual(
+      expect.arrayContaining(["NYC", "Eastern Time"]),
+    );
+    expect(catalog.find((city) => city.label === "New Delhi")?.keywords).toEqual(
+      expect.arrayContaining(["Delhi", "India", "IST"]),
+    );
   });
 
-  it("uses the runtime timezone identifier for Mumbai aliases", () => {
-    const mumbai = getCityCatalog().find((city) => city.label === "Mumbai");
+  it.each([
+    ["Chicago", "America/Chicago"],
+    ["Los Angeles", "America/Los_Angeles"],
+    ["New Delhi", "Asia/Kolkata"],
+  ])("preserves the searched city identity for %s", (label, timeZone) => {
+    const city = buildCityCatalog([timeZone]).find((option) => option.label === label);
 
-    expect(mumbai).toBeDefined();
-    expect(mumbai?.keywords).toEqual(expect.arrayContaining(["Kolkata", "New Delhi", "India"]));
+    expect(city).toBeDefined();
+    expect(city?.timeZone).toBe(timeZone);
   });
 
-  it("adds once, changes the anchor, and keeps at least one city", () => {
+  it("adds once, supports distinct cities in one timezone, changes the anchor, and keeps at least one city", () => {
     const tokyo = { label: "Tokyo", timeZone: "Asia/Tokyo" };
     const withTokyo = addCity(DEFAULT_CITIES, tokyo);
+    const chicago = { label: "Chicago", timeZone: "America/Chicago" };
+    const withChicago = addCity(withTokyo, chicago);
 
     expect(addCity(withTokyo, tokyo)).toEqual(withTokyo);
-    expect(makeAnchor(withTokyo, "Asia/Tokyo")[0]).toEqual(tokyo);
-    expect(removeCity([tokyo], "Asia/Tokyo")).toEqual([tokyo]);
+    expect(withChicago).toContainEqual(chicago);
+    expect(makeAnchor(withChicago, tokyo)[0]).toEqual(tokyo);
+    expect(removeCity([tokyo], tokyo)).toEqual([tokyo]);
   });
 
   it("falls back safely when saved data is missing or malformed", () => {
@@ -47,9 +54,13 @@ describe("city catalog", () => {
       { label: "Tokyo", timeZone: "Asia/Tokyo" },
     ]);
     expect(
-      parseStoredCities(
-        '[{"label":"Tokyo","timeZone":"Asia/Tokyo"},{"label":"Tokyo Again","timeZone":"Asia/Tokyo"}]',
-      ),
+      parseStoredCities('[{"label":"Tokyo","timeZone":"Asia/Tokyo"},{"label":"Tokyo Again","timeZone":"Asia/Tokyo"}]'),
+    ).toEqual([
+      { label: "Tokyo", timeZone: "Asia/Tokyo" },
+      { label: "Tokyo Again", timeZone: "Asia/Tokyo" },
+    ]);
+    expect(
+      parseStoredCities('[{"label":"Tokyo","timeZone":"Asia/Tokyo"},{"label":"TOKYO","timeZone":"Asia/Tokyo"}]'),
     ).toEqual([{ label: "Tokyo", timeZone: "Asia/Tokyo" }]);
   });
 });

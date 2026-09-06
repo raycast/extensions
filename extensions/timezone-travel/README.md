@@ -37,6 +37,10 @@ Use **Return to Now** from the action menu whenever you want to resume the live 
 
 Choose a 12-hour or 24-hour clock from the extension preferences.
 
+## Privacy
+
+Timezone Travel makes no network requests and requires no account or API key. Your city list is stored locally by Raycast.
+
 ## Author
 
 Created and maintained by [Marcin Mincer](mailto:marcin.mincer@gmail.com).

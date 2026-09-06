@@ -16,6 +16,7 @@ import {
   addCity,
   formatTimeZoneIdentifier,
   getCityCatalog,
+  getCityKey,
   makeAnchor,
   removeCity,
 } from "./cities";
@@ -24,6 +25,7 @@ import type { City } from "./cities";
 
 interface ManageCitiesProps {
   onChange?: (cities: City[]) => void;
+  navigationTitle?: string;
 }
 
 interface AddCityPickerProps {
@@ -35,10 +37,10 @@ interface AddCityPickerProps {
 function AddCityPicker({ cities, isSaving, onAdd }: AddCityPickerProps) {
   const [query, setQuery] = useState("");
   const { pop } = useNavigation();
-  const selectedTimeZones = useMemo(() => new Set(cities.map((city) => city.timeZone)), [cities]);
+  const selectedCities = useMemo(() => new Set(cities.map(getCityKey)), [cities]);
   const availableCities = useMemo(
-    () => getCityCatalog().filter((option) => !selectedTimeZones.has(option.timeZone)),
-    [selectedTimeZones],
+    () => getCityCatalog().filter((option) => !selectedCities.has(getCityKey(option))),
+    [selectedCities],
   );
 
   const add = useCallback(
@@ -70,7 +72,7 @@ function AddCityPicker({ cities, isSaving, onAdd }: AddCityPickerProps) {
         <List.Section title="Results">
           {availableCities.map((city) => (
             <List.Item
-              key={city.timeZone}
+              key={getCityKey(city)}
               icon={Icon.PlusCircle}
               title={city.label}
               subtitle={formatTimeZoneIdentifier(city.timeZone)}
@@ -88,7 +90,7 @@ function AddCityPicker({ cities, isSaving, onAdd }: AddCityPickerProps) {
   );
 }
 
-export function ManageCities({ onChange }: ManageCitiesProps) {
+export function ManageCities({ onChange, navigationTitle }: ManageCitiesProps) {
   const [cities, setCities] = useState<City[]>(DEFAULT_CITIES);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -111,7 +113,10 @@ export function ManageCities({ onChange }: ManageCitiesProps) {
 
   const persist = useCallback(
     async (nextCities: City[], successTitle: string): Promise<boolean> => {
-      if (isPersisting.current) return false;
+      if (isPersisting.current) {
+        await showToast(Toast.Style.Failure, "Another city change is still being saved");
+        return false;
+      }
 
       isPersisting.current = true;
       setIsSaving(true);
@@ -138,7 +143,7 @@ export function ManageCities({ onChange }: ManageCitiesProps) {
 
   const remove = useCallback(
     async (city: City) => {
-      const nextCities = removeCity(cities, city.timeZone);
+      const nextCities = removeCity(cities, city);
       if (nextCities === cities) {
         await showToast(Toast.Style.Failure, "Keep at least one city");
         return;
@@ -149,7 +154,7 @@ export function ManageCities({ onChange }: ManageCitiesProps) {
         icon: Icon.XMarkCircle,
         title: `Remove ${city.label}?`,
         message:
-          cities[0].timeZone === city.timeZone
+          getCityKey(cities[0]) === getCityKey(city)
             ? `${city.label} will be removed. ${nextAnchor.label} will become the city used for entered times.`
             : `${city.label} will be removed from your world clock.`,
         primaryAction: {
@@ -165,7 +170,7 @@ export function ManageCities({ onChange }: ManageCitiesProps) {
   );
 
   if (isLoading) {
-    return <List isLoading navigationTitle="Manage Cities" searchBarPlaceholder="Loading cities…" />;
+    return <List isLoading navigationTitle={navigationTitle} searchBarPlaceholder="Loading cities…" />;
   }
 
   const addCityPicker = (
@@ -177,11 +182,11 @@ export function ManageCities({ onChange }: ManageCitiesProps) {
   );
 
   return (
-    <List isLoading={isSaving} navigationTitle="Manage Cities" searchBarPlaceholder="Filter your cities…">
+    <List isLoading={isSaving} navigationTitle={navigationTitle} searchBarPlaceholder="Filter your cities…">
       <List.Section title="Your Cities" subtitle={`Times you enter use ${cities[0].label}`}>
         {cities.map((city, index) => (
           <List.Item
-            key={city.timeZone}
+            key={getCityKey(city)}
             icon={index === 0 ? Icon.StarCircle : Icon.CheckCircle}
             title={city.label}
             subtitle={formatTimeZoneIdentifier(city.timeZone)}
@@ -196,17 +201,13 @@ export function ManageCities({ onChange }: ManageCitiesProps) {
                       macOS: { modifiers: ["cmd", "shift"], key: "enter" },
                       Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
                     }}
-                    onAction={() =>
-                      persist(makeAnchor(cities, city.timeZone), `${city.label} now sets entered times`)
-                    }
+                    onAction={() => persist(makeAnchor(cities, city), `${city.label} now sets entered times`)}
                   />
                 ) : (
                   <Action.Push title="Add a City" icon={Icon.PlusCircle} target={addCityPicker} />
                 )}
                 <ActionPanel.Section>
-                  {index > 0 ? (
-                    <Action.Push title="Add a City" icon={Icon.PlusCircle} target={addCityPicker} />
-                  ) : null}
+                  {index > 0 ? <Action.Push title="Add a City" icon={Icon.PlusCircle} target={addCityPicker} /> : null}
                   <Action
                     title={`Remove ${city.label}`}
                     icon={Icon.XMarkCircle}

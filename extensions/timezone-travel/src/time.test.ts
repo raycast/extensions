@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   buildTimeline,
   describeDayDifference,
@@ -6,6 +6,7 @@ import {
   getCitySnapshot,
   parseTimeQuery,
   parseTimeQueryResult,
+  resolveTimeQueryEdit,
   shiftInstant,
 } from "./time";
 
@@ -21,9 +22,7 @@ describe("parseTimeQuery", () => {
   });
 
   it("supports tomorrow plus a clock time", () => {
-    expect(parseTimeQuery("tomorrow 09:00", base, "Europe/Warsaw")?.toISOString()).toBe(
-      "2026-09-05T07:00:00.000Z",
-    );
+    expect(parseTimeQuery("tomorrow 09:00", base, "Europe/Warsaw")?.toISOString()).toBe("2026-09-05T07:00:00.000Z");
   });
 
   it("supports relative movement", () => {
@@ -53,6 +52,27 @@ describe("parseTimeQuery", () => {
   it("returns undefined for incomplete or invalid input", () => {
     expect(parseTimeQuery("tomorrow", base, "Europe/Warsaw")).toBeUndefined();
     expect(parseTimeQuery("25:00", base, "Europe/Warsaw")).toBeUndefined();
+  });
+
+  it("rebases later clock edits on the instant selected by now", () => {
+    vi.useFakeTimers();
+    try {
+      const liveMoment = new Date("2026-09-10T12:00:00.000Z");
+      vi.setSystemTime(liveMoment);
+
+      const nowEdit = resolveTimeQueryEdit("now", base, base, "Europe/Warsaw");
+      expect(nowEdit.result).toEqual({ status: "valid", date: liveMoment });
+      expect(nowEdit.queryBase).toEqual(liveMoment);
+      expect(nowEdit.isLive).toBe(true);
+
+      const clockEdit = resolveTimeQueryEdit("09:00", liveMoment, nowEdit.queryBase, "Europe/Warsaw");
+      expect(clockEdit.result).toEqual({
+        status: "valid",
+        date: new Date("2026-09-10T07:00:00.000Z"),
+      });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("rejects a local time skipped by daylight saving time", () => {

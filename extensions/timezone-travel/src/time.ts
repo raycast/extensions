@@ -18,6 +18,12 @@ export type TimeQueryIssue = "incomplete" | "unrecognized" | "out-of-range" | "u
 
 export type TimeQueryResult = { status: "valid"; date: Date } | { status: "invalid"; reason: TimeQueryIssue };
 
+export interface TimeQueryEditResult {
+  result: TimeQueryResult;
+  queryBase: Date;
+  isLive: boolean;
+}
+
 const RELATIVE_UNITS = [
   "minutes",
   "minute",
@@ -38,11 +44,7 @@ const RELATIVE_QUERY_PATTERN = new RegExp(`^([+-])\\s*(\\d+(?:\\.\\d+)?)\\s*(${R
 const timeFormatters = new Map<string, Intl.DateTimeFormat>();
 const displayFormatters = new Map<string, Intl.DateTimeFormat>();
 
-function getDisplayFormatter(
-  key: string,
-  locale: string,
-  options: Intl.DateTimeFormatOptions,
-): Intl.DateTimeFormat {
+function getDisplayFormatter(key: string, locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
   const cached = displayFormatters.get(key);
   if (cached) return cached;
 
@@ -116,14 +118,7 @@ function zonedWallClockToInstant(parts: ZonedParts, timeZone: string): Date | un
 
   for (let iteration = 0; iteration < 4; iteration += 1) {
     const actual = getZonedParts(new Date(candidate), timeZone);
-    const actualUtc = Date.UTC(
-      actual.year,
-      actual.month - 1,
-      actual.day,
-      actual.hour,
-      actual.minute,
-      actual.second,
-    );
+    const actualUtc = Date.UTC(actual.year, actual.month - 1, actual.day, actual.hour, actual.minute, actual.second);
     const adjustment = desiredUtc - actualUtc;
     candidate += adjustment;
     if (adjustment === 0) break;
@@ -146,12 +141,7 @@ function looksLikeIncompleteQuery(query: string): boolean {
   if (relativePrefix) {
     const amount = relativePrefix[2];
     const unit = relativePrefix[3];
-    return (
-      !amount ||
-      amount.endsWith(".") ||
-      !unit ||
-      RELATIVE_UNITS.some((candidate) => candidate.startsWith(unit))
-    );
+    return !amount || amount.endsWith(".") || !unit || RELATIVE_UNITS.some((candidate) => candidate.startsWith(unit));
   }
 
   const clock = query.replace(/^(today|tomorrow|yesterday)\s+/, "");
@@ -213,6 +203,23 @@ export function parseTimeQueryResult(query: string, base: Date, anchorTimeZone: 
   );
 
   return date ? { status: "valid", date } : { status: "invalid", reason: "unavailable" };
+}
+
+export function resolveTimeQueryEdit(
+  query: string,
+  currentMoment: Date,
+  previousQueryBase: Date | null,
+  anchorTimeZone: string,
+): TimeQueryEditResult {
+  const queryBase = previousQueryBase ?? currentMoment;
+  const result = parseTimeQueryResult(query, queryBase, anchorTimeZone);
+  const isLive = result.status === "valid" && query.trim().toLowerCase() === "now";
+
+  return {
+    result,
+    queryBase: isLive ? result.date : queryBase,
+    isLive,
+  };
 }
 
 export function parseTimeQuery(query: string, base: Date, anchorTimeZone: string): Date | undefined {
