@@ -1,6 +1,6 @@
 # Cobalt Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-09-06
 
 - Added Windows support
 - Generated video thumbnails with ffmpeg off macOS, falling back to the status icon when it is not installed
