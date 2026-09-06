@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "audio-assistant",
+  "title": "Audio Assistant",
+  "description": "Browse your Music Assistant library and control playback from one music workspace.",
+  "icon": "icon.png",
+  "author": "opkelde",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "music",
+      "title": "Music",
+      "subtitle": "Audio Assistant",
+      "description": "Search music, select players, and manage playback and queues.",
+      "mode": "view",
+      "keywords": [
+        "music assistant",
+        "ma",
+        "songs",
+        "albums",
+        "artists",
+        "players"
+      ]
+    },
+    {
+      "name": "play-pause",
+      "title": "Play/Pause",
+      "subtitle": "Audio Assistant",
+      "description": "Play or pause the active Music Assistant player.",
+      "mode": "no-view",
+      "keywords": [
+        "music assistant",
+        "toggle",
+        "resume"
+      ]
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "subtitle": "Audio Assistant",
+      "description": "Skip to the next track on the active Music Assistant player.",
+      "mode": "no-view",
+      "keywords": [
+        "music assistant",
+        "skip"
+      ]
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "subtitle": "Audio Assistant",
+      "description": "Return to the previous track on the active Music Assistant player.",
+      "mode": "no-view",
+      "keywords": [
+        "music assistant",
+        "back"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "demoMode",
+      "title": "Demo Mode",
+      "label": "Use simulated players and music (no audio)",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Use fictional players and tracks to preview the interface without contacting a server."
+    },
+    {
+      "name": "serverUrl",
+      "title": "Music Assistant Server URL",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "http://192.168.1.10:8095",
+      "description": "Direct Music Assistant URL, including any reverse proxy base path."
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "type": "password",
+      "required": false,
+      "description": "Create a long-lived token in Music Assistant under Settings → Users → Tokens."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.21.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.2",
+    "tsx": "^4.20.0"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "eslint .",
+    "lint:raycast": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "test:live": "tsx scripts/live-smoke.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run typecheck && npm test && npm run lint && npm run format:check",
+    "prepublishOnly": "node -e \"console.error('Use npm run publish to submit this extension to the Raycast Store.'); process.exit(1)\"",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
