@@ -258,24 +258,34 @@ async function migrateLegacyServers() {
       return;
     }
 
+    let legacyServers: StoredServer[];
     try {
-      const legacyServers = JSON.parse(lockedRaw);
-      if (Array.isArray(legacyServers)) {
-        const seenIds = new Set<string>();
-        const writes: Promise<void>[] = [];
-        // The index keeps the order the servers were originally added in
-        for (let index = 0; index < legacyServers.length; index += 1) {
-          const server = legacyServers[index];
-          if (typeof server?.id !== "string" || seenIds.has(server.id)) {
-            continue;
-          }
-          seenIds.add(server.id);
-          writes.push(writeLegacyServerUnlessMutated({ ...server, addedAt: index }));
-        }
-        await Promise.all(writes);
-      }
+      const parsed = JSON.parse(lockedRaw);
+      legacyServers = Array.isArray(parsed) ? (parsed as StoredServer[]) : [];
     } catch {
       // Drop an unreadable legacy value instead of failing every read
+      await LocalStorage.removeItem(LEGACY_SERVERS_KEY);
+      return;
+    }
+
+    const seenIds = new Set<string>();
+    const writes: Promise<void>[] = [];
+    // The index keeps the order the servers were originally added in
+    for (let index = 0; index < legacyServers.length; index += 1) {
+      const server = legacyServers[index];
+      if (typeof server?.id !== "string" || seenIds.has(server.id)) {
+        continue;
+      }
+      seenIds.add(server.id);
+      writes.push(writeLegacyServerUnlessMutated({ ...server, addedAt: index }));
+    }
+
+    try {
+      await Promise.all(writes);
+    } catch {
+      // A write failed, so keep the legacy value and migrate again on the next
+      // read instead of dropping the servers it could not write
+      return;
     }
 
     await LocalStorage.removeItem(LEGACY_SERVERS_KEY);
