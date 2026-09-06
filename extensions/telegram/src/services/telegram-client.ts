@@ -1,8 +1,8 @@
-import { TelegramClient } from "telegram";
-import { StringSession } from "telegram/sessions";
+import { TelegramClient, Rich } from "teleproto";
+import { StringSession } from "teleproto/sessions";
 import { LocalStorage, environment } from "@raycast/api";
-import { Api } from "telegram/tl";
-import { computeCheck } from "telegram/Password";
+import { Api } from "teleproto/tl";
+import { computeCheck } from "teleproto/Password";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -43,6 +43,8 @@ export interface MessageMedia {
 export interface SavedMessage {
   id: number;
   text: string;
+  /** Rendered Markdown, set only for rich messages (layer 228+). */
+  markdown?: string;
   date: Date;
   media?: MessageMedia;
 }
@@ -50,6 +52,8 @@ export interface SavedMessage {
 export interface ChatMessage {
   id: number;
   text: string;
+  /** Rendered Markdown, set only for rich messages (layer 228+). */
+  markdown?: string;
   date: Date;
   media?: MessageMedia;
   senderId?: string;
@@ -368,6 +372,36 @@ export function resolveMessageAuthor(
   return {};
 }
 
+/**
+ * Reads a message's text.
+ *
+ * Bots can send rich messages (layer 228), whose content lives in `richMessage`
+ * as a block tree rather than in the flat `message` string. Older clients are not
+ * shown these at all -- the server substitutes messageMediaUnsupported -- so any
+ * code that only reads `msg.message` silently loses every rich message.
+ */
+function renderMessageContent(msg: Api.Message): { text: string; markdown?: string } {
+  if (msg.message) {
+    return { text: msg.message };
+  }
+
+  if (msg.richMessage) {
+    const plain = Rich.toPlainText(msg.richMessage);
+    return {
+      // List titles are single-line, so collapse the block structure for display.
+      text: plain.replace(/\s+/g, " ").trim(),
+      markdown: Rich.toMarkdown(msg.richMessage),
+    };
+  }
+
+  return { text: "" };
+}
+
+/** True when a message carries anything worth rendering. */
+function hasRenderableContent(msg: Api.Message): boolean {
+  return Boolean(msg.message || msg.media || msg.richMessage);
+}
+
 /** Display name and avatar for a user, matching how getChats titles a private chat. */
 async function describeUser(
   client: TelegramClient,
@@ -499,9 +533,12 @@ async function processSavedMessage(
     }
   }
 
+  const { text, markdown } = renderMessageContent(msg);
+
   return {
     id: msg.id,
-    text: msg.message || "",
+    text,
+    markdown,
     date: new Date(msg.date * 1000),
     media,
   };
@@ -547,9 +584,12 @@ async function processChatMessage(
     }
   }
 
+  const { text, markdown } = renderMessageContent(msg);
+
   return {
     id: msg.id,
-    text: msg.message || "",
+    text,
+    markdown,
     date: new Date(msg.date * 1000),
     media,
     senderId,
@@ -577,7 +617,7 @@ export async function getSavedMessages(options: GetSavedMessagesOptions): Promis
     search: searchQuery || undefined,
   });
 
-  const filteredMessages = messages.filter((msg) => msg.message || msg.media);
+  const filteredMessages = messages.filter(hasRenderableContent);
 
   const processedMessages = await Promise.all(
     filteredMessages.map((msg) => processSavedMessage(client, msg, skipMediaDownload)),
@@ -600,7 +640,7 @@ export async function getChatMessages(options: GetMessagesOptions): Promise<Chat
     search: searchQuery || undefined,
   });
 
-  const filteredMessages = messages.filter((msg) => msg.message || msg.media);
+  const filteredMessages = messages.filter(hasRenderableContent);
 
   // Get the chat entity to know who the chat partner is
   const entity = await client.getEntity(chatId);

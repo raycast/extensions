@@ -1,5 +1,10 @@
 # Telegram Changelog
 
+## [Support Rich Messages from Bots] - {PR_MERGE_DATE}
+
+- Show messages from bots that use rich text. Their content is carried in a field added in Telegram API layer 228, which the extension did not read, so these messages appeared as "Unknown" or were dropped from the list entirely
+- Replace the archived `telegram` (GramJS) dependency with its maintained fork `teleproto`. GramJS is pinned to API layer 198 and its authors now direct users to teleproto; Telegram withholds newer message content from clients on the older layer
+
 ## [Fix Photo Previews and Message Senders] - 2026-09-08
 
 - Show photos in the detail pane. They were embedded as base64 data URIs, which Raycast's markdown renderer drops once they grow large, leaving the pane blank
