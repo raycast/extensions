@@ -275,12 +275,22 @@ function memberPages(entries: DocEntry[]): string[] {
   return [...pages];
 }
 
+function restorePage(page: string, previous: MetaIndex, meta: MetaIndex): void {
+  const owner = typeOf(page);
+  const prefix = `${owner}#`;
+  for (const [key, value] of Object.entries(previous)) {
+    if (key === owner || key.startsWith(prefix)) {
+      meta[key] = value;
+    }
+  }
+}
+
 async function scan(
   entries: DocEntry[],
   force: boolean,
   previous: MetaIndex = {},
 ): Promise<{ meta: MetaIndex; complete: boolean }> {
-  const meta: MetaIndex = { ...previous };
+  const meta: MetaIndex = {};
   const pages = memberPages(entries);
 
   let next = 0;
@@ -292,6 +302,7 @@ async function scan(
         scanPage(html, pages[at], meta);
       } catch {
         failed += 1;
+        restorePage(pages[at], previous, meta);
       }
     }
   }
@@ -304,6 +315,14 @@ async function scan(
     await scanEvents(entries, meta, force);
   } catch {
     failed += 1;
+    for (const entry of entries) {
+      if (entry.kind === "event" && previous[entry.name]?.intents) {
+        meta[entry.name] = {
+          ...meta[entry.name],
+          intents: previous[entry.name].intents,
+        };
+      }
+    }
   }
 
   return { meta, complete: failed === 0 };
