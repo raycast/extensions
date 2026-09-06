@@ -42,7 +42,7 @@ export async function generateThumbnail(filePath: string) {
         await mkdir(thumbnailDir, { recursive: true });
       }
 
-      const thumbnailPath = path.join(thumbnailDir, `${path.basename(filePath, ext)}.jpg`);
+      const thumbnailPath = path.join(thumbnailDir, `${path.basename(filePath)}.jpg`);
 
       try {
         if (process.platform !== "darwin") {

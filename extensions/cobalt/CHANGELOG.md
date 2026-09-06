@@ -8,6 +8,8 @@
 - Expanded `~` in the download directory preference so the default resolves on both platforms
 - Fixed `cmd` shortcuts that had no Windows mapping
 - Padded the history grid when it shows status icons rather than thumbnails
+- Kept the download notification preference meaningful on Windows by showing a HUD
+- Fixed thumbnails colliding when two downloads shared a name but not an extension
 
 ## [Download History command and improvements] - 2025-06-27
 

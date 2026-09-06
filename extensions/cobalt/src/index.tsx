@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Action,
   showToast,
+  showHUD,
   Toast,
   getPreferenceValues,
   openExtensionPreferences,
@@ -253,8 +254,12 @@ export default function DownloadCommand() {
           });
         },
       };
-      if (preferences.notifyOnDownload && process.platform === "darwin") {
-        runAppleScript(`display notification "Downloaded ${filename}!" with title "Cobalt" sound name "Glass"`);
+      if (preferences.notifyOnDownload) {
+        if (process.platform === "darwin") {
+          runAppleScript(`display notification "Downloaded ${filename}!" with title "Cobalt" sound name "Glass"`);
+        } else {
+          showHUD(`Downloaded ${filename}!`);
+        }
       }
 
       const thumbnailPath = await generateThumbnail(destination);
