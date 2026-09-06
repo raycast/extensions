@@ -10,6 +10,7 @@ import {
 
 export default function RestoreWorkspace() {
   const [workspaces, setWorkspaces] = useState<WorkspaceSummary[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -18,6 +19,11 @@ export default function RestoreWorkspace() {
     readWorkspaceSummaries().then((summaries) => {
       if (isCurrent) {
         setWorkspaces(summaries);
+        setIsLoading(false);
+      }
+    }).catch(() => {
+      if (isCurrent) {
+        setLoadError("Open SnapState to repair the local workspace index, then try again.");
         setIsLoading(false);
       }
     });
@@ -46,7 +52,18 @@ export default function RestoreWorkspace() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Restore a SnapState workspace">
-      {!isLoading && workspaces.length === 0 ? (
+      {!isLoading && loadError ? (
+        <List.EmptyView
+          icon="icon.png"
+          title="Couldn't read SnapState workspaces"
+          description={loadError}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Get SnapState" url={SNAPSTATE_DOWNLOAD_URL} />
+            </ActionPanel>
+          }
+        />
+      ) : !isLoading && workspaces.length === 0 ? (
         <List.EmptyView
           icon="icon.png"
           title="No SnapState workspaces yet"

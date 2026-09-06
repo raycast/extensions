@@ -25,12 +25,47 @@ const SUMMARY_PATH = join(
   "raycast-workspaces.json",
 );
 
+function isWorkspaceSummary(value: unknown): value is WorkspaceSummary {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const summary = value as Partial<WorkspaceSummary>;
+  return (
+    typeof summary.id === "string" &&
+    typeof summary.name === "string" &&
+    typeof summary.icon === "string" &&
+    typeof summary.accentHex === "string" &&
+    typeof summary.updatedAt === "string" &&
+    typeof summary.appCount === "number" &&
+    typeof summary.windowCount === "number" &&
+    typeof summary.displayCount === "number"
+  );
+}
+
+function isMissingSummaryIndex(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "ENOENT"
+  );
+}
+
 export async function readWorkspaceSummaries(): Promise<WorkspaceSummary[]> {
   try {
     const contents = await readFile(SUMMARY_PATH, "utf8");
-    const summaries = JSON.parse(contents) as WorkspaceSummary[];
+    const summaries: unknown = JSON.parse(contents);
+    if (!Array.isArray(summaries) || !summaries.every(isWorkspaceSummary)) {
+      throw new Error("The SnapState workspace index has an invalid format.");
+    }
+
     return summaries.sort((left, right) => left.name.localeCompare(right.name));
-  } catch {
+  } catch (error) {
+    if (!isMissingSummaryIndex(error)) {
+      throw new Error("The SnapState workspace index is unreadable.", { cause: error });
+    }
+
     return [];
   }
 }
