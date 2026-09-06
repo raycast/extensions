@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Detect more Chromium browsers on Windows] - {PR_MERGE_DATE}
+## [Detect more Chromium browsers on Windows] - 2026-09-06
 
 - Find Brave Nightly, Vivaldi, Helium and Dia on Windows instead of only looking in the macOS application support folder
 
