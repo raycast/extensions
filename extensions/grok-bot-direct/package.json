@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grok-bot-direct",
+  "title": "Grok Bot",
+  "description": "Unofficial Grok Bot client with direct Cursor sign-in, bot threads, and formatted chat history.",
+  "icon": "extension-icon.png",
+  "author": "Supremum",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "bots",
+      "title": "Browse Bot Threads",
+      "description": "Browse and message your Grok Bot teammates",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "format": "prettier --write src tests *.json *.ts *.mts *.js",
+    "format:check": "prettier --check src tests *.json *.ts *.mts *.js",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint:store": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.2.0",
+    "react": "19.2.8",
+    "remark-gfm": "4.0.1",
+    "remark-math": "6.0.0",
+    "remark-parse": "11.0.0",
+    "unified": "11.0.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@vitest/coverage-v8": "5.0.0",
+    "esbuild": "0.28.2",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "5.0.0"
+  }
+}
