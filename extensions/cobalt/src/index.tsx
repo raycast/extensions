@@ -20,7 +20,7 @@ import fs from "fs";
 import type { CobaltRequest, CobaltResponse, FormValues } from "./types";
 import { parse as parseContentDispositionHeader } from "content-disposition";
 import { addToHistory } from "./history";
-import { getServiceFromUrl, generateThumbnail } from "./utils";
+import { getServiceFromUrl, generateThumbnail, resolveHome } from "./utils";
 
 // official cobalt instance URLs that are no longer available
 const oldCobaltInstances = ["https://co.wuk.sh", "https://api.cobalt.tools"];
@@ -205,8 +205,9 @@ export default function DownloadCommand() {
       return;
     }
 
-    if (!fs.existsSync(preferences.downloadDirectory)) {
-      await mkdir(preferences.downloadDirectory, { recursive: true });
+    const downloadDirectory = resolveHome(preferences.downloadDirectory);
+    if (!fs.existsSync(downloadDirectory)) {
+      await mkdir(downloadDirectory, { recursive: true });
     }
 
     if (!filename) {
@@ -218,7 +219,7 @@ export default function DownloadCommand() {
       }
     }
 
-    const destination = path.resolve(preferences.downloadDirectory, filename);
+    const destination = path.resolve(downloadDirectory, filename);
     const writeStream = fs.createWriteStream(destination);
 
     const body = Readable.fromWeb(response.body);
@@ -241,7 +242,7 @@ export default function DownloadCommand() {
       toast.message = `Saved to ${filename}`;
       toast.primaryAction = {
         title: "View in History",
-        shortcut: { modifiers: ["cmd"], key: "h" },
+        shortcut: { macOS: { modifiers: ["cmd"], key: "h" }, windows: { modifiers: ["ctrl"], key: "h" } },
         onAction: () => {
           toast.hide();
           launchCommand({
@@ -252,7 +253,7 @@ export default function DownloadCommand() {
           });
         },
       };
-      if (preferences.notifyOnDownload) {
+      if (preferences.notifyOnDownload && process.platform === "darwin") {
         runAppleScript(`display notification "Downloaded ${filename}!" with title "Cobalt" sound name "Glass"`);
       }
 
@@ -304,7 +305,7 @@ export default function DownloadCommand() {
               <Action
                 title="View Download History"
                 icon={Icon.List}
-                shortcut={{ modifiers: ["cmd"], key: "h" }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "h" }, windows: { modifiers: ["ctrl"], key: "h" } }}
                 onAction={() => launchCommand({ name: "history", type: LaunchType.UserInitiated })}
               />
             </>

@@ -117,11 +117,7 @@ export default function HistoryCommand() {
                   <ActionPanel>
                     {entryExists && <Action.Open title="Open File" target={entry.downloadPath} icon={Icon.Play} />}
                     {entryExists && (
-                      <Action.ShowInFinder
-                        title="Show in Finder"
-                        path={entry.downloadPath}
-                        shortcut={Keyboard.Shortcut.Common.Open}
-                      />
+                      <Action.ShowInFinder path={entry.downloadPath} shortcut={Keyboard.Shortcut.Common.Open} />
                     )}
                     <Action.CopyToClipboard
                       title="Copy URL"
@@ -145,7 +141,7 @@ export default function HistoryCommand() {
                       icon={Icon.ExclamationMark}
                       style={Action.Style.Destructive}
                       onAction={clearHistory}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                      shortcut={Keyboard.Shortcut.Common.RemoveAll}
                     />
                   </ActionPanel>
                 }

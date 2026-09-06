@@ -2,7 +2,12 @@ import { runAppleScript } from "@raycast/utils";
 import { environment } from "@raycast/api";
 import { mkdir } from "fs/promises";
 import path from "path";
+import os from "os";
 import fs from "fs";
+
+export function resolveHome(dir: string): string {
+  return dir.startsWith("~") ? path.join(os.homedir(), dir.slice(1)) : dir;
+}
 
 export function getServiceFromUrl(url: string): string {
   try {
@@ -27,7 +32,8 @@ export async function generateThumbnail(filePath: string) {
       return filePath;
     }
 
-    if ([".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v"].includes(ext)) {
+    // Video thumbnails go through ffmpeg and qlmanage via AppleScript, so macOS only.
+    if (process.platform === "darwin" && [".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v"].includes(ext)) {
       const thumbnailDir = path.join(environment.supportPath, "thumbnails");
       if (!fs.existsSync(thumbnailDir)) {
         await mkdir(thumbnailDir, { recursive: true });

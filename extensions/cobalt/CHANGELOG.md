@@ -1,5 +1,13 @@
 # Cobalt Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+- Added Windows support
+- Skipped video thumbnail generation on Windows, since it relies on AppleScript
+- Replaced the AppleScript download notification with the existing success toast on Windows
+- Expanded `~` in the download directory preference so the default resolves on both platforms
+- Fixed `cmd` shortcuts that were not mapped for Windows
+
 ## [Download History command and improvements] - 2025-06-27
 
 - Added `Download History` command (Thanks @ripgrim!)
