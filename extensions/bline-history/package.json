@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bline-history",
+  "title": "bLine Clipboard",
+  "description": "Search the clipboard history bLine syncs across your Macs, and paste anything back.",
+  "icon": "icon.png",
+  "author": "brandonedling",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-history",
+      "title": "Search Clipboard History",
+      "description": "Search clips from every Mac",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showPreview",
+          "title": "Preview Pane",
+          "label": "Show the selected clip on the right",
+          "description": "Open the list with a preview pane showing the whole clip. Toggle it any time with Cmd-Shift-D.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "categories": [
+    "Productivity"
+  ]
+}
