@@ -1,0 +1,42 @@
+{
+  "name": "snapstate",
+  "title": "SnapState",
+  "description": "Restore complete Mac workspaces from Raycast",
+  "icon": "icon.png",
+  "author": "Arush",
+  "license": "MIT",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "restore-workspace",
+      "title": "Restore Workspace",
+      "description": "Restore a saved SnapState workspace",
+      "mode": "view"
+    },
+    {
+      "name": "save-workspace",
+      "title": "Save Current Workspace",
+      "description": "Capture the current Mac workspace in SnapState",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
