@@ -19,6 +19,7 @@ import {
   getCityKey,
   makeAnchor,
   removeCity,
+  sortCitiesByTimeZone,
 } from "./cities";
 import { loadCities, saveCities } from "./city-storage";
 import type { City } from "./cities";
@@ -100,7 +101,7 @@ export function ManageCities({ onChange, navigationTitle }: ManageCitiesProps) {
     let isActive = true;
     loadCities()
       .then((storedCities) => {
-        if (isActive) setCities(storedCities);
+        if (isActive) setCities(sortCitiesByTimeZone(storedCities, new Date()));
       })
       .catch(() => showToast(Toast.Style.Failure, "Could not load your cities"))
       .finally(() => {
@@ -121,11 +122,12 @@ export function ManageCities({ onChange, navigationTitle }: ManageCitiesProps) {
       isPersisting.current = true;
       setIsSaving(true);
       const previousCities = cities;
-      setCities(nextCities);
-      onChange?.(nextCities);
+      const orderedCities = sortCitiesByTimeZone(nextCities, new Date());
+      setCities(orderedCities);
+      onChange?.(orderedCities);
 
       try {
-        await saveCities(nextCities);
+        await saveCities(orderedCities);
         await showToast(Toast.Style.Success, successTitle);
         return true;
       } catch {

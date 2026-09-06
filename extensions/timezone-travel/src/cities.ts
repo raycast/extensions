@@ -1,3 +1,5 @@
+import { getCitySnapshot } from "./time";
+
 export interface City {
   label: string;
   timeZone: string;
@@ -14,9 +16,9 @@ interface CityChoice {
 
 export const DEFAULT_CITIES: City[] = [
   { label: "Warsaw", timeZone: "Europe/Warsaw" },
-  { label: "New York", timeZone: "America/New_York" },
-  { label: "Austin", timeZone: "America/Chicago" },
   { label: "San Francisco", timeZone: "America/Los_Angeles" },
+  { label: "Austin", timeZone: "America/Chicago" },
+  { label: "New York", timeZone: "America/New_York" },
 ];
 
 const CITY_CHOICES: Record<string, CityChoice[]> = {
@@ -85,6 +87,33 @@ export function formatTimeZoneIdentifier(value: string): string {
 
 export function getCityKey(city: City): string {
   return `${city.timeZone}:${city.label.trim().toLocaleLowerCase("en-US")}`;
+}
+
+export function sortCitiesByTimeZone(cities: City[], date: Date): City[] {
+  if (cities.length < 2) return [...cities];
+
+  const [anchor, ...otherCities] = cities;
+  const localMinutes = new Map<string, number>();
+  const getLocalMinutes = (city: City) => {
+    const key = city.timeZone;
+    const cached = localMinutes.get(key);
+    if (cached !== undefined) return cached;
+
+    const snapshot = getCitySnapshot(date, city.timeZone);
+    const value = snapshot.daySerial * 1_440 + snapshot.hour * 60;
+    localMinutes.set(key, value);
+    return value;
+  };
+
+  return [
+    anchor,
+    ...otherCities.sort(
+      (left, right) =>
+        getLocalMinutes(left) - getLocalMinutes(right) ||
+        left.label.localeCompare(right.label) ||
+        left.timeZone.localeCompare(right.timeZone),
+    ),
+  ];
 }
 
 function isValidTimeZone(timeZone: string): boolean {

@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CITIES, addCity, buildCityCatalog, makeAnchor, parseStoredCities, removeCity } from "./cities";
+import {
+  DEFAULT_CITIES,
+  addCity,
+  buildCityCatalog,
+  makeAnchor,
+  parseStoredCities,
+  removeCity,
+  sortCitiesByTimeZone,
+} from "./cities";
 
 describe("city catalog", () => {
   it("turns timezone identifiers into searchable city choices", () => {
@@ -43,6 +51,39 @@ describe("city catalog", () => {
     expect(withChicago).toContainEqual(chicago);
     expect(makeAnchor(withChicago, tokyo)[0]).toEqual(tokyo);
     expect(removeCity([tokyo], tokyo)).toEqual([tokyo]);
+  });
+
+  it("keeps the anchor first and sorts every other city by increasing UTC offset", () => {
+    const cities = [
+      { label: "Warsaw", timeZone: "Europe/Warsaw" },
+      { label: "Tokyo", timeZone: "Asia/Tokyo" },
+      { label: "New York", timeZone: "America/New_York" },
+      { label: "San Francisco", timeZone: "America/Los_Angeles" },
+      { label: "Austin", timeZone: "America/Chicago" },
+    ];
+
+    expect(sortCitiesByTimeZone(cities, new Date("2026-01-15T12:00:00Z")).map((city) => city.label)).toEqual([
+      "Warsaw",
+      "San Francisco",
+      "Austin",
+      "New York",
+      "Tokyo",
+    ]);
+    expect(cities.map((city) => city.label)).toEqual(["Warsaw", "Tokyo", "New York", "San Francisco", "Austin"]);
+  });
+
+  it("sorts cities with the same UTC offset by name", () => {
+    const cities = [
+      { label: "Warsaw", timeZone: "Europe/Warsaw" },
+      { label: "San Francisco", timeZone: "America/Los_Angeles" },
+      { label: "Los Angeles", timeZone: "America/Los_Angeles" },
+    ];
+
+    expect(sortCitiesByTimeZone(cities, new Date("2026-07-15T12:00:00Z")).map((city) => city.label)).toEqual([
+      "Warsaw",
+      "Los Angeles",
+      "San Francisco",
+    ]);
   });
 
   it("falls back safely when saved data is missing or malformed", () => {

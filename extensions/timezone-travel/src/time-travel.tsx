@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DEFAULT_CITIES, getCityKey } from "./cities";
+import { DEFAULT_CITIES, getCityKey, sortCitiesByTimeZone } from "./cities";
 import type { City } from "./cities";
 import { loadCities } from "./city-storage";
 import { ManageCities } from "./manage-cities";
@@ -106,16 +106,17 @@ export default function Command() {
   const [queryState, setQueryState] = useState<QueryState>("idle");
   const [isLive, setIsLive] = useState(true);
   const queryBase = useRef<Date | null>(null);
+  const orderedCities = useMemo(() => sortCitiesByTimeZone(cities, moment), [cities, moment]);
   const readings = useMemo(
     () =>
-      cities.map((city) => ({
+      orderedCities.map((city) => ({
         city,
         ...getCitySnapshot(moment, city.timeZone),
         date: formatDateInZone(moment, city.timeZone),
         time: formatTimeInZone(moment, city.timeZone, use24Hour),
         timeZoneName: formatTimeZoneName(moment, city.timeZone),
       })),
-    [cities, moment, use24Hour],
+    [orderedCities, moment, use24Hour],
   );
   const clipboardSummary = useMemo(() => readings.map(formatReadingSummary).join("\n"), [readings]);
 
@@ -123,7 +124,7 @@ export default function Command() {
     let isActive = true;
     loadCities()
       .then((storedCities) => {
-        if (isActive) setCities(storedCities);
+        if (isActive) setCities(sortCitiesByTimeZone(storedCities, new Date()));
       })
       .catch(() => showToast(Toast.Style.Failure, "Could not load your saved cities"))
       .finally(() => {
@@ -164,9 +165,9 @@ export default function Command() {
   const updateCities = useCallback(
     (nextCities: City[]) => {
       resetTimeQuery();
-      setCities(nextCities);
+      setCities(sortCitiesByTimeZone(nextCities, moment));
     },
-    [resetTimeQuery],
+    [moment, resetTimeQuery],
   );
 
   const changeQuery = useCallback(
