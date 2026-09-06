@@ -18,9 +18,12 @@ The active player is saved separately for each Music Assistant server and user. 
 | Command        | Purpose                                                                     |
 | -------------- | --------------------------------------------------------------------------- |
 | Music          | Search players, artists, tracks, and albums; control playback and the queue |
-| Play/Pause     | Toggle playback on the active player                                        |
+| Play / Pause   | Toggle playback on the active player                                        |
 | Next Track     | Skip forward on the active player                                           |
 | Previous Track | Return to the previous track on the active player                           |
+| Volume Up      | Increase volume by 5% on the active player                                  |
+| Volume Down    | Decrease volume by 5% on the active player                                  |
+| Toggle Mute    | Toggle mute on the active player                                            |
 
 ## Music Workspace
 
@@ -30,7 +33,26 @@ Players separates available outputs, compatible synced group members, and offlin
 
 Press Enter to select a player, play a track immediately, or browse an artist or album. Open Raycast's action panel for Play Next, Add to Queue, repeat, shuffle, mute, volume, transport controls, queue inspection, and refresh.
 
-Volume shortcuts are `Ctrl+=` and `Ctrl+-` on both Windows and macOS. Playback and track actions always target the saved active player; volume actions target a highlighted player when applicable.
+### Default Shortcuts
+
+| Action                | macOS                 | Windows                | Notes                               |
+| --------------------- | --------------------- | ---------------------- | ----------------------------------- |
+| Play/Pause            | `Alt + Enter`         | `Alt + Enter`          | Targets active player               |
+| Next Track            | `Alt + .`             | `Alt + .`              | Forward track skip                  |
+| Previous Track        | `Alt + ,`             | `Alt + ,`              | Previous track skip                 |
+| Play Next             | `Cmd + Option + N`    | `Ctrl + Alt + N`       | Enqueue to play next                |
+| Add to Queue          | `Alt + A`             | `Alt + A`              | Append to active queue              |
+| Browse Artist         | `Cmd + Space`         | `Ctrl + Space`         | Open artist collection              |
+| Browse Album          | `Cmd + Shift + Space` | `Ctrl + Shift + Space` | Open album tracklist                |
+| Volume Up / Down (5%) | `Alt + =` / `Alt + -` | `Alt + =` / `Alt + -`  | Targets highlighted/active player   |
+| Mute / Unmute Player  | `Alt + M`             | `Alt + M`              | Contextual toggle with dynamic icon |
+| Show Queue            | `Alt + Q`             | `Alt + Q`              | Open queue inspection               |
+| Toggle Shuffle        | `Alt + S`             | `Alt + S`              | Feedback toast: On / Off            |
+| Toggle Repeat         | `Alt + R`             | `Alt + R`              | Cycles Track → Queue → Off          |
+| Refresh               | `Cmd + R`             | `Ctrl + R`             | Refresh library/player state        |
+| Extension Preferences | `Cmd + .`             | `Ctrl + .`             | Non-configurable                    |
+
+Action shortcuts can be customized via 3-part structured dropdowns in Extension Preferences (`Cmd + .` / `Ctrl + .`).
 
 ## Demo Mode
 

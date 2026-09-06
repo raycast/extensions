@@ -6,7 +6,7 @@ Updated September 6, 2026. This is the single record of implementation status, v
 
 The extension has a working live HTTP adapter and optional, explicitly labeled demo mode. It is beyond the original foundation stage. Live mode is the default; demo produces no audio and its queues reset when Music closes.
 
-- Four commands and five root views, with explicit server/user-scoped output selection.
+- Seven commands and five root views, with explicit server/user-scoped output selection.
 - Credentials stored strictly in Raycast's native password preferences, directing unconfigured launches to Extension Preferences with clear setup guidance.
 - 3-part structured dropdown action shortcut preferences with reasonable defaults (`Alt+Enter` Play/Pause, `Alt+.` / `Alt+,` Next/Prev, `Ctrl+Alt+N` Play Next, `Alt+A` Add to Queue, `Ctrl+Space` Browse Artist, `Ctrl+Shift+Space` Browse Album, `Alt+M` dynamic Mute/Unmute Player toggle, `Alt+=` / `Alt+-` Volume, `Alt+Q` Queue, `Alt+S` Shuffle, `Alt+R` Repeat, `Ctrl+R` Refresh, `Ctrl+.` Preferences), validation against invalid modifier-as-key combinations, and visual toasts on Repeat/Shuffle/Mute toggles.
 - Search pager warnings accumulation across pages, resilient search revision tracking, and inactive queue loading isolation.
@@ -24,13 +24,13 @@ The last code/assets update addressed PR review feedback on token storage, inval
 | Evidence                            | Result and limits                                                                                                                                                                                                                                                     |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Latest code validation, September 6 | 41 automated tests, TypeScript, ESLint, Prettier, and all four production bundles passed in WSL. Coverage includes warning accumulation, inactive queue isolation, and shortcut customization. These do not prove native keyboard/layout behavior.                    |
-| Official submission, September 6    | Publisher accepted manifest/package, icon, metadata, lint, and formatting; existing PR updated successfully.                                                                                                                                                          |
+| Official submission, September 6    | Publisher accepted manifest/package, icon, metadata, lint, and formatting; [Raycast PR #30841](https://github.com/raycast/extensions/pull/30841) updated successfully.                                                                                                |
 | Read-only live smoke, September 5   | Music Assistant 2.10.2/schema 65: authentication, scoped identity, player/effective queue decoding, All/Tracks/Artists/Albums loading, pagination signals, typed search, and artist/album browsing passed.                                                            |
 | Artwork smoke, September 5          | Canonical image proxy returned unauthenticated JPEG HTTP 200. Decoded art was available for 19/20 sampled albums, 14/20 tracks, and 5/20 artists; missing source metadata uses fallbacks.                                                                             |
 | Group API verification, September 6 | Running server command/schema endpoints confirmed membership arguments and fields. Tests cover compatibility, static members, followers, active groups, stale state, and queue ownership. Automated validation did not change live membership or verify audible sync. |
 | Native Windows                      | Development bundle previously compiled and attached. User reported broad working playback and later supplied native screenshots and keyboard fixes. This is useful user evidence, not completion of every scenario below.                                             |
 | Native macOS                        | No recorded host validation.                                                                                                                                                                                                                                          |
-| Documentation cleanup, September 6  | Consolidated seven historical documents into two, checked current behavior against source and recent commits, and removed stale plans/status claims. No runtime behavior changed.                                                                                     |
+| Documentation cleanup, September 6  | Consolidated historical documents into two, checked current behavior against source and recent commits, and removed stale plans/status claims. No runtime behavior changed.                                                                                           |
 
 Tests cover domain policies, saved output isolation, strict wire decoding, HTTP errors/cancellation/no replay, exact live command arguments, queue identity/loading, paging races, shared route state, grouping, and shortcut mappings. Fixtures contain sanitized source shapes; they do not substitute for a running server.
 
@@ -67,10 +67,10 @@ Record host/app/server versions and concrete outcomes when running these checks.
 
 ### Native Windows and macOS
 
-- [ ] Record Raycast/host versions; discover all four commands by Audio Assistant / Music Assistant.
+- [ ] Record Raycast/host versions; discover all seven commands by Audio Assistant / Music Assistant.
 - [ ] Five root views, Players sections/detail, grids, combined artist List, artwork, loading/empty/error states, scrolling, and Back/query restoration.
 - [ ] Enter actions, repeated Play/Pause, native action panel, Shift capitalization, select/copy/paste, and hotkeys across root and pushed views.
-- [ ] Physical Ctrl+= / Ctrl+- on the intended keyboard layout; volume targets highlighted player while transport targets saved output.
+- [ ] Physical Alt+= / Alt+- (or custom bindings) on the intended keyboard layout; volume targets highlighted player while transport targets saved output.
 - [ ] Rapid actions/refresh preserve search focus and usable results; quick commands show feedback and exit; closing Music cleans up resources.
 
 The icon, screenshot preparation, and publisher checks are already recorded as passed above. They are not outstanding checklist items. Do not describe the extension as fully cross-platform validated until the applicable live/native gaps are closed.

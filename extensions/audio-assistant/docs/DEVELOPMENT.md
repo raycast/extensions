@@ -21,7 +21,7 @@ Keep feature changes in separate commits so they can be reverted independently. 
 
 ## Product contract
 
-Exactly four top-level commands: **Music**, **Play/Pause**, **Next Track**, and **Previous Track**, each with the subtitle **Audio Assistant**. Richer controls belong inside Music. No menu-bar command, AppleScript, shell playback, local receiver, or extra root dropdown is part of the current product.
+Exactly seven top-level commands: **Music**, **Play / Pause**, **Next Track**, **Previous Track**, **Volume Up**, **Volume Down**, and **Toggle Mute**, each with the subtitle **Audio Assistant**. Richer controls belong inside Music. No menu-bar command, AppleScript, shell playback, local receiver, or extra root dropdown is part of the current product.
 
 | Root view | Layout and behavior                                                                                                                                                                                                |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -130,6 +130,6 @@ WebSocket events are future work. A future client must handle initial server inf
 
 ## Store submission
 
-Use `npm run publish`, Raycast's official publisher, to update the existing [PR #30819](https://github.com/raycast/extensions/pull/30819) when publication is requested. Do not manually create a replacement PR. The prior successful Windows submission used an ignored `.publish` ordinary checkout with host dependencies; synchronize tracked content and remove stale submission files before reusing it. Never commit generated checkouts or credentials.
+Use `npm run publish`, Raycast's official publisher, to update the existing [PR #30841](https://github.com/raycast/extensions/pull/30841) when publication is requested. Do not manually create a replacement PR. The publisher uses the user's GitHub authentication from `~/.config/raycast/config.json` and updates the PR branch automatically. Never commit generated checkouts or credentials.
 
 The extension icon is `assets/icon.png`. Store screenshots are the ordered 2000×1250 PNGs `metadata/audio-assistant-1.png` through `-3.png`; original user captures are retained in `media/`. Keep screenshots out of runtime assets. Recheck the official Store requirements when preparing a future submission.

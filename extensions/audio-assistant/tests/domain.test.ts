@@ -126,3 +126,35 @@ test("demo search pagination and cancellation obey the service contract", async 
   abort.abort();
   await assert.rejects(service.search({ query: "", view: "all", limit: 10 }, abort.signal));
 });
+
+test("stepVolume and toggleMute target the active player with capability and bounds checks", async () => {
+  const service = new DemoMusicService();
+  const saved = storage();
+  const controller = new PlaybackController(service, saved);
+
+  await assert.rejects(controller.stepVolume(5), /Select a player/);
+  await assert.rejects(controller.toggleMute(), /Select a player/);
+
+  await controller.select("demo-player-0");
+
+  const up = await controller.stepVolume(5);
+  assert.equal(up.newVolume, 40);
+  assert.equal((await service.getPlayers())[0]?.volume, 40);
+
+  const down = await controller.stepVolume(-10);
+  assert.equal(down.newVolume, 30);
+
+  const max = await controller.stepVolume(200);
+  assert.equal(max.newVolume, 100);
+
+  const min = await controller.stepVolume(-200);
+  assert.equal(min.newVolume, 0);
+
+  const mute1 = await controller.toggleMute();
+  assert.equal(mute1.muted, true);
+  assert.equal((await service.getPlayers())[0]?.muted, true);
+
+  const mute2 = await controller.toggleMute();
+  assert.equal(mute2.muted, false);
+  assert.equal((await service.getPlayers())[0]?.muted, false);
+});

@@ -1,5 +1,5 @@
 import type { PlaybackAction, Player, QueueIntent, Track } from "../domain/model";
-import { requirePlayer } from "../domain/policy";
+import { AudioAssistantError, requirePlayer } from "../domain/policy";
 import type { ActivePlayerStore, MusicService } from "./port";
 
 /** Persisted default = active target. Highlighting rows alone never changes it. */
@@ -21,5 +21,24 @@ export class PlaybackController {
   }
   async playback(action: PlaybackAction): Promise<void> {
     await this.service.playback((await this.active()).id, action);
+  }
+  async stepVolume(delta: number): Promise<{ player: Player; newVolume: number }> {
+    const player = await this.active();
+    if (!player.capabilities.volume) {
+      throw new AudioAssistantError("unsupported", `${player.name} does not support volume control.`);
+    }
+    const current = player.volume ?? 0;
+    const newVolume = Math.min(100, Math.max(0, current + delta));
+    await this.service.setVolume(player.id, newVolume);
+    return { player, newVolume };
+  }
+  async toggleMute(): Promise<{ player: Player; muted: boolean }> {
+    const player = await this.active();
+    if (!player.capabilities.mute) {
+      throw new AudioAssistantError("unsupported", `${player.name} does not support mute.`);
+    }
+    const nextMuted = !player.muted;
+    await this.service.setMuted(player.id, nextMuted);
+    return { player, muted: nextMuted };
   }
 }
