@@ -102,7 +102,22 @@ const BROWSER_DEFINITIONS: BrowserDefinition[] = [
   { id: BROWSERS_BUNDLE_ID.chromeBeta, name: "Chrome Beta", macBundleId: "com.google.chrome.beta" },
   { id: BROWSERS_BUNDLE_ID.chromeDev, name: "Chrome Dev", macBundleId: "com.google.chrome.dev" },
   { id: BROWSERS_BUNDLE_ID.comet, name: "Comet", macBundleId: "ai.perplexity.comet" },
-  { id: BROWSERS_BUNDLE_ID.dia, name: "Dia", macBundleId: "company.thebrowser.dia" },
+  {
+    id: BROWSERS_BUNDLE_ID.dia,
+    name: "Dia",
+    macBundleId: "company.thebrowser.dia",
+    windowsUserDataPath: WINDOWS_LOCAL_APPDATA
+      ? join(
+          WINDOWS_LOCAL_APPDATA,
+          "Packages",
+          "TheBrowserCompany.Dia_ttt1ap7aakyb4",
+          "LocalCache",
+          "Local",
+          "Dia",
+          "User Data",
+        )
+      : undefined,
+  },
   { id: BROWSERS_BUNDLE_ID.chatGPTAtlas, name: "ChatGPT Atlas", macBundleId: "com.openai.atlas" },
   { id: BROWSERS_BUNDLE_ID.firefox, name: "Firefox", macBundleId: "org.mozilla.firefox" },
   { id: BROWSERS_BUNDLE_ID.firefoxDev, name: "Firefox Dev", macBundleId: "org.mozilla.firefoxdeveloperedition" },
