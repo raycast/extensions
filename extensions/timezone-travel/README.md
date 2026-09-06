@@ -6,6 +6,8 @@ Timezone Travel turns time-zone planning into one keyboard flow. Choose a moment
 every saved city moves with it, so you can answer “what time is that for everyone?” without doing the
 arithmetic yourself.
 
+![Timezone Travel showing synchronized local times across four cities](media/timezone-travel.png)
+
 ## One Timeline, Every City
 
 - **Travel by keyboard** — press `Option` + `←/→` on macOS or `Alt` + `←/→` on Windows to move every
