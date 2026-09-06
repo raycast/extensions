@@ -6,7 +6,7 @@ import { fetchPage } from "./pages";
 import { DocEntry, EntryMeta, MetaIndex } from "./types";
 
 const META_TTL = 24 * 60 * 60 * 1000;
-const DENSE_PAGE_LIMIT = 12;
+const SCAN_CONCURRENCY = 16;
 const SECTION_LIMIT = 20000;
 
 const TREE_PAGE = "overview-tree.html";
@@ -265,23 +265,36 @@ async function scanEvents(
   }
 }
 
-function densePages(entries: DocEntry[]): string[] {
-  const counts = new Map<string, number>();
+function memberPages(entries: DocEntry[]): string[] {
+  const pages = new Set<string>();
   for (const entry of entries) {
-    if (!entry.owner) continue;
-    counts.set(entry.page, (counts.get(entry.page) ?? 0) + 1);
+    if (entry.owner && entry.page) {
+      pages.add(entry.page);
+    }
   }
-  return [...counts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, DENSE_PAGE_LIMIT)
-    .map(([page]) => page);
+  return [...pages];
 }
 
 async function scan(entries: DocEntry[], force: boolean): Promise<MetaIndex> {
   const meta: MetaIndex = {};
-  for (const page of densePages(entries)) {
-    scanPage(await fetchPage(page, undefined, force, false), page, meta);
+  const pages = memberPages(entries);
+
+  let next = 0;
+  async function worker(): Promise<void> {
+    for (let at = next++; at < pages.length; at = next++) {
+      try {
+        const html = await fetchPage(pages[at], undefined, force, false);
+        scanPage(html, pages[at], meta);
+      } catch {
+        // Individual page failures do not abort the metadata build
+      }
+    }
   }
+
+  await Promise.all(
+    Array.from({ length: Math.min(SCAN_CONCURRENCY, pages.length) }, worker),
+  );
+
   await scanEvents(entries, meta, force);
   return meta;
 }

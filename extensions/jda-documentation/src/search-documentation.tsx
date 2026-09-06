@@ -203,13 +203,13 @@ export default function SearchDocumentation() {
       title: "Refreshing documentation index",
     });
     try {
-      await clearDetailsCache();
       const refreshed = await refreshInventory();
       if (includeGuides) {
         await refreshGuides();
         await refreshFaq();
       }
       await ensureMeta(refreshed.entries, true);
+      await clearDetailsCache();
       await revalidate();
       await revalidateWiki();
       await revalidateMeta();

@@ -278,20 +278,30 @@ export async function clearDetailsCache(): Promise<void> {
   await discardPages();
 }
 
-export function documentationPages(entries: DocEntry[]): string[] {
-  return [
-    ...new Set(
-      entries
-        .filter((entry) => entry.kind !== "guide")
-        .map((entry) => entry.page),
-    ),
-  ];
+export interface PageTarget {
+  page: string;
+  base: string;
+}
+
+export function documentationPages(entries: DocEntry[]): PageTarget[] {
+  const seen = new Set<string>();
+  const targets: PageTarget[] = [];
+  for (const entry of entries) {
+    if (!entry.page) continue;
+    const base = entry.kind === "guide" ? WIKI_BASE : DOCS_BASE;
+    const key = base + entry.page;
+    if (!seen.has(key)) {
+      seen.add(key);
+      targets.push({ page: entry.page, base });
+    }
+  }
+  return targets;
 }
 
 // One unreachable page out of a thousand must not abandon the whole download,
 // and a serial loop over them takes minutes that concurrency removes.
 export async function prefetchPages(
-  pages: string[],
+  pages: PageTarget[],
   onProgress: (done: number, total: number) => void,
 ): Promise<number> {
   let next = 0;
@@ -301,7 +311,7 @@ export async function prefetchPages(
   async function worker(): Promise<void> {
     for (let at = next++; at < pages.length; at = next++) {
       try {
-        await fetchPage(pages[at], DOCS_BASE, true, false);
+        await fetchPage(pages[at].page, pages[at].base, true, false);
       } catch {
         failed += 1;
       }
