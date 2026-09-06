@@ -1,0 +1,42 @@
+{
+  "name": "channel-mixer-helper",
+  "title": "Channel Mixer Helper",
+  "description": "將來源 HEX 色彩轉成 Photoshop Channel Mixer 建議值",
+  "version": "1.0.0",
+  "author": "AyakaNya",
+  "license": "MIT",
+  "icon": "icon.png",
+  "categories": [
+    "Design Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "convert-color",
+      "title": "HEX 色版混合器轉換",
+      "description": "輸入來源與目標 HEX，產生穩定的 Photoshop Channel Mixer 建議值",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "轉換歷史",
+      "description": "查看最近使用過的 HEX 色彩轉換",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "typescript": "^5.7.2"
+  }
+}
