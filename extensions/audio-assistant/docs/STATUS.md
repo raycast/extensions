@@ -7,6 +7,9 @@ Updated September 6, 2026. This is the single record of implementation status, v
 The extension has a working live HTTP adapter and optional, explicitly labeled demo mode. It is beyond the original foundation stage. Live mode is the default; demo produces no audio and its queues reset when Music closes.
 
 - Four commands and five root views, with explicit server/user-scoped output selection.
+- First-launch credential onboarding form directly in the Music command, testing connectivity, supporting demo mode, and persisting to LocalStorage without requiring manual extension preferences.
+- 3-part structured dropdown action shortcut preferences with reasonable defaults (`Alt+Enter` Play/Pause, `Alt+.` / `Alt+,` Next/Prev, `Ctrl+Alt+N` Play Next, `Alt+A` Add to Queue, `Ctrl+Space` Browse Artist, `Ctrl+Shift+Space` Browse Album, `Alt+M` dynamic Mute/Unmute Player toggle, `Alt+=` / `Alt+-` Volume, `Alt+Q` Queue, `Alt+S` Shuffle, `Alt+R` Repeat, `Ctrl+R` Refresh, `Ctrl+.` Preferences), visual toasts on Repeat/Shuffle/Mute toggles, and a "Restore Default Shortcuts" action.
+- Search pager warnings accumulation across pages, resilient search revision tracking, and inactive queue loading isolation.
 - Paged library lists/grids, independently paged All discovery, cancellable searches, partial discovery recovery, and cached collection browsing.
 - Artist albums and tracks together on one searchable screen; root Artists/Albums retain grids. Album tracks follow disc/track order; related-media actions and album/track artwork are implemented.
 - Playback, Play Next, append, volume steps, mute, repeat, shuffle, queue inspection, and non-current queue-entry removal. Queue loading includes entries beyond the first 200.
@@ -14,13 +17,13 @@ The extension has a working live HTTP adapter and optional, explicitly labeled d
 - Available/Group/Offline player sections, compatible synced membership addition/removal, static-member protection, and effective queue resolution. All excludes offline players.
 - Updated icon and three ordered Store screenshots; user originals retained separately.
 
-The last code/assets update was pushed through `4f0aebc` on the project repository. The official publisher successfully updated [Raycast PR #30819](https://github.com/raycast/extensions/pull/30819) to submission head `de7901e1dd7997aceb7351c75d864d878f1dccb2` on September 6. It was open at that check; submission is not Store approval. This records that publication, not a claim about later review activity. The old Greptile review predates the shared-session, queue-loading, preference/configuration, shortcut, and screenshot fixes; no new review score is recorded here.
+The last code/assets update addressed PR review feedback (warning preservation across search pages, search revision sync, inactive queue loading failure isolation) and added first-run credential onboarding and customizable action keybindings.
 
 ## Validation evidence
 
 | Evidence                            | Result and limits                                                                                                                                                                                                                                                     |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Latest code validation, September 6 | 38 automated tests, TypeScript, ESLint, Prettier, and all four production bundles passed in WSL. The combined artist view also passed check/build. These do not prove native keyboard/layout behavior.                                                                |
+| Latest code validation, September 6 | 41 automated tests, TypeScript, ESLint, Prettier, and all four production bundles passed in WSL. Coverage includes warning accumulation, inactive queue isolation, and shortcut customization. These do not prove native keyboard/layout behavior.                    |
 | Official submission, September 6    | Publisher accepted manifest/package, icon, metadata, lint, and formatting; existing PR updated successfully.                                                                                                                                                          |
 | Read-only live smoke, September 5   | Music Assistant 2.10.2/schema 65: authentication, scoped identity, player/effective queue decoding, All/Tracks/Artists/Albums loading, pagination signals, typed search, and artist/album browsing passed.                                                            |
 | Artwork smoke, September 5          | Canonical image proxy returned unauthenticated JPEG HTTP 200. Decoded art was available for 19/20 sampled albums, 14/20 tracks, and 5/20 artists; missing source metadata uses fallbacks.                                                                             |

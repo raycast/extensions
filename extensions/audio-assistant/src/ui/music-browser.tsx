@@ -7,7 +7,7 @@ import { ItemActions } from "./item-actions";
 import { reportError } from "./feedback";
 import { SessionRoute, useMusic } from "./session";
 import { SearchPager } from "../services/search-pager";
-import { shortcuts } from "./shortcuts";
+import { restoreDefaultShortcuts, shortcuts } from "./shortcuts";
 
 const views: { value: View; title: string }[] = [
   { value: "all", title: "All" },
@@ -55,7 +55,7 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
     setSearching(true);
     setView(value as View);
   };
-  const collectionRevision = collection ? revision : 0;
+  const searchRevision = collection || error ? revision : 0;
   useEffect(() => {
     const abort = new AbortController();
     setSearching(true);
@@ -120,7 +120,7 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
       abort.abort();
       nextPager.dispose();
     };
-  }, [service, view, query, collection, collectionRevision]);
+  }, [service, view, query, collection, searchRevision]);
   const openCollection = (item: Artist | Album) =>
     push(
       <SessionRoute sessionBridge={bridge}>
@@ -156,7 +156,17 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
     <ActionPanel>
       <ActionPanel.Section title="Workspace">
         <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={() => run(refresh)} />
-        <Action title="Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+        <Action
+          title="Extension Preferences"
+          icon={Icon.Gear}
+          shortcut={shortcuts.preferences}
+          onAction={openExtensionPreferences}
+        />
+        <Action
+          title="Restore Default Shortcuts"
+          icon={Icon.RotateAntiClockwise}
+          onAction={() => void restoreDefaultShortcuts()}
+        />
       </ActionPanel.Section>
     </ActionPanel>
   );

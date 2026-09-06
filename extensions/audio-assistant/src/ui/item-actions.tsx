@@ -3,7 +3,7 @@ import type { Artist, Album, Item } from "../domain/model";
 import { SessionRoute, useMusic } from "./session";
 import { PlayerActions } from "./player-actions";
 import { QueueView } from "./queue-view";
-import { shortcuts } from "./shortcuts";
+import { restoreDefaultShortcuts, shortcuts } from "./shortcuts";
 
 export function ItemActions({ item, openCollection }: { item?: Item; openCollection: (item: Artist | Album) => void }) {
   const { controller, run, refresh, bridge } = useMusic();
@@ -42,6 +42,7 @@ export function ItemActions({ item, openCollection }: { item?: Item; openCollect
           <Action
             title={item.kind === "artist" ? "Browse Artist" : "Browse Album"}
             icon={Icon.Cd}
+            shortcut={item.kind === "artist" ? shortcuts.browseArtist : shortcuts.browseAlbum}
             onAction={() => openCollection(item)}
           />
         )}
@@ -50,13 +51,19 @@ export function ItemActions({ item, openCollection }: { item?: Item; openCollect
       {item?.kind === "track" && (
         <ActionPanel.Section title="Related Music">
           {item.albumItem && (
-            <Action title="Browse Track Album" icon={Icon.Cd} onAction={() => openCollection(item.albumItem!)} />
+            <Action
+              title="Browse Track Album"
+              icon={Icon.Cd}
+              shortcut={shortcuts.browseAlbum}
+              onAction={() => openCollection(item.albumItem!)}
+            />
           )}
-          {item.artists?.map((artist) => (
+          {item.artists?.map((artist, idx) => (
             <Action
               key={artist.uri}
               title={`Browse Artist: ${artist.name}`}
               icon={Icon.Person}
+              shortcut={idx === 0 ? shortcuts.browseArtist : undefined}
               onAction={() => openCollection(artist)}
             />
           ))}
@@ -82,7 +89,17 @@ export function ItemActions({ item, openCollection }: { item?: Item; openCollect
           }
         />
         <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={() => run(refresh)} />
-        <Action title="Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+        <Action
+          title="Extension Preferences"
+          icon={Icon.Gear}
+          shortcut={shortcuts.preferences}
+          onAction={openExtensionPreferences}
+        />
+        <Action
+          title="Restore Default Shortcuts"
+          icon={Icon.RotateAntiClockwise}
+          onAction={() => void restoreDefaultShortcuts()}
+        />
       </ActionPanel.Section>
     </ActionPanel>
   );

@@ -41,25 +41,30 @@ Play Now uses the server's `play` option, not queue replacement. Play Next uses 
 
 `Primary` is Cmd on macOS and Ctrl on Windows. Keep native selection/focus handling in List/Grid and one contextual action panel per row. Preserve the fixes from `acb5748`: do not reintroduce controlled selection that steals search focus, duplicate root action panels, or search resets after ordinary playback mutations. Do not assign application shortcuts to text editing or the native action-panel keys.
 
-| Action                        | Shortcut                                   |
-| ----------------------------- | ------------------------------------------ |
-| Primary row action            | Enter                                      |
-| Native action panel           | Primary+K                                  |
-| Play/Pause                    | Primary+P                                  |
-| Next / Previous               | Primary+Shift+Right / Left                 |
-| Play Next / Add to Queue      | Primary+Shift+N / A                        |
-| Volume up / down, five points | Physical Ctrl+= / Ctrl+- on both platforms |
-| Mute / Repeat / Shuffle       | Primary+Shift+M / R / S                    |
-| Show Queue                    | Primary+Shift+Q                            |
-| Refresh                       | Primary+R                                  |
+| Action                        | Default Shortcut                    |
+| ----------------------------- | ----------------------------------- |
+| Primary row action            | Enter                               |
+| Native action panel           | Primary+K                           |
+| Play/Pause                    | Alt+Enter                           |
+| Next / Previous               | Alt+. / Alt+,                       |
+| Play Next                     | Primary+Alt+N                       |
+| Add to Queue                  | Alt+A                               |
+| Browse Artist / Album         | Primary+Space / Primary+Shift+Space |
+| Volume up / down, five points | Alt+= / Alt+-                       |
+| Mute / Unmute Player          | Alt+M                               |
+| Shuffle                       | Alt+S                               |
+| Repeat                        | Alt+R                               |
+| Show Queue                    | Alt+Q                               |
+| Refresh                       | Primary+R                           |
+| Extension Preferences         | Primary+. (non-configurable)        |
 
-The executable shortcut map is `src/ui/shortcuts.ts`. Hide capability-dependent actions when unsupported; Next/Previous also reject unsupported calls at the service boundary. Native keyboard checks remain separate from automated shortcut-map tests.
+The executable shortcut map is `src/ui/shortcuts.ts`. Action shortcuts can be customized via 3-part structured dropdowns in extension preferences (Modifier 1, Key/Modifier 2, Key/NA 3) while protecting core keys (`Enter`, `Primary+K`, and text editing keys without shift). A "Restore Default Shortcuts" action resets bindings to defaults. Hide capability-dependent actions when unsupported; Next/Previous also reject unsupported calls at the service boundary. Native keyboard checks remain separate from automated shortcut-map tests.
 
 ## Architecture
 
 | Area                                   | Main files                                                                                                    |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Commands, preferences, runtime         | `package.json`, `src/music.tsx`, `src/runtime.ts`, `src/quick-command.ts`                                     |
+| Commands, preferences, runtime         | `package.json`, `src/music.tsx`, `src/runtime.ts`, `src/quick-command.ts`, `src/ui/setup-form.tsx`            |
 | Domain and target/group policy         | `src/domain/model.ts`, `policy.ts`, `grouping.ts`                                                             |
 | Typed service and saved selection      | `src/services/port.ts`, `controller.ts`                                                                       |
 | HTTP, decoding, live implementation    | `src/services/http-client.ts`, `wire.ts`, `live.ts`                                                           |

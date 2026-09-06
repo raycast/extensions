@@ -1,12 +1,12 @@
 import { showHUD } from "@raycast/api";
 import type { PlaybackAction } from "./domain/model";
-import { createRuntime } from "./runtime";
+import { createRuntimeAsync } from "./runtime";
 import { reportError } from "./ui/feedback";
 
 export async function runQuickCommand(action: PlaybackAction): Promise<void> {
-  let runtime: ReturnType<typeof createRuntime> | undefined;
+  let runtime: Awaited<ReturnType<typeof createRuntimeAsync>> | undefined;
   try {
-    runtime = createRuntime();
+    runtime = await createRuntimeAsync();
     if (runtime.service.mode === "demo") {
       await showHUD("Demo mode: playback is simulated inside Music only");
       return;

@@ -88,6 +88,2946 @@
       "type": "password",
       "required": false,
       "description": "Create a long-lived token in Music Assistant under Settings → Users → Tokens."
+    },
+    {
+      "name": "shortcutPlayPauseMod1",
+      "title": "Shortcut: Play/Pause (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "alt",
+      "description": "First modifier for Play/Pause.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutPlayPauseMod2",
+      "title": "Shortcut: Play/Pause (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "enter",
+      "description": "Second key or modifier for Play/Pause.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutPlayPauseKey",
+      "title": "Shortcut: Play/Pause (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutNextMod1",
+      "title": "Shortcut: Next Track (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "alt",
+      "description": "First modifier for Next Track.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutNextMod2",
+      "title": "Shortcut: Next Track (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": ".",
+      "description": "Second key or modifier for Next Track.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutNextKey",
+      "title": "Shortcut: Next Track (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutPreviousMod1",
+      "title": "Shortcut: Previous Track (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "alt",
+      "description": "First modifier for Previous Track.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutPreviousMod2",
+      "title": "Shortcut: Previous Track (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": ",",
+      "description": "Second key or modifier for Previous Track.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutPreviousKey",
+      "title": "Shortcut: Previous Track (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutPlayNextMod1",
+      "title": "Shortcut: Play Next (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "ctrl",
+      "description": "First modifier for Play Next.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutPlayNextMod2",
+      "title": "Shortcut: Play Next (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "alt",
+      "description": "Second key or modifier for Play Next.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutPlayNextKey",
+      "title": "Shortcut: Play Next (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "n",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutAddToQueueMod1",
+      "title": "Shortcut: Add to Queue (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "alt",
+      "description": "First modifier for Add to Queue.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutAddToQueueMod2",
+      "title": "Shortcut: Add to Queue (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "a",
+      "description": "Second key or modifier for Add to Queue.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutAddToQueueKey",
+      "title": "Shortcut: Add to Queue (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutBrowseArtistMod1",
+      "title": "Shortcut: Browse Artist (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "ctrl",
+      "description": "First modifier for Browse Artist.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutBrowseArtistMod2",
+      "title": "Shortcut: Browse Artist (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "space",
+      "description": "Second key or modifier for Browse Artist.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutBrowseArtistKey",
+      "title": "Shortcut: Browse Artist (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutBrowseAlbumMod1",
+      "title": "Shortcut: Browse Album (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "ctrl",
+      "description": "First modifier for Browse Album.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutBrowseAlbumMod2",
+      "title": "Shortcut: Browse Album (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "shift",
+      "description": "Second key or modifier for Browse Album.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutBrowseAlbumKey",
+      "title": "Shortcut: Browse Album (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "space",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutMuteMod1",
+      "title": "Shortcut: Mute/Unmute Player (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "alt",
+      "description": "First modifier for Mute/Unmute Player.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutMuteMod2",
+      "title": "Shortcut: Mute/Unmute Player (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "m",
+      "description": "Second key or modifier for Mute/Unmute Player.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutMuteKey",
+      "title": "Shortcut: Mute/Unmute Player (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutVolumeUpMod1",
+      "title": "Shortcut: Volume Up (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "alt",
+      "description": "First modifier for Volume Up.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutVolumeUpMod2",
+      "title": "Shortcut: Volume Up (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "=",
+      "description": "Second key or modifier for Volume Up.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutVolumeUpKey",
+      "title": "Shortcut: Volume Up (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutVolumeDownMod1",
+      "title": "Shortcut: Volume Down (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "alt",
+      "description": "First modifier for Volume Down.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutVolumeDownMod2",
+      "title": "Shortcut: Volume Down (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "-",
+      "description": "Second key or modifier for Volume Down.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutVolumeDownKey",
+      "title": "Shortcut: Volume Down (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutQueueMod1",
+      "title": "Shortcut: Show Queue (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "alt",
+      "description": "First modifier for Show Queue.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutQueueMod2",
+      "title": "Shortcut: Show Queue (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "q",
+      "description": "Second key or modifier for Show Queue.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutQueueKey",
+      "title": "Shortcut: Show Queue (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutShuffleMod1",
+      "title": "Shortcut: Toggle Shuffle (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "alt",
+      "description": "First modifier for Toggle Shuffle.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutShuffleMod2",
+      "title": "Shortcut: Toggle Shuffle (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "s",
+      "description": "Second key or modifier for Toggle Shuffle.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutShuffleKey",
+      "title": "Shortcut: Toggle Shuffle (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutRepeatMod1",
+      "title": "Shortcut: Toggle Repeat (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "alt",
+      "description": "First modifier for Toggle Repeat.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutRepeatMod2",
+      "title": "Shortcut: Toggle Repeat (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "r",
+      "description": "Second key or modifier for Toggle Repeat.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutRepeatKey",
+      "title": "Shortcut: Toggle Repeat (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutRefreshMod1",
+      "title": "Shortcut: Refresh (Part 1: Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "ctrl",
+      "description": "First modifier for Refresh.",
+      "data": [
+        {
+          "title": "Ctrl (Cmd on macOS)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Alt (Option on macOS)",
+          "value": "alt"
+        },
+        {
+          "title": "Shift",
+          "value": "shift"
+        },
+        {
+          "title": "Ctrl (Physical on both)",
+          "value": "physical_ctrl"
+        }
+      ]
+    },
+    {
+      "name": "shortcutRefreshMod2",
+      "title": "Shortcut: Refresh (Part 2: Key or Modifier)",
+      "type": "dropdown",
+      "required": false,
+      "default": "r",
+      "description": "Second key or modifier for Refresh.",
+      "data": [
+        {
+          "title": "Shift (modifier)",
+          "value": "shift"
+        },
+        {
+          "title": "Alt / Option (modifier)",
+          "value": "alt"
+        },
+        {
+          "title": "Ctrl / Cmd (modifier)",
+          "value": "ctrl"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "K",
+          "value": "k"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
+    },
+    {
+      "name": "shortcutRefreshKey",
+      "title": "Shortcut: Refresh (Part 3: Final Key or N/A)",
+      "type": "dropdown",
+      "required": false,
+      "default": "na",
+      "description": "Third key for 3-key combo or N/A for 2-key combo.",
+      "data": [
+        {
+          "title": "N/A (2-key combo)",
+          "value": "na"
+        },
+        {
+          "title": "Enter",
+          "value": "enter"
+        },
+        {
+          "title": "Space",
+          "value": "space"
+        },
+        {
+          "title": "Right Arrow",
+          "value": "arrowRight"
+        },
+        {
+          "title": "Left Arrow",
+          "value": "arrowLeft"
+        },
+        {
+          "title": "Up Arrow",
+          "value": "arrowUp"
+        },
+        {
+          "title": "Down Arrow",
+          "value": "arrowDown"
+        },
+        {
+          "title": "Period (.)",
+          "value": "."
+        },
+        {
+          "title": "Comma (,)",
+          "value": ","
+        },
+        {
+          "title": "Equal (=)",
+          "value": "="
+        },
+        {
+          "title": "Minus (-)",
+          "value": "-"
+        },
+        {
+          "title": "M",
+          "value": "m"
+        },
+        {
+          "title": "P",
+          "value": "p"
+        },
+        {
+          "title": "N",
+          "value": "n"
+        },
+        {
+          "title": "A",
+          "value": "a"
+        },
+        {
+          "title": "Q",
+          "value": "q"
+        },
+        {
+          "title": "R",
+          "value": "r"
+        },
+        {
+          "title": "S",
+          "value": "s"
+        },
+        {
+          "title": "Tab",
+          "value": "tab"
+        }
+      ]
     }
   ],
   "dependencies": {

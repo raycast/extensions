@@ -5,6 +5,7 @@ import type {
   PlaybackAction,
   Player,
   Queue,
+  QueueEntry,
   QueueIntent,
   RepeatMode,
   SearchPage,
@@ -108,39 +109,58 @@ export class LiveMusicService implements MusicService {
   async getQueues(): Promise<Queue[]> {
     const queueValue = await this.options.client.command("player_queues/all");
     const summaries = decodeArray(queueValue, "queues", decodeQueueSummary);
-    return Promise.all(
+    const queueSettled = await Promise.allSettled(
       summaries.map(async (summary) => {
-        const entries: Queue["entries"] = [];
-        do {
-          const itemValue = await this.options.client.command("player_queues/items", {
-            queue_id: summary.id,
-            limit: 200,
-            offset: entries.length,
-          });
-          const page = decodeArray(itemValue, `queueItems.${summary.id}`, (item, path) =>
-            decodeQueueEntry(item, path, this.serverUrl),
-          );
-          const known = new Set(entries.map((entry) => entry.id));
-          if (page.some((entry) => known.has(entry.id)))
-            throw new AudioAssistantError("not-ready", "The queue changed while loading. Refresh to load it again.");
-          entries.push(...page);
-          if (entries.length >= summary.itemCount) break;
-          if (!page.length || entries.length >= 10000)
-            throw new AudioAssistantError(
-              "not-ready",
-              "Could not load the complete queue. Refresh or shorten the queue in Music Assistant.",
+        try {
+          const entries: QueueEntry[] = [];
+          do {
+            const itemValue = await this.options.client.command("player_queues/items", {
+              queue_id: summary.id,
+              limit: 200,
+              offset: entries.length,
+            });
+            const page = decodeArray(itemValue, `queueItems.${summary.id}`, (item, path) =>
+              decodeQueueEntry(item, path, this.serverUrl),
             );
-        } while (entries.length < summary.itemCount);
-        return {
-          id: summary.id,
-          active: summary.active,
-          entries,
-          currentIndex: summary.currentIndex,
-          repeat: summary.repeat,
-          shuffle: summary.shuffle,
-        };
+            const known = new Set(entries.map((entry) => entry.id));
+            if (page.some((entry) => known.has(entry.id)))
+              throw new AudioAssistantError("not-ready", "The queue changed while loading. Refresh to load it again.");
+            entries.push(...page);
+            if (entries.length >= summary.itemCount) break;
+            if (!page.length || entries.length >= 10000)
+              throw new AudioAssistantError(
+                "not-ready",
+                "Could not load the complete queue. Refresh or shorten the queue in Music Assistant.",
+              );
+          } while (entries.length < summary.itemCount);
+          return {
+            id: summary.id,
+            active: summary.active,
+            entries,
+            currentIndex: summary.currentIndex,
+            repeat: summary.repeat,
+            shuffle: summary.shuffle,
+          };
+        } catch (error) {
+          if (!summary.active) {
+            return {
+              id: summary.id,
+              active: false,
+              entries: [],
+              currentIndex: summary.currentIndex,
+              repeat: summary.repeat,
+              shuffle: summary.shuffle,
+            };
+          }
+          throw error;
+        }
       }),
     );
+    const rejected = queueSettled.find((r): r is PromiseRejectedResult => r.status === "rejected");
+    if (rejected) {
+      throw rejected.reason;
+    }
+    return queueSettled.map((res) => (res as PromiseFulfilledResult<Queue>).value);
   }
 
   private async library(kind: LibraryKind, request: SearchRequest, signal?: AbortSignal) {

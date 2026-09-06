@@ -34,7 +34,10 @@ export class SearchPager {
       const hasMore = page.nextCursor !== undefined && (!this.started || page.nextCursor !== this.cursor);
       this.cursor = page.nextCursor;
       this.started = true;
-      this.state = { items: [...merged.values()], loading: false, hasMore, warnings: page.warnings };
+      const warnings = page.warnings?.length
+        ? Array.from(new Set([...(this.state.warnings ?? []), ...page.warnings]))
+        : this.state.warnings;
+      this.state = { items: [...merged.values()], loading: false, hasMore, warnings };
     } catch (error) {
       if (this.abort.signal.aborted) return;
       this.state = { ...this.state, loading: false, error };

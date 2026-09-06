@@ -9,10 +9,11 @@ import {
   type ReactNode,
 } from "react";
 import { SessionBridge } from "../services/session-bridge";
-import { Action, ActionPanel, Detail, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { Detail, showToast, Toast } from "@raycast/api";
 import type { Player, Queue } from "../domain/model";
-import { activePlayerStore, createRuntime } from "../runtime";
+import { activePlayerStore, createRuntime, loadCredentials } from "../runtime";
 import { reportError } from "./feedback";
+import { SetupForm } from "./setup-form";
 
 type Runtime = ReturnType<typeof createRuntime>;
 interface Session extends Runtime {
@@ -50,25 +51,38 @@ function SharedSession({ children, bridge }: { children: ReactNode; bridge: Sess
 }
 
 function RootSession({ children }: { children: ReactNode }) {
-  const [state] = useState(() => {
+  const [runtime, setRuntime] = useState<Runtime | undefined>(() => {
     try {
-      return { runtime: createRuntime() };
-    } catch (error) {
-      return { error: error instanceof Error ? error.message : "Unable to start Audio Assistant." };
+      return createRuntime();
+    } catch {
+      return undefined;
     }
   });
-  if (!state.runtime)
-    return (
-      <Detail
-        markdown={`# Audio Assistant\n\n${state.error}`}
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>
+  const [loadingStored, setLoadingStored] = useState(!runtime);
+
+  useEffect(() => {
+    if (runtime) return;
+    void loadCredentials().then((stored) => {
+      if (stored) {
+        try {
+          setRuntime(createRuntime(stored));
+        } catch {
+          // invalid stored credentials
         }
-      />
-    );
-  return <MusicSession runtime={state.runtime}>{children}</MusicSession>;
+      }
+      setLoadingStored(false);
+    });
+  }, [runtime]);
+
+  if (loadingStored) {
+    return <Detail isLoading markdown="Starting Audio Assistant…" />;
+  }
+
+  if (!runtime) {
+    return <SetupForm onConnected={(credentials) => setRuntime(createRuntime(credentials))} />;
+  }
+
+  return <MusicSession runtime={runtime}>{children}</MusicSession>;
 }
 
 export function MusicSession({ runtime, children }: { runtime: Runtime; children: ReactNode }) {

@@ -58,29 +58,77 @@ test("queue paging includes the current entry beyond 200 and detects incomplete 
 
 test("shortcuts declare explicit macOS and Windows mappings without conflicting with text editing or ActionPanel", async () => {
   const { shortcuts } = await import("../src/ui/shortcuts");
-  // Volume controls use ctrl on both platforms
+  // Volume controls use alt on Windows, opt on macOS
   assert.deepEqual(shortcuts.volumeUp, {
-    macOS: { modifiers: ["ctrl"], key: "=" },
-    Windows: { modifiers: ["ctrl"], key: "=" },
+    macOS: { modifiers: ["opt"], key: "=" },
+    Windows: { modifiers: ["alt"], key: "=" },
   });
   assert.deepEqual(shortcuts.volumeDown, {
-    macOS: { modifiers: ["ctrl"], key: "-" },
-    Windows: { modifiers: ["ctrl"], key: "-" },
+    macOS: { modifiers: ["opt"], key: "-" },
+    Windows: { modifiers: ["alt"], key: "-" },
   });
   // Play/Pause
   assert.deepEqual(shortcuts.playPause, {
-    macOS: { modifiers: ["cmd"], key: "p" },
-    Windows: { modifiers: ["ctrl"], key: "p" },
+    macOS: { modifiers: ["opt"], key: "enter" },
+    Windows: { modifiers: ["alt"], key: "enter" },
   });
-  // Add to Queue is primary+shift+a, not plain primary+a
+  // Next / Previous
+  assert.deepEqual(shortcuts.next, {
+    macOS: { modifiers: ["opt"], key: "." },
+    Windows: { modifiers: ["alt"], key: "." },
+  });
+  assert.deepEqual(shortcuts.previous, {
+    macOS: { modifiers: ["opt"], key: "," },
+    Windows: { modifiers: ["alt"], key: "," },
+  });
+  // Mute
+  assert.deepEqual(shortcuts.mute, {
+    macOS: { modifiers: ["opt"], key: "m" },
+    Windows: { modifiers: ["alt"], key: "m" },
+  });
+  // Show Queue
+  assert.deepEqual(shortcuts.queue, {
+    macOS: { modifiers: ["opt"], key: "q" },
+    Windows: { modifiers: ["alt"], key: "q" },
+  });
+  // Shuffle / Repeat
+  assert.deepEqual(shortcuts.shuffle, {
+    macOS: { modifiers: ["opt"], key: "s" },
+    Windows: { modifiers: ["alt"], key: "s" },
+  });
+  assert.deepEqual(shortcuts.repeat, {
+    macOS: { modifiers: ["opt"], key: "r" },
+    Windows: { modifiers: ["alt"], key: "r" },
+  });
+  // Refresh
+  assert.deepEqual(shortcuts.refresh, {
+    macOS: { modifiers: ["cmd"], key: "r" },
+    Windows: { modifiers: ["ctrl"], key: "r" },
+  });
+  // Preferences
+  assert.deepEqual(shortcuts.preferences, {
+    macOS: { modifiers: ["cmd"], key: "." },
+    Windows: { modifiers: ["ctrl"], key: "." },
+  });
+  // Add to Queue is alt+a
   assert.deepEqual(shortcuts.addToQueue, {
-    macOS: { modifiers: ["cmd", "shift"], key: "a" },
-    Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+    macOS: { modifiers: ["opt"], key: "a" },
+    Windows: { modifiers: ["alt"], key: "a" },
   });
-  // Play Next is primary+shift+n
+  // Play Next is ctrl+alt+n
   assert.deepEqual(shortcuts.playNext, {
-    macOS: { modifiers: ["cmd", "shift"], key: "n" },
-    Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+    macOS: { modifiers: ["cmd", "opt"], key: "n" },
+    Windows: { modifiers: ["ctrl", "alt"], key: "n" },
+  });
+  // Browse Artist is ctrl+space
+  assert.deepEqual(shortcuts.browseArtist, {
+    macOS: { modifiers: ["cmd"], key: "space" },
+    Windows: { modifiers: ["ctrl"], key: "space" },
+  });
+  // Browse Album is ctrl+shift+space
+  assert.deepEqual(shortcuts.browseAlbum, {
+    macOS: { modifiers: ["cmd", "shift"], key: "space" },
+    Windows: { modifiers: ["ctrl", "shift"], key: "space" },
   });
   // Verify no shortcut uses plain "k" (action panel), plain "c" (copy), plain "a" (select all), or "v" (paste)
   for (const [name, shortcut] of Object.entries(shortcuts)) {
@@ -90,10 +138,142 @@ test("shortcuts declare explicit macOS and Windows mappings without conflicting 
     };
     assert.ok(s.Windows && s.macOS, `${name} has both Windows and macOS mappings`);
     assert.notEqual(s.Windows.key, "k", `${name} must not override ActionPanel (Ctrl+K)`);
-    if (s.Windows.key === "a") {
+    if (s.Windows.key === "a" && s.Windows.modifiers.includes("ctrl")) {
       assert.ok(s.Windows.modifiers.includes("shift"), `${name} must not conflict with Select All (Ctrl+A)`);
     }
     assert.notEqual(s.Windows.key, "c", `${name} must not conflict with Copy (Ctrl+C)`);
     assert.notEqual(s.Windows.key, "v", `${name} must not conflict with Paste (Ctrl+V)`);
   }
+});
+
+test("inactive queue failure does not block active queue refresh", async () => {
+  const service = new LiveMusicService({
+    serverUrl: "https://music.example.test",
+    client: {
+      command: async (command, args = {}) => {
+        if (command === "player_queues/all") {
+          return [
+            { queue_id: "q-active", items: 1, current_index: 0, active: true },
+            { queue_id: "q-inactive", items: 50, current_index: null, active: false },
+          ];
+        }
+        if (command === "player_queues/items") {
+          if (args.queue_id === "q-active") {
+            return [{ queue_item_id: "active-1", name: "Active Song" }];
+          }
+          if (args.queue_id === "q-inactive") {
+            throw new Error("Inactive player queue network failure");
+          }
+        }
+        throw new Error(command);
+      },
+    },
+  });
+  const queues = await service.getQueues();
+  assert.equal(queues.length, 2);
+  const active = queues.find((q) => q.id === "q-active");
+  const inactive = queues.find((q) => q.id === "q-inactive");
+  assert.equal(active?.entries.length, 1);
+  assert.equal(active?.entries[0]?.id, "active-1");
+  assert.equal(inactive?.entries.length, 0);
+  assert.equal(inactive?.active, false);
+});
+
+test("search pager accumulates warnings across pages without duplicates", async () => {
+  const { SearchPager } = await import("../src/services/search-pager");
+  type PagerState = import("../src/services/search-pager").PagerState;
+  let state: PagerState | undefined;
+  const pager = new SearchPager(
+    (request) => {
+      if (request.cursor === "page-1") {
+        return Promise.resolve({
+          items: [
+            {
+              kind: "track" as const,
+              uri: "track:2",
+              provider: "p",
+              itemId: "2",
+              name: "Song 2",
+              artist: "A",
+              artistUris: [],
+              album: "",
+              duration: 100,
+            },
+          ],
+          nextCursor: undefined,
+          warnings: ["Warning A", "Warning B"],
+        });
+      }
+      return Promise.resolve({
+        items: [
+          {
+            kind: "track" as const,
+            uri: "track:1",
+            provider: "p",
+            itemId: "1",
+            name: "Song 1",
+            artist: "A",
+            artistUris: [],
+            album: "",
+            duration: 100,
+          },
+        ],
+        nextCursor: "page-1",
+        warnings: ["Warning A"],
+      });
+    },
+    { query: "test", view: "tracks", limit: 1 },
+    (next) => {
+      state = next;
+    },
+  );
+
+  await pager.loadMore();
+  assert.deepEqual(state?.warnings, ["Warning A"]);
+
+  await pager.loadMore();
+  assert.deepEqual(state?.warnings, ["Warning A", "Warning B"]);
+});
+
+test("custom 3-part shortcut preferences override defaults while protecting forbidden keys", async () => {
+  const { getShortcuts, restoreDefaultShortcuts, resetForcedDefaults } = await import("../src/ui/shortcuts");
+  resetForcedDefaults();
+
+  // Test 2-key combo override (alt + x + na)
+  const custom = getShortcuts({
+    shortcutPlayPauseMod1: "alt",
+    shortcutPlayPauseMod2: "x",
+    shortcutPlayPauseKey: "na",
+    shortcutVolumeUpMod1: "ctrl",
+    shortcutVolumeUpMod2: "shift",
+    shortcutVolumeUpKey: "]",
+  });
+  const asPlatform = (s: unknown) =>
+    s as { Windows: { modifiers: string[]; key: string }; macOS: { modifiers: string[]; key: string } };
+  assert.equal(asPlatform(custom.playPause).Windows.key, "x");
+  assert.deepEqual(asPlatform(custom.playPause).Windows.modifiers, ["alt"]);
+  assert.deepEqual(asPlatform(custom.playPause).macOS.modifiers, ["opt"]);
+
+  // Test 3-key combo override (ctrl + shift + ])
+  assert.equal(asPlatform(custom.volumeUp).Windows.key, "]");
+  assert.deepEqual(asPlatform(custom.volumeUp).Windows.modifiers, ["ctrl", "shift"]);
+  assert.deepEqual(asPlatform(custom.volumeUp).macOS.modifiers, ["cmd", "shift"]);
+
+  // Attempting to override with forbidden key 'k' (ActionPanel) falls back to default
+  const forbidden = getShortcuts({
+    shortcutPlayPauseMod1: "ctrl",
+    shortcutPlayPauseMod2: "k",
+    shortcutPlayPauseKey: "na",
+  });
+  assert.equal(asPlatform(forbidden.playPause).Windows.key, "enter");
+
+  // Test restoreDefaultShortcuts()
+  await restoreDefaultShortcuts();
+  const restored = getShortcuts({
+    shortcutPlayPauseMod1: "alt",
+    shortcutPlayPauseMod2: "x",
+    shortcutPlayPauseKey: "na",
+  });
+  assert.equal(asPlatform(restored.playPause).Windows.key, "enter");
+  resetForcedDefaults();
 });

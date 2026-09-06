@@ -78,13 +78,20 @@ export function PlayerActions({ highlighted }: { highlighted?: Player }) {
               title={`Repeat: ${queue.repeat === "off" ? "Off → Track" : queue.repeat === "one" ? "Track → Queue" : "Queue → Off"}`}
               icon={Icon.Repeat}
               shortcut={shortcuts.repeat}
-              onAction={() => run(() => service.setRepeat(active.id, nextRepeat(queue.repeat)))}
+              onAction={() => {
+                const next = nextRepeat(queue.repeat);
+                const label = next === "off" ? "Repeat: Off" : next === "one" ? "Repeat: Track" : "Repeat: Queue";
+                run(() => service.setRepeat(active.id, next), label);
+              }}
             />
             <Action
               title={queue.shuffle ? "Turn Shuffle off" : "Turn Shuffle on"}
               icon={Icon.Shuffle}
               shortcut={shortcuts.shuffle}
-              onAction={() => run(() => service.setShuffle(active.id, !queue.shuffle))}
+              onAction={() => {
+                const nextShuffle = !queue.shuffle;
+                run(() => service.setShuffle(active.id, nextShuffle), `Shuffle: ${nextShuffle ? "On" : "Off"}`);
+              }}
             />
           </>
         )}
@@ -120,9 +127,12 @@ export function PlayerActions({ highlighted }: { highlighted?: Player }) {
           {target.capabilities.mute && (
             <Action
               title={target.muted ? "Unmute Player" : "Mute Player"}
-              icon={Icon.Speaker}
+              icon={target.muted ? Icon.SpeakerOff : Icon.SpeakerOn}
               shortcut={shortcuts.mute}
-              onAction={() => run(() => service.setMuted(target.id, !target.muted))}
+              onAction={() => {
+                const nextMuted = !target.muted;
+                run(() => service.setMuted(target.id, nextMuted), `${target.name}: ${nextMuted ? "Muted" : "Unmuted"}`);
+              }}
             />
           )}
         </ActionPanel.Section>
