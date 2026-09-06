@@ -275,18 +275,23 @@ function memberPages(entries: DocEntry[]): string[] {
   return [...pages];
 }
 
-async function scan(entries: DocEntry[], force: boolean): Promise<MetaIndex> {
-  const meta: MetaIndex = {};
+async function scan(
+  entries: DocEntry[],
+  force: boolean,
+  previous: MetaIndex = {},
+): Promise<{ meta: MetaIndex; complete: boolean }> {
+  const meta: MetaIndex = { ...previous };
   const pages = memberPages(entries);
 
   let next = 0;
+  let failed = 0;
   async function worker(): Promise<void> {
     for (let at = next++; at < pages.length; at = next++) {
       try {
         const html = await fetchPage(pages[at], undefined, force, false);
         scanPage(html, pages[at], meta);
       } catch {
-        // Individual page failures do not abort the metadata build
+        failed += 1;
       }
     }
   }
@@ -295,8 +300,13 @@ async function scan(entries: DocEntry[], force: boolean): Promise<MetaIndex> {
     Array.from({ length: Math.min(SCAN_CONCURRENCY, pages.length) }, worker),
   );
 
-  await scanEvents(entries, meta, force);
-  return meta;
+  try {
+    await scanEvents(entries, meta, force);
+  } catch {
+    failed += 1;
+  }
+
+  return { meta, complete: failed === 0 };
 }
 
 async function readStored(): Promise<StoredMeta | null> {
@@ -326,10 +336,14 @@ export async function ensureMeta(
   if (!entries.length) return stored?.meta ?? {};
 
   try {
-    const meta = await scan(entries, force);
-    memoryMeta = { fetchedAt: Date.now(), meta };
-    await mkdir(environment.supportPath, { recursive: true });
-    await writeFile(metaFile(), JSON.stringify(memoryMeta), "utf8");
+    const { meta, complete } = await scan(entries, force, stored?.meta);
+    if (complete) {
+      memoryMeta = { fetchedAt: Date.now(), meta };
+      await mkdir(environment.supportPath, { recursive: true });
+      await writeFile(metaFile(), JSON.stringify(memoryMeta), "utf8");
+    } else if (!memoryMeta) {
+      memoryMeta = { fetchedAt: stored?.fetchedAt ?? 0, meta };
+    }
     return meta;
   } catch {
     return stored?.meta ?? {};
