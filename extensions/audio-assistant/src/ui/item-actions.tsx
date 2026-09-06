@@ -3,7 +3,7 @@ import type { Artist, Album, Item } from "../domain/model";
 import { SessionRoute, useMusic } from "./session";
 import { PlayerActions } from "./player-actions";
 import { QueueView } from "./queue-view";
-import { restoreDefaultShortcuts, shortcuts } from "./shortcuts";
+import { shortcuts } from "./shortcuts";
 
 export function ItemActions({ item, openCollection }: { item?: Item; openCollection: (item: Artist | Album) => void }) {
   const { controller, run, refresh, bridge } = useMusic();
@@ -94,11 +94,6 @@ export function ItemActions({ item, openCollection }: { item?: Item; openCollect
           icon={Icon.Gear}
           shortcut={shortcuts.preferences}
           onAction={openExtensionPreferences}
-        />
-        <Action
-          title="Restore Default Shortcuts"
-          icon={Icon.RotateAntiClockwise}
-          onAction={() => void restoreDefaultShortcuts()}
         />
       </ActionPanel.Section>
     </ActionPanel>

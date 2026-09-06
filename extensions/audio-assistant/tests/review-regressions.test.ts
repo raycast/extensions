@@ -235,11 +235,10 @@ test("search pager accumulates warnings across pages without duplicates", async 
   assert.deepEqual(state?.warnings, ["Warning A", "Warning B"]);
 });
 
-test("custom 3-part shortcut preferences override defaults while protecting forbidden keys", async () => {
-  const { getShortcuts, restoreDefaultShortcuts, resetForcedDefaults } = await import("../src/ui/shortcuts");
-  resetForcedDefaults();
+test("custom 3-part shortcut preferences override defaults while protecting forbidden and invalid keys", async () => {
+  const { getShortcuts } = await import("../src/ui/shortcuts");
 
-  // Test 2-key combo override (alt + x + na)
+  // Test valid 2-key combo override (alt + x + na)
   const custom = getShortcuts({
     shortcutPlayPauseMod1: "alt",
     shortcutPlayPauseMod2: "x",
@@ -254,12 +253,12 @@ test("custom 3-part shortcut preferences override defaults while protecting forb
   assert.deepEqual(asPlatform(custom.playPause).Windows.modifiers, ["alt"]);
   assert.deepEqual(asPlatform(custom.playPause).macOS.modifiers, ["opt"]);
 
-  // Test 3-key combo override (ctrl + shift + ])
+  // Test valid 3-key combo override (ctrl + shift + ])
   assert.equal(asPlatform(custom.volumeUp).Windows.key, "]");
   assert.deepEqual(asPlatform(custom.volumeUp).Windows.modifiers, ["ctrl", "shift"]);
   assert.deepEqual(asPlatform(custom.volumeUp).macOS.modifiers, ["cmd", "shift"]);
 
-  // Attempting to override with forbidden key 'k' (ActionPanel) falls back to default
+  // Attempting to override with forbidden key 'k' (ActionPanel) falls back to default (enter)
   const forbidden = getShortcuts({
     shortcutPlayPauseMod1: "ctrl",
     shortcutPlayPauseMod2: "k",
@@ -267,13 +266,27 @@ test("custom 3-part shortcut preferences override defaults while protecting forb
   });
   assert.equal(asPlatform(forbidden.playPause).Windows.key, "enter");
 
-  // Test restoreDefaultShortcuts()
-  await restoreDefaultShortcuts();
-  const restored = getShortcuts({
-    shortcutPlayPauseMod1: "alt",
-    shortcutPlayPauseMod2: "x",
+  // Issue 3: Invalid 2-key combo with modifier as Part 2 (ctrl + shift + na) falls back to default (enter)
+  const modifierAsKey = getShortcuts({
+    shortcutPlayPauseMod1: "ctrl",
+    shortcutPlayPauseMod2: "shift",
     shortcutPlayPauseKey: "na",
   });
-  assert.equal(asPlatform(restored.playPause).Windows.key, "enter");
-  resetForcedDefaults();
+  assert.equal(asPlatform(modifierAsKey.playPause).Windows.key, "enter");
+
+  // Invalid 2-key combo with alt as Part 2 (alt + alt + na) falls back to default (enter)
+  const altAsKey = getShortcuts({
+    shortcutPlayPauseMod1: "alt",
+    shortcutPlayPauseMod2: "alt",
+    shortcutPlayPauseKey: "na",
+  });
+  assert.equal(asPlatform(altAsKey.playPause).Windows.key, "enter");
+
+  // Invalid 3-key combo with non-modifier as Part 2 (ctrl + a + b) falls back to default (enter)
+  const nonModPart2 = getShortcuts({
+    shortcutPlayPauseMod1: "ctrl",
+    shortcutPlayPauseMod2: "a",
+    shortcutPlayPauseKey: "b",
+  });
+  assert.equal(asPlatform(nonModPart2.playPause).Windows.key, "enter");
 });

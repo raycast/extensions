@@ -33,34 +33,7 @@ export const DEFAULT_SHORTCUT_CONFIG: Record<string, ShortcutDefinition> = {
   refresh: { mod1: "ctrl", mod2: "r", key: "na" },
 };
 
-let forcedDefaults = false;
-
-export function resetForcedDefaults(): void {
-  forcedDefaults = false;
-}
-
-export async function restoreDefaultShortcuts(): Promise<void> {
-  forcedDefaults = true;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const raycast = require("@raycast/api") as {
-      LocalStorage?: { removeItem: (k: string) => Promise<void> };
-      showToast?: (opts: { style: unknown; title: string }) => Promise<void>;
-      Toast?: { Style: { Success: unknown } };
-    };
-    if (raycast.LocalStorage) {
-      await raycast.LocalStorage.removeItem("shortcut-overrides:stored");
-    }
-    if (raycast.showToast && raycast.Toast) {
-      await raycast.showToast({
-        style: raycast.Toast.Style.Success,
-        title: "Shortcuts restored to defaults",
-      });
-    }
-  } catch {
-    // ignore
-  }
-}
+const MODIFIER_VALUES = new Set(["ctrl", "alt", "shift", "physical_ctrl"]);
 
 function mapModifier(mod: string, platform: "macOS" | "Windows"): Keyboard.KeyModifier {
   if (mod === "alt") return platform === "macOS" ? "opt" : "alt";
@@ -70,8 +43,22 @@ function mapModifier(mod: string, platform: "macOS" | "Windows"): Keyboard.KeyMo
   return platform === "macOS" ? "cmd" : "ctrl";
 }
 
-export function buildShortcut(def: ShortcutDefinition): Keyboard.Shortcut {
+export function buildShortcut(
+  def: ShortcutDefinition,
+  fallbackDef: ShortcutDefinition = DEFAULT_SHORTCUT_CONFIG.playPause!,
+): Keyboard.Shortcut {
   const is2Key = !def.key || def.key === "na";
+
+  // Validate: for 2-key combo, Part 2 must NOT be a modifier
+  if (is2Key && MODIFIER_VALUES.has(def.mod2)) {
+    return def === fallbackDef ? buildShortcut(DEFAULT_SHORTCUT_CONFIG.playPause!) : buildShortcut(fallbackDef);
+  }
+
+  // Validate: for 3-key combo, Part 2 MUST be a modifier, and Part 3 must NOT be a modifier
+  if (!is2Key && (!MODIFIER_VALUES.has(def.mod2) || MODIFIER_VALUES.has(def.key) || def.key === "na")) {
+    return def === fallbackDef ? buildShortcut(DEFAULT_SHORTCUT_CONFIG.playPause!) : buildShortcut(fallbackDef);
+  }
+
   const keyEquivalent = (is2Key ? def.mod2 : def.key) as Keyboard.KeyEquivalent;
 
   // Guard against ActionPanel collision: Ctrl+K or Cmd+K
@@ -80,7 +67,7 @@ export function buildShortcut(def: ShortcutDefinition): Keyboard.Shortcut {
     (def.mod1 === "ctrl" || def.mod1 === "physical_ctrl") &&
     (is2Key || def.mod2 === "ctrl")
   ) {
-    return buildShortcut(DEFAULT_SHORTCUT_CONFIG.playPause!);
+    return def === fallbackDef ? buildShortcut(DEFAULT_SHORTCUT_CONFIG.playPause!) : buildShortcut(fallbackDef);
   }
 
   const macMods: Keyboard.KeyModifier[] = [mapModifier(def.mod1, "macOS")];
@@ -109,7 +96,6 @@ function getActionDef(
   prefs: Record<string, string | undefined>,
 ): ShortcutDefinition {
   const def = DEFAULT_SHORTCUT_CONFIG[actionKey]!;
-  if (forcedDefaults) return def;
   const mod1 = prefs[`shortcut${prefPrefix}Mod1`]?.trim() || def.mod1;
   const mod2 = prefs[`shortcut${prefPrefix}Mod2`]?.trim() || def.mod2;
   const key = prefs[`shortcut${prefPrefix}Key`]?.trim() || def.key;
@@ -117,21 +103,26 @@ function getActionDef(
 }
 
 export function getShortcuts(prefs: Record<string, string | undefined> = readPreferences()) {
+  const get = (actionKey: string, prefPrefix: string) => {
+    const defaultDef = DEFAULT_SHORTCUT_CONFIG[actionKey]!;
+    const def = getActionDef(actionKey, prefPrefix, prefs);
+    return buildShortcut(def, defaultDef);
+  };
   return {
-    playPause: buildShortcut(getActionDef("playPause", "PlayPause", prefs)),
-    next: buildShortcut(getActionDef("next", "Next", prefs)),
-    previous: buildShortcut(getActionDef("previous", "Previous", prefs)),
-    playNext: buildShortcut(getActionDef("playNext", "PlayNext", prefs)),
-    addToQueue: buildShortcut(getActionDef("addToQueue", "AddToQueue", prefs)),
-    browseArtist: buildShortcut(getActionDef("browseArtist", "BrowseArtist", prefs)),
-    browseAlbum: buildShortcut(getActionDef("browseAlbum", "BrowseAlbum", prefs)),
-    mute: buildShortcut(getActionDef("mute", "Mute", prefs)),
-    volumeUp: buildShortcut(getActionDef("volumeUp", "VolumeUp", prefs)),
-    volumeDown: buildShortcut(getActionDef("volumeDown", "VolumeDown", prefs)),
-    queue: buildShortcut(getActionDef("queue", "Queue", prefs)),
-    shuffle: buildShortcut(getActionDef("shuffle", "Shuffle", prefs)),
-    repeat: buildShortcut(getActionDef("repeat", "Repeat", prefs)),
-    refresh: buildShortcut(getActionDef("refresh", "Refresh", prefs)),
+    playPause: get("playPause", "PlayPause"),
+    next: get("next", "Next"),
+    previous: get("previous", "Previous"),
+    playNext: get("playNext", "PlayNext"),
+    addToQueue: get("addToQueue", "AddToQueue"),
+    browseArtist: get("browseArtist", "BrowseArtist"),
+    browseAlbum: get("browseAlbum", "BrowseAlbum"),
+    mute: get("mute", "Mute"),
+    volumeUp: get("volumeUp", "VolumeUp"),
+    volumeDown: get("volumeDown", "VolumeDown"),
+    queue: get("queue", "Queue"),
+    shuffle: get("shuffle", "Shuffle"),
+    repeat: get("repeat", "Repeat"),
+    refresh: get("refresh", "Refresh"),
     preferences: {
       macOS: { modifiers: ["cmd"] as Keyboard.KeyModifier[], key: "." as Keyboard.KeyEquivalent },
       Windows: { modifiers: ["ctrl"] as Keyboard.KeyModifier[], key: "." as Keyboard.KeyEquivalent },

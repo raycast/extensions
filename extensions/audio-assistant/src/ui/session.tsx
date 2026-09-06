@@ -9,11 +9,10 @@ import {
   type ReactNode,
 } from "react";
 import { SessionBridge } from "../services/session-bridge";
-import { Detail, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import type { Player, Queue } from "../domain/model";
-import { activePlayerStore, createRuntime, loadCredentials } from "../runtime";
+import { activePlayerStore, createRuntime } from "../runtime";
 import { reportError } from "./feedback";
-import { SetupForm } from "./setup-form";
 
 type Runtime = ReturnType<typeof createRuntime>;
 interface Session extends Runtime {
@@ -51,38 +50,25 @@ function SharedSession({ children, bridge }: { children: ReactNode; bridge: Sess
 }
 
 function RootSession({ children }: { children: ReactNode }) {
-  const [runtime, setRuntime] = useState<Runtime | undefined>(() => {
+  const [state] = useState(() => {
     try {
-      return createRuntime();
-    } catch {
-      return undefined;
+      return { runtime: createRuntime() };
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Unable to start Audio Assistant." };
     }
   });
-  const [loadingStored, setLoadingStored] = useState(!runtime);
-
-  useEffect(() => {
-    if (runtime) return;
-    void loadCredentials().then((stored) => {
-      if (stored) {
-        try {
-          setRuntime(createRuntime(stored));
-        } catch {
-          // invalid stored credentials
+  if (!state.runtime)
+    return (
+      <Detail
+        markdown={`# Audio Assistant\n\n${state.error}\n\nTo connect to your server, configure your Music Assistant URL and Access Token in Extension Preferences. If you just want to explore the interface with fictional data, enable Demo Mode.`}
+        actions={
+          <ActionPanel>
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
         }
-      }
-      setLoadingStored(false);
-    });
-  }, [runtime]);
-
-  if (loadingStored) {
-    return <Detail isLoading markdown="Starting Audio Assistant…" />;
-  }
-
-  if (!runtime) {
-    return <SetupForm onConnected={(credentials) => setRuntime(createRuntime(credentials))} />;
-  }
-
-  return <MusicSession runtime={runtime}>{children}</MusicSession>;
+      />
+    );
+  return <MusicSession runtime={state.runtime}>{children}</MusicSession>;
 }
 
 export function MusicSession({ runtime, children }: { runtime: Runtime; children: ReactNode }) {

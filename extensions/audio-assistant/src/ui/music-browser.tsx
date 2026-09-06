@@ -7,7 +7,7 @@ import { ItemActions } from "./item-actions";
 import { reportError } from "./feedback";
 import { SessionRoute, useMusic } from "./session";
 import { SearchPager } from "../services/search-pager";
-import { restoreDefaultShortcuts, shortcuts } from "./shortcuts";
+import { shortcuts } from "./shortcuts";
 
 const views: { value: View; title: string }[] = [
   { value: "all", title: "All" },
@@ -161,11 +161,6 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
           icon={Icon.Gear}
           shortcut={shortcuts.preferences}
           onAction={openExtensionPreferences}
-        />
-        <Action
-          title="Restore Default Shortcuts"
-          icon={Icon.RotateAntiClockwise}
-          onAction={() => void restoreDefaultShortcuts()}
         />
       </ActionPanel.Section>
     </ActionPanel>

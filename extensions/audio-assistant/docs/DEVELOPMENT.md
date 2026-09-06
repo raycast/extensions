@@ -58,13 +58,13 @@ Play Now uses the server's `play` option, not queue replacement. Play Next uses 
 | Refresh                       | Primary+R                           |
 | Extension Preferences         | Primary+. (non-configurable)        |
 
-The executable shortcut map is `src/ui/shortcuts.ts`. Action shortcuts can be customized via 3-part structured dropdowns in extension preferences (Modifier 1, Key/Modifier 2, Key/NA 3) while protecting core keys (`Enter`, `Primary+K`, and text editing keys without shift). A "Restore Default Shortcuts" action resets bindings to defaults. Hide capability-dependent actions when unsupported; Next/Previous also reject unsupported calls at the service boundary. Native keyboard checks remain separate from automated shortcut-map tests.
+The executable shortcut map is `src/ui/shortcuts.ts`. Action shortcuts can be customized via 3-part structured dropdowns in extension preferences (Modifier 1, Key/Modifier 2, Key/NA 3) while protecting core keys (`Enter`, `Primary+K`, and text editing keys without shift). Invalid combinations (such as modifiers as keys in 2-key combos or non-modifiers in Part 2 for 3-key combos) fall back safely to defaults. Restoring default shortcuts is handled natively via Raycast's Extension Preferences. Hide capability-dependent actions when unsupported; Next/Previous also reject unsupported calls at the service boundary. Native keyboard checks remain separate from automated shortcut-map tests.
 
 ## Architecture
 
 | Area                                   | Main files                                                                                                    |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Commands, preferences, runtime         | `package.json`, `src/music.tsx`, `src/runtime.ts`, `src/quick-command.ts`, `src/ui/setup-form.tsx`            |
+| Commands, preferences, runtime         | `package.json`, `src/music.tsx`, `src/runtime.ts`, `src/quick-command.ts`                                     |
 | Domain and target/group policy         | `src/domain/model.ts`, `policy.ts`, `grouping.ts`                                                             |
 | Typed service and saved selection      | `src/services/port.ts`, `controller.ts`                                                                       |
 | HTTP, decoding, live implementation    | `src/services/http-client.ts`, `wire.ts`, `live.ts`                                                           |
