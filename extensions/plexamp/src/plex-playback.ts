@@ -18,7 +18,7 @@ import {
   requestTimelineServer,
 } from "./plex-request";
 import { getMetadataByKeyForTimeline, getMetadataByRatingKey } from "./plex-library";
-import type { MusicTrack, PlayQueueInfo, PlayableItem, TimelineInfo } from "./types";
+import type { MusicAlbum, MusicTrack, PlayQueueInfo, PlayableItem, TimelineInfo } from "./types";
 
 interface ServerIdentity {
   machineIdentifier: string;
@@ -196,7 +196,9 @@ export async function getPlayQueueForTimeline(
   }
 }
 
-async function createPlayQueue(item: PlayableItem): Promise<PlayQueueInfo> {
+// `startKey` picks the item to start from inside a library container. It is ignored for playlists,
+// which are addressed by `playlistID` instead.
+async function createPlayQueue(item: PlayableItem, startKey?: string): Promise<PlayQueueInfo> {
   const identity = await getServerIdentity();
   const params = new URLSearchParams({
     type: "audio",
@@ -209,7 +211,7 @@ async function createPlayQueue(item: PlayableItem): Promise<PlayQueueInfo> {
     params.set("playlistID", item.ratingKey);
   } else {
     params.set("uri", buildPlayableUri(identity.machineIdentifier, item));
-    params.set("key", item.key);
+    params.set("key", startKey ?? item.key);
   }
 
   const container = await requestServer(`/playQueues?${params.toString()}`, {
@@ -350,6 +352,11 @@ async function createExplicitQueueFromTimeline(
 
 export async function playItem(item: PlayableItem): Promise<void> {
   const queue = await createPlayQueue(item);
+  await startPlayQueue(queue);
+}
+
+export async function playAlbumFromTrack(album: MusicAlbum, track: MusicTrack): Promise<void> {
+  const queue = await createPlayQueue(album, track.key);
   await startPlayQueue(queue);
 }
 
