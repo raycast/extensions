@@ -24,7 +24,7 @@ export default function Command() {
   }
 
   if (vaultsWithPlugin.length === 0) {
-    return <AdvancedURIPluginNotInstalled />;
+    return <AdvancedURIPluginNotInstalled corePlugins={["workspaces"]} />;
   }
 
   if (vaultsWithPlugin.length > 1) {
