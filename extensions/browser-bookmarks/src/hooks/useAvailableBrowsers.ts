@@ -81,7 +81,14 @@ const BROWSER_DEFINITIONS: BrowserDefinition[] = [
       : undefined,
   },
   { id: BROWSERS_BUNDLE_ID.braveBeta, name: "Brave Beta", macBundleId: "com.brave.browser.beta" },
-  { id: BROWSERS_BUNDLE_ID.braveNightly, name: "Brave Nightly", macBundleId: "com.brave.browser.nightly" },
+  {
+    id: BROWSERS_BUNDLE_ID.braveNightly,
+    name: "Brave Nightly",
+    macBundleId: "com.brave.browser.nightly",
+    windowsUserDataPath: WINDOWS_LOCAL_APPDATA
+      ? join(WINDOWS_LOCAL_APPDATA, "BraveSoftware", "Brave-Browser-Nightly", "User Data")
+      : undefined,
+  },
   {
     id: BROWSERS_BUNDLE_ID.chrome,
     name: "Chrome",
@@ -116,12 +123,24 @@ const BROWSER_DEFINITIONS: BrowserDefinition[] = [
   { id: BROWSERS_BUNDLE_ID.edgeDev, name: "Edge Dev", macBundleId: "com.microsoft.edgemac.dev" },
   { id: BROWSERS_BUNDLE_ID.edgeCanary, name: "Edge Canary", macBundleId: "com.microsoft.edgemac.canary" },
   { id: BROWSERS_BUNDLE_ID.prismaAccess, name: "Prisma Access", macBundleId: "com.talon-sec.work" },
-  { id: BROWSERS_BUNDLE_ID.vivaldi, name: "Vivaldi", macBundleId: "com.vivaldi.vivaldi" },
+  {
+    id: BROWSERS_BUNDLE_ID.vivaldi,
+    name: "Vivaldi",
+    macBundleId: "com.vivaldi.vivaldi",
+    windowsUserDataPath: WINDOWS_LOCAL_APPDATA ? join(WINDOWS_LOCAL_APPDATA, "Vivaldi", "User Data") : undefined,
+  },
   { id: BROWSERS_BUNDLE_ID.vivaldiSnapshot, name: "Vivaldi Snapshot", macBundleId: "com.vivaldi.vivaldi.snapshot" },
   { id: BROWSERS_BUNDLE_ID.zen, name: "Zen", macBundleId: "app.zen-browser.zen" },
   { id: BROWSERS_BUNDLE_ID.libreWolf, name: "LibreWolf", macBundleId: "org.mozilla.librewolf" },
   { id: BROWSERS_BUNDLE_ID.whale, name: "Whale", macBundleId: "com.naver.whale" },
-  { id: BROWSERS_BUNDLE_ID.helium, name: "Helium", macBundleId: "net.imput.helium" },
+  {
+    id: BROWSERS_BUNDLE_ID.helium,
+    name: "Helium",
+    macBundleId: "net.imput.helium",
+    windowsUserDataPath: WINDOWS_LOCAL_APPDATA
+      ? join(WINDOWS_LOCAL_APPDATA, "imput", "Helium", "User Data")
+      : undefined,
+  },
 ];
 
 const BROWSER_DEFINITION_BY_ID = new Map(BROWSER_DEFINITIONS.map((definition) => [definition.id, definition]));

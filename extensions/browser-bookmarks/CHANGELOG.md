@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Detect more Chromium browsers on Windows] - {PR_MERGE_DATE}
+
+- Find Brave Nightly, Vivaldi and Helium on Windows instead of only looking in the macOS application support folder
+
 ## [Chrome Account Bookmarks] - 2026-05-20
 
 - Added support for Chrome account-synced bookmarks stored in `AccountBookmarks`
