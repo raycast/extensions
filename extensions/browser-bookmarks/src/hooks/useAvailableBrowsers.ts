@@ -22,7 +22,26 @@ function getWindowsLocalAppData() {
   return "";
 }
 
+function getWindowsRoamingAppData() {
+  if (process.env.APPDATA) {
+    return process.env.APPDATA;
+  }
+
+  if (process.env.USERPROFILE) {
+    return join(process.env.USERPROFILE, "AppData", "Roaming");
+  }
+
+  const homeDirectory = homedir();
+
+  if (homeDirectory) {
+    return join(homeDirectory, "AppData", "Roaming");
+  }
+
+  return "";
+}
+
 const WINDOWS_LOCAL_APPDATA = process.platform === "win32" ? getWindowsLocalAppData() : "";
+const WINDOWS_ROAMING_APPDATA = process.platform === "win32" ? getWindowsRoamingAppData() : "";
 
 export const BROWSERS_BUNDLE_ID = {
   arc: "company.thebrowser.browser",
@@ -97,7 +116,12 @@ const BROWSER_DEFINITIONS: BrowserDefinition[] = [
   { id: BROWSERS_BUNDLE_ID.comet, name: "Comet", macBundleId: "ai.perplexity.comet" },
   { id: BROWSERS_BUNDLE_ID.dia, name: "Dia", macBundleId: "company.thebrowser.dia" },
   { id: BROWSERS_BUNDLE_ID.chatGPTAtlas, name: "ChatGPT Atlas", macBundleId: "com.openai.atlas" },
-  { id: BROWSERS_BUNDLE_ID.firefox, name: "Firefox", macBundleId: "org.mozilla.firefox" },
+  {
+    id: BROWSERS_BUNDLE_ID.firefox,
+    name: "Firefox",
+    macBundleId: "org.mozilla.firefox",
+    windowsUserDataPath: WINDOWS_ROAMING_APPDATA ? join(WINDOWS_ROAMING_APPDATA, "Mozilla", "Firefox") : undefined,
+  },
   { id: BROWSERS_BUNDLE_ID.firefoxDev, name: "Firefox Dev", macBundleId: "org.mozilla.firefoxdeveloperedition" },
   { id: BROWSERS_BUNDLE_ID.ghostBrowser, name: "Ghost Browser", macBundleId: "com.ghostbrowser.gb1" },
   { id: BROWSERS_BUNDLE_ID.island, name: "Island", macBundleId: "io.island.island" },
@@ -118,7 +142,12 @@ const BROWSER_DEFINITIONS: BrowserDefinition[] = [
   { id: BROWSERS_BUNDLE_ID.prismaAccess, name: "Prisma Access", macBundleId: "com.talon-sec.work" },
   { id: BROWSERS_BUNDLE_ID.vivaldi, name: "Vivaldi", macBundleId: "com.vivaldi.vivaldi" },
   { id: BROWSERS_BUNDLE_ID.vivaldiSnapshot, name: "Vivaldi Snapshot", macBundleId: "com.vivaldi.vivaldi.snapshot" },
-  { id: BROWSERS_BUNDLE_ID.zen, name: "Zen", macBundleId: "app.zen-browser.zen" },
+  {
+    id: BROWSERS_BUNDLE_ID.zen,
+    name: "Zen",
+    macBundleId: "app.zen-browser.zen",
+    windowsUserDataPath: WINDOWS_ROAMING_APPDATA ? join(WINDOWS_ROAMING_APPDATA, "zen") : undefined,
+  },
   { id: BROWSERS_BUNDLE_ID.libreWolf, name: "LibreWolf", macBundleId: "org.mozilla.librewolf" },
   { id: BROWSERS_BUNDLE_ID.whale, name: "Whale", macBundleId: "com.naver.whale" },
   { id: BROWSERS_BUNDLE_ID.helium, name: "Helium", macBundleId: "net.imput.helium" },
