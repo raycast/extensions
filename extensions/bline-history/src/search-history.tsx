@@ -46,6 +46,8 @@ type Clip = {
   source: string;
   at: number;
   pinned: boolean;
+  /// The app the clip was copied from, when bLine recorded it (build 115+).
+  appName?: string | null;
   /// Text found inside an image, so a screenshot can be found by what it says.
   ocr?: string | null;
 };
@@ -99,7 +101,7 @@ function searchWords(c: Clip): string[] | undefined {
 function matches(c: Clip, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
-  const hay = `${c.preview} ${c.source} ${c.ocr ?? ""}`.toLowerCase();
+  const hay = `${c.preview} ${c.kind} ${c.appName ?? ""} ${c.source} ${c.ocr ?? ""}`.toLowerCase();
   return q.split(/\s+/).every((word) => hay.includes(word));
 }
 
@@ -236,10 +238,13 @@ function imageMeta(path: string): Meta | undefined {
 }
 
 export default function SearchHistory() {
-  const prefs = getPreferenceValues<{ showPreview?: boolean }>();
+  const prefs = getPreferenceValues<Preferences.SearchHistory>();
   const [clips, setClips] = useState<Clip[]>([]);
   const [thumbDir, setThumbDir] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  // Why the history could not be read, when it could not. It used to be
+  // swallowed into an empty list, which looked like an empty history.
+  const [loadError, setLoadError] = useState<string | undefined>();
   const [showDetail, setShowDetail] = useState(prefs.showPreview !== false);
   // Quick Look needs a real file. We make one per clip ON DEMAND rather than
   // up front: `bline file` writes DECRYPTED content to a cache dir, so the
@@ -266,8 +271,16 @@ export default function SearchHistory() {
       .then(([h, t]) => {
         setClips(JSON.parse(h.stdout));
         setThumbDir(t.stdout.trim());
+        setLoadError(undefined);
       })
-      .catch(() => setClips([]))
+      .catch((e: { code?: string; message?: string }) => {
+        setClips([]);
+        setLoadError(
+          e?.code === "ENOENT"
+            ? "bLine isn't installed on this Mac. Install it from bhive.software, then run this command again."
+            : `bLine's helper could not read the history: ${e?.message ?? "unknown error"}`,
+        );
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -482,8 +495,13 @@ export default function SearchHistory() {
 
   async function pasteNow(c: Clip) {
     if (c.kind === "image") {
-      // image fidelity comes from the CLI; Raycast pastes text only
-      await copy(c);
+      // Raycast pastes a FILE, so the image goes in with its own bytes and
+      // format rather than as a flattened still. The file is the one Quick
+      // Look uses, made on demand.
+      const path = await ensureFile(c);
+      if (!path) throw new Error("Could not materialise the image");
+      await closeMainWindow();
+      await Clipboard.paste({ file: path });
       return;
     }
     const { stdout } = await run(BLINE, ["cat", c.id], { maxBuffer: 16 * 1024 * 1024 });
@@ -502,6 +520,18 @@ export default function SearchHistory() {
         if (id) setSelected(id);
       }}
     >
+      {loadError && !loading && (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Couldn't read your clipboard history"
+          description={loadError}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={reload} />
+            </ActionPanel>
+          }
+        />
+      )}
       {shown.map((c) => {
         const pin = c.pinned ? [{ icon: Icon.Pin }] : [];
         const detail = c.id === selected ? detailFor(c) : undefined;

@@ -15,7 +15,8 @@ does nothing without bLine.
 
 - **Search Clipboard History** — type to filter by a clip's text, its kind,
   the app it came from, the Mac it came from, or the words inside a screenshot.
-  `⏎` pastes the clip, `⌘Y` opens Quick Look, `⌘⇧D` toggles the preview pane.
+  `⏎` copies the clip, `⌘⏎` pastes it into the frontmost app, `⌘Y` opens
+  Quick Look, `⌘⇧D` toggles the preview pane.
 
 ## Preferences
 
