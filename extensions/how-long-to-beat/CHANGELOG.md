@@ -1,6 +1,6 @@
 # Howlongtobeat Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-09-06
 
 - Fix: update to new API endpoint
 
