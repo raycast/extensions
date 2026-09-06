@@ -127,6 +127,11 @@ export default function SearchContacts() {
                 icon={Icon.Gear}
                 onAction={openExtensionPreferences}
               />
+              <Action.OpenInBrowser
+                title="Get People on the App Store"
+                icon={Icon.Download}
+                url="https://apps.apple.com/app/id6790219748"
+              />
             </ActionPanel>
           }
         />

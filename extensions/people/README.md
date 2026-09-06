@@ -6,6 +6,10 @@ phone, website, and address fields have contextual actions. The action panel can
 open the stable `contactsplus://contact/<stable-id>` link in People. The
 extension never accesses provider tokens or maintains a second contact database.
 
+## Get People
+
+The extension needs the People app running on the same Mac. Download People from the [App Store](https://apps.apple.com/app/id6790219748) or read more at [supersimplecontacts.com](https://supersimplecontacts.com/). Launcher access is part of the People subscription.
+
 ## Development
 
 People must be running on the same Mac. In the app, open **Settings →
