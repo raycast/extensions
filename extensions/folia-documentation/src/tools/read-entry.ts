@@ -16,12 +16,14 @@ type Input = {
 };
 
 export default async function readEntry(input: Input) {
-  const { docsVersion } = getPreferences();
+  const { docsVersion, includeGuides = true } = getPreferences();
   const [inventory, guides] = await Promise.all([
     loadInventory(docsVersion),
-    loadGuides(),
+    includeGuides ? loadGuides() : Promise.resolve([]),
   ]);
-  const entries = [...inventory.entries, ...guides];
+  const entries = includeGuides
+    ? [...inventory.entries, ...guides]
+    : inventory.entries;
 
   const entry =
     entries.find((candidate) => candidate.name === input.name) ??

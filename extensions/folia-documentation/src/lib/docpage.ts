@@ -198,12 +198,13 @@ function splitBlock(slice: string): { signature: string | null; html: string } {
 function collectReferences(markdown: string, base: string): string[] {
   const found = new Set<string>();
   const pattern = new RegExp(
-    `\\]\\(${escapeRegExp(base)}((?:\\\\.|[^)\\s])+)\\)`,
+    `\\]\\((?:<${escapeRegExp(base)}([^>\\s]+)>|${escapeRegExp(base)}((?:\\\\.|\\([^()\\s]*\\)|[^()\\s])+))\\)`,
     "g",
   );
 
   for (const match of markdown.matchAll(pattern)) {
-    const [target, anchor] = match[1].replace(/\\(.)/g, "$1").split("#");
+    const raw = (match[1] ?? match[2]).replace(/\\(.)/g, "$1");
+    const [target, anchor] = raw.split("#");
     if (!target.endsWith(".html") || target.includes("package-")) continue;
     const type = target.slice(0, -".html".length).replace(/\//g, ".");
     if (

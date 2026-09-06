@@ -207,10 +207,10 @@ export default function SearchDocumentation() {
       title: "Refreshing documentation index",
     });
     try {
-      await clearDetailsCache();
       const refreshed = await refreshInventory(docsVersion);
       if (includeGuides) await refreshGuides();
       await ensureMeta(refreshed.entries, docsVersion, true);
+      await clearDetailsCache();
       await revalidate();
       await revalidateGuides();
       await revalidateMeta();

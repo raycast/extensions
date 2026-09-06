@@ -19,12 +19,14 @@ type Input = {
 const DESCRIPTION_LIMIT = 1200;
 
 export default async function searchDocs(input: Input) {
-  const { docsVersion } = getPreferences();
+  const { docsVersion, includeGuides = true } = getPreferences();
   const [inventory, guides] = await Promise.all([
     loadInventory(docsVersion),
-    loadGuides(),
+    includeGuides ? loadGuides() : Promise.resolve([]),
   ]);
-  const entries = [...inventory.entries, ...guides];
+  const entries = includeGuides
+    ? [...inventory.entries, ...guides]
+    : inventory.entries;
   const meta = await ensureMeta(inventory.entries, docsVersion);
 
   const scope = input.kind
@@ -32,7 +34,7 @@ export default async function searchDocs(input: Input) {
     : entries;
   const matches = searchEntries(scope, input.query).slice(
     0,
-    Math.min(input.limit ?? 5, 10),
+    Math.max(0, Math.min(input.limit ?? 5, 10)),
   );
 
   const results = await Promise.all(
