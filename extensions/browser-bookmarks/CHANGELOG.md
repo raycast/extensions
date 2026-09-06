@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Find Firefox and Zen profiles on Windows] - {PR_MERGE_DATE}
+## [Find Firefox and Zen profiles on Windows] - 2026-09-06
 
 - Look for Firefox and Zen profiles in the Windows roaming app data folder instead of only the macOS application support folder
 
