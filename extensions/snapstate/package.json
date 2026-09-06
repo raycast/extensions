@@ -6,8 +6,13 @@
   "author": "Arush",
   "license": "MIT",
   "version": "1.0.0",
-  "platforms": ["macOS"],
-  "categories": ["Productivity", "System"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
   "commands": [
     {
       "name": "restore-workspace",
@@ -30,5 +35,8 @@
   },
   "dependencies": {
     "@raycast/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
   }
 }
