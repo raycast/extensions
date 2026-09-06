@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2026-09-06
 
 - Memoise the Chromium bookmark and folder lists so typing in the search bar no longer rewalks the bookmark tree for every browser
 - Find Brave Nightly, Vivaldi, Helium and Dia on Windows instead of only looking in the macOS application support folder
