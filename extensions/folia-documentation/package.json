@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "folia-documentation",
+  "title": "Folia Documentation",
+  "description": "Search the Folia Javadoc and PaperMC guides, with a region-aware scheduler cheatsheet and Raycast AI tools.",
+  "icon": "icon.png",
+  "author": "cemyilmazzzz122",
+  "license": "MIT",
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "folia",
+    "paper",
+    "papermc",
+    "bukkit",
+    "minecraft",
+    "java",
+    "plugin",
+    "documentation",
+    "javadoc",
+    "api",
+    "scheduler",
+    "region"
+  ],
+  "commands": [
+    {
+      "name": "search-documentation",
+      "title": "Search Documentation",
+      "subtitle": "Folia",
+      "description": "Search classes, interfaces, methods, fields, events, exceptions, guides and FAQ answers in the Folia documentation",
+      "mode": "view"
+    },
+    {
+      "name": "scheduler-cheatsheet",
+      "title": "Scheduler Cheatsheet",
+      "subtitle": "Folia",
+      "description": "Browse GlobalRegionScheduler, RegionScheduler, EntityScheduler and AsyncScheduler with copyable examples",
+      "mode": "view"
+    },
+    {
+      "name": "scheduler-code-builder",
+      "title": "Scheduler Code Builder",
+      "subtitle": "Folia",
+      "description": "Fill in a form and copy the matching GlobalRegionScheduler, RegionScheduler, EntityScheduler or AsyncScheduler Java code",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.17.0",
+    "node-html-parser": "^9.0.3",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/turndown": "^5.0.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "docsVersion",
+      "title": "Folia Version",
+      "description": "Which Javadoc build to index and search.",
+      "type": "dropdown",
+      "required": false,
+      "default": "26.2",
+      "data": [
+        {
+          "title": "26.2 (Latest)",
+          "value": "26.2"
+        },
+        {
+          "title": "26.1.2",
+          "value": "26.1.2"
+        },
+        {
+          "title": "1.21.11",
+          "value": "1.21.11"
+        }
+      ]
+    },
+    {
+      "name": "includeGuides",
+      "title": "PaperMC Guides",
+      "label": "Index the Folia guides on docs.papermc.io",
+      "description": "Index the administration guide, API reference pages and FAQ from docs.papermc.io/folia alongside the Javadoc.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "What pressing Enter on a result does.",
+      "type": "dropdown",
+      "required": false,
+      "default": "detail",
+      "data": [
+        {
+          "title": "Show Details in Raycast",
+          "value": "detail"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "browser"
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-docs",
+      "title": "Search Folia Documentation",
+      "description": "Searches the indexed Folia documentation and returns signatures, deprecation status, whether an API is unsupported on Folia, descriptions and code examples. Use this before answering any Folia question so the answer matches the real API instead of being guessed."
+    },
+    {
+      "name": "read-entry",
+      "title": "Read Folia Documentation Entry",
+      "description": "Returns the full documentation for one Folia type or member, optionally with the list of a type's own fields, constants and methods."
+    },
+    {
+      "name": "migrate-scheduler",
+      "title": "Migrate Bukkit Scheduler Call to Folia",
+      "description": "Given a legacy org.bukkit.scheduler.BukkitScheduler method name (runTask, runTaskLater, runTaskTimer, or their *Asynchronously variants), returns the real Folia scheduler API equivalents built from the actual Javadoc signatures, plus guidance on which one to pick. Use this whenever converting or explaining how to port Bukkit/Paper plugin code to Folia."
+    }
+  ]
+}
