@@ -91,6 +91,11 @@ test("shortcuts declare explicit macOS and Windows mappings without conflicting 
     macOS: { modifiers: ["opt"], key: "q" },
     Windows: { modifiers: ["alt"], key: "q" },
   });
+  // Now Playing
+  assert.deepEqual(shortcuts.nowPlaying, {
+    macOS: { modifiers: ["opt"], key: "i" },
+    Windows: { modifiers: ["alt"], key: "i" },
+  });
   // Shuffle / Repeat
   assert.deepEqual(shortcuts.shuffle, {
     macOS: { modifiers: ["opt"], key: "s" },

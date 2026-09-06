@@ -3,6 +3,7 @@ import type { Artist, Album, Item } from "../domain/model";
 import { SessionRoute, useMusic } from "./session";
 import { PlayerActions } from "./player-actions";
 import { QueueView } from "./queue-view";
+import { NowPlayingView } from "./now-playing-view";
 import { shortcuts } from "./shortcuts";
 
 export function ItemActions({ item, openCollection }: { item?: Item; openCollection: (item: Artist | Album) => void }) {
@@ -78,6 +79,16 @@ export function ItemActions({ item, openCollection }: { item?: Item; openCollect
         </ActionPanel.Section>
       )}
       <ActionPanel.Section title="Workspace">
+        <Action.Push
+          title="Now Playing"
+          icon={Icon.Music}
+          shortcut={shortcuts.nowPlaying}
+          target={
+            <SessionRoute sessionBridge={bridge}>
+              <NowPlayingView />
+            </SessionRoute>
+          }
+        />
         <Action.Push
           title="Show Queue"
           icon={Icon.List}

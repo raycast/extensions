@@ -1,9 +1,11 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useMusic } from "./session";
+import { SessionRoute, useMusic } from "./session";
 import { PlayerActions } from "./player-actions";
+import { NowPlayingView } from "./now-playing-view";
+import { shortcuts } from "./shortcuts";
 
 export function QueueView() {
-  const { activeId, players, queues, service, run, loading, busy } = useMusic();
+  const { activeId, players, queues, service, bridge, run, loading, busy } = useMusic();
   const active = players.find((p) => p.id === activeId);
   const queue = queues.find((q) => q.id === active?.queueId);
   return (
@@ -28,6 +30,16 @@ export function QueueView() {
                   onAction={() => run(() => service.removeQueueEntry(active.id, entry.id))}
                 />
               )}
+              <Action.Push
+                title="Now Playing"
+                icon={Icon.Play}
+                shortcut={shortcuts.nowPlaying}
+                target={
+                  <SessionRoute sessionBridge={bridge}>
+                    <NowPlayingView />
+                  </SessionRoute>
+                }
+              />
               <PlayerActions />
             </ActionPanel>
           }

@@ -55,6 +55,7 @@ Play Now uses the server's `play` option, not queue replacement. Play Next uses 
 | Shuffle                       | Alt+S                               |
 | Repeat                        | Alt+R                               |
 | Show Queue                    | Alt+Q                               |
+| Now Playing                   | Alt+I                               |
 | Refresh                       | Primary+R                           |
 | Extension Preferences         | Primary+. (non-configurable)        |
 
@@ -62,17 +63,17 @@ The executable shortcut map is `src/ui/shortcuts.ts`. Action shortcuts can be cu
 
 ## Architecture
 
-| Area                                   | Main files                                                                                                    |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Commands, preferences, runtime         | `package.json`, `src/music.tsx`, `src/runtime.ts`, `src/quick-command.ts`                                     |
-| Domain and target/group policy         | `src/domain/model.ts`, `policy.ts`, `grouping.ts`                                                             |
-| Typed service and saved selection      | `src/services/port.ts`, `controller.ts`                                                                       |
-| HTTP, decoding, live implementation    | `src/services/http-client.ts`, `wire.ts`, `live.ts`                                                           |
-| Demo and paged search                  | `src/services/demo.ts`, `demo-data.ts`, `search-pager.ts`                                                     |
-| Shared navigation state                | `src/services/session-bridge.ts`, `src/ui/session.tsx`                                                        |
-| Browser, players, actions, queue       | `src/ui/music-browser.tsx`, `player-sections.tsx`, `item-actions.tsx`, `player-actions.tsx`, `queue-view.tsx` |
-| Automated tests and sanitized fixtures | `tests/`                                                                                                      |
-| Read-only server smoke test            | `scripts/live-smoke.ts`                                                                                       |
+| Area                                          | Main files                                                                                                                            |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Commands, preferences, runtime                | `package.json`, `src/music.tsx`, `src/runtime.ts`, `src/quick-command.ts`                                                             |
+| Domain and target/group policy                | `src/domain/model.ts`, `policy.ts`, `grouping.ts`                                                                                     |
+| Typed service and saved selection             | `src/services/port.ts`, `controller.ts`                                                                                               |
+| HTTP, decoding, live implementation           | `src/services/http-client.ts`, `wire.ts`, `live.ts`                                                                                   |
+| Demo and paged search                         | `src/services/demo.ts`, `demo-data.ts`, `search-pager.ts`                                                                             |
+| Shared navigation state                       | `src/services/session-bridge.ts`, `src/ui/session.tsx`                                                                                |
+| Browser, players, actions, queue, now playing | `src/ui/music-browser.tsx`, `player-sections.tsx`, `item-actions.tsx`, `player-actions.tsx`, `queue-view.tsx`, `now-playing-view.tsx` |
+| Automated tests and sanitized fixtures        | `tests/`                                                                                                                              |
+| Read-only server smoke test                   | `scripts/live-smoke.ts`                                                                                                               |
 
 React consumes domain models through `MusicService`. Decode server data from `unknown` inside services; do not cast unchecked JSON into domain types or add raw command calls to views.
 
