@@ -1,9 +1,13 @@
 import { runAppleScript } from "@raycast/utils";
 import { environment } from "@raycast/api";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import { mkdir } from "fs/promises";
 import path from "path";
 import os from "os";
 import fs from "fs";
+
+const execFileAsync = promisify(execFile);
 
 export function resolveHome(dir: string): string {
   return dir.startsWith("~") ? path.join(os.homedir(), dir.slice(1)) : dir;
@@ -32,8 +36,7 @@ export async function generateThumbnail(filePath: string) {
       return filePath;
     }
 
-    // Video thumbnails go through ffmpeg and qlmanage via AppleScript, so macOS only.
-    if (process.platform === "darwin" && [".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v"].includes(ext)) {
+    if ([".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v"].includes(ext)) {
       const thumbnailDir = path.join(environment.supportPath, "thumbnails");
       if (!fs.existsSync(thumbnailDir)) {
         await mkdir(thumbnailDir, { recursive: true });
@@ -42,7 +45,15 @@ export async function generateThumbnail(filePath: string) {
       const thumbnailPath = path.join(thumbnailDir, `${path.basename(filePath, ext)}.jpg`);
 
       try {
-        await runAppleScript(`
+        if (process.platform !== "darwin") {
+          // ffmpeg ships with neither Windows nor Linux, so a missing binary just falls through
+          await execFileAsync(
+            "ffmpeg",
+            ["-y", "-ss", "00:00:01", "-i", filePath, "-frames:v", "1", "-q:v", "2", thumbnailPath],
+            { timeout: 15000 },
+          );
+        } else {
+          await runAppleScript(`
           set inputFile to POSIX file "${filePath}"
           set outputFile to POSIX file "${thumbnailPath}"
           
@@ -56,7 +67,8 @@ export async function generateThumbnail(filePath: string) {
               end try
             end try
           end tell
-        `);
+          `);
+        }
 
         if (fs.existsSync(thumbnailPath)) {
           return thumbnailPath;

@@ -3,10 +3,11 @@
 ## [Windows support] - {PR_MERGE_DATE}
 
 - Added Windows support
-- Skipped video thumbnail generation on Windows, since it relies on AppleScript
-- Replaced the AppleScript download notification with the existing success toast on Windows
+- Generated video thumbnails with ffmpeg off macOS, falling back to the status icon when it is not installed
+- Replaced the AppleScript download notification with the success toast on Windows
 - Expanded `~` in the download directory preference so the default resolves on both platforms
-- Fixed `cmd` shortcuts that were not mapped for Windows
+- Fixed `cmd` shortcuts that had no Windows mapping
+- Padded the history grid when it shows status icons rather than thumbnails
 
 ## [Download History command and improvements] - 2025-06-27
 

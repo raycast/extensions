@@ -79,6 +79,10 @@ export default function HistoryCommand() {
       : { source: Icon.XMarkCircle, tintColor: Color.Red };
   }
 
+  // status icons fill the tile edge to edge, real thumbnails should not be padded
+  const padStatusIcons =
+    process.platform !== "darwin" && !history.some((e) => e.thumbnailUrl && fs.existsSync(e.thumbnailUrl));
+
   const groupedHistory = history.reduce(
     (groups, entry) => {
       const date = new Date(entry.timestamp).toDateString();
@@ -102,7 +106,11 @@ export default function HistoryCommand() {
   }
 
   return (
-    <Grid isLoading={loading} searchBarPlaceholder="Search download history...">
+    <Grid
+      isLoading={loading}
+      searchBarPlaceholder="Search download history..."
+      inset={padStatusIcons ? Grid.Inset.Large : undefined}
+    >
       {Object.entries(groupedHistory).map(([date, entries]) => (
         <Grid.Section key={date} title={date}>
           {entries.map((entry) => {
