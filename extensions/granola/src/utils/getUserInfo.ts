@@ -1,4 +1,5 @@
-import { getLocalGranolaUserInfo } from "./getAccessToken";
+import getAccessToken from "./getAccessToken";
+import { granolaFetch } from "./granolaFetch";
 import { toErrorMessage } from "./errorUtils";
 
 interface UserInfo {
@@ -10,7 +11,14 @@ interface UserInfo {
 
 export async function getUserInfo(): Promise<UserInfo> {
   try {
-    const { userInfo } = await getLocalGranolaUserInfo();
+    const accessToken = await getAccessToken();
+    const response = await granolaFetch("https://api.granola.ai/v1/get-user-info", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+      body: "{}",
+      signal: AbortSignal.timeout(20_000),
+    });
+    const userInfo = (await response.json()) as Record<string, unknown>;
 
     // Extract user information
     const userId = userInfo.id;

@@ -45,7 +45,7 @@ If you decline approval, return to Raycast and press **Try Again**. Expired code
 Release tooling currently uses `@raycast/api` 1.x because the 2.2.0 CLI failed to extract schemas for existing AI tools during validation. `npm run publish` uses the installed CLI. The lockfile includes patched esbuild and minimatch overrides; revisit these when upgrading the CLI. Run `npm ci`, `npm test`, `npm run lint`, and `npm run build` before submission.
 
 *How does this extension work?*
-The extension uses OAuth authentication, with credentials stored through Raycast's OAuth token storage. Access tokens are refreshed automatically. The desktop app's files and tokens are never read or modified.
+The extension uses OAuth authentication, with credentials stored through Raycast's OAuth token storage. Access tokens are refreshed automatically, including when the server rejects a token before its recorded expiry. Read requests can retry once after recovery; writes and generation requests require an explicit retry. The desktop app's files and tokens are never read or modified.
 
 Note and folder operations use Granola's private API, which may change. Access remains governed by Granola's server permissions.
 

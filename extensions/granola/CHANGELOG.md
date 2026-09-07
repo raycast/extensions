@@ -8,6 +8,7 @@
 - Fix folder membership IDs and missing enhanced summaries in exports; prevent empty note nodes from producing literal `undefined` text.
 - Add copyable error diagnostics that exclude credentials and meeting content.
 - Protect rotating refresh tokens from concurrent requests and uncertain responses, with automated regression coverage.
+- Recover server-rejected access tokens automatically and retry reads once, without replaying writes or generation requests.
 - Update Raycast dependencies and the lockfile to resolve dependency advisories.
 
 ## [Sortable date prefixes for exports] - 2026-05-29

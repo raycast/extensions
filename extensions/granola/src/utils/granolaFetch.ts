@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { diagnostic } from "./diagnostics";
+import { refreshRejectedAccessToken } from "./getAccessToken";
+import { endpointCatalog } from "./endpointCatalog";
 
 export class GranolaRequestError extends Error {
   constructor(
@@ -15,6 +17,10 @@ export class GranolaRequestError extends Error {
 
 /** Shared transport. Never retries mutations or consumes/logs response bodies. */
 export async function granolaFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  return request(url, options, true);
+}
+
+async function request(url: string, options: RequestInit, recoverAuth: boolean): Promise<Response> {
   const parsed = new URL(url);
   if (!["api.granola.ai", "stream.api.granola.ai"].includes(parsed.hostname) || parsed.protocol !== "https:")
     throw new Error("Unexpected Granola API address.");
@@ -57,6 +63,26 @@ export async function granolaFetch(url: string, options: RequestInit = {}): Prom
       await response.body?.cancel();
     } catch {
       /* Preserve the HTTP status if the body stream failed. */
+    }
+    const headers = new Headers(options.headers);
+    const rejectedToken = headers.get("Authorization")?.match(/^Bearer (.+)$/i)?.[1];
+    if (response.status === 401 && recoverAuth && rejectedToken) {
+      options.signal?.throwIfAborted();
+      diagnostic("auth.access_token_rejected", { endpoint, requestId });
+      const accessToken = await refreshRejectedAccessToken(rejectedToken);
+      options.signal?.throwIfAborted();
+      // Only replay catalogued reads with reusable bodies. Never retry writes,
+      // generation, unknown routes, or a streaming request body automatically.
+      const safeRead = endpointCatalog.some(
+        (entry) => entry.kind === "read" && entry.path === parsed.pathname && parsed.hostname === "api.granola.ai",
+      );
+      if (safeRead && (options.body == null || typeof options.body === "string")) {
+        headers.set("Authorization", `Bearer ${accessToken}`);
+        return request(url, { ...options, headers }, false);
+      }
+      throw new Error(
+        `Granola sign-in refreshed. Run the command again; this request was not retried. Reference: ${requestId}`,
+      );
     }
     throw new GranolaRequestError(
       response.status,

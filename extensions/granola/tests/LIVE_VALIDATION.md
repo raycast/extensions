@@ -4,6 +4,8 @@ Last run: 2026-09-07, macOS, Granola 7.543.0, actual Raycast development extensi
 
 Release-preparation smoke test repeated on Raycast 2.2.0.0 with API 1.104.25 and utils 2.3.1: all ten read routes passed; forced refresh rotated and saved the session. Clean install, 21 offline tests, lint, TypeScript, production build, and npm audit (zero vulnerabilities) passed. Mutation results below are from the earlier integration run on the same day, not a second mutation run after dependency updates.
 
+PR review follow-up: 29 offline tests now pass, including server-rejected token recovery, a single read retry, cross-process recovery, delayed 401 responses, cancellation, and prevention of write/generation replay. The server-rejection scenarios use deterministic mocks; they are not claimed as an induced rejection of the live account's token.
+
 ## Results
 
 - OAuth authentication: HTTP 200; separate session created after browser approval.

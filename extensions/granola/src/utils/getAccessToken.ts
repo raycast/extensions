@@ -1,4 +1,3 @@
-import { granolaFetch } from "./granolaFetch";
 import { OAuth, environment } from "@raycast/api";
 import { mkdir, rmdir } from "node:fs/promises";
 import path from "node:path";
@@ -25,13 +24,15 @@ export class SignInRequired extends Error {
 
 let pending: Promise<string> | undefined;
 
-async function token(forceRefresh = false): Promise<string> {
+async function token(forceRefresh = false, rejectedAccessToken?: string): Promise<string> {
   const saved = await granolaOAuth.getTokens();
   if (!saved?.accessToken) {
     diagnostic("auth.sign_in_required", { code: "missing_session" });
     throw new SignInRequired();
   }
   if (!forceRefresh && !saved.isExpired()) return saved.accessToken;
+  // Another command may already have recovered the rejected session.
+  if (rejectedAccessToken && saved.accessToken !== rejectedAccessToken && !saved.isExpired()) return saved.accessToken;
   if (!saved.refreshToken) throw new SignInRequired();
   // Commands/tools may run in separate processes. Serialize rotating refresh
   // tokens, and read the winning process's token before issuing another refresh.
@@ -64,7 +65,12 @@ async function token(forceRefresh = false): Promise<string> {
   try {
     const current = await granolaOAuth.getTokens();
     if (!current?.refreshToken) throw new SignInRequired();
-    if ((!forceRefresh || current.refreshToken !== saved.refreshToken) && !current.isExpired())
+    if (
+      (!forceRefresh ||
+        current.refreshToken !== saved.refreshToken ||
+        (rejectedAccessToken && current.accessToken !== rejectedAccessToken)) &&
+      !current.isExpired()
+    )
       return current.accessToken;
     diagnostic("auth.refresh_started");
     // Once sent, a lost response or failed save can strand a rotated token.
@@ -103,14 +109,13 @@ export default function getAccessToken(forceRefresh = false): Promise<string> {
   return pending;
 }
 
-export async function getLocalGranolaUserInfo() {
-  const accessToken = await getAccessToken();
-  const response = await granolaFetch("https://api.granola.ai/v1/get-user-info", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-    body: "{}",
-    signal: AbortSignal.timeout(20_000),
+/** Recover a server-rejected token, even when its local expiry is in the future. */
+export async function refreshRejectedAccessToken(rejectedAccessToken: string): Promise<string> {
+  // A concurrent normal lookup can still resolve to the rejected token. Wait
+  // for it, then explicitly recover under the same cross-process refresh lock.
+  if (pending) await pending;
+  pending ??= token(true, rejectedAccessToken).finally(() => {
+    pending = undefined;
   });
-  if (!response.ok) throw new Error(`Could not load Granola account (HTTP ${response.status}).`);
-  return { userInfo: (await response.json()) as Record<string, unknown>, sourceName: "Granola API" };
+  return pending;
 }

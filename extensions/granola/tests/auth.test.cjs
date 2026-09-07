@@ -252,3 +252,42 @@ test("logout during refresh cannot resurrect the signed-out session", async () =
     h.cleanup();
   }
 });
+test("concurrent 401s recover a locally unexpired token once across processes", async () => {
+  let calls = 0;
+  const h = harness(async () => {
+    calls++;
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    return {
+      response: { ok: true },
+      body: { access_token: "replacement", refresh_token: "rotated", expires_in: 3600 },
+    };
+  });
+  h.set({ accessToken: "rejected", refreshToken: "old-refresh", isExpired: () => false });
+  try {
+    const a = h.instance(),
+      b = h.instance();
+    const lookup = a.default();
+    const results = await Promise.all([
+      a.refreshRejectedAccessToken("rejected"),
+      a.refreshRejectedAccessToken("rejected"),
+      b.refreshRejectedAccessToken("rejected"),
+    ]);
+    assert.equal(await lookup, "rejected");
+    assert.deepEqual(results, ["replacement", "replacement", "replacement"]);
+    assert.equal(calls, 1);
+    assert.equal(h.get().refreshToken, "rotated");
+  } finally {
+    h.cleanup();
+  }
+});
+test("a delayed 401 for an old token reuses the already-refreshed session", async () => {
+  const h = harness(async () => {
+    throw new Error("Should not refresh again");
+  });
+  h.set({ accessToken: "replacement", refreshToken: "rotated", isExpired: () => false });
+  try {
+    assert.equal(await h.instance().refreshRejectedAccessToken("rejected"), "replacement");
+  } finally {
+    h.cleanup();
+  }
+});
