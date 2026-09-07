@@ -1,5 +1,4 @@
-// Keep every direct Granola endpoint here. Tests fail when a call site is added
-// without classifying its side effects. A skipped mutation is never a live pass.
+// Classify endpoints so auth recovery retries reads, never writes or generation.
 export const endpointCatalog = [
   { path: "/v2/get-documents", kind: "read", input: "none" },
   { path: "/v1/get-user-info", kind: "read", input: "none" },

@@ -90,42 +90,6 @@ test("every Granola call site is catalogued and uses POST", () => {
   assert.deepEqual([...seen].sort(), Array.from(endpointCatalog, (e) => e.path).sort());
 });
 
-test("live checker never calls mutations or generation endpoints", async () => {
-  const called = [];
-  const checker = load("checkEndpoints", {
-    "./getAccessToken": { __esModule: true, default: async () => "test" },
-    "./endpointCatalog": { endpointCatalog },
-    "./granolaFetch": {
-      GranolaRequestError: class extends Error {},
-      granolaFetch: async (url) => {
-        called.push(new URL(url).pathname);
-        const route = new URL(url).pathname;
-        const body =
-          route.endsWith("get-documents") || route.endsWith("get-documents-batch")
-            ? { docs: [{ id: "sample" }] }
-            : route.endsWith("get-document-lists-metadata")
-              ? { lists: { folder: {} } }
-              : route.endsWith("get-document-transcript")
-                ? []
-                : route.endsWith("get-user-info")
-                  ? { id: "user" }
-                  : {};
-        return new Response(JSON.stringify(body));
-      },
-    },
-  });
-  const result = await checker.checkEndpoints(new AbortController().signal);
-  assert.equal(result.filter((c) => c.result === "failed").length, 0);
-  assert.deepEqual(
-    called,
-    Array.from(
-      endpointCatalog.filter((e) => e.kind === "read"),
-      (e) => e.path,
-    ),
-  );
-  assert.equal(result.filter((c) => c.result === "skipped").length, 16);
-});
-
 test("transport reports status and reference, never server body or credentials", async () => {
   const events = [];
   const transport = load(

@@ -2,12 +2,10 @@
 
 ## [2.2.0 - OAuth Authentication] - {PR_MERGE_DATE}
 
-- Use OAuth authentication to sign in once in your browser. Raycast securely stores and refreshes its own session on macOS and Windows.
-- Add a centered native sign-in screen with compact branding, approval codes, cancellation, and clear retry actions.
+- Add OAuth sign-in with secure token storage and automatic refresh on macOS and Windows.
 - Fix 404 errors when listing notes by using Granola's current POST request format.
 - Fix folder membership IDs and missing enhanced summaries in exports; prevent empty note nodes from producing literal `undefined` text.
 - Add copyable error diagnostics that exclude credentials and meeting content.
-- Protect rotating refresh tokens from concurrent requests and uncertain responses, with automated regression coverage.
 - Recover server-rejected access tokens automatically and retry reads once, without replaying writes or generation requests.
 - Update Raycast dependencies and the lockfile to resolve dependency advisories.
 
