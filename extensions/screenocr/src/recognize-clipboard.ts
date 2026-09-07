@@ -1,25 +1,23 @@
 import { closeMainWindow } from "@raycast/api";
 import { handleRecognitionOutcome } from "./ocr/result";
 import { RecognitionOutcome } from "./ocr/types";
-import { detectBarcode } from "./utils";
+import { recognize } from "./utils";
 
 export default async function command() {
   let outcome: RecognitionOutcome;
   try {
     await closeMainWindow();
-    outcome = await detectBarcode();
+    outcome = await recognize("clipboard");
   } catch (error) {
     outcome = {
       status: "error",
       message:
         error instanceof Error
           ? error.message
-          : "Failed to detect barcode/QR code",
+          : "Failed to recognize clipboard image",
     };
   }
   await handleRecognitionOutcome(outcome, {
-    subject: "detecting barcode/QR code",
-    noResultTitle: "No barcodes or QR codes detected",
-    action: "copy",
+    subject: "recognizing clipboard image",
   });
 }

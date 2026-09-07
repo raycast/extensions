@@ -2,6 +2,10 @@
 
 You can use `crossLaunchCommand` to use ScreenOCR in your extension and receive the recognized text via callback.
 
+The `recognize-text` command supports this contract on macOS and Windows. Its extension identity remains `huzef44/screenocr`. The callback result shape is unchanged.
+
+When `callbackLaunchOptions` is supplied, ScreenOCR returns the result to the caller instead of applying the ordinary copy/paste preference. The macOS capture option to copy an image before recognition can still affect the clipboard.
+
 ## Launch Context Options
 
 ### `callbackLaunchOptions`
@@ -23,7 +27,9 @@ The recognized text. Returns `null` if no text was detected.
 
 Type: `string | undefined`
 
-Error message if OCR failed or no text was detected.
+Error message if OCR failed, no text was detected, or the user cancelled capture. Cancellation returns `text: null` and an error message so the caller can stop waiting. Treat error messages as human-readable descriptions rather than stable error codes.
+
+ScreenOCR attempts callback delivery once. If delivery itself fails, it reports that failure without launching the callback again. Ordinary user cancellation without a callback stays silent.
 
 ## Launch Example
 
@@ -53,7 +59,9 @@ type OCRResult = {
   error?: string;
 };
 
-export default function Command({ launchContext = {} }: LaunchProps<{ launchContext?: OCRResult }>) {
+export default function Command({
+  launchContext = {},
+}: LaunchProps<{ launchContext?: OCRResult }>) {
   const { text, error } = launchContext;
 
   if (error) {

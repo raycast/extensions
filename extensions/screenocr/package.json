@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screenocr",
   "title": "ScreenOCR",
-  "description": "Extract text from screen captures locally via OCR",
+  "description": "Extract text from screen captures and clipboard images locally via OCR",
   "icon": "command-icon.png",
   "author": "huzef44",
   "contributors": [
@@ -10,20 +10,22 @@
     "xilopaint",
     "pernielsentikaer",
     "chrismessina",
-    "huzef_ansari"
+    "huzef_ansari",
+    "duck69"
   ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "preferences": [
     {
       "name": "primaryLanguage",
-      "title": "Primary Language",
-      "description": "Primary language for text recognition",
+      "title": "Primary Language (macOS)",
+      "description": "Primary Apple Vision language. On Windows, use Select Recognition Languages to choose an installed OCR language.",
       "type": "dropdown",
       "required": true,
       "data": [
@@ -139,12 +141,13 @@
           "title": "🇹🇷 Turkish (Turkey)",
           "value": "tr-TR"
         }
-      ]
+      ],
+      "default": "en-US"
     },
     {
       "name": "ocrMode",
-      "title": "Recognition Level",
-      "description": "Affects performance and accuracy of the text recognition",
+      "title": "Recognition Level (macOS)",
+      "description": "Apple Vision performance and accuracy. Windows uses its installed OCR engine.",
       "type": "dropdown",
       "required": true,
       "data": [
@@ -156,12 +159,13 @@
           "title": "Fast",
           "value": "fast"
         }
-      ]
+      ],
+      "default": "accurate"
     },
     {
       "name": "languageCorrection",
       "title": "Options",
-      "description": "Disabling this property returns the raw recognition results, which provides performance benefits but less accurate results",
+      "description": "macOS only: use Apple Vision language correction for more accurate recognition.",
       "type": "checkbox",
       "required": true,
       "label": "Use language correction",
@@ -169,7 +173,7 @@
     },
     {
       "name": "playSound",
-      "description": "Play camera shutter sound when capturing screenshots",
+      "description": "macOS only: play the camera shutter sound when capturing a screen region.",
       "type": "checkbox",
       "required": false,
       "label": "Play sounds",
@@ -185,7 +189,7 @@
     },
     {
       "name": "ignoreLineBreaks",
-      "description": "Ignores Line Breaks",
+      "description": "Join recognized lines with spaces instead of line breaks.",
       "type": "checkbox",
       "required": false,
       "label": "Ignore line breaks",
@@ -193,7 +197,7 @@
     },
     {
       "name": "keepImage",
-      "description": "Keep the image in the clipboard after text recognition",
+      "description": "macOS only: copy the captured image to the clipboard before recognition. Copying recognized text may replace it.",
       "type": "checkbox",
       "required": true,
       "label": "Keep image in clipboard",
@@ -201,17 +205,39 @@
     },
     {
       "name": "customWordsList",
-      "title": "Custom Words List",
-      "description": "You can improve text recognition by providing a list of words that are special to your text",
+      "title": "Custom Words List (macOS)",
+      "description": "Comma-separated words that help Apple Vision recognize specialized text. Not used by Windows OCR.",
       "type": "textfield",
       "required": false,
       "label": "Custom Words List"
+    },
+    {
+      "name": "resultAction",
+      "title": "After Recognition",
+      "description": "What to do with recognized text. Cross-extension callbacks receive the result directly.",
+      "type": "dropdown",
+      "required": true,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste into Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy and Paste",
+          "value": "both"
+        }
+      ]
     }
   ],
   "commands": [
     {
       "title": "Select Recognition Languages",
-      "description": "Choose which languages will be used for text recognition",
+      "description": "Choose recognition languages on macOS or an installed OCR language on Windows",
       "name": "preferences",
       "mode": "view"
     },
@@ -224,13 +250,19 @@
     {
       "name": "recognize-text-fullscreen",
       "title": "Recognize Text on Entire Screen",
-      "description": "Detect all text from the captured screen",
+      "description": "Recognize text on the current display on macOS or across all monitors on Windows",
+      "mode": "no-view"
+    },
+    {
+      "name": "recognize-clipboard",
+      "title": "Recognize Text in Clipboard Image",
+      "description": "Extract text from an image or supported image file in the clipboard",
       "mode": "no-view"
     },
     {
       "name": "detect-barcode",
       "title": "Detect Barcode/QR Code",
-      "description": "Detect barcodes and QR codes from the captured screen area",
+      "description": "Detect barcodes and QR codes from the captured screen area (macOS only)",
       "mode": "no-view"
     }
   ],
@@ -252,6 +284,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/ocr.test.cjs"
   }
 }
