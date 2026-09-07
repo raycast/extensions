@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Display due time in menu bar] - {PR_MERGE_DATE}
+## [Display due time in menu bar] - 2026-09-07
 
 - Display scheduled due time before reminder titles in menu bar items.
 - Add "Display Exact Due Time" preference to My Reminders to show exact due time in list accessories.
