@@ -1,6 +1,6 @@
 # Codex Sessions Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-07
 
 - **Search Codex Sessions**: fuzzy-find local Codex threads with Interactive / Working / Unread Completed / All / Archived scopes, grouped by time buckets, with a bounded rollout-file fallback when the state database is unavailable
 - **Open Codex Project**: project folders derived from your session history, frecency-ranked, with missing-folder detection and reopen-by-git-remote
