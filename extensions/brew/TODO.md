@@ -104,16 +104,20 @@ Focus: Refactor codebase structure, integrate logging, fix critical bugs, and im
 
 ## Add Support for Homebrew 5.0
 
+> **Superseded.** The extension now requires **Homebrew 6.0+**, so the remaining 5.0
+> verification items below no longer apply. The `HOMEBREW_USE_INTERNAL_API` preference was
+> removed: 6 uses that API by default and deprecates the variable.
+
 - [x] See https://brew.sh/2025/11/12/homebrew-5.0.0/ and https://github.com/Homebrew/brew/pull/20951
 - [x] Update brew command execution to handle new Homebrew 5.0 changes, including concurrency
   - [x] Added `HOMEBREW_DOWNLOAD_CONCURRENCY` environment variable support
   - [x] Added `HOMEBREW_USE_INTERNAL_API` environment variable support
   - [x] Added preferences to control these features
-- [ ] Test compatibility with Homebrew 5.0 features
+- [~] Test compatibility with Homebrew 5.0 features — superseded, targets 6.0+
 - [x] Update documentation for Homebrew 5.0
   - [x] Updated README.md with Homebrew 5.0 compatibility section
   - [x] Added code comments documenting Homebrew 5.0 changes
-- [ ] Verify all existing functionality works with Homebrew 5.0
+- [~] Verify all existing functionality works with Homebrew 5.0 — superseded, targets 6.0+
 
 ---
 
@@ -182,7 +186,7 @@ Focus: Implement AI-powered features, improve user experience, and add advanced 
 
 - [ ] Implement proper caching for brew data
   - [ ] Add cache TTL configuration option
-  - [ ] Add manual cache invalidation action
+  - [x] Add manual cache invalidation action (`Clear Cache` command)
   - [ ] Consider using SQLite for faster queries (noted in `utils.ts` comments)
   - [ ] Add cache size monitoring/cleanup
   - [ ] Simplify cache invalidation logic
@@ -201,31 +205,31 @@ Focus: Implement AI-powered features, improve user experience, and add advanced 
   - [ ] Consider a shared `PackageInfoDetail` wrapper component
 - [ ] Add more detailed cask information panels
   - [ ] Show download URL and size (from `url` field)
-  - [ ] Show installation date/time (from `installed_time` field)
+  - [x] Show installation date/time (from `installed_time` field)
   - [ ] Show SHA256 checksum (from `sha256` field)
   - [ ] Show bundle version info (`bundle_version`, `bundle_short_version`)
   - [ ] Show app artifacts (what gets installed: `.app`, binaries, etc.)
   - [ ] Show zap paths (files removed on full uninstall)
-  - [ ] Show deprecation/disabled status with reason and replacement
+  - [x] Show deprecation/disabled status with reason and replacement
   - [ ] Show old tokens/aliases (from `old_tokens` field)
   - [ ] Show supported languages (from `languages` field)
   - [ ] Add app icon from installed `.app` bundle
 - [ ] Add more detailed formula information panels
-  - [ ] Show installation date/time (from `installed[].time` - Unix timestamp)
+  - [x] Show installation date/time (from `installed[].time` - Unix timestamp)
   - [ ] Show bottle info (pre-built binary availability per architecture)
   - [ ] Show if poured from bottle vs built from source
   - [ ] Show runtime dependencies with versions (richer than just names)
   - [ ] Show test dependencies
   - [ ] Show `uses_from_macos` system dependencies
-  - [ ] Show deprecation/disabled status with reason and replacement
+  - [x] Show deprecation/disabled status with reason and replacement
   - [ ] Show if formula has post-install script (`post_install_defined`)
   - [ ] Show service info if formula provides a service
   - [ ] Show link overwrite paths
   - [ ] Show conflicts with reasons (not just names)
-- [ ] Improve icons for outdated packages
-  - [ ] Use distinct icons for outdated vs up-to-date (currently both use `CheckCircle`)
-  - [ ] Add visual indicator for pinned packages in list view
-  - [ ] Consider using `Icon.ArrowUp` or `Icon.ExclamationMark` for outdated items
+- [x] Improve icons for outdated packages
+  - [x] Use distinct icons for outdated vs up-to-date (`src/components/packageIcons.ts`)
+  - [x] Add visual indicator for pinned packages in list view (tack accessory)
+  - [x] Yellow `Icon.ArrowUpCircle` for outdated; red is reserved for a failed upgrade
 - [ ] Implement search filtering by category/type
   - [ ] Add filter for taps
   - [ ] Add filter by license type
@@ -234,9 +238,9 @@ Focus: Implement AI-powered features, improve user experience, and add advanced 
   - [ ] Track package update dates
   - [ ] Add "Recently Added" section
   - [ ] Add "Recently Updated" section
-- [ ] To Show Installed, show available updates
-  - [ ] Add action to update individual package
-  - [ ] Add action to update all packages at once
+- [x] To Show Installed, show available updates
+  - [x] Add action to update individual package
+  - [x] Add action to update all packages at once
 - [ ] Add download progress HUD to show download % complete
 - [ ] Improve keyboard shortcuts for Actions
 - [ ] Improve loading states with more informative messages
@@ -249,8 +253,14 @@ Focus: Implement AI-powered features, improve user experience, and add advanced 
   - [ ] Add screenshots of all commands
   - [ ] Document all preferences
   - [ ] Add troubleshooting section
-  - [ ] Add contribution guidelines
+  - [x] Add contribution guidelines (`CONTRIBUTING.md`)
   - [ ] Document keyboard shortcuts
+
+## ✅ Shipped since this list was written
+
+- [x] Cask pinning (`brew pin --cask`), matching formula pinning across all views
+- [x] Homebrew 6.0+ only; removed the deprecated internal-API preference
+- [x] vitest coverage for selection and formula/cask discriminator logic
 
 ## 🔮 Future Enhancements
 
@@ -260,9 +270,9 @@ Focus: Implement AI-powered features, improve user experience, and add advanced 
 - [ ] Add tap management
   - [ ] List installed taps
   - [ ] Add/remove taps
-- [ ] Add formula/cask analytics
-  - [ ] Show install counts from Homebrew analytics
-  - [ ] Show popularity ranking
-- [ ] Add batch operations
-  - [ ] Select multiple packages for install/uninstall
-  - [ ] Bulk upgrade selected packages
+- [x] Add formula/cask analytics
+  - [x] Show install counts from Homebrew analytics (30/90/365 days)
+  - [x] Show popularity ranking (Sort by Popularity, ⇧⌘S in Search)
+- [x] Add batch operations
+  - [x] Select multiple packages for install/uninstall — selection review in Show Upgrades
+  - [x] Bulk upgrade selected packages
