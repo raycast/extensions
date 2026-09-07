@@ -72,17 +72,17 @@ A collection of shortcuts that are commonly used throughout Raycast. Using them 
 | --------------- | --------- | -------------------- |
 | Copy            | ⌘ + ⇧ + C | `ctrl` + `shift` + C |
 | CopyDeeplink    | ⌘ + ⇧ + C | `ctrl` + `shift` + C |
-| CopyName        | ⌘ + ⇧ + . | `ctrl` + `alt` + C   |
-| CopyPath        | ⌘ + ⇧ + , | `alt` + `shift` + C  |
+| CopyName        | ⌘ + ⌥ + C | `ctrl` + `alt` + C   |
+| CopyPath        | ⌘ + ⌃ + C | `alt` + `shift` + C  |
 | Save            | ⌘ + S     | `ctrl` + S           |
 | Duplicate       | ⌘ + D     | `ctrl` + `shift` + S |
 | Edit            | ⌘ + E     | `ctrl` + E           |
-| MoveDown        | ⌘ + ⇧ + ↓ | `ctrl` + `shift` + ↓ |
-| MoveUp          | ⌘ + ⇧ + ↑ | `ctrl` + `shift` + ↑ |
+| MoveDown        | ⌘ + ⌥ + ↓ | `ctrl` + `shift` + ↓ |
+| MoveUp          | ⌘ + ⌥ + ↑ | `ctrl` + `shift` + ↑ |
 | New             | ⌘ + N     | `ctrl` + N           |
 | Open            | ⌘ + O     | `ctrl` + O           |
 | OpenWith        | ⌘ + ⇧ + O | `ctrl` + `shift` + O |
-| Pin             | ⌘ + ⇧ + P | `ctrl` + .           |
+| Pin             | ⌘ + .     | `ctrl` + .           |
 | Refresh         | ⌘ + R     | `ctrl` + R           |
 | Remove          | ⌃ + X     | `ctrl` + D           |
 | RemoveAll       | ⌃ + ⇧ + X | `ctrl` + `shift` + D |
