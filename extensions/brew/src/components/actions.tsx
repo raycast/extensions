@@ -6,6 +6,7 @@ import {
   brewName,
   brewIdentifier,
   brewPinnedIdentifiers,
+  pinLookupKey,
   isCask,
   brewPin,
   brewUninstall,
@@ -24,6 +25,26 @@ import {
   showActionToast,
   showBrewFailureToast,
 } from "../utils";
+
+/**
+ * Read Homebrew's pin state, reporting a read failure rather than throwing past
+ * the caller's error handling.
+ *
+ * `brewPinnedIdentifiers` deliberately throws on anything but a missing
+ * directory: an unreadable pin directory is not evidence that nothing is
+ * pinned. But these reads happen BEFORE the try/catch that owns an action's
+ * failure toast, so an escaping error rejected the action callback with no HUD
+ * and no diagnostic. Fail closed and say so — running the command anyway could
+ * hand a pinned package to a brew that refuses it.
+ */
+async function readPins(operation: string): Promise<{ formulae: Set<string>; casks: Set<string> } | undefined> {
+  try {
+    return await brewPinnedIdentifiers();
+  } catch (err) {
+    showBrewFailureToast(`${operation} failed`, ensureError(err));
+    return undefined;
+  }
+}
 
 export function FormulaInstallAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }) {
   // TD: Support installing other versions?
@@ -106,8 +127,14 @@ export function FormulaUpgradeAction(props: {
         // The DECISION reads Homebrew's own pin directory: a package pinned in
         // another command or outside Raycast is pinned whatever this snapshot
         // says, and brew errors rather than warns when we name it. ~20µs.
-        const pins = await brewPinnedIdentifiers();
-        const reallyPinned = cask ? pins.casks.has(brewIdentifier(props.formula)) : pins.formulae.has(name);
+        const pins = await readPins("Upgrade");
+        if (!pins) {
+          return;
+        }
+        // Identity, not display name: `brewName` gives a cask its title. And
+        // pins are keyed by the SHORT name — see pinLookupKey.
+        const pinKey = pinLookupKey(brewIdentifier(props.formula));
+        const reallyPinned = cask ? pins.casks.has(pinKey) : pins.formulae.has(pinKey);
 
         if (reallyPinned) {
           if (!unpinAndUpgrade) {
@@ -272,8 +299,16 @@ async function uninstall(
   const cask = isCask(formula);
   // Ask Homebrew, not the cached payload — see FormulaUpgradeAction. The caller's
   // effective value still wins when it has one (a live pin change in the review).
-  const pins = await brewPinnedIdentifiers();
-  const pinned = effectivePinned ?? (cask ? pins.casks.has(brewIdentifier(formula)) : pins.formulae.has(name));
+  // Only ask about pins when the caller has not already decided.
+  let pinned = effectivePinned;
+  if (pinned === undefined) {
+    const pins = await readPins("Uninstall");
+    if (!pins) {
+      return false;
+    }
+    const pinKey = pinLookupKey(brewIdentifier(formula));
+    pinned = cask ? pins.casks.has(pinKey) : pins.formulae.has(pinKey);
+  }
 
   // Homebrew refuses to uninstall a pinned package — casks in
   // cask/uninstall.rb (`unpin_for_removal?`) and formulae in uninstall.rb

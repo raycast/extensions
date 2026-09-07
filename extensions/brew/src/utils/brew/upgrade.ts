@@ -19,7 +19,7 @@ import { actionsLogger } from "../logger";
 import { execBrewWithProgress, BrewProgress, DEFAULT_STALE_TIMEOUT_MS } from "./progress";
 import { getErrorMessage, ensureError, StaleProcessError, BrewLockError, upgradeSkipReason } from "../errors";
 import { preferences } from "../preferences";
-import { brewPinnedIdentifiers, normalizeOutdatedResults } from "./helpers";
+import { brewPinnedIdentifiers, normalizeOutdatedResults, pinLookupKey } from "./helpers";
 
 /// Upgrade Types
 
@@ -159,7 +159,10 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
   // pinned in another command, or outside Raycast, is pinned in Homebrew's eyes
   // whatever this snapshot says. One directory read for the whole run.
   const pins = await brewPinnedIdentifiers();
-  const isPinned = (name: string, isCask: boolean) => (isCask ? pins.casks.has(name) : pins.formulae.has(name));
+  // Pins are keyed by the short name; the outdated payload names a tapped
+  // formula in full. See pinLookupKey.
+  const isPinned = (name: string, isCask: boolean) =>
+    isCask ? pins.casks.has(pinLookupKey(name)) : pins.formulae.has(pinLookupKey(name));
 
   const all: UpgradePackage[] = [
     ...outdated.formulae.map((formula) => ({ name: formula.name, isCask: false })),

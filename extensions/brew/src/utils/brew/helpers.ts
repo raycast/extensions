@@ -148,6 +148,24 @@ export function normalizeOutdatedResults(results: OutdatedResults): OutdatedResu
  * Absent directories mean nothing is pinned: `unpin` removes the directory
  * when it empties.
  */
+/**
+ * The key a pin is stored under, which is NOT always the identifier brew wants
+ * on the command line.
+ *
+ * Homebrew pins a formula at `HOMEBREW_PINNED_KEGS/<formula.name>` — the short
+ * name (formula_pin.rb) — while `brew outdated --json=v2` reports a tapped
+ * formula by its qualified `full_name`, e.g. `steipete/tap/birdclaw`. Looking a
+ * pin up by the qualified name therefore misses every tapped formula, and the
+ * package is handed to a named `brew upgrade` that Homebrew refuses.
+ *
+ * Cask tokens are already unqualified in the outdated payload, so the last
+ * segment is correct for both kinds. Use this for pin lookups only — argv keeps
+ * the full identifier.
+ */
+export function pinLookupKey(identifier: string): string {
+  return identifier.split("/").pop() || identifier;
+}
+
 export async function brewPinnedIdentifiers(): Promise<{ formulae: Set<string>; casks: Set<string> }> {
   const read = async (dir: string): Promise<Set<string>> => {
     try {

@@ -124,6 +124,7 @@ export {
   brewCaskOption,
   normalizeOutdatedResults,
   brewPinnedIdentifiers,
+  pinLookupKey,
   isCask,
   brewCompare,
   brewInstallCommand,

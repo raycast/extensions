@@ -288,6 +288,13 @@ Homebrew warns and skips more often than it fails. `brew upgrade` skips are hand
 (`upgradeSkipReason`), but these remain — each one currently reports success for work brew
 declined to do:
 
+- [ ] **A stale `effectivePinned: false` bypasses the disk check on uninstall.** The Show Upgrades
+      panel derives that boolean from its snapshot and passes it in, and `uninstall()` only reads the
+      pin directories when it is `undefined` — so a package pinned elsewhere since the fetch skips
+      the authoritative check. Combined with the exit-0 refusal below, the extension then reports
+      "Uninstalled". Predates the pin-directory work: the read happened before, but `effectivePinned`
+      overrode it either way. Fix by treating the override as a live pin CHANGE rather than a
+      complete answer, and by reading the command's outcome
 - [ ] **Pinned uninstall exits 0.** `onoe "<name> is pinned. You must unpin it to uninstall."`
       does NOT set `Homebrew.failed` (uninstall.rb, cask/uninstall.rb, utils/output.rb), so brew
       exits 0, no catch runs, and the extension reports "Uninstalled <name>". The pre-check from

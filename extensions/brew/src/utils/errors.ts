@@ -356,10 +356,23 @@ const BREW_LOCK_PATTERNS = [
  * Each reason stays distinct because each asks something different of the user.
  */
 export function upgradeSkipReason(output: string, name: string): string | undefined {
-  // Anchored to the package we named. No optional @version suffix: `foo` must
-  // not absorb a warning about the distinct formula `foo@2`.
+  // Anchored to the package we named, with two properties that must both hold:
+  //
+  //  - A TAP PREFIX is optional. Homebrew names a package in these warnings with
+  //    `full_specified_name`, which is `<tap>/<name>` outside homebrew/core
+  //    (formula.rb `full_name_with_optional_tap`). `brew outdated --json=v2`
+  //    already returns the qualified form, but `brew info --json=v2 --installed`
+  //    returns the short name with the tap in a separate field — so the same
+  //    package arrives here spelled either way depending on the caller.
+  //  - A VERSION SUFFIX is not. `python` must not absorb `python@3.14`'s
+  //    warning: those are different formulae.
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const named = new RegExp(`^.*\\bNot upgrading ${escaped}, ([^\n]+)`, "im").exec(output);
+  // Homebrew rejects extra slashes in a tap name, not punctuation
+  // (tap_constants.rb) — so the segments are "anything but a slash or space".
+  const tap = "(?:[^\\s/]+/[^\\s/]+/)?";
+  const before = "(?:^|[\\s'\"])";
+
+  const named = new RegExp(`Not upgrading ${tap}${escaped}, ([^\n]+)`, "i").exec(output);
   if (named) {
     const reason = named[1];
     if (/it is disabled/i.test(reason)) return "Disabled by Homebrew";
@@ -371,14 +384,14 @@ export function upgradeSkipReason(output: string, name: string): string | undefi
     return reason.replace(/\.$/, "");
   }
 
-  // "<name> <version> already installed" — a formula that was brought up to date
-  // as a dependency of an earlier package in the same run is the common case.
-  if (new RegExp(`^.*\\b${escaped} \\S+ already installed\\b`, "im").test(output)) {
+  // "<name> <version> already installed" — a formula brought up to date as a
+  // dependency of an earlier package in the same run is the common case.
+  if (new RegExp(`${before}${tap}${escaped} \\S+ already installed\\b`, "im").test(output)) {
     return "Already up to date";
   }
 
   // "The cask '<token>' cannot be upgraded as-is."
-  if (new RegExp(`The cask '${escaped}' cannot be upgraded as-is`, "i").test(output)) {
+  if (new RegExp(`The cask '${tap}${escaped}' cannot be upgraded as-is`, "i").test(output)) {
     return "Cannot be upgraded as-is — reinstall it";
   }
 

@@ -9,7 +9,14 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { brewName, brewUninstallCommand, brewUpgradeCommand, isCask, normalizeOutdatedResults } from "./brew/helpers";
+import {
+  brewName,
+  brewUninstallCommand,
+  brewUpgradeCommand,
+  isCask,
+  normalizeOutdatedResults,
+  pinLookupKey,
+} from "./brew/helpers";
 import { preferences } from "./preferences";
 import { isPinnedRefusal, upgradeSkipReason } from "./errors";
 import {
@@ -550,6 +557,28 @@ describe("declined upgrades are read from brew's warnings", () => {
     expect(upgradeSkipReason("Warning: Not upgrading fd, some future reason.", "fd")).toBe("some future reason");
   });
 
+  it("matches a tap-qualified warning against the short name", () => {
+    // Homebrew names the package with `full_specified_name`, which carries the
+    // tap outside homebrew/core — but `brew info --json=v2 --installed` gives
+    // the short name, so the single-package path passes the short form.
+    expect(upgradeSkipReason("Warning: steipete/tap/birdclaw 1.0.2 already installed", "birdclaw")).toBe(
+      "Already up to date",
+    );
+    expect(
+      upgradeSkipReason(
+        "Warning: Not upgrading cameroncooke/axe/axe, no version is available for the current platform",
+        "axe",
+      ),
+    ).toBe("No version for this platform");
+    // Homebrew rejects extra slashes in a tap name but not punctuation
+    // (tap_constants.rb), so the segments cannot be a \w-only class.
+    expect(upgradeSkipReason("Warning: acme/tools!/widget 1.0 already installed", "widget")).toBe("Already up to date");
+    // …and against the qualified name, which `brew outdated --json=v2` returns.
+    expect(upgradeSkipReason("Warning: steipete/tap/birdclaw 1.0.2 already installed", "steipete/tap/birdclaw")).toBe(
+      "Already up to date",
+    );
+  });
+
   it("does not attribute another package's warning to this one", () => {
     expect(upgradeSkipReason("Warning: Not upgrading zoom, it is disabled because x", "zed")).toBeUndefined();
     // A versioned sibling is a DIFFERENT package: `python` must not absorb
@@ -561,6 +590,8 @@ describe("declined upgrades are read from brew's warnings", () => {
       ),
     ).toBeUndefined();
     expect(upgradeSkipReason("Warning: python@3.14 3.14.0 already installed", "python")).toBeUndefined();
+    // A tap prefix must not let one package absorb another's warning either.
+    expect(upgradeSkipReason("Warning: steipete/tap/birdclaw 1.0 already installed", "claw")).toBeUndefined();
   });
 
   it("returns nothing for a clean upgrade", () => {
@@ -574,5 +605,25 @@ describe("declined upgrades are read from brew's warnings", () => {
         "warp@preview",
       ),
     ).toBe("No version for this platform");
+  });
+});
+
+/**
+ * Homebrew pins a formula at HOMEBREW_PINNED_KEGS/<formula.name> — the SHORT
+ * name (formula_pin.rb) — but `brew outdated --json=v2` reports a tapped
+ * formula by its qualified `full_name`. Looking a pin up by the qualified name
+ * misses it entirely, and the package is then handed to a named `brew upgrade`
+ * that Homebrew refuses.
+ */
+describe("pin lookup key", () => {
+  it("reduces a tap-qualified formula to the name its pin is stored under", () => {
+    expect(pinLookupKey("steipete/tap/birdclaw")).toBe("birdclaw");
+    expect(pinLookupKey("cameroncooke/axe/axe")).toBe("axe");
+  });
+
+  it("leaves an unqualified name alone", () => {
+    expect(pinLookupKey("brotli")).toBe("brotli");
+    expect(pinLookupKey("python@3.14")).toBe("python@3.14");
+    expect(pinLookupKey("1password")).toBe("1password");
   });
 });
