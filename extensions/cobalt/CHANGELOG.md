@@ -1,6 +1,6 @@
 # Cobalt Changelog
 
-## [Added contributor] - {PR_MERGE_DATE}
+## [Added contributor] - 2026-09-07
 
 ## [Windows support] - 2026-09-06
 

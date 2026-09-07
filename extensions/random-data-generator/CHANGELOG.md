@@ -1,6 +1,6 @@
 # Random Data Generator Changelog
 
-## [Added contributor] - {PR_MERGE_DATE}
+## [Added contributor] - 2026-09-07
 
 ## [Fix Quicklinks and Locale Switching] - 2026-09-06
 

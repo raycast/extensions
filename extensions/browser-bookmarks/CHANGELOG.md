@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Added contributor] - {PR_MERGE_DATE}
+## [Added contributor] - 2026-09-07
 
 ## [Updates] - 2026-09-06
 

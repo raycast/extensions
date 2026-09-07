@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Added contributor] - {PR_MERGE_DATE}
+## [Added contributor] - 2026-09-07
 
 ## [Fix Misleading Required Plugin Message] - 2026-09-06
 
