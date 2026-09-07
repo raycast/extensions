@@ -1,5 +1,9 @@
 # Raycast Browsers Profiles
 
+## [Add Orion browser profile support] - 2026-08-31
+
+- Add Orion profile apps from `~/Applications/Orion/Orion Profiles`
+
 ## [Copy Deeplink] - 2026-08-11
 
 - Copy a profile as deeplink (ref: [Issue #23606](https://github.com/raycast/extensions/issues/23606))

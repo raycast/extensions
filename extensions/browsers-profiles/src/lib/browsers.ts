@@ -8,6 +8,10 @@ export const launchBrowser = (browserType: string, app: string, profile: string)
   if (browserType === "CHROMIUM") {
     launchChromium(app, profile);
   }
+
+  if (browserType === "ORION") {
+    launchOrion(app);
+  }
 };
 
 /*****************************************************************************
@@ -22,4 +26,11 @@ export const launchChromium = (app: string, profile: string) => {
  ****************************************************************************/
 export const launchFirefox = (app: string, profile: string) => {
   exec(`"${app}" -P --no-remote ${profile}`);
+};
+
+/*****************************************************************************
+ * Launch Orion profile apps
+ ****************************************************************************/
+export const launchOrion = (app: string) => {
+  exec(`open -n "${app}"`);
 };
