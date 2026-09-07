@@ -7,7 +7,7 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, Synthetic, and z.ai (GLM)
+- **Multi-Agent Support** - View usage for AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, OpenRouter, Synthetic, and z.ai (GLM)
 - **Multi-Account Support** - Manage multiple API keys per provider with named accounts ("Work", "Personal", etc.)
 - **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
@@ -38,6 +38,7 @@ Track usage across your AI coding agents in one place.
 | **MiniMax**     | MiniMax API                 |     ✓      |    ✓     |    ✓    |       —       | Use OpenCode `minimax-coding-plan`, set `MINIMAX_API_KEY` env var, or paste token in preferences |
 | **MinimaxCN**   | MinimaxCN API (国内版)      |     ✓      |    —     |    ✓    |       —       | Set `MINIMAX_CN_API_KEY` env var, or paste token in preferences                                  |
 | **OpenCode Go** | OpenCode API                |     ✓      |    —     |    —    |       —       | Set workspace ID and auth cookie in preferences                                                  |
+| **OpenRouter**  | OpenRouter credits API      |     ✓      |    ✓     |    ✓    |       —       | Use OpenCode `openrouter`, set `OPENROUTER_API_KEY`/`OPENROUTER_KEY`, or paste an API key        |
 | **z.ai (GLM)**  | Zhipu API                   |     ✓      |    ✓     |    ✓    |       ✓       | Paste token, use OpenCode `zai-coding-plan`, or set `ZAI_API_KEY`/`GLM_API_KEY` env var          |
 
 **Legend:**
@@ -66,6 +67,18 @@ Agent Usage shows your DeepSeek API balance, including total, topped-up, and gra
 3. Set `DEEPSEEK_API_KEY` or `DEEPSEEK_KEY` in your shell environment
 
 Manual preferences take priority, followed by OpenCode and environment variables.
+
+### OpenRouter Credentials
+
+Agent Usage shows the credits you have left on OpenRouter. Create a key from [OpenRouter Keys](https://openrouter.ai/settings/keys), then configure it using one of these methods:
+
+1. Paste it into the **OpenRouter API Key** extension preference
+2. Sign in to OpenRouter through OpenCode using the `openrouter` provider
+3. Set `OPENROUTER_API_KEY` or `OPENROUTER_KEY` in your shell environment
+
+Manual preferences take priority, followed by OpenCode and environment variables.
+
+Which balance is shown depends on the key type. A **provisioning key** can read the account ledger (`/api/v1/credits`), so the row shows account-wide credits purchased minus credits used. A regular **inference key** cannot read that ledger, so Agent Usage falls back to the key endpoint (`/api/v1/key`) and shows that key's own spending cap instead — or `$X.XX used` when the key has no cap.
 
 ## OpenCode Active Indicator
 

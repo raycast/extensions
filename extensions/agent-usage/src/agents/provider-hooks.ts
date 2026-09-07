@@ -45,6 +45,9 @@ import { fetchMinimaxCNUsage } from "../minimaxcn/fetcher.ts";
 import type { MinimaxCNError, MinimaxCNUsage } from "../minimaxcn/types.ts";
 import { fetchOpencodegoUsage } from "../opencode-go/fetcher.ts";
 import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types.ts";
+import { resolveOpenRouterApiKey } from "../openrouter/auth.ts";
+import { fetchOpenRouterUsage } from "../openrouter/fetcher.ts";
+import type { OpenRouterError, OpenRouterUsage } from "../openrouter/types.ts";
 import { fetchSyntheticUsage, SYNTHETIC_OPENCODE_KEY } from "../synthetic/fetcher.ts";
 import type { SyntheticError, SyntheticUsage } from "../synthetic/types.ts";
 import { resolveZaiAuthTokens } from "../zai/auth.ts";
@@ -75,6 +78,7 @@ type SharedPrefs = {
   minimaxcnApiToken?: string;
   opencodegoWorkspaceId?: string;
   opencodegoAuthCookie?: string;
+  openrouterApiKey?: string;
 };
 
 function prefValue(key: keyof SharedPrefs): string {
@@ -279,6 +283,25 @@ export const useOpencodegoUsage = createUsageHook<OpencodegoUsage, OpencodegoErr
       };
     }
     return fetchOpencodegoUsage(workspaceId, authCookie);
+  },
+});
+
+export const useOpenRouterUsage = createUsageHook<OpenRouterUsage, OpenRouterError>({
+  agentId: "openrouter",
+  resolveAuthKey: async () => (await resolveOpenRouterApiKey(prefValue("openrouterApiKey"))) ?? "",
+  fetcher: async () => {
+    const apiKey = await resolveOpenRouterApiKey(prefValue("openrouterApiKey"));
+    if (!apiKey) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "OpenRouter API key not configured. Add it in extension settings (Cmd+,), log in through OpenCode, or set OPENROUTER_API_KEY in your shell.",
+        },
+      };
+    }
+    return fetchOpenRouterUsage(apiKey);
   },
 });
 

@@ -1,5 +1,12 @@
 # Agent Usage Changelog
 
+## [Add OpenRouter credit balance] - {PR_MERGE_DATE}
+
+### New Features
+
+- Show the OpenRouter credit balance in the list and menu bar, auto-detected from an OpenCode `openrouter` login, `OPENROUTER_API_KEY`/`OPENROUTER_KEY`, or a pasted API key
+- Read account credits from `/api/v1/credits` with a provisioning key, and fall back to the key's own spending cap from `/api/v1/key` for a regular inference key
+
 ## [Show Grok limit reset credits] - 2026-09-04
 
 ### New Features

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-usage",
-  "description": "Monitor AI coding agent usage across AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, Synthetic and z.ai",
+  "description": "Monitor AI coding agent usage across AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, OpenRouter, Synthetic and z.ai",
   "categories": [
     "Productivity"
   ],
@@ -265,6 +265,21 @@
       "type": "password",
       "title": "OpenCode Go Auth Cookie",
       "description": "The 'auth' cookie value from your OpenCode session. Open opencode.ai, log in, then copy the 'auth' cookie from DevTools (Application → Cookies).",
+      "required": false
+    },
+    {
+      "name": "showOpenRouter",
+      "type": "checkbox",
+      "label": "Show OpenRouter",
+      "description": "Show OpenRouter credit balance in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "openrouterApiKey",
+      "type": "password",
+      "title": "OpenRouter API Key (Optional)",
+      "description": "Auto-detected from OpenCode login (openrouter) or OPENROUTER_API_KEY/OPENROUTER_KEY. Fallback: paste a key from https://openrouter.ai/settings/keys. A provisioning key reports account credits; a regular key reports its own limit.",
       "required": false
     },
     {

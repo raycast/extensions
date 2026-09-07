@@ -30,6 +30,7 @@ import {
   useMiniMaxUsage,
   useMinimaxCNUsage,
   useOpencodegoUsage,
+  useOpenRouterUsage,
   useSyntheticAccounts,
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
@@ -51,6 +52,7 @@ import { getKimiAccessory } from "./kimi/renderer.tsx";
 import { getMiniMaxAccessory } from "./minimax/renderer.tsx";
 import { getMinimaxCNAccessory } from "./minimaxcn/renderer.tsx";
 import { getOpencodegoAccessory } from "./opencode-go/renderer.tsx";
+import { getOpenRouterAccessory } from "./openrouter/renderer.tsx";
 import { getSyntheticAccessory } from "./synthetic/renderer.tsx";
 import { getZaiAccessory } from "./zai/renderer.tsx";
 
@@ -101,6 +103,7 @@ export default function MenuBarCommand() {
   const isMinimaxVisible = Boolean(prefs.showMinimax);
   const isMinimaxCNVisible = Boolean(prefs.showMinimaxCN);
   const isOpencodeGoVisible = Boolean(prefs.showOpencodeGo);
+  const isOpenRouterVisible = Boolean(prefs.showOpenRouter);
 
   const aihubmixState = useAihubmixUsage(isAihubmixVisible);
   const ampState = useAmpUsage(isAmpVisible);
@@ -120,6 +123,7 @@ export default function MenuBarCommand() {
   const minimaxState = useMiniMaxUsage(isMinimaxVisible);
   const minimaxcnState = useMinimaxCNUsage(isMinimaxCNVisible);
   const opencodegoState = useOpencodegoUsage(isOpencodeGoVisible);
+  const openrouterState = useOpenRouterUsage(isOpenRouterVisible);
 
   // Single-account agents - memoized to prevent unnecessary re-renders
   const singleAgents = useMemo<MenuBarAgent[]>(
@@ -244,6 +248,16 @@ export default function MenuBarCommand() {
         revalidate: opencodegoState.revalidate,
         lastFetchedAt: opencodegoState.lastFetchedAt,
       },
+      {
+        id: "openrouter",
+        name: "OpenRouter",
+        icon: getThemeIcon("openrouter-icon.svg"),
+        visible: isOpenRouterVisible,
+        isLoading: openrouterState.isLoading,
+        accessory: getOpenRouterAccessory(openrouterState.usage, openrouterState.error, openrouterState.isLoading),
+        revalidate: openrouterState.revalidate,
+        lastFetchedAt: openrouterState.lastFetchedAt,
+      },
     ],
     [
       isAihubmixVisible,
@@ -311,6 +325,12 @@ export default function MenuBarCommand() {
       opencodegoState.error,
       opencodegoState.revalidate,
       opencodegoState.lastFetchedAt,
+      isOpenRouterVisible,
+      openrouterState.isLoading,
+      openrouterState.usage,
+      openrouterState.error,
+      openrouterState.revalidate,
+      openrouterState.lastFetchedAt,
     ],
   );
 
