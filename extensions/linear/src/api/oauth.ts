@@ -1,6 +1,8 @@
 import { OAuth } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 
+import { traceStagingClient } from "./workspaceAddDiagnostics";
+
 type AuthBackend = "manual" | "utils";
 // Flip to "utils" once the raycast/utils PR adding providerId/extraParameters ships (design D8).
 export const AUTH_BACKEND: AuthBackend = "manual";
@@ -42,6 +44,7 @@ export function makeLinearOAuthService(providerId: string, description: string, 
 }
 
 export const stagingService = makeLinearOAuthService("linear-staging", "Connect a Linear workspace");
+traceStagingClient(stagingService.client);
 
 const servicesByProviderId = new Map<string, OAuthService>();
 

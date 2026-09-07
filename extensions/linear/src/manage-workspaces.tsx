@@ -13,7 +13,9 @@ import {
 import { useCallback, useEffect, useState } from "react";
 
 import { ensureEntryToken, makeClient } from "./api/linearClient";
-import { fetchViewerIdentity, getServiceForProviderId, stagingService, ViewerIdentity } from "./api/oauth";
+import { fetchViewerIdentity, getServiceForProviderId, stagingService, workspaceProviderId } from "./api/oauth";
+import { traceWorkspaceAdd } from "./api/workspaceAddDiagnostics";
+import { createWorkspaceAddFlow } from "./api/workspaceAddFlow";
 import {
   entryKey,
   EntryRef,
@@ -32,19 +34,26 @@ import { clearWorkspaceNotificationsCache } from "./hooks/useAllWorkspaceNotific
 
 type Row = { entry: WorkspaceEntry; hasToken: boolean };
 
-// Written when addWorkspace starts an interactive grant, cleared once completeAddFromStaging
-// reaches a definitive outcome for that token (success or a proven-bad token) — see fix F-3.
-// Gates the MOUNT-TIME recovery call so a stray staging token can't be replayed as an
-// implicit "add" on every open of Manage Workspaces.
+// The flow lives outside the component so a remounted view can join an active add.
 const ADD_IN_FLIGHT_KEY = "staging-add-in-flight";
-
-// fetchViewerIdentity's error messages embed the HTTP status ("HTTP 401"). A 401/403 means
-// the staging token itself was rejected (permanent); anything else (network failure, 5xx) is
-// treated as transient so a stranded-but-still-good token survives to be retried.
-function isPermanentTokenFailure(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error);
-  return /HTTP (401|403)/.test(message);
-}
+const workspaceAdd = createWorkspaceAddFlow({
+  staging: stagingService.client,
+  hasPendingAdd: async () => Boolean(await LocalStorage.getItem<string>(ADD_IN_FLIGHT_KEY)),
+  markPendingAdd: () => LocalStorage.setItem(ADD_IN_FLIGHT_KEY, "1"),
+  clearPendingAdd: () => LocalStorage.removeItem(ADD_IN_FLIGHT_KEY),
+  authorize: () => stagingService.authorize(),
+  identify: fetchViewerIdentity,
+  verify: async (accessToken) => makeClient(accessToken).viewer,
+  getDestination: async (identity) => {
+    const registry = await readRegistry();
+    const existing = registry.workspaces.find((entry) => entryKey(entry) === entryKey(identity));
+    // An adopted first workspace keeps its original "linear" storage slot.
+    const providerId = existing?.providerId ?? workspaceProviderId(identity.orgId, identity.userId);
+    return getServiceForProviderId(providerId, undefined, `Linear — ${identity.orgName}`).client;
+  },
+  register: upsertWorkspaceEntry,
+  trace: traceWorkspaceAdd,
+});
 
 async function revokeAtLinear(accessToken: string): Promise<boolean> {
   try {
@@ -71,83 +80,17 @@ export default function ManageWorkspaces() {
     setIsLoading(false);
   }, []);
 
-  // Finish an interrupted add: registry write from an authorized staging token (§4.1 step 5).
-  // Ordering fix (F-2): the token is VERIFIED before anything is written to the registry —
-  // the original order wrote the entry first and verified after, so a failure between those
-  // two steps left a token-less entry behind that a stray staging token would keep resurrecting
-  // on every subsequent mount.
-  const completeAddFromStaging = useCallback(async () => {
-    const stagingTokens = await stagingService.client.getTokens();
-    if (!stagingTokens?.accessToken) {
-      // Nothing staged — clear a stale in-flight marker from a crash before any grant landed.
-      await LocalStorage.removeItem(ADD_IN_FLIGHT_KEY);
-      return false;
-    }
-
-    let identity: ViewerIdentity;
-    try {
-      identity = await fetchViewerIdentity(stagingTokens.accessToken);
-      // Second, SDK-path verification of the same token before it is ever written anywhere.
-      await makeClient(stagingTokens.accessToken).viewer;
-    } catch (error) {
-      if (isPermanentTokenFailure(error)) {
-        // The token itself is rejected (permanent failure) — clear it so a dead token
-        // doesn't keep silently failing on every future mount.
-        await stagingService.client.removeTokens();
-        await LocalStorage.removeItem(ADD_IN_FLIGHT_KEY);
-      }
-      // A transient failure (network, 5xx) leaves staging untouched so recovery can retry.
-      throw error;
-    }
-
-    const { entry, isNew } = await upsertWorkspaceEntry(identity);
-    const destination = getServiceForProviderId(entry.providerId, undefined, `Linear — ${entry.orgName}`);
-    // setTokens re-stamps updatedAt to NOW, so pass the REMAINING lifetime, not the
-    // original duration — crash recovery can run hours after the grant, and copying the
-    // full duration would make isExpired() lag the server's fixed expiry. Omit expiresIn
-    // entirely when the stored set lacks it (do not default it — that would make a
-    // non-expiring token look expiring).
-    const elapsedSeconds = Math.floor((Date.now() - stagingTokens.updatedAt.getTime()) / 1000);
-    try {
-      await destination.client.setTokens({
-        accessToken: stagingTokens.accessToken,
-        refreshToken: stagingTokens.refreshToken,
-        idToken: stagingTokens.idToken,
-        scope: stagingTokens.scope,
-        ...(stagingTokens.expiresIn !== undefined
-          ? { expiresIn: Math.max(60, stagingTokens.expiresIn - elapsedSeconds) }
-          : {}),
-      });
-    } finally {
-      // The identity is verified and the entry is written by this point — the staging
-      // token must not linger regardless of whether setTokens itself succeeded.
-      await stagingService.client.removeTokens();
-      await LocalStorage.removeItem(ADD_IN_FLIGHT_KEY);
-    }
-    await showToast({
-      style: Toast.Style.Success,
-      title: isNew ? `Added ${identity.orgName}` : `Re-authenticated ${identity.orgName}`,
-      message: identity.userEmail,
-    });
-    refreshQuickCommandSubtitles(); // fire-and-forget: workspace membership changed, subtitles listing "others" are now stale
-    return true;
-  }, []);
-
   useEffect(() => {
     (async () => {
-      // Crash/cancel recovery on mount: only resume an add the user actually started (F-3) —
-      // a stray staging token must never be replayed as an implicit "add" on every mount.
       try {
-        const addInFlight = await LocalStorage.getItem<string>(ADD_IN_FLIGHT_KEY);
-        if (addInFlight) {
-          await completeAddFromStaging();
-        }
+        const recovered = await workspaceAdd.recover();
+        if (recovered) refreshQuickCommandSubtitles();
       } catch {
-        // Leave staging for the next attempt; never crash the management surface.
+        // The flow logs the failing stage in development and preserves recovery state.
       }
       await reload();
     })();
-  }, [completeAddFromStaging, reload]);
+  }, [reload]);
 
   async function addWorkspace() {
     const proceed = await confirmAlert({
@@ -160,14 +103,16 @@ export default function ManageWorkspaces() {
     });
     if (!proceed) return;
     try {
-      await stagingService.client.removeTokens(); // clear any prior abort (§4.1 step 1)
-      // Mark that an add is genuinely in flight, so a crash before this completes still lets
-      // mount-time recovery resume it (F-3) — cleared inside completeAddFromStaging once the
-      // token is proven good or proven bad.
-      await LocalStorage.setItem(ADD_IN_FLIGHT_KEY, "1");
-      await stagingService.authorize(); // interactive; prompt=consent forces the consent screen
-      await completeAddFromStaging();
-      await reload();
+      const added = await workspaceAdd.add();
+      if (added) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: added.isNew ? `Added ${added.identity.orgName}` : `Re-authenticated ${added.identity.orgName}`,
+          message: added.identity.userEmail,
+        });
+        refreshQuickCommandSubtitles();
+      }
+      await traceWorkspaceAdd("ui.reload", reload);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
