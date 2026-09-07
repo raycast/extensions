@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [2.2.0 - OAuth Authentication] - {PR_MERGE_DATE}
+## [2.2.0 - OAuth Authentication] - 2026-09-07
 
 - Add OAuth sign-in with secure token storage and automatic refresh on macOS and Windows.
 - Fix 404 errors when listing notes by using Granola's current POST request format.
