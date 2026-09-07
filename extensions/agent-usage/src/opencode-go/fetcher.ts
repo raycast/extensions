@@ -1,8 +1,9 @@
 import { httpFetch } from "../agents/http.ts";
 import type { OpencodegoUsage, OpencodegoError, OpencodegoWindowUsage } from "./types.ts";
 
-// OpenCode stores the Zen/Go API key under "opencode-go"; older setups may store it under "opencode".
-export const OPENCODEGO_OPENCODE_KEYS = ["opencode-go", "opencode"] as const;
+// Only the "opencode-go" auth entry is accepted: a bare "opencode" Zen key may not
+// have Go entitlement, and would skip the not_configured state and fail with an opaque 403.
+export const OPENCODEGO_OPENCODE_KEY = "opencode-go";
 
 const OPENCODEGO_USAGE_API = "https://opencode.ai/zen/go/v1/usage";
 
@@ -65,6 +66,8 @@ export async function fetchOpencodegoUsage(apiKey: string): Promise<{
     url: OPENCODEGO_USAGE_API,
     token: apiKey.trim(),
     unauthorizedMessage: "OpenCode Zen API key invalid or expired. Please update it in extension settings (Cmd+,).",
+    forbiddenMessage:
+      "OpenCode Go subscription not found for this API key. Please use the key of the account with a Go subscription in extension settings (Cmd+,).",
   });
 
   if (error) return { usage: null, error };

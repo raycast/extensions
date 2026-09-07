@@ -21,6 +21,8 @@ export interface HttpFetchOptions {
   body?: string;
   timeoutMs?: number;
   unauthorizedMessage?: string;
+  /** When set, HTTP 403 responses are surfaced as an unauthorized error with this message. */
+  forbiddenMessage?: string;
 }
 
 export interface HttpFetchError {
@@ -126,6 +128,7 @@ export async function httpFetch(options: HttpFetchOptions): Promise<HttpFetchRes
     body,
     timeoutMs = 10000,
     unauthorizedMessage = "Authorization token expired or invalid. Please update it in extension settings.",
+    forbiddenMessage,
   } = options;
 
   const controller = new AbortController();
@@ -154,6 +157,10 @@ export async function httpFetch(options: HttpFetchOptions): Promise<HttpFetchRes
 
     if (response.status === 401) {
       return { data: null, error: { type: "unauthorized", message: unauthorizedMessage } };
+    }
+
+    if (response.status === 403 && forbiddenMessage) {
+      return { data: null, error: { type: "unauthorized", message: forbiddenMessage } };
     }
 
     if (!response.ok) {
