@@ -78,17 +78,26 @@ const FALLBACK_CAP = 2000;
 
 /** Shrink `seconds` until mdfind returns at most STAT_CAP paths, without
  *  dropping below `limit`. A tighter window still contains the newest
- *  files, so ranking stays exact. */
+ *  files, so ranking stays exact. Binary-search when a cut undershoots
+ *  `limit` so we don't keep an overflowing unordered result and truncate
+ *  it. Slice only when even MIN_WINDOW_SECONDS still overflows. */
 async function narrowWindow(paths: string[], seconds: number, limit: number): Promise<string[]> {
-  while (paths.length > STAT_CAP && seconds > MIN_WINDOW_SECONDS) {
-    const narrowerSeconds = Math.max(MIN_WINDOW_SECONDS, Math.floor(seconds / 2));
-    if (narrowerSeconds >= seconds) break;
-    const narrower = await mdfindPaths(dateQuery(narrowerSeconds));
-    if (narrower.length < limit) break;
-    paths = narrower;
-    seconds = narrowerSeconds;
+  let lo = MIN_WINDOW_SECONDS;
+  while (paths.length > STAT_CAP && seconds > lo) {
+    const mid = Math.max(lo, Math.floor((lo + seconds) / 2));
+    if (mid >= seconds) break;
+    const midPaths = await mdfindPaths(dateQuery(mid));
+    if (midPaths.length < limit) {
+      lo = mid + 1;
+    } else {
+      paths = midPaths;
+      seconds = mid;
+    }
   }
-  return paths.length > STAT_CAP ? paths.slice(0, STAT_CAP) : paths;
+  if (paths.length > STAT_CAP && seconds <= MIN_WINDOW_SECONDS) {
+    return paths.slice(0, STAT_CAP);
+  }
+  return paths;
 }
 
 /** Recently-modified spreadsheet files via Spotlight (mdfind), newest first.
@@ -97,7 +106,7 @@ async function narrowWindow(paths: string[], seconds: number, limit: number): Pr
  *  truncating before stat would drop arbitrary (possibly newest) files.
  *  Spotlight itself narrows to a date window instead, widening until the
  *  list can be filled; a window that still overflows STAT_CAP is tightened
- *  so statAll never walks an unbounded result. Ordering is exact for
+ *  so the newest files stay in the candidate set. Ordering is exact for
  *  anything modified within the window actually ranked. */
 export function findSpreadsheets(limit = 50): Promise<SheetFile[]> {
   return (async () => {
