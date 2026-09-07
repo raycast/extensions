@@ -1,8 +1,16 @@
-import { Action, ActionPanel, Detail, Icon, open, showToast, Toast } from "@raycast/api";
+import { open, showToast, Toast } from "@raycast/api";
+import { GranolaSignInView, SignInProblem } from "../components/GranolaSignInView";
 import { ComponentType, useEffect, useRef, useState } from "react";
 import { setTimeout as delay } from "node:timers/promises";
 import getAccessToken, { granolaOAuth, SignInRequired } from "./getAccessToken";
-import { DeviceGrant, exchangeToken, nextPoll, parseTokens, requestDeviceGrant } from "./granolaAuthProtocol";
+import {
+  DeviceGrant,
+  GranolaSignInError,
+  exchangeToken,
+  nextPoll,
+  parseTokens,
+  requestDeviceGrant,
+} from "./granolaAuthProtocol";
 import { diagnostic } from "./diagnostics";
 
 export function withGranolaAuth(Command: ComponentType) {
@@ -11,7 +19,7 @@ export function withGranolaAuth(Command: ComponentType) {
     const [checking, setChecking] = useState(true);
     const [busy, setBusy] = useState(false);
     const [grant, setGrant] = useState<DeviceGrant>();
-    const [error, setError] = useState<string>();
+    const [error, setError] = useState<SignInProblem>();
     const controller = useRef<AbortController | undefined>(undefined);
     useEffect(() => {
       let mounted = true;
@@ -20,8 +28,7 @@ export function withGranolaAuth(Command: ComponentType) {
           if (mounted) setReady(true);
         })
         .catch((e) => {
-          if (mounted && !(e instanceof SignInRequired))
-            setError(e instanceof Error ? e.message : "Could not check sign-in.");
+          if (mounted && !(e instanceof SignInRequired)) setError("connection");
         })
         .finally(() => {
           if (mounted) setChecking(false);
@@ -36,6 +43,7 @@ export function withGranolaAuth(Command: ComponentType) {
       if (controller.current) return;
       const current = new AbortController();
       controller.current = current;
+      let progressToast: Toast | undefined;
       setBusy(true);
       setError(undefined);
       setGrant(undefined);
@@ -43,10 +51,13 @@ export function withGranolaAuth(Command: ComponentType) {
         const device = await requestDeviceGrant(current.signal);
         setGrant(device);
         const deadline = Date.now() + device.expires_in * 1000;
+        progressToast = await showToast({ style: Toast.Style.Animated, title: "Waiting for browser approval" });
         await open(device.verification_uri_complete);
         let interval = device.interval;
         while (Date.now() < deadline) {
-          await delay(interval * 1000, undefined, { signal: current.signal });
+          await delay(Math.min(interval * 1000, Math.max(0, deadline - Date.now())), undefined, {
+            signal: current.signal,
+          });
           if (Date.now() >= deadline) break;
           const { response, body } = await exchangeToken(
             { grant_type: "urn:ietf:params:oauth:grant-type:device_code", device_code: device.device_code },
@@ -57,17 +68,22 @@ export function withGranolaAuth(Command: ComponentType) {
             current.signal.throwIfAborted();
             await granolaOAuth.setTokens(tokens);
             diagnostic("auth.session_saved", { code: "device_grant" });
+            await progressToast?.hide();
+            progressToast = undefined;
             setReady(true);
             await showToast({ style: Toast.Style.Success, title: "Signed In to Granola" });
             return;
           }
           interval = nextPoll(body.error, interval);
         }
-        throw new Error("Your sign-in code expired. Press Return to get a new code.");
+        throw new GranolaSignInError("expired", "Your sign-in code expired.");
       } catch (e) {
-        diagnostic(current.signal.aborted ? "auth.sign_in_cancelled" : "auth.sign_in_failed");
-        if (!current.signal.aborted) setError(e instanceof Error ? e.message : "Could not sign in. Please try again.");
+        diagnostic(current.signal.aborted ? "auth.sign_in_cancelled" : "auth.sign_in_failed", {
+          code: e instanceof GranolaSignInError ? e.kind : "unknown",
+        });
+        if (!current.signal.aborted) setError(e instanceof GranolaSignInError ? e.kind : "unknown");
       } finally {
+        await progressToast?.hide();
         if (controller.current === current) {
           controller.current = undefined;
           setBusy(false);
@@ -78,36 +94,14 @@ export function withGranolaAuth(Command: ComponentType) {
 
     if (ready) return <Command />;
     return (
-      <Detail
-        navigationTitle="Sign In to Granola"
-        isLoading={checking || busy}
-        markdown={
-          checking
-            ? ""
-            : `# ${busy ? "Finish Signing In" : "Connect to Granola"}\n\n${busy ? `Approve access in your browser. Confirm that the code matches:\n\n## ${grant?.user_code ?? "Preparing…"}\n\nYour notes will load here automatically after approval.` : "Sign in once to search your notes, read transcripts, and export meetings. Raycast keeps you signed in automatically."}${error ? `\n\n${error}` : ""}`
-        }
-        actions={
-          !checking && (
-            <ActionPanel>
-              {busy && grant ? (
-                <Action.OpenInBrowser title="Continue in Browser" url={grant.verification_uri_complete} />
-              ) : (
-                !busy && (
-                  <Action title={error ? "Try Again" : "Sign in to Granola"} icon={Icon.Person} onAction={signIn} />
-                )
-              )}
-              {grant && <Action.CopyToClipboard title="Copy Confirmation Code" content={grant.user_code} />}
-              {busy && (
-                <Action
-                  title="Cancel Sign-in"
-                  icon={Icon.XMarkCircle}
-                  onAction={() => controller.current?.abort()}
-                  shortcut={{ modifiers: ["cmd"], key: "." }}
-                />
-              )}
-            </ActionPanel>
-          )
-        }
+      <GranolaSignInView
+        checking={checking}
+        busy={busy}
+        code={grant?.user_code}
+        url={grant?.verification_uri_complete}
+        problem={error}
+        onSignIn={signIn}
+        onCancel={() => controller.current?.abort()}
       />
     );
   };

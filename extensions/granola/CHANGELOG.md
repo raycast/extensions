@@ -2,6 +2,8 @@
 
 ## [Sign in with Granola] - {PR_MERGE_DATE}
 
+- Use a centered native sign-in view with compact branding, browser-approval progress, and dedicated declined, expired-code, and connection-error states.
+
 - Add Check Connection with live read-endpoint checks, token-refresh verification, and safe diagnostic reports including endpoint/status/timing/reference IDs.
 - Prevent replay of possibly consumed refresh tokens after a lost response or failed persistence; cover refresh, concurrency, cancellation, endpoint contracts, and diagnostic privacy in regression tests.
 - Normalize current folder responses so folder-management tools return membership IDs correctly.

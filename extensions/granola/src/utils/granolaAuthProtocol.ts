@@ -4,6 +4,16 @@ import { diagnostic } from "./diagnostics";
 const CLIENT_ID = "client_01JZJ0XBDAT8PHJWQY09Y0VD61";
 const AUTH_URL = "https://auth.granola.ai/user_management";
 
+export class GranolaSignInError extends Error {
+  constructor(
+    public kind: "declined" | "expired" | "connection" | "unknown",
+    message: string,
+  ) {
+    super(message);
+    this.name = "GranolaSignInError";
+  }
+}
+
 export interface DeviceGrant {
   device_code: string;
   user_code: string;
@@ -29,7 +39,7 @@ async function request(endpoint: string, values: Record<string, string>, signal?
       code: signal?.aborted ? "cancelled" : "network_error",
     });
     signal?.throwIfAborted();
-    throw new Error(`Granola sign-in could not be reached. Reference: ${requestId}`);
+    throw new GranolaSignInError("connection", `Granola sign-in could not be reached. Reference: ${requestId}`);
   });
   diagnostic("auth.response", {
     endpoint: target,
@@ -114,7 +124,9 @@ export function parseTokens(body: Record<string, unknown>) {
 export function nextPoll(error: unknown, interval: number): number {
   if (error === "authorization_pending") return interval;
   if (error === "slow_down") return interval + 5;
-  if (error === "access_denied") throw new Error("Sign-in was declined. Press Return to try again.");
-  if (error === "expired_token") throw new Error("Your sign-in code expired. Press Return to get a new code.");
+  if (error === "access_denied")
+    throw new GranolaSignInError("declined", "Sign-in was declined. Press Return to try again.");
+  if (error === "expired_token")
+    throw new GranolaSignInError("expired", "Your sign-in code expired. Press Return to get a new code.");
   throw new Error("Granola could not complete sign-in. Please try again.");
 }

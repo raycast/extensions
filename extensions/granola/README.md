@@ -10,7 +10,7 @@ No API key, macOS password, MCP setup, or access to Granola's local files is req
 
 The Granola desktop app is only required for **Create Note** and **Open in Granola**. Sign in from a view command before using AI tools. To disconnect or switch accounts, use **Sign Out** in Raycast Settings → Extensions → Granola, then reopen a command. Local sign-out removes Raycast's saved credentials; it does not revoke the session on Granola's servers.
 
-If you decline approval or the code expires, return to Raycast and press **Try Again**. You can cancel a pending sign-in with **⌘.** or by leaving the command. Network failures do not require signing out of the Granola desktop app.
+If you decline approval, return to Raycast and press **Try Again**. Expired codes have a **Get New Code** action. The centered sign-in screen keeps your confirmation code visible while browser approval is pending. You can cancel with **⌘.** or by leaving the command. Error screens include **Copy Diagnostics** for troubleshooting. Network failures do not require signing out of the Granola desktop app.
 
 ## Granola Commands
 - **Create Note** - Start a new note and recording immediately in Granola
