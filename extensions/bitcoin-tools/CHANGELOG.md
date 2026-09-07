@@ -1,6 +1,6 @@
 # Bitcoin Tools Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-07
 
 - Convert a mainnet or testnet WIF private key to its BSV address.
 - Create P2PKH locking scripts and addresses from public key hashes.
