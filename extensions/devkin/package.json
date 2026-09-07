@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "lsh2613",
   "license": "MIT",
-  "categories": ["Developer Tools"],
+  "categories": [
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "byte",
@@ -14,7 +16,14 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the byte/bit/SI/IEC unit converter.",
       "mode": "no-view",
-      "keywords": ["unit", "kb", "mb", "gb", "kib", "mib"]
+      "keywords": [
+        "unit",
+        "kb",
+        "mb",
+        "gb",
+        "kib",
+        "mib"
+      ]
     },
     {
       "name": "length",
@@ -22,7 +31,20 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the length unit converter (mm/cm/m/km, in/ft/yd/mi).",
       "mode": "no-view",
-      "keywords": ["distance", "mm", "cm", "m", "km", "in", "ft", "yd", "mi", "inch", "foot", "mile"]
+      "keywords": [
+        "distance",
+        "mm",
+        "cm",
+        "m",
+        "km",
+        "in",
+        "ft",
+        "yd",
+        "mi",
+        "inch",
+        "foot",
+        "mile"
+      ]
     },
     {
       "name": "base",
@@ -30,7 +52,14 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the numeric base / radix converter (binary, octal, decimal, hex).",
       "mode": "no-view",
-      "keywords": ["radix", "binary", "octal", "decimal", "hex", "hexadecimal"]
+      "keywords": [
+        "radix",
+        "binary",
+        "octal",
+        "decimal",
+        "hex",
+        "hexadecimal"
+      ]
     },
     {
       "name": "json",
@@ -38,7 +67,11 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the JSON tree viewer with auto-fix and search.",
       "mode": "no-view",
-      "keywords": ["format", "tree", "parse"]
+      "keywords": [
+        "format",
+        "tree",
+        "parse"
+      ]
     },
     {
       "name": "base64",
@@ -46,7 +79,11 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the Base64 string encode/decode pane.",
       "mode": "no-view",
-      "keywords": ["encode", "decode", "string"]
+      "keywords": [
+        "encode",
+        "decode",
+        "string"
+      ]
     },
     {
       "name": "base64-image",
@@ -54,7 +91,13 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the Base64 image encode/decode pane (file, data URL, HTML, CSS, markdown).",
       "mode": "no-view",
-      "keywords": ["encode", "decode", "image", "png", "jpeg"]
+      "keywords": [
+        "encode",
+        "decode",
+        "image",
+        "png",
+        "jpeg"
+      ]
     },
     {
       "name": "jwt",
@@ -62,7 +105,11 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the JWT decoder and signature verifier.",
       "mode": "no-view",
-      "keywords": ["token", "verify", "jose"]
+      "keywords": [
+        "token",
+        "verify",
+        "jose"
+      ]
     },
     {
       "name": "sql",
@@ -70,7 +117,11 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the SQL pretty-printer.",
       "mode": "no-view",
-      "keywords": ["query", "format", "pretty"]
+      "keywords": [
+        "query",
+        "format",
+        "pretty"
+      ]
     },
     {
       "name": "diff",
@@ -78,7 +129,12 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the side-by-side text diff viewer.",
       "mode": "no-view",
-      "keywords": ["compare", "difference", "change", "patch"]
+      "keywords": [
+        "compare",
+        "difference",
+        "change",
+        "patch"
+      ]
     },
     {
       "name": "text",
@@ -86,7 +142,12 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the live char/word/byte counter.",
       "mode": "no-view",
-      "keywords": ["characters", "words", "bytes", "encoding"]
+      "keywords": [
+        "characters",
+        "words",
+        "bytes",
+        "encoding"
+      ]
     },
     {
       "name": "markdown",
@@ -94,7 +155,11 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the live markdown renderer.",
       "mode": "no-view",
-      "keywords": ["md", "render", "preview"]
+      "keywords": [
+        "md",
+        "render",
+        "preview"
+      ]
     },
     {
       "name": "html",
@@ -102,7 +167,11 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the sandboxed HTML preview pane.",
       "mode": "no-view",
-      "keywords": ["render", "preview", "iframe"]
+      "keywords": [
+        "render",
+        "preview",
+        "iframe"
+      ]
     },
     {
       "name": "qr",
@@ -110,7 +179,14 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the QR code generator and decoder (URL, Wi-Fi, vCard, and more).",
       "mode": "no-view",
-      "keywords": ["qr", "qrcode", "barcode", "scan", "wifi", "vcard"]
+      "keywords": [
+        "qr",
+        "qrcode",
+        "barcode",
+        "scan",
+        "wifi",
+        "vcard"
+      ]
     },
     {
       "name": "regex",
@@ -118,7 +194,11 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the regular expression tester with live match highlighting.",
       "mode": "no-view",
-      "keywords": ["regexp", "pattern", "match"]
+      "keywords": [
+        "regexp",
+        "pattern",
+        "match"
+      ]
     },
     {
       "name": "time",
@@ -126,11 +206,19 @@
       "subtitle": "DevKin",
       "description": "Open DevKin to the timestamp/date converter (epoch, ISO, UTC, KST).",
       "mode": "no-view",
-      "keywords": ["date", "epoch", "unix", "utc", "kst", "iso", "timestamp"]
+      "keywords": [
+        "date",
+        "epoch",
+        "unix",
+        "utc",
+        "kst",
+        "iso",
+        "timestamp"
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.0"
+    "@raycast/api": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
