@@ -1,6 +1,6 @@
 # Jotaid Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-07
 
 - Search notes by title or content and open them in Jotaid
 - Create a note straight into the Inbox
