@@ -69,6 +69,14 @@ export interface YesterdaySummary {
   min: number;
 }
 
+export type Units = "celsius" | "fahrenheit";
+
+/**
+ * Temperatures and wind speeds are in the requested unit system (see
+ * `units`). Precipitation is always metric — rain in mm, snow in cm — so the
+ * "is it raining" thresholds throughout the app have one meaning; convert for
+ * display with formatPrecip / formatSnow.
+ */
 export interface Forecast {
   latitude: number;
   longitude: number;
@@ -80,9 +88,9 @@ export interface Forecast {
   minutely_15?: MinutelyWeather;
   /** Split off from the raw response by normalizeForecast. */
   yesterday?: YesterdaySummary;
+  /** Unit system the temperatures and wind speeds were fetched in; set by normalizeForecast. */
+  units: Units;
 }
-
-export type Units = "celsius" | "fahrenheit";
 
 /**
  * The geocoder matches whole place names (cities, neighborhoods, postal
@@ -178,7 +186,7 @@ export function forecastUrl(latitude: number, longitude: number, units: Units, d
  * array. Split it off into `yesterday` so day/hour indexing in the rest of
  * the app stays zero-based on today.
  */
-export function normalizeForecast(raw: Forecast): Forecast {
+export function normalizeForecast(raw: Omit<Forecast, "units">, units: Units): Forecast {
   if (
     !raw?.current ||
     !Array.isArray(raw.hourly?.time) ||
@@ -201,7 +209,7 @@ export function normalizeForecast(raw: Forecast): Forecast {
   for (const key of Object.keys(daily) as (keyof DailyWeather)[]) {
     daily[key] = daily[key].slice(1) as never;
   }
-  return { ...raw, hourly, daily, yesterday };
+  return { ...raw, hourly, daily, yesterday, units };
 }
 
 export interface AirQualityCurrent {
@@ -324,4 +332,16 @@ export function degreesToCompass(deg: number): string {
 export function fmt(value: number | null | undefined, suffix = "", round = true): string {
   if (typeof value !== "number" || !Number.isFinite(value)) return "—";
   return `${round ? Math.round(value) : value}${suffix}`;
+}
+
+/** Rain amount for display. Data is always mm; Imperial users see inches (0.1 mm ≈ 0.004 in, hence two decimals). */
+export function formatPrecip(mm: number | null | undefined, units: Units): string {
+  if (typeof mm !== "number" || !Number.isFinite(mm)) return "—";
+  return units === "celsius" ? `${mm.toFixed(1)} mm` : `${(mm / 25.4).toFixed(2)} in`;
+}
+
+/** Snowfall amount for display. Data is always cm; Imperial users see inches. */
+export function formatSnow(cm: number | null | undefined, units: Units): string {
+  if (typeof cm !== "number" || !Number.isFinite(cm)) return "—";
+  return units === "celsius" ? `${cm.toFixed(1)} cm` : `${(cm / 2.54).toFixed(1)} in`;
 }

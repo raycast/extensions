@@ -15,6 +15,8 @@ import {
   degreesToCompass,
   fmt,
   formatPlace,
+  formatPrecip,
+  formatSnow,
   pollenSummary,
   usAqiInfo,
 } from "./lib/api";
@@ -374,7 +376,7 @@ function DayItem(props: {
                 <List.Item.Detail.Metadata.Label
                   title="Precipitation"
                   icon={Icon.CloudRain}
-                  text={`${precipSum.toFixed(1)} mm${snowSum >= 0.1 ? ` · ${snowSum.toFixed(1)} cm snow` : ""}`}
+                  text={`${formatPrecip(precipSum, forecast.units)}${snowSum >= 0.1 ? ` · ${formatSnow(snowSum, forecast.units)} snow` : ""}`}
                 />
               )}
               <List.Item.Detail.Metadata.Label

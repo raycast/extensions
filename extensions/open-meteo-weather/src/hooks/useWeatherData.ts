@@ -45,7 +45,7 @@ export function useWeatherData(active: GeoResult | undefined, units: Units, days
           .catch(() => undefined);
         throw new Error(`Forecast request failed (${res.status})${reason ? `: ${reason}` : ""}`);
       }
-      return normalizeForecast((await res.json()) as Forecast);
+      return normalizeForecast((await res.json()) as Forecast, units);
     },
   });
 

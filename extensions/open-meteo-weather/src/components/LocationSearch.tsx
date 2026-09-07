@@ -18,16 +18,18 @@ export function LocationSearch(props: {
   const { pop } = useNavigation();
 
   const hasQuery = geocodeName(query).length >= 2;
+  // No keepPreviousData: the previous query's places would stay selectable
+  // under the new text until the response lands, and the client-side filter
+  // only checks the comma qualifiers, so nothing would weed them out.
   const { isLoading, data, error } = useFetch<{ results?: GeoResult[] }>(geocodeUrl(query), {
     execute: hasQuery,
-    keepPreviousData: true,
     onError: () => {
       // Shown inline in the empty view instead of a toast.
     },
   });
 
-  // keepPreviousData holds the last results while the query is too short; don't show them.
   const results = hasQuery ? filterGeoResults(data?.results ?? [], query) : [];
+  const searching = hasQuery && isLoading && !data;
 
   // Easter eggs: certain "places" aren't on any map.
   const secret = query
@@ -52,14 +54,22 @@ export function LocationSearch(props: {
       <List.EmptyView
         icon={hasQuery && error ? Icon.ExclamationMark : Icon.Globe}
         title={
-          hasQuery ? (error ? "Couldn't reach the geocoder" : "No matches") : (props.emptyTitle ?? "Type a place name")
+          !hasQuery
+            ? (props.emptyTitle ?? "Type a place name")
+            : error
+              ? "Couldn't reach the geocoder"
+              : searching
+                ? "Searching…"
+                : "No matches"
         }
         description={
-          hasQuery
-            ? error
+          !hasQuery
+            ? (props.emptyDescription ?? "Cities, neighborhoods, or postal codes — by Open-Meteo")
+            : error
               ? error.message
-              : 'Qualify with commas: "noe valley, california"'
-            : (props.emptyDescription ?? "Cities, neighborhoods, or postal codes — by Open-Meteo")
+              : searching
+                ? geocodeName(query)
+                : 'Qualify with commas: "noe valley, california"'
         }
       />
       {results.map((geo) => (

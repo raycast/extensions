@@ -287,8 +287,10 @@ export interface StripHour {
   label: string;
   temp: number;
   glyph: GlyphKind;
-  /** Precipitation in mm for the hour; rendered as a small extra row when meaningful. */
+  /** Precipitation in mm for the hour; decides whether the extra row is shown. */
   precip?: number;
+  /** Display form of `precip` in the user's units, e.g. "1.2 mm" or "0.05 in". */
+  precipText?: string;
 }
 
 const STRIP_H = 200;
@@ -319,7 +321,7 @@ export function renderHourlyStrip(
     <text x="${x.toFixed(1)}" y="${showPrecip ? 158 : 172}" font-family="${FONT}" font-size="21" font-weight="600" fill="${style.text}" text-anchor="middle">${Math.round(h.temp)}°</text>`;
     if (showPrecip && (h.precip ?? 0) >= 0.1) {
       columns += `
-    <text x="${x.toFixed(1)}" y="184" font-family="${FONT}" font-size="15" font-weight="600" fill="${style.accent}" text-anchor="middle">${h.precip!.toFixed(1)}</text>`;
+    <text x="${x.toFixed(1)}" y="184" font-family="${FONT}" font-size="15" font-weight="600" fill="${style.accent}" text-anchor="middle">${escapeXml(h.precipText ?? h.precip!.toFixed(1))}</text>`;
     }
   });
 

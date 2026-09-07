@@ -2,7 +2,7 @@ import { Icon, LaunchType, MenuBarExtra, launchCommand, showHUD } from "@raycast
 import { showFailureToast } from "@raycast/utils";
 import { useWeatherData } from "./hooks/useWeatherData";
 import { useWeatherSettings } from "./hooks/useWeatherSettings";
-import { fmt, formatPlace, usAqiInfo } from "./lib/api";
+import { fmt, formatPlace, formatPrecip, usAqiInfo } from "./lib/api";
 import { nextHours, nowcastSummary, yesterdayComparison } from "./lib/build";
 import { iconFor, labelFor, tagColorFor } from "./lib/conditions";
 import { buildNowShareSvg, shareForecastImage } from "./lib/share";
@@ -88,7 +88,7 @@ export default function MenuBarWeather() {
             .map((h) => (
               <MenuBarExtra.Item
                 key={h.label}
-                title={`${h.label}  ·  ${Math.round(h.temp)}°${unitSymbol}${(h.precip ?? 0) >= 0.1 ? `  ·  ${h.precip!.toFixed(1)} mm` : ""}`}
+                title={`${h.label}  ·  ${Math.round(h.temp)}°${unitSymbol}${(h.precip ?? 0) >= 0.1 ? `  ·  ${formatPrecip(h.precip, forecast.units)}` : ""}`}
                 onAction={openWeather}
               />
             ))}

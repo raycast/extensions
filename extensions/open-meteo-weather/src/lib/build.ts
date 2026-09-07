@@ -1,7 +1,7 @@
 // Builders that turn forecast data into renderer options. Pure module, shared
 // by the list view, the Today view, and the share-image feature.
 
-import { Forecast, GeoResult, fmt, formatPlace } from "./api";
+import { Forecast, GeoResult, fmt, formatPlace, formatPrecip } from "./api";
 import { moonInfo } from "./astro";
 import { glyphFor, labelFor } from "./palettes";
 import { HeroOptions, HeroChartPoint, NowcastStep, StripHour } from "./svg";
@@ -123,17 +123,23 @@ export function dayHero(
   };
 }
 
+function stripHour(forecast: Forecast, idx: number, label: string): StripHour {
+  const precip = forecast.hourly.precipitation?.[idx];
+  return {
+    label,
+    temp: forecast.hourly.temperature_2m[idx],
+    glyph: glyphFor(forecast.hourly.weather_code[idx], forecast.hourly.is_day[idx] === 1),
+    precip,
+    precipText: typeof precip === "number" ? formatPrecip(precip, forecast.units) : undefined,
+  };
+}
+
 /** Strip data for the next `count` hours from now. */
 export function nextHours(forecast: Forecast, count: number): StripHour[] {
   const startIdx = nowHourIndex(forecast);
   return forecast.hourly.time
     .slice(startIdx, startIdx + count)
-    .map((t, i) => ({
-      label: i === 0 ? "Now" : `${hourOf(t)}h`,
-      temp: forecast.hourly.temperature_2m[startIdx + i],
-      glyph: glyphFor(forecast.hourly.weather_code[startIdx + i], forecast.hourly.is_day[startIdx + i] === 1),
-      precip: forecast.hourly.precipitation?.[startIdx + i],
-    }))
+    .map((t, i) => stripHour(forecast, startIdx + i, i === 0 ? "Now" : `${hourOf(t)}h`))
     .filter((h) => Number.isFinite(h.temp));
 }
 
@@ -142,12 +148,7 @@ export function dayHours(forecast: Forecast, d: number): StripHour[] {
   const start = d * 24 + 8;
   return forecast.hourly.time
     .slice(start, start + 10)
-    .map((t, i) => ({
-      label: `${hourOf(t)}h`,
-      temp: forecast.hourly.temperature_2m[start + i],
-      glyph: glyphFor(forecast.hourly.weather_code[start + i], forecast.hourly.is_day[start + i] === 1),
-      precip: forecast.hourly.precipitation?.[start + i],
-    }))
+    .map((t, i) => stripHour(forecast, start + i, `${hourOf(t)}h`))
     .filter((h) => Number.isFinite(h.temp));
 }
 
