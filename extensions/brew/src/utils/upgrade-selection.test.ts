@@ -456,30 +456,3 @@ describe("test preferences mirror the declared defaults", () => {
     expect(preferences.pinnedFirst).toBe(true);
   });
 });
-
-/**
- * Download attribution reads brew's own `Fetching <name> from <tap>` line
- * (cmd/fetch.rb). A substring scan over arbitrary progress text mis-fires: real
- * download lines carry full URLs, so a package named "git" matches an unrelated
- * package's GitHub URL, and the batch header names every package at once.
- */
-describe("prefetch attribution", () => {
-  const FETCHING_PACKAGE = /Fetching (\S+) from\s/;
-  const announced = (message: string) => FETCHING_PACKAGE.exec(message)?.[1];
-
-  it("attributes brew's per-package announcement", () => {
-    expect(announced("==> Fetching warp@preview from homebrew/cask")).toBe("warp@preview");
-  });
-
-  it("ignores the batch header naming every package", () => {
-    expect(announced("Fetching: aom, git, zed")).toBeUndefined();
-  });
-
-  it("does not attribute a URL that merely contains a package name", () => {
-    expect(announced("==> Downloading https://github.com/zed-industries/zed/releases/git-2.0.tgz")).toBeUndefined();
-  });
-
-  it("does not attribute the synthetic command echo", () => {
-    expect(announced("Running: brew fetch aom git zed")).toBeUndefined();
-  });
-});

@@ -70,8 +70,6 @@ export function statusIcon(state?: PackageState): React.ComponentProps<typeof Li
   if (!state) return { value: PENDING_ICON, tooltip: "Pending" };
 
   switch (state.status) {
-    case "downloading":
-      return { value: { source: Icon.ArrowDownCircle, tintColor: Color.Blue }, tooltip: "Downloading…" };
     case "upgrading":
       return { value: { source: getProgressIcon(0.5, Color.Blue), tintColor: Color.Blue }, tooltip: "Upgrading…" };
     case "upgraded":

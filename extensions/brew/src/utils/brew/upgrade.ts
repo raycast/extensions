@@ -21,13 +21,6 @@ import { getErrorMessage, ensureError, StaleProcessError, BrewLockError } from "
 import { preferences } from "../preferences";
 import { normalizeOutdatedResults } from "./helpers";
 
-/**
- * brew's per-package fetch announcement: `Fetching <name> from <tap>`
- * (cmd/fetch.rb). Deliberately does NOT match the `Fetching: a, b, c` batch
- * header, which names every package at once.
- */
-const FETCHING_PACKAGE = /Fetching (\S+) from\s/;
-
 /// Upgrade Types
 
 /**
@@ -41,7 +34,7 @@ export interface UpgradePackage {
 /**
  * Status of a single package during an upgrade run.
  */
-export type UpgradePackageStatus = "downloading" | "upgrading" | "upgraded" | "failed" | "skipped";
+export type UpgradePackageStatus = "upgrading" | "upgraded" | "failed" | "skipped";
 
 /**
  * Events emitted while upgrading outdated packages.
@@ -201,46 +194,24 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
   // This leverages HOMEBREW_DOWNLOAD_CONCURRENCY for parallel downloads
   if (prefetch && packages.length > 1) {
     onEvent?.({ type: "prefetch" });
-    // brew fetches every package in one invocation, so its progress lines are the
-    // only clue as to which one is in flight. Match against the names we already
-    // hold rather than parsing brew's format: a miss simply leaves rows untouched.
-    // Longest first, so "warp@preview" wins over "warp".
-    // Scoped to the batch actually running: formulae and casks are fetched in
-    // separate invocations, and a name can belong to both kinds.
-    let fetchCandidates: UpgradePackage[] = [];
-    let fetching: UpgradePackage | undefined;
-    const onFetchProgress = (progress: BrewProgress) => {
-      onEvent?.({ type: "prefetch", progress });
-      // Attribute a row ONLY from brew's own per-package announcement,
-      // `Fetching <name> from <tap>` (cmd/fetch.rb). A substring scan of
-      // arbitrary progress text mis-fires: download lines carry full URLs, so a
-      // package named "git" matches an unrelated package's GitHub URL, and the
-      // batch header ("Fetching: a, b, c" — note the colon, which this pattern
-      // does not match) names every package at once.
-      const announced = FETCHING_PACKAGE.exec(progress.message)?.[1];
-      if (!announced) return;
-      const match = fetchCandidates.find((pkg) => pkg.name === announced);
-      if (match && (match.name !== fetching?.name || match.isCask !== fetching?.isCask)) {
-        fetching = match;
-        onEvent?.({ type: "package", package: match, status: "downloading" });
-      }
-    };
+    // Batch progress only — deliberately NOT attributed to a row. brew prints
+    // every `Fetching <name> from <tap>` line while ENQUEUEING (cmd/fetch.rb),
+    // then downloads the queue concurrently, so those lines say what is about to
+    // be fetched, not what is downloading now. Marking rows from them would race
+    // through the whole list and then park on whichever was announced last.
+    // The toast reports the batch; per-row status resumes at the sequential
+    // upgrade loop below, where it is real.
+    const onFetchProgress = (progress: BrewProgress) => onEvent?.({ type: "prefetch", progress });
 
     // Fetch formulae and casks separately (brew fetch syntax)
     const formulaNames = packages.filter((pkg) => !pkg.isCask).map((pkg) => pkg.name);
     const caskNames = packages.filter((pkg) => pkg.isCask).map((pkg) => pkg.name);
 
     try {
-      const ofKind = (kind: boolean) => packages.filter((pkg) => pkg.isCask === kind);
-
       if (formulaNames.length > 0) {
-        fetchCandidates = ofKind(false);
-        fetching = undefined;
         await execBrewWithProgress(`fetch ${formulaNames.join(" ")}`, onFetchProgress, cancel, execOptions);
       }
       if (caskNames.length > 0) {
-        fetchCandidates = ofKind(true);
-        fetching = undefined;
         await execBrewWithProgress(`fetch --cask ${caskNames.join(" ")}`, onFetchProgress, cancel, execOptions);
       }
       actionsLogger.log("Pre-fetch completed", { packages: packages.length });

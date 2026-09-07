@@ -122,9 +122,7 @@ export function useBrewUpgrade(): BrewUpgrade {
                   if (event.status === "upgrading") {
                     toast.updateTitle(`Upgrading ${event.package.name} (${finished + 1}/${total})`);
                     toast.updateMessage("");
-                  } else if (event.status !== "skipped" && event.status !== "downloading") {
-                    // "downloading" is a pre-pass over every package; only a
-                    // terminal status advances the N-of-M counter.
+                  } else if (event.status !== "skipped") {
                     finished += 1;
                   }
                   setState(upgradeKey(event.package), { status: event.status, message: event.message });

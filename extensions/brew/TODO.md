@@ -273,6 +273,6 @@ Focus: Implement AI-powered features, improve user experience, and add advanced 
 - [x] Add formula/cask analytics
   - [x] Show install counts from Homebrew analytics (30/90/365 days)
   - [x] Show popularity ranking (Sort by Popularity, ⇧⌘S in Search)
-- [x] Add batch operations
-  - [x] Select multiple packages for install/uninstall — selection review in Show Upgrades
-  - [x] Bulk upgrade selected packages
+- [ ] Add batch operations
+  - [ ] Select multiple packages for install/uninstall — only upgrade selection exists today
+  - [x] Bulk upgrade selected packages (selection review in Show Upgrades)

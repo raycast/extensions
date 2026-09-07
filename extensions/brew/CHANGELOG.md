@@ -8,6 +8,7 @@
 - Fixed: a pinned cask was included in Upgrade All and reported as a **failed** upgrade. Pinned packages are now skipped, matching how pinned formulae are handled
 - Fixed: pinning or unpinning a cask did not refresh the installed list — cask pins live in a separate directory that the cache was not watching
 - Fixed: the "D" dependency badge never appeared. Homebrew removed the field it read in 5.1.9; it now reads the field brew actually reports
+- The upgrade progress toast now reports the download phase as a batch rather than naming one package: brew announces every package up front, then downloads them concurrently, so a per-package label there was not true
 - Removed the unused two-phase loading path (`brew list --versions`, added in 5.0 support). It had no caller and its cache read duplicated the main loader; installed packages already paint from cache
 - Search's "Sort by Popularity" moved from ⇧⌘P to ⇧⌘S: ⇧⌘P is Raycast's standard Pin shortcut, which now collides with the Pin action on installed packages
 - **This extension now requires Homebrew 6.0 or later.** The "Use internal API" preference is gone — Homebrew 6 uses that API by default and deprecates the setting, which made brew abort outright under `HOMEBREW_DEVELOPER`
