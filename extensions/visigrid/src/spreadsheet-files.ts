@@ -66,12 +66,6 @@ async function statAll(paths: string[]): Promise<SheetFile[]> {
 /** Widening Spotlight windows: 7 days, 90 days, 1 year, 3 years. */
 const WINDOWS_SECONDS = [7 * 24 * 3600, RECENT_SECONDS, 365 * 24 * 3600, 3 * 365 * 24 * 3600];
 
-/** Bound on the final, unwindowed fallback. Reached only when fewer than
- *  `limit` spreadsheets were modified in the last 3 years — at that point
- *  exact ordering among ancient files stops mattering, so bounded work
- *  wins over statting an arbitrarily large collection. */
-const FALLBACK_CAP = 2000;
-
 async function rankByMtime(paths: string[]): Promise<SheetFile[]> {
   const files = await statAll(paths);
   return files.sort((a, b) => b.modified.getTime() - a.modified.getTime());
@@ -119,8 +113,9 @@ async function narrowAndRank(paths: string[], seconds: number, limit: number): P
  *  Spotlight itself narrows to a date window instead, widening until the
  *  list can be filled; a window that still overflows STAT_CAP is tightened
  *  to the largest date range that still fits, so newest files stay in the
- *  candidate set. Ordering is exact for anything modified within the window
- *  actually ranked. */
+ *  candidate set. If even the widest window is short, the unwindowed
+ *  fallback ranks every match by mtime before capping — never by slicing
+ *  unordered Spotlight output. */
 export function findSpreadsheets(limit = 50): Promise<SheetFile[]> {
   return (async () => {
     let paths: string[] = [];
@@ -131,7 +126,7 @@ export function findSpreadsheets(limit = 50): Promise<SheetFile[]> {
       if (paths.length >= limit) break;
     }
     if (paths.length < limit) {
-      paths = (await mdfindPaths(NAME_QUERY)).slice(0, FALLBACK_CAP);
+      paths = await mdfindPaths(NAME_QUERY);
     } else if (paths.length > STAT_CAP) {
       return (await narrowAndRank(paths, seconds, limit)).slice(0, limit);
     }
