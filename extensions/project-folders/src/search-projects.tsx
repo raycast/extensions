@@ -26,6 +26,8 @@ import { refreshProjectInSnapshot } from "./snapshot";
 async function openInFinder(path: string) {
   await closeMainWindow();
   await open(path);
+  if (!getPreferenceValues<Preferences.SearchProjects>().resizeFinderWindows) return;
+
   const script = `
 use framework "AppKit"
 

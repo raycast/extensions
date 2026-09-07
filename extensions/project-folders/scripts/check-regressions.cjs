@@ -25,6 +25,8 @@ async function main() {
   const storage = new Map();
   const caches = [];
   const pushed = [];
+  const finderCalls = [];
+  let resizeFinderWindows;
   let failWrite = false;
   class Cache {
     data = new Map();
@@ -66,9 +68,15 @@ async function main() {
         storage.set(key, value);
       },
     },
-    getPreferenceValues: () => ({ projectsRoot: root }),
+    getPreferenceValues: () => ({ projectsRoot: root, resizeFinderWindows }),
     useNavigation: () => ({ push: (screen) => pushed.push(screen) }),
     showToast: async () => {},
+    closeMainWindow: async () => {
+      finderCalls.push("close");
+    },
+    open: async (target) => {
+      finderCalls.push(target);
+    },
     List: Object.assign(component("List"), {
       Item: component("ListItem"),
       Section: component("ListSection"),
@@ -111,6 +119,9 @@ async function main() {
       return {
         ...require("@raycast/utils/dist/useCachedPromise"),
         createDeeplink: () => "raycast://test",
+        runAppleScript: async () => {
+          finderCalls.push("resize");
+        },
       };
     return originalLoad.call(this, name, ...args);
   };
@@ -208,6 +219,20 @@ async function main() {
     scanGate = undefined;
     await settle(() => !(find("List")?.dataset.loading === "true"));
     assert.deepEqual(await getPins(), [projectPath]);
+    const layoutPreference = require("../package.json").preferences.find((pref) => pref.name === "resizeFinderWindows");
+    assert.equal(layoutPreference.default, false);
+    assert.equal(layoutPreference.required, false);
+    const finderAction = findAll("Action").find((node) => node.dataset.title === "Open in Finder");
+    assert.ok(finderAction);
+    for (const enabled of [undefined, false, true]) {
+      resizeFinderWindows = enabled;
+      finderCalls.length = 0;
+      await act(async () => {
+        finderAction.click();
+      });
+      assert.deepEqual(finderCalls, enabled ? ["close", projectPath, "resize"] : ["close", projectPath]);
+    }
+    resizeFinderWindows = undefined;
     await act(async () => renderer.unmount());
 
     const renamed = path.join(root, "2026", "0907_Renamed");
@@ -265,7 +290,7 @@ async function main() {
     await fs.rename(root, `${root}-offline`);
     await assert.rejects(buildProjectIndex(root), { code: "ENOENT" });
     console.log(
-      "Passed: concurrent pins, failed writes, read recovery, real React cold starts, cached HTTPS validation, renamed deeplinks, retry, cache migration.",
+      "Passed: concurrent pins, failed writes, read recovery, real React cold starts, cached HTTPS validation, renamed deeplinks, retry, cache migration, opt-in Finder resizing.",
     );
   } finally {
     if (renderer) await act(async () => renderer.unmount());

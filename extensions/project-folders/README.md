@@ -32,6 +32,7 @@ Each HTML file is a one-line redirect: `window.location.href = "https://…"`. O
 - **Projects Root** - required directory containing `YYYY/` year subfolders
 - **Default Link App** - optional app for Drive, Frame.io, and Magic Link Machine links
 - **Asana App** - optional. Pick Asana.app to open tasks natively
+- **Finder Window Layout** - optional, off by default. Enable to move and resize the front Finder window to the bottom half of the screen when opening a project or subfolder.
 
 ## Commands
 

@@ -26,6 +26,15 @@
   ],
   "preferences": [
     {
+      "name": "resizeFinderWindows",
+      "type": "checkbox",
+      "required": false,
+      "title": "Finder Window Layout",
+      "label": "Move and resize Finder windows when opening folders",
+      "description": "Move the front Finder window to the bottom half of the screen after opening a project or subfolder. Off by default to preserve your layout.",
+      "default": false
+    },
+    {
       "name": "projectsRoot",
       "type": "directory",
       "required": true,
