@@ -58,18 +58,26 @@ export function parseOpencodegoUsageResponse(data: unknown): {
   };
 }
 
+const OPENCODEGO_FORBIDDEN_MESSAGE =
+  "OpenCode Go subscription not found for this API key. Please use the key of the account with a Go subscription in extension settings (Cmd+,).";
+
 export async function fetchOpencodegoUsage(apiKey: string): Promise<{
   usage: OpencodegoUsage | null;
   error: OpencodegoError | null;
 }> {
-  const { data, error } = await httpFetch({
+  const { data, error, status } = await httpFetch({
     url: OPENCODEGO_USAGE_API,
     token: apiKey.trim(),
     unauthorizedMessage: "OpenCode Zen API key invalid or expired. Please update it in extension settings (Cmd+,).",
-    forbiddenMessage:
-      "OpenCode Go subscription not found for this API key. Please use the key of the account with a Go subscription in extension settings (Cmd+,).",
+    forbiddenMessage: OPENCODEGO_FORBIDDEN_MESSAGE,
   });
 
-  if (error) return { usage: null, error };
+  if (error) {
+    // A 403 means the key is valid but has no Go subscription — distinct from an expired key.
+    if (error.type === "unauthorized" && status === 403) {
+      return { usage: null, error: { type: "forbidden", message: OPENCODEGO_FORBIDDEN_MESSAGE } };
+    }
+    return { usage: null, error };
+  }
   return parseOpencodegoUsageResponse(data);
 }

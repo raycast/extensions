@@ -11,6 +11,6 @@ export interface OpencodegoUsage {
 }
 
 export interface OpencodegoError {
-  type: "not_configured" | "unauthorized" | "network_error" | "parse_error" | "unknown";
+  type: "not_configured" | "unauthorized" | "forbidden" | "network_error" | "parse_error" | "unknown";
   message: string;
 }

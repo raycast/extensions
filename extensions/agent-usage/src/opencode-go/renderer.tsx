@@ -84,6 +84,7 @@ export function getOpencodegoAccessory(
   if (error) {
     if (error.type === "not_configured") return { text: "Not Configured", tooltip: error.message };
     if (error.type === "unauthorized") return { text: "Auth Expired", tooltip: error.message };
+    if (error.type === "forbidden") return { text: "No Go Plan", tooltip: error.message };
     if (error.type === "network_error") return { text: "Network Error", tooltip: error.message };
     return { text: "Error", tooltip: error.message };
   }
