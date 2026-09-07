@@ -4,6 +4,7 @@
  * Provides utility functions for working with brew packages.
  */
 
+import { readdir } from "fs/promises";
 import { join as path_join } from "path";
 import { Cask, Formula, Nameable, OutdatedResults } from "../types";
 import { preferences } from "../preferences";
@@ -127,6 +128,43 @@ export function normalizeOutdatedResults(results: OutdatedResults): OutdatedResu
     }
   }
   return results;
+}
+
+/**
+ * The pin state Homebrew itself holds, read from disk.
+ *
+ * A pin is a symlink under `var/homebrew/pinned` (formulae) or
+ * `var/homebrew/pinned_casks` (casks), created by `brew pin` and removed by
+ * `brew unpin` — so the directory listing IS the source of truth, and a package
+ * pinned in another command or outside Raycast appears here immediately.
+ *
+ * Cached payloads carry a `pinned` flag that is only as fresh as the last
+ * fetch, which is fine for rendering but not for deciding whether to run a
+ * command Homebrew will refuse. Reading both directories measures ~20µs, about
+ * 30,000x cheaper than `brew list --pinned` (~650ms), so the authoritative
+ * check is affordable immediately before an operation — and once per batch,
+ * not once per package.
+ *
+ * Absent directories mean nothing is pinned: `unpin` removes the directory
+ * when it empties.
+ */
+export async function brewPinnedIdentifiers(): Promise<{ formulae: Set<string>; casks: Set<string> }> {
+  const read = async (dir: string): Promise<Set<string>> => {
+    try {
+      return new Set(await readdir(brewPath(path_join("var/homebrew", dir))));
+    } catch (err) {
+      // An absent directory means nothing of that kind is pinned: `unpin`
+      // removes it when it empties. Anything else — a permission problem, a
+      // broken prefix — is NOT evidence of that, and treating it as such would
+      // hand a pinned package to a command brew refuses. Fail loudly instead.
+      if ((err as NodeJS.ErrnoException)?.code === "ENOENT") {
+        return new Set();
+      }
+      throw err;
+    }
+  };
+  const [formulae, casks] = await Promise.all([read("pinned"), read("pinned_casks")]);
+  return { formulae, casks };
 }
 
 /// Options

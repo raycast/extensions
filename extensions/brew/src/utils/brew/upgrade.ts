@@ -17,9 +17,9 @@ import { OutdatedResults } from "../types";
 import { restrictToSelection } from "../upgrade-selection";
 import { actionsLogger } from "../logger";
 import { execBrewWithProgress, BrewProgress, DEFAULT_STALE_TIMEOUT_MS } from "./progress";
-import { getErrorMessage, ensureError, StaleProcessError, BrewLockError } from "../errors";
+import { getErrorMessage, ensureError, StaleProcessError, BrewLockError, upgradeSkipReason } from "../errors";
 import { preferences } from "../preferences";
-import { normalizeOutdatedResults } from "./helpers";
+import { brewPinnedIdentifiers, normalizeOutdatedResults } from "./helpers";
 
 /// Upgrade Types
 
@@ -154,14 +154,19 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
   // This matters because we name every package explicitly: Homebrew only warns
   // about a pinned package on a bare `brew upgrade`, but errors (exit 1) when it
   // is named. Leaving one in would report a deliberate skip as a failure.
-  let packages: UpgradePackage[] = [
-    ...outdated.formulae.filter((formula) => !formula.pinned).map((formula) => ({ name: formula.name, isCask: false })),
-    ...outdated.casks.filter((cask) => !cask.pinned).map((cask) => ({ name: cask.name, isCask: true })),
+  //
+  // Read the pin state from disk rather than trusting the payload: a package
+  // pinned in another command, or outside Raycast, is pinned in Homebrew's eyes
+  // whatever this snapshot says. One directory read for the whole run.
+  const pins = await brewPinnedIdentifiers();
+  const isPinned = (name: string, isCask: boolean) => (isCask ? pins.casks.has(name) : pins.formulae.has(name));
+
+  const all: UpgradePackage[] = [
+    ...outdated.formulae.map((formula) => ({ name: formula.name, isCask: false })),
+    ...outdated.casks.map((cask) => ({ name: cask.name, isCask: true })),
   ];
-  const pinned: UpgradePackage[] = [
-    ...outdated.formulae.filter((formula) => formula.pinned).map((formula) => ({ name: formula.name, isCask: false })),
-    ...outdated.casks.filter((cask) => cask.pinned).map((cask) => ({ name: cask.name, isCask: true })),
-  ];
+  let packages: UpgradePackage[] = all.filter((pkg) => !isPinned(pkg.name, pkg.isCask));
+  const pinned: UpgradePackage[] = all.filter((pkg) => isPinned(pkg.name, pkg.isCask));
 
   // Honour the selection: upgrade only the reviewed packages that are still
   // outdated. Everything else stays untouched.
@@ -247,12 +252,22 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
 
     try {
       const cmd = `upgrade ${pkg.isCask ? "--cask " : ""}${pkg.name}`;
-      await execBrewWithProgress(
+      const result = await execBrewWithProgress(
         cmd,
         (progress) => onEvent?.({ type: "package", package: pkg, status: "upgrading", progress }),
         cancel,
         { ...execOptions, packageName: pkg.name },
       );
+
+      // Exit 0 does not mean it was upgraded. Homebrew warns and skips a
+      // deprecated, unavailable or already-current package, so without reading
+      // that warning the run claims an upgrade that never happened.
+      const declined = upgradeSkipReason(`${result.stderr ?? ""}\n${result.stdout ?? ""}`, pkg.name);
+      if (declined) {
+        summary.skipped.push(pkg);
+        onEvent?.({ type: "package", package: pkg, status: "skipped", message: declined });
+        continue;
+      }
 
       summary.upgraded.push(pkg);
       onEvent?.({ type: "package", package: pkg, status: "upgraded" });

@@ -49,6 +49,8 @@ export {
   isBrewError,
   isNetworkError,
   isBrewLockError,
+  isPinnedRefusal,
+  upgradeSkipReason,
   isDownloadTimeoutError,
   isStaleProcessError,
   isPackageDisabledError,

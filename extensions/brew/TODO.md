@@ -262,14 +262,72 @@ Focus: Implement AI-powered features, improve user experience, and add advanced 
 - [x] Homebrew 6.0+ only; removed the deprecated internal-API preference
 - [x] vitest coverage for selection and formula/cask discriminator logic
 
+## ⚠️ Exit-0 no-ops brew does not report as failures
+
+Homebrew warns and skips more often than it fails. `brew upgrade` skips are handled
+(`upgradeSkipReason`), but these remain — each one currently reports success for work brew
+declined to do:
+
+- [ ] **Pinned uninstall exits 0.** `onoe "<name> is pinned. You must unpin it to uninstall."`
+      does NOT set `Homebrew.failed` (uninstall.rb, cask/uninstall.rb, utils/output.rb), so brew
+      exits 0, no catch runs, and the extension reports "Uninstalled <name>". The pre-check from
+      the pin directories prevents the common case, but a pin landing between check and command
+      slips through. Needs the same read-the-output treatment as upgrade
+- [ ] **Install of an already-installed package exits 0.** A formula warns "is already installed
+      and up-to-date" (install/check.rb); an up-to-date cask is partitioned out with `quiet: true`
+      and can be a completely SILENT exit-0 no-op (cmd/install.rb). Output parsing alone cannot
+      cover the cask case — this needs a before/after installed-state check, not a matcher
+- [ ] **`brewUpgradeAll` (bare `brew upgrade`) claims "All packages upgraded".** Bare upgrade warns
+      and skips pinned and disabled packages and may upgrade nothing at all, and its output carries
+      no complete per-package result. Currently unreachable — every UI route supplies the
+      per-package engine instead — so the honest fix may be to delete the fallback rather than
+      teach it to parse
+
 ## 🔮 Future Enhancements
 
 - [ ] Add "brew doctor" command integration
   - [ ] Show health check results in a dedicated view
   - [ ] Add quick-fix actions for common issues
-- [ ] Add tap management
-  - [ ] List installed taps
-  - [ ] Add/remove taps
+### Custom tap support
+
+The search index is `formulae.brew.sh/api/formula.json` and `.../cask.json`, which publish
+**homebrew/core and homebrew/cask only**. Anything from a third-party tap is therefore invisible
+to Search today, even when it is installed and shows correctly in Show Installed — its `tap`
+field just reads e.g. `cameroncooke/axe`. Supporting taps is mostly about closing that gap.
+
+- [ ] **Manage Taps** command (its own view command, alongside Manage Services)
+  - [ ] List installed taps (`brew tap`), with the packages each provides
+  - [ ] Add and remove taps (`brew tap <user/repo>`, `brew untap`), with a confirmation on untap
+        since it can orphan installed packages
+  - [ ] Surface a tap's status: pinned, official vs third-party, whether it needs `--force-auto-update`
+  - [ ] **Trust preamble before adding a tap.** Adding a tap means running code from an arbitrary
+        third party, which is a different kind of decision from installing a reviewed core package.
+        Follow whatever model Raycast already uses for adding an MCP server — study that flow
+        first rather than inventing our own consent screen, so this reads as the platform's
+        existing pattern. Name the tap's GitHub owner and repo, and make accepting a deliberate
+        act rather than a default
+- [ ] Make tapped packages searchable
+  - [ ] Decide the source: `brew search` shells out and covers taps but is slow and returns names
+        only, whereas the JSON index is fast and complete but core/cask only. Likely both — index
+        first, tap results merged in behind them
+  - [ ] Read tap formulae locally from `$(brew --repo)/Library/Taps/**/Formula/*.rb` for offline
+        name matching, accepting that descriptions need `brew info`
+  - [ ] Decide what a tapped package's detail panel shows: no analytics exist for it
+        (formulae.brew.sh has install counts only for core/cask), so the Statistics rows need an
+        honest empty state rather than zeros
+- [ ] Attribute packages to their tap in the UI
+  - [ ] Show the tap on rows for anything outside core/cask, so a third-party package is
+        identifiable at a glance
+  - [ ] Filter or group by tap in Search and Show Installed
+- [ ] Install from a tap
+  - [ ] Fully-qualified install (`brew install user/repo/name`), including the case where the tap
+        is not yet added — brew will add it implicitly, which the confirmation should say
+  - [ ] Handle a name that exists in both core and a tap: brew resolves core first, so an
+        unqualified install can silently install the wrong package
+
+**Open question before any of this ships:** third-party taps are arbitrary code from arbitrary
+people. Adding a tap is a trust decision, and the extension should make that explicit rather than
+treating it as an ordinary install.
 - [x] Add formula/cask analytics
   - [x] Show install counts from Homebrew analytics (30/90/365 days)
   - [x] Show popularity ranking (Sort by Popularity, ⇧⌘S in Search)

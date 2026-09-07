@@ -4,6 +4,8 @@ import {
   type BrewProgress,
   brewInstallWithProgress,
   brewName,
+  brewIdentifier,
+  brewPinnedIdentifiers,
   isCask,
   brewPin,
   brewUninstall,
@@ -12,6 +14,8 @@ import {
   brewUpgradeSingleWithProgress,
   type Cask,
   ensureError,
+  isPinnedRefusal,
+  upgradeSkipReason,
   type Formula,
   type Nameable,
   type PinKind,
@@ -98,7 +102,14 @@ export function FormulaUpgradeAction(props: {
       icon={unpinAndUpgrade ? Icon.TackDisabled : Icon.ArrowUpCircle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       onAction={async () => {
-        if (pinned) {
+        // The title above is drawn from the payload, which is fine for display.
+        // The DECISION reads Homebrew's own pin directory: a package pinned in
+        // another command or outside Raycast is pinned whatever this snapshot
+        // says, and brew errors rather than warns when we name it. ~20µs.
+        const pins = await brewPinnedIdentifiers();
+        const reallyPinned = cask ? pins.casks.has(brewIdentifier(props.formula)) : pins.formulae.has(name);
+
+        if (reallyPinned) {
           if (!unpinAndUpgrade) {
             props.onSkip?.();
             await showToast({
@@ -117,6 +128,13 @@ export function FormulaUpgradeAction(props: {
 
         props.onStart?.();
         const result = await upgrade(props.formula);
+        if (result === DECLINED) {
+          // Brew declined rather than failed. Report it the way the batch run
+          // does — and the way the pinned branch above does — instead of
+          // painting the row red for something that is not an error.
+          props.onSkip?.();
+          return;
+        }
         props.onAction(result);
       }}
     />
@@ -216,6 +234,34 @@ async function install(formula: Cask | Formula): Promise<boolean> {
   }
 }
 
+/**
+ * Homebrew refuses to uninstall a pinned package of either kind. Say so, and
+ * offer the one thing that gets past it — which unpins, so it needs an explicit
+ * confirmation rather than a silent `--force`.
+ */
+async function offerForcedUninstall(
+  formula: Cask | Nameable,
+  name: string,
+  cask: boolean,
+  effectivePinned: boolean | undefined,
+  onComplete?: (result: boolean) => void,
+): Promise<void> {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: `Can't uninstall pinned ${cask ? "cask" : "formula"} ${name}`,
+    message: "It is pinned. Unpin it first, or force the uninstall.",
+    primaryAction: {
+      title: `Unpin ${cask ? "Cask" : "Formula"} and Force Uninstall`,
+      onAction: async (toast) => {
+        await toast.hide();
+        // Tell the caller the row changed: without this the view revalidates
+        // only after the refused attempt, leaving the removed package on screen.
+        onComplete?.(await uninstall(formula, true, effectivePinned));
+      },
+    },
+  });
+}
+
 async function uninstall(
   formula: Cask | Nameable,
   force = false,
@@ -224,7 +270,10 @@ async function uninstall(
 ): Promise<boolean> {
   const name = brewName(formula);
   const cask = isCask(formula);
-  const pinned = effectivePinned ?? isPinned(formula);
+  // Ask Homebrew, not the cached payload — see FormulaUpgradeAction. The caller's
+  // effective value still wins when it has one (a live pin change in the review).
+  const pins = await brewPinnedIdentifiers();
+  const pinned = effectivePinned ?? (cask ? pins.casks.has(brewIdentifier(formula)) : pins.formulae.has(name));
 
   // Homebrew refuses to uninstall a pinned package — casks in
   // cask/uninstall.rb (`unpin_for_removal?`) and formulae in uninstall.rb
@@ -232,20 +281,7 @@ async function uninstall(
   // surface as a raw brew error, say what happened and offer the remedy, which
   // unpins as part of the removal and so needs explicit confirmation.
   if (!force && pinned) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: `Can't uninstall pinned ${cask ? "cask" : "formula"} ${name}`,
-      message: "It is pinned. Unpin it first, or force the uninstall.",
-      primaryAction: {
-        title: `Unpin ${cask ? "Cask" : "Formula"} and Force Uninstall`,
-        onAction: async (toast) => {
-          await toast.hide();
-          // Tell the caller the row changed: without this the view revalidates
-          // only after the refused attempt, leaving the removed package on screen.
-          onComplete?.(await uninstall(formula, true, effectivePinned));
-        },
-      },
-    });
+    await offerForcedUninstall(formula, name, cask, effectivePinned, onComplete);
     return false;
   }
 
@@ -260,13 +296,23 @@ async function uninstall(
     return true;
   } catch (err) {
     const error = ensureError(err);
+    // A pin that landed between the check above and this command. Offer the same
+    // remedy the pre-check does, rather than leaving brew's raw refusal.
+    if (!force && isPinnedRefusal(error)) {
+      await handle.hide();
+      await offerForcedUninstall(formula, name, cask, effectivePinned, onComplete);
+      return false;
+    }
     await handle.showFailureHUD(`Failed to uninstall ${name}`);
     showBrewFailureToast("Uninstall failed", error);
     return false;
   }
 }
 
-async function upgrade(formula: Cask | Nameable): Promise<boolean> {
+/** Homebrew ran, exited 0, and chose not to upgrade — neither success nor failure. */
+const DECLINED = "declined" as const;
+
+async function upgrade(formula: Cask | Nameable): Promise<boolean | typeof DECLINED> {
   const name = brewName(formula);
   const handle = showActionToast({
     title: `Upgrading ${name}`,
@@ -275,13 +321,24 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean> {
   });
   try {
     // Use progress-enabled upgrade to show download progress
-    await brewUpgradeSingleWithProgress(
+    const result = await brewUpgradeSingleWithProgress(
       formula,
       (progress: BrewProgress) => {
         handle.updateMessage(progress.message);
       },
       handle.abort?.signal,
     );
+
+    // Exit 0 is not proof of an upgrade — brew warns and skips a deprecated,
+    // unavailable or already-current package. Saying "Upgraded" there would be
+    // a success message for work it declined to do.
+    const declined = upgradeSkipReason(`${result.stderr ?? ""}\n${result.stdout ?? ""}`, brewIdentifier(formula));
+    if (declined) {
+      await handle.hide();
+      await showToast({ style: Toast.Style.Failure, title: `Did not upgrade ${name}`, message: declined });
+      return DECLINED;
+    }
+
     await handle.showSuccessHUD(`Upgraded ${name}`);
     return true;
   } catch (err) {

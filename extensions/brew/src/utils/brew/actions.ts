@@ -10,7 +10,7 @@ import { preferences } from "../preferences";
 import { execBrew } from "./commands";
 import { execBrewWithProgress, ProgressCallback } from "./progress";
 import { brewIdentifier, brewCaskOption, isCask } from "./helpers";
-import { ExecError } from "../types";
+import { ExecError, ExecResult } from "../types";
 
 /**
  * Install a package.
@@ -96,14 +96,18 @@ export async function brewUpgradeSingleWithProgress(
   upgradable: Cask | Nameable,
   onProgress?: ProgressCallback,
   cancel?: AbortSignal,
-): Promise<void> {
+): Promise<ExecResult> {
   const identifier = brewIdentifier(upgradable);
   actionsLogger.log("Upgrading package with progress", {
     identifier,
     type: isCask(upgradable) ? "cask" : "formula",
   });
-  await execBrewWithProgress(`upgrade ${brewCaskOption(upgradable)} ${identifier}`, onProgress, cancel);
-  actionsLogger.log("Package upgraded successfully", { identifier });
+  // The result is returned, not discarded: brew exits 0 after declining to
+  // upgrade a deprecated or already-current package, and only its warning says
+  // so. See upgradeSkipReason.
+  const result = await execBrewWithProgress(`upgrade ${brewCaskOption(upgradable)} ${identifier}`, onProgress, cancel);
+  actionsLogger.log("Package upgrade finished", { identifier });
+  return result;
 }
 
 /**

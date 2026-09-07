@@ -326,6 +326,91 @@ const BREW_LOCK_PATTERNS = [
 ];
 
 /**
+ * Why Homebrew declined to upgrade a package it was explicitly named.
+ *
+ * These are `opoo` warnings, NOT failures: brew prints one, skips the package
+ * and exits 0. Without reading them the run reports the package as upgraded
+ * when nothing happened — a success message for work that was declined.
+ *
+ * The shapes differ per kind and are quoted from the installed source; they do
+ * NOT all share the `Not upgrading <name>` prefix, which an earlier version of
+ * this function assumed:
+ *
+ *   cask/upgrade.rb   "Not upgrading <token>, it is disabled because …"
+ *                     "Not upgrading <token>, no version is available for the current platform"
+ *                     "Not upgrading <token>, the downloaded artifact has not changed"
+ *                     "Not upgrading <token>, the latest version is already installed"
+ *                     "Not upgrading <token>, the installed version is not below the minimum version …"
+ *                     "The cask '<token>' cannot be upgraded as-is. To fix this, run: …"
+ *   cmd/upgrade.rb    "<name> <version> already installed"
+ *                     "Not upgrading <name>, the installed version is not below the minimum version …"
+ *
+ * Deprecation is deliberately absent: brew warns about a deprecated package and
+ * upgrades it anyway (formula_installer.rb, cask/installer.rb), so treating it
+ * as a skip would report a real upgrade as declined. A DISABLED formula raises
+ * and fails; only a disabled cask is an exit-0 skip.
+ *
+ * The pinned case is absent too — that one is `ofail` when the package is
+ * named, and `isPinnedRefusal` handles it.
+ *
+ * Each reason stays distinct because each asks something different of the user.
+ */
+export function upgradeSkipReason(output: string, name: string): string | undefined {
+  // Anchored to the package we named. No optional @version suffix: `foo` must
+  // not absorb a warning about the distinct formula `foo@2`.
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const named = new RegExp(`^.*\\bNot upgrading ${escaped}, ([^\n]+)`, "im").exec(output);
+  if (named) {
+    const reason = named[1];
+    if (/it is disabled/i.test(reason)) return "Disabled by Homebrew";
+    if (/no version is available for the current platform/i.test(reason)) return "No version for this platform";
+    if (/the installed version is not below the minimum version/i.test(reason)) return "Installed version is not older";
+    if (/artifact has not changed|latest version is already installed/i.test(reason)) return "Already up to date";
+    // An unrecognised reason is still a skip; carry brew's own words rather than
+    // inventing a category or, worse, reporting an upgrade that did not happen.
+    return reason.replace(/\.$/, "");
+  }
+
+  // "<name> <version> already installed" — a formula that was brought up to date
+  // as a dependency of an earlier package in the same run is the common case.
+  if (new RegExp(`^.*\\b${escaped} \\S+ already installed\\b`, "im").test(output)) {
+    return "Already up to date";
+  }
+
+  // "The cask '<token>' cannot be upgraded as-is."
+  if (new RegExp(`The cask '${escaped}' cannot be upgraded as-is`, "i").test(output)) {
+    return "Cannot be upgraded as-is — reinstall it";
+  }
+
+  return undefined;
+}
+
+/**
+ * Pattern to detect Homebrew refusing to act on a pinned package.
+ *
+ * Upgrade, named explicitly (cmd/upgrade.rb, cask/upgrade.rb):
+ *   "Error: Not upgrading 1 pinned package."
+ * Uninstall, either kind (uninstall.rb, cask/uninstall.rb):
+ *   "Error: <name> is pinned. You must unpin it to uninstall."
+ *
+ * The extension reads pin state from disk before naming a package, so this is
+ * the backstop for a pin that lands between that check and the command.
+ *
+ * NOTE: it only fires where brew actually FAILS. A named pinned upgrade is
+ * `ofail` (exit 1) and reaches a catch. A pinned UNINSTALL is `onoe`, which
+ * does not set `Homebrew.failed`, so brew exits 0 and no catch runs — see
+ * TODO.md. Do not assume a caller is covered because it calls this.
+ */
+const PINNED_REFUSAL_PATTERN = /Not upgrading \d+ pinned package|is pinned\. You must unpin it/i;
+
+/**
+ * Whether Homebrew refused this operation because the package is pinned.
+ */
+export function isPinnedRefusal(error: unknown): boolean {
+  return PINNED_REFUSAL_PATTERN.test(getErrorMessage(error));
+}
+
+/**
  * Pattern to detect disabled/discontinued packages.
  * Matches: "Error: Cask 'name' has been disabled because it is discontinued upstream! It was disabled on 2024-12-16."
  * Or: "Error: Formula 'name' has been disabled because ..."

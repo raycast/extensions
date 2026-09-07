@@ -123,6 +123,7 @@ export {
   brewIdentifier,
   brewCaskOption,
   normalizeOutdatedResults,
+  brewPinnedIdentifiers,
   isCask,
   brewCompare,
   brewInstallCommand,

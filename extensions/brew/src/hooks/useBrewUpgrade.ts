@@ -122,7 +122,10 @@ export function useBrewUpgrade(): BrewUpgrade {
                   if (event.status === "upgrading") {
                     toast.updateTitle(`Upgrading ${event.package.name} (${finished + 1}/${total})`);
                     toast.updateMessage("");
-                  } else if (event.status !== "skipped") {
+                  } else {
+                    // Every terminal status advances the counter. A package brew
+                    // declined at runtime is still one of `total` — only pinned
+                    // packages are outside it, having been filtered before the run.
                     finished += 1;
                   }
                   setState(upgradeKey(event.package), { status: event.status, message: event.message });

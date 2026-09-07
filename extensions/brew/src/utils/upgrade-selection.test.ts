@@ -11,6 +11,7 @@
 import { describe, expect, it } from "vitest";
 import { brewName, brewUninstallCommand, brewUpgradeCommand, isCask, normalizeOutdatedResults } from "./brew/helpers";
 import { preferences } from "./preferences";
+import { isPinnedRefusal, upgradeSkipReason } from "./errors";
 import {
   applyPinChange,
   applyPinOverrides,
@@ -454,5 +455,124 @@ describe("test preferences mirror the declared defaults", () => {
 
   it("gives pinnedFirst its declared default of true", () => {
     expect(preferences.pinnedFirst).toBe(true);
+  });
+});
+
+/**
+ * Homebrew's own refusals, quoted from the installed source. The extension reads
+ * pin state from disk before naming a package, so these are the backstop for a
+ * pin that lands between that check and the command.
+ */
+describe("pinned refusal detection", () => {
+  it("matches the named-upgrade refusal", () => {
+    // cmd/upgrade.rb: "Not upgrading #{pinned.count} pinned #{pluralize("package", …)}:"
+    expect(isPinnedRefusal(new Error("Error: Not upgrading 1 pinned package:"))).toBe(true);
+    expect(isPinnedRefusal(new Error("Error: Not upgrading 3 pinned packages:"))).toBe(true);
+  });
+
+  it("matches the uninstall refusal for either kind", () => {
+    // uninstall.rb and cask/uninstall.rb, verbatim
+    expect(isPinnedRefusal(new Error("asc is pinned. You must unpin it to uninstall."))).toBe(true);
+    expect(isPinnedRefusal(new Error("1password is pinned. You must unpin it to uninstall."))).toBe(true);
+  });
+
+  it("does not match brew's OTHER 'Not upgrading' refusals", () => {
+    // cask/upgrade.rb:48 — deprecated/disabled, a different problem with a
+    // different remedy. Offering "unpin and force" here would be nonsense.
+    expect(isPinnedRefusal(new Error("Not upgrading zoom, it is deprecated because it is discontinued"))).toBe(false);
+    expect(isPinnedRefusal(new Error("Not upgrading warp, no version is available for the current platform"))).toBe(
+      false,
+    );
+  });
+
+  it("does not match unrelated failures", () => {
+    expect(isPinnedRefusal(new Error("Error: Another active Homebrew process is already running"))).toBe(false);
+    expect(isPinnedRefusal(undefined)).toBe(false);
+  });
+});
+
+/**
+ * Homebrew warns and skips rather than failing for these, exiting 0 — so the run
+ * would otherwise report an upgrade that never happened. Every string below is
+ * quoted from the installed source, not invented: an earlier version of this
+ * suite asserted a "Not upgrading <formula>, it is deprecated" message that brew
+ * does not emit (it warns about deprecation and upgrades anyway).
+ */
+describe("declined upgrades are read from brew's warnings", () => {
+  it("keeps each cask reason distinct rather than collapsing them", () => {
+    // cask/upgrade.rb, verbatim shapes
+    expect(upgradeSkipReason("Warning: Not upgrading zoom, it is disabled because it is discontinued!", "zoom")).toBe(
+      "Disabled by Homebrew",
+    );
+    expect(
+      upgradeSkipReason("Warning: Not upgrading warp, no version is available for the current platform", "warp"),
+    ).toBe("No version for this platform");
+    expect(upgradeSkipReason("Warning: Not upgrading zed, the downloaded artifact has not changed", "zed")).toBe(
+      "Already up to date",
+    );
+    expect(upgradeSkipReason("Warning: Not upgrading zed, the latest version is already installed", "zed")).toBe(
+      "Already up to date",
+    );
+  });
+
+  it("reads the minimum-version skip, which both kinds emit", () => {
+    // cmd/upgrade.rb for formulae and casks alike. "not below" includes equal,
+    // so the wording must not claim the installed one is strictly newer.
+    expect(
+      upgradeSkipReason(
+        "Warning: Not upgrading docker, the installed version is not below the minimum version 4.0",
+        "docker",
+      ),
+    ).toBe("Installed version is not older");
+  });
+
+  it("reads the formula already-installed skip, which has no 'Not upgrading' prefix", () => {
+    // cmd/upgrade.rb: opoo "#{f.full_specified_name} #{latest_keg.version} already installed"
+    // Reached whenever an earlier package in the same run upgraded this one as a dependency.
+    expect(upgradeSkipReason("Warning: aom 3.15.0 already installed", "aom")).toBe("Already up to date");
+  });
+
+  it("reads the cask cannot-be-upgraded-as-is skip", () => {
+    // cask/upgrade.rb
+    expect(upgradeSkipReason("Warning: The cask 'docker' cannot be upgraded as-is. To fix this, run:", "docker")).toBe(
+      "Cannot be upgraded as-is — reinstall it",
+    );
+  });
+
+  it("does NOT treat deprecation as a skip", () => {
+    // brew warns about a deprecated package and upgrades it anyway
+    // (formula_installer.rb, cask/installer.rb). Calling that a skip would
+    // report a real upgrade as declined.
+    expect(upgradeSkipReason("Warning: zoom has been deprecated because it is discontinued", "zoom")).toBeUndefined();
+  });
+
+  it("carries an unrecognised reason through rather than claiming an upgrade", () => {
+    expect(upgradeSkipReason("Warning: Not upgrading fd, some future reason.", "fd")).toBe("some future reason");
+  });
+
+  it("does not attribute another package's warning to this one", () => {
+    expect(upgradeSkipReason("Warning: Not upgrading zoom, it is disabled because x", "zed")).toBeUndefined();
+    // A versioned sibling is a DIFFERENT package: `python` must not absorb
+    // `python@3.14`'s warning.
+    expect(
+      upgradeSkipReason(
+        "Warning: Not upgrading python@3.14, no version is available for the current platform",
+        "python",
+      ),
+    ).toBeUndefined();
+    expect(upgradeSkipReason("Warning: python@3.14 3.14.0 already installed", "python")).toBeUndefined();
+  });
+
+  it("returns nothing for a clean upgrade", () => {
+    expect(upgradeSkipReason("==> Upgrading zed\n==> Downloading...", "zed")).toBeUndefined();
+  });
+
+  it("handles a versioned name without treating @ as a pattern", () => {
+    expect(
+      upgradeSkipReason(
+        "Warning: Not upgrading warp@preview, no version is available for the current platform",
+        "warp@preview",
+      ),
+    ).toBe("No version for this platform");
   });
 });
