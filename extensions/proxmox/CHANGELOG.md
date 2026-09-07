@@ -1,6 +1,6 @@
 # Proxmox Changelog
 
-## [Multiple Servers] - {PR_MERGE_DATE}
+## [Multiple Servers] - 2026-09-07
 
 - Added support for multiple Proxmox servers ([#27260](https://github.com/raycast/extensions/issues/27260))
 - Added a `Manage Servers` command to add, edit or remove servers
