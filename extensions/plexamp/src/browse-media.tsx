@@ -246,6 +246,7 @@ function PlaylistRow(props: {
 
 export function TrackRow(props: {
   track: MusicTrack;
+  id?: string;
   coverPath?: string;
   leadingActions?: ReactNode;
   onPlay: (item: PlayableItem) => Promise<void>;
@@ -257,7 +258,7 @@ export function TrackRow(props: {
   return (
     <List.Item
       key={props.track.ratingKey}
-      id={props.track.ratingKey}
+      id={props.id ?? props.track.ratingKey}
       icon={artworkSource(props.track.thumb ?? props.coverPath)}
       title={formatTrackDisplayTitle(props.track.title, {
         parentIndex: props.track.parentIndex,
@@ -838,6 +839,23 @@ function LargePlaylistTrackList(props: { playlist: AudioPlaylist; sectionKey: st
 }
 
 // ---------------------------------------------------------------------------
+// Shared: unique item ids for track lists
+// ---------------------------------------------------------------------------
+
+// A playlist can hold the same track more than once, and Raycast needs every item id in a list to be
+// unique. The first occurrence keeps its bare rating key, which album pre-selection targets; repeats get
+// an occurrence suffix.
+function withUniqueItemIds(tracks: MusicTrack[]): { track: MusicTrack; itemId: string }[] {
+  const occurrences = new Map<string, number>();
+
+  return tracks.map((track) => {
+    const occurrence = occurrences.get(track.ratingKey) ?? 0;
+    occurrences.set(track.ratingKey, occurrence + 1);
+    return { track, itemId: occurrence === 0 ? track.ratingKey : `${track.ratingKey}:${occurrence}` };
+  });
+}
+
+// ---------------------------------------------------------------------------
 // TrackList: all tracks loaded — uses Raycast built-in client-side filtering
 // ---------------------------------------------------------------------------
 
@@ -881,9 +899,10 @@ function TrackList(props: {
           }
         />
       ) : null}
-      {props.tracks.map((track) => (
+      {withUniqueItemIds(props.tracks).map(({ track, itemId }) => (
         <TrackRow
-          key={track.ratingKey}
+          key={itemId}
+          id={itemId}
           track={track}
           coverPath={props.coverPath}
           leadingActions={props.renderLeadingActions?.(track)}
@@ -928,9 +947,10 @@ function PaginatedTrackList(props: {
         </ActionPanel>
       }
     >
-      {props.tracks.map((track) => (
+      {withUniqueItemIds(props.tracks).map(({ track, itemId }) => (
         <TrackRow
-          key={track.ratingKey}
+          key={itemId}
+          id={itemId}
           track={track}
           coverPath={props.coverPath}
           onPlay={props.onPlay}
