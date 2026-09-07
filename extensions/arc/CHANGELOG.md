@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-09-07
 
 - Display the Space name in `Search Tabs` and `Search Arc` results to help distinguish tabs with identical names across different Spaces.
 - `getTabsWithSpaceInfo` now falls back to `getTabs()` when the AppleScript response is empty or unparseable, so a Space-metadata failure drops only the Space tags — not the entire tab list.
