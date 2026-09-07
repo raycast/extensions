@@ -34,7 +34,11 @@ export function isCheckedToday(streak: Streak): boolean {
   return streak.lastCheckedDate === todayDateString();
 }
 
-/** True if the streak should be considered broken (missed at least one full day). */
+/**
+ * Broken = missed at least one full day (not checked today and not yesterday).
+ * A positive count with lastCheckedDate === null is treated as broken only when
+ * it is clearly stale; intentional states after undo use yesterday's date.
+ */
 export function isBroken(streak: Streak): boolean {
   if (streak.frozen) return false;
   if (streak.count <= 0) return false;
@@ -51,6 +55,15 @@ export function getDisplayEmoji(streak: Streak): string {
 
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+/** Strict non-negative whole number parser. Rejects "1.5", "3abc", etc. */
+export function parseWholeNumber(raw: string): number | null {
+  const trimmed = raw.trim();
+  if (!/^\d+$/.test(trimmed)) return null;
+  const n = Number(trimmed);
+  if (!Number.isSafeInteger(n) || n < 0) return null;
+  return n;
 }
 
 /**

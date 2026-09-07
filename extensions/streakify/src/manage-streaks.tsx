@@ -13,7 +13,14 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { deleteStreak, getStreaks, updateStreak } from "./storage";
-import { getDisplayEmoji, isCheckedToday, Streak, todayDateString } from "./types";
+import {
+  getDisplayEmoji,
+  isCheckedToday,
+  parseWholeNumber,
+  Streak,
+  todayDateString,
+  yesterdayDateString,
+} from "./types";
 
 export default function ManageStreaks() {
   const [streaks, setStreaks] = useState<Streak[]>([]);
@@ -82,10 +89,14 @@ export default function ManageStreaks() {
     });
     if (!confirmed) return;
 
+    const newCount = Math.max(0, streak.count - 1);
+    // Keep a valid date so auto-reset does not wipe the remaining streak:
+    // - count > 0 → yesterday (still within the continuation window)
+    // - count === 0 → null
     const updated: Streak = {
       ...streak,
-      count: Math.max(0, streak.count - 1),
-      lastCheckedDate: null,
+      count: newCount,
+      lastCheckedDate: newCount > 0 ? yesterdayDateString() : null,
     };
     await updateStreak(updated);
     await showToast({
@@ -311,10 +322,19 @@ function EditStreakForm({ streak, onSave }: { streak: Streak; onSave: () => Prom
     }
 
     const countRaw = values.count?.trim() ?? "0";
-    const count = parseInt(countRaw, 10);
-    if (isNaN(count) || count < 0) {
+    const count = parseWholeNumber(countRaw === "" ? "0" : countRaw);
+    if (count === null) {
       setCountError("Must be a non-negative whole number");
       return;
+    }
+
+    // Keep dates consistent with count so auto-reset does not wipe the edit
+    let lastCheckedDate = streak.lastCheckedDate;
+    if (count === 0) {
+      lastCheckedDate = null;
+    } else if (!lastCheckedDate || lastCheckedDate !== todayDateString()) {
+      // Positive count after edit → treat as checked today so it doesn't break
+      lastCheckedDate = todayDateString();
     }
 
     const updated: Streak = {
@@ -324,6 +344,7 @@ function EditStreakForm({ streak, onSave }: { streak: Streak; onSave: () => Prom
       checkedEmoji: values.checkedEmoji?.trim() || streak.checkedEmoji,
       uncheckedEmoji: values.uncheckedEmoji?.trim() || streak.uncheckedEmoji,
       count,
+      lastCheckedDate,
       showInMenuBar: values.showInMenuBar ?? streak.showInMenuBar,
     };
 

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { addStreak } from "./storage";
-import { generateId, Streak, todayDateString } from "./types";
+import { generateId, parseWholeNumber, Streak, todayDateString } from "./types";
 
 interface FormValues {
   name: string;
@@ -25,8 +25,8 @@ export default function CreateStreak() {
     }
 
     const countRaw = values.initialCount?.trim() ?? "0";
-    const count = parseInt(countRaw, 10);
-    if (isNaN(count) || count < 0) {
+    const count = parseWholeNumber(countRaw === "" ? "0" : countRaw);
+    if (count === null) {
       setCountError("Must be a non-negative whole number");
       return;
     }
