@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [OpenCode Go Zen usage API] - {PR_MERGE_DATE}
+## [OpenCode Go Zen usage API] - 2026-09-07
 
 ### Improvements
 
