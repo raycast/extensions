@@ -71,7 +71,7 @@ export function renderOpencodegoDetail(usage: OpencodegoUsage | null, error: Ope
     }
   }
 
-  return <List.Item.Detail.Metadata>{...elements}</List.Item.Detail.Metadata>;
+  return <List.Item.Detail.Metadata>{elements}</List.Item.Detail.Metadata>;
 }
 
 export function getOpencodegoAccessory(
@@ -92,9 +92,9 @@ export function getOpencodegoAccessory(
 
   const percent = Math.round(getRemainingPercent(usage.rolling.percent));
   const tooltipParts = [
-    `Rolling: ${percent}%`,
-    `Weekly: ${Math.round(getRemainingPercent(usage.weekly.percent))}%`,
-    `Monthly: ${Math.round(getRemainingPercent(usage.monthly.percent))}%`,
+    `Rolling: ${Math.round(getRemainingPercent(usage.rolling.percent))}% remaining`,
+    `Weekly: ${Math.round(getRemainingPercent(usage.weekly.percent))}% remaining`,
+    `Monthly: ${Math.round(getRemainingPercent(usage.monthly.percent))}% remaining`,
   ];
 
   return {

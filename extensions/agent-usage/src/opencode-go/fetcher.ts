@@ -7,14 +7,24 @@ const OPENCODEGO_USAGE_API = "https://opencode.ai/zen/go/v1/usage";
 
 const USAGE_WINDOWS = ["rolling", "weekly", "monthly"] as const;
 
-function validateWindow(value: unknown): value is OpencodegoWindowUsage {
+function validateWindow(value: unknown): value is Record<string, unknown> {
   if (!value || typeof value !== "object") return false;
   const window = value as Record<string, unknown>;
   return (
     typeof window.status === "string" &&
     typeof window.percent === "number" &&
-    (window.resetsAt === undefined || typeof window.resetsAt === "string")
+    Number.isFinite(window.percent) &&
+    (window.resetsAt === undefined || window.resetsAt === null || typeof window.resetsAt === "string")
   );
+}
+
+function normalizeWindow(value: unknown): OpencodegoWindowUsage {
+  const window = value as Record<string, unknown>;
+  return {
+    status: window.status as string,
+    percent: Math.min(100, Math.max(0, window.percent as number)),
+    resetsAt: typeof window.resetsAt === "string" ? window.resetsAt : null,
+  };
 }
 
 export function parseOpencodegoUsageResponse(data: unknown): {
@@ -38,9 +48,9 @@ export function parseOpencodegoUsageResponse(data: unknown): {
 
   return {
     usage: {
-      rolling: container.rolling as OpencodegoWindowUsage,
-      weekly: container.weekly as OpencodegoWindowUsage,
-      monthly: container.monthly as OpencodegoWindowUsage,
+      rolling: normalizeWindow(container.rolling),
+      weekly: normalizeWindow(container.weekly),
+      monthly: normalizeWindow(container.monthly),
     },
     error: null,
   };
