@@ -5,7 +5,7 @@
 // shapes so the components get real types instead of `any`, which is not a
 // second implementation of anything: it is the same functions, described.
 
-import type { Cause, Finding, Level, Meta, Plan } from "./engine";
+import type { Cause, Finding, Level, Meta, Plan, Score } from "./engine";
 
 /**
  * The preferences, as the manifest declares them.
@@ -22,6 +22,7 @@ export interface CrawlOptions {
   limit: number;
   concurrency: number;
   checkExternal: boolean;
+  hosts: boolean;
 }
 
 /** A row in a preview: a fact, and the line under it. */
@@ -30,7 +31,18 @@ export interface Row {
   title: string;
   subtitle: string;
   tone: "error" | "warn" | "ok" | "plain";
+  /** The flag that would let a skipped check actually run, when the engine says
+   *  there is one. Absent for a skip that is a fact about the site rather than
+   *  a choice about the crawl. */
+  enabledBy?: string;
 }
+
+export function hostRows(meta: unknown, findings?: unknown[]): Row[];
+export function optionsForFlag(flag: string): Record<string, unknown> | null;
+/** The most pages a run can crawl inside a Raycast command before its worker
+ *  runs out of heap. */
+export const MAX_PAGES: number;
+export function hostLine(row: unknown): string;
 
 /** A row in a report — one thing to change, and the pages it is on. */
 export interface CauseRow {
@@ -54,6 +66,8 @@ export interface KeptReport {
   causes: number;
   errors: number;
   warnings: number;
+  /** Present once the app that wrote the index knew how to score a run. */
+  score?: number;
   path: string;
   when: Date;
 }
@@ -64,6 +78,7 @@ export interface StoredReport {
   meta?: Meta;
   findings?: Finding[];
   causes?: Cause[];
+  score?: Score;
 }
 
 export const SPEEDS: Record<"gentle" | "normal" | "fast", number>;
@@ -73,6 +88,15 @@ export function normalise(text: string | undefined | null): string | null;
 export function previewRows(plan: Plan | null): Row[];
 export function causeRows(report: { causes?: Cause[] } | null): CauseRow[];
 export function summaryLine(report: { meta?: Meta; findings?: Finding[]; causes?: Cause[] } | null): string;
+
+export function scoreTag(score: Score | null | undefined): string | null;
+export function scoreLine(score: Score | null | undefined): string;
+export function gainFor(
+  cause: { checkId?: string; id?: string; pages?: string[] },
+  score: Score | null | undefined,
+): number | null;
+export function passedRows(score: Score | null | undefined): Row[];
+export function skippedRows(score: Score | null | undefined): Row[];
 
 export function libraryRoot(root?: string): string;
 export function keptReports(root?: string): KeptReport[];

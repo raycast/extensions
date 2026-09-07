@@ -52,6 +52,43 @@ export interface Meta {
   ignored?: number;
   notIndexable?: number;
   sitemap?: string;
+  /** The rest of the domain, when the run was asked to look. Absent rather than
+   *  empty when it was not: a report showing no other hosts must not be
+   *  readable as a domain that has none. */
+  hosts?: HostInventory;
+}
+
+/** One host on the domain, as DNS and one request found it. */
+export interface HostRow {
+  host: string;
+  addresses: string[];
+  cname: string | null;
+  dangling: boolean;
+  status: number | null;
+  title: string | null;
+  redirectsHome: boolean;
+  noindex: boolean;
+  /** Where a request for `/` actually landed on this host. Anywhere but `/` is
+   *  overwhelmingly a login page, and the reason the staging check stayed
+   *  quiet. */
+  landedPath: string | null;
+  checked: boolean;
+}
+
+/** What else is on the domain. Discovery is certificate transparency and
+ *  verification is DNS plus a request, which is why `found` and `resolved` are
+ *  different numbers and both are worth showing. `source` names the log that
+ *  answered — two runs can list different hosts because different logs did. */
+export interface HostInventory {
+  apex: string;
+  source: string;
+  found: number;
+  resolved: number;
+  capped: number;
+  nameservers: string[];
+  mail: string[];
+  policies: string[];
+  rows: HostRow[];
 }
 
 /** The corrected sitemap, when a run asked for one. `xml` is null when the
@@ -64,11 +101,54 @@ export interface RebuiltSitemap {
   refused: string | null;
 }
 
+/** The llms.txt this site should have had, built from the site's own titles and
+ *  descriptions. `text` is null on the same refusals the sitemap makes, for the
+ *  same reason: a file built from a fraction of a site looks complete. */
+export interface RebuiltLlms {
+  text: string | null;
+  urls: string[];
+  sections: number;
+  refused: string | null;
+}
+
+/** The JSON-LD this site could add, built only from strings the crawl read off
+ *  it. `refused` can be the good answer: a site that already declares
+ *  everything this could write says so. */
+export interface GeneratedSchema {
+  json: string | null;
+  generated: { url: string; jsonld: Record<string, unknown> }[];
+  skipped: Record<string, number>;
+  refused: string | null;
+}
+
 export interface Report {
   meta: Meta;
   findings: Finding[];
   causes: Cause[];
   sitemap?: RebuiltSitemap;
+  /** The llms.txt this site should have had. Same arrangement as the sitemap:
+   *  built during the crawl, and `refused` is the half worth reading. */
+  llms?: RebuiltLlms;
+  schema?: GeneratedSchema;
+  /** How much of the checklist the site passes, scored by the engine. Optional
+   *  because a report kept before scoring existed still has to open. */
+  score?: Score;
+}
+
+/** The engine's score for a run. Mirrored in `present.d.mts`, which is the file
+ *  the non-React half is typed against; both describe `scoreRun()` in
+ *  `src/score.mjs` and neither implements any of it. */
+export interface Score {
+  score?: number;
+  grade?: string;
+  ifErrorsFixed?: number;
+  lost?: number;
+  why?: string;
+  checks?: { passed: number; failed: number; skipped: number };
+  passed?: { id: string; area: string; pass: string }[];
+  skipped?: { id: string; area: string; pass: string; why: string }[];
+  failed?: { id: string; area: string; level: Level; pages: number; cost: number }[];
+  areas?: { name: string; lost: number; passed: number; failed: number }[];
 }
 
 /** What `--dry-run` answers. `wouldCheck` is null when there is no sitemap:
@@ -98,10 +178,14 @@ export interface CrawlOptions {
   psiSample?: number;
   psiStrategy?: "mobile" | "desktop";
   writeSitemap?: boolean;
+  writeLlms?: boolean;
+  writeSchema?: boolean;
   concurrency?: number;
   checkExternal?: boolean;
   sitemap?: string;
   userAgent?: string;
+  // `true` asks about the site being crawled; a string names the property.
+  searchConsole?: string | boolean;
   onProgress?: (event: { phase?: string; url?: string; detail?: string; status?: number }) => void;
 }
 
@@ -118,7 +202,14 @@ export interface CrawlOptions {
 
 export const audit = rawAudit as unknown as
   (target: string, options?: CrawlOptions) =>
-    Promise<{ findings: Finding[]; meta: Meta; sitemap?: RebuiltSitemap }>;
+    Promise<{
+      findings: Finding[];
+      meta: Meta;
+      sitemap?: RebuiltSitemap;
+      llms?: RebuiltLlms;
+      schema?: GeneratedSchema;
+      score?: Score;
+    }>;
 
 export const preview = rawPreview as unknown as
   (target: string, options?: CrawlOptions) => Promise<Plan>;

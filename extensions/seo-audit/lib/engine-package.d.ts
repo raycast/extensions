@@ -13,7 +13,9 @@
 
 declare module "@nurkamol/seo-audit";
 declare module "@nurkamol/seo-audit/causes";
+declare module "@nurkamol/seo-audit/exports";
 declare module "@nurkamol/seo-audit/report";
+declare module "@nurkamol/seo-audit/score";
 declare module "@nurkamol/seo-audit/sitemap";
 declare module "@nurkamol/seo-audit/areas";
 declare module "@nurkamol/seo-audit/agents";

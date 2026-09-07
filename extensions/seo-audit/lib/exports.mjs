@@ -8,6 +8,12 @@
 //
 // Plain ESM with no `@raycast/api` import, like the rest of `lib/`, so
 // `node --test` can run it.
+//
+// **This is a second copy of `src/exports.mjs` and should not stay one.** The
+// engine gained the canonical list when the served window needed it, and this
+// file should import `@nurkamol/seo-audit/exports` instead — but that subpath
+// only exists from 1.34.1, and this extension's lockfile cannot move while its
+// Store submission is in review. Collapse it once that lands.
 
 import { writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -27,6 +33,10 @@ export const FORMATS = [
     detail: 'Everything, exactly as the engine produced it.' },
   { id: 'sitemap', label: 'Corrected sitemap', extension: 'xml',
     detail: 'The sitemap this site should have had.' },
+  { id: 'llms', label: 'llms.txt', extension: 'txt',
+    detail: 'The llms.txt this site should have had, from its own words.' },
+  { id: 'schema', label: 'Structured data', extension: 'json',
+    detail: 'The JSON-LD this site could add, from what it already says.' },
 ];
 
 /** A file name somebody can find again, and that sorts. */
@@ -47,12 +57,16 @@ export function render(format, report) {
   if (!report?.meta) return { text: null, refused: 'There is no report to write.' };
 
   switch (format) {
+    // The score travels with the report and is never recomputed here: it needs
+    // to know what the run was in a position to check, which lives in the crawl
+    // rather than in the findings. A report kept before scoring existed simply
+    // renders without one.
     case 'html':
-      return { text: html(report.findings ?? [], report.meta), refused: null };
+      return { text: html(report.findings ?? [], report.meta, { score: report.score }), refused: null };
     case 'markdown':
-      return { text: markdown(report.findings ?? [], report.meta), refused: null };
+      return { text: markdown(report.findings ?? [], report.meta, { score: report.score }), refused: null };
     case 'csv':
-      return { text: csv(report.findings ?? [], report.meta), refused: null };
+      return { text: csv(report.findings ?? [], report.meta, { score: report.score }), refused: null };
     case 'json':
       return { text: JSON.stringify(report, null, 2), refused: null };
     case 'sitemap':
@@ -62,6 +76,26 @@ export function render(format, report) {
       return {
         text: report.sitemap.xml,
         refused: report.sitemap.xml ? null : report.sitemap.refused,
+      };
+    // Same arrangement, and the same reason the refusal is carried rather than
+    // swallowed: a file built from a fraction of a site looks complete.
+    case 'llms':
+      if (!report.llms) {
+        return { text: null, refused: 'This run did not build one.' };
+      }
+      return {
+        text: report.llms.text,
+        refused: report.llms.text ? null : report.llms.refused,
+      };
+    // Where the refusal can be the good answer: a site that already declares
+    // everything this could write says exactly that.
+    case 'schema':
+      if (!report.schema) {
+        return { text: null, refused: 'This run did not build one.' };
+      }
+      return {
+        text: report.schema.json,
+        refused: report.schema.json ? null : report.schema.refused,
       };
     default:
       return { text: null, refused: `Unknown format "${format}".` };

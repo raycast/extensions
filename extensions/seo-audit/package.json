@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "seo-audit",
   "title": "SEO Audit",
-  "description": "Crawl a site\u2019s whole sitemap and check every page for the SEO, metadata and structured-data problems single-URL graders miss.",
+  "description": "Crawl a site’s whole sitemap and check every page for the SEO, metadata and structured-data problems single-URL graders miss.",
   "icon": "icon.png",
   "author": "nurkamol",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "preview",
       "title": "Preview Site",
-      "description": "How big is this site, and is it the right one \u2014 three requests, about a second.",
+      "description": "How big is this site, and is it the right one — three requests, about a second.",
       "mode": "view"
     },
     {
@@ -42,7 +42,7 @@
     {
       "name": "limit",
       "title": "Pages per run",
-      "description": "A launcher is a poor place to wait out a crawl of a thousand pages. Big sites belong in the app or the terminal.",
+      "description": "Capped at 40. A Raycast command gets a 100MB heap and a crawl holds every page until the cross-page checks are done, so more than that is killed mid-run rather than reported. Big sites belong in the app or the terminal.",
       "type": "textfield",
       "default": "25",
       "required": false
@@ -50,21 +50,21 @@
     {
       "name": "speed",
       "title": "Speed",
-      "description": "Gentle is one connection at a time \u2014 the setting that gets through a site answering HTTP 429.",
+      "description": "Gentle is one connection at a time — the setting that gets through a site answering HTTP 429.",
       "type": "dropdown",
       "default": "normal",
       "required": false,
       "data": [
         {
-          "title": "Gentle \u2014 1 connection",
+          "title": "Gentle — 1 connection",
           "value": "gentle"
         },
         {
-          "title": "Normal \u2014 6 connections",
+          "title": "Normal — 6 connections",
           "value": "normal"
         },
         {
-          "title": "Fast \u2014 12 connections",
+          "title": "Fast — 12 connections",
           "value": "fast"
         }
       ]
@@ -76,6 +76,15 @@
       "description": "Slower, and only a 404, 410 or no answer is reported.",
       "type": "checkbox",
       "default": false,
+      "required": false
+    },
+    {
+      "name": "hosts",
+      "title": "The rest of the domain",
+      "label": "Audit other hosts on this domain too",
+      "description": "Asks certificate transparency what else is on the domain, then resolves and fetches it: a staging copy open to the index, a subdomain pointing at a service that is gone, a second host serving the same site. Adds a few seconds, and more on a domain with hundreds of hosts.",
+      "type": "checkbox",
+      "default": true,
       "required": false
     },
     {
@@ -150,7 +159,7 @@
     {
       "name": "os",
       "title": "On",
-      "description": "A combination that cannot exist \u2014 Safari on Windows \u2014 is refused by the engine and the run goes ahead as itself.",
+      "description": "A combination that cannot exist — Safari on Windows — is refused by the engine and the run goes ahead as itself.",
       "type": "dropdown",
       "default": "",
       "required": false,
@@ -230,9 +239,27 @@
       "required": false
     },
     {
+      "name": "searchConsole",
+      "title": "Search Console",
+      "description": "Asks Google how many times each page was actually shown, and marks findings on pages that earn impressions. The one number here that is not a proxy. Needs credentials on this machine: run seo-audit --search-console-login once in a terminal. Without them the report says so rather than going quiet.",
+      "label": "Ask Search Console",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "searchConsoleProperty",
+      "title": "Property",
+      "description": "When Ask Search Console is on. The property to ask about, if it is not the site being audited — a domain property, or a URL-prefix one. Leave empty and the crawled site is used.",
+      "type": "textfield",
+      "placeholder": "sc-domain:example.com",
+      "default": "",
+      "required": false
+    },
+    {
       "name": "ignore",
       "title": "Silenced checks",
-      "description": "Check ids to leave out, comma separated. Copy one from any finding with \u2318. \u2014 a report still says how many were silenced.",
+      "description": "Check ids to leave out, comma separated. Copy one from any finding with ⌘. — a report still says how many were silenced.",
       "type": "textfield",
       "placeholder": "thin-content, img-srcset",
       "default": "",
@@ -240,7 +267,7 @@
     }
   ],
   "dependencies": {
-    "@nurkamol/seo-audit": "^1.38.1",
+    "@nurkamol/seo-audit": "^1.40.1",
     "@raycast/api": "^1.77.0"
   },
   "devDependencies": {

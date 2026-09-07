@@ -59,6 +59,9 @@ forty, not forty rows.
   than by URL, heading structure, images with no alt text
 - **Performance** — never estimated. `--psi` asks Google for Google's own
   field measurement, or the number is not shown at all
+- **Search Console** — optional, and the one number here that is not a proxy:
+  how many times Google actually showed each page, so a finding on a page with
+  traffic sorts above one on a page nobody sees
 
 ![What to change, worst first](media/seo-audit-2.png)
 
@@ -87,6 +90,7 @@ somebody's index.
 | Only what changed | Crawl only pages whose `lastmod` is newer than a date |
 | Identify as | Which browser and system to send, or your own user agent |
 | Performance | Which pages to measure, how many, mobile or desktop |
+| Search Console | Ask Google for impressions per page, and which property to ask about |
 | Silenced checks | Ids to ignore — copy one off any finding with `⌘.` |
 
 Anything left at its default is not sent, so the defaults stay written down in

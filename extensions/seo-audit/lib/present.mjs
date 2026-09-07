@@ -28,6 +28,11 @@ const count = (raw, fallback, ceiling) => {
   return Number.isFinite(asked) && asked > 0 ? Math.min(asked, ceiling) : fallback;
 };
 
+/** The most pages a run can crawl inside a Raycast command before its worker
+ *  runs out of heap. Exported so the test that pins it can read the number
+ *  rather than repeat it. */
+export const MAX_PAGES = 40;
+
 /** A comma or newline separated list, trimmed, with the blanks dropped. */
 const list = (raw) =>
   (raw ?? '')
@@ -43,9 +48,27 @@ const list = (raw) =>
  *  chose. */
 export function crawlOptions(preferences = {}) {
   const options = {
-    limit: count(preferences.limit, 25, 5000),
+    // The ceiling is the worker's, not an opinion. A Raycast command gets a
+    // 100MB JS heap, and a crawl holds every page it has read until the
+    // cross-page checks are done — measured at roughly 0.8MB of live heap per
+    // page on a content-heavy site, on top of about 16MB of fixed cost. A
+    // hundred pages peaked at 95.6MB live and the command was killed with
+    // "Command Out of Memory" before it could report anything.
+    //
+    // 40 measured at 48MB live on the same site, which leaves room for React,
+    // the Raycast API and the finished report in the same heap. 60 was tried
+    // first and reached 72MB live — survivable on a good day and not worth
+    // shipping a good day as a requirement. The
+    // engine itself has no such limit — the terminal and the macOS app run the
+    // same crawl with the whole machine behind it, which is what the preference
+    // text has always said big sites are for.
+    limit: count(preferences.limit, 25, MAX_PAGES),
     concurrency: SPEEDS[preferences.speed] ?? SPEEDS.normal,
     checkExternal: preferences.checkExternal === true,
+    // Off unless asked for, like performance. It is one slow lookup to a free
+    // third party plus one per candidate host, and a launcher is the worst
+    // place of the three to wait out something nobody asked for.
+    hosts: preferences.hosts === true,
   };
 
   const sitemap = (preferences.sitemap ?? '').trim();
@@ -77,6 +100,20 @@ export function crawlOptions(preferences = {}) {
     options.psi = mode === 'sample' ? ['/**'] : ['/'];
     if (mode === 'sample') options.psiSample = count(preferences.performanceSample, 3, 10);
     options.psiStrategy = preferences.performanceDesktop === true ? 'desktop' : 'mobile';
+  }
+
+  // Search Console, off unless asked for. `true` means "the site being
+  // audited", which is what the engine does with a bare --search-console; a
+  // property is passed through when this is one account covering several sites.
+  //
+  // The credentials are not asked for here. Getting them opens a browser and
+  // writes a file, which is a terminal errand rather than a control in a
+  // window — the same answer the macOS app gives. Without them the engine
+  // reports `search-console-unconfigured` and names what is missing, so this
+  // fails loudly in the report rather than quietly returning nothing.
+  if (preferences.searchConsole === true) {
+    const property = (preferences.searchConsoleProperty ?? '').trim();
+    options.searchConsole = property || true;
   }
 
   return options;
@@ -192,6 +229,142 @@ export function summaryLine(report) {
   if (counts.error) parts.push(`${counts.error} error${counts.error === 1 ? '' : 's'}`);
   if (report.meta.ignored) parts.push(`${report.meta.ignored} silenced`);
   return parts.join(' · ');
+}
+
+// --- the score --------------------------------------------------------------
+// Every number here is the engine's. `scoreRun()` in src/score.mjs decides what
+// a check costs and what applied; this arranges the answer into rows.
+
+/** The score as one accessory-sized string, or `null` when there is none — a
+ *  report kept before scoring existed, or a site that never answered. */
+export function scoreTag(score) {
+  if (!score || typeof score.score !== 'number') return null;
+  return `${score.score}/100${score.grade ? ` ${score.grade}` : ''}`;
+}
+
+/** The line under a score: what it cost, and what it would be with the errors
+ *  cleared. Deliberately says how many checks did not apply — a check nobody
+ *  could run must not read as one that passed. */
+export function scoreLine(score) {
+  if (!score) return '';
+  if (typeof score.score !== 'number') return score.why ?? '';
+  const parts = [`${score.lost ?? 0} points across ${score.checks?.failed ?? 0} checks`];
+  if (score.checks) parts.push(`${score.checks.passed} passed`, `${score.checks.skipped} did not apply`);
+  if (typeof score.ifErrorsFixed === 'number' && score.ifErrorsFixed > score.score) {
+    parts.push(`errors cleared → ${score.ifErrorsFixed}`);
+  }
+  return parts.join(' · ');
+}
+
+/** What the score gains when one piece of work is done.
+ *
+ *  A check can be a cause under two sections, and giving each the whole
+ *  check's cost would say the site can gain the same points twice. Split by
+ *  pages — the same split `causeCost()` makes in src/report.mjs, and the reason
+ *  it is written here too is that this file is the only one Raycast can run. */
+export function gainFor(cause, score) {
+  const check = (score?.failed ?? []).find((row) => row.id === (cause?.checkId ?? cause?.id));
+  if (!check) return null;
+  const pages = cause?.pages?.length ?? 0;
+  const share = check.pages > 0 && pages > 0 ? Math.min(1, pages / check.pages) : 1;
+  const points = check.cost * share;
+  return points < 0.05 ? null : Math.round(points * 10) / 10;
+}
+
+/** Checks that passed, as rows.
+ *  @returns {Row[]} */
+export function passedRows(score) {
+  return (score?.passed ?? []).map((check) => ({
+    id: `pass:${check.id}`,
+    title: check.pass,
+    subtitle: check.area,
+    tone: 'ok',
+  }));
+}
+
+/** Checks that never came up, one row per reason rather than one per check —
+ *  "no page declares hreflang" said once over five checks, not five times.
+ *  @returns {Row[]} */
+export function skippedRows(score) {
+  const byReason = new Map();
+  for (const check of score?.skipped ?? []) {
+    byReason.set(check.why, [...(byReason.get(check.why) ?? []), check.id]);
+  }
+  // Grouped by reason, so the flag that would fix them travels with the group.
+  // Every check under one reason is skipped for that one reason, so they either
+  // all become runnable or none of them do.
+  const flagFor = new Map();
+  for (const check of score?.skipped ?? []) {
+    if (check.enabledBy) flagFor.set(check.why, check.enabledBy);
+  }
+
+  return [...byReason].map(([why, ids]) => ({
+    id: `skip:${ids[0]}`,
+    title: why,
+    subtitle: ids.join(', '),
+    tone: 'plain',
+    // The flag that would let this run, when the engine says there is one.
+    // Absent for a skip that is a fact about the site rather than a choice
+    // about the crawl — there is nothing to press for "no page declares
+    // hreflang".
+    ...(flagFor.has(why) ? { enabledBy: flagFor.get(why) } : {}),
+  }));
+}
+
+/** The run options a flag turns on, for a front end offering to run it again.
+ *
+ *  Only the three the engine says are worth offering, and each one supplies the
+ *  value the flag needs rather than asking: `--psi` without targets measures
+ *  nothing, so the sampled form is what "measure performance" has to mean here.
+ *  A launcher has no good place to ask a follow-up question. */
+export function optionsForFlag(flag) {
+  switch (flag) {
+    case '--check-external': return { checkExternal: true };
+    case '--hosts': return { hosts: true };
+    case '--psi': return { psi: ['/**'], psiSample: 3, psiStrategy: 'mobile' };
+    default: return null;
+  }
+}
+
+/** The rest of the domain, one row per host.
+ *
+ *  The hosts a finding is about are marked from the findings themselves rather
+ *  than worked out again here — the engine decided what counts as a leaked
+ *  staging copy, and a second opinion in a launcher would be a second answer to
+ *  the same question.
+ *  @returns {Row[]} */
+export function hostRows(meta, findings = []) {
+  const inventory = meta?.hosts;
+  if (!inventory?.rows?.length) return [];
+
+  const flagged = new Map();
+  for (const finding of findings) {
+    if (!/^(subdomain-takeover|staging-indexable|duplicate-host)$/.test(finding.id)) continue;
+    try {
+      const host = new URL(finding.url).hostname;
+      if (finding.level === 'error' || !flagged.has(host)) flagged.set(host, finding.level);
+    } catch { /* a finding without a parseable URL marks nothing */ }
+  }
+
+  return inventory.rows.map((row) => ({
+    id: `host:${row.host}`,
+    title: row.host,
+    subtitle: hostLine(row),
+    tone: flagged.get(row.host) === 'error' ? 'error' : flagged.has(row.host) ? 'warn' : 'plain',
+  }));
+}
+
+/** What a host row says about itself, in one line — the same sentence the
+ *  terminal, the HTML and the macOS window print. */
+export function hostLine(row) {
+  if (row.dangling) return `CNAME → ${row.cname} (gone)`;
+  if (!row.addresses.length) return row.cname ? `CNAME → ${row.cname}` : 'does not resolve';
+  const where = row.addresses[0];
+  if (!row.checked) return `${where} · not fetched`;
+  if (row.redirectsHome) return `${where} · ${row.status} → the canonical host`;
+  if (row.noindex) return `${where} · ${row.status}, noindex`;
+  if (!row.status) return `${where} · no answer`;
+  return `${where} · ${row.status}${row.title ? `  ${row.title}` : ''}`;
 }
 
 // --- what the macOS app has already kept -----------------------------------
