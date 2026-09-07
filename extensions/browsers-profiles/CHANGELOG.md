@@ -1,6 +1,6 @@
 # Raycast Browsers Profiles
 
-## [Add Brave Origin browser support] - {PR_MERGED_AT}
+## [Add Brave Origin browser support] - {PR_MERGE_DATE}
 
 - Adding Brave Origin browser to supported browser list
 
