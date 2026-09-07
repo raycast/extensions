@@ -173,6 +173,8 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
     ...leadingRows(formula, options, formulaCaveatsText(formula)),
     homepageRow(formula.homepage, options),
     { kind: "separator", key: "homepage-sep" },
+    { kind: "label", key: "tap", title: "Tap", text: formula.tap || missing(options) },
+    { kind: "separator", key: "tap-sep" },
   ];
 
   if (formula.license) {
@@ -244,6 +246,14 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
       title: "Conflicts With",
       tags: dependencyTags(conflicts, options.isInstalled),
     });
+  }
+
+  // Same row formulae get. The list's tack accessory is hidden while the metadata
+  // panel is open (list.tsx), so without this a pinned cask has no visible pin
+  // state at all in the one view that is showing its metadata.
+  if (cask.pinned) {
+    rows.push({ kind: "separator", key: "pinned-sep" });
+    rows.push({ kind: "label", key: "pinned", title: "Pinned", text: "Yes" });
   }
 
   rows.push({ kind: "separator", key: "auto-sep" });
