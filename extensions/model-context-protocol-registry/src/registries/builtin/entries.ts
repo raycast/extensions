@@ -1007,6 +1007,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "contracko",
+    title: "Contracko",
+    description:
+      "Contract management for your workspace. Import contracts, read extracted parties, dates and values, search inside documents, run AI analysis, and track renewal deadlines. Connects to the remote Contracko MCP server over OAuth 2.1.",
+    icon: "https://app.contracko.com/mcp/icon-512.png",
+    homepage: "https://contracko.com/docs/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.contracko.com/mcp"],
+    },
+  },
+  {
     name: "discord",
     title: "Discord",
     description:
