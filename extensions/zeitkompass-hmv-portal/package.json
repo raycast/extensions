@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zeitkompass-hmv-portal",
+  "title": "Zeitkompass HMV Portal",
+  "description": "Record an incoming Rezept or Pflegeempfehlung, report the handover to the Versorgungspartner, report that the Medizinischer Dienst is involved, or record a Bewilligung - without leaving the mail client. Hands the work to the Zeitkompass Portal, which does the writing and confirms it on the claim.",
+  "icon": "extension-icon.png",
+  "author": "alex_kuon",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "report-document",
+      "title": "Report Received Prescription / Recommendation",
+      "subtitle": "Zeitkompass HMV Portal",
+      "description": "A Rezept or Pflegeempfehlung arrived by email or post. Creates the Antrag if there is none, records the document as received on the given date, and advances the Antragsphase.",
+      "mode": "view"
+    },
+    {
+      "name": "report-handover",
+      "title": "Report Distributor Handover",
+      "subtitle": "Zeitkompass HMV Portal",
+      "description": "The Antrag has gone to the Versorgungspartner. Creates the Antrag if there is none, sets the Antragsphase to \"An Versorgungspartner \u00fcbergeben\" and records the day of the handover.",
+      "mode": "view"
+    },
+    {
+      "name": "report-md",
+      "title": "Report MD Involvement",
+      "subtitle": "Zeitkompass HMV Portal",
+      "description": "The Pflegekasse has the Medizinischer Dienst assess a filed Antrag. Moves it to \"Wartet auf MD-Begutachtung\" and attaches the MD. Not for an Antrag in a Widerspruch - there the review is tracked by the Widerspruch phase itself.",
+      "mode": "view"
+    },
+    {
+      "name": "report-approval",
+      "title": "Report Approval",
+      "subtitle": "Zeitkompass HMV Portal",
+      "description": "Die Pflegekasse hat bewilligt. Creates the Antrag if there is none and sets the Antragsphase to \"Bewilligt\". Records no documents - only the outcome.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "portalUrl",
+      "type": "textfield",
+      "title": "Portal URL",
+      "description": "Origin of the Zeitkompass Portal, e.g. https://portal.inclusys.de - no path.",
+      "placeholder": "https://portal.inclusys.de",
+      "required": true
+    },
+    {
+      "name": "locale",
+      "type": "dropdown",
+      "title": "Language",
+      "description": "Locale prefix for the portal's admin routes.",
+      "required": false,
+      "default": "de",
+      "data": [
+        {
+          "title": "Deutsch",
+          "value": "de"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
