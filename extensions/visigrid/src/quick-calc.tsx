@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Detail,
-  Icon,
-  LaunchProps,
-  Form,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Icon, LaunchProps, Form, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { runVgrid } from "./vgrid";
 
@@ -21,8 +12,7 @@ function describeClipboard(clip: string): string {
     return "Clipboard is empty — literal formulas like =SUM(1,2,3) still work; copy data to reference A1, B1, …";
   }
   const { data, format } = normalizeClipboard(clip);
-  const cols =
-    data.split("\n")[0]?.split(format === "tsv" ? "\t" : ",").length ?? 1;
+  const cols = data.split("\n")[0]?.split(format === "tsv" ? "\t" : ",").length ?? 1;
   const first = rows[0].length > 40 ? rows[0].slice(0, 40) + "…" : rows[0];
   return `Clipboard data → loaded at A1: ${rows.length} row${rows.length === 1 ? "" : "s"} × ${cols} col${cols === 1 ? "" : "s"} (first: ${first})`;
 }
@@ -47,19 +37,14 @@ function normalizeClipboard(clip: string): {
   } else {
     // Space-aligned columns: most lines contain runs of 2+ spaces.
     const aligned = lines.filter((l) => / {2,}/.test(l.trim()));
-    if (
-      lines.length > 0 &&
-      aligned.length >= Math.max(1, Math.floor(lines.length * 0.6))
-    ) {
+    if (lines.length > 0 && aligned.length >= Math.max(1, Math.floor(lines.length * 0.6))) {
       rows = lines.map((l) => l.trim().split(/ {2,}/));
     }
   }
 
   if (!rows) return { data: clip, format: "csv" }; // raw CSV (or single column)
 
-  const cleaned = rows
-    .map((fields) => fields.map(cleanNumberish).join("\t"))
-    .join("\n");
+  const cleaned = rows.map((fields) => fields.map(cleanNumberish).join("\t")).join("\n");
   return { data: cleaned, format: "tsv" };
 }
 
@@ -67,9 +52,7 @@ function normalizeClipboard(clip: string): {
  *  Anything that isn't money/number-shaped passes through untouched. */
 function cleanNumberish(fieldRaw: string): string {
   const field = fieldRaw.trim();
-  const m = field.match(
-    /^\((\$?[\d,]+(?:\.\d+)?)\)$|^(-?\$?[\d,]+(?:\.\d+)?)$/,
-  );
+  const m = field.match(/^\((\$?[\d,]+(?:\.\d+)?)\)$|^(-?\$?[\d,]+(?:\.\d+)?)$/);
   if (!m) return field;
   const negative = m[1] !== undefined;
   const body = (m[1] ?? m[2]).replace(/[$,]/g, "");
@@ -77,40 +60,26 @@ function cleanNumberish(fieldRaw: string): string {
   return negative ? `-${body}` : body;
 }
 
-async function evaluate(
-  formula: string,
-): Promise<{ result: string; dataPreview: string }> {
+async function evaluate(formula: string): Promise<{ result: string; dataPreview: string }> {
   const clip = (await Clipboard.readText()) ?? "";
   // Literal formulas like =SUM(1,2,3) need no clipboard data — feed the
   // engine a single empty row so they evaluate on an empty grid.
   if (!clip.trim()) {
-    const result = (
-      await runVgrid(["calc", "--from", "csv", formula], "\n")
-    ).trim();
+    const result = (await runVgrid(["calc", "--from", "csv", formula], "\n")).trim();
     return { result, dataPreview: "(no clipboard data)" };
   }
   const { data, format } = normalizeClipboard(clip);
-  const result = (
-    await runVgrid(["calc", "--from", format, formula], data)
-  ).trim();
+  const result = (await runVgrid(["calc", "--from", format, formula], data)).trim();
   const lines = clip.trim().split("\n");
-  const dataPreview =
-    lines.slice(0, 6).join("\n") +
-    (lines.length > 6 ? `\n… ${lines.length - 6} more rows` : "");
+  const dataPreview = lines.slice(0, 6).join("\n") + (lines.length > 6 ? `\n… ${lines.length - 6} more rows` : "");
   return { result, dataPreview };
 }
 
 function ResultView(props: { formula: string }) {
   const { data, isLoading, error } = usePromise(evaluate, [props.formula]);
 
-  if (isLoading || (!data && !error))
-    return <Detail isLoading markdown="Evaluating…" />;
-  if (error || !data)
-    return (
-      <Detail
-        markdown={`## Couldn't evaluate\n\n${error?.message ?? "Unknown error"}`}
-      />
-    );
+  if (isLoading || (!data && !error)) return <Detail isLoading markdown="Evaluating…" />;
+  if (error || !data) return <Detail markdown={`## Couldn't evaluate\n\n${error?.message ?? "Unknown error"}`} />;
 
   const md = [
     `# ${data.result}`,
@@ -135,25 +104,14 @@ function ResultView(props: { formula: string }) {
   );
 }
 
-export default function QuickCalc(
-  props: LaunchProps<{ arguments: Arguments.QuickCalc }>,
-) {
+export default function QuickCalc(props: LaunchProps<{ arguments: Arguments.QuickCalc }>) {
   const initial = props.arguments.formula?.trim();
   const { push } = useNavigation();
-  const { data: clip, isLoading: clipLoading } = usePromise(
-    async () => (await Clipboard.readText()) ?? "",
-    [],
-  );
-  const clipInfo =
-    clipLoading || clip === undefined
-      ? "Reading clipboard…"
-      : describeClipboard(clip);
+  const { data: clip, isLoading: clipLoading } = usePromise(async () => (await Clipboard.readText()) ?? "", []);
+  const clipInfo = clipLoading || clip === undefined ? "Reading clipboard…" : describeClipboard(clip);
 
   // Formula given as a launch argument: evaluate immediately.
-  if (initial)
-    return (
-      <ResultView formula={initial.startsWith("=") ? initial : `=${initial}`} />
-    );
+  if (initial) return <ResultView formula={initial.startsWith("=") ? initial : `=${initial}`} />;
 
   return (
     <Form
@@ -164,8 +122,7 @@ export default function QuickCalc(
             icon={Icon.Calculator}
             onSubmit={(values: { formula: string }) => {
               const f = values.formula.trim();
-              if (f)
-                push(<ResultView formula={f.startsWith("=") ? f : `=${f}`} />);
+              if (f) push(<ResultView formula={f.startsWith("=") ? f : `=${f}`} />);
             }}
           />
         </ActionPanel>

@@ -10,9 +10,7 @@ export type SheetFile = {
 
 const EXTENSIONS = ["sheet", "xlsx", "xls", "ods", "csv", "tsv"];
 
-const NAME_QUERY = EXTENSIONS.map((e) => `kMDItemFSName == '*.${e}'c`).join(
-  " || ",
-);
+const NAME_QUERY = EXTENSIONS.map((e) => `kMDItemFSName == '*.${e}'c`).join(" || ");
 
 /** Mid-ladder Spotlight window: files touched in the last 90 days. */
 const RECENT_SECONDS = 90 * 24 * 3600;
@@ -51,20 +49,18 @@ async function statAll(paths: string[]): Promise<SheetFile[]> {
   const out: SheetFile[] = [];
   for (let i = 0; i < paths.length; i += STAT_BATCH) {
     const batch = await Promise.all(
-      paths
-        .slice(i, i + STAT_BATCH)
-        .map(async (p): Promise<SheetFile | null> => {
-          try {
-            const s = await stat(p);
-            return {
-              path: p,
-              name: p.split("/").pop() ?? p,
-              modified: s.mtime,
-            };
-          } catch {
-            return null;
-          }
-        }),
+      paths.slice(i, i + STAT_BATCH).map(async (p): Promise<SheetFile | null> => {
+        try {
+          const s = await stat(p);
+          return {
+            path: p,
+            name: p.split("/").pop() ?? p,
+            modified: s.mtime,
+          };
+        } catch {
+          return null;
+        }
+      }),
     );
     out.push(...batch.filter((f): f is SheetFile => f !== null));
   }
@@ -72,12 +68,7 @@ async function statAll(paths: string[]): Promise<SheetFile[]> {
 }
 
 /** Widening Spotlight windows: 7 days, 90 days, 1 year, 3 years. */
-const WINDOWS_SECONDS = [
-  7 * 24 * 3600,
-  RECENT_SECONDS,
-  365 * 24 * 3600,
-  3 * 365 * 24 * 3600,
-];
+const WINDOWS_SECONDS = [7 * 24 * 3600, RECENT_SECONDS, 365 * 24 * 3600, 3 * 365 * 24 * 3600];
 
 /** Bound on the final, unwindowed fallback. Reached only when fewer than
  *  `limit` spreadsheets were modified in the last 3 years — at that point
@@ -88,16 +79,9 @@ const FALLBACK_CAP = 2000;
 /** Shrink `seconds` until mdfind returns at most STAT_CAP paths, without
  *  dropping below `limit`. A tighter window still contains the newest
  *  files, so ranking stays exact. */
-async function narrowWindow(
-  paths: string[],
-  seconds: number,
-  limit: number,
-): Promise<string[]> {
+async function narrowWindow(paths: string[], seconds: number, limit: number): Promise<string[]> {
   while (paths.length > STAT_CAP && seconds > MIN_WINDOW_SECONDS) {
-    const narrowerSeconds = Math.max(
-      MIN_WINDOW_SECONDS,
-      Math.floor(seconds / 2),
-    );
+    const narrowerSeconds = Math.max(MIN_WINDOW_SECONDS, Math.floor(seconds / 2));
     if (narrowerSeconds >= seconds) break;
     const narrower = await mdfindPaths(dateQuery(narrowerSeconds));
     if (narrower.length < limit) break;
@@ -130,8 +114,6 @@ export function findSpreadsheets(limit = 50): Promise<SheetFile[]> {
       paths = await narrowWindow(paths, seconds, limit);
     }
     const files = await statAll(paths);
-    return files
-      .sort((a, b) => b.modified.getTime() - a.modified.getTime())
-      .slice(0, limit);
+    return files.sort((a, b) => b.modified.getTime() - a.modified.getTime()).slice(0, limit);
   })();
 }

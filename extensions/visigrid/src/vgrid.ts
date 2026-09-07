@@ -14,9 +14,7 @@ let cached: string | null = null;
 
 export class VgridMissingError extends Error {
   constructor() {
-    super(
-      "vgrid CLI not found. Install VisiGrid: brew install --cask visigrid/tap/visigrid",
-    );
+    super("vgrid CLI not found. Install VisiGrid: brew install --cask visigrid/tap/visigrid");
   }
 }
 
@@ -40,18 +38,13 @@ export function vgridPath(): string {
 export function runVgrid(args: string[], stdin?: string): Promise<string> {
   const bin = vgridPath();
   return new Promise((resolve, reject) => {
-    const child = execFile(
-      bin,
-      args,
-      { maxBuffer: 8 * 1024 * 1024, timeout: 15000 },
-      (error, stdout, stderr) => {
-        if (error) {
-          reject(new Error(stderr.trim() || error.message));
-        } else {
-          resolve(stdout);
-        }
-      },
-    );
+    const child = execFile(bin, args, { maxBuffer: 8 * 1024 * 1024, timeout: 15000 }, (error, stdout, stderr) => {
+      if (error) {
+        reject(new Error(stderr.trim() || error.message));
+      } else {
+        resolve(stdout);
+      }
+    });
     if (stdin !== undefined && child.stdin) {
       child.stdin.write(stdin);
       child.stdin.end();

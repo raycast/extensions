@@ -25,34 +25,19 @@ function PeekDetail(props: { file: SheetFile }) {
   );
 
   return (
-    <List.Item.Detail
-      isLoading={isLoading}
-      markdown={error ? `Couldn't peek: ${error.message}` : (markdown ?? "")}
-    />
+    <List.Item.Detail isLoading={isLoading} markdown={error ? `Couldn't peek: ${error.message}` : (markdown ?? "")} />
   );
 }
 
 export default function Peek() {
-  const {
-    data: files = [],
-    isLoading,
-    error,
-  } = useCachedPromise(findSpreadsheets, []);
+  const { data: files = [], isLoading, error } = useCachedPromise(findSpreadsheets, []);
 
   return (
-    <List
-      isLoading={isLoading}
-      isShowingDetail
-      searchBarPlaceholder="Search spreadsheets…"
-    >
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search spreadsheets…">
       <List.EmptyView
         icon={error ? Icon.Warning : Icon.Document}
         title={error ? "Couldn't Find Spreadsheets" : "No Spreadsheets Found"}
-        description={
-          error
-            ? error.message
-            : "No recent .xlsx, .csv, or .sheet files under your home folder."
-        }
+        description={error ? error.message : "No recent .xlsx, .csv, or .sheet files under your home folder."}
       />
       {files.map((f) => (
         <List.Item
@@ -62,11 +47,7 @@ export default function Peek() {
           detail={<PeekDetail file={f} />}
           actions={
             <ActionPanel>
-              <Action.Open
-                title="Open in VisiGrid"
-                target={f.path}
-                application="VisiGrid"
-              />
+              <Action.Open title="Open in VisiGrid" target={f.path} application="VisiGrid" />
               <Action.ShowInFinder path={f.path} />
               <Action.CopyToClipboard title="Copy Path" content={f.path} />
             </ActionPanel>
