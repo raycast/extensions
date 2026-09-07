@@ -9,6 +9,9 @@
   "categories": [
     "Developer Tools"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "byte",
