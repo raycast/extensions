@@ -1,6 +1,6 @@
 # Mirror Displays Changelog
 
-## [Add mirroring toggle] - {PR_MERGE_DATE}
+## [Add mirroring toggle] - 2026-09-07
 
 - Added a "Toggle Mirroring" action (and a standalone hotkey-able command) that turns mirroring off if it's on, or on if it's off, using a configurable default direction.
 
