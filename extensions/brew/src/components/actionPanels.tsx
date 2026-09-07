@@ -36,8 +36,9 @@ const SortByPopularityAction = (props: { sortByPopularity: boolean; onToggleSort
   <Action
     title={props.sortByPopularity ? "Sort by Relevance" : "Sort by Popularity"}
     icon={props.sortByPopularity ? Icon.Text : Icon.LineChart}
-    // ⌘⇧P is free: Keyboard.Shortcut.Common.Pin is ⌘. on macOS (verified in the
-    // Raycast runtime), so the Pin action in this same panel does not collide.
+    // ⌘⇧P is free: Keyboard.Shortcut.Common.Pin is ⌘. on macOS (read from the
+    // Raycast 2.2.0.0 runtime), so the Pin action in this panel does not collide.
+    // The API docs say ⌘⇧P and are wrong — see raycast/extensions#30879.
     shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
     onAction={props.onToggleSort}
   />
