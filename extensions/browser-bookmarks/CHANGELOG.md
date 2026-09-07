@@ -1,5 +1,11 @@
 # Browser Bookmarks Changelog
 
+## [Updates] - 2026-09-06
+
+- Memoise the Chromium bookmark and folder lists so typing in the search bar no longer rewalks the bookmark tree for every browser
+- Find Brave Nightly, Vivaldi, Helium and Dia on Windows instead of only looking in the macOS application support folder
+- Look for Firefox and Zen profiles in the Windows roaming app data folder instead of only the macOS application support folder
+
 ## [Chrome Account Bookmarks] - 2026-05-20
 
 - Added support for Chrome account-synced bookmarks stored in `AccountBookmarks`

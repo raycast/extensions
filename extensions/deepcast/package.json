@@ -71,7 +71,7 @@
       "name": "norwegian",
       "title": "Translate into Norwegian",
       "subtitle": "Deepcast",
-      "description": "Translate text into Norwegian (Bokmål) using DeepL",
+      "description": "Translate text into Norwegian (Bokm\u00e5l) using DeepL",
       "mode": "no-view",
       "arguments": [
         {
@@ -655,7 +655,7 @@
           "value": "KO"
         },
         {
-          "title": "Norwegian (Bokmål)",
+          "title": "Norwegian (Bokm\u00e5l)",
           "value": "NB"
         },
         {
@@ -702,7 +702,8 @@
           "title": "Paste in Frontmost App",
           "value": "paste"
         }
-      ]
+      ],
+      "default": "clipboard"
     },
     {
       "description": "Show transliteration",

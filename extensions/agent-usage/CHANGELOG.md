@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Show Grok limit reset credits] - 2026-09-04
+
+### New Features
+
+- Show Grok manual usage-limit reset tokens in the detail view: remaining count and each expiration time, matching Codex
+
 ## [Copilot multi-account and AI credits] - 2026-08-29
 
 ### New Features

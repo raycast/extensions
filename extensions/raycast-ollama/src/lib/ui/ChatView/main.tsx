@@ -104,7 +104,11 @@ export function ChatView(): React.JSX.Element {
             icon={Icon.SpeechBubbleActive}
             onAction={() => {
               Run(Query, Image, UseToolsOllamaApi, Chat, SetChat, SetIsLoading).catch(async (e: Error) => {
-                await showToast({ style: Toast.Style.Failure, title: "Error:", message: e.message });
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Error:",
+                  message: e.message,
+                });
                 SetIsLoading(false);
               });
             }}
@@ -181,10 +185,17 @@ export function ChatView(): React.JSX.Element {
                 GetImage()
                   .then((i) => {
                     SetImage(i);
-                    showToast({ style: Toast.Style.Success, title: "Image Added" });
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: "Image Added",
+                    });
                   })
                   .catch((e) => {
-                    showToast({ style: Toast.Style.Failure, title: "Error: ", message: String(e) });
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Error: ",
+                      message: String(e),
+                    });
                   })
               }
               shortcut={Shortcut.AttachImage}
@@ -238,7 +249,10 @@ export function ChatView(): React.JSX.Element {
 
     const toolUsed = message.messages.filter((v) => v.role === OllamaApiChatMessageRole.TOOL);
     if (toolUsed.length)
-      accessory.push({ icon: Icon.Hammer, tooltip: toolUsed.map((v) => `${v.tool_name}`).join(", ") });
+      accessory.push({
+        icon: Icon.Hammer,
+        tooltip: toolUsed.map((v) => `${v.tool_name}`).join(", "),
+      });
 
     return accessory;
   }

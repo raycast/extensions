@@ -1,5 +1,9 @@
 # Changelog
 
+## [Menu Bar Background Refresh] - 2026-09-03
+
+- Refresh the menu bar in the background every minute instead of only when it is opened.
+
 ## [Fix Stuck Menu Bar Toast] - 2026-08-29
 
 - Report menu bar failures with a HUD instead of a toast held open across the action. Clicking an item unloads the menu bar command, which left the toast on screen with nothing to resolve it.

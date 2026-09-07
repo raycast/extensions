@@ -23,6 +23,7 @@ const headers = (token: string) => ({
   Accept: "application/json",
   "Content-Type": "application/json",
   Authorization: `Bearer ${token}`,
+  "User-Agent": "raycast-laravel-forge (+https://www.raycast.com/KevinBatdorf/laravel-forge)",
 });
 
 export const getCollection = async (path: string, token: string, { pages = PAGE_LIMIT, from = "" } = {}) => {

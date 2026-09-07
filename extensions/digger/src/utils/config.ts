@@ -11,8 +11,15 @@ export const TIMEOUTS = {
   HOST_META: 5000,
   /** TLS certificate info socket connection */
   TLS_SOCKET: 5000,
-  /** Wayback Machine API requests */
+  /** A single Wayback Machine API request. Deliberately generous: the CDX
+   *  precise-count query legitimately takes ~5s even on an 8-snapshot archive,
+   *  so trimming this only fails requests that were going to succeed. The
+   *  runaway case is bounded by WAYBACK_TOTAL instead. */
   WAYBACK_FETCH: 10000,
+  /** Budget for the WHOLE Wayback lookup, across its four sequential requests
+   *  and their retries. Without it a hung archive.org cost 4 requests x 2
+   *  attempts x WAYBACK_FETCH — over a minute of spinner for one section. */
+  WAYBACK_TOTAL: 15000,
 } as const;
 
 /**
@@ -25,6 +32,19 @@ export const CACHE = {
   MAX_ENTRIES: 50,
   /** Key used to store the cache index in LocalStorage */
   INDEX_KEY: "digger_cache_index",
+  /**
+   * Prefix for cached entries. BUMP THE VERSION whenever the cached shape
+   * changes — v2 arrived when robotsTxt/llmsTxt became a ResourceStatus string
+   * rather than a boolean. Entries under an older prefix are purged on the next
+   * index read (see getCacheIndex).
+   */
+  KEY_PREFIX: "digger_cache_v2_",
+  /**
+   * Shared prefix across ALL cache-key versions, used to find entries left by
+   * earlier versions. INDEX_KEY starts with this too, so it must be excluded
+   * explicitly wherever this is used to identify payloads.
+   */
+  KEY_FAMILY: "digger_cache_",
 } as const;
 
 /**

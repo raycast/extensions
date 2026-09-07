@@ -1,5 +1,11 @@
 # Obsidian Changelog
 
+## [Fix Misleading Required Plugin Message] - 2026-09-06
+
+- Name the core plugin a command actually needs instead of always naming Daily Notes, so Open Workspace now asks for Workspaces
+- Drop the core plugin sentence from the Append Task message, which only needs Advanced URI
+- Retitle the screen to "Required plugins missing", since Advanced URI is often already installed
+
 ## [Fix Open Note on Creation] - 2026-08-27
 
 - Open the created note in Obsidian before the command window closes, so the "Open on creation" preference works reliably

@@ -1,6 +1,8 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { callToolJson, listTools, resolveTool } from "./mcp";
 
+export { withAuthUser } from "./meeting-url";
+
 // 注意: この2つの型はuseCachedPromiseでJSONシリアライズしてキャッシュされるため、
 // 生イベント（nativeEvent等）は含めず、表示に必要なフィールドだけに絞って軽量に保つ。
 export interface OneCalCalendar {
@@ -15,6 +17,8 @@ export interface OneCalEvent {
   id: string;
   calendarId?: string;
   calendarName?: string;
+  /** 所属カレンダーのアカウントメール。Google系会議URLのauthuser付与に使う */
+  accountEmail?: string;
   title: string;
   start: string; // ISO日時 or YYYY-MM-DD（終日）
   end?: string;
@@ -227,6 +231,7 @@ function normalizeEvent(
       `${start}-${str(raw, ["title", "summary"]) ?? ""}`,
     calendarId,
     calendarName: calendar?.name ?? str(raw, ["calendarName", "calendar"]),
+    accountEmail: calendar?.accountEmail,
     title: str(raw, ["title", "summary", "subject", "name"]) ?? "(untitled)",
     start: start ?? "",
     end,
