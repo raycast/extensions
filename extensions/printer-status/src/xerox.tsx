@@ -20,7 +20,13 @@ export default function Command() {
       preferences.modelNameOid,
       preferences.serialNumberOid,
       preferences.printerNameOid,
-      preferences.printerStatusOid,
+      preferences.wasteTonerBottleOid,
+      preferences.uptimeOid,
+      preferences.printerGeneralStatusOid,
+      preferences.displayMessage1Oid,
+      preferences.displayMessage2Oid,
+      preferences.displayMessage3Oid,
+      preferences.displayMessage4Oid,
     ],
   );
   const labels = LABELS;
@@ -83,23 +89,52 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      <List.Section title={labels.sectionGeneral}>
-        {stats?.printerStatus && (
+      <List.Section title={labels.sectionStatus}>
+        {stats?.printerGeneralStatus && (
           <List.Item
-            title={labels.status}
-            subtitle={stats.printerStatus}
+            title={labels.generalStatus}
+            subtitle={stats.printerGeneralStatus}
             icon={
-              stats.printerStatus.toLowerCase().includes("error") || stats.printerStatus.toLowerCase().includes("jam")
+              stats.printerGeneralStatus.toLowerCase().includes("error") ||
+              stats.printerGeneralStatus.toLowerCase().includes("jam")
                 ? { source: Icon.Warning, tintColor: "red" }
                 : { source: Icon.CheckCircle, tintColor: "green" }
             }
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={stats.printerStatus} title={labels.copyStatus} />
+                <Action.CopyToClipboard content={stats.printerGeneralStatus} title={labels.copyGeneralStatus} />
               </ActionPanel>
             }
           />
         )}
+        {stats?.wasteTonerBottle && (
+          <List.Item
+            title={labels.wasteTonerBottle}
+            subtitle={stats.wasteTonerBottle}
+            icon={Icon.Tag}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard content={stats.wasteTonerBottle} title={labels.copyWasteTonerBottle} />
+              </ActionPanel>
+            }
+          />
+        )}
+        {stats?.displayMessages.map((message, index) => (
+          <List.Item
+            key={`${index}-${message}`}
+            title={`${labels.displayMessage} ${index + 1}`}
+            subtitle={message}
+            icon={Icon.Monitor}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard content={message} title={labels.copyDisplayMessage} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+
+      <List.Section title={labels.sectionGeneral}>
         <List.Item
           title={labels.ipAddress}
           subtitle={host}
@@ -111,6 +146,18 @@ export default function Command() {
             </ActionPanel>
           }
         />
+        {stats?.uptime && (
+          <List.Item
+            title={labels.uptime}
+            subtitle={stats.uptime}
+            icon={Icon.Clock}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard content={stats.uptime} title={labels.copyUptime} />
+              </ActionPanel>
+            }
+          />
+        )}
         {stats?.printerName && (
           <List.Item
             title={labels.networkName}

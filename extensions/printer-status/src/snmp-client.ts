@@ -13,6 +13,10 @@ export interface PrinterStats {
   serialNumber: string | null;
   printerName: string | null;
   printerStatus: string | null;
+  uptime: string | null;
+  printerGeneralStatus: string | null;
+  wasteTonerBottle: string | null;
+  displayMessages: string[];
 }
 
 const MAX_SUPPLY_ROWS = 40;
@@ -36,6 +40,53 @@ const calculatePercentage = (currentVb: snmp.Varbind | undefined, maxVb: snmp.Va
   }
   if (current <= 100) return current.toString();
   return null;
+};
+
+const formatUptime = (vb: snmp.Varbind | undefined): string | null => {
+  const value = getValueString(vb);
+  if (!value) return null;
+
+  const ticks = parseInt(value, 10);
+  if (isNaN(ticks)) return value;
+
+  let seconds = Math.floor(ticks / 100);
+  const days = Math.floor(seconds / 86400);
+  seconds %= 86400;
+  const hours = Math.floor(seconds / 3600);
+  seconds %= 3600;
+  const minutes = Math.floor(seconds / 60);
+
+  const parts: string[] = [];
+  if (days) parts.push(`${days}d`);
+  if (hours) parts.push(`${hours}h`);
+  if (minutes || parts.length === 0) parts.push(`${minutes}m`);
+  return parts.join(" ");
+};
+
+const formatPrinterGeneralStatus = (vb: snmp.Varbind | undefined): string | null => {
+  const value = getValueString(vb);
+  if (!value) return null;
+
+  const statuses: Record<string, string> = {
+    "1": "other",
+    "2": "unknown",
+    "3": "idle",
+    "4": "printing",
+    "5": "warmup",
+  };
+
+  return statuses[value] || value;
+};
+
+const formatWasteTonerBottleUsed = (vb: snmp.Varbind | undefined): string | null => {
+  const freeSpace = getValueString(vb);
+  if (!freeSpace) return null;
+
+  const freePercentage = parseInt(freeSpace, 10);
+  if (isNaN(freePercentage)) return freeSpace;
+
+  const usedPercentage = Math.min(100, Math.max(0, 100 - freePercentage));
+  return `${usedPercentage}% used`;
 };
 
 const getOids = (session: snmp.Session, oids: string[]): Promise<snmp.Varbind[]> =>
@@ -154,7 +205,13 @@ export async function fetchPrinterStats(
     oidConfig.modelNameOid,
     oidConfig.serialNumberOid,
     oidConfig.printerNameOid,
-    oidConfig.printerStatusOid,
+    oidConfig.wasteTonerBottleOid,
+    oidConfig.uptimeOid,
+    oidConfig.printerGeneralStatusOid,
+    oidConfig.displayMessage1Oid,
+    oidConfig.displayMessage2Oid,
+    oidConfig.displayMessage3Oid,
+    oidConfig.displayMessage4Oid,
   ];
 
   try {
@@ -170,7 +227,14 @@ export async function fetchPrinterStats(
       modelName: getValueString(generalVarbinds[0]),
       serialNumber: getValueString(generalVarbinds[1]),
       printerName: getValueString(generalVarbinds[2]),
-      printerStatus: getValueString(generalVarbinds[3]),
+      wasteTonerBottle: formatWasteTonerBottleUsed(generalVarbinds[3]),
+      uptime: formatUptime(generalVarbinds[4]),
+      printerGeneralStatus: formatPrinterGeneralStatus(generalVarbinds[5]),
+      printerStatus: formatPrinterGeneralStatus(generalVarbinds[5]),
+      displayMessages: generalVarbinds
+        .slice(6, 10)
+        .map((vb) => getValueString(vb)?.trim())
+        .filter((message): message is string => Boolean(message)),
     };
   } finally {
     session.close();

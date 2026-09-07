@@ -46,7 +46,13 @@
               "modelName": "Xerox C325",
               "serialNumber": "EXAMPLE123",
               "printerName": "Office Printer",
-              "printerStatus": "idle"
+              "printerStatus": "idle",
+              "uptime": "2d 4h 12m",
+              "printerGeneralStatus": "idle",
+              "wasteTonerBottle": "16% used",
+              "displayMessages": [
+                "Ready"
+              ]
             }
           ]
         },
@@ -148,12 +154,60 @@
       "default": "1.3.6.1.2.1.1.5.0"
     },
     {
-      "name": "printerStatusOid",
+      "name": "wasteTonerBottleOid",
       "type": "textfield",
       "required": false,
-      "title": "OID - Printer Status",
-      "description": "Console display text OID",
+      "title": "OID - Waste Toner Bottle",
+      "description": "Printer-MIB supply level OID for the waste toner bottle",
+      "default": "1.3.6.1.2.1.43.11.1.1.9.1.10"
+    },
+    {
+      "name": "uptimeOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Uptime",
+      "description": "System uptime OID",
+      "default": "1.3.6.1.2.1.1.3.0"
+    },
+    {
+      "name": "printerGeneralStatusOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - General Printer Status",
+      "description": "Host Resources MIB hrPrinterStatus OID",
+      "default": "1.3.6.1.2.1.25.3.5.1.1.1"
+    },
+    {
+      "name": "displayMessage1Oid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Display Message 1",
+      "description": "Printer console display text OID, line 1",
       "default": "1.3.6.1.2.1.43.16.5.1.2.1.1"
+    },
+    {
+      "name": "displayMessage2Oid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Display Message 2",
+      "description": "Printer console display text OID, line 2",
+      "default": "1.3.6.1.2.1.43.16.5.1.2.1.2"
+    },
+    {
+      "name": "displayMessage3Oid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Display Message 3",
+      "description": "Printer console display text OID, line 3",
+      "default": "1.3.6.1.2.1.43.16.5.1.2.1.3"
+    },
+    {
+      "name": "displayMessage4Oid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Display Message 4",
+      "description": "Printer console display text OID, line 4",
+      "default": "1.3.6.1.2.1.43.16.5.1.2.1.4"
     }
   ],
   "dependencies": {
