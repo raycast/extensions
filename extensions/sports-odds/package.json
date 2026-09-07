@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sports-odds",
   "title": "Sports Odds",
-  "description": "Search live sports odds, compare the best available lines across 30+ sportsbooks, and run betting math (Kelly, hedge, de-vig, free bet) powered by ParlayAPI",
+  "description": "Search available sports odds, compare returned bookmaker quotes, and run calculators for Kelly, hedge, de-vig and free bet conversion powered by ParlayAPI",
   "icon": "icon.png",
   "author": "jacobiusmakes",
   "categories": ["Data", "Finance"],
@@ -29,7 +29,7 @@
       "type": "password",
       "required": false,
       "title": "ParlayAPI Key",
-      "description": "Optional. Unlocks full odds boards (moneyline, spreads, totals from every book). The free tier includes 1,000 credits per month with no card required: https://parlay-api.com/signup",
+      "description": "Optional. Uses your own account to request available moneyline, spread and total odds. Coverage and credit limits vary. Current plans: https://parlay-api.com/pricing",
       "placeholder": "pk_live_..."
     }
   ],

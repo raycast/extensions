@@ -89,7 +89,7 @@ function ConsensusBestLines({ game }: { game: GameHit }) {
         "",
         "This matchup is not in the live consensus feed right now. The keyless feed tracks games close to start time.",
         "",
-        "Add a free ParlayAPI key in the extension preferences to pull the full pre-game odds board for any listed game (moneyline, spreads, and totals from every tracked book).",
+        "Add your own ParlayAPI key in the extension preferences to request available moneyline, spread and total odds. Coverage and account limits apply; see https://parlay-api.com/pricing.",
       ].join("\n");
     }
     return consensusMarkdown(match);
@@ -177,7 +177,7 @@ function consensusMarkdown(g: CommandCenterGame): string {
     );
   }
   lines.push("");
-  lines.push("Live consensus feed, freshest quotes only. Stale and outlier quotes are filtered out.");
+  lines.push("Public preview quotes returned by ParlayAPI. Prices can change; coverage varies by event and bookmaker.");
   return lines.join("\n");
 }
 

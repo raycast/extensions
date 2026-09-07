@@ -19,7 +19,7 @@ const CALCULATORS: CalcInfo[] = [
   {
     id: "hedge",
     title: "Hedge Calculator",
-    subtitle: "Lock in profit on an open bet",
+    subtitle: "Estimate hedge outcomes for an open bet",
     icon: Icon.Shield,
   },
   {
@@ -31,7 +31,7 @@ const CALCULATORS: CalcInfo[] = [
   {
     id: "free-bet",
     title: "Free Bet Converter",
-    subtitle: "Turn a free bet into guaranteed cash",
+    subtitle: "Estimate free bet conversion from supplied odds",
     icon: Icon.BankNote,
   },
 ];
@@ -205,11 +205,11 @@ function HedgeForm() {
           ["Total staked", usd(data.total_stake_usd)],
           ["Profit if original wins", usd(data.profit_if_original_wins)],
           ["Profit if hedge wins", usd(data.profit_if_hedge_wins)],
-          ["Guaranteed profit", usd(data.guaranteed_profit_usd)],
-          ["True arbitrage", data.is_arb ? "Yes" : "No"],
+          ["Calculated minimum profit", usd(data.guaranteed_profit_usd)],
+          ["Arbitrage under supplied inputs", data.is_arb ? "Yes" : "No"],
         ],
         typeof data.note === "string" ? data.note : undefined,
-        `Hedge ${usd(data.hedge_stake_usd)} to lock ${usd(data.guaranteed_profit_usd)}`,
+        `Calculated hedge: ${usd(data.hedge_stake_usd)}; minimum profit under supplied inputs: ${usd(data.guaranteed_profit_usd)}`,
       ),
     );
   }
@@ -228,8 +228,8 @@ function HedgeForm() {
       <Form.TextField id="originalOdds" title="Original Odds" placeholder="+300" info={ODDS_INFO} />
       <Form.TextField id="hedgeOdds" title="Hedge Odds" placeholder="-150" info={ODDS_INFO} />
       <Form.Dropdown id="target" title="Target" defaultValue="equal_profit">
-        <Form.Dropdown.Item value="equal_profit" title="Equal Profit Both Sides" />
-        <Form.Dropdown.Item value="free_roll" title="Free Roll (no downside)" />
+        <Form.Dropdown.Item value="equal_profit" title="Equal Profit Target" />
+        <Form.Dropdown.Item value="free_roll" title="Free Roll Target" />
       </Form.Dropdown>
     </Form>
   );
@@ -323,13 +323,13 @@ function FreeBetForm() {
         "Free Bet Conversion",
         [
           ["Hedge stake", usd(data.hedge_stake_usd)],
-          ["Guaranteed cash", usd(data.guaranteed_cash_usd)],
+          ["Calculated conversion cash", usd(data.guaranteed_cash_usd)],
           ["Conversion rate", `${num(data.conversion_pct)}%`],
           ["Profit if free bet wins", usd(data.profit_if_free_bet_wins)],
           ["Profit if hedge wins", usd(data.profit_if_hedge_wins)],
         ],
         typeof data.note === "string" ? data.note : undefined,
-        `Free bet converts to ${usd(data.guaranteed_cash_usd)} guaranteed (${num(data.conversion_pct)}%)`,
+        `Calculated free bet cash: ${usd(data.guaranteed_cash_usd)} (${num(data.conversion_pct)}% conversion under supplied inputs)`,
       ),
     );
   }
