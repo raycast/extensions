@@ -11,6 +11,8 @@
 - The upgrade progress toast now reports the download phase as a batch rather than naming one package: brew announces every package up front, then downloads them concurrently, so a per-package label there was not true
 - A pinned cask now shows "Pinned: Yes" in the metadata panel, as pinned formulae already did — the list's tack accessory is hidden while that panel is open, so it was the only place the state could be seen. Formula metadata also gained the Tap row casks already had
 - A package Homebrew declines to upgrade is no longer reported as upgraded. Brew warns and skips a disabled, unavailable, already-current or un-upgradable package while still exiting 0, and each reason is now shown as its own outcome rather than one generic skip
+- Upgrading a single package that Homebrew declines now shows it as skipped, with the reason, rather than a red failure — and the "N of M" progress counter no longer stalls a step behind when a package is skipped mid-run
+- A cask that belongs to no tap no longer offers a "Copy Tap Name" action that would copy nothing
 - Pin state is now read from Homebrew's own pin directory immediately before an upgrade or uninstall, so a package pinned in another command — or outside Raycast — is respected rather than trusted from a cached snapshot. One directory read per run, ~20µs
 - If Homebrew refuses an upgrade or uninstall because the package is pinned, the toast now offers to unpin, instead of showing the raw error
 - Cask details now list the formulae and casks a cask depends on, and the architectures it requires — formula details have always shown dependencies, so casks were missing information brew reports (`gcloud-cli` needs `python@3.14`, for one)

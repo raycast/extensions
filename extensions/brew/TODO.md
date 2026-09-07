@@ -262,6 +262,26 @@ Focus: Implement AI-powered features, improve user experience, and add advanced 
 - [x] Homebrew 6.0+ only; removed the deprecated internal-API preference
 - [x] vitest coverage for selection and formula/cask discriminator logic
 
+## 🔒 Dependencies
+
+- [ ] **Migrate `stream-json` 1.9.1 → 3.6.0** (moderate advisory
+      [GHSA-528h-pc64-c93x](https://github.com/advisories/GHSA-528h-pc64-c93x), CVSS 6.2, affects
+      `<=3.4.0`). The `pick`/`ignore`/`filter`/`replace` filters are O(depth²) on nested input, so
+      small crafted JSON can block the event loop for seconds to minutes.
+  - [ ] **We use the affected API.** `src/utils/cache.ts` builds
+        `chain([… parser(), filter({ filter: keysRe }), streamArray()])` to stream the ~2.6 MB
+        `formula.json` / `cask.json` indexes, so this is not a dormant transitive dependency
+  - [ ] Exposure is low but not nil: the input is Homebrew's own API over HTTPS, and its JSON is
+        shallow — the advisory needs deep nesting we would never receive from formulae.brew.sh.
+        This is worth doing on its own schedule, not as an emergency
+  - [ ] It is a **two-major** jump and `npm audit fix --force` territory, which is why it was left
+        out of the Homebrew 6 PR. `stream-json@3.6.0` also requires `stream-chain@^4.2.5`, against
+        the 3.4.0 we pin — both move together
+  - [ ] Verify after upgrading: the chunked cache still builds, `filter`'s options shape is
+        unchanged across the majors, and the abort path still destroys the pipeline
+        (`src/utils/cache.ts` around the `onAbort` handler)
+  - [ ] Re-run `npm audit` afterwards and confirm the advisory clears rather than assuming it did
+
 ## ⚠️ Exit-0 no-ops brew does not report as failures
 
 Homebrew warns and skips more often than it fails. `brew upgrade` skips are handled
