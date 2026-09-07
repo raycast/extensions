@@ -22,8 +22,7 @@ export function obsidianUrl(target: string): string {
 }
 
 export function actionUrl(action: ReferenceAction): string {
-  if (action.kind === "pwd")
-    throw new Error("Password actions copy their target and do not have a URL");
+  if (action.kind === "pwd") throw new Error("Password actions copy their target and do not have a URL");
   if (action.kind === "open") return expandHomePath(action.target);
   if (action.kind === "ssh") return sshUrl(action.target);
   if (action.kind === "obsidian") return obsidianUrl(action.target);

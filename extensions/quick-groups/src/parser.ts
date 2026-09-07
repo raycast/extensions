@@ -20,8 +20,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 function scalarToString(value: unknown): string | undefined {
   if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint")
-    return String(value);
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") return String(value);
   if (value instanceof Date) return value.toISOString();
   if (value === null) return "null";
   return undefined;
@@ -76,13 +75,7 @@ function resolveMappingValues(
   };
 }
 
-function parseField(
-  label: string,
-  input: unknown,
-  source: string,
-  collection: string,
-  record: string,
-): ReferenceField {
+function parseField(label: string, input: unknown, source: string, collection: string, record: string): ReferenceField {
   const sensitiveLabel = SENSITIVE_PATTERN.test(label);
   const scalar = scalarToString(input);
   if (scalar !== undefined) {
@@ -126,7 +119,8 @@ function parseField(
   if (effectiveValue === undefined) {
     throw new Error(`Field "${label}" has no value in ${source} (${collection}/${record})`);
   }
-  const sensitive = sensitiveLabel || (explicitValue === undefined && firstValueSensitive);
+  const sensitive =
+    sensitiveLabel || (explicitValue === undefined ? firstValueSensitive : resolvedInput.sensitiveNames.has("value"));
   return { label, effectiveValue, values, actions, sensitive };
 }
 

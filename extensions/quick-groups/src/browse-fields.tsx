@@ -6,10 +6,7 @@ import { useReferenceData } from "./use-reference-data";
 
 function FieldValues({ group }: { group: FieldGroup }) {
   return (
-    <List
-      navigationTitle={titleCase(group.label)}
-      searchBarPlaceholder={`Search ${titleCase(group.label)} values…`}
-    >
+    <List navigationTitle={titleCase(group.label)} searchBarPlaceholder={`Search ${titleCase(group.label)} values…`}>
       {group.occurrences.map(({ field, record }, index) => (
         <List.Item
           key={`${record.collection}/${record.name}/${index}`}
@@ -30,10 +27,7 @@ function FieldValues({ group }: { group: FieldGroup }) {
 export default function Command() {
   const { referenceDirectory } = getPreferenceValues<Preferences.BrowseFields>();
   const groupsDirectory = resolveGroupsDirectory(referenceDirectory);
-  const { records, diagnostics, isLoading, reload } = useReferenceData(
-    groupsDirectory.path,
-    groupsDirectory.isDefault,
-  );
+  const { records, diagnostics, isLoading, reload } = useReferenceData(groupsDirectory.path, groupsDirectory.isDefault);
   const groups = groupFields(records);
 
   return (
@@ -46,11 +40,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Open title="Open Groups Directory" target={groupsDirectory.path} />
-              <Action
-                title="Reload Group Files"
-                icon={Icon.ArrowClockwise}
-                onAction={() => reload()}
-              />
+              <Action title="Reload Group Files" icon={Icon.ArrowClockwise} onAction={() => reload()} />
             </ActionPanel>
           }
         />
@@ -68,11 +58,7 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Browse Values"
-                  icon={Icon.List}
-                  target={<FieldValues group={group} />}
-                />
+                <Action.Push title="Browse Values" icon={Icon.List} target={<FieldValues group={group} />} />
               </ActionPanel>
             }
           />

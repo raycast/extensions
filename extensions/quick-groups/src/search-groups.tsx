@@ -20,10 +20,7 @@ import { useReferenceData } from "./use-reference-data";
 
 function RecordView({ record }: { record: ReferenceRecord }) {
   return (
-    <List
-      navigationTitle={`${record.collection} / ${record.name}`}
-      searchBarPlaceholder="Filter fields…"
-    >
+    <List navigationTitle={`${record.collection} / ${record.name}`} searchBarPlaceholder="Filter fields…">
       {record.fields.map((field, index) => (
         <List.Item
           key={`${field.label}-${index}`}
@@ -55,8 +52,7 @@ function Diagnostics({ diagnostics }: { diagnostics: Diagnostic[] }) {
           icon={{ source: Icon.Warning, tintColor: Color.Orange }}
           title={diagnostic.message}
           subtitle={
-            [diagnostic.collection, diagnostic.record].filter(Boolean).join(" / ") ||
-            diagnostic.source.split("/").pop()
+            [diagnostic.collection, diagnostic.record].filter(Boolean).join(" / ") || diagnostic.source.split("/").pop()
           }
           accessories={[
             {
@@ -73,11 +69,7 @@ function Diagnostics({ diagnostics }: { diagnostics: Diagnostic[] }) {
                 target={<DiagnosticView diagnostic={diagnostic} />}
               />
               <Action.ShowInFinder path={diagnostic.source} />
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -120,24 +112,18 @@ function DiagnosticView({ diagnostic }: { diagnostic: Diagnostic }) {
 export default function Command() {
   const { referenceDirectory } = getPreferenceValues<Preferences.SearchGroups>();
   const groupsDirectory = resolveGroupsDirectory(referenceDirectory);
-  const { records, diagnostics, isLoading, reload } = useReferenceData(
-    groupsDirectory.path,
-    groupsDirectory.isDefault,
-  );
+  const { records, diagnostics, isLoading, reload } = useReferenceData(groupsDirectory.path, groupsDirectory.isDefault);
   const [searchText, setSearchText] = useState("");
   const [collection, setCollection] = useState("__all__");
 
   const index = useMemo(() => buildSearchIndex(records), [records]);
   const collections = useMemo(
-    () =>
-      [...new Set(records.map((record) => record.collection))].sort((a, b) => a.localeCompare(b)),
+    () => [...new Set(records.map((record) => record.collection))].sort((a, b) => a.localeCompare(b)),
     [records],
   );
   const matches = useMemo(
     () =>
-      searchRecords(index, searchText).filter(
-        (record) => collection === "__all__" || record.collection === collection,
-      ),
+      searchRecords(index, searchText).filter((record) => collection === "__all__" || record.collection === collection),
     [collection, index, searchText],
   );
 
@@ -176,9 +162,7 @@ export default function Command() {
           icon={Icon.Binoculars}
           title={records.length === 0 ? "No Group Records" : "No Matches"}
           description={
-            records.length === 0
-              ? "Add a .yaml or .yml file to your Groups directory."
-              : "Try another fragment."
+            records.length === 0 ? "Add a .yaml or .yml file to your Groups directory." : "Try another fragment."
           }
           actions={
             <ActionPanel>
@@ -186,11 +170,7 @@ export default function Command() {
                 <Action title="Create Example YAML" icon={Icon.Document} onAction={createExample} />
               ) : null}
               <Action.Open title="Open Groups Directory" target={groupsDirectory.path} />
-              <Action
-                title="Reload Group Files"
-                icon={Icon.ArrowClockwise}
-                onAction={() => reload()}
-              />
+              <Action title="Reload Group Files" icon={Icon.ArrowClockwise} onAction={() => reload()} />
             </ActionPanel>
           }
         />
@@ -202,27 +182,13 @@ export default function Command() {
             icon={Icon.List}
             title={record.name}
             subtitle={record.collection}
-            accessories={[
-              { text: `${record.fields.length} field${record.fields.length === 1 ? "" : "s"}` },
-            ]}
+            accessories={[{ text: `${record.fields.length} field${record.fields.length === 1 ? "" : "s"}` }]}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Open Record"
-                  icon={Icon.Sidebar}
-                  target={<RecordView record={record} />}
-                />
-                <Action
-                  title="Reload Group Files"
-                  icon={Icon.ArrowClockwise}
-                  onAction={() => reload()}
-                />
+                <Action.Push title="Open Record" icon={Icon.Sidebar} target={<RecordView record={record} />} />
+                <Action title="Reload Group Files" icon={Icon.ArrowClockwise} onAction={() => reload()} />
                 <Action.Open title="Edit Source" target={record.source} />
-                <Action
-                  title="Open Extension Preferences"
-                  icon={Icon.Gear}
-                  onAction={openExtensionPreferences}
-                />
+                <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }
           />

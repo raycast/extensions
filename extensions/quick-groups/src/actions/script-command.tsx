@@ -29,9 +29,7 @@ export function registerScriptCommandAction(options: ScriptCommandActionOptions)
     render: (target) => {
       const args = mapArguments(target);
       if (args.length > 3) {
-        throw new Error(
-          `Script Command action "${options.name}" returned more than three arguments`,
-        );
+        throw new Error(`Script Command action "${options.name}" returned more than three arguments`);
       }
       if (!args.every((argument) => typeof argument === "string")) {
         throw new Error(`Script Command action "${options.name}" arguments must be strings`);

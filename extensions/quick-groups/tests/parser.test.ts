@@ -155,6 +155,23 @@ services:
     expect(field.values).not.toContain("token-highly-secret");
   });
 
+  it("masks an explicit value derived from a sensitive sibling", () => {
+    const { records } = parseReferenceYaml(
+      `
+services:
+  router:
+    credentials:
+      pwd: highly-secret
+      value: \${pwd}
+`,
+      "secrets.yaml",
+    );
+    const field = records[0].fields[0];
+    expect(field.effectiveValue).toBe("highly-secret");
+    expect(field.sensitive).toBe(true);
+    expect(field.values).toEqual([]);
+  });
+
   it.each([
     ["missing", "open: https://\${host}", "unknown value"],
     ["cycle", "value: \${host}\n      host: \${value}", "substitution cycle"],

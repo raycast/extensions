@@ -20,9 +20,7 @@ export function FieldActions({ field }: { field: ReferenceField }) {
   return (
     <ActionPanel title={titleCase(field.label)}>
       {field.actions.map((action, index) => (
-        <Fragment key={`${action.kind}-${index}`}>
-          {getActionDefinition(action.kind)?.render(action.target)}
-        </Fragment>
+        <Fragment key={`${action.kind}-${index}`}>{getActionDefinition(action.kind)?.render(action.target)}</Fragment>
       ))}
       <Action.CopyToClipboard
         title={`Copy ${noun}`}
