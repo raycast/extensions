@@ -1,6 +1,6 @@
 # Plexamp CHANGELOG
 
-## [Go to Album and Artist, Play Album from Track] - {PR_MERGE_DATE}
+## [Go to Album and Artist, Play Album from Track] - 2026-09-07
 
 - Added `Go to Album` (`Cmd+G`) and `Go to Artist` (`Cmd+Shift+G`) actions to every track row in `Browse Library`, `Search Library`, `Recently Played`, playlist track lists, and album track lists.
 - `Go to Album` opens the album's track list with the track pre-selected; `Go to Artist` opens the artist's release list with the album pre-selected in both list and grid view. `Now Playing`'s `Go to Album` and `Go to Artist` pre-select the same way.
