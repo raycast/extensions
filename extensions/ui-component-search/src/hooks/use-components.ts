@@ -4,44 +4,66 @@ import { CREATE_ERROR_TOAST_OPTIONS } from "../constants";
 import { libraries } from "../providers";
 import { LibraryId, UIComponent } from "../types";
 
+/** A library whose fetch failed, along with the reason. */
+export interface FailedLibrary {
+  id: LibraryId;
+  name: string;
+  message: string;
+}
+
+interface FetchResult {
+  components: UIComponent[];
+  failedLibraries: FailedLibrary[];
+}
+
 interface UseComponentsResult {
   isLoading: boolean;
   components: UIComponent[];
+  failedLibraries: FailedLibrary[];
 }
 
 /**
  * Fetch components from all libraries in parallel.
- * Returns a flat array of all components across all libraries.
+ *
+ * Each library is fetched independently and fails soft: a failure in one
+ * library never prevents the others from loading. Failed libraries are
+ * collected and returned so the UI can mark them visibly instead of
+ * silently omitting them.
  */
-async function fetchAllComponents(): Promise<UIComponent[]> {
+async function fetchAllComponents(): Promise<FetchResult> {
   const results = await Promise.allSettled(libraries.map((lib) => lib.fetchComponents()));
 
-  const allComponents: UIComponent[] = [];
-  const errors: string[] = [];
+  const components: UIComponent[] = [];
+  const failedLibraries: FailedLibrary[] = [];
 
   results.forEach((result, index) => {
+    const lib = libraries[index];
     if (result.status === "fulfilled") {
-      allComponents.push(...result.value);
+      components.push(...result.value);
     } else {
-      errors.push(`${libraries[index].name}: ${result.reason?.message || "Unknown error"}`);
+      failedLibraries.push({
+        id: lib.id,
+        name: lib.name,
+        message: result.reason?.message || "Unknown error",
+      });
     }
   });
 
-  // Show a warning toast if some libraries failed but not all
-  if (errors.length > 0 && errors.length < libraries.length) {
+  // Warn when some (but not all) libraries failed. A full failure is
+  // surfaced through the hook's onError handler instead.
+  if (failedLibraries.length > 0 && failedLibraries.length < libraries.length) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Some libraries failed to load",
-      message: errors.join("; "),
+      title: `${failedLibraries.length} librar${failedLibraries.length === 1 ? "y" : "ies"} failed to load`,
+      message: failedLibraries.map((f) => f.name).join(", "),
     });
   }
 
-  // If ALL libraries failed, throw so the hook's onError fires
-  if (errors.length === libraries.length) {
+  if (failedLibraries.length === libraries.length) {
     throw new Error("Failed to fetch components from all libraries");
   }
 
-  return allComponents;
+  return { components, failedLibraries };
 }
 
 /**
@@ -55,8 +77,9 @@ export function useComponents(filterLibrary?: LibraryId): UseComponentsResult {
     },
   });
 
-  const components = data ?? [];
+  const components = data?.components ?? [];
+  const failedLibraries = data?.failedLibraries ?? [];
   const filtered = filterLibrary ? components.filter((c) => c.library === filterLibrary) : components;
 
-  return { isLoading, components: filtered };
+  return { isLoading, components: filtered, failedLibraries };
 }
