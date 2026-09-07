@@ -338,14 +338,24 @@ async function mutateAndRestart(mutate: (snapshot: CustomPreset[]) => Promise<vo
   await backupPrefs(plist);
   const snapshot = await presetsFromPlist(plist);
   await quitApp();
+  let mutationError: unknown;
   try {
     await mutate(snapshot);
-  } finally {
-    // Always bring the app back, even if the write failed: leaving it stopped
-    // would silently hand every fan back to the system, which is a bigger
-    // change than the one the user asked for.
-    await launchApp();
+  } catch (error) {
+    mutationError = error;
   }
+
+  // Always bring the app back, even if the write failed: leaving it stopped
+  // would silently hand every fan back to the system, which is a bigger change
+  // than the one the user asked for. A failure to relaunch must not replace the
+  // mutation's error, though — that error is what tells the user whether their
+  // preferences were actually changed.
+  try {
+    await launchApp();
+  } catch (relaunchError) {
+    if (mutationError === undefined) throw relaunchError;
+  }
+  if (mutationError !== undefined) throw mutationError;
   // Give the app a moment to push the new speeds to the SMC.
   await sleep(1200);
 }
