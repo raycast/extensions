@@ -32,12 +32,8 @@ export function useActiveModel() {
 
   const setActiveModel = async (model: string) => {
     const migrated = normalizeModelName(model) ?? model;
+    await LocalStorage.setItem(ACTIVE_MODEL_KEY, migrated);
     setActiveModelState(migrated);
-    try {
-      await LocalStorage.setItem(ACTIVE_MODEL_KEY, migrated);
-    } catch (error) {
-      console.error("Failed to save active model:", error);
-    }
   };
 
   return { activeModel, setActiveModel, isLoading };

@@ -11,12 +11,21 @@ export default function SetDefaultModel() {
   const needsApiKey = !apiKey || apiKey.trim().length === 0;
 
   const handleSelect = async (model: string) => {
-    await setActiveModel(model);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Default model updated",
-      message: model,
-    });
+    try {
+      await setActiveModel(model);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Default model updated",
+        message: model,
+      });
+    } catch (error) {
+      console.error("Failed to save default model:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to save default model",
+        message: "Please try again.",
+      });
+    }
   };
 
   return (
