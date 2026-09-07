@@ -16,7 +16,11 @@ const integerCurrency = new Intl.NumberFormat("en-US", {
 });
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(loadMarketState);
+  const { data, isLoading, revalidate } = useCachedPromise(
+    loadMarketState,
+    [],
+    { keepPreviousData: true },
+  );
   const snapshot = data?.snapshot;
 
   const markdown = snapshot

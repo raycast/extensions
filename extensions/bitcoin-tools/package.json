@@ -9,6 +9,16 @@
     "Developer Tools",
     "Finance"
   ],
+  "keywords": [
+    "bitcoin",
+    "bsv",
+    "wif",
+    "address",
+    "p2pkh",
+    "xpub",
+    "xpriv",
+    "transaction"
+  ],
   "icon": "bitcoin-tools-app-icon.png",
   "author": "satchmo",
   "license": "MIT",
@@ -91,7 +101,7 @@
     },
     {
       "name": "bitcoin-price",
-      "title": "Bitcoin Price",
+      "title": "View Bitcoin Price",
       "subtitle": "BSV",
       "description": "View current Bitcoin SV market and chain data",
       "mode": "view"

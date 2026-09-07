@@ -7,7 +7,7 @@ import {
   useNavigation,
   Keyboard,
 } from "@raycast/api";
-import { useState } from "react";
+import { FormValidation, useForm } from "@raycast/utils";
 import { type DecodedTransaction, decodeTransaction } from "./lib/bitcoin";
 
 const MAX_SCRIPT_DISPLAY_LENGTH = 1_200;
@@ -100,21 +100,26 @@ function TransactionDetail({
 
 export default function Command() {
   const { push } = useNavigation();
-  const [error, setError] = useState<string>();
-
-  function handleSubmit(values: { rawTransaction: string }) {
-    try {
-      const transaction = decodeTransaction(values.rawTransaction);
-      setError(undefined);
-      push(<TransactionDetail transaction={transaction} />);
-    } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "Enter a valid raw transaction.",
-      );
-    }
-  }
+  const { handleSubmit, itemProps, setValidationError } = useForm<{
+    rawTransaction: string;
+  }>({
+    validation: {
+      rawTransaction: FormValidation.Required,
+    },
+    onSubmit(values) {
+      try {
+        const transaction = decodeTransaction(values.rawTransaction);
+        push(<TransactionDetail transaction={transaction} />);
+      } catch (submitError) {
+        setValidationError(
+          "rawTransaction",
+          submitError instanceof Error
+            ? submitError.message
+            : "Enter a valid raw transaction.",
+        );
+      }
+    },
+  });
 
   return (
     <Form
@@ -129,11 +134,10 @@ export default function Command() {
       }
     >
       <Form.TextArea
-        id="rawTransaction"
         title="Raw Transaction"
         placeholder="Paste hexadecimal transaction data"
-        error={error}
-        onChange={() => setError(undefined)}
+        autoFocus
+        {...itemProps.rawTransaction}
       />
     </Form>
   );

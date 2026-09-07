@@ -9,30 +9,40 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 import { p2pkhScriptFromAddress } from "./lib/bitcoin";
 
 interface FormValues {
   address: string;
-  format: "asm" | "hex";
+  format: string;
 }
 
 export default function Command() {
-  async function handleSubmit(values: FormValues) {
-    try {
-      const scripts = p2pkhScriptFromAddress(values.address);
-      const script = scripts[values.format];
-      await Clipboard.copy(script);
-      await closeMainWindow();
-      await showHUD(`Copied P2PKH script as ${values.format.toUpperCase()}`);
-    } catch (error) {
-      console.error("Unable to create P2PKH script", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid Address",
-        message: "Enter a valid BSV mainnet or testnet address.",
-      });
-    }
-  }
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    initialValues: {
+      format: "asm",
+    },
+    validation: {
+      address: FormValidation.Required,
+    },
+    async onSubmit(values) {
+      try {
+        const scripts = p2pkhScriptFromAddress(values.address);
+        const format = values.format === "hex" ? "hex" : "asm";
+        const script = scripts[format];
+        await Clipboard.copy(script);
+        await closeMainWindow();
+        await showHUD(`Copied P2PKH script as ${format.toUpperCase()}`);
+      } catch (error) {
+        console.error("Unable to create P2PKH script", error);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Address",
+          message: "Enter a valid BSV mainnet or testnet address.",
+        });
+      }
+    },
+  });
 
   return (
     <Form
@@ -47,11 +57,12 @@ export default function Command() {
       }
     >
       <Form.TextField
-        id="address"
         title="Address"
         placeholder="Enter a BSV address"
+        autoFocus
+        {...itemProps.address}
       />
-      <Form.Dropdown id="format" title="Output Format" defaultValue="asm">
+      <Form.Dropdown title="Output Format" {...itemProps.format}>
         <Form.Dropdown.Item value="asm" title="ASM" />
         <Form.Dropdown.Item value="hex" title="Hex" />
       </Form.Dropdown>

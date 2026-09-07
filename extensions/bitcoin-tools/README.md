@@ -14,7 +14,7 @@ Bitcoin Tools is a Raycast extension for common BSV key, address, script, transa
 | Generate BIP32 XPUB / XPRIV         | Generates random BIP32 extended keys.                                                |
 | Decode Transaction                  | Parses raw transaction hex and shows inputs, outputs, scripts, values, and metadata. |
 | BSV Price in Menu Bar               | Shows the current USD price and latest available block height.                       |
-| Bitcoin Price                       | Shows current price, 24-hour change, volume, market cap, and block height.           |
+| View Bitcoin Price                  | Shows current price, 24-hour change, volume, market cap, and block height.           |
 
 Generated values can be inserted into the focused application, copied to the clipboard, or both. Configure this behavior in the extension preferences.
 

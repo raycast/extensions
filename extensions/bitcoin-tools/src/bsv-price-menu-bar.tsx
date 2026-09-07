@@ -18,7 +18,7 @@ export default function Command() {
       isLoading={isLoading && !snapshot}
     >
       <MenuBarExtra.Item
-        title="View BSV Market Data"
+        title="View Bitcoin Price"
         icon={Icon.LineChart}
         onAction={() =>
           launchCommand({
