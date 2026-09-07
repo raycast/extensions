@@ -1,6 +1,6 @@
 # raycast-ollama Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-09-07
 
 - [Improvement] added "Paste in Active App" action for all commands, which pastes the answer on the active application.
 
