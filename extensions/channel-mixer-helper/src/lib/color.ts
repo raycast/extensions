@@ -160,31 +160,22 @@ export function formatPercentage(value: number): string {
 export function formatChannel(channel: MixerChannel): string {
   const label = channel.output.toUpperCase();
   return [
-    `輸出色版：${label}`,
-    `紅色：${formatPercentage(channel.red)}`,
-    `綠色：${formatPercentage(channel.green)}`,
-    `藍色：${formatPercentage(channel.blue)}`,
-    `常數：${formatPercentage(channel.constant)}`,
+    `Output Channel: ${label}`,
+    `Red: ${formatPercentage(channel.red)}`,
+    `Green: ${formatPercentage(channel.green)}`,
+    `Blue: ${formatPercentage(channel.blue)}`,
+    `Constant: ${formatPercentage(channel.constant)}`,
   ].join("\n");
 }
 
 export function formatConversion(conversion: ColorConversion): string {
   return [
-    `來源：${conversion.sourceHex}`,
-    `目標：${conversion.targetHex}`,
-    `來源感知亮度：${conversion.sourceLuminance}`,
+    `Source: ${conversion.sourceHex}`,
+    `Target: ${conversion.targetHex}`,
+    `Source Perceptual Luminance: ${conversion.sourceLuminance}`,
     "",
     ...conversion.channels.map(formatChannel),
     "",
-    `預估輸出：${rgbToHex(conversion.predictedRgb)}`,
+    `Predicted Output: ${rgbToHex(conversion.predictedRgb)}`,
   ].join("\n\n");
 }
-
-export const COMMON_TARGETS = [
-  { id: "deep-blue-gray", title: "深冷灰藍", hex: "#1D262D" },
-  { id: "neutral-dark-gray", title: "中性深灰", hex: "#5D5B5E" },
-  { id: "soft-black", title: "柔黑", hex: "#222222" },
-  { id: "paper-white", title: "紙張白", hex: "#EAEAEA" },
-  { id: "pure-black", title: "純黑", hex: "#000000" },
-  { id: "pure-white", title: "純白", hex: "#FFFFFF" },
-];

@@ -3,46 +3,109 @@ import {
   ActionPanel,
   Form,
   Icon,
+  LaunchProps,
+  LaunchType,
+  open,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { crossLaunchCommand } from "raycast-cross-extension";
 import { ResultView } from "./components/ResultView";
-import { calculateConversion, COMMON_TARGETS, normalizeHex } from "./lib/color";
+import { calculateConversion, normalizeHex } from "./lib/color";
 import { saveHistory } from "./lib/history";
 import { HistoryView } from "./history";
+
+type PickerTarget = "source" | "target";
+
+type ColorPickerLaunchContext = {
+  hex?: string;
+  formattedColor?: string;
+  pickerTarget?: PickerTarget;
+};
 
 type ColorConverterProps = {
   initialSource?: string;
   initialTarget?: string;
+  pickedColor?: ColorPickerLaunchContext;
 };
 
 export function ColorConverter({
   initialSource = "#7A213E",
-  initialTarget = "#1D262D",
+  initialTarget = "",
+  pickedColor,
 }: ColorConverterProps) {
   const { push } = useNavigation();
-  const [sourceHex, setSourceHex] = useState(initialSource);
-  const [targetHex, setTargetHex] = useState(initialTarget);
-  const [preset, setPreset] = useState(
-    COMMON_TARGETS.find((item) => item.hex === initialTarget)?.id ?? "",
-  );
+  const pickedHex = pickedColor?.hex ? normalizeHex(pickedColor.hex) : null;
+  const pickerTarget = pickedColor?.pickerTarget;
+  const resolvedSource =
+    pickerTarget === "source" && pickedHex ? pickedHex : initialSource;
+  const resolvedTarget =
+    pickerTarget === "target" && pickedHex ? pickedHex : initialTarget;
+  const [sourceHex, setSourceHex] = useState(resolvedSource);
+  const [targetHex, setTargetHex] = useState(resolvedTarget);
   const [sourceError, setSourceError] = useState<string>();
   const [targetError, setTargetError] = useState<string>();
+
+  useEffect(() => {
+    if (!pickedHex) {
+      return;
+    }
+
+    if (pickerTarget === "target") {
+      setTargetHex(pickedHex);
+      setTargetError(undefined);
+      return;
+    }
+
+    if (pickerTarget === "source") {
+      setSourceHex(pickedHex);
+      setSourceError(undefined);
+    }
+  }, [pickedHex, pickerTarget]);
+
+  async function pickColor(target: PickerTarget) {
+    try {
+      await crossLaunchCommand(
+        {
+          name: "pick-color",
+          type: LaunchType.UserInitiated,
+          extensionName: "color-picker",
+          ownerOrAuthorName: "thomas",
+          context: { copyToClipboard: false },
+        },
+        { context: { pickerTarget: target } },
+      );
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Color Picker Not Found",
+        message: "Install the Raycast Color Picker extension first.",
+      });
+      await open("raycast://extensions/thomas/color-picker");
+    }
+  }
 
   async function handleSubmit() {
     const normalizedSource = normalizeHex(sourceHex);
     const normalizedTarget = normalizeHex(targetHex);
     setSourceError(
-      normalizedSource ? undefined : "請輸入 3 碼或 6 碼 HEX，例如 #7A213E",
+      normalizedSource
+        ? undefined
+        : "Enter a 3- or 6-digit HEX value, such as #7A213E.",
     );
     setTargetError(
-      normalizedTarget ? undefined : "請輸入 3 碼或 6 碼 HEX，例如 #1D262D",
+      normalizedTarget
+        ? undefined
+        : "Enter a 3- or 6-digit HEX value, such as #1D262D.",
     );
 
     if (!normalizedSource || !normalizedTarget) {
-      await showToast({ style: Toast.Style.Failure, title: "HEX 格式不正確" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid HEX Value",
+      });
       return;
     }
 
@@ -50,36 +113,51 @@ export function ColorConverter({
     if (!conversion) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "無法計算這組顏色",
+        title: "Could Not Calculate Colors",
       });
       return;
     }
 
-    await saveHistory(conversion);
-    push(<ResultView conversion={conversion} />);
-  }
-
-  function handlePresetChange(value: string) {
-    setPreset(value);
-    const selected = COMMON_TARGETS.find((item) => item.id === value);
-    if (selected) {
-      setTargetHex(selected.hex);
-      setTargetError(undefined);
+    try {
+      await saveHistory(conversion);
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "History not saved",
+        message: "The conversion result is still available.",
+      });
     }
+
+    push(<ResultView conversion={conversion} />);
   }
 
   return (
     <Form
-      navigationTitle="HEX 色版混合器轉換"
+      navigationTitle="Convert HEX with Channel Mixer"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="計算 Channel Mixer"
-            icon={Icon.ArrowRight}
-            onSubmit={handleSubmit}
-          />
+          <ActionPanel.Section title="Screen Color Picker">
+            <Action
+              title="Pick Source Color from Screen"
+              icon={Icon.EyeDropper}
+              onAction={() => pickColor("source")}
+            />
+            <Action
+              title="Pick Target Color from Screen"
+              icon={Icon.EyeDropper}
+              onAction={() => pickColor("target")}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Conversion">
+            <Action.SubmitForm
+              title="Calculate Channel Mixer"
+              icon={Icon.ArrowRight}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              onSubmit={handleSubmit}
+            />
+          </ActionPanel.Section>
           <Action.Push
-            title="查看轉換歷史"
+            title="View Conversion History"
             icon={Icon.Clock}
             target={<HistoryView />}
           />
@@ -87,12 +165,16 @@ export function ColorConverter({
       }
     >
       <Form.Description
-        title="穩定模式"
-        text="使用共享感知亮度權重，避免單獨放大某一色版造成偏色；需要提升亮度時會自動使用 Constant。"
+        title="Stable Mode"
+        text="Uses shared perceptual-luminance weights to reduce color casts. Constant is added only when more brightness is needed."
+      />
+      <Form.Description
+        title="Quick Color Picking"
+        text="Press ⌘K and choose Pick Source Color from Screen or Pick Target Color from Screen. Raycast Color Picker is required."
       />
       <Form.TextField
         id="sourceHex"
-        title="來源 HEX"
+        title="Source HEX"
         placeholder="#7A213E"
         value={sourceHex}
         error={sourceError}
@@ -103,42 +185,25 @@ export function ColorConverter({
       />
       <Form.TextField
         id="targetHex"
-        title="目標 HEX"
+        title="Target HEX"
         placeholder="#1D262D"
         value={targetHex}
         error={targetError}
         onChange={(value) => {
           setTargetHex(value);
-          setPreset(
-            COMMON_TARGETS.find((item) => item.hex === normalizeHex(value))
-              ?.id ?? "",
-          );
           setTargetError(undefined);
         }}
       />
-      <Form.Dropdown
-        id="targetPreset"
-        title="常用目標色"
-        value={preset}
-        onChange={handlePresetChange}
-      >
-        <Form.Dropdown.Item value="" title="不使用預設" />
-        {COMMON_TARGETS.map((item) => (
-          <Form.Dropdown.Item
-            key={item.id}
-            value={item.id}
-            title={`${item.title} ${item.hex}`}
-          />
-        ))}
-      </Form.Dropdown>
       <Form.Description
-        title="小提示"
-        text="支援 #RGB 與 #RRGGBB；結果頁可分別複製單一輸出色版或一次複製全部建議值。"
+        title="Tip"
+        text="Supports #RGB and #RRGGBB. From the result page, copy one output channel or all recommendations at once."
       />
     </Form>
   );
 }
 
-export default function Command() {
-  return <ColorConverter />;
+export default function Command({
+  launchContext = {},
+}: LaunchProps<{ launchContext?: ColorPickerLaunchContext }>) {
+  return <ColorConverter pickedColor={launchContext} />;
 }

@@ -15,50 +15,52 @@ type ResultViewProps = {
 };
 
 const CHANNEL_LABELS = {
-  r: "紅色 Output",
-  g: "綠色 Output",
-  b: "藍色 Output",
+  r: "Red Output",
+  g: "Green Output",
+  b: "Blue Output",
 };
 
 export function ResultView({ conversion }: ResultViewProps) {
   return (
     <List navigationTitle={`${conversion.sourceHex} → ${conversion.targetHex}`}>
-      <List.Section title="RGB 預覽">
+      <List.Section title="RGB Preview">
         <List.Item
-          title="來源色"
+          title="Source Color"
           subtitle={`${conversion.sourceHex} · RGB ${conversion.sourceRgb.r}, ${conversion.sourceRgb.g}, ${conversion.sourceRgb.b}`}
           icon={colorSwatch(conversion.sourceHex)}
-          accessories={[{ text: `亮度 ${conversion.sourceLuminance}` }]}
+          accessories={[{ text: `Luminance ${conversion.sourceLuminance}` }]}
         />
         <List.Item
-          title="目標色"
+          title="Target Color"
           subtitle={`${conversion.targetHex} · RGB ${conversion.targetRgb.r}, ${conversion.targetRgb.g}, ${conversion.targetRgb.b}`}
           icon={colorSwatch(conversion.targetHex)}
-          accessories={[{ text: `預估 ${rgbToHex(conversion.predictedRgb)}` }]}
+          accessories={[
+            { text: `Predicted ${rgbToHex(conversion.predictedRgb)}` },
+          ]}
         />
       </List.Section>
 
-      <List.Section title="Photoshop Channel Mixer 建議值">
+      <List.Section title="Photoshop Channel Mixer Recommendations">
         {conversion.channels.map((channel) => (
           <List.Item
             key={channel.output}
             title={CHANNEL_LABELS[channel.output]}
             subtitle={`R ${formatPercentage(channel.red)} · G ${formatPercentage(channel.green)} · B ${formatPercentage(channel.blue)}`}
             accessories={[
-              { tag: `常數 ${formatPercentage(channel.constant)}` },
+              { tag: `Constant ${formatPercentage(channel.constant)}` },
             ]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard
-                  title="複製此輸出色版"
+                  title="Copy This Output Channel"
                   content={formatChannel(channel)}
                 />
                 <Action.CopyToClipboard
-                  title="複製全部建議值"
+                  title="Copy All Recommendations"
                   content={formatConversion(conversion)}
                 />
                 <Action.Push
-                  title="重新編輯"
+                  title="Edit Again"
                   icon={Icon.Pencil}
                   target={
                     <ColorConverter
@@ -69,7 +71,7 @@ export function ResultView({ conversion }: ResultViewProps) {
                   shortcut={Keyboard.Shortcut.Common.Edit}
                 />
                 <Action.Push
-                  title="查看轉換歷史"
+                  title="View Conversion History"
                   icon={Icon.Clock}
                   target={<HistoryView />}
                 />
@@ -79,18 +81,18 @@ export function ResultView({ conversion }: ResultViewProps) {
         ))}
       </List.Section>
 
-      <List.Section title="算法說明">
+      <List.Section title="Algorithm Notes">
         <List.Item
-          title="穩定亮度混合"
-          subtitle="三個輸出色版共享 R 29.9% / G 58.7% / B 11.4% 權重，降低單一色版被過度放大的風險。"
+          title="Stable Luminance Mix"
+          subtitle="All three output channels share R 29.9% / G 58.7% / B 11.4% weights to reduce the risk of over-amplifying one channel."
         />
         <List.Item
-          title="增益上限 100%"
-          subtitle="目標比來源亮時，使用 Constant 補足，而不是繼續放大輸入通道。"
+          title="100% Gain Ceiling"
+          subtitle="When the target is brighter than the source, Constant supplies the lift instead of further amplifying input channels."
         />
         <List.Item
-          title="預估輸出"
-          subtitle={`${rgbToHex(conversion.predictedRgb)}（依畫面顯示的一位小數係數計算，可能與目標差 1–2 級）`}
+          title="Predicted Output"
+          subtitle={`${rgbToHex(conversion.predictedRgb)} (calculated with the displayed one-decimal coefficients; may differ from the target by 1–2 levels)`}
         />
       </List.Section>
     </List>

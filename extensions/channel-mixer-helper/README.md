@@ -1,16 +1,36 @@
 # Channel Mixer Helper
 
-Raycast Extension，將來源 HEX 色彩轉成 Photoshop Channel Mixer 的建議設定。
+Raycast extension that converts a source HEX color into stable Photoshop
+Channel Mixer recommendations for a target HEX color.
 
-## 使用方式
+## Usage
 
-1. 在 Raycast 搜尋「HEX 色版混合器轉換」。
-2. 輸入來源 HEX 與目標 HEX，或從常用目標色選擇。
-3. 送出後，在結果頁複製單一輸出色版或全部建議值。
-4. 最近使用的轉換會保存在「轉換歷史」中。
+1. Search Raycast for **Convert HEX with Channel Mixer**.
+2. Enter the source and target HEX values. Both `#RGB` and `#RRGGBB` are supported.
+3. Press `⌘K` and choose **Pick Source Color from Screen** or **Pick Target Color from Screen** when needed.
+4. Submit the form, then copy one output channel or all recommendations from the result page.
+5. Open **Conversion History** to review recent conversions.
 
-## 算法
+Screen color picking uses Raycast's Color Picker extension. If it is not
+installed, the color-picking action opens its Raycast page.
 
-Extension 採用穩定模式：三個輸出色版都使用 Rec.601 感知亮度權重 R 29.9%、G 58.7%、B 11.4%，只調整各輸出色版的增益。增益最多到 100%；若目標通道需要更亮，會使用 Photoshop Channel Mixer 的 Constant 補足，避免過度放大單一輸入色版。
+## Algorithm
 
-這個方法會讓輸入的代表色精確對應目標色，同時比各 RGB 通道各自相除更不容易把照片或布料原有的色偏、雜訊放大。由於 Photoshop 介面通常以整數百分比輸入，Extension 顯示一位小數，預估輸出可能與目標相差 1–2 級。
+The stable mode uses shared Rec. 601 perceptual-luminance weights for all
+three output channels: R 29.9%, G 58.7%, and B 11.4%. It scales that shared
+mix up to a 100% gain ceiling and uses Photoshop Channel Mixer Constant for any
+remaining lift. This avoids independently amplifying a noisy input channel,
+which can create unwanted color casts in photos and fabric textures.
+
+The displayed coefficients use one decimal place. The predicted output is
+calculated from those displayed values and can differ from the target by one
+or two levels because Photoshop commonly displays channel values as integers.
+
+## Development
+
+```bash
+npm install
+npm run lint
+npm test
+npm run build
+```

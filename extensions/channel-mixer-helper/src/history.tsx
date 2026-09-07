@@ -1,6 +1,8 @@
 import {
   Action,
   ActionPanel,
+  Alert,
+  confirmAlert,
   Icon,
   List,
   showToast,
@@ -14,7 +16,7 @@ import { ColorConverter } from "./convert-color";
 import { colorSwatch } from "./lib/ui";
 
 function formatDate(isoDate: string): string {
-  return new Intl.DateTimeFormat("zh-TW", {
+  return new Intl.DateTimeFormat("en-US", {
     month: "numeric",
     day: "numeric",
     hour: "2-digit",
@@ -37,24 +39,37 @@ export function HistoryView() {
   }, []);
 
   async function handleClear() {
+    const confirmed = await confirmAlert({
+      title: "Clear Conversion History?",
+      message: "This permanently removes all saved color conversions.",
+      primaryAction: {
+        title: "Clear History",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     await clearHistory();
     setEntries([]);
-    await showToast({ style: Toast.Style.Success, title: "已清除轉換歷史" });
+    await showToast({ style: Toast.Style.Success, title: "History cleared" });
   }
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="搜尋來源或目標 HEX"
+      searchBarPlaceholder="Search source or target HEX"
       actions={
         <ActionPanel>
           <Action.Push
-            title="新增轉換"
+            title="New Conversion"
             icon={Icon.Plus}
             target={<ColorConverter />}
           />
           <Action
-            title="清除全部歷史"
+            title="Clear All History"
             icon={Icon.Trash}
             onAction={handleClear}
           />
@@ -63,31 +78,31 @@ export function HistoryView() {
     >
       {entries.length === 0 && !isLoading ? (
         <List.EmptyView
-          title="還沒有轉換紀錄"
-          description="完成一次 HEX 轉換後，結果會自動保存在這裡。"
+          title="No Conversion History"
+          description="Completed HEX conversions will appear here."
           icon={Icon.Clock}
         />
       ) : (
-        <List.Section title={`最近 ${entries.length} 筆`}>
+        <List.Section title={`Recent ${entries.length}`}>
           {entries.map((entry) => (
             <List.Item
               key={entry.id}
               title={`${entry.conversion.sourceHex} → ${entry.conversion.targetHex}`}
-              subtitle={`預估 ${entry.conversion.predictedRgb.r}, ${entry.conversion.predictedRgb.g}, ${entry.conversion.predictedRgb.b}`}
+              subtitle={`Predicted RGB ${entry.conversion.predictedRgb.r}, ${entry.conversion.predictedRgb.g}, ${entry.conversion.predictedRgb.b}`}
               icon={colorSwatch(entry.conversion.targetHex)}
               accessories={[{ text: formatDate(entry.createdAt) }]}
               actions={
                 <ActionPanel>
                   <Action.Push
-                    title="開啟結果"
+                    title="Open Result"
                     target={<ResultView conversion={entry.conversion} />}
                   />
                   <Action.CopyToClipboard
-                    title="複製全部建議值"
+                    title="Copy All Recommendations"
                     content={formatConversion(entry.conversion)}
                   />
                   <Action.Push
-                    title="重新編輯"
+                    title="Edit Again"
                     icon={Icon.Pencil}
                     target={
                       <ColorConverter
@@ -97,7 +112,7 @@ export function HistoryView() {
                     }
                   />
                   <Action
-                    title="清除全部歷史"
+                    title="Clear All History"
                     icon={Icon.Trash}
                     onAction={handleClear}
                   />
