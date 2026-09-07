@@ -37,6 +37,10 @@ export type PresetRef = { type: "predefined"; index: number } | { type: "custom"
 
 export class MfcError extends Error {}
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 /* ------------------------------------------------------------------ */
 /* Preset encoding                                                     */
 /* ------------------------------------------------------------------ */
@@ -347,15 +351,25 @@ async function mutateAndRestart(mutate: (snapshot: CustomPreset[]) => Promise<vo
 
   // Always bring the app back, even if the write failed: leaving it stopped
   // would silently hand every fan back to the system, which is a bigger change
-  // than the one the user asked for. A failure to relaunch must not replace the
-  // mutation's error, though — that error is what tells the user whether their
-  // preferences were actually changed.
+  // than the one the user asked for.
+  let relaunchError: unknown;
   try {
     await launchApp();
-  } catch (relaunchError) {
-    if (mutationError === undefined) throw relaunchError;
+  } catch (error) {
+    relaunchError = error;
+  }
+
+  // Both failures matter and neither may hide the other: the mutation error
+  // says whether the preferences changed, and the relaunch error says the fans
+  // are now back under system control rather than on the user's settings.
+  if (mutationError !== undefined && relaunchError !== undefined) {
+    throw new MfcError(
+      `${errorMessage(mutationError)} Macs Fan Control also could not be restarted, ` +
+        "so the fans are back under system control.",
+    );
   }
   if (mutationError !== undefined) throw mutationError;
+  if (relaunchError !== undefined) throw relaunchError;
   // Give the app a moment to push the new speeds to the SMC.
   await sleep(1200);
 }
