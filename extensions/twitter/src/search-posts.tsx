@@ -20,6 +20,7 @@ export default function SearchPostsCommand(props: LaunchProps<{ arguments: Argum
     { execute: normalizedQuery.length > 0 },
   );
   const refresh = async () => {
+    clientV2.clearCache();
     await revalidate();
   };
   const fetcher: Fetcher = { updateInline: refresh, refresh };

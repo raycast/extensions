@@ -58,6 +58,7 @@ function QuotedPosts({ postId }: { postId: string }) {
     return { data: page.items, hasMore: Boolean(page.nextToken), cursor: page.nextToken };
   });
   const refresh = async () => {
+    clientV2.clearCache();
     await revalidate();
   };
   const fetcher: Fetcher = { updateInline: refresh, refresh };

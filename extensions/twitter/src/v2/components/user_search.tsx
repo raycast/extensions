@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { User } from "../lib/twitter";
 import { clientV2, TwitterAPIError } from "../lib/twitterapi_v2";
 import { AuthorTweetList } from "./author";
@@ -25,24 +24,6 @@ async function getExactUsernameMatch(search: string): Promise<User | undefined> 
     if (error instanceof TwitterAPIError && error.statusCode === 404) return undefined;
     throw error;
   }
-}
-
-async function searchUsers(search: string): Promise<UserSearchResult[]> {
-  const query = search.trim();
-  if (!query) return [];
-
-  const [exactMatch, connectionMatches] = await Promise.all([
-    getExactUsernameMatch(query),
-    clientV2.searchMyConnections([query]),
-  ]);
-  const connectionSource = connectionMatches.relationshipsSearched.at(-1) ?? "following";
-  const results: UserSearchResult[] = exactMatch ? [{ user: exactMatch, source: "exact" }] : [];
-
-  for (const user of connectionMatches.items) {
-    if (user.id !== exactMatch?.id) results.push({ user, source: connectionSource });
-  }
-
-  return results;
 }
 
 function UserSearchListItem({ result }: { result: UserSearchResult }): ReactElement {
@@ -71,14 +52,58 @@ function UserSearchListItem({ result }: { result: UserSearchResult }): ReactElem
 export function SearchUserListV2(): ReactElement {
   const [search, setSearch] = useState("");
   const query = search.trim();
-  const { data, error, isLoading, revalidate } = usePromise(searchUsers, [query], {
-    execute: query.length > 0,
-  });
+  const [data, setData] = useState<UserSearchResult[]>([]);
+  const [error, setError] = useState<Error>();
+  const [pending, setPending] = useState(0);
+  const [revision, setRevision] = useState(0);
+  const controller = useRef<AbortController | null>(null);
+  const revalidate = () => setRevision((value) => value + 1);
+  const isLoading = pending > 0;
+
+  useEffect(() => {
+    const scan = new AbortController();
+    controller.current = scan;
+    setData([]);
+    setError(undefined);
+    setPending(query ? 2 : 0);
+    if (!query) return () => scan.abort();
+    const failed = (error: unknown) => {
+      if (!scan.signal.aborted) setError(error instanceof Error ? error : new Error(String(error)));
+    };
+    const finished = () => {
+      if (!scan.signal.aborted) setPending((value) => value - 1);
+    };
+    getExactUsernameMatch(query)
+      .then((user) => {
+        if (!scan.signal.aborted && user) {
+          setData((results) => [{ user, source: "exact" }, ...results.filter((item) => item.user.id !== user.id)]);
+        }
+      })
+      .catch(failed)
+      .finally(finished);
+    clientV2
+      .searchMyConnections([query], undefined, scan.signal)
+      .then((result) => {
+        if (!scan.signal.aborted)
+          setData((results) => [
+            ...results,
+            ...result.items
+              .filter((user) => !results.some((item) => item.user.id === user.id))
+              .map((user) => ({ user, source: result.relationshipsSearched.at(-1) ?? "following" })),
+          ]);
+      })
+      .catch(failed)
+      .finally(finished);
+    return () => scan.abort();
+  }, [query, revision]);
 
   return (
     <List
       isLoading={isLoading}
-      onSearchTextChange={setSearch}
+      onSearchTextChange={(value) => {
+        if (value.trim() !== query) controller.current?.abort();
+        setSearch(value);
+      }}
       searchBarPlaceholder="Search by Name or Username"
       filtering={false}
       throttle

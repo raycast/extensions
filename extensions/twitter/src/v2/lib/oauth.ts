@@ -1,4 +1,5 @@
 import { LocalStorage, OAuth } from "@raycast/api";
+import { readCache } from "./read_cache";
 import { XIcon } from "../../icon";
 
 const CLIENT_ID = "eHhMN2wwUldTeEpscThvMzBHZVI6MTpjaQ";
@@ -61,6 +62,7 @@ async function migrateOAuthClient(): Promise<void> {
     return;
   }
 
+  readCache.clear();
   await oauthClient.removeTokens();
   await LocalStorage.setItem(OAUTH_MIGRATION_KEY, OAUTH_CONFIGURATION);
 }
@@ -90,6 +92,7 @@ async function authorizeWithOAuthClient(): Promise<void> {
 
     if (tokenSet.refreshToken) {
       try {
+        readCache.clear();
         await oauthClient.setTokens(await refreshTokens(tokenSet.refreshToken));
         return;
       } catch (error) {
@@ -102,6 +105,7 @@ async function authorizeWithOAuthClient(): Promise<void> {
       }
     }
 
+    readCache.clear();
     await oauthClient.removeTokens();
   }
 
@@ -111,6 +115,7 @@ async function authorizeWithOAuthClient(): Promise<void> {
     scope: OAUTH_SCOPES,
   });
   const { authorizationCode } = await oauthClient.authorize(authRequest);
+  readCache.clear();
   await oauthClient.setTokens(await fetchTokens(authRequest, authorizationCode));
 }
 
@@ -133,6 +138,7 @@ export async function getOAuthTokens(): Promise<OAuth.TokenSet | undefined> {
 }
 
 export async function resetOAuthTokens(): Promise<void> {
+  readCache.clear();
   await oauthClient.removeTokens();
 }
 

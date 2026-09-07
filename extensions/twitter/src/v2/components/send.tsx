@@ -236,9 +236,19 @@ export function TweetSendThreadFormV2({
   useEffect(() => {
     let canceled = false;
     async function loadDraft() {
-      if (!defaultValue) {
+      if (!defaultValue && !initialQuotePostId) {
         const draft = await loadThreadDraft();
-        if (!canceled && draft) setTweets(draft);
+        if (!canceled && draft) {
+          setTweets(draft.tweets);
+          if (draft.settings) {
+            setReplySettings(draft.settings.replySettings);
+            setQuotePostId(draft.settings.quotePostId);
+            setIncludePoll(draft.settings.includePoll);
+            setPollOptions(draft.settings.pollOptions);
+            setPollDurationPreset(draft.settings.pollDurationPreset as PollDurationPreset);
+            setCustomPollDurationMinutes(draft.settings.customPollDurationMinutes);
+          }
+        }
       }
       if (!canceled) setIsDraftLoaded(true);
     }
@@ -246,12 +256,28 @@ export function TweetSendThreadFormV2({
     return () => {
       canceled = true;
     };
-  }, [defaultValue]);
+  }, [defaultValue, initialQuotePostId]);
 
   useEffect(() => {
     if (!isDraftLoaded) return;
-    saveThreadDraft(tweets).catch((error) => console.error("Could not save X post draft", error));
-  }, [isDraftLoaded, tweets]);
+    saveThreadDraft(tweets, {
+      replySettings,
+      quotePostId,
+      includePoll,
+      pollOptions,
+      pollDurationPreset,
+      customPollDurationMinutes,
+    }).catch((error) => console.error("Could not save X post draft", error));
+  }, [
+    isDraftLoaded,
+    tweets,
+    replySettings,
+    quotePostId,
+    includePoll,
+    pollOptions,
+    pollDurationPreset,
+    customPollDurationMinutes,
+  ]);
 
   const addTweet = () => {
     const nt = [...tweets, { text: "" }];
@@ -278,7 +304,7 @@ export function TweetSendThreadFormV2({
   };
   const updateTweet = (text: string, index: number) => {
     setTweets((currentTweets) =>
-      currentTweets.map((tweet, currentIndex) => (currentIndex === index ? { text } : tweet)),
+      currentTweets.map((tweet, currentIndex) => (currentIndex === index ? { ...tweet, text } : tweet)),
     );
   };
   const updateMedia = (mediaPaths: string[], index: number) => {

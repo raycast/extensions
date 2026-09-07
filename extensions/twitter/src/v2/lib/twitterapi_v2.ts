@@ -1,4 +1,5 @@
-import { Cache } from "@raycast/api";
+import { createHash } from "node:crypto";
+import { readCache } from "./read_cache";
 import { readFile, stat } from "node:fs/promises";
 import { extname } from "node:path";
 import { useEffect, useState } from "react";
@@ -30,7 +31,6 @@ const READ_CACHE_TTL_MS = 2 * 60 * 1000;
 const MAX_RATE_LIMIT_BACKOFF_MS = 30 * 1000;
 const ANALYTICS_WINDOW_DAYS = 30;
 const MEDIA_CHUNK_SIZE = 4 * 1024 * 1024;
-const readCache = new Cache({ namespace: "twitter-api-v2-reads" });
 
 const defaultFields: TTweetv2TweetField[] = [
   "public_metrics",
@@ -446,11 +446,15 @@ export class ClientV2 {
   }
 
   private async cachedRead<T>(key: string, operation: (api: TwitterApi) => Promise<T>): Promise<T> {
+    await authorize();
+    const token = (await getOAuthTokens())?.accessToken;
+    if (!token) throw new Error("Connect an X account before reading data.");
+    key = `${createHash("sha256").update(token).digest("hex")}:${key}`;
     const cached = getCached<T>(key);
     if (cached !== undefined) return cached;
 
     const value = await this.request(operation);
-    setCached(key, value);
+    if ((await getOAuthTokens())?.accessToken === token) setCached(key, value);
     return value;
   }
 
@@ -518,20 +522,28 @@ export class ClientV2 {
       if (conversationIds.has(tweet.id)) ownerByConversationId.set(tweet.id, tweet.user.id);
     }
 
-    const missingConversationIds = [...conversationIds].filter((id) => !ownerByConversationId.has(id)).sort();
-    if (missingConversationIds.length > 0) {
-      const fetchedOwners = await this.cachedRead(
-        `conversation-owners:${missingConversationIds.join(",")}`,
-        async (api) => {
-          const result = await api.v2.tweets(missingConversationIds, { "tweet.fields": ["author_id"] });
-          return Object.fromEntries(
-            (result.data ?? []).flatMap((tweet) => (tweet.author_id ? [[tweet.id, tweet.author_id]] : [])),
-          );
-        },
+    const token = (await getOAuthTokens())?.accessToken;
+    if (!token) throw new Error("Connect an X account before reading data.");
+    const scope = createHash("sha256").update(token).digest("hex");
+    const ownerKey = (id: string) => `${scope}:conversation-owner:${id}`;
+    for (const id of conversationIds) {
+      const owner = ownerByConversationId.get(id) ?? getCached<string>(ownerKey(id));
+      if (owner) ownerByConversationId.set(id, owner);
+    }
+    const missing = [...conversationIds].filter((id) => !ownerByConversationId.has(id));
+    for (let offset = 0; offset < missing.length; offset += 100) {
+      const result = await this.request(
+        async (api) => await api.v2.tweets(missing.slice(offset, offset + 100), { "tweet.fields": ["author_id"] }),
       );
-      for (const [conversationId, ownerId] of Object.entries(fetchedOwners)) {
-        ownerByConversationId.set(conversationId, ownerId);
+      if ((await getOAuthTokens())?.accessToken !== token) {
+        return await this.getModeratableReplyIds(tweets);
       }
+      for (const tweet of result.data ?? []) {
+        if (tweet.author_id) ownerByConversationId.set(tweet.id, tweet.author_id);
+      }
+    }
+    if ((await getOAuthTokens())?.accessToken === token) {
+      for (const [id, owner] of ownerByConversationId) setCached(ownerKey(id), owner);
     }
 
     return replies
@@ -647,7 +659,11 @@ export class ClientV2 {
     }
   }
 
-  async searchMyConnections(terms: string[], limit = DEFAULT_CONNECTION_SEARCH_LIMIT): Promise<ConnectionSearchResult> {
+  async searchMyConnections(
+    terms: string[],
+    limit = DEFAULT_CONNECTION_SEARCH_LIMIT,
+    signal?: AbortSignal,
+  ): Promise<ConnectionSearchResult> {
     const normalizedTerms = normalizeSearchTerms(terms);
     if (normalizedTerms.length === 0) throw new Error("At least one non-empty connection search term is required.");
     if (normalizedTerms.length > 8) throw new Error("Search connections with at most eight terms.");
@@ -655,7 +671,7 @@ export class ClientV2 {
       throw new Error("The connection search limit must be an integer from 1 to 100.");
     }
 
-    const following = await this.searchConnectionRelationship(normalizedTerms, "following", limit);
+    const following = await this.searchConnectionRelationship(normalizedTerms, "following", limit, signal);
     if (following.items.length > 0) {
       return {
         relationshipsSearched: ["following"],
@@ -664,7 +680,7 @@ export class ClientV2 {
       };
     }
 
-    const followers = await this.searchConnectionRelationship(normalizedTerms, "followers", limit);
+    const followers = await this.searchConnectionRelationship(normalizedTerms, "followers", limit, signal);
     return {
       relationshipsSearched: ["following", "followers"],
       items: followers.items,
@@ -679,7 +695,9 @@ export class ClientV2 {
     normalizedTerms: string[],
     relationship: ConnectionRelationship,
     limit: number,
+    signal?: AbortSignal,
   ): Promise<ConnectionRelationshipSearchResult> {
+    signal?.throwIfAborted();
     const me = await this.me();
     const matches: Array<{ user: User; score: number }> = [];
     let pagesSearched = 0;
@@ -687,7 +705,9 @@ export class ClientV2 {
     let nextToken: string | undefined;
 
     do {
+      signal?.throwIfAborted();
       const page = await this.getConnectionPage(me.id, relationship, nextToken);
+      signal?.throwIfAborted();
       pagesSearched += 1;
       usersSearched += page.items.length;
 
@@ -1114,22 +1134,34 @@ export class ClientV2 {
 
   async createThread(posts: CreatePostInput[]): Promise<CreatedPost[]> {
     if (posts.length === 0) throw new Error("A thread needs at least one post.");
-    const result = await this.request(async (api) => {
-      const created: CreatedPost[] = [];
-      let previousPostId: string | undefined;
-      for (const post of posts) {
-        const payload = await this.buildPostPayload(api, {
-          ...post,
-          replyToPostId: previousPostId ?? post.replyToPostId,
-        });
-        const response = await api.v2.tweet(payload);
-        created.push(response.data);
-        previousPostId = response.data.id;
+    const normalizedPosts: CreatePostInput[] = [];
+    for (const [index, post] of posts.entries()) {
+      try {
+        const normalized = normalizePostInput(post);
+        validateMediaCombination(await Promise.all((normalized.mediaPaths ?? []).map(inspectMediaFile)));
+        normalizedPosts.push(normalized);
+      } catch (error) {
+        throw new Error(`Post ${index + 1}: ${getErrorMessage(error)}`);
       }
-      return created;
-    });
-    this.clearCache();
-    return result;
+    }
+    const created: CreatedPost[] = [];
+    for (const post of normalizedPosts) {
+      try {
+        created.push(
+          await this.createPost({
+            ...post,
+            replyToPostId: created.at(-1)?.id ?? post.replyToPostId,
+          }),
+        );
+      } catch (error) {
+        throw new Error(
+          `Post ${created.length + 1} failed: ${getErrorMessage(error)}${
+            created.length ? ` Published post IDs: ${created.map((item) => item.id).join(", ")}.` : ""
+          }`,
+        );
+      }
+    }
+    return created;
   }
 
   async sendTweet(text: string): Promise<void> {
