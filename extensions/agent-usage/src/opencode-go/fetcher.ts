@@ -1,7 +1,8 @@
 import { httpFetch } from "../agents/http.ts";
 import type { OpencodegoUsage, OpencodegoError, OpencodegoWindowUsage } from "./types.ts";
 
-export const OPENCODEGO_OPENCODE_KEY = "opencode";
+// OpenCode stores the Zen/Go API key under "opencode-go"; older setups may store it under "opencode".
+export const OPENCODEGO_OPENCODE_KEYS = ["opencode-go", "opencode"] as const;
 
 const OPENCODEGO_USAGE_API = "https://opencode.ai/zen/go/v1/usage";
 

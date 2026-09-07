@@ -43,7 +43,7 @@ import type { MiniMaxError, MiniMaxUsage } from "../minimax/types.ts";
 import { resolveMinimaxCNAuthTokens } from "../minimaxcn/auth.ts";
 import { fetchMinimaxCNUsage } from "../minimaxcn/fetcher.ts";
 import type { MinimaxCNError, MinimaxCNUsage } from "../minimaxcn/types.ts";
-import { fetchOpencodegoUsage, OPENCODEGO_OPENCODE_KEY } from "../opencode-go/fetcher.ts";
+import { fetchOpencodegoUsage, OPENCODEGO_OPENCODE_KEYS } from "../opencode-go/fetcher.ts";
 import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types.ts";
 import { fetchSyntheticUsage, SYNTHETIC_OPENCODE_KEY } from "../synthetic/fetcher.ts";
 import type { SyntheticError, SyntheticUsage } from "../synthetic/types.ts";
@@ -243,11 +243,19 @@ export const useMinimaxCNUsage = createUsageHook<MinimaxCNUsage, MinimaxCNError>
   },
 });
 
+function readOpencodegoApiKey(): string | null {
+  for (const key of OPENCODEGO_OPENCODE_KEYS) {
+    const token = readOpencodeAuthToken(key);
+    if (token) return token;
+  }
+  return null;
+}
+
 export const useOpencodegoUsage = createUsageHook<OpencodegoUsage, OpencodegoError>({
   agentId: "opencode-go",
-  resolveAuthKey: async () => prefValue("opencodegoApiKey") || readOpencodeAuthToken(OPENCODEGO_OPENCODE_KEY) || "",
+  resolveAuthKey: async () => prefValue("opencodegoApiKey") || readOpencodegoApiKey() || "",
   fetcher: async () => {
-    const apiKey = prefValue("opencodegoApiKey") || readOpencodeAuthToken(OPENCODEGO_OPENCODE_KEY);
+    const apiKey = prefValue("opencodegoApiKey") || readOpencodegoApiKey();
     if (!apiKey) {
       return {
         usage: null,
