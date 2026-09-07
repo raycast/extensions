@@ -4,7 +4,7 @@
  * Provides functions for installing, uninstalling, and upgrading packages.
  */
 
-import { Cask, Formula, Nameable, OutdatedFormula } from "../types";
+import { Cask, Formula, Nameable, PinKind, Pinnable } from "../types";
 import { actionsLogger } from "../logger";
 import { preferences } from "../preferences";
 import { execBrew } from "./commands";
@@ -26,9 +26,7 @@ export async function brewInstall(installable: Cask | Formula, cancel?: AbortSig
   if (isCaskType) {
     (installable as Cask).installed = (installable as Cask).version;
   } else {
-    installable.installed = [
-      { version: installable.versions.stable, installed_as_dependency: false, installed_on_request: true },
-    ];
+    installable.installed = [{ version: installable.versions.stable, installed_on_request: true }];
   }
   actionsLogger.log("Package installed successfully", { identifier });
 }
@@ -51,9 +49,7 @@ export async function brewInstallWithProgress(
   if (isCaskType) {
     (installable as Cask).installed = (installable as Cask).version;
   } else {
-    installable.installed = [
-      { version: installable.versions.stable, installed_as_dependency: false, installed_on_request: true },
-    ];
+    installable.installed = [{ version: installable.versions.stable, installed_on_request: true }];
   }
   actionsLogger.log("Package installed successfully", { identifier });
 }
@@ -61,14 +57,22 @@ export async function brewInstallWithProgress(
 /**
  * Uninstall a package.
  */
-export async function brewUninstall(installable: Cask | Nameable, cancel?: AbortSignal): Promise<void> {
+export async function brewUninstall(installable: Cask | Nameable, cancel?: AbortSignal, force = false): Promise<void> {
   const identifier = brewIdentifier(installable);
   actionsLogger.log("Uninstalling package", {
     identifier,
     type: isCask(installable) ? "cask" : "formula",
     zap: preferences.zapCask,
+    force,
   });
-  await execBrew(`rm ${brewCaskOption(installable, true)} ${identifier}`, cancel ? { signal: cancel } : undefined);
+  // `--force` is what lets a pinned package be removed: Homebrew unpins it
+  // first — casks in cask/uninstall.rb (`unpin_for_removal?`), formulae in
+  // uninstall.rb. Only ever set from an explicit user confirmation.
+  const forceOption = force ? " --force" : "";
+  await execBrew(
+    `rm ${brewCaskOption(installable, true)}${forceOption} ${identifier}`,
+    cancel ? { signal: cancel } : undefined,
+  );
   actionsLogger.log("Package uninstalled successfully", { identifier });
 }
 
@@ -129,23 +133,36 @@ export async function brewCleanup(withoutThreshold: boolean, cancel?: AbortSigna
 }
 
 /**
- * Pin a formula to prevent upgrades.
+ * `brew pin`/`unpin` resolve a bare name against both formulae and casks
+ * (`cmd/pin.rb`: `named_args [:installed_formula, :installed_cask]`), so a token
+ * installed as both is ambiguous. Always state which one we mean.
+ *
+ * The kind is passed in rather than sniffed. `isCask()` keys off `token`, which
+ * brew omits from outdated casks; `normalizeOutdatedResults` synthesises one,
+ * but an explicit kind does not depend on that having happened.
  */
-export async function brewPinFormula(formula: Formula | OutdatedFormula): Promise<void> {
-  actionsLogger.log("Pinning formula", { name: formula.name });
-  await execBrew(`pin ${formula.name}`);
-  formula.pinned = true;
-  actionsLogger.log("Formula pinned successfully", { name: formula.name });
+export async function brewPin(item: Pinnable, kind: PinKind): Promise<boolean> {
+  const identifier = brewIdentifier(item);
+  actionsLogger.log("Pinning package", { identifier, type: kind });
+  const output = await execBrew(`pin --${kind} ${identifier}`);
+  item.pinned = true;
+  actionsLogger.log("Package pinned successfully", { identifier });
+  // A cask with `auto_updates true` is pinned, but Homebrew warns that the app
+  // may still update itself (cmd/pin.rb). Read brew's own warning rather than
+  // the payload's `auto_updates`: the outdated shapes do not carry that field,
+  // so checking it would silently drop the warning in Show Upgrades.
+  return /may update itself outside Homebrew/i.test(output.stderr ?? "");
 }
 
 /**
- * Unpin a formula to allow upgrades.
+ * Unpin a package to allow upgrades.
  */
-export async function brewUnpinFormula(formula: Formula | OutdatedFormula): Promise<void> {
-  actionsLogger.log("Unpinning formula", { name: formula.name });
-  await execBrew(`unpin ${formula.name}`);
-  formula.pinned = false;
-  actionsLogger.log("Formula unpinned successfully", { name: formula.name });
+export async function brewUnpin(item: Pinnable, kind: PinKind): Promise<void> {
+  const identifier = brewIdentifier(item);
+  actionsLogger.log("Unpinning package", { identifier, type: kind });
+  await execBrew(`unpin --${kind} ${identifier}`);
+  item.pinned = false;
+  actionsLogger.log("Package unpinned successfully", { identifier });
 }
 
 /**

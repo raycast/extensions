@@ -70,7 +70,7 @@ export function formatPackageVersion(item: Cask | Formula): string {
   if (brewIsInstalled(item)) {
     status.push("installed");
   }
-  if (!cask && item.installed?.first()?.installed_as_dependency) {
+  if (!cask && item.installed?.first()?.installed_on_request === false) {
     status.push("dependency");
   }
 
@@ -80,8 +80,19 @@ export function formatPackageVersion(item: Cask | Formula): string {
   return status.length > 0 ? `${version} (${status.join(", ")})` : version;
 }
 
+/**
+ * A checkmark prefix, so an installed dependency reads as such without relying
+ * on colour alone. U+2713 rather than an SF Symbols codepoint: this has to
+ * render on Windows too.
+ */
+const INSTALLED_TAG_PREFIX = "✓ ";
+
 function dependencyTags(names: string[] | undefined, isInstalled: (name: string) => boolean) {
-  return (names ?? []).map((name) => ({ text: name, color: isInstalled(name) ? Color.Green : Color.SecondaryText }));
+  return (names ?? []).map((name) =>
+    isInstalled(name)
+      ? { text: `${INSTALLED_TAG_PREFIX}${name}`, color: Color.Green }
+      : { text: name, color: Color.SecondaryText },
+  );
 }
 
 /** Leading rows shared by both kinds: the lifecycle warning, then the prose. */

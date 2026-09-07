@@ -86,7 +86,7 @@ export function invalidatePopularityRanks(): void {
  * Fetch (and disk-cache) the bulk install rankings for formulae and casks.
  *
  * `usePromise` re-runs its callback on mount, on every `execute` transition
- * (⇧⌘P toggling), and on revalidate — so without the in-process cache, each
+ * (⇧⌘S toggling), and on revalidate — so without the in-process cache, each
  * toggle re-reads and re-parses ~2.6MB of JSON. The download itself is already
  * avoided by downloadRemoteToCache's freshness check; this avoids the parse.
  */

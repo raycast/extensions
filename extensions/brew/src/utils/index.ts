@@ -16,6 +16,8 @@ export type {
   Versions,
   OutdatedFormula,
   OutdatedCask,
+  Pinnable,
+  PinKind,
   InstallableResults,
   OutdatedResults,
   InstalledMap,

@@ -6,10 +6,11 @@ import { DetailMetadata, caskMetadataRows } from "./packageMetadata";
 import { usePackageDetail } from "../hooks/usePackageDetail";
 
 /**
- * Check if a cask has minimal data (from fast list) vs full data.
+ * Whether this cask carries only summary fields — from the search index or a
+ * list row — rather than full `brew info` metadata.
  */
 function hasMinimalData(cask: Cask): boolean {
-  // Minimal casks have missing or empty homepage, tap, or desc
+  // A summary record has missing or empty homepage, tap, or desc
   return !cask.homepage || !cask.tap || !cask.desc;
 }
 

@@ -5,7 +5,7 @@
  *
  * Note: Homebrew does NOT support concurrent `brew upgrade` commands.
  * Running multiple upgrade processes simultaneously causes lock errors.
- * However, Homebrew 5.0 supports concurrent downloads via HOMEBREW_DOWNLOAD_CONCURRENCY.
+ * However, Homebrew supports concurrent downloads via HOMEBREW_DOWNLOAD_CONCURRENCY.
  *
  * Strategy for faster upgrades:
  * 1. Pre-fetch all packages concurrently using `brew fetch`
@@ -19,6 +19,14 @@ import { actionsLogger } from "../logger";
 import { execBrewWithProgress, BrewProgress, DEFAULT_STALE_TIMEOUT_MS } from "./progress";
 import { getErrorMessage, ensureError, StaleProcessError, BrewLockError } from "../errors";
 import { preferences } from "../preferences";
+import { normalizeOutdatedResults } from "./helpers";
+
+/**
+ * brew's per-package fetch announcement: `Fetching <name> from <tap>`
+ * (cmd/fetch.rb). Deliberately does NOT match the `Fetching: a, b, c` batch
+ * header, which names every package at once.
+ */
+const FETCHING_PACKAGE = /Fetching (\S+) from\s/;
 
 /// Upgrade Types
 
@@ -33,7 +41,7 @@ export interface UpgradePackage {
 /**
  * Status of a single package during an upgrade run.
  */
-export type UpgradePackageStatus = "upgrading" | "upgraded" | "failed" | "skipped";
+export type UpgradePackageStatus = "downloading" | "upgrading" | "upgraded" | "failed" | "skipped";
 
 /**
  * Events emitted while upgrading outdated packages.
@@ -82,7 +90,7 @@ export interface UpgradeSummary {
 export interface UpgradeOptions {
   /** Include auto-updating casks */
   greedy?: boolean;
-  /** Pre-fetch all packages before upgrading (uses Homebrew 5.0 concurrent downloads) */
+  /** Pre-fetch all packages before upgrading (uses Homebrew's concurrent downloads) */
   prefetch?: boolean;
   /** Continue upgrading remaining packages if one fails */
   continueOnError?: boolean;
@@ -116,7 +124,7 @@ export function upgradeKey(pkg: UpgradePackage): string {
  * Upgrade all outdated packages, reporting progress via events.
  *
  * Features:
- * - Optional pre-fetching with Homebrew 5.0 concurrent downloads
+ * - Optional pre-fetching with Homebrew's concurrent downloads
  * - Pinned formulae are skipped
  * - Continue upgrading remaining packages when one fails
  * - Cancellation via AbortSignal
@@ -147,16 +155,20 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
     cmd += " --greedy";
   }
   const result = await execBrewWithProgress(cmd, undefined, cancel, execOptions);
-  const outdated = JSON.parse(result.stdout) as OutdatedResults;
+  const outdated = normalizeOutdatedResults(JSON.parse(result.stdout) as OutdatedResults);
 
-  // Pinned formulae cannot be upgraded, so exclude them from the run
+  // Pinned packages cannot be upgraded, so exclude them from the run.
+  // This matters because we name every package explicitly: Homebrew only warns
+  // about a pinned package on a bare `brew upgrade`, but errors (exit 1) when it
+  // is named. Leaving one in would report a deliberate skip as a failure.
   let packages: UpgradePackage[] = [
     ...outdated.formulae.filter((formula) => !formula.pinned).map((formula) => ({ name: formula.name, isCask: false })),
-    ...outdated.casks.map((cask) => ({ name: cask.name, isCask: true })),
+    ...outdated.casks.filter((cask) => !cask.pinned).map((cask) => ({ name: cask.name, isCask: true })),
   ];
-  const pinned: UpgradePackage[] = outdated.formulae
-    .filter((formula) => formula.pinned)
-    .map((formula) => ({ name: formula.name, isCask: false }));
+  const pinned: UpgradePackage[] = [
+    ...outdated.formulae.filter((formula) => formula.pinned).map((formula) => ({ name: formula.name, isCask: false })),
+    ...outdated.casks.filter((cask) => cask.pinned).map((cask) => ({ name: cask.name, isCask: true })),
+  ];
 
   // Honour the selection: upgrade only the reviewed packages that are still
   // outdated. Everything else stays untouched.
@@ -186,20 +198,49 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
   });
 
   // Step 3 (optional): Pre-fetch all packages concurrently
-  // This leverages Homebrew 5.0's HOMEBREW_DOWNLOAD_CONCURRENCY for parallel downloads
+  // This leverages HOMEBREW_DOWNLOAD_CONCURRENCY for parallel downloads
   if (prefetch && packages.length > 1) {
     onEvent?.({ type: "prefetch" });
-    const onFetchProgress = (progress: BrewProgress) => onEvent?.({ type: "prefetch", progress });
+    // brew fetches every package in one invocation, so its progress lines are the
+    // only clue as to which one is in flight. Match against the names we already
+    // hold rather than parsing brew's format: a miss simply leaves rows untouched.
+    // Longest first, so "warp@preview" wins over "warp".
+    // Scoped to the batch actually running: formulae and casks are fetched in
+    // separate invocations, and a name can belong to both kinds.
+    let fetchCandidates: UpgradePackage[] = [];
+    let fetching: UpgradePackage | undefined;
+    const onFetchProgress = (progress: BrewProgress) => {
+      onEvent?.({ type: "prefetch", progress });
+      // Attribute a row ONLY from brew's own per-package announcement,
+      // `Fetching <name> from <tap>` (cmd/fetch.rb). A substring scan of
+      // arbitrary progress text mis-fires: download lines carry full URLs, so a
+      // package named "git" matches an unrelated package's GitHub URL, and the
+      // batch header ("Fetching: a, b, c" — note the colon, which this pattern
+      // does not match) names every package at once.
+      const announced = FETCHING_PACKAGE.exec(progress.message)?.[1];
+      if (!announced) return;
+      const match = fetchCandidates.find((pkg) => pkg.name === announced);
+      if (match && (match.name !== fetching?.name || match.isCask !== fetching?.isCask)) {
+        fetching = match;
+        onEvent?.({ type: "package", package: match, status: "downloading" });
+      }
+    };
 
     // Fetch formulae and casks separately (brew fetch syntax)
     const formulaNames = packages.filter((pkg) => !pkg.isCask).map((pkg) => pkg.name);
     const caskNames = packages.filter((pkg) => pkg.isCask).map((pkg) => pkg.name);
 
     try {
+      const ofKind = (kind: boolean) => packages.filter((pkg) => pkg.isCask === kind);
+
       if (formulaNames.length > 0) {
+        fetchCandidates = ofKind(false);
+        fetching = undefined;
         await execBrewWithProgress(`fetch ${formulaNames.join(" ")}`, onFetchProgress, cancel, execOptions);
       }
       if (caskNames.length > 0) {
+        fetchCandidates = ofKind(true);
+        fetching = undefined;
         await execBrewWithProgress(`fetch --cask ${caskNames.join(" ")}`, onFetchProgress, cancel, execOptions);
       }
       actionsLogger.log("Pre-fetch completed", { packages: packages.length });

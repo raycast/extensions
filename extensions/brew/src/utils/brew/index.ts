@@ -35,7 +35,6 @@ export type { BrewPhase, BrewProgress, ProgressCallback } from "./progress";
 export {
   brewFetchInstalled,
   brewFetchInstallableResults,
-  brewFetchInstalledFast,
   brewMapInstalled,
   asInstallableResults,
   brewFetchOutdated,
@@ -80,8 +79,8 @@ export {
   brewUpgradeSingleWithProgress,
   brewUpgradeAll,
   brewCleanup,
-  brewPinFormula,
-  brewUnpinFormula,
+  brewPin,
+  brewUnpin,
   brewDoctor,
 } from "./actions";
 
@@ -123,6 +122,7 @@ export {
   brewInstalledDate,
   brewIdentifier,
   brewCaskOption,
+  normalizeOutdatedResults,
   isCask,
   brewCompare,
   brewInstallCommand,

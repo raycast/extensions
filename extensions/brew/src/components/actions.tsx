@@ -5,16 +5,17 @@ import {
   brewInstallWithProgress,
   brewName,
   isCask,
-  brewPinFormula,
+  brewPin,
   brewUninstall,
-  brewUnpinFormula,
+  brewUnpin,
   brewUpgradeAll,
   brewUpgradeSingleWithProgress,
   type Cask,
   ensureError,
   type Formula,
   type Nameable,
-  type OutdatedFormula,
+  type PinKind,
+  type Pinnable,
   preferences,
   showActionToast,
   showBrewFailureToast,
@@ -34,7 +35,16 @@ export function FormulaInstallAction(props: { formula: Cask | Formula; onAction:
   );
 }
 
-export function FormulaUninstallAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }) {
+export function FormulaUninstallAction(props: {
+  formula: Cask | Nameable;
+  /**
+   * Effective pin state, when the caller tracks it live. The payload's own
+   * `pinned` can be a stale snapshot from an in-flight fetch, so a view that
+   * knows better says so rather than letting a guard read the stale value.
+   */
+  pinned?: boolean;
+  onAction: (result: boolean) => void;
+}) {
   return (
     <Action
       title="Uninstall"
@@ -42,7 +52,7 @@ export function FormulaUninstallAction(props: { formula: Cask | Nameable; onActi
       shortcut={Keyboard.Shortcut.Common.Remove}
       style={Action.Style.Destructive}
       onAction={async () => {
-        const result = await uninstall(props.formula);
+        const result = await uninstall(props.formula, false, props.pinned, props.onAction);
         props.onAction(result);
       }}
     />
@@ -52,11 +62,14 @@ export function FormulaUninstallAction(props: { formula: Cask | Nameable; onActi
 /**
  * Upgrade a single package.
  *
- * A PINNED formula is skipped rather than attempted. `brew upgrade` refuses it
- * outright — "Error: Not upgrading 1 pinned package" — so running it would
- * surface a failure toast for a package the user deliberately froze. Upgrade
- * All already skips pinned formulae and reports them as skipped; this makes the
- * single-package action say the same thing, in every view that offers it.
+ * `brew upgrade` refuses a PINNED package outright — "Error: Not upgrading 1
+ * pinned package" — so the action never simply attempts one.
+ *
+ * Where the caller tracks per-package status (the upgrade run), it stays a
+ * skip: a row that reports "skipped" should not quietly unpin itself. Elsewhere
+ * (Search, Show Installed) the only sensible reading of pressing Upgrade on a
+ * pinned row is "do the thing" — so the action says "Unpin and Upgrade" and
+ * does both, rather than refusing and naming a shortcut to press instead.
  */
 export function FormulaUpgradeAction(props: {
   formula: Cask | Nameable;
@@ -68,22 +81,38 @@ export function FormulaUpgradeAction(props: {
    * no status (Search, Show Installed) leave it undefined and rely on the toast.
    */
   onSkip?: () => void;
+  /** Effective pin state, when the caller tracks it live. See FormulaUninstallAction. */
+  pinned?: boolean;
   onAction: (result: boolean) => void;
 }) {
+  const pinned = props.pinned ?? isPinned(props.formula);
+  const cask = isCask(props.formula);
+  const unpinAndUpgrade = pinned && !props.onSkip;
+  // Name the package: this action sits beside "Upgrade All" in the same panel,
+  // so "Upgrade" alone leaves the scope of what is about to run ambiguous.
+  const name = brewName(props.formula);
+
   return (
     <Action
-      title="Upgrade"
-      icon={Icon.ArrowUpCircle}
+      title={unpinAndUpgrade ? `Unpin ${cask ? "Cask" : "Formula"} and Upgrade ${name}` : `Upgrade ${name}`}
+      icon={unpinAndUpgrade ? Icon.TackDisabled : Icon.ArrowUpCircle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       onAction={async () => {
-        if (isPinned(props.formula)) {
-          props.onSkip?.();
-          await showToast({
-            style: Toast.Style.Success,
-            title: "Skipping Pinned Formulae Upgrades",
-            message: `${brewName(props.formula)} is pinned. Unpin it (⌘ .) to upgrade.`,
-          });
-          return;
+        if (pinned) {
+          if (!unpinAndUpgrade) {
+            props.onSkip?.();
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Skipping Pinned Upgrades",
+              message: `${brewName(props.formula)} is pinned. Unpin it (⌘ .) to upgrade.`,
+            });
+            return;
+          }
+          // The pin is the only thing standing in the way, and the user just
+          // asked for the upgrade — so lift it, then proceed.
+          if (!(await unpin(props.formula as Pinnable, cask ? "cask" : "formula"))) {
+            return;
+          }
         }
 
         props.onStart?.();
@@ -94,13 +123,9 @@ export function FormulaUpgradeAction(props: {
   );
 }
 
-/**
- * Pinning is formula-only. A cask is never treated as pinned even if the API
- * hands one a `pinned` field — there is no Unpin action in the cask panel, so
- * the toast would name a remedy the user cannot reach.
- */
+/** Formulae and casks are both pinnable (casks since Homebrew 5.1.12). */
 function isPinned(item: Cask | Nameable): boolean {
-  return !isCask(item) && (item as Formula).pinned === true;
+  return (item as Formula | Cask).pinned === true;
 }
 
 export function FormulaUpgradeAllAction(props: {
@@ -125,18 +150,19 @@ export function FormulaUpgradeAllAction(props: {
   );
 }
 
-export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; onAction: (result: boolean) => void }) {
-  const isPinned = props.formula.pinned;
+export function PinAction(props: { item: Pinnable; kind: PinKind; onAction: (result: boolean) => void }) {
+  const pinned = props.item.pinned;
+  const noun = props.kind === "cask" ? "Cask" : "Formula";
   return (
     <Action
-      title={isPinned ? "Unpin" : "Pin"}
-      icon={isPinned ? Icon.TackDisabled : Icon.Tack}
+      title={`${pinned ? "Unpin" : "Pin"} ${noun}`}
+      icon={pinned ? Icon.TackDisabled : Icon.Tack}
       shortcut={Keyboard.Shortcut.Common.Pin}
       onAction={async () => {
-        if (isPinned) {
-          props.onAction(await unpin(props.formula));
+        if (pinned) {
+          props.onAction(await unpin(props.item, props.kind));
         } else {
-          props.onAction(await pin(props.formula));
+          props.onAction(await pin(props.item, props.kind));
         }
       }}
     />
@@ -190,15 +216,46 @@ async function install(formula: Cask | Formula): Promise<boolean> {
   }
 }
 
-async function uninstall(formula: Cask | Nameable): Promise<boolean> {
+async function uninstall(
+  formula: Cask | Nameable,
+  force = false,
+  effectivePinned?: boolean,
+  onComplete?: (result: boolean) => void,
+): Promise<boolean> {
   const name = brewName(formula);
+  const cask = isCask(formula);
+  const pinned = effectivePinned ?? isPinned(formula);
+
+  // Homebrew refuses to uninstall a pinned package — casks in
+  // cask/uninstall.rb (`unpin_for_removal?`) and formulae in uninstall.rb
+  // ("is pinned. You must unpin it to uninstall."). Rather than let that
+  // surface as a raw brew error, say what happened and offer the remedy, which
+  // unpins as part of the removal and so needs explicit confirmation.
+  if (!force && pinned) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Can't uninstall pinned ${cask ? "cask" : "formula"} ${name}`,
+      message: "It is pinned. Unpin it first, or force the uninstall.",
+      primaryAction: {
+        title: `Unpin ${cask ? "Cask" : "Formula"} and Force Uninstall`,
+        onAction: async (toast) => {
+          await toast.hide();
+          // Tell the caller the row changed: without this the view revalidates
+          // only after the refused attempt, leaving the removed package on screen.
+          onComplete?.(await uninstall(formula, true, effectivePinned));
+        },
+      },
+    });
+    return false;
+  }
+
   const handle = showActionToast({
     title: `Uninstalling ${name}`,
     message: "",
     cancelable: true,
   });
   try {
-    await brewUninstall(formula, handle.abort?.signal);
+    await brewUninstall(formula, handle.abort?.signal, force);
     await handle.showSuccessHUD(`Uninstalled ${name}`);
     return true;
   } catch (err) {
@@ -253,28 +310,40 @@ async function upgradeAll(): Promise<boolean> {
   }
 }
 
-export async function pin(formula: Formula | OutdatedFormula): Promise<boolean> {
-  showToast(Toast.Style.Animated, `Pinning ${brewName(formula)}`);
+export async function pin(item: Pinnable, kind: PinKind): Promise<boolean> {
+  const name = brewName(item as Cask | Nameable);
+  showToast(Toast.Style.Animated, `Pinning ${name}`);
   try {
-    await brewPinFormula(formula);
-    formula.pinned = true;
-    showToast(Toast.Style.Success, `Pinned ${brewName(formula)}`);
+    const mayAutoUpdate = await brewPin(item, kind);
+    item.pinned = true;
+    // A cask that updates itself ignores the pin: Homebrew pins it anyway and
+    // warns (cmd/pin.rb). Say so rather than implying the version is frozen.
+    if (mayAutoUpdate) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Pinned ${name}`,
+        message: "Pinning may be overridden by auto-updates",
+      });
+    } else {
+      showToast(Toast.Style.Success, `Pinned ${name}`);
+    }
     return true;
   } catch (err) {
-    showBrewFailureToast("Pin formula failed", ensureError(err));
+    showBrewFailureToast(`Pin ${kind} failed`, ensureError(err));
     return false;
   }
 }
 
-export async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
-  showToast(Toast.Style.Animated, `Unpinning ${brewName(formula)}`);
+export async function unpin(item: Pinnable, kind: PinKind): Promise<boolean> {
+  const name = brewName(item as Cask | Nameable);
+  showToast(Toast.Style.Animated, `Unpinning ${name}`);
   try {
-    await brewUnpinFormula(formula);
-    formula.pinned = false;
-    showToast(Toast.Style.Success, `Unpinned ${brewName(formula)}`);
+    await brewUnpin(item, kind);
+    item.pinned = false;
+    showToast(Toast.Style.Success, `Unpinned ${name}`);
     return true;
   } catch (err) {
-    showBrewFailureToast("Unpin formula failed", ensureError(err));
+    showBrewFailureToast(`Unpin ${kind} failed`, ensureError(err));
     return false;
   }
 }

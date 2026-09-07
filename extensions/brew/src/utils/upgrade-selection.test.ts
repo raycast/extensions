@@ -4,10 +4,13 @@
  * Fixtures below reproduce real `brew outdated --json=v2` payloads captured
  * from Homebrew 6.x (2026-07-30) — not the type declarations. In particular:
  * `installed_versions` is an array for casks as well as formulae, and
- * `pinned` / `pinned_version` are reported for both.
+ * `pinned` / `pinned_version` are reported for both. Casks have been pinnable
+ * since Homebrew 5.1.12.
  */
 
 import { describe, expect, it } from "vitest";
+import { brewName, brewUninstallCommand, brewUpgradeCommand, isCask, normalizeOutdatedResults } from "./brew/helpers";
+import { preferences } from "./preferences";
 import {
   applyPinChange,
   applyPinOverrides,
@@ -57,6 +60,13 @@ const OUTDATED_JSON = `{
       "current_version": "1.100.0",
       "pinned": false,
       "pinned_version": null
+    },
+    {
+      "name": "docker",
+      "installed_versions": ["4.30.0"],
+      "current_version": "4.31.0",
+      "pinned": true,
+      "pinned_version": "4.30.0"
     }
   ]
 }`;
@@ -133,14 +143,33 @@ describe("mergeSelectionState", () => {
     expect(merged.get(selectionKey("formula", "jq"))).toBe(true);
   });
 
-  it("casks are default-selected like unpinned formulae — they carry no pin state before Homebrew 6", () => {
+  it("unpinned casks are default-selected like unpinned formulae", () => {
     const packages: SelectablePackage[] = [
       { kind: "formula", name: "wget", pinned: false },
-      { kind: "cask", name: "firefox" },
+      { kind: "cask", name: "firefox", pinned: false },
     ];
     const merged = mergeSelectionState(new Map(), packages);
     expect(merged.get(selectionKey("cask", "firefox"))).toBe(true);
     expect(selectedPackages(packages, merged)).toEqual(packages);
+  });
+
+  it("excludes a pinned cask, exactly as it excludes a pinned formula", () => {
+    const packages: SelectablePackage[] = [
+      { kind: "cask", name: "raycast", pinned: false },
+      { kind: "cask", name: "docker", pinned: true },
+    ];
+    const merged = mergeSelectionState(new Map(), packages);
+    expect(merged.get(selectionKey("cask", "raycast"))).toBe(true);
+    expect(merged.get(selectionKey("cask", "docker"))).toBe(false);
+    expect(selectedPackages(packages, merged)).toEqual([{ kind: "cask", name: "raycast", pinned: false }]);
+  });
+
+  it("unpinning a cask in the review includes it, like a formula", () => {
+    const packages: SelectablePackage[] = [{ kind: "cask", name: "docker", pinned: true }];
+    const state = mergeSelectionState(new Map(), packages);
+    const key = selectionKey("cask", "docker");
+    expect(state.get(key)).toBe(false);
+    expect(applyPinChange(state, key, false).get(key)).toBe(true);
   });
 
   it("drops packages that are no longer outdated", () => {
@@ -361,5 +390,96 @@ describe("outdated payload contract", () => {
     expect(Array.isArray(outdated.formulae[0].installed_versions)).toBe(true);
     expect(Array.isArray(outdated.casks[0].installed_versions)).toBe(true);
     expect(outdated.casks[0].installed_versions[0]).toBe("1.99.0");
+  });
+});
+
+/**
+ * `brew outdated --json=v2` omits `token` from casks, but `isCask()` — and so
+ * every brew argv built from `brewCaskOption` / `brewIdentifier` — keys off it.
+ * Several formula-vs-cask conflations in this work passed a clean typecheck
+ * before normalization existed, so pin the discriminator down here.
+ */
+describe("outdated casks are distinguishable from formulae", () => {
+  // Parsed exactly as the production ingresses parse it: raw brew JSON, then
+  // normalized. Stamping the token by hand here would test the contract while
+  // leaving the ingress — the thing that actually broke — uncovered.
+  const parsed = normalizeOutdatedResults(JSON.parse(OUTDATED_JSON) as OutdatedResults);
+  const outdatedCask = parsed.casks[0];
+  const outdatedFormula = parsed.formulae[0];
+
+  it("synthesises a token brew does not report", () => {
+    // Guards the ingress: raw brew JSON has no token at all.
+    const raw = JSON.parse(OUTDATED_JSON) as OutdatedResults;
+    expect(raw.casks[0].token).toBeUndefined();
+    expect(outdatedCask.token).toBe(outdatedCask.name);
+  });
+
+  it("leaves an already-normalized payload alone", () => {
+    const again = normalizeOutdatedResults(parsed);
+    expect(again.casks[0].token).toBe(outdatedCask.name);
+  });
+
+  it("identifies an outdated cask as a cask", () => {
+    expect(isCask(outdatedCask)).toBe(true);
+    expect(isCask(outdatedFormula)).toBe(false);
+  });
+
+  it("builds cask-shaped upgrade and uninstall commands", () => {
+    expect(brewUpgradeCommand(outdatedCask)).toContain("--cask");
+    expect(brewUpgradeCommand(outdatedCask)).toContain(outdatedCask.name);
+    expect(brewUninstallCommand(outdatedCask)).toContain("--cask");
+  });
+
+  it("leaves formula commands without --cask", () => {
+    expect(brewUpgradeCommand(outdatedFormula)).not.toContain("--cask");
+  });
+
+  it("renders the whole name, not its first character", () => {
+    // An OutdatedCask's `name` is a string where a Cask's is an array; indexing
+    // blindly turns "raycast" into "r".
+    expect(brewName(outdatedCask)).toBe(outdatedCask.name);
+  });
+});
+
+/**
+ * The `@raycast/api` stub must hand back the DECLARED preference defaults. With
+ * an empty object every preference reads `undefined`, so a test can pass by
+ * exercising a falsy branch that no real user is ever in.
+ */
+describe("test preferences mirror the declared defaults", () => {
+  it("gives zapCask its declared default rather than undefined", () => {
+    // zapCask defaults to false, but it must be a real boolean, not absent.
+    expect(typeof preferences.zapCask).toBe("boolean");
+  });
+
+  it("gives pinnedFirst its declared default of true", () => {
+    expect(preferences.pinnedFirst).toBe(true);
+  });
+});
+
+/**
+ * Download attribution reads brew's own `Fetching <name> from <tap>` line
+ * (cmd/fetch.rb). A substring scan over arbitrary progress text mis-fires: real
+ * download lines carry full URLs, so a package named "git" matches an unrelated
+ * package's GitHub URL, and the batch header names every package at once.
+ */
+describe("prefetch attribution", () => {
+  const FETCHING_PACKAGE = /Fetching (\S+) from\s/;
+  const announced = (message: string) => FETCHING_PACKAGE.exec(message)?.[1];
+
+  it("attributes brew's per-package announcement", () => {
+    expect(announced("==> Fetching warp@preview from homebrew/cask")).toBe("warp@preview");
+  });
+
+  it("ignores the batch header naming every package", () => {
+    expect(announced("Fetching: aom, git, zed")).toBeUndefined();
+  });
+
+  it("does not attribute a URL that merely contains a package name", () => {
+    expect(announced("==> Downloading https://github.com/zed-industries/zed/releases/git-2.0.tgz")).toBeUndefined();
+  });
+
+  it("does not attribute the synthetic command echo", () => {
+    expect(announced("Running: brew fetch aom git zed")).toBeUndefined();
   });
 });
