@@ -3,6 +3,7 @@ import { ComponentType, useEffect, useRef, useState } from "react";
 import { setTimeout as delay } from "node:timers/promises";
 import getAccessToken, { granolaOAuth, SignInRequired } from "./getAccessToken";
 import { DeviceGrant, exchangeToken, nextPoll, parseTokens, requestDeviceGrant } from "./granolaAuthProtocol";
+import { diagnostic } from "./diagnostics";
 
 export function withGranolaAuth(Command: ComponentType) {
   return function GranolaAuth() {
@@ -55,6 +56,7 @@ export function withGranolaAuth(Command: ComponentType) {
             const tokens = parseTokens(body);
             current.signal.throwIfAborted();
             await granolaOAuth.setTokens(tokens);
+            diagnostic("auth.session_saved", { code: "device_grant" });
             setReady(true);
             await showToast({ style: Toast.Style.Success, title: "Signed In to Granola" });
             return;
@@ -63,6 +65,7 @@ export function withGranolaAuth(Command: ComponentType) {
         }
         throw new Error("Your sign-in code expired. Press Return to get a new code.");
       } catch (e) {
+        diagnostic(current.signal.aborted ? "auth.sign_in_cancelled" : "auth.sign_in_failed");
         if (!current.signal.aborted) setError(e instanceof Error ? e.message : "Could not sign in. Please try again.");
       } finally {
         if (controller.current === current) {

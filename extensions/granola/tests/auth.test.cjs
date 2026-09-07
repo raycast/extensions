@@ -14,7 +14,13 @@ function load(file, overrides = {}, globals = {}) {
   const exports = {};
   vm.runInNewContext(js, {
     exports,
-    require: (id) => overrides[id] ?? require(id),
+    require: (id) =>
+      overrides[id] ??
+      (id === "./diagnostics"
+        ? { diagnostic: () => {} }
+        : id === "./granolaFetch"
+          ? { granolaFetch: (...args) => globals.fetch(...args) }
+          : require(id)),
     Buffer,
     URL,
     URLSearchParams,
@@ -117,6 +123,7 @@ test("cancellation reaches the network request", async () => {
 function harness(exchange) {
   const supportPath = fs.mkdtempSync(path.join(os.tmpdir(), "granola-auth-test-"));
   let saved = { accessToken: "old-access", refreshToken: "old-refresh", isExpired: () => true };
+  let failSave = false;
   const api = {
     environment: { supportPath },
     OAuth: {
@@ -126,6 +133,7 @@ function harness(exchange) {
           return saved;
         }
         async setTokens(tokens) {
+          if (failSave) throw new Error("Storage unavailable");
           saved = { ...tokens, isExpired: () => false };
         }
         async removeTokens() {
@@ -141,6 +149,10 @@ function harness(exchange) {
   return {
     instance: () => load("getAccessToken.ts", overrides),
     get: () => saved,
+    locks: () => fs.readdirSync(supportPath),
+    failSave: () => {
+      failSave = true;
+    },
     set: (v) => {
       saved = v;
     },
@@ -185,6 +197,44 @@ test("temporary HTTP error keeps the session for retry", async () => {
   try {
     await assert.rejects(h.instance().default(), /503/);
     assert.equal(h.get().refreshToken, "old-refresh");
+  } finally {
+    h.cleanup();
+  }
+});
+test("ambiguous refresh outcome retains its lock to prevent token replay", async () => {
+  const h = harness(async () => {
+    throw new Error("Connection lost");
+  });
+  try {
+    await assert.rejects(h.instance().default(), /Connection lost/);
+    assert.equal(h.locks().length, 1);
+  } finally {
+    h.cleanup();
+  }
+});
+test("failed persistence does not allow replaying the old refresh token", async () => {
+  const h = harness(async () => ({
+    response: { ok: true },
+    body: { access_token: "new", refresh_token: "new", expires_in: 3600 },
+  }));
+  h.failSave();
+  try {
+    await assert.rejects(h.instance().default(), /Storage unavailable/);
+    assert.equal(h.locks().length, 1);
+    assert.equal(h.get().refreshToken, "old-refresh");
+  } finally {
+    h.cleanup();
+  }
+});
+test("forced refresh rotates even a currently valid session", async () => {
+  const h = harness(async () => ({
+    response: { ok: true },
+    body: { access_token: "new", refresh_token: "new", expires_in: 3600 },
+  }));
+  h.set({ accessToken: "valid", refreshToken: "old-refresh", isExpired: () => false });
+  try {
+    assert.equal(await h.instance().default(true), "new");
+    assert.equal(h.get().refreshToken, "new");
   } finally {
     h.cleanup();
   }

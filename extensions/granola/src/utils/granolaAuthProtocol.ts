@@ -1,3 +1,6 @@
+import { randomUUID } from "node:crypto";
+import { diagnostic } from "./diagnostics";
+
 const CLIENT_ID = "client_01JZJ0XBDAT8PHJWQY09Y0VD61";
 const AUTH_URL = "https://auth.granola.ai/user_management";
 
@@ -10,11 +13,30 @@ export interface DeviceGrant {
 }
 
 async function request(endpoint: string, values: Record<string, string>, signal?: AbortSignal) {
+  const requestId = randomUUID();
+  const started = Date.now();
+  const target = `auth.granola.ai/user_management/${endpoint}`;
   const response = await fetch(`${AUTH_URL}/${endpoint}`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ client_id: CLIENT_ID, ...values }),
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20_000)]) : AbortSignal.timeout(20_000),
+  }).catch(() => {
+    diagnostic("auth.request_failed", {
+      endpoint: target,
+      requestId,
+      durationMs: Date.now() - started,
+      code: signal?.aborted ? "cancelled" : "network_error",
+    });
+    signal?.throwIfAborted();
+    throw new Error(`Granola sign-in could not be reached. Reference: ${requestId}`);
+  });
+  diagnostic("auth.response", {
+    endpoint: target,
+    method: "POST",
+    requestId,
+    status: response.status,
+    durationMs: Date.now() - started,
   });
   let body: Record<string, unknown>;
   try {
@@ -22,8 +44,15 @@ async function request(endpoint: string, values: Record<string, string>, signal?
     if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error();
     body = value as Record<string, unknown>;
   } catch {
+    diagnostic("auth.invalid_response", { requestId, status: response.status });
     throw new Error(`Granola returned an invalid sign-in response (HTTP ${response.status}).`);
   }
+  if (
+    ["authorization_pending", "slow_down", "invalid_grant", "access_denied", "expired_token"].includes(
+      String(body.error),
+    )
+  )
+    diagnostic("auth.outcome", { requestId, code: String(body.error) });
   return { response, body };
 }
 

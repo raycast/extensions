@@ -50,4 +50,19 @@ Note and folder operations use Granola's private API. This device flow uses Gran
 This extension does not collect telemetry. Authentication requests go to Granola's authentication service and note requests go directly to Granola's API. Tokens are not printed in diagnostics.
 
 ## Support
+
+### Troubleshooting
+
+Run **Check Connection** in the Granola extension. **Check Read Endpoints** tests every read endpoint using an accessible sample note/folder; it does not modify meeting data. **Verify Token Refresh** refreshes Raycast's own session and then reruns the reads. A new browser login is unnecessary unless the session was revoked or a previous refresh had an uncertain outcome.
+
+After reproducing a problem, use **Copy Diagnostics** in Check Connection or on a load-error screen and attach the report to your issue. Reports contain the command, platform/Raycast version, endpoint, HTTP status, time to response headers, request reference IDs, and auth lifecycle events. They exclude tokens, device codes, account information, request/response bodies, and meeting content. Local logs are bounded to approximately 128 KiB per command; reports include up to 200 recent records. Nothing is uploaded automatically.
+
+Common signals: `401` means authorization was rejected, `403` means the operation is not permitted, `404` identifies a missing route/resource, and `429` means rate limiting. `auth.refresh_saved` confirms the replacement token was stored. `auth.refresh_uncertain` or `auth.refresh_lock_timeout` means reconnect using Raycast's extension sign-out preference; the extension deliberately avoids replaying a potentially consumed refresh token.
+
+### Developer tests
+
+Run `npm test`, `npm run lint`, and `npm run build`. Offline tests cover token expiry/rotation, concurrent refresh, revocation, cancellation, transport errors, endpoint coverage, and diagnostic privacy. The endpoint catalog distinguishes reads, writes, generation, and authentication; skipped live checks are never reported as passes.
+
+See [live validation](tests/LIVE_VALIDATION.md) for the opt-in dummy-note/Notion integration test and the recorded results. These tests require explicit authorization to create/export/delete test data and are not run by `npm test`.
+
 This plugin is an independent project and is not affiliated with, endorsed by, or in any way officially connected to Granola Inc. All trademarks and copyrights related to Granola and Granola AI are the property of their respective owners.

@@ -1,9 +1,11 @@
+import { granolaFetch } from "./granolaFetch";
 import { OAuth, environment } from "@raycast/api";
 import { mkdir, rmdir } from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 import { exchangeToken, parseTokens } from "./granolaAuthProtocol";
+import { diagnostic } from "./diagnostics";
 
 // Use Raycast's secure token store and standard logout preference. Device
 // authorization has no redirect, so PKCEClient.authorize is not used.
@@ -23,10 +25,13 @@ export class SignInRequired extends Error {
 
 let pending: Promise<string> | undefined;
 
-async function token(): Promise<string> {
+async function token(forceRefresh = false): Promise<string> {
   const saved = await granolaOAuth.getTokens();
-  if (!saved?.accessToken) throw new SignInRequired();
-  if (!saved.isExpired()) return saved.accessToken;
+  if (!saved?.accessToken) {
+    diagnostic("auth.sign_in_required", { code: "missing_session" });
+    throw new SignInRequired();
+  }
+  if (!forceRefresh && !saved.isExpired()) return saved.accessToken;
   if (!saved.refreshToken) throw new SignInRequired();
   // Commands/tools may run in separate processes. Serialize rotating refresh
   // tokens, and read the winning process's token before issuing another refresh.
@@ -46,20 +51,31 @@ async function token(): Promise<string> {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
       const updated = await granolaOAuth.getTokens();
       if (!updated?.accessToken) throw new SignInRequired();
-      if (!updated.isExpired()) return updated.accessToken;
+      if (updated.refreshToken !== saved.refreshToken && !updated.isExpired()) return updated.accessToken;
+      if (attempt === 0) diagnostic("auth.refresh_wait");
       await delay(250);
     }
   }
-  if (!acquired) throw new Error("Granola sign-in is busy. Reconnect using Sign In to Granola to recover.");
+  if (!acquired) {
+    diagnostic("auth.refresh_lock_timeout", { code: "reconnect_required" });
+    throw new Error("Granola sign-in is busy. Sign out in extension preferences and reconnect.");
+  }
+  let releaseLock = true;
   try {
     const current = await granolaOAuth.getTokens();
     if (!current?.refreshToken) throw new SignInRequired();
-    if (!current.isExpired()) return current.accessToken;
+    if ((!forceRefresh || current.refreshToken !== saved.refreshToken) && !current.isExpired())
+      return current.accessToken;
+    diagnostic("auth.refresh_started");
+    // Once sent, a lost response or failed save can strand a rotated token.
+    // Keep its lock in that case instead of replaying a possibly consumed token.
+    releaseLock = false;
     const { response, body } = await exchangeToken({
       grant_type: "refresh_token",
       refresh_token: current.refreshToken,
     });
     if (!response.ok) {
+      releaseLock = true;
       if (body.error === "invalid_grant" || body.error === "access_denied") {
         const latest = await granolaOAuth.getTokens();
         if (latest?.refreshToken === current.refreshToken) await granolaOAuth.removeTokens();
@@ -71,14 +87,17 @@ async function token(): Promise<string> {
     const latest = await granolaOAuth.getTokens();
     if (latest?.refreshToken !== current.refreshToken) throw new SignInRequired();
     await granolaOAuth.setTokens(tokens);
+    releaseLock = true;
+    diagnostic("auth.refresh_saved", { rotated: tokens.refreshToken !== current.refreshToken });
     return tokens.accessToken;
   } finally {
-    await rmdir(lock);
+    if (releaseLock) await rmdir(lock);
+    else diagnostic("auth.refresh_uncertain", { code: "reconnect_required" });
   }
 }
 
-export default function getAccessToken(): Promise<string> {
-  pending ??= token().finally(() => {
+export default function getAccessToken(forceRefresh = false): Promise<string> {
+  pending ??= token(forceRefresh).finally(() => {
     pending = undefined;
   });
   return pending;
@@ -86,7 +105,7 @@ export default function getAccessToken(): Promise<string> {
 
 export async function getLocalGranolaUserInfo() {
   const accessToken = await getAccessToken();
-  const response = await fetch("https://api.granola.ai/v1/get-user-info", {
+  const response = await granolaFetch("https://api.granola.ai/v1/get-user-info", {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
     body: "{}",

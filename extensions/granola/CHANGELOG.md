@@ -2,6 +2,10 @@
 
 ## [Sign in with Granola] - {PR_MERGE_DATE}
 
+- Add Check Connection with live read-endpoint checks, token-refresh verification, and safe diagnostic reports including endpoint/status/timing/reference IDs.
+- Prevent replay of possibly consumed refresh tokens after a lost response or failed persistence; cover refresh, concurrency, cancellation, endpoint contracts, and diagnostic privacy in regression tests.
+- Normalize current folder responses so folder-management tools return membership IDs correctly.
+
 - Replace local desktop credential reads with one-time browser sign-in on macOS and Windows. No API key, Keychain password, or MCP configuration is needed.
 - Add a native sign-in screen with confirmation code, browser action, cancellation, and retry when approval is declined or expires.
 - Securely store the extension's own session using Raycast OAuth storage, automatically refresh it, and provide Raycast's built-in sign-out preference.
