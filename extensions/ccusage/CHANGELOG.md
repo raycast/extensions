@@ -1,6 +1,6 @@
 # Claude Usage (ccusage) Changelog
 
-## [Fix npx failure with missing npm prefix and surface CLI errors] - {PR_MERGE_DATE}
+## [Fix npx failure with missing npm prefix and surface CLI errors] - 2026-09-07
 
 ### Fixed
 
