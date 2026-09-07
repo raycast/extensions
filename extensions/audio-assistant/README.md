@@ -27,11 +27,17 @@ The active player is saved separately for each Music Assistant server and user. 
 
 ## Music Workspace
 
-Use the dropdown beside the search bar to switch between **All**, **Players**, **Tracks**, **Artists**, and **Albums**. All begins with available players, followed by artists, tracks, and albums. Artist and album views use cover grids. Opening an artist shows albums and tracks together on one searchable screen.
+Use the dropdown beside the search bar to switch between **All**, **Favorites**, **Players**, **Tracks**, **Artists**, and **Albums**. All begins with your active player, followed by other available players, artists, tracks, and albums. On a fresh launch, this puts your saved available output first for immediate volume/mute control. Highlighting another player still targets that player for volume/mute, while transport controls use your saved output. Artist and album views use cover grids. Opening an artist shows albums and tracks together on one searchable screen.
 
 Players separates available outputs, compatible synced group members, and offline outputs. Select your primary output first, then press Enter on a compatible player in the Group Players section to add it. Linked members have a removal action. Group controls depend on the server's reported capabilities; Sendspin endpoints must already be connected to Music Assistant.
 
 Press Enter to select a player, play a track immediately, or browse an artist or album. Open Raycast's action panel for Now Playing details, Play Next, Add to Queue, repeat, shuffle, mute, volume, transport controls, queue inspection, and refresh.
+
+### Favorites
+
+Choose **Favorites** to browse tracks, artists, and albums marked as favorites in Music Assistant. Search stays within your favorites, and all three sections load additional pages as you scroll. Enter plays a track or opens an artist/album; your existing queue and playback shortcuts work here too.
+
+Mark favorites in Music Assistant, then use **Refresh** in the Favorites view to pick up changes. This view does not add or remove favorites. If a section cannot load, the other results remain available with a warning and Refresh recovery. A server that cannot return confirmed favorites reports an error rather than showing an unfiltered library. Demo Mode includes a small fictional favorites selection.
 
 ### Default Shortcuts
 

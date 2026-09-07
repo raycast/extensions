@@ -7,6 +7,7 @@ export function demoData(): { library: Library; queues: Queue[] } {
     uri: `demo://artist/${i}`,
     provider: "demo",
     itemId: `artist-${i}`,
+    favorite: i === 0,
   }));
   const albums = ["Blue Hour", "Small Signals", "After the Rain"].map((name, i) => ({
     kind: "album" as const,
@@ -14,6 +15,7 @@ export function demoData(): { library: Library; queues: Queue[] } {
     uri: `demo://album/${i}`,
     provider: "demo",
     itemId: `album-${i}`,
+    favorite: i === 1,
     artist: artists[i]!.name,
     artistUris: [artists[i]!.uri],
   }));
@@ -26,6 +28,7 @@ export function demoData(): { library: Library; queues: Queue[] } {
         uri: `demo://track/${i}`,
         provider: "demo",
         itemId: `track-${i}`,
+        favorite: i % 2 === 0,
         artist: album.artist,
         artistUris: album.artistUris,
         album: album.name,

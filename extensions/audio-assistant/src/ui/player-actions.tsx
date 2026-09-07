@@ -5,7 +5,7 @@ import { nextRepeat } from "../domain/policy";
 import { SessionRoute, useMusic } from "./session";
 import { useShortcuts } from "./use-shortcuts";
 
-function ChoosePlayerView() {
+export function ChoosePlayerView() {
   const { players, activeId, controller, run, busy } = useMusic();
   return (
     <List navigationTitle="Choose Active Player" isLoading={busy} searchBarPlaceholder="Search players…">

@@ -1,3 +1,4 @@
+import { searchFavorites } from "./favorite-search";
 import type {
   Album,
   Artist,
@@ -18,6 +19,7 @@ import { normalizeServerUrl } from "./http-client";
 import type { MusicService } from "./port";
 import { groupLeader, isGroupMember, requireGroupChange } from "../domain/grouping";
 import {
+  requireFavorite,
   decodeAlbum,
   decodeArray,
   decodeArtist,
@@ -168,7 +170,12 @@ export class LiveMusicService implements MusicService {
     const safeOffset = Number.isFinite(offset) && offset >= 0 ? offset : 0;
     const value = await this.options.client.command(
       `music/${kind}/library_items`,
-      { limit: request.limit, offset: safeOffset, search: request.query || undefined },
+      {
+        limit: request.limit,
+        offset: safeOffset,
+        search: request.query || undefined,
+        ...(request.view === "favorites" ? { favorite: true, summary: false } : {}),
+      },
       signal,
     );
     const decoder = (item: unknown, path: string): Track | Artist | Album =>
@@ -177,7 +184,10 @@ export class LiveMusicService implements MusicService {
         : kind === "artists"
           ? decodeArtist(item, path, this.serverUrl)
           : decodeAlbum(item, path, this.serverUrl);
-    const items = decodeArray(value, kind, decoder);
+    const items = decodeArray(value, kind, (item, path) => {
+      if (request.view === "favorites") requireFavorite(item, path);
+      return decoder(item, path);
+    });
     return { items, nextCursor: items.length === request.limit ? String(safeOffset + items.length) : undefined };
   }
 
@@ -189,6 +199,8 @@ export class LiveMusicService implements MusicService {
   }
 
   async search(request: SearchRequest, signal?: AbortSignal): Promise<SearchPage> {
+    if (request.view === "favorites")
+      return searchFavorites(request, (kind, page, abort) => this.library(kind, page, abort), signal);
     if (request.view === "players") {
       const words = request.query.toLocaleLowerCase().split(/\s+/).filter(Boolean);
       const players = (await this.getPlayers()).filter((player) =>

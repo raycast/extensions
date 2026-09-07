@@ -1,5 +1,7 @@
+import { allPlayers } from "../domain/all-players";
+import { ChoosePlayerView } from "./player-actions";
 import { KeyboardShortcutsAction } from "./shortcut-settings-view";
-import { Action, ActionPanel, Grid, Icon, List, openExtensionPreferences, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, List, Detail, openExtensionPreferences, useNavigation } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import type { Album, Artist, Item, Library, View } from "../domain/model";
 import { PlayerDetail, PlayerSections } from "./player-sections";
@@ -12,6 +14,7 @@ import { useShortcuts } from "./use-shortcuts";
 
 const views: { value: View; title: string }[] = [
   { value: "all", title: "All" },
+  { value: "favorites", title: "Favorites" },
   { value: "players", title: "Players" },
   { value: "tracks", title: "Tracks" },
   { value: "artists", title: "Artists" },
@@ -40,7 +43,7 @@ function subtitle(item: Item) {
 
 export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
   const shortcuts = useShortcuts();
-  const { service, players, queues, activeId, revision, loading, busy, bridge, run, refresh } = useMusic();
+  const { service, players, queues, activeId, outputError, revision, loading, busy, bridge, run, refresh } = useMusic();
   const { push } = useNavigation();
   const [view, setView] = useState<View>("all");
   const collectionCache = useRef<{ key: string; library: Library } | undefined>(undefined);
@@ -49,6 +52,12 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
   const [searching, setSearching] = useState(true);
   const [error, setError] = useState<string>();
   const [hasMore, setHasMore] = useState(false);
+  const [favoriteRevision, setFavoriteRevision] = useState(0);
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const refreshMusic = async () => {
+    if (!collection && view === "favorites") setFavoriteRevision((value) => value + 1);
+    await refresh();
+  };
   const pager = useRef<SearchPager | undefined>(undefined);
   const changeView = (value: string) => {
     pager.current?.dispose();
@@ -57,11 +66,12 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
     setSearching(true);
     setView(value as View);
   };
-  const searchRevision = collection || error ? revision : 0;
+  const searchRevision = !collection && view === "favorites" ? favoriteRevision : collection || error ? revision : 0;
   useEffect(() => {
     const abort = new AbortController();
     setSearching(true);
     setError(undefined);
+    setWarnings([]);
     setHasMore(false);
     if (view === "players" && !collection) {
       setItems([]);
@@ -75,7 +85,14 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
         setItems(state.items);
         setSearching(state.loading);
         setHasMore(state.hasMore && !state.error);
-        setError(state.error ? "Could not load music. Use Refresh to retry." : undefined);
+        setError(
+          state.error
+            ? view === "favorites"
+              ? "Could Not Load Favorites"
+              : "Could not load music. Use Refresh to retry."
+            : undefined,
+        );
+        setWarnings(state.warnings ?? []);
         if (state.error) void reportError(state.error);
         if (!state.loading && state.warnings?.length) void reportError(new Error(state.warnings.join(" ")));
       },
@@ -122,7 +139,7 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
       abort.abort();
       nextPager.dispose();
     };
-  }, [service, view, query, collection, searchRevision]);
+  }, [service, view, query, collection, searchRevision, favoriteRevision]);
   const openCollection = (item: Artist | Album) =>
     push(
       <SessionRoute sessionBridge={bridge}>
@@ -139,7 +156,8 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
     isLoading: loading || busy || searching,
     searchText: query,
     onSearchTextChange: setQuery,
-    searchBarPlaceholder: "Search players, artists, tracks, albums…",
+    searchBarPlaceholder:
+      !collection && view === "favorites" ? "Search your favorites…" : "Search players, artists, tracks, albums…",
     filtering: false as const,
     throttle: true,
     pagination:
@@ -153,11 +171,16 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
             },
           },
   };
-  const actions = (item?: Item) => <ItemActions item={item} openCollection={openCollection} />;
+  const actions = (item?: Item) => <ItemActions item={item} openCollection={openCollection} onRefresh={refreshMusic} />;
   const emptyActions = (
     <ActionPanel>
       <ActionPanel.Section title="Workspace">
-        <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={() => run(refresh)} />
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={shortcuts.refresh}
+          onAction={() => run(refreshMusic)}
+        />
         <KeyboardShortcutsAction />
         <Action
           title="Extension Preferences"
@@ -201,8 +224,16 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
       </Grid>
     );
   }
+  // A fresh List must not initially highlight a different room while saved output resolution is pending.
+  if (!collection && view === "all" && loading) return <Detail isLoading markdown="Loading your active player…" />;
+  const playerLayout = allPlayers(players, activeId, query, outputError);
+  const activeRow = playerLayout.active;
   const sections =
-    collection?.kind === "artist" ? (["album", "track"] as const) : (["player", "artist", "track", "album"] as const);
+    collection?.kind === "artist"
+      ? (["album", "track"] as const)
+      : !collection && view === "favorites"
+        ? (["track", "artist", "album"] as const)
+        : (["player", "artist", "track", "album"] as const);
   return (
     <List
       {...common}
@@ -218,10 +249,87 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
       }
     >
       <List.EmptyView
-        title={error ?? "No Results"}
-        description="Try another search or music view."
+        title={
+          error ??
+          (view === "favorites" && !collection
+            ? searching
+              ? "Loading Favorites…"
+              : query.trim()
+                ? "No Matching Favorites"
+                : "No Favorites Yet"
+            : "No Results")
+        }
+        description={
+          view === "favorites" && !collection
+            ? error
+              ? "Use Refresh to retry. Your server must support favorite filtering."
+              : query.trim()
+                ? "Try another search within your favorites."
+                : "Mark tracks, artists, or albums as favorites in Music Assistant, then Refresh."
+            : "Try another search or music view."
+        }
         actions={emptyActions}
       />
+      {!collection && view === "favorites" && (warnings.length > 0 || error) && (
+        <List.Section title="Favorites Could Not Fully Load">
+          <List.Item
+            id="favorites-warning"
+            title={error ?? "Some Favorites Are Unavailable"}
+            subtitle={warnings.join(" ") || "Use Refresh to retry."}
+            icon={Icon.Warning}
+            actions={emptyActions}
+          />
+        </List.Section>
+      )}
+      {!collection && view === "all" && (activeRow || playerLayout.status) && (
+        <List.Section title="Active Player">
+          {activeRow ? (
+            <List.Item
+              id={itemKey(activeRow)}
+              key={itemKey(activeRow)}
+              title={activeRow.name}
+              subtitle={subtitle(activeRow)}
+              icon={thumbnail(activeRow)}
+              accessories={[
+                {
+                  text: activeRow.muted
+                    ? "Muted"
+                    : activeRow.volume !== undefined
+                      ? `${activeRow.volume}%`
+                      : "Volume unavailable",
+                },
+                { text: "Active" },
+              ]}
+              actions={actions(activeRow)}
+            />
+          ) : (
+            <List.Item
+              id="active-player-status"
+              title={playerLayout.status!}
+              icon={Icon.Warning}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="Choose Active Player"
+                    target={
+                      <SessionRoute sessionBridge={bridge}>
+                        <ChoosePlayerView />
+                      </SessionRoute>
+                    }
+                  />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={shortcuts.refresh}
+                    onAction={() => run(refreshMusic)}
+                  />
+                  <KeyboardShortcutsAction />
+                </ActionPanel>
+              }
+            />
+          )}
+        </List.Section>
+      )}
       {!collection && view === "players" ? (
         <PlayerSections query={query} actions={actions} />
       ) : (
@@ -230,7 +338,7 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
             key={kind}
             title={{ player: "Players", artist: "Artists", track: "Tracks", album: "Albums" }[kind]}
           >
-            {items
+            {(kind === "player" && !collection && view === "all" ? playerLayout.others : items)
               .filter(
                 (item) =>
                   item.kind === kind &&
@@ -247,7 +355,9 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
                   accessories={
                     item.kind === "player"
                       ? [{ text: item.id === activeId ? "Active" : item.available ? "Enter to Select" : "Offline" }]
-                      : []
+                      : !collection && view === "favorites"
+                        ? [{ icon: Icon.Star, tooltip: "Favorite in Music Assistant" }]
+                        : []
                   }
                   detail={item.kind === "player" ? <PlayerDetail player={item} /> : undefined}
                   actions={actions(item)}

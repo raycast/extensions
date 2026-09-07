@@ -7,7 +7,15 @@ import { QueueView } from "./queue-view";
 import { NowPlayingView } from "./now-playing-view";
 import { useShortcuts } from "./use-shortcuts";
 
-export function ItemActions({ item, openCollection }: { item?: Item; openCollection: (item: Artist | Album) => void }) {
+export function ItemActions({
+  item,
+  openCollection,
+  onRefresh,
+}: {
+  item?: Item;
+  openCollection: (item: Artist | Album) => void;
+  onRefresh?: () => Promise<void>;
+}) {
   const shortcuts = useShortcuts();
   const { controller, run, refresh, bridge } = useMusic();
   return (
@@ -101,7 +109,12 @@ export function ItemActions({ item, openCollection }: { item?: Item; openCollect
             </SessionRoute>
           }
         />
-        <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={() => run(refresh)} />
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={shortcuts.refresh}
+          onAction={() => run(onRefresh ?? refresh)}
+        />
         <KeyboardShortcutsAction />
         <Action
           title="Extension Preferences"

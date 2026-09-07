@@ -21,6 +21,7 @@ interface Session extends Runtime {
   players: Player[];
   queues: Queue[];
   activeId?: string;
+  outputError?: string;
   revision: number;
   loading: boolean;
   busy: boolean;
@@ -78,6 +79,7 @@ export function MusicSession({ runtime, children }: { runtime: Runtime; children
   const [players, setPlayers] = useState<Player[]>([]);
   const [queues, setQueues] = useState<Queue[]>([]);
   const [activeId, setActiveId] = useState<string>();
+  const [outputError, setOutputError] = useState<string>();
   const [revision, setRevision] = useState(0);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -93,8 +95,18 @@ export function MusicSession({ runtime, children }: { runtime: Runtime; children
     else failure = playerResult.reason;
     if (queueResult.status === "fulfilled") setQueues(queueResult.value);
     else failure ??= queueResult.reason;
-    if (scopeResult.status === "fulfilled") setActiveId(await activePlayerStore.get(scopeResult.value));
-    else failure ??= scopeResult.reason;
+    let outputFailed = playerResult.status === "rejected" || scopeResult.status === "rejected";
+    if (scopeResult.status === "fulfilled") {
+      try {
+        setActiveId(await activePlayerStore.get(scopeResult.value));
+      } catch (error) {
+        outputFailed = true;
+        failure ??= error;
+      }
+    } else failure ??= scopeResult.reason;
+    setOutputError(
+      outputFailed ? "Could not resolve your active player. Refresh to retry or choose a player." : undefined,
+    );
     setRevision((value) => value + 1);
     if (failure) throw failure;
   }, [runtime]);
@@ -123,7 +135,7 @@ export function MusicSession({ runtime, children }: { runtime: Runtime; children
       setBusy(false);
     }
   }
-  const session = { ...runtime, players, queues, activeId, revision, loading, busy, run, refresh, bridge };
+  const session = { ...runtime, players, queues, activeId, outputError, revision, loading, busy, run, refresh, bridge };
   useEffect(() => {
     bridge.publish(session);
   });

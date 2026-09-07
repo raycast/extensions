@@ -1,0 +1,118 @@
+{
+  "public_openapi_version": "2.10.2",
+  "verified_date": "2026-09-07",
+  "source": "Running server /api-docs/commands.json; public schema only, no authenticated library data",
+  "commands": [
+    {
+      "command": "music/albums/library_items",
+      "parameters": [
+        {
+          "name": "favorite",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter by favorite status."
+        },
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "Filter by search query."
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of items to return."
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip."
+        },
+        {
+          "name": "summary",
+          "type": "boolean",
+          "required": false,
+          "description": "When True (default), return slim summary items containing only the fields needed for a list view. Set to False to get fully hydrated items."
+        }
+      ],
+      "return_type": "Array of Album",
+      "required_scope": "library.read"
+    },
+    {
+      "command": "music/artists/library_items",
+      "parameters": [
+        {
+          "name": "favorite",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter by favorite status."
+        },
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "Filter by search query."
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of items to return."
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip."
+        },
+        {
+          "name": "summary",
+          "type": "boolean",
+          "required": false,
+          "description": "When True (default), return slim summary items containing only the fields needed for a list view. Set to False to get fully hydrated items."
+        }
+      ],
+      "return_type": "Array of Artist",
+      "required_scope": "library.read"
+    },
+    {
+      "command": "music/tracks/library_items",
+      "parameters": [
+        {
+          "name": "favorite",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter by favorite status."
+        },
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "Filter by search query."
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of items to return."
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip."
+        },
+        {
+          "name": "summary",
+          "type": "boolean",
+          "required": false,
+          "description": "When True (default), return slim summary items containing only the fields needed for a list view. Set to False to get fully hydrated items."
+        }
+      ],
+      "return_type": "Array of Track",
+      "required_scope": "library.read"
+    }
+  ]
+}

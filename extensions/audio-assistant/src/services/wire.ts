@@ -48,8 +48,14 @@ function repeatMode(value: unknown): Queue["repeat"] {
   return value === "one" || value === "all" ? value : "off";
 }
 
+/** Reject ignored/unsupported favorite filters rather than displaying non-favorites. */
+export function requireFavorite(value: unknown, path: string): void {
+  if (record(value, path).favorite !== true) throw new WireError(`${path}.favorite`, "a confirmed favorite (true)");
+}
+
 function mediaIdentity(value: RecordValue, path: string) {
   return {
+    ...(typeof value.favorite === "boolean" ? { favorite: value.favorite } : {}),
     itemId: string(value.item_id, `${path}.item_id`),
     provider: string(value.provider, `${path}.provider`),
     uri: string(value.uri, `${path}.uri`),

@@ -51,6 +51,7 @@ export function searchLibrary(library: Library, view: View, query: string): Item
   const artists = library.artists.filter(matches);
   const tracks = library.tracks.filter(matches);
   const albums = library.albums.filter(matches);
+  if (view === "favorites") return [...tracks, ...artists, ...albums].filter((item) => item.favorite === true);
   if (view === "players") return players;
   if (view === "artists") return artists;
   if (view === "tracks") return tracks;

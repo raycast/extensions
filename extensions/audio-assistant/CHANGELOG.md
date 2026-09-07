@@ -4,6 +4,8 @@
 
 - Provide seven top-level commands: Music, Play / Pause, Next Track, Previous Track, Volume Up, Volume Down, and Toggle Mute.
 - Browse Music Assistant players, artists, tracks, and albums from one searchable workspace.
+- Add a Favorites view for server-marked tracks, artists, and albums, with favorite-only search, independent pagination, and partial-error recovery.
+- Place the saved available output first in All for quick volume/mute access, with explicit recovery for unavailable outputs.
 - Select and persist an active playback target for Music and the quick playback commands.
 - Play music immediately, queue tracks next, append tracks, and inspect or edit the active queue.
 - Inspect current playback with full cover art and metadata using the Now Playing Detail screen (`Alt + I`).

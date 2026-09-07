@@ -1,17 +1,18 @@
 # Status and validation
 
-Updated September 6, 2026. This is the single record of implementation status, validation, and remaining work. Product and protocol details live in the [development guide](DEVELOPMENT.md). Historical milestone logs are preserved in Git rather than separate handoff/roadmap files.
+Updated September 7, 2026. This is the single record of implementation status, validation, and remaining work. Product and protocol details live in the [development guide](DEVELOPMENT.md). Historical milestone logs are preserved in Git rather than separate handoff/roadmap files.
 
 ## Current implementation
 
 The extension has a working live HTTP adapter and optional, explicitly labeled demo mode. It is beyond the original foundation stage. Live mode is the default; demo produces no audio and its queues reset when Music closes.
 
-- Seven commands and five root views, with explicit server/user-scoped output selection.
+- Seven commands and six root views, with explicit server/user-scoped output selection. All now places the available active output first, without duplicate rows or controlled selection, and uses fresh session player state. Initial output loading is gated; failed/offline selections show explicit recovery.
 - Credentials stored strictly in Raycast's native password preferences, directing unconfigured launches to Extension Preferences with clear setup guidance.
 - Searchable, grouped Keyboard Shortcuts editor inside Music, opened with Ctrl+Shift+. on Windows / Cmd+Shift+. on macOS. All prior defaults remain unchanged, including Ctrl+. / Cmd+. for Extension Preferences. Native configuration now contains only connection settings and Demo Mode, with guidance to the editor.
 - Per-action modifier/key editing with full previews, validation against reserved keys and other Music actions on either platform, individual reset, confirmed reset-all, and persisted updates across root/pushed views. Local storage contains only shortcut definitions and review state. Failed writes preserve active bindings; corrupt data is retained until explicit recovery.
 - First-run shortcut review notice and best-effort import of legacy fields exposed by Raycast. Removal of manifest fields may make old custom values unavailable; users are explicitly told to review and reapply missing customizations. This migration limitation was accepted for this release; native migration has not been verified.
 - Search pager warnings accumulation across pages, resilient search revision tracking, and inactive queue loading isolation.
+- Favorites lists server-marked tracks, artists, and albums, with favorite-only search, independent paging beyond the All discovery cap, confirmed-favorite decoding, explicit membership Refresh, retained partial results/warnings, and deterministic demo data. Favorite editing is not implemented.
 - Paged library lists/grids, independently paged All discovery, cancellable searches, partial discovery recovery, and cached collection browsing.
 - Artist albums and tracks together on one searchable screen; root Artists/Albums retain grids. Album tracks follow disc/track order; related-media actions and album/track artwork are implemented.
 - Playback, Play Next, append, volume steps, mute, repeat, shuffle, queue inspection, non-current queue-entry removal, and dedicated Now Playing Detail view (`Alt+I`) with artwork and metadata sidebar. Queue loading includes entries beyond the first 200.
@@ -19,13 +20,13 @@ The extension has a working live HTTP adapter and optional, explicitly labeled d
 - Available/Group/Offline player sections, compatible synced membership addition/removal, static-member protection, and effective queue resolution. All excludes offline players.
 - Updated icon and five ordered Store screenshots; user originals retained separately. The latest screenshot update adds two captures and preserves the user’s reordered set in both folders. All five metadata images are 2000×1250; copies 1 and 5 were resized to satisfy publisher validation, with media originals unchanged.
 
-The latest implementation replaces the 45 shortcut preference dropdowns with a native editor inside Music. Prior playback, token handling, paging, and Now Playing fixes remain in place.
+The latest implementation adds Active Player at the top of All and a Favorites dropdown view. The previous implementation replaced the 45 shortcut preference dropdowns with a native editor inside Music. Prior playback, token handling, paging, and Now Playing fixes remain in place.
 
 ## Validation evidence
 
 | Evidence                            | Result and limits                                                                                                                                                                                                                                                                                                                                                                                               |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Latest code validation, September 6 | 49 automated tests, TypeScript, ESLint, Prettier, and all seven production bundles passed in WSL. Shortcut coverage includes every unchanged platform default, manifest guidance/fixed editor shortcut, legacy import, persistence/reopen, validation/collisions, individual/all reset, review acknowledgment, failed writes, and corrupt-storage recovery. These do not prove native keyboard/layout behavior. |
+| Latest code validation, September 7 | 59 automated tests, TypeScript, ESLint, Prettier, and all seven production bundles passed in WSL. Shortcut coverage includes every unchanged platform default, manifest guidance/fixed editor shortcut, legacy import, persistence/reopen, validation/collisions, individual/all reset, review acknowledgment, failed writes, and corrupt-storage recovery. These do not prove native keyboard/layout behavior. |
 | Official submission, September 6    | Publisher accepted manifest/package, icon, metadata, lint, and formatting; [Raycast PR #30841](https://github.com/raycast/extensions/pull/30841) updated successfully.                                                                                                                                                                                                                                          |
 | Read-only live smoke, September 5   | Music Assistant 2.10.2/schema 65: authentication, scoped identity, player/effective queue decoding, All/Tracks/Artists/Albums loading, pagination signals, typed search, and artist/album browsing passed.                                                                                                                                                                                                      |
 | Artwork smoke, September 5          | Canonical image proxy returned unauthenticated JPEG HTTP 200. Decoded art was available for 19/20 sampled albums, 14/20 tracks, and 5/20 artists; missing source metadata uses fallbacks.                                                                                                                                                                                                                       |
@@ -37,6 +38,8 @@ The latest implementation replaces the 45 shortcut preference dropdowns with a n
 Tests cover domain policies, saved output isolation, strict wire decoding, HTTP errors/cancellation/no replay, exact live command arguments, queue identity/loading, paging races, shared route state, grouping, and shortcut mappings. Fixtures contain sanitized source shapes; they do not substitute for a running server.
 
 `npm run test:live` is the read-only smoke harness. Provide connection settings through environment variables as defined in `scripts/live-smoke.ts`; never commit real settings. A successful WSL build is not evidence that Raycast rendered or imported the extension.
+
+The September 7 Favorites checks cover exact library request arguments, independent source exhaustion, more than five favorite artists, healthy results during partial failure, total failure versus empty results, invalid/non-favorite flags, repeated pages, malformed cursors, cancellation, membership reload, and demo paging/search. Public command/schema verification on the running server confirmed the filter contract; its OpenAPI reports 2.10.2. No authenticated library token was available to the test harness, so authenticated Favorites results and physical playback/volume checks remain unverified. Native keyboard/focus behavior also remains unverified by these tests.
 
 ## Remaining work
 
@@ -53,9 +56,14 @@ These are known limitations or future improvements, not features already exposed
 
 ## Outstanding validation checklist
 
+Active-player composition has automated coverage for saved/group outputs, duplicate removal, query filtering, stable row identity, unavailable selections, and resolution errors. Fresh-launch native highlight and physical shortcut targeting still require host verification.
+
 Record host/app/server versions and concrete outcomes when running these checks. Do not mark them passed from mocks, a bundle, screenshots alone, or a general report that playback works. These apply to current functionality; test future controls when implemented.
 
 ### Live behavior
+
+- [ ] Authenticated Favorites: confirm true membership for tracks/artists/albums, typed search, multiple pages, empty states, partial errors, and external membership changes followed by Refresh. The updated read-only smoke harness includes Favorites.
+- [ ] Fresh-launch Active Player: initial highlight and volume/mute target are the saved available output, including delayed resolution and grouped outputs; no transient first-player targeting. Native search/Back/focus and deliberate player navigation remain stable.
 
 - [ ] Missing settings, invalid token, forbidden operation, server unavailable/timeout, setup-required server, and reverse-proxy connection behavior.
 - [ ] No saved output sends no playback mutation; selecting/reopening/quick commands use the same scoped output; removed/offline output never falls back to another room.
@@ -71,7 +79,7 @@ Record host/app/server versions and concrete outcomes when running these checks.
 
 - [ ] Shortcut editor on Windows/macOS: compact configuration guidance, Ctrl+Shift+. / Cmd+Shift+. entry from root/nested/empty/setup views, searching/grouped rows, modifier/key form layout, Save/Cancel/Back, immediate bindings after saving, reset confirmation/conflicts, first-run notice and actual legacy preference availability. Automated tests do not validate these native behaviors.
 - [ ] Record Raycast/host versions; discover all seven commands by Audio Assistant / Music Assistant.
-- [ ] Five root views, Players sections/detail, grids, combined artist List, artwork, loading/empty/error states, scrolling, and Back/query restoration.
+- [ ] Six root views, Players sections/detail, grids, combined artist List, artwork, loading/empty/error states, scrolling, and Back/query restoration.
 - [ ] Enter actions, repeated Play/Pause, native action panel, Shift capitalization, select/copy/paste, and hotkeys across root and pushed views.
 - [ ] Physical Alt+= / Alt+- (or custom bindings) on the intended keyboard layout; volume targets highlighted player while transport targets saved output.
 - [ ] Rapid actions/refresh preserve search focus and usable results; quick commands show feedback and exit; closing Music cleans up resources.

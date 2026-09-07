@@ -22,12 +22,13 @@ async function main() {
   const service = new LiveMusicService({ serverUrl, client });
   const info = (await client.command("info")) as Record<string, unknown>;
   const players = await service.getPlayers();
-  const [all, tracks, artists, albums, queues] = await Promise.all([
+  const [all, tracks, artists, albums, queues, favorites] = await Promise.all([
     service.search({ view: "all", query: "", limit: 100 }),
     service.search({ view: "tracks", query: "", limit: 20 }),
     service.search({ view: "artists", query: "", limit: 20 }),
     service.search({ view: "albums", query: "", limit: 20 }),
     service.getQueues(),
+    service.search({ view: "favorites", query: "", limit: 20 }),
   ]);
   const firstTrack = tracks.items.find((item) => item.kind === "track");
   const firstArtist = artists.items.find((item) => item.kind === "artist");
@@ -57,6 +58,9 @@ async function main() {
         })),
         resultCounts: {
           all: all.items.length,
+          favorites: favorites.items.length,
+          favoriteWarnings: favorites.warnings?.length ?? 0,
+          favoritesHaveMore: favorites.nextCursor !== undefined,
           tracks: tracks.items.length,
           artists: artists.items.length,
           albums: albums.items.length,

@@ -1,5 +1,5 @@
 /** UI-owned models. Decode server responses at the adapter boundary, never in React. */
-export type View = "all" | "players" | "tracks" | "artists" | "albums";
+export type View = "all" | "favorites" | "players" | "tracks" | "artists" | "albums";
 export type RepeatMode = "off" | "one" | "all";
 export type PlaybackAction = "play-pause" | "next" | "previous";
 export type QueueIntent = "play-now" | "play-next" | "add";
@@ -9,6 +9,7 @@ export interface MediaRef {
   itemId: string;
 }
 interface MediaBase extends MediaRef {
+  favorite?: boolean;
   name: string;
   artwork?: string;
 }
