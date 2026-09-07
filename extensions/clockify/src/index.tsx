@@ -224,7 +224,7 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { pop } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<{
+  const { handleSubmit, itemProps, values } = useForm<{
     projectId: string;
     taskId?: string;
     description?: string;
@@ -275,6 +275,13 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
     getAllProjectsAndTagsOnWorkspace();
   }, [config, isValidToken]);
 
+  // Driven off the form value rather than the Dropdown's onChange: overriding onChange after
+  // spreading itemProps drops useForm's own handler, which leaves projectId unset and the
+  // controlled value pinned to null, so the selection snaps back and re-emits onChange forever.
+  useEffect(() => {
+    if (values.projectId) fetchTasksForProject(values.projectId);
+  }, [values.projectId]);
+
   async function fetchTasksForProject(projectId: string): Promise<void> {
     setIsLoading(true);
 
@@ -299,7 +306,7 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
         </ActionPanel>
       }
     >
-      <Form.Dropdown {...itemProps.projectId} title="Project" onChange={(projectId) => fetchTasksForProject(projectId)}>
+      <Form.Dropdown {...itemProps.projectId} title="Project">
         {projects.map((project: Project) => (
           <Form.Dropdown.Item
             key={project.id}
@@ -514,6 +521,11 @@ function AddTimeEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) 
     getAllProjectsAndTags();
   }, [config]);
 
+  // See NewEntry: overriding the Dropdown's onChange would drop useForm's handler and loop.
+  useEffect(() => {
+    if (values.projectId) fetchTasksForProject(values.projectId);
+  }, [values.projectId]);
+
   async function fetchTasksForProject(projectId: string): Promise<void> {
     setIsLoading(true);
 
@@ -537,7 +549,7 @@ function AddTimeEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) 
         </ActionPanel>
       }
     >
-      <Form.Dropdown {...itemProps.projectId} title="Project" onChange={(projectId) => fetchTasksForProject(projectId)}>
+      <Form.Dropdown {...itemProps.projectId} title="Project">
         {projects.map((project: Project) => (
           <Form.Dropdown.Item
             key={project.id}
