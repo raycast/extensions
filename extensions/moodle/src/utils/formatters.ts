@@ -103,12 +103,37 @@ export function formatRelativeDueDate(timestampInSeconds: number): {
 }
 
 /**
- * Normalizes Moodle base URL by ensuring proper protocol and removing trailing slashes.
+ * Normalizes Moodle base URL by ensuring a secure, supported protocol and removing trailing slashes.
  */
 export function normalizeMoodleUrl(url: string): string {
-  let trimmed = url.trim();
-  if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
-    trimmed = `https://${trimmed}`;
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+
+  const candidate = /^https?:\/\//i.test(trimmed)
+    ? trimmed
+    : `https://${trimmed}`;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(candidate);
+  } catch {
+    throw new Error(`Invalid Moodle URL: ${trimmed}`);
   }
-  return trimmed.replace(/\/+$/, "");
+
+  const hostname = parsed.hostname.toLowerCase();
+  const isAllowedLoopback =
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "[::1]" ||
+    hostname === "::1";
+
+  if (parsed.protocol !== "https:" && !isAllowedLoopback) {
+    throw new Error(
+      "Moodle URL must use HTTPS unless it is a localhost or loopback address.",
+    );
+  }
+
+  const pathname =
+    parsed.pathname === "/" ? "" : parsed.pathname.replace(/\/+$/, "");
+  return `${parsed.origin}${pathname}`;
 }

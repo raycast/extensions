@@ -4,14 +4,12 @@ import {
   Toast,
   showInFinder,
 } from "@raycast/api";
-import fetch from "node-fetch";
 import fs from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import { pipeline } from "node:stream/promises";
 import path from "node:path";
 import os from "node:os";
 import {
-  MoodlePreferences,
   MoodleSiteInfo,
   MoodleCourse,
   MoodleCourseSection,
@@ -31,6 +29,25 @@ export class MoodleError extends Error {
     super(message);
     this.name = "MoodleError";
   }
+}
+
+const unsupportedMethodErrorCodes = new Set([
+  "cannotfindthefunction",
+  "functionnotavailable",
+  "invalidfunction",
+  "invalidmethod",
+  "methodnotfound",
+  "missingmethod",
+  "unknownfunction",
+  "unknownmethod",
+]);
+
+function isUnsupportedMethodError(error: unknown): boolean {
+  return (
+    error instanceof MoodleError &&
+    typeof error.errorCode === "string" &&
+    unsupportedMethodErrorCodes.has(error.errorCode.toLowerCase())
+  );
 }
 
 /**
@@ -74,12 +91,20 @@ export function cleanToken(rawToken: string): string {
 /**
  * Gets verified user preferences.
  */
-export function getMoodlePrefs(): MoodlePreferences {
-  const prefs = getPreferenceValues<MoodlePreferences>();
+export function getMoodlePrefs(): Preferences & {
+  moodleUrl: string;
+  apiToken: string;
+} {
+  const prefs = getPreferenceValues<Preferences>();
+  const moodleUrl = prefs.moodleUrl.trim()
+    ? normalizeMoodleUrl(prefs.moodleUrl)
+    : "";
+  const apiToken = cleanToken(prefs.apiToken);
+
   return {
     ...prefs,
-    moodleUrl: normalizeMoodleUrl(prefs.moodleUrl || ""),
-    apiToken: cleanToken(prefs.apiToken || ""),
+    moodleUrl,
+    apiToken,
   };
 }
 
@@ -310,14 +335,14 @@ export async function getSiteInfo(): Promise<MoodleSiteInfo> {
       siteurl: moodleUrl,
       userpictureurl: "",
     };
-    return cachedSiteInfo;
+    return cachedSiteInfo!;
   }
 
   const info = await callMoodleWs<MoodleSiteInfo>(
     "core_webservice_get_site_info",
   );
   cachedSiteInfo = info;
-  return info;
+  return cachedSiteInfo!;
 }
 
 export async function getEnrolledCourses(): Promise<MoodleCourse[]> {
@@ -330,30 +355,26 @@ export async function getEnrolledCourses(): Promise<MoodleCourse[]> {
         "core_enrol_get_users_courses",
         { userid: session.userId },
       );
-      if (Array.isArray(courses) && courses.length > 0) {
+      if (Array.isArray(courses)) {
         return courses.sort(
           (a, b) =>
             (b.timemodified || b.startdate || 0) -
             (a.timemodified || a.startdate || 0),
         );
       }
-    } catch {
-      // fallback to timeline courses
+    } catch (error) {
+      if (!isUnsupportedMethodError(error)) throw error;
     }
 
-    try {
-      const timelineData = await callMoodleAjax<{ courses: MoodleCourse[] }>(
-        "core_course_get_enrolled_courses_by_timeline_classification",
-        { offset: 0, limit: 0, classification: "all", sort: "fullname" },
-      );
-      return (timelineData.courses || []).sort(
-        (a, b) =>
-          (b.timemodified || b.startdate || 0) -
-          (a.timemodified || a.startdate || 0),
-      );
-    } catch {
-      return [];
-    }
+    const timelineData = await callMoodleAjax<{ courses: MoodleCourse[] }>(
+      "core_course_get_enrolled_courses_by_timeline_classification",
+      { offset: 0, limit: 0, classification: "all", sort: "fullname" },
+    );
+    return (timelineData.courses || []).sort(
+      (a, b) =>
+        (b.timemodified || b.startdate || 0) -
+        (a.timemodified || a.startdate || 0),
+    );
   }
 
   const siteInfo = await getSiteInfo();
@@ -412,8 +433,8 @@ export async function getAssignments(): Promise<MoodleAssignment[]> {
           }
           return list.sort((a, b) => (a.duedate || 0) - (b.duedate || 0));
         }
-      } catch {
-        // Fallback to calendar action events
+      } catch (error) {
+        if (!isUnsupportedMethodError(error)) throw error;
       }
     }
 
@@ -421,7 +442,8 @@ export async function getAssignments(): Promise<MoodleAssignment[]> {
     const calEvents = await getUpcomingCalendarEvents();
     return (calEvents.events || []).map((e) => ({
       id: e.id,
-      cmid: e.id,
+      cmid: 0,
+      url: e.action?.url,
       course: e.course?.id || 0,
       name: e.name,
       duedate: e.timesort || e.timestart,
@@ -466,30 +488,22 @@ export async function getUpcomingCalendarEvents(): Promise<MoodleActionEventsRes
   const { apiToken } = getMoodlePrefs();
 
   if (isSessionCookie(apiToken)) {
-    try {
-      return await callMoodleAjax<MoodleActionEventsResponse>(
-        "core_calendar_get_action_events_by_timesort",
-        {
-          timesortfrom: now - 86400,
-          limitnum: 50,
-        },
-      );
-    } catch {
-      return { events: [] };
-    }
-  }
-
-  try {
-    return await callMoodleWs<MoodleActionEventsResponse>(
+    return await callMoodleAjax<MoodleActionEventsResponse>(
       "core_calendar_get_action_events_by_timesort",
       {
         timesortfrom: now - 86400,
         limitnum: 50,
       },
     );
-  } catch {
-    return { events: [] };
   }
+
+  return await callMoodleWs<MoodleActionEventsResponse>(
+    "core_calendar_get_action_events_by_timesort",
+    {
+      timesortfrom: now - 86400,
+      limitnum: 50,
+    },
+  );
 }
 
 export async function getNotifications(): Promise<MoodleNotificationsResponse> {
@@ -497,24 +511,16 @@ export async function getNotifications(): Promise<MoodleNotificationsResponse> {
   const siteInfo = await getSiteInfo();
 
   if (isSessionCookie(apiToken)) {
-    try {
-      return await callMoodleAjax<MoodleNotificationsResponse>(
-        "message_popup_get_popup_notifications",
-        { useridto: siteInfo.userid },
-      );
-    } catch {
-      return { notifications: [], unreadcount: 0 };
-    }
-  }
-
-  try {
-    return await callMoodleWs<MoodleNotificationsResponse>(
+    return await callMoodleAjax<MoodleNotificationsResponse>(
       "message_popup_get_popup_notifications",
       { useridto: siteInfo.userid },
     );
-  } catch {
-    return { notifications: [], unreadcount: 0 };
   }
+
+  return await callMoodleWs<MoodleNotificationsResponse>(
+    "message_popup_get_popup_notifications",
+    { useridto: siteInfo.userid },
+  );
 }
 
 export async function markNotificationRead(
@@ -547,7 +553,8 @@ export async function downloadCourseFile(
   });
 
   try {
-    let targetDir = downloadDirectory?.trim() || "";
+    const rawDownloadDirectory = String(downloadDirectory ?? "");
+    let targetDir = rawDownloadDirectory.trim();
     if (!targetDir) {
       targetDir = path.join(os.homedir(), "Downloads", "Moodle");
     } else if (targetDir.startsWith("~")) {

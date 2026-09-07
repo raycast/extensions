@@ -109,7 +109,9 @@ export default function UpcomingAssignmentsCommand() {
         />
       ) : (
         filteredAssignments?.map((assignment) => {
-          const assignUrl = `${moodleUrl}/mod/assign/view.php?id=${assignment.cmid}`;
+          const assignUrl =
+            assignment.url ||
+            `${moodleUrl}/mod/assign/view.php?id=${assignment.cmid}`;
           const dueStatus = formatRelativeDueDate(assignment.duedate);
 
           let tintColor = Color.SecondaryText;

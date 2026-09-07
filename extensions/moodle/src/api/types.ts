@@ -1,10 +1,3 @@
-export interface MoodlePreferences {
-  moodleUrl: string;
-  apiToken: string;
-  downloadDirectory?: string;
-  calendarName?: string;
-}
-
 export interface MoodleSiteInfo {
   sitename: string;
   username: string;
@@ -79,6 +72,7 @@ export interface MoodleCourseSection {
 export interface MoodleAssignment {
   id: number;
   cmid: number;
+  url?: string;
   course: number;
   name: string;
   nosubmissions?: number;
