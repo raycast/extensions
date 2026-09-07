@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Dynamic Model Selection & Live Model List] - {PR_MERGE_DATE}
+## [Dynamic Model Selection & Live Model List] - 2026-09-07
 
 - 🆕 Fetch the list of available models live from Google's API instead of a hardcoded dropdown, so newly released and retired models no longer require a manual extension update.
 - 🔄 Convert the per-command model dropdowns into a live model picker in AI Chat, fetched via the Gemini API.
