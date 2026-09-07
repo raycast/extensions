@@ -16,12 +16,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "check-connection",
-      "title": "Check Connection",
-      "description": "Check Granola authentication and read endpoints, and copy safe diagnostics",
-      "mode": "view"
-    },
-    {
       "name": "search-notes",
       "title": "Search Notes",
       "description": "Search all notes from Granola",

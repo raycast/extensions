@@ -6,14 +6,13 @@ Create, manage, and review notes in [Granola](https://www.granola.ai/). Use the 
 ## Getting started
 Open **Search Notes** (or any browsing/export command), press **Sign In to Granola**, and approve the matching code in your browser. Your notes load automatically after approval. Sign in once; Raycast securely stores a separate session and refreshes it automatically on macOS and Windows.
 
-No API key, macOS password, MCP setup, or access to Granola's local files is required. The approval page uses Granola's `mcp-auth.granola.ai` domain; the extension uses OAuth for authentication and calls Granola's API directly, without MCP.
+The extension uses OAuth authentication. No API key, system password, or access to Granola's local files is required.
 
 The Granola desktop app is only required for **Create Note** and **Open in Granola**. Sign in from a view command before using AI tools. To disconnect or switch accounts, use **Sign Out** in Raycast Settings → Extensions → Granola, then reopen a command. Local sign-out removes Raycast's saved credentials; it does not revoke the session on Granola's servers.
 
 If you decline approval, return to Raycast and press **Try Again**. Expired codes have a **Get New Code** action. The centered sign-in screen keeps your confirmation code visible while browser approval is pending. You can cancel with **⌘.** or by leaving the command. Error screens include **Copy Diagnostics** for troubleshooting. Network failures do not require signing out of the Granola desktop app.
 
 ## Granola Commands
-- **Check Connection** - Verify authentication and read endpoints, test token refresh, and copy safe diagnostics for support
 - **Create Note** - Start a new note and recording immediately in Granola
 - **Search Notes** - View your notes in a list, see their details (including transcript), copy their links, or copy their contents as HTML or Markdown
 - **Search People** - Browse and search people from your Granola meetings, view their company affiliations and meeting history
@@ -46,9 +45,9 @@ If you decline approval, return to Raycast and press **Try Again**. Expired code
 Release tooling currently uses `@raycast/api` 1.x because the 2.2.0 CLI failed to extract schemas for existing AI tools during validation. `npm run publish` uses the installed CLI. The lockfile includes patched esbuild and minimatch overrides; revisit these when upgrading the CLI. Run `npm ci`, `npm test`, `npm run lint`, and `npm run build` before submission.
 
 *How does this extension work?*
-The extension uses Granola's OAuth device authorization endpoint to obtain its own session, stored through Raycast's OAuth token storage. Access tokens are refreshed before expiry and rotated refresh tokens are saved before further requests. Concurrent refreshes are serialized across command processes. The desktop app's encrypted files and tokens are never read or modified.
+The extension uses OAuth authentication, with credentials stored through Raycast's OAuth token storage. Access tokens are refreshed automatically. The desktop app's files and tokens are never read or modified.
 
-Note and folder operations use Granola's private API. This device flow uses Granola's existing public OAuth client ID, not an independently registered Raycast client. These interfaces may change; this is not a vendor-supported API contract. No account-plan bypass is performed: access remains governed by Granola's server permissions.
+Note and folder operations use Granola's private API, which may change. Access remains governed by Granola's server permissions.
 
 *What data does this extension collect?*
 This extension does not collect telemetry. Authentication requests go to Granola's authentication service and note requests go directly to Granola's API. Tokens are not printed in diagnostics.
@@ -57,9 +56,7 @@ This extension does not collect telemetry. Authentication requests go to Granola
 
 ### Troubleshooting
 
-Run **Check Connection** in the Granola extension. **Check Read Endpoints** tests every read endpoint using an accessible sample note/folder; it does not modify meeting data. **Verify Token Refresh** refreshes Raycast's own session and then reruns the reads. A new browser login is unnecessary unless the session was revoked or a previous refresh had an uncertain outcome.
-
-After reproducing a problem, use **Copy Diagnostics** in Check Connection or on a load-error screen and attach the report to your issue. Reports contain the command, platform/Raycast version, endpoint, HTTP status, time to response headers, request reference IDs, and auth lifecycle events. They exclude tokens, device codes, account information, request/response bodies, and meeting content. Local logs are bounded to approximately 128 KiB per command; reports include up to 200 recent records. Nothing is uploaded automatically.
+After reproducing a problem, use **Copy Diagnostics** on the sign-in or load-error screen and attach the report to your issue. Reports contain the command, platform/Raycast version, endpoint, HTTP status, time to response headers, request reference IDs, and auth lifecycle events. They exclude tokens, device codes, account information, request/response bodies, and meeting content. Local logs are bounded to approximately 128 KiB per command; reports include up to 200 recent records. Nothing is uploaded automatically.
 
 Common signals: `401` means authorization was rejected, `403` means the operation is not permitted, `404` identifies a missing route/resource, and `429` means rate limiting. `auth.refresh_saved` confirms the replacement token was stored. `auth.refresh_uncertain` or `auth.refresh_lock_timeout` means reconnect using Raycast's extension sign-out preference; the extension deliberately avoids replaying a potentially consumed refresh token.
 

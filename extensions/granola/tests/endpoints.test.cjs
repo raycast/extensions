@@ -25,6 +25,18 @@ function load(name, mocks = {}, globals = {}) {
   return exports;
 }
 const { endpointCatalog } = load("endpointCatalog");
+test("release commands preserve the existing Store command surface", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json"), "utf8"));
+  assert.deepEqual(manifest.commands.map((command) => command.name), [
+    "search-notes",
+    "create-note",
+    "export-transcripts",
+    "export-notes",
+    "create-note-from-transcript",
+    "search-people",
+    "search-companies",
+  ]);
+});
 test("folder readback normalizes embedded documents to membership IDs", () => {
   const { normalizeFolder } = load("normalizeFolder");
   const result = normalizeFolder({
@@ -126,7 +138,7 @@ test("diagnostic export omits unknown fields, query strings, and error bodies", 
   try {
     const logs = load(
       "diagnostics",
-      { "@raycast/api": { environment: { supportPath, commandName: "check-connection" } } },
+      { "@raycast/api": { environment: { supportPath, commandName: "search-notes" } } },
       { console: { log: () => {} } },
     );
     logs.diagnostic("request.failed", {

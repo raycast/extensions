@@ -6,7 +6,7 @@ Release-preparation smoke test repeated on Raycast 2.2.0.0 with API 1.104.25 and
 
 ## Results
 
-- OAuth device authorization and exchange: HTTP 200; separate session created after browser approval.
+- OAuth authentication: HTTP 200; separate session created after browser approval.
 - Refresh: HTTP 200, rotated refresh token saved through Raycast OAuth storage; concurrent callers received the saved session. Subsequent API reads succeeded without browser approval.
 - All 10 read routes in `endpointCatalog.ts`: HTTP 200 and basic response-shape validation (notes, user, folder metadata, document set, recipes, document batch, transcript, panels, document metadata, individual folder).
 - Dummy note workflow: create-document, update-document, insert-transcriptions, llm-proxy, llm-proxy-stream, create-document-panel, update-document-panel all returned HTTP 200; title and summary workflow completed.
@@ -20,7 +20,7 @@ These results establish route compatibility for the tested account and fixtures,
 
 ## Repeat read-only checks
 
-Run Granola **Check Connection** in Raycast. **Verify Token Refresh** deliberately refreshes the extension's own session, then checks reads. Copy Diagnostics produces a support report without credentials or meeting contents.
+The Store extension has no separate diagnostics command. For a development-only run, temporarily register a view command with an explicit Action that calls `checkEndpoints(new AbortController().signal)` from `src/utils/checkEndpoints.ts`. To verify rotation first, call `getAccessToken(true)` from `src/utils/getAccessToken.ts`. Remove the temporary command and manifest entry before submitting. Error screens retain Copy Diagnostics for support without credentials or meeting contents.
 
 ## Repeat mutation checks (explicit opt-in only)
 

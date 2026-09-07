@@ -1,12 +1,12 @@
 # Granola Changelog
 
-## [Sign in with Granola] - {PR_MERGE_DATE}
+## [2.2.0 - OAuth Authentication] - {PR_MERGE_DATE}
 
-- Sign in once in your browser on macOS or Windows. Raycast securely stores and refreshes its own session; no API key, Keychain password, or access to Granola's local files is required.
+- Use OAuth authentication to sign in once in your browser. Raycast securely stores and refreshes its own session on macOS and Windows.
 - Add a centered native sign-in screen with compact branding, approval codes, cancellation, and clear retry actions.
 - Fix 404 errors when listing notes by using Granola's current POST request format.
 - Fix folder membership IDs and missing enhanced summaries in exports; prevent empty note nodes from producing literal `undefined` text.
-- Add Check Connection, token-refresh verification, and copyable diagnostics that exclude credentials and meeting content.
+- Add copyable error diagnostics that exclude credentials and meeting content.
 - Protect rotating refresh tokens from concurrent requests and uncertain responses, with automated regression coverage.
 - Update Raycast dependencies and the lockfile to resolve dependency advisories.
 
