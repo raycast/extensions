@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "moodle",
+  "title": "Moodle",
+  "description": "Access Moodle courses, download course files, track assignments, sync deadlines to Calendar, and read notifications. Supports Web Service tokens and browser MoodleSession cookies for SSO.",
+  "icon": "moodle-icon.png",
+  "author": "RJperson",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-courses",
+      "title": "Browse Courses and Files",
+      "subtitle": "Moodle",
+      "description": "Browse enrolled courses, sections, and download course documents, slides, and files.",
+      "mode": "view"
+    },
+    {
+      "name": "upcoming-assignments",
+      "title": "Upcoming Deadlines & Assignments",
+      "subtitle": "Moodle",
+      "description": "View upcoming assignment deadlines, submission status, and add directly to Apple Calendar.",
+      "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications & Announcements",
+      "subtitle": "Moodle",
+      "description": "View recent Moodle notifications, alerts, and course announcements.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-links",
+      "title": "Quick Open Moodle",
+      "subtitle": "Moodle",
+      "description": "Quickly jump to Moodle Dashboard, My Courses, Calendar, or Grades in browser.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "moodleUrl",
+      "title": "Moodle URL",
+      "description": "The base URL of your Moodle instance (e.g. https://moodle.your-university.edu)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://moodle.your-university.edu"
+    },
+    {
+      "name": "apiToken",
+      "title": "Token or MoodleSession Cookie",
+      "description": "Your Moodle Web Service API token, or your browser MoodleSession cookie (for SSO logins).",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter token or paste MoodleSession cookie"
+    },
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "Folder where downloaded course files are saved. Defaults to ~/Downloads if left blank.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "calendarName",
+      "title": "macOS Calendar Name",
+      "description": "Name of the calendar to add events into (leave empty to use default calendar).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g. School, Study, or leave empty"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.0",
+    "@raycast/utils": "^1.18.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
