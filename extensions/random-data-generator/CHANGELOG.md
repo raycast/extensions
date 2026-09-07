@@ -1,5 +1,7 @@
 # Random Data Generator Changelog
 
+## [Added contributor] - {PR_MERGE_DATE}
+
 ## [Fix Quicklinks and Locale Switching] - 2026-09-06
 
 - Fixed quicklinks failing with a missing arguments error, by passing the quicklink data as launch context
