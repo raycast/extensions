@@ -219,7 +219,7 @@ export function CaskActionPanel(props: {
 
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
-          <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
+          {cask.tap && <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />}
         </ActionPanel.Section>
 
         <ViewSection
@@ -250,7 +250,7 @@ export function CaskActionPanel(props: {
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
-          <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
+          {cask.tap && <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />}
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={brewInstallCommand(cask)}

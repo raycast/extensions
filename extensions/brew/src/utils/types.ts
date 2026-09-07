@@ -24,7 +24,8 @@ export interface Nameable {
 }
 
 interface Installable {
-  tap: string;
+  /** Null for a formula loaded from a path or URL, and for a tapless cask. */
+  tap: string | null;
   desc?: string;
   homepage: string;
   versions: Versions;
@@ -56,6 +57,10 @@ export interface Cask extends Installable {
 
 export interface CaskDependency {
   macos?: { [key: string]: string[] };
+  /** Casks can depend on formulae and other casks, not just an OS version. */
+  formula?: string[];
+  cask?: string[];
+  arch?: { type: string; bits?: number }[];
 }
 
 /// Formula Types

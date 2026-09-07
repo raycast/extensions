@@ -224,6 +224,31 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
     { kind: "label", key: "version", title: "Version", text: formatPackageVersion(cask) },
   ];
 
+  // Casks depend on formulae and other casks, not only an OS version
+  // (cask/dsl/depends_on.rb) — formula metadata has always shown its
+  // dependencies, so omitting these was drift rather than a kind difference.
+  const packageDeps = [...(cask.depends_on?.formula ?? []), ...(cask.depends_on?.cask ?? [])];
+  if (packageDeps.length > 0) {
+    rows.push({ kind: "separator", key: "dependencies-sep" });
+    rows.push({
+      kind: "tags",
+      key: "dependencies",
+      title: "Dependencies",
+      tags: dependencyTags(packageDeps, options.isInstalled),
+    });
+  }
+
+  const arch = cask.depends_on?.arch;
+  if (arch && arch.length > 0) {
+    rows.push({ kind: "separator", key: "arch-sep" });
+    rows.push({
+      kind: "tags",
+      key: "arch",
+      title: "Architecture",
+      tags: arch.map(({ type, bits }) => ({ text: bits ? `${type}${bits}` : type })),
+    });
+  }
+
   const macos = cask.depends_on?.macos;
   if (macos) {
     rows.push({ kind: "separator", key: "macos-sep" });
