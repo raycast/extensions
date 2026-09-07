@@ -18,9 +18,10 @@ interface UserInfo {
 const API_CONFIG = {
   API_URL: "https://api.granola.ai/v1",
   STREAM_API_URL: "https://stream.api.granola.ai/v1",
-  CLIENT_VERSION: "7.162.1",
+  CLIENT_VERSION: "7.543.0",
   getUserAgent(): string {
-    return `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Granola/${this.CLIENT_VERSION} Chrome/146.0.7680.188 Electron/41.2.1 Safari/537.36`;
+    const platform = process.platform === "win32" ? "Windows NT 10.0; Win64; x64" : "Macintosh; Intel Mac OS X 10_15_7";
+    return `Granola/${this.CLIENT_VERSION} (${platform})`;
   },
   // Unique delimiter that's extremely unlikely to appear in content
   CHUNK_DELIMITER: "\x1F\x1E\x1D__GRANOLA_CHUNK__\x1D\x1E\x1F",

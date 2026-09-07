@@ -66,9 +66,12 @@ export function fetchGranolaData(route: string) {
     error: fetchError,
     revalidate,
   } = useFetch<GetDocumentsResponse<Document | Doc>>(url, {
+    method: "POST",
+    body: "{}",
     headers: accessToken
       ? {
           Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
         }
       : undefined,
     execute: !!accessToken,
@@ -342,8 +345,11 @@ export async function getDocumentsList(): Promise<Document[]> {
     const url = `https://api.granola.ai/v2/get-documents`;
     const token = await getAccessToken();
     const response = await fetch(url, {
+      method: "POST",
+      body: "{}",
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     });
 

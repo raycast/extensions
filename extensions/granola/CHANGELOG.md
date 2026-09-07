@@ -1,5 +1,15 @@
 # Granola Changelog
 
+## [Sign in with Granola] - {PR_MERGE_DATE}
+
+- Replace local desktop credential reads with one-time browser sign-in on macOS and Windows. No API key, Keychain password, or MCP configuration is needed.
+- Add a native sign-in screen with confirmation code, browser action, cancellation, and retry when approval is declined or expires.
+- Securely store the extension's own session using Raycast OAuth storage, automatically refresh it, and provide Raycast's built-in sign-out preference.
+- Restore API access for note search, folder browsing, people/company search, exports, and AI tools when Granola encrypts its local authentication files.
+- Send note-list requests with POST to avoid 404 responses from Granola's current API.
+- Fall back to available HTML summaries when structured panel content cannot be converted during export; prevent empty nodes from producing literal `undefined` text (related to [#26014](https://github.com/raycast/extensions/issues/26014)).
+- Address missing/expired local-token reports: [#28357](https://github.com/raycast/extensions/issues/28357), [#29203](https://github.com/raycast/extensions/issues/29203), [#29621](https://github.com/raycast/extensions/issues/29621), [#29769](https://github.com/raycast/extensions/issues/29769), [#30088](https://github.com/raycast/extensions/issues/30088), [#30513](https://github.com/raycast/extensions/issues/30513), [#30696](https://github.com/raycast/extensions/issues/30696), and [#30748](https://github.com/raycast/extensions/issues/30748).
+
 ## [Sortable date prefixes for exports] - 2026-05-29
 
 - Prefix exported note and transcript filenames with ISO-8601 creation date
@@ -213,4 +223,4 @@ and many many more fixes and improvements, etc!
 - Added Granola extension
 - Added `New Note` command, which starts a new note and recording immediately in Granola
 - Added `Search Notes` command, which allows you to view your notes in a list, view their details, copy their links, or copy their contents as HTML or Markdown
-- Added `AI Notes` AI command, which allows you to use Raycast AI on top of Granola and other AI extensions 
+- Added `AI Notes` AI command, which allows you to use Raycast AI on top of Granola and other AI extensions

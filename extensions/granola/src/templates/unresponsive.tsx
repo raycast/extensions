@@ -14,7 +14,7 @@ export default function Unresponsive({ context = "unknown", error }: Unresponsiv
 
   return (
     <Detail
-      markdown={`# Error from Granola \n\n Could not communicate with the Granola service. Please make sure Granola is open, running, and that you are logged in, then try again.`}
+      markdown={`# Could Not Load Granola\n\n${error?.message ?? "Check your internet connection and try again. If your session was revoked, sign out in Raycast extension preferences and reconnect."}`}
     />
   );
 }

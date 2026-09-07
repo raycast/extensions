@@ -37,10 +37,7 @@ export async function getUserInfo(): Promise<UserInfo> {
       picture: typeof picture === "string" ? picture : undefined,
     };
   } catch (error) {
-    throw new Error(
-      `Failed to get Granola user info: ${toErrorMessage(error)}. Please make sure Granola is installed, running, and that you are logged in to the application. (Platform: ${process.platform})`,
-      { cause: error },
-    );
+    throw new Error(`Failed to get Granola user info: ${toErrorMessage(error)}`, { cause: error });
   }
 }
 

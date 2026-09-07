@@ -4,12 +4,13 @@ Create, manage, and review notes in [Granola](https://www.granola.ai/). Use the 
 > create a list of tasks for me in @todoist based on my last meeting in @granola
 
 ## Getting started
-So long as you have Granola installed and running, and you are logged in, you can use this extension right away.
+Open **Search Notes** (or any browsing/export command), press **Sign In to Granola**, and approve the matching code in your browser. Your notes load automatically after approval. Sign in once; Raycast securely stores a separate session and refreshes it automatically on macOS and Windows.
 
-If you run into any issues, please verify the following:
-- You must have Granola app installed and running
-- You must be logged into the Granola app
-- Raycast must have access to your `~/Library/Application Support/Granola` folder (macOS) or `%APPDATA%\Granola` folder (Windows)
+No API key, macOS password, MCP setup, or access to Granola's local files is required. The approval page uses Granola's `mcp-auth.granola.ai` domain; the extension uses OAuth for authentication and calls Granola's API directly, without MCP.
+
+The Granola desktop app is only required for **Create Note** and **Open in Granola**. Sign in from a view command before using AI tools. To disconnect or switch accounts, use **Sign Out** in Raycast Settings → Extensions → Granola, then reopen a command. Local sign-out removes Raycast's saved credentials; it does not revoke the session on Granola's servers.
+
+If you decline approval or the code expires, return to Raycast and press **Try Again**. You can cancel a pending sign-in with **⌘.** or by leaving the command. Network failures do not require signing out of the Granola desktop app.
 
 ## Granola Commands
 - **Create Note** - Start a new note and recording immediately in Granola
@@ -41,10 +42,12 @@ If you run into any issues, please verify the following:
 
 ## Developer Notes / Privacy
 *How does this extension work?*
-This extension reads local data from your `~/Library/Application Support/Granola` folder (macOS) or `%APPDATA%\Granola` folder (Windows). It grabs your Granola API `access_token` from the same folder, first from the plaintext Supabase config and then from Granola's local `stored-accounts.json` fallback. This keeps Search Notes, transcript exports, and AI tools working when the desktop app has moved the active session into stored accounts. When pulling AI notes, this extension uses that token to make API calls to the private Granola API on your behalf; same as if you were opening the note directly in the Granola app. This `access_token` changes periodically so pulling it dynamically this way will keep the extension working. If not, you may need to launch Granola and re-sign in if your session has expired.
+The extension uses Granola's OAuth device authorization endpoint to obtain its own session, stored through Raycast's OAuth token storage. Access tokens are refreshed before expiry and rotated refresh tokens are saved before further requests. Concurrent refreshes are serialized across command processes. The desktop app's encrypted files and tokens are never read or modified.
+
+Note and folder operations use Granola's private API. This device flow uses Granola's existing public OAuth client ID, not an independently registered Raycast client. These interfaces may change; this is not a vendor-supported API contract. No account-plan bypass is performed: access remains governed by Granola's server permissions.
 
 *What data does this extension collect?*
-This extension does not collect any data. It only reads data from your local Granola app data, or directly from the Granola API, the same way the Granola app does behind the scenes.
+This extension does not collect telemetry. Authentication requests go to Granola's authentication service and note requests go directly to Granola's API. Tokens are not printed in diagnostics.
 
 ## Support
 This plugin is an independent project and is not affiliated with, endorsed by, or in any way officially connected to Granola Inc. All trademarks and copyrights related to Granola and Granola AI are the property of their respective owners.
