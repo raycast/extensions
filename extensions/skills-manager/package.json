@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "skills-manager",
+  "title": "Skills Manager",
+  "description": "Browse, search, install and deploy your shared AI agent-skill library across Claude Code, Codex, Cursor and 50+ other agents.",
+  "icon": "icon.png",
+  "author": "TeddyHS",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "my-skills",
+      "title": "My Skills",
+      "subtitle": "Skills Manager",
+      "description": "Browse the skill library, deploy skills to agents and manage tags.",
+      "mode": "view"
+    },
+    {
+      "name": "search-skills",
+      "title": "Search Skills",
+      "subtitle": "Skills Manager",
+      "description": "Search the skills.sh marketplace and install skills into the library.",
+      "mode": "view"
+    },
+    {
+      "name": "presets",
+      "title": "Presets",
+      "subtitle": "Skills Manager",
+      "description": "Deploy, undeploy and organize skill presets.",
+      "mode": "view"
+    },
+    {
+      "name": "agents",
+      "title": "Agents",
+      "subtitle": "Skills Manager",
+      "description": "Inspect detected agents and toggle which ones receive skills.",
+      "mode": "view"
+    },
+    {
+      "name": "check-updates",
+      "title": "Check for Skill Updates",
+      "subtitle": "Skills Manager",
+      "description": "Probe upstream sources for skill updates and apply them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "CLI Path",
+      "description": "Absolute path to skills-manager-cli. Leave empty to auto-detect the copy published by the Skills Manager app (recommended).",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
