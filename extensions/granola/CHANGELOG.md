@@ -2,19 +2,13 @@
 
 ## [Sign in with Granola] - {PR_MERGE_DATE}
 
-- Use a centered native sign-in view with compact branding, browser-approval progress, and dedicated declined, expired-code, and connection-error states.
-
-- Add Check Connection with live read-endpoint checks, token-refresh verification, and safe diagnostic reports including endpoint/status/timing/reference IDs.
-- Prevent replay of possibly consumed refresh tokens after a lost response or failed persistence; cover refresh, concurrency, cancellation, endpoint contracts, and diagnostic privacy in regression tests.
-- Normalize current folder responses so folder-management tools return membership IDs correctly.
-
-- Replace local desktop credential reads with one-time browser sign-in on macOS and Windows. No API key, Keychain password, or MCP configuration is needed.
-- Add a native sign-in screen with confirmation code, browser action, cancellation, and retry when approval is declined or expires.
-- Securely store the extension's own session using Raycast OAuth storage, automatically refresh it, and provide Raycast's built-in sign-out preference.
-- Restore API access for note search, folder browsing, people/company search, exports, and AI tools when Granola encrypts its local authentication files.
-- Send note-list requests with POST to avoid 404 responses from Granola's current API.
-- Fall back to available HTML summaries when structured panel content cannot be converted during export; prevent empty nodes from producing literal `undefined` text (related to [#26014](https://github.com/raycast/extensions/issues/26014)).
-- Address missing/expired local-token reports: [#28357](https://github.com/raycast/extensions/issues/28357), [#29203](https://github.com/raycast/extensions/issues/29203), [#29621](https://github.com/raycast/extensions/issues/29621), [#29769](https://github.com/raycast/extensions/issues/29769), [#30088](https://github.com/raycast/extensions/issues/30088), [#30513](https://github.com/raycast/extensions/issues/30513), [#30696](https://github.com/raycast/extensions/issues/30696), and [#30748](https://github.com/raycast/extensions/issues/30748).
+- Sign in once in your browser on macOS or Windows. Raycast securely stores and refreshes its own session; no API key, Keychain password, or access to Granola's local files is required.
+- Add a centered native sign-in screen with compact branding, approval codes, cancellation, and clear retry actions.
+- Fix 404 errors when listing notes by using Granola's current POST request format.
+- Fix folder membership IDs and missing enhanced summaries in exports; prevent empty note nodes from producing literal `undefined` text.
+- Add Check Connection, token-refresh verification, and copyable diagnostics that exclude credentials and meeting content.
+- Protect rotating refresh tokens from concurrent requests and uncertain responses, with automated regression coverage.
+- Update Raycast dependencies and the lockfile to resolve dependency advisories.
 
 ## [Sortable date prefixes for exports] - 2026-05-29
 

@@ -53,7 +53,11 @@ export async function checkEndpoints(signal: AbortSignal): Promise<EndpointCheck
         body: JSON.stringify(body),
         signal,
       });
-      const data = await response.json();
+      const data = (await response.json()) as {
+        docs?: Array<{ id: string }>;
+        lists?: Record<string, unknown>;
+        id?: string;
+      };
       let valid = data !== null && typeof data === "object";
       if (endpoint.path.endsWith("get-documents") || endpoint.path.endsWith("get-documents-batch"))
         valid = Array.isArray(data?.docs);
@@ -71,8 +75,8 @@ export async function checkEndpoints(signal: AbortSignal): Promise<EndpointCheck
         continue;
       }
       if (endpoint.path === "/v2/get-documents")
-        noteId = data.docs.find((doc: { id?: unknown }) => typeof doc.id === "string")?.id;
-      if (endpoint.path.endsWith("get-document-lists-metadata")) folderId = Object.keys(data.lists)[0];
+        noteId = data.docs?.find((doc: { id?: unknown }) => typeof doc.id === "string")?.id;
+      if (endpoint.path.endsWith("get-document-lists-metadata")) folderId = Object.keys(data.lists ?? {})[0];
       checks.push({ path: endpoint.path, result: "passed", detail: `HTTP ${response.status}; response shape checked` });
     } catch (error) {
       if (signal.aborted) throw error;

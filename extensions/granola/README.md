@@ -13,6 +13,7 @@ The Granola desktop app is only required for **Create Note** and **Open in Grano
 If you decline approval, return to Raycast and press **Try Again**. Expired codes have a **Get New Code** action. The centered sign-in screen keeps your confirmation code visible while browser approval is pending. You can cancel with **⌘.** or by leaving the command. Error screens include **Copy Diagnostics** for troubleshooting. Network failures do not require signing out of the Granola desktop app.
 
 ## Granola Commands
+- **Check Connection** - Verify authentication and read endpoints, test token refresh, and copy safe diagnostics for support
 - **Create Note** - Start a new note and recording immediately in Granola
 - **Search Notes** - View your notes in a list, see their details (including transcript), copy their links, or copy their contents as HTML or Markdown
 - **Search People** - Browse and search people from your Granola meetings, view their company affiliations and meeting history
@@ -41,6 +42,9 @@ If you decline approval, return to Raycast and press **Try Again**. Expired code
 - **ZIP Exports** - Export multiple notes as organized ZIP files grouped by folder
 
 ## Developer Notes / Privacy
+
+Release tooling currently uses `@raycast/api` 1.x because the 2.2.0 CLI failed to extract schemas for existing AI tools during validation. `npm run publish` uses the installed CLI. The lockfile includes patched esbuild and minimatch overrides; revisit these when upgrading the CLI. Run `npm ci`, `npm test`, `npm run lint`, and `npm run build` before submission.
+
 *How does this extension work?*
 The extension uses Granola's OAuth device authorization endpoint to obtain its own session, stored through Raycast's OAuth token storage. Access tokens are refreshed before expiry and rotated refresh tokens are saved before further requests. Concurrent refreshes are serialized across command processes. The desktop app's encrypted files and tokens are never read or modified.
 

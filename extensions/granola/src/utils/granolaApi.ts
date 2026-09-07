@@ -1660,7 +1660,7 @@ export async function fetchUpcomingEvents(): Promise<CalendarEvent[]> {
     await handleApiError(refreshResponse, "Refresh Google events");
   }
 
-  const data = await refreshResponse.json();
+  const data = (await refreshResponse.json()) as { results?: Array<{ events?: CalendarEvent[] }> };
 
   // Extract events from the response
   const allEvents: CalendarEvent[] = [];

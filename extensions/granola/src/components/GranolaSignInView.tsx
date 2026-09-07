@@ -71,10 +71,9 @@ export function GranolaSignInView({ checking, busy, code, url, problem, onSignIn
     };
   }, []);
   const error = problem ? problems[problem] : undefined;
-  if (checking) return <List navigationTitle="Granola" isLoading searchBarPlaceholder="Connecting to Granola…" />;
+  if (checking) return <List isLoading searchBarPlaceholder="Connecting to Granola…" />;
   return (
     <List
-      navigationTitle="Granola"
       filtering={false}
       searchBarPlaceholder={busy ? "Waiting for browser approval…" : "Connect your Granola account"}
     >

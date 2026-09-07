@@ -2,6 +2,8 @@
 
 Last run: 2026-09-07, macOS, Granola 7.543.0, actual Raycast development extension.
 
+Release-preparation smoke test repeated on Raycast 2.2.0.0 with API 1.104.25 and utils 2.3.1: all ten read routes passed; forced refresh rotated and saved the session. Clean install, 21 offline tests, lint, TypeScript, production build, and npm audit (zero vulnerabilities) passed. Mutation results below are from the earlier integration run on the same day, not a second mutation run after dependency updates.
+
 ## Results
 
 - OAuth device authorization and exchange: HTTP 200; separate session created after browser approval.
