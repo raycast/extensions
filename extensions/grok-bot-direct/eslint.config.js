@@ -1,2 +1,3 @@
+const { defineConfig } = require("eslint/config");
 const raycast = require("@raycast/eslint-config");
-module.exports = [...raycast];
+module.exports = defineConfig([...raycast]);

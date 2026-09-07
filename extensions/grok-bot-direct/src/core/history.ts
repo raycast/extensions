@@ -122,7 +122,11 @@ export function transcriptMarkdown(
 export class HistoryStore {
   private values = new Map<string, HistorySnapshot>();
   private listeners = new Map<string, Set<() => void>>();
-  private flights = new Map<string, Promise<void>>();
+  private flights = new Map<
+    string,
+    { promise: Promise<void>; older: boolean }
+  >();
+  private queuedOlder = new Map<string, Promise<void>>();
   private generation = 0;
   constructor(
     private readonly client: Pick<GrokClient, "transcript" | "thread">,
@@ -151,13 +155,26 @@ export class HistoryStore {
     this.generation++;
     this.values.clear();
     this.flights.clear();
+    this.queuedOlder.clear();
     for (const group of this.listeners.values())
       for (const listener of group) listener();
   }
   async load(botId: string, rootId?: string, older = false): Promise<void> {
     const key = this.key(botId, rootId);
     const running = this.flights.get(key);
-    if (running) return running;
+    if (running) {
+      if (!older || running.older || rootId) return running.promise;
+      const queued = this.queuedOlder.get(key);
+      if (queued) return queued;
+      const generation = this.generation;
+      const next = running.promise.then(() => {
+        if (this.queuedOlder.get(key) === next) this.queuedOlder.delete(key);
+        if (generation === this.generation)
+          return this.load(botId, rootId, true);
+      });
+      this.queuedOlder.set(key, next);
+      return next;
+    }
     const previous = this.read(botId, rootId);
     if (older && (rootId || previous.before === undefined)) return;
     const generation = this.generation;
@@ -204,7 +221,7 @@ export class HistoryStore {
       }
     };
     const flight = execute();
-    this.flights.set(key, flight);
+    this.flights.set(key, { promise: flight, older });
     return flight;
   }
 }

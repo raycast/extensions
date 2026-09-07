@@ -162,6 +162,110 @@ describe("history and thread identity", () => {
 });
 
 describe("loaded conversation cache", () => {
+  it("queues one older page after an overlapping poll and coalesces repeated clicks", async () => {
+    let finishPoll!: (value: Transcript) => void;
+    let finishOlder!: (value: Transcript) => void;
+    const api = {
+      transcript: vi
+        .fn()
+        .mockResolvedValueOnce({
+          entries: [message("b", "recent")],
+          nextBeforeSeq: 20,
+        })
+        .mockImplementationOnce(
+          () =>
+            new Promise<Transcript>((resolve) => {
+              finishPoll = resolve;
+            }),
+        )
+        .mockImplementationOnce(
+          () =>
+            new Promise<Transcript>((resolve) => {
+              finishOlder = resolve;
+            }),
+        ),
+      thread: vi.fn(),
+    };
+    const store = new HistoryStore(api);
+    await store.load("bot");
+    const poll = store.load("bot");
+    const older = store.load("bot", undefined, true);
+    const repeated = store.load("bot", undefined, true);
+    expect(api.transcript).toHaveBeenCalledTimes(2);
+    finishPoll({ entries: [message("c", "new reply")], nextBeforeSeq: 30 });
+    await poll;
+    expect(api.transcript).toHaveBeenCalledTimes(3);
+    expect(api.transcript).toHaveBeenLastCalledWith("bot", 20);
+    const whilePaging = store.load("bot", undefined, true);
+    finishOlder({ entries: [message("a", "older")], nextBeforeSeq: 10 });
+    await Promise.all([older, repeated, whilePaging]);
+    expect(api.transcript).toHaveBeenCalledTimes(3);
+    expect(store.read("bot").entries.map((entry) => entry.content)).toEqual([
+      "older",
+      "recent",
+      "new reply",
+    ]);
+  });
+  it("cancels queued history on account reset without disrupting the new account", async () => {
+    let finish!: (value: Transcript) => void;
+    const api = {
+      transcript: vi
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise<Transcript>((resolve) => {
+              finish = resolve;
+            }),
+        )
+        .mockResolvedValue({
+          entries: [message("new", "new account")],
+          nextBeforeSeq: 10,
+        }),
+      thread: vi.fn(),
+    };
+    const store = new HistoryStore(api);
+    const oldPoll = store.load("bot");
+    const queued = store.load("bot", undefined, true);
+    store.clear();
+    await store.load("bot");
+    finish({ entries: [message("old", "old account")], nextBeforeSeq: 20 });
+    await Promise.all([oldPoll, queued]);
+    expect(api.transcript).toHaveBeenCalledTimes(2);
+    expect(store.read("bot").entries.map((entry) => entry.content)).toEqual([
+      "new account",
+    ]);
+  });
+  it("still runs queued older history after a failed polling refresh", async () => {
+    let fail!: (error: Error) => void;
+    const api = {
+      transcript: vi
+        .fn()
+        .mockResolvedValueOnce({
+          entries: [message("b", "recent")],
+          nextBeforeSeq: 20,
+        })
+        .mockImplementationOnce(
+          () =>
+            new Promise<Transcript>((_, reject) => {
+              fail = reject;
+            }),
+        )
+        .mockResolvedValueOnce({ entries: [message("a", "older")] }),
+      thread: vi.fn(),
+    };
+    const store = new HistoryStore(api);
+    await store.load("bot");
+    const poll = store.load("bot");
+    const older = store.load("bot", undefined, true);
+    fail(new Error("poll failed"));
+    await Promise.all([poll, older]);
+    expect(api.transcript).toHaveBeenLastCalledWith("bot", 20);
+    expect(store.read("bot").entries.map((entry) => entry.content)).toEqual([
+      "older",
+      "recent",
+    ]);
+    expect(store.read("bot").error).toBeUndefined();
+  });
   it("retains older history when the live tail refreshes", async () => {
     const api = {
       transcript: vi
