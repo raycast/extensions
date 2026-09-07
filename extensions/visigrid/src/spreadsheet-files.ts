@@ -15,16 +15,12 @@ const NAME_QUERY = EXTENSIONS.map((e) => `kMDItemFSName == '*.${e}'c`).join(" ||
 /** Mid-ladder Spotlight window: files touched in the last 90 days. */
 const RECENT_SECONDS = 90 * 24 * 3600;
 
-/** Don't shrink an overflowing window below this — at that point a hard cap
- *  on paths is cheaper than more mdfind round-trips. */
-const MIN_WINDOW_SECONDS = 60;
-
 /** fs.stat concurrency bound — cheap syscalls, but don't open the floodgates
  *  on a pathological home directory. */
 const STAT_BATCH = 256;
 
 /** Max paths passed to statAll. Date windows that overflow this are
- *  narrowed so the newest `limit` files stay in the candidate set. */
+ *  narrowed so the newest files stay in the candidate set. */
 const STAT_CAP = 512;
 
 function mdfindPaths(query: string): Promise<string[]> {
@@ -76,28 +72,44 @@ const WINDOWS_SECONDS = [7 * 24 * 3600, RECENT_SECONDS, 365 * 24 * 3600, 3 * 365
  *  wins over statting an arbitrarily large collection. */
 const FALLBACK_CAP = 2000;
 
-/** Shrink `seconds` until mdfind returns at most STAT_CAP paths, without
- *  dropping below `limit`. A tighter window still contains the newest
- *  files, so ranking stays exact. Binary-search when a cut undershoots
- *  `limit` so we don't keep an overflowing unordered result and truncate
- *  it. Slice only when even MIN_WINDOW_SECONDS still overflows. */
-async function narrowWindow(paths: string[], seconds: number, limit: number): Promise<string[]> {
-  let lo = MIN_WINDOW_SECONDS;
-  while (paths.length > STAT_CAP && seconds > lo) {
-    const mid = Math.max(lo, Math.floor((lo + seconds) / 2));
-    if (mid >= seconds) break;
-    const midPaths = await mdfindPaths(dateQuery(mid));
-    if (midPaths.length < limit) {
-      lo = mid + 1;
+async function rankByMtime(paths: string[]): Promise<SheetFile[]> {
+  const files = await statAll(paths);
+  return files.sort((a, b) => b.modified.getTime() - a.modified.getTime());
+}
+
+/** Shrink an overflowing Spotlight window to a set that still contains the
+ *  newest files and is safe to rank. Search down to 1 second for the largest
+ *  window with at least `limit` and at most STAT_CAP paths. If no such window
+ *  exists, rank the smallest overflowing set by mtime and keep STAT_CAP —
+ *  never slice unordered mdfind output, and never hand the caller a list
+ *  larger than STAT_CAP. */
+async function narrowAndRank(paths: string[], seconds: number, limit: number): Promise<SheetFile[]> {
+  const cache = new Map<number, string[]>([[seconds, paths]]);
+  const query = async (s: number): Promise<string[]> => {
+    const cached = cache.get(s);
+    if (cached) return cached;
+    const found = await mdfindPaths(dateQuery(s));
+    cache.set(s, found);
+    return found;
+  };
+
+  let low = 1;
+  let high = seconds;
+  let best: string[] | undefined;
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    const midPaths = await query(mid);
+    if (midPaths.length <= STAT_CAP) {
+      best = midPaths;
+      low = mid + 1;
     } else {
-      paths = midPaths;
-      seconds = mid;
+      high = mid - 1;
     }
   }
-  if (paths.length > STAT_CAP && seconds <= MIN_WINDOW_SECONDS) {
-    return paths.slice(0, STAT_CAP);
-  }
-  return paths;
+  if (best && best.length >= limit) return rankByMtime(best);
+
+  const overflow = await query(Math.min(seconds, Math.max(low, 1)));
+  return (await rankByMtime(overflow)).slice(0, STAT_CAP);
 }
 
 /** Recently-modified spreadsheet files via Spotlight (mdfind), newest first.
@@ -106,8 +118,9 @@ async function narrowWindow(paths: string[], seconds: number, limit: number): Pr
  *  truncating before stat would drop arbitrary (possibly newest) files.
  *  Spotlight itself narrows to a date window instead, widening until the
  *  list can be filled; a window that still overflows STAT_CAP is tightened
- *  so the newest files stay in the candidate set. Ordering is exact for
- *  anything modified within the window actually ranked. */
+ *  to the largest date range that still fits, so newest files stay in the
+ *  candidate set. Ordering is exact for anything modified within the window
+ *  actually ranked. */
 export function findSpreadsheets(limit = 50): Promise<SheetFile[]> {
   return (async () => {
     let paths: string[] = [];
@@ -120,9 +133,8 @@ export function findSpreadsheets(limit = 50): Promise<SheetFile[]> {
     if (paths.length < limit) {
       paths = (await mdfindPaths(NAME_QUERY)).slice(0, FALLBACK_CAP);
     } else if (paths.length > STAT_CAP) {
-      paths = await narrowWindow(paths, seconds, limit);
+      return (await narrowAndRank(paths, seconds, limit)).slice(0, limit);
     }
-    const files = await statAll(paths);
-    return files.sort((a, b) => b.modified.getTime() - a.modified.getTime()).slice(0, limit);
+    return (await rankByMtime(paths)).slice(0, limit);
   })();
 }
