@@ -8,8 +8,9 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  convertTimestampUnit,
   dateToWallClockParts,
   formatInTimeZone,
   formatWallClockParts,
@@ -32,10 +33,12 @@ const TIME_ZONES = [
 type ActiveResult = "current" | "timestamp-to-date" | "date-to-timestamp";
 
 export default function Command() {
+  const initialMilliseconds = useRef(Date.now()).current;
+  const hasTimestampInteraction = useRef(false);
   const [unit, setUnit] = useState<TimestampUnit>("seconds");
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState(initialMilliseconds);
   const [timestampInput, setTimestampInput] = useState(() =>
-    timestampFromMilliseconds(Date.now(), "seconds"),
+    timestampFromMilliseconds(initialMilliseconds, "seconds"),
   );
   const [timestampTimeZone, setTimestampTimeZone] = useState(SYSTEM_TIME_ZONE);
   const [dateInput, setDateInput] = useState<Date | null>(() => new Date());
@@ -46,14 +49,19 @@ export default function Command() {
   const [activeResult, setActiveResult] = useState<ActiveResult>("current");
 
   useEffect(() => {
+    let cancelled = false;
     LocalStorage.getItem<string>(UNIT_STORAGE_KEY).then((savedUnit) => {
+      if (cancelled || hasTimestampInteraction.current) return;
       if (savedUnit !== "seconds" && savedUnit !== "milliseconds") return;
       setUnit(savedUnit);
-      setTimestampInput((value) =>
-        timestampFromMilliseconds(parseTimestamp(value, "seconds"), savedUnit),
+      setTimestampInput(
+        timestampFromMilliseconds(initialMilliseconds, savedUnit),
       );
     });
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [initialMilliseconds]);
 
   useEffect(() => {
     const interval = setInterval(
@@ -122,13 +130,9 @@ export default function Command() {
 
   async function changeUnit(nextUnit: TimestampUnit) {
     if (nextUnit === unit) return;
+    hasTimestampInteraction.current = true;
     try {
-      setTimestampInput(
-        timestampFromMilliseconds(
-          parseTimestamp(timestampInput, unit),
-          nextUnit,
-        ),
-      );
+      setTimestampInput(convertTimestampUnit(timestampInput, unit, nextUnit));
     } catch {
       // Keep invalid input unchanged so it can be corrected.
     }
@@ -140,6 +144,7 @@ export default function Command() {
   async function pasteTimestamp() {
     const text = await Clipboard.readText();
     if (text?.trim()) {
+      hasTimestampInteraction.current = true;
       setTimestampInput(text.trim());
       setActiveResult("timestamp-to-date");
     }
@@ -158,6 +163,32 @@ export default function Command() {
       setDateTimeText(formatWallClockParts(dateToWallClockParts(date)));
       setActiveResult("date-to-timestamp");
     }
+  }
+
+  async function copyAllResults() {
+    const errors = [convertedDate.error, convertedTimestamp.error].filter(
+      (error): error is string => Boolean(error),
+    );
+    if (errors.length > 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Unable to Copy All Results",
+        message: errors.join(" "),
+      });
+      return;
+    }
+
+    await Clipboard.copy(
+      [
+        `Current timestamp: ${currentTimestamp}`,
+        `Timestamp to date: ${convertedDate.value} (${timestampTimeZone})`,
+        `Date to timestamp: ${convertedTimestamp.value} (${dateTimeZone})`,
+      ].join("\n"),
+    );
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Copied All Results",
+    });
   }
 
   return (
@@ -206,6 +237,7 @@ export default function Command() {
               title="Use Current Timestamp"
               icon={Icon.Bolt}
               onAction={() => {
+                hasTimestampInteraction.current = true;
                 setTimestampInput(timestampFromMilliseconds(Date.now(), unit));
                 setActiveResult("timestamp-to-date");
               }}
@@ -221,21 +253,17 @@ export default function Command() {
               onAction={pasteTimestamp}
             />
             <Action
-              title="Copy All Results"
-              icon={Icon.CopyClipboard}
-              onAction={async () => {
-                await Clipboard.copy(
-                  [
-                    `Current timestamp: ${currentTimestamp}`,
-                    `Timestamp to date: ${convertedDate.value} (${timestampTimeZone})`,
-                    `Date to timestamp: ${convertedTimestamp.value} (${dateTimeZone})`,
-                  ].join("\n"),
-                );
-                await showToast({
-                  style: Toast.Style.Success,
-                  title: "Copied All Results",
-                });
-              }}
+              title={
+                convertedDate.error || convertedTimestamp.error
+                  ? "Fix Invalid Input to Copy All"
+                  : "Copy All Results"
+              }
+              icon={
+                convertedDate.error || convertedTimestamp.error
+                  ? Icon.Warning
+                  : Icon.CopyClipboard
+              }
+              onAction={copyAllResults}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -274,6 +302,7 @@ export default function Command() {
         }
         value={timestampInput}
         onChange={(value) => {
+          hasTimestampInteraction.current = true;
           setTimestampInput(value);
           setActiveResult("timestamp-to-date");
         }}

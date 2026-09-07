@@ -38,6 +38,18 @@ export function parseTimestamp(raw: string, unit: TimestampUnit) {
   return milliseconds;
 }
 
+export function convertTimestampUnit(
+  raw: string,
+  fromUnit: TimestampUnit,
+  toUnit: TimestampUnit,
+) {
+  const milliseconds = parseTimestamp(raw, fromUnit);
+  const value = toUnit === "seconds" ? milliseconds / 1000 : milliseconds;
+  if (Number.isInteger(value)) return value.toString();
+
+  return value.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+}
+
 export function formatInTimeZone(
   milliseconds: number,
   timeZone: string,
