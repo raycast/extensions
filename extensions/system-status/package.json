@@ -158,6 +158,10 @@
   ],
   "title": "System Status",
   "author": "JamexCEO",
-  "platforms": ["Windows"],
-  "categories": ["System"]
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "System"
+  ]
 }
