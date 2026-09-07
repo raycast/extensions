@@ -1,6 +1,6 @@
 # smry Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-07
 
 - Save the current browser tab with one command.
 - Search open browser tabs and save one to Inbox or Later.
