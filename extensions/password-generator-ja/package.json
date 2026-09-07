@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/downloads/extension.schema.json",
+  "name": "password-generator-ja",
+  "title": "Password Generator",
+  "description": "Generate passwords with custom rules",
+  "icon": "icon.png",
+  "author": "yuta",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Generate Password",
+      "description": "Generate a strong password",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "language",
+          "type": "dropdown",
+          "required": false,
+          "title": "Language",
+          "description": "Language for the extension UI",
+          "default": "en",
+          "data": [
+            { "title": "English", "value": "en" },
+            { "title": "日本語", "value": "ja" },
+            { "title": "简体中文", "value": "zh_CN" },
+            { "title": "繁體中文", "value": "zh_TW" },
+            { "title": "한국어", "value": "ko" },
+            { "title": "Русский", "value": "ru" },
+            { "title": "Español", "value": "es" },
+            { "title": "Français", "value": "fr" },
+            { "title": "Deutsch", "value": "de" }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
