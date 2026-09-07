@@ -64,6 +64,11 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
   // the persisted default when Google still offers it, otherwise the first live model so a
   // stored/deprecated model never lingers.
   const defaultModel = useMemo(() => {
+    // A failed or empty live lookup means we have no evidence the persisted model is
+    // invalid, so honor it instead of swapping in the hardcoded fallback.
+    if (availableModels.length === 0) {
+      return activeModel ?? migratedDefault;
+    }
     const activeValid = activeModel && availableModels.some((m) => m.name === activeModel);
     return activeValid ? activeModel : (availableModels[0]?.name ?? migratedDefault);
   }, [activeModel, availableModels, migratedDefault]);
