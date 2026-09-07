@@ -60,14 +60,14 @@ function check(label: string, cond: boolean, extra = "") {
   check("fans at 3200", (await exec(SMC)).stdout.includes("3200"));
 
   log("\n=== 6. rename ===");
-  await renamePreset(created.index, "ZZ Renamed");
+  await renamePreset(created, "ZZ Renamed");
   const afterRename = await getCustomPresets();
   check("renamed", afterRename.some(p => p.name === "ZZ Renamed"));
   check("still active + 3200", (await exec(SMC)).stdout.includes("3200"));
 
   log("\n=== 7. delete active preset re-points ActivePreset ===");
   const target = (await getCustomPresets()).find(p => p.name === "ZZ Renamed")!;
-  await deletePreset(target.index);
+  await deletePreset(target);
   const afterDelete = await getCustomPresets();
   const activeAfter = await getActivePreset();
   check("preset gone", !afterDelete.some(p => p.name.startsWith("ZZ")));

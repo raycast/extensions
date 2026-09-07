@@ -17,7 +17,7 @@ import { getCustomPresets, upsertPreset, deletePreset } from "../src/lib/mfc";
   check("new preset added", mid.some(p => p.name === "ZZ Guard"));
 
   const target = mid.find(p => p.name === "ZZ Guard")!;
-  await deletePreset(target.index);
+  await deletePreset(target);
   const after = await getCustomPresets();
   console.log("after delete:", JSON.stringify(after.map(p => p.name)));
   check("only the target was removed",

@@ -1,24 +1,26 @@
 import { showToast, Toast, showHUD, open, closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { applyPreset, isInstalled, PresetRef, MfcError } from "./mfc";
+import manifest from "../../package.json";
 
 const APP_STORE_URL = "https://macs-fan-control.en.softonic.com/mac";
 const VENDOR_URL = "https://crystalidea.com/macs-fan-control";
 
-export type Prefs = {
-  temperatureUnit?: string;
-  toggleBehavior?: string;
-  scratchPresetName?: string;
-};
-
 export function scratchPresetName(): string {
-  const { scratchPresetName } = getPreferenceValues<Prefs>();
+  const { scratchPresetName } = getPreferenceValues<Preferences>();
   return (scratchPresetName || "").trim() || "Raycast Custom";
 }
 
-/** Deep link that applies a preset by name — used to build Quicklinks. */
+/**
+ * Deep link that applies a preset by name.
+ *
+ * A Quicklink is a URL the user triggers later from root search, so this cannot
+ * use `launchCommand` — that only launches a command from inside a running one.
+ * The identifiers are read from the manifest rather than written out here, so
+ * renaming the extension or its author cannot leave a stale link behind.
+ */
 export function presetDeeplink(name: string): string {
   const args = encodeURIComponent(JSON.stringify({ preset: name }));
-  return `raycast://extensions/davidlam04/macs-fan-control/start-fan-preset?arguments=${args}`;
+  return `raycast://extensions/${manifest.author}/${manifest.name}/start-fan-preset?arguments=${args}`;
 }
 
 export async function ensureInstalled(): Promise<boolean> {

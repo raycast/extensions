@@ -1,12 +1,12 @@
 import { showHUD, closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { isRunning, launchApp, quitApp } from "./lib/mfc";
-import { ensureInstalled, Prefs } from "./lib/actions";
+import { ensureInstalled } from "./lib/actions";
 
 export default async function Command() {
   if (!(await ensureInstalled())) return;
   await closeMainWindow();
 
-  const { toggleBehavior } = getPreferenceValues<Prefs>();
+  const { toggleBehavior } = getPreferenceValues<Preferences>();
   const running = await isRunning();
 
   if (!running) {

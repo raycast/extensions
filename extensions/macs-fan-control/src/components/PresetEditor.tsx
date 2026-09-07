@@ -73,7 +73,7 @@ export default function PresetEditor(props: Props) {
   const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
 
-  const { data: smc, isLoading } = usePromise(readSmc);
+  const { data: smc, isLoading, error: smcError } = usePromise(readSmc);
   const fans = smc?.fans ?? [];
 
   useEffect(() => {
@@ -310,7 +310,20 @@ export default function PresetEditor(props: Props) {
     });
   }
 
-  if (!isLoading && fans.length === 0) {
+  // A failed SMC read is not the same as a Mac without fans — saying "fanless"
+  // when the helper simply errored would be plainly wrong on a MacBook Pro.
+  if (!isLoading && smcError) {
+    return (
+      <Form>
+        <Form.Description
+          title="Could not read the fans"
+          text={`${smcError.message}\n\nThe bundled smc-reader helper could not be run, so this form cannot show fan speeds or their limits.`}
+        />
+      </Form>
+    );
+  }
+
+  if (!isLoading && !smcError && fans.length === 0) {
     return (
       <Form>
         <Form.Description

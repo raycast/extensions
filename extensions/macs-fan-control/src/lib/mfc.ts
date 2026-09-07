@@ -228,10 +228,7 @@ export async function getCustomPresets(): Promise<CustomPreset[]> {
 }
 
 /** Resolve a preset by name, case-insensitively, across custom and built-in presets. */
-export function findPresetByName(
-  name: string,
-  customs: CustomPreset[],
-): { ref: PresetRef; label: string } | null {
+export function findPresetByName(name: string, customs: CustomPreset[]): { ref: PresetRef; label: string } | null {
   const wanted = name.trim().toLowerCase();
   if (!wanted) return null;
 
@@ -282,6 +279,7 @@ export async function launchApp(): Promise<void> {
     if (await isRunning()) return;
     await sleep(200);
   }
+  throw new MfcError("Macs Fan Control did not start.");
 }
 
 export async function quitApp(): Promise<void> {
@@ -340,10 +338,31 @@ async function mutateAndRestart(mutate: (snapshot: CustomPreset[]) => Promise<vo
   await backupPrefs(plist);
   const snapshot = await presetsFromPlist(plist);
   await quitApp();
-  await mutate(snapshot);
-  await launchApp();
+  try {
+    await mutate(snapshot);
+  } finally {
+    // Always bring the app back, even if the write failed: leaving it stopped
+    // would silently hand every fan back to the system, which is a bigger
+    // change than the one the user asked for.
+    await launchApp();
+  }
   // Give the app a moment to push the new speeds to the SMC.
   await sleep(1200);
+}
+
+/**
+ * Find a preset in a freshly-read list.
+ *
+ * The numeric index is only a position, so it goes stale if anything inserts or
+ * removes a preset while a form or confirmation is open. Match on the name the
+ * user actually chose, and only trust the old slot if it still holds that name.
+ */
+function resolveTarget(list: CustomPreset[], target: CustomPreset): number {
+  const sameName = list.filter((p) => p.name === target.name);
+  if (sameName.length === 1) return sameName[0].index;
+  const atOldSlot = list[target.index];
+  if (atOldSlot && atOldSlot.name === target.name) return target.index;
+  throw new MfcError(`“${target.name}” is no longer one of your presets.`);
 }
 
 export async function applyPreset(ref: PresetRef): Promise<void> {
@@ -381,9 +400,7 @@ async function writePresetsGuarded(
   expectRemoved?: string,
 ): Promise<void> {
   const afterNames = new Set(lower(after));
-  const missing = lower(before).filter(
-    (name) => !afterNames.has(name) && name !== expectRemoved?.toLowerCase(),
-  );
+  const missing = lower(before).filter((name) => !afterNames.has(name) && name !== expectRemoved?.toLowerCase());
   if (missing.length > 0) {
     throw new MfcError(
       `Refusing to write: that would have removed ${missing.length} preset(s) — ${missing.join(", ")}. Nothing was changed.`,
@@ -428,31 +445,29 @@ export async function upsertPreset(
   return { index, name: trimmed, fans };
 }
 
-export async function renamePreset(index: number, newName: string): Promise<void> {
+export async function renamePreset(target: CustomPreset, newName: string): Promise<void> {
   const trimmed = newName.trim();
   if (!trimmed) throw new MfcError("A preset needs a name.");
   if (trimmed.includes("|")) throw new MfcError("Preset names cannot contain the \u201c|\u201d character.");
 
   await mutateAndRestart(async (snapshot) => {
     const existing = reconcile(snapshot, await getCustomPresets());
-    const target = existing[index];
-    if (!target) throw new MfcError("That preset no longer exists.");
+    const index = resolveTarget(existing, target);
     const next = existing.map((p) => ({ name: p.name, fans: p.fans }));
     next[index] = { name: trimmed, fans: next[index].fans };
-    await writePresetsGuarded(existing, next, target.name);
+    await writePresetsGuarded(existing, next, existing[index].name);
   });
 }
 
-export async function deletePreset(index: number): Promise<void> {
+export async function deletePreset(target: CustomPreset): Promise<void> {
   await mutateAndRestart(async (snapshot) => {
     const existing = reconcile(snapshot, await getCustomPresets());
-    const target = existing[index];
-    if (!target) throw new MfcError("That preset no longer exists.");
+    const index = resolveTarget(existing, target);
 
     const next = existing.filter((_, i) => i !== index).map((p) => ({ name: p.name, fans: p.fans }));
     const active = await getActivePreset();
 
-    await writePresetsGuarded(existing, next, target.name);
+    await writePresetsGuarded(existing, next, existing[index].name);
     // Deleting shifts every later preset down one slot, so ActivePreset has to
     // be re-pointed or the app would silently apply the wrong preset.
     if (active?.type === "custom") {

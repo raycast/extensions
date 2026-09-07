@@ -96,10 +96,8 @@ export function headlineTemperature(sensors: Sensor[]): number | null {
 /* Formatting                                                          */
 /* ------------------------------------------------------------------ */
 
-type Prefs = { temperatureUnit?: string };
-
 export function formatTemperature(celsius: number): string {
-  const { temperatureUnit } = getPreferenceValues<Prefs>();
+  const { temperatureUnit } = getPreferenceValues<Preferences>();
   if (temperatureUnit === "fahrenheit") {
     return `${Math.round(celsius * (9 / 5) + 32)}°F`;
   }

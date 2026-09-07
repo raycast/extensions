@@ -26,16 +26,7 @@ import {
   launchApp,
   quitApp,
 } from "./lib/mfc";
-import {
-  Fan,
-  Sensor,
-  formatRpm,
-  formatTemperature,
-  fanLabel,
-  fanLoad,
-  groupSensors,
-  readSmc,
-} from "./lib/smc";
+import { Fan, Sensor, formatRpm, formatTemperature, fanLabel, fanLoad, groupSensors, readSmc } from "./lib/smc";
 import { describeMac, getMacInfo } from "./lib/hardware";
 import { VENDOR_URL, applyPresetWithFeedback, presetDeeplink, scratchPresetName } from "./lib/actions";
 import PresetEditor from "./components/PresetEditor";
@@ -246,7 +237,7 @@ export default function Command() {
                       title: "Deleting…",
                     });
                     try {
-                      await deletePreset(props.custom!.index);
+                      await deletePreset(props.custom!);
                       toast.style = Toast.Style.Success;
                       toast.title = `Deleted “${props.custom!.name}”`;
                       refreshAll();
@@ -290,16 +281,11 @@ export default function Command() {
           <List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title="Current" text={formatRpm(fan.actual)} />
             <List.Item.Detail.Metadata.Label title="Target" text={formatRpm(fan.target)} />
-            <List.Item.Detail.Metadata.Label
-              title="Control"
-              text={fan.mode === 1 ? "Forced by a preset" : "System"}
-            />
+            <List.Item.Detail.Metadata.Label title="Control" text={fan.mode === 1 ? "Forced by a preset" : "System"} />
             <List.Item.Detail.Metadata.Separator />
             <List.Item.Detail.Metadata.Label title="Minimum" text={formatRpm(fan.min)} />
             <List.Item.Detail.Metadata.Label title="Maximum" text={formatRpm(fan.max)} />
-            {load !== null && (
-              <List.Item.Detail.Metadata.Label title="Of Range" text={`${Math.round(load * 100)}%`} />
-            )}
+            {load !== null && <List.Item.Detail.Metadata.Label title="Of Range" text={`${Math.round(load * 100)}%`} />}
             {fan.id && <List.Item.Detail.Metadata.Label title="Location" text={fan.id} />}
           </List.Item.Detail.Metadata>
         }
@@ -392,7 +378,20 @@ export default function Command() {
             }
           />
         ))}
-        {!smc.isLoading && fans.length === 0 && (
+        {!smc.isLoading && smc.error && (
+          <List.Item
+            icon={{ source: Icon.Warning, tintColor: Color.Red }}
+            title="Could not read the fans"
+            subtitle={smc.error.message}
+            actions={
+              <ActionPanel>
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={refreshAll} />
+                <GlobalActions />
+              </ActionPanel>
+            }
+          />
+        )}
+        {!smc.isLoading && !smc.error && fans.length === 0 && (
           <List.Item
             icon={{ source: Icon.Info, tintColor: Color.SecondaryText }}
             title="No controllable fans"
@@ -434,11 +433,7 @@ export default function Command() {
             key={`temp-${group.title}`}
             icon={{ source: Icon.Temperature, tintColor: Color.SecondaryText }}
             title={group.title}
-            subtitle={
-              showDetail
-                ? undefined
-                : `${group.sensors.length} sensor${group.sensors.length === 1 ? "" : "s"}`
-            }
+            subtitle={showDetail ? undefined : `${group.sensors.length} sensor${group.sensors.length === 1 ? "" : "s"}`}
             accessories={
               showDetail ? [] : [{ tag: { value: formatTemperature(group.peak), color: Color.PrimaryText } }]
             }

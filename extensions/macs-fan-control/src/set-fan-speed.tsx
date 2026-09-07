@@ -9,7 +9,5 @@ import { scratchPresetName } from "./lib/actions";
  * single reserved preset keeps the user's own presets untouched.
  */
 export default function Command() {
-  return (
-    <PresetEditor submitTitle="Apply Speed" initialName={scratchPresetName()} lockName activateAfterSave />
-  );
+  return <PresetEditor submitTitle="Apply Speed" initialName={scratchPresetName()} lockName activateAfterSave />;
 }

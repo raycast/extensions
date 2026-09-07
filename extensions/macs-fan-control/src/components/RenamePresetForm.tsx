@@ -17,7 +17,7 @@ export default function RenamePresetForm(props: { preset: CustomPreset; onRename
     setSaving(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Renaming…" });
     try {
-      await renamePreset(props.preset.index, trimmed);
+      await renamePreset(props.preset, trimmed);
       toast.style = Toast.Style.Success;
       toast.title = `Renamed to “${trimmed}”`;
       props.onRenamed();
