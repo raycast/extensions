@@ -1,0 +1,150 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "devkin",
+  "title": "DevKin",
+  "description": "Open a specific DevKin feature tab — JSON / Byte / Length / Base / Base64 / JWT / SQL / Text Diff / Text / Markdown / HTML / QR / Regex / Time — straight from Raycast.",
+  "icon": "icon.png",
+  "author": "lsh2613",
+  "license": "MIT",
+  "categories": ["Developer Tools"],
+  "commands": [
+    {
+      "name": "byte",
+      "title": "Byte Converter",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the byte/bit/SI/IEC unit converter.",
+      "mode": "no-view",
+      "keywords": ["unit", "kb", "mb", "gb", "kib", "mib"]
+    },
+    {
+      "name": "length",
+      "title": "Length Converter",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the length unit converter (mm/cm/m/km, in/ft/yd/mi).",
+      "mode": "no-view",
+      "keywords": ["distance", "mm", "cm", "m", "km", "in", "ft", "yd", "mi", "inch", "foot", "mile"]
+    },
+    {
+      "name": "base",
+      "title": "Base Converter",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the numeric base / radix converter (binary, octal, decimal, hex).",
+      "mode": "no-view",
+      "keywords": ["radix", "binary", "octal", "decimal", "hex", "hexadecimal"]
+    },
+    {
+      "name": "json",
+      "title": "JSON Converter",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the JSON tree viewer with auto-fix and search.",
+      "mode": "no-view",
+      "keywords": ["format", "tree", "parse"]
+    },
+    {
+      "name": "base64",
+      "title": "Base64 String Converter",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the Base64 string encode/decode pane.",
+      "mode": "no-view",
+      "keywords": ["encode", "decode", "string"]
+    },
+    {
+      "name": "base64-image",
+      "title": "Base64 Image Converter",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the Base64 image encode/decode pane (file, data URL, HTML, CSS, markdown).",
+      "mode": "no-view",
+      "keywords": ["encode", "decode", "image", "png", "jpeg"]
+    },
+    {
+      "name": "jwt",
+      "title": "JWT Converter",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the JWT decoder and signature verifier.",
+      "mode": "no-view",
+      "keywords": ["token", "verify", "jose"]
+    },
+    {
+      "name": "sql",
+      "title": "SQL Formatter",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the SQL pretty-printer.",
+      "mode": "no-view",
+      "keywords": ["query", "format", "pretty"]
+    },
+    {
+      "name": "diff",
+      "title": "Text Diff",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the side-by-side text diff viewer.",
+      "mode": "no-view",
+      "keywords": ["compare", "difference", "change", "patch"]
+    },
+    {
+      "name": "text",
+      "title": "Text Inspector",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the live char/word/byte counter.",
+      "mode": "no-view",
+      "keywords": ["characters", "words", "bytes", "encoding"]
+    },
+    {
+      "name": "markdown",
+      "title": "Markdown Preview",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the live markdown renderer.",
+      "mode": "no-view",
+      "keywords": ["md", "render", "preview"]
+    },
+    {
+      "name": "html",
+      "title": "HTML Preview",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the sandboxed HTML preview pane.",
+      "mode": "no-view",
+      "keywords": ["render", "preview", "iframe"]
+    },
+    {
+      "name": "qr",
+      "title": "QR Code Converter",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the QR code generator and decoder (URL, Wi-Fi, vCard, and more).",
+      "mode": "no-view",
+      "keywords": ["qr", "qrcode", "barcode", "scan", "wifi", "vcard"]
+    },
+    {
+      "name": "regex",
+      "title": "Regex Tester",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the regular expression tester with live match highlighting.",
+      "mode": "no-view",
+      "keywords": ["regexp", "pattern", "match"]
+    },
+    {
+      "name": "time",
+      "title": "Time Converter",
+      "subtitle": "DevKin",
+      "description": "Open DevKin to the timestamp/date converter (epoch, ISO, UTC, KST).",
+      "mode": "no-view",
+      "keywords": ["date", "epoch", "unix", "utc", "kst", "iso", "timestamp"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.5.5",
+    "@types/react": "^18.3.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
