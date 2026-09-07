@@ -133,10 +133,10 @@
     "@raycast/api": "^1.83.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.5",
-    "eslint": "^8.57.0",
+    "eslint": "^9.17.0",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4"
   },
