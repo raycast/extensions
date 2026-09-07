@@ -254,17 +254,10 @@
       "required": false
     },
     {
-      "name": "opencodegoWorkspaceId",
-      "type": "textfield",
-      "title": "OpenCode Go Workspace ID",
-      "description": "Your OpenCode workspace ID (e.g. wrk_abc123 or just the suffix after wrk_). Found in the OpenCode dashboard URL.",
-      "required": false
-    },
-    {
-      "name": "opencodegoAuthCookie",
+      "name": "opencodegoApiKey",
       "type": "password",
-      "title": "OpenCode Go Auth Cookie",
-      "description": "The 'auth' cookie value from your OpenCode session. Open opencode.ai, log in, then copy the 'auth' cookie from DevTools (Application → Cookies).",
+      "title": "OpenCode Go API Key (Optional)",
+      "description": "Auto-detected from OpenCode login. Fallback: paste your OpenCode Zen API key from https://opencode.ai/settings (used to call the zen/go/v1/usage API).",
       "required": false
     },
     {

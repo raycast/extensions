@@ -43,7 +43,7 @@ import type { MiniMaxError, MiniMaxUsage } from "../minimax/types.ts";
 import { resolveMinimaxCNAuthTokens } from "../minimaxcn/auth.ts";
 import { fetchMinimaxCNUsage } from "../minimaxcn/fetcher.ts";
 import type { MinimaxCNError, MinimaxCNUsage } from "../minimaxcn/types.ts";
-import { fetchOpencodegoUsage } from "../opencode-go/fetcher.ts";
+import { fetchOpencodegoUsage, OPENCODEGO_OPENCODE_KEY } from "../opencode-go/fetcher.ts";
 import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types.ts";
 import { fetchSyntheticUsage, SYNTHETIC_OPENCODE_KEY } from "../synthetic/fetcher.ts";
 import type { SyntheticError, SyntheticUsage } from "../synthetic/types.ts";
@@ -73,8 +73,7 @@ type SharedPrefs = {
   zaiApiToken?: string;
   minimaxApiToken?: string;
   minimaxcnApiToken?: string;
-  opencodegoWorkspaceId?: string;
-  opencodegoAuthCookie?: string;
+  opencodegoApiKey?: string;
 };
 
 function prefValue(key: keyof SharedPrefs): string {
@@ -246,39 +245,20 @@ export const useMinimaxCNUsage = createUsageHook<MinimaxCNUsage, MinimaxCNError>
 
 export const useOpencodegoUsage = createUsageHook<OpencodegoUsage, OpencodegoError>({
   agentId: "opencode-go",
-  resolveAuthKey: async () => `${prefValue("opencodegoWorkspaceId")}\n${prefValue("opencodegoAuthCookie")}`,
+  resolveAuthKey: async () => prefValue("opencodegoApiKey") || readOpencodeAuthToken(OPENCODEGO_OPENCODE_KEY) || "",
   fetcher: async () => {
-    const workspaceId = prefValue("opencodegoWorkspaceId");
-    const authCookie = prefValue("opencodegoAuthCookie");
-    if (!workspaceId && !authCookie) {
+    const apiKey = prefValue("opencodegoApiKey") || readOpencodeAuthToken(OPENCODEGO_OPENCODE_KEY);
+    if (!apiKey) {
       return {
         usage: null,
         error: {
           type: "not_configured",
           message:
-            "OpenCode Go workspace ID and auth cookie not configured. Please add them in extension settings (Cmd+,).",
+            "OpenCode Zen API key not found. Login via OpenCode (`opencode auth login`) or paste your API key in extension settings (Cmd+,).",
         },
       };
     }
-    if (!workspaceId) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message: "OpenCode Go workspace ID not configured. Please add it in extension settings (Cmd+,).",
-        },
-      };
-    }
-    if (!authCookie) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message: "OpenCode Go auth cookie not configured. Please add it in extension settings (Cmd+,).",
-        },
-      };
-    }
-    return fetchOpencodegoUsage(workspaceId, authCookie);
+    return fetchOpencodegoUsage(apiKey);
   },
 });
 

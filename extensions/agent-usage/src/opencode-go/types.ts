@@ -1,15 +1,13 @@
-export interface OpencodegoQuota {
-  label: string;
-  used: number;
-  limit: number;
-  unit: string;
+export interface OpencodegoWindowUsage {
+  status: string;
+  percent: number;
+  resetsAt: string | null;
 }
 
 export interface OpencodegoUsage {
-  planName: string;
-  primary: OpencodegoQuota;
-  quotas: OpencodegoQuota[];
-  resetsAt: string | null;
+  rolling: OpencodegoWindowUsage;
+  weekly: OpencodegoWindowUsage;
+  monthly: OpencodegoWindowUsage;
 }
 
 export interface OpencodegoError {
