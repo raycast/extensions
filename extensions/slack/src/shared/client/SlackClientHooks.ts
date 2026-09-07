@@ -1,8 +1,8 @@
 import { handleError } from "../utils";
 import { SlackClient } from "./SlackClient";
 import { useCachedPromise, usePromise } from "@raycast/utils";
-import { useRef } from "react";
-import { mergeDirectorySearchResults } from "./directory";
+import { useMemo, useRef } from "react";
+import { createDirectoryUserSearch, mergeDirectorySearchResults } from "./directory";
 
 export const useChannels = () =>
   usePromise(
@@ -24,8 +24,17 @@ export const useDirectorySearch = (query: string) => {
   const userSearchAbortable = useRef<AbortController>(null);
   const conversationSearchAbortable = useRef<AbortController>(null);
 
+  const userSearch = useMemo(
+    () => createDirectoryUserSearch(() => SlackClient.searchUsers(query, userSearchAbortable.current?.signal)),
+    [query],
+  );
+
   const users = usePromise(
-    (searchText: string) => SlackClient.searchUsers(searchText, userSearchAbortable.current?.signal),
+    (...args: [string]) => {
+      // Keep the query in the hook arguments so each query starts a fresh execution.
+      void args;
+      return userSearch.getUsers();
+    },
     [query],
     {
       abortable: userSearchAbortable,
@@ -35,7 +44,8 @@ export const useDirectorySearch = (query: string) => {
     },
   );
   const conversations = usePromise(
-    (searchText: string) => SlackClient.searchConversations(searchText, conversationSearchAbortable.current?.signal),
+    (searchText: string) =>
+      SlackClient.searchConversations(searchText, conversationSearchAbortable.current?.signal, userSearch.getUserNames),
     [query],
     {
       abortable: conversationSearchAbortable,

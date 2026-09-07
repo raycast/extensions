@@ -13,3 +13,16 @@ export function mergeDirectorySearchResults<User, Channel, Group>(
   if (!users && !conversations) return undefined;
   return [users ?? [], conversations?.[0] ?? [], conversations?.[1] ?? []];
 }
+
+/** Shares one compact user search result between user rows and MPIM name resolution for a query. */
+export function createDirectoryUserSearch<User extends { username: string; name: string }>(
+  loadUsers: () => Promise<User[]>,
+) {
+  let users: Promise<User[]> | undefined;
+  const getUsers = () => (users ??= loadUsers());
+  return {
+    getUsers,
+    getUserNames: async (): Promise<ReadonlyMap<string, string>> =>
+      new Map((await getUsers()).map((user) => [user.username, user.name])),
+  };
+}

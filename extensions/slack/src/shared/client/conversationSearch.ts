@@ -8,7 +8,8 @@ import { toUserName } from "./member";
 type ConversationSearchOptions = {
   query: string;
   maxResultsPerType: number;
-  userNames: ReadonlyMap<string, string>;
+  userNames?: ReadonlyMap<string, string>;
+  loadUserNames?: () => Promise<ReadonlyMap<string, string>>;
   loadConversationsPage: (cursor?: string) => Promise<CursorPage<SlackConversation>>;
   signal?: AbortSignal;
 };
@@ -69,14 +70,26 @@ export async function searchUserNames({
 export async function searchConversationDirectory({
   query,
   maxResultsPerType,
-  userNames,
+  userNames = new Map(),
+  loadUserNames,
   loadConversationsPage,
   signal,
 }: ConversationSearchOptions): Promise<[Channel[], Group[]]> {
   let channelCount = 0;
   let groupCount = 0;
   const results = await collectPaginatedResults<SlackConversation, ConversationSearchResult>({
-    loadPage: loadConversationsPage,
+    loadPage: async (cursor) => {
+      const page = await loadConversationsPage(cursor);
+      signal?.throwIfAborted();
+      if (
+        loadUserNames &&
+        page.items.some((conversation) => conversation.is_mpim || conversation.name?.startsWith("mpdm-"))
+      ) {
+        userNames = await loadUserNames();
+        loadUserNames = undefined;
+      }
+      return page;
+    },
     transform: (conversation) => {
       if (conversation.is_mpim || conversation.name?.startsWith("mpdm-")) {
         const group = toGroup(conversation, userNames);

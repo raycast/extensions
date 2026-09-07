@@ -204,26 +204,30 @@ export class SlackClient {
     return userMatches.map(({ user }) => user).sort((a, b) => sortNames(a.name, b.name));
   }
 
-  public static async searchConversations(query: string, signal?: AbortSignal): Promise<[Channel[], Group[]]> {
+  public static async searchConversations(
+    query: string,
+    signal?: AbortSignal,
+    loadUserNames?: () => Promise<ReadonlyMap<string, string>>,
+  ): Promise<[Channel[], Group[]]> {
     const slackWebClient = getSlackWebClient();
-    const userNames = await searchUserNames({
-      query,
-      maxResults: maxSearchResultsPerType,
-      loadPage: async (cursor) => {
-        const response = await slackWebClient.users.list({
-          limit: getDirectorySearchPageSize(query),
-          cursor,
-        });
-        return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
-      },
-      signal,
-    });
-    signal?.throwIfAborted();
-
     const [channels, groups] = await searchConversationDirectory({
       query,
       maxResultsPerType: maxSearchResultsPerType,
-      userNames,
+      loadUserNames:
+        loadUserNames ??
+        (() =>
+          searchUserNames({
+            query,
+            maxResults: maxSearchResultsPerType,
+            loadPage: async (cursor) => {
+              const response = await slackWebClient.users.list({
+                limit: getDirectorySearchPageSize(query),
+                cursor,
+              });
+              return { items: response.members ?? [], nextCursor: response.response_metadata?.next_cursor };
+            },
+            signal,
+          })),
       loadConversationsPage: async (cursor) => {
         const response = await slackWebClient.conversations.list({
           exclude_archived: true,
