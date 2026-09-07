@@ -4,6 +4,8 @@ Monitor and manage your Codex tasks directly from Raycast.
 
 ## Commands
 
+All **New Thread** commands default to ordinary **ChatGPT Chat**. Change **Default Chat Mode** to **Codex** to restore coding tasks and working-directory support. In Chat mode, working directories are ignored and the prompt form hides the directory picker. The desktop link prefills the composer; press Send to submit the message.
+
 ### Search Threads
 
 Browse active and archived Codex threads updated in the last 30 days. Search by name, working directory, preview text, or full transcript text.
@@ -18,15 +20,25 @@ Browse active and archived Codex threads updated in the last 30 days. Search by 
 
 ### New Thread
 
-Start a new thread in your default working directory.
+Open a new chat in the configured mode. Codex mode uses your default working directory.
 
 ### New Thread with Prompt
 
-Start a thread with a typed prompt and a working-directory picker. The picker lists subfolders from your Working Directory Root, with recent thread counts when available, plus a Choose Folder option with a native folder chooser.
+Start a chat with a typed prompt. In Codex mode, a working-directory picker lists subfolders from your Working Directory Root, with recent thread counts when available, plus a Choose Folder option with a native folder chooser.
 
 ### New Thread from Clipboard
 
-Start a thread using clipboard text as the prompt. It uses the Default Working Directory preference when configured. With no preference configured, it falls back to the app's default.
+Start a chat using clipboard text as the prompt. In Codex mode, it uses the Default Working Directory preference when configured.
+
+### New Thread from Selected Text
+
+Select text in the frontmost application and run this command to open a chat with that text as its prompt, without an intermediate form. In Codex mode it uses **Default Working Directory**, just like New Thread from Clipboard.
+
+Assign a global hotkey in **Raycast Settings → Extensions → Codex → New Thread from Selected Text**, then select text in another application and press that hotkey. If no text is selected or the selection cannot be read, the command shows a message and does not open a thread. Clipboard text is not used as a fallback.
+
+Set **Selected Text Prompt Prefix** in the extension preferences to prepend reusable instructions. The prompt is the prefix, a blank line, and the selected text. Leave the preference empty to use only the selection. This setting only affects the selected-text command. The current desktop deeplink initializes the composer; it does not automatically submit the message.
+
+If selection reading fails, check Raycast's permission in **System Settings → Privacy & Security → Accessibility** and try selecting plain text in another application. Selection support depends on the source application.
 
 ### Open Codex
 

@@ -77,6 +77,19 @@
       ]
     },
     {
+      "name": "new-thread-from-selected-text",
+      "title": "New Thread from Selected Text",
+      "subtitle": "Codex",
+      "description": "Start a new Codex thread using selected text from the frontmost application as the initial prompt.",
+      "mode": "no-view",
+      "keywords": [
+        "selection",
+        "selected",
+        "prompt",
+        "start"
+      ]
+    },
+    {
       "name": "open-codex",
       "title": "Open Codex",
       "description": "Open the Codex app.",
@@ -89,6 +102,32 @@
     }
   ],
   "preferences": [
+    {
+      "name": "newChatMode",
+      "title": "Default Chat Mode",
+      "description": "Mode used by all New Thread commands. Working directory settings apply only to Codex mode.",
+      "type": "dropdown",
+      "required": false,
+      "default": "chat",
+      "data": [
+        {
+          "title": "ChatGPT Chat",
+          "value": "chat"
+        },
+        {
+          "title": "Codex",
+          "value": "codex"
+        }
+      ]
+    },
+    {
+      "name": "selectedTextPromptPrefix",
+      "title": "Selected Text Prompt Prefix",
+      "description": "Instructions prepended to selected text, separated by a blank line. Leave empty to send only the selection.",
+      "type": "textfield",
+      "placeholder": "Explain the following:",
+      "required": false
+    },
     {
       "name": "defaultProjectDirectory",
       "title": "Default Working Directory",

@@ -1,5 +1,13 @@
 # Codex Changelog
 
+## [Selected Text Prompts and Chat Mode] - {PR_MERGE_DATE}
+
+- Default all New Thread commands to ordinary ChatGPT Chat using an explicit mode in the desktop deeplink; added a Default Chat Mode preference to switch back to Codex.
+- Hide and skip working-directory configuration in Chat mode, and clarify that prompts are prefilled for manual submission.
+- Added a configurable Selected Text Prompt Prefix, separated from the selection by a blank line.
+- Added a no-view command to prefill a new chat from the frontmost application's selected text, using the configured Default Working Directory in Codex mode.
+- Added feedback for empty or unreadable selections and documentation for global hotkey setup.
+
 ## [Modernized Thread Management] - 2026-07-25
 
 - Updated the Codex integration for the ChatGPT desktop app and current app-server behavior.

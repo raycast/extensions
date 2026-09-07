@@ -38,25 +38,31 @@ const projectsFolderTip =
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const isCodexMode = preferences.newChatMode === "codex";
   const defaultWorkingDirectory = preferences.defaultProjectDirectory;
   const workingDirectoryRoot = preferences.projectsDirectory?.trim();
   const [selectedDirectoryValue, setSelectedDirectoryValue] = useState(
     defaultDirectoryItemValue,
   );
-  const isCustomPath = selectedDirectoryValue === customPathItemValue;
+  const isCustomPath =
+    isCodexMode && selectedDirectoryValue === customPathItemValue;
 
   useEffect(() => {
-    void showProjectsFolderTipOnce(preferences.projectsDirectory);
-  }, [preferences.projectsDirectory]);
+    if (isCodexMode)
+      void showProjectsFolderTipOnce(preferences.projectsDirectory);
+  }, [isCodexMode, preferences.projectsDirectory]);
 
-  const folderScan = usePromise(loadProjectsFolderRecords, [
-    preferences.projectsDirectory,
-  ]);
+  const folderScan = usePromise(
+    loadProjectsFolderRecords,
+    [preferences.projectsDirectory],
+    { execute: isCodexMode },
+  );
   const recentHistory = useCachedPromise(
     loadRecentWorkingDirectoryRecords,
     [],
     {
       failureToastOptions: { title: "Couldn't load thread counts" },
+      execute: isCodexMode,
     },
   );
 
@@ -105,7 +111,7 @@ export default function Command() {
 
   return (
     <Form
-      isLoading={folderScan.isLoading}
+      isLoading={isCodexMode && folderScan.isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -122,48 +128,50 @@ export default function Command() {
         autoFocus
         {...itemProps.prompt}
       />
-      <Form.Dropdown
-        id="workingDirectory"
-        title="Working Directory"
-        placeholder="Search folders..."
-        value={selectedDirectoryValue}
-        onChange={setSelectedDirectoryValue}
-        info={getWorkingDirectoryInfo({
-          hasProjectsFolder: Boolean(preferences.projectsDirectory?.trim()),
-          folderWarning: folderScan.data?.warning ?? null,
-          recentUnavailable: Boolean(
-            recentHistory.error && !recentHistory.data,
-          ),
-        })}
-      >
-        <Form.Dropdown.Item
-          value={defaultDirectoryItemValue}
-          title={getDefaultDirectoryTitle(defaultWorkingDirectory)}
-          icon="⭐"
-          keywords={getDefaultDirectoryKeywords(defaultWorkingDirectory)}
-        />
-        <Form.Dropdown.Item
-          value={customPathItemValue}
-          title="Choose Folder"
-          icon="📂"
-          keywords={["custom", "path", "other"]}
-        />
-        {folderOptions.length > 0 && workingDirectoryRoot ? (
-          <Form.Dropdown.Section
-            title={`Folders in ${tildeifyPath(expandTildePath(workingDirectoryRoot))}`}
-          >
-            {folderOptions.map((option) => (
-              <Form.Dropdown.Item
-                key={option.cwd}
-                value={option.cwd}
-                title={option.title}
-                icon={{ fileIcon: option.cwd }}
-                keywords={option.keywords}
-              />
-            ))}
-          </Form.Dropdown.Section>
-        ) : null}
-      </Form.Dropdown>
+      {isCodexMode ? (
+        <Form.Dropdown
+          id="workingDirectory"
+          title="Working Directory"
+          placeholder="Search folders..."
+          value={selectedDirectoryValue}
+          onChange={setSelectedDirectoryValue}
+          info={getWorkingDirectoryInfo({
+            hasProjectsFolder: Boolean(preferences.projectsDirectory?.trim()),
+            folderWarning: folderScan.data?.warning ?? null,
+            recentUnavailable: Boolean(
+              recentHistory.error && !recentHistory.data,
+            ),
+          })}
+        >
+          <Form.Dropdown.Item
+            value={defaultDirectoryItemValue}
+            title={getDefaultDirectoryTitle(defaultWorkingDirectory)}
+            icon="⭐"
+            keywords={getDefaultDirectoryKeywords(defaultWorkingDirectory)}
+          />
+          <Form.Dropdown.Item
+            value={customPathItemValue}
+            title="Choose Folder"
+            icon="📂"
+            keywords={["custom", "path", "other"]}
+          />
+          {folderOptions.length > 0 && workingDirectoryRoot ? (
+            <Form.Dropdown.Section
+              title={`Folders in ${tildeifyPath(expandTildePath(workingDirectoryRoot))}`}
+            >
+              {folderOptions.map((option) => (
+                <Form.Dropdown.Item
+                  key={option.cwd}
+                  value={option.cwd}
+                  title={option.title}
+                  icon={{ fileIcon: option.cwd }}
+                  keywords={option.keywords}
+                />
+              ))}
+            </Form.Dropdown.Section>
+          ) : null}
+        </Form.Dropdown>
+      ) : null}
       {isCustomPath ? (
         <Form.FilePicker
           title="Custom Path"

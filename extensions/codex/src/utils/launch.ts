@@ -12,6 +12,7 @@ const execFileAsync = promisify(execFile);
 type NewThreadInput = {
   prompt?: string;
   path?: string;
+  mode?: "chat" | "codex";
 };
 
 const codexAppUrl = "codex://";
@@ -31,16 +32,21 @@ export async function openNewCodexThread(
   input: NewThreadInput = {},
 ): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
+  const mode =
+    input.mode ?? (preferences.newChatMode === "codex" ? "codex" : "chat");
   const defaultWorkingDirectory = preferences.defaultProjectDirectory;
-  const projectPath = await resolveProjectDirectory(
-    input.path ?? defaultWorkingDirectory,
-  );
+  const projectPath =
+    mode === "codex"
+      ? await resolveProjectDirectory(input.path ?? defaultWorkingDirectory)
+      : undefined;
   const prompt = input.prompt?.trim();
 
   await ensureCodexAppIsReady();
-  await open(buildNewThreadUrl({ path: projectPath, prompt }));
+  await open(buildNewThreadUrl({ path: projectPath, prompt, mode }));
   await showHUD(
-    prompt ? "Initialized new thread with prompt" : "Initialized new thread",
+    prompt
+      ? "Opened new chat with prompt — press Send to chat"
+      : "Opened new chat",
   );
 }
 
@@ -111,14 +117,18 @@ async function resolveProjectDirectory(
   return expandedPath;
 }
 
-function buildNewThreadUrl({ path, prompt }: NewThreadInput): string {
-  const params = new URLSearchParams();
+function buildNewThreadUrl({
+  path,
+  prompt,
+  mode = "chat",
+}: NewThreadInput): string {
+  const params = new URLSearchParams({ mode });
 
   if (prompt) {
     params.set("prompt", prompt);
   }
 
-  if (path) {
+  if (path && mode === "codex") {
     params.set("path", path);
   }
 
