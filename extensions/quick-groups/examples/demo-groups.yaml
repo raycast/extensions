@@ -1,0 +1,87 @@
+projects:
+  quick-groups:
+    location:
+      value: ~/Projects/quick-groups
+      open: ${value}
+      application/Terminal: ${value}
+      application/Finder: ${value}
+      application/Visual Studio Code: ${value}
+      raycast/script/open-project: ${value}
+    repository:
+      value: https://github.com/example/quick-groups
+      open: ${value}
+    notes:
+      value: Demo Vault/Projects/Quick Groups
+      obsidian: ${value}
+  garden-redesign:
+    folder:
+      value: ~/Projects/Garden Redesign
+      application/Finder: ${value}
+    plan:
+      value: Demo Vault/Projects/Garden Redesign
+      obsidian: ${value}
+    supplier:
+      value: https://example.com/garden
+      open: ${value}
+
+machines:
+  studio-server:
+    address:
+      value: 192.0.2.20
+      user: alex
+      ssh: ${user}@${value}
+    dashboard:
+      value: https://192.0.2.20:8006
+      open: ${value}
+    documentation:
+      value: Demo Vault/Machines/Studio Server
+      obsidian: ${value}
+    login:
+      value: alex
+      pwd: demo-only-not-a-real-password
+  media-center:
+    address:
+      value: 192.0.2.46
+      ssh: media@${value}
+    library:
+      value: ~/Media
+      application/Finder: ${value}
+
+writing:
+  clockwork-sky:
+    manuscript:
+      value: ~/Writing/Clockwork Sky.scriv
+      open: ${value}
+      application/Scrivener: ${value}
+    research:
+      value: Demo Vault/Writing/Clockwork Sky
+      obsidian: ${value}
+    submissions:
+      value: ~/Writing/Clockwork Sky/Submissions
+      application/Finder: ${value}
+  field-notes:
+    notebook:
+      value: Demo Vault/Writing/Field Notes
+      obsidian: ${value}
+    archive:
+      value: ~/Writing/Field Notes
+      application/Finder: ${value}
+
+clients:
+  northstar-studio:
+    workspace:
+      value: ~/Clients/Northstar Studio
+      application/Finder: ${value}
+      application/Visual Studio Code: ${value}
+    portal:
+      value: https://example.com/northstar
+      open: ${value}
+    contact: maya@example.com
+  paper-lantern:
+    workspace:
+      value: ~/Clients/Paper Lantern
+      application/Finder: ${value}
+    brief:
+      value: Demo Vault/Clients/Paper Lantern Brief
+      obsidian: ${value}
+    contact: devon@example.com

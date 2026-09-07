@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-groups",
+  "title": "Quick Groups",
+  "description": "Search and act on grouped reference data from local YAML files",
+  "icon": "reference-icon.png",
+  "author": "neilbartlett",
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "keywords": [
+    "groups",
+    "reference",
+    "yaml"
+  ],
+  "license": "MIT",
+  "access": "public",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-groups",
+      "title": "Search Groups",
+      "description": "Search grouped records from local YAML files",
+      "keywords": [
+        "qg",
+        "reference",
+        "yaml"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "browse-fields",
+      "title": "Browse Fields",
+      "description": "Browse grouped values by field",
+      "keywords": [
+        "fields",
+        "reference",
+        "yaml"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "referenceDirectory",
+      "title": "Custom Groups Directory",
+      "description": "Optional directory override for your Quick Groups YAML files",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.1",
+    "js-yaml": "^4.1.0",
+    "react": "^19.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8"
+  }
+}
