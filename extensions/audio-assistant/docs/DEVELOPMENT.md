@@ -141,4 +141,4 @@ WebSocket events are future work. A future client must handle initial server inf
 
 Use `npm run publish`, Raycast's official publisher, to update the existing [PR #30841](https://github.com/raycast/extensions/pull/30841) when publication is requested. Do not manually create a replacement PR. The publisher uses the user's GitHub authentication from `~/.config/raycast/config.json` and updates the PR branch automatically. Never commit generated checkouts or credentials.
 
-The extension icon is `assets/icon.png`. Store screenshots are the ordered 2000×1250 PNGs `metadata/audio-assistant-1.png` through `-3.png`; original user captures are retained in `media/`. Keep screenshots out of runtime assets. Recheck the official Store requirements when preparing a future submission.
+The extension icon is `assets/icon.png`. Store screenshots are the five ordered 2000×1250 PNGs `metadata/audio-assistant-1.png` through `-5.png`; original user captures are retained in `media/`. Keep screenshots out of runtime assets. Recheck the official Store requirements when preparing a future submission.

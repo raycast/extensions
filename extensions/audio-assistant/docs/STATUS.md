@@ -17,7 +17,7 @@ The extension has a working live HTTP adapter and optional, explicitly labeled d
 - Playback, Play Next, append, volume steps, mute, repeat, shuffle, queue inspection, non-current queue-entry removal, and dedicated Now Playing Detail view (`Alt+I`) with artwork and metadata sidebar. Queue loading includes entries beyond the first 200.
 - Shared state across pushed navigation, capability checks for Next/Previous, and the user's native focus/text-editing/action-panel fixes.
 - Available/Group/Offline player sections, compatible synced membership addition/removal, static-member protection, and effective queue resolution. All excludes offline players.
-- Updated icon and three ordered Store screenshots; user originals retained separately.
+- Updated icon and five ordered Store screenshots; user originals retained separately. The latest screenshot update adds two captures and preserves the user’s reordered set in both folders. All five metadata images are 2000×1250; copies 1 and 5 were resized to satisfy publisher validation, with media originals unchanged.
 
 The latest implementation replaces the 45 shortcut preference dropdowns with a native editor inside Music. Prior playback, token handling, paging, and Now Playing fixes remain in place.
 
