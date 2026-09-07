@@ -1,5 +1,10 @@
 # App Updates Changelog
 
+## [Bounded Sparkle Scanning] - {PR_MERGE_DATE}
+
+- Limit how many `defaults` processes the Sparkle scan spawns at once: reading the `Info.plist` of every app in `/Applications` used to fan out one process per installed app, which could stall the extension host on machines with a large number of apps
+- Peak concurrency is now capped at a batch of 8 regardless of how many apps are installed (measured on a 32-app machine: 31 concurrent processes before, 8 after, with an identical scan result)
+
 ## [Raycast 2 Compatibility] - 2026-08-27
 
 - Updated to `@raycast/api` 2.x and `@raycast/utils` 2.x
