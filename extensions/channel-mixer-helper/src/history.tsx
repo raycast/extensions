@@ -52,9 +52,17 @@ export function HistoryView() {
       return;
     }
 
-    await clearHistory();
-    setEntries([]);
-    await showToast({ style: Toast.Style.Success, title: "History cleared" });
+    try {
+      await clearHistory();
+      setEntries([]);
+      await showToast({ style: Toast.Style.Success, title: "History cleared" });
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Clear History",
+        message: "Your saved conversions were not changed.",
+      });
+    }
   }
 
   return (

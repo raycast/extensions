@@ -11,13 +11,13 @@ const HISTORY_KEY = "channel-mixer-history";
 const MAX_HISTORY = 30;
 
 export async function getHistory(): Promise<HistoryEntry[]> {
-  const raw = await LocalStorage.getItem<string>(HISTORY_KEY);
-
-  if (!raw) {
-    return [];
-  }
-
   try {
+    const raw = await LocalStorage.getItem<string>(HISTORY_KEY);
+
+    if (!raw) {
+      return [];
+    }
+
     const parsed = JSON.parse(raw) as HistoryEntry[];
     return Array.isArray(parsed) ? parsed : [];
   } catch {

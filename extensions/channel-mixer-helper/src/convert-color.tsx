@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Form,
   Icon,
+  Keyboard,
   LaunchProps,
   LaunchType,
   open,
@@ -23,6 +24,8 @@ type ColorPickerLaunchContext = {
   hex?: string;
   formattedColor?: string;
   pickerTarget?: PickerTarget;
+  sourceHex?: string;
+  targetHex?: string;
 };
 
 type ColorConverterProps = {
@@ -39,10 +42,12 @@ export function ColorConverter({
   const { push } = useNavigation();
   const pickedHex = pickedColor?.hex ? normalizeHex(pickedColor.hex) : null;
   const pickerTarget = pickedColor?.pickerTarget;
+  const contextSource = pickedColor?.sourceHex ?? initialSource;
+  const contextTarget = pickedColor?.targetHex ?? initialTarget;
   const resolvedSource =
-    pickerTarget === "source" && pickedHex ? pickedHex : initialSource;
+    pickerTarget === "source" && pickedHex ? pickedHex : contextSource;
   const resolvedTarget =
-    pickerTarget === "target" && pickedHex ? pickedHex : initialTarget;
+    pickerTarget === "target" && pickedHex ? pickedHex : contextTarget;
   const [sourceHex, setSourceHex] = useState(resolvedSource);
   const [targetHex, setTargetHex] = useState(resolvedTarget);
   const [sourceError, setSourceError] = useState<string>();
@@ -75,7 +80,17 @@ export function ColorConverter({
           ownerOrAuthorName: "thomas",
           context: { copyToClipboard: false },
         },
-        { context: { pickerTarget: target } },
+        {
+          name: "convert-color",
+          type: LaunchType.UserInitiated,
+          extensionName: "channel-mixer-helper",
+          ownerOrAuthorName: "AyakaNya",
+          context: {
+            pickerTarget: target,
+            sourceHex,
+            targetHex,
+          },
+        },
       );
     } catch {
       await showToast({
@@ -136,24 +151,26 @@ export function ColorConverter({
       navigationTitle="Convert HEX with Channel Mixer"
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Screen Color Picker">
-            <Action
-              title="Pick Source Color from Screen"
-              icon={Icon.EyeDropper}
-              onAction={() => pickColor("source")}
-            />
-            <Action
-              title="Pick Target Color from Screen"
-              icon={Icon.EyeDropper}
-              onAction={() => pickColor("target")}
-            />
-          </ActionPanel.Section>
           <ActionPanel.Section title="Conversion">
             <Action.SubmitForm
               title="Calculate Channel Mixer"
               icon={Icon.ArrowRight}
               shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
               onSubmit={handleSubmit}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Screen Color Picker">
+            <Action
+              title="Pick Source Color from Screen"
+              icon={Icon.EyeDropper}
+              shortcut={Keyboard.Shortcut.Common.Duplicate}
+              onAction={() => pickColor("source")}
+            />
+            <Action
+              title="Pick Target Color from Screen"
+              icon={Icon.EyeDropper}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+              onAction={() => pickColor("target")}
             />
           </ActionPanel.Section>
           <Action.Push
