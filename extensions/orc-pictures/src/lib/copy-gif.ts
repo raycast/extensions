@@ -1,0 +1,75 @@
+import { existsSync } from "node:fs";
+import { mkdir, stat, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+
+import { environment } from "@raycast/api";
+
+import { absoluteUrl, type CatalogGif } from "./catalog";
+
+const cachedGifPath = (slug: string): string =>
+  join(environment.supportPath, "gifs", `${slug}.gif`);
+
+const localGifPath = (
+  slug: string,
+  localGifsDirectory: string | undefined,
+): string | undefined => {
+  if (!localGifsDirectory) {
+    return undefined;
+  }
+
+  const path = join(localGifsDirectory, `${slug}.gif`);
+
+  if (!existsSync(path)) {
+    return undefined;
+  }
+
+  return path;
+};
+
+const cachedGifIfReady = async (slug: string): Promise<string | undefined> => {
+  const path = cachedGifPath(slug);
+
+  try {
+    const info = await stat(path);
+
+    if (info.size > 0) {
+      return path;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+};
+
+export const ensureLocalGif = async (
+  gif: CatalogGif,
+  origin: string,
+  localGifsDirectory?: string,
+): Promise<string> => {
+  const localPath = localGifPath(gif.slug, localGifsDirectory);
+
+  if (localPath) {
+    return localPath;
+  }
+
+  const cachedPath = await cachedGifIfReady(gif.slug);
+
+  if (cachedPath) {
+    return cachedPath;
+  }
+
+  const response = await fetch(absoluteUrl(gif.file, origin));
+
+  if (!response.ok) {
+    throw new Error(`Could not download ${gif.slug}.gif`);
+  }
+
+  const bytes = Buffer.from(await response.arrayBuffer());
+  const dest = cachedGifPath(gif.slug);
+
+  await mkdir(join(environment.supportPath, "gifs"), { recursive: true });
+  await writeFile(dest, bytes);
+
+  return dest;
+};

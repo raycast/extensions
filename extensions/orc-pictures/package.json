@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orc-pictures",
+  "description": "Search orc reaction GIFs and copy the GIF file to the clipboard for X.",
+  "categories": [
+    "Fun",
+    "Media"
+  ],
+  "license": "MIT",
+  "author": "orcdev",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.17.2",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.2"
+  },
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "search-gifs",
+      "title": "Search Orc GIFs",
+      "subtitle": "orc.pictures",
+      "description": "Search the catalog and copy a GIF file to the clipboard.",
+      "mode": "view",
+      "keywords": [
+        "gif",
+        "orc",
+        "reaction",
+        "x",
+        "twitter"
+      ]
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "catalogUrl",
+      "title": "Catalog URL",
+      "description": "JSON catalog endpoint. Defaults to the live orc.pictures catalog.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://orc.pictures/catalog.json"
+    },
+    {
+      "name": "siteUrl",
+      "title": "Site URL",
+      "description": "Used to resolve GIF and poster paths.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://orc.pictures"
+    },
+    {
+      "name": "localGifsDirectory",
+      "title": "Local GIFs folder",
+      "description": "Optional. Point this at public/gifs in the orc.pictures repo to copy files without downloading.",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "title": "Orc Pictures"
+}
