@@ -9,6 +9,7 @@ export interface OidConfig {
   serialNumberOid: string;
   printerNameOid: string;
   wasteTonerBottleOid: string;
+  wasteTonerBottleMaxCapacityOid: string;
   uptimeOid: string;
   printerGeneralStatusOid: string;
   displayMessage1Oid: string;
@@ -36,6 +37,7 @@ export const DEFAULT_OIDS: OidConfig = {
 
   // Status
   wasteTonerBottleOid: "1.3.6.1.2.1.43.11.1.1.9.1.10",
+  wasteTonerBottleMaxCapacityOid: "1.3.6.1.2.1.43.11.1.1.8.1.10",
   uptimeOid: "1.3.6.1.2.1.1.3.0",
   printerGeneralStatusOid: "1.3.6.1.2.1.25.3.5.1.1.1",
   displayMessage1Oid: "1.3.6.1.2.1.43.16.5.1.2.1.1",
@@ -44,7 +46,22 @@ export const DEFAULT_OIDS: OidConfig = {
   displayMessage4Oid: "1.3.6.1.2.1.43.16.5.1.2.1.4",
 };
 
-export const getOidConfig = (preferences: Partial<OidConfig>): OidConfig => ({
+export interface RawOidPreferences extends Partial<OidConfig> {
+  /** @deprecated Renamed to displayMessage1Oid; kept for existing user configurations. */
+  printerStatusOid?: string;
+}
+
+const resolveDisplayMessage1Oid = (preferences: RawOidPreferences): string => {
+  const current = preferences.displayMessage1Oid || DEFAULT_OIDS.displayMessage1Oid;
+  const legacy = preferences.printerStatusOid;
+  const isCurrentCustomized = current !== DEFAULT_OIDS.displayMessage1Oid;
+  if (!isCurrentCustomized && legacy && legacy !== DEFAULT_OIDS.displayMessage1Oid) {
+    return legacy;
+  }
+  return current;
+};
+
+export const getOidConfig = (preferences: RawOidPreferences): OidConfig => ({
   totalPagesOid: preferences.totalPagesOid || DEFAULT_OIDS.totalPagesOid,
   blackPagesOid: preferences.blackPagesOid || DEFAULT_OIDS.blackPagesOid,
   colorPagesOid: preferences.colorPagesOid || DEFAULT_OIDS.colorPagesOid,
@@ -55,9 +72,11 @@ export const getOidConfig = (preferences: Partial<OidConfig>): OidConfig => ({
   serialNumberOid: preferences.serialNumberOid || DEFAULT_OIDS.serialNumberOid,
   printerNameOid: preferences.printerNameOid || DEFAULT_OIDS.printerNameOid,
   wasteTonerBottleOid: preferences.wasteTonerBottleOid || DEFAULT_OIDS.wasteTonerBottleOid,
+  wasteTonerBottleMaxCapacityOid:
+    preferences.wasteTonerBottleMaxCapacityOid || DEFAULT_OIDS.wasteTonerBottleMaxCapacityOid,
   uptimeOid: preferences.uptimeOid || DEFAULT_OIDS.uptimeOid,
   printerGeneralStatusOid: preferences.printerGeneralStatusOid || DEFAULT_OIDS.printerGeneralStatusOid,
-  displayMessage1Oid: preferences.displayMessage1Oid || DEFAULT_OIDS.displayMessage1Oid,
+  displayMessage1Oid: resolveDisplayMessage1Oid(preferences),
   displayMessage2Oid: preferences.displayMessage2Oid || DEFAULT_OIDS.displayMessage2Oid,
   displayMessage3Oid: preferences.displayMessage3Oid || DEFAULT_OIDS.displayMessage3Oid,
   displayMessage4Oid: preferences.displayMessage4Oid || DEFAULT_OIDS.displayMessage4Oid,

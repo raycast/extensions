@@ -1,6 +1,6 @@
 # Changelog
 
-## [Add Xerox Status OIDs] - 2026-09-07
+## [Add Xerox Status OIDs] - {PR_MERGE_DATE}
 
 - Added support for waste toner bottle level monitoring
 - Added printer uptime tracking

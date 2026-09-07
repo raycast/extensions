@@ -16,7 +16,7 @@ export interface PrinterStats {
   uptime: string | null;
   printerGeneralStatus: string | null;
   wasteTonerBottle: string | null;
-  displayMessages: string[];
+  displayMessages: { line: number; message: string }[];
 }
 
 const MAX_SUPPLY_ROWS = 40;
@@ -78,14 +78,14 @@ const formatPrinterGeneralStatus = (vb: snmp.Varbind | undefined): string | null
   return statuses[value] || value;
 };
 
-const formatWasteTonerBottleUsed = (vb: snmp.Varbind | undefined): string | null => {
-  const freeSpace = getValueString(vb);
-  if (!freeSpace) return null;
+const formatWasteTonerBottleUsed = (
+  currentVb: snmp.Varbind | undefined,
+  maxVb: snmp.Varbind | undefined,
+): string | null => {
+  const freePercentage = calculatePercentage(currentVb, maxVb);
+  if (freePercentage == null) return null;
 
-  const freePercentage = parseInt(freeSpace, 10);
-  if (isNaN(freePercentage)) return freeSpace;
-
-  const usedPercentage = Math.min(100, Math.max(0, 100 - freePercentage));
+  const usedPercentage = Math.min(100, Math.max(0, 100 - parseInt(freePercentage, 10)));
   return `${usedPercentage}% used`;
 };
 
@@ -206,6 +206,7 @@ export async function fetchPrinterStats(
     oidConfig.serialNumberOid,
     oidConfig.printerNameOid,
     oidConfig.wasteTonerBottleOid,
+    oidConfig.wasteTonerBottleMaxCapacityOid,
     oidConfig.uptimeOid,
     oidConfig.printerGeneralStatusOid,
     oidConfig.displayMessage1Oid,
@@ -227,14 +228,15 @@ export async function fetchPrinterStats(
       modelName: getValueString(generalVarbinds[0]),
       serialNumber: getValueString(generalVarbinds[1]),
       printerName: getValueString(generalVarbinds[2]),
-      wasteTonerBottle: formatWasteTonerBottleUsed(generalVarbinds[3]),
-      uptime: formatUptime(generalVarbinds[4]),
-      printerGeneralStatus: formatPrinterGeneralStatus(generalVarbinds[5]),
-      printerStatus: formatPrinterGeneralStatus(generalVarbinds[5]),
+      wasteTonerBottle: formatWasteTonerBottleUsed(generalVarbinds[3], generalVarbinds[4]),
+      uptime: formatUptime(generalVarbinds[5]),
+      printerGeneralStatus: formatPrinterGeneralStatus(generalVarbinds[6]),
+      printerStatus: formatPrinterGeneralStatus(generalVarbinds[6]),
       displayMessages: generalVarbinds
-        .slice(6, 10)
+        .slice(7, 11)
         .map((vb) => getValueString(vb)?.trim())
-        .filter((message): message is string => Boolean(message)),
+        .map((message, index) => (message ? { line: index + 1, message } : null))
+        .filter((entry): entry is { line: number; message: string } => entry !== null),
     };
   } finally {
     session.close();

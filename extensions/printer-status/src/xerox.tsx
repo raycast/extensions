@@ -119,10 +119,10 @@ export default function Command() {
             }
           />
         )}
-        {stats?.displayMessages.map((message, index) => (
+        {stats?.displayMessages.map(({ line, message }) => (
           <List.Item
-            key={`${index}-${message}`}
-            title={`${labels.displayMessage} ${index + 1}`}
+            key={`${line}-${message}`}
+            title={`${labels.displayMessage} ${line}`}
             subtitle={message}
             icon={Icon.Monitor}
             actions={
