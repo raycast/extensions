@@ -1,6 +1,6 @@
 # VisiGrid Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-07
 
 - Quick Calc: evaluate Excel formulas against clipboard tables (CSV, TSV, and
   space-aligned columns; money formats like `$28,500` and `(1,234)` normalized)
