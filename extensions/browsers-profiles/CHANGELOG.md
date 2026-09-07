@@ -1,6 +1,6 @@
 # Raycast Browsers Profiles
 
-## [Add Brave Origin browser support] - {PR_MERGE_DATE}
+## [Add Brave Origin browser support] - 2026-09-07
 
 - Adding Brave Origin browser to supported browser list
 
