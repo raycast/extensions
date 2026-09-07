@@ -107,6 +107,7 @@ export function AnswerView(props: props): React.JSX.Element {
     return (
       <ActionPanel title="Actions">
         <Action.CopyToClipboard content={answer} />
+        <Action.Paste content={answer} />
         <Action
           title={showAnswerMetadata ? "Hide Metadata" : "Show Metadata"}
           icon={showAnswerMetadata ? Icon.EyeDisabled : Icon.Eye}
