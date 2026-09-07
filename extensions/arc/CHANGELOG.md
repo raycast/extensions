@@ -3,6 +3,7 @@
 ## [Improvements] - {PR_MERGE_DATE}
 
 - Display the Space name in `Search Tabs` and `Search Arc` results to help distinguish tabs with identical names across different Spaces.
+- `getTabsWithSpaceInfo` now falls back to `getTabs()` when the AppleScript response is empty or unparseable, so a Space-metadata failure drops only the Space tags — not the entire tab list.
 
 ## [Fix SQL injection in history and download search] - 2026-06-23
 
