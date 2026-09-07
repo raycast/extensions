@@ -8,6 +8,11 @@ export interface CatalogGif {
   title: string;
 }
 
+const SAFE_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const SAFE_ASSET_PATH = /^\/gifs\/[a-z0-9]+(?:-[a-z0-9]+)*\.(gif|jpg)$/;
+
+export const isSafeSlug = (slug: string): boolean => SAFE_SLUG.test(slug);
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && !Array.isArray(value) && value.constructor === Object;
 
@@ -22,7 +27,10 @@ const isCatalogGif = (value: unknown): value is CatalogGif => {
     typeof value.slug === "string" &&
     typeof value.title === "string" &&
     Array.isArray(value.tags) &&
-    value.tags.every((tag) => typeof tag === "string")
+    value.tags.every((tag) => typeof tag === "string") &&
+    isSafeSlug(value.slug) &&
+    SAFE_ASSET_PATH.test(value.file) &&
+    SAFE_ASSET_PATH.test(value.poster)
   );
 };
 
@@ -42,5 +50,17 @@ export const parseCatalog = (value: unknown): CatalogGif[] => {
 
 export const bundledCatalog: CatalogGif[] = parseCatalog(fallbackCatalog);
 
-export const absoluteUrl = (path: string, origin: string): string =>
-  new URL(path, origin).toString();
+export const absoluteUrl = (path: string, origin: string): string => {
+  if (!path.startsWith("/") || path.startsWith("//") || path.includes("..")) {
+    throw new Error("Catalog path must be root-relative");
+  }
+
+  const base = new URL(origin);
+  const url = new URL(path, base);
+
+  if (url.origin !== base.origin) {
+    throw new Error("Catalog URL must stay on the site origin");
+  }
+
+  return url.href;
+};

@@ -12,7 +12,7 @@ type ExtensionPreferences = {
   "catalogUrl": string,
   /** Site URL - Used to resolve GIF and poster paths. */
   "siteUrl": string,
-  /** Local GIFs folder - Optional. Point this at public/gifs in the orc.pictures repo to copy files without downloading. */
+  /** Local GIFs Folder - Optional. Point this at public/gifs in the orc.pictures repo to copy files without downloading. */
   "localGifsDirectory"?: string
 }
 

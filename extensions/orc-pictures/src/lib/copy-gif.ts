@@ -1,13 +1,35 @@
 import { existsSync } from "node:fs";
 import { mkdir, stat, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { resolve } from "node:path";
 
 import { environment } from "@raycast/api";
 
-import { absoluteUrl, type CatalogGif } from "./catalog";
+import { absoluteUrl, isSafeSlug, type CatalogGif } from "./catalog";
+
+const gifFileName = (slug: string): string => {
+  if (!isSafeSlug(slug)) {
+    throw new Error("Invalid GIF slug");
+  }
+
+  return `${slug}.gif`;
+};
+
+const pathInside = (root: string, fileName: string): string => {
+  const resolvedRoot = resolve(root);
+  const resolved = resolve(resolvedRoot, fileName);
+  const prefix = resolvedRoot.endsWith("/") ? resolvedRoot : `${resolvedRoot}/`;
+
+  if (resolved !== resolvedRoot && !resolved.startsWith(prefix)) {
+    throw new Error("GIF path escaped directory");
+  }
+
+  return resolved;
+};
+
+const cacheDirectory = (): string => resolve(environment.supportPath, "gifs");
 
 const cachedGifPath = (slug: string): string =>
-  join(environment.supportPath, "gifs", `${slug}.gif`);
+  pathInside(cacheDirectory(), gifFileName(slug));
 
 const localGifPath = (
   slug: string,
@@ -17,7 +39,7 @@ const localGifPath = (
     return undefined;
   }
 
-  const path = join(localGifsDirectory, `${slug}.gif`);
+  const path = pathInside(localGifsDirectory, gifFileName(slug));
 
   if (!existsSync(path)) {
     return undefined;
@@ -68,7 +90,7 @@ export const ensureLocalGif = async (
   const bytes = Buffer.from(await response.arrayBuffer());
   const dest = cachedGifPath(gif.slug);
 
-  await mkdir(join(environment.supportPath, "gifs"), { recursive: true });
+  await mkdir(cacheDirectory(), { recursive: true });
   await writeFile(dest, bytes);
 
   return dest;

@@ -66,7 +66,7 @@
     },
     {
       "name": "localGifsDirectory",
-      "title": "Local GIFs folder",
+      "title": "Local GIFs Folder",
       "description": "Optional. Point this at public/gifs in the orc.pictures repo to copy files without downloading.",
       "type": "directory",
       "required": false
