@@ -1,6 +1,6 @@
 # Changelog
 
-## [URL designer command] - {PR_MERGE_DATE}
+## [URL designer command] - 2026-09-07
 
 - Add a Raycast command to collect URL patterns.
 - Add URL normalization and duplicate prevention.
