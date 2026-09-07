@@ -163,6 +163,7 @@ export function ChatView(): React.JSX.Element {
               <Action title="No" icon={Icon.XMarkCircle} />
             </ActionPanel.Submenu>
           )}
+          {answer && <Action.Paste title="Paste Answer" content={answer.content as string} />}
         </ActionPanel.Section>
         {Chat && !IsLoading && (
           <ActionPanel.Section title="Attach">
