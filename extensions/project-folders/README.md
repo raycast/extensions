@@ -25,7 +25,7 @@ YYYY/
     …other project files
 ```
 
-Each HTML file is a one-line redirect: `window.location.href = "https://…"`. Missing files just mean that link is absent.
+Each HTML file is a one-line redirect: `window.location.href = "https://…"`. Only absolute HTTPS destinations are exposed as service actions. Missing files mean that link is absent; other read errors are reported and retried on the next scan.
 
 ## Preferences
 
@@ -42,4 +42,12 @@ Each HTML file is a one-line redirect: `window.location.href = "https://…"`. M
 ```bash
 npm install
 npm run dev
+```
+
+The regression checks use React DOM and the real Raycast hooks with isolated native API mocks. They do not open Raycast or touch your projects.
+
+```bash
+npm test
+npx ray lint --fix
+npm run build
 ```

@@ -18,6 +18,21 @@ export type ProjectLinks = {
 
 const URL_RE = /window\.location\.href\s*=\s*["']([^"']+)["']/i;
 
+export function httpsUrl(value: string | undefined): string | undefined {
+  if (!value || !/^https:\/\//i.test(value)) return undefined;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function sanitizeLinks(links: ProjectLinks): ProjectLinks {
+  const asana = httpsUrl(links.asana);
+  return { asana, drive: httpsUrl(links.drive), frameio: httpsUrl(links.frameio), gid: extractGid(asana) };
+}
+
 export function extractGid(asanaUrl: string | undefined): string | undefined {
   if (!asanaUrl) return undefined;
   const matches = asanaUrl.match(/\d{10,}/g);
@@ -34,9 +49,10 @@ export async function readLink(projectPath: string, kind: LinkKind): Promise<str
     const s = await stat(file);
     if (!s.isFile()) return undefined;
     const html = await readFile(file, "utf8");
-    return html.match(URL_RE)?.[1];
-  } catch {
-    return undefined;
+    return httpsUrl(html.match(URL_RE)?.[1]);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
   }
 }
 

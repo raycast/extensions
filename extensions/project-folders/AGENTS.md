@@ -39,8 +39,9 @@ Raycast extension. TypeScript, **npm** (Raycast Store CI requires `package-lock.
 ### Commands
 
 - `npm run dev` - launches `ray develop` (live-reload into the user's installed Raycast).
-- `npx ray lint --fix` - type check + ESLint + Prettier in one pass. Run this before reporting work as done; there is no separate test suite.
-- No CI yet. No tests.
+- `npx ray lint --fix` - type check + ESLint + Prettier in one pass. Run this before reporting work as done.
+- `npm test` - filesystem, pin concurrency, and React lifecycle regression checks with isolated native API mocks.
+- No CI yet.
 
 ### Folder convention (input data, external to the repo)
 

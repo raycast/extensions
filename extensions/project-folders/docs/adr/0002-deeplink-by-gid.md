@@ -45,14 +45,13 @@ Behavior on launch:
 
 1. Read `launchContext.gid`. The command reads **only** `gid` and ignores any other keys,
    so the context shape can gain fields later without breaking existing callers.
-2. Look the gid up in the cached index. If two projects share a gid, the most recent
-   (the index is already sorted by mtime descending) wins.
-3. On a miss, force a disk rescan (`revalidate`) and retry the match once - this catches a
-   project created or linked after the last snapshot.
-4. On a match, push `ProjectScreen` on top of the normal list. Escape returns to the full
-   list.
-5. On a still-miss after the rescan, stay on the list and show a failure toast naming the
-   gid.
+2. Wait for a successful disk scan before looking up the gid. Cached matches may point
+   to a folder that has since been renamed. If two projects share a gid, the first in
+   the index wins, with years newest-first and projects sorted by mtime descending.
+3. On a match, push `ProjectScreen` with the refreshed project. Escape returns to the
+   full list.
+4. On a miss after the scan, stay on the list and show a failure toast naming the gid.
+   A failed scan shows the read error instead of navigating from stale data.
 
 A "Copy Deeplink to Project" action is exposed on each list item, shown only when the
 project has a gid.

@@ -7,20 +7,28 @@ export async function getPins(): Promise<string[]> {
   return raw ? (JSON.parse(raw) as string[]) : [];
 }
 
-async function setPins(pins: string[]): Promise<void> {
-  await LocalStorage.setItem(PINS_KEY, JSON.stringify(pins));
+// Serialise writes within the command so pruning cannot overwrite a concurrent toggle.
+let pendingMutation: Promise<unknown> = Promise.resolve();
+
+function updatePins(update: (pins: string[]) => string[]): Promise<string[]> {
+  const mutation = pendingMutation.then(async () => {
+    const pins = await getPins();
+    const next = update(pins);
+    if (JSON.stringify(next) !== JSON.stringify(pins)) {
+      await LocalStorage.setItem(PINS_KEY, JSON.stringify(next));
+    }
+    return next;
+  });
+  pendingMutation = mutation.catch(() => {});
+  return mutation;
 }
 
-export async function togglePin(projectPath: string): Promise<string[]> {
-  const pins = await getPins();
-  const next = pins.includes(projectPath) ? pins.filter((p) => p !== projectPath) : [projectPath, ...pins];
-  await setPins(next);
-  return next;
+export function togglePin(projectPath: string): Promise<string[]> {
+  return updatePins((pins) =>
+    pins.includes(projectPath) ? pins.filter((p) => p !== projectPath) : [projectPath, ...pins],
+  );
 }
 
-export async function prunePins(existingPaths: Set<string>): Promise<string[]> {
-  const pins = await getPins();
-  const next = pins.filter((p) => existingPaths.has(p));
-  if (next.length !== pins.length) await setPins(next);
-  return next;
+export function prunePins(existingPaths: Set<string>): Promise<string[]> {
+  return updatePins((pins) => pins.filter((p) => existingPaths.has(p)));
 }

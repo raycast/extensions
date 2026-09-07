@@ -16,10 +16,10 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { runAppleScript, useCachedPromise } from "@raycast/utils";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { projectDeeplink } from "./deeplink";
-import { magicLinkUrl, type ProjectLinks } from "./links";
-import { prunePins, togglePin } from "./pins";
+import { magicLinkUrl, sanitizeLinks, type ProjectLinks } from "./links";
+import { getPins, prunePins, togglePin } from "./pins";
 import { buildProjectIndex, indexByGid, indexByPath, projectKeywords, type Project } from "./projects";
 import { refreshProjectInSnapshot } from "./snapshot";
 
@@ -69,36 +69,47 @@ export default function Command(props: LaunchProps<{ launchContext?: { gid?: str
   const targetGid = props.launchContext?.gid;
   const { projectsRoot, linkApp, asanaApp } = getPreferenceValues<Preferences.SearchProjects>();
 
+  const { data: pins = [], revalidate: revalidatePins } = useCachedPromise(getPins, [], { initialData: [] });
+  const [scannedRoot, setScannedRoot] = useState<string>();
   const {
-    data: index,
+    data: cachedIndex,
     isLoading,
     error,
     revalidate,
   } = useCachedPromise(buildProjectIndex, [projectsRoot], {
     initialData: { years: [] },
+    onData: (freshIndex) => {
+      setScannedRoot(projectsRoot);
+      void prunePins(new Set(indexByPath(freshIndex).keys()))
+        .then(() => revalidatePins())
+        .catch((error: Error) =>
+          showToast({ style: Toast.Style.Failure, title: "Could not update pins", message: error.message }),
+        );
+    },
   });
+  // Persisted hook results can predate URL validation. Validate before rendering any actions.
+  const index = useMemo(
+    () => ({
+      years: cachedIndex.years.map((year) => ({
+        ...year,
+        projects: year.projects.map((project) => ({ ...project, links: sanitizeLinks(project.links) })),
+      })),
+    }),
+    [cachedIndex],
+  );
 
   const byPath = useMemo(() => indexByPath(index), [index]);
   const byGid = useMemo(() => indexByGid(index), [index]);
-  const pathsKey = useMemo(() => Array.from(byPath.keys()).sort().join("\n"), [byPath]);
 
   // Deeplink: open a project's grid directly when launched with a gid. See ADR 0002.
   const { push } = useNavigation();
   const navigatedRef = useRef(false);
-  const retriedRef = useRef(false);
   useEffect(() => {
-    if (!targetGid || navigatedRef.current) return;
+    if (!targetGid || navigatedRef.current || scannedRoot !== projectsRoot || isLoading || error) return;
     const match = byGid.get(targetGid);
     if (match) {
       navigatedRef.current = true;
       push(<ProjectScreen project={match} linkApp={linkApp} asanaApp={asanaApp} />);
-      return;
-    }
-    if (isLoading) return; // wait for data before treating it as a miss
-    if (!retriedRef.current) {
-      // Stale snapshot: force a disk rescan and retry the match once.
-      retriedRef.current = true;
-      revalidate();
       return;
     }
     navigatedRef.current = true;
@@ -107,23 +118,18 @@ export default function Command(props: LaunchProps<{ launchContext?: { gid?: str
       title: "No project for that link",
       message: `gid ${targetGid}`,
     });
-  }, [targetGid, byGid, isLoading, push, revalidate, linkApp, asanaApp]);
-
-  const { data: pins = [], revalidate: revalidatePins } = useCachedPromise(
-    async (key: string) => prunePins(new Set(key ? key.split("\n") : [])),
-    [pathsKey],
-    { initialData: [] },
-  );
+  }, [targetGid, byGid, scannedRoot, projectsRoot, isLoading, error, push, linkApp, asanaApp]);
 
   if (error) {
     return (
-      <List>
+      <List isLoading={isLoading}>
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title="Could not read projects root"
+          title="Could not read projects"
           description={`${projectsRoot}\n${error.message}`}
           actions={
             <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
               <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
             </ActionPanel>
           }

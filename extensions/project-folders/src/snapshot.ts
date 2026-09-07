@@ -4,7 +4,8 @@ import { join } from "node:path";
 import { LINK_FILES, readAllLinks, type LinkKind, type ProjectLinks } from "./links";
 
 const YEAR_RE = /^\d{4}$/;
-const SNAPSHOT_VERSION = 3;
+// Version 4 discards missing links cached after read failures by older versions.
+const SNAPSHOT_VERSION = 4;
 const SNAPSHOT_PATH = join(environment.supportPath, "index.json");
 const LINK_KINDS = Object.keys(LINK_FILES) as LinkKind[];
 
@@ -54,8 +55,9 @@ async function readSubfolders(projectPath: string): Promise<string[]> {
       .filter((e) => e.isDirectory() && !e.name.startsWith("."))
       .map((e) => e.name)
       .sort();
-  } catch {
-    return [];
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw error;
   }
 }
 
@@ -65,8 +67,9 @@ async function readLinkMtimes(projectPath: string): Promise<LinkMtimes> {
       try {
         const linkStat = await stat(join(projectPath, LINK_FILES[kind]));
         return linkStat.isFile() ? ([kind, linkStat.mtimeMs] as const) : null;
-      } catch {
-        return null;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+        throw error;
       }
     }),
   );
@@ -106,8 +109,9 @@ async function scanYear(root: string, year: string, cached: SnapshotYear | undef
       try {
         const s = await stat(projectPath);
         return scanProject(yearPath, e.name, s.mtimeMs, cachedByName.get(e.name));
-      } catch {
-        return null;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+        throw error;
       }
     }),
   );
@@ -121,13 +125,7 @@ async function scanYear(root: string, year: string, cached: SnapshotYear | undef
 
 export async function refreshSnapshot(root: string): Promise<Snapshot> {
   const cached = await loadSnapshot(root);
-  let entries;
-  try {
-    entries = await readdir(root, { withFileTypes: true });
-  } catch (err) {
-    if (cached) return cached;
-    throw err;
-  }
+  const entries = await readdir(root, { withFileTypes: true });
   const yearNames = entries
     .filter((e) => e.isDirectory() && YEAR_RE.test(e.name))
     .map((e) => e.name)
@@ -151,7 +149,8 @@ export async function refreshProjectInSnapshot(root: string, year: string, name:
   let diskMtime: number;
   try {
     diskMtime = (await stat(projectPath)).mtimeMs;
-  } catch {
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     yearEntry.projects = yearEntry.projects.filter((p) => p.name !== name);
     await saveSnapshot(cached);
     return cached;

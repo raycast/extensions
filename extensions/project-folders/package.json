@@ -6,8 +6,16 @@
   "icon": "command-icon.png",
   "author": "hugini",
   "license": "MIT",
-  "categories": ["Productivity"],
-  "keywords": ["asana", "frame.io", "google drive", "projects", "finder"],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "asana",
+    "frame.io",
+    "google drive",
+    "projects",
+    "finder"
+  ],
   "commands": [
     {
       "name": "search-projects",
@@ -48,15 +56,20 @@
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "eslint": "^8.57.1",
+    "jsdom": "26.1.0",
     "prettier": "^3.3.3",
+    "react-dom": "19.0.0",
     "typescript": "^5.4.0"
   },
   "scripts": {
+    "test": "node scripts/check-regressions.cjs",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
   },
-  "platforms": ["macOS"]
+  "platforms": [
+    "macOS"
+  ]
 }
