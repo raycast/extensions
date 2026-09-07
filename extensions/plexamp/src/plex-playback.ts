@@ -220,14 +220,17 @@ async function createPlayQueue(item: PlayableItem, startKey?: string): Promise<P
   return parsePlayQueue(container);
 }
 
-async function startPlayQueue(queue: PlayQueueInfo): Promise<void> {
+async function startPlayQueue(queue: PlayQueueInfo, startKey?: string): Promise<void> {
   const config = await requireServerConfig();
   const identity = await getServerIdentity();
-  const selectedKey = queue.selectedKey ?? queue.items[0]?.key;
 
-  if (!selectedKey) {
+  if (queue.items.length === 0) {
     throw new Error("The created play queue did not include a playable track.");
   }
+
+  // The response only carries a window of the queue, and parsePlayQueue falls back to the first item when
+  // the selected one is outside it, so the key the caller asked for takes precedence.
+  const selectedKey = startKey ?? queue.selectedKey ?? queue.items[0].key;
 
   await requestPlayer("/player/playback/playMedia", {
     machineIdentifier: identity.machineIdentifier,
@@ -357,7 +360,7 @@ export async function playItem(item: PlayableItem): Promise<void> {
 
 export async function playAlbumFromTrack(album: MusicAlbum, track: MusicTrack): Promise<void> {
   const queue = await createPlayQueue(album, track.key);
-  await startPlayQueue(queue);
+  await startPlayQueue(queue, track.key);
 }
 
 export async function queueItem(item: PlayableItem): Promise<void> {
