@@ -22,6 +22,8 @@ interface Session extends Runtime {
   queues: Queue[];
   activeId?: string;
   outputError?: string;
+  favoriteRevision: number;
+  notifyFavoritesChanged: () => void;
   revision: number;
   loading: boolean;
   busy: boolean;
@@ -81,6 +83,8 @@ export function MusicSession({ runtime, children }: { runtime: Runtime; children
   const [activeId, setActiveId] = useState<string>();
   const [outputError, setOutputError] = useState<string>();
   const [revision, setRevision] = useState(0);
+  const [favoriteRevision, setFavoriteRevision] = useState(0);
+  const notifyFavoritesChanged = useCallback(() => setFavoriteRevision((value) => value + 1), []);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
@@ -135,7 +139,21 @@ export function MusicSession({ runtime, children }: { runtime: Runtime; children
       setBusy(false);
     }
   }
-  const session = { ...runtime, players, queues, activeId, outputError, revision, loading, busy, run, refresh, bridge };
+  const session = {
+    ...runtime,
+    players,
+    queues,
+    activeId,
+    outputError,
+    revision,
+    favoriteRevision,
+    notifyFavoritesChanged,
+    loading,
+    busy,
+    run,
+    refresh,
+    bridge,
+  };
   useEffect(() => {
     bridge.publish(session);
   });

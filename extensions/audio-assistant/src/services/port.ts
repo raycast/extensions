@@ -10,6 +10,7 @@ import type {
   SearchPage,
   SearchRequest,
   Track,
+  TrackFavoriteResult,
 } from "../domain/model";
 
 /** All commands share this boundary. Implement live.ts behind it; do not add fetch to views. */
@@ -29,6 +30,8 @@ export interface MusicService {
   setShuffle(playerId: string, shuffle: boolean): Promise<void>;
   removeQueueEntry(playerId: string, entryId: string): Promise<void>;
   setGroupMember(playerId: string, memberId: string, joined: boolean): Promise<void>;
+  toggleTrackFavorite(track: Track): Promise<TrackFavoriteResult>;
+  toggleCurrentTrackFavorite(playerId: string): Promise<TrackFavoriteResult>;
   dispose(): void;
 }
 export interface ActivePlayerStore {

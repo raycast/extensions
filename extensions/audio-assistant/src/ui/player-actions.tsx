@@ -1,3 +1,4 @@
+import { TrackFavoriteAction } from "./track-favorite-action";
 import { KeyboardShortcutsAction } from "./shortcut-settings-view";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import type { Player } from "../domain/model";
@@ -67,6 +68,7 @@ export function PlayerActions({ highlighted }: { highlighted?: Player }) {
           shortcut={shortcuts.playPause}
           onAction={() => run(() => controller.playback("play-pause"))}
         />
+        <TrackFavoriteAction />
         {active?.capabilities.nextPrevious && (
           <>
             <Action

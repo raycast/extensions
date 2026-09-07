@@ -114,5 +114,89 @@
       "return_type": "Array of Track",
       "required_scope": "library.read"
     }
+  ],
+  "track_mutation_commands": [
+    {
+      "command": "music/favorites/add_item",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "string | Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | SoundEffect | Genre | AudioSource | MediaCollection | ItemMapping",
+          "required": true,
+          "description": ""
+        }
+      ],
+      "return_type": "null",
+      "required_scope": "library.write"
+    },
+    {
+      "command": "music/favorites/remove_item",
+      "parameters": [
+        {
+          "name": "media_type",
+          "type": "<enum 'MediaType",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "library_item_id",
+          "type": "string | integer",
+          "required": true,
+          "description": ""
+        }
+      ],
+      "return_type": "null",
+      "required_scope": "library.write"
+    },
+    {
+      "command": "music/tracks/get",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "provider_instance_id_or_domain",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "allow_update_metadata",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "recursive",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "album_uri",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "return_type": "Track",
+      "required_scope": "library.read"
+    },
+    {
+      "command": "player_queues/get",
+      "parameters": [
+        {
+          "name": "queue_id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ],
+      "return_type": "PlayerQueue",
+      "required_scope": "queues.read"
+    }
   ]
 }

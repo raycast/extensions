@@ -4,6 +4,7 @@
 
 - Provide seven top-level commands: Music, Play / Pause, Next Track, Previous Track, Volume Up, Volume Down, and Toggle Mute.
 - Browse Music Assistant players, artists, tracks, and albums from one searchable workspace.
+- Toggle favorite status for the active player’s current track (Alt+F) or highlighted track (Alt+Shift+F), with configurable shortcuts and confirmed add/remove notifications.
 - Add a Favorites view for server-marked tracks, artists, and albums, with favorite-only search, independent pagination, and partial-error recovery.
 - Place the saved available output first in All for quick volume/mute access, with explicit recovery for unavailable outputs.
 - Select and persist an active playback target for Music and the quick playback commands.

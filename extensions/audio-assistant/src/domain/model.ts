@@ -86,3 +86,9 @@ export interface SearchPage {
   /** Sanitized partial-source failures; usable results must remain visible. */
   warnings?: string[];
 }
+
+export interface TrackFavoriteResult {
+  track: Track;
+  sourceUri: string;
+  favorite: boolean;
+}

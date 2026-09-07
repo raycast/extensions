@@ -37,28 +37,30 @@ Press Enter to select a player, play a track immediately, or browse an artist or
 
 Choose **Favorites** to browse tracks, artists, and albums marked as favorites in Music Assistant. Search stays within your favorites, and all three sections load additional pages as you scroll. Enter plays a track or opens an artist/album; your existing queue and playback shortcuts work here too.
 
-Mark favorites in Music Assistant, then use **Refresh** in the Favorites view to pick up changes. This view does not add or remove favorites. If a section cannot load, the other results remain available with a warning and Refresh recovery. A server that cannot return confirmed favorites reports an error rather than showing an unfiltered library. Demo Mode includes a small fictional favorites selection.
+Press **Alt + F** to toggle the current track on your active player, or **Alt + Shift + F** to toggle the highlighted track (Option on macOS). Both shortcuts are configurable in **Music → Keyboard Shortcuts**. Confirmed changes show Added to Favorites / Removed from Favorites toasts, and the Favorites view updates automatically. For changes made outside the extension, use **Refresh**. If a section cannot load, the other results remain available with a warning and Refresh recovery. A server that cannot return confirmed favorites reports an error rather than showing an unfiltered library. Demo Mode includes a small fictional favorites selection.
 
 ### Default Shortcuts
 
-| Action                | macOS                 | Windows                | Notes                               |
-| --------------------- | --------------------- | ---------------------- | ----------------------------------- |
-| Play/Pause            | `Alt + Enter`         | `Alt + Enter`          | Targets active player               |
-| Next Track            | `Alt + .`             | `Alt + .`              | Forward track skip                  |
-| Previous Track        | `Alt + ,`             | `Alt + ,`              | Previous track skip                 |
-| Play Next             | `Cmd + Option + N`    | `Ctrl + Alt + N`       | Enqueue to play next                |
-| Add to Queue          | `Alt + A`             | `Alt + A`              | Append to active queue              |
-| Browse Artist         | `Cmd + Space`         | `Ctrl + Space`         | Open artist collection              |
-| Browse Album          | `Cmd + Shift + Space` | `Ctrl + Shift + Space` | Open album tracklist                |
-| Volume Up / Down (5%) | `Alt + =` / `Alt + -` | `Alt + =` / `Alt + -`  | Targets highlighted/active player   |
-| Mute / Unmute Player  | `Alt + M`             | `Alt + M`              | Contextual toggle with dynamic icon |
-| Show Queue            | `Alt + Q`             | `Alt + Q`              | Open queue inspection               |
-| Now Playing           | `Alt + I`             | `Alt + I`              | Open Now Playing detail view        |
-| Toggle Shuffle        | `Alt + S`             | `Alt + S`              | Feedback toast: On / Off            |
-| Toggle Repeat         | `Alt + R`             | `Alt + R`              | Cycles Track → Queue → Off          |
-| Refresh               | `Cmd + R`             | `Ctrl + R`             | Refresh library/player state        |
-| Keyboard Shortcuts    | `Cmd + Shift + .`     | `Ctrl + Shift + .`     | Open the shortcut editor (fixed)    |
-| Extension Preferences | `Cmd + .`             | `Ctrl + .`             | Non-configurable                    |
+| Action                  | macOS                 | Windows                | Notes                                |
+| ----------------------- | --------------------- | ---------------------- | ------------------------------------ |
+| Favorite Playing Track  | `Option + F`          | `Alt + F`              | Toggle active player’s current track |
+| Favorite Selected Track | `Option + Shift + F`  | `Alt + Shift + F`      | Toggle highlighted track             |
+| Play/Pause              | `Alt + Enter`         | `Alt + Enter`          | Targets active player                |
+| Next Track              | `Alt + .`             | `Alt + .`              | Forward track skip                   |
+| Previous Track          | `Alt + ,`             | `Alt + ,`              | Previous track skip                  |
+| Play Next               | `Cmd + Option + N`    | `Ctrl + Alt + N`       | Enqueue to play next                 |
+| Add to Queue            | `Alt + A`             | `Alt + A`              | Append to active queue               |
+| Browse Artist           | `Cmd + Space`         | `Ctrl + Space`         | Open artist collection               |
+| Browse Album            | `Cmd + Shift + Space` | `Ctrl + Shift + Space` | Open album tracklist                 |
+| Volume Up / Down (5%)   | `Alt + =` / `Alt + -` | `Alt + =` / `Alt + -`  | Targets highlighted/active player    |
+| Mute / Unmute Player    | `Alt + M`             | `Alt + M`              | Contextual toggle with dynamic icon  |
+| Show Queue              | `Alt + Q`             | `Alt + Q`              | Open queue inspection                |
+| Now Playing             | `Alt + I`             | `Alt + I`              | Open Now Playing detail view         |
+| Toggle Shuffle          | `Alt + S`             | `Alt + S`              | Feedback toast: On / Off             |
+| Toggle Repeat           | `Alt + R`             | `Alt + R`              | Cycles Track → Queue → Off           |
+| Refresh                 | `Cmd + R`             | `Ctrl + R`             | Refresh library/player state         |
+| Keyboard Shortcuts      | `Cmd + Shift + .`     | `Ctrl + Shift + .`     | Open the shortcut editor (fixed)     |
+| Extension Preferences   | `Cmd + .`             | `Ctrl + .`             | Non-configurable                     |
 
 ### Customize Shortcuts
 

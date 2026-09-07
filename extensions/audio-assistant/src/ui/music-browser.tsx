@@ -1,3 +1,4 @@
+import { TrackFavoriteAction } from "./track-favorite-action";
 import { allPlayers } from "../domain/all-players";
 import { ChoosePlayerView } from "./player-actions";
 import { KeyboardShortcutsAction } from "./shortcut-settings-view";
@@ -43,7 +44,20 @@ function subtitle(item: Item) {
 
 export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
   const shortcuts = useShortcuts();
-  const { service, players, queues, activeId, outputError, revision, loading, busy, bridge, run, refresh } = useMusic();
+  const {
+    service,
+    players,
+    queues,
+    activeId,
+    outputError,
+    revision,
+    favoriteRevision: favoriteMutationRevision,
+    loading,
+    busy,
+    bridge,
+    run,
+    refresh,
+  } = useMusic();
   const { push } = useNavigation();
   const [view, setView] = useState<View>("all");
   const collectionCache = useRef<{ key: string; library: Library } | undefined>(undefined);
@@ -66,7 +80,12 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
     setSearching(true);
     setView(value as View);
   };
-  const searchRevision = !collection && view === "favorites" ? favoriteRevision : collection || error ? revision : 0;
+  const searchRevision =
+    !collection && view === "favorites"
+      ? favoriteRevision + favoriteMutationRevision
+      : collection || error
+        ? revision
+        : 0;
   useEffect(() => {
     const abort = new AbortController();
     setSearching(true);
@@ -181,6 +200,7 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
           shortcut={shortcuts.refresh}
           onAction={() => run(refreshMusic)}
         />
+        <TrackFavoriteAction />
         <KeyboardShortcutsAction />
         <Action
           title="Extension Preferences"

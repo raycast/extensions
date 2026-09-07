@@ -1,3 +1,4 @@
+import { TrackFavoriteAction } from "./track-favorite-action";
 import { KeyboardShortcutsAction } from "./shortcut-settings-view";
 import { Action, ActionPanel, Clipboard, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import type { Artist, Album, Item } from "../domain/model";
@@ -35,6 +36,7 @@ export function ItemActions({
               icon={Icon.Play}
               onAction={() => run(() => controller.enqueue(item, "play-now"), `Playing ${item.name}`)}
             />
+            <TrackFavoriteAction track={item} />
             <Action
               title="Play Next"
               icon={Icon.Forward}

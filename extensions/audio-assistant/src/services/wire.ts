@@ -310,3 +310,14 @@ export function resolveEffectiveQueues(players: DecodedPlayer[], queues: QueueSu
 export function visiblePlayers(players: DecodedPlayer[]): DecodedPlayer[] {
   return players.filter((player) => !player.hidden && !player.private);
 }
+
+/** Only real track media may be favorited; synthetic queue fallback identities are never sent. */
+export function decodeCurrentTrack(value: unknown, queueId: string, serverUrl?: string): Track {
+  const queue = record(value, "currentQueue");
+  if (queue.queue_id !== queueId) throw new WireError("currentQueue.queue_id", "the requested queue");
+  if (!queue.current_item) throw new Error("Nothing is currently playing on your active player.");
+  const entry = record(queue.current_item, "currentQueue.current_item");
+  const media = record(entry.media_item, "currentQueue.current_item.media_item");
+  if (media.media_type !== "track") throw new Error("The current item is not a favoritable track.");
+  return decodeTrack(media, "currentQueue.current_item.media_item", serverUrl);
+}

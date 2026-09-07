@@ -12,6 +12,7 @@ import type {
   SearchPage,
   SearchRequest,
   Track,
+  TrackFavoriteResult,
   View,
 } from "../domain/model";
 import { AudioAssistantError, clampVolume, requirePlayer } from "../domain/policy";
@@ -20,6 +21,7 @@ import type { MusicService } from "./port";
 import { groupLeader, isGroupMember, requireGroupChange } from "../domain/grouping";
 import {
   requireFavorite,
+  decodeCurrentTrack,
   decodeAlbum,
   decodeArray,
   decodeArtist,
@@ -325,6 +327,55 @@ export class LiveMusicService implements MusicService {
       );
     }
     return player;
+  }
+
+  private async favoriteTrackDetails(track: Track): Promise<Track> {
+    if (track.provider === "queue" || !track.uri || !track.itemId)
+      throw new Error("This queue item has no favoritable track identity.");
+    const result = decodeTrack(
+      await this.options.client.command("music/tracks/get", {
+        item_id: track.itemId,
+        provider_instance_id_or_domain: track.provider,
+        allow_update_metadata: false,
+      }),
+      "favoriteTrack",
+      this.serverUrl,
+    );
+    if (typeof result.favorite !== "boolean")
+      throw new Error("The server did not report this track's favorite status.");
+    return result;
+  }
+
+  async toggleTrackFavorite(track: Track): Promise<TrackFavoriteResult> {
+    const current = await this.favoriteTrackDetails(track);
+    const favorite = !current.favorite;
+    if (!favorite && current.provider !== "library")
+      throw new Error("The server did not resolve the library identity needed to remove this favorite.");
+    try {
+      await this.options.client.command(
+        favorite ? "music/favorites/add_item" : "music/favorites/remove_item",
+        favorite ? { item: current.uri } : { media_type: "track", library_item_id: current.itemId },
+      );
+    } catch (error) {
+      // Reconcile an ambiguous response once, without replaying the write or claiming success.
+      await this.favoriteTrackDetails(current).catch(() => undefined);
+      throw error;
+    }
+    const confirmed = await this.favoriteTrackDetails(current);
+    if (confirmed.favorite !== favorite)
+      throw new Error("The favorite change could not be confirmed. Refresh before trying again.");
+    return { track: confirmed, sourceUri: track.uri, favorite };
+  }
+
+  async toggleCurrentTrackFavorite(playerId: string): Promise<TrackFavoriteResult> {
+    const player = await this.target(playerId, true);
+    if (player.state === "idle") throw new Error("Nothing is currently playing on your active player.");
+    const track = decodeCurrentTrack(
+      await this.options.client.command("player_queues/get", { queue_id: player.queueId }),
+      player.queueId!,
+      this.serverUrl,
+    );
+    return this.toggleTrackFavorite(track);
   }
 
   async enqueue(playerId: string, track: Track, intent: QueueIntent): Promise<void> {

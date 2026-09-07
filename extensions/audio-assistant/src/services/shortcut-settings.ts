@@ -2,6 +2,8 @@ import { buildShortcut, DEFAULT_SHORTCUT_CONFIG, type ShortcutDefinition } from 
 import { shortcutKeys } from "../ui/shortcut-keys";
 
 export const shortcutActions = [
+  { id: "favoritePlaying", prefix: "FavoritePlaying", title: "Favorite Playing Track", group: "Playback" },
+  { id: "favoriteSelected", prefix: "FavoriteSelected", title: "Favorite Selected Track", group: "Playback" },
   { id: "playPause", prefix: "PlayPause", title: "Play/Pause", group: "Playback" },
   { id: "next", prefix: "Next", title: "Next Track", group: "Playback" },
   { id: "previous", prefix: "Previous", title: "Previous Track", group: "Playback" },
@@ -136,6 +138,8 @@ export class ShortcutSettings {
           throw new Error("invalid storage");
         const values = parsed.config as Record<string, unknown>;
         for (const { id } of shortcutActions) {
+          // These actions were added after v1 shipped; preserve every existing override on upgrade.
+          if (values[id] === undefined && (id === "favoritePlaying" || id === "favoriteSelected")) continue;
           if (!isDefinition(values[id])) throw new Error("invalid shortcut");
           config[id] = values[id];
         }

@@ -48,6 +48,8 @@ Play Now uses the server's `play` option, not queue replacement. Play Next uses 
 | ----------------------------- | ----------------------------------- |
 | Primary row action            | Enter                               |
 | Native action panel           | Primary+K                           |
+| Favorite Playing Track        | Alt+F                               |
+| Favorite Selected Track       | Alt+Shift+F                         |
 | Play/Pause                    | Alt+Enter                           |
 | Next / Previous               | Alt+. / Alt+,                       |
 | Play Next                     | Primary+Alt+N                       |
@@ -92,7 +94,7 @@ Raycast renders pushed routes outside the parent's React context. `SessionRoute`
 
 Favorites is the second of six dropdown views, after All. `MusicService.search({ view: "favorites", ... })` routes to `src/services/favorite-search.ts` and the live library adapter. It sends `favorite: true`, `summary: false`, `search`, `limit`, and `offset` to each media type's `library_items` endpoint; it never falls back to unrestricted `music/search`. Full items must explicitly report `favorite: true` before strict media decoding. This also rejects ignored/unsupported filters instead of leaking non-favorites. No user impersonation argument is sent: queries use the authenticated request context.
 
-The opaque Favorites cursor tracks each source's offset and previous-page identity digest; exhausted or failed sources are omitted. Repeated pages fail visibly. Partial failures retain successful results and accumulated warnings; failed sources restart only on explicit Refresh or a fresh search. The UI distinguishes no favorites, no search matches, and query failures. Favorites has a separate explicit-refresh revision, so membership changes can be fetched without restarting search after ordinary playback mutations. Parent Favorites query/view state survives collection navigation. The optional domain favorite flag is decoded only from booleans; demo fixtures mark a deterministic subset. Favorite editing, playlists, and radio remain outside this implementation.
+The opaque Favorites cursor tracks each source's offset and previous-page identity digest; exhausted or failed sources are omitted. Repeated pages fail visibly. Partial failures retain successful results and accumulated warnings; failed sources restart only on explicit Refresh or a fresh search. The UI distinguishes no favorites, no search matches, and query failures. Favorites has a separate explicit-refresh revision, so membership changes can be fetched without restarting search after ordinary playback mutations. Parent Favorites query/view state survives collection navigation. The optional domain favorite flag is decoded only from booleans; demo fixtures mark a deterministic subset. Track favorites can be toggled with Alt+F for the active output’s current track and Alt+Shift+F for the highlighted track; both are configurable. Artist/album favorite editing, playlists, and radio remain outside this implementation.
 
 Search uses cancellable service cursors with identity deduplication and stale-response rejection. Empty-query All advances tracks and albums independently; successful sources remain usable when another fails. Collections cache full browse results and filter locally until refresh. Current state refreshes on launch, explicit Refresh, and successful mutations; there is no event subscription or periodic polling yet.
 
@@ -114,25 +116,32 @@ HTTP commands POST to `<base-url>/api` with bearer authentication and `{ message
 
 Tokens belong only in Raycast's password preference. Exclude them from logs, URLs, fixtures, documentation, and cache keys. The read-only test harness accepts connection settings through environment variables and omits identities/media names from output. Do not silently fall back to demo after a live connection failure.
 
-| Implemented operation     | Command / essential arguments                                                                              |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Connection identity       | `info`, `auth/me`                                                                                          |
-| Players / queue summaries | `players/all` (`return_unavailable: true`), `player_queues/all`                                            |
-| Queue entries             | `player_queues/items` (`queue_id`, `limit`, `offset`)                                                      |
-| Library pages             | `music/{tracks,artists,albums}/library_items` (`limit`, `offset`, `search`)                                |
-| Typed search              | `music/search` (`search_query`, `media_types`, `limit`); no unsupported offset                             |
-| Artist collections        | `music/artists/artist_tracks`, `music/artists/artist_albums` (`item_id`, `provider_instance_id_or_domain`) |
-| Album tracks              | `music/albums/album_tracks` (same identity arguments, `in_library_only: false`)                            |
-| Play / enqueue            | `player_queues/play_media` (`queue_id`, `media`, `option`)                                                 |
-| Transport                 | `players/cmd/play_pause`, `next`, `previous` (`player_id`)                                                 |
-| Volume / mute             | `players/cmd/volume_set` (`player_id`, `volume_level`), `volume_mute` (`player_id`, `muted`)               |
-| Repeat / shuffle          | `player_queues/repeat` (`queue_id`, `repeat_mode`), `shuffle` (`queue_id`, `shuffle_enabled`)              |
-| Remove queue entry        | `player_queues/delete_item` (`queue_id`, `item_id_or_index`)                                               |
-| Group membership          | `players/cmd/set_members` (`target_player`, `player_ids_to_add` or `player_ids_to_remove`)                 |
+| Implemented operation     | Command / essential arguments                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Connection identity       | `info`, `auth/me`                                                                                               |
+| Players / queue summaries | `players/all` (`return_unavailable: true`), `player_queues/all`                                                 |
+| Queue entries             | `player_queues/items` (`queue_id`, `limit`, `offset`)                                                           |
+| Library pages             | `music/{tracks,artists,albums}/library_items` (`limit`, `offset`, `search`)                                     |
+| Typed search              | `music/search` (`search_query`, `media_types`, `limit`); no unsupported offset                                  |
+| Artist collections        | `music/artists/artist_tracks`, `music/artists/artist_albums` (`item_id`, `provider_instance_id_or_domain`)      |
+| Album tracks              | `music/albums/album_tracks` (same identity arguments, `in_library_only: false`)                                 |
+| Track favorite lookup     | `music/tracks/get` (`item_id`, `provider_instance_id_or_domain`, `allow_update_metadata: false`)                |
+| Track favorite add/remove | `music/favorites/add_item` (`item` URI); `music/favorites/remove_item` (`media_type: track`, `library_item_id`) |
+| Current track lookup      | `player_queues/get` (`queue_id` resolved from active output)                                                    |
+| Play / enqueue            | `player_queues/play_media` (`queue_id`, `media`, `option`)                                                      |
+| Transport                 | `players/cmd/play_pause`, `next`, `previous` (`player_id`)                                                      |
+| Volume / mute             | `players/cmd/volume_set` (`player_id`, `volume_level`), `volume_mute` (`player_id`, `muted`)                    |
+| Repeat / shuffle          | `player_queues/repeat` (`queue_id`, `repeat_mode`), `shuffle` (`queue_id`, `shuffle_enabled`)                   |
+| Remove queue entry        | `player_queues/delete_item` (`queue_id`, `item_id_or_index`)                                                    |
+| Group membership          | `players/cmd/set_members` (`target_player`, `player_ids_to_add` or `player_ids_to_remove`)                      |
 
 Queue loading requests batches of 200 until the reported item count is reached. It rejects overlapping/stalled results and stops incomplete loads at 10,000 entries with an explicit error. This is complete-result loading within that guard, not incremental queue UI pagination.
 
 Media identities include provider, item ID, and canonical URI. Optional related artists/albums may be full objects or ItemMappings; malformed references omit navigation without dropping a valid track. Internal artwork uses the encoded opaque `proxy_id` at `<base-url>/imageproxy/<proxy_id>?size=512`, preserving proxy base paths. Direct remotely accessible HTTP(S) artwork remains unchanged. The schema-65 server returned unauthenticated JPEGs from the canonical proxy; never put a token in artwork URLs.
+
+Track favorite mutations use `MusicService.toggleTrackFavorite` / `toggleCurrentTrackFavorite`. The playing variant resolves the active player’s effective queue afresh and reads `player_queues/get.current_item.media_item`; idle players, foreign sources, and non-track/synthetic queue items fail clearly. Both variants use `music/tracks/get` with metadata updates disabled to obtain current favorite state. Add uses `music/favorites/add_item` with the canonical URI; remove requires a resolved library identity and uses `music/favorites/remove_item` with media type `track` and library item ID. Re-read the track to verify before showing success. After an ambiguous write error, read state once without replaying the write and report failure. These commands require `library.write` in addition to the read permissions.
+
+Favorite actions share the session mutation lock and publish a Favorites-only revision after either outcome, so root/pushed Favorites views reconcile without resetting unrelated searches. Toasts distinguish Added / Removed and retain Demo labeling. Existing shortcut storage gains the two missing definitions without resetting previous overrides. If an old custom shortcut conflicts with a new default, the new action remains available through the action panel but its conflicting key is withheld until edited in Keyboard Shortcuts.
 
 ### Favorites compatibility check, September 7, 2026
 

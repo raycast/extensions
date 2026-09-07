@@ -1,3 +1,4 @@
+import { TrackFavoriteAction } from "./track-favorite-action";
 import { KeyboardShortcutsAction } from "./shortcut-settings-view";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { SessionRoute, useMusic } from "./session";
@@ -51,6 +52,7 @@ export function QueueView() {
                 }
               />
               <PlayerActions />
+              <TrackFavoriteAction track={entry.track} />
               <KeyboardShortcutsAction />
             </ActionPanel>
           }

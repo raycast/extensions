@@ -17,6 +17,8 @@ export interface ShortcutDefinition {
 }
 
 export const DEFAULT_SHORTCUT_CONFIG: Record<string, ShortcutDefinition> = {
+  favoritePlaying: { mod1: "alt", mod2: "f", key: "na" },
+  favoriteSelected: { mod1: "alt", mod2: "shift", key: "f" },
   playPause: { mod1: "alt", mod2: "enter", key: "na" },
   next: { mod1: "alt", mod2: ".", key: "na" },
   previous: { mod1: "alt", mod2: ",", key: "na" },
@@ -113,6 +115,8 @@ export function getShortcuts(prefs: Record<string, string | undefined> = readPre
     return buildShortcut(def, defaultDef);
   };
   return {
+    favoritePlaying: get("favoritePlaying", "FavoritePlaying"),
+    favoriteSelected: get("favoriteSelected", "FavoriteSelected"),
     playPause: get("playPause", "PlayPause"),
     next: get("next", "Next"),
     previous: get("previous", "Previous"),

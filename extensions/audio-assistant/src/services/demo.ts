@@ -1,5 +1,14 @@
 import { randomUUID } from "node:crypto";
-import type { Album, Artist, PlaybackAction, QueueIntent, RepeatMode, SearchRequest, Track } from "../domain/model";
+import type {
+  Album,
+  Artist,
+  PlaybackAction,
+  QueueIntent,
+  RepeatMode,
+  SearchRequest,
+  Track,
+  TrackFavoriteResult,
+} from "../domain/model";
 import { AudioAssistantError, clampVolume, requirePlayer, requireQueue, searchLibrary } from "../domain/policy";
 import { demoData } from "./demo-data";
 import type { MusicService } from "./port";
@@ -106,6 +115,22 @@ export class DemoMusicService implements MusicService {
     if (queue.currentIndex === index) throw new Error("Skip the current track before removing it.");
     queue.entries.splice(index, 1);
     if (queue.currentIndex !== null && index < queue.currentIndex) queue.currentIndex -= 1;
+  }
+  async toggleTrackFavorite(track: Track): Promise<TrackFavoriteResult> {
+    const stored = this.data.library.tracks.find((item) => item.uri === track.uri);
+    if (!stored) throw new Error("This demo track is no longer available.");
+    stored.favorite = !stored.favorite;
+    for (const queue of this.data.queues)
+      for (const entry of queue.entries) {
+        if (entry.track.uri === stored.uri) entry.track.favorite = stored.favorite;
+      }
+    return { track: structuredClone(stored), sourceUri: track.uri, favorite: stored.favorite };
+  }
+  async toggleCurrentTrackFavorite(playerId: string): Promise<TrackFavoriteResult> {
+    const queue = this.queue(playerId);
+    const track = queue.currentIndex === null ? undefined : queue.entries[queue.currentIndex]?.track;
+    if (!track) throw new Error("Nothing is currently playing on your active player.");
+    return this.toggleTrackFavorite(track);
   }
   dispose() {
     /* No resources in demo mode. */
