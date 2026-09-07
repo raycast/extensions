@@ -11,7 +11,11 @@ export interface CatalogGif {
 const SAFE_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const SAFE_ASSET_PATH = /^\/gifs\/[a-z0-9]+(?:-[a-z0-9]+)*\.(gif|jpg)$/;
 
-export const isSafeSlug = (slug: string): boolean => SAFE_SLUG.test(slug);
+export const isSafeSlug = (slug: unknown): slug is string =>
+  typeof slug === "string" && SAFE_SLUG.test(slug);
+
+const isSafeAssetPath = (path: unknown): path is string =>
+  typeof path === "string" && SAFE_ASSET_PATH.test(path);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && !Array.isArray(value) && value.constructor === Object;
@@ -21,16 +25,21 @@ const isCatalogGif = (value: unknown): value is CatalogGif => {
     return false;
   }
 
+  if (!isSafeSlug(value.slug)) {
+    return false;
+  }
+
+  if (!isSafeAssetPath(value.file) || !isSafeAssetPath(value.poster)) {
+    return false;
+  }
+
+  if (typeof value.title !== "string") {
+    return false;
+  }
+
   return (
-    typeof value.file === "string" &&
-    typeof value.poster === "string" &&
-    typeof value.slug === "string" &&
-    typeof value.title === "string" &&
     Array.isArray(value.tags) &&
-    value.tags.every((tag) => typeof tag === "string") &&
-    isSafeSlug(value.slug) &&
-    SAFE_ASSET_PATH.test(value.file) &&
-    SAFE_ASSET_PATH.test(value.poster)
+    value.tags.every((tag) => typeof tag === "string")
   );
 };
 
@@ -56,6 +65,11 @@ export const absoluteUrl = (path: string, origin: string): string => {
   }
 
   const base = new URL(origin);
+
+  if (base.protocol !== "https:" && base.protocol !== "http:") {
+    throw new Error("Site origin must be HTTP or HTTPS");
+  }
+
   const url = new URL(path, base);
 
   if (url.origin !== base.origin) {
