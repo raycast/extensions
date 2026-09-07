@@ -6,7 +6,7 @@ import {
   brewName,
   brewIdentifier,
   brewPinnedIdentifiers,
-  pinLookupKey,
+  isPinnedPackage,
   isCask,
   brewPin,
   brewUninstall,
@@ -131,10 +131,8 @@ export function FormulaUpgradeAction(props: {
         if (!pins) {
           return;
         }
-        // Identity, not display name: `brewName` gives a cask its title. And
-        // pins are keyed by the SHORT name — see pinLookupKey.
-        const pinKey = pinLookupKey(brewIdentifier(props.formula));
-        const reallyPinned = cask ? pins.casks.has(pinKey) : pins.formulae.has(pinKey);
+        // Identity, not display name: `brewName` gives a cask its title.
+        const reallyPinned = isPinnedPackage(pins, brewIdentifier(props.formula), cask);
 
         if (reallyPinned) {
           if (!unpinAndUpgrade) {
@@ -306,8 +304,7 @@ async function uninstall(
     if (!pins) {
       return false;
     }
-    const pinKey = pinLookupKey(brewIdentifier(formula));
-    pinned = cask ? pins.casks.has(pinKey) : pins.formulae.has(pinKey);
+    pinned = isPinnedPackage(pins, brewIdentifier(formula), cask);
   }
 
   // Homebrew refuses to uninstall a pinned package — casks in
@@ -331,8 +328,8 @@ async function uninstall(
     return true;
   } catch (err) {
     const error = ensureError(err);
-    // A pin that landed between the check above and this command. Offer the same
-    // remedy the pre-check does, rather than leaving brew's raw refusal.
+    // Only reached when brew actually FAILS. An ordinary pinned uninstall uses
+    // `onoe` and exits 0, so it never lands here — see TODO.md.
     if (!force && isPinnedRefusal(error)) {
       await handle.hide();
       await offerForcedUninstall(formula, name, cask, effectivePinned, onComplete);
@@ -364,9 +361,8 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean | typeof DECLI
       handle.abort?.signal,
     );
 
-    // Exit 0 is not proof of an upgrade — brew warns and skips a deprecated,
-    // unavailable or already-current package. Saying "Upgraded" there would be
-    // a success message for work it declined to do.
+    // Exit 0 is not proof of an upgrade — brew warns and skips a disabled,
+    // unavailable or already-current package.
     const declined = upgradeSkipReason(`${result.stderr ?? ""}\n${result.stdout ?? ""}`, brewIdentifier(formula));
     if (declined) {
       await handle.hide();

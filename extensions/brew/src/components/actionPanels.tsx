@@ -36,9 +36,7 @@ const SortByPopularityAction = (props: { sortByPopularity: boolean; onToggleSort
   <Action
     title={props.sortByPopularity ? "Sort by Relevance" : "Sort by Popularity"}
     icon={props.sortByPopularity ? Icon.Text : Icon.LineChart}
-    // Not ⌘⇧P: that is Keyboard.Shortcut.Common.Pin, and the Pin action shares
-    // this panel for an installed package.
-    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
     onAction={props.onToggleSort}
   />
 );

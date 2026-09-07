@@ -19,7 +19,7 @@ import { actionsLogger } from "../logger";
 import { execBrewWithProgress, BrewProgress, DEFAULT_STALE_TIMEOUT_MS } from "./progress";
 import { getErrorMessage, ensureError, StaleProcessError, BrewLockError, upgradeSkipReason } from "../errors";
 import { preferences } from "../preferences";
-import { brewPinnedIdentifiers, normalizeOutdatedResults, pinLookupKey } from "./helpers";
+import { brewPinnedIdentifiers, isPinnedPackage, normalizeOutdatedResults } from "./helpers";
 
 /// Upgrade Types
 
@@ -157,12 +157,9 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
   //
   // Read the pin state from disk rather than trusting the payload: a package
   // pinned in another command, or outside Raycast, is pinned in Homebrew's eyes
-  // whatever this snapshot says. One directory read for the whole run.
+  // whatever this snapshot says. One snapshot of both pin directories per run.
   const pins = await brewPinnedIdentifiers();
-  // Pins are keyed by the short name; the outdated payload names a tapped
-  // formula in full. See pinLookupKey.
-  const isPinned = (name: string, isCask: boolean) =>
-    isCask ? pins.casks.has(pinLookupKey(name)) : pins.formulae.has(pinLookupKey(name));
+  const isPinned = (name: string, isCask: boolean) => isPinnedPackage(pins, name, isCask);
 
   const all: UpgradePackage[] = [
     ...outdated.formulae.map((formula) => ({ name: formula.name, isCask: false })),
@@ -262,9 +259,8 @@ export async function brewUpgradeOutdated(options?: UpgradeOptions): Promise<Upg
         { ...execOptions, packageName: pkg.name },
       );
 
-      // Exit 0 does not mean it was upgraded. Homebrew warns and skips a
-      // deprecated, unavailable or already-current package, so without reading
-      // that warning the run claims an upgrade that never happened.
+      // Exit 0 does not mean it was upgraded: Homebrew warns and skips a
+      // disabled, unavailable or already-current package.
       const declined = upgradeSkipReason(`${result.stderr ?? ""}\n${result.stdout ?? ""}`, pkg.name);
       if (declined) {
         summary.skipped.push(pkg);

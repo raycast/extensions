@@ -5,10 +5,7 @@ import { Formula, brewPrefix, brewFetchFormulaInfo, uiLogger, ensureError } from
 import { DetailMetadata, formulaMetadataRows } from "./packageMetadata";
 import { usePackageDetail } from "../hooks/usePackageDetail";
 
-/**
- * Whether this formula carries only summary fields — from the search index or a
- * list row — rather than full `brew info` metadata.
- */
+/** Whether this formula looks like a summary record and should be refetched. */
 function hasMinimalData(formula: Formula): boolean {
   // A summary record has missing or empty homepage, tap, or desc
   return !formula.homepage || !formula.tap || !formula.desc;

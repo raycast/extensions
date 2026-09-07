@@ -484,8 +484,8 @@ describe("pinned refusal detection", () => {
   });
 
   it("does not match brew's OTHER 'Not upgrading' refusals", () => {
-    // cask/upgrade.rb:48 — deprecated/disabled, a different problem with a
-    // different remedy. Offering "unpin and force" here would be nonsense.
+    // A different problem with a different remedy — offering "unpin and force"
+    // here would be nonsense.
     expect(isPinnedRefusal(new Error("Not upgrading zoom, it is deprecated because it is discontinued"))).toBe(false);
     expect(isPinnedRefusal(new Error("Not upgrading warp, no version is available for the current platform"))).toBe(
       false,
@@ -500,10 +500,9 @@ describe("pinned refusal detection", () => {
 
 /**
  * Homebrew warns and skips rather than failing for these, exiting 0 — so the run
- * would otherwise report an upgrade that never happened. Every string below is
- * quoted from the installed source, not invented: an earlier version of this
- * suite asserted a "Not upgrading <formula>, it is deprecated" message that brew
- * does not emit (it warns about deprecation and upgrades anyway).
+ * would otherwise report an upgrade that never happened. The message shapes are
+ * taken from the installed source; the unrecognised-reason case below is a
+ * deliberate synthetic fixture.
  */
 describe("declined upgrades are read from brew's warnings", () => {
   it("keeps each cask reason distinct rather than collapsing them", () => {

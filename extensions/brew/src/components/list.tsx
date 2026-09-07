@@ -58,8 +58,7 @@ export function FormulaList(props: FormulaListProps) {
   // know which one is actually on screen before it fetches anything for it.
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // A pin is an explicit user decision, so surfacing it first is the default;
-  // the preference exists because the sections used to sit at the bottom.
+  // A pin is an explicit user decision, so surfacing it first is the default.
   const pinnedFirst = preferences.pinnedFirst;
 
   const formulaeSection = formulae.length > 0 && (

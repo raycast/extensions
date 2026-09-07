@@ -5,10 +5,7 @@ import { Cask, brewName, brewFetchCaskInfo, uiLogger, ensureError } from "../uti
 import { DetailMetadata, caskMetadataRows } from "./packageMetadata";
 import { usePackageDetail } from "../hooks/usePackageDetail";
 
-/**
- * Whether this cask carries only summary fields — from the search index or a
- * list row — rather than full `brew info` metadata.
- */
+/** Whether this cask looks like a summary record and should be refetched. */
 function hasMinimalData(cask: Cask): boolean {
   // A summary record has missing or empty homepage, tap, or desc
   return !cask.homepage || !cask.tap || !cask.desc;

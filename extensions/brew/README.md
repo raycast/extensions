@@ -40,7 +40,7 @@ Selecting a package shows its install counts (30 / 90 / 365 days) and build erro
 [formulae.brew.sh](https://formulae.brew.sh) analytics API. Only the selected package is fetched —
 about 5 KB per row you land on, and nothing at all for the rest of the list.
 
-**Sort by Popularity** (⇧⌘S in Search) is different: ranking every result requires Homebrew's bulk
+**Sort by Popularity** (⇧⌘P in Search) is different: ranking every result requires Homebrew's bulk
 30-day rankings, about 2.6 MB for formulae and casks combined. That download happens the first time
 you enable the sort, is cached on disk, and is never fetched if you don't use the sort. While it is
 on, each row also shows its 30-day install count.

@@ -135,8 +135,10 @@ export function normalizeOutdatedResults(results: OutdatedResults): OutdatedResu
  *
  * A pin is a symlink under `var/homebrew/pinned` (formulae) or
  * `var/homebrew/pinned_casks` (casks), created by `brew pin` and removed by
- * `brew unpin` — so the directory listing IS the source of truth, and a package
- * pinned in another command or outside Raycast appears here immediately.
+ * `brew unpin`, so a package pinned in another command or outside Raycast
+ * appears here immediately. This is a directory snapshot, not brew's own
+ * predicate — it checks the symlink (formula_pin.rb) and, for a cask, that its
+ * target still exists (cask.rb).
  *
  * Cached payloads carry a `pinned` flag that is only as fresh as the last
  * fetch, which is fine for rendering but not for deciding whether to run a
@@ -154,9 +156,8 @@ export function normalizeOutdatedResults(results: OutdatedResults): OutdatedResu
  *
  * Homebrew pins a formula at `HOMEBREW_PINNED_KEGS/<formula.name>` — the short
  * name (formula_pin.rb) — while `brew outdated --json=v2` reports a tapped
- * formula by its qualified `full_name`, e.g. `steipete/tap/birdclaw`. Looking a
- * pin up by the qualified name therefore misses every tapped formula, and the
- * package is handed to a named `brew upgrade` that Homebrew refuses.
+ * formula by its qualified `full_name`. Looking a pin up by the qualified name
+ * therefore misses every tapped formula.
  *
  * Cask tokens are already unqualified in the outdated payload, so the last
  * segment is correct for both kinds. Use this for pin lookups only — argv keeps
@@ -164,6 +165,21 @@ export function normalizeOutdatedResults(results: OutdatedResults): OutdatedResu
  */
 export function pinLookupKey(identifier: string): string {
   return identifier.split("/").pop() || identifier;
+}
+
+/**
+ * Whether Homebrew has this package pinned, given a set read from disk.
+ *
+ * Keys by the short name (see pinLookupKey) and picks the right directory —
+ * the two rules every caller needs, in one place.
+ */
+export function isPinnedPackage(
+  pins: { formulae: Set<string>; casks: Set<string> },
+  identifier: string,
+  isCask: boolean,
+): boolean {
+  const key = pinLookupKey(identifier);
+  return isCask ? pins.casks.has(key) : pins.formulae.has(key);
 }
 
 export async function brewPinnedIdentifiers(): Promise<{ formulae: Set<string>; casks: Set<string> }> {

@@ -4,10 +4,8 @@
  * helpers, is otherwise untestable.
  *
  * `getPreferenceValues` returns the DECLARED DEFAULTS from package.json rather
- * than an empty object. An empty object silently reads every preference as
- * `undefined`, which means a test can pass by exercising only the falsy branch
- * of something like `zapCask` while the real default is true — the test looks
- * green and covers behaviour no user ever gets.
+ * than an empty object, which would read every preference as `undefined` and let
+ * a test pass by exercising a branch the declared default never reaches.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";

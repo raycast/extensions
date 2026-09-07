@@ -65,9 +65,9 @@ export async function brewUninstall(installable: Cask | Nameable, cancel?: Abort
     zap: preferences.zapCask,
     force,
   });
-  // `--force` is what lets a pinned package be removed: Homebrew unpins it
-  // first — casks in cask/uninstall.rb (`unpin_for_removal?`), formulae in
-  // uninstall.rb. Only ever set from an explicit user confirmation.
+  // `--force` is what lets a pinned package be removed; it also drops the pin
+  // (cask/uninstall.rb unpins first, uninstall.rb rm_pins after). Only ever set
+  // from an explicit user confirmation.
   const forceOption = force ? " --force" : "";
   await execBrew(
     `rm ${brewCaskOption(installable, true)}${forceOption} ${identifier}`,
@@ -102,9 +102,8 @@ export async function brewUpgradeSingleWithProgress(
     identifier,
     type: isCask(upgradable) ? "cask" : "formula",
   });
-  // The result is returned, not discarded: brew exits 0 after declining to
-  // upgrade a deprecated or already-current package, and only its warning says
-  // so. See upgradeSkipReason.
+  // Returned, not discarded: brew exits 0 after declining to upgrade, and only
+  // its warning says so. See upgradeSkipReason.
   const result = await execBrewWithProgress(`upgrade ${brewCaskOption(upgradable)} ${identifier}`, onProgress, cancel);
   actionsLogger.log("Package upgrade finished", { identifier });
   return result;

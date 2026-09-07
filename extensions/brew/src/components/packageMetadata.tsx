@@ -95,6 +95,20 @@ function dependencyTags(names: string[] | undefined, isInstalled: (name: string)
   );
 }
 
+/** Append a tag row and its separator, or nothing when there is nothing to show. */
+function pushTagRow(
+  rows: MetadataRow[],
+  key: string,
+  title: string,
+  tags: { text: string; color?: Color.ColorLike }[] | undefined,
+): void {
+  if (!tags || tags.length === 0) {
+    return;
+  }
+  rows.push({ kind: "separator", key: `${key}-sep` });
+  rows.push({ kind: "tags", key, title, tags });
+}
+
 /** Leading rows shared by both kinds: the lifecycle warning, then the prose. */
 function leadingRows(item: Cask | Formula, options: MetadataOptions, caveats: string | undefined): MetadataRow[] {
   const rows: MetadataRow[] = [];
@@ -194,10 +208,7 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
     ["build-dependencies", "Build Dependencies", formula.build_dependencies],
     ["conflicts", "Conflicts With", formula.conflicts_with],
   ] as const) {
-    if (names && names.length > 0) {
-      rows.push({ kind: "separator", key: `${key}-sep` });
-      rows.push({ kind: "tags", key, title, tags: dependencyTags(names, options.isInstalled) });
-    }
+    pushTagRow(rows, key, title, names && dependencyTags(names, options.isInstalled));
   }
 
   if (formula.pinned) {
@@ -225,57 +236,33 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
   ];
 
   // Casks depend on formulae and other casks, not only an OS version
-  // (cask/dsl/depends_on.rb) — formula metadata has always shown its
-  // dependencies, so omitting these was drift rather than a kind difference.
+  // (cask/dsl/depends_on.rb).
   const packageDeps = [...(cask.depends_on?.formula ?? []), ...(cask.depends_on?.cask ?? [])];
-  if (packageDeps.length > 0) {
-    rows.push({ kind: "separator", key: "dependencies-sep" });
-    rows.push({
-      kind: "tags",
-      key: "dependencies",
-      title: "Dependencies",
-      tags: dependencyTags(packageDeps, options.isInstalled),
-    });
-  }
+  pushTagRow(rows, "dependencies", "Dependencies", dependencyTags(packageDeps, options.isInstalled));
 
-  const arch = cask.depends_on?.arch;
-  if (arch && arch.length > 0) {
-    rows.push({ kind: "separator", key: "arch-sep" });
-    rows.push({
-      kind: "tags",
-      key: "arch",
-      title: "Architecture",
-      tags: arch.map(({ type, bits }) => ({ text: bits ? `${type}${bits}` : type })),
-    });
-  }
+  pushTagRow(
+    rows,
+    "arch",
+    "Architecture",
+    cask.depends_on?.arch?.map(({ type, bits }) => ({ text: bits ? `${type}${bits}` : type })),
+  );
 
   const macos = cask.depends_on?.macos;
-  if (macos) {
-    rows.push({ kind: "separator", key: "macos-sep" });
-    rows.push({
-      kind: "tags",
-      key: "macos",
-      title: "macOS Version",
-      tags: Object.entries(macos)
+  pushTagRow(
+    rows,
+    "macos",
+    "macOS Version",
+    macos &&
+      Object.entries(macos)
         .filter(([, values]) => values)
         .map(([key, values]) => ({ text: `${key} ${values.join(", ")}` })),
-    });
-  }
+  );
 
   const conflicts = cask.conflicts_with?.cask;
-  if (conflicts && conflicts.length > 0) {
-    rows.push({ kind: "separator", key: "conflicts-sep" });
-    rows.push({
-      kind: "tags",
-      key: "conflicts",
-      title: "Conflicts With",
-      tags: dependencyTags(conflicts, options.isInstalled),
-    });
-  }
+  pushTagRow(rows, "conflicts", "Conflicts With", conflicts && dependencyTags(conflicts, options.isInstalled));
 
-  // Same row formulae get. The list's tack accessory is hidden while the metadata
-  // panel is open (list.tsx), so without this a pinned cask has no visible pin
-  // state at all in the one view that is showing its metadata.
+  // The list's tack accessory is hidden while the metadata panel is open
+  // (list.tsx), so this is the only pin indicator a cask has in that view.
   if (cask.pinned) {
     rows.push({ kind: "separator", key: "pinned-sep" });
     rows.push({ kind: "label", key: "pinned", title: "Pinned", text: "Yes" });

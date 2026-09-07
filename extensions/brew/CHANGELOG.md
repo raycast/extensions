@@ -17,7 +17,6 @@
 - If Homebrew refuses an upgrade or uninstall because the package is pinned, the toast now offers to unpin, instead of showing the raw error
 - Cask details now list the formulae and casks a cask depends on, and the architectures it requires — formula details have always shown dependencies, so casks were missing information brew reports (`gcloud-cli` needs `python@3.14`, for one)
 - Removed the unused two-phase loading path (`brew list --versions`, added in 5.0 support). It had no caller and its cache read duplicated the main loader; installed packages already paint from cache
-- Search's "Sort by Popularity" moved from ⇧⌘P to ⇧⌘S: ⇧⌘P is Raycast's standard Pin shortcut, which now collides with the Pin action on installed packages
 - **This extension now requires Homebrew 6.0 or later.** The "Use internal API" preference is gone — Homebrew 6 uses that API by default and deprecates the setting, which made brew abort outright under `HOMEBREW_DEVELOPER`
 
 ## [Show Upgrades: reviewed, selective upgrading] - 2026-09-01

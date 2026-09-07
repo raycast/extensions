@@ -325,6 +325,12 @@ const BREW_LOCK_PATTERNS = [
   /brew upgrade.*process has already/i,
 ];
 
+/** Optional `<owner>/<repo>/`. Brew rejects extra slashes in a tap name, not punctuation. */
+const TAP_PREFIX = "(?:[^\\s/]+/[^\\s/]+/)?";
+
+/** Start of line or a separator, so a short name cannot match mid-token. */
+const WORD_START = "(?:^|[\\s'\"])";
+
 /**
  * Why Homebrew declined to upgrade a package it was explicitly named.
  *
@@ -332,18 +338,17 @@ const BREW_LOCK_PATTERNS = [
  * and exits 0. Without reading them the run reports the package as upgraded
  * when nothing happened — a success message for work that was declined.
  *
- * The shapes differ per kind and are quoted from the installed source; they do
- * NOT all share the `Not upgrading <name>` prefix, which an earlier version of
- * this function assumed:
+ * The shapes differ per kind, are quoted from the installed source, and do NOT
+ * all share the `Not upgrading <name>` prefix:
  *
  *   cask/upgrade.rb   "Not upgrading <token>, it is disabled because …"
  *                     "Not upgrading <token>, no version is available for the current platform"
  *                     "Not upgrading <token>, the downloaded artifact has not changed"
  *                     "Not upgrading <token>, the latest version is already installed"
- *                     "Not upgrading <token>, the installed version is not below the minimum version …"
  *                     "The cask '<token>' cannot be upgraded as-is. To fix this, run: …"
  *   cmd/upgrade.rb    "<name> <version> already installed"
  *                     "Not upgrading <name>, the installed version is not below the minimum version …"
+ *                     (that last one covers casks too — it is emitted from cmd/upgrade.rb)
  *
  * Deprecation is deliberately absent: brew warns about a deprecated package and
  * upgrades it anyway (formula_installer.rb, cask/installer.rb), so treating it
@@ -367,12 +372,8 @@ export function upgradeSkipReason(output: string, name: string): string | undefi
   //  - A VERSION SUFFIX is not. `python` must not absorb `python@3.14`'s
   //    warning: those are different formulae.
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  // Homebrew rejects extra slashes in a tap name, not punctuation
-  // (tap_constants.rb) — so the segments are "anything but a slash or space".
-  const tap = "(?:[^\\s/]+/[^\\s/]+/)?";
-  const before = "(?:^|[\\s'\"])";
 
-  const named = new RegExp(`Not upgrading ${tap}${escaped}, ([^\n]+)`, "i").exec(output);
+  const named = new RegExp(`Not upgrading ${TAP_PREFIX}${escaped}, ([^\n]+)`, "i").exec(output);
   if (named) {
     const reason = named[1];
     if (/it is disabled/i.test(reason)) return "Disabled by Homebrew";
@@ -386,12 +387,12 @@ export function upgradeSkipReason(output: string, name: string): string | undefi
 
   // "<name> <version> already installed" — a formula brought up to date as a
   // dependency of an earlier package in the same run is the common case.
-  if (new RegExp(`${before}${tap}${escaped} \\S+ already installed\\b`, "im").test(output)) {
+  if (new RegExp(`${WORD_START}${TAP_PREFIX}${escaped} \\S+ already installed\\b`, "im").test(output)) {
     return "Already up to date";
   }
 
   // "The cask '<token>' cannot be upgraded as-is."
-  if (new RegExp(`The cask '${tap}${escaped}' cannot be upgraded as-is`, "i").test(output)) {
+  if (new RegExp(`The cask '${TAP_PREFIX}${escaped}' cannot be upgraded as-is`, "i").test(output)) {
     return "Cannot be upgraded as-is — reinstall it";
   }
 
@@ -402,7 +403,7 @@ export function upgradeSkipReason(output: string, name: string): string | undefi
  * Pattern to detect Homebrew refusing to act on a pinned package.
  *
  * Upgrade, named explicitly (cmd/upgrade.rb, cask/upgrade.rb):
- *   "Error: Not upgrading 1 pinned package."
+ *   "Error: Not upgrading 1 pinned package:"
  * Uninstall, either kind (uninstall.rb, cask/uninstall.rb):
  *   "Error: <name> is pinned. You must unpin it to uninstall."
  *
