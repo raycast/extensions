@@ -1,8 +1,9 @@
+import { KeyboardShortcutsAction } from "./shortcut-settings-view";
 import { Action, ActionPanel, Color, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 import { useMusic, SessionRoute } from "./session";
 import { PlayerActions } from "./player-actions";
 import { QueueView } from "./queue-view";
-import { shortcuts } from "./shortcuts";
+import { useShortcuts } from "./use-shortcuts";
 
 function formatDuration(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -11,6 +12,7 @@ function formatDuration(seconds: number): string {
 }
 
 export function NowPlayingView() {
+  const shortcuts = useShortcuts();
   const { activeId, players, queues, service, bridge, run, refresh, loading, busy } = useMusic();
   const active = players.find((p) => p.id === activeId);
   const queue = queues.find((q) => q.id === active?.queueId);
@@ -35,6 +37,7 @@ export function NowPlayingView() {
               shortcut={shortcuts.refresh}
               onAction={() => run(refresh)}
             />
+            <KeyboardShortcutsAction />
             <Action
               title="Extension Preferences"
               icon={Icon.Gear}
@@ -97,6 +100,7 @@ export function NowPlayingView() {
                 shortcut={shortcuts.refresh}
                 onAction={() => run(refresh)}
               />
+              <KeyboardShortcutsAction />
               <Action
                 title="Extension Preferences"
                 icon={Icon.Gear}
@@ -184,6 +188,7 @@ export function NowPlayingView() {
               shortcut={shortcuts.refresh}
               onAction={() => run(refresh)}
             />
+            <KeyboardShortcutsAction />
             <Action
               title="Extension Preferences"
               icon={Icon.Gear}

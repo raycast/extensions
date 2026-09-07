@@ -6,8 +6,10 @@
 - Browse Music Assistant players, artists, tracks, and albums from one searchable workspace.
 - Select and persist an active playback target for Music and the quick playback commands.
 - Play music immediately, queue tracks next, append tracks, and inspect or edit the active queue.
+- Inspect current playback with full cover art and metadata using the Now Playing Detail screen (`Alt + I`).
 - Control playback, volume, mute, repeat, shuffle, and collection browsing with keyboard shortcuts.
-- Customize action shortcuts via structured 3-part dropdowns in Extension Preferences with modifier validation.
+- Customize action shortcuts in a searchable, grouped Keyboard Shortcuts screen inside Music (`Ctrl + Shift + .` on Windows; `Cmd + Shift + .` on macOS), with previews, conflict validation, and individual/all-default reset.
+- Simplify Extension Preferences to connection settings and Demo Mode, with guidance to the shortcut editor. Preserve all default bindings and offer a first-run review of available legacy customizations.
 - Contextual dual-function Mute/Unmute toggle with dynamic icon and toast feedback.
 - Link compatible synced players from the Players workspace, with offline outputs in a separate section.
 - Page library and queue results, and browse artist albums and tracks together on one screen.

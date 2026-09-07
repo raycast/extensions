@@ -1,10 +1,12 @@
+import { KeyboardShortcutsAction } from "./shortcut-settings-view";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { SessionRoute, useMusic } from "./session";
 import { PlayerActions } from "./player-actions";
 import { NowPlayingView } from "./now-playing-view";
-import { shortcuts } from "./shortcuts";
+import { useShortcuts } from "./use-shortcuts";
 
 export function QueueView() {
+  const shortcuts = useShortcuts();
   const { activeId, players, queues, service, bridge, run, loading, busy } = useMusic();
   const active = players.find((p) => p.id === activeId);
   const queue = queues.find((q) => q.id === active?.queueId);
@@ -13,7 +15,15 @@ export function QueueView() {
       navigationTitle={`${service.mode === "demo" ? "Demo " : ""}Queue · ${active?.name ?? "No Active Player"}`}
       isLoading={loading || busy}
     >
-      <List.EmptyView title="Queue Is Empty" description="Play a track or add one to the queue from Music." />
+      <List.EmptyView
+        title="Queue Is Empty"
+        description="Play a track or add one to the queue from Music."
+        actions={
+          <ActionPanel>
+            <KeyboardShortcutsAction />
+          </ActionPanel>
+        }
+      />
       {queue?.entries.map((entry, index) => (
         <List.Item
           key={entry.id}
@@ -41,6 +51,7 @@ export function QueueView() {
                 }
               />
               <PlayerActions />
+              <KeyboardShortcutsAction />
             </ActionPanel>
           }
         />

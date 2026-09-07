@@ -1,3 +1,4 @@
+import { KeyboardShortcutsAction } from "./shortcut-settings-view";
 import {
   createContext,
   useCallback,
@@ -64,6 +65,7 @@ function RootSession({ children }: { children: ReactNode }) {
         actions={
           <ActionPanel>
             <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <KeyboardShortcutsAction />
           </ActionPanel>
         }
       />

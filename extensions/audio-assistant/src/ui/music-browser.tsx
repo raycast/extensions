@@ -1,3 +1,4 @@
+import { KeyboardShortcutsAction } from "./shortcut-settings-view";
 import { Action, ActionPanel, Grid, Icon, List, openExtensionPreferences, useNavigation } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import type { Album, Artist, Item, Library, View } from "../domain/model";
@@ -7,7 +8,7 @@ import { ItemActions } from "./item-actions";
 import { reportError } from "./feedback";
 import { SessionRoute, useMusic } from "./session";
 import { SearchPager } from "../services/search-pager";
-import { shortcuts } from "./shortcuts";
+import { useShortcuts } from "./use-shortcuts";
 
 const views: { value: View; title: string }[] = [
   { value: "all", title: "All" },
@@ -38,6 +39,7 @@ function subtitle(item: Item) {
 }
 
 export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
+  const shortcuts = useShortcuts();
   const { service, players, queues, activeId, revision, loading, busy, bridge, run, refresh } = useMusic();
   const { push } = useNavigation();
   const [view, setView] = useState<View>("all");
@@ -156,6 +158,7 @@ export function MusicBrowser({ collection }: { collection?: Artist | Album }) {
     <ActionPanel>
       <ActionPanel.Section title="Workspace">
         <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={() => run(refresh)} />
+        <KeyboardShortcutsAction />
         <Action
           title="Extension Preferences"
           icon={Icon.Gear}

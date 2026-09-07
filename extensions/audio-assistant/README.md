@@ -31,7 +31,7 @@ Use the dropdown beside the search bar to switch between **All**, **Players**, *
 
 Players separates available outputs, compatible synced group members, and offline outputs. Select your primary output first, then press Enter on a compatible player in the Group Players section to add it. Linked members have a removal action. Group controls depend on the server's reported capabilities; Sendspin endpoints must already be connected to Music Assistant.
 
-Press Enter to select a player, play a track immediately, or browse an artist or album. Open Raycast's action panel for Play Next, Add to Queue, repeat, shuffle, mute, volume, transport controls, queue inspection, and refresh.
+Press Enter to select a player, play a track immediately, or browse an artist or album. Open Raycast's action panel for Now Playing details, Play Next, Add to Queue, repeat, shuffle, mute, volume, transport controls, queue inspection, and refresh.
 
 ### Default Shortcuts
 
@@ -47,12 +47,22 @@ Press Enter to select a player, play a track immediately, or browse an artist or
 | Volume Up / Down (5%) | `Alt + =` / `Alt + -` | `Alt + =` / `Alt + -`  | Targets highlighted/active player   |
 | Mute / Unmute Player  | `Alt + M`             | `Alt + M`              | Contextual toggle with dynamic icon |
 | Show Queue            | `Alt + Q`             | `Alt + Q`              | Open queue inspection               |
+| Now Playing           | `Alt + I`             | `Alt + I`              | Open Now Playing detail view        |
 | Toggle Shuffle        | `Alt + S`             | `Alt + S`              | Feedback toast: On / Off            |
 | Toggle Repeat         | `Alt + R`             | `Alt + R`              | Cycles Track → Queue → Off          |
 | Refresh               | `Cmd + R`             | `Ctrl + R`             | Refresh library/player state        |
+| Keyboard Shortcuts    | `Cmd + Shift + .`     | `Ctrl + Shift + .`     | Open the shortcut editor (fixed)    |
 | Extension Preferences | `Cmd + .`             | `Ctrl + .`             | Non-configurable                    |
 
-Action shortcuts can be customized via 3-part structured dropdowns in Extension Preferences (`Cmd + .` / `Ctrl + .`).
+### Customize Shortcuts
+
+Open **Music → action panel → Keyboard Shortcuts**, or press **Cmd + Shift + .** on macOS / **Ctrl + Shift + .** on Windows. Search the grouped list for an action and press Enter to edit its modifier, optional additional modifier, and key. The list shows the complete shortcut and whether it is Default or Custom. Save applies changes throughout Music; Escape cancels the edit.
+
+Use **Restore Default** for one action or **Restore All Defaults** (with confirmation) for the complete set. Invalid combinations, protected Raycast/text-editing keys, and shortcuts already assigned to another Music action are explained before saving. If another action is using a default you want to restore, change that action first or restore all defaults.
+
+All existing default bindings are unchanged. On first launch after this update, review your bindings in Keyboard Shortcuts: old custom values are imported if Raycast still exposes them, but removed preference fields may no longer be available. Reapply any missing customization, then choose **Mark Shortcuts Reviewed** to dismiss the reminder.
+
+Extension Preferences still opens with **Cmd + . / Ctrl + .** and contains only the server URL, password token, and Demo Mode. Shortcut overrides are stored locally for this extension and shared between live and demo Music views; they do not contain connection details. Global hotkeys that launch the seven commands remain configured in Raycast.
 
 ## Demo Mode
 

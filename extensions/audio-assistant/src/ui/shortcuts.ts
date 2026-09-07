@@ -47,7 +47,10 @@ function mapModifier(mod: string, platform: "macOS" | "Windows"): Keyboard.KeyMo
 export function buildShortcut(
   def: ShortcutDefinition,
   fallbackDef: ShortcutDefinition = DEFAULT_SHORTCUT_CONFIG.playPause!,
-): Keyboard.Shortcut {
+): {
+  macOS: { modifiers: Keyboard.KeyModifier[]; key: Keyboard.KeyEquivalent };
+  Windows: { modifiers: Keyboard.KeyModifier[]; key: Keyboard.KeyEquivalent };
+} {
   const is2Key = !def.key || def.key === "na";
 
   // Validate: for 2-key combo, Part 2 must NOT be a modifier
@@ -125,6 +128,10 @@ export function getShortcuts(prefs: Record<string, string | undefined> = readPre
     shuffle: get("shuffle", "Shuffle"),
     repeat: get("repeat", "Repeat"),
     refresh: get("refresh", "Refresh"),
+    keyboardShortcuts: {
+      macOS: { modifiers: ["cmd", "shift"] as Keyboard.KeyModifier[], key: "." as Keyboard.KeyEquivalent },
+      Windows: { modifiers: ["ctrl", "shift"] as Keyboard.KeyModifier[], key: "." as Keyboard.KeyEquivalent },
+    },
     preferences: {
       macOS: { modifiers: ["cmd"] as Keyboard.KeyModifier[], key: "." as Keyboard.KeyEquivalent },
       Windows: { modifiers: ["ctrl"] as Keyboard.KeyModifier[], key: "." as Keyboard.KeyEquivalent },

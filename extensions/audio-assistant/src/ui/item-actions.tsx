@@ -1,12 +1,14 @@
+import { KeyboardShortcutsAction } from "./shortcut-settings-view";
 import { Action, ActionPanel, Clipboard, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import type { Artist, Album, Item } from "../domain/model";
 import { SessionRoute, useMusic } from "./session";
 import { PlayerActions } from "./player-actions";
 import { QueueView } from "./queue-view";
 import { NowPlayingView } from "./now-playing-view";
-import { shortcuts } from "./shortcuts";
+import { useShortcuts } from "./use-shortcuts";
 
 export function ItemActions({ item, openCollection }: { item?: Item; openCollection: (item: Artist | Album) => void }) {
+  const shortcuts = useShortcuts();
   const { controller, run, refresh, bridge } = useMusic();
   return (
     <ActionPanel>
@@ -100,6 +102,7 @@ export function ItemActions({ item, openCollection }: { item?: Item; openCollect
           }
         />
         <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={() => run(refresh)} />
+        <KeyboardShortcutsAction />
         <Action
           title="Extension Preferences"
           icon={Icon.Gear}

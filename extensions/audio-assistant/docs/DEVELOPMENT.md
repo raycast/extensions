@@ -15,7 +15,7 @@ npm run check
 npm run build
 ```
 
-`check` runs TypeScript, tests, ESLint, and Prettier. `build` bundles all four commands. Run both after substantive code changes; use formatting and link checks for documentation-only changes. A WSL build can report that Raycast is not running: it proves bundling, not native import or keyboard behavior. Use a separate host dependency installation for native `npm run dev`.
+`check` runs TypeScript, tests, ESLint, and Prettier. `build` bundles all seven commands. Run both after substantive code changes; use formatting and link checks for documentation-only changes. A WSL build can report that Raycast is not running: it proves bundling, not native import or keyboard behavior. Use a separate host dependency installation for native `npm run dev`.
 
 Keep feature changes in separate commits so they can be reverted independently. Update [STATUS.md](STATUS.md) when behavior, limitations, or validation evidence changes. Preserve user changes and avoid accumulating separate handoff, milestone, and roadmap files.
 
@@ -57,9 +57,16 @@ Play Now uses the server's `play` option, not queue replacement. Play Next uses 
 | Show Queue                    | Alt+Q                               |
 | Now Playing                   | Alt+I                               |
 | Refresh                       | Primary+R                           |
+| Keyboard Shortcuts            | Primary+Shift+. (non-configurable)  |
 | Extension Preferences         | Primary+. (non-configurable)        |
 
-The executable shortcut map is `src/ui/shortcuts.ts`. Action shortcuts can be customized via 3-part structured dropdowns in extension preferences (Modifier 1, Key/Modifier 2, Key/NA 3) while protecting core keys (`Enter`, `Primary+K`, and text editing keys without shift). Invalid combinations (such as modifiers as keys in 2-key combos or non-modifiers in Part 2 for 3-key combos) fall back safely to defaults. Restoring default shortcuts is handled natively via Raycast's Extension Preferences. Hide capability-dependent actions when unsupported; Next/Previous also reject unsupported calls at the service boundary. Native keyboard checks remain separate from automated shortcut-map tests.
+The executable default map is `src/ui/shortcuts.ts`; preserve its existing values exactly. **Music → Keyboard Shortcuts** is a native searchable List grouped into Playback, Volume, Queue, and Navigation. Enter edits one action in a Form (modifier, optional additional modifier, key), with a full shortcut preview, validation, Save/Cancel, and reset controls. Primary+Shift+. opens it from Music routes, including empty/setup states. Primary+. continues opening native Extension Preferences, which contains only connection settings and Demo Mode; the server URL description points to the editor. Exactly seven top-level commands remain.
+
+`src/services/shortcut-settings.ts` owns versioned, validated shortcut-only LocalStorage data under `music-shortcuts-v1`. `src/ui/use-shortcuts.ts` adapts the shared store to React with `useSyncExternalStore`. Music waits for initial loading before rendering action bindings. Successful persistence publishes a new snapshot to root and pushed routes without replacing the music session or refreshing playback. Failed writes leave the current snapshot unchanged. Unreadable saved data produces an explicit error, uses defaults for that launch, and is not automatically overwritten; reopening retries, or confirmed Restore All Defaults recovers.
+
+On first use, import only known legacy shortcut fields returned by `getPreferenceValues`; never persist the preference object, server URL, or password token. Raycast does not document retention of removed manifest preference values, so migration is best effort, with an explicit first-run review notice approved for this release. Users may need to reapply missing customizations. Mark Shortcuts Reviewed persists acknowledgment; resets cannot resurrect legacy overrides. Shortcuts are extension-local UI settings shared between live/demo modes, separate from server/user-scoped playback output state.
+
+Validate keys/modifiers, duplicate physical modifiers on either platform, Shift-only typing/selection combinations, native action-panel and text-editing keys, both fixed settings shortcuts, and collisions with other Music action shortcuts on either platform. Preserve imported effective legacy bindings instead of silently rewriting them to satisfy new validation. New edits must pass validation. Restoring one default also checks collisions; restoring all defaults confirms replacement. Native global command hotkeys remain Raycast-managed. Hide capability-dependent actions when unsupported; Next/Previous also reject unsupported calls at the service boundary. Native keyboard/layout checks remain separate from automated tests.
 
 ## Architecture
 
@@ -72,12 +79,13 @@ The executable shortcut map is `src/ui/shortcuts.ts`. Action shortcuts can be cu
 | Demo and paged search                         | `src/services/demo.ts`, `demo-data.ts`, `search-pager.ts`                                                                             |
 | Shared navigation state                       | `src/services/session-bridge.ts`, `src/ui/session.tsx`                                                                                |
 | Browser, players, actions, queue, now playing | `src/ui/music-browser.tsx`, `player-sections.tsx`, `item-actions.tsx`, `player-actions.tsx`, `queue-view.tsx`, `now-playing-view.tsx` |
+| Shortcut settings and editor                  | `src/services/shortcut-settings.ts`, `src/ui/use-shortcuts.ts`, `src/ui/shortcut-settings-view.tsx`, `src/ui/shortcut-keys.ts`        |
 | Automated tests and sanitized fixtures        | `tests/`                                                                                                                              |
 | Read-only server smoke test                   | `scripts/live-smoke.ts`                                                                                                               |
 
 React consumes domain models through `MusicService`. Decode server data from `unknown` inside services; do not cast unchecked JSON into domain types or add raw command calls to views.
 
-Raycast renders pushed routes outside the parent's React context. `SessionRoute` bridges them to the root-owned session using `SessionBridge` and `useSyncExternalStore`. They share the runtime, selected output, mutation lock, and demo queues. Only the root owns disposal; do not create independent sessions for artist/album/queue routes.
+Raycast renders pushed routes outside the parent's React context. `SessionRoute` bridges them to the root-owned session using `SessionBridge` and `useSyncExternalStore`. They share the runtime, selected output, mutation lock, and demo queues. Only the root owns disposal; do not create independent sessions for artist/album/queue/now-playing routes.
 
 Search uses cancellable service cursors with identity deduplication and stale-response rejection. Empty-query All advances tracks and albums independently; successful sources remain usable when another fails. Collections cache full browse results and filter locally until refresh. Current state refreshes on launch, explicit Refresh, and successful mutations; there is no event subscription or periodic polling yet.
 
@@ -121,11 +129,11 @@ Media identities include provider, item ID, and canonical URI. Optional related 
 
 ### Authoritative references
 
-- Raycast: [manifest](https://developers.raycast.com/information/manifest), [List](https://developers.raycast.com/api-reference/user-interface/list), [Grid](https://developers.raycast.com/api-reference/user-interface/grid), [actions](https://developers.raycast.com/api-reference/user-interface/action), [action panel](https://developers.raycast.com/api-reference/user-interface/action-panel), [keyboard](https://developers.raycast.com/api-reference/keyboard), [Store preparation](https://developers.raycast.com/basics/prepare-an-extension-for-store).
+- Raycast: [manifest](https://developers.raycast.com/information/manifest), [List](https://developers.raycast.com/api-reference/user-interface/list), [Grid](https://developers.raycast.com/api-reference/user-interface/grid), [actions](https://developers.raycast.com/api-reference/user-interface/action), [action panel](https://developers.raycast.com/api-reference/user-interface/action-panel), [keyboard](https://developers.raycast.com/api-reference/keyboard), [Form](https://developers.raycast.com/api-reference/user-interface/form), [preferences](https://developers.raycast.com/api-reference/preferences), [storage](https://developers.raycast.com/api-reference/storage), [Store preparation](https://developers.raycast.com/basics/prepare-an-extension-for-store).
 - The pinned Raycast API is **2.2.0**. Use installed declarations when checking the current implementation; native UI is List/Grid/Detail, not arbitrary HTML.
 - Music Assistant [2.10.2 player controller](https://github.com/music-assistant/server/blob/2.10.2/music_assistant/controllers/players/controller.py) verifies membership feature gates, expanded compatibility IDs, and group redirection.
 - Fixture source snapshots: [frontend API client `4864bc4`](https://github.com/music-assistant/frontend/blob/4864bc46559f6eb29936fc8ae963f693dfc6932b/src/plugins/api/index.ts), [server HTTP controller `52d52ee`](https://github.com/music-assistant/server/blob/52d52ee8d6bff777b7502047e4dafba91b8adbb6/music_assistant/controllers/webserver/controller.py), [models `290fb0b`](https://github.com/music-assistant/models/tree/290fb0beb611d83faeed7665099093662b343871). That server development snapshot uses schema 67; it is not the installed schema-65 server.
-- Design references: [Jellyamp PR #26549](https://github.com/raycast/extensions/pull/26549) for native dropdown navigation and [Music Assistant Controls](https://www.raycast.com/yoerivd/music-assistant-controls) for context. No implementation code or branding was copied; Audio Assistant's distinction is its cohesive four-command workflow.
+- Design references: [Jellyamp PR #26549](https://github.com/raycast/extensions/pull/26549) for native dropdown navigation and [Music Assistant Controls](https://www.raycast.com/yoerivd/music-assistant-controls) for context. No implementation code or branding was copied; Audio Assistant's distinction is its cohesive Music workspace.
 
 WebSocket events are future work. A future client must handle initial server info, token authentication, correlated/partial results, pending-request rejection, cleanup, and reauthentication on reconnect before becoming authoritative for the UI.
 

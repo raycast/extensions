@@ -1,13 +1,22 @@
+import { KeyboardShortcutsAction } from "./shortcut-settings-view";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import type { Player } from "../domain/model";
 import { nextRepeat } from "../domain/policy";
 import { SessionRoute, useMusic } from "./session";
-import { shortcuts } from "./shortcuts";
+import { useShortcuts } from "./use-shortcuts";
 
 function ChoosePlayerView() {
   const { players, activeId, controller, run, busy } = useMusic();
   return (
     <List navigationTitle="Choose Active Player" isLoading={busy} searchBarPlaceholder="Search players…">
+      <List.EmptyView
+        title="No Players Found"
+        actions={
+          <ActionPanel>
+            <KeyboardShortcutsAction />
+          </ActionPanel>
+        }
+      />
       {players.map((player) => (
         <List.Item
           key={player.id}
@@ -22,6 +31,7 @@ function ChoosePlayerView() {
                 icon={Icon.Checkmark}
                 onAction={() => run(() => controller.select(player.id), `${player.name} selected`)}
               />
+              <KeyboardShortcutsAction />
             </ActionPanel>
           }
         />
@@ -32,6 +42,7 @@ function ChoosePlayerView() {
 
 /** Volume/mute target a highlighted player; transport/repeat/shuffle always target the saved active player. */
 export function PlayerActions({ highlighted }: { highlighted?: Player }) {
+  const shortcuts = useShortcuts();
   const { players, queues, activeId, controller, service, run, bridge } = useMusic();
   const active = players.find((p) => p.id === activeId);
   const target = highlighted ?? active;

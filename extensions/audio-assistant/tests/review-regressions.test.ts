@@ -294,4 +294,28 @@ test("custom 3-part shortcut preferences override defaults while protecting forb
     shortcutPlayPauseKey: "b",
   });
   assert.equal(asPlatform(nonModPart2.playPause).Windows.key, "enter");
+
+  // Custom Now Playing override (ctrl + shift + p)
+  const customNowPlaying = getShortcuts({
+    shortcutNowPlayingMod1: "ctrl",
+    shortcutNowPlayingMod2: "shift",
+    shortcutNowPlayingKey: "p",
+  });
+  assert.equal(asPlatform(customNowPlaying.nowPlaying).Windows.key, "p");
+  assert.deepEqual(asPlatform(customNowPlaying.nowPlaying).Windows.modifiers, ["ctrl", "shift"]);
+  assert.deepEqual(asPlatform(customNowPlaying.nowPlaying).macOS.modifiers, ["cmd", "shift"]);
+
+  // Shortcut editing lives inside Music; the native configuration stays compact.
+  const { readFileSync } = await import("node:fs");
+  const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+  assert.equal(pkg.commands.length, 7);
+  assert.deepEqual(
+    pkg.preferences.map((p: { name: string }) => p.name),
+    ["demoMode", "serverUrl", "accessToken"],
+  );
+  assert.match(pkg.preferences.find((p: { name: string }) => p.name === "serverUrl").description, /Keyboard Shortcuts/);
+  assert.deepEqual(getShortcuts().keyboardShortcuts, {
+    macOS: { modifiers: ["cmd", "shift"], key: "." },
+    Windows: { modifiers: ["ctrl", "shift"], key: "." },
+  });
 });
