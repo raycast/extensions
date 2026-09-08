@@ -16,16 +16,16 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "^22.17.2",
-    "@types/react": "^19.1.10",
-    "eslint": "^9.39.5",
+    "@types/node": "^26.5.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.10.0",
     "prettier": "^3.9.6",
-    "typescript": "^5.9.2"
+    "typescript": "^7.0.2"
   },
   "icon": "icon.png",
   "commands": [
@@ -45,7 +45,8 @@
     }
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "preferences": [
     {
