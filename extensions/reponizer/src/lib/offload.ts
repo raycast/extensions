@@ -63,20 +63,15 @@ export async function readOffloadFile(dir: string): Promise<OffloadFileData> {
   return data;
 }
 
-export interface OffloadPreflight {
-  /** Local-only state that no re-clone could bring back. Non-empty means offload must not run. */
-  problems: string[];
-  /**
-   * Ignored paths the working copy would take to the Trash. Git never restores these, but they
-   * are deliberately outside version control, so the caller confirms them instead of blocking.
-   * Fully ignored directories are reported as a single entry.
-   */
-  ignored: string[];
-}
-
-/** `! <path>` entries from `git status --porcelain=v2 --ignored`. */
-function parseIgnoredPaths(statusOut: string): string[] {
-  return statusOut
+/**
+ * Ignored paths the working copy would take to the Trash. Git never restores these, but they are
+ * deliberately outside version control, so callers confirm them instead of blocking. Fully ignored
+ * directories are reported as a single entry. Local-only and cheap, so it can run before the
+ * confirmation without holding a safety check open across it.
+ */
+export async function findIgnoredPaths(fullPath: string): Promise<string[]> {
+  const out = await git(fullPath, ["status", "--porcelain=v2", "--ignored"]);
+  return out
     .split("\n")
     .filter((line) => line.startsWith("! "))
     .map((line) => line.slice(2))
@@ -113,17 +108,18 @@ async function findUnpushedTags(fullPath: string, localTags: string[]): Promise<
 }
 
 /**
- * Everything the repo holds that a fresh clone of origin would not reproduce: blocking problems
- * plus the ignored files the caller has to confirm. Empty problems = safe to offload.
+ * Every reason the repo holds state a fresh clone of origin would not reproduce. Empty = safe to
+ * offload. Deliberately not cached: it must run immediately before the working copy is trashed,
+ * with no user interaction in between, or state created in the meantime would be lost.
  */
-export async function checkOffloadReady(repo: Repo): Promise<OffloadPreflight> {
+async function findUnsyncedState(repo: Repo): Promise<string[]> {
   const problems: string[] = [];
 
   // Refresh remote-tracking refs first so ahead/upstream checks are trustworthy.
   await git(repo.fullPath, ["fetch", "origin", "--prune"], { timeoutMs: 60_000 });
 
   const [statusOut, stashOut, branchesOut, tagsOut] = await Promise.all([
-    git(repo.fullPath, ["status", "--porcelain=v2", "--branch", "--ignored"]),
+    git(repo.fullPath, ["status", "--porcelain=v2", "--branch"]),
     git(repo.fullPath, ["stash", "list", "--format=%gd"]),
     git(repo.fullPath, [
       "for-each-ref",
@@ -165,19 +161,19 @@ export async function checkOffloadReady(repo: Repo): Promise<OffloadPreflight> {
     if (localOnly > 0) problems.push(`${pluralize(localOnly, "commit")} not reachable from any remote`);
   }
 
-  return { problems, ignored: parseIgnoredPaths(statusOut) };
+  return problems;
 }
 
 /**
  * Remove the local copy of an in-sync repo: the working copy is moved aside,
  * replaced by a folder containing only the offload placeholder file, and then trashed.
- * Throws OffloadBlockedError when any local-only state would be lost. Pass the `preflight`
- * already shown to the user to avoid running the (networked) checks twice.
+ * Throws OffloadBlockedError when any local-only state would be lost. The check runs here rather
+ * than being passed in, so a confirmation the caller showed first cannot leave it stale.
  */
-export async function offloadRepo(repo: Repo, preflight?: OffloadPreflight): Promise<string | undefined> {
+export async function offloadRepo(repo: Repo): Promise<string | undefined> {
   if (!repo.origin) throw new Error("Repository has no “origin” remote — nothing to re-download it from later.");
 
-  const { problems } = preflight ?? (await checkOffloadReady(repo));
+  const problems = await findUnsyncedState(repo);
   if (problems.length > 0) throw new OffloadBlockedError(problems);
 
   const data: OffloadFileData = {

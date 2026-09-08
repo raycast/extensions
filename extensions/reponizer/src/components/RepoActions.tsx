@@ -17,7 +17,7 @@ import {
 import type { RepoIndexController } from "../hooks/useRepoIndex";
 import { getConfig } from "../lib/config";
 import { git } from "../lib/git";
-import { checkOffloadReady, offloadRepo, restoreOffloaded } from "../lib/offload";
+import { OffloadBlockedError, findIgnoredPaths, offloadRepo, restoreOffloaded } from "../lib/offload";
 import {
   OpResult,
   failureReport,
@@ -310,15 +310,23 @@ function StorageActions({ entry, ctl }: ActionContext) {
     });
     if (!confirmed) return;
     await withToast(`Offloading ${entry.name}…`, async (toast) => {
-      toast.message = "Verifying everything is pushed…";
-      const preflight = await checkOffloadReady(entry);
-      if (preflight.problems.length > 0) throw new Error(preflight.problems.join(" · "));
-      if (preflight.ignored.length > 0 && !(await confirmIgnoredLoss(preflight.ignored))) {
+      // Ignored files are outside git on purpose, so losing them is the user's call. Ask first and
+      // let offloadRepo run the safety check afterwards: a check taken before this dialog would be
+      // stale by the time it closes, and anything committed or stashed meanwhile would be trashed.
+      toast.message = "Looking for ignored files…";
+      const ignored = await findIgnoredPaths(entry.fullPath);
+      if (ignored.length > 0 && !(await confirmIgnoredLoss(ignored))) {
         toast.hide();
         return;
       }
-      toast.message = "Moving the local copy to the Trash…";
-      const warning = await offloadRepo(entry, preflight);
+      toast.message = "Verifying everything is pushed…";
+      let warning: string | undefined;
+      try {
+        warning = await offloadRepo(entry);
+      } catch (error) {
+        if (error instanceof OffloadBlockedError) throw new Error(error.problems.join(" · "));
+        throw error;
+      }
       await ctl.reconcile(entry.fullPath);
       if (warning) return warning;
       return entry.sizeBytes !== undefined ? `Freed ${formatBytes(entry.sizeBytes)}` : "Local copy removed";
