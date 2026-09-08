@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Fix project selection resetting and timer failing to start] - {PR_MERGE_DATE}
+## [Fix project selection resetting and timer failing to start] - 2026-09-08
 
 - Fixed the project dropdown resetting to the first project on every selection in both "Start New Timer" and "Add Time Entry".
 - Fixed "Timer could not be started" caused by the selected project never reaching the form values.
