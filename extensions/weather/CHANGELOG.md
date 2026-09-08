@@ -1,6 +1,6 @@
 # Weather Changelog
 
-## [Feels Like in Menu Bar] - {PR_MERGE_DATE}
+## [Feels Like in Menu Bar] - 2026-09-08
 
 - Add menu bar preference to show the feels-like temperature instead of the actual temperature
 
