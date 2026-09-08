@@ -3,15 +3,18 @@
   "display": "Node 22",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "lib": ["es2020", "dom"],
+    "lib": ["ES2023", "dom"],
     "module": "commonjs",
-    "target": "es2020",
+    "target": "ES2022",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
+    "types": ["node", "react"]
   }
 }

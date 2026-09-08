@@ -1,9 +1,9 @@
 import usePullStore from "./usePullStore";
 import { useEffect, useState, useMemo } from "react";
 import { getLogin } from "../integration/getLogin";
-import { isActionUserInitiated } from "../util";
 import { PullRequestShort } from "../types";
 import { getPreferenceValues } from "@raycast/api";
+import { loadConfig } from "../attention/lib/config";
 
 const { owners } = getPreferenceValues();
 
@@ -19,8 +19,6 @@ const usePulls = () => {
         .map((user: string) => `user:${user.toString().trim()}`)
         .join(" ")
     : "";
-  const exitShortcut = () => console.debug("usePulls: exitShortcut");
-  const defaultFilters: string[] = ["is:open", "draft:false", "archived:false", userFilters];
 
   const openPulls = useMemo(
     () =>
@@ -35,7 +33,16 @@ const usePulls = () => {
     Promise.resolve()
       .then(() => console.debug("runPullIteration >>>>>>>>>"))
       .then(() => setIsRemotePullsLoading(true))
-      .then(() => fetchPulls(defaultFilters))
+      .then(() => loadConfig())
+      .then(config => {
+        const orgFilters = config.activeOrgs.map(org => `org:${org}`);
+        return fetchPulls([
+          "is:open",
+          "draft:false",
+          "archived:false",
+          ...(orgFilters.length > 0 ? orgFilters : [userFilters]),
+        ]);
+      })
       .then((pulls: PullRequestShort[]) => updatePulls(pulls))
       .then(() => console.debug("<<<<<<<<< runPullIteration"))
       .finally(() => setIsRemotePullsLoading(false));
@@ -49,7 +56,7 @@ const usePulls = () => {
     Promise.resolve()
       .then(() => console.debug("usePulls: start"))
       .then(() => getLogin().then(setLogin))
-      .then(() => (isActionUserInitiated() ? exitShortcut() : runPullIteration()))
+      .then(() => runPullIteration())
       .catch(console.error)
       .finally(() => console.debug("usePulls: end"));
   }, [isPullStoreLoading]);

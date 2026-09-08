@@ -1,3 +1,10 @@
+# Reply tracking and optional CLI authentication - {PR_MERGE_DATE}
+
+- Preserve the original GitHub icon, search, review-status menu, and PAT support.
+- Add optional GitHub CLI authentication across all commands.
+- Add conversation reply tracking, ageing, filters, an optional attention menu, and an activity inbox.
+- Keep scheduled tracking and desktop notifications off by default.
+
 # Snake Changelog
 
 ## [Maintenance] - 2026-06-23
@@ -25,5 +32,5 @@
 ## [Update] - 2022-09-12
 
 - Menubar; item now hides PR immediately after clicking on it
-- Menubar; Added hotkeys to navigate through items  (⌘+1-9);
+- Menubar; Added hotkeys to navigate through items (⌘+1-9);
 - Menubar; Added a force-refresh option.

@@ -1,10 +1,16 @@
 import { GraphQLClient } from "graphql-request";
-import { getPreferenceValues } from "@raycast/api";
+import { token } from "../attention/lib/gh-cli";
+import { host } from "../attention/lib/preferences";
 
-const graphQLClient = new GraphQLClient("https://api.github.com/graphql", {
-  headers: {
-    Authorization: `token ${getPreferenceValues().token}`,
+const currentHost = host();
+const graphQLClient = new GraphQLClient(
+  currentHost ? `https://${currentHost}/api/graphql` : "https://api.github.com/graphql",
+  {
+    fetch: async (input, init) => {
+      const headers = new Headers(init?.headers);
+      headers.set("Authorization", `bearer ${await token(host())}`);
+      return fetch(input, { ...init, headers });
+    },
   },
-});
-
+);
 export default graphQLClient;
