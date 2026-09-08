@@ -1,5 +1,7 @@
 # Obsidian Changelog
 
+## [Added contributor] - 2026-09-07
+
 ## [Fix Misleading Required Plugin Message] - 2026-09-06
 
 - Name the core plugin a command actually needs instead of always naming Daily Notes, so Open Workspace now asks for Workspaces

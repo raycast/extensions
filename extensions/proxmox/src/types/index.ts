@@ -2,6 +2,24 @@ import type { useFetch } from "@raycast/utils";
 
 export type FetchOptions<T> = Parameters<typeof useFetch<T>>[1];
 
+export type PveServer = {
+  id: string;
+  name: string;
+  url: string;
+  tokenId: string;
+  tokenSecret: string;
+};
+
+/** An entity tagged with the server it was fetched from */
+export type WithServer<T> = T & { server: PveServer };
+
+/** The outcome of fetching one resource from one server */
+export type PveServerResult<T> = {
+  server: PveServer;
+  data?: T;
+  error?: string;
+};
+
 export const enum PveVmStatus {
   running = "running",
   stopped = "stopped",
@@ -108,7 +126,7 @@ export type VmAction = {
     doing: string;
     ended: string;
   };
-  func: (vm: PveVm) => Promise<unknown>;
+  func: (vm: WithServer<PveVm>) => Promise<unknown>;
   needConfirm?: boolean;
 };
 

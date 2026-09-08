@@ -1,5 +1,7 @@
 # Browser Bookmarks Changelog
 
+## [Added contributor] - 2026-09-07
+
 ## [Updates] - 2026-09-06
 
 - Memoise the Chromium bookmark and folder lists so typing in the search bar no longer rewalks the bookmark tree for every browser

@@ -1,5 +1,15 @@
 # Proxmox Changelog
 
+## [Multiple Servers] - 2026-09-07
+
+- Added support for multiple Proxmox servers ([#27260](https://github.com/raycast/extensions/issues/27260))
+- Added a `Manage Servers` command to add, edit or remove servers
+- The VM and storage lists now show the resources of all configured servers, grouped per server
+- An unreachable server no longer hides the results of the other servers
+- The server configured in the extension preferences keeps working as before
+- VM actions now check the HTTP status of the response, failed actions no longer show a success toast
+- Added mock data for the storage list, used for development and store screenshots
+
 ## [Updates] - 2025-12-12
 
 - Cleanup codebase, refactored almost all code to separate files

@@ -1,5 +1,11 @@
 # Clockify Changelog
 
+## [Fix project selection resetting and timer failing to start] - 2026-09-08
+
+- Fixed the project dropdown resetting to the first project on every selection in both "Start New Timer" and "Add Time Entry".
+- Fixed "Timer could not be started" caused by the selected project never reaching the form values.
+- Fixed the resulting loop of task requests, which triggered Clockify rate limiting (HTTP 429).
+
 ## [Fix cached workspace data] - 2026-05-15
 
 - Fixed cached projects, tags, and tasks falling back incorrectly when Clockify returns no data.
