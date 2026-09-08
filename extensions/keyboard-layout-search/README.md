@@ -2,8 +2,6 @@
 
 Fix a Raycast search typed with the wrong keyboard layout, then open the intended application or continue with the corrected text.
 
-![Keyboard Layout Search](media/keyboard-layout-search.png)
-
 ## Features
 
 - Automatically detects Russian, Ukrainian, French AZERTY, German QWERTZ, and Greek input.
