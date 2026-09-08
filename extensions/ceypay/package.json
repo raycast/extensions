@@ -35,13 +35,6 @@
       "subtitle": "CeyPay",
       "description": "Browse CeyPay product and legal updates, newest first",
       "mode": "view"
-    },
-    {
-      "name": "socials",
-      "title": "Follow CeyPay",
-      "subtitle": "CeyPay",
-      "description": "Open CeyPay on Telegram, X, LinkedIn, GitHub, Instagram, Facebook, or TikTok",
-      "mode": "view"
     }
   ],
   "dependencies": {

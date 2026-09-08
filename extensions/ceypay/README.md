@@ -39,14 +39,23 @@ Raycast, or `⌘ ↵` to open it on the site.
 Product and legal updates as one row per entry, newest first, with its release date and tags. Press `↵` for the
 full entry including screenshots, or `⌘ ↵` to open its permalink on the docs site.
 
-### Follow CeyPay
-
-Every official CeyPay channel — Telegram, X, LinkedIn, GitHub, Instagram, Facebook, and TikTok — in one grid.
-
 ## Where the data comes from
 
 Docs and API search run entirely offline against `assets/index.json`, which ships inside the extension. Nothing
 is fetched while you type, so results are instant and search keeps working without a network connection.
+
+### How fresh the index is
+
+The index is a snapshot, not a live feed. It is regenerated from the docs repository as part of `npm run build`
+and shipped inside each extension release, so **new or renamed docs pages and API endpoints only show up in
+search after a new version of this extension is published** — they are not picked up automatically in between.
+Page *content* is always current, because opening a result fetches the page from `docs.ceypay.io` at read time;
+it is the searchable list of pages and endpoints that follows the release cycle. Blog posts and changelog
+entries are fetched live and are never affected by this.
+
+If a page you expect is missing, it most likely landed in the docs after the last release — please
+[open an issue](https://github.com/raycast/extensions/issues/new/choose) and a refreshed index will go out with
+the next version.
 
 Network requests happen only when you open something:
 
@@ -86,6 +95,18 @@ yet. A batch of 404s means the deployed docs are behind the docs repo — deploy
 npm install
 npm run dev
 ```
+
+## CeyPay links
+
+- Website — [ceypay.io](https://ceypay.io)
+- Docs — [docs.ceypay.io](https://docs.ceypay.io)
+- Telegram — [@CeyPayio](https://t.me/CeyPayio)
+- X — [@ceypayintern](https://x.com/ceypayintern)
+- LinkedIn — [CeyPay](https://www.linkedin.com/showcase/ceypay)
+- GitHub — [CeyPay-io](https://github.com/CeyPay-io)
+- Instagram — [@ceypay.io](https://www.instagram.com/ceypay.io)
+- Facebook — [ceypay.io](https://www.fb.com/ceypay.io)
+- TikTok — [@ceypay.io](https://www.tiktok.com/@ceypay.io)
 
 ## Contributing
 
