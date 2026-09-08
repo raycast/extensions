@@ -5,7 +5,7 @@ import { OFFLOAD_FILE } from "./scan";
 import { isClean } from "./status";
 import type { Protocol, Repo } from "./types";
 import { buildRemoteUrl, coerceCloneUrl, parseRemoteUrl, relativePathForUrl } from "./remotes";
-import { errorMessage, mapConcurrent } from "./util";
+import { errorMessage, isInsideRoot, mapConcurrent } from "./util";
 
 export interface OpResult {
   fullPath: string;
@@ -122,8 +122,7 @@ export async function cloneRepo(plan: ClonePlan): Promise<void> {
 /** Remove now-empty parent directories between `from` (exclusive) and `root` (exclusive). */
 export async function pruneEmptyParents(root: string, from: string): Promise<void> {
   let dir = path.dirname(from);
-  const resolvedRoot = path.resolve(root);
-  while (path.resolve(dir) !== resolvedRoot && path.resolve(dir).startsWith(resolvedRoot + path.sep)) {
+  while (isInsideRoot(root, dir)) {
     try {
       const names = (await fs.readdir(dir)).filter((n) => n !== ".DS_Store");
       if (names.length > 0) return;

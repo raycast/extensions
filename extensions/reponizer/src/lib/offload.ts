@@ -7,7 +7,7 @@ import { parseRemoteUrl } from "./remotes";
 import { OFFLOAD_FILE } from "./scan";
 import { parseStatus } from "./status";
 import type { OffloadedRepo, RemoteInfo, Repo } from "./types";
-import { pluralize } from "./util";
+import { errorMessage, pluralize } from "./util";
 
 export interface OffloadFileData {
   schema: "reponizer/offloaded";
@@ -42,32 +42,95 @@ export async function readOffloadFile(dir: string): Promise<OffloadFileData> {
     throw new Error(`origin is not a valid git URL: ${data.origin}`);
   }
   if (!Array.isArray(data.remotes)) data.remotes = [];
-  data.remotes = data.remotes.filter(
-    (remote) =>
-      typeof remote?.name === "string" &&
-      /^[A-Za-z0-9][\w.-]*$/.test(remote.name) &&
-      typeof remote?.fetchUrl === "string" &&
-      !remote.fetchUrl.startsWith("-") &&
-      parseRemoteUrl(remote.fetchUrl) !== undefined,
-  );
+  data.remotes = data.remotes
+    .filter(
+      (remote) =>
+        typeof remote?.name === "string" &&
+        /^[A-Za-z0-9][\w.-]*$/.test(remote.name) &&
+        typeof remote?.fetchUrl === "string" &&
+        !remote.fetchUrl.startsWith("-") &&
+        parseRemoteUrl(remote.fetchUrl) !== undefined,
+    )
+    // A push URL reaches git argv exactly like a fetch URL, so it has to clear the same bar.
+    // Only the push URL is dropped when it does not — the remote itself is still usable.
+    .map((remote) =>
+      typeof remote.pushUrl === "string" &&
+      !remote.pushUrl.startsWith("-") &&
+      parseRemoteUrl(remote.pushUrl) !== undefined
+        ? remote
+        : { ...remote, pushUrl: undefined },
+    );
   return data;
 }
 
-/** Every reason the repo contains state that only exists locally. Empty result = safe to offload. */
-async function findUnsyncedState(repo: Repo): Promise<string[]> {
+export interface OffloadPreflight {
+  /** Local-only state that no re-clone could bring back. Non-empty means offload must not run. */
+  problems: string[];
+  /**
+   * Ignored paths the working copy would take to the Trash. Git never restores these, but they
+   * are deliberately outside version control, so the caller confirms them instead of blocking.
+   * Fully ignored directories are reported as a single entry.
+   */
+  ignored: string[];
+}
+
+/** `! <path>` entries from `git status --porcelain=v2 --ignored`. */
+function parseIgnoredPaths(statusOut: string): string[] {
+  return statusOut
+    .split("\n")
+    .filter((line) => line.startsWith("! "))
+    .map((line) => line.slice(2))
+    .filter(Boolean);
+}
+
+/**
+ * Tags live only in `.git` unless they were pushed, so a re-clone brings back neither the tag
+ * nor any commit reachable only through it. Compared against origin by name.
+ */
+async function findUnpushedTags(fullPath: string, localTags: string[]): Promise<string[]> {
+  if (localTags.length === 0) return [];
+  let remoteOut: string;
+  try {
+    remoteOut = await git(fullPath, ["ls-remote", "--tags", "--refs", "origin"], { timeoutMs: 60_000 });
+  } catch {
+    // Fail closed: tags that cannot be verified are treated as unpushed rather than trashed.
+    return [`${pluralize(localTags.length, "tag")} could not be verified against origin`];
+  }
+  const onOrigin = new Set(
+    remoteOut
+      .split("\n")
+      .map((line) => line.split("\t")[1] ?? "")
+      .filter((ref) => ref.startsWith("refs/tags/"))
+      .map((ref) => ref.slice("refs/tags/".length)),
+  );
+  const missing = localTags.filter((tag) => !onOrigin.has(tag));
+  if (missing.length === 0) return [];
+  const sample = missing
+    .slice(0, 3)
+    .map((tag) => `“${tag}”`)
+    .join(", ");
+  return [`${pluralize(missing.length, "tag")} not on origin (${sample}${missing.length > 3 ? ", …" : ""})`];
+}
+
+/**
+ * Everything the repo holds that a fresh clone of origin would not reproduce: blocking problems
+ * plus the ignored files the caller has to confirm. Empty problems = safe to offload.
+ */
+export async function checkOffloadReady(repo: Repo): Promise<OffloadPreflight> {
   const problems: string[] = [];
 
   // Refresh remote-tracking refs first so ahead/upstream checks are trustworthy.
   await git(repo.fullPath, ["fetch", "origin", "--prune"], { timeoutMs: 60_000 });
 
-  const [statusOut, stashOut, branchesOut] = await Promise.all([
-    git(repo.fullPath, ["status", "--porcelain=v2", "--branch"]),
+  const [statusOut, stashOut, branchesOut, tagsOut] = await Promise.all([
+    git(repo.fullPath, ["status", "--porcelain=v2", "--branch", "--ignored"]),
     git(repo.fullPath, ["stash", "list", "--format=%gd"]),
     git(repo.fullPath, [
       "for-each-ref",
       "refs/heads",
       "--format=%(refname:short)%09%(upstream:short)%09%(upstream:track)",
     ]),
+    git(repo.fullPath, ["for-each-ref", "refs/tags", "--format=%(refname:short)"]),
   ]);
 
   const stashes = stashOut ? stashOut.split("\n").filter(Boolean).length : 0;
@@ -84,18 +147,37 @@ async function findUnsyncedState(repo: Repo): Promise<string[]> {
     else if (track?.includes("ahead")) problems.push(`branch “${branch}” is ahead of ${upstream}`);
   }
 
-  return problems;
+  problems.push(...(await findUnpushedTags(repo.fullPath, tagsOut.split("\n").filter(Boolean))));
+
+  // Catch-all for history the per-branch checks cannot see — most notably a detached HEAD.
+  // Only reported when nothing above already explains it, and skipped on a repo without commits.
+  if (problems.length === 0) {
+    const out = await git(repo.fullPath, [
+      "rev-list",
+      "--count",
+      "HEAD",
+      "--branches",
+      "--tags",
+      "--not",
+      "--remotes",
+    ]).catch(() => "0");
+    const localOnly = Number.parseInt(out, 10) || 0;
+    if (localOnly > 0) problems.push(`${pluralize(localOnly, "commit")} not reachable from any remote`);
+  }
+
+  return { problems, ignored: parseIgnoredPaths(statusOut) };
 }
 
 /**
  * Remove the local copy of an in-sync repo: the working copy is moved aside,
  * replaced by a folder containing only the offload placeholder file, and then trashed.
- * Throws OffloadBlockedError when any local-only state would be lost.
+ * Throws OffloadBlockedError when any local-only state would be lost. Pass the `preflight`
+ * already shown to the user to avoid running the (networked) checks twice.
  */
-export async function offloadRepo(repo: Repo): Promise<string | undefined> {
+export async function offloadRepo(repo: Repo, preflight?: OffloadPreflight): Promise<string | undefined> {
   if (!repo.origin) throw new Error("Repository has no “origin” remote — nothing to re-download it from later.");
 
-  const problems = await findUnsyncedState(repo);
+  const { problems } = preflight ?? (await checkOffloadReady(repo));
   if (problems.length > 0) throw new OffloadBlockedError(problems);
 
   const data: OffloadFileData = {
@@ -164,8 +246,11 @@ export async function writeOffloadPlaceholder(
   await fs.writeFile(path.join(fullPath, OFFLOAD_FILE), JSON.stringify(data, null, 2) + "\n");
 }
 
-/** Re-download an offloaded repo by cloning its recorded origin back into place. */
-export async function restoreOffloaded(entry: OffloadedRepo): Promise<void> {
+/**
+ * Re-download an offloaded repo by cloning its recorded origin back into place.
+ * Returns a warning when the clone worked but some remotes could not be recreated.
+ */
+export async function restoreOffloaded(entry: OffloadedRepo): Promise<string | undefined> {
   const data = await readOffloadFile(entry.fullPath);
 
   const names = (await fs.readdir(entry.fullPath)).filter((n) => n !== OFFLOAD_FILE && n !== ".DS_Store");
@@ -188,10 +273,27 @@ export async function restoreOffloaded(entry: OffloadedRepo): Promise<void> {
     throw error;
   }
 
+  // `git clone` and `git remote add` point both directions at the same URL, so a recorded push
+  // URL that differs from the fetch URL has to be reapplied — otherwise later pushes silently
+  // target the fetch destination instead of the one the repo was configured with.
+  const failures: string[] = [];
   for (const remote of data.remotes) {
-    if (remote.name === "origin") continue;
-    await git(entry.fullPath, ["remote", "add", remote.name, remote.fetchUrl]).catch(() => undefined);
+    try {
+      if (remote.name !== "origin") {
+        await git(entry.fullPath, ["remote", "add", remote.name, remote.fetchUrl]);
+      }
+      if (remote.pushUrl && remote.pushUrl !== remote.fetchUrl) {
+        await git(entry.fullPath, ["remote", "set-url", "--push", remote.name, remote.pushUrl]);
+      }
+    } catch (error) {
+      failures.push(`${remote.name} (${errorMessage(error)})`);
+    }
   }
+  if (failures.length > 0) {
+    // The clone itself succeeded — report the gap rather than discarding a working checkout.
+    return `Restored, but these remotes need to be re-added by hand: ${failures.join(", ")}`;
+  }
+  return undefined;
 }
 
 /** Verify the extra remotes recorded during offload are back; used by callers for reporting only. */

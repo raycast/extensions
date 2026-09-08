@@ -18,20 +18,29 @@ export interface ExportFile {
 
 const SNAPSHOT_KEY = "reponizer.snapshot";
 
+/**
+ * A lone origin round-trips through `origin` alone; extra remotes and push URLs that differ
+ * from the fetch URL would otherwise be lost on import, so those need the full list.
+ */
+function remotesWorthExporting(remotes: RemoteInfo[]): RemoteInfo[] | undefined {
+  const meaningful = remotes.length > 1 || remotes.some((r) => r.pushUrl && r.pushUrl !== r.fetchUrl);
+  return meaningful ? remotes : undefined;
+}
+
 export function buildExport(index: RepoIndex): ExportFile {
   const repos: ExportedRepo[] = index.entries.map((entry) => {
     if (entry.kind === "offloaded") {
       return {
         path: entry.relativePath,
         origin: entry.originUrl || undefined,
-        remotes: entry.remotes.length > 1 ? entry.remotes : undefined,
+        remotes: remotesWorthExporting(entry.remotes),
         offloaded: true,
       };
     }
     return {
       path: entry.relativePath,
       origin: entry.origin?.fetchUrl,
-      remotes: entry.remotes.length > 1 ? entry.remotes : undefined,
+      remotes: remotesWorthExporting(entry.remotes),
     };
   });
   return {
@@ -41,6 +50,20 @@ export function buildExport(index: RepoIndex): ExportFile {
     root: index.root,
     repos,
   };
+}
+
+/**
+ * Export entries are written on another machine (or restored from a synced snapshot), so their
+ * paths are untrusted input that ends up in `path.join(root, path)`. Only a plain relative path
+ * may survive: absolute paths, `..` traversal, backslashes, and NUL bytes are rejected outright.
+ * Returns the cleaned POSIX path, or undefined when the entry must not be used.
+ */
+export function safeRelativePath(raw: string): string | undefined {
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.startsWith("/") || /[\0\\]/.test(trimmed)) return undefined;
+  const segments = trimmed.split("/").filter((segment) => segment !== "" && segment !== ".");
+  if (segments.length === 0 || segments.includes("..")) return undefined;
+  return segments.join("/");
 }
 
 export function parseExportFile(json: string): ExportFile {
@@ -58,6 +81,11 @@ export function parseExportFile(json: string): ExportFile {
     if (typeof repo.path !== "string" || !repo.path) {
       throw new Error("Export contains an entry without a path.");
     }
+    const safe = safeRelativePath(repo.path);
+    if (!safe) {
+      throw new Error(`Export contains an entry whose path escapes the repositories root: ${repo.path}`);
+    }
+    repo.path = safe;
   }
   return file as ExportFile;
 }

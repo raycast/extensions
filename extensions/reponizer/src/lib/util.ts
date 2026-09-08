@@ -1,3 +1,15 @@
+import path from "node:path";
+
+/**
+ * True when `target` resolves to a location strictly below `root`. Used to keep paths that
+ * come from outside the extension (export files, synced snapshots) from escaping the root.
+ */
+export function isInsideRoot(root: string, target: string): boolean {
+  const resolvedRoot = path.resolve(root);
+  const resolvedTarget = path.resolve(target);
+  return resolvedTarget !== resolvedRoot && resolvedTarget.startsWith(resolvedRoot + path.sep);
+}
+
 /** Run `fn` over all items with at most `limit` concurrent executions, preserving order. */
 export async function mapConcurrent<T, R>(
   items: readonly T[],

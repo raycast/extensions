@@ -45,7 +45,7 @@ Reponizer works out of the box if your repositories live in `~/repos` in a `host
 
 - Press `⌘ I` on any repository to toggle a detail panel with remotes, sync state, and sizes.
 - The list opens instantly from cache and rescans in the background; `⌘ R` forces a rescan, `⌥⌘ R` also recomputes folder sizes.
-- **Offloading**: Reponizer refuses to offload a repo with unpushed branches, uncommitted changes, untracked files, or stashes — nothing is ever lost. The freed folder keeps a small `reponizer-offloaded.json` placeholder so you (and the import command) know what belongs there.
+- **Offloading**: Reponizer refuses to offload a repo with unpushed branches, unpushed tags, uncommitted changes, untracked files, or stashes — nothing is ever lost. Files your `.gitignore` covers cannot come back from the remote either, so they are listed for you to confirm before anything is trashed. The freed folder keeps a small `reponizer-offloaded.json` placeholder so you (and the import command) know what belongs there.
 - **Importing on a fresh machine**: choose *Create Offloaded Placeholders* to mirror the whole structure without downloading anything, then restore repos on demand.
 
 ## Troubleshooting

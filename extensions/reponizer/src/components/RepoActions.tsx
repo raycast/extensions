@@ -17,7 +17,7 @@ import {
 import type { RepoIndexController } from "../hooks/useRepoIndex";
 import { getConfig } from "../lib/config";
 import { git } from "../lib/git";
-import { OffloadBlockedError, offloadRepo, restoreOffloaded } from "../lib/offload";
+import { checkOffloadReady, offloadRepo, restoreOffloaded } from "../lib/offload";
 import {
   OpResult,
   failureReport,
@@ -31,7 +31,7 @@ import {
 import { convertProtocol, expectedOriginFor, protocolOf, relativePathForUrl, webUrlFor } from "../lib/remotes";
 import { openInTerminal } from "../lib/terminal";
 import type { OffloadedRepo, Protocol, Repo, RepoEntry } from "../lib/types";
-import { errorMessage, formatBytes } from "../lib/util";
+import { errorMessage, formatBytes, pluralize } from "../lib/util";
 import { RemotesView } from "./RemotesView";
 
 interface ActionContext {
@@ -286,28 +286,39 @@ function RemoteActions({ entry, ctl }: ActionContext) {
   );
 }
 
+/** Ignored files never reach the remote, so a later restore cannot bring them back — say so. */
+function confirmIgnoredLoss(ignored: string[]): Promise<boolean> {
+  const sample = ignored.slice(0, 5).join(", ");
+  return confirmAlert({
+    title: "Trash Ignored Files?",
+    message:
+      `${pluralize(ignored.length, "ignored path")} (${sample}${ignored.length > 5 ? ", …" : ""}) ` +
+      "will be trashed with the working copy. They are not in git, so restoring from origin cannot bring them back.",
+    primaryAction: { title: "Offload Anyway", style: Alert.ActionStyle.Destructive },
+  });
+}
+
 function StorageActions({ entry, ctl }: ActionContext) {
   const offload = async () => {
     if (entry.kind !== "repo") return;
     const confirmed = await confirmAlert({
       title: "Offload Local Copy",
       message:
-        "Reponizer verifies that every branch, change, and stash is pushed, then moves the working copy to the Trash. " +
+        "Reponizer verifies that every branch, tag, change, and stash is pushed, then moves the working copy to the Trash. " +
         "A placeholder with the origin URL stays behind so the repo can be re-downloaded anytime.",
       primaryAction: { title: "Offload", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
     await withToast(`Offloading ${entry.name}…`, async (toast) => {
       toast.message = "Verifying everything is pushed…";
-      let warning: string | undefined;
-      try {
-        warning = await offloadRepo(entry);
-      } catch (error) {
-        if (error instanceof OffloadBlockedError) {
-          throw new Error(error.problems.join(" · "));
-        }
-        throw error;
+      const preflight = await checkOffloadReady(entry);
+      if (preflight.problems.length > 0) throw new Error(preflight.problems.join(" · "));
+      if (preflight.ignored.length > 0 && !(await confirmIgnoredLoss(preflight.ignored))) {
+        toast.hide();
+        return;
       }
+      toast.message = "Moving the local copy to the Trash…";
+      const warning = await offloadRepo(entry, preflight);
       await ctl.reconcile(entry.fullPath);
       if (warning) return warning;
       return entry.sizeBytes !== undefined ? `Freed ${formatBytes(entry.sizeBytes)}` : "Local copy removed";
@@ -317,9 +328,9 @@ function StorageActions({ entry, ctl }: ActionContext) {
   const restore = async (offloaded: OffloadedRepo) => {
     await withToast(`Restoring ${offloaded.name}…`, async (toast) => {
       toast.message = "Cloning from origin…";
-      await restoreOffloaded(offloaded);
+      const warning = await restoreOffloaded(offloaded);
       await ctl.reconcile(offloaded.fullPath);
-      return "Local copy restored";
+      return warning ?? "Local copy restored";
     });
   };
 

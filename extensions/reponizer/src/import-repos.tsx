@@ -18,7 +18,7 @@ import { getConfig } from "./lib/config";
 import { ExportFile, loadSnapshot, parseExportFile, planImport } from "./lib/exportImport";
 import { writeOffloadPlaceholder } from "./lib/offload";
 import { cloneRepo, planClone } from "./lib/ops";
-import { errorMessage, mapConcurrent, pluralize } from "./lib/util";
+import { errorMessage, isInsideRoot, mapConcurrent, pluralize } from "./lib/util";
 
 type Mode = "clone" | "placeholders";
 
@@ -71,13 +71,19 @@ export default function Command() {
       const failures: string[] = [];
       await mapConcurrent(plan.missing, mode === "clone" ? 2 : 8, async (repo) => {
         try {
+          // parseExportFile already rejects traversal, but the destination is only assembled
+          // here — re-check containment right before anything touches the disk.
+          const destination = path.join(config.root, repo.path);
+          if (!isInsideRoot(config.root, destination)) {
+            throw new Error("path resolves outside the repositories root");
+          }
           if (mode === "placeholders") {
-            await writeOffloadPlaceholder(path.join(config.root, repo.path), repo.path, repo.origin!, repo.remotes);
+            await writeOffloadPlaceholder(destination, repo.path, repo.origin!, repo.remotes);
           } else {
             const clonePlan = planClone(config.root, repo.origin!, config.defaultProtocol);
             if (!clonePlan) throw new Error(`unparseable origin URL: ${repo.origin}`);
             // Preserve the exported location even if it differs from what the URL implies.
-            await cloneRepo({ ...clonePlan, destination: path.join(config.root, repo.path), relativePath: repo.path });
+            await cloneRepo({ ...clonePlan, destination, relativePath: repo.path });
           }
         } catch (error) {
           failures.push(`${repo.path}: ${errorMessage(error)}`);
