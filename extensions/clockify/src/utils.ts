@@ -65,13 +65,20 @@ export async function fetcher(
  *
  * Single implementation on purpose: both useConfig and resolveConfig need this chain, and two
  * copies would be free to drift apart.
+ *
+ * Returns the error separately so callers can tell "this account has no workspace" apart from
+ * "the request failed"; the two need different messages.
  */
-export async function resolveWorkspaceId(user: User | undefined): Promise<string | undefined> {
+export async function resolveWorkspaceId(
+  user: User | undefined,
+): Promise<{ workspaceId?: string; error?: string | Error }> {
   const fromUser = user?.defaultWorkspace || user?.activeWorkspace;
-  if (fromUser) return fromUser;
+  if (fromUser) return { workspaceId: fromUser };
 
-  const { data } = await fetcher(`/workspaces`);
-  return (data as Workspace[] | undefined)?.[0]?.id;
+  const { data, error } = await fetcher(`/workspaces`);
+  if (error) return { error };
+
+  return { workspaceId: (data as Workspace[] | undefined)?.[0]?.id };
 }
 
 /**
@@ -98,7 +105,7 @@ export async function resolveConfig(): Promise<{ workspaceId?: string; userId?: 
   const { data } = await fetcher(`/user`);
   const user = data as User | undefined;
 
-  const workspaceId = storedWorkspaceId || (await resolveWorkspaceId(user));
+  const workspaceId = storedWorkspaceId || (await resolveWorkspaceId(user)).workspaceId;
   const userId = storedUserId || user?.id;
 
   if (workspaceId) await LocalStorage.setItem("workspaceId", workspaceId);
