@@ -16,7 +16,7 @@ export const isSafeSlug = (slug: unknown): slug is string => typeof slug === "st
 const isSafeAssetPath = (path: unknown): path is string => typeof path === "string" && SAFE_ASSET_PATH.test(path);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
-  value !== null && !Array.isArray(value) && value.constructor === Object;
+  typeof value === "object" && value !== null && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype;
 
 const isCatalogGif = (value: unknown): value is CatalogGif => {
   if (!isRecord(value)) {
