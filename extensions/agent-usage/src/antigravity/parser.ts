@@ -273,7 +273,10 @@ function parseError(message: string): ParseResult {
  * Parse Cloud Code / local RetrieveUserQuotaSummary payloads.
  * Accepts `{ groups }`, `{ response: { groups } }`, or `{ summary: { groups } }`.
  */
-export function parseAntigravityQuotaSummaryResponse(raw: unknown): ParseResult {
+export function parseAntigravityQuotaSummaryResponse(
+  raw: unknown,
+  account?: { email?: string | null; plan?: string | null },
+): ParseResult {
   const parsedQuotaGroups = parseQuotaGroups(raw);
   if (parsedQuotaGroups.length === 0) {
     return parseError("No quota groups available");
@@ -281,8 +284,8 @@ export function parseAntigravityQuotaSummaryResponse(raw: unknown): ParseResult 
 
   return {
     usage: {
-      accountEmail: null,
-      accountPlan: null,
+      accountEmail: toNullableString(account?.email) ?? null,
+      accountPlan: toNullableString(account?.plan) ?? null,
       models: [],
       primaryModel: null,
       secondaryModel: null,
@@ -291,6 +294,20 @@ export function parseAntigravityQuotaSummaryResponse(raw: unknown): ParseResult 
     },
     error: null,
   };
+}
+
+/** Prefer paid subscription name, then current tier, from loadCodeAssist. */
+export function extractAntigravityPlanFromLoadCodeAssist(raw: unknown): string | null {
+  const body = asRecord(raw);
+  if (!body) return null;
+
+  const paidTier = asRecord(body.paidTier);
+  const currentTier = asRecord(body.currentTier);
+  return toNullableString(paidTier?.name) ?? toNullableString(currentTier?.name);
+}
+
+export function extractEmailFromUserInfo(raw: unknown): string | null {
+  return toNullableString(asRecord(raw)?.email);
 }
 
 function parseQuotaGroups(raw: unknown): AntigravityQuotaGroup[] {

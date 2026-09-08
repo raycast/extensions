@@ -306,7 +306,10 @@ test("parseAntigravityQuotaSummaryResponse accepts Cloud Code top-level groups",
     description: "Within each group, models share a weekly limit and a 5-hour limit.",
   };
 
-  const result = parseAntigravityQuotaSummaryResponse(cloudCodeResponse);
+  const result = parseAntigravityQuotaSummaryResponse(cloudCodeResponse, {
+    email: "user@example.com",
+    plan: "Google AI Pro",
+  });
 
   assert.equal(result.error, null);
   assert.equal(result.usage?.quotaGroups?.length, 2);
@@ -314,6 +317,21 @@ test("parseAntigravityQuotaSummaryResponse accepts Cloud Code top-level groups",
   assert.equal(result.usage?.quotaGroups?.[0].buckets[0].percentLeft, 88);
   assert.equal(result.usage?.quotaGroups?.[0].buckets[1].percentLeft, 100);
   assert.equal(result.usage?.primaryModel, null);
+  assert.equal(result.usage?.accountEmail, "user@example.com");
+  assert.equal(result.usage?.accountPlan, "Google AI Pro");
+});
+
+test("extractAntigravityPlanFromLoadCodeAssist prefers paidTier name", async () => {
+  const { extractAntigravityPlanFromLoadCodeAssist } = await import("./parser.ts");
+
+  assert.equal(
+    extractAntigravityPlanFromLoadCodeAssist({
+      currentTier: { name: "Antigravity" },
+      paidTier: { name: "Google AI Pro" },
+    }),
+    "Google AI Pro",
+  );
+  assert.equal(extractAntigravityPlanFromLoadCodeAssist({ currentTier: { name: "Antigravity" } }), "Antigravity");
 });
 
 test("parseAntigravityUserStatusResponse ignores quota groups without usable buckets", async () => {
