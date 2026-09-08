@@ -80,6 +80,9 @@ const formatWasteTonerBottleUsed = (
   currentVb: snmp.Varbind | undefined,
   maxVb: snmp.Varbind | undefined,
 ): string | null => {
+  const capacity = Number(getValueString(maxVb));
+  if (!Number.isFinite(capacity) || capacity <= 0) return null;
+
   const freePercentage = calculatePercentage(currentVb, maxVb);
   if (freePercentage == null) return null;
 
@@ -97,6 +100,24 @@ const getOids = (session: snmp.Session, oids: string[]): Promise<snmp.Varbind[]>
       resolve(varbinds || []);
     });
   });
+
+const openPrinterSession = async (host: string, community: string, pageCountOid: string) => {
+  let lastError: unknown;
+
+  // Probe before starting optional requests so they all use a supported version.
+  for (const version of [snmp.Version2c, snmp.Version1]) {
+    const session = snmp.createSession(host, community, { version, timeout: 5000, retries: 1 });
+    try {
+      const pageVarbinds = await getOids(session, [pageCountOid]);
+      return { session, pageVarbinds };
+    } catch (error) {
+      session.close();
+      lastError = error;
+    }
+  }
+
+  throw lastError;
+};
 
 const getOptionalOid = async (session: snmp.Session, oid: string): Promise<snmp.Varbind | undefined> => {
   try {
@@ -207,11 +228,7 @@ export async function fetchPrinterStats(
   community: string = "public",
   oidConfig: OidConfig = DEFAULT_OIDS,
 ): Promise<PrinterStats> {
-  // Keep the library's default SNMP v1 session: some printers only speak v1.
-  // Optional OIDs are already fetched individually (see getOptionalOid/
-  // getOptionalOids), so a single unsupported OID under v1 no longer aborts
-  // the whole PDU/request; only that value comes back as unavailable.
-  const session = snmp.createSession(host, community, { timeout: 5000, retries: 1 });
+  const { session, pageVarbinds } = await openPrinterSession(host, community, oidConfig.totalPagesOid);
   const optionalPageOids = [oidConfig.blackPagesOid, oidConfig.colorPagesOid].filter(Boolean);
   const generalOidsList = [
     oidConfig.modelNameOid,
@@ -228,8 +245,7 @@ export async function fetchPrinterStats(
   ];
 
   try {
-    const [pageVarbinds, optionalPageVarbinds, generalVarbinds, tonerLevels] = await Promise.all([
-      getOids(session, [oidConfig.totalPagesOid]),
+    const [optionalPageVarbinds, generalVarbinds, tonerLevels] = await Promise.all([
       getOptionalOids(session, optionalPageOids),
       getOptionalOids(session, generalOidsList),
       fetchTonerLevels(session, oidConfig).catch(() => ({
