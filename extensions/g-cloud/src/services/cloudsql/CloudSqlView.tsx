@@ -18,7 +18,7 @@ import { ApiErrorView } from "../../components/ApiErrorView";
 import { CloudShellAction } from "../../components/CloudShellAction";
 import { friendlyErrorMessage } from "../../utils/errorMessages";
 import { useStreamerMode } from "../../utils/useStreamerMode";
-import { maskIPIfEnabled, maskEmailIfEnabled } from "../../utils/maskSensitiveData";
+import { maskIPIfEnabled, maskEmailIfEnabled, maskSecretIfEnabled } from "../../utils/maskSensitiveData";
 
 const MAINTENANCE_DAYS = ["Any", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -677,15 +677,19 @@ function UsersView({ projectId, gcloudPath, instance }: InstanceSubViewProps) {
       ) : (
         users.map((user) => {
           const isIamUser = Boolean(user.iamStatus) || user.type?.startsWith("CLOUD_IAM");
+          // An IAM user's name is an email; a built-in user's is an opaque account name,
+          // which maskSecret hides without dressing it up as an address.
           const displayName = user.name.includes("@")
             ? maskEmailIfEnabled(user.name, isStreamerMode)
-            : maskIPIfEnabled(user.name, isStreamerMode);
+            : maskSecretIfEnabled(user.name, isStreamerMode);
+          // host is routinely an IP or CIDR, so it leaks just as readily as the name.
+          const displayHost = user.host ? maskIPIfEnabled(user.host, isStreamerMode) : undefined;
 
           return (
             <List.Item
               key={`${user.name}@${user.host || "%"}`}
               title={displayName}
-              subtitle={user.host ? `host: ${user.host}` : undefined}
+              subtitle={displayHost ? `host: ${displayHost}` : undefined}
               icon={{ source: isIamUser ? Icon.Key : Icon.Person, tintColor: isIamUser ? Color.Yellow : Color.Blue }}
               accessories={isIamUser ? [{ tag: { value: "IAM", color: Color.Yellow } }] : []}
               actions={
