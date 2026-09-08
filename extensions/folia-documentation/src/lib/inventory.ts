@@ -1,7 +1,8 @@
 import { environment } from "@raycast/api";
-import { createWriteStream } from "node:fs";
-import { mkdir, readFile, rename } from "node:fs/promises";
+import { createReadStream, createWriteStream } from "node:fs";
+import { mkdir, rename } from "node:fs/promises";
 import path from "node:path";
+import { createInterface } from "node:readline";
 import { CACHE_SCHEMA, docsBase, timeoutSignal } from "./constants";
 import { DocEntry, EntryKind, Inventory, SectionId } from "./types";
 
@@ -216,21 +217,51 @@ async function fetchText(base: string, file: string): Promise<string> {
   return response.text();
 }
 
+// The `.jsonl` token also stands in for a format version: the cache is now a
+// line-delimited file, so an old array-form `inventory-v1-<version>.json` left
+// by a previous build is simply ignored rather than mis-parsed, without
+// disturbing the guide/page/details caches that also key off CACHE_SCHEMA.
 function cachePath(version: string): string {
   return path.join(
     environment.supportPath,
-    `inventory-${CACHE_SCHEMA}-${version}.json`,
+    `inventory-${CACHE_SCHEMA}-${version}.jsonl`,
   );
 }
 
+interface CacheHeader {
+  version: string;
+  fetchedAt: number;
+}
+
+// The whole-file JSON.parse this replaces built a multi-megabyte source string
+// and the parser's own tree/scratch on top of it in one synchronous call —
+// the last big transient allocation left in the command and AI-tool path, and
+// on its own enough to exhaust Raycast's worker heap on the ~33,000-entry
+// index. A line-delimited file is read back one entry at a time: the header is
+// line one, every following line is one entry's JSON, so peak memory is the
+// finished array plus a single line, never a second copy of the whole thing.
 async function readCache(version: string): Promise<Inventory | null> {
+  const lines = createInterface({
+    input: createReadStream(cachePath(version), { encoding: "utf8" }),
+    crlfDelay: Infinity,
+  });
+
   try {
-    const cached = JSON.parse(
-      await readFile(cachePath(version), "utf8"),
-    ) as Inventory;
-    return cached.entries?.length ? cached : null;
+    let header: CacheHeader | null = null;
+    const entries: DocEntry[] = [];
+
+    for await (const line of lines) {
+      if (!line) continue;
+      if (!header) header = JSON.parse(line) as CacheHeader;
+      else entries.push(JSON.parse(line) as DocEntry);
+    }
+
+    if (!header || !entries.length) return null;
+    return { version: header.version, fetchedAt: header.fetchedAt, entries };
   } catch {
     return null;
+  } finally {
+    lines.close();
   }
 }
 
@@ -239,7 +270,8 @@ async function readCache(version: string): Promise<Inventory | null> {
 // single call, which is exactly the kind of allocation that can tip a tight
 // heap over the edge. Writing entry-by-entry keeps only one entry's JSON in
 // memory at a time; the temp-file rename keeps a crash mid-write from leaving
-// a truncated cache behind.
+// a truncated cache behind. The header goes on line one and each entry on its
+// own line so readCache can stream it back the same way.
 async function writeCache(inventory: Inventory): Promise<void> {
   await mkdir(environment.supportPath, { recursive: true });
   const file = cachePath(inventory.version);
@@ -250,13 +282,13 @@ async function writeCache(inventory: Inventory): Promise<void> {
     stream.on("error", reject);
     stream.on("finish", resolve);
 
-    stream.write(
-      `{"version":${JSON.stringify(inventory.version)},"fetchedAt":${inventory.fetchedAt},"entries":[`,
-    );
-    inventory.entries.forEach((entry, index) => {
-      stream.write((index > 0 ? "," : "") + JSON.stringify(entry));
-    });
-    stream.write("]}");
+    const header: CacheHeader = {
+      version: inventory.version,
+      fetchedAt: inventory.fetchedAt,
+    };
+    stream.write(JSON.stringify(header));
+    for (const entry of inventory.entries)
+      stream.write(`\n${JSON.stringify(entry)}`);
     stream.end();
   });
 
