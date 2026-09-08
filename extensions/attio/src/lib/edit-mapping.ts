@@ -58,21 +58,23 @@ export function toWireValue(a: Attribute, formValue: unknown): unknown[] {
       // Decorations must look like real currency tokens ("$", "\u20AC", "CA$",
       // "CHF", "EUR") \u2014 arbitrary letters would turn "12k" into 12 and
       // "1 million" into 1. Whitespace is legal only between a decoration and
-      // the number, never inside it ("1,2 34" must not repair to 1234). The
-      // exponent is capped at two digits so "1e-324" cannot underflow to a
-      // silent 0 (nothing costs more than e\u00B199).
+      // the number, never inside it ("1,2 34" must not repair to 1234).
       const WS = "[\\s\\u00A0\\u202F]*";
       const m = s.match(
         new RegExp(
           `^([+-]?)(?:(?:[A-Z]{1,3}\\p{Sc}|[A-Z]{3}|\\p{Sc})${WS})?` +
-            `([+-]?(?:\\d{1,3}(?:,\\d{3})+|\\d+|(?=\\.))(?:\\.\\d*)?(?:[eE][+-]?\\d{1,2})?)` +
+            `([+-]?(?:\\d{1,3}(?:,\\d{3})+|\\d+|(?=\\.))(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)` +
             `(?:${WS}(?:\\p{Sc}|[A-Z]{3}))?$`,
           "u",
         ),
       );
-      const n = m ? Number(m[1] + m[2].replace(/,/g, "")) : NaN;
+      const core = m ? m[2].replace(/,/g, "") : "";
+      const n = m ? Number(m[1] + core) : NaN;
+      // A nonzero mantissa that parses to 0 underflowed ("1e-324") \u2014 saving a
+      // silent 0 for it would corrupt the amount. A real "0"/"0.00" still saves.
+      const underflow = n === 0 && /[1-9]/.test(core.split(/[eE]/)[0]);
 
-      if (!Number.isFinite(n)) throw new Error(`${a.title} must be a number`);
+      if (!Number.isFinite(n) || underflow) throw new Error(`${a.title} must be a number`);
       return [n];
     }
     case "date": {

@@ -95,6 +95,10 @@ describe("initialFieldValue / toWireValue round-trip", () => {
     expect(() => toWireValue(a, "1e")).toThrow(/number/i);
     expect(() => toWireValue(a, "1eUSD")).toThrow(/number/i);
     expect(() => toWireValue(a, "1e-324")).toThrow(/number/i); // must NOT underflow to 0
+    expect(toWireValue(a, "1e100")).toEqual([1e100]); // large finite exponents are valid numbers
+    expect(toWireValue(a, "1e-100")).toEqual([1e-100]);
+    expect(toWireValue(a, "0")).toEqual([0]); // a real zero still saves
+    expect(toWireValue(a, "0.00")).toEqual([0]);
   });
   it("checkbox", () => {
     const a = attr({ api_slug: "c", type: "checkbox" });
