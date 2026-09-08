@@ -7,3 +7,5 @@
 - Optional ParlayAPI key preference requests available moneyline, spread and total odds; coverage and account limits apply
 - Only show matchups returned for the active search query, including during request races and failures.
 - Mark missing bookmaker outcomes as unavailable instead of displaying another outcome's price.
+- Use the supported keyless request limit and one sport-specific alias/kickoff identity in both odds views.
+- Keep repeat fixtures and same-city teams separate, and include outcomes supplied by later bookmakers.

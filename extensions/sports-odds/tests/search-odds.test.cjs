@@ -8,10 +8,10 @@ const ts = require("typescript");
 // Render the actual command with inert Raycast elements. The hook returns
 // controlled responses so request order and keepPreviousData are deterministic.
 // No Raycast installation, API requests or credentials are used; the price fixture is a saved public response.
-const sourceRoot = path.resolve(__dirname, "../src");
+const sourceRoot = process.env.SPORTS_ODDS_TEST_SOURCE || path.resolve(__dirname, "../src");
 const compiled = Object.fromEntries(
-  ["api", "search-odds"].map((name) => {
-    const filename = path.join(sourceRoot, name + (name === "api" ? ".ts" : ".tsx"));
+  ["api", "search-odds", "team-aliases"].map((name) => {
+    const filename = path.join(sourceRoot, name + (name === "search-odds" ? ".tsx" : ".ts"));
     const result = ts.transpileModule(fs.readFileSync(filename, "utf8"), {
       fileName: filename,
       reportDiagnostics: true,
@@ -60,11 +60,12 @@ function commandHarness() {
   const state = { searchText: "", data: undefined, isLoading: false, url: undefined, options: undefined };
   const modules = {};
   let memo;
-  const element = (type, props) => ({ type, props: props || {} });
+  const element = (type, props, key) => ({ type, props: props || {}, key });
   const raycast = {
-    Action: { Push: "Action.Push", OpenInBrowser: "Action.OpenInBrowser" },
+    Action: { Push: "Action.Push", OpenInBrowser: "Action.OpenInBrowser", CopyToClipboard: "Action.CopyToClipboard" },
     ActionPanel: "ActionPanel",
-    Detail: "Detail",
+    Detail: Object.assign(() => {}, { Metadata: Object.assign(() => {}, { Label: "Label", Separator: "Separator" }) }),
+    getPreferenceValues: () => ({ apiKey: state.apiKey }),
     Icon: { MagnifyingGlass: "MagnifyingGlass", LineChart: "LineChart", BullsEye: "BullsEye" },
     List: Object.assign(() => {}, { Item: "List.Item", EmptyView: "List.EmptyView" }),
   };
@@ -93,18 +94,27 @@ function commandHarness() {
     const module = { exports: {} };
     modules[name] = module;
     const requireModule = (specifier) => {
-      if (specifier === "./api") return load("api");
+      if (["./api", "./team-aliases"].includes(specifier)) return load(specifier.slice(2));
       assert.ok(Object.hasOwn(imports, specifier), "Unexpected runtime dependency: " + specifier);
       return imports[specifier];
     };
     // Expose the private formatter only inside this isolated test module.
-    const formatterExport = name === "search-odds" ? "\nmodule.exports.formatFullBoard = fullBoardMarkdown;" : "";
+    const formatterExport =
+      name === "search-odds"
+        ? "\nmodule.exports.formatFullBoard = fullBoardMarkdown; module.exports.ConsensusBestLines = ConsensusBestLines; module.exports.FullOddsBoard = FullOddsBoard; module.exports.GameLines = GameLines;"
+        : "";
     vm.runInNewContext(compiled[name] + formatterExport, { module, exports: module.exports, require: requireModule });
     return module.exports;
   }
   const command = load("search-odds").default;
   return {
     state,
+    api: load("api"),
+    keyless: (game) => load("search-odds").ConsensusBestLines({ game }),
+    keyed: (game) => load("search-odds").FullOddsBoard({ game, apiKey: "synthetic-test-key" }),
+    lines: (game) => load("search-odds").GameLines({ game }),
+    keyedComponent: load("search-odds").FullOddsBoard,
+    keylessComponent: load("search-odds").ConsensusBestLines,
     render: () => command(),
     fullBoard: load("search-odds").formatFullBoard,
     search(text) {
@@ -269,4 +279,204 @@ test("reordering source outcomes keeps prices under their named columns", () => 
   assert.ok(markdown.includes("| Book | Minnesota Twins | Chicago White Sox |"));
   assert.ok(markdown.includes("| FanDuel | +106 | -124 |"));
   assert.ok(markdown.includes("| BetMGM | +1750 | Not available |"));
+});
+
+// Synthetic identities/times isolate matching behavior, not data coverage.
+function gameResult(
+  home = "Boston Red Sox",
+  away = "Los Angeles Angels",
+  time = "2026-09-08T23:10:00Z",
+  sport = "baseball_mlb",
+) {
+  return { type: "game", sport_key: sport, sport_title: sport, home_team: home, away_team: away, commence_time: time };
+}
+
+function oddsEvent(result, id) {
+  return { ...result, id, event_id: id, bookmakers: [] };
+}
+
+test("the actual keyless request stays within the command-center limit", () => {
+  const h = commandHarness();
+  h.keyless(h.api.dedupeGames([gameResult()])[0]);
+  const url = new URL(h.state.url);
+  assert.equal(url.pathname, "/live/api/command_center");
+  assert.equal(url.searchParams.get("limit"), "50");
+  assert.equal(h.state.options, undefined);
+});
+
+test("BOS/LAA aliases dedupe with canonical names in either source order and match either board", () => {
+  for (const reversed of [false, true]) {
+    const h = commandHarness();
+    const rows = [gameResult("BOS", "LAA"), gameResult()];
+    if (reversed) rows.reverse();
+    const games = h.api.dedupeGames(rows);
+    assert.equal(games.length, 1);
+    assert.equal(games[0].homeTeam, "Boston Red Sox");
+    assert.equal(games[0].awayTeam, "Los Angeles Angels");
+    const event = oddsEvent(gameResult(), "matching-event");
+    assert.equal(h.api.findEvent([event], games[0]), event);
+    const aliasEvent = oddsEvent(gameResult("BOS", "LAA"), "alias-event");
+    assert.equal(h.api.findEvent([aliasEvent], games[0]), aliasEvent);
+  }
+});
+
+test("aliases are sport-specific and unknown names require exact full identity", () => {
+  const api = commandHarness().api;
+  assert.equal(api.canonicalTeam("BOS", "baseball_mlb"), "Boston Red Sox");
+  assert.equal(api.canonicalTeam("BOS", "basketball_nba"), "Boston Celtics");
+  const target = api.dedupeGames([gameResult("United", "City", undefined, "soccer_test")])[0];
+  assert.equal(
+    api.findEvent([oddsEvent(gameResult("Manchester United", "City", undefined, "soccer_test"), "wrong")], target),
+    undefined,
+  );
+  assert.equal(
+    api.findEvent([oddsEvent(gameResult("United", "City", undefined, "soccer_other"), "wrong-sport")], target),
+    undefined,
+  );
+});
+
+test("Lakers/Clippers and Yankees/Mets against the same opponent remain distinct with their own times", () => {
+  const h = commandHarness();
+  for (const [sport, a, b, opponent] of [
+    ["basketball_nba", "Los Angeles Lakers", "Los Angeles Clippers", "Boston Celtics"],
+    ["baseball_mlb", "New York Yankees", "New York Mets", "Boston Red Sox"],
+  ]) {
+    const rows = [
+      gameResult(a, opponent, "2026-09-08T18:00:00Z", sport),
+      gameResult(b, opponent, "2026-09-09T19:00:00Z", sport),
+    ];
+    const games = h.api.dedupeGames(rows);
+    assert.equal(games.length, 2);
+    assert.equal(games[0].commenceTime.getTime(), Date.parse(rows[0].commence_time));
+    assert.equal(games[1].commenceTime.getTime(), Date.parse(rows[1].commence_time));
+    const events = rows.map((r, i) => oddsEvent(r, String(i)));
+    assert.equal(h.api.findEvent(events, games[0]), events[0]);
+    assert.equal(h.api.findEvent(events, games[1]), events[1]);
+  }
+});
+
+test("same teams on different dates and same-day doubleheaders remain separately actionable", () => {
+  const h = commandHarness();
+  const times = ["2026-09-08T18:00:00Z", "2026-09-08T23:00:00Z", "2026-09-09T18:00:00Z"];
+  const rows = times.map((time) => gameResult("BOS", "LAA", time));
+  h.state.data = { query: "Boston", results: rows };
+  const items = findElements(h.search("Boston"), "List.Item");
+  assert.equal(items.length, 3);
+  assert.equal(new Set(items.map((item) => item.key)).size, 3);
+  const games = h.api.dedupeGames(rows);
+  const events = times.map((time, i) => oddsEvent(gameResult(undefined, undefined, time), String(i)));
+  for (let i = 0; i < games.length; i++) {
+    assert.equal(h.api.findEvent(events.slice().reverse(), games[i]), events[i]);
+  }
+});
+
+test("missing kickoffs do not borrow a dated row's time or select an ambiguous event", () => {
+  const api = commandHarness().api;
+  const undated = { ...gameResult("BOS", "LAA"), commence_time: undefined };
+  const games = api.dedupeGames([undated, gameResult()]);
+  assert.equal(games.length, 2);
+  assert.equal(games[0].commenceTime, undefined);
+  const a = oddsEvent(gameResult(), "a");
+  const b = oddsEvent(gameResult(undefined, undefined, "2026-09-09T23:10:00Z"), "b");
+  assert.equal(api.findEvent([a, b], games[0]), undefined);
+  assert.equal(api.findEvent([a], games[0]), a);
+  assert.equal(api.findEvent([b], games[1]), undefined);
+});
+
+test("equivalent UTC timestamp spellings dedupe independently of the process timezone", () => {
+  const api = commandHarness().api;
+  const games = api.dedupeGames([
+    gameResult("BOS", "LAA", "2026-09-08 23:10:00"),
+    gameResult(undefined, undefined, "2026-09-08T23:10:00"),
+    gameResult(undefined, undefined, "2026-09-08T19:10:00-04:00"),
+  ]);
+  assert.equal(games.length, 1);
+  assert.equal(games[0].commenceTime.toISOString(), "2026-09-08T23:10:00.000Z");
+});
+
+test("own-key flow resolves the selected dated alias fixture rather than the first opponent match", () => {
+  const h = commandHarness();
+  const target = h.api.dedupeGames([gameResult("BOS", "LAA")])[0];
+  h.state.data = [
+    oddsEvent(gameResult(undefined, undefined, "2026-09-09T23:10:00Z"), "wrong-date"),
+    oddsEvent(gameResult(), "right-date"),
+  ];
+  const detail = h.keyed(target);
+  assert.ok(detail.props.markdown.includes("Boston Red Sox"));
+  assert.equal(
+    findElements(detail.props.actions, "Action.CopyToClipboard").filter((el) => el.props.title === "Copy Event ID")[0]
+      .props.content,
+    "right-date",
+  );
+  assert.equal(h.state.options.headers["X-API-Key"], "synthetic-test-key");
+  assert.ok(!h.state.url.includes("synthetic-test-key"));
+});
+
+test("both preference routes select their existing own-key or keyless board", () => {
+  const h = commandHarness();
+  const target = h.api.dedupeGames([gameResult()])[0];
+  assert.equal(h.lines(target).type, h.keylessComponent);
+  h.state.apiKey = "  synthetic-test-key  ";
+  assert.equal(h.lines(target).type, h.keyedComponent);
+  assert.equal(h.lines(target).props.apiKey, "synthetic-test-key");
+});
+
+test("a partial first bookmaker cannot hide another team's available price", () => {
+  const board = structuredClone(incompleteBoard);
+  board.bookmakers.reverse();
+  const markdown = commandHarness().fullBoard(board);
+  assert.ok(markdown.includes("| Book | Minnesota Twins | Chicago White Sox |"));
+  assert.ok(markdown.includes("| BetMGM | +1750 | Not available |"));
+  assert.ok(markdown.includes("| FanDuel | +106 | -124 |"));
+});
+
+test("each market unions outcome columns across all books, retaining genuine missing prices", () => {
+  const board = {
+    ...incompleteBoard,
+    bookmakers: [
+      {
+        title: "First",
+        markets: [
+          { key: "spreads", outcomes: [{ name: "Home", point: -1.5, price: -110 }] },
+          { key: "totals", outcomes: [{ name: "Over", point: 8.5, price: -105 }] },
+        ],
+      },
+      {
+        title: "Second",
+        markets: [
+          { key: "spreads", outcomes: [{ name: "Away", point: 1.5, price: -115 }] },
+          { key: "totals", outcomes: [{ name: "Under", point: 8.5, price: -120 }] },
+        ],
+      },
+      { title: "Empty", markets: [] },
+    ],
+  };
+  const markdown = commandHarness().fullBoard(board);
+  assert.ok(markdown.includes("| Book | Home | Away |"));
+  assert.ok(markdown.includes("| First | -1.5 -110 | Not available |"));
+  assert.ok(markdown.includes("| Second | Not available | +1.5 -115 |"));
+  assert.ok(markdown.includes("| Book | Over | Under |"));
+  assert.ok(markdown.includes("| First | 8.5 -105 | Not available |"));
+  assert.ok(markdown.includes("| Second | Not available | 8.5 -120 |"));
+  assert.ok(!markdown.includes("| Empty |"));
+});
+
+test("keyless alias selection uses the dated matching command-center event", () => {
+  const h = commandHarness();
+  const target = h.api.dedupeGames([gameResult("BOS", "LAA")])[0];
+  const makeEvent = (date, id, price) => ({
+    ...oddsEvent(gameResult(undefined, undefined, date), id),
+    book_count: 1,
+    max_gap_cents: 0,
+    best_home: { bookmaker: "Fixture Book", price, alternatives: [] },
+    best_away: { bookmaker: "Fixture Book", price: -110, alternatives: [] },
+  });
+  h.state.data = {
+    games: [makeEvent("2026-09-09T23:10:00Z", "wrong-date", 999), makeEvent("2026-09-08T23:10:00Z", "right-date", 120)],
+  };
+  const detail = h.keyless(target);
+  assert.ok(detail.props.markdown.includes("**+120**"));
+  assert.ok(!detail.props.markdown.includes("+999"));
+  const links = findElements(detail.props.actions, "Action.OpenInBrowser");
+  assert.ok(links.some((link) => link.props.url.endsWith("/live/game/right-date")));
 });

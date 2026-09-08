@@ -11,7 +11,7 @@ import {
   dedupeGames,
   formatAmerican,
   getApiKey,
-  normalizeTeam,
+  findEvent,
 } from "./api";
 
 export default function SearchOddsCommand() {
@@ -51,7 +51,7 @@ export default function SearchOddsCommand() {
       />
       {games.map((game) => (
         <List.Item
-          key={`${game.sportKey}-${game.homeTeam}-${game.awayTeam}`}
+          key={game.key}
           icon={Icon.LineChart}
           title={`${game.awayTeam} @ ${game.homeTeam}`}
           subtitle={game.sportTitle}
@@ -76,10 +76,10 @@ function GameLines({ game }: { game: GameHit }) {
 /** Keyless view: best available moneyline per side from the public live command center. */
 function ConsensusBestLines({ game }: { game: GameHit }) {
   const { isLoading, data } = useFetch<CommandCenterResponse>(
-    `${BASE_URL}/live/api/command_center?sport=${encodeURIComponent(game.sportKey)}&limit=100`,
+    `${BASE_URL}/live/api/command_center?sport=${encodeURIComponent(game.sportKey)}&limit=50`,
   );
 
-  const match = useMemo(() => findGame(data?.games ?? [], game), [data, game]);
+  const match = useMemo(() => findEvent(data?.games ?? [], game), [data, game]);
 
   const markdown = useMemo(() => {
     if (!data) return "";
@@ -138,16 +138,6 @@ function ConsensusBestLines({ game }: { game: GameHit }) {
   );
 }
 
-function findGame(games: CommandCenterGame[], target: GameHit): CommandCenterGame | undefined {
-  const home = normalizeTeam(target.homeTeam);
-  const away = normalizeTeam(target.awayTeam);
-  return games.find((g) => {
-    const gh = normalizeTeam(g.home_team);
-    const ga = normalizeTeam(g.away_team);
-    return (gh.includes(home) || home.includes(gh)) && (ga.includes(away) || away.includes(ga));
-  });
-}
-
 function consensusMarkdown(g: CommandCenterGame): string {
   const lines: string[] = [];
   lines.push(`# ${g.away_team} @ ${g.home_team}`);
@@ -188,16 +178,7 @@ function FullOddsBoard({ game, apiKey }: { game: GameHit; apiKey: string }) {
     { headers: { "X-API-Key": apiKey } },
   );
 
-  const event = useMemo(() => {
-    if (!Array.isArray(data)) return undefined;
-    const home = normalizeTeam(game.homeTeam);
-    const away = normalizeTeam(game.awayTeam);
-    return data.find((e) => {
-      const eh = normalizeTeam(e.home_team ?? "");
-      const ea = normalizeTeam(e.away_team ?? "");
-      return (eh.includes(home) || home.includes(eh)) && (ea.includes(away) || away.includes(ea));
-    });
-  }, [data, game]);
+  const event = useMemo(() => (Array.isArray(data) ? findEvent(data, game) : undefined), [data, game]);
 
   const markdown = useMemo(() => {
     if (!data) return "";
@@ -240,11 +221,18 @@ function fullBoardMarkdown(e: OddsEvent): string {
 
   for (const section of sections) {
     const rows: string[] = [];
-    let headerCols: string[] | undefined;
+    const headerCols = Array.from(
+      new Set(
+        (e.bookmakers ?? []).flatMap((book) =>
+          (book.markets ?? [])
+            .filter((market) => market.key === section.key)
+            .flatMap((market) => market.outcomes.map((outcome) => outcome.name)),
+        ),
+      ),
+    );
     for (const book of e.bookmakers ?? []) {
       const market = (book.markets ?? []).find((m) => m.key === section.key);
       if (!market || market.outcomes.length === 0) continue;
-      if (!headerCols) headerCols = market.outcomes.map((o) => o.name);
       const cells = headerCols.map((name) => {
         const o = market.outcomes.find((x) => x.name === name);
         if (!o) return "Not available";
@@ -253,7 +241,7 @@ function fullBoardMarkdown(e: OddsEvent): string {
       });
       rows.push(`| ${book.title} | ${cells.join(" | ")} |`);
     }
-    if (rows.length > 0 && headerCols) {
+    if (rows.length > 0 && headerCols.length > 0) {
       lines.push("");
       lines.push(`## ${section.title}`);
       lines.push("");
