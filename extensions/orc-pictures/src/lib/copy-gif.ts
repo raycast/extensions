@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { mkdir, stat, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { isAbsolute, relative, resolve } from "node:path";
 
 import { environment } from "@raycast/api";
 
@@ -17,9 +17,9 @@ const gifFileName = (slug: string): string => {
 const pathInside = (root: string, fileName: string): string => {
   const resolvedRoot = resolve(root);
   const resolved = resolve(resolvedRoot, fileName);
-  const prefix = resolvedRoot.endsWith("/") ? resolvedRoot : `${resolvedRoot}/`;
+  const rel = relative(resolvedRoot, resolved);
 
-  if (resolved !== resolvedRoot && !resolved.startsWith(prefix)) {
+  if (rel === "" || rel.startsWith("..") || isAbsolute(rel)) {
     throw new Error("GIF path escaped directory");
   }
 
@@ -28,9 +28,13 @@ const pathInside = (root: string, fileName: string): string => {
 
 const cacheDirectory = (): string => resolve(environment.supportPath, "gifs");
 
-const cachedGifPath = (slug: string): string => pathInside(cacheDirectory(), gifFileName(slug));
+const cachedGifPath = (slug: string): string =>
+  pathInside(cacheDirectory(), gifFileName(slug));
 
-const localGifPath = (slug: string, localGifsDirectory: string | undefined): string | undefined => {
+const localGifPath = (
+  slug: string,
+  localGifsDirectory: string | undefined
+): string | undefined => {
   if (!localGifsDirectory) {
     return undefined;
   }
@@ -60,7 +64,11 @@ const cachedGifIfReady = async (slug: string): Promise<string | undefined> => {
   return undefined;
 };
 
-export const ensureLocalGif = async (gif: CatalogGif, origin: string, localGifsDirectory?: string): Promise<string> => {
+export const ensureLocalGif = async (
+  gif: CatalogGif,
+  origin: string,
+  localGifsDirectory?: string
+): Promise<string> => {
   const localPath = localGifPath(gif.slug, localGifsDirectory);
 
   if (localPath) {
