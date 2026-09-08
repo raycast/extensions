@@ -1,7 +1,7 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { fetcher, validateToken } from "./utils";
-import { DataValues, User } from "./types";
+import { DataValues, User, Workspace } from "./types";
 
 interface ConfigProps {
   config: DataValues;
@@ -36,10 +36,31 @@ export default function useConfig(): ConfigProps {
 
         if (data) {
           const user = data as User;
-          LocalStorage.setItem("userId", user.id);
-          LocalStorage.setItem("workspaceId", user.defaultWorkspace);
-          LocalStorage.setItem("name", user.name);
-          setData({ userId: user.id, workspaceId: user.defaultWorkspace, name: user.name });
+
+          // defaultWorkspace is not guaranteed. setItem cannot store undefined, so a missing value
+          // means workspaceId never lands in LocalStorage, the guard above fails on every mount,
+          // and every request goes to /workspaces/undefined/... Fall back to the active workspace,
+          // then to the first workspace this token can see.
+          let workspaceId = user.defaultWorkspace || user.activeWorkspace;
+
+          if (!workspaceId) {
+            const { data: workspaces } = await fetcher(`/workspaces`);
+            workspaceId = (workspaces as Workspace[] | undefined)?.[0]?.id;
+          }
+
+          if (!workspaceId) {
+            showToast(Toast.Style.Failure, "No Clockify workspace found for this API key");
+            return;
+          }
+
+          // Await these, and write them one at a time rather than with Promise.all: consumers read
+          // the ids back out of LocalStorage as soon as config is published, and concurrent writes
+          // can be lost — leaving workspaceId absent while userId and name land.
+          await LocalStorage.setItem("userId", user.id);
+          await LocalStorage.setItem("workspaceId", workspaceId);
+          await LocalStorage.setItem("name", user.name);
+
+          setData({ userId: user.id, workspaceId, name: user.name });
           showToast(Toast.Style.Success, "Clockify is ready");
         } else if (error === "Unauthorized") {
           showToast(Toast.Style.Failure, "Invalid API Key detected");
