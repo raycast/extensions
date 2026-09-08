@@ -117,8 +117,12 @@ export default function Command(): JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    let isCurrent = true;
+    const controller = new AbortController();
+
     if (searchText.length === 0) {
       setResults([]);
+      setIsLoading(false);
       return;
     }
 
@@ -127,49 +131,63 @@ export default function Command(): JSX.Element {
     ) as string[];
     if (chars.length === 0) {
       setResults([]);
+      setIsLoading(false);
       return;
     }
 
-    async function fetchAll() {
-      setIsLoading(true);
-      const newResults: ResultItem[] = await Promise.all(
-        chars.map(async (char: string) => {
-          try {
-            const hex = char2hex(char);
-            const infoUrl = `https://hantang.github.io/search-wubi/data/chars/${hex}/${encodeURIComponent(char)}.json`;
-            const writerUrl = `https://hantang.github.io/search-wubi/data/hanzi-writer-data/${encodeURIComponent(char)}.json`;
+    setIsLoading(true);
 
-            const [infoRes, writerRes] = await Promise.all([
-              fetch(infoUrl),
-              fetch(writerUrl),
-            ]);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const newResults: ResultItem[] = await Promise.all(
+          chars.map(async (char: string) => {
+            try {
+              const hex = char2hex(char);
+              const infoUrl = `https://hantang.github.io/search-wubi/data/chars/${hex}/${encodeURIComponent(char)}.json`;
+              const writerUrl = `https://hantang.github.io/search-wubi/data/hanzi-writer-data/${encodeURIComponent(char)}.json`;
 
-            let info: CharInfo | undefined;
-            let writerData: CharWriterData | undefined;
+              const [infoRes, writerRes] = await Promise.all([
+                fetch(infoUrl, { signal: controller.signal }),
+                fetch(writerUrl, { signal: controller.signal }),
+              ]);
 
-            if (infoRes.ok) {
-              info = (await infoRes.json()) as CharInfo;
+              let info: CharInfo | undefined;
+              let writerData: CharWriterData | undefined;
+
+              if (infoRes.ok) {
+                info = (await infoRes.json()) as CharInfo;
+              }
+              if (writerRes.ok) {
+                writerData = (await writerRes.json()) as CharWriterData;
+              }
+
+              return { char, info, writerData };
+            } catch (e) {
+              if ((e as Error).name !== "AbortError") {
+                console.error(e);
+              }
             }
-            if (writerRes.ok) {
-              writerData = (await writerRes.json()) as CharWriterData;
-            }
+            return { char };
+          }),
+        );
 
-            return { char, info, writerData };
-          } catch (e) {
-            console.error(e);
-          }
-          return { char };
-        }),
-      );
-      setResults(newResults);
-      setIsLoading(false);
-    }
-
-    const timeoutId = setTimeout(() => {
-      fetchAll();
+        if (isCurrent && !controller.signal.aborted) {
+          setResults(newResults);
+          setIsLoading(false);
+        }
+      } catch (e) {
+        if (isCurrent && (e as Error).name !== "AbortError") {
+          console.error(e);
+          setIsLoading(false);
+        }
+      }
     }, 300);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      isCurrent = false;
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
   }, [searchText]);
 
   return (
