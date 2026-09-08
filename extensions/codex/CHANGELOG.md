@@ -1,6 +1,6 @@
 # Codex Changelog
 
-## [MCP Servers, Projects, and Usage Stats] - {PR_MERGE_DATE}
+## [MCP Servers, Projects, and Usage Stats] - 2026-09-08
 
 - Added Manage MCP Servers to inspect and configure servers, reload changes, and sign in with OAuth
 - Added Browse Projects to view project folders and threads, with Open in Desktop
