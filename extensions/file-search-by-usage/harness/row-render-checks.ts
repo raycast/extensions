@@ -94,6 +94,8 @@ export async function rowRenderChecks(
     onDescend: (entry: { path: string }) => calls.push(`enter:${entry.path}`),
     onUp: () => calls.push("up"),
     onBack: () => calls.push("back"),
+    onHistoryBack: () => calls.push("previous"),
+    onHistoryForward: () => calls.push("next"),
   };
   const setupActions = {
     setup: { recents: true, drive: true, hasRun: true },
@@ -170,6 +172,16 @@ export async function rowRenderChecks(
     assert(
       calls.join(",") === "/foo/bar499,enter:/foo/bar499,up,back,setup",
       "deferred actions operate on the newly selected item and keep setup available",
+    );
+    action("Previous Search").props.onAction();
+    action("Next Search").props.onAction();
+    assert(
+      calls.slice(-2).join() === "previous,next" &&
+        action("Previous Search").props.shortcut.key === "[" &&
+        action("Next Search").props.shortcut.key === "]" &&
+        action("Previous Search").props.shortcut.modifiers.join() === "cmd" &&
+        action("Next Search").props.shortcut.modifiers.join() === "cmd",
+      "search-history actions preserve callbacks and command-bracket shortcuts",
     );
     assert(
       action("Go to Parent Folder").props.shortcut.key === "arrowLeft" &&

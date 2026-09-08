@@ -1,4 +1,4 @@
-/** Live-search memory limits, independent of pagination and setup indexing. */
+/** Live-search memory limits, independent of setup indexing. */
 export const LIVE_RESULTS = 500;
 /** Native rows and action trees have a separate, smaller memory budget. */
 export const LIVE_RENDERED_RESULTS = 100;

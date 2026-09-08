@@ -5,19 +5,15 @@ import { act, create, ReactTestRenderer } from "react-test-renderer";
 import { useFolderSelection } from "../src/components/use-folder-selection";
 import { rowIdForEntry } from "../src/lib/entry-identity";
 import { LIVE_RENDERED_RESULTS } from "../src/lib/search-limits";
-import { useEventHandles } from "../src/components/use-event-handles";
+import { displayRows } from "../src/lib/display-rows";
 
-/** Exercise the actual browser selection/pagination boundary with native callbacks. */
+/** Exercise the browser's bounded display and native selection boundary. */
 export async function listRenderChecks(
   assert: (ok: boolean, label: string) => void,
 ) {
   const source = fs.readFileSync("src/components/browser.tsx", "utf8");
   const start = source.indexOf("  const { selectedId");
   const end = source.indexOf("\n  const rowHandlers", start);
-  const paging = source.slice(
-    source.indexOf("      pagination={{", end),
-    source.indexOf("      selectedItemId=", end),
-  );
   const resetStart = source.indexOf("  // Reset row IDs for a new query;");
   const reset = source.slice(
     resetStart,
@@ -27,13 +23,10 @@ export async function listRenderChecks(
     `return function View({ rows, initialSelectionPath, query = "", restorationRevision = 0 }) {
     const [generation, setGeneration] = useState(0);
     const parsed = { normalized: query }, dir = undefined;
-    const [visibleCount, setVisibleCount] = useState(200);
     const selectionPathRef = useRef();
-    const event = useEventHandles();
     ${reset}
     ${source.slice(start, end)}
-    return <List ${paging} count={renderedCount}
-      entries={typeof renderedRows === "undefined" ? rows.slice(0, renderedCount) : renderedRows}
+    return <List entries={renderedRows}
       selectedId={selectedId} onSelectionChange={onSelectionChange} />;
   }`,
     { loader: "tsx", jsxFactory: "React.createElement" },
@@ -48,7 +41,7 @@ export async function listRenderChecks(
     "rowIdForEntry",
     "List",
     "LIVE_RENDERED_RESULTS",
-    "useEventHandles",
+    "displayRows",
     code,
   )(
     React,
@@ -60,11 +53,32 @@ export async function listRenderChecks(
     rowIdForEntry,
     "list",
     LIVE_RENDERED_RESULTS,
-    useEventHandles,
+    displayRows,
   );
   const rows = Array.from({ length: 2000 }, (_, i) => ({
     entry: { path: `/foo/bar${i}`, name: `bar${i}` },
   }));
+  for (const length of [0, 1, 99, 100, 101, 2000]) {
+    const input = Object.freeze(rows.slice(0, length));
+    for (const selected of [
+      undefined,
+      "/missing",
+      "/foo/bar0",
+      "/foo/bar99",
+      "/foo/bar1999",
+    ]) {
+      const output = displayRows(input, selected);
+      assert(
+        output.length === Math.min(length, 100) &&
+          new Set(output).size === output.length &&
+          output.every(
+            (row, i) =>
+              i === 0 || rows.indexOf(output[i - 1]) < rows.indexOf(row),
+          ),
+        `display subset stays bounded, unique, and ordered (${length} rows, ${selected ?? "no selection"})`,
+      );
+    }
+  }
   assert(
     LIVE_RENDERED_RESULTS === 100,
     "the live list has a 100-row memory ceiling",
@@ -80,6 +94,10 @@ export async function listRenderChecks(
       renderer = create(React.createElement(View, { rows }));
     });
     const list = () => renderer!.root.findByType("list").props;
+    assert(
+      list().entries.length === 100 && list().entries[99] === rows[99],
+      "the displayed subset preserves the first 100 ranked rows",
+    );
     await act(() => list().onSelectionChange("1:/foo/bar0"));
     await act(() =>
       renderer!.update(
@@ -93,35 +111,18 @@ export async function listRenderChecks(
         ),
       "reranking retains the selected item without mounting all 2,000 rows",
     );
-    const staleLoadMore = list().pagination.onLoadMore;
-    await act(() => {
-      for (let i = 0; i < 30; i++) staleLoadMore();
-    });
     assert(
-      list().count === Math.min(400, LIVE_RENDERED_RESULTS),
-      "duplicate load-more notifications for one page admit only one next page",
-    );
-    const latePage = list().pagination.onLoadMore;
-    for (let i = 0; i < 20; i++)
-      await act(() => list().pagination.onLoadMore());
-    assert(
-      list().count <= LIVE_RENDERED_RESULTS &&
-        list().entries.length <= LIVE_RENDERED_RESULTS &&
-        !list().pagination.hasMore,
-      "late pagination notifications cannot grow state beyond the result count",
+      list().entries[98] === rows[1901] &&
+        list().entries[99] === rows[0] &&
+        rows.length === 2000,
+      "selection replaces only the last visible row and leaves source results intact",
     );
     await act(() =>
       renderer!.update(React.createElement(View, { rows, query: "baz" })),
     );
-    await act(() => latePage());
     assert(
-      list().count === Math.min(200, LIVE_RENDERED_RESULTS),
-      "a callback from a later page cannot expand a new query's first page",
-    );
-    await act(() => staleLoadMore());
-    assert(
-      list().count === Math.min(200, LIVE_RENDERED_RESULTS),
-      "a callback from an old query is ignored even when page counts match",
+      list().entries.length === 100,
+      "a new query retains the same display budget",
     );
     await act(() =>
       renderer!.update(
@@ -138,13 +139,6 @@ export async function listRenderChecks(
           (row: (typeof rows)[number]) => row.entry.path === "/foo/bar1999",
         ),
       "parent-folder focus admits its target without rendering all intervening rows",
-    );
-    for (let i = 0; i < 30; i++)
-      await act(() => list().pagination.onLoadMore());
-    assert(
-      list().entries.length <= LIVE_RENDERED_RESULTS &&
-        !list().pagination.hasMore,
-      "automatic paging toward a restored selection stops at the display budget",
     );
   } finally {
     if (renderer) await act(() => renderer!.unmount());

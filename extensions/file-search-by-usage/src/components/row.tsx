@@ -6,6 +6,7 @@ import { formatSize, relativeTime } from "../lib/format";
 import { displayPath } from "../lib/read-dir";
 import { SetupActions, SetupActionsProps } from "./setup-actions";
 import { NavigationActions } from "./navigation-actions";
+import { SearchHistoryActions } from "./search-history-actions";
 
 export type RowHandlers = {
   /** Opens a file in its default app or a folder in Finder. */
@@ -214,17 +215,9 @@ function RowActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Search">
-        <Action
-          title="Previous Search"
-          icon={Icon.ArrowLeftCircle}
-          shortcut={{ modifiers: ["cmd"], key: "[" }}
-          onAction={handlers.onHistoryBack}
-        />
-        <Action
-          title="Next Search"
-          icon={Icon.ArrowRightCircle}
-          shortcut={{ modifiers: ["cmd"], key: "]" }}
-          onAction={handlers.onHistoryForward}
+        <SearchHistoryActions
+          onHistoryBack={handlers.onHistoryBack}
+          onHistoryForward={handlers.onHistoryForward}
         />
       </ActionPanel.Section>
 

@@ -79,7 +79,7 @@ Development builds log navigation transitions, result-view lifetimes, retained h
 
 Shared cancellation signals belong to query and navigation events. Each effect owns the cleanup of its own work, so React's development-mode startup replay cannot disable later searches. An edit revision restarts a cancelled search even when rapid edits return to the same query before React renders.
 
-The list renders at most 100 rows, including any retained selection. A selected item outside the displayed subset replaces the last row if necessary to stay within the ceiling. It keeps its place in the sorted subset without mounting every intervening row. Action menus and detail panels are separate components: Raycast mounts them only for the selected item, so other rows do not build those trees. The harness checks these allocations and verifies that actions and details follow selection changes. Native selection notifications update a ref, not React state; only navigation restoration issues a selection request, released when Raycast acknowledges it. Duplicate or obsolete pagination callbacks cannot expand the display beyond its limit. Collection does not depend on scrolling. Live folder walks have no time or depth cutoff, but share the directory ceiling and honor their result limit. Independent directory workers share a physical-read limit of eight, and overlapping expansion roots share a visited set. Recursive queues can hold at most the bounded set of admitted directories. Setup retains its separate limits.
+The list renders at most 100 rows, including any retained selection. The pure `displayRows` helper keeps the first 100 ranked results, replacing the last row with the selected item when it falls outside that subset. This preserves order without mounting intervening rows. Action menus and detail panels are separate components: Raycast mounts them only for the selected item, so other rows do not build those trees. The harness checks these allocations and verifies that actions and details follow selection changes. Native selection notifications update a ref, not React state; only navigation restoration issues a selection request, released when Raycast acknowledges it. There is no pagination state or load-more callback; collection does not depend on scrolling. Live folder walks have no time or depth cutoff, but share the directory ceiling and honor their result limit. Independent directory workers share a physical-read limit of eight, and overlapping expansion roots share a visited set. Recursive queues can hold at most the bounded set of admitted directories. Setup retains its separate limits.
 
 ### Completion state
 
@@ -257,7 +257,7 @@ These numbers explain the architecture but should not be treated as fixed. File 
 
 ## Keyboard shortcuts
 
-Shortcuts are declared in `src/components/row.tsx`, `navigation-actions.tsx`, and the empty view in `browser.tsx`. Use Raycast's common shortcuts for Quick Look, Open With, Pin, Copy Path, and Refresh where available.
+Shortcuts are declared in `src/components/row.tsx`, `navigation-actions.tsx`, `search-history-actions.tsx`, and the empty view in `browser.tsx`. Navigation and query-history actions are shared between empty and populated lists. Use Raycast's common shortcuts for Quick Look, Open With, Pin, Copy Path, and Refresh where available.
 
 The custom bindings are:
 

@@ -83,6 +83,7 @@ import { SetupActions } from "./setup-actions";
 import { entryStoragePath, rowIdForEntry } from "../lib/entry-identity";
 import { relativeTime } from "../lib/format";
 import { compareRankedEntries, RankedEntry } from "../lib/result-order";
+import { displayRows } from "../lib/display-rows";
 import {
   DirectorySnapshot,
   readDirectoryAsync,
@@ -96,6 +97,7 @@ import { useStandardPlaces } from "./use-standard-places";
 import { useFolderSelection } from "./use-folder-selection";
 import { FolderNavigation, FolderResume } from "../lib/folder-navigation";
 import { NavigationActions } from "./navigation-actions";
+import { SearchHistoryActions } from "./search-history-actions";
 import { useEventHandles } from "./use-event-handles";
 import {
   SearchScreen,
@@ -180,7 +182,6 @@ function BrowserView({
   const [searchError, setSearchError] = useState<string>();
   const [searchPartial, setSearchPartial] = useState<string>();
   const [searchActive, setSearchActive] = useState(true);
-  const [visibleCount, setVisibleCount] = useState(200);
   const [sortMode, setSortMode] = useCachedState<SortMode>(
     "sort-mode",
     "usage",
@@ -1361,7 +1362,6 @@ function BrowserView({
   // Reset row IDs for a new query; cached paths remain searchable.
   useEffect(() => {
     setGeneration((g) => g + 1);
-    setVisibleCount(200);
   }, [parsed.normalized, dir]);
 
   const onSearchTextChange = useCallback(
@@ -1522,24 +1522,10 @@ function BrowserView({
     useFolderSelection(initialSelectionPath, rows, generation, query);
   selectionPathRef.current = getSelectedPath();
   const retainedSelectionPath = selectionPathRef.current ?? retainedPath;
-  const displayLimit = Math.min(rows.length, LIVE_RENDERED_RESULTS);
-  const renderedCount = Math.min(visibleCount, displayLimit);
-  const pageScope = `${generation}:${query}`;
-  const pageScopeRef = useRef(pageScope);
-  pageScopeRef.current = pageScope;
-  const renderedRows = useMemo(() => {
-    const page = rows.slice(0, renderedCount);
-    // Keep a restored folder selectable without mounting thousands of rows
-    // before it. Appending it preserves the order of this sorted subset.
-    const targetIndex = retainedSelectionPath
-      ? rows.findIndex(({ entry }) => entry.path === retainedSelectionPath)
-      : -1;
-    if (targetIndex >= renderedCount) {
-      if (page.length === LIVE_RENDERED_RESULTS) page.pop();
-      page.push(rows[targetIndex]);
-    }
-    return page;
-  }, [rows, renderedCount, retainedSelectionPath]);
+  const renderedRows = useMemo(
+    () => displayRows(rows, retainedSelectionPath),
+    [rows, retainedSelectionPath],
+  );
   const rowHandlers = Object.fromEntries(
     Object.entries(handlers).map(([name, callback]) => [
       name,
@@ -1610,19 +1596,6 @@ function BrowserView({
       // Raycast's own filter would re-rank by match score and wipe out the
       // usage ranking, so we filter and sort ourselves.
       filtering={false}
-      pagination={{
-        pageSize: 200,
-        hasMore: displayLimit > renderedCount,
-        onLoadMore: event("loadMore", () =>
-          setVisibleCount((count) =>
-            pageScopeRef.current !== pageScope ||
-            renderedCount >= displayLimit ||
-            count !== visibleCount
-              ? count
-              : Math.min(displayLimit, renderedCount + 200),
-          ),
-        ),
-      }}
       selectedItemId={selectedId ?? undefined}
       onSelectionChange={event("selection", (id: string | null) => {
         if (!navigation.isCurrent(frameId)) return;
@@ -1745,17 +1718,9 @@ function BrowserView({
                 onUp={rowHandlers.onUp}
               />
               <SetupActions {...setupActions} />
-              <Action
-                title="Previous Search"
-                icon={Icon.ArrowLeftCircle}
-                shortcut={{ modifiers: ["cmd"], key: "[" }}
-                onAction={rowHandlers.onHistoryBack}
-              />
-              <Action
-                title="Next Search"
-                icon={Icon.ArrowRightCircle}
-                shortcut={{ modifiers: ["cmd"], key: "]" }}
-                onAction={rowHandlers.onHistoryForward}
+              <SearchHistoryActions
+                onHistoryBack={rowHandlers.onHistoryBack}
+                onHistoryForward={rowHandlers.onHistoryForward}
               />
               <Action
                 title="Index Google Drive"

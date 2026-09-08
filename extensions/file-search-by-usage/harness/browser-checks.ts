@@ -1025,7 +1025,6 @@ export async function browserChecks(
     },
     discoveredRef,
     setGeneration: () => {},
-    setVisibleCount: () => {},
     parsed: queryTools.parseQuery("foorep"),
     dir: undefined,
   };
