@@ -12,11 +12,12 @@ interface SendMessageFormValues {
 
 interface UseSendMessageOptions {
   chatId: string;
+  topicId?: number;
   onBeforeSubmit?: () => Promise<boolean> | boolean;
   onSuccess?: (params: { chatId: string; message: string }) => Promise<void> | void;
 }
 
-export function useSendMessage({ chatId, onBeforeSubmit, onSuccess }: UseSendMessageOptions) {
+export function useSendMessage({ chatId, topicId, onBeforeSubmit, onSuccess }: UseSendMessageOptions) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { handleSubmit, itemProps } = useForm<SendMessageFormValues>({
@@ -32,6 +33,7 @@ export function useSendMessage({ chatId, onBeforeSubmit, onSuccess }: UseSendMes
       try {
         await handleSendMessage({
           chatId,
+          topicId,
           message: values.message,
           files: values.files,
         });
@@ -75,10 +77,12 @@ function validateFiles(files: string[] | undefined): string | undefined {
 
 async function handleSendMessage({
   chatId,
+  topicId,
   message,
   files,
 }: {
   chatId: string;
+  topicId?: number;
   message: string;
   files: string[];
 }): Promise<void> {
@@ -92,6 +96,7 @@ async function handleSendMessage({
   await sendMessage({
     config,
     chatId,
+    topicId,
     message,
     filePaths: files || [],
   });

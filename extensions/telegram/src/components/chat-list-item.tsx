@@ -2,6 +2,7 @@ import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { Chat } from "../services/telegram-client";
 import { getAvatarIcon } from "../utils/avatar";
 import { ChatMessagesView } from "./chat-messages-view";
+import { ChatTopicsView } from "./chat-topics-view";
 import { ChatListItemDetail } from "./chat-list-item-detail";
 import { SendMessageForm } from "./send-message-form";
 import { ToggleDetailAction, RefreshAction } from "./actions";
@@ -22,6 +23,10 @@ export function ChatListItem({ chat, onRefresh, isShowingDetail, onToggleDetail 
   });
 
   const accessories: List.Item.Accessory[] = [];
+
+  if (chat.isForum) {
+    accessories.push({ icon: Icon.Hashtag, tooltip: "Forum group" });
+  }
 
   if (chat.unreadCount > 0) {
     accessories.push({
@@ -45,10 +50,17 @@ export function ChatListItem({ chat, onRefresh, isShowingDetail, onToggleDetail 
       detail={isShowingDetail ? <ChatListItemDetail chat={chat} /> : undefined}
       actions={
         <ActionPanel>
-          <Action.Push icon={Icon.Message} title="View Messages" target={<ChatMessagesView chat={chat} />} />
+          <Action.Push
+            icon={chat.isForum ? Icon.Hashtag : Icon.Message}
+            title={chat.isForum ? "View Topics" : "View Messages"}
+            target={chat.isForum ? <ChatTopicsView chat={chat} /> : <ChatMessagesView chat={chat} />}
+          />
+          {chat.isForum ? (
+            <Action.Push icon={Icon.Message} title="View All Messages" target={<ChatMessagesView chat={chat} />} />
+          ) : null}
           <Action.Push
             icon={Icon.Pencil}
-            title="Send Message"
+            title={chat.isForum ? "Send to General" : "Send Message"}
             target={<SendMessageForm chat={chat} onSuccess={onRefresh} />}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
           />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { List, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { getConfig, ensureAuthenticated } from "./utils/auth";
 import { groupChatsByPinned } from "./utils/chat";
 import { getChats } from "./services/telegram-client";
@@ -14,24 +14,18 @@ export default function BrowseChats() {
   const [isShowingDetail, handleToggleDetail] = useDetailToggle(SHOW_DETAIL_KEY);
 
   const {
-    data: chats,
+    data: chats = [],
     isLoading,
     revalidate,
-  } = useCachedPromise(
-    async () => {
-      const authenticated = await ensureAuthenticated();
-      if (!authenticated) {
-        return [];
-      }
+  } = usePromise(async () => {
+    const authenticated = await ensureAuthenticated();
+    if (!authenticated) {
+      return [];
+    }
 
-      const config = getConfig();
-      return await getChats({ config, limit: 100 });
-    },
-    [],
-    {
-      initialData: [],
-    },
-  );
+    const config = getConfig();
+    return await getChats({ config, limit: 100 });
+  }, []);
 
   const filteredChats = chats.filter((chat) => chat.title.toLowerCase().includes(searchText.toLowerCase()));
   const groupedChats = groupChatsByPinned(filteredChats);

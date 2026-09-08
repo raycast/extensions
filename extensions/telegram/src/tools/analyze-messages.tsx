@@ -9,6 +9,7 @@ import { handleTelegramError } from "../utils/errors";
 
 interface Arguments {
   chatId: string;
+  topicId?: number;
   query: string;
   limit?: number;
 }
@@ -19,7 +20,7 @@ interface Preferences {
 
 export default async function AnalyzeMessages(args: Arguments) {
   try {
-    const { chatId, query } = args;
+    const { chatId, topicId, query } = args;
     let limit = args.limit ?? 20;
 
     // Cap limit to prevent excessive token usage, middle-out will handle overflow gracefully
@@ -48,7 +49,7 @@ export default async function AnalyzeMessages(args: Arguments) {
     }
 
     const config = getConfig();
-    const messages = await getChatMessages({ config, chatId, limit, skipMediaDownload: false });
+    const messages = await getChatMessages({ config, chatId, topicId, limit, skipMediaDownload: false });
 
     const messageContext = messages
       .map((msg, idx) => {

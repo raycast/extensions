@@ -1,11 +1,14 @@
 # Telegram
 
-A Raycast extension for viewing and sending messages to your Telegram Saved Messages.
+A Raycast extension for browsing Telegram chats and forum topics, reading organized message histories, and sending messages without leaving Raycast.
 
 ## Features
 
-- 📥 **View Saved Messages**: Browse your Telegram saved messages directly in Raycast
-- 📤 **Send to Saved Messages**: Quickly send notes and messages to yourself
+- **Browse chats**: Search private chats, groups, and pinned conversations
+- **Navigate forum topics**: Open searchable topics inside forum-enabled groups
+- **Read organized histories**: Scan sender-first message rows grouped by date, with media and timestamp context
+- **Send messages**: Send text and attachments to chats or specific forum topics
+- **Saved Messages**: Browse and send notes to yourself
 - 🔐 **Secure Authentication**: Uses official Telegram API with session persistence
 
 ## Setup
@@ -56,14 +59,24 @@ Log in to your Telegram account. You'll need to do this once before using the ot
 ### View Saved Messages
 
 Browse your Telegram saved messages in a list view. Features:
+
 - Search through your messages
 - See message timestamps
 - Copy messages to clipboard
 - Refresh the list (⌘ + R)
 
+### Browse Chats
+
+Browse private chats and groups. Forum-enabled groups open into a topic list with unread counts, recent-message previews, and topic search. Open any topic to read or send messages within it.
+
+### Send Message
+
+Choose a private chat, group, or forum topic, then send text and optional file attachments. When opened from a topic history, the destination topic is selected automatically.
+
 ### Send to Saved Messages
 
 Quickly send a message to your Telegram saved messages. Perfect for:
+
 - Saving quick notes
 - Storing links for later
 - Sending reminders to yourself
@@ -88,15 +101,6 @@ Make sure you've entered the correct API ID and API Hash in the extension prefer
 ### "Failed to Load Messages" Error
 
 This usually means your session has expired. Try running the "Authenticate with Telegram" command again.
-
-## Future Features
-
-Coming soon:
-- View all chats
-- Send messages to other users and groups
-- Media support (photos, files)
-- Message search
-- Notifications
 
 ## License
 
