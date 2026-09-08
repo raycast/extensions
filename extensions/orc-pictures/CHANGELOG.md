@@ -1,6 +1,6 @@
 # orc.pictures Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-08
 
 - Search orc reaction GIFs
 - Copy the GIF file to the clipboard so it pastes into X as an animation
