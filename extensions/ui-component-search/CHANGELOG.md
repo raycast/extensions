@@ -1,6 +1,6 @@
 # UI Component Search Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-08
 
 - Search and browse UI components across shadcn/ui, PrimeNG, Angular Material, spartan/ui, Taiga UI, Mantine, React Spectrum, and Chakra UI
 - Filter results by a single library or view all libraries grouped into sections
