@@ -1,6 +1,6 @@
 # Attio Changelog
 
-## [2.0.0] - {PR_MERGE_DATE}
+## [2.0.0] - 2026-09-08
 
 Full rewrite. Same commands, new engine — plus a set of new commands.
 
