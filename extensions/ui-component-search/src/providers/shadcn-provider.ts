@@ -1,16 +1,14 @@
 import { LIBRARY_URLS } from "../constants";
-import { UIComponent, UILibrary } from "../types";
+import { ProviderResult, UIComponent, UILibrary } from "../types";
 import { getCached, setCache } from "../utils/cache";
+import { slugToTitle as toDisplayName } from "./provider-helpers";
 
-/** Convert a slug like "alert-dialog" to "Alert Dialog" */
-function toDisplayName(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
-async function fetchComponents(): Promise<UIComponent[]> {
+/**
+ * shadcn/ui has no bundled static fallback, so a network error, non-OK
+ * response, or parse failure rejects — surfacing the library as failed
+ * (rather than silently degraded) in the UI.
+ */
+async function fetchComponents(): Promise<ProviderResult> {
   const cached = getCached("shadcn");
   if (cached) return cached;
 
@@ -50,8 +48,8 @@ async function fetchComponents(): Promise<UIComponent[]> {
       library: "shadcn" as const,
     }));
 
-  setCache("shadcn", components);
-  return components;
+  setCache("shadcn", components, "live");
+  return { components, source: "live" };
 }
 
 export const shadcnLibrary: UILibrary = {

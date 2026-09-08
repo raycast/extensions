@@ -1,84 +1,68 @@
 import { LIBRARY_URLS } from "../constants";
-import { UIComponent, UILibrary } from "../types";
-import { getCached, setCache } from "../utils/cache";
-
-/** Convert a slug like "autocomplete" to "AutoComplete" using PrimeNG conventions */
-function toDisplayName(slug: string): string {
-  // PrimeNG uses PascalCase-ish names; we'll title-case each word
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+import { ProviderResult, UIComponent, UILibrary } from "../types";
+import { fetchWithFallback, slugToTitle as toDisplayName } from "./provider-helpers";
 
 /**
  * PrimeNG doesn't have a single components listing page.
  * We fetch the homepage and parse the embedded Angular app state
  * to extract the sidebar menu structure with all component routes.
  *
- * Fallback: if scraping fails, use a comprehensive static list.
+ * Fallback: on any network error, non-OK response, or unparseable markup,
+ * the bundled static list is used and the result is marked as fallback.
  */
-async function fetchComponents(): Promise<UIComponent[]> {
-  const cached = getCached("primeng");
-  if (cached) return cached;
+function fetchComponents(): Promise<ProviderResult> {
+  return fetchWithFallback("primeng", scrape, buildFallback);
+}
 
-  let components: UIComponent[] | null = null;
+async function scrape(): Promise<UIComponent[]> {
+  const res = await fetch(`${LIBRARY_URLS.primeng.base}/installation`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch PrimeNG: ${res.statusText}`);
+  }
+  const html = await res.text();
 
-  try {
-    // Try to scrape from the PrimeNG site
-    const res = await fetch(`${LIBRARY_URLS.primeng.base}/installation`);
-    if (res.ok) {
-      const html = await res.text();
+  // PrimeNG's Angular app embeds route data. Look for component links in the HTML.
+  // The sidebar contains links like href="/autocomplete", href="/accordion", etc.
+  const linkRegex = /routerLink="\/([a-z][a-z0-9-]*)"/gi;
+  const slugs = new Set<string>();
+  let match;
 
-      // PrimeNG's Angular app embeds route data. Look for component links in the HTML.
-      // The sidebar contains links like href="/autocomplete", href="/accordion", etc.
-      const linkRegex = /routerLink="\/([a-z][a-z0-9-]*)"/gi;
-      const slugs = new Set<string>();
-      let match;
-
-      while ((match = linkRegex.exec(html)) !== null) {
-        slugs.add(match[1].toLowerCase());
-      }
-
-      // Also try href patterns
-      const hrefRegex = /href="\/([a-z][a-z0-9-]*)"/gi;
-      while ((match = hrefRegex.exec(html)) !== null) {
-        const slug = match[1].toLowerCase();
-        // Filter out non-component pages
-        if (!NON_COMPONENT_SLUGS.has(slug)) {
-          slugs.add(slug);
-        }
-      }
-
-      if (slugs.size > 20) {
-        // We got a reasonable number of components from scraping
-        components = Array.from(slugs)
-          .filter((slug) => !NON_COMPONENT_SLUGS.has(slug))
-          .sort()
-          .map((slug) => ({
-            name: toDisplayName(slug),
-            slug,
-            url: `${LIBRARY_URLS.primeng.base}/${slug}`,
-            library: "primeng" as const,
-          }));
-      }
-    }
-  } catch {
-    // Scraping failed, fall through to static list
+  while ((match = linkRegex.exec(html)) !== null) {
+    slugs.add(match[1].toLowerCase());
   }
 
-  // Fallback to static list if scraping didn't yield enough results
-  if (!components || components.length === 0) {
-    components = PRIMENG_COMPONENTS.map((slug) => ({
+  // Also try href patterns
+  const hrefRegex = /href="\/([a-z][a-z0-9-]*)"/gi;
+  while ((match = hrefRegex.exec(html)) !== null) {
+    const slug = match[1].toLowerCase();
+    // Filter out non-component pages
+    if (!NON_COMPONENT_SLUGS.has(slug)) {
+      slugs.add(slug);
+    }
+  }
+
+  if (slugs.size <= 20) {
+    throw new Error("Could not parse component list from PrimeNG");
+  }
+
+  return Array.from(slugs)
+    .filter((slug) => !NON_COMPONENT_SLUGS.has(slug))
+    .sort()
+    .map((slug) => ({
       name: toDisplayName(slug),
       slug,
       url: `${LIBRARY_URLS.primeng.base}/${slug}`,
       library: "primeng" as const,
     }));
-  }
+}
 
-  setCache("primeng", components);
-  return components;
+function buildFallback(): UIComponent[] {
+  return PRIMENG_COMPONENTS.map((slug) => ({
+    name: toDisplayName(slug),
+    slug,
+    url: `${LIBRARY_URLS.primeng.base}/${slug}`,
+    library: "primeng" as const,
+  }));
 }
 
 /** Pages that are NOT components */

@@ -18,6 +18,21 @@ export interface UIComponent {
   library: LibraryId;
 }
 
+/**
+ * Where a library's component list came from.
+ * - "live":     successfully scraped/parsed from the docs site
+ * - "fallback": the live fetch failed (network error, non-OK response, or the
+ *               markup could not be parsed) and the provider's bundled static
+ *               list was used instead. A broken scraper must stay visible.
+ */
+export type ComponentSource = "live" | "fallback";
+
+/** Result of a provider fetch: the components plus how they were obtained. */
+export interface ProviderResult {
+  components: UIComponent[];
+  source: ComponentSource;
+}
+
 /** Metadata and fetcher for a UI library */
 export interface UILibrary {
   id: LibraryId;
@@ -27,12 +42,18 @@ export interface UILibrary {
   icon: string;
   /** Base URL of the library's website */
   baseUrl: string;
-  /** Fetch the list of components from this library */
-  fetchComponents: () => Promise<UIComponent[]>;
+  /**
+   * Fetch the list of components from this library.
+   * Resolves with the components and their source status; rejects only when
+   * there is no usable data at all (no live result and no static fallback).
+   */
+  fetchComponents: () => Promise<ProviderResult>;
 }
 
 /** Shape of cached component data per library */
 export interface CachedData {
   timestamp: number;
   components: UIComponent[];
+  /** Source status at the time the data was cached (defaults to "live" for legacy entries). */
+  source: ComponentSource;
 }

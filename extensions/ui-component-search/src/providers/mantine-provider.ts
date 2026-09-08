@@ -1,72 +1,59 @@
 import { LIBRARY_URLS } from "../constants";
-import { UIComponent, UILibrary } from "../types";
-import { getCached, setCache } from "../utils/cache";
-
-/** Convert a slug like "action-icon" to "Action Icon" */
-function toDisplayName(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+import { ProviderResult, UIComponent, UILibrary } from "../types";
+import { fetchWithFallback, slugToTitle as toDisplayName } from "./provider-helpers";
 
 /**
  * Fetch Mantine components by parsing the sitemap.xml.
  * The sitemap contains URLs like https://mantine.dev/core/{slug}
  * We extract unique component slugs from these URLs.
  *
- * Fallback: if scraping fails, use a comprehensive static list.
+ * Fallback: on any network error, non-OK response, or unparseable markup,
+ * the bundled static list is used and the result is marked as fallback.
  */
-async function fetchComponents(): Promise<UIComponent[]> {
-  const cached = getCached("mantine");
-  if (cached) return cached;
+function fetchComponents(): Promise<ProviderResult> {
+  return fetchWithFallback("mantine", scrape, buildFallback);
+}
 
-  let components: UIComponent[] | null = null;
+async function scrape(): Promise<UIComponent[]> {
+  const res = await fetch(LIBRARY_URLS.mantine.sitemap);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch Mantine: ${res.statusText}`);
+  }
+  const xml = await res.text();
 
-  try {
-    const res = await fetch(LIBRARY_URLS.mantine.sitemap);
-    if (res.ok) {
-      const xml = await res.text();
+  // Extract component slugs from sitemap URLs like /core/{slug}
+  const locRegex = /<loc>https:\/\/mantine\.dev\/core\/([a-z][a-z0-9-]*)<\/loc>/g;
+  const slugs = new Set<string>();
+  let match;
 
-      // Extract component slugs from sitemap URLs like /core/{slug}
-      const locRegex = /<loc>https:\/\/mantine\.dev\/core\/([a-z][a-z0-9-]*)<\/loc>/g;
-      const slugs = new Set<string>();
-      let match;
-
-      while ((match = locRegex.exec(xml)) !== null) {
-        const slug = match[1];
-        if (!NON_COMPONENT_SLUGS.has(slug)) {
-          slugs.add(slug);
-        }
-      }
-
-      if (slugs.size > 20) {
-        components = Array.from(slugs)
-          .sort()
-          .map((slug) => ({
-            name: toDisplayName(slug),
-            slug,
-            url: `${LIBRARY_URLS.mantine.components}/${slug}`,
-            library: "mantine" as const,
-          }));
-      }
+  while ((match = locRegex.exec(xml)) !== null) {
+    const slug = match[1];
+    if (!NON_COMPONENT_SLUGS.has(slug)) {
+      slugs.add(slug);
     }
-  } catch {
-    // Scraping failed, fall through to static list
   }
 
-  // Fallback to static list if scraping didn't yield enough results
-  if (!components || components.length === 0) {
-    components = MANTINE_COMPONENTS.map((slug) => ({
+  if (slugs.size <= 20) {
+    throw new Error("Could not parse component list from Mantine");
+  }
+
+  return Array.from(slugs)
+    .sort()
+    .map((slug) => ({
       name: toDisplayName(slug),
       slug,
       url: `${LIBRARY_URLS.mantine.components}/${slug}`,
       library: "mantine" as const,
     }));
-  }
+}
 
-  setCache("mantine", components);
-  return components;
+function buildFallback(): UIComponent[] {
+  return MANTINE_COMPONENTS.map((slug) => ({
+    name: toDisplayName(slug),
+    slug,
+    url: `${LIBRARY_URLS.mantine.components}/${slug}`,
+    library: "mantine" as const,
+  }));
 }
 
 /** Pages under /core that are NOT components */

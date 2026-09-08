@@ -1,5 +1,5 @@
 import { Cache } from "@raycast/api";
-import { CachedData, LibraryId, UIComponent } from "../types";
+import { CachedData, ComponentSource, LibraryId, UIComponent } from "../types";
 
 const cache = new Cache();
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -10,15 +10,18 @@ function cacheKey(libraryId: LibraryId): string {
 
 /**
  * Get cached components for a library, or null if cache is missing/stale.
+ * The source status is preserved so that fallback data stays marked as
+ * fallback for the lifetime of the cache entry.
  */
-export function getCached(libraryId: LibraryId): UIComponent[] | null {
+export function getCached(libraryId: LibraryId): { components: UIComponent[]; source: ComponentSource } | null {
   const raw = cache.get(cacheKey(libraryId));
   if (!raw) return null;
 
   try {
     const parsed: CachedData = JSON.parse(raw);
     if (Date.now() - parsed.timestamp < CACHE_TTL_MS) {
-      return parsed.components;
+      // Legacy entries (cached before source tracking) default to "live".
+      return { components: parsed.components, source: parsed.source ?? "live" };
     }
   } catch {
     // Cache is corrupted
@@ -27,9 +30,9 @@ export function getCached(libraryId: LibraryId): UIComponent[] | null {
 }
 
 /**
- * Store components in the cache for a library.
+ * Store components in the cache for a library, along with their source status.
  */
-export function setCache(libraryId: LibraryId, components: UIComponent[]): void {
-  const data: CachedData = { timestamp: Date.now(), components };
+export function setCache(libraryId: LibraryId, components: UIComponent[], source: ComponentSource): void {
+  const data: CachedData = { timestamp: Date.now(), components, source };
   cache.set(cacheKey(libraryId), JSON.stringify(data));
 }

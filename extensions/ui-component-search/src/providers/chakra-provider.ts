@@ -1,72 +1,60 @@
 import { LIBRARY_URLS } from "../constants";
-import { UIComponent, UILibrary } from "../types";
-import { getCached, setCache } from "../utils/cache";
-
-/** Convert a slug like "checkbox-card" to "Checkbox Card" */
-function toDisplayName(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+import { ProviderResult, UIComponent, UILibrary } from "../types";
+import { fetchWithFallback, slugToTitle as toDisplayName } from "./provider-helpers";
 
 /**
  * Fetch Chakra UI components by scraping the components overview page.
  * Component pages live at https://chakra-ui.com/docs/components/{slug}
  * and the overview page's sidebar links to all of them.
  *
- * Fallback: if scraping fails, use a comprehensive static list.
+ * Fallback: on any network error, non-OK response, or unparseable markup,
+ * the bundled static list is used and the result is marked as fallback.
  */
-async function fetchComponents(): Promise<UIComponent[]> {
-  const cached = getCached("chakra");
-  if (cached) return cached;
+function fetchComponents(): Promise<ProviderResult> {
+  return fetchWithFallback("chakra", scrape, buildFallback);
+}
 
-  let components: UIComponent[] | null = null;
+async function scrape(): Promise<UIComponent[]> {
+  const res = await fetch(LIBRARY_URLS.chakra.overview);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch Chakra UI: ${res.statusText}`);
+  }
+  const html = await res.text();
 
-  try {
-    const res = await fetch(LIBRARY_URLS.chakra.overview);
-    if (res.ok) {
-      const html = await res.text();
+  // Sidebar links look like href="/docs/components/{slug}"
+  const linkRegex = /\/docs\/components\/([a-z][a-z0-9-]*)/g;
+  const slugs = new Set<string>();
+  let match;
 
-      // Sidebar links look like href="/docs/components/{slug}"
-      const linkRegex = /\/docs\/components\/([a-z][a-z0-9-]*)/g;
-      const slugs = new Set<string>();
-      let match;
-
-      while ((match = linkRegex.exec(html)) !== null) {
-        const slug = match[1];
-        if (slug !== "concepts" && !NON_COMPONENT_SLUGS.has(slug)) {
-          slugs.add(slug);
-        }
-      }
-
-      if (slugs.size > 20) {
-        components = Array.from(slugs)
-          .sort()
-          .map((slug) => ({
-            name: toDisplayName(slug),
-            slug,
-            url: `${LIBRARY_URLS.chakra.components}/${slug}`,
-            library: "chakra" as const,
-          }));
-      }
+  while ((match = linkRegex.exec(html)) !== null) {
+    const slug = match[1];
+    if (slug !== "concepts" && !NON_COMPONENT_SLUGS.has(slug)) {
+      slugs.add(slug);
     }
-  } catch {
-    // Scraping failed, fall through to static list
   }
 
-  // Fallback to static list if scraping didn't yield enough results
-  if (!components || components.length === 0) {
-    components = CHAKRA_COMPONENTS.map((slug) => ({
+  // Too few results means the markup likely changed — treat as a parse failure.
+  if (slugs.size <= 20) {
+    throw new Error("Could not parse component list from Chakra UI");
+  }
+
+  return Array.from(slugs)
+    .sort()
+    .map((slug) => ({
       name: toDisplayName(slug),
       slug,
       url: `${LIBRARY_URLS.chakra.components}/${slug}`,
       library: "chakra" as const,
     }));
-  }
+}
 
-  setCache("chakra", components);
-  return components;
+function buildFallback(): UIComponent[] {
+  return CHAKRA_COMPONENTS.map((slug) => ({
+    name: toDisplayName(slug),
+    slug,
+    url: `${LIBRARY_URLS.chakra.components}/${slug}`,
+    library: "chakra" as const,
+  }));
 }
 
 /** Utility/provider pages under /docs/components that are NOT UI components */

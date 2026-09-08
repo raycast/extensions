@@ -1,6 +1,6 @@
 import { LIBRARY_URLS } from "../constants";
-import { UIComponent, UILibrary } from "../types";
-import { getCached, setCache } from "../utils/cache";
+import { ProviderResult, UIComponent, UILibrary } from "../types";
+import { fetchWithFallback } from "./provider-helpers";
 
 /**
  * Convert a PascalCase component name like "ActionButton" to "Action Button".
@@ -19,58 +19,53 @@ function toDisplayName(name: string): string {
  * https://react-spectrum.adobe.com/Accordion. The sidebar on any component
  * page links to every other component, so we parse those links.
  *
- * Fallback: if scraping fails, use a comprehensive static list.
+ * Fallback: on any network error, non-OK response, or unparseable markup,
+ * the bundled static list is used and the result is marked as fallback.
  */
-async function fetchComponents(): Promise<UIComponent[]> {
-  const cached = getCached("react-spectrum");
-  if (cached) return cached;
+function fetchComponents(): Promise<ProviderResult> {
+  return fetchWithFallback("react-spectrum", scrape, buildFallback);
+}
 
-  let components: UIComponent[] | null = null;
+async function scrape(): Promise<UIComponent[]> {
+  const res = await fetch(`${LIBRARY_URLS.reactSpectrum.base}/Accordion`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch React Spectrum: ${res.statusText}`);
+  }
+  const html = await res.text();
 
-  try {
-    const res = await fetch(`${LIBRARY_URLS.reactSpectrum.base}/Accordion`);
-    if (res.ok) {
-      const html = await res.text();
+  // Sidebar links look like href="https://react-spectrum.adobe.com/ActionButton"
+  const linkRegex = /href="https:\/\/react-spectrum\.adobe\.com\/([A-Z][A-Za-z0-9]+)"/g;
+  const names = new Set<string>();
+  let match;
 
-      // Sidebar links look like href="https://react-spectrum.adobe.com/ActionButton"
-      const linkRegex = /href="https:\/\/react-spectrum\.adobe\.com\/([A-Z][A-Za-z0-9]+)"/g;
-      const names = new Set<string>();
-      let match;
-
-      while ((match = linkRegex.exec(html)) !== null) {
-        const name = match[1];
-        if (!NON_COMPONENT_NAMES.has(name)) {
-          names.add(name);
-        }
-      }
-
-      if (names.size > 20) {
-        components = Array.from(names)
-          .sort()
-          .map((name) => ({
-            name: toDisplayName(name),
-            slug: name,
-            url: `${LIBRARY_URLS.reactSpectrum.base}/${name}`,
-            library: "react-spectrum" as const,
-          }));
-      }
+  while ((match = linkRegex.exec(html)) !== null) {
+    const name = match[1];
+    if (!NON_COMPONENT_NAMES.has(name)) {
+      names.add(name);
     }
-  } catch {
-    // Scraping failed, fall through to static list
   }
 
-  // Fallback to static list if scraping didn't yield enough results
-  if (!components || components.length === 0) {
-    components = REACT_SPECTRUM_COMPONENTS.map((name) => ({
+  if (names.size <= 20) {
+    throw new Error("Could not parse component list from React Spectrum");
+  }
+
+  return Array.from(names)
+    .sort()
+    .map((name) => ({
       name: toDisplayName(name),
       slug: name,
       url: `${LIBRARY_URLS.reactSpectrum.base}/${name}`,
       library: "react-spectrum" as const,
     }));
-  }
+}
 
-  setCache("react-spectrum", components);
-  return components;
+function buildFallback(): UIComponent[] {
+  return REACT_SPECTRUM_COMPONENTS.map((name) => ({
+    name: toDisplayName(name),
+    slug: name,
+    url: `${LIBRARY_URLS.reactSpectrum.base}/${name}`,
+    library: "react-spectrum" as const,
+  }));
 }
 
 /** Root pages that are NOT components */

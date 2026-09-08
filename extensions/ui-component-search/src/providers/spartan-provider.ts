@@ -1,14 +1,6 @@
 import { LIBRARY_URLS } from "../constants";
-import { UIComponent, UILibrary } from "../types";
-import { getCached, setCache } from "../utils/cache";
-
-/** Convert a slug like "alert-dialog" to "Alert Dialog" */
-function toDisplayName(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+import { ProviderResult, UIComponent, UILibrary } from "../types";
+import { fetchWithFallback, slugToTitle as toDisplayName } from "./provider-helpers";
 
 /**
  * Fetch spartan/ui components by scraping the /components page HTML.
@@ -17,55 +9,50 @@ function toDisplayName(slug: string): string {
  * format changing (the previous "ng-state" JSON payload no longer
  * contains component data).
  *
- * Fallback: if scraping fails, use a comprehensive static list.
+ * Fallback: on any network error, non-OK response, or unparseable markup,
+ * the bundled static list is used and the result is marked as fallback.
  */
-async function fetchComponents(): Promise<UIComponent[]> {
-  const cached = getCached("spartan");
-  if (cached) return cached;
+function fetchComponents(): Promise<ProviderResult> {
+  return fetchWithFallback("spartan", scrape, buildFallback);
+}
 
-  let components: UIComponent[] | null = null;
+async function scrape(): Promise<UIComponent[]> {
+  const res = await fetch(LIBRARY_URLS.spartan.components);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch spartan/ui: ${res.statusText}`);
+  }
+  const html = await res.text();
 
-  try {
-    const res = await fetch(LIBRARY_URLS.spartan.components);
-    if (res.ok) {
-      const html = await res.text();
+  // Extract component slugs from links like href="/components/{slug}"
+  const hrefRegex = /href="\/components\/([a-z][a-z0-9-]*)"/g;
+  const slugs = new Set<string>();
+  let match;
 
-      // Extract component slugs from links like href="/components/{slug}"
-      const hrefRegex = /href="\/components\/([a-z][a-z0-9-]*)"/g;
-      const slugs = new Set<string>();
-      let match;
-
-      while ((match = hrefRegex.exec(html)) !== null) {
-        slugs.add(match[1]);
-      }
-
-      if (slugs.size > 20) {
-        components = Array.from(slugs)
-          .sort()
-          .map((slug) => ({
-            name: toDisplayName(slug),
-            slug,
-            url: `${LIBRARY_URLS.spartan.components}/${slug}`,
-            library: "spartan" as const,
-          }));
-      }
-    }
-  } catch {
-    // Scraping failed, fall through to static list
+  while ((match = hrefRegex.exec(html)) !== null) {
+    slugs.add(match[1]);
   }
 
-  // Fallback to static list if scraping didn't yield enough results
-  if (!components || components.length === 0) {
-    components = SPARTAN_COMPONENTS.map((slug) => ({
+  if (slugs.size <= 20) {
+    throw new Error("Could not parse component list from spartan/ui");
+  }
+
+  return Array.from(slugs)
+    .sort()
+    .map((slug) => ({
       name: toDisplayName(slug),
       slug,
       url: `${LIBRARY_URLS.spartan.components}/${slug}`,
       library: "spartan" as const,
     }));
-  }
+}
 
-  setCache("spartan", components);
-  return components;
+function buildFallback(): UIComponent[] {
+  return SPARTAN_COMPONENTS.map((slug) => ({
+    name: toDisplayName(slug),
+    slug,
+    url: `${LIBRARY_URLS.spartan.components}/${slug}`,
+    library: "spartan" as const,
+  }));
 }
 
 /** Comprehensive static list of spartan/ui component slugs */

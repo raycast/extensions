@@ -1,65 +1,58 @@
 import { LIBRARY_URLS } from "../constants";
-import { UIComponent, UILibrary } from "../types";
-import { getCached, setCache } from "../utils/cache";
+import { ProviderResult, UIComponent, UILibrary } from "../types";
+import { fetchWithFallback, slugToTitle as toDisplayName } from "./provider-helpers";
 
-/** Convert a slug like "button-toggle" to "Button Toggle" */
-function toDisplayName(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+/**
+ * Fetch Angular Material components by scraping the categories page.
+ *
+ * Fallback: on any network error, non-OK response, or unparseable markup,
+ * the bundled static list is used and the result is marked as fallback.
+ */
+function fetchComponents(): Promise<ProviderResult> {
+  return fetchWithFallback("material", scrape, buildFallback);
 }
 
-async function fetchComponents(): Promise<UIComponent[]> {
-  const cached = getCached("material");
-  if (cached) return cached;
+async function scrape(): Promise<UIComponent[]> {
+  const res = await fetch(LIBRARY_URLS.material.components);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch Angular Material: ${res.statusText}`);
+  }
+  const html = await res.text();
 
-  let components: UIComponent[] | null = null;
+  // Angular Material site embeds component data. Look for links to /components/{slug}
+  const linkRegex = /\/components\/([a-z][a-z0-9-]*)/g;
+  const slugs = new Set<string>();
+  let match;
 
-  try {
-    const res = await fetch(LIBRARY_URLS.material.components);
-    if (res.ok) {
-      const html = await res.text();
-
-      // Angular Material site embeds component data. Look for links to /components/{slug}
-      const linkRegex = /\/components\/([a-z][a-z0-9-]*)/g;
-      const slugs = new Set<string>();
-      let match;
-
-      while ((match = linkRegex.exec(html)) !== null) {
-        const slug = match[1];
-        // Filter out non-component paths like "categories", "overview", "api", "examples"
-        if (!NON_COMPONENT_SLUGS.has(slug)) {
-          slugs.add(slug);
-        }
-      }
-
-      if (slugs.size > 10) {
-        components = Array.from(slugs)
-          .sort()
-          .map((slug) => ({
-            name: toDisplayName(slug),
-            slug,
-            url: `${LIBRARY_URLS.material.base}/components/${slug}/overview`,
-            library: "material" as const,
-          }));
-      }
+  while ((match = linkRegex.exec(html)) !== null) {
+    const slug = match[1];
+    // Filter out non-component paths like "categories", "overview", "api", "examples"
+    if (!NON_COMPONENT_SLUGS.has(slug)) {
+      slugs.add(slug);
     }
-  } catch {
-    // Scraping failed, fall through to static list
   }
 
-  if (!components || components.length === 0) {
-    components = MATERIAL_COMPONENTS.map((slug) => ({
+  if (slugs.size <= 10) {
+    throw new Error("Could not parse component list from Angular Material");
+  }
+
+  return Array.from(slugs)
+    .sort()
+    .map((slug) => ({
       name: toDisplayName(slug),
       slug,
       url: `${LIBRARY_URLS.material.base}/components/${slug}/overview`,
       library: "material" as const,
     }));
-  }
+}
 
-  setCache("material", components);
-  return components;
+function buildFallback(): UIComponent[] {
+  return MATERIAL_COMPONENTS.map((slug) => ({
+    name: toDisplayName(slug),
+    slug,
+    url: `${LIBRARY_URLS.material.base}/components/${slug}/overview`,
+    library: "material" as const,
+  }));
 }
 
 /** Paths under /components/ that are NOT actual components */

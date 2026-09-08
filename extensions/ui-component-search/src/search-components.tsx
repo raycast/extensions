@@ -21,14 +21,21 @@ function groupByLibrary(components: UIComponent[]): Map<LibraryId, UIComponent[]
   return groups;
 }
 
-function ComponentItem({ component }: { component: UIComponent }) {
+function ComponentItem({ component, isFallback }: { component: UIComponent; isFallback: boolean }) {
   const lib = libraries.find((l) => l.id === component.library);
+  const accessories: List.Item.Accessory[] = [{ text: lib?.name ?? component.library }];
+  if (isFallback) {
+    accessories.unshift({
+      icon: { source: Icon.Warning, tintColor: Color.Yellow },
+      tooltip: "Live fetch failed — showing bundled fallback data, which may be out of date",
+    });
+  }
   return (
     <List.Item
       key={`${component.library}-${component.slug}`}
       title={component.name}
       subtitle={component.slug}
-      accessories={[{ text: lib?.name ?? component.library }]}
+      accessories={accessories}
       icon={{ source: lib?.icon ?? Icon.Box, fallback: Icon.Box }}
       actions={
         <ActionPanel>
@@ -45,7 +52,7 @@ function ComponentItem({ component }: { component: UIComponent }) {
   );
 }
 
-/** A visible row marking a library whose live fetch failed. */
+/** A visible row marking a library whose fetch failed outright (no data at all). */
 function FailedLibraryItem({ failure }: { failure: FailedLibrary }) {
   const lib = libraries.find((l) => l.id === failure.id);
   return (
@@ -68,11 +75,25 @@ function FailedLibraryItem({ failure }: { failure: FailedLibrary }) {
 export default function SearchComponents() {
   const [selectedLibrary, setSelectedLibrary] = useState<string>(ALL_LIBRARIES);
   const filterLibrary = selectedLibrary === ALL_LIBRARIES ? undefined : (selectedLibrary as LibraryId);
-  const { isLoading, components, failedLibraries } = useComponents(filterLibrary);
+  const { isLoading, components, failedLibraries, fallbackLibraries } = useComponents(filterLibrary);
 
   const failedIds = new Set(failedLibraries.map((f) => f.id));
-  // When a single library is selected, only show its failure (if any).
+  const fallbackIds = new Set(fallbackLibraries.map((f) => f.id));
+
+  // When a single library is selected, only show its own degraded state (if any).
   const visibleFailures = filterLibrary ? failedLibraries.filter((f) => f.id === filterLibrary) : failedLibraries;
+
+  function dropdownIcon(lib: (typeof libraries)[number]) {
+    if (failedIds.has(lib.id)) return { source: Icon.Warning, tintColor: Color.Red };
+    if (fallbackIds.has(lib.id)) return { source: Icon.Warning, tintColor: Color.Yellow };
+    return { source: lib.icon, fallback: Icon.Box };
+  }
+
+  function dropdownTitle(lib: (typeof libraries)[number]) {
+    if (failedIds.has(lib.id)) return `${lib.name} (failed)`;
+    if (fallbackIds.has(lib.id)) return `${lib.name} (fallback)`;
+    return lib.name;
+  }
 
   return (
     <List
@@ -82,19 +103,9 @@ export default function SearchComponents() {
         <List.Dropdown tooltip="Filter by Library" value={selectedLibrary} onChange={setSelectedLibrary}>
           <List.Dropdown.Item title="All Libraries" value={ALL_LIBRARIES} icon={Icon.Globe} />
           <List.Dropdown.Section title="Libraries">
-            {libraries.map((lib) => {
-              const failed = failedIds.has(lib.id);
-              return (
-                <List.Dropdown.Item
-                  key={lib.id}
-                  title={failed ? `${lib.name} (failed)` : lib.name}
-                  value={lib.id}
-                  icon={
-                    failed ? { source: Icon.Warning, tintColor: Color.Red } : { source: lib.icon, fallback: Icon.Box }
-                  }
-                />
-              );
-            })}
+            {libraries.map((lib) => (
+              <List.Dropdown.Item key={lib.id} title={dropdownTitle(lib)} value={lib.id} icon={dropdownIcon(lib)} />
+            ))}
           </List.Dropdown.Section>
         </List.Dropdown>
       }
@@ -109,16 +120,29 @@ export default function SearchComponents() {
       {filterLibrary
         ? // Single library selected — flat list
           components.map((component) => (
-            <ComponentItem key={`${component.library}-${component.slug}`} component={component} />
+            <ComponentItem
+              key={`${component.library}-${component.slug}`}
+              component={component}
+              isFallback={fallbackIds.has(component.library)}
+            />
           ))
         : // All libraries — grouped by library
           Array.from(groupByLibrary(components)).map(([libraryId, libComponents]) => {
             const lib = libraries.find((l) => l.id === libraryId);
             if (libComponents.length === 0) return null;
+            const isFallback = fallbackIds.has(libraryId);
             return (
-              <List.Section key={libraryId} title={lib?.name ?? libraryId}>
+              <List.Section
+                key={libraryId}
+                title={lib?.name ?? libraryId}
+                subtitle={isFallback ? "Using fallback data" : undefined}
+              >
                 {libComponents.map((component) => (
-                  <ComponentItem key={`${component.library}-${component.slug}`} component={component} />
+                  <ComponentItem
+                    key={`${component.library}-${component.slug}`}
+                    component={component}
+                    isFallback={isFallback}
+                  />
                 ))}
               </List.Section>
             );

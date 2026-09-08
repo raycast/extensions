@@ -1,73 +1,60 @@
 import { LIBRARY_URLS } from "../constants";
-import { UIComponent, UILibrary } from "../types";
-import { getCached, setCache } from "../utils/cache";
-
-/** Convert a slug like "button-close" to "Button Close" */
-function toDisplayName(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
+import { ProviderResult, UIComponent, UILibrary } from "../types";
+import { fetchWithFallback, slugToTitle as toDisplayName } from "./provider-helpers";
 
 /**
  * Fetch Taiga UI components by parsing the sitemap.xml.
  * The sitemap contains URLs like https://taiga-ui.dev/components/{slug}/
  * We extract unique component slugs from these URLs.
  *
- * Fallback: if scraping fails, use a comprehensive static list.
+ * Fallback: on any network error, non-OK response, or unparseable markup,
+ * the bundled static list is used and the result is marked as fallback.
  */
-async function fetchComponents(): Promise<UIComponent[]> {
-  const cached = getCached("taiga");
-  if (cached) return cached;
+function fetchComponents(): Promise<ProviderResult> {
+  return fetchWithFallback("taiga", scrape, buildFallback);
+}
 
-  let components: UIComponent[] | null = null;
+async function scrape(): Promise<UIComponent[]> {
+  const res = await fetch(LIBRARY_URLS.taiga.sitemap);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch Taiga UI: ${res.statusText}`);
+  }
+  const xml = await res.text();
 
-  try {
-    const res = await fetch(LIBRARY_URLS.taiga.sitemap);
-    if (res.ok) {
-      const xml = await res.text();
+  // Extract component slugs from sitemap URLs like /components/{slug}/
+  const locRegex = /<loc>https:\/\/taiga-ui\.dev\/components\/([a-z][a-z0-9-]*)\/<\/loc>/g;
+  const slugs = new Set<string>();
+  let match;
 
-      // Extract component slugs from sitemap URLs like /components/{slug}/
-      const locRegex = /<loc>https:\/\/taiga-ui\.dev\/components\/([a-z][a-z0-9-]*)\/<\/loc>/g;
-      const slugs = new Set<string>();
-      let match;
-
-      while ((match = locRegex.exec(xml)) !== null) {
-        const slug = match[1];
-        // Filter out deprecated and legacy components
-        if (!slug.endsWith("-deprecated") && !slug.endsWith("-old") && !slug.endsWith("-legacy")) {
-          slugs.add(slug);
-        }
-      }
-
-      if (slugs.size > 20) {
-        components = Array.from(slugs)
-          .sort()
-          .map((slug) => ({
-            name: toDisplayName(slug),
-            slug,
-            url: `${LIBRARY_URLS.taiga.components}/${slug}`,
-            library: "taiga" as const,
-          }));
-      }
+  while ((match = locRegex.exec(xml)) !== null) {
+    const slug = match[1];
+    // Filter out deprecated and legacy components
+    if (!slug.endsWith("-deprecated") && !slug.endsWith("-old") && !slug.endsWith("-legacy")) {
+      slugs.add(slug);
     }
-  } catch {
-    // Scraping failed, fall through to static list
   }
 
-  // Fallback to static list if scraping didn't yield enough results
-  if (!components || components.length === 0) {
-    components = TAIGA_COMPONENTS.map((slug) => ({
+  if (slugs.size <= 20) {
+    throw new Error("Could not parse component list from Taiga UI");
+  }
+
+  return Array.from(slugs)
+    .sort()
+    .map((slug) => ({
       name: toDisplayName(slug),
       slug,
       url: `${LIBRARY_URLS.taiga.components}/${slug}`,
       library: "taiga" as const,
     }));
-  }
+}
 
-  setCache("taiga", components);
-  return components;
+function buildFallback(): UIComponent[] {
+  return TAIGA_COMPONENTS.map((slug) => ({
+    name: toDisplayName(slug),
+    slug,
+    url: `${LIBRARY_URLS.taiga.components}/${slug}`,
+    library: "taiga" as const,
+  }));
 }
 
 /** Comprehensive static list of Taiga UI component slugs */
