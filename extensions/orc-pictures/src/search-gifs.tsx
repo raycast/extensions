@@ -65,7 +65,10 @@ const GifActions = ({ gif, localGifsDirectory, origin }: GifActionsProps) => {
       <Action icon={Icon.Clipboard} title="Copy GIF" onAction={() => copyGifFile(gif, origin, localGifsDirectory)} />
       <Action
         icon={Icon.Download}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "v" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+        }}
         title="Paste GIF"
         onAction={() => pasteGifFile(gif, origin, localGifsDirectory)}
       />
