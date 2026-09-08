@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "1.0.0",
+  "name": "better-json",
+  "title": "Better JSON",
+  "main": "src/better-json.tsx",
+  "types": "src/better-json.tsx",
+  "files": [
+    "src",
+    "assets",
+    "README.md",
+    "CHANGELOG.md",
+    "tsconfig.json",
+    "eslint.config.js"
+  ],
+  "keywords": [
+    "raycast",
+    "json",
+    "json-parser",
+    "json-formatter",
+    "developer-tools"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XiaoDaiGua-Ray/better-json.git"
+  },
+  "description": "Format, inspect, and convert JSON from Raycast.",
+  "icon": "better-json-icon.png",
+  "author": "xiaodaiguaray",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "better-json",
+      "title": "Better JSON",
+      "description": "Format, inspect, and convert JSON.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showMetadata",
+          "type": "checkbox",
+          "required": false,
+          "title": "Show Detail Metadata",
+          "label": "Show metadata below the formatted JSON preview",
+          "description": "Display additional child counts, source size, and search index statistics. The current path, source, and conversion mode are always visible.",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "test": "node scripts/test.mjs",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "publish-extension": "npx @raycast/api@latest publish"
+  }
+}
