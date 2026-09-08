@@ -1,74 +1,245 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twitter",
-  "title": "Twitter",
-  "description": "Send and search Tweets",
-  "icon": "logo.png",
+  "title": "X.com",
+  "description": "Browse, search, publish posts, and send direct messages on X",
+  "icon": "extension-icon.png",
   "author": "tonka3000",
   "contributors": [
     "peduarte",
-    "xmok"
+    "xmok",
+    "0xdhrv"
   ],
   "license": "MIT",
+  "categories": [
+    "Communication"
+  ],
   "commands": [
     {
       "name": "timeline",
-      "title": "Recent Tweets",
-      "subtitle": "Twitter",
-      "description": "Show Twitter timeline",
+      "title": "Recent Posts",
+      "subtitle": "X (Twitter)",
+      "description": "Show your X home timeline",
       "mode": "view"
     },
     {
       "name": "mytweets",
-      "title": "My Recent Tweets",
-      "subtitle": "Twitter",
-      "description": "Show My Tweets",
+      "title": "My Posts & Analytics",
+      "subtitle": "X (Twitter)",
+      "description": "Show your posts and engagement analytics from the last 30 days",
       "mode": "view"
     },
     {
       "name": "send",
-      "title": "Send Tweet",
-      "subtitle": "Twitter",
-      "description": "Send a tweet",
+      "title": "Send Post",
+      "subtitle": "X (Twitter)",
+      "description": "Publish a post to X",
       "mode": "view"
     },
     {
       "name": "user_search",
       "title": "Search User",
-      "subtitle": "Twitter",
-      "description": "Search Twitter User",
+      "subtitle": "X (Twitter)",
+      "description": "Search X users without leaving Raycast",
       "mode": "view"
+    },
+    {
+      "name": "search-posts",
+      "title": "Search Posts",
+      "subtitle": "X (Twitter)",
+      "description": "Search recent X posts from the last seven days",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "bookmarks",
+      "icon": "extension-icon.png",
+      "title": "Bookmarks",
+      "subtitle": "X (Twitter)",
+      "description": "Browse bookmarked X posts",
+      "mode": "view"
+    },
+    {
+      "name": "bookmark-folders",
+      "icon": "extension-icon.png",
+      "title": "Bookmark Folders",
+      "subtitle": "X (Twitter)",
+      "description": "Browse X bookmark folders and their saved posts",
+      "mode": "view"
+    },
+    {
+      "name": "mentions",
+      "icon": "extension-icon.png",
+      "title": "Mentions",
+      "subtitle": "X (Twitter)",
+      "description": "Triage posts that mention your X account",
+      "mode": "view"
+    },
+    {
+      "name": "send-dm",
+      "title": "Send Direct Message",
+      "subtitle": "X (Twitter)",
+      "description": "Send a confirmed 1:1 or group X direct message",
+      "mode": "view"
+    },
+    {
+      "name": "user-profile",
+      "title": "User Profile",
+      "subtitle": "X (Twitter)",
+      "description": "View an X user profile and their recent posts",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "username",
+          "placeholder": "Username",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "post-selected-text",
+      "title": "Post Selected Text",
+      "subtitle": "X (Twitter)",
+      "description": "Post the selected text to X",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-posts",
+      "title": "Search X Posts",
+      "description": "Searches one page of public X posts from the last seven days and returns a continuation token for explicitly requested additional results"
+    },
+    {
+      "name": "search-my-posts",
+      "title": "Search My X Posts",
+      "description": "Searches the authenticated user's retrievable post and reply history by paginating through up to X's 3,200 most recent authored posts"
+    },
+    {
+      "name": "search-my-connections",
+      "title": "Search My X Connections",
+      "description": "Searches the authenticated user's following by name, username, or profile details, falling back to followers only when following has no matches"
+    },
+    {
+      "name": "get-timeline",
+      "title": "Get X Timeline",
+      "description": "Gets one page of posts from the authenticated user's X home timeline without automatically fetching more billed pages"
+    },
+    {
+      "name": "post",
+      "title": "Post to X",
+      "description": "Publishes a confirmed X post with optional media, quote, poll, and reply settings"
+    },
+    {
+      "name": "post-thread",
+      "title": "Post X Thread",
+      "description": "Publishes a confirmed ordered thread by chaining each post as a reply to the previous post"
+    },
+    {
+      "name": "get-user",
+      "title": "Get X User",
+      "description": "Gets an X user profile and optionally one explicitly requested page of their recent posts"
+    },
+    {
+      "name": "get-user-connections",
+      "title": "Get X User Connections",
+      "description": "Lists one page of followers or following for any specified accessible X account, not just the authenticated user"
+    },
+    {
+      "name": "check-follow-relationship",
+      "title": "Check X Follow Relationship",
+      "description": "Verifies whether one specified X account follows another by scanning up to 10,000 following entries; incomplete or failed lookups remain unverified"
+    },
+    {
+      "name": "get-bookmarks",
+      "title": "Get X Bookmarks",
+      "description": "Gets one explicitly requested page of posts bookmarked by the authenticated X user"
+    },
+    {
+      "name": "get-bookmark-folders",
+      "title": "Get X Bookmark Folders",
+      "description": "Lists bookmark folders or gets one page of posts from a specific folder"
+    },
+    {
+      "name": "get-my-posts",
+      "title": "Get My X Posts",
+      "description": "Gets one page of the authenticated user's posts and private analytics from the last 30 days"
+    },
+    {
+      "name": "get-mentions",
+      "title": "Get X Mentions",
+      "description": "Gets one page of posts that mention the authenticated X user"
+    },
+    {
+      "name": "get-post-engagement",
+      "title": "Get X Post Engagement",
+      "description": "Gets one page of users who liked or reposted a post, or posts that quote it"
+    },
+    {
+      "name": "reply-to-post",
+      "title": "Reply to X Post",
+      "description": "Publishes an exact public reply to a specific X post after showing the text for confirmation"
+    },
+    {
+      "name": "delete-post",
+      "title": "Delete X Post",
+      "description": "Permanently deletes a post owned by the authenticated X user after destructive confirmation"
+    },
+    {
+      "name": "set-like",
+      "title": "Like or Unlike X Post",
+      "description": "Likes or unlikes a specific X post after confirming the requested public interaction"
+    },
+    {
+      "name": "set-repost",
+      "title": "Repost or Undo X Repost",
+      "description": "Reposts or removes the authenticated user's repost of a specific X post after confirmation"
+    },
+    {
+      "name": "set-bookmark",
+      "title": "Add or Remove X Bookmark",
+      "description": "Adds or removes a private bookmark after confirmation"
+    },
+    {
+      "name": "set-reply-hidden",
+      "title": "Hide or Unhide X Reply",
+      "description": "Hides or unhides a reply in the authenticated user's conversation after confirmation"
+    },
+    {
+      "name": "send-dm",
+      "title": "Send X Direct Message",
+      "description": "Sends a confirmed 1:1 or group direct message and never performs unsolicited outreach"
     }
   ],
   "preferences": [
     {
-      "name": "clientid",
-      "type": "password",
-      "title": "OAuth Client ID",
-      "required": false,
-      "default": "",
-      "description": "X OAuth Client ID From Your X Application"
-    },
-    {
       "name": "listwithdetail",
       "type": "checkbox",
-      "label": "Show Tweets inside a Tweets List",
+      "label": "Show the Details Pane by Default",
       "required": false,
       "default": true,
       "title": "List Behavior",
-      "description": "Show Tweets inside a Tweets List directly"
+      "description": "Start post lists with the details pane visible; you can toggle it from the action panel"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "2.2.0",
+    "@raycast/utils": "2.3.1",
     "twitter-api-v2": "^1.16.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "2.2.0",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
-    "eslint": "^9.22.0",
+    "eslint": "10.9.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
