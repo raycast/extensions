@@ -14,13 +14,18 @@ function attrArray(attrs: string, name: string): string[] {
   return [...raw.matchAll(/"([^"]*)"|'([^']*)'/g)].map((m) => m[1] ?? m[2]).filter(Boolean);
 }
 
+/**
+ * Dates are formatted as `en-US` rather than the system locale: Raycast's UI is
+ * English, and extensions are not meant to carry their own localization, so a
+ * fixed locale keeps every row reading the same way for every user.
+ */
 export function formatEntryDate(value: string | undefined): string {
   if (!value) return "";
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!match) return value;
   const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 /** Full date for the detail pane, where there is room for it. */
@@ -30,7 +35,7 @@ export function formatEntryDateLong(value: string | undefined): string {
   if (!match) return value;
   const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+  return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
 /**

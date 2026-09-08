@@ -46,12 +46,18 @@ is fetched while you type, so results are instant and search keeps working witho
 
 ### How fresh the index is
 
-The index is a snapshot, not a live feed. It is regenerated from the docs repository as part of `npm run build`
-and shipped inside each extension release, so **new or renamed docs pages and API endpoints only show up in
-search after a new version of this extension is published** — they are not picked up automatically in between.
-Page *content* is always current, because opening a result fetches the page from `docs.ceypay.io` at read time;
-it is the searchable list of pages and endpoints that follows the release cycle. Blog posts and changelog
-entries are fetched live and are never affected by this.
+The index is a snapshot, not a live feed. `assets/index.json` is committed to the repository and shipped inside
+each extension release, so **new or renamed docs pages and API endpoints only show up in search after a new
+version of this extension is published** — they are not picked up automatically in between. Page *content* is
+always current, because opening a result fetches the page from `docs.ceypay.io` at read time; it is the
+searchable list of pages and endpoints that follows the release cycle. Blog posts and changelog entries are
+fetched live and are never affected by this.
+
+Regeneration is conditional, not automatic. `npm run build` runs `build:index` first, but that script rebuilds
+the index only when it finds a CeyPay docs checkout (a sibling `docs/` directory, or `DOCS_DIR`). Without one it
+prints a notice, keeps the committed snapshot, and lets the build continue — so the extension builds anywhere,
+but a release is only as fresh as the last commit of `assets/index.json`. Refreshing it is a deliberate step for
+a maintainer with the docs repository checked out, described under [Regenerating](#regenerating).
 
 If a page you expect is missing, it most likely landed in the docs after the last release — please
 [open an issue](https://github.com/raycast/extensions/issues/new/choose) and a refreshed index will go out with
@@ -87,7 +93,9 @@ npm run build:index -- --no-verify           # skip the live-URL check
 By default the script verifies every indexed URL against the live site and reports any that are not reachable
 yet. A batch of 404s means the deployed docs are behind the docs repo — deploy, then re-run.
 
-`npm run build` regenerates the index before building the extension, so a release always ships a fresh index.
+`npm run build` runs this step first, so a maintainer who has the docs repository checked out ships a fresh
+index. In a checkout without it, the step is a no-op that keeps the committed `assets/index.json` and the build
+proceeds — regenerate before cutting a release if the docs have moved on.
 
 ## Development
 
