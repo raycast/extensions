@@ -1655,21 +1655,31 @@ export interface CloudSqlInstance {
 }
 
 /** Guards against a malformed response looping forever; far above any realistic page count. */
-const SQLADMIN_MAX_PAGES = 50;
+export const SQLADMIN_MAX_PAGES = 50;
+
+/**
+ * A capped listing can stop with results still outstanding, so callers are told when that
+ * happened rather than being handed a partial list that looks complete.
+ */
+export interface CloudSqlListResult<T> {
+  items: T[];
+  /** True when the page cap was reached while a nextPageToken was still outstanding. */
+  truncated: boolean;
+}
 
 /**
  * `maxResults` means "cap the work" — the hub's bounded resource counts rely on that and
- * stay a single page. Without it every page is followed, so nothing is silently truncated.
+ * stay a single page. Without it every page is followed, up to SQLADMIN_MAX_PAGES.
  */
 export async function listCloudSqlInstances(
   gcloudPath: string,
   projectId: string,
   options?: { fields?: string; maxResults?: number },
-): Promise<CloudSqlInstance[]> {
+): Promise<CloudSqlListResult<CloudSqlInstance>> {
   const paginate = !options?.maxResults;
   const instances: CloudSqlInstance[] = [];
   let pageToken: string | undefined;
-  let page = 0;
+  let pages = 0;
 
   do {
     const params = new URLSearchParams();
@@ -1683,9 +1693,11 @@ export async function listCloudSqlInstances(
 
     instances.push(...(response.items || []));
     pageToken = paginate ? response.nextPageToken : undefined;
-  } while (pageToken && ++page < SQLADMIN_MAX_PAGES);
+    pages += 1;
+  } while (pageToken && pages < SQLADMIN_MAX_PAGES);
 
-  return instances;
+  // A token still in hand means the cap stopped the walk, not the server.
+  return { items: instances, truncated: Boolean(pageToken) };
 }
 
 export async function getCloudSqlInstance(
@@ -1755,11 +1767,11 @@ export async function listCloudSqlBackupRuns(
   projectId: string,
   instanceId: string,
   options?: { maxResults?: number },
-): Promise<CloudSqlBackupRun[]> {
+): Promise<CloudSqlListResult<CloudSqlBackupRun>> {
   const paginate = !options?.maxResults;
   const backupRuns: CloudSqlBackupRun[] = [];
   let pageToken: string | undefined;
-  let page = 0;
+  let pages = 0;
 
   do {
     const params = new URLSearchParams();
@@ -1771,9 +1783,10 @@ export async function listCloudSqlBackupRuns(
 
     backupRuns.push(...(response.items || []));
     pageToken = paginate ? response.nextPageToken : undefined;
-  } while (pageToken && ++page < SQLADMIN_MAX_PAGES);
+    pages += 1;
+  } while (pageToken && pages < SQLADMIN_MAX_PAGES);
 
-  return backupRuns;
+  return { items: backupRuns, truncated: Boolean(pageToken) };
 }
 
 export interface CloudSqlOperation {

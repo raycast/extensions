@@ -6,6 +6,7 @@ import {
   listCloudSqlUsers,
   listCloudSqlBackupRuns,
   createCloudSqlBackupRun,
+  SQLADMIN_MAX_PAGES,
   CloudSqlInstance,
   CloudSqlDatabase,
   CloudSqlUser,
@@ -183,6 +184,26 @@ function InstanceCopySection({ instance, projectId }: { instance: CloudSqlInstan
   );
 }
 
+/**
+ * A toast is easy to miss, and a truncated list otherwise looks complete — so the
+ * shortfall also gets a row that stays on screen, pointing at the console for the rest.
+ */
+function TruncatedNoticeItem({ resource, consoleUrl }: { resource: string; consoleUrl: string }) {
+  return (
+    <List.Item
+      title={`Some ${resource} are not shown`}
+      subtitle={`Stopped after ${SQLADMIN_MAX_PAGES} pages of results`}
+      icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+      accessories={[{ tag: { value: "Partial", color: Color.Orange } }]}
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser title="Open in Console" url={consoleUrl} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 interface CloudSqlViewProps {
   projectId: string;
   gcloudPath: string;
@@ -191,6 +212,7 @@ interface CloudSqlViewProps {
 export default function CloudSqlView({ projectId, gcloudPath }: CloudSqlViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [instances, setInstances] = useState<CloudSqlInstance[]>([]);
+  const [isTruncated, setIsTruncated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { push } = useNavigation();
   const { isEnabled: isStreamerMode } = useStreamerMode();
@@ -205,10 +227,17 @@ export default function CloudSqlView({ projectId, gcloudPath }: CloudSqlViewProp
     setError(null);
 
     try {
-      const instanceList = await listCloudSqlInstances(gcloudPath, projectId);
-      setInstances(instanceList);
+      const { items, truncated } = await listCloudSqlInstances(gcloudPath, projectId);
+      setInstances(items);
+      setIsTruncated(truncated);
 
-      if (instanceList.length === 0) {
+      if (truncated) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Showing partial results",
+          message: `Stopped after ${SQLADMIN_MAX_PAGES} pages — some instances are not listed`,
+        });
+      } else if (items.length === 0) {
         showToast({
           style: Toast.Style.Success,
           title: "No Cloud SQL instances found",
@@ -218,7 +247,7 @@ export default function CloudSqlView({ projectId, gcloudPath }: CloudSqlViewProp
         showToast({
           style: Toast.Style.Success,
           title: "Instances loaded",
-          message: `Found ${instanceList.length} instances`,
+          message: `Found ${items.length} instances`,
         });
       }
     } catch (err) {
@@ -378,42 +407,53 @@ ${
           }
         />
       ) : (
-        instances.map((instance) => {
-          const status = getInstanceStatus(instance);
-          const isHighAvailability = instance.settings?.availabilityType === "REGIONAL";
+        [
+          ...instances.map((instance) => {
+            const status = getInstanceStatus(instance);
+            const isHighAvailability = instance.settings?.availabilityType === "REGIONAL";
 
-          return (
-            <List.Item
-              key={instance.name}
-              title={instance.name}
-              subtitle={formatDatabaseVersion(instance.databaseVersion)}
-              icon={{ source: Icon.HardDrive, tintColor: status.color }}
-              accessories={[
-                ...(isHighAvailability ? [{ icon: Icon.Layers, tooltip: "Regional (HA)" }] : []),
-                ...(instance.settings?.tier ? [{ text: instance.settings.tier, tooltip: "Machine type" }] : []),
-                ...(instance.region ? [{ text: instance.region }] : []),
-                { tag: { value: status.text, color: status.color } },
-              ]}
-              actions={
-                <ActionPanel>
-                  <InstanceNavigationSection
-                    instance={instance}
-                    projectId={projectId}
-                    gcloudPath={gcloudPath}
-                    onViewDetails={() => viewInstanceDetails(instance)}
-                  />
-                  <InstanceCopySection instance={instance} projectId={projectId} />
-                  <ActionPanel.Section>
-                    <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchInstances} />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="Cloud Shell">
-                    <CloudShellAction projectId={projectId} />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          );
-        })
+            return (
+              <List.Item
+                key={instance.name}
+                title={instance.name}
+                subtitle={formatDatabaseVersion(instance.databaseVersion)}
+                icon={{ source: Icon.HardDrive, tintColor: status.color }}
+                accessories={[
+                  ...(isHighAvailability ? [{ icon: Icon.Layers, tooltip: "Regional (HA)" }] : []),
+                  ...(instance.settings?.tier ? [{ text: instance.settings.tier, tooltip: "Machine type" }] : []),
+                  ...(instance.region ? [{ text: instance.region }] : []),
+                  { tag: { value: status.text, color: status.color } },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <InstanceNavigationSection
+                      instance={instance}
+                      projectId={projectId}
+                      gcloudPath={gcloudPath}
+                      onViewDetails={() => viewInstanceDetails(instance)}
+                    />
+                    <InstanceCopySection instance={instance} projectId={projectId} />
+                    <ActionPanel.Section>
+                      <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchInstances} />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="Cloud Shell">
+                      <CloudShellAction projectId={projectId} />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          }),
+          ...(isTruncated
+            ? [
+                <TruncatedNoticeItem
+                  key="cloudsql-truncated"
+                  resource="instances"
+                  consoleUrl={`https://console.cloud.google.com/sql/instances?project=${projectId}`}
+                />,
+              ]
+            : []),
+        ]
       )}
     </List>
   );
@@ -689,6 +729,7 @@ function getBackupStatus(backup: CloudSqlBackupRun): StatusInfo {
 function BackupsView({ projectId, gcloudPath, instanceName }: SubViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [backups, setBackups] = useState<CloudSqlBackupRun[]>([]);
+  const [isTruncated, setIsTruncated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { push } = useNavigation();
 
@@ -701,8 +742,17 @@ function BackupsView({ projectId, gcloudPath, instanceName }: SubViewProps) {
     setError(null);
 
     try {
-      const backupList = await listCloudSqlBackupRuns(gcloudPath, projectId, instanceName);
-      setBackups(backupList);
+      const { items, truncated } = await listCloudSqlBackupRuns(gcloudPath, projectId, instanceName);
+      setBackups(items);
+      setIsTruncated(truncated);
+
+      if (truncated) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Showing partial results",
+          message: `Stopped after ${SQLADMIN_MAX_PAGES} pages — older backups are not listed`,
+        });
+      }
     } catch (err) {
       console.error("Error fetching backups:", err);
       const friendly = friendlyErrorMessage(err, "Failed to fetch backups");
@@ -766,43 +816,57 @@ function BackupsView({ projectId, gcloudPath, instanceName }: SubViewProps) {
           }
         />
       ) : (
-        backups.map((backup) => {
-          const status = getBackupStatus(backup);
-          const isOnDemand = backup.type === "ON_DEMAND";
+        [
+          ...backups.map((backup) => {
+            const status = getBackupStatus(backup);
+            const isOnDemand = backup.type === "ON_DEMAND";
 
-          return (
-            <List.Item
-              key={backup.id}
-              title={formatTimestamp(backup.startTime)}
-              subtitle={backup.description || undefined}
-              icon={{ source: Icon.Clock, tintColor: status.color }}
-              accessories={[
-                ...(backup.location ? [{ text: backup.location }] : []),
-                {
-                  tag: { value: isOnDemand ? "On-demand" : "Automated", color: isOnDemand ? Color.Blue : Color.Purple },
-                },
-                { tag: { value: status.text, color: status.color } },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Create Backup"
-                    icon={Icon.Plus}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    onAction={handleCreateBackup}
-                  />
-                  <Action.CopyToClipboard title="Copy Backup ID" content={backup.id} />
-                  <Action.OpenInBrowser
-                    title="Open in Console"
-                    url={`https://console.cloud.google.com/sql/instances/${instanceName}/backups?project=${projectId}`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                  />
-                  <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchBackups} />
-                </ActionPanel>
-              }
-            />
-          );
-        })
+            return (
+              <List.Item
+                key={backup.id}
+                title={formatTimestamp(backup.startTime)}
+                subtitle={backup.description || undefined}
+                icon={{ source: Icon.Clock, tintColor: status.color }}
+                accessories={[
+                  ...(backup.location ? [{ text: backup.location }] : []),
+                  {
+                    tag: {
+                      value: isOnDemand ? "On-demand" : "Automated",
+                      color: isOnDemand ? Color.Blue : Color.Purple,
+                    },
+                  },
+                  { tag: { value: status.text, color: status.color } },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Create Backup"
+                      icon={Icon.Plus}
+                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      onAction={handleCreateBackup}
+                    />
+                    <Action.CopyToClipboard title="Copy Backup ID" content={backup.id} />
+                    <Action.OpenInBrowser
+                      title="Open in Console"
+                      url={`https://console.cloud.google.com/sql/instances/${instanceName}/backups?project=${projectId}`}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                    />
+                    <Action title="Refresh" icon={Icon.RotateClockwise} onAction={fetchBackups} />
+                  </ActionPanel>
+                }
+              />
+            );
+          }),
+          ...(isTruncated
+            ? [
+                <TruncatedNoticeItem
+                  key="cloudsql-backups-truncated"
+                  resource="backups"
+                  consoleUrl={`https://console.cloud.google.com/sql/instances/${instanceName}/backups?project=${projectId}`}
+                />,
+              ]
+            : []),
+        ]
       )}
     </List>
   );

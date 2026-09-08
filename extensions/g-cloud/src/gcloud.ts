@@ -406,6 +406,13 @@ export async function fetchResourceCounts(
     iamCount = policy.bindings?.length || 0;
   }
 
+  // Cloud SQL returns { items, truncated } rather than a bare array.
+  let cloudsqlCount = 0;
+  if (cloudsqlResult.status === "fulfilled") {
+    const page = cloudsqlResult.value as { items?: unknown[] };
+    cloudsqlCount = page.items?.length || 0;
+  }
+
   return {
     compute: getArrayCount(computeResult as PromiseSettledResult<unknown[]>),
     storage: getArrayCount(storageResult as PromiseSettledResult<unknown[]>),
@@ -414,7 +421,7 @@ export async function fetchResourceCounts(
     secrets: getArrayCount(secretsResult as PromiseSettledResult<unknown[]>),
     cloudrun: getArrayCount(cloudrunResult as PromiseSettledResult<unknown[]>),
     cloudfunctions: getArrayCount(cloudfunctionsResult as PromiseSettledResult<unknown[]>),
-    cloudsql: getArrayCount(cloudsqlResult as PromiseSettledResult<unknown[]>),
+    cloudsql: cloudsqlCount,
     cloudbuild: getArrayCount(cloudbuildResult as PromiseSettledResult<unknown[]>),
   };
 }
