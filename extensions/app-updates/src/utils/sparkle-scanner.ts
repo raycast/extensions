@@ -54,8 +54,9 @@ async function mapInBatches<T, R>(
   return results;
 }
 
-// An app with a feed costs 4 `defaults` calls (the feed URL, then 3 in
-// parallel), so a batch of 8 peaks at ~32 concurrent processes.
+// An app with a feed costs 4 `defaults` calls, but never all at once: the feed
+// lookup is awaited before the other three run in parallel. A batch of 8 is
+// therefore bounded by 8 * 3 = 24 concurrent processes.
 const PLIST_BATCH_SIZE = 8;
 
 async function readAppInfo(app: { name: string; path: string }): Promise<AppInfo | null> {
