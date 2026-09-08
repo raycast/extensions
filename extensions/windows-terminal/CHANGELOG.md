@@ -1,6 +1,6 @@
 # Windows Terminal Changelog
 
-## [New Tab Menu Preference] - 2026-09-08
+## [New Tab Menu Preference] - {PR_MERGE_DATE}
 
 - Added the `Use New Tab Menu order` preference. When enabled, profiles are filtered and ordered to match Windows Terminal's `newTabMenu` setting (`profile`, `matchProfiles`, `folder`, and `remainingProfiles` entries), instead of the raw `settings.json` list order.
 

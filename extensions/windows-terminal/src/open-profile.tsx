@@ -46,9 +46,17 @@ function resolveNewTabMenuOrder(profiles: Profile[], newTabMenu: NewTabMenuEntry
         const match = profiles.find((p) => p.guid === entry.profile || p.name === entry.profile);
         if (match) addGuid(match.guid);
       } else if (entry.type === "matchProfiles") {
-        const nameRe = entry.name ? new RegExp(entry.name) : null;
-        const cmdRe = entry.commandline ? new RegExp(entry.commandline) : null;
-        const sourceRe = entry.source ? new RegExp(entry.source) : null;
+        // A malformed regex in settings.json shouldn't crash the whole list — skip just this entry.
+        let nameRe: RegExp | null;
+        let cmdRe: RegExp | null;
+        let sourceRe: RegExp | null;
+        try {
+          nameRe = entry.name ? new RegExp(entry.name) : null;
+          cmdRe = entry.commandline ? new RegExp(entry.commandline) : null;
+          sourceRe = entry.source ? new RegExp(entry.source) : null;
+        } catch {
+          continue;
+        }
         profiles.forEach((p) => {
           if (nameRe && !nameRe.test(p.name)) return;
           if (cmdRe && !cmdRe.test(p.commandline ?? "")) return;
@@ -168,93 +176,98 @@ function Actions(props: { name: string; quake: boolean }) {
   );
 }
 
+function isSsh(item: Profile) {
+  return item.source === "Windows.Terminal.SSH";
+}
+
+function isWsl(item: Profile) {
+  return item.source === "Microsoft.WSL" || item.source === "Windows.Terminal.Wsl";
+}
+
+function getIcon(item: Profile) {
+  if (item.guid === "{b453ae62-4e3d-5e58-b989-0a998ec441b8}") return Icon.Cloud; // Azure Cloud Shell
+  if (isSsh(item)) return Icon.Network;
+  if (isWsl(item)) return Icon.HardDrive;
+  return Icon.Terminal;
+}
+
+function getKeywords(item: Profile) {
+  if (
+    item.guid === "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}" || // Windows PowerShell 1.0 (comes with Windows)
+    item.guid === "{574e775e-4f2a-5b96-ac1e-a2962a402336}" // Windows Powershell 7.0+
+  ) {
+    return ["pwsh"];
+  }
+  if (item.guid === "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}") return ["cmd"];
+  return [];
+}
+
+function ProfileItem(props: { item: Profile; quake: boolean }) {
+  return (
+    <List.Item
+      key={props.item.guid}
+      icon={getIcon(props.item)}
+      title={props.item.name}
+      keywords={getKeywords(props.item)}
+      actions={<Actions name={props.item.name} quake={props.quake} />}
+    />
+  );
+}
+
 export default function Command() {
   const { openProfilesInQuakeWindow: quake, useNewTabMenu } = getPreferenceValues<Preferences>();
 
   const newTabMenuOrder =
     useNewTabMenu && PROFILES.newTabMenu ? resolveNewTabMenuOrder(PROFILES.profiles.list, PROFILES.newTabMenu) : null;
-  const orderIndex = newTabMenuOrder ? new Map(newTabMenuOrder.map((guid, index) => [guid, index])) : null;
 
-  // When ordering by the New Tab Menu, drop profiles it doesn't reference and sort by
-  // first-reference order; otherwise keep the existing settings.json list order.
-  function applyOrder(items: Profile[]): Profile[] {
-    if (!orderIndex) return items;
-    return items
-      .filter((item) => orderIndex.has(item.guid))
+  // The New Tab Menu can interleave regular, SSH, and WSL profiles, so honoring its order means
+  // one flat list instead of the three fixed, independently-ordered sections below.
+  if (newTabMenuOrder) {
+    const orderIndex = new Map(newTabMenuOrder.map((guid, index) => [guid, index]));
+    const items = PROFILES.profiles.list
+      .filter((item) => item.hidden !== true && orderIndex.has(item.guid))
       .sort((a, b) => orderIndex.get(a.guid)! - orderIndex.get(b.guid)!);
+
+    return (
+      <List searchBarPlaceholder="Search all profiles...">
+        <List.Section title="Profiles">
+          {items.map((item) => (
+            <ProfileItem key={item.guid} item={item} quake={quake} />
+          ))}
+        </List.Section>
+      </List>
+    );
   }
 
   return (
     <List searchBarPlaceholder="Search all profiles...">
       <List.Section title="Profiles">
-        {applyOrder(
-          PROFILES.profiles.list.filter(
-            (item) =>
-              item.hidden !== true &&
-              item.source !== "Microsoft.WSL" &&
-              item.source !== "Windows.Terminal.Wsl" &&
-              item.source !== "Windows.Terminal.SSH",
-          ),
-        ).map((item) => (
-          <List.Item
-            key={item.guid}
-            icon={
-              item.guid === "{b453ae62-4e3d-5e58-b989-0a998ec441b8}" // Azure Cloud Shell
-                ? Icon.Cloud
-                : Icon.Terminal
-            }
-            title={item.name}
-            keywords={
-              item.guid === "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}" || // Windows PowerShell 1.0 (comes with Windows)
-              item.guid === "{574e775e-4f2a-5b96-ac1e-a2962a402336}" // Windows Powershell 7.0+
-                ? ["pwsh"]
-                : item.guid === "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}"
-                  ? ["cmd"]
-                  : []
-            }
-            actions={<Actions name={item.name} quake={quake} />}
-          />
-        ))}
+        {PROFILES.profiles.list
+          .filter((item) => item.hidden !== true && !isSsh(item) && !isWsl(item))
+          .map((item) => (
+            <ProfileItem key={item.guid} item={item} quake={quake} />
+          ))}
       </List.Section>
 
-      {(() => {
-        const remoteServers = applyOrder(
-          PROFILES.profiles.list.filter((item) => item.hidden !== true && item.source === "Windows.Terminal.SSH"),
-        );
-        return remoteServers.length > 0 ? (
-          <List.Section title="Remote Servers">
-            {remoteServers.map((item) => (
-              <List.Item
-                key={item.guid}
-                icon={Icon.Network}
-                title={item.name}
-                actions={<Actions name={item.name} quake={quake} />}
-              />
+      {PROFILES.profiles.list.some((item) => isSsh(item)) ? (
+        <List.Section title="Remote Servers">
+          {PROFILES.profiles.list
+            .filter((item) => item.hidden !== true && isSsh(item))
+            .map((item) => (
+              <ProfileItem key={item.guid} item={item} quake={quake} />
             ))}
-          </List.Section>
-        ) : null;
-      })()}
+        </List.Section>
+      ) : null}
 
-      {(() => {
-        const wslProfiles = applyOrder(
-          PROFILES.profiles.list.filter(
-            (item) =>
-              item.hidden !== true && (item.source === "Microsoft.WSL" || item.source === "Windows.Terminal.Wsl"),
-          ),
-        );
-        return wslProfiles.length > 0 ? (
-          <List.Section title="Windows Subsystem for Linux">
-            {wslProfiles.map((item) => (
-              <List.Item
-                key={item.guid}
-                icon={Icon.HardDrive}
-                title={item.name}
-                actions={<Actions name={item.name} quake={quake} />}
-              />
+      {PROFILES.profiles.list.some((item) => isWsl(item)) ? (
+        <List.Section title="Windows Subsystem for Linux">
+          {PROFILES.profiles.list
+            .filter((item) => item.hidden !== true && isWsl(item))
+            .map((item) => (
+              <ProfileItem key={item.guid} item={item} quake={quake} />
             ))}
-          </List.Section>
-        ) : null;
-      })()}
+        </List.Section>
+      ) : null}
     </List>
   );
 }
