@@ -18,7 +18,7 @@
       "name": "search-tickets",
       "title": "Search Tickets",
       "subtitle": "iPF OS",
-      "description": "Find any ticket and act on it. Opens on what you are watching, and widens to the whole organisation.",
+      "description": "Find and act on tickets you watch, are assigned to, or created.",
       "mode": "view",
       "keywords": ["ticket", "tickets", "ticketing", "issue", "support", "backlog", "watching"]
     },

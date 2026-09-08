@@ -5,19 +5,18 @@ import type { Ticket } from "../domain/ticket";
 
 const PAGE_SIZE = 50;
 
-export type TicketScope = "mine" | "assigned" | "watching" | "all";
+export type TicketScope = "mine" | "assigned" | "watching";
 
 export const SCOPE_LABELS: Record<TicketScope, string> = {
   watching: "Watching",
   assigned: "Assigned to Me",
   mine: "My Tickets",
-  all: "All Tickets",
 };
 
-export const SCOPE_ORDER: TicketScope[] = ["watching", "assigned", "mine", "all"];
+export const SCOPE_ORDER: TicketScope[] = ["watching", "assigned", "mine"];
 
 const scopeFilter = (scope: TicketScope, subject: string | undefined): Partial<ListTicketsParams> => {
-  if (!subject || scope === "all") return {};
+  if (!subject) return {};
 
   switch (scope) {
     case "assigned":
@@ -55,7 +54,7 @@ export function useTickets({ scope, subject, enabled = true, ...filters }: UseTi
         };
       },
     [scope, subject, JSON.stringify(filters)],
-    { execute: enabled, keepPreviousData: true },
+    { execute: enabled && Boolean(subject), keepPreviousData: true },
   );
 
   return {

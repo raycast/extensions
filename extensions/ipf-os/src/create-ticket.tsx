@@ -6,7 +6,7 @@ import { listProjects, listSprints } from "./lib/api/directory";
 import { describeError } from "./lib/api/errors";
 import { createTicket } from "./lib/api/tickets";
 import { TICKET_TYPES, TYPE_LABELS, type TicketType } from "./lib/domain/enums";
-import { derivePriority, isPastDue } from "./lib/domain/priority";
+import { derivePriority } from "./lib/domain/priority";
 import { useDirectory } from "./lib/hooks/use-directory";
 import { useSession } from "./lib/hooks/use-session";
 import { priorityLabel, userAvatar } from "./lib/ui/presentation";
@@ -54,9 +54,6 @@ export default function CreateTicketCommand() {
     if (!values.title.trim()) nextErrors.title = "Give the ticket a title";
     if (!values.description.trim()) nextErrors.description = "Describe what needs attention";
     if (!values.owningDepartmentId) nextErrors.owningDepartmentId = "Choose an owning department";
-    if (isPastDue(values.dueDate)) {
-      nextErrors.dueDate = "Pick a future date. A past due date breaches its SLA immediately.";
-    }
 
     setErrors(nextErrors);
     if (Object.values(nextErrors).some(Boolean)) return;

@@ -16,14 +16,13 @@ To disconnect: Action Panel → **Sign Out**, or Raycast → Settings → Extens
 
 ### Search Tickets
 
-Find any ticket and act on it. Opens on **Watching**, and widens from there.
+Find and act on tickets you watch, are assigned to, or created. Opens on **Watching**.
 
 | Scope | Meaning |
 | --- | --- |
 | Watching | Tickets you participate in (default) |
 | Assigned to Me | Tickets assigned to you |
 | My Tickets | Tickets you created |
-| All Tickets | Organisation-wide |
 
 Type to search ticket number, title, or description. Filter by status or type from the Action Panel.
 

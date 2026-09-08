@@ -19,6 +19,3 @@ export function derivePriority(dueDate: Date | null | undefined, reference = new
   if (leadMinutes <= SLA_WINDOW_MINUTES.MEDIUM) return "MEDIUM";
   return "NORMAL";
 }
-
-export const isPastDue = (dueDate: Date | null | undefined, reference = new Date()): boolean =>
-  Boolean(dueDate) && (dueDate as Date).getTime() <= reference.getTime();

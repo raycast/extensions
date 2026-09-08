@@ -42,7 +42,7 @@ export default function SearchTicketsCommand() {
     status,
     type,
     search: searchText.trim() || undefined,
-    enabled: Boolean(session) || scope === "all",
+    enabled: Boolean(session),
   });
 
   if (sessionError) {
