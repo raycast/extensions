@@ -1,7 +1,7 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { fetcher, validateToken } from "./utils";
-import { DataValues, User, Workspace } from "./types";
+import { fetcher, resolveWorkspaceId, validateToken } from "./utils";
+import { DataValues, User } from "./types";
 
 interface ConfigProps {
   config: DataValues;
@@ -37,16 +37,10 @@ export default function useConfig(): ConfigProps {
         if (data) {
           const user = data as User;
 
-          // defaultWorkspace is not guaranteed. setItem cannot store undefined, so a missing value
-          // means workspaceId never lands in LocalStorage, the guard above fails on every mount,
-          // and every request goes to /workspaces/undefined/... Fall back to the active workspace,
-          // then to the first workspace this token can see.
-          let workspaceId = user.defaultWorkspace || user.activeWorkspace;
-
-          if (!workspaceId) {
-            const { data: workspaces } = await fetcher(`/workspaces`);
-            workspaceId = (workspaces as Workspace[] | undefined)?.[0]?.id;
-          }
+          // setItem cannot store undefined, so an unresolved workspace means workspaceId never
+          // lands in LocalStorage, the guard above fails on every mount, and every request goes to
+          // /workspaces/undefined/...
+          const workspaceId = await resolveWorkspaceId(user);
 
           if (!workspaceId) {
             showToast(Toast.Style.Failure, "No Clockify workspace found for this API key");
