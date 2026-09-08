@@ -1,6 +1,6 @@
 # Telegram Changelog
 
-## [Fix Photo Previews and Message Senders] - {PR_MERGE_DATE}
+## [Fix Photo Previews and Message Senders] - 2026-09-08
 
 - Show photos in the detail pane. They were embedded as base64 data URIs, which Raycast's markdown renderer drops once they grow large, leaving the pane blank
 - Resolve message senders from the entity attached to each message rather than `client.getEntity`, which throws in a fresh command process because the session does not persist an entity cache, showing group messages as "Unknown User"
