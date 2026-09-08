@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { dataGeneration, withStorageLock } from "./storage-lock";
 import { VisitLog } from "./types";
 import { canonicalPath, pathExists } from "./read-dir";
 import {
@@ -26,35 +27,46 @@ export async function loadVisitLog(): Promise<VisitLog> {
   return EMPTY;
 }
 
-async function save(log: VisitLog): Promise<void> {
+async function save(log: VisitLog, assertCurrent: () => void): Promise<void> {
+  assertCurrent();
   await LocalStorage.setItem(KEY, JSON.stringify(log));
 }
 
 /** Records a visit against current storage to avoid stale-view overwrites. */
-export async function recordVisit(path: string): Promise<VisitLog> {
-  const loaded = await loadVisitLog();
-  // Canonical paths merge usage across aliases.
-  const updated = recordEms(loaded, canonicalPath(path), Date.now());
+export async function recordVisit(
+  path: string,
+  generation = dataGeneration(),
+): Promise<VisitLog> {
+  return withStorageLock(async (assertCurrent) => {
+    const loaded = await loadVisitLog();
+    // Canonical paths merge usage across aliases.
+    const updated = recordEms(loaded, canonicalPath(path), Date.now());
 
-  const { log, pruned } = pruneVisits(updated);
-  const final = pruned > 0 ? dropMissing(log) : log;
-  await save(final);
-  return final;
+    const { log, pruned } = pruneVisits(updated);
+    const final = pruned > 0 ? dropMissing(log) : log;
+    await save(final, assertCurrent);
+    return final;
+  }, generation);
 }
 
 export async function resetVisit(path: string): Promise<VisitLog> {
-  const log = await loadVisitLog();
-  const items = { ...log.items };
-  delete items[canonicalPath(path)];
-  delete items[path];
-  const next = { tick: log.tick, items };
-  await save(next);
-  return next;
+  return withStorageLock(async (assertCurrent) => {
+    const log = await loadVisitLog();
+    const items = { ...log.items };
+    delete items[canonicalPath(path)];
+    delete items[path];
+    const next = { tick: log.tick, items };
+    await save(next, assertCurrent);
+    return next;
+  }, dataGeneration());
 }
 
 export async function clearVisits(): Promise<VisitLog> {
-  await LocalStorage.removeItem(KEY);
-  return EMPTY;
+  return withStorageLock(async (assertCurrent) => {
+    assertCurrent();
+    await LocalStorage.removeItem(KEY);
+    return EMPTY;
+  }, dataGeneration());
 }
 
 /** Forget entries whose file no longer exists. Only run when pruning fired. */
@@ -86,15 +98,19 @@ export async function loadAbbreviations(): Promise<Abbreviations> {
 export async function recordAbbreviation(
   normalizedQuery: string,
   target: string,
+  generation = dataGeneration(),
 ): Promise<Abbreviations> {
-  if (normalizedQuery.trim() === "") return loadAbbreviations();
-  const next = mergeAbbreviation(
-    await loadAbbreviations(),
-    normalizedQuery.trim().toLowerCase(),
-    canonicalPath(target),
-  );
-  await LocalStorage.setItem(ABBREV_KEY, JSON.stringify(next));
-  return next;
+  return withStorageLock(async (assertCurrent) => {
+    if (normalizedQuery.trim() === "") return loadAbbreviations();
+    const next = mergeAbbreviation(
+      await loadAbbreviations(),
+      normalizedQuery.trim().toLowerCase(),
+      canonicalPath(target),
+    );
+    assertCurrent();
+    await LocalStorage.setItem(ABBREV_KEY, JSON.stringify(next));
+    return next;
+  }, generation);
 }
 
 const PINS_KEY = "pins";
@@ -114,13 +130,16 @@ export async function loadPins(): Promise<string[]> {
 }
 
 export async function togglePin(rawTarget: string): Promise<string[]> {
-  const target = canonicalPath(rawTarget);
-  const pins = await loadPins();
-  const next = pins.includes(target)
-    ? pins.filter((p) => p !== target)
-    : [...pins, target];
-  await LocalStorage.setItem(PINS_KEY, JSON.stringify(next));
-  return next;
+  return withStorageLock(async (assertCurrent) => {
+    const target = canonicalPath(rawTarget);
+    const pins = await loadPins();
+    const next = pins.includes(target)
+      ? pins.filter((p) => p !== target)
+      : [...pins, target];
+    assertCurrent();
+    await LocalStorage.setItem(PINS_KEY, JSON.stringify(next));
+    return next;
+  }, dataGeneration());
 }
 
 const SEARCHES_KEY = "searches";
@@ -140,14 +159,20 @@ export async function loadSearches(): Promise<string[]> {
 }
 
 /** Records distinct queries in most-recent-first order. */
-export async function recordSearch(query: string): Promise<string[]> {
-  const trimmed = query.trim();
-  if (trimmed === "") return loadSearches();
-  const existing = await loadSearches();
-  const next = [trimmed, ...existing.filter((q) => q !== trimmed)].slice(
-    0,
-    MAX_SEARCHES,
-  );
-  await LocalStorage.setItem(SEARCHES_KEY, JSON.stringify(next));
-  return next;
+export async function recordSearch(
+  query: string,
+  generation = dataGeneration(),
+): Promise<string[]> {
+  return withStorageLock(async (assertCurrent) => {
+    const trimmed = query.trim();
+    if (trimmed === "") return loadSearches();
+    const existing = await loadSearches();
+    const next = [trimmed, ...existing.filter((q) => q !== trimmed)].slice(
+      0,
+      MAX_SEARCHES,
+    );
+    assertCurrent();
+    await LocalStorage.setItem(SEARCHES_KEY, JSON.stringify(next));
+    return next;
+  }, generation);
 }

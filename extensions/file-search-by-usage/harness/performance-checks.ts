@@ -5,6 +5,7 @@ import { execFile } from "node:child_process";
 import { isDeepStrictEqual } from "node:util";
 import { compareNames } from "../src/lib/name-order";
 import { MAX_ENTRIES, readDirectory, statEntry } from "../src/lib/read-dir";
+import { Entry } from "../src/lib/types";
 import {
   DirectorySnapshot,
   observeDirectory,
@@ -61,6 +62,30 @@ export async function performanceChecks(
     fs.symlinkSync(file, path.join(root, "foo-link"));
     fs.symlinkSync(path.join(root, "bar"), path.join(root, "bar-link"));
     fs.symlinkSync(path.join(root, "missing"), path.join(root, "broken-link"));
+    const aliasedParent = path.join(root, "parent-alias");
+    fs.symlinkSync(root, aliasedParent);
+    const throughParent = path.join(aliasedParent, path.basename(file));
+    const realFile = fs.realpathSync(file);
+    assert(
+      statEntry(throughParent)?.storagePath === realFile,
+      "single-entry reads resolve symlinks in parent folders for storage identity",
+    );
+    assert(
+      (await statEntryAsync(throughParent))?.storagePath === realFile,
+      "asynchronous entry reads share canonical identity through aliased parents",
+    );
+    assert(
+      readDirectory(aliasedParent, false).entries.find(
+        (entry) => entry.path === throughParent,
+      )?.storagePath === realFile,
+      "directory listings use canonical storage paths beneath aliased parents",
+    );
+    assert(
+      (await readDirectoryAsync(aliasedParent, false)).entries.find(
+        (entry) => entry.path === throughParent,
+      )?.storagePath === realFile,
+      "asynchronous listings preserve canonical storage identity beneath aliased parents",
+    );
     const stats = fs.statSync(file);
     const originalStat = fs.statSync;
     let redundantStats = 0;
@@ -95,12 +120,15 @@ export async function performanceChecks(
       );
     }
     for (const hidden of [false, true]) {
+      const actual = await readDirectoryAsync(root, hidden);
+      const expected = readDirectory(root, hidden);
+      const byPath = (a: Entry, b: Entry) => a.path.localeCompare(b.path);
       assert(
         isDeepStrictEqual(
-          await readDirectoryAsync(root, hidden),
-          readDirectory(root, hidden),
+          { ...actual, entries: actual.entries.sort(byPath) },
+          { ...expected, entries: expected.entries.sort(byPath) },
         ),
-        `async directory results preserve order, hidden filtering, and broken links (hidden=${hidden})`,
+        `async directory results preserve metadata, hidden filtering, and broken links (hidden=${hidden})`,
       );
     }
     assert(
@@ -213,11 +241,14 @@ export async function performanceChecks(
     fs.mkdirSync(large);
     for (let i = 0; i < MAX_ENTRIES + 1; i++)
       fs.writeFileSync(path.join(large, `foo-${i}`), "");
-    const syncLarge = readDirectory(large, false);
     const asyncLarge = await readDirectoryAsync(large, false);
     assert(
-      asyncLarge.truncated === 1 && isDeepStrictEqual(asyncLarge, syncLarge),
-      "async listings preserve the entry cap, truncation count, and selection order",
+      asyncLarge.truncated > 0 &&
+        asyncLarge.entries.length === MAX_ENTRIES &&
+        new Set(asyncLarge.entries.map((entry) => entry.path)).size ===
+          MAX_ENTRIES &&
+        asyncLarge.entries.every((entry) => fs.existsSync(entry.path)),
+      "async listings cap retained entries, preserve valid unique paths, and report omissions",
     );
   } finally {
     for (const stop of stops) stop();

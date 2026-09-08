@@ -9,6 +9,8 @@ export function useDirectoryListing(
   dir: string | undefined,
   showHidden: boolean,
   reloadKey: number,
+  signal?: AbortSignal,
+  enabled = true,
 ): DirectorySnapshot {
   const [state, setState] = useState<{
     dir: string;
@@ -17,11 +19,22 @@ export function useDirectoryListing(
     snapshot: DirectorySnapshot;
   }>();
   useEffect(() => {
-    if (dir === undefined) return;
-    return observeDirectory(dir, showHidden, (snapshot) => {
-      setState({ dir, showHidden, reloadKey, snapshot });
-    });
-  }, [dir, showHidden, reloadKey]);
+    if (dir === undefined || !enabled || signal?.aborted) return;
+    const stop = observeDirectory(
+      dir,
+      showHidden,
+      (snapshot) => {
+        if (signal?.aborted) return;
+        setState({ dir, showHidden, reloadKey, snapshot });
+      },
+      { continuous: true },
+    );
+    signal?.addEventListener("abort", stop, { once: true });
+    return () => {
+      signal?.removeEventListener("abort", stop);
+      stop();
+    };
+  }, [dir, showHidden, reloadKey, signal, enabled]);
   if (dir === undefined) return EMPTY;
   return state?.dir === dir &&
     state.showHidden === showHidden &&

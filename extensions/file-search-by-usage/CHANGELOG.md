@@ -4,7 +4,20 @@
 
 - Search local and cloud files and folders in one usage-ranked list.
 - Show history, pins, cached results, and indexed Google Drive locations immediately, then merge delayed Spotlight results.
-- Navigate folders with `⌘→` and `⌘←`, search from the frontmost Finder folder, or type an absolute or home-relative path.
+- Keep live search collecting results until its sources finish, a memory safety limit is reached, or the query or folder changes, without interrupting previews or selection.
+- Cap each screen's live ranking pool and cached rows at 500, alongside bounded Spotlight candidates and recursive folder queues; stream directory reads and report partial coverage when capped.
+- Limit the displayed list to 100 rows and build action menus and details only for the selected item to reduce memory use.
+- Keep search active on first launch, reopening, and rapid edits back to the same query, without requiring setup to refresh it.
+- Retrieve fuzzy alphanumeric filename matches in a second Spotlight pass, including files not yet in the cache.
+- Stream results and keep healthy reads moving past stalled files; collection continues independently of scrolling.
+- Offer an optional first-run import of recent documents and nearby files, without changing recorded usage.
+- Include Google Drive indexing in first-run setup, with separate skip choices, progress, cancellation, and retries for incomplete scans.
+- Keep the main setup prompt until setup runs, then keep retries and refreshes in Actions.
+- Expand recent-file setup to 500 documents, 50 parent folders, 500 neighbors per folder, and a 10,000-entry cache.
+- Coordinate deletion with pending history and cache writes; bound recent-file reads across retries and retain cached results when metadata stalls.
+- Navigate folders with `⌘→` and `⌘←`, or type an absolute or home-relative path.
+- Use one native search screen with at most five saved locations; release each previous result view, restore folder history with `⌥←`, and keep setup running across navigation.
+- Detach native control callbacks when results are discarded so development tools cannot retain their index arrays.
 - Filter with `-d`, `-f`, `ext:`, `after:`, `before:`, `size:`, and dot-prefixed hidden-file queries.
 - Learn query-to-item shortcuts and allow frequently used folders to be pinned.
 - Index Google Drive shortcuts and shared folders that Spotlight cannot catalog.

@@ -1,5 +1,6 @@
 import { Cache } from "@raycast/api";
 import { UsageMeta } from "./spotlight";
+import { dataGeneration, withStorageLock } from "./storage-lock";
 
 /** Directory-keyed cache of Spotlight usage metadata. */
 const cache = new Cache({ namespace: "usage-meta" });
@@ -21,13 +22,16 @@ export function readCachedUsage(dir: string): Map<string, UsageMeta> {
   }
 }
 
-export function writeCachedUsage(
+export async function writeCachedUsage(
   dir: string,
   meta: Map<string, UsageMeta>,
-): void {
+  generation = dataGeneration(),
+): Promise<void> {
   if (meta.size === 0) return;
   try {
-    cache.set(dir, JSON.stringify(Object.fromEntries(meta)));
+    await withStorageLock(async () => {
+      cache.set(dir, JSON.stringify(Object.fromEntries(meta)));
+    }, generation);
   } catch {
     // A cache write failure does not affect current results.
   }

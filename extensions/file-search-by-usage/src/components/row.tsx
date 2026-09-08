@@ -4,6 +4,8 @@ import { Entry, Visit } from "../lib/types";
 import { ScoreParts } from "../lib/score";
 import { formatSize, relativeTime } from "../lib/format";
 import { displayPath } from "../lib/read-dir";
+import { SetupActions, SetupActionsProps } from "./setup-actions";
+import { NavigationActions } from "./navigation-actions";
 
 export type RowHandlers = {
   /** Opens a file in its default app or a folder in Finder. */
@@ -12,6 +14,8 @@ export type RowHandlers = {
   onDescend: (entry: Entry) => void;
   /** Navigates to the parent; undefined at the filesystem root or global scope. */
   onUp?: () => void;
+  /** Restores the previous location and query in the single search screen. */
+  onBack?: () => void;
   /** Cycles query history with ⌘[ and ⌘]. */
   onHistoryBack: () => void;
   onHistoryForward: () => void;
@@ -40,6 +44,7 @@ type Props = {
   subtitle?: string;
   pinned: boolean;
   handlers: RowHandlers;
+  setupActions: SetupActionsProps;
 };
 
 /** Builds native metadata rows for the detail panel. */
@@ -101,6 +106,7 @@ export function Row({
   subtitle,
   pinned,
   handlers,
+  setupActions,
 }: Props) {
   const accessories: List.Item.Accessory[] = [];
   if (pinned) accessories.push({ icon: Icon.Pin, tooltip: "Pinned" });
@@ -130,165 +136,185 @@ export function Row({
       quickLook={{ path: entry.path, name: entry.name }}
       detail={
         showingDetail ? (
-          <List.Item.Detail
-            metadata={
-              <List.Item.Detail.Metadata>
-                {detailPairs(entry, visit, score).flatMap(
-                  ({ section, rows }) => [
-                    ...(section
-                      ? [
-                          <List.Item.Detail.Metadata.Separator
-                            key={`sep-${section}`}
-                          />,
-                        ]
-                      : []),
-                    ...rows.map(([title, text]) => (
-                      <List.Item.Detail.Metadata.Label
-                        key={`${section}-${title}`}
-                        title={title}
-                        text={text}
-                      />
-                    )),
-                  ],
-                )}
-              </List.Item.Detail.Metadata>
-            }
-          />
+          <RowDetail entry={entry} visit={visit} score={score} />
         ) : undefined
       }
       actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action
-              title={entry.isDirectory ? "Open in Finder" : "Open"}
-              icon={entry.isDirectory ? Icon.Finder : Icon.ArrowRight}
-              onAction={() => handlers.onOpen(entry)}
-            />
-            {entry.isDirectory && (
-              <Action
-                title="Navigate into Folder"
-                icon={Icon.ChevronRight}
-                shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
-                onAction={() => handlers.onDescend(entry)}
-              />
-            )}
-            {handlers.onUp && (
-              <Action
-                title="Go to Parent Folder"
-                icon={Icon.ChevronLeft}
-                shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
-                onAction={handlers.onUp}
-              />
-            )}
-            <Action.ToggleQuickLook
-              title="Quick Look"
-              shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-            />
-          </ActionPanel.Section>
-
-          <ActionPanel.Section title="Search">
-            <Action
-              title="Previous Search"
-              icon={Icon.ArrowLeftCircle}
-              shortcut={{ modifiers: ["cmd"], key: "[" }}
-              onAction={handlers.onHistoryBack}
-            />
-            <Action
-              title="Next Search"
-              icon={Icon.ArrowRightCircle}
-              shortcut={{ modifiers: ["cmd"], key: "]" }}
-              onAction={handlers.onHistoryForward}
-            />
-          </ActionPanel.Section>
-
-          <ActionPanel.Section title="This Item">
-            <Action.ShowInFinder
-              path={entry.path}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-            />
-            <Action.OpenWith
-              path={entry.path}
-              shortcut={Keyboard.Shortcut.Common.OpenWith}
-            />
-            <Action
-              title={pinned ? "Unpin" : "Pin"}
-              icon={pinned ? Icon.PinDisabled : Icon.Pin}
-              shortcut={Keyboard.Shortcut.Common.Pin}
-              onAction={() => handlers.onTogglePin(entry)}
-            />
-            <Action
-              title={showingDetail ? "Hide Details" : "Show Details"}
-              icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["cmd"], key: "i" }}
-              onAction={handlers.onToggleDetail}
-            />
-          </ActionPanel.Section>
-
-          <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard
-              title="Copy Path"
-              content={entry.path}
-              shortcut={Keyboard.Shortcut.Common.CopyPath}
-            />
-            <Action.CopyToClipboard title="Copy Name" content={entry.name} />
-            <Action.CopyToClipboard
-              title="Copy File"
-              content={{ file: entry.path }}
-            />
-          </ActionPanel.Section>
-
-          <ActionPanel.Section title="Google Drive">
-            <Action
-              title="Index Google Drive"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-              icon={Icon.Repeat}
-              onAction={handlers.onReindexShortcuts}
-            />
-          </ActionPanel.Section>
-
-          <ActionPanel.Section title="Usage History">
-            {handlers.onLearn && (
-              <Action
-                title="Remember This Search for This Item"
-                icon={Icon.Stars}
-                shortcut={{ modifiers: ["cmd", "opt"], key: "a" }}
-                onAction={() => handlers.onLearn?.(entry)}
-              />
-            )}
-            <Action
-              title="Reset Ranking for This Item"
-              icon={Icon.XMarkCircle}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
-              onAction={() => handlers.onResetRanking(entry)}
-            />
-            <Action
-              title="Clear All Rankings…"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              onAction={handlers.onClearAllRankings}
-            />
-            <Action
-              title="Delete All Data and Cache…"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              onAction={handlers.onEraseEverything}
-            />
-          </ActionPanel.Section>
-
-          <ActionPanel.Section>
-            <Action
-              title="Refresh"
-              icon={Icon.ArrowClockwise}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
-              onAction={handlers.onRefresh}
-            />
-            <Action.Trash
-              paths={[entry.path]}
-              onTrash={() => handlers.onRefresh()}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
+        <RowActions
+          entry={entry}
+          pinned={pinned}
+          showingDetail={showingDetail}
+          handlers={handlers}
+          setupActions={setupActions}
+        />
       }
     />
+  );
+}
+
+// Raycast mounts these panels only for the selected item. Keep their trees lazy.
+function RowDetail({
+  entry,
+  visit,
+  score,
+}: Pick<Props, "entry" | "visit" | "score">) {
+  return (
+    <List.Item.Detail
+      metadata={
+        <List.Item.Detail.Metadata>
+          {detailPairs(entry, visit, score).flatMap(({ section, rows }) => [
+            ...(section
+              ? [<List.Item.Detail.Metadata.Separator key={`sep-${section}`} />]
+              : []),
+            ...rows.map(([title, text]) => (
+              <List.Item.Detail.Metadata.Label
+                key={`${section}-${title}`}
+                title={title}
+                text={text}
+              />
+            )),
+          ])}
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
+}
+
+function RowActions({
+  entry,
+  pinned,
+  showingDetail,
+  handlers,
+  setupActions,
+}: Pick<
+  Props,
+  "entry" | "pinned" | "showingDetail" | "handlers" | "setupActions"
+>) {
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>
+        <Action
+          title={entry.isDirectory ? "Open in Finder" : "Open"}
+          icon={entry.isDirectory ? Icon.Finder : Icon.ArrowRight}
+          onAction={() => handlers.onOpen(entry)}
+        />
+        {entry.isDirectory && (
+          <Action
+            title="Navigate into Folder"
+            icon={Icon.ChevronRight}
+            shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+            onAction={() => handlers.onDescend(entry)}
+          />
+        )}
+        <NavigationActions onUp={handlers.onUp} onBack={handlers.onBack} />
+        <Action.ToggleQuickLook
+          title="Quick Look"
+          shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Search">
+        <Action
+          title="Previous Search"
+          icon={Icon.ArrowLeftCircle}
+          shortcut={{ modifiers: ["cmd"], key: "[" }}
+          onAction={handlers.onHistoryBack}
+        />
+        <Action
+          title="Next Search"
+          icon={Icon.ArrowRightCircle}
+          shortcut={{ modifiers: ["cmd"], key: "]" }}
+          onAction={handlers.onHistoryForward}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="This Item">
+        <Action.ShowInFinder
+          path={entry.path}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+        />
+        <Action.OpenWith
+          path={entry.path}
+          shortcut={Keyboard.Shortcut.Common.OpenWith}
+        />
+        <Action
+          title={pinned ? "Unpin" : "Pin"}
+          icon={pinned ? Icon.PinDisabled : Icon.Pin}
+          shortcut={Keyboard.Shortcut.Common.Pin}
+          onAction={() => handlers.onTogglePin(entry)}
+        />
+        <Action
+          title={showingDetail ? "Hide Details" : "Show Details"}
+          icon={Icon.Sidebar}
+          shortcut={{ modifiers: ["cmd"], key: "i" }}
+          onAction={handlers.onToggleDetail}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Copy">
+        <Action.CopyToClipboard
+          title="Copy Path"
+          content={entry.path}
+          shortcut={Keyboard.Shortcut.Common.CopyPath}
+        />
+        <Action.CopyToClipboard title="Copy Name" content={entry.name} />
+        <Action.CopyToClipboard
+          title="Copy File"
+          content={{ file: entry.path }}
+        />
+      </ActionPanel.Section>
+
+      <SetupActions {...setupActions} />
+      <ActionPanel.Section title="Google Drive">
+        <Action
+          title="Index Google Drive"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+          icon={Icon.Repeat}
+          onAction={handlers.onReindexShortcuts}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Usage History">
+        {handlers.onLearn && (
+          <Action
+            title="Remember This Search for This Item"
+            icon={Icon.Stars}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "a" }}
+            onAction={() => handlers.onLearn?.(entry)}
+          />
+        )}
+        <Action
+          title="Reset Ranking for This Item"
+          icon={Icon.XMarkCircle}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+          onAction={() => handlers.onResetRanking(entry)}
+        />
+        <Action
+          title="Clear All Rankings…"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={handlers.onClearAllRankings}
+        />
+        <Action
+          title="Delete All Data and Cache…"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={handlers.onEraseEverything}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={handlers.onRefresh}
+        />
+        <Action.Trash
+          paths={[entry.path]}
+          onTrash={() => handlers.onRefresh()}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
   );
 }

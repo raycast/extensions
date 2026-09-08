@@ -1,4 +1,5 @@
 import { Cache } from "@raycast/api";
+import { dataGeneration, withStorageLock } from "./storage-lock";
 
 /** Path-only cache of results from earlier Spotlight queries. */
 const cache = new Cache({ namespace: "discovered", capacity: 4_000_000 });
@@ -22,7 +23,18 @@ export function loadDiscovered(): string[] {
   }
 }
 
-export function rememberDiscovered(paths: string[]): string[] {
+export async function rememberDiscovered(
+  paths: string[],
+  generation = dataGeneration(),
+): Promise<string[]> {
+  try {
+    return await withStorageLock(async () => remember(paths), generation);
+  } catch {
+    return [];
+  }
+}
+
+function remember(paths: string[]): string[] {
   if (paths.length === 0) return loadDiscovered();
 
   const fresh = paths.slice(0, MAX_PER_PASS);

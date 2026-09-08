@@ -32,10 +32,12 @@ export function clearSharedIndexCache(): number {
   return bytes;
 }
 
-export function saveSharedIndex(index: SharedIndex): void {
+export function saveSharedIndex(index: SharedIndex): boolean {
   try {
     cache.set(KEY, JSON.stringify(index));
+    return true;
   } catch {
     // Preserve the existing index if the replacement exceeds capacity.
+    return false;
   }
 }

@@ -3,6 +3,7 @@ import path from "node:path";
 import os from "node:os";
 import { NOISE_SEGMENTS, SHORTCUT_TARGETS } from "./read-dir";
 import type { IndexPartialReason } from "./index-refresh";
+import { driveReads, DriveReads } from "./drive-reads";
 
 export type Shortcut = {
   /** Path to the user-visible shortcut. */
@@ -28,13 +29,19 @@ const CONCURRENCY = 8;
 
 export async function googleDriveRoots(
   cloudRoot: string,
+  reads?: DriveReads,
 ): Promise<{ roots: string[]; available: boolean }> {
   let drives: string[];
   try {
-    drives = (await fs.readdir(cloudRoot, { withFileTypes: true }))
+    drives = (
+      await (reads
+        ? reads.readdir(cloudRoot)
+        : fs.readdir(cloudRoot, { withFileTypes: true }))
+    )
       .filter((entry) => entry.name.startsWith("GoogleDrive"))
       .map((entry) => path.join(cloudRoot, entry.name));
   } catch {
+    reads?.check();
     return { roots: [], available: false };
   }
 
@@ -42,10 +49,12 @@ export async function googleDriveRoots(
   let readFailed = false;
   for (const drive of drives) {
     try {
-      const stats = await fs.stat(path.join(drive, SHORTCUT_TARGETS));
+      const target = path.join(drive, SHORTCUT_TARGETS);
+      const stats = await (reads ? reads.stat(target) : fs.stat(target));
       if (stats.isDirectory()) roots.push(drive);
       else readFailed = true;
     } catch (error) {
+      reads?.check();
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
         readFailed = true;
       }
@@ -58,6 +67,7 @@ export async function googleDriveRoots(
 /** Finds Google Drive shortcuts that Spotlight cannot index. */
 export async function scanShortcuts(
   opts: {
+    signal?: AbortSignal;
     maxDepth?: number;
     budgetMs?: number;
     cloudRoot?: string;
@@ -74,92 +84,112 @@ export async function scanShortcuts(
   const deadline = Date.now() + budgetMs;
   const shortcuts: Shortcut[] = [];
   let partial = false;
+  const reads = driveReads(budgetMs, opts.signal);
+  let readFailed = false;
 
-  const source = await googleDriveRoots(cloudRoot);
-  let readFailed = !source.available;
-  if (!source.available && source.roots.length === 0) {
+  try {
+    reads.check();
+    const source = await googleDriveRoots(cloudRoot, reads);
+    readFailed = !source.available;
+    if (!source.available && source.roots.length === 0) {
+      return {
+        shortcuts,
+        scannedAt: Date.now(),
+        available: false,
+        partial: false,
+      };
+    }
+
+    let current = source.roots;
+    for (let depth = 0; depth <= maxDepth && current.length > 0; depth++) {
+      const next: string[] = [];
+
+      for (let i = 0; i < current.length; i += CONCURRENCY) {
+        if (Date.now() > deadline) {
+          partial = true;
+          return {
+            shortcuts,
+            scannedAt: Date.now(),
+            available: !readFailed,
+            partial,
+            partialReason: "time-limit",
+            error: readFailed
+              ? "Google Drive could not be fully read"
+              : undefined,
+          };
+        }
+
+        const batch = current.slice(i, i + CONCURRENCY);
+        const listings = await Promise.all(
+          batch.map(async (dir) => {
+            try {
+              return {
+                dir,
+                entries: await reads.readdir(dir),
+              };
+            } catch {
+              reads.check();
+              return { dir, entries: [], failed: true };
+            }
+          }),
+        );
+
+        for (const { dir, entries, failed = false } of listings) {
+          reads.check();
+          readFailed ||= failed;
+          for (const entry of entries) {
+            if (entry.name.startsWith(".")) continue;
+            if (NOISE_SEGMENTS.has(entry.name)) continue;
+            const full = path.join(dir, entry.name);
+
+            if (entry.isSymbolicLink()) {
+              try {
+                const target = await reads.readlink(full);
+                if (target.includes(SHORTCUT_TARGETS)) {
+                  shortcuts.push({ path: full, name: entry.name, target });
+                }
+              } catch {
+                reads.check();
+                // Ignore unreadable or dangling shortcuts.
+              }
+              continue;
+            }
+
+            if (entry.isDirectory()) next.push(full);
+          }
+        }
+      }
+
+      current = next;
+      // Persistable checkpoint after each depth level.
+      reads.check();
+      await onProgress?.({
+        shortcuts: [...shortcuts],
+        scannedAt: Date.now(),
+        available: !readFailed,
+        partial: true,
+        error: readFailed ? "Google Drive could not be fully read" : undefined,
+      });
+    }
+
     return {
       shortcuts,
       scannedAt: Date.now(),
-      available: false,
-      partial: false,
+      available: !readFailed,
+      partial: partial || current.length > 0,
+      partialReason: current.length > 0 ? "depth-limit" : undefined,
+      error: readFailed ? "Google Drive could not be fully read" : undefined,
     };
-  }
-
-  let current = source.roots;
-  for (let depth = 0; depth <= maxDepth && current.length > 0; depth++) {
-    const next: string[] = [];
-
-    for (let i = 0; i < current.length; i += CONCURRENCY) {
-      if (Date.now() > deadline) {
-        partial = true;
-        return {
-          shortcuts,
-          scannedAt: Date.now(),
-          available: !readFailed,
-          partial,
-          partialReason: "time-limit",
-          error: readFailed
-            ? "Google Drive could not be fully read"
-            : undefined,
-        };
-      }
-
-      const batch = current.slice(i, i + CONCURRENCY);
-      const listings = await Promise.all(
-        batch.map(async (dir) => {
-          try {
-            return {
-              dir,
-              entries: await fs.readdir(dir, { withFileTypes: true }),
-            };
-          } catch {
-            return { dir, entries: [], failed: true };
-          }
-        }),
-      );
-
-      for (const { dir, entries, failed = false } of listings) {
-        readFailed ||= failed;
-        for (const entry of entries) {
-          if (entry.name.startsWith(".")) continue;
-          if (NOISE_SEGMENTS.has(entry.name)) continue;
-          const full = path.join(dir, entry.name);
-
-          if (entry.isSymbolicLink()) {
-            try {
-              const target = await fs.readlink(full);
-              if (target.includes(SHORTCUT_TARGETS)) {
-                shortcuts.push({ path: full, name: entry.name, target });
-              }
-            } catch {
-              // Ignore unreadable or dangling shortcuts.
-            }
-            continue;
-          }
-
-          if (entry.isDirectory()) next.push(full);
-        }
-      }
-    }
-
-    current = next;
-    // Persistable checkpoint after each depth level.
-    await onProgress?.({
-      shortcuts: [...shortcuts],
+  } catch (error) {
+    if (!reads.stopped) throw error;
+    return {
+      shortcuts,
       scannedAt: Date.now(),
       available: !readFailed,
       partial: true,
-      error: readFailed ? "Google Drive could not be fully read" : undefined,
-    });
+      partialReason: opts.signal?.aborted ? undefined : "time-limit",
+    };
+  } finally {
+    reads.dispose();
   }
-
-  return {
-    shortcuts,
-    scannedAt: Date.now(),
-    available: !readFailed,
-    partial: partial || current.length > 0,
-    partialReason: current.length > 0 ? "depth-limit" : undefined,
-    error: readFailed ? "Google Drive could not be fully read" : undefined,
-  };
 }

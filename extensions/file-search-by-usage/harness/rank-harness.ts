@@ -13,6 +13,12 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { performanceChecks } from "./performance-checks";
 import { indexingChecks } from "./indexing-checks";
+import { recentsChecks } from "./recents-checks";
+import { browserChecks } from "./browser-checks";
+import { eventHandleChecks } from "./event-handle-checks";
+import { liveSearchChecks } from "./live-search-checks";
+import { resultOrderChecks } from "./result-order-checks";
+import { rowRenderChecks } from "./row-render-checks";
 import {
   canonicalPath,
   hiddenDirsMatching,
@@ -134,6 +140,12 @@ function fake(name: string, ageDays: number): Entry {
 }
 
 async function main() {
+  await recentsChecks(assert);
+  await browserChecks(assert);
+  await eventHandleChecks(assert);
+  resultOrderChecks(assert);
+  await rowRenderChecks(assert);
+  await liveSearchChecks(assert);
   await indexingChecks(assert);
   await performanceChecks(assert);
   const live = process.argv.includes("--live");
@@ -495,6 +507,10 @@ async function main() {
     (command) => command.name === "index-shortcuts",
   );
   assert(
+    !manifest.commands?.some((command) => command.name === "browse-finder"),
+    "the manifest does not expose the removed Finder-scoped search command",
+  );
+  assert(
     indexCommand !== undefined && indexCommand.interval === undefined,
     "Google Drive indexing runs only when the user starts it",
   );
@@ -563,6 +579,23 @@ async function main() {
     "a shortcut scan records when its time bound stops it",
   );
 
+  for (const name of ["foo.txt", "bar.txt", "baz.txt"])
+    fs.writeFileSync(path.join(targetRoot, name), "");
+  const flatCheckpoints: number[] = [];
+  const flatLimited = await scanSharedFolders({
+    cloudRoot: syntheticCloud,
+    limit: 2,
+    onProgress: (index) => {
+      flatCheckpoints.push(index.paths.length);
+    },
+  });
+  assert(
+    flatLimited.paths.length === 2 &&
+      flatLimited.partial &&
+      flatLimited.partialReason === "item-limit" &&
+      flatCheckpoints.every((count) => count <= 2),
+    "a final flat folder hitting the item limit stays partial and checkpoints remain bounded",
+  );
   const nestedSharedFolder = path.join(targetRoot, "nested");
   fs.mkdirSync(nestedSharedFolder, { recursive: true });
   const depthLimitedShared = await scanSharedFolders({
@@ -1075,6 +1108,20 @@ async function main() {
     deriveProgress({ ...base, isPathQuery: true }).spotlight === "skipped",
     "the path bar skips Spotlight",
   );
+  const directFolder = deriveProgress({
+    ...base,
+    scoped: true,
+    directChildrenOnly: true,
+    query: "c",
+    termLength: 1,
+    folderMetaPending: true,
+  });
+  assert(
+    directFolder.spotlight === "skipped" &&
+      directFolder.needed === undefined &&
+      directFolder.folder === "running",
+    "short folder queries report direct-child metadata work without waiting for Spotlight",
+  );
   // A hidden-only query skips Spotlight.
   const bare = deriveProgress({
     ...base,
@@ -1103,6 +1150,11 @@ async function main() {
   assert(
     deriveProgress({ ...base, backgroundPending: true }).memory === "running",
     "memory stays pending while cached indexes are still loading",
+  );
+  const recentPartial = deriveProgress({ ...base, memoryPartial: true });
+  assert(
+    recentPartial.memory === "partial" && statusLight(recentPartial) === "🟠",
+    "timed-out recent-file validation reports a partial memory stage",
   );
   const failedSearch = deriveProgress({ ...base, searchFailed: true });
   assert(
@@ -1851,12 +1903,12 @@ async function main() {
     console.log("  (nothing deep enough inside a shared folder, skipped)");
   }
 
-  console.log("\n=== Finder's trailing slash ===");
+  console.log("\n=== trailing slash paths ===");
   const withSlash = `${home}/Documents/`;
   const child = `${home}/Documents/Some Folder`;
   assert(
     path.dirname(child) !== withSlash,
-    "the raw Finder path breaks the direct-child test",
+    "a trailing slash breaks the direct-child test before normalization",
   );
   assert(
     path.dirname(child) === normalizeDir(withSlash),

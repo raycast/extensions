@@ -87,8 +87,12 @@ export function deriveProgress(state: {
   rankingReady: boolean;
   /** Cached indexes and learned searches still loading in the background. */
   backgroundPending?: boolean;
+  /** Some cached paths could not be checked because of a deadline or read error. */
+  memoryPartial?: boolean;
   /** Searching inside a folder rather than the whole disk. */
   scoped: boolean;
+  /** Folder browsing reads direct children; it does not run name discovery. */
+  directChildrenOnly?: boolean;
   /** The mdls pass over that folder's children. */
   folderMetaPending: boolean;
   folderFailed?: boolean;
@@ -100,6 +104,7 @@ export function deriveProgress(state: {
   isHiddenOnly: boolean;
   searching: boolean;
   searchFailed?: boolean;
+  searchPartial?: boolean;
   /** Length of the term Spotlight would be asked for. */
   termLength: number;
   minQuery: number;
@@ -108,18 +113,27 @@ export function deriveProgress(state: {
   rankingFailed?: boolean;
   rankingPartial?: boolean;
 }): Progress {
-  const spotlight: Stage = state.searchFailed
-    ? "failed"
-    : state.isPathQuery || state.query === "" || state.isHiddenOnly
-      ? "skipped"
-      : state.searching
-        ? "running"
-        : state.termLength < state.minQuery
-          ? "waiting"
-          : "done";
+  const spotlight: Stage = state.directChildrenOnly
+    ? "skipped"
+    : state.searchFailed
+      ? "failed"
+      : state.isPathQuery || state.query === "" || state.isHiddenOnly
+        ? "skipped"
+        : state.searching
+          ? "running"
+          : state.searchPartial
+            ? "partial"
+            : state.termLength < state.minQuery
+              ? "waiting"
+              : "done";
 
   return {
-    memory: state.rankingReady && !state.backgroundPending ? "done" : "running",
+    memory:
+      !state.rankingReady || state.backgroundPending
+        ? "running"
+        : state.memoryPartial
+          ? "partial"
+          : "done",
     folder:
       state.scoped || state.isPathQuery
         ? state.folderFailed

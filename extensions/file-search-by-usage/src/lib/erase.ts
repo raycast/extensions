@@ -3,6 +3,8 @@ import { clearDiscoveredCache } from "./discovered";
 import { clearSharedIndexCache } from "./shared-index";
 import { clearUsageCache } from "./usage-cache";
 import { withIndexingLock } from "./indexing-lock";
+import { clearRecentEntries } from "./recent-setup";
+import { invalidateData, withStorageLock } from "./storage-lock";
 
 /** Counts of extension data removed from Raycast storage. */
 export type Erased = {
@@ -12,7 +14,7 @@ export type Erased = {
   abbreviations: number;
   /** Keys in local storage, including any this build does not know about. */
   keys: number;
-  /** From the two caches whose size is measurable. */
+  /** From the caches whose size is measurable. */
   cacheBytes: number;
 };
 
@@ -48,23 +50,29 @@ export function describeErased(erased: Erased): string {
 /** Clears all extension-owned Raycast storage without touching user files. */
 export async function eraseEverything(): Promise<Erased | undefined> {
   return withIndexingLock(async (assertOwned) => {
-    const items = await LocalStorage.allItems();
+    return withStorageLock(async (assertCurrent) => {
+      const items = await LocalStorage.allItems();
 
-    const erased: Erased = {
-      visits: countEntries(items["visits"]),
-      pins: countEntries(items["pins"]),
-      searches: countEntries(items["searches"]),
-      abbreviations: countEntries(items["abbreviations"]),
-      keys: Object.keys(items).length,
-      cacheBytes: 0,
-    };
+      const erased: Erased = {
+        visits: countEntries(items["visits"]),
+        pins: countEntries(items["pins"]),
+        searches: countEntries(items["searches"]),
+        abbreviations: countEntries(items["abbreviations"]),
+        keys: Object.keys(items).length,
+        cacheBytes: 0,
+      };
 
-    assertOwned();
-    await LocalStorage.clear();
-    assertOwned();
-    erased.cacheBytes = clearDiscoveredCache() + clearSharedIndexCache();
-    clearUsageCache();
+      assertOwned();
+      assertCurrent();
+      invalidateData();
+      await LocalStorage.clear();
+      assertOwned();
+      assertCurrent();
+      erased.cacheBytes =
+        clearDiscoveredCache() + clearSharedIndexCache() + clearRecentEntries();
+      clearUsageCache();
 
-    return erased;
+      return erased;
+    }, undefined);
   }, "deletion");
 }

@@ -85,6 +85,7 @@ export function readDirectory(dir: string, showHidden: boolean): ReadResult {
     : dirents.filter((d) => !d.name.startsWith("."));
   const truncated = Math.max(0, visible.length - MAX_ENTRIES);
   const entries: Entry[] = [];
+  const storageDir = canonicalPath(dir);
 
   for (const dirent of visible.slice(0, MAX_ENTRIES)) {
     const full = path.join(dir, dirent.name);
@@ -95,7 +96,8 @@ export function readDirectory(dir: string, showHidden: boolean): ReadResult {
     let birthtimeMs = 0;
     let dev: number | undefined;
     let ino: number | undefined;
-    let storagePath: string | undefined;
+    let storagePath: string | undefined =
+      storageDir === dir ? undefined : path.join(storageDir, dirent.name);
 
     try {
       // Follow symlinks so aliased folders remain navigable.
@@ -299,7 +301,7 @@ export function statEntry(full: string): Entry | undefined {
     return {
       name: path.basename(full),
       path: full,
-      storagePath: isSymlink ? fs.realpathSync(full) : undefined,
+      storagePath: fs.realpathSync(full),
       isDirectory: stats.isDirectory(),
       isSymlink,
       size: stats.size,
