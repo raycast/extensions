@@ -6,6 +6,7 @@ import {
   Icon,
   List,
 } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { useEffect, useState } from "react";
@@ -673,6 +674,10 @@ function formatDate(now: Date, format: DateFormat) {
       return `${year2}/${month2}/${day2}`;
     case "YYYY/MM/DD":
       return `${year4}/${month2}/${day2}`;
+    default: {
+      const exhaustive: never = format;
+      return exhaustive;
+    }
   }
 }
 
@@ -800,47 +805,21 @@ function LiveTimeDetailPage(props: { timeFormat: TimeFormat }) {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences.SystemStatus>();
-  const [snapshot, setSnapshot] = useState<SystemSnapshot | null>(null);
   const [now, setNow] = useState(() => new Date());
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const {
+    data: snapshot,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(fetchSystemSnapshot, [], { keepPreviousData: true });
 
   useEffect(() => {
-    let cancelled = false;
+    const interval = setInterval(() => {
+      revalidate();
+    }, REFRESH_INTERVAL_MS);
 
-    async function load() {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const nextSnapshot = await fetchSystemSnapshot();
-
-        if (!cancelled) {
-          setSnapshot(nextSnapshot);
-        }
-      } catch (loadError) {
-        if (!cancelled) {
-          setError(
-            loadError instanceof Error
-              ? loadError.message
-              : "Failed to load system status.",
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    void load();
-    const interval = setInterval(() => void load(), REFRESH_INTERVAL_MS);
-
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [refreshKey]);
+    return () => clearInterval(interval);
+  }, [revalidate]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -869,6 +848,7 @@ export default function Command() {
   };
 
   const currentSnapshot = snapshot ?? fallbackSnapshot;
+  const errorMessage = error?.message;
   const showSeconds = Boolean(preferences.showSeconds);
   const showInlineDetail = preferences.detailViewMode !== "subpage";
   const timeFormat = preferences.timeFormat ?? "12h";
@@ -934,14 +914,14 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} isShowingDetail={showInlineDetail}>
-      {error ? (
+      {errorMessage && !snapshot ? (
         <List.Item
           title="Unable to load system status"
-          accessories={[{ text: error }]}
+          accessories={[{ text: errorMessage }]}
           icon={Icon.Warning}
           detail={
             showInlineDetail ? (
-              <List.Item.Detail markdown={`# Error\n\n${error}`} />
+              <List.Item.Detail markdown={`# Error\n\n${errorMessage}`} />
             ) : undefined
           }
           actions={
@@ -952,7 +932,7 @@ export default function Command() {
                   target={
                     <StaticDetailPage
                       title="Error"
-                      markdown={`# Error\n\n${error}`}
+                      markdown={`# Error\n\n${errorMessage}`}
                     />
                   }
                 />
@@ -960,11 +940,11 @@ export default function Command() {
               <Action
                 title="Retry"
                 icon={Icon.ArrowClockwise}
-                onAction={() => setRefreshKey((value) => value + 1)}
+                onAction={revalidate}
               />
               <Action.CopyToClipboard
                 title="Copy Details"
-                content={`# Error\n\n${error}`}
+                content={`# Error\n\n${errorMessage}`}
               />
             </ActionPanel>
           }
@@ -997,7 +977,7 @@ export default function Command() {
                     macOS: { modifiers: ["cmd"], key: "r" },
                     Windows: { modifiers: ["ctrl"], key: "r" },
                   }}
-                  onAction={() => setRefreshKey((value) => value + 1)}
+                  onAction={revalidate}
                 />
                 <Action.CopyToClipboard
                   title="Copy Details"

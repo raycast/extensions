@@ -1,3 +1,13 @@
-# Introducing the System Status Raycast extension!
+# System Status
 
-Ever wanted to hide that pesky taskbar, but always found yourself turning it back on? Whether it be to see your Wi-Fi connection, volume, battery, or just the time or date, we always need our taskbar to quickly see these things - **until now**. With the new **System Status** Raycast extension, you can view all of this information right from Raycast! Set a hotkey to instantly view your information.
+View Wi-Fi, volume, battery, time, and date from Raycast on Windows.
+
+This extension is Windows-only. After installing, assign a hotkey to **System Status** so you can open it instantly.
+
+## Preferences
+
+All optional:
+
+- **Show Seconds** and **Time Format** — how the time row is displayed
+- **Date Format** and **Date Detail Format** — how the date row and its details are displayed
+- **Detail View Mode** — show details in the side panel, or open them on Enter
