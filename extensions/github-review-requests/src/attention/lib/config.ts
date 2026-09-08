@@ -151,7 +151,7 @@ export const DEFAULT_CONFIG: Config = {
 
 /** Reads the stored config, filling in any missing fields with defaults. */
 export async function loadConfig(): Promise<Config> {
-  const owners = (getPreferenceValues<{ owners?: string }>().owners ?? "")
+  const owners = (getPreferenceValues<Preferences>().owners ?? "")
     .split(",")
     .map(s => s.trim())
     .filter(Boolean);

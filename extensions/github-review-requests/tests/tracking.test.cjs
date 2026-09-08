@@ -4,6 +4,7 @@ const { state, reset, api } = require("./harness.cjs");
 const { search } = require("../src/attention/lib/github.ts");
 const { agingOf } = require("../src/attention/lib/aging.ts");
 const { loadConfig, saveConfig, orgQualifier } = require("../src/attention/lib/config.ts");
+const { authorIgnoredBy } = require("../src/attention/lib/config.ts");
 const {
   diffCandidates,
   recordActivity,
@@ -103,6 +104,10 @@ test("existing owner scope seeds tracking; explicitly clearing it is preserved",
   assert.equal(orgQualifier(config), " org:acme org:personal-owner");
   await saveConfig({ ...config, activeOrgs: [] });
   assert.deepEqual((await loadConfig()).activeOrgs, []);
+});
+test("ignored authors use the same normalization for classic and attention menus", () => {
+  assert.equal(authorIgnoredBy(["dependabot"], "dependabot[bot]"), true);
+  assert.equal(authorIgnoredBy(["app/renovate"], "renovate[bot]"), true);
 });
 test("watcher makes zero requests when scheduled tracking is disabled", async () => {
   global.fetch = async () => {

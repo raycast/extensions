@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import { getLogin } from "../integration/getLogin";
 import { PullRequestShort } from "../types";
 import { getPreferenceValues } from "@raycast/api";
-import { loadConfig } from "../attention/lib/config";
+import { loadConfig, normalizeAuthor } from "../attention/lib/config";
 
 const { owners } = getPreferenceValues();
 
@@ -42,8 +42,9 @@ const usePulls = () => {
           "archived:false",
           ...(orgFilters.length > 0 ? orgFilters : [userFilters]),
         ]).then(pulls => {
-          const ignored = new Set(config.ignoredAuthors.map(author => author.toLowerCase()));
-          return pulls.filter(pull => !ignored.has(pull.user.login.toLowerCase()));
+          return pulls.filter(
+            pull => !config.ignoredAuthors.some(author => normalizeAuthor(author) === normalizeAuthor(pull.user.login)),
+          );
         });
       })
       .then((pulls: PullRequestShort[]) => updatePulls(pulls))

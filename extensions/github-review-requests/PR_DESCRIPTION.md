@@ -23,11 +23,12 @@ Both methods use an explicit Authentication Method preference shared by all comm
 - Adds Show in Menu Bar to tracking settings and shared configuration shortcuts to both menu-bar layouts.
 
 - Preserves the existing extension identity, author, command identifiers, PAT/owners preferences, icon asset, and original menu layout; adds `vitoraguila` as a contributor.
+- The classic **My Pull Requests** menu continues to use the original pull, refresh, recent-history, and review-status flow. It now uses the shared selected credential, applies the selected organization scope (`org:`), and filters configured ignored authors; the existing Owners preference remains the fallback when no organization scope is selected.
 - Adds Pull Request Attention, Activity Inbox, Configure Review Tracking, and an optional background watcher. Original commands link to the new views.
 - Tracks unresolved inline threads and PR conversations, including review bodies, with ignored authors and direct links to the relevant comment.
 - Shows age, inactivity, and the oldest unanswered wait, with optional menu-bar attention grouping.
 - Keeps scheduled tracking and desktop notifications off by default; the first activity check establishes a silent baseline.
-- Uses the selected credential for original and new requests. Credential changes invalidate cached account data; CLI tokens are not copied into persistent extension storage.
+- Uses the selected credential for original and new requests. Credential changes invalidate cached account data; CLI tokens are not copied into persistent extension storage. Existing organizations, watched repositories, teams, ignored authors, saved filters, and notification settings remain in the shared tracking configuration and continue to feed their corresponding attention categories.
 - Adds regression coverage for auth selection/failures, reply tracking, ageing, existing scope initialization, and inbox baseline/persistence behavior.
 
 ## Validation status — update before posting

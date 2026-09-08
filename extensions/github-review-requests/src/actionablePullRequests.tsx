@@ -32,6 +32,6 @@ function ClassicMenu() {
 }
 
 export default function Command() {
-  const { menuBarLayout } = getPreferenceValues<{ menuBarLayout?: string }>();
+  const { menuBarLayout } = getPreferenceValues<Preferences.ActionablePullRequests>();
   return menuBarLayout === "attention" ? <AttentionMenu /> : <ClassicMenu />;
 }

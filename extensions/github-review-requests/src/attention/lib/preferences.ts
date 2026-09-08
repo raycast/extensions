@@ -1,29 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 
-/** Extension-level preferences declared in package.json. */
-export type ExtensionPrefs = {
-  authMethod?: "pat" | "gh";
-  token?: string;
-  owners?: string;
-  trackingEnabled?: boolean;
-  ghPath?: string;
-  host?: string;
-  maxResults?: string;
-};
-
-/** Preferences declared on the menu-bar command. */
-export type MenuBarPrefs = ExtensionPrefs & {
-  menuBarCategory?: string;
-  hideWhenEmpty?: boolean;
-  menuBarLimit?: string;
-};
-
-export function prefs(): ExtensionPrefs {
-  return getPreferenceValues<ExtensionPrefs>();
+export function prefs(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
-export function menuBarPrefs(): MenuBarPrefs {
-  return getPreferenceValues<MenuBarPrefs>();
+export function menuBarPrefs(): Preferences.ActionablePullRequests {
+  return getPreferenceValues<Preferences.ActionablePullRequests>();
 }
 
 /** The GitHub host to talk to; "" means the public API. */
