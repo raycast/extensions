@@ -1,13 +1,10 @@
-import type { Application } from "@raycast/api";
-import { execFile, spawn } from "child_process";
+import { execFile } from "child_process";
 import { existsSync } from "fs";
 import { homedir } from "os";
 import { join, resolve, sep } from "path";
 import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
-
-export const isWindows = process.platform === "win32";
 
 // ---------------------------------------------------------------------------
 // Folder name
@@ -42,41 +39,29 @@ export function formatDate(format: string, date: Date): string {
 export function resolveInside(parent: string, name: string): string | null {
   const base = resolve(parent);
   const target = resolve(base, name);
-  return target.startsWith(base + sep) ? target : null;
+  // The root folder already ends in a separator, and appending a second one would make every
+  // target fail the containment check. The explicit `target !== base` keeps the parent itself
+  // out: with a root parent the prefix *is* the parent, so a name like `..` would pass.
+  const prefix = base.endsWith(sep) ? base : base + sep;
+  return target !== base && target.startsWith(prefix) ? target : null;
+}
+
+/**
+ * Shortens a path under the home folder to `~/…` for display. Compares whole segments, so a
+ * sibling that merely starts with the same characters — `/Users/anna-old` next to `/Users/anna`
+ * — is left alone instead of being mangled into `~-old`.
+ */
+export function tildify(path: string): string {
+  const home = homedir();
+  return path === home || path.startsWith(home + sep) ? `~${path.slice(home.length)}` : path;
 }
 
 // ---------------------------------------------------------------------------
 // Default parent folder
 // ---------------------------------------------------------------------------
 
-function system32(...segments: string[]): string {
-  return join(process.env.SystemRoot ?? "C:\\Windows", "System32", ...segments);
-}
-
-/**
- * On Windows the Desktop is often not `%USERPROFILE%\Desktop`: OneDrive moves it, group
- * policy can redirect it, and the on-disk name may be localized. The registry's known-folder
- * entry is the source of truth, so ask it instead of guessing.
- */
-async function desktopDir(): Promise<string> {
-  if (!isWindows) return join(homedir(), "Desktop");
-  try {
-    const { stdout } = await execFileAsync(
-      system32("reg.exe"),
-      ["query", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders", "/v", "Desktop"],
-      { windowsHide: true },
-    );
-    const value = /REG(?:_EXPAND)?_SZ\s+(.+)/.exec(stdout)?.[1].trim();
-    // process.env is case-insensitive on Windows, so %UserProfile% and %USERPROFILE% both resolve
-    if (value) return value.replace(/%([^%]+)%/g, (match, name) => process.env[name] ?? match);
-  } catch {
-    // reg.exe unavailable or key missing — fall through to the conventional location
-  }
-  return join(homedir(), "Desktop");
-}
-
-export async function defaultParentDir(): Promise<string> {
-  return join(await desktopDir(), "temp");
+export function defaultParentDir(): string {
+  return join(homedir(), "Desktop", "temp");
 }
 
 // ---------------------------------------------------------------------------
@@ -119,62 +104,4 @@ export function currentShellHandler(handlers: unknown): string | undefined {
     typeof h.LSHandlerModificationDate === "number" ? h.LSHandlerModificationDate : 0;
   const newest = shellHandlers.sort((a, b) => modified(b) - modified(a))[0];
   return newest?.LSHandlerRoleShell as string | undefined;
-}
-
-// ---------------------------------------------------------------------------
-// Windows: open a terminal at a folder
-// ---------------------------------------------------------------------------
-
-/**
- * `start` gives the program its own window and `/d` sets its working directory, which every
- * console shell and most terminal emulators use as the starting folder. Console programs
- * launched this way are hosted by the user's "Default terminal application" setting.
- * `start` returns as soon as the program is launched, so waiting for cmd's exit code is cheap
- * and is the only way to learn that the executable could not be found.
- */
-function launch(exe: string, args: string[], cwd: string): Promise<void> {
-  const command = ["start", '""', "/d", `"${cwd}"`, `"${exe}"`, ...args.map((arg) => `"${arg}"`)].join(" ");
-  const child = spawn(process.env.ComSpec ?? system32("cmd.exe"), ["/d", "/s", "/c", `"${command}"`], {
-    stdio: "ignore",
-    windowsHide: true,
-    windowsVerbatimArguments: true,
-  });
-  return new Promise((done, fail) => {
-    child.once("error", fail);
-    child.once("exit", (code) =>
-      code === 0 ? done() : fail(new Error(`Could not launch ${exe} (exit code ${code})`)),
-    );
-  });
-}
-
-// The Store build of Windows Terminal lives under the protected Program Files\WindowsApps
-// folder and cannot be launched from there; its app-execution alias is the supported entry point.
-const WT_ALIAS = join(
-  process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local"),
-  "Microsoft",
-  "WindowsApps",
-  "wt.exe",
-);
-
-function isWindowsTerminal(app: Application): boolean {
-  return (
-    /^windows terminal/i.test(app.name) || /WindowsTerminal/i.test(app.windowsAppId ?? "") || /wt\.exe$/i.test(app.path)
-  );
-}
-
-/** Opens `target` in a terminal on Windows and returns the app name for the HUD. */
-export async function openTerminalWindows(target: string, app?: Application): Promise<string> {
-  if (app && !isWindowsTerminal(app)) {
-    await launch(app.path, [], target);
-    return app.name;
-  }
-  // Windows Terminal — chosen explicitly, or as the best stand-in for "system default" when installed.
-  // It ignores the inherited working directory (profiles define their own), so pass -d explicitly.
-  const wt = existsSync(WT_ALIAS) ? WT_ALIAS : app?.path;
-  if (wt) {
-    await launch(wt, ["-d", target], target);
-    return app?.name ?? "Windows Terminal";
-  }
-  await launch(system32("WindowsPowerShell", "v1.0", "powershell.exe"), [], target);
-  return "Windows PowerShell";
 }

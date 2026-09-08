@@ -1,20 +1,18 @@
 import { Application, getApplications, getPreferenceValues, open, showHUD, showInFinder } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { mkdir } from "fs/promises";
-import { homedir } from "os";
 import {
   FALLBACK_TERMINAL_BUNDLE,
   defaultParentDir,
   defaultTerminalBundleId,
   formatDate,
-  isWindows,
-  openTerminalWindows,
   resolveInside,
+  tildify,
 } from "./lib";
 
 const DEFAULT_FORMAT = "yyyy-MM-dd";
 
-async function openTerminalMac(target: string, app?: Application): Promise<string> {
+async function openTerminal(target: string, app?: Application): Promise<string> {
   if (app) {
     await open(target, app);
     return app.name;
@@ -32,7 +30,7 @@ export default async function command() {
   try {
     const prefs = getPreferenceValues<Preferences.CreateDatedFolder>();
 
-    const parent = prefs.parentDir?.trim() || (await defaultParentDir());
+    const parent = prefs.parentDir?.trim() || defaultParentDir();
     const format = prefs.dateFormat?.trim() || DEFAULT_FORMAT;
     const target = resolveInside(parent, formatDate(format, new Date()));
     if (!target) {
@@ -42,15 +40,13 @@ export default async function command() {
 
     await mkdir(target, { recursive: true });
 
-    const terminal = isWindows
-      ? await openTerminalWindows(target, prefs.terminal)
-      : await openTerminalMac(target, prefs.terminal);
+    const terminal = await openTerminal(target, prefs.terminal);
 
     if (prefs.revealInFinder) {
       await showInFinder(target);
     }
 
-    await showHUD(`📂 ${terminal} → ${target.replace(homedir(), "~")}`);
+    await showHUD(`📂 ${terminal} → ${tildify(target)}`);
   } catch (error) {
     await showFailureToast(error, { title: "Could not create dated folder" });
   }
