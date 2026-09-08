@@ -12,7 +12,6 @@ type CollectPaginatedResultsOptions<T, Result> = {
   signal?: AbortSignal;
   // Keep scanning at the retention cap and let preferred matches displace fallback matches.
   prioritize?: (item: Result) => boolean;
-  stopAfterPage?: (pageResults: Result[]) => boolean;
   stopAfterMatchingPage?: boolean;
 };
 
@@ -28,7 +27,6 @@ export async function collectPaginatedResults<T, Result>({
   scanAllPages,
   signal,
   prioritize,
-  stopAfterPage,
   stopAfterMatchingPage = false,
 }: CollectPaginatedResultsOptions<T, Result>): Promise<Result[]> {
   const results: Result[] = [];
@@ -39,36 +37,26 @@ export async function collectPaginatedResults<T, Result>({
     const page = await loadPage(cursor);
     signal?.throwIfAborted();
     const resultCountBeforePage = results.length;
-    const pageResults: Result[] = [];
 
     for (const item of page.items) {
       const result = transform(item);
       if (result && matches(result)) {
         if (results.length < maxResults) {
           results.push(result);
-          pageResults.push(result);
         } else if (prioritize?.(result)) {
           const replacement = results.findIndex((retained) => !prioritize(retained));
           if (replacement >= 0) {
             results[replacement] = result;
-            if (pageResults.length < maxResults) pageResults.push(result);
-            else {
-              const pageReplacement = pageResults.findIndex((retained) => !prioritize(retained));
-              if (pageReplacement >= 0) pageResults[pageReplacement] = result;
-            }
           }
         }
       }
 
-      if (!prioritize && results.length >= maxResults) {
+      if (results.length >= maxResults && (!prioritize || results.every(prioritize))) {
         return results;
       }
     }
 
     cursor = page.nextCursor || undefined;
-    if (stopAfterPage?.(pageResults)) {
-      return results;
-    }
     if (stopAfterMatchingPage && results.length > resultCountBeforePage) {
       return results;
     }

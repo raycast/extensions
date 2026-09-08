@@ -149,3 +149,47 @@ test("name enrichment finds a visible name beyond 100 profile-only matches", asy
   assert.equal(names.size, 100);
   assert.equal(names.get("asmith"), "Alice Smith");
 });
+
+test("retains visible-name matches from every page until the directory ends", async () => {
+  const cursors: Array<string | undefined> = [];
+  const names = await searchUserNames({
+    query: "Alice",
+    maxResults: 100,
+    loadPage: async (cursor) => {
+      cursors.push(cursor);
+      return cursor
+        ? { items: [{ id: "U2", name: "ajohnson", profile: { real_name: "Alice Johnson" } }] }
+        : { items: [{ id: "U1", name: "asmith", profile: { real_name: "Alice Smith" } }], nextCursor: "next" };
+    },
+  });
+  assert.deepEqual(cursors, [undefined, "next"]);
+  assert.deepEqual([...names.values()], ["Alice Smith", "Alice Johnson"]);
+});
+
+test("stops name lookup only when 100 visible matches replace retained profile matches", async () => {
+  let pages = 0;
+  const names = await searchUserNames({
+    query: "Alice",
+    maxResults: 100,
+    loadPage: async () => {
+      pages++;
+      assert.ok(pages <= 3, "Must stop at the preferred-result limit");
+      const items =
+        pages === 1
+          ? Array.from({ length: 100 }, (_, i) => ({
+              id: `UH${i}`,
+              name: `hidden${i}`,
+              profile: { real_name: `Person ${i}`, title: "Alice project" },
+            }))
+          : Array.from({ length: 50 }, (_, i) => ({
+              id: `UA${pages}${i}`,
+              name: `alice${pages}${i}`,
+              profile: { real_name: `Alice ${pages}-${i}` },
+            }));
+      return { items, nextCursor: String(pages) };
+    },
+  });
+  assert.equal(pages, 3);
+  assert.equal(names.size, 100);
+  assert.ok([...names.values()].every((name) => name.startsWith("Alice ")));
+});

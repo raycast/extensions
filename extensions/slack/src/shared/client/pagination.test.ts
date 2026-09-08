@@ -21,7 +21,6 @@ for (const laterPage of [true, false]) {
       transform: (user) => user,
       matches: (user) => matchesAllWords([user.name, user.title], "Alice"),
       prioritize: (user) => matchesVisibleName(user.name, "Alice"),
-      stopAfterPage: (users) => users.some((user) => matchesVisibleName(user.name, "Alice")),
       maxResults: 100,
       scanAllPages: true,
     });
@@ -70,19 +69,20 @@ test("an aborted priority scan does not request another page", async () => {
   assert.equal(pages, 1);
 });
 
-test("a visible match after the cap on the same page stops further requests", async () => {
+test("visible matches on later pages replace profile matches until exhaustion", async () => {
   let pages = 0;
-  await collectPaginatedResults({
-    loadPage: async () => {
-      assert.equal(++pages, 1);
-      return { items: [...hiddenMatches, alice], nextCursor: "must-not-load" };
-    },
+  const johnson = { name: "Alice Johnson", title: "Engineer" };
+  const users = await collectPaginatedResults({
+    loadPage: async () =>
+      ++pages === 1 ? { items: [...hiddenMatches, alice], nextCursor: "next" } : { items: [johnson] },
     transform: (user) => user,
     matches: () => true,
     prioritize: (user) => matchesVisibleName(user.name, "Alice"),
-    stopAfterPage: (users) => users.some((user) => matchesVisibleName(user.name, "Alice")),
     maxResults: 100,
     scanAllPages: true,
   });
-  assert.equal(pages, 1);
+  assert.equal(pages, 2);
+  assert.equal(users.length, 100);
+  assert.ok(users.includes(alice));
+  assert.ok(users.includes(johnson));
 });

@@ -199,8 +199,6 @@ export class SlackClient {
       scanAllPages,
       signal,
       prioritize: scanAllPages ? ({ user }) => matchesVisibleName(user.name, query) : undefined,
-      stopAfterPage: (pageResults) =>
-        scanAllPages && pageResults.some(({ user }) => matchesVisibleName(user.name, query)),
     });
 
     return userMatches.map(({ user }) => user).sort((a, b) => sortNames(a.name, b.name));

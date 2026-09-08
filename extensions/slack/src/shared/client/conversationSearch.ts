@@ -60,8 +60,6 @@ export async function searchUserNames({
     scanAllPages: true,
     signal,
     prioritize: ({ userName: [, displayName] }) => matchesVisibleName(displayName, query),
-    stopAfterPage: (pageResults) =>
-      pageResults.some(({ userName: [, displayName] }) => matchesVisibleName(displayName, query)),
   });
 
   return new Map(userNameEntries.map(({ userName }) => userName));
