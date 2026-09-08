@@ -25,7 +25,6 @@ export default function Command() {
       preferences.uptimeOid,
       preferences.printerGeneralStatusOid,
       preferences.printerStatusOid,
-      preferences.displayMessage1Oid,
       preferences.displayMessage2Oid,
       preferences.displayMessage3Oid,
       preferences.displayMessage4Oid,

@@ -47,19 +47,9 @@ export const DEFAULT_OIDS: OidConfig = {
 };
 
 export interface RawOidPreferences extends Partial<OidConfig> {
-  /** @deprecated Renamed to displayMessage1Oid; kept for existing user configurations. */
+  /** Preference key retained for existing custom display-line-1 OIDs. */
   printerStatusOid?: string;
 }
-
-const resolveDisplayMessage1Oid = (preferences: RawOidPreferences): string => {
-  const current = preferences.displayMessage1Oid || DEFAULT_OIDS.displayMessage1Oid;
-  const legacy = preferences.printerStatusOid;
-  const isCurrentCustomized = current !== DEFAULT_OIDS.displayMessage1Oid;
-  if (!isCurrentCustomized && legacy && legacy !== DEFAULT_OIDS.displayMessage1Oid) {
-    return legacy;
-  }
-  return current;
-};
 
 export const getOidConfig = (preferences: RawOidPreferences): OidConfig => ({
   totalPagesOid: preferences.totalPagesOid || DEFAULT_OIDS.totalPagesOid,
@@ -76,7 +66,7 @@ export const getOidConfig = (preferences: RawOidPreferences): OidConfig => ({
     preferences.wasteTonerBottleMaxCapacityOid || DEFAULT_OIDS.wasteTonerBottleMaxCapacityOid,
   uptimeOid: preferences.uptimeOid || DEFAULT_OIDS.uptimeOid,
   printerGeneralStatusOid: preferences.printerGeneralStatusOid || DEFAULT_OIDS.printerGeneralStatusOid,
-  displayMessage1Oid: resolveDisplayMessage1Oid(preferences),
+  displayMessage1Oid: preferences.printerStatusOid || DEFAULT_OIDS.displayMessage1Oid,
   displayMessage2Oid: preferences.displayMessage2Oid || DEFAULT_OIDS.displayMessage2Oid,
   displayMessage3Oid: preferences.displayMessage3Oid || DEFAULT_OIDS.displayMessage3Oid,
   displayMessage4Oid: preferences.displayMessage4Oid || DEFAULT_OIDS.displayMessage4Oid,

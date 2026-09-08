@@ -51,7 +51,10 @@
               "printerGeneralStatus": "idle",
               "wasteTonerBottle": "16% used",
               "displayMessages": [
-                "Ready"
+                {
+                  "line": 1,
+                  "message": "Ready"
+                }
               ]
             }
           ]
@@ -187,14 +190,6 @@
     },
     {
       "name": "printerStatusOid",
-      "type": "textfield",
-      "required": false,
-      "title": "OID - Printer Status (Legacy)",
-      "description": "Deprecated: use OID - Display Message 1 instead. Kept so existing custom values keep working.",
-      "default": "1.3.6.1.2.1.43.16.5.1.2.1.1"
-    },
-    {
-      "name": "displayMessage1Oid",
       "type": "textfield",
       "required": false,
       "title": "OID - Display Message 1",
