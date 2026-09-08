@@ -144,29 +144,41 @@ export default function AddTask() {
 
       // No automation fired — fall back to the default/recent channel so a
       // link without one still lands where every other task would.
-      let fellBackToDefault = false;
+      let channelFailed = false;
       if (
         deferToAutomation &&
         !created.channel &&
         created.id &&
         values.channel
       ) {
-        await setChannel(created.id, values.channel);
-        fellBackToDefault = true;
+        // The task exists by now, so a failure here is not a failed creation.
+        // Reporting it as one would send the user back to a filled-in form and
+        // invite a retry that creates a duplicate — say what actually went
+        // wrong instead and leave the task standing without a channel.
+        try {
+          await setChannel(created.id, values.channel);
+        } catch {
+          channelFailed = true;
+        }
       }
 
       // Recorded after the task lands, so the next one can start here while
       // it's still recent — the picked channel, whichever channel automation
-      // assigned, or the default just applied as a fallback.
-      await rememberLastChannel(created.channel || values.channel || "");
+      // assigned, or the default just applied as a fallback. Nothing to record
+      // when the fallback didn't take.
+      await rememberLastChannel(
+        channelFailed ? "" : created.channel || values.channel || "",
+      );
       await toast.hide();
       // Close and go back to root. Without an explicit type this follows the
       // user's "Pop to Root Search" preference, which can leave the filled-in
       // form on the stack for the next launch.
       await showHUD(
-        created.channel && !fellBackToDefault
-          ? `Added task: ${created.title} → ${created.channel}`
-          : `Added task: ${created.title}`,
+        channelFailed
+          ? `Added task: ${created.title} — couldn't set the channel`
+          : created.channel
+            ? `Added task: ${created.title} → ${created.channel}`
+            : `Added task: ${created.title}`,
         {
           popToRootType: PopToRootType.Immediate,
           clearRootSearch: true,
