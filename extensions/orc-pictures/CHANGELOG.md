@@ -1,6 +1,6 @@
 # orc.pictures Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2026-09-08
 
 - Fix copying GIFs on Windows
 - Use the orc.pictures logo as the Store icon
