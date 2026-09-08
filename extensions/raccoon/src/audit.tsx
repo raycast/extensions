@@ -9,6 +9,7 @@ import {
 	Keyboard,
 	List,
 	openExtensionPreferences,
+	showInFinder,
 	showToast,
 	Toast,
 	useNavigation,
@@ -16,6 +17,11 @@ import {
 import { showFailureToast, useExec, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { AUDIT_CONF, readSkipList, skipCheck } from "./audit-conf";
+import {
+	AUDIT_EXPORT_FORMATS,
+	type AuditExportFormat,
+	exportAudit,
+} from "./audit-export";
 import {
 	type AuditCheck,
 	type AuditStatus,
@@ -377,6 +383,29 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 	// wherever the cursor is. `fixable` is often zero — a Mac with nothing wrong
 	// is the ordinary case — and the action is left out entirely rather than
 	// offered as a button that would do nothing.
+	// The audit is re-run rather than rendered from what is on screen: a report
+	// handed to someone else has to be the state of the machine now, not the
+	// state it was in when this view last loaded.
+	async function exportReport(format: AuditExportFormat) {
+		const progress = await showToast({
+			style: Toast.Style.Animated,
+			title: "Running the audit",
+			message: "Saving the report",
+		});
+		try {
+			const path = await exportAudit(format);
+			progress.style = Toast.Style.Success;
+			progress.title = "Report saved";
+			progress.message = path;
+			await showInFinder(path);
+		} catch (error) {
+			progress.hide();
+			await showFailureToast(error, {
+				title: "Could not export the report",
+			});
+		}
+	}
+
 	const screenActions = (
 		<>
 			{fixable > 0 && (
@@ -404,6 +433,25 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 					shortcut={Keyboard.Shortcut.Common.Copy}
 				/>
 			) : null}
+			{/* Copying JSON to the clipboard answers "let me look at this
+			    elsewhere". It does not answer "I audited six Macs this morning
+			    and the client wants the findings", which is a file, in a format
+			    somebody else can open. rcc chooses the name and prints the
+			    path; this only reveals what it wrote. */}
+			<ActionPanel.Submenu
+				title="Export Report"
+				icon={Icon.Download}
+				shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+			>
+				{AUDIT_EXPORT_FORMATS.map((format) => (
+					<Action
+						key={format.id}
+						title={`${format.title} — ${format.subtitle}`}
+						icon={Icon.Document}
+						onAction={() => exportReport(format.id)}
+					/>
+				))}
+			</ActionPanel.Submenu>
 			<Action
 				title="Show Raw Output"
 				icon={Icon.Text}

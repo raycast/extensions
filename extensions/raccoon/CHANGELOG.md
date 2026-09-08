@@ -2,6 +2,10 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Cmd+Shift+E on the security audit saves the report as a document - Markdown,
+  RTF, HTML, CSV or JSON - and reveals it in Finder. The audit is re-run rather
+  than rendered from what is on screen: a report handed to someone else has to
+  be the state of the machine now. Needs rcc 1.0.1.
 - Opening a screen does not act. `Apps` and `Upgrade` open in `--dry-run`; doing
   it for real is a separate, confirmed action.
 - Environment and PATH Overlaps run under the login shell's PATH, not the

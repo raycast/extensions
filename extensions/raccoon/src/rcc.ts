@@ -27,7 +27,7 @@ export const RUNTIME_PATH = [
 	"/sbin",
 ].join(":");
 
-export const INSTALL_COMMAND = "brew install thousandflowers/raccoon/rcc";
+export const INSTALL_COMMAND = "brew install thousandflowers/tap/rcc";
 
 export class RccNotFoundError extends Error {
 	constructor() {
@@ -89,7 +89,16 @@ function stream(
 ): Promise<RccExit> {
 	return new Promise((resolve, reject) => {
 		const child = spawn(file, args, {
-			env: { ...process.env, NO_COLOR: "1", PATH: path },
+			// RCC_PROGRESS_PROTOCOL asks rcc for the __RCC_PROGRESS__ lines
+			// upgrade-progress.ts parses. Without it rcc stays quiet: it used
+			// to emit them whenever stdout was not a terminal, which put the
+			// protocol into every redirect and log a person ever made.
+			env: {
+				...process.env,
+				NO_COLOR: "1",
+				RCC_PROGRESS_PROTOCOL: "1",
+				PATH: path,
+			},
 			stdio: ["ignore", "pipe", "pipe"],
 		});
 
