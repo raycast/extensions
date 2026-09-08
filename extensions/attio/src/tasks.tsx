@@ -93,6 +93,11 @@ export default function Tasks({ initialFilter = "all" }: { initialFilter?: Filte
     [sort],
   );
   const { isLoading, data, pagination, error, revalidate, mutate, self } = h;
+  // Raycast invokes Action.Push's onPop DURING the navigation re-render, so a
+  // bare `revalidate` there setStates Tasks mid-render ("Cannot update a
+  // component (Tasks) while rendering InternalNavigationRoot", live 2026-09-08).
+  // Defer it out of the render pass.
+  const revalidateAfterPop = () => setTimeout(revalidate, 0);
   const members = useMembers();
   const allTasks: Task[] = data ?? [];
   const currentDate = useMemo(() => new Date(), []);
@@ -206,7 +211,7 @@ export default function Tasks({ initialFilter = "all" }: { initialFilter?: Filte
       icon={Icon.Plus}
       title="New Task"
       target={<NewTask />}
-      onPop={revalidate}
+      onPop={revalidateAfterPop}
       shortcut={Keyboard.Shortcut.Common.New}
     />
   ) : null;
@@ -274,7 +279,7 @@ export default function Tasks({ initialFilter = "all" }: { initialFilter?: Filte
                 icon={Icon.Pencil}
                 title="Edit Task"
                 target={<TaskEditForm task={task} />}
-                onPop={revalidate}
+                onPop={revalidateAfterPop}
                 shortcut={Keyboard.Shortcut.Common.Edit}
               />
             )}
