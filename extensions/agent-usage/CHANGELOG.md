@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Unreleased]
+
+### Bug Fixes
+
+- Apply the provider order from Move Up/Down in the list to the menu bar (use Refresh All after reordering)
+
 ## [Add OpenRouter credit balance] - 2026-09-08
 
 ### New Features
