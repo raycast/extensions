@@ -1,4 +1,3 @@
-import { environment } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 export interface DockTile {
@@ -8,8 +7,6 @@ export interface DockTile {
   badge: string;
   /** Numeric badge value. Capped labels such as "99+" use the leading number; dots and other text count as 1. */
   count: number;
-  /** POSIX path from the tile's AXURL, when the Dock exposes one. */
-  path?: string;
 }
 
 export class AccessibilityError extends Error {}
@@ -22,9 +19,9 @@ export function isAccessibilityError(error: unknown): boolean {
   return /assistive|accessibility|-25211|-1719|not allowed/i.test(message);
 }
 
-const SEP = "|~|"; // never appears in app names or file URLs
+const SEP = "|~|"; // never appears in app names
 
-// Reads every application tile in the Dock's list, its AXStatusLabel (the badge), and AXURL.
+// Reads every application tile in the Dock's list and its AXStatusLabel (the badge).
 // Only AXApplicationDockItem tiles are emitted: the Handoff tile (AXHandoffDockItem) carries the
 // source device's identifier, e.g. "com.apple.iphone-13-pro-1", in its status label, and folders,
 // the separator and Trash never have badges.
@@ -45,12 +42,7 @@ tell application "System Events"
           set s to value of attribute "AXStatusLabel" of e
         end try
         if s is missing value then set s to ""
-        set u to ""
-        try
-          set u to (value of attribute "AXURL" of e) as string
-        end try
-        if u is missing value then set u to ""
-        set out to out & n & "${SEP}" & s & "${SEP}" & u & linefeed
+        set out to out & n & "${SEP}" & s & linefeed
       end if
     end repeat
   end tell
@@ -73,13 +65,8 @@ export async function readDockTiles(): Promise<DockTile[]> {
     .split("\n")
     .filter((line) => line.length > 0)
     .map((line) => {
-      const [name = "", badge = "", url = ""] = line.split(SEP);
-      return {
-        name,
-        badge,
-        count: badgeToCount(badge),
-        path: posixPathFromDockUrl(url),
-      };
+      const [name = "", badge = ""] = line.split(SEP);
+      return { name, badge, count: badgeToCount(badge) };
     });
 }
 
@@ -95,20 +82,6 @@ export function badgeToCount(badge: string): number {
   return 1; // "•" or any other non-numeric badge
 }
 
-/** POSIX path from a Dock AXURL (`file:///…` / `file://localhost/…`) or an already-absolute path. */
-function posixPathFromDockUrl(url: string): string | undefined {
-  const trimmed = url.trim();
-  if (!trimmed) return undefined;
-  if (trimmed.startsWith("/")) return trimmed.replace(/\/+$/, "") || undefined;
-  const match = /^file:\/\/(?:localhost)?(\/[^]*)$/i.exec(trimmed);
-  if (!match?.[1]) return undefined;
-  try {
-    return decodeURIComponent(match[1]).replace(/\/+$/, "") || undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 /** Whether macOS is in Dark appearance. Menu bar dropdowns follow this, not Raycast's own theme. */
 export async function readSystemDarkMode(): Promise<boolean> {
   try {
@@ -118,7 +91,7 @@ export async function readSystemDarkMode(): Promise<boolean> {
     );
     return out.trim() === "true";
   } catch {
-    return environment.appearance === "dark";
+    return false;
   }
 }
 

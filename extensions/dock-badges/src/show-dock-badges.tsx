@@ -57,9 +57,9 @@ function sameName(a: string, b: string): boolean {
   return a.localeCompare(b, undefined, { sensitivity: "accent" }) === 0;
 }
 
-/** Prefer the Dock tile's AXURL; System Events often cannot read it, so fall back to getApplications. */
+/** Bundle path of the installed app matching the tile's name, for its icon and to open it. */
 function resolvePath(tile: DockTile, applications: Application[] | undefined): string | undefined {
-  return tile.path ?? applications?.find((application) => sameName(application.name, tile.name))?.path;
+  return applications?.find((application) => sameName(application.name, tile.name))?.path;
 }
 
 export default function Command() {
@@ -72,7 +72,7 @@ export default function Command() {
     onError: () => undefined,
   });
   const { data: applications } = useCachedPromise(getApplications, [], { keepPreviousData: true });
-  const { data: darkMode = environment.appearance === "dark" } = useCachedPromise(readSystemDarkMode, [], {
+  const { data: darkMode = false } = useCachedPromise(readSystemDarkMode, [], {
     keepPreviousData: true,
     execute: menuOpen,
   });
@@ -147,7 +147,7 @@ export default function Command() {
 }
 
 /**
- * Open the resolved app bundle; if that is missing or fails, click its Dock tile instead.
+ * Open the matched app bundle; if that is missing or fails, click its Dock tile instead.
  * Menu bar commands have no Raycast window for a toast, so a failed fallback is reported via HUD.
  */
 async function openDockApp(tile: DockTile, path?: string): Promise<void> {
