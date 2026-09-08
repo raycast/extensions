@@ -9,7 +9,8 @@
     "xilopaint",
     "ridemountainpig",
     "pernielsentikaer",
-    "proprocrastinator"
+    "proprocrastinator",
+    "bailey_jennings"
   ],
   "platforms": [
     "macOS",
@@ -46,6 +47,24 @@
           "required": false,
           "label": "Show Text",
           "default": true
+        },
+        {
+          "name": "menutemperature",
+          "type": "dropdown",
+          "title": "Temperature",
+          "description": "Which temperature to show as menu bar text",
+          "required": false,
+          "default": "actual",
+          "data": [
+            {
+              "title": "Actual",
+              "value": "actual"
+            },
+            {
+              "title": "Feels Like",
+              "value": "feelslike"
+            }
+          ]
         }
       ]
     }
