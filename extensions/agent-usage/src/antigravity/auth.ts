@@ -15,8 +15,7 @@ const TOKEN_FILE_PATH = path.join(os.homedir(), ".gemini", "antigravity-cli", "a
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 
 // Antigravity installed-app public client (RFC 8252). Not a user secret; same values as the CLI / sqwu usage.
-export const ANTIGRAVITY_OAUTH_CLIENT_ID =
-  "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com";
+export const ANTIGRAVITY_OAUTH_CLIENT_ID = "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com";
 export const ANTIGRAVITY_OAUTH_CLIENT_SECRET = "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";
 
 const TOKEN_SKEW_MS = 60_000;
