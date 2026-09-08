@@ -1,6 +1,6 @@
 # OpenQR Changelog
 
-## [Ownership Transfer] - 2026-08-30
+## [Ownership Transfer] - {PR_MERGE_DATE}
 
 - Extension ownership transferred to the OpenQR organisation.
 
