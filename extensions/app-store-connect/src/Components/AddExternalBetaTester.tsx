@@ -46,19 +46,17 @@ export default function AddExternalBetaTester({ group, didUpdateNewTester }: Pro
           setIsLoading(false);
           showToast({
             style: Toast.Style.Success,
-            title: "Success!",
-            message: "Invite sent",
+            title: "Tester Invited",
+            message: values.email,
           });
-          if (response && response.ok) {
-            try {
-              const json = await response.json();
-              const invited = betaTesterSchema.safeParse(json.data);
-              if (invited.success) {
-                didUpdateNewTester(invited.data);
-              }
-            } catch (error) {
-              console.log(error);
+          try {
+            const json = await response.json();
+            const invited = betaTesterSchema.safeParse(json.data);
+            if (invited.success) {
+              didUpdateNewTester(invited.data);
             }
+          } catch (error) {
+            console.log(error);
           }
         } catch (error) {
           setIsLoading(false);

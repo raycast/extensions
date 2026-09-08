@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix Stats for Large Accounts] - 2026-08-29
+
+- Split aggregate and list GraphQL requests so My GitHub Stats loads for accounts with large histories
+
 ## [Search Repositories UX and Performance Fixes] - 2026-08-22
 
 - Search Repositories: Show **Recent Visited Repositories** when the search field is empty instead of running a blank API search.
@@ -28,6 +32,11 @@
 - **Download as ZIP** forms explain that archives do not create a Git repository and do not use the Default Clone Path.
 - README: added a **Cloning and Downloading Repositories** section describing when to use each flow.
 - Normalized action titles to Title Case (`Enable Auto-Merge`, `Re-Run Workflow`, `Sort by`).
+
+## [Load GitHub lists incrementally] - 2026-08-10
+
+- Added native pagination to repository, issue, pull request, discussion, release, notification, workflow run, and commit lists so initial results render sooner and later pages load on demand.
+- Limited GraphQL page sizes to 25 items while honoring smaller configured limits to reduce large-request failures.
 
 ## [Show CI status in pull request details] - 2026-08-10
 

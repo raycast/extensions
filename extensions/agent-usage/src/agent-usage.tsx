@@ -18,7 +18,7 @@ import { ManageAccountsForm } from "./accounts/ManageAccountsForm.tsx";
 import type { AccountUsageState } from "./accounts/types.ts";
 import { formatErrorMarkdown } from "./agents/detail-format.ts";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
-import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId } from "./agents/order.ts";
+import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId, getRequestedSelectedRowId } from "./agents/order.ts";
 import {
   useAihubmixUsage,
   useAmpUsage,
@@ -26,7 +26,7 @@ import {
   useClaudeUsage,
   useClinePassAccounts,
   useCodexAccounts,
-  useCopilotUsage,
+  useCopilotAccounts,
   useCursorUsage,
   useDeepSeekUsage,
   useDroidUsage,
@@ -36,6 +36,7 @@ import {
   useMiniMaxUsage,
   useMinimaxCNUsage,
   useOpencodegoUsage,
+  useOpenRouterUsage,
   useSyntheticAccounts,
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
@@ -78,6 +79,8 @@ import { formatMinimaxCNUsageText, getMinimaxCNAccessory, renderMinimaxCNDetail 
 import type { MinimaxCNError, MinimaxCNUsage } from "./minimaxcn/types.ts";
 import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDetail } from "./opencode-go/renderer.tsx";
 import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types.ts";
+import { formatOpenRouterUsageText, getOpenRouterAccessory, renderOpenRouterDetail } from "./openrouter/renderer.tsx";
+import type { OpenRouterError, OpenRouterUsage } from "./openrouter/types.ts";
 import { formatSyntheticUsageText, getSyntheticAccessory, renderSyntheticDetail } from "./synthetic/renderer.tsx";
 import type { SyntheticError, SyntheticUsage } from "./synthetic/types.ts";
 import { formatZaiUsageText, getZaiAccessory, renderZaiDetail } from "./zai/renderer.tsx";
@@ -96,7 +99,7 @@ interface AgentRegistryEntry<TUsage, TError extends ErrorLike> extends AgentDefi
 }
 
 /** Providers rendered from account rows — they have no single-usage hook. */
-type MultiAccountAgentId = "clinepass" | "codex" | "kimi" | "synthetic" | "zai";
+type MultiAccountAgentId = "clinepass" | "codex" | "copilot" | "kimi" | "synthetic" | "zai";
 
 interface AgentUsageById {
   aihubmix: AihubmixUsage;
@@ -117,6 +120,7 @@ interface AgentUsageById {
   minimax: MiniMaxUsage;
   minimaxcn: MinimaxCNUsage;
   "opencode-go": OpencodegoUsage;
+  openrouter: OpenRouterUsage;
 }
 
 interface AgentErrorById {
@@ -138,6 +142,7 @@ interface AgentErrorById {
   minimax: MiniMaxError;
   minimaxcn: MinimaxCNError;
   "opencode-go": OpencodegoError;
+  openrouter: OpenRouterError;
 }
 
 type AgentRegistry = {
@@ -178,7 +183,7 @@ interface AccountedAgentView {
   /** The account id, for use in the manage-accounts form */
   accountId: string;
   /** The provider key, for use in the manage-accounts form */
-  provider: "clinepass" | "kimi" | "zai" | "codex" | "synthetic";
+  provider: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic";
   /** Whether this provider is supported (always true for accounted views) */
   isSupported: boolean;
   /** The API token for this account (for copying) */
@@ -254,7 +259,6 @@ const AGENT_REGISTRY: AgentRegistry = {
     description: "GitHub Copilot",
     isSupported: true,
     settingsUrl: "https://github.com/settings/copilot",
-    useUsage: useCopilotUsage,
     renderDetail: renderCopilotDetail,
     getAccessory: getCopilotAccessory,
     formatUsageText: formatCopilotUsageText,
@@ -398,6 +402,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     getAccessory: getOpencodegoAccessory,
     formatUsageText: formatOpencodegoUsageText,
   },
+  openrouter: {
+    id: "openrouter",
+    name: "OpenRouter",
+    icon: "openrouter-icon.svg",
+    description: "OpenRouter Credit Balance",
+    isSupported: true,
+    settingsUrl: "https://openrouter.ai/credits",
+    useUsage: useOpenRouterUsage,
+    renderDetail: renderOpenRouterDetail,
+    getAccessory: getOpenRouterAccessory,
+    formatUsageText: formatOpenRouterUsageText,
+  },
 };
 
 const AGENT_IDS: AgentId[] = [...DEFAULT_AGENT_ORDER];
@@ -434,7 +450,7 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
   providerName: string,
   icon: string,
   settingsUrl: string | undefined,
-  provider: "clinepass" | "kimi" | "zai" | "codex" | "synthetic",
+  provider: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic",
   isVisible: boolean,
   accountStates: AccountUsageState<TUsage, TError>[],
   renderDetail: (usage: TUsage | null, error: TError | null) => React.ReactNode,
@@ -472,6 +488,7 @@ function getAccountedTitle(providerName: string, label: string): string {
 function getProviderName(agentId: MultiAccountAgentId): string {
   if (agentId === "clinepass") return "ClinePass";
   if (agentId === "codex") return "Codex";
+  if (agentId === "copilot") return "Copilot";
   if (agentId === "kimi") return "Kimi";
   if (agentId === "zai") return "z.ai";
   return "Synthetic";
@@ -485,7 +502,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const aihubmixState = AGENT_REGISTRY.aihubmix.useUsage(Boolean(prefs.showAihubmix));
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
   const claudeState = AGENT_REGISTRY.claude.useUsage(Boolean(prefs.showClaude));
-  const copilotState = AGENT_REGISTRY.copilot.useUsage(Boolean(prefs.showCopilot));
   const cursorState = AGENT_REGISTRY.cursor.useUsage(Boolean(prefs.showCursor));
   const deepseekState = AGENT_REGISTRY.deepseek.useUsage(Boolean(prefs.showDeepSeek));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
@@ -495,10 +511,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const minimaxState = AGENT_REGISTRY.minimax.useUsage(Boolean(prefs.showMinimax));
   const minimaxcnState = AGENT_REGISTRY.minimaxcn.useUsage(Boolean(prefs.showMinimaxCN));
   const opencodegoState = AGENT_REGISTRY["opencode-go"].useUsage(Boolean(prefs.showOpencodeGo));
+  const openrouterState = AGENT_REGISTRY.openrouter.useUsage(Boolean(prefs.showOpenRouter));
 
   // Multi-account providers
   const clinePassState = useClinePassAccounts(Boolean(prefs.showClinePass));
   const codexState = useCodexAccounts(Boolean(prefs.showCodex));
+  const copilotState = useCopilotAccounts(Boolean(prefs.showCopilot));
   const kimiState = useKimiAccounts(Boolean(prefs.showKimi));
   const syntheticState = useSyntheticAccounts(Boolean(prefs.showSynthetic));
   const zaiState = useZaiAccounts(Boolean(prefs.showZai));
@@ -507,7 +525,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     aihubmix: createAgentView(AGENT_REGISTRY.aihubmix, aihubmixState, Boolean(prefs.showAihubmix)),
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
     claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
-    copilot: createAgentView(AGENT_REGISTRY.copilot, copilotState, Boolean(prefs.showCopilot)),
     cursor: createAgentView(AGENT_REGISTRY.cursor, cursorState, Boolean(prefs.showCursor)),
     deepseek: createAgentView(AGENT_REGISTRY.deepseek, deepseekState, Boolean(prefs.showDeepSeek)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
@@ -517,6 +534,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     minimax: createAgentView(AGENT_REGISTRY.minimax, minimaxState, Boolean(prefs.showMinimax)),
     minimaxcn: createAgentView(AGENT_REGISTRY.minimaxcn, minimaxcnState, Boolean(prefs.showMinimaxCN)),
     "opencode-go": createAgentView(AGENT_REGISTRY["opencode-go"], opencodegoState, Boolean(prefs.showOpencodeGo)),
+    openrouter: createAgentView(AGENT_REGISTRY.openrouter, openrouterState, Boolean(prefs.showOpenRouter)),
   };
 
   const clinePassAccountedViews = createAccountedViews(
@@ -543,6 +561,19 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     renderKimiDetail,
     getKimiAccessory,
     formatKimiUsageText,
+  );
+
+  const copilotAccountedViews = createAccountedViews(
+    "copilot",
+    "Copilot",
+    AGENT_REGISTRY.copilot.icon,
+    AGENT_REGISTRY.copilot.settingsUrl,
+    "copilot",
+    Boolean(prefs.showCopilot),
+    copilotState.accounts,
+    renderCopilotDetail,
+    getCopilotAccessory,
+    formatCopilotUsageText,
   );
 
   const zaiAccountedViews = createAccountedViews(
@@ -640,6 +671,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
         if (agentId === "codex") {
           return codexAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
         }
+        if (agentId === "copilot") {
+          return copilotAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
+        }
         if (agentId === "kimi") {
           return kimiAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
         }
@@ -660,6 +694,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
       agentOrder,
       clinePassAccountedViews,
       codexAccountedViews,
+      copilotAccountedViews,
       kimiAccountedViews,
       syntheticAccountedViews,
       zaiAccountedViews,
@@ -669,9 +704,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   const requestedSelectedAgentId = props.launchContext?.selectedAgentId;
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(() =>
-    typeof requestedSelectedAgentId === "string" && isAgentId(requestedSelectedAgentId)
-      ? requestedSelectedAgentId
-      : undefined,
+    getRequestedSelectedRowId(requestedSelectedAgentId),
   );
 
   useEffect(() => {
@@ -696,7 +729,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   const isLoading =
     allRows.some((row) => row.view.isLoading) ||
-    [clinePassState, codexState, kimiState, syntheticState, zaiState].some((state) => state.isLoading);
+    [clinePassState, codexState, copilotState, kimiState, syntheticState, zaiState].some((state) => state.isLoading);
 
   const hasPromptedGeminiReauth = useRef(false);
 

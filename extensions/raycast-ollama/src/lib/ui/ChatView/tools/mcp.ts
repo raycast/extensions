@@ -3,7 +3,10 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport, StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { Implementation } from "@modelcontextprotocol/sdk/types";
 
-const mcpClientImplementation: Implementation = { name: "raycast-extension-ollama", version: "2026-05-18" };
+const mcpClientImplementation: Implementation = {
+  name: "raycast-extension-ollama",
+  version: "2026-05-18",
+};
 
 /* Get Available Tools from Mcp Server */
 export async function ToolMcp(stdioServerParam: StdioServerParameters): Promise<Tool[]> {
@@ -32,7 +35,10 @@ export async function ToolMcp(stdioServerParam: StdioServerParameters): Promise<
         await client.connect(transport);
 
         /* Tool Call */
-        const result = await client.callTool({ name: mcpTool.name, arguments: parameters });
+        const result = await client.callTool({
+          name: mcpTool.name,
+          arguments: parameters,
+        });
 
         /* Disconnect from Mcp Server */
         await client.close();

@@ -33,38 +33,62 @@ function listApps(dir: string): { name: string; path: string }[] {
   }
 }
 
+// Runs `fn` over `items` a batch at a time instead of all at once. Every plist
+// read spawns a `defaults` process, so an unbounded fan-out over /Applications
+// forks one process per installed app — unnoticeable with 30 apps, enough to
+// stall the extension host with a few hundred.
+async function mapInBatches<T, R>(
+  items: T[],
+  batchSize: number,
+  fn: (item: T) => Promise<R>,
+  onBatch?: (current: number, total: number) => void,
+): Promise<R[]> {
+  const results: R[] = [];
+
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    onBatch?.(Math.min(i + batchSize, items.length), items.length);
+    results.push(...(await Promise.all(batch.map(fn))));
+  }
+
+  return results;
+}
+
+// An app with a feed costs 4 `defaults` calls, but never all at once: the feed
+// lookup is awaited before the other three run in parallel. A batch of 8 is
+// therefore bounded by 8 * 3 = 24 concurrent processes.
+const PLIST_BATCH_SIZE = 8;
+
+async function readAppInfo(app: { name: string; path: string }): Promise<AppInfo | null> {
+  const plistPath = `${app.path}/Contents/Info`;
+  const plistFile = `${app.path}/Contents/Info.plist`;
+
+  if (!existsSync(plistFile)) return null;
+
+  const feedUrl = await readPlistKey(plistPath, "SUFeedURL");
+  if (!feedUrl || feedUrl === "NULL") return null;
+
+  const [name, version, bundleId] = await Promise.all([
+    readPlistKey(plistPath, "CFBundleName"),
+    readPlistKey(plistPath, "CFBundleShortVersionString"),
+    readPlistKey(plistPath, "CFBundleIdentifier"),
+  ]);
+
+  return {
+    name: name || app.name.replace(".app", ""),
+    version: version || "unknown",
+    feedUrl,
+    appPath: app.path,
+    bundleId: bundleId || "",
+  };
+}
+
 async function getSparkleApps(): Promise<AppInfo[]> {
   const appsDirs = ["/Applications", `${homedir()}/Applications`];
-  const apps: AppInfo[] = [];
-
   const allApps = appsDirs.flatMap((dir) => listApps(dir));
 
-  const checks = allApps.map(async (app) => {
-    const plistPath = `${app.path}/Contents/Info`;
-    const plistFile = `${app.path}/Contents/Info.plist`;
-
-    if (!existsSync(plistFile)) return;
-
-    const feedUrl = await readPlistKey(plistPath, "SUFeedURL");
-    if (!feedUrl || feedUrl === "NULL") return;
-
-    const [name, version, bundleId] = await Promise.all([
-      readPlistKey(plistPath, "CFBundleName"),
-      readPlistKey(plistPath, "CFBundleShortVersionString"),
-      readPlistKey(plistPath, "CFBundleIdentifier"),
-    ]);
-
-    apps.push({
-      name: name || app.name.replace(".app", ""),
-      version: version || "unknown",
-      feedUrl,
-      appPath: app.path,
-      bundleId: bundleId || "",
-    });
-  });
-
-  await Promise.all(checks);
-  return apps;
+  const infos = await mapInBatches(allApps, PLIST_BATCH_SIZE, readAppInfo);
+  return infos.filter((info): info is AppInfo => info !== null);
 }
 
 function extractLatestVersion(xml: string): { version: string; url: string } | null {
@@ -159,17 +183,7 @@ async function checkApp(app: AppInfo): Promise<AppUpdate | null> {
 
 export async function scanSparkleUpdates(onProgress?: (current: number, total: number) => void): Promise<AppUpdate[]> {
   const apps = await getSparkleApps();
-  const updates: AppUpdate[] = [];
 
-  for (let i = 0; i < apps.length; i += BATCH_SIZE) {
-    const batch = apps.slice(i, i + BATCH_SIZE);
-    onProgress?.(Math.min(i + BATCH_SIZE, apps.length), apps.length);
-
-    const results = await Promise.all(batch.map(checkApp));
-    for (const result of results) {
-      if (result) updates.push(result);
-    }
-  }
-
-  return updates;
+  const results = await mapInBatches(apps, BATCH_SIZE, checkApp, onProgress);
+  return results.filter((update): update is AppUpdate => update !== null);
 }

@@ -61,6 +61,9 @@
     "Windows"
   ],
   "overrides": {
-    "brace-expansion": "5.0.8"
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
+    "undici": "7.29.0"
   }
 }

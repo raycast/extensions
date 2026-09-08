@@ -279,7 +279,7 @@ export async function getProjects(gcloudPath: string): Promise<Project[]> {
       return cachedResult.result as Project[];
     }
 
-    const { stdout } = await execFilePromise(gcloudPath, args, { timeout: 30000 });
+    const { stdout } = await execFilePromise(gcloudPath, args, { timeout: 30000, maxBuffer: 64 * 1024 * 1024 });
 
     if (!stdout || stdout.trim() === "") {
       return [];

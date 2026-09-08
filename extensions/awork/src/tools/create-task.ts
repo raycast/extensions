@@ -83,7 +83,9 @@ export default async (input: Input) => {
 
   const result = await createTask(tokens.accessToken, values);
   const workspaceUrl = await LocalStorage.getItem<string>("URL");
-  const url = workspaceUrl ? `${workspaceUrl.replace(/\/$/, "")}/tasks/${result.task.id}` : undefined;
+  const url = workspaceUrl
+    ? `${workspaceUrl.replace(/\/$/, "")}/tasks/${result.task.taskIdentifier ?? result.task.id}`
+    : undefined;
   const warnings = result.assigneeError
     ? [`Task created, but assignees could not be set: ${result.assigneeError.message}`]
     : [];

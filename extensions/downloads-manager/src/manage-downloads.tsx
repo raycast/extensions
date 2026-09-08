@@ -10,10 +10,8 @@ import {
   LocalStorage,
   showToast,
   Toast,
-  trash,
 } from "@raycast/api";
 import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
-import { PathLike } from "fs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   defaultDownloadsLayout,
@@ -28,6 +26,7 @@ import {
   Download,
   formatFileSize,
   getFileType,
+  moveToTrash,
 } from "./utils";
 
 function FilePreviewDetail({ download, isSelected }: { download: Download; isSelected: boolean }) {
@@ -146,7 +145,7 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     }
   }, [isLoading, hasMore, nextOffset, loadNextPage]);
 
-  function handleTrash(paths: PathLike | PathLike[]) {
+  function handleTrash(paths: string | string[]) {
     setDownloads((downloads: Download[]) =>
       downloads.filter((download: Download) =>
         Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path,
@@ -154,7 +153,7 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     );
   }
 
-  async function handleMoveToTrash(paths: PathLike | PathLike[]) {
+  async function handleMoveToTrash(paths: string | string[]) {
     const hasConfirmedMoveToTrash = await LocalStorage.getItem<boolean>(MOVE_TO_TRASH_CONFIRMATION_KEY);
     let shouldTrash = hasConfirmedMoveToTrash ?? false;
 
@@ -182,8 +181,18 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     }
 
     try {
-      await trash(paths);
-      handleTrash(paths);
+      const { trashedPaths, failedPaths } = await moveToTrash(paths);
+      handleTrash(trashedPaths);
+
+      if (failedPaths.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Some Items Could Not Be Moved to Trash",
+          message: `${failedPaths.length} item${failedPaths.length === 1 ? "" : "s"} could not be moved`,
+        });
+        return;
+      }
+
       await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
     } catch (error) {
       await showFailureToast(error, { title: "Move to Trash Failed" });

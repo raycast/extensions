@@ -13,7 +13,7 @@ import { resolveSpaceIconUrl } from "./utils/space-icon.util";
 function Body() {
   const { data: availableBrowsers, isLoading } = useAvailableBrowsers();
   const { enabledSpaces } = useEnabledSpaces();
-  // READ 권한 스페이스는 임포트 대상에서 제외
+  // Exclude READ-only spaces from import targets
   const writableSpaces = enabledSpaces?.filter((s) => s.myRole !== "READ");
 
   // Get browser icon from bundle ID

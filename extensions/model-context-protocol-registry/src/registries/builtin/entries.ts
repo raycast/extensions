@@ -1155,6 +1155,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "stellary",
+    title: "Stellary",
+    description:
+      "AI-native project piloting and project management (open beta). Connect your AI assistant to Stellary workspaces through the hosted Streamable HTTP MCP server. Bearer PAT required.",
+    icon: "https://raw.githubusercontent.com/Anymfah/stellary-mcp/main/assets/logo-400.png",
+    homepage: "https://stellary.co/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.stellary.co/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
+    },
+  },
+  {
     name: "vc-deal-flow-signal",
     title: "VC Deal Flow Signal",
     description:

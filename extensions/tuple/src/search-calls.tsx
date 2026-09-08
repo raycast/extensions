@@ -14,17 +14,17 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { showFailureToast, useExec } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { EditCallMetadata, SummarizeCall } from "./call-ai";
 import { CallDraft } from "./lib/ai";
 import { TupleErrorDetail, TupleErrorEmptyView } from "./lib/empty-state";
-import { tupleExecOptions, useTupleJson } from "./lib/hooks";
+import { useTupleJson } from "./lib/hooks";
 import {
   classifyError,
   deleteTranscript,
   exportTranscripts,
-  getBinaryPath,
+  getCompactTranscript,
   getConnectPrompt,
   stripAnsi,
   stripMatchMarkers,
@@ -310,9 +310,7 @@ function TranscriptDetail({ callId, call, onChange }: { callId: string; call?: S
     onChange?.();
   };
 
-  const { data, isLoading, error, revalidate } = useExec(getBinaryPath(), ["transcription", "show", callId], {
-    ...tupleExecOptions(),
-    keepPreviousData: true,
+  const { data, isLoading, error, revalidate } = usePromise(getCompactTranscript, [callId], {
     onError: async (error) => {
       if (classifyError(error).kind === TupleErrorKind.Unknown) {
         await showFailureToast(error, { title: "Could Not Load Transcript" });

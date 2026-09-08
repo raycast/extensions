@@ -102,8 +102,7 @@ export default function TestInformation({ app }: TestInformationProps) {
           setSubmitIsLoading(false);
           showToast({
             style: Toast.Style.Success,
-            title: "Success!",
-            message: "Updated beta app information",
+            title: "Test Information Updated",
           });
         } catch (error) {
           presentError(error);

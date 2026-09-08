@@ -1,5 +1,23 @@
 # Sonarr Changelog
 
+## [Second Instance and Windows Connection Fix] - 2026-08-25
+
+### Added
+
+- Support for a second Sonarr instance: enable it in the preferences, then switch between the two from the `Instance` section of any command's action panel (`⌘⇧I` / `Ctrl+Shift+I`). The selection is stored, so it applies to every command and survives closing Raycast
+- The second instance is configured with the same preferences as the first one — host, port, URL base, connection type and API key — so both accept exactly the same setups
+- `Instance Name` and `Second Instance Name` preferences, used to label the instance in the search bar and in the switch action
+- `Active Instance` preference, deciding which instance commands start on
+- `Instance Status` now reports every configured instance side by side — connection, version, and health checks per instance — and flags a second instance that is enabled but missing its host or API key
+
+### Changed
+
+- The `API Key` preference is now a password field, so the key is masked in the preferences instead of being displayed in clear text. Raycast stores password preferences separately from plain ones, so the key may need to be entered once more after updating
+
+### Fixed
+
+- Fixed the extension crashing on Windows with `Cannot read properties of undefined (reading 'trim')` when the optional `URL Base` preference was left empty: Raycast returns `undefined` rather than an empty string there, so every preference is now read through a helper that tolerates it
+
 ## [Windows Support] - 2026-08-22
 
 ### Added

@@ -1,6 +1,4 @@
-import { CATEGORY_META } from "../types";
 import type { TweakState } from "../types";
-import { getCommandString, getResetCommandString } from "./defaults";
 
 export function formatValue(tweak: TweakState): string {
   if (tweak.type === "boolean") {
@@ -22,74 +20,4 @@ export function formatDefault(tweak: TweakState): string {
     return match?.title ?? String(tweak.defaultValue);
   }
   return String(tweak.defaultValue);
-}
-
-export function buildDetailMarkdown(tweak: TweakState, options?: { showCategory?: boolean }): string {
-  const lines: string[] = [];
-
-  lines.push(`## ${tweak.title}`);
-  lines.push("");
-  lines.push(tweak.description);
-  lines.push("");
-  lines.push("---");
-  lines.push("");
-  lines.push(`**Status:** ${tweak.isModified ? "Modified" : "Default"}`);
-  lines.push("");
-  lines.push(`**Current Value:** \`${formatValue(tweak)}\``);
-  lines.push("");
-  lines.push(`**Default Value:** \`${formatDefault(tweak)}\``);
-  lines.push("");
-
-  if (options?.showCategory) {
-    lines.push(`**Category:** ${CATEGORY_META[tweak.category].title}`);
-    lines.push("");
-  }
-
-  if (tweak.type === "enum" && tweak.options) {
-    lines.push("**Options:**");
-    for (const opt of tweak.options) {
-      const marker = String(tweak.currentValue) === String(opt.value) ? " (current)" : "";
-      lines.push(`- ${opt.title}${marker}`);
-    }
-    lines.push("");
-  }
-
-  lines.push("---");
-  lines.push("");
-  lines.push(`**Domain:** \`${tweak.domain}\``);
-  lines.push("");
-  lines.push(`**Key:** \`${tweak.key}\``);
-  lines.push("");
-  lines.push("**Command:**");
-  lines.push("```bash");
-  lines.push(getCommandString(tweak, tweak.currentValue));
-  lines.push("```");
-  lines.push("");
-  lines.push("**Reset:**");
-  lines.push("```bash");
-  lines.push(getResetCommandString(tweak));
-  lines.push("```");
-
-  if (tweak.requiresRestart) {
-    lines.push("");
-    lines.push(`**Requires restart:** ${tweak.requiresRestart}`);
-  }
-
-  if (tweak.minMacOS || tweak.maxMacOS) {
-    lines.push("");
-    if (tweak.minMacOS && tweak.maxMacOS) {
-      lines.push(`**macOS:** ${tweak.minMacOS} – ${tweak.maxMacOS}`);
-    } else if (tweak.minMacOS) {
-      lines.push(`**macOS:** ${tweak.minMacOS}+`);
-    } else if (tweak.maxMacOS) {
-      lines.push(`**macOS:** up to ${tweak.maxMacOS}`);
-    }
-  }
-
-  if (tweak.risk === "moderate") {
-    lines.push("");
-    lines.push("> **Warning:** This setting is marked as moderate risk.");
-  }
-
-  return lines.join("\n");
 }

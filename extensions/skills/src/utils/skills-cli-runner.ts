@@ -1,6 +1,8 @@
-import { access, stat } from "node:fs/promises";
+import { access, mkdir, stat, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
-import { basename } from "node:path";
+import { basename, join } from "node:path";
+import { environment } from "@raycast/api";
+import lockfile from "proper-lockfile";
 import { getCustomNpxPath, shouldDisableSkillsCliTelemetry } from "../preferences";
 import { execFileAsync } from "./exec-async";
 import { getExecOptions } from "./exec-options";
@@ -11,6 +13,8 @@ let validatedCustomNpxPath: string | null = null;
 let pendingCustomNpxValidation: { path: string; promise: Promise<void> } | null = null;
 let pendingSkillsCliRun: Promise<unknown> = Promise.resolve();
 let bunxResolutionFailed = false;
+
+const SKILLS_CLI_LOCK_TARGET = join(environment.supportPath, "skills-cli");
 
 type ExecFailure = Error & {
   code?: string | number;
@@ -60,14 +64,37 @@ export interface RunSkillsCliOptions {
   readOnly?: boolean;
 }
 
+export type SkillsCliRunner = (args: string[], options?: RunSkillsCliOptions) => Promise<string>;
+
 export async function runSkillsCli(args: string[], options: RunSkillsCliOptions = {}): Promise<string> {
-  return enqueueSkillsCliRun(() => runSkillsCliCommand(args, options.readOnly ?? false));
+  return withSkillsCliLock((runLocked) => runLocked(args, options));
+}
+
+export async function withSkillsCliLock<T>(run: (runLocked: SkillsCliRunner) => Promise<T>): Promise<T> {
+  return enqueueSkillsCliRun(() =>
+    withCrossProcessSkillsCliLock(() =>
+      run((args, options = {}) => runSkillsCliCommand(args, options.readOnly ?? false)),
+    ),
+  );
 }
 
 async function enqueueSkillsCliRun<T>(run: () => Promise<T>): Promise<T> {
   const runAfterPending = pendingSkillsCliRun.then(run, run);
   pendingSkillsCliRun = runAfterPending.catch(() => undefined);
   return runAfterPending;
+}
+
+async function withCrossProcessSkillsCliLock<T>(run: () => Promise<T>): Promise<T> {
+  await mkdir(environment.supportPath, { recursive: true });
+  await writeFile(SKILLS_CLI_LOCK_TARGET, "", { flag: "a" });
+  const release = await lockfile.lock(SKILLS_CLI_LOCK_TARGET, {
+    retries: { forever: true, factor: 1, minTimeout: 100, maxTimeout: 100, randomize: true },
+  });
+  try {
+    return await run();
+  } finally {
+    await release();
+  }
 }
 
 async function runSkillsCliCommand(args: string[], readOnly: boolean): Promise<string> {

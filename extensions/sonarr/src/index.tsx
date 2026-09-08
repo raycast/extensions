@@ -13,7 +13,9 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import type { SingleSeries } from "@/lib/types/episode";
+import type { InstanceState } from "@/lib/types/instance";
 import type { SonarrPreferences } from "@/lib/types/preferences";
+import { useInstance } from "@/lib/hooks/useInstance";
 import { useCalendar, searchEpisode, searchSeason, toggleEpisodeMonitoring } from "@/lib/hooks/useSonarrAPI";
 import {
   formatAirDate,
@@ -24,16 +26,18 @@ import {
   getEpisodeStatus,
   formatFileSize,
   formatQualityProfile,
-  getSonarrUrl,
+  getSearchPlaceholder,
 } from "@/lib/utils/formatting";
+import { InstanceActions } from "@/lib/components/InstanceActions";
 import { Shortcuts } from "@/lib/utils/shortcuts";
 
 export default function Command() {
   const preferences = getPreferenceValues<SonarrPreferences>();
   const futureDays = parseInt(preferences.futureDays || "14");
   const [searchText, setSearchText] = useState("");
+  const instanceState = useInstance();
 
-  const { data, isLoading, mutate } = useCalendar(futureDays);
+  const { data, isLoading, mutate } = useCalendar(instanceState.instance, futureDays);
 
   const filteredEpisodes = useMemo(() => {
     if (!data) return [];
@@ -47,25 +51,42 @@ export default function Command() {
     );
   }, [data, searchText]);
 
+  // Also reachable with an empty list: without it, switching back out of an
+  // instance that returned nothing would mean quitting the command.
+  const instancePanel = (
+    <ActionPanel>
+      <InstanceActions state={instanceState} />
+    </ActionPanel>
+  );
+
   return (
     <List
-      searchBarPlaceholder="Search upcoming episodes..."
-      isLoading={isLoading}
+      actions={instancePanel}
+      searchBarPlaceholder={getSearchPlaceholder(instanceState, "Search upcoming episodes")}
+      isLoading={isLoading || instanceState.isLoading}
       isShowingDetail
       filtering={false}
       onSearchTextChange={setSearchText}
     >
       <List.Section title="Upcoming Episodes" subtitle={`${filteredEpisodes.length} episodes`}>
         {filteredEpisodes.map((episode) => (
-          <EpisodeListItem key={episode.id} episode={episode} onRefresh={mutate} />
+          <EpisodeListItem key={episode.id} episode={episode} onRefresh={mutate} instanceState={instanceState} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefresh: () => void }) {
-  const sonarrUrl = getSonarrUrl();
+function EpisodeListItem({
+  episode,
+  onRefresh,
+  instanceState,
+}: {
+  episode: SingleSeries;
+  onRefresh: () => void;
+  instanceState: InstanceState;
+}) {
+  const sonarrUrl = instanceState.instance?.url ?? "";
 
   const status = getEpisodeStatus(episode.airDateUtc, episode.hasFile, episode.monitored);
   const poster = getSeriesPoster(episode.series.images);
@@ -124,7 +145,7 @@ function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefr
 
   const handleSearchEpisode = async () => {
     try {
-      await searchEpisode([episode.id]);
+      await searchEpisode(instanceState.instance, [episode.id]);
       await onRefresh();
     } catch (error) {
       showFailureToast(error, { title: "Failed to search episode" });
@@ -133,7 +154,7 @@ function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefr
 
   const handleSearchSeason = async () => {
     try {
-      await searchSeason(episode.seriesId, episode.seasonNumber);
+      await searchSeason(instanceState.instance, episode.seriesId, episode.seasonNumber);
       await onRefresh();
     } catch (error) {
       showFailureToast(error, { title: "Failed to search season" });
@@ -152,7 +173,7 @@ function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefr
 
     if (confirmed) {
       try {
-        await toggleEpisodeMonitoring(episode.id, !episode.monitored);
+        await toggleEpisodeMonitoring(instanceState.instance, episode.id, !episode.monitored);
         await onRefresh();
       } catch (error) {
         showFailureToast(error, { title: "Failed to update episode monitoring" });
@@ -235,6 +256,8 @@ function EpisodeListItem({ episode, onRefresh }: { episode: SingleSeries; onRefr
               shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
+
+          <InstanceActions state={instanceState} />
         </ActionPanel>
       }
     />

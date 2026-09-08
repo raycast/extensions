@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "runpool",
+  "title": "RunPool",
+  "description": "Manage on-demand self-hosted GitHub Actions runner pools on your Mac",
+  "icon": "icon.png",
+  "author": "aic",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pools",
+      "title": "Show Runner Pools",
+      "subtitle": "RunPool",
+      "description": "See every runner pool, start and stop them, and change how many runners each has",
+      "mode": "view"
+    },
+    {
+      "name": "recent-runs",
+      "title": "Show Recent Workflow Runs",
+      "subtitle": "RunPool",
+      "description": "See recent GitHub Actions workflow runs for repositories served by your runner pools",
+      "mode": "view"
+    },
+    {
+      "name": "manage-runner-pools",
+      "title": "Manage Runner Pools",
+      "subtitle": "RunPool",
+      "description": "Pause or resume automatic runner pools without affecting other CI providers",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Runner Status",
+      "subtitle": "RunPool",
+      "description": "Keep a live summary of the pools in this command's subtitle",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "menubar",
+      "title": "Runner Status in Menu Bar",
+      "subtitle": "RunPool",
+      "description": "Show how much of your runner capacity is busy, as a fill level in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "colourIcon",
+          "title": "Appearance",
+          "label": "Use the RunPool blue",
+          "description": "Off by default, so the icon matches the other items in your menu bar.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "runpoolPath",
+      "title": "Executable Path",
+      "description": "Only if runpool is installed somewhere unusual.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-status",
+      "title": "Get Pool Status",
+      "description": "Read every runner pool: how many runners each has, how many are running, how many jobs are in flight, and what GitHub sees"
+    },
+    {
+      "name": "start-pool",
+      "title": "Start Pool",
+      "description": "Bring a pool's runners online immediately, rather than waiting for a queued job to wake it"
+    },
+    {
+      "name": "stop-pool",
+      "title": "Stop Pool",
+      "description": "Stand a pool's runners down. Refuses while a job is running, because stopping mid-job fails it"
+    },
+    {
+      "name": "set-pool-count",
+      "title": "Set Runner Count",
+      "description": "Change how many runners a pool has. Growing registers new runners with GitHub, shrinking deregisters them"
+    },
+    {
+      "name": "toggle-pause",
+      "title": "Pause or Resume Runner Pools",
+      "description": "Pause stands every RunPool runner down and stops pools waking. Resume returns them to on-demand"
+    },
+    {
+      "name": "pause-pool",
+      "title": "Pause Pool",
+      "description": "Persistently pause one pool. It stops its runners and will not wake until resumed"
+    },
+    {
+      "name": "resume-pool",
+      "title": "Resume Pool",
+      "description": "Resume one persistently paused pool so it can wake for queued work"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "evals": "ray evals",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}

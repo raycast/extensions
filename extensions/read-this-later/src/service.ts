@@ -1,4 +1,4 @@
-// Where the Research Sync backend lives, and how we talk to it.
+// Where the Clipfile backend lives, and how we talk to it.
 //
 // Single source of truth: api.ts, offline.ts and capture.ts all reach the same
 // Worker, and three independent copies of the URL is three chances for them to

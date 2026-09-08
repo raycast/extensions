@@ -3,7 +3,11 @@ import { withAccessToken } from "@raycast/utils";
 import { filterIssues } from "../api/getIssues";
 import { linear } from "../api/linearClient";
 
-export default withAccessToken(linear)(async (inputs: {
+import { collect, CursorPageInput } from "./linearUtils";
+
+interface Input extends CursorPageInput {
+  /** Max results (default 50, max 250) */ limit?: number;
+  /** Next page cursor */ cursor?: string;
   /**
    * Filter object.
    *
@@ -128,6 +132,14 @@ export default withAccessToken(linear)(async (inputs: {
   * IMPORTANT: When user asks about my issues (assigned to me, my issues, etc), always filter by assignee.
   */
   filter: string;
-}) => {
-  return (await filterIssues(inputs.filter)).issues;
+}
+
+export default withAccessToken(linear)(async (input: Input) => {
+  return collect(async ({ first, after }) => {
+    const result = await filterIssues(input.filter, after, first);
+    return {
+      nodes: result.issues ?? [],
+      pageInfo: result.pageInfo ?? { hasNextPage: false },
+    };
+  }, input);
 });

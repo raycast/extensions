@@ -1,5 +1,9 @@
 # Tuple Changelog
 
+## [Compact Transcript Timestamps] - 2026-08-25
+
+- Transcript views and AI summaries keep compact clock timestamps as Tuple shifts its CLI default to full RFC3339 instants.
+
 ## [Smarter Calls and Rooms] - 2026-08-20
 
 - **Contacts** now show only the call action that person can accept: start when they're online, join when their call has room, and neither when they're offline or the call is full. Favorites, search, and Copy Email still work for everyone.

@@ -76,3 +76,4 @@ globalping
 mymind
 buffer
 nocal
+openqr

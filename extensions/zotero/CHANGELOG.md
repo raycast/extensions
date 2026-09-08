@@ -1,5 +1,14 @@
 # Zotero Changelog
 
+## [Group libraries, fuzzy search, and BibTeX-key search] - 2026-08-30
+
+- Search now uses a subsequence fuzzy finder (fuzzysort) instead of near-exact matching, so typing `qsim` finds "Quantum Simulation". Results are ranked by how well they match, and the most recent items show for an empty query.
+- Added a "Search by BibTeX Citation Key" preference. With it on, typing a citation key like `smith2020quantum` returns that item.
+- Group libraries are now supported. By default only your personal library is searched, so a paper shared to a group no longer shows up twice. Use the new "Configure Group Libraries" action (`⌘L`) to pick which groups to include.
+- Items in group libraries now open in Zotero. The `zotero://` links use the `/groups/<groupID>/` path for group items, so pressing Enter opens them instead of doing nothing.
+- Selecting a collection now filters the whole library before the 100-item cap. Collections are matched by their library and key, so two collections that share a name (or a key across libraries) stay separate, and the dropdown labels them so you can tell them apart. The dropdown lists collections from your personal library and any group libraries you have included.
+- Large libraries no longer run out of memory while searching. Matching long fields such as abstracts and notes no longer grows the heap on every keystroke.
+
 ## [Fixes] - 2026-07-17
 
 - Fix "Worker terminated due to reaching memory limit: JS heap out of memory" crash on large libraries when browsing or running broad searches: the command rendered every matching item (the whole library on an empty query, or hundreds/thousands for a broad query), and Raycast's per-item detail + action list grows the command worker's memory until it is killed. Results are now capped at 100 rendered items (the section header shows "Top 100 — refine your search to see more" when capped), which keeps the render footprint bounded. Follow-up to #29478 / #29250

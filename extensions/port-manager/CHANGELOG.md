@@ -1,5 +1,9 @@
 # Port Manager Changelog
 
+## [Windows Support] - 2026-09-01
+
+- Fix "Open Ports" command on non-english windows locales
+
 ## [Windows Support] - 2026-08-13
 
 - Added Windows support for listing and killing processes listening on TCP ports

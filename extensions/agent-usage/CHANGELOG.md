@@ -1,5 +1,48 @@
 # Agent Usage Changelog
 
+## [Add OpenRouter credit balance] - 2026-09-08
+
+### New Features
+
+- Show the OpenRouter credit balance in the list and menu bar, auto-detected from an OpenCode `openrouter` login, `OPENROUTER_API_KEY`/`OPENROUTER_KEY`, or a pasted API key
+- Read account credits from `/api/v1/credits` with a provisioning key, and fall back to the key's own spending cap from `/api/v1/key` for a regular inference key
+
+## [OpenCode Go Zen usage API] - 2026-09-07
+
+### Improvements
+
+- Fetch OpenCode Go usage from the Zen JSON API (`https://opencode.ai/zen/go/v1/usage`) instead of scraping the workspace web page
+- Replace the workspace ID and session cookie setup with an optional Zen API key, auto-detected from OpenCode (`~/.local/share/opencode/auth.json`)
+- Show rolling, weekly, and monthly limits with per-window reset times in the detail view
+
+## [Show Grok limit reset credits] - 2026-09-04
+
+### New Features
+
+- Show Grok manual usage-limit reset tokens in the detail view: remaining count and each expiration time, matching Codex
+
+## [Copilot multi-account and AI credits] - 2026-08-29
+
+### New Features
+
+- Support unlimited named GitHub Copilot accounts, with separate rows in the main list and menu bar
+- Add Copilot accounts through the existing **Manage Accounts** action
+- Prefer the active GitHub CLI token from `gh auth token`, then fall back to `GITHUB_TOKEN` and `GH_TOKEN` as separate auto-detected accounts while retaining the legacy preference token
+
+### Improvements
+
+- Rename Copilot's Premium Interactions quota to AI Credits
+- Show the remaining AI Credits as both a percentage and a credit balance, such as `24 / 300 credits`
+- Support GitHub token discovery from Windows command shells as well as Unix login shells
+
+## [Fix Amp usage parse] - 2026-08-27
+
+### Bug Fixes
+
+- Parse `amp usage` when labels are markdown-bold (`**Amp Free:**`), which is what the CLI emits when it is not attached to a TTY (Raycast's fetch path)
+- Parse Amp Megawatt/Gigawatt subscription remaining (other usage + orb usage) in the detail view
+- List and menu bar still show Amp Free when present; if Amp Free is absent they use the tighter subscription pool instead of 0%
+
 ## [Add AIHubMix Usage] - 2026-08-22
 
 - Add AIHubMix balance monitoring to the main list and menu bar

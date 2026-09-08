@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 
-import { formatResetTime, getRemainingPercent } from "../agents/format.ts";
+import { formatResetTime } from "../agents/format.ts";
 import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
@@ -10,14 +10,16 @@ import {
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
-import type { OpencodegoUsage, OpencodegoError, OpencodegoQuota } from "./types.ts";
+import type { OpencodegoUsage, OpencodegoError, OpencodegoWindowUsage } from "./types.ts";
 
-function formatQuotaText(quota: OpencodegoQuota): string {
-  const remaining = quota.limit - quota.used;
-  const percent = Math.round(getRemainingPercent(remaining, quota.limit));
-  const usedStr = quota.unit ? `${quota.used} ${quota.unit}` : `${quota.used}`;
-  const limitStr = quota.unit ? `${quota.limit} ${quota.unit}` : `${quota.limit}`;
-  return `${usedStr}/${limitStr} (${percent}% remaining)`;
+// API percent is "percentage used", so remaining = 100 - percent
+function getRemainingPercent(usedPercent: number): number {
+  return Math.max(0, Math.min(100, 100 - usedPercent));
+}
+
+function formatWindowText(window: OpencodegoWindowUsage): string {
+  const percent = Math.round(getRemainingPercent(window.percent));
+  return `${generateAsciiBar(percent)} ${percent}% remaining`;
 }
 
 export function formatOpencodegoUsageText(usage: OpencodegoUsage | null, error: OpencodegoError | null): string {
@@ -25,22 +27,18 @@ export function formatOpencodegoUsageText(usage: OpencodegoUsage | null, error: 
   if (fallback !== null) return fallback;
   const u = usage as OpencodegoUsage;
 
-  let text = `OpenCode Go Usage\nPlan: ${u.planName}`;
+  let text = "OpenCode Go Usage";
 
-  const primaryRemaining = u.primary.limit - u.primary.used;
-  const primaryPercent = Math.round(getRemainingPercent(primaryRemaining, u.primary.limit));
-  text += `\n\n${u.primary.label}`;
-  text += `\n${generateAsciiBar(primaryPercent)} ${formatQuotaText(u.primary)}`;
-
-  for (const quota of u.quotas) {
-    const remaining = quota.limit - quota.used;
-    const percent = Math.round(getRemainingPercent(remaining, quota.limit));
-    text += `\n\n${quota.label}`;
-    text += `\n${generateAsciiBar(percent)} ${formatQuotaText(quota)}`;
-  }
-
-  if (u.resetsAt) {
-    text += `\n\nResets: ${formatResetTime(u.resetsAt)}`;
+  for (const [label, window] of Object.entries({
+    "Rolling limit": u.rolling,
+    "Weekly limit": u.weekly,
+    "Monthly limit": u.monthly,
+  }) as [string, OpencodegoWindowUsage][]) {
+    text += `\n\n${label}`;
+    text += `\n${formatWindowText(window)}`;
+    if (window.resetsAt) {
+      text += `\nResets: ${formatResetTime(window.resetsAt)}`;
+    }
   }
 
   return text;
@@ -51,40 +49,29 @@ export function renderOpencodegoDetail(usage: OpencodegoUsage | null, error: Ope
   if (fallback !== null) return fallback;
   const u = usage as OpencodegoUsage;
 
+  const windows = [
+    { key: "rolling", label: "Rolling Limit", window: u.rolling },
+    { key: "weekly", label: "Weekly Limit", window: u.weekly },
+    { key: "monthly", label: "Monthly Limit", window: u.monthly },
+  ];
+
   const elements: React.ReactNode[] = [];
 
-  elements.push(<List.Item.Detail.Metadata.Label key="plan" title="Plan" text={u.planName} />);
-
-  const primaryRemaining = u.primary.limit - u.primary.used;
-  const primaryPercent = Math.round(getRemainingPercent(primaryRemaining, u.primary.limit));
-  elements.push(<List.Item.Detail.Metadata.Separator key="sep-primary" />);
-  elements.push(
-    <List.Item.Detail.Metadata.Label
-      key="primary"
-      title={u.primary.label}
-      text={`${generateAsciiBar(primaryPercent)} ${formatQuotaText(u.primary)}`}
-    />,
-  );
-
-  for (const [idx, quota] of u.quotas.entries()) {
-    const remaining = quota.limit - quota.used;
-    const percent = Math.round(getRemainingPercent(remaining, quota.limit));
-    elements.push(<List.Item.Detail.Metadata.Separator key={`sep-${idx}`} />);
-    elements.push(
-      <List.Item.Detail.Metadata.Label
-        key={`quota-${idx}`}
-        title={quota.label}
-        text={`${generateAsciiBar(percent)} ${formatQuotaText(quota)}`}
-      />,
-    );
+  for (const [idx, { key, label, window }] of windows.entries()) {
+    if (idx > 0) elements.push(<List.Item.Detail.Metadata.Separator key={`sep-${key}`} />);
+    elements.push(<List.Item.Detail.Metadata.Label key={key} title={label} text={formatWindowText(window)} />);
+    if (window.resetsAt) {
+      elements.push(
+        <List.Item.Detail.Metadata.Label
+          key={`${key}-reset`}
+          title={`${label} Resets`}
+          text={formatResetTime(window.resetsAt)}
+        />,
+      );
+    }
   }
 
-  if (u.resetsAt) {
-    elements.push(<List.Item.Detail.Metadata.Separator key="sep-reset" />);
-    elements.push(<List.Item.Detail.Metadata.Label key="reset" title="Resets In" text={formatResetTime(u.resetsAt)} />);
-  }
-
-  return <List.Item.Detail.Metadata>{...elements}</List.Item.Detail.Metadata>;
+  return <List.Item.Detail.Metadata>{elements}</List.Item.Detail.Metadata>;
 }
 
 export function getOpencodegoAccessory(
@@ -97,20 +84,19 @@ export function getOpencodegoAccessory(
   if (error) {
     if (error.type === "not_configured") return { text: "Not Configured", tooltip: error.message };
     if (error.type === "unauthorized") return { text: "Auth Expired", tooltip: error.message };
+    if (error.type === "forbidden") return { text: "No Go Plan", tooltip: error.message };
     if (error.type === "network_error") return { text: "Network Error", tooltip: error.message };
     return { text: "Error", tooltip: error.message };
   }
 
   if (!usage) return getNoDataAccessory();
 
-  const remaining = usage.primary.limit - usage.primary.used;
-  const percent = Math.round(getRemainingPercent(remaining, usage.primary.limit));
-
-  const tooltipParts = usage.quotas.map((q) => {
-    const r = q.limit - q.used;
-    const pct = Math.round(getRemainingPercent(r, q.limit));
-    return `${q.label}: ${pct}%`;
-  });
+  const percent = Math.round(getRemainingPercent(usage.rolling.percent));
+  const tooltipParts = [
+    `Rolling: ${Math.round(getRemainingPercent(usage.rolling.percent))}% remaining`,
+    `Weekly: ${Math.round(getRemainingPercent(usage.weekly.percent))}% remaining`,
+    `Monthly: ${Math.round(getRemainingPercent(usage.monthly.percent))}% remaining`,
+  ];
 
   return {
     icon: generatePieIcon(percent),

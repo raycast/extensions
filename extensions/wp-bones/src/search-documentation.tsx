@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
@@ -73,7 +73,7 @@ export default function Command() {
                   <Action.CopyToClipboard
                     title="Copy URL"
                     content={item.url.replace(/\.html/g, "")}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                 </ActionPanel>
               }

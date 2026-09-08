@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Fix Menu Bar task actions in background] - 2026-08-27
+
+- Use background-safe HUD notifications for Menu Bar task actions instead of Toast APIs that can crash the command.
+
 ## [Fix menu bar out-of-memory crash] - 2026-07-18
 
 - Fixed the Menu Bar command crashing with "Worker terminated due to reaching memory limit" on larger accounts. Every command previously shared one cache key holding the entire sync state (all tasks, comments, and locations); the menu bar's background worker now uses its own cache key holding only the small slice of data it needs (user, projects, items, labels, collaborators), completing the sync scoping started in #28005.

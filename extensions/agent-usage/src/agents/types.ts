@@ -18,7 +18,8 @@ export type AgentId =
   | "zai"
   | "minimax"
   | "minimaxcn"
-  | "opencode-go";
+  | "opencode-go"
+  | "openrouter";
 
 export interface AgentDefinition {
   id: AgentId;
@@ -60,6 +61,7 @@ export interface AgentVisibilityPreferences {
   showMinimax: boolean;
   showMinimaxCN: boolean;
   showOpencodeGo: boolean;
+  showOpenRouter: boolean;
   showSynthetic: boolean;
   showZai: boolean;
 }

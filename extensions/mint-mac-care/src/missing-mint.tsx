@@ -12,7 +12,7 @@ export function MissingMint({ resolution, onRetry }: { resolution: MintCLIResolu
       : resolution.status === "incompatible"
         ? {
             title: "Update Mint to continue",
-            description: `The installed Mint CLI does not provide schema ${MINIMUM_SCHEMA_VERSION} with the required read-only capabilities.`,
+            description: `The installed Mint CLI does not provide schema ${MINIMUM_SCHEMA_VERSION} with Mint's shared action surface.`,
           }
         : {
             title: "Mint CLI not found",
@@ -25,7 +25,7 @@ export function MissingMint({ resolution, onRetry }: { resolution: MintCLIResolu
 
 ${message.description}
 
-Mint links its bundled CLI into \`/opt/homebrew/bin\` or \`/usr/local/bin\` without overwriting files it did not create. This extension verifies Mint's Developer ID signature and compatibility contract before running read-only status, scan, or explanation commands. File cleanup remains inside Mint's review and journal workflow.`}
+Mint links its bundled CLI into \`/opt/homebrew/bin\` or \`/usr/local/bin\` without overwriting files it did not create. This extension verifies Mint's Developer ID signature and compatibility contract before every request. Cleanup, Memory, Uninstall, Redact, Boundaries, plan allowance, history, and Undo remain owned by Mint's native engines.`}
       actions={
         <ActionPanel>
           <Action title="Check Again" icon={Icon.ArrowClockwise} onAction={onRetry} />

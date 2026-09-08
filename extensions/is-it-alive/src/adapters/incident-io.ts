@@ -30,6 +30,69 @@ function proxyBase(siteUrl: string): string {
   return `${origin}/proxy/${hostname}`;
 }
 
+async function discardBody(response: Response): Promise<void> {
+  try {
+    await response.body?.cancel();
+  } catch {
+    // Some test and runtime response bodies do not support cancellation.
+  }
+}
+
+async function redirectedOrigin(siteUrl: string): Promise<string | null> {
+  try {
+    const response = await fetch(siteUrl, {
+      method: "GET",
+      redirect: "manual",
+      headers: { Accept: "text/html" },
+    });
+    await discardBody(response);
+
+    if (response.status < 300 || response.status >= 400) {
+      return null;
+    }
+
+    const location = response.headers.get("location");
+    if (!location) {
+      return null;
+    }
+
+    return normalizeSiteUrl(new URL(location, siteUrl).origin);
+  } catch {
+    return null;
+  }
+}
+
+async function isIncidentIoSite(siteUrl: string): Promise<boolean> {
+  try {
+    const data = await fetchJson<ComponentImpactsResponse>(
+      componentImpactsUrl(proxyBase(siteUrl)),
+    );
+    return Array.isArray(data.component_impacts);
+  } catch {
+    return false;
+  }
+}
+
+async function resolveIncidentIoSiteUrl(
+  siteUrl: string,
+): Promise<string | null> {
+  const normalized = normalizeSiteUrl(siteUrl);
+  if (await isIncidentIoSite(normalized)) {
+    return normalized;
+  }
+
+  const redirected = await redirectedOrigin(normalized);
+  if (
+    redirected &&
+    redirected !== normalized &&
+    (await isIncidentIoSite(redirected))
+  ) {
+    return redirected;
+  }
+
+  return null;
+}
+
 function impactToDayLevel(status: IncidentIoImpactStatus): DayStatus["level"] {
   switch (status) {
     case "operational":
@@ -288,11 +351,7 @@ function computeOverallIndicator(
 export const incidentIoAdapter: StatusAdapter = {
   async detect(siteUrl: string): Promise<boolean> {
     try {
-      const proxy = proxyBase(siteUrl);
-      const data = await fetchJson<ComponentImpactsResponse>(
-        componentImpactsUrl(proxy),
-      );
-      return Array.isArray(data.component_impacts);
+      return (await resolveIncidentIoSiteUrl(siteUrl)) !== null;
     } catch {
       return false;
     }
@@ -300,15 +359,17 @@ export const incidentIoAdapter: StatusAdapter = {
 
   async fetchSnapshot(input: FetchSnapshotInput): Promise<StatusSnapshot> {
     const normalized = normalizeSiteUrl(input.url);
-    const proxy = proxyBase(normalized);
-    const hostname = new URL(normalized).hostname;
+    const canonical =
+      (await resolveIncidentIoSiteUrl(normalized)) ?? normalized;
+    const proxy = proxyBase(canonical);
+    const hostname = new URL(canonical).hostname;
     const fetchedAt = new Date().toISOString();
 
     try {
       const [incidentsData, impactsData, pageMetadata] = await Promise.all([
         fetchJson<{ incidents: IncidentIoIncident[] }>(`${proxy}/incidents`),
         fetchJson<ComponentImpactsResponse>(componentImpactsUrl(proxy)),
-        fetchPageMetadata(normalized, hostname),
+        fetchPageMetadata(canonical, hostname),
       ]);
 
       const { catalog, pageName } = pageMetadata;
@@ -348,7 +409,7 @@ export const incidentIoAdapter: StatusAdapter = {
 
       return {
         pageName,
-        pageUrl: normalized,
+        pageUrl: canonical,
         overallDescription: overallDescription(
           indicator,
           activeIncidents.length,

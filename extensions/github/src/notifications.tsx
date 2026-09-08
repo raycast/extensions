@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { getGitHubClient } from "./api/githubClient";
 import NotificationListItem from "./components/NotificationListItem";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
+import { uniqueById } from "./helpers";
 import { getErrorMessage } from "./helpers/errors";
 import { getNotificationIcon, Notification } from "./helpers/notifications";
 import { withGitHubClient } from "./helpers/withGithubClient";
@@ -29,35 +30,43 @@ function Notifications() {
     mutate: mutateList,
     pagination,
   } = useCachedPromise(
-    () => async (options: { page: number }) => {
-      const response = await octokit.activity.listNotificationsForAuthenticatedUser({
-        all: true,
-        per_page: NOTIFICATIONS_PAGE_SIZE,
-        page: options.page + 1,
-      });
+    (repository) =>
+      async ({ cursor }) => {
+        const page = cursor ? Number(cursor) : 1;
+        const response = repository
+          ? await octokit.activity.listRepoNotificationsForAuthenticatedUser({
+              owner: repository.split("/")[0],
+              repo: repository.split("/")[1],
+              all: true,
+              per_page: NOTIFICATIONS_PAGE_SIZE,
+              page,
+            })
+          : await octokit.activity.listNotificationsForAuthenticatedUser({
+              all: true,
+              per_page: NOTIFICATIONS_PAGE_SIZE,
+              page,
+            });
+        const hasMore =
+          response.headers.link?.includes('rel="next"') ?? response.data.length === NOTIFICATIONS_PAGE_SIZE;
+        const notifications = await Promise.all(
+          response.data.map(async (notification: Notification) => ({
+            ...notification,
+            icon: await getNotificationIcon(notification),
+          })),
+        );
 
-      const notifications = await Promise.all(
-        response.data.map(async (notification: Notification) => {
-          const icon = await getNotificationIcon(notification);
-          return { ...notification, icon };
-        }),
-      );
-
-      return {
-        data: notifications,
-        hasMore: response.data.length === NOTIFICATIONS_PAGE_SIZE,
-      };
-    },
-    [],
+        return {
+          data: notifications,
+          hasMore,
+          cursor: hasMore ? String(page + 1) : undefined,
+        };
+      },
+    [selectedRepository],
   );
 
   const notifications = useMemo(() => {
-    if (selectedRepository) {
-      return data?.filter((notification: Notification) => notification.repository.full_name === selectedRepository);
-    }
-
-    return data;
-  }, [data, selectedRepository]);
+    return uniqueById(data ?? []);
+  }, [data]);
 
   const [unreadNotifications, readNotifications] = partition(notifications, (notification) => notification.unread);
 

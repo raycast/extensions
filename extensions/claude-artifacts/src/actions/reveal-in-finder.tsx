@@ -3,7 +3,7 @@ import { Action, Icon, Keyboard, showInFinder } from "@raycast/api";
 import { access } from "fs/promises";
 
 /**
- * "Reveal in Finder" that survives a path which no longer exists.
+ * "Show in Finder" that survives a path which no longer exists.
  *
  * `Action.ShowInFinder` calls `realpath` internally and throws an **unhandled**
  * `ENOENT` when the target is gone, which Raycast renders as a full-screen error
@@ -41,7 +41,7 @@ export function RevealInFinderAction({
           const missing = getErrorMessage(error).includes("ENOENT");
 
           await showError(error, {
-            title: missing ? "Folder Not Found" : "Could Not Reveal in Finder",
+            title: missing ? "Folder Not Found" : "Could Not Show in Finder",
             // A raw ENOENT string names the syscall, which tells the user
             // nothing actionable; say what actually happened instead. Any other
             // failure keeps the kit's derived message, which is the real cause.

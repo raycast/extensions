@@ -1,4 +1,4 @@
-import { Form, Action, ActionPanel, showToast, Toast, useNavigation, Icon } from "@raycast/api";
+import { Form, Action, ActionPanel, showToast, Toast, useNavigation, Icon, Keyboard } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { iCloudService } from "../../api/connect";
@@ -128,7 +128,7 @@ export function AddressForm({
                     await generate();
                     setValidationError("address", null);
                   }}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   icon={Icon.Repeat}
                 />
               )}

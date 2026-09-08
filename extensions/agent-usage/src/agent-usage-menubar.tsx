@@ -20,7 +20,7 @@ import {
   useClaudeUsage,
   useClinePassAccounts,
   useCodexAccounts,
-  useCopilotUsage,
+  useCopilotAccounts,
   useCursorUsage,
   useDeepSeekUsage,
   useDroidUsage,
@@ -30,6 +30,7 @@ import {
   useMiniMaxUsage,
   useMinimaxCNUsage,
   useOpencodegoUsage,
+  useOpenRouterUsage,
   useSyntheticAccounts,
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
@@ -51,6 +52,7 @@ import { getKimiAccessory } from "./kimi/renderer.tsx";
 import { getMiniMaxAccessory } from "./minimax/renderer.tsx";
 import { getMinimaxCNAccessory } from "./minimaxcn/renderer.tsx";
 import { getOpencodegoAccessory } from "./opencode-go/renderer.tsx";
+import { getOpenRouterAccessory } from "./openrouter/renderer.tsx";
 import { getSyntheticAccessory } from "./synthetic/renderer.tsx";
 import { getZaiAccessory } from "./zai/renderer.tsx";
 
@@ -101,13 +103,14 @@ export default function MenuBarCommand() {
   const isMinimaxVisible = Boolean(prefs.showMinimax);
   const isMinimaxCNVisible = Boolean(prefs.showMinimaxCN);
   const isOpencodeGoVisible = Boolean(prefs.showOpencodeGo);
+  const isOpenRouterVisible = Boolean(prefs.showOpenRouter);
 
   const aihubmixState = useAihubmixUsage(isAihubmixVisible);
   const ampState = useAmpUsage(isAmpVisible);
   const claudeState = useClaudeUsage(isClaudeVisible);
   const clinePassState = useClinePassAccounts(isClinePassVisible);
   const codexState = useCodexAccounts(isCodexVisible);
-  const copilotState = useCopilotUsage(isCopilotVisible);
+  const copilotState = useCopilotAccounts(isCopilotVisible);
   const cursorState = useCursorUsage(isCursorVisible);
   const deepseekState = useDeepSeekUsage(isDeepSeekVisible);
   const droidState = useDroidUsage(isDroidVisible);
@@ -120,6 +123,7 @@ export default function MenuBarCommand() {
   const minimaxState = useMiniMaxUsage(isMinimaxVisible);
   const minimaxcnState = useMinimaxCNUsage(isMinimaxCNVisible);
   const opencodegoState = useOpencodegoUsage(isOpencodeGoVisible);
+  const openrouterState = useOpenRouterUsage(isOpenRouterVisible);
 
   // Single-account agents - memoized to prevent unnecessary re-renders
   const singleAgents = useMemo<MenuBarAgent[]>(
@@ -153,16 +157,6 @@ export default function MenuBarCommand() {
         accessory: getClaudeAccessory(claudeState.usage, claudeState.error, claudeState.isLoading),
         revalidate: claudeState.revalidate,
         lastFetchedAt: claudeState.lastFetchedAt,
-      },
-      {
-        id: "copilot",
-        name: "Copilot",
-        icon: getThemeIcon("copilot-icon.svg"),
-        visible: isCopilotVisible,
-        isLoading: copilotState.isLoading,
-        accessory: getCopilotAccessory(copilotState.usage, copilotState.error, copilotState.isLoading),
-        revalidate: copilotState.revalidate,
-        lastFetchedAt: copilotState.lastFetchedAt,
       },
       {
         id: "cursor",
@@ -254,12 +248,21 @@ export default function MenuBarCommand() {
         revalidate: opencodegoState.revalidate,
         lastFetchedAt: opencodegoState.lastFetchedAt,
       },
+      {
+        id: "openrouter",
+        name: "OpenRouter",
+        icon: getThemeIcon("openrouter-icon.svg"),
+        visible: isOpenRouterVisible,
+        isLoading: openrouterState.isLoading,
+        accessory: getOpenRouterAccessory(openrouterState.usage, openrouterState.error, openrouterState.isLoading),
+        revalidate: openrouterState.revalidate,
+        lastFetchedAt: openrouterState.lastFetchedAt,
+      },
     ],
     [
       isAihubmixVisible,
       isAmpVisible,
       isClaudeVisible,
-      isCopilotVisible,
       isCursorVisible,
       isDeepSeekVisible,
       isDroidVisible,
@@ -281,11 +284,6 @@ export default function MenuBarCommand() {
       claudeState.error,
       claudeState.revalidate,
       claudeState.lastFetchedAt,
-      copilotState.isLoading,
-      copilotState.usage,
-      copilotState.error,
-      copilotState.revalidate,
-      copilotState.lastFetchedAt,
       cursorState.isLoading,
       cursorState.usage,
       cursorState.error,
@@ -327,6 +325,12 @@ export default function MenuBarCommand() {
       opencodegoState.error,
       opencodegoState.revalidate,
       opencodegoState.lastFetchedAt,
+      isOpenRouterVisible,
+      openrouterState.isLoading,
+      openrouterState.usage,
+      openrouterState.error,
+      openrouterState.revalidate,
+      openrouterState.lastFetchedAt,
     ],
   );
 
@@ -388,6 +392,33 @@ export default function MenuBarCommand() {
       lastFetchedAt: account.lastFetchedAt,
     }));
   }, [isCodexVisible, codexState]);
+
+  const copilotAgents = useMemo<MenuBarAgent[]>(() => {
+    if (!isCopilotVisible) return [];
+    if (copilotState.isLoading) {
+      return [
+        {
+          id: "copilot" as AgentId,
+          name: "Copilot",
+          icon: getThemeIcon("copilot-icon.svg"),
+          visible: true,
+          isLoading: true,
+          accessory: getCopilotAccessory(null, null, true),
+          revalidate: copilotState.revalidate,
+        },
+      ];
+    }
+    return copilotState.accounts.map((account) => ({
+      id: `copilot-${account.accountId}` as AgentId,
+      name: account.label === "Default" ? "Copilot" : `Copilot • ${account.label}`,
+      icon: getThemeIcon("copilot-icon.svg"),
+      visible: true,
+      isLoading: account.isLoading,
+      accessory: getCopilotAccessory(account.usage, account.error, account.isLoading),
+      revalidate: account.revalidate,
+      lastFetchedAt: account.lastFetchedAt,
+    }));
+  }, [isCopilotVisible, copilotState]);
 
   const kimiAgents = useMemo<MenuBarAgent[]>(() => {
     if (!isKimiVisible) return [];
@@ -476,11 +507,17 @@ export default function MenuBarCommand() {
   const visibleAgents = useMemo(
     () =>
       sortByDefaultAgentOrder(
-        [...singleAgents, ...clinePassAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter(
-          (a) => a.visible,
-        ),
+        [
+          ...singleAgents,
+          ...clinePassAgents,
+          ...codexAgents,
+          ...copilotAgents,
+          ...kimiAgents,
+          ...syntheticAgents,
+          ...zaiAgents,
+        ].filter((a) => a.visible),
       ),
-    [singleAgents, clinePassAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
+    [singleAgents, clinePassAgents, codexAgents, copilotAgents, kimiAgents, syntheticAgents, zaiAgents],
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 

@@ -3,11 +3,10 @@
  *
  * Provides functions for executing brew commands with proper error handling.
  *
- * Homebrew 5.0 Compatibility Notes:
- * - Download concurrency is now enabled by default (HOMEBREW_DOWNLOAD_CONCURRENCY=auto)
- * - The extension supports controlling this via preferences
- * - --no-quarantine and --quarantine flags are deprecated
- * - HOMEBREW_USE_INTERNAL_API can be enabled for the new smaller JSON API
+ * Targets Homebrew 6.0 and later.
+ *
+ * Download concurrency is enabled by default (HOMEBREW_DOWNLOAD_CONCURRENCY=auto);
+ * the extension exposes a preference to turn it off.
  */
 
 import { exec } from "child_process";
@@ -25,7 +24,7 @@ import { bundleIdentifier } from "../cache";
 
 const execp = promisify(exec);
 
-// Track if we've logged the Homebrew 5.0 environment configuration
+// Track if we've logged the Homebrew environment configuration
 let homebrewEnvLogged = false;
 
 /**
@@ -68,7 +67,7 @@ export async function execBrew(cmd: string, options?: { signal?: AbortSignal }):
 /**
  * Get the environment variables for brew execution.
  *
- * Homebrew 5.0 environment variables:
+ * Homebrew environment variables:
  * - HOMEBREW_DOWNLOAD_CONCURRENCY: Controls parallel downloads (default: "auto")
  *   Set to "1" to disable concurrent downloads
  */
@@ -82,31 +81,23 @@ export async function execBrewEnv(): Promise<NodeJS.ProcessEnv> {
   const env = { ...process.env };
   env["SUDO_ASKPASS"] = askpassPath;
   // Use HOMEBREW_BROWSER to pass through the app's bundle identifier.
-  // Brew will ignore custom environment variables.
+  // Only commands that open a URL read this (brew execs it directly), and the
+  // extension never invokes one — which is the reason this is safe.
   env["HOMEBREW_BROWSER"] = bundleIdentifier;
 
-  // Homebrew 5.0: Control download concurrency
-  // By default, Homebrew 5.0 enables concurrent downloads (auto)
-  // Users can disable this via preferences if they experience issues
+  // Control download concurrency. Homebrew enables concurrent downloads by
+  // default (auto); users can disable this via preferences if it causes trouble.
   const downloadConcurrencyDisabled = preferences.disableDownloadConcurrency;
   if (downloadConcurrencyDisabled) {
     env["HOMEBREW_DOWNLOAD_CONCURRENCY"] = "1";
   }
 
-  // Homebrew 5.0: Opt-in to the new internal API (smaller JSON)
-  // This will become default in a future version
-  const useInternalApi = preferences.useInternalApi;
-  if (useInternalApi) {
-    env["HOMEBREW_USE_INTERNAL_API"] = "1";
-  }
-
-  // Log Homebrew 5.0 configuration once per session
+  // Log the Homebrew configuration once per session
   if (!homebrewEnvLogged) {
     homebrewEnvLogged = true;
-    brewLogger.log("Homebrew 5.0 Configuration", {
+    brewLogger.log("Homebrew Configuration", {
       downloadConcurrencyEnabled: !downloadConcurrencyDisabled,
       downloadConcurrencyMode: downloadConcurrencyDisabled ? "sequential (1)" : "parallel (auto)",
-      internalApiEnabled: useInternalApi,
       verboseLogging: preferences.verboseLogging,
     });
   }

@@ -151,6 +151,19 @@ export function getColor(item: HistoryItem | string): HistoryColor {
   return typeof item === "string" ? item : item.color;
 }
 
+export function parseColorList(colors: string): string[] {
+  const parsed = colors
+    .split(";")
+    .map((color) => color.trim())
+    .filter((color) => color.length > 0);
+
+  if (parsed.length === 0) {
+    throw new Error("Provide at least one CSS color.");
+  }
+
+  return parsed;
+}
+
 export function copyAsJSON(items: (HistoryItem | string)[]): string {
   return JSON.stringify({ colors: items.map((item) => getFormattedColor(getColor(item))) }, null, 2);
 }

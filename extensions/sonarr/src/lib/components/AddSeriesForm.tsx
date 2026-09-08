@@ -1,4 +1,5 @@
 import { addSeries, getQualityProfiles, getRootFolders } from "@/lib/hooks/useSonarrAPI";
+import type { SonarrInstance } from "@/lib/types/instance";
 import type { AddSeriesOptions, QualityProfile, RootFolder, SeriesLookup } from "@/lib/types/series";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
@@ -6,9 +7,10 @@ import { useEffect, useState } from "react";
 interface AddSeriesFormProps {
   series: SeriesLookup;
   onSeriesAdded: () => void;
+  instance: SonarrInstance | null;
 }
 
-export default function AddSeriesForm({ series, onSeriesAdded }: AddSeriesFormProps) {
+export default function AddSeriesForm({ series, onSeriesAdded, instance }: AddSeriesFormProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [rootFolders, setRootFolders] = useState<RootFolder[]>([]);
@@ -18,7 +20,7 @@ export default function AddSeriesForm({ series, onSeriesAdded }: AddSeriesFormPr
     async function loadOptions() {
       setIsLoading(true);
       try {
-        const [folders, profiles] = await Promise.all([getRootFolders(), getQualityProfiles()]);
+        const [folders, profiles] = await Promise.all([getRootFolders(instance), getQualityProfiles(instance)]);
         setRootFolders(folders);
         setQualityProfiles(profiles);
       } catch (error) {
@@ -33,7 +35,7 @@ export default function AddSeriesForm({ series, onSeriesAdded }: AddSeriesFormPr
     }
 
     loadOptions();
-  }, []);
+  }, [instance]);
 
   async function handleSubmit(values: {
     rootFolderPath: string;
@@ -46,7 +48,7 @@ export default function AddSeriesForm({ series, onSeriesAdded }: AddSeriesFormPr
       showToast({
         style: Toast.Style.Failure,
         title: "Configuration Error",
-        message: "No root folders or quality profiles configured in Sonarr",
+        message: `No root folders or quality profiles configured in ${instance?.name ?? "Sonarr"}`,
       });
       return;
     }
@@ -74,7 +76,7 @@ export default function AddSeriesForm({ series, onSeriesAdded }: AddSeriesFormPr
     };
 
     try {
-      await addSeries(options);
+      await addSeries(instance, options);
       onSeriesAdded();
       pop();
     } catch {
@@ -105,7 +107,10 @@ export default function AddSeriesForm({ series, onSeriesAdded }: AddSeriesFormPr
         </ActionPanel>
       }
     >
-      <Form.Description title="Add Series to Sonarr" text={`Adding: ${series.title} (${series.year})`} />
+      <Form.Description
+        title={`Add Series to ${instance?.name ?? "Sonarr"}`}
+        text={`Adding: ${series.title} (${series.year})`}
+      />
 
       <Form.Dropdown id="rootFolderPath" title="Root Folder" defaultValue={rootFolders[0]?.path}>
         {rootFolders.map((folder) => (

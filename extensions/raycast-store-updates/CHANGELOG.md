@@ -1,5 +1,9 @@
 # Raycast Store Updates Changelog
 
+## [Raycast 2 Compatibility] - 2026-08-27
+
+- Updated to `@raycast/api` 2.x and `@raycast/utils` 2.x
+
 ## [Fix Windows crash, reduce API usage, and improve the menu bar] - 2026-07-31
 
 - Fix a `TypeError: e is not iterable` crash reported on Windows. The GitHub API does not always answer an array-returning endpoint with an array, and on Windows requests traverse a system proxy that can return an HTML error page or an empty body with a 200 status. Responses are now parsed defensively instead of being cast and iterated

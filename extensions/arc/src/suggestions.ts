@@ -18,7 +18,6 @@ const config: SearchConfigs = {
     search: "https://www.google.com/search?q=",
     suggestions: "https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=",
     suggestionParser: (json: GoogleSuggestionParser, suggestions: Suggestion[]) => {
-      console.log(json);
       json[1].map((item: string, i: number) => {
         const type = json[4]["google:suggesttype"][i];
         const description = json[2][i];
@@ -60,7 +59,6 @@ const config: SearchConfigs = {
     search: "https://www.ecosia.org/search?q=",
     suggestions: "https://ac.ecosia.org?type=list&q=",
     suggestionParser: (json: EcosiaSuggestionParser, suggestions: Suggestion[]) => {
-      console.log(json);
       json[1].map((item: string) => {
         suggestions.push({
           id: nanoid(),
@@ -74,7 +72,6 @@ const config: SearchConfigs = {
     search: "https://kagi.com/search?q=",
     suggestions: "https://kagi.com/api/autosuggest?q=",
     suggestionParser: (json: KagiSuggestionParser, suggestions: Suggestion[]) => {
-      console.log(json);
       json[1].map((item: string) => {
         suggestions.push({
           id: nanoid(),

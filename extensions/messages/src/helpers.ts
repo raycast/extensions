@@ -3,7 +3,7 @@ import { homedir } from "os";
 import { Icon, Image, Color } from "@raycast/api";
 import { getAvatarIcon, runAppleScript } from "@raycast/utils";
 
-import type { ChatOrMessageInfo, Contact, Message, MessagesTarget } from "./types";
+import type { ChatOrMessageInfo, Contact, Message, MessageAttachment, MessagesTarget } from "./types";
 
 export function buildChatSearchableText(
   chat: { chat_identifier: string; group_participants?: string | null },
@@ -64,11 +64,13 @@ export async function sendMessage({
   text,
   service_name,
   group_name,
+  chat_guid,
 }: {
   address: string;
   text: string;
   service_name: Message["service"] | "auto";
   group_name?: string | null;
+  chat_guid?: string | null;
 }): Promise<string> {
   if (typeof address !== "string" || !address.trim()) {
     return "Error: Invalid recipient address.";
@@ -79,9 +81,23 @@ export async function sendMessage({
   const escapeForAppleScript = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   const safeText = escapeForAppleScript(text);
 
-  const scripts = group_name
+  const scripts = chat_guid
     ? [
         `
+    tell application "Messages"
+      try
+        set targetChat to first chat whose id is "${escapeForAppleScript(chat_guid)}"
+        send "${safeText}" to targetChat
+        return "Success"
+      on error errMsg
+        return "Error: " & errMsg
+      end try
+    end tell
+    `,
+      ]
+    : group_name
+      ? [
+          `
     tell application "Messages"
       try
         set targetChat to chat "${escapeForAppleScript(group_name)}"
@@ -92,9 +108,9 @@ export async function sendMessage({
       end try
     end tell
     `,
-      ]
-    : (service_name === "auto" ? (["iMessage", "SMS"] as const) : [service_name]).map(
-        (service) => `
+        ]
+      : (service_name === "auto" ? (["iMessage", "SMS"] as const) : [service_name]).map(
+          (service) => `
     tell application "Messages"
       try
         set targetService to (service 1 whose service type = ${service})
@@ -106,7 +122,7 @@ export async function sendMessage({
       end try
     end tell
     `,
-      );
+        );
 
   let result = "Error: Could not find a Messages service for this recipient.";
   for (const script of scripts) {
@@ -121,12 +137,12 @@ export async function sendMessage({
   return result;
 }
 
-export function decodeHexString(hexString: string): string {
+export function decodeHexString(hexString: string | null | undefined): string {
   const START_PATTERN: number[] = [0x01, 0x2b];
   const END_PATTERN: number[] = [0x86, 0x84];
 
   // Convert hex string to byte array
-  const bytes = hexString.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || [];
+  const bytes = hexString?.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || [];
 
   // Find the start index and remove the start pattern
   let startIndex = -1;
@@ -174,6 +190,35 @@ export function decodeHexString(hexString: string): string {
   return result;
 }
 
+export function decodeMessageBody(hexBody: string | null | undefined, plainText?: string | null): string {
+  return decodeHexString(hexBody) || plainText || "";
+}
+
+export function parseMessageAttachments(value: string): MessageAttachment[] {
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.flatMap((attachment): MessageAttachment[] => {
+      if (!attachment || typeof attachment !== "object") return [];
+      const item = attachment as Record<string, unknown>;
+      if (typeof item.id !== "number" && typeof item.id !== "string") return [];
+
+      return [
+        {
+          id: String(item.id),
+          filename: typeof item.filename === "string" ? item.filename : null,
+          name: typeof item.name === "string" ? item.name : null,
+          mimeType: typeof item.mimeType === "string" ? item.mimeType : null,
+          sizeBytes: typeof item.sizeBytes === "number" ? item.sizeBytes : null,
+        },
+      ];
+    });
+  } catch {
+    return [];
+  }
+}
+
 export function getMessagesUrl(chat: MessagesTarget, body?: string): string {
   if (chat.is_group && chat.latest_message_guid && !body) {
     return `sms://open?message-guid=${encodeURIComponent(chat.latest_message_guid)}`;
@@ -209,20 +254,36 @@ export function buildMessagesQuery({
   filterClause = "",
   spamFilters = "",
   chatIdentifierClause = "",
+  chatGuidClause = "",
   beforeClause = "",
+  cursorClause = "",
+  snapshotClause = "",
+  fromClause = "",
+  toClause = "",
   limit = "50",
 }: {
   filterClause?: string;
   spamFilters?: string;
   chatIdentifierClause?: string;
+  chatGuidClause?: string;
   beforeClause?: string;
+  cursorClause?: string;
+  snapshotClause?: string;
+  fromClause?: string;
+  toClause?: string;
   limit?: string;
 }): string {
+  const sortDate = "COALESCE(NULLIF(chat_message_join.message_date, 0), message.date)";
+
   return `
     SELECT
+      message.ROWID AS row_id,
+      chat.ROWID AS chat_row_id,
+      chat.guid AS chat_guid,
       message.guid,
+      CAST(${sortDate} AS TEXT) AS date_nanoseconds,
       strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-        message.date / 1000000000 + strftime('%s', '2001-01-01'),
+        ${sortDate} / 1000000000 + strftime('%s', '2001-01-01'),
         'unixepoch'
       )) AS date,
       strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
@@ -242,6 +303,7 @@ export function buildMessagesQuery({
       END as group_name,
       message.service,
       hex(message.attributedBody) as body,
+      message.text as plain_text,
       CASE WHEN chat.style = 43 THEN 1 ELSE 0 END as is_group,
       CASE
         WHEN chat.style = 43 THEN GROUP_CONCAT(DISTINCT handle.id)
@@ -250,7 +312,22 @@ export function buildMessagesQuery({
       attachment.filename as attachment_filename,
       attachment.transfer_name as attachment_name,
       attachment.mime_type as attachment_mime_type,
-      hex(replied.attributedBody) as reply_body
+      COALESCE((
+        SELECT json_group_array(json_object(
+          'id', message_attachment.ROWID,
+          'filename', message_attachment.filename,
+          'name', message_attachment.transfer_name,
+          'mimeType', message_attachment.mime_type,
+          'sizeBytes', message_attachment.total_bytes
+        ))
+        FROM message_attachment_join all_message_attachments
+        JOIN attachment message_attachment ON all_message_attachments.attachment_id = message_attachment.ROWID
+        WHERE all_message_attachments.message_id = message.ROWID
+          AND message_attachment.filename IS NOT NULL
+          AND message_attachment.filename NOT LIKE '%.pluginPayloadAttachment'
+      ), '[]') AS attachments_json,
+      hex(replied.attributedBody) as reply_body,
+      replied.text as reply_plain_text
     FROM
       message
       JOIN chat_message_join ON message."ROWID" = chat_message_join.message_id
@@ -261,16 +338,32 @@ export function buildMessagesQuery({
       LEFT JOIN attachment ON message_attachment_join.attachment_id = attachment."ROWID"
       LEFT JOIN message replied ON message.reply_to_guid = replied.guid
     WHERE
-      message.attributedBody IS NOT NULL
-      AND message.associated_message_type = 0
+      (message.attributedBody IS NOT NULL OR message.text IS NOT NULL OR attachment.filename IS NOT NULL)
+      AND (
+        message.associated_message_type IS NULL
+        OR (
+          message.associated_message_type != 1000
+          AND message.associated_message_type NOT BETWEEN 2000 AND 2007
+          AND message.associated_message_type NOT BETWEEN 3000 AND 3007
+          AND message.associated_message_type != 4000
+        )
+      )
       ${filterClause}
       ${spamFilters}
       ${chatIdentifierClause}
+      ${chatGuidClause}
       ${beforeClause}
+      ${cursorClause}
+      ${snapshotClause}
+      ${fromClause}
+      ${toClause}
     GROUP BY
-      message.guid
+      message.ROWID,
+      chat.ROWID
     ORDER BY
-      date DESC
+      ${sortDate} DESC,
+      message.ROWID DESC,
+      chat.ROWID DESC
     LIMIT ${limit}
   `;
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## [Restore Configure Session defaults] - 2026-08-27
+
+- Pre-fill the Configure Session duration and unit in Raycast v2 and remember the last entered values between launches.
+
 ## [Quick Start Session command] - 2026-07-14
 
 - Add a Quick Start Session command: type hours, minutes, and seconds inline to start a session

@@ -1,11 +1,44 @@
 import { URL } from "url";
 import { writeFileSync, unlinkSync } from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
-import { spawn } from "child_process";
+import { lstat, readFile, rename, rm, writeFile } from "fs/promises";
+import { tmpdir, homedir } from "os";
+import { dirname, join, resolve } from "path";
+import { spawn, execFile } from "child_process";
+import { promisify } from "util";
 import { randomUUID } from "crypto";
 import { showToast, Toast } from "@raycast/api";
-import { BrowserConfig } from "./types";
+import { BrowserConfig, GoogleChromeLocalState, Profile } from "./types";
+
+const execFileAsync = promisify(execFile);
+
+const isProfileOpen = async (profilePath: string) => {
+  try {
+    const { stdout } = await execFileAsync("/usr/sbin/lsof", ["-nP", "-t", "+D", profilePath], { timeout: 10000 });
+    return stdout.trim().length > 0;
+  } catch (error) {
+    const output = error instanceof Error && "stdout" in error ? String(error.stdout) : "";
+    if (output.trim()) return true;
+    const code = error instanceof Error ? (error as { code?: string | number }).code : undefined;
+    if (code === 1 || code === "1") return false;
+    throw new Error("Could not determine whether the Chrome profile is open");
+  }
+};
+
+export const readChromeLocalState = async (browser: BrowserConfig) => {
+  const path = join(homedir(), browser.dataPath, "Local State");
+  const text = await readFile(path, "utf8");
+  return { path, text, state: JSON.parse(text) as GoogleChromeLocalState };
+};
+
+const writeFileAtomically = async (path: string, text: string) => {
+  const temporaryPath = `${path}.${randomUUID()}.tmp`;
+  try {
+    await writeFile(temporaryPath, text, "utf8");
+    await rename(temporaryPath, path);
+  } finally {
+    await rm(temporaryPath, { force: true }).catch(() => undefined);
+  }
+};
 
 export type ChromeTarget =
   | { action: "focus" }
@@ -18,6 +51,74 @@ export const ChromeAction = {
   NewTab: { action: "newTab" } as ChromeTarget,
   NewWindow: { action: "newWindow" } as ChromeTarget,
   openUrl: (url: string): ChromeTarget => ({ action: "openUrl", url }),
+};
+
+export const deleteChromeProfile = async (profile: Profile, browser: BrowserConfig) => {
+  const dataDirectory = resolve(homedir(), browser.dataPath);
+  const profilePath = resolve(dataDirectory, profile.directory);
+  if (dirname(profilePath) !== dataDirectory) throw new Error("Invalid Chrome profile directory");
+
+  const { path: localStatePath, text: originalLocalStateText, state: localState } = await readChromeLocalState(browser);
+  const infoCache = localState.profile?.info_cache;
+  if (!infoCache || !Object.prototype.hasOwnProperty.call(infoCache, profile.directory)) {
+    throw new Error("Profile no longer exists");
+  }
+  if (Object.keys(infoCache).length === 1) throw new Error("Chrome must keep at least one profile");
+
+  let profileStats;
+  try {
+    profileStats = await lstat(profilePath);
+  } catch (error) {
+    if (!(error instanceof Error) || (error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+  if (profileStats && !profileStats.isDirectory()) throw new Error("Chrome profile path is not a directory");
+
+  let deletedProfilePath: string | undefined;
+  if (profileStats) {
+    if (await isProfileOpen(profilePath)) throw new Error(`Close the ${profile.name} profile before deleting it`);
+    deletedProfilePath = join(dataDirectory, `.raycast-delete-${randomUUID()}`);
+    await rename(profilePath, deletedProfilePath);
+  }
+
+  try {
+    if (deletedProfilePath && (await isProfileOpen(deletedProfilePath))) {
+      throw new Error(`Close the ${profile.name} profile before deleting it`);
+    }
+    delete infoCache[profile.directory];
+    localState.profile.last_active_profiles = localState.profile.last_active_profiles?.filter(
+      (directory) => directory !== profile.directory,
+    );
+    localState.profile.profiles_order = localState.profile.profiles_order?.filter(
+      (directory) => directory !== profile.directory,
+    );
+    if (localState.profile.last_used === profile.directory) {
+      localState.profile.last_used = Object.keys(infoCache)[0];
+    }
+    await writeFileAtomically(localStatePath, `${JSON.stringify(localState, null, 2)}\n`);
+  } catch (error) {
+    try {
+      if (deletedProfilePath) await rename(deletedProfilePath, profilePath);
+      await writeFileAtomically(localStatePath, originalLocalStateText);
+    } catch {
+      throw new Error("Profile deletion failed and could not be rolled back");
+    }
+    throw error;
+  }
+
+  if (deletedProfilePath) {
+    try {
+      await rm(deletedProfilePath, { recursive: true, force: true });
+    } catch (error) {
+      try {
+        await rename(deletedProfilePath, profilePath);
+        await writeFileAtomically(localStatePath, originalLocalStateText);
+      } catch {
+        throw new Error("Profile deletion failed and could not be rolled back");
+      }
+      throw error;
+    }
+  }
+  return localState;
 };
 
 export const createBookmarkListItem = (url: string, name?: string) => {
@@ -294,6 +395,45 @@ const launchInProfileCommand = (browser: BrowserConfig, profileDirectory: string
 };
 
 /**
+ * Resolves the Google account given name Chrome's Profiles menu bar item
+ * prefixes onto a signed-in profile's label — that menu does *not* show the
+ * profile's own name, it shows `${givenName} (${name})`, eg a profile named
+ * "Work" signed in with a Google account whose given name is "Alex" appears
+ * in the menu as "Alex (Work)". Matching against the raw profile name alone
+ * therefore never matches a signed-in profile, which previously fell through
+ * to a substring search across every menu item and could silently click an
+ * unrelated profile whose label happened to contain the search text (eg
+ * profile "Work" matched "Work admin" or "old work" first, depending on menu
+ * order — opening a different profile's session with no visible error).
+ *
+ * Prefers `profile.givenName`, which both callers now carry without a disk
+ * read: the main list (`index.tsx`) reads it straight from `Local State`
+ * alongside the rest of the profile, and a freshly created Quicklink
+ * (`open-profile.tsx`) carries it across the deeplink. Falls back to a fresh
+ * `Local State` read, keyed by `profile.directory`, only for a Quicklink
+ * created *before* this field existed, whose deeplink payload still lacks
+ * it — without this fallback, such a stale Quicklink would silently do
+ * nothing for a signed-in profile (the exact match fails, and the
+ * AppleScript's `error` is swallowed by the detached process's
+ * `stdio: "ignore"`).
+ */
+const resolveGivenName = async (browser: BrowserConfig, profile: Profile): Promise<string | undefined> => {
+  if (profile.givenName) {
+    return profile.givenName;
+  }
+  try {
+    const { state: localState } = await readChromeLocalState(browser);
+    return localState.profile.info_cache[profile.directory]?.gaia_given_name;
+  } catch (error) {
+    // Non-fatal: the caller falls back to the raw profile name. Logged so a
+    // stale-Quicklink mismatch is diagnosable (I/O error vs. malformed
+    // Local State) instead of silently doing nothing.
+    console.debug("resolveGivenName: could not read Local State", error);
+    return undefined;
+  }
+};
+
+/**
  * Run the script that opens Google Chrome.
  *
  * - `ChromeAction.Focus`: focuses the existing profile window (or opens it if not open)
@@ -316,7 +456,7 @@ const launchInProfileCommand = (browser: BrowserConfig, profileDirectory: string
  *   when the spawn failed, so the failure toast stays visible.
  */
 export const openGoogleChrome = async (
-  profile: { name: string; directory: string },
+  profile: Profile,
   target: ChromeTarget,
   didSpawn: () => Promise<void>,
   browser: BrowserConfig,
@@ -331,7 +471,16 @@ export const openGoogleChrome = async (
     return;
   }
 
-  const escapedProfileName = escapeAppleScriptString(profile.name);
+  // Try the Google-account label first — what Chrome actually shows for a
+  // signed-in profile — then the raw profile name, which is what Chrome
+  // shows for a local profile and is also the safety net when there's no
+  // given name at all. Both are exact candidates: no substring/contains
+  // matching, since that can't distinguish "Work" from "Work admin" or
+  // "old work".
+  const givenName = await resolveGivenName(browser, profile);
+  const googleAccountLabel = givenName ? `${givenName} (${profile.name})` : undefined;
+  const candidateNames = [...new Set([googleAccountLabel, profile.name].filter((n): n is string => Boolean(n)))];
+  const escapedCandidates = candidateNames.map((n) => `"${escapeAppleScriptString(n)}"`).join(", ");
   const escapedUrl = url ? escapeAppleScriptString(url) : undefined;
   const escapedAppName = escapeAppleScriptString(browser.appName);
 
@@ -349,24 +498,19 @@ export const openGoogleChrome = async (
       tell process "${escapedAppName}"
         set profileMenu to menu 1 of menu bar item 8 of menu bar 1
         set menuItems to name of menu items of profileMenu
+        set candidateNames to {${escapedCandidates}}
 
-        if "${escapedProfileName}" is in menuItems then
-          click menu item "${escapedProfileName}" of profileMenu
-        else
-          set foundMatch to false
-          repeat with menuItemName in menuItems
-            if menuItemName is not missing value then
-              if menuItemName contains "${escapedProfileName}" then
-                click menu item menuItemName of profileMenu
-                set foundMatch to true
-                exit repeat
-              end if
-            end if
-          end repeat
-
-          if foundMatch is false then
-            error "Profile not found in menu"
+        set foundMatch to false
+        repeat with candidateName in candidateNames
+          if candidateName is in menuItems then
+            click menu item candidateName of profileMenu
+            set foundMatch to true
+            exit repeat
           end if
+        end repeat
+
+        if foundMatch is false then
+          error "Profile not found in menu"
         end if
       end tell
     end tell

@@ -10,10 +10,44 @@ interface CacheIndex {
 
 async function getCacheIndex(): Promise<CacheIndex> {
   const indexStr = await LocalStorage.getItem<string>(CACHE.INDEX_KEY);
-  if (!indexStr) {
-    return { keys: [], lastAccessed: {} };
+
+  // Validate the parsed shape rather than trusting it. This comes back from
+  // LocalStorage, so the CacheIndex type is a claim about it, not a guarantee —
+  // a truncated write leaves `keys` present and `lastAccessed` missing, and the
+  // purge below would then throw mid-way, after deleting payloads.
+  let index: CacheIndex = { keys: [], lastAccessed: {} };
+  if (indexStr) {
+    try {
+      const parsed = JSON.parse(indexStr);
+      index = {
+        keys: Array.isArray(parsed?.keys) ? parsed.keys.filter((k: unknown): k is string => typeof k === "string") : [],
+        lastAccessed: parsed?.lastAccessed && typeof parsed.lastAccessed === "object" ? parsed.lastAccessed : {},
+      };
+    } catch {
+      // A corrupt index is not recoverable; start clean rather than throw into
+      // the caller, which would surface a cache problem as a fetch failure.
+    }
   }
-  return JSON.parse(indexStr);
+
+  // Purge entries left by an older key version.
+  //
+  // Scanned from LocalStorage itself, not from `index.keys`: a payload write
+  // that succeeded while the following index update did not leaves an orphan no
+  // index-based sweep could ever find. Those would sit there forever — never
+  // read (lookups build a current-prefix key) and never expired (the 48h check
+  // only runs on a read that can no longer happen).
+  const all = await LocalStorage.allItems();
+  const stale = Object.keys(all).filter(
+    (k) => k !== CACHE.INDEX_KEY && k.startsWith(CACHE.KEY_FAMILY) && !k.startsWith(CACHE.KEY_PREFIX),
+  );
+  if (stale.length === 0) return index;
+
+  await Promise.all(stale.map((k) => LocalStorage.removeItem(k)));
+  const staleSet = new Set(stale);
+  index.keys = index.keys.filter((k) => !staleSet.has(k));
+  for (const k of stale) delete index.lastAccessed[k];
+  await saveCacheIndex(index);
+  return index;
 }
 
 async function saveCacheIndex(index: CacheIndex): Promise<void> {
@@ -24,7 +58,7 @@ async function evictLRU(): Promise<void> {
   const index = await getCacheIndex();
 
   if (index.keys.length >= CACHE.MAX_ENTRIES) {
-    const sortedKeys = index.keys.sort((a, b) => {
+    const sortedKeys = [...index.keys].sort((a, b) => {
       const aAccessed = index.lastAccessed[a] || 0;
       const bAccessed = index.lastAccessed[b] || 0;
       return aAccessed - bAccessed;

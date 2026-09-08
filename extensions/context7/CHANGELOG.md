@@ -1,5 +1,10 @@
 # Context7
 
+## [Raycast API 2.0] - 2026-08-25
+
+- Updated to Raycast API 2.0
+- Updated dependencies
+
 ## [My Libraries, My Snippets, and Wider Search] - 2026-08-18
 
 - Added **My Libraries** — save a library and its documentation is kept on disk, so opening it is instant and works offline. Shows when each library was last captured, with Refresh and Refresh All actions

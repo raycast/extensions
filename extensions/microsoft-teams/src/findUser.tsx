@@ -1,8 +1,8 @@
 import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { usePromise } from "@raycast/utils";
-import { OpenUrlAction } from "./api/util";
-import { CallType, callUser } from "./actions/callAction";
+import { OpenUrlAction, platformShortcut } from "./api/util";
+import { CallType, createCallUrl, createChatUrl } from "./api/links";
 import { addRecentUser, getRecentUsers, getUserPhotoDataUrl, searchUsers, User } from "./api/user";
 import { defaultPresence, getPresence } from "./api/presence";
 import { usePromiseWithTimeout } from "./hooks/usePromiseWithTimeout";
@@ -34,7 +34,7 @@ function userChatUrl(user: User): string | undefined {
   if (!address) {
     return undefined;
   }
-  return `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(address)}`;
+  return createChatUrl([address]);
 }
 
 function userMatchesQuery(user: User, query: string): boolean {
@@ -103,19 +103,10 @@ function rankUsers(users: User[], query: string, recentPositionById: Map<string,
 }
 
 function UserItem({ user, onOpenUser }: { user: User; onOpenUser: () => Promise<void> }) {
+  const address = userAddress(user);
   const chatUrl = userChatUrl(user);
-  const { data: currentPresence } = usePromiseWithTimeout<typeof getPresence>(
-    getPresence,
-    [user.id],
-    3000,
-    defaultPresence()
-  );
-  const { data: photoDataUrl } = usePromiseWithTimeout<typeof getUserPhotoDataUrl>(
-    getUserPhotoDataUrl,
-    [user.id],
-    3000,
-    undefined
-  );
+  const { data: currentPresence } = usePromiseWithTimeout(getPresence, [user.id], 3000, defaultPresence());
+  const { data: photoDataUrl } = usePromiseWithTimeout(getUserPhotoDataUrl, [user.id], 3000, undefined);
   const availability = currentPresence?.activity ?? currentPresence?.availability;
   const accessories = [
     ...(user.jobTitle ? [{ tag: { value: user.jobTitle, color: Color.Blue } }] : []),
@@ -131,28 +122,22 @@ function UserItem({ user, onOpenUser }: { user: User; onOpenUser: () => Promise<
       actions={
         <ActionPanel>
           {chatUrl ? <OpenUrlAction url={chatUrl} title="Open Chat" callback={onOpenUser} /> : undefined}
-          {chatUrl ? (
+          {address ? (
             <OpenUrlAction
               title="Call Audio"
-              url={chatUrl}
-              callback={async () => {
-                await onOpenUser();
-                await callUser(CallType.Audio);
-              }}
+              url={createCallUrl([address], CallType.Audio)}
+              callback={onOpenUser}
               icon={Icon.Phone}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              shortcut={platformShortcut(["cmd", "shift"], "a")}
             />
           ) : undefined}
-          {chatUrl ? (
+          {address ? (
             <OpenUrlAction
               title="Call Video"
-              url={chatUrl}
-              callback={async () => {
-                await onOpenUser();
-                await callUser(CallType.Video);
-              }}
+              url={createCallUrl([address], CallType.Video)}
+              callback={onOpenUser}
               icon={Icon.Camera}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              shortcut={platformShortcut(["cmd", "shift"], "v")}
             />
           ) : undefined}
         </ActionPanel>
@@ -180,7 +165,7 @@ export default function FindUser() {
   const resultUsers = rankUsers(
     searchedList.filter((user) => !recentIds.has(user.id)),
     trimmedQuery,
-    recentPositionById
+    recentPositionById,
   );
 
   async function markUserAsRecent(user: User) {

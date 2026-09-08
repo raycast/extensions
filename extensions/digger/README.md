@@ -3,7 +3,7 @@
 **Like `dig`, but for the web.** Comprehensive website intelligence and metadata extraction for Raycast.
 
 <div align="center">
-  <img src="assets/digger.png" width="128" height="128" alt="Digger icon">
+  <img src="media/digger.png" width="128" height="128" alt="Digger icon">
 </div>
 
 <div align="center">

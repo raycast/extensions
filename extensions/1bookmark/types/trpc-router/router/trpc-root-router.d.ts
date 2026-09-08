@@ -101,6 +101,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 associatedSpaces: {
                     myTags: string[];
                     myRole: import(".prisma/client").$Enums.TeamRole;
+                    myStatus: import(".prisma/client").$Enums.TeamMemberStatus;
                     myImage: string | null;
                     myNickname: string | null;
                     myAuthEmail: string | null;
@@ -121,15 +122,15 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     id: string;
                     createdAt: Date;
                     name: string;
-                    updatedAt: Date;
                     image: string | null;
                     slackTeamId: string | null;
+                    updatedAt: Date;
                 }[];
                 createdAt: Date;
                 name: string;
+                image: string | null;
                 email: string;
                 updatedAt: Date;
-                image: string | null;
             };
             meta: object;
         }>;
@@ -139,18 +140,18 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 user: {
                     createdAt: Date;
                     name: string;
+                    image: string | null;
                     email: string;
                     updatedAt: Date;
-                    image: string | null;
                 };
             } & {
                 status: import(".prisma/client").$Enums.TeamMemberStatus;
                 spaceId: string;
                 createdAt: Date;
-                email: string;
-                tags: string[];
-                updatedAt: Date;
                 image: string | null;
+                email: string;
+                updatedAt: Date;
+                tags: string[];
                 nickname: string | null;
                 authEmail: string | null;
                 role: import(".prisma/client").$Enums.TeamRole;
@@ -289,8 +290,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 description: string;
                 spaceId: string;
                 name: string;
-                url: string;
                 tags: string[];
+                url: string;
             };
             output: {
                 description: string | null;
@@ -298,8 +299,10 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 id: string;
                 createdAt: Date;
                 name: string;
-                url: string;
+                updatedAt: Date;
                 tags: string[];
+                deletedAt: Date | null;
+                url: string;
                 faviconUrl: string | null;
                 faviconAttemptedAt: Date | null;
                 faviconAttemptCount: number;
@@ -308,8 +311,6 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 previewImageAttemptCount: number;
                 author: string;
                 authorEmail: string;
-                deletedAt: Date | null;
-                updatedAt: Date;
             };
             meta: object;
         }>;
@@ -487,8 +488,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 id: string;
                 description?: string | undefined;
                 name?: string | undefined;
-                url?: string | undefined;
                 tags?: string[] | undefined;
+                url?: string | undefined;
             };
             output: {
                 description: string | null;
@@ -496,8 +497,10 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 id: string;
                 createdAt: Date;
                 name: string;
-                url: string;
+                updatedAt: Date;
                 tags: string[];
+                deletedAt: Date | null;
+                url: string;
                 faviconUrl: string | null;
                 faviconAttemptedAt: Date | null;
                 faviconAttemptCount: number;
@@ -506,8 +509,6 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 previewImageAttemptCount: number;
                 author: string;
                 authorEmail: string;
-                deletedAt: Date | null;
-                updatedAt: Date;
             };
             meta: object;
         }>;
@@ -534,15 +535,20 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
         import: import("@trpc/server").TRPCMutationProcedure<{
             input: {
                 spaceId: string;
-                tags: string[];
                 bookmarks: {
                     name: string;
                     url: string;
                     description?: string | undefined;
                 }[];
+                tags: string[];
                 browserName: string;
+                duplicateStrategy?: "skip" | "overwrite" | undefined;
             };
-            output: void;
+            output: {
+                imported: number;
+                overwritten: number;
+                skipped: number;
+            };
             meta: object;
         }>;
     }>>;
@@ -649,6 +655,15 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
         };
         transformer: true;
     }, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
+        delete: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+            };
+            output: {
+                spaceId: string;
+            };
+            meta: object;
+        }>;
         create: import("@trpc/server").TRPCMutationProcedure<{
             input: {
                 name: string;
@@ -671,20 +686,14 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 spaceId: string;
             };
             output: ({
-                _count: {
-                    tags: number;
-                    bookmarks: number;
-                    users: number;
-                    memberAuthPolicies: number;
-                };
                 users: {
                     status: import(".prisma/client").$Enums.TeamMemberStatus;
                     spaceId: string;
                     createdAt: Date;
-                    email: string;
-                    tags: string[];
-                    updatedAt: Date;
                     image: string | null;
+                    email: string;
+                    updatedAt: Date;
+                    tags: string[];
                     nickname: string | null;
                     authEmail: string | null;
                     role: import(".prisma/client").$Enums.TeamRole;
@@ -696,6 +705,12 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     emailPattern: string;
                     authCheckIntervalSec: number;
                 }[];
+                _count: {
+                    bookmarks: number;
+                    users: number;
+                    tags: number;
+                    memberAuthPolicies: number;
+                };
             } & {
                 type: import(".prisma/client").$Enums.SpaceType;
                 status: string | null;
@@ -703,10 +718,54 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 id: string;
                 createdAt: Date;
                 name: string;
-                updatedAt: Date;
                 image: string | null;
                 slackTeamId: string | null;
+                updatedAt: Date;
             }) | null;
+            meta: object;
+        }>;
+        invitationInfo: import("@trpc/server").TRPCQueryProcedure<{
+            input: {
+                spaceId: string;
+            };
+            output: {
+                id: string;
+                name: string;
+                image: string | null;
+                memberCount: number;
+                alreadyMember: boolean;
+                pending: boolean;
+                banned: boolean;
+            };
+            meta: object;
+        }>;
+        joinByInvitation: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+            };
+            output: {
+                spaceId: string;
+                status: "ACTIVATED";
+            } | {
+                spaceId: string;
+                status: "PENDING";
+            };
+            meta: object;
+        }>;
+        approveJoinRequest: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                targetEmail: string;
+            };
+            output: void;
+            meta: object;
+        }>;
+        rejectJoinRequest: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                targetEmail: string;
+            };
+            output: void;
             meta: object;
         }>;
         update: import("@trpc/server").TRPCMutationProcedure<{
@@ -978,7 +1037,11 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             input: {
                 type: "BOOKMARK_OPEN" | "BOOKMARK_COPY";
                 spaceId: string;
-                data: Record<string, string>;
+                data: {
+                    bookmarkId: string;
+                } & {
+                    [k: string]: string;
+                };
             };
             output: void;
             meta: object;

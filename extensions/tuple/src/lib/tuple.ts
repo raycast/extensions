@@ -267,16 +267,24 @@ function isUnsupportedFlag(error: unknown, flag: string): boolean {
   return `${classified.message}\n${classified.detail ?? ""}`.toLowerCase().includes(`unknown flag: ${flag}`);
 }
 
-async function runTupleActionWithFallback(args: string[], optionalArgs: string[]): Promise<void> {
+async function runWithOptionalArgs<T>(
+  run: (args: string[]) => Promise<T>,
+  args: string[],
+  optionalArgs: string[],
+): Promise<T> {
   try {
-    await runTupleAction([...args, ...optionalArgs]);
+    return await run([...args, ...optionalArgs]);
   } catch (error) {
     const unsupported = optionalArgs.find((arg) => arg.startsWith("--") && isUnsupportedFlag(error, arg));
     if (!unsupported) {
       throw error;
     }
-    await runTupleAction(args);
+    return run(args);
   }
+}
+
+async function runTupleActionWithFallback(args: string[], optionalArgs: string[]): Promise<void> {
+  await runWithOptionalArgs(runTupleAction, args, optionalArgs);
 }
 
 export function startCall(email: string): Promise<void> {
@@ -357,12 +365,22 @@ export function stripAnsi(text: string): string {
 }
 
 /**
- * Fetch a stored call's transcript as plain text (`transcription show`, default format). ANSI codes
- * are stripped defensively (see {@link stripAnsi}) so every consumer — including AI summarization
- * and the read-transcript tool — gets clean text even from an older CLI that colorized its output.
+ * Fetch a stored call's transcript using the CLI's default timestamp format.
+ * ANSI codes are stripped defensively (see {@link stripAnsi}) so agent tools get
+ * clean text even from an older CLI that colorized its output.
  */
 export async function getTranscript(callId: string): Promise<string> {
   return stripAnsi(await runTuple(["transcription", "show", callId]));
+}
+
+/**
+ * Fetch compact transcript text for human display and title/summary generation.
+ * Current CLIs honor `--timestamps clock`; older CLIs already default to clocks
+ * and reach the same result through the optional-flag fallback.
+ */
+export async function getCompactTranscript(callId: string): Promise<string> {
+  const transcript = await runWithOptionalArgs(runTuple, ["transcription", "show", callId], ["--timestamps", "clock"]);
+  return stripAnsi(transcript);
 }
 
 /**

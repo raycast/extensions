@@ -26,6 +26,12 @@ export type ScriptDraft = {
   /** `media` becomes ` · #media` on the subtitle. Never on the title. */
   category?: string;
   application?: string;
+  /**
+   * Absolute path to a native app that stands in for the target wherever it is installed. Its presence
+   * is what turns a plain opener into a surface router: the script opens the app where it is present and
+   * the target where it is not, so one command serves machines that differ in what is installed.
+   */
+  desktopApplication?: string;
   author?: string;
   authorURL?: string;
   iconReference?: string;
@@ -152,6 +158,41 @@ export const scriptFilename = (draft: ScriptDraft) => {
  */
 const escapeForShell = (value: string) => value.replace(/([\\"`$])/g, "\\$1");
 
+/**
+ * A native app cannot serve a search: `open -a` takes no query, so a target carrying a `{query}`
+ * placeholder has nothing an app could stand in for. A non-URL target is excluded for the same kind of
+ * reason — a folder has no web equivalent to fall back to.
+ */
+const routerAppOf = (draft: ScriptDraft) =>
+  draft.desktopApplication && !findPlaceholder(draft.target) && /^https?:\/\//i.test(draft.target)
+    ? draft.desktopApplication
+    : undefined;
+
+/**
+ * The app is opened by its own path rather than by a name derived from it. A basename is not an identity:
+ * two bundles can share one, and a renamed or unregistered app resolves to something else or to nothing,
+ * so `open -a` could miss the very bundle the presence check just confirmed.
+ *
+ * No argument, and so no dropdown. Raycast has to raise the launcher to render an argument field, which
+ * costs a command its hotkey — an optional argument still prompts, it only permits an empty answer. A
+ * router's whole value is firing without ceremony, so forcing a surface belongs on a second command
+ * rather than on this one.
+ */
+const routerBody = (draft: ScriptDraft, appPath: string) => {
+  const openWeb = draft.application ? `open -a "${escapeForShell(draft.application)}" "$url"` : 'open "$url"';
+
+  return [
+    `url="${escapeForShell(draft.target)}"`,
+    `app="${escapeForShell(appPath)}"`,
+    "",
+    "if [[ -d $app ]]; then",
+    '  open "$app"',
+    "else",
+    `  ${openWeb}`,
+    "fi",
+  ].join("\n");
+};
+
 const buildBody = (draft: ScriptDraft) => {
   const placeholder = findPlaceholder(draft.target);
 
@@ -164,6 +205,9 @@ const buildBody = (draft: ScriptDraft) => {
   // survive while the target's own `$` characters do not. A literal "$1" replacement string would be read
   // as a capture-group reference and expand to the placeholder's own name, hence the function form.
   const target = escapeForShell(draft.target);
+
+  const routerApp = routerAppOf(draft);
+  if (routerApp) return routerBody(draft, routerApp);
 
   if (placeholder) return `open "${target.replace(PLACEHOLDER_PATTERN, () => "$1")}"`;
   if (draft.application) return `open -a "${escapeForShell(draft.application)}" "${target}"`;

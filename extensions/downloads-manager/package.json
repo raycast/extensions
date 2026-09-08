@@ -181,6 +181,15 @@
           "value": "permaDel"
         }
       ]
+    },
+    {
+      "type": "checkbox",
+      "name": "showDeletingFilename",
+      "label": "Show Deleting Filename",
+      "title": "Show Deleting Filename",
+      "description": "Whether to show the filename being permanently deleted in the confirmation message",
+      "required": false,
+      "default": true
     }
   ],
   "tools": [

@@ -265,14 +265,24 @@ export default class Process implements ProcessInfo {
     return Array.from(valuesByPid.values());
   }
 
+  private static isWindowsListeningForeignAddress(foreignAddress: string) {
+    return foreignAddress === "0.0.0.0:0" || foreignAddress === "[::]:0";
+  }
+
   private static parseWindowsNetstat(stdout: string) {
     const namedPorts = getNamedPorts();
     const valuesByPid = new Map<number, ProcessInfo>();
 
     for (const line of stdout.split("\n")) {
-      const [protocol, localAddress, , state, pidValue] = line.trim().split(/\s+/);
+      const [protocol, localAddress, foreignAddress, , pidValue] = line.trim().split(/\s+/);
       const pid = Number(pidValue);
-      if (protocol !== "TCP" || state !== "LISTENING" || !Number.isFinite(pid) || pid <= 0) continue;
+      if (
+        protocol !== "TCP" ||
+        !Process.isWindowsListeningForeignAddress(foreignAddress) ||
+        !Number.isFinite(pid) ||
+        pid <= 0
+      )
+        continue;
 
       const portInfo = Process.parsePortInfo(localAddress, namedPorts);
       if (portInfo === undefined) continue;

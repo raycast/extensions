@@ -17,6 +17,7 @@ export const DEFAULT_AGENT_ORDER = [
   "minimax",
   "minimaxcn",
   "opencode-go",
+  "openrouter",
   "synthetic",
   "zai",
 ] as const satisfies readonly AgentId[];
@@ -47,4 +48,8 @@ export function getInitialSelectedRowId(
   }
 
   return rows[0]?.rowId;
+}
+
+export function getRequestedSelectedRowId(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
 }
