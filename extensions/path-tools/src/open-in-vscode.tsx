@@ -3,7 +3,6 @@ import {
   ActionPanel,
   Form,
   Icon,
-  showFailureToast,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -30,7 +29,11 @@ export default function OpenInVisualStudioCodeCommand() {
       toast.style = Toast.Style.Success;
       toast.title = "已在 VS Code 中打开";
     } catch (error) {
-      await showFailureToast(error, { title: "无法打开 VS Code" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "无法打开 VS Code",
+        message: error instanceof Error ? error.message : String(error),
+      });
     } finally {
       setIsLoading(false);
     }
