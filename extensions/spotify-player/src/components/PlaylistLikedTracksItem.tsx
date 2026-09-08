@@ -18,7 +18,6 @@ export default function PlaylistLikedTracksItem({ type }: PlaylistLikedTracksIte
   const uri = `spotify:user:${meData?.id}:collection`;
   const { myLibraryData } = useYourLibrary({
     category: "tracks",
-    keepPreviousData: true,
   });
 
   return (

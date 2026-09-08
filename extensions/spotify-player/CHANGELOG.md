@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [Reduce Library and Playlist Memory Usage] - {PR_MERGE_DATE}
+
+- Load playlist actions when opened instead of scanning playlists while browsing songs, search results, or albums.
+- Check playlist membership one page at a time, including songs beyond the first 1,000, and cancel checks when the selection changes.
+- Include later-page playlists in Your Library and share playlist loading without repeatedly copying or caching the catalog.
+
 ## [Fix Support Next And Previous Actions For Episodes] - 2026-09-03
 
 - Support Next and Previous actions for episodes not just songs.
