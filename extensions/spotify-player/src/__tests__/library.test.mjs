@@ -1,15 +1,19 @@
-const { test } = require("node:test");
-const assert = require("node:assert/strict");
-const { React, fixture, stats, resetStats, track, toasts } = require("./harness.cjs");
-const { act, create } = require("react-test-renderer");
-const { playlistContainsTrack } = require("../src/api/playlistContainsTrack.ts");
-const { getMyPlaylists } = require("../src/api/getMyPlaylists.ts");
-const { TrackActionPanel } = require("../src/components/TrackActionPanel.tsx");
-const { PlaylistPicker } = require("../src/components/PlaylistPicker.tsx");
-const { TracksList } = require("../src/components/TracksList.tsx");
-const Library = require("../src/yourLibrary.tsx").default;
-const { useSearch } = require("../src/hooks/useSearch.ts");
-const { AddToSavedTracksAction } = require("../src/components/AddToSavedTracksAction.tsx");
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import harness from "../../tests/harness.cjs";
+const { React, fixture, stats, resetStats, track, toasts } = harness;
+import { act, create } from "react-test-renderer";
+import { createRequire } from "node:module";
+// The fixture loader selects/transpiles current or baseline TypeScript at runtime.
+const loadSource = createRequire(import.meta.url);
+const { playlistContainsTrack } = loadSource("../api/playlistContainsTrack.ts");
+const { getMyPlaylists } = loadSource("../api/getMyPlaylists.ts");
+const { TrackActionPanel } = loadSource("../components/TrackActionPanel.tsx");
+const { PlaylistPicker } = loadSource("../components/PlaylistPicker.tsx");
+const { TracksList } = loadSource("../components/TracksList.tsx");
+const Library = loadSource("../yourLibrary.tsx").default;
+const { useSearch } = loadSource("../hooks/useSearch.ts");
+const { AddToSavedTracksAction } = loadSource("../components/AddToSavedTracksAction.tsx");
 const tick = () => new Promise((r) => setImmediate(r));
 async function settle() {
   for (let n = 0; n < 45; n++) await act(tick);
@@ -187,7 +191,7 @@ test("new search response wins when older search finishes last", async () => {
 test("catalog membership consumers stream pages, do not refetch on equivalent renders, and cancel old songs", async () => {
   resetStats();
   const client = fixture({ playlists: 3, tracks: 100 });
-  const { usePlaylistsContainingTrack } = require("../src/hooks/usePlaylistsContainingTrack.ts");
+  const { usePlaylistsContainingTrack } = loadSource("../hooks/usePlaylistsContainingTrack.ts");
   let state;
   function Membership({ uri }) {
     state = usePlaylistsContainingTrack({ playlists: [{ id: "p0" }, { id: "p1" }, { id: "p2" }], trackUri: uri });
@@ -214,7 +218,7 @@ test("catalog membership consumers stream pages, do not refetch on equivalent re
 test("playing-song command renders the lazy picker; quicklinks check beyond 1000 before adding", async () => {
   resetStats();
   fixture({ playlists: 1, tracks: 1500, contains: (_, n) => n === 1400 });
-  const Command = require("../src/addPlayingSongToPlaylist.tsx").default;
+  const Command = loadSource("../addPlayingSongToPlaylist.tsx").default;
   const picker = await mount(React.createElement(Command, {}));
   assert.equal(stats.calls.tracks, undefined);
   await unmount(picker);
@@ -228,4 +232,82 @@ test("playing-song command renders the lazy picker; quicklinks check beyond 1000
   await settle();
   assert.equal(stats.writes.filter((x) => x[0] === "add").length, 1);
   await unmount(quicklink);
+});
+
+for (const state of ["loading", "failed"]) {
+  test(`picker can remove when background membership is ${state}`, async () => {
+    resetStats();
+    const client = fixture({ playlists: 1, tracks: 1, contains: () => true });
+    const renderer = await mount(React.createElement(PlaylistPicker, { uri: "spotify:track:target" }));
+    const fetch = client.getPlaylistsByPlaylistIdTracks;
+    let finishBackground;
+    let first = true;
+    client.getPlaylistsByPlaylistIdTracks = async (...args) => {
+      if (!first) return fetch(...args);
+      first = false;
+      if (state === "failed") throw new Error("Background check failed");
+      return new Promise((resolve) => {
+        finishBackground = resolve;
+      });
+    };
+    await act(async () => renderer.root.findByType("List").props.onSelectionChange("p0"));
+    await settle();
+    assert.equal(renderer.root.findByType("Action").props.title, "Add or Remove from Playlist");
+    await act(async () => renderer.root.findByType("Action").props.onAction());
+    assert.equal(stats.writes.filter((x) => x[0] === "remove").length, 1);
+    assert.equal(stats.writes.filter((x) => x[0] === "add").length, 0);
+    if (finishBackground) await act(async () => finishBackground({ items: [], next: null }));
+    await unmount(renderer);
+  });
+}
+
+for (const failure of ["scan", "mutation"]) {
+  test(`failed quicklink ${failure} can explicitly retry once without reopening`, async () => {
+    resetStats();
+    const client = fixture({ playlists: 1, tracks: 1 });
+    const method = failure === "scan" ? "getPlaylistsByPlaylistIdTracks" : "postPlaylistsByPlaylistIdTracks";
+    const original = client[method];
+    let attempts = 0;
+    client[method] = async (...args) => {
+      if (++attempts === 1) throw new Error("Transient failure");
+      return original(...args);
+    };
+    const Command = loadSource("../addPlayingSongToPlaylist.tsx").default;
+    const element = React.createElement(Command, { launchContext: { playlistId: "p0" } });
+    const renderer = await mount(element);
+    assert.equal(attempts, 1);
+    await act(async () => renderer.update(element));
+    await settle();
+    assert.equal(attempts, 1);
+    const retry = renderer.root
+      .findAllByType("Action")
+      .find((action) => action.props.title === "Retry Adding to Playlist").props.onAction;
+    await act(async () => Promise.all([retry(), retry()]));
+    await settle();
+    assert.equal(attempts, 2);
+    assert.equal(stats.writes.filter((x) => x[0] === "add").length, 1);
+    await act(async () => retry());
+    assert.equal(attempts, 2);
+    await unmount(renderer);
+  });
+}
+
+test("Now Playing keeps the picker action after profile and catalog failures", async () => {
+  resetStats();
+  const client = fixture({ playlists: 1, tracks: 1 });
+  const profile = client.getMe;
+  const catalog = client.getMePlaylists;
+  client.getMe = client.getMePlaylists = async () => {
+    throw new Error("Secondary request failed");
+  };
+  const Command = loadSource("../nowPlaying.tsx").default;
+  const renderer = await mount(React.createElement(Command));
+  const action = renderer.root.findAllByType("Action.Push").find((action) => action.props.title === "Add to Playlist");
+  assert.ok(action);
+  client.getMe = profile;
+  client.getMePlaylists = catalog;
+  const picker = await mount(action.props.target);
+  assert.equal(picker.root.findByType("List.Item").props.title, "Playlist 0");
+  await unmount(picker);
+  await unmount(renderer);
 });

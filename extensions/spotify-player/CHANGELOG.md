@@ -4,6 +4,7 @@
 
 - Load playlist actions when opened instead of scanning playlists while browsing songs, search results, or albums.
 - Check playlist membership one page at a time, including songs beyond the first 1,000, and cancel checks when the selection changes.
+- Keep playlist actions usable during failed or pending checks and allow retrying failed quicklinks.
 - Include later-page playlists in Your Library and share playlist loading without repeatedly copying or caching the catalog.
 
 ## [Fix Support Next And Previous Actions For Episodes] - 2026-09-03

@@ -43,6 +43,11 @@ Action.Push = component("Action.Push"); // targets mount only after explicit nav
 for (const name of ["OpenInBrowser", "CopyToClipboard", "CreateQuicklink"]) Action[name] = component(`Action.${name}`);
 const ActionPanel = component("ActionPanel");
 for (const name of ["Submenu", "Section"]) ActionPanel[name] = component(`ActionPanel.${name}`);
+const Detail = component("Detail");
+Detail.Metadata = component("Detail.Metadata");
+Detail.Metadata.Label = component("Detail.Metadata.Label");
+Detail.Metadata.TagList = component("Detail.Metadata.TagList");
+Detail.Metadata.TagList.Item = component("Detail.Metadata.TagList.Item");
 const List = component("List");
 const Grid = component("Grid");
 Grid.Inset = { Small: "small" };
@@ -57,6 +62,7 @@ const api = {
   Action,
   ActionPanel,
   List,
+  Detail,
   Grid,
   Cache,
   Icon: new Proxy({}, { get: (_, k) => k }),
@@ -245,6 +251,7 @@ function fixture({ playlists = 250, tracks = 1500, delay = 0, contains = () => f
         stats.writes.push(["remove", id, body]);
         return { snapshot_id: "new" };
       }),
+    getMePlayerDevices: async () => ({ devices: [] }),
     getMePlayerCurrentlyPlaying: () =>
       request("playing", {}, () => ({ item: track("target"), currently_playing_type: "track" })),
   };

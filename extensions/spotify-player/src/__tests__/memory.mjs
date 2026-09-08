@@ -1,13 +1,16 @@
 // Run each variant in a fresh process. BASELINE_REF selects the actual pre-change source via git show.
-const { React, fixture, stats, sample } = require("./harness.cjs");
-const { act, create } = require("react-test-renderer");
-const { TrackActionPanel } = require("../src/components/TrackActionPanel.tsx");
-const { track } = require("./harness.cjs");
+import harness from "../../tests/harness.cjs";
+const { React, fixture, stats, sample, track } = harness;
+import { act, create } from "react-test-renderer";
+import { createRequire } from "node:module";
+// The fixture loader selects/transpiles current or baseline TypeScript at runtime.
+const loadSource = createRequire(import.meta.url);
+const { TrackActionPanel } = loadSource("../components/TrackActionPanel.tsx");
 const scenario = process.argv[2] ?? "browse";
 const { PlaylistPicker } = ["picker", "navigation"].includes(scenario)
-  ? require("../src/components/PlaylistPicker.tsx")
+  ? loadSource("../components/PlaylistPicker.tsx")
   : {};
-const { playlistContainsTrack } = scenario === "scan" ? require("../src/api/playlistContainsTrack.ts") : {};
+const { playlistContainsTrack } = scenario === "scan" ? loadSource("../api/playlistContainsTrack.ts") : {};
 fixture({ playlists: 120, tracks: 2500 });
 const tick = () => new Promise((r) => setImmediate(r));
 async function settle() {
@@ -23,8 +26,8 @@ async function settle() {
   const timer = setInterval(sample, 1);
   let renderer;
   if (scenario === "navigation") {
-    const Library = require("../src/yourLibrary.tsx").default;
-    const { TracksList } = require("../src/components/TracksList.tsx");
+    const Library = loadSource("../yourLibrary.tsx").default;
+    const { TracksList } = loadSource("../components/TracksList.tsx");
     for (let visit = 0; visit < 25; visit++) {
       for (const element of [
         React.createElement(Library),

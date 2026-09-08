@@ -599,8 +599,8 @@
   },
   "scripts": {
     "build": "ray build",
-    "test": "node --test tests/library.test.cjs",
-    "test:memory": "node --expose-gc --max-old-space-size=100 tests/memory.cjs",
+    "test": "node --test src/__tests__/library.test.mjs",
+    "test:memory": "node --expose-gc --max-old-space-size=100 src/__tests__/memory.mjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

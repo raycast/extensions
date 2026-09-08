@@ -63,7 +63,9 @@ export function PlaylistPicker({ uri, quicklinks = false }: { uri: string; quick
               actions={
                 <ActionPanel>
                   <Action
-                    title={contains ? "Remove from Playlist" : "Add to Playlist"}
+                    title={
+                      !checked ? "Add or Remove from Playlist" : contains ? "Remove from Playlist" : "Add to Playlist"
+                    }
                     icon={contains ? Icon.Minus : Icon.Plus}
                     onAction={async () => {
                       if (busy.current) return;
@@ -86,7 +88,7 @@ export function PlaylistPicker({ uri, quicklinks = false }: { uri: string; quick
                             await popToRoot();
                           }
                         };
-                        if (exists && !contains) {
+                        if (exists && checked && !contains) {
                           await showToast({
                             title: "Duplicate found",
                             style: Toast.Style.Failure,
