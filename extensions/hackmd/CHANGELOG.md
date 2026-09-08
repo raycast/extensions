@@ -1,6 +1,6 @@
 # HackMD Changelog
 
-## [Workspace Browser Actions] - {PR_MERGE_DATE}
+## [Workspace Browser Actions] - 2026-09-08
 
 - Add Open Workspace in Browser and Open Profile in Browser actions to Browse Notes for personal and team workspaces, including empty note lists.
 - Add Open Profile in Browser to history notes for the selected note’s team or author.
