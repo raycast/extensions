@@ -184,6 +184,7 @@ export class SlackClient {
         return {
           user,
           searchableValues: [
+            user.name,
             member.name,
             member.real_name,
             member.profile?.display_name,
@@ -197,6 +198,7 @@ export class SlackClient {
       maxResults: maxSearchResultsPerType,
       scanAllPages,
       signal,
+      prioritize: scanAllPages ? ({ user }) => matchesVisibleName(user.name, query) : undefined,
       stopAfterPage: (pageResults) =>
         scanAllPages && pageResults.some(({ user }) => matchesVisibleName(user.name, query)),
     });
@@ -208,11 +210,13 @@ export class SlackClient {
     query: string,
     signal?: AbortSignal,
     loadUserNames?: () => Promise<ReadonlyMap<string, string>>,
+    types: "channels" | "groups" | "all" = "all",
   ): Promise<[Channel[], Group[]]> {
     const slackWebClient = getSlackWebClient();
     const [channels, groups] = await searchConversationDirectory({
       query,
       maxResultsPerType: maxSearchResultsPerType,
+      types,
       loadUserNames:
         loadUserNames ??
         (() =>
@@ -231,7 +235,12 @@ export class SlackClient {
       loadConversationsPage: async (cursor) => {
         const response = await slackWebClient.conversations.list({
           exclude_archived: true,
-          types: "public_channel,private_channel,mpim",
+          types:
+            types === "channels"
+              ? "public_channel,private_channel"
+              : types === "groups"
+                ? "mpim"
+                : "public_channel,private_channel,mpim",
           limit: getDirectorySearchPageSize(query),
           cursor,
         });

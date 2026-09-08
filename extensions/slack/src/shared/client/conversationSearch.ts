@@ -6,6 +6,7 @@ import { collectPaginatedResults, matchesAllWords, matchesVisibleName } from "./
 import { toUserName } from "./member";
 
 type ConversationSearchOptions = {
+  types?: "channels" | "groups" | "all";
   query: string;
   maxResultsPerType: number;
   userNames?: ReadonlyMap<string, string>;
@@ -44,6 +45,7 @@ export async function searchUserNames({
       return {
         userName,
         searchableValues: [
+          userName[1],
           member.name,
           member.real_name,
           member.profile?.display_name,
@@ -57,6 +59,7 @@ export async function searchUserNames({
     maxResults,
     scanAllPages: true,
     signal,
+    prioritize: ({ userName: [, displayName] }) => matchesVisibleName(displayName, query),
     stopAfterPage: (pageResults) =>
       pageResults.some(({ userName: [, displayName] }) => matchesVisibleName(displayName, query)),
   });
@@ -69,6 +72,7 @@ export async function searchUserNames({
  */
 export async function searchConversationDirectory({
   query,
+  types = "all",
   maxResultsPerType,
   userNames = new Map(),
   loadUserNames,
@@ -82,6 +86,7 @@ export async function searchConversationDirectory({
       const page = await loadConversationsPage(cursor);
       signal?.throwIfAborted();
       if (
+        types !== "channels" &&
         loadUserNames &&
         page.items.some((conversation) => conversation.is_mpim || conversation.name?.startsWith("mpdm-"))
       ) {
@@ -92,10 +97,12 @@ export async function searchConversationDirectory({
     },
     transform: (conversation) => {
       if (conversation.is_mpim || conversation.name?.startsWith("mpdm-")) {
+        if (types === "channels") return undefined;
         const group = toGroup(conversation, userNames);
         return group ? { type: "group", value: group } : undefined;
       }
 
+      if (types === "groups") return undefined;
       const channel = toChannel(conversation);
       return channel ? { type: "channel", value: channel } : undefined;
     },
@@ -114,7 +121,7 @@ export async function searchConversationDirectory({
       channelCount += 1;
       return true;
     },
-    maxResults: maxResultsPerType * 2,
+    maxResults: types === "all" ? maxResultsPerType * 2 : maxResultsPerType,
     scanAllPages: query.trim().length > 0,
     signal,
   });

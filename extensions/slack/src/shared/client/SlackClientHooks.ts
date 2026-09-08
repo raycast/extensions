@@ -22,6 +22,7 @@ export const useChannels = () =>
 
 export const useDirectorySearch = (query: string) => {
   const userSearchAbortable = useRef<AbortController>(null);
+  const channelSearchAbortable = useRef<AbortController>(null);
   const conversationSearchAbortable = useRef<AbortController>(null);
 
   const userSearch = useMemo(
@@ -43,9 +44,25 @@ export const useDirectorySearch = (query: string) => {
       },
     },
   );
+  const channels = usePromise(
+    (searchText: string) =>
+      SlackClient.searchConversations(searchText, channelSearchAbortable.current?.signal, undefined, "channels"),
+    [query],
+    {
+      abortable: channelSearchAbortable,
+      onError(error) {
+        handleError(error, "Failed to search Slack channels");
+      },
+    },
+  );
   const conversations = usePromise(
     (searchText: string) =>
-      SlackClient.searchConversations(searchText, conversationSearchAbortable.current?.signal, userSearch.getUserNames),
+      SlackClient.searchConversations(
+        searchText,
+        conversationSearchAbortable.current?.signal,
+        userSearch.getUserNames,
+        "groups",
+      ),
     [query],
     {
       abortable: conversationSearchAbortable,
@@ -56,8 +73,11 @@ export const useDirectorySearch = (query: string) => {
   );
 
   return {
-    data: mergeDirectorySearchResults(users.data, conversations.data),
-    isLoading: users.isLoading || conversations.isLoading,
+    data: mergeDirectorySearchResults(
+      users.data,
+      channels.data || conversations.data ? [channels.data?.[0] ?? [], conversations.data?.[1] ?? []] : undefined,
+    ),
+    isLoading: users.isLoading || channels.isLoading || conversations.isLoading,
   };
 };
 

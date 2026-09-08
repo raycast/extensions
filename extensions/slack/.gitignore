@@ -17,3 +17,6 @@ compiled_raycast_rust
 compiled_raycast_swift
 /node_modules
 raycast-env.d.ts
+
+# Test output
+.test-dist/

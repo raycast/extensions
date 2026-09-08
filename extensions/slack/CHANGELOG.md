@@ -4,6 +4,8 @@
 
 - Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.
 - Continue member searches past hidden-profile matches so people whose visible names occur later in Slack's unordered directory can still be found.
+- Show channel search results independently of group DM name lookup.
+- Resolve direct messages when opening browser links or creating Quicklinks and Huddle links.
 - Correctly recognize Slack member IDs that begin with `W` so those people appear as message recipients instead of channels.
 - Show Slack's requested retry delay when API calls are rate-limited, then retry automatically instead of failing immediately.
 
