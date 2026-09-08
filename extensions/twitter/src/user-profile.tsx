@@ -6,10 +6,6 @@ import { ToggleDetailsAction, TweetListItem, useModeratableReplyIds } from "./v2
 import { deduplicateById } from "./v2/lib/twitter";
 import { clientV2, TwitterUserNotFoundError } from "./v2/lib/twitterapi_v2";
 
-interface Arguments {
-  username?: string;
-}
-
 function getProfileMarkdown(user: Awaited<ReturnType<typeof clientV2.getUserByUsername>>): string {
   const metrics = user.public_metrics;
   const lines = [`# ${user.name}`, `[@${user.username}](https://x.com/${user.username})`];
@@ -25,7 +21,7 @@ function getProfileMarkdown(user: Awaited<ReturnType<typeof clientV2.getUserByUs
   return lines.join("\n\n");
 }
 
-export default function UserProfileCommand(props: LaunchProps<{ arguments: Arguments }>) {
+export default function UserProfileCommand(props: LaunchProps<{ arguments: Arguments.UserProfile }>) {
   const [username, setUsername] = useState(props.arguments.username?.trim() ?? props.fallbackText?.trim() ?? "");
   const [isShowingDetail, setIsShowingDetail] = useState(shouldShowListWithDetails);
   const normalizedUsername = username.trim().replace(/^@/, "");

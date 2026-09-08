@@ -4,11 +4,7 @@ import { useState } from "react";
 import { TweetList } from "./v2/components/tweet";
 import { clientV2, Fetcher } from "./v2/lib/twitterapi_v2";
 
-interface Arguments {
-  query?: string;
-}
-
-export default function SearchPostsCommand(props: LaunchProps<{ arguments: Arguments }>) {
+export default function SearchPostsCommand(props: LaunchProps<{ arguments: Arguments.SearchPosts }>) {
   const [query, setQuery] = useState(props.arguments.query?.trim() ?? props.fallbackText?.trim() ?? "");
   const normalizedQuery = query.trim();
   const { data, error, isLoading, pagination, revalidate } = usePromise(
