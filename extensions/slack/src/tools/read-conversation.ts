@@ -3,7 +3,7 @@ import { withSlackClient } from "../shared/withSlackClient";
 
 type Input = {
   /**
-   * A Slack conversation ID, user ID, or message permalink. Conversation IDs start with C, D, or G. User IDs start with U or W.
+   * A Slack conversation ID, user ID, or message permalink. Conversation IDs start with C, D, or G. User IDs start with U or W. Passing a user ID opens or finds the DM and returns its D-prefixed channel ID; use that channel ID with Upload Files.
    */
   conversation: string;
   /**
