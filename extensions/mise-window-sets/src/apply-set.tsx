@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { applySetURL, layoutsFilePath, loadSets } from "./sets";
 
@@ -22,15 +14,8 @@ export default function Command() {
           description={`Install Mise and capture a Set first.\n${layoutsFilePath}`}
           actions={
             <ActionPanel>
-              <Action
-                title="Retry"
-                icon={Icon.ArrowClockwise}
-                onAction={revalidate}
-              />
-              <Action.OpenInBrowser
-                title="Get Mise"
-                url="https://usemise.dev"
-              />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action.OpenInBrowser title="Get Mise" url="https://usemise.dev" />
             </ActionPanel>
           }
         />
@@ -43,15 +28,8 @@ export default function Command() {
           description="Capture a Set from Mise’s menu bar, then reload this list."
           actions={
             <ActionPanel>
-              <Action
-                title="Reload List"
-                icon={Icon.ArrowClockwise}
-                onAction={revalidate}
-              />
-              <Action.OpenInBrowser
-                title="Get Mise"
-                url="https://usemise.dev"
-              />
+              <Action title="Reload List" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action.OpenInBrowser title="Get Mise" url="https://usemise.dev" />
             </ActionPanel>
           }
         />
@@ -84,15 +62,8 @@ export default function Command() {
                   }
                 }}
               />
-              <Action
-                title="Reload List"
-                icon={Icon.ArrowClockwise}
-                onAction={revalidate}
-              />
-              <Action.OpenInBrowser
-                title="Mise Pro / Download"
-                url="https://usemise.dev"
-              />
+              <Action title="Reload List" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action.OpenInBrowser title="Mise Pro / Download" url="https://usemise.dev" />
             </ActionPanel>
           }
         />

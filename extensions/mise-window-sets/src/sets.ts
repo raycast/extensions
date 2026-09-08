@@ -2,13 +2,7 @@ import { homedir } from "os";
 import { join } from "path";
 import { readFile } from "fs/promises";
 
-export const layoutsFilePath = join(
-  homedir(),
-  "Library",
-  "Application Support",
-  "Layouts",
-  "layouts.json",
-);
+export const layoutsFilePath = join(homedir(), "Library", "Application Support", "Layouts", "layouts.json");
 
 export type MiseSet = {
   name: string;
