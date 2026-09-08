@@ -1,4 +1,4 @@
-# Reply tracking and optional CLI authentication - {PR_MERGE_DATE}
+## [Update] - {PR_MERGE_DATE}
 
 - Preserve the original GitHub icon, search, review-status menu, and PAT support.
 - Add optional GitHub CLI authentication across all commands.
