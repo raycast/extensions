@@ -34,19 +34,22 @@ async function readShellEnvToken(): Promise<string | null> {
     const shellName = shell.replaceAll("\\", "/").split("/").pop()?.toLowerCase() ?? "";
     const isCommandShell = shellName === "cmd.exe" || shellName.endsWith(".cmd") || shellName.endsWith(".bat");
     const lookupScript = isCommandShell
-      ? `echo ${API_KEY_START_MARKER}%OPENROUTER_API_KEY%${API_KEY_END_MARKER} & echo ${KEY_START_MARKER}%OPENROUTER_KEY%${KEY_END_MARKER}`
+      ? `echo ${API_KEY_START_MARKER}!OPENROUTER_API_KEY!${API_KEY_END_MARKER} & echo ${KEY_START_MARKER}!OPENROUTER_KEY!${KEY_END_MARKER}`
       : [
           `printf '${API_KEY_START_MARKER}%s${API_KEY_END_MARKER}\\n' "$OPENROUTER_API_KEY"`,
           `printf '${KEY_START_MARKER}%s${KEY_END_MARKER}\\n' "$OPENROUTER_KEY"`,
         ].join("; ");
-    const shellArgs = isCommandShell ? ["/d", "/s", "/c", lookupScript] : ["-ilc", lookupScript];
+    const shellArgs = isCommandShell ? ["/d", "/v:on", "/s", "/c", lookupScript] : ["-ilc", lookupScript];
     const isBatchShell = shellName.endsWith(".cmd") || shellName.endsWith(".bat");
     const executable = isBatchShell ? process.env.ComSpec || "cmd.exe" : shell;
-    const executableArgs = isBatchShell ? ["/d", "/c", shell] : shellArgs;
+    // A .cmd/.bat login wrapper must be `call`ed in the same cmd.exe session as the lookup,
+    // otherwise the variables it initialises are gone before we echo them.
+    const executableArgs = isBatchShell ? ["/d", "/v:on", "/c", `call "${shell}" & ${lookupScript}`] : shellArgs;
     const { stdout } = await execFileAsync(executable, executableArgs, {
       encoding: "utf-8",
       timeout: SHELL_LOOKUP_TIMEOUT_MS,
       maxBuffer: 64 * 1024,
+      windowsVerbatimArguments: isCommandShell,
     });
 
     const apiKey = extractMarkedValue(stdout, API_KEY_START_MARKER, API_KEY_END_MARKER);
