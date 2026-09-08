@@ -57,9 +57,18 @@ function sameName(a: string, b: string): boolean {
   return a.localeCompare(b, undefined, { sensitivity: "accent" }) === 0;
 }
 
-/** Bundle path of the installed app matching the tile's name, for its icon and to open it. */
-function resolvePath(tile: DockTile, applications: Application[] | undefined): string | undefined {
-  return applications?.find((application) => sameName(application.name, tile.name))?.path;
+/**
+ * Installed apps matching the tile's name. The first match supplies the icon. Opening by path only
+ * happens when the match is unique: if several bundles share the name, `open` would succeed on
+ * whichever came first, so the tile is clicked in the Dock instead (by name and ordinal), which
+ * activates exactly what it shows.
+ */
+function resolvePaths(
+  tile: DockTile,
+  applications: Application[] | undefined,
+): { iconPath?: string; openPath?: string } {
+  const matches = applications?.filter((application) => sameName(application.name, tile.name)) ?? [];
+  return { iconPath: matches[0]?.path, openPath: matches.length === 1 ? matches[0].path : undefined };
 }
 
 export default function Command() {
@@ -79,7 +88,7 @@ export default function Command() {
 
   const badged = (data ?? [])
     .filter((tile) => tile.count > 0)
-    .map((tile) => ({ tile, path: resolvePath(tile, applications) }));
+    .map((tile) => ({ tile, ...resolvePaths(tile, applications) }));
   const total = badged.reduce((sum, { tile }) => sum + tile.count, 0);
   const hasBadges = total > 0;
 
@@ -124,8 +133,14 @@ export default function Command() {
         </MenuBarExtra.Section>
       ) : (
         <MenuBarExtra.Section title={hasBadges ? notificationLabel(total) : "No notifications"}>
-          {badged.map(({ tile, path }, index) => (
-            <AppItem key={`${tile.name}-${index}`} tile={tile} path={path} darkMode={darkMode} />
+          {badged.map(({ tile, iconPath, openPath }) => (
+            <AppItem
+              key={`${tile.name}-${tile.ordinal}`}
+              tile={tile}
+              iconPath={iconPath}
+              openPath={openPath}
+              darkMode={darkMode}
+            />
           ))}
         </MenuBarExtra.Section>
       )}
@@ -147,7 +162,7 @@ export default function Command() {
 }
 
 /**
- * Open the matched app bundle; if that is missing or fails, click its Dock tile instead.
+ * Open the uniquely matched app bundle; if there is none or it fails, click its Dock tile instead.
  * Menu bar commands have no Raycast window for a toast, so a failed fallback is reported via HUD.
  */
 async function openDockApp(tile: DockTile, path?: string): Promise<void> {
@@ -160,7 +175,7 @@ async function openDockApp(tile: DockTile, path?: string): Promise<void> {
     }
   }
   try {
-    await clickDockTile(tile.name);
+    await clickDockTile(tile.name, tile.ordinal);
   } catch (error) {
     const reason = isAccessibilityError(error)
       ? "Raycast needs Accessibility permission"
@@ -169,13 +184,23 @@ async function openDockApp(tile: DockTile, path?: string): Promise<void> {
   }
 }
 
-function AppItem({ tile, path, darkMode }: { tile: DockTile; path?: string; darkMode: boolean }) {
+function AppItem({
+  tile,
+  iconPath,
+  openPath,
+  darkMode,
+}: {
+  tile: DockTile;
+  iconPath?: string;
+  openPath?: string;
+  darkMode: boolean;
+}) {
   return (
     <MenuBarExtra.Item
       title={tile.name}
       subtitle={tile.badge}
-      icon={path ? { fileIcon: path } : menuIcon(Icon.AppWindow, darkMode)}
-      onAction={() => openDockApp(tile, path)}
+      icon={iconPath ? { fileIcon: iconPath } : menuIcon(Icon.AppWindow, darkMode)}
+      onAction={() => openDockApp(tile, openPath)}
     />
   );
 }

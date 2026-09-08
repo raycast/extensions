@@ -7,6 +7,8 @@ export interface DockTile {
   badge: string;
   /** Numeric badge value. Capped labels such as "99+" use the leading number; dots and other text count as 1. */
   count: number;
+  /** 1-based position among application tiles sharing this name, so duplicates can be told apart. */
+  ordinal: number;
 }
 
 export class AccessibilityError extends Error {}
@@ -61,12 +63,15 @@ export async function readDockTiles(): Promise<DockTile[]> {
     throw error;
   }
 
+  const seen = new Map<string, number>();
   return raw
     .split("\n")
     .filter((line) => line.length > 0)
     .map((line) => {
       const [name = "", badge = ""] = line.split(SEP);
-      return { name, badge, count: badgeToCount(badge) };
+      const ordinal = (seen.get(name) ?? 0) + 1;
+      seen.set(name, ordinal);
+      return { name, badge, count: badgeToCount(badge), ordinal };
     });
 }
 
@@ -95,11 +100,27 @@ export async function readSystemDarkMode(): Promise<boolean> {
   }
 }
 
-/** Clicks an application Dock tile via Accessibility, activating whatever it represents. */
-export async function clickDockTile(name: string): Promise<void> {
+/**
+ * Clicks an application Dock tile via Accessibility, activating whatever it represents. `ordinal`
+ * picks among tiles sharing the name, in Dock order, so the tile read earlier is the one clicked.
+ * If that tile has since gone but others with the name remain, the nearest remaining one is
+ * clicked instead; only a name with no tile at all is an error.
+ */
+export async function clickDockTile(name: string, ordinal = 1): Promise<void> {
   const escaped = name.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   await runAppleScript(
-    `tell application "System Events" to tell process "Dock" to click (first UI element of list 1 whose name is "${escaped}" and subrole is "AXApplicationDockItem")`,
+    `
+tell application "System Events"
+  tell process "Dock"
+    set matches to (UI elements of list 1 whose name is "${escaped}" and subrole is "AXApplicationDockItem")
+    set n to count of matches
+    if n is 0 then error "No Dock tile named \\"${escaped}\\"" number 1000
+    set i to ${Math.max(1, Math.floor(ordinal))}
+    if i > n then set i to n
+    click item i of matches
+  end tell
+end tell
+`,
     { timeout: 5000 },
   );
 }
