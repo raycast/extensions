@@ -1,5 +1,9 @@
 # Window Sizer Changelog
 
+## [Improve Resize Positioning] - {PR_MERGE_DATE}
+
+- Shrink windows that fill the screen's usable area around their original center
+
 ## [New Feature and Improvements] - 2026-07-10
 
 - Added support for editing custom sizes
