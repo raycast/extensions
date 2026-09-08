@@ -41,7 +41,10 @@ const usePulls = () => {
           "draft:false",
           "archived:false",
           ...(orgFilters.length > 0 ? orgFilters : [userFilters]),
-        ]);
+        ]).then(pulls => {
+          const ignored = new Set(config.ignoredAuthors.map(author => author.toLowerCase()));
+          return pulls.filter(pull => !ignored.has(pull.user.login.toLowerCase()));
+        });
       })
       .then((pulls: PullRequestShort[]) => updatePulls(pulls))
       .then(() => console.debug("<<<<<<<<< runPullIteration"))
