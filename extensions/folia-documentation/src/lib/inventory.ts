@@ -1,6 +1,7 @@
 import { environment } from "@raycast/api";
+import { once } from "node:events";
 import { createReadStream, createWriteStream } from "node:fs";
-import { mkdir, rename } from "node:fs/promises";
+import { mkdir, rename, rm } from "node:fs/promises";
 import path from "node:path";
 import { createInterface } from "node:readline";
 import { CACHE_SCHEMA, docsBase, timeoutSignal } from "./constants";
@@ -269,30 +270,49 @@ async function readCache(version: string): Promise<Inventory | null> {
 // string (and the recursive serializer's own scratch space on top of it) in a
 // single call, which is exactly the kind of allocation that can tip a tight
 // heap over the edge. Writing entry-by-entry keeps only one entry's JSON in
-// memory at a time; the temp-file rename keeps a crash mid-write from leaving
-// a truncated cache behind. The header goes on line one and each entry on its
-// own line so readCache can stream it back the same way.
+// memory at a time, pausing serialization whenever the stream's write buffer
+// is full to respect backpressure. The temp-file rename keeps a crash mid-write
+// from leaving a truncated cache behind. The header goes on line one and each
+// entry on its own line so readCache can stream it back the same way.
 async function writeCache(inventory: Inventory): Promise<void> {
   await mkdir(environment.supportPath, { recursive: true });
   const file = cachePath(inventory.version);
   const tmpFile = `${file}.tmp`;
 
-  await new Promise<void>((resolve, reject) => {
-    const stream = createWriteStream(tmpFile, { encoding: "utf8" });
-    stream.on("error", reject);
-    stream.on("finish", resolve);
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const stream = createWriteStream(tmpFile, { encoding: "utf8" });
+      stream.on("error", reject);
+      stream.on("finish", resolve);
 
-    const header: CacheHeader = {
-      version: inventory.version,
-      fetchedAt: inventory.fetchedAt,
-    };
-    stream.write(JSON.stringify(header));
-    for (const entry of inventory.entries)
-      stream.write(`\n${JSON.stringify(entry)}`);
-    stream.end();
-  });
+      const writeAll = async (): Promise<void> => {
+        const header: CacheHeader = {
+          version: inventory.version,
+          fetchedAt: inventory.fetchedAt,
+        };
+        if (!stream.write(JSON.stringify(header))) {
+          await once(stream, "drain");
+        }
+        for (const entry of inventory.entries) {
+          if (!stream.write(`\n${JSON.stringify(entry)}`)) {
+            await once(stream, "drain");
+          }
+        }
+        stream.end();
+      };
 
-  await rename(tmpFile, file);
+      writeAll().catch(reject);
+    });
+
+    await rename(tmpFile, file);
+  } catch (error) {
+    try {
+      await rm(tmpFile, { force: true });
+    } catch {
+      // ignore cleanup errors
+    }
+    throw error;
+  }
 }
 
 // Scoping each file's raw text to this function, rather than to three
