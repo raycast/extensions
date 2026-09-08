@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Cask pinning, Homebrew 6] - {PR_MERGE_DATE}
+## [Cask pinning, Homebrew 6] - 2026-09-08
 
 - **Casks can now be pinned**, just like formulae — pin a cask and it is locked out of upgrades, gets its own section in Show Installed, and shows the same pin icon everywhere. Homebrew has supported this since 5.1.12
 - Pinning a cask that updates itself now says so: the pin holds for brew, but the app can still self-update, so the toast says "Pinning may be overridden by auto-updates" instead of implying the version is frozen
