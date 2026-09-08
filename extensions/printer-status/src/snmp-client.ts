@@ -207,11 +207,11 @@ export async function fetchPrinterStats(
   community: string = "public",
   oidConfig: OidConfig = DEFAULT_OIDS,
 ): Promise<PrinterStats> {
-  const session = snmp.createSession(host, community, {
-    version: snmp.Version2c,
-    timeout: 5000,
-    retries: 1,
-  });
+  // Keep the library's default SNMP v1 session: some printers only speak v1.
+  // Optional OIDs are already fetched individually (see getOptionalOid/
+  // getOptionalOids), so a single unsupported OID under v1 no longer aborts
+  // the whole PDU/request; only that value comes back as unavailable.
+  const session = snmp.createSession(host, community, { timeout: 5000, retries: 1 });
   const optionalPageOids = [oidConfig.blackPagesOid, oidConfig.colorPagesOid].filter(Boolean);
   const generalOidsList = [
     oidConfig.modelNameOid,
