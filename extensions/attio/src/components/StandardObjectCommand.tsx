@@ -21,10 +21,15 @@ export default function StandardObjectCommand({ slug, recordId }: { slug: Standa
     selfIsLoading: self.isLoading,
     selfError: self.error,
     missing: missingScopes(self.granted, "listObjects"),
-    error: undefined,
-    hasLiveData: true,
-    onRetry: self.revalidate,
-    errorDetail: self.error ? getErrorMessage(self.error) : undefined,
+    // A failed schema load must read as a failure with a retry path — without
+    // this, an empty object list mislabels the workspace as "isn't enabled".
+    error: schema.error,
+    hasLiveData: schema.objects.length > 0,
+    onRetry: () => {
+      self.revalidate();
+      schema.revalidate();
+    },
+    errorDetail: (self.error ?? schema.error) ? getErrorMessage(self.error ?? schema.error) : undefined,
   });
   if (g) return g;
 

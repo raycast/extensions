@@ -49,7 +49,15 @@ export function toWireValue(a: Attribute, formValue: unknown): unknown[] {
     case "currency": {
       const s = String(formValue).trim();
       if (s === "") return [];
-      const n = Number(s.replace(/[$,]/g, ""));
+      // Prefills use Intl currency formatting ("€1,234.56", "CA$1,000") and
+      // String(number) for numbers (which can be scientific notation). Accept
+      // exactly: optional edge currency symbols/codes, group separators, and a
+      // plain-or-exponent number — anything else must throw, not be squashed
+      // into a different number ("12/34" must never save as 1234).
+      const cleaned = s.replace(/[,\s\u00A0\u202F]/g, "");
+      const m = cleaned.match(/^([+-]?)[\p{Sc}\p{L}]*([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)[\p{Sc}\p{L}]*$/u);
+      const n = m ? Number(m[1] + m[2]) : NaN;
+
       if (!Number.isFinite(n)) throw new Error(`${a.title} must be a number`);
       return [n];
     }

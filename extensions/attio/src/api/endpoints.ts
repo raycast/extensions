@@ -29,8 +29,16 @@ export const listObjects = () => request<Paged<AttioObject>>("/v2/objects");
 export const createObject = (body: ObjectCreateBody) =>
   request<Envelope<AttioObject>>("/v2/objects", { method: "POST", body: JSON.stringify(body) });
 
-export const listAttributes = (object: string) =>
-  request<Paged<Attribute>>(`/v2/objects/${object}/attributes?limit=100`);
+export const listAttributes = async (object: string): Promise<Paged<Attribute>> => {
+  // Offset-paginate: an object can carry more than one page of attributes, and a
+  // truncated schema silently drops fields from details, exports, and edit forms.
+  const data: Attribute[] = [];
+  for (let offset = 0; ; offset += 100) {
+    const page = await request<Paged<Attribute>>(`/v2/objects/${object}/attributes?limit=100&offset=${offset}`);
+    data.push(...page.data);
+    if (page.data.length < 100) return { data };
+  }
+};
 export const listAttributeOptions = (object: string, attribute: string) =>
   request<Paged<SelectOption>>(`/v2/objects/${object}/attributes/${attribute}/options`);
 export const listAttributeStatuses = (object: string, attribute: string) =>

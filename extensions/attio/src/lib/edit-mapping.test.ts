@@ -56,6 +56,23 @@ describe("initialFieldValue / toWireValue round-trip", () => {
     expect(toWireValue(a, "42")).toEqual([42]);
     expect(() => toWireValue(a, "forty-two")).toThrow(/number/i);
   });
+  it("currency strips any Intl-formatted symbol, not just $", () => {
+    const a = attr({ api_slug: "v", type: "currency" });
+    expect(toWireValue(a, "$1,234.56")).toEqual([1234.56]);
+    expect(toWireValue(a, "€1,234.56")).toEqual([1234.56]);
+    expect(toWireValue(a, "£99")).toEqual([99]);
+    expect(toWireValue(a, "CA$1,000")).toEqual([1000]);
+    expect(toWireValue(a, "-¥500")).toEqual([-500]);
+    expect(() => toWireValue(a, "abc")).toThrow(/number/i);
+  });
+  it("number keeps scientific notation and rejects mixed garbage instead of squashing it", () => {
+    const a = attr({ api_slug: "n", type: "number" });
+    expect(toWireValue(a, "1e3")).toEqual([1000]);
+    expect(toWireValue(a, "1e+21")).toEqual([1e21]);
+    expect(toWireValue(a, "2e-7")).toEqual([2e-7]);
+    expect(() => toWireValue(a, "12/34")).toThrow(/number/i);
+    expect(() => toWireValue(a, "12abc34")).toThrow(/number/i);
+  });
   it("checkbox", () => {
     const a = attr({ api_slug: "c", type: "checkbox" });
     expect(toWireValue(a, true)).toEqual([true]);

@@ -12,7 +12,7 @@ export function useSchema() {
   const self = useSelf();
   const ready = self.isActive === true && missingScopes(self.granted, "listObjects").length === 0;
 
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, error, revalidate } = useCachedPromise(
     async (_fp: string) => {
       const { data: objects } = await listObjects();
       const filteredObjects = objects.filter(
@@ -31,5 +31,9 @@ export function useSchema() {
     objects: data?.objects ?? [],
     attributesFor: (slug: string): Attribute[] | undefined => data?.attributes[slug],
     isLoading,
+    error,
+    revalidate: () => {
+      if (ready) revalidate();
+    },
   };
 }
