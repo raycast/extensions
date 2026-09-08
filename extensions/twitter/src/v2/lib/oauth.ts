@@ -1,4 +1,5 @@
 import { LocalStorage, OAuth } from "@raycast/api";
+import { withOAuthLock } from "./oauth_lock";
 import { readCache } from "./read_cache";
 import { XIcon } from "../../icon";
 
@@ -54,8 +55,6 @@ const oauthClient = new OAuth.PKCEClient({
 
 // Authorization
 
-let migrationPromise: Promise<void> | undefined;
-
 async function migrateOAuthClient(): Promise<void> {
   const migratedConfiguration = await LocalStorage.getItem<string>(OAUTH_MIGRATION_KEY);
   if (migratedConfiguration === OAUTH_CONFIGURATION) {
@@ -67,15 +66,11 @@ async function migrateOAuthClient(): Promise<void> {
   await LocalStorage.setItem(OAUTH_MIGRATION_KEY, OAUTH_CONFIGURATION);
 }
 
-async function ensureOAuthClientMigration(): Promise<void> {
-  migrationPromise ??= migrateOAuthClient();
-  await migrationPromise;
-}
-
 export async function authorize(): Promise<void> {
-  await ensureOAuthClientMigration();
-
-  authorizationPromise ??= authorizeWithOAuthClient().finally(() => {
+  authorizationPromise ??= withOAuthLock(async () => {
+    await migrateOAuthClient();
+    await authorizeWithOAuthClient();
+  }).finally(() => {
     authorizationPromise = undefined;
   });
   await authorizationPromise;
@@ -102,11 +97,11 @@ async function authorizeWithOAuthClient(): Promise<void> {
         if (latestTokenSet?.accessToken && !latestTokenSet.isExpired()) {
           return;
         }
+        throw new Error("Could not refresh X authentication. Retry, or log out and reconnect in extension settings.");
       }
     }
 
-    readCache.clear();
-    await oauthClient.removeTokens();
+    throw new Error("X authentication has expired. Log out and reconnect in extension settings.");
   }
 
   const authRequest = await oauthClient.authorizationRequest({
@@ -137,9 +132,16 @@ export async function getOAuthTokens(): Promise<OAuth.TokenSet | undefined> {
   return await oauthClient.getTokens();
 }
 
-export async function resetOAuthTokens(): Promise<void> {
-  readCache.clear();
-  await oauthClient.removeTokens();
+export async function resetOAuthTokens(expectedAccessToken?: string): Promise<void> {
+  await withOAuthLock(async () => {
+    // A delayed 401 from an older request must not erase a newer session.
+    if (expectedAccessToken !== undefined) {
+      const current = await oauthClient.getTokens();
+      if (current?.accessToken !== expectedAccessToken) return;
+    }
+    readCache.clear();
+    await oauthClient.removeTokens();
+  });
 }
 
 async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {

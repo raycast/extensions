@@ -421,15 +421,19 @@ export class ClientV2 {
     operation: (api: TwitterApi) => Promise<T>,
     retries = { authentication: true, rateLimit: true },
   ): Promise<T> {
+    let failedAccessToken: string | undefined;
     try {
       const api = await this.getAPI();
+      const tokens = api.getActiveTokens();
+      if (tokens.type === "oauth2") failedAccessToken = tokens.bearerToken;
       return await operation(api);
     } catch (error) {
       if (!(error instanceof ApiResponseError)) throw error;
 
       const normalizedError = normalizeTwitterError(error);
       if (retries.authentication && normalizedError instanceof TwitterAuthenticationError) {
-        await resetOAuthTokens();
+        if (failedAccessToken === undefined) throw normalizedError;
+        await resetOAuthTokens(failedAccessToken);
         return await this.request(operation, { authentication: false, rateLimit: retries.rateLimit });
       }
 
