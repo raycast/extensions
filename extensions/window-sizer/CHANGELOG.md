@@ -1,6 +1,6 @@
 # Window Sizer Changelog
 
-## [Improve Resize Positioning] - {PR_MERGE_DATE}
+## [Improve Resize Positioning] - 2026-09-08
 
 - Shrink windows that fill the screen's usable area around their original center
 
