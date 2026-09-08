@@ -35,6 +35,8 @@ export interface AntigravityOAuthCredentials {
 interface CachedAccessToken {
   accessToken: string;
   expiresAtMs: number;
+  /** Ties the cache to the current Antigravity credential (refresh token preferred). */
+  credentialKey: string;
 }
 
 let accessTokenCache: CachedAccessToken | null = null;
@@ -160,13 +162,20 @@ export async function resolveAntigravityAccessToken(
   const readCredentials = options.readCredentials ?? readAntigravityOAuthCredentials;
   const refreshToken = options.refreshToken ?? refreshAntigravityAccessToken;
 
-  if (accessTokenCache && accessTokenCache.expiresAtMs - TOKEN_SKEW_MS > nowMs) {
-    return accessTokenCache.accessToken;
-  }
-
   const credentials = await readCredentials();
   if (!credentials) {
+    accessTokenCache = null;
     return null;
+  }
+
+  const key = antigravityCredentialCacheKey(credentials);
+
+  if (
+    accessTokenCache &&
+    accessTokenCache.credentialKey === key &&
+    accessTokenCache.expiresAtMs - TOKEN_SKEW_MS > nowMs
+  ) {
+    return accessTokenCache.accessToken;
   }
 
   if (isAntigravityAccessTokenFresh(credentials.token, nowMs)) {
@@ -175,20 +184,25 @@ export async function resolveAntigravityAccessToken(
 
   const refresh = credentials.token.refresh_token;
   if (!refresh) {
-    return credentials.token.access_token || null;
+    return null;
   }
 
   const refreshed = await refreshToken(refresh, timeoutMs);
   if (!refreshed) {
-    return credentials.token.access_token || null;
+    return null;
   }
 
   accessTokenCache = {
     accessToken: refreshed.accessToken,
     expiresAtMs: nowMs + refreshed.expiresIn * 1000,
+    credentialKey: key,
   };
 
   return refreshed.accessToken;
+}
+
+function antigravityCredentialCacheKey(credentials: AntigravityOAuthCredentials): string {
+  return credentials.token.refresh_token ?? credentials.token.access_token;
 }
 
 export async function refreshAntigravityAccessToken(

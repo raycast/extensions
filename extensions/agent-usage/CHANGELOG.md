@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Unreleased]
+## [Fix Antigravity Closed-App Quota] - {PR_MERGE_DATE}
 
 ### Bug Fixes
 
