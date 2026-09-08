@@ -25,21 +25,31 @@ export default function WebhookForm(props: { webhook?: Webhook; onSaved: () => v
   const { pop } = useNavigation();
   const { webhook } = props;
   const initialUrl = webhook?.target_url ?? "";
-  const initialEvents = webhook?.subscriptions.map((s) => s.event_type) ?? [];
-  const [createdSecret, setCreatedSecret] = useState<{ secret: string; target_url: string } | null>(null);
+  // Deduplicate: a webhook can carry several subscriptions for the SAME event
+  // type (different filters) — the picker works in unique event types, and the
+  // submit path re-expands each retained type back to all its subscriptions.
+  const initialEvents = [...new Set(webhook?.subscriptions.map((s) => s.event_type) ?? [])];
+  const [createdSecret, setCreatedSecret] = useState<{ secret: string; target_url: string; webhook_id: string } | null>(
+    null,
+  );
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, webhook ? "Updating" : "Creating");
       try {
-        const subscriptions = values.events.map((event_type) => ({
-          event_type: event_type as WebhookEventType,
-          filter: null,
-        }));
+        // Keep every existing subscription (and its filter) for retained event
+        // types — rebuilding with filter:null would silently strip filters.
+        const subscriptions = [...new Set(values.events)].flatMap((event_type) => {
+          const existing = webhook?.subscriptions.filter((sub) => sub.event_type === event_type);
+          return existing?.length
+            ? existing.map((sub) => ({ event_type: sub.event_type as WebhookEventType, filter: sub.filter }))
+            : [{ event_type: event_type as WebhookEventType, filter: null }];
+        });
         if (webhook) {
           const body: Partial<WebhookCreateBody> = {};
           if (values.target_url !== initialUrl) body.target_url = values.target_url;
-          const eventsChanged = JSON.stringify([...values.events].sort()) !== JSON.stringify([...initialEvents].sort());
+          const eventsChanged =
+            JSON.stringify([...new Set(values.events)].sort()) !== JSON.stringify([...initialEvents].sort());
           if (eventsChanged) body.subscriptions = subscriptions;
           if (Object.keys(body).length === 0) {
             toast.style = Toast.Style.Success;
@@ -55,7 +65,7 @@ export default function WebhookForm(props: { webhook?: Webhook; onSaved: () => v
           toast.style = Toast.Style.Success;
           toast.title = "Webhook created";
           props.onSaved();
-          setCreatedSecret({ secret: data.secret, target_url: data.target_url });
+          setCreatedSecret({ secret: data.secret, target_url: data.target_url, webhook_id: data.id.webhook_id });
           return;
         }
         props.onSaved();
@@ -72,14 +82,16 @@ export default function WebhookForm(props: { webhook?: Webhook; onSaved: () => v
   });
 
   if (createdSecret) {
-    const { secret, target_url } = createdSecret;
+    const { secret, target_url, webhook_id } = createdSecret;
     const handleSaveToFile = async () => {
       const toast = await showToast(Toast.Style.Animated, "Saving secret");
       try {
         const sanitized = sanitizeDomainForFilename(target_url);
-        const filename = `attio_webhook_${sanitized}.txt`;
+        // Webhook id in the name + "wx" so two webhooks on the same host can
+        // never silently overwrite each other's one-time secret.
+        const filename = `attio_webhook_${sanitized}_${webhook_id.slice(0, 8)}.txt`;
         const filepath = `${homedir()}/Downloads/${filename}`;
-        writeFileSync(filepath, `${secret}\n`, { mode: 0o600 });
+        writeFileSync(filepath, `${secret}\n`, { mode: 0o600, flag: "wx" });
         toast.style = Toast.Style.Success;
         toast.title = "Secret saved";
         toast.primaryAction = { title: "Show in Finder", onAction: () => showInFinder(filepath) };

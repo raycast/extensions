@@ -87,10 +87,12 @@ export const WEBHOOK_EVENT_TYPES = [
 ] as const;
 export type WebhookEventType = (typeof WEBHOOK_EVENT_TYPES)[number];
 
-/** POST/PATCH /v2/webhooks body (spec: filter is always null — no filter UI in scope). */
+/** POST/PATCH /v2/webhooks body. New subscriptions send filter:null (no filter
+ * UI in scope), but PATCH round-trips existing subscriptions verbatim so
+ * filters created in the web app survive edits — hence `unknown`. */
 export type WebhookCreateBody = {
   target_url: string;
-  subscriptions: Array<{ event_type: WebhookEventType; filter: null }>;
+  subscriptions: Array<{ event_type: WebhookEventType; filter: unknown }>;
 };
 
 /**

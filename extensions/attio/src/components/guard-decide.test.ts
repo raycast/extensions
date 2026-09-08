@@ -55,4 +55,21 @@ describe("decide — precedence is the spec §6 table, top to bottom", () => {
   it("10: network selfError still beats auth (precedence unchanged)", () => {
     expect(decide({ ...base, selfError: new AttioNetworkError("down") }).kind).toBe("network");
   });
+  it("11: temporary /v2/self failures never read as a rejected token", () => {
+    expect(decide({ ...base, selfError: new AttioApiError(429, "rate_limit_error", "x", "slow down", 900) })).toEqual({
+      kind: "rate-limited",
+      retryAfterMs: 900,
+    });
+    expect(decide({ ...base, selfError: new AttioApiError(500, "server_error", "x", "boom") }).kind).toBe("api-error");
+    expect(decide({ ...base, selfError: new AttioApiError(503, "server_error", "x", "down") }).kind).toBe("api-error");
+  });
+  it("12: simultaneous errors — a temporary self failure beats a data-fetch error", () => {
+    const dataErr = new AttioApiError(404, "not_found_error", "missing", "gone");
+    expect(
+      decide({ ...base, error: dataErr, selfError: new AttioApiError(429, "rate_limit_error", "x", "x") }).kind,
+    ).toBe("rate-limited");
+    expect(
+      decide({ ...base, error: dataErr, selfError: new AttioApiError(503, "server_error", "x", "down") }).kind,
+    ).toBe("api-error");
+  });
 });

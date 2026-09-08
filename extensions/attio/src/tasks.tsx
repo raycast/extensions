@@ -76,14 +76,21 @@ const buildAccessories = (
 };
 
 export default function Tasks({ initialFilter = "all" }: { initialFilter?: Filter } = {}) {
+  const [sort, setSort] = useCachedState<TaskSort>("tasks-sort", "deadline-asc");
   const h = useAttio(
     "listTasks",
-    () =>
+    // The API defaults to created_at:asc (oldest first), so "Created ↓" must
+    // ask for the reverse server-side; sort is a dep so pagination restarts.
+    (taskSort: TaskSort) =>
       async ({ page }: { page: number }) => {
-        const { data } = await listTasks({ limit: PAGE_SIZE, offset: page * PAGE_SIZE });
+        const { data } = await listTasks({
+          limit: PAGE_SIZE,
+          offset: page * PAGE_SIZE,
+          sort: taskSort === "created-desc" ? "created_at:desc" : undefined,
+        });
         return { data, hasMore: data.length === PAGE_SIZE };
       },
-    [],
+    [sort],
   );
   const { isLoading, data, pagination, error, revalidate, mutate, self } = h;
   const members = useMembers();
@@ -91,7 +98,6 @@ export default function Tasks({ initialFilter = "all" }: { initialFilter?: Filte
   const currentDate = useMemo(() => new Date(), []);
   const canWrite = satisfied(self.granted, "task:read-write");
   const [filter, setFilter] = useState<Filter>(initialFilter);
-  const [sort, setSort] = useCachedState<TaskSort>("tasks-sort", "deadline-asc");
   const [groupByDue, setGroupByDue] = useCachedState<boolean>("tasks-group-by-due", false);
 
   const filteredTasks = allTasks.filter((task) => {
@@ -107,8 +113,8 @@ export default function Tasks({ initialFilter = "all" }: { initialFilter?: Filte
     }
   });
 
-  // "created-desc" keeps the API's original (creation-order) sequence — Array.sort
-  // is stable, so a no-op comparator preserves it without a second network sort.
+  // "created-desc" is served newest-first by the API (sort=created_at:desc in
+  // the hook) — the no-op comparator just preserves that server order.
   const tasks = [...filteredTasks].sort((a, b) => {
     if (sort === "created-desc") return 0;
     if (!a.deadline_at && !b.deadline_at) return 0;

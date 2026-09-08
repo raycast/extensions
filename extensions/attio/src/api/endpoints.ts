@@ -74,8 +74,13 @@ export const listNotes = (opts: { limit: number; offset: number }) =>
 export const updateNote = (note_id: string, body: { title?: string; format?: "markdown"; content?: string }) =>
   request<Envelope<Note>>(`/v2/notes/${note_id}`, { method: "PATCH", body: JSON.stringify({ data: body }) });
 
-export const listTasks = async (opts: { limit: number; offset: number }) => {
-  const res = await request<Paged<Task>>(`/v2/tasks?limit=${opts.limit}&offset=${opts.offset}`);
+export const listTasks = async (opts: {
+  limit: number;
+  offset: number;
+  sort?: "created_at:asc" | "created_at:desc";
+}) => {
+  const sort = opts.sort ? `&sort=${opts.sort}` : "";
+  const res = await request<Paged<Task>>(`/v2/tasks?limit=${opts.limit}&offset=${opts.offset}${sort}`);
   // Live API omits these arrays on some tasks even though the schema requires
   // them (verified from a production crash 2026-09-01); normalize once here so
   // no consumer ever guards.

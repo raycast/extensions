@@ -24,13 +24,16 @@ export const editableAttributes = (attributes: Attribute[]): Attribute[] =>
 export function initialFieldValue(
   a: Attribute,
   values: Record<string, AttributeValue[]>,
-): string | boolean | Date | null {
+): string | string[] | boolean | Date | null {
   const vs = values[a.api_slug] ?? [];
   if (a.type === "checkbox") return vs[0]?.attribute_type === "checkbox" ? vs[0].value : false;
   if (a.type === "date" || a.type === "timestamp") {
     const first = vs[0];
     return first && "value" in first && typeof first.value === "string" ? new Date(first.value) : null;
   }
+  // Multiselect select/status render as TagPickers, which take arrays — a
+  // joined "A, B" string is not an option and breaks titles containing commas.
+  if (a.is_multiselect && (a.type === "select" || a.type === "status")) return vs.map((v) => formatValue(v));
   return vs.map((v) => formatValue(v)).join(", ");
 }
 
@@ -41,6 +44,14 @@ export function toWireValue(a: Attribute, formValue: unknown): unknown[] {
       .split(",")
       .map((x) => x.trim())
       .filter(Boolean);
+  // TagPicker values (multiselect select/status) arrive as arrays — pass the
+  // exact strings through: a trim would change the option identifier the API
+  // resolves against. Any other type receiving an array is a caller bug.
+  if (Array.isArray(formValue)) {
+    if (!(a.is_multiselect && (a.type === "select" || a.type === "status")))
+      throw new Error(`${a.title} must be a single value`);
+    return formValue.filter((x): x is string => typeof x === "string" && x !== "");
+  }
   switch (a.type) {
     case "checkbox":
       return [Boolean(formValue)];
@@ -104,7 +115,9 @@ export function changedValues(
     const before = initial[a.api_slug];
     const after = current[a.api_slug];
     const same =
-      before === after || (before instanceof Date && after instanceof Date && before.getTime() === after.getTime());
+      before === after ||
+      (before instanceof Date && after instanceof Date && before.getTime() === after.getTime()) ||
+      (Array.isArray(before) && Array.isArray(after) && JSON.stringify(before) === JSON.stringify(after));
     if (!same) out[a.api_slug] = toWireValue(a, after);
   }
   return out;

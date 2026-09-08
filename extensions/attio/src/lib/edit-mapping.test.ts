@@ -100,6 +100,14 @@ describe("initialFieldValue / toWireValue round-trip", () => {
     expect(toWireValue(a, "0")).toEqual([0]); // a real zero still saves
     expect(toWireValue(a, "0.00")).toEqual([0]);
   });
+  it("multiselect select round-trips as arrays (commas in titles survive)", () => {
+    const a = attr({ api_slug: "tags", type: "select", is_multiselect: true });
+    expect(toWireValue(a, ["Alpha", "Beta, Inc."])).toEqual(["Alpha", "Beta, Inc."]);
+    expect(toWireValue(a, [])).toEqual([]);
+    // unchanged arrays must not count as edits
+    expect(changedValues({ tags: ["A", "B"] }, { tags: ["A", "B"] }, [a])).toEqual({});
+    expect(changedValues({ tags: ["A"] }, { tags: ["A", "B"] }, [a])).toEqual({ tags: ["A", "B"] });
+  });
   it("checkbox", () => {
     const a = attr({ api_slug: "c", type: "checkbox" });
     expect(toWireValue(a, true)).toEqual([true]);

@@ -140,6 +140,28 @@ export default function RecordEditForm(props: {
           case "status": {
             const opts = choices?.[a.api_slug];
             if (!opts) return <Form.Description key={a.api_slug} title={a.title} text="Loading choices…" />;
+            if (a.is_multiselect) {
+              // Array-valued state end to end: a joined "A, B" string is not an
+              // option, and a Dropdown would PUT a single value over the rest.
+              const selected = Array.isArray(val) ? (val as string[]) : [];
+              // Union in the INITIAL selections too: an archived option lives in
+              // neither opts nor (once deselected) the current selection, and it
+              // must stay re-selectable until the form is saved.
+              const initialSel = Array.isArray(initial[a.api_slug]) ? (initial[a.api_slug] as string[]) : [];
+              return (
+                <Form.TagPicker
+                  key={a.api_slug}
+                  id={a.api_slug}
+                  title={a.title}
+                  value={selected}
+                  onChange={set(a.api_slug)}
+                >
+                  {[...new Set([...opts, ...initialSel, ...selected])].map((o) => (
+                    <Form.TagPicker.Item key={o} value={o} title={o} />
+                  ))}
+                </Form.TagPicker>
+              );
+            }
             return (
               <Form.Dropdown
                 key={a.api_slug}
