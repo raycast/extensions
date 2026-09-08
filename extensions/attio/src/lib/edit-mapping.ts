@@ -51,12 +51,26 @@ export function toWireValue(a: Attribute, formValue: unknown): unknown[] {
       if (s === "") return [];
       // Prefills use Intl currency formatting ("€1,234.56", "CA$1,000") and
       // String(number) for numbers (which can be scientific notation). Accept
-      // exactly: optional edge currency symbols/codes, group separators, and a
-      // plain-or-exponent number — anything else must throw, not be squashed
-      // into a different number ("12/34" must never save as 1234).
-      const cleaned = s.replace(/[,\s\u00A0\u202F]/g, "");
-      const m = cleaned.match(/^([+-]?)[\p{Sc}\p{L}]*([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)[\p{Sc}\p{L}]*$/u);
-      const n = m ? Number(m[1] + m[2]) : NaN;
+      // exactly: optional edge currency symbols/codes and an en-US number —
+      // comma only as a strict 3-digit group separator. Anything else must
+      // throw, not be squashed into a different number: "12/34" must never
+      // save as 1234, and decimal-comma "1.234,56" must never save as 1.23456.
+      // Decorations must look like real currency tokens ("$", "\u20AC", "CA$",
+      // "CHF", "EUR") \u2014 arbitrary letters would turn "12k" into 12 and
+      // "1 million" into 1. Whitespace is legal only between a decoration and
+      // the number, never inside it ("1,2 34" must not repair to 1234). The
+      // exponent is capped at two digits so "1e-324" cannot underflow to a
+      // silent 0 (nothing costs more than e\u00B199).
+      const WS = "[\\s\\u00A0\\u202F]*";
+      const m = s.match(
+        new RegExp(
+          `^([+-]?)(?:(?:[A-Z]{1,3}\\p{Sc}|[A-Z]{3}|\\p{Sc})${WS})?` +
+            `([+-]?(?:\\d{1,3}(?:,\\d{3})+|\\d+|(?=\\.))(?:\\.\\d*)?(?:[eE][+-]?\\d{1,2})?)` +
+            `(?:${WS}(?:\\p{Sc}|[A-Z]{3}))?$`,
+          "u",
+        ),
+      );
+      const n = m ? Number(m[1] + m[2].replace(/,/g, "")) : NaN;
 
       if (!Number.isFinite(n)) throw new Error(`${a.title} must be a number`);
       return [n];

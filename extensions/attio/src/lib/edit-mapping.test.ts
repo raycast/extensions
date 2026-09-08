@@ -73,6 +73,29 @@ describe("initialFieldValue / toWireValue round-trip", () => {
     expect(() => toWireValue(a, "12/34")).toThrow(/number/i);
     expect(() => toWireValue(a, "12abc34")).toThrow(/number/i);
   });
+  it("currency rejects decimal-comma formats instead of misparsing them", () => {
+    const a = attr({ api_slug: "v", type: "currency" });
+    expect(toWireValue(a, "1,234.56")).toEqual([1234.56]);
+    expect(toWireValue(a, "1,234,567.89")).toEqual([1234567.89]);
+    expect(() => toWireValue(a, "1.234,56 €")).toThrow(/number/i); // must NOT save 1.23456
+    expect(() => toWireValue(a, "1,56")).toThrow(/number/i); // ambiguous European decimal
+    expect(() => toWireValue(a, "12,34.56")).toThrow(/number/i); // malformed grouping
+  });
+  it("currency accepts code-spaced Intl output and decimal shorthand, rejects magnitude words", () => {
+    const a = attr({ api_slug: "v", type: "currency" });
+    expect(toWireValue(a, "CHF 1,234.56")).toEqual([1234.56]);
+    expect(toWireValue(a, "SEK 500")).toEqual([500]);
+    expect(toWireValue(a, "100 EUR")).toEqual([100]);
+    expect(toWireValue(a, ".5")).toEqual([0.5]);
+    expect(toWireValue(a, "-.5")).toEqual([-0.5]);
+    expect(toWireValue(a, "1.")).toEqual([1]);
+    expect(() => toWireValue(a, "12k")).toThrow(/number/i); // must NOT save 12
+    expect(() => toWireValue(a, "1 million")).toThrow(/number/i); // must NOT save 1
+    expect(() => toWireValue(a, "1,2 34")).toThrow(/number/i); // internal space must not repair
+    expect(() => toWireValue(a, "1e")).toThrow(/number/i);
+    expect(() => toWireValue(a, "1eUSD")).toThrow(/number/i);
+    expect(() => toWireValue(a, "1e-324")).toThrow(/number/i); // must NOT underflow to 0
+  });
   it("checkbox", () => {
     const a = attr({ api_slug: "c", type: "checkbox" });
     expect(toWireValue(a, true)).toEqual([true]);
