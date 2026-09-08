@@ -208,6 +208,19 @@ async function getClient(): Promise<Client> {
   return clientPromise;
 }
 
+/**
+ * Open the connection ahead of the first tool call.
+ *
+ * Connecting means an MCP initialize round trip, plus a token refresh when the
+ * stored one has expired — paid by whichever call goes first. A command that
+ * sits idle while the user fills in a form pays it on submit, where it's felt;
+ * calling this on mount moves it to where it isn't. Failures are swallowed:
+ * `getClient` drops the cached promise, so the real call retries and reports.
+ */
+export function warmUp(): void {
+  void getClient().catch(() => undefined);
+}
+
 function mapError(error: unknown): never {
   const text = error instanceof Error ? error.message : String(error);
   if (error instanceof UnauthorizedError || /401|unauthorized/i.test(text)) {

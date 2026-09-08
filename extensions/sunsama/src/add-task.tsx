@@ -16,7 +16,9 @@ import {
   getDefaultChannel,
   getRecentChannel,
   rememberLastChannel,
+  setChannel,
 } from "./lib/sunsama-client";
+import { warmUp } from "./lib/mcp";
 import { toDayString } from "./lib/date";
 import { reportError } from "./lib/errors";
 import { parseDuration, parseSubtasks } from "./lib/time";
@@ -46,6 +48,11 @@ export default function AddTask() {
     getPreferenceValues<Preferences.AddTask>();
   const rememberFor = Number(rememberChannelMinutes) || 0;
   const channels = useChannels();
+
+  // Nothing else in this form touches the server — the stored channel list is
+  // read from disk — so without this the MCP handshake happens on submit, in
+  // front of the user. Opening it on mount overlaps it with the typing.
+  useEffect(warmUp, []);
 
   // The channel to start on: the one just used, while it's still recent, and
   // otherwise the saved default. Resolved together so the field is only set
@@ -117,28 +124,54 @@ export default function AddTask() {
       style: Toast.Style.Animated,
       title: "Creating task…",
     });
+    // A link may carry its own channel automation server-side (e.g. a Trello
+    // board mapped to a channel). Only worth deferring to it when the channel
+    // field is still whatever it auto-filled to — an explicit pick always wins.
+    const channelUntouched = values.channel === (startingChannel ?? "");
+    const deferToAutomation = !!url && channelUntouched;
+
     try {
-      const createdTitle = await createTask({
+      const created = await createTask({
         title,
         day: toDayString(values.day ?? new Date()),
         url,
         notes: values.notes.trim() || undefined,
-        channel: values.channel || undefined,
+        channel: deferToAutomation ? undefined : values.channel || undefined,
         position: values.position === "bottom" ? "bottom" : "top",
         timeEstimate,
         subtasks: parseSubtasks(values.subtasks),
       });
+
+      // No automation fired — fall back to the default/recent channel so a
+      // link without one still lands where every other task would.
+      let fellBackToDefault = false;
+      if (
+        deferToAutomation &&
+        !created.channel &&
+        created.id &&
+        values.channel
+      ) {
+        await setChannel(created.id, values.channel);
+        fellBackToDefault = true;
+      }
+
       // Recorded after the task lands, so the next one can start here while
-      // it's still recent.
-      await rememberLastChannel(values.channel);
+      // it's still recent — the picked channel, whichever channel automation
+      // assigned, or the default just applied as a fallback.
+      await rememberLastChannel(created.channel || values.channel || "");
       await toast.hide();
       // Close and go back to root. Without an explicit type this follows the
       // user's "Pop to Root Search" preference, which can leave the filled-in
       // form on the stack for the next launch.
-      await showHUD(`Added task: ${createdTitle}`, {
-        popToRootType: PopToRootType.Immediate,
-        clearRootSearch: true,
-      });
+      await showHUD(
+        created.channel && !fellBackToDefault
+          ? `Added task: ${created.title} → ${created.channel}`
+          : `Added task: ${created.title}`,
+        {
+          popToRootType: PopToRootType.Immediate,
+          clearRootSearch: true,
+        },
+      );
     } catch (error) {
       toast.hide();
       await reportError(error, "Failed to create task");
