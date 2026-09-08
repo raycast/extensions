@@ -478,6 +478,56 @@ async function main() {
   }
   line("10 paced requests", sequentialBad === 0, sequentialBad === 0 ? "all 200" : `${sequentialBad} rejected`);
 
+  /* 3i. Pagination ----------------------------------------------------------- */
+  // My Work pages with take/skip. If an instance ignores skip, every page is
+  // page one - the client guards against that, but it is worth knowing.
+  console.log("\n3i. Pagination");
+  const pageOne = await request("page/0", `${base}/api/v1/Assignables?format=json&take=2&skip=0`, { transport });
+  const pageTwo = await request("page/2", `${base}/api/v1/Assignables?format=json&take=2&skip=2`, { transport });
+  if (pageOne.status === 200 && pageTwo.status === 200) {
+    const first = (pageOne.body?.Items ?? []).map((row) => row?.Id).join(",");
+    const second = (pageTwo.body?.Items ?? []).map((row) => row?.Id).join(",");
+    const distinct = first !== second && second.length > 0;
+    line("skip returns a different page", distinct, distinct ? "paging works" : "skip appears to be ignored");
+  } else {
+    line("skip", false, `HTTP ${pageOne.status} / ${pageTwo.status}`);
+  }
+
+  /* 3j. Boards and views ------------------------------------------------------ */
+  // Boards are not in the v1 entity model - EntityTypes lists none - so if they
+  // are reachable at all it is through some other endpoint. Nothing here is
+  // documented; this is a spread of candidates to see what answers.
+  console.log("\n3j. Boards and views");
+  const boardCandidates = [
+    ["v1 Views", "/api/v1/Views?format=json&take=1"],
+    ["v1 Boards", "/api/v1/Boards?format=json&take=1"],
+    ["v1 Dashboards", "/api/v1/Dashboards?format=json&take=1"],
+    ["v2 View", "/api/v2/View?take=1&select={id,name}"],
+    ["v2 Board", "/api/v2/Board?take=1&select={id,name}"],
+    ["Generals filtered to View", `/api/v1/Generals?format=json&take=1&where=${encodeURIComponent("(EntityType.Name eq 'View')")}`],
+    ["svc views", "/svc/views/api/views"],
+    ["api/v1/Context AppContext", "/api/v1/Context?format=json&include=[AppContext]"],
+  ];
+  for (const [name, path] of boardCandidates) {
+    const entry = await request(`board/${name}`, `${base}${path}`, { transport });
+    line(name, entry.status === 200, `HTTP ${entry.status}`);
+
+    if (entry.status !== 200 || !entry.body || typeof entry.body !== "object") continue;
+
+    // The field names decide whether "created by me", "shared with me", "my
+    // team's" and "pinned" are expressible at all. Names only, never values -
+    // except a board's own name, which is configuration rather than content.
+    const items = entry.body.Items ?? entry.body.items ?? (Array.isArray(entry.body) ? entry.body : null);
+    const sample = Array.isArray(items) ? items[0] : entry.body;
+    if (sample && typeof sample === "object") {
+      console.log(`         record fields: ${Object.keys(sample).join(", ")}`);
+      const interesting = ["Owner", "Author", "CreatedBy", "Users", "Teams", "Project", "IsShared", "IsPrivate", "IsFavorite", "Pinned", "Sharing", "AccessLevel"];
+      const present = interesting.filter((field) => field in sample);
+      if (present.length > 0) console.log(`         useful for grouping: ${present.join(", ")}`);
+      if (Array.isArray(items)) console.log(`         items returned: ${items.length}`);
+    }
+  }
+
   /* 4. Per-type fallback sanity ------------------------------------------- */
   console.log("\n4. Per-type collections (fan-out fallback)");
   for (const type of ASSIGNABLE_TYPES) {

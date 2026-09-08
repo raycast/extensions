@@ -38,8 +38,8 @@ uses API v1 throughout and only takes advantage of API v2 where an instance offe
 
 ## Credits
 
-Entity type icons are from [Lucide](https://lucide.dev), used under the ISC licence. Each bundled file keeps
-its licence header; the set is regenerated with `npm run icons`.
+Entity type icons are from [Lucide](https://lucide.dev), used under the ISC license. Each bundled file keeps
+its license header; the set is regenerated with `npm run icons`.
 
 ## Privacy
 

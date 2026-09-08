@@ -74,7 +74,7 @@ export default function ManageInstancesCommand() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Filter instances">
       <List.EmptyView
         icon={Icon.Plus}
         title="No Instances Yet"

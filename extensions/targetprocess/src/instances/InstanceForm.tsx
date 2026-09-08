@@ -79,6 +79,7 @@ export function InstanceForm({ instance, onSaved }: Props) {
       <Form.PasswordField
         id="token"
         title="Access Token"
+        placeholder="Paste your personal access token"
         defaultValue={instance?.token}
         info="Targetprocess: your profile → Settings → Access Tokens. Stored in Raycast's encrypted local storage."
       />

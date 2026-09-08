@@ -28,6 +28,8 @@ export function describeFailure(error: unknown, instanceLabel?: string): Failure
       };
     case "not-targetprocess":
       return { title: "Not a Targetprocess Instance", message: error.message };
+    case "insecure-transport":
+      return { title: "Insecure Connection", message: error.message };
     case "rate-limited":
       return {
         title: "Too Many Requests",

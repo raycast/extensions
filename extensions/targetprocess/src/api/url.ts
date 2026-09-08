@@ -3,6 +3,44 @@ import { AuthTransport, TargetprocessError } from "./types";
 export const ROW_INCLUDE =
   "[Id,Name,EntityType[Name],EntityState[Name,NumericPriority,IsFinal],Project[Name],ModifyDate]";
 
+/** Hostnames that cannot resolve outside the machine or its local network. */
+const LOCAL_SUFFIXES = [".local", ".internal", ".lan", ".home.arpa", ".localdomain"];
+
+function isPrivateHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+
+  if (host === "localhost" || host === "::1") return true;
+  if (LOCAL_SUFFIXES.some((suffix) => host.endsWith(suffix))) return true;
+  // A bare hostname with no dots can only be resolved locally.
+  if (!host.includes(".") && !host.includes(":")) return true;
+  // IPv6 unique-local (fc00::/7).
+  if (/^f[cd][0-9a-f]{2}:/.test(host)) return true;
+
+  const ipv4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  if (!ipv4) return false;
+  const [a, b] = [Number(ipv4[1]), Number(ipv4[2])];
+  if (a === 127 || a === 10) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 169 && b === 254) return true;
+  return false;
+}
+
+/**
+ * Personal access tokens travel in a header or, on most instances, the query string. Over http that
+ * is readable by anything on the path, so plain http is allowed only where the traffic cannot leave
+ * a private network.
+ */
+export function assertSecureTransport(url: URL): void {
+  if (url.protocol === "https:") return;
+  if (isPrivateHost(url.hostname)) return;
+
+  throw new TargetprocessError(
+    "insecure-transport",
+    `Use https:// for ${url.hostname}. Plain http would send your access token in clear text.`,
+  );
+}
+
 /** Preserves any path prefix, so on-premise installs at https://host/TargetProcess keep working. */
 export function normaliseBaseUrl(input: string): string {
   const trimmed = input.trim();
@@ -22,6 +60,8 @@ export function normaliseBaseUrl(input: string): string {
   if (url.hostname.length === 0) {
     throw new TargetprocessError("not-targetprocess", `"${input}" is not a valid URL.`);
   }
+
+  assertSecureTransport(url);
 
   const path = url.pathname.replace(/\/+$/, "").replace(/\/api\/v[12]$/i, "");
 

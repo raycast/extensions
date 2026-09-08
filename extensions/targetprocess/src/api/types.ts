@@ -36,7 +36,14 @@ export interface Entity {
 }
 
 export type FailureKind =
-  "unreachable" | "unauthorised" | "not-targetprocess" | "not-found" | "rate-limited" | "server" | "unexpected";
+  | "unreachable"
+  | "unauthorised"
+  | "not-targetprocess"
+  | "insecure-transport"
+  | "not-found"
+  | "rate-limited"
+  | "server"
+  | "unexpected";
 
 export class TargetprocessError extends Error {
   constructor(

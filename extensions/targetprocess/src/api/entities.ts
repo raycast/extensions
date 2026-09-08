@@ -144,18 +144,50 @@ function isNotFound(error: unknown): boolean {
   return typeof error === "object" && error !== null && "kind" in error && error.kind === "not-found";
 }
 
+/** A bound on paging, so a misconfigured filter cannot walk an entire instance. */
+const MAX_PAGES = 20;
+
+/**
+ * Pages until the instance runs out. My Work is a complete list by definition - silently stopping
+ * at the first page would hide assignments and make the totals wrong.
+ */
 export async function assignedTo(
   instance: Connectable,
   userId: number,
   options: SearchOptions & FetchOptions = {},
 ): Promise<Entity[]> {
-  const { data } = await fetchJson<Collection>(
-    instance,
-    "api/v1/Assignables",
-    { take: PAGE_SIZE, include: ROW_INCLUDE, where: assignedToWhere(userId, options) },
-    options,
-  );
-  return byRecency(mapCollection(data));
+  const where = assignedToWhere(userId, options);
+  const collected: Entity[] = [];
+  const seen = new Set<number>();
+
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const { data } = await fetchJson<Collection>(
+      instance,
+      "api/v1/Assignables",
+      { take: PAGE_SIZE, skip: page * PAGE_SIZE, include: ROW_INCLUDE, where },
+      options,
+    );
+
+    const mapped = mapCollection(data);
+    let added = 0;
+    for (const entity of mapped) {
+      if (seen.has(entity.id)) continue;
+      seen.add(entity.id);
+      collected.push(entity);
+      added += 1;
+    }
+
+    // Count the raw rows, not the mapped ones: mapping drops unusable rows and
+    // would end paging early on a page that was actually full.
+    if ((data.Items?.length ?? 0) < PAGE_SIZE) break;
+
+    // An instance that ignores `skip` would return page one forever. Every row
+    // being one we already have means paging is not working - but a page that
+    // mapped to nothing is a page of unusable rows, which says nothing either way.
+    if (mapped.length > 0 && added === 0) break;
+  }
+
+  return byRecency(collected);
 }
 
 export interface StateGroup {
