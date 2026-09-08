@@ -131,6 +131,9 @@
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
   "version": "0.3.0",
   "scripts": {
     "build": "ray build",
