@@ -269,12 +269,38 @@ function parseError(message: string): ParseResult {
   };
 }
 
+/**
+ * Parse Cloud Code / local RetrieveUserQuotaSummary payloads.
+ * Accepts `{ groups }`, `{ response: { groups } }`, or `{ summary: { groups } }`.
+ */
+export function parseAntigravityQuotaSummaryResponse(raw: unknown): ParseResult {
+  const parsedQuotaGroups = parseQuotaGroups(raw);
+  if (parsedQuotaGroups.length === 0) {
+    return parseError("No quota groups available");
+  }
+
+  return {
+    usage: {
+      accountEmail: null,
+      accountPlan: null,
+      models: [],
+      primaryModel: null,
+      secondaryModel: null,
+      tertiaryModel: null,
+      quotaGroups: parsedQuotaGroups,
+    },
+    error: null,
+  };
+}
+
 function parseQuotaGroups(raw: unknown): AntigravityQuotaGroup[] {
   const body = asRecord(raw);
-  const response = asRecord(body?.response);
-  if (!response) return [];
+  if (!body) return [];
 
-  const groups = asArray(response.groups);
+  const nested = asRecord(body.response) ?? asRecord(body.summary);
+  const container = nested ?? body;
+  const groups = asArray(container.groups);
+
   return groups
     .map((g): AntigravityQuotaGroup | null => {
       const groupRecord = asRecord(g);
