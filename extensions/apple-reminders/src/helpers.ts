@@ -2,10 +2,26 @@ import { UTCDate } from "@date-fns/utc";
 import { Color, Icon } from "@raycast/api";
 import { addDays, format, isThisYear, isBefore, formatISO, isSameDay } from "date-fns";
 
-import { Location, Priority, Reminder } from "./hooks/useData";
+import type { Location, Priority, Reminder } from "./hooks/useData";
 
 export function isFullDay(date: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(date);
+}
+
+export function formatReminderTime(reminder?: { dueDate?: string | null } | null): string {
+  if (!reminder?.dueDate || isFullDay(reminder.dueDate)) {
+    return "";
+  }
+
+  const date = new Date(reminder.dueDate);
+  if (isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 export function getDateString(date: string) {

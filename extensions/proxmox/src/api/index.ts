@@ -1,63 +1,65 @@
-import { getPreferenceValues } from "@raycast/api";
-import type { ApiResponse, PveVm } from "@/types";
+import type { ApiResponse, PveServer, PveVm, WithServer } from "@/types";
 import { buildHeaders } from "@/utils/headers";
 
-async function pveFetch<T = unknown>(url: string, options?: RequestInit) {
-  const preferences = getPreferenceValues<Preferences>();
-  const fetchUrl = new URL(url, preferences.serverUrl).toString();
+export async function pveFetch<T = unknown>(server: PveServer, url: string, options?: RequestInit) {
+  const fetchUrl = new URL(url, server.url).toString();
   const fetchOptions = Object.assign({}, options, {
-    headers: buildHeaders(),
+    headers: buildHeaders(server),
   });
 
   const response = await fetch(fetchUrl, fetchOptions);
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+
   return (await response.json()) as ApiResponse<T>;
 }
 
-export async function startVm(vm: PveVm) {
+export async function startVm(vm: WithServer<PveVm>) {
   const url = `api2/json/nodes/${vm.node}/${vm.id}/status/start`;
-  await pveFetch(url, {
+  await pveFetch(vm.server, url, {
     method: "POST",
   });
 }
 
-export async function stopVm(vm: PveVm) {
+export async function stopVm(vm: WithServer<PveVm>) {
   const url = `api2/json/nodes/${vm.node}/${vm.id}/status/stop`;
-  await pveFetch(url, {
+  await pveFetch(vm.server, url, {
     method: "POST",
   });
 }
 
-export async function shutdownVm(vm: PveVm) {
+export async function shutdownVm(vm: WithServer<PveVm>) {
   const url = `api2/json/nodes/${vm.node}/${vm.id}/status/shutdown`;
-  await pveFetch(url, {
+  await pveFetch(vm.server, url, {
     method: "POST",
   });
 }
 
-export async function suspendVm(vm: PveVm) {
+export async function suspendVm(vm: WithServer<PveVm>) {
   const url = `api2/json/nodes/${vm.node}/${vm.id}/status/suspend`;
-  await pveFetch(url, {
+  await pveFetch(vm.server, url, {
     method: "POST",
   });
 }
 
-export async function resetVm(vm: PveVm) {
+export async function resetVm(vm: WithServer<PveVm>) {
   const url = `api2/json/nodes/${vm.node}/${vm.id}/status/reset`;
-  await pveFetch(url, {
+  await pveFetch(vm.server, url, {
     method: "POST",
   });
 }
 
-export async function resumeVm(vm: PveVm) {
+export async function resumeVm(vm: WithServer<PveVm>) {
   const url = `api2/json/nodes/${vm.node}/${vm.id}/status/resume`;
-  await pveFetch(url, {
+  await pveFetch(vm.server, url, {
     method: "POST",
   });
 }
 
-export async function rebootVm(vm: PveVm) {
+export async function rebootVm(vm: WithServer<PveVm>) {
   const url = `api2/json/nodes/${vm.node}/${vm.id}/status/reboot`;
-  await pveFetch(url, {
+  await pveFetch(vm.server, url, {
     method: "POST",
   });
 }

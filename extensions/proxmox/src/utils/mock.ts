@@ -1,4 +1,62 @@
-import { type PveVm, PveVmStatus, PveVmTypes } from "@/types";
+import { type PveServer, type PveServerResult, type PveStorage, type PveVm, PveVmStatus, PveVmTypes } from "@/types";
+
+export const getMockServer = (name: string): PveServer => ({
+  id: name,
+  name,
+  url: `https://${name}.local:8006`,
+  tokenId: "root@pam!raycast",
+  tokenSecret: "mock-secret",
+});
+
+export const getMockPveVmResults = (): PveServerResult<PveVm[]>[] => {
+  const vms = getMockPveVmData();
+
+  return [
+    { server: getMockServer("pve-01"), data: vms.slice(0, 3) },
+    { server: getMockServer("pve-02"), data: vms.slice(3) },
+  ];
+};
+
+export const getMockPveStorageResults = (): PveServerResult<PveStorage[]>[] => {
+  const GiB = 1024 * 1024 * 1024;
+  const makeStorage = (
+    node: string,
+    storage: string,
+    plugintype: string,
+    content: string,
+    disk: number,
+    maxdisk: number,
+    shared = 0,
+  ): PveStorage => ({
+    id: `storage/${node}/${storage}`,
+    disk,
+    maxdisk,
+    shared,
+    content,
+    status: "available",
+    plugintype,
+    storage,
+    node,
+  });
+
+  return [
+    {
+      server: getMockServer("pve-01"),
+      data: [
+        makeStorage("pve", "local", "dir", "iso,vztmpl,backup", 19 * GiB, 68 * GiB),
+        makeStorage("pve", "local-lvm", "lvmthin", "images,rootdir", 121 * GiB, 349 * GiB),
+        makeStorage("pve", "backups", "nfs", "backup", 590 * GiB, 2048 * GiB, 1),
+      ],
+    },
+    {
+      server: getMockServer("pve-02"),
+      data: [
+        makeStorage("pve2", "local", "dir", "iso,vztmpl,backup", 9 * GiB, 94 * GiB),
+        makeStorage("pve2", "local-lvm", "lvmthin", "images,rootdir", 87 * GiB, 250 * GiB),
+      ],
+    },
+  ];
+};
 
 export const getMockPveVmData = (): PveVm[] => {
   const baseVmList = [

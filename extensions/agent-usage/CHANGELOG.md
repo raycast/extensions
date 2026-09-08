@@ -7,6 +7,14 @@
 - Show the OpenRouter credit balance in the list and menu bar, auto-detected from an OpenCode `openrouter` login, `OPENROUTER_API_KEY`/`OPENROUTER_KEY`, or a pasted API key
 - Read account credits from `/api/v1/credits` with a provisioning key, and fall back to the key's own spending cap from `/api/v1/key` for a regular inference key
 
+## [OpenCode Go Zen usage API] - 2026-09-07
+
+### Improvements
+
+- Fetch OpenCode Go usage from the Zen JSON API (`https://opencode.ai/zen/go/v1/usage`) instead of scraping the workspace web page
+- Replace the workspace ID and session cookie setup with an optional Zen API key, auto-detected from OpenCode (`~/.local/share/opencode/auth.json`)
+- Show rolling, weekly, and monthly limits with per-window reset times in the detail view
+
 ## [Show Grok limit reset credits] - 2026-09-04
 
 ### New Features

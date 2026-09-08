@@ -1,7 +1,6 @@
 import { useEffect } from "react";
-import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import type { ApiResponse, FetchOptions } from "@/types";
+import type { ApiResponse, FetchOptions, PveServer } from "@/types";
 import type { OmitData, WithData } from "@/types";
 import { buildHeaders } from "@/utils/headers";
 
@@ -9,13 +8,12 @@ type PveFetchOptions<T> = FetchOptions<T> & {
   timerInterval?: number | null;
 };
 
-export const usePveFetch = <T>(url: string, options?: PveFetchOptions<T>) => {
+export const usePveFetch = <T>(server: PveServer, url: string, options?: PveFetchOptions<T>) => {
   const { timerInterval = 1000, ...rest } = options ?? {};
-  const preferences = getPreferenceValues<Preferences>();
-  const fetchUrl = new URL(url, preferences.serverUrl).toString();
+  const fetchUrl = new URL(url, server.url).toString();
   const fetchOptions: FetchOptions<T> = {
     ...rest,
-    headers: buildHeaders(),
+    headers: buildHeaders(server),
     mapResult(result) {
       return { data: (result as ApiResponse<T>).data };
     },
@@ -23,8 +21,9 @@ export const usePveFetch = <T>(url: string, options?: PveFetchOptions<T>) => {
 
   const result = useFetch<T>(fetchUrl, fetchOptions);
 
+  const execute = rest.execute !== false;
   useEffect(() => {
-    if (timerInterval === null) {
+    if (timerInterval === null || !execute) {
       return;
     }
 
@@ -33,7 +32,7 @@ export const usePveFetch = <T>(url: string, options?: PveFetchOptions<T>) => {
     }, timerInterval);
 
     return () => clearInterval(handle);
-  }, [result.revalidate, timerInterval]);
+  }, [result.revalidate, timerInterval, execute]);
 
   return result;
 };

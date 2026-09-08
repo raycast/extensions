@@ -1,5 +1,16 @@
 # Google Gemini Changelog
 
+## [Dynamic Model Selection & Live Model List] - 2026-09-07
+
+- 🆕 Fetch the list of available models live from Google's API instead of a hardcoded dropdown, so newly released and retired models no longer require a manual extension update.
+- 🔄 Convert the per-command model dropdowns into a live model picker in AI Chat, fetched via the Gemini API.
+- ⭐ New "Set Default Model" command that lists live Google Studio models and persists your app-wide default across all commands.
+- 🗑️ Removed the static model fields from the extension Settings (the hardcoded "Default Model" dropdown and the "Custom Model" text field) — the Settings now contain no model fields. Model selection lives entirely in the dynamic "Set Default Model" command and the AI Chat picker.
+- 🧩 Moved the model picker in AI Chat into the Action Panel (⌘M submenu) so the search bar shows only one dropdown (your chats).
+- 🔎 Renamed the deprecated-model remapping helper to `normalizeModelName` and confirmed all migration targets (`gemini-3.5-flash-lite`, `gemini-3.6-flash`, `gemini-3.5-flash`) match Google's current stable model list.
+- 🧼 Auto-title chats using the latest flash-lite model from the live list, with a fallback to the default model.
+- 🐛 Fixed the broken `gemini-2.5-flash-lite` model which returned 404 for new users.
+
 ## [Update Models] - 2026-09-03
 
 - 🆕 Updated model list: removed unavailable models, added Gemini 3.x models.
