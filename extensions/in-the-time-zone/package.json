@@ -45,6 +45,28 @@
       "required": false
     },
     {
+      "name": "cityOrder",
+      "type": "dropdown",
+      "title": "City Order",
+      "description": "How cities are ordered. Custom keeps your own arrangement via the Move Up/Down actions.",
+      "data": [
+        {
+          "title": "GMT Offset (West → East)",
+          "value": "offset-asc"
+        },
+        {
+          "title": "GMT Offset (East → West)",
+          "value": "offset-desc"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
+        }
+      ],
+      "default": "offset-asc",
+      "required": false
+    },
+    {
       "name": "defaultScrubMinutes",
       "type": "dropdown",
       "title": "Arrow Key Scrub Minutes",
