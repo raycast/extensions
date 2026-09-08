@@ -1,0 +1,50 @@
+{
+  "name": "path-tools",
+  "title": "Path Tools",
+  "version": "1.0.0",
+  "description": "Open Finder paths in iTerm and Visual Studio Code",
+  "main": "src/finder-to-iterm.tsx",
+  "icon": "icon.png",
+  "author": "han_dong",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "finder-to-iterm",
+      "title": "Finder -> iTerm",
+      "description": "Open the current Finder directory in iTerm.",
+      "subtitle": "在 iTerm 中打开 Finder 当前目录",
+      "mode": "no-view"
+    },
+    {
+      "name": "iterm-to-finder",
+      "title": "iTerm -> Finder",
+      "description": "Open the current iTerm directory in Finder.",
+      "subtitle": "在 Finder 中打开 iTerm 当前目录",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-in-vscode",
+      "title": "用 VS Code 打开路径",
+      "description": "Open a Finder target or supplied path in Visual Studio Code.",
+      "subtitle": "打开 Finder 选中项、当前目录或手动输入的路径",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
