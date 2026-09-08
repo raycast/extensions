@@ -19,6 +19,7 @@ import {
   setChannel,
 } from "./lib/sunsama-client";
 import { warmUp } from "./lib/mcp";
+import { ChannelPickState, nextChannelPickState } from "./lib/channels";
 import { toDayString } from "./lib/date";
 import { reportError } from "./lib/errors";
 import { parseDuration, parseSubtasks } from "./lib/time";
@@ -90,10 +91,21 @@ export default function AddTask() {
     },
   });
 
-  // On the very first run (no cache yet), apply it once it resolves.
+  // Whether the channel was picked by the user or filled in for them. Recorded
+  // as it happens rather than compared at submit, so switching away and back
+  // still counts as a deliberate choice.
+  const [channelPick, setChannelPick] = useState<ChannelPickState>({
+    autoFilled: null,
+    touched: false,
+  });
+
+  // On the very first run (no cache yet), apply it once it resolves — but never
+  // over a channel the user picked while it was still resolving.
   useEffect(() => {
-    if (startingChannel) setValue("channel", startingChannel);
-  }, [startingChannel, setValue]);
+    if (!startingChannel || channelPick.touched) return;
+    setChannelPick((pick) => ({ ...pick, autoFilled: startingChannel }));
+    setValue("channel", startingChannel);
+  }, [startingChannel, channelPick.touched, setValue]);
 
   async function submit(values: FormValues) {
     const entry = values.task.trim();
@@ -127,8 +139,7 @@ export default function AddTask() {
     // A link may carry its own channel automation server-side (e.g. a Trello
     // board mapped to a channel). Only worth deferring to it when the channel
     // field is still whatever it auto-filled to — an explicit pick always wins.
-    const channelUntouched = values.channel === (startingChannel ?? "");
-    const deferToAutomation = !!url && channelUntouched;
+    const deferToAutomation = !!url && !channelPick.touched;
 
     try {
       const created = await createTask({
@@ -224,7 +235,14 @@ export default function AddTask() {
         type={Form.DatePicker.Type.Date}
       />
       <Form.Separator />
-      <ChannelDropdown {...itemProps.channel} channels={channels} />
+      <ChannelDropdown
+        {...itemProps.channel}
+        channels={channels}
+        onChange={(value) => {
+          setChannelPick((pick) => nextChannelPickState(pick, value));
+          itemProps.channel.onChange?.(value);
+        }}
+      />
       <Form.Dropdown {...itemProps.position} title="Position">
         <Form.Dropdown.Item
           value="top"
