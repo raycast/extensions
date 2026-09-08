@@ -1,6 +1,6 @@
 # In The Timezone Changelog
 
-## [City Ordering] - {PR_MERGE_DATE}
+## [City Ordering] - 2026-09-08
 
 - Cities are now sorted by GMT offset by default (west → east), in both the list and timeline views
 - Added a "City Order" preference: GMT Offset (West → East), GMT Offset (East → West), or Custom
