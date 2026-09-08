@@ -184,7 +184,7 @@
     },
     {
       "name": "ghPath",
-      "title": "gh CLI Path",
+      "title": "GitHub CLI Path",
       "description": "Absolute path to the GitHub CLI binary. Leave empty to auto-detect (Homebrew, /usr/local/bin, PATH).",
       "type": "textfield",
       "required": false,
@@ -201,7 +201,7 @@
     },
     {
       "name": "maxResults",
-      "title": "Max Results per Category",
+      "title": "Max Results Per Category",
       "description": "How many pull requests to load per category. Higher values cost more GitHub API quota.",
       "type": "textfield",
       "required": false,
