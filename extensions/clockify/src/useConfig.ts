@@ -40,10 +40,15 @@ export default function useConfig(): ConfigProps {
           // setItem cannot store undefined, so an unresolved workspace means workspaceId never
           // lands in LocalStorage, the guard above fails on every mount, and every request goes to
           // /workspaces/undefined/...
-          const workspaceId = await resolveWorkspaceId(user);
+          const { workspaceId, error: workspaceError } = await resolveWorkspaceId(user);
+
+          if (!workspaceError && !workspaceId) {
+            showToast(Toast.Style.Failure, "No Clockify workspace found for this API key");
+            return;
+          }
 
           if (!workspaceId) {
-            showToast(Toast.Style.Failure, "No Clockify workspace found for this API key");
+            showToast(Toast.Style.Failure, "Could not load Clockify workspaces", workspaceError?.toString());
             return;
           }
 
