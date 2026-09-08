@@ -19,9 +19,13 @@ export function getCached(libraryId: LibraryId): { components: UIComponent[]; so
 
   try {
     const parsed: CachedData = JSON.parse(raw);
+    // Legacy entries (cached before source tracking) may hold static fallback
+    // data that would otherwise be presented as a successful live scrape.
+    // Treat them as stale so they are re-fetched with a correct source status.
+    if (parsed.source === undefined) return null;
+
     if (Date.now() - parsed.timestamp < CACHE_TTL_MS) {
-      // Legacy entries (cached before source tracking) default to "live".
-      return { components: parsed.components, source: parsed.source ?? "live" };
+      return { components: parsed.components, source: parsed.source };
     }
   } catch {
     // Cache is corrupted
