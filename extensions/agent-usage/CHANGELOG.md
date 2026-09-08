@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add OpenRouter credit balance] - {PR_MERGE_DATE}
+## [Add OpenRouter credit balance] - 2026-09-08
 
 ### New Features
 
