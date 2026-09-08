@@ -11,11 +11,9 @@ export interface CatalogGif {
 const SAFE_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const SAFE_ASSET_PATH = /^\/gifs\/[a-z0-9]+(?:-[a-z0-9]+)*\.(gif|jpg)$/;
 
-export const isSafeSlug = (slug: unknown): slug is string =>
-  typeof slug === "string" && SAFE_SLUG.test(slug);
+export const isSafeSlug = (slug: unknown): slug is string => typeof slug === "string" && SAFE_SLUG.test(slug);
 
-const isSafeAssetPath = (path: unknown): path is string =>
-  typeof path === "string" && SAFE_ASSET_PATH.test(path);
+const isSafeAssetPath = (path: unknown): path is string => typeof path === "string" && SAFE_ASSET_PATH.test(path);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && !Array.isArray(value) && value.constructor === Object;
@@ -37,10 +35,7 @@ const isCatalogGif = (value: unknown): value is CatalogGif => {
     return false;
   }
 
-  return (
-    Array.isArray(value.tags) &&
-    value.tags.every((tag) => typeof tag === "string")
-  );
+  return Array.isArray(value.tags) && value.tags.every((tag) => typeof tag === "string");
 };
 
 export const parseCatalog = (value: unknown): CatalogGif[] => {

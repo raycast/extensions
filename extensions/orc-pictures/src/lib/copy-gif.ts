@@ -28,13 +28,9 @@ const pathInside = (root: string, fileName: string): string => {
 
 const cacheDirectory = (): string => resolve(environment.supportPath, "gifs");
 
-const cachedGifPath = (slug: string): string =>
-  pathInside(cacheDirectory(), gifFileName(slug));
+const cachedGifPath = (slug: string): string => pathInside(cacheDirectory(), gifFileName(slug));
 
-const localGifPath = (
-  slug: string,
-  localGifsDirectory: string | undefined,
-): string | undefined => {
+const localGifPath = (slug: string, localGifsDirectory: string | undefined): string | undefined => {
   if (!localGifsDirectory) {
     return undefined;
   }
@@ -64,11 +60,7 @@ const cachedGifIfReady = async (slug: string): Promise<string | undefined> => {
   return undefined;
 };
 
-export const ensureLocalGif = async (
-  gif: CatalogGif,
-  origin: string,
-  localGifsDirectory?: string,
-): Promise<string> => {
+export const ensureLocalGif = async (gif: CatalogGif, origin: string, localGifsDirectory?: string): Promise<string> => {
   const localPath = localGifPath(gif.slug, localGifsDirectory);
 
   if (localPath) {
