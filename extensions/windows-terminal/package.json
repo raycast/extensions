@@ -23,6 +23,15 @@
       "type": "checkbox",
       "required": false,
       "default": false
+    },
+    {
+      "name": "useNewTabMenu",
+      "title": "New Tab Menu",
+      "label": "Use New Tab Menu order",
+      "description": "When enabled, shows profiles in the order defined by Windows Terminal's New Tab Menu setting (newTabMenu in settings.json) instead of the raw profile list order.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
