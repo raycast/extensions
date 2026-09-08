@@ -1,6 +1,6 @@
 import { Cache, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import uniqWith from "lodash.uniqwith";
-import { FetcherArgs, FetcherResponse, TimeEntry, Project, Task, User } from "./types";
+import { FetcherArgs, FetcherResponse, TimeEntry, Project, Task, User, Workspace } from "./types";
 import { showFailureToast } from "@raycast/utils";
 
 const cache = new Cache();
@@ -60,6 +60,21 @@ export async function fetcher(
 }
 
 /**
+ * Picks the workspace to operate on. `defaultWorkspace` is not guaranteed to be present, so fall
+ * back to the active workspace and then to the first workspace this token can see.
+ *
+ * Single implementation on purpose: both useConfig and resolveConfig need this chain, and two
+ * copies would be free to drift apart.
+ */
+export async function resolveWorkspaceId(user: User | undefined): Promise<string | undefined> {
+  const fromUser = user?.defaultWorkspace || user?.activeWorkspace;
+  if (fromUser) return fromUser;
+
+  const { data } = await fetcher(`/workspaces`);
+  return (data as Workspace[] | undefined)?.[0]?.id;
+}
+
+/**
  * Resolves the workspace and user ids that every request needs.
  *
  * These are written by useConfig, but a resolved `LocalStorage.setItem` does not guarantee the key
@@ -83,7 +98,7 @@ export async function resolveConfig(): Promise<{ workspaceId?: string; userId?: 
   const { data } = await fetcher(`/user`);
   const user = data as User | undefined;
 
-  const workspaceId = storedWorkspaceId || user?.defaultWorkspace || user?.activeWorkspace;
+  const workspaceId = storedWorkspaceId || (await resolveWorkspaceId(user));
   const userId = storedUserId || user?.id;
 
   if (workspaceId) await LocalStorage.setItem("workspaceId", workspaceId);
