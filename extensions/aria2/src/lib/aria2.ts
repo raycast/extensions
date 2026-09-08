@@ -1,11 +1,11 @@
-import { environment, getPreferenceValues } from "@raycast/api";
+import { environment, getPreferenceValues, trash } from "@raycast/api";
 import { execFileSync, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, rm } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { toNumber } from "./format";
-import { writeHandlerConfig } from "./magnet-handler";
+import { handlerAppExists, writeHandlerConfig } from "./magnet-handler";
 
 const STATUS_KEYS = [
   "gid",
@@ -81,9 +81,32 @@ export function downloadDir(): string {
 }
 
 export function rpcUrl(): string {
-  const host = prefs().rpcHost?.trim() || "127.0.0.1";
+  const { scheme, host, port } = rpcEndpoint();
+  return `${scheme}://${host}:${port}/jsonrpc`;
+}
+
+function rpcEndpoint(): { scheme: "http" | "https"; host: string; port: string } {
+  let host = prefs().rpcHost?.trim() || "127.0.0.1";
   const port = prefs().rpcPort?.trim() || "6800";
-  return `http://${host}:${port}/jsonrpc`;
+  let scheme: "http" | "https" = prefs().rpcSecure ? "https" : "http";
+
+  const schemeMatch = host.match(/^(https?):\/\//i);
+  if (schemeMatch) {
+    scheme = schemeMatch[1].toLowerCase() as "http" | "https";
+    host = host.slice(schemeMatch[0].length);
+  }
+
+  const pathIndex = host.indexOf("/");
+  if (pathIndex !== -1) host = host.slice(0, pathIndex);
+
+  return { scheme, host, port };
+}
+
+function isLocalRpcHost(): boolean {
+  const host = rpcEndpoint()
+    .host.replace(/^\[|\]$/g, "")
+    .toLowerCase();
+  return host === "127.0.0.1" || host === "localhost" || host === "::1" || host === "0.0.0.0";
 }
 
 function handlerConfig() {
@@ -152,14 +175,21 @@ export async function ping(): Promise<void> {
 export async function ensureAria2(): Promise<void> {
   try {
     await ping();
-    await writeHandlerConfig(handlerConfig()).catch(() => undefined);
+    await syncHandlerConfig();
     return;
   } catch (error) {
-    if (!prefs().autoStart || !isConnectionError(error)) throw error;
+    const canStartLocal =
+      prefs().autoStart && isConnectionError(error) && isLocalRpcHost() && rpcEndpoint().scheme === "http";
+    if (!canStartLocal) throw error;
   }
 
   await startDaemon();
   await waitForRpc();
+  await syncHandlerConfig();
+}
+
+async function syncHandlerConfig(): Promise<void> {
+  if (!handlerAppExists()) return;
   await writeHandlerConfig(handlerConfig()).catch(() => undefined);
 }
 
@@ -299,20 +329,31 @@ export async function removeTorrent(gid: string, deleteFiles: boolean, download?
   const files = deleteFiles ? filePaths(download) : [];
   try {
     await rpc("aria2.forceRemove", [gid]);
-  } catch {
-    // already gone from the active queue
+  } catch (error) {
+    if (!isMissingDownload(error)) throw error;
   }
   try {
     await rpc("aria2.removeDownloadResult", [gid]);
-  } catch {
-    // not in the result list
+  } catch (error) {
+    if (!isMissingDownload(error)) throw error;
   }
   if (!deleteFiles) return;
+  await trashDownloadFiles(files);
+}
 
-  for (const filePath of files) {
-    await rm(filePath, { force: true, recursive: true }).catch(() => undefined);
-    await rm(`${filePath}.aria2`, { force: true }).catch(() => undefined);
+function isMissingDownload(error: unknown): boolean {
+  return error instanceof Aria2Error && /not found/i.test(error.message);
+}
+
+async function trashDownloadFiles(paths: string[]): Promise<void> {
+  const toTrash: string[] = [];
+  for (const filePath of paths) {
+    if (existsSync(filePath)) toTrash.push(filePath);
+    const control = `${filePath}.aria2`;
+    if (existsSync(control)) toTrash.push(control);
   }
+  if (toTrash.length === 0) return;
+  await trash(toTrash);
 }
 
 export async function purgeCompleted(): Promise<void> {

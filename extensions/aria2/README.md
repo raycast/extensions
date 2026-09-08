@@ -13,11 +13,12 @@ aria2 **does seed** after a torrent finishes. The default share ratio is `1.0` (
 
 | Preference | Default | Notes |
 | --- | --- | --- |
-| RPC Host / Port | `127.0.0.1` / `6800` | Must match `--rpc-listen-port` |
-| RPC Secret | empty | Must match `--rpc-secret` if you set one |
+| RPC Host / Port | `127.0.0.1` / `6800` | Must match `--rpc-listen-port`. Prefix the host with `https://` or enable **Use HTTPS** for a remote daemon. |
+| RPC Secret | empty | Must match `--rpc-secret` if you set one. Over the network, use HTTPS so the token is not sent in plaintext. |
+| Use HTTPS | off | aria2 needs `--rpc-secure` (and a cert) on the daemon side. |
 | Default Download Folder | `~/Downloads` | Used for new torrents and the magnet handler |
 | aria2c Path | auto-detect | Set if aria2c is not in Homebrew’s usual locations |
-| Start aria2c if it is not running | on | Starts a local RPC daemon on first use |
+| Start aria2c if it is not running | on | Starts a local RPC daemon on first use. Does not run for remote hosts. |
 | Seed Ratio | `1.0` | Applied when this extension starts aria2c |
 
 If you already run aria2 yourself, start it with RPC:
@@ -42,6 +43,6 @@ You can also:
 
 ## Commands
 
-- **Manage Torrents** — downloading, seeding, queued, paused, completed; pause/resume/remove; open in Finder
+- **Manage Torrents** — downloading, seeding, queued, paused, completed; pause/resume/remove; open in Finder. Remove and Delete Files moves paths to Trash.
 - **Add Torrent** — magnet, HTTP(S) torrent URL, or local `.torrent` file
 - **Set Magnet Handler** — install, reinstall, or remove the system handler

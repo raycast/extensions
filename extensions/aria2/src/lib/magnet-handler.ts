@@ -98,8 +98,9 @@ export async function writeHandlerConfig(config: {
   rpcSecret: string;
   downloadDir: string;
 }): Promise<void> {
-  await mkdir(join(homedir(), "Library/Application Support/aria2-raycast"), { recursive: true });
-  await writeFile(HANDLER_CONFIG_PATH, JSON.stringify(config, null, 2));
+  await mkdir(join(homedir(), "Library/Application Support/aria2-raycast"), { recursive: true, mode: 0o700 });
+  await writeFile(HANDLER_CONFIG_PATH, JSON.stringify(config, null, 2), { mode: 0o600 });
+  await chmod(HANDLER_CONFIG_PATH, 0o600);
 }
 
 export function handlerAppExists(): boolean {
@@ -176,7 +177,23 @@ export async function installMagnetHandler(config: {
 }
 
 export async function uninstallMagnetHandler(): Promise<void> {
+  const current = await currentMagnetHandler();
+  if (current === HANDLER_BUNDLE_ID) {
+    await execFileAsync("/usr/bin/swift", [
+      "-e",
+      'import Foundation; import CoreServices; LSSetDefaultHandlerForURLScheme("magnet" as CFString, "com.apple.Safari" as CFString)',
+    ]).catch(() => undefined);
+  }
+
+  const lsregister =
+    "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister";
+  if (existsSync(lsregister) && existsSync(HANDLER_APP_PATH)) {
+    await execFileAsync(lsregister, ["-u", HANDLER_APP_PATH]).catch(() => undefined);
+  }
+
   await rm(HANDLER_APP_PATH, { recursive: true, force: true });
+  await rm(HANDLER_CONFIG_PATH, { force: true });
+  await rm(join(homedir(), "Library/Application Support/aria2-raycast/handler.applescript"), { force: true });
 }
 
 async function replaceOrInsertPlist(

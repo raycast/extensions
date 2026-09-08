@@ -312,7 +312,7 @@ async function confirmRemove(download: Aria2Download, deleteFiles: boolean, muta
   const confirmed = await confirmAlert({
     title: deleteFiles ? "Remove and delete files?" : "Remove torrent?",
     message: deleteFiles
-      ? `${torrentName(download)} will be removed from aria2 and deleted from disk.`
+      ? `${torrentName(download)} will be removed from aria2 and moved to Trash.`
       : `${torrentName(download)} will be removed from aria2. Downloaded files are kept.`,
     primaryAction: { title: deleteFiles ? "Delete" : "Remove", style: Alert.ActionStyle.Destructive },
   });

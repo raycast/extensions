@@ -67,6 +67,15 @@
       "description": "Value of aria2c --rpc-secret. Leave empty if RPC is unauthenticated."
     },
     {
+      "name": "rpcSecure",
+      "type": "checkbox",
+      "required": false,
+      "title": "RPC",
+      "label": "Use HTTPS for JSON-RPC",
+      "description": "Required if the RPC host is not on this Mac and you set an RPC secret. You can also prefix the host with https://.",
+      "default": false
+    },
+    {
       "name": "downloadDir",
       "type": "directory",
       "required": false,
@@ -87,7 +96,7 @@
       "required": false,
       "title": "Daemon",
       "label": "Start aria2c with RPC if it is not running",
-      "description": "Launches a local aria2c daemon when the RPC endpoint cannot be reached.",
+      "description": "Starts a local aria2c daemon when 127.0.0.1/localhost cannot be reached. Ignored for remote hosts and HTTPS.",
       "default": true
     },
     {
