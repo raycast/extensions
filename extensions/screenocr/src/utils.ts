@@ -9,26 +9,18 @@ export async function recognize(
     const { recognizeWindows } = await import("./ocr/windows");
     return recognizeWindows(mode);
   }
-  if (process.platform === "darwin") {
-    const { recognizeMacOS } = await import("./ocr/macos");
-    return recognizeMacOS(mode);
-  }
   return {
     status: "error",
-    message: "ScreenOCR is supported on macOS and Windows",
+    message: "Windows OCR is only available on Windows",
   };
 }
 
 export async function detectBarcode(): Promise<RecognitionOutcome> {
-  if (process.platform !== "darwin") {
-    return {
-      status: "error",
-      message:
-        "Barcode and QR code detection is currently available only on macOS",
-    };
-  }
-  const { detectBarcodeMacOS } = await import("./ocr/macos");
-  return detectBarcodeMacOS();
+  return {
+    status: "error",
+    message:
+      "Barcode and QR code detection is currently available only on macOS",
+  };
 }
 
 export const showSuccessToast = async (title: string) => {

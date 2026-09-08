@@ -4,6 +4,12 @@ import { RecognitionOutcome } from "./ocr/types";
 import { recognize } from "./utils";
 
 export default async function command() {
+  if (process.platform === "darwin") {
+    const { recognizeTextFullscreenCommand } =
+      await import("./ocr/macos-commands");
+    return recognizeTextFullscreenCommand();
+  }
+
   let outcome: RecognitionOutcome;
   try {
     await closeMainWindow();

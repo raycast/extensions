@@ -66,18 +66,14 @@ function createHost(options = {}) {
       },
     },
     "swift:../../swift": Object.fromEntries(
-      ["recognizeText", "recognizeClipboardText", "detectBarcode"].map(
-        (name) => [
-          name,
-          async (...args) => {
-            calls.push(["swift", name, args]);
-            return (
-              options.swiftResult ??
-              '{"status":"recognized","text":"Example text"}'
-            );
-          },
-        ],
-      ),
+      ["recognizeText", "detectBarcode"].map((name) => [
+        name,
+        async (...args) => {
+          calls.push(["swift", name, args]);
+          if (options.swiftError) throw options.swiftError;
+          return options.swiftResult ?? "Example text";
+        },
+      ]),
     ),
   };
   const fakeProcess = Object.create(process);

@@ -52,12 +52,9 @@ export async function handleRecognitionOutcome(
     return;
   }
 
-  const preference = getPreferenceValues<Preferences>();
   const action =
     options.action ??
-    (preference.resultAction === "paste" || preference.resultAction === "both"
-      ? preference.resultAction
-      : "copy");
+    (process.platform === "win32" ? getWindowsResultAction() : "copy");
   if (action === "copy") {
     try {
       await Clipboard.copy(outcome.text);
@@ -96,4 +93,12 @@ export async function handleRecognitionOutcome(
       title: "Text was copied, but could not be pasted",
     });
   }
+}
+
+function getWindowsResultAction(): ResultAction {
+  const preference = getPreferenceValues<Preferences>();
+  return preference.resultAction === "paste" ||
+    preference.resultAction === "both"
+    ? preference.resultAction
+    : "copy";
 }

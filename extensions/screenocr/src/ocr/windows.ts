@@ -25,7 +25,9 @@ type ErrorPayload = {
     | "clipboard-empty"
     | "clipboard-unsupported"
     | "clipboard-corrupt"
-    | "clipboard-busy";
+    | "clipboard-busy"
+    | "clipboard-too-large"
+    | "clipboard-unreadable";
 };
 
 const MAX_OUTPUT_BYTES = 1024 * 1024 * 8;
@@ -35,10 +37,12 @@ const LANGUAGE_TAG = /^(auto|[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3})$/;
 class ProtocolError extends Error {}
 
 function powershellPath(): string {
-  const windowsRoot =
-    process.env.SystemRoot || process.env.WINDIR || "C:\\Windows";
+  const windowsRoot = [process.env.SystemRoot, process.env.WINDIR].find(
+    (value): value is string =>
+      typeof value === "string" && /^[A-Za-z]:[\\/]/.test(value),
+  );
   return path.win32.resolve(
-    windowsRoot,
+    windowsRoot || "C:\\Windows",
     "System32",
     "WindowsPowerShell",
     "v1.0",
@@ -150,8 +154,16 @@ function processError(error: unknown, language?: string): RecognitionOutcome {
           "The copied file is not a supported image format.",
         "clipboard-corrupt": "The copied image file could not be decoded.",
         "clipboard-busy": "The clipboard is busy. Try again.",
+        "clipboard-too-large":
+          "The copied image is too large to process safely.",
+        "clipboard-unreadable": "The copied image file could not be read.",
       };
-      if (payload.status === "error" && Object.hasOwn(messages, payload.code)) {
+      if (
+        payload.status === "error" &&
+        Object.keys(payload).sort().join(",") === "code,status" &&
+        typeof payload.code === "string" &&
+        Object.hasOwn(messages, payload.code)
+      ) {
         return { status: "error", message: messages[payload.code] };
       }
     } catch {
@@ -201,43 +213,58 @@ export async function getAvailableWindowsLanguages(): Promise<
     );
   }
   const payload = parsePayload<LanguagesPayload>(stdout);
+  const seenTags = new Set<string>();
   if (
     payload.status !== "languages" ||
     Object.keys(payload).sort().join(",") !== "languages,status" ||
     !Array.isArray(payload.languages) ||
-    payload.languages.some(
-      (language) =>
+    payload.languages.some((language) => {
+      if (
         !language ||
+        typeof language !== "object" ||
+        Array.isArray(language) ||
+        Object.keys(language).sort().join(",") !== "displayName,tag" ||
         typeof language.tag !== "string" ||
         !LANGUAGE_TAG.test(language.tag) ||
         language.tag === "auto" ||
         typeof language.displayName !== "string" ||
-        language.displayName.length === 0,
-    )
+        language.displayName.trim().length === 0
+      ) {
+        return true;
+      }
+      const normalizedTag = language.tag.toLowerCase();
+      if (seenTags.has(normalizedTag)) return true;
+      seenTags.add(normalizedTag);
+      return false;
+    })
   ) {
     throw new Error(
       "The Windows OCR helper returned an invalid language list.",
     );
   }
-  return payload.languages;
+  return payload.languages.map(({ tag, displayName }) => ({
+    tag,
+    displayName,
+  }));
 }
 
 export async function recognizeWindows(
   mode: CaptureMode,
 ): Promise<RecognitionOutcome> {
-  const preferences = getPreferenceValues<Preferences>();
-  const language = await getWindowsRecognitionLanguage();
-  if (!LANGUAGE_TAG.test(language)) {
-    return {
-      status: "error",
-      message:
-        "The saved Windows OCR language is invalid. Choose a language in Select Recognition Languages.",
-    };
-  }
-  const arguments_ = ["-Mode", mode, "-Language", language];
-  if (preferences.ignoreLineBreaks) arguments_.push("-IgnoreLineBreaks");
-
+  let language: string | undefined;
   try {
+    const preferences = getPreferenceValues<Preferences>();
+    language = await getWindowsRecognitionLanguage();
+    if (!LANGUAGE_TAG.test(language)) {
+      return {
+        status: "error",
+        message:
+          "The saved Windows OCR language is invalid. Choose a language in Select Recognition Languages.",
+      };
+    }
+    const arguments_ = ["-Mode", mode, "-Language", language];
+    if (preferences.ignoreLineBreaks) arguments_.push("-IgnoreLineBreaks");
+
     const { stdout } = await invokeHelper(
       arguments_,
       mode === "area" ? 300_000 : PROCESS_TIMEOUT_MS,

@@ -7,7 +7,13 @@ export default async function command() {
   let outcome: RecognitionOutcome;
   try {
     await closeMainWindow();
-    outcome = await recognize("clipboard");
+    outcome =
+      process.platform === "win32"
+        ? await recognize("clipboard")
+        : {
+            status: "error",
+            message: "Clipboard image OCR is available only on Windows",
+          };
   } catch (error) {
     outcome = {
       status: "error",

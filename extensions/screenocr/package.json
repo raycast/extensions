@@ -142,7 +142,9 @@
           "value": "tr-TR"
         }
       ],
-      "default": "en-US"
+      "default": {
+        "Windows": "en-US"
+      }
     },
     {
       "name": "ocrMode",
@@ -160,7 +162,9 @@
           "value": "fast"
         }
       ],
-      "default": "accurate"
+      "default": {
+        "Windows": "accurate"
+      }
     },
     {
       "name": "languageCorrection",
@@ -213,11 +217,13 @@
     },
     {
       "name": "resultAction",
-      "title": "After Recognition",
-      "description": "What to do with recognized text. Cross-extension callbacks receive the result directly.",
+      "title": "After Recognition (Windows)",
+      "description": "Windows only: what to do with recognized text. Cross-extension callbacks receive the result directly.",
       "type": "dropdown",
-      "required": true,
-      "default": "copy",
+      "required": false,
+      "default": {
+        "Windows": "copy"
+      },
       "data": [
         {
           "title": "Copy to Clipboard",
@@ -255,8 +261,8 @@
     },
     {
       "name": "recognize-clipboard",
-      "title": "Recognize Text in Clipboard Image",
-      "description": "Extract text from an image or supported image file in the clipboard",
+      "title": "Recognize Text in Clipboard Image (Windows Only)",
+      "description": "Extract text from an image or supported image file in the Windows clipboard",
       "mode": "no-view"
     },
     {
@@ -285,6 +291,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "test": "node --test tests/ocr.test.cjs"
+    "test": "node --test tests/ocr.test.cjs",
+    "test:windows": "powershell.exe -NoLogo -NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -File tests/windows-native.ps1 -RequireOcr"
   }
 }

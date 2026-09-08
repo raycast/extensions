@@ -12,6 +12,10 @@ param(
 $ErrorActionPreference = 'Stop'
 try { [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false } catch {}
 
+$script:MaxClipboardFileBytes = 128MB
+$script:MaxSourceDimension = 32768
+$script:MaxSourcePixels = 100000000L
+
 function Write-ProtocolJson {
     param([object]$Value)
     $json = ConvertTo-Json -InputObject $Value -Compress -Depth 5
@@ -31,12 +35,28 @@ function Wait-WinRtOperation {
 function New-CompatibleBitmap {
     param([System.Drawing.Image]$Source)
     if ($Source.Width -lt 1 -or $Source.Height -lt 1) { throw 'The image has invalid dimensions.' }
-    $bitmap = New-Object System.Drawing.Bitmap ($Source.Width, $Source.Height, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+    if ($Source.Width -gt $script:MaxSourceDimension -or $Source.Height -gt $script:MaxSourceDimension -or
+        ([long]$Source.Width * [long]$Source.Height) -gt $script:MaxSourcePixels) {
+        throw 'SCREENOCR_IMAGE_TOO_LARGE'
+    }
+
+    $width = $Source.Width
+    $height = $Source.Height
+    $maxDimension = [Windows.Media.Ocr.OcrEngine]::MaxImageDimension
+    if ($width -gt $maxDimension -or $height -gt $maxDimension) {
+        $ratio = [Math]::Min($maxDimension / [double]$width, $maxDimension / [double]$height)
+        $width = [Math]::Max(1, [int][Math]::Floor($width * $ratio))
+        $height = [Math]::Max(1, [int][Math]::Floor($height * $ratio))
+    }
+
+    $bitmap = New-Object System.Drawing.Bitmap ($width, $height, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
     $graphics = $null
     try {
         $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
         $graphics.Clear([System.Drawing.Color]::White)
-        $graphics.DrawImage($Source, 0, 0, $Source.Width, $Source.Height)
+        $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+        $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+        $graphics.DrawImage($Source, 0, 0, $width, $height)
         return $bitmap
     }
     catch {
@@ -76,14 +96,23 @@ function New-OcrEngine {
     if ($LanguageTag -eq 'auto') {
         return [Windows.Media.Ocr.OcrEngine]::TryCreateFromUserProfileLanguages()
     }
+
     $requested = New-Object Windows.Globalization.Language ($LanguageTag)
-    if (-not [Windows.Media.Ocr.OcrEngine]::IsLanguageSupported($requested)) { return $null }
-    return [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage($requested)
+    $available = @([Windows.Media.Ocr.OcrEngine]::AvailableRecognizerLanguages | Where-Object {
+        $_.LanguageTag -ieq $requested.LanguageTag
+    })
+    if ($available.Count -eq 0) { return $null }
+
+    # TryCreateFromLanguage uses Windows language matching and may otherwise
+    # resolve a removed regional pack to a related installed language.
+    $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage($available[0])
+    if (-not $engine -or $engine.RecognizerLanguage.LanguageTag -ine $available[0].LanguageTag) { return $null }
+    return $engine
 }
 
 function Normalize-OcrLine {
     param([string]$Text, [string]$LanguageTag)
-    if ($LanguageTag -notmatch '^(zh|ja)(-|$)') { return $Text }
+    if ($LanguageTag -notmatch '^(zh|yue|ja)(-|$)') { return $Text }
     # Remove only the common intra-CJK OCR artifact. Fullwidth forms and Hangul
     # are deliberately excluded so their token boundaries remain intact.
     $han = '\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF'
@@ -168,6 +197,7 @@ function Select-ScreenRegion {
         $form.ShowInTaskbar = $false
         $form.Cursor = [System.Windows.Forms.Cursors]::Cross
         $form.KeyPreview = $true
+        $form.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::None
         $form.GetType().GetProperty('DoubleBuffered', [System.Reflection.BindingFlags]'Instance,NonPublic').SetValue($form, $true, $null)
         $state = @{ Dragging = $false; Start = [System.Drawing.Point]::Empty; Current = [System.Drawing.Point]::Empty; Selection = [System.Drawing.Rectangle]::Empty; Done = $false }
         $getRectangle = {
@@ -225,12 +255,23 @@ function Select-ScreenRegion {
 function Read-ClipboardBitmapOnce {
     if ([System.Windows.Forms.Clipboard]::ContainsImage()) {
         $image = [System.Windows.Forms.Clipboard]::GetImage()
-        if ($image) { try { return @{ Kind = 'image'; Bitmap = (New-CompatibleBitmap $image) } } finally { $image.Dispose() } }
+        if ($image) {
+            try {
+                try { return @{ Kind = 'image'; Bitmap = (New-CompatibleBitmap $image) } }
+                catch {
+                    if ($_.Exception.Message -eq 'SCREENOCR_IMAGE_TOO_LARGE') { return @{ Kind = 'too-large' } }
+                    return @{ Kind = 'corrupt' }
+                }
+            }
+            finally { $image.Dispose() }
+        }
     }
     if (-not [System.Windows.Forms.Clipboard]::ContainsFileDropList()) { return @{ Kind = 'empty' } }
     $files = [System.Windows.Forms.Clipboard]::GetFileDropList()
-    $supported = @('.bmp', '.gif', '.jpg', '.jpeg', '.png', '.tif', '.tiff')
+    $supported = @('.bmp', '.gif', '.jpe', '.jfif', '.jpg', '.jpeg', '.png', '.tif', '.tiff')
     $foundUnsupported = $false
+    $foundTooLarge = $false
+    $foundUnreadable = $false
     $foundCorrupt = $false
     foreach ($file in $files) {
         $extension = [System.IO.Path]::GetExtension($file).ToLowerInvariant()
@@ -238,13 +279,27 @@ function Read-ClipboardBitmapOnce {
         $stream = $null
         $image = $null
         try {
-            $stream = New-Object System.IO.FileStream ($file, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
-            $image = [System.Drawing.Image]::FromStream($stream, $true, $true)
-            return @{ Kind = 'image'; Bitmap = (New-CompatibleBitmap $image) }
+            try {
+                $stream = New-Object System.IO.FileStream ($file, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read)
+                if ($stream.Length -gt $script:MaxClipboardFileBytes) { $foundTooLarge = $true; continue }
+            }
+            catch {
+                $foundUnreadable = $true
+                continue
+            }
+            try {
+                $image = [System.Drawing.Image]::FromStream($stream, $true, $true)
+                return @{ Kind = 'image'; Bitmap = (New-CompatibleBitmap $image) }
+            }
+            catch {
+                if ($_.Exception.Message -eq 'SCREENOCR_IMAGE_TOO_LARGE') { $foundTooLarge = $true }
+                else { $foundCorrupt = $true }
+            }
         }
-        catch { $foundCorrupt = $true }
         finally { if ($image) { $image.Dispose() }; if ($stream) { $stream.Dispose() } }
     }
+    if ($foundTooLarge) { return @{ Kind = 'too-large' } }
+    if ($foundUnreadable) { return @{ Kind = 'unreadable' } }
     if ($foundCorrupt) { return @{ Kind = 'corrupt' } }
     if ($foundUnsupported) { return @{ Kind = 'unsupported' } }
     return @{ Kind = 'empty' }
@@ -329,6 +384,12 @@ catch {
     }
     elseif ($_.Exception.Message -eq 'SCREENOCR_CLIPBOARD_BUSY') {
         Write-ProtocolJson @{ status = 'error'; code = 'clipboard-busy' }; $exitCode = 4
+    }
+    elseif ($_.Exception.Message -eq 'SCREENOCR_CLIPBOARD_TOO-LARGE') {
+        Write-ProtocolJson @{ status = 'error'; code = 'clipboard-too-large' }; $exitCode = 4
+    }
+    elseif ($_.Exception.Message -eq 'SCREENOCR_CLIPBOARD_UNREADABLE') {
+        Write-ProtocolJson @{ status = 'error'; code = 'clipboard-unreadable' }; $exitCode = 4
     }
     else { $exitCode = 5; [Console]::Error.WriteLine($_.Exception.ToString()) }
 }

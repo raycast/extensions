@@ -4,9 +4,15 @@ import { handleRecognitionOutcome } from "./ocr/result";
 import { LaunchContext } from "./types";
 import { RecognitionOutcome } from "./ocr/types";
 
-export default async function command({
-  launchContext,
-}: LaunchProps<{ launchContext?: LaunchContext }>) {
+export default async function command(
+  props: LaunchProps<{ launchContext?: LaunchContext }>,
+) {
+  if (process.platform === "darwin") {
+    const { recognizeTextCommand } = await import("./ocr/macos-commands");
+    return recognizeTextCommand(props);
+  }
+
+  const { launchContext } = props;
   let outcome: RecognitionOutcome;
   try {
     await closeMainWindow();

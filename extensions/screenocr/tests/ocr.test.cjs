@@ -10,33 +10,14 @@ const callbackOptions = {
 const outputs = (host) =>
   host.calls.filter(([name]) => ["copy", "paste"].includes(name));
 
-test("native outcomes preserve real Error-prefixed text and reject malformed responses", () => {
-  const host = createHost();
-  const { parseOutcome } = host.load("src/ocr/macos.ts");
-  for (const outcome of [
-    { status: "recognized", text: "Error: this is real OCR\n日本語" },
-    { status: "no-text" },
-    { status: "cancelled" },
-    { status: "error", message: "Capture denied" },
-  ])
-    assert.deepEqual(parseOutcome(JSON.stringify(outcome)), outcome);
-  for (const raw of [
-    "diagnostic output",
-    "null",
-    "[]",
-    "{}",
-    '{"status":"unknown"}',
-    '{"status":"recognized","text":""}',
-    '{"status":"recognized","text":"  "}',
-    '{"status":"recognized","text":42}',
-    '{"status":"recognized","text":"ok","extra":true}',
-    '{"status":"error","message":null}',
-    '{"status":"cancelled","text":"stale"}',
-  ])
-    assert.equal(parseOutcome(raw).status, "error", raw);
-  assert.equal(
-    host.imports.some((name) => name.startsWith("swift:")),
-    false,
+test("Windows preserves Unicode and real Error-prefixed OCR text", async () => {
+  const text = "Error: this is real OCR\n日本語";
+  const host = createHost({
+    stdout: JSON.stringify({ status: "recognized", text }),
+  });
+  assert.deepEqual(
+    await host.load("src/ocr/windows.ts").recognizeWindows("clipboard"),
+    { status: "recognized", text },
   );
 });
 
@@ -240,6 +221,18 @@ for (const [error, stdout, status, message] of [
     "error",
     /supported image/,
   ],
+  [
+    { code: 4 },
+    '{"status":"error","code":"clipboard-too-large"}',
+    "error",
+    /too large/,
+  ],
+  [
+    { code: 4 },
+    '{"status":"error","code":"clipboard-unreadable"}',
+    "error",
+    /could not be read/,
+  ],
   [{ code: "ENOENT" }, "", "error", /PowerShell 5.1/],
   [{ killed: true, signal: "SIGTERM" }, "", "error", /timed out/],
   [
@@ -293,31 +286,59 @@ test("Windows language selection and inventory preserve macOS selections", async
   await assert.rejects(windows.setWindowsRecognitionLanguage("--invalid"));
 });
 
-test("macOS clipboard recognition preserves selected languages and avoids PowerShell", async () => {
-  const host = createHost({
-    platform: "darwin",
-    storage: { SelectedLanguages: '[{"title":"French","value":"fr-FR"}]' },
+for (const entry of [
+  "src/recognize-text.tsx",
+  "src/recognize-text-fullscreen.ts",
+  "src/detect-barcode.tsx",
+]) {
+  test(`${entry} retains macOS copy behavior and never invokes PowerShell`, async () => {
+    const mac = createHost({
+      platform: "darwin",
+      preferences: { resultAction: "both" },
+    });
+    await mac.load(entry).default({});
+    assert.deepEqual(outputs(mac), [["copy", "Example text"]]);
+    assert.equal(
+      mac.calls.some(([name]) => name === "process"),
+      false,
+    );
   });
-  await host.load("src/recognize-clipboard.ts").default();
-  assert.equal(
-    host.calls.some(([name]) => name === "process"),
-    false,
-  );
-  const swift = host.calls.find(([name]) => name === "swift");
-  assert.equal(swift[1], "recognizeClipboardText");
-  assert.deepEqual(swift[2].at(-1), ["fr-FR", "en-US"]);
-});
+}
 
-test("barcode stays copy-only on macOS and never loads Swift on Windows", async () => {
+test("macOS OCR retains selected languages and the original raw Swift contract", async () => {
   const mac = createHost({
     platform: "darwin",
-    preferences: { resultAction: "both" },
+    storage: { SelectedLanguages: '[{"title":"French","value":"fr-FR"}]' },
+    swiftResult: "Known text",
   });
-  await mac.load("src/detect-barcode.tsx").default();
+  await mac
+    .load("src/recognize-text.tsx")
+    .default({ launchContext: { callbackLaunchOptions: callbackOptions } });
+  const swift = mac.calls.find(([name]) => name === "swift");
+  assert.equal(swift[1], "recognizeText");
+  assert.deepEqual(swift[2][6], ["fr-FR", "en-US"]);
+  assert.deepEqual(outputs(mac), []);
   assert.deepEqual(
-    outputs(mac).map(([name]) => name),
-    ["copy"],
+    mac.calls.find(([name]) => name === "callback"),
+    ["callback", callbackOptions, { text: "Known text" }],
   );
+});
+
+test("clipboard command reports Windows limitation on macOS without native calls", async () => {
+  const mac = createHost({ platform: "darwin" });
+  await mac.load("src/recognize-clipboard.ts").default();
+  assert.deepEqual(outputs(mac), []);
+  assert.equal(
+    mac.calls.some(([name]) => name === "swift" || name === "process"),
+    false,
+  );
+  assert.match(
+    String(mac.calls.find(([name]) => name === "failure")[1]),
+    /Windows/i,
+  );
+});
+
+test("barcode reports macOS limitation on Windows without loading Swift", async () => {
   const win = createHost();
   await win.load("src/detect-barcode.tsx").default();
   assert.deepEqual(outputs(win), []);
