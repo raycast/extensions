@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "turbo-speedo-video",
+  "version": "1.0.0",
+  "description": "Adjust video speed, change frame rate, and remove audio with FFmpeg.",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "video",
+    "ffmpeg",
+    "speed",
+    "framerate",
+    "audio"
+  ],
+  "author": "tomjohn",
+  "license": "MIT",
+  "title": "Turbo Speedo Video",
+  "icon": "icon.png",
+  "categories": [
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "adjust-video-speed",
+      "title": "Adjust Video Speed",
+      "description": "Change video playback speed, framerate, and audio with FFmpeg",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "filePath",
+          "placeholder": "Video file path",
+          "type": "text",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "name": "remove-audio",
+      "title": "Remove Audio",
+      "description": "Remove audio from video while adjusting speed and framerate",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "filePath",
+          "placeholder": "Video file path",
+          "type": "text",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "name": "change-framerate",
+      "title": "Change Framerate",
+      "description": "Change video framerate with optional speed and audio adjustments",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "filePath",
+          "placeholder": "Video file path",
+          "type": "text",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ffmpegPath",
+      "title": "FFmpeg Path",
+      "description": "Path to FFmpeg executable (leave empty for auto-detection)",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@testing-library/dom": "^10.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@types/jest": "^29.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0",
+    "prettier": "3.6.2",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
