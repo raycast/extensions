@@ -68,7 +68,7 @@ function find(tree, title) {
 }
 
 const reference = Date.parse("2026-09-09T10:00:00+03:00");
-function createForm() {
+function createForm(sessionHook = { useSession: () => ({}) }, authErrorView = {}) {
   let now = reference;
   class Clock extends Date {
     constructor(...args) {
@@ -111,9 +111,9 @@ function createForm() {
       "./lib/domain/enums": { TICKET_TYPES: [], TYPE_LABELS: {} },
       "./lib/domain/priority": priority,
       "./lib/hooks/use-directory": { useDirectory: () => ({ lookup: { users: [], departments: [] } }) },
-      "./lib/hooks/use-session": { useSession: () => ({}) },
+      "./lib/hooks/use-session": sessionHook,
       "./lib/ui/presentation": { priorityLabel: (value) => value },
-      "./views/auth-error": {},
+      "./views/auth-error": authErrorView,
       "./views/ticket-detail": { TicketDetail: "TicketDetail" },
     },
     Clock,
@@ -137,6 +137,108 @@ const fields = {
   sprintId: "",
   needsResponse: false,
 };
+
+test("failed or canceled login recovers through the session hook in both commands", async () => {
+  for (const message of ["Login failed", "Login canceled"]) {
+    for (const command of ["create", "search"]) {
+      let attempts = 0;
+      let pending;
+      let execute;
+      const session = { subject: "demo" };
+      const result = {
+        data: undefined,
+        error: undefined,
+        isLoading: false,
+        revalidate() {
+          result.isLoading = true;
+          pending = execute().then(
+            (data) => {
+              result.data = data;
+              result.error = undefined;
+              result.isLoading = false;
+            },
+            (error) => {
+              result.error = error;
+              result.isLoading = false;
+            },
+          );
+        },
+      };
+      const sessionHook = load("src/lib/hooks/use-session.ts", {
+        "../auth": {
+          getAuthProvider: () => ({
+            async getSession() {
+              if (++attempts === 1) throw new Error(message);
+              return session;
+            },
+          }),
+        },
+        "@raycast/utils": {
+          useCachedPromise(fn, args) {
+            if (!execute) {
+              execute = () => fn(...args);
+              result.revalidate();
+            }
+            return result;
+          },
+        },
+      });
+      const api = {
+        Action,
+        ActionPanel,
+        Form,
+        Icon: {},
+        Color: {},
+        Keyboard: {},
+        List: Object.assign(() => {}, { Dropdown, EmptyView: "EmptyView" }),
+      };
+      const authErrorView = load("src/views/auth-error.tsx", {
+        "react/jsx-runtime": jsx,
+        "@raycast/api": api,
+        "../lib/auth": {
+          getAuthProvider: () => {
+            throw new Error("Retry bypassed the session hook");
+          },
+        },
+      });
+      const harness = renderHarness();
+      const search =
+        command === "search" &&
+        load("src/search-tickets.tsx", {
+          react: harness.react,
+          "react/jsx-runtime": jsx,
+          "@raycast/api": api,
+          "./lib/config": {},
+          "./lib/domain/enums": {},
+          "./lib/hooks/use-directory": { useDirectory: () => ({ lookup: {} }) },
+          "./lib/hooks/use-session": sessionHook,
+          "./lib/hooks/use-tickets": {
+            SCOPE_LABELS: {},
+            SCOPE_ORDER: [],
+            useTickets: () => ({ tickets: [] }),
+          },
+          "./lib/ui/presentation": {},
+          "./views/auth-error": authErrorView,
+          "./views/ticket-detail": {},
+        }).default;
+      const render = search ? () => harness.render(search) : createForm(sessionHook, authErrorView).render;
+      render();
+      await pending;
+      const failed = render();
+      assert.equal(failed.type, authErrorView.AuthErrorView);
+      assert.equal(failed.props.error.message, message);
+      const retry = find(authErrorView.AuthErrorView(failed.props), "Connect to IPF OS");
+      assert.equal(retry.onAction, result.revalidate);
+      retry.onAction();
+      assert.equal(sessionHook.useSession().isLoading, true);
+      await pending;
+      assert.equal(sessionHook.useSession().error, undefined);
+      assert.equal(sessionHook.useSession().session, session);
+      assert.notEqual(render().type, authErrorView.AuthErrorView);
+      assert.equal(attempts, 2);
+    }
+  }
+});
 
 test("submission rejects elapsed deadlines but accepts future times today and preserves timestamps", async () => {
   const form = createForm();

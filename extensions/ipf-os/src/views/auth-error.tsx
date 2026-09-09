@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from
 
 import { getAuthProvider } from "../lib/auth";
 
-export function AuthErrorView({ error }: { error: Error }) {
+export function AuthErrorView({ error, onRetry }: { error: Error; onRetry: () => void }) {
   return (
     <List>
       <List.EmptyView
@@ -11,7 +11,7 @@ export function AuthErrorView({ error }: { error: Error }) {
         description={error.message}
         actions={
           <ActionPanel>
-            <Action title="Connect to iPF OS" icon={Icon.Link} onAction={() => void getAuthProvider().getSession()} />
+            <Action title="Connect to IPF OS" icon={Icon.Link} onAction={onRetry} />
             <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             <Action title="Sign out" icon={Icon.Trash} onAction={() => void getAuthProvider().signOut()} />
           </ActionPanel>

@@ -33,7 +33,7 @@ export default function SearchTicketsCommand() {
   const [type, setType] = useState<TicketType | undefined>();
   const [searchText, setSearchText] = useState("");
 
-  const { session, error: sessionError } = useSession();
+  const { session, error: sessionError, revalidate: retrySession } = useSession();
   const { lookup } = useDirectory();
 
   const { tickets, isLoading, pagination, revalidate, error } = useTickets({
@@ -46,7 +46,7 @@ export default function SearchTicketsCommand() {
   });
 
   if (sessionError) {
-    return <AuthErrorView error={sessionError} />;
+    return <AuthErrorView error={sessionError} onRetry={retrySession} />;
   }
 
   const activeFilters = [status ? STATUS_LABELS[status] : undefined, type ? TYPE_LABELS[type] : undefined]

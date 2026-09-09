@@ -27,7 +27,7 @@ interface FormValues {
 
 export default function CreateTicketCommand() {
   const { push } = useNavigation();
-  const { error: sessionError } = useSession();
+  const { error: sessionError, revalidate: retrySession } = useSession();
   const { lookup, isLoading: isDirectoryLoading } = useDirectory();
 
   const { data: projects } = useCachedPromise(listProjects, [], { keepPreviousData: true });
@@ -43,7 +43,7 @@ export default function CreateTicketCommand() {
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
   if (sessionError) {
-    return <AuthErrorView error={sessionError} />;
+    return <AuthErrorView error={sessionError} onRetry={retrySession} />;
   }
 
   const clearError = (field: string) => setErrors((current) => ({ ...current, [field]: undefined }));
