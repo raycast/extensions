@@ -1090,6 +1090,7 @@ export async function getWindowsBluetoothDevices(): Promise<BluetoothDevice[]> {
   const script = `
 ${WINRT_ASYNC_PREAMBLE}
 [Windows.Devices.Bluetooth.BluetoothDevice,Windows.Devices.Bluetooth,ContentType=WindowsRuntime] | Out-Null
+[Windows.Devices.Bluetooth.BluetoothLEDevice,Windows.Devices.Bluetooth,ContentType=WindowsRuntime] | Out-Null
 [Windows.Devices.Radios.Radio,Windows.System.Devices,ContentType=WindowsRuntime] | Out-Null
 
 $radios = Await ([Windows.Devices.Radios.Radio]::GetRadiosAsync()) ([System.Collections.Generic.IReadOnlyList[Windows.Devices.Radios.Radio]])
@@ -1111,6 +1112,14 @@ foreach ($dev in $pnpDevices) {
                 $isConnected = $true
             }
         } catch {}
+        if (-not $isConnected) {
+            try {
+                $btLeDev = Await ([Windows.Devices.Bluetooth.BluetoothLEDevice]::FromBluetoothAddressAsync($macNum)) ([Windows.Devices.Bluetooth.BluetoothLEDevice])
+                if ($btLeDev -and $btLeDev.ConnectionStatus -eq [Windows.Devices.Bluetooth.BluetoothConnectionStatus]::Connected) {
+                    $isConnected = $true
+                }
+            } catch {}
+        }
     }
 
     $formattedMac = if ($macRaw -match '^[0-9A-Fa-f]{12}$') {
@@ -1234,15 +1243,6 @@ export async function toggleWindowsBluetoothDeviceConnection(
       return;
     }
     if (trimmed.includes("FailedToDisconnect")) {
-      const devices = await getWindowsBluetoothDevices();
-      const dev = devices.find(
-        (d) =>
-          d.id === deviceId ||
-          d.address?.replace(/[^0-9A-Fa-f]/g, "").toUpperCase() === macHex,
-      );
-      if (dev && !dev.isConnected) {
-        return;
-      }
       throw new Error("Failed to disconnect device");
     }
     if (trimmed.startsWith("Error:")) {

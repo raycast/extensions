@@ -101,13 +101,16 @@ class QuickRadiosHelper {
     private static extern bool BluetoothFindDeviceClose(IntPtr hFind);
 
     private static int GetWin32DeviceConnectionState(ulong address) {
+        // Classic Bluetooth Win32 APIs (BluetoothApis.dll) do NOT track Low Energy (BLE) or dual-mode connections.
+        // Therefore, fConnected == true confirms Classic connection (1), but fConnected == false can never
+        // positively confirm disconnection (0). It must return -1 (indeterminate) when not connected via Classic.
         try {
             var btdi = new BLUETOOTH_DEVICE_INFO();
             btdi.dwSize = (uint)Marshal.SizeOf(typeof(BLUETOOTH_DEVICE_INFO));
             btdi.Address = address;
             uint res = BluetoothGetDeviceInfo(IntPtr.Zero, ref btdi);
-            if (res == 0) {
-                return btdi.fConnected ? 1 : 0;
+            if (res == 0 && btdi.fConnected) {
+                return 1;
             }
         } catch {}
 
@@ -128,8 +131,8 @@ class QuickRadiosHelper {
             if (hFind != IntPtr.Zero) {
                 try {
                     do {
-                        if (deviceInfo.Address == address) {
-                            return deviceInfo.fConnected ? 1 : 0;
+                        if (deviceInfo.Address == address && deviceInfo.fConnected) {
+                            return 1;
                         }
                     } while (BluetoothFindNextDevice(hFind, ref deviceInfo));
                 } finally {
@@ -279,20 +282,77 @@ class QuickRadiosHelper {
     }
 
     private static int GetDeviceConnectionState(ulong address, int timeoutMs = 350) {
+        bool anyConnected = false;
+        bool classicDisconnected = false;
+        bool leDisconnected = false;
+        bool classicTimedOut = false;
+        bool leTimedOut = false;
+
+        Task<BluetoothDevice> classicTask = null;
+        Task<BluetoothLEDevice> leTask = null;
+
         try {
             var op = BluetoothDevice.FromBluetoothAddressAsync(address);
-            var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
-            if (task.Wait(timeoutMs)) {
-                if (task.Result != null) {
-                    var isConn = task.Result.ConnectionStatus == BluetoothConnectionStatus.Connected;
-                    try {
-                        task.Result.Dispose();
-                    } catch {}
-                    return isConn ? 1 : 0;
-                }
-                return 0;
-            }
+            classicTask = System.WindowsRuntimeSystemExtensions.AsTask(op);
         } catch {}
+
+        try {
+            var opLE = BluetoothLEDevice.FromBluetoothAddressAsync(address);
+            leTask = System.WindowsRuntimeSystemExtensions.AsTask(opLE);
+        } catch {}
+
+        if (classicTask != null) {
+            try {
+                if (classicTask.Wait(timeoutMs)) {
+                    if (classicTask.Result != null) {
+                        if (classicTask.Result.ConnectionStatus == BluetoothConnectionStatus.Connected) {
+                            anyConnected = true;
+                        } else {
+                            classicDisconnected = true;
+                        }
+                        try { classicTask.Result.Dispose(); } catch {}
+                    }
+                } else {
+                    classicTimedOut = true;
+                }
+            } catch {
+                classicTimedOut = true;
+            }
+        }
+
+        if (anyConnected) return 1;
+
+        if (leTask != null) {
+            try {
+                if (leTask.Wait(timeoutMs)) {
+                    if (leTask.Result != null) {
+                        if (leTask.Result.ConnectionStatus == BluetoothConnectionStatus.Connected) {
+                            anyConnected = true;
+                        } else {
+                            leDisconnected = true;
+                        }
+                        try { leTask.Result.Dispose(); } catch {}
+                    }
+                } else {
+                    leTimedOut = true;
+                }
+            } catch {
+                leTimedOut = true;
+            }
+        }
+
+        if (anyConnected) return 1;
+
+        // If any transport query timed out or errored, we cannot positively confirm disconnection across all transports
+        if (classicTimedOut || leTimedOut) {
+            return -1;
+        }
+
+        // Positively confirmed disconnected ONLY if at least one transport was explicitly verified disconnected
+        if (classicDisconnected || leDisconnected) {
+            return 0;
+        }
+
         return -1;
     }
 
@@ -649,14 +709,17 @@ class QuickRadiosHelper {
 
     private static int GetDeviceStatus(ulong address) {
         try {
-            var op = BluetoothDevice.FromBluetoothAddressAsync(address);
-            var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
-            if (task.Wait(2500) && task.Result != null) {
-                Console.WriteLine(task.Result.ConnectionStatus == BluetoothConnectionStatus.Connected ? "Connected" : "Disconnected");
+            int state = GetDeviceConnectionState(address, 2500);
+            if (state == 1) {
+                Console.WriteLine("Connected");
                 return 0;
             }
-            Console.WriteLine("Disconnected");
-            return 0;
+            if (state == 0) {
+                Console.WriteLine("Disconnected");
+                return 0;
+            }
+            Console.WriteLine("Unknown");
+            return 1;
         } catch (Exception ex) {
             Console.WriteLine("Error: " + ex.Message);
             return 2;
@@ -666,6 +729,13 @@ class QuickRadiosHelper {
     private static string EscapeJson(string s) {
         if (string.IsNullOrEmpty(s)) return "";
         return s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "").Replace("\n", "");
+    }
+
+    private class DeviceEntry {
+        public string CleanHex;
+        public string Name;
+        public string FormattedMac;
+        public bool IsConnected;
     }
 
     private static int ListDevices() {
@@ -682,8 +752,7 @@ class QuickRadiosHelper {
             var deviceInfo = new BLUETOOTH_DEVICE_INFO();
             deviceInfo.dwSize = (uint)Marshal.SizeOf(typeof(BLUETOOTH_DEVICE_INFO));
 
-            var results = new List<string>();
-            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var devices = new Dictionary<string, DeviceEntry>(StringComparer.OrdinalIgnoreCase);
 
             IntPtr hFind = BluetoothFindFirstDevice(ref searchParams, ref deviceInfo);
             if (hFind != IntPtr.Zero) {
@@ -691,7 +760,7 @@ class QuickRadiosHelper {
                     do {
                         string cleanHex = deviceInfo.Address.ToString("X12").ToUpperInvariant();
                         if (string.IsNullOrEmpty(cleanHex) || cleanHex == "000000000000") continue;
-                        if (!seen.Add(cleanHex)) continue;
+                        if (devices.ContainsKey(cleanHex)) continue;
 
                         string name = (deviceInfo.szName ?? "").Trim();
                         if (string.IsNullOrEmpty(name)) name = "Bluetooth Device (" + cleanHex + ")";
@@ -713,14 +782,12 @@ class QuickRadiosHelper {
                             }
                         } catch {}
 
-                        string jsonItem = string.Format(
-                            "{{\"Id\":\"BTHENUM\\\\DEV_{0}\",\"Name\":\"{1}\",\"Address\":\"{2}\",\"IsConnected\":{3}}}",
-                            cleanHex,
-                            EscapeJson(name),
-                            formattedMac,
-                            isConnected ? "true" : "false"
-                        );
-                        results.Add(jsonItem);
+                        devices[cleanHex] = new DeviceEntry {
+                            CleanHex = cleanHex,
+                            Name = name,
+                            FormattedMac = formattedMac,
+                            IsConnected = isConnected
+                        };
                     } while (BluetoothFindNextDevice(hFind, ref deviceInfo));
                 } finally {
                     BluetoothFindDeviceClose(hFind);
@@ -736,12 +803,17 @@ class QuickRadiosHelper {
                         ulong addr;
                         string cleanHex;
                         if (TryParseMac(d.Id, out addr, out cleanHex)) {
-                            if (seen.Add(cleanHex)) {
-                                bool isConn = false;
-                                object connVal;
-                                if (d.Properties.TryGetValue("System.Devices.Aep.IsConnected", out connVal) && connVal is bool) {
-                                    isConn = (bool)connVal;
+                            bool isConn = false;
+                            object connVal;
+                            if (d.Properties.TryGetValue("System.Devices.Aep.IsConnected", out connVal) && connVal is bool) {
+                                isConn = (bool)connVal;
+                            }
+                            DeviceEntry existing;
+                            if (devices.TryGetValue(cleanHex, out existing)) {
+                                if (isConn) {
+                                    existing.IsConnected = true;
                                 }
+                            } else {
                                 string formattedMac = string.Format("{0}:{1}:{2}:{3}:{4}:{5}",
                                     cleanHex.Substring(0, 2),
                                     cleanHex.Substring(2, 2),
@@ -749,18 +821,28 @@ class QuickRadiosHelper {
                                     cleanHex.Substring(6, 2),
                                     cleanHex.Substring(8, 2),
                                     cleanHex.Substring(10, 2));
-                                results.Add(string.Format(
-                                    "{{\"Id\":\"BTHENUM\\\\DEV_{0}\",\"Name\":\"{1}\",\"Address\":\"{2}\",\"IsConnected\":{3}}}",
-                                    cleanHex,
-                                    EscapeJson(d.Name),
-                                    formattedMac,
-                                    isConn ? "true" : "false"
-                                ));
+                                devices[cleanHex] = new DeviceEntry {
+                                    CleanHex = cleanHex,
+                                    Name = string.IsNullOrEmpty(d.Name) ? ("Bluetooth Device (" + cleanHex + ")") : d.Name,
+                                    FormattedMac = formattedMac,
+                                    IsConnected = isConn
+                                };
                             }
                         }
                     }
                 }
             } catch {}
+
+            var results = new List<string>();
+            foreach (var dev in devices.Values) {
+                results.Add(string.Format(
+                    "{{\"Id\":\"BTHENUM\\\\DEV_{0}\",\"Name\":\"{1}\",\"Address\":\"{2}\",\"IsConnected\":{3}}}",
+                    dev.CleanHex,
+                    EscapeJson(dev.Name),
+                    dev.FormattedMac,
+                    dev.IsConnected ? "true" : "false"
+                ));
+            }
 
             Console.WriteLine("[" + string.Join(",", results.ToArray()) + "]");
             return 0;
