@@ -418,12 +418,13 @@ export function summarizeDay(
         .map((n) => n.text)
     : [];
 
-  const seen = new Set(journalNotes.map(normalizeNoteText));
+  // Skip pending files whose text already appears in journal notes (already imported).
+  // Do not mark pending texts as seen — identical pending files are distinct records.
+  const journalTexts = new Set(journalNotes.map(normalizeNoteText));
   summary.notes = [...journalNotes];
   for (const pending of pendingJsonNotes) {
     const key = normalizeNoteText(pending.text);
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
+    if (!key || journalTexts.has(key)) continue;
     summary.notes.push(pending.text);
   }
 

@@ -10,17 +10,13 @@ export const DEFAULT_ICLOUD_DIR = path.join(
   "Documents",
 );
 
-export interface ExtensionPreferences {
-  icloudPath?: string;
-}
-
 export function resolveIcloudDir(override?: string): string {
   const trimmed = override?.trim();
   return trimmed ? trimmed : DEFAULT_ICLOUD_DIR;
 }
 
-export function getExtensionPreferences(): ExtensionPreferences {
-  return getPreferenceValues<ExtensionPreferences>();
+export function getExtensionPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 export function toLocalDateString(date: Date): string {
