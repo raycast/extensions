@@ -3,7 +3,30 @@ import { usePromise } from "@raycast/utils";
 import { getTopEnergyProcesses } from "./energy";
 
 export default function Command() {
-  const { data, isLoading, revalidate } = usePromise(getTopEnergyProcesses);
+  const { data, isLoading, revalidate, error } = usePromise(
+    getTopEnergyProcesses,
+  );
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could Not Read Energy Impact"
+          description={`Running \`top\` failed: ${error.message}`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   return (
     <List isLoading={isLoading}>

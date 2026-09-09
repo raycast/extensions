@@ -12,6 +12,7 @@ export default function Command() {
   const {
     data,
     isLoading,
+    error,
     revalidate: revalidatePower,
   } = usePromise(getPowerInfo);
   const profile = usePromise(getPowerProfile);
@@ -22,6 +23,19 @@ export default function Command() {
     profile.revalidate();
     thermal.revalidate();
   };
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could Not Read Power Info"
+          description={`Running \`ioreg\` failed: ${error.message}`}
+          actions={<Actions revalidate={revalidate} />}
+        />
+      </List>
+    );
+  }
 
   const adapter = data?.adapter;
   const battery = data?.battery;

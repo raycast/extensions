@@ -1,5 +1,5 @@
 import { Icon, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import {
   batteryPowerWatts,
   formatAmps,
@@ -83,9 +83,18 @@ export default function Command() {
             <MenuBarExtra.Item
               icon={Icon.RaycastLogoNeg}
               title="Open Power and Charger Info"
-              onAction={() =>
-                launchCommand({ name: "index", type: LaunchType.UserInitiated })
-              }
+              onAction={async () => {
+                try {
+                  await launchCommand({
+                    name: "index",
+                    type: LaunchType.UserInitiated,
+                  });
+                } catch (error) {
+                  await showFailureToast(error, {
+                    title: "Could not open Power and Charger Info",
+                  });
+                }
+              }}
             />
           </MenuBarExtra.Section>
         </>

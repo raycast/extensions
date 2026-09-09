@@ -51,7 +51,8 @@
       "subtitle": "Watts Up",
       "description": "Show the negotiated power adapter wattage — or the battery percentage when unplugged — in the menu bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {

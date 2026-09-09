@@ -27,6 +27,8 @@ export default function Command() {
     assertions.revalidate();
   };
 
+  const error = settings.error ?? status.error ?? assertions.error;
+
   async function toggle(
     key: "lowpowermode" | "powernap",
     title: string,
@@ -64,6 +66,19 @@ export default function Command() {
 
   const minutes = (value?: number) =>
     value === undefined ? "–" : value === 0 ? "Never" : `${value} min`;
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could Not Read Energy Settings"
+          description={`Running \`pmset\` failed: ${error.message}`}
+          actions={<RefreshAction revalidate={revalidate} />}
+        />
+      </List>
+    );
+  }
 
   return (
     <List

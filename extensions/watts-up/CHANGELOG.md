@@ -1,5 +1,5 @@
-# Watts Up Changelog
+# Watt's up Changelog
 
-## [Added Watts Up Extension] - {PR_MERGE_DATE}
+## [Initial Version] - {PR_MERGE_DATE}
 
-Initial version code
+Adds four commands to read power adapter wattage, battery health, per-process energy impact and energy settings on macOS.

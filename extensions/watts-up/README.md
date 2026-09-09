@@ -1,4 +1,4 @@
-# Watt's Up
+# Watt's up
 
 Check your MacBook's charger wattage, charging power, battery health and charge status — inspired by [SomeInterestingUserName/WhatWatt](https://github.com/SomeInterestingUserName/WhatWatt).
 
