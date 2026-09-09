@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timetrack",
+  "title": "TimeTrack",
+  "description": "TimeTrack for MBC Kanban",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "track-time",
+      "title": "Track Time",
+      "subtitle": "Track time with MBC Kanban",
+      "description": "Track your time directly with the MBC Kanban API",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-tracker",
+      "title": "TimeTrack Menu Bar",
+      "subtitle": "Show current timer",
+      "description": "Displays the latest time tracking and elapsed time in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "userId",
+      "type": "textfield",
+      "required": true,
+      "title": "User ID",
+      "description": "Your user ID for time tracking"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your API key for authentication"
+    },
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "API URL",
+      "description": "The time tracking API endpoint",
+      "default": "https://production.mcb.dk/timetracker/starttimetracking"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "kbjmcb",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ]
+}
