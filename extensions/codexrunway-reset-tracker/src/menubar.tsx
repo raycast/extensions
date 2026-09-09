@@ -1,18 +1,22 @@
 import { Color, Icon, MenuBarExtra, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { LatestResponse, formatDate, latestUrl, relativeTime } from "./api";
-import { useResetToday } from "./status";
+import { RecordsResponse, formatDate, recordsUrl, relativeTime } from "./api";
+import { resetTodayIn } from "./status";
+
+/** One request serves both the latest record and the reset-today scan (API allows 20/hour). */
+const PAGE_SIZE = 10;
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useFetch<LatestResponse>(
-    latestUrl("all"),
+  const { data, isLoading, revalidate } = useFetch<RecordsResponse>(
+    recordsUrl("all", 1, PAGE_SIZE),
     {
       keepPreviousData: true,
     },
   );
 
-  const record = data?.data;
-  const { resetToday, at } = useResetToday(record);
+  const records = data?.data?.items ?? [];
+  const record = records[0];
+  const { resetToday, at } = resetTodayIn(records);
 
   const title = record
     ? resetToday

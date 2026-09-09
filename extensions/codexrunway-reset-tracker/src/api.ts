@@ -44,12 +44,6 @@ export interface ApiMeta {
   lastSuccessfulCheckAt: string;
 }
 
-export interface LatestResponse {
-  ok: boolean;
-  data: ResetRecord;
-  meta: ApiMeta;
-}
-
 /** The `/records` endpoint nests the page of results (and pagination info) under `data`. */
 export interface RecordsPage {
   items: ResetRecord[];
@@ -64,13 +58,6 @@ export interface RecordsResponse {
   ok: boolean;
   data: RecordsPage;
   meta: ApiMeta;
-}
-
-export function latestUrl(kind: ResetKind = "all"): string {
-  const params = new URLSearchParams();
-  if (kind !== "all") params.set("kind", kind);
-  const qs = params.toString();
-  return `${BASE_URL}/records/latest${qs ? `?${qs}` : ""}`;
 }
 
 export function recordsUrl(
@@ -114,7 +101,7 @@ export function statusLabel(record: ResetRecord): string {
 }
 
 /** True if `iso` falls on today's calendar date (viewer's local timezone). */
-export function isToday(iso?: string | null): boolean {
+function isToday(iso?: string | null): boolean {
   if (!iso) return false;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return false;
@@ -160,9 +147,4 @@ export function resetTodayAt(record: ResetRecord): string | null {
   if (done && happenedToday(record.effectiveAt))
     return record.effectiveAt ?? null;
   return null;
-}
-
-/** Answers the site's own headline question ("Any new Codex reset today?") for a single record. */
-export function resetHappenedToday(record: ResetRecord): boolean {
-  return resetTodayAt(record) !== null;
 }
