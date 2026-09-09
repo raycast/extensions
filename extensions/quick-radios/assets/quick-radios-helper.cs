@@ -234,13 +234,17 @@ class QuickRadiosHelper {
         }
     }
 
-    private static int GetDeviceConnectionState(ulong address) {
+    private static int GetDeviceConnectionState(ulong address, int timeoutMs = 350) {
         try {
             var op = BluetoothDevice.FromBluetoothAddressAsync(address);
             var task = System.WindowsRuntimeSystemExtensions.AsTask(op);
-            if (task.Wait(350)) {
+            if (task.Wait(timeoutMs)) {
                 if (task.Result != null) {
-                    return task.Result.ConnectionStatus == BluetoothConnectionStatus.Connected ? 1 : 0;
+                    var isConn = task.Result.ConnectionStatus == BluetoothConnectionStatus.Connected;
+                    try {
+                        task.Result.Dispose();
+                    } catch {}
+                    return isConn ? 1 : 0;
                 }
                 return 0;
             }
@@ -548,8 +552,8 @@ class QuickRadiosHelper {
                 }
             }
 
-            // If no services were successfully disabled and device remains connected, fail early
-            if (servicesToDisable.Count > 0 && !anyServiceDisabled && GetDeviceConnectionState(address) != 0) {
+            // If no services were successfully disabled and device is confirmed connected, fail early
+            if (servicesToDisable.Count > 0 && !anyServiceDisabled && GetDeviceConnectionState(address) == 1) {
                 _operationComplete = true;
                 Console.WriteLine("FailedToDisconnect");
                 return 1;
@@ -568,7 +572,20 @@ class QuickRadiosHelper {
             }
 
             _operationComplete = true;
-            if (GetDeviceConnectionState(address) == 0) {
+            int finalState = GetDeviceConnectionState(address);
+            if (finalState == 0) {
+                CompleteSuccess("Disconnected");
+                return 0;
+            }
+
+            // If the initial check was indeterminate (-1) due to a slow WinRT response, retry with a longer wait
+            if (finalState == -1) {
+                finalState = GetDeviceConnectionState(address, 1500);
+            }
+
+            // Only report failure if the device is confirmed still connected (1).
+            // For confirmed disconnected (0) or indeterminate/unknown (-1), report success so TypeScript reconciles state.
+            if (finalState != 1) {
                 CompleteSuccess("Disconnected");
                 return 0;
             }
