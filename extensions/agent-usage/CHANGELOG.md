@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Apply Saved Provider Order] - {PR_MERGE_DATE}
+## [Apply Saved Provider Order] - 2026-09-09
 
 ### Bug Fixes
 
