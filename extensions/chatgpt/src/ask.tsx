@@ -1,5 +1,5 @@
 import { ActionPanel, clearSearchBar, getPreferenceValues, List, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { PrimaryAction } from "./actions";
 import { FormInputActionSection } from "./actions/form-input";
@@ -10,35 +10,95 @@ import { useConversations } from "./hooks/useConversations";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
 import { useQuestion } from "./hooks/useQuestion";
 import { useSavedChat } from "./hooks/useSavedChat";
+import { AuthProvider, AuthStatus, getInitialAuthStatus, resolveAuthStatus } from "./utils/auth";
+import { filterModelsForAuth, orderModelsForSelection, resolveModelOptionForAuth } from "./utils/model-support";
 import { Chat, Conversation, Model } from "./type";
+import { AuthRequiredView } from "./views/auth-required";
 import { ChatView } from "./views/chat";
 import { ModelDropdown } from "./views/model/dropdown";
 import { QuestionForm } from "./views/question/form";
 
-export default function Ask(props: { conversation?: Conversation; initialQuestion?: string }) {
+interface AskProps {
+  conversation?: Conversation;
+  initialQuestion?: string;
+}
+
+export default function Ask(props: AskProps) {
+  const [authStatus, setAuthStatus] = useState<AuthStatus>(() => getInitialAuthStatus());
+  const [isAuthLoading, setAuthLoading] = useState<boolean>(() => !getInitialAuthStatus().hasApiKey);
+
+  const refreshAuth = useCallback(async (showLoading = false) => {
+    if (showLoading) {
+      setAuthLoading(true);
+    }
+
+    const status = await resolveAuthStatus();
+    setAuthStatus(status);
+    setAuthLoading(false);
+  }, []);
+
+  useEffect(() => {
+    refreshAuth(false);
+  }, [refreshAuth]);
+
+  if (isAuthLoading) {
+    return <List isLoading={true} />;
+  }
+
+  if (authStatus.provider === "none") {
+    return <AuthRequiredView onAuthChange={() => refreshAuth(true)} />;
+  }
+
+  return <AskContent {...props} authProvider={authStatus.provider} />;
+}
+
+function AskContent(props: AskProps & { authProvider: AuthProvider }) {
+  const { authProvider } = props;
   const conversations = useConversations();
   const models = useModel();
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();
-  const chats = useChat<Chat>(props.conversation ? props.conversation.chats : []);
+  const chats = useChat<Chat>(props.conversation ? props.conversation.chats : [], props.conversation?.codexThreadId);
   const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
 
-  useEffect(() => {
-    // only work on `Summarize -> Ask` flow
-    if (props.initialQuestion) {
-      chats.ask(props.initialQuestion, [], props.conversation!.model);
-    }
-  }, []);
+  const availableModels = useMemo(
+    () => orderModelsForSelection(filterModelsForAuth(Object.values(models.data), authProvider, models.option)),
+    [authProvider, models.data, models.option],
+  );
+
+  const availableModelsMap = useMemo(() => {
+    return availableModels.reduce<Record<string, Model>>((acc, model) => {
+      acc[model.id] = model;
+      return acc;
+    }, {});
+  }, [availableModels]);
 
   const [conversation, setConversation] = useState<Conversation>(
-    props.conversation ?? {
-      id: uuidv4(),
-      chats: [],
-      model: DEFAULT_MODEL,
-      pinned: false,
-      updated_at: "",
-      created_at: new Date().toISOString(),
-    },
+    (() => {
+      const initialConversation = props.conversation ?? {
+        id: uuidv4(),
+        chats: [],
+        model: DEFAULT_MODEL,
+        codexThreadId: null,
+        pinned: false,
+        updated_at: "",
+        created_at: new Date().toISOString(),
+      };
+
+      const modelOption = resolveModelOptionForAuth(initialConversation.model.option, authProvider, models.option);
+      if (modelOption === initialConversation.model.option) {
+        return initialConversation;
+      }
+
+      return {
+        ...initialConversation,
+        model: {
+          ...initialConversation.model,
+          option: modelOption,
+          updated_at: new Date().toISOString(),
+        },
+      };
+    })(),
   );
 
   const [isLoading, setLoading] = useState<boolean>(true);
@@ -56,6 +116,23 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
 
   const { push, pop } = useNavigation();
   const [isConversationDone, setIsConversationDone] = useState(false);
+
+  useEffect(() => {
+    // only work on `Summarize -> Ask` flow
+    if (props.initialQuestion) {
+      chats.ask(props.initialQuestion, [], conversation.model);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (models.isLoading || availableModels.length === 0) {
+      return;
+    }
+
+    if (!availableModelsMap[selectedModelId]) {
+      setSelectedModelId(getFallbackModelId(availableModels));
+    }
+  }, [models.isLoading, availableModels, availableModelsMap, selectedModelId]);
 
   useEffect(() => {
     // `QuestionForm` depend on models data and conversation data
@@ -84,7 +161,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
             chats.ask(question, files, conversation.model);
             pop();
           }}
-          models={Object.values(models.data)}
+          models={availableModels}
           selectedModel={selectedModelId}
           onModelChange={setSelectedModelId}
           isFirstCall={conversation.chats.length === 0}
@@ -93,7 +170,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
     }
 
     setLoading(false);
-  }, [models.isLoading, models.data, question.data, conversation.model]);
+  }, [models.isLoading, availableModels, question.data, conversation.model]);
 
   useEffect(() => {
     if ((props.conversation?.id !== conversation.id || conversations.data.length === 0) && isAutoSaveConversation) {
@@ -109,16 +186,20 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
     if (models.isLoading) {
       return;
     }
-    if (models.data && conversation.chats.length === 0) {
-      const defaultUserModel = models.data[DEFAULT_MODEL.id] ?? conversation.model;
+    if (availableModels.length > 0 && conversation.chats.length === 0) {
+      const defaultUserModel = availableModelsMap[DEFAULT_MODEL.id] ?? availableModels[0] ?? conversation.model;
       setConversation({ ...conversation, model: defaultUserModel, updated_at: new Date().toISOString() });
     }
-  }, [models.isLoading, models.data]);
+  }, [models.isLoading, availableModels, availableModelsMap]);
 
   useEffect(() => {
-    const updatedConversation = { ...conversation, chats: chats.data, updated_at: new Date().toISOString() };
-    setConversation(updatedConversation);
-  }, [chats.data]);
+    setConversation((previousConversation) => ({
+      ...previousConversation,
+      chats: chats.data,
+      codexThreadId: chats.codexThreadId,
+      updated_at: new Date().toISOString(),
+    }));
+  }, [chats.data, chats.codexThreadId]);
 
   useEffect(() => {
     if (models.isLoading) {
@@ -126,7 +207,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
     }
     // as long as this side effect under the bottom stack, we should stick `state` in this position
     setIsConversationDone(false);
-    const selectedModel = models.data[selectedModelId];
+    const selectedModel = availableModelsMap[selectedModelId];
     // console.debug("selectedModel: ", selectedModelId, selectedModel?.option);
     setConversation({
       ...conversation,
@@ -134,7 +215,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       updated_at: new Date().toISOString(),
     });
     setIsConversationDone(true);
-  }, [selectedModelId, models.isLoading, models.data]);
+  }, [selectedModelId, models.isLoading, availableModelsMap]);
 
   const getActionPanel = (question: string, model: Model) => (
     <ActionPanel>
@@ -142,7 +223,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       <FormInputActionSection
         initialQuestion={question}
         onSubmit={(question, files) => chats.ask(question, files, model)}
-        models={Object.values(models.data)}
+        models={availableModels}
         selectedModel={selectedModelId}
         onModelChange={setSelectedModelId}
       />
@@ -165,7 +246,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
             <FormInputActionSection
               initialQuestion={question.data}
               onSubmit={(question, files) => chats.ask(question, files, conversation.model)}
-              models={Object.values(models.data)}
+              models={availableModels}
               selectedModel={selectedModelId}
               onModelChange={setSelectedModelId}
             />
@@ -177,11 +258,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       }
       selectedItemId={chats.selectedChatId || undefined}
       searchBarAccessory={
-        <ModelDropdown
-          models={Object.values(models.data)}
-          onModelChange={setSelectedModelId}
-          selectedModel={selectedModelId}
-        />
+        <ModelDropdown models={availableModels} onModelChange={setSelectedModelId} selectedModel={selectedModelId} />
       }
       // https://github.com/raycast/extensions/issues/10844
       // `onSelectionChange` may cause race condition
@@ -194,10 +271,18 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
         setConversation={setConversation}
         use={{ chats, conversations, savedChats }}
         conversation={conversation}
-        models={Object.values(models.data)}
+        models={availableModels}
         selectedModel={selectedModelId}
         onModelChange={setSelectedModelId}
       />
     </List>
   );
+}
+
+function getFallbackModelId(models: Model[]): string {
+  if (models.find((model) => model.id === "default")) {
+    return "default";
+  }
+
+  return models[0]?.id ?? "default";
 }

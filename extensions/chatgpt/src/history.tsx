@@ -8,8 +8,17 @@ import { useHistory } from "./hooks/useHistory";
 import { useSavedChat } from "./hooks/useSavedChat";
 import { Chat } from "./type";
 import { AnswerDetailView } from "./views/answer-detail";
+import { AuthGate } from "./views/auth-required";
 
 export default function History() {
+  return (
+    <AuthGate>
+      <HistoryView />
+    </AuthGate>
+  );
+}
+
+function HistoryView() {
   const savedChat = useSavedChat();
   const history = useHistory();
   const [searchText, setSearchText] = useState<string>("");

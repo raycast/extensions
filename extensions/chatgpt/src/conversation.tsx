@@ -5,11 +5,20 @@ import { PreferencesActionSection } from "./actions/preferences";
 import Ask from "./ask";
 import { useConversations } from "./hooks/useConversations";
 import { Conversation as ConversationType } from "./type";
+import { AuthGate } from "./views/auth-required";
 import { ConversationListView } from "./views/conversation-list";
 import { ExportData, ImportData } from "./utils/import-export";
 import { ImportForm } from "./views/import-form";
 
 export default function Conversation() {
+  return (
+    <AuthGate>
+      <ConversationView />
+    </AuthGate>
+  );
+}
+
+function ConversationView() {
   const conversations = useConversations();
   const { push } = useNavigation();
 

@@ -4,27 +4,11 @@ import { useEffect, useState } from "react";
 
 import { useChatGPT } from "../hooks/useChatGPT";
 import { AskImageProps, Model } from "../type";
+import { getConfiguredApiKey } from "../utils/auth";
 import { toUnit } from "../utils";
+import { AuthRequiredView } from "./auth-required";
 import { LoadFrom, loadFromClipboard, loadFromFinder } from "../utils/load";
 import { countImageTokens, countToken, estimateImagePrice, estimatePrice } from "../utils/token";
-
-const preferences = getPreferenceValues<Preferences>();
-
-const visionModelName: string = (preferences.useVisionModel && preferences.visionModelName) || "gpt-4o";
-
-const VISION_MODEL: Model = {
-  id: visionModelName,
-  updated_at: new Date().toISOString(),
-  created_at: new Date().toISOString(),
-  name: "Default",
-  prompt: "You are a helpful vision assistant.",
-  option: visionModelName,
-  temperature: "1",
-  enableReasoningEffortChange: false,
-  reasoningEffort: "medium",
-  pinned: false,
-  vision: true,
-};
 
 function bufferToDataUrl(mimeType: string, buffer: Buffer) {
   const base64String = buffer.toString("base64");
@@ -32,6 +16,37 @@ function bufferToDataUrl(mimeType: string, buffer: Buffer) {
 }
 
 export function VisionView(props: AskImageProps) {
+  if (!getConfiguredApiKey()) {
+    return (
+      <AuthRequiredView
+        title="API Key Required"
+        description="Image understanding commands are available only with API key sign-in."
+        allowChatGPTSignIn={false}
+      />
+    );
+  }
+
+  return <VisionViewWithApiKey {...props} />;
+}
+
+function VisionViewWithApiKey(props: AskImageProps) {
+  const preferences = getPreferenceValues<Preferences>();
+  const visionModelName = (preferences.useVisionModel && preferences.visionModelName) || "gpt-4o";
+
+  const VISION_MODEL: Model = {
+    id: visionModelName,
+    updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    name: "Default",
+    prompt: "You are a helpful vision assistant.",
+    option: visionModelName,
+    temperature: "1",
+    enableReasoningEffortChange: false,
+    reasoningEffort: "medium",
+    pinned: false,
+    vision: true,
+  };
+
   const chatGPT = useChatGPT();
   const [useStream] = useState<boolean>(() => {
     return getPreferenceValues<{

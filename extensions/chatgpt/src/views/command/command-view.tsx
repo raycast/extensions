@@ -12,26 +12,61 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useChat } from "../../hooks/useChat";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { canAccessBrowserExtension } from "../../utils/browser";
 import { PrimaryAction } from "../../actions";
 import { Command, ChatHook } from "../../type";
 import { fetchContent } from "../../utils/cmd-input";
 import { getAppIconPath } from "../../utils/icon";
+import { getInitialAuthStatus, resolveAuthStatus } from "../../utils/auth";
+import { resolveModelOptionForAuth } from "../../utils/model-support";
 import Ask from "../../ask";
 import { v4 as uuidv4 } from "uuid";
 import { mapCommandToModel, useCommand } from "../../hooks/useCommand";
+import { AuthRequiredView } from "../auth-required";
+import { useModel } from "../../hooks/useModel";
 
 type CommandLaunchContext = { commandId?: string };
 export type CommandLaunchProps = LaunchProps<{ launchContext?: CommandLaunchContext }>;
 
 export default function CommandView(props: CommandLaunchProps) {
+  const [hasAuth, setHasAuth] = useState<boolean>(() => getInitialAuthStatus().provider !== "none");
+  const [isAuthLoading, setAuthLoading] = useState<boolean>(() => getInitialAuthStatus().provider === "none");
+
+  const refreshAuth = useCallback(async (showLoading = false) => {
+    if (showLoading) {
+      setAuthLoading(true);
+    }
+
+    const status = await resolveAuthStatus();
+    setHasAuth(status.provider !== "none");
+    setAuthLoading(false);
+  }, []);
+
+  useEffect(() => {
+    refreshAuth(false);
+  }, [refreshAuth]);
+
+  if (isAuthLoading) {
+    return <Detail markdown="" isLoading={true} />;
+  }
+
+  if (!hasAuth) {
+    return <AuthRequiredView onAuthChange={() => refreshAuth(true)} />;
+  }
+
+  return <AuthenticatedCommandView {...props} />;
+}
+
+function AuthenticatedCommandView(props: CommandLaunchProps) {
   const navigation = useNavigation();
   const commands = useCommand();
+  const models = useModel();
   const chat = useChat([]);
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [userInput, setUserInput] = useState<string | null>(null);
   const [userInputError, setUserInputError] = useState<string | null>(null);
+  const [effectiveModel, setEffectiveModel] = useState<string | null>(null);
   const [frontmostApp, setFrontmostApp] = useState<Application | null>(null);
 
   const requestedCommandId = props.launchContext?.commandId || "";
@@ -53,11 +88,20 @@ export default function CommandView(props: CommandLaunchProps) {
   }, [requestedCommand]);
 
   useEffect(() => {
-    if (userInput && requestedCommand) {
-      setAiAnswer(null);
-      chat.ask(userInput, [], mapCommandToModel(requestedCommand));
+    if (!userInput || !requestedCommand || models.isFetching) {
+      return;
     }
-  }, [userInput, requestedCommand]);
+
+    (async () => {
+      const auth = await resolveAuthStatus();
+      const modelOption = resolveModelOptionForAuth(requestedCommand.model, auth.provider, models.option);
+      const model = { ...mapCommandToModel(requestedCommand), option: modelOption };
+
+      setAiAnswer(null);
+      setEffectiveModel(modelOption);
+      chat.ask(userInput, [], model);
+    })();
+  }, [models.isFetching, models.option, userInput, requestedCommand]);
 
   useEffect(() => {
     if (!chat.streamData && !chat.isLoading && chat.data.length > 0) {
@@ -80,6 +124,7 @@ export default function CommandView(props: CommandLaunchProps) {
 
   const viewBuilder = new CommandViewBuilder(
     requestedCommand,
+    effectiveModel ?? requestedCommand.model,
     chat,
     navigation,
     frontmostApp,
@@ -96,6 +141,7 @@ class CommandViewBuilder {
   totalViewWidthPx: number;
 
   command: Command;
+  displayModel: string;
   chat: ChatHook;
   navigation: Navigation;
   frontmostApp: Application | null;
@@ -105,6 +151,7 @@ class CommandViewBuilder {
 
   constructor(
     command: Command,
+    displayModel: string,
     chat: ChatHook,
     navigation: Navigation,
     frontmostApp: Application | null,
@@ -116,6 +163,7 @@ class CommandViewBuilder {
     this.iconSizePx = 17;
 
     this.command = command;
+    this.displayModel = displayModel;
     this.chat = chat;
     this.navigation = navigation;
     this.frontmostApp = frontmostApp;
@@ -148,13 +196,18 @@ class CommandViewBuilder {
       footerMessage = "Continue in Chat ⌘ + 🅹";
     }
 
+    const modelLabel =
+      this.displayModel === this.command.model
+        ? this.displayModel
+        : `${this.displayModel} (switched from ${this.command.model})`;
+
     return `${this.generateTitleSvg(this.command.name)}
 
 ${inputTemplate}
 
 ${this.aiAnswer || "..."}
 
-${this.generateStatFooterSvg(this.command.model, footerMessage, chatWidthPx, footerMessageColor)}
+${this.generateStatFooterSvg(modelLabel, footerMessage, chatWidthPx, footerMessageColor)}
 
 ${this.error ? "---" : ""}
 ${this.error || ""}`;
@@ -252,7 +305,8 @@ ${this.error || ""}`;
               conversation={{
                 id: uuidv4(),
                 chats: this.chat.data,
-                model: mapCommandToModel(this.command),
+                model: { ...mapCommandToModel(this.command), option: this.displayModel },
+                codexThreadId: this.chat.codexThreadId,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 pinned: false,

@@ -1,6 +1,6 @@
 import { canAccessBrowserExtension } from "./utils/browser";
 import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
 import { showFailureToast } from "@raycast/utils";
@@ -10,8 +10,19 @@ import { open } from "@raycast/api";
 import { PrimaryAction } from "./actions";
 import { useBrowserContent } from "./hooks/useBrowser";
 import { CacheAdapter } from "./utils/cache";
+import { AuthProvider, resolveAuthStatus } from "./utils/auth";
+import { filterModelsForAuth, orderModelsForSelection } from "./utils/model-support";
+import { AuthGate } from "./views/auth-required";
 
 export default function Summarize() {
+  return (
+    <AuthGate>
+      <SummarizeView />
+    </AuthGate>
+  );
+}
+
+function SummarizeView() {
   if (!canAccessBrowserExtension()) {
     return (
       <List
@@ -45,17 +56,33 @@ export default function Summarize() {
     setQuestion(content || "");
   }, [loading, content, browserError]);
 
-  const { data, isLoading: modelLoading } = useModel();
-
-  const [defaultModel, setDefaultModel] = useState<Model | null>(null);
-  const [separateDefaultModel, setSeparateDefaultModel] = useState<Model[] | null>(null);
+  const { data, isLoading: modelLoading, option } = useModel();
+  const [authProvider, setAuthProvider] = useState<AuthProvider>("none");
 
   useEffect(() => {
-    if (!modelLoading) {
-      setSeparateDefaultModel(Object.values(data).filter((x) => x.id !== "default"));
-      setDefaultModel(data["default"] ?? DEFAULT_MODEL);
-    }
-  }, [modelLoading]);
+    resolveAuthStatus().then((auth) => {
+      setAuthProvider(auth.provider);
+    });
+  }, []);
+
+  const availableModels = useMemo(() => {
+    return orderModelsForSelection(filterModelsForAuth(Object.values(data), authProvider, option));
+  }, [data, authProvider, option]);
+
+  const defaultModel = useMemo<Model>(() => {
+    return availableModels.find((model) => model.id === "default") ?? availableModels[0] ?? DEFAULT_MODEL;
+  }, [availableModels]);
+
+  const separateDefaultModel = useMemo(() => {
+    return availableModels.filter((model) => model.id !== defaultModel.id);
+  }, [availableModels, defaultModel.id]);
+
+  const modelsById = useMemo(() => {
+    return availableModels.reduce<Record<string, Model>>((acc, model) => {
+      acc[model.id] = model;
+      return acc;
+    }, {});
+  }, [availableModels]);
 
   const [selectedModelId, setSelectedModelId] = useState<string>("default");
   const cache = new CacheAdapter("select_model");
@@ -68,6 +95,16 @@ export default function Summarize() {
   useEffect(() => {
     cache.set(selectedModelId);
   }, [selectedModelId]);
+
+  useEffect(() => {
+    if (modelLoading || availableModels.length === 0) {
+      return;
+    }
+
+    if (!modelsById[selectedModelId]) {
+      setSelectedModelId(defaultModel.id);
+    }
+  }, [modelLoading, availableModels, modelsById, selectedModelId, defaultModel.id]);
 
   const RetryAction = () => {
     // - retry for browser retrieve failed
@@ -87,13 +124,14 @@ export default function Summarize() {
             title="Submit"
             icon={Icon.Checkmark}
             onAction={() => {
-              const chooseModel = data[selectedModelId] || DEFAULT_MODEL;
+              const chooseModel = modelsById[selectedModelId] ?? defaultModel;
               // PS: Ask page back to Summarize is purely new conversation
               // we don't want to maintain the old conversation
               const conversation: Conversation = {
                 id: uuidv4(),
                 chats: [],
                 model: chooseModel,
+                codexThreadId: null,
                 pinned: false,
                 updated_at: "",
                 created_at: new Date().toISOString(),
@@ -137,10 +175,9 @@ export default function Summarize() {
               <Form.Dropdown.Item key={defaultModel.id} title={defaultModel.name} value={defaultModel.id} />
             )}
             <Form.Dropdown.Section title="Custom Models">
-              {separateDefaultModel &&
-                separateDefaultModel.map((model) => (
-                  <Form.Dropdown.Item value={model.id} title={model.name} key={model.id} />
-                ))}
+              {separateDefaultModel.map((model) => (
+                <Form.Dropdown.Item value={model.id} title={model.name} key={model.id} />
+              ))}
             </Form.Dropdown.Section>
           </Form.Dropdown>
         )

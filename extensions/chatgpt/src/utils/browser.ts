@@ -1,10 +1,7 @@
 import { BrowserExtension, environment, getPreferenceValues } from "@raycast/api";
 import { YoutubeTranscript } from "youtube-transcript";
-import fetch from "cross-fetch";
 import * as fs from "node:fs";
 import { showFailureToast } from "@raycast/utils";
-
-global.fetch = fetch;
 
 export function canAccessBrowserExtension() {
   return environment.canAccess(BrowserExtension);

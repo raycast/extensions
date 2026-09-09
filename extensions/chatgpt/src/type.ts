@@ -23,6 +23,7 @@ export interface Conversation {
   id: string;
   model: Model;
   chats: Chat[];
+  codexThreadId?: string | null;
   updated_at: string;
   created_at: string;
   pinned: boolean;
@@ -96,6 +97,7 @@ export type ModelHook = BaseHook<Record<string, Model>> &
 
 export interface ChatHook {
   data: Chat[];
+  codexThreadId: string | null;
   errorMsg: string | null;
   setData: Set<Chat[]>;
   isLoading: boolean;

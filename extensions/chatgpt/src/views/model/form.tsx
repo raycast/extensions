@@ -3,8 +3,9 @@ import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { CSVPrompt, Model, ModelHook, ReasoningEffort } from "../../type";
 import { parse } from "csv-parse/sync";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getConfiguration } from "../../hooks/useChatGPT";
+import { orderModelOptionsForSelection } from "../../utils/model-support";
 
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
@@ -61,7 +62,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     initialValues: {
       name: model?.name ?? props.name ?? "",
       temperature: model?.temperature.toString() ?? "1",
-      option: model?.option ?? "gpt-5-nano",
+      option: model?.option ?? "gpt-5.4-mini",
       prompt: model?.prompt ?? "You are a helpful assistant.",
       enableReasoningEffortChange: model?.enableReasoningEffortChange ?? false,
       reasoningEffort: model?.reasoningEffort ?? "medium",
@@ -70,7 +71,20 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     },
   });
 
-  const MODEL_OPTIONS = use.models.option;
+  const MODEL_OPTIONS = useMemo(() => {
+    return orderModelOptionsForSelection(use.models.option);
+  }, [use.models.option]);
+
+  useEffect(() => {
+    if (isCustomModel) {
+      return;
+    }
+
+    const currentOption = String(itemProps.option.value ?? "");
+    if (!MODEL_OPTIONS.includes(currentOption) && MODEL_OPTIONS.length > 0) {
+      setValue("option", MODEL_OPTIONS[0]);
+    }
+  }, [MODEL_OPTIONS, isCustomModel, itemProps.option.value, setValue]);
 
   const { isLoading, data } = useFetch<CSVPrompt[]>(
     "https://raw.githubusercontent.com/awesome-chatgpt-prompts/awesome-chatgpt-prompts-github/awesome-chatgpt-prompts/prompts.csv",

@@ -155,10 +155,10 @@
     {
       "name": "apiKey",
       "label": "Open AI API Key",
-      "description": "Enter your personal Open AI API Key",
+      "description": "Enter your personal Open AI API Key (optional when using ChatGPT sign-in)",
       "type": "password",
       "title": "API Key",
-      "required": true
+      "required": false
     },
     {
       "name": "useStream",
@@ -349,7 +349,6 @@
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.2",
     "@types/uuid": "^10.0.0",
-    "cross-fetch": "^4.1.0",
     "csv-parse": "^5.6.0",
     "image-meta": "^0.2.1",
     "moment": "^2.30.1",
@@ -358,24 +357,25 @@
     "proxy-agent": "^6.5.0",
     "run-applescript": "^7.0.0",
     "say": "^0.16.0",
+    "tar": "^7.5.13",
     "uuid": "^9.0.0",
     "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/plist": "^3.0.5",
     "@types/node": "^22.19.1",
+    "@types/plist": "^3.0.5",
     "@types/react": "^19.2.7",
     "eslint": "^9.39.1",
     "prettier": "^3.7.3",
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
+    "build": "node ./scripts/vendor-codex-runtime.mjs && ray build -e dist",
+    "dev": "node ./scripts/vendor-codex-runtime.mjs && ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish",
+    "publish": "node ./scripts/vendor-codex-runtime.mjs && ray publish",
     "pull": "ray pull-contributions"
   }
 }
