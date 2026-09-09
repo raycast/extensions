@@ -12,7 +12,7 @@ export function useProxy(): Agent {
     // They trust the system certificate store (and honour the system proxy when it is enabled),
     // whereas the OpenAI SDK's default agent only trusts Node's bundled root certificates,
     // which breaks endpoints behind a TLS-inspecting corporate proxy.
-    return (getConfigUrl(prefs) ?? "").startsWith("http:") ? http.globalAgent : https.globalAgent;
+    return /^\s*http:/i.test(getConfigUrl(prefs) ?? "") ? http.globalAgent : https.globalAgent;
   }
 
   let proxyUrl = `${prefs.proxyProtocol}://${prefs.proxyHost}:${prefs.proxyPort}`;
