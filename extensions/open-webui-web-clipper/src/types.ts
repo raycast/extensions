@@ -3,12 +3,6 @@ export type SendMode = "save" | "chat" | "append";
 export type PromptMode = "none" | "discuss" | "summarize" | "research";
 export type OpenAfterSendMode = "never" | "send_only" | "always";
 
-export interface PreferencesShape {
-  baseUrl: string;
-  apiKey: string;
-  openAfterSendMode?: OpenAfterSendMode;
-}
-
 export interface Clip {
   mode: CaptureMode;
   title: string;

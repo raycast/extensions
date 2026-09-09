@@ -8,7 +8,6 @@ import type {
   Folder,
   FolderAttachment,
   ModelInfo,
-  PreferencesShape,
   UploadedFile,
 } from "./types";
 import { clipToMarkdown, safeFilename } from "./capture";
@@ -37,7 +36,7 @@ function dedupeFiles(files: ChatFileRef[]): ChatFileRef[] {
 }
 
 export class OpenWebUIClient {
-  constructor(private readonly prefs: PreferencesShape) {}
+  constructor(private readonly prefs: Preferences) {}
 
   get baseUrl(): string {
     return normalizeBaseUrl(this.prefs.baseUrl);
@@ -80,7 +79,9 @@ export class OpenWebUIClient {
   }
 
   async getFolder(folderId: string): Promise<Folder> {
-    return this.request<Folder>(`/api/v1/folders/${encodeURIComponent(folderId)}`);
+    return this.request<Folder>(
+      `/api/v1/folders/${encodeURIComponent(folderId)}`,
+    );
   }
 
   async getModels(): Promise<ModelInfo[]> {
@@ -89,14 +90,21 @@ export class OpenWebUIClient {
   }
 
   async getChats(folderId: string): Promise<ChatRecord[]> {
-    return this.request<ChatRecord[]>(`/api/v1/chats/folder/${encodeURIComponent(folderId)}`);
+    return this.request<ChatRecord[]>(
+      `/api/v1/chats/folder/${encodeURIComponent(folderId)}`,
+    );
   }
 
   async getChat(chatId: string): Promise<ChatRecord> {
-    return this.request<ChatRecord>(`/api/v1/chats/${encodeURIComponent(chatId)}`);
+    return this.request<ChatRecord>(
+      `/api/v1/chats/${encodeURIComponent(chatId)}`,
+    );
   }
 
-  async uploadClipAsMarkdown(clip: Clip, processInBackground = true): Promise<UploadedFile> {
+  async uploadClipAsMarkdown(
+    clip: Clip,
+    processInBackground = true,
+  ): Promise<UploadedFile> {
     const form = new FormData();
     form.append(
       "file",
@@ -125,7 +133,9 @@ export class OpenWebUIClient {
       ...(typeof file.meta?.size === "number" ? { size: file.meta.size } : {}),
       context: "full",
       file,
-      ...(file.meta?.collection_name ? { collection_name: file.meta.collection_name } : {}),
+      ...(file.meta?.collection_name
+        ? { collection_name: file.meta.collection_name }
+        : {}),
     };
   }
 
@@ -136,7 +146,8 @@ export class OpenWebUIClient {
           `/api/v1/files/${encodeURIComponent(fileId)}/process/status`,
         );
         if (state.status === "completed") return;
-        if (state.status === "failed") throw new Error(state.error || "File processing failed.");
+        if (state.status === "failed")
+          throw new Error(state.error || "File processing failed.");
       } catch (error) {
         if (attempt === maxAttempts - 1) throw error;
       }
@@ -144,10 +155,16 @@ export class OpenWebUIClient {
     }
   }
 
-  async attachFileToFolder(folderId: string, file: UploadedFile, clip: Clip): Promise<Folder> {
+  async attachFileToFolder(
+    folderId: string,
+    file: UploadedFile,
+    clip: Clip,
+  ): Promise<Folder> {
     const folder = await this.getFolder(folderId);
     const current = Array.isArray(folder.data?.files) ? folder.data.files : [];
-    const exists = current.some((item) => item.type === "file" && item.id === file.id);
+    const exists = current.some(
+      (item) => item.type === "file" && item.id === file.id,
+    );
     if (exists) return folder;
 
     // Open WebUI folder knowledge is keyed by resource type + id. Keep the stored
@@ -158,27 +175,38 @@ export class OpenWebUIClient {
       name: file.filename || file.meta?.name || safeFilename(clip.title),
     };
 
-    const updated = await this.request<Folder>(`/api/v1/folders/${encodeURIComponent(folderId)}/update`, {
-      method: "POST",
-      body: JSON.stringify({
-        data: {
-          ...(folder.data ?? {}),
-          files: [...current, attachment],
-        },
-      }),
-    });
+    const updated = await this.request<Folder>(
+      `/api/v1/folders/${encodeURIComponent(folderId)}/update`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          data: {
+            ...(folder.data ?? {}),
+            files: [...current, attachment],
+          },
+        }),
+      },
+    );
 
-    const savedInResponse = updated.data?.files?.some((item) => item.type === "file" && item.id === file.id);
+    const savedInResponse = updated.data?.files?.some(
+      (item) => item.type === "file" && item.id === file.id,
+    );
     if (!savedInResponse) {
-      throw new Error("Open WebUI accepted the folder update but did not return the saved file in folder.data.files.");
+      throw new Error(
+        "Open WebUI accepted the folder update but did not return the saved file in folder.data.files.",
+      );
     }
 
     // Re-read from the server. A silent/no-op folder update must be reported as an
     // error instead of looking like a successful Quick Save.
     const verified = await this.getFolder(folderId);
-    const persisted = verified.data?.files?.some((item) => item.type === "file" && item.id === file.id);
+    const persisted = verified.data?.files?.some(
+      (item) => item.type === "file" && item.id === file.id,
+    );
     if (!persisted) {
-      throw new Error("The file was uploaded, but Open WebUI did not persist it as a source for the selected folder.");
+      throw new Error(
+        "The file was uploaded, but Open WebUI did not persist it as a source for the selected folder.",
+      );
     }
 
     return verified;
@@ -187,14 +215,21 @@ export class OpenWebUIClient {
   async saveClipToFolder(
     folderId: string,
     clip: Clip,
-  ): Promise<{ fileId: string; filename: string; folderId: string; folderName: string }> {
+  ): Promise<{
+    fileId: string;
+    filename: string;
+    folderId: string;
+    folderName: string;
+  }> {
     // Quick Save must not report success before Open WebUI has processed the file.
     const file = await this.uploadClipAsMarkdown(clip, false);
     const state = await this.request<{ status?: string; error?: string }>(
       `/api/v1/files/${encodeURIComponent(file.id)}/process/status`,
     );
     if (state.status === "failed") {
-      throw new Error(state.error || "Open WebUI could not process the saved Markdown file.");
+      throw new Error(
+        state.error || "Open WebUI could not process the saved Markdown file.",
+      );
     }
 
     const folder = await this.attachFileToFolder(folderId, file, clip);
@@ -208,7 +243,9 @@ export class OpenWebUIClient {
 
   private extractGeneratedTitle(body: unknown): string | null {
     if (!body || typeof body !== "object") return null;
-    const choices = (body as { choices?: Array<{ message?: { content?: string } }> }).choices;
+    const choices = (
+      body as { choices?: Array<{ message?: { content?: string } }> }
+    ).choices;
     const content = choices?.[0]?.message?.content?.trim();
     if (!content) return null;
 
@@ -216,8 +253,11 @@ export class OpenWebUIClient {
     const end = content.lastIndexOf("}");
     if (start >= 0 && end > start) {
       try {
-        const parsed = JSON.parse(content.slice(start, end + 1)) as { title?: unknown };
-        if (typeof parsed.title === "string" && parsed.title.trim()) return parsed.title.trim();
+        const parsed = JSON.parse(content.slice(start, end + 1)) as {
+          title?: unknown;
+        };
+        if (typeof parsed.title === "string" && parsed.title.trim())
+          return parsed.title.trim();
       } catch {
         // Fall through to plain-text handling.
       }
@@ -244,10 +284,17 @@ export class OpenWebUIClient {
         ...message,
         content: message.content.slice(0, 8000),
       }));
-      const result = await this.request<unknown>("/api/v1/tasks/title/completions", {
-        method: "POST",
-        body: JSON.stringify({ model, messages: titleMessages, chat_id: chatId }),
-      });
+      const result = await this.request<unknown>(
+        "/api/v1/tasks/title/completions",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            model,
+            messages: titleMessages,
+            chat_id: chatId,
+          }),
+        },
+      );
       title = this.extractGeneratedTitle(result) || fallbackTitle;
     } catch {
       // Title generation may be disabled or the configured task model may be unavailable.
@@ -288,7 +335,8 @@ export class OpenWebUIClient {
     // done=true. Open WebUI's MessageInput treats any current message with
     // done != true as active, regardless of role, so this avoids both the stuck
     // Stop button and a fake/blank assistant response.
-    const assistantId = assistantState === "pending" ? crypto.randomUUID() : null;
+    const assistantId =
+      assistantState === "pending" ? crypto.randomUUID() : null;
     const timestamp = Math.floor(Date.now() / 1000);
 
     const userMessage: ChatMessage = {
@@ -302,7 +350,9 @@ export class OpenWebUIClient {
       ...(files.length ? { files } : {}),
     };
 
-    const historyMessages: Record<string, ChatMessage> = { [userId]: userMessage };
+    const historyMessages: Record<string, ChatMessage> = {
+      [userId]: userMessage,
+    };
     const flatMessages: ChatMessage[] = [userMessage];
     let currentId = userId;
 
@@ -349,36 +399,45 @@ export class OpenWebUIClient {
     userMessage?: ChatMessage,
     folderId?: string | null,
   ): Promise<void> {
-    const response = await fetch(mergeUrl(this.baseUrl, "/api/chat/completions"), {
-      method: "POST",
-      headers: this.headers(true),
-      body: JSON.stringify({
-        chat_id: chatId,
-        id: assistantId,
-        messages,
-        model,
-        ...(files.length ? { files } : {}),
-        ...(folderId ? { folder_id: folderId } : {}),
-        ...(userMessage ? { user_message: userMessage, parent_id: userMessage.parentId ?? null } : {}),
-        stream: true,
-        background_tasks: {
-          title_generation: true,
-          tags_generation: false,
-          follow_up_generation: false,
-        },
-        features: {
-          code_interpreter: false,
-          web_search: false,
-          image_generation: false,
-          memory: false,
-        },
-        variables: {
-          "{{CURRENT_DATETIME}}": new Date().toISOString(),
-          "{{CURRENT_TIMEZONE}}": Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-        session_id: crypto.randomUUID(),
-      }),
-    });
+    const response = await fetch(
+      mergeUrl(this.baseUrl, "/api/chat/completions"),
+      {
+        method: "POST",
+        headers: this.headers(true),
+        body: JSON.stringify({
+          chat_id: chatId,
+          id: assistantId,
+          messages,
+          model,
+          ...(files.length ? { files } : {}),
+          ...(folderId ? { folder_id: folderId } : {}),
+          ...(userMessage
+            ? {
+                user_message: userMessage,
+                parent_id: userMessage.parentId ?? null,
+              }
+            : {}),
+          stream: true,
+          background_tasks: {
+            title_generation: true,
+            tags_generation: false,
+            follow_up_generation: false,
+          },
+          features: {
+            code_interpreter: false,
+            web_search: false,
+            image_generation: false,
+            memory: false,
+          },
+          variables: {
+            "{{CURRENT_DATETIME}}": new Date().toISOString(),
+            "{{CURRENT_TIMEZONE}}":
+              Intl.DateTimeFormat().resolvedOptions().timeZone,
+          },
+          session_id: crypto.randomUUID(),
+        }),
+      },
+    );
 
     if (!response.ok) {
       const text = await response.text();
@@ -396,7 +455,9 @@ export class OpenWebUIClient {
       try {
         const body = JSON.parse(text) as { status?: boolean; detail?: unknown };
         if (body.status === false) {
-          throw new Error(`Open WebUI rejected completion: ${errorDetail(body.detail ?? body)}`);
+          throw new Error(
+            `Open WebUI rejected completion: ${errorDetail(body.detail ?? body)}`,
+          );
         }
       } catch (error) {
         if (error instanceof SyntaxError) {
@@ -420,11 +481,15 @@ export class OpenWebUIClient {
     }
   }
 
-  private async markAssistantDone(chatId: string, assistantId: string): Promise<void> {
+  private async markAssistantDone(
+    chatId: string,
+    assistantId: string,
+  ): Promise<void> {
     const current = await this.getChat(chatId);
     const map = current.chat?.history?.messages ?? {};
     const assistant = map[assistantId];
-    if (!assistant || assistant.role !== "assistant" || assistant.done === true) return;
+    if (!assistant || assistant.role !== "assistant" || assistant.done === true)
+      return;
 
     const finished: ChatMessage = { ...assistant, done: true };
     const nextMap = { ...map, [assistantId]: finished };
@@ -444,7 +509,6 @@ export class OpenWebUIClient {
       }),
     });
   }
-
 
   async saveClipAsVisibleChat(
     folderId: string,
@@ -469,7 +533,14 @@ export class OpenWebUIClient {
     // Keep Quick Save as a completed user-only clip. The user message is marked
     // done=true by createChat(), so Open WebUI shows the normal idle input without
     // rendering a misleading empty assistant/model response.
-    const chat = await this.createChat(folderId, model, content, title, [fileRef], "completed");
+    const chat = await this.createChat(
+      folderId,
+      model,
+      content,
+      title,
+      [fileRef],
+      "completed",
+    );
     const warnings: string[] = [];
 
     // Also attach the same file as folder-level knowledge when possible. This is
@@ -506,15 +577,26 @@ export class OpenWebUIClient {
   ): Promise<ChatOperationResult> {
     const uploaded = await this.uploadClipAsMarkdown(clip, false);
     const fileRef = this.toChatFileRef(uploaded, clip);
-    const chat = await this.createChat(folderId, model, content, title, [fileRef], "pending");
+    const chat = await this.createChat(
+      folderId,
+      model,
+      content,
+      title,
+      [fileRef],
+      "pending",
+    );
     const warnings: string[] = [];
 
     const map = chat.chat?.history?.messages ?? {};
-    const userMessage = Object.values(map).find((message) => message.role === "user");
+    const userMessage = Object.values(map).find(
+      (message) => message.role === "user",
+    );
     const assistantId = chat.chat?.history?.currentId;
 
     if (!assistantId || !userMessage) {
-      warnings.push("The chat was created, but the automatic model response could not be prepared.");
+      warnings.push(
+        "The chat was created, but the automatic model response could not be prepared.",
+      );
       return { chat, warnings };
     }
 
@@ -569,7 +651,9 @@ export class OpenWebUIClient {
     );
     const warnings: string[] = [];
     const map = chat.chat?.history?.messages ?? {};
-    const userMessage = Object.values(map).find((message) => message.role === "user");
+    const userMessage = Object.values(map).find(
+      (message) => message.role === "user",
+    );
     const assistantId = generate ? chat.chat?.history?.currentId : null;
 
     if (generate && assistantId && userMessage) {
@@ -589,7 +673,9 @@ export class OpenWebUIClient {
         } catch {
           // Best effort: the chat itself already exists and must remain accessible.
         }
-        warnings.push(`The chat was created, but the automatic model response did not start: ${error instanceof Error ? error.message : String(error)}`);
+        warnings.push(
+          `The chat was created, but the automatic model response did not start: ${error instanceof Error ? error.message : String(error)}`,
+        );
       }
     }
 
@@ -599,11 +685,22 @@ export class OpenWebUIClient {
     try {
       await this.attachFileToFolder(folderId, uploaded, clip);
     } catch (error) {
-      warnings.push(`The file is attached to the message, but it could not be confirmed as a folder source: ${error instanceof Error ? error.message : String(error)}`);
+      warnings.push(
+        `The file is attached to the message, but it could not be confirmed as a folder source: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
 
-    const finalTitle = await this.generateAndSaveTitle(chat.id, model, [{ role: "user", content }], title);
-    const finalChat = { ...chat, title: finalTitle, chat: { ...chat.chat, title: finalTitle } };
+    const finalTitle = await this.generateAndSaveTitle(
+      chat.id,
+      model,
+      [{ role: "user", content }],
+      title,
+    );
+    const finalChat = {
+      ...chat,
+      title: finalTitle,
+      chat: { ...chat.chat, title: finalTitle },
+    };
     return { chat: finalChat, warnings };
   }
 
@@ -611,17 +708,27 @@ export class OpenWebUIClient {
     const direct = chat.chat?.models?.[0];
     if (direct) return direct;
     const messages = Object.values(chat.chat?.history?.messages ?? {});
-    const lastAssistant = [...messages].reverse().find((message) => message.role === "assistant" && message.model);
+    const lastAssistant = [...messages]
+      .reverse()
+      .find((message) => message.role === "assistant" && message.model);
     return lastAssistant?.model || "";
   }
 
-  async appendToChat(chatId: string, content: string, clip: Clip, generate = true): Promise<ChatOperationResult> {
+  async appendToChat(
+    chatId: string,
+    content: string,
+    clip: Clip,
+    generate = true,
+  ): Promise<ChatOperationResult> {
     const existing = await this.getChat(chatId);
     const history = existing.chat?.history ?? { messages: {}, currentId: null };
     const messagesMap = history.messages ?? {};
     const previousId = history.currentId ?? existing.chat?.currentId ?? null;
     const model = this.inferModel(existing);
-    if (!model) throw new Error("Could not determine the model used by the existing chat.");
+    if (!model)
+      throw new Error(
+        "Could not determine the model used by the existing chat.",
+      );
 
     const uploaded = await this.uploadClipAsMarkdown(clip, false);
     const fileRef = this.toChatFileRef(uploaded, clip);
@@ -677,11 +784,15 @@ export class OpenWebUIClient {
 
     const legacyMessages = [...(existing.chat?.messages ?? [])];
     if (previousId) {
-      const previousIndex = legacyMessages.findIndex((message) => message.id === previousId);
-      if (previousIndex >= 0 && mergedMessages[previousId]) legacyMessages[previousIndex] = mergedMessages[previousId];
+      const previousIndex = legacyMessages.findIndex(
+        (message) => message.id === previousId,
+      );
+      if (previousIndex >= 0 && mergedMessages[previousId])
+        legacyMessages[previousIndex] = mergedMessages[previousId];
     }
     legacyMessages.push(userMessage);
-    if (assistantId && mergedMessages[assistantId]) legacyMessages.push(mergedMessages[assistantId]);
+    if (assistantId && mergedMessages[assistantId])
+      legacyMessages.push(mergedMessages[assistantId]);
 
     const chatFiles = dedupeFiles([...(existing.chat?.files ?? []), fileRef]);
     const updatedChat: ChatData = {
@@ -708,12 +819,18 @@ export class OpenWebUIClient {
 
     if (generate && assistantId) {
       try {
-        const ordered = this.linearizeMessages(existing.chat);
+        const ordered = this.activeBranchMessages(existing.chat);
         await this.runCompletion(
           chatId,
           assistantId,
           model,
-          [...ordered.map((message) => ({ role: message.role, content: message.content })), { role: "user", content }],
+          [
+            ...ordered.map((message) => ({
+              role: message.role,
+              content: message.content,
+            })),
+            { role: "user", content },
+          ],
           [fileRef],
           userMessage,
           existing.folder_id ?? null,
@@ -724,7 +841,9 @@ export class OpenWebUIClient {
         } catch {
           // Best effort: keep the conversation usable even when generation fails.
         }
-        warnings.push(`The message was added, but the automatic model response did not start: ${error instanceof Error ? error.message : String(error)}`);
+        warnings.push(
+          `The message was added, but the automatic model response did not start: ${error instanceof Error ? error.message : String(error)}`,
+        );
       }
     }
 
@@ -732,26 +851,42 @@ export class OpenWebUIClient {
       try {
         await this.attachFileToFolder(existing.folder_id, uploaded, clip);
       } catch (error) {
-        warnings.push(`The file is attached to the message, but it could not be confirmed as a folder source: ${error instanceof Error ? error.message : String(error)}`);
+        warnings.push(
+          `The file is attached to the message, but it could not be confirmed as a folder source: ${error instanceof Error ? error.message : String(error)}`,
+        );
       }
     }
 
     return { chat: await this.getChat(chatId), warnings };
   }
 
-  private linearizeMessages(chat: ChatData): ChatMessage[] {
+  private activeBranchMessages(chat: ChatData): ChatMessage[] {
     const map = chat.history?.messages ?? {};
     if (!Object.keys(map).length) return chat.messages ?? [];
-    const result: ChatMessage[] = [];
-    let currentId: string | undefined = Object.values(map).find((m) => !m.parentId)?.id;
+
+    // Open WebUI chats can branch after edits/regenerations. `history.currentId`
+    // identifies the leaf that is active in the UI. Reconstruct that exact branch
+    // by walking parentId backwards; following childrenIds[0] can silently select
+    // a different historical branch and send the wrong context to the model.
+    let currentId = chat.history?.currentId ?? chat.currentId ?? undefined;
+    if (!currentId || !map[currentId]) return chat.messages ?? [];
+
+    const reversed: ChatMessage[] = [];
     const seen = new Set<string>();
     while (currentId && map[currentId] && !seen.has(currentId)) {
       seen.add(currentId);
-      const message = map[currentId];
-      if (message.role === "user" || message.role === "assistant" || message.role === "system") result.push(message);
-      currentId = message.childrenIds?.[0];
+      const message: ChatMessage = map[currentId];
+      if (
+        message.role === "user" ||
+        message.role === "assistant" ||
+        message.role === "system"
+      ) {
+        reversed.push(message);
+      }
+      currentId = message.parentId ?? undefined;
     }
-    return result;
+
+    return reversed.reverse();
   }
 
   folderUrl(folderId: string): string {

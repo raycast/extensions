@@ -4,22 +4,58 @@ import type { CaptureMode, Clip } from "./types";
 async function getCurrentTabMeta(): Promise<{ title: string; url: string }> {
   let title = "Untitled page";
   try {
-    const pageTitle = await BrowserExtension.getContent({ cssSelector: "title", format: "text" });
+    const pageTitle = await BrowserExtension.getContent({
+      cssSelector: "title",
+      format: "text",
+    });
     if (pageTitle.trim()) title = pageTitle.trim();
   } catch {
-    // We can still use getTabs below.
+    // Metadata can still be partially recovered from the tab list.
   }
 
   try {
-    const tabs = (await BrowserExtension.getTabs()) as Array<{ active: boolean; title?: string; url: string }>;
-    const activeTabs = tabs.filter((tab: { active: boolean }) => tab.active);
-    const matching = activeTabs.find((tab: { title?: string }) => (tab.title ?? "").trim() === title);
-    const tab = matching ?? activeTabs[0];
-    if (tab) {
-      return {
-        title: tab.title?.trim() || title,
-        url: tab.url || "",
-      };
+    const tabs = await BrowserExtension.getTabs();
+    const activeTabs = tabs.filter((tab) => tab.active);
+    if (activeTabs.length === 1) {
+      const tab = activeTabs[0];
+      return { title: tab.title?.trim() || title, url: tab.url || "" };
+    }
+
+    // getContent() without tabId always targets the active tab in the focused
+    // browser window. getTabs(), however, can return one active tab per window.
+    // A unique title match is therefore safe; otherwise verify candidates by
+    // comparing their visible text to the focused tab. Never guess a URL when
+    // the focused tab cannot be identified unambiguously.
+    const titleMatches = activeTabs.filter(
+      (tab) => (tab.title ?? "").trim() === title,
+    );
+    if (titleMatches.length === 1) {
+      const tab = titleMatches[0];
+      return { title: tab.title?.trim() || title, url: tab.url || "" };
+    }
+
+    if (activeTabs.length > 1) {
+      try {
+        const focusedText = await BrowserExtension.getContent({
+          format: "text",
+        });
+        const candidates = titleMatches.length ? titleMatches : activeTabs;
+        const contentMatches: typeof candidates = [];
+        for (const tab of candidates) {
+          const tabText = await BrowserExtension.getContent({
+            tabId: tab.id,
+            format: "text",
+          });
+          if (tabText === focusedText) contentMatches.push(tab);
+        }
+        if (contentMatches.length === 1) {
+          const tab = contentMatches[0];
+          return { title: tab.title?.trim() || title, url: tab.url || "" };
+        }
+      } catch {
+        // Fall through to a title-only result rather than attributing the clip
+        // to a different browser window.
+      }
     }
   } catch {
     // Return title-only fallback.
@@ -38,7 +74,9 @@ export async function capture(mode: CaptureMode): Promise<Clip> {
       throw new Error("No text is selected in the browser.");
     }
   } else if (mode === "page") {
-    content = (await BrowserExtension.getContent({ format: "markdown" })).trim();
+    content = (
+      await BrowserExtension.getContent({ format: "markdown" })
+    ).trim();
     if (!content) {
       throw new Error("Could not extract content from the current page.");
     }
@@ -68,7 +106,11 @@ function readablePreview(clip: Clip): string {
   return `${clean.slice(0, limit).trimEnd()}\n\n…`;
 }
 
-export function buildPrompt(clip: Clip, promptMode: string, customInstruction?: string): string {
+export function buildPrompt(
+  clip: Clip,
+  promptMode: string,
+  customInstruction?: string,
+): string {
   const instruction = customInstruction?.trim()
     ? customInstruction.trim()
     : promptMode === "summarize"
@@ -79,12 +121,25 @@ export function buildPrompt(clip: Clip, promptMode: string, customInstruction?: 
           ? "Let's discuss the attached material. Start by identifying what is most important, interesting, or actionable. Reply in the language of the source material unless instructed otherwise."
           : "The material is attached as context. Use the source carefully, avoid unsupported assumptions, and reply in the language of the source material unless instructed otherwise.";
 
-  const lines = [instruction, "", `Source: ${clip.url || "URL unavailable"}`, `Title: ${clip.title}`];
+  const lines = [
+    instruction,
+    "",
+    `Source: ${clip.url || "URL unavailable"}`,
+    `Title: ${clip.title}`,
+  ];
   const preview = readablePreview(clip);
   if (preview) {
-    lines.push("", clip.mode === "selection" ? "Captured selection:" : "Material preview:", "", preview);
+    lines.push(
+      "",
+      clip.mode === "selection" ? "Captured selection:" : "Material preview:",
+      "",
+      preview,
+    );
   }
-  lines.push("", `The full material is attached as ${safeFilename(clip.title)}.`);
+  lines.push(
+    "",
+    `The full material is attached as ${safeFilename(clip.title)}.`,
+  );
   return lines.join("\n");
 }
 
@@ -103,13 +158,15 @@ export function chatTitleFromClip(clip: Clip): string {
 
   const firstMeaningfulLine = clip.content
     .split(/\r?\n/)
-    .map((line) => line
-      .replace(/^\s{0,3}#{1,6}\s+/, "")
-      .replace(/^\s*[-*+>]\s+/, "")
-      .replace(/^\s*\d+[.)]\s+/, "")
-      .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-      .replace(/[*_`~]/g, "")
-      .trim())
+    .map((line) =>
+      line
+        .replace(/^\s{0,3}#{1,6}\s+/, "")
+        .replace(/^\s*[-*+>]\s+/, "")
+        .replace(/^\s*\d+[.)]\s+/, "")
+        .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+        .replace(/[*_`~]/g, "")
+        .trim(),
+    )
     .find((line) => line.length >= 8 && !/^https?:\/\//i.test(line));
 
   if (firstMeaningfulLine) {
@@ -117,7 +174,8 @@ export function chatTitleFromClip(clip: Clip): string {
   }
 
   try {
-    if (clip.url) return new URL(clip.url).hostname.replace(/^www\./, "").slice(0, 120);
+    if (clip.url)
+      return new URL(clip.url).hostname.replace(/^www\./, "").slice(0, 120);
   } catch {
     // Ignore malformed URL and use a neutral fallback.
   }
