@@ -1,6 +1,6 @@
 # UpNote Changelog
 
-## [Fix Special Characters Breaking Note, Notebook and Tag Actions] - {PR_MERGE_DATE}
+## [Fix Special Characters Breaking Note, Notebook and Tag Actions] - 2026-09-09
 
 - Fixed Create Note, Create Notebook and View Tag failing silently when the entered title, text or tag contained an apostrophe or other special characters; x-callback-url parameters are now properly percent-encoded and the URL is opened without going through a shell.
 
