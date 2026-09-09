@@ -14,9 +14,9 @@ Press **Tab** or **Shift-Tab** to switch styles. Up/Down also works. **Enter** c
 
 In ASCII mode, choose **Small**, **Standard**, **Slant**, or **Big** from the font dropdown. Small is the compact default. Text wraps at 60 columns and removes trailing whitespace and empty edge rows. Paste into a code block or monospace field to preserve alignment. Emoji pictures appear as separate blocks in input order, including joined emoji and skin tones.
 
-![ASCII preview in Raycast v2](media/ascii-v2.png)
+![ASCII preview in Raycast v2](media/ascii-clean.png)
 
-![Detailed Unicode dot text in Raycast v2](media/unicode-dots-v2.png)
+![Detailed Unicode dot text in Raycast v2](media/unicode-dots-clean.png)
 
 ### Quick input
 
@@ -30,7 +30,7 @@ Inside CoolText, open **Image to Text Art** from Actions (Command-I on macOS). C
 
 PNG and JPEG are supported. Images must be smaller than 20 MB, at most 16 megapixels, and no more than 8192 pixels on either side. Dimensions are checked before decoding. Character proportions are corrected and tall output is capped at 64 rows. Simple subjects and strong contrast give the clearest results. The action **Use Copied Image File** accepts copied files; raw clipboard screenshots must first be saved as PNG.
 
-![Image dot conversion in Raycast v2](media/image-dots-v2.png)
+![Image dot conversion in Raycast v2](media/image-dots-clean.png)
 
 ## Install locally
 
