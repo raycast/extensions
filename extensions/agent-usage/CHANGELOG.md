@@ -1,5 +1,12 @@
 # Agent Usage Changelog
 
+## [Fix Antigravity Closed-App Quota] - 2026-09-09
+
+### Bug Fixes
+
+- Fetch Antigravity quota via stored Google OAuth credentials when the Antigravity app/`agy` language server is not running, so Agent Usage still shows Gemini/Claude weekly and 5-hour limits
+- Fill Antigravity email and plan on that OAuth path from Google userinfo and Cloud Code `loadCodeAssist`
+
 ## [Apply Saved Provider Order] - 2026-09-09
 
 ### Bug Fixes
