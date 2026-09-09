@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { mkdir, stat, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { isAbsolute, relative, resolve } from "node:path";
 
 import { environment } from "@raycast/api";
 
@@ -17,9 +17,9 @@ const gifFileName = (slug: string): string => {
 const pathInside = (root: string, fileName: string): string => {
   const resolvedRoot = resolve(root);
   const resolved = resolve(resolvedRoot, fileName);
-  const prefix = resolvedRoot.endsWith("/") ? resolvedRoot : `${resolvedRoot}/`;
+  const rel = relative(resolvedRoot, resolved);
 
-  if (resolved !== resolvedRoot && !resolved.startsWith(prefix)) {
+  if (rel === "" || rel.startsWith("..") || isAbsolute(rel)) {
     throw new Error("GIF path escaped directory");
   }
 

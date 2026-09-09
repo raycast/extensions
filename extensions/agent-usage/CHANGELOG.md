@@ -7,6 +7,12 @@
 - Fetch Antigravity quota via stored Google OAuth credentials when the Antigravity app/`agy` language server is not running, so Agent Usage still shows Gemini/Claude weekly and 5-hour limits
 - Fill Antigravity email and plan on that OAuth path from Google userinfo and Cloud Code `loadCodeAssist`
 
+## [Apply Saved Provider Order] - 2026-09-09
+
+### Bug Fixes
+
+- Apply the provider order from Move Up/Down in the list to the menu bar (use Refresh All after reordering)
+
 ## [Add OpenRouter credit balance] - 2026-09-08
 
 ### New Features

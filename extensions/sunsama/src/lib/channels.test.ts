@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { matchesChannel, matchesNoChannel } from "./channels";
+import {
+  matchesChannel,
+  matchesNoChannel,
+  nextChannelPickState,
+} from "./channels";
 import { Channel } from "./types";
 
 const channel = (name: string, categoryName?: string): Channel => ({
@@ -59,5 +63,33 @@ describe("matchesNoChannel", () => {
 
   it("stops matching once the query names something else", () => {
     expect(matchesNoChannel("bark")).toBe(false);
+  });
+});
+
+describe("nextChannelPickState", () => {
+  // The picks the field reports, in order, starting from the channel the form
+  // filled in for the user.
+  const pick = (autoFilled: string | null, ...picks: string[]) =>
+    picks.reduce(nextChannelPickState, { autoFilled, touched: false });
+
+  it("doesn't count the channel the form filled in", () => {
+    expect(pick("Work", "Work").touched).toBe(false);
+  });
+
+  it("counts a channel the user picked", () => {
+    expect(pick("Work", "Work", "The Lab").touched).toBe(true);
+    expect(pick(null, "The Lab").touched).toBe(true);
+  });
+
+  it("counts switching away and back to the channel filled in", () => {
+    expect(pick("Work", "Work", "The Lab", "Work").touched).toBe(true);
+  });
+
+  it("counts a pick made before the channel was filled in", () => {
+    expect(pick(null, "The Lab", "Work").touched).toBe(true);
+  });
+
+  it("counts clearing the channel", () => {
+    expect(pick("Work", "Work", "").touched).toBe(true);
   });
 });

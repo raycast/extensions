@@ -2,6 +2,7 @@ import {
   getPreferenceValues,
   Icon,
   LaunchType,
+  LocalStorage,
   MenuBarExtra,
   launchCommand,
   openCommandPreferences,
@@ -9,10 +10,16 @@ import {
   Keyboard,
 } from "@raycast/api";
 import type { Image } from "@raycast/api";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { formatClock, latestTimestamp } from "./agents/format.ts";
-import { sortByDefaultAgentOrder } from "./agents/order.ts";
+import {
+  AGENT_ORDER_KEY,
+  DEFAULT_AGENT_ORDER,
+  isDefaultAgentId,
+  parseStoredAgentOrder,
+  sortByAgentOrder,
+} from "./agents/order.ts";
 import {
   useAihubmixUsage,
   useAmpUsage,
@@ -84,6 +91,17 @@ function getMenuItemTooltip(usageTooltip?: string): string {
 
 export default function MenuBarCommand() {
   const prefs = getPreferenceValues<AgentVisibilityPreferences>();
+  const [agentOrder, setAgentOrder] = useState<readonly AgentId[]>(DEFAULT_AGENT_ORDER);
+
+  const loadAgentOrder = useCallback(async () => {
+    const stored = await LocalStorage.getItem<string>(AGENT_ORDER_KEY);
+    const parsed = parseStoredAgentOrder(stored, isDefaultAgentId, DEFAULT_AGENT_ORDER);
+    setAgentOrder(parsed ?? DEFAULT_AGENT_ORDER);
+  }, []);
+
+  useEffect(() => {
+    void loadAgentOrder();
+  }, [loadAgentOrder]);
 
   const isAihubmixVisible = Boolean(prefs.showAihubmix);
   const isAmpVisible = Boolean(prefs.showAmp);
@@ -506,7 +524,7 @@ export default function MenuBarCommand() {
 
   const visibleAgents = useMemo(
     () =>
-      sortByDefaultAgentOrder(
+      sortByAgentOrder(
         [
           ...singleAgents,
           ...clinePassAgents,
@@ -516,12 +534,14 @@ export default function MenuBarCommand() {
           ...syntheticAgents,
           ...zaiAgents,
         ].filter((a) => a.visible),
+        agentOrder,
       ),
-    [singleAgents, clinePassAgents, codexAgents, copilotAgents, kimiAgents, syntheticAgents, zaiAgents],
+    [singleAgents, clinePassAgents, codexAgents, copilotAgents, kimiAgents, syntheticAgents, zaiAgents, agentOrder],
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 
   const handleRefresh = async () => {
+    await loadAgentOrder();
     await Promise.all(visibleAgents.map((a) => a.revalidate()));
     await showHUD("Agent Usage Refreshed");
   };

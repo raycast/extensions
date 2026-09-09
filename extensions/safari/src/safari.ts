@@ -188,3 +188,22 @@ export async function closeOtherTabs() {
     return `Error: ${error}`;
   }
 }
+
+// Create before activating to avoid switching to an existing window's Space.
+// Retry activation because Safari can drop it while finishing a cold launch.
+export async function newWindow() {
+  const activationRetries = 10;
+  const activationDelaySeconds = 0.2;
+
+  await runAppleScript(`
+    tell application "${safariAppIdentifier}"
+      make new document
+      repeat ${activationRetries} times
+        activate
+        if frontmost then exit repeat
+        delay ${activationDelaySeconds}
+      end repeat
+      if not frontmost then error "Window created, but ${safariAppIdentifier} did not take focus"
+    end tell
+  `);
+}

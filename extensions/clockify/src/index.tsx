@@ -22,6 +22,7 @@ import {
   getAllTimeEntriesFromLocalStorage,
   fetcher,
   dateDiffToString,
+  resolveConfig,
 } from "./utils";
 import { TimeEntry, Project, Task, Tag } from "./types";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
@@ -380,8 +381,7 @@ function StopTimerAtForm({ entry, updateTimeEntries }: { entry: TimeEntry; updat
       if (!endDate) return;
       showToast(Toast.Style.Animated, "Stopping timer...");
 
-      const workspaceId = await LocalStorage.getItem("workspaceId");
-      const userId = await LocalStorage.getItem("userId");
+      const { workspaceId, userId } = await resolveConfig();
 
       const { data, error } = await fetcher(`/workspaces/${workspaceId}/user/${userId}/time-entries`, {
         method: "PATCH",
@@ -467,7 +467,7 @@ function AddTimeEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) 
 
       showToast(Toast.Style.Animated, "Adding time entry...");
 
-      const workspaceId = await LocalStorage.getItem("workspaceId");
+      const { workspaceId } = await resolveConfig();
 
       const { data, error } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
         method: "POST",
