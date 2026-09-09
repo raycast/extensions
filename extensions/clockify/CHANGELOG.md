@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Fix time entries always being created as non-billable] - {PR_MERGE_DATE}
+## [Fix time entries always being created as non-billable] - 2026-09-09
 
 - Time entries now follow the project's "billable by default" setting instead of always being created as non-billable. Clockify treats an absent `billable` field as `false` rather than inheriting it from the project, so the value is now sent explicitly.
 - Applies to starting a new timer, restarting a recent entry, and adding a completed entry with "Add Time Entry".
