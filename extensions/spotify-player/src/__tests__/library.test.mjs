@@ -66,6 +66,44 @@ test("overlapping checks have at most two requests; cancelled checks stop and er
   fixture({ fail: () => true });
   await assert.rejects(playlistContainsTrack("p0", "missing"), /Fixture request failure/);
 });
+test("queued cancellation settles before active requests finish and preserves request slots", async () => {
+  resetStats();
+  const client = fixture();
+  const started = [];
+  const releases = [];
+  client.getPlaylistsByPlaylistIdTracks = (id) => {
+    started.push(id);
+    return new Promise((resolve) => releases.push(() => resolve({ items: [], next: null })));
+  };
+  const pending = [playlistContainsTrack("active1", "missing"), playlistContainsTrack("active2", "missing")];
+  const controller = new AbortController();
+  const cancelled = playlistContainsTrack("cancelled", "missing", controller.signal);
+  pending.push(cancelled);
+  let rejection;
+  cancelled.catch((error) => (rejection = error));
+  pending.push(playlistContainsTrack("next", "missing"));
+  try {
+    controller.abort();
+    await tick();
+    assert.equal(rejection, controller.signal.reason);
+    assert.equal(rejection.name, "AbortError");
+    pending.push(playlistContainsTrack("last", "missing"));
+    assert.deepEqual(started, ["active1", "active2"]);
+    releases.shift()();
+    await tick();
+    assert.deepEqual(started, ["active1", "active2", "next"]);
+    releases.shift()();
+    await tick();
+    assert.deepEqual(started, ["active1", "active2", "next", "last"]);
+  } finally {
+    // Drain even on failure so the shared limiter cannot affect later tests.
+    while (releases.length) {
+      releases.shift()();
+      await tick();
+    }
+    await Promise.allSettled(pending);
+  }
+});
 test("null tracks, relinked tracks, empty pages and invalid continuation", async () => {
   resetStats();
   const client = fixture();

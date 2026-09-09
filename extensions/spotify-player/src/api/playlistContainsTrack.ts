@@ -5,8 +5,22 @@ let active = 0;
 const waiting: (() => void)[] = [];
 async function request<T>(fn: () => Promise<T>, signal?: AbortSignal): Promise<T> {
   signal?.throwIfAborted();
-  if (active >= 2) await new Promise<void>((resolve) => waiting.push(resolve));
-  else active++;
+  if (active >= 2) {
+    await new Promise<void>((resolve, reject) => {
+      const resume = () => {
+        signal?.removeEventListener("abort", abort);
+        resolve();
+      };
+      const abort = () => {
+        const index = waiting.indexOf(resume);
+        if (index !== -1) waiting.splice(index, 1);
+        signal?.removeEventListener("abort", abort);
+        reject(signal?.reason);
+      };
+      waiting.push(resume);
+      signal?.addEventListener("abort", abort, { once: true });
+    });
+  } else active++;
   try {
     signal?.throwIfAborted();
     return await fn();
