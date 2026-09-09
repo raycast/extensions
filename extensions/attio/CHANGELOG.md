@@ -1,6 +1,6 @@
 # Attio Changelog
 
-## [Task Edit Fix] - {PR_MERGE_DATE}
+## [Task Edit Fix] - 2026-09-09
 
 - Fixed a React state-update warning when returning from the task edit or new-task form
 
