@@ -263,3 +263,32 @@ test("single-provider unavailable snapshots display immediately but do not skip 
   assert.equal(checks, 2);
   assert.equal(state.cache.has("missing"), false);
 });
+
+for (const agentId of ["grok", "amp", "antigravity"]) {
+  test(`${agentId} without auth resolution reuses fresh cache but rechecks expired usage on open`, async () => {
+    const now = Date.now();
+    const entry = { ...cached, timestamp: now, authHash: hashAuthKey("") };
+    state.cache.set(agentId, JSON.stringify(entry));
+    let requests = 0;
+    const useUsage = createUsageHook<OpenRouterUsage, OpenRouterError>({
+      agentId,
+      fetcher: async () => {
+        requests++;
+        return { usage: null, error: { type: "not_configured", message: "Logged out" } };
+      },
+    });
+
+    useUsage();
+    assert.deepEqual(await state.run!(), entry);
+    assert.equal(requests, 0);
+
+    state.cache.set(agentId, JSON.stringify({ ...entry, timestamp: now - 60_001 }));
+    const reopening = useUsage();
+    assert.deepEqual(reopening.usage, usage);
+    assert.equal(reopening.isLoading, false);
+    state.data = await state.run!();
+    assert.equal(requests, 1);
+    assert.equal(useUsage().usage, null);
+    assert.equal(useUsage().error?.type, "not_configured");
+  });
+}

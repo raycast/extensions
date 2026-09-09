@@ -61,7 +61,9 @@ export function createUsageHook<TUsage, TError extends ErrorLike>(options: {
     const authKey = resolveAuthKey ? await resolveAuthKey() : "";
     const authHash = hashAuthKey(authKey);
     const cached = readPayload<TUsage, TError>(agentId);
-    if (!force && cached && isPayloadFresh(cached, Date.now(), getTtlMs(background), authHash)) {
+    // Without credential identity, periodically fetch to detect login changes.
+    const ttlMs = getTtlMs(background || !resolveAuthKey);
+    if (!force && cached && isPayloadFresh(cached, Date.now(), ttlMs, authHash)) {
       return cached;
     }
 
