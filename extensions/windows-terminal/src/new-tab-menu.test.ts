@@ -37,13 +37,6 @@ describe("buildProfileMatcher", () => {
     assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "[" }), null);
   });
 
-  it("rejects patterns that can backtrack exponentially", () => {
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(a+)+" }), null);
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(a|aa)*" }), null);
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", commandline: "((ab)+)+" }), null);
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", source: "(a{1,2})+" }), null);
-  });
-
   it("keeps patterns that only look nested", () => {
     assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(Power)+Shell" }), ["PowerShell"]);
     assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?:Power|Command)\\s.*" }), ["Command Prompt"]);
@@ -51,6 +44,28 @@ describe("buildProfileMatcher", () => {
       "PowerShell",
       "Command Prompt",
     ]);
+  });
+
+  it("keeps a repeated group whose alternatives are disjoint", () => {
+    assert.deepEqual(matchedNames({ type: "matchProfiles", commandline: "(pwsh|cmd)+\\.exe" }), [
+      "PowerShell",
+      "Command Prompt",
+    ]);
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(a|b)+" }), []);
+  });
+
+  it("bounds pathological patterns instead of rejecting or hanging on them", () => {
+    // (a+)+, (a?a?)+, ((ab)+)+, (a|aa)* all cause exponential backtracking in a native regex
+    // engine. The matcher still builds (the pattern is valid syntax) and returns fast with no
+    // match, instead of freezing or silently dropping a pattern that could otherwise be safe.
+    const adversarialName = "a".repeat(40) + "!";
+    for (const pattern of ["(a+)+", "(a?a?)+", "((ab)+)+", "(a|aa)*"]) {
+      const start = Date.now();
+      const matcher = buildProfileMatcher({ type: "matchProfiles", name: pattern });
+      assert.notEqual(matcher, null, pattern);
+      assert.equal(matcher!({ ...powershell, name: adversarialName }), false, pattern);
+      assert.ok(Date.now() - start < 1000, `${pattern} took too long`);
+    }
   });
 });
 
