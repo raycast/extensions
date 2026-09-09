@@ -1,3 +1,4 @@
+import { Parser } from "commonmark";
 import type { BlogPost } from "./types";
 
 /**
@@ -178,6 +179,140 @@ function markdownImage(src: string, width?: number, height?: number): string {
   return isTrustedImage(src) ? `![](${sizedImage(src, width, height)})` : "";
 }
 
+/* ------------------------------------------------------------------ *
+ * The image gate over the finished Markdown
+ *
+ * Gating each `<img>` on the way through is not enough on its own: the
+ * document is Markdown by the time Raycast sees it, and an image can reach it
+ * as text rather than as a tag — a title, caption or tag name that is itself
+ * image syntax. Reading that text back with the same parser Raycast's renderer
+ * follows is the only way to see every image it will actually fetch, reference
+ * images included: `![alt][label]` names no URL at the point of use, so the
+ * destination only appears once a parser has paired it with its definition.
+ * ------------------------------------------------------------------ */
+
+/** Every destination CommonMark resolves for an image, references included. */
+function imageDestinations(markdown: string): string[] {
+  const walker = new Parser().parse(markdown).walker();
+  const destinations: string[] = [];
+  for (let event = walker.next(); event; event = walker.next()) {
+    if (event.entering && event.node.type === "image") destinations.push(event.node.destination ?? "");
+  }
+  return destinations;
+}
+
+type InlineImage = { destination: string; end: number };
+
+/**
+ * Reads `![alt](destination "title")` starting at `![`, the way CommonMark does:
+ * brackets nest, so the label of `![a[b]](…)` runs to its own closing bracket
+ * rather than the first one, and a `<…>` destination may hold spaces.
+ */
+function readInlineImage(source: string, start: number): InlineImage | undefined {
+  let i = start + 2;
+  for (let depth = 1; i < source.length && depth > 0; i++) {
+    if (source[i] === "\\") i++;
+    else if (source[i] === "[") depth++;
+    else if (source[i] === "]") depth--;
+  }
+  if (source[i] !== "(") return undefined;
+
+  i++;
+  while (i < source.length && /\s/.test(source[i])) i++;
+
+  let destination = "";
+  if (source[i] === "<") {
+    for (i++; i < source.length && source[i] !== ">"; i++) {
+      if (source[i] === "\\") i++;
+      destination += source[i];
+    }
+    i++;
+  } else {
+    for (let depth = 0; i < source.length && !/\s/.test(source[i]); i++) {
+      if (source[i] === "\\") i++;
+      else if (source[i] === "(") depth++;
+      else if (source[i] === ")" && depth-- === 0) break;
+      destination += source[i];
+    }
+  }
+
+  // Past the destination sits an optional title, then the closing paren.
+  for (; i < source.length; i++) {
+    if (source[i] === "\\") i++;
+    else if (source[i] === ")") return { destination, end: i + 1 };
+  }
+  return undefined;
+}
+
+/** Drops inline images whose destination is not one the reader may contact. */
+function removeInlineImages(markdown: string, untrusted: (destination: string) => boolean): string {
+  let out = "";
+  let cursor = 0;
+
+  for (let start = markdown.indexOf("!["); start !== -1; start = markdown.indexOf("![", cursor)) {
+    out += markdown.slice(cursor, start);
+    const image = readInlineImage(markdown, start);
+    if (!image) {
+      // Not an inline image after all — keep the `![` and carry on past it.
+      out += "![";
+      cursor = start + 2;
+      continue;
+    }
+    if (!untrusted(image.destination)) out += markdown.slice(start, image.end);
+    cursor = image.end;
+  }
+
+  return out + markdown.slice(cursor);
+}
+
+/**
+ * Drops the link reference definitions that point somewhere untrusted, which is
+ * what makes `![alt][label]` resolve. Without its definition the reference is no
+ * longer a link of any kind and renders as the literal text it looks like.
+ *
+ * Definitions inside a fenced block are sample text rather than markup, so the
+ * fences are tracked and their contents left alone.
+ */
+function removeReferenceDefinitions(markdown: string, untrusted: (destination: string) => boolean): string {
+  let fence = "";
+
+  return markdown
+    .split("\n")
+    .filter((line) => {
+      const fenced = line.match(/^\s{0,3}(`{3,}|~{3,})/)?.[1];
+      if (fence) {
+        if (fenced?.startsWith(fence[0])) fence = "";
+        return true;
+      }
+      if (fenced) {
+        fence = fenced;
+        return true;
+      }
+      const destination = line.match(/^ {0,3}\[(?:[^\]\\]|\\.)+\]:\s*<?([^\s>]+)>?/)?.[1];
+      return !destination || !untrusted(destination);
+    })
+    .join("\n");
+}
+
+/**
+ * Holds every image in the finished document to `IMAGE_HOSTS`, whichever syntax
+ * it arrived in. The parser has the last word: if an untrusted destination is
+ * still reachable after the targeted removals, image syntax is escaped document
+ * wide, so the worst case is an image rendered as the text that describes it and
+ * never a request to a host that was not named here.
+ */
+export function gateImages(markdown: string): string {
+  const untrusted = (destination: string) => !isTrustedImage(destination);
+
+  let out = markdown;
+  if (imageDestinations(out).some(untrusted)) {
+    out = removeReferenceDefinitions(out, untrusted);
+    out = removeInlineImages(out, untrusted);
+  }
+
+  return imageDestinations(out).some(untrusted) ? out.replace(/!\[/g, "!\\[") : out;
+}
+
 export type ImageSize = { width: number; height: number };
 
 /**
@@ -314,11 +449,7 @@ export function postToMarkdown(post: BlogPost, heroSize?: ImageSize): string {
     .replace(/^(\s*- .*)\n\n(?=\s*- )/gm, "$1\n")
     .trim();
 
-  // Every `<img>` is gated on the way through, but an image can also arrive as
-  // plain text — a title, caption or tag name that is itself `![](…)` renders as
-  // an image and fetches. This last pass holds anything that reached the output
-  // by that route to the same rule.
-  return document.replace(/!\[[^\]]*\]\(\s*([^)\s]+)[^)]*\)/g, (image, src: string) =>
-    isTrustedImage(src) ? image : "",
-  );
+  // Every `<img>` is gated on the way through; this reads the finished document
+  // back as Markdown to catch the images that arrived as text instead.
+  return gateImages(document);
 }

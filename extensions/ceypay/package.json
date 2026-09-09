@@ -39,15 +39,18 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "commonmark": "^0.31.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@types/commonmark": "^0.27.10",
     "@types/node": "22.7.5",
     "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "vitest": "^3.2.7"
   },
   "scripts": {
     "build": "npm run build:index && ray build -e dist",
@@ -55,6 +58,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
   }
 }
