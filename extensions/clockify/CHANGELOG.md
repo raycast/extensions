@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Fix requests being sent to an undefined workspace] - {PR_MERGE_DATE}
+## [Fix requests being sent to an undefined workspace] - 2026-09-09
 
 - Fixed commands failing with "User doesn't belong to Workspace" and "Timer could not be started" when the stored workspace id was missing. The id is now resolved and repaired on demand rather than read straight from `LocalStorage`, which can drop a key when several values are written concurrently.
 - Fixed the menu bar command being unable to recover from that state on its own, as it never bootstrapped the workspace id itself.
