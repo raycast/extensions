@@ -5,6 +5,7 @@ import {
   LaunchType,
   launchCommand,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { oauthClient } from "./oauth";
 
 export function ErrorActions({
@@ -30,11 +31,17 @@ export function ErrorActions({
         title="Reconnect Kato"
         icon={Icon.Link}
         onAction={async () => {
-          await oauthClient.removeTokens();
-          await launchCommand({
-            name: command,
-            type: LaunchType.UserInitiated,
-          });
+          try {
+            await oauthClient.removeTokens();
+            await launchCommand({
+              name: command,
+              type: LaunchType.UserInitiated,
+            });
+          } catch (error) {
+            await showFailureToast(error, {
+              title: "Could not reconnect to Kato",
+            });
+          }
         }}
       />
     </ActionPanel>

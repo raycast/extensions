@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { isValidElement, type ReactElement, type ReactNode } from "react";
 import ConnectionCommand from "../src/connection";
 import { NotificationActions } from "../src/notification-actions";
+import KatoMenuBarCommand from "../src/menu-bar";
+import { ErrorActions } from "../src/error-actions";
 import type { KatoNotification } from "../src/types";
 
 const mocks = vi.hoisted(() => ({
@@ -11,6 +13,9 @@ const mocks = vi.hoisted(() => ({
   switchWorkspace: vi.fn(),
   showToast: vi.fn(),
   confirmAlert: vi.fn(),
+  launchCommand: vi.fn(),
+  removeTokens: vi.fn(),
+  showFailureToast: vi.fn(),
   state: [] as unknown[],
   stateIndex: 0,
   effect: undefined as (() => void) | undefined,
@@ -27,6 +32,13 @@ vi.mock("@raycast/api", () => ({
     Metadata: Object.assign("Metadata", { Label: "Label" }),
   }),
   Icon: {},
+  Color: {},
+  MenuBarExtra: Object.assign("MenuBarExtra", {
+    Section: "Section",
+    Item: "Item",
+  }),
+  LaunchType: { UserInitiated: "userInitiated" },
+  launchCommand: mocks.launchCommand,
   Keyboard: { Shortcut: { Common: { Refresh: {} } } },
   Toast: {
     Style: { Animated: "animated", Success: "success", Failure: "failure" },
@@ -36,6 +48,8 @@ vi.mock("@raycast/api", () => ({
 }));
 vi.mock("@raycast/utils", () => ({
   withAccessToken: () => (component: unknown) => component,
+  useCachedPromise: () => ({ isLoading: false }),
+  showFailureToast: mocks.showFailureToast,
 }));
 vi.mock("../src/api", () => ({
   katoApi: { whoami: mocks.whoami, dismissNotification: mocks.dismiss },
@@ -44,6 +58,7 @@ vi.mock("../src/api", () => ({
 vi.mock("../src/oauth", () => ({
   accessTokenOptions: {},
   switchWorkspace: mocks.switchWorkspace,
+  oauthClient: { removeTokens: mocks.removeTokens },
 }));
 vi.mock("../src/create-task", () => ({ CreateTaskForm: "CreateTaskForm" }));
 vi.mock("react", async (importOriginal) => ({
@@ -61,6 +76,7 @@ vi.mock("react", async (importOriginal) => ({
   useEffect: (effect: () => void) => {
     mocks.effect = effect;
   },
+  useMemo: (factory: () => unknown) => factory(),
 }));
 
 function renderConnection() {
@@ -72,7 +88,10 @@ function renderConnection() {
   }>;
 }
 
-function findAction(node: ReactNode, title: string): (() => void) | undefined {
+function findAction(
+  node: ReactNode,
+  title: string,
+): (() => void | Promise<void>) | undefined {
   if (Array.isArray(node)) {
     for (const child of node) {
       const action = findAction(child, title);
@@ -82,7 +101,7 @@ function findAction(node: ReactNode, title: string): (() => void) | undefined {
   if (
     isValidElement<{
       title?: string;
-      onAction?: () => void;
+      onAction?: () => void | Promise<void>;
       children?: ReactNode;
     }>(node)
   ) {
@@ -98,6 +117,56 @@ beforeEach(() => {
   mocks.effect = undefined;
   mocks.showToast.mockImplementation(async (options) => ({ ...options }));
   mocks.confirmAlert.mockResolvedValue(true);
+});
+
+describe("command launch failures", () => {
+  it.each([
+    ["Open My Day", "my-day"],
+    ["Create Task", "create-task"],
+    ["Search Workspace", "search-kato"],
+    ["Current Workspace", "connection"],
+  ])(
+    "shows feedback when the menu bar cannot launch %s",
+    async (title, name) => {
+      const error = new Error("Command launch failed");
+      mocks.launchCommand.mockRejectedValue(error);
+      const tree = KatoMenuBarCommand({}) as ReactElement;
+      findAction(tree, title)!();
+      await vi.waitFor(() =>
+        expect(mocks.showFailureToast).toHaveBeenCalledWith(error, {
+          title: "Could not open Kato command",
+        }),
+      );
+      expect(mocks.launchCommand).toHaveBeenCalledWith({
+        name,
+        type: "userInitiated",
+      });
+    },
+  );
+
+  it.each(["token removal", "command launch"])(
+    "catches reconnect %s failures",
+    async (stage) => {
+      const error = new Error(`${stage} failed`);
+      if (stage === "token removal")
+        mocks.removeTokens.mockRejectedValue(error);
+      else mocks.launchCommand.mockRejectedValue(error);
+      const tree = ErrorActions({ command: "my-day", onRetry: vi.fn() });
+      await expect(
+        findAction(tree, "Reconnect Kato")!(),
+      ).resolves.toBeUndefined();
+      expect(mocks.showFailureToast).toHaveBeenCalledWith(error, {
+        title: "Could not reconnect to Kato",
+      });
+      if (stage === "token removal")
+        expect(mocks.launchCommand).not.toHaveBeenCalled();
+      else
+        expect(mocks.launchCommand).toHaveBeenCalledWith({
+          name: "my-day",
+          type: "userInitiated",
+        });
+    },
+  );
 });
 
 describe("notification dismissal", () => {

@@ -7,7 +7,11 @@ import {
   launchCommand,
   open,
 } from "@raycast/api";
-import { useCachedPromise, withAccessToken } from "@raycast/utils";
+import {
+  showFailureToast,
+  useCachedPromise,
+  withAccessToken,
+} from "@raycast/utils";
 import { useMemo } from "react";
 import { katoApi } from "./api";
 import { formatMeetingTime } from "./dates";
@@ -17,8 +21,12 @@ import { accessTokenOptions } from "./oauth";
 
 const KATO_ICON = "mask-gradient.png";
 
-function launch(name: string) {
-  return launchCommand({ name, type: LaunchType.UserInitiated });
+async function launch(name: string) {
+  try {
+    await launchCommand({ name, type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not open Kato command" });
+  }
 }
 
 function titleCase(value: string) {

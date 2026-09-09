@@ -17,6 +17,17 @@ export const oauthClient = new OAuth.PKCEClient({
   description: "Connect Raycast to your Kato workspace",
 });
 
+class TokenRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code?: string,
+  ) {
+    super(message);
+    this.name = "TokenRequestError";
+  }
+}
+
 async function tokenRequest(
   body: URLSearchParams,
 ): Promise<OAuth.TokenResponse> {
@@ -33,10 +44,12 @@ async function tokenRequest(
       payload?.error_description ??
       payload?.error ??
       "Kato did not return an access token";
-    throw new Error(
+    throw new TokenRequestError(
       environment.isDevelopment
         ? `${reason} (${response.status} from ${TOKEN_URL})`
         : reason,
+      response.status,
+      payload?.error,
     );
   }
   return payload;
@@ -61,7 +74,16 @@ export async function authorize(): Promise<string> {
       );
       await oauthClient.setTokens(refreshed);
       return refreshed.access_token;
-    } catch {
+    } catch (error) {
+      // Only an explicit invalid_grant response rejects the refresh token.
+      // Network, server, and token-storage failures must preserve credentials.
+      if (
+        !(error instanceof TokenRequestError) ||
+        error.status !== 400 ||
+        error.code !== "invalid_grant"
+      ) {
+        throw error;
+      }
       await oauthClient.removeTokens();
       tokens = undefined;
     }
