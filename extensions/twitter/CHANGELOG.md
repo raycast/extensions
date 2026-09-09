@@ -3,7 +3,9 @@
 ## [Fix Authentication Lock Recovery] - {PR_MERGE_DATE}
 
 - Prevent interrupted commands from leaving X login and logout permanently blocked
+- Avoid authentication failures caused by unrelated services using the same local port
 - Require login before opening command screens or continuing with selected-text posting
+- Validate selected text before opening login
 
 ## [OAuth, New Commands, and AI Tools] - 2026-09-09
 

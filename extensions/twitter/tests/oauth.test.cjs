@@ -5,6 +5,8 @@ const os = require("node:os");
 const path = require("node:path");
 const { fork } = require("node:child_process");
 const { Worker } = require("node:worker_threads");
+const { createHash } = require("node:crypto");
+const { createServer } = require("node:net");
 
 const { load } = require("./load.cjs");
 
@@ -229,7 +231,7 @@ if (process.argv[2] === "lock-worker") {
           }),
       ),
     );
-    assert.equal(fs.existsSync(path.join(directory, "oauth-credentials.lock")), false);
+    assert.equal(fs.existsSync(path.join(directory, "oauth-credentials-v2.lock")), false);
   });
 
   function deferred() {
@@ -262,6 +264,24 @@ if (process.argv[2] === "lock-worker") {
       }).withOAuthLock;
     return { directory, makeLock };
   }
+
+  test(
+    "an unrelated listener on the former hashed port does not block authentication",
+    { timeout: 10000 },
+    async (t) => {
+      const { directory, makeLock } = lockFixture(t);
+      const hash = createHash("sha256").update(directory).digest();
+      const port = 49152 + (hash.readUInt32BE(0) % 16384);
+      const server = createServer((socket) => socket.destroy());
+      t.after(() => new Promise((resolve) => server.close(resolve)));
+      await new Promise((resolve, reject) => {
+        server.once("error", reject);
+        server.listen({ host: "127.0.0.1", port, exclusive: true }, resolve);
+      });
+      assert.equal(await makeLock()(async () => "acquired"), "acquired");
+      assert.equal(server.listening, true);
+    },
+  );
 
   test("a killed process releases the authentication lock", { timeout: 10000 }, async (t) => {
     const { directory, makeLock } = lockFixture(t);
@@ -324,23 +344,28 @@ if (process.argv[2] === "lock-worker") {
     assert.equal(await makeLock()(async () => "acquired"), "acquired");
   });
 
-  test("a live holder excludes another command until login completes", { timeout: 10000 }, async (t) => {
-    const { makeLock } = lockFixture(t);
-    const acquired = deferred();
-    const release = deferred();
-    const held = makeLock()(async () => {
-      acquired.resolve();
-      await release.promise;
-    });
-    await acquired.promise;
-    let entered = false;
-    const pending = makeLock()(async () => {
-      entered = true;
-    });
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    assert.equal(entered, false);
-    release.resolve();
-    await Promise.all([held, pending]);
-    assert.equal(entered, true);
-  });
+  test(
+    "a live holder renews its lock beyond the stale threshold until login completes",
+    { timeout: 10000 },
+    async (t) => {
+      const { makeLock } = lockFixture(t);
+      const acquired = deferred();
+      const release = deferred();
+      const held = makeLock()(async () => {
+        acquired.resolve();
+        await release.promise;
+      });
+      await acquired.promise;
+      let entered = false;
+      const pending = makeLock()(async () => {
+        entered = true;
+      });
+      // Hold longer than the five-second stale threshold to exercise renewal.
+      await new Promise((resolve) => setTimeout(resolve, 6_000));
+      assert.equal(entered, false);
+      release.resolve();
+      await Promise.all([held, pending]);
+      assert.equal(entered, true);
+    },
+  );
 }

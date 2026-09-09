@@ -1,27 +1,27 @@
 import { environment } from "@raycast/api";
-import { createHash } from "node:crypto";
-import { createServer, Server } from "node:net";
+import { mkdir } from "node:fs/promises";
+import { join } from "node:path";
 import { setTimeout } from "node:timers/promises";
+import { lock } from "proper-lockfile";
 
-async function acquireLock(): Promise<Server> {
-  // Raycast commands can share a backend PID. A filesystem lock owned by that
-  // PID survives a terminated command worker. The OS closes this listener when
-  // its worker exits, including when JavaScript finally blocks cannot run.
-  // Use the installation's support path so commands and AI tools share a lock.
-  const hash = createHash("sha256").update(environment.supportPath).digest();
-  const port = 49152 + (hash.readUInt32BE(0) % 16384);
+async function acquireLock(): Promise<() => Promise<void>> {
+  // Commands and AI tools share a support path, but may also share a backend
+  // PID. A worker-owned heartbeat allows recovery after worker termination
+  // without relying on that PID or reserving a TCP port. Use a new name so
+  // legacy PID-owned lock directories cannot block acquisition.
+  await mkdir(environment.supportPath, { recursive: true });
+  const lockPath = join(environment.supportPath, "oauth-credentials-v2");
   const deadline = Date.now() + 15_000;
   while (true) {
-    const server = createServer((socket) => socket.destroy());
     try {
-      await new Promise<void>((resolve, reject) => {
-        server.once("error", reject);
-        server.listen({ host: "127.0.0.1", port, exclusive: true }, resolve);
+      return await lock(lockPath, {
+        realpath: false,
+        stale: 5_000,
+        update: 1_000,
+        retries: 0,
       });
-      return server;
     } catch (error) {
-      server.close();
-      if ((error as NodeJS.ErrnoException).code !== "EADDRINUSE") throw error;
+      if ((error as NodeJS.ErrnoException).code !== "ELOCKED") throw error;
       if (Date.now() >= deadline) {
         throw new Error("X authentication is busy. Finish any open X login, then retry.");
       }
@@ -31,10 +31,10 @@ async function acquireLock(): Promise<Server> {
 }
 
 export async function withOAuthLock<T>(operation: () => Promise<T>): Promise<T> {
-  const server = await acquireLock();
+  const release = await acquireLock();
   try {
     return await operation();
   } finally {
-    await new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+    await release();
   }
 }

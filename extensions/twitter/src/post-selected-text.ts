@@ -7,10 +7,10 @@ import { authorize } from "./v2/lib/oauth";
 export default async function PostSelectedTextCommand() {
   try {
     const text = (await getSelectedText()).trim();
-    // Capture the selection before the login overlay changes the focused app.
-    await authorize();
     if (!text) throw new Error("Select some text before running this command.");
     validatePostLength(text);
+    // Capture and validate the selection before login changes the focused app.
+    await authorize();
 
     await showHUD("Posting selected text...");
     await clientV2.sendTweet(text);
