@@ -1,0 +1,212 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "email-aliases",
+  "title": "Email Aliases",
+  "description": "Generate a plus-addressed or catch-all email alias from the website you are currently on. Choose how many domain levels the alias uses, switch between several accounts, and add date or random suffixes so aliases cannot be guessed.",
+  "icon": "icon.png",
+  "author": "jnbp",
+  "categories": ["Productivity", "Security", "Web"],
+  "license": "MIT",
+  "platforms": ["macOS", "Windows"],
+  "commands": [
+    {
+      "name": "generate-alias",
+      "title": "Generate Email Alias",
+      "subtitle": "Email Aliases",
+      "description": "Creates an email alias from the active browser tab and copies or pastes it right away.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "label",
+          "type": "text",
+          "placeholder": "Label or domain (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "build-alias",
+      "title": "Build Email Alias",
+      "subtitle": "Email Aliases",
+      "description": "Compose an email alias step by step with a live preview, an account picker and per-run overrides.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accounts",
+      "title": "Email Accounts",
+      "description": "Comma-separated list. Use a full address for plus addressing (me@gmail.com) or @example.com for a catch-all domain. Add an optional display name with a colon: Work: me@company.com",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "me@gmail.com, Work: me@company.com, Catch-All: @mydomain.com"
+    },
+    {
+      "name": "separator",
+      "title": "Separator",
+      "description": "Character between the user part and the alias. Most providers use a plus sign, some use a hyphen.",
+      "type": "textfield",
+      "required": false,
+      "default": "+"
+    },
+    {
+      "name": "domainDepth",
+      "title": "Domain Depth",
+      "description": "How much of the hostname ends up in the alias. Automatic keeps a meaningful subdomain like nas.example.com but drops single sign-on noise like login.example.com. Levels are counted on top of the public suffix, so amazon.co.uk stays intact.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        { "title": "Automatic — keeps a subdomain only when it means something", "value": "auto" },
+        { "title": "Domain + suffix — example.com", "value": "1" },
+        { "title": "One level more — shop.example.com", "value": "2" },
+        { "title": "Two levels more — eu.shop.example.com", "value": "3" },
+        { "title": "Three levels more", "value": "4" },
+        { "title": "Full hostname", "value": "full" },
+        { "title": "Name only, without suffix — example", "value": "name" }
+      ]
+    },
+    {
+      "name": "stripWww",
+      "title": "Hostname",
+      "label": "Ignore a leading www.",
+      "description": "Drops www. before the domain depth is applied.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "dotReplacement",
+      "title": "Replace Dots With",
+      "description": "Replaces the dots inside the alias, for example example.com becomes example-com. Leave empty to keep the dots.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "suffixMode",
+      "title": "Extra Suffix",
+      "description": "Appends a date and/or a random token so an alias cannot be guessed from the domain alone.",
+      "type": "dropdown",
+      "required": false,
+      "default": "none",
+      "data": [
+        { "title": "None", "value": "none" },
+        { "title": "Date", "value": "date" },
+        { "title": "Random token", "value": "random" },
+        { "title": "Date and random token", "value": "both" }
+      ]
+    },
+    {
+      "name": "suffixSeparator",
+      "title": "Suffix Separator",
+      "description": "Character between the alias and the extra suffix.",
+      "type": "textfield",
+      "required": false,
+      "default": "-"
+    },
+    {
+      "name": "dateFormat",
+      "title": "Date Format",
+      "description": "Supported tokens: yyyy, yy, MM, dd, HH, mm.",
+      "type": "textfield",
+      "required": false,
+      "default": "yyMM"
+    },
+    {
+      "name": "randomLength",
+      "title": "Random Token Length",
+      "description": "Number of characters in the random token (1-32).",
+      "type": "textfield",
+      "required": false,
+      "default": "4"
+    },
+    {
+      "name": "template",
+      "title": "Alias Template",
+      "description": "Tokens: {user} {sep} {label} {suffix} {alias} {domain} {host} {date} {random}",
+      "type": "textfield",
+      "required": false,
+      "default": "{user}{sep}{alias}@{domain}"
+    },
+    {
+      "name": "catchAllTemplate",
+      "title": "Catch-All Template",
+      "description": "Used for accounts entered as @example.com. Same tokens as the alias template.",
+      "type": "textfield",
+      "required": false,
+      "default": "{alias}@{domain}"
+    },
+    {
+      "name": "lowercase",
+      "title": "Normalisation",
+      "label": "Lowercase the alias",
+      "description": "Also strips characters that are not allowed in the local part of an address.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "maxAliasLength",
+      "title": "Maximum Alias Length",
+      "description": "Truncates the alias part after this many characters. Leave empty for no limit.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "action",
+      "title": "After Generating",
+      "description": "What happens once the alias is built.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copyPaste",
+      "data": [
+        { "title": "Copy to clipboard", "value": "copy" },
+        { "title": "Copy and paste into the frontmost app", "value": "copyPaste" },
+        { "title": "Paste only", "value": "paste" }
+      ]
+    },
+    {
+      "name": "browserSource",
+      "title": "Read the Current URL From",
+      "description": "AppleScript works without any extra install but is macOS only. The Raycast browser extension also covers Firefox and Zen.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        { "title": "Automatic — AppleScript, then browser extension", "value": "auto" },
+        { "title": "AppleScript only", "value": "applescript" },
+        { "title": "Raycast browser extension only", "value": "extension" }
+      ]
+    },
+    {
+      "name": "preferredBrowser",
+      "title": "Preferred Browser",
+      "description": "Always read the URL from this browser instead of whichever app is in front.",
+      "type": "appPicker",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.1",
+    "@raycast/utils": "^2.3.1",
+    "tldts": "^7.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
