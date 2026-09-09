@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const { state, reset, api } = require("./harness.cjs");
 const { search } = require("../src/attention/lib/github.ts");
 const { agingOf } = require("../src/attention/lib/aging.ts");
-const { loadConfig, saveConfig, orgQualifier } = require("../src/attention/lib/config.ts");
+const { loadConfig, saveConfig, ownerQualifier } = require("../src/attention/lib/config.ts");
 const { authorIgnoredBy } = require("../src/attention/lib/config.ts");
 const {
   diffCandidates,
@@ -101,7 +101,7 @@ test("existing owner scope seeds tracking; explicitly clearing it is preserved",
   state.preferences.owners = "acme, personal-owner";
   const config = await loadConfig();
   assert.deepEqual(config.activeOrgs, ["acme", "personal-owner"]);
-  assert.equal(orgQualifier(config), " org:acme org:personal-owner");
+  assert.equal(ownerQualifier(config), " user:acme user:personal-owner");
   await saveConfig({ ...config, activeOrgs: [] });
   assert.deepEqual((await loadConfig()).activeOrgs, []);
 });

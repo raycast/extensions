@@ -83,7 +83,7 @@ Open **Pull Request Attention** to browse review requests, team requests, your P
 
 Ageing indicators distinguish how long a PR has been open, how long it has been quiet, and how long an unanswered conversation has been waiting. Recent unrelated activity does not make an old unanswered request fresh. Sort by recent activity, longest wait, longest quiet period, or oldest PR.
 
-Open **Configure Review Tracking** to select organizations, watched repositories and teams, ignored authors, and saved filters. The existing **Organizations/Owners** preference seeds the new tracking scope on first use. Once saved, tracking configuration is independent; changing the original owner preference does not overwrite it. The original search command still accepts GitHub search qualifiers in its search field.
+Open **Configure Review Tracking** to select organizations, watched repositories and teams, ignored authors, and saved filters. The existing **Organizations/Owners** preference seeds the new tracking scope on first use. Personal and organization owners are both supported in the classic menu, attention categories, and tracked-scope saved filters. Once saved, tracking configuration is independent; changing the original owner preference does not overwrite it. Choosing **Organizations → Search Everywhere** clears the owner restriction in both menu layouts, even if the original preference still contains owners. Explicit repository/team selections and saved-filter queries retain their own constraints. The original search command still accepts GitHub search qualifiers in its search field.
 
 These are attention signals based on the fetched conversation, not a guarantee that every comment is a question. Searches and nested conversations have limits; very large or busy PRs can have older messages outside the fetched window. Verify the full discussion on GitHub when needed.
 
@@ -93,7 +93,7 @@ The first time a view command successfully authenticates, it automatically start
 
 Both menu layouts include **Configure Review Tracking → Authentication Method**, which shows the current method and opens the native extension preferences to change it. The tracking settings screen also has an **Account & Data → Authentication Method** row. Raycast owns this preference; these shortcuts use the same PAT/CLI selector rather than storing a second selection.
 
-Both menu layouts include **Configure Review Tracking**, with shortcuts to Organizations, Watched Repositories, Watched Teams, Default Filter Scope, Ignored Authors, Saved Filters, Built-in Categories, and Notifications. Each opens the same configuration screen used by the settings command. These settings govern the attention/tracking views; they do not replace the original layout’s review-status grouping or its Organizations/Owners preference.
+Both menu layouts include **Configure Review Tracking**, with shortcuts to Organizations, Watched Repositories, Watched Teams, Default Filter Scope, Ignored Authors, Saved Filters, Built-in Categories, and Notifications. Each opens the same configuration screen used by the settings command. The organization/owner scope and ignored authors apply to both layouts; the original review-status grouping is preserved.
 
 **My Pull Requests** retains the original GitHub icon and review-status layout by default. Its menu also links to Pull Request Attention and Activity Inbox.
 
@@ -113,22 +113,24 @@ When changing authentication method, token, or host, reopen commands. Cached PR 
 
 ## Develop and validate this integration locally
 
-This folder is an isolated integration prototype based on the existing extension. `UPSTREAM.json` records its source commit. The original `gh-review-raycast` project and the published PR are not modified.
+This extension lives in `extensions/github-review-requests` in the `raycast/extensions` repository. Run the following from a checkout of that repository.
 
 Use Node.js **22.22.2 or later**, as required by the installed Raycast API package.
 
 ```sh
-cd /Users/vitoraguila/projects/github-review-requests-integration
+cd extensions/github-review-requests
 npm ci
+npm run build
 npm test
 npm run typecheck
 npm run lint
-npm run build
 npm run dev
 ```
+
+`npm run build` generates the ignored `raycast-env.d.ts` definitions needed by TypeScript; do not commit that file.
 
 `npm run dev` prepares `.local-preview` and imports **GitHub Review Requests (Local)** with a separate extension identity. Its preferences and storage are separate from the Store extension and your original GH Review extension. Search for the commands with the **GitHub Review Requests (Local)** subtitle. Select your authentication method in this local extension's preferences; existing credentials are not copied automatically.
 
 Restart `npm run dev` after changing source files: it refreshes the preview copy. Edit files in `src/`, not `.local-preview/src/`. Stop the terminal process when finished and disable/remove the **Local** extension from Raycast settings if you no longer want it installed. Leave tracking disabled until you are ready to test it.
 
-See [LOCAL_VALIDATION.md](LOCAL_VALIDATION.md) for the manual test checklist and remaining checks. The future PR wording is in [PR_DESCRIPTION.md](PR_DESCRIPTION.md); it has not been posted. `npm run dev:upstream` uses the real extension identity and is intended only for an intentional final integration test, since it can affect the installed extension's development version.
+See [LOCAL_VALIDATION.md](LOCAL_VALIDATION.md) for the manual test checklist and remaining checks. `npm run dev:upstream` uses the real extension identity and is intended only for an intentional final integration test, since it can affect the installed extension's development version.

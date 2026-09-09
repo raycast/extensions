@@ -23,7 +23,7 @@ Both methods use an explicit Authentication Method preference shared by all comm
 - Adds Show in Menu Bar to tracking settings and shared configuration shortcuts to both menu-bar layouts.
 
 - Preserves the existing extension identity, author, command identifiers, PAT/owners preferences, icon asset, and original menu layout; adds `vitoraguila` as a contributor.
-- The classic **My Pull Requests** menu continues to use the original pull, refresh, recent-history, and review-status flow. It now uses the shared selected credential, applies the selected organization scope (`org:`), and filters configured ignored authors; the existing Owners preference remains the fallback when no organization scope is selected.
+- The classic **My Pull Requests** menu continues to use the original pull, refresh, recent-history, and review-status flow. It now uses the shared selected credential, applies the shared organization/personal-owner scope (`user:`), and filters configured ignored authors; the existing Owners preference seeds missing scope configuration, while an explicitly cleared scope searches globally.
 - Adds Pull Request Attention, Activity Inbox, Configure Review Tracking, and an optional background watcher. Original commands link to the new views.
 - Tracks unresolved inline threads and PR conversations, including review bodies, with ignored authors and direct links to the relevant comment.
 - Shows age, inactivity, and the oldest unanswered wait, with optional menu-bar attention grouping.
@@ -33,6 +33,6 @@ Both methods use an explicit Authentication Method preference shared by all comm
 
 ## Validation status — update before posting
 
-Automated validation passed: 18 regression tests (`npm test`), TypeScript (`npm run typecheck`), Raycast lint (`npm run lint`), and the distribution build (`npm run build`). The isolated local extension also compiled and started successfully with `npm run dev`. Native Raycast rendering, real PAT/SSO access, and manual regression checks remain tracked in LOCAL_VALIDATION.md. No claim of complete manual validation is made yet.
+Automated validation passed: 26 regression tests (`npm test`), TypeScript (`npm run typecheck`), Raycast lint (`npm run lint`), and the distribution build (`npm run build`). Checks ran with Node 22.22.2. Read-only GitHub GraphQL checks confirmed personal, organization, and mixed `user:` scopes. Native Raycast rendering, real PAT/SSO access, and manual regression checks remain tracked in LOCAL_VALIDATION.md. No claim of complete manual validation is made yet.
 
-This text is a local draft. It has not been posted to GitHub, and PR #29775 is unchanged.
+PR #29775 remains a draft until manual validation is complete and it is explicitly marked ready for review.

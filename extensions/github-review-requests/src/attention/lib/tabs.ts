@@ -6,7 +6,7 @@
 import { Color, Icon } from "@raycast/api";
 
 import type { Config } from "./config";
-import { orgActive, orgQualifier, searchString } from "./config";
+import { orgActive, ownerQualifier, searchString } from "./config";
 import type { PullRequest, Viewer } from "./types";
 import { nameWithOwner } from "./types";
 
@@ -31,7 +31,7 @@ export type Category = {
 /** Assembles the category list for a config/viewer pair. */
 export function buildCategories(config: Config, viewer: Viewer): Category[] {
   const categories: Category[] = [];
-  const scope = orgQualifier(config);
+  const scope = ownerQualifier(config);
 
   if (config.showBuiltins) {
     categories.push({

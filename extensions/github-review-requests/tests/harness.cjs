@@ -40,6 +40,7 @@ require.extensions[".ts"] = (mod, filename) => {
   });
   mod._compile(outputText, filename);
 };
+require.extensions[".tsx"] = require.extensions[".ts"];
 function reset() {
   state.preferences = { token: "test-pat", ghPath: "/nonexistent/gh" };
   state.storage.clear();

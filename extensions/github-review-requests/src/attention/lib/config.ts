@@ -1,5 +1,5 @@
 /**
- * The extension's persisted configuration: which orgs are in scope, which
+ * The extension's persisted configuration: which owners are in scope, which
  * repos and teams are watched, which authors to hide, and the user's saved
  * filters. This is the Raycast counterpart of flex-review's TOML config
  * (internal/config) — same fields, stored in Raycast's LocalStorage instead.
@@ -100,8 +100,8 @@ export type Config = {
    */
   defaultScope: "tracked" | "all";
   /**
-   * The selected organizations. When non-empty the built-in categories are
-   * scoped to these orgs (org:a org:b). Empty = search globally.
+   * Selected organization or personal owners. The persisted field name is kept
+   * for compatibility. Empty = search globally (including after migration).
    */
   activeOrgs: string[];
   /** Watched repositories, surfacing as the "Watching" category. */
@@ -213,7 +213,7 @@ export function isAuthorIgnored(config: Config, login: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Org scope
+// Owner scope
 // ---------------------------------------------------------------------------
 
 /** Reports whether an organization scope is active (vs. searching globally). */
@@ -228,12 +228,18 @@ export function orgActive(config: Config, owner: string): boolean {
 }
 
 /**
- * The GitHub search qualifier scoping a query to the active orgs
- * (" org:a org:b"), or "" when searching globally. GitHub ORs multiple org:
- * qualifiers.
+ * GitHub user: accepts both organization and personal repository owners,
+ * preserving the legacy Owners preference without account-type lookups.
+ * Multiple user: qualifiers are ORed; an empty selection searches globally.
  */
-export function orgQualifier(config: Config): string {
-  return config.activeOrgs.map(o => ` org:${o}`).join("");
+export function ownerScopeTokens(config: Config): string[] {
+  return config.activeOrgs.map(owner => `user:${owner}`);
+}
+
+export function ownerQualifier(config: Config): string {
+  return ownerScopeTokens(config)
+    .map(token => ` ${token}`)
+    .join("");
 }
 
 // ---------------------------------------------------------------------------
@@ -241,12 +247,12 @@ export function orgQualifier(config: Config): string {
 // ---------------------------------------------------------------------------
 
 /**
- * repo:/org: tokens derived from the watched config when defaultScope is
+ * repo:/user: tokens derived from the watched config when defaultScope is
  * "tracked"; otherwise nothing.
  */
 function scopeTokens(config: Config): string[] {
   if (config.defaultScope !== "tracked") return [];
-  return [...config.activeOrgs.map(o => `org:${o}`), ...config.repos.map(r => `repo:${nameWithOwner(r)}`)];
+  return [...ownerScopeTokens(config), ...config.repos.map(r => `repo:${nameWithOwner(r)}`)];
 }
 
 /**

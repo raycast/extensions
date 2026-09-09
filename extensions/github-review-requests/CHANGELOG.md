@@ -1,5 +1,6 @@
 ## [Update] - {PR_MERGE_DATE}
 
+- Preserve personal and organization owner scopes across both menu layouts, and honor Search Everywhere after migration.
 - Preserve the original GitHub icon, search, review-status menu, and PAT support.
 - Add optional GitHub CLI authentication across all commands.
 - Add conversation reply tracking, ageing, filters, an optional attention menu, and an activity inbox.
