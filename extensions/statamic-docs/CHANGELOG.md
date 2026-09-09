@@ -1,6 +1,6 @@
 # Statamic Docs Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-09
 
 - Fixed a crash on launch in newer Raycast versions, caused by the version dropdown firing before the available versions had loaded
 
