@@ -23,6 +23,7 @@ import {
   fetcher,
   dateDiffToString,
   resolveConfig,
+  isProjectBillable,
 } from "./utils";
 import { TimeEntry, Project, Task, Tag } from "./types";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
@@ -469,6 +470,9 @@ function AddTimeEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) 
 
       const { workspaceId } = await resolveConfig();
 
+      // See addNewTimeEntry: an absent billable field means false, not the project's default.
+      const billable = await isProjectBillable(projectId);
+
       const { data, error } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
         method: "POST",
         body: {
@@ -478,6 +482,7 @@ function AddTimeEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) 
           taskId: taskId === "-1" ? null : taskId || null,
           projectId,
           tagIds: tagIds || [],
+          billable,
           customFieldValues: [],
         },
       });
