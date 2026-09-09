@@ -1,6 +1,6 @@
 # Telegram Changelog
 
-## [Support Rich Messages from Bots] - {PR_MERGE_DATE}
+## [Support Rich Messages from Bots] - 2026-09-09
 
 - Show messages from bots that use rich text. Their content is carried in a field added in Telegram API layer 228, which the extension did not read, so these messages appeared as "Unknown" or were dropped from the list entirely
 - Replace the archived `telegram` (GramJS) dependency with its maintained fork `teleproto`. GramJS is pinned to API layer 198 and its authors now direct users to teleproto; Telegram withholds newer message content from clients on the older layer
