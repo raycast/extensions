@@ -1,6 +1,6 @@
 import { Cache, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import uniqWith from "lodash.uniqwith";
-import { FetcherArgs, FetcherResponse, TimeEntry, Project, Task } from "./types";
+import { FetcherArgs, FetcherResponse, TimeEntry, Project, Task, User, Workspace } from "./types";
 import { showFailureToast } from "@raycast/utils";
 
 const cache = new Cache();
@@ -59,11 +59,69 @@ export async function fetcher(
   }
 }
 
+/**
+ * Picks the workspace to operate on. `defaultWorkspace` is not guaranteed to be present, so fall
+ * back to the active workspace and then to the first workspace this token can see.
+ *
+ * Single implementation on purpose: both useConfig and resolveConfig need this chain, and two
+ * copies would be free to drift apart.
+ *
+ * Returns the error separately so callers can tell "this account has no workspace" apart from
+ * "the request failed"; the two need different messages.
+ */
+export async function resolveWorkspaceId(
+  user: User | undefined,
+): Promise<{ workspaceId?: string; error?: string | Error }> {
+  const fromUser = user?.defaultWorkspace || user?.activeWorkspace;
+  if (fromUser) return { workspaceId: fromUser };
+
+  const { data, error } = await fetcher(`/workspaces`);
+  if (error) return { error };
+
+  return { workspaceId: (data as Workspace[] | undefined)?.[0]?.id };
+}
+
+/**
+ * Resolves the workspace and user ids that every request needs.
+ *
+ * These are written by useConfig, but a resolved `LocalStorage.setItem` does not guarantee the key
+ * is readable yet: when several writes are issued concurrently — useConfig can bootstrap from more
+ * than one mounted component at once — a key can be lost, and callers then request
+ * /workspaces/undefined/... which Clockify rejects with "User doesn't belong to Workspace".
+ *
+ * So treat LocalStorage as a cache rather than the source of truth: if either id is missing,
+ * re-derive it from /user and repair the stored copy with sequential writes.
+ */
+export async function resolveConfig(): Promise<{ workspaceId?: string; userId?: string }> {
+  const [storedWorkspaceId, storedUserId] = await Promise.all([
+    LocalStorage.getItem<string>("workspaceId"),
+    LocalStorage.getItem<string>("userId"),
+  ]);
+
+  if (storedWorkspaceId && storedUserId) {
+    return { workspaceId: storedWorkspaceId, userId: storedUserId };
+  }
+
+  const { data } = await fetcher(`/user`);
+  const user = data as User | undefined;
+
+  const workspaceId = storedWorkspaceId || (await resolveWorkspaceId(user)).workspaceId;
+  const userId = storedUserId || user?.id;
+
+  if (workspaceId) await LocalStorage.setItem("workspaceId", workspaceId);
+  if (userId) await LocalStorage.setItem("userId", userId);
+
+  return { workspaceId, userId };
+}
+
 export function validateToken(): boolean {
   const preferences = getPreferenceValues<Preferences>();
   const token = preferences.token;
 
-  if (token.length !== 48) {
+  // Guard before reading .length: this runs inside a useState initializer, so if the preference is
+  // ever absent the throw happens during render and takes the whole command down rather than
+  // showing the recoverable invalid-key state.
+  if (!token || token.length !== 48) {
     showToast(Toast.Style.Failure, "Invalid API Key detected");
     return false;
   }
@@ -129,8 +187,7 @@ export function toMonospaceFont(text: string | null): string {
 }
 
 export async function getTimeEntries({ onError }: { onError?: (state: boolean) => void }): Promise<TimeEntry[]> {
-  const workspaceId = await LocalStorage.getItem("workspaceId");
-  const userId = await LocalStorage.getItem("userId");
+  const { workspaceId, userId } = await resolveConfig();
 
   const { data, error } = await fetcher(
     `/workspaces/${workspaceId}/user/${userId}/time-entries?hydrated=true&page-size=500`,
@@ -158,8 +215,7 @@ export async function getTimeEntries({ onError }: { onError?: (state: boolean) =
 export async function stopCurrentTimer(callback?: () => void): Promise<void> {
   showToast(Toast.Style.Animated, "Stopping…");
 
-  const workspaceId = await LocalStorage.getItem("workspaceId");
-  const userId = await LocalStorage.getItem("userId");
+  const { workspaceId, userId } = await resolveConfig();
 
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/user/${userId}/time-entries`, {
     method: "PATCH",
@@ -235,8 +291,7 @@ export function getAllTimeEntriesFromLocalStorage(): TimeEntry[] {
 
 export async function getTodayTotalTimeForProject(projectId: string): Promise<number> {
   try {
-    const workspaceId = await LocalStorage.getItem("workspaceId");
-    const userId = await LocalStorage.getItem("userId");
+    const { workspaceId, userId } = await resolveConfig();
 
     // Get today's date range in ISO format
     const today = new Date();
@@ -295,7 +350,7 @@ export function millisecondsToDurationString(ms: number): string {
 }
 
 export async function getProjects({ onError }: { onError?: (state: boolean) => void } = {}): Promise<Project[]> {
-  const workspaceId = await LocalStorage.getItem("workspaceId");
+  const { workspaceId } = await resolveConfig();
 
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/projects?page-size=1000&archived=false`);
   if (error === "Unauthorized") {
@@ -312,7 +367,7 @@ export async function getProjects({ onError }: { onError?: (state: boolean) => v
 }
 
 export async function getTasksForProject(projectId: string): Promise<Task[]> {
-  const workspaceId = await LocalStorage.getItem("workspaceId");
+  const { workspaceId } = await resolveConfig();
   const cacheKey = `project[${projectId}]`;
 
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/projects/${projectId}/tasks?page-size=1000`);
@@ -339,7 +394,7 @@ export async function addNewTimeEntry(
 ): Promise<TimeEntry | null> {
   showToast(Toast.Style.Animated, "Starting…");
 
-  const workspaceId = await LocalStorage.getItem("workspaceId");
+  const { workspaceId } = await resolveConfig();
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
     method: "POST",
     body: {
@@ -370,7 +425,9 @@ export async function addNewTimeEntry(
 
     return data as TimeEntry;
   } else {
-    showToast(Toast.Style.Failure, "Timer could not be started");
+    // Surface the reason: this toast used to be the extension's only symptom for several distinct
+    // failures, which made them very hard to tell apart.
+    showToast(Toast.Style.Failure, "Timer could not be started", error?.toString());
     return null;
   }
 }
