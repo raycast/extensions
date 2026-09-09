@@ -26,11 +26,8 @@ import {
 const PAGE_SIZE = 10;
 
 export default function Command() {
-  const { plan, iconOnly, notifyResets } = getPreferenceValues<{
-    plan: string;
-    iconOnly: boolean;
-    notifyResets: boolean;
-  }>();
+  const { plan, iconOnly, notifyResets } =
+    getPreferenceValues<Preferences.Menubar>();
   const { data, error, isLoading, revalidate } = useCachedPromise(
     fetchMenuRecords,
     [recordsUrl("all", 1, PAGE_SIZE), plan, notifyResets],

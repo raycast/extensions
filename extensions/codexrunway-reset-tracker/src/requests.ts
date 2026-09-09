@@ -85,7 +85,8 @@ export async function fetchRecords(url: string): Promise<FetchedRecords> {
       );
     if (cached && Date.now() - cached.fetchedAt < FRESH_FOR) return cached;
     // ponytail: one lock for this 20/hour API; per-service locks if more APIs are added.
-    const waitUntil = Date.now() + 15_000;
+    // Outlast the holder's 15s network timeout so a timed-out holder's lock can still be taken.
+    const waitUntil = Date.now() + 20_000;
     while (!locked) {
       try {
         mkdirSync(lockPath);

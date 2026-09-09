@@ -26,8 +26,8 @@ import { confidenceColor, statusIcon } from "./status";
 
 export default function Command() {
   const [kind, setKind] = useState<ResetKind>("all");
-  const [plan, setPlan] = useState(
-    getPreferenceValues<{ plan: string }>().plan,
+  const [plan, setPlan] = useState<string>(
+    getPreferenceValues<Preferences.History>().plan,
   );
   const [searchText, setSearchText] = useState("");
 

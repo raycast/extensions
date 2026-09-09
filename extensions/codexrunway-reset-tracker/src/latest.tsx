@@ -28,7 +28,7 @@ import { confidenceColor } from "./status";
 const PAGE_SIZE = 10;
 
 export default function Command() {
-  const { plan } = getPreferenceValues<{ plan: string }>();
+  const { plan } = getPreferenceValues<Preferences.Latest>();
   const { data, error, isLoading, revalidate } = useCachedPromise(
     fetchRecords,
     [recordsUrl("all", 1, PAGE_SIZE)],
