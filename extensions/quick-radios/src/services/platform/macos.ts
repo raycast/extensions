@@ -216,49 +216,280 @@ export async function toggleMacWifi(targetState?: boolean): Promise<boolean> {
   return nextState;
 }
 
+async function getMacSavedNetworks(device: string): Promise<Set<string>> {
+  try {
+    const output = await runExecFile("networksetup", [
+      "-listpreferredwirelessnetworks",
+      device,
+    ]);
+    const lines = output.split("\n");
+    const saved = new Set<string>();
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith("Preferred networks on")) {
+        saved.add(trimmed);
+      }
+    }
+    return saved;
+  } catch {
+    return new Set<string>();
+  }
+}
+
+async function scanMacWifiCoreWlan(
+  device: string,
+): Promise<Array<{ ssid: string; rssi: number }>> {
+  try {
+    const script = `
+      ObjC.import('CoreWLAN');
+      var client = $.CWWiFiClient.sharedWiFiClient;
+      var iface = client.interfaceWithName("${device}") || client.interface;
+      var scan = iface ? iface.scanForNetworksWithNameError(null, null) : null;
+      var res = [];
+      if (scan) {
+        var count = scan.count;
+        var all = scan.allObjects;
+        for (var i = 0; i < count; i++) {
+          var net = all.objectAtIndex(i);
+          var s = net.ssid ? net.ssid.js : '';
+          if (s) {
+            res.push({ ssid: s, rssi: net.rssiValue });
+          }
+        }
+      }
+      JSON.stringify(res);
+    `;
+    const stdout = await runExecFile("osascript", [
+      "-l",
+      "JavaScript",
+      "-e",
+      script,
+    ]);
+    if (stdout && stdout.trim()) {
+      return JSON.parse(stdout);
+    }
+  } catch {
+    // CoreWLAN JXA fallback failed
+  }
+  return [];
+}
+
+async function scanMacWifiSystemProfiler(): Promise<
+  Array<{ ssid: string; rssi: number; security?: string }>
+> {
+  try {
+    const output = await runExecFile("system_profiler", ["SPAirPortDataType"]);
+    const results: Array<{ ssid: string; rssi: number; security?: string }> =
+      [];
+    const lines = output.split("\n");
+    let currentSsid: string | undefined;
+    let currentRssi: number | undefined;
+    let currentSec: string | undefined;
+
+    const commitCurrent = () => {
+      if (currentSsid && currentRssi !== undefined) {
+        results.push({
+          ssid: currentSsid,
+          rssi: currentRssi,
+          security: currentSec || "Encrypted",
+        });
+      }
+      currentSsid = undefined;
+      currentRssi = undefined;
+      currentSec = undefined;
+    };
+
+    let inNetworksSection = false;
+    for (const line of lines) {
+      if (
+        line.includes("Current Network Information:") ||
+        line.includes("Other Local Wi-Fi Networks:")
+      ) {
+        inNetworksSection = true;
+        continue;
+      }
+      if (!inNetworksSection) continue;
+
+      const ssidMatch = line.match(/^\s{8,12}([^\s:][^:]*):$/);
+      if (
+        ssidMatch &&
+        !line.includes("PHY Mode") &&
+        !line.includes("Channel") &&
+        !line.includes("Security")
+      ) {
+        commitCurrent();
+        currentSsid = ssidMatch[1].trim();
+        continue;
+      }
+
+      const sigMatch = line.match(/Signal \/ Noise:\s*(-?\d+)\s*dBm/i);
+      if (sigMatch) {
+        currentRssi = parseInt(sigMatch[1], 10);
+      }
+
+      const secMatch = line.match(/Security:\s*(.+)/i);
+      if (secMatch) {
+        currentSec = secMatch[1].trim();
+      }
+    }
+    commitCurrent();
+    return results;
+  } catch {
+    return [];
+  }
+}
+
 export async function getMacWifiNetworks(): Promise<WifiNetwork[]> {
   try {
-    const scanOutput = await runExecFile(AIRPORT_PATH, ["-s"]);
-    const current = await getMacWifiStatus();
+    const device = await getMacWifiDevice();
+    const [current, savedNetworks] = await Promise.all([
+      getMacWifiStatus(),
+      getMacSavedNetworks(device),
+    ]);
 
-    const lines = scanOutput.split("\n").slice(1);
-    // Match multi-word SSID anchored before the standard 17-char BSSID MAC address
-    const lineRegex =
-      /^\s*(.*?)\s+([0-9a-fA-F]{2}(?::[0-9a-fA-F]{2}){5})\s+(-?\d+)\s+(.*)$/;
     const networkMap = new Map<string, WifiNetwork>();
 
-    for (const line of lines) {
-      const match = line.match(lineRegex);
-      if (!match) continue;
-      const ssid = match[1].trim();
-      if (!ssid) continue;
-      const rssi = parseInt(match[3], 10) || -70;
-      const signalPercent = Math.max(0, Math.min(100, 2 * (rssi + 100)));
-      const remainder = match[4].trim();
-      const remParts = remainder.split(/\s+/);
-      const rawSecurity =
-        remParts.length > 3
-          ? remParts.slice(3).join(" ")
-          : remParts[remParts.length - 1] || "Open";
-      const security =
-        rawSecurity === "NONE" || rawSecurity === "--" ? "Open" : rawSecurity;
+    // 1. Try primary airport utility scan
+    let scanSucceeded = false;
+    try {
+      const scanOutput = await runExecFile(AIRPORT_PATH, ["-s"]);
+      const lines = scanOutput.split("\n").slice(1);
+      const lineRegex =
+        /^\s*(.*?)\s+([0-9a-fA-F]{2}(?::[0-9a-fA-F]{2}){5})\s+(-?\d+)\s+(.*)$/;
 
-      const existing = networkMap.get(ssid);
-      if (!existing || signalPercent > existing.signalPercent) {
-        networkMap.set(ssid, {
-          ssid,
-          signalPercent,
-          authentication: security,
-          isSaved: false,
-          isConnected: ssid === current.ssid,
+      for (const line of lines) {
+        const match = line.match(lineRegex);
+        if (!match) continue;
+        const ssid = match[1].trim();
+        if (!ssid) continue;
+        const rssi = parseInt(match[3], 10) || -70;
+        const signalPercent = Math.max(0, Math.min(100, 2 * (rssi + 100)));
+        const remainder = match[4].trim();
+        const remParts = remainder.split(/\s+/);
+        const rawSecurity =
+          remParts.length > 3
+            ? remParts.slice(3).join(" ")
+            : remParts[remParts.length - 1] || "Open";
+        const security =
+          rawSecurity === "NONE" || rawSecurity === "--" ? "Open" : rawSecurity;
+
+        const existing = networkMap.get(ssid);
+        if (!existing || signalPercent > existing.signalPercent) {
+          networkMap.set(ssid, {
+            ssid,
+            signalPercent,
+            authentication: security,
+            isSaved: savedNetworks.has(ssid),
+            isConnected: ssid === current.ssid,
+          });
+        }
+      }
+      scanSucceeded = networkMap.size > 0;
+    } catch {
+      // Airport tool is deprecated/removed on macOS Tahoe
+    }
+
+    // 2. Fallback scans on modern macOS without airport
+    if (!scanSucceeded) {
+      const cwNetworks = await scanMacWifiCoreWlan(device);
+      if (cwNetworks.length > 0) {
+        for (const net of cwNetworks) {
+          const signalPercent = Math.max(
+            0,
+            Math.min(100, 2 * (net.rssi + 100)),
+          );
+          const existing = networkMap.get(net.ssid);
+          if (!existing || signalPercent > existing.signalPercent) {
+            networkMap.set(net.ssid, {
+              ssid: net.ssid,
+              signalPercent,
+              authentication: "Encrypted",
+              isSaved: savedNetworks.has(net.ssid),
+              isConnected: net.ssid === current.ssid,
+            });
+          }
+        }
+        scanSucceeded = networkMap.size > 0;
+      }
+
+      if (!scanSucceeded) {
+        const spNetworks = await scanMacWifiSystemProfiler();
+        for (const net of spNetworks) {
+          const signalPercent = Math.max(
+            0,
+            Math.min(100, 2 * (net.rssi + 100)),
+          );
+          const existing = networkMap.get(net.ssid);
+          if (!existing || signalPercent > existing.signalPercent) {
+            networkMap.set(net.ssid, {
+              ssid: net.ssid,
+              signalPercent,
+              authentication: net.security || "Encrypted",
+              isSaved: savedNetworks.has(net.ssid),
+              isConnected: net.ssid === current.ssid,
+            });
+          }
+        }
+      }
+    }
+
+    // 3. Ensure currently active network is never hidden even if scanning produced no results
+    if (current.isConnected && current.ssid) {
+      const activeSsid = current.ssid;
+      const existing = networkMap.get(activeSsid);
+      if (existing) {
+        existing.isConnected = true;
+        if (current.signalPercent) {
+          existing.signalPercent = Math.max(
+            existing.signalPercent,
+            current.signalPercent,
+          );
+        }
+      } else {
+        networkMap.set(activeSsid, {
+          ssid: activeSsid,
+          signalPercent: current.signalPercent ?? 100,
+          authentication: "Connected",
+          isSaved: savedNetworks.has(activeSsid),
+          isConnected: true,
         });
       }
     }
 
+    // 4. Populate saved profiles that are not currently in range
+    for (const savedSsid of savedNetworks) {
+      if (!networkMap.has(savedSsid)) {
+        networkMap.set(savedSsid, {
+          ssid: savedSsid,
+          signalPercent: 0,
+          authentication: "Saved",
+          isSaved: true,
+          isConnected: savedSsid === current.ssid,
+        });
+      }
+    }
+
+    // 5. Sort networks: Connected -> Saved in range -> In range -> Saved out of range
     return Array.from(networkMap.values()).sort((a, b) => {
       if (a.isConnected && !b.isConnected) return -1;
       if (!a.isConnected && b.isConnected) return 1;
-      return b.signalPercent - a.signalPercent;
+
+      const aSavedInRange = a.isSaved && a.signalPercent > 0;
+      const bSavedInRange = b.isSaved && b.signalPercent > 0;
+      if (aSavedInRange && !bSavedInRange) return -1;
+      if (!aSavedInRange && bSavedInRange) return 1;
+
+      const aInRange = !a.isSaved && a.signalPercent > 0;
+      const bInRange = !b.isSaved && b.signalPercent > 0;
+      if (aInRange && !bInRange) return -1;
+      if (!aInRange && bInRange) return 1;
+
+      const aSavedOut = a.isSaved && a.signalPercent === 0;
+      const bSavedOut = b.isSaved && b.signalPercent === 0;
+      if (aSavedOut && !bSavedOut) return -1;
+      if (!aSavedOut && bSavedOut) return 1;
+
+      return b.signalPercent - a.signalPercent || a.ssid.localeCompare(b.ssid);
     });
   } catch {
     return [];

@@ -525,11 +525,15 @@ class QuickRadiosHelper {
             watcherThread.Start();
 
             // Disable services sequentially, checking early after each
+            bool anyServiceDisabled = false;
             foreach (Guid g in servicesToDisable) {
                 if (_operationComplete) break;
 
                 Guid currentGuid = g;
-                BluetoothSetServiceState(IntPtr.Zero, ref btdi, ref currentGuid, 0u);
+                uint res = BluetoothSetServiceState(IntPtr.Zero, ref btdi, ref currentGuid, 0u);
+                if (res == 0) {
+                    anyServiceDisabled = true;
+                }
 
                 // Early check: after disabling this service, poll briefly up to 1000ms
                 int elapsed = 0;
@@ -542,6 +546,13 @@ class QuickRadiosHelper {
                     Thread.Sleep(150);
                     elapsed += 150;
                 }
+            }
+
+            // If no services were successfully disabled and device remains connected, fail early
+            if (servicesToDisable.Count > 0 && !anyServiceDisabled && GetDeviceConnectionState(address) != 0) {
+                _operationComplete = true;
+                Console.WriteLine("FailedToDisconnect");
+                return 1;
             }
 
             // Final polling loop (up to 2 seconds)
@@ -557,8 +568,13 @@ class QuickRadiosHelper {
             }
 
             _operationComplete = true;
-            CompleteSuccess("Disconnected");
-            return 0;
+            if (GetDeviceConnectionState(address) == 0) {
+                CompleteSuccess("Disconnected");
+                return 0;
+            }
+
+            Console.WriteLine("FailedToDisconnect");
+            return 1;
         } catch (Exception ex) {
             Console.WriteLine("Error: " + ex.Message);
             return 2;

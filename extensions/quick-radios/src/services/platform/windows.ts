@@ -767,19 +767,71 @@ function unescapeXml(str: string): string {
     .replace(/&amp;/g, "&");
 }
 
-/**
- * Connects to a Wi-Fi network by SSID. If a password is provided for an unsaved network,
- * creates a temporary XML profile.
- */
-export async function connectWindowsWifi(
-  ssid: string,
-  password?: string,
-): Promise<void> {
-  if (password) {
-    const escapedSsid = escapeXml(ssid);
-    const escapedPassword = escapeXml(password);
-    const hexSsid = Buffer.from(ssid, "utf-8").toString("hex");
-    const profileXml = `<?xml version="1.0"?>
+async function hasWindowsProfile(ssid: string): Promise<boolean> {
+  try {
+    const output = await runNetsh(["wlan", "show", "profile", `name=${ssid}`]);
+    return (
+      !output.includes("is not found on any interface") &&
+      !output.includes("There is no such wireless interface")
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function getVisibleNetworkSecurity(ssid: string): Promise<
+  | {
+      authentication: string;
+      encryption: string;
+    }
+  | undefined
+> {
+  try {
+    const output = await runNetsh(["wlan", "show", "networks"]);
+    const blocks = output.split(/(?:^|\r?\n)SSID\s+\d+\s*:\s*/i).slice(1);
+    for (const block of blocks) {
+      const lines = block.split("\n").map((l) => l.trim());
+      if (lines[0] === ssid) {
+        const authMatch = block.match(/Authentication\s*:\s*(.+)/i);
+        const encMatch = block.match(/Encryption\s*:\s*(.+)/i);
+        return {
+          authentication: authMatch ? authMatch[1].trim() : "Open",
+          encryption: encMatch ? encMatch[1].trim() : "None",
+        };
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return undefined;
+}
+
+async function addWindowsWifiProfileXml(profileXml: string): Promise<void> {
+  const tempPath = path.join(os.tmpdir(), `wifi_prof_${Date.now()}.xml`);
+  fs.writeFileSync(tempPath, profileXml, "utf-8");
+  try {
+    await runNetsh([
+      "wlan",
+      "add",
+      "profile",
+      `filename=${tempPath}`,
+      "user=current",
+    ]);
+  } finally {
+    if (fs.existsSync(tempPath)) {
+      fs.unlinkSync(tempPath);
+    }
+  }
+}
+
+function buildWpaPskXml(
+  escapedSsid: string,
+  hexSsid: string,
+  auth: string,
+  encryption: string,
+  escapedPassword: string,
+): string {
+  return `<?xml version="1.0"?>
 <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
     <name>${escapedSsid}</name>
     <SSIDConfig>
@@ -793,8 +845,8 @@ export async function connectWindowsWifi(
     <MSM>
         <security>
             <authEncryption>
-                <authentication>WPA2PSK</authentication>
-                <encryption>AES</encryption>
+                <authentication>${auth}</authentication>
+                <encryption>${encryption}</encryption>
                 <useOneX>false</useOneX>
             </authEncryption>
             <sharedKey>
@@ -805,20 +857,118 @@ export async function connectWindowsWifi(
         </security>
     </MSM>
 </WLANProfile>`;
+}
 
-    const tempPath = path.join(os.tmpdir(), `wifi_prof_${Date.now()}.xml`);
-    fs.writeFileSync(tempPath, profileXml, "utf-8");
-    try {
-      await runNetsh([
-        "wlan",
-        "add",
-        "profile",
-        `filename=${tempPath}`,
-        "user=current",
-      ]);
-    } finally {
-      if (fs.existsSync(tempPath)) {
-        fs.unlinkSync(tempPath);
+/**
+ * Connects to a Wi-Fi network by SSID. Supports Open, WPA3-Personal, Enterprise (802.1X),
+ * and WPA/WPA2-Personal networks with appropriate profile generation.
+ */
+export async function connectWindowsWifi(
+  ssid: string,
+  password?: string,
+): Promise<void> {
+  const profileExists = await hasWindowsProfile(ssid);
+
+  if (!profileExists || password) {
+    const sec = await getVisibleNetworkSecurity(ssid);
+    const auth = (sec?.authentication || "").toUpperCase();
+    const isOpen =
+      auth.includes("OPEN") || (!password && !auth.includes("ENTERPRISE"));
+    const isEnterprise = auth.includes("ENTERPRISE");
+    const isWpa3 = auth.includes("WPA3") || auth.includes("SAE");
+    const isWpa1 = auth.startsWith("WPA-") || auth === "WPAPSK";
+
+    const escapedSsid = escapeXml(ssid);
+    const hexSsid = Buffer.from(ssid, "utf-8").toString("hex");
+
+    if (isOpen) {
+      const openXml = `<?xml version="1.0"?>
+<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
+    <name>${escapedSsid}</name>
+    <SSIDConfig>
+        <SSID>
+            <hex>${hexSsid}</hex>
+            <name>${escapedSsid}</name>
+        </SSID>
+    </SSIDConfig>
+    <connectionType>ESS</connectionType>
+    <connectionMode>auto</connectionMode>
+    <MSM>
+        <security>
+            <authEncryption>
+                <authentication>open</authentication>
+                <encryption>none</encryption>
+                <useOneX>false</useOneX>
+            </authEncryption>
+        </security>
+    </MSM>
+</WLANProfile>`;
+      await addWindowsWifiProfileXml(openXml);
+    } else if (isEnterprise) {
+      const entXml = `<?xml version="1.0"?>
+<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
+    <name>${escapedSsid}</name>
+    <SSIDConfig>
+        <SSID>
+            <hex>${hexSsid}</hex>
+            <name>${escapedSsid}</name>
+        </SSID>
+    </SSIDConfig>
+    <connectionType>ESS</connectionType>
+    <connectionMode>auto</connectionMode>
+    <MSM>
+        <security>
+            <authEncryption>
+                <authentication>${isWpa3 ? "WPA3" : "WPA2"}</authentication>
+                <encryption>AES</encryption>
+                <useOneX>true</useOneX>
+            </authEncryption>
+        </security>
+    </MSM>
+</WLANProfile>`;
+      await addWindowsWifiProfileXml(entXml);
+    } else if (password) {
+      const escapedPassword = escapeXml(password);
+      if (isWpa3) {
+        const wpa3Xml = buildWpaPskXml(
+          escapedSsid,
+          hexSsid,
+          "WPA3SAE",
+          "AES",
+          escapedPassword,
+        );
+        try {
+          await addWindowsWifiProfileXml(wpa3Xml);
+        } catch {
+          // Fallback to WPA2PSK if adapter/driver does not support WPA3 profile
+          const wpa2Fallback = buildWpaPskXml(
+            escapedSsid,
+            hexSsid,
+            "WPA2PSK",
+            "AES",
+            escapedPassword,
+          );
+          await addWindowsWifiProfileXml(wpa2Fallback);
+        }
+      } else if (isWpa1) {
+        const enc = sec?.encryption?.toUpperCase() === "AES" ? "AES" : "TKIP";
+        const wpa1Xml = buildWpaPskXml(
+          escapedSsid,
+          hexSsid,
+          "WPAPSK",
+          enc,
+          escapedPassword,
+        );
+        await addWindowsWifiProfileXml(wpa1Xml);
+      } else {
+        const wpa2Xml = buildWpaPskXml(
+          escapedSsid,
+          hexSsid,
+          "WPA2PSK",
+          "AES",
+          escapedPassword,
+        );
+        await addWindowsWifiProfileXml(wpa2Xml);
       }
     }
   }

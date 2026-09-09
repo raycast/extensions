@@ -40,7 +40,10 @@ export default function BluetoothCommand() {
   const pendingDeviceIdRef = useRef<string | null>(null);
   const actionSeqRef = useRef(0);
   const timeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
-  const pendingRefreshRef = useRef<{ showNotification?: boolean } | null>(null);
+  const pendingRefreshRef = useRef<{
+    showNotification?: boolean;
+    isBackground?: boolean;
+  } | null>(null);
 
   const scheduleTimeout = useCallback((fn: () => void, ms: number) => {
     if (!isMountedRef.current) return;
@@ -74,12 +77,16 @@ export default function BluetoothCommand() {
       }
 
       if (isScanningRef.current) {
-        if (!isBackground) {
-          pendingRefreshRef.current = {
-            showNotification:
-              showNotification || pendingRefreshRef.current?.showNotification,
-          };
-        }
+        pendingRefreshRef.current = {
+          showNotification:
+            showNotification ||
+            Boolean(pendingRefreshRef.current?.showNotification),
+          isBackground:
+            isBackground &&
+            (pendingRefreshRef.current !== null
+              ? Boolean(pendingRefreshRef.current.isBackground)
+              : true),
+        };
         return;
       }
 
