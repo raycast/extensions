@@ -94,6 +94,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [Contracko](https://contracko.com/docs/mcp-server) | AI contract management. Review contracts for risks and obligations, extract dates, parties and values, search inside documents, and track renewal deadlines. Connects to the remote Contracko MCP server over OAuth 2.1. |
 | [Talk to Figma](https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp) | This project implements a Model Context Protocol (MCP) integration between Cursor AI and Figma, allowing Cursor to communicate with Figma for reading designs and modifying them programmatically. |
 | [Airbnb](https://github.com/openbnb-org/mcp-server-airbnb) | MCP Server for searching Airbnb and get listing details. |
 | [Airtable](https://github.com/domdomegg/airtable-mcp-server) | A Model Context Protocol server that provides read and write access to Airtable databases. This server enables LLMs to inspect database schemas, then read and write records. |

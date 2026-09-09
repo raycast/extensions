@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Contracko MCP Server] - 2026-09-09
+
+Add Contracko to the community registry for contract review, document search, and renewal tracking. Connects to the remote OAuth MCP server through `mcp-remote`.
+
 ## [Add Stellary MCP Server] - 2026-09-02
 
 Add Stellary to the community registry: AI-native project piloting and project management (open beta). Remote Streamable HTTP MCP server via mcp-remote; Bearer PAT required.
