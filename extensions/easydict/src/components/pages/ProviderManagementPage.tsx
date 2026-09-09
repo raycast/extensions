@@ -65,25 +65,29 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
   const visibleProviderKeys = rows.map((row) =>
     row.kind === "ai" ? getAIProviderKey(row.profile) : row.service.providerKey,
   );
-  async function saveProfiles(nextProfiles: AIProviderProfile[], savedOrder = controller.storedState?.providerOrder) {
-    const storedState = controller.storedState;
-    if (!storedState) throw new Error("AI provider configuration has not loaded. Try again after loading completes.");
-    const fallbackOrder = getCombinedProviderOrder(nextProfiles, undefined, servicesOrder);
-    const previousFallbackOrder = getCombinedProviderOrder(storedState.profiles, undefined, servicesOrder);
-    const previousKeys = new Set(getCombinedAvailableProviderKeys(storedState.profiles));
-    const appendNewKeys = fallbackOrder.filter((key) => !previousKeys.has(key));
-    const nextProviderOrder = reconcileProviderOrder(
-      savedOrder,
-      getCombinedAvailableProviderKeys(nextProfiles),
-      savedOrder ? fallbackOrder : [...previousFallbackOrder, ...appendNewKeys],
-    );
-    const normalizedProfiles = syncAIProviderOrders(nextProfiles, nextProviderOrder);
-    await controller.update({
-      ...storedState,
-      profiles: normalizedProfiles,
-      providerOrder: nextProviderOrder,
+  async function saveProfiles(
+    updateProfiles: (profiles: AIProviderProfile[]) => AIProviderProfile[],
+    savedOrder?: string[],
+  ) {
+    const nextState = await controller.update((storedState) => {
+      const nextProfiles = updateProfiles(storedState.profiles);
+      const currentOrder = savedOrder ?? storedState.providerOrder;
+      const fallbackOrder = getCombinedProviderOrder(nextProfiles, undefined, servicesOrder);
+      const previousFallbackOrder = getCombinedProviderOrder(storedState.profiles, undefined, servicesOrder);
+      const previousKeys = new Set(getCombinedAvailableProviderKeys(storedState.profiles));
+      const appendNewKeys = fallbackOrder.filter((key) => !previousKeys.has(key));
+      const nextProviderOrder = reconcileProviderOrder(
+        currentOrder,
+        getCombinedAvailableProviderKeys(nextProfiles),
+        currentOrder ? fallbackOrder : [...previousFallbackOrder, ...appendNewKeys],
+      );
+      return {
+        ...storedState,
+        profiles: syncAIProviderOrders(nextProfiles, nextProviderOrder),
+        providerOrder: nextProviderOrder,
+      };
     });
-    if (normalizedProfiles.filter((profile) => profile.adapter === "raycast-ai" && profile.enabled).length > 1) {
+    if (nextState.profiles.filter((profile) => profile.adapter === "raycast-ai" && profile.enabled).length > 1) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Multiple Raycast AI providers enabled",
@@ -109,7 +113,7 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
             isNewProvider
             showPresetSelector={showPresetSelector}
             description={description}
-            onSave={(saved) => saveProfiles([...profiles, saved])}
+            onSave={(saved) => saveProfiles((currentProfiles) => [...currentProfiles, saved])}
           />
         }
       />
@@ -144,10 +148,10 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
                     primaryAction: { title: "Reset", style: Alert.ActionStyle.Destructive },
                   });
                   if (confirmed) {
-                    await controller.update({
+                    await controller.update(() => ({
                       ...createEmptyAIProviderState(),
                       migratedLegacyProviders: [...LEGACY_AI_PROVIDER_NAMES],
-                    });
+                    }));
                   }
                 }}
               />
@@ -168,7 +172,7 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
     const nextOrder = [...providerOrder];
     [nextOrder[currentIndex], nextOrder[nextIndex]] = [nextOrder[nextIndex], nextOrder[currentIndex]];
     setSelectedProviderKey(providerKey);
-    await saveProfiles(profiles, nextOrder);
+    await saveProfiles((currentProfiles) => currentProfiles, nextOrder);
     setSelectedProviderKey(providerKey);
   }
 
@@ -274,7 +278,9 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
                     <AIProviderForm
                       profile={profile}
                       onSave={(saved) =>
-                        saveProfiles(profiles.map((candidate) => (candidate.id === saved.id ? saved : candidate)))
+                        saveProfiles((currentProfiles) =>
+                          currentProfiles.map((candidate) => (candidate.id === saved.id ? saved : candidate)),
+                        )
                       }
                     />
                   }
@@ -283,8 +289,8 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
                   title={profile.enabled ? "Disable Provider" : "Enable Provider"}
                   icon={profile.enabled ? Icon.Pause : Icon.Play}
                   onAction={() =>
-                    saveProfiles(
-                      profiles.map((candidate) =>
+                    saveProfiles((currentProfiles) =>
+                      currentProfiles.map((candidate) =>
                         candidate.id === profile.id ? { ...candidate, enabled: !candidate.enabled } : candidate,
                       ),
                     )
@@ -294,8 +300,8 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
                   title="Duplicate Provider"
                   icon={Icon.Duplicate}
                   onAction={() =>
-                    saveProfiles([
-                      ...profiles,
+                    saveProfiles((currentProfiles) => [
+                      ...currentProfiles,
                       { ...profile, id: randomUUID(), name: `${profile.name} Copy`, enabled: false },
                     ])
                   }
@@ -314,7 +320,9 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
                     });
                     if (confirmed) {
                       setSelectedProviderKey(undefined);
-                      await saveProfiles(profiles.filter((candidate) => candidate.id !== profile.id));
+                      await saveProfiles((currentProfiles) =>
+                        currentProfiles.filter((candidate) => candidate.id !== profile.id),
+                      );
                     }
                   }}
                 />

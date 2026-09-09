@@ -18,7 +18,7 @@ import {
 
 export const AI_PROVIDER_STORAGE_KEY = "ai-provider-profiles";
 const LOG_LABEL = "AI Providers";
-let profileUpdateQueue = Promise.resolve();
+let providerStateUpdateQueue = Promise.resolve();
 
 export type AIProviderLoadResult =
   | { kind: "missing"; state: StoredAIProviderStateV1 | StoredAIProviderState }
@@ -68,11 +68,33 @@ export async function saveAIProviderState(state: StoredAIProviderState): Promise
   if (!isStoredAIProviderState(state)) {
     throw new Error("Refusing to save an invalid AI provider configuration.");
   }
+  await enqueueProviderStateUpdate(() => writeAIProviderState(state));
+}
+
+export function updateAIProviderState(
+  update: (state: StoredAIProviderState) => StoredAIProviderState,
+): Promise<StoredAIProviderState> {
+  return enqueueProviderStateUpdate(async () => {
+    const result = await loadAIProviderState();
+    if ((result.kind !== "missing" && result.kind !== "ready") || result.state.version !== 2) {
+      throw new Error("AI provider configuration is not available for updates.");
+    }
+
+    const nextState = update(result.state);
+    if (!isStoredAIProviderState(nextState)) {
+      throw new Error("Refusing to save an invalid AI provider configuration.");
+    }
+    await writeAIProviderState(nextState);
+    return nextState;
+  });
+}
+
+async function writeAIProviderState(state: StoredAIProviderState): Promise<void> {
   await LocalStorage.setItem(AI_PROVIDER_STORAGE_KEY, JSON.stringify(state));
 }
 
 export function fallbackAIProviderToPromptJSON(profileId: string): Promise<boolean> {
-  const update = profileUpdateQueue.then(async () => {
+  return enqueueProviderStateUpdate(async () => {
     const result = await loadAIProviderState();
     if (result.kind !== "ready" || result.state.version !== 2) return false;
 
@@ -83,14 +105,18 @@ export function fallbackAIProviderToPromptJSON(profileId: string): Promise<boole
 
     const profiles = [...result.state.profiles];
     profiles[profileIndex] = { ...profile, jsonOutputMode: "prompt" };
-    await saveAIProviderState({ ...result.state, profiles });
+    await writeAIProviderState({ ...result.state, profiles });
     return true;
   });
-  profileUpdateQueue = update.then(
+}
+
+function enqueueProviderStateUpdate<Result>(update: () => Promise<Result>): Promise<Result> {
+  const pending = providerStateUpdateQueue.then(update);
+  providerStateUpdateQueue = pending.then(
     () => undefined,
     () => undefined,
   );
-  return update;
+  return pending;
 }
 
 export function isStoredAIProviderState(value: unknown): value is StoredAIProviderState {

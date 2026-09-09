@@ -1,3 +1,4 @@
+import { LocalStorage } from "@raycast/api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -6,6 +7,7 @@ import {
   isStoredAIProviderStateV1,
   loadAIProviderState,
   saveAIProviderState,
+  updateAIProviderState,
 } from "./repository";
 import type { StoredAIProviderState } from "./types";
 
@@ -91,6 +93,61 @@ describe("AI provider repository", () => {
     expect(await loadAIProviderState()).toEqual({
       kind: "ready",
       state: { ...state, profiles: [{ ...state.profiles[0], jsonOutputMode: "prompt" }] },
+    });
+  });
+
+  it("preserves a concurrent provider update when JSON fallback waits for the same state queue", async () => {
+    const profile = {
+      id: "profile-1",
+      adapter: "openai-compatible" as const,
+      name: "Example",
+      enabled: true,
+      order: 0,
+      icon: { kind: "initials" as const },
+      wordResultMode: "dictionary" as const,
+      endpoint: "https://example.com/v1",
+      model: "example-model",
+      apiKey: "test-placeholder",
+      tokenLimitMode: "max-tokens" as const,
+      jsonOutputMode: "json-object" as const,
+    };
+    storage.set(
+      AI_PROVIDER_STORAGE_KEY,
+      JSON.stringify({ version: 2, migratedLegacyProviders: [], profiles: [profile] }),
+    );
+
+    let releaseSave: () => void = () => undefined;
+    const saveStarted = new Promise<void>((resolveStarted) => {
+      vi.mocked(LocalStorage.setItem).mockImplementationOnce(async (key, value) => {
+        resolveStarted();
+        await new Promise<void>((resolveSave) => {
+          releaseSave = resolveSave;
+        });
+        if (typeof value !== "string") throw new Error("Expected serialized provider state.");
+        storage.set(key, value);
+      });
+    });
+
+    const addedProfile = { ...profile, id: "profile-2", name: "Added", order: 1 };
+    const managementUpdate = updateAIProviderState((state) => ({
+      ...state,
+      profiles: [...state.profiles, addedProfile],
+    }));
+    await saveStarted;
+    const fallbackUpdate = fallbackAIProviderToPromptJSON(profile.id);
+    releaseSave();
+
+    await expect(Promise.all([managementUpdate, fallbackUpdate])).resolves.toEqual([
+      { version: 2, migratedLegacyProviders: [], profiles: [profile, addedProfile] },
+      true,
+    ]);
+    await expect(loadAIProviderState()).resolves.toEqual({
+      kind: "ready",
+      state: {
+        version: 2,
+        migratedLegacyProviders: [],
+        profiles: [{ ...profile, jsonOutputMode: "prompt" }, addedProfile],
+      },
     });
   });
 
