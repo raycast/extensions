@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
-import { validateExportFile } from "../src/lib/import-export-format";
+import { createExportFile, validateExportFile } from "../src/lib/import-export-format";
+import type { Shortcut } from "../src/types/shortcut";
 
-const validShortcut = {
+const validShortcut: Shortcut = {
   id: "open-command-menu",
   commandName: "Open Command Menu",
   modifiers: ["command", "shift"],
@@ -51,13 +52,26 @@ assert.deepEqual(imported.shortcuts[0], {
   sourceUrl: "https://www.raycast.com",
 });
 
+// Round-trip regression for 1,001 shortcuts
+const thousandOneShortcuts = Array.from({ length: 1001 }, (_, i) => ({
+  ...validShortcut,
+  id: String(i),
+}));
+assert.doesNotThrow(() => validateExportFile(createExportFile(thousandOneShortcuts)));
+
+// Exceeding MAX_SHORTCUTS_PER_FILE throws consistently on export and import validation
+assert.throws(
+  () => createExportFile(Array.from({ length: 10_001 }, (_, i) => ({ ...validShortcut, id: String(i) }))),
+  /Cannot export more than 10000 shortcuts/,
+);
+
 assert.throws(
   () =>
     validateExportFile({
       ...makeExport(),
-      shortcuts: Array.from({ length: 1_001 }, () => validShortcut),
+      shortcuts: Array.from({ length: 10_001 }, (_, i) => ({ ...validShortcut, id: String(i) })),
     }),
-  /cannot contain more than 1000 shortcuts/,
+  /cannot contain more than 10000 shortcuts/,
 );
 
 console.log("import/export format tests passed");

@@ -11,7 +11,10 @@ import { formatShortcutDisplay, normalizeKey, normalizeModifiers } from "./short
 
 export const EXPORT_FORMAT = "shortcut-vault";
 export const EXPORT_VERSION = 1;
-export const MAX_IMPORT_SHORTCUTS = 1_000;
+export const MAX_SHORTCUTS_PER_FILE = 10_000;
+export const MAX_IMPORT_SHORTCUTS = MAX_SHORTCUTS_PER_FILE;
+export const MAX_EXPORT_SHORTCUTS = MAX_SHORTCUTS_PER_FILE;
+export const MAX_FILE_BYTES = 6 * 1024 * 1024; // 6 MB
 
 const MAX_ID_LENGTH = 256;
 const MAX_COMMAND_NAME_LENGTH = 512;
@@ -32,6 +35,10 @@ type PrepareImportOptions = {
 };
 
 export function createExportFile(shortcuts: Shortcut[]): ShortcutExportFile {
+  if (shortcuts.length > MAX_EXPORT_SHORTCUTS) {
+    throw new Error(`Cannot export more than ${MAX_EXPORT_SHORTCUTS} shortcuts.`);
+  }
+
   return {
     format: EXPORT_FORMAT,
     version: EXPORT_VERSION,

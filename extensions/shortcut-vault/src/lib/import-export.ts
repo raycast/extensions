@@ -2,17 +2,23 @@ import { environment } from "@raycast/api";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ShortcutExportFile } from "../types/shortcut";
-import { createExportFile, validateExportFile } from "./import-export-format";
+import { MAX_FILE_BYTES, createExportFile, validateExportFile } from "./import-export-format";
 import { getDefaultShortcuts } from "./default-shortcuts";
 import { getCustomShortcuts, importCustomShortcuts } from "./storage";
-export { EXAMPLE_EXPORT, EXPORT_FORMAT, EXPORT_VERSION, createExportFile } from "./import-export-format";
+export {
+  EXAMPLE_EXPORT,
+  EXPORT_FORMAT,
+  EXPORT_VERSION,
+  MAX_FILE_BYTES,
+  MAX_IMPORT_SHORTCUTS,
+  MAX_SHORTCUTS_PER_FILE,
+  createExportFile,
+} from "./import-export-format";
 
 export type ImportResult = {
   importedCount: number;
   regeneratedIds: number;
 };
-
-const MAX_IMPORT_FILE_BYTES = 6 * 1024 * 1024;
 
 export async function writeExportFile(): Promise<{
   filePath: string;
@@ -22,6 +28,11 @@ export async function writeExportFile(): Promise<{
   const shortcuts = await getCustomShortcuts();
   const exportFile = createExportFile(shortcuts);
   const json = JSON.stringify(exportFile, null, 2);
+
+  if (Buffer.byteLength(json, "utf8") > MAX_FILE_BYTES) {
+    throw new Error("Export exceeds maximum supported file size of 6 MB.");
+  }
+
   const exportDir = path.join(environment.supportPath, "exports");
   const exportTimestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const filePath = path.join(exportDir, `shortcut-vault-${exportTimestamp}.json`);
@@ -39,12 +50,12 @@ export async function readImportFile(filePath: string): Promise<ShortcutExportFi
     throw new Error("Choose a JSON file, not a folder.");
   }
 
-  if (fileStats.size > MAX_IMPORT_FILE_BYTES) {
+  if (fileStats.size > MAX_FILE_BYTES) {
     throw new Error("The selected file is too large. Import files must be 6 MB or smaller.");
   }
 
   const raw = await readFile(filePath, "utf8");
-  if (Buffer.byteLength(raw, "utf8") > MAX_IMPORT_FILE_BYTES) {
+  if (Buffer.byteLength(raw, "utf8") > MAX_FILE_BYTES) {
     throw new Error("The selected file is too large. Import files must be 6 MB or smaller.");
   }
   let parsed: unknown;

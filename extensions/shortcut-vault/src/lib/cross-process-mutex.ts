@@ -25,7 +25,7 @@ export class CrossProcessMutex {
         try {
           this.writeLockContent();
         } catch (writeErr) {
-          this.removeLock();
+          this.tryReclaimStaleLockDir();
           throw writeErr;
         }
         acquired = true;
@@ -78,31 +78,58 @@ export class CrossProcessMutex {
           // Lock was reclaimed by another process — do not touch it
           return;
         }
-        fs.unlinkSync(this.lockFile);
       }
-      if (fs.existsSync(this.lockDir)) {
-        fs.rmdirSync(this.lockDir);
-      }
+      this.tryReclaimStaleLockDir();
     } catch {
       // Lock was already released or never fully acquired — nothing to clean up
     }
   }
 
   private writeLockContent(): void {
-    fs.writeFileSync(this.lockFile, `${process.pid}:${Date.now()}`);
+    const tmpFile = path.join(
+      this.lockDir,
+      `.pid.tmp.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}`,
+    );
+    fs.writeFileSync(tmpFile, `${process.pid}:${Date.now()}`);
+    fs.renameSync(tmpFile, this.lockFile);
   }
 
   private tryBreakStaleLock(): boolean {
     try {
+      if (!fs.existsSync(this.lockDir)) {
+        return false;
+      }
+
+      // Check for aged, incomplete lock (lock directory exists, but pid.txt was never written)
+      if (!fs.existsSync(this.lockFile)) {
+        try {
+          const dirStat = fs.statSync(this.lockDir);
+          const dirAge = Date.now() - dirStat.mtimeMs;
+          if (dirAge > CrossProcessMutex.STALE_THRESHOLD_MS) {
+            return this.tryReclaimStaleLockDir();
+          }
+        } catch {
+          return false;
+        }
+        return false;
+      }
+
       const content = fs.readFileSync(this.lockFile, "utf-8");
       const parts = content.split(":");
       const pid = parseInt(parts[0] ?? "", 10);
       const timestamp = parseInt(parts[1] ?? "", 10);
 
       if (isNaN(timestamp) || isNaN(pid)) {
-        // Corrupt lock file — treat as stale and break immediately
-        this.removeLock();
-        return true;
+        // Corrupt lock file — check age before breaking
+        try {
+          const fileStat = fs.statSync(this.lockFile);
+          if (Date.now() - fileStat.mtimeMs > CrossProcessMutex.STALE_THRESHOLD_MS) {
+            return this.tryReclaimStaleLockDir();
+          }
+        } catch {
+          return false;
+        }
+        return false;
       }
 
       const isStale = Date.now() - timestamp > CrossProcessMutex.STALE_THRESHOLD_MS;
@@ -112,18 +139,37 @@ export class CrossProcessMutex {
 
       // Timestamp is stale — verify the holder process is actually dead before breaking
       if (!this.isProcessAlive(pid)) {
-        this.removeLock();
-        return true;
+        return this.tryReclaimStaleLockDir();
       }
 
-      // Process is alive but hasn't refreshed the heartbeat. This should be rare
-      // (heartbeat fires every 2 s, stale threshold is 15 s). Do NOT break; let
-      // the holder finish and release naturally.
       return false;
     } catch {
       // Could not read the lock file (e.g. race: holder just released) — retry acquire
       return false;
     }
+  }
+
+  private tryReclaimStaleLockDir(): boolean {
+    const parentDir = path.dirname(this.lockDir);
+    const staleDir = path.join(
+      parentDir,
+      `${path.basename(this.lockDir)}.stale.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}`,
+    );
+
+    try {
+      fs.renameSync(this.lockDir, staleDir);
+    } catch {
+      // Another contender already reclaimed/renamed it, or it was released
+      return false;
+    }
+
+    try {
+      fs.rmSync(staleDir, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup errors on the stale directory
+    }
+
+    return true;
   }
 
   private isProcessAlive(pid: number): boolean {
@@ -132,15 +178,6 @@ export class CrossProcessMutex {
       return true;
     } catch {
       return false;
-    }
-  }
-
-  private removeLock(): void {
-    try {
-      if (fs.existsSync(this.lockFile)) fs.unlinkSync(this.lockFile);
-      if (fs.existsSync(this.lockDir)) fs.rmdirSync(this.lockDir);
-    } catch {
-      // Ignore removal errors
     }
   }
 }

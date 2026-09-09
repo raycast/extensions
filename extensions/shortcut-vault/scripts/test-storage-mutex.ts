@@ -64,6 +64,58 @@ async function run() {
     if (fs.existsSync(path.join(lockDir, "pid.txt"))) fs.unlinkSync(path.join(lockDir, "pid.txt"));
     if (fs.existsSync(lockDir)) fs.rmdirSync(lockDir);
 
+    // 6. Aged, incomplete lock recovery (lockDir exists without pid.txt)
+    fs.mkdirSync(lockDir, { recursive: true });
+    const pastTime = new Date(Date.now() - 30000);
+    fs.utimesSync(lockDir, pastTime, pastTime);
+    assert.ok(!fs.existsSync(path.join(lockDir, "pid.txt")), "pid.txt should not exist");
+
+    const incompleteRecovered = await mutex.runExclusive(async () => "incomplete-recovered");
+    assert.equal(incompleteRecovered, "incomplete-recovered");
+    assert.ok(!fs.existsSync(lockDir), "Aged incomplete lock should be cleaned up");
+
+    // 7. Concurrent contenders recover stale lock safely
+    fs.mkdirSync(lockDir, { recursive: true });
+    fs.writeFileSync(path.join(lockDir, "pid.txt"), `999999999:${Date.now() - 30000}`);
+
+    const contender1 = new CrossProcessMutex(lockDir, 3000);
+    const contender2 = new CrossProcessMutex(lockDir, 3000);
+
+    const [r1, r2] = await Promise.all([
+      contender1.runExclusive(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        return "c1";
+      }),
+      contender2.runExclusive(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        return "c2";
+      }),
+    ]);
+
+    assert.ok((r1 === "c1" && r2 === "c2") || (r1 === "c2" && r2 === "c1"));
+    assert.ok(!fs.existsSync(lockDir), "Lock should be released after both contenders finish");
+
+    // 8. Atomic heartbeat publishing never leaves pid.txt empty
+    const longRunningMutex = new CrossProcessMutex(lockDir, 2000);
+    let readEmptyPid = false;
+
+    await longRunningMutex.runExclusive(async () => {
+      const checkEnd = Date.now() + 300;
+      while (Date.now() < checkEnd) {
+        try {
+          const content = fs.readFileSync(path.join(lockDir, "pid.txt"), "utf8");
+          if (content.trim().length === 0) {
+            readEmptyPid = true;
+          }
+        } catch {
+          // File may be checked during transition
+        }
+        await new Promise((r) => setTimeout(r, 10));
+      }
+    });
+
+    assert.equal(readEmptyPid, false, "Heartbeat updates must never expose an empty pid.txt");
+
     console.log("storage mutex tests passed");
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });

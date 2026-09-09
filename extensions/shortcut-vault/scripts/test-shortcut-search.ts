@@ -55,6 +55,19 @@ const shortcuts: Shortcut[] = [
     createdAt: "2026-07-04T00:00:00.000Z",
     updatedAt: "2026-07-04T00:00:00.000Z",
   },
+  {
+    id: "zoom-in",
+    commandName: "Zoom In",
+    modifiers: ["command"],
+    key: "+",
+    shortcutDisplay: "⌘ + +",
+    ownerName: "Safari",
+    ownerType: "mac-app",
+    scope: "app",
+    sourceType: "default",
+    createdAt: "2026-07-04T00:00:00.000Z",
+    updatedAt: "2026-07-04T00:00:00.000Z",
+  },
 ];
 
 assert.deepEqual(tokenizeSearchQuery("cmd right"), ["command", "right"]);
@@ -65,5 +78,18 @@ assert.deepEqual(searchShortcuts(shortcuts, "esc").map((shortcut) => shortcut.id
 assert.deepEqual(searchShortcuts(shortcuts, "enter").map((shortcut) => shortcut.id), ["submit-form"]);
 assert.deepEqual(searchShortcuts(shortcuts, "return").map((shortcut) => shortcut.id), ["submit-form"]);
 assert.deepEqual(searchShortcuts(shortcuts, "cmd shift p").map((shortcut) => shortcut.id), ["command-palette"]);
+
+// Literal + search regressions
+assert.deepEqual(tokenizeSearchQuery("+"), ["plus"]);
+assert.deepEqual(tokenizeSearchQuery("cmd +"), ["command", "plus"]);
+assert.deepEqual(tokenizeSearchQuery("cmd + +"), ["command", "plus"]);
+assert.deepEqual(tokenizeSearchQuery("cmd + p"), ["command", "p"]);
+assert.deepEqual(tokenizeSearchQuery("cmd+p"), ["command", "p"]);
+
+assert.deepEqual(searchShortcuts(shortcuts, "+").map((shortcut) => shortcut.id), ["zoom-in"]);
+assert.deepEqual(searchShortcuts(shortcuts, "cmd +").map((shortcut) => shortcut.id), ["zoom-in"]);
+assert.deepEqual(searchShortcuts(shortcuts, "cmd + +").map((shortcut) => shortcut.id), ["zoom-in"]);
+assert.deepEqual(searchShortcuts(shortcuts, "cmd + p").map((shortcut) => shortcut.id), ["command-palette"]);
+assert.deepEqual(searchShortcuts(shortcuts, "zoom +").map((shortcut) => shortcut.id), ["zoom-in"]);
 
 console.log("shortcut search tests passed");

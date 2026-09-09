@@ -21,7 +21,7 @@ export function tokenizeSearchQuery(query: string): string[] {
   return normalized
     .split(" ")
     .map((term) => term.trim())
-    .filter((term) => term && term !== "plus");
+    .filter(Boolean);
 }
 
 function getShortcutSearchIndex(shortcut: Shortcut): string[] {
@@ -51,13 +51,27 @@ function buildShortcutSearchIndex(shortcut: Shortcut): string[] {
   ].map(normalizeSearchValue);
 }
 
+function replaceCombinationSeparators(value: string): string {
+  // Replace '+' when used as a combination separator:
+  // 1. After a modifier and followed by another key/modifier/plus (e.g. "cmd + p", "cmd + +", "⌘ + +", "cmd+p")
+  let s = value.replace(
+    /(⌘|⌥|⌃|⇧|\b(?:cmd|command|opt|option|alt|ctrl|control|ctl|shift|fn)\b)\s*\+\s*(?=\S)/gi,
+    "$1 ",
+  );
+  // 2. Between any two non-plus tokens (e.g. "a + b")
+  s = s.replace(/([^\s+])\s*\+\s*([^\s+])/g, "$1 $2");
+  return s;
+}
+
 function normalizeSearchValue(value: string): string {
-  return value
+  const separated = replaceCombinationSeparators(value);
+  return separated
     .toLocaleLowerCase()
     .replaceAll("⌘", " command ")
     .replaceAll("⌥", " option ")
     .replaceAll("⌃", " control ")
     .replaceAll("⇧", " shift ")
+    .replaceAll("+", " plus ")
     .replaceAll("?", " question ")
     .replaceAll("!", " exclamation ")
     .replaceAll("#", " hash ")
