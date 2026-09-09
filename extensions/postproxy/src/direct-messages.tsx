@@ -6,7 +6,7 @@ import { MessagesView } from "./components/MessagesView";
 import { participantProfileUrl, supportsDMs } from "./lib/dm";
 import { groupProfiles, profileOptionTitle } from "./lib/grouping";
 import { useProfileGroups, useProfiles } from "./lib/hooks";
-import { api, APP_URL, authHeaders, normalizeList } from "./lib/postproxy";
+import { APP_URL, normalizeList, request } from "./lib/postproxy";
 import { platformIcon, platformLabel } from "./lib/platforms";
 import type { Chat, Profile } from "./lib/types";
 
@@ -19,19 +19,17 @@ function chatTime(chat: Chat): number {
   return new Date(chatDate(chat)).getTime();
 }
 
-/** Aggregate chats across the given profiles, tagged by their own platform/profile, newest-first. */
+/**
+ * Aggregate chats across the given profiles, tagged by their own platform/profile, newest-first.
+ * A failed request throws (via `request`) so the caller can show the real error instead of a
+ * misleading empty inbox.
+ */
 async function loadChats(targets: Profile[]): Promise<Chat[]> {
   if (targets.length === 0) return [];
   const perProfile = await Promise.all(
-    targets.map(async (profile) => {
-      try {
-        const response = await fetch(api(`/profiles/${profile.id}/chats?per_page=50`), { headers: authHeaders() });
-        if (!response.ok) return [] as Chat[];
-        return normalizeList<Chat>(await response.json());
-      } catch {
-        return [] as Chat[];
-      }
-    }),
+    targets.map(async (profile) =>
+      normalizeList<Chat>(await request("GET", `/profiles/${profile.id}/chats?per_page=50`)),
+    ),
   );
   return perProfile.flat().sort((a, b) => chatTime(b) - chatTime(a));
 }
@@ -48,8 +46,9 @@ export default function DirectMessages() {
     [selected, dmKey],
   );
 
-  const { data, isLoading, revalidate } = usePromise(loadChats, [targets]);
+  const { data, isLoading, error: chatsError, revalidate } = usePromise(loadChats, [targets]);
   const chats = data ?? [];
+  const loadError = error ?? chatsError; // profiles failed to load, or the chat requests did
   const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
 
   return (
@@ -74,8 +73,14 @@ export default function DirectMessages() {
         </List.Dropdown>
       }
     >
-      {error && profiles.length === 0 ? (
-        <ErrorView error={error} onRetry={revalidateProfiles} />
+      {loadError && chats.length === 0 ? (
+        <ErrorView
+          error={loadError}
+          onRetry={() => {
+            revalidateProfiles();
+            revalidate();
+          }}
+        />
       ) : dmProfiles.length === 0 && !loadingProfiles ? (
         <List.EmptyView
           icon={Icon.Message}

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { showFailureToast, useFetch } from "@raycast/utils";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { supportsComments } from "../lib/comments";
 import { useProfiles } from "../lib/hooks";
 import { api, APP_URL, authHeaders, deletePost, publishDraft } from "../lib/postproxy";
@@ -76,7 +76,9 @@ export function PostDetail({ post, onChange }: { post: Post; onChange?: () => vo
 
   // Detailed per-platform analytics, filtered by the selected period.
   const [period, setPeriod] = useState("all");
-  const fromIso = periodFromIso(period);
+  // Freeze the cutoff to the selected period; periodFromIso() reads Date.now(), so without this the
+  // analytics URL would change on every render (incl. fetch-state updates) and refetch in a loop.
+  const fromIso = useMemo(() => periodFromIso(period), [period]);
   const {
     data: statsResponse,
     isLoading: loadingStats,

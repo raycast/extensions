@@ -9,7 +9,7 @@ import { supportsComments } from "./lib/comments";
 import { groupNameFor, groupProfiles, profileOptionTitle } from "./lib/grouping";
 import { useProfileGroups, useProfiles } from "./lib/hooks";
 import { formatDate } from "./lib/format";
-import { api, authHeaders, normalizeList, replyComment } from "./lib/postproxy";
+import { normalizeList, replyComment, request } from "./lib/postproxy";
 import { platformIcon, platformLabel } from "./lib/platforms";
 import type { Comment, Post, Profile } from "./lib/types";
 
@@ -26,29 +26,21 @@ function commentTime(entry: CommentEntry): number {
 /**
  * Aggregate comments across the given profiles' recent posts. The API has no
  * global comments feed, so we fetch recent posts per profile and their comments,
- * tag each with its profile, then flatten and sort newest-first.
+ * tag each with its profile, then flatten and sort newest-first. A failed request
+ * throws (via `request`) so the caller can show the real error rather than an empty list.
  */
 async function loadRecentComments(targets: Profile[]): Promise<CommentEntry[]> {
   if (targets.length === 0) return [];
   const postsPerProfile = targets.length > 1 ? 10 : 15;
   const perProfile = await Promise.all(
     targets.map(async (profile) => {
-      const postsResponse = await fetch(api(`/posts?profile_id=${profile.id}&per_page=${postsPerProfile}`), {
-        headers: authHeaders(),
-      });
-      if (!postsResponse.ok) return [] as CommentEntry[];
-      const posts = normalizeList<Post>(await postsResponse.json());
+      const posts = normalizeList<Post>(
+        await request("GET", `/posts?profile_id=${profile.id}&per_page=${postsPerProfile}`),
+      );
       const chunks = await Promise.all(
         posts.map(async (post) => {
-          try {
-            const response = await fetch(api(`/posts/${post.id}/comments?profile_id=${profile.id}&per_page=20`), {
-              headers: authHeaders(),
-            });
-            if (!response.ok) return [] as CommentEntry[];
-            return normalizeList<Comment>(await response.json()).map((comment) => ({ comment, post, profile }));
-          } catch {
-            return [] as CommentEntry[];
-          }
+          const result = await request("GET", `/posts/${post.id}/comments?profile_id=${profile.id}&per_page=20`);
+          return normalizeList<Comment>(result).map((comment) => ({ comment, post, profile }));
         }),
       );
       return chunks.flat();
@@ -62,7 +54,12 @@ function commentMarkdown(entry: CommentEntry): string {
 }
 
 export default function RecentComments() {
-  const { data: profiles, isLoading: loadingProfiles, error: profilesError } = useProfiles();
+  const {
+    data: profiles,
+    isLoading: loadingProfiles,
+    error: profilesError,
+    revalidate: revalidateProfiles,
+  } = useProfiles();
   const { data: groups } = useProfileGroups();
   const commentable = profiles.filter((profile) => supportsComments(profile.platform));
   const [selected, setSelected] = useState(""); // "" = All profiles
@@ -101,7 +98,13 @@ export default function RecentComments() {
       }
     >
       {error && entries.length === 0 ? (
-        <ErrorView error={error} onRetry={revalidate} />
+        <ErrorView
+          error={error}
+          onRetry={() => {
+            revalidateProfiles();
+            revalidate();
+          }}
+        />
       ) : commentable.length === 0 && !loadingProfiles ? (
         <List.EmptyView
           icon={Icon.Bubble}
