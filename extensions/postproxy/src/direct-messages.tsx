@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { ErrorView } from "./components/ErrorView";
 import { MessagesView } from "./components/MessagesView";
 import { participantProfileUrl, supportsDMs } from "./lib/dm";
 import { groupProfiles, profileOptionTitle } from "./lib/grouping";
 import { useProfileGroups, useProfiles } from "./lib/hooks";
-import { APP_URL, normalizeList, request } from "./lib/postproxy";
+import { APP_URL, normalizeList, request, settleAll } from "./lib/postproxy";
 import { platformIcon, platformLabel } from "./lib/platforms";
 import type { Chat, Profile } from "./lib/types";
 
@@ -21,17 +21,22 @@ function chatTime(chat: Chat): number {
 
 /**
  * Aggregate chats across the given profiles, tagged by their own platform/profile, newest-first.
- * A failed request throws (via `request`) so the caller can show the real error instead of a
- * misleading empty inbox.
+ * Keeps partial results: chats that loaded are shown even if some profiles fail. It only throws (→ the
+ * caller's error view) when nothing loaded at all; a partial failure warns via a toast instead of
+ * discarding the chats that did load or hiding the failure behind an empty inbox.
  */
 async function loadChats(targets: Profile[]): Promise<Chat[]> {
   if (targets.length === 0) return [];
-  const perProfile = await Promise.all(
+  const { items, errors } = await settleAll(
     targets.map(async (profile) =>
       normalizeList<Chat>(await request("GET", `/profiles/${profile.id}/chats?per_page=50`)),
     ),
   );
-  return perProfile.flat().sort((a, b) => chatTime(b) - chatTime(a));
+  if (items.length === 0 && errors.length > 0) throw errors[0];
+  if (errors.length > 0) {
+    await showFailureToast(errors[0], { title: `Couldn't load ${errors.length} of ${targets.length} inboxes` });
+  }
+  return items.sort((a, b) => chatTime(b) - chatTime(a));
 }
 
 export default function DirectMessages() {

@@ -73,6 +73,22 @@ export async function request<T = unknown>(
   return contentType.includes("application/json") ? ((await res.json()) as T) : ({} as T);
 }
 
+/**
+ * Run many list-returning tasks and keep partial results. Successful items are returned even when some
+ * tasks fail, and the failures are collected separately — so a caller can show the data that did load
+ * (warning about the rest) instead of discarding good results, yet still surface a total failure.
+ */
+export async function settleAll<T>(tasks: Promise<T[]>[]): Promise<{ items: T[]; errors: Error[] }> {
+  const settled = await Promise.allSettled(tasks);
+  const items: T[] = [];
+  const errors: Error[] = [];
+  for (const result of settled) {
+    if (result.status === "fulfilled") items.push(...result.value);
+    else errors.push(result.reason instanceof Error ? result.reason : new Error(String(result.reason)));
+  }
+  return { items, errors };
+}
+
 /** A media entry is a local file (vs a remote URL) when it looks like a filesystem path. */
 function isLocalFile(m: string): boolean {
   return m.startsWith("/") || m.startsWith("~") || m.startsWith("file:");

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { CommentsView } from "./components/CommentsView";
 import { ErrorView } from "./components/ErrorView";
 import { PostDetail } from "./components/PostDetail";
@@ -9,7 +9,7 @@ import { supportsComments } from "./lib/comments";
 import { groupNameFor, groupProfiles, profileOptionTitle } from "./lib/grouping";
 import { useProfileGroups, useProfiles } from "./lib/hooks";
 import { formatDate } from "./lib/format";
-import { normalizeList, replyComment, request } from "./lib/postproxy";
+import { normalizeList, replyComment, request, settleAll } from "./lib/postproxy";
 import { platformIcon, platformLabel } from "./lib/platforms";
 import type { Comment, Post, Profile } from "./lib/types";
 
@@ -24,29 +24,39 @@ function commentTime(entry: CommentEntry): number {
 }
 
 /**
- * Aggregate comments across the given profiles' recent posts. The API has no
- * global comments feed, so we fetch recent posts per profile and their comments,
- * tag each with its profile, then flatten and sort newest-first. A failed request
- * throws (via `request`) so the caller can show the real error rather than an empty list.
+ * Aggregate comments across the given profiles' recent posts. The API has no global comments feed, so
+ * we fetch recent posts per profile and their comments, tag each with its profile, then flatten and
+ * sort newest-first. Keeps partial results at both levels: a failed comments request for one post
+ * doesn't drop the rest of that profile's comments, and one failing profile doesn't drop the others.
+ * It throws only when nothing loaded at all; a partial failure warns via a toast instead.
  */
 async function loadRecentComments(targets: Profile[]): Promise<CommentEntry[]> {
   if (targets.length === 0) return [];
   const postsPerProfile = targets.length > 1 ? 10 : 15;
-  const perProfile = await Promise.all(
+  const { items, errors } = await settleAll(
     targets.map(async (profile) => {
       const posts = normalizeList<Post>(
         await request("GET", `/posts?profile_id=${profile.id}&per_page=${postsPerProfile}`),
       );
-      const chunks = await Promise.all(
-        posts.map(async (post) => {
-          const result = await request("GET", `/posts/${post.id}/comments?profile_id=${profile.id}&per_page=20`);
-          return normalizeList<Comment>(result).map((comment) => ({ comment, post, profile }));
-        }),
+      const perPost = await settleAll(
+        posts.map(async (post) =>
+          normalizeList<Comment>(
+            await request("GET", `/posts/${post.id}/comments?profile_id=${profile.id}&per_page=20`),
+          ).map((comment) => ({ comment, post, profile })),
+        ),
       );
-      return chunks.flat();
+      // Bubble up only if every post's comments failed, so this profile isn't silently emptied.
+      if (perPost.items.length === 0 && perPost.errors.length > 0) throw perPost.errors[0];
+      return perPost.items;
     }),
   );
-  return perProfile.flat().sort((a, b) => commentTime(b) - commentTime(a));
+  if (items.length === 0 && errors.length > 0) throw errors[0];
+  if (errors.length > 0) {
+    await showFailureToast(errors[0], {
+      title: `Couldn't load comments for ${errors.length} of ${targets.length} profiles`,
+    });
+  }
+  return items.sort((a, b) => commentTime(b) - commentTime(a));
 }
 
 function commentMarkdown(entry: CommentEntry): string {
