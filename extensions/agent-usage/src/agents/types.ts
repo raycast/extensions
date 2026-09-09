@@ -31,6 +31,7 @@ export interface AgentDefinition {
 }
 
 export interface UsageState<TUsage, TError> {
+  credentialStatus?: "unverified";
   isLoading: boolean;
   usage: TUsage | null;
   error: TError | null;

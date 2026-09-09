@@ -10,6 +10,7 @@ import { createHash } from "node:crypto";
  * rendering with the wrong shape.
  */
 export interface CachedUsagePayload<TUsage, TError> {
+  credentialStatus?: "unverified";
   usage: TUsage | null;
   error: TError | null;
   /** Epoch millis of the fetch that produced this payload. */

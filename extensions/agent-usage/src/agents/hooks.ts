@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 
 import type { AccountsState, AccountUsageState } from "../accounts/types.ts";
 import { isOpenCodeActiveToken } from "./opencode-active.ts";
+import type { CredentialCheck } from "./credential-check.ts";
 import type { UsageState } from "./types.ts";
 import {
   allAccountRowsSucceeded,
@@ -54,21 +55,68 @@ export function createUsageHook<TUsage, TError extends ErrorLike>(options: {
   fetcher: (authKey: string) => Promise<FetchResult<TUsage, TError>>;
   /** Local auth material (tokens, cookies). A change invalidates the cached payload. */
   resolveAuthKey?: () => Promise<string>;
+  credentials?: {
+    check: () => Promise<CredentialCheck>;
+    error: (message: string) => TError;
+  };
 }) {
-  const { agentId, fetcher, resolveAuthKey } = options;
+  const { agentId, fetcher, resolveAuthKey, credentials } = options;
 
   async function resolve(force: boolean, background: boolean): Promise<CachedUsagePayload<TUsage, TError>> {
-    const authKey = resolveAuthKey ? await resolveAuthKey() : "";
-    const authHash = hashAuthKey(authKey);
     const cached = readPayload<TUsage, TError>(agentId);
-    // Without credential identity, periodically fetch to detect login changes.
-    const ttlMs = getTtlMs(background || !resolveAuthKey);
-    if (!force && cached && isPayloadFresh(cached, Date.now(), ttlMs, authHash)) {
+    let check: CredentialCheck | undefined;
+    if (credentials) {
+      try {
+        check = await credentials.check();
+      } catch {
+        check = { status: "unverified" };
+      }
+      if (check.status === "signed_out") {
+        usageCache.remove(agentId);
+        return {
+          usage: null,
+          error: credentials.error("Signed out. Log in to this provider and refresh."),
+          timestamp: Date.now(),
+          authHash: hashAuthKey(""),
+        };
+      }
+      if (
+        check.status === "unverified" &&
+        !force &&
+        background &&
+        cached &&
+        isPayloadFresh(cached, Date.now(), getTtlMs(true), cached.authHash)
+      ) {
+        return { ...cached, credentialStatus: "unverified" };
+      }
+      if (check.status === "unverified" && !force && !background && cached && getTtlMs(false) > 0) {
+        return { ...cached, credentialStatus: "unverified" };
+      }
+    }
+    const authKey = check?.status === "authenticated" ? check.key : resolveAuthKey ? await resolveAuthKey() : "";
+    const authHash = hashAuthKey(authKey);
+    if (check?.status === "authenticated" && cached && cached.authHash !== authHash) {
+      usageCache.remove(agentId);
+    }
+    if (
+      !force &&
+      check?.status !== "unverified" &&
+      cached &&
+      isPayloadFresh(cached, Date.now(), getTtlMs(background), authHash)
+    ) {
       return cached;
     }
 
     const result = await fetcher(authKey);
-    const payload = { ...result, timestamp: Date.now(), authHash };
+    const payload: CachedUsagePayload<TUsage, TError> = {
+      ...result,
+      timestamp: Date.now(),
+      authHash,
+      ...(check?.status === "unverified" ? { credentialStatus: "unverified" as const } : {}),
+    };
+    if (check?.status === "unverified" && result.error && cached && getTtlMs(false) > 0) {
+      return { ...cached, credentialStatus: "unverified" };
+    }
     if (result.usage !== null && result.error === null) {
       usageCache.set(agentId, JSON.stringify(payload));
     }
@@ -111,6 +159,7 @@ export function createUsageHook<TUsage, TError extends ErrorLike>(options: {
         forceRef.current = true;
         await revalidate();
       },
+      credentialStatus: payload?.credentialStatus,
       lastFetchedAt: payload?.timestamp || undefined,
     };
   }

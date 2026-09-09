@@ -17,7 +17,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ManageAccountsForm } from "./accounts/ManageAccountsForm.tsx";
 import type { AccountUsageState } from "./accounts/types.ts";
 import { formatErrorMarkdown } from "./agents/detail-format.ts";
-import { formatClock, latestTimestamp } from "./agents/format.ts";
+import { formatClock, latestTimestamp, withCredentialStatus } from "./agents/format.ts";
 import {
   AGENT_ORDER_KEY,
   DEFAULT_AGENT_ORDER,
@@ -443,7 +443,8 @@ function createAgentView<TUsage, TError extends ErrorLike>(
     isLoading: state.isLoading,
     lastFetchedAt: state.lastFetchedAt,
     revalidate: state.revalidate,
-    getAccessory: () => config.getAccessory(state.usage, state.error, state.isLoading),
+    getAccessory: () =>
+      withCredentialStatus(config.getAccessory(state.usage, state.error, state.isLoading), state.credentialStatus),
     renderDetail: () => config.renderDetail(state.usage, state.error),
     formatUsageText: () => config.formatUsageText(state.usage, state.error),
   };

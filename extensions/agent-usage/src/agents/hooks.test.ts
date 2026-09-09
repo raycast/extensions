@@ -24,6 +24,7 @@ const mocks: Record<string, string> = {
     export class Cache {
       get(key) { return state.cache.get(key); }
       set(key, value) { state.cache.set(key, value); }
+      remove(key) { return state.cache.delete(key); }
     }
     export const environment = { get commandName() { return state.commandName; } };
     export const getPreferenceValues = () => ({ cacheTtl: state.cacheTtl, backgroundRefreshInterval: "1" });
@@ -265,30 +266,101 @@ test("single-provider unavailable snapshots display immediately but do not skip 
 });
 
 for (const agentId of ["grok", "amp", "antigravity"]) {
-  test(`${agentId} without auth resolution reuses fresh cache but rechecks expired usage on open`, async () => {
-    const now = Date.now();
-    const entry = { ...cached, timestamp: now, authHash: hashAuthKey("") };
-    state.cache.set(agentId, JSON.stringify(entry));
+  test(`${agentId} retains old usage for unchanged credentials and invalidates confirmed logout`, async () => {
+    state.cache.set(agentId, JSON.stringify(cached));
+    let loggedIn = true;
     let requests = 0;
     const useUsage = createUsageHook<OpenRouterUsage, OpenRouterError>({
       agentId,
+      credentials: {
+        check: async () => (loggedIn ? { status: "authenticated", key: "test-key" } : { status: "signed_out" }),
+        error: (message) => ({ type: "unknown", message }),
+      },
       fetcher: async () => {
         requests++;
-        return { usage: null, error: { type: "not_configured", message: "Logged out" } };
+        return { usage, error: null };
       },
     });
-
     useUsage();
-    assert.deepEqual(await state.run!(), entry);
+    assert.deepEqual(await state.run!(), cached);
     assert.equal(requests, 0);
-
-    state.cache.set(agentId, JSON.stringify({ ...entry, timestamp: now - 60_001 }));
-    const reopening = useUsage();
-    assert.deepEqual(reopening.usage, usage);
-    assert.equal(reopening.isLoading, false);
+    loggedIn = false;
     state.data = await state.run!();
-    assert.equal(requests, 1);
     assert.equal(useUsage().usage, null);
-    assert.equal(useUsage().error?.type, "not_configured");
+    assert.match(useUsage().error!.message, /Signed out/);
+    assert.equal(state.cache.has(agentId), false);
+    assert.equal(requests, 0);
   });
 }
+
+test("unverified credentials retain old usage without requests; manual refresh still works", async () => {
+  const useUsage = createUsageHook<OpenRouterUsage, OpenRouterError>({
+    agentId: "openrouter",
+    credentials: {
+      check: async () => {
+        throw new Error("Temporary keychain failure");
+      },
+      error: (message) => ({ type: "unknown", message }),
+    },
+    fetcher: async () => ({ usage: { ...usage, remaining: 42 }, error: null }),
+  });
+  useUsage();
+  state.data = await state.run!();
+  assert.deepEqual(useUsage().usage, usage);
+  assert.equal(useUsage().credentialStatus, "unverified");
+  const refreshed = await useUsage.refresh(true);
+  assert.equal(refreshed.usage?.remaining, 42);
+});
+
+test("changed credentials discard the old success even if the new usage request fails", async () => {
+  const useUsage = createUsageHook<OpenRouterUsage, OpenRouterError>({
+    agentId: "openrouter",
+    credentials: {
+      check: async () => ({ status: "authenticated", key: "different-account" }),
+      error: (message) => ({ type: "unknown", message }),
+    },
+    fetcher: async () => ({ usage: null, error: { type: "network_error", message: "Offline" } }),
+  });
+  useUsage();
+  state.data = await state.run!();
+  assert.equal(useUsage().usage, null);
+  assert.equal(state.cache.has("openrouter"), false);
+});
+
+test("scheduled refresh still refreshes old usage for unchanged credentials", async () => {
+  let requests = 0;
+  const useUsage = createUsageHook<OpenRouterUsage, OpenRouterError>({
+    agentId: "openrouter",
+    credentials: {
+      check: async () => ({ status: "authenticated", key: "test-key" }),
+      error: (message) => ({ type: "unknown", message }),
+    },
+    fetcher: async () => {
+      requests++;
+      return { usage, error: null };
+    },
+  });
+  await useUsage.refresh();
+  assert.equal(requests, 1);
+});
+
+test("unverified credentials allow cold-cache loading and honor disabling cache reads", async () => {
+  let requests = 0;
+  const useUsage = createUsageHook<OpenRouterUsage, OpenRouterError>({
+    agentId: "new-provider",
+    credentials: {
+      check: async () => ({ status: "unverified" }),
+      error: (message) => ({ type: "unknown", message }),
+    },
+    fetcher: async () => {
+      requests++;
+      return { usage, error: null };
+    },
+  });
+  useUsage();
+  await state.run!();
+  assert.equal(requests, 1);
+  state.cacheTtl = "0";
+  await state.run!();
+  assert.equal(requests, 2);
+});
