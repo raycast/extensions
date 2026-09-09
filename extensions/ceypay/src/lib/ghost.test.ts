@@ -81,6 +81,42 @@ describe("gateImages", () => {
     expect(destinations(gateImages(markdown))).toEqual([]);
   });
 
+  /**
+   * A post explaining Markdown carries image syntax it means to show rather than
+   * render. The gate has to leave those samples intact even while it is removing
+   * a real image elsewhere in the same document.
+   */
+  describe("code samples", () => {
+    const sample = "![sample](https://example.invalid/image.png)";
+    const blocked = `![bad](${UNTRUSTED})`;
+
+    it("keeps a fenced sample while removing a real untrusted image", () => {
+      const gated = gateImages(`${blocked}\n\n\`\`\`md\n${sample}\n\`\`\`\n`);
+
+      expect(gated).toContain(sample);
+      expect(destinations(gated)).toEqual([]);
+    });
+
+    it("keeps a sample in a tilde-fenced block", () => {
+      expect(gateImages(`${blocked}\n\n~~~md\n${sample}\n~~~\n`)).toContain(sample);
+    });
+
+    it("keeps a sample inside an inline code span", () => {
+      expect(gateImages(`${blocked}\n\nUse \`${sample}\` to embed one.`)).toContain(sample);
+    });
+
+    it("escapes nothing inside code when it falls back to escaping", () => {
+      // A definition split across lines is past what the targeted removals read,
+      // so this document reaches the escaping fallback.
+      const awkward = `![bad][remote]\n\n[remote]:\n  ${UNTRUSTED}\n\n\`\`\`md\n${sample}\n\`\`\`\n`;
+      const gated = gateImages(awkward);
+
+      expect(destinations(gated)).toEqual([]);
+      expect(gated).toContain(sample);
+      expect(gated).not.toContain("!\\[sample]");
+    });
+  });
+
   it("keeps prose that merely looks like an image", () => {
     expect(gateImages("Nothing here, just [a link](https://example.com) and text.")).toContain("a link");
   });

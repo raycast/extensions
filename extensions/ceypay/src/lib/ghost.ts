@@ -244,25 +244,58 @@ function readInlineImage(source: string, start: number): InlineImage | undefined
   return undefined;
 }
 
+/**
+ * Rewrites the prose of a document and leaves its code alone. Image syntax
+ * inside a fenced block or a code span is a sample — writing about an image
+ * rather than showing one — so the renderer never fetches it and editing it
+ * would corrupt a code sample the post meant to display.
+ */
+function mapProse(markdown: string, rewrite: (prose: string) => string): string {
+  let fence = "";
+
+  return markdown
+    .split("\n")
+    .map((line) => {
+      const fenced = line.match(/^\s{0,3}(`{3,}|~{3,})/)?.[1];
+      if (fence) {
+        if (fenced?.startsWith(fence[0])) fence = "";
+        return line;
+      }
+      if (fenced) {
+        fence = fenced;
+        return line;
+      }
+      // Splitting on a captured pattern interleaves the parts: the code spans
+      // land on the odd indices, the prose between them on the even ones.
+      return line
+        .split(/(`+[^`]*`+)/)
+        .map((part, index) => (index % 2 === 0 ? rewrite(part) : part))
+        .join("");
+    })
+    .join("\n");
+}
+
 /** Drops inline images whose destination is not one the reader may contact. */
 function removeInlineImages(markdown: string, untrusted: (destination: string) => boolean): string {
-  let out = "";
-  let cursor = 0;
+  return mapProse(markdown, (prose) => {
+    let out = "";
+    let cursor = 0;
 
-  for (let start = markdown.indexOf("!["); start !== -1; start = markdown.indexOf("![", cursor)) {
-    out += markdown.slice(cursor, start);
-    const image = readInlineImage(markdown, start);
-    if (!image) {
-      // Not an inline image after all — keep the `![` and carry on past it.
-      out += "![";
-      cursor = start + 2;
-      continue;
+    for (let start = prose.indexOf("!["); start !== -1; start = prose.indexOf("![", cursor)) {
+      out += prose.slice(cursor, start);
+      const image = readInlineImage(prose, start);
+      if (!image) {
+        // Not an inline image after all — keep the `![` and carry on past it.
+        out += "![";
+        cursor = start + 2;
+        continue;
+      }
+      if (!untrusted(image.destination)) out += prose.slice(start, image.end);
+      cursor = image.end;
     }
-    if (!untrusted(image.destination)) out += markdown.slice(start, image.end);
-    cursor = image.end;
-  }
 
-  return out + markdown.slice(cursor);
+    return out + prose.slice(cursor);
+  });
 }
 
 /**
@@ -297,9 +330,9 @@ function removeReferenceDefinitions(markdown: string, untrusted: (destination: s
 /**
  * Holds every image in the finished document to `IMAGE_HOSTS`, whichever syntax
  * it arrived in. The parser has the last word: if an untrusted destination is
- * still reachable after the targeted removals, image syntax is escaped document
- * wide, so the worst case is an image rendered as the text that describes it and
- * never a request to a host that was not named here.
+ * still reachable after the targeted removals, image syntax is escaped across
+ * the document's prose, so the worst case is an image rendered as the text that
+ * describes it and never a request to a host that was not named here.
  */
 export function gateImages(markdown: string): string {
   const untrusted = (destination: string) => !isTrustedImage(destination);
@@ -310,7 +343,8 @@ export function gateImages(markdown: string): string {
     out = removeInlineImages(out, untrusted);
   }
 
-  return imageDestinations(out).some(untrusted) ? out.replace(/!\[/g, "!\\[") : out;
+  if (!imageDestinations(out).some(untrusted)) return out;
+  return mapProse(out, (prose) => prose.replace(/!\[/g, "!\\["));
 }
 
 export type ImageSize = { width: number; height: number };
