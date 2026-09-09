@@ -366,6 +366,35 @@ export async function getProjects({ onError }: { onError?: (state: boolean) => v
   }
 }
 
+/**
+ * Whether a project is billable by default.
+ *
+ * Prefers the project list the forms already cache in LocalStorage and only falls back to a
+ * request, because a timer can be restarted from a recent entry before any form has loaded
+ * projects. Returns undefined when the setting cannot be determined, which callers pass straight
+ * into the request body: JSON.stringify drops undefined, so the field is omitted and behaviour is
+ * unchanged rather than guessed at.
+ *
+ * Cache-first means a setting changed in Clockify web can be stale here until the cache is
+ * rewritten, which either form does on mount. Restarting a recent entry does not open a form, so
+ * that path can use an older value. Accepted deliberately: billability changes rarely, and always
+ * refetching would add a request to every timer start.
+ */
+export async function isProjectBillable(projectId: string): Promise<boolean | undefined> {
+  try {
+    const stored = await LocalStorage.getItem<string>("projects");
+    if (stored) {
+      const project = (JSON.parse(stored) as Project[]).find((project) => project.id === projectId);
+      if (project) return project.billable;
+    }
+  } catch (e) {
+    console.error("Error reading cached projects:", e);
+  }
+
+  const projects = await getProjects();
+  return projects.find((project) => project.id === projectId)?.billable;
+}
+
 export async function getTasksForProject(projectId: string): Promise<Task[]> {
   const { workspaceId } = await resolveConfig();
   const cacheKey = `project[${projectId}]`;
@@ -395,6 +424,12 @@ export async function addNewTimeEntry(
   showToast(Toast.Style.Animated, "Starting…");
 
   const { workspaceId } = await resolveConfig();
+
+  // Clockify defaults billable to false when the field is absent; it does not fall back to the
+  // project's "billable by default" setting, so that has to be sent explicitly or every entry
+  // lands as non-billable.
+  const billable = await isProjectBillable(projectId);
+
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
     method: "POST",
     body: {
@@ -403,6 +438,7 @@ export async function addNewTimeEntry(
       taskId,
       projectId,
       tagIds,
+      billable,
       customFieldValues: [],
     },
   });
