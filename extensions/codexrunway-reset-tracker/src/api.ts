@@ -82,22 +82,23 @@ export function formatDate(iso?: string | null): string {
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
+    timeZoneName: "short",
   });
 }
 
-/** Short, human label for a record's current status, e.g. for the menu bar title. */
+export function recordState(record: ResetRecord): string {
+  if (record.kind === "reset_completed" || record.scheduleState === "fulfilled")
+    return "Completed";
+  return record.scheduleState ? humanize(record.scheduleState) : "Scheduled";
+}
+
+export function humanize(value: string): string {
+  const text = value.replace(/_/g, " ");
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export function statusLabel(record: ResetRecord): string {
-  const type = record.resetType ?? "reset";
-  if (
-    record.kind === "reset_completed" ||
-    record.scheduleState === "fulfilled"
-  ) {
-    return `${type} done`;
-  }
-  if (record.kind === "reset_scheduled") {
-    return `${type} pending`;
-  }
-  return type;
+  return `${humanize(record.resetType)} reset · ${recordState(record)}`;
 }
 
 /** True if `iso` falls on today's calendar date (viewer's local timezone). */
@@ -143,8 +144,122 @@ function happenedToday(iso?: string | null): boolean {
 export function resetTodayAt(record: ResetRecord): string | null {
   const done =
     record.kind === "reset_completed" || record.scheduleState === "fulfilled";
-  if (happenedToday(record.completedAt)) return record.completedAt ?? null;
+  if (record.completedAt)
+    return happenedToday(record.completedAt) ? record.completedAt : null;
   if (done && happenedToday(record.effectiveAt))
     return record.effectiveAt ?? null;
   return null;
+}
+
+/** Select the most recent completion, not the most recently announced schedule. */
+export function resetTodayIn(records: ResetRecord[]): {
+  resetToday: boolean;
+  at: string | null;
+  record: ResetRecord | undefined;
+} {
+  let at: string | null = null;
+  let record: ResetRecord | undefined;
+  for (const candidate of records) {
+    const time = resetTodayAt(candidate);
+    if (time && (!at || Date.parse(time) > Date.parse(at))) {
+      at = time;
+      record = candidate;
+    }
+  }
+  return { resetToday: at !== null, at, record };
+}
+
+/** Reject unsuccessful payloads instead of rendering them as empty records. */
+export async function parseRecords(
+  response: Response,
+): Promise<RecordsResponse> {
+  if (!response.ok)
+    throw new Error(`Unable to load records (HTTP ${response.status})`);
+  const result = (await response.json()) as Partial<RecordsResponse> | null;
+  if (!result?.ok || !Array.isArray(result.data?.items))
+    throw new Error("Invalid records response");
+  return result as RecordsResponse;
+}
+
+export function matchesPlan(record: ResetRecord, plan: string): boolean {
+  const plans = record.scope?.plans?.map((value) => value.toLowerCase()) ?? [];
+  return (
+    plan === "all" ||
+    plans.includes("all") ||
+    plans.includes(plan.toLowerCase())
+  );
+}
+
+/** Prefer the earliest upcoming window; otherwise expose an unconfirmed elapsed plan. */
+export function nextScheduleIn(
+  records: ResetRecord[],
+  now = Date.now(),
+): ResetRecord | undefined {
+  const pending = records.filter(
+    (record) =>
+      record.kind === "reset_scheduled" &&
+      !record.completedAt &&
+      !record.completionRecordId &&
+      !["fulfilled", "cancelled", "canceled", "superseded", "expired"].includes(
+        record.scheduleState ?? "",
+      ),
+  );
+  const start = (record: ResetRecord) =>
+    Date.parse(record.scheduleWindow?.startAt ?? record.effectiveAt ?? "");
+  const end = (record: ResetRecord) =>
+    Date.parse(record.scheduleWindow?.endAt ?? record.effectiveAt ?? "");
+  const upcoming = pending
+    .filter((record) => end(record) >= now)
+    .sort((a, b) => start(a) - start(b));
+  return (
+    upcoming[0] ??
+    pending.find((record) => !Number.isFinite(end(record))) ??
+    pending.sort((a, b) => end(b) - end(a))[0]
+  );
+}
+
+export function scheduleLabel(record?: ResetRecord): string {
+  if (!record) return "No upcoming schedule found in the latest records";
+  const start = record.scheduleWindow?.startAt ?? record.effectiveAt;
+  const end = record.scheduleWindow?.endAt ?? record.effectiveAt;
+  if (!start || !Number.isFinite(Date.parse(start)))
+    return "Timing not yet confirmed";
+  const time =
+    end && end !== start
+      ? `${formatDate(start)} – ${formatDate(end)}`
+      : formatDate(start);
+  return Date.parse(end ?? start) < Date.now()
+    ? `Expected ${time} — awaiting completion confirmation`
+    : `Expected ${time}`;
+}
+
+/** Match every query word across the full announcement and scope, without native keyword truncation. */
+export function matchesSearch(record: ResetRecord, query: string): boolean {
+  const text = [
+    statusLabel(record),
+    record.text,
+    ...(record.scope?.plans ?? []),
+    ...(record.scope?.windows ?? []),
+  ]
+    .join(" ")
+    .toLocaleLowerCase();
+  return query
+    .trim()
+    .toLocaleLowerCase()
+    .split(/\s+/)
+    .every((word) => text.includes(word));
+}
+
+export function recordTime(record: ResetRecord): number {
+  return (
+    Date.parse(
+      record.completedAt ?? record.effectiveAt ?? record.announcedAt ?? "",
+    ) || 0
+  );
+}
+
+export function formatWindow(window: ResetScheduleWindow): string {
+  return window.startAt === window.endAt
+    ? formatDate(window.startAt)
+    : `${formatDate(window.startAt)} – ${formatDate(window.endAt)}`;
 }

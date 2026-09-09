@@ -1,48 +1,152 @@
 import { useState } from "react";
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import {
-  RecordsResponse,
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  List,
+  getPreferenceValues,
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { fetchHistory, FetchedRecords } from "./requests";
+import {
   ResetKind,
   ResetRecord,
   formatDate,
-  recordsUrl,
   relativeTime,
   statusLabel,
+  recordState,
+  matchesPlan,
+  humanize,
+  matchesSearch,
+  recordTime,
+  formatWindow,
 } from "./api";
 import { confidenceColor, statusIcon } from "./status";
 
-const PAGE_SIZE = 10;
-
 export default function Command() {
   const [kind, setKind] = useState<ResetKind>("all");
-  const [page, setPage] = useState(1);
-
-  const { data, isLoading } = useFetch<RecordsResponse>(
-    recordsUrl(kind, page, PAGE_SIZE),
-    {
-      keepPreviousData: true,
-    },
+  const [plan, setPlan] = useState(
+    getPreferenceValues<{ plan: string }>().plan,
   );
+  const [searchText, setSearchText] = useState("");
 
-  const records = data?.data?.items ?? [];
-  const total = data?.data?.total;
-  const hasNextPage =
-    data?.data?.hasNext ??
-    (total ? page * PAGE_SIZE < total : records.length === PAGE_SIZE);
+  const { data, error, isLoading, revalidate, pagination } = useCachedPromise(
+    fetchHistory,
+    [kind],
+    { keepPreviousData: false },
+  );
+  const entries = [
+    ...new Map((data ?? []).map((entry) => [entry.page, entry])).values(),
+  ];
+  const pages = entries
+    .map((entry) => entry.result)
+    .filter((result): result is FetchedRecords => result !== undefined);
+  const warning =
+    error?.message ?? entries.find((entry) => entry.warning)?.warning;
+  const loaded = [
+    ...new Map(
+      pages
+        .flatMap((page) => page.data.items)
+        .map((record) => [record.id, record]),
+    ).values(),
+  ];
+  const records = loaded
+    .filter(
+      (record) =>
+        matchesPlan(record, plan) && matchesSearch(record, searchText),
+    )
+    .sort((a, b) => recordTime(b) - recordTime(a));
+  const checkedAt = new Map(
+    pages.flatMap((page) =>
+      page.data.items.map(
+        (record) => [record.id, page.meta?.lastSuccessfulCheckAt] as const,
+      ),
+    ),
+  );
+  const groups = new Map<string, ResetRecord[]>();
+  for (const record of records) {
+    const date = new Date(
+      record.completedAt ?? record.effectiveAt ?? record.announcedAt ?? "",
+    );
+    const day = Number.isNaN(date.getTime())
+      ? "Date unknown"
+      : date.toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+    if (!groups.has(day)) groups.set(day, []);
+    groups.get(day)?.push(record);
+  }
+  const hasMore = Boolean(pagination?.hasMore) && !warning;
+  const pageActions = (
+    <ActionPanel.Section>
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        onAction={() => revalidate()}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+      />
+      {!isLoading && pagination?.hasMore && (
+        <Action
+          title={warning ? "Retry Failed Page" : "Load More Records"}
+          icon={Icon.ArrowDown}
+          onAction={() => pagination?.onLoadMore()}
+          shortcut={{ modifiers: ["cmd"], key: "arrowDown" }}
+        />
+      )}
+      <ActionPanel.Submenu title={`Plan: ${humanize(plan)}`} icon={Icon.Person}>
+        {["all", "free", "plus", "pro", "team", "business", "enterprise"].map(
+          (value) => (
+            <Action
+              key={value}
+              title={value === "all" ? "All Plans" : humanize(value)}
+              icon={plan === value ? Icon.Checkmark : Icon.Circle}
+              onAction={() => setPlan(value)}
+            />
+          ),
+        )}
+      </ActionPanel.Submenu>
+      {(searchText || kind !== "all" || plan !== "all") && (
+        <Action
+          title="Clear Filters"
+          icon={Icon.XMarkCircle}
+          onAction={() => {
+            setSearchText("");
+            setKind("all");
+            setPlan("all");
+          }}
+        />
+      )}
+    </ActionPanel.Section>
+  );
 
   return (
     <List
       isLoading={isLoading}
       isShowingDetail
-      searchBarPlaceholder="Filter by reset type or text…"
+      navigationTitle={`Reset History · ${humanize(plan)} · ${records.length} matching · ${loaded.length} loaded${warning ? " · Update failed" : ""}`}
+      pagination={
+        pagination
+          ? {
+              ...pagination,
+              pageSize: 10,
+              hasMore: hasMore && !searchText && plan === "all",
+            }
+          : undefined
+      }
+      searchBarPlaceholder="Search loaded records by type, plan, or text…"
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      filtering={false}
+      actions={<ActionPanel>{pageActions}</ActionPanel>}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by kind"
           value={kind}
           onChange={(value) => {
             setKind(value as ResetKind);
-            setPage(1);
           }}
         >
           <List.Dropdown.Item title="All Kinds" value="all" />
@@ -51,60 +155,55 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {records.map((record) => (
-        <RecordItem key={record.id} record={record} />
+      <List.EmptyView
+        icon={warning ? Icon.ExclamationMark : Icon.MagnifyingGlass}
+        title={
+          isLoading
+            ? "Loading records…"
+            : warning
+              ? "Unable to load records"
+              : searchText
+                ? "No matching loaded records"
+                : "No reset records"
+        }
+        description={
+          warning
+            ? warning
+            : "Search covers loaded records. Use Actions to load more records or clear filters."
+        }
+        actions={<ActionPanel>{pageActions}</ActionPanel>}
+      />
+      {[...groups].map(([day, items]) => (
+        <List.Section key={day} title={day} subtitle={warning}>
+          {items.map((record) => (
+            <RecordItem
+              key={record.id}
+              record={record}
+              pageActions={pageActions}
+              checkedAt={checkedAt.get(record.id)}
+            />
+          ))}
+        </List.Section>
       ))}
-      <List.Section
-        title={`Page ${page}${total ? ` of ${Math.max(1, Math.ceil(total / PAGE_SIZE))}` : ""}`}
-      >
-        {page > 1 && (
-          <List.Item
-            title="← Previous Page"
-            icon={Icon.ArrowLeft}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Previous Page"
-                  onAction={() => setPage((p) => Math.max(1, p - 1))}
-                />
-              </ActionPanel>
-            }
-          />
-        )}
-        {hasNextPage && (
-          <List.Item
-            title="Next Page →"
-            icon={Icon.ArrowRight}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Next Page"
-                  onAction={() => setPage((p) => p + 1)}
-                />
-              </ActionPanel>
-            }
-          />
-        )}
-      </List.Section>
     </List>
   );
 }
 
-function RecordItem({ record }: { record: ResetRecord }) {
-  const when = record.completedAt ?? record.effectiveAt ?? record.announcedAt;
+function RecordItem({
+  record,
+  pageActions,
+  checkedAt,
+}: {
+  record: ResetRecord;
+  pageActions: List.Item.Props["actions"];
+  checkedAt?: string;
+}) {
   const { icon, tintColor } = statusIcon(record);
-
-  const accessories: List.Item.Props["accessories"] = [
-    { tag: { value: record.resetType, color: Color.SecondaryText } },
-  ];
-  if (when) accessories.push({ date: new Date(when) });
 
   return (
     <List.Item
       icon={{ source: icon, tintColor }}
       title={statusLabel(record)}
-      subtitle={record.text?.split("\n")[0] ?? ""}
-      accessories={accessories}
       detail={
         <List.Item.Detail
           markdown={
@@ -115,19 +214,9 @@ function RecordItem({ record }: { record: ResetRecord }) {
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label
-                title="Kind"
-                text={record.kind}
+                title="Status"
+                text={recordState(record)}
               />
-              <List.Item.Detail.Metadata.Label
-                title="Reset Type"
-                text={record.resetType}
-              />
-              {record.scheduleState && (
-                <List.Item.Detail.Metadata.Label
-                  title="Schedule State"
-                  text={record.scheduleState}
-                />
-              )}
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label
                 title="Announced"
@@ -158,6 +247,20 @@ function RecordItem({ record }: { record: ResetRecord }) {
                   />
                 ))}
               </List.Item.Detail.Metadata.TagList>
+              <List.Item.Detail.Metadata.Label
+                title="Usage Windows"
+                text={record.scope?.windows?.join(", ") || "Not specified"}
+              />
+              {record.scheduleWindow && (
+                <List.Item.Detail.Metadata.Label
+                  title="Expected Window"
+                  text={formatWindow(record.scheduleWindow)}
+                />
+              )}
+              <List.Item.Detail.Metadata.Label
+                title="Source Last Checked"
+                text={formatDate(checkedAt)}
+              />
               {record.confidence != null && (
                 <List.Item.Detail.Metadata.TagList title="Confidence">
                   <List.Item.Detail.Metadata.TagList.Item
@@ -192,6 +295,7 @@ function RecordItem({ record }: { record: ResetRecord }) {
               url={record.source.url}
             />
           )}
+          {pageActions}
           <Action.CopyToClipboard
             title="Copy Raw JSON"
             content={JSON.stringify(record, null, 2)}

@@ -1,28 +1,65 @@
-import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { RecordsResponse, formatDate, recordsUrl, relativeTime } from "./api";
-import { confidenceColor, resetTodayIn } from "./status";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Icon,
+  Keyboard,
+  getPreferenceValues,
+  openExtensionPreferences,
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { fetchRecords } from "./requests";
+import {
+  formatDate,
+  formatWindow,
+  recordsUrl,
+  relativeTime,
+  resetTodayIn,
+  statusLabel,
+  matchesPlan,
+  nextScheduleIn,
+  scheduleLabel,
+  humanize,
+  recordState,
+} from "./api";
+import { confidenceColor } from "./status";
 
 /** One request serves both the latest record and the reset-today scan (API allows 20/hour). */
 const PAGE_SIZE = 10;
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useFetch<RecordsResponse>(
-    recordsUrl("all", 1, PAGE_SIZE),
+  const { plan } = getPreferenceValues<{ plan: string }>();
+  const { data, error, isLoading, revalidate } = useCachedPromise(
+    fetchRecords,
+    [recordsUrl("all", 1, PAGE_SIZE)],
     {
       keepPreviousData: true,
     },
   );
 
-  const records = data?.data?.items ?? [];
-  const record = records[0];
-  const { resetToday } = resetTodayIn(records);
+  const warning = error?.message ?? data?.warning;
+  const records = (data?.data?.items ?? []).filter((record) =>
+    matchesPlan(record, plan),
+  );
+  const next = nextScheduleIn(records);
+  const { resetToday, at, record: todayRecord } = resetTodayIn(records);
+  const record = todayRecord ?? records[0];
 
   const markdown = record
     ? [
-        `# ${resetToday ? "✅ Reset today" : "◻︎ No reset yet today"}`,
+        warning
+          ? `**Update failed — showing previously fetched data.**\n\n${warning}`
+          : "",
+        `# ${resetToday ? `Reset confirmed today · ${relativeTime(at)}` : "No reset confirmed today"}`,
+        `Plan: ${humanize(plan)} · Based on the latest 10 records. Times are local.`,
         "",
-        `**${record.resetType.toUpperCase()}** — ${record.kind.replace("reset_", "")}`,
+        "## Next planned reset",
+        next
+          ? `${statusLabel(next)} — ${scheduleLabel(next)}`
+          : scheduleLabel(),
+        "",
+        `## ${resetToday ? "Confirmed reset" : "Latest announcement"}`,
+        `**${statusLabel(record)}**`,
         "",
         record.text ? `> ${record.text.split("\n").join("\n> ")}` : "",
         "",
@@ -30,7 +67,11 @@ export default function Command() {
           ? `Source: [${record.source.handle ?? record.source.origin} on ${record.source.origin}](${record.source.url})`
           : `Source: ${record.source.origin}`,
       ].join("\n")
-    : "Loading latest reset record…";
+    : isLoading
+      ? "Loading latest reset record…"
+      : warning
+        ? `# Unable to load reset records\n\n${warning}\n\nTry refreshing with ⌘R.`
+        : `# No reset records for ${humanize(plan)}\n\nNo matching record in the latest 10 announcements. Change the plan in extension preferences or browse history.`;
 
   return (
     <Detail
@@ -39,14 +80,7 @@ export default function Command() {
       metadata={
         record ? (
           <Detail.Metadata>
-            <Detail.Metadata.Label title="Kind" text={record.kind} />
-            <Detail.Metadata.Label title="Reset Type" text={record.resetType} />
-            {record.scheduleState && (
-              <Detail.Metadata.Label
-                title="Schedule State"
-                text={record.scheduleState}
-              />
-            )}
+            <Detail.Metadata.Label title="Status" text={recordState(record)} />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label
               title="Announced At"
@@ -74,6 +108,20 @@ export default function Command() {
                 <Detail.Metadata.TagList.Item key={plan} text={plan} />
               ))}
             </Detail.Metadata.TagList>
+            <Detail.Metadata.Label
+              title="Usage Windows"
+              text={record.scope?.windows?.join(", ") || "Not specified"}
+            />
+            {record.scheduleWindow && (
+              <Detail.Metadata.Label
+                title="Expected Window"
+                text={formatWindow(record.scheduleWindow)}
+              />
+            )}
+            <Detail.Metadata.Label
+              title="Source Last Checked"
+              text={formatDate(data?.meta?.lastSuccessfulCheckAt)}
+            />
             {record.confidence != null && (
               <Detail.Metadata.TagList title="Confidence">
                 <Detail.Metadata.TagList.Item
@@ -115,6 +163,11 @@ export default function Command() {
             icon={Icon.ArrowClockwise}
             onAction={() => revalidate()}
             shortcut={Keyboard.Shortcut.Common.Refresh}
+          />
+          <Action
+            title="Extension Preferences"
+            icon={Icon.Gear}
+            onAction={openExtensionPreferences}
           />
           {record && (
             <Action.CopyToClipboard

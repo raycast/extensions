@@ -1,5 +1,5 @@
 import { Color, Icon } from "@raycast/api";
-import { ResetRecord, resetTodayAt } from "./api";
+import { ResetRecord } from "./api";
 
 /** Native icon + tint for a record's state, replacing emoji with Raycast's own color language. */
 export function statusIcon(record: ResetRecord): {
@@ -24,17 +24,4 @@ export function confidenceColor(confidence?: number | null): Color {
   if (confidence >= 0.9) return Color.Green;
   if (confidence >= 0.7) return Color.Yellow;
   return Color.Red;
-}
-
-/**
- * "Did a reset happen today?" — the newest record overall may be a fresh schedule that hides
- * an earlier completion, so scan the whole (newest-first) page rather than just its head.
- * Returns the timestamp of that reset (for relative-time display), or null.
- */
-export function resetTodayIn(records: ResetRecord[]): {
-  resetToday: boolean;
-  at: string | null;
-} {
-  const at = records.map(resetTodayAt).find((t) => t != null) ?? null;
-  return { resetToday: at !== null, at };
 }
