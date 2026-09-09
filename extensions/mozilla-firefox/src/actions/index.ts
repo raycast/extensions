@@ -23,9 +23,26 @@ const WINDOWS_FIREFOX_PATHS: Record<string, string[]> = {
   ],
 };
 
+const RELEASE_VARIANT = "Firefox";
+
+/**
+ * Resolves the Firefox executable path for the given variant on Windows.
+ * Release Firefox falls back to the bare "firefox.exe" (resolved via PATH) when
+ * not found at its known install locations. Non-release variants (Nightly, ESR,
+ * Developer Edition) must resolve to a verified install path — falling back to
+ * "firefox.exe" would silently launch Release instead, so an actionable error
+ * is thrown instead.
+ */
 function getWindowsFirefoxExe(browserApp: string): string {
-  const candidates = WINDOWS_FIREFOX_PATHS[browserApp] ?? WINDOWS_FIREFOX_PATHS["Firefox"];
-  return candidates.find(existsSync) ?? "firefox.exe";
+  const candidates = WINDOWS_FIREFOX_PATHS[browserApp] ?? WINDOWS_FIREFOX_PATHS[RELEASE_VARIANT];
+  const resolved = candidates.find(existsSync);
+  if (resolved) return resolved;
+
+  if (browserApp === RELEASE_VARIANT || !WINDOWS_FIREFOX_PATHS[browserApp]) return "firefox.exe";
+
+  throw new Error(
+    `${browserApp} was not found. Please verify it is installed, or change the Firefox Application preference.`,
+  );
 }
 
 /**

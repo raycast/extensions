@@ -21,7 +21,7 @@ export function NotInstalledError() {
 
     try {
       if (isWindows) {
-        await runPowerShellScript("winget install Mozilla.Firefox");
+        await runPowerShellScript("winget install Mozilla.Firefox", { timeout: 300_000 });
       } else {
         await execAsync("brew install --cask firefox");
       }
