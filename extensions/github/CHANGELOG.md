@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix Star Action Icon] - {PR_MERGE_DATE}
+
+- Search Repositories: Fix the broken Star action icon
+
 ## [Fix Stats for Large Accounts] - 2026-08-29
 
 - Split aggregate and list GraphQL requests so My GitHub Stats loads for accounts with large histories
