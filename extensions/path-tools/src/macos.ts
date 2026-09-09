@@ -94,15 +94,34 @@ export async function findPaths(query: string): Promise<string[]> {
   const escapedQuery = query.replace(/[\\*"]/g, "\\$&");
   const spotlightQuery = `kMDItemFSName == "*${escapedQuery}*"cdw`;
   const { stdout } = await execFileAsync("/usr/bin/mdfind", [spotlightQuery]);
-  const spotlightPaths = stdout
+  const spotlightCandidates = stdout
     .split("\n")
     .map((path) => path.trim())
-    .filter(Boolean)
-    .slice(0, maxSearchResults);
+    .filter(Boolean);
+  const spotlightPaths = await filterExistingPaths(spotlightCandidates);
 
-  return spotlightPaths.length > 0
-    ? spotlightPaths
-    : searchHomeDirectory(query);
+  if (spotlightPaths.length >= maxSearchResults) {
+    return spotlightPaths.slice(0, maxSearchResults);
+  }
+
+  const fallbackPaths = await searchHomeDirectory(query);
+  const candidatePaths = [...new Set([...spotlightPaths, ...fallbackPaths])];
+  return (await filterExistingPaths(candidatePaths)).slice(0, maxSearchResults);
+}
+
+async function filterExistingPaths(paths: string[]): Promise<string[]> {
+  const existingPaths = await Promise.all(
+    paths.map(async (path) => {
+      try {
+        await stat(path);
+        return path;
+      } catch {
+        return undefined;
+      }
+    }),
+  );
+
+  return existingPaths.filter((path): path is string => path !== undefined);
 }
 
 async function searchHomeDirectory(query: string): Promise<string[]> {
@@ -158,7 +177,7 @@ export async function openItermDirectoryInFinder(): Promise<void> {
 tell application id "com.googlecode.iterm2"
   activate
   if (count of windows) is 0 then error "iTerm has no open window."
-  set activeSession to «class Wcsn» of window 1
+  set activeSession to «class Wcsn» of «class Crwn»
   -- iTerm exposes this command as "variable", an AppleScript reserved word.
   set directoryUrl to «event Itrmvarb» activeSession given «class Namd»:"path"
   if directoryUrl is missing value or directoryUrl is "" then
