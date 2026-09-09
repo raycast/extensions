@@ -1,0 +1,165 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aws-sso-status",
+  "title": "AWS SSO Status",
+  "description": "Check AWS IAM Identity Center credentials and their remaining lifetime from Raycast and your menu bar.",
+  "icon": "extension-icon.png",
+  "author": "leo66",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "aws",
+    "sso",
+    "iam",
+    "identity center",
+    "credentials"
+  ],
+  "commands": [
+    {
+      "name": "aws-sso-status",
+      "title": "AWS SSO Status",
+      "description": "View IAM Identity Center profiles, check credentials, and sign in",
+      "mode": "view"
+    },
+    {
+      "name": "aws-sso-menu-bar",
+      "title": "AWS SSO Menu Bar",
+      "description": "Monitor AWS credential status and remaining lifetime in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "aws-sso-sign-in",
+      "title": "AWS SSO Login",
+      "description": "Quickly sign in with the primary SSO profile or an optional profile name",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "profile",
+          "type": "text",
+          "placeholder": "Profile (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "diagnostics",
+      "title": "AWS SSO Diagnostics",
+      "description": "Inspect local AWS config path, CLI installation, and profile discovery without exposing credentials",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryProfile",
+      "type": "textfield",
+      "required": false,
+      "title": "Primary Profile",
+      "description": "Leave empty to select default, or the first profile alphabetically. Must match the profile filter."
+    },
+    {
+      "name": "profileFilter",
+      "type": "textfield",
+      "required": false,
+      "title": "Profile Filter",
+      "description": "Comma-separated profile names, such as dev,production. Leave empty to show all SSO profiles."
+    },
+    {
+      "name": "threshold",
+      "type": "dropdown",
+      "required": false,
+      "title": "Expiring Soon Threshold",
+      "description": "Warn when the resolved credentials have this much time remaining.",
+      "default": "30",
+      "data": [
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "1 hour",
+          "value": "60"
+        },
+        {
+          "title": "2 hours",
+          "value": "120"
+        }
+      ]
+    },
+    {
+      "name": "menuBarStyle",
+      "type": "dropdown",
+      "required": false,
+      "title": "Menu Bar Style",
+      "description": "Show only remaining time, or a check/cross symbol. Profile details stay in the dropdown.",
+      "default": "remaining",
+      "data": [
+        {
+          "title": "Remaining Time",
+          "value": "remaining"
+        },
+        {
+          "title": "Simple (✓ / ✕)",
+          "value": "status"
+        }
+      ]
+    },
+    {
+      "name": "awsCliPath",
+      "type": "textfield",
+      "required": false,
+      "title": "AWS CLI Path",
+      "description": "Optional absolute path to aws for custom installations. Otherwise searches PATH and standard macOS locations."
+    },
+    {
+      "name": "notifyOnSignOut",
+      "type": "checkbox",
+      "required": false,
+      "title": "Sign-In Reminder",
+      "label": "Notify when an active SSO session needs sign-in",
+      "description": "Show one Raycast Toast/HUD per sign-out episode, after a previously successful check. No repeated reminders. Disabled by default.",
+      "default": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.2.1",
+    "proper-lockfile": "^4.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.9.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/burger66leo/raycast-aws-sso-status.git"
+  },
+  "homepage": "https://github.com/burger66leo/raycast-aws-sso-status",
+  "bugs": {
+    "url": "https://github.com/burger66leo/raycast-aws-sso-status/issues"
+  }
+}
