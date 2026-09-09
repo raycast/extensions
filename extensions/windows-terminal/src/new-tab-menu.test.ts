@@ -36,6 +36,22 @@ describe("buildProfileMatcher", () => {
     assert.equal(buildProfileMatcher({ type: "matchProfiles" }), null);
     assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "[" }), null);
   });
+
+  it("rejects patterns that can backtrack exponentially", () => {
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(a+)+" }), null);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(a|aa)*" }), null);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", commandline: "((ab)+)+" }), null);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", source: "(a{1,2})+" }), null);
+  });
+
+  it("keeps patterns that only look nested", () => {
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(Power)+Shell" }), ["PowerShell"]);
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?:Power|Command)\\s.*" }), ["Command Prompt"]);
+    assert.deepEqual(matchedNames({ type: "matchProfiles", commandline: "[a-z]+\\.exe" }), [
+      "PowerShell",
+      "Command Prompt",
+    ]);
+  });
 });
 
 describe("resolveNewTabMenuOrder", () => {

@@ -15,17 +15,40 @@ export interface NewTabMenuEntry {
   entries?: NewTabMenuEntry[];
 }
 
+// JavaScript regex matching can't be interrupted once it starts, so an exponentially
+// backtracking pattern — (a+)+, (a|aa)*, ((ab)+)+ — would freeze the profile list while it
+// renders. Every such pattern quantifies a group that itself repeats or alternates, so reject
+// that shape up front. Conservative: a harmless pattern like (a|b)+ is rejected too, which
+// costs one unmatched menu entry instead of a hung command.
+function hasRiskyBacktracking(pattern: string): boolean {
+  // Escapes and character classes can't open a group, so reduce them to a plain character first.
+  let rest = pattern.replace(/\\./g, "a").replace(/\[[^\]]*\]/g, "a");
+  const innermostGroup = /\(([^()]*)\)(\*|\+|\?|\{\d+(?:,\d*)?\})?/;
+
+  // Collapse groups from the inside out. A group that repeats collapses to "a+" so an enclosing
+  // quantifier still sees a repeat inside it; anything else collapses to a plain "a".
+  for (let match = innermostGroup.exec(rest); match; match = innermostGroup.exec(rest)) {
+    const [whole, body, quantifier] = match;
+    const repeats = quantifier !== undefined && quantifier !== "?";
+    if (repeats && /[*+|]|\{\d*,\d*\}/.test(body)) return true;
+    rest = rest.replace(whole, repeats ? "a+" : "a");
+  }
+
+  return false;
+}
+
 // A matchProfiles entry matches a profile when ANY provided field (name/commandline/source)
 // fully matches that field's regex — mirrors Windows Terminal's MatchProfilesEntry. Empty profile
 // fields never match, so "source": ".*" skips local profiles and "commandline": ".*" skips
-// profiles without a command line. An entry with no patterns, or a malformed regex, matches
-// nothing rather than crashing or matching all.
+// profiles without a command line. An entry with no patterns, or a malformed or exponentially
+// backtracking regex, matches nothing rather than crashing, hanging, or matching all.
 export function buildProfileMatcher(entry: NewTabMenuEntry): ((profile: Profile) => boolean) | null {
   const specs: { pattern: string; get: (profile: Profile) => string }[] = [];
   if (entry.name !== undefined) specs.push({ pattern: entry.name, get: (p) => p.name });
   if (entry.commandline !== undefined) specs.push({ pattern: entry.commandline, get: (p) => p.commandline ?? "" });
   if (entry.source !== undefined) specs.push({ pattern: entry.source, get: (p) => p.source ?? "" });
   if (specs.length === 0) return null;
+  if (specs.some(({ pattern }) => hasRiskyBacktracking(pattern))) return null;
 
   let matchers: { regex: RegExp; get: (profile: Profile) => string }[];
   try {
