@@ -45,11 +45,11 @@ Raycast imports the extension automatically. The manifest author is the Raycast 
 
 ## Original format and compatibility
 
-For `hi`, Alphabet Emoji copies `:alphabet-yellow-h::alphabet-white-i:`. It preserves the original converter's letter case and alternates colors by UTF-16 input position, including punctuation and spaces. Each ordinary space becomes three spaces. Other characters pass through unchanged.
+For `hi`, Alphabet Emoji copies `:alphabet-yellow-h::alphabet-white-i:`. It preserves plain ASCII letter case and alternates colors by UTF-16 input position, including punctuation and spaces. Each ordinary space becomes three spaces. Vietnamese letters map to lowercase Telex emoji names: `ậ` becomes `aaj`, `ư` becomes `uw`, and `đ`/`Đ` become `dd`. Composed (NFC) and decomposed (NFD) input are supported; color positions still follow the original UTF-16 input. Unsupported letters such as `ñ`, `î`, and `ĉ` pass through unchanged.
 
-The receiving workspace needs matching `alphabet-yellow-*` and `alphabet-white-*` custom emoji. Use lowercase input if uppercase emoji codes are unavailable.
+The receiving workspace needs matching `alphabet-yellow-*` and `alphabet-white-*` custom emoji, including the corresponding Vietnamese Telex names. Use lowercase input if uppercase emoji codes are unavailable.
 
-ASCII banners support printable English ASCII characters and line breaks, plus emoji through the picture conversion path. Other scripts and accented text currently show an error rather than being silently removed; Alphabet Emoji preserves them.
+ASCII banners support printable English ASCII characters and line breaks, plus emoji through the picture conversion path. Other scripts and accented text currently show an error rather than being silently removed; Alphabet Emoji converts supported Vietnamese letters and preserves other scripts.
 
 ## Privacy and credits
 

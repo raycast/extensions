@@ -8,3 +8,4 @@
 - Choose four ASCII fonts or pass optional text directly from Raycast search.
 - Access text previews, quick copying, and image conversion through one CoolText command.
 - Keep Unicode dot letters readable with consistent sizing, complete word wrapping, and Compact or Detailed output.
+- Convert Vietnamese letters to Telex alphabet emoji names while preserving unsupported characters.

@@ -9,7 +9,38 @@ describe("text styles", () => {
     expect(transformText("a !b")).toBe(":alphabet-yellow-a:   !:alphabet-white-b:");
   });
   it("preserves Unicode, line breaks, and the original UTF-16 color positions", () => {
-    expect(transformText("🫶é\nb")).toBe("🫶é\n:alphabet-yellow-b:");
+    expect(transformText("🫶ß\nb")).toBe("🫶ß\n:alphabet-yellow-b:");
+  });
+  it("maps Vietnamese letters to telex emoji names, composed or decomposed", () => {
+    expect(transformText("nhậu đi")).toBe(
+      ":alphabet-yellow-n::alphabet-white-h::alphabet-yellow-aaj::alphabet-white-u:   :alphabet-white-dd::alphabet-yellow-i:",
+    );
+    expect(transformText("Ợ ă ế".normalize("NFD"))).toBe(
+      ":alphabet-yellow-owj:   :alphabet-yellow-aw:   :alphabet-white-ees:",
+    );
+    expect(transformText("ç")).toBe("ç");
+  });
+  it.each(["K", "ç", "ñ", "î", "û", "ĉ", "ĝ", "ŝ", "ǹ", "a\u031b", "e\u0306", "a\u0302\u0306", "a\u0301\u0300"])(
+    "preserves unsupported alphabet glyph %s verbatim",
+    (glyph) => {
+      expect(transformText(glyph)).toBe(glyph);
+    },
+  );
+  it.each([
+    ["ă", "aw"],
+    ["â", "aa"],
+    ["ê", "ee"],
+    ["ô", "oo"],
+    ["ơ", "ow"],
+    ["ư", "uw"],
+    ["í", "is"],
+    ["ỹ", "yx"],
+    ["Đ", "dd"],
+  ])("retains valid Vietnamese glyph %s across case and normalization", (glyph, name) => {
+    for (const input of [glyph, glyph.toUpperCase()]) {
+      expect(transformText(input.normalize("NFC"))).toBe(`:alphabet-yellow-${name}:`);
+      expect(transformText(input.normalize("NFD"))).toBe(`:alphabet-yellow-${name}:`);
+    }
   });
   it("keeps repeated and edge spaces", () => {
     expect(transformText("  a ")).toBe("      :alphabet-yellow-a:   ");
