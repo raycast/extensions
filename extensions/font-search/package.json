@@ -5,6 +5,9 @@
   "description": "Search locally installed fonts, as displayed in font book.",
   "icon": "extension-icon.png",
   "author": "tnixc",
+  "contributors": [
+    "mindprint"
+  ],
   "preferences": [
     {
       "name": "previewText",
