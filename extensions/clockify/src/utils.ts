@@ -367,29 +367,54 @@ export async function getProjects({ onError }: { onError?: (state: boolean) => v
 }
 
 /**
+ * Looks a project up in whichever cache holds it.
+ *
+ * There are two, written by independent code paths: the forms in index.tsx cache the project list
+ * in LocalStorage under "projects", and getProjects() caches it in Cache under clockify/projects.
+ * Both are checked so that a list fetched by either path is reused. LocalStorage comes first only
+ * because the forms rewrite it on every mount, making it the more recently refreshed of the two.
+ */
+async function findCachedProject(projectId: string): Promise<Project | undefined> {
+  let stored: string | undefined;
+
+  try {
+    stored = await LocalStorage.getItem<string>("projects");
+  } catch (e) {
+    console.error("Error reading cached projects:", e);
+  }
+
+  for (const source of [stored, cache.get(PROJECTS_CACHE_KEY)]) {
+    if (!source) continue;
+
+    try {
+      const project = (JSON.parse(source) as Project[]).find((project) => project.id === projectId);
+      if (project) return project;
+    } catch (e) {
+      console.error("Error reading cached projects:", e);
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * Whether a project is billable by default.
  *
- * Prefers the project list the forms already cache in LocalStorage and only falls back to a
- * request, because a timer can be restarted from a recent entry before any form has loaded
- * projects. Returns undefined when the setting cannot be determined, which callers pass straight
- * into the request body: JSON.stringify drops undefined, so the field is omitted and behaviour is
- * unchanged rather than guessed at.
+ * Reads the cached project list and only falls back to a request, because a timer can be restarted
+ * from a recent entry before any form has loaded projects. getProjects() populates one of the
+ * caches findCachedProject() reads, so that fallback primes itself and costs one request rather
+ * than one per timer start. Returns undefined when the setting cannot be determined, which callers
+ * pass straight into the request body: JSON.stringify drops undefined, so the field is omitted and
+ * behaviour is unchanged rather than guessed at.
  *
- * Cache-first means a setting changed in Clockify web can be stale here until the cache is
+ * Cache-first means a setting changed in Clockify web can be stale here until a cache is
  * rewritten, which either form does on mount. Restarting a recent entry does not open a form, so
  * that path can use an older value. Accepted deliberately: billability changes rarely, and always
  * refetching would add a request to every timer start.
  */
 export async function isProjectBillable(projectId: string): Promise<boolean | undefined> {
-  try {
-    const stored = await LocalStorage.getItem<string>("projects");
-    if (stored) {
-      const project = (JSON.parse(stored) as Project[]).find((project) => project.id === projectId);
-      if (project) return project.billable;
-    }
-  } catch (e) {
-    console.error("Error reading cached projects:", e);
-  }
+  const cached = await findCachedProject(projectId);
+  if (cached) return cached.billable;
 
   const projects = await getProjects();
   return projects.find((project) => project.id === projectId)?.billable;
