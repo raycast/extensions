@@ -71,6 +71,10 @@ export class BrowserHandoffAuthProvider implements AuthProvider {
   }
 
   private async readStaffSession(): Promise<AuthSession | undefined> {
+    if (!(await client.getTokens())?.accessToken) {
+      await clearSession();
+      return undefined;
+    }
     const existing = await readSession();
     if (existing?.email.toLowerCase() === FALLBACK_ADMIN_EMAIL) {
       await this.signOut();

@@ -54,6 +54,9 @@ export default function CreateTicketCommand() {
     if (!values.title.trim()) nextErrors.title = "Give the ticket a title";
     if (!values.description.trim()) nextErrors.description = "Describe what needs attention";
     if (!values.owningDepartmentId) nextErrors.owningDepartmentId = "Choose an owning department";
+    if (values.dueDate && values.dueDate.getTime() <= Date.now()) {
+      nextErrors.dueDate = "Choose a future date and time. Today is allowed if the time is still ahead.";
+    }
 
     setErrors(nextErrors);
     if (Object.values(nextErrors).some(Boolean)) return;
@@ -103,6 +106,27 @@ export default function CreateTicketCommand() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Ticket" icon={Icon.Plus} onSubmit={submit} />
+          <ActionPanel.Section title="Due Date">
+            {[1, 2, 4, 24].map((hours) => (
+              <Action
+                key={hours}
+                title={hours === 24 ? "In 1 Day" : `In ${hours} ${hours === 1 ? "Hour" : "Hours"}`}
+                icon={Icon.Clock}
+                onAction={() => {
+                  setDueDate(new Date(Date.now() + hours * 3_600_000));
+                  clearError("dueDate");
+                }}
+              />
+            ))}
+            <Action
+              title="Clear Due Date"
+              icon={Icon.XMarkCircle}
+              onAction={() => {
+                setDueDate(null);
+                clearError("dueDate");
+              }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >

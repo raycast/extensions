@@ -41,7 +41,7 @@ Priority is not a field you pick. It is derived from due date:
 | ≤ 72 hours | Medium |
 | Later, or no due date | Normal |
 
-Past due dates are rejected. Leave assignee empty to auto-route.
+Elapsed deadlines are rejected; today is allowed when the selected time is still ahead. Use the Due Date actions to select a deadline in 1 hour, 2 hours, 4 hours, or 1 day, or choose a date and time manually. Leave assignee empty to auto-route.
 
 ### Assigned Tickets
 

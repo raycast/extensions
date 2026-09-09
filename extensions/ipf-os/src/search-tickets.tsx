@@ -52,6 +52,17 @@ export default function SearchTicketsCommand() {
   const activeFilters = [status ? STATUS_LABELS[status] : undefined, type ? TYPE_LABELS[type] : undefined]
     .filter(Boolean)
     .join(" · ");
+  const clearFiltersAction =
+    status || type ? (
+      <Action
+        title="Clear Filters"
+        icon={Icon.XMarkCircle}
+        onAction={() => {
+          setStatus(undefined);
+          setType(undefined);
+        }}
+      />
+    ) : null;
 
   return (
     <List
@@ -77,6 +88,7 @@ export default function SearchTicketsCommand() {
           actions={
             <ActionPanel>
               <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              {clearFiltersAction}
             </ActionPanel>
           }
         />
@@ -99,6 +111,7 @@ export default function SearchTicketsCommand() {
         <List.EmptyView
           icon={Icon.Tray}
           title="Nothing here"
+          actions={clearFiltersAction ? <ActionPanel>{clearFiltersAction}</ActionPanel> : undefined}
           description={
             searchText
               ? "No ticket matches that search. Try a ticket number or a word from the title."

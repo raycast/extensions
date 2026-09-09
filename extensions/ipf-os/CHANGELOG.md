@@ -1,5 +1,5 @@
 # iPF OS Changelog
 
-## [Initial Version] - 2026-08-21
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Search, create, and manage iPF OS tickets from Raycast.
