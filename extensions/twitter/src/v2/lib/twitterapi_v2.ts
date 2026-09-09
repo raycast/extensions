@@ -1,3 +1,4 @@
+import { validatePostLength } from "./post_text";
 import { createHash } from "node:crypto";
 import { readCache } from "./read_cache";
 import { readFile, stat } from "node:fs/promises";
@@ -338,14 +339,15 @@ function requireUsername(value: string): string {
   return username;
 }
 
-function normalizePostInput(input: CreatePostInput): CreatePostInput {
+export function normalizePostInput(input: CreatePostInput): CreatePostInput {
   const text = input.text?.trim() ?? "";
   const mediaPaths = [...new Set((input.mediaPaths ?? []).map((path) => path.trim()).filter(Boolean))];
   const quotePostId = input.quotePostId ? requireNumericId(input.quotePostId, "quote post ID") : undefined;
   const replyToPostId = input.replyToPostId ? requireNumericId(input.replyToPostId, "reply post ID") : undefined;
 
   if (!text && mediaPaths.length === 0) throw new Error("A post needs text or media.");
-  if (text.length > 280) throw new Error(`Post text is ${text.length} characters; X allows up to 280.`);
+  validatePostLength(text);
+  validateMediaCombination(mediaPaths.map(getMediaFormat));
   if (input.poll && mediaPaths.length > 0) throw new Error("A poll cannot be combined with media.");
   if (input.poll && quotePostId) throw new Error("A poll cannot be combined with a quote post.");
 
@@ -379,6 +381,18 @@ async function inspectMediaFile(path: string): Promise<MediaFileInfo> {
   const fileStat = await stat(path);
   if (!fileStat.isFile()) throw new Error(`Media attachment is not a file: ${path}`);
 
+  const format = getMediaFormat(path);
+
+  const maximumSize =
+    format.kind === "image" ? 5 * 1024 * 1024 : format.kind === "gif" ? 15 * 1024 * 1024 : 512 * 1024 * 1024;
+  if (fileStat.size > maximumSize) {
+    const limit = maximumSize / (1024 * 1024);
+    throw new Error(`${path} is larger than X's ${limit} MB ${format.kind} upload limit.`);
+  }
+  return { ...format, size: fileStat.size };
+}
+
+function getMediaFormat(path: string): Omit<MediaFileInfo, "size"> {
   const extension = extname(path).toLowerCase();
   const format = {
     ".jpg": { mimeType: "image/jpeg", kind: "image" },
@@ -393,20 +407,32 @@ async function inspectMediaFile(path: string): Promise<MediaFileInfo> {
 
   if (!format) throw new Error(`Unsupported media format "${extension || "unknown"}" for ${path}.`);
 
-  const maximumSize =
-    format.kind === "image" ? 5 * 1024 * 1024 : format.kind === "gif" ? 15 * 1024 * 1024 : 512 * 1024 * 1024;
-  if (fileStat.size > maximumSize) {
-    const limit = maximumSize / (1024 * 1024);
-    throw new Error(`${path} is larger than X's ${limit} MB ${format.kind} upload limit.`);
-  }
-
-  return { ...format, size: fileStat.size };
+  return format;
 }
 
-function validateMediaCombination(files: MediaFileInfo[]): void {
+function validateMediaCombination(files: Omit<MediaFileInfo, "size">[]): void {
   if (files.length > 4) throw new Error("A post can contain at most four images.");
   if (files.length > 1 && files.some((file) => file.kind !== "image")) {
     throw new Error("A post can contain either up to four images, one GIF, or one video.");
+  }
+}
+
+export class ThreadPublishError extends Error {
+  constructor(
+    readonly created: CreatedPost[],
+    message: string,
+  ) {
+    super(message);
+    this.name = "ThreadPublishError";
+  }
+}
+
+export function postInputError(input: CreatePostInput): string | undefined {
+  try {
+    normalizePostInput(input);
+    return undefined;
+  } catch (error) {
+    return getErrorMessage(error);
   }
 }
 
@@ -1136,7 +1162,10 @@ export class ClientV2 {
     return result.data;
   }
 
-  async createThread(posts: CreatePostInput[]): Promise<CreatedPost[]> {
+  async createThread(
+    posts: CreatePostInput[],
+    onProgress?: (created: CreatedPost[]) => Promise<void>,
+  ): Promise<CreatedPost[]> {
     if (posts.length === 0) throw new Error("A thread needs at least one post.");
     const normalizedPosts: CreatePostInput[] = [];
     for (const [index, post] of posts.entries()) {
@@ -1157,9 +1186,11 @@ export class ClientV2 {
             replyToPostId: created.at(-1)?.id ?? post.replyToPostId,
           }),
         );
+        await onProgress?.([...created]);
       } catch (error) {
-        throw new Error(
-          `Post ${created.length + 1} failed: ${getErrorMessage(error)}${
+        throw new ThreadPublishError(
+          created,
+          `Thread stopped after ${created.length} published posts: ${getErrorMessage(error)}${
             created.length ? ` Published post IDs: ${created.map((item) => item.id).join(", ")}.` : ""
           }`,
         );

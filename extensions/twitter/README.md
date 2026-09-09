@@ -23,7 +23,7 @@ Use the **Logout** action in a post's action panel to disconnect your account. T
 
 - **Recent Posts** — browse the authenticated home timeline (without replies).
 - **My Posts & Analytics** — browse your posts from the last 30 days with public metrics plus private impressions, profile clicks, link clicks, and video views when X returns them.
-- **Send Post** — compose a post or chained thread with up to four images, one GIF, or one video per post. The first post can instead include a poll or quote another post, and the composer controls who can reply. Draft text and media paths persist locally and are cleared only after a successful publish.
+- **Send Post** — compose a post or chained thread with up to four images, one GIF, or one video per post. The first post can instead include a poll or quote another post, and the composer controls who can reply. Draft text and media paths persist locally. After each published post, the draft keeps only the remaining posts and the ID to reply to, so retries resume the thread.
 - **Search User** — find exact usernames and search your following or followers without leaving Raycast.
 - **Search Posts** — search public posts from the last seven days, including X search operators.
 - **Bookmarks** — browse posts saved by the authenticated account.
@@ -31,7 +31,7 @@ Use the **Logout** action in a post's action panel to disconnect your account. T
 - **Mentions** — triage posts that mention the authenticated account.
 - **Send Direct Message** — send a user-confirmed 1:1 or group DM with one optional media attachment.
 - **User Profile** — inspect an exact username and browse that account's recent posts.
-- **Post Selected Text** — publish up to 280 characters selected in the frontmost app without opening a command view.
+- **Post Selected Text** — publish up to 280 weighted characters selected in the frontmost app without opening a command view.
 
 Lists load up to 20 posts per page. Additional pages are fetched only when you scroll for more results, and successful reads are cached for two minutes to avoid repeating billed X API requests. The details pane follows the extension preference by default and can be toggled at any time with **Option-D** from the action panel.
 

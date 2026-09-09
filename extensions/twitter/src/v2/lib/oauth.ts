@@ -98,11 +98,24 @@ async function authorizeWithOAuthClient(): Promise<void> {
         if (latestTokenSet?.accessToken && !latestTokenSet.isExpired()) {
           return;
         }
-        throw new Error("Could not refresh X authentication. Retry, or log out and reconnect in extension settings.");
+        // Recheck immediately before removal; a delayed read may have observed old credentials.
+        const current = await oauthClient.getTokens();
+        if (current?.accessToken && !current.isExpired()) return;
+        if (
+          current &&
+          (current.accessToken !== tokenSet.accessToken || current.refreshToken !== tokenSet.refreshToken)
+        ) {
+          throw new Error("X authentication changed. Retry to use the newer session.");
+        }
+        readCache.clear();
+        await oauthClient.removeTokens();
       }
     }
 
-    throw new Error("X authentication has expired. Log out and reconnect in extension settings.");
+    if (!tokenSet.refreshToken) {
+      readCache.clear();
+      await oauthClient.removeTokens();
+    }
   }
 
   const authRequest = await oauthClient.authorizationRequest({

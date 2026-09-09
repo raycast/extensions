@@ -5,7 +5,7 @@ import { requirePostId, requirePostText } from "./inputs";
 type Input = {
   /** Numeric ID of the X post to reply to. */
   postId: string;
-  /** Exact public reply text. Must contain 1 to 280 characters. */
+  /** Exact public reply text. Must contain 1 to 280 weighted characters. */
   text: string;
 };
 

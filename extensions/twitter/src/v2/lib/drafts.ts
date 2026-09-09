@@ -6,6 +6,7 @@ let draftWriteQueue = Promise.resolve();
 
 export interface TweetDraftContent {
   text: string;
+  replyToPostId?: string;
   mediaPaths?: string[];
 }
 
@@ -31,6 +32,9 @@ function isTweetDraftContent(value: unknown): value is TweetDraftContent {
     value !== null &&
     "text" in value &&
     typeof value.text === "string" &&
+    (!("replyToPostId" in value) ||
+      value.replyToPostId === undefined ||
+      (typeof value.replyToPostId === "string" && /^\d{1,19}$/.test(value.replyToPostId))) &&
     (!("mediaPaths" in value) ||
       value.mediaPaths === undefined ||
       (Array.isArray(value.mediaPaths) && value.mediaPaths.every((path) => typeof path === "string")))

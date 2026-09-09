@@ -4,24 +4,8 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { fork } = require("node:child_process");
-const ts = require("typescript");
 
-function load(file, mocks, modules = new Map()) {
-  file = path.resolve(file);
-  if (modules.has(file)) return modules.get(file).exports;
-  const module = { exports: {} };
-  modules.set(file, module);
-  const code = ts.transpileModule(fs.readFileSync(file, "utf8"), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
-  }).outputText;
-  const requireMock = (name) => {
-    if (name in mocks) return mocks[name];
-    if (name.startsWith(".")) return load(path.resolve(path.dirname(file), name + ".ts"), mocks, modules);
-    return require(name);
-  };
-  new Function("require", "module", "exports", code)(requireMock, module, module.exports);
-  return module.exports;
-}
+const { load } = require("./load.cjs");
 
 if (process.argv[2] === "lock-worker") {
   const directory = process.argv[3];
@@ -58,6 +42,7 @@ if (process.argv[2] === "lock-worker") {
     const state = {
       onRead: undefined,
       fail: false,
+      errorCode: "invalid_grant",
       configuration:
         "eHhMN2wwUldTeEpscThvMzBHZVI6MTpjaQ:tweet.read tweet.write users.read follows.read like.read like.write bookmark.read bookmark.write tweet.moderate.write media.write dm.read dm.write offline.access",
       authorizationRequests: [],
@@ -71,8 +56,8 @@ if (process.argv[2] === "lock-worker") {
       getTokens: async () => {
         reads++;
         const snapshot = stored;
-        state.onRead?.(reads, () => {
-          stored = fresh;
+        state.onRead?.(reads, (replacement = fresh) => {
+          stored = replacement;
         });
         return snapshot;
       },
@@ -116,7 +101,7 @@ if (process.argv[2] === "lock-worker") {
         ok: !state.fail,
         status: state.fail ? 400 : 200,
         text: async () =>
-          JSON.stringify(state.fail ? { error: "invalid_grant" } : { access_token: "fresh", refresh_token: "rotated" }),
+          JSON.stringify(state.fail ? { error: state.errorCode } : { access_token: "fresh", refresh_token: "rotated" }),
       };
     };
     return {
@@ -151,9 +136,44 @@ if (process.argv[2] === "lock-worker") {
     f.state.onRead = (reads, publishWinner) => {
       if (reads === 2) publishWinner();
     };
-    await assert.rejects(f.api().authorize(), /Could not refresh X authentication/);
+    await f.api().authorize();
     assert.equal(f.stored().accessToken, "fresh");
     assert.equal(f.removals(), 0);
+  });
+
+  test("revoked tokens are cleared and the next attempt can authorize", async (t) => {
+    const f = fixture(t);
+    f.state.fail = true;
+    const api = f.api();
+    await assert.rejects(api.authorize(), /invalid_grant/);
+    assert.equal(f.removals(), 1);
+    assert.equal(f.stored(), undefined);
+    f.state.fail = false;
+    await api.authorize();
+    assert.equal(f.stored().accessToken, "fresh");
+    assert.equal(f.state.authorizationRequests.length, 2);
+  });
+
+  test("invalid grant preserves a newer expired session for its own refresh", async (t) => {
+    const f = fixture(t);
+    f.state.fail = true;
+    f.state.onRead = (reads, publishWinner) => {
+      if (reads === 2) publishWinner({ accessToken: "newer", refreshToken: "newer-refresh", isExpired: () => true });
+    };
+    await assert.rejects(f.api().authorize(), /authentication changed/);
+    assert.equal(f.stored().refreshToken, "newer-refresh");
+    assert.equal(f.removals(), 0);
+    assert.equal(f.state.authorizationRequests.length, 0);
+  });
+
+  test("transient OAuth errors do not erase credentials or start authorization", async (t) => {
+    const f = fixture(t);
+    f.state.fail = true;
+    f.state.errorCode = "temporarily_unavailable";
+    await assert.rejects(f.api().authorize(), /temporarily_unavailable/);
+    assert.equal(f.stored().refreshToken, "refresh");
+    assert.equal(f.removals(), 0);
+    assert.equal(f.state.authorizationRequests.length, 0);
   });
 
   test("independent OAuth instances serialize refresh and reread rotated credentials", async (t) => {

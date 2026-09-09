@@ -2,7 +2,7 @@ import { Tool } from "@raycast/api";
 import { clientV2, ReplySettings } from "../v2/lib/twitterapi_v2";
 
 type Input = {
-  /** Exact text to post publicly on X. May be empty only when mediaPaths is provided; maximum 280 characters. */
+  /** Exact text to post publicly on X. May be empty only when mediaPaths is provided; maximum 280 weighted characters. */
   text?: string;
   /** Absolute local paths of up to four images, one GIF, or one video to upload and attach. */
   mediaPaths?: string[];

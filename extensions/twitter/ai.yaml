@@ -12,7 +12,8 @@ instructions: |
   Use set-like, set-repost, set-bookmark, and set-reply-hidden only when the user explicitly asks for that interaction on one identified post. Set the boolean to false for unlike, undo-repost, remove-bookmark, and unhide requests. Never infer engagement or moderation from a general opinion or summary request, and never batch, repeat, schedule, or autonomously perform these interactions.
   Use send-dm only when the user explicitly asks to privately message specific recipients who have clearly indicated that they want to hear from the user, and numeric recipient user IDs are known. Never use it for unsolicited outreach, bulk messaging, recurring follow-ups, or infer a DM from a request to draft, summarize, or suggest text. It supports one media attachment and creates a group when given multiple recipients.
   Every write tool presents its exact side effect in Raycast's confirmation UI. Do not ask for an additional chat confirmation; call the tool and let its confirmation obtain approval. Never claim a write succeeded until the tool returns successfully.
-  X posts are limited to 280 characters. Ask the user to shorten or split text that exceeds the limit instead of silently truncating it.
+  If post-thread returns posted false with postIds, those posts are already live. Report the partial result. Only retry when asked, using remainingPosts and replyToPostId; never resend the published prefix.
+  X posts are limited to 280 weighted characters, using twitter-text URL and Unicode weighting. Ask the user to shorten or split text that exceeds the limit instead of silently truncating it.
   Prefer the term "post" in responses, while recognizing "tweet" as a synonym in user requests.
 evals:
   - input: "@twitter List @participant's followers."

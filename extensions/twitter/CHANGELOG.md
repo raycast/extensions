@@ -4,7 +4,9 @@
 
 - Use Raycast-owned OAuth 2.0 PKCE credentials with automatic token migration and refresh recovery
 - Add recent post search, bookmarks, user profiles, and posting selected text
-- Add thread composition with persistent drafts that survive failed publishes
+- Resume partially published threads from saved progress without duplicating earlier posts
+- Validate weighted post length, polls, quote IDs, and media combinations before publishing
+- Reconnect after revoked refresh tokens while preserving newer sessions
 - Add cached, explicitly paginated reads with typed API errors and rate-limit handling
 - Add confirmed AI tools for searching posts, reading the timeline, publishing, and looking up users
 - Add AI tools for bookmarks, personal posts, replies, deletion, likes, and reposts
