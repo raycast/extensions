@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Align shortcuts with Search Screenshots] - {PR_MERGE_DATE}
+## [Align shortcuts with Search Screenshots] - 2026-09-09
 
 Bring Downloads Manager closer to Raycast's native Screenshots extension's "Search Screenshots" command, making common file actions and keyboard shortcuts more consistent across Raycast.
 
