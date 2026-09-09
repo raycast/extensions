@@ -105,7 +105,7 @@ export default function SearchFiles(props: LaunchProps) {
     );
   }
 
-  const items = data ?? lastData.current;
+  const items = data ?? [];
 
   return (
     <List
