@@ -6,7 +6,7 @@ Trigger [Capso](https://github.com/lzhgus/Capso) screenshots, OCR, video recordi
 
 - 📸 **Area, Window & Fullscreen Capture:** Quickly select and snap any screen region, active window, or display.
 - 🔤 **Instant OCR (Text Extraction):** Extract text directly from screen elements to your clipboard.
-- 🎥 **Screen Recording:** Start and stop video recordings seamlessly.
+- 🎥 **Screen Recording:** Open Capso screen recording setup.
 - 📜 **Scrolling Capture:** Capture full-length scrollable webpages and documents.
 - 🕒 **Screenshot History:** Open Capso's capture gallery to browse, copy, or manage past recordings and screenshots.
 - 🌐 **Translate:** Capture text and translate instantly, or translate selected text.

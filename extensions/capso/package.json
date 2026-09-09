@@ -99,9 +99,9 @@
     },
     {
       "name": "capture-recording",
-      "title": "Start / Stop Recording",
+      "title": "Start Recording",
       "subtitle": "Capso",
-      "description": "Toggle screen video recording",
+      "description": "Open Capso screen recording setup",
       "icon": "record-screen.png",
       "mode": "no-view",
       "keywords": [
