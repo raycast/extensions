@@ -30,7 +30,7 @@ The existing **Copy Link as HTML** command still copies HTML source text from a 
 
 For GitHub pull requests, issues, and repository discussions, the command optionally uses an installed, authenticated [GitHub CLI](https://cli.github.com/) (`gh auth login`). On macOS it checks `/opt/homebrew/bin/gh`, `/usr/local/bin/gh`, and `/usr/bin/gh`. Authentication stays with `gh`; the extension does not request or store a token.
 
-GitHub CLI lookups have a five-second timeout. If `gh` is unavailable or fails, the command fetches page HTML with a six-second timeout, looking for `<title>` and then `og:title`. It does not use browser cookies or execute page JavaScript, so other sign-in-only or dynamically rendered pages may not provide a usable title.
+GitHub CLI lookups have a five-second timeout. If `gh` is unavailable or fails, the command fetches page HTML with a six-second timeout, looking for `<title>` and then `og:title`. The streamed response body is limited to 1 MiB (1,048,576 bytes), measured on the actual body chunks rather than the `Content-Length` header. Oversized responses are aborted; the command copies the original URL and shows an error. It does not use browser cookies or execute page JavaScript, so other sign-in-only or dynamically rendered pages may not provide a usable title.
 
 If the page has no title, the URL is used as the link text. If fetching fails, the command copies the original URL and shows an error. Invalid clipboard input is left untouched. URLs are fetched only when you run the command; GitHub lookups use your existing account permissions.
 

@@ -26,7 +26,119 @@ function loadTitles({ exec, fetch, installed = true, globals = {} } = {}) {
   );
 }
 
-const response = (html) => ({ ok: true, text: async () => html });
+const response = (html) => new Response(html);
+
+function streamedResponse(chunks, signal, headers = {}) {
+  let reads = 0;
+  const body = new ReadableStream(
+    {
+      start(controller) {
+        signal.addEventListener("abort", () => controller.error(new Error("Aborted")));
+      },
+      pull(controller) {
+        if (reads < chunks.length) controller.enqueue(chunks[reads++]);
+        else controller.close();
+      },
+    },
+    { highWaterMark: 0 },
+  );
+  return { response: new Response(body, { headers }), body, reads: () => reads };
+}
+
+test("HTML accepts exactly 1 MiB and preserves UTF-8 across chunk boundaries", async () => {
+  const title = "<title>Café</title>";
+  const html = Buffer.from(title + " ".repeat(1024 * 1024 - Buffer.byteLength(title)));
+  const split = html.indexOf(Buffer.from("é")) + 1;
+  const titles = loadTitles({
+    fetch: async (_url, { signal }) =>
+      streamedResponse([html.subarray(0, split), html.subarray(split)], signal).response,
+  });
+  assert.equal(await titles.fetchPageTitle("https://example.com"), "Café");
+});
+
+for (const headers of [{}, { "content-length": "1" }, { "content-encoding": "gzip", "content-length": "64" }]) {
+  test(`HTML enforces actual body bytes regardless of headers: ${JSON.stringify(headers)}`, async () => {
+    let stream;
+    let signal;
+    const titles = loadTitles({
+      fetch: async (_url, options) => {
+        signal = options.signal;
+        stream = streamedResponse(
+          [Buffer.alloc(1024 * 1024, 32), Buffer.from("x"), Buffer.from("must not be read")],
+          signal,
+          headers,
+        );
+        return stream.response;
+      },
+    });
+    await assert.rejects(titles.fetchPageTitle("https://example.com"), /1 MiB limit/);
+    assert.equal(stream.reads(), 2);
+    assert.equal(signal.aborted, true);
+    assert.equal(stream.body.locked, false);
+  });
+}
+
+test("a single oversized chunk uses the command's original-URL fallback", async () => {
+  const url = "https://example.com";
+  let signal;
+  const titles = loadTitles({
+    fetch: async (_url, options) => {
+      signal = options.signal;
+      return streamedResponse([Buffer.alloc(1024 * 1024 + 1, 32)], signal).response;
+    },
+  });
+  const { run, state } = loadCommand({ input: url, lookup: titles.fetchPageTitle });
+  await run();
+  assert.deepEqual(state.copies, [url]);
+  assert.match(state.errors[0].error.message, /1 MiB limit/);
+  assert.equal(state.hud.length, 0);
+  assert.equal(signal.aborted, true);
+});
+
+test("HTTP timeout during body reading aborts the stream and releases its lock", async () => {
+  let expire;
+  let cleared = false;
+  let body;
+  const titles = loadTitles({
+    globals: {
+      setTimeout: (fn, ms) => {
+        assert.equal(ms, 6000);
+        expire = fn;
+        return 1;
+      },
+      clearTimeout: () => {
+        cleared = true;
+      },
+    },
+    fetch: async (_url, { signal }) => {
+      body = new ReadableStream({
+        start(controller) {
+          controller.enqueue(Buffer.from("<title>Incomplete"));
+          signal.addEventListener("abort", () => controller.error(new Error("Aborted")));
+        },
+        pull() {
+          expire();
+        },
+      });
+      return new Response(body);
+    },
+  });
+  await assert.rejects(titles.fetchPageTitle("https://example.com"), /Aborted/);
+  assert.equal(cleared, true);
+  assert.equal(body.locked, false);
+});
+
+test("empty and failed response streams release resources", async () => {
+  const url = "https://example.com";
+  assert.equal(await loadTitles({ fetch: async () => new Response(null, { status: 204 }) }).fetchPageTitle(url), url);
+  const body = new ReadableStream({
+    start(controller) {
+      controller.error(new Error("Connection lost"));
+    },
+  });
+  await assert.rejects(loadTitles({ fetch: async () => new Response(body) }).fetchPageTitle(url), /Connection lost/);
+  assert.equal(body.locked, false);
+});
 
 test("rich links escape the title and URL, with an unchanged raw URL fallback", () => {
   const formatter = loadSource("utils/formatter.ts", { "@raycast/api": {}, "@raycast/utils": {} });
