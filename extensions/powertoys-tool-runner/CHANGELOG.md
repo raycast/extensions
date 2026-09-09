@@ -1,6 +1,6 @@
 # PowerToys Tool Runner Changelog
 
-## [Added Light Switch Command] - {PR_MERGE_DATE}
+## [Added Light Switch Command] - 2026-09-09
 
 - Added Light Switch command to toggle between light and dark themes using PowerToys
 
