@@ -606,6 +606,7 @@
 /extensions/datahub                                                 @nickrotondo
 /extensions/datawrapper                                             @benkates
 /extensions/date-converter                                          @asportnoy @vineus @danyalprout @aleksey925
+/extensions/dated-folder                                            @fanhefeng
 /extensions/datetime-format-converter                               @yangxyo @yisshengyouni @pernielsentikaer @hemangkinra @jose-elias-alvarez @bestemic @ridemountainpig
 /extensions/dawa                                                    @SimonJ @pernielsentikaer
 /extensions/day-one                                                 @AntonNiklasson @bestemic

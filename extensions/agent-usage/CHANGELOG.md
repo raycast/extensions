@@ -2,9 +2,18 @@
 
 ## [Cached usage and background refresh] - {PR_MERGE_DATE}
 
+### Improvements
+
 - Add configurable background refresh every 1, 5, 15, 30, or 60 minutes, including when the menu bar is disabled
 - Show cached provider and account rows immediately while checking credentials, then update the list when accounts or availability change
 - Add the standard Refresh keyboard shortcut and avoid duplicate refresh requests for multi-account providers
+
+## [Fix Antigravity Closed-App Quota] - 2026-09-09
+
+### Bug Fixes
+
+- Fetch Antigravity quota via stored Google OAuth credentials when the Antigravity app/`agy` language server is not running, so Agent Usage still shows Gemini/Claude weekly and 5-hour limits
+- Fill Antigravity email and plan on that OAuth path from Google userinfo and Cloud Code `loadCodeAssist`
 
 ## [Apply Saved Provider Order] - 2026-09-09
 
