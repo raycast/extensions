@@ -1,10 +1,11 @@
+import { withXAuth } from "./v2/lib/with_x_auth";
 import { LaunchProps } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { TweetList } from "./v2/components/tweet";
 import { clientV2, Fetcher } from "./v2/lib/twitterapi_v2";
 
-export default function SearchPostsCommand(props: LaunchProps<{ arguments: Arguments.SearchPosts }>) {
+function SearchPostsCommand(props: LaunchProps<{ arguments: Arguments.SearchPosts }>) {
   const [query, setQuery] = useState(props.arguments.query?.trim() ?? props.fallbackText?.trim() ?? "");
   const normalizedQuery = query.trim();
   const { data, error, isLoading, pagination, revalidate } = usePromise(
@@ -42,3 +43,5 @@ export default function SearchPostsCommand(props: LaunchProps<{ arguments: Argum
     />
   );
 }
+
+export default withXAuth(SearchPostsCommand);

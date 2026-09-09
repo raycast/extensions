@@ -1136,10 +1136,7 @@ export class ClientV2 {
     if (mediaIds.length > 0) {
       payload.media = {
         media_ids: mediaIds as
-          | [string]
-          | [string, string]
-          | [string, string, string]
-          | [string, string, string, string],
+          [string] | [string, string] | [string, string, string] | [string, string, string, string],
       };
     }
     if (normalized.quotePostId) payload.quote_tweet_id = normalized.quotePostId;

@@ -1,6 +1,11 @@
 # X Changelog
 
-## [OAuth, New Commands, and AI Tools] - {PR_MERGE_DATE}
+## [Fix Authentication Lock Recovery] - {PR_MERGE_DATE}
+
+- Prevent interrupted commands from leaving X login and logout permanently blocked
+- Require login before opening command screens or continuing with selected-text posting
+
+## [OAuth, New Commands, and AI Tools] - 2026-09-09
 
 - Use Raycast-owned OAuth 2.0 PKCE credentials with automatic token migration and refresh recovery
 - Add recent post search, bookmarks, user profiles, and posting selected text

@@ -1,3 +1,4 @@
+import { withXAuth } from "./v2/lib/with_x_auth";
 import { Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
@@ -5,7 +6,7 @@ import { TweetList } from "./v2/components/tweet";
 import { filterBookmarks } from "./v2/lib/bookmark_search";
 import { clientV2, Fetcher } from "./v2/lib/twitterapi_v2";
 
-export default function BookmarksCommand() {
+function BookmarksCommand() {
   const [query, setQuery] = useState("");
   const { data, error, isLoading, pagination, revalidate } = usePromise(
     () => async (options: { cursor?: string }) => {
@@ -48,3 +49,5 @@ export default function BookmarksCommand() {
     />
   );
 }
+
+export default withXAuth(BookmarksCommand);

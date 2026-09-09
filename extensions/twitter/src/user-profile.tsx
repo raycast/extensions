@@ -1,3 +1,4 @@
+import { withXAuth } from "./v2/lib/with_x_auth";
 import { Action, ActionPanel, Icon, Image, Keyboard, LaunchProps, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -21,7 +22,7 @@ function getProfileMarkdown(user: Awaited<ReturnType<typeof clientV2.getUserByUs
   return lines.join("\n\n");
 }
 
-export default function UserProfileCommand(props: LaunchProps<{ arguments: Arguments.UserProfile }>) {
+function UserProfileCommand(props: LaunchProps<{ arguments: Arguments.UserProfile }>) {
   const [username, setUsername] = useState(props.arguments.username?.trim() ?? props.fallbackText?.trim() ?? "");
   const [isShowingDetail, setIsShowingDetail] = useState(shouldShowListWithDetails);
   const normalizedUsername = username.trim().replace(/^@/, "");
@@ -142,3 +143,5 @@ export default function UserProfileCommand(props: LaunchProps<{ arguments: Argum
     </List>
   );
 }
+
+export default withXAuth(UserProfileCommand);

@@ -157,6 +157,7 @@ test("selected text accepts long URLs and rejects overweight Unicode before send
       Toast: { Style: { Failure: "failure" } },
     },
     "./utils": { getErrorMessage: (error) => error.message },
+    "./v2/lib/oauth": { authorize: async () => "token" },
     "./v2/lib/twitterapi_v2": { clientV2: { sendTweet: async (text) => sent.push(text) } },
   }).default;
   await command();
@@ -164,4 +165,29 @@ test("selected text accepts long URLs and rejects overweight Unicode before send
   await command();
   assert.deepEqual(sent, [longURL]);
   assert.match(errors[0], /Post length is 282/);
+});
+
+test("selected text is captured before login and authentication failure prevents posting", async () => {
+  const events = [];
+  const command = load("src/post-selected-text.ts", {
+    "@raycast/api": {
+      getSelectedText: async () => {
+        events.push("capture");
+        return "Selected before opening login";
+      },
+      showHUD: async () => assert.fail("Posting must not start"),
+      showToast: async ({ message }) => events.push(message),
+      Toast: { Style: { Failure: "failure" } },
+    },
+    "./utils": { getErrorMessage: (error) => error.message },
+    "./v2/lib/oauth": {
+      authorize: async () => {
+        events.push("login");
+        throw new Error("Login cancelled");
+      },
+    },
+    "./v2/lib/twitterapi_v2": { clientV2: { sendTweet: async () => assert.fail("Must not post without login") } },
+  }).default;
+  await command();
+  assert.deepEqual(events, ["capture", "login", "Login cancelled"]);
 });

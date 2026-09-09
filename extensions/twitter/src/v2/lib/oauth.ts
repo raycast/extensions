@@ -67,17 +67,20 @@ async function migrateOAuthClient(): Promise<void> {
   await LocalStorage.setItem(OAUTH_MIGRATION_KEY, OAUTH_CONFIGURATION);
 }
 
-export async function authorize(): Promise<void> {
+export async function authorize(): Promise<string> {
   authorizationPromise ??= withOAuthLock(async () => {
     await migrateOAuthClient();
     await authorizeWithOAuthClient();
+    const tokens = await oauthClient.getTokens();
+    if (!tokens?.accessToken) throw new Error("X login did not complete. Please try again.");
+    return tokens.accessToken;
   }).finally(() => {
     authorizationPromise = undefined;
   });
-  await authorizationPromise;
+  return await authorizationPromise;
 }
 
-let authorizationPromise: Promise<void> | undefined;
+let authorizationPromise: Promise<string> | undefined;
 
 async function authorizeWithOAuthClient(): Promise<void> {
   const tokenSet = await oauthClient.getTokens();

@@ -2,10 +2,13 @@ import { validatePostLength } from "./v2/lib/post_text";
 import { getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
 import { getErrorMessage } from "./utils";
 import { clientV2 } from "./v2/lib/twitterapi_v2";
+import { authorize } from "./v2/lib/oauth";
 
 export default async function PostSelectedTextCommand() {
   try {
     const text = (await getSelectedText()).trim();
+    // Capture the selection before the login overlay changes the focused app.
+    await authorize();
     if (!text) throw new Error("Select some text before running this command.");
     validatePostLength(text);
 
