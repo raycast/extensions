@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+// Slim schema for Today at a Glance — only fields needed to summarize a day.
+import "google/protobuf/timestamp.proto";
+
+message FullDirectory {
+  repeated Event events = 1;
+  repeated JournalEntry journal_entries = 2;
+}
+
+message Event {
+  Meta meta = 1;
+  TimestampWithOffset start_at = 2;
+  optional TimestampWithOffset end_at = 3;
+  EventType type = 4;
+
+  PlaceVisit place_visit = 100;
+  DateEvent date_event = 101;
+  Movement movement = 102;
+  Sleep sleep = 105;
+}
+
+message JournalEntry {
+  Meta meta = 1;
+  string eventID = 2 [json_name = "eventId"];
+  string source = 3;
+  string text = 4;
+}
+
+message Meta {
+  string ID = 1 [json_name = "id"];
+  TimestampWithOffset created_at = 2;
+  TimestampWithOffset updated_at = 3;
+  TimestampWithOffset deleted_at = 4;
+}
+
+message TimestampWithOffset {
+  google.protobuf.Timestamp UTC_timestamp = 1 [json_name = "utcTimestamp"];
+  optional sint32 UTC_offset_seconds = 2 [json_name = "utcOffsetSeconds"];
+}
+
+message DateEvent {
+  string date = 1;
+}
+
+message PlaceVisit {
+  optional string name = 2;
+  optional string secondary_name = 3;
+}
+
+message MoveActivity {
+  string activity = 1;
+  uint32 distance_meters = 4;
+}
+
+message Movement {
+  repeated MoveActivity move_activities = 3;
+}
+
+message Sleep {
+  uint32 asleep_secs = 2;
+}
+
+enum EventType {
+  ET_NOT_SPECIFIED = 0;
+  DATE = 1;
+  PLACEVISIT = 2;
+  MOVEMENT = 3;
+  NO_DATA_PERIOD = 4;
+  WORKOUT = 5;
+  SLEEP = 6;
+  EVENT_GROUP = 7;
+  TRIP = 8;
+}
