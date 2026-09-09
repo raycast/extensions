@@ -40,3 +40,11 @@ it("offers more dot resolution while retaining a compact option", async () => {
   expect(detailed.split("\n").length).toBeGreaterThan(compact.split("\n").length);
   expect(detailed.split("\n")[0].length).toBeGreaterThan(compact.split("\n")[0].length);
 });
+
+it.each([
+  ["Detailed", "WW"],
+  ["Compact", "WWW"],
+] as const)("rechecks a moved word before adding another letter in %s mode", async (detail, word) => {
+  const expected = await Promise.all(["i ", word, "W"].map((line) => textToDots(line, detail)));
+  expect(await textToDots(`i ${word}W`, detail)).toBe(expected.join("\n"));
+});

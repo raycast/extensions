@@ -27,7 +27,7 @@ export async function textToDots(text: string, detail: DotTextDetail = "Detailed
   for (const paragraph of normalized.split("\n")) {
     let line = "";
     for (const character of paragraph) {
-      if (measureText(font, line + character) > maxLinePixels) {
+      while (line && measureText(font, line + character) > maxLinePixels) {
         const space = line.lastIndexOf(" ");
         if (space > 0) {
           lines.push(line.slice(0, space + 1));
