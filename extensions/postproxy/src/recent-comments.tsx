@@ -33,27 +33,35 @@ function commentTime(entry: CommentEntry): number {
 async function loadRecentComments(targets: Profile[]): Promise<CommentEntry[]> {
   if (targets.length === 0) return [];
   const postsPerProfile = targets.length > 1 ? 10 : 15;
-  const { items, errors } = await settleAll(
-    targets.map(async (profile) => {
-      const posts = normalizeList<Post>(
-        await request("GET", `/posts?profile_id=${profile.id}&per_page=${postsPerProfile}`),
-      );
-      const perPost = await settleAll(
+
+  // Each profile resolves to its own { items, errors } and never rejects, so every failure — listing a
+  // profile's posts OR any single post's comments — is collected rather than hidden behind partial data.
+  const perProfile = await Promise.all(
+    targets.map(async (profile): Promise<{ items: CommentEntry[]; errors: Error[] }> => {
+      let posts: Post[];
+      try {
+        posts = normalizeList<Post>(
+          await request("GET", `/posts?profile_id=${profile.id}&per_page=${postsPerProfile}`),
+        );
+      } catch (error) {
+        return { items: [], errors: [error instanceof Error ? error : new Error(String(error))] };
+      }
+      return settleAll(
         posts.map(async (post) =>
           normalizeList<Comment>(
             await request("GET", `/posts/${post.id}/comments?profile_id=${profile.id}&per_page=20`),
           ).map((comment) => ({ comment, post, profile })),
         ),
       );
-      // Bubble up only if every post's comments failed, so this profile isn't silently emptied.
-      if (perPost.items.length === 0 && perPost.errors.length > 0) throw perPost.errors[0];
-      return perPost.items;
     }),
   );
+
+  const items = perProfile.flatMap((result) => result.items);
+  const errors = perProfile.flatMap((result) => result.errors);
   if (items.length === 0 && errors.length > 0) throw errors[0];
   if (errors.length > 0) {
     await showFailureToast(errors[0], {
-      title: `Couldn't load comments for ${errors.length} of ${targets.length} profiles`,
+      title: `Couldn't load some comments (${errors.length} request${errors.length === 1 ? "" : "s"} failed)`,
     });
   }
   return items.sort((a, b) => commentTime(b) - commentTime(a));
