@@ -1,6 +1,6 @@
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { Cache, environment, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import type { AccountsState, AccountUsageState } from "../accounts/types.ts";
 import { isOpenCodeActiveToken } from "./opencode-active.ts";
@@ -10,6 +10,7 @@ import {
   hashAuthKey,
   hashAccountAuthKeys,
   isPayloadFresh,
+  cacheReadTtl,
   parseCachedPayload,
   parseTtlSeconds,
   stripAccountTokens,
@@ -20,13 +21,23 @@ import type { CachedUsagePayload } from "./usage-cache.ts";
 // changes so entries written by older extension versions read as cache misses.
 const usageCache = new Cache({ namespace: "agent-usage-ttl-v3" });
 
-function getTtlMs(): number {
-  const prefs = getPreferenceValues<{ cacheTtl?: string }>();
-  return parseTtlSeconds(prefs.cacheTtl) * 1000;
+function getTtlMs(background: boolean): number {
+  const prefs = getPreferenceValues<{ cacheTtl?: string; backgroundRefreshInterval?: string }>();
+  return cacheReadTtl(
+    parseTtlSeconds(prefs.cacheTtl) * 1000,
+    Number(prefs.backgroundRefreshInterval ?? "1") * 60_000,
+    background,
+  );
 }
 
 function readPayload<TUsage, TError>(agentId: string): CachedUsagePayload<TUsage, TError> | undefined {
   return parseCachedPayload<TUsage, TError>(usageCache.get(agentId));
+}
+
+// Display snapshots include unavailable providers and partial account results.
+// They never decide whether a request can be skipped; the success cache does.
+function readDisplayPayload<TUsage, TError>(key: string): CachedUsagePayload<TUsage, TError> | undefined {
+  return readPayload<TUsage, TError>(`${key}-display`) ?? readPayload<TUsage, TError>(key);
 }
 
 type ErrorLike = { type: string; message: string };
@@ -34,49 +45,59 @@ type ErrorLike = { type: string; message: string };
 type FetchResult<TUsage, TError> = { usage: TUsage | null; error: TError | null };
 
 /**
- * Factory for provider usage hooks backed by the shared TTL cache.
- *
- * Every mount runs the (cheap, local) auth resolution; the remote fetch only
- * happens when the cached payload is stale, was recorded under different auth
- * material, or was an error. Only successful fetches are persisted, so
- * failures are retried on the next launch. `revalidate` always bypasses the
- * TTL — it only runs on explicit user refresh.
- *
- * A mount renders nothing until the current fetch resolves: the cached payload
- * is consulted inside the fetcher rather than shown synchronously, so a
- * background refresh never flashes the stale previous state before the new one.
+ * The view displays cached provider state while checking local credentials.
+ * Scheduled refreshes apply the configured interval; manual refresh bypasses it.
+ * The loader is also exposed for the no-view background command.
  */
 export function createUsageHook<TUsage, TError extends ErrorLike>(options: {
   agentId: string;
-  fetcher: () => Promise<FetchResult<TUsage, TError>>;
+  fetcher: (authKey: string) => Promise<FetchResult<TUsage, TError>>;
   /** Local auth material (tokens, cookies). A change invalidates the cached payload. */
   resolveAuthKey?: () => Promise<string>;
 }) {
   const { agentId, fetcher, resolveAuthKey } = options;
 
-  return function useUsage(enabled = true): UsageState<TUsage, TError> {
+  async function resolve(force: boolean, background: boolean): Promise<CachedUsagePayload<TUsage, TError>> {
+    const authKey = resolveAuthKey ? await resolveAuthKey() : "";
+    const authHash = hashAuthKey(authKey);
+    const cached = readPayload<TUsage, TError>(agentId);
+    if (!force && cached && isPayloadFresh(cached, Date.now(), getTtlMs(background), authHash)) {
+      return cached;
+    }
+
+    const result = await fetcher(authKey);
+    const payload = { ...result, timestamp: Date.now(), authHash };
+    if (result.usage !== null && result.error === null) {
+      usageCache.set(agentId, JSON.stringify(payload));
+    }
+    return payload;
+  }
+
+  async function load(force = false, background = true): Promise<CachedUsagePayload<TUsage, TError>> {
+    const payload = await resolve(force, background);
+    usageCache.set(`${agentId}-display`, JSON.stringify(payload));
+    return payload;
+  }
+
+  function useUsage(enabled = true): UsageState<TUsage, TError> {
     const forceRef = useRef(false);
+    // Shell-based credential discovery can take seconds. Show the last result
+    // while validating credentials, then replace it with the resolved result.
+    // Scheduled commands must still wait for their refresh to finish.
+    const [initialPayload] = useState(() =>
+      enabled && environment.commandName === "agent-usage" && getTtlMs(false) > 0
+        ? readDisplayPayload<TUsage, TError>(agentId)
+        : undefined,
+    );
 
     const fetcherFn = useCallback(async (): Promise<CachedUsagePayload<TUsage, TError>> => {
       const force = forceRef.current;
       forceRef.current = false;
-
-      const authHash = hashAuthKey(resolveAuthKey ? await resolveAuthKey() : "");
-      const cached = readPayload<TUsage, TError>(agentId);
-      if (!force && cached && isPayloadFresh(cached, Date.now(), getTtlMs(), authHash)) {
-        return cached;
-      }
-
-      const result = await fetcher();
-      const payload = { ...result, timestamp: Date.now(), authHash };
-      if (result.usage !== null && result.error === null) {
-        usageCache.set(agentId, JSON.stringify(payload));
-      }
-      return payload;
+      return load(force, environment.commandName !== "agent-usage");
     }, []);
 
     const { data, isLoading, revalidate } = usePromise(fetcherFn, [], { execute: enabled });
-    const payload = data;
+    const payload = data ?? initialPayload;
     const hasContent = Boolean(payload && (payload.usage !== null || payload.error !== null));
 
     return {
@@ -90,7 +111,9 @@ export function createUsageHook<TUsage, TError extends ErrorLike>(options: {
       },
       lastFetchedAt: payload?.timestamp || undefined,
     };
-  };
+  }
+
+  return Object.assign(useUsage, { refresh: load });
 }
 
 /** Account row shape persisted to the cache — same as the live row minus the token. */
@@ -127,63 +150,94 @@ export function createAccountsHook<
   type Row = PersistedAccountRow<TUsage, TError> & { token: string };
   type Payload = CachedUsagePayload<Row[], TError>;
 
-  return function useAccounts(enabled = true): AccountsState<TUsage, TError> {
+  async function resolve(force: boolean, background: boolean): Promise<Payload> {
+    const accounts = await getAccounts();
+    const authHash = hashAccountAuthKeys(accounts, (account) =>
+      JSON.stringify([account.id, resolveAccountAuthKey ? resolveAccountAuthKey(account) : account.token]),
+    );
+
+    const cached = readPayload<PersistedAccountRow<TUsage, TError>[], TError>(cacheKey);
+    if (!force && cached && isPayloadFresh(cached, Date.now(), getTtlMs(background), authHash)) {
+      const accountsById = new Map(accounts.map((account) => [account.id, account]));
+      return {
+        ...cached,
+        usage: (cached.usage ?? []).map((row) => {
+          const account = accountsById.get(row.accountId);
+          const token = account?.token ?? "";
+          return {
+            ...row,
+            label: account?.label ?? row.label,
+            token,
+            isOpenCodeActive: openCodeKey ? isOpenCodeActiveToken(token, openCodeKey) : false,
+          };
+        }),
+      };
+    }
+
+    if (accounts.length === 0) {
+      // Recheck missing accounts on every launch, even when their display row is cached.
+      const rows: Row[] = [
+        {
+          accountId: "none",
+          label: "Default",
+          token: "",
+          usage: null,
+          error: noAccountsError,
+          isOpenCodeActive: false,
+        },
+      ];
+      return { usage: rows, error: null, timestamp: Date.now(), authHash };
+    }
+
+    const rows: Row[] = await Promise.all(
+      accounts.map(async (account) => {
+        const result = await fetcher(account);
+        return {
+          accountId: account.id,
+          label: account.label,
+          token: account.token,
+          usage: result.usage,
+          error: result.error,
+          isOpenCodeActive: openCodeKey ? isOpenCodeActiveToken(account.token, openCodeKey) : false,
+        };
+      }),
+    );
+
+    const payload: Payload = { usage: rows, error: null, timestamp: Date.now(), authHash };
+    if (allAccountRowsSucceeded(rows)) {
+      usageCache.set(cacheKey, JSON.stringify({ ...payload, usage: stripAccountTokens(rows) }));
+    }
+    return payload;
+  }
+
+  async function load(force = false, background = true): Promise<Payload> {
+    const payload = await resolve(force, background);
+    usageCache.set(
+      `${cacheKey}-display`,
+      JSON.stringify({ ...payload, usage: payload.usage ? stripAccountTokens(payload.usage) : null }),
+    );
+    return payload;
+  }
+
+  function useAccounts(enabled = true): AccountsState<TUsage, TError> {
     const forceRef = useRef(false);
+    const [initialPayload] = useState(() => {
+      if (!enabled || environment.commandName !== "agent-usage" || getTtlMs(false) <= 0) return undefined;
+      const cached = readDisplayPayload<PersistedAccountRow<TUsage, TError>[], TError>(cacheKey);
+      if (!cached) return undefined;
+      // Only display metadata is cached. Credential actions become available
+      // once discovery has supplied current tokens.
+      return { ...cached, usage: cached.usage?.map((row) => ({ ...row, token: "" })) ?? null };
+    });
 
     const fetcherFn = useCallback(async (): Promise<Payload> => {
       const force = forceRef.current;
       forceRef.current = false;
-
-      const accounts = await getAccounts();
-      const authHash = hashAccountAuthKeys(accounts, resolveAccountAuthKey);
-
-      const cached = readPayload<PersistedAccountRow<TUsage, TError>[], TError>(cacheKey);
-      if (!force && cached && isPayloadFresh(cached, Date.now(), getTtlMs(), authHash)) {
-        const tokensById = new Map(accounts.map((account) => [account.id, account.token]));
-        return {
-          ...cached,
-          usage: (cached.usage ?? []).map((row) => ({ ...row, token: tokensById.get(row.accountId) ?? "" })),
-        };
-      }
-
-      if (accounts.length === 0) {
-        // Not-configured is recomputed on every mount (no network involved), never cached.
-        const rows: Row[] = [
-          {
-            accountId: "none",
-            label: "Default",
-            token: "",
-            usage: null,
-            error: noAccountsError,
-            isOpenCodeActive: false,
-          },
-        ];
-        return { usage: rows, error: null, timestamp: Date.now(), authHash };
-      }
-
-      const rows: Row[] = await Promise.all(
-        accounts.map(async (account) => {
-          const result = await fetcher(account);
-          return {
-            accountId: account.id,
-            label: account.label,
-            token: account.token,
-            usage: result.usage,
-            error: result.error,
-            isOpenCodeActive: openCodeKey ? isOpenCodeActiveToken(account.token, openCodeKey) : false,
-          };
-        }),
-      );
-
-      const payload: Payload = { usage: rows, error: null, timestamp: Date.now(), authHash };
-      if (allAccountRowsSucceeded(rows)) {
-        usageCache.set(cacheKey, JSON.stringify({ ...payload, usage: stripAccountTokens(rows) }));
-      }
-      return payload;
+      return load(force, environment.commandName !== "agent-usage");
     }, []);
 
     const { data, isLoading, revalidate } = usePromise(fetcherFn, [], { execute: enabled });
-    const payload = data;
+    const payload = data ?? initialPayload;
     const rows = enabled ? (payload?.usage ?? []) : [];
 
     const revalidateAll = async () => {
@@ -209,5 +263,7 @@ export function createAccountsHook<
       isLoading: enabled && rows.length === 0 ? isLoading : false,
       revalidate: revalidateAll,
     };
-  };
+  }
+
+  return Object.assign(useAccounts, { refresh: load });
 }

@@ -542,7 +542,7 @@ export default function MenuBarCommand() {
 
   const handleRefresh = async () => {
     await loadAgentOrder();
-    await Promise.all(visibleAgents.map((a) => a.revalidate()));
+    await Promise.all([...new Set(visibleAgents.map((agent) => agent.revalidate))].map((refresh) => refresh()));
     await showHUD("Agent Usage Refreshed");
   };
 

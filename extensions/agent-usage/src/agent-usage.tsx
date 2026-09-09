@@ -773,7 +773,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   }, [prefs.showGemini, geminiState.error?.type, handleGeminiReauth]);
 
   const handleRefresh = async () => {
-    await Promise.all(allRows.map((row) => row.view.revalidate()));
+    await Promise.all([...new Set(allRows.map((row) => row.view.revalidate))].map((refresh) => refresh()));
     await showToast({
       title: "Refreshed",
       style: Toast.Style.Success,
@@ -832,7 +832,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                   <ActionPanel>
                     {agent.isSupported && (
                       <>
-                        <Action title={refreshTitle} icon={Icon.ArrowClockwise} onAction={handleRefresh} />
+                        <Action
+                          title={refreshTitle}
+                          icon={Icon.ArrowClockwise}
+                          shortcut={Keyboard.Shortcut.Common.Refresh}
+                          onAction={handleRefresh}
+                        />
                         <Action.CopyToClipboard
                           title="Copy Usage Details"
                           content={agent.formatUsageText()}
@@ -903,7 +908,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                 detail={<List.Item.Detail markdown={errorMarkdown} metadata={detail} />}
                 actions={
                   <ActionPanel>
-                    <Action title={refreshTitle} icon={Icon.ArrowClockwise} onAction={handleRefresh} />
+                    <Action
+                      title={refreshTitle}
+                      icon={Icon.ArrowClockwise}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
+                      onAction={handleRefresh}
+                    />
                     <Action.CopyToClipboard
                       title="Copy Usage Details"
                       content={view.formatUsageText()}

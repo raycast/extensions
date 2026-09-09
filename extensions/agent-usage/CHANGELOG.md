@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Cached usage and background refresh] - {PR_MERGE_DATE}
+
+- Add configurable background refresh every 1, 5, 15, 30, or 60 minutes, including when the menu bar is disabled
+- Show cached provider and account rows immediately while checking credentials, then update the list when accounts or availability change
+- Add the standard Refresh keyboard shortcut and avoid duplicate refresh requests for multi-account providers
+
 ## [Apply Saved Provider Order] - 2026-09-09
 
 ### Bug Fixes

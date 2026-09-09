@@ -98,3 +98,10 @@ export function stripAccountTokens<TRow extends { token: string }>(rows: TRow[])
     return rest as Omit<TRow, "token">;
   });
 }
+
+/** Keep cached view data until explicit refresh, but still honor disabling the cache. */
+export function cacheReadTtl(ttlMs: number, refreshIntervalMs: number, background: boolean): number {
+  if (ttlMs <= 0) return 0;
+  if (!background) return Infinity;
+  return Number.isFinite(refreshIntervalMs) && refreshIntervalMs >= 60_000 ? refreshIntervalMs : 60_000;
+}

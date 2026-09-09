@@ -269,8 +269,7 @@ export const useOpencodegoUsage = createUsageHook<OpencodegoUsage, OpencodegoErr
 export const useOpenRouterUsage = createUsageHook<OpenRouterUsage, OpenRouterError>({
   agentId: "openrouter",
   resolveAuthKey: async () => (await resolveOpenRouterApiKey(prefValue("openrouterApiKey"))) ?? "",
-  fetcher: async () => {
-    const apiKey = await resolveOpenRouterApiKey(prefValue("openrouterApiKey"));
+  fetcher: async (apiKey) => {
     if (!apiKey) {
       return {
         usage: null,
