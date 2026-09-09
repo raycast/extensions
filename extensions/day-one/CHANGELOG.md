@@ -1,6 +1,6 @@
 # Day One Changelog
 
-## [Support the renamed dayone CLI] - {PR_MERGE_DATE}
+## [Support the renamed dayone CLI] - 2026-09-09
 
 - Fixed the "Day One CLI Missing" error on Day One for Mac 2025.19+, which renamed the CLI from `dayone2` to `dayone`. The extension now detects and uses whichever CLI is installed.
 
