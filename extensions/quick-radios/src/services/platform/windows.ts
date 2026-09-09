@@ -1234,6 +1234,15 @@ export async function toggleWindowsBluetoothDeviceConnection(
       return;
     }
     if (trimmed.includes("FailedToDisconnect")) {
+      const devices = await getWindowsBluetoothDevices();
+      const dev = devices.find(
+        (d) =>
+          d.id === deviceId ||
+          d.address?.replace(/[^0-9A-Fa-f]/g, "").toUpperCase() === macHex,
+      );
+      if (dev && !dev.isConnected) {
+        return;
+      }
       throw new Error("Failed to disconnect device");
     }
     if (trimmed.startsWith("Error:")) {

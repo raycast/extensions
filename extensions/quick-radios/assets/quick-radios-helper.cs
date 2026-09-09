@@ -89,6 +89,9 @@ class QuickRadiosHelper {
     }
 
     [DllImport("BluetoothApis.dll", SetLastError = true)]
+    private static extern uint BluetoothGetDeviceInfo(IntPtr hRadio, ref BLUETOOTH_DEVICE_INFO pbtdi);
+
+    [DllImport("BluetoothApis.dll", SetLastError = true)]
     private static extern IntPtr BluetoothFindFirstDevice(ref BLUETOOTH_DEVICE_SEARCH_PARAMS searchParams, ref BLUETOOTH_DEVICE_INFO deviceInfo);
 
     [DllImport("BluetoothApis.dll", SetLastError = true)]
@@ -96,6 +99,47 @@ class QuickRadiosHelper {
 
     [DllImport("BluetoothApis.dll", SetLastError = true)]
     private static extern bool BluetoothFindDeviceClose(IntPtr hFind);
+
+    private static int GetWin32DeviceConnectionState(ulong address) {
+        try {
+            var btdi = new BLUETOOTH_DEVICE_INFO();
+            btdi.dwSize = (uint)Marshal.SizeOf(typeof(BLUETOOTH_DEVICE_INFO));
+            btdi.Address = address;
+            uint res = BluetoothGetDeviceInfo(IntPtr.Zero, ref btdi);
+            if (res == 0) {
+                return btdi.fConnected ? 1 : 0;
+            }
+        } catch {}
+
+        try {
+            var searchParams = new BLUETOOTH_DEVICE_SEARCH_PARAMS();
+            searchParams.dwSize = (uint)Marshal.SizeOf(typeof(BLUETOOTH_DEVICE_SEARCH_PARAMS));
+            searchParams.fReturnAuthenticated = true;
+            searchParams.fReturnRemembered = true;
+            searchParams.fReturnConnected = true;
+            searchParams.fReturnUnknown = true;
+            searchParams.fIssueInquiry = false;
+            searchParams.hRadio = IntPtr.Zero;
+
+            var deviceInfo = new BLUETOOTH_DEVICE_INFO();
+            deviceInfo.dwSize = (uint)Marshal.SizeOf(typeof(BLUETOOTH_DEVICE_INFO));
+
+            IntPtr hFind = BluetoothFindFirstDevice(ref searchParams, ref deviceInfo);
+            if (hFind != IntPtr.Zero) {
+                try {
+                    do {
+                        if (deviceInfo.Address == address) {
+                            return deviceInfo.fConnected ? 1 : 0;
+                        }
+                    } while (BluetoothFindNextDevice(hFind, ref deviceInfo));
+                } finally {
+                    BluetoothFindDeviceClose(hFind);
+                }
+            }
+        } catch {}
+
+        return -1;
+    }
 
     private static int ScanWifi() {
         try {
@@ -583,9 +627,14 @@ class QuickRadiosHelper {
                 finalState = GetDeviceConnectionState(address, 1500);
             }
 
-            // Only report failure if the device is confirmed still connected (1).
-            // For confirmed disconnected (0) or indeterminate/unknown (-1), report success so TypeScript reconciles state.
-            if (finalState != 1) {
+            // Fallback to synchronous native Win32 device info if WinRT query is indeterminate
+            if (finalState == -1) {
+                finalState = GetWin32DeviceConnectionState(address);
+            }
+
+            // Strictly require confirmed disconnection (0) before declaring success.
+            // Never report Disconnected on indeterminate (-1) or connected (1) state.
+            if (finalState == 0) {
                 CompleteSuccess("Disconnected");
                 return 0;
             }
