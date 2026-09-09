@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2026-09-09
 
 - Add a `New Window` command that opens a new window of the selected Safari browser.
 
