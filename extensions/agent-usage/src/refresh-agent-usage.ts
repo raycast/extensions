@@ -45,7 +45,7 @@ const providers = {
 };
 
 export default async function Command(): Promise<void> {
-  const prefs = getPreferenceValues<Partial<Record<keyof typeof providers, boolean>>>();
+  const prefs = getPreferenceValues<Preferences>();
   const manual = environment.launchType === LaunchType.UserInitiated;
   const results = await Promise.allSettled(
     Object.entries(providers)

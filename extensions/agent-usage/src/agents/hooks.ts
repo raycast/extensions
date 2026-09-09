@@ -22,7 +22,7 @@ import type { CachedUsagePayload } from "./usage-cache.ts";
 const usageCache = new Cache({ namespace: "agent-usage-ttl-v3" });
 
 function getTtlMs(background: boolean): number {
-  const prefs = getPreferenceValues<{ cacheTtl?: string; backgroundRefreshInterval?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   return cacheReadTtl(
     parseTtlSeconds(prefs.cacheTtl) * 1000,
     Number(prefs.backgroundRefreshInterval ?? "1") * 60_000,
