@@ -67,6 +67,17 @@ describe("buildProfileMatcher", () => {
       assert.ok(Date.now() - start < 1000, `${pattern} took too long`);
     }
   });
+
+  it("treats ^ and $ as anchors, not literal characters", () => {
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "^PowerShell$" }), ["PowerShell"]);
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "^Power.*$" }), ["PowerShell"]);
+  });
+
+  it("doesn't exhaust its step budget on a long but linear match", () => {
+    const longCommandline = "C:\\tools\\" + "a".repeat(1000) + ".exe";
+    const matcher = buildProfileMatcher({ type: "matchProfiles", commandline: "C:\\\\tools\\\\.*\\.exe" });
+    assert.ok(matcher!({ ...powershell, commandline: longCommandline }));
+  });
 });
 
 describe("resolveNewTabMenuOrder", () => {

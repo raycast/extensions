@@ -22,7 +22,12 @@ export interface NewTabMenuEntry {
 // match fails rather than exploring further. That makes ALL patterns safe to run, including ones
 // that look risky, so nothing needs to be rejected up front — a repeated group with safe
 // alternatives, like (dev|prod)+, still matches normally.
-type AtomNode = { kind: "char"; test: (ch: string) => boolean } | { kind: "any" } | { kind: "group"; alt: AltNode };
+type AtomNode =
+  | { kind: "char"; test: (ch: string) => boolean }
+  | { kind: "any" }
+  | { kind: "group"; alt: AltNode }
+  | { kind: "start" }
+  | { kind: "end" };
 type QuantNode = { atom: AtomNode; min: number; max: number; greedy: boolean };
 type SeqNode = { atoms: QuantNode[] };
 type AltNode = { options: SeqNode[] };
@@ -108,6 +113,16 @@ function parsePattern(pattern: string): AltNode {
       i++;
       return { kind: "any" };
     }
+    // matchFull already anchors the whole match, so ^/$ are zero-width assertions here, not
+    // literal characters — a pattern like "^PowerShell$" must still match "PowerShell".
+    if (c === "^") {
+      i++;
+      return { kind: "start" };
+    }
+    if (c === "$") {
+      i++;
+      return { kind: "end" };
+    }
     if (c === "\\") {
       i++;
       return parseEscape();
@@ -172,10 +187,13 @@ function parsePattern(pattern: string): AltNode {
 }
 
 // Every recursive attempt below — descending into a group, trying one more quantifier repeat,
-// trying an alternation branch — spends one step. Legitimate matchProfiles patterns against
-// profile-sized strings need at most a few hundred; this budget leaves headroom for that while
-// still cutting off exponential blowups almost immediately.
-const STEP_BUDGET = 2000;
+// trying an alternation branch — spends one step, and a simple linear pattern like ".*" already
+// spends a small constant number of steps per character. A fixed budget would then cut off a
+// legitimate match against a long value (e.g. a ~1000-character commandline) before it finishes.
+// Scaling the budget with the value's length avoids that while still cutting off exponential
+// blowups almost immediately — those exceed even a scaled budget within a few dozen characters.
+const MIN_STEP_BUDGET = 2000;
+const STEP_BUDGET_PER_CHAR = 50;
 
 // Continuation-passing backtracking matcher, fully anchored (matches only if it consumes the
 // whole string). `k` is "what to try once this piece has matched"; quantifiers try repeating
@@ -183,12 +201,15 @@ const STEP_BUDGET = 2000;
 // failure — same shape as a native regex engine, just with a hard step ceiling.
 function matchFull(alt: AltNode, str: string): boolean {
   let steps = 0;
-  const withinBudget = () => ++steps <= STEP_BUDGET;
+  const budget = Math.max(MIN_STEP_BUDGET, str.length * STEP_BUDGET_PER_CHAR);
+  const withinBudget = () => ++steps <= budget;
 
   function matchAtomOnce(atom: AtomNode, pos: number, k: (pos: number) => boolean): boolean {
     if (!withinBudget()) return false;
     if (atom.kind === "char") return pos < str.length && atom.test(str[pos]) && k(pos + 1);
     if (atom.kind === "any") return pos < str.length && k(pos + 1);
+    if (atom.kind === "start") return pos === 0 && k(pos);
+    if (atom.kind === "end") return pos === str.length && k(pos);
     return matchAlt(atom.alt, pos, k);
   }
 
