@@ -47,6 +47,15 @@ export function createExportFile(shortcuts: Shortcut[]): ShortcutExportFile {
   };
 }
 
+export function serializeExportFile(exportFile: ShortcutExportFile): string {
+  const json = JSON.stringify(exportFile, null, 2);
+  const byteLength = new TextEncoder().encode(json).length;
+  if (byteLength > MAX_FILE_BYTES) {
+    throw new Error("The export exceeds the 6 MB limit and cannot be imported.");
+  }
+  return json;
+}
+
 export function prepareImportedShortcuts(
   importedShortcuts: Shortcut[],
   existingShortcuts: Shortcut[],

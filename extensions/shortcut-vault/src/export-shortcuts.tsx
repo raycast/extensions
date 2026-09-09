@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Clipboard, Detail, Icon, Toast, showInFinder, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ShortcutForm } from "./components/ShortcutForm";
-import { createExportFile, writeExportFile } from "./lib/import-export";
+import { createExportFile, serializeExportFile, writeExportFile } from "./lib/import-export";
 import { getCustomShortcuts } from "./lib/storage";
 
 export default function Command() {
@@ -52,7 +52,8 @@ export default function Command() {
   async function copyExportJson() {
     try {
       const shortcuts = await getCustomShortcuts();
-      await Clipboard.copy(JSON.stringify(createExportFile(shortcuts), null, 2));
+      const json = serializeExportFile(createExportFile(shortcuts));
+      await Clipboard.copy(json);
       await showToast({
         style: Toast.Style.Success,
         title: "Export JSON copied",

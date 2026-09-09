@@ -2,7 +2,7 @@ import { environment } from "@raycast/api";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ShortcutExportFile } from "../types/shortcut";
-import { MAX_FILE_BYTES, createExportFile, validateExportFile } from "./import-export-format";
+import { MAX_FILE_BYTES, createExportFile, serializeExportFile, validateExportFile } from "./import-export-format";
 import { getDefaultShortcuts } from "./default-shortcuts";
 import { getCustomShortcuts, importCustomShortcuts } from "./storage";
 export {
@@ -13,6 +13,7 @@ export {
   MAX_IMPORT_SHORTCUTS,
   MAX_SHORTCUTS_PER_FILE,
   createExportFile,
+  serializeExportFile,
 } from "./import-export-format";
 
 export type ImportResult = {
@@ -27,11 +28,7 @@ export async function writeExportFile(): Promise<{
 }> {
   const shortcuts = await getCustomShortcuts();
   const exportFile = createExportFile(shortcuts);
-  const json = JSON.stringify(exportFile, null, 2);
-
-  if (Buffer.byteLength(json, "utf8") > MAX_FILE_BYTES) {
-    throw new Error("Export exceeds maximum supported file size of 6 MB.");
-  }
+  const json = serializeExportFile(exportFile);
 
   const exportDir = path.join(environment.supportPath, "exports");
   const exportTimestamp = new Date().toISOString().replace(/[:.]/g, "-");

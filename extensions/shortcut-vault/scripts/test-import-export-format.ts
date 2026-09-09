@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createExportFile, validateExportFile } from "../src/lib/import-export-format";
+import { createExportFile, serializeExportFile, validateExportFile } from "../src/lib/import-export-format";
 import type { Shortcut } from "../src/types/shortcut";
 
 const validShortcut: Shortcut = {
@@ -72,6 +72,22 @@ assert.throws(
       shortcuts: Array.from({ length: 10_001 }, (_, i) => ({ ...validShortcut, id: String(i) })),
     }),
   /cannot contain more than 10000 shortcuts/,
+);
+
+// serializeExportFile succeeds for valid export
+const serialized = serializeExportFile(createExportFile(thousandOneShortcuts));
+assert.ok(serialized.length > 0);
+
+// serializeExportFile throws if payload exceeds MAX_FILE_BYTES (6 MB)
+const oversizedShortcuts = Array.from({ length: 2000 }, (_, i) => ({
+  ...validShortcut,
+  id: String(i),
+  notes: "x".repeat(3500),
+}));
+const oversizedFile = createExportFile(oversizedShortcuts);
+assert.throws(
+  () => serializeExportFile(oversizedFile),
+  /exceeds the 6 MB limit/,
 );
 
 console.log("import/export format tests passed");
