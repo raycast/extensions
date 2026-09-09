@@ -1,19 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  confirmAlert,
-  Icon,
-  LaunchType,
-  launchCommand,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { BaselineReference, compatibilityKey, HistorySnapshot, StoredBenchmarkRun } from "./history/history";
 import { capitalize, formatBinaryBytes, formatBytes, formatSpeed } from "./presentation/format";
+import { launchStorageCommand } from "./raycast/commands";
 import { benchmarkHistory } from "./raycast/services";
 
 export default function ViewStorageHistoryCommand() {
@@ -43,7 +32,7 @@ export default function ViewStorageHistoryCommand() {
               <Action
                 title="Run Storage Benchmark"
                 icon={Icon.Play}
-                onAction={() => launchCommand({ name: "run-storage-benchmark", type: LaunchType.UserInitiated })}
+                onAction={() => launchStorageCommand("run-storage-benchmark")}
               />
             </ActionPanel>
           }
@@ -169,7 +158,7 @@ function historyActions(run: StoredBenchmarkRun, baseline: BaselineReference | u
       <Action
         title="Run Storage Benchmark"
         icon={Icon.Play}
-        onAction={() => launchCommand({ name: "run-storage-benchmark", type: LaunchType.UserInitiated })}
+        onAction={() => launchStorageCommand("run-storage-benchmark")}
       />
       {!isBaseline ? (
         <Action
@@ -227,7 +216,7 @@ function detachedBaselineActions(volumeId: string, volumeName: string, key: stri
       <Action
         title="Run Storage Benchmark"
         icon={Icon.Play}
-        onAction={() => launchCommand({ name: "run-storage-benchmark", type: LaunchType.UserInitiated })}
+        onAction={() => launchStorageCommand("run-storage-benchmark")}
       />
       <Action
         title="Reset Baseline"

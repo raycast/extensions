@@ -3,10 +3,17 @@ import { BenchmarkHelperError } from "./engine";
 export interface ContextualBenchmarkFailure {
   code: string;
   message: string;
+  cleanupPaths?: string[];
 }
 
 export function contextualizeBenchmarkFailure(error: unknown): ContextualBenchmarkFailure {
-  if (error instanceof BenchmarkHelperError) return { code: error.code, message: error.message };
+  if (error instanceof BenchmarkHelperError) {
+    return {
+      code: error.code,
+      message: error.message,
+      ...(error.cleanupPaths.length > 0 ? { cleanupPaths: error.cleanupPaths } : {}),
+    };
+  }
   if (error instanceof Error && "code" in error) {
     const code = String(error.code);
     if (code === "EACCES" || code === "EPERM" || code === "EROFS") {

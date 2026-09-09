@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { readdir, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
@@ -7,7 +7,6 @@ import { useEffect, useMemo, useState } from "react";
 interface DestinationPickerProps {
   currentRoot: string;
   onSave: (root: string) => Promise<void> | void;
-  onCancel: () => void;
 }
 
 interface FolderEntry {
@@ -17,7 +16,8 @@ interface FolderEntry {
 
 const volumesRoot = "/Volumes";
 
-export function DestinationPicker({ currentRoot, onSave, onCancel }: DestinationPickerProps) {
+export function DestinationPicker({ currentRoot, onSave }: DestinationPickerProps) {
+  const { pop } = useNavigation();
   const [directory, setDirectory] = useState(currentRoot);
   const [folders, setFolders] = useState<FolderEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +50,7 @@ export function DestinationPicker({ currentRoot, onSave, onCancel }: Destination
 
   async function select(root: string) {
     await onSave(root);
+    pop();
   }
 
   function browse(root: string) {
@@ -59,7 +60,7 @@ export function DestinationPicker({ currentRoot, onSave, onCancel }: Destination
 
   const navigationActions = (
     <>
-      <Action title="Back to Test Setup" icon={Icon.ArrowLeft} onAction={onCancel} />
+      <Action title="Back to Test Setup" icon={Icon.ArrowLeft} onAction={pop} />
       <Action title="Browse Home Folder" icon={Icon.Folder} onAction={() => browse(homedir())} />
       <Action title="Browse Mounted Volumes" icon={Icon.HardDrive} onAction={() => browse(volumesRoot)} />
     </>
@@ -97,7 +98,7 @@ export function DestinationPicker({ currentRoot, onSave, onCancel }: Destination
           icon={Icon.ArrowLeft}
           actions={
             <ActionPanel>
-              <Action title="Back to Test Setup" icon={Icon.ArrowLeft} onAction={onCancel} />
+              <Action title="Back to Test Setup" icon={Icon.ArrowLeft} onAction={pop} />
             </ActionPanel>
           }
         />

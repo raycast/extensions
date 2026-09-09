@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, LaunchType, launchCommand, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, openExtensionPreferences, useNavigation } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cleanupStaleBenchmarkFiles } from "./benchmark/destination";
@@ -15,6 +15,7 @@ import { DestinationPicker } from "./components/DestinationPicker";
 import { MethodologyDetail } from "./components/MethodologyDetail";
 import { BenchmarkRunInput } from "./history/history";
 import { interpretStoredRun, ResultInterpretation } from "./history/interpretation";
+import { launchStorageCommand } from "./raycast/commands";
 import {
   resolveBenchmarkPreferenceSummary,
   resolveDestinationRoot,
@@ -30,23 +31,24 @@ type CompletedState = {
   interpretation: ResultInterpretation;
   destinationRoot: string;
 };
-type FailedState = { kind: "failed"; title: string; message: string; destinationRoot: string; target: BenchmarkTarget };
-type DestinationReturnState = ReadyState | CompletedState | FailedState;
+type FailedState = {
+  kind: "failed";
+  title: string;
+  message: string;
+  cleanupPaths?: string[];
+  destinationRoot: string;
+  target: BenchmarkTarget;
+};
 
 type CommandState =
   | { kind: "loading" }
   | ReadyState
   | { kind: "running"; destinationRoot: string; target: BenchmarkTarget; event?: BenchmarkEvent }
   | CompletedState
-  | FailedState
-  | {
-      kind: "choosing-destination";
-      currentRoot: string;
-      target: BenchmarkTarget;
-      previousState: DestinationReturnState;
-    };
+  | FailedState;
 
 export default function RunStorageBenchmarkCommand() {
+  const { push } = useNavigation();
   const [state, setState] = useState<CommandState>({ kind: "loading" });
   const abortController = useRef<AbortController | undefined>(undefined);
   const mounted = useRef(true);
@@ -89,9 +91,10 @@ export default function RunStorageBenchmarkCommand() {
       const interpretation = interpretStoredRun(snapshot, run);
       if (mounted.current) setState({ kind: "completed", run, interpretation, destinationRoot });
     } catch (error) {
-      const cancelled = error instanceof BenchmarkCancelledError || controller.signal.aborted;
-      const title = cancelled ? "Benchmark Cancelled" : "Benchmark Failed";
       const failure = contextualizeBenchmarkFailure(error);
+      const cancelled =
+        failure.code !== "cleanup_failed" && (error instanceof BenchmarkCancelledError || controller.signal.aborted);
+      const title = cancelled ? "Benchmark Cancelled" : "Benchmark Failed";
       const message = failure.message;
       await benchmarkHistory.recordDiagnostic({
         id: randomUUID(),
@@ -100,7 +103,9 @@ export default function RunStorageBenchmarkCommand() {
         code: cancelled ? "cancelled" : failure.code,
         message: sanitizedDiagnosticMessage(message),
       });
-      if (mounted.current) setState({ kind: "failed", title, message, destinationRoot, target });
+      if (mounted.current) {
+        setState({ kind: "failed", title, message, cleanupPaths: failure.cleanupPaths, destinationRoot, target });
+      }
     }
   }, []);
 
@@ -122,13 +127,13 @@ export default function RunStorageBenchmarkCommand() {
     await startBenchmark(destinationRoot, target);
   }
 
-  function openDestinationPicker(currentRoot: string, target: BenchmarkTarget, previousState: DestinationReturnState) {
-    setState({
-      kind: "choosing-destination",
-      currentRoot,
-      target: benchmarkTargetFromConfiguration(target),
-      previousState,
-    });
+  function openDestinationPicker(currentRoot: string, target: BenchmarkTarget) {
+    push(
+      <DestinationPicker
+        currentRoot={currentRoot}
+        onSave={(root) => chooseDestination(root, benchmarkTargetFromConfiguration(target))}
+      />,
+    );
   }
 
   async function chooseDestination(root: string, target: BenchmarkTarget) {
@@ -145,15 +150,6 @@ export default function RunStorageBenchmarkCommand() {
   }
 
   if (state.kind === "loading") return <Detail isLoading markdown="# Preparing Storage Benchmark" />;
-  if (state.kind === "choosing-destination") {
-    return (
-      <DestinationPicker
-        currentRoot={state.currentRoot}
-        onSave={(root) => chooseDestination(root, state.target)}
-        onCancel={() => setState(state.previousState)}
-      />
-    );
-  }
   if (state.kind === "ready") {
     const actions = (primary: "start" | "destination" | "maximum-data" | "time-target") => {
       const startAction = (
@@ -167,7 +163,7 @@ export default function RunStorageBenchmarkCommand() {
         <Action
           title="Choose Disk or Folder"
           icon={Icon.HardDrive}
-          onAction={() => openDestinationPicker(state.destinationRoot, state, state)}
+          onAction={() => openDestinationPicker(state.destinationRoot, state)}
         />
       );
       const maximumDataAction = (
@@ -254,11 +250,15 @@ export default function RunStorageBenchmarkCommand() {
   if (state.kind === "failed") {
     return (
       <Detail
-        markdown={`# ${state.title}\n\n${escapeMarkdown(state.message)}\n\nNo benchmark data was retained.`}
+        markdown={[
+          `# ${state.title}`,
+          escapeMarkdown(state.message),
+          ...(state.cleanupPaths?.map((filePath) => `- ${escapeMarkdown(filePath)}`) ?? []),
+        ].join("\n\n")}
         actions={commandActions(
           state.target,
           () => startBenchmark(state.destinationRoot, state.target),
-          () => openDestinationPicker(state.destinationRoot, state.target, state),
+          () => openDestinationPicker(state.destinationRoot, state.target),
           (target) => startBenchmark(state.destinationRoot, target),
         )}
       />
@@ -274,7 +274,7 @@ export default function RunStorageBenchmarkCommand() {
       actions={commandActions(
         target,
         () => startBenchmark(state.destinationRoot, target),
-        () => openDestinationPicker(state.destinationRoot, target, state),
+        () => openDestinationPicker(state.destinationRoot, target),
         (nextTarget) => startBenchmark(state.destinationRoot, nextTarget),
       )}
     />
@@ -299,7 +299,7 @@ function commandActions(
       <Action
         title="View Storage History"
         icon={Icon.Clock}
-        onAction={() => launchCommand({ name: "view-storage-history", type: LaunchType.UserInitiated })}
+        onAction={() => launchStorageCommand("view-storage-history")}
       />
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
       <Action.Push title="How the Test Works" icon={Icon.Info} target={<MethodologyDetail />} />

@@ -21,7 +21,7 @@ Task tiers are broad examples. They are not guarantees for a codec, application,
 
 - Results, volume identity, and settings stay in Raycast's local storage.
 - No analytics or telemetry are collected.
-- Test data and sampled contents are never transmitted or retained.
+- Test data and sampled contents are never transmitted. Temporary data is deleted after each run; if cleanup fails, the failure screen lists the paths to remove manually.
 - The extension requests only normal filesystem access to the selected location. Some removable or protected folders may require granting Raycast access in macOS System Settings.
 - Network and cloud-backed paths are outside the v1 support boundary.
 

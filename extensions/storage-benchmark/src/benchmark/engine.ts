@@ -129,20 +129,24 @@ export class NativeBenchmarkEngine implements BenchmarkEngine {
     clearInterval(progressTimer);
     observer.signal?.removeEventListener("abort", abort);
 
-    let cleanupError: unknown;
+    const cleanupPaths: string[] = [];
     try {
       await removeTemporaryFile(temporaryFilePath);
-    } catch (error) {
-      cleanupError = error;
+    } catch {
+      cleanupPaths.push(temporaryFilePath);
     }
     try {
       await rm(transportDirectory, { recursive: true, force: true });
-    } catch (error) {
-      cleanupError ??= error;
+    } catch {
+      cleanupPaths.push(transportDirectory);
     }
 
-    if (cleanupError) {
-      throw new BenchmarkHelperError("cleanup_failed", "Unable to remove temporary benchmark data");
+    if (cleanupPaths.length > 0) {
+      throw new BenchmarkHelperError(
+        "cleanup_failed",
+        "Temporary benchmark data may remain. Remove the following paths manually before running another test.",
+        cleanupPaths,
+      );
     }
     if (failure) throw failure;
     if (!result) throw new BenchmarkHelperError("missing_result", "Swift returned no benchmark result");
@@ -179,6 +183,7 @@ export class BenchmarkHelperError extends Error {
   constructor(
     public readonly code: string,
     message: string,
+    public readonly cleanupPaths: string[] = [],
   ) {
     super(message);
     this.name = "BenchmarkHelperError";
