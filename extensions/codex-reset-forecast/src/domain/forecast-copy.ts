@@ -1,175 +1,94 @@
-import type { ForecastHistoryEntry, ForecastResponse } from "../api/forecast-schema";
-import { hasSourcePostAction, isSourcePostDetail } from "./classify-history";
-import { formatDateTime, formatPercentage, formatRelativeTime, scoreTransition } from "./format-forecast";
-
-type ForecastNarrative = {
-  advice: string;
-  summary: string;
-  title: string;
-};
+import type { ForecastResponse } from "../api/forecast-schema";
+import { formatDateTime, formatPercentage } from "./format-forecast";
+import { forecastChart } from "./forecast-chart";
+import { latestReset, recordLabel, safeSourceUrl, type HistoryItem } from "./reset-history";
 
 const MARKDOWN_LITERAL_CHARACTERS = new Set("&\\`*_{}<>#+-.!|[]$~");
 
-function escapeMarkdown(value: string): string {
+export function escapeMarkdown(value: string): string {
   return Array.from(value, (character) =>
     MARKDOWN_LITERAL_CHARACTERS.has(character) ? `&#${character.charCodeAt(0)};` : character,
   ).join("");
 }
 
-function escapedProse(value: string): string {
-  return value
-    .split(/\n{2,}/)
-    .map((paragraph) => escapeMarkdown(paragraph).replace(/\n/g, "  \n"))
-    .join("\n\n");
+// X excerpts in the snapshot can contain literal backslash-n separators.
+export function sourceText(value: string): string {
+  return value.replace(/\\n/g, "\n").replace(/\r\n?/g, "\n").trim();
 }
 
-function blockquote(markdown: string): string {
-  return markdown
-    .split("\n")
-    .map((line) => (line ? `> ${line}` : ">"))
-    .join("\n");
+function prose(value: string): string {
+  return escapeMarkdown(sourceText(value)).replace(/(?<!\n)\n(?!\n)/g, "  \n");
 }
 
-function restoreFlattenedCode(value: string): string {
-  const code = value.trim();
-
-  if (/^[A-Za-z_][\w.-]*\s*=/.test(code)) {
-    return code.replace(/\s+(?=[A-Za-z_][\w.-]*\s*=)/g, "\n");
-  }
-
-  return code.replace(/\s+\\\s+(?=-)/g, " \\\n");
+export function forecastSummary(response: ForecastResponse): string {
+  const reset = latestReset(response);
+  return [
+    `Codex reset likelihood: ${formatPercentage(response.forecast?.score24h)} within 24 hours; ${formatPercentage(response.forecast?.score48h)} within 48 hours.`,
+    `Last confirmed reset: ${reset ? formatDateTime(reset.dateTime) : "unknown"}.`,
+    `Forecast updated: ${formatDateTime(response.updatedAt)}.`,
+    "Source: https://codexreset.org/",
+  ].join("\n");
 }
 
-function sourceProseMarkdown(value: string): string {
-  const segments = value.split("```");
-  if (segments.length < 3 || segments.length % 2 === 0) return escapedProse(value);
-
-  return segments
-    .map((segment, index) => {
-      if (!segment.trim()) return "";
-      if (index % 2 === 0) return escapedProse(segment.trim());
-      return `\`\`\`\n${restoreFlattenedCode(segment)}\n\`\`\``;
-    })
+export function outlookMarkdown(
+  response: ForecastResponse,
+  warning?: string,
+  appearance: "light" | "dark" = "dark",
+  lastCheckedAt?: string,
+): string {
+  return [
+    "# Reset Outlook",
+    `![${formatPercentage(response.forecast?.score24h)} within 24 hours; ${formatPercentage(response.forecast?.score48h)} within 48 hours](${forecastChart(response, appearance)})`,
+    warning ? `> ${escapeMarkdown(warning)}` : "",
+    "### Why this estimate",
+    response.forecast?.semanticSummary
+      ? prose(response.forecast.semanticSummary)
+      : "The source has not published an explanation yet.",
+    "---",
+    `**Forecast updated** · ${escapeMarkdown(formatDateTime(response.updatedAt))}`,
+    lastCheckedAt ? `**Last checked** · ${escapeMarkdown(formatDateTime(lastCheckedAt))}` : "",
+    "[Codex Reset Monitor](https://codexreset.org/) · Source estimates",
+  ]
     .filter(Boolean)
     .join("\n\n");
 }
 
-function sourcePostMarkdown(value: string): string {
-  const normalized = value.replace(/\r\n?/g, "\n").trim();
-  const divider = /(?:^|\s)={3,}(?=\s|$)/.exec(normalized);
-
-  if (!divider) return blockquote(sourceProseMarkdown(normalized));
-
-  const introduction = normalized.slice(0, divider.index).trim();
-  const remainder = normalized.slice(divider.index + divider[0].length).trim();
-  const bulletItems = remainder.startsWith("-")
-    ? remainder
-        .split(/(?:^|\s)-\s+(?=\S)/)
-        .map((item) => item.trim())
-        .filter(Boolean)
-    : [];
-  const body =
-    bulletItems.length > 0
-      ? bulletItems.map((item) => `- ${escapeMarkdown(item)}`).join("\n")
-      : sourceProseMarkdown(remainder);
-
-  return blockquote([sourceProseMarkdown(introduction), body].filter(Boolean).join("\n\n"));
+export function historyDetailMarkdown(record: HistoryItem): string {
+  const lines = [
+    `# ${escapeMarkdown(record.title)}`,
+    `**${recordLabel(record)}** · ${escapeMarkdown(formatDateTime(record.dateTime))}`,
+  ];
+  if (record.evidence) {
+    lines.push(
+      `### ${escapeMarkdown(record.evidence.author)}${record.evidence.handle ? ` · ${escapeMarkdown(record.evidence.handle)}` : ""}`,
+    );
+    lines.push(
+      prose(record.evidence.summary)
+        .split("\n")
+        .map((line) => `> ${line}`)
+        .join("\n"),
+    );
+  }
+  if (record.description) lines.push("### Reset details", prose(record.description));
+  if (record.scope) lines.push(`**Applies to:** ${prose(record.scope)}`);
+  if (record.evidence && record.evidence.createdAt !== record.dateTime)
+    lines.push(`**Source posted:** ${escapeMarkdown(formatDateTime(record.evidence.createdAt))}`);
+  const source = safeSourceUrl(record.sourceUrl);
+  if (source)
+    lines.push(
+      `Original source: [${escapeMarkdown(record.sourceLabel || "View Source")}](${source.replace(/\(/g, "%28").replace(/\)/g, "%29")})`,
+    );
+  return lines.join("\n\n");
 }
 
-export function forecastSummary(
-  response: ForecastResponse,
-  lastSuccessfulRequestAt = response.fetchedAt,
-  now = new Date(),
-): string {
+export function historySummary(record: HistoryItem): string {
   return [
-    `Codex reset likelihood: ${formatPercentage(response.forecast.score)}.`,
-    `Last confirmed reset: ${formatRelativeTime(response.forecast.latestResetAt, now)}.`,
-    `Forecast checked: ${formatDateTime(lastSuccessfulRequestAt)}.`,
-    "Unofficial and not affiliated with OpenAI.",
-  ].join(" ");
-}
-
-function shortAge(hours: number): string {
-  if (hours < 1) return `${Math.max(1, Math.round(hours * 60))}m`;
-  if (hours < 48) return `${Math.round(hours)}h`;
-  return `${Math.round(hours / 24)}d`;
-}
-
-export function forecastNarrative(response: ForecastResponse, now = new Date()): ForecastNarrative {
-  const hoursSinceReset = Math.max(0, now.getTime() - new Date(response.forecast.latestResetAt).getTime()) / 3_600_000;
-
-  if (response.forecast.resetAnnounced) {
-    return {
-      advice: "Treat the forecast as certain, but do not count the new quota until it lands.",
-      summary:
-        "Tibo announced a Codex rate-limit reset in the next 48 hours. It has not happened yet, so the reset clock and cooldown have not moved.",
-      title: "Reset announced.",
-    };
-  }
-
-  if (hoursSinceReset < 24) {
-    return {
-      advice: "Tibo already pressed it. Spend responsibly, or do not.",
-      summary: `The latest Codex quota reset was confirmed ${shortAge(hoursSinceReset)} ago. The cooldown now outweighs the incident weather.`,
-      title: "It already reset.",
-    };
-  }
-
-  if (response.forecast.score >= 72) {
-    return {
-      advice: "Find a suspiciously token-hungry side project.",
-      summary: "Operational pain is stacking up. Historically, this is reset-button weather.",
-      title: "Use it or potentially lose it.",
-    };
-  }
-
-  if (response.forecast.score >= 48) {
-    return {
-      advice: "Maybe stop hoarding. Keep a meaty task nearby.",
-      summary: "There are enough signals to raise an eyebrow, but nothing is guaranteed.",
-      title: "Worth a tactical token burn.",
-    };
-  }
-
-  if (response.forecast.score >= 26) {
-    return {
-      advice: "Normal building conditions. Check Tibo before panic-spending.",
-      summary: "Some signals are present, but the public data is not making a strong case yet.",
-      title: "Do not force it.",
-    };
-  }
-
-  return {
-    advice: "Keep your tokens. The reset button is having a quiet afternoon.",
-    summary: "The incident desk is quiet, or a reset happened too recently.",
-    title: "Probably not today.",
-  };
-}
-
-export function historyDetailMarkdown(entry: ForecastHistoryEntry): string {
-  const sections = entry.changes.map((change) => {
-    const source = change.details?.find(isSourcePostDetail);
-    const explanations = (change.details ?? []).filter((detail) => !isSourcePostDetail(detail));
-    const delta = `${change.delta > 0 ? "+" : ""}${change.delta} pts`;
-    const lines = [`## ${escapeMarkdown(change.label)}`, `**${escapeMarkdown(delta)}**`];
-
-    if (source?.name) {
-      lines.push("### Source Post");
-      if (!hasSourcePostAction(source)) {
-        lines.push(`**${escapeMarkdown(source.action)}**`);
-      }
-      lines.push(sourcePostMarkdown(source.name));
-    }
-    for (const detail of explanations) {
-      lines.push(`**${escapeMarkdown(detail.action)}:** ${escapeMarkdown(detail.name)}`);
-    }
-
-    return lines.join("\n\n");
-  });
-
-  return [
-    `# ${scoreTransition(entry.fromScore, entry.toScore)}`,
-    `Updated ${escapeMarkdown(formatDateTime(entry.at))}`,
-    ...sections,
-  ].join("\n\n");
+    record.title,
+    `${recordLabel(record)} · ${formatDateTime(record.dateTime)}`,
+    record.scope,
+    record.evidence ? sourceText(record.evidence.summary) : record.description,
+    record.sourceUrl,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }

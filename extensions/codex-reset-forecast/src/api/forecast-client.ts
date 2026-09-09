@@ -1,101 +1,71 @@
-import { parseForecastResponse, type ForecastResponse } from "./forecast-schema";
+import { parseSnapshotPayload, type ForecastResponse } from "./forecast-schema";
 
-export const FORECAST_URL = "https://www.willcodexquotareset.com/api/forecast";
+// Public GET function used by the codexreset.org homepage. See .github/DESIGN.md
+// for the observed wire contract and the live contract check when upstream changes.
+export const FORECAST_URL =
+  "https://codexreset.org/_serverFn/265792b9fbf2f0d07fea84fe2c15432450c2afaf3552f5e75c04dc9540f99dbf";
 
 export type ForecastSnapshot = {
   response: ForecastResponse;
-  etag?: string;
   lastSuccessfulRequestAt: string;
 };
 
 export interface ForecastStore {
   read(): ForecastSnapshot | undefined;
-  readLastSuccessfulRequestAt(snapshot: ForecastSnapshot): string | undefined;
   write(snapshot: ForecastSnapshot): void;
-  writeLastSuccessfulRequestAt(snapshot: ForecastSnapshot, timestamp: string): void;
 }
-
-type ForecastLoadResult = {
-  response: ForecastResponse;
-  lastSuccessfulRequestAt: string;
-  isStale: boolean;
-  warning?: string;
-};
 
 type FetchForecastOptions = {
   store: ForecastStore;
   fetchImpl?: typeof fetch;
   now?: () => Date;
   timeoutMilliseconds?: number;
-  url?: string;
 };
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+function snapshotTime(response: ForecastResponse): number {
+  return Math.max(Date.parse(response.updatedAt), Date.parse(response.ingestion?.completedAt ?? response.updatedAt));
 }
 
 export async function fetchForecast({
   store,
   fetchImpl = fetch,
   now = () => new Date(),
-  timeoutMilliseconds = 10_000,
-  url = FORECAST_URL,
-}: FetchForecastOptions): Promise<ForecastLoadResult> {
-  const cached = store.read();
+  timeoutMilliseconds = 15_000,
+}: FetchForecastOptions): Promise<ForecastSnapshot> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMilliseconds);
 
   try {
-    const headers = new Headers({ Accept: "application/json" });
-    if (cached?.etag) headers.set("If-None-Match", cached.etag);
+    const response = await fetchImpl(FORECAST_URL, {
+      headers: { Accept: "application/json", "x-tsr-serverFn": "true" },
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`Codex Reset Monitor returned HTTP ${response.status}.`);
 
-    const response = await fetchImpl(url, { headers, signal: controller.signal });
-
-    if (response.status === 304) {
-      if (!cached) throw new Error("Forecast API returned 304 without cached data");
-
-      // A 304 carries no representation and must never rewrite the shared snapshot.
-      // Only a 200 response owns the cached forecast and ETag.
-      // Its success time is scoped to the version named by this request, so a
-      // concurrent newer 200 response keeps its own independently verified time.
-      const lastSuccessfulRequestAt = now().toISOString();
-      store.writeLastSuccessfulRequestAt(cached, lastSuccessfulRequestAt);
-      const latest = store.read() ?? cached;
-      return {
-        response: latest.response,
-        lastSuccessfulRequestAt: store.readLastSuccessfulRequestAt(latest) ?? latest.lastSuccessfulRequestAt,
-        isStale: false,
-      };
+    let parsed: ForecastResponse;
+    try {
+      parsed = parseSnapshotPayload(await response.json());
+    } catch {
+      throw new Error("Codex Reset Monitor returned an unreadable snapshot. Try refreshing later.");
     }
 
-    if (!response.ok) throw new Error(`Forecast API returned ${response.status}`);
+    // A slower request must not replace a newer snapshot from the other command.
+    const current = store.read();
+    if (current && snapshotTime(current.response) > snapshotTime(parsed)) return current;
 
-    const parsed = parseForecastResponse(await response.json());
-    const lastSuccessfulRequestAt = now().toISOString();
-    const snapshot: ForecastSnapshot = {
-      response: parsed,
-      etag: response.headers.get("etag") ?? undefined,
-      lastSuccessfulRequestAt,
-    };
+    const snapshot: ForecastSnapshot = { response: parsed, lastSuccessfulRequestAt: now().toISOString() };
     store.write(snapshot);
-    store.writeLastSuccessfulRequestAt(snapshot, lastSuccessfulRequestAt);
-
-    return {
-      response: parsed,
-      lastSuccessfulRequestAt,
-      isStale: false,
-    };
+    return snapshot;
   } catch (error) {
-    if (!cached) throw error;
-
-    const latest = store.read() ?? cached;
-
-    return {
-      response: latest.response,
-      lastSuccessfulRequestAt: store.readLastSuccessfulRequestAt(latest) ?? latest.lastSuccessfulRequestAt,
-      isStale: true,
-      warning: errorMessage(error),
-    };
+    // A failed refresh does not invalidate a successful snapshot or its check time.
+    const cached = store.read();
+    if (cached) return cached;
+    const warning = controller.signal.aborted
+      ? "The request timed out. Try refreshing."
+      : error instanceof Error
+        ? error.message
+        : "The reset monitor could not be reached.";
+    throw new Error(warning);
   } finally {
     clearTimeout(timeout);
   }

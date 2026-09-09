@@ -1,35 +1,40 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType } from "@raycast/api";
+import { safeSourceUrl } from "../domain/reset-history";
 
-export const WEBSITE_URL = "https://www.willcodexquotareset.com/";
+export const WEBSITE_URL = "https://codexreset.org/";
 
 type ForecastActionsProps = {
-  detail?: Action.Push.Props["target"];
-  sourceUrl?: string;
-  copyContent: string;
+  sourceUrl?: string | null;
+  copyContent?: string;
   copyTitle?: string;
-  onRefresh?: () => void;
+  onRefresh: () => void;
 };
 
-export function ForecastActions({ detail, sourceUrl, copyContent, copyTitle, onRefresh }: ForecastActionsProps) {
-  const refreshAction = onRefresh ? <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} /> : null;
-  const sourceAction = sourceUrl ? (
-    <Action.OpenInBrowser title="Open Source Post" url={sourceUrl} />
-  ) : (
-    <Action.OpenInBrowser title="Open Will Codex Reset?" url={WEBSITE_URL} />
-  );
-
+export function ForecastActions({ sourceUrl, copyContent, copyTitle, onRefresh }: ForecastActionsProps) {
+  const source = safeSourceUrl(sourceUrl);
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {detail ? <Action.Push title="View Details" icon={Icon.Eye} target={detail} /> : sourceAction}
-        {detail && sourceUrl ? sourceAction : null}
-        {detail || sourceUrl ? <Action.OpenInBrowser title="Open Will Codex Reset?" url={WEBSITE_URL} /> : null}
+        {source ? <Action.OpenInBrowser title="Open Original Source" url={source} /> : null}
+        <Action.OpenInBrowser title="Open Codex Reset Monitor" url={WEBSITE_URL} />
+        <Action
+          title="View Reset Calendar"
+          icon={Icon.Calendar}
+          onAction={() => launchCommand({ name: "reset-history-calendar", type: LaunchType.UserInitiated })}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.CopyToClipboard title={copyTitle ?? "Copy Forecast Summary"} content={copyContent} />
-        {sourceUrl ? <Action.CopyToClipboard title="Copy Source URL" content={sourceUrl} /> : null}
+        {copyContent ? (
+          <Action.CopyToClipboard title={copyTitle ?? "Copy Forecast Summary"} content={copyContent} />
+        ) : null}
+        {source ? <Action.CopyToClipboard title="Copy Source URL" content={source} /> : null}
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={onRefresh}
+        />
       </ActionPanel.Section>
-      {refreshAction ? <ActionPanel.Section>{refreshAction}</ActionPanel.Section> : null}
     </ActionPanel>
   );
 }

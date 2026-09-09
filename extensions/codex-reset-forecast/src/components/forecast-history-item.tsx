@@ -1,80 +1,67 @@
-import { Color, Detail, Icon, List } from "@raycast/api";
-import type { ForecastHistoryEntry } from "../api/forecast-schema";
-import { classifyHistoryEntry, getSourceDetail, historyTitle } from "../domain/classify-history";
-import { historyDetailMarkdown } from "../domain/forecast-copy";
-import { formatDateTime, scoreTransition } from "../domain/format-forecast";
+import { Color, Icon, List } from "@raycast/api";
+import { historyDetailMarkdown, historySummary, sourceText } from "../domain/forecast-copy";
+import { formatRecordDate } from "../domain/format-forecast";
+import { recordLabel, type HistoryItem } from "../domain/reset-history";
 import { ForecastActions } from "./forecast-actions";
 
-type ForecastHistoryItemProps = {
-  entry: ForecastHistoryEntry;
-  isStale: boolean;
-  onRefresh: () => void;
-};
-
-function appearance(kind: ReturnType<typeof classifyHistoryEntry>) {
-  if (kind === "confirmed-reset") {
-    return {
-      icon: { source: Icon.CheckCircle, tintColor: Color.Green },
-      tag: { value: "RESET", color: Color.Green },
-    };
+export function recordAppearance(record: HistoryItem) {
+  switch (record.type) {
+    case "forced-reset":
+      return { source: Icon.CheckCircle, tintColor: Color.Green };
+    case "compensation":
+      return { source: Icon.Gift, tintColor: Color.Green };
+    case "banked-reset":
+      return { source: Icon.Wallet, tintColor: Color.Purple };
+    case "announcement":
+      return { source: Icon.Megaphone, tintColor: Color.Orange };
+    default:
+      return { source: Icon.Document, tintColor: Color.SecondaryText };
   }
-
-  if (kind === "announcement") {
-    return {
-      icon: { source: Icon.Megaphone, tintColor: Color.Orange },
-      tag: { value: "ANNOUNCED", color: Color.Orange },
-    };
-  }
-
-  return {
-    icon: { source: Icon.BarChart, tintColor: Color.SecondaryText },
-    tag: undefined,
-  };
 }
 
-export function ForecastHistoryItem({ entry, isStale, onRefresh }: ForecastHistoryItemProps) {
-  const kind = classifyHistoryEntry(entry);
-  const source = getSourceDetail(entry);
-  const visual = appearance(kind);
-  const markdown = historyDetailMarkdown(entry);
-  const copyContent = source?.name ?? markdown;
-  const copyTitle = source?.name ? "Copy Source Post" : "Copy Forecast Change";
-  const accessories: List.Item.Accessory[] = [];
+export function ResetDetail({ record }: { record: HistoryItem }) {
+  return <List.Item.Detail markdown={historyDetailMarkdown(record)} />;
+}
 
-  if (isStale) accessories.push({ tag: { value: "STALE", color: Color.Yellow } });
-  if (visual.tag) accessories.push({ tag: visual.tag });
-  accessories.push({ text: scoreTransition(entry.fromScore, entry.toScore) });
-  accessories.push({ date: new Date(entry.at) });
-  const detail = (
-    <Detail
-      markdown={markdown}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Score" text={scoreTransition(entry.fromScore, entry.toScore)} />
-          <Detail.Metadata.Label
-            title="Total Change"
-            text={`${entry.scoreDelta > 0 ? "+" : ""}${entry.scoreDelta} pts`}
-          />
-          <Detail.Metadata.Label title="Updated" text={formatDateTime(entry.at)} />
-          {source?.url ? <Detail.Metadata.Link title="Source" text="Open Source Post" target={source.url} /> : null}
-        </Detail.Metadata>
-      }
-      actions={<ForecastActions sourceUrl={source?.url} copyContent={copyContent} copyTitle={copyTitle} />}
-    />
-  );
-
+export function ForecastHistoryItem({ record, onRefresh }: { record: HistoryItem; onRefresh: () => void }) {
+  const visual = recordAppearance(record);
   return (
     <List.Item
-      icon={visual.icon}
-      title={historyTitle(entry)}
-      subtitle={formatDateTime(entry.at)}
-      accessories={accessories}
+      id={record.id}
+      title={formatRecordDate(record.dateTime)}
+      icon={visual}
+      keywords={[
+        record.title,
+        record.dateTime,
+        record.description,
+        record.scope ?? "",
+        record.sourceLabel ?? "",
+        record.evidence?.author ?? "",
+        record.evidence?.handle ?? "",
+        sourceText(record.evidence?.summary ?? ""),
+      ]}
+      accessories={[
+        {
+          tag: {
+            value:
+              record.type === "forced-reset"
+                ? "Reset"
+                : record.type === "banked-reset"
+                  ? "Banked"
+                  : record.type === "announcement"
+                    ? "Announced"
+                    : recordLabel(record),
+            color: visual.tintColor,
+          },
+          tooltip: record.title,
+        },
+      ]}
+      detail={<ResetDetail record={record} />}
       actions={
         <ForecastActions
-          detail={detail}
-          sourceUrl={source?.url}
-          copyContent={copyContent}
-          copyTitle={copyTitle}
+          sourceUrl={record.sourceUrl}
+          copyContent={historySummary(record)}
+          copyTitle="Copy Reset Record"
           onRefresh={onRefresh}
         />
       }

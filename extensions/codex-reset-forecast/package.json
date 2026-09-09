@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codex-reset-forecast",
   "title": "Codex Reset Forecast",
-  "description": "View the unofficial Codex reset forecast and history from the Will Codex Reset? website. Not affiliated with OpenAI.",
-  "icon": "icon.png",
+  "description": "See the 24-hour and 48-hour Codex reset likelihood, announcements, and reset history from codexreset.org. Unofficial and not affiliated with OpenAI.",
+  "icon": "codexreset-icon-transparent.png",
   "author": "Astatine-213",
   "platforms": [
     "macOS"
@@ -19,7 +19,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "build": "ray build",
+    "build": "ray build -e dist",
     "test": "vitest run",
     "test:contract": "LIVE_CONTRACT=1 vitest run tests/live-contract.test.ts",
     "test:watch": "vitest",
@@ -27,27 +27,25 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.24",
-    "@raycast/utils": "^2.3.0",
-    "zod": "^4.4.3"
-  },
-  "overrides": {
-    "esbuild": "^0.28.1"
+    "@raycast/api": "^2.2.1",
+    "@raycast/utils": "^2.3.1",
+    "seroval": "^1.6.7",
+    "zod": "^4.6.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "^22.19.17",
-    "@types/react": "^19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2",
-    "vitest": "^4.1.10"
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.0"
   },
   "commands": [
     {
       "name": "check-reset-forecast",
       "title": "Check Reset Forecast",
-      "description": "View the current Codex reset forecast and recent history.",
+      "description": "View the reset outlook, announcements, and sourced reset records from Codex Reset Monitor.",
       "mode": "view",
       "keywords": [
         "codex",
@@ -58,36 +56,48 @@
       ]
     },
     {
+      "name": "reset-history-calendar",
+      "title": "View Reset Calendar",
+      "description": "See confirmed Codex reset days across the current and previous month at a glance.",
+      "mode": "view",
+      "keywords": [
+        "codex",
+        "reset",
+        "history",
+        "calendar",
+        "frequency",
+        "month"
+      ]
+    },
+    {
       "name": "toggle-reset-forecast-menu-bar",
-      "title": "Toggle Reset Forecast in Menu Bar",
-      "description": "Show or hide the reset forecast in the macOS menu bar.",
-      "mode": "no-view",
+      "title": "Show Reset Forecast in Menu Bar",
+      "description": "Show the reset forecast in the menu bar. Configure its display here, or hide it from its menu.",
+      "mode": "menu-bar",
       "keywords": [
         "codex",
         "quota",
         "reset",
         "forecast",
         "menu bar"
-      ]
-    },
-    {
-      "name": "reset-forecast-menu-bar",
-      "title": "Refresh Menu Bar Forecast",
-      "description": "Refresh the reset forecast shown in the macOS menu bar.",
-      "mode": "menu-bar",
+      ],
       "interval": "30m",
       "preferences": [
         {
           "name": "menuBarDisplay",
           "title": "Menu Bar Display",
-          "description": "Choose the reset information shown in the macOS menu bar.",
+          "description": "Show the reset likelihood within 24 or 48 hours, or elapsed time since the last confirmed reset.",
           "type": "dropdown",
           "required": false,
-          "default": "likelihood",
+          "default": "likelihood-24h",
           "data": [
             {
-              "title": "Reset Likelihood",
-              "value": "likelihood"
+              "title": "Reset Likelihood (24 Hours)",
+              "value": "likelihood-24h"
+            },
+            {
+              "title": "Reset Likelihood (48 Hours)",
+              "value": "likelihood-48h"
             },
             {
               "title": "Time Since Last Reset",

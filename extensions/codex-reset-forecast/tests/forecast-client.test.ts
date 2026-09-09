@@ -1,217 +1,102 @@
 import { describe, expect, it, vi } from "vitest";
-import validFixture from "./fixtures/forecast-valid.json";
-import { fetchForecast, type ForecastSnapshot, type ForecastStore } from "../src/api/forecast-client";
+import { toCrossJSON } from "seroval";
+import fixture from "./fixtures/forecast-valid.json";
+import { fetchForecast, FORECAST_URL, type ForecastSnapshot, type ForecastStore } from "../src/api/forecast-client";
 
 class MemoryStore implements ForecastStore {
-  snapshot: ForecastSnapshot | undefined;
+  snapshot?: ForecastSnapshot;
   writes: ForecastSnapshot[] = [];
-  lastSuccessfulRequests = new Map<string, string>();
-
-  private snapshotKey(snapshot: ForecastSnapshot) {
-    return `${snapshot.etag ?? ""}\n${snapshot.response.fetchedAt}`;
-  }
-
   read() {
     return this.snapshot;
   }
-
-  readLastSuccessfulRequestAt(snapshot: ForecastSnapshot) {
-    return this.lastSuccessfulRequests.get(this.snapshotKey(snapshot));
-  }
-
   write(snapshot: ForecastSnapshot) {
     this.writes.push(snapshot);
     this.snapshot = snapshot;
   }
-
-  writeLastSuccessfulRequestAt(snapshot: ForecastSnapshot, timestamp: string) {
-    this.lastSuccessfulRequests.set(this.snapshotKey(snapshot), timestamp);
-  }
 }
-
-const now = () => new Date("2026-08-11T02:00:00.000Z");
+const now = () => new Date("2026-09-09T07:05:00Z");
+const jsonResponse = (value = fixture) =>
+  new Response(JSON.stringify(toCrossJSON({ result: value, error: undefined, context: {} })));
 
 describe("fetchForecast", () => {
-  it("validates and caches a successful response", async () => {
+  it("fetches and validates the same structured endpoint as the website", async () => {
     const store = new MemoryStore();
-    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
-      new Response(JSON.stringify(validFixture), {
-        status: 200,
-        headers: { "content-type": "application/json", etag: 'W/"forecast-1"' },
-      }),
-    );
-
+    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse());
     const result = await fetchForecast({ store, fetchImpl, now });
-
-    expect(result.isStale).toBe(false);
-    expect(result.lastSuccessfulRequestAt).toBe("2026-08-11T02:00:00.000Z");
-    expect(store.snapshot?.etag).toBe('W/"forecast-1"');
-    expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T02:00:00.000Z");
-    expect(store.readLastSuccessfulRequestAt(store.snapshot!)).toBe("2026-08-11T02:00:00.000Z");
-  });
-
-  it("sends the cached ETag and reuses data after a 304", async () => {
-    const store = new MemoryStore();
-    const firstFetch = vi.fn<typeof fetch>().mockResolvedValue(
-      new Response(JSON.stringify(validFixture), {
-        status: 200,
-        headers: { etag: 'W/"forecast-1"' },
-      }),
-    );
-    await fetchForecast({ store, fetchImpl: firstFetch, now });
-
-    const secondFetch = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 304 }));
-    const refreshedNow = () => new Date("2026-08-11T03:00:00.000Z");
-    const result = await fetchForecast({ store, fetchImpl: secondFetch, now: refreshedNow });
-
-    const [, request] = secondFetch.mock.calls[0];
-    expect(new Headers(request?.headers).get("If-None-Match")).toBe('W/"forecast-1"');
-    expect(result.isStale).toBe(false);
-    expect(result.response.forecast.score).toBe(64);
-    expect(result.response.fetchedAt).toBe(validFixture.fetchedAt);
-    expect(result.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
-    expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T02:00:00.000Z");
-    expect(store.readLastSuccessfulRequestAt(store.snapshot!)).toBe("2026-08-11T03:00:00.000Z");
+    expect(fetchImpl.mock.calls[0][0]).toBe(FORECAST_URL);
+    expect(new Headers(fetchImpl.mock.calls[0][1]?.headers).get("x-tsr-serverFn")).toBe("true");
+    expect(result.response.forecast?.score48h).toBe(43);
     expect(store.writes).toHaveLength(1);
+    expect(result.lastSuccessfulRequestAt).toBe(now().toISOString());
   });
 
-  it("preserves a successful 304 timestamp for a later stale fallback", async () => {
+  it("keeps the snapshot and last successful check time through repeated failed refreshes", async () => {
     const store = new MemoryStore();
-    await fetchForecast({
+    const saved = await fetchForecast({
       store,
-      fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(
-        new Response(JSON.stringify(validFixture), {
-          status: 200,
-          headers: { etag: 'W/"forecast-1"' },
-        }),
-      ),
+      fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(jsonResponse()),
       now,
     });
-    await fetchForecast({
-      store,
-      fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 304 })),
-      now: () => new Date("2026-08-11T03:00:00.000Z"),
-    });
-
-    const result = await fetchForecast({
-      store,
-      fetchImpl: vi.fn<typeof fetch>().mockRejectedValue(new Error("offline")),
-      now: () => new Date("2026-08-11T04:00:00.000Z"),
-    });
-
-    expect(result.isStale).toBe(true);
-    expect(result.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
-    expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T02:00:00.000Z");
-    expect(store.writes).toHaveLength(1);
-  });
-
-  it("does not overwrite a concurrent successful response when a 304 finishes later", async () => {
-    const store = new MemoryStore();
-    const originalSnapshot: ForecastSnapshot = {
-      response: validFixture,
-      etag: 'W/"forecast-1"',
-      lastSuccessfulRequestAt: "2026-08-11T02:00:00.000Z",
-    };
-    store.snapshot = originalSnapshot;
-
-    let resolveNotModified!: (response: Response) => void;
-    const delayedNotModified = new Promise<Response>((resolve) => {
-      resolveNotModified = resolve;
-    });
-    const notModifiedFetch = vi.fn<typeof fetch>().mockReturnValue(delayedNotModified);
-    const notModifiedRequest = fetchForecast({
-      store,
-      fetchImpl: notModifiedFetch,
-      now: () => new Date("2026-08-11T04:00:00.000Z"),
-    });
-
-    const newerFixture = {
-      ...validFixture,
-      fetchedAt: "2026-08-11T03:00:00.000Z",
-      forecast: { ...validFixture.forecast, score: 85 },
-    };
-    await fetchForecast({
-      store,
-      fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(
-        new Response(JSON.stringify(newerFixture), {
-          status: 200,
-          headers: { etag: 'W/"forecast-2"' },
-        }),
-      ),
-      now: () => new Date("2026-08-11T03:00:00.000Z"),
-    });
-
-    resolveNotModified(new Response(null, { status: 304 }));
-    const result = await notModifiedRequest;
-
-    expect(result.response.forecast.score).toBe(85);
-    expect(result.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
-    expect(store.snapshot?.response.forecast.score).toBe(85);
-    expect(store.snapshot?.etag).toBe('W/"forecast-2"');
-    expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
-    expect(store.readLastSuccessfulRequestAt(originalSnapshot)).toBe("2026-08-11T04:00:00.000Z");
-    expect(store.readLastSuccessfulRequestAt(store.snapshot!)).toBe("2026-08-11T03:00:00.000Z");
-    expect(store.writes).toHaveLength(1);
-
-    const staleResult = await fetchForecast({
-      store,
-      fetchImpl: vi.fn<typeof fetch>().mockRejectedValue(new Error("offline")),
-      now: () => new Date("2026-08-11T05:00:00.000Z"),
-    });
-    expect(staleResult.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
-  });
-
-  it("rejects a 304 response when no cached data exists", async () => {
-    const store = new MemoryStore();
-
-    await expect(
-      fetchForecast({
-        store,
-        fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 304 })),
-        now,
-      }),
-    ).rejects.toThrow("Forecast API returned 304 without cached data");
-  });
-
-  it("returns stale cached data after a network failure", async () => {
-    const store = new MemoryStore();
-    const successfulFetch = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(validFixture)));
-    await fetchForecast({ store, fetchImpl: successfulFetch, now });
-
-    const failedFetch = vi.fn<typeof fetch>().mockRejectedValue(new Error("offline"));
-    const result = await fetchForecast({ store, fetchImpl: failedFetch, now });
-
-    expect(result.isStale).toBe(true);
-    expect(result.warning).toBe("offline");
-  });
-
-  it("preserves valid cached data when a new response is invalid", async () => {
-    const store = new MemoryStore();
-    await fetchForecast({
-      store,
-      fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify(validFixture))),
-      now,
-    });
-
-    const result = await fetchForecast({
-      store,
-      fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({ broken: true }))),
-      now,
-    });
-
-    expect(result.isStale).toBe(true);
-    expect(result.response.forecast.score).toBe(64);
-  });
-
-  it("throws when no cached response is available", async () => {
-    const store = new MemoryStore();
-
-    await expect(
-      fetchForecast({
+    for (const hours of [1, 2, 3]) {
+      const result = await fetchForecast({
         store,
         fetchImpl: vi.fn<typeof fetch>().mockRejectedValue(new Error("offline")),
+        now: () => new Date(now().getTime() + hours * 3_600_000),
+      });
+      expect(result).toBe(saved);
+      expect(result.lastSuccessfulRequestAt).toBe(now().toISOString());
+    }
+    expect(store.writes).toHaveLength(1);
+  });
+
+  it.each([
+    () => new Response("unavailable", { status: 503 }),
+    () => new Response("<html>broken</html>"),
+    () => new Response(JSON.stringify(toCrossJSON({ result: { broken: true } }))),
+  ])("does not replace valid data after an HTTP, decode, or schema failure", async (failure) => {
+    const store = new MemoryStore();
+    await fetchForecast({ store, fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(jsonResponse()), now });
+    const result = await fetchForecast({ store, fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(failure()), now });
+    expect(result).toBe(store.snapshot);
+    expect(store.writes).toHaveLength(1);
+  });
+
+  it("reports an uncached failure", async () => {
+    await expect(
+      fetchForecast({
+        store: new MemoryStore(),
+        fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 500 })),
         now,
       }),
-    ).rejects.toThrow("offline");
+    ).rejects.toThrow("HTTP 500");
+  });
+
+  it("aborts a hung request and retains the cache", async () => {
+    const store = new MemoryStore();
+    await fetchForecast({ store, fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(jsonResponse()), now });
+    const fetchImpl: typeof fetch = (_url, options) =>
+      new Promise((_resolve, reject) => options?.signal?.addEventListener("abort", () => reject(new Error("aborted"))));
+    const result = await fetchForecast({ store, fetchImpl, now, timeoutMilliseconds: 5 });
+    expect(result).toBe(store.snapshot);
+    expect(store.writes).toHaveLength(1);
+  });
+
+  it("does not roll back a newer snapshot when an older request completes later", async () => {
+    const store = new MemoryStore();
+    let resolve!: (response: Response) => void;
+    const delayed = fetchForecast({
+      store,
+      fetchImpl: () =>
+        new Promise((done) => {
+          resolve = done;
+        }),
+      now,
+    });
+    const newer = { ...fixture, updatedAt: "2026-09-09T08:00:00Z", forecast: { ...fixture.forecast, score24h: 60 } };
+    await fetchForecast({ store, fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(jsonResponse(newer)), now });
+    resolve(jsonResponse());
+    const result = await delayed;
+    expect(result.response.forecast?.score24h).toBe(60);
+    expect(store.writes).toHaveLength(1);
   });
 });

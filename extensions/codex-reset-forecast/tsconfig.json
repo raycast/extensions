@@ -3,6 +3,7 @@
   "include": ["src/**/*", "tests/**/*", "vitest.config.mts", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["ES2023"],
+    "types": ["node", "react"],
     "module": "commonjs",
     "target": "ES2023",
     "strict": true,
