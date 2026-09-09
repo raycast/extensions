@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "path-tools",
   "title": "Path Tools",
   "version": "1.0.0",
@@ -7,26 +8,40 @@
   "icon": "icon.png",
   "author": "han_dong",
   "license": "MIT",
+  "categories": [
+    "System",
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "finder-to-iterm",
       "title": "Finder -> iTerm",
       "description": "Open the current Finder directory in iTerm.",
-      "subtitle": "在 iTerm 中打开 Finder 当前目录",
+      "subtitle": "Open the current Finder directory in iTerm",
       "mode": "no-view"
     },
     {
       "name": "iterm-to-finder",
       "title": "iTerm -> Finder",
       "description": "Open the current iTerm directory in Finder.",
-      "subtitle": "在 Finder 中打开 iTerm 当前目录",
+      "subtitle": "Open the current iTerm directory in Finder",
       "mode": "no-view"
     },
     {
       "name": "open-in-vscode",
-      "title": "用 VS Code 打开路径",
-      "description": "Open a Finder target or supplied path in Visual Studio Code.",
-      "subtitle": "打开 Finder 选中项、当前目录或手动输入的路径",
+      "title": "Finder -> VS Code",
+      "description": "Open the current Finder directory in Visual Studio Code.",
+      "subtitle": "Open the current Finder directory in VS Code",
+      "mode": "no-view"
+    },
+    {
+      "name": "openi",
+      "title": "Search and Open in iTerm",
+      "description": "Search files and folders, then open their directory in iTerm.",
+      "subtitle": "Search files and folders to open their directory in iTerm",
+      "keywords": [
+        "openi"
+      ],
       "mode": "view"
     }
   ],
