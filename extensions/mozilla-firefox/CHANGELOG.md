@@ -1,6 +1,6 @@
 # Mozilla Firefox Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-09-09
 
 - Added Windows support for all three commands: New Tab, Search History, Search Bookmarks
 - Firefox profile directory is resolved from `%APPDATA%\Mozilla\Firefox\Profiles` on Windows
