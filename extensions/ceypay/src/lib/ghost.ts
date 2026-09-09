@@ -245,26 +245,42 @@ function readInlineImage(source: string, start: number): InlineImage | undefined
 }
 
 /**
+ * Reads a document line by line and says whether each one is code, so a scan can
+ * step over fenced blocks without touching them.
+ *
+ * A fence closes only on a run of its own character at least as long as the one
+ * that opened it, and on a line carrying nothing else. Both rules matter here:
+ * wrapping a sample in a longer fence is how a post shows ``` in the first
+ * place, and an inner ```js opens a nested sample rather than ending the block.
+ */
+function fenceTracker(): (line: string) => boolean {
+  let fence = "";
+
+  return (line) => {
+    const run = line.match(/^\s{0,3}(`{3,}|~{3,})/)?.[1];
+    if (fence) {
+      const closes = run && run[0] === fence[0] && run.length >= fence.length;
+      if (closes && /^\s{0,3}(`{3,}|~{3,})[ \t]*$/.test(line)) fence = "";
+      return true;
+    }
+    if (run) fence = run;
+    return Boolean(run);
+  };
+}
+
+/**
  * Rewrites the prose of a document and leaves its code alone. Image syntax
  * inside a fenced block or a code span is a sample — writing about an image
  * rather than showing one — so the renderer never fetches it and editing it
  * would corrupt a code sample the post meant to display.
  */
 function mapProse(markdown: string, rewrite: (prose: string) => string): string {
-  let fence = "";
+  const isCode = fenceTracker();
 
   return markdown
     .split("\n")
     .map((line) => {
-      const fenced = line.match(/^\s{0,3}(`{3,}|~{3,})/)?.[1];
-      if (fence) {
-        if (fenced?.startsWith(fence[0])) fence = "";
-        return line;
-      }
-      if (fenced) {
-        fence = fenced;
-        return line;
-      }
+      if (isCode(line)) return line;
       // Splitting on a captured pattern interleaves the parts: the code spans
       // land on the odd indices, the prose between them on the even ones.
       return line
@@ -307,20 +323,12 @@ function removeInlineImages(markdown: string, untrusted: (destination: string) =
  * fences are tracked and their contents left alone.
  */
 function removeReferenceDefinitions(markdown: string, untrusted: (destination: string) => boolean): string {
-  let fence = "";
+  const isCode = fenceTracker();
 
   return markdown
     .split("\n")
     .filter((line) => {
-      const fenced = line.match(/^\s{0,3}(`{3,}|~{3,})/)?.[1];
-      if (fence) {
-        if (fenced?.startsWith(fence[0])) fence = "";
-        return true;
-      }
-      if (fenced) {
-        fence = fenced;
-        return true;
-      }
+      if (isCode(line)) return true;
       const destination = line.match(/^ {0,3}\[(?:[^\]\\]|\\.)+\]:\s*<?([^\s>]+)>?/)?.[1];
       return !destination || !untrusted(destination);
     })

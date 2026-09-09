@@ -105,6 +105,31 @@ describe("gateImages", () => {
       expect(gateImages(`${blocked}\n\nUse \`${sample}\` to embed one.`)).toContain(sample);
     });
 
+    it("keeps a triple fence shown inside a longer one", () => {
+      // Wrapping in a longer fence is how a post displays ``` itself, so the
+      // inner run must not be read as the end of the block.
+      const gated = gateImages(`${blocked}\n\n\`\`\`\`md\n\`\`\`\n${sample}\n\`\`\`\n\`\`\`\`\n`);
+
+      expect(gated).toContain(sample);
+      expect(destinations(gated)).toEqual([]);
+    });
+
+    it("keeps a triple tilde fence shown inside a longer one", () => {
+      expect(gateImages(`${blocked}\n\n~~~~md\n~~~\n${sample}\n~~~\n~~~~\n`)).toContain(sample);
+    });
+
+    it("does not treat an inner fence carrying a language as the closing one", () => {
+      const gated = gateImages(`${blocked}\n\n\`\`\`\`\n\`\`\`js\n${sample}\n\`\`\`\n\`\`\`\`\n`);
+
+      expect(gated).toContain(sample);
+    });
+
+    it("keeps a definition inside a longer fence", () => {
+      const markdown = `${blocked}\n\n\`\`\`\`md\n\`\`\`\n[remote]: ${UNTRUSTED}\n\`\`\`\n\`\`\`\`\n`;
+
+      expect(gateImages(markdown)).toContain(`[remote]: ${UNTRUSTED}`);
+    });
+
     it("escapes nothing inside code when it falls back to escaping", () => {
       // A definition split across lines is past what the targeted removals read,
       // so this document reaches the escaping fallback.
