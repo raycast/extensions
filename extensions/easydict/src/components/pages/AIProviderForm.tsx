@@ -1,6 +1,7 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { type AIModelOption, resolveAIProviderModelCatalog } from "@/ai-providers/modelCatalog";
@@ -15,7 +16,6 @@ import { getAIProviderTestFingerprint } from "@/ai-providers/testFingerprint";
 import type {
   AIProviderProfile,
   JSONOutputMode,
-  LegacyAIProviderName,
   ProviderIconConfig,
   TokenLimitMode,
   WordResultMode,
@@ -28,25 +28,18 @@ import { logTrace, logWarn } from "@/utils/logger";
 type IconSelection =
   Exclude<ProviderIconConfig["kind"], "preset"> | Extract<ProviderIconConfig, { kind: "preset" }>["name"];
 
-export interface LegacyReplacementOption {
-  value: LegacyAIProviderName;
-  title: string;
-}
-
 export function AIProviderForm({
   profile,
   onSave,
   isNewProvider = false,
   showPresetSelector = false,
-  legacyReplacement,
-  legacyReplacementOptions = [],
+  description,
 }: {
   profile: AIProviderProfile;
-  onSave: (profile: AIProviderProfile, legacyReplacement?: LegacyAIProviderName) => Promise<void>;
+  onSave: (profile: AIProviderProfile) => Promise<void>;
   isNewProvider?: boolean;
   showPresetSelector?: boolean;
-  legacyReplacement?: LegacyAIProviderName;
-  legacyReplacementOptions?: LegacyReplacementOption[];
+  description?: string;
 }) {
   const { pop } = useNavigation();
   const [name, setName] = useState(profile.name);
@@ -66,9 +59,6 @@ export function AIProviderForm({
   );
   const [iconURL, setIconURL] = useState(profile.icon.kind === "remote" ? profile.icon.url : "");
   const [presetName, setPresetName] = useState<OpenAICompatiblePresetName>("custom");
-  const [selectedLegacyReplacement, setSelectedLegacyReplacement] = useState<LegacyAIProviderName | "">(
-    legacyReplacement ?? "",
-  );
   const [modelSearchText, setModelSearchText] = useState("");
   const modelCatalog = useMemo(
     () =>
@@ -131,8 +121,12 @@ export function AIProviderForm({
       return;
     }
 
-    await onSave(saved, selectedLegacyReplacement || undefined);
-    pop();
+    try {
+      await onSave(saved);
+      pop();
+    } catch (error) {
+      await showFailureToast(error, { title: "Failed to Save Provider" });
+    }
   }
 
   async function testProvider(draft = buildDraftProfile()): Promise<AIProviderProfile | undefined> {
@@ -328,20 +322,8 @@ export function AIProviderForm({
           ))}
         </Form.Dropdown>
       )}
+      {description && <Form.Description text={description} />}
       <Form.TextField id="name" title="Name" value={name} onChange={setName} />
-      {(legacyReplacement !== undefined || legacyReplacementOptions.length > 0) && (
-        <Form.Dropdown
-          id="legacyReplacement"
-          title="Replace Legacy Provider"
-          value={selectedLegacyReplacement}
-          onChange={(value) => setSelectedLegacyReplacement(value as LegacyAIProviderName | "")}
-        >
-          <Form.Dropdown.Item title="None" value="" />
-          {legacyReplacementOptions.map((option) => (
-            <Form.Dropdown.Item key={option.value} title={option.title} value={option.value} />
-          ))}
-        </Form.Dropdown>
-      )}
       {profile.adapter === "openai-compatible" && (
         <>
           <Form.TextField id="endpoint" title="API Base URL" value={endpoint} onChange={setEndpoint} />

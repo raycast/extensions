@@ -7,10 +7,9 @@
 #### 🆕 Custom AI Providers
 
 - Connect LLMs through Raycast AI or any OpenAI-compatible endpoint for translation and word lookup.
-- **No action is required after updating.** Existing OpenAI and Gemini preferences continue to work and are treated as legacy until imported.
-- **Migration is optional and explicit.** Open **Manage Providers** and import configured OpenAI or Gemini settings individually or together; merely opening the page does not migrate anything.
-- **Migration remains explicit and reversible.** Imported providers replace their legacy counterparts without changing the old preferences. Removing a replacement keeps the legacy provider retired until it is restored manually, so deleted providers do not silently return.
-- **Provider ordering is now managed in Manage Providers.** Built-in, configured legacy, and AI providers share one order and can be moved together with the **Move Up**/**Move Down** actions. AI providers may explicitly replace an available legacy OpenAI or Gemini slot. The **Legacy Service List Order** preference only initializes this order until it is saved.
+- **Existing settings migrate automatically.** Open Search Word or Manage Providers to convert configured OpenAI and Gemini settings into ordinary AI providers, preserving connection settings, enablement, and ordering. Previously imported providers keep their edits; previously retired providers stay removed.
+- **Manage AI providers in Manage Providers.** Old Extension Settings remain available as import sources, but no longer run separate providers. Editing, disabling, or deleting an AI provider does not restore an old service. Use **Add from Legacy OpenAI/Gemini Settings…** to create another copy, initially disabled.
+- **Provider ordering is now managed in Manage Providers.** Built-in and AI providers share one order and can be moved together with the **Move Up**/**Move Down** actions or Cmd+Shift+Up/Down on macOS and Ctrl+Shift+Up/Down on Windows. The **Legacy Service List Order** preference only initializes this order until it is saved.
 
 ### ✨ New Features
 

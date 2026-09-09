@@ -2,13 +2,22 @@
 
 import { randomUUID } from "node:crypto";
 
+import {
+  getAIProviderKey,
+  getBuiltinProviderKey,
+  getProviderOrder,
+  type ProviderOrderCandidate,
+  reconcileProviderOrder,
+  syncAIProviderOrders,
+} from "@/core/query/providerOrder";
+import { TranslationType } from "@/types/api";
+
 import { normalizeOpenAICompatibleEndpoint } from "./endpoint";
 import { inferTokenLimitMode } from "./tokenLimit";
 import type {
-  AIProviderProfile,
-  LegacyAIProviderAssignment,
   LegacyAIProviderName,
   OpenAICompatibleProfile,
+  StoredAIProviderState,
   StoredAIProviderStateV1,
 } from "./types";
 
@@ -36,106 +45,117 @@ export interface LegacyAIProviderConfiguration {
   };
 }
 
-export function importLegacyAIProviders(
-  state: StoredAIProviderStateV1,
-  legacy: LegacyAIProviderConfiguration,
-  providerNames: LegacyAIProviderName[] = getImportableLegacyAIProviderNames(state, legacy),
-): StoredAIProviderStateV1 {
-  const imported: OpenAICompatibleProfile[] = [];
-  const requestedProviders = new Set(providerNames);
-  const assignments = { ...state.legacyProviderAssignments };
-  if (requestedProviders.has("openai") && legacy.openai.apiKey && assignments.openai === undefined) {
-    const id = randomUUID();
-    imported.push({
-      id,
-      adapter: "openai-compatible",
-      name: "OpenAI",
-      enabled: legacy.openai.enabled,
-      order: state.profiles.length + imported.length,
-      icon: { kind: "preset", name: "openai" },
-      wordResultMode: "translation",
-      endpoint: normalizeOpenAICompatibleEndpoint(legacy.openai.endpoint),
-      model: legacy.openai.model,
-      apiKey: legacy.openai.apiKey,
-      jsonOutputMode: "prompt",
-      tokenLimitMode: legacy.openai.forceMaxCompletionTokens
-        ? "max-completion-tokens"
-        : inferTokenLimitMode(legacy.openai.endpoint, legacy.openai.model),
-    });
-    assignments.openai = { kind: "profile", profileId: id };
-  }
-  if (requestedProviders.has("gemini") && legacy.gemini.apiKey && assignments.gemini === undefined) {
-    const id = randomUUID();
-    imported.push({
-      id,
-      adapter: "openai-compatible",
-      name: "Gemini",
-      enabled: legacy.gemini.enabled,
-      order: state.profiles.length + imported.length,
-      icon: { kind: "preset", name: "gemini" },
-      wordResultMode: "translation",
-      endpoint: normalizeGeminiEndpoint(legacy.gemini.endpoint),
-      website: "https://gemini.google.com",
-      model: legacy.gemini.model,
-      apiKey: legacy.gemini.apiKey,
-      jsonOutputMode: "prompt",
-      tokenLimitMode: inferTokenLimitMode(legacy.gemini.endpoint, legacy.gemini.model),
-    });
-    assignments.gemini = { kind: "profile", profileId: id };
-  }
-
-  if (imported.length === 0) return state;
-  const nextOrder = Math.max(-1, ...state.profiles.map((profile) => profile.order)) + 1;
+export function createProfileFromLegacySettings(
+  provider: LegacyAIProviderName,
+  configuration: LegacyAIProviderConfiguration,
+  order: number,
+): OpenAICompatibleProfile {
+  const legacy = configuration[provider];
   return {
-    ...state,
-    profiles: [...state.profiles, ...imported.map((profile, index) => ({ ...profile, order: nextOrder + index }))],
-    legacyProviderAssignments: assignments,
+    id: randomUUID(),
+    adapter: "openai-compatible",
+    name: provider === "openai" ? "OpenAI" : "Gemini",
+    enabled: legacy.enabled,
+    order,
+    icon: { kind: "preset", name: provider },
+    wordResultMode: "translation",
+    endpoint:
+      provider === "openai"
+        ? normalizeOpenAICompatibleEndpoint(legacy.endpoint)
+        : normalizeGeminiEndpoint(legacy.endpoint),
+    ...(provider === "gemini" ? { website: "https://gemini.google.com" } : {}),
+    model: legacy.model.trim(),
+    apiKey: legacy.apiKey.trim(),
+    jsonOutputMode: "prompt",
+    tokenLimitMode:
+      provider === "openai" && configuration.openai.forceMaxCompletionTokens
+        ? "max-completion-tokens"
+        : inferTokenLimitMode(legacy.endpoint, legacy.model),
   };
 }
 
-export function getImportableLegacyAIProviderNames(
-  state: StoredAIProviderStateV1,
+/** Convert old slots once; ordinary provider identity never depends on migration history. */
+export function migrateLegacyAIProviderState(
+  state: StoredAIProviderStateV1 | StoredAIProviderState,
   legacy: LegacyAIProviderConfiguration,
-): LegacyAIProviderName[] {
-  return LEGACY_AI_PROVIDER_NAMES.filter(
-    (provider) => Boolean(legacy[provider].apiKey) && state.legacyProviderAssignments?.[provider] === undefined,
-  );
-}
+  builtinCandidates: ProviderOrderCandidate[],
+  servicesOrder: string[] = [],
+): StoredAIProviderState {
+  const assignments = { ...state.legacyProviderAssignments };
+  const migrated = new Set<LegacyAIProviderName>(state.version === 2 ? state.migratedLegacyProviders : []);
+  const profiles = [...state.profiles];
+  const legacyProfileKeys = new Map<string, string>();
+  const legacyCandidates = LEGACY_AI_PROVIDER_NAMES.map((provider) => ({
+    providerKey: getBuiltinProviderKey(
+      "translation",
+      provider === "openai" ? TranslationType.OpenAI : TranslationType.Gemini,
+    ),
+    type: provider === "openai" ? TranslationType.OpenAI : TranslationType.Gemini,
+    serviceOrder: 0,
+  }));
 
-export function getLegacyAIProviderReplacement(
-  profileId: string,
-  assignments: StoredAIProviderStateV1["legacyProviderAssignments"],
-): LegacyAIProviderName | undefined {
-  return LEGACY_AI_PROVIDER_NAMES.find((provider) => {
-    const assignment = assignments?.[provider];
-    return assignment?.kind === "profile" && assignment.profileId === profileId;
+  for (const [index, provider] of LEGACY_AI_PROVIDER_NAMES.entries()) {
+    const assignment = assignments[provider];
+    if (assignment) {
+      migrated.add(provider);
+      if (assignment.kind === "profile") {
+        const profile = profiles.find((candidate) => candidate.id === assignment.profileId);
+        if (profile) {
+          legacyProfileKeys.set(legacyCandidates[index].providerKey, getAIProviderKey(profile));
+        }
+      }
+    } else if (!migrated.has(provider) && legacy[provider].apiKey.trim()) {
+      const profile = createProfileFromLegacySettings(
+        provider,
+        legacy,
+        Math.max(-1, ...profiles.map((p) => p.order)) + 1,
+      );
+      profiles.push(profile);
+      legacyProfileKeys.set(legacyCandidates[index].providerKey, getAIProviderKey(profile));
+      assignments[provider] = { kind: "profile", profileId: profile.id };
+      migrated.add(provider);
+    }
+  }
+
+  if (state.version === 2 && profiles.length === state.profiles.length) return state;
+
+  const legacyKeyByProfileKey = new Map(
+    [...legacyProfileKeys].map(([legacyKey, profileKey]) => [profileKey, legacyKey] as const),
+  );
+  const previousProfiles = state.profiles.filter((profile) => !legacyKeyByProfileKey.has(getAIProviderKey(profile)));
+  const fallbackOrder = getProviderOrder(previousProfiles, undefined, servicesOrder, [
+    ...builtinCandidates,
+    ...legacyCandidates,
+  ]);
+  const savedOrder = (state.providerOrder ?? fallbackOrder).map((key) => legacyKeyByProfileKey.get(key) ?? key);
+  // Earlier migrations drop slots without credentials. Restore newly imported slots
+  // before their next surviving fallback neighbor without reordering saved providers.
+  for (const [index, key] of fallbackOrder.entries()) {
+    if (!legacyProfileKeys.has(key) || savedOrder.includes(key)) continue;
+    const nextKey = fallbackOrder.slice(index + 1).find((candidate) => savedOrder.includes(candidate));
+    savedOrder.splice(nextKey === undefined ? savedOrder.length : savedOrder.indexOf(nextKey), 0, key);
+  }
+  const previousOrder = reconcileProviderOrder(savedOrder, fallbackOrder, fallbackOrder);
+  const legacyKeys = new Set(legacyCandidates.map((candidate) => candidate.providerKey));
+  const migratedOrder = previousOrder.flatMap((key) => {
+    if (!legacyKeys.has(key)) return [key];
+    const profileKey = legacyProfileKeys.get(key);
+    return profileKey ? [profileKey] : [];
   });
-}
-
-export function getEffectiveLegacyAIProviderAssignment(
-  provider: LegacyAIProviderName,
-  profiles: AIProviderProfile[],
-  assignments: StoredAIProviderStateV1["legacyProviderAssignments"],
-): LegacyAIProviderAssignment | undefined {
-  const assignment = assignments?.[provider];
-  if (assignment?.kind !== "profile") return assignment;
-  return profiles.some((profile) => profile.id === assignment.profileId) ? assignment : { kind: "retired" };
-}
-
-export function normalizeLegacyAIProviderAssignments(
-  profiles: AIProviderProfile[],
-  assignments: StoredAIProviderStateV1["legacyProviderAssignments"],
-): StoredAIProviderStateV1["legacyProviderAssignments"] {
-  if (!assignments) return undefined;
-  return Object.fromEntries(
-    LEGACY_AI_PROVIDER_NAMES.flatMap((provider) => {
-      const assignment = getEffectiveLegacyAIProviderAssignment(provider, profiles, assignments);
-      return assignment ? [[provider, assignment]] : [];
-    }),
-  );
+  const providerOrder = getProviderOrder(profiles, migratedOrder, servicesOrder, builtinCandidates);
+  const migratedLegacyProviders = LEGACY_AI_PROVIDER_NAMES.filter((provider) => migrated.has(provider));
+  return {
+    version: 2,
+    profiles: syncAIProviderOrders(profiles, providerOrder),
+    ...(providerOrder.length > 0 ? { providerOrder } : {}),
+    migratedLegacyProviders,
+    ...(migratedLegacyProviders.length < LEGACY_AI_PROVIDER_NAMES.length && Object.keys(assignments).length > 0
+      ? { legacyProviderAssignments: assignments }
+      : {}),
+  };
 }
 
 function normalizeGeminiEndpoint(endpoint: string): string {
-  const normalized = endpoint.trim().replace(/\/+$/, "");
+  const normalized = normalizeOpenAICompatibleEndpoint(endpoint);
   return normalized.endsWith("/v1beta/openai") ? normalized : `${normalized}/v1beta/openai`;
 }

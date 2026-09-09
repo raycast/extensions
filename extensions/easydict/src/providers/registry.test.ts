@@ -63,7 +63,7 @@ describe("combined provider registry", () => {
 
   it("passes one combined order to both category resolvers", () => {
     const expectedOrder = getCombinedProviderOrder([]);
-    const snapshot = resolveProviderServices({ version: 1, profiles: [] });
+    const snapshot = resolveProviderServices({ version: 2, profiles: [], migratedLegacyProviders: [] });
     const services = [...snapshot.dictionaryServices, ...snapshot.translationServices];
 
     expect(services.map((service) => service.order)).toEqual(

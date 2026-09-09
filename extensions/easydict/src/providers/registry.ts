@@ -1,6 +1,6 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import type { AIProviderProfile, StoredAIProviderStateV1 } from "@/ai-providers/types";
+import type { AIProviderProfile, StoredAIProviderState } from "@/ai-providers/types";
 import { myPreferences } from "@/consts";
 import {
   assignGlobalServiceOrder,
@@ -8,7 +8,6 @@ import {
   getBuiltinProviderCandidates,
   getProviderOrder,
 } from "@/core/query/providerOrder";
-import { TranslationType } from "@/types/api";
 
 import { dictionaryProviderServices, type DictionaryServiceConfig, resolveDictionaryServices } from "./dictionary";
 import type { NativeJSONUnsupportedHandler } from "./dictionary/ai";
@@ -29,9 +28,6 @@ export const builtinDictionaryProviderServices = assignGlobalServiceOrder(
   defaultProviderOrder,
 );
 export const builtinTranslationServices = assignGlobalServiceOrder(translationServices, defaultProviderOrder);
-export const builtinTranslationServicesBeforeAIProfilesLoad = builtinTranslationServices.filter(
-  (service) => service.type !== TranslationType.OpenAI && service.type !== TranslationType.Gemini,
-);
 export const builtinProviderServices = [...builtinDictionaryProviderServices, ...builtinTranslationServices];
 
 export type BuiltinProviderService =
@@ -46,26 +42,22 @@ export function getCombinedProviderOrder(
   profiles: AIProviderProfile[],
   savedOrder?: string[],
   servicesOrder: string[] = getLegacyServicesOrder(),
-  assignments?: StoredAIProviderStateV1["legacyProviderAssignments"],
 ): string[] {
-  return getProviderOrder(profiles, savedOrder, servicesOrder, builtinCandidates, assignments);
+  return getProviderOrder(profiles, savedOrder, servicesOrder, builtinCandidates);
 }
 
-export function getCombinedAvailableProviderKeys(
-  profiles: AIProviderProfile[],
-  assignments?: StoredAIProviderStateV1["legacyProviderAssignments"],
-): string[] {
-  return getAvailableProviderKeys(profiles, builtinCandidates, assignments);
+export function getCombinedAvailableProviderKeys(profiles: AIProviderProfile[]): string[] {
+  return getAvailableProviderKeys(profiles, builtinCandidates);
 }
 
 export function resolveProviderServices(
-  state: StoredAIProviderStateV1,
+  state: StoredAIProviderState,
   onNativeJSONUnsupported?: NativeJSONUnsupportedHandler,
 ): ProviderServiceSnapshot {
-  const { profiles, providerOrder: savedOrder, legacyProviderAssignments: assignments } = state;
-  const providerOrder = getCombinedProviderOrder(profiles, savedOrder, getLegacyServicesOrder(), assignments);
+  const { profiles, providerOrder: savedOrder } = state;
+  const providerOrder = getCombinedProviderOrder(profiles, savedOrder, getLegacyServicesOrder());
   return {
-    translationServices: resolveTranslationServices(profiles, providerOrder, assignments),
-    dictionaryServices: resolveDictionaryServices(profiles, providerOrder, onNativeJSONUnsupported, assignments),
+    translationServices: resolveTranslationServices(profiles, providerOrder),
+    dictionaryServices: resolveDictionaryServices(profiles, providerOrder, onNativeJSONUnsupported),
   };
 }

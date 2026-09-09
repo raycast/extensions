@@ -1,12 +1,7 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import {
-  getLegacyAIProviderName,
-  isLegacyAIProviderAvailable,
-  isLegacyAIProviderConfigured,
-} from "@/ai-providers/legacyConfiguration";
 import { getAIProviderQueryMode, resolveAIProviderIcon } from "@/ai-providers/runtime";
-import type { AIProviderProfile, StoredAIProviderStateV1 } from "@/ai-providers/types";
+import type { AIProviderProfile } from "@/ai-providers/types";
 import { myPreferences } from "@/consts";
 import { getLangCode } from "@/core/language/utils";
 import {
@@ -32,7 +27,6 @@ import { CaiyunTranslateProvider } from "./caiyun";
 import { DeepLTranslateProvider } from "./deepL";
 import { DeepLXTranslateProvider } from "./deepLX";
 import { GoogleTranslateProvider } from "./google";
-import { GeminiTranslateProvider, OpenAITranslateProvider } from "./openai-compatible";
 import { TencentTranslateProvider } from "./tencent";
 import { VolcanoTranslateProvider } from "./volcano";
 import { YoudaoTranslateProvider } from "./youdao";
@@ -77,12 +71,6 @@ const staticTranslationServices: Array<
   { type: TranslationType.Tencent, preference: "enableTencentTranslate", provider: TencentTranslateProvider },
   { type: TranslationType.Volcano, preference: "enableVolcanoTranslate", provider: VolcanoTranslateProvider },
   { type: TranslationType.Caiyun, preference: "enableCaiyunTranslate", provider: CaiyunTranslateProvider },
-  {
-    type: TranslationType.Gemini,
-    preference: "enableGeminiTranslate",
-    provider: GeminiTranslateProvider,
-    isEnabled: () => myPreferences.enableGeminiTranslate && isLegacyAIProviderConfigured("gemini"),
-  },
   {
     type: TranslationType.Google,
     preference: "enableGoogleTranslate",
@@ -135,12 +123,6 @@ const staticTranslationServices: Array<
     implicitlyEnabledBy: youdaoEnabledByDictionary ? "Youdao Dictionary" : undefined,
     provider: YoudaoTranslateProvider,
   },
-  {
-    type: TranslationType.OpenAI,
-    preference: "enableOpenAITranslate",
-    provider: OpenAITranslateProvider,
-    isEnabled: () => myPreferences.enableOpenAITranslate && isLegacyAIProviderConfigured("openai"),
-  },
 ];
 
 const staticTranslationServicesWithOrder: TranslationServiceConfig[] = staticTranslationServices.map(
@@ -166,20 +148,15 @@ const categoryProviderOrder = getProviderOrder(
 );
 export const translationServices = assignGlobalServiceOrder(staticTranslationServicesWithOrder, categoryProviderOrder);
 
-export const translationServicesBeforeAIProfilesLoad = translationServices.filter(
-  (service) => service.type !== TranslationType.OpenAI && service.type !== TranslationType.Gemini,
-);
-
 export function resolveTranslationServices(
   profiles: AIProviderProfile[],
   providerOrder?: string[],
-  assignments?: StoredAIProviderStateV1["legacyProviderAssignments"],
 ): TranslationServiceConfig[] {
   const dynamicServices = profiles.map((profile): TranslationServiceConfig => {
     const common = {
       id: `profile:${profile.id}`,
       label: profile.name,
-      providerKey: getAIProviderKey(profile, assignments),
+      providerKey: getAIProviderKey(profile),
       order: profile.order,
       type: TranslationType.OpenAI,
       icon: resolveAIProviderIcon(profile),
@@ -191,12 +168,8 @@ export function resolveTranslationServices(
       createProvider: () => createAITranslationProvider(profile),
     };
   });
-  const availableBuiltinServices = translationServices.filter((service) => {
-    const legacyProvider = getLegacyAIProviderName(service.type);
-    return legacyProvider ? isLegacyAIProviderAvailable(legacyProvider, profiles, assignments) : true;
-  });
   const servicesOrder = myPreferences.servicesOrder ? myPreferences.servicesOrder.split(",") : [];
-  const resolved = [...availableBuiltinServices, ...dynamicServices];
+  const resolved = [...translationServices, ...dynamicServices];
   const resolvedProviderOrder =
     providerOrder ??
     getProviderOrder(
@@ -204,7 +177,6 @@ export function resolveTranslationServices(
       undefined,
       servicesOrder,
       getBuiltinProviderCandidates(staticTranslationServicesWithOrder),
-      assignments,
     );
   return assignGlobalServiceOrder(resolved, resolvedProviderOrder);
 }

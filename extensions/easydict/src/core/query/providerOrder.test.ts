@@ -7,8 +7,6 @@ import {
   getAIProviderKey,
   getBuiltinProviderKey,
   getInitialProviderOrder,
-  getProviderOrder,
-  reconcileAIProviderReplacementOrder,
   reconcileProviderOrder,
 } from "./providerOrder";
 
@@ -91,92 +89,5 @@ describe("provider ordering", () => {
     expect(
       reconcileProviderOrder([existing, "stale", existing], [existing, newProvider], [existing, newProvider]),
     ).toEqual([existing, newProvider]);
-  });
-
-  it("uses explicit legacy assignments as stable built-in keys", () => {
-    const openAIKey = getBuiltinProviderKey("translation", TranslationType.OpenAI);
-    const geminiKey = getBuiltinProviderKey("translation", TranslationType.Gemini);
-    const profile = {
-      id: "profile",
-      adapter: "openai-compatible" as const,
-      name: "Provider",
-      enabled: true,
-      order: 0,
-      icon: { kind: "preset" as const, name: "openai" as const },
-      wordResultMode: "translation" as const,
-      endpoint: "https://api.openai.com/v1",
-      model: "model",
-      apiKey: "key",
-      tokenLimitMode: "max-tokens" as const,
-      jsonOutputMode: "prompt" as const,
-    };
-
-    expect(getAIProviderKey(profile, { openai: { kind: "profile", profileId: profile.id } })).toBe(openAIKey);
-    expect(getAIProviderKey(profile, { gemini: { kind: "profile", profileId: profile.id } })).toBe(geminiKey);
-  });
-
-  it("keeps an imported legacy provider in the same position as its built-in row", () => {
-    const openAIKey = getBuiltinProviderKey("translation", TranslationType.OpenAI);
-    const builtinCandidates = [
-      {
-        providerKey: getBuiltinProviderKey("dictionary", DictionaryType.Youdao),
-        type: DictionaryType.Youdao,
-        serviceOrder: 0,
-      },
-      { providerKey: openAIKey, type: TranslationType.OpenAI, serviceOrder: 11 },
-    ];
-    const beforeImport = getProviderOrder([], undefined, [], builtinCandidates);
-    const afterImport = getProviderOrder(
-      [
-        {
-          id: "profile-openai",
-          adapter: "openai-compatible",
-          name: "OpenAI",
-          enabled: true,
-          order: 0,
-          icon: { kind: "preset", name: "openai" },
-          wordResultMode: "translation",
-          endpoint: "https://api.openai.com/v1",
-          model: "model",
-          apiKey: "key",
-          tokenLimitMode: "max-tokens",
-          jsonOutputMode: "prompt",
-        },
-      ],
-      undefined,
-      [],
-      builtinCandidates,
-      { openai: { kind: "profile", profileId: "profile-openai" } },
-    );
-
-    expect(afterImport.indexOf(openAIKey)).toBe(beforeImport.indexOf(openAIKey));
-  });
-
-  it("places a profile immediately after the legacy slot when replacement stops", () => {
-    const profile = {
-      id: "profile-gemini",
-      adapter: "raycast-ai" as const,
-      name: "Raycast AI",
-      enabled: true,
-      order: 0,
-      icon: { kind: "preset" as const, name: "raycast" as const },
-      wordResultMode: "translation" as const,
-      model: "model",
-    };
-    const googleKey = getBuiltinProviderKey("translation", TranslationType.Google);
-    const geminiKey = getBuiltinProviderKey("translation", TranslationType.Gemini);
-    const deepLKey = getBuiltinProviderKey("translation", TranslationType.DeepL);
-
-    expect(reconcileAIProviderReplacementOrder([googleKey, geminiKey, deepLKey], profile, "gemini", undefined)).toEqual(
-      [googleKey, geminiKey, getAIProviderKey(profile), deepLKey],
-    );
-    expect(
-      reconcileAIProviderReplacementOrder(
-        [googleKey, geminiKey, getAIProviderKey(profile), deepLKey],
-        profile,
-        undefined,
-        "gemini",
-      ),
-    ).toEqual([googleKey, geminiKey, deepLKey]);
   });
 });

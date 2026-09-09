@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { OpenAICompatibleProfile, RaycastAIProfile } from "@/ai-providers/types";
+import { EASYDICT_VERSION } from "@/consts";
 
 import { OpenAICompatibleDictionaryProvider } from "./openai-compatible";
 import { RaycastAIDictionaryProvider } from "./raycast-ai";
@@ -18,6 +19,7 @@ vi.mock("@raycast/api", () => ({
     ask: testDoubles.ask,
   },
   environment: { canAccess: testDoubles.canAccess, isDevelopment: false },
+  getPreferenceValues: () => ({}),
 }));
 vi.mock("@xsai/stream-text", () => ({ streamText: testDoubles.streamText }));
 vi.mock("@/utils/http", () => ({ timedFetch: { native: testDoubles.nativeFetch } }));
@@ -77,6 +79,7 @@ describe("AI dictionary provider adapters", () => {
     await new OpenAICompatibleDictionaryProvider(createOpenAIProfile("")).request(createQuery());
 
     expect(testDoubles.streamText).toHaveBeenCalledWith(expect.not.objectContaining({ apiKey: expect.anything() }));
+    expect(testDoubles.streamText.mock.calls[0][0]).not.toHaveProperty("headers");
   });
 
   it("falls back from unsupported native JSON and reports the configuration change", async () => {
@@ -88,14 +91,21 @@ describe("AI dictionary provider adapters", () => {
       })
       .mockReturnValueOnce({ textStream: createTextStream([response]) });
 
-    const profile = createOpenAIProfile();
+    const profile = createOpenAIProfile("test-key", "https://opencode.ai/zen/go/v1");
     await new OpenAICompatibleDictionaryProvider(profile, onNativeJSONUnsupported).request(createQuery());
 
     expect(testDoubles.streamText).toHaveBeenCalledTimes(2);
     expect(testDoubles.streamText.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ responseFormat: { type: "json_object" } }),
+      expect.objectContaining({
+        headers: {
+          "User-Agent": `raycast-easydict/${EASYDICT_VERSION}`,
+          "x-opencode-session": expect.any(String),
+        },
+        responseFormat: { type: "json_object" },
+      }),
     );
     expect(testDoubles.streamText.mock.calls[1][0]).not.toHaveProperty("responseFormat");
+    expect(testDoubles.streamText.mock.calls[0][0].headers).toEqual(testDoubles.streamText.mock.calls[1][0].headers);
     expect(onNativeJSONUnsupported).toHaveBeenCalledWith({ ...profile, jsonOutputMode: "prompt" });
   });
 
@@ -106,12 +116,40 @@ describe("AI dictionary provider adapters", () => {
       .mockReturnValueOnce({ textStream: createTextStream(["not-json"]) })
       .mockReturnValueOnce({ textStream: createTextStream([response]) });
 
-    const profile = createOpenAIProfile();
+    const profile = createOpenAIProfile("test-key", "https://opencode.ai/zen/go/v1");
     await new OpenAICompatibleDictionaryProvider(profile, onNativeJSONUnsupported).request(createQuery());
 
     expect(testDoubles.streamText).toHaveBeenCalledTimes(2);
+    expect(testDoubles.streamText.mock.calls[0][0].headers).toEqual({
+      "User-Agent": `raycast-easydict/${EASYDICT_VERSION}`,
+      "x-opencode-session": expect.any(String),
+    });
     expect(testDoubles.streamText.mock.calls[1][0]).not.toHaveProperty("responseFormat");
+    expect(testDoubles.streamText.mock.calls[0][0].headers).toEqual(testDoubles.streamText.mock.calls[1][0].headers);
     expect(onNativeJSONUnsupported).not.toHaveBeenCalled();
+  });
+
+  it("adds fresh OpenCode Go headers to each dictionary query and preserves authentication", async () => {
+    const response = JSON.stringify(createResponse());
+    testDoubles.streamText.mockImplementation(() => ({ textStream: createTextStream([response]) }));
+    const provider = new OpenAICompatibleDictionaryProvider(
+      createOpenAIProfile("test-key", "https://opencode.ai/zen/go/v1/chat/completions"),
+    );
+
+    await provider.request(createQuery());
+    await provider.request(createQuery());
+
+    const [first, second] = testDoubles.streamText.mock.calls.map(([options]) => options);
+    expect(first).toEqual(
+      expect.objectContaining({
+        apiKey: "test-key",
+        headers: {
+          "User-Agent": `raycast-easydict/${EASYDICT_VERSION}`,
+          "x-opencode-session": expect.any(String),
+        },
+      }),
+    );
+    expect(second.headers["x-opencode-session"]).not.toBe(first.headers["x-opencode-session"]);
   });
 
   it("does not fall back for unrelated request errors", async () => {
@@ -155,7 +193,10 @@ function createRaycastProfile(): RaycastAIProfile {
   };
 }
 
-function createOpenAIProfile(apiKey = "test-key"): OpenAICompatibleProfile {
+function createOpenAIProfile(
+  apiKey = "test-key",
+  endpoint = "https://example.com/v1/chat/completions",
+): OpenAICompatibleProfile {
   return {
     id: "openai",
     adapter: "openai-compatible",
@@ -164,7 +205,7 @@ function createOpenAIProfile(apiKey = "test-key"): OpenAICompatibleProfile {
     order: 0,
     icon: { kind: "initials" },
     wordResultMode: "dictionary",
-    endpoint: "https://example.com/v1/chat/completions",
+    endpoint,
     model: "test-model",
     apiKey,
     tokenLimitMode: "max-tokens",

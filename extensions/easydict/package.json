@@ -669,7 +669,7 @@
       "name": "enableOpenAITranslate",
       "label": "Legacy OpenAI Translate",
       "required": false,
-      "description": "Used until this configuration is imported from Manage Providers. Retained temporarily for migration.",
+      "description": "Initial enablement for automatic legacy migration. After migration, use Manage Providers.",
       "default": false
     },
     {
@@ -677,7 +677,7 @@
       "name": "enableGeminiTranslate",
       "label": "Legacy Gemini Translate",
       "required": false,
-      "description": "Used until this configuration is imported from Manage Providers. Retained temporarily for migration.",
+      "description": "Initial enablement for automatic legacy migration. After migration, use Manage Providers.",
       "default": false
     },
     {
@@ -766,14 +766,14 @@
       "name": "openAIAPIKey",
       "type": "password",
       "required": false,
-      "description": "Used only by the legacy OpenAI provider and retained temporarily for migration."
+      "description": "Import source for automatic migration. After migration, edit the AI provider in Manage Providers."
     },
     {
       "title": "Legacy OpenAI Endpoint",
       "name": "openAIAPIURL",
       "type": "textfield",
       "required": false,
-      "description": "Used only by the legacy OpenAI provider and retained temporarily for migration.",
+      "description": "Import source for automatic migration. After migration, edit the AI provider in Manage Providers.",
       "default": "https://api.openai.com/v1",
       "placeholder": "https://api.openai.com/v1"
     },
@@ -782,7 +782,7 @@
       "name": "openAIModel",
       "type": "textfield",
       "required": false,
-      "description": "Used only by the legacy OpenAI provider and retained temporarily for migration.",
+      "description": "Import source for automatic migration. After migration, edit the AI provider in Manage Providers.",
       "default": "gpt-5.4-mini"
     },
     {
@@ -791,7 +791,7 @@
       "type": "checkbox",
       "label": "Always Use max_completion_tokens",
       "required": false,
-      "description": "Used only by the legacy OpenAI provider and retained temporarily for migration.",
+      "description": "Import source for automatic migration. After migration, edit the AI provider in Manage Providers.",
       "default": false
     },
     {
@@ -799,14 +799,14 @@
       "name": "geminiAPIKey",
       "type": "password",
       "required": false,
-      "description": "Used only by the legacy Gemini provider and retained temporarily for migration."
+      "description": "Import source for automatic migration. After migration, edit the AI provider in Manage Providers."
     },
     {
       "title": "Legacy Gemini Endpoint",
       "name": "geminiAPIURL",
       "type": "textfield",
       "required": false,
-      "description": "Used only by the legacy Gemini provider and retained temporarily for migration.",
+      "description": "Import source for automatic migration. After migration, edit the AI provider in Manage Providers.",
       "default": "https://generativelanguage.googleapis.com"
     },
     {
@@ -814,7 +814,7 @@
       "name": "geminiModel",
       "type": "textfield",
       "required": false,
-      "description": "Used only by the legacy Gemini provider and retained temporarily for migration.",
+      "description": "Import source for automatic migration. After migration, edit the AI provider in Manage Providers.",
       "default": "gemini-3.5-flash"
     },
     {

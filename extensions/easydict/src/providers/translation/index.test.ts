@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { LegacyAIProviderConfiguration } from "@/ai-providers/legacy";
-import { importLegacyAIProviders } from "@/ai-providers/legacy";
+import { createProfileFromLegacySettings } from "@/ai-providers/legacy";
 import { TranslationType } from "@/types/api";
 
 import { resolveTranslationServices, translationServices } from "./index";
@@ -44,23 +43,12 @@ vi.mock("@raycast/api", () => ({
   getPreferenceValues: () => preferences,
 }));
 
-const legacy: LegacyAIProviderConfiguration = {
-  openai: {
-    enabled: true,
-    endpoint: "https://api.openai.com/v1/chat/completions",
-    model: "gpt-4.1-mini",
-    apiKey: "openai-placeholder",
-    forceMaxCompletionTokens: false,
-  },
-  gemini: {
-    enabled: true,
-    endpoint: "https://generativelanguage.googleapis.com",
-    model: "gemini-2.5-flash",
-    apiKey: "gemini-placeholder",
-  },
-};
-
 describe("translation service compatibility", () => {
+  it("never exposes legacy AI services through the built-in fallback registry", () => {
+    expect(translationServices.map((service) => service.type)).not.toContain(TranslationType.OpenAI);
+    expect(translationServices.map((service) => service.type)).not.toContain(TranslationType.Gemini);
+  });
+
   it("marks providers enabled indirectly through dictionary settings", () => {
     expect(translationServices.find((service) => service.type === TranslationType.DeepL)).toMatchObject({
       enabledInPreferences: false,
@@ -72,32 +60,26 @@ describe("translation service compatibility", () => {
     });
   });
 
-  it("keeps legacy services retired after their replacement profiles are deleted", () => {
-    const imported = importLegacyAIProviders({ version: 1, profiles: [] }, legacy);
-
-    const servicesWithImportedProfiles = resolveTranslationServices(
-      imported.profiles,
-      undefined,
-      imported.legacyProviderAssignments,
+  it("removes a deleted AI profile without restoring any preference-backed AI service", () => {
+    const profile = createProfileFromLegacySettings(
+      "openai",
+      {
+        openai: {
+          enabled: true,
+          apiKey: "placeholder",
+          endpoint: "https://api.openai.com/v1",
+          model: "model",
+          forceMaxCompletionTokens: false,
+        },
+        gemini: { enabled: false, apiKey: "", endpoint: "https://example.com", model: "model" },
+      },
+      0,
     );
-    expect(servicesWithImportedProfiles.map((service) => service.id)).not.toContain(`static:${TranslationType.OpenAI}`);
-    expect(servicesWithImportedProfiles.map((service) => service.id)).not.toContain(`static:${TranslationType.Gemini}`);
-
-    const servicesAfterAllProfilesAreDeleted = resolveTranslationServices(
-      [],
-      undefined,
-      imported.legacyProviderAssignments,
+    expect(resolveTranslationServices([profile]).map((service) => service.id)).toContain(`profile:${profile.id}`);
+    expect(resolveTranslationServices([]).map((service) => service.id)).toEqual(
+      translationServices.map((service) => service.id),
     );
-    expect(servicesAfterAllProfilesAreDeleted.map((service) => service.id)).not.toContain(
-      `static:${TranslationType.OpenAI}`,
-    );
-    expect(servicesAfterAllProfilesAreDeleted.map((service) => service.id)).not.toContain(
-      `static:${TranslationType.Gemini}`,
-    );
-
-    const servicesAfterRestore = resolveTranslationServices([]);
-    expect(servicesAfterRestore.map((service) => service.id)).toEqual(
-      expect.arrayContaining([`static:${TranslationType.OpenAI}`, `static:${TranslationType.Gemini}`]),
-    );
+    expect(resolveTranslationServices([]).map((service) => service.type)).not.toContain(TranslationType.OpenAI);
+    expect(resolveTranslationServices([]).map((service) => service.type)).not.toContain(TranslationType.Gemini);
   });
 });

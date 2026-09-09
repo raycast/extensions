@@ -31,10 +31,9 @@ export const RELEASE_MARKDOWN = `
 #### Custom AI Providers
 
 - Connect LLMs through Raycast AI or any OpenAI-compatible endpoint for translation and word lookup.
-- **No action is required after updating.** Existing OpenAI and Gemini preferences continue to work and are treated as legacy until imported.
-- **Migration is optional and explicit.** Open **Manage Providers** and import configured OpenAI or Gemini settings individually or together; merely opening the page does not migrate anything.
-- **Migration remains explicit and reversible.** Imported providers replace their legacy counterparts without changing the old preferences. Removing a replacement keeps the legacy provider retired until it is restored manually, so deleted providers do not silently return.
-- **Provider ordering is now managed in Manage Providers.** Built-in, configured legacy, and AI providers share one order and can be moved together with the **Move Up**/**Move Down** actions or Cmd+Shift+Up/Down on macOS and Ctrl+Shift+Up/Down on Windows. AI providers may explicitly replace an available legacy OpenAI or Gemini slot. The **Legacy Service List Order** preference only initializes this order until it is saved.
+- **Existing settings migrate automatically.** Open Search Word or Manage Providers to convert configured OpenAI and Gemini settings into ordinary AI providers, preserving connection settings, enablement, and ordering. Previously imported providers keep their edits; previously retired providers stay removed.
+- **Manage AI providers in Manage Providers.** Old Extension Settings remain available as import sources, but no longer run separate providers. Editing, disabling, or deleting an AI provider does not restore an old service. Use **Add from Legacy OpenAI/Gemini Settings…** to create another copy, initially disabled.
+- **Provider ordering is now managed in Manage Providers.** Built-in and AI providers share one order and can be moved together with the **Move Up**/**Move Down** actions or Cmd+Shift+Up/Down on macOS and Ctrl+Shift+Up/Down on Windows. The **Legacy Service List Order** preference only initializes this order until it is saved.
 
 ### ✨ New Features
 
@@ -73,10 +72,9 @@ export const RELEASE_MARKDOWN = `
 #### 🆕 自定义 AI Provider
 
 - 现在可通过 Raycast AI 或任意 OpenAI 兼容端点接入 LLM，用于翻译和查词。
-- **更新后无需操作。** 原有 OpenAI 和 Gemini 偏好设置继续生效，并在导入前作为旧版提供商使用。
-- **迁移可选且必须主动执行。** 进入 **Manage Providers**，单独或一起导入已配置的 OpenAI/Gemini 设置；仅打开页面不会迁移。
-- **迁移仍然显式且可撤销。** 导入后的 Provider 会替代对应旧版服务，但不会修改旧 Preferences。删除替代项后，旧版 Provider 会保持 retired，只有用户手动 Restore 才会恢复，避免已删除的 Provider 静默返回。
-- **Provider 排序现在统一由 Manage Providers 管理。** 内置、已配置的旧版和 AI Provider 共用同一顺序，可通过 **Move Up**/**Move Down** 一起调整；AI Provider 也可以显式替代可用的旧版 OpenAI 或 Gemini 位置。**Legacy Service List Order** 仅在新顺序保存前负责初始化。
+- **旧设置自动迁移。** 打开 Search Word 或 Manage Providers 时，已配置的 OpenAI/Gemini 设置会转换为普通 AI Provider，保留连接配置、启用状态和排序。已导入 Provider 的修改会保留；此前已退出的 Provider 不会重新创建。
+- **AI Provider 统一在 Manage Providers 管理。** 旧 Extension Settings 仅保留为导入来源，不再运行独立服务。编辑、禁用或删除 AI Provider 不会恢复旧服务；如需重新复制旧配置，可使用 **Add from Legacy OpenAI/Gemini Settings…**，新副本初始为禁用状态。
+- **Provider 排序现在统一由 Manage Providers 管理。** 内置和 AI Provider 共用同一顺序，可通过 **Move Up**/**Move Down** 或 macOS 的 Cmd+Shift+Up/Down、Windows 的 Ctrl+Shift+Up/Down 调整。**Legacy Service List Order** 仅在新顺序保存前负责初始化。
 
 ### ✨ 新特性
 

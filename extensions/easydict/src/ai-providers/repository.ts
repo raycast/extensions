@@ -10,6 +10,7 @@ import {
   type LegacyAIProviderAssignment,
   PROVIDER_ICON_NAMES,
   type ProviderIconConfig,
+  type StoredAIProviderState,
   type StoredAIProviderStateV1,
   type TokenLimitMode,
   type WordResultMode,
@@ -20,14 +21,14 @@ const LOG_LABEL = "AI Providers";
 let profileUpdateQueue = Promise.resolve();
 
 export type AIProviderLoadResult =
-  | { kind: "missing"; state: StoredAIProviderStateV1 }
-  | { kind: "ready"; state: StoredAIProviderStateV1 }
+  | { kind: "missing"; state: StoredAIProviderStateV1 | StoredAIProviderState }
+  | { kind: "ready"; state: StoredAIProviderStateV1 | StoredAIProviderState }
   | { kind: "invalid"; rawValue: string; message: string }
   | { kind: "unsupported"; rawValue: string; version: unknown }
   | { kind: "error"; error: Error };
 
-export function createEmptyAIProviderState(): StoredAIProviderStateV1 {
-  return { version: 1, profiles: [] };
+export function createEmptyAIProviderState(): StoredAIProviderState {
+  return { version: 2, profiles: [], migratedLegacyProviders: [] };
 }
 
 export async function loadAIProviderState(): Promise<AIProviderLoadResult> {
@@ -47,11 +48,11 @@ export async function loadAIProviderState(): Promise<AIProviderLoadResult> {
       return { kind: "invalid", rawValue, message: "The saved provider configuration is not valid JSON." };
     }
 
-    if (!isRecord(value) || value.version !== 1) {
+    if (!isRecord(value) || (value.version !== 1 && value.version !== 2)) {
       timer.done("unsupported stored configuration");
       return { kind: "unsupported", rawValue, version: isRecord(value) ? value.version : undefined };
     }
-    if (!isStoredAIProviderStateV1(value)) {
+    if (!isStoredAIProviderStateV1(value) && !isStoredAIProviderState(value)) {
       timer.done("invalid stored configuration");
       return { kind: "invalid", rawValue, message: "The saved provider configuration has an invalid shape." };
     }
@@ -63,8 +64,8 @@ export async function loadAIProviderState(): Promise<AIProviderLoadResult> {
   }
 }
 
-export async function saveAIProviderState(state: StoredAIProviderStateV1): Promise<void> {
-  if (!isStoredAIProviderStateV1(state)) {
+export async function saveAIProviderState(state: StoredAIProviderState): Promise<void> {
+  if (!isStoredAIProviderState(state)) {
     throw new Error("Refusing to save an invalid AI provider configuration.");
   }
   await LocalStorage.setItem(AI_PROVIDER_STORAGE_KEY, JSON.stringify(state));
@@ -73,7 +74,7 @@ export async function saveAIProviderState(state: StoredAIProviderStateV1): Promi
 export function fallbackAIProviderToPromptJSON(profileId: string): Promise<boolean> {
   const update = profileUpdateQueue.then(async () => {
     const result = await loadAIProviderState();
-    if (result.kind !== "ready") return false;
+    if (result.kind !== "ready" || result.state.version !== 2) return false;
 
     const profileIndex = result.state.profiles.findIndex((profile) => profile.id === profileId);
     const profile = result.state.profiles[profileIndex];
@@ -92,17 +93,39 @@ export function fallbackAIProviderToPromptJSON(profileId: string): Promise<boole
   return update;
 }
 
+export function isStoredAIProviderState(value: unknown): value is StoredAIProviderState {
+  if (!isRecord(value) || value.version !== 2 || !isProviderStateBody(value)) return false;
+  const migrated = value.migratedLegacyProviders;
+  if (
+    !Array.isArray(migrated) ||
+    !migrated.every((provider) => provider === "openai" || provider === "gemini") ||
+    new Set(migrated).size !== migrated.length
+  ) {
+    return false;
+  }
+  if (value.legacyProviderAssignments === undefined) return true;
+  if (!isLegacyProviderAssignments(value.legacyProviderAssignments)) return false;
+  return Object.keys(value.legacyProviderAssignments).every((provider) => migrated.includes(provider));
+}
+
 export function isStoredAIProviderStateV1(value: unknown): value is StoredAIProviderStateV1 {
-  if (!isRecord(value) || value.version !== 1 || !Array.isArray(value.profiles)) return false;
-  if (value.providerOrder !== undefined && !isProviderOrder(value.providerOrder)) return false;
+  if (!isRecord(value) || value.version !== 1 || !isProviderStateBody(value)) return false;
   if (value.legacyProviderAssignments !== undefined && !isLegacyProviderAssignments(value.legacyProviderAssignments))
     return false;
+  return true;
+}
+
+function isProviderStateBody(value: Record<string, unknown>): boolean {
+  if (!Array.isArray(value.profiles)) return false;
+  if (value.providerOrder !== undefined && !isProviderOrder(value.providerOrder)) return false;
   if (!value.profiles.every(isAIProviderProfile)) return false;
   const profileIds = value.profiles.map((profile) => profile.id);
   return new Set(profileIds).size === profileIds.length;
 }
 
-function isLegacyProviderAssignments(value: unknown): boolean {
+function isLegacyProviderAssignments(
+  value: unknown,
+): value is NonNullable<StoredAIProviderState["legacyProviderAssignments"]> {
   if (!isRecord(value)) return false;
   const allowedProviders = new Set(["openai", "gemini"]);
   const assignedProfileIds = new Set<string>();

@@ -4,6 +4,7 @@ import { streamText } from "@xsai/stream-text";
 
 import type { TokenLimitParams } from "@/ai-providers/tokenLimit";
 import { getLanguageEnglishName } from "@/core/language/utils";
+import { getOpenAICompatibleRequestHeaders } from "@/providers/shared/openai-compatible-headers";
 import { BaseStreamingTranslateProvider } from "@/providers/translation/base";
 import type { QueryInput, RequestOptions, StreamChunk, TranslationResult } from "@/types/query";
 import { timedFetch } from "@/utils/http";
@@ -31,6 +32,7 @@ export abstract class BaseOpenAICompatibleTranslateProvider extends BaseStreamin
     const url = this.getEndpoint();
     const apiKey = this.getAPIKey();
     const modelName = this.getModel();
+    const headers = getOpenAICompatibleRequestHeaders(url);
 
     const fromLanguage = getLanguageEnglishName(queryWordInfo.fromLanguage);
     const toLanguage = getLanguageEnglishName(queryWordInfo.toLanguage);
@@ -47,6 +49,7 @@ export abstract class BaseOpenAICompatibleTranslateProvider extends BaseStreamin
     const streamResult = streamText({
       baseURL: url,
       ...(apiKey ? { apiKey } : {}),
+      ...(headers ? { headers } : {}),
       model: modelName,
       messages,
       abortSignal: signal,

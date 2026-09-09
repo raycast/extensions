@@ -23,7 +23,6 @@ import {
 import {
   builtinDictionaryProviderServices,
   builtinTranslationServices,
-  builtinTranslationServicesBeforeAIProfilesLoad,
   resolveProviderServices,
 } from "@/providers/registry";
 import { buildFavoriteWord } from "@/types/favorite";
@@ -71,13 +70,10 @@ export default function SearchWord({ initialQueryText, fallbackText }: SearchWor
       return resolveProviderServices(aiProviderProfiles.storedState, handleNativeJSONUnsupported);
     }
     return {
-      translationServices:
-        aiProviderProfiles.state.kind === "loading"
-          ? builtinTranslationServicesBeforeAIProfilesLoad
-          : builtinTranslationServices,
+      translationServices: builtinTranslationServices,
       dictionaryServices: builtinDictionaryProviderServices,
     };
-  }, [aiProviderProfiles.profiles, aiProviderProfiles.state.kind, handleNativeJSONUnsupported]);
+  }, [aiProviderProfiles.storedState, handleNativeJSONUnsupported]);
 
   const {
     displaySections,

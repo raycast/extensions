@@ -9,6 +9,7 @@ import { normalizeOpenAICompatibleEndpoint } from "@/ai-providers/endpoint";
 import { getTokenLimitParams } from "@/ai-providers/tokenLimit";
 import type { JSONOutputMode, OpenAICompatibleProfile } from "@/ai-providers/types";
 import { getLanguageEnglishName } from "@/core/language/utils";
+import { getOpenAICompatibleRequestHeaders } from "@/providers/shared/openai-compatible-headers";
 import { DictionaryType } from "@/types/api";
 import type { DictionaryResult, QueryInput, RequestOptions } from "@/types/query";
 import { normalizeError } from "@/utils/errors";
@@ -43,6 +44,7 @@ export class OpenAICompatibleDictionaryProvider extends BaseDictionaryProvider<A
     const fromLanguage = getLanguageEnglishName(queryWordInfo.fromLanguage);
     const toLanguage = getLanguageEnglishName(queryWordInfo.toLanguage);
     const model = this.profile.model.trim();
+    const headers = getOpenAICompatibleRequestHeaders(this.profile.endpoint);
     logTrace(this.logLabel, `dictionary (${model}): ${fromLanguage} -> ${toLanguage}: ${queryWordInfo.word}`);
 
     const messages = renderAIDictionaryChatMessages(
@@ -50,17 +52,17 @@ export class OpenAICompatibleDictionaryProvider extends BaseDictionaryProvider<A
     );
     let result: AIWordResult;
     if (this.profile.jsonOutputMode !== "json-object") {
-      result = parseAIWordResult(await this.requestCompletion(messages, "prompt", signal));
+      result = parseAIWordResult(await this.requestCompletion(messages, "prompt", headers, signal));
     } else {
       let completion: string;
       try {
-        completion = await this.requestCompletion(messages, "json-object", signal);
+        completion = await this.requestCompletion(messages, "json-object", headers, signal);
       } catch (error) {
         if (signal?.aborted) throw error;
         if (!isUnsupportedJSONOutputError(error)) throw error;
         await this.notifyNativeJSONUnsupported();
         logWarn(this.logLabel, "native JSON output is unsupported; falling back to prompt-based JSON");
-        result = parseAIWordResult(await this.requestCompletion(messages, "prompt", signal));
+        result = parseAIWordResult(await this.requestCompletion(messages, "prompt", headers, signal));
         return this.createResult(queryWordInfo, result);
       }
 
@@ -68,7 +70,7 @@ export class OpenAICompatibleDictionaryProvider extends BaseDictionaryProvider<A
         result = parseAIWordResult(completion);
       } catch {
         logWarn(this.logLabel, "native JSON output was invalid; retrying with prompt-based JSON");
-        result = parseAIWordResult(await this.requestCompletion(messages, "prompt", signal));
+        result = parseAIWordResult(await this.requestCompletion(messages, "prompt", headers, signal));
       }
     }
 
@@ -78,12 +80,14 @@ export class OpenAICompatibleDictionaryProvider extends BaseDictionaryProvider<A
   private async requestCompletion(
     messages: ReturnType<typeof renderAIDictionaryChatMessages>,
     outputMode: JSONOutputMode,
+    headers: Record<string, string> | undefined,
     signal?: AbortSignal,
   ): Promise<string> {
     const apiKey = this.profile.apiKey.trim();
     const streamResult = streamText({
       baseURL: normalizeOpenAICompatibleEndpoint(this.profile.endpoint),
       ...(apiKey ? { apiKey } : {}),
+      ...(headers ? { headers } : {}),
       model: this.profile.model.trim(),
       messages,
       abortSignal: signal,
