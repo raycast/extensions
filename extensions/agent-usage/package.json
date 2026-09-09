@@ -330,23 +330,23 @@
       "required": false,
       "data": [
         {
-          "title": "1 minute",
+          "title": "1 Minute",
           "value": "1"
         },
         {
-          "title": "5 minutes",
+          "title": "5 Minutes",
           "value": "5"
         },
         {
-          "title": "15 minutes",
+          "title": "15 Minutes",
           "value": "15"
         },
         {
-          "title": "30 minutes",
+          "title": "30 Minutes",
           "value": "30"
         },
         {
-          "title": "60 minutes",
+          "title": "60 Minutes",
           "value": "60"
         }
       ]
