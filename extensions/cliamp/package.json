@@ -1,0 +1,162 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cliamp",
+  "title": "Cliamp",
+  "description": "Control and manage the cliamp terminal music player — playback, search, playlists, queue, and daemon — over its local IPC socket.",
+  "icon": "extension-icon.png",
+  "author": "rickdronkers",
+  "categories": [
+    "Media"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "cliamp",
+      "description": "See the current track and control playback, volume, shuffle, repeat, EQ, and speed.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Music",
+      "subtitle": "cliamp",
+      "description": "Search any configured provider (radio, local, podcasts, streaming services) and play or queue results.",
+      "mode": "view"
+    },
+    {
+      "name": "queue",
+      "title": "Live Playlist",
+      "subtitle": "cliamp",
+      "description": "View and manage the live playlist: play, reorder, queue next, remove.",
+      "mode": "view"
+    },
+    {
+      "name": "playlists",
+      "title": "Browse Playlists",
+      "subtitle": "cliamp",
+      "description": "Browse provider playlists, load them, or drill into their tracks.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Now Playing in Menu Bar",
+      "subtitle": "cliamp",
+      "description": "Current track and playback controls in the macOS menu bar.",
+      "mode": "menu-bar",
+      "interval": "30s"
+    },
+    {
+      "name": "toggle",
+      "title": "Play/Pause",
+      "subtitle": "cliamp",
+      "description": "Toggle playback.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next Track",
+      "subtitle": "cliamp",
+      "description": "Skip to the next track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Previous Track",
+      "subtitle": "cliamp",
+      "description": "Skip to the previous track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop Playback",
+      "subtitle": "cliamp",
+      "description": "Stop playback.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-up",
+      "title": "Raise Volume",
+      "subtitle": "cliamp",
+      "description": "Raise volume by 3 dB.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-down",
+      "title": "Lower Volume",
+      "subtitle": "cliamp",
+      "description": "Lower volume by 3 dB.",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-station",
+      "title": "Play Station",
+      "subtitle": "cliamp",
+      "description": "Play a radio station by name — searches your favorites first, then the radio directory. Ideal as a Quicklink target.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "station",
+          "placeholder": "Station",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "start-daemon",
+      "title": "Start Cliamp Daemon",
+      "subtitle": "cliamp",
+      "description": "Start the headless cliamp daemon if it is not running.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quit-daemon",
+      "title": "Quit Cliamp Daemon",
+      "subtitle": "cliamp",
+      "description": "Stop the running cliamp daemon.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliampPath",
+      "title": "cliamp Binary",
+      "description": "Path to the cliamp executable (used to auto-start the daemon).",
+      "type": "textfield",
+      "required": false,
+      "default": "/opt/homebrew/bin/cliamp"
+    },
+    {
+      "name": "autoStart",
+      "label": "Auto-start daemon",
+      "description": "Start cliamp --daemon automatically when a command finds it not running.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}
