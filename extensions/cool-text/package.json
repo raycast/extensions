@@ -3,7 +3,7 @@
   "name": "cool-text",
   "title": "CoolText",
   "description": "Turn text, emoji, and images into alphabet emoji, ASCII art, or Unicode dot art.",
-  "icon": "cooltext-pencil-icon.png",
+  "icon": "cooltext-pencil-transparent.png",
   "author": "pho_huynh",
   "platforms": [
     "macOS",
