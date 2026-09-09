@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix Star Action Icon] - {PR_MERGE_DATE}
+## [Fix Star Action Icon] - 2026-09-09
 
 - Search Repositories: Fix the broken Star action icon
 
