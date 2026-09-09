@@ -1,6 +1,6 @@
 # Browser Tabs Changelog
 
-## [Fix Maximized Windows on Windows] - {PR_MERGE_DATE}
+## [Fix Maximized Windows on Windows] - 2026-09-09
 
 - Fix switching to or closing a tab shrinking a maximized browser window on Windows: a window that is already on screen is no longer shown again, only brought to the front
 
