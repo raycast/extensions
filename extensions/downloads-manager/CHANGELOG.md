@@ -1,6 +1,8 @@
 # Downloads Manager Changelog
 
-## [Align Manage Downloads keyboard shortcuts] - {PR_MERGE_DATE}
+## [Align shortcuts with Search Screenshots] - {PR_MERGE_DATE}
+
+Bring Downloads Manager closer to Raycast's native Screenshots extension's "Search Screenshots" command, making common file actions and keyboard shortcuts more consistent across Raycast.
 
 - Added a Primary Action preference to copy downloads with Enter, while keeping Open as the default.
 - Added pasting the selected download to the focused app with Command+Enter on macOS or Ctrl+Enter on Windows.
