@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Cached usage and background refresh] - {PR_MERGE_DATE}
+## [Cached usage and background refresh] - 2026-09-09
 
 ### Improvements
 
