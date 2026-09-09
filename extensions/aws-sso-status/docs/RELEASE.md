@@ -5,7 +5,7 @@
 - Raycast username `leo66` verified in the app.
 - English-only Store source prepared; 35 tests, TypeScript, lint, and build passed.
 - Three native Raycast Window Capture screenshots (2000 × 1250 PNG) are in `metadata/`. They use an isolated fake AWS CLI and fictional profiles; no production AWS data is included.
-- Real browser reauthentication and a timed native background-refresh check still need the maintainer's manual verification before submission.
+- The maintainer confirmed successful real browser authentication and background-refresh testing on September 9, 2026.
 
 ## Local manual verification
 
