@@ -7,6 +7,7 @@ import {
   getAIProviderKey,
   getBuiltinProviderKey,
   getInitialProviderOrder,
+  moveProviderInOrder,
   reconcileProviderOrder,
 } from "./providerOrder";
 
@@ -89,5 +90,12 @@ describe("provider ordering", () => {
     expect(
       reconcileProviderOrder([existing, "stale", existing], [existing, newProvider], [existing, newProvider]),
     ).toEqual([existing, newProvider]);
+  });
+
+  it("applies consecutive provider moves to the latest order", () => {
+    const firstMove = moveProviderInOrder(["a", "b", "c", "d"], "b", 1);
+    const secondMove = moveProviderInOrder(firstMove, "b", 1);
+
+    expect(secondMove).toEqual(["a", "c", "d", "b"]);
   });
 });

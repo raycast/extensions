@@ -31,7 +31,12 @@ import type {
 } from "@/ai-providers/types";
 import { getProviderIcon, getQueryTypeIcon } from "@/components/ui/Icons";
 import { myPreferences } from "@/consts";
-import { getAIProviderKey, reconcileProviderOrder, syncAIProviderOrders } from "@/core/query/providerOrder";
+import {
+  getAIProviderKey,
+  moveProviderInOrder,
+  reconcileProviderOrder,
+  syncAIProviderOrders,
+} from "@/core/query/providerOrder";
 import type { useAIProviderProfiles } from "@/hooks/useAIProviderProfiles";
 import {
   type BuiltinProviderService,
@@ -67,11 +72,11 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
   );
   async function saveProfiles(
     updateProfiles: (profiles: AIProviderProfile[]) => AIProviderProfile[],
-    savedOrder?: string[],
+    updateOrder?: (profiles: AIProviderProfile[], savedOrder: string[] | undefined) => string[] | undefined,
   ) {
     const nextState = await controller.update((storedState) => {
       const nextProfiles = updateProfiles(storedState.profiles);
-      const currentOrder = savedOrder ?? storedState.providerOrder;
+      const currentOrder = updateOrder?.(nextProfiles, storedState.providerOrder) ?? storedState.providerOrder;
       const fallbackOrder = getCombinedProviderOrder(nextProfiles, undefined, servicesOrder);
       const previousFallbackOrder = getCombinedProviderOrder(storedState.profiles, undefined, servicesOrder);
       const previousKeys = new Set(getCombinedAvailableProviderKeys(storedState.profiles));
@@ -163,16 +168,14 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
   }
 
   async function moveProvider(providerKey: string, offset: -1 | 1) {
-    const visibleIndex = visibleProviderKeys.indexOf(providerKey);
-    const adjacentKey = visibleProviderKeys[visibleIndex + offset];
-    if (visibleIndex < 0 || !adjacentKey) return;
-    const currentIndex = providerOrder.indexOf(providerKey);
-    const nextIndex = providerOrder.indexOf(adjacentKey);
-    if (currentIndex < 0 || nextIndex < 0) return;
-    const nextOrder = [...providerOrder];
-    [nextOrder[currentIndex], nextOrder[nextIndex]] = [nextOrder[nextIndex], nextOrder[currentIndex]];
     setSelectedProviderKey(providerKey);
-    await saveProfiles((currentProfiles) => currentProfiles, nextOrder);
+    await saveProfiles(
+      (currentProfiles) => currentProfiles,
+      (currentProfiles, savedOrder) => {
+        const currentOrder = getCombinedProviderOrder(currentProfiles, savedOrder, servicesOrder);
+        return moveProviderInOrder(currentOrder, providerKey, offset);
+      },
+    );
     setSelectedProviderKey(providerKey);
   }
 

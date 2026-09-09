@@ -164,6 +164,16 @@ export function reconcileProviderOrder(
   return result;
 }
 
+export function moveProviderInOrder(providerOrder: string[], providerKey: string, offset: -1 | 1): string[] {
+  const currentIndex = providerOrder.indexOf(providerKey);
+  const nextIndex = currentIndex + offset;
+  if (currentIndex < 0 || nextIndex < 0 || nextIndex >= providerOrder.length) return providerOrder;
+
+  const nextOrder = [...providerOrder];
+  [nextOrder[currentIndex], nextOrder[nextIndex]] = [nextOrder[nextIndex], nextOrder[currentIndex]];
+  return nextOrder;
+}
+
 export function getProviderOrder(
   profiles: AIProviderProfile[],
   savedOrder: string[] | undefined,
