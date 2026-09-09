@@ -66,27 +66,35 @@ function parsePattern(pattern: string): AltNode {
     const atom = parseAtom();
     let min = 1;
     let max = 1;
+    let quantified = false;
     const c = peek();
     if (c === "*") {
       min = 0;
       max = Infinity;
+      quantified = true;
       i++;
     } else if (c === "+") {
       min = 1;
       max = Infinity;
+      quantified = true;
       i++;
     } else if (c === "?") {
       min = 0;
       max = 1;
+      quantified = true;
       i++;
     } else if (c === "{") {
       const braces = /^\{(\d+)(,(\d*))?\}/.exec(pattern.slice(i));
       if (braces) {
         min = parseInt(braces[1], 10);
         max = braces[2] === undefined ? min : braces[3] === "" ? Infinity : parseInt(braces[3], 10);
+        quantified = true;
         i += braces[0].length;
       }
     }
+    // Windows Terminal's regex engine rejects a quantified anchor (^?, $*, ^{2}...) as a syntax
+    // error rather than matching it literally or ignoring the quantifier, so mirror that here.
+    if (quantified && (atom.kind === "start" || atom.kind === "end")) return fail("quantified anchor");
     let greedy = true;
     if (peek() === "?") {
       greedy = false;

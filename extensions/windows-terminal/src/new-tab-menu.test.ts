@@ -73,6 +73,13 @@ describe("buildProfileMatcher", () => {
     assert.deepEqual(matchedNames({ type: "matchProfiles", name: "^Power.*$" }), ["PowerShell"]);
   });
 
+  it("rejects a quantified anchor, matching Windows Terminal's regex engine", () => {
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "^?PowerShell" }), null);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "PowerShell$?" }), null);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "^*PowerShell" }), null);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "^{2}PowerShell" }), null);
+  });
+
   it("doesn't exhaust its step budget on a long but linear match", () => {
     const longCommandline = "C:\\tools\\" + "a".repeat(1000) + ".exe";
     const matcher = buildProfileMatcher({ type: "matchProfiles", commandline: "C:\\\\tools\\\\.*\\.exe" });
