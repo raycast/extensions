@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { RecordsResponse, formatDate, recordsUrl, relativeTime } from "./api";
 import { confidenceColor, resetTodayIn } from "./status";
@@ -114,7 +114,7 @@ export default function Command() {
             title="Refresh"
             icon={Icon.ArrowClockwise}
             onAction={() => revalidate()}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
           {record && (
             <Action.CopyToClipboard
