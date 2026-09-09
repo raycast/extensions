@@ -40,19 +40,22 @@
       "name": "search-kato",
       "title": "Search Workspace",
       "description": "Search tasks, records, and meetings",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Kato"
     },
     {
       "name": "objects",
       "title": "Objects",
       "description": "Browse Kato objects and their records",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Kato"
     },
     {
       "name": "my-day",
       "title": "My Day",
       "description": "See today's meetings, tasks, and notifications",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Kato"
     },
     {
       "name": "menu-bar",
@@ -65,31 +68,36 @@
       "name": "my-tasks",
       "title": "My Tasks",
       "description": "View and update your assigned Kato tasks",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Kato"
     },
     {
       "name": "create-task",
       "title": "Create Task",
       "description": "Create a task in Kato",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Kato"
     },
     {
       "name": "upcoming-meetings",
       "title": "Upcoming Meetings",
       "description": "View and join your upcoming Kato meetings",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Kato"
     },
     {
       "name": "notifications",
       "title": "Notifications",
       "description": "Triage mentions, assignments, and updates",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Kato"
     },
     {
       "name": "connection",
       "title": "Current Workspace",
       "description": "View your connection or switch Kato workspaces",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Kato"
     }
   ]
 }

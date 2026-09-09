@@ -57,15 +57,14 @@ export function NotificationActions({
   }
 
   async function dismiss() {
-    onDismissed?.();
     try {
       await katoApi.dismissNotification(notification.id);
+      onDismissed?.();
       await showToast({
         style: Toast.Style.Success,
         title: "Notification dismissed",
       });
     } catch (cause) {
-      onUnread?.();
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not dismiss notification",

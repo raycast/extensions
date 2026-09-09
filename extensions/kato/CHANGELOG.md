@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 - Public Beta
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Added OAuth sign-in with PKCE and workspace selection.
 - Added unified search across tasks, records, and meetings.

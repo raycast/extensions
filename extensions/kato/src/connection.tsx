@@ -18,11 +18,32 @@ import type { WhoAmI } from "./types";
 function ConnectionCommand() {
   const [connection, setConnection] = useState<WhoAmI>();
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>();
 
-  async function load() {
+  async function load(toast?: Toast) {
     setIsLoading(true);
+    setError(undefined);
     try {
       setConnection(await katoApi.whoami());
+      return true;
+    } catch (cause) {
+      const message =
+        cause instanceof Error
+          ? cause.message
+          : "An unexpected error occurred.";
+      setConnection(undefined);
+      setError(message);
+      const options = {
+        style: Toast.Style.Failure,
+        title: "Could not load Kato connection",
+        message,
+      };
+      if (toast) {
+        Object.assign(toast, options);
+      } else {
+        await showToast(options);
+      }
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -32,10 +53,10 @@ function ConnectionCommand() {
 
   async function changeWorkspace() {
     const confirmed = await confirmAlert({
-      title: "Switch Kato Workspace?",
+      title: error ? "Reconnect to Kato?" : "Switch Kato Workspace?",
       message:
         "Raycast will reconnect to Kato and ask which workspace you want to use.",
-      primaryAction: { title: "Switch Workspace" },
+      primaryAction: { title: error ? "Reconnect" : "Switch Workspace" },
     });
     if (!confirmed) return;
 
@@ -44,15 +65,23 @@ function ConnectionCommand() {
       title: "Opening Kato…",
     });
     try {
+      setConnection(undefined);
       await switchWorkspace();
       clearKatoCache();
-      await load();
+      if (!(await load(toast))) return;
       toast.style = Toast.Style.Success;
-      toast.title = "Workspace switched";
+      toast.title = error ? "Reconnected to Kato" : "Workspace switched";
     } catch (cause) {
+      const message =
+        cause instanceof Error
+          ? cause.message
+          : "An unexpected error occurred.";
+      setError(message);
       toast.style = Toast.Style.Failure;
-      toast.title = "Could not switch workspace";
-      toast.message = (cause as Error).message;
+      toast.title = error
+        ? "Could not reconnect to Kato"
+        : "Could not switch workspace";
+      toast.message = message;
     }
   }
 
@@ -60,9 +89,11 @@ function ConnectionCommand() {
     <Detail
       isLoading={isLoading}
       markdown={
-        connection
-          ? `# ${connection.workspace.name}\n\nConnected to Kato as ${connection.member.name ?? connection.member.email ?? "a workspace member"}.`
-          : "# Current Workspace"
+        error
+          ? `# Could not load Kato connection\n\n${error}\n\nCheck your internet connection and choose **Retry Connection**. If access was rejected or expired, choose **Reconnect to Kato** to sign in again and select a workspace.`
+          : connection
+            ? `# ${connection.workspace.name}\n\nConnected to Kato as ${connection.member.name ?? connection.member.email ?? "a workspace member"}.`
+            : "# Current Workspace"
       }
       metadata={
         connection ? (
@@ -100,20 +131,33 @@ function ConnectionCommand() {
       }
       actions={
         <ActionPanel>
+          {error ? (
+            <Action
+              title="Retry Connection"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={() => {
+                clearKatoCache();
+                void load();
+              }}
+            />
+          ) : null}
           <Action
-            title="Switch Workspace"
+            title={error ? "Reconnect to Kato" : "Switch Workspace"}
             icon={Icon.Switch}
             onAction={() => void changeWorkspace()}
           />
-          <Action
-            title="Refresh Connection"
-            icon={Icon.ArrowClockwise}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={() => {
-              clearKatoCache();
-              void load();
-            }}
-          />
+          {!error ? (
+            <Action
+              title="Refresh Connection"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={() => {
+                clearKatoCache();
+                void load();
+              }}
+            />
+          ) : null}
         </ActionPanel>
       }
     />

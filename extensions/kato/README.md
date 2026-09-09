@@ -24,7 +24,7 @@ also disconnect from Raycast's extension preferences.
 - **My Tasks** groups assigned work into Overdue, Today, Upcoming, and Unscheduled, with complete, Undo, inline updates, edit, comment, and detail actions.
 - **Create Task** supports description, due date, priority, status, estimate, assignees, linked records, linked meetings, and sections.
 - **Upcoming Meetings** groups your schedule and makes Join Meeting the primary action when available.
-- **Notifications** triages mentions, assignments, task updates, and record activity with optimistic read and dismiss actions.
+- **Notifications** triages mentions, assignments, task updates, and record activity with optimistic read actions and dismissal after confirmation from Kato.
 - **Current Workspace** shows the active workspace and reconnects OAuth to switch workspaces.
 
 Records and meetings remain read-only. The extension can create and fully edit
