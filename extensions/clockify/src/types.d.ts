@@ -19,6 +19,9 @@ export interface Project {
   description?: string;
   name: string;
   color: string;
+  // The project's "billable by default" setting. Optional so that an absent value stays
+  // distinguishable from false: callers omit the field entirely rather than sending a guess.
+  billable?: boolean;
 }
 
 export interface Task {
