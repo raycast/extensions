@@ -2,6 +2,7 @@ import os from "os";
 import fs from "fs";
 import path from "path";
 import zlib from "zlib";
+import { environment } from "@raycast/api";
 
 function makeChunk(type: string, data: Buffer): Buffer {
   const len = Buffer.alloc(4);
@@ -70,32 +71,59 @@ function unfilterPng(raw: Buffer, w: number, h: number, bytesPerPixel: number): 
   return out;
 }
 
-function decodePng(buf: Buffer): { w: number; h: number; pixels: Buffer } {
+function decodePng(buf: Buffer): { w: number; h: number; pixels: Buffer } | null {
+  if (!buf || buf.length < 29) return null;
+  // PNG signature
+  if (buf.readUInt32BE(0) !== 0x89504e47 || buf.readUInt32BE(4) !== 0x0d0a1a0a) {
+    return null;
+  }
   const w = buf.readUInt32BE(16);
   const h = buf.readUInt32BE(20);
+  const bitDepth = buf.readUInt8(24);
   const colorType = buf.readUInt8(25);
+  const compressionMethod = buf.readUInt8(26);
+  const filterMethod = buf.readUInt8(27);
+  const interlaceMethod = buf.readUInt8(28);
+
+  // Validate standard non-interlaced 8-bit truecolor RGB (2) or RGBA (6)
+  if (bitDepth !== 8 || compressionMethod !== 0 || filterMethod !== 0 || interlaceMethod !== 0) {
+    return null;
+  }
+  if (colorType !== 2 && colorType !== 6) {
+    return null;
+  }
+
   let pos = 8;
   const idatList: Buffer[] = [];
   while (pos < buf.length) {
+    if (pos + 8 > buf.length) break;
     const len = buf.readUInt32BE(pos);
     const type = buf.slice(pos + 4, pos + 8).toString("ascii");
-    if (type === "IDAT") idatList.push(buf.slice(pos + 8, pos + 8 + len));
+    if (type === "IDAT") {
+      idatList.push(buf.slice(pos + 8, pos + 8 + len));
+    }
     pos += 8 + len + 4;
   }
-  const raw = zlib.inflateSync(Buffer.concat(idatList));
-  if (colorType === 2) {
-    const rgb = unfilterPng(raw, w, h, 3);
-    const rgba = Buffer.alloc(w * h * 4);
-    for (let i = 0; i < w * h; i++) {
-      rgba[i * 4] = rgb[i * 3];
-      rgba[i * 4 + 1] = rgb[i * 3 + 1];
-      rgba[i * 4 + 2] = rgb[i * 3 + 2];
-      rgba[i * 4 + 3] = 255;
+  if (idatList.length === 0) return null;
+
+  try {
+    const raw = zlib.inflateSync(Buffer.concat(idatList));
+    if (colorType === 2) {
+      const rgb = unfilterPng(raw, w, h, 3);
+      const rgba = Buffer.alloc(w * h * 4);
+      for (let i = 0; i < w * h; i++) {
+        rgba[i * 4] = rgb[i * 3];
+        rgba[i * 4 + 1] = rgb[i * 3 + 1];
+        rgba[i * 4 + 2] = rgb[i * 3 + 2];
+        rgba[i * 4 + 3] = 255;
+      }
+      return { w, h, pixels: rgba };
+    } else {
+      const rgba = unfilterPng(raw, w, h, 4);
+      return { w, h, pixels: rgba };
     }
-    return { w, h, pixels: rgba };
-  } else {
-    const rgba = unfilterPng(raw, w, h, 4);
-    return { w, h, pixels: rgba };
+  } catch {
+    return null;
   }
 }
 
@@ -168,11 +196,12 @@ function blendPixel(dst: Buffer, dIdx: number, r: number, g: number, b: number, 
 
 // User Request:
 // "remove the background instead fill the space by increasing the size of badge icon"
-function compositeAvatarMainWithDirectBadge(avatarPngBuf: Buffer, browserPngBuf: Buffer): Buffer {
+function compositeAvatarMainWithDirectBadge(avatarPngBuf: Buffer, browserPngBuf: Buffer): Buffer | null {
   const canvas = Buffer.alloc(256 * 256 * 4);
 
-  // 1. Draw Profile Avatar as the MAIN HERO ICON (Circular, diameter 240px, centered at 116, 140)
   const av = decodePng(avatarPngBuf);
+  const browserLogo = decodePng(browserPngBuf);
+  if (!av || !browserLogo) return null;
   const mainCx = 116;
   const mainCy = 140;
   const mainRadius = 120;
@@ -207,7 +236,6 @@ function compositeAvatarMainWithDirectBadge(avatarPngBuf: Buffer, browserPngBuf:
   const logoRadius = 68;
   const logoDrawSize = logoRadius * 2;
 
-  const browserLogo = decodePng(browserPngBuf);
   const scaledLogo = resizeRgba(browserLogo.pixels, browserLogo.w, browserLogo.h, logoDrawSize, logoDrawSize);
   const logoStartX = badgeCx - logoRadius;
   const logoStartY = badgeCy - logoRadius;
@@ -286,18 +314,19 @@ export function ensureAvatarBadgedIcon(
 
   try {
     const assetsDir = getAssetsDir();
-    const profilesDir = path.join(assetsDir, "profiles");
+    const supportDir = environment.supportPath;
+    const profilesDir = path.join(supportDir, "profiles");
     if (!fs.existsSync(profilesDir)) {
       fs.mkdirSync(profilesDir, { recursive: true });
     }
 
-    const badgedFile = path.join(profilesDir, `v8_nobg_${safeProfileId}.png`);
+    const badgedFile = path.join(profilesDir, `nobg_${safeProfileId}.png`);
     const avatarStat = fs.statSync(diskAvatarPath);
 
     if (fs.existsSync(badgedFile)) {
       const badgedStat = fs.statSync(badgedFile);
       if (badgedStat.mtimeMs >= avatarStat.mtimeMs) {
-        return `profiles/v8_nobg_${safeProfileId}.png`;
+        return badgedFile;
       }
     }
 
@@ -310,14 +339,12 @@ export function ensureAvatarBadgedIcon(
     const browserLogoBuf = fs.readFileSync(browserLogoPath);
     const avatarBuf = fs.readFileSync(diskAvatarPath);
     const composited = compositeAvatarMainWithDirectBadge(avatarBuf, browserLogoBuf);
+    if (!composited) {
+      return undefined;
+    }
 
     fs.writeFileSync(badgedFile, composited);
-    fs.writeFileSync(path.join(profilesDir, `v7_glass_badge_${safeProfileId}.png`), composited);
-    fs.writeFileSync(path.join(profilesDir, `v6_badge_${safeProfileId}.png`), composited);
-    fs.writeFileSync(path.join(profilesDir, `v5_badge_${safeProfileId}.png`), composited);
-    fs.writeFileSync(path.join(profilesDir, `${safeProfileId}.png`), composited);
-
-    return `profiles/v8_nobg_${safeProfileId}.png`;
+    return badgedFile;
   } catch (err) {
     console.error(`Failed to generate badged icon for ${safeProfileId}:`, err);
     return undefined;

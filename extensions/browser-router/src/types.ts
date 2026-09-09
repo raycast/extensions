@@ -15,17 +15,13 @@ export interface BrowserProfile {
   isFavorite?: boolean;
 }
 
-export interface ExtensionPreferences {
-  defaultSearchEngine: "google" | "duckduckgo" | "bing" | "brave" | "perplexity" | "ecosia" | "custom";
-  customSearchUrl?: string;
-}
-
 export interface CustomProfileData {
   id: string;
   browserName: string;
   profileName: string;
   executablePath: string;
   profileDirectory: string;
+  browserType?: "chromium" | "firefox";
   browserId?: string;
   userDataDir?: string;
 }

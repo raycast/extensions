@@ -27,8 +27,16 @@ export async function launchBrowserProfile(
       if (incognito) {
         args.push("-private-window");
       }
-      if (profile.profileDirectory && profile.profileDirectory !== "default") {
-        args.push("-P", profile.profileDirectory);
+      if (
+        profile.profileDirectory &&
+        profile.profileDirectory !== "default" &&
+        profile.profileDirectory !== "Default"
+      ) {
+        if (path.isAbsolute(profile.profileDirectory) || fs.existsSync(profile.profileDirectory)) {
+          args.push("-profile", profile.profileDirectory);
+        } else {
+          args.push("-P", profile.profileDirectory);
+        }
       }
       if (targetUrl) {
         args.push(targetUrl);
@@ -43,13 +51,6 @@ export async function launchBrowserProfile(
         }
       }
 
-      // For Brave, Vivaldi, Arc, Opera, and custom browsers:
-      // Raycast runs as an MSIX packaged app on Windows, which can redirect CSIDL_LOCALAPPDATA to AppData\Local\Temp
-      // when child processes are spawned without explicit paths. This caused cold-started browsers to boot into empty,
-      // unauthenticated Temp profiles instead of the real user profile.
-      // Explicitly passing --user-data-dir overrides this and forces Chromium to use the real profile on disk!
-      // (Note: Do not pass --user-data-dir for Chrome and Edge when they are running with background tasks,
-      // to avoid exit code 21 profile lock contention).
       if (
         profile.browserId === "brave" ||
         profile.browserId === "vivaldi" ||
@@ -85,10 +86,6 @@ export async function launchBrowserProfile(
       }
     }
 
-    // Direct process spawn using Node standard libuv command line formatting.
-    // NOTE: Never use windowsVerbatimArguments: true on Windows!
-    // With standard spawn, Node automatically quotes executable paths and arguments with spaces safely,
-    // preventing Chrome and Edge from opening bogus http://files/... or [(x86)] tabs.
     const child = spawn(profile.executablePath, args, {
       detached: true,
       stdio: "ignore",
@@ -96,25 +93,36 @@ export async function launchBrowserProfile(
       env: process.env,
     });
 
-    child.on("error", async (err) => {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to launch browser",
-        message: err.message,
+    return new Promise<boolean>((resolve) => {
+      let settled = false;
+
+      child.once("error", async (err) => {
+        if (settled) return;
+        settled = true;
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to launch browser",
+          message: err.message,
+        });
+        resolve(false);
+      });
+
+      child.once("spawn", async () => {
+        if (settled) return;
+        settled = true;
+        child.unref();
+
+        const modeText = incognito ? " (Incognito)" : "";
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Opened in ${profile.displayName}${modeText}`,
+          message: targetUrl ? (targetUrl.length > 50 ? targetUrl.substring(0, 47) + "..." : targetUrl) : undefined,
+        });
+
+        await closeMainWindow();
+        resolve(true);
       });
     });
-
-    child.unref();
-
-    const modeText = incognito ? " (Incognito)" : "";
-    await showToast({
-      style: Toast.Style.Success,
-      title: `Opened in ${profile.displayName}${modeText}`,
-      message: targetUrl ? (targetUrl.length > 50 ? targetUrl.substring(0, 47) + "..." : targetUrl) : undefined,
-    });
-
-    await closeMainWindow();
-    return true;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     await showToast({

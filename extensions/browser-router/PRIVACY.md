@@ -50,11 +50,16 @@ None of this data leaves your machine or syncs to external servers.
 
 ## 4. Optional In-App Feedback & Discord Relay
 
-When you choose to submit feedback or report a bug via <kbd>Ctrl</kbd> + <kbd>F</kbd>:
+When you choose to submit feedback or report a bug via the built-in feedback form:
 - **Data Transmitted**:
   - Selected feedback category (Bug Report, Feature Request, Question, Other)
   - Subject line and description text entered by you
+  - Optional contact email (only if you voluntarily enter one to receive a response)
+  - Operating system platform (Windows)
   - Extension version (e.g., 1.0.0)
+- **What is NEVER Transmitted**:
+  - No hardware identifiers, CPU architecture, device fingerprints, or tracking cookies.
+  - No search queries, destinations, URLs, browsing history, or local profile paths.
 - **How It Works**:
   - The payload is transmitted securely via HTTPS to an authenticated Cloudflare Worker relay (https://search-router-feedback.kanha01945.workers.dev/).
   - The Cloudflare Worker formats a secure Discord embed and delivers it directly to the developer's community triage channel without exposing Discord webhook credentials in the client code.

@@ -13,7 +13,7 @@ import {
   LocalStorage,
 } from "@raycast/api";
 import { useEffect, useState, useMemo } from "react";
-import { BrowserProfile, ExtensionPreferences } from "./types";
+import { BrowserProfile } from "./types";
 import { detectAllProfiles } from "./utils/browserDetector";
 import { buildTargetUrl } from "./utils/urlHelper";
 import { launchBrowserProfile } from "./utils/launcher";
@@ -24,7 +24,7 @@ import { FeedbackForm } from "./components/FeedbackForm";
 import { UserManualView } from "./components/UserManualView";
 
 export default function Command(props: LaunchProps<{ arguments: { query?: string }; fallbackText?: string }>) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   // Determine if query came from Raycast argument or fallback text
   const initialQuery = (props.arguments.query || props.fallbackText || "").trim();

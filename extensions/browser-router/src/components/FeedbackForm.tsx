@@ -140,11 +140,8 @@ export function FeedbackForm() {
     }
 
     const trimmedEmail = enteredEmail.trim();
-    if (!trimmedEmail) {
-      setEmailError("Email is required");
-      hasError = true;
-    } else if (!EMAIL_REGEX.test(trimmedEmail)) {
-      setEmailError("Please enter a valid email address");
+    if (trimmedEmail && !EMAIL_REGEX.test(trimmedEmail)) {
+      setEmailError("Please enter a valid email address or leave empty");
       hasError = true;
     } else {
       setEmailError(undefined);
@@ -176,8 +173,8 @@ export function FeedbackForm() {
     }
 
     const fields = [
-      { name: "👤 Submitter", value: trimmedEmail, inline: true },
-      { name: "💻 System", value: `Windows (${process.arch})`, inline: true },
+      { name: "👤 Submitter", value: trimmedEmail || "Anonymous", inline: true },
+      { name: "💻 Platform", value: "Windows", inline: true },
     ];
 
     if (selectedCategory === "other" && selectedCustomCategory.trim()) {

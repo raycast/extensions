@@ -335,10 +335,8 @@ export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
         for (let i = 1; i < sections.length; i++) {
           const section = sections[i];
           const nameMatch = section.match(/Name=([^\r\n]+)/);
-          const pathMatch = section.match(/Path=([^\r\n]+)/);
           if (nameMatch) {
             const profileName = nameMatch[1].trim();
-            const profilePath = pathMatch ? pathMatch[1].trim() : profileName;
             ffProfilesFound++;
             const profileId = `firefox_${profileName}`;
             const customName = nicknames[profileId];
@@ -349,7 +347,7 @@ export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
               browserName: "Firefox",
               profileName,
               displayName: customName || `Firefox — ${profileName}`,
-              profileDirectory: profilePath,
+              profileDirectory: profileName,
               executablePath: firefoxExe,
               iconPath: ffLogo,
               fallbackIcon: "extension-icon.png",
@@ -381,12 +379,17 @@ export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
   // Merge Custom Profiles
   const customProfiles = await getCustomProfiles();
   for (const cp of customProfiles) {
-    const logoIcon =
-      getExtractedAssetIcon(cp.browserId || "custom", cp.executablePath) || findLogoInAppDir(cp.executablePath);
+    const isFirefox =
+      cp.browserType === "firefox" ||
+      cp.browserId === "firefox" ||
+      cp.executablePath.toLowerCase().includes("firefox") ||
+      cp.browserName.toLowerCase().includes("firefox");
+    const browserId = isFirefox ? "firefox" : cp.browserId || "custom";
+    const logoIcon = getExtractedAssetIcon(browserId, cp.executablePath) || findLogoInAppDir(cp.executablePath);
     const customName = nicknames[cp.id];
     profiles.push({
       id: cp.id,
-      browserId: cp.browserId || "custom",
+      browserId,
       browserName: cp.browserName,
       profileName: cp.profileName,
       displayName: customName || `${cp.browserName} — ${cp.profileName}`,
