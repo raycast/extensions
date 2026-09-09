@@ -1,8 +1,15 @@
-import { Clipboard, showHUD, type LaunchProps } from "@raycast/api";
+import { Clipboard, showHUD } from "@raycast/api";
 import { renderCoolText } from "./render";
 
-export default async function Command(props: LaunchProps<{ arguments: Arguments.CoolText }>) {
-  const { text, variant, font } = props.arguments;
+export default async function copyQuickText({
+  text = "",
+  variant,
+  font,
+}: {
+  text?: string;
+  variant?: string;
+  font?: string;
+}) {
   if (!text.trim()) {
     await showHUD("Enter some text to copy");
     return;

@@ -1,7 +1,12 @@
 import { Jimp, intToRGBA } from "jimp";
+import { imageDimensions } from "./image-dimensions";
 
 export const IMAGE_WIDTHS = { Compact: 32, Detailed: 56 } as const;
 export const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+export const MAX_IMAGE_PIXELS = 16_000_000;
+export const MAX_IMAGE_DIMENSION = 8192;
+const MAX_JPEG_MEMORY_MB = 128;
+const PIXELS_PER_MEGAPIXEL = 1_000_000;
 const MAX_ROWS = 64;
 const CHARACTER_ASPECT_RATIO = 0.5;
 const CHANNEL_MAX = 255;
@@ -29,7 +34,22 @@ async function prepare(buffer: Buffer, columns: number, cellWidth: number, cellH
   if (!Number.isInteger(columns) || columns < 1 || columns > IMAGE_WIDTHS.Detailed) {
     throw new Error("Choose a supported image width.");
   }
-  const image = await Jimp.fromBuffer(buffer);
+  const dimensions = imageDimensions(buffer);
+  if (
+    dimensions.width < 1 ||
+    dimensions.height < 1 ||
+    dimensions.width > MAX_IMAGE_DIMENSION ||
+    dimensions.height > MAX_IMAGE_DIMENSION ||
+    dimensions.width * dimensions.height > MAX_IMAGE_PIXELS
+  ) {
+    throw new Error("Choose an image up to 16 megapixels and 8192 pixels per side.");
+  }
+  const image = await Jimp.fromBuffer(buffer, {
+    "image/jpeg": {
+      maxResolutionInMP: MAX_IMAGE_PIXELS / PIXELS_PER_MEGAPIXEL,
+      maxMemoryUsageInMB: MAX_JPEG_MEMORY_MB,
+    },
+  });
   const aspectRatio = image.height / image.width;
   const width = Math.max(1, Math.min(columns, Math.floor(MAX_ROWS / (aspectRatio * CHARACTER_ASPECT_RATIO))));
   const height = Math.min(MAX_ROWS, Math.max(1, Math.round(width * aspectRatio * CHARACTER_ASPECT_RATIO)));

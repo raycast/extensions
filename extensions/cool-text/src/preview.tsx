@@ -1,7 +1,10 @@
-import { Action, ActionPanel, Clipboard, Icon, List, Toast, showHUD, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Clipboard, Icon, List, Toast, showHUD, showToast, type LaunchProps } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
 import { ASCII_FONTS, DEFAULT_FONT, transformText } from "./transform";
 import { renderCoolText } from "./render";
+import copyQuickText from "./cool-text";
+import ImageCommand from "./image";
+import type { DotTextDetail } from "./dot-text";
 
 const EXAMPLE_TEXT = "Cool";
 const STYLES = [
@@ -25,29 +28,46 @@ const STYLES = [
   },
 ] as const;
 
-type ArtPreview = { source: string; font: string; variant: string; output: string; error: string };
+type ArtPreview = {
+  source: string;
+  font: string;
+  detail: DotTextDetail;
+  variant: string;
+  output: string;
+  error: string;
+};
 
-export default function Preview() {
-  const [text, setText] = useState("");
-  const [selectedStyle, setSelectedStyle] = useState<string>("alphabet");
-  const [font, setFont] = useState<string>(DEFAULT_FONT);
+export default function Preview({ arguments: args }: LaunchProps<{ arguments: Arguments.Preview }>) {
+  const [text, setText] = useState(args.text || "");
+  const [selectedStyle, setSelectedStyle] = useState<string>(args.variant || "alphabet");
+  const [font, setFont] = useState<string>(args.font || DEFAULT_FONT);
+  const [dotDetail, setDotDetail] = useState<DotTextDetail>("Detailed");
+  const quickCopyStarted = useRef(false);
   const [art, setArt] = useState<ArtPreview>();
   const hasInput = Boolean(text.trim());
   const source = hasInput ? text : EXAMPLE_TEXT;
-  const artReady = art?.source === source && art.font === font && art.variant === selectedStyle;
+  const artReady =
+    art?.source === source && art.font === font && art.detail === dotDetail && art.variant === selectedStyle;
+
+  useEffect(() => {
+    if (!args.text || quickCopyStarted.current) return;
+    quickCopyStarted.current = true;
+    void copyQuickText(args);
+  }, [args]);
 
   useEffect(() => {
     if (selectedStyle === "alphabet" || artReady) return;
     let cancelled = false;
-    renderCoolText(source, selectedStyle, font).then(
+    renderCoolText(source, selectedStyle, font, dotDetail).then(
       (output) => {
-        if (!cancelled) setArt({ source, font, variant: selectedStyle, output, error: "" });
+        if (!cancelled) setArt({ source, font, detail: dotDetail, variant: selectedStyle, output, error: "" });
       },
       (error: unknown) => {
         if (!cancelled)
           setArt({
             source,
             font,
+            detail: dotDetail,
             variant: selectedStyle,
             output: "",
             error: error instanceof Error ? error.message : "Could not preview text",
@@ -57,7 +77,7 @@ export default function Preview() {
     return () => {
       cancelled = true;
     };
-  }, [source, font, selectedStyle, artReady]);
+  }, [source, font, dotDetail, selectedStyle, artReady]);
 
   const alphabetOutput = transformText(source);
   function cycleStyle(direction: number) {
@@ -94,7 +114,6 @@ export default function Preview() {
 
   return (
     <List
-      navigationTitle="CoolText"
       searchBarPlaceholder="Type text or emoji… Tab switches style"
       searchText={text}
       onSearchTextChange={setText}
@@ -111,6 +130,15 @@ export default function Preview() {
             {ASCII_FONTS.map((name) => (
               <List.Dropdown.Item key={name} title={name} value={name} />
             ))}
+          </List.Dropdown>
+        ) : selectedStyle === "dots" ? (
+          <List.Dropdown
+            tooltip="Dot text detail"
+            value={dotDetail}
+            onChange={(value) => setDotDetail(value as DotTextDetail)}
+          >
+            <List.Dropdown.Item title="Detailed" value="Detailed" />
+            <List.Dropdown.Item title="Compact" value="Compact" />
           </List.Dropdown>
         ) : undefined
       }
@@ -138,6 +166,12 @@ export default function Preview() {
             actions={
               <ActionPanel>
                 <Action title="Copy Text" icon={Icon.Clipboard} onAction={() => copy(style.id)} />
+                <Action.Push
+                  title="Image to Text Art"
+                  icon={Icon.Image}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "i" }, Windows: { modifiers: ["ctrl"], key: "i" } }}
+                  target={<ImageCommand />}
+                />
                 <Action
                   title="Next Style"
                   icon={Icon.ArrowRight}

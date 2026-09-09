@@ -18,22 +18,25 @@
   "private": true,
   "commands": [
     {
-      "name": "cool-text",
-      "title": "Quick Copy CoolText",
-      "description": "Choose a style, transform your text, and automatically copy the result.",
-      "mode": "no-view",
+      "name": "preview",
+      "title": "CoolText",
+      "description": "Create text or image art, preview styles, and copy the result.",
+      "mode": "view",
       "keywords": [
         "emoji",
         "ascii",
         "alphabet",
-        "clipboard"
+        "clipboard",
+        "image",
+        "unicode",
+        "dots"
       ],
       "arguments": [
         {
           "name": "text",
           "type": "text",
-          "placeholder": "Type your cool text",
-          "required": true
+          "placeholder": "Text to copy (optional)",
+          "required": false
         },
         {
           "name": "variant",
@@ -79,32 +82,6 @@
             }
           ]
         }
-      ]
-    },
-    {
-      "name": "preview",
-      "title": "CoolText",
-      "description": "Preview alphabet emoji, ASCII art, or Unicode dots as you type, then press Enter to copy.",
-      "mode": "view",
-      "keywords": [
-        "emoji",
-        "ascii",
-        "preview",
-        "alphabet"
-      ]
-    },
-    {
-      "name": "image",
-      "title": "Image to Text Art",
-      "description": "Turn an image into ASCII or Unicode dot art with size and contrast controls.",
-      "mode": "view",
-      "keywords": [
-        "image",
-        "photo",
-        "ascii",
-        "picture",
-        "unicode",
-        "dots"
       ]
     }
   ],

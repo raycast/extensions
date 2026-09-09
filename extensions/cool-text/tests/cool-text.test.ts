@@ -9,7 +9,7 @@ import { Clipboard, showHUD } from "@raycast/api";
 import Command from "../src/cool-text";
 
 function run(text: string, variant = "alphabet") {
-  return Command({ arguments: { text, variant } } as Parameters<typeof Command>[0]);
+  return Command({ text, variant });
 }
 
 beforeEach(() => vi.resetAllMocks());

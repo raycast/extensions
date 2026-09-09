@@ -34,3 +34,33 @@ it("routes emoji through the Unicode dot renderer", async () => {
   expect(await renderCoolText("😀", "dots")).toBe("⣿⡇");
   expect(emojiToAscii).toHaveBeenCalledExactlyOnceWith("😀", "dots");
 });
+
+it("rejects too many emoji before starting any downloads", async () => {
+  for (const variant of ["ascii", "dots"]) {
+    await expect(renderCoolText("😀".repeat(9), variant)).rejects.toThrow("up to 8 emoji");
+  }
+  expect(emojiToAscii).not.toHaveBeenCalled();
+});
+
+it("accepts eight joined emoji as eight pictures", async () => {
+  vi.mocked(emojiToAscii).mockResolvedValue("ART");
+  expect(await renderCoolText("👩🏽‍💻".repeat(8), "ascii")).toBe(Array(8).fill("ART").join("\n\n"));
+  expect(emojiToAscii).toHaveBeenCalledTimes(8);
+});
+
+it("starts emoji requests together and retains input order when they finish out of order", async () => {
+  let resolveFirst!: (value: string) => void;
+  let resolveSecond!: (value: string) => void;
+  const first = new Promise<string>((resolve) => {
+    resolveFirst = resolve;
+  });
+  const second = new Promise<string>((resolve) => {
+    resolveSecond = resolve;
+  });
+  vi.mocked(emojiToAscii).mockReturnValueOnce(first).mockReturnValueOnce(second);
+  const result = renderCoolText("😀😎", "ascii");
+  await vi.waitFor(() => expect(emojiToAscii).toHaveBeenCalledTimes(2));
+  resolveSecond("SECOND");
+  resolveFirst("FIRST");
+  expect(await result).toBe("FIRST\n\nSECOND");
+});
