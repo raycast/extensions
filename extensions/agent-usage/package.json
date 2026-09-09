@@ -60,7 +60,14 @@
       "subtitle": "Agent Usage",
       "description": "Show agent usage in the menu bar",
       "mode": "menu-bar",
-      "interval": "1h"
+      "interval": "1m"
+    },
+    {
+      "name": "refresh-agent-usage",
+      "title": "Refresh Agent Usage",
+      "description": "Refresh cached usage for enabled providers in the background",
+      "mode": "no-view",
+      "interval": "1m"
     }
   ],
   "platforms": [
@@ -309,10 +316,40 @@
     {
       "name": "cacheTtl",
       "type": "textfield",
-      "title": "Cache Duration (Seconds)",
-      "description": "Cache duration in seconds for remote API requests. Set to 0 to disable caching.",
+      "title": "Cache Reads (0 to Disable)",
+      "description": "Set to 0 to disable cache reads. When enabled, the usage screen keeps cached results until manual or background refresh.",
       "default": "180",
       "required": false
+    },
+    {
+      "name": "backgroundRefreshInterval",
+      "type": "dropdown",
+      "title": "Background Refresh Interval",
+      "description": "How often to update cached provider usage. Enable the Refresh Agent Usage command in Raycast to start background updates. Scheduling is approximate.",
+      "default": "1",
+      "required": false,
+      "data": [
+        {
+          "title": "1 Minute",
+          "value": "1"
+        },
+        {
+          "title": "5 Minutes",
+          "value": "5"
+        },
+        {
+          "title": "15 Minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 Minutes",
+          "value": "30"
+        },
+        {
+          "title": "60 Minutes",
+          "value": "60"
+        }
+      ]
     }
   ],
   "title": "Agent Usage"

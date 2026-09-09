@@ -4,6 +4,9 @@ import { loadAccounts } from "../accounts/storage.ts";
 import { resolveAihubmixAccessKey } from "../aihubmix/auth.ts";
 import { fetchAihubmixUsage } from "../aihubmix/fetcher.ts";
 import type { AihubmixError, AihubmixUsage } from "../aihubmix/types.ts";
+import { checkAmpCredentials } from "../amp/auth.ts";
+import { checkAntigravityCredentials } from "../antigravity/credential-check.ts";
+import { checkGrokCredentials } from "../grok/auth.ts";
 import { fetchAmpUsage } from "../amp/fetcher.ts";
 import type { AmpError, AmpUsage } from "../amp/types.ts";
 import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
@@ -105,11 +108,19 @@ export const useAihubmixUsage = createUsageHook<AihubmixUsage, AihubmixError>({
 
 export const useAmpUsage = createUsageHook<AmpUsage, AmpError>({
   agentId: "amp",
+  credentials: {
+    check: checkAmpCredentials,
+    error: (message) => ({ type: "unknown", message }),
+  },
   fetcher: fetchAmpUsage,
 });
 
 export const useAntigravityUsage = createUsageHook<AntigravityUsage, AntigravityError>({
   agentId: "antigravity",
+  credentials: {
+    check: checkAntigravityCredentials,
+    error: (message) => ({ type: "unknown", message }),
+  },
   fetcher: () => fetchAntigravityUsage(),
 });
 
@@ -198,6 +209,10 @@ export const useGeminiUsage = createUsageHook<GeminiUsage, GeminiError>({
 
 export const useGrokUsage = createUsageHook<GrokUsage, GrokError>({
   agentId: "grok",
+  credentials: {
+    check: checkGrokCredentials,
+    error: (message) => ({ type: "unknown", message }),
+  },
   fetcher: fetchGrokUsage,
 });
 
@@ -269,8 +284,7 @@ export const useOpencodegoUsage = createUsageHook<OpencodegoUsage, OpencodegoErr
 export const useOpenRouterUsage = createUsageHook<OpenRouterUsage, OpenRouterError>({
   agentId: "openrouter",
   resolveAuthKey: async () => (await resolveOpenRouterApiKey(prefValue("openrouterApiKey"))) ?? "",
-  fetcher: async () => {
-    const apiKey = await resolveOpenRouterApiKey(prefValue("openrouterApiKey"));
+  fetcher: async (apiKey) => {
     if (!apiKey) {
       return {
         usage: null,
