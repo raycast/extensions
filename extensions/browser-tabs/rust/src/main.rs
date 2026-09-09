@@ -35,7 +35,7 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     EnumWindows, GetForegroundWindow, GetWindowThreadProcessId, IsIconic, IsWindowVisible,
-    SetForegroundWindow, ShowWindow, SW_RESTORE, SW_SHOW,
+    SetForegroundWindow, ShowWindow, SW_RESTORE,
 };
 
 /// Browsers whose tab strips UI Automation can read. The Gecko based ones are included even
@@ -494,10 +494,12 @@ fn is_selected(tab: &IUIAutomationElement) -> bool {
 
 fn bring_window_to_front(hwnd: HWND) {
     unsafe {
+        // Only a minimised window needs showing again, and SW_RESTORE puts one that was
+        // maximised before it was minimised back to maximised. A window that is already on
+        // screen is left alone: ShowWindow on it drops a maximised window back to its
+        // restored size, and foregrounding is all that is needed anyway.
         if IsIconic(hwnd).as_bool() {
             let _ = ShowWindow(hwnd, SW_RESTORE);
-        } else {
-            let _ = ShowWindow(hwnd, SW_SHOW);
         }
         let _ = SetForegroundWindow(hwnd);
     }

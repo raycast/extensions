@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Hermoso MCP Server] - 2026-09-08
+
+Add Hermoso to the official registry: an AI ad studio for marketers. Research winning ads across the Meta, Google and LinkedIn ad libraries and organic social, generate finished on-brand image and video ads, publish and schedule to your own channels, and build and manage paid campaigns across the major ad platforms. Remote Streamable HTTP server with OAuth sign-in through an `mcp-remote` bridge, no API key.
+
 ## [Add Stellary MCP Server] - 2026-09-02
 
 Add Stellary to the community registry: AI-native project piloting and project management (open beta). Remote Streamable HTTP MCP server via mcp-remote; Bearer PAT required.

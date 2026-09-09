@@ -43,7 +43,14 @@ export interface FetcherArgs {
 export interface User {
   id: string;
   name: string;
-  defaultWorkspace: string;
+  // Not guaranteed to be present: Clockify omits/empties these for some accounts.
+  defaultWorkspace?: string;
+  activeWorkspace?: string;
+}
+
+export interface Workspace {
+  id: string;
+  name: string;
 }
 
 export interface FetcherResponse {

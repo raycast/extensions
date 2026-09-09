@@ -9,7 +9,8 @@
     "xilopaint",
     "ridemountainpig",
     "pernielsentikaer",
-    "proprocrastinator"
+    "proprocrastinator",
+    "bailey_jennings"
   ],
   "platforms": [
     "macOS",
@@ -46,6 +47,24 @@
           "required": false,
           "label": "Show Text",
           "default": true
+        },
+        {
+          "name": "menutemperature",
+          "type": "dropdown",
+          "title": "Temperature",
+          "description": "Which temperature to show as menu bar text",
+          "required": false,
+          "default": "actual",
+          "data": [
+            {
+              "title": "Actual",
+              "value": "actual"
+            },
+            {
+              "title": "Feels Like",
+              "value": "feelslike"
+            }
+          ]
         }
       ]
     }
@@ -111,6 +130,9 @@
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
   },
   "version": "0.3.0",
   "scripts": {

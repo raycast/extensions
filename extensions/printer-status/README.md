@@ -16,9 +16,13 @@ To get specific data, SNMP relies on **OIDs (Object Identifiers)**. An OID is a 
 
 This extension uses configurable Printer-MIB OIDs suitable for the Xerox C325 to fetch data such as:
 
-- Page counts
-- Toner levels
-- Device status
+- Page counts (total, black & white, color)
+- Toner ink levels (black, cyan, magenta, yellow)
+- Waste toner bottle level
+- Device identity (model, serial number, network name)
+- Uptime
+- General printer status (idle, printing, warmup, etc.)
+- Console display messages (up to 4 lines)
 
 ## Configuration
 
@@ -28,3 +32,5 @@ To use this extension, you must provide the IP address of your printer. The defa
 2. Go to **Raycast Settings** → **Extensions** → **Printer Status**.
 3. Enter your printer's IP address in the **Printer IP Address** field (default: `192.168.1.10`).
 4. Adjust the OID preferences only if your printer returns empty or incorrect values.
+
+> **Note:** The **OID - Printer Status (Legacy)** preference is deprecated in favor of **OID - Display Message 1** and only exists to keep older custom configurations working. New setups should use **OID - Display Message 1** instead.
