@@ -5,9 +5,14 @@ import { getBuiltinProviderCandidates } from "@/core/query/providerOrder";
 import { builtinProviderServices } from "@/providers/registry";
 import { normalizeError } from "@/utils/errors";
 
-import { migrateLegacyAIProviderState } from "./legacy";
+import { LEGACY_AI_PROVIDER_NAMES, migrateLegacyAIProviderState } from "./legacy";
 import { getLegacyAIProviderConfiguration } from "./legacyConfiguration";
-import { type AIProviderLoadResult, loadAIProviderState, saveAIProviderState } from "./repository";
+import {
+  type AIProviderLoadResult,
+  createEmptyAIProviderState,
+  loadAIProviderState,
+  saveAIProviderState,
+} from "./repository";
 import type { StoredAIProviderState } from "./types";
 
 export type AIProviderConfigurationLoadResult =
@@ -21,6 +26,13 @@ export function loadAIProviderConfiguration(): Promise<AIProviderConfigurationLo
     pendingLoad = undefined;
   });
   return pendingLoad;
+}
+
+export function resetAIProviderConfiguration(): Promise<void> {
+  return saveAIProviderState({
+    ...createEmptyAIProviderState(),
+    migratedLegacyProviders: [...LEGACY_AI_PROVIDER_NAMES],
+  });
 }
 
 async function loadAndMigrate(): Promise<AIProviderConfigurationLoadResult> {

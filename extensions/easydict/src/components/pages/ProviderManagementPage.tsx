@@ -15,13 +15,14 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Fragment, useState } from "react";
 
+import { resetAIProviderConfiguration } from "@/ai-providers/configuration";
 import { createProfileFromLegacySettings, LEGACY_AI_PROVIDER_NAMES } from "@/ai-providers/legacy";
 import { getLegacyAIProviderConfiguration } from "@/ai-providers/legacyConfiguration";
 import { getDefaultRaycastAIModel } from "@/ai-providers/modelCatalog";
 import { OPENAI_COMPATIBLE_PRESETS, type OpenAICompatiblePresetName } from "@/ai-providers/presets";
-import { createEmptyAIProviderState } from "@/ai-providers/repository";
 import { isAIProviderProfileRunnable } from "@/ai-providers/runtime";
 import type {
   AIProviderProfile,
@@ -152,11 +153,13 @@ export default function ProviderManagementPage({ controller }: { controller: AIP
                     message: "This permanently removes all saved dynamic providers and API keys.",
                     primaryAction: { title: "Reset", style: Alert.ActionStyle.Destructive },
                   });
-                  if (confirmed) {
-                    await controller.update(() => ({
-                      ...createEmptyAIProviderState(),
-                      migratedLegacyProviders: [...LEGACY_AI_PROVIDER_NAMES],
-                    }));
+                  if (!confirmed) return;
+
+                  try {
+                    await resetAIProviderConfiguration();
+                    await controller.revalidate();
+                  } catch (error) {
+                    await showFailureToast(error, { title: "Failed to Reset AI Provider Configuration" });
                   }
                 }}
               />

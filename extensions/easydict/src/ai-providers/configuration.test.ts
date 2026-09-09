@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAIProviderKey } from "@/core/query/providerOrder";
 
-import { loadAIProviderConfiguration } from "./configuration";
+import { loadAIProviderConfiguration, resetAIProviderConfiguration } from "./configuration";
 import { AI_PROVIDER_STORAGE_KEY, saveAIProviderState } from "./repository";
 
 const { storage, legacy } = vi.hoisted(() => ({
@@ -131,13 +131,32 @@ describe("AI provider configuration loading", () => {
   });
 
   it.each([
-    ["{broken", "invalid"],
-    [JSON.stringify({ version: 99, profiles: [] }), "unsupported"],
-    [JSON.stringify({ version: 1, profiles: [{ id: "incomplete" }] }), "invalid"],
-  ])("preserves unreadable stored configuration %s without importing preferences", async (raw, kind) => {
+    ["malformed JSON", "{broken", "invalid"],
+    [
+      "an invalid version 1 configuration shape",
+      JSON.stringify({ version: 1, profiles: [{ id: "incomplete" }] }),
+      "invalid",
+    ],
+    [
+      "an invalid version 2 configuration shape",
+      JSON.stringify({ version: 2, migratedLegacyProviders: [], profiles: [{ id: "incomplete" }] }),
+      "invalid",
+    ],
+    ["an unsupported version", JSON.stringify({ version: 99, profiles: [] }), "unsupported"],
+  ])("preserves %s until reset, then replaces it with an empty configuration", async (_description, raw, kind) => {
     storage.set(AI_PROVIDER_STORAGE_KEY, raw);
     expect(await loadAIProviderConfiguration()).toMatchObject({ kind, rawValue: raw });
     expect(LocalStorage.setItem).not.toHaveBeenCalled();
     expect(storage.get(AI_PROVIDER_STORAGE_KEY)).toBe(raw);
+
+    await resetAIProviderConfiguration();
+
+    const state = {
+      version: 2,
+      profiles: [],
+      migratedLegacyProviders: ["openai", "gemini"],
+    };
+    expect(await loadAIProviderConfiguration()).toEqual({ kind: "ready", state });
+    expect(JSON.parse(storage.get(AI_PROVIDER_STORAGE_KEY)!)).toEqual(state);
   });
 });
