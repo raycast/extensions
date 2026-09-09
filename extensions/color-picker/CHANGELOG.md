@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix color swatches rendering as a grey square when the color format preference is set to a format that is not a valid CSS color, such as `HEX No Prefix`
+
 ## [Favorite Colors & AI Tools] - 2026-08-29
 
 - Add a `Favorite Colors` command to view and use saved favorites

@@ -66,13 +66,8 @@ export function getFormattedColor(_color: HistoryColor, format?: ColorFormatType
   }
 }
 
-const unsupportedPreviewFormats = ["p3", "rgb", "rgb-percentage"];
 export function getPreviewColor(color: HistoryColor) {
-  const formattedColor = getFormattedColor(
-    color,
-    unsupportedPreviewFormats.includes(preferences.colorFormat) ? "oklch" : undefined,
-  );
-  return formattedColor;
+  return getFormattedColor(color, "oklch");
 }
 
 export function getShortcut(index: number) {
