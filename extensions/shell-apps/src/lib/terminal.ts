@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 import { randomUUID } from "crypto";
-import { readFileSync, unlinkSync, writeFileSync } from "fs";
+import { readFileSync, unlinkSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 import type { ShellApp, TerminalKind } from "./types";
@@ -154,17 +154,14 @@ function buildLauncherScript(app: ShellApp, resultFile: string): string {
 export function launchApp(app: ShellApp): Promise<string | null> {
   return new Promise((resolve) => {
     const resultFile = join(tmpdir(), `shell-apps-launch-${randomUUID()}.txt`);
-    const psFile = join(tmpdir(), `shell-apps-launcher-${randomUUID()}.ps1`);
     const script = buildLauncherScript(app, resultFile);
 
     let settled = false;
     const cleanup = () => {
-      for (const file of [resultFile, psFile]) {
-        try {
-          unlinkSync(file);
-        } catch {
-          // ignore
-        }
+      try {
+        unlinkSync(resultFile);
+      } catch {
+        // ignore
       }
     };
     const settle = (message: string | null) => {
@@ -174,14 +171,11 @@ export function launchApp(app: ShellApp): Promise<string | null> {
       resolve(message);
     };
 
-    try {
-      writeFileSync(psFile, "\ufeff" + script, "utf8");
-    } catch (error) {
-      settle(`Failed to write launcher script: ${(error as Error).message}`);
-      return;
-    }
-
-    const cmdLine = `""${POWERSHELL}" -NoLogo -WindowStyle Hidden -ExecutionPolicy Bypass -File "${psFile}""`;
+    // The launcher is passed via -EncodedCommand so the payload is fixed on
+    // the process command line: a temp .ps1 could be swapped between write
+    // and read to get arbitrary commands elevated after UAC approval.
+    const encoded = encodePS(script);
+    const cmdLine = `""${POWERSHELL}" -NoLogo -WindowStyle Hidden -ExecutionPolicy Bypass -EncodedCommand ${encoded}""`;
     const child = spawn(CMD, ["/d", "/s", "/c", cmdLine], {
       stdio: "ignore",
       windowsHide: true,
