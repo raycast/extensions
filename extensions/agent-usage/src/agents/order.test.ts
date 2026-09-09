@@ -1,7 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getInitialSelectedRowId, getRequestedSelectedRowId, sortByDefaultAgentOrder } from "./order.ts";
+import {
+  DEFAULT_AGENT_ORDER,
+  getInitialSelectedRowId,
+  getRequestedSelectedRowId,
+  isDefaultAgentId,
+  parseStoredAgentOrder,
+  resolveProviderId,
+  sortByAgentOrder,
+  sortByDefaultAgentOrder,
+} from "./order.ts";
 import type { AgentId } from "./types.ts";
 
 test("sortByDefaultAgentOrder uses the canonical provider order and keeps provider accounts together", () => {
@@ -51,6 +60,37 @@ test("sortByDefaultAgentOrder uses the canonical provider order and keeps provid
       "zai-1",
     ],
   );
+});
+
+test("sortByAgentOrder respects a saved user order and composite account row ids", () => {
+  const agents = [
+    { id: "amp" },
+    { id: "codex-account-1" },
+    { id: "zai-account-1" },
+    { id: "claude" },
+    { id: "minimaxcn-1" },
+    { id: "minimax" },
+  ];
+
+  assert.deepEqual(
+    sortByAgentOrder(agents, ["zai", "minimaxcn", "claude", "codex", "amp", "minimax"]).map((agent) => agent.id),
+    ["zai-account-1", "minimaxcn-1", "claude", "codex-account-1", "amp", "minimax"],
+  );
+});
+
+test("resolveProviderId prefers the longest matching provider prefix", () => {
+  assert.equal(resolveProviderId("minimaxcn-account-1"), "minimaxcn");
+  assert.equal(resolveProviderId("minimax"), "minimax");
+  assert.equal(resolveProviderId("unknown-row"), undefined);
+});
+
+test("parseStoredAgentOrder merges missing providers after the saved order", () => {
+  assert.deepEqual(
+    parseStoredAgentOrder(JSON.stringify(["zai", "amp"]), isDefaultAgentId, DEFAULT_AGENT_ORDER)?.slice(0, 2),
+    ["zai", "amp"],
+  );
+  assert.equal(parseStoredAgentOrder(undefined, isDefaultAgentId, DEFAULT_AGENT_ORDER), null);
+  assert.equal(parseStoredAgentOrder("not-json", isDefaultAgentId, DEFAULT_AGENT_ORDER), null);
 });
 
 test("getInitialSelectedRowId selects the first visible provider in the saved user order", () => {

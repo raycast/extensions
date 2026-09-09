@@ -18,7 +18,13 @@ import { ManageAccountsForm } from "./accounts/ManageAccountsForm.tsx";
 import type { AccountUsageState } from "./accounts/types.ts";
 import { formatErrorMarkdown } from "./agents/detail-format.ts";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
-import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId, getRequestedSelectedRowId } from "./agents/order.ts";
+import {
+  AGENT_ORDER_KEY,
+  DEFAULT_AGENT_ORDER,
+  getInitialSelectedRowId,
+  getRequestedSelectedRowId,
+  parseStoredAgentOrder,
+} from "./agents/order.ts";
 import {
   useAihubmixUsage,
   useAmpUsage,
@@ -85,8 +91,6 @@ import { formatSyntheticUsageText, getSyntheticAccessory, renderSyntheticDetail 
 import type { SyntheticError, SyntheticUsage } from "./synthetic/types.ts";
 import { formatZaiUsageText, getZaiAccessory, renderZaiDetail } from "./zai/renderer.tsx";
 import type { ZaiError, ZaiUsage } from "./zai/types.ts";
-
-const AGENT_ORDER_KEY = "agent-order";
 
 type ErrorLike = { type: string; message: string };
 type CommandLaunchContext = { selectedAgentId?: string };
@@ -623,20 +627,10 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   useEffect(() => {
     LocalStorage.getItem<string>(AGENT_ORDER_KEY).then((stored) => {
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            const validOrder = parsed.filter((id): id is AgentId => typeof id === "string" && isAgentId(id));
-            if (validOrder.length > 0) {
-              const missingIds = AGENT_IDS.filter((id) => !validOrder.includes(id));
-              setAgentOrder([...validOrder, ...missingIds]);
-              setHasStoredAgentOrder(true);
-            }
-          }
-        } catch {
-          // keep default order
-        }
+      const parsed = parseStoredAgentOrder(stored, isAgentId, AGENT_IDS);
+      if (parsed) {
+        setAgentOrder(parsed);
+        setHasStoredAgentOrder(true);
       }
       setOrderLoaded(true);
     });
