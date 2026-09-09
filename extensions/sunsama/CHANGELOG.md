@@ -1,6 +1,6 @@
 # Sunsama Changelog
 
-## [Default Channel for Linked Tasks] - {PR_MERGE_DATE}
+## [Default Channel for Linked Tasks] - 2026-09-09
 
 - A pasted link now keeps whichever channel Sunsama's own automation assigns to
   it, and falls back to your default channel when no automation fires. Picking a
