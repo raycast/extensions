@@ -43,6 +43,56 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/**
+ * Percent-encodes the characters that would otherwise end the link in the
+ * target syntax. A URL containing `|` breaks Jira, one containing `]` breaks
+ * Org and AsciiDoc, and so on. `%` is never touched, so existing escapes in
+ * the address survive.
+ */
+function encodeUrl(url: string, characters: string): string {
+  let encoded = url;
+  for (const character of characters) {
+    const replacement = `%${character.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0")}`;
+    encoded = encoded.split(character).join(replacement);
+  }
+  return encoded;
+}
+
+/** Replaces the characters that would close the link description too early. */
+function safeTitle(title: string, replacements: Record<string, string>): string {
+  let safe = title;
+  for (const [from, to] of Object.entries(replacements)) {
+    safe = safe.split(from).join(to);
+  }
+  return safe;
+}
+
+const LATEX_SPECIALS: Record<string, string> = {
+  "\\": "\\textbackslash{}",
+  "&": "\\&",
+  "%": "\\%",
+  $: "\\$",
+  "#": "\\#",
+  _: "\\_",
+  "{": "\\{",
+  "}": "\\}",
+  "~": "\\textasciitilde{}",
+  "^": "\\textasciicircum{}",
+};
+
+function latexTitle(title: string): string {
+  let out = "";
+  for (const character of title) {
+    out += LATEX_SPECIALS[character] ?? character;
+  }
+  return out;
+}
+
+/** Inside \href the address only needs the TeX comment and macro characters escaped. */
+function latexUrl(url: string): string {
+  return url.replace(/([%#\\{}])/g, "\\$1");
+}
+
 function markdownLink(tab: CleanTab): string {
   const title = tab.title.replace(/([[\]])/g, "\\$1");
   const url = /[()\s]/.test(tab.url) ? `<${tab.url}>` : tab.url;
@@ -124,61 +174,62 @@ export const FORMATS: FormatDefinition[] = [
     id: "slack",
     title: "Slack",
     hint: "<URL|Title>",
-    render: (tab) => `<${tab.url}|${tab.title.replace(/[<>|]/g, "")}>`,
+    render: (tab) =>
+      `<${encodeUrl(tab.url, "|<>")}|${safeTitle(tab.title, { "&": "&amp;", "<": "&lt;", ">": "&gt;", "|": "/" })}>`,
   },
   {
     id: "jira",
     title: "Jira",
     hint: "[Title|URL]",
-    render: (tab) => `[${tab.title.replace(/[[\]|]/g, "")}|${tab.url}]`,
+    render: (tab) => `[${safeTitle(tab.title, { "[": "(", "]": ")", "|": "/" })}|${encodeUrl(tab.url, "|[]")}]`,
   },
   {
     id: "confluence",
     title: "Confluence Wiki",
     hint: "[Title|URL]",
-    render: (tab) => `[${tab.title.replace(/[[\]|]/g, "")}|${tab.url}]`,
+    render: (tab) => `[${safeTitle(tab.title, { "[": "(", "]": ")", "|": "/" })}|${encodeUrl(tab.url, "|[]")}]`,
   },
   {
     id: "mediawiki",
     title: "MediaWiki",
     hint: "[URL Title]",
-    render: (tab) => `[${tab.url} ${tab.title.replace(/[[\]]/g, "")}]`,
+    render: (tab) => `[${encodeUrl(tab.url, "[] ")} ${safeTitle(tab.title, { "]": "&#93;" })}]`,
   },
   {
     id: "asciidoc",
     title: "AsciiDoc",
     hint: "URL[Title]",
-    render: (tab) => `${tab.url}[${tab.title.replace(/[[\]]/g, "")}]`,
+    render: (tab) => `${encodeUrl(tab.url, "[] ")}[${safeTitle(tab.title, { "]": "\\]", ",": "\\," })}]`,
   },
   {
     id: "rst",
     title: "reStructuredText",
     hint: "`Title <URL>`_",
-    render: (tab) => `\`${tab.title.replace(/`/g, "")} <${tab.url}>\`_`,
+    render: (tab) => `\`${safeTitle(tab.title, { "`": "'", "<": "(", ">": ")" })} <${encodeUrl(tab.url, "<>")}>\`_`,
   },
   {
     id: "org",
     title: "Org Mode",
     hint: "[[URL][Title]]",
-    render: (tab) => `[[${tab.url}][${tab.title.replace(/[[\]]/g, "")}]]`,
+    render: (tab) => `[[${encodeUrl(tab.url, "[]")}][${safeTitle(tab.title, { "[": "(", "]": ")" })}]]`,
   },
   {
     id: "bbcode",
     title: "BBCode",
     hint: "[url=URL]Title[/url]",
-    render: (tab) => `[url=${tab.url}]${tab.title.replace(/[[\]]/g, "")}[/url]`,
+    render: (tab) => `[url=${encodeUrl(tab.url, "[]")}]${safeTitle(tab.title, { "[": "(", "]": ")" })}[/url]`,
   },
   {
     id: "textile",
     title: "Textile",
     hint: '"Title":URL',
-    render: (tab) => `"${tab.title.replace(/"/g, "")}":${tab.url}`,
+    render: (tab) => `"${safeTitle(tab.title, { '"': "&quot;" })}":${encodeUrl(tab.url, " ")}`,
   },
   {
     id: "latex",
     title: "LaTeX",
     hint: "\\href{URL}{Title}",
-    render: (tab) => `\\href{${tab.url}}{${tab.title.replace(/[{}]/g, "")}}`,
+    render: (tab) => `\\href{${latexUrl(tab.url)}}{${latexTitle(tab.title)}}`,
   },
   {
     id: "custom",

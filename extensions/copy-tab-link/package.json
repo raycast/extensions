@@ -61,7 +61,7 @@
       "name": "copy-all-tabs",
       "title": "Copy All Tabs",
       "subtitle": "Copy Tab Link",
-      "description": "Copies every tab of the frontmost browser window as a list.",
+      "description": "Copies every tab of the frontmost browser window as a list. Uses AppleScript, so it is not available for Firefox or Zen.",
       "mode": "no-view"
     }
   ],

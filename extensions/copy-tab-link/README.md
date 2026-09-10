@@ -17,7 +17,7 @@ template.
 | Copy Tab as Plain Text | Bare URL, title, or `Title — URL`, whichever you configured |
 | Copy Tab in Custom Format | Your own template |
 | Copy Tab As… | A list of every format with a live preview |
-| Copy All Tabs | Every tab of the front window as a list |
+| Copy All Tabs | Every tab of the frontmost window as a list (AppleScript browsers only) |
 
 ## Formats
 
@@ -57,7 +57,9 @@ Shift, Wavebox, Whale and Yandex, including their beta and canary builds.
 
 Firefox and Zen do not expose their tabs to AppleScript. For those, install the
 [Raycast browser extension](https://www.raycast.com/browser-extension) — the extension falls back to it
-automatically. You can also pin one specific browser in the preferences instead of following whichever app
+automatically for single links. **Copy All Tabs** stays AppleScript only, because the browser extension
+reports the tabs of every window at once without saying which window they belong to, and a list mixing in
+tabs from windows you cannot see would be worse than no list. You can also pin one specific browser in the preferences instead of following whichever app
 is in front.
 
 ## Privacy

@@ -141,18 +141,6 @@ export async function activeTabsFromBrowserExtension(): Promise<TabInfo[]> {
   }
 }
 
-export async function allTabsFromBrowserExtension(): Promise<TabInfo[]> {
-  if (!environment.canAccess(BrowserExtension)) return [];
-  try {
-    const tabs = await BrowserExtension.getTabs();
-    return tabs
-      .filter((tab) => Boolean(tab.url))
-      .map((tab) => ({ url: tab.url, title: tab.title ?? "", source: "Browser Extension" }));
-  } catch {
-    return [];
-  }
-}
-
 /**
  * Visible applications, front to back. Used to find the browser the user
  * looked at most recently, which is not always the frontmost app: pasting a
@@ -250,23 +238,27 @@ export async function getTabCandidates(options: LookupOptions): Promise<TabInfo[
   }
 }
 
+/**
+ * Every tab of one browser window.
+ *
+ * Deliberately AppleScript only: `BrowserExtension.getTabs()` returns the tabs
+ * of every window at once and carries no window identity, so using it here
+ * would quietly mix in tabs the user cannot see.
+ */
 export async function getAllTabs(options: LookupOptions): Promise<TabInfo[]> {
-  const useAppleScript = options.browserSource !== "extension" && isMac();
-  const useExtension = options.browserSource !== "applescript";
-
-  if (useAppleScript) {
-    const names =
-      options.preferredBrowser && isKnownBrowser(options.preferredBrowser)
-        ? [options.preferredBrowser]
-        : await browsersByLayer();
-    for (const appName of names) {
-      const tabs = await allTabsFromAppleScript(appName);
-      if (tabs.length > 0) return tabs;
-    }
+  if (!isMac() || options.browserSource === "extension") {
+    throw new NoTabError(
+      "Copying a whole window needs AppleScript, because the browser extension does not say which window a tab belongs to. Use a browser that supports AppleScript, or copy tabs one at a time.",
+    );
   }
 
-  if (useExtension) {
-    const tabs = await allTabsFromBrowserExtension();
+  const names =
+    options.preferredBrowser && isKnownBrowser(options.preferredBrowser)
+      ? [options.preferredBrowser]
+      : await browsersByLayer();
+
+  for (const appName of names) {
+    const tabs = await allTabsFromAppleScript(appName);
     if (tabs.length > 0) return tabs;
   }
 
