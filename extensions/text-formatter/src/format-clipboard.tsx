@@ -4,6 +4,7 @@ import { aiFormat } from "./lib/ai-format";
 import { markdownToHtml } from "./lib/markdown-to-html";
 import { htmlToMarkdown } from "./lib/html-to-markdown";
 import { readClipboardHtml } from "./lib/clipboard-html";
+import { writeRichClipboard } from "./lib/clipboard-write";
 
 interface Preferences {
   engine: "auto" | "ai" | "offline";
@@ -97,7 +98,12 @@ async function run() {
   // Write BOTH flavors: markdown as plain text, rendered HTML as rich text.
   // The destination app picks whichever it understands.
   const richHtml = markdownToHtml(formatted);
-  await Clipboard.copy({ text: formatted, html: richHtml });
+  try {
+    writeRichClipboard(formatted, richHtml);
+  } catch {
+    // Losing rich formatting is bad; losing the formatted text entirely is worse.
+    await Clipboard.copy({ text: formatted });
+  }
 
   const label = usedEngine === "AI" ? "✅ Formatted (Claude) — ready to paste" : "✅ Formatted — ready to paste";
   await showHUD(label);

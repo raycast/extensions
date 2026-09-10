@@ -1,8 +1,7 @@
 # Magic Formatter Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Fix rich formatting not reaching the clipboard] - {PR_MERGE_DATE}
 
-- Re-space clipboard text into clean paragraphs
-- Preserve bold, italics, and bullets
-- Optional Claude engine when an Anthropic API key is set
-- Offline engine works with no key
+- Write the rich-text (HTML) clipboard flavor directly to the macOS pasteboard. Only the plain-text flavor was landing, so destinations that render real formatting — Slack most visibly — received raw markdown and showed literal `**` and `*` markers instead of bold and italics.
+
+## [Initial Release] - {PR_MERGE_DATE}
