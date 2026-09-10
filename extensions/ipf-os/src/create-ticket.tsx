@@ -27,14 +27,15 @@ interface FormValues {
 
 export default function CreateTicketCommand() {
   const { push } = useNavigation();
-  const { error: sessionError, revalidate: retrySession } = useSession();
-  const { lookup, isLoading: isDirectoryLoading } = useDirectory();
+  const { session, error: sessionError, revalidate: retrySession } = useSession();
+  const hasSession = Boolean(session);
+  const { lookup, isLoading: isDirectoryLoading } = useDirectory({ execute: hasSession });
 
-  const { data: projects } = useCachedPromise(listProjects, [], { keepPreviousData: true });
+  const { data: projects } = useCachedPromise(listProjects, [], { execute: hasSession, keepPreviousData: true });
   const [projectId, setProjectId] = useState<string>("");
   const [sprintId, setSprintId] = useState<string>("");
   const { data: sprints } = useCachedPromise(listSprints, [projectId], {
-    execute: projectId.length > 0,
+    execute: hasSession && projectId.length > 0,
     keepPreviousData: false,
   });
 

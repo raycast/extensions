@@ -34,7 +34,7 @@ export default function SearchTicketsCommand() {
   const [searchText, setSearchText] = useState("");
 
   const { session, error: sessionError, revalidate: retrySession } = useSession();
-  const { lookup } = useDirectory();
+  const { lookup } = useDirectory({ execute: Boolean(session) });
 
   const { tickets, isLoading, pagination, revalidate, error } = useTickets({
     scope,

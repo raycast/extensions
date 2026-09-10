@@ -30,7 +30,7 @@ interface TicketDetailProps {
 
 export function TicketDetail({ ticketId, onMutate }: TicketDetailProps) {
   const { session } = useSession();
-  const { lookup } = useDirectory();
+  const { lookup } = useDirectory({ execute: Boolean(session) });
 
   const {
     data: ticket,

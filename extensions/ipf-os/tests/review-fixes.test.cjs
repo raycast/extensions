@@ -8,6 +8,7 @@ const ts = require("typescript");
 function load(file, mocks, DateType = Date) {
   const source = ts.transpileModule(fs.readFileSync(path.join(__dirname, "..", file), "utf8"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
+    fileName: file,
   }).outputText;
   const context = {
     exports: {},
@@ -137,6 +138,257 @@ const fields = {
   sprintId: "",
   needsResponse: false,
 };
+
+function createAsyncQueryHarness() {
+  const states = new Map();
+  const calls = [];
+
+  const keyFor = (fn, args) => `${fn.name}:${JSON.stringify(args)}`;
+
+  function useCachedPromise(fn, args = [], options = {}) {
+    const key = keyFor(fn, args);
+    let state = states.get(key);
+    if (!state) {
+      state = {
+        data: undefined,
+        error: undefined,
+        isLoading: false,
+        pending: undefined,
+        ran: false,
+        revalidate() {
+          state.isLoading = true;
+          calls.push({ name: fn.name, args });
+          state.pending = Promise.resolve()
+            .then(() => fn(...args))
+            .then(
+              (data) => {
+                state.data = data;
+                state.error = undefined;
+                state.isLoading = false;
+              },
+              (error) => {
+                state.error = error;
+                state.isLoading = false;
+              },
+            );
+        },
+      };
+      states.set(key, state);
+    }
+
+    if (options.execute !== false && !state.ran) {
+      state.ran = true;
+      state.revalidate();
+    }
+
+    return state;
+  }
+
+  return {
+    useCachedPromise,
+    calls,
+    waitForIdle: async () => {
+      const pending = [...states.values()].map((state) => state.pending).filter(Boolean);
+      await Promise.all(pending);
+    },
+  };
+}
+
+for (const loginError of ["Login canceled", "Login failed"]) {
+  test(`fresh login defers form data queries after ${loginError}`, async () => {
+    const departments = [{ id: "dept-1", name: "Support", code: "SUP" }];
+    const users = [{ id: "user-1", email: "user@example.com", displayName: "Jane User" }];
+    const projects = [{ id: "project-1", projectName: "Raycast" }];
+    const sprints = [
+      { id: "sprint-1", projectId: "project-1", isoYear: 2026, isoWeek: 37, goal: "Ship fix", status: "OPEN" },
+    ];
+    const apiCalls = [];
+    let sessionAttempt = 0;
+
+    async function getSession() {
+      sessionAttempt++;
+      if (sessionAttempt === 1) throw new Error(loginError);
+      return { subject: "user-1", role: "STAFF", accessToken: "token" };
+    }
+
+    const queries = createAsyncQueryHarness();
+    const sessionHook = load("src/lib/hooks/use-session.ts", {
+      "../auth": { getAuthProvider: () => ({ getSession, getCachedSession: getSession }) },
+      "@raycast/utils": { useCachedPromise: queries.useCachedPromise },
+    });
+    const storage = new Map();
+    const request = async ({ path }) => {
+      apiCalls.push(path);
+      const responses = {
+        "/users": users,
+        "/departments": departments,
+        "/projects": projects,
+        "/projects/project-1/sprints": sprints,
+      };
+      assert.ok(Object.hasOwn(responses, path));
+      return responses[path];
+    };
+    const directoryApi = load("src/lib/api/directory.ts", {
+      "@raycast/api": {
+        LocalStorage: {
+          getItem: async (key) => storage.get(key),
+          setItem: async (key, value) => storage.set(key, value),
+          removeItem: async (key) => storage.delete(key),
+        },
+      },
+      "./client": { ApiError: Error, requestAll: request, requestOne: request },
+    });
+    const directoryHook = load("src/lib/hooks/use-directory.ts", {
+      "../api/directory": directoryApi,
+      "@raycast/utils": { useCachedPromise: queries.useCachedPromise },
+    });
+    const authErrorView = load("src/views/auth-error.tsx", {
+      "react/jsx-runtime": jsx,
+      "@raycast/api": {
+        Action,
+        ActionPanel,
+        Color: {},
+        Icon: {},
+        List: Object.assign(() => {}, { EmptyView: "EmptyView" }),
+        openExtensionPreferences() {},
+      },
+      "../lib/auth": { getAuthProvider: () => ({ signOut() {} }) },
+    });
+    const harness = renderHarness();
+    const component = load("src/create-ticket.tsx", {
+      react: harness.react,
+      "react/jsx-runtime": jsx,
+      "@raycast/api": {
+        Action,
+        ActionPanel,
+        Form,
+        Icon: {},
+        Toast: { Style: {} },
+        showToast: async () => ({}),
+        useNavigation: () => ({ push() {} }),
+      },
+      "@raycast/utils": { useCachedPromise: queries.useCachedPromise },
+      "./lib/api/directory": directoryApi,
+      "./lib/api/errors": { describeError: (error) => error.message },
+      "./lib/api/tickets": { createTicket: async () => ({ id: "ticket-1", ticketNumber: "IPF-1" }) },
+      "./lib/domain/enums": { TICKET_TYPES: [], TYPE_LABELS: {} },
+      "./lib/domain/priority": load("src/lib/domain/priority.ts", {}),
+      "./lib/hooks/use-directory": directoryHook,
+      "./lib/hooks/use-session": sessionHook,
+      "./lib/ui/presentation": { priorityLabel: (value) => value, userAvatar: () => undefined },
+      "./views/auth-error": authErrorView,
+      "./views/ticket-detail": { TicketDetail: "TicketDetail" },
+    }).default;
+
+    harness.render(component);
+    await queries.waitForIdle();
+    const failed = harness.render(component);
+    assert.equal(failed.type, authErrorView.AuthErrorView);
+    assert.deepEqual(apiCalls, []);
+
+    const retry = find(authErrorView.AuthErrorView(failed.props), "Connect to IPF OS");
+    retry.onAction();
+    await queries.waitForIdle();
+    const connected = harness.render(component);
+    await queries.waitForIdle();
+    const populated = harness.render(component);
+
+    assert.notEqual(connected.type, authErrorView.AuthErrorView);
+    assert.deepEqual([...apiCalls].sort(), ["/departments", "/projects", "/users"]);
+    assert.equal(storage.size, 1);
+    assert.equal(
+      nodes(populated).some((node) => node.props.value === "dept-1" && node.props.title === "Support"),
+      true,
+    );
+    assert.equal(
+      nodes(populated).some((node) => node.props.value === "project-1" && node.props.title === "Raycast"),
+      true,
+    );
+
+    nodes(populated)
+      .find((node) => node.props.id === "projectId")
+      .props.onChange("project-1");
+    const withProject = harness.render(component);
+    await queries.waitForIdle();
+    const withSprint = harness.render(component);
+    assert.equal(
+      nodes(withProject).some((node) => node.props.value === "sprint-1"),
+      false,
+    );
+    assert.equal(
+      nodes(withSprint).some((node) => node.props.value === "sprint-1" && node.props.title === "Ship fix"),
+      true,
+    );
+    assert.deepEqual([...apiCalls].sort(), ["/departments", "/projects", "/projects/project-1/sprints", "/users"]);
+
+    harness.render(component);
+    await queries.waitForIdle();
+    assert.deepEqual([...apiCalls].sort(), ["/departments", "/projects", "/projects/project-1/sprints", "/users"]);
+  });
+}
+
+test("search and detail forward the directory session gate", () => {
+  for (const session of [undefined, { subject: "user-1" }]) {
+    const directoryOptions = [];
+    const directoryHook = {
+      useDirectory: (options) => (directoryOptions.push(options), { lookup: { departmentName: () => "" } }),
+    };
+    const api = {
+      Action,
+      ActionPanel,
+      Color: {},
+      Icon: {},
+      List: Object.assign(() => {}, { Dropdown, EmptyView: "EmptyView" }),
+      Keyboard: {},
+      Detail: Object.assign(() => {}, {
+        Metadata: Object.assign(() => {}, {
+          Label: "Label",
+          TagList: Object.assign(() => {}, { Item: "Tag" }),
+          Separator: "Separator",
+        }),
+      }),
+    };
+    const searchHarness = renderHarness();
+    const search = load("src/search-tickets.tsx", {
+      react: searchHarness.react,
+      "react/jsx-runtime": jsx,
+      "@raycast/api": api,
+      "./lib/config": {},
+      "./lib/domain/enums": {},
+      "./lib/hooks/use-directory": directoryHook,
+      "./lib/hooks/use-session": { useSession: () => ({ session }) },
+      "./lib/hooks/use-tickets": { SCOPE_LABELS: {}, SCOPE_ORDER: [], useTickets: () => ({ tickets: [] }) },
+      "./lib/ui/presentation": {},
+      "./views/auth-error": {},
+      "./views/ticket-detail": {},
+    }).default;
+    searchHarness.render(search);
+
+    const detailHarness = renderHarness();
+    const detail = load("src/views/ticket-detail.tsx", {
+      react: detailHarness.react,
+      "react/jsx-runtime": jsx,
+      "@raycast/api": api,
+      "@raycast/utils": { getProgressIcon: () => undefined, useCachedPromise: () => ({}) },
+      "../lib/api/tickets": {},
+      "../lib/config": {},
+      "../lib/domain/enums": {},
+      "../lib/domain/permissions": { permissionsForTicket: () => ({}) },
+      "../lib/domain/ticket": {},
+      "../lib/hooks/use-directory": directoryHook,
+      "../lib/hooks/use-session": { useSession: () => ({ session }) },
+      "../lib/api/directory": {},
+      "../lib/ui/presentation": {},
+      "./ticket-actions": {},
+    }).TicketDetail;
+    detailHarness.render(() => detail({ ticketId: "ticket-1" }));
+
+    assert.deepEqual(
+      directoryOptions.map((options) => options.execute),
+      [Boolean(session), Boolean(session)],
+    );
+  }
+});
 
 test("failed or canceled login recovers through the session hook in both commands", async () => {
   for (const message of ["Login failed", "Login canceled"]) {
