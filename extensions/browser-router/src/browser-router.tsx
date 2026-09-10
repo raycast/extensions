@@ -27,7 +27,7 @@ export default function Command(props: LaunchProps<{ arguments: { query?: string
   const preferences = getPreferenceValues<Preferences>();
 
   // Determine if query came from Raycast argument or fallback text
-  const initialQuery = (props.arguments.query || props.fallbackText || "").trim();
+  const initialQuery = (props.arguments?.query || props.fallbackText || "").trim();
 
   // Mode: "query" (default, typing updates search query/URL) or "filter" (typing filters browser list)
   const [mode, setMode] = useState<"query" | "filter">("query");

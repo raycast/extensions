@@ -50,10 +50,7 @@ export function AddCustomProfileForm({ onProfileAdded }: AddCustomProfileFormPro
 
     if (hasError) return;
 
-    const isFirefox =
-      browserType === "firefox" ||
-      executablePath.toLowerCase().includes("firefox") ||
-      browserName.toLowerCase().includes("firefox");
+    const isFirefox = browserType === "firefox";
 
     const id = "custom_" + Date.now();
     await saveCustomProfile({

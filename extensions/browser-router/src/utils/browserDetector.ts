@@ -381,9 +381,10 @@ export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
   for (const cp of customProfiles) {
     const isFirefox =
       cp.browserType === "firefox" ||
-      cp.browserId === "firefox" ||
-      cp.executablePath.toLowerCase().includes("firefox") ||
-      cp.browserName.toLowerCase().includes("firefox");
+      (!cp.browserType &&
+        (cp.browserId === "firefox" ||
+          cp.executablePath.toLowerCase().includes("firefox") ||
+          cp.browserName.toLowerCase().includes("firefox")));
     const browserId = isFirefox ? "firefox" : cp.browserId || "custom";
     const logoIcon = getExtractedAssetIcon(browserId, cp.executablePath) || findLogoInAppDir(cp.executablePath);
     const customName = nicknames[cp.id];
