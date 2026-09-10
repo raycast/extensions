@@ -1,6 +1,6 @@
 # raycast-zabbix Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-10
 
 - "Hosts" and "Problems" Commands: react re-render bug when fresh data was loaded.
 
