@@ -15,12 +15,14 @@ export interface NewTabMenuEntry {
   entries?: NewTabMenuEntry[];
 }
 
-// A minimal backtracking regex engine, used instead of JavaScript's native RegExp. Native regex
-// matching can't be interrupted once it starts, so a pathological pattern — (a+)+, (a?a?)+,
-// ((ab)+)+ — would freeze the profile list while it renders. This engine bounds itself with a
-// step counter instead: every recursive attempt costs one step, and once the budget is spent the
-// match fails rather than exploring further. That makes ALL patterns safe to run, including ones
-// that look risky, so nothing needs to be rejected up front — a repeated group with safe
+// A minimal regex engine, used instead of JavaScript's native RegExp. Native regex matching can't
+// be interrupted once it starts, so a pathological pattern — (a+)+, (a?a?)+, ((ab)+)+ — would
+// freeze the profile list while it renders, and a backtracking engine's own recursion can overflow
+// the call stack on a long value even for a safe pattern like ".*". This engine avoids both: it
+// compiles the pattern into a Thompson NFA (compileProgram) and matches by advancing every
+// reachable state together, one input character at a time (matchFull) — the technique RE2 and
+// Rust's regex crate use for guaranteed linear-time matching with no backtracking. So nothing needs
+// to be rejected up front and nothing needs a step budget — a repeated group with safe
 // alternatives, like (dev|prod)+, still matches normally.
 type AtomNode =
   | { kind: "char"; test: (ch: string) => boolean }
@@ -33,6 +35,11 @@ type SeqNode = { atoms: QuantNode[] };
 type AltNode = { options: SeqNode[] };
 
 class RegexSyntaxError extends Error {}
+
+// compileQuant below unrolls an explicit {n,m} into n or m literal copies of the atom, so a bound
+// this large would blow up the compiled instruction count regardless of the input being matched.
+// matchProfiles patterns never legitimately need more than this.
+const MAX_QUANT_BOUND = 1000;
 
 // Parses the subset of ECMAScript regex syntax matchProfiles patterns actually use: literals,
 // `.`, escapes (`\d\w\s` and their negations, `\.` etc.), `[...]` classes, `(...)`/`(?:...)`
@@ -88,6 +95,9 @@ function parsePattern(pattern: string): AltNode {
       if (braces) {
         min = parseInt(braces[1], 10);
         max = braces[2] === undefined ? min : braces[3] === "" ? Infinity : parseInt(braces[3], 10);
+        if (max < min || min > MAX_QUANT_BOUND || (max !== Infinity && max > MAX_QUANT_BOUND)) {
+          return fail("quantifier bound out of range");
+        }
         quantified = true;
         i += braces[0].length;
       }
@@ -169,8 +179,11 @@ function parsePattern(pattern: string): AltNode {
         const esc = pattern[i];
         i++;
         if (esc === "d") tests.push((ch) => ch >= "0" && ch <= "9");
+        else if (esc === "D") tests.push((ch) => !(ch >= "0" && ch <= "9"));
         else if (esc === "w") tests.push((ch) => /\w/.test(ch));
+        else if (esc === "W") tests.push((ch) => !/\w/.test(ch));
         else if (esc === "s") tests.push((ch) => /\s/.test(ch));
+        else if (esc === "S") tests.push((ch) => !/\s/.test(ch));
         else tests.push((ch) => ch === esc);
         continue;
       }
@@ -194,55 +207,169 @@ function parsePattern(pattern: string): AltNode {
   return result;
 }
 
-// Every recursive attempt below — descending into a group, trying one more quantifier repeat,
-// trying an alternation branch — spends one step, and a simple linear pattern like ".*" already
-// spends a small constant number of steps per character. A fixed budget would then cut off a
-// legitimate match against a long value (e.g. a ~1000-character commandline) before it finishes.
-// Scaling the budget with the value's length avoids that while still cutting off exponential
-// blowups almost immediately — those exceed even a scaled budget within a few dozen characters.
-const MIN_STEP_BUDGET = 2000;
-const STEP_BUDGET_PER_CHAR = 50;
+// Compiles the parsed AST into a Thompson NFA instead of interpreting it recursively. Each
+// instruction is one node of that NFA; `split` is the only branch point, and `next`/`next2` link
+// the graph together. A `Frag` under construction tracks its entry instruction plus the dangling
+// successor slots ("patch list", in Thompson's original terms) still waiting to be pointed at
+// whatever comes next.
+type CharInst = { op: "char"; test: (ch: string) => boolean; next?: Inst };
+type AnyInst = { op: "any"; next?: Inst };
+type StartInst = { op: "start"; next?: Inst };
+type EndInst = { op: "end"; next?: Inst };
+type SplitInst = { op: "split"; next?: Inst; next2?: Inst };
+type NopInst = { op: "nop"; next?: Inst };
+type MatchInst = { op: "match" };
+type Inst = CharInst | AnyInst | StartInst | EndInst | SplitInst | NopInst | MatchInst;
 
-// Continuation-passing backtracking matcher, fully anchored (matches only if it consumes the
-// whole string). `k` is "what to try once this piece has matched"; quantifiers try repeating
-// (greedy) or stopping (lazy) first, per their `greedy` flag, and fall back to the other on
-// failure — same shape as a native regex engine, just with a hard step ceiling.
-function matchFull(alt: AltNode, str: string): boolean {
-  let steps = 0;
-  const budget = Math.max(MIN_STEP_BUDGET, str.length * STEP_BUDGET_PER_CHAR);
-  const withinBudget = () => ++steps <= budget;
+type PatchSlot =
+  | { inst: CharInst | AnyInst | StartInst | EndInst | NopInst | SplitInst; slot: "next" }
+  | { inst: SplitInst; slot: "next2" };
+type Frag = { start: Inst; out: PatchSlot[] };
 
-  function matchAtomOnce(atom: AtomNode, pos: number, k: (pos: number) => boolean): boolean {
-    if (!withinBudget()) return false;
-    if (atom.kind === "char") return pos < str.length && atom.test(str[pos]) && k(pos + 1);
-    if (atom.kind === "any") return pos < str.length && k(pos + 1);
-    if (atom.kind === "start") return pos === 0 && k(pos);
-    if (atom.kind === "end") return pos === str.length && k(pos);
-    return matchAlt(atom.alt, pos, k);
+function patch(out: PatchSlot[], target: Inst): void {
+  for (const p of out) {
+    if (p.slot === "next2") p.inst.next2 = target;
+    else p.inst.next = target;
   }
+}
 
-  function matchQuant(q: QuantNode, pos: number, k: (pos: number) => boolean): boolean {
-    function attempt(count: number, p: number): boolean {
-      if (!withinBudget()) return false;
-      const tryMore = () => count < q.max && matchAtomOnce(q.atom, p, (np) => attempt(count + 1, np));
-      const tryStop = () => count >= q.min && k(p);
-      return q.greedy ? tryMore() || tryStop() : tryStop() || tryMore();
+function emptyFrag(): Frag {
+  const inst: NopInst = { op: "nop" };
+  return { start: inst, out: [{ inst, slot: "next" }] };
+}
+
+function concat(a: Frag, b: Frag): Frag {
+  patch(a.out, b.start);
+  return { start: a.start, out: b.out };
+}
+
+function concatAll(frags: Frag[]): Frag {
+  return frags.reduce(concat, emptyFrag());
+}
+
+function compileAtom(atom: AtomNode): Frag {
+  if (atom.kind === "group") return compileAlt(atom.alt);
+  if (atom.kind === "char") {
+    const inst: CharInst = { op: "char", test: atom.test };
+    return { start: inst, out: [{ inst, slot: "next" }] };
+  }
+  if (atom.kind === "any") {
+    const inst: AnyInst = { op: "any" };
+    return { start: inst, out: [{ inst, slot: "next" }] };
+  }
+  if (atom.kind === "start") {
+    const inst: StartInst = { op: "start" };
+    return { start: inst, out: [{ inst, slot: "next" }] };
+  }
+  const inst: EndInst = { op: "end" };
+  return { start: inst, out: [{ inst, slot: "next" }] };
+}
+
+function repeatFrag(atom: AtomNode, count: number): Frag {
+  return concatAll(Array.from({ length: count }, () => compileAtom(atom)));
+}
+
+function starFrag(atom: AtomNode): Frag {
+  const split: SplitInst = { op: "split" };
+  const body = compileAtom(atom);
+  patch(body.out, split);
+  split.next = body.start;
+  return { start: split, out: [{ inst: split, slot: "next2" }] };
+}
+
+function plusFrag(atom: AtomNode): Frag {
+  const split: SplitInst = { op: "split" };
+  const body = compileAtom(atom);
+  patch(body.out, split);
+  split.next = body.start;
+  return { start: body.start, out: [{ inst: split, slot: "next2" }] };
+}
+
+function optionalFrag(atom: AtomNode): Frag {
+  const split: SplitInst = { op: "split" };
+  const body = compileAtom(atom);
+  split.next = body.start;
+  return { start: split, out: [...body.out, { inst: split, slot: "next2" }] };
+}
+
+// Whether a quantifier is greedy or lazy only affects which substring a capturing group would
+// record — irrelevant here, since buildProfileMatcher only ever asks "does the whole field match"
+// (see matchFull). So greedy and lazy compile identically; `q.greedy` is parsed but never consulted.
+function compileQuant(q: QuantNode): Frag {
+  if (q.max === Infinity) {
+    if (q.min === 0) return starFrag(q.atom);
+    return concat(repeatFrag(q.atom, q.min - 1), plusFrag(q.atom));
+  }
+  const optionals = concatAll(Array.from({ length: q.max - q.min }, () => optionalFrag(q.atom)));
+  return concat(repeatFrag(q.atom, q.min), optionals);
+}
+
+function compileSeq(seq: SeqNode): Frag {
+  return concatAll(seq.atoms.map(compileQuant));
+}
+
+function compileAlt(alt: AltNode): Frag {
+  return alt.options.map(compileSeq).reduceRight((rest, option) => {
+    const split: SplitInst = { op: "split" };
+    split.next = option.start;
+    split.next2 = rest.start;
+    return { start: split, out: [...option.out, ...rest.out] };
+  });
+}
+
+function compileProgram(alt: AltNode): Inst {
+  const frag = compileAlt(alt);
+  const matchInst: MatchInst = { op: "match" };
+  patch(frag.out, matchInst);
+  return frag.start;
+}
+
+// Epsilon-closure: follows the zero-width instructions (`split`, `nop`, and the anchors when their
+// condition holds) until it reaches a `char`/`any`/`match` instruction, adding those to `list`.
+// `visited` dedupes instructions already queued at this string position — that's what stops a
+// zero-width loop like (a?)* from spinning forever: once its `split` has been visited at a given
+// position, revisiting it adds nothing new, so the closure always terminates after at most one
+// visit per instruction, and the pattern's remainder (matching past the loop) still gets explored.
+function addThread(list: Inst[], visited: Set<Inst>, inst: Inst, pos: number, str: string): void {
+  if (visited.has(inst)) return;
+  visited.add(inst);
+  if (inst.op === "split") {
+    addThread(list, visited, inst.next!, pos, str);
+    addThread(list, visited, inst.next2!, pos, str);
+  } else if (inst.op === "nop") {
+    addThread(list, visited, inst.next!, pos, str);
+  } else if (inst.op === "start") {
+    if (pos === 0) addThread(list, visited, inst.next!, pos, str);
+  } else if (inst.op === "end") {
+    if (pos === str.length) addThread(list, visited, inst.next!, pos, str);
+  } else {
+    list.push(inst);
+  }
+}
+
+// Runs the compiled NFA over `str` breadth-first, one input position at a time (Pike's VM) instead
+// of recursing per character the way a backtracking engine would. Every thread advances together, so
+// the call stack never grows with the length of `str` or with the pattern's backtracking search
+// space — a 2,000-character value and a pathological pattern like (a+)+ cost the same handful of
+// stack frames as a one-character match, and total work is bounded by str.length × the pattern's
+// compiled size, so nothing can blow up exponentially and no step budget is needed.
+function matchFull(prog: Inst, str: string): boolean {
+  let current: Inst[] = [];
+  addThread(current, new Set(), prog, 0, str);
+
+  for (let pos = 0; pos < str.length; pos++) {
+    if (current.length === 0) return false;
+    const next: Inst[] = [];
+    const visited = new Set<Inst>();
+    const ch = str[pos];
+    for (const inst of current) {
+      if (inst.op === "char" && inst.test(ch)) addThread(next, visited, inst.next!, pos + 1, str);
+      else if (inst.op === "any") addThread(next, visited, inst.next!, pos + 1, str);
     }
-    return attempt(0, pos);
+    current = next;
   }
 
-  function matchSeq(atoms: QuantNode[], idx: number, pos: number, k: (pos: number) => boolean): boolean {
-    if (!withinBudget()) return false;
-    if (idx === atoms.length) return k(pos);
-    return matchQuant(atoms[idx], pos, (np) => matchSeq(atoms, idx + 1, np, k));
-  }
-
-  function matchAlt(alt: AltNode, pos: number, k: (pos: number) => boolean): boolean {
-    if (!withinBudget()) return false;
-    return alt.options.some((seq) => matchSeq(seq.atoms, 0, pos, k));
-  }
-
-  return matchAlt(alt, 0, (pos) => pos === str.length);
+  return current.some((inst) => inst.op === "match");
 }
 
 // A matchProfiles entry matches a profile when ANY provided field (name/commandline/source)
@@ -257,17 +384,17 @@ export function buildProfileMatcher(entry: NewTabMenuEntry): ((profile: Profile)
   if (entry.source !== undefined) specs.push({ pattern: entry.source, get: (p) => p.source ?? "" });
   if (specs.length === 0) return null;
 
-  let matchers: { alt: AltNode; get: (profile: Profile) => string }[];
+  let matchers: { prog: Inst; get: (profile: Profile) => string }[];
   try {
-    matchers = specs.map(({ pattern, get }) => ({ alt: parsePattern(pattern), get }));
+    matchers = specs.map(({ pattern, get }) => ({ prog: compileProgram(parsePattern(pattern)), get }));
   } catch {
     return null;
   }
 
   return (profile: Profile) =>
-    matchers.some(({ alt, get }) => {
+    matchers.some(({ prog, get }) => {
       const value = get(profile);
-      return value.length > 0 && matchFull(alt, value);
+      return value.length > 0 && matchFull(prog, value);
     });
 }
 

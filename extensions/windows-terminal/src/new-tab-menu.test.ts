@@ -80,10 +80,25 @@ describe("buildProfileMatcher", () => {
     assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "^{2}PowerShell" }), null);
   });
 
-  it("doesn't exhaust its step budget on a long but linear match", () => {
+  it("matches a long linear value without excessive cost", () => {
     const longCommandline = "C:\\tools\\" + "a".repeat(1000) + ".exe";
     const matcher = buildProfileMatcher({ type: "matchProfiles", commandline: "C:\\\\tools\\\\.*\\.exe" });
     assert.ok(matcher!({ ...powershell, commandline: longCommandline }));
+  });
+
+  it("doesn't overflow the call stack on a long value", () => {
+    const longCommandline = "a".repeat(2000);
+    const matcher = buildProfileMatcher({ type: "matchProfiles", commandline: ".*" });
+    assert.equal(matcher!({ ...powershell, commandline: longCommandline }), true);
+  });
+
+  it("doesn't let a zero-length repetition block the rest of the pattern", () => {
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(a?)*b" });
+    assert.equal(matcher!({ ...powershell, name: "b" }), true);
+  });
+
+  it("supports negated escape classes inside a bracket expression", () => {
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "[\\D]+" })!(powershell), true);
   });
 });
 
