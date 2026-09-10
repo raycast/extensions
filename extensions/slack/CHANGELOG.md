@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Fix AI file uploads failing with internal_error] - {PR_MERGE_DATE}
+
+- Fix **Upload Files** failing with a bare `internal_error` when a message was attached, caused by Slack rejecting the newer `markdown` block in `files.completeUploadExternal`; the AI message signature now uses upload-safe blocks for file uploads.
+- Return an actionable message when Slack still responds with `internal_error` so the AI can recover instead of retrying blindly or re-encoding files.
+
 ## [Fix recipient search in large workspaces] - {PR_MERGE_DATE}
 
 - Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.
