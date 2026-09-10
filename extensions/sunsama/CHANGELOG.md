@@ -1,5 +1,13 @@
 # Sunsama Changelog
 
+## [AI Extension] - {PR_MERGE_DATE}
+
+- Ask Raycast AI to manage your day: mention `@sunsama` in AI Chat to list a
+  day's tasks and channels, add tasks (with notes, a channel, planned time,
+  subtasks, or a pasted link), edit, complete, reschedule, and delete tasks,
+  add subtasks, and start or stop timers. Changes to an existing task ask you
+  to confirm first.
+
 ## [Default Channel for Linked Tasks] - 2026-09-09
 
 - A pasted link now keeps whichever channel Sunsama's own automation assigns to
