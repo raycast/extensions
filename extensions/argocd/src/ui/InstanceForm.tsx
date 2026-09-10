@@ -1,10 +1,8 @@
-import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 import { useState } from "react";
-import { clearSecrets } from "./deps";
 import {
   ValidationError,
-  credentialsInvalidatedBy,
   upsertInstance,
   validateInstance,
   type ArgoInstance,
@@ -46,31 +44,9 @@ export function InstanceForm({ instances, editing, onSaved }: Props) {
         instances,
         () => randomUUID(),
       );
-      // An edit keeps the id, so the stored credential outlives it. Pointing the instance at
-      // another server or switching its auth mode makes that credential wrong, and the token
-      // reader cannot notice: it returns a live session without asking the server anything.
-      // Dropped here instead, which keeps that fast path free.
-      //
-      // Decided before the save, applied after it. Clearing first meant a rejected save left
-      // the old configuration in place with its credential already gone: signed out by an edit
-      // that never happened. This order can only fail the other way, leaving a saved instance
-      // holding a credential it no longer matches, which is recoverable and is said out loud.
-      const previous = instances.find((candidate) => candidate.id === instance.id);
-      const stale = previous !== undefined && credentialsInvalidatedBy(previous, instance);
-
+      // A credential invalidated by this edit is dropped by saveInstances, which is the one
+      // function every write goes through. Doing it here covered this form and nothing else.
       await onSaved(upsertInstance(instances, instance));
-
-      if (stale) {
-        try {
-          await clearSecrets(instance.id);
-        } catch {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "The old credential could not be removed",
-            message: `Sign in to ${instance.name} again, or clear its token from Manage Instances.`,
-          });
-        }
-      }
       pop();
     } catch (error) {
       if (error instanceof ValidationError) {
