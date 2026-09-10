@@ -40,14 +40,23 @@ class RegexSyntaxError extends Error {}
 class RegexTooLargeError extends Error {}
 
 // compileQuant unrolls {n,m} into that many copies of the atom, and nesting multiplies them: the
-// program for (a{1000}){1000} is a million instructions even though neither quantifier is
-// unreasonable on its own. So the cap is on the size of the whole compiled program rather than on
-// any single quantifier. It's set well above what a real matchProfiles pattern needs (a long
-// literal alternation is still only a few hundred instructions) but far below that million, which
-// keeps compilation bounded in both memory and time, and bounds matching too — the Pike VM does at
-// most program-size work per character, so a refused pattern is also the only kind that could
-// have made rendering the profile list crawl.
+// program for (a{200}){200} is 40,000+ instructions even though MAX_QUANT_REPEAT below allows
+// each 200 individually. So this cap is on the size of the whole compiled program, catching that
+// multiplication regardless of how deep the nesting goes. It's set well above what a real
+// matchProfiles pattern needs (a long literal alternation is still only a few hundred
+// instructions) but far below what nesting a few max-sized quantifiers can reach, which keeps
+// compilation bounded in both memory and time.
 const MAX_PROGRAM_SIZE = 50000;
+
+// A single {n,m} unrolls into that many copies of its atom (compileQuant), one split per optional
+// copy. Matching cost for that isn't just O(program size × value length): at any position, every
+// still-reachable "how many reps have I skipped so far" copy is a separate live NFA thread, so an
+// optional quantifier's cost is closer to O(bound²) — measured, a 2-way alternation with an
+// explicit bound of 200 against a value of that length needs ~240,000 steps, 300 needs ~540,000.
+// A real matchProfiles pattern never needs to repeat anything anywhere near this many times, so
+// the bound is capped well before that quadratic cost gets expensive. Nested multiplication like
+// (a{200}){200} is still caught by MAX_PROGRAM_SIZE.
+const MAX_QUANT_REPEAT = 200;
 
 // Parses the subset of ICU regex syntax (the flavor Windows Terminal itself matches with) that
 // matchProfiles patterns actually use: literals, `.`, escapes (`\d\w\s` and their negations, `\.`
@@ -115,6 +124,9 @@ function parsePattern(pattern: string): AltNode {
         min = parseInt(braces[1], 10);
         max = braces[2] === undefined ? min : braces[3] === "" ? Infinity : parseInt(braces[3], 10);
         if (max < min) return fail("quantifier bounds out of order");
+        if (min > MAX_QUANT_REPEAT || (max !== Infinity && max > MAX_QUANT_REPEAT)) {
+          return fail("quantifier bound too large");
+        }
         quantified = true;
         i += braces[0].length;
       }
@@ -268,8 +280,8 @@ type PatchSlot =
 type Frag = { start: Inst; out: PatchSlot[] };
 
 // Every instruction is created through here, so the running total covers nested repetitions too —
-// the budget is spent as (a{1000}){1000} unrolls, and compilation gives up partway through rather
-// than after building the whole million-instruction program.
+// the budget is spent as (a{200}){200} unrolls, and compilation gives up partway through rather
+// than after building the whole 40,000+-instruction program.
 let instructionCount = 0;
 
 function newInst<T extends Inst>(inst: T): T {
@@ -385,14 +397,15 @@ function compileProgram(alt: AltNode): Inst {
   return frag.start;
 }
 
-// matchFull's total work is O(program size × value length): the NFA can't backtrack exponentially,
-// but a program well within MAX_PROGRAM_SIZE run against a long field value is still a lot of
-// arithmetic — e.g. (a|b){0,4000} compiles to a modest program but keeps thousands of live threads,
-// and matching it against a long commandline could take tens of millions of steps, run
-// synchronously during rendering, once per profile per resolution pass. This budget bounds that
-// total, independent of both factors, the same "give up and report no match" fallback
-// MAX_PROGRAM_SIZE already uses for a pattern that's too large to compile at all.
-const MAX_MATCH_STEPS = 200000;
+// A safety net behind MAX_QUANT_REPEAT, not the primary defense against slow matching — that's
+// now the quantifier bound above, which keeps realistic patterns fast in the first place. This
+// budget exists for constructs MAX_QUANT_REPEAT doesn't cover: a long value matched against a
+// small program (e.g. ".*"), or several moderate quantifiers/alternations compounding within one
+// pattern. It's set with headroom above the worst case MAX_QUANT_REPEAT actually allows (a 5-way
+// alternation at the bound measured ~390,000 steps) so a legitimately matching pattern within that
+// bound always finishes rather than being silently cut off — MAX_QUANT_REPEAT is what keeps this
+// budget from ever being the thing standing between a valid pattern and a correct answer.
+const MAX_MATCH_STEPS = 1000000;
 type StepBudget = { remaining: number };
 
 // \b sits between a word character and a non-word one, counting the space off either end of the

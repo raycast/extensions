@@ -127,23 +127,30 @@ describe("buildProfileMatcher", () => {
     assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(PowerShell)\\1" }), null);
   });
 
+  it("rejects a single quantifier bound above 200, the per-quantifier repeat limit", () => {
+    assert.notEqual(buildProfileMatcher({ type: "matchProfiles", name: "a{200}" }), null);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "a{201}" }), null);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "a{0,4000}" }), null);
+  });
+
   it("refuses a pattern whose nested repetitions compile to a huge program", () => {
+    // Each quantifier here (200) is within the per-quantifier bound on its own; nesting them
+    // multiplies the compiled size past MAX_PROGRAM_SIZE, which is what must catch this case.
     const start = Date.now();
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(a{1000}){1000}" }), null);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "((a|b){200}){200}" }), null);
     assert.ok(Date.now() - start < 1000, "compiling took too long");
     // A merely long pattern still compiles and matches.
     assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?:PowerShell){1}" }), ["PowerShell"]);
   });
 
-  it("bounds total matching work for a wide quantifier against a long value", () => {
-    // (a|b){0,4000} compiles (its program fits under MAX_PROGRAM_SIZE) but keeps thousands of
-    // live threads; without a bound on total matching work, running it against a value this long
-    // would take tens of millions of steps synchronously during rendering.
-    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(a|b){0,4000}" });
+  it("matches correctly, not just quickly, right up to the per-quantifier bound", () => {
+    // A quantifier at the 200 bound isn't just fast to reject — a legitimately matching value at
+    // that length must actually match, not silently fail because matching work is bounded too.
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(a|b){0,200}" });
     assert.notEqual(matcher, null);
-    const start = Date.now();
-    matcher!({ ...powershell, name: "a".repeat(4000) });
-    assert.ok(Date.now() - start < 500, "wide quantifier against a long value took too long");
+    assert.equal(matcher!({ ...powershell, name: "a".repeat(200) }), true);
+    assert.equal(matcher!({ ...powershell, name: "ab".repeat(100) }), true);
+    assert.equal(matcher!({ ...powershell, name: "c".repeat(200) }), false);
   });
 });
 
