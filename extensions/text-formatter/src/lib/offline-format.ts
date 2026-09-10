@@ -11,6 +11,8 @@
  * gets converted to HTML for the rich-text clipboard flavor by the caller.
  */
 
+import { restoreParagraphs } from "./restore-paragraphs";
+
 const ABBREVIATIONS = [
   "Mr",
   "Mrs",
@@ -107,6 +109,11 @@ export function offlineFormat(text: string): string {
     out.push(line);
   }
   t = out.join("\n");
+
+  // Last: if what we have is still one undifferentiated block, restore paragraph
+  // breaks from linguistic cues. Runs while abbreviations are still masked so a
+  // period inside "e.g." is never mistaken for a sentence boundary.
+  t = restoreParagraphs(t);
 
   t = restoreAbbreviations(t, abbrevMap);
 
