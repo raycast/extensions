@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { basename } from "node:path";
-import { parseHerdrClientTtys, parseHerdrClients, type HerdrClient } from "./terminal-focus";
+import { PS_COLUMNS, parseHerdrClientTtys, parseHerdrClients, type HerdrClient } from "./terminal-focus";
 
 type Capture = (path: string, args: string[], timeout: number) => Promise<string>;
 
@@ -29,9 +29,9 @@ async function herdrPids(binary: string, timeout: number, capture: Capture): Pro
   return pids.length > 0 ? pids : undefined;
 }
 
-async function listProcesses(pids: string[], columns: string, timeout: number, capture: Capture) {
+async function listProcesses(pids: string[], timeout: number, capture: Capture) {
   try {
-    return await capture("/bin/ps", ["-p", pids.join(","), "-o", columns], timeout);
+    return await capture("/bin/ps", ["-p", pids.join(","), "-o", PS_COLUMNS], timeout);
   } catch {
     return undefined;
   }
@@ -46,7 +46,7 @@ export async function lookupHerdrClientTtys(
   const pids = await herdrPids(binary, timeout, capture);
   if (pids === undefined) return undefined;
   if (pids.length === 0) return [];
-  const output = await listProcesses(pids, "tty=,comm=,args=", timeout, capture);
+  const output = await listProcesses(pids, timeout, capture);
   return output === undefined ? undefined : parseHerdrClientTtys(output, binary, sessionName);
 }
 
@@ -60,6 +60,6 @@ export async function lookupHerdrClients(
   const pids = await herdrPids(binary, timeout, capture);
   if (pids === undefined) return undefined;
   if (pids.length === 0) return [];
-  const output = await listProcesses(pids, "pid=,tty=,comm=,args=", timeout, capture);
+  const output = await listProcesses(pids, timeout, capture);
   return output === undefined ? undefined : parseHerdrClients(output, binary, sessionName);
 }

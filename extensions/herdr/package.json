@@ -333,7 +333,7 @@
     {
       "name": "sessionEnterAction",
       "title": "Attaching a Session",
-      "description": "What Enter does on a session in Manage Sessions. Switch detaches the selected session's clients in the terminal and reuses their window. The other action stays available under a shortcut.",
+      "description": "What Enter does on a session in Manage Sessions. Switch detaches the selected session's clients in the terminal and, in WezTerm, reuses their window. The other action stays available under a shortcut.",
       "type": "dropdown",
       "required": false,
       "default": "attach",

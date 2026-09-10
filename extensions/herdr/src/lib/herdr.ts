@@ -101,10 +101,12 @@ function extractCliError(stderr: string): HerdrError | undefined {
   return undefined;
 }
 
-// Read commands never start a server, so a Stopped session answers with a
-// refused (or missing) socket rather than a CLI error envelope.
-function isStoppedSessionDetail(detail: string): boolean {
-  return /ConnectionRefused|Connection refused|kind: NotFound/.test(detail);
+// Read commands never start a server, so a Stopped session's socket refuses the
+// connection. Only that answer counts: a missing socket path (NotFound) means
+// the session does not exist, and calling that "stopped" would offer to start
+// it, creating a session under a name the user mistyped.
+function isStoppedSessionStderr(stderr: string): boolean {
+  return /ConnectionRefused|Connection refused/.test(stderr);
 }
 
 export async function runHerdr(args: string[], options: RunOptions = {}): Promise<string> {
@@ -130,12 +132,15 @@ export async function runHerdr(args: string[], options: RunOptions = {}): Promis
         if (cliError) return reject(cliError);
         if (error) {
           const detail = stderr.trim() || stdout.trim() || error.message;
-          if (session && isStoppedSessionDetail(detail)) {
+          const timedOut = "killed" in error && error.killed;
+          // Read from stderr alone, and only when the command ran to
+          // completion: `pane read` puts raw terminal text on stdout, which can
+          // quote a refused connection of its own.
+          if (session && !timedOut && isStoppedSessionStderr(stderr)) {
             return reject(
               new HerdrError(`Herdr session “${session}” is stopped`, "session_not_running", detail, session),
             );
           }
-          const timedOut = "killed" in error && error.killed;
           return reject(
             new HerdrError(
               timedOut ? "The Herdr command timed out" : "Unable to run the Herdr command",

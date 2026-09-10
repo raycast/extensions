@@ -13,7 +13,7 @@ function switchMessage(result: SwitchResult): string {
   if (result.detached > 0) {
     return `Detached ${result.detached} client${result.detached === 1 ? "" : "s"} of “${result.previous}”`;
   }
-  return `Attached alongside: ${result.skipped}`;
+  return result.skipped ? `Attached alongside: ${result.skipped}` : "Attached alongside";
 }
 
 export default function Command() {
@@ -31,8 +31,10 @@ export default function Command() {
     const succeeded = await runAction(
       "Opening session",
       async () => {
-        await setSelectedSession(name);
+        // Selected only once the terminal has the client, so a failed attach
+        // never leaves Raycast pointed at a session it cannot show.
         await launchHerdrInTerminal(["session", "attach", name], { includeSession: false, ...options });
+        await setSelectedSession(name);
       },
       { success: "Terminal Opened", onSuccess: selected.revalidate },
     );
@@ -103,12 +105,14 @@ export default function Command() {
         description="Open Herdr to create the default session."
       />
       {(sessions.data || []).map((session) => {
+        // The preference decides which action Enter runs by ordering the two.
+        // Both keep a fixed shortcut, so neither key changes meaning with it.
         const attachAction = (
           <Action
             key="attach"
             title={session.running ? "Attach in Terminal" : "Start and Attach in Terminal"}
             icon={Icon.Terminal}
-            shortcut={enterAction === "switch" ? shortcuts.attach : undefined}
+            shortcut={shortcuts.attach}
             onAction={() => attach(session.name)}
           />
         );
@@ -117,7 +121,7 @@ export default function Command() {
             key="switch"
             title={session.running ? "Switch to Session" : "Start and Switch to Session"}
             icon={Icon.Replace}
-            shortcut={enterAction === "attach" ? shortcuts.switchSession : undefined}
+            shortcut={shortcuts.switchSession}
             onAction={() => switchTo(session.name)}
           />
         );

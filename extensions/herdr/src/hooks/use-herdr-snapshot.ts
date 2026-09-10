@@ -29,7 +29,13 @@ export function useHerdrSnapshot() {
     return () => clearInterval(timer);
   }, [interval, result.revalidate]);
 
-  // A hook that is not executing reports itself as not loading, so the
-  // session lookup keeps the loading state up until the first snapshot runs.
-  return { ...result, session, isLoading: selected.isLoading || result.isLoading };
+  // A hook that is not executing reports itself as not loading, so the session
+  // lookup carries both the loading state and its own failure: without it a
+  // rejected lookup rendered an empty list with no error.
+  return {
+    ...result,
+    session,
+    isLoading: selected.isLoading || result.isLoading,
+    error: result.error ?? selected.error,
+  };
 }

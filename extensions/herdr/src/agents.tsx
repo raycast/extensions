@@ -5,7 +5,7 @@ import { StartAgentForm } from "./components/start-agent-form";
 import { useHerdrSnapshot } from "./hooks/use-herdr-snapshot";
 import { agentIcon, agentName } from "./lib/agent-appearance";
 import type { AgentStatus } from "./lib/types";
-import { ErrorView, SwitchSessionAction, shortcuts, statusIcon, statusTitle } from "./lib/ui";
+import { ErrorView, ManageSessionsAction, shortcuts, statusIcon, statusTitle } from "./lib/ui";
 
 type Filter = "all" | AgentStatus;
 
@@ -23,7 +23,7 @@ export default function Command() {
       searchBarPlaceholder="Search agents, names, projects, paths…"
       actions={
         <ActionPanel>
-          <SwitchSessionAction />
+          <ManageSessionsAction />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
@@ -100,7 +100,7 @@ export default function Command() {
                   shortcut={shortcuts.refresh}
                   onAction={snapshot.revalidate}
                 />
-                <SwitchSessionAction />
+                <ManageSessionsAction />
               </ActionPanel>
             }
           />

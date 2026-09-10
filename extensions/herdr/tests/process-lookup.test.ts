@@ -27,9 +27,10 @@ describe("lookupHerdrClientTtys", () => {
     const capture = vi
       .fn()
       .mockResolvedValueOnce("101\n102")
-      .mockResolvedValueOnce("ttys001 herdr herdr\nttys002 herdr herdr --session work");
+      .mockResolvedValueOnce("101 ttys001 herdr\n102 ttys002 herdr --session work");
 
     await expect(lookupHerdrClientTtys("/opt/herdr", "work", 250, capture)).resolves.toEqual(["/dev/ttys002"]);
+    expect(capture).toHaveBeenLastCalledWith("/bin/ps", ["-p", "101,102", "-o", "pid=,tty=,args="], 250);
   });
 });
 
@@ -38,12 +39,12 @@ describe("lookupHerdrClients", () => {
     const capture = vi
       .fn()
       .mockResolvedValueOnce("101\n102")
-      .mockResolvedValueOnce("101 ttys001 herdr herdr\n102 ttys002 herdr herdr --session work");
+      .mockResolvedValueOnce("101 ttys001 herdr\n102 ttys002 herdr --session work");
 
     await expect(lookupHerdrClients("/opt/herdr", "work", 250, capture)).resolves.toEqual([
       { pid: "102", tty: "/dev/ttys002" },
     ]);
-    expect(capture).toHaveBeenLastCalledWith("/bin/ps", ["-p", "101,102", "-o", "pid=,tty=,comm=,args="], 250);
+    expect(capture).toHaveBeenLastCalledWith("/bin/ps", ["-p", "101,102", "-o", "pid=,tty=,args="], 250);
   });
 
   it("returns an empty list when pgrep confirms no process and unavailable when ps fails", async () => {

@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -61,12 +61,9 @@ function mockSystem(fixture: Fixture) {
     }
     if (path === "/bin/ps") {
       events.push("ps");
-      const withPid = args.includes("pid=,tty=,comm=,args=");
-      return respond(
-        fixture.processes
-          .map((process) => `${withPid ? `${process.pid} ` : ""}${process.tty} herdr ${process.args}`)
-          .join("\n"),
-      );
+      // The one column set both lookups use: pid, tty, then the whole argv.
+      expect(args).toEqual(["-p", fixture.processes.map((process) => process.pid).join(","), "-o", "pid=,tty=,args="]);
+      return respond(fixture.processes.map((process) => `${process.pid} ${process.tty} ${process.args}`).join("\n"));
     }
     if (path.endsWith("wezterm")) {
       events.push(`wezterm ${args[1]}${args[1] === "spawn" ? ` ${args.slice(2).join(" ")}` : ""}`);
@@ -92,6 +89,15 @@ beforeEach(() => {
   events.length = 0;
   kill.mockClear();
   vi.mocked(execFile).mockReset();
+  vi.mocked(spawn).mockReset();
+  const child = {
+    once(event: string, callback: () => void) {
+      if (event === "spawn") callback();
+      return child;
+    },
+    unref() {},
+  };
+  vi.mocked(spawn).mockReturnValue(child as never);
 });
 
 const previousClient: Process = { pid: "101", tty: "ttys001", args: `${binary} session attach tmp-a` };
@@ -157,11 +163,29 @@ describe("switchToSession", () => {
     expect(kill).not.toHaveBeenCalled();
   });
 
-  it("detaches nothing when the new client cannot be launched", async () => {
+  // Regression: the selection was persisted before the launch, so a failed
+  // switch left every command pointed at a session the terminal never showed.
+  it("keeps the previous selection when the new client cannot be launched", async () => {
     mockSystem({ processes: [previousClient], panes: [previousPane], spawnResult: new Error("spawn failed") });
 
     await expect(switchToSession("tmp-b", kill)).rejects.toThrow();
     expect(kill).not.toHaveBeenCalled();
+    expect(storage.get("selectedSession")).toBe("tmp-a");
+  });
+
+  // Regression: a `found` location whose signals all failed reported zero
+  // detached with no reason, which rendered as "Attached alongside: undefined".
+  it("says the previous clients survived when every signal fails", async () => {
+    mockSystem({ processes: [previousClient], panes: [previousPane] });
+    const failing = vi.fn(() => {
+      throw Object.assign(new Error("no such process"), { code: "ESRCH" });
+    });
+
+    const result = await switchToSession("tmp-b", failing);
+
+    expect(result).toMatchObject({ outcome: "attached", detached: 0 });
+    expect(result.skipped).toBeTruthy();
+    expect(result.skipped).not.toContain("undefined");
   });
 
   it("does not detach clients of the target when switching to the selected session", async () => {
@@ -171,6 +195,23 @@ describe("switchToSession", () => {
     const result = await switchToSession("tmp-b", kill);
 
     expect(result).toMatchObject({ outcome: "attached", previous: "tmp-b", detached: 0 });
+    expect(kill).not.toHaveBeenCalled();
+    // Regression: this branch claimed no client of the session was open in a
+    // terminal pane without ever looking.
+    expect(result.skipped).not.toContain("terminal pane");
+  });
+
+  // Regression: a terminal that cannot list its panes was reported as "no
+  // client is open", a claim the extension never checked.
+  it("reports that the terminal cannot list panes rather than claiming no client", async () => {
+    preferences.terminalApplication = { bundleId: "net.kovidgoyal.kitty", name: "kitty", path: "/Applications/kitty.app" };
+    mockSystem({ processes: [previousClient], panes: [] });
+
+    const result = await switchToSession("tmp-b", kill);
+
+    expect(result).toMatchObject({ outcome: "attached", detached: 0 });
+    expect(result.skipped).toContain("kitty");
+    expect(result.skipped).not.toContain("terminal pane");
     expect(kill).not.toHaveBeenCalled();
   });
 });

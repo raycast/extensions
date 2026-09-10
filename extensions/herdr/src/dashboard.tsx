@@ -6,7 +6,15 @@ import { StartAgentForm } from "./components/start-agent-form";
 import { useHerdrSnapshot } from "./hooks/use-herdr-snapshot";
 import { agentIcon, agentName } from "./lib/agent-appearance";
 import type { PaneInfo } from "./lib/types";
-import { ErrorView, SwitchSessionAction, abbreviatePath, shortcuts, statusIcon, statusTitle, tabLabel } from "./lib/ui";
+import {
+  ErrorView,
+  ManageSessionsAction,
+  abbreviatePath,
+  shortcuts,
+  statusIcon,
+  statusTitle,
+  tabLabel,
+} from "./lib/ui";
 
 type Scope = "all" | "attention" | "workspaces" | "tabs" | "panes" | "agents";
 
@@ -46,7 +54,7 @@ export default function Command() {
       searchBarPlaceholder="Search workspaces, tabs, panes, agents, paths…"
       actions={
         <ActionPanel>
-          <SwitchSessionAction />
+          <ManageSessionsAction />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}

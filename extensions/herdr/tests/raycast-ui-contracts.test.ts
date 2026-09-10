@@ -60,6 +60,16 @@ describe("Raycast UI contracts", () => {
     }
   });
 
+  // CONTEXT.md reserves Switch for detach + attach + select, so only Manage
+  // Sessions may title an action that way; elsewhere it opens the picker.
+  it("titles only the real switch action Switch", () => {
+    for (const path of sourceFiles(join(process.cwd(), "src"))) {
+      if (path.endsWith("sessions.tsx") || !path.endsWith(".tsx")) continue;
+      const titles = [...readFileSync(path, "utf8").matchAll(/"([^"\n]*\bSwitch\b[^"\n]*)"/g)].map((match) => match[1]);
+      expect(titles, `${path} titles a non-switch action Switch`).toEqual([]);
+    }
+  });
+
   it("does not put actions inside List.EmptyView", () => {
     for (const path of sourceFiles(join(process.cwd(), "src"))) {
       const source = readFileSync(path, "utf8");

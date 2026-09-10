@@ -34,6 +34,8 @@ export interface LaunchOptions {
   newWindow?: boolean;
   /** WezTerm only: spawn the tab into this window. */
   windowId?: string;
+  /** WezTerm only: a `cli list --format json` output the caller already has. */
+  wezTermListing?: string;
 }
 
 function execCapture(path: string, args: string[], timeout = 5_000): Promise<string> {
@@ -118,6 +120,7 @@ export async function focusExistingHerdrClient(explicitSession?: string): Promis
       mustClearTitle = true;
       const title = await runHerdrJson<{ changed: boolean; reason: string }>(["terminal", "title", "set", marker], {
         timeout: FAST_FOCUS_TIMEOUT_MS,
+        session,
       });
       if (!title.changed) {
         mustClearTitle = false;
@@ -133,10 +136,10 @@ export async function focusExistingHerdrClient(explicitSession?: string): Promis
     } finally {
       if (mustClearTitle) {
         try {
-          await runHerdr(["terminal", "title", "clear"], { timeout: FAST_FOCUS_TIMEOUT_MS });
+          await runHerdr(["terminal", "title", "clear"], { timeout: FAST_FOCUS_TIMEOUT_MS, session });
         } catch {
           // Retry generously so the marker title does not stick.
-          await runHerdr(["terminal", "title", "clear"], { timeout: 5_000 }).catch(() => undefined);
+          await runHerdr(["terminal", "title", "clear"], { timeout: 5_000, session }).catch(() => undefined);
         }
       }
     }
@@ -168,7 +171,7 @@ export async function focusExistingHerdrClient(explicitSession?: string): Promis
 }
 
 export type ClientLocation =
-  | { status: "found"; clients: HerdrClient[]; windowId?: string }
+  | { status: "found"; clients: HerdrClient[]; windowId?: string; listing?: string }
   | { status: "none" }
   | { status: "unavailable"; reason: string };
 
@@ -194,9 +197,10 @@ export async function locateTerminalPaneClients(session: string): Promise<Client
 
   let paneTtys: string[] | undefined;
   let windowId: string | undefined;
+  let listing: string | undefined;
   if (kind === "wezterm") {
     const executable = wezTermExecutable(application);
-    const listing = executable
+    listing = executable
       ? await tryExecCapture(executable, ["cli", "list", "--format", "json"], FAST_FOCUS_TIMEOUT_MS)
       : undefined;
     const panes = listing ? selectWezTermPanes(listing, ttys) : undefined;
@@ -208,9 +212,8 @@ export async function locateTerminalPaneClients(session: string): Promise<Client
     paneTtys = output === undefined ? undefined : parseTtyList(output);
   }
   if (paneTtys === undefined) return { status: "unavailable", reason: `${terminalName} did not list its panes` };
-  const visible = paneTtys;
-  const inPanes = clients.filter((client) => visible.includes(client.tty));
-  return inPanes.length > 0 ? { status: "found", clients: inPanes, windowId } : { status: "none" };
+  const inPanes = clients.filter((client) => paneTtys.includes(client.tty));
+  return inPanes.length > 0 ? { status: "found", clients: inPanes, windowId, listing } : { status: "none" };
 }
 
 export async function revealFocusedHerdr(): Promise<boolean> {
@@ -238,7 +241,11 @@ async function launchWarp(appTarget: string, command: string): Promise<void> {
 async function wezTermPlacement(executable: string, options: LaunchOptions): Promise<string[]> {
   if (options.newWindow) return ["--new-window"];
   if (options.windowId) return ["--window-id", options.windowId];
-  const listing = await tryExecCapture(executable, ["cli", "list", "--format", "json"], FAST_FOCUS_TIMEOUT_MS);
+  // A caller that already listed the panes passes the listing on, so a Switch
+  // does not spawn a third `wezterm cli list`.
+  const listing =
+    options.wezTermListing ??
+    (await tryExecCapture(executable, ["cli", "list", "--format", "json"], FAST_FOCUS_TIMEOUT_MS));
   const windowId = listing ? selectWezTermWindow(listing) : undefined;
   return windowId ? ["--window-id", windowId] : ["--new-window"];
 }

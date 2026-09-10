@@ -88,13 +88,16 @@ export async function runAction(
   }
 }
 
-/** Opens Manage Sessions, the one picker for the Selected Session. */
-export function SwitchSessionAction({ title = "Switch Session…" }: { title?: string }) {
+/**
+ * Opens Manage Sessions, the one picker for the Selected Session. Selecting or
+ * switching happens there, so this action is never titled Switch.
+ */
+export function ManageSessionsAction({ title = "Manage Sessions…" }: { title?: string }) {
   return (
     <Action
       title={title}
       icon={Icon.Switch}
-      shortcut={shortcuts.switchSession}
+      shortcut={shortcuts.manageSessions}
       onAction={() => launchCommand({ name: "sessions", type: LaunchType.UserInitiated })}
     />
   );
@@ -121,7 +124,7 @@ function SessionStoppedView({ session, onRetry }: { session: string; onRetry?: (
               if (succeeded) await closeMainWindow({ clearRootSearch: true });
             }}
           />
-          <SwitchSessionAction title="Choose Another Session" />
+          <ManageSessionsAction title="Choose Another Session" />
           {onRetry ? (
             <Action title="Try Again" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={onRetry} />
           ) : null}

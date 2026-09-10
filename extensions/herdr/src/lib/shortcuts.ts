@@ -19,4 +19,5 @@ export const shortcuts = {
   selectSession: { modifiers: ["cmd"], key: "s" },
   attachInNewWindow: { modifiers: ["cmd", "shift"], key: "o" },
   switchSession: { modifiers: ["cmd", "shift"], key: "s" },
+  manageSessions: { modifiers: ["cmd", "shift"], key: "s" },
 } satisfies Record<string, Keyboard.Shortcut>;
