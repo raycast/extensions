@@ -55,19 +55,26 @@ insert the result into the frontmost application or copy it to the clipboard.
 
 # Models
 
+Manage chat presets and AI commands together in **Models**. Select a preset and use **Create AI Command from This Model** in its action menu to create a command with the same chat settings.
+
+- Creating a command from **AI Commands** starts with **Independent Configuration**. Set its model ID, temperature, reasoning, vision and prompt directly; no chat preset is required or created.
+- Creating a command from a preset in **Models** starts with **Inherit from a Model**. The form displays the effective settings directly. Editing a field customizes it only for that command; untouched fields continue to follow the base model. Use the action menu to reset individual fields or restore all inherited settings.
+- Prompt overrides replace the base prompt; prompts are never concatenated. An empty prompt is allowed.
+- Switch an inherited command to independent configuration to copy its currently effective settings and stop following the base model. Either mode can be changed later in the command form.
+- Use **Ask with This Model** to start a conversation with the selected preset or command. In Ask, use **Edit Model** or **Edit AI Command** to update its configuration and return without losing the draft or conversation.
+- Full Text Input also supports editing the selected configuration. Subsequent requests use the saved settings.
+- Existing commands keep their original settings through dedicated base presets and prompt overrides. A model used by commands cannot be removed until those commands become independent or use another base model.
+- Built-in commands start with independent settings. Importing models preserves any referenced base model missing from the import file, including when restoring an older backup.
+
+**AI Commands** is available for quick execution and command management. The standalone **Create AI Command** entry has been removed; use the action menu in **Models** to create commands. Existing commands are preserved. Shortcuts or deep links to the removed entry need to be replaced with **Models**.
+
 GPT-5 model supports vision capabilities, which can be enabled in the Models Command when creating or editing a model.
 You can also enable per-model reasoning control in the model form and set the `Effort` (`none`, `low`, `medium`, `high`).
 By default, reasoning effort override is disabled. When it is enabled and set to anything except `none`, the extension sends `reasoning_effort` in Chat Completions requests.
 
 ### Custom Models
 
-Enable `Use API Endpoint` and set `API Endpoint` in preferences to use a compatible API provider.
-
-When creating or editing a Model or AI Command, the `Model` dropdown loads model IDs from the configured API.
-Search and select an available model, or type any model ID and select `Use "your-model-id"` to use it.
-Manual entry is always available, including when the API cannot list models. There is no separate `Custom model` preference.
-Previously saved model IDs remain selectable even if they are missing from the API response.
-Azure continues to skip model discovery; enter the model ID manually.
+Modify the preferences properties to configure the API Endpoint and use custom models.
 
 # How to use
 

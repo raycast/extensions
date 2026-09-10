@@ -137,16 +137,9 @@
       ]
     },
     {
-      "name": "create-ai-command",
-      "title": "Create AI Command",
-      "description": "Create new quick AI command",
-      "mode": "view",
-      "icon": "icon.png"
-    },
-    {
       "name": "search-ai-command",
-      "title": "Search AI Command",
-      "description": "Search AI commands",
+      "title": "AI Commands",
+      "description": "Run and manage AI commands",
       "mode": "view",
       "icon": "icon.png"
     }
@@ -213,6 +206,15 @@
       "title": "Text-to-Speech",
       "required": false,
       "default": false
+    },
+    {
+      "default": false,
+      "description": "Enable custom model names without selecting from the model API",
+      "label": "Enable custom model name",
+      "name": "isCustomModel",
+      "required": false,
+      "title": "Custom model",
+      "type": "checkbox"
     },
     {
       "default": false,
@@ -366,8 +368,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node --experimental-strip-types --test tests/*.test.cjs",
     "publish": "ray publish",
-    "pull": "ray pull-contributions"
+    "pull": "ray pull-contributions",
+    "test": "node --require ./tests/register.cjs --test tests/*.test.cjs"
   }
 }

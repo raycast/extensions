@@ -9,7 +9,10 @@ import {
   useNavigation,
   Clipboard,
 } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useModelCatalog } from "../../hooks/useModelCatalog";
+import { EditModelAction } from "../../actions/edit-model";
+import { selectedChatModel } from "../../utils/model-selection";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
 import { QuestionFormProps } from "../../type";
 import { checkFileValidity, formats } from "../../utils";
@@ -17,13 +20,22 @@ import path from "node:path";
 
 export const QuestionForm = ({
   initialQuestion,
-  selectedModel,
-  models,
+  selectedModel: initialModel,
+  models: initialModels,
   onModelChange,
   onSubmit,
   isFirstCall,
 }: QuestionFormProps) => {
   const { pop } = useNavigation();
+  const { models: liveModels, isLoading } = useModelCatalog();
+  const [selectedModel, setSelectedModel] = useState(initialModel);
+  const currentModel = selectedChatModel(
+    liveModels,
+    selectedModel,
+    initialModels.find((model) => model.id === selectedModel),
+  );
+  const models = isLoading ? [...initialModels] : Object.values(liveModels);
+  if (!models.some((model) => model.id === currentModel.id)) models.push(currentModel);
 
   const [question, setQuestion] = useState<string>(initialQuestion ?? "");
   const [questionError, setQuestionError] = useState<string | undefined>();
@@ -32,14 +44,8 @@ export const QuestionForm = ({
   const separateDefaultModel = models.filter((x) => x.id !== "default");
   const defaultModel = models.find((x) => x.id === "default") ?? DEFAULT_MODEL;
 
-  const visionMap = useMemo(() => {
-    const map = new Map<string, boolean>();
-    models.forEach((m) => map.set(m.id, m.vision || false));
-    return map;
-  }, [models]);
-
   const [files, setFiles] = useState<string[]>([]);
-  const [enableVision, setEnableVision] = useState(visionMap.get(selectedModel) || false);
+  const enableVision = !!currentModel.vision;
 
   const addFromSelected = useCallback(
     (errCallback?: (reason: unknown) => void | Promise<void>) => {
@@ -88,10 +94,11 @@ export const QuestionForm = ({
                 }
                 searchFiles = files;
               }
-              onSubmit(question, searchFiles);
+              onSubmit(question, searchFiles, currentModel);
               pop();
             }}
           />
+          <EditModelAction modelId={currentModel.id} />
           {enableVision && (
             <>
               <Action
@@ -149,9 +156,9 @@ export const QuestionForm = ({
         id="model"
         title="Model"
         placeholder="Choose model"
-        defaultValue={selectedModel}
+        value={currentModel.id}
         onChange={(id) => {
-          setEnableVision(visionMap.get(id) || false);
+          setSelectedModel(id);
           onModelChange(id);
         }}
       >
