@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Kyma API MCP Server] - {PR_MERGE_DATE}
+## [Add Kyma API MCP Server] - 2026-09-10
 
 Add Kyma API to the community registry: hosted MCP server for one endpoint across open and frontier models, with measured per-model uptime, public usage rankings, and a spend-capped chat tool. OAuth 2.1 sign-in via the `@kyma-api/mcp-server` stdio bridge.
 
