@@ -281,9 +281,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
         </>
       )}
       <Form.TextArea id="translation" title="Translation" value={translation} />
-      {translation.length > 0 && (
-        <Form.Description title="Copied" text="Rich text is on the clipboard. Paste with ⌘V." />
-      )}
+      {translation.length > 0 && <Form.Description title="Status" text="Translation complete." />}
       {(showTransliteration == "always" || (showTransliteration == "whenProvided" && transliteration.length > 0)) && (
         <Form.Description title="Transliteration" text={transliteration} />
       )}
