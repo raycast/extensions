@@ -1,6 +1,6 @@
 # X Changelog
 
-## [Fix Authentication Lock Recovery] - {PR_MERGE_DATE}
+## [Fix Authentication Lock Recovery] - 2026-09-10
 
 - Prevent interrupted commands from leaving X login and logout permanently blocked
 - Avoid authentication failures caused by unrelated services using the same local port
