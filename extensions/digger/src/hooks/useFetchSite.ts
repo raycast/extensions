@@ -1224,6 +1224,7 @@ export function useFetchSite(url?: string) {
             // href that fails to resolve is KEPT so it fails into `unchecked`
             // rather than vanishing from the denominator.
             stylesheets.map((sheet) => resolveUrl(sheet.href)).filter((href) => !href.startsWith("data:")),
+            normalizedUrl,
             abortController.signal,
           ).then((result) => withStylesheetTokens(theme, result)),
           theme,

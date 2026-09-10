@@ -174,12 +174,34 @@ function gamma(channel: number): number {
   return clamp01(encoded);
 }
 
-function toHexString(r: number, g: number, b: number): string {
+function toHexString(r: number, g: number, b: number, alpha = 1): string {
   const byte = (n: number) =>
     Math.round(clamp01(n) * 255)
       .toString(16)
       .padStart(2, "0");
-  return `#${byte(r)}${byte(g)}${byte(b)}`;
+  // Alpha is carried through as an 8-digit value rather than dropped. Discarding
+  // it here made `rgba(255,0,0,.5)` indistinguishable from opaque red by the time
+  // it reached the swatch, defeating the hollow-indicator branch that exists
+  // precisely for translucent colours.
+  const rgb = `#${byte(r)}${byte(g)}${byte(b)}`;
+  return alpha >= 1 ? rgb : `${rgb}${byte(alpha)}`;
+}
+
+/** The alpha argument of a functional colour, after the `/` or as a 4th value. */
+function alphaOf(body: string): number {
+  const slash = body.split("/");
+  if (slash.length > 1) {
+    const raw = slash[1].trim();
+    if (raw === "" || raw === "none") return 1;
+    return raw.endsWith("%") ? parseFloat(raw) / 100 : parseFloat(raw);
+  }
+  const parts = body
+    .trim()
+    .split(/[\s,]+/)
+    .filter(Boolean);
+  if (parts.length < 4) return 1;
+  const raw = parts[3];
+  return raw.endsWith("%") ? parseFloat(raw) / 100 : parseFloat(raw);
 }
 
 /** Splits `oklch(1 2 3 / .5)` into its numeric arguments, alpha discarded. */
@@ -275,9 +297,10 @@ export function toHex(input: string): string | undefined {
 
   if (value.startsWith("#")) {
     const hex = value.slice(1);
-    if (/^[0-9a-f]{3,4}$/.test(hex)) return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+    if (/^[0-9a-f]{3}$/.test(hex)) return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+    if (/^[0-9a-f]{4}$/.test(hex)) return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
     if (/^[0-9a-f]{6}$/.test(hex)) return `#${hex}`;
-    if (/^[0-9a-f]{8}$/.test(hex)) return `#${hex.slice(0, 6)}`;
+    if (/^[0-9a-f]{8}$/.test(hex)) return `#${hex}`;
     return undefined;
   }
 
@@ -293,34 +316,34 @@ export function toHex(input: string): string | undefined {
     case "rgb":
     case "rgba": {
       const scale = (t: string) => (t.endsWith("%") ? num(t, 1) : num(t) / 255);
-      return toHexString(scale(parts[0]), scale(parts[1]), scale(parts[2]));
+      return toHexString(scale(parts[0]), scale(parts[1]), scale(parts[2]), alphaOf(body));
     }
     case "hsl":
     case "hsla": {
       const [r, g, b] = hslToRgb(num(parts[0]), num(parts[1], 1), num(parts[2], 1));
-      return toHexString(r, g, b);
+      return toHexString(r, g, b, alphaOf(body));
     }
     case "oklch": {
       const L = num(parts[0], 1);
       const C = num(parts[1], 0.4);
       const h = (num(parts[2]) * Math.PI) / 180;
       const [r, g, b] = oklabToLinear(L, C * Math.cos(h), C * Math.sin(h));
-      return toHexString(gamma(r), gamma(g), gamma(b));
+      return toHexString(gamma(r), gamma(g), gamma(b), alphaOf(body));
     }
     case "oklab": {
       const [r, g, b] = oklabToLinear(num(parts[0], 1), num(parts[1], 0.4), num(parts[2], 0.4));
-      return toHexString(gamma(r), gamma(g), gamma(b));
+      return toHexString(gamma(r), gamma(g), gamma(b), alphaOf(body));
     }
     case "lch": {
       const L = num(parts[0], 100);
       const C = num(parts[1], 150);
       const h = (num(parts[2]) * Math.PI) / 180;
       const [r, g, b] = labToLinear(L, C * Math.cos(h), C * Math.sin(h));
-      return toHexString(gamma(r), gamma(g), gamma(b));
+      return toHexString(gamma(r), gamma(g), gamma(b), alphaOf(body));
     }
     case "lab": {
       const [r, g, b] = labToLinear(num(parts[0], 100), num(parts[1], 125), num(parts[2], 125));
-      return toHexString(gamma(r), gamma(g), gamma(b));
+      return toHexString(gamma(r), gamma(g), gamma(b), alphaOf(body));
     }
     case "color": {
       // `color(srgb r g b)` and `color(display-p3 r g b)`. P3 primaries are wider

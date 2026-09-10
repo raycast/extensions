@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { LIMITS, TIMEOUTS } from "./config";
 import { getLogger } from "./logger";
 import { redactUrlForLog } from "./urlUtils";
@@ -5,20 +6,26 @@ import { redactUrlForLog } from "./urlUtils";
 const log = getLogger("fetcher");
 
 /**
- * The locale to ask servers for, derived from the machine's own.
+ * The language to ask servers for, from the Page Language preference.
  *
- * WITHOUT this header a content-negotiating site picks a locale for us, and
- * Digger faithfully reports whatever it was handed: muse.ai serves
- * `<html lang="ar-AR" dir="rtl">` to a request that expresses no preference,
- * which surfaced as a Language row reading `ar-AR` for an en-US page. The
- * User-Agent makes no difference; only this header does. It affects the title,
- * description and Open Graph tags too, not just the Language row.
+ * WITHOUT this header a content-negotiating site picks a locale for us, and Digger
+ * faithfully reports whatever it was handed: muse.ai serves
+ * `<html lang="ar-AR" dir="rtl">` to a request that expresses no preference, which
+ * surfaced as a Language row reading `ar-AR` for an en-US page. It affects the
+ * title, description and Open Graph tags too, not just the Language row.
+ *
+ * It reads a PREFERENCE rather than the machine locale, because the Store
+ * guidelines are explicit: "If the locale might affect functionality … please use
+ * the preferences API." Deriving it from `Intl` also made the result depend on a
+ * setting the user cannot see from inside Raycast, so two machines analysing the
+ * same URL could legitimately disagree about its title.
  */
 export function preferredLanguage(): string {
   try {
-    const locale = new Intl.DateTimeFormat().resolvedOptions().locale;
-    const base = locale.split("-")[0];
-    return base === locale ? `${locale};q=0.9, *;q=0.5` : `${locale}, ${base};q=0.9, *;q=0.5`;
+    const configured = getPreferenceValues<Preferences>().acceptLanguage?.trim();
+    const tag = configured && configured !== "" ? configured : "en-US";
+    const base = tag.split("-")[0];
+    return base === tag ? `${tag}, *;q=0.5` : `${tag}, ${base};q=0.9, *;q=0.5`;
   } catch {
     return "en-US, en;q=0.9, *;q=0.5";
   }
@@ -31,7 +38,11 @@ export function preferredLanguage(): string {
  */
 const FETCH_HEADERS = {
   "Accept-Encoding": "identity",
-  "Accept-Language": preferredLanguage(),
+  // A getter, not a captured value: reading the preference at module load would
+  // pin whatever it was when the command started.
+  get "Accept-Language"() {
+    return preferredLanguage();
+  },
 };
 
 export interface FetchResult {

@@ -114,7 +114,7 @@ export function Theme({ data, onRefresh, progress }: ThemeProps) {
                 <Action.Push
                   title="View All Color Tokens"
                   icon={Icon.Swatch}
-                  target={<ThemeTokensListView theme={theme} stylesheetUrls={stylesheetUrls} />}
+                  target={<ThemeTokensListView theme={theme} stylesheetUrls={stylesheetUrls} pageUrl={data!.url} />}
                   shortcut={{
                     macOS: { modifiers: ["cmd"], key: "return" },
                     Windows: { modifiers: ["ctrl"], key: "return" },

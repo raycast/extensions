@@ -29,6 +29,14 @@
   error page now reads as absent, and a 406 as unavailable, instead of "could not parse".
 - Long lists ending in a clipped `......ore` instead of "…and 9 more", in Resources,
   HTTP Headers, Discoverability, and Data Feeds.
+- Translucent colors rendering as fully opaque swatches.
+
+### Security
+
+- Stylesheets are fetched only from the site being analysed or a public host, with every
+  redirect re-checked. A page could previously name a stylesheet on `localhost`, a private
+  network address, or a cloud metadata endpoint and have Digger request it. They are also
+  now read with a hard byte cap rather than buffered in full.
 
 ## [Report failed DNS, certificate, Wayback and host-metadata lookups] - 2026-09-03
 

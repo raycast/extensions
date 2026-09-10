@@ -10,6 +10,8 @@ interface ThemeTokensListViewProps {
   theme: ThemeData;
   /** Every stylesheet the page links, already absolute. */
   stylesheetUrls: string[];
+  /** The dug URL — the reference the network guard judges cross-origin against. */
+  pageUrl: string;
 }
 
 interface DeepScan {
@@ -50,6 +52,15 @@ type ViewMode = "list" | "grid";
 function gridTitle(token: ThemeColor): string {
   const name = token.name ?? token.value;
   return name.startsWith("--") ? name.slice(2) : name;
+}
+
+/** A tintable 6-digit hex, or undefined when the colour is translucent or unresolved. */
+function opaqueHex(token: ThemeColor): string | undefined {
+  const hex = token.hex;
+  if (!hex) return undefined;
+  if (/^#[0-9a-f]{6}$/i.test(hex)) return hex;
+  if (/^#[0-9a-f]{8}$/i.test(hex)) return hex.slice(6).toLowerCase() === "ff" ? hex.slice(0, 7) : undefined;
+  return undefined;
 }
 
 const UNRESOLVED_TILE =
@@ -117,7 +128,7 @@ function TokenActions({
   );
 }
 
-export function ThemeTokensListView({ theme, stylesheetUrls }: ThemeTokensListViewProps) {
+export function ThemeTokensListView({ theme, stylesheetUrls, pageUrl }: ThemeTokensListViewProps) {
   const [deep, setDeep] = useState<DeepScan | undefined>();
   const [viewMode, setViewMode] = useCachedState<ViewMode>("theme-token-view", "list");
   const [isScanning, setIsScanning] = useState(stylesheetUrls.length > 0);
@@ -130,7 +141,7 @@ export function ThemeTokensListView({ theme, stylesheetUrls }: ThemeTokensListVi
     if (urls.length === 0) return;
     const controller = new AbortController();
 
-    fetchStylesheetTokens(urls, controller.signal, {
+    fetchStylesheetTokens(urls, pageUrl, controller.signal, {
       maxSheets: LIMITS.MAX_STYLESHEETS_DEEP,
       maxTokens: LIMITS.MAX_THEME_TOKENS_DEEP,
     })
@@ -151,7 +162,7 @@ export function ThemeTokensListView({ theme, stylesheetUrls }: ThemeTokensListVi
       });
 
     return () => controller.abort();
-  }, [urlKey]);
+  }, [urlKey, pageUrl]);
 
   // Two rules, in this order, and the order is the whole point.
   //
@@ -226,9 +237,12 @@ export function ThemeTokensListView({ theme, stylesheetUrls }: ThemeTokensListVi
               {items.map((token) => (
                 <Grid.Item
                   key={`${token.source}-${token.name}`}
+                  // `opaqueHex` is undefined for a translucent colour: Raycast tints
+                  // have no alpha, so showing one as its opaque RGB would display a
+                  // colour the site does not use.
                   content={
-                    token.hex
-                      ? { color: { light: token.hex, dark: token.hex, adjustContrast: false } }
+                    opaqueHex(token)
+                      ? { color: { light: opaqueHex(token)!, dark: opaqueHex(token)!, adjustContrast: false } }
                       : { source: UNRESOLVED_TILE }
                   }
                   // The leading `--` is on every token and identifies none of

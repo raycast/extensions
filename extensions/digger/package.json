@@ -20,10 +20,18 @@
   ],
   "preferences": [
     {
+      "name": "acceptLanguage",
+      "title": "Page Language",
+      "description": "Sent as the Accept-Language header. Sites that serve more than one language use it to choose which version Digger analyses; without it they pick for you.",
+      "type": "textfield",
+      "default": "en-US",
+      "required": false
+    },
+    {
       "name": "prettyPrintCode",
       "title": "Code Formatting",
       "label": "Pretty-print JSON and XML when viewing a file",
-      "description": "Re-indent minified files so they are readable. Turn off to see exactly the bytes the server sent — Copy and Download always use the original either way.",
+      "description": "Re-indent minified files so they are readable. Turn off to see exactly the bytes the server sent \u2014 Copy and Download always use the original either way.",
       "type": "checkbox",
       "required": false,
       "default": true

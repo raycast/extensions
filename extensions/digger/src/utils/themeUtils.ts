@@ -2,6 +2,7 @@ import { ThemeColor, ThemeData } from "../types";
 import { toHex } from "./colorUtils";
 import { LIMITS, TIMEOUTS } from "./config";
 import { getLogger } from "./logger";
+import { fetchPageSuppliedUrl } from "./networkGuard";
 import { redactUrlForLog } from "./urlUtils";
 
 const log = getLogger("theme");
@@ -236,6 +237,38 @@ export function extractTokensFromCss(css: string, into: Map<string, string[]>, m
 }
 
 /**
+ * Reads at most MAX_CSS_BYTES, then cancels the stream.
+ *
+ * `await response.text()` buffers the WHOLE body before any cap can be applied, so
+ * slicing afterwards limits what is parsed and not what is downloaded — a 200MB or
+ * endlessly streaming stylesheet is fully resident first, and the on-demand view
+ * repeats that for up to 40 sheets. Reading chunk by chunk and cancelling bounds
+ * the memory, not just the parse.
+ */
+async function readCapped(response: Response): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) return "";
+  const decoder = new TextDecoder("utf-8", { fatal: false });
+  let text = "";
+  let bytes = 0;
+  try {
+    while (bytes < LIMITS.MAX_CSS_BYTES) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+      const remaining = LIMITS.MAX_CSS_BYTES - bytes;
+      const slice = value.byteLength > remaining ? value.subarray(0, remaining) : value;
+      bytes += slice.byteLength;
+      text += decoder.decode(slice, { stream: true });
+    }
+    text += decoder.decode();
+  } finally {
+    await reader.cancel().catch(() => undefined);
+  }
+  return text;
+}
+
+/**
  * Reads linked stylesheets for colour tokens.
  *
  * Bounded on three axes because none of them is bounded by the site: how many
@@ -249,6 +282,7 @@ export function extractTokensFromCss(css: string, into: Map<string, string[]>, m
  */
 export async function fetchStylesheetTokens(
   hrefs: readonly string[],
+  pageUrl: string,
   signal?: AbortSignal,
   options: { maxSheets?: number; maxTokens?: number } = {},
 ): Promise<{ tokens: ThemeColor[]; scanned: number; linked: number; unchecked: number; truncated: boolean }> {
@@ -267,14 +301,14 @@ export async function fetchStylesheetTokens(
     if (found.size >= maxTokens) break;
     try {
       const timeout = AbortSignal.timeout(TIMEOUTS.STYLESHEET);
-      const response = await fetch(href, {
-        redirect: "follow",
+      // Every hop re-checked: these URLs come from page content, so the
+      // destination is the page author's choice, not the user's.
+      const response = await fetchPageSuppliedUrl(href, pageUrl, {
         headers: { "Accept-Encoding": "identity" },
         signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const body = await response.text();
-      extractTokensFromCss(body.slice(0, LIMITS.MAX_CSS_BYTES), found, maxTokens);
+      extractTokensFromCss(await readCapped(response), found, maxTokens);
       scanned++;
     } catch (error) {
       unchecked++;
