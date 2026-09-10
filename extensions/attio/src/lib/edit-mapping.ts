@@ -21,13 +21,30 @@ export const editableAttributes = (attributes: Attribute[]): Attribute[] =>
   attributes.filter((a) => a.is_writable && !a.is_archived && EDITABLE_TYPES.has(a.type));
 
 /**
- * The create form additionally renders personal-name (person Name) and
- * actor-reference (deal Owner, required) — a record can't be created without
- * them.
+ * The create form additionally renders personal-name (person Name),
+ * actor-reference (deal Owner, required), and single record links (a person's
+ * Company). Multiselect record links, location, and interaction stay
+ * Attio-only — no async-search multiselect control exists.
  */
 const CREATABLE_TYPES = new Set([...EDITABLE_TYPES, "personal-name", "actor-reference"]);
 export const creatableAttributes = (attributes: Attribute[]): Attribute[] =>
-  attributes.filter((a) => a.is_writable && !a.is_archived && CREATABLE_TYPES.has(a.type));
+  attributes.filter(
+    (a) =>
+      a.is_writable &&
+      !a.is_archived &&
+      (CREATABLE_TYPES.has(a.type) || (a.type === "record-reference" && !a.is_multiselect)),
+  );
+
+/**
+ * A checkbox's static workspace default, so the create form can DISPLAY the
+ * value Attio would apply — an untouched box is omitted from the POST and the
+ * default wins; the form must show that outcome, not an unchecked lie.
+ */
+export function staticCheckboxDefault(a: Attribute): boolean | undefined {
+  if (!a.is_default_value_enabled || a.default_value?.type !== "static") return undefined;
+  const t = a.default_value.template?.[0];
+  return t && t.attribute_type === "checkbox" && typeof t.value === "boolean" ? t.value : undefined;
+}
 
 /**
  * The edit form's additional supported types beyond EDITABLE_TYPES: names,

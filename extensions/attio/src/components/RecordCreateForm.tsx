@@ -6,9 +6,11 @@ import { createRecord, listAttributeOptions, listAttributeStatuses } from "../ap
 import { missingScopes } from "../api/operations";
 import type { Attribute } from "../api/types";
 import { useMembers } from "../hooks/useMembers";
+import { useSchema } from "../hooks/useSchema";
 import { cacheNs, useSelf } from "../hooks/useSelf";
-import { creatableAttributes, toWireValue } from "../lib/edit-mapping";
+import { creatableAttributes, staticCheckboxDefault, toWireValue } from "../lib/edit-mapping";
 import { openRecordInHomeCommand } from "../lib/open-record";
+import RecordRefPicker, { decodeRef } from "./RecordRefPicker";
 
 /**
  * Tag-input companion-field id suffix. ":" can't appear in an Attio api_slug,
@@ -103,6 +105,12 @@ export default function RecordCreateForm(props: {
   const self = useSelf();
   const members = useMembers();
   const canListMembers = missingScopes(self.granted, "listMembers").length === 0;
+  const schema = useSchema();
+  const slugByObjectId = useMemo(
+    () => Object.fromEntries(schema.objects.map((o) => [o.id.object_id, o.api_slug])),
+    [schema.objects],
+  );
+  const allObjectSlugs = useMemo(() => schema.objects.map((o) => o.api_slug), [schema.objects]);
   const creatable = useMemo(() => creatableAttributes(props.attributes), [props.attributes]);
   // Restored draft values seed the form: "<slug>_pending" keys are tag-input
   // text that never got committed; everything else is field state.
@@ -114,12 +122,25 @@ export default function RecordCreateForm(props: {
       if (k.endsWith(PENDING_SUFFIX)) pending[k.slice(0, -PENDING_SUFFIX.length)] = String(v);
       else fields[k] = v;
     }
-    return { fields, pending };
+    // A restored draft counts as user input; the seeds added below do not.
+    const draftKeys = Object.keys(fields);
+    // Seed checkboxes with their STATIC workspace defaults so the form shows
+    // the value Attio will apply; drafts win over seeds.
+    for (const a of creatableAttributes(props.attributes)) {
+      if (a.type === "checkbox" && !(a.api_slug in fields)) {
+        const d = staticCheckboxDefault(a);
+        if (d !== undefined) fields[a.api_slug] = d;
+      }
+    }
+    return { fields, pending, draftKeys };
   }, []);
   const [current, setCurrent] = useState<Record<string, unknown>>(fromDraft.fields);
+  // Slugs the USER changed (drafts count, default seeds don't) — gates "Nothing to create".
+  const touched = useRef<Set<string>>(new Set(fromDraft.draftKeys));
   // Inline field errors (Raycast-standard validation) — set on submit, cleared on edit.
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const set = (slug: string) => (value: unknown) => {
+    touched.current.add(slug);
     setCurrent((c) => ({ ...c, [slug]: value }));
     // Clear the field's error — a ":first"/":last" sub-key clears its base
     // attribute's error, which is where submit records it.
@@ -166,7 +187,7 @@ export default function RecordCreateForm(props: {
   async function submit() {
     if (submitting.current) return;
     const anyPending = Object.values(pendingTags.current).some((t) => t.trim() !== "");
-    if (Object.keys(current).length === 0 && !anyPending) {
+    if (touched.current.size === 0 && !anyPending) {
       showFailureToast(new Error("Fill in at least one field"), { title: "Nothing to create" });
       return;
     }
@@ -196,6 +217,11 @@ export default function RecordCreateForm(props: {
               : [];
         } else if (a.type === "actor-reference")
           wire = val ? [{ referenced_actor_type: "workspace-member", referenced_actor_id: val }] : [];
+        else if (a.type === "record-reference") wire = val ? [decodeRef(String(val))] : [];
+        // An untouched checkbox with no visible static default is OMITTED so
+        // Attio can apply a dynamic/server default (a seeded one sends what
+        // the form displayed).
+        else if (a.type === "checkbox" && current[a.api_slug] === undefined) continue;
         // Checkboxes always send what the form shows (an untouched box shows
         // unchecked); everything else empty is omitted so Attio can apply a
         // configured default — which also covers required-with-default fields.
@@ -300,6 +326,22 @@ export default function RecordCreateForm(props: {
                 ))}
               </Form.Dropdown>
             );
+          case "record-reference": {
+            const allowedIds = a.config?.record_reference?.allowed_object_ids ?? null;
+            const allowed = (allowedIds?.length ? allowedIds.map((id) => slugByObjectId[id]) : allObjectSlugs).filter(
+              (s): s is string => typeof s === "string" && s !== "",
+            );
+            return (
+              <RecordRefPicker
+                key={a.api_slug}
+                attr={a}
+                allowedSlugs={allowed}
+                value={String(val ?? "")}
+                onChange={set(a.api_slug)}
+                error={error}
+              />
+            );
+          }
           case "checkbox":
             return (
               <Form.Checkbox

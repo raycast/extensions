@@ -68,7 +68,7 @@ If you grant only the "required to read" scopes above, the extension is fully re
 - **Members and Teams** — browse workspace members
 - **Manage Webhooks** — configure webhooks and webhook events (create, edit, delete; event-type picker)
 
-New records are created with the dedicated Create commands or from any record list (`⌘N`): every writable attribute your workspace defines is rendered, required fields are validated inline, and deal owners are picked from your workspace members. The Create commands support Raycast drafts — a half-filled form survives dismissing Raycast.
+New records are created with the dedicated Create commands or from any record list (`⌘N`): writable attributes from your workspace schema are rendered — including person names, owners, and record links like a person's Company — with inline validation for required fields. Multi-value record links, locations, and interactions can only be set in Attio. The Create commands support Raycast drafts — a half-filled form survives dismissing Raycast.
 
 ## AI Extension
 

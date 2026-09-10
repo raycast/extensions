@@ -7,6 +7,7 @@ import {
   editableAttributes,
   initialFieldValue,
   personalNameToWire,
+  staticCheckboxDefault,
   toWireValue,
 } from "./edit-mapping";
 
@@ -52,16 +53,43 @@ describe("editableAttributes", () => {
   });
 });
 
-describe("creatableAttributes — create form adds name/owner types the edit form defers", () => {
-  it("includes personal-name and actor-reference on top of the editable set", () => {
+describe("creatableAttributes — create form covers names, owners, and record links", () => {
+  it("includes personal-name, actor-reference, and single record-reference on top of the editable set", () => {
     const list = [
       attr({ api_slug: "name", type: "personal-name" }),
       attr({ api_slug: "owner", type: "actor-reference" }),
+      attr({ api_slug: "company", type: "record-reference" }),
+      attr({ api_slug: "team", type: "record-reference", is_multiselect: true }), // no async multiselect UI
       attr({ api_slug: "ok_text", type: "text" }),
       attr({ api_slug: "not_writable", type: "personal-name", is_writable: false }),
       attr({ api_slug: "deferred_loc", type: "location" }),
     ];
-    expect(creatableAttributes(list).map((a) => a.api_slug)).toEqual(["name", "owner", "ok_text"]);
+    expect(creatableAttributes(list).map((a) => a.api_slug)).toEqual(["name", "owner", "company", "ok_text"]);
+  });
+});
+
+describe("staticCheckboxDefault — seeds the create form so display matches outcome", () => {
+  it("returns the workspace's static default for a checkbox", () => {
+    const a = attr({
+      api_slug: "c",
+      type: "checkbox",
+      is_default_value_enabled: true,
+      default_value: { type: "static", template: [{ attribute_type: "checkbox", value: true }] },
+    });
+    expect(staticCheckboxDefault(a)).toBe(true);
+  });
+  it("returns undefined for dynamic, disabled, or non-checkbox defaults", () => {
+    expect(staticCheckboxDefault(attr({ api_slug: "c", type: "checkbox" }))).toBeUndefined();
+    expect(
+      staticCheckboxDefault(
+        attr({
+          api_slug: "c",
+          type: "checkbox",
+          is_default_value_enabled: true,
+          default_value: { type: "dynamic", template: "current-user" },
+        }),
+      ),
+    ).toBeUndefined();
   });
 });
 

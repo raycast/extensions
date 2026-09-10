@@ -19,6 +19,7 @@ export default function RecordRefPicker(props: {
   initial?: { value: string; title: string };
   value: string;
   onChange: (v: string) => void;
+  error?: string;
 }) {
   const [text, setText] = useState("");
   // The picked item must survive later searches that no longer include it —
@@ -52,6 +53,7 @@ export default function RecordRefPicker(props: {
         props.onChange(v);
       }}
       info="Type to search"
+      error={props.error}
     >
       {/* Keep "—" when the field STARTED empty, even if required — the user
           must be able to revert an exploratory pick without abandoning the form. */}

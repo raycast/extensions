@@ -6,7 +6,7 @@
 
 - Dedicated Create Person / Create Company / Create Deal commands with Raycast draft support — dismiss mid-entry and pick the form back up later
 - New Record (`⌘N`) from every record list — the standard objects open their Create command; custom objects get the same schema-driven form inline
-- Schema-driven form: writable attributes from your workspace schema, inline required/invalid validation, tag-style entry for multi-value fields (domains validated for well-formed TLDs), person names parsed into Attio's name format, deal owners picked from workspace members
+- Schema-driven form: writable attributes from your workspace schema (multi-value record links, locations, and interactions stay Attio-only), inline required/invalid validation, tag-style entry for multi-value fields with TLD-validated domains, split first/last name fields, record links with live search, deal owners picked from workspace members, and untouched checkboxes leaving workspace defaults intact
 - Success toast offers Open in Attio for the record you just created
 - Record action panels reordered: open/pin/new up top, edit and copy together, view controls, then export with delete always last
 
