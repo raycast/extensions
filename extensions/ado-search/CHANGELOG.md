@@ -1,6 +1,6 @@
 # Azure DevOps Repository Search
 
-## [Optional assigned-to-me filter for My Work Items] - {PR_MERGE_DATE}
+## [Optional assigned-to-me filter for My Work Items] - 2026-09-10
 Added a setting to My Work Items to browse work items assigned to anyone, not just yourself. It is on by default (assigned-to-me only); when turned off, a project, state, or type filter is required to keep the result set bounded, and each item's assignee is shown in the list.
 
 ## [Fix My Work Items settings not saving] - 2026-06-24
