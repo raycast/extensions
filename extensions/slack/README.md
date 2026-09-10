@@ -86,6 +86,10 @@ If you don't want to log in through OAuth, you can use an access token instead. 
          # AI Tool: Upload Files
          - files:write
 
+         # AI Tool: Download Files
+         # Command: Search Messages (Download Attachment)
+         - files:read
+
          # Command: Search Emojis
          - emoji:read
 

@@ -1,4 +1,4 @@
-import { stat } from "node:fs/promises";
+import { open } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 
@@ -39,18 +39,14 @@ export function sanitizeFilename(name: string): string {
   return cleaned || "download";
 }
 
-async function pathExists(candidate: string): Promise<boolean> {
-  try {
-    await stat(candidate);
-    return true;
-  } catch {
-    return false;
-  }
+function isAlreadyExistsError(error: unknown): boolean {
+  return error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === "EEXIST";
 }
 
 /**
- * Returns a path inside `dir` for `filename` that does not already exist,
- * appending ` (2)`, ` (3)`, … before the extension on collision.
+ * Reserves a path inside `dir` for `filename` by creating it exclusively
+ * (`wx`). Appends ` (2)`, ` (3)`, … before the extension on collision so two
+ * downloads cannot claim the same name.
  */
 export async function resolveUniquePath(dir: string, filename: string): Promise<string> {
   const ext = path.extname(filename);
@@ -58,10 +54,18 @@ export async function resolveUniquePath(dir: string, filename: string): Promise<
 
   let candidate = path.join(dir, filename);
   let counter = 2;
-  while (await pathExists(candidate)) {
-    candidate = path.join(dir, `${stem} (${counter})${ext}`);
-    counter += 1;
-  }
 
-  return candidate;
+  while (true) {
+    try {
+      const handle = await open(candidate, "wx");
+      await handle.close();
+      return candidate;
+    } catch (error) {
+      if (!isAlreadyExistsError(error)) {
+        throw error;
+      }
+      candidate = path.join(dir, `${stem} (${counter})${ext}`);
+      counter += 1;
+    }
+  }
 }

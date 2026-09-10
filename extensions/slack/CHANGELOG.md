@@ -15,6 +15,7 @@
 - Surface attachment metadata (id, name, mimetype, size) in **Read Conversation**, **Read Thread**, and **Get Channel History** so attachments can be discovered and downloaded.
 - Add a **Download Attachment** action to **Search Messages** results that saves the file and reveals it in Finder.
 - Request the `files:read` scope so private files can be downloaded; existing OAuth users will be asked to re-authorize.
+- Add `files:read` to the manual access-token setup instructions.
 
 ## [Keep Set Status responsive in large workspaces] - 2026-08-29
 

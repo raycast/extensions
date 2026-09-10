@@ -196,14 +196,20 @@ function Search() {
                   <Action
                     title="Download Attachment"
                     icon={Icon.Download}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                    }}
                     onAction={() => downloadAttachment(files[0])}
                   />
                 ) : files.length > 1 ? (
                   <ActionPanel.Submenu
                     title="Download Attachment"
                     icon={Icon.Download}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                    }}
                   >
                     {files.map((file, index) => (
                       <Action

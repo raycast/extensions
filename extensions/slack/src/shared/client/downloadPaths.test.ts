@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -45,4 +45,23 @@ test("resolveUniquePath handles filenames without an extension", async () => {
   await writeFile(first, "x");
   const second = await resolveUniquePath(dir, "README");
   assert.equal(second, path.join(dir, "README (2)"));
+});
+
+test("resolveUniquePath reserves the chosen path so a later call cannot reuse it", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "slack-dl-"));
+
+  const first = await resolveUniquePath(dir, "photo.png");
+  const second = await resolveUniquePath(dir, "photo.png");
+
+  assert.equal(first, path.join(dir, "photo.png"));
+  assert.equal(second, path.join(dir, "photo (2).png"));
+});
+
+test("resolveUniquePath does not collide when called in parallel", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "slack-dl-"));
+
+  const paths = await Promise.all(Array.from({ length: 20 }, () => resolveUniquePath(dir, "photo.png")));
+
+  assert.equal(new Set(paths).size, 20);
+  assert.equal((await readdir(dir)).length, 20);
 });
