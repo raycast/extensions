@@ -76,7 +76,7 @@ SDK `2.2.1` bundles a TypeScript compiler whose tool-schema pass cannot locate i
 
 Concrete AI output contracts avoid the SDK extractor's unsupported nullable unions and inferred spread members. Optional fields are omitted when unavailable. The schema regression checks ensure capture identity and continuation fields survive packaging.
 
-The extension icon is exported from the official Coast Local application's macOS icon. The runtime asset is `assets/extension_icon.png` (512 by 512 PNG). Coast branding identifies the integration; it does not indicate affiliation or endorsement.
+The extension icon is exported from the official Coast Local application's macOS icon, with excess macOS padding trimmed and the original artwork resized to 512 by 512 pixels for Raycast. The runtime asset is `assets/extension_icon.png`. Coast branding identifies the integration; it does not indicate affiliation or endorsement.
 
 ## Privacy
 

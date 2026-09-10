@@ -14,4 +14,4 @@
 - Save reusable local search definitions without retaining copies of recordings.
 - Preserve source warnings and clarify timestamp, accessibility completeness and payload metadata.
 - Prevent OCR-to-screenshot flicker in Search previews.
-- Use Coast's application icon while retaining the independent-maintainer disclosure.
+- Use Coast's application icon with normalized padding for consistent sizing in Raycast, while retaining the independent-maintainer disclosure.
