@@ -1,12 +1,23 @@
 import { useState } from "react";
-import { Action, ActionPanel, Icon, Image, List, useNavigation } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Image,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  List,
+  useNavigation,
+} from "@raycast/api";
+import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import { deleteRecord, listAttributeStatuses, queryRecords, searchRecords } from "./api/endpoints";
-import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from "./api/operations";
+import { DEFAULT_PAGE_SIZE as PAGE_SIZE, satisfied } from "./api/operations";
 import type { AttioObject, AttioRecord, AttributeValue, SearchHit } from "./api/types";
 import ExportActions from "./components/ExportActions";
 import { guard } from "./components/Guard";
 import RecordActions from "./components/RecordActions";
+import RecordCreateForm from "./components/RecordCreateForm";
 import RecordDetail from "./components/RecordDetail";
 import RecordScreen from "./components/RecordScreen";
 import { useAttio } from "./hooks/useAttio";
@@ -14,13 +25,21 @@ import { useMembers } from "./hooks/useMembers";
 import { usePins } from "./hooks/usePins";
 import { useRecordTitles } from "./hooks/useRecordTitles";
 import { useSchema } from "./hooks/useSchema";
-import { cacheNs } from "./hooks/useSelf";
+import { cacheNs, useSelf } from "./hooks/useSelf";
 import { getObjectTitle, recordSubtitle, recordTitle, SORT_OPTIONS } from "./lib/display";
 import { formatValues, getRecordReferences, shortId } from "./lib/format";
 import { recordIcon, STANDARD_OBJECT_ICONS } from "./lib/record-icon";
 
+/** Standard objects with a dedicated top-level Create command (drafts work there). */
+const CREATE_COMMANDS: Record<string, string> = {
+  people: "create-person",
+  companies: "create-company",
+  deals: "create-deal",
+};
+
 export default function Records({ object }: { object: AttioObject }) {
   const schema = useSchema();
+  const self = useSelf();
   const members = useMembers();
   const pins = usePins(object.api_slug ?? "");
   const { push } = useNavigation();
@@ -90,6 +109,49 @@ export default function Records({ object }: { object: AttioObject }) {
       )}
     />
   );
+  const singular = object.singular_noun ?? "Record";
+  // Standard objects launch their dedicated Create command (top-level form =
+  // draft support); custom objects keep the pushed form, which can't draft.
+  // hasOwn guards against inherited keys — a custom object could be slugged "constructor".
+  const createCommand = Object.hasOwn(CREATE_COMMANDS, object.api_slug ?? "")
+    ? CREATE_COMMANDS[object.api_slug ?? ""]
+    : undefined;
+  const newRecordAction =
+    satisfied(self.granted, "record_permission:read-write") && attributes ? (
+      createCommand ? (
+        <Action
+          icon={Icon.Plus}
+          title={`New ${singular}`}
+          shortcut={Keyboard.Shortcut.Common.New}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: createCommand, type: LaunchType.UserInitiated });
+            } catch (error) {
+              showFailureToast(error, { title: `Couldn't open Create ${singular}` });
+            }
+          }}
+        />
+      ) : (
+        <Action.Push
+          icon={Icon.Plus}
+          title={`New ${singular}`}
+          shortcut={Keyboard.Shortcut.Common.New}
+          target={
+            <RecordCreateForm
+              objectSlug={object.api_slug ?? ""}
+              singularNoun={singular}
+              attributes={attributes}
+              // Refresh BOTH data paths: the browse query and, when the form was
+              // opened from a "no matches" search, the search results behind it.
+              onCreated={() => {
+                revalidate();
+                searchH.revalidate();
+              }}
+            />
+          }
+        />
+      )
+    ) : null;
   const pinnedRecords = records.filter((r) => pins.pinned.has(r.id.record_id));
   const mainRecords = records.filter((r) => !pins.pinned.has(r.id.record_id));
 
@@ -132,6 +194,8 @@ export default function Records({ object }: { object: AttioObject }) {
               onDelete={makeDeleteHandler(record)}
               pins={{ pinned: isPinned, toggle: () => pins.toggle(record.id.record_id) }}
               pushFallback={(slug, id) => push(<RecordScreen objectSlug={slug} recordId={id} />)}
+              newAction={newRecordAction}
+              exportAction={exportAction}
               extraViewActions={
                 <>
                   {isDeals && ownerRef?.referenced_actor_id && !ownerFilter && (
@@ -170,7 +234,6 @@ export default function Records({ object }: { object: AttioObject }) {
                 </>
               }
             />
-            <ActionPanel.Section>{exportAction}</ActionPanel.Section>
           </ActionPanel>
         }
       />
@@ -206,6 +269,7 @@ export default function Records({ object }: { object: AttioObject }) {
                 onAction={() => pins.toggle(hit.id.record_id)}
               />
             </ActionPanel.Section>
+            <ActionPanel.Section>{newRecordAction}</ActionPanel.Section>
           </ActionPanel>
         }
       />
@@ -236,7 +300,11 @@ export default function Records({ object }: { object: AttioObject }) {
     >
       {searching ? (
         searchHits.length === 0 && !searchH.isLoading ? (
-          <List.EmptyView icon={Icon.MagnifyingGlass} title={`No matches in ${object.plural_noun ?? "records"}`} />
+          <List.EmptyView
+            icon={Icon.MagnifyingGlass}
+            title={`No matches in ${object.plural_noun ?? "records"}`}
+            actions={newRecordAction ? <ActionPanel>{newRecordAction}</ActionPanel> : undefined}
+          />
         ) : (
           searchHits.map(renderSearchItem)
         )
@@ -244,6 +312,7 @@ export default function Records({ object }: { object: AttioObject }) {
         <List.EmptyView
           icon={Icon.Document}
           title={`No ${(object.singular_noun ?? object.api_slug ?? "").toLowerCase()} records`}
+          actions={newRecordAction ? <ActionPanel>{newRecordAction}</ActionPanel> : undefined}
         />
       ) : (
         <>

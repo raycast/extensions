@@ -20,6 +20,39 @@ const EDITABLE_TYPES = new Set([
 export const editableAttributes = (attributes: Attribute[]): Attribute[] =>
   attributes.filter((a) => a.is_writable && !a.is_archived && EDITABLE_TYPES.has(a.type));
 
+/**
+ * The create form additionally renders personal-name (person Name) and
+ * actor-reference (deal Owner, required) — a record can't be created without
+ * them.
+ */
+const CREATABLE_TYPES = new Set([...EDITABLE_TYPES, "personal-name", "actor-reference"]);
+export const creatableAttributes = (attributes: Attribute[]): Attribute[] =>
+  attributes.filter((a) => a.is_writable && !a.is_archived && CREATABLE_TYPES.has(a.type));
+
+/**
+ * The edit form's additional supported types beyond EDITABLE_TYPES: names,
+ * owners, and record links, each with bespoke controls. Single-select only —
+ * there's no async-search multiselect control. Location and interaction stay
+ * Attio-only.
+ */
+const DEFERRED_EDITABLE = new Set(["personal-name", "actor-reference", "record-reference"]);
+export const deferredEditableAttributes = (attributes: Attribute[]): Attribute[] =>
+  attributes.filter((a) => a.is_writable && !a.is_archived && !a.is_multiselect && DEFERRED_EDITABLE.has(a.type));
+
+/**
+ * "First … Last" → Attio's object syntax (all three fields required). A single
+ * token or an explicit "Last, First" uses the string syntax Attio parses.
+ */
+export function personalNameToWire(input: string): unknown[] {
+  // Pasted names often carry NBSP/narrow-NBSP — normalize so splitting works.
+  const s = input.replace(/[\u00A0\u202F]/g, " ").trim();
+  if (s === "") return [];
+  if (s.includes(",") || !s.includes(" ")) return [s];
+  const parts = s.split(/\s+/);
+  const last_name = parts[parts.length - 1];
+  return [{ first_name: parts.slice(0, -1).join(" "), last_name, full_name: s }];
+}
+
 /** Current value → form control value. Multiselects join with ", ". */
 export function initialFieldValue(
   a: Attribute,
@@ -37,6 +70,16 @@ export function initialFieldValue(
   return vs.map((v) => formatValue(v)).join(", ");
 }
 
+/**
+ * Bare hostname with a real TLD — no protocol, path, or spaces. Labels can't
+ * start or end with a hyphen; the TLD is alphabetic or punycode (xn--).
+ */
+const LABEL = "[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?";
+const DOMAIN_RE = new RegExp(`^(?:${LABEL}\\.)+(?:[a-z]{2,63}|xn--[a-z0-9]{2,59})$`, "i");
+const assertDomain = (a: Attribute) => (s: string) => {
+  if (!DOMAIN_RE.test(s)) throw new Error(`"${s}" isn't a valid domain for ${a.title} (e.g. attio.com)`);
+};
+
 /** Form control value → wire array for PUT values. Throws with a user-facing message on invalid input. */
 export function toWireValue(a: Attribute, formValue: unknown): unknown[] {
   const split = (s: string) =>
@@ -44,13 +87,15 @@ export function toWireValue(a: Attribute, formValue: unknown): unknown[] {
       .split(",")
       .map((x) => x.trim())
       .filter(Boolean);
-  // TagPicker values (multiselect select/status) arrive as arrays — pass the
-  // exact strings through: a trim would change the option identifier the API
-  // resolves against. Any other type receiving an array is a caller bug.
+  // TagPicker values (any multiselect: select/status options, or free-text
+  // tag inputs like domains/emails) arrive as arrays — pass the exact strings
+  // through: a trim would change the option identifier the API resolves
+  // against. A single-value type receiving an array is a caller bug.
   if (Array.isArray(formValue)) {
-    if (!(a.is_multiselect && (a.type === "select" || a.type === "status")))
-      throw new Error(`${a.title} must be a single value`);
-    return formValue.filter((x): x is string => typeof x === "string" && x !== "");
+    if (!a.is_multiselect) throw new Error(`${a.title} must be a single value`);
+    const out = formValue.filter((x): x is string => typeof x === "string" && x !== "");
+    if (a.type === "domain") out.forEach(assertDomain(a));
+    return out;
   }
   switch (a.type) {
     case "checkbox":
@@ -99,7 +144,9 @@ export function toWireValue(a: Attribute, formValue: unknown): unknown[] {
     default: {
       const s = String(formValue ?? "").trim();
       if (s === "") return [];
-      return a.is_multiselect ? split(s) : [s];
+      const out = a.is_multiselect ? split(s) : [s];
+      if (a.type === "domain") out.forEach(assertDomain(a));
+      return out;
     }
   }
 }

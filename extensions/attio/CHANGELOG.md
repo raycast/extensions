@@ -1,5 +1,25 @@
 # Attio Changelog
 
+## [Create Records + AI Tools] - {PR_MERGE_DATE}
+
+### Create People, Companies, and Deals
+
+- Dedicated Create Person / Create Company / Create Deal commands with Raycast draft support — dismiss mid-entry and pick the form back up later
+- New Record (`⌘N`) from every record list — the standard objects open their Create command; custom objects get the same schema-driven form inline
+- Schema-driven form: writable attributes from your workspace schema, inline required/invalid validation, tag-style entry for multi-value fields (domains validated for well-formed TLDs), person names parsed into Attio's name format, deal owners picked from workspace members
+- Success toast offers Open in Attio for the record you just created
+- Record action panels reordered: open/pin/new up top, edit and copy together, view controls, then export with delete always last
+
+### Editing
+
+- The Edit form now covers names (split First/Last, like Attio), owners, and single record links — associate a person with a company via live record search, right from Raycast
+- Fields follow your workspace's schema order, required fields validate inline, and everything saves in one request
+
+### AI Extension
+
+- Talk to Attio from Raycast AI (`@attio`): Search Records, Create Person, Create Company, and Create Deal tools, with confirmation before any write
+- Create Deal resolves stage names case-insensitively against your pipeline and matches owners by member name or email
+
 ## [Task Edit Fix] - 2026-09-09
 
 - Fixed a React state-update warning when returning from the task edit or new-task form
