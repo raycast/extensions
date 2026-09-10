@@ -43,7 +43,7 @@
       "name": "projectKey",
       "type": "textfield",
       "title": "Default Project Key",
-      "description": "Project used until you pick another one with the Switch Project action (⌘⇧S). If left blank, defaults to 'default'.",
+      "description": "Project used until you pick another one with the Switch Project action (⌘⇧S on macOS, Ctrl+Shift+S on Windows). If left blank, defaults to 'default'.",
       "required": false
     },
     {
@@ -82,6 +82,7 @@
     "mock-server": "ts-node ./mock/mock-ld-server.ts"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
