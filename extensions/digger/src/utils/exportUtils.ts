@@ -154,6 +154,27 @@ export function rowsFromJson(text: string): Exportable["rows"] {
   return { headers, values };
 }
 
+/**
+ * A numeric character reference, or the original text when it names nothing.
+ *
+ * `String.fromCodePoint` THROWS a RangeError above U+10FFFF, and this runs inside
+ * `inferRows` during render — so one `&#1114112;` in a remote sitemap took out the
+ * whole detail view and its export actions rather than displaying an odd string.
+ * A reference that cannot be resolved is left exactly as written: that is what the
+ * bytes said, and substituting a replacement character would be a quieter lie.
+ */
+function codePoint(value: number, original: string): string {
+  if (!Number.isInteger(value) || value < 0 || value > 0x10ffff) return original;
+  // Lone surrogates are accepted by fromCodePoint but are not valid XML and
+  // corrupt any string they land in.
+  if (value >= 0xd800 && value <= 0xdfff) return original;
+  try {
+    return String.fromCodePoint(value);
+  } catch {
+    return original;
+  }
+}
+
 /** Resolves the XML entities a <loc> legitimately contains. */
 function decodeXmlText(raw: string): string {
   const cdata = /^\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*$/.exec(raw);
@@ -164,8 +185,8 @@ function decodeXmlText(raw: string): string {
       .replace(/&gt;/g, ">")
       .replace(/&quot;/g, '"')
       .replace(/&apos;/g, "'")
-      .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
-      .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+      .replace(/&#(\d+);/g, (whole, code) => codePoint(Number(code), whole))
+      .replace(/&#x([0-9a-f]+);/gi, (whole, code) => codePoint(parseInt(code, 16), whole))
       // Ampersand last, or `&amp;lt;` would decode twice.
       .replace(/&amp;/g, "&")
       .trim()

@@ -11,28 +11,20 @@ interface ActionsProps {
   url: string;
   onRefresh: () => void;
   sectionActions?: ReactNode;
-  /**
-   * Put the section's own actions above Browser, making the first of them the
-   * default (⏎).
-   *
-   * Off by default because Open in Browser is the right default for most
-   * sections. It is wrong for Well-Known: those URLs mostly redirect to the
-   * site's homepage, so ⏎ appeared to do nothing useful.
-   */
-  sectionActionsFirst?: boolean;
 }
 
-export function Actions({ data, url, onRefresh, sectionActions, sectionActionsFirst = false }: ActionsProps) {
+export function Actions({ data, url, onRefresh, sectionActions }: ActionsProps) {
   const section = sectionActions && <ActionPanel.Section title="View">{sectionActions}</ActionPanel.Section>;
   return (
     <ActionPanel>
-      {sectionActionsFirst && section}
-
+      {/* Browser stays first, so a section's own actions are APPENDED and the
+          default action of every section is unchanged. Section actions that
+          deserve one-keystroke access carry their own shortcut instead. */}
       <ActionPanel.Section title="Browser">
         <BrowserActions url={url} />
       </ActionPanel.Section>
 
-      {!sectionActionsFirst && section}
+      {section}
 
       <ActionPanel.Section title="Copy">
         <CopyActions data={data} url={url} />

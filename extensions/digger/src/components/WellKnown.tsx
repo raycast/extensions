@@ -58,13 +58,18 @@ export function WellKnown({ data, onRefresh, progress }: WellKnownProps) {
           data={data}
           url={data.url}
           onRefresh={onRefresh}
-          sectionActionsFirst
           sectionActions={
             wellKnown && (
               <Action.Push
                 title="View Well-Known Files"
                 icon={Icon.List}
                 target={<WellKnownListView data={wellKnown} />}
+                // Open in Browser remains ⏎; a well-known URL usually redirects to
+                // the site's homepage, so this is the one worth a shortcut.
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "return" },
+                  Windows: { modifiers: ["ctrl"], key: "return" },
+                }}
               />
             )
           }

@@ -108,7 +108,6 @@ export function Theme({ data, onRefresh, progress }: ThemeProps) {
             data={data}
             url={data.url}
             onRefresh={onRefresh}
-            sectionActionsFirst
             sectionActions={
               theme && (theme.tokens.length > 0 || stylesheetUrls.length > 0) ? (
                 <Action.Push

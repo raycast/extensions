@@ -30,6 +30,8 @@
 - Long lists ending in a clipped `......ore` instead of "…and 9 more", in Resources,
   HTTP Headers, Discoverability, and Data Feeds.
 - Translucent colors rendering as fully opaque swatches.
+- A sitemap containing an out-of-range character reference such as `&#1114112;`
+  preventing the sitemap view and its export actions from opening.
 
 ### Security
 
