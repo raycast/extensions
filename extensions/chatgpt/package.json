@@ -137,16 +137,9 @@
       ]
     },
     {
-      "name": "create-ai-command",
-      "title": "Create AI Command",
-      "description": "Create new quick AI command",
-      "mode": "view",
-      "icon": "icon.png"
-    },
-    {
       "name": "search-ai-command",
-      "title": "Search AI Command",
-      "description": "Search AI commands",
+      "title": "AI Commands",
+      "description": "Run and manage AI commands",
       "mode": "view",
       "icon": "icon.png"
     }
@@ -376,6 +369,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
-    "pull": "ray pull-contributions"
+    "pull": "ray pull-contributions",
+    "test": "node --require ./tests/register.cjs --test tests/*.test.cjs"
   }
 }

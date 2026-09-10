@@ -1,5 +1,14 @@
 # Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Create and edit AI commands in Models, including creating a command from the selected model.
+- Remove the standalone Create AI Command entry. Create commands through the Models action menu; replace shortcuts or deep links to the removed entry with Models.
+- Rename Search AI Command to AI Commands, preserving existing command shortcuts and quicklinks.
+- Let commands configure their own model settings or inherit a base model with per-setting overrides; preserve existing command settings during migration.
+- Add navigation from Models to Ask and editing from Ask, retaining model selection, drafts and existing messages.
+- Keep model and command edits synchronized across open forms, and prevent removal of models still used by commands.
+
 ## [Fix] - 2026-09-10
 
 - Fix: Reuse Raycast's HTTP(S) agents when no custom proxy is configured, so the system certificate store is trusted and OpenAI-compatible endpoints behind a TLS-inspecting corporate proxy work

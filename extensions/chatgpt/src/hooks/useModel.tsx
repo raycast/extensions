@@ -1,70 +1,31 @@
-import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { Model, ModelHook, ReasoningEffort } from "../type";
+import { showToast, Toast } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
+import type { Model, ModelHook } from "../type";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useProxy } from "./useProxy";
+import { modelCatalog, saveConfiguration, useModelCatalog } from "./useModelCatalog";
+import { DEFAULT_MODEL } from "../utils/model-defaults";
+export { DEFAULT_MODEL } from "../utils/model-defaults";
 
-type StoredModel = Partial<Model> & Pick<Model, "id">;
-
-export const DEFAULT_MODEL: Model = {
-  id: "default",
-  updated_at: new Date().toISOString(),
-  created_at: new Date().toISOString(),
-  name: "Default",
-  prompt: "You are a helpful assistant.",
-  option: "gpt-5-nano",
-  temperature: "1",
-  enableReasoningEffortChange: false,
-  reasoningEffort: "medium",
-  pinned: false,
-  vision: false,
+const actions = {
+  add: (model: Model) => saveConfiguration(() => modelCatalog.saveModel(model), "Model saved"),
+  update: (model: Model) => saveConfiguration(() => modelCatalog.saveModel(model), "Model updated"),
+  remove: (model: Model) => saveConfiguration(() => modelCatalog.removeModel(model), "Model removed"),
+  clear: () => saveConfiguration(() => modelCatalog.setModels({ default: DEFAULT_MODEL }), "Models cleared"),
+  setModels: modelCatalog.setModels,
+  importModels: modelCatalog.importModels,
 };
 
-const REASONING_EFFORT_OPTIONS: ReasoningEffort[] = ["none", "low", "medium", "high"];
-
-function isReasoningEffort(value: unknown): value is ReasoningEffort {
-  return typeof value === "string" && REASONING_EFFORT_OPTIONS.includes(value as ReasoningEffort);
-}
-
-function normalizeModel(model: StoredModel): Model {
-  const now = new Date().toISOString();
-  return {
-    ...DEFAULT_MODEL,
-    ...model,
-    id: model.id,
-    created_at: model.created_at ?? now,
-    updated_at: model.updated_at ?? now,
-    temperature: String(model.temperature ?? DEFAULT_MODEL.temperature),
-    enableReasoningEffortChange: Boolean(model.enableReasoningEffortChange),
-    reasoningEffort: isReasoningEffort(model.reasoningEffort) ? model.reasoningEffort : DEFAULT_MODEL.reasoningEffort,
-    vision: model.vision ?? false,
-    pinned: model.pinned ?? false,
-  };
-}
-
-function normalizeModels(models: Record<string, StoredModel>): Record<string, Model> {
-  const normalized = Object.values(models).reduce<Record<string, Model>>((acc, model) => {
-    acc[model.id] = normalizeModel(model);
-    return acc;
-  }, {});
-  if (!normalized[DEFAULT_MODEL.id]) {
-    normalized[DEFAULT_MODEL.id] = DEFAULT_MODEL;
-  }
-  return normalized;
-}
-
-export function useModel(): ModelHook {
-  const [data, setData] = useState<Record<string, Model>>({});
-  const [isLoading, setLoading] = useState<boolean>(true);
-  const [isFetching, setFetching] = useState<boolean>(true);
+export function useModel(fetchOptions = false): ModelHook {
+  const { models: data, isLoading } = useModelCatalog();
+  const [isFetching, setFetching] = useState(fetchOptions);
   const gpt = useChatGPT();
   const proxy = useProxy();
   const { useAzure, isCustomModel } = getConfiguration();
   const [option, setOption] = useState<Model["option"][]>(["gpt-5-nano", "gpt-5.2-chat-latest"]);
-  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    if (isCustomModel) {
+    if (!fetchOptions || isCustomModel) {
       // If choose to use custom model, we don't need to fetch models from the API
       setFetching(false);
       return;
@@ -76,7 +37,7 @@ export function useModel(): ModelHook {
           let models = res.data;
           // some provider return text/plain content type
           // and the sdk `defaultParseResponse` simply return `text`
-          if (models.length === 0) {
+          if (!Array.isArray(models) || models.length === 0) {
             try {
               const body = JSON.parse((res as unknown as { body: string }).body);
               models = body.data;
@@ -84,7 +45,7 @@ export function useModel(): ModelHook {
               // ignore try to parse it
             }
           }
-          setOption(models.map((x) => x.id));
+          if (Array.isArray(models)) setOption(models.map((x) => x.id));
         })
         .catch(async (err) => {
           console.error(err);
@@ -111,113 +72,7 @@ export function useModel(): ModelHook {
     } else {
       setFetching(false);
     }
-  }, [gpt]);
+  }, [gpt, fetchOptions]);
 
-  useEffect(() => {
-    (async () => {
-      const storedModels: StoredModel[] | Record<string, StoredModel> = JSON.parse(
-        (await LocalStorage.getItem<string>("models")) || "{}",
-      );
-      const storedModelsLength = ((models: Record<string, StoredModel> | StoredModel[]): number =>
-        Array.isArray(models) ? models.length : Object.keys(models).length)(storedModels);
-
-      if (storedModelsLength === 0) {
-        setData({ [DEFAULT_MODEL.id]: DEFAULT_MODEL });
-      } else {
-        let modelsById: Record<string, StoredModel>;
-        // Support for old data structure
-        if (Array.isArray(storedModels)) {
-          modelsById = storedModels.reduce((acc, model) => ({ ...acc, [model.id]: model }), {});
-        } else {
-          modelsById = storedModels;
-        }
-        setData(normalizeModels(modelsById));
-      }
-      setLoading(false);
-      isInitialMount.current = false;
-    })();
-  }, []);
-
-  useEffect(() => {
-    // Avoid saving when initial loading
-    if (isInitialMount.current) {
-      return;
-    }
-    LocalStorage.setItem("models", JSON.stringify(data));
-  }, [data]);
-
-  const add = useCallback(
-    async (model: Model) => {
-      const toast = await showToast({
-        title: "Saving your model...",
-        style: Toast.Style.Animated,
-      });
-      setData((prevData) => ({
-        ...prevData,
-        [model.id]: normalizeModel({ ...model, created_at: new Date().toISOString() }),
-      }));
-      toast.title = "Model saved!";
-      toast.style = Toast.Style.Success;
-    },
-    [setData],
-  );
-
-  const update = useCallback(
-    async (model: Model) => {
-      const toast = await showToast({
-        title: "Updating your model...",
-        style: Toast.Style.Animated,
-      });
-      setData((prevData) => ({
-        ...prevData,
-        [model.id]: normalizeModel({
-          ...prevData[model.id],
-          ...model,
-          updated_at: new Date().toISOString(),
-        }),
-      }));
-      toast.title = "Model updated!";
-      toast.style = Toast.Style.Success;
-    },
-    [setData],
-  );
-
-  const remove = useCallback(
-    async (model: Model) => {
-      const toast = await showToast({
-        title: "Removing your model...",
-        style: Toast.Style.Animated,
-      });
-      setData((prevData) => {
-        const newData = { ...prevData };
-        delete newData[model.id];
-        return newData;
-      });
-      toast.title = "Model removed!";
-      toast.style = Toast.Style.Success;
-    },
-    [setData],
-  );
-
-  const clear = useCallback(async () => {
-    const toast = await showToast({
-      title: "Clearing your models ...",
-      style: Toast.Style.Animated,
-    });
-    setData({ [DEFAULT_MODEL.id]: DEFAULT_MODEL });
-    toast.title = "Models cleared!";
-    toast.style = Toast.Style.Success;
-  }, [setData]);
-
-  const setModels = useCallback(
-    async (models: Record<string, Model>) => {
-      setData(normalizeModels(models));
-    },
-    [setData],
-  );
-
-  return useMemo(
-    () => ({ data, isLoading, option, add, update, remove, clear, setModels, isFetching }),
-    [data, isLoading, option, add, update, remove, clear, setModels, isFetching],
-  );
+  return useMemo(() => ({ data, isLoading, option, isFetching, ...actions }), [data, isLoading, option, isFetching]);
 }
