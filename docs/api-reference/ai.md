@@ -181,14 +181,13 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-5
 | Anthropic_Claude_Opus_5 | Anthropic's most powerful model with combined reasoning and non-reasoning capabilities. |
 | Perplexity_Sonar | Fast Perplexity model with integrated search capabilities. |
 | Perplexity_Sonar_Pro | Advanced Perplexity model for complex queries with search integration. |
-| Groq_Llama_3.3_70B | Meta's state-of-the-art model for reasoning and general knowledge. |
-| Groq_Llama_3.1_8B | Fast, instruction-optimized open-source model. |
 | Mistral_Nemo | Small, Apache-licensed model built with NVIDIA. |
 | Mistral_Large | Top-tier reasoning model with strong multilingual support. |
 | Mistral_Medium | A powerful, cost-effective, frontier-class multimodal model. |
 | Mistral_Small | Latest enterprise-grade small model with improved reasoning. |
 | Mistral_Codestral | Specialized model for code-related tasks and testing. |
-| Groq_Qwen3-32B | The latest generation of large language models in the Qwen series. |
+| Google_Gemini_3.8_Flash | Balances speed with intelligence for agentic and multimodal tasks. |
+| Google_Gemini_3.7_Flash | Balances speed with intelligence for agentic and multimodal tasks. |
 | Google_Gemini_3.6_Flash | Balances speed with intelligence for agentic and multimodal tasks. |
 | Google_Gemini_3.5_Flash | Near-Pro intelligence with Flash-tier speed and cost for agentic workflows. |
 | Google_Gemini_3.5_Flash_Lite | Fast, cost-effective model for high-throughput agentic workflows and data processing. |
@@ -198,15 +197,19 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-5
 | Google_Gemini_2.5_Pro | Previous generation thinking model for complex problem solving. |
 | Google_Gemini_2.5_Flash | Fast, well-rounded thinking model. |
 | Google_Gemini_2.5_Flash_Lite | Fast model optimized for large-scale text output. |
+| xAI_Grok-4.6 | xAI's latest flagship Grok model, delivering frontier reasoning, stronger coding, and multimodal understanding. |
 | xAI_Grok-4.5 | xAI's latest flagship Grok model, delivering frontier reasoning, stronger coding, and multimodal understanding. |
 | xAI_Grok-4.3 | xAI's advanced reasoning model with enhanced capabilities. |
-| Baseten_Kimi_K2.7_Code | Moonshot AI's code-optimized trillion-parameter multimodal model with enhanced coding capabilities and agentic tool-calling. |
-| Baseten_GLM-5.2 | Z.AI's next-generation flagship model with MoE + DSA architecture for efficient long-context coding, agentic, and reasoning tasks. |
-| Baseten_DeepSeek_V4_Pro | DeepSeek's 1.6T parameter MoE model optimized for coding, reasoning, and agentic tasks with a 1M token context window. |
+| Vercel_GLM-5.2 | Z.AI's next-generation flagship model with MoE + DSA architecture for efficient long-context coding, agentic, and reasoning tasks. |
+| Vercel_GLM-5.3 | Z.AI's flagship model with stronger coding and agent capabilities than GLM-5.2, driven by post-training on the same base. |
+| Vercel_GLM-5.3_Flash | Z.AI's native multimodal coding model with hybrid attention, visual coding, and agentic tool use. |
+| Vercel_Kimi_K2.7_Code | Moonshot AI's code-optimized trillion-parameter multimodal model with enhanced coding capabilities and agentic tool-calling. |
 | Vercel_Kimi_K3 | Moonshot AI's trillion-parameter multimodal model with strong reasoning and agentic tool-calling. |
 | Vercel_Gemma_4_31B | Google's open-weight dense model with vision and 140+ language support, tuned for output quality over throughput. |
 | Vercel_Inkling | Thinking Machines' open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
+| Vercel_Inkling_Small | Thinking Machines' smaller, faster open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
 | Vercel_DeepSeek_V4_Flash | DeepSeek's lightweight V4 MoE model tuned for fast, low-cost coding, reasoning, and agentic tasks. |
+| Vercel_DeepSeek_V4_Pro | DeepSeek's 1.6T parameter MoE model optimized for coding, reasoning, and agentic tasks with a 1M token context window. |
 | Vercel_Qwen3.8_Max | Alibaba's 2.4-trillion-parameter MoE flagship with native visual understanding for long-horizon coding and professional work. |
 
 If a model isn't available to the user (or has been disabled by the user), Raycast will fallback to a similar one.
