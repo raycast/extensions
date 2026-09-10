@@ -29,7 +29,7 @@ Browse your LaunchDarkly feature flags, targeting rules, environments and recent
 
 ## Commands
 
-Shortcuts below are shown for macOS; on Windows, use `Ctrl` instead of `⌘` and `Alt` instead of `⌥`.
+Shortcuts below are shown for macOS; on Windows, use `Ctrl` instead of `⌘` and `Alt` instead of `⌥`, except the favorites shortcut is `Ctrl+.`.
 
 ### List Feature Flags
 
