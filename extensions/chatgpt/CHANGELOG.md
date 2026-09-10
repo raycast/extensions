@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-10
 
 - Fix: Reuse Raycast's HTTP(S) agents when no custom proxy is configured, so the system certificate store is trusted and OpenAI-compatible endpoints behind a TLS-inspecting corporate proxy work
 
