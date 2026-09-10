@@ -231,6 +231,7 @@ export function Translator({
       abortControllerRef.current?.abort();
       const controller = new AbortController();
       abortControllerRef.current = controller;
+      setIsRefining(false);
       setIsTranslating(true);
       setError("");
 
@@ -335,6 +336,7 @@ export function Translator({
     abortControllerRef.current?.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
+    setIsTranslating(false);
     setIsRefining(true);
     setError("");
 

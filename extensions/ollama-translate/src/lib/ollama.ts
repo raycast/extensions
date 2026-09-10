@@ -286,39 +286,48 @@ export function parseTranslationResult(content: string): TranslationResult {
     .replace(/\s*```$/, "")
     .trim();
 
+  let parsed: unknown;
   try {
-    const parsed = JSON.parse(unwrapped) as unknown;
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      const object = parsed as Record<string, unknown>;
-      const translation = firstString(object, [
-        "translation",
-        "finalTranslation",
-        "final_translation",
-        "translatedText",
-        "translated_text",
-        "output",
-        "result",
-      ]);
-      const detectedLanguageCode = firstString(object, [
-        "detectedLanguageCode",
-        "detected_language_code",
-        "detectedLanguage",
-        "sourceLanguage",
-        "source_language",
-      ]);
-
-      if (translation) {
-        return {
-          translation,
-          detectedLanguageCode: detectedLanguageCode.toLowerCase(),
-        };
-      }
-    }
+    parsed = JSON.parse(unwrapped) as unknown;
   } catch {
-    // A few community models ignore Ollama's schema. Their plain-text answer is still useful.
+    // Some models ignore the schema, but broken JSON must not become translation text.
+    if (
+      unwrapped &&
+      !unwrapped.startsWith("{") &&
+      !unwrapped.startsWith("[") &&
+      !/^```json\b/i.test(content.trim())
+    ) {
+      return { translation: unwrapped, detectedLanguageCode: "" };
+    }
+    throw new Error("The model returned an invalid translation.");
   }
 
-  if (unwrapped) return { translation: unwrapped, detectedLanguageCode: "" };
+  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+    const object = parsed as Record<string, unknown>;
+    const translation = firstString(object, [
+      "translation",
+      "finalTranslation",
+      "final_translation",
+      "translatedText",
+      "translated_text",
+      "output",
+      "result",
+    ]);
+    const detectedLanguageCode = firstString(object, [
+      "detectedLanguageCode",
+      "detected_language_code",
+      "detectedLanguage",
+      "sourceLanguage",
+      "source_language",
+    ]);
+
+    if (translation) {
+      return {
+        translation,
+        detectedLanguageCode: detectedLanguageCode.toLowerCase(),
+      };
+    }
+  }
   throw new Error("The model returned an invalid translation.");
 }
 
