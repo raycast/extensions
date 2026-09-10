@@ -1,7 +1,7 @@
 import { Clipboard, closeMainWindow, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { CleanTab, toCleanTab } from "./clean";
-import { NoTabError, TabInfo, getActiveTab, getAllTabs } from "./browsers";
+import { AmbiguousTabError, NoTabError, TabInfo, getActiveTab, getAllTabs } from "./browsers";
 import { FormatId, getFormat } from "./formats";
 import { copyRichText, htmlDocument, pasteClipboard } from "./richtext";
 import { Settings, getSettings } from "./settings";
@@ -72,6 +72,10 @@ export async function runCopyCommand(formatId: FormatId, mode: Mode = "copy") {
     const clean = toCleanTab(tab.url, tab.title, settings.clean);
     await deliver(toPayload(formatId, clean, settings), mode, getFormat(formatId).title, settings);
   } catch (error) {
+    if (error instanceof AmbiguousTabError) {
+      await showFailureToast(error, { title: "Several browser windows are open" });
+      return;
+    }
     if (error instanceof NoTabError) {
       await showFailureToast(error, { title: "No browser tab found" });
       return;

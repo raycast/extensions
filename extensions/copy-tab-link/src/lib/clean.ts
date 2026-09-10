@@ -83,8 +83,10 @@ export function cleanTitle(rawTitle: string, options: CleanOptions): string {
 
   title = title.replace(/\s+/g, " ").trim();
 
+  // The ellipsis counts towards the limit, otherwise the result is one
+  // character longer than the user asked for.
   if (options.maxTitleLength && options.maxTitleLength > 0 && title.length > options.maxTitleLength) {
-    title = `${title.slice(0, options.maxTitleLength).trimEnd()}…`;
+    title = `${title.slice(0, Math.max(1, options.maxTitleLength - 1)).trimEnd()}…`;
   }
 
   return title;
