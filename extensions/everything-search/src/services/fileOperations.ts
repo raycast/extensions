@@ -82,7 +82,7 @@ export async function showInExplorer(path: string, preferences: Preferences) {
       });
     }
   } else {
-    await open(targetPath);
+    exec(`explorer.exe /select,"${path}"`);
   }
 }
 
