@@ -97,7 +97,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
       text: values.text,
       targetLanguage: values.to,
       sourceLanguage: values.from && values.from.length > 0 ? values.from : undefined,
-      onTranslateAction: "none",
+      viewInCurrentCommand: true,
       formality: values.formality ?? "default",
     });
 
