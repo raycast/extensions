@@ -1,6 +1,6 @@
 # Threads Changelog
 
-## [Fix Media Downloads and Support Share Links] - {PR_MERGE_DATE}
+## [Fix Media Downloads and Support Share Links] - 2026-09-10
 
 - Fix `Download Threads Media`, which had stopped working for every post. Both third-party
   services it relied on are gone — `api.threadsphotodownloader.com` no longer resolves in
