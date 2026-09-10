@@ -5,9 +5,16 @@
   "description": "Generate a plus-addressed or catch-all email alias from the website you are currently on. Choose how many domain levels the alias uses, switch between several accounts, and add date or random suffixes so aliases cannot be guessed.",
   "icon": "icon.png",
   "author": "jnbp",
-  "categories": ["Productivity", "Security", "Web"],
+  "categories": [
+    "Productivity",
+    "Security",
+    "Web"
+  ],
   "license": "MIT",
-  "platforms": ["macOS", "Windows"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "generate-alias",
@@ -57,13 +64,34 @@
       "required": false,
       "default": "auto",
       "data": [
-        { "title": "Automatic — keeps a subdomain only when it means something", "value": "auto" },
-        { "title": "Domain + suffix — example.com", "value": "1" },
-        { "title": "One level more — shop.example.com", "value": "2" },
-        { "title": "Two levels more — eu.shop.example.com", "value": "3" },
-        { "title": "Three levels more", "value": "4" },
-        { "title": "Full hostname", "value": "full" },
-        { "title": "Name only, without suffix — example", "value": "name" }
+        {
+          "title": "Automatic — keeps a subdomain only when it means something",
+          "value": "auto"
+        },
+        {
+          "title": "Domain + suffix — example.com",
+          "value": "1"
+        },
+        {
+          "title": "One level more — shop.example.com",
+          "value": "2"
+        },
+        {
+          "title": "Two levels more — eu.shop.example.com",
+          "value": "3"
+        },
+        {
+          "title": "Three levels more",
+          "value": "4"
+        },
+        {
+          "title": "Full hostname",
+          "value": "full"
+        },
+        {
+          "title": "Name only, without suffix — example",
+          "value": "name"
+        }
       ]
     },
     {
@@ -91,10 +119,22 @@
       "required": false,
       "default": "none",
       "data": [
-        { "title": "None", "value": "none" },
-        { "title": "Date", "value": "date" },
-        { "title": "Random token", "value": "random" },
-        { "title": "Date and random token", "value": "both" }
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Date",
+          "value": "date"
+        },
+        {
+          "title": "Random token",
+          "value": "random"
+        },
+        {
+          "title": "Date and random token",
+          "value": "both"
+        }
       ]
     },
     {
@@ -162,9 +202,18 @@
       "required": false,
       "default": "copyPaste",
       "data": [
-        { "title": "Copy to clipboard", "value": "copy" },
-        { "title": "Copy and paste into the frontmost app", "value": "copyPaste" },
-        { "title": "Paste only", "value": "paste" }
+        {
+          "title": "Copy to clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Copy and paste into the frontmost app",
+          "value": "copyPaste"
+        },
+        {
+          "title": "Paste only",
+          "value": "paste"
+        }
       ]
     },
     {
@@ -175,9 +224,18 @@
       "required": false,
       "default": "auto",
       "data": [
-        { "title": "Automatic — AppleScript, then browser extension", "value": "auto" },
-        { "title": "AppleScript only", "value": "applescript" },
-        { "title": "Raycast browser extension only", "value": "extension" }
+        {
+          "title": "Automatic — AppleScript, then browser extension",
+          "value": "auto"
+        },
+        {
+          "title": "AppleScript only",
+          "value": "applescript"
+        },
+        {
+          "title": "Raycast browser extension only",
+          "value": "extension"
+        }
       ]
     },
     {

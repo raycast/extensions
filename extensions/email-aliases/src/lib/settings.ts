@@ -1,25 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Account, SuffixMode, parseAccounts, parseNumber, parseOptionalNumber } from "./alias";
-import { DomainDepth, isDomainDepth } from "./domain";
-
-interface RawPreferences {
-  accounts: string;
-  separator?: string;
-  domainDepth?: string;
-  stripWww?: boolean;
-  dotReplacement?: string;
-  suffixMode?: string;
-  suffixSeparator?: string;
-  dateFormat?: string;
-  randomLength?: string;
-  template?: string;
-  catchAllTemplate?: string;
-  lowercase?: boolean;
-  maxAliasLength?: string;
-  action?: string;
-  browserSource?: string;
-  preferredBrowser?: { name: string; path: string; bundleId?: string };
-}
+import { DomainDepth } from "./domain";
 
 export type AliasAction = "copy" | "copyPaste" | "paste";
 
@@ -42,33 +23,29 @@ export interface Settings {
   preferredBrowser?: string;
 }
 
-function toSuffixMode(value: string | undefined): SuffixMode {
-  return value === "date" || value === "random" || value === "both" ? value : "none";
-}
-
-function toAction(value: string | undefined): AliasAction {
-  return value === "copy" || value === "paste" ? value : "copyPaste";
-}
-
+/**
+ * Reads the manifest-generated preference type, so the shape here can never
+ * drift away from `package.json`.
+ */
 export function getSettings(): Settings {
-  const raw = getPreferenceValues<RawPreferences>();
+  const raw = getPreferenceValues<Preferences>();
 
   return {
     accounts: parseAccounts(raw.accounts),
-    separator: raw.separator ?? "+",
-    depth: raw.domainDepth && isDomainDepth(raw.domainDepth) ? raw.domainDepth : "auto",
-    stripWww: raw.stripWww ?? true,
-    dotReplacement: raw.dotReplacement ?? "",
-    suffixMode: toSuffixMode(raw.suffixMode),
-    suffixSeparator: raw.suffixSeparator ?? "-",
-    dateFormat: raw.dateFormat ?? "yyMM",
+    separator: raw.separator,
+    depth: raw.domainDepth,
+    stripWww: raw.stripWww,
+    dotReplacement: raw.dotReplacement,
+    suffixMode: raw.suffixMode,
+    suffixSeparator: raw.suffixSeparator,
+    dateFormat: raw.dateFormat,
     randomLength: parseNumber(raw.randomLength, 4),
-    template: raw.template?.trim() || "{user}{sep}{alias}@{domain}",
-    catchAllTemplate: raw.catchAllTemplate?.trim() || "{alias}@{domain}",
-    lowercase: raw.lowercase ?? true,
+    template: raw.template.trim() || "{user}{sep}{alias}@{domain}",
+    catchAllTemplate: raw.catchAllTemplate.trim() || "{alias}@{domain}",
+    lowercase: raw.lowercase,
     maxAliasLength: parseOptionalNumber(raw.maxAliasLength),
-    action: toAction(raw.action),
-    browserSource: raw.browserSource ?? "auto",
+    action: raw.action,
+    browserSource: raw.browserSource,
     preferredBrowser: raw.preferredBrowser?.name,
   };
 }

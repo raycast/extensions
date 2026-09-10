@@ -1,26 +1,28 @@
-import { Clipboard, LaunchProps, closeMainWindow, open, showHUD } from "@raycast/api";
+import { Clipboard, LaunchProps, LaunchType, closeMainWindow, launchCommand, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { AliasError, buildAlias } from "./lib/alias";
-import { NoTabError, getActiveTab } from "./lib/browsers";
+import { AmbiguousTabError, NoTabError, getActiveTab } from "./lib/browsers";
 import { extractHost } from "./lib/domain";
 import { getSettings } from "./lib/settings";
 
-interface Arguments {
-  label?: string;
+function openBuilder() {
+  launchCommand({ name: "build-alias", type: LaunchType.UserInitiated }).catch((error) => {
+    showFailureToast(error, { title: "Could not open Build Email Alias" });
+  });
 }
 
-export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.GenerateAlias }>) {
   const settings = getSettings();
 
   if (settings.accounts.length === 0) {
-    await showFailureToast(new Error("No account configured"), {
+    await showFailureToast(new Error("No valid account found"), {
       title: "Add an email account in the extension preferences",
     });
     return;
   }
 
   const account = settings.accounts[0];
-  const argument = props.arguments?.label?.trim() ?? "";
+  const argument = props.arguments.label?.trim() ?? "";
 
   let host = "";
   let sourceIsLabel = false;
@@ -50,15 +52,10 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
       host = parsedHost;
       source = parsedHost;
     } catch (error) {
-      if (error instanceof NoTabError) {
+      if (error instanceof AmbiguousTabError || error instanceof NoTabError) {
         await showFailureToast(error, {
-          title: "No browser tab found",
-          primaryAction: {
-            title: "Open Build Email Alias",
-            onAction: () => {
-              open("raycast://extensions/jnbp/email-aliases/build-alias");
-            },
-          },
+          title: error instanceof AmbiguousTabError ? "Several browser windows are open" : "No browser tab found",
+          primaryAction: { title: "Open Build Email Alias", onAction: openBuilder },
         });
         return;
       }

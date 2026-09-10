@@ -13,9 +13,21 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { AliasError, SuffixMode, buildAlias, randomToken } from "./lib/alias";
-import { getActiveTab } from "./lib/browsers";
+import { TabInfo, getTabCandidates } from "./lib/browsers";
 import { DOMAIN_DEPTH_OPTIONS, DomainDepth, extractHost, isDomainDepth } from "./lib/domain";
-import { getSettings } from "./lib/settings";
+import { AliasAction, getSettings } from "./lib/settings";
+
+const ACTION_TITLES: Record<AliasAction, string> = {
+  copy: "Copy Alias",
+  copyPaste: "Paste and Copy Alias",
+  paste: "Paste Alias",
+};
+
+const ACTION_ICONS: Record<AliasAction, Icon> = {
+  copy: Icon.Clipboard,
+  copyPaste: Icon.Text,
+  paste: Icon.Text,
+};
 
 export default function Command() {
   const settings = useMemo(() => getSettings(), []);
@@ -26,22 +38,22 @@ export default function Command() {
   const [depth, setDepth] = useState<DomainDepth>(settings.depth);
   const [suffixMode, setSuffixMode] = useState<SuffixMode>(settings.suffixMode);
   const [token, setToken] = useState(() => randomToken(settings.randomLength));
+  const [candidates, setCandidates] = useState<TabInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      try {
-        const tab = await getActiveTab({
-          browserSource: settings.browserSource,
-          preferredBrowser: settings.preferredBrowser,
-        });
-        if (!cancelled) setSource(tab.url);
-      } catch {
-        // No browser tab available: the user simply types a domain instead.
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
+      // More than one candidate means several browser windows claim an active
+      // tab, so the user picks instead of the extension guessing.
+      const tabs = await getTabCandidates({
+        browserSource: settings.browserSource,
+        preferredBrowser: settings.preferredBrowser,
+      });
+      if (cancelled) return;
+      setCandidates(tabs);
+      if (tabs.length > 0) setSource(tabs[0].url);
+      setIsLoading(false);
     })();
     return () => {
       cancelled = true;
@@ -84,7 +96,7 @@ export default function Command() {
     }
   }, [account, source, literal, depth, suffixMode, token, settings]);
 
-  async function submit(mode: "copy" | "paste" | "copyPaste") {
+  async function submit(mode: AliasAction) {
     if (!preview.address) {
       await showFailureToast(new Error(preview.error || "Enter a URL, a domain or a label first."), {
         title: "Nothing to copy",
@@ -124,24 +136,29 @@ export default function Command() {
     );
   }
 
+  // The configured action comes first, the remaining two follow.
+  const otherActions = (["copy", "copyPaste", "paste"] as AliasAction[]).filter((mode) => mode !== settings.action);
+
   return (
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action
-            title={settings.action === "copy" ? "Copy Alias" : "Paste and Copy Alias"}
-            icon={settings.action === "copy" ? Icon.Clipboard : Icon.Text}
-            onAction={() => submit(settings.action === "copy" ? "copy" : "copyPaste")}
+            title={ACTION_TITLES[settings.action]}
+            icon={ACTION_ICONS[settings.action]}
+            onAction={() => submit(settings.action)}
           />
-          <Action title="Copy Alias" icon={Icon.Clipboard} onAction={() => submit("copy")} />
-          <Action title="Paste Alias" icon={Icon.Text} onAction={() => submit("paste")} />
+          {otherActions.map((mode) => (
+            <Action key={mode} title={ACTION_TITLES[mode]} icon={ACTION_ICONS[mode]} onAction={() => submit(mode)} />
+          ))}
           <Action
             title="Regenerate Random Token"
             icon={Icon.Repeat}
             shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={() => setToken(randomToken(settings.randomLength))}
           />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
@@ -155,6 +172,20 @@ export default function Command() {
           />
         ))}
       </Form.Dropdown>
+
+      {candidates.length > 1 && !literal ? (
+        <Form.Dropdown
+          id="tab"
+          title="Browser Window"
+          info="Several browser windows report an active tab. Pick the one you mean."
+          value={source}
+          onChange={setSource}
+        >
+          {candidates.map((tab) => (
+            <Form.Dropdown.Item key={tab.url} value={tab.url} title={tab.title || tab.url} icon={Icon.Globe} />
+          ))}
+        </Form.Dropdown>
+      ) : null}
 
       <Form.TextField
         id="source"

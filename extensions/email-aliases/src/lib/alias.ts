@@ -14,6 +14,15 @@ export interface Account {
 
 export class AliasError extends Error {}
 
+/** A domain needs at least one dot, so a bare "@" is not a catch-all account. */
+const DOMAIN_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
+/** Deliberately loose, but it does insist on a local part and a real domain. */
+const ADDRESS_PATTERN = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/;
+
+export function isValidDomain(domain: string): boolean {
+  return DOMAIN_PATTERN.test(domain);
+}
+
 /**
  * Parses the "Email Accounts" preference.
  *
@@ -41,6 +50,7 @@ export function parseAccounts(preference: string | undefined): Account[] {
 
       if (value.startsWith("@")) {
         const domain = value.slice(1).trim().toLowerCase();
+        if (!isValidDomain(domain)) return undefined;
         return { name: name || `@${domain}`, isCatchAll: true, user: "", domain };
       }
 
@@ -53,7 +63,7 @@ export function parseAccounts(preference: string | undefined): Account[] {
         .slice(at + 1)
         .trim()
         .toLowerCase();
-      if (!user || !domain) return undefined;
+      if (!user || !isValidDomain(domain)) return undefined;
       return { name: name || value.toLowerCase(), isCatchAll: false, user, domain };
     })
     .filter((account): account is Account => account !== undefined);
@@ -85,7 +95,6 @@ export function randomToken(length: number): string {
 export interface SanitizeOptions {
   lowercase: boolean;
   dotReplacement: string;
-  maxLength?: number;
 }
 
 /** Keeps only characters that are safe in the local part of an address. */
@@ -104,10 +113,6 @@ export function sanitizeLabel(value: string, options: SanitizeOptions): string {
   if (options.dotReplacement) {
     label = label.split(".").join(options.dotReplacement);
     label = label.replace(/-{2,}/g, "-").replace(/^[-._]+|[-._]+$/g, "");
-  }
-
-  if (options.maxLength && options.maxLength > 0) {
-    label = label.slice(0, options.maxLength).replace(/[-._]+$/g, "");
   }
 
   return label;
@@ -145,11 +150,15 @@ export interface BuildResult {
   host: string;
 }
 
+/** Cuts to `length` without leaving a dangling separator behind. */
+function trimTo(value: string, length: number): string {
+  return value.slice(0, Math.max(0, length)).replace(/[-._]+$/g, "");
+}
+
 export function buildAlias(options: BuildOptions): BuildResult {
   const sanitize: SanitizeOptions = {
     lowercase: options.lowercase,
     dotReplacement: options.dotReplacement,
-    maxLength: options.maxAliasLength,
   };
 
   const host = options.host ?? (options.sourceIsLabel ? "" : options.source);
@@ -157,20 +166,32 @@ export function buildAlias(options: BuildOptions): BuildResult {
     ? options.source
     : hostToLabel(options.source, { depth: options.depth, stripWww: options.stripWww });
 
-  const label = sanitizeLabel(rawLabel, sanitize);
+  const date = options.dateFormat ? formatDate(options.dateFormat) : "";
+  const random = options.randomOverride ?? randomToken(options.randomLength);
+
+  const separator = options.suffixSeparator || "-";
+  const parts: string[] = [];
+  if (options.suffixMode === "date" || options.suffixMode === "both") parts.push(date);
+  if (options.suffixMode === "random" || options.suffixMode === "both") parts.push(random);
+  const suffix = parts.filter(Boolean).join(separator);
+  const suffixPart = suffix ? `${separator}${suffix}` : "";
+
+  // The maximum applies to the finished alias, suffix included. Trimming only
+  // the label would let a date and a random token push it past the limit.
+  const max = options.maxAliasLength && options.maxAliasLength > 0 ? options.maxAliasLength : undefined;
+  let label = sanitizeLabel(rawLabel, sanitize);
+  if (max) {
+    label = trimTo(label, Math.max(1, max - suffixPart.length));
+  }
+
   if (!label) {
     throw new AliasError("The alias would be empty. Check the domain depth and the replacement characters.");
   }
 
-  const date = options.dateFormat ? formatDate(options.dateFormat) : "";
-  const random = options.randomOverride ?? randomToken(options.randomLength);
-
-  const parts: string[] = [];
-  if (options.suffixMode === "date" || options.suffixMode === "both") parts.push(date);
-  if (options.suffixMode === "random" || options.suffixMode === "both") parts.push(random);
-  const suffix = parts.filter(Boolean).join(options.suffixSeparator || "-");
-
-  const alias = suffix ? `${label}${options.suffixSeparator || "-"}${suffix}` : label;
+  let alias = `${label}${suffixPart}`;
+  if (max && alias.length > max) {
+    alias = trimTo(alias, max);
+  }
 
   const template = options.account.isCatchAll ? options.catchAllTemplate : options.template;
   const address = renderTemplate(template, {
@@ -185,8 +206,8 @@ export function buildAlias(options: BuildOptions): BuildResult {
     random,
   });
 
-  if (!address.includes("@")) {
-    throw new AliasError("The template did not produce an address. It needs an @ and a {domain} token.");
+  if (!ADDRESS_PATTERN.test(address)) {
+    throw new AliasError(`"${address}" is not a valid email address. Check the template and the account.`);
   }
 
   return { address, label, suffix, host };
