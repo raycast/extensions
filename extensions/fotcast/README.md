@@ -5,9 +5,7 @@ Football fixtures and scores in Raycast, from FotMob.
 - **Matches** shows every league's matches for one day, grouped by competition.
   Each row's title is followed by the kickoff time before the match starts,
   then the match clock (minute, HT, FT) once it starts. The right side shows
-  Home crest, score badge, Away crest. The score badge turns green, red or grey
-  when the match finishes, coloured from your favorite club's side (win,
-  loss, draw or no favorite involved).
+  Home crest, score badge, Away crest. When the match finishes the score badge turns green for a win, red for a loss and grey for a draw, judged from your favorite club's side when one is playing and from the home side otherwise.
 - Favorite any number of teams and leagues. Matches involving a favorite team
   are pinned to a `★ Teams` section at the top, followed by one `★ <league>`
   section per favorite league, then the rest of the day in FotMob's own order.
