@@ -52,11 +52,16 @@ export const useMultiPveFetch = <T>(url: string, options?: MultiPveFetchOptions)
     }
 
     const handle = setInterval(() => {
-      result.revalidate();
+      // revalidate() aborts the request that is still in flight, so ticking
+      // while a server is slower than the interval would abort every request
+      // before it can resolve and the list would never leave the loading state.
+      if (!result.isLoading) {
+        result.revalidate();
+      }
     }, timerInterval);
 
     return () => clearInterval(handle);
-  }, [result.revalidate, timerInterval, execute]);
+  }, [result.revalidate, result.isLoading, timerInterval, execute]);
 
   return {
     ...result,

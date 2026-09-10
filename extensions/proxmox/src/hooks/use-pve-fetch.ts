@@ -28,11 +28,16 @@ export const usePveFetch = <T>(server: PveServer, url: string, options?: PveFetc
     }
 
     const handle = setInterval(() => {
-      result.revalidate();
+      // revalidate() aborts the request that is still in flight, so ticking
+      // while the server is slower than the interval would abort every request
+      // before it can resolve and the data would never refresh.
+      if (!result.isLoading) {
+        result.revalidate();
+      }
     }, timerInterval);
 
     return () => clearInterval(handle);
-  }, [result.revalidate, timerInterval, execute]);
+  }, [result.revalidate, result.isLoading, timerInterval, execute]);
 
   return result;
 };

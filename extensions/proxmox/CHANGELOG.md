@@ -1,5 +1,9 @@
 # Proxmox Changelog
 
+## [Fix Slow Server Loading] - 2026-09-10
+
+- Fixed the VM and storage lists staying empty and loading forever when a server responds slower than the refresh interval
+
 ## [Multiple Servers] - 2026-09-07
 
 - Added support for multiple Proxmox servers ([#27260](https://github.com/raycast/extensions/issues/27260))
