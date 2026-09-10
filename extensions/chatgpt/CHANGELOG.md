@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix] - 2026-09-10
+
+- Fix: Reuse Raycast's HTTP(S) agents when no custom proxy is configured, so the system certificate store is trusted and OpenAI-compatible endpoints behind a TLS-inspecting corporate proxy work
+
 ## [Feature] - 2026-03-09
 
 - Feature: Added a per-model `Reasoning` toggle with an `Effort` selector (`none`, `low`, `medium`, `high`) in the model form.
