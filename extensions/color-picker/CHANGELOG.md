@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-10
 
 - Fix color swatches rendering as a grey square when the color format preference is set to a format that is not a valid CSS color, such as `HEX No Prefix`
 - Fix the `OKLCH` format dropping the alpha channel and producing a `NaN` hue for black, white and gray
