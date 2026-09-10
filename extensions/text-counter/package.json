@@ -23,28 +23,66 @@
     {
       "name": "count-text",
       "title": "Count Tokens / Words / Lines",
-      "description": "Count tokens, words, lines, and characters from clipboard input",
+      "description": "Count tokens, words, lines, and characters from selected text or clipboard",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "preferSelectedText",
+      "type": "checkbox",
+      "required": false,
+      "title": "Text Source",
+      "label": "Prefer selected text over clipboard",
+      "description": "Try to read the selected text in the frontmost app first, falling back to the clipboard",
+      "default": true
+    },
+    {
+      "name": "showTokenCounts",
+      "type": "checkbox",
+      "required": false,
+      "title": "Display",
+      "label": "Show token counts",
+      "description": "Show LLM token counts (o200k_base, cl100k_base, Claude estimate)",
+      "default": true
+    },
+    {
+      "name": "showReadingTime",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show reading time",
+      "description": "Show an estimated reading time based on average reading speed",
+      "default": true
+    },
+    {
+      "name": "showCostEstimates",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show cost estimates",
+      "description": "Show input cost estimates using live model pricing from models.dev (cached for 24h)",
+      "default": true
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.82.5",
+    "@raycast/api": "^1.104.23",
     "gpt-tokenizer": "^2.6.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "^19.3.0",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "vitest run",
     "publish": "npx @raycast/api@latest publish"
   }
 }
