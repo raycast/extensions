@@ -110,6 +110,40 @@ const isValidChannelId = (channelId?: string) => {
   return channelIdRegex.test(channelId.trim());
 };
 
+type SlackFileLike = {
+  id?: string;
+  name?: string;
+  title?: string;
+  mimetype?: string;
+  filetype?: string;
+  size?: number;
+};
+
+type FormattedSlackFile = {
+  id: string;
+  name?: string;
+  mimetype?: string;
+  size?: number;
+};
+
+/**
+ * Normalizes a message's `files` array into a compact shape the AI can act on.
+ * The `id` values can be passed to the Download Files tool. Returns `undefined`
+ * when a message has no downloadable files so the key can be omitted.
+ */
+const formatSlackFiles = (files?: SlackFileLike[]): FormattedSlackFile[] | undefined => {
+  const formatted = (files ?? [])
+    .filter((file): file is SlackFileLike & { id: string } => Boolean(file.id))
+    .map((file) => ({
+      id: file.id,
+      name: file.name ?? file.title,
+      mimetype: file.mimetype ?? file.filetype,
+      size: file.size,
+    }));
+
+  return formatted.length > 0 ? formatted : undefined;
+};
+
 export {
   timeDifference,
   convertTimestampToDate,
@@ -117,4 +151,5 @@ export {
   handleError,
   convertSlackEmojiToUnicode,
   isValidChannelId,
+  formatSlackFiles,
 };

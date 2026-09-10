@@ -240,6 +240,11 @@
       "title": "Upload Files",
       "name": "upload-files",
       "description": "Upload one or more local files to a Slack channel, DM, group DM, or thread, optionally with message text. The channel must be a C, D, or G conversation ID; never pass a U or W user ID. For a named person, use Find Users, then Read Conversation, then pass its returned D-prefixed channel ID here. Pass multiple absolute file paths separated by newlines."
+    },
+    {
+      "title": "Download Files",
+      "name": "download-files",
+      "description": "Download one or more files (attachments) from Slack to a local folder. Pass Slack file IDs, one per line; file IDs start with F and appear in the `files` array returned by Read Conversation, Read Thread, Get Channel History, or Search Messages. Files are saved to the user's ~/Downloads folder by default, or to an optional destination directory. Returns the saved absolute paths."
     }
   ],
   "dependencies": {

@@ -6,6 +6,8 @@ import {
   mergeDirectorySearchResults,
   mergeVisitedDirectoryItems,
   rememberVisitedDirectoryItem,
+  visitedDirectoryItemsCacheKey,
+  visitedDirectoryItemsForWorkspace,
 } from "./directory";
 
 test("member rows and group names share one user lookup per query", async () => {
@@ -64,4 +66,28 @@ test("empty query results include a visited channel from a later page", async ()
     mergeVisitedDirectoryItems(channels, visited, "frequently")?.some((channel) => channel.id === laterChannel.id),
     false,
   );
+});
+
+test("recent items cache keys differ across workspaces", () => {
+  assert.equal(visitedDirectoryItemsCacheKey("T1"), "open-channel-visited-items:T1");
+  assert.notEqual(visitedDirectoryItemsCacheKey("T1"), visitedDirectoryItemsCacheKey("T2"));
+});
+
+test("visited items are omitted until the authenticated workspace is known", () => {
+  const visited = [{ id: "C1", teamId: "T1" }];
+  assert.deepEqual(visitedDirectoryItemsForWorkspace(visited, undefined), []);
+  assert.equal(visitedDirectoryItemsForWorkspace(visited, "T1"), visited);
+});
+
+test("empty query does not surface another workspace's recents when the cache is scoped", () => {
+  const results = [{ id: "C1", name: "ops", teamId: "T2" }];
+  const otherWorkspaceVisited = [{ id: "U-old", name: "From T1", teamId: "T1" }];
+  const scopedVisited = visitedDirectoryItemsForWorkspace(otherWorkspaceVisited, undefined);
+  assert.equal(
+    mergeVisitedDirectoryItems(results, scopedVisited, "")?.some((item) => item.id === "U-old"),
+    false,
+  );
+
+  const t2Visited = visitedDirectoryItemsForWorkspace([{ id: "C-later", name: "later", teamId: "T2" }], "T2");
+  assert.ok(mergeVisitedDirectoryItems(results, t2Visited, "")?.some((item) => item.id === "C-later"));
 });

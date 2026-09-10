@@ -336,7 +336,8 @@ export class SlackClient {
 
     const id = authResponse.user_id;
     const username = authResponse.user;
-    return { id, username };
+    const teamId = authResponse.team_id;
+    return { id, username, teamId };
   }
 
   public static async getUserProfileById(userId: string): Promise<Profile> {

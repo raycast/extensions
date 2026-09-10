@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix recipient search and AI file uploads] - {PR_MERGE_DATE}
+## [Fix recipient search, AI file uploads, and attachment downloads] - {PR_MERGE_DATE}
 
 - Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.
 - Keep frequently opened **Open Channel** results visible when they fall outside the initial directory page by retaining the latest 100 visited rows and merging them into empty-query results before frecency sorting.
@@ -11,6 +11,10 @@
 - Show Slack's requested retry delay when API calls are rate-limited, then retry automatically instead of failing immediately.
 - Fix **Upload Files** failing with a bare `internal_error` when a message was attached, caused by Slack rejecting the newer `markdown` block in `files.completeUploadExternal`; the AI message signature now uses upload-safe blocks for file uploads.
 - Return an actionable message when Slack still responds with `internal_error` so the AI can recover instead of retrying blindly or re-encoding files.
+- Add a **Download Files** AI tool that saves Slack attachments to `~/Downloads` (or a chosen folder) by their file IDs.
+- Surface attachment metadata (id, name, mimetype, size) in **Read Conversation**, **Read Thread**, and **Get Channel History** so attachments can be discovered and downloaded.
+- Add a **Download Attachment** action to **Search Messages** results that saves the file and reveals it in Finder.
+- Request the `files:read` scope so private files can be downloaded; existing OAuth users will be asked to re-authorize.
 
 ## [Keep Set Status responsive in large workspaces] - 2026-08-29
 

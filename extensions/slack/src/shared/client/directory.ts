@@ -14,8 +14,17 @@ export function mergeDirectorySearchResults<User, Channel, Group>(
   return [users ?? [], conversations?.[0] ?? [], conversations?.[1] ?? []];
 }
 
+export function visitedDirectoryItemsCacheKey(teamId: string | undefined): string {
+  return `open-channel-visited-items:${teamId ?? ""}`;
+}
+
 export function rememberVisitedDirectoryItem<T extends { id: string }>(items: readonly T[], item: T): T[] {
   return [item, ...items.filter((entry) => entry.id !== item.id)].slice(0, 100);
+}
+
+/** Recents are per-workspace; do not merge until the authenticated team is known. */
+export function visitedDirectoryItemsForWorkspace<T>(visited: readonly T[], teamId: string | undefined): readonly T[] {
+  return teamId ? visited : [];
 }
 
 /**
