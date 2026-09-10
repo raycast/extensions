@@ -42,7 +42,7 @@ export function CaptureDetailPane({ capture }: { capture: CaptureDetail }) {
     ? `![Capture](${pathToFileURL(imagePath).href})`
     : imageError
       ? "Screenshot unavailable. Open the inspector to retry, or choose Show OCR there."
-      : "Loading screenshot…";
+      : "";
 
   return (
     <List.Item.Detail

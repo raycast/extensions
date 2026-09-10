@@ -189,7 +189,9 @@ function ScreenshotGrid({
             content={
               images[capture.frame_id]?.path
                 ? { source: images[capture.frame_id].path! }
-                : Icon.Image
+                : images[capture.frame_id]?.error
+                  ? Icon.ExclamationMark
+                  : ""
             }
             title={capture.title || capture.application}
             subtitle={
