@@ -38,9 +38,10 @@ simplebanking has to be installed. The binary is looked up in this order:
 2. `/usr/local/bin/sb`
 3. `/Applications/simplebanking.app/Contents/MacOS/simplebanking-cli`
 4. the same below `~/Applications`
+5. wherever macOS says the app with the bundle identifier `tech.yaxi.simplebanking` lives
 
-The last two are intentional: someone who never set up the command-line tool should still be
-able to use the extension without doing anything first.
+Steps 3 to 5 are intentional: someone who never set up the command-line tool, or who keeps the
+app somewhere unusual, should still be able to use the extension without doing anything first.
 
 ## Commands
 

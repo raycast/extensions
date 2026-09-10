@@ -1,4 +1,4 @@
-import { List, Icon } from "@raycast/api";
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Buchung, buchungen, euro, SbFehlt } from "./sb";
 
@@ -96,7 +96,16 @@ export default function Ausgaben() {
   if (fehler) {
     return (
       <List>
-        <List.EmptyView icon={Icon.ExclamationMark} title="simplebanking Not Reachable" description={fehler} />
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="simplebanking Not Reachable"
+          description={fehler}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Download the App" url="https://www.simplebanking.de" />
+            </ActionPanel>
+          }
+        />
       </List>
     );
   }

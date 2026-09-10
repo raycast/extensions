@@ -1,9 +1,13 @@
+import { getApplications } from "@raycast/api";
 import { execFile } from "child_process";
 import { existsSync } from "fs";
 import { homedir } from "os";
 import { promisify } from "util";
 
 const run = promisify(execFile);
+
+/** Die Bundle-ID der App — darüber findet LaunchServices sie, egal wo sie liegt. */
+const BUNDLE_ID = "tech.yaxi.simplebanking";
 
 /**
  * Wo das `sb`-Binary liegt.
@@ -22,14 +26,35 @@ const KANDIDATEN = [
 
 export class SbFehlt extends Error {
   constructor() {
-    super("simplebanking was not found. Expected at ~/.local/bin/sb or in /Applications.");
+    super("simplebanking is not installed, or it could not be located. Get it at simplebanking.de, then try again.");
   }
 }
 
-function pfad(): string {
-  const treffer = KANDIDATEN.find((p) => existsSync(p));
-  if (!treffer) throw new SbFehlt();
-  return treffer;
+/** Einmal gefunden, bleibt der Pfad für die Lebensdauer des Befehls. */
+let gemerkt: string | undefined;
+
+/**
+ * Findet das CLI.
+ *
+ * Die festen Pfade decken den Normalfall ab. Liegt die App woanders — umbenannt, in
+ * einem Unterordner, aus dem Build-Verzeichnis gestartet —, fragt der zweite Schritt
+ * LaunchServices nach der Bundle-ID; das ist dieselbe Auskunft, die der Finder und
+ * Spotlight benutzen, und sie kennt jede App, die auf diesem Mac schon einmal lief.
+ */
+async function pfad(): Promise<string> {
+  if (gemerkt) return gemerkt;
+
+  const fest = KANDIDATEN.find((p) => existsSync(p));
+  if (fest) return (gemerkt = fest);
+
+  const apps = await getApplications();
+  for (const app of apps) {
+    if (app.bundleId !== BUNDLE_ID) continue;
+    const cli = `${app.path}/Contents/MacOS/simplebanking-cli`;
+    if (existsSync(cli)) return (gemerkt = cli);
+  }
+
+  throw new SbFehlt();
 }
 
 /**
@@ -39,7 +64,7 @@ function pfad(): string {
  * Einzige Ausnahme ist `refresh`, das bewusst einen eigenen Befehl hat.
  */
 async function sb<T>(args: string[]): Promise<T> {
-  const { stdout } = await run(pfad(), [...args, "--json"], {
+  const { stdout } = await run(await pfad(), [...args, "--json"], {
     timeout: 15_000,
     maxBuffer: 8 * 1024 * 1024,
   });
@@ -76,7 +101,7 @@ export const buchungen = (tage: number) => sb<Buchung[]>(["tx", "--days", String
  * TAN-Freigabe abbrechen und den Abruf als gescheitert melden, obwohl er noch läuft.
  */
 export async function aktualisieren(): Promise<void> {
-  await run(pfad(), ["refresh"]);
+  await run(await pfad(), ["refresh"]);
 }
 
 /** Text für einen Betrag, der nicht vorliegt — in Listen wie in kopiertem Text. */
