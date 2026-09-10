@@ -13,10 +13,13 @@ import { useState } from "react";
 import { execSync } from "node:child_process";
 import { getSchedule, Event, Person } from "./google";
 
+function keyOfDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function dayKeyOf(ev: Event): string {
   if (ev.allDay) return ev.start.slice(0, 10);
-  const d = new Date(ev.start);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return keyOfDate(new Date(ev.start));
 }
 
 function labelFor(key: string): string {
@@ -50,12 +53,17 @@ interface Slot {
   end: Date;
 }
 
-// Every bookable free 30-min grid slot between 9am–5pm. Busy and already-past
-// slots are dropped — only future openings appear.
+// Every bookable free 30-min grid slot between 9am–5pm on a weekday. Busy and
+// already-past slots are dropped — only future openings appear. Events Google
+// marks "free" don't block; an all-day busy event blocks the whole day.
 function freeSlots(key: string, dayEvents: Event[]): Slot[] {
   const [y, m, d] = key.split("-").map(Number);
+  const dow = new Date(y, m - 1, d).getDay();
+  if (dow === 0 || dow === 6) return [];
+  const busyEvents = dayEvents.filter((e) => e.busy);
+  if (busyEvents.some((e) => e.allDay)) return [];
   const nowMs = Date.now();
-  const busy = dayEvents
+  const busy = busyEvents
     .filter((e) => !e.allDay)
     .map(
       (e) => [new Date(e.start).getTime(), new Date(e.end).getTime()] as const,
@@ -242,7 +250,7 @@ function dayCalendarSvg(
       `<rect x="${GUT}" y="4" width="${bodyW}" height="20" rx="5" fill="${C.strip}"/>`,
     );
     parts.push(
-      `<text x="${GUT + 8}" y="18" fill="${C.stripText}" font-size="11">${xmlEscape("All-day · " + allDay.map((e) => e.title).join(" · ")).slice(0, 80)}</text>`,
+      `<text x="${GUT + 8}" y="18" fill="${C.stripText}" font-size="11">${xmlEscape(("All-day · " + allDay.map((e) => e.title).join(" · ")).slice(0, 80))}</text>`,
     );
   }
   // event blocks — events that already ended today render muted gray (disabled);
@@ -269,17 +277,16 @@ function dayCalendarSvg(
       parts.push(
         `<rect x="${x + 1}" y="${y1 + 1}" width="${w - 2}" height="${hgt - 2}" rx="5" fill="none" stroke="${C.sel}" stroke-width="2"/>`,
       );
-    const title = xmlEscape(p.raw.title).slice(
-      0,
-      Math.max(6, Math.floor(w / 6.5)),
+    // Truncate before escaping so a cut never lands inside an entity.
+    const title = xmlEscape(
+      p.raw.title.slice(0, Math.max(6, Math.floor(w / 6.5))),
     );
     parts.push(
       `<text x="${x + 8}" y="${y1 + 15}" fill="${isPast ? "#ffffff80" : "#fff"}" font-size="11.5" font-weight="600">${title}</text>`,
     );
     if (hgt > 30) {
-      const tt = xmlEscape(timeText(p.raw)).slice(
-        0,
-        Math.max(6, Math.floor(w / 6)),
+      const tt = xmlEscape(
+        timeText(p.raw).slice(0, Math.max(6, Math.floor(w / 6))),
       );
       parts.push(
         `<text x="${x + 8}" y="${y1 + 30}" fill="${isPast ? "#ffffff59" : "#ffffffcc"}" font-size="10">${tt}</text>`,
@@ -365,7 +372,12 @@ export default function Schedule({ person }: { person: Person }) {
     const key = dayKeyOf(ev);
     (byDay.get(key) ?? byDay.set(key, []).get(key)!).push(ev);
   }
-  const days = [...byDay.keys()].sort();
+  // Always the next 7 days, so event-free days still offer open slots.
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    return keyOfDate(d);
+  });
   const accent = resolveAccent();
 
   const toggle = () => (
@@ -390,7 +402,7 @@ export default function Schedule({ person }: { person: Person }) {
         />
       )}
       {days.map((key) => {
-        const dayEvents = byDay.get(key)!;
+        const dayEvents = byDay.get(key) ?? [];
         const label = labelFor(key);
         const isToday = label === "Today";
         const nowMs = Date.now();
@@ -444,11 +456,6 @@ export default function Schedule({ person }: { person: Person }) {
                   }
                   actions={
                     <ActionPanel>
-                      <Action.OpenInBrowser
-                        title="Open in Google Calendar"
-                        icon={Icon.Calendar}
-                        url={row.ev.htmlLink ?? calendarUrlFor(key)}
-                      />
                       {row.ev.meetLink && (
                         <Action.OpenInBrowser
                           title="Join Google Meet"
@@ -456,6 +463,11 @@ export default function Schedule({ person }: { person: Person }) {
                           url={row.ev.meetLink}
                         />
                       )}
+                      <Action.OpenInBrowser
+                        title="Open in Google Calendar"
+                        icon={Icon.Calendar}
+                        url={row.ev.htmlLink ?? calendarUrlFor(key)}
+                      />
                       {toggle()}
                       <Action.OpenInBrowser
                         title="Open Day in Google Calendar"

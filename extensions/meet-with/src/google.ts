@@ -12,6 +12,7 @@ export interface Event {
   start: string; // RFC3339 datetime, or YYYY-MM-DD when allDay
   end: string;
   allDay: boolean;
+  busy: boolean; // false when Google marks the event "free" (transparent)
   meetLink?: string;
   attendees?: number;
   htmlLink?: string;
@@ -80,6 +81,7 @@ interface CalendarEvent {
   start?: { dateTime?: string; date?: string };
   end?: { dateTime?: string; date?: string };
   attendees?: { self?: boolean; responseStatus?: string }[];
+  transparency?: string;
   hangoutLink?: string;
   htmlLink?: string;
   conferenceData?: {
@@ -120,6 +122,7 @@ export async function getSchedule(email: string): Promise<Schedule> {
           start,
           end,
           allDay: !e.start?.dateTime,
+          busy: e.transparency !== "transparent",
           meetLink,
           attendees: e.attendees?.length,
           htmlLink: e.htmlLink,
@@ -156,6 +159,7 @@ export async function getSchedule(email: string): Promise<Schedule> {
       start: b.start,
       end: b.end,
       allDay: false,
+      busy: true,
     }));
     return { events, busyOnly: true };
   }
