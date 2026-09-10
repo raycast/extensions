@@ -6,11 +6,6 @@ import { pageItems } from "./pagination";
 
 const execFileAsync = promisify(execFile);
 
-export type Preferences = {
-  coastPath?: string;
-  defaultLimit?: string;
-};
-
 export type CaptureDetail = {
   frame_id: number;
   timestamp: string;

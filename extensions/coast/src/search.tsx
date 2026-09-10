@@ -18,7 +18,6 @@ import {
   listApplications,
   type ApplicationIdentifier,
   type CaptureDetail,
-  type Preferences,
 } from "./coast";
 import { loadSearchResults } from "./search-data";
 
@@ -33,7 +32,7 @@ type State = {
 
 export default function Command() {
   const appIcon = useAppIcons();
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Search>();
   const request = useRef(0);
   const loading = useRef(false);
   const configuredSize = Number(preferences.defaultLimit);

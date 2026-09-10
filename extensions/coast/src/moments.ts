@@ -11,9 +11,14 @@ export function captureSubtitle(capture: CaptureDetail): string | undefined {
 export function groupMoments(captures: CaptureDetail[]): CaptureDetail[][] {
   const groups: CaptureDetail[][] = [];
   const seen = new Set<number>();
-  for (const capture of [...captures].sort((a, b) =>
-    a.timestamp.localeCompare(b.timestamp),
-  )) {
+  for (const capture of [...captures].sort((a, b) => {
+    const aTime = new Date(a.timestamp).getTime();
+    const bTime = new Date(b.timestamp).getTime();
+    return (
+      (Number.isFinite(aTime) ? aTime : Infinity) -
+        (Number.isFinite(bTime) ? bTime : Infinity) || a.frame_id - b.frame_id
+    );
+  })) {
     if (seen.has(capture.frame_id)) continue;
     seen.add(capture.frame_id);
     const group = groups.at(-1);
@@ -27,7 +32,7 @@ export function groupMoments(captures: CaptureDetail[]): CaptureDetail[][] {
       ? new Date(capture.timestamp).getTime() -
         new Date(previous.timestamp).getTime()
       : Infinity;
-    if (sameContext && gap <= 120_000) group!.push(capture);
+    if (sameContext && gap >= 0 && gap <= 120_000) group!.push(capture);
     else groups.push([capture]);
   }
   return groups;

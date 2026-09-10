@@ -5,6 +5,7 @@
 - Search recorded text and inspect screenshots and accessibility content.
 - Explore application usage, sessions, grouped moments, and surrounding activity.
 - Show readable local times and compact durations.
+- Order mixed-offset captures by their actual instant and display only completed minutes of usage.
 - Query recorded activity through Raycast AI tools.
 - Browse local screenshots in a paginated native gallery with app/domain filters.
 - Navigate previous/next selected moments and discover explicitly related captures.

@@ -35,7 +35,7 @@ export function readableTime(value: string, detailed = false): string {
 
 export function duration(seconds: number): string {
   if (seconds < 60) return seconds > 0 ? "<1m" : "0m";
-  const minutes = Math.round(seconds / 60);
+  const minutes = Math.floor(seconds / 60);
   return minutes >= 60
     ? `${Math.floor(minutes / 60)}h ${minutes % 60}m`
     : `${minutes}m`;
