@@ -1,6 +1,6 @@
 # Melanite Search Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-10
 
 - Search a Melanite library by file name, tag name, and memo
 - Narrow results by kind (notes, images, videos, audio, documents, other)
