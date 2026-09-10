@@ -1,17 +1,18 @@
 # ClaudeScope for Raycast
 
-Search and open local coding-agent transcript history from Raycast. The
-extension works with Claude Code, Codex, Copilot CLI, Junie, pi, opencode,
-Antigravity, and Grok sessions already indexed by
-[ClaudeScope](https://github.com/vladar107/claudescope).
+The Raycast companion for [ClaudeScope](https://github.com/vladar107/claudescope),
+a local transcript browser with a persistent multi-agent index. It is a client
+for that app, not a standalone session parser: search the sessions ClaudeScope
+has already indexed and open the exact matching message in its full threaded
+view, straight from Raycast. It works with Claude Code, Codex, Copilot CLI,
+Junie, pi, opencode, Antigravity, and Grok sessions.
 
 ## How ClaudeScope Differs
 
-ClaudeScope is the Raycast companion to a full local transcript browser and
-persistent multi-agent index. Search results open the exact matched message in
-the complete threaded transcript, where ClaudeScope also exposes tool calls,
-file changes, subagents, token usage, cost, and analytics. Recent Sessions uses
-the same normalized project and agent metadata across every supported source.
+Search results open the exact matched message in the complete threaded
+transcript, where ClaudeScope also exposes tool calls, file changes, subagents,
+token usage, cost, and analytics. ClaudeScope Recent Sessions uses the same
+normalized project and agent metadata across every supported source.
 
 Unlike Claude Code-specific launchers and automation tools, ClaudeScope is
 strictly read-only and works across multiple coding agents. It never resumes,
@@ -55,7 +56,7 @@ absolute executable path in the extension preferences.
 ## Commands
 
 - **Search ClaudeScope** — debounced full-text search with exact message links.
-- **Recent Sessions** — browse and locally filter the 75 most recent sessions.
+- **ClaudeScope Recent Sessions** — browse and locally filter the 75 most recent sessions.
 - **Open ClaudeScope** — start the daemon if needed and open the local web app.
 
 ## Privacy
