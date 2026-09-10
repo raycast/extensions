@@ -1,5 +1,10 @@
 # Kill Process Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- App grouping now works on Windows, where it groups processes by executable path (fixes #26386)
+- Killing a grouped app on Windows now terminates every process in the group rather than only the main process and its children
+
 ## [Improvements] - 2026-06-25
 
 - App grouping is now enabled by default and groups processes by `.app` bundle path for more accurate CPU and memory totals (fixes #25095)

@@ -28,7 +28,7 @@ import {
   fetchRunningProcesses,
   restartProcess as restartSelectedProcess,
   terminateProcess,
-  terminateProcessTree,
+  terminateProcessGroup,
   terminateProcessesByName,
 } from "./utils/process";
 
@@ -242,7 +242,7 @@ export default function ProcessList() {
 
     try {
       if (process.type === "aggregatedApp") {
-        await terminateProcessTree(process.id, force);
+        await terminateProcessGroup(process, force);
       } else {
         await terminateProcess(process.id, force);
       }
