@@ -175,16 +175,12 @@ describe("error mapping", () => {
 
   it("surfaces the server message on a 500", async () => {
     const { fetchStub } = recorder(() => json({ message: "server said no" }, 500));
-    await expect(new ArgoClient(instance(), deps(fetchStub)).listApplications()).rejects.toThrowError(
-      /server said no/,
-    );
+    await expect(new ArgoClient(instance(), deps(fetchStub)).listApplications()).rejects.toThrowError(/server said no/);
   });
 
   it("stays readable when the error body is not JSON", async () => {
     const { fetchStub } = recorder(() => new Response("<html>502</html>", { status: 502 }));
-    await expect(new ArgoClient(instance(), deps(fetchStub)).listApplications()).rejects.toThrowError(
-      /answered 502/,
-    );
+    await expect(new ArgoClient(instance(), deps(fetchStub)).listApplications()).rejects.toThrowError(/answered 502/);
   });
 
   it("truncates a very long server message", async () => {
@@ -197,18 +193,14 @@ describe("error mapping", () => {
 
   it("maps a transport failure to a network error naming the VPN", async () => {
     const fetchStub = vi.fn().mockRejectedValue(new TypeError("fetch failed")) as unknown as typeof fetch;
-    await expect(new ArgoClient(instance(), deps(fetchStub)).listApplications()).rejects.toThrowError(
-      NetworkError,
-    );
+    await expect(new ArgoClient(instance(), deps(fetchStub)).listApplications()).rejects.toThrowError(NetworkError);
     await expect(new ArgoClient(instance(), deps(fetchStub)).listApplications()).rejects.toThrowError(/VPN/);
   });
 
   it("maps an abort to a timeout", async () => {
     const abort = Object.assign(new Error("aborted"), { name: "AbortError" });
     const fetchStub = vi.fn().mockRejectedValue(abort) as unknown as typeof fetch;
-    await expect(new ArgoClient(instance(), deps(fetchStub)).listApplications()).rejects.toThrowError(
-      TimeoutError,
-    );
+    await expect(new ArgoClient(instance(), deps(fetchStub)).listApplications()).rejects.toThrowError(TimeoutError);
   });
 
   it("never puts the token or the request URL in an error message", async () => {
@@ -229,9 +221,9 @@ describe("error mapping", () => {
       }
       return json(APP_LIST);
     }) as unknown as typeof fetch;
-    await expect(
-      new ArgoClient(instance(), deps(fetchStub)).listApplications(controller.signal),
-    ).rejects.toThrowError(TimeoutError);
+    await expect(new ArgoClient(instance(), deps(fetchStub)).listApplications(controller.signal)).rejects.toThrowError(
+      TimeoutError,
+    );
   });
 });
 
@@ -269,17 +261,14 @@ describe("sync", () => {
 
 describe("deep links", () => {
   it("builds the web UI URL of an application", () => {
-    expect(
-      new ArgoClient(instance(), deps(vi.fn() as unknown as typeof fetch)).appUrl("app-one", "argocd"),
-    ).toBe("https://argocd.example.com/applications/argocd/app-one");
+    expect(new ArgoClient(instance(), deps(vi.fn() as unknown as typeof fetch)).appUrl("app-one", "argocd")).toBe(
+      "https://argocd.example.com/applications/argocd/app-one",
+    );
   });
 
   it("builds the web UI URL of an ApplicationSet", () => {
     expect(
-      new ArgoClient(instance(), deps(vi.fn() as unknown as typeof fetch)).appSetUrl(
-        "team-a-set",
-        "team-a-apps",
-      ),
+      new ArgoClient(instance(), deps(vi.fn() as unknown as typeof fetch)).appSetUrl("team-a-set", "team-a-apps"),
     ).toBe("https://argocd.example.com/applicationsets/team-a-apps/team-a-set");
   });
 });

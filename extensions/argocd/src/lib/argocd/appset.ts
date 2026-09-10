@@ -138,12 +138,7 @@ export function mergeAppSets(fromApi: AppSetSummary[], derived: AppSetSummary[])
   return [...merged.values()];
 }
 
-export function ownedByAppSet(
-  app: AppSummary,
-  instanceId: string,
-  namespace: string,
-  appSetName: string,
-): boolean {
+export function ownedByAppSet(app: AppSummary, instanceId: string, namespace: string, appSetName: string): boolean {
   return app.instanceId === instanceId && app.namespace === namespace && app.appSetName === appSetName;
 }
 

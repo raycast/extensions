@@ -85,10 +85,7 @@ describe("renewal is silent", () => {
       readSession: vi.fn().mockResolvedValue(session({ expiresAt: NOW + RENEW_AHEAD_MS - 1 })),
     });
     await expect(createSsoTokenReader(d)(INSTANCE)).resolves.toBe("renewed-id-token");
-    expect(d.refresh).toHaveBeenCalledWith(ENDPOINTS, "public-client", "the-refresh-token", [
-      "openid",
-      "groups",
-    ]);
+    expect(d.refresh).toHaveBeenCalledWith(ENDPOINTS, "public-client", "the-refresh-token", ["openid", "groups"]);
   });
 
   it("renews an already expired session, which is the whole point of the refresh token", async () => {
@@ -99,19 +96,13 @@ describe("renewal is silent", () => {
   it("stores the renewed session, so the next command starts from it", async () => {
     const d = deps({ readSession: vi.fn().mockResolvedValue(session({ expiresAt: NOW - 1 })) });
     await createSsoTokenReader(d)(INSTANCE);
-    expect(d.writeSession).toHaveBeenCalledWith(
-      "i1",
-      expect.objectContaining({ idToken: "renewed-id-token" }),
-    );
+    expect(d.writeSession).toHaveBeenCalledWith("i1", expect.objectContaining({ idToken: "renewed-id-token" }));
   });
 
   it("keeps the existing refresh token when the provider does not rotate it", async () => {
     const d = deps({ readSession: vi.fn().mockResolvedValue(session({ expiresAt: NOW - 1 })) });
     await createSsoTokenReader(d)(INSTANCE);
-    expect(d.writeSession).toHaveBeenCalledWith(
-      "i1",
-      expect.objectContaining({ refreshToken: "the-refresh-token" }),
-    );
+    expect(d.writeSession).toHaveBeenCalledWith("i1", expect.objectContaining({ refreshToken: "the-refresh-token" }));
   });
 
   it("stores a rotated refresh token", async () => {
@@ -174,9 +165,7 @@ describe("when a login really is needed", () => {
 
   it("voids a session minted against another provider rather than producing a puzzling 401", async () => {
     const d = deps({
-      readSession: vi
-        .fn()
-        .mockResolvedValue(session({ expiresAt: NOW - 1, issuer: "https://old.example.com" })),
+      readSession: vi.fn().mockResolvedValue(session({ expiresAt: NOW - 1, issuer: "https://old.example.com" })),
     });
     await expect(createSsoTokenReader(d)(INSTANCE)).rejects.toThrowError(/different identity provider/);
     expect(d.clearSession).toHaveBeenCalledWith("i1");

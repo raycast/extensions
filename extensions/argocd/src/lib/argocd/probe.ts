@@ -94,11 +94,7 @@ export async function probeInstance(instance: ArgoInstance, deps: ProbeDeps): Pr
   };
 }
 
-export function isProbeStale(
-  reachability: Reachability,
-  now: number,
-  ttlMs: number = DEFAULT_PROBE_TTL_MS,
-): boolean {
+export function isProbeStale(reachability: Reachability, now: number, ttlMs: number = DEFAULT_PROBE_TTL_MS): boolean {
   if (reachability.state === "unknown") {
     return true;
   }

@@ -90,9 +90,7 @@ export function useAppSets(instances: ArgoInstance[]): UseAppSetsResult {
       for (const instance of instances) {
         const derived = derivedByInstance.get(instance.id) ?? [];
         setStates((current) =>
-          current.map((state) =>
-            state.instance.id === instance.id ? { ...state, appSets: derived } : state,
-          ),
+          current.map((state) => (state.instance.id === instance.id ? { ...state, appSets: derived } : state)),
         );
       }
 

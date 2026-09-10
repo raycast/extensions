@@ -97,11 +97,7 @@ export function instanceHost(instance: Pick<ArgoInstance, "baseUrl">): string {
   return new URL(instance.baseUrl).host;
 }
 
-export function validateInstance(
-  draft: InstanceDraft,
-  existing: ArgoInstance[],
-  newId: () => string,
-): ArgoInstance {
+export function validateInstance(draft: InstanceDraft, existing: ArgoInstance[], newId: () => string): ArgoInstance {
   const name = draft.name.trim();
   if (name.length === 0) {
     throw new ValidationError("The name is required.", "name");
@@ -136,6 +132,21 @@ export function validateInstance(
     allowWrite: draft.env === "prod" ? false : (draft.allowWrite ?? false),
     enabled: draft.enabled ?? true,
   };
+}
+
+/**
+ * True when an edit invalidates whatever credential the instance already holds.
+ *
+ * An edit keeps the instance's id, so its stored session survives it. Point the instance at
+ * another server, or switch its auth mode, and the old provider's token is still what gets
+ * sent. The token reader cannot catch this on its common path: it returns a live session
+ * without asking the server anything, which is what makes opening a command free, and
+ * validating the provider binding there would cost a settings request on every read.
+ *
+ * So the invalidation happens here, once, at the edit.
+ */
+export function credentialsInvalidatedBy(previous: ArgoInstance, next: ArgoInstance): boolean {
+  return previous.baseUrl !== next.baseUrl || previous.authMode !== next.authMode;
 }
 
 export function upsertInstance(instances: ArgoInstance[], instance: ArgoInstance): ArgoInstance[] {

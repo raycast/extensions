@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   ValidationError,
+  credentialsInvalidatedBy,
   instanceHost,
   normalizeBaseUrl,
   parseInstances,
@@ -43,9 +44,7 @@ describe("normalizeBaseUrl", () => {
   });
 
   it("preserves a base path without its trailing slash", () => {
-    expect(normalizeBaseUrl("https://gateway.example.com/argocd/")).toBe(
-      "https://gateway.example.com/argocd",
-    );
+    expect(normalizeBaseUrl("https://gateway.example.com/argocd/")).toBe("https://gateway.example.com/argocd");
   });
 
   it("prepends https when the scheme is missing", () => {
@@ -229,5 +228,33 @@ describe("loopback is the one place cleartext is allowed", () => {
 
   it("refuses a protocol that is neither http nor https even on loopback", () => {
     expect(() => normalizeBaseUrl("ftp://localhost")).toThrowError(/must use http or https/);
+  });
+});
+
+describe("an edit can void the stored credential", () => {
+  const base: ArgoInstance = {
+    id: "i1",
+    name: "prod",
+    baseUrl: "https://argocd.example.com",
+    env: "prod",
+    authMode: "sso",
+    allowWrite: false,
+    enabled: true,
+  };
+
+  it("is voided by a new server, since the old provider's token would be sent to it", () => {
+    expect(credentialsInvalidatedBy(base, { ...base, baseUrl: "https://other.example.com" })).toBe(true);
+  });
+
+  it("is voided by a new auth mode, whose provider reads different storage", () => {
+    expect(credentialsInvalidatedBy(base, { ...base, authMode: "token" })).toBe(true);
+    expect(credentialsInvalidatedBy(base, { ...base, authMode: "cli" })).toBe(true);
+  });
+
+  it("survives an edit that cannot affect who issued the token", () => {
+    expect(credentialsInvalidatedBy(base, { ...base, name: "production" })).toBe(false);
+    expect(credentialsInvalidatedBy(base, { ...base, enabled: false })).toBe(false);
+    expect(credentialsInvalidatedBy(base, { ...base, allowWrite: true })).toBe(false);
+    expect(credentialsInvalidatedBy(base, { ...base, env: "preprod" })).toBe(false);
   });
 });

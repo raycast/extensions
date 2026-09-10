@@ -9,6 +9,7 @@
 
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import type { ComponentProps } from "react";
+import { openManageInstances } from "./launch";
 import { useMemo, useState } from "react";
 import { UnreachableError } from "../lib/argocd/errors";
 import { AuthError } from "../lib/auth/provider";
@@ -65,10 +66,7 @@ export function ApplicationListView({
 }: Props) {
   const [query, setQuery] = useState("");
 
-  const instanceById = useMemo(
-    () => new Map(states.map((state) => [state.instance.id, state.instance])),
-    [states],
-  );
+  const instanceById = useMemo(() => new Map(states.map((state) => [state.instance.id, state.instance])), [states]);
 
   const apps = useMemo(() => {
     const all = states.flatMap((state) => state.apps);
@@ -76,8 +74,7 @@ export function ApplicationListView({
   }, [states, filter]);
 
   const ranked = useMemo(
-    () =>
-      query.trim().length === 0 ? defaultOrder(apps, recentKeys, limit) : rankApps(apps, query, { limit }),
+    () => (query.trim().length === 0 ? defaultOrder(apps, recentKeys, limit) : rankApps(apps, query, { limit })),
     [apps, query, recentKeys, limit],
   );
 
@@ -112,8 +109,7 @@ export function ApplicationListView({
         title={
           failing.length > 0
             ? authTitle(failing)
-            : (emptyTitle ??
-              (apps.length === 0 ? "No applications cached yet" : `Nothing matches "${query.trim()}"`))
+            : (emptyTitle ?? (apps.length === 0 ? "No applications cached yet" : `Nothing matches "${query.trim()}"`))
         }
         // The error's own message says whether there is no session at all, an expired one, or
         // no stored token. Replacing it with a guess is how "no credential" reads as "expired".
@@ -125,11 +121,11 @@ export function ApplicationListView({
               // single sign-on, a CLI login for the CLI session, and storing a token for the
               // token mode, where neither login helps.
               state.instance.authMode === "token" ? (
-                <Action.Open
+                <Action
                   key={state.instance.id}
                   title={`Set the API Token for ${state.instance.name}`}
                   icon={Icon.Key}
-                  target="raycast://extensions/pixibixi/argocd/manage-instances"
+                  onAction={() => void openManageInstances()}
                 />
               ) : (
                 <Action
@@ -206,7 +202,5 @@ function authTitle(failing: InstanceState[]): string {
  * fixed by the action the other one needs.
  */
 function authDescription(failing: InstanceState[]): string {
-  return failing
-    .map((state) => state.error?.message ?? `${state.instance.name} refused the request.`)
-    .join("\n");
+  return failing.map((state) => state.error?.message ?? `${state.instance.name} refused the request.`).join("\n");
 }

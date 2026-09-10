@@ -27,9 +27,7 @@ const RAW = process.env.REAL_APPS_JSON;
  */
 function projectAll(): AppSummary[] {
   const list = JSON.parse(readFileSync(RAW as string, "utf8")) as { items: unknown[] };
-  return list.items
-    .map((item) => projectSummary(item, "i1"))
-    .filter((app): app is AppSummary => app !== undefined);
+  return list.items.map((item) => projectSummary(item, "i1")).filter((app): app is AppSummary => app !== undefined);
 }
 
 function itemCount(): number {

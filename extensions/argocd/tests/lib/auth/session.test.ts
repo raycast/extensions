@@ -42,9 +42,9 @@ describe("sessionFromTokens", () => {
 
   it("falls back to the token's own exp claim when the exchange reported none", () => {
     const idToken = fakeJwt({ exp: 2_000_000_000 });
-    expect(
-      sessionFromTokens({ idToken, refreshToken: undefined, expiresAt: undefined }, "i", "c").expiresAt,
-    ).toBe(2_000_000_000_000);
+    expect(sessionFromTokens({ idToken, refreshToken: undefined, expiresAt: undefined }, "i", "c").expiresAt).toBe(
+      2_000_000_000_000,
+    );
   });
 });
 
@@ -60,9 +60,9 @@ describe("mergeRenewal", () => {
   });
 
   it("takes a rotated refresh token", () => {
-    expect(
-      mergeRenewal(session(), { idToken: "new", refreshToken: "rotated", expiresAt: NOW }).refreshToken,
-    ).toBe("rotated");
+    expect(mergeRenewal(session(), { idToken: "new", refreshToken: "rotated", expiresAt: NOW }).refreshToken).toBe(
+      "rotated",
+    );
   });
 });
 

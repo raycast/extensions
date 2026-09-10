@@ -41,12 +41,7 @@ export interface CliSessionDeps {
   clearCachedSession: (instanceId: string) => Promise<void>;
   readSettings: (instance: ArgoInstance) => Promise<OidcSettings>;
   discover: (issuer: string) => Promise<OidcEndpoints>;
-  refresh: (
-    endpoints: OidcEndpoints,
-    clientId: string,
-    refreshToken: string,
-    scopes: string[],
-  ) => Promise<TokenSet>;
+  refresh: (endpoints: OidcEndpoints, clientId: string, refreshToken: string, scopes: string[]) => Promise<TokenSet>;
   now: () => number;
 }
 

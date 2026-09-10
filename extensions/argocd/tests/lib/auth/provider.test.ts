@@ -37,9 +37,7 @@ describe("cli auth mode", () => {
 
   it("looks the session up by host", async () => {
     const readCliToken = vi.fn().mockResolvedValue({ token: SECRET, expiresAt: undefined });
-    await createTokenProvider(deps({ readCliToken }))(
-      instance({ baseUrl: "https://argocd.example.com:8443" }),
-    );
+    await createTokenProvider(deps({ readCliToken }))(instance({ baseUrl: "https://argocd.example.com:8443" }));
     expect(readCliToken).toHaveBeenCalledWith("argocd.example.com:8443");
   });
 

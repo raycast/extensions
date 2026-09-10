@@ -65,9 +65,7 @@ export function useApplications(instances: ArgoInstance[]): UseApplicationsResul
 
     const patch = (loaded: LoadedInstance, loading: boolean) => {
       setStates((current) =>
-        current.map((state) =>
-          state.instance.id === loaded.instance.id ? fromLoaded(loaded, loading) : state,
-        ),
+        current.map((state) => (state.instance.id === loaded.instance.id ? fromLoaded(loaded, loading) : state)),
       );
     };
 

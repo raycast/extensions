@@ -223,10 +223,7 @@ export function resourceNeedsAttention(resource: ResourceStatus): boolean {
   if (resource.requiresPruning) {
     return true;
   }
-  return isAttentionWorthy(
-    resource.health ?? "Unknown",
-    resource.status === "" ? "Unknown" : resource.status,
-  );
+  return isAttentionWorthy(resource.health ?? "Unknown", resource.status === "" ? "Unknown" : resource.status);
 }
 
 /**

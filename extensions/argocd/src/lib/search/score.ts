@@ -111,11 +111,7 @@ export function rankAppSets<T extends Rankable>(sets: T[], query: string, limit:
  * What an operator sees before typing anything. Recently opened first, then whatever needs
  * attention, then the rest: "the first sixty names alphabetically" is never the useful answer.
  */
-export function defaultOrder(
-  apps: AppSummary[],
-  recentKeys: string[],
-  limit: number,
-): RankResult<AppSummary> {
+export function defaultOrder(apps: AppSummary[], recentKeys: string[], limit: number): RankResult<AppSummary> {
   const byKey = new Map(apps.map((app) => [appKey(app), app]));
   const seen = new Set<string>();
 

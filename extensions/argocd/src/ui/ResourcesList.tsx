@@ -78,10 +78,7 @@ export function ResourcesList({ appName, appNamespace, instance, resources, coun
               )
             }
           />
-          <Action.OpenInBrowser
-            title="Open in ArgoCD"
-            url={client.resourceUrl(appName, appNamespace, resource)}
-          />
+          <Action.OpenInBrowser title="Open in ArgoCD" url={client.resourceUrl(appName, appNamespace, resource)} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Resource Name" content={resource.name} />

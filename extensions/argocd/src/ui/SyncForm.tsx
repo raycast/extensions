@@ -1,22 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Form,
-  Icon,
-  Toast,
-  confirmAlert,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Form, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { ValidationError } from "../lib/config/instances";
-import {
-  DEFAULT_SYNC_FORM,
-  buildSyncRequest,
-  describeSyncRequest,
-  type SyncFormValues,
-} from "../lib/argocd/sync";
+import { DEFAULT_SYNC_FORM, buildSyncRequest, describeSyncRequest, type SyncFormValues } from "../lib/argocd/sync";
 import type { AppSummary } from "../lib/argocd/types";
 import type { ArgoInstance } from "../lib/config/instances";
 import { makeClient } from "./deps";

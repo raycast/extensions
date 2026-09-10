@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
+import { openManageInstances } from "./launch";
 import { AuthError } from "../lib/auth/provider";
 import { healthSeverity, syncSeverity } from "../lib/model/status";
 import { orderResources, resourceNeedsAttention } from "../lib/argocd/project";
@@ -49,9 +50,7 @@ function resourceLine(resource: ResourceStatus): string {
   ]
     .filter(Boolean)
     .join(", ");
-  const identity = resource.namespace
-    ? `\`${resource.name}\` in \`${resource.namespace}\``
-    : `\`${resource.name}\``;
+  const identity = resource.namespace ? `\`${resource.name}\` in \`${resource.namespace}\`` : `\`${resource.name}\``;
   return `- **${resource.kind || "?"}** ${identity}: ${state}`;
 }
 
@@ -130,9 +129,7 @@ function markdown(
     lines.push("", "## Recent deployments", "");
     for (const entry of detail.history) {
       const by = entry.initiatedBy ? ` by ${entry.initiatedBy}` : "";
-      lines.push(
-        `- \`${shortRevision(entry.revision) ?? "?"}\` on ${entry.deployedAt ?? "an unknown date"}${by}`,
-      );
+      lines.push(`- \`${shortRevision(entry.revision) ?? "?"}\` on ${entry.deployedAt ?? "an unknown date"}${by}`);
     }
   }
 
@@ -147,15 +144,12 @@ function markdown(
   // Only the failures. A "serverside-applied" message on a Synced resource is the sync working
   // as intended, and listing those buried the ones that matter.
   const failures = (detail?.syncResources ?? []).filter(
-    (resource) =>
-      resource.status === "SyncFailed" || resource.hookPhase === "Failed" || resource.hookPhase === "Error",
+    (resource) => resource.status === "SyncFailed" || resource.hookPhase === "Failed" || resource.hookPhase === "Error",
   );
   if (failures.length > 0) {
     lines.push("", "## Last sync failures", "");
     for (const resource of failures.slice(0, 15)) {
-      lines.push(
-        `- **${resource.kind || "?"}** \`${resource.name}\`: ${resource.message || resource.status}`,
-      );
+      lines.push(`- **${resource.kind || "?"}** \`${resource.name}\`: ${resource.message || resource.status}`);
     }
   }
 
@@ -274,9 +268,7 @@ export function ApplicationDetail({ app, instance, onRefresh }: Props) {
               ) : (
                 <Detail.Metadata.TagList.Item text="manual" color={Color.SecondaryText} />
               )}
-              {detail.syncPolicy.prune ? (
-                <Detail.Metadata.TagList.Item text="prune" color={Color.Orange} />
-              ) : null}
+              {detail.syncPolicy.prune ? <Detail.Metadata.TagList.Item text="prune" color={Color.Orange} /> : null}
               {detail.syncPolicy.selfHeal ? (
                 <Detail.Metadata.TagList.Item text="self-heal" color={Color.Green} />
               ) : null}
@@ -289,9 +281,7 @@ export function ApplicationDetail({ app, instance, onRefresh }: Props) {
               icon={{
                 source: Icon.Box,
                 tintColor:
-                  detail.resourceCounts.outOfSync + detail.resourceCounts.degraded > 0
-                    ? Color.Yellow
-                    : Color.Green,
+                  detail.resourceCounts.outOfSync + detail.resourceCounts.degraded > 0 ? Color.Yellow : Color.Green,
               }}
             />
           ) : null}
@@ -325,9 +315,7 @@ export function ApplicationDetail({ app, instance, onRefresh }: Props) {
               icon={{ source: Icon.Dot, tintColor: severityColor(syncSeverity(current.sync)) }}
             />
           ) : null}
-          {detail?.reconciledAt ? (
-            <Detail.Metadata.Label title="Last reconciled" text={detail.reconciledAt} />
-          ) : null}
+          {detail?.reconciledAt ? <Detail.Metadata.Label title="Last reconciled" text={detail.reconciledAt} /> : null}
           {detail && detail.syncPolicy.syncOptions.length > 0 ? (
             <Detail.Metadata.Label title="Sync options" text={detail.syncPolicy.syncOptions.join(", ")} />
           ) : null}
@@ -344,14 +332,14 @@ export function ApplicationDetail({ app, instance, onRefresh }: Props) {
         <ActionPanel>
           <ActionPanel.Section>
             {error instanceof AuthError ? (
-              <Action.Open
+              <Action
                 title={
                   instance.authMode === "token"
                     ? `Set the API Token for ${instance.name}`
                     : `Sign in to ${instance.name}`
                 }
                 icon={instance.authMode === "token" ? Icon.Key : Icon.Fingerprint}
-                target="raycast://extensions/pixibixi/argocd/manage-instances"
+                onAction={() => void openManageInstances()}
               />
             ) : null}
             <Action.OpenInBrowser title="Open in ArgoCD" url={url} />
@@ -379,9 +367,7 @@ export function ApplicationDetail({ app, instance, onRefresh }: Props) {
                 icon={Icon.Document}
                 shortcut={{ modifiers: ["cmd"], key: "d" }}
                 onAction={() =>
-                  push(
-                    <ResourceDiffView appName={app.name} appNamespace={app.namespace} instance={instance} />,
-                  )
+                  push(<ResourceDiffView appName={app.name} appNamespace={app.namespace} instance={instance} />)
                 }
               />
             ) : null}
@@ -438,14 +424,8 @@ export function ApplicationDetail({ app, instance, onRefresh }: Props) {
               />
             ) : null}
             <Action.CopyToClipboard title="Copy Application Name" content={app.name} />
-            <Action.CopyToClipboard
-              title="Copy ArgoCD URL"
-              content={url}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
-            {current.repoUrl ? (
-              <Action.OpenInBrowser title="Open Source Repository" url={current.repoUrl} />
-            ) : null}
+            <Action.CopyToClipboard title="Copy ArgoCD URL" content={url} shortcut={Keyboard.Shortcut.Common.Copy} />
+            {current.repoUrl ? <Action.OpenInBrowser title="Open Source Repository" url={current.repoUrl} /> : null}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -453,12 +433,7 @@ export function ApplicationDetail({ app, instance, onRefresh }: Props) {
   );
 }
 
-function resourceSummary(counts: {
-  total: number;
-  outOfSync: number;
-  degraded: number;
-  needsPruning: number;
-}): string {
+function resourceSummary(counts: { total: number; outOfSync: number; degraded: number; needsPruning: number }): string {
   const problems = [
     counts.outOfSync > 0 ? `${counts.outOfSync} out of sync` : undefined,
     counts.degraded > 0 ? `${counts.degraded} degraded` : undefined,

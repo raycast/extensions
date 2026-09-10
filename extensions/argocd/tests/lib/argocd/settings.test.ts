@@ -45,9 +45,11 @@ describe("projectOidcSettings", () => {
   });
 
   it("tolerates missing scopes and a missing PKCE flag", () => {
-    expect(
-      projectOidcSettings({ oidcConfig: { issuer: "https://idp.example.com", clientID: "c" } }),
-    ).toMatchObject({ scopes: [], pkceEnabled: false, providerName: undefined });
+    expect(projectOidcSettings({ oidcConfig: { issuer: "https://idp.example.com", clientID: "c" } })).toMatchObject({
+      scopes: [],
+      pkceEnabled: false,
+      providerName: undefined,
+    });
   });
 });
 
@@ -63,9 +65,9 @@ describe("fetchOidcSettings", () => {
       return Response.json(SETTINGS);
     }) as unknown as typeof globalThis.fetch;
 
-    await expect(
-      fetchOidcSettings("https://argocd.example.com", { fetch: fetchStub }),
-    ).resolves.toMatchObject({ clientId: "web-client" });
+    await expect(fetchOidcSettings("https://argocd.example.com", { fetch: fetchStub })).resolves.toMatchObject({
+      clientId: "web-client",
+    });
     expect(calls[0]).toBe("https://argocd.example.com/api/v1/settings");
   });
 
@@ -95,17 +97,11 @@ describe("fetchOidcSettings", () => {
 
     const abort = vi
       .fn()
-      .mockRejectedValue(
-        Object.assign(new Error("aborted"), { name: "TimeoutError" }),
-      ) as unknown as typeof fetch;
-    await expect(fetchOidcSettings("https://argocd.example.com", { fetch: abort })).rejects.toThrowError(
-      TimeoutError,
-    );
+      .mockRejectedValue(Object.assign(new Error("aborted"), { name: "TimeoutError" })) as unknown as typeof fetch;
+    await expect(fetchOidcSettings("https://argocd.example.com", { fetch: abort })).rejects.toThrowError(TimeoutError);
 
     const failing = stub(() => new Response("", { status: 502 }));
-    await expect(fetchOidcSettings("https://argocd.example.com", { fetch: failing })).rejects.toThrowError(
-      ApiError,
-    );
+    await expect(fetchOidcSettings("https://argocd.example.com", { fetch: failing })).rejects.toThrowError(ApiError);
   });
 
   it("reports a body that is not JSON", async () => {

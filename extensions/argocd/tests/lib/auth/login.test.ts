@@ -26,12 +26,7 @@ function deps(overrides: Partial<SsoLoginDeps> = {}): SsoLoginDeps {
 
 describe("ssoLoginArgs", () => {
   it("runs the SSO login through grpc-web", () => {
-    expect(ssoLoginArgs("argocd.example.com")).toEqual([
-      "login",
-      "argocd.example.com",
-      "--sso",
-      "--grpc-web",
-    ]);
+    expect(ssoLoginArgs("argocd.example.com")).toEqual(["login", "argocd.example.com", "--sso", "--grpc-web"]);
   });
 });
 
@@ -85,13 +80,7 @@ describe("runSsoLogin", () => {
     let current = 0;
     const now = vi.fn(() => (current += 1000));
     await expect(
-      runSsoLogin(
-        "argocd.example.com",
-        "argocd",
-        { spawn: vi.fn(), readToken: vi.fn(), sleep, now },
-        2000,
-        500,
-      ),
+      runSsoLogin("argocd.example.com", "argocd", { spawn: vi.fn(), readToken: vi.fn(), sleep, now }, 2000, 500),
     ).rejects.toThrowError(/Timed out/);
     expect(sleep).toHaveBeenCalledWith(500);
   });

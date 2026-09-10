@@ -1,8 +1,10 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 import { useState } from "react";
+import { clearSecrets } from "./deps";
 import {
   ValidationError,
+  credentialsInvalidatedBy,
   upsertInstance,
   validateInstance,
   type ArgoInstance,
@@ -44,6 +46,14 @@ export function InstanceForm({ instances, editing, onSaved }: Props) {
         instances,
         () => randomUUID(),
       );
+      // An edit keeps the id, so the stored credential outlives it. Pointing the instance at
+      // another server or switching its auth mode makes that credential wrong, and the token
+      // reader cannot notice: it returns a live session without asking the server anything.
+      // Dropped here instead, which keeps that fast path free.
+      const previous = instances.find((candidate) => candidate.id === instance.id);
+      if (previous && credentialsInvalidatedBy(previous, instance)) {
+        await clearSecrets(instance.id);
+      }
       await onSaved(upsertInstance(instances, instance));
       pop();
     } catch (error) {
@@ -60,11 +70,7 @@ export function InstanceForm({ instances, editing, onSaved }: Props) {
       navigationTitle={editing ? `Edit ${editing.name}` : "Add an ArgoCD instance"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={editing ? "Save Instance" : "Add Instance"}
-            icon={Icon.Check}
-            onSubmit={submit}
-          />
+          <Action.SubmitForm title={editing ? "Save Instance" : "Add Instance"} icon={Icon.Check} onSubmit={submit} />
         </ActionPanel>
       }
     >

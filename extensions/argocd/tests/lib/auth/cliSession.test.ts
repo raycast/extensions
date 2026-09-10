@@ -125,26 +125,19 @@ describe("rule 2: a live cached renewal wins over a round trip", () => {
 });
 
 describe("rule 3: renewal from the config's refresh token", () => {
-  const lapsed = () =>
-    deps({ readCliToken: vi.fn().mockResolvedValue(cliToken({ expiresAt: new Date(NOW - 1) })) });
+  const lapsed = () => deps({ readCliToken: vi.fn().mockResolvedValue(cliToken({ expiresAt: new Date(NOW - 1) })) });
 
   it("uses the refresh token the argocd CLI stored, and the instance's own provider settings", async () => {
     const d = lapsed();
     await expect(createCliTokenReader(d)(INSTANCE)).resolves.toBe("renewed-id-token");
-    expect(d.refresh).toHaveBeenCalledWith(ENDPOINTS, "public-client", "config-refresh-token", [
-      "openid",
-      "groups",
-    ]);
+    expect(d.refresh).toHaveBeenCalledWith(ENDPOINTS, "public-client", "config-refresh-token", ["openid", "groups"]);
     expect(d.readSettings).toHaveBeenCalledWith(INSTANCE);
   });
 
   it("caches the renewal, so the next command costs no round trip", async () => {
     const d = lapsed();
     await createCliTokenReader(d)(INSTANCE);
-    expect(d.writeCachedSession).toHaveBeenCalledWith(
-      "i1",
-      expect.objectContaining({ idToken: "renewed-id-token" }),
-    );
+    expect(d.writeCachedSession).toHaveBeenCalledWith("i1", expect.objectContaining({ idToken: "renewed-id-token" }));
   });
 
   it("never writes back into the argocd CLI config, which is not ours to rewrite", async () => {
@@ -156,9 +149,7 @@ describe("rule 3: renewal from the config's refresh token", () => {
 
   it("asks for a login when the config carries no refresh token", async () => {
     const d = deps({
-      readCliToken: vi
-        .fn()
-        .mockResolvedValue(cliToken({ expiresAt: new Date(NOW - 1), refreshToken: undefined })),
+      readCliToken: vi.fn().mockResolvedValue(cliToken({ expiresAt: new Date(NOW - 1), refreshToken: undefined })),
     });
     const rejection = createCliTokenReader(d)(INSTANCE);
     await expect(rejection).rejects.toThrowError(AuthError);

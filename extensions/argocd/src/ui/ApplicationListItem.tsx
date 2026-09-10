@@ -47,11 +47,7 @@ export function ApplicationListItem({ app, instance, showInstance, onRefresh }: 
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Application Name" content={app.name} />
-            <Action.CopyToClipboard
-              title="Copy ArgoCD URL"
-              content={url}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
+            <Action.CopyToClipboard title="Copy ArgoCD URL" content={url} shortcut={Keyboard.Shortcut.Common.Copy} />
             {app.repoUrl ? <Action.OpenInBrowser title="Open Source Repository" url={app.repoUrl} /> : null}
           </ActionPanel.Section>
           <ActionPanel.Section>

@@ -92,12 +92,7 @@ describe("filterByAppSet", () => {
   const unowned = app({ name: "hand-written", namespace: "team-a-apps", appSetName: undefined });
 
   it("matches on instance, namespace and owner name together", () => {
-    const result = filterByAppSet(
-      [owned, otherNamespace, otherInstance, unowned],
-      "i1",
-      "team-a-apps",
-      "team-a-set",
-    );
+    const result = filterByAppSet([owned, otherNamespace, otherInstance, unowned], "i1", "team-a-apps", "team-a-set");
     expect(result.map((a) => a.name)).toEqual(["generated-one"]);
   });
 
@@ -152,9 +147,7 @@ describe("rollupAppSet", () => {
   });
 
   it("counts an application that is both out of sync and degraded once in attention", () => {
-    const apps = [
-      app({ namespace: "team-a-apps", appSetName: "team-a-set", sync: "OutOfSync", health: "Degraded" }),
-    ];
+    const apps = [app({ namespace: "team-a-apps", appSetName: "team-a-set", sync: "OutOfSync", health: "Degraded" })];
     expect(rollupAppSet(apps, appSet)).toEqual({ total: 1, outOfSync: 1, degraded: 1, attention: 1 });
   });
 });
@@ -197,9 +190,7 @@ describe("deriveAppSets", () => {
   });
 
   it("builds a haystack so a derived entry is searchable like any other", () => {
-    const derived = deriveAppSets([
-      app({ namespace: "team-a-apps", appSetName: "team-a-set", project: "team-a" }),
-    ]);
+    const derived = deriveAppSets([app({ namespace: "team-a-apps", appSetName: "team-a-set", project: "team-a" })]);
     expect(derived[0]?.haystack).toBe("team-a-set team-a-apps team-a");
   });
 });
@@ -209,12 +200,8 @@ describe("mergeAppSets", () => {
   if (!fromApi) {
     throw new Error("fixture failed to project");
   }
-  const derivedSame = deriveAppSets([
-    app({ namespace: "team-a-apps", appSetName: "team-a-set", project: "team-a" }),
-  ]);
-  const derivedOther = deriveAppSets([
-    app({ namespace: "team-b-apps", appSetName: "team-b-set", project: "team-b" }),
-  ]);
+  const derivedSame = deriveAppSets([app({ namespace: "team-a-apps", appSetName: "team-a-set", project: "team-a" })]);
+  const derivedOther = deriveAppSets([app({ namespace: "team-b-apps", appSetName: "team-b-set", project: "team-b" })]);
 
   it("prefers the API entry, which is the only one carrying conditions", () => {
     const merged = mergeAppSets([fromApi], derivedSame);

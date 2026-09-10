@@ -73,8 +73,7 @@ const providerDeps = {
     clientId: string,
     refreshToken: string,
     scopes: string[],
-  ) =>
-    refreshTokens({ endpoints, clientId, refreshToken, scopes }, { fetch: globalThis.fetch, now: Date.now }),
+  ) => refreshTokens({ endpoints, clientId, refreshToken, scopes }, { fetch: globalThis.fetch, now: Date.now }),
   now: () => Date.now(),
 };
 
@@ -86,8 +85,7 @@ const providerDeps = {
 const readCliSessionToken = createCliTokenReader({
   readCliToken: (host) => readCliToken(host),
   readCachedSession: async (instanceId) => parseSession(await readCliSessionRaw(secretStore, instanceId)),
-  writeCachedSession: (instanceId, session) =>
-    writeCliSessionRaw(secretStore, instanceId, serializeSession(session)),
+  writeCachedSession: (instanceId, session) => writeCliSessionRaw(secretStore, instanceId, serializeSession(session)),
   clearCachedSession: (instanceId) => clearCliSession(secretStore, instanceId),
   ...providerDeps,
 });

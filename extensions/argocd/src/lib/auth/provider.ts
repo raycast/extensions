@@ -48,11 +48,7 @@ export function createTokenProvider(deps: TokenProviderDeps): TokenProvider {
 
     if (instance.authMode === "sso") {
       if (!deps.readSsoToken) {
-        throw new AuthError(
-          `Single sign-on is not wired up in this context for ${instance.name}.`,
-          instance.id,
-          host,
-        );
+        throw new AuthError(`Single sign-on is not wired up in this context for ${instance.name}.`, instance.id, host);
       }
       return deps.readSsoToken(instance);
     }
@@ -75,11 +71,7 @@ export function createTokenProvider(deps: TokenProviderDeps): TokenProvider {
 
     const session = await deps.readCliToken(host);
     if (!session) {
-      throw new AuthError(
-        `No argocd CLI session for ${host}. Run the SSO login to create one.`,
-        instance.id,
-        host,
-      );
+      throw new AuthError(`No argocd CLI session for ${host}. Run the SSO login to create one.`, instance.id, host);
     }
     if (isExpired(session, deps.now())) {
       throw new AuthError(`The argocd CLI session for ${host} has expired. Log in again.`, instance.id, host);

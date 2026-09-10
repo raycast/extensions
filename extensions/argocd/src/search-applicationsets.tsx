@@ -98,12 +98,7 @@ export default function SearchApplicationSets() {
         >
           <List.Dropdown.Item value={ALL_SCOPE} title="All instances" icon={Icon.Globe} />
           {enabled.map((instance) => (
-            <List.Dropdown.Item
-              key={instance.id}
-              value={instance.id}
-              title={instance.name}
-              icon={Icon.HardDrive}
-            />
+            <List.Dropdown.Item key={instance.id} value={instance.id} title={instance.name} icon={Icon.HardDrive} />
           ))}
         </List.Dropdown>
       }

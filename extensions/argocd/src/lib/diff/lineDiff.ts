@@ -58,8 +58,7 @@ function commonSubsequence(a: string[], b: string[]): [number, number][] {
     for (let j = columns - 1; j >= 0; j--) {
       const row = table[i] as number[];
       const next = table[i + 1] as number[];
-      row[j] =
-        a[i] === b[j] ? (next[j + 1] as number) + 1 : Math.max(next[j] as number, row[j + 1] as number);
+      row[j] = a[i] === b[j] ? (next[j + 1] as number) + 1 : Math.max(next[j] as number, row[j + 1] as number);
     }
   }
 
@@ -127,9 +126,7 @@ export function diffLines(removedText: string, addedText: string): DiffLine[] {
  * a 300 line manifest readable when three lines changed.
  */
 export function toHunks(lines: DiffLine[], context = 3): DiffHunk[] {
-  const changed = lines
-    .map((line, index) => (line.kind === "context" ? -1 : index))
-    .filter((index) => index !== -1);
+  const changed = lines.map((line, index) => (line.kind === "context" ? -1 : index)).filter((index) => index !== -1);
   if (changed.length === 0) {
     return [];
   }

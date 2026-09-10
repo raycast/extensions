@@ -71,7 +71,11 @@ export async function loadApplications(
         reachability: storedReachability[instance.id] ?? UNKNOWN_REACHABILITY,
         error: undefined,
       };
-      options.onCached?.(state);
+      // cache.read is asynchronous, so the run can be replaced while it is in flight. Without
+      // this the cached list is published into the newer run and paints as its own result.
+      if (!cancelled()) {
+        options.onCached?.(state);
+      }
       return state;
     }),
   );
@@ -139,6 +143,12 @@ export async function loadApplications(
       }
       // The cached applications stay: a stale list beats an empty one.
       state.error = error as Error;
+    }
+    // Checked again here, not only before and after the request: cancellation during
+    // cache.write would otherwise publish this instance into a run the caller has replaced,
+    // where the patch is applied by instance id alone and restores a stale list.
+    if (cancelled()) {
+      return loaded;
     }
     options.onSettled?.(state);
   }

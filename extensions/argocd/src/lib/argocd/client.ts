@@ -18,14 +18,7 @@
 
 import type { ArgoInstance } from "../config/instances";
 import { AuthError } from "../auth/provider";
-import {
-  ApiError,
-  ForbiddenError,
-  NetworkError,
-  NotFoundError,
-  ReadOnlyInstanceError,
-  TimeoutError,
-} from "./errors";
+import { ApiError, ForbiddenError, NetworkError, NotFoundError, ReadOnlyInstanceError, TimeoutError } from "./errors";
 import { projectAppSet, type AppSetSummary } from "./appset";
 import { projectDetail, projectResourceDiff, projectRevisionMetadata, projectSummary } from "./project";
 import { decodeStream, streamArrayItems } from "./stream";
@@ -188,20 +181,10 @@ export class ArgoClient {
     if (!this.instance.allowWrite) {
       throw new ReadOnlyInstanceError(this.instance.name);
     }
-    await this.request(
-      "POST",
-      `/api/v1/applications/${encodeURIComponent(name)}/sync`,
-      { appNamespace },
-      body,
-      signal,
-    );
+    await this.request("POST", `/api/v1/applications/${encodeURIComponent(name)}/sync`, { appNamespace }, body, signal);
   }
 
-  private async readApplication(
-    name: string,
-    query: Record<string, string>,
-    signal?: AbortSignal,
-  ): Promise<AppDetail> {
+  private async readApplication(name: string, query: Record<string, string>, signal?: AbortSignal): Promise<AppDetail> {
     const body = await this.get(`/api/v1/applications/${encodeURIComponent(name)}`, query, signal);
     const detail = projectDetail(body, this.instance.id);
     if (!detail) {
@@ -288,11 +271,7 @@ export class ArgoClient {
 
     switch (response.status) {
       case 401:
-        return new AuthError(
-          `The session for ${host} is not valid any more. Log in again.`,
-          this.instance.id,
-          host,
-        );
+        return new AuthError(`The session for ${host} is not valid any more. Log in again.`, this.instance.id, host);
       case 403:
         return new ForbiddenError(
           `Your account is not allowed to do this on ${this.instance.name}.${detail ? ` ${detail}` : ""}`,

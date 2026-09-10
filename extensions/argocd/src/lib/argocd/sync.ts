@@ -116,7 +116,5 @@ export function describeSyncRequest(request: SyncRequest): string {
   }
   if (request.retryStrategy) parts.push(`retries up to ${request.retryStrategy.limit} times`);
 
-  return parts.length === 0
-    ? "Syncs with the application's default options."
-    : `Syncs with ${parts.join(", ")}.`;
+  return parts.length === 0 ? "Syncs with the application's default options." : `Syncs with ${parts.join(", ")}.`;
 }

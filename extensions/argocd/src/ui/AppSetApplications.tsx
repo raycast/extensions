@@ -6,12 +6,11 @@
  * ApplicationSet controller stamps on each generated application.
  */
 
-import { Toast, showToast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { ownedByAppSet } from "../lib/argocd/appset";
-import { instanceHost, type ArgoInstance } from "../lib/config/instances";
+import type { ArgoInstance } from "../lib/config/instances";
 import { ApplicationListView } from "./ApplicationListView";
-import { ssoLogin } from "./deps";
+import { loginToInstance } from "./loginToInstance";
 import { readPreferences } from "./preferences";
 import { loadRecentKeys } from "./storage";
 import { useApplications } from "./useApplications";
@@ -33,17 +32,10 @@ export function AppSetApplications({ instance, namespace, appSetName }: Props) {
   }, []);
 
   const login = useCallback(async () => {
-    const host = instanceHost(instance);
-    const toast = await showToast({ style: Toast.Style.Animated, title: `Logging in to ${host}` });
-    try {
-      await ssoLogin(host);
-      toast.style = Toast.Style.Success;
-      toast.title = `Logged in to ${host}`;
+    // Every mode's login, not just the CLI one: this view used to run `argocd login --sso`
+    // for an `sso` instance, which writes a config the provider never reads.
+    if (await loginToInstance(instance)) {
       refresh(instance.id);
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "SSO login did not complete";
-      toast.message = (error as Error).message;
     }
   }, [instance, refresh]);
 

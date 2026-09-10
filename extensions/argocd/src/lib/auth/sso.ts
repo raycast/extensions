@@ -25,12 +25,7 @@ export interface SsoDeps {
   /** The instance's own OIDC configuration, so nothing is hardcoded here. */
   readSettings: (instance: ArgoInstance) => Promise<OidcSettings>;
   discover: (issuer: string) => Promise<OidcEndpoints>;
-  refresh: (
-    endpoints: OidcEndpoints,
-    clientId: string,
-    refreshToken: string,
-    scopes: string[],
-  ) => Promise<TokenSet>;
+  refresh: (endpoints: OidcEndpoints, clientId: string, refreshToken: string, scopes: string[]) => Promise<TokenSet>;
   now: () => number;
 }
 
@@ -60,11 +55,7 @@ export function createSsoTokenReader(deps: SsoDeps): (instance: ArgoInstance) =>
     if (!stored.refreshToken) {
       // Nothing to renew from, which is the one case where an expiry has to be someone's
       // problem. It happens when the provider was not asked for offline_access.
-      throw loginRequired(
-        instance,
-        host,
-        "The single sign-on session has expired and carries no refresh token.",
-      );
+      throw loginRequired(instance, host, "The single sign-on session has expired and carries no refresh token.");
     }
 
     const settings = await deps.readSettings(instance);

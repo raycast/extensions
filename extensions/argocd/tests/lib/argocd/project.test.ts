@@ -24,9 +24,7 @@ const RAW_APP = {
     name: "app-one",
     namespace: "team-a-apps",
     resourceVersion: "1234",
-    ownerReferences: [
-      { apiVersion: "argoproj.io/v1alpha1", kind: "ApplicationSet", name: "team-a-set", uid: "abc" },
-    ],
+    ownerReferences: [{ apiVersion: "argoproj.io/v1alpha1", kind: "ApplicationSet", name: "team-a-set", uid: "abc" }],
   },
   spec: {
     project: "team-a",
@@ -335,9 +333,9 @@ describe("resourceNeedsAttention", () => {
   });
 
   it("leaves a synced and healthy resource alone", () => {
-    expect(
-      resourceNeedsAttention(one({ kind: "A", name: "a", status: "Synced", health: { status: "Healthy" } })),
-    ).toBe(false);
+    expect(resourceNeedsAttention(one({ kind: "A", name: "a", status: "Synced", health: { status: "Healthy" } }))).toBe(
+      false,
+    );
   });
 
   it("does not flag a resource ArgoCD has not compared yet", () => {
@@ -368,9 +366,7 @@ describe("projectSyncPolicy", () => {
   });
 
   it("honours an explicit enabled: false", () => {
-    expect(projectSyncPolicy({ syncPolicy: { automated: { enabled: false, prune: true } } }).automated).toBe(
-      false,
-    );
+    expect(projectSyncPolicy({ syncPolicy: { automated: { enabled: false, prune: true } } }).automated).toBe(false);
   });
 
   it("reports a manual application as not automated", () => {
@@ -497,9 +493,7 @@ describe("projectResourceDiff", () => {
   });
 
   it("flags a manifest past the diff line limit instead of freezing on it", () => {
-    const huge = JSON.stringify(
-      Object.fromEntries(Array.from({ length: 4200 }, (_, index) => [`key${index}`, index])),
-    );
+    const huge = JSON.stringify(Object.fromEntries(Array.from({ length: 4200 }, (_, index) => [`key${index}`, index])));
     const projected = projectResourceDiff({
       kind: "ConfigMap",
       name: "huge",

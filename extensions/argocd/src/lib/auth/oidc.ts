@@ -105,10 +105,7 @@ export async function discover(issuer: string, deps: DiscoveryDeps): Promise<Oid
   const authorizationEndpoint = asString(body.authorization_endpoint);
   const tokenEndpoint = asString(body.token_endpoint);
   if (!authorizationEndpoint || !tokenEndpoint) {
-    throw new OidcError(
-      "The identity provider's metadata has no authorization or token endpoint.",
-      "discovery",
-    );
+    throw new OidcError("The identity provider's metadata has no authorization or token endpoint.", "discovery");
   }
 
   return {
@@ -182,6 +179,23 @@ export interface CallbackResult {
  * Reads the provider's redirect back to the loopback listener. The state check is the caller's
  * job, because only the caller knows what it sent.
  */
+/**
+ * Escapes text before it is interpolated into the loopback callback page.
+ *
+ * parseCallback below puts the `error` and `error_description` query parameters into the error
+ * it throws, and those arrive from a redirect the identity provider controls. The callback page
+ * interpolated that message into HTML raw, which made a predictable loopback URL an injection
+ * point. The ampersand is replaced first: doing it later would turn `&lt;` into `&amp;lt;`.
+ */
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function parseCallback(requestUrl: string, base = "http://127.0.0.1"): CallbackResult {
   let url: URL;
   try {

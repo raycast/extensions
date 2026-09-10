@@ -108,9 +108,7 @@ export function parseSession(raw: string | undefined): SsoSession | undefined {
     idToken,
     refreshToken: typeof value.refreshToken === "string" ? value.refreshToken : undefined,
     expiresAt:
-      typeof value.expiresAt === "number" && Number.isFinite(value.expiresAt)
-        ? value.expiresAt
-        : decodeExpiry(idToken),
+      typeof value.expiresAt === "number" && Number.isFinite(value.expiresAt) ? value.expiresAt : decodeExpiry(idToken),
     issuer: typeof value.issuer === "string" ? value.issuer : "",
     clientId: typeof value.clientId === "string" ? value.clientId : "",
   };

@@ -1,11 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  decodeJwtExpiry,
-  extractToken,
-  isExpired,
-  readCliToken,
-  type CliToken,
-} from "../../../src/lib/auth/cliConfig";
+import { decodeJwtExpiry, extractToken, isExpired, readCliToken, type CliToken } from "../../../src/lib/auth/cliConfig";
 
 /** Builds a syntactically valid JWT with no signature, so no real token is ever committed. */
 function fakeJwt(payload: Record<string, unknown>, options: { pad?: boolean } = {}): string {

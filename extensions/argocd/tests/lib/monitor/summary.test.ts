@@ -84,10 +84,7 @@ describe("summarize", () => {
 
   it("sorts each list by name, so the menu does not reshuffle between refreshes", () => {
     const apps = [app("zebra", { health: "Degraded" }), app("alpha", { health: "Degraded" })];
-    expect(summarize([report({ apps })]).instances[0]?.degraded.map((a) => a.name)).toEqual([
-      "alpha",
-      "zebra",
-    ]);
+    expect(summarize([report({ apps })]).instances[0]?.degraded.map((a) => a.name)).toEqual(["alpha", "zebra"]);
   });
 
   it("keeps instances apart and aggregates across them", () => {
@@ -139,9 +136,7 @@ describe("monitorState", () => {
   });
 
   it("reports stale only once nothing is known to be wrong", () => {
-    expect(monitorState(summarize([report({ apps: [HEALTHY], error: new Error("unreachable") })]))).toBe(
-      "stale",
-    );
+    expect(monitorState(summarize([report({ apps: [HEALTHY], error: new Error("unreachable") })]))).toBe("stale");
   });
 
   it("reports healthy when everything is in order", () => {
@@ -157,9 +152,7 @@ describe("monitorTitle", () => {
   const options = { showWhenHealthy: false };
 
   it("carries only the urgent number, since a menu bar has very little room", () => {
-    expect(monitorTitle(summarize([report({ apps: [DEGRADED, MISSING, DRIFTED] })]), options)).toBe(
-      "1 degraded",
-    );
+    expect(monitorTitle(summarize([report({ apps: [DEGRADED, MISSING, DRIFTED] })]), options)).toBe("1 degraded");
   });
 
   it("falls back to missing, then to drift", () => {
@@ -168,9 +161,9 @@ describe("monitorTitle", () => {
   });
 
   it("reports drift on its own", () => {
-    expect(
-      monitorTitle(summarize([report({ apps: [DRIFTED, app("d2", { sync: "OutOfSync" })] })]), options),
-    ).toBe("2 out of sync");
+    expect(monitorTitle(summarize([report({ apps: [DRIFTED, app("d2", { sync: "OutOfSync" })] })]), options)).toBe(
+      "2 out of sync",
+    );
   });
 
   it("stays quiet when everything is healthy", () => {
@@ -178,9 +171,7 @@ describe("monitorTitle", () => {
   });
 
   it("shows a count when everything is healthy and that was asked for", () => {
-    expect(monitorTitle(summarize([report({ apps: [HEALTHY] })]), { showWhenHealthy: true })).toBe(
-      "1 healthy",
-    );
+    expect(monitorTitle(summarize([report({ apps: [HEALTHY] })]), { showWhenHealthy: true })).toBe("1 healthy");
   });
 
   it("names the unreachable instance when there is one, and counts them when there are more", () => {

@@ -17,14 +17,7 @@ import { UNKNOWN_REACHABILITY, type Reachability } from "./lib/argocd/probe";
 import { instanceHost, removeInstance, upsertInstance, type ArgoInstance } from "./lib/config/instances";
 import { InstanceForm } from "./ui/InstanceForm";
 import { loginWithSso } from "./ui/oidcLogin";
-import {
-  clearSecrets,
-  clearSsoSession,
-  readApiToken,
-  readSsoSession,
-  writeApiToken,
-  writeSsoSession,
-} from "./ui/deps";
+import { clearSecrets, clearSsoSession, readApiToken, readSsoSession, writeApiToken, writeSsoSession } from "./ui/deps";
 import { probe, ssoLogin } from "./ui/deps";
 import { loadInstances, loadReachability, saveInstances, saveReachability } from "./ui/storage";
 import { environmentColor, reachabilityIcon, reachabilityText } from "./ui/statusVisuals";
@@ -55,9 +48,7 @@ export default function ManageInstances() {
   }, []);
 
   const checkAll = useCallback(async (targets: ArgoInstance[]) => {
-    const results = await Promise.all(
-      targets.map(async (instance) => [instance.id, await probe(instance)] as const),
-    );
+    const results = await Promise.all(targets.map(async (instance) => [instance.id, await probe(instance)] as const));
     const map = Object.fromEntries(results);
     setReachability((current) => ({ ...current, ...map }));
     await saveReachability({ ...(await loadReachability()), ...map });
@@ -199,9 +190,7 @@ export default function ManageInstances() {
                   <Action
                     title="Edit Instance"
                     icon={Icon.Pencil}
-                    onAction={() =>
-                      push(<InstanceForm instances={instances} editing={instance} onSaved={persist} />)
-                    }
+                    onAction={() => push(<InstanceForm instances={instances} editing={instance} onSaved={persist} />)}
                   />
                   <Action
                     title="Check Reachability"
@@ -233,18 +222,18 @@ export default function ManageInstances() {
                       onAction={() => void signOut(instance)}
                     />
                   ) : null}
-                  {instance.authMode === "cli" ? (
-                    <Action
-                      title="Log in with SSO"
-                      icon={Icon.Person}
-                      onAction={() => void login(instance)}
-                    />
-                  ) : (
+                  {/* Three modes, three actions. This was `cli ? login : token`, so an `sso`
+                      instance fell into the else and was offered a token its provider never
+                      reads: a stored credential and a reported success that cannot authenticate
+                      anything. */}
+                  {instance.authMode === "token" ? (
                     <Action
                       title="Set API Token"
                       icon={Icon.Key}
                       onAction={() => push(<TokenForm instance={instance} />)}
                     />
+                  ) : (
+                    <Action title="Sign in" icon={Icon.Person} onAction={() => void login(instance)} />
                   )}
                   {instance.authMode === "token" ? (
                     <Action

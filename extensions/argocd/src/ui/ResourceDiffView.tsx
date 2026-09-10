@@ -39,10 +39,7 @@ function stats(diff: ResourceDiff): string {
   if (diff.tooLarge) {
     return "too large to diff";
   }
-  const parts = [
-    diff.added > 0 ? `+${diff.added}` : undefined,
-    diff.removed > 0 ? `-${diff.removed}` : undefined,
-  ];
+  const parts = [diff.added > 0 ? `+${diff.added}` : undefined, diff.removed > 0 ? `-${diff.removed}` : undefined];
   return parts.filter(Boolean).join(" ");
 }
 

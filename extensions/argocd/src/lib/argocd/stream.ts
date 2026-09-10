@@ -187,10 +187,7 @@ export interface StreamArrayOptions {
  * Consumes an async iterable of decoded text chunks and calls `onItem` for each element of the
  * named array. Chunk boundaries may fall anywhere, including inside a string or a key.
  */
-export async function streamArrayItems(
-  chunks: AsyncIterable<string>,
-  options: StreamArrayOptions,
-): Promise<void> {
+export async function streamArrayItems(chunks: AsyncIterable<string>, options: StreamArrayOptions): Promise<void> {
   const state = initialState();
   const batch: unknown[] = [];
 
@@ -225,8 +222,7 @@ export async function* decodeStream(
   stream: AsyncIterable<Uint8Array> | ReadableStream<Uint8Array>,
 ): AsyncGenerator<string> {
   const decoder = new TextDecoder("utf-8");
-  const iterable =
-    Symbol.asyncIterator in stream ? (stream as AsyncIterable<Uint8Array>) : toIterable(stream);
+  const iterable = Symbol.asyncIterator in stream ? (stream as AsyncIterable<Uint8Array>) : toIterable(stream);
   for await (const bytes of iterable) {
     // stream: true so a multi-byte character split across chunks is not mangled.
     yield decoder.decode(bytes, { stream: true });

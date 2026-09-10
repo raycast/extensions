@@ -66,7 +66,7 @@
       "preferences": [
         {
           "name": "showWhenHealthy",
-          "title": "When everything is healthy",
+          "title": "When Everything Is Healthy",
           "label": "Show the application count",
           "description": "Off by default, so the menu bar stays quiet until something needs attention.",
           "type": "checkbox",
@@ -111,7 +111,7 @@
     },
     {
       "name": "argocdCliPath",
-      "title": "argocd CLI Path",
+      "title": "ArgoCD CLI Path",
       "description": "Path to the argocd binary used for the SSO login action.",
       "type": "textfield",
       "required": false,
@@ -133,10 +133,7 @@
     "typecheck": "tsc --noEmit",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "test:coverage": "vitest run --coverage",
-    "check:secrets": "./scripts/check-no-secrets.sh",
-    "store:payload": "./scripts/store-payload.sh",
-    "demo": "node scripts/demo-argocd.mjs"
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

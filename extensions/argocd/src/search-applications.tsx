@@ -1,10 +1,9 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { instanceHost, type ArgoInstance } from "./lib/config/instances";
+import type { ArgoInstance } from "./lib/config/instances";
 import { InstanceForm } from "./ui/InstanceForm";
 import { ApplicationListView } from "./ui/ApplicationListView";
-import { ssoLogin, writeSsoSession } from "./ui/deps";
-import { loginWithSso } from "./ui/oidcLogin";
+import { loginToInstance } from "./ui/loginToInstance";
 import { readPreferences } from "./ui/preferences";
 import { loadInstances, loadRecentKeys, loadScope, saveInstances, saveScope } from "./ui/storage";
 import { useApplications } from "./ui/useApplications";
@@ -20,11 +19,7 @@ export default function SearchApplications() {
 
   useEffect(() => {
     void (async () => {
-      const [stored, recents, savedScope] = await Promise.all([
-        loadInstances(),
-        loadRecentKeys(),
-        loadScope(),
-      ]);
+      const [stored, recents, savedScope] = await Promise.all([loadInstances(), loadRecentKeys(), loadScope()]);
       setInstances(stored);
       setRecentKeys(recents);
       setScope(savedScope);
@@ -43,29 +38,8 @@ export default function SearchApplications() {
 
   const login = useCallback(
     async (instance: ArgoInstance) => {
-      const host = instanceHost(instance);
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: `Signing in to ${host}`,
-        message: "Finish the sign-in in your browser.",
-      });
-      try {
-        // The two modes need different logins, and offering the wrong one is how an earlier
-        // version told a token instance to run an SSO flow that could not help it.
-        if (instance.authMode === "sso") {
-          const { session } = await loginWithSso(instance);
-          await writeSsoSession(instance.id, session);
-        } else {
-          await ssoLogin(host);
-        }
-        toast.style = Toast.Style.Success;
-        toast.title = `Signed in to ${host}`;
-        toast.message = undefined;
+      if (await loginToInstance(instance)) {
         refresh(instance.id);
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Sign-in did not complete";
-        toast.message = (error as Error).message;
       }
     },
     [refresh],
@@ -121,12 +95,7 @@ export default function SearchApplications() {
         >
           <List.Dropdown.Item value={ALL_SCOPE} title="All instances" icon={Icon.Globe} />
           {enabled.map((instance) => (
-            <List.Dropdown.Item
-              key={instance.id}
-              value={instance.id}
-              title={instance.name}
-              icon={Icon.HardDrive}
-            />
+            <List.Dropdown.Item key={instance.id} value={instance.id} title={instance.name} icon={Icon.HardDrive} />
           ))}
         </List.Dropdown>
       }

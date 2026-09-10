@@ -78,18 +78,15 @@ describe("probeInstance", () => {
     expect(Object.keys(headers).map((key) => key.toLowerCase())).not.toContain("authorization");
   });
 
-  it.each([401, 403, 404, 500, 503])(
-    "treats a %i as reachable, because the server answered",
-    async (status) => {
-      const result = await probeInstance(
-        INSTANCE,
-        deps(() => new Response("", { status })),
-      );
-      expect(result.state).toBe("reachable");
-      expect(result.version).toBeUndefined();
-      expect(result.reason).toBe(`answered ${status}`);
-    },
-  );
+  it.each([401, 403, 404, 500, 503])("treats a %i as reachable, because the server answered", async (status) => {
+    const result = await probeInstance(
+      INSTANCE,
+      deps(() => new Response("", { status })),
+    );
+    expect(result.state).toBe("reachable");
+    expect(result.version).toBeUndefined();
+    expect(result.reason).toBe(`answered ${status}`);
+  });
 
   it("stays reachable when a 200 body is not JSON", async () => {
     const result = await probeInstance(

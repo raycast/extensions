@@ -21,6 +21,7 @@ import {
   discover,
   exchangeCode,
   parseCallback,
+  escapeHtml,
 } from "../lib/auth/oidc";
 import { sessionFromTokens, type SsoSession } from "../lib/auth/session";
 import type { ArgoInstance } from "../lib/config/instances";
@@ -33,7 +34,7 @@ const LOGIN_TIMEOUT_MS = 180_000;
 
 /** What the browser tab shows once the provider has redirected back. */
 function completionPage(message: string): string {
-  return `<!doctype html><meta charset="utf-8"><title>ArgoCD</title><body style="font:16px -apple-system,sans-serif;padding:3rem;color:#222"><p>${message}</p><p style="color:#777">You can close this tab and go back to Raycast.</p></body>`;
+  return `<!doctype html><meta charset="utf-8"><title>ArgoCD</title><body style="font:16px -apple-system,sans-serif;padding:3rem;color:#222"><p>${escapeHtml(message)}</p><p style="color:#777">You can close this tab and go back to Raycast.</p></body>`;
 }
 
 interface Callback {
@@ -82,10 +83,7 @@ function awaitCallback(signal: AbortSignal): Promise<Callback> {
     signal.addEventListener("abort", () => {
       server.close();
       reject(
-        new OidcError(
-          "The sign-in was not completed in time. Run it again and finish it in the browser.",
-          "timeout",
-        ),
+        new OidcError("The sign-in was not completed in time. Run it again and finish it in the browser.", "timeout"),
       );
     });
 

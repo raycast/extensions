@@ -47,9 +47,7 @@ describe("clampPreferences", () => {
 
   it("clamps to the maximum, so a huge maxResults cannot freeze the list", () => {
     expect(clampPreferences({ maxResults: "99999" }).maxResults).toBe(PREFERENCE_BOUNDS.maxResults.max);
-    expect(clampPreferences({ cacheTtlSeconds: "99999" }).cacheTtlSeconds).toBe(
-      PREFERENCE_BOUNDS.cacheTtlSeconds.max,
-    );
+    expect(clampPreferences({ cacheTtlSeconds: "99999" }).cacheTtlSeconds).toBe(PREFERENCE_BOUNDS.cacheTtlSeconds.max);
   });
 
   it("rounds a fractional value and tolerates surrounding whitespace", () => {

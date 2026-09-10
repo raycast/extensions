@@ -74,9 +74,7 @@ describe("discover", () => {
 
   it("fails clearly when the provider cannot be reached", async () => {
     const fetchStub = vi.fn().mockRejectedValue(new TypeError("fetch failed")) as unknown as typeof fetch;
-    await expect(discover("https://idp.example.com", { fetch: fetchStub })).rejects.toThrowError(
-      /Could not reach/,
-    );
+    await expect(discover("https://idp.example.com", { fetch: fetchStub })).rejects.toThrowError(/Could not reach/);
   });
 
   it("fails when the metadata has no endpoints", async () => {
@@ -91,9 +89,7 @@ describe("discover", () => {
     await expect(discover("https://idp.example.com", { fetch: notFound })).rejects.toThrowError(/404/);
 
     const { fetchStub: notJson } = stubFetch([() => new Response("<html>", { status: 200 })]);
-    await expect(discover("https://idp.example.com", { fetch: notJson })).rejects.toThrowError(
-      /not return JSON/,
-    );
+    await expect(discover("https://idp.example.com", { fetch: notJson })).rejects.toThrowError(/not return JSON/);
   });
 });
 
@@ -276,8 +272,7 @@ describe("exchangeCode", () => {
 
   it("surfaces any other provider error description", async () => {
     const { fetchStub } = stubFetch([
-      () =>
-        Response.json({ error: "invalid_grant", error_description: "code already used" }, { status: 400 }),
+      () => Response.json({ error: "invalid_grant", error_description: "code already used" }, { status: 400 }),
     ]);
     await expect(exchangeCode(options, deps(fetchStub))).rejects.toThrowError(/code already used/);
   });
@@ -332,12 +327,27 @@ describe("refreshTokens", () => {
 
   it("surfaces an expired or revoked refresh token, which needs a new login", async () => {
     const { fetchStub } = stubFetch([
-      () =>
-        Response.json(
-          { error: "invalid_grant", error_description: "refresh token is invalid" },
-          { status: 400 },
-        ),
+      () => Response.json({ error: "invalid_grant", error_description: "refresh token is invalid" }, { status: 400 }),
     ]);
     await expect(refreshTokens(options, deps(fetchStub))).rejects.toThrowError(/refresh token is invalid/);
+  });
+});
+
+describe("the callback page cannot be injected into", () => {
+  it("escapes provider-supplied text, which parseCallback puts in the error message", async () => {
+    // The provider chooses error_description, and it arrives via a redirect to a predictable
+    // loopback URL. Interpolating it raw made the completion page an injection point.
+    const { escapeHtml } = await import("../../../src/lib/auth/oidc");
+    expect(escapeHtml("<script>alert(1)</script>")).toBe("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(escapeHtml(`" onload="x`)).toBe("&quot; onload=&quot;x");
+    expect(escapeHtml("a & b")).toBe("a &amp; b");
+    expect(escapeHtml("it's")).toBe("it&#39;s");
+  });
+
+  it("escapes the ampersand first, so an escape cannot be double-encoded into a tag", () => {
+    // &lt; must not become &amp;lt; -- order matters and a later reorder would break it.
+    return import("../../../src/lib/auth/oidc").then(({ escapeHtml }) => {
+      expect(escapeHtml("&lt;script&gt;")).toBe("&amp;lt;script&amp;gt;");
+    });
   });
 });

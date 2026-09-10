@@ -11,15 +11,7 @@
  * keeps showing the last numbers it had rather than emptying.
  */
 
-import {
-  Color,
-  Icon,
-  MenuBarExtra,
-  getPreferenceValues,
-  open,
-  openCommandPreferences,
-  type Image,
-} from "@raycast/api";
+import { Color, Icon, MenuBarExtra, getPreferenceValues, open, openCommandPreferences, type Image } from "@raycast/api";
 import { useEffect, useState } from "react";
 import type { AppSummary } from "./lib/argocd/types";
 import type { ArgoInstance } from "./lib/config/instances";
@@ -33,16 +25,13 @@ import {
   type MonitorSummary,
 } from "./lib/monitor/summary";
 import { makeClient } from "./ui/deps";
+import { openManageInstances, openSearchApplications } from "./ui/launch";
 import { loadApplications } from "./ui/loadApplications";
 import { environmentColor, healthIcon, humanAge, syncIcon } from "./ui/statusVisuals";
 import { loadInstances } from "./ui/storage";
 
 /** How many applications one section lists before the rest is left to the search command. */
 const PER_SECTION = 12;
-
-interface MonitorPreferences {
-  showWhenHealthy?: boolean;
-}
 
 /**
  * A problem state gets a semantic icon; everything else gets the extension's own mark.
@@ -102,9 +91,7 @@ export default function Monitor() {
   const state: MonitorState = summary ? monitorState(summary) : "empty";
   // A title while loading is what makes the item findable on the very first run, which is
   // exactly when someone is looking for it.
-  const title = summary
-    ? monitorTitle(summary, { showWhenHealthy: preferences().showWhenHealthy })
-    : "ArgoCD";
+  const title = summary ? monitorTitle(summary, { showWhenHealthy: preferences().showWhenHealthy }) : "ArgoCD";
 
   return (
     <MenuBarExtra
@@ -117,7 +104,7 @@ export default function Monitor() {
         <MenuBarExtra.Item
           title="No ArgoCD instance configured"
           subtitle="Open Manage Instances"
-          onAction={() => void open("raycast://extensions/pixibixi/argocd/manage-instances")}
+          onAction={() => void openManageInstances()}
         />
       ) : null}
 
@@ -129,25 +116,19 @@ export default function Monitor() {
         <MenuBarExtra.Item
           title="Search Applications"
           icon={Icon.MagnifyingGlass}
-          onAction={() => void open("raycast://extensions/pixibixi/argocd/search-applications")}
+          onAction={() => void openSearchApplications()}
         />
-        <MenuBarExtra.Item
-          title="Manage Instances"
-          icon={Icon.Gear}
-          onAction={() => void open("raycast://extensions/pixibixi/argocd/manage-instances")}
-        />
-        <MenuBarExtra.Item
-          title="Configure This Menu"
-          icon={Icon.Cog}
-          onAction={() => void openCommandPreferences()}
-        />
+        <MenuBarExtra.Item title="Manage Instances" icon={Icon.Gear} onAction={() => void openManageInstances()} />
+        <MenuBarExtra.Item title="Configure This Menu" icon={Icon.Cog} onAction={() => void openCommandPreferences()} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
 
 function preferences(): { showWhenHealthy: boolean } {
-  const raw = getPreferenceValues<MonitorPreferences>();
+  // Preferences.Monitor is generated from the manifest, so a renamed preference is a type
+  // error here rather than a silent `undefined` that reads as "off".
+  const raw = getPreferenceValues<Preferences.Monitor>();
   return { showWhenHealthy: raw.showWhenHealthy === true };
 }
 
@@ -159,12 +140,10 @@ function InstanceSections({ instance, all }: { instance: MonitorInstance; all: A
   // fixes, and the menu cannot ask for either.
   const subtitle = instance.problem ? `${age}, ${instance.problem.split(".")[0]}` : age;
 
-  const MANAGE = "raycast://extensions/pixibixi/argocd/manage-instances";
-  // Routed on the kind of failure, not on words in the message.
-  const problemTarget =
-    instance.problemKind === "unreachable" || instance.problemKind === "auth"
-      ? MANAGE
-      : (configured?.baseUrl ?? MANAGE);
+  // Routed on the kind of failure, not on words in the message. Both failures a person can
+  // act on lead to Manage Instances, which is a command and so launched, not opened as a URL.
+  const fixableHere = instance.problemKind === "unreachable" || instance.problemKind === "auth" || !configured?.baseUrl;
+  const problemAction = fixableHere ? () => void openManageInstances() : () => void open(configured.baseUrl);
 
   function appItem(app: AppSummary) {
     return (
@@ -172,9 +151,7 @@ function InstanceSections({ instance, all }: { instance: MonitorInstance; all: A
         key={`${app.instanceId}/${app.namespace}/${app.name}`}
         title={app.name}
         subtitle={app.project}
-        icon={
-          app.health === "Degraded" || app.health === "Missing" ? healthIcon(app.health) : syncIcon(app.sync)
-        }
+        icon={app.health === "Degraded" || app.health === "Missing" ? healthIcon(app.health) : syncIcon(app.sync)}
         onAction={() => {
           if (configured) {
             void open(makeClient(configured).appUrl(app.name, app.namespace));
@@ -194,7 +171,7 @@ function InstanceSections({ instance, all }: { instance: MonitorInstance; all: A
             source: instance.problem ? Icon.ExclamationMark : Icon.Box,
             tintColor: instance.problem ? Color.Orange : environmentColor(instance.env),
           }}
-          onAction={() => void open(problemTarget)}
+          onAction={problemAction}
         />
       </MenuBarExtra.Section>
 
@@ -204,7 +181,7 @@ function InstanceSections({ instance, all }: { instance: MonitorInstance; all: A
           {instance.degraded.length > PER_SECTION ? (
             <MenuBarExtra.Item
               title={`${instance.degraded.length - PER_SECTION} more`}
-              onAction={() => void open("raycast://extensions/pixibixi/argocd/search-applications")}
+              onAction={() => void openSearchApplications()}
             />
           ) : null}
         </MenuBarExtra.Section>
@@ -216,7 +193,7 @@ function InstanceSections({ instance, all }: { instance: MonitorInstance; all: A
           {instance.missing.length > PER_SECTION ? (
             <MenuBarExtra.Item
               title={`${instance.missing.length - PER_SECTION} more`}
-              onAction={() => void open("raycast://extensions/pixibixi/argocd/search-applications")}
+              onAction={() => void openSearchApplications()}
             />
           ) : null}
         </MenuBarExtra.Section>
@@ -228,7 +205,7 @@ function InstanceSections({ instance, all }: { instance: MonitorInstance; all: A
           {instance.outOfSync.length > PER_SECTION ? (
             <MenuBarExtra.Item
               title={`${instance.outOfSync.length - PER_SECTION} more`}
-              onAction={() => void open("raycast://extensions/pixibixi/argocd/search-applications")}
+              onAction={() => void openSearchApplications()}
             />
           ) : null}
         </MenuBarExtra.Section>
