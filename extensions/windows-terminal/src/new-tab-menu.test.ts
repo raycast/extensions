@@ -78,6 +78,55 @@ describe("buildProfileMatcher", () => {
     assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "PowerShell$?" }), null);
     assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "^*PowerShell" }), null);
     assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "^{2}PowerShell" }), null);
+    // \b/\B are zero-width assertions too — a quantifier's always-valid zero-rep path would
+    // otherwise silently accept \b* without the assertion ever actually holding.
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "a\\b*b" }), null);
+  });
+
+  it("rejects a character class range that's out of order", () => {
+    // [z-a] can never match anything; reject it rather than silently compiling an always-false
+    // predicate a config author would have no way to notice.
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "[z-a]" }), null);
+    // A properly-ordered range still works.
+    assert.deepEqual(matchedNames({ type: "matchProfiles", commandline: "[a-z]+\\.exe" }), [
+      "PowerShell",
+      "Command Prompt",
+    ]);
+  });
+
+  it("forms a range from an escaped boundary character, not just a plain one", () => {
+    // parseClassAtom resolves \- or \] to their literal character before the range check runs,
+    // so an escaped boundary (needed for a char like "-" that can't appear unescaped there)
+    // still participates in the range instead of silently becoming disjoint literals.
+    assert.equal(
+      buildProfileMatcher({ type: "matchProfiles", name: "[\\--9]+" })!({ ...powershell, name: "1.2.3" }),
+      true,
+    );
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "[X-\\]]+" })!({ ...powershell, name: "]" }), true);
+    // A multi-character escape (\d, \w, \s) can't anchor or end a range — there's no single
+    // character to range from/to.
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "[a-\\d]" }), null);
+  });
+
+  it("rejects a quantifier bound with an implausible number of digits", () => {
+    // A 300+ digit bound overflows parseInt to Infinity, which would pass the "max < min"
+    // ordering check (Infinity < Infinity is false) as if it were a legitimate {n,}. Checked on
+    // the parsed value, not the digit-string length, so a zero-padded bound isn't wrongly
+    // rejected as "too large" just for having a lot of leading zeros.
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "a{" + "9".repeat(310) + "}" }), null);
+    assert.notEqual(buildProfileMatcher({ type: "matchProfiles", name: "a{100000000}" }), null);
+    assert.equal(
+      buildProfileMatcher({ type: "matchProfiles", name: "a{0000000005,10}" })!({ ...powershell, name: "aaaaa" }),
+      true,
+    );
+  });
+
+  it("rejects a pattern nested too deeply instead of overflowing the call stack", () => {
+    const deep = "(".repeat(5000) + "a" + ")".repeat(5000);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: deep }), null);
+    // A realistic amount of nesting still compiles fine.
+    const shallow = "(".repeat(50) + "a" + ")".repeat(50);
+    assert.notEqual(buildProfileMatcher({ type: "matchProfiles", name: shallow }), null);
   });
 
   it("matches a long linear value without excessive cost", () => {
@@ -171,31 +220,39 @@ describe("buildProfileMatcher", () => {
     assert.equal(matcher!({ ...powershell, name: "a" }), false);
   });
 
-  it("reaches the minimum of a large counted repeat whose body can match empty", () => {
-    // (|a){2,4000} needs one empty rep plus one "a" rep to satisfy min=2 while consuming a
-    // single character. Reaching that requires revisiting the repeat instruction at a higher
-    // count within the same position — a plain identity-only visited set stops after the first
-    // visit and never gets there, silently rejecting a value that should match.
-    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(|a){2,4000}" });
-    assert.notEqual(matcher, null);
-    assert.equal(matcher!({ ...powershell, name: "a" }), true);
-    assert.equal(matcher!({ ...powershell, name: "aa" }), true);
-    assert.equal(matcher!({ ...powershell, name: "b" }), false);
+  it("rejects a large counted repeat whose body doesn't consume a fixed number of characters", () => {
+    // Every rep of a large counted repeat must consume the same fixed number of characters —
+    // otherwise different combinations of alternatives can reach the same string position after
+    // a different number of reps, and the dedup key's capping can only tell those apart when
+    // every rep advances the position by the same fixed amount. Rather than silently mismatch
+    // near `max`, this is rejected outright, the same as a nested quantifier.
+    // A nullable alternative (0 characters) differs from a nonzero one.
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(|a){2,4000}" }), null);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(a?){2,25}" }), null);
+    // Two nonzero but differently-sized alternatives (1 vs 2 characters) — confirmed by exhaustive
+    // DP-vs-engine comparison to silently mismatch near `max` before this rejection existed.
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(a|aa){21,30}" }), null);
+    // Every alternative the same fixed nonzero length is fine.
+    assert.notEqual(buildProfileMatcher({ type: "matchProfiles", name: "(a|b){2,25}" }), null);
   });
 
-  it("still enforces the maximum of a large counted repeat whose body can match empty", () => {
-    // Capping the dedup key at `min` must not affect the actual reps count `repeat` compares
-    // against `max` — only how many equivalent states get explored at one position.
-    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "a{2,10}" });
-    assert.equal(matcher!({ ...powershell, name: "a".repeat(10) }), true);
-    assert.equal(matcher!({ ...powershell, name: "a".repeat(11) }), false);
+  it("matches correctly right up to the maximum of a large counted repeat, not just at the minimum", () => {
+    // A prior fix reached `min` correctly but the dedup key still collapsed distinct in-progress
+    // counts near `max`, dropping counts required to reach the top of the range.
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "a{2,25}" });
+    assert.equal(matcher!({ ...powershell, name: "a".repeat(2) }), true);
+    assert.equal(matcher!({ ...powershell, name: "a".repeat(24) }), true);
+    assert.equal(matcher!({ ...powershell, name: "a".repeat(25) }), true);
+    assert.equal(matcher!({ ...powershell, name: "a".repeat(26) }), false);
   });
 
-  it("doesn't blow up matching a large counted repeat whose body can match empty", () => {
-    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(|a){2,4000}" });
-    const start = Date.now();
-    matcher!({ ...powershell, name: "a".repeat(2000) });
-    assert.ok(Date.now() - start < 200, "matching took too long");
+  it("keeps two sequential large counted repeats independent within one match", () => {
+    // Exiting the first repeat must not leave its count/countFor attached to the thread going
+    // into the second — the second repeat's own instruction would then see a stale, unrelated
+    // count, corrupting its own reps tracking and dedup key.
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "a{5,4000}a{5,4000}" });
+    assert.equal(matcher!({ ...powershell, name: "a".repeat(10) }), true, "5+5 split");
+    assert.equal(matcher!({ ...powershell, name: "a".repeat(8) }), false, "second field below its min");
   });
 
   it("keeps each field's counted repeat independent when an entry has more than one field", () => {

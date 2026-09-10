@@ -71,6 +71,12 @@ function parsePattern(pattern: string): AltNode {
   // where it appears to the end of that group, subsequent `|` branches included. It's applied as
   // each character test is built, so the compiled program needs no notion of case at all.
   let ignoreCase = false;
+  // parseAtom recurses into parseAlt for every "(" — this bounds that recursion, since the parser
+  // (unlike matchFull's explicit-stack VM) has no other stack-safety guard. Nothing near this depth
+  // is a realistic matchProfiles pattern; it exists so a pathologically deep one fails cleanly as
+  // "malformed" like any other unsupported pattern, instead of overflowing the call stack.
+  let groupDepth = 0;
+  const MAX_GROUP_DEPTH = 100;
   const foldCase = (test: (ch: string) => boolean) => {
     if (!ignoreCase) return test;
     return (ch: string) => test(ch) || test(ch.toLowerCase()) || test(ch.toUpperCase());
@@ -118,14 +124,24 @@ function parsePattern(pattern: string): AltNode {
       if (braces) {
         min = parseInt(braces[1], 10);
         max = braces[2] === undefined ? min : braces[3] === "" ? Infinity : parseInt(braces[3], 10);
+        // A bound with enough digits overflows parseInt to Infinity, which would pass the
+        // "max < min" check below (Infinity < Infinity is false) as if it were a legitimate
+        // unbounded {n,}. Checked on the parsed value, not the digit-string length, so a
+        // zero-padded bound like {0000000005,10} isn't wrongly rejected as "too large" — no real
+        // matchProfiles pattern needs a bound anywhere near this size either way.
+        if (min > 1e9 || (max !== Infinity && max > 1e9)) return fail("quantifier bound too large");
         if (max < min) return fail("quantifier bounds out of order");
         quantified = true;
         i += braces[0].length;
       }
     }
     // Windows Terminal's regex engine rejects a quantified anchor (^?, $*, ^{2}...) as a syntax
-    // error rather than matching it literally or ignoring the quantifier, so mirror that here.
-    if (quantified && (atom.kind === "start" || atom.kind === "end")) return fail("quantified anchor");
+    // error rather than matching it literally or ignoring the quantifier, so mirror that here —
+    // \b/\B are zero-width assertions too, so without this a quantifier's always-valid zero-rep
+    // path (e.g. starFrag) would silently accept \b* without the assertion ever holding.
+    if (quantified && (atom.kind === "start" || atom.kind === "end" || atom.kind === "boundary")) {
+      return fail("quantified anchor");
+    }
     let greedy = true;
     if (peek() === "?") {
       greedy = false;
@@ -153,7 +169,9 @@ function parsePattern(pattern: string): AltNode {
         // ignoreCase set for whatever follows it in the enclosing group.
         if (delimiter === ")") return { kind: "group", alt: { options: [{ atoms: [] }] } };
       }
+      if (++groupDepth > MAX_GROUP_DEPTH) return fail("pattern nested too deeply");
       const alt = parseAlt();
+      groupDepth--;
       if (peek() !== ")") return fail("unbalanced parenthesis");
       i++;
       ignoreCase = outerIgnoreCase;
@@ -207,6 +225,26 @@ function parsePattern(pattern: string): AltNode {
     return charAtom((ch) => ch === c);
   }
 
+  // Reads one position inside a class: either a literal character (plain, or an escaped one like
+  // \- or \]) that can potentially anchor a range, or a multi-character escape predicate (\d, \w,
+  // \s, or a negation) that can't — \d-9 has no meaningful "range from a whole digit class".
+  type ClassAtom = { literal: string } | { predicate: (ch: string) => boolean };
+  function parseClassAtom(): ClassAtom {
+    const c = pattern[i];
+    if (c !== "\\") {
+      i++;
+      return { literal: c };
+    }
+    i++;
+    const esc = pattern[i];
+    i++;
+    if (esc === undefined) return fail("trailing backslash");
+    const predicate = escapePredicates[esc];
+    if (predicate !== undefined) return { predicate };
+    if (/[A-Za-z0-9]/.test(esc)) return fail(`unsupported escape "\\${esc}"`);
+    return { literal: esc };
+  }
+
   function parseClass(): AtomNode {
     i++; // consume "["
     let negate = false;
@@ -216,23 +254,20 @@ function parsePattern(pattern: string): AltNode {
     }
     const tests: ((ch: string) => boolean)[] = [];
     while (i < n && peek() !== "]") {
-      const start = peek();
-      if (start === "\\") {
-        i++;
-        const esc = pattern[i];
-        i++;
-        if (esc === undefined) return fail("trailing backslash");
-        const predicate = escapePredicates[esc];
-        if (predicate) tests.push(predicate);
-        else if (/[A-Za-z0-9]/.test(esc)) return fail(`unsupported escape "\\${esc}"`);
-        else tests.push((ch) => ch === esc);
+      const startAtom = parseClassAtom();
+      if ("predicate" in startAtom) {
+        tests.push(startAtom.predicate);
         continue;
       }
-      i++;
+      const start = startAtom.literal;
       if (peek() === "-" && pattern[i + 1] !== "]" && i + 1 < n) {
         i++; // consume "-"
-        const end = pattern[i];
-        i++;
+        const endAtom = parseClassAtom();
+        if ("predicate" in endAtom) return fail("a character class can't end a range");
+        const end = endAtom.literal;
+        // A descending range like [z-a] can never match anything; real regex engines reject it
+        // as malformed rather than silently compiling a predicate that's always false.
+        if (end < start) return fail(`character range "${start}-${end}" out of order`);
         tests.push((ch) => ch >= start && ch <= end);
       } else {
         tests.push((ch) => ch === start);
@@ -287,6 +322,7 @@ type PatchSlot =
   | { inst: CharInst | AnyInst | StartInst | EndInst | BoundaryInst | NopInst | SplitInst | RepeatInst; slot: "next" }
   | { inst: SplitInst; slot: "next2" };
 type Frag = { start: Inst; out: PatchSlot[] };
+// /Thompson NFA instruction types
 
 // Every instruction is created through here, so the running total covers nested unrolling too —
 // e.g. small quantifiers nested several levels deep, each individually under UNROLL_THRESHOLD but
@@ -320,6 +356,7 @@ function concatAll(frags: Frag[]): Frag {
   return frags.reduce(concat, emptyFrag());
 }
 
+// Compiles a single, unquantified atom into a one-instruction (or, for a group, sub-program) Frag.
 function compileAtom(atom: AtomNode): Frag {
   if (atom.kind === "group") return compileAlt(atom.alt);
   if (atom.kind === "char") {
@@ -384,12 +421,46 @@ function hasNestedQuantifier(atom: AtomNode): boolean {
   );
 }
 
+// The number of characters `atom` always consumes, if every alternative consumes the same amount,
+// or null if that amount varies (including an alternative that matches empty, like (|a) — 0 counts
+// as a value here, so it can differ from a sibling alternative's nonzero length). Only meaningful
+// once hasNestedQuantifier has ruled out a real quantifier anywhere inside `atom`, so every atom in
+// every sequence occurs exactly once here — no min/max to account for.
+//
+// compileCountedRepeat needs this to be a single, nonzero value: hasVisited/markVisited collapse
+// every rep count from `min` up to `max` onto one dedup entry per position, on the assumption that
+// they're all interchangeable, which only holds when each rep advances the string position by the
+// same fixed amount. Confirmed by direct DP-vs-engine comparison that this isn't just true for a
+// zero-width alternative — (a|aa){min,max} (no alternative is empty, but they're 1 vs 2 characters)
+// reaches the same string position after a different number of reps depending on which alternatives
+// were taken, and only one of those trajectories survives the collapse, silently losing counts near
+// `max` a real match needs. Rejected the same way hasNestedQuantifier is: not unsafe to compile,
+// just not representable by this counter.
+function fixedWidth(atom: AtomNode): number | null {
+  if (atom.kind === "char" || atom.kind === "any") return 1;
+  if (atom.kind === "start" || atom.kind === "end" || atom.kind === "boundary") return 0;
+  const widths = atom.alt.options.map((seq) => {
+    let total = 0;
+    for (const q of seq.atoms) {
+      const atomWidth = fixedWidth(q.atom);
+      if (atomWidth === null) return null;
+      total += atomWidth;
+    }
+    return total;
+  });
+  return widths.every((w) => w === widths[0]) ? widths[0] : null;
+}
+
 // Compiles atom{min,max} (max possibly Infinity) as one `repeat` instruction plus one copy of the
 // atom's body, instead of unrolling — see the `repeat`/`increment` handling in addThread for how a
 // thread's counter takes the place of the copies compileQuant's other branch would otherwise make.
 function compileCountedRepeat(atom: AtomNode, min: number, max: number): Frag {
   if (hasNestedQuantifier(atom)) {
     throw new RegexTooLargeError("a quantifier this large can't wrap another quantifier");
+  }
+  const width = fixedWidth(atom);
+  if (!width) {
+    throw new RegexTooLargeError("a quantifier this large needs every alternative to be the same length");
   }
   const repeat: RepeatInst = newInst({ op: "repeat", min, max, bodyStart: undefined as unknown as Inst });
   const body = compileAtom(atom);
@@ -455,18 +526,13 @@ type StepBudget = { remaining: number };
 type Thread = { inst: Inst; count: number; countFor: RepeatInst | null };
 const NO_REPEAT = null;
 
-// \b sits between a word character and a non-word one, counting the space off either end of the
-// value as non-word — so it holds at both ends of "PowerShell" but not inside it.
-const isWordChar = (ch: string | undefined) => ch !== undefined && /\w/.test(ch);
-
-function isWordBoundary(str: string, pos: number): boolean {
-  return isWordChar(str[pos - 1]) !== isWordChar(str[pos]);
-}
-
-// Instructions outside any counted repeat dedupe by identity alone (`plain`), same as before a
-// large quantifier could compile without unrolling. Instructions reached *inside* one (`countFor`
-// names which `repeat`) need `count` in the key too — see capForDedup for why capping it at that
-// repeat's `min` is safe rather than just using it raw.
+// Instructions outside any counted repeat dedupe by identity alone (`plain`) — same as before this
+// engine had a counted-repeat mechanism at all. Instructions reached *while inside* one need `count`
+// in the key too, kept in a separate structure (`scoped`): two sequential large repeats mean a
+// "just exiting the first, entering the second fresh" thread and a "already partway through the
+// second" thread can reach the second repeat's own instruction at the very same position, and they
+// must not collide just because they happen to share that instruction — see capForDedup for why
+// capping `count` at the repeat's `min` is safe rather than using it raw.
 type VisitedState = { plain: Set<Inst>; scoped: Map<Inst, Set<number>> };
 
 function newVisited(): VisitedState {
@@ -477,12 +543,13 @@ function newVisited(): VisitedState {
 // identical for reachability: `repeat` offers the exact same exit target and the exact same
 // continue-into-body target regardless of the exact count, right up to (and including) `max` —
 // forced exit at `max` reaches nothing that optional exit at `min` didn't already reach. So capping
-// the count at `min` for dedup purposes loses no reachable state, while bounding how many times a
-// nullable body (one that can match empty, e.g. (|a)) can loop back within a single position —
-// without the cap, each loop reaches `repeat` at a new, never-before-seen count and dedup never
-// kicks in, so a large `max` risks growing that unboundedly before a real character is consumed.
-// Only called when thread.countFor !== NO_REPEAT (see hasVisited/markVisited), so there's always a
-// real repeat to read `min` from.
+// the count at `min` for dedup purposes loses no reachable state, PROVIDED the body can't reach the
+// same position at two different counts in the first place — the precondition compileCountedRepeat
+// enforces is exactly that: hasNestedQuantifier rules out a real quantifier anywhere inside the
+// body, and fixedWidth requires every alternative to consume the same fixed, nonzero number of
+// characters, so a fresh entry into this repeat's scope has a single, unambiguous count at any
+// given position. Only called when thread.countFor !== NO_REPEAT (see hasVisited/markVisited), so
+// there's always a real repeat to read `min` from.
 function capForDedup(thread: Thread): number {
   return Math.min(thread.count, thread.countFor!.min);
 }
@@ -503,6 +570,14 @@ function markVisited(visited: VisitedState, thread: Thread): void {
     visited.scoped.set(thread.inst, seen);
   }
   seen.add(capForDedup(thread));
+}
+
+// \b sits between a word character and a non-word one, counting the space off either end of the
+// value as non-word — so it holds at both ends of "PowerShell" but not inside it.
+const isWordChar = (ch: string | undefined) => ch !== undefined && /\w/.test(ch);
+
+function isWordBoundary(str: string, pos: number): boolean {
+  return isWordChar(str[pos - 1]) !== isWordChar(str[pos]);
 }
 
 // Epsilon-closure: follows the zero-width instructions (`split`, `nop`, and the anchors when their
@@ -548,11 +623,14 @@ function addThread(
         stack.push({ inst: inst.bodyStart, count: reps, countFor: inst });
       } else if (inst.max === Infinity || reps < inst.max) {
         // Within range: try one more rep, but stopping here is also valid (mirrors optionalFrag).
-        stack.push({ inst: inst.next!, count, countFor });
+        // Exiting resets countFor to NO_REPEAT — carrying this repeat's count/countFor past
+        // `next` would let it reach a later, unrelated `repeat` instruction still tagged as
+        // "inside" this one, corrupting that instruction's own dedup key and reps count.
+        stack.push({ inst: inst.next!, count: 0, countFor: NO_REPEAT });
         stack.push({ inst: inst.bodyStart, count: reps, countFor: inst });
       } else {
         // At the maximum: no more reps allowed.
-        stack.push({ inst: inst.next!, count, countFor });
+        stack.push({ inst: inst.next!, count: 0, countFor: NO_REPEAT });
       }
     } else if (inst.op === "increment") {
       stack.push({ inst: inst.repeat, count: count + 1, countFor: inst.repeat });
@@ -561,6 +639,7 @@ function addThread(
     }
   }
 }
+// /addThread
 
 // Runs the compiled NFA over `str` breadth-first, one input position at a time (Pike's VM) instead
 // of recursing per character the way a backtracking engine would. Every thread advances together, so
@@ -592,6 +671,7 @@ function matchFull(prog: Inst, str: string): boolean {
 
   return current.some((thread) => thread.inst.op === "match");
 }
+// /matchFull
 
 // A matchProfiles entry matches a profile when ANY provided field (name/commandline/source)
 // fully matches that field's regex — mirrors Windows Terminal's MatchProfilesEntry. Empty profile
