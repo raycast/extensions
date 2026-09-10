@@ -1,0 +1,154 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "argocd",
+  "title": "ArgoCD",
+  "description": "Search applications across several ArgoCD instances, then open, inspect or sync them.",
+  "icon": "argocd.png",
+  "author": "pixibixi",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "argocd",
+    "gitops",
+    "kubernetes",
+    "deployment",
+    "sync"
+  ],
+  "commands": [
+    {
+      "name": "search-applications",
+      "title": "Search Applications",
+      "subtitle": "ArgoCD",
+      "description": "Search ArgoCD applications across every configured instance.",
+      "mode": "view",
+      "keywords": [
+        "app",
+        "argo",
+        "gitops"
+      ]
+    },
+    {
+      "name": "search-applicationsets",
+      "title": "Search ApplicationSets",
+      "subtitle": "ArgoCD",
+      "description": "Search ApplicationSets and jump to the applications they generated.",
+      "mode": "view",
+      "keywords": [
+        "appset",
+        "applicationset",
+        "generator"
+      ]
+    },
+    {
+      "name": "manage-instances",
+      "title": "Manage Instances",
+      "subtitle": "ArgoCD",
+      "description": "Add, edit and remove the ArgoCD instances the extension queries.",
+      "mode": "view",
+      "keywords": [
+        "server",
+        "cluster",
+        "config"
+      ]
+    },
+    {
+      "name": "monitor",
+      "title": "Monitor",
+      "subtitle": "ArgoCD",
+      "description": "Menu bar counter of the degraded and out-of-sync applications across every instance. Also keeps the local cache warm, so the search command stays instant.",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "showWhenHealthy",
+          "title": "When everything is healthy",
+          "label": "Show the application count",
+          "description": "Off by default, so the menu bar stays quiet until something needs attention.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cacheTtlSeconds",
+      "title": "Cache TTL",
+      "description": "Seconds before a cached application list is refreshed in the background. Clamped to 5-3600.",
+      "type": "textfield",
+      "required": false,
+      "default": "60"
+    },
+    {
+      "name": "requestTimeoutSeconds",
+      "title": "Request Timeout",
+      "description": "Seconds before an ArgoCD API request is aborted. Clamped to 3-120.",
+      "type": "textfield",
+      "required": false,
+      "default": "15"
+    },
+    {
+      "name": "probeTimeoutSeconds",
+      "title": "Reachability Probe Timeout",
+      "description": "Seconds before an instance is considered unreachable. Kept short so a VPN that is down is reported immediately. Clamped to 1-30.",
+      "type": "textfield",
+      "required": false,
+      "default": "4"
+    },
+    {
+      "name": "maxResults",
+      "title": "Max Results",
+      "description": "Maximum number of applications rendered at once. Clamped to 10-200.",
+      "type": "textfield",
+      "required": false,
+      "default": "60"
+    },
+    {
+      "name": "argocdCliPath",
+      "title": "argocd CLI Path",
+      "description": "Path to the argocd binary used for the SSO login action.",
+      "type": "textfield",
+      "required": false,
+      "default": "argocd"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.0",
+    "@raycast/utils": "^2.3.1",
+    "yaml": "^2.9.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "format:check": "prettier --check .",
+    "format": "prettier --write .",
+    "test:coverage": "vitest run --coverage",
+    "check:secrets": "./scripts/check-no-secrets.sh",
+    "store:payload": "./scripts/store-payload.sh",
+    "demo": "node scripts/demo-argocd.mjs"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "@vitest/coverage-v8": "^5.0.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}
