@@ -385,6 +385,16 @@ function compileProgram(alt: AltNode): Inst {
   return frag.start;
 }
 
+// matchFull's total work is O(program size × value length): the NFA can't backtrack exponentially,
+// but a program well within MAX_PROGRAM_SIZE run against a long field value is still a lot of
+// arithmetic — e.g. (a|b){0,4000} compiles to a modest program but keeps thousands of live threads,
+// and matching it against a long commandline could take tens of millions of steps, run
+// synchronously during rendering, once per profile per resolution pass. This budget bounds that
+// total, independent of both factors, the same "give up and report no match" fallback
+// MAX_PROGRAM_SIZE already uses for a pattern that's too large to compile at all.
+const MAX_MATCH_STEPS = 200000;
+type StepBudget = { remaining: number };
+
 // \b sits between a word character and a non-word one, counting the space off either end of the
 // value as non-word — so it holds at both ends of "PowerShell" but not inside it.
 const isWordChar = (ch: string | undefined) => ch !== undefined && /\w/.test(ch);
@@ -402,9 +412,10 @@ function isWordBoundary(str: string, pos: number): boolean {
 // Walked with an explicit stack, not recursion — a flat run of thousands of optional atoms
 // (a?a?a?...) chains that many `split`s in a row, and recursing that chain would grow the JS call
 // stack with the pattern's size, independent of how long the string being matched is.
-function addThread(list: Inst[], visited: Set<Inst>, start: Inst, pos: number, str: string): void {
+function addThread(list: Inst[], visited: Set<Inst>, start: Inst, pos: number, str: string, budget: StepBudget): void {
   const stack: Inst[] = [start];
   while (stack.length > 0) {
+    if (budget.remaining-- <= 0) return;
     const inst = stack.pop()!;
     if (visited.has(inst)) continue;
     visited.add(inst);
@@ -428,11 +439,13 @@ function addThread(list: Inst[], visited: Set<Inst>, start: Inst, pos: number, s
 // of recursing per character the way a backtracking engine would. Every thread advances together, so
 // the call stack never grows with the length of `str` or with the pattern's backtracking search
 // space — a 2,000-character value and a pathological pattern like (a+)+ cost the same handful of
-// stack frames as a one-character match, and total work is bounded by str.length × the pattern's
-// compiled size, so nothing can blow up exponentially and no step budget is needed.
+// stack frames as a one-character match. Total work is bounded by str.length × the pattern's
+// compiled size, so nothing can blow up exponentially, but that product can still be large for a
+// big program and a long value — MAX_MATCH_STEPS caps it.
 function matchFull(prog: Inst, str: string): boolean {
+  const budget: StepBudget = { remaining: MAX_MATCH_STEPS };
   let current: Inst[] = [];
-  addThread(current, new Set(), prog, 0, str);
+  addThread(current, new Set(), prog, 0, str, budget);
 
   for (let pos = 0; pos < str.length; pos++) {
     if (current.length === 0) return false;
@@ -440,8 +453,9 @@ function matchFull(prog: Inst, str: string): boolean {
     const visited = new Set<Inst>();
     const ch = str[pos];
     for (const inst of current) {
-      if (inst.op === "char" && inst.test(ch)) addThread(next, visited, inst.next!, pos + 1, str);
-      else if (inst.op === "any") addThread(next, visited, inst.next!, pos + 1, str);
+      if (budget.remaining-- <= 0) return false;
+      if (inst.op === "char" && inst.test(ch)) addThread(next, visited, inst.next!, pos + 1, str, budget);
+      else if (inst.op === "any") addThread(next, visited, inst.next!, pos + 1, str, budget);
     }
     current = next;
   }
@@ -452,9 +466,10 @@ function matchFull(prog: Inst, str: string): boolean {
 // A matchProfiles entry matches a profile when ANY provided field (name/commandline/source)
 // fully matches that field's regex — mirrors Windows Terminal's MatchProfilesEntry. Empty profile
 // fields never match, so "source": ".*" skips local profiles and "commandline": ".*" skips
-// profiles without a command line. An entry with no patterns, or a regex that is malformed,
-// unsupported, or too large to compile, matches nothing rather than crashing or matching all —
-// compilation happens here, once per entry, so a refused pattern can't throw during rendering.
+// profiles without a command line. An entry with no patterns, a regex that is malformed or
+// unsupported, one too large to compile, or one whose match against a particular value runs past
+// MAX_MATCH_STEPS, all resolve the same way: that value doesn't match, rather than crashing or
+// matching everything.
 export function buildProfileMatcher(entry: NewTabMenuEntry): ((profile: Profile) => boolean) | null {
   const specs: { pattern: string; get: (profile: Profile) => string }[] = [];
   if (entry.name !== undefined) specs.push({ pattern: entry.name, get: (p) => p.name });

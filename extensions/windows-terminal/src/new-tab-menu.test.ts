@@ -134,6 +134,17 @@ describe("buildProfileMatcher", () => {
     // A merely long pattern still compiles and matches.
     assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?:PowerShell){1}" }), ["PowerShell"]);
   });
+
+  it("bounds total matching work for a wide quantifier against a long value", () => {
+    // (a|b){0,4000} compiles (its program fits under MAX_PROGRAM_SIZE) but keeps thousands of
+    // live threads; without a bound on total matching work, running it against a value this long
+    // would take tens of millions of steps synchronously during rendering.
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(a|b){0,4000}" });
+    assert.notEqual(matcher, null);
+    const start = Date.now();
+    matcher!({ ...powershell, name: "a".repeat(4000) });
+    assert.ok(Date.now() - start < 500, "wide quantifier against a long value took too long");
+  });
 });
 
 describe("resolveNewTabMenuOrder", () => {
