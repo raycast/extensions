@@ -222,7 +222,8 @@ const coverMarkdown = (track: Track, album: Album | null): string => {
 };
 
 const buildMarkdown = (data: Conversion | undefined, isLoading: boolean): string => {
-  if (isLoading || !data || data.mode === "empty") return "";
+  if (isLoading || !data) return "";
+  if (data.mode === "empty") return UNRESOLVED_MESSAGE.invalid;
 
   if (data.mode === "error") return UNRESOLVED_MESSAGE[data.reason];
 

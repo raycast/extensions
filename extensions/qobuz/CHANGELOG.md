@@ -1,5 +1,9 @@
 # Qobuz Changelog
 
+## [Explain an empty clipboard] - {PR_MERGE_DATE}
+
+- Convert Track Link: show the "Nothing to convert" hint when the clipboard is empty instead of a blank view
+
 ## [Initial Version] - 2026-07-22
 
 - Search Qobuz albums, artists, and tracks in a grid, with a type filter and in-Raycast detail views
