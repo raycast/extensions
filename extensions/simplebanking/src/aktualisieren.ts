@@ -11,16 +11,16 @@ import { aktualisieren, SbFehlt } from "./sb";
 export default async function Command() {
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Konten werden abgerufen …",
+    title: "Refreshing accounts…",
   });
   try {
     await aktualisieren();
     toast.style = Toast.Style.Success;
-    toast.title = "Aktualisiert";
+    toast.title = "Accounts refreshed";
   } catch (e) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Abruf fehlgeschlagen";
+    toast.title = "Refresh failed";
     toast.message = e instanceof SbFehlt ? e.message : String(e);
-    await showHUD("simplebanking konnte nicht abrufen");
+    await showHUD("simplebanking could not refresh");
   }
 }

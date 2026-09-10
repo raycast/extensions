@@ -4,8 +4,8 @@ Balances, transactions and a monthly overview from
 [simplebanking](https://www.simplebanking.de) — right inside Raycast.
 
 simplebanking is a menu-bar banking app for macOS with access to German banks over PSD2.
-This extension is a read-only front-end for the data the app has already fetched. The
-extension's own interface is in German, matching the app and its audience.
+This extension is a read-only front-end for the data the app has already fetched. Amounts are
+formatted the German way (`1.234,56 €`), matching the app and its audience.
 
 ## How it works
 
@@ -46,9 +46,9 @@ able to use the extension without doing anything first.
 
 | Command | What it shows | Contacts the bank |
 |---|---|---|
-| Balance | Balance of every account, plus a total | no |
+| Balance | Balance of every account, plus a total per currency | no |
 | Transactions | Bookings of the last 30 days, searchable | no |
-| Monthly Overview | Income, spending, net, categories | no |
+| Monthly Overview | Income, spending, net and categories for the current month, per currency | no |
 | Refresh Accounts | — | **yes** |
 
 ## Development

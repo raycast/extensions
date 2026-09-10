@@ -22,7 +22,7 @@ const KANDIDATEN = [
 
 export class SbFehlt extends Error {
   constructor() {
-    super("simplebanking wurde nicht gefunden. Erwartet unter ~/.local/bin/sb oder in /Applications.");
+    super("simplebanking was not found. Expected at ~/.local/bin/sb or in /Applications.");
   }
 }
 
@@ -50,7 +50,8 @@ export interface Konto {
   slotId: string;
   name: string;
   iban: string;
-  balance: number;
+  /** Fehlt, solange die App für dieses Konto noch keinen Saldo abgerufen hat. */
+  balance?: number | null;
   currency: string;
 }
 
@@ -60,25 +61,30 @@ export interface Buchung {
   merchant: string;
   amount: number;
   currency: string;
-  category: string;
+  category: string | null;
   status: string;
-}
-
-export interface Uebersicht {
-  month: string;
-  totalIncome: number;
-  totalExpenses: number;
-  net: number;
-  byCategory: { category: string; amount: number }[];
 }
 
 export const konten = () => sb<Konto[]>(["balance"]);
 export const buchungen = (tage: number) => sb<Buchung[]>(["tx", "--days", String(tage)]);
-export const uebersicht = () => sb<Uebersicht>(["summary"]);
 
-/** Der einzige Befehl, der die Bank anfragt — kann eine Freigabe verlangen. */
+/**
+ * Der einzige Befehl, der die Bank anfragt — kann eine Freigabe verlangen.
+ *
+ * Bewusst ohne eigenes Zeitlimit: Das CLI wartet selbst höchstens 180 Sekunden auf die
+ * App und meldet dann einen Fehler. Ein zweites, kürzeres Limit hier würde eine laufende
+ * TAN-Freigabe abbrechen und den Abruf als gescheitert melden, obwohl er noch läuft.
+ */
 export async function aktualisieren(): Promise<void> {
-  await run(pfad(), ["refresh"], { timeout: 120_000 });
+  await run(pfad(), ["refresh"]);
+}
+
+/** Text für einen Betrag, der nicht vorliegt — in Listen wie in kopiertem Text. */
+export const NICHT_VERFUEGBAR = "Not Available";
+
+/** Ein Betrag, der auch fehlen darf: fehlt er, kommt kein `NaN €`, sondern ein Wort. */
+export function betragOderHinweis(betrag: number | null | undefined, waehrung = "EUR"): string {
+  return betrag == null ? NICHT_VERFUEGBAR : euro(betrag, waehrung);
 }
 
 /**
@@ -87,14 +93,18 @@ export async function aktualisieren(): Promise<void> {
  * Der Grund in einem Satz: 1.000 € + 1.000 $ sind nicht 2.000 €. Ohne Umrechnungskurs —
  * und den holt diese Erweiterung bewusst nicht — gibt es keine einzelne Zahl, die stimmt.
  * Im Normalfall (alles Euro) kommt genau ein Betrag heraus, es ändert sich also nichts.
+ *
+ * Posten ohne Betrag werden übergangen, nicht als 0 gezählt: Eine Summe, in der ein Konto
+ * stillschweigend fehlt, wäre eine falsche Zahl. Fehlt jeder Betrag, gibt es keine Summe.
  */
-export function summeJeWaehrung(posten: { amount: number; currency: string }[]): string {
+export function summeJeWaehrung(posten: { amount?: number | null; currency: string }[]): string {
   const summen = new Map<string, number>();
   for (const p of posten) {
+    if (p.amount == null) continue;
     const w = p.currency || "EUR";
     summen.set(w, (summen.get(w) ?? 0) + p.amount);
   }
-  if (summen.size === 0) return euro(0);
+  if (summen.size === 0) return posten.length === 0 ? euro(0) : NICHT_VERFUEGBAR;
   return [...summen.entries()]
     .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
     .map(([w, betrag]) => euro(betrag, w))

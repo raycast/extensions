@@ -1,10 +1,16 @@
 import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Konto, konten, euro, summeJeWaehrung, SbFehlt } from "./sb";
+import { Konto, konten, betragOderHinweis, summeJeWaehrung, SbFehlt } from "./sb";
 
 /** Eine Zeile zum Weitergeben: Konto, IBAN, Saldo — in dieser Reihenfolge lesbar. */
 function alsText(k: Konto): string {
-  return `${k.name} · ${k.iban} · ${euro(k.balance, k.currency)}`;
+  return `${k.name} · ${k.iban} · ${betragOderHinweis(k.balance, k.currency)}`;
+}
+
+/** Farbe nach Vorzeichen — und Grau, wenn es noch keinen Saldo gibt. */
+function farbe(k: Konto): Color {
+  if (k.balance == null) return Color.SecondaryText;
+  return k.balance < 0 ? Color.Red : Color.Green;
 }
 
 export default function Saldo() {
@@ -22,53 +28,56 @@ export default function Saldo() {
   if (fehler) {
     return (
       <List>
-        <List.EmptyView icon={Icon.ExclamationMark} title="Nicht erreichbar" description={fehler} />
+        <List.EmptyView icon={Icon.ExclamationMark} title="simplebanking Not Reachable" description={fehler} />
       </List>
     );
   }
 
   const summe = summeJeWaehrung(daten.map((k) => ({ amount: k.balance, currency: k.currency })));
+  const ohneSaldo = daten.filter((k) => k.balance == null).length;
+  const summeHinweis =
+    ohneSaldo === 0 ? undefined : `${ohneSaldo} ${ohneSaldo === 1 ? "account" : "accounts"} without a cached balance`;
 
   return (
-    <List isLoading={laedt} searchBarPlaceholder="Konto suchen">
+    <List isLoading={laedt} searchBarPlaceholder="Search accounts">
       {daten.length > 1 && (
-        <List.Section title="Gesamt">
+        <List.Section title="Total">
           <List.Item
             icon={Icon.BankNote}
-            title="Alle Konten"
+            title="All Accounts"
+            subtitle={summeHinweis}
             accessories={[{ text: summe }]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Übersicht Kopieren" content={daten.map(alsText).join("\n")} />
-                <Action.CopyToClipboard title="Summe Kopieren" content={summe} />
+                <Action.CopyToClipboard title="Copy Overview" content={daten.map(alsText).join("\n")} />
+                <Action.CopyToClipboard title="Copy Total" content={summe} />
               </ActionPanel>
             }
           />
         </List.Section>
       )}
-      <List.Section title="Konten">
+      <List.Section title="Accounts">
         {daten.map((k) => (
           <List.Item
             key={k.slotId}
-            icon={{
-              source: Icon.Building,
-              tintColor: k.balance < 0 ? Color.Red : Color.Green,
-            }}
+            icon={{ source: Icon.Building, tintColor: farbe(k) }}
             title={k.name}
             subtitle={k.iban.slice(0, 8) + "…"}
-            accessories={[{ text: euro(k.balance, k.currency) }]}
+            accessories={[{ text: betragOderHinweis(k.balance, k.currency) }]}
             actions={
               <ActionPanel>
                 {/* Return kopiert die ganze Zeile — das ist, was man weitergibt. */}
-                <Action.CopyToClipboard title="Kontodaten Kopieren" content={alsText(k)} />
+                <Action.CopyToClipboard title="Copy Account Details" content={alsText(k)} />
                 <Action.CopyToClipboard
-                  title="IBAN Kopieren"
+                  // IBAN ist ein Akronym, kein Wort — die Title-Case-Regel wüsste das nicht.
+                  // eslint-disable-next-line @raycast/prefer-title-case
+                  title="Copy IBAN"
                   content={k.iban}
                   shortcut={{ modifiers: ["cmd"], key: "i" }}
                 />
                 <Action.CopyToClipboard
-                  title="Nur Saldo Kopieren"
-                  content={euro(k.balance, k.currency)}
+                  title="Copy Balance Only"
+                  content={betragOderHinweis(k.balance, k.currency)}
                   shortcut={{ modifiers: ["cmd"], key: "b" }}
                 />
               </ActionPanel>

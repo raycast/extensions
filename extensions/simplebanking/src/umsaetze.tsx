@@ -10,14 +10,25 @@ function alsText(b: Buchung, kontoName: string): string {
   return teile.join(" · ");
 }
 
+function anzahl(n: number): string {
+  return `${n} ${n === 1 ? "transaction" : "transactions"}`;
+}
+
+/** Farbe nach Vorzeichen — und Grau, wenn es noch keinen Saldo gibt. */
+function farbe(k: Konto): Color {
+  if (k.balance == null) return Color.SecondaryText;
+  return k.balance < 0 ? Color.Red : Color.Green;
+}
+
 /** Die Buchungen eines Kontos — oder aller, wenn `konto` fehlt. */
 function Liste({ daten, namen, konto }: { daten: Buchung[]; namen: Map<string, string>; konto?: Konto }) {
   const sichtbar = konto ? daten.filter((b) => b.slotId === konto.slotId) : daten;
   const summe = summeJeWaehrung(sichtbar);
+  const titel = konto ? konto.name : "All Accounts";
 
   return (
-    <List navigationTitle={konto ? konto.name : "Alle Konten"} searchBarPlaceholder="Händler, Kategorie …">
-      <List.Section title={konto ? konto.name : "Alle Konten"} subtitle={`${sichtbar.length} · ${summe}`}>
+    <List navigationTitle={titel} searchBarPlaceholder="Search merchant or category">
+      <List.Section title={titel} subtitle={`${sichtbar.length} · ${summe}`}>
         {sichtbar.map((b, i) => {
           const kontoName = namen.get(b.slotId) ?? "";
           return (
@@ -25,7 +36,7 @@ function Liste({ daten, namen, konto }: { daten: Buchung[]; namen: Map<string, s
               key={`${b.slotId}-${b.date}-${i}`}
               icon={b.status === "pending" ? Icon.Clock : Icon.Receipt}
               title={b.merchant}
-              subtitle={b.category}
+              subtitle={b.category ?? undefined}
               accessories={[
                 // Das Konto nur zeigen, solange nicht ohnehin danach gefiltert wird.
                 ...(!konto && kontoName ? [{ tag: kontoName }] : []),
@@ -34,14 +45,14 @@ function Liste({ daten, namen, konto }: { daten: Buchung[]; namen: Map<string, s
               ]}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard title="Buchung Kopieren" content={alsText(b, kontoName)} />
+                  <Action.CopyToClipboard title="Copy Transaction" content={alsText(b, kontoName)} />
                   <Action.CopyToClipboard
-                    title="Nur Betrag Kopieren"
+                    title="Copy Amount Only"
                     content={euro(b.amount, b.currency)}
                     shortcut={{ modifiers: ["cmd"], key: "b" }}
                   />
                   <Action.CopyToClipboard
-                    title="Nur Händler Kopieren"
+                    title="Copy Merchant Only"
                     content={b.merchant}
                     shortcut={{ modifiers: ["cmd"], key: "h" }}
                   />
@@ -84,7 +95,7 @@ export default function Umsaetze() {
   if (fehler) {
     return (
       <List>
-        <List.EmptyView icon={Icon.ExclamationMark} title="Nicht erreichbar" description={fehler} />
+        <List.EmptyView icon={Icon.ExclamationMark} title="simplebanking Not Reachable" description={fehler} />
       </List>
     );
   }
@@ -96,16 +107,16 @@ export default function Umsaetze() {
   }
 
   return (
-    <List isLoading={laedt} searchBarPlaceholder="Konto suchen">
-      <List.Section title="Gesamt">
+    <List isLoading={laedt} searchBarPlaceholder="Search accounts">
+      <List.Section title="Total">
         <List.Item
           icon={Icon.BankNote}
-          title="Alle Konten"
-          accessories={[{ text: `${daten.length} Buchungen` }]}
+          title="All Accounts"
+          accessories={[{ text: anzahl(daten.length) }]}
           actions={
             <ActionPanel>
               <Action.Push
-                title="Umsätze Zeigen"
+                title="Show Transactions"
                 icon={Icon.Receipt}
                 target={<Liste daten={daten} namen={namen} />}
               />
@@ -113,18 +124,18 @@ export default function Umsaetze() {
           }
         />
       </List.Section>
-      <List.Section title="Konten">
+      <List.Section title="Accounts">
         {kontenListe.map((k) => (
           <List.Item
             key={k.slotId}
-            icon={{ source: Icon.Building, tintColor: k.balance < 0 ? Color.Red : Color.Green }}
+            icon={{ source: Icon.Building, tintColor: farbe(k) }}
             title={k.name}
             subtitle={k.iban.slice(0, 8) + "…"}
-            accessories={[{ text: `${anzahlJeKonto.get(k.slotId) ?? 0} Buchungen` }]}
+            accessories={[{ text: anzahl(anzahlJeKonto.get(k.slotId) ?? 0) }]}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Umsätze Zeigen"
+                  title="Show Transactions"
                   icon={Icon.Receipt}
                   target={<Liste daten={daten} namen={namen} konto={k} />}
                 />
