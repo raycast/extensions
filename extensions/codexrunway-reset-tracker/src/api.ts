@@ -218,19 +218,45 @@ export function nextScheduleIn(
   );
 }
 
-export function scheduleLabel(record?: ResetRecord): string {
-  if (!record) return "No upcoming schedule found in the latest records";
+/** Display text for a schedule's window, plus whether that window already elapsed. */
+export function scheduleTime(
+  record: ResetRecord,
+): { start: string; time: string; overdue: boolean } | null {
   const start = record.scheduleWindow?.startAt ?? record.effectiveAt;
   const end = record.scheduleWindow?.endAt ?? record.effectiveAt;
-  if (!start || !Number.isFinite(Date.parse(start)))
-    return "Timing not yet confirmed";
+  if (!start || !Number.isFinite(Date.parse(start))) return null;
   const time =
     end && end !== start
       ? `${formatDate(start)} – ${formatDate(end)}`
       : formatDate(start);
-  return Date.parse(end ?? start) < Date.now()
-    ? `Expected ${time} — awaiting completion confirmation`
-    : `Expected ${time}`;
+  return { start, time, overdue: Date.parse(end ?? start) < Date.now() };
+}
+
+/**
+ * How far the wait has run, 0–1, from the announcement to the schedule's start.
+ * Null when the elapsed fraction is unknowable (no target, or no announcement to measure from).
+ */
+export function scheduleProgress(
+  record: ResetRecord,
+  now = Date.now(),
+): number | null {
+  const target = Date.parse(
+    record.scheduleWindow?.startAt ?? record.effectiveAt ?? "",
+  );
+  if (!Number.isFinite(target)) return null;
+  if (now >= target) return 1;
+  const from = Date.parse(record.announcedAt ?? "");
+  if (!Number.isFinite(from) || from >= target) return null;
+  return Math.max(0, (now - from) / (target - from));
+}
+
+export function scheduleLabel(record?: ResetRecord): string {
+  if (!record) return "No upcoming schedule found in the latest records";
+  const schedule = scheduleTime(record);
+  if (!schedule) return "Timing not yet confirmed";
+  return schedule.overdue
+    ? `Expected ${schedule.time} — awaiting completion confirmation`
+    : `Expected ${schedule.time}`;
 }
 
 /** Match every query word across the full announcement and scope, without native keyword truncation. */

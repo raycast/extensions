@@ -103,10 +103,13 @@ export async function fetchRecords(url: string): Promise<FetchedRecords> {
           if ((lockError as NodeJS.ErrnoException).code === "ENOENT") continue;
           throw lockError;
         }
-        if (Date.now() >= waitUntil)
+        if (Date.now() >= waitUntil) {
+          // Overlapping slow requests can outlast the wait; stale data beats a scary banner.
+          if (cached) return cached;
           throw new Error(
             "Timed out waiting for another command to finish refreshing. Try again shortly.",
           );
+        }
         await delay(250);
         cached = readCached(url) ?? cached;
         if (cached && Date.now() - cached.fetchedAt < FRESH_FOR) return cached;

@@ -145,3 +145,29 @@ assert.equal(
   console.error(error);
   process.exitCode = 1;
 });
+
+// scheduleProgress: fixedNow is 12:00Z, so a 10:00 → 13:00 wait is two thirds done.
+const announced = (overrides = {}) =>
+  record({ announcedAt: "2026-09-08T10:00:00Z", ...overrides });
+assert.equal(api.scheduleProgress(announced()), 2 / 3);
+assert.equal(api.scheduleProgress(announced({ effectiveAt: null })), null);
+assert.equal(api.scheduleProgress(record()), null); // no announcedAt to measure from
+assert.equal(
+  api.scheduleProgress(announced({ effectiveAt: "2026-09-08T11:00:00Z" })),
+  1,
+); // target already passed
+assert.equal(
+  api.scheduleProgress(announced({ announcedAt: "2026-09-08T14:00:00Z" })),
+  null,
+); // announced after the target
+assert.equal(
+  api.scheduleProgress(
+    announced({
+      scheduleWindow: {
+        startAt: "2026-09-08T14:00:00Z",
+        endAt: "2026-09-08T15:00:00Z",
+      },
+    }),
+  ),
+  0.5,
+); // the window's start wins over effectiveAt
