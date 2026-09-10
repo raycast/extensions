@@ -96,7 +96,7 @@ export function BlockActions({ block, channel, extraActions }: BlockActionsProps
   return (
     <ActionPanel title={block?.title ?? "✦"}>
       {renderBlockAction()}
-      {block ? (
+      {block && block.class !== "Channel" ? (
         <ActionPanel.Section>
           <Action.Push
             icon={Icon.Pencil}
