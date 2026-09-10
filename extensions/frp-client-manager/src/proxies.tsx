@@ -100,6 +100,10 @@ function sshCommand(item: ProxyViewItem): string {
 }
 
 function proxyIcon(item: ProxyViewItem) {
+  if (item.visitor) {
+    // Visitors have no runtime status in the admin API; render neutral.
+    return { source: Icon.ArrowRightCircle, tintColor: Color.Blue };
+  }
   if (item.statusUnavailable) {
     return { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText };
   }
@@ -118,6 +122,7 @@ function proxyAccessories(item: ProxyViewItem) {
     accessories.unshift({
       tag: { value: "visitor", color: Color.Blue },
     });
+    return accessories;
   }
   if (item.statusUnavailable) {
     accessories.unshift({

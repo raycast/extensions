@@ -762,7 +762,12 @@ export async function loadProxyItems(): Promise<ProxyViewItem[]> {
   const statusUnavailable = !adminStatus;
 
   const toItem = (proxy: ProxyConfig, visitor: boolean): ProxyViewItem => {
-    const runtime = runtimes.find((item) => item.name === proxy.name);
+    // The admin /api/status endpoint reports proxies only — visitors have no
+    // runtime entry, so don't match one by name: a same-named proxy would
+    // lend its status, and a healthy visitor would look failed.
+    const runtime = visitor
+      ? undefined
+      : runtimes.find((item) => item.name === proxy.name);
     return {
       config: proxy,
       serverAddr: config.serverAddr,
