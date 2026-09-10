@@ -151,7 +151,7 @@ export function getPlistPath(label: string): string {
 
 export function hasLaunchdService(): boolean {
   const label = getPrefs().launchdLabel;
-  return Boolean(label) && existsSync(getPlistPath(label));
+  return label !== undefined && label.length > 0 && existsSync(getPlistPath(label));
 }
 
 export async function resolveLogPath(frpDir: string): Promise<string> {
