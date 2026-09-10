@@ -1,6 +1,6 @@
 # yopass Changelog
 
-## [Fix Yopass v13 API endpoint] - {PR_MERGE_DATE}
+## [Fix Yopass v13 API endpoint] - 2026-09-10
 
 - POST secrets to `/create/secret` instead of `/secret` (the create endpoint moved in Yopass 13.0.0; the old path now returns 404 on 13.0.0+). Fixes extension failing against current `yopass.se`/`api.yopass.se` and any 13.0.0+ instance (ref: [Issue #30813](https://github.com/raycast/extensions/issues/30813)). Self-hosted instances older than 13.0.0 must be upgraded (12.5.0 and earlier still use `POST /secret`).
 
