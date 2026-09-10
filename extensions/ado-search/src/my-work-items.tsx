@@ -1061,6 +1061,17 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
   const branchList = branches ?? [];
 
   const handleSubmit = async () => {
+    // Mirror the query-layer guard in buildWorkItemsWiql: browsing everyone's
+    // items needs a bounding filter, otherwise the next query would throw and
+    // leave the list empty/stale despite a "saved" toast.
+    if (!assignedToMe && !project.trim() && states.length === 0 && types.length === 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Add a bounding filter",
+        message: "To show items not assigned to you, pick a project, state, or type first.",
+      });
+      return;
+    }
     setSubmitting(true);
     const next: AppSettings = {
       project: project.trim(),

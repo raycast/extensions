@@ -1,7 +1,7 @@
 /**
  * Pure WIQL (Work Item Query Language) builder for the "My Work Items" command.
- * No I/O, no Raycast deps — kept separate so it is unit-testable via
- * `npx tsx src/lib/wiql.test.ts` (see wiql.test.ts).
+ * No I/O, no Raycast deps — kept side-effect free so the query shape can be
+ * reasoned about (and typechecked via `npm run build`) in isolation.
  */
 
 export interface WorkItemsWiqlOptions {
