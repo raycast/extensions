@@ -5,14 +5,17 @@ import {
   Color,
   Icon,
   Keyboard,
+  LaunchType,
   List,
   Toast,
   confirmAlert,
   getPreferenceValues,
+  launchCommand,
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
 import { execFile } from "node:child_process";
+import { constants } from "node:fs";
 import { access, readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -25,15 +28,18 @@ import {
   readDeepLinks,
   resolveStorageConfiguration,
 } from "./storage.js";
+import {
+  LinkEnvironment,
+  assertCanOpen,
+  buildADBRemoteCommand,
+  builtInEnvironments,
+  decodeEnvironments,
+  findUnresolvedVariables,
+  resolveDeepLink,
+} from "./deep-link-utils.js";
 
 const executeFile = promisify(execFile);
-
-type LinkEnvironment = {
-  id: string;
-  name: string;
-  variables: Record<string, string>;
-  isBuiltIn?: boolean;
-};
+const commandOptions = { timeout: 60_000, maxBuffer: 1024 * 1024 } as const;
 
 type TargetDevice = {
   id: string;
@@ -41,16 +47,13 @@ type TargetDevice = {
   detail?: string;
 };
 
-const builtInEnvironments: LinkEnvironment[] = [
-  { id: "00000000-0000-0000-0000-000000000001", name: "Development", variables: {}, isBuiltIn: true },
-  { id: "00000000-0000-0000-0000-000000000002", name: "Production", variables: {}, isBuiltIn: true },
-];
-
 export default function SearchDeepLinks() {
   const preferences = getPreferenceValues<Preferences.SearchDeepLinks>();
   const [links, setLinks] = useState<DeepLink[]>([]);
   const [environments, setEnvironments] = useState<LinkEnvironment[]>(builtInEnvironments);
-  const [selectedEnvironment, setSelectedEnvironment] = useState(preferences.defaultEnvironment || "Development");
+  const [selectedEnvironmentID, setSelectedEnvironmentID] = useState(
+    () => environmentByPreference(builtInEnvironments, preferences.defaultEnvironment)?.id ?? builtInEnvironments[0].id,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
   const [storageConfiguration, setStorageConfiguration] = useState<StorageConfiguration>();
@@ -66,15 +69,15 @@ export default function SearchDeepLinks() {
     try {
       const configuration = await resolveStorageConfiguration(preferences.storageFile);
       const decodedLinks = await readDeepLinks(configuration.storagePath);
-      const decodedEnvironments = await readFile(configuration.environmentsPath, "utf8")
-        .then((value) => JSON.parse(value) as LinkEnvironment[])
-        .catch(() => builtInEnvironments);
+      const decodedEnvironments = await readEnvironments(configuration.environmentsPath);
 
       setStorageConfiguration(configuration);
       setLinks(decodedLinks);
       setEnvironments(decodedEnvironments);
-      if (!decodedEnvironments.some((environment) => environment.name === selectedEnvironment)) {
-        setSelectedEnvironment(decodedEnvironments[0]?.name ?? "Development");
+      if (!decodedEnvironments.some((environment) => environment.id === selectedEnvironmentID)) {
+        setSelectedEnvironmentID(
+          environmentByPreference(decodedEnvironments, preferences.defaultEnvironment)?.id ?? decodedEnvironments[0].id,
+        );
       }
     } catch (loadError) {
       setStorageConfiguration(undefined);
@@ -122,12 +125,14 @@ export default function SearchDeepLinks() {
     () => [...links].sort((left, right) => Number(Boolean(right.isFavorite)) - Number(Boolean(left.isFavorite))),
     [links],
   );
+  const selectedEnvironment =
+    environments.find((environment) => environment.id === selectedEnvironmentID) ?? environments[0];
 
   async function openLink(link: DeepLink) {
     const toast = await showToast({ style: Toast.Style.Animated, title: `Opening ${link.title}` });
     try {
-      const resolvedURL = resolve(link.urlString, selectedEnvironment, environments);
-      assertCanOpen(resolvedURL, selectedEnvironment);
+      const resolvedURL = resolveDeepLink(link.urlString, selectedEnvironment.variables);
+      assertCanOpen(resolvedURL, selectedEnvironment.name);
       await openURL(resolvedURL, preferences, selectedTarget);
       toast.style = Toast.Style.Success;
       toast.title = "Deep Link Opened";
@@ -171,9 +176,9 @@ export default function SearchDeepLinks() {
       isLoading={isLoading}
       searchBarPlaceholder="Search by name, URL, group, or tag"
       searchBarAccessory={
-        <List.Dropdown tooltip="Environment" value={selectedEnvironment} onChange={setSelectedEnvironment}>
+        <List.Dropdown tooltip="Environment" value={selectedEnvironmentID} onChange={setSelectedEnvironmentID}>
           {environments.map((environment) => (
-            <List.Dropdown.Item key={environment.id} title={environment.name} value={environment.name} />
+            <List.Dropdown.Item key={environment.id} title={environment.name} value={environment.id} />
           ))}
         </List.Dropdown>
       }
@@ -187,12 +192,42 @@ export default function SearchDeepLinks() {
             <ActionPanel>
               <Action title="Retry" icon={Icon.ArrowClockwise} onAction={load} />
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action.OpenInBrowser
+                title="Download Simulator Deep Linker"
+                url="https://github.com/StefanBoblic/SimulatorDeepLinker/releases/latest"
+              />
+            </ActionPanel>
+          }
+        />
+      ) : sortedLinks.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.Link}
+          title="No Deep Links"
+          description="Add a deep link or refresh after adding one in Simulator Deep Linker."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Add Deep Link"
+                icon={Icon.Plus}
+                onAction={() => launchCommand({ name: "add-deep-link", type: LaunchType.UserInitiated })}
+              />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                onAction={load}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action.OpenInBrowser
+                title="Download Simulator Deep Linker"
+                url="https://github.com/StefanBoblic/SimulatorDeepLinker/releases/latest"
+              />
             </ActionPanel>
           }
         />
       ) : (
         sortedLinks.map((link) => {
-          const resolvedURL = resolve(link.urlString, selectedEnvironment, environments);
+          const resolvedURL = resolveDeepLink(link.urlString, selectedEnvironment.variables);
           const unresolvedVariables = findUnresolvedVariables(resolvedURL);
           return (
             <List.Item
@@ -211,7 +246,7 @@ export default function SearchDeepLinks() {
                   <Action title="Open Deep Link" icon={Icon.Play} onAction={() => openLink(link)} />
                   {preferences.platform === "ios" || preferences.platform === "android" ? (
                     <ActionPanel.Submenu
-                      title={`Select Target Device${targetName(selectedTarget, targetDevices) ? ` (${targetName(selectedTarget, targetDevices)})` : ""}`}
+                      title={`Select Target Device${targetName(selectedTarget, targetDevices) ? ` (${targetName(selectedTarget, targetDevices)})` : ""}…`}
                       icon={Icon.Mobile}
                     >
                       {preferences.platform === "ios" ? (
@@ -283,53 +318,41 @@ async function openURL(
 
   switch (preferences.platform) {
     case "ios":
-      await executeFile("/usr/bin/xcrun", ["simctl", "openurl", target || "booted", urlString]);
+      await executeFile("/usr/bin/xcrun", ["simctl", "openurl", target || "booted", urlString], commandOptions);
       return;
-    case "ios-device":
+    case "ios-device": {
       if (!target) {
         throw new Error("Set a physical Apple device identifier in extension preferences.");
       }
-      if (!preferences.bundleIdentifier) {
+      const bundleIdentifier = preferences.bundleIdentifier?.trim();
+      if (!bundleIdentifier) {
         throw new Error("Set the Apple Bundle Identifier in extension preferences.");
       }
-      await executeFile("/usr/bin/xcrun", [
-        "devicectl",
-        "device",
-        "process",
-        "launch",
-        "--device",
-        target,
-        preferences.bundleIdentifier,
-        "--payload-url",
-        urlString,
-      ]);
+      await executeFile(
+        "/usr/bin/xcrun",
+        ["devicectl", "device", "process", "launch", "--device", target, bundleIdentifier, "--payload-url", urlString],
+        commandOptions,
+      );
       return;
+    }
     case "android": {
       if (!target) {
         throw new Error("Connect an Android device or set a fallback ADB device serial in extension preferences.");
       }
       const adb = await locateADB();
-      const argumentsList = [
-        "-s",
-        target,
-        "shell",
-        "am",
-        "start",
-        "-W",
-        "-a",
-        "android.intent.action.VIEW",
-        "-d",
-        urlString,
-      ];
-      if (preferences.androidPackage?.trim()) argumentsList.push("-p", preferences.androidPackage.trim());
-      await executeFile(adb, argumentsList);
+      const remoteCommand = buildADBRemoteCommand(urlString, preferences.androidPackage);
+      await executeFile(adb, ["-s", target, "shell", remoteCommand], commandOptions);
     }
   }
 }
 
 async function discoverTargets(platform: Preferences.SearchDeepLinks["platform"]): Promise<TargetDevice[]> {
   if (platform === "ios") {
-    const { stdout } = await executeFile("/usr/bin/xcrun", ["simctl", "list", "devices", "available", "--json"]);
+    const { stdout } = await executeFile(
+      "/usr/bin/xcrun",
+      ["simctl", "list", "devices", "available", "--json"],
+      commandOptions,
+    );
     const response = JSON.parse(stdout) as {
       devices?: Record<string, Array<{ isAvailable?: boolean; name: string; state: string; udid: string }>>;
     };
@@ -343,7 +366,7 @@ async function discoverTargets(platform: Preferences.SearchDeepLinks["platform"]
 
   if (platform === "android") {
     const adb = await locateADB();
-    const { stdout } = await executeFile(adb, ["devices", "-l"]);
+    const { stdout } = await executeFile(adb, ["devices", "-l"], commandOptions);
     return stdout
       .split(/\r?\n/)
       .slice(1)
@@ -369,9 +392,9 @@ async function locateADB(): Promise<string> {
     "/usr/local/bin/adb",
   ].filter((candidate): candidate is string => Boolean(candidate));
 
-  for (const candidate of candidates) {
+  for (const candidate of new Set(candidates)) {
     try {
-      await access(candidate);
+      await access(candidate, constants.X_OK);
       return candidate;
     } catch {
       continue;
@@ -380,35 +403,24 @@ async function locateADB(): Promise<string> {
   throw new Error("ADB was not found. Install Android Platform Tools or configure ANDROID_HOME.");
 }
 
-function resolve(source: string, environmentName: string, environments: LinkEnvironment[]): string {
-  const environment = environments.find((candidate) => candidate.name === environmentName);
-  return Object.entries(environment?.variables ?? {}).reduce(
-    (value, [key, replacement]) => value.replaceAll(`{{${key}}}`, replacement).replaceAll(`\${${key}}`, replacement),
-    source,
-  );
-}
-
-function findUnresolvedVariables(value: string): string[] {
-  const variables = new Set<string>();
-  for (const match of value.matchAll(/{{\s*([^{}]+?)\s*}}|\${([^{}]+)}/g)) {
-    variables.add((match[1] || match[2]).trim());
-  }
-  return [...variables];
-}
-
-function assertCanOpen(urlString: string, environmentName: string): void {
-  const unresolvedVariables = findUnresolvedVariables(urlString);
-  if (unresolvedVariables.length > 0) {
-    throw new Error(
-      `Configure ${unresolvedVariables.join(", ")} in the ${environmentName} environment before opening this link.`,
-    );
-  }
-
+async function readEnvironments(environmentsPath: string): Promise<LinkEnvironment[]> {
   try {
-    new URL(urlString);
-  } catch {
-    throw new Error("The deep link is malformed or does not include a URL scheme (for example, myapp://).");
+    return decodeEnvironments(await readFile(environmentsPath, "utf8"));
+  } catch (error) {
+    if (isNodeError(error, "ENOENT")) return builtInEnvironments;
+    throw new Error(`Could not read environments: ${error instanceof Error ? error.message : String(error)}`);
   }
+}
+
+function environmentByPreference(
+  environments: LinkEnvironment[],
+  preference: string | undefined,
+): LinkEnvironment | undefined {
+  const normalizedPreference = preference?.trim();
+  if (!normalizedPreference) return undefined;
+  return environments.find(
+    (environment) => environment.name.localeCompare(normalizedPreference, undefined, { sensitivity: "accent" }) === 0,
+  );
 }
 
 function defaultTarget(platform: Preferences.SearchDeepLinks["platform"]): string | undefined {
@@ -427,8 +439,16 @@ function simulatorRuntimeName(runtime: string): string {
 }
 
 function commandError(error: unknown): string {
+  if (typeof error === "object" && error && "killed" in error && error.killed) {
+    return "The developer tool did not respond within 60 seconds.";
+  }
   if (typeof error === "object" && error && "stderr" in error) {
-    return String((error as { stderr?: string }).stderr || "Command failed").trim();
+    const stderr = String((error as { stderr?: string }).stderr ?? "").trim();
+    if (stderr) return stderr;
   }
   return error instanceof Error ? error.message : String(error);
+}
+
+function isNodeError(error: unknown, code: string): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error && error.code === code;
 }

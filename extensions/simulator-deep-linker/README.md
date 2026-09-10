@@ -1,6 +1,6 @@
 # Simulator Deep Linker
 
-> This extension requires the [free, open-source Simulator Deep Linker macOS app](https://github.com/StefanBoblic/SimulatorDeepLinker). Install it with Homebrew or download it from [GitHub Releases](https://github.com/StefanBoblic/SimulatorDeepLinker/releases/latest).
+> This extension requires the [free, open-source Simulator Deep Linker macOS app](https://github.com/StefanBoblic/SimulatorDeepLinker) and macOS 15.7 or later. Install the app with Homebrew or download it from [GitHub Releases](https://github.com/StefanBoblic/SimulatorDeepLinker/releases/latest).
 
 Search your saved deep-link library from Raycast, switch environments, copy resolved URLs, and open links on iOS or Android developer devices.
 
@@ -11,6 +11,7 @@ Search your saved deep-link library from Raycast, switch environments, copy reso
    - Or download the latest free release from [GitHub Releases](https://github.com/StefanBoblic/SimulatorDeepLinker/releases/latest).
 2. Open the macOS app once. It creates the shared storage and publishes its location for the extension.
 3. For Apple targets, install Xcode. For Android targets, install Android Platform Tools and make sure `adb` can see the device.
+4. In Raycast's extension preferences, choose the target platform. Add a bundle identifier for a physical Apple device or, optionally, an Android package to constrain link handling.
 
 ## Using the Extension
 
@@ -21,6 +22,6 @@ Search your saved deep-link library from Raycast, switch environments, copy reso
 
 Development and Production environments start without variables. Configure every placeholder used by a template in the macOS app under **Settings → Environments**. The extension warns instead of opening a URL when the selected environment leaves placeholders unresolved.
 
-The extension detects the app's active storage automatically. If you deliberately keep a compatible `deeplinks.json` elsewhere, select it with **Storage Override** in the extension preferences.
+The extension detects the app's active storage automatically. If you deliberately keep a compatible `deeplinks.json` elsewhere, select it with **Storage Override** in the extension preferences. Keep its `environments.json` in the same directory.
 
 Unlike the Xcode extension's **Open URL in Simulator** and the Adb extension's **Open Url**, Simulator Deep Linker keeps a searchable, shared library with groups, tags, favorites, and reusable environments.

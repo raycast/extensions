@@ -46,7 +46,7 @@
     {
       "name": "platform",
       "title": "Target Platform",
-      "description": "Choose how the CLI should open selected links.",
+      "description": "Choose how the extension should open selected links.",
       "type": "dropdown",
       "default": "ios",
       "required": true,
@@ -96,6 +96,7 @@
     "@types/react": "19.1.9",
     "eslint": "^9.32.0",
     "prettier": "^3.6.2",
+    "tsx": "^4.23.13",
     "typescript": "^5.9.2"
   },
   "scripts": {
@@ -103,6 +104,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --import tsx --test tests/**/*.test.ts"
   }
 }
