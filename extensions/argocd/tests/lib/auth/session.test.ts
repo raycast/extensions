@@ -3,6 +3,7 @@ import {
   RENEW_AHEAD_MS,
   isExpired,
   matchesProvider,
+  matchesServer,
   mergeRenewal,
   needsLogin,
   needsRenewal,
@@ -141,5 +142,38 @@ describe("serialization", () => {
   it("recovers the expiry from the token when the stored value is missing", () => {
     const idToken = fakeJwt({ exp: 2_000_000_000 });
     expect(parseSession(JSON.stringify({ idToken }))?.expiresAt).toBe(2_000_000_000_000);
+  });
+});
+
+describe("a session records the server it was minted for", () => {
+  const base: SsoSession = {
+    idToken: "t",
+    refreshToken: "r",
+    expiresAt: undefined,
+    issuer: "https://idp.example.com",
+    clientId: "c",
+  };
+
+  it("matches the server it was minted for", () => {
+    expect(matchesServer({ ...base, baseUrl: "https://a.example.com" }, "https://a.example.com")).toBe(true);
+  });
+
+  it("does not match another server, which is what makes an edit detectable with no request", () => {
+    expect(matchesServer({ ...base, baseUrl: "https://a.example.com" }, "https://b.example.com")).toBe(false);
+  });
+
+  it("leaves a session stored before the field existed alone, since unknown is not grounds to void", () => {
+    expect(matchesServer(base, "https://anything.example.com")).toBe(true);
+  });
+
+  it("is stamped by sessionFromTokens and by a renewal", () => {
+    const tokens = { idToken: "x", refreshToken: undefined, expiresAt: 1 };
+    expect(sessionFromTokens(tokens, "i", "c", "https://a.example.com").baseUrl).toBe("https://a.example.com");
+    expect(mergeRenewal(base, tokens, "https://a.example.com").baseUrl).toBe("https://a.example.com");
+  });
+
+  it("omits the field rather than storing undefined when no server is given", () => {
+    const session = sessionFromTokens({ idToken: "x", refreshToken: undefined, expiresAt: 1 }, "i", "c");
+    expect("baseUrl" in session).toBe(false);
   });
 });

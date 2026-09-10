@@ -155,7 +155,10 @@ export async function loginWithSso(instance: ArgoInstance): Promise<LoginResult>
       );
     }
 
-    return { session: sessionFromTokens(tokens, settings.issuer, settings.clientId), settings };
+    return {
+      session: sessionFromTokens(tokens, settings.issuer, settings.clientId, instance.baseUrl),
+      settings,
+    };
   } finally {
     clearTimeout(timer);
     controller.abort();

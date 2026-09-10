@@ -207,3 +207,31 @@ describe("secret hygiene", () => {
     expect.assertions(2);
   });
 });
+
+describe("a cached renewal minted for another server is void", () => {
+  it("is discarded rather than served, however fresh it is", async () => {
+    const d = deps({
+      readCliToken: vi.fn().mockResolvedValue(cliToken({ expiresAt: new Date(NOW - 1) })),
+      readCachedSession: vi.fn().mockResolvedValue(cached({ baseUrl: "https://old.example.com" })),
+    });
+    await expect(createCliTokenReader(d)(INSTANCE)).resolves.toBe("renewed-id-token");
+    expect(d.clearCachedSession).toHaveBeenCalledWith("i1");
+  });
+
+  it("serves one recorded for this server", async () => {
+    const d = deps({
+      readCliToken: vi.fn().mockResolvedValue(cliToken({ expiresAt: new Date(NOW - 1) })),
+      readCachedSession: vi.fn().mockResolvedValue(cached({ baseUrl: INSTANCE.baseUrl })),
+    });
+    await expect(createCliTokenReader(d)(INSTANCE)).resolves.toBe("cached-id-token");
+    expect(d.refresh).not.toHaveBeenCalled();
+  });
+
+  it("stamps the server on what it caches", async () => {
+    const d = deps({
+      readCliToken: vi.fn().mockResolvedValue(cliToken({ expiresAt: new Date(NOW - 1) })),
+    });
+    await createCliTokenReader(d)(INSTANCE);
+    expect(d.writeCachedSession).toHaveBeenCalledWith("i1", expect.objectContaining({ baseUrl: INSTANCE.baseUrl }));
+  });
+});

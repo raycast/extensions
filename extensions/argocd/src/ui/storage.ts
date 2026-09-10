@@ -57,8 +57,21 @@ export async function saveInstances(instances: ArgoInstance[]): Promise<void> {
 
   await LocalStorage.setItem(INSTANCES_KEY, serializeInstances(instances));
 
+  // The write is the save. Past this line the configuration is stored, so a failure to clear
+  // must not be reported as a failed save: the caller would keep its old state and leave the
+  // form open over storage that already changed, and a retry would diff the new list against
+  // itself and skip the cleanup for good.
+  //
+  // Which is why this cleanup is an optimisation and not the safeguard. The safeguard is the
+  // `baseUrl` recorded on the session: the token readers compare it locally, with no request,
+  // and void a session minted for another server whatever its expiry says. If every call here
+  // failed, the invariant would still hold.
   for (const instance of invalidated) {
-    await clearInstanceSecrets(secretStore, instance.id);
+    try {
+      await clearInstanceSecrets(secretStore, instance.id);
+    } catch {
+      // Deliberately swallowed. The reader catches the mismatch on the next use.
+    }
   }
 }
 

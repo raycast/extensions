@@ -17,18 +17,33 @@ export interface SsoSession {
   /** Kept so a session is invalidated when the instance is pointed at another provider. */
   issuer: string;
   clientId: string;
+  /**
+   * The server this token was minted for.
+   *
+   * Recorded so a session pointed at another server can be caught **locally**, with a string
+   * comparison and no request. The issuer and client can only be compared after reading the
+   * instance's settings, which is a round trip, so that check lives on the renewal path and
+   * a live token skipped it. Cleanup at save time closed most of that gap, but a cleanup that
+   * fails leaves nothing behind to retry from. This closes it for good and costs nothing.
+   *
+   * Optional because sessions stored before this field existed do not carry it. Absent means
+   * unknown, and unknown is not grounds to void a session, the same rule `expiresAt` follows:
+   * the server stays the authority. It is stamped on the next renewal.
+   */
+  baseUrl?: string;
 }
 
 /** Renew this far ahead of expiry, so a request is never sent with a token about to lapse. */
 export const RENEW_AHEAD_MS = 60_000;
 
-export function sessionFromTokens(tokens: TokenSet, issuer: string, clientId: string): SsoSession {
+export function sessionFromTokens(tokens: TokenSet, issuer: string, clientId: string, baseUrl?: string): SsoSession {
   return {
     idToken: tokens.idToken,
     refreshToken: tokens.refreshToken,
     expiresAt: tokens.expiresAt ?? decodeExpiry(tokens.idToken),
     issuer,
     clientId,
+    ...(baseUrl === undefined ? {} : { baseUrl }),
   };
 }
 
@@ -36,12 +51,14 @@ export function sessionFromTokens(tokens: TokenSet, issuer: string, clientId: st
  * Merges a renewal into the stored session. A provider that does not rotate the refresh token
  * returns none, and the existing one stays valid, so it is kept.
  */
-export function mergeRenewal(previous: SsoSession, tokens: TokenSet): SsoSession {
+export function mergeRenewal(previous: SsoSession, tokens: TokenSet, baseUrl?: string): SsoSession {
   return {
     ...previous,
     idToken: tokens.idToken,
     refreshToken: tokens.refreshToken ?? previous.refreshToken,
     expiresAt: tokens.expiresAt ?? decodeExpiry(tokens.idToken),
+    // Stamps the field on a session stored before it existed.
+    ...(baseUrl === undefined ? {} : { baseUrl }),
   };
 }
 
@@ -74,6 +91,14 @@ export function needsLogin(session: SsoSession | undefined, now: number): boolea
 /** A session is void once the instance points at a different provider or client. */
 export function matchesProvider(session: SsoSession, issuer: string, clientId: string): boolean {
   return session.issuer === issuer && session.clientId === clientId;
+}
+
+/**
+ * False only when the session records a server and it is not this one. A session with no
+ * recorded server predates the field and is left alone.
+ */
+export function matchesServer(session: SsoSession, baseUrl: string): boolean {
+  return session.baseUrl === undefined || session.baseUrl === baseUrl;
 }
 
 export function serializeSession(session: SsoSession): string {

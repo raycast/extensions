@@ -15,7 +15,7 @@ import type { ArgoInstance } from "../config/instances";
 import type { OidcSettings } from "../argocd/settings";
 import { AuthError } from "./provider";
 import { OidcError, type OidcEndpoints, type TokenSet } from "./oidc";
-import { matchesProvider, mergeRenewal, needsRenewal, type SsoSession } from "./session";
+import { matchesServer, matchesProvider, mergeRenewal, needsRenewal, type SsoSession } from "./session";
 
 export interface SsoDeps {
   /** The stored session for this instance, or undefined when there has been no login. */
@@ -46,6 +46,16 @@ export function createSsoTokenReader(deps: SsoDeps): (instance: ArgoInstance) =>
     const stored = await deps.readSession(instance.id);
     if (!stored) {
       return Promise.reject(loginRequired(instance, host, "There is no single sign-on session yet."));
+    }
+
+    // A session minted for another server is void whatever its expiry says, and this catches
+    // it without a request: the server is recorded on the session. The issuer and client can
+    // only be compared after reading the instance's settings, so that check stays below on the
+    // renewal path. Without this, a live token survived an edit until it expired, and the
+    // cleanup that was supposed to prevent that had no way to be retried if it failed.
+    if (!matchesServer(stored, instance.baseUrl)) {
+      await deps.clearSession(instance.id);
+      throw loginRequired(instance, host, "This instance now points at a different server.");
     }
 
     if (!needsRenewal(stored, deps.now())) {
@@ -85,7 +95,7 @@ export function createSsoTokenReader(deps: SsoDeps): (instance: ArgoInstance) =>
       throw error;
     }
 
-    const renewed = mergeRenewal(stored, tokens);
+    const renewed = mergeRenewal(stored, tokens, instance.baseUrl);
     await deps.writeSession(instance.id, renewed);
     return renewed.idToken;
   };

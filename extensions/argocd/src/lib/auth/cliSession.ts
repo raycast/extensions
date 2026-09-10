@@ -31,7 +31,7 @@ import { instanceHost } from "../config/instances";
 import type { CliToken } from "./cliConfig";
 import { OidcError, type OidcEndpoints, type TokenSet } from "./oidc";
 import { AuthError } from "./provider";
-import { mergeRenewal, needsRenewal, sessionFromTokens, type SsoSession } from "./session";
+import { matchesServer, mergeRenewal, needsRenewal, sessionFromTokens, type SsoSession } from "./session";
 
 export interface CliSessionDeps {
   readCliToken: (host: string) => Promise<CliToken | undefined>;
@@ -69,9 +69,12 @@ export function createCliTokenReader(deps: CliSessionDeps): (instance: ArgoInsta
       return stored.token;
     }
 
-    // Rule 2.
+    // Rule 2. The recorded server is checked first, locally: a cached renewal minted for
+    // another server is void however fresh it is.
     const cached = await deps.readCachedSession(instance.id);
-    if (cached && !needsRenewal(cached, deps.now())) {
+    if (cached && !matchesServer(cached, instance.baseUrl)) {
+      await deps.clearCachedSession(instance.id);
+    } else if (cached && !needsRenewal(cached, deps.now())) {
       return cached.idToken;
     }
 
@@ -101,8 +104,8 @@ export function createCliTokenReader(deps: CliSessionDeps): (instance: ArgoInsta
     }
 
     const renewed = cached
-      ? mergeRenewal(cached, tokens)
-      : sessionFromTokens(tokens, settings.issuer, settings.clientId);
+      ? mergeRenewal(cached, tokens, instance.baseUrl)
+      : sessionFromTokens(tokens, settings.issuer, settings.clientId, instance.baseUrl);
     await deps.writeCachedSession(instance.id, renewed);
     return renewed.idToken;
   };

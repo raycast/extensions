@@ -193,3 +193,30 @@ describe("secret hygiene", () => {
     expect.assertions(2);
   });
 });
+
+describe("a session minted for another server is void with no request", () => {
+  it("is refused and discarded even while live, which the expiry check alone allowed", async () => {
+    const d = deps({
+      readSession: vi.fn().mockResolvedValue(session({ baseUrl: "https://old.example.com" })),
+    });
+    await expect(createSsoTokenReader(d)(INSTANCE)).rejects.toThrowError(/different server/);
+    expect(d.clearSession).toHaveBeenCalledWith("i1");
+    // The whole point: caught locally, so the common path stays free of round trips.
+    expect(d.readSettings).not.toHaveBeenCalled();
+    expect(d.discover).not.toHaveBeenCalled();
+    expect(d.refresh).not.toHaveBeenCalled();
+  });
+
+  it("serves a live session recorded for this very server", async () => {
+    const d = deps({
+      readSession: vi.fn().mockResolvedValue(session({ baseUrl: INSTANCE.baseUrl })),
+    });
+    await expect(createSsoTokenReader(d)(INSTANCE)).resolves.toBe("live-id-token");
+  });
+
+  it("stamps the server on a renewal, so a session stored before the field gains it", async () => {
+    const d = deps({ readSession: vi.fn().mockResolvedValue(session({ expiresAt: NOW - 1 })) });
+    await createSsoTokenReader(d)(INSTANCE);
+    expect(d.writeSession).toHaveBeenCalledWith("i1", expect.objectContaining({ baseUrl: INSTANCE.baseUrl }));
+  });
+});
