@@ -1,6 +1,6 @@
 # MemeStash Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-10
 
 - Search your image/meme library in a thumbnail grid, fuzzy-filtered by name and keywords
 - Paste the selected image into the frontmost app, with copy and show-in-Finder fallbacks
