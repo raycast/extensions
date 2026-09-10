@@ -1,24 +1,31 @@
 import { Process } from "../types";
+import { isWindows } from "./platform";
 
 function getOuterAppBundlePath(path: string): string | undefined {
+  if (isWindows) {
+    return path ? path.toLowerCase() : undefined;
+  }
   return path.match(/^(.+?\.app)(?:\/|$)/)?.[1];
 }
 
-function getAppNameFromBundlePath(bundlePath: string): string {
+function getAppNameFromBundlePath(bundlePath: string, processes: Process[]): string {
+  if (isWindows) {
+    return processes[0].processName;
+  }
   return bundlePath.match(/([^/]+)\.app$/)?.[1] ?? bundlePath;
 }
 
 function findMainProcess(processes: Process[], appName: string): Process {
   const processIds = new Set(processes.map((process) => process.id));
-  return (
-    processes.find((process) => process.processName === appName) ??
-    processes.find((process) => !processIds.has(process.pid)) ??
-    processes[0]
-  );
+  const rootProcess = processes.find((process) => !processIds.has(process.pid));
+  if (isWindows) {
+    return rootProcess ?? processes[0];
+  }
+  return processes.find((process) => process.processName === appName) ?? rootProcess ?? processes[0];
 }
 
 function aggregateAppProcesses(bundlePath: string, processes: Process[]): Process {
-  const appName = getAppNameFromBundlePath(bundlePath);
+  const appName = getAppNameFromBundlePath(bundlePath, processes);
   const mainProcess = findMainProcess(processes, appName);
   const childProcesses = processes.filter((process) => process.id !== mainProcess.id);
 
