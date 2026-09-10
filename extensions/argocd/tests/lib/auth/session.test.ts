@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   RENEW_AHEAD_MS,
+  SESSION_FIELDS,
   isExpired,
   matchesProvider,
   matchesServer,
@@ -175,5 +176,54 @@ describe("a session records the server it was minted for", () => {
   it("omits the field rather than storing undefined when no server is given", () => {
     const session = sessionFromTokens({ idToken: "x", refreshToken: undefined, expiresAt: 1 }, "i", "c");
     expect("baseUrl" in session).toBe(false);
+  });
+});
+
+describe("a session survives storage intact", () => {
+  const full: SsoSession = {
+    idToken: "the-id-token",
+    refreshToken: "the-refresh-token",
+    expiresAt: 1_757_280_000_000,
+    issuer: "https://idp.example.com",
+    clientId: "public-client",
+    baseUrl: "https://argocd.example.com",
+  };
+
+  it("round-trips every field, which is what parseSession dropped baseUrl by failing to do", () => {
+    expect(parseSession(serializeSession(full))).toEqual(full);
+  });
+
+  it("keeps the server binding usable after the round trip, not just in memory", () => {
+    const restored = parseSession(serializeSession(full));
+    expect(restored).toBeDefined();
+    expect(matchesServer(restored as SsoSession, "https://argocd.example.com")).toBe(true);
+    expect(matchesServer(restored as SsoSession, "https://other.example.com")).toBe(false);
+  });
+
+  it("covers every declared field, so the next one added cannot be silently dropped", () => {
+    // The failure this guards against: a field reaches the interface and the readers, its
+    // checks are tested in memory, and the parser never learns about it.
+    for (const field of SESSION_FIELDS) {
+      expect(Object.keys(full)).toContain(field);
+    }
+    const restored = parseSession(serializeSession(full)) as unknown as Record<string, unknown>;
+    const expected = full as unknown as Record<string, unknown>;
+    for (const field of SESSION_FIELDS) {
+      expect({ field, value: restored[field] }).toEqual({ field, value: expected[field] });
+    }
+  });
+
+  it("omits an absent binding rather than storing null, keeping unknown distinguishable", () => {
+    const { baseUrl: _omitted, ...legacy } = full;
+    const restored = parseSession(JSON.stringify(legacy));
+    expect(restored && "baseUrl" in restored).toBe(false);
+    expect(matchesServer(restored as SsoSession, "https://anything.example.com")).toBe(true);
+  });
+
+  it("ignores a binding that is not a usable string", () => {
+    for (const bad of [42, "", null, {}]) {
+      const restored = parseSession(JSON.stringify({ ...full, baseUrl: bad }));
+      expect(restored && "baseUrl" in restored).toBe(false);
+    }
   });
 });

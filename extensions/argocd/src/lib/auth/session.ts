@@ -106,6 +106,17 @@ export function serializeSession(session: SsoSession): string {
 }
 
 /**
+ * Every field a session carries, so a round-trip test can assert none is dropped.
+ *
+ * This exists because `parseSession` rebuilds the object field by field, which is the right
+ * way to distrust storage and the wrong way to add a field: `baseUrl` was added to the
+ * interface and to both readers, the checks were tested, and the parser silently discarded it
+ * on every load. The safeguard was inert in production and green in the suite, because the
+ * tests built sessions in memory and never went through storage.
+ */
+export const SESSION_FIELDS = ["idToken", "refreshToken", "expiresAt", "issuer", "clientId", "baseUrl"] as const;
+
+/**
  * Reads a stored session back. Storage is not something to trust blindly, so anything that
  * does not carry an id token is discarded rather than repaired.
  */
@@ -136,5 +147,8 @@ export function parseSession(raw: string | undefined): SsoSession | undefined {
       typeof value.expiresAt === "number" && Number.isFinite(value.expiresAt) ? value.expiresAt : decodeExpiry(idToken),
     issuer: typeof value.issuer === "string" ? value.issuer : "",
     clientId: typeof value.clientId === "string" ? value.clientId : "",
+    // Omitted rather than set to undefined, so `"baseUrl" in session` stays false for a
+    // session that predates the field and the round trip is exactly lossless.
+    ...(typeof value.baseUrl === "string" && value.baseUrl.length > 0 ? { baseUrl: value.baseUrl } : {}),
   };
 }
