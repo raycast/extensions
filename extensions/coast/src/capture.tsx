@@ -5,6 +5,7 @@ import {
   Clipboard,
   Icon,
   List,
+  getPreferenceValues,
   open,
   showHUD,
 } from "@raycast/api";
@@ -17,32 +18,49 @@ import {
 } from "./coast";
 import { aroundMoment, readableTime } from "./dates";
 import { Inspector, MomentsView } from "./explore";
+import { PreviewCache } from "./preview-cache";
+
+const previews = new PreviewCache();
+const previewHeight = 220;
 
 export function CaptureDetailPane({ capture }: { capture: CaptureDetail }) {
-  const [imagePath, setImagePath] = useState<string>();
-  const [imageError, setImageError] = useState<string>();
+  const source =
+    getPreferenceValues<Preferences>().coastPath?.trim() || "coast";
+  const key = JSON.stringify([source, capture.frame_id]);
+  const [result, setResult] = useState<{
+    key: string;
+    path?: string;
+    error?: string;
+  }>();
+  // Selection identity prevents a previous frame appearing with new metadata.
+  const imagePath =
+    previews.get(key) || (result?.key === key ? result.path : undefined);
+  const imageError = result?.key === key ? result.error : undefined;
 
   useEffect(() => {
     let active = true;
-    setImagePath(undefined);
-    setImageError(undefined);
-    getCaptureImage(capture.frame_id)
-      .then((path) => active && setImagePath(path))
+    setResult(undefined);
+    previews
+      .load(key, () => getCaptureImage(capture.frame_id))
+      .then((path) => active && setResult({ key, path }))
       .catch((error) => {
         if (active) {
-          setImageError(error instanceof Error ? error.message : String(error));
+          setResult({
+            key,
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       });
     return () => {
       active = false;
     };
-  }, [capture.frame_id]);
+  }, [key, capture.frame_id]);
 
   const markdown = imagePath
-    ? `![Capture](${pathToFileURL(imagePath).href})`
+    ? `![Capture](${pathToFileURL(imagePath).href}?raycast-height=${previewHeight})`
     : imageError
       ? "Screenshot unavailable. Open the inspector to retry, or choose Show OCR there."
-      : "";
+      : `![](preview-space.svg?raycast-height=${previewHeight})`;
 
   return (
     <List.Item.Detail

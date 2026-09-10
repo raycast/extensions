@@ -16,4 +16,5 @@
 - Preserve source warnings and clarify timestamp, accessibility completeness and payload metadata.
 - Prevent OCR-to-screenshot flicker in Search previews.
 - Keep pending screenshot previews blank instead of flashing loading text or placeholder icons.
+- Reserve preview space to keep metadata stationary during image loading, and reuse recent local screenshot paths for faster repeat selections.
 - Use Coast's application icon with normalized padding for consistent sizing in Raycast, while retaining the independent-maintainer disclosure.
