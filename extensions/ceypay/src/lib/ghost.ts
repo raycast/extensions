@@ -1,4 +1,4 @@
-import { Parser } from "commonmark";
+import { Parser, type Node, type Position } from "commonmark";
 import type { BlogPost } from "./types";
 
 /**
@@ -189,170 +189,199 @@ function markdownImage(src: string, width?: number, height?: number): string {
  * follows is the only way to see every image it will actually fetch, reference
  * images included: `![alt][label]` names no URL at the point of use, so the
  * destination only appears once a parser has paired it with its definition.
+ *
+ * The tree the parser returns answers the other half of it too. Which text is
+ * code is not a question a pattern can settle: a backtick and a run of two
+ * never close each other, so text between them reads as a code span while the
+ * parser is resolving an image inside it. Both questions are put to the tree
+ * here, and the blocks that offend are written back out of it.
  * ------------------------------------------------------------------ */
 
-/** Every destination CommonMark resolves for an image, references included. */
-function imageDestinations(markdown: string): string[] {
-  const walker = new Parser().parse(markdown).walker();
-  const destinations: string[] = [];
+function parse(markdown: string): Node {
+  return new Parser().parse(markdown);
+}
+
+/**
+ * Where a node sits in the source. commonmark records this while it parses, and
+ * only for blocks: an inline node has no position of its own, so this is also
+ * how a block is told from what it contains.
+ */
+function positionOf(node: Node): Position | undefined {
+  return node.sourcepos;
+}
+
+/**
+ * Whether the renderer would be sent to a host because of this node.
+ *
+ * An image is judged on the destination the parser resolved for it, which for a
+ * reference image is the only place one is ever stated. Raw HTML is never
+ * trusted: the document is Markdown by now, so a tag inside it arrived as text,
+ * and whether it fetches anything is the renderer's decision rather than ours.
+ *
+ * Code is absent from this list, and that is the point of reading the tree. A
+ * code span or a code block holds no image node and no HTML node however much
+ * image syntax it displays, so a sample a post means to show — fenced, indented
+ * or inline — is never mistaken for a request and never touched.
+ */
+function fetches(node: Node): boolean {
+  if (node.type === "html_inline" || node.type === "html_block") return true;
+  return node.type === "image" && !isTrustedImage(node.destination ?? undefined);
+}
+
+/** The leaf blocks carrying something the reader must not be made to fetch. */
+function offendingBlocks(document: Node): Node[] {
+  const blocks: Node[] = [];
+  const walker = document.walker();
+
   for (let event = walker.next(); event; event = walker.next()) {
-    if (event.entering && event.node.type === "image") destinations.push(event.node.destination ?? "");
-  }
-  return destinations;
-}
+    if (!event.entering || !fetches(event.node)) continue;
 
-type InlineImage = { destination: string; end: number };
-
-/**
- * Reads `![alt](destination "title")` starting at `![`, the way CommonMark does:
- * brackets nest, so the label of `![a[b]](…)` runs to its own closing bracket
- * rather than the first one, and a `<…>` destination may hold spaces.
- */
-function readInlineImage(source: string, start: number): InlineImage | undefined {
-  let i = start + 2;
-  for (let depth = 1; i < source.length && depth > 0; i++) {
-    if (source[i] === "\\") i++;
-    else if (source[i] === "[") depth++;
-    else if (source[i] === "]") depth--;
-  }
-  if (source[i] !== "(") return undefined;
-
-  i++;
-  while (i < source.length && /\s/.test(source[i])) i++;
-
-  let destination = "";
-  if (source[i] === "<") {
-    for (i++; i < source.length && source[i] !== ">"; i++) {
-      if (source[i] === "\\") i++;
-      destination += source[i];
-    }
-    i++;
-  } else {
-    for (let depth = 0; i < source.length && !/\s/.test(source[i]); i++) {
-      if (source[i] === "\\") i++;
-      else if (source[i] === "(") depth++;
-      else if (source[i] === ")" && depth-- === 0) break;
-      destination += source[i];
-    }
+    // An inline node states no position of its own, so the leaf block holding
+    // it is the unit that gets rewritten.
+    let block: Node | null = event.node;
+    while (block && !positionOf(block)) block = block.parent;
+    if (block && !blocks.includes(block)) blocks.push(block);
   }
 
-  // Past the destination sits an optional title, then the closing paren.
-  for (; i < source.length; i++) {
-    if (source[i] === "\\") i++;
-    else if (source[i] === ")") return { destination, end: i + 1 };
-  }
-  return undefined;
+  return blocks;
 }
 
 /**
- * Reads a document line by line and says whether each one is code, so a scan can
- * step over fenced blocks without touching them.
- *
- * A fence closes only on a run of its own character at least as long as the one
- * that opened it, and on a line carrying nothing else. Both rules matter here:
- * wrapping a sample in a longer fence is how a post shows ``` in the first
- * place, and an inner ```js opens a nested sample rather than ending the block.
+ * Text out of the tree goes back in as text: every character that could open
+ * markup is escaped, so a rewritten block renders what it reads and can never
+ * grow an image it did not already have. `!` is escaped along with the rest —
+ * a `\!` the post wrote as text sits next to a link in the tree, and the two
+ * put back unescaped would spell an image between them.
  */
-function fenceTracker(): (line: string) => boolean {
-  let fence = "";
-
-  return (line) => {
-    const run = line.match(/^\s{0,3}(`{3,}|~{3,})/)?.[1];
-    if (fence) {
-      const closes = run && run[0] === fence[0] && run.length >= fence.length;
-      if (closes && /^\s{0,3}(`{3,}|~{3,})[ \t]*$/.test(line)) fence = "";
-      return true;
-    }
-    if (run) fence = run;
-    return Boolean(run);
-  };
+function escapeText(text: string): string {
+  return text.replace(/[\\`*_[\]<>&!~|]/g, "\\$&");
 }
 
 /**
- * Rewrites the prose of a document and leaves its code alone. Image syntax
- * inside a fenced block or a code span is a sample — writing about an image
- * rather than showing one — so the renderer never fetches it and editing it
- * would corrupt a code sample the post meant to display.
+ * A code span wide enough to hold its own content: the fence has to outrun the
+ * longest run of backticks inside it, and content that begins or ends with a
+ * backtick — or with a space at both ends — needs the padding space CommonMark
+ * strips back off when it reads the span.
  */
-function mapProse(markdown: string, rewrite: (prose: string) => string): string {
-  const isCode = fenceTracker();
-
-  return markdown
-    .split("\n")
-    .map((line) => {
-      if (isCode(line)) return line;
-      // Splitting on a captured pattern interleaves the parts: the code spans
-      // land on the odd indices, the prose between them on the even ones.
-      return line
-        .split(/(`+[^`]*`+)/)
-        .map((part, index) => (index % 2 === 0 ? rewrite(part) : part))
-        .join("");
-    })
-    .join("\n");
+function renderCode(literal: string): string {
+  const runs = (literal.match(/`+/g) ?? []).map((run) => run.length);
+  const fence = "`".repeat(Math.max(0, ...runs) + 1);
+  const spaced = literal.startsWith(" ") && literal.endsWith(" ") && literal.trim() !== "";
+  const padding = /^`|`$/.test(literal) || spaced ? " " : "";
+  return `${fence}${padding}${literal}${padding}${fence}`;
 }
 
-/** Drops inline images whose destination is not one the reader may contact. */
-function removeInlineImages(markdown: string, untrusted: (destination: string) => boolean): string {
-  return mapProse(markdown, (prose) => {
-    let out = "";
-    let cursor = 0;
+/** Whether a destination can be written without the angle brackets. */
+function isBareDestination(destination: string): boolean {
+  if (destination === "" || /[\s<>\\]/.test(destination)) return false;
 
-    for (let start = prose.indexOf("!["); start !== -1; start = prose.indexOf("![", cursor)) {
-      out += prose.slice(cursor, start);
-      const image = readInlineImage(prose, start);
-      if (!image) {
-        // Not an inline image after all — keep the `![` and carry on past it.
-        out += "![";
-        cursor = start + 2;
-        continue;
-      }
-      if (!untrusted(image.destination)) out += prose.slice(start, image.end);
-      cursor = image.end;
-    }
+  // Parens may stand unescaped only while they balance.
+  let depth = 0;
+  for (const character of destination) {
+    if (character === "(") depth++;
+    else if (character === ")" && --depth < 0) return false;
+  }
+  return depth === 0;
+}
 
-    return out + prose.slice(cursor);
-  });
+/** A destination and title as the link or image they came from would write them. */
+function renderTarget(node: Node): string {
+  const destination = node.destination ?? "";
+  const written = isBareDestination(destination) ? destination : `<${destination.replace(/[<>\\]/g, "\\$&")}>`;
+  return written + (node.title ? ` "${node.title.replace(/["\\]/g, "\\$&")}"` : "");
+}
+
+function renderChildren(parent: Node): string {
+  let out = "";
+  for (let child = parent.firstChild; child; child = child.next) out += renderInline(child);
+  return out;
+}
+
+/** One inline node, written back as the Markdown that would parse to it. */
+function renderInline(node: Node): string {
+  switch (node.type) {
+    case "code":
+      return renderCode(node.literal ?? "");
+    case "emph":
+      return `*${renderChildren(node)}*`;
+    case "strong":
+      return `**${renderChildren(node)}**`;
+    case "link":
+      // A link is a destination the reader chooses to open, not one the
+      // renderer fetches, so it is carried across as it was.
+      return `[${renderChildren(node)}](${renderTarget(node)})`;
+    case "image":
+      // A dropped image leaves nothing behind: its alt text describes a picture
+      // that is not there.
+      return fetches(node) ? "" : `![${renderChildren(node)}](${renderTarget(node)})`;
+    case "softbreak":
+    case "linebreak":
+      // Both go back as a space, so a rewritten block returns on a single line
+      // and a break can never land where a new block would start.
+      return " ";
+    default:
+      // Text, and raw HTML, which is text here for the reason `fetches` gives.
+      return escapeText(node.literal ?? "");
+  }
 }
 
 /**
- * Drops the link reference definitions that point somewhere untrusted, which is
- * what makes `![alt][label]` resolve. Without its definition the reference is no
- * longer a link of any kind and renders as the literal text it looks like.
- *
- * Definitions inside a fenced block are sample text rather than markup, so the
- * fences are tracked and their contents left alone.
+ * The container markers a block sits behind — a quote's `>`, a list item's
+ * bullet, the indent beneath either. A tab advances to the next stop of four,
+ * the way the parser counted the columns it reported.
  */
-function removeReferenceDefinitions(markdown: string, untrusted: (destination: string) => boolean): string {
-  const isCode = fenceTracker();
+function blockIndent(line: string, column: number): string {
+  let at = 1;
+  let index = 0;
+  for (; index < line.length && at < column; index++) at += line[index] === "\t" ? 4 - ((at - 1) % 4) : 1;
+  return line.slice(0, index);
+}
 
-  return markdown
-    .split("\n")
-    .filter((line) => {
-      if (isCode(line)) return true;
-      const destination = line.match(/^ {0,3}\[(?:[^\]\\]|\\.)+\]:\s*<?([^\s>]+)>?/)?.[1];
-      return !destination || !untrusted(destination);
-    })
-    .join("\n");
+/** One block, written back from its own subtree, minus the images it may not show. */
+function renderBlock(block: Node, indent: string): string[] {
+  const body =
+    block.type === "heading"
+      ? `${"#".repeat(block.level)} ${renderChildren(block)}`
+      : block.type === "html_block"
+        ? escapeText((block.literal ?? "").replace(/\n+$/, ""))
+        : renderChildren(block);
+
+  // An HTML block is the only kind that still spans lines once it is text.
+  const continuation = indent.replace(/\S/g, " ");
+  return body.split("\n").map((line, index) => (index === 0 ? indent : continuation) + line);
+}
+
+/** Puts each offending block back as the Markdown its own subtree describes. */
+function rewriteBlocks(markdown: string, blocks: Node[]): string {
+  const lines = markdown.split("\n");
+
+  // Last block first, so the line numbers the parser reported for the earlier
+  // ones still point where they did.
+  for (const block of [...blocks].sort((a, b) => b.sourcepos[0][0] - a.sourcepos[0][0])) {
+    const [[first, column], [last]] = block.sourcepos;
+    lines.splice(first - 1, last - first + 1, ...renderBlock(block, blockIndent(lines[first - 1] ?? "", column)));
+  }
+
+  return lines.join("\n");
 }
 
 /**
  * Holds every image in the finished document to `IMAGE_HOSTS`, whichever syntax
- * it arrived in. The parser has the last word: if an untrusted destination is
- * still reachable after the targeted removals, image syntax is escaped across
- * the document's prose, so the worst case is an image rendered as the text that
- * describes it and never a request to a host that was not named here.
+ * it arrived in, and leaves the rest of the document as it was — the code
+ * samples in a post about Markdown included.
  */
 export function gateImages(markdown: string): string {
-  const untrusted = (destination: string) => !isTrustedImage(destination);
+  const blocks = offendingBlocks(parse(markdown));
+  if (blocks.length === 0) return markdown;
 
-  let out = markdown;
-  if (imageDestinations(out).some(untrusted)) {
-    out = removeReferenceDefinitions(out, untrusted);
-    out = removeInlineImages(out, untrusted);
-  }
+  const gated = rewriteBlocks(markdown, blocks);
 
-  if (!imageDestinations(out).some(untrusted)) return out;
-  return mapProse(out, (prose) => prose.replace(/!\[/g, "!\\["));
+  // A rewritten block is built out of escaped text, code spans, links and
+  // trusted images, so the parser should now resolve nothing left to fetch.
+  // Asking it again is what makes that a fact rather than a claim. Were it ever
+  // not, the document goes out as the characters it is made of, and no parser
+  // reads an image out of text whose every bracket is escaped.
+  return offendingBlocks(parse(gated)).length === 0 ? gated : escapeText(gated);
 }
 
 export type ImageSize = { width: number; height: number };
