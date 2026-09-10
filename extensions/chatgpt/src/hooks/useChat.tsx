@@ -106,10 +106,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           temperature: Number(model.temperature),
           ...(includeReasoningEffort && selectedReasoningEffort ? { reasoning_effort: selectedReasoningEffort } : {}),
           messages: [
-            ...chatTransformer(
-              [...data].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at)),
-              model.prompt,
-            ),
+            ...chatTransformer([...data].reverse(), model.prompt),
             { role: "user", content: buildUserMessage(question, files) },
           ],
           stream: useStream,

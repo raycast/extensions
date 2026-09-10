@@ -72,10 +72,9 @@ export default function Conversation() {
               <ImportForm
                 moduleName="Conversation"
                 onSubmit={async (file) => {
-                  const data = await ImportData<ConversationType>("conversations", file);
-                  if (!data) return false;
-                  await conversations.setConversations(data);
-                  return true;
+                  ImportData<ConversationType>("conversations", file).then((data) => {
+                    conversations.setConversations(data);
+                  });
                 }}
               />,
             )
@@ -134,10 +133,9 @@ export default function Conversation() {
                     <ImportForm
                       moduleName="Conversation"
                       onSubmit={async (file) => {
-                        const data = await ImportData<ConversationType>("conversations", file);
-                        if (!data) return false;
-                        await conversations.setConversations(data);
-                        return true;
+                        ImportData<ConversationType>("conversations", file).then((data) => {
+                          conversations.setConversations(data);
+                        });
                       }}
                     />,
                   )

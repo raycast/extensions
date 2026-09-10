@@ -33,22 +33,38 @@ export function ExportData(data: any, moduleName: string) {
     });
 }
 
-export async function ImportData<T>(
-  localStorageKey: string,
-  file: string,
-  save?: (data: T[] | Record<string, T>) => Promise<void>,
-  message = "This action cannot be undone",
-): Promise<T[] | undefined> {
+export async function ImportData<T>(localStorageKey: string, file: string): Promise<T[]> {
   const data = await readFile(file);
   const parsedData = JSON.parse(data.toString());
-  const confirmed = await confirmAlert({
-    title: "Import will overwrite your current data",
-    message,
-    icon: Icon.Download,
-    primaryAction: { title: "Import", style: Alert.ActionStyle.Destructive },
+  return new Promise<T[]>((resolve, reject) => {
+    confirmAlert({
+      title: "Import will overwrite your current data",
+      message: "This action cannot be undone",
+      icon: Icon.Download,
+      primaryAction: {
+        title: "Import",
+        style: Alert.ActionStyle.Destructive,
+        onAction: async () => {
+          LocalStorage.setItem(localStorageKey, JSON.stringify(parsedData))
+            .then(() => {
+              showToast({
+                title: "Data imported",
+                message: `from ${file}`,
+                style: Toast.Style.Success,
+              });
+              console.log("Imported data", parsedData);
+              resolve(parsedData);
+            })
+            .catch((error) => {
+              showToast({
+                title: "Failed to import data",
+                message: error.message,
+                style: Toast.Style.Failure,
+              });
+              reject(error);
+            });
+        },
+      },
+    });
   });
-  if (!confirmed) return;
-  await (save ? save(parsedData) : LocalStorage.setItem(localStorageKey, JSON.stringify(parsedData)));
-  await showToast({ title: "Data imported", message: `from ${file}`, style: Toast.Style.Success });
-  return Array.isArray(parsedData) ? parsedData : Object.values(parsedData);
 }

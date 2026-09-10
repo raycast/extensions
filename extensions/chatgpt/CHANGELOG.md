@@ -2,12 +2,9 @@
 
 ## [Feature] - {PR_MERGE_DATE}
 
-- Create and edit AI commands in Models, including creating a command from the selected model.
-- Remove the standalone Create AI Command entry. Create commands through the Models action menu; replace shortcuts or deep links to the removed entry with Models.
-- Rename Search AI Command to AI Commands, preserving existing command shortcuts and quicklinks.
-- Let commands configure their own model settings or inherit a base model with per-setting overrides; preserve existing command settings during migration.
-- Add navigation from Models to Ask and editing from Ask, retaining model selection, drafts and existing messages.
-- Keep model and command edits synchronized across open forms, and prevent removal of models still used by commands.
+- Model and AI Command forms now combine API model discovery and manual model ID entry in one searchable dropdown.
+- Removed the separate `Custom model` preference; saved model IDs remain available when model discovery fails or omits them.
+- Model management no longer waits for the remote model list; each form loads its own options in the background.
 
 ## [Fix] - 2026-09-10
 

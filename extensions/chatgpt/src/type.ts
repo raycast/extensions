@@ -47,18 +47,6 @@ export type ReasoningEffort = "none" | "low" | "medium" | "high";
 export type CommandContentSource = "clipboard" | "selectedText" | "browserTab";
 
 export interface Command {
-  created_at?: string;
-  updated_at?: string;
-  configurationMode?: "independent" | "inherit";
-  baseModelId?: string;
-  overrideModel?: boolean;
-  overrideTemperature?: boolean;
-  overrideReasoning?: boolean;
-  overrideVision?: boolean;
-  overridePrompt?: boolean;
-  enableReasoningEffortChange?: boolean;
-  reasoningEffort?: ReasoningEffort;
-  vision?: boolean;
   id: string;
   name: string;
   prompt: string;
@@ -101,10 +89,7 @@ export type QuestionHook = BaseHook<string> & { update: PromiseFunctionWithOneAr
 export type ModelHook = BaseHook<Record<string, Model>> &
   BaseFunctionHook<Model> & {
     setModels: PromiseFunctionWithOneArg<Record<string, Model>>;
-    importModels: PromiseFunctionWithOneArg<Model[] | Record<string, Model>>;
     update: PromiseFunctionWithOneArg<Model>;
-    option: Model["option"][];
-    isFetching: boolean;
   };
 
 export interface ChatHook {
@@ -128,7 +113,6 @@ export type CommandHook = BaseHook<Record<string, Command>> &
     update: PromiseFunctionWithOneArg<Command>;
     clear: PromiseFunctionNoArg;
     isDefault: (id: string) => boolean;
-    resolveModel: (command: Command) => Model;
   };
 
 export interface ChangeModelProp {
@@ -139,7 +123,7 @@ export interface ChangeModelProp {
 
 export interface QuestionFormProps extends ChangeModelProp {
   initialQuestion: string;
-  onSubmit: (question: string, files: string[], model?: Model) => void;
+  onSubmit: (question: string, files: string[]) => void;
   isFirstCall?: boolean;
 }
 

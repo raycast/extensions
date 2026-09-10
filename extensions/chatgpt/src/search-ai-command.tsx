@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, LaunchType, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction } from "./actions";
-import { Command } from "./type";
+import { Command, CommandHook } from "./type";
 import packageJson from "../package.json";
 import { DEFAULT_COMMANDS, useCommand } from "./hooks/useCommand";
 import { CommandForm, iconsByContentSource } from "./views/command/from";
@@ -83,7 +83,7 @@ function SearchAiCommand() {
               title: "Are you sure you want to remove this AI command from your collection?",
             }}
             icon={Icon.Trash}
-            onAction={() => commands.remove(cmd).catch(() => {})}
+            onAction={() => commands.remove(cmd)}
           />
         )}
         {commands.isDefault(cmd.id) && (
@@ -93,7 +93,7 @@ function SearchAiCommand() {
               title: "Are you sure you want to reset this action to its default settings?",
             }}
             icon={Icon.Repeat}
-            onAction={() => commands.update(DEFAULT_COMMANDS[cmd.id]).catch(() => {})}
+            onAction={() => resetToDefaults(cmd, DEFAULT_COMMANDS, commands)}
             shortcut={null}
           />
         )}
@@ -104,7 +104,7 @@ function SearchAiCommand() {
               "Are you sure? All your custom AI commands will be deleted, and default AI commands will be recreated with their default values.",
           }}
           icon={Icon.Trash}
-          onAction={() => commands.clear().catch(() => {})}
+          onAction={commands.clear}
           shortcut={{ modifiers: ["shift", "ctrl"], key: "x" }}
         />
       </ActionPanel.Section>
@@ -135,10 +135,7 @@ function SearchAiCommand() {
               id={cmd.id}
               key={cmd.id}
               title={cmd.name}
-              accessories={[
-                { icon: iconsByContentSource[cmd.contentSource] },
-                { text: commands.resolveModel(cmd).option },
-              ]}
+              accessories={[{ icon: iconsByContentSource[cmd.contentSource] }, { text: cmd.model }]}
               actions={selectedCommandId === cmd.id ? getActionPanel(cmd) : undefined}
             />
           ))}
@@ -151,10 +148,7 @@ function SearchAiCommand() {
               id={cmd.id}
               key={cmd.id}
               title={cmd.name}
-              accessories={[
-                { icon: iconsByContentSource[cmd.contentSource] },
-                { text: commands.resolveModel(cmd).option },
-              ]}
+              accessories={[{ icon: iconsByContentSource[cmd.contentSource] }, { text: cmd.model }]}
               actions={selectedCommandId === cmd.id ? getActionPanel(cmd) : undefined}
             />
           ))}
@@ -179,4 +173,11 @@ function SearchAiCommand() {
       )}
     </List>
   );
+}
+
+function resetToDefaults(cmd: Command, defaultCommands: Record<string, Command>, commands: CommandHook) {
+  const defaultCommand = defaultCommands[cmd.id];
+  if (defaultCommand) {
+    commands.update(defaultCommand);
+  }
 }

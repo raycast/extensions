@@ -1,39 +1,64 @@
-import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
-import { CSVPrompt, Model, ReasoningEffort } from "../../type";
+import { CSVPrompt, Model, ModelHook, ReasoningEffort } from "../../type";
 import { parse } from "csv-parse/sync";
 import { useCallback, useState } from "react";
-import { useModel } from "../../hooks/useModel";
-import { ModelField } from "./model-field";
-import { validateTemperature } from "../../utils/model-validation";
+import { ModelPicker } from "./model-picker";
+import { useModelOptions } from "../../hooks/useModelOptions";
 
-export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (model: Model) => void }) => {
-  const { model } = props;
-  const models = useModel();
+export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
+  const { use, model } = props;
+  const modelOptions = useModelOptions();
   const { pop } = useNavigation();
   const reasoningEffortOptions: ReasoningEffort[] = ["none", "low", "medium", "high"];
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
-    onSubmit: async (values) => {
-      const updatedModel: Model = {
-        ...values,
-        id: model?.id ?? uuidv4(),
-        created_at: model?.created_at ?? new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      try {
-        if (model) await models.update(updatedModel);
-        else await models.add(updatedModel);
-        props.onSaved?.(updatedModel);
-        pop();
-      } catch {
-        // Keep the draft open when persistence fails.
+    onSubmit: async (model) => {
+      let updatedModel: Model = { ...model, updated_at: new Date().toISOString() };
+      updatedModel = { ...updatedModel, temperature: updatedModel.temperature };
+      if (props.model) {
+        const toast = await showToast({
+          title: "Update your model...",
+          style: Toast.Style.Animated,
+        });
+        use.models.update({ ...updatedModel, id: props.model.id, created_at: props.model.created_at });
+        toast.title = "Model updated!";
+        toast.style = Toast.Style.Success;
+      } else {
+        await showToast({
+          title: "Save your model...",
+          style: Toast.Style.Animated,
+        });
+        use.models.add({
+          ...updatedModel,
+          id: uuidv4(),
+          created_at: new Date().toISOString(),
+        });
+        await showToast({
+          title: "Model saved",
+          style: Toast.Style.Animated,
+        });
       }
+      pop();
     },
     validation: {
       name: FormValidation.Required,
-      temperature: validateTemperature,
+      option: FormValidation.Required,
+      temperature: (value) => {
+        if (value !== undefined && value !== null) {
+          const numValue = Number(value);
+          if (!isNaN(numValue)) {
+            if (numValue < 0) {
+              return "Minimal value is 0";
+            } else if (numValue > 2) {
+              return "Maximal value is 2";
+            }
+          }
+        } else {
+          return FormValidation.Required;
+        }
+      },
     },
     initialValues: {
       name: model?.name ?? props.name ?? "",
@@ -46,8 +71,6 @@ export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (mode
       vision: model?.vision ?? false,
     },
   });
-
-  const [showAwesomePrompts, setShowAwesomePrompts] = useState(false);
 
   const { isLoading, data } = useFetch<CSVPrompt[]>(
     "https://raw.githubusercontent.com/awesome-chatgpt-prompts/awesome-chatgpt-prompts-github/awesome-chatgpt-prompts/prompts.csv",
@@ -66,7 +89,6 @@ export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (mode
         }
       },
       keepPreviousData: true,
-      execute: showAwesomePrompts,
     },
   );
 
@@ -79,10 +101,10 @@ export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (mode
     [setValue],
   );
 
+  const [showAwesomePrompts, setShowAwesomePrompts] = useState(false);
+
   return (
     <Form
-      navigationTitle={model ? "Edit Model" : "Create Model"}
-      isLoading={models.isFetching}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" icon={Icon.SaveDocument} onSubmit={handleSubmit} />
@@ -146,7 +168,7 @@ export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (mode
           ))}
         </Form.Dropdown>
       )}
-      <ModelField {...itemProps.option} />
+      <ModelPicker models={modelOptions.options} isLoading={modelOptions.isLoading} {...itemProps.option} />
 
       <Form.Checkbox title="Vision" label="Enable vision capabilities" {...itemProps.vision} />
       {model?.id !== "default" && <Form.Checkbox title="Pinned" label="Pin model" {...itemProps.pinned} />}
