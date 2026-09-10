@@ -17,5 +17,6 @@ export const shortcuts = {
   copyPath: { modifiers: ["cmd", "shift"], key: "c" },
   delete: { modifiers: ["ctrl"], key: "x" },
   selectSession: { modifiers: ["cmd"], key: "s" },
+  attachInNewWindow: { modifiers: ["cmd", "shift"], key: "o" },
   switchSession: { modifiers: ["cmd", "shift"], key: "s" },
 } satisfies Record<string, Keyboard.Shortcut>;

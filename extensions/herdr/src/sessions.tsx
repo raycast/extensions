@@ -16,12 +16,12 @@ export default function Command() {
   }
 
   // Every attach also selects: what the terminal shows is what Raycast controls.
-  async function attach(name: string) {
+  async function attach(name: string, options: { newWindow?: boolean } = {}) {
     const succeeded = await runAction(
       "Opening session",
       async () => {
         await setSelectedSession(name);
-        await launchHerdrInTerminal(["session", "attach", name], { includeSession: false });
+        await launchHerdrInTerminal(["session", "attach", name], { includeSession: false, ...options });
       },
       { success: "Terminal Opened", onSuccess: selected.revalidate },
     );
@@ -100,6 +100,12 @@ export default function Command() {
                 title={session.running ? "Attach in Terminal" : "Start and Attach in Terminal"}
                 icon={Icon.Terminal}
                 onAction={() => attach(session.name)}
+              />
+              <Action
+                title={session.running ? "Attach in New Window" : "Start and Attach in New Window"}
+                icon={Icon.PlusTopRightSquare}
+                shortcut={shortcuts.attachInNewWindow}
+                onAction={() => attach(session.name, { newWindow: true })}
               />
               <Action
                 title="Select Session"

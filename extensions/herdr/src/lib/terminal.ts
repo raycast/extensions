@@ -22,6 +22,15 @@ const FAST_FOCUS_TIMEOUT_MS = 450;
 const PROCESS_LOOKUP_TIMEOUT_MS = 250;
 type ClientFocusResult = "focused" | "missing" | "unavailable";
 
+export interface LaunchOptions {
+  /** Prefix the resolved session flag. Callers passing their own `session attach` argv opt out. */
+  includeSession?: boolean;
+  /** Open a new Terminal Window instead of a tab in an existing one. */
+  newWindow?: boolean;
+  /** WezTerm only: spawn the tab into this window. */
+  windowId?: string;
+}
+
 function execCapture(path: string, args: string[], timeout = 5_000): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile(path, args, { timeout, encoding: "utf8" }, (error, stdout) =>
@@ -175,10 +184,15 @@ async function launchWarp(appTarget: string, command: string): Promise<void> {
   cleanup.unref();
 }
 
-export async function launchHerdrInTerminal(
-  args: string[] = [],
-  options: { includeSession?: boolean } = {},
-): Promise<void> {
+async function wezTermPlacement(executable: string, options: LaunchOptions): Promise<string[]> {
+  if (options.newWindow) return ["--new-window"];
+  if (options.windowId) return ["--window-id", options.windowId];
+  const listing = await tryExecCapture(executable, ["cli", "list", "--format", "json"], FAST_FOCUS_TIMEOUT_MS);
+  const windowId = listing ? selectWezTermWindow(listing) : undefined;
+  return windowId ? ["--window-id", windowId] : ["--new-window"];
+}
+
+export async function launchHerdrInTerminal(args: string[] = [], options: LaunchOptions = {}): Promise<void> {
   const binary = await resolveHerdrBinary();
   const application = selectedApplication();
   // Launched clients inherit the Raycast process environment, where a leaked
@@ -200,16 +214,20 @@ export async function launchHerdrInTerminal(
     return;
   }
   if (kind === "iterm") {
-    const script = `tell application "iTerm"
-activate
-if (count windows) > 0 then
+    const placement = options.newWindow
+      ? `set targetWindow to create window with default profile
+set targetSession to current session of targetWindow`
+      : `if (count windows) > 0 then
   set targetWindow to current window
   set targetTab to create tab with default profile targetWindow
   set targetSession to current session of targetTab
 else
   set targetWindow to create window with default profile
   set targetSession to current session of targetWindow
-end if
+end if`;
+    const script = `tell application "iTerm"
+activate
+${placement}
 tell targetSession to write text ${appleScriptString(command)}
 end tell`;
     await exec("/usr/bin/osascript", ["-e", script]);
@@ -222,15 +240,18 @@ end tell`;
     return;
   }
   if (kind === "ghostty") {
+    const placement = options.newWindow
+      ? "new window with configuration cfg"
+      : `if (count windows) > 0 then
+  new tab in front window with configuration cfg
+else
+  new window with configuration cfg
+end if`;
     const script = `tell application "Ghostty"
 activate
 set cfg to new surface configuration
 set command of cfg to ${appleScriptString(command)}
-if (count windows) > 0 then
-  new tab in front window with configuration cfg
-else
-  new window with configuration cfg
-end if
+${placement}
 return "opened"
 end tell`;
     if ((await tryExecCapture("/usr/bin/osascript", ["-e", script], 1_500)) === "opened") return;
@@ -244,11 +265,10 @@ end tell`;
   if (kind === "wezterm") {
     const executable = wezTermExecutable(application);
     if (executable) {
-      const listing = await tryExecCapture(executable, ["cli", "list", "--format", "json"], FAST_FOCUS_TIMEOUT_MS);
-      const windowId = listing ? selectWezTermWindow(listing) : undefined;
+      const placement = await wezTermPlacement(executable, options);
       const paneId = await tryExecCapture(
         executable,
-        ["cli", "spawn", ...(windowId ? ["--window-id", windowId] : ["--new-window"]), "--", binary, ...sessionArgs],
+        ["cli", "spawn", ...placement, "--", binary, ...sessionArgs],
         750,
       );
       if (paneId && /^\d+$/.test(paneId)) {
