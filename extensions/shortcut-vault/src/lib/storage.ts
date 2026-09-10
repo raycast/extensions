@@ -40,11 +40,10 @@ async function readCustomShortcuts(): Promise<Shortcut[]> {
       const shortcut = parseStoredShortcut(parsed);
 
       if (seenIds.has(shortcut.id)) {
-        const oldKey = getItemKey(shortcut.id);
         shortcut.id = crypto.randomUUID();
-        // The ID was duplicated in storage. Fix it by saving the new one and deleting the old duplicate entry
+        // The ID was duplicated in storage. Fix it by saving the new one and deleting the duplicate entry
         await LocalStorage.setItem(getItemKey(shortcut.id), JSON.stringify(shortcut));
-        await LocalStorage.removeItem(oldKey);
+        await LocalStorage.removeItem(key);
       }
 
       seenIds.add(shortcut.id);
