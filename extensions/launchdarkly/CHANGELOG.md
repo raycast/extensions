@@ -1,6 +1,6 @@
 # Launchdarkly Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-09-10
 
 - 🪟 The extension is now available on Raycast for Windows
 - ⌨️ Switch Project, Toggle Name, Recent Changes and Flag History shortcuts use `Ctrl` instead of `⌘` on Windows
