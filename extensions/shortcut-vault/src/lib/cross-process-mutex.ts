@@ -4,6 +4,7 @@ import path from "node:path";
 export interface MutexOptions {
   acquireTimeoutMs?: number;
   onBeforeReclaimForTesting?: () => void | Promise<void>;
+  onBeforeRenameForTesting?: () => void | Promise<void>;
 }
 
 interface StaleLockSnapshot {
@@ -16,8 +17,10 @@ interface StaleLockSnapshot {
 export class CrossProcessMutex {
   private readonly lockDir: string;
   private readonly lockFile: string;
+  private readonly reclaimDir: string;
   private readonly acquireTimeoutMs: number;
   private readonly onBeforeReclaimForTesting?: () => void | Promise<void>;
+  private readonly onBeforeRenameForTesting?: () => void | Promise<void>;
   private static readonly HEARTBEAT_INTERVAL_MS = 2000;
   private static readonly STALE_THRESHOLD_MS = 15000;
   private static readonly DEFAULT_ACQUIRE_TIMEOUT_MS = 5000;
@@ -25,11 +28,13 @@ export class CrossProcessMutex {
   constructor(lockDir: string, options?: number | MutexOptions) {
     this.lockDir = lockDir;
     this.lockFile = path.join(this.lockDir, "pid.txt");
+    this.reclaimDir = `${this.lockDir}.reclaim`;
     if (typeof options === "number") {
       this.acquireTimeoutMs = options;
     } else {
       this.acquireTimeoutMs = options?.acquireTimeoutMs ?? CrossProcessMutex.DEFAULT_ACQUIRE_TIMEOUT_MS;
       this.onBeforeReclaimForTesting = options?.onBeforeReclaimForTesting;
+      this.onBeforeRenameForTesting = options?.onBeforeRenameForTesting;
     }
   }
 
@@ -38,6 +43,13 @@ export class CrossProcessMutex {
     let acquired = false;
 
     while (Date.now() - start < this.acquireTimeoutMs) {
+      // If a recovery or reclaim operation is active, do not attempt to acquire.
+      // Wait for the transition / restoration to settle.
+      if (this.isReclaimInProgress()) {
+        await new Promise((resolve) => setTimeout(resolve, 25));
+        continue;
+      }
+
       try {
         fs.mkdirSync(this.lockDir);
         let createdDirIno: number | undefined;
@@ -47,13 +59,29 @@ export class CrossProcessMutex {
           this.writeLockContent();
         } catch (writeErr) {
           if (createdDirIno !== undefined) {
-            this.tryReclaimStaleLockDir({
+            await this.tryReclaimStaleLockDir({
               dirIno: createdDirIno,
               hasFile: false,
             });
           }
           throw writeErr;
         }
+
+        // Post-creation check: if a reclaim barrier became active concurrently,
+        // verify our directory wasn't moved or replaced during acquisition
+        if (this.isReclaimInProgress()) {
+          try {
+            const currentStat = fs.statSync(this.lockDir);
+            if (currentStat.ino !== createdDirIno) {
+              await new Promise((resolve) => setTimeout(resolve, 25));
+              continue;
+            }
+          } catch {
+            await new Promise((resolve) => setTimeout(resolve, 25));
+            continue;
+          }
+        }
+
         acquired = true;
         break;
       } catch (e: unknown) {
@@ -88,11 +116,11 @@ export class CrossProcessMutex {
       return await task();
     } finally {
       clearInterval(heartbeat);
-      this.releaseIfOwned();
+      await this.releaseIfOwned();
     }
   }
 
-  private releaseIfOwned(): void {
+  private async releaseIfOwned(): Promise<void> {
     try {
       if (!fs.existsSync(this.lockDir)) {
         return;
@@ -114,7 +142,7 @@ export class CrossProcessMutex {
         fileIno: fileStat.ino,
         content,
       };
-      this.tryReclaimStaleLockDir(snapshot);
+      await this.tryReclaimStaleLockDir(snapshot);
     } catch {
       // Lock was already released or never fully acquired — nothing to clean up
     }
@@ -148,7 +176,7 @@ export class CrossProcessMutex {
             if (this.onBeforeReclaimForTesting) {
               await this.onBeforeReclaimForTesting();
             }
-            return this.tryReclaimStaleLockDir(snapshot);
+            return await this.tryReclaimStaleLockDir(snapshot);
           }
         } catch {
           return false;
@@ -176,7 +204,7 @@ export class CrossProcessMutex {
             if (this.onBeforeReclaimForTesting) {
               await this.onBeforeReclaimForTesting();
             }
-            return this.tryReclaimStaleLockDir(snapshot);
+            return await this.tryReclaimStaleLockDir(snapshot);
           }
         } catch {
           return false;
@@ -203,7 +231,7 @@ export class CrossProcessMutex {
           if (this.onBeforeReclaimForTesting) {
             await this.onBeforeReclaimForTesting();
           }
-          return this.tryReclaimStaleLockDir(snapshot);
+          return await this.tryReclaimStaleLockDir(snapshot);
         } catch {
           return false;
         }
@@ -216,41 +244,103 @@ export class CrossProcessMutex {
     }
   }
 
-  private tryReclaimStaleLockDir(snapshot: StaleLockSnapshot): boolean {
-    if (!this.isSnapshotMatch(this.lockDir, snapshot)) {
+  private async tryReclaimStaleLockDir(snapshot: StaleLockSnapshot): Promise<boolean> {
+    if (!this.acquireReclaimBarrier()) {
       return false;
     }
-
-    const parentDir = path.dirname(this.lockDir);
-    const staleDir = path.join(
-      parentDir,
-      `${path.basename(this.lockDir)}.stale.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}`,
-    );
 
     try {
-      fs.renameSync(this.lockDir, staleDir);
+      if (!this.isSnapshotMatch(this.lockDir, snapshot)) {
+        return false;
+      }
+
+      if (this.onBeforeRenameForTesting) {
+        await this.onBeforeRenameForTesting();
+      }
+
+      const parentDir = path.dirname(this.lockDir);
+      const staleDir = path.join(
+        parentDir,
+        `${path.basename(this.lockDir)}.stale.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}`,
+      );
+
+      try {
+        fs.renameSync(this.lockDir, staleDir);
+      } catch {
+        // Another contender already reclaimed/renamed it, or it was released
+        return false;
+      }
+
+      if (!this.isSnapshotMatch(staleDir, snapshot)) {
+        // Race: live lock was moved right before renameSync. Restore it immediately!
+        // Because the reclaim barrier is active, no other command could have acquired this.lockDir.
+        try {
+          fs.renameSync(staleDir, this.lockDir);
+        } catch {
+          // If restore fails, do not touch destination
+        }
+        return false;
+      }
+
+      try {
+        fs.rmSync(staleDir, { recursive: true, force: true });
+      } catch {
+        // Ignore cleanup errors on the stale directory
+      }
+
+      return true;
+    } finally {
+      this.releaseReclaimBarrier();
+    }
+  }
+
+  private isReclaimInProgress(): boolean {
+    try {
+      if (!fs.existsSync(this.reclaimDir)) {
+        return false;
+      }
+      const stat = fs.statSync(this.reclaimDir);
+      if (Date.now() - stat.mtimeMs > CrossProcessMutex.STALE_THRESHOLD_MS) {
+        try {
+          fs.rmdirSync(this.reclaimDir);
+        } catch {
+          // Ignore
+        }
+        return false;
+      }
+      return true;
     } catch {
-      // Another contender already reclaimed/renamed it, or it was released
       return false;
     }
+  }
 
-    if (!this.isSnapshotMatch(staleDir, snapshot)) {
-      // Race: directory was replaced right before renameSync. Restore it immediately!
-      try {
-        fs.renameSync(staleDir, this.lockDir);
-      } catch {
-        // Ignore restore errors if destination is already taken
+  private acquireReclaimBarrier(): boolean {
+    try {
+      fs.mkdirSync(this.reclaimDir);
+      return true;
+    } catch (e: unknown) {
+      const err = e as { code?: string };
+      if (err.code === "EEXIST") {
+        if (this.isReclaimInProgress()) {
+          return false;
+        }
+        try {
+          fs.mkdirSync(this.reclaimDir);
+          return true;
+        } catch {
+          return false;
+        }
       }
       return false;
     }
+  }
 
+  private releaseReclaimBarrier(): void {
     try {
-      fs.rmSync(staleDir, { recursive: true, force: true });
+      fs.rmdirSync(this.reclaimDir);
     } catch {
-      // Ignore cleanup errors on the stale directory
+      // Ignore cleanup error
     }
-
-    return true;
   }
 
   private isSnapshotMatch(targetDir: string, snapshot: StaleLockSnapshot): boolean {

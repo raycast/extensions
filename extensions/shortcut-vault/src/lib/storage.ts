@@ -188,7 +188,7 @@ export async function duplicateCustomShortcut(id: string, expectedUpdatedAt?: st
     const duplicate: Shortcut = {
       ...existing,
       id: crypto.randomUUID(),
-      commandName: `${existing.commandName} Copy`,
+      commandName: `${existing.commandName.slice(0, 512 - " Copy".length)} Copy`,
       createdAt: now,
       updatedAt: now,
     };

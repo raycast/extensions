@@ -116,62 +116,62 @@ async function run() {
 
     assert.equal(readEmptyPid, false, "Heartbeat updates must never expose an empty pid.txt");
 
-    // 9. Stale lock recovery is safe against replacement race (interleaving probe)
+    // 9. Stale lock recovery is safe against replacement race occurring after snapshot check but before renameSync
     // Setup an initial stale lock with a dead PID
     fs.mkdirSync(lockDir, { recursive: true });
     fs.writeFileSync(path.join(lockDir, "pid.txt"), `999999999:${Date.now() - 30000}`);
 
     let probeExecuted = false;
-    let raceContender2HoldingLock = false;
-    let releaseRaceContender2: (() => void) | undefined;
-    const raceContender2HoldPromise = new Promise<void>((resolve) => {
-      releaseRaceContender2 = resolve;
-    });
+    let contender3Blocked = false;
 
-    const raceContender2 = new CrossProcessMutex(lockDir, 2000);
-    let raceContender2TaskPromise: Promise<string> | undefined;
-
-    // Contender 1 inspects the stale lock. Right between the stale check and the reclaim,
-    // the interleaving probe inserts Contender 2's recovery and lock acquisition.
+    // Contender 1 inspects the stale lock, passes isSnapshotMatch(), and triggers onBeforeRenameForTesting
+    // right before renameSync(). The interleaving probe replaces the stale lock with Contender 2's live lock.
     const raceContender1 = new CrossProcessMutex(lockDir, {
-      acquireTimeoutMs: 4000,
-      onBeforeReclaimForTesting: async () => {
+      acquireTimeoutMs: 3000,
+      onBeforeRenameForTesting: async () => {
         if (!probeExecuted) {
           probeExecuted = true;
-          raceContender2TaskPromise = raceContender2.runExclusive(async () => {
-            raceContender2HoldingLock = true;
-            await raceContender2HoldPromise;
-            return "c2-success";
-          });
-
-          // Wait until raceContender2 has recovered the stale lock and is actively holding its new lock
-          while (!raceContender2HoldingLock) {
-            await new Promise((r) => setTimeout(r, 10));
-          }
-
-          // At this point, contender 2 is actively holding the lock in its critical section.
-          // When contender 1 attempts tryReclaimStaleLockDir(), it must NOT rename or delete
-          // contender 2's active lock directory.
-          setTimeout(() => {
-            // After contender 1 attempts reclaim and fails, release contender 2
-            assert.ok(fs.existsSync(lockDir), "Contender 2's lock directory must remain intact");
-            assert.ok(
-              fs.readFileSync(path.join(lockDir, "pid.txt"), "utf8").startsWith(`${process.pid}:`),
-              "Contender 2's lock file must remain intact",
-            );
-            releaseRaceContender2?.();
-          }, 150);
+          // Contender 2 replaces the stale lock with a live lock
+          fs.rmSync(lockDir, { recursive: true, force: true });
+          fs.mkdirSync(lockDir);
+          fs.writeFileSync(path.join(lockDir, "pid.txt"), `${process.pid}:${Date.now()}`);
         }
       },
     });
 
-    const raceContender1Result = await raceContender1.runExclusive(async () => "c1-success");
-    const raceContender2Result = await raceContender2TaskPromise;
+    // Start contender 1 recovery
+    const contender1Promise = raceContender1.runExclusive(async () => "c1-after-restore");
 
-    assert.ok(probeExecuted, "Interleaving probe should have executed");
-    assert.equal(raceContender2Result, "c2-success");
-    assert.equal(raceContender1Result, "c1-success");
-    assert.ok(!fs.existsSync(lockDir), "Lock should be released cleanly after both contenders finish");
+    // Wait until probe executes
+    while (!probeExecuted) {
+      await new Promise((r) => setTimeout(r, 10));
+    }
+
+    // Attempt concurrent acquisition by Contender 3 while the live lock is in transition
+    const contender3InTransition = new CrossProcessMutex(lockDir, 100);
+    try {
+      await contender3InTransition.runExclusive(async () => "c3-success");
+    } catch {
+      contender3Blocked = true;
+    }
+
+    assert.ok(probeExecuted, "Interleaving probe must have executed");
+    assert.ok(contender3Blocked, "Another command must be blocked while lock is in transition / restoration");
+
+    // Contender 2's live lock must be restored and intact at lockDir
+    assert.ok(fs.existsSync(lockDir), "Contender 2's lock directory must be restored to lockDir");
+    assert.ok(
+      fs.readFileSync(path.join(lockDir, "pid.txt"), "utf8").startsWith(`${process.pid}:`),
+      "Contender 2's lock file must remain intact",
+    );
+
+    // Contender 2 now finishes its task and releases its lock
+    fs.rmSync(lockDir, { recursive: true, force: true });
+
+    // Contender 1 can now acquire cleanly
+    const c1Result = await contender1Promise;
+    assert.equal(c1Result, "c1-after-restore");
+    assert.ok(!fs.existsSync(lockDir), "Lock should be cleanly released at the end");
 
     // 10. Aged incomplete lock recovery is safe against replacement race
     fs.mkdirSync(lockDir, { recursive: true });

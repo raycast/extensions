@@ -90,4 +90,10 @@ assert.throws(
   /exceeds the 6 MB limit/,
 );
 
+// Duplicating a valid 512-character command name stays within 512 characters
+const longName512 = "A".repeat(512);
+const duplicatedName = `${longName512.slice(0, 512 - " Copy".length)} Copy`;
+assert.equal(duplicatedName.length, 512);
+assert.doesNotThrow(() => validateExportFile(makeExport({ ...validShortcut, commandName: duplicatedName })));
+
 console.log("import/export format tests passed");
