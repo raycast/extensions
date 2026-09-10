@@ -1,25 +1,31 @@
-import { useEffect } from "react";
-import { useFetch } from "@raycast/utils";
-import type { ApiResponse, FetchOptions, PveServer } from "@/types";
+import { useEffect, useRef } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import type { PveServer } from "@/types";
 import type { OmitData, WithData } from "@/types";
-import { buildHeaders } from "@/utils/headers";
+import { pveFetch } from "@/api";
 
-type PveFetchOptions<T> = FetchOptions<T> & {
+type PveFetchOptions<T> = {
+  /** Set to false to skip fetching, e.g. while the data isn't needed yet */
+  execute?: boolean;
+  /** Called when a request fails, e.g. to show a toast and an error screen */
+  onError?: (error: Error) => void | Promise<void>;
+  onData?: (data: T) => void | Promise<void>;
+  /** How often to revalidate in milliseconds, `null` to never poll */
   timerInterval?: number | null;
 };
 
 export const usePveFetch = <T>(server: PveServer, url: string, options?: PveFetchOptions<T>) => {
   const { timerInterval = 1000, ...rest } = options ?? {};
-  const fetchUrl = new URL(url, server.url).toString();
-  const fetchOptions: FetchOptions<T> = {
-    ...rest,
-    headers: buildHeaders(server),
-    mapResult(result) {
-      return { data: (result as ApiResponse<T>).data };
-    },
-  };
+  const abortable = useRef<AbortController>(null);
 
-  const result = useFetch<T>(fetchUrl, fetchOptions);
+  // Fetching through pveFetch() bounds every request in time and stays
+  // cache-backed, so the last successful data renders again on a cold start.
+  const result = useCachedPromise(
+    async (server: PveServer, url: string): Promise<T> =>
+      (await pveFetch<T>(server, url, { signal: abortable.current?.signal })).data,
+    [server, url],
+    { ...rest, abortable },
+  );
 
   const execute = rest.execute !== false;
   useEffect(() => {

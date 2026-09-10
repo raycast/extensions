@@ -17,6 +17,9 @@ export const useStorageStatus = (
       showFailureToast(error);
       setShowErrorScreen(true);
     },
+    // A timed-out or failed poll latches the error screen, clear it again once
+    // the server answers so the recovered status shows instead of a stale error.
+    onData: () => setShowErrorScreen(false),
     timerInterval: 5000,
   });
 

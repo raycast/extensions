@@ -1,8 +1,9 @@
 # Proxmox Changelog
 
-## [Fix Slow Server Loading] - 2026-09-10
+## [Fix Slow Server Loading] - {PR_MERGE_DATE}
 
 - Fixed the VM and storage lists staying empty and loading forever when a server responds slower than the refresh interval
+- Fixed an unresponsive server blocking the refresh of the lists, requests are now cancelled after 10 seconds and the failure is shown for that server
 
 ## [Multiple Servers] - 2026-09-07
 
