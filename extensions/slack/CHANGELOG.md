@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix recipient search, AI file uploads, and attachment downloads] - {PR_MERGE_DATE}
+## [Fix recipient search, AI file uploads, and attachment downloads] - 2026-09-10
 
 - Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.
 - Keep frequently opened **Open Channel** results visible when they fall outside the initial directory page by retaining the latest 100 visited rows and merging them into empty-query results before frecency sorting.
