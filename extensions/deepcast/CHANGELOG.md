@@ -1,6 +1,6 @@
 # Deepcast Changelog
 
-## [Respect Translation Action Preference] - {PR_MERGE_DATE}
+## [Respect Translation Action Preference] - 2026-09-10
 
 - Fix the main Translate form ignoring `On Translation Action` and always copying the translated text to the clipboard ([#30932](https://github.com/raycast/extensions/issues/30932))
 
