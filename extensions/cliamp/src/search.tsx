@@ -10,6 +10,7 @@ import {
   stationDeeplink,
   trackFromFavorite,
 } from "./lib/favorites";
+import { addTrackFavorite, listTrackFavorites, removeTrackFavorite } from "./lib/trackFavorites";
 import { callOp, listProviders, ProviderPlaylist, Track, trackLabel } from "./lib/ipc";
 
 const BITRATES = [0, 64, 128, 192, 256, 320];
@@ -41,6 +42,7 @@ export default function SearchMusic() {
   const [favorites, setFavorites] = useState<FavStation[]>(() => readFavorites());
 
   const providers = usePromise(listProviders);
+  const trackFavs = usePromise(listTrackFavorites);
   const hasCatalog = providers.data?.find((p) => p.key === provider)?.catalog ?? false;
   const isRadio = provider === "radio";
 
@@ -97,6 +99,24 @@ export default function SearchMusic() {
       await callOp("provider.load", { provider, playlist: pl.id });
       await callOp("play");
       await showToast({ style: Toast.Style.Success, title: "Playing", message: pl.name });
+    } catch (e) {
+      await fail(e);
+    }
+  }
+
+  const favoriteTrackPaths = new Set((trackFavs.data ?? []).map((t) => String(t.path)));
+
+  async function toggleTrackFavorite(t: Track) {
+    try {
+      const index = (trackFavs.data ?? []).findIndex((f) => f.path === t.path);
+      if (index >= 0) {
+        await removeTrackFavorite(index);
+        await showToast({ style: Toast.Style.Success, title: "Removed from Favorites", message: t.title });
+      } else {
+        await addTrackFavorite(t);
+        await showToast({ style: Toast.Style.Success, title: "Added to Favorites", message: t.title });
+      }
+      trackFavs.revalidate();
     } catch (e) {
       await fail(e);
     }
@@ -235,6 +255,48 @@ export default function SearchMusic() {
           ))}
         </List.Section>
       )}
+      {!query.trim() && (trackFavs.data?.length ?? 0) > 0 && (
+        <List.Section title="Favorite Tracks">
+          {(trackFavs.data ?? []).map((t, i) => (
+            <List.Item
+              key={`tfav-${t.path ?? i}`}
+              icon={Icon.Star}
+              title={t.title ?? trackLabel(t)}
+              subtitle={t.artist}
+              accessories={t.album ? [{ text: t.album }] : []}
+              actions={
+                <ActionPanel>
+                  <Action title="Play Now" icon={Icon.Play} onAction={() => act("track.play", t, "Playing")} />
+                  <Action
+                    title="Queue Next"
+                    icon={Icon.Forward}
+                    onAction={() => act("track.queue", t, "Queued next")}
+                  />
+                  <Action
+                    title="Remove from Favorites"
+                    icon={Icon.StarDisabled}
+                    style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    onAction={async () => {
+                      try {
+                        await removeTrackFavorite(i);
+                        await showToast({
+                          style: Toast.Style.Success,
+                          title: "Removed from Favorites",
+                          message: t.title,
+                        });
+                        trackFavs.revalidate();
+                      } catch (e) {
+                        await fail(e);
+                      }
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
       {!query.trim() && shownCatalog.length > 0 && (
         <List.Section title={`Browse${filterSuffix}`}>
           {shownCatalog.map((pl) => {
@@ -281,8 +343,9 @@ export default function SearchMusic() {
           {shownResults.map((t, i) => {
             const meta = t.provider_meta ?? {};
             const isFav = !!t.path && favoriteUrls.has(String(t.path));
+            const isTrackFav = !!t.path && favoriteTrackPaths.has(String(t.path));
             const accessories: List.Item.Accessory[] = [];
-            if (isFav) accessories.push({ icon: Icon.Star });
+            if (isFav || isTrackFav) accessories.push({ icon: Icon.Star });
             if (meta["radio.codec"]) accessories.push({ tag: meta["radio.codec"] });
             if (meta["radio.bitrate"]) accessories.push({ text: `${meta["radio.bitrate"]} kbps` });
             if (meta["radio.country"]) accessories.push({ text: meta["radio.country"] });
@@ -316,6 +379,14 @@ export default function SearchMusic() {
                           icon={isFav ? Icon.StarDisabled : Icon.Star}
                           shortcut={{ modifiers: ["cmd"], key: "d" }}
                           onAction={() => toggleFavorite(t)}
+                        />
+                      )}
+                      {!isRadio && t.path && t.title && (
+                        <Action
+                          title={isTrackFav ? "Remove from Favorites" : "Add to Favorites"}
+                          icon={isTrackFav ? Icon.StarDisabled : Icon.Star}
+                          shortcut={{ modifiers: ["cmd"], key: "d" }}
+                          onAction={() => toggleTrackFavorite(t)}
                         />
                       )}
                       {t.path && <Action.CopyToClipboard title="Copy URL/Path" content={String(t.path)} />}

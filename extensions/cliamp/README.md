@@ -7,7 +7,7 @@ Control and manage [cliamp](https://www.cliamp.stream/) — the terminal music p
 | Command | What it does |
 | --- | --- |
 | **Now Playing** | Control center: track info, play/pause/next/prev/stop, seek, volume, shuffle, repeat, mono, speed, EQ presets |
-| **Search Music** | Search any configured provider (radio, local, podcasts, Spotify, Tidal, …) and play or queue results. Empty search box shows your Favorites + the browsable station catalog. ⌘D bookmarks a station, ⌘F / ⌘⇧F filter by min bitrate / codec |
+| **Search Music** | Search any configured provider (radio, local, podcasts, YouTube Music, Spotify, Tidal, …) and play or queue results. Empty search box shows your favorite stations and tracks + the browsable station catalog. ⌘D favorites a station or track (tracks go to a cliamp "Starred" playlist, bookmarked so they appear in cliamp's native Favorites), ⌘F / ⌘⇧F filter by min bitrate / codec |
 | **Live Playlist** | View/manage the live playlist: play, queue next, reorder, remove, clear |
 | **Browse Playlists** | Browse provider playlists, load them, or drill into tracks |
 | **Now Playing in Menu Bar** | Current track + controls in the macOS menu bar (refreshes every 30 s) |
