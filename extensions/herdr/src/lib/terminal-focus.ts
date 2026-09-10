@@ -10,6 +10,19 @@ function appleScriptString(value: string): string {
   return `"${value.replaceAll("\\", "\\\\").replaceAll('"', '\\"').replaceAll("\n", "\\n")}"`;
 }
 
+export interface HerdrClient {
+  pid: string;
+  tty: string;
+}
+
+function isHerdrCommand(args: string, binaryName: string): boolean {
+  const executable = args
+    .trim()
+    .split(/\s+/, 1)[0]
+    .replace(/^['"]|['"]$/g, "");
+  return basename(executable) === binaryName || basename(executable) === "herdr";
+}
+
 function sessionMatches(args: string, sessionName?: string): boolean {
   const namedSession = args.match(/(?:^|\s)--session(?:=|\s+)([^\s]+)/)?.[1];
   const attachedSession = args.match(/(?:^|\s)session\s+attach\s+([^\s]+)/)?.[1];
@@ -27,15 +40,37 @@ export function parseHerdrClientTtys(output: string, binary: string, sessionName
     if (!match) continue;
     const [, tty, , args] = match;
     if (tty === "??" || tty === "?") continue;
-    const executable = args
-      .trim()
-      .split(/\s+/, 1)[0]
-      .replace(/^['"]|['"]$/g, "");
-    if (basename(executable) !== binaryName && basename(executable) !== "herdr") continue;
+    if (!isHerdrCommand(args, binaryName)) continue;
     if (!sessionMatches(args, sessionName)) continue;
     ttys.push(tty.startsWith("/dev/") ? tty : `/dev/${tty}`);
   }
   return [...new Set(ttys)];
+}
+
+// Only an argv that names the session outright qualifies a detach candidate:
+// a bare `herdr` or the remote bridge's `herdr client` would otherwise read as
+// a Default Session client, and a `--remote` attach targets another host.
+function namedSession(args: string): string | undefined {
+  if (/(?:^|\s)--remote(?:=|\s)/.test(args)) return undefined;
+  return (
+    args.match(/(?:^|\s)--session(?:=|\s+)([^\s]+)/)?.[1] ?? args.match(/(?:^|\s)session\s+attach\s+([^\s]+)/)?.[1]
+  );
+}
+
+/** Parses `ps -o pid=,tty=,comm=,args=` into the Clients that name `sessionName`. */
+export function parseHerdrClients(output: string, binary: string, sessionName: string): HerdrClient[] {
+  const binaryName = basename(binary);
+  const clients: HerdrClient[] = [];
+  for (const line of output.split("\n")) {
+    const match = line.trim().match(/^(\d+)\s+(\S+)\s+(\S+)\s+(.+)$/);
+    if (!match) continue;
+    const [, pid, tty, , args] = match;
+    if (tty === "??" || tty === "?") continue;
+    if (!isHerdrCommand(args, binaryName)) continue;
+    if (namedSession(args) !== sessionName) continue;
+    clients.push({ pid, tty: tty.startsWith("/dev/") ? tty : `/dev/${tty}` });
+  }
+  return clients;
 }
 
 export function buildTerminalFocusScript(ttys: string[]): string {
@@ -96,6 +131,36 @@ export function buildGhosttyFocusScript(title: string): string {
   end ignoring
   return "miss"
 end tell`;
+}
+
+export function buildTerminalTtyListScript(): string {
+  return `tell application "Terminal" to get tty of every tab of every window`;
+}
+
+export function buildITermTtyListScript(): string {
+  return `tell application "iTerm" to get tty of every session of every tab of every window`;
+}
+
+/** osascript prints nested lists flattened as "/dev/ttys001, /dev/ttys002". */
+export function parseTtyList(output: string): string[] {
+  return [...new Set(output.split(/[,\s]+/).filter((item) => item.startsWith("/dev/")))];
+}
+
+/** The given ttys that are WezTerm panes, with the window of the first match. */
+export function selectWezTermPanes(output: string, ttys: string[]): { ttys: string[]; windowId?: string } | undefined {
+  let panes: unknown;
+  try {
+    panes = JSON.parse(output);
+  } catch {
+    return undefined;
+  }
+  if (!Array.isArray(panes)) return undefined;
+  const matches = (panes as WezTermPane[]).filter((pane) => pane.tty_name && ttys.includes(pane.tty_name));
+  const windowId = matches.find((pane) => Number.isInteger(pane.window_id))?.window_id;
+  return {
+    ttys: matches.map((pane) => pane.tty_name as string),
+    windowId: windowId === undefined ? undefined : String(windowId),
+  };
 }
 
 export function selectWezTermPane(output: string, ttys: string[]): string | undefined {

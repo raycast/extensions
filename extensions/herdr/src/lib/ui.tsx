@@ -65,17 +65,19 @@ export function statusIcon(status?: AgentStatus): { source: Icon; tintColor: Col
   return { source, tintColor: statusColor(status) };
 }
 
+/** Runs `action` behind a toast. A string it returns becomes the success toast's message. */
 export async function runAction(
   title: string,
-  action: () => Promise<void>,
+  action: () => Promise<void | string>,
   options: { success?: string; onSuccess?: () => void | Promise<void> } = {},
 ): Promise<boolean> {
   const toast = await showToast({ style: Toast.Style.Animated, title });
   try {
-    await action();
+    const message = await action();
     await options.onSuccess?.();
     toast.style = Toast.Style.Success;
     toast.title = options.success || title.replace(/^\w+ing\b/, "Done");
+    if (typeof message === "string") toast.message = message;
     return true;
   } catch (error) {
     const formatted = formatHerdrError(error);

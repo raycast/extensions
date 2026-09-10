@@ -42,6 +42,16 @@ describe("Raycast UI contracts", () => {
     expect(preference?.data?.map((item) => item.value)).toEqual(["open", "none"]);
   });
 
+  // Attach stays the Enter action by default so the upstream behavior is unchanged.
+  it("offers attach and switch as session Enter actions, defaulting to attach", () => {
+    const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
+      preferences: Array<{ name: string; default?: string; data?: Array<{ value: string }> }>;
+    };
+    const preference = manifest.preferences.find((item) => item.name === "sessionEnterAction");
+    expect(preference?.data?.map((item) => item.value)).toEqual(["attach", "switch"]);
+    expect(preference?.default).toBe("attach");
+  });
+
   it("does not assign Raycast-reserved shared shortcuts", () => {
     for (const [name, shortcut] of Object.entries(shortcuts)) {
       expect(reservedShortcuts, `${name} uses reserved shortcut ${shortcutKey(shortcut)}`).not.toContain(

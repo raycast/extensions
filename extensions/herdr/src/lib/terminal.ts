@@ -7,15 +7,20 @@ import type { Application } from "@raycast/api";
 import { getHerdrPreferences } from "./preferences";
 import { resolveHerdrBinary, runHerdr, runHerdrJson } from "./herdr";
 import { resolveSession } from "./session-selection";
-import { lookupHerdrClientTtys } from "./process-lookup";
+import { lookupHerdrClientTtys, lookupHerdrClients } from "./process-lookup";
 import { shellQuote } from "./parsers";
 import { detectTerminalKind, expandCustomLauncher } from "./terminal-config";
 import {
   buildGhosttyFocusScript,
   buildITermFocusScript,
+  buildITermTtyListScript,
   buildTerminalFocusScript,
+  buildTerminalTtyListScript,
+  parseTtyList,
   selectWezTermPane,
+  selectWezTermPanes,
   selectWezTermWindow,
+  type HerdrClient,
 } from "./terminal-focus";
 
 const FAST_FOCUS_TIMEOUT_MS = 450;
@@ -160,6 +165,52 @@ export async function focusExistingHerdrClient(explicitSession?: string): Promis
   }
 
   return "unavailable";
+}
+
+export type ClientLocation =
+  | { status: "found"; clients: HerdrClient[]; windowId?: string }
+  | { status: "none" }
+  | { status: "unavailable"; reason: string };
+
+/**
+ * The Clients of `session` whose tty is a Terminal Pane of the configured
+ * Terminal Application, with the WezTerm window of the first. Only these may
+ * be detached: servers, CLI calls, and the remote bridge run on Herdr's own
+ * ptys and never appear in a terminal's pane listing.
+ */
+export async function locateTerminalPaneClients(session: string): Promise<ClientLocation> {
+  const application = selectedApplication();
+  const kind = detectTerminalKind(application || { bundleId: "com.apple.Terminal", name: "Terminal", path: "" });
+  const terminalName = application?.name || "the terminal";
+  if (kind !== "wezterm" && kind !== "terminal" && kind !== "iterm") {
+    return { status: "unavailable", reason: `${terminalName} cannot list its panes` };
+  }
+
+  const binary = await resolveHerdrBinary();
+  const clients = await lookupHerdrClients(binary, session, PROCESS_LOOKUP_TIMEOUT_MS);
+  if (clients === undefined) return { status: "unavailable", reason: "the process list could not be read" };
+  if (clients.length === 0) return { status: "none" };
+  const ttys = clients.map((client) => client.tty);
+
+  let paneTtys: string[] | undefined;
+  let windowId: string | undefined;
+  if (kind === "wezterm") {
+    const executable = wezTermExecutable(application);
+    const listing = executable
+      ? await tryExecCapture(executable, ["cli", "list", "--format", "json"], FAST_FOCUS_TIMEOUT_MS)
+      : undefined;
+    const panes = listing ? selectWezTermPanes(listing, ttys) : undefined;
+    paneTtys = panes?.ttys;
+    windowId = panes?.windowId;
+  } else {
+    const script = kind === "terminal" ? buildTerminalTtyListScript() : buildITermTtyListScript();
+    const output = await tryExecCapture("/usr/bin/osascript", ["-e", script], FAST_FOCUS_TIMEOUT_MS);
+    paneTtys = output === undefined ? undefined : parseTtyList(output);
+  }
+  if (paneTtys === undefined) return { status: "unavailable", reason: `${terminalName} did not list its panes` };
+  const visible = paneTtys;
+  const inPanes = clients.filter((client) => visible.includes(client.tty));
+  return inPanes.length > 0 ? { status: "found", clients: inPanes, windowId } : { status: "none" };
 }
 
 export async function revealFocusedHerdr(): Promise<boolean> {
