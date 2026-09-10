@@ -1,143 +1,200 @@
-import axios from "axios";
-import { createWriteStream, existsSync } from "fs";
-import { showToast, Toast, showInFinder } from "@raycast/api";
+import { existsSync } from "node:fs";
+import { rename } from "node:fs/promises";
+import { resolve } from "node:path";
+import { Readable, Transform } from "node:stream";
+import { pipeline } from "node:stream/promises";
+import { Clipboard, Keyboard, showInFinder, showToast, Toast } from "@raycast/api";
+import { failToast, showError } from "@chrismessina/raycast-kit";
+// Subpath: `/bytes` carries no `@raycast/api` dependency. Requires `moduleResolution: Node16`.
+import { formatBytes } from "@chrismessina/raycast-kit/bytes";
+import { logger } from "@chrismessina/raycast-logger";
+import type { ThreadsMedia } from "./threads-post";
 import {
-  THREADS_PHOTO_DOWNLOADER_API,
-  DOLPHIN_RADAR_API,
-  IMAGE_EXTENSION,
-  VIDEO_EXTENSION,
-  DEFAULT_USER_AGENT,
-} from "./constants";
+  assertMediaResponse,
+  convertImage,
+  extensionFor,
+  redactUrl,
+  releaseReservation,
+  reservePath,
+} from "./media-files";
 
-type ThreadsDolphinRadarResponse = {
-  data: {
-    post_detail: {
-      media_list: {
-        url: string;
-      }[];
-    };
-  };
-};
+/**
+ * A whole download, headers to last byte. Threads media is tens of megabytes at most, so
+ * this only ever trips on a connection that has stalled — without it a hung CDN socket
+ * leaves the command spinning with no way out.
+ */
+const DOWNLOAD_TIMEOUT_MS = 5 * 60 * 1000;
 
-type ThreadsPhotoDownloaderResponse = {
-  image_urls: string[];
-  video_urls: { download_url: string }[];
-};
+/**
+ * Module-level gate, mirroring `useAppDownload` in the ios-apps extension. A no-view
+ * command can be launched again while the first run is still going — and a user who thinks
+ * a long download has stalled will do exactly that — which would otherwise start a second
+ * set of transfers writing alongside the first.
+ */
+let downloadActive = false;
 
-const requestConfig = {
-  headers: {
-    "User-Agent": DEFAULT_USER_AGENT,
-  },
-};
-
-async function getMediaFromThreadsPhotoDownloader(threadsUrl: string) {
-  const response = await axios.get(`${THREADS_PHOTO_DOWNLOADER_API}?url=${threadsUrl}`, requestConfig);
-
-  const imageUrls = (response.data as ThreadsPhotoDownloaderResponse)["image_urls"] || [];
-  const rawVideoUrls = (response.data as ThreadsPhotoDownloaderResponse)["video_urls"] || [];
-  const videoUrls = rawVideoUrls.map((item) => item.download_url);
-
-  if (imageUrls.length === 0 && videoUrls.length === 0) {
-    return null;
-  }
-
-  return {
-    images: imageUrls,
-    videos: videoUrls,
-  };
+export function beginDownloadRun(): boolean {
+  if (downloadActive) return false;
+  downloadActive = true;
+  return true;
 }
 
-async function getMediaFromDolphinRadar(threadsPostId: string) {
-  const response = await axios.get(`${DOLPHIN_RADAR_API}/${threadsPostId}`, requestConfig);
-
-  const mediaList = (response.data as ThreadsDolphinRadarResponse).data.post_detail.media_list;
-
-  if (!mediaList || mediaList.length === 0) {
-    return null;
-  }
-
-  const { images, videos } = mediaList.reduce<{
-    images: string[];
-    videos: string[];
-  }>(
-    (acc, media) => {
-      if (media.url.includes(`.${IMAGE_EXTENSION}`)) {
-        acc.images.push(media.url);
-      } else if (media.url.includes(`.${VIDEO_EXTENSION}`)) {
-        acc.videos.push(media.url);
-      }
-      return acc;
-    },
-    { images: [], videos: [] },
-  );
-
-  return { images, videos };
+export function endDownloadRun(): void {
+  downloadActive = false;
 }
 
-export async function getThreadsMediaURL(threadsUrl: string, threadsPostId: string) {
+export async function handleDownload(
+  media: ThreadsMedia,
+  name: string,
+  downloadFolder: string,
+  label: string,
+  options: { imageFormat?: string } = {},
+): Promise<string | null> {
+  let progressToast: Toast | undefined;
+  let pending: { filePath: string; partPath: string } | undefined;
+
   try {
-    const result = await getMediaFromThreadsPhotoDownloader(threadsUrl);
-    return result;
-  } catch {
-    try {
-      return await getMediaFromDolphinRadar(threadsPostId);
-    } catch {
-      return null;
+    progressToast = await showToast({
+      title: `Downloading ${label}`,
+      message: "0%",
+      style: Toast.Style.Animated,
+    });
+
+    logger.log(`[download-media] Downloading ${label}`, { url: redactUrl(media.url) });
+
+    const response = await fetch(media.url, { signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS) });
+    logger.log(`[download-media] Media server responded`, {
+      status: response.status,
+      contentType: response.headers.get("content-type"),
+      contentLength: response.headers.get("content-length"),
+    });
+
+    if (!response.ok || !response.body) {
+      // Nothing will read this body; let go of the socket rather than waiting for GC.
+      await response.body?.cancel().catch(() => {});
+      throw new Error(`The media server returned ${response.status} ${response.statusText}.`);
     }
-  }
-}
 
-export async function handleDownload(mediaUrl: string, mediaId: string, downloadFolder: string, fileExtension: string) {
-  let filePath = `${downloadFolder}/${mediaId.substring(0, 100)}.${fileExtension}`;
-  let counter = 1;
+    // Everything between here and the pipeline can throw (a bad content type, an unwritable
+    // download folder). None of it consumes the body, so release the socket rather than
+    // leaving it to a timeout — a carousel would otherwise strand one per failed item.
+    const contentType = response.headers.get("content-type");
+    let reserved;
+    try {
+      assertMediaResponse(contentType);
+      reserved = await reservePath(resolve(downloadFolder), name, extensionFor(contentType, media.kind));
+    } catch (error) {
+      await response.body.cancel().catch(() => {});
+      throw error;
+    }
+    const { handle, filePath } = reserved;
+    pending = { filePath, partPath: reserved.partPath };
 
-  while (existsSync(filePath)) {
-    filePath = `${downloadFolder}/${mediaId.substring(0, 100)}(${counter}).${fileExtension}`;
-    counter++;
-  }
+    const declared = Number(response.headers.get("content-length"));
+    const total = Number.isFinite(declared) && declared > 0 ? declared : 0;
+    let loaded = 0;
+    let lastShown = "";
 
-  const writer = createWriteStream(filePath);
+    const trackProgress = new Transform({
+      transform(chunk: Buffer, _encoding, callback) {
+        loaded += chunk.length;
+        // Without a content-length there is no percentage to show, but silence reads as a
+        // stall — fall back to bytes so the toast always moves.
+        const next = total > 0 ? `${Math.min(100, Math.floor((loaded / total) * 100))}%` : formatBytes(loaded);
+        // Toast writes are IPC; only push when the label actually changes.
+        if (next !== lastShown) {
+          lastShown = next;
+          if (progressToast) progressToast.message = next;
+        }
+        callback(null, chunk);
+      },
+    });
 
-  const progressToast = await showToast({
-    title: "Downloading Media",
-    message: "0%",
-    style: Toast.Style.Animated,
-  });
+    // `handle.createWriteStream()` — NOT `createWriteStream("", { fd: handle.fd })`, which
+    // leaves the FileHandle and the stream both owning the descriptor and emits
+    // "File descriptor N closed but not opened in unmanaged mode" on close.
+    await pipeline(Readable.fromWeb(response.body), trackProgress, handle.createWriteStream());
 
-  try {
-    const response = await axios.get(mediaUrl, {
-      responseType: "stream",
-      onDownloadProgress: (event) => {
-        if (event.total) {
-          const progress = Math.round((event.loaded / event.total) * 100);
-          progressToast.message = `${progress}%`;
+    // A 200 with an empty body is not a download. `existsSync` would happily accept the
+    // zero-byte file, so check before it is given its real name.
+    if (loaded === 0) {
+      throw new Error("The media server sent an empty response.");
+    }
+
+    // Only now does the file get its real name, so a half-written download can never be
+    // mistaken for a complete one — nor squat on the name a retry wants.
+    await rename(reserved.partPath, filePath);
+    pending = undefined;
+
+    // Decide from what the server sent, not from the extension we guessed upstream.
+    let finalPath = filePath;
+    if (media.kind === "image" && options.imageFormat && options.imageFormat !== "original") {
+      progressToast.message = "Converting…";
+      const conversion = await convertImage(filePath, options.imageFormat);
+      finalPath = conversion.path;
+      // `convertImage` stays free of @raycast/api so it can be unit-tested, so it reports
+      // the reason rather than logging it.
+      if (conversion.skipped) {
+        logger.log(`[download-media] Kept the original image`, { filePath, reason: conversion.skipped });
+      } else {
+        logger.log(`[download-media] Converted image`, { from: filePath, to: finalPath });
+      }
+    }
+
+    // ios-apps verifies the file is really on disk before claiming success; a path is not
+    // evidence, and a success toast for a file that isn't there is the worst outcome.
+    if (!existsSync(finalPath)) {
+      throw new Error("The download finished but the file isn't on disk.");
+    }
+
+    progressToast.style = Toast.Style.Success;
+    progressToast.title = `Downloaded ${label}`;
+    progressToast.message = finalPath;
+    progressToast.primaryAction = {
+      title: "Show in Finder",
+      shortcut: Keyboard.Shortcut.Common.Open,
+      onAction: async (toast) => {
+        // Reveal can fail (the file moved, the volume went away); swallowing the rejection
+        // would leave the action looking like it worked.
+        try {
+          await showInFinder(finalPath);
+        } catch {
+          toast.message = "Couldn't reveal the file — it may have moved.";
         }
       },
-    });
-
-    response.data.pipe(writer);
-
-    await new Promise<void>((resolve, reject) => {
-      writer.on("finish", resolve);
-      writer.on("error", reject);
-    });
-
-    await showToast({
-      title: "Download Complete",
-      message: `Media saved to ${filePath}`,
-      style: Toast.Style.Success,
-      primaryAction: {
-        title: "Show in Finder",
-        onAction: async () => {
-          await showInFinder(filePath);
-        },
+    };
+    progressToast.secondaryAction = {
+      title: "Copy Path",
+      shortcut: Keyboard.Shortcut.Common.Copy,
+      onAction: async (toast) => {
+        try {
+          await Clipboard.copy(finalPath);
+          toast.message = "Path copied to clipboard";
+        } catch {
+          toast.message = "Couldn't copy the path.";
+        }
       },
-    });
+    };
+
+    logger.log(`[download-media] Download complete`, { filePath: finalPath });
+    return finalPath;
   } catch (error) {
-    await showToast({
-      title: "Error While Downloading Media",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-      style: Toast.Style.Failure,
+    logger.error(`[download-media] Download failed for ${label}`, {
+      url: redactUrl(media.url),
+      error: String(error),
     });
+
+    if (pending) await releaseReservation(pending.filePath, pending.partPath);
+
+    const report = {
+      title: `Couldn't Download ${label}`,
+      copyContext: `GET ${redactUrl(media.url)}`,
+      // A timeout arrives as an abort, and it is the one abort the user must be told about.
+      ignoreAbort: false,
+    };
+    if (progressToast) failToast(progressToast, error, report);
+    else await showError(error, report);
+
+    return null;
   }
 }
