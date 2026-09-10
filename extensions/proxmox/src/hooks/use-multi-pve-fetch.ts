@@ -15,6 +15,11 @@ type MultiPveFetchOptions = {
  *
  * Failures are captured per server, so one unreachable server
  * doesn't prevent showing the results of the others.
+ *
+ * Every tick fetches all servers as one batch, so while a server hangs the
+ * healthy ones refresh at that server's request timeout instead of at
+ * `timerInterval`. Splitting the batch per server would keep them on their own
+ * cadence, but also cost one re-render and one cache write per server per tick.
  */
 export const useMultiPveFetch = <T>(url: string, options?: MultiPveFetchOptions) => {
   const { timerInterval = 1000, execute = true } = options ?? {};
