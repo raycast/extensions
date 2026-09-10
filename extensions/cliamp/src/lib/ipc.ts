@@ -253,10 +253,12 @@ interface Job {
 }
 
 // Submit an operation and wait for its job to finish; returns job.result.
+// Provider operations can be slow (yt-dlp cookie extraction and URL resolution
+// take 10-20s on a cold start), so the job-completion timeout is generous.
 export async function callOp<T = Record<string, unknown>>(
   operation: string,
   params: Record<string, unknown> = {},
-  timeoutMs = 20000,
+  timeoutMs = 60000,
 ): Promise<T> {
   return withClient(async (c) => {
     const submitted = await c.request("operation.submit", { operation, params });
