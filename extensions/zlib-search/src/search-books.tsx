@@ -61,7 +61,14 @@ export default function Command() {
     {
       execute: searchText.trim().length > 0,
       env: execEnv,
-      parseOutput: ({ stdout }) => {
+      parseOutput: ({ stdout, stderr, error, exitCode, signal, timedOut }) => {
+        if (error || exitCode !== 0 || signal || timedOut) {
+          throw new Error(
+            stderr.trim() ||
+              error?.message ||
+              "Search failed. Check your zlib installation and login.",
+          );
+        }
         try {
           return JSON.parse(stdout) as SearchResult;
         } catch {
