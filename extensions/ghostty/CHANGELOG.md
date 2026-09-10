@@ -1,6 +1,6 @@
 # Ghostty Changelog
 
-## [Fix new window opening on the wrong workspace] - 2026-9-10
+## [Fix new window opening on the wrong workspace] - {PR_MERGE_DATE}
 
 - Fixed "New Window" activating an existing window before creating the new one, which caused window managers (OmniWM, yabai, aerospace, etc.) to switch to the workspace of the existing window. The new window now opens on the current workspace.
 
