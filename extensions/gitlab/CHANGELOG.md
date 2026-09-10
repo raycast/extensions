@@ -1,5 +1,10 @@
 # GitLab Changelog
 
+## [Squash commits checkbox in MR create form] - {PR_MERGE_DATE}
+
+- Add "Squash commits when merge request is accepted" checkbox to the MR create form
+- Fix boolean form values being dropped on submit
+
 ## [AI Extension] - 2025-09-18
 
 ## [Added support for Windows] - 2025-08-07
