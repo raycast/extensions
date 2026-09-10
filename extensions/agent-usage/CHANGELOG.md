@@ -1,5 +1,10 @@
 # Agent Usage Changelog
 
+## [Fixed exhausted quota display] - 2026-09-10
+
+- Keep MiniMax CN 5h and weekly usage visible with 0% remaining and reset countdowns when quotas are exhausted.
+- Apply the same display to copied usage text.
+
 ## [Cached usage and background refresh] - 2026-09-09
 
 ### Improvements
