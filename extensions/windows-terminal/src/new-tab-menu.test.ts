@@ -105,6 +105,35 @@ describe("buildProfileMatcher", () => {
     const matcher = buildProfileMatcher({ type: "matchProfiles", name: "a?".repeat(5000) + "b" });
     assert.equal(matcher!({ ...powershell, name: "b" }), true);
   });
+
+  it("treats \\b and \\B as word boundaries, not literal letters", () => {
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "\\bPowerShell\\b" })!(powershell), true);
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "\\bCommand\\b Prompt" }), ["Command Prompt"]);
+    // There's no boundary mid-word, so \b can't split PowerShell between "Power" and "Shell".
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "Power\\bShell" }), []);
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "Power\\BShell" }), ["PowerShell"]);
+  });
+
+  it("honors the (?i) inline case-insensitivity flag", () => {
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?i)powershell" }), ["PowerShell"]);
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?i:power)Shell" }), ["PowerShell"]);
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?i)[p]owershell" }), ["PowerShell"]);
+    // The flag lapses at the end of the group that set it, so "SHELL" stays case-sensitive.
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?:(?i)power)SHELL" }), []);
+  });
+
+  it("rejects an escape it doesn't implement instead of matching it as a literal", () => {
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "\\p{L}+" }), null);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(PowerShell)\\1" }), null);
+  });
+
+  it("refuses a pattern whose nested repetitions compile to a huge program", () => {
+    const start = Date.now();
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(a{1000}){1000}" }), null);
+    assert.ok(Date.now() - start < 1000, "compiling took too long");
+    // A merely long pattern still compiles and matches.
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?:PowerShell){1}" }), ["PowerShell"]);
+  });
 });
 
 describe("resolveNewTabMenuOrder", () => {

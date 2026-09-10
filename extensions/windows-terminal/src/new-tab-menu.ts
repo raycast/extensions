@@ -21,31 +21,40 @@ export interface NewTabMenuEntry {
 // the call stack on a long value even for a safe pattern like ".*". This engine avoids both: it
 // compiles the pattern into a Thompson NFA (compileProgram) and matches by advancing every
 // reachable state together, one input character at a time (matchFull) — the technique RE2 and
-// Rust's regex crate use for guaranteed linear-time matching with no backtracking. So nothing needs
-// to be rejected up front and nothing needs a step budget — a repeated group with safe
-// alternatives, like (dev|prod)+, still matches normally.
+// Rust's regex crate use for guaranteed linear-time matching with no backtracking. So no pattern
+// needs rejecting for how it might backtrack — a repeated group with safe alternatives, like
+// (dev|prod)+, still matches normally, and so does (a+)+ — only the compiled program's sheer size
+// is capped (MAX_PROGRAM_SIZE).
 type AtomNode =
   | { kind: "char"; test: (ch: string) => boolean }
   | { kind: "any" }
   | { kind: "group"; alt: AltNode }
   | { kind: "start" }
-  | { kind: "end" };
+  | { kind: "end" }
+  | { kind: "boundary"; negate: boolean };
 type QuantNode = { atom: AtomNode; min: number; max: number; greedy: boolean };
 type SeqNode = { atoms: QuantNode[] };
 type AltNode = { options: SeqNode[] };
 
 class RegexSyntaxError extends Error {}
+class RegexTooLargeError extends Error {}
 
-// compileQuant below unrolls an explicit {n,m} into n or m literal copies of the atom, so a bound
-// this large would blow up the compiled instruction count regardless of the input being matched.
-// matchProfiles patterns never legitimately need more than this.
-const MAX_QUANT_BOUND = 1000;
+// compileQuant unrolls {n,m} into that many copies of the atom, and nesting multiplies them: the
+// program for (a{1000}){1000} is a million instructions even though neither quantifier is
+// unreasonable on its own. So the cap is on the size of the whole compiled program rather than on
+// any single quantifier. It's set well above what a real matchProfiles pattern needs (a long
+// literal alternation is still only a few hundred instructions) but far below that million, which
+// keeps compilation bounded in both memory and time, and bounds matching too — the Pike VM does at
+// most program-size work per character, so a refused pattern is also the only kind that could
+// have made rendering the profile list crawl.
+const MAX_PROGRAM_SIZE = 50000;
 
-// Parses the subset of ECMAScript regex syntax matchProfiles patterns actually use: literals,
-// `.`, escapes (`\d\w\s` and their negations, `\.` etc.), `[...]` classes, `(...)`/`(?:...)`
-// groups, `|` alternation, and `* + ? {n,m}` quantifiers (with lazy `?` variants). Anything else
-// — lookaround, backreferences, unicode property escapes — is unsupported and throws, which
-// buildProfileMatcher treats the same as any other malformed pattern.
+// Parses the subset of ICU regex syntax (the flavor Windows Terminal itself matches with) that
+// matchProfiles patterns actually use: literals, `.`, escapes (`\d\w\s` and their negations, `\.`
+// etc.), the `\b`/`\B` word-boundary assertions, `[...]` classes, `(...)`/`(?:...)` groups, the
+// `(?i)`/`(?i:...)` case-insensitivity flag, `|` alternation, and `* + ? {n,m}` quantifiers (with
+// lazy `?` variants). Anything else — lookaround, backreferences, unicode property escapes — is
+// unsupported and throws, which buildProfileMatcher treats the same as a malformed pattern.
 function parsePattern(pattern: string): AltNode {
   let i = 0;
   const n = pattern.length;
@@ -53,6 +62,16 @@ function parsePattern(pattern: string): AltNode {
   const fail = (msg: string): never => {
     throw new RegexSyntaxError(msg);
   };
+
+  // Set by (?i) and restored when the enclosing group closes, mirroring ICU: the flag runs from
+  // where it appears to the end of that group, subsequent `|` branches included. It's applied as
+  // each character test is built, so the compiled program needs no notion of case at all.
+  let ignoreCase = false;
+  const foldCase = (test: (ch: string) => boolean) => {
+    if (!ignoreCase) return test;
+    return (ch: string) => test(ch) || test(ch.toLowerCase()) || test(ch.toUpperCase());
+  };
+  const charAtom = (test: (ch: string) => boolean): AtomNode => ({ kind: "char", test: foldCase(test) });
 
   function parseAlt(): AltNode {
     const options = [parseSeq()];
@@ -95,9 +114,7 @@ function parsePattern(pattern: string): AltNode {
       if (braces) {
         min = parseInt(braces[1], 10);
         max = braces[2] === undefined ? min : braces[3] === "" ? Infinity : parseInt(braces[3], 10);
-        if (max < min || min > MAX_QUANT_BOUND || (max !== Infinity && max > MAX_QUANT_BOUND)) {
-          return fail("quantifier bound out of range");
-        }
+        if (max < min) return fail("quantifier bounds out of order");
         quantified = true;
         i += braces[0].length;
       }
@@ -119,11 +136,23 @@ function parsePattern(pattern: string): AltNode {
     if (c === "*" || c === "+" || c === "?" || c === ")") return fail(`unexpected "${c}"`);
     if (c === "(") {
       i++;
-      if (pattern.slice(i, i + 2) === "?:") i += 2;
-      else if (peek() === "?") return fail("unsupported group modifier");
+      const outerIgnoreCase = ignoreCase;
+      if (peek() === "?") {
+        // "?:" plain group, "?i)" / "?-i)" a flag switch, "?i:" a flag scoped to this group.
+        const modifier = /^\?(-?)(i*)([:)])/.exec(pattern.slice(i));
+        if (!modifier) return fail("unsupported group modifier");
+        const [consumed, disable, flags, delimiter] = modifier;
+        if (flags === "" && delimiter === ")") return fail("empty inline flags");
+        if (flags !== "") ignoreCase = disable !== "-";
+        i += consumed.length;
+        // (?i) is a switch, not a group: it matches nothing itself, and deliberately leaves
+        // ignoreCase set for whatever follows it in the enclosing group.
+        if (delimiter === ")") return { kind: "group", alt: { options: [{ atoms: [] }] } };
+      }
       const alt = parseAlt();
       if (peek() !== ")") return fail("unbalanced parenthesis");
       i++;
+      ignoreCase = outerIgnoreCase;
       return { kind: "group", alt };
     }
     if (c === "[") return parseClass();
@@ -146,22 +175,32 @@ function parsePattern(pattern: string): AltNode {
       return parseEscape();
     }
     i++;
-    return { kind: "char", test: (ch) => ch === c };
+    return charAtom((ch) => ch === c);
   }
+
+  const escapePredicates: Record<string, (ch: string) => boolean> = {
+    d: (ch) => ch >= "0" && ch <= "9",
+    D: (ch) => !(ch >= "0" && ch <= "9"),
+    w: (ch) => /\w/.test(ch),
+    W: (ch) => !/\w/.test(ch),
+    s: (ch) => /\s/.test(ch),
+    S: (ch) => !/\s/.test(ch),
+  };
 
   function parseEscape(): AtomNode {
     const c = pattern[i];
     i++;
     if (c === undefined) return fail("trailing backslash");
-    const predicates: Record<string, (ch: string) => boolean> = {
-      d: (ch) => ch >= "0" && ch <= "9",
-      D: (ch) => !(ch >= "0" && ch <= "9"),
-      w: (ch) => /\w/.test(ch),
-      W: (ch) => !/\w/.test(ch),
-      s: (ch) => /\s/.test(ch),
-      S: (ch) => !/\s/.test(ch),
-    };
-    return { kind: "char", test: predicates[c] ?? ((ch) => ch === c) };
+    // \b and \B are zero-width assertions about the surrounding characters, not the letters
+    // "b"/"B" — reading them literally is what made \bPowerShell\b miss the PowerShell profile.
+    if (c === "b" || c === "B") return { kind: "boundary", negate: c === "B" };
+    const predicate = escapePredicates[c];
+    if (predicate) return charAtom(predicate);
+    // An escaped letter or digit that isn't one of the above is a construct this engine doesn't
+    // implement (\A, \p{...}, a backreference). Reject the pattern rather than matching it as a
+    // literal, which would silently match the wrong profiles.
+    if (/[A-Za-z0-9]/.test(c)) return fail(`unsupported escape "\\${c}"`);
+    return charAtom((ch) => ch === c);
   }
 
   function parseClass(): AtomNode {
@@ -178,12 +217,10 @@ function parsePattern(pattern: string): AltNode {
         i++;
         const esc = pattern[i];
         i++;
-        if (esc === "d") tests.push((ch) => ch >= "0" && ch <= "9");
-        else if (esc === "D") tests.push((ch) => !(ch >= "0" && ch <= "9"));
-        else if (esc === "w") tests.push((ch) => /\w/.test(ch));
-        else if (esc === "W") tests.push((ch) => !/\w/.test(ch));
-        else if (esc === "s") tests.push((ch) => /\s/.test(ch));
-        else if (esc === "S") tests.push((ch) => !/\s/.test(ch));
+        if (esc === undefined) return fail("trailing backslash");
+        const predicate = escapePredicates[esc];
+        if (predicate) tests.push(predicate);
+        else if (/[A-Za-z0-9]/.test(esc)) return fail(`unsupported escape "\\${esc}"`);
         else tests.push((ch) => ch === esc);
         continue;
       }
@@ -199,7 +236,10 @@ function parsePattern(pattern: string): AltNode {
     }
     if (peek() !== "]") return fail("unbalanced bracket");
     i++;
-    return { kind: "char", test: (ch) => negate !== tests.some((test) => test(ch)) };
+    // Case folding has to happen inside the negation, not around it: (?i)[^a] means "neither a
+    // nor A", so folding the finished (already negated) test would let it match "A".
+    const member = foldCase((ch) => tests.some((test) => test(ch)));
+    return { kind: "char", test: (ch) => negate !== member(ch) };
   }
 
   const result = parseAlt();
@@ -216,15 +256,26 @@ type CharInst = { op: "char"; test: (ch: string) => boolean; next?: Inst };
 type AnyInst = { op: "any"; next?: Inst };
 type StartInst = { op: "start"; next?: Inst };
 type EndInst = { op: "end"; next?: Inst };
+type BoundaryInst = { op: "boundary"; negate: boolean; next?: Inst };
 type SplitInst = { op: "split"; next?: Inst; next2?: Inst };
 type NopInst = { op: "nop"; next?: Inst };
 type MatchInst = { op: "match" };
-type Inst = CharInst | AnyInst | StartInst | EndInst | SplitInst | NopInst | MatchInst;
+type Inst = CharInst | AnyInst | StartInst | EndInst | BoundaryInst | SplitInst | NopInst | MatchInst;
 
 type PatchSlot =
-  | { inst: CharInst | AnyInst | StartInst | EndInst | NopInst | SplitInst; slot: "next" }
+  | { inst: CharInst | AnyInst | StartInst | EndInst | BoundaryInst | NopInst | SplitInst; slot: "next" }
   | { inst: SplitInst; slot: "next2" };
 type Frag = { start: Inst; out: PatchSlot[] };
+
+// Every instruction is created through here, so the running total covers nested repetitions too —
+// the budget is spent as (a{1000}){1000} unrolls, and compilation gives up partway through rather
+// than after building the whole million-instruction program.
+let instructionCount = 0;
+
+function newInst<T extends Inst>(inst: T): T {
+  if (++instructionCount > MAX_PROGRAM_SIZE) throw new RegexTooLargeError("pattern is too large to compile");
+  return inst;
+}
 
 function patch(out: PatchSlot[], target: Inst): void {
   for (const p of out) {
@@ -234,7 +285,7 @@ function patch(out: PatchSlot[], target: Inst): void {
 }
 
 function emptyFrag(): Frag {
-  const inst: NopInst = { op: "nop" };
+  const inst: NopInst = newInst({ op: "nop" });
   return { start: inst, out: [{ inst, slot: "next" }] };
 }
 
@@ -250,27 +301,35 @@ function concatAll(frags: Frag[]): Frag {
 function compileAtom(atom: AtomNode): Frag {
   if (atom.kind === "group") return compileAlt(atom.alt);
   if (atom.kind === "char") {
-    const inst: CharInst = { op: "char", test: atom.test };
+    const inst: CharInst = newInst({ op: "char", test: atom.test });
     return { start: inst, out: [{ inst, slot: "next" }] };
   }
   if (atom.kind === "any") {
-    const inst: AnyInst = { op: "any" };
+    const inst: AnyInst = newInst({ op: "any" });
     return { start: inst, out: [{ inst, slot: "next" }] };
   }
   if (atom.kind === "start") {
-    const inst: StartInst = { op: "start" };
+    const inst: StartInst = newInst({ op: "start" });
     return { start: inst, out: [{ inst, slot: "next" }] };
   }
-  const inst: EndInst = { op: "end" };
+  if (atom.kind === "end") {
+    const inst: EndInst = newInst({ op: "end" });
+    return { start: inst, out: [{ inst, slot: "next" }] };
+  }
+  const inst: BoundaryInst = newInst({ op: "boundary", negate: atom.negate });
   return { start: inst, out: [{ inst, slot: "next" }] };
 }
 
+// Counts up rather than building the array first, so an absurd count like a{999999999} trips the
+// instruction budget partway through instead of trying to size an array for all of it.
 function repeatFrag(atom: AtomNode, count: number): Frag {
-  return concatAll(Array.from({ length: count }, () => compileAtom(atom)));
+  const frags: Frag[] = [];
+  for (let copy = 0; copy < count; copy++) frags.push(compileAtom(atom));
+  return concatAll(frags);
 }
 
 function starFrag(atom: AtomNode): Frag {
-  const split: SplitInst = { op: "split" };
+  const split: SplitInst = newInst({ op: "split" });
   const body = compileAtom(atom);
   patch(body.out, split);
   split.next = body.start;
@@ -278,7 +337,7 @@ function starFrag(atom: AtomNode): Frag {
 }
 
 function plusFrag(atom: AtomNode): Frag {
-  const split: SplitInst = { op: "split" };
+  const split: SplitInst = newInst({ op: "split" });
   const body = compileAtom(atom);
   patch(body.out, split);
   split.next = body.start;
@@ -286,7 +345,7 @@ function plusFrag(atom: AtomNode): Frag {
 }
 
 function optionalFrag(atom: AtomNode): Frag {
-  const split: SplitInst = { op: "split" };
+  const split: SplitInst = newInst({ op: "split" });
   const body = compileAtom(atom);
   split.next = body.start;
   return { start: split, out: [...body.out, { inst: split, slot: "next2" }] };
@@ -300,8 +359,9 @@ function compileQuant(q: QuantNode): Frag {
     if (q.min === 0) return starFrag(q.atom);
     return concat(repeatFrag(q.atom, q.min - 1), plusFrag(q.atom));
   }
-  const optionals = concatAll(Array.from({ length: q.max - q.min }, () => optionalFrag(q.atom)));
-  return concat(repeatFrag(q.atom, q.min), optionals);
+  const optionals: Frag[] = [];
+  for (let copy = q.min; copy < q.max; copy++) optionals.push(optionalFrag(q.atom));
+  return concat(repeatFrag(q.atom, q.min), concatAll(optionals));
 }
 
 function compileSeq(seq: SeqNode): Frag {
@@ -310,7 +370,7 @@ function compileSeq(seq: SeqNode): Frag {
 
 function compileAlt(alt: AltNode): Frag {
   return alt.options.map(compileSeq).reduceRight((rest, option) => {
-    const split: SplitInst = { op: "split" };
+    const split: SplitInst = newInst({ op: "split" });
     split.next = option.start;
     split.next2 = rest.start;
     return { start: split, out: [...option.out, ...rest.out] };
@@ -318,10 +378,19 @@ function compileAlt(alt: AltNode): Frag {
 }
 
 function compileProgram(alt: AltNode): Inst {
+  instructionCount = 0;
   const frag = compileAlt(alt);
-  const matchInst: MatchInst = { op: "match" };
+  const matchInst: MatchInst = newInst({ op: "match" });
   patch(frag.out, matchInst);
   return frag.start;
+}
+
+// \b sits between a word character and a non-word one, counting the space off either end of the
+// value as non-word — so it holds at both ends of "PowerShell" but not inside it.
+const isWordChar = (ch: string | undefined) => ch !== undefined && /\w/.test(ch);
+
+function isWordBoundary(str: string, pos: number): boolean {
+  return isWordChar(str[pos - 1]) !== isWordChar(str[pos]);
 }
 
 // Epsilon-closure: follows the zero-width instructions (`split`, `nop`, and the anchors when their
@@ -347,6 +416,8 @@ function addThread(list: Inst[], visited: Set<Inst>, start: Inst, pos: number, s
       if (pos === 0) stack.push(inst.next!);
     } else if (inst.op === "end") {
       if (pos === str.length) stack.push(inst.next!);
+    } else if (inst.op === "boundary") {
+      if (isWordBoundary(str, pos) !== inst.negate) stack.push(inst.next!);
     } else {
       list.push(inst);
     }
@@ -381,8 +452,9 @@ function matchFull(prog: Inst, str: string): boolean {
 // A matchProfiles entry matches a profile when ANY provided field (name/commandline/source)
 // fully matches that field's regex — mirrors Windows Terminal's MatchProfilesEntry. Empty profile
 // fields never match, so "source": ".*" skips local profiles and "commandline": ".*" skips
-// profiles without a command line. An entry with no patterns, or a malformed or unsupported
-// regex, matches nothing rather than crashing or matching all.
+// profiles without a command line. An entry with no patterns, or a regex that is malformed,
+// unsupported, or too large to compile, matches nothing rather than crashing or matching all —
+// compilation happens here, once per entry, so a refused pattern can't throw during rendering.
 export function buildProfileMatcher(entry: NewTabMenuEntry): ((profile: Profile) => boolean) | null {
   const specs: { pattern: string; get: (profile: Profile) => string }[] = [];
   if (entry.name !== undefined) specs.push({ pattern: entry.name, get: (p) => p.name });
