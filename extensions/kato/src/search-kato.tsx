@@ -174,15 +174,20 @@ function SearchKatoCommand() {
         try {
           if (query.trim().length >= 2) {
             const types = filter === "all" ? [] : [filter];
-            setResults(
-              await katoApi.search(query.trim(), types, controller.signal),
+            const searchResults = await katoApi.search(
+              query.trim(),
+              types,
+              controller.signal,
             );
+            if (controller.signal.aborted) return;
+            setResults(searchResults);
           } else {
             const [tasks, meetings, records] = await Promise.all([
               katoApi.tasks(),
               katoApi.upcomingMeetings(),
               katoApi.recentRecords(controller.signal),
             ]);
+            if (controller.signal.aborted) return;
             const urgent: TaskSearchResult[] = tasks
               .filter(
                 (task) =>
@@ -225,8 +230,11 @@ function SearchKatoCommand() {
             );
           }
         } catch (cause) {
-          if ((cause as Error).name !== "AbortError")
-            setError((cause as Error).message);
+          if (controller.signal.aborted) return;
+          if (cause instanceof Error && cause.name === "AbortError") return;
+          setError(
+            cause instanceof Error ? cause.message : "Could not search Kato.",
+          );
         } finally {
           if (!controller.signal.aborted) setIsLoading(false);
         }

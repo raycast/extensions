@@ -1,3 +1,4 @@
 import raycastConfig from "@raycast/eslint-config";
+import { defineConfig } from "eslint/config";
 
-export default [...raycastConfig];
+export default defineConfig([...raycastConfig]);

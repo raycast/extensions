@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kato",
   "title": "Kato",
   "version": "0.1.0",
