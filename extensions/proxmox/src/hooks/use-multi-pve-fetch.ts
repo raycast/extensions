@@ -18,8 +18,9 @@ type MultiPveFetchOptions = {
  *
  * Every tick fetches all servers as one batch, so while a server hangs the
  * healthy ones refresh at that server's request timeout instead of at
- * `timerInterval`. Splitting the batch per server would keep them on their own
- * cadence, but also cost one re-render and one cache write per server per tick.
+ * `timerInterval`. Keeping them on their own cadence would mean one hook per
+ * server, which needs a child component per server since the server count
+ * changes at runtime.
  */
 export const useMultiPveFetch = <T>(url: string, options?: MultiPveFetchOptions) => {
   const { timerInterval = 1000, execute = true } = options ?? {};
