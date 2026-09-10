@@ -31,7 +31,6 @@ export default function Command() {
 
   return (
     <Grid
-      navigationTitle="Recent Reset Calendar"
       columns={2}
       aspectRatio="1"
       inset={Grid.Inset.Zero}

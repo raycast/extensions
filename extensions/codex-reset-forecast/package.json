@@ -11,6 +11,11 @@
   "categories": [
     "Developer Tools"
   ],
+  "keywords": [
+    "codex",
+    "quota",
+    "openai"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=22.22.2"

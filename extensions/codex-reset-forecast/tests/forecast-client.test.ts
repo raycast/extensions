@@ -32,6 +32,7 @@ describe("fetchForecast", () => {
 
   it("keeps the snapshot and last successful check time through repeated failed refreshes", async () => {
     const store = new MemoryStore();
+    const onCacheFallback = vi.fn();
     const saved = await fetchForecast({
       store,
       fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(jsonResponse()),
@@ -42,11 +43,14 @@ describe("fetchForecast", () => {
         store,
         fetchImpl: vi.fn<typeof fetch>().mockRejectedValue(new Error("offline")),
         now: () => new Date(now().getTime() + hours * 3_600_000),
+        onCacheFallback,
       });
       expect(result).toBe(saved);
       expect(result.lastSuccessfulRequestAt).toBe(now().toISOString());
     }
     expect(store.writes).toHaveLength(1);
+    expect(onCacheFallback).toHaveBeenCalledTimes(3);
+    expect(onCacheFallback.mock.calls[0][0].message).toBe("offline");
   });
 
   it.each([

@@ -20,6 +20,7 @@ type FetchForecastOptions = {
   fetchImpl?: typeof fetch;
   now?: () => Date;
   timeoutMilliseconds?: number;
+  onCacheFallback?: (error: Error) => void | Promise<void>;
 };
 
 function snapshotTime(response: ForecastResponse): number {
@@ -31,6 +32,7 @@ export async function fetchForecast({
   fetchImpl = fetch,
   now = () => new Date(),
   timeoutMilliseconds = 15_000,
+  onCacheFallback,
 }: FetchForecastOptions): Promise<ForecastSnapshot> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMilliseconds);
@@ -58,13 +60,16 @@ export async function fetchForecast({
     return snapshot;
   } catch (error) {
     // A failed refresh does not invalidate a successful snapshot or its check time.
-    const cached = store.read();
-    if (cached) return cached;
     const warning = controller.signal.aborted
       ? "The request timed out. Try refreshing."
       : error instanceof Error
         ? error.message
         : "The reset monitor could not be reached.";
+    const cached = store.read();
+    if (cached) {
+      await onCacheFallback?.(new Error(warning));
+      return cached;
+    }
     throw new Error(warning);
   } finally {
     clearTimeout(timeout);

@@ -47,8 +47,9 @@ snapshot used by codexreset.org. Probabilities are the source's estimates; the
 extension does not calculate predictions or track your personal quota.
 
 The last valid snapshot is saved locally. If a refresh fails, the extension
-quietly keeps the existing data and its original **Last Checked** time. The menu
-bar icon stays the same. An error appears only when no saved data is available.
+keeps the existing data and its original **Last Checked** time, and shows a
+failure toast. The menu bar icon stays the same. An empty error state appears
+only when no saved data is available.
 Source status messages still explain when a forecast is awaiting reassessment
 or some monitored sources did not respond. An unchanged forecast stays current
 until the source says otherwise or its scheduled reassessment is due.
