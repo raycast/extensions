@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import type { Application } from "@raycast/api";
 import { getHerdrPreferences } from "./preferences";
 import { resolveHerdrBinary, runHerdr, runHerdrJson } from "./herdr";
+import { resolveSession } from "./session-selection";
 import { lookupHerdrClientTtys } from "./process-lookup";
 import { shellQuote } from "./parsers";
 import { detectTerminalKind, expandCustomLauncher } from "./terminal-config";
@@ -60,10 +61,6 @@ function selectedApplication(): Application | undefined {
   return getHerdrPreferences().terminalApplication;
 }
 
-function selectedSession(): string {
-  return getHerdrPreferences().sessionName?.trim() || "default";
-}
-
 function wezTermExecutable(application: Application | undefined): string | undefined {
   if (!application?.path) return undefined;
   return join(application.path, "Contents", "MacOS", "wezterm");
@@ -82,13 +79,14 @@ export async function bringTerminalToFront(): Promise<void> {
   }
 }
 
-async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
+export async function focusExistingHerdrClient(explicitSession?: string): Promise<ClientFocusResult> {
   const application = selectedApplication();
   const kind = detectTerminalKind(application || { bundleId: "com.apple.Terminal", name: "Terminal", path: "" });
+  const session = await resolveSession(explicitSession);
 
   if (kind === "terminal" || kind === "iterm") {
     const binary = await resolveHerdrBinary();
-    const ttys = await lookupHerdrClientTtys(binary, selectedSession(), PROCESS_LOOKUP_TIMEOUT_MS);
+    const ttys = await lookupHerdrClientTtys(binary, session, PROCESS_LOOKUP_TIMEOUT_MS);
     if (ttys === undefined) return "unavailable";
     if (ttys.length === 0) return "missing";
     const script = kind === "terminal" ? buildTerminalFocusScript(ttys) : buildITermFocusScript(ttys);
@@ -138,7 +136,7 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
       resolveHerdrBinary(),
     ]);
     if (!listing) return "unavailable";
-    const ttys = await lookupHerdrClientTtys(binary, selectedSession(), PROCESS_LOOKUP_TIMEOUT_MS);
+    const ttys = await lookupHerdrClientTtys(binary, session, PROCESS_LOOKUP_TIMEOUT_MS);
     if (ttys === undefined) return "unavailable";
     const paneId = selectWezTermPane(listing, ttys);
     if (!paneId) return "missing";
@@ -179,18 +177,14 @@ async function launchWarp(appTarget: string, command: string): Promise<void> {
 
 export async function launchHerdrInTerminal(
   args: string[] = [],
-  options: { includePreferredSession?: boolean } = {},
+  options: { includeSession?: boolean } = {},
 ): Promise<void> {
   const binary = await resolveHerdrBinary();
   const application = selectedApplication();
   // Launched clients inherit the Raycast process environment, where a leaked
-  // HERDR_SESSION would retarget them, so the session is always named. The
-  // opt-out branches on the option alone: an unset preference is also
-  // undefined and must still produce the flag.
-  const sessionArgs =
-    options.includePreferredSession === false
-      ? args
-      : ["--session", getHerdrPreferences().sessionName?.trim() || "default", ...args];
+  // HERDR_SESSION would retarget them, so the resolved session is always
+  // named. Callers that pass their own `session attach` argv opt out.
+  const sessionArgs = options.includeSession === false ? args : ["--session", await resolveSession(), ...args];
   const command = [binary, ...sessionArgs].map(shellQuote).join(" ");
   const customLauncher = getHerdrPreferences().customTerminalLauncher?.trim();
   if (customLauncher) {

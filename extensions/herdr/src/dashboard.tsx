@@ -1,4 +1,4 @@
-import { Action, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { CreateWorkspaceForm } from "./components/create-workspace-form";
 import { AgentActions, PaneActions, TabActions, WorkspaceActions } from "./components/resource-actions";
@@ -6,7 +6,7 @@ import { StartAgentForm } from "./components/start-agent-form";
 import { useHerdrSnapshot } from "./hooks/use-herdr-snapshot";
 import { agentIcon, agentName } from "./lib/agent-appearance";
 import type { PaneInfo } from "./lib/types";
-import { ErrorView, abbreviatePath, statusIcon, statusTitle, tabLabel } from "./lib/ui";
+import { ErrorView, SwitchSessionAction, abbreviatePath, shortcuts, statusIcon, statusTitle, tabLabel } from "./lib/ui";
 
 type Scope = "all" | "attention" | "workspaces" | "tabs" | "panes" | "agents";
 
@@ -41,8 +41,20 @@ export default function Command() {
 
   return (
     <List
+      navigationTitle={snapshot.session ? `Dashboard · ${snapshot.session}` : undefined}
       isLoading={snapshot.isLoading}
       searchBarPlaceholder="Search workspaces, tabs, panes, agents, paths…"
+      actions={
+        <ActionPanel>
+          <SwitchSessionAction />
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={shortcuts.refresh}
+            onAction={snapshot.revalidate}
+          />
+        </ActionPanel>
+      }
       searchBarAccessory={
         <List.Dropdown tooltip="Filter Dashboard" value={scope} onChange={(value) => setScope(value as Scope)}>
           <List.Dropdown.Item value="all" title="Everything" />

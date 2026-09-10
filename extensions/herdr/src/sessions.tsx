@@ -1,12 +1,39 @@
 import { Action, ActionPanel, Alert, Icon, List, closeMainWindow, confirmAlert } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useSelectedSession } from "./hooks/use-herdr-snapshot";
 import { getSessions, runHerdr } from "./lib/herdr";
+import { clearSelectedSessionIf, setSelectedSession } from "./lib/session-selection";
 import { launchHerdrInTerminal } from "./lib/terminal";
 import { ErrorView, runAction, shortcuts } from "./lib/ui";
 
 export default function Command() {
   const sessions = useCachedPromise(getSessions, [], { keepPreviousData: true });
+  const selected = useSelectedSession();
   if (sessions.error && !sessions.data) return <ErrorView error={sessions.error} onRetry={sessions.revalidate} />;
+
+  async function refresh() {
+    await Promise.all([sessions.revalidate(), selected.revalidate()]);
+  }
+
+  // Every attach also selects: what the terminal shows is what Raycast controls.
+  async function attach(name: string) {
+    const succeeded = await runAction(
+      "Opening session",
+      async () => {
+        await setSelectedSession(name);
+        await launchHerdrInTerminal(["session", "attach", name], { includeSession: false });
+      },
+      { success: "Terminal Opened", onSuccess: selected.revalidate },
+    );
+    if (succeeded) await closeMainWindow({ clearRootSearch: true });
+  }
+
+  async function select(name: string) {
+    await runAction("Selecting session", () => setSelectedSession(name), {
+      success: "Session Selected",
+      onSuccess: selected.revalidate,
+    });
+  }
 
   async function stop(name: string) {
     if (
@@ -38,10 +65,13 @@ export default function Command() {
       return;
     await runAction(
       "Deleting session",
-      () => runHerdr(["session", "delete", name, "--json"], { session: "" }).then(() => undefined),
+      async () => {
+        await runHerdr(["session", "delete", name, "--json"], { session: "" });
+        await clearSelectedSessionIf(name);
+      },
       {
         success: "Session Deleted",
-        onSuccess: sessions.revalidate,
+        onSuccess: refresh,
       },
     );
   }
@@ -62,21 +92,20 @@ export default function Command() {
           accessories={[
             { tag: session.running ? "Running" : "Stopped" },
             ...(session.default ? [{ tag: "Default" }] : []),
+            ...(session.name === selected.data ? [{ tag: "Selected" }] : []),
           ]}
           actions={
             <ActionPanel>
               <Action
                 title={session.running ? "Attach in Terminal" : "Start and Attach in Terminal"}
                 icon={Icon.Terminal}
-                onAction={async () => {
-                  const succeeded = await runAction(
-                    "Opening session",
-                    () =>
-                      launchHerdrInTerminal(["session", "attach", session.name], { includePreferredSession: false }),
-                    { success: "Terminal Opened" },
-                  );
-                  if (succeeded) await closeMainWindow({ clearRootSearch: true });
-                }}
+                onAction={() => attach(session.name)}
+              />
+              <Action
+                title="Select Session"
+                icon={Icon.Checkmark}
+                shortcut={shortcuts.selectSession}
+                onAction={() => select(session.name)}
               />
               {session.running ? (
                 <Action
@@ -101,12 +130,7 @@ export default function Command() {
                 shortcut={shortcuts.copyId}
               />
               <Action.ShowInFinder path={session.session_dir} shortcut={shortcuts.copyPath} />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                shortcut={shortcuts.refresh}
-                onAction={sessions.revalidate}
-              />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={refresh} />
             </ActionPanel>
           }
         />

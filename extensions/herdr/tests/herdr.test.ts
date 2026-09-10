@@ -4,10 +4,12 @@ import { access } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { resolveHerdrBinary, runHerdr } from "../src/lib/herdr";
+import { HerdrError, getSnapshot, resolveHerdrBinary, runHerdr } from "../src/lib/herdr";
+import { storage } from "./helpers/raycast-api";
 
 vi.mock("node:fs/promises", () => ({ access: vi.fn() }));
 vi.mock("node:child_process", () => ({ execFile: vi.fn() }));
+vi.mock("@raycast/api", () => import("./helpers/raycast-api"));
 
 const preferences: { herdrPath?: string; sessionName?: string } = {};
 vi.mock("../src/lib/preferences", () => ({
@@ -17,6 +19,7 @@ vi.mock("../src/lib/preferences", () => ({
 beforeEach(() => {
   preferences.herdrPath = "~/.local/bin/herdr";
   preferences.sessionName = undefined;
+  storage.clear();
   vi.mocked(access).mockReset().mockResolvedValue();
   vi.mocked(execFile).mockReset();
 });
@@ -38,21 +41,21 @@ describe("resolveHerdrBinary", () => {
   });
 });
 
+function mockExecFileSuccess() {
+  // execFile's promisify-compatible callback signature: the callback is the
+  // last argument after (file, args, options).
+  vi.mocked(execFile).mockImplementation(((...callArgs: unknown[]) => {
+    const callback = callArgs.at(-1) as (error: Error | null, stdout: string, stderr: string) => void;
+    callback(null, "{}", "");
+    return {};
+  }) as never);
+}
+
+function executedArgs(): unknown {
+  return vi.mocked(execFile).mock.calls[0][1];
+}
+
 describe("runHerdr", () => {
-  function mockExecFileSuccess() {
-    // execFile's promisify-compatible callback signature: the callback is the
-    // last argument after (file, args, options).
-    vi.mocked(execFile).mockImplementation(((...callArgs: unknown[]) => {
-      const callback = callArgs.at(-1) as (error: Error | null, stdout: string, stderr: string) => void;
-      callback(null, "{}", "");
-      return {};
-    }) as never);
-  }
-
-  function executedArgs(): unknown {
-    return vi.mocked(execFile).mock.calls[0][1];
-  }
-
   // Regression: without a --session flag the CLI falls back to an inherited
   // HERDR_SESSION, so a value leaking into the Raycast process environment
   // could silently retarget every command.
@@ -78,5 +81,49 @@ describe("runHerdr", () => {
 
     await runHerdr(["session", "list", "--json"], { session: "" });
     expect(executedArgs()).toEqual(["session", "list", "--json"]);
+  });
+
+  it("targets the Selected Session ahead of the configured session", async () => {
+    storage.set("selectedSession", "tmp-b");
+    preferences.sessionName = "work";
+    mockExecFileSuccess();
+
+    await runHerdr(["pane", "list"]);
+    expect(executedArgs()).toEqual(["--session", "tmp-b", "pane", "list"]);
+  });
+
+  // Herdr's read commands never start a server, so a Stopped session surfaces
+  // as a refused socket connection. Views and the menu bar key their Stopped
+  // state off this code and the session it names.
+  it("reports a Stopped session when Herdr refuses the connection", async () => {
+    storage.set("selectedSession", "tmp-b");
+    vi.mocked(execFile).mockImplementation(((...callArgs: unknown[]) => {
+      const callback = callArgs.at(-1) as (error: Error | null, stdout: string, stderr: string) => void;
+      callback(
+        Object.assign(new Error("Command failed"), { code: 1 }),
+        "",
+        'Error: Os { code: 61, kind: ConnectionRefused, message: "Connection refused" }\n',
+      );
+      return {};
+    }) as never);
+
+    const failure = await runHerdr(["api", "snapshot"]).catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(HerdrError);
+    expect(failure).toMatchObject({ code: "session_not_running", session: "tmp-b" });
+    expect((failure as HerdrError).message).toContain("tmp-b");
+  });
+});
+
+describe("getSnapshot", () => {
+  it("reads the snapshot of an explicit session", async () => {
+    storage.set("selectedSession", "tmp-b");
+    vi.mocked(execFile).mockImplementation(((...callArgs: unknown[]) => {
+      const callback = callArgs.at(-1) as (error: Error | null, stdout: string, stderr: string) => void;
+      callback(null, JSON.stringify({ result: { snapshot: { workspaces: [], tabs: [], panes: [], agents: [] } } }), "");
+      return {};
+    }) as never);
+
+    await getSnapshot(undefined, "tmp-a");
+    expect(executedArgs()).toEqual(["--session", "tmp-a", "api", "snapshot"]);
   });
 });

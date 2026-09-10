@@ -1,6 +1,20 @@
 import { homedir } from "node:os";
-import { Action, ActionPanel, Color, Detail, Icon, Toast, openExtensionPreferences, showToast } from "@raycast/api";
-import { formatHerdrError } from "./herdr";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  LaunchType,
+  Toast,
+  closeMainWindow,
+  launchCommand,
+  openExtensionPreferences,
+  showToast,
+} from "@raycast/api";
+import { formatHerdrError, stoppedSessionOf } from "./herdr";
+import { shortcuts } from "./shortcuts";
+import { launchHerdrInTerminal } from "./terminal";
 import type { AgentStatus, TabInfo } from "./types";
 export { shortcuts } from "./shortcuts";
 
@@ -72,7 +86,53 @@ export async function runAction(
   }
 }
 
+/** Opens Manage Sessions, the one picker for the Selected Session. */
+export function SwitchSessionAction({ title = "Switch Session…" }: { title?: string }) {
+  return (
+    <Action
+      title={title}
+      icon={Icon.Switch}
+      shortcut={shortcuts.switchSession}
+      onAction={() => launchCommand({ name: "sessions", type: LaunchType.UserInitiated })}
+    />
+  );
+}
+
+// Reads never start a session, so a Stopped Selected Session is shown as such;
+// attaching through the terminal is the only way to start it from here.
+function SessionStoppedView({ session, onRetry }: { session: string; onRetry?: () => void }) {
+  const markdown = `# Session “${session}” is stopped\n\nAttach to start it in your terminal, or choose another session for Raycast to control.`;
+  return (
+    <Detail
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Start and Attach in Terminal"
+            icon={Icon.Terminal}
+            onAction={async () => {
+              const succeeded = await runAction(
+                "Starting session",
+                () => launchHerdrInTerminal(["session", "attach", session], { includeSession: false }),
+                { success: "Terminal Opened" },
+              );
+              if (succeeded) await closeMainWindow({ clearRootSearch: true });
+            }}
+          />
+          <SwitchSessionAction title="Choose Another Session" />
+          {onRetry ? (
+            <Action title="Try Again" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={onRetry} />
+          ) : null}
+          <Action title="Open Extension Preferences…" icon={Icon.Gear} onAction={openExtensionPreferences} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 export function ErrorView({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
+  const stoppedSession = stoppedSessionOf(error);
+  if (stoppedSession) return <SessionStoppedView session={stoppedSession} onRetry={onRetry} />;
   const formatted = formatHerdrError(error);
   const isMissing = error instanceof Error && "code" in error && error.code === "binary_not_found";
   const markdown = `# ${formatted.title}\n\n${formatted.message || "Make sure Herdr is installed and its server is running."}`;

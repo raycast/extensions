@@ -9,7 +9,7 @@ import {
 } from "@raycast/api";
 import { useHerdrSnapshot } from "./hooks/use-herdr-snapshot";
 import { agentIcon, agentName } from "./lib/agent-appearance";
-import { focusResource, formatHerdrError, getAgentTarget } from "./lib/herdr";
+import { focusResource, formatHerdrError, getAgentTarget, stoppedSessionOf } from "./lib/herdr";
 import { getHerdrPreferences } from "./lib/preferences";
 import { launchHerdrInTerminal, revealFocusedHerdr } from "./lib/terminal";
 import type { AgentInfo, AgentStatus, HerdrSnapshot } from "./lib/types";
@@ -91,6 +91,7 @@ export default function Command() {
             ? "unknown"
             : undefined;
   const leadingCount = leadingStatus ? groups.get(leadingStatus)?.length : undefined;
+  const stoppedSession = stoppedSessionOf(snapshot.error);
 
   if (!visible) return null;
 
@@ -100,15 +101,31 @@ export default function Command() {
       icon={leadingStatus ? statusIcon(leadingStatus) : Icon.Terminal}
       title={leadingCount ? String(leadingCount) : undefined}
       tooltip={
-        snapshot.error
-          ? "Herdr is unavailable"
-          : `Herdr · ${blocked.length} need attention · ${done.length} done · ${working.length} working · ${idle.length} idle · ${unknown.length} unknown`
+        stoppedSession
+          ? `Herdr · ${stoppedSession} is stopped`
+          : snapshot.error
+            ? "Herdr is unavailable"
+            : [
+                "Herdr",
+                snapshot.session,
+                `${blocked.length} need attention`,
+                `${done.length} done`,
+                `${working.length} working`,
+                `${idle.length} idle`,
+                `${unknown.length} unknown`,
+              ]
+                .filter(Boolean)
+                .join(" · ")
       }
     >
       {snapshot.error ? (
         <MenuBarExtra.Item
-          title="Herdr Unavailable — Open Herdr"
-          icon={Icon.ExclamationMark}
+          title={
+            stoppedSession
+              ? `Session “${stoppedSession}” Is Stopped — Start and Attach`
+              : "Herdr Unavailable — Open Herdr"
+          }
+          icon={stoppedSession ? Icon.Circle : Icon.ExclamationMark}
           onAction={() => void openHerdr()}
         />
       ) : null}
@@ -173,6 +190,11 @@ export default function Command() {
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={() => void snapshot.revalidate()}
+        />
+        <MenuBarExtra.Item
+          title="Manage Sessions…"
+          icon={Icon.Switch}
+          onAction={() => void launchCommand({ name: "sessions", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item title="Preferences…" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </MenuBarExtra.Section>

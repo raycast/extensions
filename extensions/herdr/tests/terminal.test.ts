@@ -3,8 +3,10 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { launchHerdrInTerminal } from "../src/lib/terminal";
+import { storage } from "./helpers/raycast-api";
 
 vi.mock("node:child_process", () => ({ execFile: vi.fn(), spawn: vi.fn() }));
+vi.mock("@raycast/api", () => import("./helpers/raycast-api"));
 vi.mock("node:fs/promises", () => ({
   access: vi.fn().mockResolvedValue(undefined),
   chmod: vi.fn(),
@@ -24,6 +26,7 @@ beforeEach(() => {
   preferences.herdrPath = "~/.local/bin/herdr";
   preferences.sessionName = undefined;
   preferences.customTerminalLauncher = "term -e {herdr} {args}";
+  storage.clear();
   vi.mocked(spawn).mockReset();
   const child = {
     once(event: string, callback: () => void) {
@@ -56,7 +59,15 @@ describe("launchHerdrInTerminal", () => {
   });
 
   it("omits the session flag when the caller opts out with its own argv", async () => {
-    await launchHerdrInTerminal(["session", "attach", "review"], { includePreferredSession: false });
+    await launchHerdrInTerminal(["session", "attach", "review"], { includeSession: false });
     expect(spawnedArgs()).toEqual(["-e", binary, "session", "attach", "review"]);
+  });
+
+  it("launches the Selected Session ahead of the configured session", async () => {
+    storage.set("selectedSession", "tmp-b");
+    preferences.sessionName = "work";
+
+    await launchHerdrInTerminal();
+    expect(spawnedArgs()).toEqual(["-e", binary, "--session", "tmp-b"]);
   });
 });

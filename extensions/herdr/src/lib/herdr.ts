@@ -4,6 +4,7 @@ import { delimiter, join } from "node:path";
 import { homedir } from "node:os";
 import { execFile } from "node:child_process";
 import { getHerdrPreferences } from "./preferences";
+import { resolveSession } from "./session-selection";
 import type { HerdrSession, HerdrSnapshot, PaneInfo } from "./types";
 
 interface RunOptions {
@@ -25,6 +26,7 @@ export class HerdrError extends Error {
     message: string,
     readonly code?: string,
     readonly detail?: string,
+    readonly session?: string,
   ) {
     super(message);
     this.name = "HerdrError";
@@ -99,14 +101,19 @@ function extractCliError(stderr: string): HerdrError | undefined {
   return undefined;
 }
 
+// Read commands never start a server, so a Stopped session answers with a
+// refused (or missing) socket rather than a CLI error envelope.
+function isStoppedSessionDetail(detail: string): boolean {
+  return /ConnectionRefused|Connection refused|kind: NotFound/.test(detail);
+}
+
 export async function runHerdr(args: string[], options: RunOptions = {}): Promise<string> {
   const binary = await resolveHerdrBinary();
-  const preferences = getHerdrPreferences();
-  const selectedSession = options.session ?? (preferences.sessionName?.trim() || "default");
+  const session = await resolveSession(options.session);
   // Without --session the CLI falls back to an inherited HERDR_SESSION, so the
   // session is always named explicitly. An empty session opts out for
   // commands that span sessions.
-  const sessionArgs = selectedSession ? ["--session", selectedSession] : [];
+  const sessionArgs = session ? ["--session", session] : [];
 
   return new Promise<string>((resolve, reject) => {
     execFile(
@@ -123,6 +130,11 @@ export async function runHerdr(args: string[], options: RunOptions = {}): Promis
         if (cliError) return reject(cliError);
         if (error) {
           const detail = stderr.trim() || stdout.trim() || error.message;
+          if (session && isStoppedSessionDetail(detail)) {
+            return reject(
+              new HerdrError(`Herdr session “${session}” is stopped`, "session_not_running", detail, session),
+            );
+          }
           const timedOut = "killed" in error && error.killed;
           return reject(
             new HerdrError(
@@ -150,8 +162,8 @@ export async function runHerdrJson<T>(args: string[], options: RunOptions = {}):
   }
 }
 
-export async function getSnapshot(signal?: AbortSignal): Promise<HerdrSnapshot> {
-  const result = await runHerdrJson<{ snapshot: HerdrSnapshot }>(["api", "snapshot"], { signal });
+export async function getSnapshot(signal?: AbortSignal, session?: string): Promise<HerdrSnapshot> {
+  const result = await runHerdrJson<{ snapshot: HerdrSnapshot }>(["api", "snapshot"], { signal, session });
   if (!result.snapshot) throw new HerdrError("Herdr did not return a session snapshot", "invalid_snapshot");
   return result.snapshot;
 }
@@ -258,6 +270,11 @@ export async function runInPane(target: string, command: string): Promise<void> 
 
 export function getAgentTarget(agent: { name?: string; pane_id: string }): string {
   return agent.name || agent.pane_id;
+}
+
+/** The Session a failure names when its server is Stopped, so views can offer to start it. */
+export function stoppedSessionOf(error: unknown): string | undefined {
+  return error instanceof HerdrError && error.code === "session_not_running" ? error.session : undefined;
 }
 
 export function formatHerdrError(error: unknown): { title: string; message?: string } {
