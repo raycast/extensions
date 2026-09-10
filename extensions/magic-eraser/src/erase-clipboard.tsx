@@ -2,6 +2,7 @@ import { Clipboard, showHUD } from "@raycast/api";
 import { readClipboardHtml } from "./lib/clipboard-html";
 import { htmlToMarkdown } from "./lib/html-to-markdown";
 import { markdownToHtml } from "./lib/markdown-to-html";
+import { writeRichClipboard } from "./lib/clipboard-write";
 import { delist } from "./lib/erase";
 
 export default async function Command() {
@@ -31,7 +32,12 @@ export default async function Command() {
     // Rich targets (Docs/Gmail/HubSpot) get bold/links + clean spacing; markdown
     // targets (Slack/Notion) get the cleaned markdown.
     const richHtml = markdownToHtml(cleaned);
-    await Clipboard.copy({ text: cleaned, html: richHtml });
+    try {
+      writeRichClipboard(cleaned, richHtml);
+    } catch {
+      // Losing rich formatting is bad; losing the cleaned text entirely is worse.
+      await Clipboard.copy({ text: cleaned });
+    }
 
     await showHUD("🧹 List markers removed — formatting kept");
   } catch (e) {
