@@ -1,5 +1,11 @@
 # Changelog
 
+## [Feature] - 2026-09-10
+
+- Model and AI Command forms now combine API model discovery and manual model ID entry in one searchable dropdown.
+- Removed the separate `Custom model` preference; saved model IDs remain available when model discovery fails or omits them.
+- Model management no longer waits for the remote model list; each form loads its own options in the background.
+
 ## [Fix] - 2026-09-10
 
 - Fix: Reuse Raycast's HTTP(S) agents when no custom proxy is configured, so the system certificate store is trusted and OpenAI-compatible endpoints behind a TLS-inspecting corporate proxy work
