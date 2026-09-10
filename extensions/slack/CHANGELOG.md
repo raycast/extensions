@@ -1,11 +1,6 @@
 # Slack Changelog
 
-## [Fix AI file uploads failing with internal_error] - {PR_MERGE_DATE}
-
-- Fix **Upload Files** failing with a bare `internal_error` when a message was attached, caused by Slack rejecting the newer `markdown` block in `files.completeUploadExternal`; the AI message signature now uses upload-safe blocks for file uploads.
-- Return an actionable message when Slack still responds with `internal_error` so the AI can recover instead of retrying blindly or re-encoding files.
-
-## [Fix recipient search in large workspaces] - {PR_MERGE_DATE}
+## [Fix recipient search and AI file uploads] - {PR_MERGE_DATE}
 
 - Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.
 - Keep frequently opened **Open Channel** results visible when they fall outside the initial directory page by retaining the latest 100 visited rows and merging them into empty-query results before frecency sorting.
@@ -14,6 +9,8 @@
 - Resolve direct messages when opening browser links or creating Quicklinks and Huddle links.
 - Correctly recognize Slack member IDs that begin with `W` so those people appear as message recipients instead of channels.
 - Show Slack's requested retry delay when API calls are rate-limited, then retry automatically instead of failing immediately.
+- Fix **Upload Files** failing with a bare `internal_error` when a message was attached, caused by Slack rejecting the newer `markdown` block in `files.completeUploadExternal`; the AI message signature now uses upload-safe blocks for file uploads.
+- Return an actionable message when Slack still responds with `internal_error` so the AI can recover instead of retrying blindly or re-encoding files.
 
 ## [Keep Set Status responsive in large workspaces] - 2026-08-29
 
