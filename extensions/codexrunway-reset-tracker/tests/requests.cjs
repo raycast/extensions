@@ -140,6 +140,24 @@ const requests = load("src/requests.ts", {
   );
   assert.equal(shared.data.items[0].id, "shared");
   assert.equal(calls, before, "a waiting command reuses the completed request");
+  // A wedged holder outlasting the wait must not pass a stale cache off as current.
+  entries.set(
+    "wedged-url",
+    JSON.stringify({ ...sharedResult, fetchedAt: now - 600_000 }),
+  );
+  fs.mkdirSync(path.join(root, "request.lock"));
+  const held = new Date(now);
+  fs.utimesSync(path.join(root, "request.lock"), held, held);
+  const wedged = await requests.fetchRecords("wedged-url");
+  assert.match(
+    wedged.warning,
+    /Timed out waiting/,
+    "a stale cache served past the lock wait is flagged as a failed refresh",
+  );
+  assert.equal(wedged.data.items[0].id, "shared");
+  assert.equal(calls, before, "a wedged holder does not spend a request");
+  fs.rmdirSync(path.join(root, "request.lock"));
+
   const budgetBeforeRace = fs.readFileSync(
     path.join(root, "request-budget.json"),
     "utf8",
