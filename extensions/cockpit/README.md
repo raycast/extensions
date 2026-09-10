@@ -2,7 +2,7 @@
 
 An instrument panel for your Mac, in Raycast: system vitals next to how much Codex and Claude usage you have left.
 
-![Cockpit](metadata/cockpit-1.png)
+![Cockpit](media/cockpit.png)
 
 ## Included modules
 
