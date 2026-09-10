@@ -100,6 +100,11 @@ describe("buildProfileMatcher", () => {
   it("supports negated escape classes inside a bracket expression", () => {
     assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "[\\D]+" })!(powershell), true);
   });
+
+  it("doesn't overflow the call stack on a long flat run of optional atoms", () => {
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "a?".repeat(5000) + "b" });
+    assert.equal(matcher!({ ...powershell, name: "b" }), true);
+  });
 });
 
 describe("resolveNewTabMenuOrder", () => {

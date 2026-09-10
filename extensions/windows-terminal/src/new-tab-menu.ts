@@ -330,20 +330,26 @@ function compileProgram(alt: AltNode): Inst {
 // zero-width loop like (a?)* from spinning forever: once its `split` has been visited at a given
 // position, revisiting it adds nothing new, so the closure always terminates after at most one
 // visit per instruction, and the pattern's remainder (matching past the loop) still gets explored.
-function addThread(list: Inst[], visited: Set<Inst>, inst: Inst, pos: number, str: string): void {
-  if (visited.has(inst)) return;
-  visited.add(inst);
-  if (inst.op === "split") {
-    addThread(list, visited, inst.next!, pos, str);
-    addThread(list, visited, inst.next2!, pos, str);
-  } else if (inst.op === "nop") {
-    addThread(list, visited, inst.next!, pos, str);
-  } else if (inst.op === "start") {
-    if (pos === 0) addThread(list, visited, inst.next!, pos, str);
-  } else if (inst.op === "end") {
-    if (pos === str.length) addThread(list, visited, inst.next!, pos, str);
-  } else {
-    list.push(inst);
+// Walked with an explicit stack, not recursion — a flat run of thousands of optional atoms
+// (a?a?a?...) chains that many `split`s in a row, and recursing that chain would grow the JS call
+// stack with the pattern's size, independent of how long the string being matched is.
+function addThread(list: Inst[], visited: Set<Inst>, start: Inst, pos: number, str: string): void {
+  const stack: Inst[] = [start];
+  while (stack.length > 0) {
+    const inst = stack.pop()!;
+    if (visited.has(inst)) continue;
+    visited.add(inst);
+    if (inst.op === "split") {
+      stack.push(inst.next2!, inst.next!);
+    } else if (inst.op === "nop") {
+      stack.push(inst.next!);
+    } else if (inst.op === "start") {
+      if (pos === 0) stack.push(inst.next!);
+    } else if (inst.op === "end") {
+      if (pos === str.length) stack.push(inst.next!);
+    } else {
+      list.push(inst);
+    }
   }
 }
 
