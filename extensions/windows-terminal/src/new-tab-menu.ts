@@ -267,7 +267,7 @@ type MatchInst = { op: "match" };
 // A counted repeat: one shared instruction, however large `max` is. `bodyStart` is entered again
 // each rep instead of being duplicated per rep — see compileCountedRepeat and the `count`/`countFor`
 // fields threads carry through addThread/matchFull.
-type RepeatInst = { op: "repeat"; id: number; min: number; max: number; bodyStart: Inst; next?: Inst };
+type RepeatInst = { op: "repeat"; min: number; max: number; bodyStart: Inst; next?: Inst };
 // The body's own exit, patched to loop back through here rather than straight to `repeat`, so the
 // matcher can tell "just finished one more rep of this repeat" apart from "entering it fresh".
 type IncrementInst = { op: "increment"; repeat: RepeatInst };
@@ -384,11 +384,6 @@ function hasNestedQuantifier(atom: AtomNode): boolean {
   );
 }
 
-let nextRepeatId = 0;
-// Indexed by RepeatInst.id, so addThread's dedup key can look up a repeat's `min` from just the
-// `countFor` a thread carries, without every instruction needing its own back-pointer to it.
-let repeatsById: RepeatInst[] = [];
-
 // Compiles atom{min,max} (max possibly Infinity) as one `repeat` instruction plus one copy of the
 // atom's body, instead of unrolling — see the `repeat`/`increment` handling in addThread for how a
 // thread's counter takes the place of the copies compileQuant's other branch would otherwise make.
@@ -396,14 +391,7 @@ function compileCountedRepeat(atom: AtomNode, min: number, max: number): Frag {
   if (hasNestedQuantifier(atom)) {
     throw new RegexTooLargeError("a quantifier this large can't wrap another quantifier");
   }
-  const repeat: RepeatInst = newInst({
-    op: "repeat",
-    id: nextRepeatId++,
-    min,
-    max,
-    bodyStart: undefined as unknown as Inst,
-  });
-  repeatsById[repeat.id] = repeat;
+  const repeat: RepeatInst = newInst({ op: "repeat", min, max, bodyStart: undefined as unknown as Inst });
   const body = compileAtom(atom);
   const increment: IncrementInst = newInst({ op: "increment", repeat });
   patch(body.out, increment);
@@ -443,8 +431,6 @@ function compileAlt(alt: AltNode): Frag {
 
 function compileProgram(alt: AltNode): Inst {
   instructionCount = 0;
-  nextRepeatId = 0;
-  repeatsById = [];
   const frag = compileAlt(alt);
   const matchInst: MatchInst = newInst({ op: "match" });
   patch(frag.out, matchInst);
@@ -461,10 +447,13 @@ type StepBudget = { remaining: number };
 
 // A live NFA thread: which instruction it's at, plus the counter compileCountedRepeat's `repeat`/
 // `increment` instructions read and write. `countFor` names which `repeat` instruction `count`
-// belongs to — a thread not currently inside a counted repeat carries a `countFor` that matches no
-// real instruction, so `repeat` treats it as a fresh entry (see the "repeat" case in addThread).
-type Thread = { inst: Inst; count: number; countFor: number };
-const NO_REPEAT = -1;
+// belongs to, as a direct reference (not an id looked up in shared state — a `matchProfiles` entry
+// compiles one program per field, and a lookup table reset by each compile would leave an earlier
+// field's threads reading another field's repeat metadata once all fields are later matched). A
+// thread not currently inside a counted repeat carries a `countFor` of null, so `repeat` treats it
+// as a fresh entry (see the "repeat" case in addThread).
+type Thread = { inst: Inst; count: number; countFor: RepeatInst | null };
+const NO_REPEAT = null;
 
 // \b sits between a word character and a non-word one, counting the space off either end of the
 // value as non-word — so it holds at both ends of "PowerShell" but not inside it.
@@ -493,9 +482,9 @@ function newVisited(): VisitedState {
 // without the cap, each loop reaches `repeat` at a new, never-before-seen count and dedup never
 // kicks in, so a large `max` risks growing that unboundedly before a real character is consumed.
 // Only called when thread.countFor !== NO_REPEAT (see hasVisited/markVisited), so there's always a
-// real repeat to look up.
+// real repeat to read `min` from.
 function capForDedup(thread: Thread): number {
-  return Math.min(thread.count, repeatsById[thread.countFor].min);
+  return Math.min(thread.count, thread.countFor!.min);
 }
 
 function hasVisited(visited: VisitedState, thread: Thread): boolean {
@@ -553,20 +542,20 @@ function addThread(
       if (isWordBoundary(str, pos) !== inst.negate) stack.push({ inst: inst.next!, count, countFor });
     } else if (inst.op === "repeat") {
       // A thread not already inside this repeat (countFor doesn't match) is entering fresh, at 0.
-      const reps = countFor === inst.id ? count : 0;
+      const reps = countFor === inst ? count : 0;
       if (reps < inst.min) {
         // Below the minimum: another rep is mandatory, no option to stop yet.
-        stack.push({ inst: inst.bodyStart, count: reps, countFor: inst.id });
+        stack.push({ inst: inst.bodyStart, count: reps, countFor: inst });
       } else if (inst.max === Infinity || reps < inst.max) {
         // Within range: try one more rep, but stopping here is also valid (mirrors optionalFrag).
         stack.push({ inst: inst.next!, count, countFor });
-        stack.push({ inst: inst.bodyStart, count: reps, countFor: inst.id });
+        stack.push({ inst: inst.bodyStart, count: reps, countFor: inst });
       } else {
         // At the maximum: no more reps allowed.
         stack.push({ inst: inst.next!, count, countFor });
       }
     } else if (inst.op === "increment") {
-      stack.push({ inst: inst.repeat, count: count + 1, countFor: inst.repeat.id });
+      stack.push({ inst: inst.repeat, count: count + 1, countFor: inst.repeat });
     } else {
       list.push(thread);
     }

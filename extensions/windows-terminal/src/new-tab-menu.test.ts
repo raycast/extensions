@@ -197,6 +197,30 @@ describe("buildProfileMatcher", () => {
     matcher!({ ...powershell, name: "a".repeat(2000) });
     assert.ok(Date.now() - start < 200, "matching took too long");
   });
+
+  it("keeps each field's counted repeat independent when an entry has more than one field", () => {
+    // Each field compiles to its own program. A field's repeat metadata must stay tied to that
+    // field's own program, not leak into whichever field happened to compile last.
+    const matcher = buildProfileMatcher({
+      type: "matchProfiles",
+      name: "a{5,4000}",
+      commandline: "b{50,4000}",
+    });
+    assert.notEqual(matcher, null);
+    assert.equal(matcher!({ ...powershell, name: "a".repeat(5), commandline: "x" }), true);
+    assert.equal(matcher!({ ...powershell, name: "x", commandline: "b".repeat(50) }), true);
+    // Below commandline's own min (50), even though name's min (5) would already be satisfied.
+    assert.equal(matcher!({ ...powershell, name: "x", commandline: "b".repeat(5) }), false);
+
+    // The field with no counted repeat at all, compiled after the one that has one, previously
+    // reset shared state the first field's program depended on and crashed matching entirely.
+    const reordered = buildProfileMatcher({
+      type: "matchProfiles",
+      name: "a{0,4000}",
+      commandline: "pwsh.exe",
+    });
+    assert.equal(reordered!({ ...powershell, name: "aaa", commandline: "nope.exe" }), true);
+  });
 });
 
 describe("resolveNewTabMenuOrder", () => {
