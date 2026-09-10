@@ -10,17 +10,21 @@ type Input = {
 
 /** Stop the running timer. */
 export default async function tool(input: Input) {
-  let taskId = input.taskId?.trim();
-  let subtaskId: string | undefined;
+  const taskId = input.taskId?.trim();
 
-  // Whatever is running is the thing to stop — including a subtask timer.
+  // Sunsama runs one timer at a time, so the active one is the only thing
+  // that can be stopped — including when it's on a subtask.
   const active = await getActiveTimer();
-  if (active && (!taskId || active.taskId === taskId)) {
-    taskId = active.taskId;
-    subtaskId = active.subtaskId;
+  const running = active?.taskId;
+  if (!running) return { stopped: false, reason: "No timer is running." };
+  if (taskId && running !== taskId) {
+    return {
+      stopped: false,
+      reason: "The running timer is on a different task.",
+      runningTaskId: running,
+    };
   }
-  if (!taskId) return { stopped: false, reason: "No timer is running." };
 
-  await stopTimer(taskId, subtaskId);
-  return { stopped: true };
+  await stopTimer(running, active.subtaskId);
+  return { stopped: true, taskId: running };
 }
