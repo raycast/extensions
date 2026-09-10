@@ -170,6 +170,33 @@ describe("buildProfileMatcher", () => {
     assert.equal(matcher!({ ...powershell, name: "aaaaa" + "aaa" }), true);
     assert.equal(matcher!({ ...powershell, name: "a" }), false);
   });
+
+  it("reaches the minimum of a large counted repeat whose body can match empty", () => {
+    // (|a){2,4000} needs one empty rep plus one "a" rep to satisfy min=2 while consuming a
+    // single character. Reaching that requires revisiting the repeat instruction at a higher
+    // count within the same position — a plain identity-only visited set stops after the first
+    // visit and never gets there, silently rejecting a value that should match.
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(|a){2,4000}" });
+    assert.notEqual(matcher, null);
+    assert.equal(matcher!({ ...powershell, name: "a" }), true);
+    assert.equal(matcher!({ ...powershell, name: "aa" }), true);
+    assert.equal(matcher!({ ...powershell, name: "b" }), false);
+  });
+
+  it("still enforces the maximum of a large counted repeat whose body can match empty", () => {
+    // Capping the dedup key at `min` must not affect the actual reps count `repeat` compares
+    // against `max` — only how many equivalent states get explored at one position.
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "a{2,10}" });
+    assert.equal(matcher!({ ...powershell, name: "a".repeat(10) }), true);
+    assert.equal(matcher!({ ...powershell, name: "a".repeat(11) }), false);
+  });
+
+  it("doesn't blow up matching a large counted repeat whose body can match empty", () => {
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(|a){2,4000}" });
+    const start = Date.now();
+    matcher!({ ...powershell, name: "a".repeat(2000) });
+    assert.ok(Date.now() - start < 200, "matching took too long");
+  });
 });
 
 describe("resolveNewTabMenuOrder", () => {

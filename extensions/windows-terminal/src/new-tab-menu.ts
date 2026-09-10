@@ -385,6 +385,9 @@ function hasNestedQuantifier(atom: AtomNode): boolean {
 }
 
 let nextRepeatId = 0;
+// Indexed by RepeatInst.id, so addThread's dedup key can look up a repeat's `min` from just the
+// `countFor` a thread carries, without every instruction needing its own back-pointer to it.
+let repeatsById: RepeatInst[] = [];
 
 // Compiles atom{min,max} (max possibly Infinity) as one `repeat` instruction plus one copy of the
 // atom's body, instead of unrolling — see the `repeat`/`increment` handling in addThread for how a
@@ -400,6 +403,7 @@ function compileCountedRepeat(atom: AtomNode, min: number, max: number): Frag {
     max,
     bodyStart: undefined as unknown as Inst,
   });
+  repeatsById[repeat.id] = repeat;
   const body = compileAtom(atom);
   const increment: IncrementInst = newInst({ op: "increment", repeat });
   patch(body.out, increment);
@@ -440,6 +444,7 @@ function compileAlt(alt: AltNode): Frag {
 function compileProgram(alt: AltNode): Inst {
   instructionCount = 0;
   nextRepeatId = 0;
+  repeatsById = [];
   const frag = compileAlt(alt);
   const matchInst: MatchInst = newInst({ op: "match" });
   patch(frag.out, matchInst);
@@ -469,6 +474,48 @@ function isWordBoundary(str: string, pos: number): boolean {
   return isWordChar(str[pos - 1]) !== isWordChar(str[pos]);
 }
 
+// Instructions outside any counted repeat dedupe by identity alone (`plain`), same as before a
+// large quantifier could compile without unrolling. Instructions reached *inside* one (`countFor`
+// names which `repeat`) need `count` in the key too — see capForDedup for why capping it at that
+// repeat's `min` is safe rather than just using it raw.
+type VisitedState = { plain: Set<Inst>; scoped: Map<Inst, Set<number>> };
+
+function newVisited(): VisitedState {
+  return { plain: new Set(), scoped: new Map() };
+}
+
+// Once a thread has reached `min` reps of a counted repeat, every rep beyond that is behaviorally
+// identical for reachability: `repeat` offers the exact same exit target and the exact same
+// continue-into-body target regardless of the exact count, right up to (and including) `max` —
+// forced exit at `max` reaches nothing that optional exit at `min` didn't already reach. So capping
+// the count at `min` for dedup purposes loses no reachable state, while bounding how many times a
+// nullable body (one that can match empty, e.g. (|a)) can loop back within a single position —
+// without the cap, each loop reaches `repeat` at a new, never-before-seen count and dedup never
+// kicks in, so a large `max` risks growing that unboundedly before a real character is consumed.
+// Only called when thread.countFor !== NO_REPEAT (see hasVisited/markVisited), so there's always a
+// real repeat to look up.
+function capForDedup(thread: Thread): number {
+  return Math.min(thread.count, repeatsById[thread.countFor].min);
+}
+
+function hasVisited(visited: VisitedState, thread: Thread): boolean {
+  if (thread.countFor === NO_REPEAT) return visited.plain.has(thread.inst);
+  return visited.scoped.get(thread.inst)?.has(capForDedup(thread)) ?? false;
+}
+
+function markVisited(visited: VisitedState, thread: Thread): void {
+  if (thread.countFor === NO_REPEAT) {
+    visited.plain.add(thread.inst);
+    return;
+  }
+  let seen = visited.scoped.get(thread.inst);
+  if (!seen) {
+    seen = new Set();
+    visited.scoped.set(thread.inst, seen);
+  }
+  seen.add(capForDedup(thread));
+}
+
 // Epsilon-closure: follows the zero-width instructions (`split`, `nop`, and the anchors when their
 // condition holds) until it reaches a `char`/`any`/`match` instruction, adding those to `list`.
 // `visited` dedupes instructions already queued at this string position — that's what stops a
@@ -480,7 +527,7 @@ function isWordBoundary(str: string, pos: number): boolean {
 // stack with the pattern's size, independent of how long the string being matched is.
 function addThread(
   list: Thread[],
-  visited: Set<Inst>,
+  visited: VisitedState,
   start: Thread,
   pos: number,
   str: string,
@@ -491,8 +538,8 @@ function addThread(
     if (budget.remaining-- <= 0) return;
     const thread = stack.pop()!;
     const inst = thread.inst;
-    if (visited.has(inst)) continue;
-    visited.add(inst);
+    if (hasVisited(visited, thread)) continue;
+    markVisited(visited, thread);
     const { count, countFor } = thread;
     if (inst.op === "split") {
       stack.push({ inst: inst.next2!, count, countFor }, { inst: inst.next!, count, countFor });
@@ -536,12 +583,12 @@ function addThread(
 function matchFull(prog: Inst, str: string): boolean {
   const budget: StepBudget = { remaining: MAX_MATCH_STEPS };
   let current: Thread[] = [];
-  addThread(current, new Set(), { inst: prog, count: 0, countFor: NO_REPEAT }, 0, str, budget);
+  addThread(current, newVisited(), { inst: prog, count: 0, countFor: NO_REPEAT }, 0, str, budget);
 
   for (let pos = 0; pos < str.length; pos++) {
     if (current.length === 0) return false;
     const next: Thread[] = [];
-    const visited = new Set<Inst>();
+    const visited = newVisited();
     const ch = str[pos];
     for (const thread of current) {
       if (budget.remaining-- <= 0) return false;
