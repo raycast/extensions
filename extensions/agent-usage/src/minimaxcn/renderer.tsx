@@ -25,18 +25,22 @@ export function formatMinimaxCNUsageText(usage: MinimaxCNUsage | null, error: Mi
     text += `\n\nCoding Model (${codingModel.model_name}):`;
 
     const intervalPercent = getIntervalPercent(codingModel);
-    if (intervalPercent !== null) {
+    // Mirror the renderer rule: keep the row when reset is pending, even if the API
+    // stops returning a percentage once the quota is exhausted.
+    if (intervalPercent !== null || codingModel.remains_time > 0) {
+      const shown = intervalPercent ?? 0;
       text += `\n\n5h Limit (${formatDuration(codingModel.remains_time / 1000)}):`;
-      text += `\n${generateAsciiBar(intervalPercent)}`;
-      text += `\n${intervalPercent}% remaining`;
+      text += `\n${generateAsciiBar(shown)}`;
+      text += `\n${shown}% remaining`;
       text += `\nResets In: ${formatDuration(codingModel.remains_time / 1000)}`;
     }
 
     const weeklyPercent = getWeeklyPercent(codingModel);
-    if (weeklyPercent !== null) {
+    if (weeklyPercent !== null || codingModel.weekly_remains_time > 0) {
+      const shown = weeklyPercent ?? 0;
       text += `\n\nWeekly Limit (${formatDuration(codingModel.weekly_remains_time / 1000)}):`;
-      text += `\n${generateAsciiBar(weeklyPercent)}`;
-      text += `\n${weeklyPercent}% remaining`;
+      text += `\n${generateAsciiBar(shown)}`;
+      text += `\n${shown}% remaining`;
       text += `\nResets In: ${formatDuration(codingModel.weekly_remains_time / 1000)}`;
     }
   }
@@ -59,13 +63,17 @@ export function renderMinimaxCNDetail(usage: MinimaxCNUsage | null, error: Minim
 
           {(() => {
             const percent = getIntervalPercent(codingModel);
-            if (percent === null) return null;
+            // When the 5h quota is exhausted (total=0, status not active, no remaining_percent),
+            // getIntervalPercent returns null. Preserve the row so the user still sees the reset
+            // countdown and a 0% placeholder, as long as reset hasn't happened yet.
+            if (percent === null && codingModel.remains_time <= 0) return null;
+            const shown = percent ?? 0;
             return (
               <>
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
                   title="5h Limit"
-                  text={`${generateAsciiBar(percent)} ${percent}% remaining`}
+                  text={`${generateAsciiBar(shown)} ${shown}% remaining`}
                 />
                 <List.Item.Detail.Metadata.Label
                   title="Resets In"
@@ -77,13 +85,16 @@ export function renderMinimaxCNDetail(usage: MinimaxCNUsage | null, error: Minim
 
           {(() => {
             const percent = getWeeklyPercent(codingModel);
-            if (percent === null) return null;
+            // Same rationale as the 5h block: keep the weekly row visible while reset is pending,
+            // even when the API no longer returns a percentage for an exhausted weekly quota.
+            if (percent === null && codingModel.weekly_remains_time <= 0) return null;
+            const shown = percent ?? 0;
             return (
               <>
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
                   title="Weekly Limit"
-                  text={`${generateAsciiBar(percent)} ${percent}% remaining`}
+                  text={`${generateAsciiBar(shown)} ${shown}% remaining`}
                 />
                 <List.Item.Detail.Metadata.Label
                   title="Resets In"
@@ -131,14 +142,18 @@ export function getMinimaxCNAccessory(
 
   const intervalPercent = getIntervalPercent(codingModel);
   const weeklyPercent = getWeeklyPercent(codingModel);
-  if (intervalPercent === null && weeklyPercent === null) {
+  // Mirror the detail-panel rule: when the API no longer returns a percentage for an
+  // exhausted quota but reset hasn't arrived, treat it as 0% rather than "no data".
+  const shownIntervalPercent = intervalPercent ?? (codingModel.remains_time > 0 ? 0 : null);
+  const shownWeeklyPercent = weeklyPercent ?? (codingModel.weekly_remains_time > 0 ? 0 : null);
+  if (shownIntervalPercent === null && shownWeeklyPercent === null) {
     return getNoDataAccessory();
   }
 
-  const percent = intervalPercent ?? weeklyPercent ?? 0;
+  const percent = shownIntervalPercent ?? shownWeeklyPercent ?? 0;
   const parts: string[] = [];
-  if (intervalPercent !== null) parts.push(`5h: ${intervalPercent}%`);
-  if (weeklyPercent !== null) parts.push(`Weekly: ${weeklyPercent}%`);
+  if (shownIntervalPercent !== null) parts.push(`5h: ${shownIntervalPercent}%`);
+  if (shownWeeklyPercent !== null) parts.push(`Weekly: ${shownWeeklyPercent}%`);
 
   return {
     icon: generatePieIcon(percent),
