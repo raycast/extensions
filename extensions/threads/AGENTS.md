@@ -33,10 +33,12 @@ Manifest-driven: every entry in `package.json` → `commands` maps 1:1 to a `src
   `quick-thread`, `quick-follow`, `new-thread`. Each constructs a URL and opens it.
   `src/lib/post-intent.ts` and `src/lib/follow-intent.ts` are pure URL constructors.
 - **`src/download-thread-media.tsx`** — resolves a post, then downloads each item.
-  - `src/lib/threads-post.ts` — resolves any Threads link to `{ canonicalUrl, code, media[] }`.
+  - `src/lib/threads-post.ts` — resolves a Threads **post** link (canonical, `?xmt`-decorated,
+    or `/share/`) to `{ canonicalUrl, code, media[] }`. A profile or feed URL is rejected: the
+    resolved path must contain `/post/<code>`.
   - `src/lib/media-files.ts` — path reservation, image conversion, content-type→extension
-    mapping, URL redaction. The file-destroying mistakes live here, which is why it is
-    separated and tested hardest.
+    mapping, response validation, URL redaction. The file-destroying mistakes live here, which
+    is why it is kept free of `@raycast/api` and covered by real-filesystem tests.
   - `src/lib/download-media.ts` — streams one media URL to disk with a progress toast.
 
 ## Resolving a post
@@ -69,8 +71,10 @@ yields media, keeping a media-less match as a fallback so a text post still reso
 > string" and the payload's braces are never indexed at all. The post then fails with
 > "Couldn't read this post's media" for a reason that has nothing to do with the post. Real
 > pages survive only by luck: their ~340 quotes outside `<script>` happen to be even. Each
-> block is scanned independently so one bad script cannot corrupt another; a document with no
-> script tags is scanned whole, which keeps bare-JSON fixtures working.
+> block is scanned independently so one bad script cannot corrupt another. The fallback keys
+> off finding **no nonempty script body** — not off the absence of `<script>` tags — so a page
+> whose only script is empty is also scanned whole. That fallback exists to keep bare-JSON
+> fixtures working.
 
 > **The one-pass index is load-bearing, not a micro-optimisation.** Brace-matching forward
 > from each candidate rescans toward the end of a ~1 MB document once per candidate, so a
@@ -85,8 +89,11 @@ Two more things the parser must keep doing, each covered by a fixture:
 
 - **Treat the payload as untrusted.** It is remote JSON matched against hand-written types.
   Every container is shape-checked (`Array.isArray`, null filtering) and every candidate URL
-  must parse as absolute `https` with no embedded credentials — so a shape change surfaces as
-  a readable error, not `candidates.reduce is not a function`.
+  must parse as absolute `https` with no embedded credentials — so a shape change **cannot
+  throw** `candidates.reduce is not a function`. Note what that buys and what it does not:
+  malformed containers are filtered to empty, so the user sees "no media to download" rather
+  than a diagnosis. If a post that plainly has media reports none, suspect the payload shape
+  before suspecting the post.
 - **Validate the input URL.** Only `https`/`http` on an allowlisted host, no credentials, and
   `http` is upgraded to `https` before the request: the whole flow depends on trusting a
   redirect, so it must never be issued in the clear.
@@ -98,8 +105,11 @@ Media URLs are signed and **~1 KB long**. Never truncate one — it returns `403
 ### Kind comes from the payload; extension comes from the response
 
 `ThreadsMedia` carries `kind: "image" | "video" | "audio"` (the public API's `media_type`
-vocabulary), decided by which container the post used. The response header then refines the
-*extension* within that kind. **Both halves are load-bearing, and each fails the other way:**
+vocabulary), decided by which container the post used. The extension then comes from the
+response header **whenever it is a type we recognise**; `kind` supplies the fallback when it is
+not, plus one override (below). There is no general within-kind restriction —
+`extensionFor("video/mp4", "image")` returns `mp4`. **Both inputs are load-bearing, and each
+fails the other way:**
 
 - A `.jpg` URL is served as `image/webp` on some posts and `image/jpeg` on others (both
   observed 2026-09-09), so trusting the URL writes WebP bytes into a `.jpg` — which several
@@ -115,9 +125,15 @@ seen" fails silently, and `image/jpeg` turned up after `image/webp` looked unive
 `audio/webm` landing as `.m4a` — the same mislabelling in the other direction. Raw
 `audio/aac` is an ADTS stream, not MP4, so it is `.aac`.
 
-**Voice posts live at `audio.audio_src`**, not in a versions array — `media_type: 11` in the
-payload. A post with none of `video_versions`, `image_versions2`, or `audio` genuinely has no
-media (a text post is `media_type: 19`).
+**Voice posts live at `audio.audio_src`**, not in a versions array. A post yields no media only
+when none of `video_versions`, `image_versions2`, `audio`, **or `carousel_media`** produces a
+usable candidate — `extractMedia` expands a carousel first, so a post whose own containers are
+empty can still yield items.
+
+> The parser deliberately **does not read `media_type`**. It infers from which container is
+> populated, which needs no knowledge of the numeric codes — those are Instagram-internal and
+> undocumented. For orientation only, observed values are `1` image, `2` video, `8` carousel,
+> `11` voice, `19` text. Do not switch on them.
 
 ### Never overwriting a file
 
@@ -129,7 +145,9 @@ media (a text post is `media_type: 19`).
 > `src/lib/media-files.test.ts`; do not "simplify" the double reservation away.
 
 Content streams into the `.part` file and is renamed only on success, so a half-written
-download can neither be mistaken for a complete one nor squat on the name a retry wants.
+download is never mistaken for a complete one. Cleanup on failure is best-effort — the `rm`
+calls swallow their errors — so a killed process or an unwritable directory can still leave a
+reservation behind, and the next attempt steps to `name (1)`.
 
 ### The rest of the download path
 
@@ -145,9 +163,12 @@ download can neither be mistaken for a complete one nor squat on the name a retr
 - **Uses `handle.createWriteStream()`**, never `createWriteStream("", { fd: handle.fd })`. The
   latter leaves the `FileHandle` and the stream both owning the descriptor and emits
   `File descriptor N closed but not opened in unmanaged mode` on close.
-- **Redacts signed CDN URLs** with `redactUrl` before any log line or Copy Error payload.
-  Those `oh`/`oe` parameters are a working, time-limited grant of access to the media, and the
-  user pastes Copy Error into bug reports.
+- **Redacts signed CDN URLs** with `redactUrl` in every log line and `copyContext` this code
+  composes. Those `oh`/`oe` parameters are a working, time-limited grant of access, and the user
+  pastes Copy Error into bug reports. **The guarantee stops at composed strings:** a caught
+  error is passed to `failToast` and stringified as-is, so a URL embedded in some *upstream*
+  error message would not be redacted. No such message has been observed — `statusText` is a
+  short reason phrase — which is why this is documented rather than guarded.
 - **Refuses a concurrent run.** A no-view command can be relaunched while the first is still
   going, and someone who thinks a long download has stalled will do exactly that.
 
@@ -160,7 +181,9 @@ returns `{ path, skipped }` with the original path and a reason, and the caller 
 - **A file already in the requested format is left alone.** Threads serves JPEG for plenty of
   posts, so "download as `.jpg`, then convert to JPEG" is an ordinary path — and converting a
   format to itself reserves a destination next to the file just downloaded, producing
-  `name (1).jpg` and deleting the original.
+  `name (1).jpg` and deleting the original. The comparison is on the **filename extension**,
+  not the bytes, and it is exact: `.jpeg` does not match `jpg`. That is safe here because the
+  extension was just derived from the response, but it is not a content check.
 - **`sips` exits 0 having produced nothing usable**, so the output is `stat`-ed for a nonempty
   regular file before the original is removed.
 - **`sips` rejects a `--` separator**, so passing an absolute path (via `resolve()`) is the
@@ -224,8 +247,9 @@ file, not the test. Each entry records `covers`: the behaviour that regresses if
 disappears. A deleted post fails the suite, which is a signal to swap in another covering the
 same behaviour, not a code defect.
 
-The suite validates the file's shape before using it, so a malformed edit fails with a readable
-reason rather than a confusing fetch mismatch. In particular it rejects a **`/share/` id pasted
+The suite validates the file's shape in its own test, so a malformed edit fails with a readable
+reason alongside the network failures rather than only as a confusing fetch mismatch. It does
+not gate them — the network cases still run. In particular it rejects a **`/share/` id pasted
 into `code`** — they are different identifiers, and the share URL puts the wrong one right in
 front of you: `/share/InQUBOY9S/` resolves to code `DcTZYVBkhjU`.
 
@@ -242,7 +266,7 @@ It scrapes an undocumented internal payload, so assume the shape moved. Get grou
 ```bash
 UA='Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 curl -s -A "$UA" -L "https://www.threads.com/@muse/post/DdCYkFvlDvi" -o /tmp/post.html
-grep -c '"video_versions"' /tmp/post.html   # 0 means the payload shape moved
+grep -c '"video_versions"' /tmp/post.html   # on THIS post (a video), 0 means the shape moved
 ```
 
 Then `npm test` for the parser fixtures, and `npm run test:live` for the real posts.
@@ -267,12 +291,14 @@ Then `npm test` for the parser fixtures, and `npm run test:live` for the real po
 - **`tsconfig` is `module`/`moduleResolution: Node16`**, which is what lets
   `@chrismessina/raycast-kit/bytes` resolve. The scaffold default (commonjs + node10) ignores
   `exports` maps and fails every subpath import with `TS2307`. Don't reach for `bundler` — it
-  requires `module: es2015`+ and is rejected with `TS5095`.
+  requires `module` to be `preserve` or `es2015`+ and is otherwise rejected with `TS5095`, so
+  from a commonjs baseline it is the larger migration, not the smaller one.
 - **`ray publish` does not read `.gitignore`.** It copies the extension root minus a fixed list
   (`.git`, `.github`, `.direnv`, `.swiftpm`, `.raycast-swift-build`, `compiled_raycast_rust`,
-  `compiled_raycast_swift`, `node_modules`, `raycast-env.d.ts`) — verified against the installed
-  `@raycast/api`. Anything else on disk ships, however thoroughly git ignores it, so a file that
-  must not be published has to live outside the extension root.
+  `compiled_raycast_swift`, `node_modules`, `raycast-env.d.ts`), applied at every level, and it
+  copies regular files and symlinks only — verified against the installed `@raycast/api`, so
+  re-check if that version moves. Anything else on disk ships, however thoroughly git ignores
+  it, so a file that must not be published has to live outside the extension root.
 - **Bumping `vitest` may crash npm** with `Cannot read properties of null (reading 'edgesOut')`,
   an arborist bug while re-resolving vitest 4's optional `@vitest/browser-playwright` peer.
   `npm install --legacy-peer-deps` gets past it; once the lockfile is complete, plain
