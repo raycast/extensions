@@ -46,6 +46,8 @@ Unlock the true potential of your internet connection with Raycast's Speedtest e
 * Precise internet speed tests using the official [speedtest.net CLI](https://www.speedtest.net/apps/cli)  
 * Automatic CLI download and setup  
 * Comprehensive metrics: Download speed, upload speed, latency, and jitter
+* Live speed meter: a speedometer that follows the running phase (ping → download → upload), a bandwidth-over-time chart, and both meters side by side when the test finishes
+* Everything else (ISP, server, latency details, call/stream quality, result link) stays visible in the side panel, and the classic detailed list is one shortcut away (`⌘ L`)
 
 ## **Why Raycast Speedtest?**
 
@@ -67,7 +69,9 @@ Raycast Speedtest gives you the real-time data you need to:
 
 1. Install the Raycast Speedtest extension  
 2. Fire up Raycast and type "speedtest"  
-3. Watch as your network stats come to life
+3. Watch the meter run; press `⌘ L` for the detailed list, `⌘ R` to run the test again
+
+> **Note:** Ookla rate-limits the CLI. If you run the test many times in a short period you will see a "rate limit reached" message; wait a few minutes and try again.
 
 
 ## ⚠️ Speedtest.net CLI license agreements ⚠️

@@ -13,10 +13,10 @@ Search models, view benchmark results, compare prices, and check leaderboards al
 ## Usage
 
 - Command: `View AI Stats`
-- Switch Views (Search ↔ Leaderboards): Cmd+L
-- Creator Filter: Cmd+P
-- Reset Filters: Cmd+Backspace
-- Pinned Models: Pin/Unpin from list or detail (Option+Enter); Move Up/Down
+- Switch Views (Search ↔ Leaderboards): Cmd+L on macOS, Ctrl+L on Windows
+- Creator Filter: Cmd+P on macOS, Ctrl+P on Windows
+- Reset Filters: Cmd+Backspace on macOS, Ctrl+Backspace on Windows
+- Pinned Models: Pin/Unpin from list or detail (Option+Enter on macOS, Alt+Enter on Windows); Move Up/Down
 
 ## Commands
 
@@ -24,19 +24,21 @@ Search models, view benchmark results, compare prices, and check leaderboards al
 
 ## Action Menu (Quick Reference)
 
+Shortcuts use Cmd and Option on macOS, or Ctrl and Alt on Windows.
+
 - Search
-  - Switch to Leaderboards (Cmd+L)
-  - Filter by Creator… (Cmd+P)
-  - Reset Filters (Cmd+Backspace)
-  - Pin / Unpin (Option+Enter) / Move Pin Up / Move Pin Down
+  - Switch to Leaderboards (Cmd/Ctrl+L)
+  - Filter by Creator… (Cmd/Ctrl+P)
+  - Reset Filters (Cmd/Ctrl+Backspace)
+  - Pin / Unpin (Option/Alt+Enter) / Move Pin Up / Move Pin Down
   - Open Details (Enter)
   - Refresh
 
 - Leaderboards
   - Open Details (Enter)
-  - Switch to Search (Cmd+L)
-  - Change Leaderboard… (Cmd+P)
-  - Pin / Unpin (Option+Enter)
+  - Switch to Search (Cmd/Ctrl+L)
+  - Change Leaderboard… (Cmd/Ctrl+P)
+  - Pin / Unpin (Option/Alt+Enter)
   - Refresh
 
 ## Features
@@ -53,7 +55,7 @@ Search models, view benchmark results, compare prices, and check leaderboards al
 
 1. Install the extension in Raycast
 2. Run the command: `View AI Stats`
-   - Use the search list and Action menu (or Cmd+K) to switch to leaderboards.
+   - Use the search list and Action menu (Cmd+K on macOS, Ctrl+K on Windows) to switch to leaderboards.
 
 ## Preferences
 

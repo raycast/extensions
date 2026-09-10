@@ -1,5 +1,49 @@
 # Agent Usage Changelog
 
+## [Fixed exhausted quota display] - 2026-09-10
+
+- Keep MiniMax CN 5h and weekly usage visible with 0% remaining and reset countdowns when quotas are exhausted.
+- Apply the same display to copied usage text.
+
+## [Cached usage and background refresh] - 2026-09-09
+
+### Improvements
+
+- Add configurable background refresh every 1, 5, 15, 30, or 60 minutes, including when the menu bar is disabled
+- Show cached provider and account rows immediately while checking credentials, then update the list when accounts or availability change
+- Add the standard Refresh keyboard shortcut and avoid duplicate refresh requests for multi-account providers
+- Keep cached usage for unchanged Amp and Grok credentials, and invalidate it on confirmed login changes
+- Retain cached usage with an Account unverified label when credential checks fail or Antigravity's active account cannot be determined
+- Keep manual and scheduled refresh independent of foreground credential checks
+
+## [Fix Antigravity Closed-App Quota] - 2026-09-09
+
+### Bug Fixes
+
+- Fetch Antigravity quota via stored Google OAuth credentials when the Antigravity app/`agy` language server is not running, so Agent Usage still shows Gemini/Claude weekly and 5-hour limits
+- Fill Antigravity email and plan on that OAuth path from Google userinfo and Cloud Code `loadCodeAssist`
+
+## [Apply Saved Provider Order] - 2026-09-09
+
+### Bug Fixes
+
+- Apply the provider order from Move Up/Down in the list to the menu bar (use Refresh All after reordering)
+
+## [Add OpenRouter credit balance] - 2026-09-08
+
+### New Features
+
+- Show the OpenRouter credit balance in the list and menu bar, auto-detected from an OpenCode `openrouter` login, `OPENROUTER_API_KEY`/`OPENROUTER_KEY`, or a pasted API key
+- Read account credits from `/api/v1/credits` with a provisioning key, and fall back to the key's own spending cap from `/api/v1/key` for a regular inference key
+
+## [OpenCode Go Zen usage API] - 2026-09-07
+
+### Improvements
+
+- Fetch OpenCode Go usage from the Zen JSON API (`https://opencode.ai/zen/go/v1/usage`) instead of scraping the workspace web page
+- Replace the workspace ID and session cookie setup with an optional Zen API key, auto-detected from OpenCode (`~/.local/share/opencode/auth.json`)
+- Show rolling, weekly, and monthly limits with per-window reset times in the detail view
+
 ## [Show Grok limit reset credits] - 2026-09-04
 
 ### New Features

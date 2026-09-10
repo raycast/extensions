@@ -1,5 +1,9 @@
 # Day One Changelog
 
+## [Support the renamed dayone CLI] - 2026-09-09
+
+- Fixed the "Day One CLI Missing" error on Day One for Mac 2025.19+, which renamed the CLI from `dayone2` to `dayone`. The extension now detects and uses whichever CLI is installed.
+
 ## [Bug fix] - 2026-05-19
 
 - Fixed CLI detection when Raycast does not inherit the terminal PATH.

@@ -2,7 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brew",
   "title": "Brew",
-  "description": "Search and install Homebrew formulae",
+  "description": "Search, install and manage Homebrew formulae and casks",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
   "author": "nhojb",
   "contributors": [
     "Aayush9029",
@@ -69,7 +73,7 @@
     },
     {
       "name": "upgrade",
-      "title": "Upgrade",
+      "title": "Upgrade All",
       "subtitle": "Brew",
       "description": "Upgrade brew formulae & casks",
       "mode": "view"
@@ -185,18 +189,19 @@
     },
     {
       "default": false,
-      "description": "Homebrew 5.0 enables parallel downloads by default. Enable this option to disable concurrent downloads if you experience issues.",
+      "description": "Homebrew enables parallel downloads by default. Enable this option to disable concurrent downloads if you experience issues.",
       "label": "Disable concurrent downloads",
       "name": "disableDownloadConcurrency",
       "required": false,
-      "title": "Homebrew 5.0 Options",
+      "title": "Homebrew Options",
       "type": "checkbox"
     },
     {
-      "default": false,
-      "description": "Use Homebrew's internal JSON API.",
-      "label": "Use internal API (experimental)",
-      "name": "useInternalApi",
+      "default": true,
+      "description": "Show pinned formulae and casks at the top of Show Installed and Show Upgrades, rather than at the bottom. Pinned packages are excluded from upgrades until you unpin them.",
+      "label": "Show pinned items at the top of lists",
+      "title": "Lists",
+      "name": "pinnedFirst",
       "required": false,
       "type": "checkbox"
     },
@@ -221,7 +226,7 @@
   ],
   "dependencies": {
     "@chrismessina/raycast-logger": "^1.4.0",
-    "@raycast/api": "^2.1.0",
+    "@raycast/api": "^2.2.0",
     "@raycast/utils": "^2.3.0",
     "@types/stream-json": "^1.7.8",
     "stream-chain": "^3.4.0",

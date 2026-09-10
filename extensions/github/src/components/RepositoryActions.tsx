@@ -160,7 +160,12 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
         {repository.viewerHasStarred ? (
           <Action title="Unstar" icon={Icon.Star} onAction={removeStar} shortcut={Keyboard.Shortcut.Common.Pin} />
         ) : (
-          <Action title="Star" icon="star-filled.svg" onAction={star} shortcut={Keyboard.Shortcut.Common.Pin} />
+          <Action
+            title="Star"
+            icon={{ source: "star-filled.svg", tintColor: Color.PrimaryText }}
+            onAction={star}
+            shortcut={Keyboard.Shortcut.Common.Pin}
+          />
         )}
       </ActionPanel.Section>
 

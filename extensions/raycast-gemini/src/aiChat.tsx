@@ -13,9 +13,12 @@ import {
   Alert,
 } from "@raycast/api";
 import { GoogleGenAI } from "@google/genai";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ensureUniqueChatName, generateChatTitle, isGeneratedChatName } from "./api/chatTitles";
 import { getSafetySettings } from "./api/safetySettings";
+import { useAvailableModels } from "./api/useAvailableModels";
+import { useActiveModel } from "./api/useActiveModel";
+import { normalizeModelName, DEFAULT_MODEL } from "./api/modelMigrations";
 
 interface ChatMessage {
   prompt: string;
@@ -51,10 +54,29 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
     });
   };
 
-  const { apiKey, defaultModel, model, prompt } = getPreferenceValues<Preferences.AiChat>();
-  const aiChatModel = model === "default" ? defaultModel : model;
-  // Lightweight model used only for generating chat titles.
-  const titleModel = "gemini-3.1-flash-lite";
+  const { apiKey, prompt } = getPreferenceValues<Preferences.AiChat>();
+  const { models: availableModels, isLoading: modelsLoading } = useAvailableModels();
+  const { activeModel, isLoading: activeModelLoading } = useActiveModel();
+  const migratedDefault = normalizeModelName(DEFAULT_MODEL) ?? DEFAULT_MODEL;
+  const modelsSettled = !activeModelLoading && !modelsLoading;
+
+  // App-wide default, used for new chats and for chats that carry no model of their own:
+  // the persisted default when Google still offers it, otherwise the first live model so a
+  // stored/deprecated model never lingers.
+  const defaultModel = useMemo(() => {
+    // A failed or empty live lookup means we have no evidence the persisted model is
+    // invalid, so honor it instead of swapping in the hardcoded fallback.
+    if (availableModels.length === 0) {
+      return activeModel ?? migratedDefault;
+    }
+    const activeValid = activeModel && availableModels.some((m) => m.name === activeModel);
+    return activeValid ? activeModel : (availableModels[0]?.name ?? migratedDefault);
+  }, [activeModel, availableModels, migratedDefault]);
+
+  // Lightweight model used to auto-title chats fetched from the live model list,
+  // falling back to the default model if none is available.
+  const titleModel = availableModels.find((m) => m.name.startsWith("gemini-3.5-flash-lite"))?.name ?? defaultModel;
+
   const genAI = new GoogleGenAI({ apiKey });
   const createNewChatName = (chats: ChatEntry[], prefix = "New Chat ") => {
     const existingChatNames = chats.map((x) => x.name);
@@ -87,7 +109,7 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
         name: newName,
         creationDate: new Date(),
         messages: [],
-        model: aiChatModel,
+        model: defaultModel,
       });
       newChatData.currentChat = newName;
       return newChatData;
@@ -125,6 +147,9 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
 
   const GeminiActionPanel = ({ idx }: { idx?: number } = {}) => {
     const currentChatObj = chatData ? getChat(chatData.currentChat) : null;
+    // Read the model off the chat that is open rather than from separate state, so switching
+    // chats can never show one chat's model while requests use another's.
+    const currentChatModel = currentChatObj?.model ?? defaultModel;
     const message =
       currentChatObj && typeof idx === "number" && currentChatObj.messages && currentChatObj.messages[idx]
         ? currentChatObj.messages[idx]
@@ -186,7 +211,7 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
                     ])
                     .flat();
 
-                  const modelName = currentChatObj.model ?? aiChatModel;
+                  const modelName = currentChatObj.model ?? defaultModel;
                   const chatSession = genAI.chats.create({
                     model: modelName,
                     config: {
@@ -254,6 +279,34 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
             }
           }}
         />
+        <ActionPanel.Section title="Model">
+          <ActionPanel.Submenu
+            icon={Icon.Network}
+            title={`Model: ${currentChatModel}`}
+            shortcut={{ modifiers: ["cmd"], key: "m" }}
+          >
+            {availableModels.map((m) => (
+              <ActionPanel.Item
+                key={m.name}
+                title={m.displayName}
+                icon={m.name === currentChatModel ? Icon.Checkmark : Icon.Dot}
+                onAction={() => {
+                  setChatData((oldData) => {
+                    if (!oldData) {
+                      return oldData;
+                    }
+                    const newChatData = structuredClone(oldData);
+                    const currentChat = getChat(newChatData.currentChat, newChatData.chats);
+                    if (currentChat) {
+                      currentChat.model = m.name;
+                    }
+                    return newChatData;
+                  });
+                }}
+              />
+            ))}
+          </ActionPanel.Submenu>
+        </ActionPanel.Section>
         {message && (
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
@@ -402,12 +455,22 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
   };
 
   const [chatData, setChatData] = useState<ChatData | null>(null);
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
+    // Load stored chats exactly once, after the live model list and persisted default
+    // are known, so newly created chats are never stamped with a stale model.
+    if (!modelsSettled || hasInitialized.current) {
+      return;
+    }
+    hasInitialized.current = true;
     (async () => {
       const storedChatData = await LocalStorage.getItem<string>("chatData");
       if (storedChatData) {
         const newData: ChatData = JSON.parse(storedChatData);
+        for (const chat of newData.chats) {
+          chat.model = normalizeModelName(chat.model);
+        }
 
         if (getChat(newData.currentChat, newData.chats)?.messages[0]?.finished === false) {
           const currentChat = getChat(newData.currentChat, newData.chats)!;
@@ -423,7 +486,7 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
             .flat();
 
           const chatSession = genAI.chats.create({
-            model: currentChat.model ?? aiChatModel,
+            model: currentChat.model ?? defaultModel,
             config: {
               safetySettings: getSafetySettings(),
               ...(prompt?.trim() ? { systemInstruction: prompt.trim() } : {}),
@@ -495,7 +558,7 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
               name: "New Chat 1",
               creationDate: new Date(),
               messages: [],
-              model: aiChatModel,
+              model: defaultModel,
             },
           ],
         };
@@ -523,7 +586,7 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
                 finished: true,
               },
             ],
-            model: aiChatModel,
+            model: defaultModel,
           });
           newChatData.currentChat = `Quick AI at ${new Date().toLocaleString("en-US", {
             month: "2-digit",
@@ -536,7 +599,7 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
         });
       }
     })();
-  }, []);
+  }, [modelsSettled, defaultModel]);
 
   useEffect(() => {
     if (chatData) {

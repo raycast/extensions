@@ -75,4 +75,6 @@ saasflow
 globalping
 mymind
 buffer
+mutedeck
 nocal
+openqr

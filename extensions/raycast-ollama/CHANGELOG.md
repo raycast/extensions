@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [Improvement] - 2026-09-07
+
+- [Improvement] added "Paste in Active App" action for all commands, which pastes the answer on the active application.
+
 ## [Fix] - 2026-09-04
 
 - Fixed model discovery timing out too quickly and showing connection failures as an empty installed-model list.

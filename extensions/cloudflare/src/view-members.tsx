@@ -1,10 +1,9 @@
 import { List } from '@raycast/api';
 
-import Service, { Member } from './service';
-import { getMemberStatusIcon, getToken, handleNetworkError } from './utils';
+import { Member } from './service';
+import { getMemberStatusIcon, handleNetworkError } from './utils';
 import { useCachedPromise } from '@raycast/utils';
-
-const service = new Service(getToken());
+import { getCloudflareService, withCloudflareAccessToken } from './oauth';
 
 function Command() {
   const {
@@ -12,11 +11,13 @@ function Command() {
     data: { accounts, members },
   } = useCachedPromise(
     async () => {
-      const accounts = await service.listAccounts();
+      const accounts = await getCloudflareService().listAccounts();
       const members: Record<string, Member[]> = {};
       for (let i = 0; i < accounts.length; i++) {
         const account = accounts[i];
-        const accountMembers = await service.listMembers(account.id);
+        const accountMembers = await getCloudflareService().listMembers(
+          account.id,
+        );
         members[account.id] = accountMembers;
       }
       return {
@@ -59,4 +60,4 @@ function Command() {
   );
 }
 
-export default Command;
+export default withCloudflareAccessToken(Command);

@@ -9,6 +9,7 @@ import {
   brewName,
   Cask,
   Formula,
+  preferences,
 } from "../utils";
 import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
 import { installStateIcon, UPDATE_AVAILABLE_COLOR } from "./packageIcons";
@@ -19,6 +20,7 @@ export interface FormulaListProps {
   formulae: Formula[];
   casks: Cask[];
   pinnedFormulae?: Formula[];
+  pinnedCasks?: Cask[];
   searchBarPlaceholder: string;
   searchBarAccessory?: React.ComponentProps<typeof List>["searchBarAccessory"];
   searchText?: string;
@@ -48,12 +50,103 @@ export function FormulaList(props: FormulaListProps) {
   const formulae = props.formulae;
   const casks = props.casks;
   const pinnedFormulae = props.pinnedFormulae ?? [];
-  const hasResults = formulae.length > 0 || casks.length > 0 || pinnedFormulae.length > 0;
+  const pinnedCasks = props.pinnedCasks ?? [];
+  const hasResults = formulae.length > 0 || casks.length > 0 || pinnedFormulae.length > 0 || pinnedCasks.length > 0;
   const showMetadataPanel = props.showMetadataPanel ?? false;
 
   // Raycast constructs the detail element for every row, so the panel needs to
   // know which one is actually on screen before it fetches anything for it.
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // A pin is an explicit user decision, so surfacing it first is the default.
+  const pinnedFirst = preferences.pinnedFirst;
+
+  const formulaeSection = formulae.length > 0 && (
+    <List.Section title="Formulae">
+      {formulae.map((formula) => (
+        <FormulaListItem
+          key={`formula-${formula.name}`}
+          id={`formula-${formula.name}`}
+          selectedId={selectedId}
+          formula={formula}
+          isInstalled={props.isInstalled}
+          onAction={props.onAction}
+          showMetadataPanel={showMetadataPanel}
+          onToggleSidebar={props.onToggleSidebar}
+          sortByPopularity={props.sortByPopularity}
+          onToggleSort={props.onToggleSort}
+          showDescription={props.showDescription}
+          onToggleDescription={props.onToggleDescription}
+          showInstalledDate={props.showInstalledDate}
+          showDependenciesFilter={props.showDependenciesFilter}
+        />
+      ))}
+      {formulae.isTruncated() && <MoreListItem />}
+    </List.Section>
+  );
+  const casksSection = casks.length > 0 && (
+    <List.Section title="Casks">
+      {casks.map((cask) => (
+        <CaskListItem
+          key={`cask-${cask.token}`}
+          id={`cask-${cask.token}`}
+          selectedId={selectedId}
+          cask={cask}
+          isInstalled={props.isInstalled}
+          onAction={props.onAction}
+          showMetadataPanel={showMetadataPanel}
+          onToggleSidebar={props.onToggleSidebar}
+          sortByPopularity={props.sortByPopularity}
+          onToggleSort={props.onToggleSort}
+          showDescription={props.showDescription}
+          onToggleDescription={props.onToggleDescription}
+          showInstalledDate={props.showInstalledDate}
+        />
+      ))}
+      {casks.isTruncated() && <MoreListItem />}
+    </List.Section>
+  );
+  const pinnedFormulaeSection = pinnedFormulae.length > 0 && (
+    <List.Section title="Pinned Formulae" subtitle={`${pinnedFormulae.length}`}>
+      {pinnedFormulae.map((formula) => (
+        <FormulaListItem
+          key={`pinned-formula-${formula.name}`}
+          id={`pinned-formula-${formula.name}`}
+          selectedId={selectedId}
+          formula={formula}
+          isInstalled={props.isInstalled}
+          onAction={props.onAction}
+          showMetadataPanel={showMetadataPanel}
+          onToggleSidebar={props.onToggleSidebar}
+          showDescription={props.showDescription}
+          onToggleDescription={props.onToggleDescription}
+          showInstalledDate={props.showInstalledDate}
+          showDependenciesFilter={props.showDependenciesFilter}
+        />
+      ))}
+    </List.Section>
+  );
+  const pinnedCasksSection = pinnedCasks.length > 0 && (
+    <List.Section title="Pinned Casks" subtitle={`${pinnedCasks.length}`}>
+      {pinnedCasks.map((cask) => (
+        <CaskListItem
+          key={`pinned-cask-${cask.token}`}
+          id={`pinned-cask-${cask.token}`}
+          selectedId={selectedId}
+          cask={cask}
+          isInstalled={props.isInstalled}
+          onAction={props.onAction}
+          showMetadataPanel={showMetadataPanel}
+          onToggleSidebar={props.onToggleSidebar}
+          sortByPopularity={props.sortByPopularity}
+          onToggleSort={props.onToggleSort}
+          showDescription={props.showDescription}
+          onToggleDescription={props.onToggleDescription}
+          showInstalledDate={props.showInstalledDate}
+        />
+      ))}
+    </List.Section>
+  );
 
   return (
     <List
@@ -77,70 +170,20 @@ export function FormulaList(props: FormulaListProps) {
       {!hasResults && !props.isLoading && props.dataFetched && (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="No Results" description="No packages found" />
       )}
-      {formulae.length > 0 && (
-        <List.Section title="Formulae">
-          {formulae.map((formula) => (
-            <FormulaListItem
-              key={`formula-${formula.name}`}
-              id={`formula-${formula.name}`}
-              selectedId={selectedId}
-              formula={formula}
-              isInstalled={props.isInstalled}
-              onAction={props.onAction}
-              showMetadataPanel={showMetadataPanel}
-              onToggleSidebar={props.onToggleSidebar}
-              sortByPopularity={props.sortByPopularity}
-              onToggleSort={props.onToggleSort}
-              showDescription={props.showDescription}
-              onToggleDescription={props.onToggleDescription}
-              showInstalledDate={props.showInstalledDate}
-              showDependenciesFilter={props.showDependenciesFilter}
-            />
-          ))}
-          {formulae.isTruncated() && <MoreListItem />}
-        </List.Section>
-      )}
-      {casks.length > 0 && (
-        <List.Section title="Casks">
-          {casks.map((cask) => (
-            <CaskListItem
-              key={`cask-${cask.token}`}
-              id={`cask-${cask.token}`}
-              selectedId={selectedId}
-              cask={cask}
-              isInstalled={props.isInstalled}
-              onAction={props.onAction}
-              showMetadataPanel={showMetadataPanel}
-              onToggleSidebar={props.onToggleSidebar}
-              sortByPopularity={props.sortByPopularity}
-              onToggleSort={props.onToggleSort}
-              showDescription={props.showDescription}
-              onToggleDescription={props.onToggleDescription}
-              showInstalledDate={props.showInstalledDate}
-            />
-          ))}
-          {casks.isTruncated() && <MoreListItem />}
-        </List.Section>
-      )}
-      {pinnedFormulae.length > 0 && (
-        <List.Section title="Pinned Formulae" subtitle={`${pinnedFormulae.length}`}>
-          {pinnedFormulae.map((formula) => (
-            <FormulaListItem
-              key={`pinned-formula-${formula.name}`}
-              id={`pinned-formula-${formula.name}`}
-              selectedId={selectedId}
-              formula={formula}
-              isInstalled={props.isInstalled}
-              onAction={props.onAction}
-              showMetadataPanel={showMetadataPanel}
-              onToggleSidebar={props.onToggleSidebar}
-              showDescription={props.showDescription}
-              onToggleDescription={props.onToggleDescription}
-              showInstalledDate={props.showInstalledDate}
-              showDependenciesFilter={props.showDependenciesFilter}
-            />
-          ))}
-        </List.Section>
+      {pinnedFirst ? (
+        <>
+          {pinnedFormulaeSection}
+          {pinnedCasksSection}
+          {formulaeSection}
+          {casksSection}
+        </>
+      ) : (
+        <>
+          {formulaeSection}
+          {casksSection}
+          {pinnedFormulaeSection}
+          {pinnedCasksSection}
+        </>
       )}
     </List>
   );
@@ -249,7 +292,12 @@ export function CaskListItem(props: {
     accessories.push({ tag: { value: "Outdated", color: UPDATE_AVAILABLE_COLOR } });
   }
   accessories.push({ text: version });
-  pushAccessories(accessories, props.showInstalledDate ? brewInstalledDate(cask) : undefined, cask.installs, false);
+  pushAccessories(
+    accessories,
+    props.showInstalledDate ? brewInstalledDate(cask) : undefined,
+    cask.installs,
+    cask.pinned,
+  );
 
   return (
     <List.Item
@@ -301,7 +349,8 @@ const compactNumber = new Intl.NumberFormat("en", { notation: "compact", maximum
  *   in that case alone. Showing it unconditionally would mean every user paid
  *   for that download on first search, so the count rides along with the sort
  *   rather than being always-on.
- * - **Pin** — formulae only; casks cannot be pinned.
+ * - **Pin** — shown for any pinned package. Casks have been pinnable since
+ *   Homebrew 5.1.12.
  */
 function pushAccessories(
   accessories: List.Item.Accessory[],

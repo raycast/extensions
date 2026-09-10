@@ -140,6 +140,7 @@ export function AnswerView(props: props): React.JSX.Element {
             shortcut={Shortcut.New}
           />
         )}
+        <Action.Paste content={answer} />
       </ActionPanel>
     );
   }

@@ -1,3 +1,5 @@
+import type { Accessory } from "./types.ts";
+
 /**
  * Shared time formatting utilities for agent usage providers.
  */
@@ -98,4 +100,13 @@ export function formatClock(timestamp: number | undefined): string {
 export function latestTimestamp(timestamps: (number | undefined)[]): number | undefined {
   const known = timestamps.filter((value): value is number => typeof value === "number" && value > 0);
   return known.length > 0 ? Math.max(...known) : undefined;
+}
+
+export function withCredentialStatus(accessory: Accessory, status?: "unverified"): Accessory {
+  if (!status) return accessory;
+  return {
+    ...accessory,
+    text: `${accessory.text} · Account unverified`,
+    tooltip: `${accessory.tooltip}. Cached result; the current account could not be verified. Use Refresh to check usage.`,
+  };
 }

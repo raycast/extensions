@@ -1,9 +1,12 @@
 import { homedir } from "os";
 
-import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
+import { BROWSERS_BUNDLE_ID, getBrowserDataPath } from "./useAvailableBrowsers";
 import useChromiumBookmarks from "./useChromiumBookmarks";
 
-const VIVALDI_BOOKMARKS_PATH = `${homedir()}/Library/Application Support/Vivaldi`;
+const VIVALDI_BOOKMARKS_PATH = getBrowserDataPath(
+  BROWSERS_BUNDLE_ID.vivaldi,
+  `${homedir()}/Library/Application Support/Vivaldi`,
+);
 
 export default function useVivaldiBookmarks(enabled: boolean) {
   return useChromiumBookmarks(enabled, {

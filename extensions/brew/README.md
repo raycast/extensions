@@ -5,32 +5,34 @@ Search and manage your brew casks and formulae from [Raycast](https://raycast.co
 ## Commands
 
 - **Search** — search brew formulae & casks and install them
-- **Show Installed** — list installed formulae & casks, with pinned formulae in their own section
-- **Show Upgrades** (previously Show Outdated) — review outdated packages, choose which upgrade, and run it. The review opens with everything not pinned selected (exactly what a plain `brew upgrade` would do), so running immediately upgrades everything. A pin is a lock, matching brew's own behaviour: pinned formulae cannot be selected, and including one means unpinning it first — the primary action on a pinned row does both in one step. Casks are selectable exactly like formulae; cask pinning waits on Homebrew 6's `brew pin --cask` and ships in a follow-up.
-- **Upgrade** — upgrade everything outdated in one shot, no review step, with progress reported per package via the toast
+- **Show Installed** — list installed formulae & casks, with pinned formulae and pinned casks each in their own section
+- **Show Upgrades** (previously Show Outdated) — review outdated packages, choose which upgrade, and run it. The review opens with everything not pinned selected (exactly what a plain `brew upgrade` would do), so running immediately upgrades everything. A pin is a lock, matching brew's own behaviour: a pinned package cannot be selected, and including one means unpinning it first — the primary action on a pinned row does both in one step. Formulae and casks behave identically.
+- **Upgrade All** — upgrade everything outdated in one shot, no review step, with progress reported per package via the toast
 - **Manage Services** — start, stop & restart Homebrew services
 - **Services Menu Bar** — control Homebrew services from the menu bar
 - **Clean up** — clean files and packages from the cache that are older than 120 days
 - **Clear Cache** — clear the cached formulae, casks, and installed packages files
 
-## Homebrew 5.0 Compatibility
+## Homebrew Compatibility
 
-This extension is compatible with Homebrew 5.0 and later. Key changes in Homebrew 5.0:
+**This extension requires Homebrew 6.0 or later.**
 
-- **Concurrent Downloads**: Homebrew 5.0 enables parallel downloads by default. If you experience issues, you can disable this in the extension preferences.
-- **Internal API**: Homebrew 5.0 introduces a more efficient internal JSON API. You can opt-in to this experimental feature in preferences.
-- **Deprecated Flags**: The `--no-quarantine` and `--quarantine` flags are deprecated in Homebrew 5.0.
-- **macOS Support**: Homebrew 5.0 no longer supports macOS Mojave (10.14) and older.
+- **Internal API**: the faster internal JSON API is the default. The extension's "Use internal API"
+  preference is gone — Homebrew 6 deprecates `HOMEBREW_USE_INTERNAL_API`, and setting it makes brew
+  abort outright for anyone running with `HOMEBREW_DEVELOPER`.
+- **Concurrent Downloads**: parallel downloads are on by default. If you hit trouble, turn them off
+  in the extension preferences.
+- **Removed Flags**: `--no-quarantine` and `--quarantine`, deprecated in 5.x, are gone in 6.
+- **Pinning**: formulae and casks can both be pinned. A pin is a lock — brew refuses to upgrade or
+  uninstall a pinned package until you unpin it.
 
-For more details, see the [Homebrew 5.0 release notes](https://brew.sh/2025/11/12/homebrew-5.0.0/).
+For more details, see the [Homebrew 6.0 release notes](https://brew.sh/2026/06/11/homebrew-6.0.0/).
 
 ## Performance
 
 This extension uses several optimizations to provide a fast experience:
 
-- **Two-Phase Loading**: Installed packages load quickly with basic info, then fetch full metadata in the background.
 - **Lazy Loading**: Package details are fetched on-demand when viewing, not upfront.
-- **Internal API Option**: When enabled, downloads are 96% smaller (~1 MB vs ~30 MB for formulae).
 
 ## Install Statistics
 

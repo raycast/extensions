@@ -96,6 +96,10 @@ export function ChatView(): React.JSX.Element {
   function ActionMessage(props: { message?: RaycastChatMessage }): React.JSX.Element {
     const question = props.message?.messages.find((v) => v.role === OllamaApiChatMessageRole.USER);
     const answer = props.message?.messages.find((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
+    const answerText = props.message?.messages
+      .filter((message) => message.role === OllamaApiChatMessageRole.ASSISTANT)
+      .map((message) => message.content)
+      .join("");
     return (
       <ActionPanel>
         {!IsLoading && Query && Chat && ChatModelsAvailable && (
@@ -163,6 +167,7 @@ export function ChatView(): React.JSX.Element {
               <Action title="No" icon={Icon.XMarkCircle} />
             </ActionPanel.Submenu>
           )}
+          {answerText && <Action.Paste title="Paste Answer" content={answerText} />}
         </ActionPanel.Section>
         {Chat && !IsLoading && (
           <ActionPanel.Section title="Attach">

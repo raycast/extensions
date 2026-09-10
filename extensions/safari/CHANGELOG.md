@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [New Command] - 2026-09-09
+
+- Add a `New Window` command that opens a new window of the selected Safari browser.
+
 ## [Fix] - 2026-08-12
 
 - Handle large Safari bookmark libraries without parser limit errors.

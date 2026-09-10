@@ -70,7 +70,7 @@ export function formatPackageVersion(item: Cask | Formula): string {
   if (brewIsInstalled(item)) {
     status.push("installed");
   }
-  if (!cask && item.installed?.first()?.installed_as_dependency) {
+  if (!cask && item.installed?.first()?.installed_on_request === false) {
     status.push("dependency");
   }
 
@@ -80,8 +80,33 @@ export function formatPackageVersion(item: Cask | Formula): string {
   return status.length > 0 ? `${version} (${status.join(", ")})` : version;
 }
 
+/**
+ * A checkmark prefix, so an installed dependency reads as such without relying
+ * on colour alone. U+2713 rather than an SF Symbols codepoint: this has to
+ * render on Windows too.
+ */
+const INSTALLED_TAG_PREFIX = "✓ ";
+
 function dependencyTags(names: string[] | undefined, isInstalled: (name: string) => boolean) {
-  return (names ?? []).map((name) => ({ text: name, color: isInstalled(name) ? Color.Green : Color.SecondaryText }));
+  return (names ?? []).map((name) =>
+    isInstalled(name)
+      ? { text: `${INSTALLED_TAG_PREFIX}${name}`, color: Color.Green }
+      : { text: name, color: Color.SecondaryText },
+  );
+}
+
+/** Append a tag row and its separator, or nothing when there is nothing to show. */
+function pushTagRow(
+  rows: MetadataRow[],
+  key: string,
+  title: string,
+  tags: { text: string; color?: Color.ColorLike }[] | undefined,
+): void {
+  if (!tags || tags.length === 0) {
+    return;
+  }
+  rows.push({ kind: "separator", key: `${key}-sep` });
+  rows.push({ kind: "tags", key, title, tags });
 }
 
 /** Leading rows shared by both kinds: the lifecycle warning, then the prose. */
@@ -162,6 +187,8 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
     ...leadingRows(formula, options, formulaCaveatsText(formula)),
     homepageRow(formula.homepage, options),
     { kind: "separator", key: "homepage-sep" },
+    { kind: "label", key: "tap", title: "Tap", text: formula.tap || missing(options) },
+    { kind: "separator", key: "tap-sep" },
   ];
 
   if (formula.license) {
@@ -181,10 +208,7 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
     ["build-dependencies", "Build Dependencies", formula.build_dependencies],
     ["conflicts", "Conflicts With", formula.conflicts_with],
   ] as const) {
-    if (names && names.length > 0) {
-      rows.push({ kind: "separator", key: `${key}-sep` });
-      rows.push({ kind: "tags", key, title, tags: dependencyTags(names, options.isInstalled) });
-    }
+    pushTagRow(rows, key, title, names && dependencyTags(names, options.isInstalled));
   }
 
   if (formula.pinned) {
@@ -211,28 +235,37 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
     { kind: "label", key: "version", title: "Version", text: formatPackageVersion(cask) },
   ];
 
+  // Casks depend on formulae and other casks, not only an OS version
+  // (cask/dsl/depends_on.rb).
+  const packageDeps = [...(cask.depends_on?.formula ?? []), ...(cask.depends_on?.cask ?? [])];
+  pushTagRow(rows, "dependencies", "Dependencies", dependencyTags(packageDeps, options.isInstalled));
+
+  pushTagRow(
+    rows,
+    "arch",
+    "Architecture",
+    cask.depends_on?.arch?.map(({ type, bits }) => ({ text: bits ? `${type}${bits}` : type })),
+  );
+
   const macos = cask.depends_on?.macos;
-  if (macos) {
-    rows.push({ kind: "separator", key: "macos-sep" });
-    rows.push({
-      kind: "tags",
-      key: "macos",
-      title: "macOS Version",
-      tags: Object.entries(macos)
+  pushTagRow(
+    rows,
+    "macos",
+    "macOS Version",
+    macos &&
+      Object.entries(macos)
         .filter(([, values]) => values)
         .map(([key, values]) => ({ text: `${key} ${values.join(", ")}` })),
-    });
-  }
+  );
 
   const conflicts = cask.conflicts_with?.cask;
-  if (conflicts && conflicts.length > 0) {
-    rows.push({ kind: "separator", key: "conflicts-sep" });
-    rows.push({
-      kind: "tags",
-      key: "conflicts",
-      title: "Conflicts With",
-      tags: dependencyTags(conflicts, options.isInstalled),
-    });
+  pushTagRow(rows, "conflicts", "Conflicts With", conflicts && dependencyTags(conflicts, options.isInstalled));
+
+  // The list's tack accessory is hidden while the metadata panel is open
+  // (list.tsx), so this is the only pin indicator a cask has in that view.
+  if (cask.pinned) {
+    rows.push({ kind: "separator", key: "pinned-sep" });
+    rows.push({ kind: "label", key: "pinned", title: "Pinned", text: "Yes" });
   }
 
   rows.push({ kind: "separator", key: "auto-sep" });
