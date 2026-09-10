@@ -12,16 +12,18 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useState } from "react";
-import { User, useDirectorySearch } from "./shared/client";
+import { User, useDirectorySearch, type Channel, type Group } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
-import { useFrecencySorting } from "@raycast/utils";
+import { useCachedState, useFrecencySorting } from "@raycast/utils";
 import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
 import { convertSlackEmojiToUnicode } from "./shared/utils";
 import { toZonedTime } from "date-fns-tz";
 import { differenceInMinutes } from "date-fns";
 import SendMessage from "./send-message";
 import { directMessageAction } from "./shared/directMessageAction";
-import { isSlackUserId } from "./shared/client/directory";
+import { isSlackUserId, mergeVisitedDirectoryItems, rememberVisitedDirectoryItem } from "./shared/client/directory";
+
+type OpenChannelItem = User | Channel | Group;
 
 const { displayExtraMetadata } = getPreferenceValues<Preferences.Search>();
 
@@ -78,12 +80,18 @@ function CopyIdAction({ id }: { id: string }) {
 function Search() {
   const { push } = useNavigation();
   const [searchText, setSearchText] = useState("");
+  const [recentItems, setRecentItems] = useCachedState<OpenChannelItem[]>("open-channel-visited-items", []);
   const { isAppInstalled, isLoading } = useSlackApp();
   const { data, isLoading: isLoadingChannels } = useDirectorySearch(searchText);
 
-  const channels = data?.flat();
+  const channels = mergeVisitedDirectoryItems(data?.flat(), recentItems, searchText);
 
   const { data: recents, visitItem, resetRanking } = useFrecencySorting(channels, { key: (item) => item.id });
+
+  const rememberVisit = (item: OpenChannelItem) => {
+    setRecentItems((items) => rememberVisitedDirectoryItem(items, item));
+    return visitItem(item);
+  };
 
   return (
     <List isLoading={isLoading || isLoadingChannels} filtering={false} throttle onSearchTextChange={setSearchText}>
@@ -113,7 +121,7 @@ function Search() {
               actions={
                 <ActionPanel>
                   <OpenChatInSlack
-                    {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => visitItem(item) }}
+                    {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => rememberVisit(item) }}
                   />
 
                   <Action.Push
@@ -191,7 +199,7 @@ function Search() {
               actions={
                 <ActionPanel>
                   <OpenChannelInSlack
-                    {...{ workspaceId, channelId, isAppInstalled, onAction: () => visitItem(item) }}
+                    {...{ workspaceId, channelId, isAppInstalled, onAction: () => rememberVisit(item) }}
                   />
 
                   <Action.CreateQuicklink

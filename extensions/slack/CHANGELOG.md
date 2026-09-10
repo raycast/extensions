@@ -8,6 +8,7 @@
 ## [Fix recipient search in large workspaces] - {PR_MERGE_DATE}
 
 - Keep **Send Message** and **Open Channel** responsive in large workspaces by loading bounded, filtered directory pages instead of retaining and caching the entire workspace directory.
+- Keep frequently opened **Open Channel** results visible when they fall outside the initial directory page by retaining the latest 100 visited rows and merging them into empty-query results before frecency sorting.
 - Continue member searches past hidden-profile matches so people whose visible names occur later in Slack's unordered directory can still be found.
 - Show channel search results independently of group DM name lookup.
 - Resolve direct messages when opening browser links or creating Quicklinks and Huddle links.
