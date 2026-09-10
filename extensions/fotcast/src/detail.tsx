@@ -247,14 +247,32 @@ function subLines(team: LineupTeam): string[] {
 const ratingColor = (r: number) =>
   r >= 9 ? "#0A84FF" : r >= 7 ? "#34C759" : r >= 6 ? "#FF9F0A" : "#FF453A";
 
-function rated(team: LineupTeam): { name: string; rating: number }[] {
+type Rated = { name: string; rating: number; goals: number; assists: number };
+
+function rated(team: LineupTeam): Rated[] {
   return [...(team.starters ?? []), ...(team.subs ?? [])]
-    .flatMap((p) => {
+    .flatMap((p): Rated[] => {
       const r = p.performance?.rating;
-      return typeof r === "number" ? [{ name: lastName(p), rating: r }] : [];
+      if (typeof r !== "number") return [];
+      const types = (p.performance?.events ?? []).map((e) => e.type);
+      return [
+        {
+          name: lastName(p),
+          rating: r,
+          goals: types.filter((t) => t === "goal").length,
+          assists: types.filter((t) => t === "assist").length,
+        },
+      ];
     })
     .sort((a, b) => b.rating - a.rating);
 }
+
+// Small goal ball and assist boot, drawn at (x, y) = left edge, text baseline.
+const ball = (x: number, y: number) =>
+  `<circle cx="${x + 5}" cy="${y - 4}" r="4.5" fill="#fff" stroke="#111" stroke-width="1.2"/>` +
+  `<circle cx="${x + 5}" cy="${y - 4}" r="1.6" fill="#111"/>`;
+const boot = (x: number, y: number, fill: string) =>
+  `<path d="M${x + 1},${y - 9} h4 v4 l5,2 v3 h-10 z" fill="${fill}"/>`;
 
 function ratings(
   home: LineupTeam,
@@ -269,6 +287,17 @@ function ratings(
   const LINE = 24;
   const top = y0 + 26;
   const parts = [rule(y0, t)];
+  // ponytail: 12px SF text averages ~6.4px/char; icons trail the name by estimate.
+  const CHAR = 6.7;
+  // dir 1 draws rightwards from x, -1 leftwards (mirrored away column).
+  const marks = (p: Rated, x: number, y: number, dir: 1 | -1) => {
+    let out = "";
+    let cx = dir === 1 ? x : x - 11;
+    for (let i = 0; i < p.goals; i++, cx += 13 * dir) out += ball(cx, y);
+    for (let i = 0; i < p.assists; i++, cx += 13 * dir)
+      out += boot(cx, y, t.muted);
+    return out;
+  };
   const pill = (x: number, y: number, rating: number) =>
     `<rect x="${x - 17}" y="${y - 13}" width="34" height="18" rx="5" fill="${ratingColor(rating)}"/>` +
     `<text x="${x}" y="${y}" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">${rating.toFixed(1)}</text>`;
@@ -277,6 +306,7 @@ function ratings(
     parts.push(
       pill(63, y, p.rating),
       `<text x="88" y="${y}" fill="${t.text}" font-size="12">${xml(p.name)}</text>`,
+      marks(p, 88 + p.name.length * CHAR + 9, y, 1),
     );
   });
   r.forEach((p, i) => {
@@ -284,6 +314,7 @@ function ratings(
     parts.push(
       pill(W - 63, y, p.rating),
       `<text x="${W - 88}" y="${y}" fill="${t.text}" font-size="12" text-anchor="end">${xml(p.name)}</text>`,
+      marks(p, W - 88 - p.name.length * CHAR - 9, y, -1),
     );
   });
   return [parts.join(""), 26 + rows * LINE];
