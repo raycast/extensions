@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Docs] - {PR_MERGE_DATE}
+## [Docs] - 2026-09-10
 
 - Updated the README to document fuzzy search, the "Search by BibTeX Citation Key" preference, group libraries, the collection filter, and the 100-result limit
 
