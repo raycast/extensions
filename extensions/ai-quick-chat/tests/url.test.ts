@@ -12,10 +12,14 @@ test("normalizes common provider base URLs", () => {
 
 test("builds chat and model endpoints", () => {
   assert.equal(chatCompletionsUrl("http://127.0.0.1:11434/v1"), "http://127.0.0.1:11434/v1/chat/completions");
+  assert.equal(chatCompletionsUrl("http://localhost:1234/v1"), "http://localhost:1234/v1/chat/completions");
+  assert.equal(chatCompletionsUrl("http://[::1]:1234/v1"), "http://[::1]:1234/v1/chat/completions");
   assert.equal(modelsUrl("https://api.together.ai/v1"), "https://api.together.ai/v1/models");
 });
 
 test("rejects unsafe or ambiguous base URLs", () => {
   assert.throws(() => normalizeBaseUrl("file:///tmp/api"), /HTTP or HTTPS/);
+  assert.throws(() => normalizeBaseUrl("http://api.example.com/v1"), /loopback/);
+  assert.throws(() => normalizeBaseUrl("http://127.evil.example/v1"), /loopback/);
   assert.throws(() => normalizeBaseUrl("https://example.com/v1?api-version=1"), /query string/);
 });

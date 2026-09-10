@@ -73,6 +73,8 @@ Content-Type: application/json
 
 with a request body containing `model`, `messages`, and `stream: true`. Standard OpenAI SSE chunks, GLM-style `reasoning_content`, and compatible servers that ignore streaming and return a normal JSON completion are supported.
 
+Remote providers must use HTTPS so API keys are never sent over plaintext connections. HTTP is accepted only for loopback hosts such as `localhost`, `127.0.0.1`, and `::1` for local model servers.
+
 Base URLs containing query strings are intentionally rejected because appending standard paths would be ambiguous. Use a gateway that exposes a normal OpenAI-compatible base URL for those services.
 
 ## Development
@@ -113,6 +115,8 @@ npm run build
 Raycast 把 Root Search 的 `Tab` 固定绑定给内置 Quick AI，第三方扩展没有覆盖权限；扩展也不能自动修改 Fallback 排序，因此上面的设置需要手动完成一次。之后日常操作就是“输入问题 → Enter”。
 
 聊天支持多轮追问、流式输出、停止生成、重试、模型切换和本地历史。GLM 等模型返回的 `reasoning_content` 会与最终答案分开保存并可隐藏。API Key 存在 Raycast 的隔离加密数据库中；聊天正文使用 AES-256-GCM 加密后保存在扩展目录。会话数量默认不限制，可自行设置；总存储上限为 10 GB，达到后自动清理最旧会话。
+
+远程服务必须使用 HTTPS，避免 API Key 通过明文连接发送。HTTP 仅允许用于 `localhost`、`127.0.0.1`、`::1` 等本机回环地址。
 
 ## License
 

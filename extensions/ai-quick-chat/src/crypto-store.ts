@@ -65,12 +65,20 @@ export async function decryptJson<T>(payload: string): Promise<T> {
 export async function readEncryptedJson<T>(
   filePath: string,
 ): Promise<T | undefined> {
+  let primaryError: unknown;
   try {
     return await decryptJson<T>(await readFile(filePath, "utf8"));
   } catch (error) {
-    const nodeError = error as NodeJS.ErrnoException;
-    if (nodeError.code === "ENOENT") return undefined;
-    throw error;
+    primaryError = error;
+  }
+
+  try {
+    return await decryptJson<T>(await readFile(`${filePath}.backup`, "utf8"));
+  } catch (backupError) {
+    const primaryCode = (primaryError as NodeJS.ErrnoException).code;
+    const backupCode = (backupError as NodeJS.ErrnoException).code;
+    if (primaryCode === "ENOENT" && backupCode === "ENOENT") return undefined;
+    throw primaryCode === "ENOENT" ? backupError : primaryError;
   }
 }
 
@@ -80,12 +88,38 @@ export async function writeEncryptedPayload(
 ): Promise<void> {
   await mkdir(path.dirname(filePath), { recursive: true });
   const temporaryPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+  const backupPath = `${filePath}.backup`;
   await writeFile(temporaryPath, payload, { encoding: "utf8", mode: 0o600 });
   try {
     await rename(temporaryPath, filePath);
-  } catch {
-    await rm(filePath, { force: true });
+    await rm(backupPath, { force: true });
+    return;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code !== "EEXIST" && code !== "EPERM" && code !== "ENOTEMPTY")
+      throw error;
+  }
+
+  await rm(backupPath, { force: true });
+  let movedExistingFile = false;
+  try {
+    await rename(filePath, backupPath);
+    movedExistingFile = true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+
+  try {
     await rename(temporaryPath, filePath);
+  } catch (error) {
+    if (movedExistingFile) {
+      await rename(backupPath, filePath).catch(() => undefined);
+    }
+    throw error;
+  }
+
+  if (movedExistingFile) {
+    await rm(backupPath, { force: true });
   }
 }
 

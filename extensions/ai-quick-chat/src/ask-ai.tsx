@@ -18,10 +18,6 @@ import {
   setActiveSelection,
 } from "./provider-store";
 
-interface AskArguments {
-  prompt?: string;
-}
-
 function NewChatForm(props: { onSubmit: (prompt: string) => void }) {
   const {
     data: providerData,
@@ -159,8 +155,40 @@ function NewChatForm(props: { onSubmit: (prompt: string) => void }) {
   );
 }
 
+function PromptLauncher(props: { prompt: string }) {
+  const { data: providers, isLoading, revalidate } = usePromise(getProviders);
+
+  if (isLoading || !providers) return <List isLoading />;
+  if (providers.length === 0) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Stars}
+          title="Add an AI Provider"
+          description="Configure an OpenAI-compatible endpoint to send this question."
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Add Provider"
+                icon={Icon.Plus}
+                target={
+                  <ProviderForm
+                    onSaved={async () => void (await revalidate())}
+                  />
+                }
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  return <ConversationView initialPrompt={props.prompt} />;
+}
+
 export default function AskAICommand(
-  props: LaunchProps<{ arguments: AskArguments }>,
+  props: LaunchProps<{ arguments: Arguments.AskAi }>,
 ) {
   const launchPrompt = (
     props.fallbackText ||
@@ -169,7 +197,7 @@ export default function AskAICommand(
   ).trim();
   const [prompt, setPrompt] = useState(launchPrompt);
   return prompt ? (
-    <ConversationView initialPrompt={prompt} />
+    <PromptLauncher prompt={prompt} />
   ) : (
     <NewChatForm onSubmit={setPrompt} />
   );

@@ -8,6 +8,7 @@ import {
   writeEncryptedPayload,
 } from "./crypto-store";
 import { selectSessionsToKeep } from "./history-retention";
+import { withFileLock } from "./history-lock";
 import type {
   ChatSession,
   HistorySettings,
@@ -23,6 +24,10 @@ const HISTORY_DIRECTORY = path.join(
   "encrypted-history-v1",
 );
 const HISTORY_INDEX = path.join(HISTORY_DIRECTORY, "index.enc");
+const HISTORY_LOCK_TARGET = path.join(
+  environment.supportPath,
+  "encrypted-history-v1-mutations",
+);
 
 interface HistoryIndex {
   version: 1;
@@ -64,9 +69,7 @@ async function rebuildIndex(): Promise<HistoryIndex> {
       // A corrupt individual chat should not make all history unavailable.
     }
   }
-  const index: HistoryIndex = { version: 1, sessions };
-  await writeEncryptedJson(HISTORY_INDEX, index);
-  return index;
+  return { version: 1, sessions };
 }
 
 async function loadIndex(): Promise<HistoryIndex> {
@@ -104,8 +107,11 @@ export async function getHistorySettings(): Promise<HistorySettings> {
 export async function saveHistorySettings(
   settings: HistorySettings,
 ): Promise<void> {
-  await LocalStorage.setItem(HISTORY_SETTINGS_KEY, JSON.stringify(settings));
-  await enforceRetention();
+  await withFileLock(HISTORY_LOCK_TARGET, async () => {
+    await LocalStorage.setItem(HISTORY_SETTINGS_KEY, JSON.stringify(settings));
+    const index = await loadIndex();
+    await pruneAndSave(index.sessions);
+  });
 }
 
 export async function listSessionMetadata(): Promise<SessionMetadata[]> {
@@ -119,16 +125,18 @@ export async function getSession(id: string): Promise<ChatSession | undefined> {
 }
 
 export async function saveSession(session: ChatSession): Promise<void> {
-  const payload = await encryptJson(session);
-  const bytes = Buffer.byteLength(payload, "utf8");
-  if (bytes > MAX_HISTORY_BYTES)
-    throw new Error("This conversation exceeds the 10 GB history limit.");
-  await writeEncryptedPayload(sessionPath(session.id), payload);
+  await withFileLock(HISTORY_LOCK_TARGET, async () => {
+    const payload = await encryptJson(session);
+    const bytes = Buffer.byteLength(payload, "utf8");
+    if (bytes > MAX_HISTORY_BYTES)
+      throw new Error("This conversation exceeds the 10 GB history limit.");
+    await writeEncryptedPayload(sessionPath(session.id), payload);
 
-  const index = await loadIndex();
-  const sessions = index.sessions.filter((item) => item.id !== session.id);
-  sessions.push(metadataFor(session, bytes));
-  await pruneAndSave(sessions, session.id);
+    const index = await loadIndex();
+    const sessions = index.sessions.filter((item) => item.id !== session.id);
+    sessions.push(metadataFor(session, bytes));
+    await pruneAndSave(sessions, session.id);
+  });
 }
 
 async function pruneAndSave(
@@ -154,20 +162,26 @@ async function pruneAndSave(
 }
 
 export async function enforceRetention(): Promise<void> {
-  const index = await loadIndex();
-  await pruneAndSave(index.sessions);
+  await withFileLock(HISTORY_LOCK_TARGET, async () => {
+    const index = await loadIndex();
+    await pruneAndSave(index.sessions);
+  });
 }
 
 export async function deleteSession(id: string): Promise<void> {
-  await rm(sessionPath(id), { force: true });
-  const index = await loadIndex();
-  await saveIndex(index.sessions.filter((item) => item.id !== id));
+  await withFileLock(HISTORY_LOCK_TARGET, async () => {
+    await rm(sessionPath(id), { force: true });
+    const index = await loadIndex();
+    await saveIndex(index.sessions.filter((item) => item.id !== id));
+  });
 }
 
 export async function clearHistory(): Promise<void> {
-  await rm(HISTORY_DIRECTORY, { recursive: true, force: true });
-  await mkdir(HISTORY_DIRECTORY, { recursive: true });
-  await saveIndex([]);
+  await withFileLock(HISTORY_LOCK_TARGET, async () => {
+    await rm(HISTORY_DIRECTORY, { recursive: true, force: true });
+    await mkdir(HISTORY_DIRECTORY, { recursive: true });
+    await saveIndex([]);
+  });
 }
 
 export async function getStorageStats(): Promise<StorageStats> {

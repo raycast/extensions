@@ -15,6 +15,7 @@ import { createSessionTitle, getSession, saveSession } from "./history-store";
 import { ModelPicker } from "./model-picker";
 import { streamChatCompletion } from "./openai-client";
 import { getProviders, resolveActiveModel } from "./provider-store";
+import { interruptStaleStreamingMessages } from "./session-recovery";
 import type { ChatMessage, ChatSession, ProviderProfile } from "./types";
 
 function isoNow(): string {
@@ -274,7 +275,11 @@ export function ConversationView(props: {
 
       if (props.sessionId) {
         const stored = await getSession(props.sessionId);
-        if (stored) commitSession(stored);
+        if (stored) {
+          const recovered = interruptStaleStreamingMessages(stored);
+          if (recovered !== stored) await saveSession(recovered);
+          commitSession(recovered);
+        }
         setIsInitializing(false);
         return;
       }
