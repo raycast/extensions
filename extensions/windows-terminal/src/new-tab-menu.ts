@@ -23,9 +23,9 @@ export interface NewTabMenuEntry {
 // reachable state together, one input character at a time (matchFull) — the technique RE2 and
 // Rust's regex crate use for guaranteed linear-time matching with no backtracking. So no pattern
 // needs rejecting for how it might backtrack — a repeated group with safe alternatives, like
-// (dev|prod)+, still matches normally, and so does (a+)+. A large bounded quantifier on a simple
-// atom, like (a|b){0,4000}, is unbounded in practice too — compileCountedRepeat gives it a counter
-// instead of unrolling it, so neither compiled size nor matching cost grows with the bound.
+// (dev|prod)+, still matches normally, and so does (a+)+. A large bounded quantifier, like
+// (a|b){0,4000} or (|a){2,4000}, is unbounded in practice too — compileCountedRepeat gives it a
+// counter instead of unrolling it, so the compiled size doesn't grow with the bound.
 type AtomNode =
   | { kind: "char"; test: (ch: string) => boolean }
   | { kind: "any" }
@@ -49,8 +49,8 @@ class RegexTooLargeError extends Error {}
 const MAX_PROGRAM_SIZE = 50000;
 
 // Below this, compileQuant unrolls a {n,m} into that many literal copies (cheap, and lets it nest
-// inside another quantifier); at or above it, compileCountedRepeat is used instead — no nesting
-// support, but the compiled size and matching cost no longer scale with the bound.
+// inside another large quantifier); at or above it, compileCountedRepeat is used instead — it can't
+// nest inside another counted repeat, but the compiled size no longer scales with the bound.
 const UNROLL_THRESHOLD = 20;
 
 // Parses the subset of ICU regex syntax (the flavor Windows Terminal itself matches with) that
@@ -410,58 +410,47 @@ function optionalFrag(atom: AtomNode): Frag {
   return { start: split, out: [...body.out, { inst: split, slot: "next2" }] };
 }
 
-// compileCountedRepeat's counter is a single (count, countFor) pair per thread, not a stack, so it
-// can't tell two active repeats apart — a quantified atom that itself contains a quantifier (e.g.
-// (a{5}){500}) can't safely go through it. Every atom below UNROLL_THRESHOLD is quantified with
-// its default {1,1} (see parseQuant), so this is only true when something was genuinely repeated.
-function hasNestedQuantifier(atom: AtomNode): boolean {
-  if (atom.kind !== "group") return false;
-  return atom.alt.options.some((seq) =>
-    seq.atoms.some((q) => q.min !== 1 || q.max !== 1 || hasNestedQuantifier(q.atom)),
-  );
+// Whether compileQuant sends this quantifier through compileCountedRepeat (a large bound) rather
+// than unrolling it (a small one) — the one place that decision lives.
+function usesCounter(q: QuantNode): boolean {
+  if (q.max === Infinity) return q.min > UNROLL_THRESHOLD;
+  return q.min > UNROLL_THRESHOLD || q.max - q.min > UNROLL_THRESHOLD;
 }
 
-// The number of characters `atom` always consumes, if every alternative consumes the same amount,
-// or null if that amount varies (including an alternative that matches empty, like (|a) — 0 counts
-// as a value here, so it can differ from a sibling alternative's nonzero length). Only meaningful
-// once hasNestedQuantifier has ruled out a real quantifier anywhere inside `atom`, so every atom in
-// every sequence occurs exactly once here — no min/max to account for.
-//
-// compileCountedRepeat needs this to be a single, nonzero value: hasVisited/markVisited collapse
-// every rep count from `min` up to `max` onto one dedup entry per position, on the assumption that
-// they're all interchangeable, which only holds when each rep advances the string position by the
-// same fixed amount. Confirmed by direct DP-vs-engine comparison that this isn't just true for a
-// zero-width alternative — (a|aa){min,max} (no alternative is empty, but they're 1 vs 2 characters)
-// reaches the same string position after a different number of reps depending on which alternatives
-// were taken, and only one of those trajectories survives the collapse, silently losing counts near
-// `max` a real match needs. Rejected the same way hasNestedQuantifier is: not unsafe to compile,
-// just not representable by this counter.
-function fixedWidth(atom: AtomNode): number | null {
-  if (atom.kind === "char" || atom.kind === "any") return 1;
-  if (atom.kind === "start" || atom.kind === "end" || atom.kind === "boundary") return 0;
-  const widths = atom.alt.options.map((seq) => {
-    let total = 0;
-    for (const q of seq.atoms) {
-      const atomWidth = fixedWidth(q.atom);
-      if (atomWidth === null) return null;
-      total += atomWidth;
-    }
-    return total;
-  });
-  return widths.every((w) => w === widths[0]) ? widths[0] : null;
+// compileCountedRepeat's counter is a single (count, countFor) pair per thread, not a stack, so it
+// can't tell two active counted repeats apart — exiting the inner one resets countFor (see the
+// "repeat" case in addThread) and loses the outer count. So a large quantifier whose body contains
+// another *large* quantifier, e.g. ((a|b){200}){200}, can't go through it. A small quantifier inside
+// the body is fine: it unrolls into plain instructions that carry the thread's count through
+// untouched, so (a?){2,4000} or (a{2}){2,4000} compile and match normally.
+function hasNestedCountedRepeat(atom: AtomNode): boolean {
+  if (atom.kind !== "group") return false;
+  return atom.alt.options.some((seq) => seq.atoms.some((q) => usesCounter(q) || hasNestedCountedRepeat(q.atom)));
+}
+
+// Whether `atom` matches the empty string unconditionally — an empty alternative, or one made only
+// of optional atoms. Anchors and \b don't count: they're zero-width but conditional on position.
+function isNullable(atom: AtomNode): boolean {
+  if (atom.kind !== "group") return false;
+  return atom.alt.options.some((seq) => seq.atoms.every((q) => q.min === 0 || isNullable(q.atom)));
 }
 
 // Compiles atom{min,max} (max possibly Infinity) as one `repeat` instruction plus one copy of the
 // atom's body, instead of unrolling — see the `repeat`/`increment` handling in addThread for how a
 // thread's counter takes the place of the copies compileQuant's other branch would otherwise make.
+// The body can be anything a small quantifier could wrap — nullable alternatives like (|a),
+// differently-sized ones like (a|aa), an unrolled quantifier — because the matcher dedupes threads
+// inside a counted repeat by their exact count (see hasVisited), never by assuming reps line up
+// with string positions.
 function compileCountedRepeat(atom: AtomNode, min: number, max: number): Frag {
-  if (hasNestedQuantifier(atom)) {
-    throw new RegexTooLargeError("a quantifier this large can't wrap another quantifier");
+  if (hasNestedCountedRepeat(atom)) {
+    throw new RegexTooLargeError("a quantifier this large can't wrap another quantifier this large");
   }
-  const width = fixedWidth(atom);
-  if (!width) {
-    throw new RegexTooLargeError("a quantifier this large needs every alternative to be the same length");
-  }
+  // A body that can always match empty makes `min` meaningless — any shortfall is made up with
+  // empty reps at no cost — so (|a){3000,4000} accepts exactly what (|a){0,4000} does. Compiling
+  // it as the latter matters for cost, not just tidiness: below `min` every count is a distinct
+  // state (see VisitedState), and a nullable body reaches all of them at every single position.
+  if (isNullable(atom)) min = 0;
   const repeat: RepeatInst = newInst({ op: "repeat", min, max, bodyStart: undefined as unknown as Inst });
   const body = compileAtom(atom);
   const increment: IncrementInst = newInst({ op: "increment", repeat });
@@ -474,17 +463,14 @@ function compileCountedRepeat(atom: AtomNode, min: number, max: number): Frag {
 // record — irrelevant here, since buildProfileMatcher only ever asks "does the whole field match"
 // (see matchFull). So greedy and lazy compile identically; `q.greedy` is parsed but never consulted.
 function compileQuant(q: QuantNode): Frag {
+  if (usesCounter(q)) return compileCountedRepeat(q.atom, q.min, q.max);
   if (q.max === Infinity) {
     if (q.min === 0) return starFrag(q.atom);
-    if (q.min <= UNROLL_THRESHOLD) return concat(repeatFrag(q.atom, q.min - 1), plusFrag(q.atom));
-    return compileCountedRepeat(q.atom, q.min, Infinity);
+    return concat(repeatFrag(q.atom, q.min - 1), plusFrag(q.atom));
   }
-  if (q.min <= UNROLL_THRESHOLD && q.max - q.min <= UNROLL_THRESHOLD) {
-    const optionals: Frag[] = [];
-    for (let copy = q.min; copy < q.max; copy++) optionals.push(optionalFrag(q.atom));
-    return concat(repeatFrag(q.atom, q.min), concatAll(optionals));
-  }
-  return compileCountedRepeat(q.atom, q.min, q.max);
+  const optionals: Frag[] = [];
+  for (let copy = q.min; copy < q.max; copy++) optionals.push(optionalFrag(q.atom));
+  return concat(repeatFrag(q.atom, q.min), concatAll(optionals));
 }
 
 function compileSeq(seq: SeqNode): Frag {
@@ -527,49 +513,52 @@ type Thread = { inst: Inst; count: number; countFor: RepeatInst | null };
 const NO_REPEAT = null;
 
 // Instructions outside any counted repeat dedupe by identity alone (`plain`) — same as before this
-// engine had a counted-repeat mechanism at all. Instructions reached *while inside* one need `count`
-// in the key too, kept in a separate structure (`scoped`): two sequential large repeats mean a
-// "just exiting the first, entering the second fresh" thread and a "already partway through the
-// second" thread can reach the second repeat's own instruction at the very same position, and they
-// must not collide just because they happen to share that instruction — see capForDedup for why
-// capping `count` at the repeat's `min` is safe rather than using it raw.
-type VisitedState = { plain: Set<Inst>; scoped: Map<Inst, Set<number>> };
+// engine had a counted-repeat mechanism at all. Instructions reached *while inside* one are keyed
+// by their exact `count` too (`scoped`): the same instruction at the same position with a
+// different count is a genuinely different state, because the count decides how many more reps
+// are still mandatory (below `min`) or still allowed (up to `max`). Nothing about the body is
+// assumed — a prefix like (?:x|xa) can enter the repeat at two different positions, so two threads
+// with different counts legitimately share an instruction at every later position, and merging
+// them (as an earlier "cap the count at min" key did) silently drops the one that could still reach
+// `max`.
+//
+// `lowestSettled` is the one pruning that IS sound: once a thread's count is at or above `min`, a
+// lower count can do everything a higher one can (exit now, or keep going — for longer), so a
+// thread whose count is ≥ min is redundant whenever a thread at the same instruction with a count
+// in [min, count] has already been queued at this position. That's what keeps something like
+// ".*a{0,12000}" linear instead of carrying every possible count along at every position.
+type VisitedState = { plain: Set<Inst>; scoped: Map<Inst, Set<number>>; lowestSettled: Map<Inst, number> };
 
 function newVisited(): VisitedState {
-  return { plain: new Set(), scoped: new Map() };
-}
-
-// Once a thread has reached `min` reps of a counted repeat, every rep beyond that is behaviorally
-// identical for reachability: `repeat` offers the exact same exit target and the exact same
-// continue-into-body target regardless of the exact count, right up to (and including) `max` —
-// forced exit at `max` reaches nothing that optional exit at `min` didn't already reach. So capping
-// the count at `min` for dedup purposes loses no reachable state, PROVIDED the body can't reach the
-// same position at two different counts in the first place — the precondition compileCountedRepeat
-// enforces is exactly that: hasNestedQuantifier rules out a real quantifier anywhere inside the
-// body, and fixedWidth requires every alternative to consume the same fixed, nonzero number of
-// characters, so a fresh entry into this repeat's scope has a single, unambiguous count at any
-// given position. Only called when thread.countFor !== NO_REPEAT (see hasVisited/markVisited), so
-// there's always a real repeat to read `min` from.
-function capForDedup(thread: Thread): number {
-  return Math.min(thread.count, thread.countFor!.min);
+  return { plain: new Set(), scoped: new Map(), lowestSettled: new Map() };
 }
 
 function hasVisited(visited: VisitedState, thread: Thread): boolean {
-  if (thread.countFor === NO_REPEAT) return visited.plain.has(thread.inst);
-  return visited.scoped.get(thread.inst)?.has(capForDedup(thread)) ?? false;
+  const { inst, count, countFor } = thread;
+  if (countFor === NO_REPEAT) return visited.plain.has(inst);
+  if (count >= countFor.min) {
+    const lowest = visited.lowestSettled.get(inst);
+    if (lowest !== undefined && lowest <= count) return true;
+  }
+  return visited.scoped.get(inst)?.has(count) ?? false;
 }
 
 function markVisited(visited: VisitedState, thread: Thread): void {
-  if (thread.countFor === NO_REPEAT) {
-    visited.plain.add(thread.inst);
+  const { inst, count, countFor } = thread;
+  if (countFor === NO_REPEAT) {
+    visited.plain.add(inst);
     return;
   }
-  let seen = visited.scoped.get(thread.inst);
+  let seen = visited.scoped.get(inst);
   if (!seen) {
     seen = new Set();
-    visited.scoped.set(thread.inst, seen);
+    visited.scoped.set(inst, seen);
   }
-  seen.add(capForDedup(thread));
+  seen.add(count);
+  if (count >= countFor.min) {
+    const lowest = visited.lowestSettled.get(inst);
+    if (lowest === undefined || count < lowest) visited.lowestSettled.set(inst, count);
+  }
 }
 
 // \b sits between a word character and a non-word one, counting the space off either end of the
@@ -646,8 +635,9 @@ function addThread(
 // the call stack never grows with the length of `str` or with the pattern's backtracking search
 // space — a 2,000-character value and a pathological pattern like (a+)+ cost the same handful of
 // stack frames as a one-character match. Work per position is bounded by the pattern's compiled
-// size — kept independent of any quantifier's bound by compileCountedRepeat — so nothing can blow
-// up exponentially or scale with a large bound; MAX_MATCH_STEPS is a backstop for what's left.
+// size times the distinct repeat counts still alive there (see VisitedState) — for any realistic
+// pattern that's a handful — so nothing can blow up exponentially; MAX_MATCH_STEPS is a backstop
+// for what's left.
 function matchFull(prog: Inst, str: string): boolean {
   const budget: StepBudget = { remaining: MAX_MATCH_STEPS };
   let current: Thread[] = [];
@@ -658,6 +648,13 @@ function matchFull(prog: Inst, str: string): boolean {
     const next: Thread[] = [];
     const visited = newVisited();
     const ch = str[pos];
+    // Lowest count first, so a thread that dominates (see VisitedState.lowestSettled) is always
+    // queued before the ones it makes redundant. The closure explores a body's first alternative
+    // first, and for something like (a|aa){21,4000} that's the higher-count path — left in that
+    // order, every count would survive at every position and the budget would run out on a
+    // perfectly ordinary long value. Counts only ever grow by one per `increment` or reset to
+    // zero on exit, so sorting here keeps that dominance order through the whole step.
+    current.sort((a, b) => a.count - b.count);
     for (const thread of current) {
       if (budget.remaining-- <= 0) return false;
       const inst = thread.inst;
