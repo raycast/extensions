@@ -7,6 +7,7 @@ import {
   writeEncryptedJson,
   writeEncryptedPayload,
 } from "./crypto-store";
+import { removeEncryptedFile } from "./encrypted-file";
 import { selectSessionsToKeep } from "./history-retention";
 import { withFileLock } from "./history-lock";
 import type {
@@ -157,7 +158,7 @@ async function pruneAndSave(
   }
 
   for (const item of retention.removed)
-    await rm(sessionPath(item.id), { force: true });
+    await removeEncryptedFile(sessionPath(item.id));
   await saveIndex(retention.kept);
 }
 
@@ -170,7 +171,7 @@ export async function enforceRetention(): Promise<void> {
 
 export async function deleteSession(id: string): Promise<void> {
   await withFileLock(HISTORY_LOCK_TARGET, async () => {
-    await rm(sessionPath(id), { force: true });
+    await removeEncryptedFile(sessionPath(id));
     const index = await loadIndex();
     await saveIndex(index.sessions.filter((item) => item.id !== id));
   });

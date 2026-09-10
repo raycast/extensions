@@ -2,6 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { encryptedBackupPath } from "./encrypted-file";
 
 const MASTER_KEY_STORAGE_KEY = "history-master-key-v1";
 
@@ -73,7 +74,9 @@ export async function readEncryptedJson<T>(
   }
 
   try {
-    return await decryptJson<T>(await readFile(`${filePath}.backup`, "utf8"));
+    return await decryptJson<T>(
+      await readFile(encryptedBackupPath(filePath), "utf8"),
+    );
   } catch (backupError) {
     const primaryCode = (primaryError as NodeJS.ErrnoException).code;
     const backupCode = (backupError as NodeJS.ErrnoException).code;
@@ -88,7 +91,7 @@ export async function writeEncryptedPayload(
 ): Promise<void> {
   await mkdir(path.dirname(filePath), { recursive: true });
   const temporaryPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
-  const backupPath = `${filePath}.backup`;
+  const backupPath = encryptedBackupPath(filePath);
   await writeFile(temporaryPath, payload, { encoding: "utf8", mode: 0o600 });
   try {
     await rename(temporaryPath, filePath);
