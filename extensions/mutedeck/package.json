@@ -7,8 +7,7 @@
   "author": "smitmartijn",
   "owner": "mutedeck",
   "access": "public",
-  "contributors": ["smitmartijn"],
-  "pastContributors": ["chad_walters"],
+  "contributors": ["chad_walters"],
   "categories": ["Applications", "Communication", "Productivity"],
   "license": "MIT",
   "commands": [
