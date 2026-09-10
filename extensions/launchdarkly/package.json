@@ -82,6 +82,7 @@
     "mock-server": "ts-node ./mock/mock-ld-server.ts"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

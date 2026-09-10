@@ -1,5 +1,9 @@
 # Launchdarkly Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+- 🪟 The extension is now available on Raycast for Windows
+
 ## [Projects, history, favorites and richer targeting] - 2026-09-08
 
 ### New
