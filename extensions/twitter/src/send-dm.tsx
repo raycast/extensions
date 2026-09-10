@@ -1,3 +1,4 @@
+import { withXAuth } from "./v2/lib/with_x_auth";
 import { Action, ActionPanel, confirmAlert, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { getErrorMessage } from "./utils";
@@ -31,7 +32,7 @@ async function resolveRecipientIds(value: string): Promise<{ ids: string[]; labe
   return { ids: resolved.map(({ id }) => id), labels: resolved.map(({ label }) => label) };
 }
 
-export default function SendDirectMessageCommand() {
+function SendDirectMessageCommand() {
   const [isSending, setIsSending] = useState(false);
 
   const submit = async (values: DirectMessageFormValues) => {
@@ -93,3 +94,5 @@ export default function SendDirectMessageCommand() {
     </Form>
   );
 }
+
+export default withXAuth(SendDirectMessageCommand);

@@ -1,9 +1,10 @@
+import { withXAuth } from "./v2/lib/with_x_auth";
 import { Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { TweetList } from "./v2/components/tweet";
 import { clientV2, Fetcher } from "./v2/lib/twitterapi_v2";
 
-export default function MentionsCommand() {
+function MentionsCommand() {
   const { data, error, isLoading, pagination, revalidate } = usePromise(
     () => async (options: { cursor?: string }) => {
       const page = await clientV2.mentions(options.cursor);
@@ -38,3 +39,5 @@ export default function MentionsCommand() {
     />
   );
 }
+
+export default withXAuth(MentionsCommand);

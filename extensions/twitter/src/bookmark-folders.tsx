@@ -1,3 +1,4 @@
+import { withXAuth } from "./v2/lib/with_x_auth";
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { TweetList } from "./v2/components/tweet";
@@ -39,7 +40,7 @@ function BookmarkFolderPosts({ folderId, folderName }: { folderId: string; folde
   );
 }
 
-export default function BookmarkFoldersCommand() {
+function BookmarkFoldersCommand() {
   const { data, error, isLoading, pagination, revalidate } = usePromise(
     () => async (options: { cursor?: string }) => {
       const page = await clientV2.bookmarkFolders(options.cursor);
@@ -89,3 +90,5 @@ export default function BookmarkFoldersCommand() {
     </List>
   );
 }
+
+export default withXAuth(BookmarkFoldersCommand);

@@ -4,6 +4,9 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { fork } = require("node:child_process");
+const { Worker } = require("node:worker_threads");
+const { createHash } = require("node:crypto");
+const { createServer } = require("node:net");
 
 const { load } = require("./load.cjs");
 
@@ -42,6 +45,7 @@ if (process.argv[2] === "lock-worker") {
     const state = {
       onRead: undefined,
       fail: false,
+      discardTokens: false,
       errorCode: "invalid_grant",
       configuration:
         "eHhMN2wwUldTeEpscThvMzBHZVI6MTpjaQ:tweet.read tweet.write users.read follows.read like.read like.write bookmark.read bookmark.write tweet.moderate.write media.write dm.read dm.write offline.access",
@@ -62,7 +66,7 @@ if (process.argv[2] === "lock-worker") {
         return snapshot;
       },
       setTokens: async () => {
-        stored = fresh;
+        stored = state.discardTokens ? undefined : fresh;
       },
       removeTokens: async () => {
         removals++;
@@ -112,6 +116,21 @@ if (process.argv[2] === "lock-worker") {
       refreshes: () => refreshes,
     };
   }
+
+  test("command authorization returns the saved token after login", async (t) => {
+    const f = fixture(t);
+    f.state.configuration = undefined;
+    assert.equal(await f.api().authorize(), "fresh");
+    assert.equal(f.state.authorizationRequests.length, 1);
+    assert.equal(f.stored().accessToken, "fresh");
+  });
+
+  test("command authorization rejects a login that did not save credentials", async (t) => {
+    const f = fixture(t);
+    f.state.configuration = undefined;
+    f.state.discardTokens = true;
+    await assert.rejects(f.api().authorize(), /X login did not complete/);
+  });
 
   test("scope migration requests like.read and like.write during reauthorization", async (t) => {
     const f = fixture(t);
@@ -212,7 +231,7 @@ if (process.argv[2] === "lock-worker") {
           }),
       ),
     );
-    assert.equal(fs.existsSync(path.join(directory, "oauth-credentials.lock")), false);
+    assert.equal(fs.existsSync(path.join(directory, "oauth-credentials-v2.lock")), false);
   });
 
   function deferred() {
@@ -236,116 +255,117 @@ if (process.argv[2] === "lock-worker") {
     return child;
   }
 
-  function lockFixture(t, fsOverrides = {}) {
+  function lockFixture(t) {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "x-oauth-recovery-"));
     t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
-    const makeLock = (overrides = fsOverrides) =>
+    const makeLock = () =>
       load("src/v2/lib/oauth_lock.ts", {
         "@raycast/api": { environment: { supportPath: directory } },
-        "node:fs/promises": { ...require("node:fs/promises"), ...overrides },
       }).withOAuthLock;
     return { directory, makeLock };
   }
 
-  test("a killed holder is recovered by competing processes", { timeout: 10000 }, async (t) => {
-    const { directory } = lockFixture(t);
+  test(
+    "an unrelated listener on the former hashed port does not block authentication",
+    { timeout: 10000 },
+    async (t) => {
+      const { directory, makeLock } = lockFixture(t);
+      const hash = createHash("sha256").update(directory).digest();
+      const port = 49152 + (hash.readUInt32BE(0) % 16384);
+      const server = createServer((socket) => socket.destroy());
+      t.after(() => new Promise((resolve) => server.close(resolve)));
+      await new Promise((resolve, reject) => {
+        server.once("error", reject);
+        server.listen({ host: "127.0.0.1", port, exclusive: true }, resolve);
+      });
+      assert.equal(await makeLock()(async () => "acquired"), "acquired");
+      assert.equal(server.listening, true);
+    },
+  );
+
+  test("a killed process releases the authentication lock", { timeout: 10000 }, async (t) => {
+    const { directory, makeLock } = lockFixture(t);
     const child = await holder(t, directory);
     const exited = new Promise((resolve) => child.once("exit", resolve));
     child.kill("SIGKILL");
     await exited;
-    assert.equal(fs.existsSync(path.join(directory, "oauth-credentials.lock")), true);
-    await Promise.all(
-      Array.from(
-        { length: 4 },
-        () =>
-          new Promise((resolve, reject) => {
-            const contender = fork(__filename, ["lock-worker", directory], { stdio: "pipe" });
-            t.after(() => {
-              if (contender.exitCode === null) contender.kill("SIGKILL");
-            });
-            let stderr = "";
-            contender.stderr.on("data", (chunk) => {
-              stderr += chunk;
-            });
-            contender.once("error", reject);
-            contender.once("exit", (code) => (code === 0 ? resolve() : reject(new Error(stderr))));
-          }),
-      ),
+    assert.equal(await makeLock()(async () => "acquired"), "acquired");
+  });
+
+  test(
+    "terminating a command worker releases its lock while the backend PID stays alive",
+    { timeout: 10000 },
+    async (t) => {
+      const { directory, makeLock } = lockFixture(t);
+      const worker = new Worker(
+        `
+      const { parentPort, workerData } = require("node:worker_threads");
+      const { load } = require(workerData.loader);
+      const { withOAuthLock } = load("src/v2/lib/oauth_lock.ts", {
+        "@raycast/api": { environment: { supportPath: workerData.directory } },
+      });
+      withOAuthLock(async () => {
+        parentPort.postMessage(process.pid);
+        await new Promise(() => {});
+      });
+      setInterval(() => {}, 1000);
+    `,
+        { eval: true, workerData: { directory, loader: path.resolve("tests/load.cjs") } },
+      );
+      t.after(() => worker.terminate());
+      const pid = await new Promise((resolve, reject) => {
+        worker.once("message", resolve);
+        worker.once("error", reject);
+        worker.once("exit", () => reject(new Error("Worker exited before acquiring lock")));
+      });
+      assert.equal(pid, process.pid);
+      await worker.terminate();
+      assert.equal(await makeLock()(async () => "acquired"), "acquired");
+    },
+  );
+
+  test("legacy locks owned by the live backend do not block authentication", async (t) => {
+    const { directory, makeLock } = lockFixture(t);
+    const lockPath = path.join(directory, "oauth-credentials.lock");
+    fs.mkdirSync(lockPath);
+    fs.writeFileSync(path.join(lockPath, `${process.pid}-1234.owner`), "");
+    assert.equal(await makeLock()(async () => "acquired"), "acquired");
+  });
+
+  test("an operation failure releases the lock and preserves the original error", async (t) => {
+    const { makeLock } = lockFixture(t);
+    const failure = new Error("token exchange failed");
+    await assert.rejects(
+      makeLock()(async () => {
+        throw failure;
+      }),
+      (error) => error === failure,
     );
-    assert.equal(fs.existsSync(path.join(directory, "oauth-credentials.lock")), false);
+    assert.equal(await makeLock()(async () => "acquired"), "acquired");
   });
 
-  test("an old lock held by a live process remains protected", { timeout: 10000 }, async (t) => {
-    const { directory, makeLock } = lockFixture(t);
-    const child = await holder(t, directory);
-    const lockPath = path.join(directory, "oauth-credentials.lock");
-    const owners = fs.readdirSync(lockPath);
-    fs.utimesSync(lockPath, new Date(0), new Date(0));
-    const inspected = deferred();
-    const withLock = makeLock({
-      readdir: async (target) => {
-        const entries = await fs.promises.readdir(target);
-        inspected.resolve();
-        return entries;
-      },
-    });
-    let entered = false;
-    const pending = withLock(async () => {
-      entered = true;
-    });
-    await inspected.promise;
-    assert.equal(entered, false);
-    assert.deepEqual(fs.readdirSync(lockPath), owners);
-    child.send("release");
-    await pending;
-    assert.equal(entered, true);
-  });
-
-  test("a delayed dead-owner cleanup cannot remove a replacement holder", { timeout: 10000 }, async (t) => {
-    const { directory, makeLock } = lockFixture(t);
-    const child = await holder(t, directory);
-    const exited = new Promise((resolve) => child.once("exit", resolve));
-    child.kill("SIGKILL");
-    await exited;
-    const lockPath = path.join(directory, "oauth-credentials.lock");
-    const oldOwner = fs.readdirSync(lockPath)[0];
-    const paused = deferred(),
-      resume = deferred(),
-      replacementEntered = deferred(),
-      replacementInspected = deferred(),
-      release = deferred();
-    let delayedEntered = false;
-    const delayedLock = makeLock({
-      readdir: async (target) => {
-        const entries = await fs.promises.readdir(target);
-        if (entries.length > 0 && !entries.includes(oldOwner)) replacementInspected.resolve();
-        return entries;
-      },
-      unlink: async (target) => {
-        if (path.basename(target) === oldOwner) {
-          paused.resolve();
-          await resume.promise;
-        }
-        return fs.promises.unlink(target);
-      },
-    });
-    const delayed = delayedLock(async () => {
-      delayedEntered = true;
-    });
-    await paused.promise;
-    const replacement = makeLock()(async () => {
-      replacementEntered.resolve();
-      await release.promise;
-    });
-    await replacementEntered.promise;
-    const replacementOwners = fs.readdirSync(lockPath);
-    resume.resolve();
-    // Wait for the delayed recoverer to inspect the replacement after its stale cleanup.
-    await replacementInspected.promise;
-    assert.equal(delayedEntered, false);
-    assert.deepEqual(fs.readdirSync(lockPath), replacementOwners);
-    release.resolve();
-    await Promise.all([delayed, replacement]);
-    assert.equal(delayedEntered, true);
-  });
+  test(
+    "a live holder renews its lock beyond the stale threshold until login completes",
+    { timeout: 10000 },
+    async (t) => {
+      const { makeLock } = lockFixture(t);
+      const acquired = deferred();
+      const release = deferred();
+      const held = makeLock()(async () => {
+        acquired.resolve();
+        await release.promise;
+      });
+      await acquired.promise;
+      let entered = false;
+      const pending = makeLock()(async () => {
+        entered = true;
+      });
+      // Hold longer than the five-second stale threshold to exercise renewal.
+      await new Promise((resolve) => setTimeout(resolve, 6_000));
+      assert.equal(entered, false);
+      release.resolve();
+      await Promise.all([held, pending]);
+      assert.equal(entered, true);
+    },
+  );
 }

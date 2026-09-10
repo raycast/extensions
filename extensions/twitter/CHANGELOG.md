@@ -1,5 +1,12 @@
 # X Changelog
 
+## [Fix Authentication Lock Recovery] - 2026-09-10
+
+- Prevent interrupted commands from leaving X login and logout permanently blocked
+- Avoid authentication failures caused by unrelated services using the same local port
+- Require login before opening command screens or continuing with selected-text posting
+- Validate selected text before opening login
+
 ## [OAuth, New Commands, and AI Tools] - 2026-09-09
 
 - Use Raycast-owned OAuth 2.0 PKCE credentials with automatic token migration and refresh recovery
