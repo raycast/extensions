@@ -127,30 +127,48 @@ describe("buildProfileMatcher", () => {
     assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(PowerShell)\\1" }), null);
   });
 
-  it("rejects a single quantifier bound above 200, the per-quantifier repeat limit", () => {
-    assert.notEqual(buildProfileMatcher({ type: "matchProfiles", name: "a{200}" }), null);
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "a{201}" }), null);
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "a{0,4000}" }), null);
+  it("compiles and matches a large bounded quantifier on a simple atom, not just a small one", () => {
+    // (a|b){0,4000} and a{0,12000} are the exact patterns raised in review: a large bound on a
+    // simple atom is valid ICU syntax and must actually match, not be rejected outright.
+    const wide = buildProfileMatcher({ type: "matchProfiles", name: "(a|b){0,4000}" });
+    assert.notEqual(wide, null);
+    assert.equal(wide!({ ...powershell, name: "a".repeat(4000) }), true);
+    assert.equal(wide!({ ...powershell, name: "ab".repeat(2000) }), true);
+    assert.equal(wide!({ ...powershell, name: "a".repeat(4001) }), false);
+    assert.equal(wide!({ ...powershell, name: "c".repeat(4000) }), false);
+
+    const literal = buildProfileMatcher({ type: "matchProfiles", commandline: "a{0,12000}" });
+    assert.notEqual(literal, null);
+    assert.equal(literal!({ ...powershell, commandline: "a".repeat(2000) }), true);
+    assert.equal(literal!({ ...powershell, commandline: "a".repeat(12000) }), true);
+    assert.equal(literal!({ ...powershell, commandline: "a".repeat(12001) }), false);
   });
 
-  it("refuses a pattern whose nested repetitions compile to a huge program", () => {
-    // Each quantifier here (200) is within the per-quantifier bound on its own; nesting them
-    // multiplies the compiled size past MAX_PROGRAM_SIZE, which is what must catch this case.
+  it("matches a large bounded quantifier quickly, since it no longer scales with the bound", () => {
+    const matcher = buildProfileMatcher({ type: "matchProfiles", commandline: "a{0,12000}" });
+    const start = Date.now();
+    matcher!({ ...powershell, commandline: "a".repeat(2000) });
+    assert.ok(Date.now() - start < 200, "matching took too long");
+  });
+
+  it("rejects a large quantifier wrapping content that has its own quantifier", () => {
+    // compileCountedRepeat's counter can't represent two independently-active repeats, so this
+    // falls back to being rejected (consistent with any other unsupported construct) rather than
+    // silently compiling something that would count wrong.
     const start = Date.now();
     assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "((a|b){200}){200}" }), null);
     assert.ok(Date.now() - start < 1000, "compiling took too long");
-    // A merely long pattern still compiles and matches.
-    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?:PowerShell){1}" }), ["PowerShell"]);
+    // A large quantifier around plain (unquantified) content is unaffected.
+    assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?:PowerShell){1,200}" }), ["PowerShell"]);
   });
 
-  it("matches correctly, not just quickly, right up to the per-quantifier bound", () => {
-    // A quantifier at the 200 bound isn't just fast to reject — a legitimately matching value at
-    // that length must actually match, not silently fail because matching work is bounded too.
-    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(a|b){0,200}" });
-    assert.notEqual(matcher, null);
-    assert.equal(matcher!({ ...powershell, name: "a".repeat(200) }), true);
-    assert.equal(matcher!({ ...powershell, name: "ab".repeat(100) }), true);
-    assert.equal(matcher!({ ...powershell, name: "c".repeat(200) }), false);
+  it("still unrolls a small quantifier, so it can nest inside another quantifier", () => {
+    // (a?)* mixes two quantifiers, one nested in the other — only possible because both are
+    // small enough to unroll; compileCountedRepeat's single counter couldn't represent this.
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(a{2,5})*" });
+    assert.equal(matcher!({ ...powershell, name: "aaa" }), true);
+    assert.equal(matcher!({ ...powershell, name: "aaaaa" + "aaa" }), true);
+    assert.equal(matcher!({ ...powershell, name: "a" }), false);
   });
 });
 

@@ -23,8 +23,9 @@ export interface NewTabMenuEntry {
 // reachable state together, one input character at a time (matchFull) — the technique RE2 and
 // Rust's regex crate use for guaranteed linear-time matching with no backtracking. So no pattern
 // needs rejecting for how it might backtrack — a repeated group with safe alternatives, like
-// (dev|prod)+, still matches normally, and so does (a+)+ — only the compiled program's sheer size
-// is capped (MAX_PROGRAM_SIZE).
+// (dev|prod)+, still matches normally, and so does (a+)+. A large bounded quantifier on a simple
+// atom, like (a|b){0,4000}, is unbounded in practice too — compileCountedRepeat gives it a counter
+// instead of unrolling it, so neither compiled size nor matching cost grows with the bound.
 type AtomNode =
   | { kind: "char"; test: (ch: string) => boolean }
   | { kind: "any" }
@@ -39,24 +40,18 @@ type AltNode = { options: SeqNode[] };
 class RegexSyntaxError extends Error {}
 class RegexTooLargeError extends Error {}
 
-// compileQuant unrolls {n,m} into that many copies of the atom, and nesting multiplies them: the
-// program for (a{200}){200} is 40,000+ instructions even though MAX_QUANT_REPEAT below allows
-// each 200 individually. So this cap is on the size of the whole compiled program, catching that
-// multiplication regardless of how deep the nesting goes. It's set well above what a real
-// matchProfiles pattern needs (a long literal alternation is still only a few hundred
-// instructions) but far below what nesting a few max-sized quantifiers can reach, which keeps
-// compilation bounded in both memory and time.
+// compileQuant unrolls a *small* {n,m} into that many copies of the atom — cheap, and it's what
+// lets a bounded quantifier nest freely inside another (e.g. (a?)*). A *large* bound instead
+// compiles through compileCountedRepeat, a single shared instruction the matcher's thread carries
+// a counter through, so the compiled size and matching cost stay independent of how big the bound
+// is (see MAX_MATCH_STEPS). This cap remains as a backstop against structural blowup unrelated to
+// quantifier size — e.g. an alternation with an implausible number of branches.
 const MAX_PROGRAM_SIZE = 50000;
 
-// A single {n,m} unrolls into that many copies of its atom (compileQuant), one split per optional
-// copy. Matching cost for that isn't just O(program size × value length): at any position, every
-// still-reachable "how many reps have I skipped so far" copy is a separate live NFA thread, so an
-// optional quantifier's cost is closer to O(bound²) — measured, a 2-way alternation with an
-// explicit bound of 200 against a value of that length needs ~240,000 steps, 300 needs ~540,000.
-// A real matchProfiles pattern never needs to repeat anything anywhere near this many times, so
-// the bound is capped well before that quadratic cost gets expensive. Nested multiplication like
-// (a{200}){200} is still caught by MAX_PROGRAM_SIZE.
-const MAX_QUANT_REPEAT = 200;
+// Below this, compileQuant unrolls a {n,m} into that many literal copies (cheap, and lets it nest
+// inside another quantifier); at or above it, compileCountedRepeat is used instead — no nesting
+// support, but the compiled size and matching cost no longer scale with the bound.
+const UNROLL_THRESHOLD = 20;
 
 // Parses the subset of ICU regex syntax (the flavor Windows Terminal itself matches with) that
 // matchProfiles patterns actually use: literals, `.`, escapes (`\d\w\s` and their negations, `\.`
@@ -124,9 +119,6 @@ function parsePattern(pattern: string): AltNode {
         min = parseInt(braces[1], 10);
         max = braces[2] === undefined ? min : braces[3] === "" ? Infinity : parseInt(braces[3], 10);
         if (max < min) return fail("quantifier bounds out of order");
-        if (min > MAX_QUANT_REPEAT || (max !== Infinity && max > MAX_QUANT_REPEAT)) {
-          return fail("quantifier bound too large");
-        }
         quantified = true;
         i += braces[0].length;
       }
@@ -272,16 +264,34 @@ type BoundaryInst = { op: "boundary"; negate: boolean; next?: Inst };
 type SplitInst = { op: "split"; next?: Inst; next2?: Inst };
 type NopInst = { op: "nop"; next?: Inst };
 type MatchInst = { op: "match" };
-type Inst = CharInst | AnyInst | StartInst | EndInst | BoundaryInst | SplitInst | NopInst | MatchInst;
+// A counted repeat: one shared instruction, however large `max` is. `bodyStart` is entered again
+// each rep instead of being duplicated per rep — see compileCountedRepeat and the `count`/`countFor`
+// fields threads carry through addThread/matchFull.
+type RepeatInst = { op: "repeat"; id: number; min: number; max: number; bodyStart: Inst; next?: Inst };
+// The body's own exit, patched to loop back through here rather than straight to `repeat`, so the
+// matcher can tell "just finished one more rep of this repeat" apart from "entering it fresh".
+type IncrementInst = { op: "increment"; repeat: RepeatInst };
+type Inst =
+  | CharInst
+  | AnyInst
+  | StartInst
+  | EndInst
+  | BoundaryInst
+  | SplitInst
+  | NopInst
+  | MatchInst
+  | RepeatInst
+  | IncrementInst;
 
 type PatchSlot =
-  | { inst: CharInst | AnyInst | StartInst | EndInst | BoundaryInst | NopInst | SplitInst; slot: "next" }
+  | { inst: CharInst | AnyInst | StartInst | EndInst | BoundaryInst | NopInst | SplitInst | RepeatInst; slot: "next" }
   | { inst: SplitInst; slot: "next2" };
 type Frag = { start: Inst; out: PatchSlot[] };
 
-// Every instruction is created through here, so the running total covers nested repetitions too —
-// the budget is spent as (a{200}){200} unrolls, and compilation gives up partway through rather
-// than after building the whole 40,000+-instruction program.
+// Every instruction is created through here, so the running total covers nested unrolling too —
+// e.g. small quantifiers nested several levels deep, each individually under UNROLL_THRESHOLD but
+// multiplying together — and compilation gives up partway through rather than after building the
+// whole oversized program.
 let instructionCount = 0;
 
 function newInst<T extends Inst>(inst: T): T {
@@ -363,17 +373,55 @@ function optionalFrag(atom: AtomNode): Frag {
   return { start: split, out: [...body.out, { inst: split, slot: "next2" }] };
 }
 
+// compileCountedRepeat's counter is a single (count, countFor) pair per thread, not a stack, so it
+// can't tell two active repeats apart — a quantified atom that itself contains a quantifier (e.g.
+// (a{5}){500}) can't safely go through it. Every atom below UNROLL_THRESHOLD is quantified with
+// its default {1,1} (see parseQuant), so this is only true when something was genuinely repeated.
+function hasNestedQuantifier(atom: AtomNode): boolean {
+  if (atom.kind !== "group") return false;
+  return atom.alt.options.some((seq) =>
+    seq.atoms.some((q) => q.min !== 1 || q.max !== 1 || hasNestedQuantifier(q.atom)),
+  );
+}
+
+let nextRepeatId = 0;
+
+// Compiles atom{min,max} (max possibly Infinity) as one `repeat` instruction plus one copy of the
+// atom's body, instead of unrolling — see the `repeat`/`increment` handling in addThread for how a
+// thread's counter takes the place of the copies compileQuant's other branch would otherwise make.
+function compileCountedRepeat(atom: AtomNode, min: number, max: number): Frag {
+  if (hasNestedQuantifier(atom)) {
+    throw new RegexTooLargeError("a quantifier this large can't wrap another quantifier");
+  }
+  const repeat: RepeatInst = newInst({
+    op: "repeat",
+    id: nextRepeatId++,
+    min,
+    max,
+    bodyStart: undefined as unknown as Inst,
+  });
+  const body = compileAtom(atom);
+  const increment: IncrementInst = newInst({ op: "increment", repeat });
+  patch(body.out, increment);
+  repeat.bodyStart = body.start;
+  return { start: repeat, out: [{ inst: repeat, slot: "next" }] };
+}
+
 // Whether a quantifier is greedy or lazy only affects which substring a capturing group would
 // record — irrelevant here, since buildProfileMatcher only ever asks "does the whole field match"
 // (see matchFull). So greedy and lazy compile identically; `q.greedy` is parsed but never consulted.
 function compileQuant(q: QuantNode): Frag {
   if (q.max === Infinity) {
     if (q.min === 0) return starFrag(q.atom);
-    return concat(repeatFrag(q.atom, q.min - 1), plusFrag(q.atom));
+    if (q.min <= UNROLL_THRESHOLD) return concat(repeatFrag(q.atom, q.min - 1), plusFrag(q.atom));
+    return compileCountedRepeat(q.atom, q.min, Infinity);
   }
-  const optionals: Frag[] = [];
-  for (let copy = q.min; copy < q.max; copy++) optionals.push(optionalFrag(q.atom));
-  return concat(repeatFrag(q.atom, q.min), concatAll(optionals));
+  if (q.min <= UNROLL_THRESHOLD && q.max - q.min <= UNROLL_THRESHOLD) {
+    const optionals: Frag[] = [];
+    for (let copy = q.min; copy < q.max; copy++) optionals.push(optionalFrag(q.atom));
+    return concat(repeatFrag(q.atom, q.min), concatAll(optionals));
+  }
+  return compileCountedRepeat(q.atom, q.min, q.max);
 }
 
 function compileSeq(seq: SeqNode): Frag {
@@ -391,22 +439,27 @@ function compileAlt(alt: AltNode): Frag {
 
 function compileProgram(alt: AltNode): Inst {
   instructionCount = 0;
+  nextRepeatId = 0;
   const frag = compileAlt(alt);
   const matchInst: MatchInst = newInst({ op: "match" });
   patch(frag.out, matchInst);
   return frag.start;
 }
 
-// A safety net behind MAX_QUANT_REPEAT, not the primary defense against slow matching — that's
-// now the quantifier bound above, which keeps realistic patterns fast in the first place. This
-// budget exists for constructs MAX_QUANT_REPEAT doesn't cover: a long value matched against a
-// small program (e.g. ".*"), or several moderate quantifiers/alternations compounding within one
-// pattern. It's set with headroom above the worst case MAX_QUANT_REPEAT actually allows (a 5-way
-// alternation at the bound measured ~390,000 steps) so a legitimately matching pattern within that
-// bound always finishes rather than being silently cut off — MAX_QUANT_REPEAT is what keeps this
-// budget from ever being the thing standing between a valid pattern and a correct answer.
+// A backstop, not the primary defense against slow matching — compileCountedRepeat is, since it
+// keeps a large bound's matching cost independent of the bound itself. What's left for this budget
+// to catch: several moderate constructs compounding within one pattern, or anything unforeseen.
+// It's generous — matching a large bound against a value that size measures in the tens of
+// thousands of steps (see new-tab-menu.test.ts), so this is headroom, not a tight fit.
 const MAX_MATCH_STEPS = 1000000;
 type StepBudget = { remaining: number };
+
+// A live NFA thread: which instruction it's at, plus the counter compileCountedRepeat's `repeat`/
+// `increment` instructions read and write. `countFor` names which `repeat` instruction `count`
+// belongs to — a thread not currently inside a counted repeat carries a `countFor` that matches no
+// real instruction, so `repeat` treats it as a fresh entry (see the "repeat" case in addThread).
+type Thread = { inst: Inst; count: number; countFor: number };
+const NO_REPEAT = -1;
 
 // \b sits between a word character and a non-word one, counting the space off either end of the
 // value as non-word — so it holds at both ends of "PowerShell" but not inside it.
@@ -425,25 +478,50 @@ function isWordBoundary(str: string, pos: number): boolean {
 // Walked with an explicit stack, not recursion — a flat run of thousands of optional atoms
 // (a?a?a?...) chains that many `split`s in a row, and recursing that chain would grow the JS call
 // stack with the pattern's size, independent of how long the string being matched is.
-function addThread(list: Inst[], visited: Set<Inst>, start: Inst, pos: number, str: string, budget: StepBudget): void {
-  const stack: Inst[] = [start];
+function addThread(
+  list: Thread[],
+  visited: Set<Inst>,
+  start: Thread,
+  pos: number,
+  str: string,
+  budget: StepBudget,
+): void {
+  const stack: Thread[] = [start];
   while (stack.length > 0) {
     if (budget.remaining-- <= 0) return;
-    const inst = stack.pop()!;
+    const thread = stack.pop()!;
+    const inst = thread.inst;
     if (visited.has(inst)) continue;
     visited.add(inst);
+    const { count, countFor } = thread;
     if (inst.op === "split") {
-      stack.push(inst.next2!, inst.next!);
+      stack.push({ inst: inst.next2!, count, countFor }, { inst: inst.next!, count, countFor });
     } else if (inst.op === "nop") {
-      stack.push(inst.next!);
+      stack.push({ inst: inst.next!, count, countFor });
     } else if (inst.op === "start") {
-      if (pos === 0) stack.push(inst.next!);
+      if (pos === 0) stack.push({ inst: inst.next!, count, countFor });
     } else if (inst.op === "end") {
-      if (pos === str.length) stack.push(inst.next!);
+      if (pos === str.length) stack.push({ inst: inst.next!, count, countFor });
     } else if (inst.op === "boundary") {
-      if (isWordBoundary(str, pos) !== inst.negate) stack.push(inst.next!);
+      if (isWordBoundary(str, pos) !== inst.negate) stack.push({ inst: inst.next!, count, countFor });
+    } else if (inst.op === "repeat") {
+      // A thread not already inside this repeat (countFor doesn't match) is entering fresh, at 0.
+      const reps = countFor === inst.id ? count : 0;
+      if (reps < inst.min) {
+        // Below the minimum: another rep is mandatory, no option to stop yet.
+        stack.push({ inst: inst.bodyStart, count: reps, countFor: inst.id });
+      } else if (inst.max === Infinity || reps < inst.max) {
+        // Within range: try one more rep, but stopping here is also valid (mirrors optionalFrag).
+        stack.push({ inst: inst.next!, count, countFor });
+        stack.push({ inst: inst.bodyStart, count: reps, countFor: inst.id });
+      } else {
+        // At the maximum: no more reps allowed.
+        stack.push({ inst: inst.next!, count, countFor });
+      }
+    } else if (inst.op === "increment") {
+      stack.push({ inst: inst.repeat, count: count + 1, countFor: inst.repeat.id });
     } else {
-      list.push(inst);
+      list.push(thread);
     }
   }
 }
@@ -452,28 +530,31 @@ function addThread(list: Inst[], visited: Set<Inst>, start: Inst, pos: number, s
 // of recursing per character the way a backtracking engine would. Every thread advances together, so
 // the call stack never grows with the length of `str` or with the pattern's backtracking search
 // space — a 2,000-character value and a pathological pattern like (a+)+ cost the same handful of
-// stack frames as a one-character match. Total work is bounded by str.length × the pattern's
-// compiled size, so nothing can blow up exponentially, but that product can still be large for a
-// big program and a long value — MAX_MATCH_STEPS caps it.
+// stack frames as a one-character match. Work per position is bounded by the pattern's compiled
+// size — kept independent of any quantifier's bound by compileCountedRepeat — so nothing can blow
+// up exponentially or scale with a large bound; MAX_MATCH_STEPS is a backstop for what's left.
 function matchFull(prog: Inst, str: string): boolean {
   const budget: StepBudget = { remaining: MAX_MATCH_STEPS };
-  let current: Inst[] = [];
-  addThread(current, new Set(), prog, 0, str, budget);
+  let current: Thread[] = [];
+  addThread(current, new Set(), { inst: prog, count: 0, countFor: NO_REPEAT }, 0, str, budget);
 
   for (let pos = 0; pos < str.length; pos++) {
     if (current.length === 0) return false;
-    const next: Inst[] = [];
+    const next: Thread[] = [];
     const visited = new Set<Inst>();
     const ch = str[pos];
-    for (const inst of current) {
+    for (const thread of current) {
       if (budget.remaining-- <= 0) return false;
-      if (inst.op === "char" && inst.test(ch)) addThread(next, visited, inst.next!, pos + 1, str, budget);
-      else if (inst.op === "any") addThread(next, visited, inst.next!, pos + 1, str, budget);
+      const inst = thread.inst;
+      const { count, countFor } = thread;
+      if (inst.op === "char" && inst.test(ch))
+        addThread(next, visited, { inst: inst.next!, count, countFor }, pos + 1, str, budget);
+      else if (inst.op === "any") addThread(next, visited, { inst: inst.next!, count, countFor }, pos + 1, str, budget);
     }
     current = next;
   }
 
-  return current.some((inst) => inst.op === "match");
+  return current.some((thread) => thread.inst.op === "match");
 }
 
 // A matchProfiles entry matches a profile when ANY provided field (name/commandline/source)
