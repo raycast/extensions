@@ -2,6 +2,7 @@ import { useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 import type { PveServer, PveStorageContent, WithShowErrorScreen } from "@/types";
 import { type PveFetchWithDataResult, usePveFetch } from "@/hooks/use-pve-fetch";
+import { describeFetchError } from "@/utils/errors";
 
 export const useStorageContent = (
   server: PveServer,
@@ -12,7 +13,7 @@ export const useStorageContent = (
 
   const { data, ...rest } = usePveFetch<PveStorageContent[]>(server, `api2/json/nodes/${node}/storage/${id}/content`, {
     onError: (error) => {
-      showFailureToast(error);
+      showFailureToast(error, { message: describeFetchError(error) });
       setShowErrorScreen(true);
     },
     timerInterval: null,

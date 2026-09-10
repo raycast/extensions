@@ -4,6 +4,7 @@ import type { PveVm, VmAction, WithServer } from "@/types";
 import { PveVmStatus, PveVmTypes } from "@/types";
 import type { useVmList } from "@/hooks/use-vm-list";
 import { ALL_ACTIONS } from "@/utils/const";
+import { describeFetchError } from "@/utils/errors";
 import { formatBrowserUrl } from "@/utils/format";
 
 type VmActionPanelProps = {
@@ -36,6 +37,7 @@ export const VmActionPanel = ({ vm, revalidate, mutate }: VmActionPanelProps) =>
     } catch (e) {
       await showFailureToast(e, {
         title: `Failed to ${title} ${vm.name}`,
+        message: describeFetchError(e),
       });
       return;
     }

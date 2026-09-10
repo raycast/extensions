@@ -15,6 +15,12 @@ type MultiPveFetchOptions = {
  *
  * Failures are captured per server, so one unreachable server
  * doesn't prevent showing the results of the others.
+ *
+ * Every tick fetches all servers as one batch, so while a server hangs the
+ * healthy ones refresh at that server's request timeout instead of at
+ * `timerInterval`. Keeping them on their own cadence would mean one hook per
+ * server, which needs a child component per server since the server count
+ * changes at runtime.
  */
 export const useMultiPveFetch = <T>(url: string, options?: MultiPveFetchOptions) => {
   const { timerInterval = 1000, execute = true } = options ?? {};
@@ -52,11 +58,16 @@ export const useMultiPveFetch = <T>(url: string, options?: MultiPveFetchOptions)
     }
 
     const handle = setInterval(() => {
-      result.revalidate();
+      // revalidate() aborts the request that is still in flight, so ticking
+      // while a server is slower than the interval would abort every request
+      // before it can resolve and the list would never leave the loading state.
+      if (!result.isLoading) {
+        result.revalidate();
+      }
     }, timerInterval);
 
     return () => clearInterval(handle);
-  }, [result.revalidate, timerInterval, execute]);
+  }, [result.revalidate, result.isLoading, timerInterval, execute]);
 
   return {
     ...result,
