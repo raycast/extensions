@@ -1,18 +1,36 @@
 import fs from "node:fs";
 import path from "node:path";
 
+export interface MutexOptions {
+  acquireTimeoutMs?: number;
+  onBeforeReclaimForTesting?: () => void | Promise<void>;
+}
+
+interface StaleLockSnapshot {
+  dirIno: number;
+  hasFile: boolean;
+  fileIno?: number;
+  content?: string;
+}
+
 export class CrossProcessMutex {
   private readonly lockDir: string;
   private readonly lockFile: string;
   private readonly acquireTimeoutMs: number;
+  private readonly onBeforeReclaimForTesting?: () => void | Promise<void>;
   private static readonly HEARTBEAT_INTERVAL_MS = 2000;
   private static readonly STALE_THRESHOLD_MS = 15000;
   private static readonly DEFAULT_ACQUIRE_TIMEOUT_MS = 5000;
 
-  constructor(lockDir: string, acquireTimeoutMs: number = CrossProcessMutex.DEFAULT_ACQUIRE_TIMEOUT_MS) {
+  constructor(lockDir: string, options?: number | MutexOptions) {
     this.lockDir = lockDir;
     this.lockFile = path.join(this.lockDir, "pid.txt");
-    this.acquireTimeoutMs = acquireTimeoutMs;
+    if (typeof options === "number") {
+      this.acquireTimeoutMs = options;
+    } else {
+      this.acquireTimeoutMs = options?.acquireTimeoutMs ?? CrossProcessMutex.DEFAULT_ACQUIRE_TIMEOUT_MS;
+      this.onBeforeReclaimForTesting = options?.onBeforeReclaimForTesting;
+    }
   }
 
   async runExclusive<T>(task: () => Promise<T>): Promise<T> {
@@ -22,10 +40,18 @@ export class CrossProcessMutex {
     while (Date.now() - start < this.acquireTimeoutMs) {
       try {
         fs.mkdirSync(this.lockDir);
+        let createdDirIno: number | undefined;
         try {
+          const dirStat = fs.statSync(this.lockDir);
+          createdDirIno = dirStat.ino;
           this.writeLockContent();
         } catch (writeErr) {
-          this.tryReclaimStaleLockDir();
+          if (createdDirIno !== undefined) {
+            this.tryReclaimStaleLockDir({
+              dirIno: createdDirIno,
+              hasFile: false,
+            });
+          }
           throw writeErr;
         }
         acquired = true;
@@ -33,7 +59,7 @@ export class CrossProcessMutex {
       } catch (e: unknown) {
         const err = e as { code?: string };
         if (err.code === "EEXIST") {
-          if (this.tryBreakStaleLock()) {
+          if (await this.tryBreakStaleLock()) {
             continue;
           }
           await new Promise((resolve) => setTimeout(resolve, 50));
@@ -71,15 +97,24 @@ export class CrossProcessMutex {
       if (!fs.existsSync(this.lockDir)) {
         return;
       }
-      if (fs.existsSync(this.lockFile)) {
-        const content = fs.readFileSync(this.lockFile, "utf-8");
-        const ownerPid = parseInt(content.split(":")[0] ?? "", 10);
-        if (ownerPid !== process.pid) {
-          // Lock was reclaimed by another process — do not touch it
-          return;
-        }
+      if (!fs.existsSync(this.lockFile)) {
+        return;
       }
-      this.tryReclaimStaleLockDir();
+      const dirStat = fs.statSync(this.lockDir);
+      const fileStat = fs.statSync(this.lockFile);
+      const content = fs.readFileSync(this.lockFile, "utf-8");
+      const ownerPid = parseInt(content.split(":")[0] ?? "", 10);
+      if (ownerPid !== process.pid) {
+        // Lock was reclaimed by another process — do not touch it
+        return;
+      }
+      const snapshot: StaleLockSnapshot = {
+        dirIno: dirStat.ino,
+        hasFile: true,
+        fileIno: fileStat.ino,
+        content,
+      };
+      this.tryReclaimStaleLockDir(snapshot);
     } catch {
       // Lock was already released or never fully acquired — nothing to clean up
     }
@@ -94,7 +129,7 @@ export class CrossProcessMutex {
     fs.renameSync(tmpFile, this.lockFile);
   }
 
-  private tryBreakStaleLock(): boolean {
+  private async tryBreakStaleLock(): Promise<boolean> {
     try {
       if (!fs.existsSync(this.lockDir)) {
         return false;
@@ -106,7 +141,14 @@ export class CrossProcessMutex {
           const dirStat = fs.statSync(this.lockDir);
           const dirAge = Date.now() - dirStat.mtimeMs;
           if (dirAge > CrossProcessMutex.STALE_THRESHOLD_MS) {
-            return this.tryReclaimStaleLockDir();
+            const snapshot: StaleLockSnapshot = {
+              dirIno: dirStat.ino,
+              hasFile: false,
+            };
+            if (this.onBeforeReclaimForTesting) {
+              await this.onBeforeReclaimForTesting();
+            }
+            return this.tryReclaimStaleLockDir(snapshot);
           }
         } catch {
           return false;
@@ -122,9 +164,19 @@ export class CrossProcessMutex {
       if (isNaN(timestamp) || isNaN(pid)) {
         // Corrupt lock file — check age before breaking
         try {
+          const dirStat = fs.statSync(this.lockDir);
           const fileStat = fs.statSync(this.lockFile);
           if (Date.now() - fileStat.mtimeMs > CrossProcessMutex.STALE_THRESHOLD_MS) {
-            return this.tryReclaimStaleLockDir();
+            const snapshot: StaleLockSnapshot = {
+              dirIno: dirStat.ino,
+              hasFile: true,
+              fileIno: fileStat.ino,
+              content,
+            };
+            if (this.onBeforeReclaimForTesting) {
+              await this.onBeforeReclaimForTesting();
+            }
+            return this.tryReclaimStaleLockDir(snapshot);
           }
         } catch {
           return false;
@@ -139,7 +191,22 @@ export class CrossProcessMutex {
 
       // Timestamp is stale — verify the holder process is actually dead before breaking
       if (!this.isProcessAlive(pid)) {
-        return this.tryReclaimStaleLockDir();
+        try {
+          const dirStat = fs.statSync(this.lockDir);
+          const fileStat = fs.statSync(this.lockFile);
+          const snapshot: StaleLockSnapshot = {
+            dirIno: dirStat.ino,
+            hasFile: true,
+            fileIno: fileStat.ino,
+            content,
+          };
+          if (this.onBeforeReclaimForTesting) {
+            await this.onBeforeReclaimForTesting();
+          }
+          return this.tryReclaimStaleLockDir(snapshot);
+        } catch {
+          return false;
+        }
       }
 
       return false;
@@ -149,7 +216,11 @@ export class CrossProcessMutex {
     }
   }
 
-  private tryReclaimStaleLockDir(): boolean {
+  private tryReclaimStaleLockDir(snapshot: StaleLockSnapshot): boolean {
+    if (!this.isSnapshotMatch(this.lockDir, snapshot)) {
+      return false;
+    }
+
     const parentDir = path.dirname(this.lockDir);
     const staleDir = path.join(
       parentDir,
@@ -163,6 +234,16 @@ export class CrossProcessMutex {
       return false;
     }
 
+    if (!this.isSnapshotMatch(staleDir, snapshot)) {
+      // Race: directory was replaced right before renameSync. Restore it immediately!
+      try {
+        fs.renameSync(staleDir, this.lockDir);
+      } catch {
+        // Ignore restore errors if destination is already taken
+      }
+      return false;
+    }
+
     try {
       fs.rmSync(staleDir, { recursive: true, force: true });
     } catch {
@@ -170,6 +251,43 @@ export class CrossProcessMutex {
     }
 
     return true;
+  }
+
+  private isSnapshotMatch(targetDir: string, snapshot: StaleLockSnapshot): boolean {
+    try {
+      if (!fs.existsSync(targetDir)) {
+        return false;
+      }
+      const dirStat = fs.statSync(targetDir);
+      if (dirStat.ino !== snapshot.dirIno) {
+        return false;
+      }
+
+      const targetFile = path.join(targetDir, "pid.txt");
+      if (snapshot.hasFile) {
+        if (!fs.existsSync(targetFile)) {
+          return false;
+        }
+        const fileStat = fs.statSync(targetFile);
+        if (snapshot.fileIno !== undefined && fileStat.ino !== snapshot.fileIno) {
+          return false;
+        }
+        if (snapshot.content !== undefined) {
+          const currentContent = fs.readFileSync(targetFile, "utf-8");
+          if (currentContent !== snapshot.content) {
+            return false;
+          }
+        }
+      } else {
+        if (fs.existsSync(targetFile)) {
+          return false;
+        }
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private isProcessAlive(pid: number): boolean {
