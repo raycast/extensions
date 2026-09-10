@@ -1,0 +1,6 @@
+{
+  "extends": "@raycast/eslint-config",
+  "rules": {
+    "@raycast/verify-title": "off"
+  }
+}
