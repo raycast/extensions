@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { selectRecentEntries } from "../lib/recent-files";
 import { useCachedEntries } from "./use-cached-entries";
 import { SearchSetup } from "./use-search-setup";
+import { TypeFilter } from "../lib/query";
 
 /** Only the active folder validates and retains matching recent entries. */
 export function useRecentFiles(
@@ -12,6 +13,7 @@ export function useRecentFiles(
   reloadKey: number,
   canonicalScope?: string,
   signal?: AbortSignal,
+  typeFilter: TypeFilter = "all",
 ) {
   const candidates = useMemo(
     () =>
@@ -24,6 +26,7 @@ export function useRecentFiles(
     reloadKey,
     Infinity,
     signal,
+    typeFilter,
   );
   return {
     ...setup,

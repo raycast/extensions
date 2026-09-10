@@ -1,7 +1,7 @@
 import { Entry } from "./types";
 import { readEntryMetadata } from "./directory-listing";
 import { createReadPool } from "./bounded-reads";
-import { matchPath, matchesStats, parseQuery } from "./query";
+import { matchPath, matchesStats, parseQuery, TypeFilter } from "./query";
 
 export type CachedCandidate = Pick<Entry, "path"> & Partial<Entry>;
 export type RecentValidation = {
@@ -20,6 +20,7 @@ export function createRecentValidator(stat = readEntryMetadata) {
       signal?: AbortSignal;
       budgetMs?: number;
       query?: string;
+      typeFilter?: TypeFilter;
       limit?: number;
       onProgress?: (entries: Entry[]) => void;
       /** Continue validating while the query remains active. */
@@ -34,7 +35,7 @@ export function createRecentValidator(stat = readEntryMetadata) {
       ? undefined
       : setTimeout(interrupt, options.budgetMs ?? 1000);
     options.signal?.addEventListener("abort", interrupt, { once: true });
-    const parsed = parseQuery(options.query ?? "");
+    const parsed = parseQuery(options.query ?? "", options.typeFilter);
     const limit = options.limit ?? (options.continuous ? Infinity : 60);
     const found = new Map<string, Entry>();
     const checked = new Set<string>();

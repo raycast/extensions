@@ -758,6 +758,39 @@ export async function browserChecks(
     rankCode + "\nreturn rankSources;",
   )(...Object.values(browsingDependencies)) as typeof rank;
   const browsed = browse([...entries, canonicalChild]);
+  for (const type of ["all", "directory", "file"] as const) {
+    for (const pathBar of [false, true]) {
+      const dependencies = {
+        ...rankDependencies,
+        parsed: queryTools.parseQuery("", type),
+        effectiveQuery: "",
+        pathQuery: pathBar ? { dir: "/foo", prefix: "" } : undefined,
+        learnedSet: new Set(["/foo/bar", "/foo/baz.txt"]),
+      };
+      const filteredRank = new Function(
+        ...Object.keys(dependencies),
+        rankCode + "\nreturn rankSources;",
+      )(...Object.values(dependencies)) as typeof rank;
+      const result = filteredRank([
+        entries[0],
+        {
+          ...entries[0],
+          path: "/foo/baz.txt",
+          name: "baz.txt",
+          isDirectory: false,
+        },
+        canonicalChild,
+      ]);
+      assert(
+        result.length === (type === "all" ? 2 : 1) &&
+          result.every(
+            ({ entry }) =>
+              type === "all" || entry.isDirectory === (type === "directory"),
+          ),
+        `${type} menu filter applies to ${pathBar ? "path-bar" : "folder"} ranking, including learned matches`,
+      );
+    }
+  }
   assert(
     browsed.length === 1 && browsed[0].entry.path === "/foo/bar",
     "clearing a folder query excludes cached and delayed descendants from the listing",
@@ -1183,6 +1216,7 @@ export async function browserChecks(
     "query",
     "reloadKey",
     "queryController",
+    "parsed",
     learnedCode + "\nreturn learnedCache;",
   )(
     (candidates: { path: string }[], query: string) =>
@@ -1194,6 +1228,7 @@ export async function browserChecks(
     "baz",
     0,
     queryController,
+    queryTools.parseQuery("baz"),
   );
   assert(
     learned.entries.length === 1,

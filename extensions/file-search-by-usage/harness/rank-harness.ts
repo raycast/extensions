@@ -16,8 +16,10 @@ import { indexingChecks } from "./indexing-checks";
 import { recentsChecks } from "./recents-checks";
 import { browserChecks } from "./browser-checks";
 import { eventHandleChecks } from "./event-handle-checks";
+import { searchScreenChecks } from "./search-screen-checks";
 import { liveSearchChecks } from "./live-search-checks";
 import { resultOrderChecks } from "./result-order-checks";
+import { typeFilterChecks } from "./type-filter-checks";
 import { rowRenderChecks } from "./row-render-checks";
 import {
   canonicalPath,
@@ -140,9 +142,11 @@ function fake(name: string, ageDays: number): Entry {
 }
 
 async function main() {
+  await typeFilterChecks(assert);
   await recentsChecks(assert);
   await browserChecks(assert);
   await eventHandleChecks(assert);
+  await searchScreenChecks(assert);
   resultOrderChecks(assert);
   await rowRenderChecks(assert);
   await liveSearchChecks(assert);

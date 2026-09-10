@@ -19,6 +19,14 @@ export class SearchScreen {
     };
   };
 
+  onSearchTextChange = (text: string): void => {
+    const onChange = this.props.onSearchTextChange;
+    // Raycast must receive the new text in the same commit as its input counter.
+    if (text !== this.props.searchText)
+      this.publish(this.frameId, { ...this.props, searchText: text });
+    onChange?.(text);
+  };
+
   begin(frameId: number, searchText: string): void {
     this.frameId = frameId;
     this.publish(frameId, { filtering: false, isLoading: true, searchText });
@@ -34,7 +42,10 @@ export class SearchScreen {
 /** The native List keeps its identity across all folder transitions. */
 export function SearchScreenView({ screen }: { screen: SearchScreen }) {
   return (
-    <List {...useSyncExternalStore(screen.subscribe, screen.getSnapshot)} />
+    <List
+      {...useSyncExternalStore(screen.subscribe, screen.getSnapshot)}
+      onSearchTextChange={screen.onSearchTextChange}
+    />
   );
 }
 

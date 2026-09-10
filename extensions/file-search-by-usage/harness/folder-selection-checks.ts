@@ -49,6 +49,71 @@ export async function folderSelectionChecks(
   globals.IS_REACT_ACT_ENVIRONMENT = true;
   let renderer: ReactTestRenderer | undefined;
   try {
+    function FreshFolder({ entries }: { entries: typeof rows }) {
+      renders++;
+      current = useFolderSelection(undefined, entries, 1, "", 0, true);
+      return null;
+    }
+    await act(() => {
+      renderer = create(React.createElement(FreshFolder, { entries: [] }));
+    });
+    await act(() => current.onSelectionChange("1:/old/folder"));
+    await act(() =>
+      renderer!.update(React.createElement(FreshFolder, { entries: rows })),
+    );
+    assert(
+      current!.selectedId === null,
+      "first-row focus waits for Raycast to register the new folder's items",
+    );
+    await act(() => current.onSelectionChange("1:/foo/bar4"));
+    assert(
+      current!.selectedId === "1:/foo/bar0",
+      "Raycast's initial restored selection is replaced with the first folder row",
+    );
+    await act(() => current.onSelectionChange("1:/foo/bar0"));
+    const beforeAcknowledgements = renders;
+    for (let i = 0; i < 20; i++) {
+      await act(() => current.onSelectionChange("1:/foo/bar0"));
+    }
+    assert(
+      renders === beforeAcknowledgements,
+      "repeated first-row acknowledgements do not create selection render loops",
+    );
+    await act(() =>
+      renderer!.update(
+        React.createElement(FreshFolder, { entries: [...rows].reverse() }),
+      ),
+    );
+    assert(
+      current!.selectedId === "1:/foo/bar249" &&
+        current!.getSelectedPath() === "/foo/bar249",
+      "acknowledging an early first row does not strand focus below later results",
+    );
+    await act(() => current.onSelectionChange("1:/foo/bar0"));
+    assert(
+      current!.selectedId === "1:/foo/bar249",
+      "a delayed report of the previously requested row does not cancel top focus",
+    );
+    await act(() => current.onSelectionChange("1:/foo/bar249"));
+    await act(() => current.onSelectionChange("1:/foo/bar248"));
+    const beforeRefresh = renders;
+    await act(() => current.onSelectionChange("1:/foo/bar248"));
+    assert(
+      current!.selectedId === null &&
+        current!.getSelectedPath() === "/foo/bar248" &&
+        renders === beforeRefresh,
+      "initial top-row focus releases control without echoing subsequent selection",
+    );
+    await act(() =>
+      renderer!.update(
+        React.createElement(FreshFolder, { entries: rows.slice(1) }),
+      ),
+    );
+    assert(
+      current!.selectedId === null,
+      "later folder updates do not repeatedly force selection to the top",
+    );
+    await act(() => renderer!.unmount());
     await act(() => {
       renderer = create(React.createElement(View, { entries: [] }));
     });
@@ -56,6 +121,11 @@ export async function folderSelectionChecks(
     await act(() =>
       renderer!.update(React.createElement(View, { entries: rows })),
     );
+    assert(
+      current!.selectedId === null,
+      "restored folder focus also waits until native rows are registered",
+    );
+    await act(() => current.onSelectionChange("1:/foo/bar0"));
     assert(
       current!.selectedId === "1:/foo/bar249",
       "the folder just left is selected when it arrives, even beyond the first page",
@@ -156,6 +226,7 @@ export async function folderSelectionChecks(
         }),
       ),
     );
+    await act(() => current.onSelectionChange("4:/foo/bar0"));
     assert(
       current!.selectedId === "4:/foo/bar249",
       "Escape can restore the selected folder in a nonempty search query",
@@ -173,6 +244,7 @@ export async function folderSelectionChecks(
         }),
       ),
     );
+    await act(() => current.onSelectionChange("4:/foo/bar249"));
     assert(
       current!.selectedId === "4:/foo/bar1",
       "returning to a mounted setup owner rearms the requested folder selection",
@@ -190,6 +262,7 @@ export async function folderSelectionChecks(
         }),
       ),
     );
+    await act(() => current.onSelectionChange("4:/foo/bar249"));
     assert(
       current!.selectedId === "4:/foo/bar1",
       "returning to the same mounted folder can restore the same selection again",

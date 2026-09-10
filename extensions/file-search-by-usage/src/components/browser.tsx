@@ -26,7 +26,7 @@ import {
 import os from "node:os";
 import path from "node:path";
 import { setMaxListeners } from "node:events";
-import { Entry, SORT_MODES, SortMode, VisitLog } from "../lib/types";
+import { Entry, SortMode, VisitLog } from "../lib/types";
 import { describeErased, eraseEverything } from "../lib/erase";
 import {
   deriveProgress,
@@ -77,11 +77,12 @@ import {
   excludesDirectories,
   matchesStats,
   parseQuery,
+  TypeFilter,
 } from "../lib/query";
 import { Row, RowHandlers } from "./row";
 import { SetupActions } from "./setup-actions";
 import { entryStoragePath, rowIdForEntry } from "../lib/entry-identity";
-import { relativeTime } from "../lib/format";
+import { compactScopeLabel, relativeTime } from "../lib/format";
 import { compareRankedEntries, RankedEntry } from "../lib/result-order";
 import { displayRows } from "../lib/display-rows";
 import {
@@ -95,9 +96,10 @@ import { SearchSetup, useSearchSetup } from "./use-search-setup";
 import { useCachedEntries } from "./use-cached-entries";
 import { useStandardPlaces } from "./use-standard-places";
 import { useFolderSelection } from "./use-folder-selection";
-import { FolderNavigation, FolderResume } from "../lib/folder-navigation";
+import { FolderNavigation } from "../lib/folder-navigation";
 import { NavigationActions } from "./navigation-actions";
 import { SearchHistoryActions } from "./search-history-actions";
+import { SearchOptions } from "./search-options";
 import { useEventHandles } from "./use-event-handles";
 import {
   SearchScreen,
@@ -139,7 +141,6 @@ function BrowserView({
   initialSearchText,
   screen,
   onNavigate,
-  onBack,
   navigation,
   frameId,
   setup,
@@ -153,9 +154,7 @@ function BrowserView({
     fromId: number,
     target: string,
     selectedPath: string | undefined,
-    resume: FolderResume,
   ) => void;
-  onBack: (fromId: number) => void;
   navigation: FolderNavigation;
   frameId: number;
   setup: SearchSetup;
@@ -167,7 +166,6 @@ function BrowserView({
   const event = useEventHandles();
 
   const [searchText, setSearchText] = useState(initialSearchText);
-  const selectionPathRef = useRef<string | undefined>(undefined);
   const [children, setChildren] = useState<Entry[]>([]);
   const [found, setFound] = useState<Entry[]>([]);
   const [visitLog, setVisitLog] = useState<VisitLog>({ tick: 0, items: {} });
@@ -185,6 +183,10 @@ function BrowserView({
   const [sortMode, setSortMode] = useCachedState<SortMode>(
     "sort-mode",
     "usage",
+  );
+  const [typeFilter, setTypeFilter] = useCachedState<TypeFilter>(
+    "type-filter",
+    "all",
   );
   const [showingDetail, setShowingDetail] = useState(false);
   /** True until scoped entries receive cached or fresh usage metadata. */
@@ -204,7 +206,10 @@ function BrowserView({
   );
   /** Name fragment used by path-bar results. */
   const effectiveQuery = pathQuery ? pathQuery.prefix : query;
-  const parsed = useMemo(() => parseQuery(searchText), [searchText]);
+  const parsed = useMemo(
+    () => parseQuery(searchText, typeFilter),
+    [searchText, typeFilter],
+  );
   // Dot-prefixed queries temporarily include hidden entries.
   const showHidden = prefs.showHidden || parsed.hidden;
   const scopeController = useMemo(
@@ -214,7 +219,7 @@ function BrowserView({
   const [queryRevision, setQueryRevision] = useState(0);
   const queryController = useMemo(
     () => new AbortController(),
-    [scopeController, query, queryRevision],
+    [scopeController, query, parsed.type, queryRevision],
   );
   // These signals cancel user-obsoleted work; each effect cleans up its own work.
   useEffect(() => {
@@ -230,19 +235,10 @@ function BrowserView({
       if (!navigation.canNavigate(frameId, target)) return;
       scopeController.abort();
       setSearchActive(false);
-      onNavigate(frameId, target, initialSelectionPath, {
-        query: searchText,
-        selectedPath: selectionPathRef.current,
-      });
+      onNavigate(frameId, target, initialSelectionPath);
     },
-    [scopeController, navigation, frameId, onNavigate, searchText],
+    [scopeController, navigation, frameId, onNavigate],
   );
-  const goBack = useCallback(() => {
-    if (!navigation.isCurrent(frameId) || !navigation.canGoBack) return;
-    scopeController.abort();
-    setSearchActive(false);
-    onBack(frameId);
-  }, [scopeController, navigation, frameId, onBack]);
   const scopeCandidates = useMemo(() => (dir ? [{ path: dir }] : []), [dir]);
   const scopeCache = useCachedEntries(
     scopeCandidates,
@@ -260,6 +256,7 @@ function BrowserView({
     reloadKey,
     canonicalDir,
     queryController.signal,
+    parsed.type,
   );
   const directoryListing = useDirectoryListing(
     dir,
@@ -768,6 +765,7 @@ function BrowserView({
     reloadKey,
     Infinity,
     queryController.signal,
+    parsed.type,
   );
   const startingPoints = startingCache.entries;
 
@@ -789,6 +787,7 @@ function BrowserView({
     reloadKey,
     Infinity,
     queryController.signal,
+    parsed.type,
   );
   const discoveredMatches = discoveredCache.entries;
 
@@ -808,6 +807,7 @@ function BrowserView({
     reloadKey,
     Infinity,
     queryController.signal,
+    parsed.type,
   );
   const sharedMatches = sharedCache.entries;
   const shortcutCandidates = useMemo(() => {
@@ -831,6 +831,7 @@ function BrowserView({
     reloadKey,
     Infinity,
     queryController.signal,
+    parsed.type,
   );
   const shortcuts = shortcutCache.entries;
 
@@ -858,6 +859,7 @@ function BrowserView({
     reloadKey,
     Infinity,
     queryController.signal,
+    parsed.type,
   );
   const learnedMatches = learnedCache.entries;
   const cachedPending =
@@ -1171,8 +1173,6 @@ function BrowserView({
         void commitSearch(entry.path).catch(() => {});
         navigate(entry.path);
       },
-      onBack: navigation.canGoBack ? goBack : undefined,
-      // A parent outside the retained history becomes a new location.
       onUp:
         dir && parent && parent !== dir
           ? () => navigate(parent, dir)
@@ -1354,15 +1354,13 @@ function BrowserView({
       commitSearch,
       setQueryProgrammatically,
       navigate,
-      navigation,
-      goBack,
     ],
   );
 
   // Reset row IDs for a new query; cached paths remain searchable.
   useEffect(() => {
     setGeneration((g) => g + 1);
-  }, [parsed.normalized, dir]);
+  }, [parsed.normalized, parsed.type, dir]);
 
   const onSearchTextChange = useCallback(
     (next: string) => {
@@ -1460,35 +1458,6 @@ function BrowserView({
                           : dir && isUnindexedScope(dir)
                             ? "read directly, not in Spotlight's index"
                             : undefined;
-  const orderingLabel = (() => {
-    if (pathQuery) return "items at this location";
-    if (hiddenOnly(parsed)) return "hidden files and folders";
-    const only =
-      parsed.type === "directory"
-        ? "folders only · "
-        : parsed.type === "file"
-          ? "files only · "
-          : "";
-    if (only !== "" && query !== "") {
-      return `${only}best matches, then most-used`;
-    }
-    if (sortMode !== "usage") {
-      const chosen = SORT_MODES.find((m) => m.value === sortMode);
-      return `sorted by ${chosen?.title.toLowerCase() ?? sortMode}`;
-    }
-    if (query === "" && !dir) return "what you use most, and your usual places";
-    // Textual match tier precedes usage score for non-empty queries.
-    if (query !== "") {
-      if (dir && isUnindexedScope(dir)) {
-        return resultsTruncated
-          ? "reading this shared folder — showing what was found so far"
-          : "reading this shared folder directly (it is not indexed)";
-      }
-      return "best name matches, then most-used";
-    }
-    return "most-used first";
-  })();
-
   const scopeLabel = dir ? displayPath(dir) : "Everywhere";
   const tooShort =
     !dir && !pathQuery && query !== "" && query.length < minQuery;
@@ -1504,7 +1473,7 @@ function BrowserView({
 
   // Show “complete” only after every applicable stage settles.
   const sectionStatus = [
-    settling ? `${rows.length} so far` : `${rows.length}`,
+    `${rows.length} ${rows.length === 1 ? "item" : "items"}${settling ? " so far" : ""}`,
     light === "🟢" ? "complete" : describeProgress(progress),
     rows.length > LIVE_RENDERED_RESULTS
       ? `Display limited to ${LIVE_RENDERED_RESULTS} items — narrow your query`
@@ -1513,15 +1482,14 @@ function BrowserView({
     recentFiles.partial || cachedPartial
       ? "some cached files could not be checked"
       : undefined,
-    settling ? undefined : orderingLabel,
   ]
     .filter(Boolean)
-    .join(" · ");
+    .join(" · ")
+    .replace(/\s+/gu, " ");
 
   const { selectedId, retainedPath, getSelectedPath, onSelectionChange } =
-    useFolderSelection(initialSelectionPath, rows, generation, query);
-  selectionPathRef.current = getSelectedPath();
-  const retainedSelectionPath = selectionPathRef.current ?? retainedPath;
+    useFolderSelection(initialSelectionPath, rows, generation, query, 0, true);
+  const retainedSelectionPath = getSelectedPath() ?? retainedPath;
   const renderedRows = useMemo(
     () => displayRows(rows, retainedSelectionPath),
     [rows, retainedSelectionPath],
@@ -1532,6 +1500,18 @@ function BrowserView({
       event(name, callback),
     ]),
   ) as RowHandlers;
+  useEffect(() => {
+    if (!environment.isDevelopment) return;
+    traceNavigation("selection-request", {
+      frameId,
+      generation,
+      rows: rows.length,
+      requestedIndex: rows.findIndex(
+        ({ entry }) => rowIdForEntry(generation, entry) === selectedId,
+      ),
+      restoring: initialSelectionPath !== undefined,
+    });
+  }, [frameId, generation, rows, selectedId]);
   const setupActions = {
     setup: recentFiles.setup,
     importing: recentFiles.importing,
@@ -1584,10 +1564,7 @@ function BrowserView({
       frameId={frameId}
       actions={
         <ActionPanel>
-          <NavigationActions
-            onBack={rowHandlers.onBack}
-            onUp={rowHandlers.onUp}
-          />
+          <NavigationActions onUp={rowHandlers.onUp} />
           <SetupActions {...setupActions} />
         </ActionPanel>
       }
@@ -1599,8 +1576,20 @@ function BrowserView({
       selectedItemId={selectedId ?? undefined}
       onSelectionChange={event("selection", (id: string | null) => {
         if (!navigation.isCurrent(frameId)) return;
+        if (environment.isDevelopment)
+          traceNavigation("selection-received", {
+            frameId,
+            generation,
+            rows: rows.length,
+            selectedIndex: rows.findIndex(
+              ({ entry }) => rowIdForEntry(generation, entry) === id,
+            ),
+            requestedIndex: rows.findIndex(
+              ({ entry }) => rowIdForEntry(generation, entry) === selectedId,
+            ),
+            empty: id === null,
+          });
         onSelectionChange(id);
-        selectionPathRef.current = getSelectedPath();
       })}
       searchText={searchText}
       onSearchTextChange={event("query", onSearchTextChange)}
@@ -1612,15 +1601,17 @@ function BrowserView({
       navigationTitle={dir ? path.basename(dir) || scopeLabel : undefined}
       isShowingDetail={showingDetail && rows.length > 0}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Sort by"
-          value={sortMode}
-          onChange={event("sort", (v: string) => setSortMode(v as SortMode))}
-        >
-          {SORT_MODES.map((m) => (
-            <List.Dropdown.Item key={m.value} title={m.title} value={m.value} />
-          ))}
-        </List.Dropdown>
+        <SearchOptions
+          typeFilter={typeFilter}
+          effectiveType={parsed.type}
+          sortMode={sortMode}
+          onSortChange={event("sort", setSortMode)}
+          onTypeChange={event("type", (next: TypeFilter) => {
+            if (parseQuery(searchText, next).type !== parsed.type)
+              queryController.abort();
+            setTypeFilter(next);
+          })}
+        />
       }
     >
       {rankingReady &&
@@ -1652,10 +1643,7 @@ function BrowserView({
               }
               actions={
                 <ActionPanel>
-                  <NavigationActions
-                    onBack={rowHandlers.onBack}
-                    onUp={rowHandlers.onUp}
-                  />
+                  <NavigationActions onUp={rowHandlers.onUp} />
                   <SetupActions {...setupActions} />
                 </ActionPanel>
               }
@@ -1713,10 +1701,7 @@ function BrowserView({
           }
           actions={
             <ActionPanel>
-              <NavigationActions
-                onBack={rowHandlers.onBack}
-                onUp={rowHandlers.onUp}
-              />
+              <NavigationActions onUp={rowHandlers.onUp} />
               <SetupActions {...setupActions} />
               <SearchHistoryActions
                 onHistoryBack={rowHandlers.onHistoryBack}
@@ -1746,8 +1731,7 @@ function BrowserView({
         />
       ) : (
         <List.Section
-          title={`${light}  ${sectionTitle}`}
-          subtitle={sectionStatus}
+          title={`${light}  ${compactScopeLabel(sectionTitle)} · ${sectionStatus}`}
         >
           {(searchActive ? renderedRows : []).map(({ entry, score }) => (
             <Row
@@ -1774,7 +1758,7 @@ function BrowserView({
   );
 }
 
-/** One native screen owns setup and a bounded history of lightweight locations. */
+/** One native screen owns setup and the active folder, without folder history. */
 export function Browser(props: Props) {
   enableNavigationDiagnostics(environment.isDevelopment);
   const [navigation] = useState(
@@ -1798,25 +1782,10 @@ export function Browser(props: Props) {
     };
   }, [screen, navigation]);
   const onNavigate = useCallback(
-    (
-      fromId: number,
-      target: string,
-      selectedPath: string | undefined,
-      resume: FolderResume,
-    ) => {
-      const next = navigation.navigate(fromId, target, selectedPath, resume);
+    (fromId: number, target: string, selectedPath: string | undefined) => {
+      const next = navigation.navigate(fromId, target, selectedPath);
       if (next) {
-        screen.begin(next.id, next.query);
-        setFrame(next);
-      }
-    },
-    [navigation, screen],
-  );
-  const onBack = useCallback(
-    (fromId: number) => {
-      const next = navigation.back(fromId);
-      if (next) {
-        screen.begin(next.id, next.query);
+        screen.begin(next.id, "");
         setFrame(next);
       }
     },
@@ -1832,11 +1801,10 @@ export function Browser(props: Props) {
         dir={frame.dir}
         navigation={navigation}
         frameId={frame.id}
-        initialSearchText={frame.query}
+        initialSearchText=""
         screen={screen}
         initialSelectionPath={frame.selectedPath}
         onNavigate={onNavigate}
-        onBack={onBack}
         setup={setup}
         reloadKey={reloadKey}
         setReloadKey={setReloadKey}

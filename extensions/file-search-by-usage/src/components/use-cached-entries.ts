@@ -6,6 +6,7 @@ import {
 import { Entry } from "../lib/types";
 import { dataGeneration } from "../lib/storage-lock";
 import { LIVE_RESULTS } from "../lib/search-limits";
+import { TypeFilter } from "../lib/query";
 
 const EMPTY: Entry[] = [];
 
@@ -16,6 +17,7 @@ export function useCachedEntries(
   reloadKey: number,
   limit = LIVE_RESULTS,
   signal?: AbortSignal,
+  typeFilter: TypeFilter = "all",
 ) {
   limit = Math.min(limit, LIVE_RESULTS);
   const [checked, setChecked] = useState<{
@@ -27,6 +29,7 @@ export function useCachedEntries(
     partial: boolean;
     limited: boolean;
     signal?: AbortSignal;
+    typeFilter: TypeFilter;
   }>();
   useEffect(() => {
     const active = new AbortController();
@@ -38,6 +41,7 @@ export function useCachedEntries(
       !active.signal.aborted && generation === dataGeneration();
     void validateRecentEntries(candidates, {
       query,
+      typeFilter,
       limit,
       continuous: true,
       signal: active.signal,
@@ -52,6 +56,7 @@ export function useCachedEntries(
             partial: false,
             limited: false,
             signal,
+            typeFilter,
           });
       },
     }).then((result) => {
@@ -65,18 +70,20 @@ export function useCachedEntries(
           partial: result.partial,
           limited: result.limited ?? false,
           signal,
+          typeFilter,
         });
     });
     return () => {
       signal?.removeEventListener("abort", stop);
       stop();
     };
-  }, [candidates, query, reloadKey, limit, signal]);
+  }, [candidates, query, reloadKey, limit, signal, typeFilter]);
   const current =
     checked?.candidates === candidates &&
     checked.query === query &&
     checked.reloadKey === reloadKey &&
-    checked.signal === signal;
+    checked.signal === signal &&
+    checked.typeFilter === typeFilter;
   return {
     entries: current ? checked.entries : EMPTY,
     pending: candidates.length > 0 && (!current || checked.pending),

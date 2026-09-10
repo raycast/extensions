@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { transformSync } from "esbuild";
 import * as React from "react";
-import { FolderNavigation, FolderResume } from "../src/lib/folder-navigation";
+import { FolderNavigation } from "../src/lib/folder-navigation";
 import type { SearchSetup } from "../src/components/use-search-setup";
 import type { SearchScreen } from "../src/components/search-screen";
 import { act, create, ReactTestRenderer } from "react-test-renderer";
@@ -54,13 +54,7 @@ export async function navigationMemoryChecks(
     navigation: FolderNavigation;
     setup: SearchSetup;
     screen: SearchScreen;
-    onNavigate: (
-      id: number,
-      dir: string,
-      selected: string | undefined,
-      resume: FolderResume,
-    ) => void;
-    onBack: (id: number) => void;
+    onNavigate: (id: number, dir: string, selected: string | undefined) => void;
   };
   let current: ViewProps;
   function View(props: ViewProps) {
@@ -173,43 +167,34 @@ export async function navigationMemoryChecks(
   const previous = globals.IS_REACT_ACT_ENVIRONMENT;
   globals.IS_REACT_ACT_ENVIRONMENT = true;
   let renderer: ReactTestRenderer | undefined;
-  const go = async (
-    dir: string,
-    query = "",
-    selectedPath?: string,
-    initialSelection?: string,
-  ) => {
-    await act(() =>
-      current.onNavigate(current.frameId, dir, initialSelection, {
-        query,
-        selectedPath,
-      }),
-    );
-  };
-  const back = async () => {
-    await act(() => current.onBack(current.frameId));
+  const go = async (dir: string, initialSelection?: string) => {
+    await act(() => current.onNavigate(current.frameId, dir, initialSelection));
   };
   try {
     await act(async () => {
       renderer = create(React.createElement(Screen));
     });
-    await go("/foo", "foo", "/foo");
+    await act(() =>
+      current.screen.publish(current.frameId, { searchText: "foo" }),
+    );
+    await go("/foo");
     assert(
       renderer!.root.findByType("list").props.searchText === "",
       "folder navigation clears the search text on the persistent native List",
     );
-    await go("/foo/bar", "bar", "/foo/bar");
+    await act(() =>
+      current.screen.publish(current.frameId, { searchText: "bar" }),
+    );
+    await go("/foo/bar");
     const stale = { frameId: current!.frameId, navigate: current!.onNavigate };
-    await go("/foo", "", undefined, "/foo/bar");
+    await go("/foo", "/foo/bar");
     assert(
       current!.dir === "/foo" &&
-        current!.initialSearchText === "bar" &&
+        current!.initialSearchText === "" &&
         current!.initialSelectionPath === "/foo/bar",
-      "the single screen restores parent query and folder selection",
+      "the single screen starts a fresh parent query and selects the folder just left",
     );
-    await act(() =>
-      stale.navigate(stale.frameId, "/foo/baz", undefined, { query: "" }),
-    );
+    await act(() => stale.navigate(stale.frameId, "/foo/baz", undefined));
     assert(
       current!.dir === "/foo",
       "a deleted result view cannot navigate through a late callback",
@@ -226,8 +211,8 @@ export async function navigationMemoryChecks(
     );
     const before = unmountedViews;
     for (let count = 0; count < 60; count++) {
-      await go("/foo/bar", "bar", "/foo/bar");
-      await go("/foo", "", undefined, "/foo/bar");
+      await go("/foo/bar");
+      await go("/foo", "/foo/bar");
     }
     assert(
       nativePushes === 0 &&
@@ -244,7 +229,7 @@ export async function navigationMemoryChecks(
     for (let i = 0; i < 6; i++) await go(`/foo/bar${i}`);
     assert(
       setupRuns === 1 && !setupSignal?.aborted,
-      "discarding old folder history does not cancel command-owned setup",
+      "visiting further folders does not cancel command-owned setup",
     );
     await act(async () => {
       finishSetup();
@@ -252,13 +237,14 @@ export async function navigationMemoryChecks(
     });
     assert(
       !current!.setup.importing,
-      "setup completion reaches the active folder after history eviction",
+      "setup completion reaches the active folder after repeated navigation",
     );
-    while (current!.navigation.canGoBack) await back();
+    await go("/", "/foo");
     assert(
-      renderer!.root.findByType("list").props.searchText === "foo" &&
-        nativeListMounts === 1,
-      "Back restores the query without remounting the native List",
+      renderer!.root.findByType("list").props.searchText === "" &&
+        nativeListMounts === 1 &&
+        current!.initialSelectionPath === "/foo",
+      "parent navigation reaches the filesystem root without remounting the List",
     );
     const beforeStalePublish = current!.screen.getSnapshot();
     current!.screen.publish(stale.frameId, { searchText: "obsolete" });
@@ -266,13 +252,6 @@ export async function navigationMemoryChecks(
       current!.screen.getSnapshot() === beforeStalePublish,
       "late result publication from an old folder cannot replace the active List",
     );
-    assert(
-      current!.dir === undefined &&
-        current!.initialSearchText === "foo" &&
-        current!.initialSelectionPath === "/foo",
-      "Back beyond retained folders restores the saved starting search",
-    );
-
     await act(async () => {
       setupPromise = current.setup.start();
       await Promise.resolve();

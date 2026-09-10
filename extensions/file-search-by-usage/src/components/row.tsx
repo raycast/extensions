@@ -11,12 +11,10 @@ import { SearchHistoryActions } from "./search-history-actions";
 export type RowHandlers = {
   /** Opens a file in its default app or a folder in Finder. */
   onOpen: (entry: Entry) => void;
-  /** ⌘→ — navigate into a folder. */
+  /** ⌥⌘↓ — navigate into a folder. */
   onDescend: (entry: Entry) => void;
   /** Navigates to the parent; undefined at the filesystem root or global scope. */
   onUp?: () => void;
-  /** Restores the previous location and query in the single search screen. */
-  onBack?: () => void;
   /** Cycles query history with ⌘[ and ⌘]. */
   onHistoryBack: () => void;
   onHistoryForward: () => void;
@@ -203,11 +201,11 @@ function RowActions({
           <Action
             title="Navigate into Folder"
             icon={Icon.ChevronRight}
-            shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+            shortcut={Keyboard.Shortcut.Common.MoveDown}
             onAction={() => handlers.onDescend(entry)}
           />
         )}
-        <NavigationActions onUp={handlers.onUp} onBack={handlers.onBack} />
+        <NavigationActions onUp={handlers.onUp} />
         <Action.ToggleQuickLook
           title="Quick Look"
           shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
@@ -250,9 +248,14 @@ function RowActions({
           content={entry.path}
           shortcut={Keyboard.Shortcut.Common.CopyPath}
         />
-        <Action.CopyToClipboard title="Copy Name" content={entry.name} />
+        <Action.CopyToClipboard
+          title="Copy Name"
+          content={entry.name}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
+        />
         <Action.CopyToClipboard
           title="Copy File"
+          shortcut={Keyboard.Shortcut.Common.Copy}
           content={{ file: entry.path }}
         />
       </ActionPanel.Section>

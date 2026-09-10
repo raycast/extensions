@@ -6,12 +6,67 @@ import { useFolderSelection } from "../src/components/use-folder-selection";
 import { rowIdForEntry } from "../src/lib/entry-identity";
 import { LIVE_RENDERED_RESULTS } from "../src/lib/search-limits";
 import { displayRows } from "../src/lib/display-rows";
+import * as format from "../src/lib/format";
+import { describeProgress } from "../src/lib/progress";
 
 /** Exercise the browser's bounded display and native selection boundary. */
 export async function listRenderChecks(
   assert: (ok: boolean, label: string) => void,
 ) {
   const source = fs.readFileSync("src/components/browser.tsx", "utf8");
+  const headingStart = source.indexOf("  const scopeLabel =");
+  const sectionStart = source.lastIndexOf("<List.Section");
+  const headingCode = transformSync(
+    source.slice(headingStart, source.indexOf("  const { selectedId")) +
+      "\nreturn (" +
+      source.slice(sectionStart, source.indexOf(">", sectionStart) + 1) +
+      "</List.Section>);",
+    { loader: "tsx", jsxFactory: "React.createElement" },
+  ).code;
+  function heading(dir: string, caveat?: string) {
+    const deps = {
+      React,
+      List: { Section: "section" },
+      ...format,
+      dir,
+      displayPath: (value: string) => value,
+      query: "",
+      pathQuery: undefined,
+      minQuery: 3,
+      settling: false,
+      rows: Array(6),
+      light: "🟢",
+      describeProgress,
+      LIVE_RENDERED_RESULTS,
+      caveat,
+      recentFiles: { partial: false },
+      cachedPartial: false,
+      orderingLabel: "most-used first",
+    };
+    return new Function(...Object.keys(deps), headingCode)(
+      ...Object.values(deps),
+    ).props;
+  }
+  const shortHeading = heading("/foo/bar/baz");
+  assert(
+    shortHeading.title.includes("…/bar/baz") &&
+      !shortHeading.title.includes("/foo/") &&
+      shortHeading.subtitle === undefined &&
+      shortHeading.title.includes("complete"),
+    "the section uses one text field with a compact path, count, and status",
+  );
+  const longHeading = heading(`/foo/bar/${"baz".repeat(100)}\nqux`);
+  assert(
+    longHeading.title.length < 90 &&
+      !/[\r\n\t\u2028\u2029]/u.test(longHeading.title),
+    "long folder names and embedded line breaks cannot expand the section label",
+  );
+  assert(
+    heading("/foo/bar", "Some files could not be checked").title.includes(
+      "Some files could not be checked",
+    ),
+    "shortening the header preserves search caveats",
+  );
   const start = source.indexOf("  const { selectedId");
   const end = source.indexOf("\n  const rowHandlers", start);
   const resetStart = source.indexOf("  // Reset row IDs for a new query;");
@@ -23,7 +78,6 @@ export async function listRenderChecks(
     `return function View({ rows, initialSelectionPath, query = "", restorationRevision = 0 }) {
     const [generation, setGeneration] = useState(0);
     const parsed = { normalized: query }, dir = undefined;
-    const selectionPathRef = useRef();
     ${reset}
     ${source.slice(start, end)}
     return <List entries={renderedRows}
@@ -91,13 +145,41 @@ export async function listRenderChecks(
   let renderer: ReactTestRenderer | undefined;
   try {
     await act(() => {
-      renderer = create(React.createElement(View, { rows }));
+      renderer = create(React.createElement(View, { rows: [] }));
     });
     const list = () => renderer!.root.findByType("list").props;
+    assert(
+      list().selectedId === null,
+      "startup waits for results before selecting",
+    );
+    await act(() => renderer!.update(React.createElement(View, { rows })));
+    await act(() => list().onSelectionChange("1:/foo/bar4"));
+    assert(
+      list().selectedId === "1:/foo/bar0",
+      "startup selects the first result when rows arrive",
+    );
     assert(
       list().entries.length === 100 && list().entries[99] === rows[99],
       "the displayed subset preserves the first 100 ranked rows",
     );
+    await act(() => list().onSelectionChange("1:/foo/bar0"));
+    assert(
+      list().selectedId === "1:/foo/bar0",
+      "startup acknowledgement keeps focus at the top during initial loading",
+    );
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, { rows: [...rows].reverse() }),
+      ),
+    );
+    assert(
+      list().selectedId === "1:/foo/bar1999",
+      "startup focus follows the first result after delayed reranking",
+    );
+    await act(() => list().onSelectionChange("1:/foo/bar1999"));
+    await act(() => renderer!.update(React.createElement(View, { rows })));
+    await act(() => list().onSelectionChange("1:/foo/bar0"));
+    await act(() => list().onSelectionChange("1:/foo/bar1"));
     await act(() => list().onSelectionChange("1:/foo/bar0"));
     await act(() =>
       renderer!.update(

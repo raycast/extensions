@@ -69,15 +69,18 @@ function parseDate(raw: string): number | undefined {
     : undefined;
 }
 
-export function parseQuery(raw: string): ParsedQuery {
+export function parseQuery(
+  raw: string,
+  defaultType: TypeFilter = "all",
+): ParsedQuery {
   const tokens: string[] = [];
   const extensions: string[] = [];
-  let type: TypeFilter = "all";
+  let type: TypeFilter = defaultType;
   let after: number | undefined;
   let before: number | undefined;
   let minSize: number | undefined;
   let maxSize: number | undefined;
-  let hasFilters = false;
+  let hasFilters = defaultType !== "all";
   let hidden = false;
 
   for (const word of raw.trim().split(/\s+/)) {
@@ -404,13 +407,15 @@ export function excludesDirectories(parsed: ParsedQuery): boolean {
 }
 
 /**
- * The filters that need a stat(): modification date and size. Kept out of
+ * The filters that need metadata: type, modification date, and size. Kept out of
  * matchPath so the cheap string pass can run over thousands of paths first.
  */
 export function matchesStats(
   parsed: ParsedQuery,
   stats: { mtimeMs: number; size: number; isDirectory: boolean },
 ): boolean {
+  if (parsed.type === "directory" && !stats.isDirectory) return false;
+  if (parsed.type === "file" && stats.isDirectory) return false;
   if (parsed.after !== undefined && stats.mtimeMs < parsed.after) return false;
   if (parsed.before !== undefined && stats.mtimeMs >= parsed.before)
     return false;

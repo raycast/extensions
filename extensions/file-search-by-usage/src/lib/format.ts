@@ -1,3 +1,13 @@
+/** Keep the end of a location readable without letting it crowd the status. */
+export function compactScopeLabel(scope: string): string {
+  const parts = scope.replace(/\s+/gu, " ").split("/").filter(Boolean);
+  const label = parts.length > 2 ? `…/${parts.slice(-2).join("/")}` : scope;
+  const chars = Array.from(label.replace(/\s+/gu, " "));
+  return chars.length > 40
+    ? `${chars.slice(0, 25).join("")}…${chars.slice(-14).join("")}`
+    : chars.join("");
+}
+
 export function formatSize(bytes: number): string {
   if (bytes <= 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB"];

@@ -53,7 +53,16 @@ export async function rowRenderChecks(
       Section: "action-section",
     }),
     Icon: new Proxy({}, { get: (_target, key) => key }),
-    Keyboard: { Shortcut: { Common: {} } },
+    Keyboard: {
+      Shortcut: {
+        Common: {
+          MoveDown: { modifiers: ["cmd", "opt"], key: "arrowDown" },
+          MoveUp: { modifiers: ["cmd", "opt"], key: "arrowUp" },
+          CopyName: { modifiers: ["cmd", "opt"], key: "c" },
+          Copy: { modifiers: ["cmd", "shift"], key: "c" },
+        },
+      },
+    },
   };
   const output = buildSync({
     entryPoints: ["src/components/row.tsx"],
@@ -93,7 +102,6 @@ export async function rowRenderChecks(
     onOpen: (entry: { path: string }) => calls.push(entry.path),
     onDescend: (entry: { path: string }) => calls.push(`enter:${entry.path}`),
     onUp: () => calls.push("up"),
-    onBack: () => calls.push("back"),
     onHistoryBack: () => calls.push("previous"),
     onHistoryForward: () => calls.push("next"),
   };
@@ -164,13 +172,21 @@ export async function rowRenderChecks(
     const actions = renderer!.root.findAllByType("action");
     const action = (title: string) =>
       actions.find((item) => item.props.title === title)!;
+    assert(
+      !action("Back to Previous Folder") &&
+        !actions.some(
+          (item) =>
+            item.props.shortcut?.key === "arrowLeft" &&
+            item.props.shortcut.modifiers.join() === "opt",
+        ),
+      "result actions do not expose removed folder-history navigation",
+    );
     action("Open in Finder").props.onAction();
     action("Navigate into Folder").props.onAction();
     action("Go to Parent Folder").props.onAction();
-    action("Back to Previous Folder").props.onAction();
     action("Set Up Search").props.onAction();
     assert(
-      calls.join(",") === "/foo/bar499,enter:/foo/bar499,up,back,setup",
+      calls.join(",") === "/foo/bar499,enter:/foo/bar499,up,setup",
       "deferred actions operate on the newly selected item and keep setup available",
     );
     action("Previous Search").props.onAction();
@@ -184,12 +200,21 @@ export async function rowRenderChecks(
       "search-history actions preserve callbacks and command-bracket shortcuts",
     );
     assert(
-      action("Go to Parent Folder").props.shortcut.key === "arrowLeft" &&
-        action("Back to Previous Folder").props.shortcut.key === "arrowLeft" &&
-        action("Back to Previous Folder").props.shortcut.modifiers.join() ===
-          "opt" &&
-        action("Navigate into Folder").props.shortcut.key === "arrowRight",
+      action("Go to Parent Folder").props.shortcut ===
+        api.Keyboard.Shortcut.Common.MoveUp &&
+        action("Navigate into Folder").props.shortcut ===
+          api.Keyboard.Shortcut.Common.MoveDown,
       "deferred folder actions retain their navigation shortcuts",
+    );
+    const copies = renderer!.root.findAllByType("action-copy");
+    const copy = (title: string) =>
+      copies.find((item) => item.props.title === title)!.props;
+    assert(
+      copy("Copy Name").shortcut === api.Keyboard.Shortcut.Common.CopyName &&
+        copy("Copy Name").content === "bar499" &&
+        copy("Copy File").shortcut === api.Keyboard.Shortcut.Common.Copy &&
+        copy("Copy File").content.file === "/foo/bar499",
+      "copy actions use Raycast shortcuts and preserve name versus file payloads",
     );
     assert(
       renderer!.root.findByType("action-openwith").props.path ===
