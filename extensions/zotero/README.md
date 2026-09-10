@@ -81,10 +81,11 @@ Please note that the cache will become invalid if you update preferences.
 
 ![Empty View](media/empty_view.png)
 
-Search is fuzzy: each query term matches scattered letters in order, so typing `qsim` finds
-"Quantum Simulation". Results are ranked by how well they match. At most 100 results are shown
-at a time; when a query matches more, the section subtitle says "Top 100 — refine your search
-to see more".
+Search is fuzzy: each query term matches scattered letters in order in the title, tags, authors,
+DOI, and collection names, so typing `qsim` finds "Quantum Simulation". Abstracts and notes are
+matched as contiguous text, so a phrase from them must appear as-is. Results are ranked by how
+well they match. At most 100 results are shown at a time; when a query matches 100 or more, the
+section subtitle says "Top 100 — refine your search to see more".
 
 This extension supports different types of searches. Here are some common examples:
 
@@ -149,5 +150,5 @@ reference. It shows up when your library has at least one group, and opens a lis
 which groups to include. Your personal library is always searched.
 
 References from a group library show the group name after the title, for example
-"Title · Group Name", and a `**Library:**` line in the detail view. Pressing Enter opens them
-in Zotero.
+"Title · Group Name", and a `**Library:**` line in the detail view. The "Open in Zotero"
+action opens them in the Zotero app.
