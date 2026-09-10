@@ -33,13 +33,41 @@ export class SbFehlt extends Error {
 /** Einmal gefunden, bleibt der Pfad für die Lebensdauer des Befehls. */
 let gemerkt: string | undefined;
 
+/** Das CLI im Bundle — oder nichts, wenn es dort nicht liegt. */
+function cliIm(appPfad: string): string | undefined {
+  const cli = `${appPfad.replace(/\/$/, "")}/Contents/MacOS/simplebanking-cli`;
+  return existsSync(cli) ? cli : undefined;
+}
+
+/**
+ * Fragt LaunchServices nach dem Ort der App.
+ *
+ * `path to application id` ist dieselbe Auskunft, die der Finder benutzt, und sie kennt
+ * jede App, die auf diesem Mac schon einmal geöffnet wurde — unabhängig davon, wo sie
+ * liegt und ob sie gerade läuft. Kein Shell, feste Argumente; scheitert es, bleibt es
+ * beim Ergebnis der anderen Wege.
+ */
+async function ueberLaunchServices(): Promise<string | undefined> {
+  try {
+    const { stdout } = await run(
+      "/usr/bin/osascript",
+      ["-e", `POSIX path of (path to application id "${BUNDLE_ID}")`],
+      {
+        timeout: 10_000,
+      },
+    );
+    return cliIm(stdout.trim());
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Findet das CLI.
  *
  * Die festen Pfade decken den Normalfall ab. Liegt die App woanders — umbenannt, in
- * einem Unterordner, aus dem Build-Verzeichnis gestartet —, fragt der zweite Schritt
- * LaunchServices nach der Bundle-ID; das ist dieselbe Auskunft, die der Finder und
- * Spotlight benutzen, und sie kennt jede App, die auf diesem Mac schon einmal lief.
+ * einem Unterordner, aus dem Build-Verzeichnis gestartet —, fragen die nächsten Schritte
+ * Raycast und dann LaunchServices nach der Bundle-ID.
  */
 async function pfad(): Promise<string> {
   if (gemerkt) return gemerkt;
@@ -47,12 +75,14 @@ async function pfad(): Promise<string> {
   const fest = KANDIDATEN.find((p) => existsSync(p));
   if (fest) return (gemerkt = fest);
 
-  const apps = await getApplications();
-  for (const app of apps) {
+  for (const app of await getApplications()) {
     if (app.bundleId !== BUNDLE_ID) continue;
-    const cli = `${app.path}/Contents/MacOS/simplebanking-cli`;
-    if (existsSync(cli)) return (gemerkt = cli);
+    const cli = cliIm(app.path);
+    if (cli) return (gemerkt = cli);
   }
+
+  const registriert = await ueberLaunchServices();
+  if (registriert) return (gemerkt = registriert);
 
   throw new SbFehlt();
 }
