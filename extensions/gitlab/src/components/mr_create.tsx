@@ -17,6 +17,7 @@ interface MRFormValues {
   labels: string[];
   milestone_id: number;
   remove_source_branch: boolean;
+  squash: boolean;
 }
 
 const NO_TEMPLATE = "no_template";
@@ -136,6 +137,15 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
   };
 
   const [removeBranch, setRemoveBranch] = useState<boolean | undefined>(undefined);
+
+  const squashFlagOrDefault = (val?: boolean) => {
+    if (val !== undefined) {
+      return val;
+    }
+    return project?.squash_option === "default_on";
+  };
+
+  const [squash, setSquash] = useState<boolean | undefined>(undefined);
   const [selectedTemplateName, setSelectedTemplateName] = useState<string>(NO_TEMPLATE);
   const [description, setDescription] = useState<string | undefined>(undefined);
 
@@ -165,6 +175,7 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
         projects={projects || []}
         setSelectedProject={(newValue) => {
           setRemoveBranch(undefined);
+          setSquash(undefined);
           setSelectedProject(newValue);
         }}
         value={selectedProject}
@@ -230,6 +241,14 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
         value={removeBranchFlagOrDefault(removeBranch)}
         onChange={setRemoveBranch}
       />
+      {(project?.squash_option === "default_on" || project?.squash_option === "default_off") && (
+        <Form.Checkbox
+          id="squash"
+          label="Squash commits when merge request is accepted"
+          value={squashFlagOrDefault(squash)}
+          onChange={setSquash}
+        />
+      )}
     </Form>
   );
 }

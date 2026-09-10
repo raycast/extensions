@@ -86,6 +86,7 @@ export function dataToProject(project: any): Project {
     default_branch: project.default_branch,
     archived: project.archived,
     remove_source_branch_after_merge: project.remove_source_branch_after_merge,
+    squash_option: project.squash_option ?? "default_off",
   };
 }
 
@@ -329,6 +330,7 @@ export class Project {
   public default_branch = "";
   public archived = false;
   public remove_source_branch_after_merge = false;
+  public squash_option: "never" | "always" | "default_on" | "default_off" = "default_off";
 }
 
 export class User {
