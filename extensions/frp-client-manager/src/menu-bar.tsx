@@ -124,7 +124,7 @@ export default function Command() {
         </MenuBarExtra.Section>
       ) : null}
       <MenuBarExtra.Section>
-        {data?.managed && running ? (
+        {running ? (
           <MenuBarExtra.Item
             title="Restart"
             icon={Icon.ArrowClockwise}
@@ -136,27 +136,25 @@ export default function Command() {
             }}
           />
         ) : null}
-        {data?.managed ? (
-          running ? (
-            <MenuBarExtra.Item
-              title="Stop"
-              icon={Icon.Stop}
-              onAction={async () => {
-                if (!(await confirmStop())) {
-                  return;
-                }
-                await runAction("Stopping frpc…", stopService, revalidate);
-              }}
-            />
-          ) : (
-            <MenuBarExtra.Item
-              title="Start"
-              icon={Icon.Play}
-              onAction={() =>
-                runAction("Starting frpc…", startService, revalidate)
+        {running ? (
+          <MenuBarExtra.Item
+            title="Stop"
+            icon={Icon.Stop}
+            onAction={async () => {
+              if (!(await confirmStop())) {
+                return;
               }
-            />
-          )
+              await runAction("Stopping frpc…", stopService, revalidate);
+            }}
+          />
+        ) : data?.managed ? (
+          <MenuBarExtra.Item
+            title="Start"
+            icon={Icon.Play}
+            onAction={() =>
+              runAction("Starting frpc…", startService, revalidate)
+            }
+          />
         ) : null}
         <MenuBarExtra.Item
           title="Open frpc Logs"
@@ -246,7 +244,11 @@ async function handleUpgrade(
     style: Toast.Style.Animated,
     title: `Upgrading to ${update.latestVersion}…`,
   });
-  const result = await upgradeFrpc(update.downloadUrl, update.latestVersion);
+  const result = await upgradeFrpc(
+    update.downloadUrl,
+    update.latestVersion,
+    update.digest,
+  );
   if (result.ok) {
     toast.style = Toast.Style.Success;
     toast.title = "Upgrade complete";

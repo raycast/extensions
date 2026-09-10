@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "frp-client-manager",
-  "title": "frp Client Manager",
+  "title": "Frp Client Manager",
   "description": "Manage a local frp client (frpc): service control, proxies, logs, config hot-reload, and version upgrades.",
   "icon": "icon.png",
   "author": "DanielZHAO",
@@ -43,7 +43,7 @@
     },
     {
       "name": "menu-bar",
-      "title": "frp Menu Bar",
+      "title": "Frp Menu Bar",
       "description": "Menu bar extra showing frpc status and proxy counts.",
       "mode": "menu-bar",
       "interval": "30s"
@@ -52,7 +52,7 @@
   "preferences": [
     {
       "name": "frpDir",
-      "title": "frp Directory",
+      "title": "Frp Directory",
       "description": "Root directory that contains frpc.toml, logs, and versioned frpc binaries.",
       "type": "textfield",
       "required": true,
@@ -61,7 +61,7 @@
     },
     {
       "name": "launchdLabel",
-      "title": "launchd Label",
+      "title": "Launchd Label",
       "description": "Label of the LaunchAgent that runs frpc (e.g. com.user.frpc). Leave empty if frpc is not managed by launchd.",
       "type": "textfield",
       "required": false,

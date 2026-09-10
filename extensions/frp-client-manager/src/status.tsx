@@ -144,9 +144,9 @@ function StatusActions({
 
   return (
     <ActionPanel>
-      {managed ? (
+      {managed || running ? (
         <ActionPanel.Section title="Service">
-          {running ? null : (
+          {running || !managed ? null : (
             <Action
               title="Start"
               icon={Icon.Play}
@@ -278,7 +278,11 @@ async function handleUpgrade(
     style: Toast.Style.Animated,
     title: `Upgrading to ${update.latestVersion}…`,
   });
-  const result = await upgradeFrpc(update.downloadUrl, update.latestVersion);
+  const result = await upgradeFrpc(
+    update.downloadUrl,
+    update.latestVersion,
+    update.digest,
+  );
   if (result.ok) {
     toast.style = Toast.Style.Success;
     toast.title = "Upgrade complete";

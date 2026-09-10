@@ -52,7 +52,7 @@ export default function Command() {
         <List.Item
           key={item.config.name}
           title={item.config.name}
-          subtitle={`${item.localAddress} → ${item.config.remotePort}`}
+          subtitle={`${item.localAddress} → ${item.remoteAddress}`}
           icon={proxyIcon(item)}
           accessories={proxyAccessories(item)}
           actions={
@@ -86,7 +86,10 @@ export default function Command() {
 }
 
 function showSsh(item: ProxyViewItem): boolean {
-  return item.config.name === "ssh" || item.config.localPort === 22;
+  return (
+    item.config.remotePort !== undefined &&
+    (item.config.name === "ssh" || item.config.localPort === 22)
+  );
 }
 
 function sshCommand(item: ProxyViewItem): string {

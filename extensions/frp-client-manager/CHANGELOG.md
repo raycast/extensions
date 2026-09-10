@@ -1,4 +1,4 @@
-# frp Client Manager Changelog
+# Frp Client Manager Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

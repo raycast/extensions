@@ -1,4 +1,4 @@
-# frp Client Manager
+# Frp Client Manager
 
 Manage a local [frp](https://github.com/fatedier/frp) client (frpc) on macOS from Raycast.
 
@@ -8,7 +8,7 @@ Manage a local [frp](https://github.com/fatedier/frp) client (frpc) on macOS fro
 - **Manage Proxies** — lists every proxy from `frpc.toml` with its live status from the frpc admin API. Copy the remote address or a ready-to-use SSH command.
 - **View Logs** — tail the frpc log with error / warning / info filters.
 - **Edit Config** — view `frpc.toml`, verify it with `frpc verify`, and hot-reload it through the admin API without dropping connections.
-- **frp Menu Bar** — always-on menu bar item with proxy status, service control, and update checks.
+- **Frp Menu Bar** — always-on menu bar item with proxy status, service control, and update checks.
 - **Updates** — detects new [frp releases](https://github.com/fatedier/frp/releases) and can upgrade the local frpc binary in one step (old versions are kept, the LaunchAgent plist is backed up, and the service is restarted).
 
 ## Setup

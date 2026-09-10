@@ -8,6 +8,7 @@ import {
   execFile as execFileCallback,
   type ExecFileException,
 } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   copyFile,
   cp,
@@ -33,14 +34,6 @@ const UPDATE_CACHE_TTL_MS = 60 * 60 * 1000;
 
 const FRPC_ARCH = arch === "arm64" ? "darwin_arm64" : "darwin_amd64";
 
-export interface ExtensionPreferences {
-  frpDir: string;
-  launchdLabel?: string;
-  adminAddr: string;
-  adminUser: string;
-  adminPassword?: string;
-}
-
 export interface ServiceStatus {
   running: boolean;
   state: string;
@@ -53,8 +46,8 @@ export interface ProxyConfig {
   name: string;
   type: string;
   localIP: string;
-  localPort: number;
-  remotePort: number;
+  localPort?: number;
+  remotePort?: number;
 }
 
 export interface FrpcConfig {
@@ -80,6 +73,7 @@ export interface UpdateCheckResult {
   localVersion: string;
   latestVersion?: string;
   downloadUrl?: string;
+  digest?: string;
   checkedAt: number;
 }
 
@@ -116,8 +110,8 @@ export interface LogLine {
   message: string;
 }
 
-export function getPrefs(): ExtensionPreferences {
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+export function getPrefs() {
+  const prefs = getPreferenceValues<Preferences>();
   return {
     frpDir: expandTilde(prefs.frpDir || "~/frp"),
     launchdLabel: prefs.launchdLabel?.trim() || undefined,
@@ -272,17 +266,41 @@ export async function startService(): Promise<void> {
 }
 
 export async function stopService(): Promise<void> {
-  await execFile("/bin/launchctl", ["bootout", launchdTarget(requireLabel())], {
-    timeout: 8000,
-  });
+  const label = requireLabel();
+  try {
+    await execFile("/bin/launchctl", ["bootout", launchdTarget(label)], {
+      timeout: 8000,
+    });
+    return;
+  } catch (error) {
+    // The job is not loaded (e.g. frpc was started manually). Fall back to
+    // terminating the running process so Stop never silently no-ops.
+    const status = await pgrepStatus();
+    if (status.running && status.pid) {
+      await execFile("/bin/kill", [String(status.pid)], { timeout: 5000 });
+      return;
+    }
+    throw error;
+  }
 }
 
 export async function restartService(): Promise<void> {
-  await execFile(
-    "/bin/launchctl",
-    ["kickstart", "-k", launchdTarget(requireLabel())],
-    { timeout: 8000 },
-  );
+  const label = requireLabel();
+  const status = await getServiceStatus();
+  if (status.managed) {
+    await execFile(
+      "/bin/launchctl",
+      ["kickstart", "-k", launchdTarget(label)],
+      { timeout: 8000 },
+    );
+    return;
+  }
+  // The launchd job is not loaded: stop any manually started frpc first,
+  // then bootstrap the service so Restart works in every state.
+  if (status.running && status.pid) {
+    await execFile("/bin/kill", [String(status.pid)], { timeout: 5000 });
+  }
+  await startService();
 }
 
 export async function parseFrpcToml(configPath: string): Promise<FrpcConfig> {
@@ -428,8 +446,25 @@ export async function checkForUpdates(
 ): Promise<UpdateCheckResult> {
   if (!force) {
     const cached = await readUpdateCache();
-    if (cached && Date.now() - cached.checkedAt < UPDATE_CACHE_TTL_MS) {
-      return { ...cached, localVersion };
+    if (
+      cached &&
+      Date.now() - cached.checkedAt < UPDATE_CACHE_TTL_MS &&
+      // Entries saved before checksum support lack a digest; refetch so an
+      // offered upgrade is always verifiable.
+      !(cached.hasUpdate && !cached.digest)
+    ) {
+      // Re-derive the decision against the current local version: the cached
+      // hasUpdate/downloadUrl go stale if the user adds or removes a
+      // versioned binary directory during the cache window.
+      const hasUpdate = cached.latestVersion
+        ? compareSemver(cached.latestVersion, localVersion) > 0
+        : false;
+      return {
+        ...cached,
+        localVersion,
+        hasUpdate,
+        downloadUrl: hasUpdate ? cached.downloadUrl : undefined,
+      };
     }
   }
 
@@ -470,6 +505,7 @@ export async function checkForUpdates(
       localVersion,
       latestVersion,
       downloadUrl: hasUpdate ? asset?.browser_download_url : undefined,
+      digest: hasUpdate ? assetDigest(asset) : undefined,
       checkedAt: Date.now(),
     };
     await LocalStorage.setItem(UPDATE_CACHE_KEY, JSON.stringify(result));
@@ -482,6 +518,7 @@ export async function checkForUpdates(
 export async function upgradeFrpc(
   downloadUrl: string,
   version: string,
+  expectedSha256?: string,
 ): Promise<UpgradeResult> {
   const prefs = getPrefs();
   const destDir = join(prefs.frpDir, `frp_${version}_${FRPC_ARCH}`);
@@ -500,7 +537,22 @@ export async function upgradeFrpc(
     if (!response.ok) {
       throw new Error(`download failed: HTTP ${response.status}`);
     }
-    await writeFile(tarPath, Buffer.from(await response.arrayBuffer()));
+    const archive = Buffer.from(await response.arrayBuffer());
+    // Verify the archive against the sha256 digest published on the GitHub
+    // release before anything is extracted or launched.
+    const checksum = expectedSha256 ?? (await fetchReleaseDigest(version));
+    if (!checksum) {
+      throw new Error(
+        "no checksum published for this release asset; aborting upgrade",
+      );
+    }
+    const actual = createHash("sha256").update(archive).digest("hex");
+    if (actual !== checksum.toLowerCase()) {
+      throw new Error(
+        "checksum mismatch: the downloaded archive does not match the digest published on the GitHub release",
+      );
+    }
+    await writeFile(tarPath, archive);
     await execFile("/usr/bin/tar", ["-xzf", tarPath, "-C", tmpDir], {
       timeout: 60_000,
     });
@@ -509,12 +561,19 @@ export async function upgradeFrpc(
     if (!existsSync(join(extracted, "frpc"))) {
       throw new Error("extracted archive is missing frpc");
     }
-    if (!existsSync(destDir)) {
-      try {
-        await rename(extracted, destDir);
-      } catch {
-        await cp(extracted, destDir, { recursive: true });
+    if (existsSync(destDir)) {
+      // A previous failed attempt may have left a stale or incomplete
+      // install behind; only reuse it when its binary actually reports the
+      // target version.
+      const existingVersion = await getFrpcVersion(newBinary);
+      if (existingVersion === version) {
+        await rm(extracted, { recursive: true, force: true });
+      } else {
+        await rm(destDir, { recursive: true, force: true });
+        await moveIntoPlace(extracted, destDir);
       }
+    } else {
+      await moveIntoPlace(extracted, destDir);
     }
 
     if (plistPath && bakPath && existsSync(plistPath)) {
@@ -691,8 +750,14 @@ export async function loadProxyItems(): Promise<ProxyViewItem[]> {
     return {
       config: proxy,
       serverAddr: config.serverAddr,
-      remoteAddress: `${config.serverAddr}:${proxy.remotePort}`,
-      localAddress: `${proxy.localIP}:${proxy.localPort}`,
+      remoteAddress:
+        proxy.remotePort !== undefined
+          ? `${config.serverAddr}:${proxy.remotePort}`
+          : (runtime?.remote_addr ?? config.serverAddr),
+      localAddress:
+        proxy.localPort !== undefined
+          ? `${proxy.localIP}:${proxy.localPort}`
+          : (runtime?.local_addr ?? proxy.localIP),
       runtime,
       statusUnavailable,
     };
@@ -852,18 +917,29 @@ function toProxyConfig(value: unknown): ProxyConfig | undefined {
   ) {
     return undefined;
   }
-  const localPort = Number(value.localPort);
-  const remotePort = Number(value.remotePort);
-  if (!Number.isFinite(localPort) || !Number.isFinite(remotePort)) {
-    return undefined;
-  }
-  return {
+  // Many valid proxy kinds omit one or both ports: stcp/xtcp/tcpmux and
+  // plugin-based proxies may have no remotePort, visitors have no localPort.
+  // Only reject entries whose port is present but not a number.
+  const config: ProxyConfig = {
     name: value.name,
     type: value.type,
     localIP: typeof value.localIP === "string" ? value.localIP : "127.0.0.1",
-    localPort,
-    remotePort,
   };
+  if (value.localPort !== undefined) {
+    const localPort = Number(value.localPort);
+    if (!Number.isFinite(localPort)) {
+      return undefined;
+    }
+    config.localPort = localPort;
+  }
+  if (value.remotePort !== undefined) {
+    const remotePort = Number(value.remotePort);
+    if (!Number.isFinite(remotePort)) {
+      return undefined;
+    }
+    config.remotePort = remotePort;
+  }
+  return config;
 }
 
 function toProxyRuntime(value: unknown): ProxyRuntime | undefined {
@@ -908,7 +984,7 @@ function parseAdminStatus(value: unknown): AdminStatusMap | undefined {
 
 function isGithubRelease(value: unknown): value is {
   tag_name: string;
-  assets: { name: string; browser_download_url: string }[];
+  assets: { name: string; browser_download_url: string; digest?: string }[];
 } {
   if (
     !isRecord(value) ||
@@ -921,8 +997,57 @@ function isGithubRelease(value: unknown): value is {
     (asset) =>
       isRecord(asset) &&
       typeof asset.name === "string" &&
-      typeof asset.browser_download_url === "string",
+      typeof asset.browser_download_url === "string" &&
+      (asset.digest === undefined || typeof asset.digest === "string"),
   );
+}
+
+function assetDigest(
+  asset: { digest?: string } | undefined,
+): string | undefined {
+  const digest = asset?.digest;
+  return digest?.startsWith("sha256:")
+    ? digest.slice("sha256:".length)
+    : undefined;
+}
+
+async function fetchReleaseDigest(
+  version: string,
+): Promise<string | undefined> {
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/fatedier/frp/releases/tags/v${version}`,
+      {
+        headers: {
+          "User-Agent": USER_AGENT,
+          Accept: "application/vnd.github+json",
+        },
+        signal: AbortSignal.timeout(5000),
+      },
+    );
+    if (!response.ok) {
+      return undefined;
+    }
+    const payload: unknown = await response.json();
+    if (!isGithubRelease(payload)) {
+      return undefined;
+    }
+    const assetName = `frp_${version}_${FRPC_ARCH}.tar.gz`;
+    return assetDigest(payload.assets.find((item) => item.name === assetName));
+  } catch {
+    return undefined;
+  }
+}
+
+async function moveIntoPlace(
+  source: string,
+  destination: string,
+): Promise<void> {
+  try {
+    await rename(source, destination);
+  } catch {
+    await cp(source, destination, { recursive: true });
+  }
 }
 
 async function readUpdateCache(): Promise<UpdateCheckResult | undefined> {
@@ -951,6 +1076,7 @@ async function readUpdateCache(): Promise<UpdateCheckResult | undefined> {
           : undefined,
       downloadUrl:
         typeof parsed.downloadUrl === "string" ? parsed.downloadUrl : undefined,
+      digest: typeof parsed.digest === "string" ? parsed.digest : undefined,
       checkedAt: parsed.checkedAt,
     };
   } catch {
