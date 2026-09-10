@@ -1,6 +1,6 @@
 # Changelog
 
-## [Feature] - 2026-09-10
+## [Feature] - {PR_MERGE_DATE}
 
 - Model and AI Command forms now combine API model discovery and manual model ID entry in one searchable dropdown.
 - Removed the separate `Custom model` preference; saved model IDs remain available when model discovery fails or omits them.
