@@ -29,6 +29,8 @@ Browse your LaunchDarkly feature flags, targeting rules, environments and recent
 
 ## Commands
 
+Shortcuts below are shown for macOS; on Windows, use `Ctrl` instead of `⌘` and `Alt` instead of `⌥`.
+
 ### List Feature Flags
 
 Search flags in the current project. The dropdown filters by **state** (live, deprecated, archived), **type** (temporary, permanent), **My Flags** (flags you maintain) and **tags**. Favorites and recently viewed flags appear above the results when the search is empty.

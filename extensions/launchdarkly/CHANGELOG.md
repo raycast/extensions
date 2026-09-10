@@ -3,6 +3,7 @@
 ## [Windows support] - {PR_MERGE_DATE}
 
 - 🪟 The extension is now available on Raycast for Windows
+- ⌨️ Switch Project, Toggle Name, Recent Changes and Flag History shortcuts use `Ctrl` instead of `⌘` on Windows
 
 ## [Projects, history, favorites and richer targeting] - 2026-09-08
 
