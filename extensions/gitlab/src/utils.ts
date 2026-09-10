@@ -193,6 +193,10 @@ export function capitalizeFirstLetter(name: string): string {
 export function toFormValues(values: Record<string, unknown>): Record<string, string> {
   const val: Record<string, string> = {};
   for (const [k, v] of Object.entries(values)) {
+    if (typeof v === "boolean") {
+      val[k] = String(v);
+      continue;
+    }
     if (v) {
       if (Array.isArray(v)) {
         if (v.length > 0) {
