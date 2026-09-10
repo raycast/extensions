@@ -48,12 +48,14 @@ export interface ProxyConfig {
   localIP: string;
   localPort?: number;
   remotePort?: number;
+  serverName?: string;
 }
 
 export interface FrpcConfig {
   serverAddr: string;
   serverPort: number;
   proxies: ProxyConfig[];
+  visitors: ProxyConfig[];
   logTo?: string;
 }
 
@@ -101,6 +103,7 @@ export interface ProxyViewItem {
   localAddress: string;
   runtime?: ProxyRuntime;
   statusUnavailable: boolean;
+  visitor: boolean;
 }
 
 export interface LogLine {
@@ -253,7 +256,7 @@ export async function getServiceStatus(): Promise<ServiceStatus> {
       // not loaded: fall through to pgrep so a manually started frpc still shows
     }
   }
-  return pgrepStatus();
+  return pgrepStatus(getPrefs().frpDir);
 }
 
 export async function startService(): Promise<void> {
@@ -274,8 +277,9 @@ export async function stopService(): Promise<void> {
     return;
   } catch (error) {
     // The job is not loaded (e.g. frpc was started manually). Fall back to
-    // terminating the running process so Stop never silently no-ops.
-    const status = await pgrepStatus();
+    // terminating the running process from the configured frp directory so
+    // Stop never silently no-ops — and never kills an unrelated instance.
+    const status = await pgrepStatus(getPrefs().frpDir);
     if (status.running && status.pid) {
       await execFile("/bin/kill", [String(status.pid)], { timeout: 5000 });
       return;
@@ -324,8 +328,17 @@ export async function parseFrpcToml(configPath: string): Promise<FrpcConfig> {
       }
     }
   }
+  const visitors: ProxyConfig[] = [];
+  if (Array.isArray(parsed.visitors)) {
+    for (const entry of parsed.visitors) {
+      const visitor = toVisitorConfig(entry);
+      if (visitor) {
+        visitors.push(visitor);
+      }
+    }
+  }
 
-  return { serverAddr, serverPort, proxies, logTo };
+  return { serverAddr, serverPort, proxies, visitors, logTo };
 }
 
 export async function fetchAdminStatus(): Promise<AdminStatusMap | undefined> {
@@ -446,25 +459,23 @@ export async function checkForUpdates(
 ): Promise<UpdateCheckResult> {
   if (!force) {
     const cached = await readUpdateCache();
-    if (
-      cached &&
-      Date.now() - cached.checkedAt < UPDATE_CACHE_TTL_MS &&
-      // Entries saved before checksum support lack a digest; refetch so an
-      // offered upgrade is always verifiable.
-      !(cached.hasUpdate && !cached.digest)
-    ) {
+    if (cached && Date.now() - cached.checkedAt < UPDATE_CACHE_TTL_MS) {
       // Re-derive the decision against the current local version: the cached
       // hasUpdate/downloadUrl go stale if the user adds or removes a
       // versioned binary directory during the cache window.
       const hasUpdate = cached.latestVersion
         ? compareSemver(cached.latestVersion, localVersion) > 0
         : false;
-      return {
-        ...cached,
-        localVersion,
-        hasUpdate,
-        downloadUrl: hasUpdate ? cached.downloadUrl : undefined,
-      };
+      // Entries saved before checksum support (or while no asset metadata
+      // was stored) cannot offer a verifiable upgrade; refetch instead.
+      if (!hasUpdate || (cached.downloadUrl && cached.digest)) {
+        return {
+          ...cached,
+          localVersion,
+          hasUpdate,
+          downloadUrl: hasUpdate ? cached.downloadUrl : undefined,
+        };
+      }
     }
   }
 
@@ -504,8 +515,10 @@ export async function checkForUpdates(
       hasUpdate,
       localVersion,
       latestVersion,
-      downloadUrl: hasUpdate ? asset?.browser_download_url : undefined,
-      digest: hasUpdate ? assetDigest(asset) : undefined,
+      // Always cache the asset metadata so a later local downgrade can still
+      // offer a verifiable upgrade without a refetch.
+      downloadUrl: asset?.browser_download_url,
+      digest: assetDigest(asset),
       checkedAt: Date.now(),
     };
     await LocalStorage.setItem(UPDATE_CACHE_KEY, JSON.stringify(result));
@@ -715,7 +728,10 @@ export async function loadStatusDashboard(): Promise<StatusDashboard> {
   ]);
   const counts = adminStatus
     ? countOnline(adminStatus)
-    : { online: 0, total: config?.proxies.length ?? 0 };
+    : {
+        online: 0,
+        total: config ? config.proxies.length + config.visitors.length : 0,
+      };
   const update = await checkForUpdates(version ?? "");
   const serverAddress = config
     ? `${config.serverAddr}:${config.serverPort}`
@@ -745,7 +761,7 @@ export async function loadProxyItems(): Promise<ProxyViewItem[]> {
   const runtimes = flattenAdminStatus(adminStatus);
   const statusUnavailable = !adminStatus;
 
-  return config.proxies.map((proxy) => {
+  const toItem = (proxy: ProxyConfig, visitor: boolean): ProxyViewItem => {
     const runtime = runtimes.find((item) => item.name === proxy.name);
     return {
       config: proxy,
@@ -753,15 +769,23 @@ export async function loadProxyItems(): Promise<ProxyViewItem[]> {
       remoteAddress:
         proxy.remotePort !== undefined
           ? `${config.serverAddr}:${proxy.remotePort}`
-          : (runtime?.remote_addr ?? config.serverAddr),
+          : (runtime?.remote_addr ??
+            (proxy.serverName
+              ? `server proxy: ${proxy.serverName}`
+              : config.serverAddr)),
       localAddress:
         proxy.localPort !== undefined
           ? `${proxy.localIP}:${proxy.localPort}`
           : (runtime?.local_addr ?? proxy.localIP),
       runtime,
       statusUnavailable,
+      visitor,
     };
-  });
+  };
+  return [
+    ...config.proxies.map((proxy) => toItem(proxy, false)),
+    ...config.visitors.map((visitor) => toItem(visitor, true)),
+  ];
 }
 
 function requireLabel(): string {
@@ -786,15 +810,21 @@ function launchdTarget(label: string): string {
   return `${launchdDomain()}/${label}`;
 }
 
-async function pgrepStatus(): Promise<ServiceStatus> {
+async function pgrepStatus(frpDir?: string): Promise<ServiceStatus> {
   try {
     const { stdout } = await execFile("/usr/bin/pgrep", ["-fl", "frpc"], {
       timeout: 3000,
     });
-    const line = stdout
+    const lines = stdout
       .split("\n")
       .map((entry) => entry.trim())
-      .find((entry) => entry.includes("/frpc") && !entry.includes("pgrep"));
+      .filter((entry) => entry.includes("/frpc") && !entry.includes("pgrep"));
+    // Scope the match to the configured frp directory: an unscoped match
+    // would let Stop/Restart kill an unrelated frpc instance.
+    const root = frpDir?.replace(/\/+$/, "");
+    const line = (
+      root ? lines.filter((entry) => entry.includes(`${root}/`)) : lines
+    )[0];
     if (!line) {
       return { running: false, state: "not loaded", managed: false };
     }
@@ -942,6 +972,34 @@ function toProxyConfig(value: unknown): ProxyConfig | undefined {
   return config;
 }
 
+function toVisitorConfig(value: unknown): ProxyConfig | undefined {
+  if (
+    !isRecord(value) ||
+    typeof value.name !== "string" ||
+    typeof value.type !== "string"
+  ) {
+    return undefined;
+  }
+  // Visitors bind locally (bindAddr/bindPort) and point at a server-side
+  // proxy via serverName; they have no remotePort of their own.
+  const config: ProxyConfig = {
+    name: value.name,
+    type: value.type,
+    localIP: typeof value.bindAddr === "string" ? value.bindAddr : "127.0.0.1",
+  };
+  if (typeof value.serverName === "string") {
+    config.serverName = value.serverName;
+  }
+  if (value.bindPort !== undefined) {
+    const bindPort = Number(value.bindPort);
+    if (!Number.isFinite(bindPort)) {
+      return undefined;
+    }
+    config.localPort = bindPort;
+  }
+  return config;
+}
+
 function toProxyRuntime(value: unknown): ProxyRuntime | undefined {
   if (
     !isRecord(value) ||
@@ -984,7 +1042,11 @@ function parseAdminStatus(value: unknown): AdminStatusMap | undefined {
 
 function isGithubRelease(value: unknown): value is {
   tag_name: string;
-  assets: { name: string; browser_download_url: string; digest?: string }[];
+  assets: {
+    name: string;
+    browser_download_url: string;
+    digest?: string | null;
+  }[];
 } {
   if (
     !isRecord(value) ||
@@ -993,17 +1055,21 @@ function isGithubRelease(value: unknown): value is {
   ) {
     return false;
   }
+  // GitHub's asset schema allows `digest` to be null; a single null digest
+  // must not invalidate the whole release response.
   return value.assets.every(
     (asset) =>
       isRecord(asset) &&
       typeof asset.name === "string" &&
       typeof asset.browser_download_url === "string" &&
-      (asset.digest === undefined || typeof asset.digest === "string"),
+      (asset.digest === undefined ||
+        asset.digest === null ||
+        typeof asset.digest === "string"),
   );
 }
 
 function assetDigest(
-  asset: { digest?: string } | undefined,
+  asset: { digest?: string | null } | undefined,
 ): string | undefined {
   const digest = asset?.digest;
   return digest?.startsWith("sha256:")

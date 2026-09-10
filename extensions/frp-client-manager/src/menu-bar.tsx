@@ -191,7 +191,9 @@ async function loadMenuSnapshot(): Promise<MenuSnapshot> {
     version,
     adminReachable: Boolean(adminStatus),
     proxies,
-    configuredCount: config?.proxies.length ?? 0,
+    configuredCount: config
+      ? config.proxies.length + config.visitors.length
+      : 0,
     update,
     logPath,
     managed: hasLaunchdService(),

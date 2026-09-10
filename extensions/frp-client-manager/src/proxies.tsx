@@ -58,8 +58,10 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard
-                title="Copy Remote Address"
-                content={item.remoteAddress}
+                title={
+                  item.visitor ? "Copy Local Address" : "Copy Remote Address"
+                }
+                content={item.visitor ? item.localAddress : item.remoteAddress}
               />
               {showSsh(item) ? (
                 <Action.CopyToClipboard
@@ -112,6 +114,11 @@ function proxyAccessories(item: ProxyViewItem) {
     tag?: { value: string; color: Color };
     text?: string;
   }[] = [{ text: item.config.type }, { text: item.remoteAddress }];
+  if (item.visitor) {
+    accessories.unshift({
+      tag: { value: "visitor", color: Color.Blue },
+    });
+  }
   if (item.statusUnavailable) {
     accessories.unshift({
       tag: { value: "status unavailable", color: Color.SecondaryText },
