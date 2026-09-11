@@ -4,7 +4,7 @@ import { delimiter, join } from "node:path";
 import { homedir } from "node:os";
 import { execFile } from "node:child_process";
 import { getHerdrPreferences } from "./preferences";
-import type { HerdrSession, HerdrSnapshot, PaneInfo } from "./types";
+import type { AgentInfo, HerdrSession, HerdrSnapshot, PaneInfo } from "./types";
 
 interface RunOptions {
   timeout?: number;
@@ -162,6 +162,12 @@ export async function getSessions(): Promise<HerdrSession[]> {
 }
 
 export async function focusResource(kind: "workspace" | "tab" | "pane" | "agent", id: string): Promise<void> {
+  if (kind === "agent") {
+    // herdr v0.9.0's `agent focus` doesn't push workspace switches to attached clients; route through pane focus.
+    const target = await runHerdrJson<{ agent: AgentInfo }>(["agent", "get", id]);
+    await focusPane(target.agent.pane_id);
+    return;
+  }
   if (kind === "pane") {
     await focusPane(id);
     return;
