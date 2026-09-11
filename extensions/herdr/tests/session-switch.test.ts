@@ -43,6 +43,8 @@ interface Fixture {
   spawned?: { processes?: Process[]; panes?: Pane[] };
   /** Reveal finds the pane but cannot activate it, so it reports unavailable. */
   activateFails?: boolean;
+  /** After the spawn, the process list cannot be read: pgrep fails outright. */
+  lookupFailsAfterSpawn?: boolean;
 }
 
 const events: string[] = [];
@@ -66,6 +68,8 @@ function mockSystem(fixture: Fixture) {
     const respond = (stdout: string) => callback(null, stdout, "");
     if (path.endsWith("pgrep")) {
       events.push("pgrep");
+      if (spawned && fixture.lookupFailsAfterSpawn)
+        return callback(Object.assign(new Error("timeout"), { killed: true }), "", "");
       if (processes().length === 0) return callback(Object.assign(new Error("no match"), { code: 1 }), "", "");
       return respond(
         processes()
@@ -352,12 +356,15 @@ describe("switchToSession replacement identity", () => {
     expect(storage.get("selectedSession")).toBe("tmp-a");
   });
 
-  it("detaches once a client that was not already there appears", async () => {
+  // When the spawn reports no pane, as on the `open` fallback or a terminal other
+  // than WezTerm, identity falls back to a client that was not open before.
+  it("detaches once a client that was not already there appears, without a pane id", async () => {
     const replacement: Process = { pid: "902", tty: "ttys091", args: `${binary} session attach tmp-b` };
     mockSystem({
       processes: [previousClient, strayTarget],
       panes: [previousPane, strayPane],
       activateFails: true,
+      spawnResult: "",
       spawned: { processes: [replacement], panes: [{ window_id: 3, pane_id: 78, tty_name: "/dev/ttys091" }] },
     });
 
@@ -378,5 +385,61 @@ describe("switchToSession replacement identity", () => {
     expect(result).toMatchObject({ outcome: "attached", detached: 0 });
     expect(storage.get("selectedSession")).toBe("tmp-b");
     expect(kill).not.toHaveBeenCalled();
+  });
+});
+
+// Regression: a lookup that failed after the spawn was read as "cannot be
+// verified here" and the switch went on to detach. The terminal could list its
+// panes a moment earlier, so this is a transient failure with clients at stake,
+// and nothing may be signaled on it.
+describe("switchToSession with an unavailable confirmation", () => {
+  it("preserves the previous clients and the selection when the lookup fails", async () => {
+    mockSystem({
+      processes: [previousClient],
+      panes: [previousPane],
+      spawned: spawnedTarget,
+      lookupFailsAfterSpawn: true,
+    });
+
+    await expect(switchToSession("tmp-b", switchOptions(kill))).rejects.toThrow(/confirm/);
+    expect(kill).not.toHaveBeenCalled();
+    expect(storage.get("selectedSession")).toBe("tmp-a");
+  });
+});
+
+// The maintainer asked for the new client to be verified where it was aimed.
+// WezTerm reports the pane id it spawned, so the confirmation looks for a
+// client of the target in that very pane rather than for any new client.
+describe("switchToSession confirmation by spawned pane", () => {
+  const strayTarget: Process = { pid: "901", tty: "ttys090", args: `${binary} session attach tmp-b` };
+  const strayPane = { window_id: 9, pane_id: 90, tty_name: "/dev/ttys090" };
+
+  it("requires the client to sit in the pane the spawn created", async () => {
+    // A new client of the target appears, but in some other pane, not pane 77.
+    const elsewhere: Process = { pid: "903", tty: "ttys093", args: `${binary} session attach tmp-b` };
+    mockSystem({
+      processes: [previousClient, strayTarget],
+      panes: [previousPane, strayPane],
+      activateFails: true,
+      spawned: { processes: [elsewhere], panes: [{ window_id: 4, pane_id: 93, tty_name: "/dev/ttys093" }] },
+    });
+
+    await expect(switchToSession("tmp-b", switchOptions(kill))).rejects.toThrow(/tmp-b/);
+    expect(kill).not.toHaveBeenCalled();
+  });
+
+  it("accepts the client in the spawned pane even beside an older client", async () => {
+    const replacement: Process = { pid: "902", tty: "ttys091", args: `${binary} session attach tmp-b` };
+    mockSystem({
+      processes: [previousClient, strayTarget],
+      panes: [previousPane, strayPane],
+      activateFails: true,
+      spawned: { processes: [replacement], panes: [{ window_id: 3, pane_id: 77, tty_name: "/dev/ttys091" }] },
+    });
+
+    const result = await switchToSession("tmp-b", switchOptions(kill));
+
+    expect(result).toMatchObject({ outcome: "attached", detached: 1 });
+    expect(kill).toHaveBeenCalledWith(101, "SIGTERM");
   });
 });

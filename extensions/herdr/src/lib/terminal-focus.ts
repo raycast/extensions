@@ -216,6 +216,7 @@ export function parseWezTermPanes(output: string): WezTermPane[] | undefined {
 export interface WezTermMatch {
   tty: string;
   windowId?: string;
+  paneId?: string;
 }
 
 /**
@@ -234,6 +235,7 @@ export function selectWezTermPanes(
     .map((pane) => ({
       tty: pane.tty_name as string,
       windowId: Number.isInteger(pane.window_id) ? String(pane.window_id) : undefined,
+      paneId: Number.isInteger(pane.pane_id) ? String(pane.pane_id) : undefined,
     }));
   return { matches, windowId: matches.find((match) => match.windowId !== undefined)?.windowId };
 }

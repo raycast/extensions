@@ -59,5 +59,14 @@ export function releaseSessionPin(): void {
  */
 export async function resolveSession(explicit?: string): Promise<string> {
   if (explicit !== undefined) return explicit;
-  return pinnedSession ?? (await getSelectedSession()) ?? getPreferredSession();
+  return pinnedSession ?? (await resolveStoredSession());
+}
+
+/**
+ * The Selected Session as persisted, or the Preferred Session, ignoring any pin.
+ * A view refreshes through this so it can discover a selection made in another
+ * command; the pin exists for the actions that view fires, not for its reads.
+ */
+export async function resolveStoredSession(): Promise<string> {
+  return (await getSelectedSession()) ?? getPreferredSession();
 }

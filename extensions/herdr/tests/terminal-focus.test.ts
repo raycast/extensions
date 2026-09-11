@@ -144,8 +144,8 @@ describe("selectWezTermPanes", () => {
   it("keeps only ttys that are WezTerm panes and reports each match's window", () => {
     expect(selectWezTermPanes(panes, ["/dev/ttys041", "/dev/ttys001", "/dev/ttys003"])).toEqual({
       matches: [
-        { tty: "/dev/ttys001", windowId: "4" },
-        { tty: "/dev/ttys003", windowId: "5" },
+        { tty: "/dev/ttys001", windowId: "4", paneId: "1" },
+        { tty: "/dev/ttys003", windowId: "5", paneId: "3" },
       ],
       windowId: "4",
     });

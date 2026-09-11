@@ -4,6 +4,7 @@ import {
   pinSession,
   releaseSessionPin,
   resolveSession,
+  resolveStoredSession,
   setSelectedSession,
 } from "../src/lib/session-selection";
 import { snapshotOfSession } from "../src/hooks/use-herdr-snapshot";
@@ -115,5 +116,28 @@ describe("snapshotOfSession", () => {
     expect(snapshotOfSession({ session: "tmp-a", snapshot }, "tmp-a")).toBe(snapshot);
     expect(snapshotOfSession({ session: "tmp-a", snapshot }, "tmp-b")).toBeUndefined();
     expect(snapshotOfSession(undefined, "tmp-a")).toBeUndefined();
+  });
+});
+
+// Regression: the view's periodic refresh resolved through its own pin, so it
+// could never observe a selection made in another command. The menu bar runs
+// in its own long-lived process, so it stayed on the session it started with.
+describe("resolveStoredSession", () => {
+  it("reads the stored selection past any pin", async () => {
+    storage.set("selectedSession", "tmp-b");
+    preferences.sessionName = "work";
+    pinSession("tmp-a");
+
+    await expect(resolveStoredSession()).resolves.toBe("tmp-b");
+    await expect(resolveSession()).resolves.toBe("tmp-a");
+  });
+
+  it("falls back to the Preferred Session, then to Herdr's default", async () => {
+    pinSession("tmp-a");
+    preferences.sessionName = "work";
+    await expect(resolveStoredSession()).resolves.toBe("work");
+
+    preferences.sessionName = undefined;
+    await expect(resolveStoredSession()).resolves.toBe("default");
   });
 });

@@ -39,6 +39,11 @@ export interface LaunchOptions {
   wezTermListing?: string;
 }
 
+export interface LaunchResult {
+  /** WezTerm only: the pane `cli spawn` created, so a caller can confirm this launch and no other attached. */
+  wezTermPaneId?: string;
+}
+
 function execCapture(path: string, args: string[], timeout = 5_000): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile(path, args, { timeout, encoding: "utf8" }, (error, stdout) =>
@@ -171,8 +176,8 @@ export async function focusExistingHerdrClient(explicitSession?: string): Promis
   return "unavailable";
 }
 
-/** A located Client, with the Terminal Window of its pane where the terminal reports one. */
-export type LocatedClient = HerdrClient & { windowId?: string };
+/** A located Client, with its Terminal Window and pane where the terminal reports them. */
+export type LocatedClient = HerdrClient & { windowId?: string; paneId?: string };
 
 export type ClientLocation =
   | { status: "found"; clients: LocatedClient[]; windowId?: string; listing?: string }
@@ -217,10 +222,10 @@ export async function locateTerminalPaneClients(session: string): Promise<Client
     matches = output === undefined ? undefined : parseTtyList(output).map((tty) => ({ tty }));
   }
   if (matches === undefined) return { status: "unavailable", reason: `${terminalName} did not list its panes` };
-  const paneWindows = new Map(matches.map((match) => [match.tty, match.windowId]));
+  const byTty = new Map(matches.map((match) => [match.tty, match]));
   const inPanes = clients
-    .filter((client) => paneWindows.has(client.tty))
-    .map((client) => ({ ...client, windowId: paneWindows.get(client.tty) }));
+    .filter((client) => byTty.has(client.tty))
+    .map((client) => ({ ...client, windowId: byTty.get(client.tty)?.windowId, paneId: byTty.get(client.tty)?.paneId }));
   return inPanes.length > 0 ? { status: "found", clients: inPanes, windowId, listing } : { status: "none" };
 }
 
@@ -258,7 +263,7 @@ async function wezTermPlacement(executable: string, options: LaunchOptions): Pro
   return windowId ? ["--window-id", windowId] : ["--new-window"];
 }
 
-export async function launchHerdrInTerminal(args: string[] = [], options: LaunchOptions = {}): Promise<void> {
+export async function launchHerdrInTerminal(args: string[] = [], options: LaunchOptions = {}): Promise<LaunchResult> {
   const binary = await resolveHerdrBinary();
   const application = selectedApplication();
   // Launched clients inherit the Raycast process environment, where a leaked
@@ -270,14 +275,14 @@ export async function launchHerdrInTerminal(args: string[] = [], options: Launch
   if (customLauncher) {
     const [executable, launcherArgs] = expandCustomLauncher(customLauncher, binary, sessionArgs);
     await spawnDetached(executable, launcherArgs);
-    return;
+    return {};
   }
   const kind = detectTerminalKind(application || { bundleId: "com.apple.Terminal", name: "Terminal", path: "" });
 
   if (kind === "terminal") {
     const script = `tell application "Terminal"\nactivate\ndo script ${appleScriptString(command)}\nend tell`;
     await exec("/usr/bin/osascript", ["-e", script]);
-    return;
+    return {};
   }
   if (kind === "iterm") {
     const placement = options.newWindow
@@ -297,13 +302,13 @@ ${placement}
 tell targetSession to write text ${appleScriptString(command)}
 end tell`;
     await exec("/usr/bin/osascript", ["-e", script]);
-    return;
+    return {};
   }
 
   const appTarget = application?.path || application?.name;
   if (!appTarget) {
     await exec("/usr/bin/open", ["-a", "Terminal"]);
-    return;
+    return {};
   }
   if (kind === "ghostty") {
     const placement = options.newWindow
@@ -320,13 +325,13 @@ set command of cfg to ${appleScriptString(command)}
 ${placement}
 return "opened"
 end tell`;
-    if ((await tryExecCapture("/usr/bin/osascript", ["-e", script], 1_500)) === "opened") return;
+    if ((await tryExecCapture("/usr/bin/osascript", ["-e", script], 1_500)) === "opened") return {};
     await exec("/usr/bin/open", ["-na", appTarget, "--args", "-e", binary, ...sessionArgs]);
-    return;
+    return {};
   }
   if (kind === "alacritty") {
     await exec("/usr/bin/open", ["-na", appTarget, "--args", "-e", binary, ...sessionArgs]);
-    return;
+    return {};
   }
   if (kind === "wezterm") {
     const executable = wezTermExecutable(application);
@@ -339,21 +344,22 @@ end tell`;
       );
       if (paneId && /^\d+$/.test(paneId)) {
         await bringTerminalToFront();
-        return;
+        return { wezTermPaneId: paneId };
       }
     }
     await exec("/usr/bin/open", ["-na", appTarget, "--args", "start", "--", binary, ...sessionArgs]);
-    return;
+    return {};
   }
   if (kind === "kitty") {
     const kittyExecutable = application?.path ? join(application.path, "Contents", "MacOS", "kitty") : undefined;
     if (kittyExecutable) await spawnDetached(kittyExecutable, [binary, ...sessionArgs]);
     else await exec("/usr/bin/open", ["-na", appTarget, "--args", binary, ...sessionArgs]);
-    return;
+    return {};
   }
   if (kind === "warp") {
     await launchWarp(appTarget, command);
-    return;
+    return {};
   }
   await exec("/usr/bin/open", ["-na", appTarget, "--args", "-e", binary, ...sessionArgs]);
+  return {};
 }

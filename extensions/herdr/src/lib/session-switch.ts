@@ -1,6 +1,11 @@
 import { HerdrError } from "./herdr";
 import { resolveSession, setSelectedSession } from "./session-selection";
-import { focusExistingHerdrClient, launchHerdrInTerminal, locateTerminalPaneClients } from "./terminal";
+import {
+  focusExistingHerdrClient,
+  launchHerdrInTerminal,
+  locateTerminalPaneClients,
+  type LocatedClient,
+} from "./terminal";
 
 export interface SwitchResult {
   /** The target's existing Client was revealed, or a new one was attached. */
@@ -35,32 +40,50 @@ async function terminalPaneClientPids(session: string): Promise<Set<string>> {
 }
 
 /**
- * Waits until a Client of `session` owns a Terminal Pane. A spawn only proves
- * the Terminal Application ran the command: Herdr can still exit afterwards, on
- * a protocol mismatch or a refused nested launch, so nothing is detached until a
- * Client is actually there. "unverifiable" is a terminal that cannot list its
- * panes, which is also a terminal where no detach is possible.
+ * Waits until a Client of `session` that `isReplacement` accepts owns a Terminal
+ * Pane. A spawn only proves the Terminal Application ran the command: Herdr can
+ * still exit afterwards, on a protocol mismatch or a refused nested launch, so
+ * nothing is detached until the Client is actually there.
  *
- * Clients in `ignorePids` do not count. A Client of the target can already be
- * open while Reveal still reports it as unavailable, on a listing that timed out
- * or a pane it could not activate, and such a Client says nothing about the
- * process just spawned. Passing no set accepts any Client, which is right when
- * nothing will be detached on the strength of it.
+ * A lookup that fails is read two ways. With Clients at stake (`strict`), the
+ * terminal listed its panes a moment ago, so the failure is transient and means
+ * "not yet"; at the deadline the switch fails and signals nothing. With nothing
+ * to detach, a terminal that cannot list its panes cannot verify anything, and
+ * the selection is allowed to proceed.
  */
 async function confirmClientAttached(
   session: string,
-  ignorePids: Set<string> | undefined,
+  isReplacement: (client: LocatedClient) => boolean,
+  strict: boolean,
   timeoutMs: number,
   pollMs: number,
 ): Promise<"attached" | "unverifiable" | "missing"> {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const located = await locateTerminalPaneClients(session);
-    if (located.status === "unavailable") return "unverifiable";
-    if (located.status === "found" && located.clients.some((client) => !ignorePids?.has(client.pid))) return "attached";
+    if (located.status === "found" && located.clients.some(isReplacement)) return "attached";
+    if (located.status === "unavailable" && !strict) return "unverifiable";
     if (Date.now() >= deadline) return "missing";
     await delay(pollMs);
   }
+}
+
+/**
+ * How the switch recognizes the Client its launch created. `alreadyOpen` is
+ * recorded only when Clients are at stake; without it, any Client of the target
+ * shows the Session is on screen and nothing will be signaled on the strength
+ * of it. Otherwise WezTerm reports the pane it spawned, so the Client must sit
+ * in that pane: one that appeared elsewhere, or was open before, proves nothing
+ * about this launch. Without a pane id, a Client that was not open before the
+ * launch counts.
+ */
+function replacementTest(
+  spawnedPaneId: string | undefined,
+  alreadyOpen: Set<string> | undefined,
+): (client: LocatedClient) => boolean {
+  if (alreadyOpen === undefined) return () => true;
+  if (spawnedPaneId !== undefined) return (client) => client.paneId === spawnedPaneId;
+  return (client) => !alreadyOpen.has(client.pid);
 }
 
 /**
@@ -94,9 +117,10 @@ export async function switchToSession(target: string, options: SwitchOptions = {
 
   // Recorded before the launch, and only when Clients are at stake: the switch
   // then knows which Clients of the target it must not mistake for the new one.
-  const alreadyOpen = location.status === "found" ? await terminalPaneClientPids(target) : undefined;
+  const detachPlanned = location.status === "found";
+  const alreadyOpen = detachPlanned ? await terminalPaneClientPids(target) : undefined;
 
-  await launchHerdrInTerminal(["session", "attach", target], {
+  const launched = await launchHerdrInTerminal(["session", "attach", target], {
     includeSession: false,
     windowId: location.status === "found" ? location.windowId : undefined,
     wezTermListing: location.status === "found" ? location.listing : undefined,
@@ -104,15 +128,16 @@ export async function switchToSession(target: string, options: SwitchOptions = {
 
   const confirmation = await confirmClientAttached(
     target,
-    alreadyOpen,
+    replacementTest(launched.wezTermPaneId, alreadyOpen),
+    detachPlanned,
     options.confirmTimeoutMs ?? CONFIRM_TIMEOUT_MS,
     options.confirmPollMs ?? CONFIRM_POLL_MS,
   );
   if (confirmation === "missing") {
     throw new HerdrError(
-      `Herdr did not attach “${target}”`,
+      `Could not confirm a new client of “${target}”`,
       "switch_unconfirmed",
-      `The terminal ran the command but no client of “${target}” appeared, so “${previous}” was left as it was.`,
+      `The terminal ran the command, but no client of “${target}” appeared where it was launched, so “${previous}” was left as it was.`,
       target,
     );
   }

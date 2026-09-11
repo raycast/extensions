@@ -65,10 +65,10 @@ export function statusIcon(status?: AgentStatus): { source: Icon; tintColor: Col
   return { source, tintColor: statusColor(status) };
 }
 
-/** Runs `action` behind a toast. A string it returns becomes the success toast's message. */
+/** Runs `action` behind a toast. A string it returns becomes the success toast's message; other results are ignored. */
 export async function runAction(
   title: string,
-  action: () => Promise<void | string>,
+  action: () => Promise<unknown>,
   options: { success?: string; onSuccess?: () => void | Promise<void> } = {},
 ): Promise<boolean> {
   const toast = await showToast({ style: Toast.Style.Animated, title });

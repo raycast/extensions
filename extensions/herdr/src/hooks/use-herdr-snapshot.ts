@@ -2,12 +2,16 @@ import { useEffect, useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { getSnapshot } from "../lib/herdr";
 import { getRefreshIntervalMs } from "../lib/preferences";
-import { pinSession, resolveSession } from "../lib/session-selection";
+import { pinSession, resolveStoredSession } from "../lib/session-selection";
 import type { HerdrSnapshot } from "../lib/types";
 
-/** The Session every command resolves to. Revalidate after selecting another. */
+/**
+ * The Session every command resolves to. Read from persisted state rather than
+ * through resolveSession: that would return this view's own pin first, and the
+ * view could never notice a selection made in another command.
+ */
 export function useSelectedSession() {
-  return useCachedPromise(() => resolveSession(), [], { keepPreviousData: true });
+  return useCachedPromise(() => resolveStoredSession(), [], { keepPreviousData: true });
 }
 
 interface SessionSnapshot {

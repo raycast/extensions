@@ -83,7 +83,9 @@ describe("launchHerdrInTerminal", () => {
   });
 
   it("omits the session flag when the caller opts out with its own argv", async () => {
-    await launchHerdrInTerminal(["session", "attach", "review"], { includeSession: false });
+    await expect(launchHerdrInTerminal(["session", "attach", "review"], { includeSession: false })).resolves.toEqual(
+      {},
+    );
     expect(spawnedArgs()).toEqual(["-e", binary, "session", "attach", "review"]);
   });
 
@@ -119,6 +121,16 @@ describe("launchHerdrInTerminal in WezTerm", () => {
 
     await launchHerdrInTerminal(["session", "attach", "tmp-b"], { includeSession: false });
     expect(spawnArgs()).toEqual(["cli", "spawn", "--window-id", "4", "--", binary, "session", "attach", "tmp-b"]);
+  });
+
+  // The pane id lets a caller confirm that this launch, and not some other
+  // client of the session, attached.
+  it("reports the pane the spawn created", async () => {
+    mockExecFile(() => "9");
+
+    await expect(launchHerdrInTerminal(["session", "attach", "tmp-b"], { includeSession: false })).resolves.toEqual({
+      wezTermPaneId: "9",
+    });
   });
 
   it("spawns a new window without listing panes when asked", async () => {
