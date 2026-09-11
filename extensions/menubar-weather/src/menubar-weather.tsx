@@ -22,17 +22,24 @@ export default function MenubarWeather() {
   const { data: weatherData, isLoading } = useLatestWeather(kLocation);
 
   const weather: OpenMeteoWeather | undefined = useMemo(() => {
-    if (!weatherData) {
-      const cache = new Cache();
-      const cacheStr = cache.get(CacheKey.LATEST_WEATHER);
-      if (cacheStr) {
+    // useCachedPromise with keepPreviousData can hand back stale data, so
+    // validate it before use and only then fall back to the cached payload.
+    if (isValidWeatherResponse(weatherData)) {
+      return weatherData;
+    }
+    const cache = new Cache();
+    const cacheStr = cache.get(CacheKey.LATEST_WEATHER);
+    if (cacheStr) {
+      try {
         const cachedWeather = JSON.parse(cacheStr) as unknown;
         if (isValidWeatherResponse(cachedWeather)) {
           return cachedWeather;
         }
+      } catch {
+        // Ignore a corrupt cache entry.
       }
     }
-    return weatherData;
+    return undefined;
   }, [weatherData]);
 
   const menuItems: string[] = useMemo(() => {

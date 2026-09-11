@@ -9,27 +9,71 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function hasNonEmptyArrays(record: Record<string, unknown>, keys: string[]) {
-  return keys.every((key) => Array.isArray(record[key]) && (record[key] as unknown[]).length > 0);
+const HOURLY_INDEXED_KEYS = ["apparent_temperature", "relativehumidity_2m", "surface_pressure", "visibility"];
+const DAILY_NUMBER_KEYS = [
+  "weathercode",
+  "windspeed_10m_max",
+  "winddirection_10m_dominant",
+  "temperature_2m_max",
+  "temperature_2m_min",
+  "rain_sum",
+  "uv_index_max",
+];
+const DAILY_STRING_KEYS = ["time", "sunrise", "sunset"];
+const HOURLY_UNIT_KEYS = ["relativehumidity_2m", "surface_pressure", "visibility"];
+
+// The menu command renders 24 hours (timeHour() is 0-23), so hourly arrays
+// must cover the current-hour index and every entry be a number or null.
+function isIndexedNumberArray(value: unknown): value is (number | null)[] {
+  return (
+    Array.isArray(value) && value.length >= 24 && value.every((entry) => typeof entry === "number" || entry === null)
+  );
+}
+
+function isNumberOrNullArray(value: unknown): value is (number | null)[] {
+  return (
+    Array.isArray(value) && value.length > 0 && value.every((entry) => typeof entry === "number" || entry === null)
+  );
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.length > 0 && value.every((entry) => typeof entry === "string");
 }
 
 export function isValidWeatherResponse(data: unknown): data is OpenMeteoWeather {
   if (!isRecord(data) || data.error === true) return false;
-  const { current_weather, hourly, daily, hourly_units } = data;
-  if (!isRecord(current_weather) || !isRecord(hourly_units) || !isRecord(hourly) || !isRecord(daily)) {
+  const { current_weather, hourly, daily, hourly_units, daily_units } = data;
+  if (!isRecord(current_weather) || !isRecord(hourly) || !isRecord(daily) || !isRecord(hourly_units)) {
     return false;
   }
+
   if (
     typeof current_weather.temperature !== "number" ||
     typeof current_weather.windspeed !== "number" ||
-    typeof current_weather.winddirection !== "number"
+    typeof current_weather.winddirection !== "number" ||
+    typeof current_weather.weathercode !== "number" ||
+    typeof current_weather.time !== "string"
   ) {
     return false;
   }
-  return (
-    hasNonEmptyArrays(hourly, ["apparent_temperature", "relativehumidity_2m", "surface_pressure", "visibility"]) &&
-    hasNonEmptyArrays(daily, ["temperature_2m_min", "temperature_2m_max", "uv_index_max", "sunrise", "sunset"])
-  );
+
+  if (!HOURLY_INDEXED_KEYS.every((key) => isIndexedNumberArray(hourly[key]))) return false;
+  if (!HOURLY_UNIT_KEYS.every((key) => typeof hourly_units[key] === "string")) return false;
+
+  if (!DAILY_STRING_KEYS.every((key) => isStringArray(daily[key]))) return false;
+  if (!DAILY_NUMBER_KEYS.every((key) => isNumberOrNullArray(daily[key]))) return false;
+
+  // Forecast submenus map over each numeric array but index daily.time at the
+  // same position, so all daily arrays must have the same length.
+  const dayCount = (daily.time as unknown[]).length;
+  const allDailyKeys = [...DAILY_STRING_KEYS, ...DAILY_NUMBER_KEYS];
+  if (!allDailyKeys.every((key) => (daily[key] as unknown[]).length === dayCount)) return false;
+
+  if (daily_units !== undefined && (!isRecord(daily_units) || typeof daily_units.rain_sum !== "string")) {
+    return false;
+  }
+
+  return true;
 }
 
 export async function getOpenMeteoWeather(lat: string, lon: string) {
