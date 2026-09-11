@@ -4,6 +4,7 @@ import path from "node:path";
 import * as queryTools from "../src/lib/query";
 import { scoreEntry } from "../src/lib/score";
 import { entryStoragePath } from "../src/lib/entry-identity";
+import { shouldReplaceIndex } from "../src/lib/index-refresh";
 import { relativeDepth } from "../src/lib/read-dir";
 import { Entry } from "../src/lib/types";
 import { createRecentValidator } from "../src/lib/recent-validation";
@@ -347,7 +348,7 @@ export async function browserChecks(
       available: true,
       partial: false,
     }),
-    shouldReplaceIndex: () => true,
+    shouldReplaceIndex,
     saveShortcutIndex: async () => {},
     setShortcuts: () => {},
     setShortcutsScannedAt: () => {},
@@ -386,6 +387,65 @@ export async function browserChecks(
   assert(
     refreshToast.style === "success" && displayedShared[0] === "/unsaved",
     "a successful refresh still publishes the newly saved shared index",
+  );
+  const previousShortcuts = {
+    shortcuts: [{ path: "/shortcut", name: "shortcut", target: "/target" }],
+    available: true,
+    partial: true,
+    scannedAt: 1,
+  };
+  const previousShared = {
+    paths: ["/previous", "/other"],
+    available: true,
+    partial: true,
+    scannedAt: 1,
+  };
+  let shortcutWrites = 0;
+  let sharedWrites = 0;
+  let displayedShortcuts: unknown;
+  let displayedTimestamp: number | undefined;
+  const partialRefreshDependencies = {
+    ...refreshDependencies,
+    loadShortcutIndex: async () => previousShortcuts,
+    scanShortcuts: async () => ({
+      ...previousShortcuts,
+      shortcuts: [],
+      scannedAt: 2,
+    }),
+    loadSharedIndex: () => previousShared,
+    scanSharedFolders: async () => ({
+      ...previousShared,
+      paths: ["/previous"],
+      scannedAt: 2,
+    }),
+    saveShortcutIndex: async () => {
+      shortcutWrites++;
+    },
+    saveSharedIndex: () => {
+      sharedWrites++;
+      return true;
+    },
+    setShortcuts: (shortcuts: unknown) => {
+      displayedShortcuts = shortcuts;
+    },
+    setShortcutsScannedAt: (timestamp: number) => {
+      displayedTimestamp = timestamp;
+    },
+  };
+  await new Function(...Object.keys(partialRefreshDependencies), refreshCode)(
+    ...Object.values(partialRefreshDependencies),
+  )();
+  assert(
+    shortcutWrites === 0 &&
+      sharedWrites === 0 &&
+      displayedShortcuts === previousShortcuts.shortcuts &&
+      displayedTimestamp === 1 &&
+      displayedShared === previousShared.paths,
+    "short action-panel refresh preserves richer partial indexes in storage and display",
+  );
+  assert(
+    /kept/i.test(refreshToast.message),
+    "short action-panel refresh reports retained partial indexes",
   );
   let target: { dir?: string; initialSelectionPath?: string } = {};
   const upStart = source.indexOf("      onUp:");

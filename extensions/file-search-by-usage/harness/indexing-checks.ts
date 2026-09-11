@@ -985,6 +985,44 @@ export async function indexingChecks(
       );
     }
 
+    for (const reason of ["time-limit", "depth-limit", "item-limit"] as const) {
+      const shrinking = loadCommand(path.join(root, `shrinking-${reason}`));
+      const savedShortcuts = JSON.stringify({ ...good, partial: true });
+      const savedShared = JSON.stringify({
+        paths: ["/foo/bar", "/foo/baz"],
+        scannedAt: 1,
+        available: true,
+        partial: true,
+      });
+      shrinking.storage.set("shortcuts", savedShortcuts);
+      shrinking.caches.get("shared-folders")!.set("index", savedShared);
+      Object.assign(shrinking.shared, {
+        paths: ["/foo/bar"],
+        scannedAt: 2,
+        partial: true,
+        partialReason: reason,
+      });
+      const refresh = shrinking.command();
+      await flush();
+      shrinking.scans[0]({
+        ...good,
+        shortcuts: [],
+        scannedAt: 2,
+        partial: true,
+        partialReason: reason,
+      });
+      await refresh;
+      assert(
+        shrinking.storage.get("shortcuts") === savedShortcuts &&
+          shrinking.caches.get("shared-folders")!.get("index") === savedShared,
+        `${reason} refresh keeps richer partial indexes and their saved metadata`,
+      );
+      assert(
+        shrinking.toasts.some((t) => /kept/i.test(t.message ?? "")),
+        `${reason} refresh explains that richer partial indexes were kept`,
+      );
+    }
+
     const evolving = loadCommand(path.join(root, "evolving"));
     const initial = evolving.command();
     await flush();

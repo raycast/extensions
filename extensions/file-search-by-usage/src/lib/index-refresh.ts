@@ -40,16 +40,18 @@ export function driveIndexCaveat(
   return [shortcutMessage, sharedMessage].filter(Boolean).join(" · ");
 }
 
-/** A bounded refresh must not discard a complete, non-empty index. */
+/** Partial scans cannot replace complete indexes or shrink saved partial ones. */
 export function shouldReplaceIndex(
   existingCount: number,
+  incomingCount: number,
   sourceAvailable: boolean,
   sourcePartial = false,
   existingPartial = false,
 ): boolean {
   return (
     existingCount === 0 ||
-    (sourceAvailable && (!sourcePartial || existingPartial))
+    (sourceAvailable &&
+      (!sourcePartial || (existingPartial && incomingCount >= existingCount)))
   );
 }
 

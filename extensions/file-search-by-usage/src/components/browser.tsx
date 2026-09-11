@@ -1270,6 +1270,7 @@ function BrowserView({
           const index = await scanShortcuts({ maxDepth: 6, budgetMs: 20_000 });
           const replaceShortcuts = shouldReplaceIndex(
             previousShortcuts.shortcuts.length,
+            index.shortcuts.length,
             index.available,
             index.partial,
             previousShortcuts.partial,
@@ -1292,6 +1293,7 @@ function BrowserView({
           const shared = await scanSharedFolders({ budgetMs: 20_000 });
           const replaceShared = shouldReplaceIndex(
             previousShared.paths.length,
+            shared.paths.length,
             shared.available,
             shared.partial,
             previousShared.partial,

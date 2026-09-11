@@ -172,7 +172,7 @@ Browsing one of those folders reads its direct children, so changes can appear b
 
 If Google Drive is offline, unmounted, or becomes unreadable during an indexing run, the extension keeps the previous index and reports that the refresh failed.
 
-If a refresh reaches its time, depth, or item limit, a previous complete, non-empty index is kept. The notice explains which index was kept and why the refresh stopped. When there is no complete index to protect, the partial results remain searchable.
+If a refresh reaches its time, depth, or item limit, a previous complete, non-empty index is kept. An existing partial index is also kept if the new partial scan found fewer entries. The notice explains which index was kept and why the refresh stopped. Partial scans can populate an empty index or replace a partial index with at least as many entries. A complete scan can remove stale paths, even if it finds fewer entries.
 
 Only one indexing run can be active at a time, including runs started from the action panel. A second request leaves the current run alone. After a crash, a retry can recover a lock older than ten minutes only if its owner process is confirmed to have stopped. If it remains busy after restarting Raycast, see lock recovery in [DEVELOPMENT.md](DEVELOPMENT.md).
 

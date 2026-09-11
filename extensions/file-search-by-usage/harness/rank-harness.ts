@@ -519,13 +519,41 @@ async function main() {
     "Google Drive indexing runs only when the user starts it",
   );
   assert(
-    !shouldReplaceIndex(12, false),
+    !shouldReplaceIndex(12, 20, false),
     "an unavailable refresh does not replace an existing index",
   );
   assert(
-    shouldReplaceIndex(12, true),
+    shouldReplaceIndex(12, 0, true),
     "an available refresh can replace an existing index",
   );
+  for (const [
+    existing,
+    incoming,
+    available,
+    partial,
+    savedPartial,
+    expected,
+  ] of [
+    [12, 0, true, true, true, false],
+    [12, 11, true, true, true, false],
+    [12, 12, true, true, true, true],
+    [12, 13, true, true, true, true],
+    [12, 13, true, true, false, false],
+    [12, 13, false, true, true, false],
+    [12, 0, true, false, true, true],
+    [0, 1, true, true, false, true],
+  ] as const) {
+    assert(
+      shouldReplaceIndex(
+        existing,
+        incoming,
+        available,
+        partial,
+        savedPartial,
+      ) === expected,
+      `index replacement preserves partial coverage (${existing} → ${incoming}, available=${available}, partial=${partial}, savedPartial=${savedPartial})`,
+    );
+  }
   assert(
     !shouldSaveCheckpoint(12) && shouldSaveCheckpoint(0),
     "partial checkpoints cannot overwrite a useful existing index",

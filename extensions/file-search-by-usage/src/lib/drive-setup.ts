@@ -88,6 +88,7 @@ export async function indexGoogleDriveLocked(
     if (options.signal?.aborted) return stopped();
     const replaceShortcuts = shouldReplaceIndex(
       previousShortcuts.shortcuts.length,
+      shortcuts.shortcuts.length,
       shortcuts.available,
       shortcuts.partial,
       previousShortcuts.partial,
@@ -122,6 +123,7 @@ export async function indexGoogleDriveLocked(
     if (options.signal?.aborted) return stopped();
     const replaceShared = shouldReplaceIndex(
       previousShared.paths.length,
+      shared.paths.length,
       shared.available,
       shared.partial,
       previousShared.partial,
