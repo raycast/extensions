@@ -24,6 +24,7 @@ import {
   scheduleProgress,
   scheduleTime,
   humanize,
+  brief,
 } from "./api";
 
 /** One request serves both the latest record and the reset-today scan (API allows 20/hour). */
@@ -34,7 +35,7 @@ function stamp(iso: string): string {
   return `${formatDate(iso)} · ${relativeTime(iso)}`;
 }
 
-/** A timestamp row whose ⌥ alternate reveals the raw UTC value the API actually returned. */
+/** A timestamp row whose tooltip carries the raw UTC value the API actually returned. */
 function TimeItem({
   icon,
   title,
@@ -49,8 +50,7 @@ function TimeItem({
       icon={icon}
       title={title}
       subtitle={stamp(iso)}
-      tooltip="Hold ⌥ for the raw UTC timestamp"
-      alternate={<MenuBarExtra.Item icon={icon} title={title} subtitle={iso} />}
+      tooltip={iso}
     />
   );
 }
@@ -140,7 +140,7 @@ export default function Command() {
             }}
             title={statusLabel(record)}
             subtitle={relativeTime(at ?? record.announcedAt)}
-            tooltip={record.text ?? undefined}
+            tooltip={brief(record.text)}
             onAction={
               record.source?.url
                 ? () => open(record.source.url as string)
@@ -185,7 +185,7 @@ export default function Command() {
             }
             title={statusLabel(next)}
             subtitle={countdown ?? "timing not yet confirmed"}
-            tooltip={next.text ?? undefined}
+            tooltip={brief(next.text)}
           />
         ) : (
           <MenuBarExtra.Item

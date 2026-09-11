@@ -97,6 +97,16 @@ export function humanize(value: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+/**
+ * macOS sizes a tooltip to its text and then shoves it upward to fit, so a long
+ * multi-line announcement runs off the top of the screen. One short line stays put.
+ */
+export function brief(text?: string | null): string | undefined {
+  const line = text?.replace(/\s+/g, " ").trim();
+  if (!line) return undefined;
+  return line.length > 120 ? `${line.slice(0, 119)}\u2026` : line;
+}
+
 export function statusLabel(record: ResetRecord): string {
   return `${humanize(record.resetType)} reset · ${recordState(record)}`;
 }

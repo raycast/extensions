@@ -171,3 +171,8 @@ assert.equal(
   ),
   0.5,
 ); // the window's start wins over effectiveAt
+
+assert.equal(api.brief(null), undefined);
+assert.equal(api.brief("  \n "), undefined);
+assert.equal(api.brief("a\n\nb  c"), "a b c");
+assert.equal(api.brief("x".repeat(200)), `${"x".repeat(119)}…`);
