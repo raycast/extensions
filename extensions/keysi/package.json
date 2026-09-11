@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keysi",
+  "title": "Keysi",
+  "description": "Search the keyboard shortcuts of the app you're in, and the cheat sheets for tools that have no menu bar at all.",
+  "icon": "icon.png",
+  "author": "noloman",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-sheets",
+      "title": "Search Cheat Sheets",
+      "subtitle": "Keysi",
+      "description": "Search Vim, tmux and your own cheat sheets without leaving the keyboard.",
+      "mode": "view"
+    },
+    {
+      "name": "show-shortcuts",
+      "title": "Show Shortcuts",
+      "subtitle": "Keysi",
+      "description": "Open Keysi's panel for the app you were just in.",
+      "mode": "no-view"
+    },
+    {
+      "name": "practice",
+      "title": "Practice Shortcuts",
+      "subtitle": "Keysi",
+      "description": "Open Keysi's drill for the shortcuts you keep missing.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "node --test --experimental-strip-types test/*.test.ts",
+    "fix-lint": "ray lint --fix",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
