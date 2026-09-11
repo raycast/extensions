@@ -52,8 +52,8 @@ export async function launchBrowserProfile(
       }
 
       // Resolve custom profile directory and user-data-dir
-      let udd = profile.userDataDir;
-      let profileDir = profile.profileDirectory;
+      let udd = profile.userDataDir ? profile.userDataDir.trim().replace(/^"|"$/g, "") : undefined;
+      let profileDir = profile.profileDirectory ? profile.profileDirectory.trim().replace(/^"|"$/g, "") : undefined;
 
       // If profileDir is an absolute path or contains directory separators, extract user-data root and subfolder
       if (profileDir && (path.isAbsolute(profileDir) || profileDir.includes("\\") || profileDir.includes("/"))) {

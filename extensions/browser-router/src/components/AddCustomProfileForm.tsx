@@ -53,7 +53,7 @@ export function AddCustomProfileForm({ onProfileAdded }: AddCustomProfileFormPro
     if (hasError) return;
 
     const isFirefox = browserType === "firefox";
-    let cleanedProfileDir = profileDirectory.trim() || (isFirefox ? "default" : "Default");
+    let cleanedProfileDir = profileDirectory.trim().replace(/^"|"$/g, "") || (isFirefox ? "default" : "Default");
     let cleanedUserDataDir = userDataDir.trim() ? userDataDir.trim().replace(/^"|"$/g, "") : undefined;
 
     // If user entered an absolute path for profile directory and omitted userDataDir, auto-split
