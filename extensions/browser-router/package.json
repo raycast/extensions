@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "browser-router",
+  "title": "Browser Router",
+  "description": "Route search queries and URLs to any installed browser and profile on Windows.",
+  "icon": "extension-icon.png",
+  "author": "raghavg02",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browser-router",
+      "title": "Browser Router",
+      "description": "Route queries and URLs to any browser and profile on Windows",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search query or URL...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultSearchEngine",
+      "title": "Default Search Engine",
+      "description": "Search engine used when entering search queries instead of direct URLs",
+      "type": "dropdown",
+      "required": false,
+      "default": "google",
+      "data": [
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "Bing",
+          "value": "bing"
+        },
+        {
+          "title": "Brave Search",
+          "value": "brave"
+        },
+        {
+          "title": "Perplexity",
+          "value": "perplexity"
+        },
+        {
+          "title": "Ecosia",
+          "value": "ecosia"
+        },
+        {
+          "title": "Custom URL",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "customSearchUrl",
+      "title": "Custom Search URL",
+      "description": "Used if default search engine is set to Custom. Use %s as the search query placeholder.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://kagi.com/search?q=%s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "ray publish",
+    "postbuild": "node -e \"require('fs').copyFileSync('dist/browser-router.js', 'browser-router.js'); require('fs').copyFileSync('dist/browser-router.js.map', 'browser-router.js.map');\""
+  }
+}
