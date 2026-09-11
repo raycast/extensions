@@ -63,6 +63,20 @@ const MAX_PROGRAM_SIZE = 50000;
 // regardless of size (see insideCountedRepeat).
 const UNROLL_THRESHOLD = 20;
 
+// ICU's character classes, not JavaScript's ASCII-only ones — Windows Terminal matches with ICU,
+// where \w covers letters, marks, decimal digits, and connector punctuation in any script
+// ("Développement"), \d any script's decimal digits ("١٢٣"), \s is [\t\n\f\r\p{Z}], and \b is
+// defined in terms of that \w ("\bÉquipe\b"). Values and patterns are walked by code point, not
+// UTF-16 code unit, so "." consumes all of "🚀" — and, as in ICU without its DOTALL flag, "."
+// stops at a line terminator.
+const isWordChar = (ch: string) => /[\p{Alphabetic}\p{M}\p{Nd}\p{Pc}\p{Join_Control}]/u.test(ch);
+const isDigit = (ch: string) => /\p{Nd}/u.test(ch);
+const isSpace = (ch: string) => /[\t\n\f\r\p{Z}]/u.test(ch);
+// U+000A-U+000D, U+0085, U+2028, U+2029 — ICU's line terminators (spelled as code points: U+2028/9 are
+// line separators, and a literal one would end the regex line it sits on).
+const LINE_TERMINATORS = new Set([0x0a, 0x0b, 0x0c, 0x0d, 0x85, 0x2028, 0x2029]);
+const isLineTerminator = (ch: string) => LINE_TERMINATORS.has(ch.codePointAt(0)!);
+
 // Parses the subset of ICU regex syntax (the flavor Windows Terminal itself matches with) that
 // matchProfiles patterns actually use: literals, `.`, escapes (`\d\w\s` and their negations, `\.`
 // etc.), the `\b`/`\B` word-boundary assertions, `[...]` classes, `(...)`/`(?:...)` groups, the
@@ -71,8 +85,10 @@ const UNROLL_THRESHOLD = 20;
 // unsupported and throws UnsupportedPatternError; a malformed pattern throws RegexSyntaxError.
 function parsePattern(pattern: string): AltNode {
   let i = 0;
-  const n = pattern.length;
-  const peek = () => pattern[i];
+  const chars = Array.from(pattern);
+  const n = chars.length;
+  const peek = () => chars[i];
+  const rest = () => chars.slice(i).join("");
   const fail = (msg: string): never => {
     throw new RegexSyntaxError(msg);
   };
@@ -134,7 +150,7 @@ function parsePattern(pattern: string): AltNode {
       quantified = true;
       i++;
     } else if (c === "{") {
-      const braces = /^\{(\d+)(,(\d*))?\}/.exec(pattern.slice(i));
+      const braces = /^\{(\d+)(,(\d*))?\}/.exec(rest());
       if (braces) {
         min = parseInt(braces[1], 10);
         max = braces[2] === undefined ? min : braces[3] === "" ? Infinity : parseInt(braces[3], 10);
@@ -156,6 +172,10 @@ function parsePattern(pattern: string): AltNode {
     if (quantified && (atom.kind === "start" || atom.kind === "end" || atom.kind === "boundary")) {
       return fail("quantified anchor");
     }
+    // ICU's possessive quantifiers (a++, a*+, a?+, a{2}+) aren't implemented — and a "+" right
+    // after a quantifier means exactly that there, so it can't be left to read as a stray "+" and
+    // be reported as malformed.
+    if (quantified && peek() === "+") return unsupported("possessive quantifier not implemented");
     let greedy = true;
     if (peek() === "?") {
       greedy = false;
@@ -173,7 +193,7 @@ function parsePattern(pattern: string): AltNode {
       const outerIgnoreCase = ignoreCase;
       if (peek() === "?") {
         // "?:" plain group, "?i)" / "?-i)" a flag switch, "?i:" a flag scoped to this group.
-        const modifier = /^\?(-?)(i*)([:)])/.exec(pattern.slice(i));
+        const modifier = /^\?(-?)(i*)([:)])/.exec(rest());
         if (!modifier) return unsupported("group modifier not implemented");
         const [consumed, disable, flags, delimiter] = modifier;
         if (flags === "" && delimiter === ")") return fail("empty inline flags");
@@ -215,16 +235,16 @@ function parsePattern(pattern: string): AltNode {
   }
 
   const escapePredicates: Record<string, (ch: string) => boolean> = {
-    d: (ch) => ch >= "0" && ch <= "9",
-    D: (ch) => !(ch >= "0" && ch <= "9"),
-    w: (ch) => /\w/.test(ch),
-    W: (ch) => !/\w/.test(ch),
-    s: (ch) => /\s/.test(ch),
-    S: (ch) => !/\s/.test(ch),
+    d: isDigit,
+    D: (ch) => !isDigit(ch),
+    w: isWordChar,
+    W: (ch) => !isWordChar(ch),
+    s: isSpace,
+    S: (ch) => !isSpace(ch),
   };
 
   function parseEscape(): AtomNode {
-    const c = pattern[i];
+    const c = chars[i];
     i++;
     if (c === undefined) return fail("trailing backslash");
     // \b and \B are zero-width assertions about the surrounding characters, not the letters
@@ -244,13 +264,13 @@ function parsePattern(pattern: string): AltNode {
   // \s, or a negation) that can't — \d-9 has no meaningful "range from a whole digit class".
   type ClassAtom = { literal: string } | { predicate: (ch: string) => boolean };
   function parseClassAtom(): ClassAtom {
-    const c = pattern[i];
+    const c = chars[i];
     if (c !== "\\") {
       i++;
       return { literal: c };
     }
     i++;
-    const esc = pattern[i];
+    const esc = chars[i];
     i++;
     if (esc === undefined) return fail("trailing backslash");
     const predicate = escapePredicates[esc];
@@ -272,14 +292,14 @@ function parsePattern(pattern: string): AltNode {
       // as set intersection ([a-z&&[^m]]). Neither is implemented; reading them as literals would
       // quietly match the wrong profiles, so report them instead.
       if (peek() === "[") return unsupported("nested character set not implemented");
-      if (pattern.startsWith("&&", i)) return unsupported("character set intersection not implemented");
+      if (peek() === "&" && chars[i + 1] === "&") return unsupported("character set intersection not implemented");
       const startAtom = parseClassAtom();
       if ("predicate" in startAtom) {
         tests.push(startAtom.predicate);
         continue;
       }
       const start = startAtom.literal;
-      if (peek() === "-" && pattern[i + 1] !== "]" && i + 1 < n) {
+      if (peek() === "-" && chars[i + 1] !== "]" && i + 1 < n) {
         i++; // consume "-"
         const endAtom = parseClassAtom();
         if ("predicate" in endAtom) return fail("a character class can't end a range");
@@ -628,10 +648,10 @@ function enqueue(list: Thread[], visited: VisitedState, thread: Thread): void {
 
 // \b sits between a word character and a non-word one, counting the space off either end of the
 // value as non-word — so it holds at both ends of "PowerShell" but not inside it.
-const isWordChar = (ch: string | undefined) => ch !== undefined && /\w/.test(ch);
-
-function isWordBoundary(str: string, pos: number): boolean {
-  return isWordChar(str[pos - 1]) !== isWordChar(str[pos]);
+function isWordBoundary(chars: string[], pos: number): boolean {
+  const before = pos > 0 && isWordChar(chars[pos - 1]);
+  const after = pos < chars.length && isWordChar(chars[pos]);
+  return before !== after;
 }
 
 // Epsilon-closure: follows the zero-width instructions (`split`, `nop`, and the anchors when their
@@ -648,7 +668,7 @@ function addThread(
   visited: VisitedState,
   start: Thread,
   pos: number,
-  str: string,
+  chars: string[],
   budget: StepBudget,
 ): void {
   const stack: Thread[] = [start];
@@ -664,9 +684,9 @@ function addThread(
     } else if (inst.op === "start") {
       if (pos === 0) stack.push({ inst: inst.next!, lo, hi, countFor });
     } else if (inst.op === "end") {
-      if (pos === str.length) stack.push({ inst: inst.next!, lo, hi, countFor });
+      if (pos === chars.length) stack.push({ inst: inst.next!, lo, hi, countFor });
     } else if (inst.op === "boundary") {
-      if (isWordBoundary(str, pos) !== inst.negate) stack.push({ inst: inst.next!, lo, hi, countFor });
+      if (isWordBoundary(chars, pos) !== inst.negate) stack.push({ inst: inst.next!, lo, hi, countFor });
     } else if (inst.op === "repeat") {
       // A thread not already inside this repeat (countFor doesn't match) is entering fresh, at 0.
       const [from, to] = countFor === inst ? [lo, hi] : [0, 0];
@@ -698,14 +718,16 @@ function addThread(
 // backstop for what's left, and running out of it throws rather than answering "no match".
 function matchFull(prog: Inst, str: string): boolean {
   const budget: StepBudget = { remaining: MAX_MATCH_STEPS };
+  // One element per code point, so a surrogate pair like "🚀" is one character to the matcher.
+  const chars = Array.from(str);
   let current: Thread[] = [];
-  addThread(current, newVisited(), { inst: prog, lo: 0, hi: 0, countFor: NO_REPEAT }, 0, str, budget);
+  addThread(current, newVisited(), { inst: prog, lo: 0, hi: 0, countFor: NO_REPEAT }, 0, chars, budget);
 
-  for (let pos = 0; pos < str.length; pos++) {
+  for (let pos = 0; pos < chars.length; pos++) {
     if (current.length === 0) return false;
     const next: Thread[] = [];
     const visited = newVisited();
-    const ch = str[pos];
+    const ch = chars[pos];
     // Lowest count first, so a thread that dominates (see VisitedState.lowestSettled) is always
     // queued before the ones it makes redundant. The closure explores a body's first alternative
     // first, and for something like (a|aa){21,4000} that's the higher-count path — left in that
@@ -717,9 +739,9 @@ function matchFull(prog: Inst, str: string): boolean {
       spend(budget);
       const { inst, lo, hi, countFor } = thread;
       if (inst.op === "char" && inst.test(ch))
-        addThread(next, visited, { inst: inst.next!, lo, hi, countFor }, pos + 1, str, budget);
-      else if (inst.op === "any")
-        addThread(next, visited, { inst: inst.next!, lo, hi, countFor }, pos + 1, str, budget);
+        addThread(next, visited, { inst: inst.next!, lo, hi, countFor }, pos + 1, chars, budget);
+      else if (inst.op === "any" && !isLineTerminator(ch))
+        addThread(next, visited, { inst: inst.next!, lo, hi, countFor }, pos + 1, chars, budget);
     }
     current = next;
   }

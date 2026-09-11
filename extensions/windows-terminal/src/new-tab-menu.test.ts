@@ -174,6 +174,51 @@ describe("buildProfileMatcher", () => {
     assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?:(?i)power)SHELL" }), []);
   });
 
+  it("uses ICU's character classes, not JavaScript's ASCII-only ones", () => {
+    // Windows Terminal matches with ICU, where \w, \d, \b, and \s cover every script.
+    const matches = (pattern: string, name: string) =>
+      buildProfileMatcher({ type: "matchProfiles", name: pattern })!({ ...powershell, name });
+    assert.equal(matches("\\w+", "Développement"), true);
+    assert.equal(matches("\\bÉquipe\\b", "Équipe"), true);
+    assert.equal(matches("\\d+", "١٢٣"), true);
+    assert.equal(matches("\\D+", "١٢٣"), false);
+    assert.equal(matches("\\W+", "Développement"), false);
+    assert.equal(matches("a\\sb", "a b"), true);
+    assert.equal(matches("(?i)équipe", "ÉQUIPE"), true);
+  });
+
+  it("matches by code point, so one . consumes a whole emoji", () => {
+    const matches = (pattern: string, name: string) =>
+      buildProfileMatcher({ type: "matchProfiles", name: pattern })!({ ...powershell, name });
+    assert.equal(matches(".", "🚀"), true);
+    assert.equal(matches("..", "🚀"), false);
+    assert.equal(matches("🚀+", "🚀🚀"), true);
+    assert.equal(matches("[^a]", "🚀"), true);
+    assert.equal(matches("[🚀-🚂]", "🚁"), true);
+  });
+
+  it("doesn't let . match a line terminator, like ICU without its DOTALL flag", () => {
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "a.b" });
+    assert.equal(matcher!({ ...powershell, name: "a b" }), true);
+    assert.equal(matcher!({ ...powershell, name: "a\nb" }), false);
+    assert.equal(matcher!({ ...powershell, name: "a b" }), false);
+    // \s still covers it, so a pattern that means to cross a line can.
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "a\\sb" })!({ ...powershell, name: "a\nb" }), true);
+  });
+
+  it("reports a possessive quantifier as unsupported rather than malformed", () => {
+    // a++ is valid ICU; treating the second "+" as a stray one would quietly match nothing.
+    for (const pattern of ["a++", "a*+", "a?+", "a{2}+"]) {
+      assert.throws(
+        () => buildProfileMatcher({ type: "matchProfiles", name: pattern }),
+        UnsupportedPatternError,
+        pattern,
+      );
+    }
+    // A lazy quantifier is still fine.
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "a+?" })!({ ...powershell, name: "aaa" }), true);
+  });
+
   it("reports an escape it doesn't implement instead of matching it as a literal", () => {
     // These are valid for Windows Terminal, so unlike a malformed pattern (null: matches nothing
     // there either) they're surfaced to the caller — the message names the offending pattern.
