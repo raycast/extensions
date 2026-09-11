@@ -9,10 +9,6 @@ export default async () => {
   if (isInstalled) {
     await closeMainWindow();
     await runAppleScript('tell application "Tomito" to start');
-    // If "Manually finish sessions and breaks" is selected,
-    // and the current interval has completed,
-    // 'start' is the only AppleScript command that mimics
-    // clicking the "Finish" button
-    await syncFocus("disable");
+    await syncFocus("enable");
   }
 };
