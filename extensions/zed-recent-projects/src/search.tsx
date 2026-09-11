@@ -8,7 +8,6 @@ import { usePinnedEntries } from "./hooks/use-pinned-entries";
 import { useRecentWorkspaces } from "./hooks/use-recent-workspaces";
 import { isMultiFolder } from "./lib/workspaces";
 import { closeZedWindow, focusZedWindow, getZedBundleId, openWithZedCli, ZedBuild } from "./lib/zed";
-import { isAmbiguousProjectTitle } from "./lib/zed-window-title";
 import { focusOpenProjects, showOpenStatus } from "./lib/preferences";
 import { execWindowsZed } from "./lib/windows";
 import { platform } from "os";
@@ -41,11 +40,6 @@ export function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const zedBuild = preferences.build as ZedBuild;
   const bundleId = getZedBundleId(zedBuild);
-
-  const openProjectTitles = Object.values(workspaces)
-    .map((workspace) => getEntry(workspace))
-    .filter((entry): entry is Entry => !!entry && !!entry.isOpen)
-    .map((entry) => entry.title);
 
   const closeEntry = async (entry: Entry) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Closing project..." });
@@ -91,7 +85,7 @@ export function Command() {
               keywords={showOpenStatus ? [entry.isOpen ? "open" : "closed"] : undefined}
               actions={
                 <ActionPanel>
-                  <OpenInZedAction entry={entry} revalidate={revalidate} openProjectTitles={openProjectTitles} />
+                  <OpenInZedAction entry={entry} revalidate={revalidate} />
                   {isMac && entry.isOpen && (
                     <Action
                       title="Close Project Window"
@@ -159,7 +153,7 @@ export function Command() {
                 keywords={showOpenStatus ? [entry.isOpen ? "open" : "closed"] : undefined}
                 actions={
                   <ActionPanel>
-                    <OpenInZedAction entry={entry} revalidate={revalidate} openProjectTitles={openProjectTitles} />
+                    <OpenInZedAction entry={entry} revalidate={revalidate} />
                     {isMac && entry.isOpen && (
                       <Action
                         title="Close Project Window"
@@ -194,15 +188,7 @@ export function Command() {
   );
 }
 
-function OpenInZedAction({
-  entry,
-  revalidate,
-  openProjectTitles,
-}: {
-  entry: Entry;
-  revalidate: () => void;
-  openProjectTitles: string[];
-}) {
+function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () => void }) {
   const { app, cliPath } = useZedContext();
   const zedIcon = { fileIcon: app.path };
   const primaryPath = getEntryPrimaryPath(entry);
@@ -211,14 +197,10 @@ function OpenInZedAction({
   // Opt-in: raise the window of an already-open entry instead of invoking the
   // CLI, which opens a duplicate window on recent Zed versions. macOS only:
   // focusing goes through System Events (cliPath is also null off macOS).
-  // Skip focus when another open entry shares this basename title. Window
-  // titles are not unique in that case, so fall through to the CLI.
+  // Always pass the path so two folders with the same basename can still
+  // uniquely match when the window title includes the workspace path.
   const focusIfOpen = async () =>
-    focusOpenProjects &&
-    isMac &&
-    entry.isOpen &&
-    !isAmbiguousProjectTitle(openProjectTitles, entry.title) &&
-    (await focusZedWindow(entry.title, bundleId, primaryPath));
+    focusOpenProjects && isMac && entry.isOpen && (await focusZedWindow(entry.title, bundleId, primaryPath));
 
   const actionTitle = entry.isOpen ? "Focus Window" : "Open in Zed";
 

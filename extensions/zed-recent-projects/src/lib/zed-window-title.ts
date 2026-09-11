@@ -119,8 +119,3 @@ export function findUniqueMatchingWindowTitle(
   const titleMatches = windowTitles.filter((name) => windowTitleMatchesProject(name, projectTitle));
   return titleMatches.length === 1 ? titleMatches[0] : null;
 }
-
-/** True when more than one currently-open project uses this list title. */
-export function isAmbiguousProjectTitle(openTitles: string[], projectTitle: string): boolean {
-  return openTitles.filter((title) => title === projectTitle).length > 1;
-}

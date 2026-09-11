@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   findUniqueMatchingWindowTitle,
-  isAmbiguousProjectTitle,
   windowTitleContainsProjectPath,
   windowTitleMatchesProject,
 } from "./zed-window-title";
@@ -103,15 +102,5 @@ describe("findUniqueMatchingWindowTitle", () => {
 
   it("does not accept /foo as matching a /foo-bar path title", () => {
     expect(findUniqueMatchingWindowTitle(["/Users/a/foo-bar/src/main.ts"], "foo", "/Users/a/foo")).toBe(null);
-  });
-});
-
-describe("isAmbiguousProjectTitle", () => {
-  it("is true when two open projects share a title", () => {
-    expect(isAmbiguousProjectTitle(["foo", "bar", "foo"], "foo")).toBe(true);
-  });
-
-  it("is false when the title appears once", () => {
-    expect(isAmbiguousProjectTitle(["foo", "bar"], "foo")).toBe(false);
   });
 });
