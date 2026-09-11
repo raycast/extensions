@@ -1,4 +1,5 @@
 import type { ComponentHistory, ComponentHistoryDay, ComponentHistoryLevel, Health } from "../../domain/types";
+import { assertComponentHistory } from "../../domain/snapshot-validation";
 
 const LEVEL_SEVERITY: Readonly<Record<ComponentHistoryLevel, number>> = {
   not_monitored: -1,
@@ -7,6 +8,7 @@ const LEVEL_SEVERITY: Readonly<Record<ComponentHistoryLevel, number>> = {
   informational: 2,
   maintenance: 3,
   degraded: 4,
+  affected: 4,
   partial_outage: 5,
   major_outage: 6,
 };
@@ -78,7 +80,7 @@ export function componentHistory(
   const uptimeText = uptimePercent === undefined ? undefined : publishedPercentText(options.uptimeText);
   const monitoredSinceDate = options.monitoredSince ? parsedDate(options.monitoredSince) : undefined;
   const monitoredSince = monitoredSinceDate ? dateKey(monitoredSinceDate) : undefined;
-  return {
+  const history: ComponentHistory = {
     basis,
     windowDays: days.length,
     days,
@@ -86,10 +88,17 @@ export function componentHistory(
     ...(uptimeText ? { uptimeText } : {}),
     ...(monitoredSince ? { monitoredSince } : {}),
   };
+  try {
+    assertComponentHistory(history);
+    return history;
+  } catch {
+    return undefined;
+  }
 }
 
 export function finitePercent(value: unknown): number | undefined {
-  const number = typeof value === "number" ? value : typeof value === "string" ? Number.parseFloat(value) : Number.NaN;
+  const text = typeof value === "string" ? value.trim().replace(/\s*%$/, "") : undefined;
+  const number = typeof value === "number" ? value : text && /^\d+(?:\.\d+)?$/.test(text) ? Number(text) : Number.NaN;
   return Number.isFinite(number) && number >= 0 && number <= 100 ? number : undefined;
 }
 

@@ -1,4 +1,5 @@
 import { deriveProviderHealth, highestHealth } from "../../domain/derive-health";
+import { assertIncidents } from "../../domain/snapshot-validation";
 import type { ComponentStatus, Health, Incident, IncidentState, IncidentUpdate } from "../../domain/types";
 import { parseTimestamp } from "../../utils/dates";
 import { withoutTrailingSlash } from "../../utils/url";
@@ -41,13 +42,27 @@ export function createFlashcatAdapter(config: FlashcatAdapterConfig): ProviderAd
       const sourceBase = `${apiBaseUrl.replace(/\/+$/, "")}/${encodeURIComponent(config.pageId)}`;
       const [currentPayload, historyPayload, structurePayload] = await Promise.all([
         request(`${sourceBase}/summary/active`, signal),
-        request(`${sourceBase}/change/list?start_at_seconds=${startAt}&end_at_seconds=${endAt}`, signal),
-        fetchOptionalEnrichment(signal, (historySignal) =>
-          request(
+        fetchOptionalEnrichment(signal, async (historySignal) => {
+          const payload = await request(
+            `${sourceBase}/change/list?start_at_seconds=${startAt}&end_at_seconds=${endAt}`,
+            historySignal,
+          );
+          const data = requireRecord(requireRecord(payload, "Flashcat history").data, "Flashcat history data");
+          if (!Array.isArray(data.items)) throw new Error("Flashcat history items were missing");
+          assertIncidents(parseChanges(optionalRecordArray(data.items), config.statusPageUrl));
+          return payload;
+        }),
+        fetchOptionalEnrichment(signal, async (historySignal) => {
+          const payload = await request(
             `${sourceBase}/summary/structure?start_at_from_seconds=${startAt}&start_at_to_seconds=${endAt}`,
             historySignal,
-          ),
-        ),
+          );
+          const data = requireRecord(requireRecord(payload, "Flashcat structure").data, "Flashcat structure data");
+          if (!Array.isArray(data.component_impacts) || !Array.isArray(data.component_uptimes))
+            throw new Error("Flashcat component history was malformed");
+          parseFlashcatComponentHistories(payload, fetchedAt);
+          return payload;
+        }),
       ]);
       const parsed = parseFlashcatStatus(
         currentPayload,
@@ -63,6 +78,7 @@ export function createFlashcatAdapter(config: FlashcatAdapterConfig): ProviderAd
         health,
         components: parsed.components,
         incidents: parsed.incidents,
+        incidentHistoryAvailability: historyPayload === undefined ? "unavailable" : "available",
         fetchedAt: fetchedAt.toISOString(),
       };
     },
@@ -78,8 +94,7 @@ export function parseFlashcatStatus(
 ): { reportedHealth: Health; components: ComponentStatus[]; incidents: Incident[] } {
   const currentRoot = requireRecord(currentPayload, "Flashcat current response");
   const current = requireRecord(currentRoot.data, "Flashcat current status");
-  const historyRoot = requireRecord(historyPayload, "Flashcat history response");
-  const history = requireRecord(historyRoot.data, "Flashcat incident history");
+  const history = optionalRecord(optionalRecord(historyPayload)?.data);
   const page = requireRecord(current.page, "Flashcat status page");
   const sections = new Map(
     optionalRecordArray(page.sections)
@@ -94,16 +109,24 @@ export function parseFlashcatStatus(
     .filter((component): component is ComponentStatus => component !== undefined)
     .map((component) => {
       const history = histories.get(component.id);
-      return history ? { ...component, history } : component;
+      return {
+        ...component,
+        history,
+        historyAvailability: history
+          ? ("available" as const)
+          : structurePayload === undefined || histories.has(component.id)
+            ? ("unavailable" as const)
+            : ("unsupported" as const),
+      };
     });
   if (components.length === 0) throw new Error("Flashcat status page contained no components");
 
   const incidents = [
     ...new Map(
-      [...optionalRecordArray(history.items), ...activeChanges]
-        .map((change) => parseChange(change, statusPageUrl))
-        .filter((incident): incident is Incident => incident !== undefined)
-        .map((incident) => [incident.id, incident]),
+      parseChanges([...optionalRecordArray(history?.items), ...activeChanges], statusPageUrl).map((incident) => [
+        incident.id,
+        incident,
+      ]),
     ).values(),
   ].sort((left, right) => parseTimestamp(right.startedAt) - parseTimestamp(left.startedAt));
 
@@ -112,6 +135,12 @@ export function parseFlashcatStatus(
     components,
     incidents,
   };
+}
+
+function parseChanges(changes: JsonRecord[], statusPageUrl: string): Incident[] {
+  return changes
+    .map((change) => parseChange(change, statusPageUrl))
+    .filter((incident): incident is Incident => incident !== undefined);
 }
 
 export function parseFlashcatComponentHistories(payload: unknown, now = new Date()) {
@@ -141,7 +170,7 @@ export function parseFlashcatComponentHistories(payload: unknown, now = new Date
       uptimePercent,
       uptimeText: uptimePercent === undefined ? undefined : `${uptimePercent.toFixed(2)}%`,
     });
-    if (history) result.set(componentId, history);
+    result.set(componentId, history);
   }
   return result;
 }

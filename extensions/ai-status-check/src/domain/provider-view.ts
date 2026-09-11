@@ -1,14 +1,11 @@
-import { incidentActivityTime } from "../providers/utils/incidents";
-import { highestHealth } from "./derive-health";
-import type { ComponentStatus, Health, Incident } from "./types";
+import { incidentActivityTime, sortIncidentsByActivity } from "./incidents";
+import type { ComponentStatus, Incident } from "./types";
 
 const RECENT_INCIDENT_WINDOW_MS = 30 * 24 * 60 * 60 * 1_000;
 const RECENT_INCIDENT_LIMIT = 10;
 
-export interface ComponentGroup {
+interface ComponentGroup {
   name: string;
-  health: Health;
-  affectedCount: number;
   components: ComponentStatus[];
 }
 
@@ -36,22 +33,18 @@ export function buildComponentSections(components: readonly ComponentStatus[]): 
     ungrouped,
     groups: [...groups].map(([name, groupedComponents]) => ({
       name,
-      health: highestHealth(groupedComponents.map((component) => component.health)),
-      affectedCount: groupedComponents.filter(
-        (component) => component.health !== "operational" && component.health !== "unknown",
-      ).length,
       components: groupedComponents,
     })),
   };
 }
 
 export function getActiveIncidents(incidents: readonly Incident[]): Incident[] {
-  return incidents.filter((incident) => incident.state !== "resolved");
+  return sortIncidentsByActivity(incidents.filter((incident) => incident.state !== "resolved"));
 }
 
 export function getRecentIncidents(incidents: readonly Incident[], now = Date.now()): Incident[] {
   const cutoff = now - RECENT_INCIDENT_WINDOW_MS;
-  return incidents
+  return sortIncidentsByActivity(incidents)
     .filter((incident) => incident.state === "resolved")
     .filter((incident) => {
       const activityAt = incidentActivityTime(incident);

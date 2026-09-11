@@ -1,10 +1,11 @@
 import { highestHealth } from "../../domain/derive-health";
+import { assertIncidents } from "../../domain/snapshot-validation";
 import type { ComponentStatus, Health, Incident, IncidentUpdate } from "../../domain/types";
 import { parseTimestamp } from "../../utils/dates";
 import { withTrailingSlash } from "../../utils/url";
 import type { ProviderAdapter, ProviderAdapterConfig } from "../types";
 import { fetchJson, type FetchJson } from "../utils/http";
-import { mergeIncidents } from "../utils/incidents";
+import { mergeIncidents } from "../../domain/incidents";
 import { fetchOptionalEnrichment } from "../utils/optional-enrichment";
 import {
   applyHistoryRange,
@@ -43,22 +44,23 @@ export function createIncidentIoAdapter(config: IncidentIoAdapterConfig): Provid
 
   return {
     async fetch(signal) {
-      const [proxyPayload, incidentsPayload] = await Promise.all([
-        request(proxyUrl, signal),
-        request(incidentsUrl, signal),
-      ]);
-      const summary = parseIncidentIoSummary(proxyPayload);
+      const proxyPayload = await request(proxyUrl, signal);
+      const summary = parseIncidentIoSummary(proxyPayload, config.statusPageUrl);
       const fetchedAt = now();
-      const impactsPayload = await fetchOptionalEnrichment(signal, (historySignal) =>
-        request(
-          config.componentImpactsUrl ?? componentImpactsUrl(proxyUrl, fetchedAt, summary.historyWindowDays),
-          historySignal,
+      const [history, impactsPayload] = await Promise.all([
+        fetchOptionalEnrichment(signal, async (historySignal) => {
+          const incidents = parseIncidentIoIncidents(await request(incidentsUrl, historySignal), config.statusPageUrl);
+          assertIncidents(incidents);
+          return incidents;
+        }),
+        fetchOptionalEnrichment(signal, (historySignal) =>
+          request(
+            config.componentImpactsUrl ?? componentImpactsUrl(proxyUrl, fetchedAt, summary.historyWindowDays),
+            historySignal,
+          ),
         ),
-      );
-      const incidents = mergeIncidents(
-        parseIncidentIoIncidents(incidentsPayload, config.statusPageUrl),
-        summary.incidents,
-      );
+      ]);
+      const incidents = mergeIncidents(history ?? [], summary.incidents);
 
       return {
         providerId: config.providerId,
@@ -66,6 +68,7 @@ export function createIncidentIoAdapter(config: IncidentIoAdapterConfig): Provid
         statusText: summary.statusText,
         components: attachComponentHistory(summary, impactsPayload, fetchedAt),
         incidents,
+        incidentHistoryAvailability: history === undefined ? "unavailable" : "available",
         fetchedAt: fetchedAt.toISOString(),
       };
     },
@@ -82,7 +85,7 @@ export interface ParsedIncidentIoSummary {
   historyVisibility: ReadonlyMap<string, { display: boolean; monitoredSince?: string }>;
 }
 
-export function parseIncidentIoSummary(payload: unknown): ParsedIncidentIoSummary {
+export function parseIncidentIoSummary(payload: unknown, statusPageUrl?: string): ParsedIncidentIoSummary {
   const root = requireRecord(payload, "Incident.io proxy");
   const summary = requireRecord(root.summary, "Incident.io proxy summary");
   const sourceComponents = optionalRecordArray(summary.components);
@@ -92,8 +95,8 @@ export function parseIncidentIoSummary(payload: unknown): ParsedIncidentIoSummar
   const historyVisibility = parseHistoryVisibility(summary.structure);
   const components = parseStructure(summary.structure, sourceComponents, affectedStatuses);
   const incidents = [
-    ...parseIncidentIoNoticeList(summary.ongoing_incidents, "incident", undefined),
-    ...parseIncidentIoNoticeList(summary.scheduled_maintenances, "maintenance", undefined),
+    ...parseIncidentIoNoticeList(summary.ongoing_incidents, "incident", statusPageUrl),
+    ...parseIncidentIoNoticeList(summary.scheduled_maintenances, "maintenance", statusPageUrl),
   ];
   const issueHealth = highestHealth(
     incidents
@@ -127,20 +130,19 @@ function componentImpactsUrl(proxyUrl: string, now: Date, windowDays: number): s
 
 function attachComponentHistory(summary: ParsedIncidentIoSummary, payload: unknown, now: Date): ComponentStatus[] {
   const root = optionalRecord(payload);
-  if (!root || !Array.isArray(root.component_impacts) || !Array.isArray(root.component_uptimes)) {
-    return summary.components;
-  }
+  const available = Boolean(root && Array.isArray(root.component_impacts) && Array.isArray(root.component_uptimes));
 
-  const impacts = optionalRecordArray(root.component_impacts);
+  const impacts = optionalRecordArray(root?.component_impacts);
   const uptimes = new Map(
-    optionalRecordArray(root.component_uptimes)
+    optionalRecordArray(root?.component_uptimes)
       .map((entry) => [optionalString(entry.component_id), entry] as const)
       .filter((entry): entry is readonly [string, JsonRecord] => Boolean(entry[0])),
   );
 
   return summary.components.map((component) => {
     const visibility = summary.historyVisibility.get(component.id);
-    if (!visibility?.display) return component;
+    if (!visibility?.display) return { ...component, historyAvailability: "unsupported" };
+    if (!available) return { ...component, historyAvailability: "unavailable" };
 
     const days = historyWindow(summary.historyWindowDays, now);
     for (const impact of impacts) {
@@ -164,7 +166,7 @@ function attachComponentHistory(summary: ParsedIncidentIoSummary, payload: unkno
       uptimePercent,
       uptimeText,
     });
-    return history ? { ...component, history } : component;
+    return { ...component, history, historyAvailability: history ? "available" : "unavailable" };
   });
 }
 
@@ -192,6 +194,7 @@ function positiveInteger(value: unknown): number | undefined {
 
 export function parseIncidentIoIncidents(payload: unknown, statusPageUrl: string): Incident[] {
   const root = requireRecord(payload, "Incident.io incident history");
+  if (!Array.isArray(root.incidents)) throw new Error("Incident.io incident history was missing its incident list");
   return parseIncidentIoNoticeList(root.incidents, "incident", statusPageUrl).sort(
     (left, right) => parseTimestamp(right.startedAt) - parseTimestamp(left.startedAt),
   );
@@ -393,10 +396,12 @@ function mapIncidentIoState(value: string | undefined): Incident["state"] {
       return "monitoring";
     case "resolved":
     case "completed":
+    case "maintenance_complete":
       return "resolved";
     case "scheduled":
     case "maintenance_scheduled":
     case "in_progress":
+    case "maintenance_in_progress":
       return "scheduled";
     default:
       return "unknown";

@@ -36,6 +36,7 @@ export function createBetterStackAdapter(config: BetterStackAdapterConfig): Prov
           ...incident,
           url: `${statusPageUrl}/incident/${encodeURIComponent(incident.id)}`,
         })),
+        incidentHistoryAvailability: "available",
         fetchedAt: now().toISOString(),
       };
     },
@@ -123,6 +124,7 @@ function parseResource(resource: JsonRecord, sections: ReadonlyMap<string, strin
     statusText,
     group: typeof sectionId === "number" || typeof sectionId === "string" ? sections.get(String(sectionId)) : undefined,
     ...(history ? { history } : {}),
+    historyAvailability: history ? "available" : historyDays.length ? "unavailable" : "unsupported",
   };
 }
 

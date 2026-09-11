@@ -1,3 +1,4 @@
+import { extractBalancedObject } from "../utils/embedded-json";
 import type { ComponentHistory, ComponentHistoryLevel, ComponentStatus } from "../../domain/types";
 import { normalizeStatusToken } from "../../utils/status-token";
 import type { ProviderAdapter, ProviderAdapterConfig } from "../types";
@@ -181,31 +182,6 @@ function parsedDate(value: unknown): Date | undefined {
   if (typeof value !== "string") return undefined;
   const date = new Date(value);
   return Number.isFinite(date.getTime()) ? date : undefined;
-}
-
-function extractBalancedObject(text: string, openIndex: number): string | undefined {
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  for (let index = openIndex; index < text.length; index += 1) {
-    const character = text[index];
-    if (escaped) {
-      escaped = false;
-      continue;
-    }
-    if (character === "\\") {
-      escaped = true;
-      continue;
-    }
-    if (character === '"') {
-      inString = !inString;
-      continue;
-    }
-    if (inString) continue;
-    if (character === "{") depth += 1;
-    if (character === "}" && --depth === 0) return text.slice(openIndex, index + 1);
-  }
-  return undefined;
 }
 
 function parseReferences(rsc: string): ReadonlyMap<string, string> {

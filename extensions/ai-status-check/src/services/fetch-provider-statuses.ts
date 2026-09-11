@@ -1,11 +1,11 @@
 import { getDataFreshness } from "../domain/freshness";
+import { assertProviderSnapshot } from "../domain/snapshot-validation";
 import type { ProviderStatusRecord } from "../domain/types";
 import type { ProviderDefinition } from "../providers/types";
 import { RequestTimeoutError } from "../utils/request-timeout";
 import type { StatusCache } from "./status-cache";
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
-const DEFAULT_CONCURRENCY = 6;
 
 interface RefreshProviderOptions {
   cache: StatusCache;
@@ -14,10 +14,6 @@ interface RefreshProviderOptions {
   now?: () => number;
   signal?: AbortSignal;
   timeoutMs?: number;
-}
-
-interface RefreshProvidersOptions extends RefreshProviderOptions {
-  concurrency?: number;
 }
 
 export function recordFromCache(providerId: string, cache: StatusCache, now = Date.now()): ProviderStatusRecord {
@@ -58,6 +54,8 @@ export async function refreshProviderStatus(
 
   try {
     const snapshot = await provider.adapter.fetch(timeoutController.signal);
+    options.signal?.throwIfAborted();
+    assertProviderSnapshot(snapshot, provider.id);
     if (options.isCurrent?.(provider.id) !== false) options.cache.setSnapshot(snapshot);
 
     return {
@@ -78,29 +76,6 @@ export async function refreshProviderStatus(
     clearTimeout(timeout);
     options.signal?.removeEventListener("abort", abortFromParent);
   }
-}
-
-export async function refreshProviderStatuses(
-  providers: readonly ProviderDefinition[],
-  options: RefreshProvidersOptions,
-): Promise<ProviderStatusRecord[]> {
-  if (providers.length === 0) return [];
-
-  const results = new Array<ProviderStatusRecord>(providers.length);
-  const concurrency = Math.max(1, Math.min(options.concurrency ?? DEFAULT_CONCURRENCY, providers.length));
-  let nextIndex = 0;
-
-  async function worker(): Promise<void> {
-    while (nextIndex < providers.length) {
-      const index = nextIndex++;
-      const provider = providers[index];
-      const result = await refreshProviderStatus(provider, options);
-      results[index] = result;
-    }
-  }
-
-  await Promise.all(Array.from({ length: concurrency }, () => worker()));
-  return results;
 }
 
 function errorMessage(error: unknown): string {

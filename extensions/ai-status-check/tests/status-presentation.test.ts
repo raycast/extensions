@@ -2,22 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   componentStatusPresentation,
-  incidentActivityLabel,
   incidentImpactLabel,
   incidentStateLabel,
   incidentUpdateStateLabel,
   providerStatusPresentation,
-  providerUpdatedLabel,
 } from "../src/domain/status-presentation";
 import type { ComponentStatus, Incident, IncidentUpdate, ProviderStatusRecord } from "../src/domain/types";
-
-const now = Date.parse("2026-08-11T16:00:00Z");
-
-test("shows only the latest incident activity time", () => {
-  assert.equal(incidentActivityLabel(incident("investigating", "2026-04-29T16:00:00Z"), now), "updated 104 days ago");
-  assert.equal(incidentActivityLabel(incident("scheduled", "2026-08-10T16:00:00Z"), now), "updated yesterday");
-  assert.equal(incidentActivityLabel(incident("resolved", "2026-08-10T16:00:00Z"), now), "updated yesterday");
-});
 
 test("prefers the provider's published incident impact language", () => {
   const published = { ...incident("identified", "2026-08-11T15:00:00Z"), impactText: "none" };
@@ -100,11 +90,6 @@ test("normalizes known incident states and preserves unfamiliar wording", () => 
     incidentStateLabel({ ...incident("scheduled", "2026-08-11T15:00:00Z"), stateText: "maintenance_scheduled" }),
     "Scheduled",
   );
-});
-
-test("shows provider timing only as an updated label", () => {
-  const record = providerRecord();
-  assert.equal(providerUpdatedLabel(record.snapshot!, now), "updated now");
 });
 
 function incident(state: Incident["state"], updatedAt: string): Incident {

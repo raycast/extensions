@@ -15,7 +15,6 @@ import { moonshotProvider } from "./catalog/moonshot";
 import { openaiProvider } from "./catalog/openai";
 import { openRouterProvider } from "./catalog/openrouter";
 import { perplexityProvider } from "./catalog/perplexity";
-import { replicateProvider } from "./catalog/replicate";
 import { stabilityProvider } from "./catalog/stability";
 import { togetherProvider } from "./catalog/together";
 import { xaiProvider } from "./catalog/xai";
@@ -36,7 +35,6 @@ export const PROVIDERS = [
   togetherProvider,
   fireworksProvider,
   cerebrasProvider,
-  replicateProvider,
   huggingFaceProvider,
   basetenProvider,
   elevenLabsProvider,

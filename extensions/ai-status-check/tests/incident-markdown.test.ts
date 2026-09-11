@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { Incident } from "../src/domain/types";
-import { buildIncidentMarkdown } from "../src/utils/incident-markdown";
+import { buildIncidentMarkdown, buildIncidentMetadata } from "../src/utils/incident-markdown";
 
-test("renders incident metadata as separate list items", () => {
+test("keeps available incident fields in metadata without duplicating them in the timeline", () => {
   const incident: Incident = {
     id: "embedding-api-degraded",
     title: "Embedding API Degraded",
@@ -16,13 +16,15 @@ test("renders incident metadata as separate list items", () => {
     updates: [],
   };
 
-  const metadata = buildIncidentMarkdown(incident)
-    .split("\n")
-    .filter((line) => line.startsWith("- "));
+  const metadata = buildIncidentMetadata(incident);
 
-  assert.equal(metadata.length, 4);
-  assert.equal(metadata[0], "- **State:** Investigating");
-  assert.equal(metadata[1], "- **Impact:** Degraded performance");
-  assert.match(metadata[2] ?? "", /^- \*\*Started:\*\* /);
-  assert.match(metadata[3] ?? "", /^- \*\*Last updated:\*\* /);
+  assert.deepEqual(
+    metadata.map(({ title }) => title),
+    ["State", "Impact", "Started", "Last Updated"],
+  );
+  assert.equal(metadata[0]?.text, "Investigating");
+  assert.equal(metadata[1]?.text, "Degraded performance");
+  assert.ok(metadata[2]?.text);
+  assert.ok(metadata[3]?.text);
+  assert.doesNotMatch(buildIncidentMarkdown(incident), /State:|Impact:|Started:|Last updated:/);
 });

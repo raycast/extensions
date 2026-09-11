@@ -2,6 +2,7 @@ import type { ComponentHistory, ComponentHistoryLevel } from "../domain/types";
 
 const LEVEL_COLOR: Readonly<Record<ComponentHistoryLevel, string>> = {
   operational: "#34C759",
+  affected: "#C73C40",
   informational: "#0A84FF",
   maintenance: "#8E8E93",
   degraded: "#FFD60A",
@@ -14,10 +15,11 @@ const LEVEL_COLOR: Readonly<Record<ComponentHistoryLevel, string>> = {
 export function buildComponentHistoryMarkdown(history: ComponentHistory | undefined): string | undefined {
   if (!history?.days.length) return undefined;
   const chart = buildComponentHistoryChart(history);
+  const periodDays = history.periodDays ?? history.windowDays;
   const summary =
     history.uptimePercent === undefined
-      ? `Past ${history.windowDays} days — ${history.basis === "incidents" ? "incident history" : "availability history"}`
-      : `Past ${history.windowDays} days — **${formatUptimePercent(history.uptimePercent, history.uptimeText)} uptime**`;
+      ? `Past ${periodDays} days — ${history.basis === "incidents" ? "incident history" : "availability history"}`
+      : `Past ${periodDays} days — **${formatUptimePercent(history.uptimePercent, history.uptimeText)} uptime**`;
   return `${chart}\n\n${summary}`;
 }
 

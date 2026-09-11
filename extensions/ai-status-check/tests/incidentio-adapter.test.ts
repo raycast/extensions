@@ -2,6 +2,21 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { createIncidentIoAdapter, parseIncidentIoSummary } from "../src/providers/adapters/incidentio";
+import { assertProviderSnapshot } from "../src/domain/snapshot-validation";
+
+test("invalid historical Incident.io timestamps preserve the current summary", async () => {
+  const proxy = await fixture("proxy.json");
+  const history = (await fixture("incidents.json")) as { incidents: { published_at: string }[] };
+  history.incidents[0]!.published_at = "not-a-date";
+  const snapshot = await createIncidentIoAdapter({
+    providerId: "example",
+    statusPageUrl: "https://status.example.com/",
+    fetchJson: async (url) => (url.endsWith("/incidents") ? history : url.includes("component_impacts") ? {} : proxy),
+  }).fetch(new AbortController().signal);
+  assertProviderSnapshot(snapshot, "example");
+  assert.equal(snapshot.health, "degraded");
+  assert.equal(snapshot.incidentHistoryAvailability, "unavailable");
+});
 
 test("uses the Incident.io proxy structure and affected component states", async () => {
   const proxy = await fixture("proxy.json");
@@ -152,6 +167,91 @@ test("rejects malformed Incident.io proxy responses", () => {
     () => parseIncidentIoSummary({ summary: { components: [], structure: { items: [] } } }),
     /contained no components/,
   );
+});
+
+test("failed or malformed history retains current Incident.io status and active incidents", async () => {
+  for (const failure of [new Error("History unavailable"), { unexpected: [] }]) {
+    const snapshot = await createIncidentIoAdapter({
+      providerId: "example",
+      statusPageUrl: "https://status.example.com/",
+      fetchJson: async (url) => {
+        if (url.endsWith("/incidents")) {
+          if (failure instanceof Error) throw failure;
+          return failure;
+        }
+        if (url.includes("component_impacts")) throw new Error("Chart unavailable");
+        return {
+          summary: {
+            components: [{ id: "api", name: "API" }],
+            affected_components: [],
+            ongoing_incidents: [{ id: "active", name: "Investigating API errors", status: "investigating" }],
+            structure: { items: [{ component: { component_id: "api", name: "API", display_uptime: true } }] },
+          },
+        };
+      },
+    }).fetch(new AbortController().signal);
+    assert.equal(snapshot.incidents[0]?.id, "active");
+    assert.equal(snapshot.incidentHistoryAvailability, "unavailable");
+    assert.equal(snapshot.components[0]?.historyAvailability, "unavailable");
+    assert.equal(snapshot.components[0]?.history, undefined);
+  }
+});
+
+test("active Incident.io summary notices retain their official link and history updates", async () => {
+  const notice = {
+    id: "active",
+    name: "API disruption",
+    type: "incident",
+    status: "investigating",
+    published_at: "2026-09-10T10:00:00Z",
+  };
+  const snapshot = await createIncidentIoAdapter({
+    providerId: "example",
+    statusPageUrl: "https://status.example.com/",
+    fetchJson: async (url) => {
+      if (url.endsWith("/incidents"))
+        return {
+          incidents: [
+            {
+              ...notice,
+              updates: [
+                {
+                  id: "u",
+                  to_status: "investigating",
+                  message_string: "Investigating",
+                  published_at: notice.published_at,
+                },
+              ],
+            },
+          ],
+        };
+      if (url.includes("component_impacts")) return {};
+      return {
+        summary: { components: [{ id: "api", name: "API" }], affected_components: [], ongoing_incidents: [notice] },
+      };
+    },
+  }).fetch(new AbortController().signal);
+  assert.equal(snapshot.incidents[0]?.url, "https://status.example.com/incidents/active");
+  assert.equal(snapshot.incidents[0]?.updates.length, 1);
+});
+
+test("an Incident.io notice present only in the current summary still has an official incident link", async () => {
+  const snapshot = await createIncidentIoAdapter({
+    providerId: "example",
+    statusPageUrl: "https://status.example.com/",
+    fetchJson: async (url) => {
+      if (url.endsWith("/incidents")) return { incidents: [] };
+      if (url.includes("component_impacts")) return {};
+      return {
+        summary: {
+          components: [{ id: "api", name: "API" }],
+          affected_components: [],
+          ongoing_incidents: [{ id: "new", name: "New incident", status: "investigating" }],
+        },
+      };
+    },
+  }).fetch(new AbortController().signal);
+  assert.equal(snapshot.incidents[0]?.url, "https://status.example.com/incidents/new");
 });
 
 async function fixture(name: string): Promise<unknown> {

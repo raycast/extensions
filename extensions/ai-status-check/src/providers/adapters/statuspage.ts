@@ -1,5 +1,9 @@
+import { parseDateKey } from "../../utils/dates";
+import { assertIncidents } from "../../domain/snapshot-validation";
+import { extractBalancedObject } from "../utils/embedded-json";
 import { deriveProviderHealth } from "../../domain/derive-health";
 import type {
+  ComponentHistory,
   ComponentHistoryDay,
   ComponentStatus,
   Health,
@@ -12,9 +16,15 @@ import { normalizeStatusToken } from "../../utils/status-token";
 import { withTrailingSlash } from "../../utils/url";
 import { componentHistory, finitePercent, publishedPercentText } from "../utils/component-history";
 import { fetchJson, fetchText, type FetchJson, type FetchText } from "../utils/http";
-import { sortIncidentsByActivity } from "../utils/incidents";
+import { mergeIncidents } from "../../domain/incidents";
 import { fetchOptionalEnrichment } from "../utils/optional-enrichment";
-import { optionalRecordArray, optionalString, requireRecord, type JsonRecord } from "../utils/runtime-values";
+import {
+  optionalRecord,
+  optionalRecordArray,
+  optionalString,
+  requireRecord,
+  type JsonRecord,
+} from "../utils/runtime-values";
 import { mapFlexibleHealth } from "../utils/status-normalization";
 import type { ProviderAdapter, ProviderAdapterConfig } from "../types";
 
@@ -40,101 +50,173 @@ export function createStatuspageAdapter(config: StatuspageAdapterConfig): Provid
 
   return {
     async fetch(signal) {
-      const [summaryPayload, incidentsPayload, maintenancesPayload, statusPageHtml] = await Promise.all([
-        fetchJsonResponse(endpoints.summary, signal),
-        fetchJsonResponse(endpoints.incidents, signal),
-        fetchJsonResponse(endpoints.maintenances, signal),
-        fetchOptionalEnrichment(signal, (historySignal) => fetchTextResponse(config.statusPageUrl, historySignal)),
-      ]);
+      const summaryPayload = await fetchJsonResponse(endpoints.summary, signal);
       const fetchedAt = now();
 
       const summary = parseSummary(summaryPayload);
-      const uptimeData = parseStatuspageUptimeHtml(statusPageHtml ?? "");
-      const incidents = sortIncidentsByActivity([
-        ...parseIncidents(incidentsPayload, config.statusPageUrl),
-        ...parseScheduledMaintenances(maintenancesPayload, config.statusPageUrl),
-      ]).filter((incident) => config.incidentFilter?.(incident) ?? true);
-      const components = summary.components
-        .filter((component) => config.componentFilter?.(component) ?? true)
-        .map((component) => {
-          const history = statuspageComponentHistory(uptimeData[component.id]);
-          return history ? { ...component, history } : component;
-        });
+      const components = summary.components.filter((component) => config.componentFilter?.(component) ?? true);
+      const [history, maintenances, histories] = await Promise.all([
+        fetchOptionalEnrichment(signal, async (historySignal) => {
+          const payload = requireRecord(
+            await fetchJsonResponse(endpoints.incidents, historySignal),
+            "incident history",
+          );
+          if (!Array.isArray(payload.incidents)) throw new Error("Incident history list was missing");
+          const incidents = parseIncidents(payload, config.statusPageUrl);
+          assertIncidents(incidents);
+          return incidents;
+        }),
+        fetchOptionalEnrichment(signal, async (historySignal) => {
+          const payload = requireRecord(
+            await fetchJsonResponse(endpoints.maintenances, historySignal),
+            "maintenance history",
+          );
+          if (!Array.isArray(payload.scheduled_maintenances)) throw new Error("Maintenance history list was missing");
+          const incidents = parseScheduledMaintenances(payload, config.statusPageUrl);
+          assertIncidents(incidents);
+          return incidents;
+        }),
+        fetchComponentHistories(components, signal),
+      ]);
+      const incidents = mergeIncidents(
+        [...(history ?? []), ...(maintenances ?? [])],
+        [
+          ...parseIncidents(summaryPayload, config.statusPageUrl),
+          ...parseScheduledMaintenances(summaryPayload, config.statusPageUrl),
+        ],
+      ).filter((incident) => config.incidentFilter?.(incident) ?? true);
       const isScopedProvider = Boolean(config.componentFilter || config.incidentFilter);
-      const health = deriveProviderHealth(isScopedProvider ? "unknown" : summary.reportedHealth, components, incidents);
+      if (config.componentFilter && components.length === 0) {
+        throw new Error("Status source contained no matching components");
+      }
+      const health = isScopedProvider ? deriveProviderHealth("unknown", components, incidents) : summary.reportedHealth;
 
       return {
         providerId: config.providerId,
         health,
         statusText: isScopedProvider ? undefined : summary.statusText,
-        components,
+        components: components.map((component) => {
+          return { ...component, ...histories.get(component.id) };
+        }),
         incidents,
+        incidentHistoryAvailability: history === undefined || maintenances === undefined ? "unavailable" : "available",
         fetchedAt: fetchedAt.toISOString(),
       };
     },
   };
-}
 
-interface StatuspageUptimeDay {
-  date?: unknown;
-  outages?: unknown;
-}
-
-interface StatuspageUptimeComponent {
-  component?: { startDate?: unknown };
-  days?: StatuspageUptimeDay[];
-  uptimeText?: unknown;
-}
-
-type StatuspageUptimeData = Record<string, StatuspageUptimeComponent>;
-
-/** Parse the official day-level availability data embedded by Statuspage. */
-export function parseStatuspageUptimeHtml(html: string): StatuspageUptimeData {
-  const marker = "window.uptimeData = ";
-  const markerIndex = html.indexOf(marker);
-  if (markerIndex === -1) return {};
-  const openIndex = html.indexOf("{", markerIndex + marker.length);
-  if (openIndex === -1) return {};
-  const objectText = extractBalancedObject(html, openIndex);
-  if (!objectText) return {};
-  try {
-    const parsed: unknown = JSON.parse(objectText);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
-    const uptimeData = parsed as StatuspageUptimeData;
-    for (const match of html.matchAll(
-      /<span\s+id="uptime-percent-([^"]+)"[^>]*>[\s\S]*?<var\s+data-var="uptime-percent"[^>]*>\s*([\d.]+)\s*<\/var>/gi,
-    )) {
-      const componentId = match[1];
-      const uptimeText = match[2];
-      const component = componentId ? uptimeData[componentId] : undefined;
-      if (component && uptimeText) component.uptimeText = uptimeText;
-    }
-    return uptimeData;
-  } catch {
-    return {};
+  async function fetchComponentHistories(components: ComponentStatus[], signal: AbortSignal) {
+    const histories = new Map<string, Pick<ComponentStatus, "history" | "historyAvailability">>(
+      components.map(({ id }) => [id, { historyAvailability: "unavailable" }]),
+    );
+    const componentIds = new Set(components.map((component) => component.id));
+    const retainHistories = (data: StatuspageUptimeData, ids: Iterable<string>) => {
+      for (const id of ids) {
+        const history = statuspageComponentHistory(data[id]);
+        if (history) histories.set(id, { history, historyAvailability: "available" });
+      }
+    };
+    await fetchOptionalEnrichment(signal, async (historySignal) => {
+      const html = await fetchTextResponse(config.statusPageUrl, historySignal);
+      historySignal.throwIfAborted();
+      const inline = parseStatuspageUptimeHtml(html);
+      const lazyIds = [
+        ...new Set(
+          [...html.matchAll(/\bdata-uptime-lazy=["']([a-z0-9-]+)["']/gi)]
+            .map((match) => match[1]!)
+            .filter((id) => componentIds.has(id)),
+        ),
+      ];
+      for (const id of componentIds) {
+        histories.set(id, { historyAvailability: inline[id] || lazyIds.includes(id) ? "unavailable" : "unsupported" });
+      }
+      retainHistories(inline, componentIds);
+      // Match the public page's batch limit; never request unrelated component IDs.
+      for (let offset = 0; offset < lazyIds.length; offset += 60) {
+        historySignal.throwIfAborted();
+        const ids = lazyIds.slice(offset, offset + 60);
+        const url = new URL("uptime_showcase", config.statusPageUrl);
+        url.searchParams.set("components", ids.join(","));
+        const payload = await fetchOptionalEnrichment(historySignal, (batchSignal) =>
+          fetchJsonResponse(url.toString(), batchSignal),
+        );
+        historySignal.throwIfAborted();
+        retainHistories(parseStatuspageUptimeShowcase(payload), ids);
+      }
+    });
+    // Keep completed charts if a later batch times out; late work cannot alter the returned snapshot.
+    return new Map(histories);
   }
 }
 
-function statuspageComponentHistory(value: StatuspageUptimeComponent | undefined) {
-  if (!Array.isArray(value?.days) || value.days.length === 0) return undefined;
-  const monitoredSince = sourceDate(value.component?.startDate);
-  const days = value.days.flatMap<ComponentHistoryDay>((day) => {
-    const date = typeof day.date === "string" ? day.date.slice(0, 10) : undefined;
-    if (!date) return [];
-    if (monitoredSince && date < monitoredSince) return [{ date, level: "not_monitored" as const }];
+type StatuspageUptimeData = Record<string, JsonRecord>;
 
-    const outages = day.outages && typeof day.outages === "object" ? (day.outages as Record<string, unknown>) : {};
-    const major = nonNegativeNumber(outages.m);
-    const partial = nonNegativeNumber(outages.p);
-    const weightedDayDowntime = major + partial * 0.3;
-    return [
-      {
-        date,
-        level: statuspageDayLevel(weightedDayDowntime),
-      },
-    ];
-  });
-  if (days.length === 0) return undefined;
+/** Parse the official day-level availability data embedded by Statuspage. */
+export function parseStatuspageUptimeHtml(html: string): StatuspageUptimeData {
+  let uptimeData: StatuspageUptimeData = {};
+  for (const match of html.matchAll(/window\.uptimeData\s*=\s*\{/g)) {
+    const objectText = extractBalancedObject(html, match.index + match[0].length - 1);
+    if (!objectText) continue;
+    try {
+      uptimeData = { ...uptimeData, ...uptimeRecords(JSON.parse(objectText)) };
+    } catch {
+      /* A malformed optional chart must not hide current status. */
+    }
+  }
+  for (const match of html.matchAll(
+    /<span\s+id="uptime-percent-([^"]+)"[^>]*>[\s\S]*?<var\s+data-var="uptime-percent"[^>]*>\s*([\d.]+)\s*<\/var>/gi,
+  )) {
+    const componentId = match[1];
+    const uptimeText = match[2];
+    const component = componentId ? optionalRecord(uptimeData[componentId]) : undefined;
+    if (component && uptimeText) component.uptimeText = uptimeText;
+  }
+  return uptimeData;
+}
+
+function parseStatuspageUptimeShowcase(payload: unknown): StatuspageUptimeData {
+  const root = optionalRecord(payload);
+  const timelines = uptimeRecords(root?.timelines);
+  for (const value of optionalRecordArray(root?.values)) {
+    const id = optionalString(value.component);
+    const timeline = id ? optionalRecord(timelines[id]) : undefined;
+    if (timeline) timeline.uptimeText = value.ninety;
+  }
+  return timelines;
+}
+
+function uptimeRecords(value: unknown): StatuspageUptimeData {
+  return Object.fromEntries(
+    Object.entries(optionalRecord(value) ?? {}).flatMap(([id, entry]) => {
+      const record = optionalRecord(entry);
+      return record ? [[id, { ...record }]] : [];
+    }),
+  );
+}
+
+function statuspageComponentHistory(value: JsonRecord | undefined): ComponentHistory | undefined {
+  if (!Array.isArray(value?.days) || value.days.length === 0) return;
+  const monitoredSince = sourceDate(optionalRecord(value.component)?.startDate);
+  const days: ComponentHistoryDay[] = [];
+  for (const raw of value.days) {
+    const day = optionalRecord(raw);
+    const date = parseDateKey(day?.date);
+    if (!date) return;
+    const previous = days.at(-1)?.date;
+    if (previous && Date.parse(date) - Date.parse(previous) !== 86_400_000) return;
+    if (monitoredSince && date < monitoredSince) {
+      days.push({ date, level: "not_monitored" });
+      continue;
+    }
+    const outages = optionalRecord(day?.outages);
+    if (!outages) return;
+    const unfamiliar = Object.entries(outages).some(
+      ([key, duration]) =>
+        !["m", "p", "d"].includes(key) || typeof duration !== "number" || !Number.isFinite(duration) || duration < 0,
+    );
+    const downtime = nonNegativeNumber(outages.m) + nonNegativeNumber(outages.p) * 0.3;
+    days.push({ date, level: unfamiliar ? "unknown" : statuspageDayLevel(downtime) });
+  }
   const publishedUptime = finitePercent(value.uptimeText);
   return componentHistory("availability", days, {
     uptimePercent: publishedUptime,
@@ -153,36 +235,11 @@ function statuspageDayLevel(weightedDowntimeSeconds: number) {
 function sourceDate(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const date = value.slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : undefined;
+  return parseDateKey(date);
 }
 
 function nonNegativeNumber(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : 0;
-}
-
-function extractBalancedObject(text: string, openIndex: number): string | undefined {
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  for (let index = openIndex; index < text.length; index += 1) {
-    const character = text[index];
-    if (escaped) {
-      escaped = false;
-      continue;
-    }
-    if (character === "\\") {
-      escaped = true;
-      continue;
-    }
-    if (character === '"') {
-      inString = !inString;
-      continue;
-    }
-    if (inString) continue;
-    if (character === "{") depth += 1;
-    if (character === "}" && --depth === 0) return text.slice(openIndex, index + 1);
-  }
-  return undefined;
 }
 
 export function statuspageEndpoints(

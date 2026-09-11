@@ -7,6 +7,7 @@ import { highestHealth } from "../domain/derive-health";
 import { getActiveIncidents } from "../domain/provider-view";
 import type { Incident, ProviderStatusRecord } from "../domain/types";
 import type { ProviderDefinition } from "../providers/types";
+import type { ProviderStatusStore } from "../services/provider-status-store";
 import { ProviderListActions } from "./provider-actions";
 import { ProviderDetail } from "./provider-detail";
 import { statusIcon } from "./status-icon";
@@ -15,10 +16,10 @@ interface ProviderListItemProps {
   provider: ProviderDefinition;
   record: ProviderStatusRecord;
   onRefreshAll(): Promise<void>;
-  onRefreshProvider(providerId: string): Promise<ProviderStatusRecord | undefined>;
+  store: ProviderStatusStore;
 }
 
-export function ProviderListItem({ provider, record, onRefreshAll, onRefreshProvider }: ProviderListItemProps) {
+export function ProviderListItem({ provider, record, onRefreshAll, store }: ProviderListItemProps) {
   const snapshot = record.snapshot;
   const activeIncidents = getActiveIncidents(snapshot?.incidents ?? []);
   const hasOverallStatus = Boolean(snapshot && (snapshot.statusText || snapshot.health !== "unknown"));
@@ -45,7 +46,7 @@ export function ProviderListItem({ provider, record, onRefreshAll, onRefreshProv
       actions={
         <ProviderListActions
           provider={provider}
-          detail={<ProviderDetail provider={provider} record={record} onRefresh={onRefreshProvider} />}
+          detail={<ProviderDetail provider={provider} store={store} />}
           onRefreshAll={onRefreshAll}
         />
       }

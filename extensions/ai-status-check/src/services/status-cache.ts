@@ -1,4 +1,4 @@
-import { Cache } from "@raycast/api";
+import { assertProviderSnapshot } from "../domain/snapshot-validation";
 import type { ProviderSnapshot } from "../domain/types";
 
 const CACHE_VERSION = 2;
@@ -9,10 +9,10 @@ export interface StatusCache {
   setSnapshot(snapshot: ProviderSnapshot): void;
 }
 
-export class RaycastStatusCache implements StatusCache {
-  readonly #cache: Cache;
+export class SnapshotCache implements StatusCache {
+  readonly #cache: { get(key: string): string | undefined; set(key: string, value: string): void };
 
-  constructor(cache = new Cache()) {
+  constructor(cache: { get(key: string): string | undefined; set(key: string, value: string): void }) {
     this.#cache = cache;
   }
 
@@ -22,33 +22,19 @@ export class RaycastStatusCache implements StatusCache {
 
     try {
       const value: unknown = JSON.parse(raw);
-      return isProviderSnapshot(value, providerId) ? value : undefined;
+      assertProviderSnapshot(value, providerId);
+      return value;
     } catch {
       return undefined;
     }
   }
 
   setSnapshot(snapshot: ProviderSnapshot): void {
+    assertProviderSnapshot(snapshot, snapshot.providerId);
     this.#cache.set(cacheKey(snapshot.providerId), JSON.stringify(snapshot));
   }
 }
 
 function cacheKey(providerId: string): string {
   return `${CACHE_PREFIX}${providerId}`;
-}
-
-function isProviderSnapshot(value: unknown, providerId: string): value is ProviderSnapshot {
-  if (!isRecord(value)) return false;
-
-  return (
-    value.providerId === providerId &&
-    typeof value.health === "string" &&
-    typeof value.fetchedAt === "string" &&
-    Array.isArray(value.components) &&
-    Array.isArray(value.incidents)
-  );
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

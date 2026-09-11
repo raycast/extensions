@@ -1,9 +1,10 @@
-import { Detail, Icon, List } from "@raycast/api";
-import { incidentActivityLabel, incidentStateLabel } from "../domain/status-presentation";
-import type { Incident } from "../domain/types";
+import { Icon, List } from "@raycast/api";
+import { incidentStateLabel, incidentHistoryMessage } from "../domain/status-presentation";
+import type { DataAvailability, Incident } from "../domain/types";
 import type { ProviderDefinition } from "../providers/types";
-import { buildIncidentMarkdown } from "../utils/incident-markdown";
-import { IncidentActions, IncidentDetailActions, ProviderSourceActions } from "./provider-actions";
+import { buildIncidentMarkdown, buildIncidentMetadata } from "../utils/incident-markdown";
+import { IncidentActions } from "./provider-actions";
+import { ProviderNotice } from "./provider-notice";
 import { incidentIcon } from "./status-icon";
 
 interface IncidentSectionProps {
@@ -24,7 +25,13 @@ export function ActiveIncidents({ incidents, provider, onRefresh }: IncidentSect
   );
 }
 
-export function RecentIncidents({ incidents, provider, onRefresh }: IncidentSectionProps) {
+export function RecentIncidents({
+  incidents,
+  provider,
+  onRefresh,
+  availability,
+}: IncidentSectionProps & { availability?: DataAvailability }) {
+  const message = incidentHistoryMessage(availability);
   return (
     <List.Section title="Recent Incidents">
       {incidents.length > 0 ? (
@@ -32,14 +39,25 @@ export function RecentIncidents({ incidents, provider, onRefresh }: IncidentSect
           <IncidentItem key={incident.id} incident={incident} provider={provider} onRefresh={onRefresh} />
         ))
       ) : (
-        <List.Item
+        <ProviderNotice
           id="recent-incidents-empty"
-          icon={Icon.CheckCircle}
-          title="No Recent Incidents"
-          subtitle="No resolved incidents were published in the last 30 days"
-          actions={<ProviderSourceActions provider={provider} onRefresh={onRefresh} />}
+          icon={availability === "available" ? Icon.CheckCircle : Icon.Info}
+          title={message.title}
+          description={message.description}
+          provider={provider}
+          onRefresh={onRefresh}
         />
       )}
+      {incidents.length > 0 && availability === "unavailable" ? (
+        <ProviderNotice
+          id="recent-incidents-incomplete"
+          icon={Icon.Info}
+          title="Some Incident History Is Unavailable"
+          description="Showing the incidents that could be retrieved. Open the official status page for the full history."
+          provider={provider}
+          onRefresh={onRefresh}
+        />
+      ) : null}
     </List.Section>
   );
 }
@@ -53,34 +71,25 @@ function IncidentItem({
   provider: ProviderDefinition;
   onRefresh(): Promise<void>;
 }) {
-  const activity = incidentActivityLabel(incident);
-  const accessories: List.Item.Accessory[] = [{ text: incidentStateLabel(incident) }];
-  if (activity) accessories.push({ text: activity });
-
   return (
     <List.Item
       id={`incident:${incident.id}`}
       icon={incidentIcon(incident)}
       title={incident.title}
-      accessories={accessories}
-      actions={
-        <IncidentActions
-          incident={incident}
-          provider={provider}
-          target={<IncidentDetail incident={incident} provider={provider} />}
-          onRefresh={onRefresh}
+      keywords={[incidentStateLabel(incident)]}
+      detail={
+        <List.Item.Detail
+          markdown={buildIncidentMarkdown(incident)}
+          metadata={
+            <List.Item.Detail.Metadata>
+              {buildIncidentMetadata(incident).map(({ title, text }) => (
+                <List.Item.Detail.Metadata.Label key={title} title={title} text={text} />
+              ))}
+            </List.Item.Detail.Metadata>
+          }
         />
       }
-    />
-  );
-}
-
-function IncidentDetail({ incident, provider }: { incident: Incident; provider: ProviderDefinition }) {
-  return (
-    <Detail
-      navigationTitle={incident.title}
-      markdown={buildIncidentMarkdown(incident)}
-      actions={<IncidentDetailActions incident={incident} provider={provider} />}
+      actions={<IncidentActions incident={incident} provider={provider} onRefresh={onRefresh} />}
     />
   );
 }

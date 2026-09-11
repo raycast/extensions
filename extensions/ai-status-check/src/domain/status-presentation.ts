@@ -1,10 +1,42 @@
-import type { ComponentStatus, Health, Incident, IncidentState, IncidentUpdate, ProviderSnapshot } from "./types";
-import { formatRelativeTime } from "../utils/dates";
+import type {
+  ComponentStatus,
+  DataAvailability,
+  Health,
+  Incident,
+  IncidentState,
+  IncidentUpdate,
+  ProviderSnapshot,
+} from "./types";
 import { normalizeStatusToken } from "../utils/status-token";
 
 export interface StatusPresentation {
   label: string;
   health: Health;
+}
+
+export function componentHistoryMessage(availability: DataAvailability | undefined, loading = false): string {
+  if (loading) return "Loading component history…";
+  if (availability === "unavailable")
+    return "Component history could not be loaded. Current status is still available.";
+  if (availability === "unsupported") return "No component history is published for this service.";
+  return "No component history is available for this service.";
+}
+
+export function incidentHistoryMessage(availability: DataAvailability | undefined): {
+  title: string;
+  description: string;
+} {
+  if (availability === "available")
+    return { title: "No Recent Incidents", description: "No resolved incidents were published in the last 30 days" };
+  if (availability === "unsupported")
+    return {
+      title: "No Incident History Published",
+      description: "Open the official status page for available information",
+    };
+  return {
+    title: "Incident History Unavailable",
+    description: "Recent incident history could not be verified. Current status is still available.",
+  };
 }
 
 const KNOWN_HEALTH: Readonly<Partial<Record<string, Health>>> = {
@@ -95,20 +127,6 @@ export function incidentStateLabel(incident: Pick<Incident, "state" | "stateText
 
 export function incidentUpdateStateLabel(update: Pick<IncidentUpdate, "state" | "stateText">): string {
   return knownSourceLabel(update.stateText, KNOWN_INCIDENT_STATES) ?? fallbackIncidentStateLabel(update.state);
-}
-
-export function incidentActivityLabel(incident: Incident, now = Date.now()): string | undefined {
-  const updatedAt = formatRelativeTime(incident.updatedAt, now);
-  const startedAt = formatRelativeTime(incident.startedAt, now);
-  return updatedAt ? `updated ${updatedAt}` : startedAt ? `started ${startedAt}` : undefined;
-}
-
-export function providerUpdatedLabel(
-  snapshot: Pick<ProviderSnapshot, "fetchedAt">,
-  now = Date.now(),
-): string | undefined {
-  const refreshedAt = formatRelativeTime(snapshot.fetchedAt, now);
-  return refreshedAt ? `updated ${refreshedAt}` : undefined;
 }
 
 function healthPresentation(

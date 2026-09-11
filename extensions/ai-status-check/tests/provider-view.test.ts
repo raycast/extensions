@@ -3,7 +3,7 @@ import test from "node:test";
 import { buildComponentSections, getActiveIncidents, getRecentIncidents } from "../src/domain/provider-view";
 import type { ComponentStatus, Incident } from "../src/domain/types";
 
-test("builds one shared component hierarchy with aggregate group health", () => {
+test("groups components by their published group without losing ungrouped services", () => {
   const components: ComponentStatus[] = [
     { id: "api", name: "API", group: "Platform", health: "operational" },
     { id: "batch", name: "Batch", group: "Platform", health: "degraded" },
@@ -15,11 +15,9 @@ test("builds one shared component hierarchy with aggregate group health", () => 
   assert.deepEqual(
     sections.groups.map((group) => ({
       name: group.name,
-      health: group.health,
-      affectedCount: group.affectedCount,
       ids: group.components.map((item) => item.id),
     })),
-    [{ name: "Platform", health: "degraded", affectedCount: 1, ids: ["api", "batch"] }],
+    [{ name: "Platform", ids: ["api", "batch"] }],
   );
   assert.deepEqual(
     sections.ungrouped.map((component) => component.id),
@@ -57,6 +55,21 @@ test("keeps long-running incidents when they were resolved recently", () => {
     getRecentIncidents([longRunning], now).map((item) => item.id),
     ["long-running"],
   );
+});
+
+test("orders recent incidents by latest activity before applying the ten-incident limit", () => {
+  const now = Date.parse("2026-09-10T16:00:00Z");
+  const incidents = Array.from({ length: 10 }, (_, index) =>
+    incident(`recent-${index}`, "resolved", new Date(now - (index + 1) * 86_400_000).toISOString()),
+  );
+  incidents.push({
+    ...incident("just-resolved", "resolved", "2026-07-01T00:00:00Z"),
+    resolvedAt: new Date(now - 60_000).toISOString(),
+  });
+  const result = getRecentIncidents(incidents, now);
+  assert.equal(result[0]?.id, "just-resolved");
+  assert.equal(result.length, 10);
+  assert.equal(incidents.at(-1)?.id, "just-resolved");
 });
 
 function incident(id: string, state: Incident["state"], startedAt?: string): Incident {

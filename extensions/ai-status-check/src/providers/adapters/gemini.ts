@@ -56,6 +56,7 @@ export function createGeminiAdapter(config: GeminiAdapterConfig): ProviderAdapte
         health: deriveProviderHealth(reportedHealth, components, incidents),
         components,
         incidents,
+        incidentHistoryAvailability: "available",
         fetchedAt: fetchedAt.toISOString(),
       };
     },
@@ -98,6 +99,7 @@ export function geminiComponents(incidents: readonly Incident[], now = new Date(
       ...component,
       health: highestHealth(["operational", ...active.map((incident) => incident.health)]),
       history: componentHistory("incidents", days),
+      historyAvailability: "available",
     };
   });
 }

@@ -14,7 +14,7 @@
     "src/providers/adapters/**/*.ts",
     "src/providers/registry.ts",
     "src/services/fetch-provider-statuses.ts",
-    "src/services/provider-request-order.ts",
+    "src/services/provider-status-store.ts",
     "tests/**/*.ts"
   ]
 }

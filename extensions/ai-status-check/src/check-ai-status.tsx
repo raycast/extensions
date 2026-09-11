@@ -16,8 +16,7 @@ import { ProviderListItem } from "./components/provider-list-item";
 export default function CheckAiStatusCommand() {
   const preferences = getPreferenceValues<ProviderPreferences>();
   const enabledProviders = getEnabledProviders(preferences);
-  const { records, isRefreshing, isInitialLoading, refreshAll, refreshProvider } =
-    useProviderStatuses(enabledProviders);
+  const { records, isRefreshing, isInitialLoading, refreshAll, store } = useProviderStatuses(enabledProviders);
   const sections = buildProviderSections(enabledProviders, records);
 
   async function refreshAllWithFeedback() {
@@ -60,7 +59,7 @@ export default function CheckAiStatusCommand() {
                   provider={provider}
                   record={records[provider.id] ?? unavailableProviderRecord(provider.id)}
                   onRefreshAll={refreshAllWithFeedback}
-                  onRefreshProvider={refreshProvider}
+                  store={store}
                 />
               ))}
             </List.Section>

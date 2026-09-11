@@ -175,15 +175,6 @@
       "required": false
     },
     {
-      "name": "showReplicate",
-      "type": "checkbox",
-      "title": "",
-      "description": "Show Replicate status, components, and incidents.",
-      "label": "Replicate",
-      "default": false,
-      "required": false
-    },
-    {
       "name": "showHuggingFace",
       "type": "checkbox",
       "title": "",
@@ -233,7 +224,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@raycast/api": "^2.0.6"
+    "@raycast/api": "^2.0.6",
+    "node-html-parser": "^9.0.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

@@ -25,7 +25,9 @@ export function createProvider<PreferenceKey extends string, Config extends Prov
   createAdapter: ProviderAdapterFactory<Config>,
   ...[options]: AdapterOptionsArgument<Config>
 ): ProviderDefinition<PreferenceKey> {
-  const statusPageUrl = withTrailingSlash(metadata.statusPageUrl);
+  const sourceUrl = new URL(metadata.statusPageUrl);
+  if (!sourceUrl.search && !sourceUrl.hash) sourceUrl.pathname = withTrailingSlash(sourceUrl.pathname);
+  const statusPageUrl = sourceUrl.toString();
   const adapterConfig = {
     ...options,
     providerId: metadata.id,

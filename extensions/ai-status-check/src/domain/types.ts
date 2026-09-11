@@ -4,12 +4,15 @@ export type DataFreshness = "fresh" | "stale" | "expired" | "unavailable";
 
 export type RefreshState = "idle" | "refreshing" | "failed";
 
+export type DataAvailability = "available" | "unavailable" | "unsupported";
+
 export type IncidentState = "investigating" | "identified" | "monitoring" | "resolved" | "scheduled" | "unknown";
 
 export type ProviderCategory = "model-providers" | "routers-and-inference" | "specialized";
 
 export type ComponentHistoryLevel =
   | "operational"
+  | "affected"
   | "degraded"
   | "partial_outage"
   | "major_outage"
@@ -26,6 +29,8 @@ export interface ComponentHistoryDay {
 export interface ComponentHistory {
   /** Number of calendar days represented by the provider's published history. */
   windowDays: number;
+  /** Source's elapsed reporting period when its inclusive calendar has an extra date. */
+  periodDays?: number;
   /** Whether the source publishes availability measurements or an incident calendar. */
   basis: "availability" | "incidents";
   days: ComponentHistoryDay[];
@@ -68,6 +73,8 @@ export interface ComponentStatus {
   statusText?: string;
   url?: string;
   history?: ComponentHistory;
+  /** Omitted for older snapshots or history that has not been requested yet. */
+  historyAvailability?: DataAvailability;
 }
 
 export interface ProviderSnapshot {
@@ -76,6 +83,8 @@ export interface ProviderSnapshot {
   statusText?: string;
   components: ComponentStatus[];
   incidents: Incident[];
+  /** Whether the source's recent incident history was successfully retrieved. */
+  incidentHistoryAvailability?: DataAvailability;
   fetchedAt: string;
 }
 

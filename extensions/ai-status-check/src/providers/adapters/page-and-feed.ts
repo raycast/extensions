@@ -1,9 +1,11 @@
 import { deriveProviderHealth } from "../../domain/derive-health";
+import { assertIncidents } from "../../domain/snapshot-validation";
 import type { ComponentStatus, Health, Incident, IncidentUpdate } from "../../domain/types";
 import { parseTimestamp } from "../../utils/dates";
 import { normalizeStatusToken } from "../../utils/status-token";
 import type { ProviderAdapter, ProviderAdapterConfig } from "../types";
 import { fetchText, type FetchText } from "../utils/http";
+import { fetchOptionalEnrichment } from "../utils/optional-enrichment";
 import { parseRssItems, stripHtml, type RssItem } from "../utils/rss";
 import { mapFlexibleIncidentState, statusComponentId } from "../utils/status-normalization";
 
@@ -28,25 +30,25 @@ export function createPageAndFeedAdapter(config: PageAndFeedAdapterConfig): Prov
   return {
     async fetch(signal) {
       const fetchedAt = now();
-      const [page, feed] = await Promise.all([
+      const [page, history] = await Promise.all([
         request(config.pageUrl ?? config.statusPageUrl, signal).then((html) => config.parsePage(html, fetchedAt)),
-        request(config.feedUrl, signal),
+        fetchOptionalEnrichment(signal, async (historySignal) => {
+          const incidents = (config.parseFeed ?? parseIncidentRss)(await request(config.feedUrl, historySignal));
+          assertIncidents(incidents);
+          return incidents;
+        }),
       ]);
-      const incidents = (config.parseFeed ?? parseIncidentRss)(feed);
+      const incidents = history ?? [];
       const components = page.components;
       if (components.length === 0) throw new Error("Status adapter contained no components");
-      const pageHealth = page.reportedHealth;
-      const reportedHealth =
-        pageHealth === "unknown" && incidents.every((incident) => incident.state === "resolved")
-          ? "operational"
-          : pageHealth;
 
       return {
         providerId: config.providerId,
-        health: deriveProviderHealth(reportedHealth, components, incidents),
+        health: deriveProviderHealth(page.reportedHealth, components, incidents),
         statusText: page.statusText,
         components,
         incidents,
+        incidentHistoryAvailability: history === undefined ? "unavailable" : "available",
         fetchedAt: fetchedAt.toISOString(),
       };
     },

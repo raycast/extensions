@@ -7,10 +7,6 @@ interface ProviderActionsProps {
   onRefresh(): Promise<void>;
 }
 
-interface NavigationActionsProps extends ProviderActionsProps {
-  target: Action.Push.Props["target"];
-}
-
 export function ProviderListActions({
   provider,
   detail,
@@ -54,6 +50,7 @@ export function ComponentActions({
       <Action.OpenInBrowser
         title={component.url ? "Open Component Status" : "Open Official Status Page"}
         url={component.url ?? provider.statusPageUrl}
+        shortcut={Keyboard.Shortcut.Common.Open}
       />
       <RefreshProviderAction onRefresh={onRefresh} />
       {component.url ? <Action.OpenInBrowser title="Open Official Status Page" url={provider.statusPageUrl} /> : null}
@@ -61,46 +58,7 @@ export function ComponentActions({
   );
 }
 
-export function ComponentListActions({ provider, target, onRefresh }: NavigationActionsProps) {
-  return (
-    <ActionPanel>
-      <Action.Push title="View Components" icon={Icon.Sidebar} target={target} />
-      <OpenProviderStatusAction provider={provider} />
-      <RefreshProviderAction onRefresh={onRefresh} />
-    </ActionPanel>
-  );
-}
-
-export function IncidentActions({
-  incident,
-  provider,
-  target,
-  onRefresh,
-}: NavigationActionsProps & { incident: Incident }) {
-  return (
-    <ActionPanel>
-      <Action.Push title="View Incident Details" icon={Icon.AppWindowSidebarLeft} target={target} />
-      {incident.url ? (
-        <Action.OpenInBrowser
-          title="Open Official Incident"
-          url={incident.url}
-          shortcut={Keyboard.Shortcut.Common.Open}
-        />
-      ) : null}
-      <RefreshProviderAction onRefresh={onRefresh} />
-      {incident.url ? (
-        <Action.CopyToClipboard
-          title="Copy Incident Link"
-          content={incident.url}
-          shortcut={Keyboard.Shortcut.Common.Copy}
-        />
-      ) : null}
-      <Action.OpenInBrowser title="Open Official Status Page" url={provider.statusPageUrl} />
-    </ActionPanel>
-  );
-}
-
-export function IncidentDetailActions({ incident, provider }: { incident: Incident; provider: ProviderDefinition }) {
+export function IncidentActions({ incident, provider, onRefresh }: ProviderActionsProps & { incident: Incident }) {
   return (
     <ActionPanel>
       {incident.url ? (
@@ -109,7 +67,10 @@ export function IncidentDetailActions({ incident, provider }: { incident: Incide
           url={incident.url}
           shortcut={Keyboard.Shortcut.Common.Open}
         />
-      ) : null}
+      ) : (
+        <OpenProviderStatusAction provider={provider} />
+      )}
+      <RefreshProviderAction onRefresh={onRefresh} />
       {incident.url ? (
         <Action.CopyToClipboard
           title="Copy Incident Link"
@@ -117,7 +78,7 @@ export function IncidentDetailActions({ incident, provider }: { incident: Incide
           shortcut={Keyboard.Shortcut.Common.Copy}
         />
       ) : null}
-      <Action.OpenInBrowser title="Open Official Status Page" url={provider.statusPageUrl} />
+      {incident.url ? <Action.OpenInBrowser title="Open Official Status Page" url={provider.statusPageUrl} /> : null}
     </ActionPanel>
   );
 }

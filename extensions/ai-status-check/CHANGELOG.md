@@ -2,8 +2,9 @@
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
-- Check the published system status of 20 AI providers from one command.
-- Inspect provider components in a dedicated detail view, including source-published history and uptime where available.
-- Read incident update timelines and open the corresponding official source.
+- Check the published system status of 19 AI providers from one command.
+- Browse overview, components, and incident timelines in one provider screen with All, Components, and Incidents filters.
+- View source-published component history and uptime, with clear availability messages when history cannot be retrieved.
+- Open each component or incident's official source directly from its preview.
 - Choose which providers are displayed and fetched from extension preferences.
-- Preserve last-known results while status sources refresh independently.
+- Preserve last-known results during source failures and keep provider details synchronized when refreshing.

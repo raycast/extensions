@@ -26,7 +26,6 @@ const expectedProviderIds = [
   "together-ai",
   "fireworks-ai",
   "cerebras",
-  "replicate",
   "hugging-face",
   "baseten",
   "elevenlabs",

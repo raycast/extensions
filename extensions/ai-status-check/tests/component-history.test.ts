@@ -3,6 +3,8 @@ import test from "node:test";
 import {
   applyHistoryRange,
   componentHistory,
+  finitePercent,
+  publishedPercentText,
   historyWindow,
   markBeforeMonitoredSince,
 } from "../src/providers/utils/component-history";
@@ -37,6 +39,14 @@ test("preserves provider precision but never derives uptime from green days", ()
   assert.equal(formatUptimePercent(99.996), "99.996%");
   assert.equal(formatUptimePercent(99.9, "99.90%"), "99.90%");
   assert.equal(formatUptimePercent(100), "100%");
+});
+
+test("rejects malformed published percentages instead of accepting their numeric prefix", () => {
+  for (const value of ["99.9garbage", "99.9% extra", "", " ", "101", "-1"]) {
+    assert.equal(finitePercent(value), undefined);
+    assert.equal(publishedPercentText(value), undefined);
+  }
+  assert.equal(publishedPercentText("99.90%"), "99.90%");
 });
 
 test("encodes every status level into the SVG chart", () => {

@@ -1,4 +1,4 @@
-import { createInstatusAdapter } from "../adapters/instatus";
+import { createIncidentIoAdapter } from "../adapters/incidentio";
 import { createProvider } from "../factories/provider";
 
 export const perplexityProvider = createProvider(
@@ -11,5 +11,5 @@ export const perplexityProvider = createProvider(
     icon: "provider-icons/perplexity.png",
     statusPageUrl: "https://status.perplexity.com/",
   },
-  createInstatusAdapter,
+  createIncidentIoAdapter,
 );

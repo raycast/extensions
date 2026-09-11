@@ -47,6 +47,7 @@ export function parseOpenRouterStatusPage(html: string, now = new Date()): Parse
       health: mapFlexibleHealth(statusText),
       statusText,
       ...(history ? { history } : {}),
+      historyAvailability: history ? "available" : barColors.length ? "unavailable" : "unsupported",
     });
   }
   if (components.length === 0) throw new Error("Status page contained no components");
