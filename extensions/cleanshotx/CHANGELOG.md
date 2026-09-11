@@ -1,6 +1,6 @@
 # Cleanshot X Changelog
 
-## [New screenshots] - {PR_MERGE_DATE}
+## [New screenshots] - 2026-09-11
 
 - Update screenshots to match the branding
 
