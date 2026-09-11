@@ -32,6 +32,7 @@
     {
       "name": "run-presets",
       "title": "Saved Prompts",
+      "subtitle": "Multi AI Chat",
       "description": "Create, manage, and run reusable prompts in configured AI chats",
       "mode": "view"
     }

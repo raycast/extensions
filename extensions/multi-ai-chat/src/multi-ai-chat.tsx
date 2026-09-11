@@ -131,8 +131,6 @@ export default function MultiAIChatCommand() {
         text="Opening the query URLs sends the prompt immediately. It may appear in browser history and sync."
       />
 
-      <Form.Separator />
-
       {AI_SERVICES.map(({ id, name }) => (
         <Form.Dropdown
           key={id}
