@@ -1,5 +1,45 @@
 # Digger Changelog
 
+## [Well-Known files, Theme colors, and resource exports] - 2026-09-11
+
+### Added
+
+- **Well-Known section** — probes 82 paths under `/.well-known/` from the IANA registry
+  and reports which ones a site actually publishes, with the contents one keystroke away.
+  A directory cannot be listed, so each path is asked for individually and judged by its
+  opening bytes rather than its status code: a single-page app answers 200 to everything.
+- **Theme section** — the colors a site declares: `theme-color` per media query,
+  `color-scheme`, the `data-theme` family, and the CSS custom properties from its
+  stylesheets. `oklch()`, `lab()`, `color(display-p3 …)` and `var()` chains are all
+  resolved so each one shows a real swatch, viewable as a list or a color grid.
+- **Copy and Download actions** on robots.txt, sitemap.xml, and every well-known file —
+  as text, Markdown, or CSV, with the sitemap's URLs and robots.txt's directives expanded
+  into rows.
+- **Copy actions in Metadata** for the page title, description, Open Graph description,
+  and Open Graph image URL.
+- **Code Formatting preference** — pretty-prints minified JSON and XML when viewing a
+  file. Copy and Download always give you the original bytes.
+
+### Fixed
+
+- Pages served in the wrong language. Digger sent no `Accept-Language`, so sites that
+  negotiate picked for it — one returned Arabic for an English page, and every field read
+  from that page was the wrong translation.
+- `sitemap.xml` reported as malformed when the site simply has none. A 200 serving an HTML
+  error page now reads as absent, and a 406 as unavailable, instead of "could not parse".
+- Long lists ending in a clipped `......ore` instead of "…and 9 more", in Resources,
+  HTTP Headers, Discoverability, and Data Feeds.
+- Translucent colors rendering as fully opaque swatches.
+- A sitemap containing an out-of-range character reference such as `&#1114112;`
+  preventing the sitemap view and its export actions from opening.
+
+### Security
+
+- Stylesheets are fetched only from the site being analysed or a public host, with every
+  redirect re-checked. A page could previously name a stylesheet on `localhost`, a private
+  network address, or a cloud metadata endpoint and have Digger request it. They are also
+  now read with a hard byte cap rather than buffered in full.
+
 ## [Report failed DNS, certificate, Wayback and host-metadata lookups] - 2026-09-03
 
 ### Added

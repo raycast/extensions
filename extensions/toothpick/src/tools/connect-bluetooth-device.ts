@@ -9,5 +9,7 @@ export default async function (input: { device_mac_address: string }) {
     throw new Error("Could not find 'blueutil'!");
   }
 
-  devicesService.connectDevice(input.device_mac_address);
+  if (!devicesService.connectDevice(input.device_mac_address)) {
+    throw new Error("Failed to connect Bluetooth device.");
+  }
 }

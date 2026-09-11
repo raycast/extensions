@@ -193,30 +193,38 @@ export function getMenuItem(weather: OpenMeteoWeather | undefined): string[] {
   const { tempUnit, windUnit } = getUnits();
 
   if (typeof weather !== "undefined") {
-    menuItems.push(
-      Math.round(
-        tempType == "apparent_temperature"
-          ? weather?.hourly.apparent_temperature[timeHour()]
-          : weather?.current_weather?.temperature,
-      ) + tempUnit,
-    );
-    if (menuUVI && weather.daily?.uv_index_max.length != 0) {
-      menuItems.push("☀ " + Math.round(weather.daily.uv_index_max[0]));
+    const apparentTemperature = weather.hourly?.apparent_temperature?.[timeHour()];
+    const currentTemperature = weather.current_weather?.temperature;
+    const preferredTemperature =
+      tempType == "apparent_temperature" ? (apparentTemperature ?? currentTemperature) : currentTemperature;
+    if (typeof preferredTemperature === "number") {
+      menuItems.push(Math.round(preferredTemperature) + tempUnit);
     }
-    if (menuPressure && weather.hourly?.surface_pressure.length != 0) {
-      menuItems.push("㍱ " + Math.round(weather.hourly.surface_pressure[timeHour()]));
+
+    const uvIndex = weather.daily?.uv_index_max?.[0];
+    if (menuUVI && typeof uvIndex === "number") {
+      menuItems.push("☀ " + Math.round(uvIndex));
     }
-    if (menuHumidity && weather.hourly?.relativehumidity_2m.length != 0) {
+
+    const surfacePressure = weather.hourly?.surface_pressure?.[timeHour()];
+    if (menuPressure && typeof surfacePressure === "number") {
+      menuItems.push("㍱ " + Math.round(surfacePressure));
+    }
+
+    const relativeHumidity = weather.hourly?.relativehumidity_2m?.[timeHour()];
+    if (menuHumidity && typeof relativeHumidity === "number") {
+      menuItems.push("🜄 " + Math.round(relativeHumidity) + (weather.hourly_units?.relativehumidity_2m ?? ""));
+    }
+
+    const currentWeather = weather.current_weather;
+    if (
+      menuWind &&
+      currentWeather &&
+      typeof currentWeather.winddirection === "number" &&
+      typeof currentWeather.windspeed === "number"
+    ) {
       menuItems.push(
-        "🜄 " + Math.round(weather.hourly.relativehumidity_2m[timeHour()]) + weather.hourly_units.relativehumidity_2m,
-      );
-    }
-    if (menuWind) {
-      menuItems.push(
-        windAngle2Direction(weather.current_weather.winddirection).icon +
-          " " +
-          Math.round(weather.current_weather.windspeed) +
-          windUnit,
+        windAngle2Direction(currentWeather.winddirection).icon + " " + Math.round(currentWeather.windspeed) + windUnit,
       );
     }
   }

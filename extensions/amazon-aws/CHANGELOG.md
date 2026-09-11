@@ -1,4 +1,9 @@
 # Amazon AWS Changelog
+
+## [Add AWS frontier agents to Console] - 2026-09-10
+
+- Add console links for AWS Security Agent, AWS DevOps Agent, and AWS FinOps Agent
+
 ## [Fix AWS SSO Authentication] - 2026-05-26
 - update aws-sdk
 

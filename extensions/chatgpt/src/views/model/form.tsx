@@ -4,12 +4,13 @@ import { v4 as uuidv4 } from "uuid";
 import { CSVPrompt, Model, ModelHook, ReasoningEffort } from "../../type";
 import { parse } from "csv-parse/sync";
 import { useCallback, useState } from "react";
-import { getConfiguration } from "../../hooks/useChatGPT";
+import { ModelPicker } from "./model-picker";
+import { useModelOptions } from "../../hooks/useModelOptions";
 
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
+  const modelOptions = useModelOptions();
   const { pop } = useNavigation();
-  const { isCustomModel } = getConfiguration();
   const reasoningEffortOptions: ReasoningEffort[] = ["none", "low", "medium", "high"];
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
@@ -43,6 +44,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     },
     validation: {
       name: FormValidation.Required,
+      option: FormValidation.Required,
       temperature: (value) => {
         if (value !== undefined && value !== null) {
           const numValue = Number(value);
@@ -69,8 +71,6 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       vision: model?.vision ?? false,
     },
   });
-
-  const MODEL_OPTIONS = use.models.option;
 
   const { isLoading, data } = useFetch<CSVPrompt[]>(
     "https://raw.githubusercontent.com/awesome-chatgpt-prompts/awesome-chatgpt-prompts-github/awesome-chatgpt-prompts/prompts.csv",
@@ -168,15 +168,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
           ))}
         </Form.Dropdown>
       )}
-      {isCustomModel ? (
-        <Form.TextField title="Model" placeholder="Custom model name" {...itemProps.option} />
-      ) : (
-        <Form.Dropdown title="Model" placeholder="Choose model option" {...itemProps.option}>
-          {MODEL_OPTIONS.map((option) => (
-            <Form.Dropdown.Item value={option} title={option} key={option} />
-          ))}
-        </Form.Dropdown>
-      )}
+      <ModelPicker models={modelOptions.options} isLoading={modelOptions.isLoading} {...itemProps.option} />
 
       <Form.Checkbox title="Vision" label="Enable vision capabilities" {...itemProps.vision} />
       {model?.id !== "default" && <Form.Checkbox title="Pinned" label="Pin model" {...itemProps.pinned} />}

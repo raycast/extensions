@@ -1,5 +1,7 @@
-import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { ResourceExportActions } from "../actions/ResourceExportActions";
+import { Exportable, inferLanguage, inferRows, prettyPrint } from "../utils/exportUtils";
 
 export interface ResourceDetailViewProps {
   /** The URL of the resource to fetch and display */
@@ -35,6 +37,13 @@ export function ResourceDetailView({ url, title, resourceName, renderAsMarkdown 
     },
   });
 
+  const { prettyPrintCode } = getPreferenceValues<Preferences>();
+  const name = resourceName || title;
+  const language = inferLanguage(name, undefined);
+  const resource: Exportable | undefined = data
+    ? { name, text: data, rows: inferRows(name, data), language }
+    : undefined;
+
   let markdown: string;
   if (error) {
     // Extract just the error message without stack trace
@@ -49,7 +58,11 @@ export function ResourceDetailView({ url, title, resourceName, renderAsMarkdown 
     if (renderAsMarkdown) {
       markdown = `# ${title}\n\n${data}`;
     } else {
-      markdown = `# ${title}\n\n\`\`\`\n${data}\n\`\`\``;
+      // A tagged fence gets syntax colouring in Raycast's Markdown renderer, so
+      // a 17KB app-site-association reads as JSON instead of grey monospace.
+      // Pretty-printing is display-only; `resource` below keeps the raw bytes.
+      const body = prettyPrintCode ? prettyPrint(data, language) : data;
+      markdown = `# ${title}\n\n\`\`\`${language}\n${body}\n\`\`\``;
     }
   } else {
     markdown = `Loading ${title}...`;
@@ -60,22 +73,18 @@ export function ResourceDetailView({ url, title, resourceName, renderAsMarkdown 
       isLoading={isLoading}
       markdown={markdown}
       actions={
-        error ? (
-          <ActionPanel>
+        <ActionPanel>
+          <ResourceExportActions resource={resource} />
+          <ActionPanel.Section>
             <Action.OpenInBrowser
               title="Open in Browser"
               url={url}
               icon={Icon.Globe}
               shortcut={Keyboard.Shortcut.Common.Open}
             />
-            <Action.CopyToClipboard
-              title="Copy URL"
-              content={url}
-              icon={Icon.Clipboard}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
-          </ActionPanel>
-        ) : undefined
+            <Action.CopyToClipboard title="Copy URL" content={url} icon={Icon.Link} />
+          </ActionPanel.Section>
+        </ActionPanel>
       }
     />
   );
